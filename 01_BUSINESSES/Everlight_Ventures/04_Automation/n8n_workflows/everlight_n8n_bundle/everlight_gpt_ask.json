@@ -1,0 +1,52 @@
+{
+    "name": "Everlight_GPT_Ask_Workflow",
+    "nodes": [
+        {
+            "parameters": {
+                "event": "slashCommand",
+                "command": "/ask_gpt"
+            },
+            "name": "Slack Trigger",
+            "type": "n8n-nodes-base.slackTrigger"
+        },
+        {
+            "parameters": {
+                "functionCode": "return {bot: $json.botName, query: $json.text};"
+            },
+            "name": "Extract Command Data",
+            "type": "n8n-nodes-base.function"
+        },
+        {
+            "parameters": {
+                "conditions": {
+                    "string": [
+                        {
+                            "value1": "={{$json.bot}}",
+                            "value2": "Thor"
+                        }
+                    ]
+                }
+            },
+            "name": "Switch GPT Bot",
+            "type": "n8n-nodes-base.switch"
+        },
+        {
+            "parameters": {
+                "model": "gpt-4",
+                "prompt": "={{$json.query}}"
+            },
+            "name": "GPT-4.5 Response",
+            "type": "n8n-nodes-base.openAi"
+        },
+        {
+            "parameters": {
+                "resource": "message",
+                "operation": "post",
+                "channel": "={{$json.channel_id}}",
+                "text": "={{$json.response}}"
+            },
+            "name": "Send Slack Message",
+            "type": "n8n-nodes-base.slack"
+        }
+    ]
+}

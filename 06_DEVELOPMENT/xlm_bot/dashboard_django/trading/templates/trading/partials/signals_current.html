@@ -1,0 +1,18 @@
+{% load trading_tags %}
+
+{% if snap.entry_signal %}
+<div class="intel-card" style="border-left:3px solid #60a5fa;">
+  <div class="intel-title">ACTIVE SIGNAL</div>
+  <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+    <span style="font-size:0.9rem;color:#e5e7eb;font-weight:600;">{{ snap.entry_signal }}</span>
+    {% if snap.direction %}
+      {{ snap.direction|direction_badge }}
+    {% endif %}
+    {% if snap.v4_selected_score %}
+      <span class="pill" style="font-size:10px;">Score {{ snap.v4_selected_score|floatformat:0 }}</span>
+    {% endif %}
+  </div>
+</div>
+{% else %}
+<div class="feed-mini" style="color:#6b7280;">No active signal.</div>
+{% endif %}

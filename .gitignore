@@ -1,0 +1,135 @@
+# ============================================================
+# HIVE MIND .gitignore
+# GitHub = logic/code/docs ONLY. Assets go to Nextcloud.
+# ============================================================
+
+# ---- LARGE ASSET DIRECTORIES (Nextcloud only) ----
+04_MEDIA_LIBRARY/
+08_BACKUPS/
+D_Backups/
+07_STAGING/
+
+# ---- UNITY / GAME ENGINE (too large for git) ----
+**/ArenaAdvance/
+**/Library/
+**/Temp/
+**/Logs/
+**/obj/
+**/Build/
+**/Clash_Carbon/
+*.dylib
+*.dll
+*.so
+*.pdb
+
+# ---- LARGE UPLOADS / MEDIA ----
+_uploads/
+SHIPPING_BOOK_IMAGES/
+generation.pid
+generation_progress.log
+
+# ---- SQLITE DB (runtime) ----
+*.sqlite3
+
+# ---- EBOOK SOURCE FILES (large) ----
+**/*.epub
+**/*.mobi
+
+# ---- SECRETS & CREDENTIALS (NEVER push) ----
+03_AUTOMATION_CORE/03_Credentials/
+**/credentials/
+**/*.json.secret
+**/*.env
+**/.env*
+**/config.json
+**/secrets/
+**/api_keys*
+**/*_key.txt
+**/*_token.txt
+**/*_secret*
+xlm_bot/secrets/
+xlm_bot/data/*.json
+xlm_bot/logs/
+trading/*/secrets/
+
+# ---- BOT RUNTIME DATA (ephemeral, not version-controlled) ----
+xlm_bot/data/XLM_*.csv
+xlm_bot/data/state.json
+xlm_bot/data/trades.csv
+xlm_bot/data/signals.jsonl
+xlm_bot/data/ai_insight.json
+xlm_bot/.heartbeat
+_logs/
+everlight_os/_logs/
+
+# ---- OLD CRYPTO BOT (runtime state only, not code) ----
+03_AUTOMATION_CORE/01_Scripts/crypto_bot/data/
+03_AUTOMATION_CORE/01_Scripts/crypto_bot/logs/
+
+# ---- PERSONAL DOCUMENTS (not for public repo) ----
+05_PERSONAL/
+
+# ---- AUDIO / LARGE PERSONAL MEDIA ----
+*.m4a
+*.mp3
+*.wav
+
+# ---- PYTHON CACHE ----
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+venv/
+.venv/
+env/
+
+# ---- NODE / NPM ----
+node_modules/
+.npm
+.next/
+.nuxt/
+
+# ---- DASHBOARD CACHE ----
+.aa_dashboard_cache/
+**/.streamlit/
+
+# ---- EDITOR / OS JUNK ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ---- CLAUDE / AI CONTEXT (local only) ----
+.claude/
+.gemini/
+.codex/
+.perplexity/
+.mcp.json
+
+# ---- LARGE BINARIES ----
+*.mp4
+*.mp3
+*.wav
+*.avi
+*.mkv
+*.mov
+*.zip
+*.tar.gz
+*.tar.bz2
+*.7z
+*.rar
+*.apk
+*.pdf
+*.iso
+*.dmg
+
+# ---- PROTON / CLOUD MOUNT ARTIFACTS ----
+ProtonDrive/

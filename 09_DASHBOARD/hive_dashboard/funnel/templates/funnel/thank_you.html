@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You're In!</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            display: flex; justify-content: center; align-items: center; min-height: 100vh;
+            background: #f8f9fa; color: #1a1a1a;
+        }
+        .card {
+            background: white; padding: 60px 40px; border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08); text-align: center; max-width: 500px;
+        }
+        h1 { font-size: 2rem; margin-bottom: 16px; }
+        p { color: #555; line-height: 1.6; margin-bottom: 12px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>You're In!</h1>
+        {% if product == "onyx" %}
+        <p>Check your email for instructions to set up your Onyx POS free trial.</p>
+        <p>Questions? Reply to any email we send -- a real human reads every one.</p>
+        {% elif product == "hivemind" %}
+        <p>You're on the Hive Mind early access list. We'll email you when it's ready.</p>
+        <p>In the meantime, follow us on social for behind-the-scenes builds.</p>
+        {% else %}
+        <p>Thanks for signing up! We'll be in touch soon.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

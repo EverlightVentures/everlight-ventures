@@ -1,0 +1,79 @@
+#!/bin/bash
+# xpb-fg - bot foreground watchdog (for systemd / startup)
+
+set -euo pipefail
+
+BOT_DIR="/mnt/sdcard/AA_MY_DRIVE/xlm_bot"
+VENV="/tmp/xlm_bot_venv"
+
+IDLE_SLEEP="${IDLE_SLEEP:-30}"
+IN_TRADE_SLEEP="${IN_TRADE_SLEEP:-5}"
+CONFIG_FILE="${XLM_CONFIG_FILE:-config.yaml}"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --config)
+      if [ $# -ge 2 ]; then
+        CONFIG_FILE="$2"
+        shift 2
+      else
+        echo "Missing value for --config"
+        exit 1
+      fi
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
+cd "$BOT_DIR" || exit 1
+bash "$BOT_DIR/_venv.sh"
+
+is_paper="$(CONFIG_FILE="$CONFIG_FILE" python3 - <<'PY'
+from pathlib import Path
+import os
+import yaml
+p=Path(os.environ.get("CONFIG_FILE","config.yaml"))
+if not p.is_absolute():
+  p=Path("/mnt/sdcard/AA_MY_DRIVE/xlm_bot")/p
+cfg=yaml.safe_load(p.read_text()) if p.exists() else {}
+print("true" if bool(cfg.get("paper", True)) else "false")
+PY
+)"
+
+if [ "$is_paper" = "true" ]; then
+  CMD=("$VENV/bin/python" main.py --config "$CONFIG_FILE" --paper)
+else
+  CMD=("$VENV/bin/python" main.py --config "$CONFIG_FILE" --live --i-understand-live)
+fi
+
+while true; do
+  if ! "${CMD[@]}"; then
+    rc=$?
+    echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] bot exited with code $rc; watchdog will retry" >&2
+  fi
+  S="$(CONFIG_FILE="$CONFIG_FILE" "$VENV/bin/python" - <<PY
+import json
+import os
+import yaml
+from pathlib import Path
+cfg_path=Path(os.environ.get("CONFIG_FILE","config.yaml"))
+if not cfg_path.is_absolute():
+  cfg_path=Path("/mnt/sdcard/AA_MY_DRIVE/xlm_bot")/cfg_path
+cfg=yaml.safe_load(cfg_path.read_text()) if cfg_path.exists() else {}
+paths=(cfg.get("paths") or {}) if isinstance(cfg,dict) else {}
+data_dir=paths.get("data_dir","data")
+p=Path(data_dir)
+if not p.is_absolute():
+  p=Path("/mnt/sdcard/AA_MY_DRIVE/xlm_bot")/p
+p=p/'state.json'
+try:
+  s=json.loads(p.read_text()) if p.exists() else {}
+except Exception:
+  s={}
+print($IN_TRADE_SLEEP if s.get('open_position') else $IDLE_SLEEP)
+PY
+)"
+  sleep "$S"
+done

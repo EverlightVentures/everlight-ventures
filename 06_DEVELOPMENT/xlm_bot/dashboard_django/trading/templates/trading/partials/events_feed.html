@@ -1,0 +1,18 @@
+{% load trading_tags %}
+
+<div class="intel-card">
+  <div class="intel-title">RECENT EVENTS</div>
+  <div class="major-feed">
+    {% for evt in major_events|slice:":20" %}
+    <div class="major-item {{ evt.tone|tone_class }}">
+      <div class="t">{{ evt.time|pt_short }} &middot; {{ evt.type|upper }}</div>
+      <div class="h">{{ evt.headline }}</div>
+      {% if evt.detail %}
+        <div class="s">{{ evt.detail }}</div>
+      {% endif %}
+    </div>
+    {% empty %}
+    <div class="feed-mini">No recent events.</div>
+    {% endfor %}
+  </div>
+</div>

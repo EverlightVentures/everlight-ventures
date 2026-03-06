@@ -1,0 +1,940 @@
+{% load static humanize trading_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="XLM Perp Trading Dashboard -- Everlight Ventures">
+  <meta name="theme-color" content="#0a0a0f">
+  <title>{% block title %}{{ app_name }} Dashboard{% endblock %}</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+  <!-- Chart.js 4 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- HTMX -->
+  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+
+  <!-- Lightweight Charts v4.2 -->
+  <script src="https://unpkg.com/lightweight-charts@4.2.0/dist/lightweight-charts.standalone.production.js"></script>
+
+  <!-- Theme CSS -->
+  <link rel="stylesheet" href="{% static 'trading/css/theme.css' %}">
+
+  <style>
+    /* ===================================================================
+       CSS VARIABLES -- TRADING DASHBOARD THEME
+       =================================================================== */
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #0f0f18;
+      --bg-tertiary: #141420;
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.05);
+
+      --gold: #c9a84c;
+      --gold-dim: #8b7635;
+      --gold-bright: #e5c76b;
+      --gold-glow: rgba(201, 168, 76, 0.25);
+
+      --green: #22c55e;
+      --green-dim: #16a34a;
+      --green-glow: rgba(34, 197, 94, 0.2);
+
+      --red: #ef4444;
+      --red-dim: #dc2626;
+      --red-glow: rgba(239, 68, 68, 0.2);
+
+      --purple: #8b5cf6;
+      --purple-dim: #6d3fd0;
+      --purple-glow: rgba(139, 92, 246, 0.2);
+
+      --cyan: #22d3ee;
+      --cyan-dim: #06b6d4;
+
+      --text-primary: #e8e6e3;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.14);
+
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-blur: 12px;
+
+      --sidebar-width: 260px;
+      --topbar-height: 64px;
+
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
+      --font-display: 'Sora', var(--font-body);
+      --font-accent: 'Fraunces', var(--font-heading);
+
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --transition-base: 0.2s var(--ease-out-expo);
+    }
+
+    /* ===================================================================
+       RESET & BASE
+       =================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--text-primary);
+    }
+
+    a {
+      color: var(--gold);
+      text-decoration: none;
+      transition: color var(--transition-base);
+    }
+    a:hover {
+      color: var(--gold-bright);
+    }
+
+    /* ===================================================================
+       SCROLLBAR
+       =================================================================== */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--gold-dim);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gold);
+    }
+
+    /* Firefox */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--gold-dim) var(--bg-secondary);
+    }
+
+    /* ===================================================================
+       LAYOUT -- SIDEBAR + MAIN
+       =================================================================== */
+    .trading-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ===================================================================
+       SIDEBAR
+       =================================================================== */
+    .trading-sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      background: var(--glass-bg);
+      border-right: 1px solid var(--glass-border);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      overflow-y: auto;
+      overflow-x: hidden;
+      transition: transform 0.35s var(--ease-out-expo);
+    }
+
+    /* Subtle gradient accent on the right border */
+    .trading-sidebar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -1px;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        var(--gold-dim) 20%,
+        var(--gold) 50%,
+        var(--gold-dim) 80%,
+        transparent 100%
+      );
+      opacity: 0.4;
+    }
+
+    /* -- Logo Area -- */
+    .sidebar-logo {
+      padding: 28px 24px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .sidebar-logo-mark {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .sidebar-hexicon {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar-hexicon svg {
+      width: 38px;
+      height: 38px;
+    }
+
+    .sidebar-hexicon .hex-fill {
+      fill: none;
+      stroke: var(--gold);
+      stroke-width: 1.5;
+      opacity: 0.7;
+    }
+
+    .sidebar-title {
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.02em;
+      line-height: 1.1;
+    }
+
+    .sidebar-subtitle {
+      font-family: var(--font-body);
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-top: 4px;
+      padding-left: 50px;
+    }
+
+    /* -- Nav Links -- */
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+    }
+
+    .sidebar-nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 16px;
+      margin-bottom: 2px;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all var(--transition-base);
+      position: relative;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar-nav-link:hover {
+      color: var(--text-primary);
+      background: rgba(201, 168, 76, 0.06);
+      box-shadow: 0 0 20px rgba(201, 168, 76, 0.08);
+    }
+
+    .sidebar-nav-link.active {
+      color: var(--gold);
+      background: rgba(201, 168, 76, 0.1);
+      border-left-color: var(--gold);
+    }
+
+    .sidebar-nav-link i {
+      width: 20px;
+      text-align: center;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+
+    .sidebar-nav-link.active i {
+      color: var(--gold);
+    }
+
+    /* -- Bot Status (bottom section) -- */
+    .sidebar-bot-section {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .sidebar-bot-title {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .bot-status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 0;
+    }
+
+    .bot-pulse-dot {
+      position: relative;
+      width: 10px;
+      height: 10px;
+      flex-shrink: 0;
+    }
+
+    .bot-pulse-dot .dot-core {
+      position: absolute;
+      inset: 2px;
+      border-radius: 50%;
+    }
+
+    .bot-pulse-dot .dot-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      opacity: 0.5;
+      animation: tradingPulse 2s ease-in-out infinite;
+    }
+
+    .bot-status-label {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .sidebar-version {
+      padding: 10px 20px 16px;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+
+    /* ===================================================================
+       MAIN CONTENT
+       =================================================================== */
+    .trading-main {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* -- Top Bar -- */
+    .trading-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: var(--topbar-height);
+      padding: 0 32px;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .topbar-page-title {
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .topbar-price {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-display);
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .topbar-price .price-label {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .topbar-price .price-value {
+      color: var(--gold-bright);
+    }
+
+    .topbar-status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .topbar-status-pill.live {
+      background: rgba(34, 197, 94, 0.12);
+      color: var(--green);
+      border: 1px solid rgba(34, 197, 94, 0.25);
+    }
+
+    .topbar-status-pill.live .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      animation: tradingPulse 2s ease-in-out infinite;
+    }
+
+    .topbar-status-pill.offline {
+      background: rgba(239, 68, 68, 0.12);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+    }
+
+    .topbar-status-pill.offline .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--red);
+    }
+
+    .topbar-clock {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+    }
+
+    .hamburger-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 4px;
+      transition: color var(--transition-base);
+    }
+    .hamburger-btn:hover {
+      color: var(--gold);
+    }
+
+    /* -- Content Area -- */
+    .trading-content {
+      flex: 1;
+      padding: 28px 32px;
+      animation: contentFadeIn 0.4s ease-out;
+    }
+
+    /* -- Footer -- */
+    .trading-footer {
+      padding: 20px 32px;
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-subtle);
+      opacity: 0.6;
+    }
+
+    .trading-footer span {
+      color: var(--gold-dim);
+    }
+
+    /* ===================================================================
+       GLASS CARDS -- Utility class for child templates
+       =================================================================== */
+    .glass-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      padding: 24px;
+      transition: all var(--transition-base);
+    }
+
+    .glass-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-hover);
+      border-top-color: var(--gold-dim);
+    }
+
+    /* ===================================================================
+       TOAST NOTIFICATIONS
+       =================================================================== */
+    .trading-toast-area {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+      max-width: 380px;
+    }
+
+    .trading-toast {
+      pointer-events: auto;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 14px 18px;
+      border-radius: 10px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-subtle);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      font-size: 0.84rem;
+      color: var(--text-primary);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      animation: toastSlideIn 0.35s var(--ease-out-expo);
+      transition: all 0.3s ease;
+    }
+
+    .trading-toast.removing {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+
+    .trading-toast.toast-success { border-left: 3px solid var(--green); }
+    .trading-toast.toast-success .toast-icon { color: var(--green); }
+    .trading-toast.toast-error { border-left: 3px solid var(--red); }
+    .trading-toast.toast-error .toast-icon { color: var(--red); }
+    .trading-toast.toast-warning { border-left: 3px solid #f59e0b; }
+    .trading-toast.toast-warning .toast-icon { color: #f59e0b; }
+    .trading-toast.toast-info { border-left: 3px solid var(--purple); }
+    .trading-toast.toast-info .toast-icon { color: var(--purple); }
+
+    .toast-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .toast-message {
+      flex: 1;
+      line-height: 1.45;
+    }
+
+    .toast-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0;
+      flex-shrink: 0;
+      transition: color var(--transition-base);
+    }
+    .toast-close:hover {
+      color: var(--text-primary);
+    }
+
+    /* ===================================================================
+       KEYFRAME ANIMATIONS
+       =================================================================== */
+    @keyframes tradingPulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+      }
+      50% {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+
+    @keyframes contentFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes toastSlideIn {
+      from {
+        opacity: 0;
+        transform: translateX(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* ===================================================================
+       RESPONSIVE -- Mobile sidebar collapse
+       =================================================================== */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    @media (max-width: 768px) {
+      .trading-sidebar {
+        transform: translateX(-100%);
+      }
+
+      .trading-sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-overlay.open {
+        display: block;
+      }
+
+      .trading-main {
+        margin-left: 0;
+      }
+
+      .hamburger-btn {
+        display: block;
+      }
+
+      .trading-content {
+        padding: 20px 16px;
+      }
+
+      .trading-topbar {
+        padding: 0 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .topbar-page-title {
+        font-size: 1.05rem;
+      }
+
+      .topbar-clock {
+        font-size: 0.72rem;
+      }
+
+      .topbar-price .price-label {
+        display: none;
+      }
+    }
+
+    /* ===================================================================
+       UTILITY CLASSES for child templates
+       =================================================================== */
+    .text-gold { color: var(--gold); }
+    .text-green { color: var(--green); }
+    .text-red { color: var(--red); }
+    .text-purple { color: var(--purple); }
+    .text-cyan { color: var(--cyan); }
+    .text-muted { color: var(--text-muted); }
+    .text-secondary { color: var(--text-secondary); }
+    .font-heading { font-family: var(--font-heading); }
+    .font-body { font-family: var(--font-body); }
+    .font-display { font-family: var(--font-display); }
+    .font-mono { font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace; }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+  </style>
+
+  {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+  <!-- ================================================================
+       SIDEBAR
+       ================================================================ -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="trading-sidebar" id="tradingSidebar">
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">
+        <div class="sidebar-hexicon">
+          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <polygon class="hex-fill" points="20,2 36,11 36,29 20,38 4,29 4,11" />
+          </svg>
+        </div>
+        <span class="sidebar-title">Trading Center</span>
+      </div>
+      <div class="sidebar-subtitle">EVERLIGHT VENTURES</div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+      <a href="{% url 'trading:terminal' %}"
+         class="sidebar-nav-link {% if active_page == 'terminal' %}active{% endif %}"
+         data-nav="terminal">
+        <i class="fa-solid fa-terminal"></i>
+        <span>Terminal</span>
+      </a>
+
+      <a href="{% url 'trading:portfolio' %}"
+         class="sidebar-nav-link {% if active_page == 'portfolio' %}active{% endif %}"
+         data-nav="portfolio">
+        <i class="fa-solid fa-wallet"></i>
+        <span>Portfolio</span>
+      </a>
+
+      <a href="{% url 'trading:signals' %}"
+         class="sidebar-nav-link {% if active_page == 'signals' %}active{% endif %}"
+         data-nav="signals">
+        <i class="fa-solid fa-signal"></i>
+        <span>Signals</span>
+      </a>
+
+      <a href="{% url 'trading:ledger' %}"
+         class="sidebar-nav-link {% if active_page == 'ledger' %}active{% endif %}"
+         data-nav="ledger">
+        <i class="fa-solid fa-book"></i>
+        <span>Ledger</span>
+      </a>
+
+      <a href="{% url 'trading:system' %}"
+         class="sidebar-nav-link {% if active_page == 'system' %}active{% endif %}"
+         data-nav="system">
+        <i class="fa-solid fa-gear"></i>
+        <span>System</span>
+      </a>
+    </nav>
+
+    <!-- Bot Status (HTMX polled) -->
+    <div class="sidebar-bot-section">
+      <div class="sidebar-bot-title">Bot Status</div>
+      <div id="sidebar-bot-status"
+           hx-get="{% url 'trading:api_sidebar_status' %}"
+           hx-trigger="every 5s"
+           hx-swap="innerHTML">
+        {% include "trading/partials/sidebar_status.html" %}
+      </div>
+    </div>
+
+    <!-- Version -->
+    <div class="sidebar-version">v{{ app_version }}</div>
+  </aside>
+
+  <!-- ================================================================
+       MAIN CONTENT
+       ================================================================ -->
+  <main class="trading-main">
+    <!-- Top Bar -->
+    <header class="trading-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <h1 class="topbar-page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+      </div>
+      <div class="topbar-right">
+        <!-- Live Price -->
+        <div class="topbar-price">
+          <span class="price-label">XLM</span>
+          <span class="price-value" id="topbarPrice">
+            {% if current_price %}${{ current_price|floatformat:5 }}{% else %}--{% endif %}
+          </span>
+        </div>
+
+        <!-- Bot Status Pill -->
+        {% if bot_alive %}
+        <div class="topbar-status-pill live">
+          <span class="pill-dot"></span>
+          LIVE
+        </div>
+        {% else %}
+        <div class="topbar-status-pill offline">
+          <span class="pill-dot"></span>
+          OFFLINE
+        </div>
+        {% endif %}
+
+        <!-- Clock (PT) -->
+        <div class="topbar-clock" id="tradingClock">
+          {{ now_pt|date:"g:i:s A" }} PT
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="trading-content">
+      {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="trading-footer">
+      <span>Everlight Ventures</span> | {{ app_name }} Dashboard
+    </footer>
+  </main>
+
+  <!-- ================================================================
+       TOAST NOTIFICATION AREA
+       ================================================================ -->
+  <div class="trading-toast-area" id="tradingToastArea"></div>
+
+  <!-- ================================================================
+       BASE SCRIPTS
+       ================================================================ -->
+  <script>
+    /* =================================================================
+       SIDEBAR TOGGLE (Mobile)
+       ================================================================= */
+    (function() {
+      const sidebar = document.getElementById('tradingSidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+      const hamburger = document.getElementById('hamburgerBtn');
+
+      if (hamburger) {
+        hamburger.addEventListener('click', function() {
+          sidebar.classList.toggle('open');
+          overlay.classList.toggle('open');
+        });
+      }
+
+      if (overlay) {
+        overlay.addEventListener('click', function() {
+          sidebar.classList.remove('open');
+          overlay.classList.remove('open');
+        });
+      }
+    })();
+
+    /* =================================================================
+       LIVE CLOCK (PT) -- updates every second
+       ================================================================= */
+    (function() {
+      const clockEl = document.getElementById('tradingClock');
+      if (!clockEl) return;
+
+      function updateClock() {
+        const now = new Date();
+        const ptTime = now.toLocaleTimeString('en-US', {
+          timeZone: 'America/Los_Angeles',
+          hour: 'numeric',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true
+        });
+        clockEl.textContent = ptTime + ' PT';
+      }
+
+      updateClock();
+      setInterval(updateClock, 1000);
+    })();
+
+    /* =================================================================
+       TOAST SYSTEM
+       ================================================================= */
+    window.TradingToast = {
+      _area: null,
+
+      _getArea: function() {
+        if (!this._area) {
+          this._area = document.getElementById('tradingToastArea');
+        }
+        return this._area;
+      },
+
+      show: function(message, type, duration) {
+        type = type || 'info';
+        duration = duration || 4000;
+
+        var area = this._getArea();
+        if (!area) return;
+
+        var icons = {
+          success: 'fa-circle-check',
+          error: 'fa-circle-xmark',
+          warning: 'fa-triangle-exclamation',
+          info: 'fa-circle-info'
+        };
+
+        var toast = document.createElement('div');
+        toast.className = 'trading-toast toast-' + type;
+        toast.innerHTML =
+          '<i class="fa-solid ' + (icons[type] || icons.info) + ' toast-icon"></i>' +
+          '<span class="toast-message">' + message + '</span>' +
+          '<button class="toast-close" onclick="this.parentElement.remove()">' +
+          '<i class="fa-solid fa-xmark"></i></button>';
+
+        area.appendChild(toast);
+
+        setTimeout(function() {
+          toast.classList.add('removing');
+          setTimeout(function() {
+            if (toast.parentElement) toast.remove();
+          }, 300);
+        }, duration);
+      }
+    };
+
+    /* =================================================================
+       HTMX EVENTS -- toast on errors
+       ================================================================= */
+    document.addEventListener('htmx:responseError', function(evt) {
+      TradingToast.show('Connection error -- retrying...', 'warning', 3000);
+    });
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

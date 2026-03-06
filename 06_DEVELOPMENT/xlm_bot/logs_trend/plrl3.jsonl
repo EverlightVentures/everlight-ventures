@@ -1,0 +1,1 @@
+{"timestamp": "2026-02-11T22:05:56.746884+00:00", "strategy": "PLRL-3", "action": "IDLE", "rescue_step": 0, "max_rescues": 3, "mr_intraday": 0.0, "mr_overnight": 0.0, "active_mr": 0.0, "active_window": "overnight", "next_rescue_at": null, "fail_at": 0.95, "enforcement": "log_only"}

@@ -1,0 +1,2 @@
+Transaction_ID,Date,Time,Employee_ID,Employee_Name,Total_Items,Subtotal,Tax,Grand_Total,Payment_Method,Amount_Received,Change_Given,Receipt_Number,Notes
+TXN20251201100136,2025-12-01,10:02:43,1001,richard,1,7.98,0.66,8.64,Cash,20.00,11.36,TXN20251201100136,testing inventroy management

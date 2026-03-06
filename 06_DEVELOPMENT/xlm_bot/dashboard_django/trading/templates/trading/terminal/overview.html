@@ -1,0 +1,197 @@
+{% load trading_tags humanize %}
+
+<!-- Price Bar -->
+{% with last=decisions.0 %}
+<div class="intel-card" style="padding:12px 18px;">
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+    <div>
+      <span class="label">XLM PERP</span>
+      {% if current_price %}
+        <span style="font-size:1.4rem;color:#f7f7f8;font-weight:600;">${{ current_price|floatformat:6 }}</span>
+      {% else %}
+        <span style="font-size:1.4rem;color:#6b7280;">--</span>
+      {% endif %}
+      {% if snap.change_24h_pct %}
+        {% if snap.change_24h_pct >= 0 %}
+          <span class="ok">+{{ snap.change_24h_pct|floatformat:2 }}%</span>
+        {% else %}
+          <span class="danger">{{ snap.change_24h_pct|floatformat:2 }}%</span>
+        {% endif %}
+      {% endif %}
+    </div>
+    {% if snap.high_24h and snap.low_24h %}
+    <div>
+      <span class="muted" style="font-size:11px;">24h: ${{ snap.low_24h|floatformat:4 }} &ndash; ${{ snap.high_24h|floatformat:4 }}</span>
+    </div>
+    {% endif %}
+  </div>
+  <div style="height:3px;background:rgba(107,114,128,0.15);border-radius:2px;margin:6px 0 2px;overflow:hidden;">
+    <div style="width:50%;height:100%;background:linear-gradient(90deg,#ef4444,#f59e0b,#10b981);border-radius:2px;"></div>
+  </div>
+</div>
+
+<!-- Regime + Gates Row -->
+<div style="display:grid;grid-template-columns:1.2fr 1fr;gap:8px;margin-top:8px;">
+  <!-- Regime Card -->
+  <div class="intel-card" style="padding:10px 14px;">
+    <div class="intel-title">REGIME</div>
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+      {% if last.regime %}
+        <span class="pill" style="background:rgba(16,185,129,0.12);color:#10b981;">{{ last.regime|upper }}</span>
+      {% endif %}
+      {% if last.vol_phase %}
+        <span class="pill" style="background:rgba(245,158,11,0.12);color:#f59e0b;">{{ last.vol_phase|upper }}</span>
+      {% endif %}
+      {% if last.direction %}
+        {% if last.direction|lower == "long" %}
+          <span class="pill ok" style="font-weight:600;">&#9650; LONG</span>
+        {% elif last.direction|lower == "short" %}
+          <span class="pill danger" style="font-weight:600;">&#9660; SHORT</span>
+        {% endif %}
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Gates Card -->
+  <div class="intel-card" style="padding:10px 14px;">
+    <div class="intel-title">GATES
+      {% if last.gates_pass %}
+        <span class="pill ok" style="font-size:10px;">ALL PASS</span>
+      {% else %}
+        <span class="pill danger" style="font-size:10px;">BLOCKED</span>
+      {% endif %}
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px 12px;">
+      {% with g=last.gates %}
+        <div style="display:inline-flex;align-items:center;gap:4px;min-width:90px;margin:2px 0;">
+          <span style="color:{% if g.atr_regime %}#10b981{% else %}#ef4444{% endif %};font-size:12px;">{% if g.atr_regime %}&#10003;{% else %}&#10007;{% endif %}</span>
+          <span style="color:#9ca3af;font-size:10px;letter-spacing:0.8px;">ATR</span>
+        </div>
+        <div style="display:inline-flex;align-items:center;gap:4px;min-width:90px;margin:2px 0;">
+          <span style="color:{% if g.session %}#10b981{% else %}#ef4444{% endif %};font-size:12px;">{% if g.session %}&#10003;{% else %}&#10007;{% endif %}</span>
+          <span style="color:#9ca3af;font-size:10px;letter-spacing:0.8px;">SESSION</span>
+        </div>
+        <div style="display:inline-flex;align-items:center;gap:4px;min-width:90px;margin:2px 0;">
+          <span style="color:{% if g.distance_from_value %}#10b981{% else %}#ef4444{% endif %};font-size:12px;">{% if g.distance_from_value %}&#10003;{% else %}&#10007;{% endif %}</span>
+          <span style="color:#9ca3af;font-size:10px;letter-spacing:0.8px;">DISTANCE</span>
+        </div>
+        <div style="display:inline-flex;align-items:center;gap:4px;min-width:90px;margin:2px 0;">
+          <span style="color:{% if g.spread %}#10b981{% else %}#ef4444{% endif %};font-size:12px;">{% if g.spread %}&#10003;{% else %}&#10007;{% endif %}</span>
+          <span style="color:#9ca3af;font-size:10px;letter-spacing:0.8px;">SPREAD</span>
+        </div>
+      {% endwith %}
+    </div>
+  </div>
+</div>
+
+<!-- Bot Status Narrative -->
+<div class="status-banner {% if norm_position %}in-trade{% elif last.gates_pass %}ready{% else %}watching{% endif %}" style="margin-top:8px;">
+  {% if norm_position %}
+    <div class="status-icon">&#9889;</div>
+    <div class="status-headline">In Trade</div>
+    <div class="status-body">
+      {{ norm_position.side|upper }} at <strong>${{ norm_position.entry_price|floatformat:4 }}</strong>
+      {% if norm_position.unrealized_pnl %}
+        &middot; Unrealized: <span class="{{ norm_position.unrealized_pnl|pnl_color }}">${{ norm_position.unrealized_pnl|floatformat:2 }}</span>
+      {% endif %}
+    </div>
+  {% elif last.failed_gates %}
+    <div class="status-icon">&#128683;</div>
+    <div class="status-headline">Blocked</div>
+    <div class="status-body">
+      {% for g in last.failed_gates %}{{ g|gate_plain }}{% if not forloop.last %}, {% endif %}{% endfor %}
+    </div>
+  {% elif last.entry_signal %}
+    <div class="status-icon">&#128161;</div>
+    <div class="status-headline">Signal Active</div>
+    <div class="status-body">
+      {{ last.entry_signal }} {{ last.direction|upper }}
+      {% if last.v4_selected_score %} &middot; Score {{ last.v4_selected_score|floatformat:0 }}/{{ last.v4_selected_threshold|floatformat:0 }}{% endif %}
+    </div>
+  {% else %}
+    <div class="status-icon">&#128065;</div>
+    <div class="status-headline">Scanning</div>
+    <div class="status-body">Watching for setups</div>
+  {% endif %}
+</div>
+
+<!-- Direction Comparison -->
+{% if snap.long_score is not None or snap.short_score is not None %}
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+  <div class="intel-card" style="padding:10px 14px;border-left:3px solid #34d399;">
+    <div class="intel-title">LONG SCORE</div>
+    <div style="font-size:1.2rem;font-weight:600;color:#34d399;">{{ snap.long_score|default:"--" }}</div>
+    {% if snap.long_hint %}
+      <div style="font-size:0.75rem;color:#9ca3af;margin-top:4px;">{{ snap.long_hint }}</div>
+    {% endif %}
+  </div>
+  <div class="intel-card" style="padding:10px 14px;border-left:3px solid #f87171;">
+    <div class="intel-title">SHORT SCORE</div>
+    <div style="font-size:1.2rem;font-weight:600;color:#f87171;">{{ snap.short_score|default:"--" }}</div>
+    {% if snap.short_hint %}
+      <div style="font-size:0.75rem;color:#9ca3af;margin-top:4px;">{{ snap.short_hint }}</div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Readiness Bars -->
+{% if snap.long_readiness is not None %}
+<div class="intel-card" style="padding:10px 14px;margin-top:8px;">
+  <div class="intel-title">READINESS</div>
+  <div style="margin:6px 0;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <span style="font-size:11px;color:#34d399;width:50px;">LONG</span>
+      <div style="flex:1;height:6px;background:rgba(107,114,128,0.15);border-radius:3px;overflow:hidden;">
+        <div style="width:{{ snap.long_readiness|pct_bar_width }};height:100%;background:#34d399;border-radius:3px;transition:width 0.3s;"></div>
+      </div>
+      <span style="font-size:11px;color:#9ca3af;width:36px;text-align:right;">{{ snap.long_readiness|floatformat:0 }}%</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="font-size:11px;color:#f87171;width:50px;">SHORT</span>
+      <div style="flex:1;height:6px;background:rgba(107,114,128,0.15);border-radius:3px;overflow:hidden;">
+        <div style="width:{{ snap.short_readiness|pct_bar_width }};height:100%;background:#f87171;border-radius:3px;transition:width 0.3s;"></div>
+      </div>
+      <span style="font-size:11px;color:#9ca3af;width:36px;text-align:right;">{{ snap.short_readiness|floatformat:0 }}%</span>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Contract Intelligence -->
+{% if snap.contract_basis_bps is not None %}
+<div class="intel-card" style="padding:10px 14px;margin-top:8px;">
+  <div class="intel-title">CONTRACT INTELLIGENCE</div>
+  <div style="display:flex;flex-wrap:wrap;gap:12px 20px;font-size:0.8rem;color:#9ca3af;margin-top:6px;">
+    {% if snap.contract_basis_bps is not None %}
+    <div class="item">
+      <div style="font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:#6b7280;">Basis</div>
+      <div style="color:{% if snap.contract_basis_bps > 0 %}#34d399{% elif snap.contract_basis_bps < 0 %}#f87171{% else %}#9ca3af{% endif %};font-weight:500;">{{ snap.contract_basis_bps|floatformat:1 }}bp</div>
+    </div>
+    {% endif %}
+    {% if snap.contract_oi_trend %}
+    <div class="item">
+      <div style="font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:#6b7280;">OI Trend</div>
+      <div style="font-weight:500;">{{ snap.contract_oi_trend }}</div>
+    </div>
+    {% endif %}
+    {% if snap.contract_funding_bias %}
+    <div class="item">
+      <div style="font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:#6b7280;">Funding</div>
+      <div style="font-weight:500;">{{ snap.contract_funding_bias }}</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Recent Events Feed (HTMX polled) -->
+<div id="events-feed"
+     hx-get="{% url 'trading:api_major_events' %}"
+     hx-trigger="every 15s"
+     hx-swap="innerHTML"
+     style="margin-top:8px;">
+  {% include "trading/partials/events_feed.html" %}
+</div>
+
+{% endwith %}

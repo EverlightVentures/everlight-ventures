@@ -1,0 +1,379 @@
+{% extends "hive/base.html" %}
+{% load static humanize hive_tags %}
+
+{% block title %}{{ app_name }} -- Events{% endblock %}
+{% block page_title %}System Events{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'hive:dashboard' %}">Hive</a>
+  <span class="sep">/</span> Events
+{% endblock %}
+
+{% block content %}
+<style>
+  /* ===================================================================
+     EVENTS -- Filter Pills
+     =================================================================== */
+  .evt-filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .evt-filter-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-right: 4px;
+  }
+
+  .evt-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 9999px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all var(--transition-base);
+  }
+
+  .evt-pill:hover {
+    color: var(--text-primary);
+    border-color: var(--gold-dim);
+    background: rgba(201, 168, 76, 0.06);
+  }
+
+  .evt-pill.active {
+    color: var(--gold);
+    border-color: var(--gold);
+    background: rgba(201, 168, 76, 0.12);
+  }
+
+  .evt-pill .pill-count {
+    font-size: 0.68rem;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 1px 7px;
+    border-radius: 9999px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .evt-pill.active .pill-count {
+    background: rgba(201, 168, 76, 0.2);
+    color: var(--gold);
+  }
+
+  /* Level-specific dot colors on pills */
+  .evt-pill .level-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .evt-pill .level-dot.dot-info    { background: var(--purple); }
+  .evt-pill .level-dot.dot-warning { background: #f59e0b; }
+  .evt-pill .level-dot.dot-error   { background: #ef4444; }
+  .evt-pill .level-dot.dot-success { background: #22c55e; }
+
+  /* ===================================================================
+     EVENTS -- Card List
+     =================================================================== */
+  .evt-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+
+  .evt-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 16px 20px;
+    cursor: pointer;
+  }
+
+  .evt-card:hover {
+    background: var(--bg-card-hover);
+    border-color: var(--border-hover);
+  }
+
+  /* Level indicator bar */
+  .evt-level-bar {
+    width: 3px;
+    min-height: 100%;
+    border-radius: 3px;
+    flex-shrink: 0;
+    align-self: stretch;
+  }
+
+  .evt-level-bar.bar-info    { background: var(--purple); }
+  .evt-level-bar.bar-warning { background: #f59e0b; }
+  .evt-level-bar.bar-error   { background: #ef4444; }
+  .evt-level-bar.bar-success { background: #22c55e; }
+
+  .evt-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .evt-header-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
+
+  .evt-level-badge {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 2px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .evt-level-badge.badge-info {
+    background: rgba(139, 92, 246, 0.12);
+    color: var(--purple);
+  }
+
+  .evt-level-badge.badge-warning {
+    background: rgba(245, 158, 11, 0.12);
+    color: #f59e0b;
+  }
+
+  .evt-level-badge.badge-error {
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+  }
+
+  .evt-level-badge.badge-success {
+    background: rgba(34, 197, 94, 0.12);
+    color: #22c55e;
+  }
+
+  .evt-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .evt-time {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  /* Collapsible detail */
+  .evt-detail {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    padding-top: 8px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s var(--ease-out-expo);
+  }
+
+  .evt-card.expanded .evt-detail {
+    max-height: 400px;
+  }
+
+  .evt-detail-text {
+    padding: 10px 14px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    font-size: 0.8rem;
+  }
+
+  .evt-expand-indicator {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    transition: transform var(--transition-base);
+    flex-shrink: 0;
+    margin-left: 8px;
+  }
+
+  .evt-card.expanded .evt-expand-indicator {
+    transform: rotate(180deg);
+  }
+
+  /* ===================================================================
+     EVENTS -- Pagination
+     =================================================================== */
+  .evt-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    margin-top: 24px;
+  }
+
+  .evt-page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    text-decoration: none;
+    transition: all var(--transition-base);
+  }
+
+  .evt-page-link:hover {
+    color: var(--gold);
+    border-color: var(--gold-dim);
+    background: rgba(201, 168, 76, 0.08);
+  }
+
+  .evt-page-link.active {
+    color: var(--gold);
+    border-color: var(--gold);
+    background: rgba(201, 168, 76, 0.15);
+    font-weight: 700;
+  }
+
+  .evt-page-link.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  /* ===================================================================
+     EVENTS -- Empty State
+     =================================================================== */
+  .evt-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+
+  .evt-empty i {
+    font-size: 2.5rem;
+    opacity: 0.2;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  /* ===================================================================
+     EVENTS -- Responsive
+     =================================================================== */
+  @media (max-width: 768px) {
+    .evt-header-row {
+      flex-wrap: wrap;
+    }
+
+    .evt-time {
+      width: 100%;
+      margin-top: 4px;
+    }
+  }
+</style>
+
+<!-- ====================================================================
+     FILTER PILLS
+     ==================================================================== -->
+<div class="evt-filters">
+  <span class="evt-filter-label">Level</span>
+
+  <a href="?" class="evt-pill {% if not request.GET.level %}active{% endif %}">
+    All
+  </a>
+
+  {% for lvl, count in level_counts.items %}
+  <a href="?level={{ lvl }}" class="evt-pill {% if request.GET.level == lvl %}active{% endif %}">
+    <span class="level-dot dot-{{ lvl }}"></span>
+    {{ lvl|title }}
+    <span class="pill-count">{{ count }}</span>
+  </a>
+  {% endfor %}
+</div>
+
+<!-- ====================================================================
+     EVENT CARDS
+     ==================================================================== -->
+<div class="evt-list">
+  {% for ev in object_list %}
+  <div class="glass-card evt-card" onclick="this.classList.toggle('expanded')">
+    <div class="evt-level-bar bar-{{ ev.level }}"></div>
+    <div class="evt-body">
+      <div class="evt-header-row">
+        <span class="evt-level-badge badge-{{ ev.level }}">{{ ev.level }}</span>
+        <span class="evt-title">{{ ev.title }}</span>
+        <span class="evt-time">{{ ev.created_at|timesince }} ago</span>
+        {% if ev.detail %}
+        <i class="fa-solid fa-chevron-down evt-expand-indicator"></i>
+        {% endif %}
+      </div>
+      {% if ev.detail %}
+      <div class="evt-detail">
+        <div class="evt-detail-text">{{ ev.detail|linebreaksbr }}</div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  {% empty %}
+  <div class="glass-card evt-empty">
+    <i class="fa-solid fa-bell-slash"></i>
+    <div style="font-size: 1rem; margin-bottom: 8px;">No events recorded.</div>
+    <div style="font-size: 0.82rem;">System events will appear here as agents process queries.</div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ====================================================================
+     PAGINATION
+     ==================================================================== -->
+{% if page_obj.has_other_pages %}
+<nav class="evt-pagination">
+  {% if page_obj.has_previous %}
+  <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.level %}&level={{ request.GET.level }}{% endif %}"
+     class="evt-page-link">
+    <i class="fa-solid fa-chevron-left"></i>
+  </a>
+  {% else %}
+  <span class="evt-page-link disabled"><i class="fa-solid fa-chevron-left"></i></span>
+  {% endif %}
+
+  {% for num in page_obj.paginator.page_range %}
+    {% if page_obj.number == num %}
+    <span class="evt-page-link active">{{ num }}</span>
+    {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+    <a href="?page={{ num }}{% if request.GET.level %}&level={{ request.GET.level }}{% endif %}"
+       class="evt-page-link">{{ num }}</a>
+    {% endif %}
+  {% endfor %}
+
+  {% if page_obj.has_next %}
+  <a href="?page={{ page_obj.next_page_number }}{% if request.GET.level %}&level={{ request.GET.level }}{% endif %}"
+     class="evt-page-link">
+    <i class="fa-solid fa-chevron-right"></i>
+  </a>
+  {% else %}
+  <span class="evt-page-link disabled"><i class="fa-solid fa-chevron-right"></i></span>
+  {% endif %}
+</nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,5 @@
+Request_ID,Employee_ID,Employee_Name,Request_Date,Start_Date,End_Date,Days_Requested,Reason,Status,Manager_Name,Approval_Date,Manager_Notes
+REQ20251202100949,1001,Rich,2025-12-02,2025-12-17,2025-12-18,2,"fun
+",Approved,Rich,2025-12-02,
+REQ20251217022208f429,1001,Rich,2025-12-17,2025-12-18,2025-12-18,1,dfda,Approved,Rich,2025-12-17,🎉 Approved! Enjoy your time off 🙌
+REQ20251217123437843,1001,Rich,2025-12-17,2026-01-01,2026-01-01,1,vacay,Denied,Rich,2025-12-17,🙏 Thanks for understanding — not approved at this time. Please try different dates or talk with your manager. 💬

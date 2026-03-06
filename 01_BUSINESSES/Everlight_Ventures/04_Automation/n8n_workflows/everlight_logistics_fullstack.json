@@ -1,0 +1,129 @@
+{
+    "name": "Everlight_Logistics_FullStack_Workflows",
+    "version": "3.0",
+    "description": "All-in-one Slack + n8n + GPT Workflow System for Everlight Logistics",
+    "created": "2025-03-31T18:11:32.840866",
+    "slack_channels": [
+        {
+            "channel": "#all-everlightlogistics",
+            "purpose": "Main company feed & AI alerts",
+            "linked_workflows": "n8n integrations for main company feed & ai alerts"
+        },
+        {
+            "channel": "#announcements",
+            "purpose": "Staff & ops updates",
+            "linked_workflows": "n8n integrations for staff & ops updates"
+        },
+        {
+            "channel": "#automation_templates",
+            "purpose": "Prebuilt n8n workflow blueprints",
+            "linked_workflows": "n8n integrations for prebuilt n8n workflow blueprints"
+        },
+        {
+            "channel": "#crypto_wallets",
+            "purpose": "Logs wallet changes, transactions",
+            "linked_workflows": "n8n integrations for logs wallet changes, transactions"
+        },
+        {
+            "channel": "#daily_tasks",
+            "purpose": "Posts GPT-generated to-do lists + habits",
+            "linked_workflows": "n8n integrations for posts gpt-generated to-do lists + habits"
+        },
+        {
+            "channel": "#email_messages",
+            "purpose": "Logs Gmail, customer support & autoresponders",
+            "linked_workflows": "n8n integrations for logs gmail, customer support & autoresponders"
+        },
+        {
+            "channel": "#gpt_prompts",
+            "purpose": "Stores reusable prompt chains for workflows",
+            "linked_workflows": "n8n integrations for stores reusable prompt chains for workflows"
+        },
+        {
+            "channel": "#gpt_workspace",
+            "purpose": "On-demand assistant + GPT-4.5 tools",
+            "linked_workflows": "n8n integrations for on-demand assistant + gpt-4.5 tools"
+        },
+        {
+            "channel": "#invoices",
+            "purpose": "Logs Stripe invoices, vendor bills, income",
+            "linked_workflows": "n8n integrations for logs stripe invoices, vendor bills, income"
+        },
+        {
+            "channel": "#my-notes",
+            "purpose": "Logs personal memos, mobile notes",
+            "linked_workflows": "n8n integrations for logs personal memos, mobile notes"
+        },
+        {
+            "channel": "#order_list",
+            "purpose": "Shows Amazon, product orders, customer requests",
+            "linked_workflows": "n8n integrations for shows amazon, product orders, customer requests"
+        },
+        {
+            "channel": "#point_of_sale",
+            "purpose": "Logs local sales, POS device reports",
+            "linked_workflows": "n8n integrations for logs local sales, pos device reports"
+        },
+        {
+            "channel": "#projects",
+            "purpose": "Breaks down deliverables + agent assignments",
+            "linked_workflows": "n8n integrations for breaks down deliverables + agent assignments"
+        },
+        {
+            "channel": "#random",
+            "purpose": "Testing + dev ideas",
+            "linked_workflows": "n8n integrations for testing + dev ideas"
+        },
+        {
+            "channel": "#reports",
+            "purpose": "AI-generated financial, ops, and audit summaries",
+            "linked_workflows": "n8n integrations for ai-generated financial, ops, and audit summaries"
+        },
+        {
+            "channel": "#sops",
+            "purpose": "Logs Standard Operating Procedures",
+            "linked_workflows": "n8n integrations for logs standard operating procedures"
+        },
+        {
+            "channel": "#text_messages",
+            "purpose": "Google Messages + Twilio synced threads",
+            "linked_workflows": "n8n integrations for google messages + twilio synced threads"
+        },
+        {
+            "channel": "#trading_view",
+            "purpose": "Logs PineScript signals, trading alerts",
+            "linked_workflows": "n8n integrations for logs pinescript signals, trading alerts"
+        },
+        {
+            "channel": "#vendor_list",
+            "purpose": "Logs vendor contacts, terms, invoices",
+            "linked_workflows": "n8n integrations for logs vendor contacts, terms, invoices"
+        },
+        {
+            "channel": "#verdant_coin",
+            "purpose": "Logs blockchain, staking updates",
+            "linked_workflows": "n8n integrations for logs blockchain, staking updates"
+        },
+        {
+            "channel": "#who_we_are",
+            "purpose": "Mission, vision, team identity",
+            "linked_workflows": "n8n integrations for mission, vision, team identity"
+        }
+    ],
+    "bots": [
+        "Thor",
+        "Braniac",
+        "Finance Wizard",
+        "Power Play"
+    ],
+    "google_messages": {
+        "integration": "custom webhook",
+        "notes": "Using Google Messages API instead of Twilio"
+    },
+    "workflow_engine": "n8n",
+    "storage": {
+        "GitHub": "connected",
+        "GoogleDrive": "connected",
+        "SD_Card": "Z Fold 5 mount point"
+    }
+}

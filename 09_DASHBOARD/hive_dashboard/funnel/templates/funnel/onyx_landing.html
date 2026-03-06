@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onyx POS -- The $49/mo POS That Does Everything</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1a1a1a; }
+        .hero {
+            background: linear-gradient(135deg, #0d0d0d 0%, #1a1a2e 50%, #16213e 100%);
+            color: white; padding: 80px 20px; text-align: center; min-height: 70vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+        }
+        .hero h1 { font-size: 2.8rem; max-width: 700px; line-height: 1.2; margin-bottom: 20px; }
+        .hero .subtitle { font-size: 1.3rem; opacity: 0.85; max-width: 600px; margin-bottom: 40px; }
+        .bullets { max-width: 600px; margin: 0 auto; padding: 60px 20px; }
+        .bullet { display: flex; align-items: flex-start; margin-bottom: 30px; }
+        .bullet-icon { font-size: 2rem; margin-right: 16px; min-width: 40px; }
+        .bullet h3 { font-size: 1.2rem; margin-bottom: 6px; }
+        .bullet p { color: #555; line-height: 1.5; }
+        .cta-section {
+            background: #f8f9fa; padding: 60px 20px; text-align: center;
+        }
+        .cta-section h2 { font-size: 2rem; margin-bottom: 10px; }
+        .cta-section .sub { color: #666; margin-bottom: 30px; }
+        .form-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; max-width: 500px; margin: 0 auto; }
+        .form-row input {
+            padding: 14px 18px; font-size: 1rem; border: 2px solid #ddd; border-radius: 8px;
+            flex: 1; min-width: 200px;
+        }
+        .form-row button {
+            padding: 14px 28px; font-size: 1rem; font-weight: 700;
+            background: #0066ff; color: white; border: none; border-radius: 8px;
+            cursor: pointer; transition: background 0.2s;
+        }
+        .form-row button:hover { background: #0052cc; }
+        .trust { color: #888; font-size: 0.85rem; margin-top: 12px; }
+        .msg { margin-top: 16px; padding: 12px; border-radius: 8px; display: none; }
+        .msg.ok { background: #d4edda; color: #155724; display: block; }
+        .msg.err { background: #f8d7da; color: #721c24; display: block; }
+        footer { text-align: center; padding: 30px; color: #aaa; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+    <section class="hero">
+        <h1>Stop Paying 2.9% on Every Sale</h1>
+        <p class="subtitle">
+            Onyx POS is the $49/mo point-of-sale system built for small retail.
+            Nurseries, boutiques, auto shops, smoke shops -- if you swipe cards, you're overpaying.
+        </p>
+    </section>
+
+    <section class="bullets">
+        <div class="bullet">
+            <span class="bullet-icon">1</span>
+            <div>
+                <h3>Built by a Small Business Owner</h3>
+                <p>Not a Silicon Valley startup. Built because Square, Toast, and Clover charge too much for what small shops actually need.</p>
+            </div>
+        </div>
+        <div class="bullet">
+            <span class="bullet-icon">2</span>
+            <div>
+                <h3>Everything You Need, Nothing You Don't</h3>
+                <p>Inventory, receipts, customer lookup, reporting. No upsells to features you'll never use. $49/mo flat.</p>
+            </div>
+        </div>
+        <div class="bullet">
+            <span class="bullet-icon">3</span>
+            <div>
+                <h3>14-Day Free Trial, No Credit Card</h3>
+                <p>Set it up in 10 minutes. If it doesn't save you money, walk away. No contracts, no cancellation fees.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta-section" id="signup">
+        <h2>Start Your Free Trial</h2>
+        <p class="sub">14 days free. No credit card required.</p>
+        <div class="form-row">
+            <input type="email" id="email" placeholder="you@yourbusiness.com" required>
+            <button onclick="submitLead()">Get Started Free</button>
+        </div>
+        <p class="trust">No spam. Unsubscribe anytime.</p>
+        <div class="msg" id="msg"></div>
+    </section>
+
+    <footer>Onyx POS by Everlight Ventures</footer>
+
+    <script>
+    async function submitLead() {
+        const email = document.getElementById('email').value.trim();
+        const msg = document.getElementById('msg');
+        if (!email || !email.includes('@')) {
+            msg.className = 'msg err';
+            msg.textContent = 'Please enter a valid email.';
+            return;
+        }
+        try {
+            const resp = await fetch('/funnel/capture/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({email: email, product: 'onyx', source: 'landing_page'}),
+            });
+            const data = await resp.json();
+            if (resp.ok) {
+                msg.className = 'msg ok';
+                msg.textContent = 'You\'re in! Check your email for next steps.';
+                document.getElementById('email').value = '';
+            } else {
+                msg.className = 'msg err';
+                msg.textContent = data.error || 'Something went wrong.';
+            }
+        } catch (e) {
+            msg.className = 'msg err';
+            msg.textContent = 'Network error. Please try again.';
+        }
+    }
+    </script>
+</body>
+</html>

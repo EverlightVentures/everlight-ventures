@@ -1,0 +1,443 @@
+{% extends "hive/base.html" %}
+{% load static humanize hive_tags %}
+
+{% block title %}{{ app_name }} -- Sessions{% endblock %}
+{% block page_title %}Sessions{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'hive:dashboard' %}">Hive</a>
+  <span class="sep">/</span> Sessions
+{% endblock %}
+
+{% block content %}
+<style>
+  /* ===================================================================
+     SESSIONS -- Search Bar
+     =================================================================== */
+  .sess-search-form {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .sess-search-input {
+    flex: 1;
+    padding: 12px 18px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    outline: none;
+    transition: all var(--transition-base);
+  }
+
+  .sess-search-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .sess-search-input:focus {
+    border-color: var(--gold-dim);
+    box-shadow: 0 0 0 3px var(--gold-glow);
+  }
+
+  .sess-search-btn {
+    padding: 12px 24px;
+    background: rgba(201, 168, 76, 0.12);
+    border: 1px solid var(--gold-dim);
+    border-radius: 10px;
+    color: var(--gold);
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all var(--transition-base);
+  }
+
+  .sess-search-btn:hover {
+    background: rgba(201, 168, 76, 0.2);
+    border-color: var(--gold);
+  }
+
+  /* ===================================================================
+     SESSIONS -- Filter Pills
+     =================================================================== */
+  .sess-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+  }
+
+  .sess-filter-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-right: 16px;
+  }
+
+  .sess-filter-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-right: 4px;
+  }
+
+  .sess-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 9999px;
+    font-size: 0.78rem;
+    font-weight: 500;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all var(--transition-base);
+  }
+
+  .sess-pill:hover {
+    color: var(--text-primary);
+    border-color: var(--gold-dim);
+    background: rgba(201, 168, 76, 0.08);
+  }
+
+  .sess-pill.active {
+    color: var(--gold);
+    border-color: var(--gold);
+    background: rgba(201, 168, 76, 0.12);
+  }
+
+  .sess-pill .pill-count {
+    font-size: 0.68rem;
+    background: rgba(255, 255, 255, 0.08);
+    padding: 1px 7px;
+    border-radius: 9999px;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+
+  .sess-pill.active .pill-count {
+    background: rgba(201, 168, 76, 0.2);
+    color: var(--gold);
+  }
+
+  /* ===================================================================
+     SESSIONS -- Card Grid
+     =================================================================== */
+  .sess-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+
+  .sess-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .sess-card:hover {
+    color: inherit;
+  }
+
+  .sess-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .sess-card-id {
+    font-family: monospace;
+    font-size: 0.82rem;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .sess-card-query {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 14px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .sess-card-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .sess-card-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .sess-card-meta-item i {
+    font-size: 0.72rem;
+    opacity: 0.6;
+  }
+
+  .sess-mode-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border: 1px solid var(--purple-dim);
+    color: var(--purple);
+    background: rgba(139, 92, 246, 0.1);
+  }
+
+  /* ===================================================================
+     SESSIONS -- Pagination
+     =================================================================== */
+  .sess-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 4px;
+    margin-top: 24px;
+  }
+
+  .sess-page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 10px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    text-decoration: none;
+    transition: all var(--transition-base);
+  }
+
+  .sess-page-link:hover {
+    color: var(--gold);
+    border-color: var(--gold-dim);
+    background: rgba(201, 168, 76, 0.08);
+  }
+
+  .sess-page-link.active {
+    color: var(--gold);
+    border-color: var(--gold);
+    background: rgba(201, 168, 76, 0.15);
+    font-weight: 700;
+  }
+
+  .sess-page-link.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+  }
+
+  /* ===================================================================
+     SESSIONS -- Responsive
+     =================================================================== */
+  @media (max-width: 768px) {
+    .sess-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .sess-search-form {
+      flex-direction: column;
+    }
+
+    .sess-search-form input[type="date"],
+    .sess-search-form select {
+      flex: 1 !important;
+      min-width: 0 !important;
+    }
+  }
+
+  /* Date + select inputs match text input style */
+  .sess-search-form input[type="date"],
+  .sess-search-form select {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    padding: 12px 14px;
+    outline: none;
+    transition: all var(--transition-base);
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .sess-search-form input[type="date"]:focus,
+  .sess-search-form select:focus {
+    border-color: var(--gold-dim);
+    box-shadow: 0 0 0 3px var(--gold-glow);
+  }
+
+  /* Dark calendar/select icons */
+  .sess-search-form input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.6);
+    cursor: pointer;
+  }
+</style>
+
+<!-- ====================================================================
+     SEARCH BAR + DATE RANGE + SORT
+     ==================================================================== -->
+<form method="get" action="" class="sess-search-form" id="sess-filter-form">
+  <input
+    type="text"
+    name="q"
+    value="{{ search_query }}"
+    placeholder="Search sessions by query text or ID..."
+    class="sess-search-input"
+    autocomplete="off"
+  >
+  <input type="date" name="date_from" value="{{ date_from }}"
+    class="sess-search-input" style="flex:0 0 140px;" title="From date">
+  <input type="date" name="date_to" value="{{ date_to }}"
+    class="sess-search-input" style="flex:0 0 140px;" title="To date">
+  <select name="sort" class="sess-search-input" style="flex:0 0 160px; cursor:pointer;"
+    onchange="this.form.submit()">
+    <option value="newest" {% if active_sort == 'newest' %}selected{% endif %}>Newest First</option>
+    <option value="oldest" {% if active_sort == 'oldest' %}selected{% endif %}>Oldest First</option>
+    <option value="duration_desc" {% if active_sort == 'duration_desc' %}selected{% endif %}>Longest First</option>
+    <option value="duration_asc" {% if active_sort == 'duration_asc' %}selected{% endif %}>Shortest First</option>
+  </select>
+  <button type="submit" class="sess-search-btn">
+    <i class="fa-solid fa-magnifying-glass"></i> Search
+  </button>
+  {% if search_query or active_status or active_mode or date_from or date_to %}
+  <a href="{% url 'hive:sessions' %}" class="sess-search-btn" style="background:rgba(239,68,68,0.08); border-color:rgba(239,68,68,0.3); color:#ef4444; text-decoration:none;">
+    <i class="fa-solid fa-xmark"></i> Clear
+  </a>
+  {% endif %}
+  {# Preserve status/mode filters when submitting search #}
+  {% if active_status %}<input type="hidden" name="status" value="{{ active_status }}">{% endif %}
+  {% if active_mode %}<input type="hidden" name="mode" value="{{ active_mode }}">{% endif %}
+</form>
+
+<!-- ====================================================================
+     FILTER PILLS
+     ==================================================================== -->
+<div class="sess-filters">
+  <!-- Status filters -->
+  <div class="sess-filter-group">
+    <span class="sess-filter-label">Status</span>
+    <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if request.GET.mode %}mode={{ request.GET.mode }}{% endif %}"
+       class="sess-pill {% if not request.GET.status %}active{% endif %}">
+      All
+    </a>
+    {% for st, count in filter_counts.status.items %}
+    <a href="?status={{ st }}{% if search_query %}&q={{ search_query }}{% endif %}{% if request.GET.mode %}&mode={{ request.GET.mode }}{% endif %}"
+       class="sess-pill {% if request.GET.status == st %}active{% endif %}">
+      {{ st|title }}
+      <span class="pill-count">{{ count }}</span>
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- Mode filters -->
+  <div class="sess-filter-group">
+    <span class="sess-filter-label">Mode</span>
+    <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if request.GET.status %}status={{ request.GET.status }}{% endif %}"
+       class="sess-pill {% if not request.GET.mode %}active{% endif %}">
+      All
+    </a>
+    {% for md, count in filter_counts.mode.items %}
+    <a href="?mode={{ md }}{% if search_query %}&q={{ search_query }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}"
+       class="sess-pill {% if request.GET.mode == md %}active{% endif %}">
+      {{ md|title }}
+      <span class="pill-count">{{ count }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ====================================================================
+     SESSION CARDS
+     ==================================================================== -->
+<div class="sess-grid">
+  {% for s in object_list %}
+  <a href="{% url 'hive:session_detail' session_id=s.session_id %}" class="glass-card sess-card">
+    <div class="sess-card-top">
+      <span class="sess-card-id">{{ s.session_id|truncatechars:12 }}</span>
+      {{ s.status|status_badge }}
+    </div>
+    <div class="sess-card-query">{{ s.query }}</div>
+    <div class="sess-card-meta">
+      <span class="sess-mode-badge">{{ s.mode }}</span>
+      <span class="sess-card-meta-item">
+        <i class="fa-solid fa-users"></i>
+        {{ s.agents_succeeded }}/{{ s.agents_total }}
+      </span>
+      <span class="sess-card-meta-item">
+        <i class="fa-solid fa-clock"></i>
+        {{ s.duration_seconds|duration_fmt }}
+      </span>
+      <span class="sess-card-meta-item">
+        <i class="fa-regular fa-calendar"></i>
+        {{ s.created_at|timesince }} ago
+      </span>
+    </div>
+  </a>
+  {% empty %}
+  <div class="glass-card" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-muted);">
+    <i class="fa-solid fa-filter-circle-xmark" style="font-size: 2.5rem; opacity: 0.2; margin-bottom: 16px; display: block;"></i>
+    <div style="font-size: 1rem; margin-bottom: 8px;">No sessions found.</div>
+    <div style="font-size: 0.82rem;">Try adjusting your search or filters.</div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ====================================================================
+     PAGINATION
+     ==================================================================== -->
+{% if page_obj.has_other_pages %}
+<nav class="sess-pagination">
+  {% if page_obj.has_previous %}
+  <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.mode %}&mode={{ request.GET.mode }}{% endif %}"
+     class="sess-page-link">
+    <i class="fa-solid fa-chevron-left"></i>
+  </a>
+  {% else %}
+  <span class="sess-page-link disabled"><i class="fa-solid fa-chevron-left"></i></span>
+  {% endif %}
+
+  {% for num in page_obj.paginator.page_range %}
+    {% if page_obj.number == num %}
+    <span class="sess-page-link active">{{ num }}</span>
+    {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+    <a href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.mode %}&mode={{ request.GET.mode }}{% endif %}"
+       class="sess-page-link">{{ num }}</a>
+    {% endif %}
+  {% endfor %}
+
+  {% if page_obj.has_next %}
+  <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.mode %}&mode={{ request.GET.mode }}{% endif %}"
+     class="sess-page-link">
+    <i class="fa-solid fa-chevron-right"></i>
+  </a>
+  {% else %}
+  <span class="sess-page-link disabled"><i class="fa-solid fa-chevron-right"></i></span>
+  {% endif %}
+</nav>
+{% endif %}
+{% endblock %}

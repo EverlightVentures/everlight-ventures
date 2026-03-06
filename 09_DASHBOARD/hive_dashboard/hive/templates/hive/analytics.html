@@ -1,0 +1,404 @@
+{% extends "hive/base.html" %}
+{% load static humanize hive_tags %}
+
+{% block title %}{{ app_name }} -- Analytics{% endblock %}
+{% block page_title %}Analytics{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'hive:dashboard' %}">Hive</a>
+  <span class="sep">/</span> Analytics
+{% endblock %}
+
+{% block content %}
+<style>
+  /* ===================================================================
+     ANALYTICS -- Chart Grid
+     =================================================================== */
+  .anl-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .anl-chart-card {
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .anl-chart-title {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .anl-chart-title i {
+    color: var(--gold-dim);
+    font-size: 0.88rem;
+  }
+
+  .anl-chart-wrap {
+    flex: 1;
+    position: relative;
+    min-height: 240px;
+  }
+
+  /* ===================================================================
+     ANALYTICS -- Responsive
+     =================================================================== */
+  @media (max-width: 1200px) {
+    .anl-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .anl-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<!-- ====================================================================
+     CHART GRID
+     ==================================================================== -->
+<div class="anl-grid">
+  <!-- 1. Sessions per Day -->
+  <div class="glass-card anl-chart-card">
+    <div class="anl-chart-title">
+      <i class="fa-solid fa-chart-line"></i>
+      Sessions per Day
+    </div>
+    <div class="anl-chart-wrap">
+      <canvas id="chartSessionsPerDay"></canvas>
+    </div>
+  </div>
+
+  <!-- 2. Agent Success Rates -->
+  <div class="glass-card anl-chart-card">
+    <div class="anl-chart-title">
+      <i class="fa-solid fa-ranking-star"></i>
+      Agent Success Rates
+    </div>
+    <div class="anl-chart-wrap">
+      <canvas id="chartAgentSuccess"></canvas>
+    </div>
+  </div>
+
+  <!-- 3. Avg Response Time by Agent -->
+  <div class="glass-card anl-chart-card">
+    <div class="anl-chart-title">
+      <i class="fa-solid fa-stopwatch"></i>
+      Avg Response Time
+    </div>
+    <div class="anl-chart-wrap">
+      <canvas id="chartAgentDurations"></canvas>
+    </div>
+  </div>
+
+  <!-- 4. Mode Distribution -->
+  <div class="glass-card anl-chart-card">
+    <div class="anl-chart-title">
+      <i class="fa-solid fa-circle-half-stroke"></i>
+      Mode Distribution
+    </div>
+    <div class="anl-chart-wrap">
+      <canvas id="chartModeDist"></canvas>
+    </div>
+  </div>
+
+  <!-- 5. Query Categories -->
+  <div class="glass-card anl-chart-card">
+    <div class="anl-chart-title">
+      <i class="fa-solid fa-tags"></i>
+      Query Categories
+    </div>
+    <div class="anl-chart-wrap">
+      <canvas id="chartCategories"></canvas>
+    </div>
+  </div>
+
+  <!-- 6. Hourly Distribution -->
+  <div class="glass-card anl-chart-card">
+    <div class="anl-chart-title">
+      <i class="fa-solid fa-clock"></i>
+      Hourly Distribution
+    </div>
+    <div class="anl-chart-wrap">
+      <canvas id="chartHourly"></canvas>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  'use strict';
+
+  /* ------------------------------------------------------------------
+     Color Palette
+     ------------------------------------------------------------------ */
+  var GOLD    = '#c9a84c';
+  var PURPLE  = '#8b5cf6';
+  var CYAN    = '#22d3ee';
+  var GREEN   = '#22c55e';
+  var RED     = '#ef4444';
+  var AMBER   = '#f59e0b';
+
+  var PALETTE = [GOLD, PURPLE, CYAN, GREEN, AMBER, RED, '#ec4899', '#14b8a6'];
+  var GRID_COLOR = 'rgba(255, 255, 255, 0.04)';
+  var TICK_COLOR = '#6b7280';
+
+  /* ------------------------------------------------------------------
+     Common Chart Options
+     ------------------------------------------------------------------ */
+  var commonTooltip = {
+    backgroundColor: '#1a1a2e',
+    titleColor: '#e8e6e3',
+    bodyColor: '#9ca3af',
+    borderColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1,
+    cornerRadius: 8,
+    padding: 10
+  };
+
+  var commonScaleX = {
+    grid: { color: GRID_COLOR, drawBorder: false },
+    ticks: { color: TICK_COLOR, font: { size: 11 } }
+  };
+
+  var commonScaleY = {
+    grid: { color: GRID_COLOR, drawBorder: false },
+    ticks: { color: TICK_COLOR, font: { size: 11 } }
+  };
+
+  /* ------------------------------------------------------------------
+     Data from Django context
+     ------------------------------------------------------------------ */
+  var dailySessions  = JSON.parse('{{ daily_sessions_json|escapejs }}');
+  var agentSuccess   = JSON.parse('{{ agent_success_json|escapejs }}');
+  var agentDurations = JSON.parse('{{ agent_durations_json|escapejs }}');
+  var modeDist       = JSON.parse('{{ mode_dist_json|escapejs }}');
+  var categoryDist   = JSON.parse('{{ category_dist_json|escapejs }}');
+  var hourlyDist     = JSON.parse('{{ hourly_dist_json|escapejs }}');
+
+  /* ------------------------------------------------------------------
+     1. Sessions per Day (Line Chart)
+     ------------------------------------------------------------------ */
+  new Chart(document.getElementById('chartSessionsPerDay').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: dailySessions.map(function(d) { return d.date; }),
+      datasets: [{
+        label: 'Sessions',
+        data: dailySessions.map(function(d) { return d.count; }),
+        borderColor: GOLD,
+        backgroundColor: GOLD + '18',
+        borderWidth: 2,
+        pointBackgroundColor: GOLD,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        fill: true,
+        tension: 0.3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: commonTooltip
+      },
+      scales: { x: commonScaleX, y: Object.assign({}, commonScaleY, { beginAtZero: true }) }
+    }
+  });
+
+  /* ------------------------------------------------------------------
+     2. Agent Success Rates (Horizontal Bar)
+     ------------------------------------------------------------------ */
+  new Chart(document.getElementById('chartAgentSuccess').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: agentSuccess.map(function(d) { return d.agent; }),
+      datasets: [{
+        label: 'Success %',
+        data: agentSuccess.map(function(d) { return d.rate; }),
+        backgroundColor: agentSuccess.map(function(d, i) { return PALETTE[i % PALETTE.length] + 'aa'; }),
+        borderColor: agentSuccess.map(function(d, i) { return PALETTE[i % PALETTE.length]; }),
+        borderWidth: 1,
+        borderRadius: 4,
+        barThickness: 20
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: Object.assign({}, commonTooltip, {
+          callbacks: { label: function(ctx) { return ctx.parsed.x.toFixed(1) + '%'; } }
+        })
+      },
+      scales: {
+        x: Object.assign({}, commonScaleX, {
+          min: 0,
+          max: 100,
+          ticks: { color: TICK_COLOR, font: { size: 11 }, callback: function(v) { return v + '%'; } }
+        }),
+        y: Object.assign({}, commonScaleY, {
+          ticks: { color: '#e8e6e3', font: { size: 12 } }
+        })
+      }
+    }
+  });
+
+  /* ------------------------------------------------------------------
+     3. Avg Response Time by Agent (Bar Chart)
+     ------------------------------------------------------------------ */
+  new Chart(document.getElementById('chartAgentDurations').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: agentDurations.map(function(d) { return d.agent; }),
+      datasets: [{
+        label: 'Avg Seconds',
+        data: agentDurations.map(function(d) { return d.avg; }),
+        backgroundColor: agentDurations.map(function(d, i) { return PALETTE[i % PALETTE.length] + 'aa'; }),
+        borderColor: agentDurations.map(function(d, i) { return PALETTE[i % PALETTE.length]; }),
+        borderWidth: 1,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: Object.assign({}, commonTooltip, {
+          callbacks: {
+            label: function(ctx) {
+              var s = ctx.parsed.y;
+              if (s < 60) return s.toFixed(1) + 's';
+              return Math.floor(s / 60) + 'm ' + Math.round(s % 60) + 's';
+            }
+          }
+        })
+      },
+      scales: {
+        x: commonScaleX,
+        y: Object.assign({}, commonScaleY, {
+          beginAtZero: true,
+          ticks: { color: TICK_COLOR, font: { size: 11 }, callback: function(v) { return v + 's'; } }
+        })
+      }
+    }
+  });
+
+  /* ------------------------------------------------------------------
+     4. Mode Distribution (Doughnut)
+     ------------------------------------------------------------------ */
+  new Chart(document.getElementById('chartModeDist').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+      labels: modeDist.map(function(d) { return d.mode; }),
+      datasets: [{
+        data: modeDist.map(function(d) { return d.count; }),
+        backgroundColor: [GOLD + 'cc', PURPLE + 'cc', CYAN + 'cc', GREEN + 'cc'],
+        borderColor: '#0a0a0f',
+        borderWidth: 3,
+        hoverOffset: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '62%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: '#9ca3af',
+            padding: 16,
+            usePointStyle: true,
+            pointStyleWidth: 10,
+            font: { size: 12 }
+          }
+        },
+        tooltip: commonTooltip
+      }
+    }
+  });
+
+  /* ------------------------------------------------------------------
+     5. Query Categories (Bar Chart)
+     ------------------------------------------------------------------ */
+  new Chart(document.getElementById('chartCategories').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: categoryDist.map(function(d) { return d.category; }),
+      datasets: [{
+        label: 'Queries',
+        data: categoryDist.map(function(d) { return d.count; }),
+        backgroundColor: categoryDist.map(function(d, i) { return PALETTE[i % PALETTE.length] + '88'; }),
+        borderColor: categoryDist.map(function(d, i) { return PALETTE[i % PALETTE.length]; }),
+        borderWidth: 1,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: commonTooltip
+      },
+      scales: {
+        x: Object.assign({}, commonScaleX, {
+          ticks: { color: TICK_COLOR, font: { size: 10 }, maxRotation: 45 }
+        }),
+        y: Object.assign({}, commonScaleY, { beginAtZero: true })
+      }
+    }
+  });
+
+  /* ------------------------------------------------------------------
+     6. Hourly Distribution (Bar Chart)
+     ------------------------------------------------------------------ */
+  var hourLabels = hourlyDist.map(function(d) { return d.hour + ':00'; });
+  new Chart(document.getElementById('chartHourly').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: hourLabels,
+      datasets: [{
+        label: 'Queries',
+        data: hourlyDist.map(function(d) { return d.count; }),
+        backgroundColor: CYAN + '55',
+        borderColor: CYAN,
+        borderWidth: 1,
+        borderRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: commonTooltip
+      },
+      scales: {
+        x: Object.assign({}, commonScaleX, {
+          ticks: { color: TICK_COLOR, font: { size: 10 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 12 }
+        }),
+        y: Object.assign({}, commonScaleY, { beginAtZero: true })
+      }
+    }
+  });
+
+})();
+</script>
+{% endblock %}

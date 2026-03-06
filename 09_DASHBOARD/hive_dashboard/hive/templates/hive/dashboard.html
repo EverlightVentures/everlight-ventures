@@ -1,0 +1,718 @@
+{% extends "hive/base.html" %}
+{% load static humanize hive_tags %}
+
+{% block title %}{{ app_name }} -- Command Center{% endblock %}
+{% block page_title %}Command Center{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'hive:dashboard' %}">Hive</a>
+  <span class="sep">/</span> Dashboard
+{% endblock %}
+
+{% block content %}
+<style>
+  /* ===================================================================
+     DASHBOARD -- Stat Cards Row
+     =================================================================== */
+  .dash-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .dash-stat-card {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .dash-stat-card .stat-icon {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-size: 2rem;
+    opacity: 0.07;
+    color: var(--gold);
+  }
+
+  .dash-stat-card .stat-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .dash-stat-card .stat-value {
+    font-family: var(--font-heading);
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--gold);
+    line-height: 1.1;
+  }
+
+  .dash-stat-card .stat-sub {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
+  }
+
+  /* ===================================================================
+     DASHBOARD -- Agent Cards Row
+     =================================================================== */
+  .dash-agents-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .dash-agent-card {
+    position: relative;
+  }
+
+  .dash-agent-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .dash-agent-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 8px currentColor;
+  }
+
+  .dash-agent-name {
+    font-family: var(--font-heading);
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .dash-agent-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .dash-agent-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+  }
+
+  .dash-agent-bar-track {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 4px;
+  }
+
+  .dash-agent-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.6s var(--ease-out-expo);
+  }
+
+  .dash-agent-footer {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.75rem;
+  }
+
+  /* ===================================================================
+     DASHBOARD -- Section Headers
+     =================================================================== */
+  .dash-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .dash-section-title {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .dash-section-link {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--gold-dim);
+  }
+
+  .dash-section-link:hover {
+    color: var(--gold);
+  }
+
+  /* ===================================================================
+     DASHBOARD -- Sessions Table
+     =================================================================== */
+  .dash-sessions-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+
+  .dash-session-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 80px 90px 80px 140px;
+    gap: 16px;
+    align-items: center;
+    padding: 14px 20px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all var(--transition-base);
+  }
+
+  .dash-session-row:hover {
+    color: var(--text-primary);
+  }
+
+  .dash-session-id {
+    font-family: monospace;
+    font-size: 0.82rem;
+    color: var(--gold);
+  }
+
+  .dash-session-query {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .dash-session-mode {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--purple);
+  }
+
+  .dash-session-duration {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dash-session-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: right;
+  }
+
+  /* ===================================================================
+     DASHBOARD -- Events List
+     =================================================================== */
+  .dash-events-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 32px;
+  }
+
+  .dash-event-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 18px;
+  }
+
+  .dash-event-level {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    min-width: 60px;
+  }
+
+  .dash-event-level.level-info    { color: var(--purple); }
+  .dash-event-level.level-warning { color: #f59e0b; }
+  .dash-event-level.level-error   { color: #ef4444; }
+  .dash-event-level.level-success { color: #22c55e; }
+
+  .dash-event-title {
+    flex: 1;
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+  }
+
+  .dash-event-time {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  /* ===================================================================
+     DASHBOARD -- Floating Action Button
+     =================================================================== */
+  .dash-fab {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    z-index: 80;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+    color: #0a0a0f;
+    font-size: 1.4rem;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 24px rgba(201, 168, 76, 0.3);
+    transition: all 0.25s var(--ease-out-expo);
+    text-decoration: none;
+  }
+
+  .dash-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 32px rgba(201, 168, 76, 0.5);
+    color: #0a0a0f;
+  }
+
+  /* ===================================================================
+     DASHBOARD -- Responsive
+     =================================================================== */
+  @media (max-width: 1200px) {
+    .dash-stats-row,
+    .dash-agents-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .dash-stats-row,
+    .dash-agents-row {
+      grid-template-columns: 1fr;
+    }
+
+    .dash-session-row {
+      grid-template-columns: 80px 1fr 70px;
+    }
+
+    .dash-session-mode,
+    .dash-session-duration,
+    .dash-session-time {
+      display: none;
+    }
+
+    #botStatCards {
+      grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    #botAiRow {
+      grid-template-columns: 1fr !important;
+    }
+  }
+
+  @keyframes agentPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+</style>
+
+<!-- ====================================================================
+     STAT CARDS
+     ==================================================================== -->
+<div class="dash-stats-row">
+  <div class="glass-card dash-stat-card">
+    <i class="fa-solid fa-layer-group stat-icon"></i>
+    <div class="stat-label">Total Sessions</div>
+    <div class="stat-value">{{ total_sessions|default:"0"|intcomma }}</div>
+    <div class="stat-sub">all time</div>
+  </div>
+
+  <div class="glass-card dash-stat-card">
+    <i class="fa-solid fa-check-double stat-icon"></i>
+    <div class="stat-label">Success Rate</div>
+    <div class="stat-value">{{ success_rate|default:"0"|floatformat:1 }}%</div>
+    <div class="stat-sub">session completion</div>
+  </div>
+
+  <div class="glass-card dash-stat-card">
+    <i class="fa-solid fa-stopwatch stat-icon"></i>
+    <div class="stat-label">Avg Duration</div>
+    <div class="stat-value">{{ avg_duration|duration_fmt }}</div>
+    <div class="stat-sub">per session</div>
+  </div>
+
+  <div class="glass-card dash-stat-card">
+    <i class="fa-solid fa-users-gear stat-icon"></i>
+    <div class="stat-label">Active Agents</div>
+    <div class="stat-value">{{ agent_cards|length }}</div>
+    <div class="stat-sub">online</div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     AGENT STATUS CARDS
+     ==================================================================== -->
+<div class="dash-section-header">
+  <h2 class="dash-section-title">Agent Status</h2>
+  <a href="{% url 'hive:agents' %}" class="dash-section-link">View All <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i></a>
+</div>
+
+<div class="dash-agents-row">
+  {% for ac in agent_cards %}
+  <div class="glass-card dash-agent-card">
+    <div class="dash-agent-header">
+      <div class="dash-agent-dot" style="color: {{ ac.color }}; background: {{ ac.color }};"></div>
+      <span class="dash-agent-name">{{ ac.display_name }}</span>
+    </div>
+    <div class="dash-agent-stats">
+      <div>
+        <div class="dash-agent-stat-row">
+          <span>Success Rate</span>
+          <span style="color: var(--gold); font-weight: 600;">{{ ac.success_rate|floatformat:0 }}%</span>
+        </div>
+        <div class="dash-agent-bar-track">
+          <div class="dash-agent-bar-fill" style="width: {{ ac.success_rate|pct_bar_width }}; background: {{ ac.color }};"></div>
+        </div>
+      </div>
+      <div class="dash-agent-stat-row">
+        <span>Avg Duration</span>
+        <span>{{ ac.avg_duration|duration_fmt }}</span>
+      </div>
+    </div>
+    <div class="dash-agent-footer">
+      <span style="color: var(--text-muted);">{{ ac.total_responses }} responses</span>
+      {{ ac.last_status|status_badge }}
+    </div>
+  </div>
+  {% empty %}
+  <div class="glass-card" style="grid-column: 1 / -1; text-align: center; padding: 40px; color: var(--text-muted);">
+    <i class="fa-solid fa-users-slash" style="font-size: 2rem; opacity: 0.3; margin-bottom: 12px; display: block;"></i>
+    No agents configured yet.
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ====================================================================
+     BOT INTELLIGENCE PANEL
+     ==================================================================== -->
+<div class="dash-section-header">
+  <h2 class="dash-section-title">XLM Bot Intelligence</h2>
+  <span id="botHeartbeat" style="font-size:0.72rem; color:var(--text-muted);">Loading...</span>
+</div>
+
+<div id="botIntelPanel" class="glass-card" style="margin-bottom:32px; padding:20px;">
+  <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:16px;" id="botStatCards">
+    <div class="bot-stat-mini">
+      <div style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:4px;">Mark Price</div>
+      <div id="botMarkPrice" style="font-size:1.3rem; font-weight:700; color:var(--gold); font-variant-numeric:tabular-nums;">--</div>
+    </div>
+    <div class="bot-stat-mini">
+      <div style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:4px;">PnL Today</div>
+      <div id="botPnl" style="font-size:1.3rem; font-weight:700; font-variant-numeric:tabular-nums;">--</div>
+    </div>
+    <div class="bot-stat-mini">
+      <div style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:4px;">Vol Regime</div>
+      <div id="botRegime" style="font-size:1.1rem; font-weight:600;">--</div>
+    </div>
+    <div class="bot-stat-mini">
+      <div style="font-size:0.68rem; text-transform:uppercase; letter-spacing:0.1em; color:var(--text-muted); margin-bottom:4px;">Recovery</div>
+      <div id="botRecovery" style="font-size:1.1rem; font-weight:600;">--</div>
+    </div>
+  </div>
+
+  <!-- AI Directives Row -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px;" id="botAiRow">
+    <div style="background:rgba(139,92,246,0.06); border:1px solid rgba(139,92,246,0.15); border-radius:10px; padding:12px 16px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+        <i class="fa-solid fa-brain" style="color:#8b5cf6; font-size:0.82rem;"></i>
+        <span style="font-weight:600; font-size:0.82rem; color:var(--text-primary);">Claude Directive</span>
+        <span id="claudeAction" style="margin-left:auto; font-size:0.72rem; font-weight:700; padding:2px 10px; border-radius:12px; background:rgba(139,92,246,0.15); color:#8b5cf6;">--</span>
+      </div>
+      <div id="claudeReasoning" style="font-size:0.78rem; color:var(--text-secondary); line-height:1.5;">Loading...</div>
+    </div>
+    <div style="background:rgba(34,197,94,0.06); border:1px solid rgba(34,197,94,0.15); border-radius:10px; padding:12px 16px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+        <i class="fa-solid fa-code" style="color:#22c55e; font-size:0.82rem;"></i>
+        <span style="font-weight:600; font-size:0.82rem; color:var(--text-primary);">Codex Directive</span>
+        <span id="codexAction" style="margin-left:auto; font-size:0.72rem; font-weight:700; padding:2px 10px; border-radius:12px; background:rgba(34,197,94,0.15); color:#22c55e;">--</span>
+      </div>
+      <div id="codexReasoning" style="font-size:0.78rem; color:var(--text-secondary); line-height:1.5;">Loading...</div>
+    </div>
+  </div>
+
+  <!-- Bottom stats strip -->
+  <div style="display:flex; gap:20px; padding-top:12px; border-top:1px solid var(--glass-border); font-size:0.75rem; color:var(--text-muted); flex-wrap:wrap;">
+    <span>Equity Start: <strong id="botEquity" style="color:var(--gold);">--</strong></span>
+    <span>USDC Spot: <strong id="botUsdc" style="color:var(--text-secondary);">--</strong></span>
+    <span>Funding: <strong id="botFunding" style="color:var(--text-secondary);">--</strong></span>
+    <span>Bias: <strong id="botBias" style="color:var(--text-secondary);">--</strong></span>
+    <span>3d PnL: <strong id="bot3dPnl">--</strong></span>
+    <span>Posture: <strong id="botPosture">--</strong></span>
+  </div>
+</div>
+
+<!-- ====================================================================
+     RECENT SESSIONS
+     ==================================================================== -->
+<div class="dash-section-header">
+  <h2 class="dash-section-title">Recent Sessions</h2>
+  <a href="{% url 'hive:sessions' %}" class="dash-section-link">View All <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i></a>
+</div>
+
+<div class="dash-sessions-grid">
+  {% for s in recent_sessions %}
+  <a href="{% url 'hive:session_detail' session_id=s.session_id %}" class="glass-card dash-session-row">
+    <span class="dash-session-id">{{ s.session_id|truncatechars:8 }}</span>
+    <span class="dash-session-query">{{ s.query|truncatechars:80 }}</span>
+    <span class="dash-session-mode">{{ s.mode }}</span>
+    <span>{{ s.status|status_badge }}</span>
+    <span class="dash-session-duration">{{ s.duration_seconds|duration_fmt }}</span>
+    <span class="dash-session-time">{{ s.created_at|timesince }} ago</span>
+  </a>
+  {% empty %}
+  <div class="glass-card" style="text-align: center; padding: 40px; color: var(--text-muted);">
+    <i class="fa-solid fa-inbox" style="font-size: 2rem; opacity: 0.3; margin-bottom: 12px; display: block;"></i>
+    No sessions yet. <a href="{% url 'hive:launch' %}">Launch your first query.</a>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ====================================================================
+     SYSTEM EVENTS
+     ==================================================================== -->
+<div class="dash-section-header">
+  <h2 class="dash-section-title">System Events</h2>
+  <a href="{% url 'hive:events' %}" class="dash-section-link">View All <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i></a>
+</div>
+
+<div class="dash-events-list">
+  {% for ev in recent_events %}
+  <div class="glass-card dash-event-item">
+    <span class="dash-event-level level-{{ ev.level }}">{{ ev.level }}</span>
+    <span class="dash-event-title">{{ ev.title }}</span>
+    <span class="dash-event-time">{{ ev.created_at|timesince }} ago</span>
+  </div>
+  {% empty %}
+  <div class="glass-card" style="text-align: center; padding: 30px; color: var(--text-muted);">
+    No system events recorded.
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ====================================================================
+     7-DAY ACTIVITY CHART
+     ==================================================================== -->
+<div class="dash-section-header">
+  <h2 class="dash-section-title">7-Day Activity</h2>
+  <a href="{% url 'hive:analytics' %}" class="dash-section-link">Full Analytics <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i></a>
+</div>
+<div class="glass-card" style="margin-bottom: 32px; padding: 20px;">
+  <canvas id="activityChart" height="80"></canvas>
+</div>
+
+<!-- ====================================================================
+     FLOATING ACTION BUTTON
+     ==================================================================== -->
+<a href="{% url 'hive:launch' %}" class="dash-fab" title="Launch New Query">
+  <i class="fa-solid fa-rocket"></i>
+</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* ====================================================================
+   BOT INTELLIGENCE -- Fetch and render
+   ==================================================================== */
+(function() {
+  function loadBotIntel() {
+    fetch('{% url "hive:api_bot_intel" %}')
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.status !== 'ok') return;
+
+        /* Heartbeat */
+        var hb = document.getElementById('botHeartbeat');
+        if (d.bot_alive) {
+          var age = d.heartbeat_age_s || 0;
+          hb.innerHTML = '<span style="color:#22c55e;"><i class="fa-solid fa-circle" style="font-size:0.5rem;margin-right:4px;animation:agentPulse 1.2s ease-in-out infinite;"></i> Online</span> <span style="opacity:0.6;">(' + Math.round(age) + 's ago)</span>';
+        } else {
+          hb.innerHTML = '<span style="color:#ef4444;"><i class="fa-solid fa-circle" style="font-size:0.5rem;margin-right:4px;"></i> Offline</span>';
+        }
+
+        /* State */
+        var st = d.state;
+        if (st) {
+          var mp = d.contract ? '$' + (d.contract.mark_price || 0).toFixed(4) : '--';
+          document.getElementById('botMarkPrice').textContent = mp;
+
+          var pnl = st.exchange_pnl_today_usd || st.pnl_today_usd || 0;
+          var pnlEl = document.getElementById('botPnl');
+          pnlEl.textContent = (pnl >= 0 ? '+' : '') + '$' + pnl.toFixed(2);
+          pnlEl.style.color = pnl >= 0 ? '#22c55e' : '#ef4444';
+
+          var regime = st.vol_state || 'UNKNOWN';
+          var regEl = document.getElementById('botRegime');
+          regEl.textContent = regime;
+          var regColors = { 'COMPRESSION': '#f59e0b', 'EXPANSION': '#22c55e', 'IGNITION': '#8b5cf6', 'TRANSITION': '#6b7280' };
+          regEl.style.color = regColors[regime] || 'var(--text-secondary)';
+
+          var rec = st.recovery_mode || 'NORMAL';
+          var recEl = document.getElementById('botRecovery');
+          recEl.textContent = rec;
+          recEl.style.color = rec === 'NORMAL' ? '#22c55e' : '#f59e0b';
+
+          if (st.safe_mode) {
+            recEl.textContent = 'SAFE MODE';
+            recEl.style.color = '#ef4444';
+          }
+
+          document.getElementById('botEquity').textContent = '$' + (st.equity_start_usd || 0).toFixed(2);
+          document.getElementById('botUsdc').textContent = '$' + (st.spot_usdc || 0).toFixed(2);
+        }
+
+        /* Contract */
+        if (d.contract) {
+          var fb = d.contract.funding_bias || '--';
+          var fr = d.contract.funding_rate_hr;
+          document.getElementById('botFunding').textContent = fb + (fr != null ? ' (' + fr.toFixed(2) + '%/hr)' : '');
+        }
+
+        /* AI directives */
+        if (d.ai) {
+          var ca = document.getElementById('claudeAction');
+          ca.textContent = d.ai.claude_action || '--';
+          if (d.ai.claude_action && d.ai.claude_action.indexOf('SHORT') !== -1) {
+            ca.style.background = 'rgba(239,68,68,0.15)'; ca.style.color = '#ef4444';
+          } else if (d.ai.claude_action && d.ai.claude_action.indexOf('LONG') !== -1) {
+            ca.style.background = 'rgba(34,197,94,0.15)'; ca.style.color = '#22c55e';
+          }
+          document.getElementById('claudeReasoning').textContent = d.ai.claude_reasoning || 'No data';
+
+          var cx = document.getElementById('codexAction');
+          cx.textContent = d.ai.codex_action || '--';
+          if (d.ai.codex_action && d.ai.codex_action.indexOf('SHORT') !== -1) {
+            cx.style.background = 'rgba(239,68,68,0.15)'; cx.style.color = '#ef4444';
+          } else if (d.ai.codex_action && d.ai.codex_action.indexOf('LONG') !== -1) {
+            cx.style.background = 'rgba(34,197,94,0.15)'; cx.style.color = '#22c55e';
+          }
+          document.getElementById('codexReasoning').textContent = d.ai.codex_reasoning || 'No data';
+
+          document.getElementById('botBias').textContent = d.ai.trading_bias || '--';
+        }
+
+        /* Daily brief */
+        if (d.daily_brief) {
+          var p3 = d.daily_brief.total_3day_pnl || 0;
+          var p3El = document.getElementById('bot3dPnl');
+          p3El.textContent = (p3 >= 0 ? '+' : '') + '$' + p3.toFixed(2);
+          p3El.style.color = p3 >= 0 ? '#22c55e' : '#ef4444';
+
+          var post = d.daily_brief.suggested_posture || '--';
+          var postEl = document.getElementById('botPosture');
+          postEl.textContent = post.charAt(0).toUpperCase() + post.slice(1);
+          postEl.style.color = post === 'conservative' ? '#f59e0b' : post === 'aggressive' ? '#22c55e' : 'var(--text-secondary)';
+        }
+      })
+      .catch(function(e) {
+        console.warn('Bot intel fetch error:', e);
+        document.getElementById('botHeartbeat').innerHTML = '<span style="color:var(--text-muted);">Unavailable</span>';
+      });
+  }
+
+  loadBotIntel();
+  setInterval(loadBotIntel, 30000); /* refresh every 30s */
+})();
+
+/* ====================================================================
+   7-DAY ACTIVITY CHART
+   ==================================================================== */
+(function () {
+  var labels  = {{ chart_7d_labels|safe }};
+  var counts  = {{ chart_7d_counts|safe }};
+  var success = {{ chart_7d_successes|safe }};
+
+  var ctx = document.getElementById('activityChart');
+  if (!ctx || typeof Chart === 'undefined') return;
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Total Sessions',
+          data: counts,
+          backgroundColor: 'rgba(201, 168, 76, 0.18)',
+          borderColor: 'rgba(201, 168, 76, 0.7)',
+          borderWidth: 1.5,
+          borderRadius: 5,
+          order: 2,
+        },
+        {
+          label: 'Successful',
+          data: success,
+          type: 'line',
+          borderColor: '#22c55e',
+          backgroundColor: 'rgba(34, 197, 94, 0.08)',
+          borderWidth: 2,
+          pointBackgroundColor: '#22c55e',
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          tension: 0.35,
+          fill: true,
+          order: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          labels: {
+            color: 'rgba(255,255,255,0.55)',
+            font: { size: 11 },
+            boxWidth: 12,
+          },
+        },
+        tooltip: {
+          backgroundColor: 'rgba(15, 15, 25, 0.92)',
+          borderColor: 'rgba(201, 168, 76, 0.3)',
+          borderWidth: 1,
+          titleColor: '#c9a84c',
+          bodyColor: 'rgba(255,255,255,0.75)',
+          padding: 10,
+        },
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 11 } },
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 11 }, stepSize: 1 },
+        },
+      },
+    },
+  });
+})();
+</script>
+{% endblock %}
