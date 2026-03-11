@@ -782,6 +782,21 @@ def log_directive_outcome(
     except Exception:
         pass
 
+    # Ingest to Blinko knowledge base (fire-and-forget)
+    try:
+        _blinko_bridge = Path(__file__).parent.parent.parent.parent / (
+            "03_AUTOMATION_CORE/01_Scripts/ai_workers/blinko_bridge.py"
+        )
+        if _blinko_bridge.exists():
+            subprocess.Popen(
+                [sys.executable, str(_blinko_bridge), "ingest-trade", json.dumps(entry)],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                start_new_session=True,
+            )
+    except Exception:
+        pass
+
 
 def log_flat_outcome(
     directive: dict,

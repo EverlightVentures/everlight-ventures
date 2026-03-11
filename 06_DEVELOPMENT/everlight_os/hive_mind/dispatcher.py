@@ -86,6 +86,34 @@ def dispatch(
         "started_at": session.created,
     })
 
+    # Phase 0: Blinko context retrieval (past decisions, war room history)
+    blinko_context = ""
+    try:
+        import subprocess, sys as _sys
+        _bridge = str(
+            WORKSPACE / "03_AUTOMATION_CORE" / "01_Scripts"
+            / "ai_workers" / "blinko_context.py"
+        )
+        _blinko_result = subprocess.run(
+            [_sys.executable, _bridge, user_prompt[:200]],
+            capture_output=True, text=True, timeout=10,
+        )
+        if _blinko_result.returncode == 0 and _blinko_result.stdout.strip():
+            blinko_context = _blinko_result.stdout.strip()
+            if verbose:
+                print(f"[HIVE] Phase 0: Blinko context retrieved ({len(blinko_context)} chars)")
+    except Exception:
+        pass  # Blinko is optional; never blocks the pipeline
+
+    # Inject Blinko context into the prompt for downstream agents
+    if blinko_context and "[Blinko unavailable" not in blinko_context and "[No matching" not in blinko_context:
+        user_prompt = (
+            f"{user_prompt}\n\n"
+            f"--- PRIOR KNOWLEDGE (from Blinko knowledge base) ---\n"
+            f"{blinko_context[:2000]}\n"
+            f"--- END PRIOR KNOWLEDGE ---"
+        )
+
     # Phase 1: Perplexity intel scout (always runs first)
     if verbose:
         print("[HIVE] Phase 1: Perplexity intel scout...")

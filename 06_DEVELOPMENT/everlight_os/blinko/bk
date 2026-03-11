@@ -1,0 +1,143 @@
+#!/usr/bin/env bash
+# bk - BlinkoLite control command
+#
+# Usage:
+#   bk start     Start BlinkoLite + watchdog
+#   bk stop      Stop BlinkoLite + watchdog
+#   bk restart   Restart BlinkoLite
+#   bk status    Show status
+#   bk logs      Tail logs
+#   bk stats     Show database stats
+#   bk query     Search the knowledge base
+#   bk ingest    Backfill all war room sessions + memory files
+#   bk watch     Start the auto-ingest daemon
+
+BLINKO_DIR="/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/blinko"
+BRIDGE="/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/ai_workers/blinko_bridge.py"
+PID_FILE="/tmp/blinko_lite.pid"
+WATCHDOG_PID="/tmp/blinko_watchdog.pid"
+LOG_FILE="/mnt/sdcard/AA_MY_DRIVE/_logs/blinko_lite.log"
+WATCHDOG_LOG="/mnt/sdcard/AA_MY_DRIVE/_logs/blinko_watchdog.log"
+
+_is_running() {
+    python3 -c "
+import urllib.request
+try:
+    r = urllib.request.urlopen('http://localhost:1111/health', timeout=3)
+    print(r.read().decode())
+    exit(0)
+except:
+    exit(1)
+" 2>/dev/null
+}
+
+case "${1:-status}" in
+    start)
+        if _is_running >/dev/null 2>&1; then
+            echo "BlinkoLite is already running."
+            _is_running
+        else
+            echo "Starting BlinkoLite + watchdog..."
+            nohup bash "${BLINKO_DIR}/blinko_watchdog.sh" >> "$WATCHDOG_LOG" 2>&1 &
+            sleep 3
+            if _is_running >/dev/null 2>&1; then
+                echo "BlinkoLite is UP on http://localhost:1111"
+                _is_running
+            else
+                echo "ERROR: Failed to start. Check logs: $LOG_FILE"
+            fi
+        fi
+        ;;
+
+    stop)
+        echo "Stopping BlinkoLite..."
+        # Stop watchdog first
+        if [ -f "$WATCHDOG_PID" ]; then
+            kill "$(cat "$WATCHDOG_PID")" 2>/dev/null
+            rm -f "$WATCHDOG_PID"
+        fi
+        # Stop blinko
+        if [ -f "$PID_FILE" ]; then
+            kill "$(cat "$PID_FILE")" 2>/dev/null
+            rm -f "$PID_FILE"
+        fi
+        pkill -f "blinko_lite.py" 2>/dev/null
+        pkill -f "blinko_watchdog.sh" 2>/dev/null
+        echo "Stopped."
+        ;;
+
+    restart)
+        $0 stop
+        sleep 1
+        $0 start
+        ;;
+
+    status)
+        echo "=== BlinkoLite Status ==="
+        if _is_running >/dev/null 2>&1; then
+            echo "Server: RUNNING"
+            _is_running
+        else
+            echo "Server: DOWN"
+        fi
+        echo ""
+        if [ -f "$WATCHDOG_PID" ] && kill -0 "$(cat "$WATCHDOG_PID")" 2>/dev/null; then
+            echo "Watchdog: RUNNING (PID $(cat "$WATCHDOG_PID"))"
+        else
+            echo "Watchdog: DOWN"
+        fi
+        echo ""
+        if [ -f "/mnt/sdcard/AA_MY_DRIVE/_logs/blinko_lite.db" ]; then
+            size=$(du -h "/mnt/sdcard/AA_MY_DRIVE/_logs/blinko_lite.db" | cut -f1)
+            echo "Database: $size"
+        else
+            echo "Database: not created yet"
+        fi
+        ;;
+
+    logs)
+        tail -f "$LOG_FILE" "$WATCHDOG_LOG" 2>/dev/null
+        ;;
+
+    stats)
+        python3 -c "
+import urllib.request, json
+try:
+    r = urllib.request.urlopen('http://localhost:1111/api/v1/note/stats', timeout=5)
+    d = json.loads(r.read())
+    print(f\"Notes: {d['total_notes']}\")
+    print(f\"DB size: {d['db_size_mb']} MB\")
+    print(f\"Uptime: {d['uptime_s']}s\")
+    print(f\"Latest: {d.get('latest_update', 'none')}\")
+except Exception as e:
+    print(f'Error: {e}')
+"
+        ;;
+
+    query)
+        shift
+        if [ -z "$1" ]; then
+            echo "Usage: bk query <search terms>"
+            exit 1
+        fi
+        python3 "$BRIDGE" query "$*"
+        ;;
+
+    ingest)
+        echo "Ingesting all war room sessions..."
+        python3 "$BRIDGE" ingest-all
+        echo ""
+        echo "Ingesting Claude memory files..."
+        python3 "$BRIDGE" ingest-memory
+        ;;
+
+    watch)
+        echo "Starting auto-ingest daemon (60s interval)..."
+        python3 "$BRIDGE" watch
+        ;;
+
+    *)
+        echo "Usage: bk {start|stop|restart|status|logs|stats|query|ingest|watch}"
+        exit 1
+        ;;
+esac

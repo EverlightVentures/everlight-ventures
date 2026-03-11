@@ -8,6 +8,7 @@ managers, merges overlapping recommendations, and flags conflicts.
 import json
 import os
 import re
+import sys
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
@@ -248,8 +249,31 @@ def build_combined_summary(session: HiveSession) -> str:
     return "\n".join(lines)
 
 
+def _ingest_to_blinko(session: HiveSession) -> None:
+    """Fire-and-forget: ingest war room session into Blinko knowledge base."""
+    if not session.war_room_dir:
+        return
+    try:
+        import subprocess
+        bridge = str(
+            WORKSPACE / "03_AUTOMATION_CORE" / "01_Scripts"
+            / "ai_workers" / "blinko_bridge.py"
+        )
+        subprocess.Popen(
+            [sys.executable, bridge, "ingest-session", session.war_room_dir],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            start_new_session=True,
+        )
+    except Exception:
+        pass  # Blinko ingestion is best-effort, never blocks the pipeline
+
+
 def log_session(session: HiveSession, roster: dict) -> None:
-    """Append session to hive_sessions.jsonl and notify Slack."""
+    """Append session to hive_sessions.jsonl, notify Slack, and ingest to Blinko."""
+    # Blinko knowledge base ingestion (fire-and-forget)
+    _ingest_to_blinko(session)
+
     # JSONL log
     log_path = roster.get("session_log", "_logs/hive_sessions.jsonl")
     log_file = WORKSPACE / log_path
