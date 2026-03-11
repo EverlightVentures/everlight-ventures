@@ -28,6 +28,14 @@ SHIPPING_BOOK_IMAGES/
 generation.pid
 generation_progress.log
 
+# ---- XLM BOT LOGS (too large for GitHub) ----
+06_DEVELOPMENT/xlm_bot/logs/
+xlm_bot/logs/
+
+# ---- HIVE DB (too large for GitHub) ----
+_logs/hive.db
+_logs/blinko_lite.db
+
 # ---- SQLITE DB (runtime) ----
 *.sqlite3
 
