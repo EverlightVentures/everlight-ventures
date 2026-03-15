@@ -1,0 +1,690 @@
+{% extends "hive/base.html" %}
+{% load humanize %}
+
+{% block title %}Everlight Business OS{% endblock %}
+{% block page_title %}Business OS{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'business_os:dashboard' %}">Business OS</a>
+  <span class="sep">/</span> CEO Board
+{% endblock %}
+
+{% block content %}
+<style>
+  .bos-hero {
+    display: grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+
+  .bos-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.22);
+  }
+
+  .bos-hero-card {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at top right, rgba(201, 168, 76, 0.13), transparent 35%),
+      radial-gradient(circle at bottom left, rgba(34, 197, 94, 0.08), transparent 32%),
+      var(--bg-card);
+  }
+
+  .bos-eyebrow {
+    color: var(--text-muted);
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: 8px;
+  }
+
+  .bos-headline {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    color: var(--gold);
+    line-height: 1.05;
+    margin-bottom: 10px;
+  }
+
+  .bos-subtext {
+    color: var(--text-secondary);
+    max-width: 60ch;
+    margin-bottom: 18px;
+  }
+
+  .bos-pulse {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .bos-pulse-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0.1);
+  }
+
+  .bos-kpi-grid,
+  .bos-stream-grid,
+  .bos-panels {
+    display: grid;
+    gap: 18px;
+  }
+
+  .bos-kpi-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-bottom: 24px;
+  }
+
+  .bos-kpi {
+    min-height: 132px;
+  }
+
+  .bos-kpi-label {
+    font-size: 0.74rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .bos-kpi-value {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    color: var(--gold);
+    line-height: 1.05;
+  }
+
+  .bos-kpi-sub {
+    margin-top: 8px;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+  }
+
+  .bos-stream-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-bottom: 24px;
+  }
+
+  .bos-stream-card {
+    min-height: 188px;
+  }
+
+  .bos-stream-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+
+  .bos-stream-name {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    color: var(--text-primary);
+  }
+
+  .bos-badge {
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+
+  .bos-badge-building {
+    color: #cbd5e1;
+    background: rgba(148, 163, 184, 0.08);
+    border-color: rgba(148, 163, 184, 0.18);
+  }
+
+  .bos-badge-pilot {
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.08);
+    border-color: rgba(251, 191, 36, 0.2);
+  }
+
+  .bos-badge-active {
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.08);
+    border-color: rgba(74, 222, 128, 0.2);
+  }
+
+  .bos-badge-watch {
+    color: #22d3ee;
+    background: rgba(34, 211, 238, 0.08);
+    border-color: rgba(34, 211, 238, 0.2);
+  }
+
+  .bos-badge-paused {
+    color: #f87171;
+    background: rgba(248, 113, 113, 0.08);
+    border-color: rgba(248, 113, 113, 0.2);
+  }
+
+  .bos-stream-metrics {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .bos-stream-metric-label {
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .bos-stream-metric-value {
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-top: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bos-stream-notes {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+  }
+
+  .bos-panels {
+    grid-template-columns: 1fr 1fr;
+    margin-bottom: 24px;
+  }
+
+  .bos-watch-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .bos-watch-item {
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .bos-watch-label {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .bos-watch-value {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bos-watch-flags {
+    margin-top: 12px;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+  }
+
+  .bos-panel-title {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    margin-bottom: 14px;
+  }
+
+  .bos-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .bos-feed-item {
+    border-radius: 12px;
+    padding: 14px;
+    border: 1px solid var(--border-subtle);
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .bos-feed-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 6px;
+    font-size: 0.74rem;
+    color: var(--text-muted);
+  }
+
+  .bos-feed-summary {
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    margin-bottom: 6px;
+  }
+
+  .bos-feed-detail {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+  }
+
+  .bos-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .bos-table th,
+  .bos-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid var(--border-subtle);
+    text-align: left;
+    font-size: 0.84rem;
+    vertical-align: top;
+  }
+
+  .bos-table th {
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.72rem;
+  }
+
+  .bos-table td {
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 1200px) {
+    .bos-hero,
+    .bos-panels {
+      grid-template-columns: 1fr;
+    }
+
+    .bos-kpi-grid,
+    .bos-stream-grid,
+    .bos-watch-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 720px) {
+    .bos-kpi-grid,
+    .bos-stream-grid,
+    .bos-watch-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<section class="bos-hero">
+  <div class="bos-card bos-hero-card">
+    <div class="bos-eyebrow">Everlight Ventures</div>
+    <h1 class="bos-headline">One board for what is working, what is broken, and what pays.</h1>
+    <p class="bos-subtext">
+      This is the control plane for the venture studio. Hive decisions, broker activity, automation health,
+      approvals, and revenue loops all land here as structured business events.
+    </p>
+    <div class="bos-pulse">
+      <span class="bos-pulse-dot"></span>
+      <span>{{ events_today }} tracked business events today</span>
+    </div>
+  </div>
+
+  <div class="bos-card">
+    <div class="bos-eyebrow">Board State</div>
+    <div class="bos-kpi-label">Open incidents</div>
+    <div class="bos-kpi-value">{{ active_incidents }}</div>
+    <div class="bos-kpi-sub">Approvals waiting: {{ open_approvals }} | Failed workflows today: {{ failed_workflows }}</div>
+    <div style="margin-top:18px">
+      <div class="bos-kpi-label">Revenue stream states</div>
+      <div class="bos-kpi-sub">
+        Active: {{ status_counts.active|default:0 }} |
+        Pilot: {{ status_counts.pilot|default:0 }} |
+        Building: {{ status_counts.building|default:0 }} |
+        Watch: {{ status_counts.watch|default:0 }} |
+        Paused: {{ status_counts.paused|default:0 }}
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="bos-kpi-grid">
+  <div class="bos-card bos-kpi">
+    <div class="bos-kpi-label">Cash Today</div>
+    <div class="bos-kpi-value">${{ cash_today|floatformat:2|intcomma }}</div>
+    <div class="bos-kpi-sub">Direct cash movement across tracked streams.</div>
+  </div>
+  <div class="bos-card bos-kpi">
+    <div class="bos-kpi-label">MRR</div>
+    <div class="bos-kpi-value">${{ mrr_total|floatformat:2|intcomma }}</div>
+    <div class="bos-kpi-sub">Recurring revenue currently tracked in the OS.</div>
+  </div>
+  <div class="bos-card bos-kpi">
+    <div class="bos-kpi-label">Affiliate Today</div>
+    <div class="bos-kpi-value">${{ affiliate_today|floatformat:2|intcomma }}</div>
+    <div class="bos-kpi-sub">Daily affiliate and commerce cash contribution.</div>
+  </div>
+  <div class="bos-card bos-kpi">
+    <div class="bos-kpi-label">Pipeline Value</div>
+    <div class="bos-kpi-value">${{ pending_pipeline|floatformat:2|intcomma }}</div>
+    <div class="bos-kpi-sub">Open broker and service pipeline waiting to convert.</div>
+  </div>
+</section>
+
+<section class="bos-stream-grid">
+  {% for stream in streams %}
+    <article class="bos-card bos-stream-card">
+      <div class="bos-stream-top">
+        <div>
+          <div class="bos-eyebrow">{{ stream.owner_agent|default:"Unassigned" }}</div>
+          <div class="bos-stream-name">{{ stream.name }}</div>
+        </div>
+        <span class="bos-badge bos-badge-{{ stream.status }}">{{ stream.status }}</span>
+      </div>
+      <div class="bos-stream-metrics">
+        <div>
+          <div class="bos-stream-metric-label">Cash Today</div>
+          <div class="bos-stream-metric-value">${{ stream.cash_today_usd|floatformat:2|intcomma }}</div>
+        </div>
+        <div>
+          <div class="bos-stream-metric-label">30d Cash</div>
+          <div class="bos-stream-metric-value">${{ stream.cash_30d_usd|floatformat:2|intcomma }}</div>
+        </div>
+        <div>
+          <div class="bos-stream-metric-label">MRR</div>
+          <div class="bos-stream-metric-value">${{ stream.mrr_usd|floatformat:2|intcomma }}</div>
+        </div>
+        <div>
+          <div class="bos-stream-metric-label">Pipeline</div>
+          <div class="bos-stream-metric-value">${{ stream.pending_pipeline_usd|floatformat:2|intcomma }}</div>
+        </div>
+      </div>
+      <div class="bos-stream-notes">{{ stream.notes }}</div>
+    </article>
+  {% endfor %}
+</section>
+
+<section class="bos-panels">
+  <div class="bos-card">
+    <h2 class="bos-panel-title">Trading Watchtower</h2>
+    <div class="bos-feed-summary">
+      {{ trading_watchtower.bot_state }} · {{ trading_watchtower.stream_status }} · {{ trading_watchtower.data_quality_status }}
+    </div>
+    <div class="bos-feed-detail">
+      Decision: {{ trading_watchtower.decision_reason|default:"No recent decision snapshot." }}
+    </div>
+    <div class="bos-watch-grid">
+      <div class="bos-watch-item">
+        <div class="bos-watch-label">Pulse</div>
+        <div class="bos-watch-value">{{ trading_watchtower.pulse_regime }}{% if trading_watchtower.pulse_health != None %} ({{ trading_watchtower.pulse_health }}){% endif %}</div>
+      </div>
+      <div class="bos-watch-item">
+        <div class="bos-watch-label">Tick</div>
+        <div class="bos-watch-value">{{ trading_watchtower.tick_health }}{% if trading_watchtower.tick_age_sec != None %} · {{ trading_watchtower.tick_age_sec }}s{% endif %}</div>
+      </div>
+      <div class="bos-watch-item">
+        <div class="bos-watch-label">Brief Age</div>
+        <div class="bos-watch-value">{% if trading_watchtower.brief_age_min != None %}{{ trading_watchtower.brief_age_min }}m{% else %}Unknown{% endif %}</div>
+      </div>
+      <div class="bos-watch-item">
+        <div class="bos-watch-label">Snapshot Age</div>
+        <div class="bos-watch-value">{% if trading_watchtower.snapshot_age_min != None %}{{ trading_watchtower.snapshot_age_min }}m{% else %}Unknown{% endif %}</div>
+      </div>
+      <div class="bos-watch-item">
+        <div class="bos-watch-label">Signal</div>
+        <div class="bos-watch-value">{{ trading_watchtower.entry_signal|default:"none" }}</div>
+      </div>
+      <div class="bos-watch-item">
+        <div class="bos-watch-label">Quality</div>
+        <div class="bos-watch-value">{{ trading_watchtower.quality_tier|default:"unknown" }}{% if trading_watchtower.route_tier %} · {{ trading_watchtower.route_tier }}{% endif %}</div>
+      </div>
+      <div class="bos-watch-item">
+        <div class="bos-watch-label">AI Directive</div>
+        <div class="bos-watch-value">{{ trading_watchtower.ai_action|default:"none" }}{% if trading_watchtower.ai_confidence != None %} · {{ trading_watchtower.ai_confidence|floatformat:2 }}{% endif %}</div>
+      </div>
+      <div class="bos-watch-item">
+        <div class="bos-watch-label">Gates</div>
+        <div class="bos-watch-value">{{ trading_watchtower.gates_pass|yesno:"pass,blocked,unknown" }}</div>
+      </div>
+    </div>
+    {% if trading_watchtower.quality_flags %}
+      <div class="bos-watch-flags">Flags: {{ trading_watchtower.quality_flags|join:", " }}</div>
+    {% endif %}
+    {% if trading_watchtower.open_alert %}
+      <article class="bos-feed-item" style="margin-top:16px;">
+        <div class="bos-feed-meta">
+          <span>xlm_bot · {{ trading_watchtower.open_alert.severity }}</span>
+          <span>{{ trading_watchtower.open_alert.created_at }}</span>
+        </div>
+        <div class="bos-feed-summary">{{ trading_watchtower.open_alert.summary }}</div>
+        <div class="bos-feed-detail">{{ trading_watchtower.open_alert.detail }}</div>
+      </article>
+    {% endif %}
+  </div>
+
+  <div class="bos-card">
+    <h2 class="bos-panel-title">Last Trade Label</h2>
+    {% if trading_watchtower.last_trade %}
+      <div class="bos-watch-grid">
+        <div class="bos-watch-item">
+          <div class="bos-watch-label">Status</div>
+          <div class="bos-watch-value">{{ trading_watchtower.last_trade.status }}</div>
+        </div>
+        <div class="bos-watch-item">
+          <div class="bos-watch-label">Side</div>
+          <div class="bos-watch-value">{{ trading_watchtower.last_trade.side|default:"unknown" }}</div>
+        </div>
+        <div class="bos-watch-item">
+          <div class="bos-watch-label">Entry Type</div>
+          <div class="bos-watch-value">{{ trading_watchtower.last_trade.entry_type|default:"unknown" }}</div>
+        </div>
+        <div class="bos-watch-item">
+          <div class="bos-watch-label">PnL</div>
+          <div class="bos-watch-value">{% if trading_watchtower.last_trade.pnl_usd != None %}${{ trading_watchtower.last_trade.pnl_usd|floatformat:2|intcomma }}{% else %}Open{% endif %}</div>
+        </div>
+        <div class="bos-watch-item">
+          <div class="bos-watch-label">Entry</div>
+          <div class="bos-watch-value">{% if trading_watchtower.last_trade.entry_price != None %}${{ trading_watchtower.last_trade.entry_price|floatformat:5 }}{% else %}Unknown{% endif %}</div>
+        </div>
+        <div class="bos-watch-item">
+          <div class="bos-watch-label">Exit</div>
+          <div class="bos-watch-value">{% if trading_watchtower.last_trade.exit_price != None %}${{ trading_watchtower.last_trade.exit_price|floatformat:5 }}{% else %}Open{% endif %}</div>
+        </div>
+        <div class="bos-watch-item">
+          <div class="bos-watch-label">Hold</div>
+          <div class="bos-watch-value">{% if trading_watchtower.last_trade.hold_minutes != None %}{{ trading_watchtower.last_trade.hold_minutes }}m{% else %}Unknown{% endif %}</div>
+        </div>
+        <div class="bos-watch-item">
+          <div class="bos-watch-label">Logged</div>
+          <div class="bos-watch-value">{{ trading_watchtower.last_trade.ts }}</div>
+        </div>
+      </div>
+      <div class="bos-watch-flags">
+        Regime: {{ trading_watchtower.last_trade.strategy_regime|default:"unknown" }}
+        {% if trading_watchtower.last_trade.exit_reason %} | Exit: {{ trading_watchtower.last_trade.exit_reason }}{% endif %}
+      </div>
+    {% else %}
+      <p class="bos-feed-detail">No trade label has been recorded yet.</p>
+    {% endif %}
+  </div>
+
+  <div class="bos-card">
+    <h2 class="bos-panel-title">Blackjack Watchtower</h2>
+    <div class="bos-feed-summary">
+      {{ blackjack_watchtower.stream_status }} · {{ blackjack_watchtower.data_quality_status }} · {{ blackjack_watchtower.integrity_mode }}
+    </div>
+    <div class="bos-feed-detail">
+      Monetization: {{ blackjack_watchtower.monetization_status }} | Players 24h: {{ blackjack_watchtower.active_players_24h|default:0 }} | Hands 24h: {{ blackjack_watchtower.hands_24h|default:0 }}
+    </div>
+    <div class="bos-watch-grid">
+      <div class="bos-watch-item">
+        <div class="bos-watch-label">Players</div>
+        <div class="bos-watch-value">{{ blackjack_watchtower.total_players|default:0 }} total · {{ blackjack_watchtower.active_players_7d|default:0 }} 7d</div>
+      </div>
+      <div class="bos-watch-item">
+        <div class="bos-watch-label">Hands</div>
+        <div class="bos-watch-value">{{ blackjack_watchtower.hands_today|default:0 }} today · {{ blackjack_watchtower.hands_1h|default:0 }} 1h</div>
+      </div>
+      <div class="bos-watch-item">
+        <div class="bos-watch-label">Wagered</div>
+        <div class="bos-watch-value">{{ blackjack_watchtower.wagered_today|default:0|intcomma }} chips</div>
+      </div>
+      <div class="bos-watch-item">
+        <div class="bos-watch-label">House Delta</div>
+        <div class="bos-watch-value">{{ blackjack_watchtower.chips_delta_today|default:0|intcomma }} chips</div>
+      </div>
+      <div class="bos-watch-item">
+        <div class="bos-watch-label">Ad Rewards</div>
+        <div class="bos-watch-value">{{ blackjack_watchtower.ad_reward_claims_today|default:0 }} claims · {{ blackjack_watchtower.ad_rewards_today|default:0|intcomma }} chips</div>
+      </div>
+      <div class="bos-watch-item">
+        <div class="bos-watch-label">VIP</div>
+        <div class="bos-watch-value">{{ blackjack_watchtower.vip_players|default:0 }} active</div>
+      </div>
+      <div class="bos-watch-item">
+        <div class="bos-watch-label">Stripe Packs</div>
+        <div class="bos-watch-value">{{ blackjack_watchtower.stripe_ready_packages|default:0 }}/{{ blackjack_watchtower.active_gem_packages|default:0 }}</div>
+      </div>
+      <div class="bos-watch-item">
+        <div class="bos-watch-label">Rejected Settlements</div>
+        <div class="bos-watch-value">{{ blackjack_watchtower.integrity_rejections_today|default:0 }}</div>
+      </div>
+    </div>
+    {% if blackjack_watchtower.quality_flags %}
+      <div class="bos-watch-flags">Flags: {{ blackjack_watchtower.quality_flags|join:", " }}</div>
+    {% endif %}
+    {% if blackjack_watchtower.last_hand %}
+      <div class="bos-feed-detail" style="margin-top:12px;">
+        Last hand: {{ blackjack_watchtower.last_hand.outcome }} | Bet {{ blackjack_watchtower.last_hand.bet_chips|intcomma }} | Delta {{ blackjack_watchtower.last_hand.chips_delta|intcomma }} | {{ blackjack_watchtower.last_hand.played_at }}
+      </div>
+    {% endif %}
+    {% if blackjack_watchtower.controls %}
+      <div class="bos-watch-flags">Controls: {{ blackjack_watchtower.controls|join:", " }}</div>
+    {% endif %}
+    {% if blackjack_watchtower.open_alerts %}
+      <div class="bos-feed" style="margin-top:16px;">
+        {% for alert in blackjack_watchtower.open_alerts %}
+          <article class="bos-feed-item">
+            <div class="bos-feed-meta">
+              <span>blackjack · {{ alert.severity }}</span>
+              <span>{{ alert.created_at }}</span>
+            </div>
+            <div class="bos-feed-summary">{{ alert.summary }}</div>
+            <div class="bos-feed-detail">{{ alert.detail }}</div>
+          </article>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<section class="bos-panels">
+  <div class="bos-card">
+    <h2 class="bos-panel-title">Recent Events</h2>
+    <div class="bos-feed">
+      {% for event in recent_events %}
+        <article class="bos-feed-item">
+          <div class="bos-feed-meta">
+            <span>{{ event.source }} · {{ event.event_type }}</span>
+            <span>{{ event.created_at|naturaltime }}</span>
+          </div>
+          <div class="bos-feed-summary">{{ event.summary }}</div>
+          <div class="bos-feed-detail">
+            Status: {{ event.status }} | Priority: {{ event.priority }}
+            {% if event.entity_type %}| {{ event.entity_type }} {{ event.entity_id }}{% endif %}
+            {% if event.revenue_impact_usd %}| Revenue impact: ${{ event.revenue_impact_usd|floatformat:2|intcomma }}{% endif %}
+          </div>
+        </article>
+      {% empty %}
+        <p class="bos-feed-detail">No business events recorded yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="bos-card">
+    <h2 class="bos-panel-title">Open Alerts</h2>
+    <div class="bos-feed">
+      {% for alert in recent_alerts %}
+        <article class="bos-feed-item">
+          <div class="bos-feed-meta">
+            <span>{{ alert.source }} · {{ alert.severity }}</span>
+            <span>{{ alert.created_at|naturaltime }}</span>
+          </div>
+          <div class="bos-feed-summary">{{ alert.summary }}</div>
+          <div class="bos-feed-detail">
+            {{ alert.detail|default:"No additional detail." }}
+            {% if alert.requires_approval %} Approval required.{% endif %}
+          </div>
+        </article>
+      {% empty %}
+        <p class="bos-feed-detail">No open alerts. The board is quiet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="bos-panels">
+  <div class="bos-card">
+    <h2 class="bos-panel-title">Broker Matches</h2>
+    <table class="bos-table">
+      <thead>
+        <tr>
+          <th>Lead</th>
+          <th>Offer</th>
+          <th>Score</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for match in broker_matches %}
+          <tr>
+            <td>{{ match.lead.name }}{% if match.lead.company %}<br><small>{{ match.lead.company }}</small>{% endif %}</td>
+            <td>{{ match.offer.title }}</td>
+            <td>{{ match.match_score|floatformat:0 }}</td>
+            <td>{{ match.status }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">No broker matches yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="bos-card">
+    <h2 class="bos-panel-title">Recent Deals</h2>
+    <table class="bos-table">
+      <thead>
+        <tr>
+          <th>Offer</th>
+          <th>Lead</th>
+          <th>Stage</th>
+          <th>Commission</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for deal in broker_deals %}
+          <tr>
+            <td>{{ deal.offer.title|default:"Unlinked offer" }}</td>
+            <td>{{ deal.lead.name|default:"Unknown lead" }}</td>
+            <td>{{ deal.stage }}</td>
+            <td>${{ deal.commission_due|floatformat:2|intcomma }}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="4">No deals yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

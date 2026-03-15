@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Everlight Blackjack | Sign In</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#04040a;font-family:'Inter',sans-serif;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;}
+.card{background:rgba(8,9,15,0.95);border:1px solid rgba(201,168,76,0.35);border-radius:16px;padding:40px;max-width:440px;width:90%;}
+.logo{font-family:'Cinzel',serif;font-size:1.6rem;font-weight:900;background:linear-gradient(135deg,#c9a84c,#f0d080,#c9a84c);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:3px;text-align:center;margin-bottom:8px;}
+.sub{text-align:center;color:rgba(255,255,255,0.4);font-size:0.8rem;letter-spacing:2px;margin-bottom:32px;}
+.tabs{display:flex;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:24px;}
+.tab{flex:1;padding:10px;text-align:center;cursor:pointer;font-family:'Cinzel',serif;font-size:0.8rem;letter-spacing:1px;color:rgba(255,255,255,0.4);border-bottom:2px solid transparent;transition:all 0.2s;}
+.tab.active{color:#c9a84c;border-bottom-color:#c9a84c;}
+.fg{margin-bottom:16px;}
+.fg label{display:block;font-size:0.72rem;color:rgba(255,255,255,0.45);letter-spacing:1px;margin-bottom:6px;}
+.fg input{width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:#fff;padding:10px 14px;font-size:0.95rem;outline:none;transition:border-color 0.2s;}
+.fg input:focus{border-color:#c9a84c;}
+.btn{width:100%;background:linear-gradient(135deg,#c9a84c,#f0d080);color:#000;font-family:'Cinzel',serif;font-weight:700;font-size:0.9rem;letter-spacing:1px;padding:12px;border:none;border-radius:8px;cursor:pointer;transition:all 0.2s;margin-top:8px;}
+.btn:hover{box-shadow:0 0 20px rgba(201,168,76,0.5);}
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:rgba(255,255,255,0.3);font-size:0.8rem;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.1);}
+.oauth{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:11px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:rgba(255,255,255,0.04);color:#fff;font-size:0.85rem;cursor:pointer;transition:all 0.2s;margin-bottom:10px;}
+.oauth:hover{background:rgba(255,255,255,0.09);border-color:rgba(255,255,255,0.35);}
+.err{color:#e74c3c;font-size:0.8rem;margin-top:8px;display:none;}
+.guest{text-align:center;margin-top:20px;}
+.guest a{color:rgba(255,255,255,0.35);font-size:0.8rem;text-decoration:none;}
+.guest a:hover{color:#c9a84c;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">EVERLIGHT</div>
+  <div class="sub">LUXURY BLACKJACK CASINO</div>
+
+  <div class="tabs">
+    <div class="tab {% if mode == 'login' %}active{% endif %}" onclick="show('login')">SIGN IN</div>
+    <div class="tab {% if mode == 'register' %}active{% endif %}" onclick="show('register')">REGISTER</div>
+  </div>
+
+  <div id="login-form" style="display:{% if mode == 'login' %}block{% else %}none{% endif %}">
+    <div class="fg"><label>USERNAME</label><input type="text" id="lu" autocomplete="username" placeholder="Your username"></div>
+    <div class="fg"><label>PASSWORD</label><input type="password" id="lp" autocomplete="current-password" placeholder="Password"></div>
+    <div class="err" id="lerr"></div>
+    <button class="btn" onclick="doLogin()">ENTER THE CASINO</button>
+
+    <div class="divider">OR</div>
+
+    {% if oauth_error %}
+    <div class="err" style="display:block;margin-bottom:10px;">{{ oauth_error }}</div>
+    {% endif %}
+
+    <button class="oauth" onclick="location.href='/blackjack/oauth/google/'">
+      <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+    <button class="oauth" onclick="location.href='/blackjack/oauth/facebook/'">
+      <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      Continue with Facebook
+    </button>
+  </div>
+
+  <div id="register-form" style="display:{% if mode == 'register' %}block{% else %}none{% endif %}">
+    <div class="fg"><label>USERNAME</label><input type="text" id="ru" autocomplete="username" placeholder="Choose a username"></div>
+    <div class="fg"><label>EMAIL</label><input type="email" id="re" autocomplete="email" placeholder="your@email.com"></div>
+    <div class="fg"><label>TABLE NAME (how others see you)</label><input type="text" id="ra" placeholder="Your avatar name"></div>
+    <div class="fg"><label>PASSWORD</label><input type="password" id="rp" autocomplete="new-password" placeholder="Create a strong password"></div>
+    <div class="err" id="rerr"></div>
+    <button class="btn" onclick="doRegister()">CREATE ACCOUNT + GET 1,000 FREE CHIPS</button>
+  </div>
+
+  <div class="guest">
+    <a href="/blackjack/">Play as guest (progress not saved)</a>
+  </div>
+</div>
+
+<script>
+const CSRF = '{{ csrf_token }}';
+function show(mode) {
+  document.getElementById('login-form').style.display = mode==='login'?'block':'none';
+  document.getElementById('register-form').style.display = mode==='register'?'block':'none';
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    t.classList.toggle('active',(i===0&&mode==='login')||(i===1&&mode==='register'));
+  });
+}
+async function post(url,data){
+  const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':CSRF},body:JSON.stringify(data)});
+  return r.json();
+}
+async function doLogin(){
+  const err=document.getElementById('lerr');
+  err.style.display='none';
+  const res=await post('/blackjack/login/',{username:document.getElementById('lu').value,password:document.getElementById('lp').value});
+  if(res.success) location.href=res.redirect||'/blackjack/';
+  else{err.textContent=res.error||'Login failed';err.style.display='block';}
+}
+async function doRegister(){
+  const err=document.getElementById('rerr');
+  err.style.display='none';
+  const res=await post('/blackjack/auth/',{
+    username:document.getElementById('ru').value,
+    email:document.getElementById('re').value,
+    avatar_name:document.getElementById('ra').value,
+    password:document.getElementById('rp').value,
+  });
+  if(res.success) location.href=res.redirect||'/blackjack/';
+  else{err.textContent=res.error||'Registration failed';err.style.display='block';}
+}
+</script>
+</body>
+</html>

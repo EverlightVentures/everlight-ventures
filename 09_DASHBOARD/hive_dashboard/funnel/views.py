@@ -8,6 +8,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.utils import timezone
 
+from business_os.services import get_trading_watchtower
+
 from .models import Lead, FunnelEvent
 
 log = logging.getLogger(__name__)
@@ -19,6 +21,30 @@ def onyx_landing(request):
 
 def hivemind_landing(request):
     return render(request, "funnel/hivemind_landing.html")
+
+
+def dashboard_landing(request):
+    try:
+        watchtower = get_trading_watchtower()
+    except Exception as exc:
+        log.warning("Trading watchtower unavailable for public dashboard: %s", exc)
+        watchtower = {}
+
+    return render(
+        request,
+        "funnel/dashboard_landing.html",
+        {
+            "watchtower": watchtower,
+            "quality_flags": watchtower.get("quality_flags") or [],
+            "last_trade": watchtower.get("last_trade") or {},
+            "open_alert": watchtower.get("open_alert") or {},
+            "telemetry_source_label": (
+                "Supabase live telemetry"
+                if watchtower.get("telemetry_source") == "supabase"
+                else "Workspace telemetry"
+            ),
+        },
+    )
 
 
 def thank_you(request):
@@ -43,7 +69,7 @@ def capture_lead(request):
         return JsonResponse({"error": "Valid email required"}, status=400)
 
     product = data.get("product", "onyx")
-    if product not in ("onyx", "hivemind"):
+    if product not in ("onyx", "hivemind", "dashboard"):
         return JsonResponse({"error": "Invalid product"}, status=400)
 
     lead, created = Lead.objects.get_or_create(
@@ -58,7 +84,10 @@ def capture_lead(request):
     FunnelEvent.objects.create(
         lead=lead,
         event_type="signup" if created else "repeat_visit",
-        metadata={"source": data.get("source", "landing_page")},
+        metadata={
+            "source": data.get("source", "landing_page"),
+            "product": product,
+        },
     )
 
     if created:

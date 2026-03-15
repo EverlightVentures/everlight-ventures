@@ -188,3 +188,119 @@ Tell us more (optional)
 
 Everlight Logistics LLC
 Inquiries: logistics@everlightventures.io
+
+
+====================================================================
+SECTION 3: HIVE MIND (/hivemind)
+Style: Dark luxury, violet with mint telemetry accents, premium operator OS
+====================================================================
+
+
+--- HERO ---
+
+HIVE MIND
+
+Stop juggling AI tools. Start running one operating system.
+
+Hive Mind is the command layer behind Everlight Ventures:
+agents, workflows, shared memory, approvals, and revenue telemetry
+working as one machine.
+
+[Join the Waitlist]
+
+
+--- WHAT IT IS ---
+
+COMMAND PLANE
+One prompt enters. The right agents, tools, and workflows activate.
+
+SHARED MEMORY
+MCP resources, workspace manifests, and notes keep context alive.
+
+EXECUTIVE BOARD
+Revenue, incidents, approvals, broker pipeline, and the trading
+watchtower roll up into one board.
+
+MONETIZATION LAYER
+Stripe, funnels, affiliate drops, services, and products feed the
+same operating system.
+
+
+--- HOW IT WORKS ---
+
+01 -- CONNECT THE STACK
+Supabase, Stripe, GitHub, Google, n8n, and your chosen models plug
+into one operating layer.
+
+02 -- DEFINE THE CONTROL FLOW
+Decide what runs automatically, what requires approval, and what
+returns to memory as reusable context.
+
+03 -- LET THE HIVE RUN
+Commands trigger agents, tools, workflows, and notifications. The
+result returns with context and a record of what happened.
+
+
+--- CTA ---
+
+EARLY ACCESS
+
+[Email Address]  [Request Access]
+
+No spam. Launch notes and architecture updates only.
+
+
+====================================================================
+SECTION 4: TRADING WATCHTOWER (/dashboard)
+Style: Void black with electric green telemetry accents, public ops terminal
+====================================================================
+
+
+--- HERO ---
+
+TRADING WATCHTOWER
+
+Public proof that the XLM machine is alive.
+
+This page shows live system health, data quality, decision freshness,
+and the latest trade label. It is an operator page, not performance theater.
+
+[Get Live Updates]
+
+
+--- LIVE STATUS ---
+
+DATA QUALITY STATUS
+Healthy or degraded. If the feed is stale, say it directly.
+
+STREAM STATUS
+Pilot, watch, or active.
+
+BOT STATE / DECISION / ENTRY SIGNAL
+Show what the system is doing now, not generic marketing stats.
+
+PULSE REGIME / TICK HEALTH / BRIEF AGE
+Make freshness and market health visible at a glance.
+
+
+--- LAST TRADE LABEL ---
+
+STATUS | SIDE | RESULT | PNL | HOLD MINUTES | EXIT REASON
+
+Trade labels are part of the public proof. The board should show the
+latest outcome clearly, not bury it.
+
+
+--- WHY IT EXISTS ---
+
+This page proves the Business OS is real.
+
+Oracle exports metrics and feature snapshots into Supabase.
+The public page and the CEO dashboard read from that shared telemetry
+layer so the system can speak with one voice.
+
+
+--- DISCLAIMER ---
+
+Informational telemetry only. Not financial advice. Not an invitation
+to invest. Futures trading carries significant risk of loss.
