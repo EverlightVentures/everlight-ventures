@@ -1,0 +1,2958 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Everlight Blackjack | Luxury 3D Casino</title>
+
+<!-- Three.js r158 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<!-- TWEEN for animations -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<!-- Google AdSense -->
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ google_ads_client }}" crossorigin="anonymous"></script>
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --gold: #c9a84c;
+  --gold-light: #f0d080;
+  --green-felt: #0d5c2e;
+  --dark: #08090f;
+  --panel-bg: rgba(8,9,15,0.92);
+  --border-gold: 1px solid rgba(201,168,76,0.4);
+  --chip-bronze: #cd7f32;
+  --chip-silver: #c0c0c0;
+  --chip-gold: #ffd700;
+  --chip-plat: #e5e4e2;
+  --chip-diamond: #b9f2ff;
+  --chip-legend: #ff6b35;
+}
+
+body {
+  background: #000;
+  font-family: 'Inter', sans-serif;
+  color: #fff;
+  overflow: hidden;
+  height: 100vh;
+  width: 100vw;
+  user-select: none;
+}
+
+/* ---- 3D Canvas ---- */
+#three-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 1;
+}
+
+/* ---- HUD Overlay ---- */
+#hud {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 10;
+  pointer-events: none;
+}
+#hud > * { pointer-events: all; }
+
+/* Top bar */
+#top-bar {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 60px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, transparent 100%);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 16px;
+}
+
+#logo {
+  font-family: 'Cinzel', serif;
+  font-size: 1.3rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #c9a84c, #f0d080, #c9a84c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 2px;
+  flex-shrink: 0;
+}
+
+.currency-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,0,0,0.7);
+  border: var(--border-gold);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.currency-pill .icon { font-size: 1rem; }
+
+#rank-badge {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+#rank-badge .rank-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  color: var(--gold);
+}
+
+#menu-btns {
+  display: flex;
+  gap: 8px;
+  margin-left: 12px;
+}
+.menu-btn {
+  background: rgba(0,0,0,0.7);
+  border: var(--border-gold);
+  border-radius: 8px;
+  color: var(--gold);
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-family: 'Cinzel', serif;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.menu-btn:hover {
+  background: rgba(201,168,76,0.15);
+  border-color: var(--gold);
+}
+
+/* Bottom controls */
+#bottom-panel {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 20px;
+  background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+}
+
+#bet-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.chip-btn {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  border: 3px solid rgba(255,255,255,0.3);
+  font-weight: 700;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  position: relative;
+}
+.chip-btn:hover { transform: translateY(-4px) scale(1.08); }
+.chip-btn:active { transform: translateY(0) scale(0.95); }
+.chip-btn.c10   { background: radial-gradient(circle, #e74c3c, #922b21); border-color: #f1948a; }
+.chip-btn.c25   { background: radial-gradient(circle, #27ae60, #1e8449); border-color: #82e0aa; }
+.chip-btn.c100  { background: radial-gradient(circle, #2980b9, #1a5276); border-color: #7fb3d3; }
+.chip-btn.c500  { background: radial-gradient(circle, #8e44ad, #6c3483); border-color: #c39bd3; }
+.chip-btn.c1000 { background: radial-gradient(circle, #c9a84c, #9a7a2c); border-color: #f0d080; }
+.chip-btn.c5000 { background: radial-gradient(circle, #1a1a1a, #333); border-color: #aaa; }
+
+#bet-display {
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 1.1rem;
+  color: var(--gold);
+  margin-bottom: 4px;
+  min-width: 140px;
+}
+#bet-amount {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #fff;
+}
+
+.action-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 12px 28px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 100px;
+}
+.action-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+.btn-deal {
+  background: linear-gradient(135deg, #c9a84c, #f0d080);
+  color: #000;
+  font-size: 1rem;
+  padding: 14px 40px;
+  box-shadow: 0 0 20px rgba(201,168,76,0.5);
+}
+.btn-deal:hover:not(:disabled) {
+  box-shadow: 0 0 35px rgba(201,168,76,0.8);
+  transform: translateY(-2px);
+}
+.btn-hit    { background: rgba(39,174,96,0.9); color: #fff; }
+.btn-stand  { background: rgba(231,76,60,0.9); color: #fff; }
+.btn-double { background: rgba(52,152,219,0.9); color: #fff; }
+.btn-split  { background: rgba(142,68,173,0.9); color: #fff; }
+.btn-surrnd { background: rgba(127,140,141,0.9); color: #fff; }
+.btn-clear  { background: rgba(40,40,40,0.9); color: #aaa; border: 1px solid #444; }
+
+/* Card area overlay */
+#card-area {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none;
+}
+#hand-values {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  margin-top: 8px;
+}
+.hand-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.6);
+  letter-spacing: 1px;
+  margin-bottom: 2px;
+}
+.hand-value {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: #fff;
+}
+.hand-value.bust { color: #e74c3c; }
+.hand-value.bj   { color: var(--gold); }
+
+/* Result banner */
+#result-banner {
+  display: none;
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 20;
+  animation: bangIn 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes bangIn {
+  from { transform: translate(-50%,-50%) scale(0.3); opacity: 0; }
+  to   { transform: translate(-50%,-50%) scale(1);   opacity: 1; }
+}
+#result-banner .result-text {
+  font-family: 'Cinzel', serif;
+  font-size: 4rem;
+  font-weight: 900;
+  text-shadow: 0 0 40px currentColor;
+}
+#result-banner .result-sub {
+  font-size: 1.3rem;
+  margin-top: 4px;
+  opacity: 0.9;
+}
+.result-win      { color: var(--gold); }
+.result-blackjack { color: #f0d080; }
+.result-loss     { color: #e74c3c; }
+.result-push     { color: #95a5a6; }
+
+/* XP bar */
+#xp-bar-wrap {
+  position: absolute;
+  bottom: 160px; left: 50%;
+  transform: translateX(-50%);
+  width: 240px;
+  text-align: center;
+  pointer-events: none;
+}
+#xp-bar-label {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+#xp-bar-bg {
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+#xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  border-radius: 2px;
+  transition: width 1s ease;
+}
+
+/* Streak / notification toast */
+#toast {
+  position: absolute;
+  top: 80px; right: 20px;
+  background: rgba(0,0,0,0.85);
+  border: var(--border-gold);
+  border-radius: 10px;
+  padding: 12px 20px;
+  font-size: 0.9rem;
+  display: none;
+  animation: slideIn 0.3s ease;
+}
+@keyframes slideInRight {
+  from { transform: translateX(120%); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+@keyframes slideIn {
+  from { transform: translateX(120%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+/* ---- Overlay Panels ---- */
+.overlay-panel {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  z-index: 50;
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+.overlay-panel.active { display: flex; }
+
+.panel-card {
+  background: var(--panel-bg);
+  border: var(--border-gold);
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 520px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+}
+.panel-close {
+  position: absolute;
+  top: 16px; right: 16px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 1.4rem;
+  cursor: pointer;
+}
+.panel-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1.4rem;
+  color: var(--gold);
+  margin-bottom: 24px;
+  letter-spacing: 2px;
+}
+
+/* Auth panel */
+.auth-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.auth-tab {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.5);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+.auth-tab.active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+
+.form-group { margin-bottom: 16px; }
+.form-group label {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.form-group input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  color: #fff;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.form-group input:focus { border-color: var(--gold); }
+
+.btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, #c9a84c, #f0d080);
+  color: #000;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+.btn-primary:hover { box-shadow: 0 0 20px rgba(201,168,76,0.5); }
+
+.oauth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+  color: rgba(255,255,255,0.3);
+  font-size: 0.8rem;
+}
+.oauth-divider::before, .oauth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255,255,255,0.1);
+}
+
+.oauth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.05);
+  color: #fff;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 10px;
+}
+.oauth-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); }
+.oauth-icon { width: 20px; height: 20px; }
+
+.auth-error {
+  color: #e74c3c;
+  font-size: 0.82rem;
+  margin-top: 8px;
+  display: none;
+}
+
+/* Avatar panel */
+.avatar-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.avatar-option {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 2px solid rgba(255,255,255,0.1);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.6);
+  transition: all 0.2s;
+  background: rgba(255,255,255,0.03);
+  padding: 8px;
+}
+.avatar-option:hover { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+.avatar-option.selected { border-color: var(--gold); background: rgba(201,168,76,0.15); color: var(--gold); }
+.avatar-option .ava-icon { font-size: 2rem; }
+.avatar-option .locked { opacity: 0.4; }
+
+.section-label {
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  color: var(--gold);
+  margin-bottom: 10px;
+  margin-top: 16px;
+  text-transform: uppercase;
+}
+
+.color-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.color-swatch {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.15s;
+}
+.color-swatch:hover, .color-swatch.selected {
+  border-color: #fff;
+  transform: scale(1.15);
+}
+
+/* Shop panel */
+.shop-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.filter-chip {
+  padding: 5px 14px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filter-chip.active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(201,168,76,0.1);
+}
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.shop-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  padding: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.shop-item:hover { border-color: var(--gold); background: rgba(201,168,76,0.06); }
+.shop-item.owned { opacity: 0.5; cursor: default; }
+.shop-item .item-rarity {
+  font-size: 0.65rem;
+  letter-spacing: 1px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.rarity-common   { color: #aaa; }
+.rarity-rare     { color: #3498db; }
+.rarity-epic     { color: #9b59b6; }
+.rarity-legendary { color: var(--gold); }
+
+.shop-item .item-name { font-weight: 600; font-size: 0.9rem; margin-bottom: 6px; }
+.shop-item .item-price {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.5);
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.price-chips { color: #e67e22; }
+.price-gems  { color: #3498db; }
+.owned-badge {
+  position: absolute;
+  top: 8px; right: 8px;
+  background: rgba(39,174,96,0.8);
+  color: #fff;
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Ad reward panel */
+#ad-panel .panel-card { max-width: 400px; text-align: center; }
+.ad-container { margin: 20px 0; }
+.ad-watch-btn {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: #fff;
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  padding: 14px 32px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+  margin-top: 12px;
+}
+.ad-watch-btn:hover { box-shadow: 0 0 20px rgba(231,76,60,0.5); transform: translateY(-2px); }
+.refill-count { font-size: 2.5rem; font-weight: 900; color: var(--gold); }
+.refill-label { font-size: 0.8rem; color: rgba(255,255,255,0.5); letter-spacing: 1px; margin-bottom: 16px; }
+
+/* Leaderboard panel */
+.lb-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.lb-pos { width: 28px; font-weight: 700; color: var(--gold); font-family: 'Cinzel', serif; }
+.lb-name { flex: 1; font-weight: 600; }
+.lb-rank { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+.lb-chips { font-size: 0.85rem; color: #27ae60; font-weight: 600; }
+
+/* Profile sidebar */
+#profile-sidebar {
+  position: absolute;
+  top: 70px; right: 0;
+  width: 280px;
+  background: var(--panel-bg);
+  border: var(--border-gold);
+  border-right: none;
+  border-radius: 12px 0 0 12px;
+  padding: 20px;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  z-index: 30;
+}
+#profile-sidebar.open { transform: translateX(0); }
+.profile-avatar {
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  background: rgba(201,168,76,0.1);
+}
+.profile-name {
+  text-align: center;
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+.profile-title {
+  text-align: center;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+.stat-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  font-size: 0.82rem;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.stat-row .stat-label { color: rgba(255,255,255,0.5); }
+.stat-row .stat-val { font-weight: 600; }
+
+/* Loading screen */
+#loading-screen {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: #000;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+.loading-title {
+  font-family: 'Cinzel', serif;
+  font-size: 2.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #c9a84c, #f0d080, #c9a84c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 4px;
+}
+.loading-bar-bg {
+  width: 300px;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.loading-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  border-radius: 2px;
+  width: 0%;
+  transition: width 0.3s ease;
+}
+.loading-sub {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 2px;
+}
+
+/* Gem shop */
+.gem-packages { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.gem-pkg {
+  background: rgba(52,152,219,0.1);
+  border: 1px solid rgba(52,152,219,0.3);
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+.gem-pkg:hover { border-color: #3498db; transform: translateY(-2px); }
+.gem-pkg.featured {
+  background: rgba(201,168,76,0.1);
+  border-color: rgba(201,168,76,0.4);
+}
+.gem-pkg.featured::before {
+  content: 'BEST VALUE';
+  position: absolute;
+  top: -10px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--gold);
+  color: #000;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+.gem-pkg .gem-count { font-size: 1.6rem; font-weight: 900; color: #3498db; }
+.gem-pkg.featured .gem-count { color: var(--gold); }
+.gem-pkg .gem-bonus { font-size: 0.7rem; color: #27ae60; margin-bottom: 6px; }
+.gem-pkg .gem-price { font-size: 1rem; font-weight: 700; }
+
+/* Particle canvas for wins */
+#particle-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 15;
+}
+
+/* Presence multiplier indicator */
+#presence-indicator {
+  position: absolute;
+  top: 70px; left: 20px;
+  background: rgba(0,0,0,0.7);
+  border: var(--border-gold);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 0.75rem;
+  pointer-events: none;
+}
+#presence-indicator .pres-label { color: rgba(255,255,255,0.4); letter-spacing: 1px; font-size: 0.65rem; }
+#presence-indicator .pres-val { color: var(--gold); font-weight: 700; font-size: 1.1rem; }
+
+/* Streak indicator */
+#streak-display {
+  position: absolute;
+  top: 70px; left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  color: #e67e22;
+  text-align: center;
+  pointer-events: none;
+  display: none;
+}
+#streak-display .streak-num { font-size: 1.8rem; font-weight: 900; display: block; }
+</style>
+</head>
+<body>
+
+<!-- Loading Screen -->
+<div id="loading-screen">
+  <div class="loading-title">EVERLIGHT BLACKJACK</div>
+  <div class="loading-bar-bg"><div class="loading-bar-fill" id="loading-fill"></div></div>
+  <div class="loading-sub" id="loading-status">INITIALIZING CASINO...</div>
+</div>
+
+<!-- 3D Canvas -->
+<canvas id="three-canvas"></canvas>
+<!-- Particle Canvas -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- HUD -->
+<div id="hud">
+  <!-- Top Bar -->
+  <div id="top-bar">
+    <div id="logo">EVERLIGHT</div>
+    <div class="currency-pill" id="chips-display">
+      <span class="icon">🪙</span>
+      <span id="chip-count">0</span>
+    </div>
+    <div class="currency-pill" id="gems-display">
+      <span class="icon">💎</span>
+      <span id="gem-count">0</span>
+    </div>
+    <div id="rank-badge">
+      <span id="rank-icon">🥉</span>
+      <span class="rank-label" id="rank-label">BRONZE</span>
+    </div>
+    <div id="menu-btns">
+      <button class="menu-btn" onclick="openPanel('profile-panel')">PROFILE</button>
+      <button class="menu-btn" onclick="openPanel('avatar-panel')">AVATAR</button>
+      <button class="menu-btn" onclick="openPanel('shop-panel')">SHOP</button>
+      <button class="menu-btn" onclick="openPanel('leaderboard-panel')">RANKS</button>
+      <button class="menu-btn" onclick="openPanel('ad-panel')">FREE CHIPS</button>
+    </div>
+  </div>
+
+  <!-- Presence indicator -->
+  <div id="presence-indicator">
+    <div class="pres-label">TABLE PRESENCE</div>
+    <div class="pres-val" id="presence-val">1.00x</div>
+  </div>
+
+  <!-- Streak display -->
+  <div id="streak-display">
+    <span class="streak-num" id="streak-num">3</span>
+    WIN STREAK
+  </div>
+
+  <!-- XP Bar -->
+  <div id="xp-bar-wrap">
+    <div id="xp-bar-label">XP TO NEXT RANK</div>
+    <div id="xp-bar-bg"><div id="xp-bar-fill" style="width:0%"></div></div>
+  </div>
+
+  <!-- Card Area (overlays on 3D scene) -->
+  <div id="card-area">
+    <div id="hand-values">
+      <div>
+        <div class="hand-label">DEALER</div>
+        <div class="hand-value" id="dealer-value">-</div>
+      </div>
+      <div>
+        <div class="hand-label">YOU</div>
+        <div class="hand-value" id="player-value">-</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Result Banner -->
+  <div id="result-banner"></div>
+
+  <!-- Toast -->
+  <div id="toast"></div>
+
+  <!-- Bottom Panel -->
+  <div id="bottom-panel">
+    <!-- Bet chips -->
+    <div id="bet-controls">
+      <button class="chip-btn c10"   onclick="addBet(10)">10</button>
+      <button class="chip-btn c25"   onclick="addBet(25)">25</button>
+      <button class="chip-btn c100"  onclick="addBet(100)">100</button>
+      <div style="text-align:center">
+        <div id="bet-display">BET</div>
+        <div id="bet-amount">0</div>
+      </div>
+      <button class="chip-btn c500"  onclick="addBet(500)">500</button>
+      <button class="chip-btn c1000" onclick="addBet(1000)">1K</button>
+      <button class="chip-btn c5000" onclick="addBet(5000)">5K</button>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="action-row" id="action-row">
+      <button class="action-btn btn-clear"  onclick="clearBet()">CLEAR</button>
+      <button class="action-btn btn-deal"   id="deal-btn" onclick="dealHand()">DEAL</button>
+    </div>
+    <div class="action-row" id="play-row" style="display:none">
+      <button class="action-btn btn-hit"    id="hit-btn"    onclick="playerHit()">HIT</button>
+      <button class="action-btn btn-stand"  id="stand-btn"  onclick="playerStand()">STAND</button>
+      <button class="action-btn btn-double" id="double-btn" onclick="playerDouble()">DOUBLE</button>
+      <button class="action-btn btn-split"  id="split-btn"  onclick="playerSplit()" style="display:none">SPLIT</button>
+      <button class="action-btn btn-surrnd" id="surrnd-btn" onclick="playerSurrender()">SURRENDER</button>
+    </div>
+  </div>
+
+  <!-- Profile sidebar -->
+  <div id="profile-sidebar">
+    <div class="profile-avatar" id="sidebar-avatar">🎭</div>
+    <div class="profile-name" id="sidebar-name">Guest</div>
+    <div class="profile-title" id="sidebar-title">ROOKIE</div>
+    <div id="sidebar-stats"></div>
+    <button class="btn-primary" onclick="openPanel('avatar-panel')" style="margin-top:16px">CUSTOMIZE AVATAR</button>
+    <button class="btn-primary" onclick="closeSidebar()" style="margin-top:8px;background:rgba(255,255,255,0.1);color:#fff;">CLOSE</button>
+  </div>
+</div>
+
+<!-- ---- OVERLAY PANELS ---- -->
+
+<!-- Auth Panel -->
+<div class="overlay-panel" id="auth-panel">
+  <div class="panel-card">
+    <div class="panel-title">EVERLIGHT CASINO</div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="switchAuthTab('login')">SIGN IN</div>
+      <div class="auth-tab" onclick="switchAuthTab('register')">REGISTER</div>
+    </div>
+
+    <div id="login-form">
+      <div class="form-group">
+        <label>USERNAME</label>
+        <input type="text" id="login-user" placeholder="Enter username" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>PASSWORD</label>
+        <input type="password" id="login-pass" placeholder="Enter password" autocomplete="current-password">
+      </div>
+      <div class="auth-error" id="login-error"></div>
+      <button class="btn-primary" onclick="doLogin()">ENTER THE CASINO</button>
+
+      <div class="oauth-divider">OR CONTINUE WITH</div>
+      <button class="oauth-btn" onclick="oauthLogin('google')">
+        <svg class="oauth-icon" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+        Continue with Google
+      </button>
+      <button class="oauth-btn" onclick="oauthLogin('facebook')">
+        <svg class="oauth-icon" viewBox="0 0 24 24"><path fill="#1877F2" d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+        Continue with Facebook
+      </button>
+    </div>
+
+    <div id="register-form" style="display:none">
+      <div class="form-group">
+        <label>USERNAME</label>
+        <input type="text" id="reg-user" placeholder="Choose a username" autocomplete="username">
+      </div>
+      <div class="form-group">
+        <label>EMAIL</label>
+        <input type="email" id="reg-email" placeholder="your@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>AVATAR NAME</label>
+        <input type="text" id="reg-avatar" placeholder="How should the table call you?">
+      </div>
+      <div class="form-group">
+        <label>PASSWORD</label>
+        <input type="password" id="reg-pass" placeholder="Create password" autocomplete="new-password">
+      </div>
+      <div class="auth-error" id="reg-error"></div>
+      <button class="btn-primary" onclick="doRegister()">CREATE ACCOUNT + CLAIM 1,000 CHIPS</button>
+    </div>
+
+    <div style="text-align:center;margin-top:16px">
+      <button class="action-btn btn-clear" onclick="playAsGuest()" style="font-size:0.75rem;padding:8px 20px">PLAY AS GUEST</button>
+    </div>
+  </div>
+</div>
+
+<!-- Avatar Panel -->
+<div class="overlay-panel" id="avatar-panel">
+  <div class="panel-card" style="max-width:600px">
+    <button class="panel-close" onclick="closePanel('avatar-panel')">x</button>
+    <div class="panel-title">AVATAR STUDIO</div>
+
+    <div class="section-label">BASE MODEL</div>
+    <div class="avatar-grid" id="base-grid"></div>
+
+    <div class="section-label">OUTFIT</div>
+    <div class="avatar-grid" id="outfit-grid"></div>
+
+    <div class="section-label">AURA / HOLOGRAM EFFECT</div>
+    <div class="avatar-grid" id="aura-grid"></div>
+
+    <div class="section-label">AVATAR NAME</div>
+    <div class="form-group" style="margin-top:8px">
+      <input type="text" id="avatar-name-input" placeholder="Your table name" maxlength="20">
+    </div>
+
+    <div class="section-label">PRIMARY COLOR</div>
+    <div class="color-row" id="primary-colors"></div>
+
+    <div style="margin-top:6px;font-size:0.75rem;color:rgba(255,255,255,0.4)">
+      Table Presence Multiplier:
+      <span id="avatar-presence-preview" style="color:var(--gold);font-weight:700">1.00x</span>
+      (higher fashion = bonus chip payouts)
+    </div>
+
+    <button class="btn-primary" onclick="saveAvatar()" style="margin-top:20px">SAVE AVATAR</button>
+  </div>
+</div>
+
+<!-- Shop Panel -->
+<div class="overlay-panel" id="shop-panel">
+  <div class="panel-card" style="max-width:600px">
+    <button class="panel-close" onclick="closePanel('shop-panel')">x</button>
+    <div class="panel-title">EVERLIGHT BOUTIQUE</div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="currency-pill">
+        <span>🪙</span> <span id="shop-chips">0</span> chips
+      </div>
+      <div class="currency-pill">
+        <span>💎</span> <span id="shop-gems">0</span> gems
+      </div>
+      <button class="menu-btn" onclick="openPanel('gem-panel')">BUY GEMS</button>
+    </div>
+
+    <div class="shop-filters">
+      <div class="filter-chip active" onclick="filterShop('all',this)">ALL</div>
+      <div class="filter-chip" onclick="filterShop('outfit',this)">OUTFITS</div>
+      <div class="filter-chip" onclick="filterShop('accessory',this)">ACCESSORIES</div>
+      <div class="filter-chip" onclick="filterShop('aura',this)">AURAS</div>
+      <div class="filter-chip" onclick="filterShop('card_back',this)">CARD BACKS</div>
+      <div class="filter-chip" onclick="filterShop('table_felt',this)">TABLE FELTS</div>
+      <div class="filter-chip" onclick="filterShop('title',this)">TITLES</div>
+    </div>
+
+    <div class="shop-grid" id="shop-grid">
+      <div style="color:rgba(255,255,255,0.3);text-align:center;grid-column:span 2;padding:40px">
+        Loading shop...
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Gem Package Panel -->
+<div class="overlay-panel" id="gem-panel">
+  <div class="panel-card" style="max-width:480px">
+    <button class="panel-close" onclick="closePanel('gem-panel')">x</button>
+    <div class="panel-title">GEM PACKAGES</div>
+    <p style="font-size:0.82rem;color:rgba(255,255,255,0.5);margin-bottom:20px">
+      Gems unlock exclusive cosmetics and premium features. Never required to win.
+    </p>
+    <div class="gem-packages" id="gem-packages-grid"></div>
+  </div>
+</div>
+
+<!-- Leaderboard Panel -->
+<div class="overlay-panel" id="leaderboard-panel">
+  <div class="panel-card" style="max-width:480px">
+    <button class="panel-close" onclick="closePanel('leaderboard-panel')">x</button>
+    <div class="panel-title">HALL OF LEGENDS</div>
+    <div id="leaderboard-rows">
+      <div style="color:rgba(255,255,255,0.3);text-align:center;padding:40px">Loading...</div>
+    </div>
+  </div>
+</div>
+
+<!-- Profile Panel -->
+<div class="overlay-panel" id="profile-panel">
+  <div class="panel-card" style="max-width:440px">
+    <button class="panel-close" onclick="closePanel('profile-panel')">x</button>
+    <div class="panel-title">PLAYER PROFILE</div>
+    <div id="profile-panel-content" style="color:rgba(255,255,255,0.5);text-align:center;padding:20px">
+      Sign in to view your profile.
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px">
+      <button class="btn-primary" onclick="openPanel('avatar-panel');closePanel('profile-panel')">EDIT AVATAR</button>
+      <button class="btn-primary" onclick="doLogout()" style="background:rgba(231,76,60,0.8);color:#fff">SIGN OUT</button>
+    </div>
+  </div>
+</div>
+
+<!-- Ad Reward Panel -->
+<div class="overlay-panel" id="ad-panel">
+  <div class="panel-card" style="max-width:380px;text-align:center">
+    <button class="panel-close" onclick="closePanel('ad-panel')">x</button>
+    <div class="panel-title">FREE CHIPS</div>
+    <div class="refill-count" id="refills-left">10</div>
+    <div class="refill-label">REFILLS REMAINING TODAY</div>
+
+    <p style="font-size:0.82rem;color:rgba(255,255,255,0.5);margin-bottom:16px">
+      Watch a short ad to earn 100 free chips.<br>Max 10 refills per day per account.
+    </p>
+
+    <!-- Google Rewarded Ad placeholder -->
+    <div class="ad-container">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="{{ google_ads_client }}"
+           data-ad-slot="{{ google_ads_slot }}"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+    </div>
+
+    <button class="ad-watch-btn" id="watch-ad-btn" onclick="watchAd()">
+      WATCH AD + CLAIM 100 CHIPS
+    </button>
+    <div style="font-size:0.7rem;color:rgba(255,255,255,0.3);margin-top:12px">
+      Resets at midnight. Account must be signed in.
+    </div>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script>
+// ============================================================
+// GAME STATE
+// ============================================================
+const SUITS = ['spades','hearts','diamonds','clubs'];
+const VALUES = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+const SUIT_SYMBOLS = { spades: 'spades', hearts: 'hearts', diamonds: 'diamonds', clubs: 'clubs' };
+
+const RANK_ICONS = {
+  Bronze: 'medal', Silver: 'trophy', Gold: 'crown',
+  Platinum: 'gem', Diamond: 'sparkles', Legend: 'fire'
+};
+const RANK_EMOJIS = {
+  Bronze: '🥉', Silver: '🥈', Gold: '🥇',
+  Platinum: '🏆', Diamond: '💎', Legend: '🔥'
+};
+
+const XP_RANKS = {
+  Bronze: 0, Silver: 1000, Gold: 5000,
+  Platinum: 15000, Diamond: 40000, Legend: 100000
+};
+
+let gameState = {
+  phase: 'bet',      // bet | playing | dealer | done
+  playerHand: [],
+  dealerHand: [],
+  deck: [],
+  bet: 0,
+  sessionId: null,
+  presenceMultiplier: 1.0,
+  canDouble: false,
+  canSplit: false,
+  handStart: null,
+};
+
+let playerData = {{ player_data_json|safe }};
+let gemPackages = {{ gem_packages_json|safe }};
+let shopItems = [];
+let ownedItems = [];
+let shopFilter = 'all';
+let avatarDraft = {};
+let isGuest = (playerData === null);
+
+const CSRFTOKEN = '{{ csrf_token }}';
+
+// ============================================================
+// THREE.JS 3D CASINO SCENE
+// ============================================================
+let scene, camera, renderer, animId;
+let tableGroup, ambientLight, spotLight1, spotLight2;
+let particles = [];
+let cardMeshes = { player: [], dealer: [] };
+let clock;
+
+function initThree() {
+  const canvas = document.getElementById('three-canvas');
+  renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.2;
+
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x04040a);
+  scene.fog = new THREE.FogExp2(0x04040a, 0.04);
+
+  clock = new THREE.Clock();
+
+  // Camera
+  camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 200);
+  camera.position.set(0, 5.5, 7.5);
+  camera.lookAt(0, 0, 0);
+
+  buildScene();
+  animate();
+}
+
+function buildScene() {
+  // === FLOOR ===
+  const floorGeo = new THREE.PlaneGeometry(60, 60);
+  const floorMat = new THREE.MeshStandardMaterial({
+    color: 0x1a0a05,
+    roughness: 0.9,
+    metalness: 0.0,
+  });
+  const floor = new THREE.Mesh(floorGeo, floorMat);
+  floor.rotation.x = -Math.PI / 2;
+  floor.position.y = -1.0;
+  floor.receiveShadow = true;
+  scene.add(floor);
+
+  // Floor pattern (subtle hexagons via texture color)
+  const floorDeco = new THREE.Mesh(
+    new THREE.PlaneGeometry(60, 60),
+    new THREE.MeshStandardMaterial({ color: 0x110800, roughness: 1.0, transparent: true, opacity: 0.6 })
+  );
+  floorDeco.rotation.x = -Math.PI / 2;
+  floorDeco.position.y = -0.99;
+  scene.add(floorDeco);
+
+  // === CASINO TABLE ===
+  tableGroup = new THREE.Group();
+  scene.add(tableGroup);
+
+  // Table base (thick wooden body)
+  const tableBaseGeo = new THREE.CylinderGeometry(4.2, 4.0, 0.5, 32);
+  const tableBaseMat = new THREE.MeshStandardMaterial({
+    color: 0x2a1505,
+    roughness: 0.4,
+    metalness: 0.2,
+  });
+  const tableBase = new THREE.Mesh(tableBaseGeo, tableBaseMat);
+  tableBase.position.y = -0.75;
+  tableBase.castShadow = true;
+  tableBase.receiveShadow = true;
+  tableGroup.add(tableBase);
+
+  // Felt surface
+  const feltGeo = new THREE.CylinderGeometry(4.0, 4.0, 0.08, 64);
+  const feltMat = new THREE.MeshStandardMaterial({
+    color: 0x0d5c2e,
+    roughness: 0.95,
+    metalness: 0.0,
+  });
+  const felt = new THREE.Mesh(feltGeo, feltMat);
+  felt.position.y = -0.46;
+  felt.receiveShadow = true;
+  tableGroup.add(felt);
+
+  // Gold trim ring
+  const trimGeo = new THREE.TorusGeometry(4.05, 0.07, 8, 64);
+  const trimMat = new THREE.MeshStandardMaterial({
+    color: 0xc9a84c,
+    roughness: 0.2,
+    metalness: 0.9,
+    emissive: 0xc9a84c,
+    emissiveIntensity: 0.15,
+  });
+  const trim = new THREE.Mesh(trimGeo, trimMat);
+  trim.rotation.x = Math.PI / 2;
+  trim.position.y = -0.42;
+  tableGroup.add(trim);
+
+  // Table leg
+  const legGeo = new THREE.CylinderGeometry(0.2, 0.25, 0.8, 16);
+  const legMat = new THREE.MeshStandardMaterial({ color: 0x2a1505, roughness: 0.3, metalness: 0.3 });
+  const leg = new THREE.Mesh(legGeo, legMat);
+  leg.position.y = -1.4;
+  leg.castShadow = true;
+  tableGroup.add(leg);
+
+  // === DEALER AREA ===
+  // Dealer name placard
+  const placardGeo = new THREE.BoxGeometry(1.5, 0.04, 0.3);
+  const placardMat = new THREE.MeshStandardMaterial({
+    color: 0xc9a84c, roughness: 0.1, metalness: 0.9,
+    emissive: 0xc9a84c, emissiveIntensity: 0.2
+  });
+  const placard = new THREE.Mesh(placardGeo, placardMat);
+  placard.position.set(0, -0.38, -2.8);
+  tableGroup.add(placard);
+
+  // === CHIP TRAY ===
+  const trayGeo = new THREE.BoxGeometry(2.5, 0.08, 0.4);
+  const trayMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.3, metalness: 0.5 });
+  const tray = new THREE.Mesh(trayGeo, trayMat);
+  tray.position.set(0, -0.41, -2.2);
+  tableGroup.add(tray);
+
+  // Chip stacks in tray
+  const chipColors = [0xe74c3c, 0x27ae60, 0x2980b9, 0x8e44ad, 0xc9a84c];
+  for (let ci = 0; ci < 5; ci++) {
+    for (let si = 0; si < 5; si++) {
+      const cGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.03, 16);
+      const cMat = new THREE.MeshStandardMaterial({
+        color: chipColors[ci], roughness: 0.3, metalness: 0.5,
+        emissive: chipColors[ci], emissiveIntensity: 0.05
+      });
+      const chip = new THREE.Mesh(cGeo, cMat);
+      chip.position.set(-1.0 + ci * 0.5, -0.36 + si * 0.032, -2.2);
+      tableGroup.add(chip);
+    }
+  }
+
+  // === AMBIENT ATMOSPHERE ===
+  // Room walls suggestion (dark panels far back)
+  const wallMat = new THREE.MeshStandardMaterial({ color: 0x0c0508, roughness: 0.9 });
+  const backWall = new THREE.Mesh(new THREE.PlaneGeometry(40, 12), wallMat);
+  backWall.position.set(0, 4, -20);
+  scene.add(backWall);
+
+  // Chandelier chain
+  const chainGeo = new THREE.CylinderGeometry(0.02, 0.02, 5, 8);
+  const chainMat = new THREE.MeshStandardMaterial({ color: 0xc9a84c, metalness: 0.9, roughness: 0.1 });
+  const chain = new THREE.Mesh(chainGeo, chainMat);
+  chain.position.set(0, 10, 0);
+  scene.add(chain);
+
+  // Chandelier base
+  const chanBase = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.8, 0.6, 0.2, 16),
+    new THREE.MeshStandardMaterial({ color: 0xc9a84c, metalness: 0.9, roughness: 0.1, emissive: 0xffcc44, emissiveIntensity: 0.3 })
+  );
+  chanBase.position.set(0, 7.5, 0);
+  scene.add(chanBase);
+
+  // === LIGHTING ===
+  // Ambient
+  const ambient = new THREE.AmbientLight(0x110a18, 0.8);
+  scene.add(ambient);
+
+  // Key spotlight (chandelier)
+  const keyLight = new THREE.SpotLight(0xfff5e0, 4.0, 25, Math.PI / 7, 0.3, 1.5);
+  keyLight.position.set(0, 8, 0);
+  keyLight.target.position.set(0, 0, 0);
+  keyLight.castShadow = true;
+  keyLight.shadow.mapSize.width = 2048;
+  keyLight.shadow.mapSize.height = 2048;
+  scene.add(keyLight);
+  scene.add(keyLight.target);
+
+  // Fill lights (casino neon)
+  const neonColors = [0x4400ff, 0xff2200, 0x00aaff];
+  const neonPositions = [[-8, 3, 0], [8, 3, 0], [0, 3, 8]];
+  neonPositions.forEach((pos, i) => {
+    const pl = new THREE.PointLight(neonColors[i], 1.5, 18, 2);
+    pl.position.set(...pos);
+    scene.add(pl);
+  });
+
+  // Gold table glow
+  const tableGlow = new THREE.PointLight(0xc9a84c, 1.2, 8, 2);
+  tableGlow.position.set(0, 1.5, 0);
+  scene.add(tableGlow);
+
+  // === AVATAR HOLOGRAM STANDS ===
+  buildAvatarStands();
+
+  // === BACKGROUND DECORATION ===
+  // Distant casino signs (glowing boxes)
+  const signPositions = [[-15, 5, -18], [15, 5, -18], [-18, 3, -10], [18, 3, -10]];
+  signPositions.forEach(pos => {
+    const sign = new THREE.Mesh(
+      new THREE.BoxGeometry(3, 1.2, 0.2),
+      new THREE.MeshStandardMaterial({
+        color: 0xc9a84c, emissive: 0xc9a84c, emissiveIntensity: 0.5,
+        roughness: 0.1, metalness: 0.8,
+      })
+    );
+    sign.position.set(...pos);
+    scene.add(sign);
+  });
+
+  // Particle system (floating dust/magic)
+  initParticles();
+}
+
+function buildAvatarStands() {
+  // 5 player seats around table bottom arc
+  const seats = [
+    { x: -3.0, z: 2.5, label: 'P1' },
+    { x: -1.5, z: 3.2, label: 'P2' },
+    { x:  0.0, z: 3.4, label: 'P3' },
+    { x:  1.5, z: 3.2, label: 'P4' },
+    { x:  3.0, z: 2.5, label: 'P5' },
+  ];
+
+  seats.forEach((seat, i) => {
+    const standGroup = new THREE.Group();
+    standGroup.name = `seat_${i}`;
+
+    // Hologram base disc
+    const discGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.04, 32);
+    const discMat = new THREE.MeshStandardMaterial({
+      color: 0x00aaff,
+      emissive: 0x0055ff,
+      emissiveIntensity: 0.8,
+      transparent: true, opacity: 0.7,
+      roughness: 0.1, metalness: 0.9,
+    });
+    const disc = new THREE.Mesh(discGeo, discMat);
+    disc.position.y = -0.38;
+    standGroup.add(disc);
+
+    // Hologram beam
+    const beamGeo = new THREE.CylinderGeometry(0.02, 0.35, 2.0, 16, 1, true);
+    const beamMat = new THREE.MeshStandardMaterial({
+      color: 0x0088ff,
+      emissive: 0x0044ff,
+      emissiveIntensity: 0.6,
+      transparent: true, opacity: 0.15,
+      side: THREE.DoubleSide,
+    });
+    const beam = new THREE.Mesh(beamGeo, beamMat);
+    beam.position.y = 0.62;
+    standGroup.add(beam);
+
+    // Seat chip area marker
+    const markerGeo = new THREE.RingGeometry(0.25, 0.32, 32);
+    const markerMat = new THREE.MeshStandardMaterial({
+      color: 0xc9a84c, emissive: 0xc9a84c, emissiveIntensity: 0.3,
+      side: THREE.DoubleSide,
+    });
+    const marker = new THREE.Mesh(markerGeo, markerMat);
+    marker.rotation.x = -Math.PI / 2;
+    marker.position.set(0, -0.42, 0.55);
+    standGroup.add(marker);
+
+    standGroup.position.set(seat.x, 0, seat.z);
+    scene.add(standGroup);
+  });
+}
+
+function initParticles() {
+  const pGeo = new THREE.BufferGeometry();
+  const count = 400;
+  const positions = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    positions[i * 3]     = (Math.random() - 0.5) * 30;
+    positions[i * 3 + 1] = Math.random() * 12;
+    positions[i * 3 + 2] = (Math.random() - 0.5) * 30;
+  }
+  pGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+  const pMat = new THREE.PointsMaterial({
+    color: 0xc9a84c, size: 0.04, transparent: true, opacity: 0.4, sizeAttenuation: true,
+  });
+  const points = new THREE.Points(pGeo, pMat);
+  points.name = 'dust';
+  scene.add(points);
+}
+
+function animate() {
+  animId = requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  // Rotate dust particles slowly
+  const dust = scene.getObjectByName('dust');
+  if (dust) { dust.rotation.y = t * 0.015; }
+
+  // Table glow pulse
+  scene.traverse(obj => {
+    if (obj.isPointLight && obj.color.getHex() === 0xc9a84c) {
+      obj.intensity = 1.2 + Math.sin(t * 2) * 0.15;
+    }
+  });
+
+  // Camera subtle sway
+  camera.position.x = Math.sin(t * 0.12) * 0.3;
+  camera.position.y = 5.5 + Math.sin(t * 0.08) * 0.1;
+  camera.lookAt(0, 0, 0);
+
+  TWEEN.update();
+  renderer.render(scene, camera);
+
+  // Update bot label positions to follow 3D seats
+  updateBotLabelPositions();
+}
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ============================================================
+// DECK / CARD LOGIC (client-side)
+// ============================================================
+function buildDeck(numDecks = 6) {
+  const deck = [];
+  for (let d = 0; d < numDecks; d++) {
+    for (const suit of SUITS) {
+      for (const val of VALUES) {
+        deck.push({ suit, val });
+      }
+    }
+  }
+  // Fisher-Yates shuffle
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  return deck;
+}
+
+function cardValue(card) {
+  if (['J','Q','K'].includes(card.val)) return 10;
+  if (card.val === 'A') return 11;
+  return parseInt(card.val);
+}
+
+function handValue(hand) {
+  let total = 0, aces = 0;
+  for (const card of hand) {
+    total += cardValue(card);
+    if (card.val === 'A') aces++;
+  }
+  while (total > 21 && aces > 0) { total -= 10; aces--; }
+  return total;
+}
+
+function isBlackjack(hand) {
+  return hand.length === 2 && handValue(hand) === 21;
+}
+
+function drawCard() {
+  if (gameState.deck.length < 15) {
+    gameState.deck = buildDeck(6);
+  }
+  return gameState.deck.pop();
+}
+
+// ============================================================
+// CARD RENDERING (2.5D cards overlaid on 3D scene)
+// ============================================================
+const SUIT_HTML = { spades: '&spades;', hearts: '&hearts;', diamonds: '&diams;', clubs: '&clubs;' };
+const SUIT_COLOR = { spades: '#111', clubs: '#111', hearts: '#c0392b', diamonds: '#c0392b' };
+
+let cardDomPool = [];
+function getCardEl() {
+  let el = document.createElement('div');
+  el.style.cssText = `
+    position:fixed;
+    width:70px;height:100px;
+    background:#fff;
+    border-radius:8px;
+    border:1px solid #ddd;
+    box-shadow:0 4px 20px rgba(0,0,0,0.6);
+    display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    font-weight:700;font-size:1.4rem;
+    transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    z-index:12;
+    pointer-events:none;
+    transform:scale(0) rotateY(90deg);
+  `;
+  document.body.appendChild(el);
+  return el;
+}
+
+function renderCard(card, x, y, faceDown = false) {
+  const el = getCardEl();
+  if (faceDown) {
+    el.style.background = 'linear-gradient(135deg,#1a3a6b,#0d1f3c)';
+    el.style.border = '2px solid #c9a84c';
+    el.innerHTML = '<span style="font-size:2rem;color:#c9a84c">&#9830;</span>';
+  } else {
+    const col = SUIT_COLOR[card.suit];
+    el.style.color = col;
+    el.innerHTML = `<div style="font-size:1.5rem">${card.val}</div>
+                    <div style="font-size:1.1rem">${SUIT_HTML[card.suit]}</div>`;
+  }
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  setTimeout(() => {
+    el.style.transform = 'scale(1) rotateY(0)';
+  }, 50);
+  return el;
+}
+
+function clearCards() {
+  document.querySelectorAll('[data-card]').forEach(e => e.remove());
+  cardDomPool.forEach(e => { if (e.parentNode) e.parentNode.removeChild(e); });
+  cardDomPool = [];
+}
+
+function positionCards(hand, isPlayer) {
+  const cx = window.innerWidth / 2;
+  const cy = isPlayer ? window.innerHeight * 0.62 : window.innerHeight * 0.30;
+  const spacing = 80;
+  const startX = cx - ((hand.length - 1) * spacing / 2) - 35;
+  return hand.map((_, i) => ({ x: startX + i * spacing, y: cy - 50 }));
+}
+
+let dealerHiddenEl = null;
+
+function renderHands() {
+  cardDomPool.forEach(e => { if (e.parentNode) e.parentNode.removeChild(e); });
+  cardDomPool = [];
+  dealerHiddenEl = null;
+
+  const playerPos = positionCards(gameState.playerHand, true);
+  gameState.playerHand.forEach((card, i) => {
+    const el = renderCard(card, playerPos[i].x, playerPos[i].y);
+    el.setAttribute('data-card', 'player-' + i);
+    cardDomPool.push(el);
+  });
+
+  const dealerPos = positionCards(gameState.dealerHand, false);
+  gameState.dealerHand.forEach((card, i) => {
+    const faceDown = (card.val === '?' || (i === 1 && gameState.phase === 'playing'));
+    const el = renderCard(card, dealerPos[i].x, dealerPos[i].y, faceDown);
+    el.setAttribute('data-card', 'dealer-' + i);
+    cardDomPool.push(el);
+    if (faceDown) dealerHiddenEl = el;
+  });
+
+  updateHandValues();
+}
+
+function updateHandValues() {
+  // Filter out hidden placeholder cards (val:"?") for value calc
+  const visiblePlayer = gameState.playerHand.filter(c => c.val !== '?');
+  const pv = visiblePlayer.length ? handValue(visiblePlayer) : 0;
+
+  const visibleDealer = gameState.phase === 'playing'
+    ? gameState.dealerHand.slice(0, 1).filter(c => c.val !== '?')
+    : gameState.dealerHand.filter(c => c.val !== '?');
+  const dv = visibleDealer.length ? handValue(visibleDealer) : 0;
+
+  const pvEl = document.getElementById('player-value');
+  pvEl.textContent = gameState.playerHand.length ? pv : '-';
+  pvEl.className = 'hand-value' + (pv > 21 ? ' bust' : '') + (isBlackjack(visiblePlayer) ? ' bj' : '');
+
+  const dvEl = document.getElementById('dealer-value');
+  dvEl.textContent = gameState.dealerHand.length ? dv : '-';
+}
+
+function revealDealerCard() {
+  if (dealerHiddenEl) {
+    const card = gameState.dealerHand[1];
+    const col = SUIT_COLOR[card.suit];
+    dealerHiddenEl.style.background = '#fff';
+    dealerHiddenEl.style.border = '1px solid #ddd';
+    dealerHiddenEl.style.color = col;
+    dealerHiddenEl.innerHTML = `<div style="font-size:1.5rem">${card.val}</div>
+                                 <div style="font-size:1.1rem">${SUIT_HTML[card.suit]}</div>`;
+    dealerHiddenEl = null;
+  }
+}
+
+// ============================================================
+// GAME FLOW
+// ============================================================
+function addBet(amount) {
+  if (gameState.phase !== 'bet') return;
+  if (!playerData && !isGuest) { openPanel('auth-panel'); return; }
+  const maxBet = playerData ? playerData.chips : 1000;
+  if (gameState.bet + amount > maxBet) {
+    showToast('Not enough chips!');
+    return;
+  }
+  gameState.bet += amount;
+  document.getElementById('bet-amount').textContent = gameState.bet.toLocaleString();
+}
+
+function clearBet() {
+  if (gameState.phase !== 'bet') return;
+  gameState.bet = 0;
+  document.getElementById('bet-amount').textContent = '0';
+}
+
+async function dealHand() {
+  if (gameState.bet < 10) { showToast('Minimum bet: 10 chips'); return; }
+  if (gameState.phase !== 'bet') return;
+
+  if (!isGuest) {
+    // Server-authoritative deal: server builds shoe and deals cards
+    try {
+      const res = await apiPost('/blackjack/api/deal/', {
+        bet: gameState.bet,
+        side_bet: 0,
+      });
+      if (res.error) { showToast(res.error); return; }
+      gameState.sessionId = res.session_id;
+      gameState.presenceMultiplier = res.presence_multiplier;
+      gameState.playerHand = res.player_hand;
+      gameState.dealerHand = res.dealer_hand;
+      updateChips(res.chips_remaining);
+
+      dealerSpeak(dealerLine('deal'));
+      gameState.phase = 'playing';
+      gameState.handStart = Date.now();
+      renderHands();
+      document.getElementById('action-row').style.display = 'none';
+      document.getElementById('play-row').style.display = 'flex';
+
+      // Show/hide double button based on server response
+      document.getElementById('double-btn').style.display = res.can_double ? 'inline-flex' : 'none';
+      const canSplit = gameState.playerHand.length === 2 &&
+        gameState.playerHand[0].val === gameState.playerHand[1].val;
+      document.getElementById('split-btn').style.display = canSplit ? 'inline-flex' : 'none';
+
+      // Natural blackjack (server already settled)
+      if (res.is_blackjack) {
+        gameState.dealerHand = res.dealer_hand;
+        renderHands();
+        await handleSettlement(res);
+        return;
+      }
+
+      updatePresenceDisplay();
+    } catch(e) {
+      showToast('Connection error');
+      return;
+    }
+  } else {
+    // Guest mode: fully client-side
+    gameState.sessionId = 'guest-' + Date.now();
+    gameState.presenceMultiplier = 1.0;
+    if (playerData) {
+      playerData.chips -= gameState.bet;
+      updateChipsDisplay(playerData.chips);
+    }
+    if (!gameState.deck.length) gameState.deck = buildDeck(6);
+    gameState.playerHand = [drawCard(), drawCard()];
+    gameState.dealerHand = [drawCard(), drawCard()];
+    dealerSpeak(dealerLine('deal'));
+    gameState.phase = 'playing';
+    gameState.handStart = Date.now();
+    renderHands();
+    document.getElementById('action-row').style.display = 'none';
+    document.getElementById('play-row').style.display = 'flex';
+    const canSplit = gameState.playerHand.length === 2 &&
+      gameState.playerHand[0].val === gameState.playerHand[1].val;
+    document.getElementById('split-btn').style.display = canSplit ? 'inline-flex' : 'none';
+    if (isBlackjack(gameState.playerHand)) {
+      await sleep(400);
+      await guestEndHand('blackjack');
+      return;
+    }
+    updatePresenceDisplay();
+  }
+}
+
+async function playerHit() {
+  if (gameState.phase !== 'playing') return;
+
+  if (!isGuest) {
+    try {
+      const res = await apiPost('/blackjack/api/action/', {
+        session_id: gameState.sessionId, action: 'hit'
+      });
+      if (res.error) { showToast(res.error); return; }
+      gameState.playerHand = res.player_hand;
+      dealerSpeak(dealerLine('hit'));
+      renderHands();
+      if (res.state === 'settled') {
+        gameState.dealerHand = res.dealer_hand;
+        renderHands();
+        await handleSettlement(res);
+      }
+    } catch(e) { showToast('Connection error'); }
+  } else {
+    gameState.playerHand.push(drawCard());
+    dealerSpeak(dealerLine('hit'));
+    renderHands();
+    const pv = handValue(gameState.playerHand);
+    if (pv > 21) { await sleep(400); await guestEndHand('bust'); }
+    else if (pv === 21) { await sleep(300); await playerStand(); }
+  }
+}
+
+async function playerStand() {
+  if (gameState.phase !== 'playing') return;
+
+  if (!isGuest) {
+    gameState.phase = 'dealer';
+    dealerSpeak(dealerLine('stand'));
+    try {
+      const res = await apiPost('/blackjack/api/action/', {
+        session_id: gameState.sessionId, action: 'stand'
+      });
+      if (res.error) { showToast(res.error); return; }
+      gameState.dealerHand = res.dealer_hand;
+      revealDealerCard();
+      renderHands();
+      await handleSettlement(res);
+    } catch(e) { showToast('Connection error'); }
+  } else {
+    gameState.phase = 'dealer';
+    dealerSpeak(dealerLine('stand'));
+    revealDealerCard();
+    updateHandValues();
+    await sleep(500);
+    while (handValue(gameState.dealerHand) < 17) {
+      dealerSpeak(dealerLine('dealer_draw'));
+      gameState.dealerHand.push(drawCard());
+      renderHands();
+      await sleep(600);
+    }
+    const dv = handValue(gameState.dealerHand);
+    const pv = handValue(gameState.playerHand);
+    let outcome;
+    if (dv > 21) outcome = 'win';
+    else if (pv > dv) outcome = 'win';
+    else if (pv < dv) outcome = 'loss';
+    else outcome = 'push';
+    await guestEndHand(outcome);
+  }
+}
+
+async function playerDouble() {
+  if (gameState.phase !== 'playing') return;
+
+  if (!isGuest) {
+    try {
+      const res = await apiPost('/blackjack/api/action/', {
+        session_id: gameState.sessionId, action: 'double'
+      });
+      if (res.error) { showToast(res.error); return; }
+      if (res.card) gameState.playerHand = res.player_hand;
+      gameState.dealerHand = res.dealer_hand;
+      renderHands();
+      await handleSettlement(res);
+    } catch(e) { showToast('Connection error'); }
+  } else {
+    showToast('Double not available in guest mode');
+  }
+}
+
+async function playerSplit() {
+  showToast('Split coming soon!');
+}
+
+async function playerSurrender() {
+  if (gameState.phase !== 'playing') return;
+
+  if (!isGuest) {
+    try {
+      const res = await apiPost('/blackjack/api/action/', {
+        session_id: gameState.sessionId, action: 'surrender'
+      });
+      if (res.error) { showToast(res.error); return; }
+      await handleSettlement(res);
+    } catch(e) { showToast('Connection error'); }
+  } else {
+    await guestEndHand('surrender');
+  }
+}
+
+async function handleSettlement(res) {
+  gameState.phase = 'done';
+  document.getElementById('play-row').style.display = 'none';
+
+  const outcome = res.outcome;
+  if (outcome !== 'bust' && outcome !== 'surrender') {
+    revealDealerCard();
+  }
+  updateHandValues();
+  showResult(outcome);
+
+  // Dealer voice
+  const dealerBust = outcome === 'win' && res.dealer_value > 21;
+  if (dealerBust)                   dealerSpeak(dealerLine('dealer_bust'));
+  else if (outcome === 'blackjack') dealerSpeak(dealerLine('blackjack'));
+  else if (outcome === 'win')       dealerSpeak(dealerLine('win'));
+  else if (outcome === 'bust')      dealerSpeak(dealerLine('bust'));
+  else if (outcome === 'push')      dealerSpeak(dealerLine('push'));
+  else if (outcome === 'surrender') dealerSpeak(dealerLine('surrender'));
+
+  // Update from server response
+  updateChips(res.chips);
+  updateXP(res.xp, res.xp_earned, res.rank);
+  if (res.streak > 1) showStreakDisplay(res.streak);
+  if (playerData) {
+    playerData.hands_played = res.hands_played || playerData.hands_played;
+    playerData.hands_won    = res.hands_won    || playerData.hands_won;
+    playerData.best_streak  = res.best_streak  || playerData.best_streak;
+    playerData.biggest_win  = res.biggest_win  || playerData.biggest_win;
+    playerData.win_rate     = res.win_rate;
+  }
+  if (res.achievements && res.achievements.length) {
+    res.achievements.forEach((ach, i) => {
+      setTimeout(() => showAchievement(ach), i * 1800);
+    });
+  }
+
+  await sleep(2200);
+  resetForNextHand();
+}
+
+async function guestEndHand(outcome) {
+  gameState.phase = 'done';
+  document.getElementById('play-row').style.display = 'none';
+  if (outcome !== 'bust' && outcome !== 'surrender') revealDealerCard();
+  updateHandValues();
+  showResult(outcome);
+
+  const dealerBust = outcome === 'win' && handValue(gameState.dealerHand) > 21;
+  if (dealerBust)                   dealerSpeak(dealerLine('dealer_bust'));
+  else if (outcome === 'blackjack') dealerSpeak(dealerLine('blackjack'));
+  else if (outcome === 'win')       dealerSpeak(dealerLine('win'));
+  else if (outcome === 'bust')      dealerSpeak(dealerLine('bust'));
+  else if (outcome === 'push')      dealerSpeak(dealerLine('push'));
+  else if (outcome === 'surrender') dealerSpeak(dealerLine('surrender'));
+
+  await sleep(2200);
+  resetForNextHand();
+}
+
+function showResult(outcome) {
+  const banner = document.getElementById('result-banner');
+  const configs = {
+    blackjack: { text: 'BLACKJACK!', sub: `+${Math.floor(gameState.bet * 1.5 * gameState.presenceMultiplier).toLocaleString()} CHIPS`, cls: 'result-blackjack', particles: 'gold' },
+    win:       { text: 'YOU WIN!',   sub: `+${Math.floor(gameState.bet * gameState.presenceMultiplier).toLocaleString()} CHIPS`, cls: 'result-win', particles: 'green' },
+    push:      { text: 'PUSH',       sub: 'BET RETURNED', cls: 'result-push', particles: null },
+    loss:      { text: 'DEALER WINS', sub: `-${gameState.bet.toLocaleString()} CHIPS`, cls: 'result-loss', particles: null },
+    bust:      { text: 'BUST!',      sub: `-${gameState.bet.toLocaleString()} CHIPS`, cls: 'result-loss', particles: null },
+    surrender: { text: 'SURRENDER',  sub: `HALF BET RETURNED`, cls: 'result-push', particles: null },
+  };
+  const cfg = configs[outcome] || configs.loss;
+  banner.innerHTML = `<div class="result-text ${cfg.cls}">${cfg.text}</div>
+                      <div class="result-sub ${cfg.cls}">${cfg.sub}</div>`;
+  banner.style.display = 'block';
+  if (cfg.particles) launchParticles(cfg.particles);
+  setTimeout(() => { banner.style.display = 'none'; }, 2000);
+}
+
+function resetForNextHand() {
+  clearCards();
+  gameState.phase = 'bet';
+  gameState.playerHand = [];
+  gameState.dealerHand = [];
+  gameState.bet = 0;
+  gameState.sessionId = null;
+  document.getElementById('bet-amount').textContent = '0';
+  document.getElementById('action-row').style.display = 'flex';
+  document.getElementById('player-value').textContent = '-';
+  document.getElementById('dealer-value').textContent = '-';
+  document.getElementById('streak-display').style.display = 'none';
+}
+
+// ============================================================
+// PARTICLE WIN EFFECT (canvas-based)
+// ============================================================
+const pCanvas = document.getElementById('particle-canvas');
+const pCtx = pCanvas.getContext('2d');
+pCanvas.width = window.innerWidth;
+pCanvas.height = window.innerHeight;
+window.addEventListener('resize', () => {
+  pCanvas.width = window.innerWidth;
+  pCanvas.height = window.innerHeight;
+});
+
+let winParticles = [];
+let pAnimId = null;
+
+function launchParticles(type) {
+  const colors = type === 'gold' ? ['#c9a84c','#f0d080','#fff','#ffe066'] :
+                                   ['#27ae60','#2ecc71','#a8ffb0','#fff'];
+  winParticles = [];
+  for (let i = 0; i < 120; i++) {
+    winParticles.push({
+      x: pCanvas.width / 2,
+      y: pCanvas.height / 2,
+      vx: (Math.random() - 0.5) * 14,
+      vy: (Math.random() - 0.5) * 14 - 6,
+      r: Math.random() * 6 + 3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      life: 1.0,
+      decay: Math.random() * 0.02 + 0.015,
+    });
+  }
+  if (!pAnimId) animateParticles();
+}
+
+function animateParticles() {
+  pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+  winParticles = winParticles.filter(p => p.life > 0);
+  winParticles.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += 0.35;
+    p.life -= p.decay;
+    pCtx.globalAlpha = p.life;
+    pCtx.fillStyle = p.color;
+    pCtx.beginPath();
+    pCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    pCtx.fill();
+  });
+  pCtx.globalAlpha = 1;
+  if (winParticles.length > 0) {
+    pAnimId = requestAnimationFrame(animateParticles);
+  } else {
+    pAnimId = null;
+  }
+}
+
+// ============================================================
+// UI HELPERS
+// ============================================================
+function updateChips(amount) {
+  if (playerData) playerData.chips = amount;
+  updateChipsDisplay(amount);
+}
+
+function updateChipsDisplay(amount) {
+  document.getElementById('chip-count').textContent = parseInt(amount || 0).toLocaleString();
+  document.getElementById('shop-chips').textContent = parseInt(amount || 0).toLocaleString();
+}
+
+function updatePresenceDisplay() {
+  document.getElementById('presence-val').textContent = gameState.presenceMultiplier.toFixed(2) + 'x';
+}
+
+function showToast(msg, duration = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, duration);
+}
+
+function showAchievement(ach) {
+  const div = document.createElement('div');
+  div.style.cssText = `position:fixed;top:80px;right:20px;z-index:9999;
+    background:linear-gradient(135deg,rgba(20,14,0,0.97),rgba(40,30,5,0.97));
+    border:1px solid #c9a84c;border-radius:12px;padding:14px 18px;
+    max-width:260px;animation:slideInRight 0.4s ease;`;
+  div.innerHTML = `
+    <div style="font-family:'Cinzel',serif;font-size:0.65rem;color:rgba(201,168,76,0.7);letter-spacing:2px;margin-bottom:4px">ACHIEVEMENT UNLOCKED</div>
+    <div style="font-size:1.1rem;margin-bottom:2px">&#127942; ${ach.name}</div>
+    <div style="font-size:0.75rem;color:rgba(255,255,255,0.6)">${ach.desc}</div>
+    ${ach.reward ? '<div style="font-size:0.75rem;color:#c9a84c;margin-top:4px">+' + ach.reward.toLocaleString() + ' chips rewarded!</div>' : ''}`;
+  document.body.appendChild(div);
+  setTimeout(() => { div.style.opacity = '0'; div.style.transition = 'opacity 0.5s'; setTimeout(() => div.remove(), 500); }, 4000);
+}
+
+function showStreakDisplay(n) {
+  const sd = document.getElementById('streak-display');
+  document.getElementById('streak-num').textContent = n;
+  sd.style.display = 'block';
+}
+
+function updateXP(total, earned, rank) {
+  if (playerData) { playerData.xp = total; playerData.rank = rank; }
+  const rankOrder = ['Bronze','Silver','Gold','Platinum','Diamond','Legend'];
+  const nextRanks = { Bronze: 1000, Silver: 5000, Gold: 15000, Platinum: 40000, Diamond: 100000, Legend: 100000 };
+  const curMin = XP_RANKS[rank] || 0;
+  const nextMax = nextRanks[rank] || 100000;
+  const pct = Math.min(100, ((total - curMin) / (nextMax - curMin)) * 100);
+  document.getElementById('xp-bar-fill').style.width = pct + '%';
+  document.getElementById('rank-label').textContent = rank.toUpperCase();
+  document.getElementById('rank-icon').textContent = RANK_EMOJIS[rank] || '';
+  if (earned > 0) showToast(`+${earned} XP`);
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+function switchAuthTab(mode) {
+  document.querySelectorAll('.auth-tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0 && mode === 'login') || (i === 1 && mode === 'register'));
+  });
+  document.getElementById('login-form').style.display = mode === 'login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = mode === 'register' ? 'block' : 'none';
+}
+
+async function doLogin() {
+  const user = document.getElementById('login-user').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  try {
+    const res = await apiPost('/blackjack/login/', { username: user, password: pass });
+    if (res.success) {
+      window.location.href = res.redirect || '/blackjack/';
+    } else {
+      errEl.textContent = res.error || 'Login failed';
+      errEl.style.display = 'block';
+    }
+  } catch(e) {
+    errEl.textContent = 'Connection error. Try again.';
+    errEl.style.display = 'block';
+  }
+}
+
+async function doRegister() {
+  const user  = document.getElementById('reg-user').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const ava   = document.getElementById('reg-avatar').value.trim();
+  const pass  = document.getElementById('reg-pass').value;
+  const errEl = document.getElementById('reg-error');
+  errEl.style.display = 'none';
+  try {
+    const res = await apiPost('/blackjack/auth/', {
+      username: user, email, avatar_name: ava, password: pass
+    });
+    if (res.success) {
+      window.location.href = res.redirect || '/blackjack/';
+    } else {
+      errEl.textContent = res.error || 'Registration failed';
+      errEl.style.display = 'block';
+    }
+  } catch(e) {
+    errEl.textContent = 'Connection error. Try again.';
+    errEl.style.display = 'block';
+  }
+}
+
+function doLogout() {
+  window.location.href = '/blackjack/logout/';
+}
+
+function oauthLogin(provider) {
+  // These redirect to configured OAuth provider
+  // Wire up via django-allauth: /accounts/google/login/ or /accounts/facebook/login/
+  const urls = {
+    google:   '/accounts/google/login/?next=/blackjack/',
+    facebook: '/accounts/facebook/login/?next=/blackjack/',
+  };
+  window.location.href = urls[provider] || '/blackjack/auth/';
+}
+
+function playAsGuest() {
+  isGuest = true;
+  playerData = { chips: 1000, gems: 0, rank: 'Bronze', xp: 0, avatar: { name: 'Guest' } };
+  updateChipsDisplay(1000);
+  closePanel('auth-panel');
+  showToast('Playing as guest - progress not saved!', 4000);
+}
+
+// ============================================================
+// AVATAR STUDIO
+// ============================================================
+const BASE_OPTIONS = [
+  { id: 'silhouette_1', icon: 'person', label: 'Classic' },
+  { id: 'silhouette_2', icon: 'person-dress', label: 'Glam' },
+  { id: 'silhouette_3', icon: 'robot', label: 'Cyber' },
+  { id: 'silhouette_4', icon: 'crown', label: 'Royal', rank: 'Gold' },
+  { id: 'silhouette_5', icon: 'fire', label: 'Legend', rank: 'Legend' },
+];
+const OUTFIT_OPTIONS = [
+  { id: 'default_suit',    icon: 'vest', label: 'Classic Suit',   score: '1.0x' },
+  { id: 'gold_tux',        icon: 'star', label: 'Gold Tux',       score: '1.15x', price_chips: 5000 },
+  { id: 'diamond_blazer',  icon: 'gem',  label: 'Diamond Blazer', score: '1.25x', price_chips: 15000 },
+  { id: 'neon_suit',       icon: 'bolt', label: 'Neon Suit',      score: '1.20x', price_gems: 50 },
+  { id: 'royal_robe',      icon: 'crown', label: 'Royal Robe',    score: '1.35x', rank: 'Platinum', price_gems: 120 },
+  { id: 'legendary_drip',  icon: 'fire', label: 'Legend Drip',    score: '1.50x', rank: 'Legend', price_gems: 300 },
+];
+const AURA_OPTIONS = [
+  { id: 'none',         icon: 'circle', label: 'No Aura',      score: '1.0x' },
+  { id: 'golden_glow',  icon: 'sun',    label: 'Golden Glow',  score: '1.05x', price_chips: 2000 },
+  { id: 'hologram_blue',icon: 'magic',  label: 'Hologram',     score: '1.10x', price_gems: 40 },
+  { id: 'fire_aura',    icon: 'fire',   label: 'Fire Aura',    score: '1.15x', rank: 'Gold', price_gems: 80 },
+  { id: 'legend_aura',  icon: 'star',   label: 'Legend Aura',  score: '1.25x', rank: 'Legend', price_gems: 200 },
+];
+const PRIMARY_COLORS = [
+  '#c9a84c','#e74c3c','#3498db','#27ae60','#9b59b6',
+  '#e67e22','#1abc9c','#e91e63','#fff','#2c2c2c',
+];
+
+function buildAvatarStudio() {
+  const cur = playerData ? playerData.avatar : {};
+  avatarDraft = { ...cur };
+
+  buildOptionGrid('base-grid', BASE_OPTIONS, 'avatar_base');
+  buildOptionGrid('outfit-grid', OUTFIT_OPTIONS, 'avatar_outfit');
+  buildOptionGrid('aura-grid', AURA_OPTIONS, 'avatar_aura');
+
+  const nameInput = document.getElementById('avatar-name-input');
+  nameInput.value = cur.name || '';
+  nameInput.oninput = () => {
+    avatarDraft.name = nameInput.value;
+  };
+
+  // Color swatches
+  const colorRow = document.getElementById('primary-colors');
+  colorRow.innerHTML = '';
+  PRIMARY_COLORS.forEach(col => {
+    const sw = document.createElement('div');
+    sw.className = 'color-swatch' + (cur.color_primary === col ? ' selected' : '');
+    sw.style.background = col;
+    sw.onclick = () => {
+      document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
+      sw.classList.add('selected');
+      avatarDraft.color_primary = col;
+      recalcAvatarPresence();
+    };
+    colorRow.appendChild(sw);
+  });
+
+  recalcAvatarPresence();
+}
+
+function buildOptionGrid(gridId, options, field) {
+  const grid = document.getElementById(gridId);
+  if (!grid) return;
+  grid.innerHTML = '';
+  const cur = (playerData && playerData.avatar) ? playerData.avatar[field.replace('avatar_','')] : 'none';
+
+  // Free items (no purchase needed)
+  const FREE_IDS = new Set(['default_suit', 'none', 'silhouette_1', 'silhouette_2', 'silhouette_3']);
+
+  options.forEach(opt => {
+    const el = document.createElement('div');
+    const isCurrent = cur === opt.id || avatarDraft[field] === opt.id;
+    const rankLocked = opt.rank && (!playerData || !isRankUnlocked(opt.rank));
+    const needsPurchase = !FREE_IDS.has(opt.id) && !ownedItems.includes(opt.id);
+    const locked = rankLocked || needsPurchase;
+    const priceLabel = needsPurchase && !rankLocked
+      ? (opt.price_chips ? `<span style="font-size:0.6rem;color:#c9a84c">&#9675; ${opt.price_chips.toLocaleString()}</span>`
+         : opt.price_gems ? `<span style="font-size:0.6rem;color:#9b59b6">&#9830; ${opt.price_gems}</span>` : '')
+      : '';
+    el.className = 'avatar-option' + (isCurrent ? ' selected' : '') + (locked ? ' locked' : '');
+    el.innerHTML = `<span class="ava-icon">&#128241;</span>
+                    <span>${opt.label}</span>
+                    ${opt.score ? `<span style="font-size:0.6rem;color:var(--gold)">${opt.score}</span>` : ''}
+                    ${rankLocked ? `<span style="font-size:0.6rem;color:#e74c3c">Req: ${opt.rank}</span>` : ''}
+                    ${needsPurchase && !rankLocked ? priceLabel : ''}`;
+    el.onclick = () => {
+      if (rankLocked) { showToast(`Requires ${opt.rank} rank!`); return; }
+      if (needsPurchase) {
+        // Prompt to buy
+        const cur2 = opt.price_chips ? `${opt.price_chips.toLocaleString()} chips` : `${opt.price_gems} gems`;
+        if (confirm(`Purchase "${opt.label}" for ${cur2}?`)) {
+          const currency = opt.price_chips ? 'chips' : 'gems';
+          buyItem(opt.id, currency).then(() => {
+            ownedItems.push(opt.id);
+            buildAvatarStudio(); // rebuild to reflect new ownership
+          });
+        }
+        return;
+      }
+      grid.querySelectorAll('.avatar-option').forEach(e => e.classList.remove('selected'));
+      el.classList.add('selected');
+      avatarDraft[field] = opt.id;
+      recalcAvatarPresence();
+    };
+    grid.appendChild(el);
+  });
+}
+
+function recalcAvatarPresence() {
+  const outfitScore = { 'default_suit': 1.0, 'gold_tux': 1.15, 'diamond_blazer': 1.25, 'neon_suit': 1.20, 'royal_robe': 1.35, 'legendary_drip': 1.50 };
+  const auraScore = { 'none': 1.0, 'golden_glow': 1.05, 'hologram_blue': 1.10, 'fire_aura': 1.15, 'legend_aura': 1.25 };
+  const rankBonus = { Bronze: 0, Silver: 0.05, Gold: 0.10, Platinum: 0.15, Diamond: 0.20, Legend: 0.30 };
+
+  const o = outfitScore[avatarDraft.avatar_outfit] || 1.0;
+  const a = auraScore[avatarDraft.avatar_aura] || 1.0;
+  const r = rankBonus[(playerData && playerData.rank) || 'Bronze'] || 0;
+  const multiplier = (o * a * (1 + r)).toFixed(3);
+  document.getElementById('avatar-presence-preview').textContent = multiplier + 'x';
+}
+
+function isRankUnlocked(required) {
+  const order = ['Bronze','Silver','Gold','Platinum','Diamond','Legend'];
+  const cur = (playerData && playerData.rank) || 'Bronze';
+  return order.indexOf(cur) >= order.indexOf(required);
+}
+
+async function saveAvatar() {
+  if (isGuest) { showToast('Sign in to save avatar!'); return; }
+  try {
+    const res = await apiPost('/blackjack/api/avatar/', {
+      avatar_name: avatarDraft.name || document.getElementById('avatar-name-input').value,
+      avatar_base: avatarDraft.avatar_base || avatarDraft.base,
+      avatar_outfit: avatarDraft.avatar_outfit || avatarDraft.outfit,
+      avatar_aura: avatarDraft.avatar_aura || avatarDraft.aura,
+      avatar_color_primary: avatarDraft.color_primary,
+    });
+    if (res.success) {
+      if (playerData) {
+        playerData.avatar = res.avatar;
+        playerData.presence_multiplier = res.presence_multiplier;
+      }
+      gameState.presenceMultiplier = res.presence_multiplier;
+      updatePresenceDisplay();
+      closePanel('avatar-panel');
+      showToast('Avatar saved! Presence: ' + res.presence_multiplier + 'x');
+    }
+  } catch(e) {
+    showToast('Save failed');
+  }
+}
+
+// ============================================================
+// SHOP
+// ============================================================
+async function loadShop() {
+  try {
+    const res = await fetch('/blackjack/api/shop/');
+    const data = await res.json();
+    shopItems = data.items || [];
+    ownedItems = data.owned || [];
+    renderShop();
+  } catch(e) {
+    document.getElementById('shop-grid').innerHTML = '<div style="color:#e74c3c;text-align:center;grid-column:span 2;padding:20px">Failed to load shop</div>';
+  }
+}
+
+function filterShop(cat, el) {
+  shopFilter = cat;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderShop();
+}
+
+function renderShop() {
+  const grid = document.getElementById('shop-grid');
+  const filtered = shopFilter === 'all' ? shopItems : shopItems.filter(i => i.category === shopFilter);
+  if (!filtered.length) {
+    grid.innerHTML = '<div style="color:rgba(255,255,255,0.3);text-align:center;grid-column:span 2;padding:40px">No items in this category yet</div>';
+    return;
+  }
+  grid.innerHTML = filtered.map(item => {
+    const owned = ownedItems.includes(item.item_id);
+    const priceHtml = [
+      item.price_chips ? `<span class="price-chips">&#9675; ${item.price_chips.toLocaleString()}</span>` : '',
+      item.price_gems  ? `<span class="price-gems">&#9830; ${item.price_gems}</span>` : '',
+      item.price_usd > 0 ? `<span>$${item.price_usd}</span>` : '',
+    ].filter(Boolean).join(' ');
+
+    return `<div class="shop-item${owned ? ' owned' : ''}" onclick="${owned ? '' : `buyItem('${item.item_id}','chips')`}">
+      <div class="item-rarity rarity-${item.rarity}">${item.rarity.toUpperCase()}</div>
+      <div class="item-name">${item.name}</div>
+      <div class="item-price">${priceHtml || 'Free'}</div>
+      ${owned ? '<div class="owned-badge">OWNED</div>' : ''}
+      ${item.rank_required !== 'Bronze' ? `<div style="font-size:0.65rem;color:#e67e22;margin-top:4px">Req: ${item.rank_required}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+async function buyItem(itemId, currency) {
+  if (isGuest) { openPanel('auth-panel'); return; }
+  try {
+    const res = await apiPost('/blackjack/api/purchase/', { item_id: itemId, currency });
+    if (res.success) {
+      ownedItems.push(itemId);
+      updateChips(res.chips);
+      document.getElementById('gem-count').textContent = res.gems;
+      document.getElementById('shop-gems').textContent = res.gems;
+      renderShop();
+      showToast('Item unlocked!');
+    } else {
+      showToast(res.error || 'Purchase failed');
+    }
+  } catch(e) {
+    showToast('Purchase error');
+  }
+}
+
+// ============================================================
+// AD REWARD
+// ============================================================
+async function watchAd() {
+  if (isGuest) { showToast('Sign in to earn chip rewards!'); openPanel('auth-panel'); return; }
+
+  const btn = document.getElementById('watch-ad-btn');
+  btn.disabled = true;
+  btn.textContent = 'LOADING AD...';
+
+  // Initialize AdSense rewarded ad
+  // In production, use Google AdSense rewarded ads API
+  // For now, simulate ad completion after 5s
+  try {
+    // Attempt to show rewarded ad
+    if (window.adsbygoogle && typeof window.adsbygoogle.push === 'function') {
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    }
+
+    // Simulate ad watch (replace with actual rewarded ad callback)
+    await sleep(2000);
+
+    const res = await apiPost('/blackjack/api/ad-reward/', { ad_unit_id: '{{ google_ads_slot }}' });
+    if (res.error) {
+      showToast(res.error);
+    } else {
+      updateChips(res.chips);
+      document.getElementById('refills-left').textContent = res.refills_remaining;
+      showToast('+100 chips credited!');
+      if (res.refills_remaining === 0) {
+        btn.textContent = 'DAILY LIMIT REACHED';
+        btn.disabled = true;
+        return;
+      }
+    }
+  } catch(e) {
+    showToast('Ad reward error. Try again.');
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'WATCH AD + CLAIM 100 CHIPS';
+}
+
+// ============================================================
+// LEADERBOARD
+// ============================================================
+async function loadLeaderboard() {
+  try {
+    const res = await fetch('/blackjack/api/leaderboard/');
+    const data = await res.json();
+    const container = document.getElementById('leaderboard-rows');
+    if (!data.leaderboard.length) {
+      container.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.3);padding:30px">No entries yet - be the first!</div>';
+      return;
+    }
+    container.innerHTML = data.leaderboard.map((row, i) => {
+      const medals = ['&#129351;','&#129352;','&#129353;'];
+      const pos = i < 3 ? medals[i] : `#${row.position}`;
+      return `<div class="lb-row">
+        <div class="lb-pos">${pos}</div>
+        <div>
+          <div class="lb-name">${row.name}</div>
+          <div class="lb-rank">${RANK_EMOJIS[row.rank] || ''} ${row.rank}</div>
+        </div>
+        <div style="margin-left:auto;text-align:right">
+          <div class="lb-chips">+${row.chips_won.toLocaleString()}</div>
+          <div style="font-size:0.7rem;color:rgba(255,255,255,0.4)">${row.win_rate}% WR | ${row.hands_played} hands</div>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    document.getElementById('leaderboard-rows').innerHTML = '<div style="color:#e74c3c;text-align:center;padding:20px">Failed to load</div>';
+  }
+}
+
+// ============================================================
+// PROFILE PANEL
+// ============================================================
+async function refreshAndRenderProfile() {
+  if (!playerData) return;
+  if (!isGuest) {
+    try {
+      const fresh = await fetch('/blackjack/api/profile/').then(r => r.json());
+      // Merge fresh server data into playerData
+      Object.assign(playerData, fresh);
+      if (fresh.owned_items) ownedItems = fresh.owned_items;
+    } catch(e) { /* use cached data */ }
+  }
+  renderProfilePanel();
+}
+
+function renderProfilePanel() {
+  if (!playerData) return;
+  const p = playerData;
+  const avatar = p.avatar || {};
+
+  // Update sidebar
+  document.getElementById('sidebar-avatar').textContent = RANK_EMOJIS[p.rank] || '&#127918;';
+  document.getElementById('sidebar-name').textContent = avatar.name || p.username || 'Player';
+  document.getElementById('sidebar-title').textContent = (avatar.title || 'Rookie').toUpperCase();
+
+  const statsEl = document.getElementById('sidebar-stats');
+  if (statsEl) {
+    statsEl.innerHTML = [
+      ['Rank',        `${RANK_EMOJIS[p.rank] || ''} ${p.rank}`],
+      ['XP',          (p.xp || 0).toLocaleString()],
+      ['Chips',       (p.chips || 0).toLocaleString()],
+      ['Win Rate',    (p.win_rate || 0) + '%'],
+      ['Hands',       (p.hands_played || 0).toLocaleString()],
+      ['Presence',    (p.presence_multiplier || 1.0).toFixed(2) + 'x'],
+    ].map(([label, val]) => `
+      <div class="stat-row">
+        <span class="stat-label">${label}</span>
+        <span class="stat-val">${val}</span>
+      </div>`).join('');
+  }
+
+  const ppContent = document.getElementById('profile-panel-content');
+  if (!ppContent) return;
+
+  const achHtml = (p.achievements && p.achievements.length)
+    ? `<div style="margin-top:16px;border-top:1px solid rgba(255,255,255,0.1);padding-top:14px">
+        <div style="font-family:'Cinzel',serif;font-size:0.75rem;color:var(--gold);letter-spacing:1px;margin-bottom:8px">ACHIEVEMENTS (${p.achievements.length})</div>
+        ${p.achievements.map(id => {
+          const def = ACHIEVEMENT_DEFS_JS[id] || {name: id};
+          return '<div style="font-size:0.72rem;color:rgba(255,255,255,0.6);margin-bottom:3px">&#127942; ' + def.name + '</div>';
+        }).join('')}
+      </div>`
+    : '';
+
+  ppContent.innerHTML = `
+    <div style="font-size:3rem;margin-bottom:8px">${RANK_EMOJIS[p.rank] || '&#127918;'}</div>
+    <div style="font-family:'Cinzel',serif;font-size:1.2rem;color:var(--gold);margin-bottom:4px">${avatar.name || p.username || 'Player'}</div>
+    <div style="color:rgba(255,255,255,0.5);font-size:0.75rem;letter-spacing:1px;margin-bottom:20px">${(avatar.title || 'Rookie').toUpperCase()} | ${(p.rank || 'Bronze').toUpperCase()}</div>
+    ${[
+      ['Chips',         (p.chips || 0).toLocaleString()],
+      ['Gems',          p.gems || 0],
+      ['Win Rate',      (p.win_rate || 0) + '%'],
+      ['Hands Played',  (p.hands_played || 0).toLocaleString()],
+      ['Hands Won',     (p.hands_won || 0).toLocaleString()],
+      ['Best Streak',   p.best_streak || 0],
+      ['Biggest Win',   '+' + (p.biggest_win || 0).toLocaleString()],
+      ['Blackjacks',    p.blackjacks || 0],
+      ['Presence',      (p.presence_multiplier || 1.0).toFixed(2) + 'x'],
+    ].map(([l,v]) => `<div class="stat-row"><span class="stat-label">${l}</span><span class="stat-val">${v}</span></div>`).join('')}
+    ${achHtml}
+    <div style="margin-top:16px">
+      <button onclick="loadAndShowHistory()" style="background:rgba(201,168,76,0.15);border:1px solid var(--gold);color:var(--gold);font-family:'Cinzel',serif;font-size:0.72rem;padding:6px 14px;border-radius:6px;cursor:pointer;letter-spacing:1px">VIEW HAND HISTORY</button>
+    </div>`;
+}
+
+// Inline achievement defs for frontend display
+const ACHIEVEMENT_DEFS_JS = {
+  first_win:       {name:'First Blood',    desc:'Win your first hand'},
+  first_blackjack: {name:'Natural 21',     desc:'Get your first blackjack'},
+  hot_streak_5:    {name:'On Fire',         desc:'Win 5 hands in a row'},
+  hot_streak_10:   {name:'Unstoppable',    desc:'Win 10 hands in a row'},
+  centurion:       {name:'Centurion',      desc:'Play 100 hands'},
+  big_winner:      {name:'High Roller',    desc:'Win 10,000+ chips in one hand'},
+  gold_rank:       {name:'Going for Gold', desc:'Reach Gold rank'},
+  diamond_rank:    {name:'Diamond Club',   desc:'Reach Diamond rank'},
+  lucky_seven:     {name:'Lucky Seven',    desc:'Win 7 blackjacks'},
+};
+
+async function loadAndShowHistory() {
+  const ppContent = document.getElementById('profile-panel-content');
+  if (!ppContent) return;
+  ppContent.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.4)">Loading history...</div>';
+  try {
+    const data = await fetch('/blackjack/api/history/').then(r => r.json());
+    if (!data.history || !data.history.length) {
+      ppContent.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.3)">No hands played yet. Hit the table!</div>';
+      return;
+    }
+    const outcomeColor = {win:'#27ae60', blackjack:'#c9a84c', loss:'#e74c3c', bust:'#e74c3c', push:'#aaa', surrender:'#888'};
+    ppContent.innerHTML = `
+      <div style="font-family:'Cinzel',serif;font-size:0.8rem;color:var(--gold);margin-bottom:12px;letter-spacing:1px">RECENT HANDS</div>
+      ${data.history.map(h => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:0.72rem">
+          <span style="color:${outcomeColor[h.outcome]||'#fff'};font-weight:600;width:70px">${h.outcome.toUpperCase()}</span>
+          <span style="color:rgba(255,255,255,0.5)">P:${h.player_value} D:${h.dealer_value}</span>
+          <span style="color:${h.chips_delta>=0?'#27ae60':'#e74c3c'};font-weight:600">${h.chips_delta>=0?'+':''}${h.chips_delta.toLocaleString()}</span>
+          <span style="color:rgba(255,255,255,0.3)">${h.played_at}</span>
+        </div>`).join('')}
+      <div style="margin-top:12px">
+        <button onclick="refreshAndRenderProfile()" style="background:rgba(201,168,76,0.15);border:1px solid var(--gold);color:var(--gold);font-family:'Cinzel',serif;font-size:0.72rem;padding:6px 14px;border-radius:6px;cursor:pointer;letter-spacing:1px">&#8592; BACK TO STATS</button>
+      </div>`;
+  } catch(e) {
+    ppContent.innerHTML = '<div style="color:#e74c3c;text-align:center;padding:20px">Failed to load history</div>';
+  }
+}
+
+// ============================================================
+// PANEL MANAGEMENT
+// ============================================================
+function openPanel(id) {
+  closeAllPanels();
+  const panel = document.getElementById(id);
+  if (panel) panel.classList.add('active');
+
+  if (id === 'auth-panel' && playerData) return;
+  if (id === 'shop-panel') { loadShop(); document.getElementById('shop-chips').textContent = (playerData ? playerData.chips : 0).toLocaleString(); }
+  if (id === 'leaderboard-panel') loadLeaderboard();
+  if (id === 'avatar-panel') buildAvatarStudio();
+  if (id === 'profile-panel') refreshAndRenderProfile();
+  if (id === 'ad-panel') {
+    if (playerData) document.getElementById('refills-left').textContent = playerData.refills_remaining;
+  }
+  if (id === 'gem-panel') renderGemPackages();
+}
+
+function closePanel(id) {
+  const panel = document.getElementById(id);
+  if (panel) panel.classList.remove('active');
+}
+
+function closeAllPanels() {
+  document.querySelectorAll('.overlay-panel').forEach(p => p.classList.remove('active'));
+}
+
+document.querySelectorAll('.overlay-panel').forEach(panel => {
+  panel.addEventListener('click', e => {
+    if (e.target === panel) panel.classList.remove('active');
+  });
+});
+
+function closeSidebar() {
+  document.getElementById('profile-sidebar').classList.remove('open');
+}
+
+function renderGemPackages() {
+  const grid = document.getElementById('gem-packages-grid');
+  if (!gemPackages.length) {
+    grid.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.3);grid-column:span 2;padding:20px">No packages available yet</div>';
+    return;
+  }
+  grid.innerHTML = gemPackages.map(pkg => {
+    const total = (pkg.gems || 0) + (pkg.bonus_gems || 0);
+    return `<div class="gem-pkg${pkg.is_featured ? ' featured' : ''}" onclick="buyGems('${pkg.name}')">
+      <div class="gem-count">&#128142; ${total}</div>
+      ${pkg.bonus_gems > 0 ? `<div class="gem-bonus">+${pkg.bonus_gems} bonus!</div>` : '<div style="height:1.2rem"></div>'}
+      <div class="gem-price">$${parseFloat(pkg.price_usd).toFixed(2)}</div>
+    </div>`;
+  }).join('');
+}
+
+async function buyGems(pkgName) {
+  if (isGuest) { openPanel('auth-panel'); return; }
+  showToast('Redirecting to payment...');
+  // Wire to Stripe via /payments/ app
+}
+
+// ============================================================
+// API HELPERS
+// ============================================================
+async function apiPost(url, data) {
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': CSRFTOKEN,
+    },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+}
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+// ============================================================
+// DEALER VOICE (Web Speech API)
+// ============================================================
+let dealerVoiceEnabled = true;
+let dealerVoiceObj = null;
+
+function initDealerVoice() {
+  if (!window.speechSynthesis) return;
+  // Load voices (async on some browsers)
+  const loadVoices = () => {
+    const voices = window.speechSynthesis.getVoices();
+    dealerVoiceObj = voices.find(v =>
+      v.name.includes('Male') || v.name.includes('Google UK English Male') ||
+      v.name.includes('Alex') || v.name.includes('Daniel')
+    ) || voices[0] || null;
+  };
+  loadVoices();
+  if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+  }
+}
+
+function dealerSpeak(text, pitchOverride) {
+  if (!dealerVoiceEnabled || !window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(text);
+  utter.rate  = 0.88;
+  utter.pitch = pitchOverride || 0.85;
+  utter.volume = 0.85;
+  if (dealerVoiceObj) utter.voice = dealerVoiceObj;
+  window.speechSynthesis.speak(utter);
+}
+
+const DEALER_LINES = {
+  deal: [
+    "Cards are out. Good luck.",
+    "Let's see what you've got.",
+    "Place your bet and let fate decide.",
+    "Dealing now. May the odds be in your favor.",
+    "The table is set. Let's play.",
+  ],
+  hit: [
+    "Another card coming your way.",
+    "You want another? Here you go.",
+    "Bold move. Let's see it.",
+    "Drawing one more.",
+  ],
+  stand: [
+    "Standing pat. Wise choice.",
+    "Player stands. Now it's my turn.",
+    "Alright, dealer plays.",
+    "You're done? Let me show you what I've got.",
+  ],
+  bust: [
+    "Bust! Better luck next hand.",
+    "Over twenty-one. Tough break.",
+    "You've gone bust. The chips are mine.",
+    "Too many cards. See you next round.",
+  ],
+  win: [
+    "Congratulations! Those chips are yours.",
+    "Well played. The player wins.",
+    "You beat the house. Impressive.",
+    "A winner! The table salutes you.",
+  ],
+  blackjack: [
+    "Blackjack! A natural twenty-one. Outstanding!",
+    "Natural twenty-one! The house is impressed.",
+    "Blackjack! You're on fire tonight.",
+  ],
+  push: [
+    "Push. Bet returned. No winner this hand.",
+    "A tie. Let's go again.",
+    "Even money. The bet is returned.",
+  ],
+  dealer_bust: [
+    "Dealer busts! Everyone at the table wins!",
+    "I've gone over. The players take it!",
+    "Well, the house busts. Congratulations all around.",
+  ],
+  dealer_draw: [
+    "Dealer draws.",
+    "House takes a card.",
+    "Dealer hits.",
+  ],
+  surrender: [
+    "Surrender accepted. Half your bet is returned.",
+    "A tactical retreat. Half your stake comes back.",
+  ],
+  low_chips: [
+    "Running low? Watch an ad to top up your chips.",
+    "The table can loan you chips via the ad screen.",
+  ],
+};
+
+function dealerLine(category) {
+  const lines = DEALER_LINES[category] || [];
+  return lines[Math.floor(Math.random() * lines.length)] || '';
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function initHUD() {
+  if (playerData) {
+    updateChipsDisplay(playerData.chips);
+    document.getElementById('gem-count').textContent = playerData.gems || 0;
+    updateXP(playerData.xp, 0, playerData.rank);
+    updatePresenceDisplay();
+    gameState.presenceMultiplier = playerData.presence_multiplier || 1.0;
+
+    if (playerData.chips <= 0) {
+      setTimeout(() => openPanel('ad-panel'), 800);
+    }
+
+    // Eagerly load owned items for avatar studio cosmetic gating
+    fetch('/blackjack/api/profile/')
+      .then(r => r.json())
+      .then(data => {
+        if (data.owned_items) ownedItems = data.owned_items;
+        if (data.achievements) playerData.achievements = data.achievements;
+      })
+      .catch(() => {});
+  } else {
+    // Not logged in: show auth
+    setTimeout(() => openPanel('auth-panel'), 1200);
+  }
+
+  if (!playerData) {
+    document.getElementById('refills-left').textContent = '10';
+  }
+}
+
+// ============================================================
+// BOT PLAYERS (basic strategy 80%, random 20%)
+// ============================================================
+const BOT_NAMES = ['Vegas Vic', 'Lucky Lou', 'Miss Fortune', 'The Shark', 'Big Stack Bobby', 'Ace Rivera'];
+const BOT_COLORS = [0x27ae60, 0xe74c3c, 0x9b59b6, 0xe67e22, 0x1abc9c];
+const BOT_SEATS  = [0, 1, 3, 4]; // seats where bots sit (0-indexed, seat 2 = player)
+
+// Basic blackjack strategy: hit on hard <= 16, stand on 17+
+// Also considers dealer upcard for doubles/splits (simplified)
+function botDecision(handVal, dealerUp, isHard) {
+  // 20% random
+  if (Math.random() < 0.2) return Math.random() < 0.5 ? 'hit' : 'stand';
+  // Basic strategy (simplified hard totals)
+  if (handVal >= 17) return 'stand';
+  if (handVal <= 11) return 'hit';
+  if (handVal === 12) return dealerUp >= 4 && dealerUp <= 6 ? 'stand' : 'hit';
+  if (handVal >= 13 && handVal <= 16) return dealerUp >= 2 && dealerUp <= 6 ? 'stand' : 'hit';
+  return 'stand';
+}
+
+function cardVal(card) {
+  if (!card) return 0;
+  const r = (card.rank || card).toString();
+  if (['J','Q','K'].includes(r)) return 10;
+  if (r === 'A') return 11;
+  return Math.min(parseInt(r) || 10, 10);
+}
+
+// Active bot state
+const bots = BOT_SEATS.map((seatIdx, i) => ({
+  seatIdx,
+  name: BOT_NAMES[i % BOT_NAMES.length],
+  chips: 800 + Math.floor(Math.random() * 4000),
+  color: BOT_COLORS[i % BOT_COLORS.length],
+  active: false,
+  labelEl: null,
+}));
+
+function initBotLabels() {
+  const seatPositions = [
+    { x: -3.0, z: 2.5 }, { x: -1.5, z: 3.2 }, { x:  0.0, z: 3.4 },
+    { x:  1.5, z: 3.2 }, { x:  3.0, z: 2.5 },
+  ];
+  const container = document.getElementById('hud');
+  bots.forEach(bot => {
+    const label = document.createElement('div');
+    label.style.cssText = `position:absolute;pointer-events:none;font-size:0.62rem;
+      font-family:'Cinzel',serif;color:rgba(255,255,255,0.7);text-align:center;
+      text-shadow:0 1px 3px rgba(0,0,0,0.9);display:none;`;
+    label.innerHTML = `<div style="color:#aef">${bot.name}</div>
+      <div style="color:rgba(201,168,76,0.8)">${bot.chips.toLocaleString()} chips</div>`;
+    container.appendChild(label);
+    bot.labelEl = label;
+  });
+}
+
+function updateBotLabelPositions() {
+  // Project 3D seat positions to 2D screen coords
+  const seatWorldPositions = [
+    new THREE.Vector3(-3.0, 1.8, 2.5),
+    new THREE.Vector3(-1.5, 1.8, 3.2),
+    new THREE.Vector3( 1.5, 1.8, 3.2),
+    new THREE.Vector3( 3.0, 1.8, 2.5),
+  ];
+  bots.forEach((bot, i) => {
+    if (!bot.labelEl || !camera) return;
+    const pos = seatWorldPositions[i].clone();
+    pos.project(camera);
+    const x = (pos.x * 0.5 + 0.5) * window.innerWidth;
+    const y = (-pos.y * 0.5 + 0.5) * window.innerHeight;
+    bot.labelEl.style.left = (x - 50) + 'px';
+    bot.labelEl.style.top  = (y - 30) + 'px';
+    bot.labelEl.style.display = 'block';
+  });
+}
+
+async function runBotRound() {
+  // Simulate a bot playing a hand (visual only, no server calls)
+  for (const bot of bots) {
+    if (!bot.labelEl) continue;
+    const bet = Math.min(Math.floor(50 + Math.random() * 150) * 10, bot.chips);
+    if (bet <= 0) continue;
+
+    // Deal bot hand
+    let hand = [
+      { rank: randomRank(), suit: '♠' },
+      { rank: randomRank(), suit: '♥' },
+    ];
+    let total = handTotal(hand);
+    const dealerUp = Math.floor(Math.random() * 9) + 2; // dealer upcard 2-10
+
+    // Bot decision loop
+    let iterations = 0;
+    while (total < 21 && iterations < 5) {
+      const decision = botDecision(total, dealerUp, true);
+      if (decision === 'stand') break;
+      hand.push({ rank: randomRank(), suit: '♦' });
+      total = handTotal(hand);
+      iterations++;
+    }
+
+    // Outcome
+    const bust = total > 21;
+    const dealerTotal = 17 + Math.floor(Math.random() * 7); // dealer 17-23
+    const win = !bust && (dealerTotal > 21 || total > dealerTotal);
+    const push = !bust && total === dealerTotal;
+
+    if (win) bot.chips += bet;
+    else if (!push) bot.chips = Math.max(0, bot.chips - bet);
+    if (bot.chips < 200) bot.chips = 800; // rebuy
+
+    // Update label briefly with action
+    const actionText = bust ? 'BUST' : win ? 'WIN +'+ bet : push ? 'PUSH' : 'LOSS -'+bet;
+    bot.labelEl.innerHTML = `<div style="color:#aef">${bot.name}</div>
+      <div style="color:rgba(201,168,76,0.8)">${bot.chips.toLocaleString()} chips</div>
+      <div style="color:${win?'#27ae60':bust||!push?'#e74c3c':'#aaa'};font-weight:700">${actionText}</div>`;
+    await sleep(1200);
+    bot.labelEl.innerHTML = `<div style="color:#aef">${bot.name}</div>
+      <div style="color:rgba(201,168,76,0.8)">${bot.chips.toLocaleString()} chips</div>`;
+  }
+}
+
+function randomRank() {
+  const ranks = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+  // Weight face cards (simulate real deck distribution)
+  const weights = [1,1,1,1,1,1,1,1,1,4,4,4,1]; // 10/J/Q/K weighted
+  const total = weights.reduce((a,b)=>a+b,0);
+  let r = Math.random() * total;
+  for (let i = 0; i < ranks.length; i++) {
+    r -= weights[i];
+    if (r <= 0) return ranks[i];
+  }
+  return '10';
+}
+
+function handTotal(hand) {
+  let total = 0, aces = 0;
+  for (const c of hand) {
+    const v = cardVal(c);
+    total += v;
+    if ((c.rank || c) === 'A') aces++;
+  }
+  while (total > 21 && aces > 0) { total -= 10; aces--; }
+  return total;
+}
+
+// Start bot simulation loop (every 8-15 seconds)
+async function botLoop() {
+  await sleep(4000); // wait for game to init
+  while (true) {
+    await runBotRound();
+    await sleep(8000 + Math.random() * 7000);
+  }
+}
+
+async function boot() {
+  const fill = document.getElementById('loading-fill');
+  const status = document.getElementById('loading-status');
+
+  const steps = [
+    [10,  'LOADING ASSETS...'],
+    [30,  'BUILDING CASINO TABLE...'],
+    [55,  'SUMMONING AVATARS...'],
+    [75,  'DEALING THE DECK...'],
+    [90,  'IGNITING ATMOSPHERE...'],
+    [100, 'WELCOME TO EVERLIGHT'],
+  ];
+
+  for (const [pct, msg] of steps) {
+    fill.style.width = pct + '%';
+    status.textContent = msg;
+    await sleep(pct < 100 ? 300 : 500);
+  }
+
+  initThree();
+  initHUD();
+  initDealerVoice();
+  initBotLabels();
+
+  // Pre-build deck
+  gameState.deck = buildDeck(6);
+
+  await sleep(400);
+  const ls = document.getElementById('loading-screen');
+  ls.style.opacity = '0';
+  ls.style.transition = 'opacity 0.6s';
+  setTimeout(() => ls.style.display = 'none', 600);
+
+  // Start bot loop after loading
+  botLoop();
+}
+
+boot();
+</script>
+
+</body>
+</html>

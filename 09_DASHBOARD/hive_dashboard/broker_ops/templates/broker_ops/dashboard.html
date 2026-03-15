@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% load humanize %}
+{% block title %}Broker OS | Everlight{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <h2 class="mb-1">Broker OS</h2>
+  <p class="text-muted mb-4">Middleman matchmaking engine - connect sellers to buyers, collect commission.</p>
+
+  <!-- KPI strip -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-2">
+      <div class="card text-center">
+        <div class="card-body py-2">
+          <div class="h4 mb-0 text-success">${{ summary.earned_total|floatformat:0|intcomma }}</div>
+          <small class="text-muted">Earned</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center">
+        <div class="card-body py-2">
+          <div class="h4 mb-0 text-warning">${{ summary.pending_total|floatformat:0|intcomma }}</div>
+          <small class="text-muted">Pending</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center">
+        <div class="card-body py-2">
+          <div class="h4 mb-0 text-info">${{ summary.unpaid_balance|floatformat:0|intcomma }}</div>
+          <small class="text-muted">Unpaid Balance</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center">
+        <div class="card-body py-2">
+          <div class="h4 mb-0">{{ summary.active_deals }}</div>
+          <small class="text-muted">Active Deals</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center">
+        <div class="card-body py-2">
+          <div class="h4 mb-0 text-success">{{ summary.closed_won }}</div>
+          <small class="text-muted">Won</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center">
+        <div class="card-body py-2">
+          <a href="{% url 'broker_ops:api_run_matching' %}?min_score=40" class="btn btn-sm btn-primary w-100">Run Matcher</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Pending matches -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">Pending Matches (top 20 by score)</div>
+        <div class="card-body p-0">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Score</th><th>Offer</th><th>Lead</th><th>Action</th></tr></thead>
+            <tbody>
+              {% for m in recent_matches %}
+              <tr>
+                <td><span class="badge bg-{% if m.match_score >= 70 %}success{% elif m.match_score >= 50 %}warning{% else %}secondary{% endif %}">{{ m.match_score }}</span></td>
+                <td>{{ m.offer.title|truncatechars:30 }}</td>
+                <td>{{ m.lead.name }} {% if m.lead.intent == 'hot' %}<span class="badge bg-danger">HOT</span>{% endif %}</td>
+                <td>
+                  <a href="/admin/broker_ops/brokermatch/{{ m.id }}/change/" class="btn btn-xs btn-outline-primary">Review</a>
+                </td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-center text-muted py-3">No pending matches. Run the matcher.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active deals -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">Recent Deals</div>
+        <div class="card-body p-0">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Stage</th><th>Offer</th><th>Value</th><th>Commission</th></tr></thead>
+            <tbody>
+              {% for d in recent_deals %}
+              <tr>
+                <td><span class="badge bg-{% if d.stage == 'closed_won' %}success{% elif d.stage == 'closed_lost' %}danger{% else %}info{% endif %}">{{ d.stage }}</span></td>
+                <td>{{ d.offer.title|truncatechars:25 }}</td>
+                <td>${{ d.deal_value|intcomma }}</td>
+                <td>${{ d.commission_due|intcomma }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-center text-muted py-3">No deals yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hot leads -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">Hot Leads</div>
+        <div class="card-body p-0">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Name</th><th>Company</th><th>Source</th><th>Added</th></tr></thead>
+            <tbody>
+              {% for l in hot_leads %}
+              <tr>
+                <td>{{ l.name }}</td>
+                <td>{{ l.company|default:"-" }}</td>
+                <td><span class="badge bg-secondary">{{ l.lead_source }}</span></td>
+                <td>{{ l.created_at|timesince }} ago</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-center text-muted py-3">No hot leads.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active offers -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">Active Offers</div>
+        <div class="card-body p-0">
+          <table class="table table-sm mb-0">
+            <thead><tr><th>Title</th><th>Category</th><th>Commission</th><th>Source</th></tr></thead>
+            <tbody>
+              {% for o in top_offers %}
+              <tr>
+                <td>{{ o.title|truncatechars:30 }}</td>
+                <td>{{ o.get_category_display }}</td>
+                <td>{{ o.commission_pct }}%</td>
+                <td>{{ o.source|default:"-" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4" class="text-center text-muted py-3">No offers loaded.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

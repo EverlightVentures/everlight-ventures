@@ -1,0 +1,72 @@
+[
+  {
+    "id": "fallback-001",
+    "title": "TRX Home2 System -- Suspension Trainer",
+    "description": "Professional-grade suspension training with 300+ exercises. Rated #1 by fitness experts.",
+    "image_url": "https://m.media-amazon.com/images/I/71o0VBB7VRL._AC_SL1500_.jpg",
+    "url": "https://www.amazon.com/dp/B00H5N7QOK?tag=everlightv-20",
+    "seller": "TRX Training",
+    "rating": 4.7,
+    "sales_velocity": 420,
+    "commission_pct": 4.5,
+    "stock": true,
+    "source": "fallback",
+    "category": "fitness"
+  },
+  {
+    "id": "fallback-002",
+    "title": "Garmin Forerunner 255 GPS Running Smartwatch",
+    "description": "Advanced running dynamics, HRV status, race predictor. Top-rated endurance watch.",
+    "image_url": "https://m.media-amazon.com/images/I/71l3vy5cPeL._AC_SL1500_.jpg",
+    "url": "https://www.amazon.com/dp/B0B3DRDLJF?tag=everlightv-20",
+    "seller": "Garmin",
+    "rating": 4.8,
+    "sales_velocity": 380,
+    "commission_pct": 5.0,
+    "stock": true,
+    "source": "fallback",
+    "category": "wearables"
+  },
+  {
+    "id": "fallback-003",
+    "title": "Rogue Ohio Bar -- Stainless Steel Barbell",
+    "description": "Elite powerlifting barbell. 190k tensile strength, dual knurl marks. Built in the USA.",
+    "image_url": "https://assets.roguefitness.com/f_auto,q_auto/global/misc/OH-placeholder/OH-PLACEHOLDER-0085_qfrnkk",
+    "url": "https://www.amazon.com/dp/B00BEEFKU0?tag=everlightv-20",
+    "seller": "Rogue Fitness",
+    "rating": 4.9,
+    "sales_velocity": 290,
+    "commission_pct": 3.5,
+    "stock": true,
+    "source": "fallback",
+    "category": "strength"
+  },
+  {
+    "id": "fallback-004",
+    "title": "Hydrow Wave Rowing Machine",
+    "description": "Live + on-demand rowing classes, 86 lb compact footprint, immersive 16\" screen.",
+    "image_url": "https://m.media-amazon.com/images/I/71AZfqS9oNL._AC_SL1500_.jpg",
+    "url": "https://www.amazon.com/dp/B09XY4K5QQ?tag=everlightv-20",
+    "seller": "Hydrow",
+    "rating": 4.6,
+    "sales_velocity": 150,
+    "commission_pct": 8.0,
+    "stock": true,
+    "source": "fallback",
+    "category": "cardio"
+  },
+  {
+    "id": "fallback-005",
+    "title": "WHOOP 4.0 Health & Fitness Tracker",
+    "description": "24/7 strain, recovery, and sleep monitoring. No screen distraction, pure performance data.",
+    "image_url": "https://m.media-amazon.com/images/I/61-ydCH2ZkL._AC_SL1500_.jpg",
+    "url": "https://www.amazon.com/dp/B09NKP52TM?tag=everlightv-20",
+    "seller": "WHOOP",
+    "rating": 4.5,
+    "sales_velocity": 520,
+    "commission_pct": 6.0,
+    "stock": true,
+    "source": "fallback",
+    "category": "wearables"
+  }
+]

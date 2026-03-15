@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hive Mind | Everlight Ventures</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #070713;
+            --panel: rgba(15, 18, 39, 0.84);
+            --panel-soft: rgba(19, 23, 52, 0.62);
+            --line: rgba(255, 255, 255, 0.10);
+            --text: #f5f7ff;
+            --muted: #b6bed6;
+            --violet: #8c5bff;
+            --ink: #14162f;
+            --mint: #83ffd7;
+            --gold: #f0cd78;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(140, 91, 255, 0.28), transparent 32%),
+                radial-gradient(circle at bottom right, rgba(131, 255, 215, 0.12), transparent 28%),
+                linear-gradient(180deg, #060611 0%, #0b1025 52%, #060611 100%);
+            color: var(--text);
+            font-family: "Space Grotesk", sans-serif;
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        body::before {
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 36px 36px;
+            content: "";
+            inset: 0;
+            opacity: 0.22;
+            pointer-events: none;
+            position: fixed;
+        }
+
+        .shell { margin: 0 auto; max-width: 1180px; padding: 28px 20px 88px; position: relative; }
+
+        .nav {
+            align-items: center;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 40px;
+        }
+
+        .brand {
+            color: var(--text);
+            font-family: "Cormorant Garamond", serif;
+            font-size: 1.7rem;
+            letter-spacing: 0.08em;
+            text-decoration: none;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 18px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--muted);
+            font-size: 0.95rem;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover { color: var(--text); }
+
+        .hero {
+            display: grid;
+            gap: 28px;
+            grid-template-columns: minmax(0, 1.5fr) minmax(290px, 0.9fr);
+            margin-bottom: 28px;
+        }
+
+        .panel {
+            backdrop-filter: blur(18px);
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 24px;
+            box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hero-copy {
+            padding: 40px;
+        }
+
+        .eyebrow,
+        .mini-label {
+            color: var(--mint);
+            display: inline-flex;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.18em;
+            margin-bottom: 18px;
+            text-transform: uppercase;
+        }
+
+        h1, h2 {
+            font-family: "Cormorant Garamond", serif;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            line-height: 0.95;
+        }
+
+        h1 {
+            font-size: clamp(3.2rem, 9vw, 6.2rem);
+            margin-bottom: 20px;
+            max-width: 12ch;
+        }
+
+        .hero-copy p {
+            color: var(--muted);
+            font-size: 1.08rem;
+            max-width: 56ch;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 28px;
+        }
+
+        .button,
+        .ghost {
+            border-radius: 999px;
+            display: inline-flex;
+            font-size: 0.94rem;
+            font-weight: 700;
+            padding: 13px 22px;
+            text-decoration: none;
+        }
+
+        .button {
+            background: linear-gradient(135deg, var(--violet), #6e45d3);
+            color: white;
+        }
+
+        .ghost {
+            border: 1px solid var(--line);
+            color: var(--text);
+        }
+
+        .hero-aside {
+            background:
+                linear-gradient(180deg, rgba(140, 91, 255, 0.28), transparent 42%),
+                rgba(10, 12, 28, 0.92);
+            padding: 28px;
+        }
+
+        .stack-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .stack-item {
+            background: var(--panel-soft);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 16px 18px;
+        }
+
+        .stack-item strong {
+            display: block;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .stack-item span {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .stats {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: rgba(11, 15, 36, 0.78);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 20px;
+        }
+
+        .stat-card strong {
+            display: block;
+            font-size: 1.8rem;
+            margin-bottom: 6px;
+        }
+
+        .stat-card span {
+            color: var(--muted);
+            font-size: 0.92rem;
+        }
+
+        .section {
+            margin-top: 28px;
+            padding: 30px;
+        }
+
+        .section h2 {
+            font-size: clamp(2.3rem, 5vw, 3.6rem);
+            margin-bottom: 10px;
+        }
+
+        .section .lede {
+            color: var(--muted);
+            font-size: 1.03rem;
+            margin-bottom: 24px;
+            max-width: 56ch;
+        }
+
+        .grid-3,
+        .grid-2 {
+            display: grid;
+            gap: 18px;
+        }
+
+        .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+        .feature,
+        .flow-step,
+        .revenue-card {
+            background: rgba(12, 16, 38, 0.86);
+            border: 1px solid var(--line);
+            border-radius: 18px;
+            padding: 22px;
+        }
+
+        .feature strong,
+        .flow-step strong,
+        .revenue-card strong {
+            display: block;
+            font-size: 1.04rem;
+            margin-bottom: 10px;
+        }
+
+        .feature p,
+        .flow-step p,
+        .revenue-card p {
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .revenue-card em {
+            color: var(--gold);
+            display: inline-block;
+            font-size: 0.8rem;
+            font-style: normal;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        .cta {
+            background:
+                radial-gradient(circle at top right, rgba(131, 255, 215, 0.22), transparent 32%),
+                linear-gradient(145deg, rgba(14, 18, 40, 0.94), rgba(8, 10, 23, 0.96));
+            display: grid;
+            gap: 20px;
+            grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+            margin-top: 28px;
+            padding: 34px;
+        }
+
+        .form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .form input {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            color: var(--text);
+            flex: 1 1 240px;
+            font: inherit;
+            padding: 14px 18px;
+        }
+
+        .form button {
+            background: linear-gradient(135deg, var(--gold), #dba44a);
+            border: none;
+            border-radius: 999px;
+            color: #17120a;
+            cursor: pointer;
+            font: inherit;
+            font-weight: 700;
+            padding: 14px 22px;
+        }
+
+        .support-copy {
+            color: var(--muted);
+            font-size: 0.94rem;
+        }
+
+        .msg {
+            border-radius: 14px;
+            display: none;
+            margin-top: 14px;
+            padding: 12px 14px;
+        }
+
+        .msg.ok { background: rgba(131, 255, 215, 0.12); color: var(--mint); display: block; }
+        .msg.err { background: rgba(255, 107, 132, 0.12); color: #ff9eb2; display: block; }
+
+        footer {
+            color: var(--muted);
+            font-size: 0.84rem;
+            margin-top: 28px;
+            text-align: center;
+        }
+
+        @media (max-width: 900px) {
+            .hero,
+            .cta,
+            .stats,
+            .grid-3,
+            .grid-2 { grid-template-columns: 1fr; }
+
+            .nav { align-items: flex-start; flex-direction: column; gap: 12px; }
+            .nav-links { flex-wrap: wrap; }
+            .hero-copy,
+            .hero-aside,
+            .section,
+            .cta { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="shell">
+        <nav class="nav">
+            <a class="brand" href="https://everlightventures.io">Everlight Ventures</a>
+            <ul class="nav-links">
+                <li><a href="/onyx/">Onyx</a></li>
+                <li><a href="/dashboard/">Watchtower</a></li>
+                <li><a href="/os/">Business OS</a></li>
+            </ul>
+        </nav>
+
+        <section class="hero">
+            <div class="panel hero-copy">
+                <span class="eyebrow">Hive Mind</span>
+                <h1>One executive board for the whole machine.</h1>
+                <p>
+                    Hive Mind is not another chat wrapper. It is the command layer for Everlight Ventures:
+                    AI agents, workflows, memory, approvals, revenue streams, and live telemetry tied together
+                    so one operator can manage a portfolio like a real company.
+                </p>
+                <div class="hero-actions">
+                    <a class="button" href="#waitlist">Join Early Access</a>
+                    <a class="ghost" href="/dashboard/">See the live watchtower</a>
+                </div>
+            </div>
+            <aside class="panel hero-aside">
+                <span class="mini-label">Stack In Production</span>
+                <div class="stack-list">
+                    <div class="stack-item">
+                        <strong>Command plane</strong>
+                        <span>Hive plus MCP tools route work across agents, approvals, and coding tasks.</span>
+                    </div>
+                    <div class="stack-item">
+                        <strong>Source of truth</strong>
+                        <span>Supabase stores leads, telemetry, events, product state, and operating history.</span>
+                    </div>
+                    <div class="stack-item">
+                        <strong>Automation bus</strong>
+                        <span>n8n handles scheduled jobs, incident fan-out, Stripe events, and revenue workflows.</span>
+                    </div>
+                    <div class="stack-item">
+                        <strong>Memory and publishing</strong>
+                        <span>Blinko, GitHub, Google, Stripe, and Namecheap plug into the same operating layer.</span>
+                    </div>
+                </div>
+            </aside>
+        </section>
+
+        <section class="stats">
+            <div class="stat-card">
+                <strong>8</strong>
+                <span>Revenue loops designed to feed one business OS</span>
+            </div>
+            <div class="stat-card">
+                <strong>24/7</strong>
+                <span>Watchtower, cron, and workflow coverage across bot and business telemetry</span>
+            </div>
+            <div class="stat-card">
+                <strong>1</strong>
+                <span>Executive board for alerts, approvals, deals, and live trading state</span>
+            </div>
+            <div class="stat-card">
+                <strong>Human</strong>
+                <span>Approvals stay binding where money, clients, or risk are on the line</span>
+            </div>
+        </section>
+
+        <section class="panel section">
+            <span class="mini-label">What It Runs</span>
+            <h2>The operating system behind Everlight.</h2>
+            <p class="lede">
+                The system coordinates revenue streams, broker deals, SaaS funnels, publishing, and the trading
+                watchtower. The point is not to let AI freestyle. The point is to give every moving part shared
+                context, disciplined approvals, and a single place to see what is actually happening.
+            </p>
+            <div class="grid-3">
+                <article class="feature">
+                    <strong>Business OS</strong>
+                    <p>Supabase-backed events, stream scorecards, incidents, approvals, and one CEO snapshot.</p>
+                </article>
+                <article class="feature">
+                    <strong>Shared memory</strong>
+                    <p>Blinko, repo context, and MCP resources keep agents from restarting every task at zero.</p>
+                </article>
+                <article class="feature">
+                    <strong>Monetization layer</strong>
+                    <p>Stripe, funnels, outreach, affiliate drops, digital products, and services feed the same board.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="panel section">
+            <span class="mini-label">Workflow</span>
+            <h2>How the hive actually works.</h2>
+            <p class="lede">
+                Every command moves through the same sequence: classify, route, execute, surface risk, then log the
+                result back into the operating system. That is what turns a handful of smart tools into a real machine.
+            </p>
+            <div class="grid-3">
+                <article class="flow-step">
+                    <strong>1. Route the job</strong>
+                    <p>Hive decides whether the request belongs to coding, content, broker ops, automation, or trading review.</p>
+                </article>
+                <article class="flow-step">
+                    <strong>2. Pull live context</strong>
+                    <p>MCP resources, RAG memory, Supabase data, and workspace manifests give every agent the same operating picture.</p>
+                </article>
+                <article class="flow-step">
+                    <strong>3. Close the loop</strong>
+                    <p>n8n, Stripe, and the watchtower publish outcomes back to the board so you are informed without babysitting tabs.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="panel section">
+            <span class="mini-label">Revenue System</span>
+            <h2>Built for more than one income stream.</h2>
+            <p class="lede">
+                The real business model is not one bot. It is a layered stack where the same system helps sell software,
+                services, content, affiliate products, deal flow, and trading intelligence while keeping cost under control.
+            </p>
+            <div class="grid-2">
+                <article class="revenue-card">
+                    <em>Recurring</em>
+                    <strong>Hive Mind, Onyx, and operator tools</strong>
+                    <p>SaaS subscriptions, premium dashboards, and packaged operating systems for founders and small teams.</p>
+                </article>
+                <article class="revenue-card">
+                    <em>Pipeline</em>
+                    <strong>Broker OS and implementation work</strong>
+                    <p>Lead matching, finder fees, setup projects, and retained automation support.</p>
+                </article>
+                <article class="revenue-card">
+                    <em>Catalog</em>
+                    <strong>Publishing, templates, and digital products</strong>
+                    <p>Books, assets, playbooks, and long-tail downloads tied into the same sales stack.</p>
+                </article>
+                <article class="revenue-card">
+                    <em>Audience</em>
+                    <strong>Affiliate drops and public proof</strong>
+                    <p>HIM Loadout, content funnels, and a live watchtower that turns system performance into trust.</p>
+                </article>
+            </div>
+        </section>
+
+        <section class="panel cta" id="waitlist">
+            <div>
+                <span class="mini-label">Early Access</span>
+                <h2>Get the operator version, not the toy version.</h2>
+                <p class="support-copy">
+                    Join the list for launch notes, architecture drops, and the first public release of the Business OS stack.
+                </p>
+            </div>
+            <div>
+                <div class="form">
+                    <input type="email" id="email" placeholder="operator@company.com" required>
+                    <button onclick="submitLead()">Request Access</button>
+                </div>
+                <p class="support-copy" style="margin-top: 12px;">
+                    No spam. We only send material tied to launch, live builds, and operating updates.
+                </p>
+                <div class="msg" id="msg"></div>
+            </div>
+        </section>
+
+        <footer>Hive Mind by Everlight Ventures -- Business OS for one operator and the machine behind him.</footer>
+    </div>
+
+    <script>
+    async function submitLead() {
+        const email = document.getElementById("email").value.trim();
+        const msg = document.getElementById("msg");
+        if (!email || !email.includes("@")) {
+            msg.className = "msg err";
+            msg.textContent = "Enter a valid email address.";
+            return;
+        }
+        try {
+            const resp = await fetch("/funnel/capture/", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({email, product: "hivemind", source: "public_hivemind"}),
+            });
+            const data = await resp.json();
+            if (resp.ok) {
+                msg.className = "msg ok";
+                msg.textContent = "You are on the list. We will send launch updates when the next release opens.";
+                document.getElementById("email").value = "";
+            } else {
+                msg.className = "msg err";
+                msg.textContent = data.error || "Request failed.";
+            }
+        } catch (err) {
+            msg.className = "msg err";
+            msg.textContent = "Network error. Try again in a minute.";
+        }
+    }
+    </script>
+</body>
+</html>

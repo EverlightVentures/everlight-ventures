@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Rewards Admin - Everlight</title>
+  <style>
+    body { font-family: sans-serif; background: #0d1117; color: #e6edf3; margin: 0; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    .stats { display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap; }
+    .stat-card {
+      background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+      padding: 16px 24px; min-width: 160px;
+    }
+    .stat-card .num { font-size: 32px; font-weight: 700; color: #58a6ff; }
+    .stat-card .lbl { font-size: 13px; color: #8b949e; margin-top: 4px; }
+    h2 { font-size: 18px; margin: 24px 0 12px; border-bottom: 1px solid #30363d; padding-bottom: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { background: #161b22; padding: 8px 12px; text-align: left; color: #8b949e; font-weight: 600; }
+    td { padding: 8px 12px; border-bottom: 1px solid #21262d; }
+    tr:hover td { background: #161b22; }
+    .badge-pending  { background: #b45309; color: #fef3c7; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+    .badge-fulfilled{ background: #166534; color: #dcfce7; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+    .badge-notified { background: #1e40af; color: #dbeafe; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+    .tier-bronze  { color: #cd7f32; }
+    .tier-silver  { color: #c0c0c0; }
+    .tier-gold    { color: #ffd700; }
+    .tier-platinum{ color: #e5e4e2; }
+    .tier-diamond { color: #b9f2ff; }
+    .tier-legend  { color: #f093fb; font-weight: 700; }
+    .fulfill-btn {
+      background: #166534; color: #dcfce7; border: none; padding: 4px 12px;
+      border-radius: 4px; cursor: pointer; font-size: 12px;
+    }
+    .fulfill-btn:hover { background: #15803d; }
+    .pts-pos { color: #3fb950; }
+    .pts-neg { color: #f85149; }
+  </style>
+</head>
+<body>
+
+<h1>Rewards Engine - Ops Dashboard</h1>
+
+<div class="stats">
+  <div class="stat-card">
+    <div class="num">{{ total_accounts }}</div>
+    <div class="lbl">Loyalty Accounts</div>
+  </div>
+  <div class="stat-card">
+    <div class="num">{{ total_referrals }}</div>
+    <div class="lbl">Total Referrals</div>
+  </div>
+  <div class="stat-card">
+    <div class="num" style="color:#f85149;">{{ active_comps }}</div>
+    <div class="lbl">Pending Comps</div>
+  </div>
+</div>
+
+<h2>Pending Comps - Needs Fulfillment</h2>
+{% if pending_comps %}
+<table>
+  <thead>
+    <tr>
+      <th>Customer</th>
+      <th>Comp Type</th>
+      <th>Value</th>
+      <th>Triggered</th>
+      <th>Expires</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for comp in pending_comps %}
+    <tr>
+      <td>{{ comp.account.customer.email }}</td>
+      <td>{{ comp.comp_type }}</td>
+      <td>{{ comp.value }}</td>
+      <td>{{ comp.triggered_at|date:"M d, Y" }}</td>
+      <td>{{ comp.expires_at|date:"M d, Y"|default:"--" }}</td>
+      <td>
+        <button class="fulfill-btn" onclick="fulfillComp({{ comp.id }})">
+          Mark Fulfilled
+        </button>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+  <p style="color:#8b949e;">No pending comps. All clear!</p>
+{% endif %}
+
+<h2>Top Players by Lifetime Points</h2>
+<table>
+  <thead>
+    <tr><th>Email</th><th>Tier</th><th>Lifetime Pts</th><th>Balance</th><th>Spent</th><th>Streak</th><th>Referrals</th></tr>
+  </thead>
+  <tbody>
+    {% for acct in top_accounts %}
+    <tr>
+      <td>{{ acct.customer.email }}</td>
+      <td class="tier-{{ acct.tier }}">{{ acct.tier|title }}</td>
+      <td>{{ acct.points_lifetime|floatformat:0 }}</td>
+      <td>{{ acct.points_balance|floatformat:0 }}</td>
+      <td>${{ acct.total_spent_cents|floatformat:0 }}</td>
+      <td>{{ acct.login_streak }}d</td>
+      <td>{{ acct.referral_count }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Recent Transactions</h2>
+<table>
+  <thead>
+    <tr><th>Email</th><th>Type</th><th>Points</th><th>Balance After</th><th>Description</th><th>Time</th></tr>
+  </thead>
+  <tbody>
+    {% for txn in recent_txns %}
+    <tr>
+      <td>{{ txn.account.customer.email }}</td>
+      <td>{{ txn.get_transaction_type_display }}</td>
+      <td class="{% if txn.points >= 0 %}pts-pos{% else %}pts-neg{% endif %}">
+        {% if txn.points >= 0 %}+{% endif %}{{ txn.points }}
+      </td>
+      <td>{{ txn.balance_after }}</td>
+      <td>{{ txn.description }}</td>
+      <td>{{ txn.created_at|date:"M d H:i" }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+function fulfillComp(compId) {
+  if (!confirm('Mark comp ' + compId + ' as fulfilled?')) return;
+  fetch('/rewards/admin-dashboard/comp/' + compId + '/fulfill/', {
+    method: 'POST',
+    headers: {'X-CSRFToken': '{{ csrf_token }}'},
+  }).then(r => r.json()).then(() => location.reload());
+}
+</script>
+</body>
+</html>

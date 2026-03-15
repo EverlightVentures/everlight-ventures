@@ -1,0 +1,38 @@
+# Gear Drop Engine Configuration
+# everlightventures.io / him-gear-drop
+
+engine:
+  name: "Everlight Gear Drop Engine"
+  version: "1.0.0"
+  timezone: "America/Los_Angeles"
+  drop_time_pt: "18:00"          # 6:00 PM PT daily
+
+scoring:
+  weights:
+    rating: 0.50
+    sales_velocity: 0.30
+    commission_pct: 0.20
+  thresholds:
+    min_rating: 4.5
+    min_stock: 5
+    min_commission_pct: 3.0
+  max_daily_drops: 3             # surface up to 3; guarantee at least 1
+
+sources:
+  supabase_table: "gear_catalog"
+  fallback_queue: "fallback_queue.json"
+  published_log: "published_ids.json"
+
+publish:
+  supabase_table: "daily_drops"
+  staging_dir: "07_STAGING/Inbox/gear_drops"
+  logs_dir: "_logs/gear_drops"
+
+affiliate:
+  amazon_tag: "everlightv-20"
+  default_commission_fallback: 4.0
+
+cron:
+  schedule: "0 18 * * *"         # 6 PM PT (run server in PT timezone)
+  script: "03_AUTOMATION_CORE/01_Scripts/daily_drop_orchestrator.py"
+  log: "_logs/gear_drops/cron.log"
