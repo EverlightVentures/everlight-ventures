@@ -21,6 +21,7 @@ Lane R -- Regime Low Vol     (threshold ~55, BB squeeze + range edge scalps)
 Lane S -- Stat Arb Proxy     (threshold ~50, z-score mean reversion)
 Lane T -- Orderflow Imbalance (threshold ~65, volume delta proxy)
 Lane U -- Macro MA Cross     (threshold ~45, 200 MA breakout on higher TF)
+Lane V -- Liquidity Sweep    (threshold ~55, bidirectional liquidation heatmap strategy)
 """
 from __future__ import annotations
 
@@ -532,6 +533,19 @@ def select_lane(
             reason="200ma_breakout_higher_tf",
         )
 
+    # --- Lane V: Liquidity Sweep (bidirectional heatmap strategy) ---
+    if et == "liquidity_sweep" and bool(config.get("lane_v_enabled", True)):
+        thresh_v = int(config.get("lane_v_threshold", 55) or 55)
+        return LaneResult(
+            lane="V",
+            label="liquidity_sweep",
+            threshold=thresh_v,
+            rescore_as="reversal_impulse",
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="liquidity_sweep_reversal_or_continuation",
+        )
+
     # --- Lane B: Breakout ---
     if et == "breakout_retest":
         return LaneResult(
@@ -593,6 +607,7 @@ LANE_REGIME_MAP: dict[str, str] = {
     "P": "mr",          # Grid Range
     "R": "mr",          # Regime Low Vol
     "S": "mr",          # Stat Arb Proxy
+    "V": "mr",          # Liquidity Sweep (reversal-dominant)
 }
 
 # Which lane regimes are allowed under each market regime.

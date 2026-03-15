@@ -12,7 +12,7 @@ from typing import Any
 import pandas as pd
 
 
-# ── Data formatting helpers ─────────────────────────────────────────
+# -- Data formatting helpers --
 
 def _fmt_candles(df: pd.DataFrame, n: int = 20) -> str:
     """Format last N candles as compact OHLCV table."""
@@ -48,6 +48,57 @@ def _fmt_indicators(regime_v4: dict, expansion: dict, price: float) -> str:
         f"OBV divergence: {regime_v4.get('obv_divergence', 'none')}",
         f"Vol phase: {expansion.get('phase', '?')} (conf: {expansion.get('confidence', '?')})",
         f"Vol direction: {expansion.get('direction', '?')}",
+    ]
+    return "\n".join(lines)
+
+
+def _fmt_math_lens(candles: pd.DataFrame | None, n: int = 20) -> str:
+    """Summarize calculus/trigonometry/algebra signals from recent closes."""
+    import math
+
+    if candles is None or candles.empty or "close" not in candles.columns:
+        return "(no math lens data)"
+
+    closes = pd.to_numeric(candles["close"], errors="coerce").dropna().tail(max(8, n))
+    if len(closes) < 8:
+        return "(insufficient candles for math lens)"
+
+    # Algebra: linear trend fit slope over the recent window.
+    x = pd.Series(range(len(closes)), dtype="float64")
+    y = closes.reset_index(drop=True).astype("float64")
+    xm = float(x.mean())
+    ym = float(y.mean())
+    var_x = float(((x - xm) ** 2).sum())
+    cov_xy = float(((x - xm) * (y - ym)).sum())
+    slope = (cov_xy / var_x) if var_x > 0 else 0.0
+    y_hat = ym + slope * (x - xm)
+    ss_res = float(((y - y_hat) ** 2).sum())
+    ss_tot = float(((y - ym) ** 2).sum())
+    r2 = 1.0 - (ss_res / ss_tot) if ss_tot > 0 else 0.0
+
+    # Calculus: first and second discrete derivatives of price.
+    velocity = float(y.iloc[-1] - y.iloc[-2])
+    acceleration = float((y.iloc[-1] - y.iloc[-2]) - (y.iloc[-2] - y.iloc[-3]))
+    integral_move = float((y.diff().fillna(0)).sum())
+
+    # Trigonometry: slope angle + normalized phase position in recent range.
+    slope_angle_deg = math.degrees(math.atan(slope))
+    p_min = float(y.min())
+    p_max = float(y.max())
+    rng = max(p_max - p_min, 1e-9)
+    phase_deg = ((float(y.iloc[-1]) - p_min) / rng) * 360.0
+
+    lines = [
+        "Algebra:",
+        f"- Trend slope (close/bar): {slope:+.6f}",
+        f"- Trend fit quality (R^2): {r2:.3f}",
+        "Calculus:",
+        f"- Velocity dP: {velocity:+.6f}",
+        f"- Acceleration d2P: {acceleration:+.6f}",
+        f"- Integral move sum(dP): {integral_move:+.6f}",
+        "Trigonometry:",
+        f"- Slope angle: {slope_angle_deg:+.2f} deg",
+        f"- Range phase: {phase_deg:.1f} deg (0=range low, 360=range high)",
     ]
     return "\n".join(lines)
 
@@ -96,7 +147,7 @@ def _fmt_feedback(feedback: list[dict]) -> str:
     so it can identify patterns in its own reasoning.
     """
     if not feedback:
-        return "(no feedback yet — this is your first session)"
+        return "(no feedback yet -- this is your first session)"
     lines = ["#  | Decision    | Conf | PnL $  | Duration | Result    | Your Reasoning (excerpt)"]
     wins = 0
     losses = 0
@@ -138,7 +189,7 @@ def _fmt_feedback(feedback: list[dict]) -> str:
     if flat_missed > 0:
         lines.append(f"FLAT calls: {flat_correct} correct, {flat_missed} missed moves (you should have traded)")
     if losses > wins and total_trades >= 3:
-        lines.append("WARNING: You're losing more than winning. Adapt your approach — try different patterns or tighter stops.")
+        lines.append("WARNING: You're losing more than winning. Try different patterns or tighter stops.")
     if flat_missed > flat_correct and (flat_missed + flat_correct) >= 3:
         lines.append("WARNING: You're saying FLAT too often and missing moves. Be more aggressive.")
     total_flats = flat_correct + flat_missed
@@ -196,7 +247,53 @@ def _fmt_kv(d: dict) -> str:
     return "\n".join(lines)
 
 
-# ── Prompt builders ─────────────────────────────────────────────────
+def _query_blinko_context(price: float = 0.0) -> str | None:
+    """Query Blinko knowledge base for relevant trade memory context.
+
+    Returns a brief summary of past trade patterns at similar price levels,
+    or None if Blinko is unavailable.
+    """
+    import json as _json
+    import os
+    from urllib.request import Request, urlopen
+
+    blinko_url = os.environ.get("BLINKO_URL", "")
+    if not blinko_url:
+        # Try loading from .env
+        _env_file = Path("/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/03_Credentials/.env")
+        if _env_file.exists():
+            for line in _env_file.read_text().splitlines():
+                if line.startswith("BLINKO_URL="):
+                    blinko_url = line.split("=", 1)[1].strip()
+    if not blinko_url:
+        return None
+
+    query = f"XLM trade patterns near ${price:.4f}"
+    payload = _json.dumps({"searchText": query, "size": 3}).encode("utf-8")
+    headers = {"Content-Type": "application/json"}
+
+    # Try both known Blinko note-search endpoints for compatibility.
+    for endpoint in ("/api/v1/note/search", "/api/v1/note/list"):
+        try:
+            req = Request(f"{blinko_url}{endpoint}", data=payload, headers=headers, method="POST")
+            with urlopen(req, timeout=5) as resp:
+                raw = resp.read().decode("utf-8")
+            data = _json.loads(raw) if raw else {}
+            notes = data.get("items") or data.get("notes") or []
+            if notes:
+                summaries = []
+                for note in notes[:3]:
+                    content = str(note.get("content", ""))[:200]
+                    if content:
+                        summaries.append(f"- {content}")
+                if summaries:
+                    return "\n".join(summaries)
+        except Exception:
+            continue
+    return None
+
+
+# -- Prompt builders --
 
 def entry_prompt(
     signal: dict,
@@ -255,6 +352,12 @@ def entry_prompt(
             "=== INDICATORS ===",
             _fmt_indicators(regime_v4, expansion, price),
         ])
+    if candles_15m is not None and not candles_15m.empty:
+        sections.extend([
+            "",
+            "=== MATH LENS (calculus/trigonometry/algebra) ===",
+            _fmt_math_lens(candles_15m, 20),
+        ])
 
     if trades_path:
         sections.extend([
@@ -310,6 +413,12 @@ def exit_prompt(
             "=== INDICATORS ===",
             _fmt_indicators(regime_v4, expansion, price),
         ])
+    if candles_15m is not None and not candles_15m.empty:
+        sections.extend([
+            "",
+            "=== MATH LENS (calculus/trigonometry/algebra) ===",
+            _fmt_math_lens(candles_15m, 15),
+        ])
 
     return "\n".join(sections)
 
@@ -343,7 +452,7 @@ def regime_prompt(
     return "\n".join(sections)
 
 
-# ── Master Directive (Executive Mode) ───────────────────────────────
+# -- Master Directive (Executive Mode) --
 
 def master_directive_prompt(
     status: dict,
@@ -360,7 +469,7 @@ def master_directive_prompt(
     peer_intel: dict | None = None,
     lane_perf_path: str | Path | None = None,
 ) -> str:
-    """Build the master directive prompt — Claude makes the executive call.
+    """Build the master directive prompt -- Claude makes the executive call.
 
     This is the ONE prompt per cycle that asks Claude to decide what to do:
     enter, exit, hold, or stay flat.
@@ -369,101 +478,106 @@ def master_directive_prompt(
     expansion = expansion or {}
     engine_recommendation = engine_recommendation or {}
 
+    # Dynamic balance from status (never hardcode)
+    _equity = status.get("equity_start_usd") or status.get("equity_usd") or 0
+    _spot = sum((status.get("spot_balances") or {}).values()) if isinstance(status.get("spot_balances"), dict) else 0
+    _total_bal = _equity + _spot
+    _consecutive_losses = status.get("consecutive_losses", 0)
+    _pnl_today = status.get("pnl_today_usd", 0)
+    _trades_today = status.get("trades_today", 0)
+
     sections = [
         "You are the executive decision engine for an automated XLM futures trading system.",
         "You have full authority to decide: enter a trade, exit a trade, hold, or stay flat.",
         "You are analyzing live market data from the XLM-USD perpetual futures contract.",
         "",
+        "GOAL: $25-$100 profit per day. Achievable with 2-4 good trades at size 1-2.",
+        "",
+        f"ACCOUNT: ${_total_bal:.0f} total (${_equity:.0f} derivatives + ${_spot:.0f} spot).",
+        f"Today: {_trades_today} trades, ${_pnl_today:+.2f} PnL, {_consecutive_losses} consecutive losses.",
+        "",
         "YOUR TEAM (PEER ADVISORS):",
-        "- Gemini (Risk/Math): Analyzes risk limits and math. Listen to them on sizing.",
-        "- Perplexity (Intel): Provides macro news/catalysts. If risk_off, be careful.",
-        "- Codex (Data): Ensures data integrity. If data is stale, HOLD.",
+        "- Gemini (Risk/Math): risk limits and math. Listen on sizing.",
+        "- Perplexity (Intel): macro news/catalysts. If risk_off, be careful.",
+        "- Codex (Data): data integrity. If data is stale, HOLD.",
         "",
-        "YOUR RULES:",
-        "- You make ONE decision per cycle. The bot executes what you say.",
-        "- For entries: specify direction, stop_loss_price, AND size (number of contracts).",
-        "- For exits: just say EXIT. The bot closes at market.",
-        "- You have full authority but USE IT WISELY. Discipline > aggression.",
-        "- TOTAL BALANCE: ~$618 (spot+derivatives). Account is rebuilding. Trade smart to grow it.",
-        "- Available contracts: up to 3 intraday (5AM-1PM PT), 1-2 overnight. Depends on margin window.",
+        "CORE RULES:",
+        "- ONE decision per cycle. Bot executes your call immediately.",
+        "- For entries: specify direction, stop_loss_price, AND size (1 or 2 contracts).",
+        "- For exits: say EXIT. Bot closes at market.",
+        "- Max position: 2 contracts. Size 1 = default. Size 2 = high conviction ONLY.",
         "",
-        "SMART POSITION SIZING — THIS IS CRITICAL:",
-        "- You CHOOSE how many contracts per trade via the 'size' field (1 to 5).",
-        "- This is your #1 risk management tool. Size = conviction.",
+        "POSITION SIZING (you have 2 sizes, use them wisely):",
         "",
-        "  SIZE 1 (Scout trade):",
-        "    Use when: First trade of session, testing a thesis, unclear direction,",
-        "    after 2+ consecutive losses, compression with no clear edge.",
-        "    Risk: ~$5 max loss. Reward: ~$15-$25 if right.",
+        "  SIZE 1 (Default, use 80% of the time):",
+        "    When: Any decent setup. First trade of session. After a loss. Unclear direction.",
+        "    Risk: ~$5 max loss per trade. Target: $8-$25 profit.",
+        "    This is your bread and butter. Consistent size-1 winners compound fast.",
         "",
-        "  SIZE 2-3 (Standard trade):",
-        "    Use when: Good setup, 65-75% confidence, clear direction but not perfect.",
-        "    Multiple confirmations but something is slightly off (volume weak, RSI mid-range).",
-        "    Risk: ~$10-$15 max. Reward: ~$30-$75.",
+        "  SIZE 2 (Conviction, use sparingly, max 1-2 per day):",
+        "    When: MONSTER tier, 75%+ confidence, MTF alignment, volume confirming,",
+        "    key S/R rejection with clear structure. Everything lines up perfectly.",
+        "    Risk: ~$10 max loss. Target: $15-$50+ profit.",
+        "    DO NOT use after a loss. EARN it with a size-1 win first.",
         "",
-        "  SIZE 4-5 (Full conviction):",
-        "    Use when: MONSTER setup, 80%+ confidence, multiple timeframe alignment,",
-        "    price at key level with clear rejection, volume confirming, trend + momentum aligned.",
-        "    This is your big swing. Only 1-2 of these per day at most.",
-        "    Risk: ~$20-$25 max. Reward: ~$60-$150+.",
-        "",
-        "  SIZING RULES:",
-        "  - NEVER go full size after a loss streak. Rebuild confidence with size 1-2 first.",
-        "  - After a big win, DON'T immediately go full size again. Let the next setup prove itself.",
-        "  - If PnL is deeply negative today, size DOWN to protect remaining capital.",
-        "  - If you're on a hot streak (3+ wins), you've EARNED the right to push size 4-5.",
-        "  - MATCH size to the quality of the setup, not your desire to recover losses.",
+        "DAILY PROFIT MATH (how to hit $25-$100/day):",
+        "- At size 1: avg winner = $12-$20, avg loser = $5-$8.",
+        "- 3 wins + 1 loss at size 1 = ~$30-$50 net. That is a great day.",
+        "- 2 wins at size 2 + 1 loss at size 1 = ~$30-$90 net. Monster day.",
+        "- You do NOT need home runs. You need consistency.",
+        "- Fees: ~$1.50 round trip. Need $3+ gross to be worth it.",
         "",
         "YOUR JOB IS TO TRADE PROFITABLY, NOT TO AVOID TRADING.",
         "Sitting FLAT all day = $0 earned. The bot exists to make money.",
-        "Target: 2-4 quality trades per day. NOT 0. NOT 14. Find the sweet spot.",
+        "Target: 2-4 quality trades per day. NOT 0. NOT 14.",
         "",
-        "WHEN YOU MUST ENTER (do NOT say FLAT if these conditions are met):",
-        "- Engine score >= 70 AND ADX > 25 (real trend exists): ENTER with trend, size 1-2.",
-        "- MONSTER quality tier (score >= 80) with 2+ indicator confluence: ENTER, size 2-3.",
-        "- Price at key S/R level with clear rejection candle: ENTER the rejection.",
+        "ENTRY TRIGGERS (do NOT say FLAT if these are met):",
+        "- Engine score >= 70 AND ADX > 25: ENTER with trend, size 1.",
+        "- MONSTER tier (score >= 80) with 2+ confluence: ENTER, size 1-2.",
+        "- Key S/R level with clear rejection candle + volume: ENTER the rejection.",
         "- Strong trend (ADX > 40) with pullback to EMA/VWAP: ENTER the pullback.",
-        "- BTC + ETH risk-on AND XLM at support with bounce: ENTER LONG.",
-        "- Expansion phase (ATR shock, high volume): this is your best edge. ENTER.",
-        "- If the engine says MONSTER and you say FLAT, you need a STRONG reason why not.",
+        "- Expansion phase (ATR shock, volume surge): your best edge. ENTER.",
+        "- BTC + ETH confirming direction: adds conviction. ENTER.",
+        "- If engine says MONSTER and you say FLAT, you need a STRONG reason.",
+        "- Lane V (Liquidity Sweep): cluster swept + wick >35% + reclaim + fib = ENTER reversal.",
+        "- Magnet continuation: strong cluster ahead + momentum aligned = ENTER toward cluster.",
         "",
-        "WHEN TO STAY FLAT (only these situations):",
-        "- Compression phase with ADX < 20 and no clear direction.",
-        "- Right after a loss (wait 5-10 min cooldown, then look for next setup).",
-        "- RSI extreme (>85 or <15) with no volume confirming the move.",
-        "- Within 15 min of overnight margin cutoff (12:45-1:00 PM PT).",
-        "- 3+ consecutive losses today (take a longer break, then come back).",
+        "STAY FLAT ONLY WHEN:",
+        "- Compression (ADX < 20) with no clear direction or structure.",
+        "- Within 15 min of margin cutoff (12:45 PM PT).",
+        "- 3+ consecutive losses today (take 30 min break, then re-engage).",
+        "- RSI extreme (>85 or <15) with zero volume confirmation.",
+        "- Equal liquidation clusters on both sides with balanced magnet = chop zone.",
+        "- Cluster exists but no sweep yet and no momentum = wait for sweep first.",
         "",
-        "RISK RULES (protect capital, but DO trade):",
-        "- Each round-trip costs ~$1.50 in fees. Need $3+ gross profit to be worth it.",
-        "- Stop loss at structural level (swing high/low), 0.5-1% from entry.",
-        "- Hold 15-90 minutes. That is the winning time range.",
-        "- After a loss: size 1 on next trade, 5-10 min cooldown. Then re-engage.",
-        "- After 2 consecutive losses: size 1, wait 10-20 min. But DO trade again.",
-        "- Never re-enter the same direction within 5 min of being stopped out.",
-        "- Do NOT overtrade: max 6 trades/day. But 0 trades/day is ALSO a failure.",
+        "RISK RULES:",
+        "- Stop loss at structural level (swing high/low), 0.3-1% from entry.",
+        "- Optimal hold: 15-90 minutes. That is the winning time range.",
+        "- After 1 loss: size 1, 10 min cooldown. Then trade again.",
+        "- After 2 losses: size 1, 20 min cooldown. Re-evaluate direction.",
+        "- Never re-enter same direction within 5 min of being stopped out.",
+        "- Max 6 trades/day. But 0 trades is ALSO a failure.",
         "",
-        "DIRECTION GUIDANCE:",
-        "- Follow the trend. Check ADX and cross-market signals (BTC/ETH).",
-        "- In uptrends: longs on pullbacks to support, shorts only at clear resistance.",
-        "- In downtrends: shorts on bounces to resistance, longs only at clear support.",
-        "- Neutral: trade whichever direction has better structure and confluence.",
+        "DIRECTION:",
+        "- Follow the trend (ADX + BTC/ETH correlation).",
+        "- Uptrend: longs on pullbacks. Downtrend: shorts on bounces.",
+        "- Neutral: whichever direction has better structure.",
         "",
-        "SELF-CORRECTION:",
-        "- Study your scorecard below. If FLAT calls keep missing moves: TRADE MORE.",
-        "- If ENTER calls keep losing: tighten entries but don't stop trading.",
-        "- The goal is 2-4 trades/day with 40%+ win rate and good R:R.",
+        "SELF-CORRECTION (study your scorecard below):",
+        "- Too many FLAT calls missing moves? Lower your bar, trade B+ setups.",
+        "- Entries keep losing? Tighten stops, wait for better structure. Do NOT stop trading.",
+        "- Goal: 45%+ win rate with 2:1+ R:R = profitable every day.",
         "",
         "Respond ONLY with valid JSON (no markdown, no commentary):",
         '{',
         '  "action": "ENTER_LONG" or "ENTER_SHORT" or "EXIT" or "HOLD" or "FLAT",',
         '  "confidence": 0.0 to 1.0,',
-        '  "size": 1-5 (number of contracts — REQUIRED for ENTER_LONG/ENTER_SHORT, omit otherwise),',
+        '  "size": 1 or 2 (REQUIRED for ENTER_LONG/ENTER_SHORT, omit otherwise),',
         '  "stop_loss_price": number (required for ENTER_LONG/ENTER_SHORT, omit otherwise),',
         '  "take_profit_price": number (optional, for ENTER_LONG/ENTER_SHORT),',
-        '  "reasoning": "1-2 sentences explaining your decision + WHY this size",',
-        '  "market_read": "1 sentence: what you see in the chart right now",',
-        '  "lane_adjustments": {"<lane_letter>": {"action": "disable"|"raise_threshold"|"lower_threshold"|"ok", "reason": "..."}} (optional, review LANE PERFORMANCE below)',
+        '  "reasoning": "1-2 sentences: your decision + why this size",',
+        '  "market_read": "1 sentence: what the chart is telling you right now",',
+        '  "lane_adjustments": {"<lane_letter>": {"action": "disable"|"raise_threshold"|"lower_threshold"|"ok", "reason": "..."}} (optional)',
         '}',
     ]
 
@@ -473,7 +587,7 @@ def master_directive_prompt(
         "=== ACCOUNT STATUS ===",
         _fmt_kv(status),
     ])
-    
+
     # Contract Context (Specific to the traded instrument)
     if status.get("contract_context"):
         sections.extend([
@@ -508,7 +622,7 @@ def master_directive_prompt(
     if mtf_levels:
         sections.extend([
             "",
-            "=== MULTI-TIMEFRAME S/R & FIB LEVELS (Monthly → 1min) ===",
+            "=== MULTI-TIMEFRAME S/R & FIB LEVELS (Monthly to 1min) ===",
             "Use these as confluence zones. When 3+ timeframes align at a level = HIGH PROBABILITY zone.",
             mtf_levels,
         ])
@@ -518,6 +632,12 @@ def master_directive_prompt(
             "",
             "=== TECHNICAL INDICATORS ===",
             _fmt_indicators(regime_v4, expansion, price),
+        ])
+    if candles_15m is not None and not candles_15m.empty:
+        sections.extend([
+            "",
+            "=== MATH LENS (calculus/trigonometry/algebra) ===",
+            _fmt_math_lens(candles_15m, 25),
         ])
 
     if trades_path:
@@ -553,12 +673,12 @@ def master_directive_prompt(
             "",
             "=== LIVE MACRO NEWS (from Perplexity, refreshed every 15 min) ===",
             "Use this for macro context. Crypto follows BTC; BTC follows risk-on/risk-off sentiment.",
-            "If Fed is hawkish or S&P dumping → risk-off → XLM likely drops → favor shorts.",
-            "If BTC pumping or risk-on → XLM follows → favor longs.",
+            "If Fed is hawkish or S&P dumping -> risk-off -> XLM likely drops -> favor shorts.",
+            "If BTC pumping or risk-on -> XLM follows -> favor longs.",
             "Weight this as 20% of your decision. Chart data is 80%.",
             macro_news,
         ])
-    
+
     # Market Pulse: composite health score fusing sentiment + news + live tick
     _mkt_health = status.get("market_health_score")
     _mkt_regime = status.get("market_regime")
@@ -581,6 +701,30 @@ def master_directive_prompt(
             "=== PEER ADVISOR REPORTS (CONSULT THESE) ===",
             _fmt_kv(peer_intel),
         ])
+
+    # Liquidation intelligence (cluster analysis, magnet bias, sweep detection)
+    _liq_intel = status.get("liquidation_intelligence")
+    if _liq_intel and isinstance(_liq_intel, str):
+        sections.extend([
+            "",
+            "=== LIQUIDATION INTELLIGENCE (heatmap proxy) ===",
+            "Liquidation clusters act as price magnets. Trade toward the cluster,",
+            "then reverse on sweep + wick + reclaim. If no rejection, continue to next pool.",
+            _liq_intel,
+        ])
+
+    # Blinko trade memory context (if available)
+    try:
+        _blinko_ctx = _query_blinko_context(price)
+        if _blinko_ctx:
+            sections.extend([
+                "",
+                "=== TRADE MEMORY (from Blinko knowledge base) ===",
+                "Past trade patterns and lessons at similar price levels:",
+                _blinko_ctx,
+            ])
+    except Exception:
+        pass
 
     # Daily brief: last 3 days performance context for posture calibration
     try:

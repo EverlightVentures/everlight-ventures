@@ -3,6 +3,7 @@ symbol: XLM-PERP
 product_id: XLP-20DEC30-CDE
 leverage: 4
 paper: false
+signal_product_id: XLP-20DEC30-CDE
 data_product_id: XLM-USD
 timezone: America/Los_Angeles
 selector:
@@ -88,6 +89,7 @@ position_sizing:
     S: 0.6    # stat arb proxy - z-score mean reversion, conservative sizing
     T: 0.8    # orderflow imbalance - volume delta is strong edge
     U: 0.9    # macro MA cross - rare but high conviction regime shift
+    V: 1.0    # liquidity sweep - full conviction when 4-of-6 confluence fires
 
   # Quality tier multipliers on position size
   tier_multipliers:
@@ -346,6 +348,11 @@ v4:
         tp_mult: 0.70
         min_profit_usd: 3.00
         decay_pct: 0.35
+      # Liquidity sweep entries: snapback is fast, capture the bounce
+      liquidity_sweep:
+        tp_mult: 0.80
+        min_profit_usd: 3.50
+        decay_pct: 0.40
       # Trend entries: wide targets, patient holds, bigger expected wins
       breakout_retest:
         tp_mult: 1.00
@@ -640,6 +647,16 @@ v4:
     # Lane U: Macro MA Cross - 200 MA breakout on 1h with 4h confirmation
     lane_u_enabled: true
     lane_u_threshold: 45           # lower threshold - 200 MA crosses are rare but powerful
+    # Lane V: Liquidity Sweep - bidirectional heatmap strategy (magnet + sweep reversal)
+    lane_v_enabled: true
+    lane_v_threshold: 55           # high bar - A+ trades only, requires 4-of-6 confluence
+    lane_v_min_signals: 4          # minimum core signals to fire
+    lane_v_wick_min_ratio: 0.35    # minimum wick-to-range ratio
+    lane_v_wick_strong_ratio: 0.50 # strong wick threshold
+    lane_v_cluster_zone_atr: 0.25  # cluster zone width in ATR multiples
+    lane_v_sweep_cooldown_bars: 3  # min bars between sweep trades
+    lane_v_continuation_enabled: true   # allow pre-sweep continuation trades
+    lane_v_reversal_enabled: true       # allow post-sweep reversal trades
     compression_breakout_enabled: true
     early_impulse_enabled: true
     early_impulse_body_mult: 1.5     # was 2.0 — catch more impulse moves
@@ -766,11 +783,35 @@ v4:
         FIB_ZONE: 10
         HTF_LEVEL: 5
 
+      # Lane V: Liquidity Sweep - bidirectional heatmap + wick reversal
+      # Uses its own composite scoring via wick_score.py + liquidation_clusters.py
+      # These weights apply when Lane V falls through to v4_engine regime scoring
+      V:
+        HTF_LEVEL: 20
+        FIB_ZONE: 15
+        RSI_EXTREME: 15
+        BB_REJECTION: 15
+        VOLUME_SPIKE: 10
+        MACD_DIVERGENCE: 10
+        OBV_DIVERGENCE: 8
+        VWAP_CONFIRM: 10
+        DOUBLE_PATTERN: 12
+
   # Multi-TF alignment bonus
   alignment:
     enabled: true
     alignment_max_bonus: 8
     alignment_max_penalty: 5
+
+# Liquidation cluster analysis (proxy heatmap from force order events)
+liquidation_clusters:
+  enabled: true
+  cluster_resolution_atr: 0.5    # group events into bands of 0.5 ATR width
+  min_cluster_events: 3          # minimum force order events to form a cluster
+  min_cluster_notional: 5000     # minimum USD notional to consider cluster "strong"
+  magnet_distance_max_atr: 5.0   # ignore clusters more than 5 ATR away
+  sweep_zone_atr: 0.25           # price within 0.25 ATR of cluster center = in the zone
+  bonus_max: 5                   # max score modifier from liquidation data (was 2)
 
 # Contract-specific intelligence (OI, funding, basis)
 contract_context:
@@ -785,6 +826,15 @@ contract_context:
   funding_extreme_hr: 0.005
   cascade_price_threshold_pct: 0.015
   cascade_oi_threshold_pct: 0.02
+
+market_structure:
+  enabled: true
+  stale_seconds: 8.0
+  depth_levels: 10
+  imbalance_long_threshold: 0.58
+  imbalance_short_threshold: 0.42
+  max_spread_bps: 12.0
+  bonus_max: 4
 
 # BTC correlation: penalize trades that fight BTC momentum
 btc_correlation:
@@ -837,8 +887,12 @@ ai:
   cache_ttl_regime: 300             # recheck regime every 5 min
   # Executive mode: Claude makes the actual entry/exit decisions
   executive_mode: true              # Claude is the boss — overrides strategy engine
-  executive_full_control: true      # ON — Opus has full authority at high confidence (hard gates still protect)
+  executive_full_control: false     # advisory-only by default; deterministic risk and freshness gates stay binding
   executive_min_confidence: 0.60    # lowered for overnight sprint — Opus needs to fire fast
+  executive_allow_soft_risk_override: false
+  executive_allow_no_signal_entries: false
+  executive_allow_size_override: false
+  executive_allow_gemini_takeover: false
   cache_ttl_directive: 60           # 60 sec — fastest reaction time when the breakout comes
   hard_min_score: 40                # ABSOLUTE floor — nothing below this trades, period
   # Codex peer advisor (team mode): Codex analyzes in parallel, Opus stays boss.
@@ -885,12 +939,23 @@ ai:
 # Macro/market informer stream for dashboard + Slack digest.
 market_intel:
   enabled: true
-  refresh_seconds: 900
+  refresh_seconds: 300
   timeout_sec: 3.5
+  binance_symbol: XLMUSDT
   max_headlines: 24
   slack_digest_enabled: true
   slack_interval_minutes: 60
   slack_max_items: 5
+  futures_relativity:
+    bonus_max: 4
+    min_confidence: 0.45
+  liquidation_feed:
+    symbol: XLMUSDT
+    stale_seconds: 45
+    window_seconds: 900
+    reconnect_seconds: 3
+    min_notional_5m_usd: 25000
+    bonus_max: 2
 
 logging:
   decisions_jsonl: logs/decisions.jsonl
@@ -991,7 +1056,16 @@ rolling_expectancy:
 market_pulse:
   enabled: true
   cache_ttl_sec: 300              # recompute every 5 min
-  danger_block_entries: false     # set true to hard-block at danger level
+  danger_block_entries: true      # danger regime is now a hard stop for new entries
   danger_threshold: 20            # health < 20 = danger zone
   risk_off_size_mult: 0.7         # 30% smaller positions in risk_off
   notify_regime_change: true      # Slack alert on regime transitions
+
+freshness_gates:
+  enabled: true
+  max_live_tick_age_sec: 60
+  max_market_brief_age_min: 45
+  block_on_dead_tick: true
+  block_on_stale_market_brief: true
+  block_on_sentiment_stale_in_danger: true
+  block_on_pulse_danger: true

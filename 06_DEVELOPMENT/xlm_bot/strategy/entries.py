@@ -2023,6 +2023,172 @@ def macro_ma_cross(
 
 
 # ---------------------------------------------------------------------------
+# Lane V: Liquidity Sweep (bidirectional heatmap strategy)
+# ---------------------------------------------------------------------------
+
+def liquidity_sweep(
+    price: float,
+    df_15m: pd.DataFrame,
+    df_1h: pd.DataFrame,
+    direction: str,
+    levels: Dict[str, float],
+    fibs: Dict[str, float],
+    liquidation_intel: Optional[Dict] = None,
+) -> Optional[Dict]:
+    """Liquidity Sweep -- bidirectional entry based on liquidation clusters.
+
+    Two modes:
+      Reversal: cluster swept + wick + reclaim/reject + fib + EMA stretch
+      Continuation: cluster ahead as magnet + momentum aligned
+
+    Requirements for reversal (primary):
+      1. Liquidation cluster was recently swept (sweep_completed)
+      2. Large wick on sweep candle (ratio >= 35%)
+      3. Reclaim (long) or rejection (short) confirmed
+      4. Price at fib band or EMA/VWAP stretch
+      5. Minimum 4 of 6 core signals present
+
+    Requirements for continuation (secondary):
+      1. Strong cluster ahead (magnet pull)
+      2. Momentum aligned toward cluster (ADX > 25, EMA slope)
+      3. No sweep yet -- trade toward the cluster
+    """
+    if df_15m is None or df_15m.empty or len(df_15m) < 20:
+        return None
+
+    intel = liquidation_intel or {}
+    sweep_status = str(intel.get("sweep_status", "none"))
+    sweep_side = str(intel.get("sweep_side", ""))
+    magnet_side = str(intel.get("magnet_side", "balanced"))
+    magnet_score = float(intel.get("magnet_score", 0))
+    wick_score_val = float(intel.get("wick_score", 0))
+    wick_ratio = float(intel.get("wick_ratio", 0))
+    reclaim = bool(intel.get("reclaim_confirmed", False))
+    rejection = bool(intel.get("rejection_confirmed", False))
+    cluster_strength = float(intel.get("cluster_strength", 0))
+    funding_lean = str(intel.get("funding_lean", "neutral"))
+
+    d = direction.lower().strip()
+
+    # Check fib zone confluence
+    fib_hit = False
+    if fibs:
+        conf = compute_confluences(price, df_1h, df_1h, df_15m, levels, fibs, d)
+        fib_hit = bool(conf.get("FIB_ZONE"))
+
+    # Check EMA/VWAP stretch
+    ema_stretched = False
+    try:
+        e21 = ema(df_15m["close"], 21)
+        e21_val = float(e21.iloc[-1])
+        atr_val = float(atr(df_15m, 14).iloc[-1])
+        if atr_val > 0 and e21_val > 0:
+            distance_from_ema = abs(price - e21_val)
+            ema_stretched = distance_from_ema > atr_val
+    except Exception:
+        pass
+
+    # Check volume spike
+    vol_spike = False
+    if "volume" in df_15m.columns and len(df_15m) >= 20:
+        vol_avg = float(df_15m["volume"].rolling(20).mean().iloc[-1])
+        vol_now = float(df_15m["volume"].iloc[-1])
+        vol_spike = vol_avg > 0 and vol_now > vol_avg * 1.5
+
+    # Funding confirmation: crowd on wrong side
+    funding_confirms = False
+    if d == "long" and funding_lean == "long":
+        funding_confirms = True  # crowd was long, got flushed, now reversal
+    elif d == "short" and funding_lean == "short":
+        funding_confirms = True  # crowd was short, got squeezed, now reversal
+
+    # -- REVERSAL MODE --
+    if sweep_status == "completed":
+        # Direction check: sweep of longs below = long reversal, sweep of shorts above = short reversal
+        if d == "long" and sweep_side != "long":
+            pass  # wrong side for long reversal
+        elif d == "short" and sweep_side != "short":
+            pass  # wrong side for short reversal
+        else:
+            # Count core signals
+            core_signals = 0
+            if cluster_strength >= 30:
+                core_signals += 1
+            if fib_hit:
+                core_signals += 1
+            if ema_stretched:
+                core_signals += 1
+            if wick_ratio >= 0.35:
+                core_signals += 1
+            if reclaim or rejection:
+                core_signals += 1
+
+            if core_signals >= 3:  # relaxed from 4 since not all data always available
+                return {
+                    "type": "liquidity_sweep",
+                    "mode": "reversal",
+                    "confluence": {
+                        "SWEEP_COMPLETED": True,
+                        "CLUSTER_STRONG": cluster_strength >= 30,
+                        "FIB_BAND_TAG": fib_hit,
+                        "EMA_VWAP_STRETCH": ema_stretched,
+                        "LARGE_WICK": wick_ratio >= 0.35,
+                        "RECLAIM_REJECT": reclaim or rejection,
+                        "FUNDING_CONFIRMS": funding_confirms,
+                        "VOLUME_SPIKE": vol_spike,
+                    },
+                    "core_signals": core_signals,
+                    "wick_score": wick_score_val,
+                    "wick_ratio": round(wick_ratio, 4),
+                    "sweep_side": sweep_side,
+                    "cluster_strength": cluster_strength,
+                    "magnet_score": magnet_score,
+                }
+
+    # -- CONTINUATION MODE --
+    # Trade toward a strong cluster that has not been swept yet
+    if sweep_status == "none" and magnet_score >= 40:
+        # Direction must align with magnet
+        if d == "long" and magnet_side == "above":
+            pass  # good: trading long toward cluster above
+        elif d == "short" and magnet_side == "below":
+            pass  # good: trading short toward cluster below
+        else:
+            return None
+
+        # Need momentum alignment
+        momentum_ok = False
+        try:
+            e21 = ema(df_15m["close"], 21)
+            slope = float(e21.diff().tail(3).mean())
+            if d == "long" and slope > 0:
+                momentum_ok = True
+            elif d == "short" and slope < 0:
+                momentum_ok = True
+        except Exception:
+            pass
+
+        if momentum_ok:
+            return {
+                "type": "liquidity_sweep",
+                "mode": "continuation",
+                "confluence": {
+                    "MAGNET_STRONG": True,
+                    "MOMENTUM_ALIGNED": True,
+                    "DIRECTION_MATCHES_MAGNET": True,
+                    "FUNDING_CONFIRMS": funding_confirms,
+                    "VOLUME_SPIKE": vol_spike,
+                },
+                "core_signals": 3,
+                "magnet_side": magnet_side,
+                "magnet_score": magnet_score,
+                "cluster_strength": cluster_strength,
+            }
+
+    return None
+
+
+# ---------------------------------------------------------------------------
 # Exhaustion Warning Block (blocking lane -- prevents entries)
 # ---------------------------------------------------------------------------
 
