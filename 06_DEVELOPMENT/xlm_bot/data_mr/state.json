@@ -1,0 +1,11 @@
+{
+  "day": "2026-02-11",
+  "trades": 0,
+  "losses": 0,
+  "cooldown_until": null,
+  "pnl_today_usd": 0.0,
+  "equity_start_usd": 212.57,
+  "transfers_today_usd": 0.0,
+  "loss_debt_usd": 0.0,
+  "consecutive_losses": 0
+}

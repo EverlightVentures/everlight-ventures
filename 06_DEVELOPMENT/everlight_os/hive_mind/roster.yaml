@@ -1,0 +1,118 @@
+# Hive Mind Team Roster
+# 4 managers, 8 employees each. Perplexity has 8 research beats.
+
+managers:
+  claude:
+    role: "Chief Operator / Strategist"
+    tool: "clx_delegate"
+    cli_mode: "review"
+    timeout_seconds: 240
+    employees:
+      - 01_chief_operator
+      - everlight_architect
+      - everlight_content_director
+      - everlight_qa_gate
+      - everlight_trading_risk
+      - reviewer
+      - 17_content_strategy
+      - 15_editor_qa
+
+  gemini:
+    role: "Logistics Commander / Executor"
+    tool: "gmx_delegate"
+    cli_mode: "plan"
+    timeout_seconds: 300
+    employees:
+      - 26_logistics_commander
+      - 02_ops_deputy
+      - 24_workflow_builder
+      - 23_automation_architect
+      - 11_sync_coordinator
+      - 22_distribution_ops
+      - 25_analytics_auditor
+      - everlight_packager
+
+  codex:
+    role: "Engineering Foreman / Profit Maximizer"
+    tool: "cx_terminal"
+    timeout_seconds: 240
+    employees:
+      - 03_engineering_foreman
+      - 27_profit_maximizer
+      - everlight_saas_builder
+      - everlight_saas_pm
+      - everlight_saas_growth
+      - 10_funnel_architect
+      - 08_seo_mapper
+      - writer
+
+  perplexity:
+    role: "Intelligence Anchor / News Desk"
+    tool: "ppx_terminal"
+    timeout_seconds: 90
+    research_beats:
+      - name: "Crypto & DeFi"
+        focus: "XLM, BTC, ETH, DeFi protocols, exchange news, regulatory moves"
+      - name: "Finance & Markets"
+        focus: "Stock markets, interest rates, economic indicators, forex, commodities"
+      - name: "World News"
+        focus: "Geopolitics, conflicts, elections, trade policy, sanctions"
+      - name: "Tech & AI"
+        focus: "AI models, startups, product launches, open source, dev tools"
+      - name: "Business & Startups"
+        focus: "SaaS metrics, funding rounds, M&A, entrepreneur strategies, ecommerce"
+      - name: "Science & Health"
+        focus: "Biotech, energy, space, climate, medical breakthroughs"
+      - name: "Legal & Regulatory"
+        focus: "SEC, crypto regulation, privacy laws, antitrust, IP"
+      - name: "Personal & Local"
+        focus: "US consumer trends, housing, MMA, fitness, personal finance"
+
+# Smart routing: keyword patterns decide which workers to dispatch.
+# Claude is NOT a target - Claude IS the orchestrator calling these workers.
+routing_rules:
+  trading:
+    managers: [gemini, codex, perplexity]
+    keywords: [trade, bot, xlm, scalp, position, margin, pnl, crypto, coinbase, futures]
+  content:
+    managers: [gemini, codex, perplexity]
+    keywords: [write, blog, post, content, article, book, publish, draft, edit]
+  engineering:
+    managers: [gemini, codex, perplexity]
+    keywords: [fix, bug, code, build, deploy, docker, api, script, function, refactor, django, streamlit, dashboard, upgrade, enhance]
+  business:
+    managers: [gemini, codex, perplexity]
+    keywords: [business, saas, revenue, scale, launch, monetize, product, ecommerce, store, supplier]
+  research:
+    managers: [perplexity, gemini]
+    keywords: [news, price, market, latest, current, "what is", research, trend, forecast]
+  operations:
+    managers: [gemini, perplexity]
+    keywords: [sync, organize, automate, workflow, pipeline, deploy, backup, migrate]
+
+# Lite mode: just perplexity intel (Claude is already the caller)
+lite_managers: [perplexity]
+
+# User context injected into Perplexity intel queries
+user_context:
+  timezone: "Pacific Time (PT)"
+  location: "United States"
+  interests:
+    - "Cryptocurrency trading (XLM on Coinbase CDE)"
+    - "SaaS building and automation"
+    - "MMA and fitness"
+    - "AI tools and development"
+    - "Ecommerce and product sourcing"
+  portfolio_note: "Running live XLM trading bot, ~$500 account"
+
+# Project BMO Phase 1 -- Specialist Performance Tracking
+# Weights are auto-updated by telemetry.get_roster_weights() after each session.
+# Manual overrides: set a specialist's weight here and it won't be auto-overwritten.
+telemetry:
+  enabled: true
+  log_file: "everlight_os/hive_mind/telemetry.jsonl"
+  lookback_sessions: 20
+
+# War room paths
+war_room_dir: "_logs/ai_war_room"
+session_log: "_logs/hive_sessions.jsonl"

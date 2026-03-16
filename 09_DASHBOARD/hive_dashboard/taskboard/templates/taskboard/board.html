@@ -1,0 +1,304 @@
+{% extends "hive/base.html" %}
+{% load humanize %}
+
+{% block title %}Taskboard -- Hive Mind{% endblock %}
+
+{% block active_nav %}
+  <style>.sidebar-nav-link[data-nav="taskboard"] { color: var(--gold) !important; background: var(--gold-glow); }</style>
+{% endblock %}
+
+{% block content %}
+<style>
+  /* ── Taskboard Specific Styles ───────────────────────────────── */
+  .tb-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;
+  }
+  .tb-header h1 {
+    font-family: var(--font-heading); font-size: 1.8rem;
+    background: linear-gradient(135deg, var(--gold-bright), var(--gold), var(--purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .tb-header .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-top: 4px; }
+
+  /* Stats Row */
+  .tb-stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1rem; margin-bottom: 2rem;
+  }
+  .tb-stat-card {
+    background: var(--glass-bg); border: 1px solid var(--glass-border);
+    border-radius: 16px; padding: 1.2rem 1.4rem;
+    backdrop-filter: blur(var(--glass-blur));
+    transition: all var(--transition-base);
+    position: relative; overflow: hidden;
+  }
+  .tb-stat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .tb-stat-card:hover::before { opacity: 1; }
+  .tb-stat-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+  .tb-stat-number {
+    font-size: 2rem; font-weight: 700; font-family: var(--font-heading);
+    color: var(--gold-bright); line-height: 1;
+  }
+  .tb-stat-label { color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 6px; }
+  .tb-stat-card.pulse .tb-stat-number { color: #ef4444; }
+  .tb-stat-card.glow .tb-stat-number { color: var(--purple); }
+
+  /* Kanban Columns */
+  .tb-kanban {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem; margin-bottom: 2rem;
+  }
+  .tb-column {
+    background: var(--bg-secondary); border: 1px solid var(--glass-border);
+    border-radius: 20px; padding: 1.4rem; min-height: 200px;
+  }
+  .tb-column-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 1rem;
+    padding-bottom: 0.8rem; border-bottom: 1px solid var(--border-subtle);
+  }
+  .tb-column-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    box-shadow: 0 0 8px currentColor;
+  }
+  .tb-column-dot.pending { background: var(--gold); color: var(--gold); }
+  .tb-column-dot.in-progress { background: var(--purple); color: var(--purple); animation: pulse-dot 2s ease-in-out infinite; }
+  .tb-column-dot.completed { background: #22c55e; color: #22c55e; }
+  .tb-column-dot.blocked { background: #ef4444; color: #ef4444; animation: pulse-dot 1.5s ease-in-out infinite; }
+  @keyframes pulse-dot { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  .tb-column-title { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary); font-weight: 600; }
+  .tb-column-count {
+    margin-left: auto; background: var(--glass-bg); border: 1px solid var(--border-subtle);
+    border-radius: 20px; padding: 2px 10px; font-size: 0.75rem; color: var(--text-muted);
+  }
+
+  /* Task Cards */
+  .tb-card {
+    background: var(--bg-tertiary); border: 1px solid var(--border-subtle);
+    border-radius: 14px; padding: 1rem 1.2rem; margin-bottom: 0.8rem;
+    cursor: pointer; transition: all var(--transition-base);
+    text-decoration: none; display: block; position: relative;
+    overflow: hidden;
+  }
+  .tb-card:hover {
+    border-color: var(--gold-dim); transform: translateY(-3px);
+    box-shadow: 0 8px 32px rgba(201, 168, 76, 0.08);
+  }
+  .tb-card::after {
+    content: ''; position: absolute; top: 0; left: 0; bottom: 0; width: 3px;
+    border-radius: 3px 0 0 3px;
+  }
+  .tb-card.priority-1::after { background: #ef4444; box-shadow: 0 0 12px rgba(239, 68, 68, 0.4); }
+  .tb-card.priority-2::after { background: #f59e0b; box-shadow: 0 0 12px rgba(245, 158, 11, 0.3); }
+  .tb-card.priority-3::after { background: var(--purple); }
+  .tb-card.priority-4::after { background: var(--text-muted); }
+  .tb-card.priority-5::after { background: var(--border-subtle); }
+
+  .tb-card-top { display: flex; align-items: flex-start; gap: 10px; }
+  .tb-card-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: var(--glass-bg); border: 1px solid var(--border-subtle);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.9rem; color: var(--gold); flex-shrink: 0;
+  }
+  .tb-card-title { font-size: 0.95rem; font-weight: 500; color: var(--text-primary); line-height: 1.3; }
+  .tb-card-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 6px; line-height: 1.4; }
+  .tb-card-meta {
+    display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;
+  }
+  .tb-badge {
+    font-size: 0.7rem; padding: 3px 8px; border-radius: 6px;
+    background: var(--glass-bg); border: 1px solid var(--border-subtle);
+    color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .tb-badge.agent { color: var(--purple); border-color: var(--purple-dim); }
+  .tb-badge.category { color: var(--gold-dim); border-color: var(--gold-dim); }
+
+  /* Empty state */
+  .tb-empty {
+    text-align: center; padding: 2rem; color: var(--text-muted);
+    font-size: 0.85rem; font-style: italic;
+  }
+  .tb-empty i { font-size: 2rem; display: block; margin-bottom: 0.8rem; opacity: 0.3; }
+
+  /* Filter bar */
+  .tb-filters {
+    display: flex; gap: 0.8rem; margin-bottom: 1.5rem; flex-wrap: wrap;
+    align-items: center;
+  }
+  .tb-filter-btn {
+    background: var(--glass-bg); border: 1px solid var(--glass-border);
+    border-radius: 10px; padding: 8px 16px; color: var(--text-secondary);
+    font-size: 0.8rem; cursor: pointer; transition: all var(--transition-base);
+    text-decoration: none;
+  }
+  .tb-filter-btn:hover, .tb-filter-btn.active {
+    border-color: var(--gold-dim); color: var(--gold); background: var(--gold-glow);
+  }
+</style>
+
+<div class="tb-header">
+  <div>
+    <h1><i class="fa-solid fa-list-check" style="margin-right:10px;"></i>AI Taskboard</h1>
+    <div class="subtitle">Tasks from your AI agents that need your input</div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="tb-stats">
+  <div class="tb-stat-card {% if stats.pending > 0 %}pulse{% endif %}">
+    <div class="tb-stat-number">{{ stats.pending }}</div>
+    <div class="tb-stat-label">Pending</div>
+  </div>
+  <div class="tb-stat-card">
+    <div class="tb-stat-number" style="color: var(--purple);">{{ stats.in_progress }}</div>
+    <div class="tb-stat-label">In Progress</div>
+  </div>
+  <div class="tb-stat-card">
+    <div class="tb-stat-number" style="color: #22c55e;">{{ stats.completed_today }}</div>
+    <div class="tb-stat-label">Done Today</div>
+  </div>
+  <div class="tb-stat-card">
+    <div class="tb-stat-number" style="color: var(--text-secondary);">{{ stats.total_completed }}</div>
+    <div class="tb-stat-label">All-Time Done</div>
+  </div>
+  <div class="tb-stat-card glow">
+    <div class="tb-stat-number">{{ stats.awaiting_retrieval }}</div>
+    <div class="tb-stat-label">Awaiting Agent Pickup</div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="tb-filters">
+  <a href="{% url 'taskboard:board' %}" class="tb-filter-btn {% if not status_filter and not category_filter %}active{% endif %}">All</a>
+  {% for cat_val, cat_label in categories %}
+  <a href="?category={{ cat_val }}" class="tb-filter-btn {% if category_filter == cat_val %}active{% endif %}">{{ cat_label }}</a>
+  {% endfor %}
+  {% for b in batches %}
+  <a href="?batch={{ b }}" class="tb-filter-btn {% if batch_filter == b %}active{% endif %}">
+    <i class="fa-solid fa-layer-group" style="margin-right:4px;"></i>{{ b|truncatechars:20 }}
+  </a>
+  {% endfor %}
+</div>
+
+<!-- Kanban Board -->
+<div class="tb-kanban">
+  <!-- Pending -->
+  <div class="tb-column">
+    <div class="tb-column-header">
+      <span class="tb-column-dot pending"></span>
+      <span class="tb-column-title">Pending</span>
+      <span class="tb-column-count">{{ pending|length }}</span>
+    </div>
+    {% for task in pending %}
+    <a href="{% url 'taskboard:task_form' task.id %}" class="tb-card priority-{{ task.priority }}">
+      <div class="tb-card-top">
+        <div class="tb-card-icon"><i class="{{ task.template.icon }}"></i></div>
+        <div>
+          <div class="tb-card-title">{{ task.title }}</div>
+          {% if task.description %}<div class="tb-card-desc">{{ task.description|truncatechars:80 }}</div>{% endif %}
+        </div>
+      </div>
+      <div class="tb-card-meta">
+        <span class="tb-badge category">{{ task.template.get_category_display }}</span>
+        {% if task.source_agent %}<span class="tb-badge agent">from: {{ task.source_agent }}</span>{% endif %}
+        <span class="tb-badge">{{ task.created_at|naturaltime }}</span>
+      </div>
+    </a>
+    {% empty %}
+    <div class="tb-empty">
+      <i class="fa-solid fa-check-double"></i>
+      No pending tasks. Your AI is happy.
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- In Progress -->
+  <div class="tb-column">
+    <div class="tb-column-header">
+      <span class="tb-column-dot in-progress"></span>
+      <span class="tb-column-title">In Progress</span>
+      <span class="tb-column-count">{{ in_progress|length }}</span>
+    </div>
+    {% for task in in_progress %}
+    <a href="{% url 'taskboard:task_form' task.id %}" class="tb-card priority-{{ task.priority }}">
+      <div class="tb-card-top">
+        <div class="tb-card-icon"><i class="{{ task.template.icon }}"></i></div>
+        <div>
+          <div class="tb-card-title">{{ task.title }}</div>
+          {% if task.description %}<div class="tb-card-desc">{{ task.description|truncatechars:80 }}</div>{% endif %}
+        </div>
+      </div>
+      <div class="tb-card-meta">
+        <span class="tb-badge category">{{ task.template.get_category_display }}</span>
+        {% if task.target_agent %}<span class="tb-badge agent">to: {{ task.target_agent }}</span>{% endif %}
+      </div>
+    </a>
+    {% empty %}
+    <div class="tb-empty">
+      <i class="fa-solid fa-hourglass-half"></i>
+      Nothing in progress right now.
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Completed -->
+  <div class="tb-column">
+    <div class="tb-column-header">
+      <span class="tb-column-dot completed"></span>
+      <span class="tb-column-title">Completed</span>
+      <span class="tb-column-count">{{ completed|length }}</span>
+    </div>
+    {% for task in completed %}
+    <div class="tb-card priority-{{ task.priority }}" style="opacity:0.7;">
+      <div class="tb-card-top">
+        <div class="tb-card-icon" style="color:#22c55e;"><i class="fa-solid fa-check"></i></div>
+        <div>
+          <div class="tb-card-title">{{ task.title }}</div>
+          <div class="tb-card-desc">
+            {% if task.retrieved_by_agent %}
+              <span style="color:#22c55e;"><i class="fa-solid fa-robot"></i> Agent retrieved</span>
+            {% else %}
+              <span style="color:var(--gold);"><i class="fa-solid fa-clock"></i> Awaiting agent pickup</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% empty %}
+    <div class="tb-empty">
+      <i class="fa-solid fa-trophy"></i>
+      No completed tasks yet. Get to work!
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Blocked -->
+  {% if blocked %}
+  <div class="tb-column">
+    <div class="tb-column-header">
+      <span class="tb-column-dot blocked"></span>
+      <span class="tb-column-title">Blocked</span>
+      <span class="tb-column-count">{{ blocked|length }}</span>
+    </div>
+    {% for task in blocked %}
+    <a href="{% url 'taskboard:task_form' task.id %}" class="tb-card priority-{{ task.priority }}">
+      <div class="tb-card-top">
+        <div class="tb-card-icon" style="color:#ef4444;"><i class="fa-solid fa-ban"></i></div>
+        <div>
+          <div class="tb-card-title">{{ task.title }}</div>
+          {% if task.notes %}<div class="tb-card-desc">{{ task.notes|truncatechars:80 }}</div>{% endif %}
+        </div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

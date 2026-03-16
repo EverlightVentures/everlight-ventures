@@ -1,0 +1,27 @@
+#!/bin/bash
+# xdr-fg - dashboard foreground watchdog (for systemd / startup)
+
+set -euo pipefail
+
+BOT_DIR="/mnt/sdcard/AA_MY_DRIVE/xlm_bot"
+VENV="/tmp/xlm_bot_venv"
+PORT="${XLM_DASH_PORT:-8502}"
+
+cd "$BOT_DIR" || exit 1
+bash "$BOT_DIR/_venv.sh"
+
+# Start Claude chat API server in background (port 8504)
+"$VENV/bin/python3" -c "
+from claude_chat_api import start_chat_server
+start_chat_server(8504)
+import time
+while True:
+    time.sleep(3600)
+" &
+CHAT_PID=$!
+trap "kill $CHAT_PID 2>/dev/null" EXIT
+
+while true; do
+  XLM_DASH_EXCHANGE_READ=1 PYTHONFAULTHANDLER=1 "$VENV/bin/streamlit" run dashboard.py --server.port "$PORT" --server.address 127.0.0.1 --server.headless true --server.fileWatcherType poll
+  sleep 2
+done

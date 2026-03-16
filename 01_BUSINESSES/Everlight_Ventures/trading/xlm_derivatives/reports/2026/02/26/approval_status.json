@@ -1,0 +1,71 @@
+{
+  "generated_at": "2026-02-26T19:44:00+00:00",
+  "report_date": "2026-02-26",
+  "advisory_agent": "Everlight Trading Risk (claude-sonnet-4-6)",
+  "changes_proposed": 5,
+  "changes_auto_applied": 0,
+  "all_changes_require_human_approval": true,
+  "approval_items": [
+    {
+      "id": "CHG-001",
+      "priority": 1,
+      "title": "Add wall-clock max_hold_minutes: 120 to exits config",
+      "requires_code_change": true,
+      "config_key": "exits.max_hold_minutes",
+      "proposed_value": 120,
+      "current_value": null,
+      "rationale": "time_stop_bars fails on bot restart. Wall-clock check using entry_time from state.json survives restarts.",
+      "status": "PENDING_APPROVAL",
+      "risk_if_not_applied": "Another 905-minute runaway trade possible on every overnight entry"
+    },
+    {
+      "id": "CHG-002",
+      "priority": 1,
+      "title": "Add circuit_breaker block with single_trade_max_loss_usd: 25",
+      "requires_code_change": true,
+      "config_key": "circuit_breaker.single_trade_max_loss_usd",
+      "proposed_value": 25,
+      "current_value": null,
+      "rationale": "No dollar-loss hard stop exists in deployed config. -$64.90 loss = 47% of session equity.",
+      "status": "PENDING_APPROVAL",
+      "risk_if_not_applied": "Single trade can exceed any reasonable loss threshold with no automated stop"
+    },
+    {
+      "id": "CHG-003",
+      "priority": 2,
+      "title": "Re-enable EV gate at min_ev_usd: -1.50",
+      "requires_code_change": false,
+      "config_key": "v4.ev.min_ev_usd",
+      "proposed_value": -1.50,
+      "current_value": -999,
+      "rationale": "Most entries have ev_usd between -1.2 and -3.2. Disabling EV gate allows fee-guaranteed losers.",
+      "status": "PENDING_APPROVAL",
+      "risk_if_not_applied": "Continued negative-EV entry accumulation erodes account even with good win rate"
+    },
+    {
+      "id": "CHG-004",
+      "priority": 2,
+      "title": "Set overnight_trading.mode to never (temporary)",
+      "requires_code_change": false,
+      "config_key": "margin_policy.overnight_trading.mode",
+      "proposed_value": "never",
+      "current_value": "auto",
+      "rationale": "Both catastrophic losses started as overnight entries. Disable until wall-clock time stop is confirmed working.",
+      "status": "PENDING_APPROVAL",
+      "risk_if_not_applied": "Overnight entries can hold for 16 hours with no intraday cutoff enforcement"
+    },
+    {
+      "id": "CHG-005",
+      "priority": 3,
+      "title": "Reduce max_trades_per_day to 4 during loss-debt recovery period",
+      "requires_code_change": false,
+      "config_key": "risk.max_trades_per_day",
+      "proposed_value": 4,
+      "current_value": 8,
+      "rationale": "Reduces revenge-trading cascade risk while loss_debt > $30.",
+      "status": "PENDING_APPROVAL",
+      "expiry": "Review after 7 days or when loss_debt < $20"
+    }
+  ],
+  "safety_statement": "This agent never executes trades and never modifies config files directly. All recommendations require human review and manual application."
+}

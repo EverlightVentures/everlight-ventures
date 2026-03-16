@@ -1,0 +1,3 @@
+Transaction_ID,Date,Time,Employee_ID,Employee_Name,Total_Items,Subtotal,Tax,Grand_Total,Payment_Method,Amount_Received,Change_Given,Receipt_Number,Notes
+TXN20251130134933,2025-11-30,13:50:52,1001,richard,2,89.98,7.42,97.40,Cash,100.00,2.60,TXN20251130134933,Good job
+TXN20251130142404,2025-11-30,14:25:11,1001,richard,1,799.98,66.00,865.98,Cash,1000.00,134.02,TXN20251130142404,Merry Christmas

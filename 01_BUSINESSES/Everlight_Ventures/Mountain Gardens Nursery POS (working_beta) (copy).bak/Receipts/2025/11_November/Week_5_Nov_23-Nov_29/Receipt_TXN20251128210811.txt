@@ -1,0 +1,36 @@
+==========================================================
+              Mountain Gardens Nursery & Pet              
+                   503 S. Curry Street                    
+                   Tehachapi, CA 93561                    
+                      (661) 822-4960                      
+
+          Growing Naturally with You Since 1980           
+==========================================================
+Transaction: TXN20251128210811
+Date: 2025-11-28    Time: 21:10:19
+Cashier: richard (ID: 1001)
+----------------------------------------------------------
+[Plant > Tree]
+1x Vanderwolf Pine (15 Gal)
+   @ $199.99 = $199.99
+   Tax: $16.50 | Total: $216.49
+
+[Animal > Other Animal]
+1x mouse (s)
+   @ $3.99 = $3.99
+   Tax: $0.33 | Total: $4.32
+
+----------------------------------------------------------
+Subtotal:       $    203.98
+Tax (8.25%):    $     16.83
+==========================================================
+TOTAL:          $    220.81
+----------------------------------------------------------
+Paid (Cash):   $    300.00
+Change:         $     79.19
+----------------------------------------------------------
+Note: great sale, thats one for me guys
+==========================================================
+
+    Your Family's Source for Quality Plants & Pet Care    
+               Thank you for your business!               

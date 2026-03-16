@@ -1,0 +1,10 @@
+[ESCALATION] {{agent_slug}}
+Task: {{task_id}}
+Issue: {{problem}}
+What I tried:
+- {{attempt_1}}
+- {{attempt_2}}
+Blocked by:
+- {{dependency}}
+Need from {{target_agent}}:
+{{specific request}}

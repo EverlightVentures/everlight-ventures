@@ -1,0 +1,9 @@
+[APPROVAL REQUEST] {{agent_slug}}
+Task: {{task_id}}
+Decision Needed: {{what needs approval}}
+Options:
+1) {{option_1}}
+2) {{option_2}}
+Recommendation: {{recommended_option}}
+Impact: {{revenue/speed/risk note}}
+Deadline: {{time}}

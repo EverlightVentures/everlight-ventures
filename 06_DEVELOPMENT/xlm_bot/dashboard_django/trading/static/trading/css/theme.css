@@ -1,0 +1,1810 @@
+/* =====================================================================
+   UNIFIED LUXURY TRADING THEME
+   Merged from: Hive Mind Dashboard + XLM Bot Streamlit Dashboard
+   ===================================================================== */
+
+/* =====================================================================
+   CSS VARIABLES
+   Foundation: Hive Mind luxury palette
+   Extensions: Trading-specific colors
+   ===================================================================== */
+:root {
+  /* -- Backgrounds -- */
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #0f0f18;
+  --bg-tertiary: #141420;
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --bg-card-hover: rgba(255, 255, 255, 0.05);
+
+  /* -- Gold (Hive signature) -- */
+  --gold: #c9a84c;
+  --gold-dim: #8b7635;
+  --gold-bright: #e5c76b;
+  --gold-glow: rgba(201, 168, 76, 0.25);
+
+  /* -- Purple (agent accent) -- */
+  --purple: #8b5cf6;
+  --purple-dim: #6d3fd0;
+  --purple-glow: rgba(139, 92, 246, 0.2);
+
+  /* -- Text -- */
+  --text-primary: #e8e6e3;
+  --text-secondary: #9ca3af;
+  --text-muted: #6b7280;
+
+  /* -- Borders -- */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-hover: rgba(255, 255, 255, 0.14);
+
+  /* -- Glass -- */
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: 12px;
+
+  /* -- Layout -- */
+  --sidebar-width: 260px;
+  --topbar-height: 64px;
+
+  /* -- Fonts: Primary (Hive) -- */
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
+
+  /* -- Fonts: Alternative (XLM Trading) -- */
+  --font-trading: 'Sora', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-trading-heading: 'Fraunces', serif;
+
+  /* -- Agent colors -- */
+  --agent-claude: #8b5cf6;
+  --agent-gemini: #22d3ee;
+  --agent-codex: #22c55e;
+  --agent-perplexity: #f59e0b;
+
+  /* -- Trading-specific colors -- */
+  --long: #34d399;
+  --short: #f87171;
+  --amber: #f59e0b;
+  --blue: #60a5fa;
+
+  /* -- Easing -- */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-base: 0.2s var(--ease-out-expo);
+}
+
+
+/* =====================================================================
+   RESET & BASE
+   ===================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--text-primary);
+}
+
+a {
+  color: var(--gold);
+  text-decoration: none;
+  transition: color var(--transition-base);
+}
+a:hover {
+  color: var(--gold-bright);
+}
+
+
+/* =====================================================================
+   SCROLLBAR
+   ===================================================================== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--gold-dim);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold-dim) var(--bg-secondary);
+}
+
+
+/* =====================================================================
+   LAYOUT -- SIDEBAR + MAIN
+   ===================================================================== */
+.hive-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+
+/* =====================================================================
+   SIDEBAR
+   ===================================================================== */
+.hive-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  background: var(--glass-bg);
+  border-right: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: transform 0.35s var(--ease-out-expo);
+}
+
+/* Subtle gradient accent on the right border */
+.hive-sidebar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: -1px;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--gold-dim) 20%,
+    var(--gold) 50%,
+    var(--gold-dim) 80%,
+    transparent 100%
+  );
+  opacity: 0.4;
+}
+
+/* -- Logo Area -- */
+.sidebar-logo {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sidebar-logo-mark {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.sidebar-hexicon {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sidebar-hexicon svg {
+  width: 38px;
+  height: 38px;
+}
+
+.sidebar-hexicon .hex-fill {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 1.5;
+  opacity: 0.7;
+}
+
+.sidebar-title {
+  font-family: var(--font-heading);
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.02em;
+  line-height: 1.1;
+}
+
+.sidebar-subtitle {
+  font-family: var(--font-body);
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-top: 4px;
+  padding-left: 50px;
+}
+
+/* -- Nav Links -- */
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 12px;
+}
+
+.sidebar-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  margin-bottom: 2px;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all var(--transition-base);
+  position: relative;
+  border-left: 3px solid transparent;
+}
+
+.sidebar-nav-link:hover {
+  color: var(--text-primary);
+  background: rgba(201, 168, 76, 0.06);
+  box-shadow: 0 0 20px rgba(201, 168, 76, 0.08);
+}
+
+.sidebar-nav-link.active {
+  color: var(--gold);
+  background: rgba(201, 168, 76, 0.1);
+  border-left-color: var(--gold);
+}
+
+.sidebar-nav-link i {
+  width: 20px;
+  text-align: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.sidebar-nav-link.active i {
+  color: var(--gold);
+}
+
+/* -- Agent Status (bottom section) -- */
+.sidebar-agents {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.sidebar-agents-title {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+
+.agent-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+}
+
+.agent-pulse-dot {
+  position: relative;
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+}
+
+.agent-pulse-dot .dot-core {
+  position: absolute;
+  inset: 2px;
+  border-radius: 50%;
+}
+
+.agent-pulse-dot .dot-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  opacity: 0.5;
+  animation: hivePulse 2s ease-in-out infinite;
+}
+
+.agent-status-label {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.sidebar-version {
+  padding: 10px 20px 16px;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+
+/* =====================================================================
+   MAIN CONTENT
+   ===================================================================== */
+.hive-main {
+  flex: 1;
+  margin-left: var(--sidebar-width);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* -- Top Bar -- */
+.hive-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--topbar-height);
+  padding: 0 32px;
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.topbar-page-title {
+  font-family: var(--font-heading);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.topbar-breadcrumb {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.topbar-breadcrumb a {
+  color: var(--text-muted);
+}
+.topbar-breadcrumb a:hover {
+  color: var(--gold);
+}
+
+.topbar-breadcrumb .sep {
+  margin: 0 6px;
+  opacity: 0.4;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.topbar-clock {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 4px;
+  transition: color var(--transition-base);
+}
+.hamburger-btn:hover {
+  color: var(--gold);
+}
+
+/* -- Content Area -- */
+.hive-content {
+  flex: 1;
+  padding: 28px 32px;
+  animation: contentFadeIn 0.4s ease-out;
+}
+
+/* -- Footer -- */
+.hive-footer {
+  padding: 20px 32px;
+  text-align: center;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-subtle);
+  opacity: 0.6;
+}
+
+.hive-footer span {
+  color: var(--gold-dim);
+}
+
+
+/* =====================================================================
+   GLASS CARDS -- Utility class for child templates
+   ===================================================================== */
+.glass-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  padding: 24px;
+  transition: all var(--transition-base);
+}
+
+.glass-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-hover);
+  border-top-color: var(--gold-dim);
+}
+
+
+/* =====================================================================
+   LOADING OVERLAY
+   ===================================================================== */
+.hive-loader-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 32px;
+  background: rgba(10, 10, 15, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.hive-loader-overlay.visible {
+  display: flex;
+}
+
+/* Hexagonal spinner */
+.hex-spinner {
+  width: 72px;
+  height: 72px;
+  position: relative;
+}
+
+.hex-spinner svg {
+  width: 72px;
+  height: 72px;
+  animation: hexSpin 2.5s linear infinite;
+}
+
+.hex-spinner .hex-stroke {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 2;
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  animation: hexDash 2.5s ease-in-out infinite;
+}
+
+.hex-spinner .hex-glow {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 4;
+  opacity: 0.15;
+  filter: blur(4px);
+}
+
+/* Affirmation text */
+.loader-affirmation {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  font-weight: 400;
+  color: var(--text-secondary);
+  letter-spacing: 0.04em;
+  text-align: center;
+  min-height: 1.5em;
+  opacity: 0;
+  animation: affirmFadeIn 0.5s ease forwards;
+}
+
+/* Progress shimmer bar */
+.loader-progress {
+  width: 240px;
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  position: relative;
+}
+
+.loader-progress-bar {
+  position: absolute;
+  top: 0;
+  left: -50%;
+  width: 50%;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gold-dim),
+    var(--gold),
+    var(--gold-dim),
+    transparent
+  );
+  animation: shimmerSlide 1.8s ease-in-out infinite;
+}
+
+
+/* =====================================================================
+   TOAST NOTIFICATIONS
+   ===================================================================== */
+.hive-toast-area {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  max-width: 380px;
+}
+
+.hive-toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: 0.84rem;
+  color: var(--text-primary);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  animation: toastSlideIn 0.35s var(--ease-out-expo);
+  transition: all 0.3s ease;
+}
+
+.hive-toast.removing {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.hive-toast.toast-success {
+  border-left: 3px solid #22c55e;
+}
+.hive-toast.toast-success .toast-icon {
+  color: #22c55e;
+}
+
+.hive-toast.toast-error {
+  border-left: 3px solid #ef4444;
+}
+.hive-toast.toast-error .toast-icon {
+  color: #ef4444;
+}
+
+.hive-toast.toast-warning {
+  border-left: 3px solid #f59e0b;
+}
+.hive-toast.toast-warning .toast-icon {
+  color: #f59e0b;
+}
+
+.hive-toast.toast-info {
+  border-left: 3px solid var(--purple);
+}
+.hive-toast.toast-info .toast-icon {
+  color: var(--purple);
+}
+
+.toast-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.toast-message {
+  flex: 1;
+  line-height: 1.45;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0;
+  flex-shrink: 0;
+  transition: color var(--transition-base);
+}
+.toast-close:hover {
+  color: var(--text-primary);
+}
+
+
+/* =====================================================================
+   UTILITY CLASSES (Hive)
+   ===================================================================== */
+.text-gold { color: var(--gold); }
+.text-purple { color: var(--purple); }
+.text-muted { color: var(--text-muted); }
+.text-secondary { color: var(--text-secondary); }
+.font-heading { font-family: var(--font-heading); }
+.font-body { font-family: var(--font-body); }
+
+
+/* =====================================================================
+   TRADING BACKGROUND -- Radial gradient atmosphere
+   (replaces .stApp from Streamlit)
+   ===================================================================== */
+.trading-bg {
+  background:
+    radial-gradient(800px 400px at 15% 8%, rgba(251, 191, 36, 0.12), rgba(0, 0, 0, 0) 50%),
+    radial-gradient(800px 400px at 85% 15%, rgba(34, 197, 94, 0.10), rgba(0, 0, 0, 0) 50%),
+    radial-gradient(800px 500px at 50% 90%, rgba(59, 130, 246, 0.08), rgba(0, 0, 0, 0) 50%),
+    linear-gradient(180deg, #060810 0%, #0a0f1a 60%, #060810 100%);
+}
+
+
+/* =====================================================================
+   MAIN TITLE & BRAND (XLM Trading)
+   ===================================================================== */
+.main-title {
+  font-size: 2.2rem;
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  margin-bottom: 0;
+  padding: 20px 0 5px 0;
+  animation: glow 4s ease-in-out infinite;
+}
+.main-title span {
+  color: var(--amber);
+  font-weight: 700;
+  background: linear-gradient(90deg, #f59e0b, #fbbf24, #f59e0b);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 3s linear infinite;
+}
+
+.brand {
+  font-family: var(--font-trading-heading);
+  font-size: 2.4rem;
+  letter-spacing: 4px;
+  color: #e5e7eb;
+  margin: 0;
+  animation: glow 5s ease-in-out infinite;
+}
+.brand span {
+  color: #fbbf24;
+  font-weight: 800;
+  background: linear-gradient(90deg, #fbbf24, #fff, #fbbf24);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shine 4s linear infinite;
+}
+.brand-sub {
+  margin-top: 6px;
+  color: rgba(203, 213, 225, 0.82);
+  font-size: 0.82rem;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+
+/* =====================================================================
+   TOP STRIP (XLM Trading)
+   ===================================================================== */
+.top-strip {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.strip-item {
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(8, 12, 20, 0.45);
+  min-width: 150px;
+  transition: border-color 200ms ease;
+}
+.strip-item:hover {
+  border-color: rgba(148, 163, 184, 0.10);
+}
+.strip-k {
+  color: rgba(148, 163, 184, 0.88);
+  font-size: 0.72rem;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+.strip-v {
+  color: #e5e7eb;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+
+/* =====================================================================
+   KPI BAR (Coinbase Truth + Bot Analytics)
+   ===================================================================== */
+.kpi-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+  justify-content: center;
+}
+.kpi-card {
+  background: linear-gradient(135deg, rgba(12, 16, 24, 0.85), rgba(20, 24, 36, 0.80));
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 14px;
+  padding: 10px 14px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  min-width: 100px;
+  flex: 1 1 100px;
+  position: relative;
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+}
+.kpi-card:hover {
+  border-color: rgba(148, 163, 184, 0.12);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+.kpi-label {
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: rgba(148, 163, 184, 0.65);
+  font-weight: 500;
+}
+.kpi-value {
+  color: #e5e7eb;
+  font-size: 1.08rem;
+  font-weight: 600;
+  margin-top: 2px;
+  white-space: nowrap;
+}
+.kpi-sub {
+  font-size: 9px;
+  color: rgba(148, 163, 184, 0.5);
+  margin-top: 1px;
+}
+.src-badge {
+  font-size: 7px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  opacity: 0.55;
+  font-weight: 600;
+}
+.src-cb { color: var(--long); }
+.src-bot { color: #fbbf24; }
+
+
+/* =====================================================================
+   TRUTH BANNER (Exchange Position Truth)
+   ===================================================================== */
+.truth-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  margin: 6px 0;
+}
+.truth-long {
+  background: rgba(16, 185, 129, 0.04);
+  border: 1px solid rgba(16, 185, 129, 0.12);
+  color: rgba(52, 211, 153, 0.90);
+}
+.truth-short {
+  background: rgba(239, 68, 68, 0.04);
+  border: 1px solid rgba(239, 68, 68, 0.12);
+  color: rgba(248, 113, 113, 0.90);
+}
+.truth-none {
+  background: rgba(148, 163, 184, 0.03);
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  color: rgba(148, 163, 184, 0.75);
+}
+.truth-label {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+
+/* =====================================================================
+   STALE BANNER (Data Freshness Warnings)
+   ===================================================================== */
+.stale-banner {
+  text-align: center;
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  margin: 4px 0;
+}
+.stale-warn {
+  background: rgba(245, 158, 11, 0.05);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+  color: rgba(251, 191, 36, 0.85);
+}
+.stale-danger {
+  background: rgba(239, 68, 68, 0.05);
+  border: 1px solid rgba(239, 68, 68, 0.15);
+  color: rgba(248, 113, 113, 0.85);
+  animation: pulseGlow 3s ease-in-out infinite;
+}
+
+
+/* =====================================================================
+   BOT ANALYTICS HEADER & AS-OF
+   ===================================================================== */
+.bot-analytics-header {
+  font-size: 8px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: rgba(251, 191, 36, 0.5);
+  font-weight: 600;
+  margin: 10px 0 2px 4px;
+}
+.as-of {
+  text-align: center;
+  font-size: 9px;
+  color: rgba(148, 163, 184, 0.4);
+  letter-spacing: 0.5px;
+  margin: 2px 0 6px;
+}
+
+
+/* =====================================================================
+   PANEL & SIDE TITLES
+   ===================================================================== */
+.panel-title {
+  color: rgba(226, 232, 240, 0.9);
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin: 8px 0 10px 0;
+}
+
+.side-title {
+  font-family: var(--font-trading-heading);
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  color: rgba(226, 232, 240, 0.92);
+  margin: 6px 0 10px 0;
+}
+.side-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 12px 0;
+}
+.side-kv {
+  color: rgba(148, 163, 184, 0.88);
+  font-size: 0.70rem;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  margin-top: 10px;
+}
+.side-v {
+  color: rgba(226, 232, 240, 0.92);
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-top: 3px;
+}
+
+
+/* =====================================================================
+   KPI (Sidebar Variant)
+   ===================================================================== */
+.kpi {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(8, 12, 20, 0.45);
+  margin-bottom: 8px;
+}
+.kpi.good { border-color: rgba(34, 197, 94, 0.15); }
+.kpi.warn { border-color: rgba(251, 191, 36, 0.15); }
+.kpi.bad  { border-color: rgba(248, 113, 113, 0.15); }
+
+/* Sidebar KPI overrides (larger text for standalone KPIs) */
+.kpi > .kpi-label {
+  color: rgba(148, 163, 184, 0.88);
+  font-size: 0.70rem;
+  letter-spacing: 1.4px;
+}
+.kpi > .kpi-value {
+  color: rgba(226, 232, 240, 0.92);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+
+/* =====================================================================
+   FOOTER (XLM Trading variant)
+   ===================================================================== */
+.footer {
+  text-align: center;
+  color: rgba(148, 163, 184, 0.8);
+  font-size: 0.70rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 10px 0 0 0;
+}
+
+
+/* =====================================================================
+   METRIC & LABEL (simple large-text display)
+   ===================================================================== */
+.metric {
+  font-size: 1.8rem;
+  color: #f7f7f8;
+}
+.label {
+  color: #7b848e;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+
+/* =====================================================================
+   PILLS (Status Badges)
+   ===================================================================== */
+.pill {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--amber);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+.pill.ok {
+  background: rgba(16, 185, 129, 0.10);
+  color: rgba(52, 211, 153, 0.90);
+  animation: pulseGlow 2.2s ease-in-out infinite;
+}
+.pill.danger {
+  background: rgba(248, 113, 113, 0.10);
+  color: rgba(248, 113, 113, 0.90);
+}
+.pill.gold {
+  background: rgba(245, 158, 11, 0.12);
+  color: rgba(251, 191, 36, 0.90);
+}
+
+/* Inline color helpers */
+.danger { color: var(--short); }
+.ok     { color: var(--long); }
+.gold   { color: #fbbf24; }
+.muted  { color: #6b7280; }
+.green  { color: var(--long); }
+.red    { color: var(--short); }
+.amber  { color: var(--amber); }
+.blue   { color: var(--blue); }
+
+
+/* =====================================================================
+   SCOREBOARD (Win/Loss/Rate/PnL)
+   ===================================================================== */
+.scoreboard {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  padding: 20px;
+  margin: 12px 0;
+  background: rgba(10, 14, 22, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+}
+.score-item { text-align: center; }
+.score-num {
+  font-size: 2.2rem;
+  font-weight: 300;
+  letter-spacing: -1px;
+}
+.score-num.wins    { color: var(--long); }
+.score-num.losses  { color: var(--short); }
+.score-num.rate    { color: var(--amber); }
+.score-num.pnl-pos { color: var(--long); }
+.score-num.pnl-neg { color: var(--short); }
+.score-label {
+  color: #555;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-top: 4px;
+}
+
+
+/* =====================================================================
+   CELEBRATION BANNER
+   ===================================================================== */
+.celebration {
+  text-align: center;
+  padding: 20px;
+  margin: 10px 0;
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(16, 185, 129, 0.05) 0%, rgba(12, 16, 24, 0.85) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.18);
+}
+.celebration .headline {
+  font-size: 1.4rem;
+  color: var(--long);
+  font-weight: 400;
+  letter-spacing: 1px;
+}
+.celebration .detail {
+  color: #999;
+  font-size: 0.85rem;
+  margin-top: 6px;
+}
+.celebration .detail strong { color: var(--long); }
+
+
+/* =====================================================================
+   TRADE LOG ROWS
+   ===================================================================== */
+.trade-log-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  margin: 3px 0;
+  background: rgba(10, 14, 22, 0.55);
+  border-radius: 8px;
+  border-left: 2px solid;
+  font-size: 0.8rem;
+  color: rgba(148, 163, 184, 0.75);
+}
+.trade-log-row.win   { border-left-color: var(--long); }
+.trade-log-row.loss  { border-left-color: var(--short); }
+.trade-log-row.entry { border-left-color: var(--blue); }
+.trade-log-row strong { color: #e5e5e5; font-weight: 500; }
+.trade-log-row .green { color: var(--long); }
+.trade-log-row .red   { color: var(--short); }
+.trade-log-row .blue  { color: var(--blue); }
+
+
+/* =====================================================================
+   STATUS BANNER (Watching / Ready / In-Trade)
+   ===================================================================== */
+.status-banner {
+  text-align: center;
+  padding: 24px 20px;
+  border-radius: 16px;
+  margin: 8px 0 16px 0;
+}
+.status-banner.watching {
+  background: linear-gradient(160deg, rgba(245, 158, 11, 0.03) 0%, rgba(12, 16, 24, 0.8) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.10);
+}
+.status-banner.ready {
+  background: linear-gradient(160deg, rgba(16, 185, 129, 0.04) 0%, rgba(12, 16, 24, 0.8) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
+.status-banner.in-trade {
+  background: linear-gradient(160deg, rgba(59, 130, 246, 0.04) 0%, rgba(12, 16, 24, 0.8) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+}
+.status-icon { font-size: 1.8rem; margin-bottom: 8px; }
+.status-headline {
+  font-size: 1.3rem;
+  font-weight: 400;
+  color: #fff;
+  letter-spacing: 1px;
+  margin-bottom: 6px;
+}
+.status-body {
+  color: #999;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  max-width: 600px;
+  margin: 0 auto;
+}
+.status-body strong { color: #e5e5e5; font-weight: 500; }
+.status-body .green { color: var(--long); }
+.status-body .red   { color: var(--short); }
+.status-body .amber { color: var(--amber); }
+.status-body .blue  { color: var(--blue); }
+
+
+/* =====================================================================
+   FEED MINI (Compact activity rows)
+   ===================================================================== */
+.feed-mini {
+  background: rgba(10, 14, 22, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.025);
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin: 4px 0;
+  font-size: 0.78rem;
+  color: rgba(148, 163, 184, 0.7);
+  line-height: 1.5;
+}
+.feed-mini strong { color: #bbb; font-weight: 500; }
+.feed-mini .green { color: var(--long); }
+.feed-mini .red   { color: var(--short); }
+.feed-mini .amber { color: var(--amber); }
+
+
+/* =====================================================================
+   INTEL CARD (Market Intelligence)
+   ===================================================================== */
+.intel-card {
+  background: rgba(10, 14, 22, 0.90);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  padding: 16px 20px;
+  margin: 6px 0;
+}
+.intel-card .intel-title {
+  color: #666;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 2.5px;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+.intel-event {
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  font-size: 0.8rem;
+  color: #888;
+  line-height: 1.5;
+}
+.intel-event:last-child { border-bottom: none; }
+.intel-event .time { color: #555; font-size: 0.7rem; margin-right: 8px; }
+.intel-event .green { color: var(--long); }
+.intel-event .red   { color: var(--short); }
+.intel-event .amber { color: var(--amber); }
+.intel-event .blue  { color: var(--blue); }
+.intel-event strong { color: #ccc; font-weight: 500; }
+
+
+/* =====================================================================
+   INFO ROW (Centered key-value pairs)
+   ===================================================================== */
+.info-row {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  flex-wrap: wrap;
+  padding: 10px 0;
+  font-size: 0.75rem;
+  color: #555;
+}
+.info-row .item { text-align: center; }
+.info-row .val { color: #999; font-weight: 500; }
+
+
+/* =====================================================================
+   MAJOR BANNER (Prominent info blocks)
+   ===================================================================== */
+.major-banner {
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin: 6px 0 10px 0;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(12, 16, 24, 0.50);
+}
+.major-banner .k {
+  font-size: 0.68rem;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #9ca3af;
+  margin-bottom: 4px;
+}
+.major-banner .v {
+  font-size: 1.0rem;
+  font-weight: 700;
+  color: #f9fafb;
+  margin-bottom: 2px;
+}
+.major-banner .d {
+  font-size: 0.78rem;
+  color: #d1d5db;
+}
+.major-banner.good { border-color: rgba(52, 211, 153, 0.20); background: rgba(6, 78, 59, 0.18); }
+.major-banner.bad  { border-color: rgba(248, 113, 113, 0.22); background: rgba(127, 29, 29, 0.18); }
+.major-banner.warn { border-color: rgba(245, 158, 11, 0.22); background: rgba(120, 53, 15, 0.18); }
+.major-banner.info { border-color: rgba(96, 165, 250, 0.40); background: rgba(30, 58, 138, 0.30); }
+
+
+/* =====================================================================
+   MAJOR FEED ITEMS
+   ===================================================================== */
+.major-feed { margin-top: 8px; }
+.major-item {
+  border-radius: 10px;
+  padding: 8px 10px;
+  margin: 6px 0;
+  border-left: 4px solid rgba(255, 255, 255, 0.18);
+  background: rgba(17, 24, 39, 0.50);
+}
+.major-item .t {
+  font-size: 0.68rem;
+  color: #9ca3af;
+  margin-bottom: 2px;
+}
+.major-item .h {
+  font-size: 0.84rem;
+  color: #f3f4f6;
+  font-weight: 650;
+  margin-bottom: 1px;
+}
+.major-item .s {
+  font-size: 0.75rem;
+  color: #d1d5db;
+}
+.major-item.good { border-left-color: var(--long); }
+.major-item.bad  { border-left-color: var(--short); }
+.major-item.warn { border-left-color: var(--amber); }
+.major-item.info { border-left-color: var(--blue); }
+
+
+/* =====================================================================
+   THOUGHT FEED (AI Thoughts / Decision Log)
+   ===================================================================== */
+.thought-feed {
+  margin-top: 8px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.thought-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 6px 0 2px 0;
+}
+.thought-toolbar .live {
+  font-size: 0.70rem;
+  color: #9ca3af;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.thought-toolbar .live .dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--long);
+  margin-right: 6px;
+  box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.5);
+  animation: pulse 1.6s infinite;
+  vertical-align: middle;
+}
+
+.thought-post {
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin: 8px 0;
+  border-left: 4px solid rgba(255, 255, 255, 0.16);
+  background: rgba(15, 23, 42, 0.55);
+}
+.thought-post .t {
+  font-size: 0.68rem;
+  color: #9ca3af;
+  margin-bottom: 4px;
+}
+.thought-post .h {
+  font-size: 0.80rem;
+  color: #f3f4f6;
+  font-weight: 650;
+  margin-bottom: 3px;
+}
+.thought-post .b {
+  font-size: 0.80rem;
+  color: #e5e7eb;
+  line-height: 1.45;
+}
+.thought-post .m {
+  font-size: 0.72rem;
+  color: #cbd5e1;
+  margin-top: 5px;
+}
+.thought-post .new-pill {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  font-size: 0.62rem;
+  color: #111827;
+  background: var(--long);
+  letter-spacing: 0.7px;
+  font-weight: 700;
+}
+.thought-post.good { border-left-color: var(--long); background: rgba(6, 78, 59, 0.30); }
+.thought-post.bad  { border-left-color: var(--short); background: rgba(127, 29, 29, 0.30); }
+.thought-post.warn { border-left-color: var(--amber); background: rgba(120, 53, 15, 0.30); }
+.thought-post.info { border-left-color: var(--blue); background: rgba(30, 58, 138, 0.26); }
+
+
+/* =====================================================================
+   BROADCAST TICKER (Horizontal scrolling)
+   ===================================================================== */
+.ticker-wrap {
+  overflow: hidden;
+  white-space: nowrap;
+  background: linear-gradient(180deg, rgba(10, 15, 28, 0.92) 0%, rgba(17, 24, 39, 0.88) 100%);
+  border-radius: 4px;
+  padding: 0;
+  margin: 6px 0;
+  position: relative;
+  border-top: 1px solid rgba(59, 130, 246, 0.15);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.08);
+}
+/* Fade edges -- smooth broadcast look */
+.ticker-wrap::before,
+.ticker-wrap::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 40px;
+  z-index: 3;
+  pointer-events: none;
+}
+.ticker-wrap::before {
+  left: 0;
+  background: linear-gradient(90deg, rgba(10, 15, 28, 0.98) 0%, transparent 100%);
+}
+.ticker-wrap::after {
+  right: 0;
+  background: linear-gradient(270deg, rgba(10, 15, 28, 0.98) 0%, transparent 100%);
+}
+.ticker-wrap .ticker-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  z-index: 4;
+  background: linear-gradient(90deg, rgba(10, 15, 28, 0.98) 60%, rgba(10, 15, 28, 0.85) 85%, transparent);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+.ticker-label.ev-label  { color: var(--blue); }
+.ticker-label.dec-label { color: #a78bfa; }
+
+.ticker-track {
+  display: inline-flex;
+  gap: 0;
+  padding-left: 90px;
+  animation: ticker-scroll var(--ticker-speed, 50s) linear infinite;
+}
+.ticker-track:hover { animation-play-state: paused; cursor: default; }
+
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: #e5e7eb;
+  flex-shrink: 0;
+  padding: 7px 0;
+  font-family: 'SF Mono', 'Consolas', 'Monaco', monospace;
+  letter-spacing: -0.01em;
+}
+.ticker-item .ts { color: #4b5563; font-size: 10px; font-weight: 400; }
+.ticker-item b   { font-weight: 700; }
+
+.ticker-sep {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 14px;
+  color: rgba(75, 85, 99, 0.4);
+  font-size: 10px;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.ticker-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.ticker-dot.good    { background: #10b981; box-shadow: 0 0 4px rgba(16, 185, 129, 0.4); }
+.ticker-dot.bad     { background: #ef4444; box-shadow: 0 0 4px rgba(239, 68, 68, 0.4); }
+.ticker-dot.warn    { background: #f59e0b; box-shadow: 0 0 4px rgba(245, 158, 11, 0.3); }
+.ticker-dot.info    { background: #60a5fa; box-shadow: 0 0 4px rgba(96, 165, 250, 0.3); }
+.ticker-dot.neutral { background: #6b7280; }
+.ticker-dot.live    { animation: ticker-pulse 1.5s ease-in-out infinite; }
+
+.ticker-tag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  text-transform: uppercase;
+}
+.ticker-tag.entry  { background: rgba(16, 185, 129, 0.15); color: var(--long); }
+.ticker-tag.exit   { background: rgba(239, 68, 68, 0.15); color: var(--short); }
+.ticker-tag.signal { background: rgba(96, 165, 250, 0.12); color: #93c5fd; }
+.ticker-tag.block  { background: rgba(107, 114, 128, 0.15); color: #9ca3af; }
+.ticker-tag.alert  { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+
+.ticker-val       { color: #fbbf24; font-weight: 600; }
+.ticker-dir-long  { color: var(--long); font-weight: 600; }
+.ticker-dir-short { color: var(--short); font-weight: 600; }
+
+
+/* =====================================================================
+   CLAUDE CHAT (AI Advisor Panel)
+   ===================================================================== */
+.claude-chat-wrap {
+  max-width: 800px;
+  margin: 0 auto;
+}
+.claude-msg {
+  margin: 8px 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+.claude-msg.user {
+  background: rgba(96, 165, 250, 0.12);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+  margin-left: 40px;
+}
+.claude-msg.assistant {
+  background: rgba(167, 139, 250, 0.10);
+  border: 1px solid rgba(167, 139, 250, 0.15);
+  margin-right: 40px;
+}
+.claude-msg .msg-role {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.claude-msg.user .msg-role      { color: var(--blue); }
+.claude-msg.assistant .msg-role { color: #a78bfa; }
+.claude-msg .msg-text { color: #e5e7eb; }
+
+.claude-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.claude-header .claude-logo {
+  font-size: 22px;
+  color: #a78bfa;
+}
+.claude-header .claude-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #e5e7eb;
+}
+.claude-header .claude-sub {
+  font-size: 11px;
+  color: #6b7280;
+}
+.claude-ctx-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  background: rgba(17, 24, 39, 0.6);
+  border-radius: 8px;
+  border: 1px solid rgba(107, 114, 128, 0.15);
+}
+.claude-ctx-bar .ctx-chip {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(107, 114, 128, 0.15);
+  color: #9ca3af;
+}
+
+
+/* =====================================================================
+   METRICS STRIP (Compact horizontal metrics)
+   ===================================================================== */
+.metrics-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  padding: 8px 12px;
+  margin: 4px 0 8px;
+  background: rgba(17, 24, 39, 0.5);
+  border-radius: 10px;
+  border: 1px solid rgba(107, 114, 128, 0.15);
+}
+.metrics-strip .ms-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 70px;
+  padding: 2px 6px;
+}
+.metrics-strip .ms-k {
+  font-size: 8px;
+  color: #6b7280;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.metrics-strip .ms-v {
+  font-size: 12px;
+  color: #d1d5db;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.metrics-strip .ms-v.good { color: #10b981; }
+.metrics-strip .ms-v.bad  { color: #ef4444; }
+.metrics-strip .ms-v.warn { color: var(--amber); }
+
+
+/* =====================================================================
+   KEYFRAME ANIMATIONS
+   ===================================================================== */
+
+/* XLM Trading: Title glow */
+@keyframes glow {
+  0%, 100% { text-shadow: 0 0 10px rgba(251, 191, 36, 0.3), 0 0 20px rgba(251, 191, 36, 0.2); }
+  50%      { text-shadow: 0 0 20px rgba(251, 191, 36, 0.6), 0 0 30px rgba(251, 191, 36, 0.4); }
+}
+
+/* XLM Trading: Brand shine */
+@keyframes shine {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+/* XLM Trading: Status pulse glow */
+@keyframes pulseGlow {
+  0%   { box-shadow: 0 0 0 rgba(34, 197, 94, 0.0); }
+  50%  { box-shadow: 0 0 24px rgba(34, 197, 94, 0.12); }
+  100% { box-shadow: 0 0 0 rgba(34, 197, 94, 0.0); }
+}
+
+/* XLM Trading: Live dot pulse */
+@keyframes pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55); }
+  70%  { box-shadow: 0 0 0 8px rgba(52, 211, 153, 0.0); }
+  100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.0); }
+}
+
+/* XLM Trading: Ticker horizontal scroll */
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* XLM Trading: Ticker dot pulse */
+@keyframes ticker-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.5; }
+}
+
+/* Hive: Agent status pulse */
+@keyframes hivePulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* Hive: Hex spinner rotation */
+@keyframes hexSpin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Hive: Hex spinner dash draw */
+@keyframes hexDash {
+  0%   { stroke-dashoffset: 300; }
+  50%  { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -300; }
+}
+
+/* Hive: Loader shimmer slide */
+@keyframes shimmerSlide {
+  0%   { left: -50%; }
+  100% { left: 100%; }
+}
+
+/* Hive: Affirmation text fade-in */
+@keyframes affirmFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hive: Affirmation text fade-out */
+@keyframes affirmFadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+/* Hive: Content area fade-in */
+@keyframes contentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hive: Toast slide-in */
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
+/* =====================================================================
+   RESPONSIVE -- Mobile sidebar collapse
+   ===================================================================== */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 768px) {
+  .hive-sidebar {
+    transform: translateX(-100%);
+  }
+
+  .hive-sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay.open {
+    display: block;
+  }
+
+  .hive-main {
+    margin-left: 0;
+  }
+
+  .hamburger-btn {
+    display: block;
+  }
+
+  .hive-content {
+    padding: 20px 16px;
+  }
+
+  .hive-topbar {
+    padding: 0 16px;
+  }
+
+  .topbar-breadcrumb {
+    display: none;
+  }
+
+  .scoreboard {
+    gap: 16px;
+    padding: 16px 10px;
+  }
+
+  .kpi-bar {
+    gap: 6px;
+  }
+
+  .ticker-wrap .ticker-label {
+    display: none;
+  }
+  .ticker-track {
+    padding-left: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .topbar-page-title {
+    font-size: 1.05rem;
+  }
+
+  .topbar-clock {
+    font-size: 0.72rem;
+  }
+
+  .score-num {
+    font-size: 1.6rem;
+  }
+
+  .main-title {
+    font-size: 1.4rem;
+    letter-spacing: 4px;
+  }
+
+  .brand {
+    font-size: 1.6rem;
+  }
+}

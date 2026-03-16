@@ -1,0 +1,4 @@
+#!/bin/bash
+set -euo pipefail
+cd "/mnt/sdcard/AA_MY_DRIVE/xlm_bot" || exit 1
+exec bash ./xpb --config config_trend.yaml "$@"

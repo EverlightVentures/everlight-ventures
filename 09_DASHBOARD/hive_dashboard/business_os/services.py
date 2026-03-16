@@ -120,6 +120,40 @@ DEFAULT_STREAMS = [
 ]
 
 
+def _runtime_pair_score(data_dir: Path, logs_dir: Path) -> int:
+    score = 0
+    for path in (
+        logs_dir / "dashboard_snapshot.json",
+        logs_dir / "decisions.jsonl",
+        logs_dir / "live_tick.json",
+        data_dir / "market_brief.json",
+        data_dir / "state.json",
+    ):
+        try:
+            if path.exists():
+                score = max(score, int(path.stat().st_mtime_ns))
+        except OSError:
+            continue
+    return score
+
+
+def _resolve_xlm_runtime_dirs() -> tuple[Path, Path]:
+    base = WORKSPACE / "06_DEVELOPMENT" / "xlm_bot"
+    pairs = [
+        (base / "data", base / "logs"),
+        (base / "data_trend", base / "logs_trend"),
+        (base / "data_mr", base / "logs_mr"),
+    ]
+    best_data, best_logs = pairs[0]
+    best_score = -1
+    for data_dir, logs_dir in pairs:
+        score = _runtime_pair_score(data_dir, logs_dir)
+        if score > best_score:
+            best_score = score
+            best_data, best_logs = data_dir, logs_dir
+    return best_data, best_logs
+
+
 def _write_jsonl(path: Path, payload: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("a", encoding="utf-8") as handle:
@@ -228,16 +262,27 @@ def _choose_trade_payload(local_payload: dict, remote_payload: dict) -> dict:
     return local_payload or remote_payload or {}
 
 
+def _read_recent_trading_reports(limit: int = 6) -> list[dict]:
+    rows = _read_supabase_rows(
+        "xlm_bot_report_history",
+        params={"select": "*", "order": "created_at.desc", "limit": str(limit)},
+    )
+    return rows if isinstance(rows, list) else []
+
+
 def _collect_trading_watchtower_data() -> dict:
-    snapshot_path = WORKSPACE / "06_DEVELOPMENT" / "xlm_bot" / "logs" / "dashboard_snapshot.json"
-    pulse_path = WORKSPACE / "06_DEVELOPMENT" / "xlm_bot" / "data" / "market_pulse.json"
-    brief_path = WORKSPACE / "06_DEVELOPMENT" / "xlm_bot" / "data" / "market_brief.json"
-    feature_path = WORKSPACE / "06_DEVELOPMENT" / "xlm_bot" / "data" / "feature_snapshot_latest.json"
-    trade_label_path = WORKSPACE / "06_DEVELOPMENT" / "xlm_bot" / "data" / "trade_label_latest.json"
+    data_dir, logs_dir = _resolve_xlm_runtime_dirs()
+    snapshot_path = logs_dir / "dashboard_snapshot.json"
+    pulse_path = data_dir / "market_pulse.json"
+    brief_path = data_dir / "market_brief.json"
+    feature_path = data_dir / "feature_snapshot_latest.json"
+    trade_label_path = data_dir / "trade_label_latest.json"
+    live_tick_path = logs_dir / "live_tick.json"
 
     snapshot = _read_json(snapshot_path)
     feature = _read_json(feature_path)
     trade_label = _read_json(trade_label_path)
+    live_tick = _read_json(live_tick_path)
     pulse_wrapper = _read_json(pulse_path)
     pulse = pulse_wrapper.get("pulse") if isinstance(pulse_wrapper.get("pulse"), dict) else {}
     pulse_components = pulse.get("components") if isinstance(pulse.get("components"), dict) else {}
@@ -331,8 +376,16 @@ def _collect_trading_watchtower_data() -> dict:
     return {
         "data_quality_status": data_quality_status,
         "quality_flags": quality_flags,
+        "runtime_data_dir": str(data_dir.name),
+        "runtime_logs_dir": str(logs_dir.name),
         "bot_state": snapshot.get("state") or feature.get("bot_state") or live_row.get("bot_state") or "unknown",
-        "price": snapshot.get("price") or feature.get("price") or feature.get("live_tick_price"),
+        "price": (
+            live_tick.get("price")
+            or snapshot.get("price")
+            or feature.get("price")
+            or feature.get("live_tick_price")
+        ),
+        "price_ts": live_tick.get("timestamp") or live_tick.get("written_at") or snapshot.get("ts"),
         "direction": snapshot.get("direction") or feature.get("direction") or live_row.get("position_side"),
         "entry_signal": snapshot.get("entry_signal") or feature.get("entry_signal") or live_row.get("entry_signal"),
         "quality_tier": snapshot.get("quality_tier") or feature.get("quality_tier") or live_row.get("quality_tier"),
@@ -351,12 +404,26 @@ def _collect_trading_watchtower_data() -> dict:
         "ai_confidence": feature.get("ai_confidence") or live_row.get("ai_confidence"),
         "last_trade": trade_label if trade_label else None,
         "telemetry_source": "supabase" if live_row else "local",
+        "public_system_state": live_row.get("public_system_state"),
+        "public_setup_state": live_row.get("public_setup_state"),
+        "public_market_climate": live_row.get("public_market_climate"),
+        "public_tick_status": live_row.get("public_tick_status"),
+        "public_data_status": live_row.get("public_data_status"),
+        "public_decision_label": live_row.get("public_decision_label"),
+        "public_pressure_note": live_row.get("public_pressure_note"),
+        "public_status_blurb": live_row.get("public_status_blurb"),
+        "public_decision_age_label": live_row.get("public_decision_age_label"),
+        "public_brief_age_label": live_row.get("public_brief_age_label"),
+        "public_price_age_label": live_row.get("public_price_age_label"),
     }
 
 
 def _collect_blackjack_watchtower_data() -> dict:
     try:
-        from blackjack.models import AdRewardLog, GameSession, GemPackage, PlayerProfile
+        from blackjack.catalog import resolve_gem_package_config
+        from blackjack.checkout_bridge import bridge_enabled as blackjack_bridge_enabled
+        from blackjack.checkout_bridge import package_checkout_ready
+        from blackjack.models import AdRewardLog, GameSession, GemPackage, GemPurchase, PlayerProfile
     except Exception as exc:
         logger.debug("Blackjack watchtower skipped: %s", exc)
         return {
@@ -371,6 +438,7 @@ def _collect_blackjack_watchtower_data() -> dict:
     today = now.date()
     day_ago = now - timedelta(days=1)
     week_ago = now - timedelta(days=7)
+    month_ago = now - timedelta(days=30)
     hour_ago = now - timedelta(hours=1)
 
     settled_sessions = GameSession.objects.exclude(outcome="")
@@ -388,9 +456,21 @@ def _collect_blackjack_watchtower_data() -> dict:
         or 0
     )
     ad_reward_claims_today = AdRewardLog.objects.filter(reward_date=today).count()
-    active_packages = GemPackage.objects.filter(is_active=True)
-    active_gem_packages = active_packages.count()
-    stripe_ready_packages = active_packages.exclude(stripe_price_id="").count()
+    active_packages = [
+        package
+        for package in GemPackage.objects.filter(is_active=True).order_by("price_usd")
+        if resolve_gem_package_config(package).get("is_active", True)
+    ]
+    active_gem_packages = len(active_packages)
+    stripe_ready_packages = sum(
+        1 for package in active_packages if package_checkout_ready(package)
+    )
+    paid_purchases = GemPurchase.objects.filter(status="paid")
+    purchases_today = paid_purchases.filter(verified_at__date=today)
+    purchases_30d = paid_purchases.filter(verified_at__gte=month_ago)
+    gem_revenue_today_cents = purchases_today.aggregate(total=Sum("amount_cents"))["total"] or 0
+    gem_revenue_30d_cents = purchases_30d.aggregate(total=Sum("amount_cents"))["total"] or 0
+    gem_purchases_today = purchases_today.count()
     wagered_today = sessions_today.aggregate(total=Sum("bet_chips"))["total"] or 0
     chips_delta_today = sessions_today.aggregate(total=Sum("chips_delta"))["total"] or 0
     integrity_rejections_today = BusinessEvent.objects.filter(
@@ -405,11 +485,20 @@ def _collect_blackjack_watchtower_data() -> dict:
         created_at__date=today,
     ).count()
 
-    # Detect server-authoritative mode by checking if recent sessions have shoe_seed
-    server_auth_sessions = sessions_24h.exclude(shoe_seed="").exists() if sessions_24h.exists() else False
-    integrity_mode = "server_authoritative" if server_auth_sessions else "partial_server_validation"
+    total_sessions = settled_sessions.count()
+    server_auth_sessions = settled_sessions.exclude(shoe_seed="").exclude(action_log=[]).count()
+    legacy_sessions = max(0, total_sessions - server_auth_sessions)
+    checkout_configured = blackjack_bridge_enabled() or bool(os.environ.get("STRIPE_SECRET_KEY", "").strip())
+
+    if total_sessions == 0:
+        integrity_mode = "provisioned"
+    elif legacy_sessions == 0:
+        integrity_mode = "server_authoritative"
+    else:
+        integrity_mode = "mixed"
+
     monetization_status = "ready"
-    if stripe_ready_packages == 0:
+    if not checkout_configured or stripe_ready_packages == 0:
         monetization_status = "not_ready"
     elif stripe_ready_packages < active_gem_packages:
         monetization_status = "partial"
@@ -419,14 +508,18 @@ def _collect_blackjack_watchtower_data() -> dict:
     if total_players and not sessions_24h.exists():
         data_quality_status = "degraded"
         quality_flags.append("no settled hands in 24h")
+    if not checkout_configured:
+        data_quality_status = "degraded"
+        quality_flags.append("checkout bridge not configured")
     if stripe_ready_packages < active_gem_packages:
         data_quality_status = "degraded"
-        quality_flags.append("stripe pack mapping incomplete")
+        quality_flags.append("some gem packages are not checkout-ready")
     if integrity_rejections_today:
         data_quality_status = "degraded"
         quality_flags.append(f"{integrity_rejections_today} settlement rejection(s) today")
-    if integrity_mode != "server_authoritative":
-        quality_flags.append("double down disabled pending server-auth bet tracking")
+    if integrity_mode == "mixed":
+        data_quality_status = "degraded"
+        quality_flags.append(f"{legacy_sessions} legacy hand(s) missing server-auth metadata")
 
     stream_status = "pilot"
     if sessions_24h.exists():
@@ -456,6 +549,10 @@ def _collect_blackjack_watchtower_data() -> dict:
         "vip_players": vip_players,
         "active_gem_packages": active_gem_packages,
         "stripe_ready_packages": stripe_ready_packages,
+        "checkout_configured": checkout_configured,
+        "gem_purchases_today": gem_purchases_today,
+        "gem_revenue_today_usd": round(gem_revenue_today_cents / 100, 2),
+        "gem_revenue_30d_usd": round(gem_revenue_30d_cents / 100, 2),
         "integrity_rejections_today": integrity_rejections_today,
         "last_hand": (
             {
@@ -471,8 +568,12 @@ def _collect_blackjack_watchtower_data() -> dict:
         ),
         "controls": [
             "duplicate settlement blocked",
-            "card/value reconciliation enforced",
-            "server-authoritative shoe and action log" if server_auth_sessions else "double down disabled until deterministic bet tracking exists",
+            "server-authoritative shoe and action log",
+            (
+                "Supabase Stripe checkout bridge"
+                if blackjack_bridge_enabled()
+                else "native Stripe checkout verification"
+            ) if checkout_configured else "Stripe checkout awaiting live bridge",
         ],
     }
 
@@ -802,12 +903,17 @@ def _sync_blackjack_stream() -> None:
     active_gem_packages = int(watchtower.get("active_gem_packages") or 0)
     stripe_ready_packages = int(watchtower.get("stripe_ready_packages") or 0)
     integrity_rejections_today = int(watchtower.get("integrity_rejections_today") or 0)
+    gem_revenue_today_usd = Decimal(str(watchtower.get("gem_revenue_today_usd") or 0))
+    gem_revenue_30d_usd = Decimal(str(watchtower.get("gem_revenue_30d_usd") or 0))
+    gem_purchases_today = int(watchtower.get("gem_purchases_today") or 0)
+    checkout_configured = bool(watchtower.get("checkout_configured"))
 
     notes_parts = [
         f"Players 24h: {watchtower.get('active_players_24h', 0)}",
         f"Hands 24h: {hands_24h}",
         f"Packages: {stripe_ready_packages}/{active_gem_packages} Stripe-ready",
         f"Integrity: {watchtower.get('integrity_mode')}",
+        f"Gem sales today: ${gem_revenue_today_usd}",
     ]
     if watchtower.get("quality_flags"):
         notes_parts.append("Flags: " + ", ".join(watchtower["quality_flags"]))
@@ -815,8 +921,8 @@ def _sync_blackjack_stream() -> None:
     upsert_revenue_stream(
         "blackjack_arcade",
         status=watchtower.get("stream_status") or "pilot",
-        cash_today_usd=Decimal("0.00"),
-        cash_30d_usd=Decimal("0.00"),
+        cash_today_usd=gem_revenue_today_usd,
+        cash_30d_usd=gem_revenue_30d_usd,
         mrr_usd=Decimal("4.99") * vip_players,
         pending_pipeline_usd=Decimal("0.00"),
         last_event_at=timezone.now(),
@@ -835,13 +941,17 @@ def _sync_blackjack_stream() -> None:
             "ad_reward_claims_today": watchtower.get("ad_reward_claims_today"),
             "vip_players": vip_players,
             "stripe_ready_packages": stripe_ready_packages,
+            "checkout_configured": checkout_configured,
+            "gem_purchases_today": gem_purchases_today,
+            "gem_revenue_today_usd": float(gem_revenue_today_usd),
+            "gem_revenue_30d_usd": float(gem_revenue_30d_usd),
             "integrity_rejections_today": integrity_rejections_today,
             "controls": watchtower.get("controls"),
         },
         notes=" | ".join(notes_parts),
     )
 
-    if watchtower.get("integrity_mode") != "server_authoritative":
+    if watchtower.get("integrity_mode") == "mixed":
         record_alert(
             summary="Blackjack settlement is not fully server-authoritative",
             source="blackjack",
@@ -850,15 +960,15 @@ def _sync_blackjack_stream() -> None:
             entity_type="game",
             entity_id="blackjack",
             detail=(
-                "Duplicate settlement is blocked and hand reconciliation is on, but the Django table "
-                "still accepts client-authored hands instead of a server-authored shoe."
+                "Blackjack now has server-auth gameplay, but some historical sessions still lack the "
+                "shoe/action-log metadata expected by the watchtower."
             ),
             payload={"controls": watchtower.get("controls", [])},
         )
     else:
         resolve_alert("blackjack:integrity:client_auth")
 
-    if stripe_ready_packages < active_gem_packages:
+    if (not checkout_configured) or stripe_ready_packages < active_gem_packages:
         record_alert(
             summary="Blackjack monetization is not Stripe-ready",
             source="blackjack",
@@ -867,8 +977,9 @@ def _sync_blackjack_stream() -> None:
             entity_type="game",
             entity_id="blackjack",
             detail=(
-                f"Only {stripe_ready_packages} of {active_gem_packages} active blackjack gem packages have "
-                "live Stripe price IDs configured."
+                "Stripe checkout is not fully ready for blackjack gem packs. "
+                f"Configured secret: {'yes' if checkout_configured else 'no'}. "
+                f"Checkout-ready packages: {stripe_ready_packages} of {active_gem_packages}."
             ),
         )
     else:
@@ -984,6 +1095,7 @@ def get_ceo_snapshot() -> dict:
     streams = RevenueStream.objects.order_by("name")
     trading_watchtower = get_trading_watchtower()
     blackjack_watchtower = get_blackjack_watchtower()
+    trading_reports = _read_recent_trading_reports()
 
     return {
         "cash_today": cash_today,
@@ -1000,4 +1112,5 @@ def get_ceo_snapshot() -> dict:
         "status_counts": {row["status"]: row["count"] for row in status_counts},
         "trading_watchtower": trading_watchtower,
         "blackjack_watchtower": blackjack_watchtower,
+        "trading_reports": trading_reports,
     }

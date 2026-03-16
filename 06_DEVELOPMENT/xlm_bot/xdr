@@ -1,0 +1,35 @@
+#!/bin/bash
+# xdr - XLM dashboard reset (no .sh)
+# Starts Streamlit under a supervisor loop so it auto-restarts if Streamlit crashes.
+
+set -euo pipefail
+
+BOT_DIR="/mnt/sdcard/AA_MY_DRIVE/xlm_bot"
+VENV="/tmp/xlm_bot_venv"
+PORT="${XLM_DASH_PORT:-8502}"
+DASH_LOG_DIR="${XLM_DASH_LOGS_DIR:-logs}"
+cd "$BOT_DIR" || exit 1
+if [[ "$DASH_LOG_DIR" != /* ]]; then
+  DASH_LOG_DIR="$BOT_DIR/$DASH_LOG_DIR"
+fi
+mkdir -p "$DASH_LOG_DIR"
+
+echo "Stopping existing dashboard..."
+pkill -f "streamlit.*run dashboard.py.*--server.port $PORT" 2>/dev/null || true
+pkill -f "xdr-fg" 2>/dev/null || true
+sleep 1
+
+# Setup venv only when requirements change.
+bash "$BOT_DIR/_venv.sh"
+
+echo "Starting dashboard..."
+LOG_FILE="$DASH_LOG_DIR/dashboard.log"
+touch "$LOG_FILE"
+nohup /bin/sh -c "
+  cd \"$BOT_DIR\" || exit 1
+  exec bash ./xdr-fg >> \"$LOG_FILE\" 2>&1
+" >/dev/null 2>&1 &
+
+sleep 1
+echo "Dashboard: http://localhost:$PORT"
+echo "Logs: tail -f $LOG_FILE"

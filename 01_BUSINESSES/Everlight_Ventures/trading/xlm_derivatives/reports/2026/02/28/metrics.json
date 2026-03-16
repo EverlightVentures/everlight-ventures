@@ -1,0 +1,40 @@
+{
+  "date": "2026-02-28",
+  "generated_by": "hive_mind_testfix1",
+  "price_range_usd": {
+    "low_24h": 0.1483,
+    "high_24h": 0.1599,
+    "sources": {
+      "mexc": 0.159,
+      "bybit": 0.1514,
+      "kucoin": 0.1491,
+      "coingecko": 0.1534
+    }
+  },
+  "indicators": {
+    "rsi": 42.67,
+    "fear_greed_index": 13,
+    "fear_greed_label": "Extreme Fear",
+    "death_cross_confirmed": true,
+    "ma50_below_ma200": true
+  },
+  "volume": {
+    "mexc_change_pct": -26,
+    "bybit_24h_usd": 107000000,
+    "kucoin_24h_usd": 126000000,
+    "coingecko_24h_usd": 371000000
+  },
+  "sentiment": {
+    "market_rank": 21,
+    "market_cap_usd": 4980000000,
+    "key_support": 0.14,
+    "danger_zone": 0.138,
+    "hive_verdict": "DO_NOT_TRADE",
+    "short_bias_lanes": ["A", "B", "K", "M"],
+    "suppress_candidates": ["G", "J", "P"]
+  },
+  "sessions": [
+    {"id": "testfix1", "verdict": "DO_NOT_TRADE"},
+    {"id": "testfix2", "verdict": "DO_NOT_TRADE", "specialists_active": "12/16", "note": "Cross-agent synthesis confirms testfix1. Short bias only."}
+  ]
+}

@@ -1,0 +1,102 @@
+{
+    "name": "Slack Slash Command - /ask_gpt",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "ask_gpt",
+                "options": {}
+            },
+            "id": "1",
+            "name": "Webhook Trigger",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1,
+            "position": [
+                250,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "functionCode": "\n                const input = $json.body.text;\n                const [botName, ...queryArr] = input.split(' ');\n                const query = queryArr.join(' ');\n                return [{ json: { botName, query } }];\n                "
+            },
+            "id": "2",
+            "name": "Parse Command",
+            "type": "n8n-nodes-base.function",
+            "typeVersion": 1,
+            "position": [
+                450,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "authentication": "predefinedCredentialType",
+                "url": "https://api.openai.com/v1/chat/completions",
+                "method": "POST",
+                "responseFormat": "json",
+                "jsonParameters": true,
+                "options": {},
+                "bodyParametersJson": "\n                {\n                    \"model\": \"gpt-4\",\n                    \"messages\": [\n                        { \"role\": \"system\", \"content\": \"You are the bot named {{$json.botName}}. Respond with expertise in that domain.\" },\n                        { \"role\": \"user\", \"content\": \"{{$json.query}}\" }\n                    ]\n                }\n                "
+            },
+            "id": "3",
+            "name": "Send to GPT",
+            "type": "n8n-nodes-base.httpRequest",
+            "typeVersion": 1,
+            "position": [
+                650,
+                300
+            ],
+            "credentials": {
+                "httpBasicAuth": {
+                    "id": "openai_api_credentials",
+                    "name": "OpenAI API"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "channel": "={{$json.body.channel_id}}",
+                "text": "={{$json.body.user_name}} asked {{$json.botName}}: \n{{$json.query}}\n\n\ud83e\udd16 *Response:* {{$json.choices[0].message.content}}",
+                "as_user": true
+            },
+            "id": "4",
+            "name": "Respond in Slack",
+            "type": "n8n-nodes-base.slack",
+            "typeVersion": 1,
+            "position": [
+                850,
+                300
+            ],
+            "credentials": {
+                "slackApi": {
+                    "id": "slack_api_credentials",
+                    "name": "Slack API"
+                }
+            }
+        }
+    ],
+    "connections": {
+        "1": {
+            "main": [
+                [
+                    "2"
+                ]
+            ]
+        },
+        "2": {
+            "main": [
+                [
+                    "3"
+                ]
+            ]
+        },
+        "3": {
+            "main": [
+                [
+                    "4"
+                ]
+            ]
+        }
+    }
+}

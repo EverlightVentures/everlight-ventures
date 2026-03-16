@@ -1,0 +1,87 @@
+{% load trading_tags %}
+
+<div class="kpi-bar">
+  <!-- Total Balance -->
+  <div class="kpi-card">
+    <span class="src-badge src-cb">CB</span>
+    <div class="kpi-label">TOTAL BALANCE</div>
+    <div class="kpi-value">{{ portfolio.total_balance|money }}</div>
+    {% if portfolio.total_balance_source %}
+      <div class="kpi-sub">{{ portfolio.total_balance_source }}</div>
+    {% endif %}
+  </div>
+
+  <!-- Cash -->
+  <div class="kpi-card">
+    <span class="src-badge src-cb">CB</span>
+    <div class="kpi-label">CASH</div>
+    <div class="kpi-value">{{ portfolio.cash_total|money }}</div>
+    {% if portfolio.usd_balance or portfolio.usdc_balance %}
+      <div class="kpi-sub">
+        USD {{ portfolio.usd_balance|money }} &middot; USDC {{ portfolio.usdc_balance|money }}
+      </div>
+    {% endif %}
+  </div>
+
+  <!-- Futures -->
+  <div class="kpi-card">
+    <span class="src-badge src-cb">CB</span>
+    <div class="kpi-label">FUTURES</div>
+    <div class="kpi-value">{{ balance.cfm_usd_balance|money }}</div>
+    {% if balance.margin_used %}
+      <div class="kpi-sub">Margin: {{ balance.margin_used|money }}</div>
+    {% endif %}
+  </div>
+
+  <!-- Position -->
+  <div class="kpi-card">
+    <div class="kpi-label">POSITION</div>
+    {% if norm_position %}
+      <div class="kpi-value {{ norm_position.side|direction_color }}">
+        {{ norm_position.side|upper }} {{ norm_position.size|default:"" }}
+      </div>
+      <div class="kpi-sub">@ ${{ norm_position.entry_price|floatformat:4 }}</div>
+    {% else %}
+      <div class="kpi-value" style="color:#6b7280;">FLAT</div>
+    {% endif %}
+  </div>
+
+  <!-- Unrealized P&L -->
+  <div class="kpi-card">
+    <div class="kpi-label">UNREALIZED</div>
+    {% if norm_position and norm_position.unrealized_pnl %}
+      <div class="kpi-value {{ norm_position.unrealized_pnl|pnl_color }}">
+        {{ norm_position.unrealized_pnl|money_signed }}
+      </div>
+    {% else %}
+      <div class="kpi-value" style="color:#6b7280;">--</div>
+    {% endif %}
+  </div>
+
+  <!-- P&L Today -->
+  <div class="kpi-card">
+    <span class="src-badge src-bot">BOT</span>
+    <div class="kpi-label">P&L TODAY</div>
+    {% if snap.exchange_pnl_today_usd is not None %}
+      <div class="kpi-value {{ snap.exchange_pnl_today_usd|pnl_color }}">
+        {{ snap.exchange_pnl_today_usd|money_signed }}
+      </div>
+    {% elif snap.pnl_today_usd is not None %}
+      <div class="kpi-value {{ snap.pnl_today_usd|pnl_color }}">
+        {{ snap.pnl_today_usd|money_signed }}
+      </div>
+    {% else %}
+      <div class="kpi-value" style="color:#6b7280;">--</div>
+    {% endif %}
+  </div>
+
+  <!-- Bot Status -->
+  <div class="kpi-card">
+    <div class="kpi-label">BOT</div>
+    {% if bot_alive %}
+      <div class="kpi-value" style="color:#34d399;">LIVE</div>
+    {% else %}
+      <div class="kpi-value" style="color:#f87171;">OFFLINE</div>
+    {% endif %}
+  </div>
+</div>

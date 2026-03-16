@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BOT_DIR="/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/crypto_bot"
+
+cd "$BOT_DIR"
+
+echo "Starting CDE_BOT (24/7 watchdog) + dashboard..."
+bash "$BOT_DIR/cb" daemon || true
+bash "$BOT_DIR/run_dashboard.sh" || true
+
+echo ""
+bash "$BOT_DIR/cb" status || true
+echo "Dashboard: http://localhost:8501"
+echo "Logs:"
+echo "  tail -f $BOT_DIR/logs/bot_$(date +%Y%m%d).log"
+echo "  tail -f $BOT_DIR/logs/bot_console.log"
+echo "  tail -f $BOT_DIR/logs/dashboard.log"
+echo "  tail -f $BOT_DIR/logs/watchdog.log"

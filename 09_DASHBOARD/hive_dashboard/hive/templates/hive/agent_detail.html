@@ -1,0 +1,491 @@
+{% extends "hive/base.html" %}
+{% load static humanize hive_tags %}
+
+{% block title %}{{ app_name }} -- {{ object.display_name }}{% endblock %}
+{% block page_title %}{{ object.display_name }}{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'hive:dashboard' %}">Hive</a>
+  <span class="sep">/</span>
+  <a href="{% url 'hive:agents' %}">Agents</a>
+  <span class="sep">/</span>
+  {{ object.display_name }}
+{% endblock %}
+
+{% block content %}
+<style>
+  /* ===================================================================
+     AGENT DETAIL -- Hero Card
+     =================================================================== */
+  .ad-hero {
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 28px;
+  }
+
+  .ad-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    border-radius: 12px 12px 0 0;
+  }
+
+  .ad-hero-inner {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .ad-hero-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    flex-shrink: 0;
+  }
+
+  .ad-hero-info {
+    flex: 1;
+  }
+
+  .ad-hero-name {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .ad-hero-role {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+  .ad-hero-stats {
+    display: flex;
+    gap: 32px;
+    margin-top: 16px;
+  }
+
+  .ad-hero-stat {
+    text-align: center;
+  }
+
+  .ad-hero-stat-value {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .ad-hero-stat-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* ===================================================================
+     AGENT DETAIL -- Charts Section
+     =================================================================== */
+  .ad-charts-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+
+  .ad-chart-card {
+    min-height: 280px;
+  }
+
+  .ad-chart-title {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ad-chart-title i {
+    color: var(--gold-dim);
+    font-size: 0.88rem;
+  }
+
+  .ad-chart-canvas-wrap {
+    position: relative;
+    height: 220px;
+  }
+
+  /* ===================================================================
+     AGENT DETAIL -- Top Employees
+     =================================================================== */
+  .ad-employees-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ad-employee-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .ad-employee-rank {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: rgba(201, 168, 76, 0.1);
+    color: var(--gold);
+    flex-shrink: 0;
+  }
+
+  .ad-employee-name {
+    flex: 1;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+  }
+
+  .ad-employee-count {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ad-employee-bar-track {
+    width: 80px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .ad-employee-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: var(--purple);
+    opacity: 0.7;
+  }
+
+  /* ===================================================================
+     AGENT DETAIL -- Recent Responses Table
+     =================================================================== */
+  .ad-responses-section {
+    margin-top: 28px;
+  }
+
+  .ad-responses-title {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ad-responses-title i {
+    color: var(--gold-dim);
+    font-size: 0.88rem;
+  }
+
+  .ad-table-wrap {
+    overflow-x: auto;
+  }
+
+  .ad-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .ad-table thead th {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-subtle);
+    white-space: nowrap;
+  }
+
+  .ad-table tbody tr {
+    transition: background var(--transition-base);
+  }
+
+  .ad-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+  }
+
+  .ad-table tbody td {
+    padding: 12px 14px;
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    vertical-align: middle;
+  }
+
+  .ad-table-session-link {
+    font-family: monospace;
+    font-size: 0.78rem;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .ad-table-preview {
+    max-width: 300px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+  }
+
+  .ad-table-time {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  /* ===================================================================
+     AGENT DETAIL -- Responsive
+     =================================================================== */
+  @media (max-width: 900px) {
+    .ad-charts-row {
+      grid-template-columns: 1fr;
+    }
+
+    .ad-hero-inner {
+      flex-direction: column;
+      text-align: center;
+    }
+
+    .ad-hero-stats {
+      justify-content: center;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .ad-hero-stats {
+      flex-direction: column;
+      gap: 16px;
+    }
+  }
+</style>
+
+<!-- ====================================================================
+     HERO CARD
+     ==================================================================== -->
+<div class="glass-card ad-hero" style="">
+  <div style="position:absolute; top:0; left:0; right:0; height:4px; background:{{ object.color|default:object.name|agent_color }}; border-radius:12px 12px 0 0;"></div>
+  <div class="ad-hero-inner">
+    <div class="ad-hero-icon" style="background: {{ object.color|default:object.name|agent_color }}1a; color: {{ object.color|default:object.name|agent_color }};">
+      <i class="fa-solid {{ object.icon_class|default:object.name|agent_icon }}"></i>
+    </div>
+    <div class="ad-hero-info">
+      <div class="ad-hero-name">{{ object.display_name }}</div>
+      <div class="ad-hero-role">{{ object.role }}</div>
+    </div>
+    <div class="ad-hero-stats">
+      <div class="ad-hero-stat">
+        <div class="ad-hero-stat-value" style="color: #22c55e;">{{ object.success_rate|floatformat:1 }}%</div>
+        <div class="ad-hero-stat-label">Success Rate</div>
+      </div>
+      <div class="ad-hero-stat">
+        <div class="ad-hero-stat-value" style="color: var(--purple);">{{ object.avg_duration|duration_fmt }}</div>
+        <div class="ad-hero-stat-label">Avg Duration</div>
+      </div>
+      <div class="ad-hero-stat">
+        <div class="ad-hero-stat-value" style="color: var(--gold);">{{ recent_responses|length }}</div>
+        <div class="ad-hero-stat-label">Recent (50)</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+     CHARTS ROW
+     ==================================================================== -->
+<div class="ad-charts-row">
+  <!-- Success Rate Trend -->
+  <div class="glass-card ad-chart-card">
+    <div class="ad-chart-title">
+      <i class="fa-solid fa-chart-line"></i>
+      Success Rate Trend (14 days)
+    </div>
+    <div class="ad-chart-canvas-wrap">
+      <canvas id="successTrendChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Top Employees -->
+  <div class="glass-card ad-chart-card">
+    <div class="ad-chart-title">
+      <i class="fa-solid fa-user-group"></i>
+      Top Employees Consulted
+    </div>
+    {% if top_employees %}
+    <div class="ad-employees-list">
+      {% for emp in top_employees %}
+      <div class="ad-employee-row">
+        <div class="ad-employee-rank">{{ forloop.counter }}</div>
+        <span class="ad-employee-name">{{ emp.name }}</span>
+        <span class="ad-employee-count">{{ emp.count }}</span>
+        <div class="ad-employee-bar-track">
+          {% if top_employees.0.count > 0 %}
+          <div class="ad-employee-bar-fill" style="width: {% widthratio emp.count top_employees.0.count 100 %}%;"></div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 40px 0; color: var(--text-muted); font-size: 0.85rem;">
+      No employee consultations recorded.
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ====================================================================
+     RECENT RESPONSES TABLE
+     ==================================================================== -->
+<div class="ad-responses-section">
+  <div class="ad-responses-title">
+    <i class="fa-solid fa-clock-rotate-left"></i>
+    Recent Responses
+  </div>
+  <div class="glass-card">
+    <div class="ad-table-wrap">
+      <table class="ad-table">
+        <thead>
+          <tr>
+            <th>Session</th>
+            <th>Status</th>
+            <th>Duration</th>
+            <th>Response Preview</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for resp in recent_responses %}
+          <tr>
+            <td>
+              <a href="{% url 'hive:session_detail' session_id=resp.session.session_id %}" class="ad-table-session-link">
+                {{ resp.session.session_id|truncatechars:10 }}
+              </a>
+            </td>
+            <td>{{ resp.status|status_badge }}</td>
+            <td style="font-variant-numeric: tabular-nums;">{{ resp.duration_seconds|duration_fmt }}</td>
+            <td>
+              <div class="ad-table-preview">{{ resp.response_text|default:"--"|truncatechars:100 }}</div>
+            </td>
+            <td class="ad-table-time">{{ resp.session.created_at|timesince }} ago</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5" style="text-align: center; padding: 30px; color: var(--text-muted);">
+              No responses yet for this agent.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  'use strict';
+
+  /* ------------------------------------------------------------------
+     SUCCESS TREND CHART (Chart.js)
+     ------------------------------------------------------------------ */
+  var trendData = {{ success_trend|safe }};
+  var labels = trendData.map(function(d) { return d.label; });
+  var rates  = trendData.map(function(d) { return d.rate; });
+
+  var ctx = document.getElementById('successTrendChart');
+  if (ctx && trendData.length > 0) {
+    new Chart(ctx.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Success %',
+          data: rates,
+          borderColor: '{{ object.color|default:object.name|agent_color }}',
+          backgroundColor: '{{ object.color|default:object.name|agent_color }}' + '20',
+          borderWidth: 2,
+          pointBackgroundColor: '{{ object.color|default:object.name|agent_color }}',
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: true,
+          tension: 0.35
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1a1a2e',
+            titleColor: '#e8e6e3',
+            bodyColor: '#9ca3af',
+            borderColor: 'rgba(255,255,255,0.08)',
+            borderWidth: 1,
+            cornerRadius: 8,
+            padding: 10,
+            callbacks: {
+              label: function(ctx) {
+                return ctx.parsed.y.toFixed(1) + '%';
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+            ticks: { color: '#6b7280', font: { size: 11 } }
+          },
+          y: {
+            min: 0,
+            max: 100,
+            grid: { color: 'rgba(255,255,255,0.04)', drawBorder: false },
+            ticks: {
+              color: '#6b7280',
+              font: { size: 11 },
+              callback: function(v) { return v + '%'; }
+            }
+          }
+        }
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}

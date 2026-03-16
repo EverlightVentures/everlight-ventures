@@ -1,0 +1,105 @@
+{% extends "trading/base.html" %}
+{% load trading_tags humanize %}
+
+{% block title %}Signals | {{ app_name }}{% endblock %}
+{% block page_title %}Signals{% endblock %}
+
+{% block content %}
+
+<!-- Current Signal (HTMX polled) -->
+<div id="signals-current"
+     hx-get="{% url 'trading:api_signals_current' %}"
+     hx-trigger="every 5s"
+     hx-swap="innerHTML">
+  {% include "trading/partials/signals_current.html" %}
+</div>
+
+<!-- Signal History -->
+<div class="intel-card" style="margin-top:12px;">
+  <div class="intel-title">SIGNAL HISTORY</div>
+  <div style="overflow-x:auto;margin-top:8px;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.78rem;">
+      <thead>
+        <tr style="color:#6b7280;text-transform:uppercase;letter-spacing:0.8px;font-size:10px;">
+          <th style="text-align:left;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.06);">Time</th>
+          <th style="text-align:left;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.06);">Signal</th>
+          <th style="text-align:center;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.06);">Dir</th>
+          <th style="text-align:center;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.06);">Score</th>
+          <th style="text-align:center;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.06);">Regime</th>
+          <th style="text-align:left;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.06);">Block Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for d in decisions %}
+          {% if d.entry_signal %}
+          <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+            <td style="padding:6px 8px;color:#9ca3af;font-size:11px;">{{ d.timestamp|pt_short }}</td>
+            <td style="padding:6px 8px;color:#d1d5db;">{{ d.entry_signal }}</td>
+            <td style="text-align:center;padding:6px 8px;">
+              {{ d.direction|direction_badge }}
+            </td>
+            <td style="text-align:center;padding:6px 8px;color:#e5e7eb;">{{ d.v4_selected_score|floatformat:0|default:"--" }}</td>
+            <td style="text-align:center;padding:6px 8px;">
+              <span class="pill" style="font-size:9px;">{{ d.regime|default:"--" }}</span>
+            </td>
+            <td style="padding:6px 8px;color:#9ca3af;font-size:11px;">
+              {% if d.block_reason %}{{ d.block_reason }}{% elif d.failed_gates %}{{ d.failed_gates|join:", " }}{% endif %}
+            </td>
+          </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Gate Pressure -->
+<div class="intel-card" style="margin-top:12px;">
+  <div class="intel-title">GATE PRESSURE (LAST 300 CYCLES)</div>
+  <div style="margin-top:8px;">
+    {% for gate_info in gate_pressure_list %}
+    <div style="display:flex;align-items:center;gap:8px;margin:6px 0;">
+      <span style="font-size:11px;color:#9ca3af;width:100px;text-transform:uppercase;letter-spacing:0.5px;">{{ gate_info.label }}</span>
+      <div style="flex:1;height:6px;background:rgba(107,114,128,0.15);border-radius:3px;overflow:hidden;">
+        <div style="width:{{ gate_info.pass_rate|default:"80" }}%;height:100%;background:linear-gradient(90deg,#34d399,#f59e0b);border-radius:3px;"></div>
+      </div>
+      <span style="font-size:10px;color:#6b7280;">{{ gate_info.pass_rate|default:"--" }}%</span>
+    </div>
+    {% empty %}
+    <div class="feed-mini">Gate pressure data not available yet.</div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- Parameter Performance -->
+{% if param_perf %}
+<div class="intel-card" style="margin-top:12px;">
+  <div class="intel-title">PARAMETER PERFORMANCE</div>
+  <div style="overflow-x:auto;margin-top:8px;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.78rem;">
+      <thead>
+        <tr style="color:#6b7280;text-transform:uppercase;letter-spacing:0.8px;font-size:10px;">
+          <th style="text-align:left;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.06);">Group</th>
+          <th style="text-align:center;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.06);">Trades</th>
+          <th style="text-align:center;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.06);">Win%</th>
+          <th style="text-align:right;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.06);">Avg P&L</th>
+          <th style="text-align:right;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.06);">Expectancy</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in param_perf %}
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+          <td style="padding:6px 8px;color:#d1d5db;">{{ row.group }}</td>
+          <td style="text-align:center;padding:6px 8px;color:#9ca3af;">{{ row.count }}</td>
+          <td style="text-align:center;padding:6px 8px;color:{% if row.win_rate >= 60 %}#34d399{% elif row.win_rate < 40 %}#f87171{% else %}#f59e0b{% endif %};">{{ row.win_rate|pct }}</td>
+          <td style="text-align:right;padding:6px 8px;" class="{{ row.avg_pnl|pnl_color }}">{{ row.avg_pnl|money_signed }}</td>
+          <td style="text-align:right;padding:6px 8px;" class="{{ row.expectancy|pnl_color }}">{{ row.expectancy|money_signed }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

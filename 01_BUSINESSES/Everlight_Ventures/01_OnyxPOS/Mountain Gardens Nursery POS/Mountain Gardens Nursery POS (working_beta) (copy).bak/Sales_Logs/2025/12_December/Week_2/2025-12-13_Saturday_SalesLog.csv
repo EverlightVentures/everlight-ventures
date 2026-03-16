@@ -1,0 +1,5 @@
+Date,Time,Transaction_ID,Employee_ID,Employee_Name,Category,Subcategory,Product_Name,Item_Name,SKU,Quantity,Size,Item_Description,Unit_Price,Unit_Cost,COGS_Line,Subtotal,Tax_Rate,Tax_Amount,Line_Total,Payment_Method,Amount_Received,Change_Due,Notes
+2025-12-13,13:00:06,TXN20251213130006,1001,Rich,Plant,Tree,,Vanderwolf Pine,PLT-TRE-25C0-1201,1,,,299.99,299.99,299.99,299.99,0.0825,24.75,324.74,,,,
+2025-12-13,13:00:06,TXN20251213130006,1001,Rich,,,=== TOTAL ===,,,1,,,299.99,,,,0.0825,24.75,324.74,Cash,450.00,125.26,
+2025-12-13,13:13:37,TXN20251213131337,1002,Melina Tapiz,Animal,Pinkie,,Mouse,ANM-PIN-4020-1201,5,,,7.98,3.99,19.95,39.90,0.0825,3.29,43.19,,,,
+2025-12-13,13:13:37,TXN20251213131337,1002,Melina Tapiz,,,=== TOTAL ===,,,1,,,39.90,,,,0.0825,3.29,43.19,Cash,50.00,6.81,

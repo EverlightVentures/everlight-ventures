@@ -54,5 +54,6 @@ def api_snapshot(request):
         ],
         "trading_watchtower": snapshot["trading_watchtower"],
         "blackjack_watchtower": snapshot["blackjack_watchtower"],
+        "trading_reports": snapshot["trading_reports"],
     }
     return JsonResponse(payload)

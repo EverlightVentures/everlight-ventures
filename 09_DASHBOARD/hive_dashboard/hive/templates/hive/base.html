@@ -1,0 +1,1549 @@
+{% load static humanize hive_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Hive Mind AI Dashboard -- Everlight Ventures OS">
+  <meta name="theme-color" content="#0a0a0f">
+  <title>{% block title %}{{ app_name }} Dashboard{% endblock %}</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
+
+  <!-- Chart.js 4 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* ===================================================================
+       CSS VARIABLES -- HIVE MIND LUXURY THEME
+       =================================================================== */
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #0f0f18;
+      --bg-tertiary: #141420;
+      --bg-card: rgba(255, 255, 255, 0.03);
+      --bg-card-hover: rgba(255, 255, 255, 0.05);
+
+      --gold: #c9a84c;
+      --gold-dim: #8b7635;
+      --gold-bright: #e5c76b;
+      --gold-glow: rgba(201, 168, 76, 0.25);
+
+      --purple: #8b5cf6;
+      --purple-dim: #6d3fd0;
+      --purple-glow: rgba(139, 92, 246, 0.2);
+
+      --text-primary: #e8e6e3;
+      --text-secondary: #9ca3af;
+      --text-muted: #6b7280;
+
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(255, 255, 255, 0.14);
+
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-blur: 12px;
+
+      --sidebar-width: 260px;
+      --topbar-height: 64px;
+
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      --font-heading: 'Playfair Display', Georgia, 'Times New Roman', serif;
+
+      --agent-claude: #8b5cf6;
+      --agent-gemini: #22d3ee;
+      --agent-codex: #22c55e;
+      --agent-perplexity: #f59e0b;
+
+      --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+      --transition-base: 0.2s var(--ease-out-expo);
+    }
+
+    /* ===================================================================
+       RESET & BASE
+       =================================================================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      font-size: 16px;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--text-primary);
+    }
+
+    a {
+      color: var(--gold);
+      text-decoration: none;
+      transition: color var(--transition-base);
+    }
+    a:hover {
+      color: var(--gold-bright);
+    }
+
+    /* ===================================================================
+       SCROLLBAR
+       =================================================================== */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--gold-dim);
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--gold);
+    }
+
+    /* Firefox */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--gold-dim) var(--bg-secondary);
+    }
+
+    /* ===================================================================
+       LAYOUT -- SIDEBAR + MAIN
+       =================================================================== */
+    .hive-layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ===================================================================
+       SIDEBAR
+       =================================================================== */
+    .hive-sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: var(--sidebar-width);
+      height: 100vh;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      background: var(--glass-bg);
+      border-right: 1px solid var(--glass-border);
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      overflow-y: auto;
+      overflow-x: hidden;
+      transition: transform 0.35s var(--ease-out-expo);
+    }
+
+    /* Subtle gradient accent on the right border */
+    .hive-sidebar::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: -1px;
+      width: 1px;
+      height: 100%;
+      background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        var(--gold-dim) 20%,
+        var(--gold) 50%,
+        var(--gold-dim) 80%,
+        transparent 100%
+      );
+      opacity: 0.4;
+    }
+
+    /* -- Logo Area -- */
+    .sidebar-logo {
+      padding: 28px 24px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .sidebar-logo-mark {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 6px;
+    }
+
+    .sidebar-hexicon {
+      position: relative;
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar-hexicon svg {
+      width: 38px;
+      height: 38px;
+    }
+
+    .sidebar-hexicon .hex-fill {
+      fill: none;
+      stroke: var(--gold);
+      stroke-width: 1.5;
+      opacity: 0.7;
+    }
+
+    .sidebar-title {
+      font-family: var(--font-heading);
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--gold);
+      letter-spacing: 0.02em;
+      line-height: 1.1;
+    }
+
+    .sidebar-subtitle {
+      font-family: var(--font-body);
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-top: 4px;
+      padding-left: 50px;
+    }
+
+    /* -- Nav Links -- */
+    .sidebar-nav {
+      flex: 1;
+      padding: 16px 12px;
+    }
+
+    .sidebar-nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 16px;
+      margin-bottom: 2px;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: all var(--transition-base);
+      position: relative;
+      border-left: 3px solid transparent;
+    }
+
+    .sidebar-nav-link:hover {
+      color: var(--text-primary);
+      background: rgba(201, 168, 76, 0.06);
+      box-shadow: 0 0 20px rgba(201, 168, 76, 0.08);
+    }
+
+    .sidebar-nav-link.active {
+      color: var(--gold);
+      background: rgba(201, 168, 76, 0.1);
+      border-left-color: var(--gold);
+    }
+
+    .sidebar-nav-link i {
+      width: 20px;
+      text-align: center;
+      font-size: 0.95rem;
+      flex-shrink: 0;
+    }
+
+    .sidebar-nav-link.active i {
+      color: var(--gold);
+    }
+
+    /* -- Agent Status (bottom section) -- */
+    .sidebar-agents {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .sidebar-agents-title {
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .agent-status-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 5px 0;
+    }
+
+    .agent-pulse-dot {
+      position: relative;
+      width: 10px;
+      height: 10px;
+      flex-shrink: 0;
+    }
+
+    .agent-pulse-dot .dot-core {
+      position: absolute;
+      inset: 2px;
+      border-radius: 50%;
+    }
+
+    .agent-pulse-dot .dot-ring {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      opacity: 0.5;
+      animation: hivePulse 2s ease-in-out infinite;
+    }
+
+    .agent-status-label {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .sidebar-version {
+      padding: 10px 20px 16px;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      opacity: 0.6;
+    }
+
+    /* ===================================================================
+       MAIN CONTENT
+       =================================================================== */
+    .hive-main {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* -- Top Bar -- */
+    .hive-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: var(--topbar-height);
+      padding: 0 32px;
+      background: rgba(10, 10, 15, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .topbar-page-title {
+      font-family: var(--font-heading);
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .topbar-breadcrumb {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .topbar-breadcrumb a {
+      color: var(--text-muted);
+    }
+    .topbar-breadcrumb a:hover {
+      color: var(--gold);
+    }
+
+    .topbar-breadcrumb .sep {
+      margin: 0 6px;
+      opacity: 0.4;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .topbar-clock {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+    }
+
+    .hamburger-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.3rem;
+      cursor: pointer;
+      padding: 4px;
+      transition: color var(--transition-base);
+    }
+    .hamburger-btn:hover {
+      color: var(--gold);
+    }
+
+    /* -- Content Area -- */
+    .hive-content {
+      flex: 1;
+      padding: 28px 32px;
+      animation: contentFadeIn 0.4s ease-out;
+    }
+
+    /* -- Footer -- */
+    .hive-footer {
+      padding: 20px 32px;
+      text-align: center;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-subtle);
+      opacity: 0.6;
+    }
+
+    .hive-footer span {
+      color: var(--gold-dim);
+    }
+
+    /* ===================================================================
+       GLASS CARDS -- Utility class for child templates
+       =================================================================== */
+    .glass-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      padding: 24px;
+      transition: all var(--transition-base);
+    }
+
+    .glass-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-hover);
+      border-top-color: var(--gold-dim);
+    }
+
+    /* ===================================================================
+       LOADING OVERLAY
+       =================================================================== */
+    .hive-loader-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 32px;
+      background: rgba(10, 10, 15, 0.88);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+    }
+
+    .hive-loader-overlay.visible {
+      display: flex;
+    }
+
+    /* Hexagonal spinner */
+    .hex-spinner {
+      width: 72px;
+      height: 72px;
+      position: relative;
+    }
+
+    .hex-spinner svg {
+      width: 72px;
+      height: 72px;
+      animation: hexSpin 2.5s linear infinite;
+    }
+
+    .hex-spinner .hex-stroke {
+      fill: none;
+      stroke: var(--gold);
+      stroke-width: 2;
+      stroke-dasharray: 300;
+      stroke-dashoffset: 300;
+      animation: hexDash 2.5s ease-in-out infinite;
+    }
+
+    .hex-spinner .hex-glow {
+      fill: none;
+      stroke: var(--gold);
+      stroke-width: 4;
+      opacity: 0.15;
+      filter: blur(4px);
+    }
+
+    /* Affirmation text */
+    .loader-affirmation {
+      font-family: var(--font-body);
+      font-size: 0.92rem;
+      font-weight: 400;
+      color: var(--text-secondary);
+      letter-spacing: 0.04em;
+      text-align: center;
+      min-height: 1.5em;
+      opacity: 0;
+      animation: affirmFadeIn 0.5s ease forwards;
+    }
+
+    /* Progress shimmer bar */
+    .loader-progress {
+      width: 240px;
+      height: 3px;
+      border-radius: 3px;
+      background: rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .loader-progress-bar {
+      position: absolute;
+      top: 0;
+      left: -50%;
+      width: 50%;
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--gold-dim),
+        var(--gold),
+        var(--gold-dim),
+        transparent
+      );
+      animation: shimmerSlide 1.8s ease-in-out infinite;
+    }
+
+    /* ===================================================================
+       TOAST NOTIFICATIONS
+       =================================================================== */
+    .hive-toast-area {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+      max-width: 380px;
+    }
+
+    .hive-toast {
+      pointer-events: auto;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 14px 18px;
+      border-radius: 10px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-subtle);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      font-size: 0.84rem;
+      color: var(--text-primary);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      animation: toastSlideIn 0.35s var(--ease-out-expo);
+      transition: all 0.3s ease;
+    }
+
+    .hive-toast.removing {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+
+    .hive-toast.toast-success {
+      border-left: 3px solid #22c55e;
+    }
+    .hive-toast.toast-success .toast-icon {
+      color: #22c55e;
+    }
+
+    .hive-toast.toast-error {
+      border-left: 3px solid #ef4444;
+    }
+    .hive-toast.toast-error .toast-icon {
+      color: #ef4444;
+    }
+
+    .hive-toast.toast-warning {
+      border-left: 3px solid #f59e0b;
+    }
+    .hive-toast.toast-warning .toast-icon {
+      color: #f59e0b;
+    }
+
+    .hive-toast.toast-info {
+      border-left: 3px solid var(--purple);
+    }
+    .hive-toast.toast-info .toast-icon {
+      color: var(--purple);
+    }
+
+    .toast-icon {
+      font-size: 1rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .toast-message {
+      flex: 1;
+      line-height: 1.45;
+    }
+
+    .toast-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.85rem;
+      padding: 0;
+      flex-shrink: 0;
+      transition: color var(--transition-base);
+    }
+    .toast-close:hover {
+      color: var(--text-primary);
+    }
+
+    /* ===================================================================
+       KEYFRAME ANIMATIONS
+       =================================================================== */
+    @keyframes hivePulse {
+      0%, 100% {
+        transform: scale(1);
+        opacity: 0.5;
+      }
+      50% {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+
+    @keyframes hexSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes hexDash {
+      0% {
+        stroke-dashoffset: 300;
+      }
+      50% {
+        stroke-dashoffset: 0;
+      }
+      100% {
+        stroke-dashoffset: -300;
+      }
+    }
+
+    @keyframes shimmerSlide {
+      0% { left: -50%; }
+      100% { left: 100%; }
+    }
+
+    @keyframes affirmFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes affirmFadeOut {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+    }
+
+    @keyframes contentFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes toastSlideIn {
+      from {
+        opacity: 0;
+        transform: translateX(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* ===================================================================
+       RESPONSIVE -- Mobile sidebar collapse
+       =================================================================== */
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99;
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    @media (max-width: 768px) {
+      .hive-sidebar {
+        transform: translateX(-100%);
+      }
+
+      .hive-sidebar.open {
+        transform: translateX(0);
+      }
+
+      .sidebar-overlay.open {
+        display: block;
+      }
+
+      .hive-main {
+        margin-left: 0;
+      }
+
+      .hamburger-btn {
+        display: block;
+      }
+
+      .hive-content {
+        padding: 20px 16px;
+      }
+
+      .hive-topbar {
+        padding: 0 16px;
+      }
+
+      .topbar-breadcrumb {
+        display: none;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .topbar-page-title {
+        font-size: 1.05rem;
+      }
+
+      .topbar-clock {
+        font-size: 0.72rem;
+      }
+    }
+
+    /* ===================================================================
+       UTILITY CLASSES for child templates
+       =================================================================== */
+    .text-gold { color: var(--gold); }
+    .text-purple { color: var(--purple); }
+    .text-muted { color: var(--text-muted); }
+    .text-secondary { color: var(--text-secondary); }
+    .font-heading { font-family: var(--font-heading); }
+    .font-body { font-family: var(--font-body); }
+  </style>
+
+  {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+  <!-- ================================================================
+       SIDEBAR
+       ================================================================ -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="hive-sidebar" id="hiveSidebar">
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">
+        <div class="sidebar-hexicon">
+          <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <polygon class="hex-fill" points="20,2 36,11 36,29 20,38 4,29 4,11" />
+          </svg>
+        </div>
+        <span class="sidebar-title">HIVE MIND</span>
+      </div>
+      <div class="sidebar-subtitle">Everlight Ventures</div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+      {% block active_nav %}{% endblock %}
+
+      <a href="{% url 'hive:dashboard' %}"
+         class="sidebar-nav-link {% if active_page == 'dashboard' %}active{% endif %}"
+         data-nav="dashboard">
+        <i class="fa-solid fa-hexagon-nodes"></i>
+        <span>Dashboard</span>
+      </a>
+
+      <a href="{% url 'hive:sessions' %}"
+         class="sidebar-nav-link {% if active_page == 'sessions' %}active{% endif %}"
+         data-nav="sessions">
+        <i class="fa-solid fa-layer-group"></i>
+        <span>Sessions</span>
+      </a>
+
+      <a href="{% url 'hive:agents' %}"
+         class="sidebar-nav-link {% if active_page == 'agents' %}active{% endif %}"
+         data-nav="agents">
+        <i class="fa-solid fa-users-gear"></i>
+        <span>Agents</span>
+      </a>
+
+      <a href="{% url 'hive:analytics' %}"
+         class="sidebar-nav-link {% if active_page == 'analytics' %}active{% endif %}"
+         data-nav="analytics">
+        <i class="fa-solid fa-chart-mixed"></i>
+        <span>Analytics</span>
+      </a>
+
+      <a href="{% url 'hive:launch' %}"
+         class="sidebar-nav-link {% if active_page == 'launch' %}active{% endif %}"
+         data-nav="launch">
+        <i class="fa-solid fa-terminal"></i>
+        <span>Console</span>
+      </a>
+
+      <a href="{% url 'hive:events' %}"
+         class="sidebar-nav-link {% if active_page == 'events' %}active{% endif %}"
+         data-nav="events">
+        <i class="fa-solid fa-bell"></i>
+        <span>Events</span>
+      </a>
+
+      <a href="{% url 'taskboard:board' %}"
+         class="sidebar-nav-link {% if active_page == 'taskboard' %}active{% endif %}"
+         data-nav="taskboard">
+        <i class="fa-solid fa-list-check"></i>
+        <span>Taskboard</span>
+      </a>
+
+      <a href="{% url 'taskboard:nerve_center' %}"
+         class="sidebar-nav-link {% if active_page == 'nerve_center' %}active{% endif %}"
+         data-nav="nerve_center">
+        <i class="fa-solid fa-satellite-dish"></i>
+        <span>Nerve Center</span>
+      </a>
+
+      <a href="{% url 'payments:dashboard' %}"
+         class="sidebar-nav-link {% if active_page == 'payments' %}active{% endif %}"
+         data-nav="payments">
+        <i class="fa-solid fa-chart-line"></i>
+        <span>Revenue</span>
+      </a>
+    </nav>
+
+    <!-- Agent Status Dots -->
+    <div class="sidebar-agents">
+      <div class="sidebar-agents-title">Agent Status</div>
+
+      <div class="agent-status-row">
+        <div class="agent-pulse-dot">
+          <span class="dot-ring" style="background: var(--agent-claude);"></span>
+          <span class="dot-core" style="background: var(--agent-claude);"></span>
+        </div>
+        <span class="agent-status-label">Claude</span>
+      </div>
+
+      <div class="agent-status-row">
+        <div class="agent-pulse-dot">
+          <span class="dot-ring" style="background: var(--agent-gemini);"></span>
+          <span class="dot-core" style="background: var(--agent-gemini);"></span>
+        </div>
+        <span class="agent-status-label">Gemini</span>
+      </div>
+
+      <div class="agent-status-row">
+        <div class="agent-pulse-dot">
+          <span class="dot-ring" style="background: var(--agent-codex);"></span>
+          <span class="dot-core" style="background: var(--agent-codex);"></span>
+        </div>
+        <span class="agent-status-label">Codex</span>
+      </div>
+
+      <div class="agent-status-row">
+        <div class="agent-pulse-dot">
+          <span class="dot-ring" style="background: var(--agent-perplexity);"></span>
+          <span class="dot-core" style="background: var(--agent-perplexity);"></span>
+        </div>
+        <span class="agent-status-label">Perplexity</span>
+      </div>
+    </div>
+
+    <!-- Version -->
+    <div class="sidebar-version">v{{ app_version }}</div>
+  </aside>
+
+  <!-- ================================================================
+       MAIN CONTENT
+       ================================================================ -->
+  <main class="hive-main">
+    <!-- Top Bar -->
+    <header class="hive-topbar">
+      <div class="topbar-left">
+        <button class="hamburger-btn" id="hamburgerBtn" aria-label="Toggle sidebar">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <h1 class="topbar-page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+        <div class="topbar-breadcrumb">
+          {% block breadcrumb %}
+            <a href="{% url 'hive:dashboard' %}">Hive</a>
+          {% endblock %}
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-clock" id="hiveClock"></div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="hive-content">
+      {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="hive-footer">
+      <span>Everlight Ventures OS</span> | Hive Mind Dashboard
+    </footer>
+  </main>
+
+  <!-- ================================================================
+       LOADING OVERLAY
+       ================================================================ -->
+  <div class="hive-loader-overlay" id="hiveLoader">
+    <div class="hex-spinner">
+      <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+        <polygon class="hex-glow" points="40,4 72,22 72,58 40,76 8,58 8,22" />
+        <polygon class="hex-stroke" points="40,4 72,22 72,58 40,76 8,58 8,22" />
+      </svg>
+    </div>
+    <div class="loader-affirmation" id="loaderAffirmation"></div>
+    <div class="loader-progress">
+      <div class="loader-progress-bar"></div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       TOAST NOTIFICATION AREA
+       ================================================================ -->
+  <div class="hive-toast-area" id="hiveToastArea"></div>
+
+  <!-- ================================================================
+       FLOATING AGENT ASSISTANT (accessible from any page)
+       ================================================================ -->
+  <style>
+    .fab-agent {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 9000;
+    }
+
+    .fab-agent-btn {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      border: 1px solid var(--glass-border);
+      background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary));
+      backdrop-filter: blur(12px);
+      color: var(--gold);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s var(--ease-out-expo);
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    .fab-agent-btn:hover {
+      transform: scale(1.08);
+      border-color: var(--gold-dim);
+      box-shadow: 0 6px 32px rgba(201,168,76,0.2);
+    }
+
+    .fab-agent-btn.open {
+      background: var(--gold);
+      color: #0a0a0f;
+    }
+
+    /* Error badge */
+    .fab-badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #ef4444;
+      color: #fff;
+      font-size: 0.6rem;
+      font-weight: 700;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fab-badge.visible { display: flex; }
+
+    /* Panel */
+    .fab-panel {
+      position: absolute;
+      bottom: 64px;
+      right: 0;
+      width: 380px;
+      max-height: 520px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
+      box-shadow: 0 16px 60px rgba(0,0,0,0.6);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      animation: fabSlideUp 0.25s var(--ease-out-expo);
+    }
+
+    .fab-panel.visible {
+      display: flex;
+    }
+
+    @keyframes fabSlideUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .fab-panel-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--glass-border);
+      font-size: 0.84rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .fab-panel-header i { color: var(--gold); }
+
+    .fab-panel-tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .fab-tab {
+      flex: 1;
+      padding: 10px;
+      text-align: center;
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .fab-tab.active {
+      color: var(--gold);
+      border-bottom-color: var(--gold);
+    }
+
+    .fab-tab:hover:not(.active) { color: var(--text-secondary); }
+
+    .fab-panel-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .fab-status-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+    }
+
+    .fab-status-row:hover { background: rgba(255,255,255,0.03); }
+
+    .fab-status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .fab-status-label { flex: 1; font-size: 0.8rem; }
+
+    .fab-status-value {
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .fab-error-item {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border-left: 3px solid #ef4444;
+      background: rgba(239,68,68,0.05);
+      margin-bottom: 6px;
+      font-size: 0.78rem;
+    }
+
+    .fab-error-title {
+      color: #ef4444;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .fab-error-detail { color: var(--text-muted); }
+
+    .fab-empty {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    .fab-panel-input {
+      display: flex;
+      gap: 6px;
+      padding: 10px 12px;
+      border-top: 1px solid var(--glass-border);
+    }
+
+    .fab-panel-input input {
+      flex: 1;
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      color: var(--text-primary);
+      font-size: 0.82rem;
+      font-family: var(--font-body);
+      outline: none;
+    }
+
+    .fab-panel-input input:focus {
+      border-color: var(--gold);
+    }
+
+    .fab-panel-input button {
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: none;
+      background: var(--gold);
+      color: #0a0a0f;
+      font-weight: 600;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .fab-panel { width: calc(100vw - 32px); right: -8px; }
+    }
+  </style>
+
+  <div class="fab-agent">
+    <div class="fab-panel" id="fabPanel">
+      <div class="fab-panel-header">
+        <i class="fa-solid fa-hexagon-nodes"></i>
+        Agent Assistant
+      </div>
+      <div class="fab-panel-tabs">
+        <div class="fab-tab active" data-tab="status">Status</div>
+        <div class="fab-tab" data-tab="errors">Errors</div>
+        <div class="fab-tab" data-tab="quick">Quick Ask</div>
+      </div>
+      <div class="fab-panel-body" id="fabBody">
+        <div class="fab-empty">Loading status...</div>
+      </div>
+      <div class="fab-panel-input" id="fabInput" style="display:none">
+        <input type="text" placeholder="Quick question for the Hive..." id="fabQuestion">
+        <button id="fabAskBtn">Ask</button>
+      </div>
+    </div>
+    <button class="fab-agent-btn" id="fabBtn" title="Agent Assistant">
+      <i class="fa-solid fa-hexagon-nodes"></i>
+    </button>
+    <div class="fab-badge" id="fabBadge">0</div>
+  </div>
+
+  <!-- ================================================================
+       JAVASCRIPT
+       ================================================================ -->
+  <script>
+    (function () {
+      'use strict';
+
+      /* ---------------------------------------------------------------
+         Global namespace
+         --------------------------------------------------------------- */
+      window.__hive = window.__hive || {};
+
+      /* ---------------------------------------------------------------
+         Clock -- Updates every second, Pacific Time
+         --------------------------------------------------------------- */
+      var clockEl = document.getElementById('hiveClock');
+
+      function updateClock() {
+        var now = new Date();
+        var opts = {
+          timeZone: 'America/Los_Angeles',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true
+        };
+        var formatted = now.toLocaleString('en-US', opts) + ' PT';
+        if (clockEl) clockEl.textContent = formatted;
+      }
+
+      updateClock();
+      setInterval(updateClock, 1000);
+      window.__hive.updateClock = updateClock;
+
+      /* ---------------------------------------------------------------
+         Affirmation Messages for Loading Overlay
+         --------------------------------------------------------------- */
+      var affirmations = [
+        'Deploying neural consensus...',
+        'Agents converging on solution...',
+        'Synthesizing collective intelligence...',
+        'Mining strategic insight...',
+        'Cross-referencing data streams...',
+        'Distilling market wisdom...',
+        'Harmonizing AI perspectives...',
+        'Building unified response...'
+      ];
+
+      var affirmIdx = 0;
+      var affirmInterval = null;
+      var affirmEl = document.getElementById('loaderAffirmation');
+
+      function rotateAffirmation() {
+        if (!affirmEl) return;
+
+        // Fade out
+        affirmEl.style.animation = 'affirmFadeOut 0.4s ease forwards';
+
+        setTimeout(function () {
+          affirmIdx = (affirmIdx + 1) % affirmations.length;
+          affirmEl.textContent = affirmations[affirmIdx];
+          affirmEl.style.animation = 'affirmFadeIn 0.5s ease forwards';
+        }, 400);
+      }
+
+      /* ---------------------------------------------------------------
+         Loading Overlay -- show / hide
+         --------------------------------------------------------------- */
+      var loaderEl = document.getElementById('hiveLoader');
+
+      function showHiveLoader() {
+        if (!loaderEl) return;
+        affirmIdx = Math.floor(Math.random() * affirmations.length);
+        if (affirmEl) {
+          affirmEl.textContent = affirmations[affirmIdx];
+          affirmEl.style.animation = 'affirmFadeIn 0.5s ease forwards';
+        }
+        loaderEl.classList.add('visible');
+        affirmInterval = setInterval(rotateAffirmation, 2500);
+      }
+
+      function hideHiveLoader() {
+        if (!loaderEl) return;
+        loaderEl.classList.remove('visible');
+        if (affirmInterval) {
+          clearInterval(affirmInterval);
+          affirmInterval = null;
+        }
+      }
+
+      window.__hive.showLoader = showHiveLoader;
+      window.__hive.hideLoader = hideHiveLoader;
+
+      /* ---------------------------------------------------------------
+         Toast Notifications
+         --------------------------------------------------------------- */
+      var toastArea = document.getElementById('hiveToastArea');
+
+      var toastIcons = {
+        success: 'fa-circle-check',
+        error:   'fa-circle-xmark',
+        warning: 'fa-triangle-exclamation',
+        info:    'fa-circle-info'
+      };
+
+      function showToast(message, level) {
+        level = level || 'info';
+        if (!toastArea) return;
+
+        var toast = document.createElement('div');
+        toast.className = 'hive-toast toast-' + level;
+
+        var iconCls = toastIcons[level] || toastIcons.info;
+
+        toast.innerHTML =
+          '<i class="fa-solid ' + iconCls + ' toast-icon"></i>' +
+          '<span class="toast-message">' + message + '</span>' +
+          '<button class="toast-close" aria-label="Dismiss">' +
+          '<i class="fa-solid fa-xmark"></i></button>';
+
+        toastArea.appendChild(toast);
+
+        // Close button
+        var closeBtn = toast.querySelector('.toast-close');
+        closeBtn.addEventListener('click', function () {
+          dismissToast(toast);
+        });
+
+        // Auto-dismiss after 5 seconds
+        setTimeout(function () {
+          dismissToast(toast);
+        }, 5000);
+      }
+
+      function dismissToast(toast) {
+        if (!toast || toast.classList.contains('removing')) return;
+        toast.classList.add('removing');
+        setTimeout(function () {
+          if (toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 300);
+      }
+
+      window.__hive.showToast = showToast;
+
+      /* ---------------------------------------------------------------
+         HTMX Integration
+         --------------------------------------------------------------- */
+      document.addEventListener('htmx:beforeRequest', function (evt) {
+        // Only show loader for full-page navigations, not small partials
+        var target = evt.detail.target;
+        if (target && target.classList && target.classList.contains('hive-content')) {
+          showHiveLoader();
+        }
+      });
+
+      document.addEventListener('htmx:afterRequest', function () {
+        hideHiveLoader();
+      });
+
+      document.addEventListener('htmx:responseError', function () {
+        hideHiveLoader();
+        showToast('Request failed. Please try again.', 'error');
+      });
+
+      /* ---------------------------------------------------------------
+         Sidebar Mobile Toggle
+         --------------------------------------------------------------- */
+      var sidebar = document.getElementById('hiveSidebar');
+      var overlay = document.getElementById('sidebarOverlay');
+      var hamburger = document.getElementById('hamburgerBtn');
+
+      function openSidebar() {
+        if (sidebar) sidebar.classList.add('open');
+        if (overlay) overlay.classList.add('open');
+      }
+
+      function closeSidebar() {
+        if (sidebar) sidebar.classList.remove('open');
+        if (overlay) overlay.classList.remove('open');
+      }
+
+      if (hamburger) {
+        hamburger.addEventListener('click', function () {
+          if (sidebar && sidebar.classList.contains('open')) {
+            closeSidebar();
+          } else {
+            openSidebar();
+          }
+        });
+      }
+
+      if (overlay) {
+        overlay.addEventListener('click', closeSidebar);
+      }
+
+      // Close sidebar on navigation (mobile)
+      var navLinks = document.querySelectorAll('.sidebar-nav-link');
+      navLinks.forEach(function (link) {
+        link.addEventListener('click', function () {
+          if (window.innerWidth <= 768) {
+            closeSidebar();
+          }
+        });
+      });
+
+      window.__hive.openSidebar = openSidebar;
+      window.__hive.closeSidebar = closeSidebar;
+
+      /* ---------------------------------------------------------------
+         Floating Agent Assistant
+         --------------------------------------------------------------- */
+      var fabBtn   = document.getElementById('fabBtn');
+      var fabPanel = document.getElementById('fabPanel');
+      var fabBody  = document.getElementById('fabBody');
+      var fabInput = document.getElementById('fabInput');
+      var fabBadge = document.getElementById('fabBadge');
+      var fabActiveTab = 'status';
+
+      if (fabBtn) {
+        fabBtn.addEventListener('click', function() {
+          var isOpen = fabPanel.classList.contains('visible');
+          if (isOpen) {
+            fabPanel.classList.remove('visible');
+            fabBtn.classList.remove('open');
+          } else {
+            fabPanel.classList.add('visible');
+            fabBtn.classList.add('open');
+            loadFabTab(fabActiveTab);
+          }
+        });
+      }
+
+      /* Tab switching */
+      document.querySelectorAll('.fab-tab').forEach(function(tab) {
+        tab.addEventListener('click', function() {
+          document.querySelectorAll('.fab-tab').forEach(function(t) { t.classList.remove('active'); });
+          this.classList.add('active');
+          fabActiveTab = this.getAttribute('data-tab');
+          loadFabTab(fabActiveTab);
+        });
+      });
+
+      function loadFabTab(tab) {
+        if (tab === 'status') {
+          fabInput.style.display = 'none';
+          fabBody.innerHTML =
+            '<div class="fab-status-row">'
+            + '<div class="fab-status-dot" style="background:var(--agent-claude)"></div>'
+            + '<span class="fab-status-label">Claude</span>'
+            + '<span class="fab-status-value" style="color:#22c55e">Ready</span>'
+            + '</div>'
+            + '<div class="fab-status-row">'
+            + '<div class="fab-status-dot" style="background:var(--agent-gemini)"></div>'
+            + '<span class="fab-status-label">Gemini</span>'
+            + '<span class="fab-status-value" style="color:#22c55e">Ready</span>'
+            + '</div>'
+            + '<div class="fab-status-row">'
+            + '<div class="fab-status-dot" style="background:var(--agent-codex)"></div>'
+            + '<span class="fab-status-label">Codex</span>'
+            + '<span class="fab-status-value" style="color:#22c55e">Ready</span>'
+            + '</div>'
+            + '<div class="fab-status-row">'
+            + '<div class="fab-status-dot" style="background:var(--agent-perplexity)"></div>'
+            + '<span class="fab-status-label">Perplexity</span>'
+            + '<span class="fab-status-value" style="color:#22c55e">Ready</span>'
+            + '</div>'
+            + '<div style="margin-top:12px;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.02);font-size:0.76rem;color:var(--text-muted)">'
+            + '<i class="fa-solid fa-circle-info" style="color:var(--gold-dim);margin-right:6px"></i>'
+            + 'All systems operational. Use the Console to query agents.'
+            + '</div>';
+
+          /* Fetch live feed for recent activity */
+          fetch('{% url "hive:api_live_feed" %}')
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+              if (data.entries && data.entries.length) {
+                var latest = data.entries[0];
+                var extraHtml = '<div style="margin-top:12px;padding:10px;border-radius:8px;background:rgba(201,168,76,0.04);border:1px solid rgba(201,168,76,0.1);font-size:0.76rem">'
+                  + '<div style="color:var(--gold);font-weight:600;margin-bottom:4px">Latest Session</div>'
+                  + '<div style="color:var(--text-muted)">' + (latest.prompt || '').substring(0, 80) + '</div>'
+                  + '<div style="color:var(--text-muted);margin-top:4px;font-size:0.7rem">'
+                  + 'Status: ' + (latest.status || '?') + ' | Duration: ' + (latest.total_duration_s || 0) + 's'
+                  + '</div></div>';
+                fabBody.innerHTML += extraHtml;
+              }
+            })
+            .catch(function() {});
+
+        } else if (tab === 'errors') {
+          fabInput.style.display = 'none';
+          fabBody.innerHTML = '<div class="fab-empty"><i class="fa-solid fa-circle-check" style="color:#22c55e;margin-right:6px"></i>No recent errors</div>';
+
+          /* Check events API for errors */
+          fetch('/hive/events/?level=error&format=json')
+            .then(function(r) { return r.text(); })
+            .catch(function() {});
+
+        } else if (tab === 'quick') {
+          fabInput.style.display = 'flex';
+          fabBody.innerHTML =
+            '<div style="padding:8px;font-size:0.78rem;color:var(--text-muted);line-height:1.6">'
+            + 'Ask a quick question and it will be dispatched to the Hive Mind via the Console.'
+            + '</div>';
+
+          var fabQuestion = document.getElementById('fabQuestion');
+          var fabAskBtn = document.getElementById('fabAskBtn');
+          if (fabAskBtn) {
+            fabAskBtn.onclick = function() {
+              var q = fabQuestion.value.trim();
+              if (!q) return;
+              /* Navigate to launch page with query pre-filled */
+              window.location.href = '{% url "hive:launch" %}#q=' + encodeURIComponent(q);
+            };
+          }
+          if (fabQuestion) {
+            fabQuestion.onkeydown = function(e) {
+              if (e.key === 'Enter') fabAskBtn.click();
+            };
+          }
+        }
+      }
+
+    })();
+  </script>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,103 @@
+{% extends "trading/base.html" %}
+{% load trading_tags humanize %}
+
+{% block title %}System | {{ app_name }}{% endblock %}
+{% block page_title %}System{% endblock %}
+
+{% block content %}
+
+<!-- Bot DNA -->
+<div class="intel-card" style="margin-bottom:12px;">
+  <div class="intel-title">BOT DNA (CONFIG)</div>
+  {% if config %}
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px;margin-top:8px;">
+    {% if config.leverage %}
+    <div class="feed-mini"><strong>Leverage:</strong> {{ config.leverage }}x</div>
+    {% endif %}
+    {% if config.contract_size %}
+    <div class="feed-mini"><strong>Contract Size:</strong> {{ config.contract_size }} XLM</div>
+    {% endif %}
+    {% if config.capital_allocation_pct %}
+    <div class="feed-mini"><strong>Capital Alloc:</strong> {{ config.capital_allocation_pct|pct }}</div>
+    {% endif %}
+    {% if config.risk_pct %}
+    <div class="feed-mini"><strong>Risk:</strong> {{ config.risk_pct|pct }}</div>
+    {% endif %}
+    {% if config.target_pct %}
+    <div class="feed-mini"><strong>Target:</strong> {{ config.target_pct|pct }}</div>
+    {% endif %}
+    {% if config.max_sl_pct %}
+    <div class="feed-mini"><strong>Max SL:</strong> {{ config.max_sl_pct|pct }}</div>
+    {% endif %}
+    {% if config.max_trades_per_day %}
+    <div class="feed-mini"><strong>Max Trades/Day:</strong> {{ config.max_trades_per_day }}</div>
+    {% endif %}
+    {% if config.max_losses_per_day %}
+    <div class="feed-mini"><strong>Max Losses/Day:</strong> {{ config.max_losses_per_day }}</div>
+    {% endif %}
+    {% if config.cooldown_minutes %}
+    <div class="feed-mini"><strong>Cooldown:</strong> {{ config.cooldown_minutes }}m</div>
+    {% endif %}
+  </div>
+
+  <!-- Full Config (collapsible) -->
+  <details style="margin-top:12px;">
+    <summary style="color:#9ca3af;cursor:pointer;font-size:0.8rem;letter-spacing:0.5px;">FULL CONFIG YAML</summary>
+    {{ config|json_pretty }}
+  </details>
+  {% else %}
+    <div class="feed-mini">Config not available.</div>
+  {% endif %}
+</div>
+
+<!-- Data Snapshot -->
+<div class="intel-card" style="margin-bottom:12px;">
+  <div class="intel-title">DATA SNAPSHOT</div>
+  {% if snap %}
+    <details style="margin-top:8px;">
+      <summary style="color:#9ca3af;cursor:pointer;font-size:0.8rem;">View snapshot JSON</summary>
+      {{ snap|json_pretty }}
+    </details>
+  {% else %}
+    <div class="feed-mini">No snapshot available.</div>
+  {% endif %}
+</div>
+
+<!-- State -->
+<div class="intel-card" style="margin-bottom:12px;">
+  <div class="intel-title">BOT STATE</div>
+  {% if state %}
+    <details style="margin-top:8px;">
+      <summary style="color:#9ca3af;cursor:pointer;font-size:0.8rem;">View state JSON</summary>
+      {{ state|json_pretty }}
+    </details>
+  {% else %}
+    <div class="feed-mini">No state data.</div>
+  {% endif %}
+</div>
+
+<!-- Log Tail (HTMX polled) -->
+<div style="margin-top:12px;">
+  <div style="display:flex;gap:8px;margin-bottom:8px;">
+    <button class="pill ok" style="cursor:pointer;border:none;"
+            hx-get="{% url 'trading:api_logs_tail' %}?type=bot"
+            hx-target="#log-viewer"
+            hx-swap="innerHTML">Bot Log</button>
+    <button class="pill gold" style="cursor:pointer;border:none;"
+            hx-get="{% url 'trading:api_logs_tail' %}?type=dashboard"
+            hx-target="#log-viewer"
+            hx-swap="innerHTML">Dashboard Log</button>
+    <button class="pill" style="cursor:pointer;border:none;"
+            hx-get="{% url 'trading:api_logs_tail' %}?type=ws"
+            hx-target="#log-viewer"
+            hx-swap="innerHTML">WS Log</button>
+  </div>
+  <div id="log-viewer"
+       hx-get="{% url 'trading:api_logs_tail' %}?type=bot"
+       hx-trigger="every 5s"
+       hx-swap="innerHTML">
+    {% include "trading/partials/logs_tail.html" %}
+  </div>
+</div>
+
+{% endblock %}

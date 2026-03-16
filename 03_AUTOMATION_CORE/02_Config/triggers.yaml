@@ -1,0 +1,254 @@
+# Everlight OS - Trigger Matrix
+# Version: 1.0 | Owner: 23_automation_architect
+# Defines: WHAT event -> WHICH pipeline -> WHO executes -> WHERE output goes
+#
+# Trigger types:
+#   file_drop    - a file lands in a watched directory
+#   schedule     - cron-style time trigger
+#   webhook      - external HTTP call
+#   state_change - internal state transition (e.g. task status flip)
+#   manual       - human invokes via CLI
+
+# FILE DROP TRIGGERS
+file_triggers:
+
+  - id: inbox_markdown
+    name: "Markdown dropped in Staging Inbox"
+    watch_path: "/mnt/sdcard/AA_MY_DRIVE/07_STAGING/Inbox"
+    file_pattern: "*.md"
+    pipeline: content_engine
+    intent: draft_review
+    route_to: "/mnt/sdcard/AA_MY_DRIVE/07_STAGING/Processing"
+    executor: gemini
+    notify_slack: "agent-content-strategy"
+    log_path: "_logs/sync/inbox_moves.jsonl"
+    enabled: true
+
+  - id: inbox_image
+    name: "Image dropped in Staging Inbox"
+    watch_path: "/mnt/sdcard/AA_MY_DRIVE/07_STAGING/Inbox"
+    file_pattern: "*.{jpg,jpeg,png,webp,gif}"
+    pipeline: content_engine
+    intent: media_review
+    route_to: "/mnt/sdcard/AA_MY_DRIVE/07_STAGING/Processing"
+    executor: codex
+    notify_slack: "agent-creative-prompts"
+    log_path: "_logs/sync/inbox_moves.jsonl"
+    enabled: true
+
+  - id: inbox_csv
+    name: "CSV/data file dropped in Staging Inbox"
+    watch_path: "/mnt/sdcard/AA_MY_DRIVE/07_STAGING/Inbox"
+    file_pattern: "*.{csv,json,xlsx}"
+    pipeline: analytics_engine
+    intent: data_ingest
+    route_to: "/mnt/sdcard/AA_MY_DRIVE/07_STAGING/Processing"
+    executor: codex
+    notify_slack: "agent-analytics-auditor"
+    log_path: "_logs/sync/inbox_moves.jsonl"
+    enabled: true
+
+  - id: inbox_script
+    name: "Script dropped in Staging Inbox"
+    watch_path: "/mnt/sdcard/AA_MY_DRIVE/07_STAGING/Inbox"
+    file_pattern: "*.{py,sh,js,ts}"
+    pipeline: engineering_engine
+    intent: code_review
+    route_to: "/mnt/sdcard/AA_MY_DRIVE/07_STAGING/Review"
+    executor: codex
+    notify_slack: "agent-ops-logs"
+    log_path: "_logs/sync/inbox_moves.jsonl"
+    enabled: true
+
+  - id: staging_review_ready
+    name: "File moves to Review - trigger QA check"
+    watch_path: "/mnt/sdcard/AA_MY_DRIVE/07_STAGING/Review"
+    file_pattern: "*.{md,py,sh}"
+    pipeline: qa_engine
+    intent: quality_gate
+    route_to: "/mnt/sdcard/AA_MY_DRIVE/07_STAGING/Review"
+    executor: claude
+    notify_slack: "agent-approvals"
+    log_path: "_logs/sync/review_log.jsonl"
+    enabled: true
+
+# SCHEDULE TRIGGERS (cron)
+schedule_triggers:
+
+  - id: morning_brief
+    name: "Daily Morning Briefing"
+    cron: "0 9 * * *"
+    timezone: "America/Los_Angeles"
+    pipeline: ops_engine
+    intent: morning_status
+    executor: claude
+    script: "03_AUTOMATION_CORE/01_Scripts/morning_brief.sh"
+    notify_slack: "ai-war-room"
+    log_path: "_logs/daily_briefs.jsonl"
+    enabled: true
+
+  - id: eod_report
+    name: "End-of-Day Status Sweep"
+    cron: "0 17 * * *"
+    timezone: "America/Los_Angeles"
+    pipeline: ops_engine
+    intent: eod_status
+    executor: gemini
+    notify_slack: "ai-war-room"
+    log_path: "_logs/daily_briefs.jsonl"
+    enabled: true
+
+  - id: weekly_kpi
+    name: "Wednesday KPI Review"
+    cron: "0 10 * * 3"
+    timezone: "America/Los_Angeles"
+    pipeline: analytics_engine
+    intent: kpi_review
+    executor: gemini
+    notify_slack: "agent-analytics-auditor"
+    log_path: "_logs/kpi_reviews.jsonl"
+    enabled: true
+
+  - id: weekly_sop_review
+    name: "Friday SOP and Workflow Health"
+    cron: "0 15 * * 5"
+    timezone: "America/Los_Angeles"
+    pipeline: ops_engine
+    intent: sop_review
+    executor: claude
+    notify_slack: "agent-ops-logs"
+    log_path: "_logs/sop_reviews.jsonl"
+    enabled: true
+
+  - id: content_publish_check
+    name: "Content Queue Check (twice daily)"
+    cron: "0 8,14 * * *"
+    timezone: "America/Los_Angeles"
+    pipeline: content_engine
+    intent: publish_queue
+    executor: codex
+    notify_slack: "agent-distribution-ops"
+    log_path: "_logs/content_publishes.jsonl"
+    enabled: false
+
+  - id: avatar_content_gen
+    name: "Daily Avatar Content Generation"
+    cron: "0 6 * * *"
+    timezone: "America/Los_Angeles"
+    pipeline: content_engine
+    intent: content_generation
+    executor: claude
+    script: "03_AUTOMATION_CORE/01_Scripts/avatar_orchestrator.py --product onyx --persona founder --count 2"
+    notify_slack: "04-content-factory"
+    log_path: "_logs/avatar_gen.jsonl"
+    enabled: false
+
+  - id: social_post_morning
+    name: "Social Posting - Morning (8 AM PT)"
+    cron: "0 8 * * *"
+    timezone: "America/Los_Angeles"
+    pipeline: content_engine
+    intent: social_distribution
+    executor: codex
+    script: "03_AUTOMATION_CORE/01_Scripts/social_poster.py --from-queue"
+    notify_slack: "04-content-factory"
+    log_path: "_logs/social_posts.jsonl"
+    enabled: false
+
+  - id: social_post_midday
+    name: "Social Posting - Midday (12 PM PT)"
+    cron: "0 12 * * *"
+    timezone: "America/Los_Angeles"
+    pipeline: content_engine
+    intent: social_distribution
+    executor: codex
+    script: "03_AUTOMATION_CORE/01_Scripts/social_poster.py --from-queue"
+    notify_slack: "04-content-factory"
+    log_path: "_logs/social_posts.jsonl"
+    enabled: false
+
+  - id: funnel_nurture
+    name: "Funnel Email Nurture (hourly)"
+    cron: "0 * * * *"
+    timezone: "America/Los_Angeles"
+    pipeline: funnel_engine
+    intent: email_nurture
+    executor: codex
+    script: "03_AUTOMATION_CORE/01_Scripts/funnel_nurture.py"
+    notify_slack: "04-content-factory"
+    log_path: "_logs/funnel_nurture.jsonl"
+    enabled: false
+
+# STATE CHANGE TRIGGERS
+state_triggers:
+
+  - id: task_blocked
+    name: "Task transitions to blocked"
+    watch_field: "status"
+    watch_value: "blocked"
+    pipeline: escalation_engine
+    intent: escalate
+    escalate_to: "02_ops_deputy"
+    notify_slack: "agent-errors"
+    sla_hours: 2
+    enabled: true
+
+  - id: task_done
+    name: "Task transitions to done"
+    watch_field: "status"
+    watch_value: "done"
+    pipeline: ops_engine
+    intent: log_completion
+    notify_slack: "ai-war-room"
+    enabled: true
+
+  - id: spec_approved
+    name: "SaaS spec approved, trigger build"
+    watch_file_pattern: "*/spec_approval.json"
+    watch_field: "approved"
+    watch_value: true
+    pipeline: saas_engine
+    intent: full_build
+    executor: codex
+    notify_slack: "agent-ops-logs"
+    log_path: "_logs/saas_builds.jsonl"
+    enabled: true
+
+# MANUAL TRIGGERS (CLI invocations)
+manual_triggers:
+
+  - id: hive_full
+    name: "Full Hive Mind deliberation"
+    command: "hive"
+    args: ["--mode", "full"]
+    pipeline: hive_engine
+    executor: all
+    notify_slack: "ai-war-room"
+    enabled: true
+
+  - id: morning_run
+    name: "Manual morning brief"
+    command: "brief"
+    script: "03_AUTOMATION_CORE/01_Scripts/morning_brief.sh"
+    pipeline: ops_engine
+    executor: claude
+    enabled: true
+
+  - id: route_task
+    name: "Manual task routing"
+    command: "route"
+    script: "03_AUTOMATION_CORE/01_Scripts/task_router.py"
+    pipeline: ops_engine
+    executor: codex
+    enabled: true
+
+# ESCALATION POLICY
+escalation_policy:
+  default_owner: "02_ops_deputy"
+  conflict_resolver: "01_chief_operator"
+  technical_failure: "03_engineering_foreman"
+  data_corruption: "03_engineering_foreman"
+  unroutable_file: "02_ops_deputy"
+  max_retry_attempts: 3
+  retry_backoff_seconds: 60
+  dead_letter_path: "_logs/dead_letter.jsonl"

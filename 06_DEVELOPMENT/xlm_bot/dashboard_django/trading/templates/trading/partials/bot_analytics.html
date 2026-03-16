@@ -1,0 +1,42 @@
+{% load trading_tags %}
+
+{% if snap %}
+<div class="metrics-strip">
+  {% if snap.regime %}
+  <div class="ms-item">
+    <span class="ms-k">Regime</span>
+    <span class="ms-v">{{ snap.regime|upper }}</span>
+  </div>
+  {% endif %}
+  {% if snap.win_rate is not None %}
+  <div class="ms-item">
+    <span class="ms-k">Win Rate</span>
+    <span class="ms-v {% if snap.win_rate >= 60 %}good{% elif snap.win_rate < 40 %}bad{% else %}warn{% endif %}">{{ snap.win_rate|pct }}</span>
+  </div>
+  {% endif %}
+  {% if snap.trades_today is not None %}
+  <div class="ms-item">
+    <span class="ms-k">Trades</span>
+    <span class="ms-v">{{ snap.trades_today }}</span>
+  </div>
+  {% endif %}
+  {% if snap.quality_tier %}
+  <div class="ms-item">
+    <span class="ms-k">Quality</span>
+    <span class="ms-v">{{ snap.quality_tier }}</span>
+  </div>
+  {% endif %}
+  {% if snap.lane %}
+  <div class="ms-item">
+    <span class="ms-k">Lane</span>
+    <span class="ms-v">{{ snap.lane }}</span>
+  </div>
+  {% endif %}
+  {% if snap.vol_phase %}
+  <div class="ms-item">
+    <span class="ms-k">Vol</span>
+    <span class="ms-v">{{ snap.vol_phase|upper }}</span>
+  </div>
+  {% endif %}
+</div>
+{% endif %}

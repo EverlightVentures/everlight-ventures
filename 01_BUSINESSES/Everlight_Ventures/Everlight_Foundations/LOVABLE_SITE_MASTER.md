@@ -1114,8 +1114,9 @@ read from that shared source of truth.
 
 ## LIVE STATUS CARDS
 
-Pull from Supabase-backed telemetry. Prefer the live watchtower fields
-over vanity metrics.
+Pull from Supabase-backed telemetry. Prefer the public-ready
+`public_*` watchtower fields first, then fall back to the raw fields.
+Do not hardcode XLM price or reuse homepage filler copy on `/dashboard`.
 
 Card 1: DATA QUALITY STATUS (healthy / degraded)
 Card 2: STREAM STATUS (pilot / watch / active)
@@ -1125,6 +1126,16 @@ Card 5: ENTRY SIGNAL
 Card 6: PULSE REGIME
 Card 7: TICK HEALTH
 Card 8: BRIEF AGE (minutes)
+
+Preferred label fields from `xlm_bot_metrics`:
+- public_system_state
+- public_setup_state
+- public_market_climate
+- public_tick_status
+- public_data_status
+- public_decision_label
+- public_pressure_note
+- public_status_blurb
 
 Design notes:
 - Status pills should look like operational badges, not consumer app counters

@@ -1,0 +1,45 @@
+{% load humanize hive_tags %}
+{# =====================================================================
+   PARTIAL: Agent Card (compact)
+   Context: agent_name, agent_display_name, agent_color, agent_icon,
+            agent_is_active, agent_total_responses, agent_success_rate,
+            agent_avg_duration
+   ===================================================================== #}
+<div class="glass-card" style="position: relative; padding: 16px 18px;">
+  {# Top color accent #}
+  <div style="position: absolute; top: 0; left: 0; right: 0; height: 2px; background: {{ agent_color }}; border-radius: 12px 12px 0 0; opacity: 0.6;"></div>
+
+  {# Header: icon + name + active dot #}
+  <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+    <div style="width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; background: {{ agent_color }}18; color: {{ agent_color }}; flex-shrink: 0;">
+      <i class="fa-solid {{ agent_icon }}"></i>
+    </div>
+    <div style="flex: 1; min-width: 0;">
+      <div style="font-weight: 600; font-size: 0.88rem; color: var(--text-primary); display: flex; align-items: center; gap: 6px;">
+        {{ agent_display_name }}
+        {# Colored pulse dot #}
+        {% if agent_is_active %}
+        <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: {{ agent_color }}; box-shadow: 0 0 6px {{ agent_color }}; flex-shrink: 0;"></span>
+        {% else %}
+        <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #4b5563; flex-shrink: 0;"></span>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# Success rate bar #}
+  <div style="margin-bottom: 10px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; color: var(--text-muted); margin-bottom: 4px;">
+      <span>Success</span>
+      <span style="color: var(--gold); font-weight: 600;">{{ agent_success_rate|floatformat:0 }}%</span>
+    </div>
+    <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden;">
+      <div style="height: 100%; width: {{ agent_success_rate|pct_bar_width }}; background: {{ agent_color }}; border-radius: 4px; transition: width 0.6s cubic-bezier(0.16,1,0.3,1);"></div>
+    </div>
+  </div>
+
+  {# Footer: responses count + duration + last status #}
+  <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; color: var(--text-muted); padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
+    <span>{{ agent_total_responses }} resp -- {{ agent_avg_duration|duration_fmt }}</span>
+  </div>
+</div>

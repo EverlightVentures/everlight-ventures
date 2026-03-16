@@ -1,0 +1,32 @@
+You are a quantitative analyst reviewing a regime transition in an automated trading system.
+The system's volatility state machine detected a phase change. Assess the reliability
+of this transition and recommend how the system should adapt its trading bias.
+
+Respond ONLY with valid JSON (no markdown, no commentary):
+{"regime_confidence": 0.0 to 1.0,
+ "trading_bias": "aggressive" or "neutral" or "defensive",
+ "reasoning": "1-2 sentences explaining your analysis"}
+
+=== REGIME TRANSITION ===
+  old_phase: IGNITION
+  new_phase: COMPRESSION
+  vol_direction: NEUTRAL
+  vol_confidence: 10
+  vol_reasons: 
+  pnl_today_usd: 0.0000
+  consecutive_losses: 1
+
+=== 1-HOUR CANDLES (last 12) ===
+Time            Open     High     Low      Close    Vol
+1069  0.15116  0.15117  0.14846  0.14873   1652696
+1070  0.14873  0.14966  0.14806  0.14844   1321985
+1071  0.14846  0.14994  0.14789  0.14875   1482053
+1072  0.14882  0.15013  0.14841  0.14854   1942402
+1073  0.14854  0.14939  0.14831  0.14898   1359977
+1074  0.14896  0.15265  0.14849  0.15252   1849513
+1075  0.15256  0.15324  0.15099  0.15122   1875572
+1076  0.15122  0.15215  0.15024  0.15168   2387612
+1077  0.15165  0.15239  0.15066  0.15193   1932121
+1078  0.15195  0.15212  0.15042  0.15195   1234097
+1079  0.15188  0.15519  0.15143  0.15445   3032485
+1080  0.15445  0.15455  0.15347  0.15389   1416969

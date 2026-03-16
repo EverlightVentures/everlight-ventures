@@ -1,0 +1,88 @@
+{% extends "trading/base.html" %}
+{% load trading_tags humanize %}
+
+{% block title %}Ledger | {{ app_name }}{% endblock %}
+{% block page_title %}Ledger{% endblock %}
+
+{% block content %}
+
+<!-- Major Events Feed (HTMX polled) -->
+<div id="major-events"
+     hx-get="{% url 'trading:api_major_events' %}"
+     hx-trigger="every 15s"
+     hx-swap="innerHTML">
+  {% include "trading/partials/events_feed.html" %}
+</div>
+
+<!-- Market Intel Stream -->
+{% if market_news %}
+<div class="intel-card" style="margin-top:12px;">
+  <div class="intel-title">MARKET INTEL STREAM</div>
+  <div style="max-height:300px;overflow-y:auto;">
+    {% for news in market_news|slice:":30" %}
+    <div class="intel-event">
+      <span class="time">{{ news.timestamp|pt_short }}</span>
+      {% if news.source %}<span style="color:#6b7280;">[{{ news.source }}]</span>{% endif %}
+      {{ news.headline|default:"" }}{{ news.title|default:"" }}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Trades (Full Table) -->
+<div class="intel-card" style="margin-top:12px;">
+  <div class="intel-title">ALL TRADES</div>
+  {% if trades_df is not None %}
+  <div style="overflow-x:auto;margin-top:8px;max-height:400px;overflow-y:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.75rem;">
+      <thead>
+        <tr style="color:#6b7280;text-transform:uppercase;letter-spacing:0.8px;font-size:9px;position:sticky;top:0;background:#0a0a0f;">
+          <th style="text-align:left;padding:6px 6px;border-bottom:1px solid rgba(255,255,255,0.08);">Time</th>
+          <th style="text-align:center;padding:6px 6px;border-bottom:1px solid rgba(255,255,255,0.08);">Side</th>
+          <th style="text-align:right;padding:6px 6px;border-bottom:1px solid rgba(255,255,255,0.08);">Entry</th>
+          <th style="text-align:right;padding:6px 6px;border-bottom:1px solid rgba(255,255,255,0.08);">Exit</th>
+          <th style="text-align:right;padding:6px 6px;border-bottom:1px solid rgba(255,255,255,0.08);">P&L</th>
+          <th style="text-align:left;padding:6px 6px;border-bottom:1px solid rgba(255,255,255,0.08);">Type</th>
+          <th style="text-align:left;padding:6px 6px;border-bottom:1px solid rgba(255,255,255,0.08);">Exit Reason</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in trades_list %}
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+          <td style="padding:5px 6px;color:#9ca3af;font-size:10px;">{{ row.entry_time|pt_short }}</td>
+          <td style="text-align:center;padding:5px 6px;">{{ row.direction|direction_badge }}</td>
+          <td style="text-align:right;padding:5px 6px;color:#d1d5db;">{{ row.entry_price|price6 }}</td>
+          <td style="text-align:right;padding:5px 6px;color:#d1d5db;">{{ row.exit_price|price6 }}</td>
+          <td style="text-align:right;padding:5px 6px;font-weight:600;" class="{{ row.pnl_usd|pnl_color }}">{{ row.pnl_usd|money_signed }}</td>
+          <td style="padding:5px 6px;color:#9ca3af;font-size:10px;">{{ row.entry_type|default:"--" }}</td>
+          <td style="padding:5px 6px;color:#9ca3af;font-size:10px;">{{ row.exit_reason|default:"--" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <div class="feed-mini">No trade data.</div>
+  {% endif %}
+</div>
+
+<!-- Cash Movements -->
+<div class="intel-card" style="margin-top:12px;">
+  <div class="intel-title">CASH MOVEMENTS</div>
+  {% if cash_movements %}
+    {% for mv in cash_movements %}
+    <div class="intel-event">
+      <span class="time">{{ mv.timestamp|pt_short }}</span>
+      <strong>{{ mv.type|default:"transfer" }}</strong>
+      {{ mv.amount|money }} {{ mv.currency|default:"USD" }}
+      {% if mv.status %}<span class="muted">&middot; {{ mv.status }}</span>{% endif %}
+      {% if mv.reason %}<span class="muted">&middot; {{ mv.reason }}</span>{% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="feed-mini">No cash movements.</div>
+  {% endif %}
+</div>
+
+{% endblock %}

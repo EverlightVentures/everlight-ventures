@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Edit {{ name }}</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+      body { margin: 0; background: #0b0f1a; color: #e8f3ff; font-family: "Space Grotesk", sans-serif; }
+      .wrap { padding: 18px; display: grid; gap: 12px; }
+      .bar { display: flex; gap: 10px; align-items: center; }
+      .btn { padding: 8px 12px; border-radius: 8px; border: 1px solid rgba(64,207,255,0.4); background: rgba(64,207,255,0.15); color: #e8f3ff; cursor: pointer; }
+      .muted { color: #8ea4c0; font-size: 12px; }
+      .split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      textarea { width: 100%; height: 80vh; background: #0f1424; color: #e8f3ff; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 12px; font-family: "JetBrains Mono", monospace; font-size: 12px; }
+      .preview { background: #0f1424; border-radius: 12px; padding: 12px; overflow: auto; height: 80vh; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="bar">
+        <button id="saveBtn" class="btn">Save</button>
+        <button id="togglePreviewBtn" class="btn">Preview</button>
+        <span class="muted">{{ name }}</span>
+      </div>
+      <div class="split" id="splitPane">
+        <textarea id="editor">{{ content }}</textarea>
+        <div id="mdPreview" class="preview"></div>
+      </div>
+    </div>
+
+    <script>
+      const saveBtn = document.getElementById("saveBtn");
+      const editor = document.getElementById("editor");
+      const togglePreviewBtn = document.getElementById("togglePreviewBtn");
+      const mdPreview = document.getElementById("mdPreview");
+      const splitPane = document.getElementById("splitPane");
+      let previewOn = true;
+
+      function renderPreview() {
+        try {
+          mdPreview.innerHTML = marked.parse(editor.value);
+        } catch {
+          mdPreview.innerHTML = "";
+        }
+      }
+      renderPreview();
+      editor.addEventListener("input", renderPreview);
+
+      togglePreviewBtn.addEventListener("click", () => {
+        previewOn = !previewOn;
+        mdPreview.style.display = previewOn ? "block" : "none";
+        splitPane.style.gridTemplateColumns = previewOn ? "1fr 1fr" : "1fr";
+      });
+
+      saveBtn.addEventListener("click", async () => {
+        const res = await fetch("/api/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ root: {{ root if root is not none else 'null' }}, path: "{{ path }}", content: editor.value })
+        });
+        if (res.ok) {
+          saveBtn.textContent = "Saved";
+          setTimeout(() => (saveBtn.textContent = "Save"), 1200);
+        } else {
+          saveBtn.textContent = "Error";
+        }
+      });
+    </script>
+  </body>
+</html>

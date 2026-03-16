@@ -1,0 +1,32 @@
+{
+  "product": "hivemind",
+  "from_name": "Sage from Hive Mind",
+  "from_email": "",
+  "sequence": [
+    {
+      "day": 0,
+      "subject": "You're on the Hive Mind waitlist",
+      "template": "hivemind_welcome.md",
+      "stage_after": "welcome_sent"
+    },
+    {
+      "day": 2,
+      "subject": "Why I use Claude, Gemini, AND Codex at the same time",
+      "template": "hivemind_day2_why.md",
+      "stage_after": "nurturing"
+    },
+    {
+      "day": 5,
+      "subject": "Watch: a live War Room session with 3 AIs",
+      "template": "hivemind_day5_demo.md",
+      "stage_after": "nurturing"
+    },
+    {
+      "day": 7,
+      "subject": "Early access is almost ready -- what would you build first?",
+      "template": "hivemind_day7_engage.md",
+      "stage_after": "nurturing"
+    }
+  ],
+  "notes": "Set from_email after picking SMTP provider. Templates are in this same directory."
+}

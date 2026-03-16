@@ -1,0 +1,203 @@
+# Everlight OS — Master Configuration
+# Every agent (Claude, Cursor, GPT, Gemini, etc.) must read this file first.
+
+# --- Brand ---
+brand:
+  name: "Everlight Ventures"
+  voice: "Professional but approachable. Clear, direct, helpful."
+  tone: "Confident and knowledgeable without being preachy."
+  tagline: "Illuminating the path forward."
+  businesses:
+    - name: "Everlight Ventures"
+      focus: "Business automation, SaaS, AI tools"
+      cadence: "3x/week"
+    - name: "Last Light Protocol"
+      focus: "Gaming community, clips, tournaments"
+      cadence: "daily"
+    - name: "BCARDI Crypto"
+      focus: "Crypto education, community, market updates"
+      cadence: "2x/day"
+    - name: "Everlight Kids"
+      focus: "Children's books, Adventures with Sam"
+      cadence: "per launch"
+
+# --- Agent Rules (ALL agents must follow) ---
+agent_rules:
+  first_actions:
+    - "Read _meta/path_map.json for all file paths"
+    - "Read configs/everlight.yaml (this file)"
+    - "Read relevant knowledge/ docs for the task type"
+  constraints:
+    - "Never hardcode file paths — use path_map.json"
+    - "Follow output contracts — every job type has required files"
+    - "Never publish or execute trades without approval"
+    - "Always include required disclaimers"
+    - "Log all runs to _logs/everlight_runs.jsonl"
+  knowledge_docs:
+    style: "knowledge/style_guide.md"
+    brand_voice: "knowledge/brand_voice.md"
+    disclaimers: "knowledge/disclaimers.md"
+    sam_and_robo: "knowledge/sam_and_robo_bible.md"
+
+# --- Role Ticket Format ---
+# Every router dispatch produces tickets in this shape.
+# Any tool (Claude, Cursor, GPT, Gemini, Perplexity, Seedance) receives the same format.
+role_ticket_format:
+  fields:
+    - role          # Who does the work (researcher, content_director, seo_formatter, etc.)
+    - task          # What to do (one clear sentence)
+    - inputs        # What they receive (file paths or data)
+    - outputs       # What files they must produce
+    - definition_of_done  # How to know it's complete
+
+# --- Slack ---
+slack:
+  webhook_url: ""  # Paste your Slack incoming webhook URL here
+  default_channel: "#everlight"
+  notify_on_complete: true
+  notify_on_error: true
+  notify_progress: false
+
+# --- Content Engine ---
+content:
+  default_cta: "Subscribe for more insights"
+  email_capture_cta: "Join 1,000+ readers getting weekly insights"
+  social_platforms: [instagram, tiktok, x, facebook]
+  social_post_count: 5
+  image_prompt_count: 4
+  required_outputs:
+    - content_pack.json
+    - blog.md
+    - socials.md
+    - email.md
+    - seo.json
+    - monetization.md
+    - image_prompts.txt
+    - video_script.md
+    - seedance_prompts.txt
+    - publish_checklist.md
+    - sources.md
+    - state.json
+    - qa_report.md
+    - approval_status.json
+
+# --- Books Engine ---
+books:
+  default_series: "adventures_with_sam"
+  author_display: "Everlight Kids"
+  author_avatar: "Sam & Robo illustration (not a personal photo)"
+  illustration_style: "Vibrant, colorful, kid-friendly digital art"
+  coloring_style: "Black and white line art, thick outlines, easy to color"
+  age_range: "4-8"
+  required_outputs:
+    - series_bible.md
+    - outline.md
+    - manuscript.md
+    - illustration_prompts.txt
+    - coloring_page_prompts.txt
+    - cover_prompt.txt
+    - kdp_metadata.json
+    - launch_socials.md
+    - launch_email.md
+    - video_script.md
+    - seedance_prompts.txt
+    - state.json
+
+# --- Trading Engine ---
+trading:
+  lookback_hours: 24
+  anomaly_thresholds:
+    gate_pass_rate_min: 0.05
+    max_loss_streak: 3
+    bot_stale_hours: 2
+    daily_loss_pct: 0.05
+  safety_rules:
+    - "Never execute trades autonomously"
+    - "Config changes require human approval"
+    - "Only produce recommendations and risk framing"
+  required_outputs:
+    - daily_report.md
+    - anomalies.json
+    - recommended_changes.md
+    - metrics.json
+    - state.json
+    - approval_status.json
+
+# --- SaaS Factory Engine ---
+saas_factory:
+  phase_gates:
+    - "Phase 0 (Spec): All 9 spec docs must exist before build starts"
+    - "Phase 1 (Build): Code must run and tests pass before launch"
+    - "Phase 2 (Launch): All launch materials reviewed before go-live"
+  safety_rules:
+    - "Never write production code without spec gate approval"
+    - "Never send launch emails without launch gate approval"
+    - "Budget estimates are advisory only — no spending without human sign-off"
+  required_outputs_phase0:
+    - scope.json
+    - stack.json
+    - spec/01_PRD.md
+    - spec/02_USER_STORIES.md
+    - spec/03_ACCEPTANCE_CRITERIA.md
+    - spec/04_NONFUNCTIONAL_REQUIREMENTS.md
+    - spec/05_DATA_MODEL.md
+    - spec/06_API_SPEC.md
+    - spec/07_UI_MAP.md
+    - spec/08_RISK_REGISTER.md
+    - spec/09_ROADMAP.md
+    - spec_approval.json
+    - state.json
+  required_outputs_phase1:
+    - build/RUNBOOK.md
+    - build/TEST_PLAN.md
+    - build/.env.example
+  required_outputs_phase2:
+    - launch/landing_page_copy.md
+    - launch/pricing.md
+    - launch/onboarding_email_sequence.md
+    - launch/affiliate_program_plan.md
+    - launch/seedance_prompts.txt
+    - launch/socials.md
+    - ops/support_sop.md
+    - ops/incident_sop.md
+    - ops/backup_restore.md
+    - ops/privacy_policy_draft.md
+    - ops/terms_draft.md
+    - ops/analytics_plan.md
+
+# --- Disclaimers (full text, ready to paste) ---
+disclaimers:
+  financial: >
+    This content is for informational and educational purposes only and does not
+    constitute financial, investment, or trading advice. Cryptocurrency and derivatives
+    trading involves substantial risk of loss. Always do your own research (DYOR) and
+    consult a qualified financial advisor before making any investment decisions.
+  affiliate: >
+    This post may contain affiliate links. If you make a purchase through these links,
+    we may earn a small commission at no additional cost to you. We only recommend
+    products and services we genuinely believe in.
+  health: >
+    This content is for informational purposes only and is not a substitute for
+    professional medical advice. Always consult your physician before starting any
+    new exercise program or diet.
+
+# --- AI Workers ---
+workers:
+  research: "perplexity"
+  outline: "openai"
+  draft: "openai"
+  seo: "openai"
+  report: "openai"
+  quality_gate: "openai"
+  default_model: "gpt-4o-mini"
+
+# --- External Tool Roles ---
+# How each paid tool maps to the Everlight team:
+tool_roles:
+  claude_code: "Lead PM + Architect + QA"
+  cursor: "Implementer + Refactorer (accepts file paths, diffs, acceptance criteria)"
+  codex: "Automation Builder (scripts, CLIs, packaging, integrations)"
+  gpt: "Brand/Content Director (final copy, tone, hooks, CTAs, scripts)"
+  gemini: "SEO/Web Structurer (metadata, schema, keyword clusters, formatting)"
+  perplexity: "Researcher (sources, competitor scans, product shortlists)"
+  seedance: "Video Studio (takes seedance_prompts.txt, outputs reel/short assets)"

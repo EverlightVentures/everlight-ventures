@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AA Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo">AA</div>
+        <div>
+          <div class="title">AA Dashboard</div>
+          <div class="subtitle">Local file universe, alive.</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="refreshBtn" class="btn ghost">Refresh</button>
+        <button id="openProtonBtn" class="btn">Proton Suite</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel left">
+        <div class="panel-title">Roots</div>
+        <div id="roots" class="roots"></div>
+        <div class="panel-title">Search</div>
+        <div class="search">
+          <input id="searchInput" type="text" placeholder="Search everything..." />
+          <button id="searchBtn" class="btn">Go</button>
+        </div>
+        <div class="panel-title">Apps</div>
+        <div id="appsGrid" class="apps-grid"></div>
+        <div class="panel-title">Proton</div>
+        <div class="proton">
+          <button data-url="https://drive.proton.me" class="btn proton-btn">Drive</button>
+          <button data-url="https://mail.proton.me" class="btn proton-btn">Mail</button>
+          <button data-url="https://calendar.proton.me" class="btn proton-btn">Calendar</button>
+          <button data-url="https://pass.proton.me" class="btn proton-btn">Pass</button>
+        </div>
+        <div class="panel-title">Shortcuts</div>
+        <div class="shortcuts">
+          <button data-jump="/" class="btn ghost">Home</button>
+          <button data-jump="/04_MEDIA_LIBRARY" class="btn ghost">Media</button>
+          <button data-jump="/06_DEVELOPMENT" class="btn ghost">Dev</button>
+        </div>
+      </section>
+
+      <section class="panel center">
+        <div class="pathbar">
+          <div id="breadcrumbs" class="breadcrumbs"></div>
+          <div class="path-actions">
+            <button id="openTabBtn" class="btn ghost">Open In New Tab</button>
+          </div>
+        </div>
+        <div id="grid" class="grid"></div>
+      </section>
+
+      <section class="panel right">
+        <div class="panel-title">System</div>
+        <div id="usageWidget" class="widget"></div>
+        <div class="panel-title">Recent</div>
+        <div id="recentList" class="recent-list"></div>
+        <div class="panel-title">Preview</div>
+        <div id="preview" class="preview">
+          <div class="preview-empty">Pick a file to preview.</div>
+        </div>
+      </section>
+    </main>
+
+    <div id="protonModal" class="modal hidden">
+      <div class="modal-card">
+        <div class="modal-title">Proton Suite</div>
+        <div class="modal-body">
+          <p>
+            Open Proton apps in new tabs. If you want Proton Drive as the default
+            storage, sync it locally and point AA Dashboard at that folder.
+          </p>
+          <div class="modal-actions">
+            <button data-url="https://drive.proton.me" class="btn proton-btn">Drive</button>
+            <button data-url="https://mail.proton.me" class="btn proton-btn">Mail</button>
+            <button data-url="https://calendar.proton.me" class="btn proton-btn">Calendar</button>
+            <button data-url="https://pass.proton.me" class="btn proton-btn">Pass</button>
+          </div>
+        </div>
+        <button id="closeProton" class="btn ghost">Close</button>
+      </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

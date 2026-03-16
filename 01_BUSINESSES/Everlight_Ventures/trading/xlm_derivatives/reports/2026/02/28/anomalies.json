@@ -1,0 +1,29 @@
+{
+  "date": "2026-02-28",
+  "anomalies": [
+    {
+      "id": "flash_drop_10pct",
+      "description": "10% drop from $0.1614 peak to $0.1491 on KuCoin",
+      "severity": "HIGH",
+      "source": "KuCoin"
+    },
+    {
+      "id": "volume_price_divergence",
+      "description": "Volume down 26% while price dropped 10% -- weak buying support at current levels",
+      "severity": "MEDIUM",
+      "source": "MEXC"
+    },
+    {
+      "id": "cross_exchange_spread",
+      "description": "Spread of ~$0.015 across major exchanges indicates arbitrage noise and low liquidity",
+      "severity": "LOW",
+      "source": "multi"
+    },
+    {
+      "id": "death_cross",
+      "description": "50-day MA crossed below 200-day MA -- structural bearish signal",
+      "severity": "HIGH",
+      "source": "technical"
+    }
+  ]
+}

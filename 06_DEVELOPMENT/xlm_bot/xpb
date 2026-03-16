@@ -1,0 +1,105 @@
+#!/bin/bash
+# xpb - XLM perpetual bot (no .sh)
+# Runs in a supervisor loop and auto-restarts on crash.
+#
+# Default behavior:
+# - If config.yaml says paper:false, this runs LIVE (and supplies --i-understand-live).
+# - Pass --paper to force paper mode.
+
+set -euo pipefail
+
+BOT_DIR="/mnt/sdcard/AA_MY_DRIVE/xlm_bot"
+VENV="/tmp/xlm_bot_venv"
+cd "$BOT_DIR" || exit 1
+
+IDLE_SLEEP="${IDLE_SLEEP:-30}"
+IN_TRADE_SLEEP="${IN_TRADE_SLEEP:-5}"
+
+bash "$BOT_DIR/_venv.sh"
+
+MODE="auto"
+CONFIG_FILE="config.yaml"
+EXTRA_ARGS=()
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --paper)
+      MODE="paper"
+      shift
+      ;;
+    --config)
+      if [ $# -ge 2 ]; then
+        CONFIG_FILE="$2"
+        shift 2
+      else
+        echo "Missing value for --config"
+        exit 1
+      fi
+      ;;
+    *)
+      EXTRA_ARGS+=("$1")
+      shift
+      ;;
+  esac
+done
+
+echo "Stopping existing bot processes for config: $CONFIG_FILE"
+# Kill only this profile's watchdog loop/worker so trend+MR can run together.
+pkill -f "main.py --config $CONFIG_FILE" 2>/dev/null || true
+pkill -f "xpb-fg --config $CONFIG_FILE" 2>/dev/null || true
+pkill -f "xpb-guardian --config $CONFIG_FILE" 2>/dev/null || true
+sleep 1
+
+is_paper="$(CONFIG_FILE="$CONFIG_FILE" python3 - <<'PY'
+from pathlib import Path
+import os
+import yaml
+p=Path(os.environ.get("CONFIG_FILE", "config.yaml"))
+if not p.is_absolute():
+  p=Path("/mnt/sdcard/AA_MY_DRIVE/xlm_bot")/p
+cfg=yaml.safe_load(p.read_text()) if p.exists() else {}
+print("true" if bool(cfg.get("paper", True)) else "false")
+PY
+)"
+
+LOG_DIR="$(CONFIG_FILE="$CONFIG_FILE" python3 - <<'PY'
+from pathlib import Path
+import os
+import yaml
+cfg_path=Path(os.environ.get("CONFIG_FILE","config.yaml"))
+if not cfg_path.is_absolute():
+  cfg_path=Path("/mnt/sdcard/AA_MY_DRIVE/xlm_bot")/cfg_path
+cfg=yaml.safe_load(cfg_path.read_text()) if cfg_path.exists() else {}
+paths=(cfg.get("paths") or {}) if isinstance(cfg,dict) else {}
+logs_dir=paths.get("logs_dir","logs")
+p=Path(logs_dir)
+if not p.is_absolute():
+  p=Path("/mnt/sdcard/AA_MY_DRIVE/xlm_bot")/p
+print(str(p))
+PY
+)"
+mkdir -p "$LOG_DIR"
+
+CMD=(python main.py)
+if [ "$MODE" = "paper" ] || [ "$is_paper" = "true" ]; then
+  CMD=("$VENV/bin/python" main.py --config "$CONFIG_FILE" --paper "${EXTRA_ARGS[@]}")
+else
+  CMD=("$VENV/bin/python" main.py --config "$CONFIG_FILE" --live --i-understand-live "${EXTRA_ARGS[@]}")
+fi
+
+echo "Starting bot watchdog... (${CMD[*]})"
+LOG_FILE="$LOG_DIR/xpb_console.log"
+touch "$LOG_FILE"
+GUARD_FILE="$LOG_DIR/xpb_guardian.log"
+touch "$GUARD_FILE"
+nohup /bin/sh -c "
+  cd \"$BOT_DIR\" || exit 1
+  exec bash ./xpb-guardian --config \"$CONFIG_FILE\"
+" >> "$GUARD_FILE" 2>&1 &
+
+sleep 1
+BOT_PID="$(pgrep -af "/tmp/xlm_bot_venv/bin/python.* main.py --config $CONFIG_FILE" 2>/dev/null | head -n 1 | awk '{print $1}')"
+GUARD_PID="$(pgrep -af "xpb-guardian --config $CONFIG_FILE" 2>/dev/null | head -n 1 | awk '{print $1}')"
+echo "Bot PID: ${BOT_PID:-}"
+echo "Guardian PID: ${GUARD_PID:-}"
+echo "Logs: tail -f $LOG_FILE"
+echo "Guardian log: tail -f $GUARD_FILE"

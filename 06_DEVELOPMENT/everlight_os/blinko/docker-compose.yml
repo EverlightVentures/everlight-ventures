@@ -1,0 +1,55 @@
+version: '3.8'
+
+# Blinko - Self-hosted LLM-powered knowledge base for Everlight Hive Mind
+# Provides vector-embedded RAG search across all war room sessions,
+# trade decisions, agent outputs, and cross-conversation memory.
+#
+# Deploy alongside XLM bot on Oracle Cloud or run locally for dev.
+# Default: http://localhost:1111
+
+services:
+  blinko:
+    image: blinkospace/blinko:latest
+    container_name: everlight-blinko
+    ports:
+      - "1111:1111"
+    environment:
+      - NODE_ENV=production
+      - NEXTAUTH_URL=http://localhost:1111
+      - NEXT_PUBLIC_BASE_URL=http://localhost:1111
+      - NEXTAUTH_SECRET=${BLINKO_SECRET:-everlight_blinko_secret_change_me}
+      - DATABASE_URL=postgresql://blinko:${BLINKO_DB_PASS:-blinko_secure_pass}@blinko-db:5432/blinko
+    volumes:
+      - blinko_data:/app/.blinko
+    depends_on:
+      blinko-db:
+        condition: service_healthy
+    restart: always
+    networks:
+      - blinko-net
+
+  blinko-db:
+    image: postgres:14-alpine
+    container_name: everlight-blinko-db
+    environment:
+      - POSTGRES_USER=blinko
+      - POSTGRES_PASSWORD=${BLINKO_DB_PASS:-blinko_secure_pass}
+      - POSTGRES_DB=blinko
+    volumes:
+      - blinko_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U blinko"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: always
+    networks:
+      - blinko-net
+
+volumes:
+  blinko_data:
+  blinko_pg_data:
+
+networks:
+  blinko-net:
+    driver: bridge

@@ -1,0 +1,92 @@
+{
+  "generated_at": "2026-02-26T19:44:00+00:00",
+  "anomalies": [
+    {
+      "id": "ANO-001",
+      "severity": "CRITICAL",
+      "title": "Time-stop circuit breaker silently failed -- Feb 25 trade held 905 minutes",
+      "detail": "Trade entered 2026-02-25T04:28 exited 2026-02-25T19:33 via exchange_side_close. Config time_stop_bars=4 (1 hour at 15m). Bot did not exit. Exchange closed the position. Loss: -$64.90 (47% of $138 session equity).",
+      "config_key": "exits.time_stop_bars",
+      "config_value": 4,
+      "actual_hold_bars": 60,
+      "first_seen": "2026-02-24",
+      "last_seen": "2026-02-25",
+      "occurrences": 2,
+      "trades_affected": ["2026-02-25T04:28:07", "2026-02-24T01:34:27"]
+    },
+    {
+      "id": "ANO-002",
+      "severity": "CRITICAL",
+      "title": "circuit_breaker single_trade_max_loss_usd not present in deployed config",
+      "detail": "User references single_trade_max_loss_usd: 30 and max_hold_hours: 6 but neither key exists in the current config.yaml on this machine. Either removed from config or Oracle Cloud is running a different config version.",
+      "config_key": "circuit_breaker",
+      "config_value": null,
+      "first_seen": "2026-02-25",
+      "last_seen": "2026-02-25"
+    },
+    {
+      "id": "ANO-003",
+      "severity": "CRITICAL",
+      "title": "Both catastrophic losses exited via exchange_side_close, not bot logic",
+      "detail": "Feb 24 -$12.25 (462 min) and Feb 25 -$64.90 (905 min) both exited with reason exchange_side_close. The bot's own exit logic (time_stop, SL, max_hold) did not fire on either occasion. The exchange did the cleanup. This is a systemic gap in position control.",
+      "exit_reasons": ["exchange_side_close", "exchange_side_close"],
+      "first_seen": "2026-02-24",
+      "last_seen": "2026-02-25"
+    },
+    {
+      "id": "ANO-004",
+      "severity": "HIGH",
+      "title": "Current open trade has negative EV: -$2.84",
+      "detail": "Open long (pullback, REDUCED tier, confluence 46) shows ev_usd=-2.844 in open_position snapshot. p_win=0.484, expected loss exceeds expected win after fees. EV gate is disabled (min_ev_usd: -999 in growth mode).",
+      "open_position_entry": "2026-02-26T19:42:17+00:00",
+      "ev_usd": -2.844,
+      "p_win": 0.484,
+      "quality_tier": "REDUCED"
+    },
+    {
+      "id": "ANO-005",
+      "severity": "HIGH",
+      "title": "Reconcile drift count: 11 today",
+      "detail": "_reconcile_drift_count_today=11 in state.json. Normal is 0-2. High drift means bot and exchange repeatedly disagreed about position state. This may be suppressing exit logic or causing re-entry after failed closes.",
+      "drift_count": 11,
+      "last_reconcile_status": "DRIFT_FIXED",
+      "first_seen": "2026-02-26"
+    },
+    {
+      "id": "ANO-006",
+      "severity": "HIGH",
+      "title": "10-day net loss approximately -$60 on ~$450 account",
+      "detail": "Cumulative loss represents roughly 13% of starting capital in 10 days. loss_debt_usd=64.97 confirmed in state. Account equity at session start today: $138.32 derivatives (down from ~$200+ on Feb 17).",
+      "estimated_net_pnl": -60,
+      "loss_debt_usd": 64.97,
+      "equity_start_today": 138.32
+    },
+    {
+      "id": "ANO-007",
+      "severity": "MEDIUM",
+      "title": "Feb 18 +$10.45 win held 522 minutes -- same structural failure, lucky outcome",
+      "detail": "The 522-min short on Feb 18 exited via profit_lock at +$10.45. This was directional luck. The same structural failure (time stop not enforcing) produced the Feb 24-25 disasters. The system does not have reliable time-based position control in either direction.",
+      "trade_date": "2026-02-18",
+      "hold_minutes": 522,
+      "pnl_usd": 10.45
+    },
+    {
+      "id": "ANO-008",
+      "severity": "MEDIUM",
+      "title": "Negative EV trades regularly passing the gate",
+      "detail": "Multiple entries show ev_usd between -1 and -3.2. min_ev_usd: -999 in growth mode disables the EV gate entirely. Most entries have negative expected value after fees. Edge is being traded on confluence score and R:R ratio alone.",
+      "examples": [
+        {"entry": "pullback mean_reversion", "ev_usd": -2.844},
+        {"entry": "pullback mean_reversion", "ev_usd": -2.815},
+        {"entry": "breakout_retest mean_reversion", "ev_usd": -2.097}
+      ]
+    },
+    {
+      "id": "ANO-009",
+      "severity": "LOW",
+      "title": "Wait 867 minutes between last exit and current trade entry",
+      "detail": "Bot was effectively idle for 14+ hours before entering the current trade. Likely due to cooldown logic or overnight trading block after the Feb 25 loss.",
+      "wait_minutes": 866.79
+    }
+  ]
+}

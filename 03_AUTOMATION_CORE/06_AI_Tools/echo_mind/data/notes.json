@@ -1,0 +1,71 @@
+[
+  {
+    "id": "202602171925199d70",
+    "mode": "mind",
+    "text": "Hey",
+    "title": "",
+    "source": "manual",
+    "sourceUrl": "",
+    "wordCount": 1,
+    "duration": 0,
+    "summary": "Hey",
+    "keyPoints": [],
+    "createdAt": "2026-02-17T19:25:19.354221+00:00"
+  },
+  {
+    "id": "202602171924427ed0",
+    "mode": "code",
+    "text": "testing 1 2 3 oh wow this is a lot better",
+    "title": "",
+    "source": "voice",
+    "sourceUrl": "",
+    "wordCount": 11,
+    "duration": 9,
+    "summary": "testing 1 2 3 oh wow this is a lot better",
+    "keyPoints": [
+      "testing",
+      "better"
+    ],
+    "createdAt": "2026-02-17T19:24:42.019444+00:00"
+  },
+  {
+    "id": "2026021718010047b0",
+    "mode": "note",
+    "text": "Second test note for Echo Mind library verification. This should appear as a clickable card in the library view.",
+    "title": "",
+    "source": "manual",
+    "sourceUrl": "",
+    "wordCount": 19,
+    "duration": 0,
+    "summary": "Second test note for Echo Mind library verification. This should appear as a clickable card in the library view.",
+    "keyPoints": [
+      "library",
+      "second",
+      "test",
+      "note",
+      "echo",
+      "mind"
+    ],
+    "createdAt": "2026-02-17T18:01:00.516699+00:00"
+  },
+  {
+    "id": "20260217172012c8a0",
+    "mode": "code",
+    "text": "Testing Echo Mind with automatic summary and key point extraction. This intelligent transcription app identifies patterns, generates summaries, and extracts key concepts from your voice recordings.",
+    "title": "",
+    "source": "voice",
+    "sourceUrl": "",
+    "wordCount": 26,
+    "duration": 15,
+    "summary": "Testing Echo Mind with automatic summary and key point extraction. This intelligent transcription app identifies patterns, generates summaries, and extracts key concepts from your voice recordings.",
+    "keyPoints": [
+      "testing",
+      "echo",
+      "mind",
+      "automatic",
+      "summary",
+      "point"
+    ],
+    "createdAt": "2026-02-17T17:20:12.755410+00:00"
+  }
+]

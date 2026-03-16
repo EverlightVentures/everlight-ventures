@@ -1,0 +1,5 @@
+Django>=5.0
+django-htmx>=1.17
+whitenoise>=6.5
+pandas>=2.0
+PyYAML>=6.0

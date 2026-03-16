@@ -1,0 +1,33 @@
+Notification_ID,Employee_ID,Employee_Name,Date_Created,Message,Type,Read,Read_Date
+NOTIF20251130135223,1001,richard,2025-11-30 13:52:23,Your time off request (2025-12-25 to 2025-12-26) has been APPROVED by RYG8. Note: Enjoy your time off!,APPROVED,Y,2025-12-17 14:38:12
+NOTIF20251201095715,1001,richard,2025-12-01 09:57:15,Your time off request (2026-01-22 to 2026-01-24) has been APPROVED by RICH. Note: have fun,APPROVED,Y,2025-12-17 14:38:12
+NTF20251201183858,Melina Tapiz,2025-12-01,2025-12-01 18:38:58,Time off approved by Rich,TIMEOFF,N,
+NTF20251202100953,1001,Rich,2025-12-02 10:09:53,Your time off request (2025-12-17 to 2025-12-18) was approved by Rich.,TIMEOFF,Y,2025-12-17 14:38:12
+NTF20251213151021,1002,Melina Tapiz,2025-12-13 15:10:21,New task assigned. Due: 2025-12-13,TASK,N,
+NTF20251213151701,1002,Melina Tapiz,2025-12-13 15:17:01,New task assigned. Due: 2025-12-13,TASK,N,
+NTF20251213160811,1002,Melina Tapiz,2025-12-13 16:08:11,New task assigned. Due: 2025-12-13,TASK,N,
+NTF20251213163746,1002,Melina Tapiz,2025-12-13 16:37:46,New task assigned. Due: 2025-12-13,TASK,N,
+NTF20251213170509c84c,1001,Rich,2025-12-13 17:05:09,New task assigned. Due: 2025-12-13,TASK,Y,2025-12-17 14:38:12
+NTF202512160214470d08,1002,Melina Tapiz,2025-12-16 02:14:47,🧩 New task assigned: water (Due 2025-12-16),TASK,N,
+NTF202512160215158e25,1001,Rich,2025-12-16 02:15:15,🧩 New task assigned: test (Due 2025-12-16),TASK,Y,2025-12-17 14:38:12
+NTF20251216022018fc34,1001,Rich,2025-12-16 02:20:18,📣 Task update: Rich set 'test' → COMPLETE — test compelete,TASK,Y,2025-12-17 14:38:12
+NTF202512160220497569,1001,Rich,2025-12-16 02:20:49,"📣 Task update: Rich set 'Job Duties' → ACKNOWLEDGED — Ok, ill weed, no problem!",TASK,Y,2025-12-17 14:38:12
+NTF20251216022553d9fb,1001,Rich,2025-12-16 02:25:53,📣 Task update: Melina Tapiz set 'Job Duties' → SKIPPED — sorry (Reason: called out),TASK,Y,2025-12-17 14:38:12
+NTF202512160226364c8c,1001,Rich,2025-12-16 02:26:36,"📣 Task update: Melina Tapiz set 'water' → ACKNOWLEDGED — Yes, i love watering, any key specific plants you noticed needing extra water?",TASK,Y,2025-12-17 14:38:12
+NTF20251216022645d8f8,1001,Rich,2025-12-16 02:26:45,📣 Task update: Melina Tapiz set 'Job Duties' → COMPLETE,TASK,Y,2025-12-17 14:38:12
+NTF202512160226493cde,1001,Rich,2025-12-16 02:26:49,📣 Task update: Melina Tapiz set 'Job Duties' → COMPLETE,TASK,Y,2025-12-17 14:38:12
+NTF202512160226527b49,1001,Rich,2025-12-16 02:26:52,📣 Task update: Melina Tapiz set 'Job Duties' → COMPLETE,TASK,Y,2025-12-17 14:38:12
+NTF20251216124611ac96,1001,Rich,2025-12-16 12:46:11,🧩 New task assigned: Finish CSV Logging (Due 2025-12-16),TASK,Y,2025-12-17 14:38:12
+NTF20251216124623ae2c,1001,Rich,2025-12-16 12:46:23,📣 Task update: Rich set 'Job Duties' → COMPLETE,TASK,Y,2025-12-17 14:38:12
+NTF202512161246279ba4,1001,Rich,2025-12-16 12:46:27,📣 Task update: Rich set 'Finish CSV Logging' → IN_PROGRESS,TASK,Y,2025-12-17 14:38:12
+NTF2025121613055574ad,1001,Rich,2025-12-16 13:05:55,"📣 Task update: Rich set 'Finish CSV Logging' → IN_PROGRESS — Ill do my best, its almost complete just alot of small pop up errors.",TASK,Y,2025-12-17 14:38:12
+NTF2025121616162783dd,1001,Rich,2025-12-16 16:16:27,📣 Task update: Melina Tapiz set 'water' → COMPLETE,TASK,Y,2025-12-17 14:38:12
+NTF2025121616185781c8,1001,Rich,2025-12-16 16:18:57,📣 Task update: Rich set 'Finish CSV Logging' → COMPLETE,TASK,Y,2025-12-17 14:38:12
+NTF20251216174225fc6e,1002,Melina Tapiz,2025-12-16 17:42:25,🧩 New task assigned: water (Due 2025-12-16),TASK,N,
+NTF20251216174339bea1,1001,Rich,2025-12-16 17:43:39,📣 Task update: Melina Tapiz set 'water' → IN_PROGRESS — cool got it,TASK,Y,2025-12-17 14:38:12
+NTF20251216202531ebae,1001,Rich,2025-12-16 20:25:31,📣 Task update: Melina Tapiz set 'water' → COMPLETE,TASK,Y,2025-12-17 14:38:12
+NTF202512170320145fd8,1001,Rich,2025-12-17 03:20:14,Your time off request (2025-12-18 to 2025-12-18) was approved by Rich. Note: 🎉 Approved! Enjoy your time off 🙌,TIMEOFF,Y,2025-12-17 14:38:12
+NTF2025121712345402c1,1001,Rich,2025-12-17 12:34:54,Your time off request (2026-01-01 to 2026-01-01) was denied by Rich. Note: 🙏 Thanks for understanding — not approved at this time. Please try different dates or talk with your manager. 💬,TIMEOFF,Y,2025-12-17 14:38:12
+NTF202512171535299e58,1002,Melina Tapiz,2025-12-17 15:35:29,🧩 New task assigned: Sweep the Store (Due 2025-12-17),TASK,N,
+NTF202512171537165faa,1001,Rich,2025-12-17 15:37:16,"📣 Task update: Melina Tapiz set 'Sweep the Store' → IN_PROGRESS — No Problem, the store will be clean!",TASK,N,
+NTF202512171611333e85,1001,Rich,2025-12-17 16:11:33,📣 Task update: Melina Tapiz set 'Sweep the Store' → IN_PROGRESS,TASK,N,

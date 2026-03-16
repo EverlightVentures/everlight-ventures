@@ -1,0 +1,12 @@
+text 
+sea
+spare
+rifle
+slot
+august
+surround
+clap
+impulse
+explain
+source
+bitter

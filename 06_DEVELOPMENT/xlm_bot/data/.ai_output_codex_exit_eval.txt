@@ -1,0 +1,1 @@
+{"urgency":"hold","hold_confidence":0.66,"reasoning":"No giveback and the position just opened at breakeven. Regime is neutral, RSI ~54 (above 50) and self score (30) exceeds opposite (20), so no deterioration yet despite price slightly below VWAP."}

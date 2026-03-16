@@ -1,0 +1,43 @@
+You are the Risk & Math Officer for an automated trading bot.
+Audit the following proposed trade decision against risk parameters.
+
+PROPOSAL:
+{
+  "action": "ENTER_SHORT",
+  "confidence": 0.61,
+  "size": 1,
+  "stop_loss_price": 0.1627,
+  "take_profit_price": 0.16,
+  "reasoning": "Low-volume dead-cat bounce into 30m/15m Fib38 resistance (0.16160) after a 2% drop to 0.15845. Volume on this bounce is collapsing (25K last candle vs 1.8M on the selloff) \u2014 no conviction behind the recovery. BTC -2.5% and ETH -2.6% both bearish = risk-off macro. Size 1 scout trade: 1 consecutive loss demands we prove the thesis small before scaling up.",
+  "market_read": "Bear flag forming \u2014 price bounced to Fib38 resistance on dying volume after a sharp selloff, with macro risk-off and 30m/15m EMAs still bearish.",
+  "peer_codex_action": "ENTER_SHORT",
+  "peer_codex_confidence": 0.58,
+  "peer_codex_reasoning": "Risk-off BTC/ETH and price below VWAP with ADX>25 favor fading this low-volume bounce into nearby resistance. Size 1 per post-loss rule and compression/low ATR; stop just above the",
+  "peer_agreement": true
+}
+
+ACCOUNT STATE:
+Equity: 138.32
+PnL Today: -0.07028999999990537
+Trades Today: 2
+Losses Today: 1
+Current Price: 0.161746
+
+RULES:
+- Max daily loss: 10% of equity
+- Max trades/day: 8
+- Max losses/day: 5
+- Size limits: Max 5 contracts. Reduce size after 2 consecutive losses.
+- Cooldown: 10 mins mandatory after any loss.
+
+Respond ONLY with valid JSON (Risk Math Report):
+{
+  "account_equity": float,
+  "max_risk_per_trade": float (usd),
+  "current_exposure": float (usd),
+  "recommended_size": int (contracts),
+  "recovery_mode": "OFF" or "SEMI_AGGRESSIVE",
+  "recovery_cap_rules": "string summary",
+  "status": "OK" or "VIOLATION",
+  "reason": "explanation"
+}

@@ -1,0 +1,60 @@
+{
+  "personas": [
+    {
+      "id": "expert",
+      "name": "Alex",
+      "niche": "crypto + AI finance",
+      "voice_style": "authoritative, clear, energetic",
+      "tone": "confident and educational",
+      "use_case": "XLM trading tips, AI tool breakdowns, market analysis hooks",
+      "portrait_file": "alex_expert.jpg",
+      "elevenlabs_voice_id": "",
+      "products": ["crypto"]
+    },
+    {
+      "id": "advisor",
+      "name": "Jordan",
+      "niche": "blockchain investment",
+      "voice_style": "calm, measured, trustworthy",
+      "tone": "analytical and approachable",
+      "use_case": "long-term crypto strategy, DeFi explainers, risk management",
+      "portrait_file": "jordan_advisor.jpg",
+      "elevenlabs_voice_id": "",
+      "products": ["crypto"]
+    },
+    {
+      "id": "hype",
+      "name": "Nova",
+      "niche": "AI tools and automation",
+      "voice_style": "upbeat, fast-paced, engaging",
+      "tone": "excited and motivating",
+      "use_case": "viral hooks, AI tool demos, automation wins",
+      "portrait_file": "nova_hype.jpg",
+      "elevenlabs_voice_id": "",
+      "products": ["crypto", "hivemind"]
+    },
+    {
+      "id": "founder",
+      "name": "Eli",
+      "niche": "small business POS and retail tech",
+      "voice_style": "direct, relatable, founder-mode",
+      "tone": "been-there-done-that practical",
+      "use_case": "Onyx POS marketing -- pain points of Square/Toast/Clover, demo walkthroughs, small business tips",
+      "portrait_file": "eli_founder.jpg",
+      "elevenlabs_voice_id": "",
+      "products": ["onyx"]
+    },
+    {
+      "id": "builder",
+      "name": "Sage",
+      "niche": "AI orchestration and multi-agent systems",
+      "voice_style": "technical but approachable, builder energy",
+      "tone": "show-don't-tell, demo-driven",
+      "use_case": "Hive Mind SaaS marketing -- multi-AI workflows, live dashboard demos, builder audience content",
+      "portrait_file": "sage_builder.jpg",
+      "elevenlabs_voice_id": "",
+      "products": ["hivemind"]
+    }
+  ],
+  "notes": "Fill in elevenlabs_voice_id after creating voices in ElevenLabs dashboard. Portrait files go in Avatar_Assets/base_portraits/."
+}

@@ -1,0 +1,7 @@
+{% load trading_tags %}
+
+<div class="intel-card">
+  <div class="intel-title">LOG: {{ log_type|upper }}</div>
+  <pre style="font-size:11px;color:#9ca3af;line-height:1.5;max-height:400px;overflow-y:auto;white-space:pre-wrap;word-break:break-all;margin-top:6px;">{% for line in log_lines %}{{ line }}
+{% empty %}No log data.{% endfor %}</pre>
+</div>

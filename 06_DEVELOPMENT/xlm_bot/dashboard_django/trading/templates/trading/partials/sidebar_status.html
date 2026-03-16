@@ -1,0 +1,33 @@
+{% comment %}
+  Sidebar bot status partial -- rendered inline and polled via HTMX every 5s.
+  Context: bot_alive (bool), bot_state (dict or None), current_price (float or None)
+{% endcomment %}
+<div class="bot-status-row">
+  <div class="bot-pulse-dot">
+    {% if bot_alive %}
+    <span class="dot-ring" style="background: var(--green);"></span>
+    <span class="dot-core" style="background: var(--green);"></span>
+    {% else %}
+    <span class="dot-core" style="background: var(--red); opacity: 0.5;"></span>
+    {% endif %}
+  </div>
+  <span class="bot-status-label">
+    {% if bot_alive %}Engine Running{% else %}Engine Offline{% endif %}
+  </span>
+</div>
+
+{% if bot_state %}
+<div class="bot-status-row">
+  <div class="bot-pulse-dot">
+    {% if bot_state.open_position %}
+    <span class="dot-ring" style="background: var(--cyan);"></span>
+    <span class="dot-core" style="background: var(--cyan);"></span>
+    {% else %}
+    <span class="dot-core" style="background: var(--text-muted); opacity: 0.4;"></span>
+    {% endif %}
+  </div>
+  <span class="bot-status-label">
+    {% if bot_state.open_position %}In Position{% else %}Flat{% endif %}
+  </span>
+</div>
+{% endif %}

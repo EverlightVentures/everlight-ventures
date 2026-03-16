@@ -1,0 +1,102 @@
+#!/bin/bash
+# xon - start all XLM services (bot, dashboards, WS feed)
+
+set -euo pipefail
+
+BOT_DIR="/mnt/sdcard/AA_MY_DRIVE/xlm_bot"
+HIVE_DIR="/mnt/sdcard/AA_MY_DRIVE/09_DASHBOARD/hive_dashboard"
+DDR_DIR="/mnt/sdcard/AA_MY_DRIVE/xlm_bot/dashboard_django"
+cd "$BOT_DIR" || exit 1
+
+# --- Core services ---
+bash ./xpb
+bash ./xdr
+bash ./xws
+
+# --- Django dashboard (DDR) on port 8503 ---
+echo ""
+echo "Starting DDR (Django dashboard)..."
+DDR_PORT="${XLM_DASH_DJANGO_PORT:-8503}"
+PY=$(command -v python3.13 2>/dev/null || command -v python3)
+pgrep -f "manage.py runserver.*$DDR_PORT" 2>/dev/null | xargs kill -TERM 2>/dev/null || true
+sleep 1
+if [ -d "$DDR_DIR" ]; then
+  cd "$DDR_DIR"
+  "$PY" manage.py migrate --run-syncdb 2>/dev/null || true
+  nohup "$PY" manage.py runserver 0.0.0.0:$DDR_PORT > "$BOT_DIR/logs/ddr.log" 2>&1 &
+  echo "  DDR: http://localhost:$DDR_PORT  (logs: logs/ddr.log)"
+else
+  echo "  ERROR: $DDR_DIR not found"
+fi
+cd "$BOT_DIR" || exit 1
+
+# --- Hive Mind dashboard on port 8504 ---
+echo ""
+echo "Starting Hive Mind dashboard..."
+HIVE_PORT=8504
+pgrep -f "manage.py runserver.*$HIVE_PORT" 2>/dev/null | xargs kill -TERM 2>/dev/null || true
+sleep 1
+if [ -d "$HIVE_DIR" ]; then
+  cd "$HIVE_DIR"
+  python3 manage.py import_sessions 2>/dev/null || true
+  nohup python3 manage.py runserver 0.0.0.0:$HIVE_PORT > "$BOT_DIR/logs/hive_dashboard.log" 2>&1 &
+  echo "  Hive: http://localhost:$HIVE_PORT  (logs: logs/hive_dashboard.log)"
+else
+  echo "  ERROR: $HIVE_DIR not found"
+fi
+cd "$BOT_DIR" || exit 1
+
+# --- Persistent notification updater (keeps Termux as foreground service) ---
+pkill -f "notify_status.sh" 2>/dev/null || true
+if [ -f "./notify_status.sh" ]; then
+  nohup bash ./notify_status.sh > logs/notify.log 2>&1 &
+fi
+
+# --- Status summary ---
+sleep 1
+echo ""
+echo "=== Status ==="
+
+bot_pid="$(pgrep -f "/tmp/xlm_bot_venv/bin/python.* main.py" | head -n 1 || true)"
+bot_sup_pid="$(pgrep -f "while true; do.*main.py" | head -n 1 || true)"
+dash_pid="$(pgrep -f "streamlit.*run dashboard.py.*--server.port 8502" | head -n 1 || true)"
+ws_pid="$(pgrep -f "/tmp/xlm_bot_venv/bin/python.*live_ws.py.*--product XLM-USD" | head -n 1 || true)"
+ddr_pid="$(pgrep -f "manage.py runserver.*$DDR_PORT" | head -n 1 || true)"
+hive_pid="$(pgrep -f "manage.py runserver.*$HIVE_PORT" | head -n 1 || true)"
+notify_pid="$(pgrep -f "notify_status.sh" | head -n 1 || true)"
+
+if [ -n "$bot_pid" ] || [ -n "$bot_sup_pid" ]; then
+  echo "  Bot:       running (pid=${bot_pid:-?} supervisor=${bot_sup_pid:-?})"
+else
+  echo "  Bot:       not running"
+fi
+
+if [ -n "$dash_pid" ]; then
+  echo "  Streamlit: :8502 running (pid=$dash_pid)"
+else
+  echo "  Streamlit: not running"
+fi
+
+if [ -n "$ddr_pid" ]; then
+  echo "  DDR:       :$DDR_PORT running (pid=$ddr_pid)"
+else
+  echo "  DDR:       not running"
+fi
+
+if [ -n "$hive_pid" ]; then
+  echo "  Hive:      :$HIVE_PORT running (pid=$hive_pid)"
+else
+  echo "  Hive:      not running"
+fi
+
+if [ -n "$ws_pid" ]; then
+  echo "  WS:        running (pid=$ws_pid)"
+else
+  echo "  WS:        not running"
+fi
+
+if [ -n "$notify_pid" ]; then
+  echo "  Notify:    running (pid=$notify_pid)"
+else
+  echo "  Notify:    not running"
+fi

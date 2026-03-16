@@ -1,0 +1,163 @@
+# Everlight Phase Gate Checklist
+# Version: 1.0 | Owner: 23_automation_architect
+# Purpose: Every automation/SaaS/content build MUST pass these gates
+# before moving to the next phase. No exceptions.
+#
+# How to use:
+#   Copy this template to your project folder as phase_gates.yaml
+#   Check off each item as you complete it
+#   Do NOT advance to next phase with any gate = false
+
+# PHASE 0 - Intake & Scoping
+# Gate: spec_approval.json must exist with approved=true before Phase 1 starts
+phase_0:
+  name: "Intake and Scoping"
+  gate_file: "spec_approval.json"
+  gate_field: "approved"
+  gate_value: true
+  required_outputs:
+    - name: "spec_approval.json"
+      description: "Scoped spec with approved=true, viable=true, icp defined"
+      template: |
+        {
+          "project": "...",
+          "icp": "...",
+          "problem_solved": "...",
+          "moat": "...",
+          "risks": [],
+          "viable": true,
+          "approved": true,
+          "approved_by": "01_chief_operator",
+          "approved_at": "YYYY-MM-DD HH:MM PT"
+        }
+    - name: "BRIEF.md"
+      description: "One-page summary: goal, ICP, success metric, timeline"
+  checklist:
+    - id: p0_icp
+      item: "ICP defined with specificity (not 'everyone', not 'small businesses')"
+      required: true
+    - id: p0_problem
+      item: "Exact problem being solved, stated in customer language"
+      required: true
+    - id: p0_moat
+      item: "Competitive moat identified (speed, niche, price, IP)"
+      required: true
+    - id: p0_risks
+      item: "At least 2 risks documented with mitigation"
+      required: true
+    - id: p0_viable
+      item: "Viability confirmed: viable=true in spec_approval.json"
+      required: true
+    - id: p0_approved
+      item: "Chief Operator approval: approved=true in spec_approval.json"
+      required: true
+
+# PHASE 1 - Build
+# Gate: build_gate.json must exist with all_tests_passed=true before Phase 2
+phase_1:
+  name: "Build"
+  gate_file: "build_gate.json"
+  gate_field: "all_tests_passed"
+  gate_value: true
+  required_outputs:
+    - name: "RUNBOOK.md"
+      description: "Step-by-step: how to install, run, restart, and debug"
+    - name: "TEST_PLAN.md"
+      description: "What tests exist, what they verify, how to run them"
+    - name: ".env.example"
+      description: "All required env vars listed with safe placeholder values"
+    - name: "build_gate.json"
+      description: "Build validation result: all_tests_passed, test_count, artifacts"
+      template: |
+        {
+          "project": "...",
+          "build_date": "YYYY-MM-DD",
+          "test_count": 0,
+          "all_tests_passed": false,
+          "artifacts": [],
+          "deployment_notes": ""
+        }
+  checklist:
+    - id: p1_runbook
+      item: "RUNBOOK.md written: install + run + restart + debug steps"
+      required: true
+    - id: p1_test_plan
+      item: "TEST_PLAN.md written with at least 3 test cases"
+      required: true
+    - id: p1_env_example
+      item: ".env.example created with all env vars (no real secrets)"
+      required: true
+    - id: p1_tests_pass
+      item: "All tests pass (evidence in build_gate.json)"
+      required: true
+    - id: p1_runnable
+      item: "Product is actually runnable end-to-end from a clean state"
+      required: true
+    - id: p1_no_hardcode
+      item: "No hardcoded credentials, paths, or secrets in source"
+      required: true
+    - id: p1_deployment_notes
+      item: "Deployment notes written in build_gate.json"
+      required: true
+
+# PHASE 2 - Launch
+# Gate: launch_gate.json must exist with launch_approved=true before going live
+phase_2:
+  name: "Launch"
+  gate_file: "launch_gate.json"
+  gate_field: "launch_approved"
+  gate_value: true
+  required_outputs:
+    - name: "LAUNCH_PACK.md"
+      description: "Launch copy: headline, subhead, CTA, 3 bullets, social post"
+    - name: "OPS_PACK.md"
+      description: "Ops: monitoring checklist, support runbook, rollback plan"
+    - name: "launch_gate.json"
+      description: "Final launch sign-off"
+      template: |
+        {
+          "project": "...",
+          "launch_date": "YYYY-MM-DD",
+          "launch_approved": false,
+          "approved_by": "",
+          "gtm_channel": "",
+          "rollback_plan": "",
+          "monitoring_setup": false
+        }
+  checklist:
+    - id: p2_launch_pack
+      item: "LAUNCH_PACK.md complete: headline, subhead, CTA, bullets, social"
+      required: true
+    - id: p2_ops_pack
+      item: "OPS_PACK.md complete: monitoring, support runbook, rollback"
+      required: true
+    - id: p2_monitoring
+      item: "Monitoring or alerting in place (even if just a health check)"
+      required: true
+    - id: p2_rollback
+      item: "Rollback plan documented and tested"
+      required: true
+    - id: p2_gtm
+      item: "GTM channel selected and first post/outreach drafted"
+      required: true
+    - id: p2_approved
+      item: "Chief Operator approves: launch_approved=true in launch_gate.json"
+      required: true
+
+# KILL CRITERIA (automatic disqualifiers at any phase)
+kill_criteria:
+  - id: kill_no_icp
+    condition: "ICP is undefined or broader than 10M people"
+    action: kill
+  - id: kill_no_moat
+    condition: "Cannot articulate a moat in one sentence"
+    action: kill
+  - id: kill_no_tests
+    condition: "Build shipped with zero automated tests"
+    action: block_at_phase_1
+  - id: kill_secrets_in_code
+    condition: "Real secrets found in source code"
+    action: immediate_halt
+  - id: kill_no_runbook
+    condition: "Product cannot be restarted without original developer"
+    action: block_at_phase_1

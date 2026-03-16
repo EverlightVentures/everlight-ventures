@@ -1,0 +1,289 @@
+{% extends "hive/base.html" %}
+{% load humanize %}
+
+{% block title %}Nerve Center -- Hive Mind{% endblock %}
+
+{% block active_nav %}
+  <style>.sidebar-nav-link[data-nav="taskboard"] { color: var(--gold) !important; background: var(--gold-glow); }</style>
+{% endblock %}
+
+{% block content %}
+<style>
+  .nc-header {
+    display: flex; align-items: center; gap: 16px; margin-bottom: 2rem;
+  }
+  .nc-header h1 {
+    font-family: var(--font-heading); font-size: 1.8rem;
+    background: linear-gradient(135deg, var(--gold-bright), var(--purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .nc-header .pulse-ring {
+    width: 14px; height: 14px; border-radius: 50%; position: relative;
+  }
+  .nc-header .pulse-ring::before {
+    content: ''; position: absolute; inset: -4px; border-radius: 50%;
+    animation: nc-pulse 2s ease-in-out infinite;
+  }
+  .nc-header .pulse-ring.live { background: #22c55e; }
+  .nc-header .pulse-ring.live::before { border: 2px solid #22c55e; }
+  .nc-header .pulse-ring.warn { background: #f59e0b; }
+  .nc-header .pulse-ring.warn::before { border: 2px solid #f59e0b; }
+  .nc-header .pulse-ring.dead { background: #ef4444; }
+  .nc-header .pulse-ring.dead::before { border: 2px solid #ef4444; }
+  @keyframes nc-pulse { 0%,100% { opacity:0.6; transform:scale(1); } 50% { opacity:0; transform:scale(2.5); } }
+
+  .nc-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 1.5rem; margin-bottom: 2rem;
+  }
+
+  .nc-card {
+    background: var(--bg-secondary); border: 1px solid var(--glass-border);
+    border-radius: 20px; padding: 1.6rem; position: relative; overflow: hidden;
+    transition: all var(--transition-base);
+  }
+  .nc-card:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+  .nc-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .nc-card.ok::before { background: linear-gradient(90deg, transparent, #22c55e, transparent); }
+  .nc-card.warn::before { background: linear-gradient(90deg, transparent, #f59e0b, transparent); }
+  .nc-card.err::before { background: linear-gradient(90deg, transparent, #ef4444, transparent); }
+  .nc-card.info::before { background: linear-gradient(90deg, transparent, var(--purple), transparent); }
+
+  .nc-card-head {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 1rem;
+  }
+  .nc-card-icon {
+    width: 44px; height: 44px; border-radius: 12px; display: flex;
+    align-items: center; justify-content: center; font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .nc-card.ok .nc-card-icon { background: rgba(34,197,94,0.12); color: #22c55e; }
+  .nc-card.warn .nc-card-icon { background: rgba(245,158,11,0.12); color: #f59e0b; }
+  .nc-card.err .nc-card-icon { background: rgba(239,68,68,0.12); color: #ef4444; }
+  .nc-card.info .nc-card-icon { background: var(--purple-glow); color: var(--purple); }
+
+  .nc-card-title { font-size: 1rem; font-weight: 600; color: var(--text-primary); }
+  .nc-card-status { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+
+  .nc-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .nc-metric {
+    background: var(--bg-tertiary); border-radius: 10px; padding: 10px 14px;
+    text-align: center;
+  }
+  .nc-metric-val {
+    font-size: 1.4rem; font-weight: 700; font-family: var(--font-heading);
+    color: var(--gold-bright); line-height: 1;
+  }
+  .nc-metric-label {
+    font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase;
+    letter-spacing: 0.05em; margin-top: 4px;
+  }
+
+  .nc-list { list-style: none; padding: 0; }
+  .nc-list li {
+    display: flex; align-items: center; gap: 10px; padding: 8px 0;
+    border-bottom: 1px solid var(--border-subtle); font-size: 0.85rem;
+  }
+  .nc-list li:last-child { border-bottom: none; }
+  .nc-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .nc-dot.green { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.4); }
+  .nc-dot.yellow { background: #f59e0b; box-shadow: 0 0 6px rgba(245,158,11,0.4); }
+  .nc-dot.red { background: #ef4444; box-shadow: 0 0 6px rgba(239,68,68,0.4); }
+  .nc-dot.gray { background: var(--text-muted); }
+
+  .nc-env-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+  .nc-env-table td {
+    padding: 6px 10px; border-bottom: 1px solid var(--border-subtle);
+  }
+  .nc-env-table td:first-child {
+    font-family: 'Courier New', monospace; color: var(--gold); white-space: nowrap;
+  }
+  .nc-env-table .set { color: #22c55e; }
+  .nc-env-table .missing { color: #ef4444; font-style: italic; }
+
+  .nc-progress-bar {
+    height: 6px; background: var(--bg-tertiary); border-radius: 3px;
+    overflow: hidden; margin-top: 12px;
+  }
+  .nc-progress-fill {
+    height: 100%; border-radius: 3px; transition: width 0.6s ease;
+    background: linear-gradient(90deg, var(--gold), var(--purple));
+  }
+
+  .nc-actions { display: flex; gap: 10px; margin-top: 1rem; flex-wrap: wrap; }
+  .nc-btn {
+    padding: 8px 16px; font-size: 0.78rem; font-weight: 600;
+    border-radius: 8px; border: 1px solid var(--border-subtle);
+    background: var(--glass-bg); color: var(--text-secondary);
+    cursor: pointer; transition: all var(--transition-base);
+    text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .nc-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+  .nc-btn.primary {
+    background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+    color: #0a0a0f; border-color: transparent;
+  }
+</style>
+
+<div class="nc-header">
+  <span class="pulse-ring {{ overall_status }}"></span>
+  <div>
+    <h1><i class="fa-solid fa-satellite-dish" style="margin-right:10px;"></i>Nerve Center</h1>
+    <div style="color:var(--text-muted);font-size:0.85rem;">System-wide status across all Everlight components</div>
+  </div>
+</div>
+
+<div class="nc-grid">
+  <!-- Taskboard Status -->
+  <div class="nc-card {{ taskboard_health }}">
+    <div class="nc-card-head">
+      <div class="nc-card-icon"><i class="fa-solid fa-list-check"></i></div>
+      <div>
+        <div class="nc-card-title">AI Taskboard</div>
+        <div class="nc-card-status">{{ taskboard.pending }} pending / {{ taskboard.completed }} done</div>
+      </div>
+    </div>
+    <div class="nc-metrics">
+      <div class="nc-metric">
+        <div class="nc-metric-val">{{ taskboard.pending }}</div>
+        <div class="nc-metric-label">Pending</div>
+      </div>
+      <div class="nc-metric">
+        <div class="nc-metric-val">{{ taskboard.in_progress }}</div>
+        <div class="nc-metric-label">In Progress</div>
+      </div>
+      <div class="nc-metric">
+        <div class="nc-metric-val">{{ taskboard.completed }}</div>
+        <div class="nc-metric-label">Done</div>
+      </div>
+    </div>
+    {% if taskboard.total > 0 %}
+    <div class="nc-progress-bar">
+      <div class="nc-progress-fill" style="width:{{ taskboard.pct_done }}%"></div>
+    </div>
+    <div style="text-align:center;font-size:0.7rem;color:var(--text-muted);margin-top:6px;">
+      {{ taskboard.pct_done }}% complete
+    </div>
+    {% endif %}
+    <div class="nc-actions">
+      <a href="{% url 'taskboard:board' %}" class="nc-btn primary"><i class="fa-solid fa-arrow-right"></i> Open Taskboard</a>
+    </div>
+  </div>
+
+  <!-- Environment / Credentials -->
+  <div class="nc-card {{ env_health }}">
+    <div class="nc-card-head">
+      <div class="nc-card-icon"><i class="fa-solid fa-key"></i></div>
+      <div>
+        <div class="nc-card-title">Credentials & API Keys</div>
+        <div class="nc-card-status">{{ env_stats.set_count }}/{{ env_stats.total }} configured</div>
+      </div>
+    </div>
+    <table class="nc-env-table">
+      {% for var in env_vars %}
+      <tr>
+        <td>{{ var.name }}</td>
+        <td class="{% if var.is_set %}set{% else %}missing{% endif %}">
+          {% if var.is_set %}<i class="fa-solid fa-check"></i> Set{% else %}<i class="fa-solid fa-xmark"></i> Missing{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+
+  <!-- Content Pipeline -->
+  <div class="nc-card {{ pipeline_health }}">
+    <div class="nc-card-head">
+      <div class="nc-card-icon"><i class="fa-solid fa-video"></i></div>
+      <div>
+        <div class="nc-card-title">Content Pipeline</div>
+        <div class="nc-card-status">Avatar + social posting engine</div>
+      </div>
+    </div>
+    <ul class="nc-list">
+      {% for item in pipeline_checks %}
+      <li>
+        <span class="nc-dot {{ item.color }}"></span>
+        <span style="color:var(--text-primary);">{{ item.label }}</span>
+        <span style="margin-left:auto;color:var(--text-muted);font-size:0.75rem;">{{ item.detail }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Funnel Status -->
+  <div class="nc-card {{ funnel_health }}">
+    <div class="nc-card-head">
+      <div class="nc-card-icon"><i class="fa-solid fa-filter"></i></div>
+      <div>
+        <div class="nc-card-title">Marketing Funnel</div>
+        <div class="nc-card-status">{{ funnel.total_leads }} leads captured</div>
+      </div>
+    </div>
+    <div class="nc-metrics">
+      <div class="nc-metric">
+        <div class="nc-metric-val">{{ funnel.total_leads }}</div>
+        <div class="nc-metric-label">Total Leads</div>
+      </div>
+      <div class="nc-metric">
+        <div class="nc-metric-val">{{ funnel.today_leads }}</div>
+        <div class="nc-metric-label">Today</div>
+      </div>
+      <div class="nc-metric">
+        <div class="nc-metric-val">{{ funnel.emails_sent }}</div>
+        <div class="nc-metric-label">Emails Sent</div>
+      </div>
+    </div>
+    <div class="nc-actions">
+      <a href="{% url 'funnel:stats' %}" class="nc-btn"><i class="fa-solid fa-chart-line"></i> Funnel Stats</a>
+      <a href="{% url 'funnel:onyx_landing' %}" class="nc-btn"><i class="fa-solid fa-external-link"></i> Onyx Page</a>
+    </div>
+  </div>
+
+  <!-- Django / Infrastructure -->
+  <div class="nc-card {{ infra_health }}">
+    <div class="nc-card-head">
+      <div class="nc-card-icon"><i class="fa-solid fa-server"></i></div>
+      <div>
+        <div class="nc-card-title">Infrastructure</div>
+        <div class="nc-card-status">Django + SQLite on {{ platform }}</div>
+      </div>
+    </div>
+    <ul class="nc-list">
+      {% for item in infra_checks %}
+      <li>
+        <span class="nc-dot {{ item.color }}"></span>
+        <span style="color:var(--text-primary);">{{ item.label }}</span>
+        <span style="margin-left:auto;color:var(--text-muted);font-size:0.75rem;">{{ item.detail }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="nc-card info">
+    <div class="nc-card-head">
+      <div class="nc-card-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+      <div>
+        <div class="nc-card-title">Recent Activity</div>
+        <div class="nc-card-status">Last 10 events</div>
+      </div>
+    </div>
+    <ul class="nc-list">
+      {% for event in recent_events %}
+      <li>
+        <span class="nc-dot {{ event.color }}"></span>
+        <span style="color:var(--text-primary);">{{ event.text }}</span>
+        <span style="margin-left:auto;color:var(--text-muted);font-size:0.7rem;">{{ event.time|naturaltime }}</span>
+      </li>
+      {% empty %}
+      <li style="color:var(--text-muted);font-style:italic;">No recent activity</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}

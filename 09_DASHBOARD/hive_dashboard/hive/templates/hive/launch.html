@@ -1,0 +1,1927 @@
+{% extends "hive/base.html" %}
+{% load static humanize hive_tags %}
+
+{% block title %}{{ app_name }} -- Hive Console{% endblock %}
+{% block page_title %}Console{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'hive:dashboard' %}">Hive</a>
+  <span class="sep">/</span> Console
+{% endblock %}
+
+{% block extra_head %}
+<!-- Marked.js for markdown rendering -->
+<script src="https://cdn.jsdelivr.net/npm/marked@14.0.0/marked.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<style>
+  /* ===================================================================
+     CONSOLE -- Full-height ChatGPT-style layout
+     =================================================================== */
+  .console-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - var(--topbar-height) - 40px);
+    max-width: 900px;
+    margin: -28px auto 0;
+    padding: 0;
+    position: relative;
+  }
+
+  /* ===================================================================
+     CONVERSATION AREA -- Scrollable message history
+     =================================================================== */
+  .console-chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 8px 24px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    scroll-behavior: smooth;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 2%, black 98%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 2%, black 98%, transparent 100%);
+  }
+
+  /* ===================================================================
+     WELCOME STATE -- Shown when chat is empty
+     =================================================================== */
+  .console-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    text-align: center;
+    padding: 40px 20px;
+    animation: consoleFadeUp 0.6s var(--ease-out-expo);
+  }
+
+  .welcome-hex {
+    width: 64px;
+    height: 64px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+    animation: welcomeFloat 4s ease-in-out infinite;
+  }
+
+  .welcome-hex svg { width: 100%; height: 100%; }
+  .welcome-hex .hex-stroke {
+    fill: none;
+    stroke: var(--gold);
+    stroke-width: 1.5;
+    opacity: 0.6;
+  }
+
+  @keyframes welcomeFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  .welcome-title {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .welcome-sub {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    max-width: 440px;
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+
+  /* Quick action chips */
+  .welcome-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    max-width: 600px;
+  }
+
+  .welcome-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.25s var(--ease-out-expo);
+    white-space: nowrap;
+  }
+
+  .welcome-chip:hover {
+    border-color: var(--gold-dim);
+    background: rgba(201, 168, 76, 0.08);
+    color: var(--text-primary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(201, 168, 76, 0.12);
+  }
+
+  .welcome-chip i {
+    color: var(--gold-dim);
+    font-size: 0.78rem;
+  }
+
+  /* ===================================================================
+     MESSAGE BUBBLES
+     =================================================================== */
+  .msg {
+    display: flex;
+    gap: 12px;
+    animation: consoleFadeUp 0.35s var(--ease-out-expo);
+    max-width: 100%;
+  }
+
+  .msg-user {
+    flex-direction: row-reverse;
+  }
+
+  .msg-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .msg-user .msg-avatar {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+    color: #0a0a0f;
+  }
+
+  .msg-hive .msg-avatar {
+    background: linear-gradient(135deg, var(--purple), var(--purple-dim));
+    color: #fff;
+  }
+
+  .msg-body {
+    max-width: 85%;
+    min-width: 0;
+  }
+
+  .msg-bubble {
+    padding: 14px 18px;
+    border-radius: 16px;
+    font-size: 0.9rem;
+    line-height: 1.65;
+    word-break: break-word;
+  }
+
+  .msg-user .msg-bubble {
+    background: rgba(201, 168, 76, 0.12);
+    border: 1px solid rgba(201, 168, 76, 0.2);
+    border-top-right-radius: 4px;
+    color: var(--text-primary);
+  }
+
+  .msg-hive .msg-bubble {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--glass-border);
+    border-top-left-radius: 4px;
+    color: var(--text-primary);
+  }
+
+  .msg-meta {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    padding: 0 4px;
+  }
+
+  .msg-user .msg-meta { text-align: right; }
+
+  /* ===================================================================
+     AGENT RESPONSE CARDS -- Live updating
+     =================================================================== */
+  .agent-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 8px;
+  }
+
+  .agent-card {
+    background: rgba(255, 255, 255, 0.025);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s var(--ease-out-expo);
+  }
+
+  .agent-card:hover {
+    border-color: var(--border-hover);
+  }
+
+  .agent-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .agent-card-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .agent-card-dot.running {
+    animation: agentPulse 1.2s ease-in-out infinite;
+  }
+
+  @keyframes agentPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+
+  .agent-card-name {
+    font-weight: 600;
+    font-size: 0.84rem;
+    color: var(--text-primary);
+    flex: 1;
+  }
+
+  .agent-card-badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .badge-running {
+    background: rgba(139, 92, 246, 0.15);
+    color: var(--purple);
+  }
+
+  .badge-done {
+    background: rgba(34, 197, 94, 0.12);
+    color: #22c55e;
+  }
+
+  .badge-failed {
+    background: rgba(239, 68, 68, 0.12);
+    color: #ef4444;
+  }
+
+  .agent-card-duration {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .agent-card-chevron {
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    transition: transform 0.2s ease;
+  }
+
+  .agent-card.expanded .agent-card-chevron {
+    transform: rotate(180deg);
+  }
+
+  .agent-card-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s var(--ease-out-expo);
+  }
+
+  .agent-card.expanded .agent-card-body {
+    max-height: 2000px;
+  }
+
+  .agent-card-content {
+    padding: 0 16px 16px;
+    font-size: 0.84rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    border-top: 1px solid rgba(255,255,255,0.04);
+    padding-top: 12px;
+  }
+
+  /* Markdown rendering inside cards */
+  .agent-card-content h1,
+  .agent-card-content h2,
+  .agent-card-content h3 {
+    font-family: var(--font-body);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 12px 0 6px;
+    font-size: 0.92rem;
+  }
+
+  .agent-card-content h3 { font-size: 0.86rem; }
+
+  .agent-card-content p { margin: 6px 0; }
+
+  .agent-card-content ul, .agent-card-content ol {
+    padding-left: 20px;
+    margin: 6px 0;
+  }
+
+  .agent-card-content li { margin: 3px 0; }
+
+  .agent-card-content strong { color: var(--text-primary); }
+
+  .agent-card-content code {
+    background: rgba(0,0,0,0.3);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.82rem;
+    color: var(--gold-bright);
+  }
+
+  .agent-card-content pre {
+    background: rgba(0,0,0,0.35);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    overflow-x: auto;
+    margin: 8px 0;
+  }
+
+  .agent-card-content pre code {
+    background: none;
+    padding: 0;
+    color: var(--text-secondary);
+  }
+
+  .agent-card-content blockquote {
+    border-left: 3px solid var(--gold-dim);
+    padding-left: 12px;
+    margin: 8px 0;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .agent-card-employees {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 8px;
+  }
+
+  .employee-tag {
+    font-size: 0.66rem;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.06);
+    color: var(--text-muted);
+  }
+
+  /* ===================================================================
+     THINKING INDICATOR
+     =================================================================== */
+  .thinking-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 18px;
+    animation: consoleFadeUp 0.3s var(--ease-out-expo);
+  }
+
+  .thinking-dots {
+    display: flex;
+    gap: 4px;
+  }
+
+  .thinking-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--gold-dim);
+    animation: thinkBounce 1.4s ease-in-out infinite;
+  }
+
+  .thinking-dots span:nth-child(2) { animation-delay: 0.15s; }
+  .thinking-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes thinkBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-6px); opacity: 1; }
+  }
+
+  .thinking-text {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* ===================================================================
+     INPUT AREA -- Bottom-pinned, ChatGPT style
+     =================================================================== */
+  .console-input-area {
+    padding: 12px 0 8px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    position: relative;
+  }
+
+  .console-input-wrapper {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.035);
+    border: 1.5px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 8px 8px 8px 16px;
+    transition: all 0.3s var(--ease-out-expo);
+  }
+
+  .console-input-wrapper:focus-within {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px var(--gold-glow), 0 0 30px rgba(201, 168, 76, 0.08);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .console-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    resize: none;
+    min-height: 24px;
+    max-height: 160px;
+    overflow-y: auto;
+  }
+
+  .console-input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .console-attach-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255,255,255,0.04);
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    font-size: 0.85rem;
+    margin-bottom: 1px;
+  }
+  .console-attach-btn:hover {
+    border-color: var(--gold-dim);
+    color: var(--gold);
+    background: rgba(201,168,76,0.08);
+  }
+  .console-attach-btn.has-file {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(201,168,76,0.12);
+  }
+  .attach-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px 4px 8px;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  .attach-chip i { font-size: 0.7rem; }
+  .attach-chip .rm-attach {
+    margin-left: 4px;
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.15s;
+  }
+  .attach-chip .rm-attach:hover { opacity: 1; }
+  .attach-preview-bar {
+    display: none;
+    padding: 0 4px 4px;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .attach-preview-bar.visible { display: flex; }
+
+  /* Image thumbnail in attach chip */
+  .attach-chip img.attach-thumb {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    object-fit: cover;
+  }
+
+  /* Drag-and-drop highlight */
+  .console-input-wrapper.drag-over {
+    border-color: var(--gold) !important;
+    background: rgba(201, 168, 76, 0.08) !important;
+    box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.15), inset 0 0 20px rgba(201, 168, 76, 0.05);
+  }
+
+  .console-send-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: none;
+    background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+    color: #0a0a0f;
+    font-size: 0.9rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s var(--ease-out-expo);
+    box-shadow: 0 2px 10px rgba(201, 168, 76, 0.25);
+  }
+
+  .console-send-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 18px rgba(201, 168, 76, 0.4);
+  }
+
+  .console-send-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .console-send-btn.is-loading i {
+    animation: spin 1s linear infinite;
+  }
+
+  /* Cancel / edit button (shown during processing) */
+  .console-cancel-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    border: 1px solid rgba(239, 68, 68, 0.35);
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s var(--ease-out-expo);
+  }
+  .console-cancel-btn:hover {
+    background: rgba(239, 68, 68, 0.2);
+    border-color: rgba(239, 68, 68, 0.5);
+    transform: scale(1.05);
+  }
+  .console-cancel-btn.visible {
+    display: flex;
+  }
+
+  /* Mode pills row under input */
+  .console-mode-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 0 4px;
+  }
+
+  .console-mode-label {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .mode-pill {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 4px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--glass-border);
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mode-pill.active {
+    background: rgba(201, 168, 76, 0.15);
+    border-color: rgba(201, 168, 76, 0.3);
+    color: var(--gold);
+  }
+
+  .mode-pill:hover:not(.active) {
+    border-color: var(--border-hover);
+    color: var(--text-secondary);
+  }
+
+  .console-slash-hint {
+    margin-left: auto;
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    opacity: 0.6;
+  }
+
+  .console-slash-hint kbd {
+    background: rgba(255,255,255,0.06);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.68rem;
+    font-family: var(--font-body);
+  }
+
+  /* ===================================================================
+     SLASH COMMAND PALETTE
+     =================================================================== */
+  .slash-palette {
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    right: 0;
+    margin-bottom: 8px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    box-shadow: 0 -8px 40px rgba(0,0,0,0.5);
+    max-height: 300px;
+    overflow-y: auto;
+    display: none;
+    z-index: 200;
+    animation: slashSlideUp 0.2s var(--ease-out-expo);
+  }
+
+  .slash-palette.visible { display: block; }
+
+  @keyframes slashSlideUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .slash-palette-header {
+    padding: 10px 14px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .slash-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+
+  .slash-item:hover, .slash-item.focused {
+    background: rgba(201, 168, 76, 0.08);
+  }
+
+  .slash-item-cmd {
+    font-weight: 600;
+    font-size: 0.84rem;
+    color: var(--gold);
+    min-width: 100px;
+  }
+
+  .slash-item-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  /* ===================================================================
+     COMBINED SUMMARY CARD
+     =================================================================== */
+  .summary-card {
+    background: rgba(201, 168, 76, 0.04);
+    border: 1px solid rgba(201, 168, 76, 0.15);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-top: 10px;
+  }
+
+  .summary-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--gold);
+  }
+
+  .summary-card-body {
+    font-size: 0.84rem;
+    line-height: 1.7;
+    color: var(--text-secondary);
+  }
+
+  .summary-stats {
+    display: flex;
+    gap: 16px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(201, 168, 76, 0.1);
+    font-size: 0.74rem;
+    color: var(--text-muted);
+  }
+
+  .summary-stats span { font-variant-numeric: tabular-nums; }
+  .summary-stats strong { color: var(--text-secondary); }
+
+  /* ===================================================================
+     COPY BUTTON
+     =================================================================== */
+  .copy-all-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 18px;
+    margin-top: 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(201, 168, 76, 0.25);
+    background: rgba(201, 168, 76, 0.08);
+    color: var(--gold);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-body);
+  }
+
+  .copy-all-btn:hover {
+    background: rgba(201, 168, 76, 0.18);
+    border-color: rgba(201, 168, 76, 0.4);
+    box-shadow: 0 2px 12px rgba(201, 168, 76, 0.15);
+    transform: translateY(-1px);
+  }
+
+  .copy-all-btn:active {
+    transform: scale(0.97);
+  }
+
+  .copy-all-btn.copied {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+  }
+
+  .copy-all-btn i {
+    font-size: 0.82rem;
+  }
+
+  .summary-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+  }
+
+  .summary-actions .copy-all-btn {
+    margin-top: 0;
+  }
+
+  /* Click-to-reuse hint on user messages */
+  .msg-user .msg-bubble {
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+  }
+  .msg-user .msg-bubble:hover {
+    border-color: rgba(201, 168, 76, 0.4);
+  }
+  .msg-user .msg-bubble:hover::after {
+    content: 'click to edit';
+    display: block;
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-align: right;
+  }
+
+  /* ===================================================================
+     SESSION PROGRESS BAR
+     =================================================================== */
+  .session-progress-bar {
+    display: none;
+    height: 3px;
+    background: rgba(255,255,255,0.04);
+    width: 100%;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .session-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+    transition: width 0.8s ease;
+    box-shadow: 0 0 8px var(--gold-glow);
+  }
+
+  /* ===================================================================
+     PER-AGENT PROGRESS BARS
+     =================================================================== */
+  .agent-progress-track {
+    height: 2px;
+    background: rgba(255,255,255,0.04);
+    overflow: hidden;
+    margin: 0 16px 0;
+  }
+
+  .agent-progress-shimmer {
+    height: 100%;
+    width: 40%;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+    animation: shimmerSlide 1.5s ease-in-out infinite;
+  }
+
+  @keyframes shimmerSlide {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+  }
+
+  /* ===================================================================
+     RESPONSE BUBBLE GLOW WHILE RUNNING
+     =================================================================== */
+  .msg-hive .msg-bubble.is-loading {
+    box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.2), 0 0 20px rgba(139, 92, 246, 0.08);
+    animation: hivePulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes hivePulse {
+    0%, 100% { box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.2), 0 0 20px rgba(139, 92, 246, 0.08); }
+    50% { box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.4), 0 0 30px rgba(139, 92, 246, 0.18); }
+  }
+
+  /* ===================================================================
+     ANIMATIONS
+     =================================================================== */
+  @keyframes consoleFadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  /* ===================================================================
+     RESPONSIVE
+     =================================================================== */
+  @media (max-width: 768px) {
+    .console-wrapper { margin: -20px auto 0; }
+    .console-chat { padding: 16px 4px; }
+    .msg-body { max-width: 92%; }
+    .welcome-chips { gap: 6px; }
+    .welcome-chip { padding: 8px 14px; font-size: 0.78rem; }
+    .welcome-title { font-size: 1.3rem; }
+  }
+</style>
+
+<!-- ====================================================================
+     CONSOLE LAYOUT
+     ==================================================================== -->
+<div class="console-wrapper">
+
+  <!-- ===== SESSION PROGRESS BAR ===== -->
+  <div id="sessionProgressBar" class="session-progress-bar"><div id="sessionProgressFill" class="session-progress-fill"></div></div>
+
+  <!-- ===== CONVERSATION AREA ===== -->
+  <div class="console-chat" id="chatArea">
+
+    <!-- Welcome state (hidden after first message) -->
+    <div class="console-welcome" id="welcomeState">
+      <div class="welcome-hex">
+        <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg">
+          <polygon class="hex-stroke" points="40,4 72,22 72,58 40,76 8,58 8,22" />
+        </svg>
+      </div>
+      <div class="welcome-title">Hive Mind Console</div>
+      <div class="welcome-sub">
+        Deploy Claude, Gemini, Codex, and Perplexity in parallel.
+        Type a question or use a slash command to get started.
+      </div>
+      <div style="margin-bottom:4px; font-size:0.7rem; font-weight:700; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-muted);">Quick Start</div>
+
+      <div class="welcome-chips">
+        <div class="welcome-chip" data-query="XLM market update -- price action, sentiment, and catalysts">
+          <i class="fa-solid fa-chart-line"></i> XLM Market
+        </div>
+        <div class="welcome-chip" data-query="Portfolio risk check -- exposure, correlation, and hedging">
+          <i class="fa-solid fa-shield-halved"></i> Risk Check
+        </div>
+        <div class="welcome-chip" data-query="Strategy optimization -- review trading parameters and suggest improvements">
+          <i class="fa-solid fa-gears"></i> Optimize Strategy
+        </div>
+        <div class="welcome-chip" data-query="News sentiment scan -- crypto headlines, social sentiment, market-moving events">
+          <i class="fa-solid fa-newspaper"></i> News Scan
+        </div>
+        <div class="welcome-chip" data-query="Full system health check -- bot status, equity, open positions, errors">
+          <i class="fa-solid fa-heart-pulse"></i> System Health
+        </div>
+        <div class="welcome-chip" data-query="What SaaS products should I build next based on market trends?">
+          <i class="fa-solid fa-rocket"></i> SaaS Ideas
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== INPUT AREA ===== -->
+  <div class="console-input-area" id="inputArea">
+
+    <!-- Slash command palette (hidden by default) -->
+    <div class="slash-palette" id="slashPalette">
+      <div class="slash-palette-header">Slash Commands</div>
+    </div>
+
+    <div class="attach-preview-bar" id="attachPreviewBar"></div>
+    <div class="console-input-wrapper">
+      <button class="console-attach-btn" id="attachBtn" title="Attach file or image">
+        <i class="fa-solid fa-paperclip"></i>
+      </button>
+      <input type="file" id="attachInput" accept="image/*,.pdf,.txt,.md,.log,.json,.csv,.yaml,.yml,.py,.js,.sh,.webp,.gif" style="display:none" multiple />
+      <textarea
+        id="consoleInput"
+        class="console-input"
+        placeholder="Ask the Hive Mind anything..."
+        rows="1"
+        autofocus
+      ></textarea>
+      <button class="console-send-btn" id="sendBtn" title="Send (Enter)">
+        <i class="fa-solid fa-arrow-up"></i>
+      </button>
+      <button class="console-cancel-btn" id="cancelBtn" title="Cancel and edit query (Esc)">
+        <i class="fa-solid fa-stop"></i>
+      </button>
+    </div>
+
+    <div class="console-mode-row">
+      <span class="console-mode-label">Mode</span>
+      <button class="mode-pill active" data-mode="full">Smart</button>
+      <button class="mode-pill" data-mode="lite">Lite</button>
+      <button class="mode-pill" data-mode="all">All</button>
+      <span class="console-slash-hint">
+        <kbd>/</kbd> for commands
+      </span>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+  'use strict';
+
+  /* ------------------------------------------------------------------
+     DOM refs
+     ------------------------------------------------------------------ */
+  var chatArea     = document.getElementById('chatArea');
+  var welcomeState = document.getElementById('welcomeState');
+  var input        = document.getElementById('consoleInput');
+  var sendBtn      = document.getElementById('sendBtn');
+  var slashPalette = document.getElementById('slashPalette');
+
+  var cancelBtn    = document.getElementById('cancelBtn');
+
+  var selectedMode = 'full';
+  var isProcessing = false;
+  var activeSessionId = null;
+  var pollTimer = null;
+  var elapsedTimer = null;
+  var sessionStartTime = null;
+  var lastSubmittedQuery = '';
+
+  var sessionProgressBar  = document.getElementById('sessionProgressBar');
+  var sessionProgressFill = document.getElementById('sessionProgressFill');
+
+  /* CSRF token */
+  var csrfMeta = document.querySelector('[name="csrfmiddlewaretoken"]');
+  var csrfToken = '';
+  /* Grab CSRF from cookie instead */
+  var cookies = document.cookie.split(';');
+  for (var i = 0; i < cookies.length; i++) {
+    var c = cookies[i].trim();
+    if (c.indexOf('csrftoken=') === 0) {
+      csrfToken = c.substring(10);
+      break;
+    }
+  }
+
+  /* ------------------------------------------------------------------
+     SLASH COMMANDS
+     ------------------------------------------------------------------ */
+  var slashCommands = [
+    { cmd: '/market',    desc: 'XLM price action, sentiment, and catalysts',     query: 'XLM market update -- price action, sentiment, and upcoming catalysts' },
+    { cmd: '/risk',      desc: 'Portfolio risk analysis and hedging ideas',       query: 'Portfolio risk check -- current exposure, correlation, and hedging recommendations' },
+    { cmd: '/strategy',  desc: 'Optimize trading parameters and entry gates',    query: 'Strategy optimization -- review current trading parameters and suggest improvements' },
+    { cmd: '/news',      desc: 'Crypto headlines and social sentiment scan',     query: 'News sentiment scan -- latest crypto headlines, social sentiment, and market-moving events' },
+    { cmd: '/health',    desc: 'Full system health and bot status check',        query: 'Full system health check -- bot status, equity, open positions, recent errors' },
+    { cmd: '/saas',      desc: 'SaaS product ideas based on market trends',      query: 'What SaaS products should I build next based on current market trends and my skill set?' },
+    { cmd: '/pnl',       desc: 'Today\'s P&L breakdown and trade analysis',      query: 'Analyze today\'s trading P&L -- wins, losses, fees, and what to improve' },
+    { cmd: '/compare',   desc: 'Compare two strategies or approaches',          query: '' },
+    { cmd: '/plan',      desc: 'Create a strategic plan for a goal',             query: '' },
+    { cmd: '/debug',     desc: 'Debug a specific bot error or behavior',         query: '' },
+  ];
+
+  function buildSlashPalette() {
+    var html = '<div class="slash-palette-header">Slash Commands</div>';
+    slashCommands.forEach(function(sc, idx) {
+      html += '<div class="slash-item" data-idx="' + idx + '">'
+        + '<span class="slash-item-cmd">' + sc.cmd + '</span>'
+        + '<span class="slash-item-desc">' + sc.desc + '</span>'
+        + '</div>';
+    });
+    slashPalette.innerHTML = html;
+
+    slashPalette.querySelectorAll('.slash-item').forEach(function(item) {
+      item.addEventListener('click', function() {
+        var idx = parseInt(this.getAttribute('data-idx'));
+        var sc = slashCommands[idx];
+        if (sc.query) {
+          input.value = sc.query;
+        } else {
+          input.value = sc.cmd + ' ';
+        }
+        slashPalette.classList.remove('visible');
+        input.focus();
+        if (sc.query) submitQuery();
+      });
+    });
+  }
+
+  buildSlashPalette();
+
+  /* Show/hide slash palette */
+  function updateSlashPalette() {
+    var val = input.value;
+    if (val.startsWith('/') && val.indexOf(' ') === -1 && val.length < 20) {
+      var filter = val.toLowerCase();
+      var items = slashPalette.querySelectorAll('.slash-item');
+      var anyVisible = false;
+      items.forEach(function(item) {
+        var idx = parseInt(item.getAttribute('data-idx'));
+        var match = slashCommands[idx].cmd.startsWith(filter);
+        item.style.display = match ? '' : 'none';
+        if (match) anyVisible = true;
+      });
+      if (anyVisible) {
+        slashPalette.classList.add('visible');
+      } else {
+        slashPalette.classList.remove('visible');
+      }
+    } else {
+      slashPalette.classList.remove('visible');
+    }
+  }
+
+  /* ------------------------------------------------------------------
+     MODE PILLS
+     ------------------------------------------------------------------ */
+  document.querySelectorAll('.mode-pill').forEach(function(pill) {
+    pill.addEventListener('click', function() {
+      document.querySelectorAll('.mode-pill').forEach(function(p) {
+        p.classList.remove('active');
+      });
+      this.classList.add('active');
+      selectedMode = this.getAttribute('data-mode');
+    });
+  });
+
+  /* ------------------------------------------------------------------
+     AUTO-RESIZE TEXTAREA
+     ------------------------------------------------------------------ */
+  input.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 160) + 'px';
+    updateSlashPalette();
+  });
+
+  /* ------------------------------------------------------------------
+     KEYBOARD: Enter to send, Shift+Enter for newline
+     ------------------------------------------------------------------ */
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      submitQuery();
+    }
+    if (e.key === 'Escape') {
+      if (isProcessing) { cancelQuery(); }
+      slashPalette.classList.remove('visible');
+    }
+  });
+
+  sendBtn.addEventListener('click', function() { submitQuery(); });
+
+  /* ------------------------------------------------------------------
+     FILE ATTACHMENT (multi-file, drag-drop, paste, thumbnails)
+     ------------------------------------------------------------------ */
+  var attachBtn        = document.getElementById('attachBtn');
+  var attachInput      = document.getElementById('attachInput');
+  var attachPreviewBar = document.getElementById('attachPreviewBar');
+  var attachedFiles    = [];
+
+  attachBtn.addEventListener('click', function() { attachInput.click(); });
+
+  attachInput.addEventListener('change', function() {
+    var files = Array.from(attachInput.files);
+    if (!files.length) return;
+    files.forEach(function(f) { addAttachedFile(f); });
+    attachInput.value = '';
+  });
+
+  function addAttachedFile(file) {
+    if (file.size > 20 * 1024 * 1024) {
+      addErrorMessage('File too large: ' + file.name + ' (max 20MB)');
+      return;
+    }
+    attachedFiles.push(file);
+    attachBtn.classList.add('has-file');
+    attachPreviewBar.classList.add('visible');
+
+    var chip = document.createElement('div');
+    chip.className = 'attach-chip';
+    chip.dataset.fileIndex = attachedFiles.length - 1;
+
+    var iconHtml;
+    if (file.type && file.type.startsWith('image/')) {
+      var url = URL.createObjectURL(file);
+      iconHtml = '<img class="attach-thumb" src="' + url + '" />';
+    } else {
+      iconHtml = '<i class="fa-solid ' + getFileIcon(file.name) + '"></i>';
+    }
+
+    var displayName = file.name.length > 24
+      ? file.name.substring(0, 18) + '...' + file.name.substring(file.name.lastIndexOf('.'))
+      : file.name;
+    chip.innerHTML = iconHtml + ' ' + displayName
+      + ' <span class="rm-attach" title="Remove"><i class="fa-solid fa-xmark"></i></span>';
+
+    chip.querySelector('.rm-attach').addEventListener('click', function() {
+      var idx = parseInt(chip.dataset.fileIndex);
+      attachedFiles[idx] = null;
+      chip.remove();
+      if (!attachedFiles.filter(Boolean).length) {
+        attachedFiles = [];
+        attachBtn.classList.remove('has-file');
+        attachPreviewBar.classList.remove('visible');
+        attachPreviewBar.innerHTML = '';
+      }
+    });
+    attachPreviewBar.appendChild(chip);
+  }
+
+  function getFileIcon(name) {
+    var ext = (name.split('.').pop() || '').toLowerCase();
+    var map = {
+      'pdf': 'fa-file-pdf', 'txt': 'fa-file-lines', 'md': 'fa-file-lines',
+      'json': 'fa-file-code', 'csv': 'fa-file-csv', 'py': 'fa-file-code',
+      'js': 'fa-file-code', 'sh': 'fa-terminal', 'yaml': 'fa-file-code',
+      'yml': 'fa-file-code', 'log': 'fa-file-lines',
+    };
+    return map[ext] || 'fa-file';
+  }
+
+  /* --- Drag-and-drop --- */
+  var inputWrapper = document.querySelector('.console-input-wrapper');
+  var dragCounter = 0;
+
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(function(evt) {
+    inputWrapper.addEventListener(evt, function(e) { e.preventDefault(); e.stopPropagation(); });
+  });
+  inputWrapper.addEventListener('dragenter', function() {
+    dragCounter++;
+    inputWrapper.classList.add('drag-over');
+  });
+  inputWrapper.addEventListener('dragleave', function() {
+    dragCounter--;
+    if (dragCounter <= 0) { dragCounter = 0; inputWrapper.classList.remove('drag-over'); }
+  });
+  inputWrapper.addEventListener('drop', function(e) {
+    dragCounter = 0;
+    inputWrapper.classList.remove('drag-over');
+    Array.from(e.dataTransfer.files).forEach(function(f) { addAttachedFile(f); });
+  });
+
+  /* --- Clipboard paste (screenshots) --- */
+  document.getElementById('consoleInput').addEventListener('paste', function(e) {
+    var items = (e.clipboardData || {}).items;
+    if (!items) return;
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        var blob = items[i].getAsFile();
+        if (blob) {
+          var ext = (blob.type.split('/')[1] || 'png').replace('jpeg', 'jpg');
+          var namedFile = new File([blob], 'clipboard_' + Date.now() + '.' + ext, { type: blob.type });
+          addAttachedFile(namedFile);
+        }
+      }
+    }
+  });
+
+  /* Cancel button: stop polling and restore query for editing */
+  cancelBtn.addEventListener('click', function() { cancelQuery(); });
+
+  function cancelQuery() {
+    if (!isProcessing) return;
+    /* Stop polling */
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    /* Remove thinking indicator */
+    removeThinking();
+    /* Hide progress bar */
+    finishProgressBar();
+    /* Restore query to input for editing */
+    input.value = lastSubmittedQuery;
+    input.style.height = 'auto';
+    input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+    /* Add a notice in chat */
+    var div = document.createElement('div');
+    div.className = 'msg msg-hive';
+    div.innerHTML =
+      '<div class="msg-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><i class="fa-solid fa-pen" style="font-size:0.72rem;color:#fff"></i></div>'
+      + '<div class="msg-body">'
+      + '<div class="msg-bubble" style="border-color:rgba(245,158,11,0.2);color:var(--text-muted);font-style:italic;">Query cancelled. Edit your prompt and re-send.</div>'
+      + '</div>';
+    chatArea.appendChild(div);
+    scrollToBottom();
+    resetInput();
+  }
+
+  /* ------------------------------------------------------------------
+     WELCOME CHIPS
+     ------------------------------------------------------------------ */
+  document.querySelectorAll('.welcome-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      input.value = this.getAttribute('data-query');
+      submitQuery();
+    });
+  });
+
+  /* ------------------------------------------------------------------
+     MARKDOWN RENDERER (using marked.js)
+     ------------------------------------------------------------------ */
+  var md = window.marked;
+  if (md && md.setOptions) {
+    md.setOptions({
+      breaks: true,
+      gfm: true,
+    });
+  }
+
+  function renderMd(text) {
+    if (!text) return '';
+    try {
+      if (md && md.parse) return md.parse(text);
+      if (md && md.marked) return md.marked(text);
+      return text.replace(/\n/g, '<br>');
+    } catch(e) {
+      return text.replace(/\n/g, '<br>');
+    }
+  }
+
+  /* ------------------------------------------------------------------
+     ADD MESSAGE TO CHAT
+     ------------------------------------------------------------------ */
+  function addUserMessage(text) {
+    if (welcomeState) {
+      welcomeState.style.display = 'none';
+    }
+
+    var now = new Date();
+    var timeStr = now.toLocaleTimeString('en-US', {
+      timeZone: 'America/Los_Angeles',
+      hour: 'numeric', minute: '2-digit', hour12: true
+    }) + ' PT';
+
+    var div = document.createElement('div');
+    div.className = 'msg msg-user';
+    div.innerHTML =
+      '<div class="msg-avatar"><i class="fa-solid fa-user" style="font-size:0.72rem"></i></div>'
+      + '<div class="msg-body">'
+      + '<div class="msg-bubble">' + escHtml(text) + '</div>'
+      + '<div class="msg-meta">' + timeStr + '</div>'
+      + '</div>';
+    chatArea.appendChild(div);
+    scrollToBottom();
+  }
+
+  function addThinkingIndicator() {
+    var div = document.createElement('div');
+    div.className = 'msg msg-hive';
+    div.id = 'thinkingMsg';
+    div.innerHTML =
+      '<div class="msg-avatar"><i class="fa-solid fa-hexagon-nodes" style="font-size:0.72rem"></i></div>'
+      + '<div class="msg-body">'
+      + '<div class="msg-bubble thinking-indicator">'
+      + '<div class="thinking-dots"><span></span><span></span><span></span></div>'
+      + '<span class="thinking-text">Deploying agents... <span class="thinking-elapsed">(0s)</span></span>'
+      + '</div>'
+      + '</div>';
+    chatArea.appendChild(div);
+    scrollToBottom();
+
+    /* Start elapsed counter */
+    if (elapsedTimer) clearInterval(elapsedTimer);
+    elapsedTimer = setInterval(function() {
+      var elapsedEl = document.querySelector('#thinkingMsg .thinking-elapsed');
+      if (elapsedEl && sessionStartTime) {
+        var secs = Math.floor((Date.now() - sessionStartTime) / 1000);
+        elapsedEl.textContent = '(' + secs + 's)';
+      }
+    }, 1000);
+  }
+
+  function updateThinkingText(text) {
+    var textEl = document.querySelector('#thinkingMsg .thinking-text');
+    if (textEl) {
+      /* Preserve the elapsed span */
+      var elapsedEl = textEl.querySelector('.thinking-elapsed');
+      var elapsedHtml = elapsedEl ? elapsedEl.outerHTML : '<span class="thinking-elapsed">(0s)</span>';
+      textEl.innerHTML = escHtml(text) + ' ' + elapsedHtml;
+    }
+  }
+
+  function removeThinking() {
+    var el = document.getElementById('thinkingMsg');
+    if (el) el.remove();
+    if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; }
+  }
+
+  function addHiveResponse(data) {
+    removeThinking();
+
+    var div = document.createElement('div');
+    div.className = 'msg msg-hive';
+    div.id = 'hiveResponse_' + (data.session_id || 'latest');
+
+    /* Determine if session is still running -- if so, add is-loading glow */
+    var stillRunning = (data.status !== 'done' && data.status !== 'failed');
+    var loadingClass = stillRunning ? ' is-loading' : '';
+
+    var avatarHtml = '<div class="msg-avatar"><i class="fa-solid fa-hexagon-nodes" style="font-size:0.72rem"></i></div>';
+    var bodyHtml = '<div class="msg-body"><div class="msg-bubble' + loadingClass + '" id="hiveBubble_' + (data.session_id || 'latest') + '">';
+
+    /* Agent cards */
+    bodyHtml += '<div class="agent-cards" id="agentCards_' + (data.session_id || '') + '">';
+    bodyHtml += buildAgentCards(data.agents || {}, data.routed_to || []);
+    bodyHtml += '</div>';
+
+    bodyHtml += '</div></div>';
+    div.innerHTML = avatarHtml + bodyHtml;
+    chatArea.appendChild(div);
+    scrollToBottom();
+  }
+
+  function removeHiveBubbleLoading(sessionId) {
+    var bubble = document.getElementById('hiveBubble_' + (sessionId || 'latest'));
+    if (bubble) bubble.classList.remove('is-loading');
+  }
+
+  function buildAgentCards(agents, routedTo) {
+    var agentMeta = {
+      perplexity: { name: 'Perplexity', color: '#f59e0b', icon: 'fa-magnifying-glass', role: 'Intelligence Anchor' },
+      codex:      { name: 'Codex',      color: '#22c55e', icon: 'fa-code',             role: 'Engineering Foreman' },
+      gemini:     { name: 'Gemini',      color: '#22d3ee', icon: 'fa-gem',              role: 'Logistics Commander' },
+      claude:     { name: 'Claude',      color: '#8b5cf6', icon: 'fa-brain',            role: 'Chief Operator' },
+    };
+
+    var html = '';
+    var keys = routedTo.length ? routedTo : Object.keys(agents);
+
+    keys.forEach(function(key) {
+      var a = agents[key] || { status: 'running' };
+      var meta = agentMeta[key] || { name: key, color: '#888', icon: 'fa-robot', role: '' };
+      var statusClass = a.status === 'done' ? 'badge-done' : a.status === 'failed' ? 'badge-failed' : 'badge-running';
+      var dotClass = a.status === 'running' ? ' running' : '';
+      var durText = a.duration_s ? a.duration_s.toFixed(1) + 's' : '';
+
+      /* Per-agent progress bar */
+      var progressBarHtml = '';
+      if (a.status === 'running') {
+        progressBarHtml = '<div class="agent-progress-track"><div class="agent-progress-shimmer"></div></div>';
+      } else if (a.status === 'done' && a.duration_s) {
+        var dur = a.duration_s;
+        var widthPct = Math.min((dur / 120) * 100, 100).toFixed(1);
+        progressBarHtml = '<div class="agent-progress-track"><div style="height:100%;width:' + widthPct + '%;background:var(--gold);"></div></div>';
+      } else if (a.status === 'failed') {
+        progressBarHtml = '<div class="agent-progress-track"><div style="height:100%;width:100%;background:#ef4444;opacity:0.5;"></div></div>';
+      }
+
+      html += '<div class="agent-card" data-agent="' + key + '">'
+        + '<div class="agent-card-header" onclick="this.parentElement.classList.toggle(\'expanded\')">'
+        + '<div class="agent-card-dot' + dotClass + '" style="background:' + meta.color + '"></div>'
+        + '<span class="agent-card-name"><i class="fa-solid ' + meta.icon + '" style="color:' + meta.color + ';margin-right:6px;font-size:0.78rem"></i>' + meta.name + '</span>'
+        + '<span class="agent-card-badge ' + statusClass + '">' + (a.status || 'running') + '</span>'
+        + (durText ? '<span class="agent-card-duration">' + durText + '</span>' : '')
+        + '<i class="fa-solid fa-chevron-down agent-card-chevron"></i>'
+        + '</div>'
+        + progressBarHtml
+        + '<div class="agent-card-body"><div class="agent-card-content">';
+
+      if (a.status === 'done' && (a.response_text || a.preview)) {
+        html += renderMd(a.response_text || a.preview);
+      } else if (a.status === 'failed') {
+        html += '<span style="color:#ef4444">' + escHtml(a.error || 'Agent failed') + '</span>';
+      } else {
+        html += '<span style="color:var(--text-muted);font-style:italic">Processing...</span>';
+      }
+
+      /* Employee tags */
+      if (a.employees && a.employees.length) {
+        html += '<div class="agent-card-employees">';
+        a.employees.forEach(function(e) {
+          html += '<span class="employee-tag">' + escHtml(e) + '</span>';
+        });
+        html += '</div>';
+      }
+
+      html += '</div></div></div>';
+    });
+
+    return html;
+  }
+
+  /* Store latest completed session data for copy */
+  var lastSessionData = null;
+
+  function addSummaryCard(data) {
+    lastSessionData = data;
+    var sid = data.session_id || 'latest';
+    var div = document.createElement('div');
+    div.className = 'msg msg-hive';
+    div.innerHTML =
+      '<div class="msg-avatar" style="visibility:hidden"></div>'
+      + '<div class="msg-body">'
+      + '<div class="summary-card">'
+      + '<div class="summary-card-header"><i class="fa-solid fa-layer-group"></i> Session Complete</div>'
+      + '<div class="summary-stats">'
+      + '<span><strong>Mode:</strong> ' + (data.mode || 'full') + '</span>'
+      + '<span><strong>Duration:</strong> ' + (data.total_duration_s || 0).toFixed(1) + 's</span>'
+      + '<span><strong>Agents:</strong> ' + (data.routed_to || []).length + '</span>'
+      + '<span><strong>Session:</strong> ' + sid + '</span>'
+      + '</div>'
+      + '<div class="summary-actions">'
+      + '<button class="copy-all-btn" onclick="copySessionOutput(\'' + sid + '\', this)">'
+      + '<i class="fa-regular fa-copy"></i> Copy'
+      + '</button>'
+      + '<button class="copy-all-btn" onclick="rerunQuery(this)" data-query="' + escAttr(lastSubmittedQuery) + '">'
+      + '<i class="fa-solid fa-rotate-right"></i> Re-run'
+      + '</button>'
+      + '<a class="copy-all-btn" href="/session/' + sid + '/" style="text-decoration:none">'
+      + '<i class="fa-solid fa-arrow-up-right-from-square"></i> View'
+      + '</a>'
+      + '</div>'
+      + '</div>'
+      + '</div>';
+    chatArea.appendChild(div);
+    scrollToBottom();
+  }
+
+  /* ------------------------------------------------------------------
+     SUBMIT QUERY
+     ------------------------------------------------------------------ */
+  function submitQuery() {
+    var query = input.value.trim();
+    if (!query || isProcessing) return;
+
+    /* Handle slash commands */
+    if (query.startsWith('/')) {
+      var parts = query.split(' ');
+      var cmd = parts[0].toLowerCase();
+      var matched = slashCommands.find(function(sc) { return sc.cmd === cmd; });
+      if (matched && matched.query) {
+        var extra = parts.slice(1).join(' ').trim();
+        query = matched.query + (extra ? '\n\nAdditional context: ' + extra : '');
+      }
+    }
+
+    isProcessing = true;
+    lastSubmittedQuery = query;
+    sessionStartTime = Date.now();
+    sendBtn.classList.add('is-loading');
+    sendBtn.disabled = true;
+    cancelBtn.classList.add('visible');
+    input.value = '';
+    input.style.height = 'auto';
+    slashPalette.classList.remove('visible');
+
+    /* Show and reset progress bar */
+    sessionProgressBar.style.display = 'block';
+    sessionProgressBar.style.opacity = '1';
+    sessionProgressFill.style.transition = 'none';
+    sessionProgressFill.style.width = '0%';
+    /* Trigger reflow before re-enabling transition */
+    void sessionProgressFill.offsetWidth;
+    sessionProgressFill.style.transition = 'width 0.8s ease';
+
+    addUserMessage(query);
+    addThinkingIndicator();
+
+    /* POST to launch endpoint (or upload endpoint if files attached) */
+    var fetchPromise;
+    var activeFiles = attachedFiles.filter(Boolean);
+    if (activeFiles.length > 0) {
+      var fd = new FormData();
+      fd.append('file', activeFiles[0]);
+      for (var fi = 1; fi < activeFiles.length; fi++) {
+        fd.append('file_' + fi, activeFiles[fi]);
+      }
+      fd.append('query', query);
+      fd.append('mode', selectedMode);
+
+      /* Use XHR for upload progress reporting */
+      fetchPromise = new Promise(function(resolve, reject) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '{% url "hive:api_upload_analyze" %}');
+        xhr.setRequestHeader('X-CSRFToken', csrfToken);
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.upload.addEventListener('progress', function(e) {
+          if (e.lengthComputable) {
+            var pct = Math.round((e.loaded / e.total) * 100);
+            updateThinkingText('Uploading... ' + pct + '%');
+          }
+        });
+        xhr.onload = function() {
+          try {
+            resolve({ json: function() { return Promise.resolve(JSON.parse(xhr.responseText)); } });
+          } catch(parseErr) { reject(parseErr); }
+        };
+        xhr.onerror = function() { reject(new Error('Upload failed')); };
+        xhr.send(fd);
+      });
+
+      /* Clear attachments after submit */
+      attachedFiles = [];
+      attachInput.value = '';
+      attachBtn.classList.remove('has-file');
+      attachPreviewBar.classList.remove('visible');
+      attachPreviewBar.innerHTML = '';
+    } else {
+      fetchPromise = fetch('{% url "hive:launch" %}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrfToken,
+          'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ query: query, mode: selectedMode })
+      });
+    }
+    fetchPromise
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.status === 'ok' && data.session_id) {
+        activeSessionId = data.session_id;
+        updateThinkingText('Agents dispatched -- polling for results...');
+        startPolling(data.session_id);
+      } else {
+        removeThinking();
+        addErrorMessage(data.message || 'Dispatch failed.');
+        resetInput();
+      }
+    })
+    .catch(function(err) {
+      removeThinking();
+      addErrorMessage('Network error -- please try again.');
+      console.error('Launch error:', err);
+      resetInput();
+    });
+  }
+
+  /* ------------------------------------------------------------------
+     PROGRESS BAR DRIVER
+     ------------------------------------------------------------------ */
+  var phasePercent = {
+    'starting':    5,
+    'dispatched':  15,
+    'intel':       35,
+    'workers':     60,
+    'convergence': 80,
+    'execution':   90,
+    'complete':    100,
+  };
+
+  function updateProgressBar(phase) {
+    var pct = phasePercent[phase];
+    if (pct !== undefined && sessionProgressFill) {
+      sessionProgressFill.style.width = pct + '%';
+    }
+  }
+
+  function finishProgressBar() {
+    if (!sessionProgressFill) return;
+    sessionProgressFill.style.width = '100%';
+    setTimeout(function() {
+      if (sessionProgressBar) {
+        sessionProgressBar.style.transition = 'opacity 0.6s ease';
+        sessionProgressBar.style.opacity = '0';
+        setTimeout(function() {
+          sessionProgressBar.style.display = 'none';
+          sessionProgressBar.style.transition = '';
+          sessionProgressBar.style.opacity = '1';
+          sessionProgressFill.style.width = '0%';
+        }, 650);
+      }
+    }, 1500);
+  }
+
+  /* ------------------------------------------------------------------
+     POLLING ENGINE
+     ------------------------------------------------------------------ */
+  function startPolling(sessionId) {
+    var pollCount = 0;
+    var maxPolls = 120; /* 120 * 3s = 6 minutes max */
+    var responseShown = false;
+
+    pollTimer = setInterval(function() {
+      pollCount++;
+      if (pollCount > maxPolls) {
+        clearInterval(pollTimer);
+        removeThinking();
+        addErrorMessage('Session timed out after 6 minutes.');
+        finishProgressBar();
+        resetInput();
+        return;
+      }
+
+      fetch('{% url "hive:api_poll_session" session_id="PLACEHOLDER" %}'.replace('PLACEHOLDER', sessionId))
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          /* Update thinking text with step numbers based on phase */
+          var phaseText = {
+            'starting':    'Step 1/6: Starting hive session...',
+            'dispatched':  'Step 2/6: Dispatching to agents...',
+            'intel':       'Step 3/6: Perplexity gathering intel...',
+            'workers':     'Step 4/6: Agents processing...',
+            'convergence': 'Step 5/6: Converging results...',
+            'execution':   'Step 6/6: Claude synthesizing...',
+            'complete':    'Complete!',
+          };
+          if (data.phase && phaseText[data.phase]) {
+            updateThinkingText(phaseText[data.phase]);
+          }
+
+          /* Drive progress bar */
+          if (data.phase) {
+            updateProgressBar(data.phase);
+          }
+
+          /* Show agent cards as soon as we have agents data */
+          if (data.agents && Object.keys(data.agents).length && !responseShown) {
+            responseShown = true;
+            removeThinking();
+            addHiveResponse(data);
+          }
+
+          /* Update existing agent cards live */
+          if (data.agents && responseShown) {
+            var cardsEl = document.getElementById('agentCards_' + sessionId);
+            if (cardsEl) {
+              cardsEl.innerHTML = buildAgentCards(data.agents, data.routed_to || []);
+            }
+          }
+
+          /* Session complete */
+          if (data.status === 'done' || data.status === 'failed') {
+            clearInterval(pollTimer);
+            pollTimer = null;
+
+            if (!responseShown) {
+              removeThinking();
+              addHiveResponse(data);
+            } else {
+              /* Final update with full response text */
+              var cardsEl = document.getElementById('agentCards_' + sessionId);
+              if (cardsEl) {
+                cardsEl.innerHTML = buildAgentCards(data.agents, data.routed_to || []);
+              }
+            }
+
+            /* Remove loading glow from response bubble */
+            removeHiveBubbleLoading(sessionId);
+
+            /* Auto-expand the first successful agent */
+            setTimeout(function() {
+              var firstCard = document.querySelector('#agentCards_' + sessionId + ' .agent-card[data-agent] .agent-card-badge.badge-done');
+              if (firstCard) {
+                var card = firstCard.closest('.agent-card');
+                if (card) card.classList.add('expanded');
+              }
+            }, 300);
+
+            addSummaryCard(data);
+            finishProgressBar();
+            resetInput();
+          }
+        })
+        .catch(function(err) {
+          console.warn('Poll error:', err);
+          /* Don't stop polling on transient errors */
+        });
+    }, 3000);
+  }
+
+  /* ------------------------------------------------------------------
+     COPY FULL SESSION OUTPUT (exposed on window for onclick)
+     ------------------------------------------------------------------ */
+  window.copySessionOutput = function(sessionId, btn) {
+    var data = lastSessionData;
+    if (!data || !data.agents) {
+      if (btn) { btn.textContent = 'No data'; }
+      return;
+    }
+
+    var agentOrder = ['perplexity', 'gemini', 'codex', 'claude'];
+    var lines = [];
+    lines.push('============================================================');
+    lines.push('  E PLURIBUS UNUM -- HIVE MIND DELIBERATION');
+    lines.push('============================================================');
+    lines.push('  Session: ' + (data.session_id || '?'));
+    lines.push('  Mode: ' + (data.mode || 'full'));
+    lines.push('  Category: ' + (data.category || 'full'));
+    lines.push('  Duration: ' + (data.total_duration_s || 0).toFixed(1) + 's');
+    lines.push('  Agents: ' + (data.routed_to || []).join(', '));
+    lines.push('============================================================');
+    lines.push('');
+
+    /* Use routed_to order if available, otherwise fallback */
+    var keys = (data.routed_to && data.routed_to.length) ? data.routed_to : agentOrder;
+
+    keys.forEach(function(key) {
+      var a = data.agents[key];
+      if (!a) return;
+
+      var status = a.status || 'unknown';
+      var dur = a.duration_s ? a.duration_s.toFixed(1) + 's' : '-';
+      var role = a.role || key;
+      lines.push('--- ' + key.toUpperCase() + ' (' + role + ') [' + status + '] ' + dur + ' ---');
+
+      if (a.employees && a.employees.length) {
+        lines.push('Team: ' + a.employees.join(', '));
+      }
+      lines.push('');
+
+      if (status === 'done' && a.response_text) {
+        lines.push(a.response_text);
+      } else if (a.error) {
+        lines.push('ERROR: ' + a.error);
+      } else {
+        lines.push('(no output)');
+      }
+      lines.push('');
+      lines.push('');
+    });
+
+    lines.push('============================================================');
+    lines.push('  Session ' + (data.session_id || '') + ' complete');
+    lines.push('============================================================');
+
+    var fullText = lines.join('\n');
+
+    navigator.clipboard.writeText(fullText).then(function() {
+      if (btn) {
+        var origHtml = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.innerHTML = origHtml;
+          btn.classList.remove('copied');
+        }, 2000);
+      }
+    }).catch(function() {
+      /* Fallback for older browsers / non-HTTPS */
+      var ta = document.createElement('textarea');
+      ta.value = fullText;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        if (btn) {
+          var origHtml = btn.innerHTML;
+          btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+          btn.classList.add('copied');
+          setTimeout(function() {
+            btn.innerHTML = origHtml;
+            btn.classList.remove('copied');
+          }, 2000);
+        }
+      } catch(e) {
+        if (btn) { btn.textContent = 'Copy failed'; }
+      }
+      document.body.removeChild(ta);
+    });
+  };
+
+  /* ------------------------------------------------------------------
+     HELPERS
+     ------------------------------------------------------------------ */
+  function addErrorMessage(text) {
+    var div = document.createElement('div');
+    div.className = 'msg msg-hive';
+    div.innerHTML =
+      '<div class="msg-avatar" style="background:linear-gradient(135deg,#ef4444,#dc2626)"><i class="fa-solid fa-exclamation" style="font-size:0.72rem;color:#fff"></i></div>'
+      + '<div class="msg-body">'
+      + '<div class="msg-bubble" style="border-color:rgba(239,68,68,0.2)">' + escHtml(text) + '</div>'
+      + '</div>';
+    chatArea.appendChild(div);
+    scrollToBottom();
+  }
+
+  function resetInput() {
+    isProcessing = false;
+    sessionStartTime = null;
+    if (elapsedTimer) { clearInterval(elapsedTimer); elapsedTimer = null; }
+    sendBtn.classList.remove('is-loading');
+    sendBtn.disabled = false;
+    cancelBtn.classList.remove('visible');
+    input.focus();
+  }
+
+  function scrollToBottom() {
+    requestAnimationFrame(function() {
+      chatArea.scrollTop = chatArea.scrollHeight;
+    });
+  }
+
+  function escHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function escAttr(s) {
+    return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /* Re-run a previous query */
+  window.rerunQuery = function(btn) {
+    var q = btn.getAttribute('data-query');
+    if (q && !isProcessing) {
+      input.value = q;
+      submitQuery();
+    }
+  };
+
+  /* Click a user message bubble to load its text into the input */
+  chatArea.addEventListener('click', function(e) {
+    if (isProcessing) return;
+    var bubble = e.target.closest('.msg-user .msg-bubble');
+    if (bubble) {
+      input.value = bubble.textContent.trim();
+      input.style.height = 'auto';
+      input.style.height = Math.min(input.scrollHeight, 160) + 'px';
+      input.focus();
+    }
+  });
+
+  /* ------------------------------------------------------------------
+     HASH-BASED QUERY PREFILL (from floating panel: #q=...)
+     ------------------------------------------------------------------ */
+  function checkHashQuery() {
+    var hash = window.location.hash;
+    if (hash && hash.indexOf('#q=') === 0) {
+      var q = decodeURIComponent(hash.substring(3));
+      if (q) {
+        input.value = q;
+        window.location.hash = '';
+        setTimeout(function() { submitQuery(); }, 300);
+      }
+    }
+  }
+  checkHashQuery();
+
+})();
+</script>
+{% endblock %}

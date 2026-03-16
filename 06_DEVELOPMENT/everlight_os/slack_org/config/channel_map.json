@@ -1,0 +1,44 @@
+{
+  "war_room": "ai-war-room",
+  "executive": {
+    "chief_claude": "agent-chief-claude",
+    "ops_gemini": "agent-ops-gemini",
+    "eng_codex": "agent-eng-codex",
+    "intel_perplexity": "agent-intel-perplexity"
+  },
+  "revenue_engine": {
+    "amazon_research": "agent-amz-research",
+    "listing_strategy": "agent-amz-listing-strategy",
+    "listing_writer": "agent-amz-listing-writer",
+    "seo_keywords": "agent-seo-keywords",
+    "affiliate_curator": "agent-affiliate-curator",
+    "funnel_architect": "agent-funnel-architect",
+    "offer_sync": "agent-offer-sync"
+  },
+  "book_team": {
+    "book_showrunner": "agent-book-showrunner",
+    "writing_room": "agent-book-writing-room",
+    "draft_writer": "agent-book-draft-writer",
+    "editor_qa": "agent-book-editor-qa",
+    "publishing_assets": "agent-publishing-assets"
+  },
+  "social_team": {
+    "content_strategy": "agent-content-strategy",
+    "trend_hunter": "agent-trend-hunter",
+    "platform_copywriter": "agent-platform-copywriter",
+    "creative_prompts": "agent-creative-prompts",
+    "content_repurpose": "agent-content-repurpose",
+    "distribution_ops": "agent-distribution-ops"
+  },
+  "automation_growth_ops": {
+    "automation_architect": "agent-automation-architect",
+    "workflow_builder": "agent-workflow-builder",
+    "analytics_auditor": "agent-analytics-auditor"
+  },
+  "shared_ops": {
+    "alerts": "agent-alerts",
+    "approvals": "agent-approvals",
+    "errors": "agent-errors",
+    "launches": "agent-launches"
+  }
+}

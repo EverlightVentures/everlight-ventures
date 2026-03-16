@@ -1,0 +1,141 @@
+{% extends "trading/base.html" %}
+{% load trading_tags humanize %}
+
+{% block title %}Portfolio | {{ app_name }}{% endblock %}
+{% block page_title %}Portfolio{% endblock %}
+
+{% block content %}
+
+<!-- Account KPIs -->
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
+  <div class="kpi-card">
+    <span class="src-badge src-cb">CB</span>
+    <div class="kpi-label">TOTAL BALANCE</div>
+    <div class="kpi-value">{{ portfolio.total_balance|money }}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">CASH</div>
+    <div class="kpi-value">{{ portfolio.cash_total|money }}</div>
+    <div class="kpi-sub">USD {{ portfolio.usd_balance|money }} &middot; USDC {{ portfolio.usdc_balance|money }}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">CRYPTO</div>
+    <div class="kpi-value">{{ portfolio.crypto_total|money }}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">FUTURES WALLET</div>
+    <div class="kpi-value">{{ balance.cfm_usd_balance|money }}</div>
+    {% if balance.equity %}
+      <div class="kpi-sub">Equity: {{ balance.equity|money }}</div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Spot Balances -->
+{% if spot_balances %}
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px;">
+  <div class="kpi-card">
+    <div class="kpi-label">USD</div>
+    <div class="kpi-value">{{ spot_balances.usd|money }}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">USDC</div>
+    <div class="kpi-value">{{ spot_balances.usdc|money }}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">TOTAL SPOT</div>
+    <div class="kpi-value">{{ spot_balances.total|money }}</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">USDC YIELD (3.5% APY)</div>
+    {% if spot_balances.usdc %}
+      <div class="kpi-value" style="color:#34d399;">${{ spot_balances.usdc|floatformat:2 }} x 3.5%</div>
+      <div class="kpi-sub">~${{ spot_balances.daily_yield|floatformat:4 }}/day</div>
+    {% else %}
+      <div class="kpi-value" style="color:#6b7280;">--</div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Portfolio Performance Charts -->
+<div class="intel-card" style="margin-bottom:12px;">
+  <div class="intel-title">PORTFOLIO PERFORMANCE</div>
+  <div id="portfolio-chart" style="height:350px;margin-top:8px;"></div>
+</div>
+
+<!-- Open Positions -->
+<div class="intel-card" style="margin-bottom:12px;">
+  <div class="intel-title">OPEN POSITIONS (EXCHANGE)</div>
+  {% if positions %}
+    {% for pos in positions %}
+    <div class="trade-log-row entry" style="margin-top:6px;">
+      <span style="font-weight:600;color:{% if pos.side == 'LONG' %}#34d399{% else %}#f87171{% endif %};">{{ pos.side }}</span>
+      <span>{{ pos.product_id }}</span>
+      <span style="color:#9ca3af;">&middot;</span>
+      <span>Entry: ${{ pos.entry_vwap|floatformat:6 }}</span>
+      <span style="color:#9ca3af;">&middot;</span>
+      <span>Mark: ${{ pos.mark_price|floatformat:6 }}</span>
+      {% if pos.unrealized_pnl %}
+        <span class="{{ pos.unrealized_pnl|pnl_color }}" style="font-weight:600;">{{ pos.unrealized_pnl|money_signed }}</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="feed-mini">No open positions.</div>
+  {% endif %}
+</div>
+
+<!-- Cash Movements (7d) -->
+<div class="intel-card">
+  <div class="intel-title">CASH MOVEMENTS (7 DAYS)</div>
+  {% if cash_movements %}
+    {% for mv in cash_movements|slice:":20" %}
+    <div class="intel-event">
+      <span class="time">{{ mv.timestamp|pt_short }}</span>
+      <strong>{{ mv.type|default:"transfer" }}</strong>
+      {{ mv.amount|money }} {{ mv.currency|default:"USD" }}
+      {% if mv.status %}<span class="muted">&middot; {{ mv.status }}</span>{% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="feed-mini">No cash movements in the last 7 days.</div>
+  {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Portfolio chart will be initialized here once equity data is available
+document.addEventListener('DOMContentLoaded', function() {
+  const container = document.getElementById('portfolio-chart');
+  if (!container || typeof LightweightCharts === 'undefined') return;
+
+  const chart = LightweightCharts.createChart(container, {
+    layout: { background: { type: 'solid', color: 'transparent' }, textColor: '#9ca3af' },
+    grid: { vertLines: { color: 'rgba(255,255,255,0.03)' }, horzLines: { color: 'rgba(255,255,255,0.03)' } },
+    timeScale: { borderColor: 'rgba(255,255,255,0.06)' },
+    rightPriceScale: { borderColor: 'rgba(255,255,255,0.06)' },
+  });
+
+  const series = chart.addAreaSeries({
+    lineColor: '#c9a84c',
+    topColor: 'rgba(201,168,76,0.3)',
+    bottomColor: 'rgba(201,168,76,0.02)',
+    lineWidth: 2,
+  });
+
+  // Fetch equity data
+  fetch('{% url "trading:api_equity_data" %}')
+    .then(r => r.json())
+    .then(data => {
+      if (data.series && data.series.length > 0) {
+        series.setData(data.series);
+        chart.timeScale().fitContent();
+      }
+    })
+    .catch(e => console.warn('Equity chart data unavailable:', e));
+});
+</script>
+{% endblock %}

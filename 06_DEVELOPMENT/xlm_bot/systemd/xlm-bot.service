@@ -1,0 +1,18 @@
+[Unit]
+Description=XLM Perp Bot (watchdog)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/mnt/sdcard/AA_MY_DRIVE/xlm_bot
+Environment=IDLE_SLEEP=30
+Environment=IN_TRADE_SLEEP=5
+ExecStart=/mnt/sdcard/AA_MY_DRIVE/xlm_bot/xpb-fg
+Restart=always
+RestartSec=3
+StandardOutput=append:/mnt/sdcard/AA_MY_DRIVE/xlm_bot/logs/xpb_service.log
+StandardError=append:/mnt/sdcard/AA_MY_DRIVE/xlm_bot/logs/xpb_service.log
+
+[Install]
+WantedBy=default.target

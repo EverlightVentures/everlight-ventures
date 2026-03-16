@@ -1,0 +1,10 @@
+__pycache__
+*.pyc
+.env
+secrets/
+logs/
+data/
+.git
+*.md
+backtest/
+tests/

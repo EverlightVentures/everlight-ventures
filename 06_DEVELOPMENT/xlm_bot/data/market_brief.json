@@ -1,0 +1,20 @@
+{
+  "brief": {
+    "headline_bullets": [
+      "XLM down 8-10% today to ~$0.15 amid broader crypto sell-off over 5.5% due to geopolitical tensions[5][2]",
+      "Bitcoin and crypto market under pressure, no specific BTC price but correlated downside[5]",
+      "S&P 500/Nasdaq not detailed; focus on crypto/macro volatility with no Fed news today[5]",
+      "XLM technicals bearish: death cross, below all MAs, RSI nearing oversold[5][2][3]"
+    ],
+    "xlm_specific": [
+      "Short-term price pressure at $0.15, support $0.14, resistance $0.16; potential bounce to $0.18-0.20 if oversold triggers[2][3]",
+      "Bullish catalysts: CME XLM futures (Feb 9), MoneyGram/Circle partnerships, RWA/DeFi focus via Soroban[1]",
+      "Bearish signals: 26-27% 30d drop, declining volume, sellers in control[1][5]"
+    ],
+    "risk_modifier": "risk_off",
+    "time_horizon": "24h",
+    "confidence": 0.85
+  },
+  "timestamp": "2026-02-28T19:16:46.560693+00:00",
+  "expires_ts": 1772307106.5607154
+}

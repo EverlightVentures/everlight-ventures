@@ -1,0 +1,32 @@
+{
+  "product": "onyx",
+  "from_name": "Eli from Onyx POS",
+  "from_email": "",
+  "sequence": [
+    {
+      "day": 0,
+      "subject": "Welcome to Onyx POS -- here's how to get started",
+      "template": "onyx_welcome.md",
+      "stage_after": "welcome_sent"
+    },
+    {
+      "day": 2,
+      "subject": "The hidden cost of Square that nobody talks about",
+      "template": "onyx_day2_cost.md",
+      "stage_after": "nurturing"
+    },
+    {
+      "day": 5,
+      "subject": "How a nursery saved $340/mo switching from Toast",
+      "template": "onyx_day5_casestudy.md",
+      "stage_after": "nurturing"
+    },
+    {
+      "day": 7,
+      "subject": "Your trial is halfway done -- any questions?",
+      "template": "onyx_day7_checkin.md",
+      "stage_after": "nurturing"
+    }
+  ],
+  "notes": "Set from_email after picking SMTP provider. Templates are in this same directory."
+}

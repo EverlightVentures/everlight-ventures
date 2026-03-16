@@ -1,0 +1,273 @@
+
+========================================
+STARTING BOOK 1
+========================================
+
+Found 24 illustration blocks in Book 1.
+--- Book 1 | Scene 1 | BW ---
+File 1_1_bw.jpg already exists, skipping generation.
+--- Book 1 | Scene 1 | COLOR ---
+File 1_1_color.jpg already exists, skipping generation.
+--- Book 1 | Scene 2 | BW ---
+File 1_2_bw.jpg already exists, skipping generation.
+--- Book 1 | Scene 2 | COLOR ---
+File 1_2_color.jpg already exists, skipping generation.
+--- Book 1 | Scene 3 | BW ---
+File 1_3_bw.jpg already exists, skipping generation.
+--- Book 1 | Scene 3 | COLOR ---
+File 1_3_color.jpg already exists, skipping generation.
+--- Book 1 | Scene 4 | BW ---
+File 1_4_bw.jpg already exists, skipping generation.
+--- Book 1 | Scene 4 | COLOR ---
+File 1_4_color.jpg already exists, skipping generation.
+--- Book 1 | Scene 5 | BW ---
+File 1_5_bw.jpg already exists, skipping generation.
+--- Book 1 | Scene 5 | COLOR ---
+File 1_5_color.jpg already exists, skipping generation.
+--- Book 1 | Scene 6 | BW ---
+File 1_6_bw.jpg already exists, skipping generation.
+--- Book 1 | Scene 6 | COLOR ---
+File 1_6_color.jpg already exists, skipping generation.
+--- Book 1 | Scene 7 | BW ---
+File 1_7_bw.jpg already exists, skipping generation.
+--- Book 1 | Scene 7 | COLOR ---
+Prompt: Same scene in soft, emotional colors. The puppy is...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book1/images/1_7_color.jpg
+--- Book 1 | Scene 8 | BW ---
+File 1_8_bw.jpg already exists, skipping generation.
+--- Book 1 | Scene 8 | COLOR ---
+File 1_8_color.jpg already exists, skipping generation.
+--- Book 1 | Scene 9 | BW ---
+File 1_9_bw.jpg already exists, skipping generation.
+--- Book 1 | Scene 9 | COLOR ---
+Prompt: Same scene in warm harvest colors. Red and green a...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book1/images/1_9_color.jpg
+--- Book 1 | Scene 10 | BW ---
+Prompt: The farmer handing Sam a shiny golden coin. Sam ho...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book1/images/1_10_bw.jpg
+--- Book 1 | Scene 10 | COLOR ---
+File 1_10_color.jpg already exists, skipping generation.
+--- Book 1 | Scene 11 | BW ---
+File 1_11_bw.jpg already exists, skipping generation.
+--- Book 1 | Scene 11 | COLOR ---
+Prompt: Same scene, absolutely magical. Golden light radia...
+Error generating: 500 Server Error: Internal Server Error for url: https://api.openai.com/v1/images/generations
+Details: {
+  "error": {
+    "message": "The server had an error while processing your request. Sorry about that!",
+    "type": "server_error",
+    "param": null,
+    "code": null
+  }
+}
+Skipping 1_11_color.jpg due to generation error.
+--- Book 1 | Scene 12 | BW ---
+Prompt: Sam walking home at sunset with Robo beside him. H...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book1/images/1_12_bw.jpg
+--- Book 1 | Scene 12 | COLOR ---
+Prompt: Same scene in gorgeous sunset colors -- orange, pi...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book1/images/1_12_color.jpg
+
+✅ Book 1 Processing Complete!
+Illustrated manuscript: /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book1/Sams_First_Superpower_MASTER_ILLUSTRATED.md
+
+========================================
+STARTING BOOK 2
+========================================
+
+Found 22 illustration blocks in Book 2.
+--- Book 2 | Scene 1 | BW ---
+Prompt: Sam and Robo walking toward a building with a sign...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_1_bw.jpg
+--- Book 2 | Scene 1 | COLOR ---
+Prompt: Same scene, full vibrant color. The science lab is...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_1_color.jpg
+--- Book 2 | Scene 2 | BW ---
+Prompt: Inside the science lab. Dr. Spark stands behind a ...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_2_bw.jpg
+--- Book 2 | Scene 2 | COLOR ---
+Prompt: Same scene, vibrant. The lab is well-lit and color...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_2_color.jpg
+--- Book 2 | Scene 3 | BW ---
+Prompt: The volcano erupting! Foam overflows the sides. Sa...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_3_bw.jpg
+--- Book 2 | Scene 3 | COLOR ---
+Prompt: Same scene, explosive with color. The foam eruptio...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_3_color.jpg
+--- Book 2 | Scene 4 | BW ---
+Prompt: Dr. Spark leading Sam and Robo in exercise. They'r...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_4_bw.jpg
+--- Book 2 | Scene 4 | COLOR ---
+Prompt: Same scene in bright, energetic colors. Sam is mid...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_4_color.jpg
+--- Book 2 | Scene 5 | BW ---
+Prompt: Sam, Robo, and Dr. Spark sitting at the table with...
+Error generating: 500 Server Error: Internal Server Error for url: https://api.openai.com/v1/images/generations
+Details: {
+  "error": {
+    "message": "The server had an error processing your request. Sorry about that! You can retry your request, or contact us through our help center at help.openai.com if you keep seeing this error. (Please include the request ID req_75a7357787d84fdeb08e642915807d84 in your email.)",
+    "type": "server_error",
+    "param": null,
+    "code": null
+  }
+}
+Skipping 2_5_bw.jpg due to generation error.
+--- Book 2 | Scene 5 | COLOR ---
+Prompt: Same scene in warm, cozy tones. Sam bites into the...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_5_color.jpg
+--- Book 2 | Scene 6 | BW ---
+Prompt: Outdoor garden scene. Sam, Robo, and their friend ...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_6_bw.jpg
+--- Book 2 | Scene 6 | COLOR ---
+Prompt: Same scene in bright, cheerful colors. Lily has wa...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_6_color.jpg
+--- Book 2 | Scene 7 | BW ---
+Prompt: Several scenes in small panels showing time passin...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_7_bw.jpg
+--- Book 2 | Scene 7 | COLOR ---
+Prompt: Same multi-panel layout in color. Panel 1: Brown s...
+Error generating: 500 Server Error: Internal Server Error for url: https://api.openai.com/v1/images/generations
+Details: {
+  "error": {
+    "message": "The server had an error while processing your request. Sorry about that!",
+    "type": "server_error",
+    "param": null,
+    "code": null
+  }
+}
+Skipping 2_7_color.jpg due to generation error.
+--- Book 2 | Scene 8 | BW ---
+Prompt: Dr. Spark's lab, decorated for a special occasion....
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_8_bw.jpg
+--- Book 2 | Scene 8 | COLOR ---
+Prompt: Same scene, festive and warm. The banners are gold...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_8_color.jpg
+--- Book 2 | Scene 9 | BW ---
+Prompt: Sam and Robo working together to fix a broken back...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_9_bw.jpg
+--- Book 2 | Scene 9 | COLOR ---
+Prompt: Same scene in focused, warm colors. Sam's brow is ...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_9_color.jpg
+--- Book 2 | Scene 10 | BW ---
+Prompt: The magical book appears again, floating before Sa...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_10_bw.jpg
+--- Book 2 | Scene 10 | COLOR ---
+Prompt: Same scene, stunning with color. The magical book ...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_10_color.jpg
+--- Book 2 | Scene 11 | BW ---
+Prompt: Sam and Robo leaving the lab, waving goodbye to Dr...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/images/2_11_bw.jpg
+--- Book 2 | Scene 11 | COLOR ---
+Prompt: Same scene in warm sunset and rainbow colors. The ...
+Error generating: 500 Server Error: Internal Server Error for url: https://api.openai.com/v1/images/generations
+Details: {
+  "error": {
+    "message": "The server had an error processing your request. Sorry about that! You can retry your request, or contact us through our help center at help.openai.com if you keep seeing this error. (Please include the request ID req_e9c7a51bdd69431fb183ed5907ebe6b5 in your email.)",
+    "type": "server_error",
+    "param": null,
+    "code": null
+  }
+}
+Skipping 2_11_color.jpg due to generation error.
+
+✅ Book 2 Processing Complete!
+Illustrated manuscript: /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/Book 2/Sams_Second_Superpower_MASTER_ILLUSTRATED.md
+
+========================================
+STARTING BOOK 4
+========================================
+
+Found 24 illustration blocks in Book 4.
+--- Book 4 | Scene 1 | BW ---
+Prompt: Sam and Robo standing at their front door. Lily is...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_1_bw.jpg
+--- Book 4 | Scene 1 | COLOR ---
+Prompt: Same scene, full vibrant color. Sam in his red shi...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_1_color.jpg
+--- Book 4 | Scene 2 | BW ---
+Prompt: Wide view of the riverbank. Trash is visible -- pl...
+Error generating: 500 Server Error: Internal Server Error for url: https://api.openai.com/v1/images/generations
+Details: {
+  "error": {
+    "message": "The server had an error processing your request. Sorry about that! You can retry your request, or contact us through our help center at help.openai.com if you keep seeing this error. (Please include the request ID req_85fc827b2fe645918d15116312ed9ce8 in your email.)",
+    "type": "server_error",
+    "param": null,
+    "code": null
+  }
+}
+Skipping 4_2_bw.jpg due to generation error.
+--- Book 4 | Scene 2 | COLOR ---
+Prompt: Same scene in full color. The river is grey-green ...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_2_color.jpg
+--- Book 4 | Scene 3 | BW ---
+Prompt: Sam, Robo, and Lily working together to clean the ...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_3_bw.jpg
+--- Book 4 | Scene 3 | COLOR ---
+Prompt: Same scene, vibrant. Sam's red shirt is smudged wi...
+Error generating: 500 Server Error: Internal Server Error for url: https://api.openai.com/v1/images/generations
+Details: {
+  "error": {
+    "message": "The server had an error processing your request. Sorry about that! You can retry your request, or contact us through our help center at help.openai.com if you keep seeing this error. (Please include the request ID req_f234ef1900264deb8f42ee9ae18211fa in your email.)",
+    "type": "server_error",
+    "param": null,
+    "code": null
+  }
+}
+Skipping 4_3_color.jpg due to generation error.
+--- Book 4 | Scene 4 | BW ---
+Prompt: Sam and Robo standing in front of a small building...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_4_bw.jpg
+--- Book 4 | Scene 4 | COLOR ---
+Prompt: Same scene, full color. Mr. Green is warm and frie...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_4_color.jpg
+--- Book 4 | Scene 5 | BW ---
+Prompt: Inside the recycling center. Sam and Robo are sort...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_5_bw.jpg
+--- Book 4 | Scene 5 | COLOR ---
+Prompt: Same scene, vibrant and detailed. The recycling ce...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_5_color.jpg
+--- Book 4 | Scene 6 | BW ---
+Prompt: A farm scene. Farmer Brown stands next to rows of ...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_6_bw.jpg
+--- Book 4 | Scene 6 | COLOR ---
+Prompt: Same scene, lush and colorful. The farm is green a...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_6_color.jpg
+--- Book 4 | Scene 7 | BW ---
+Prompt: Sam and Robo working with the rain barrel system. ...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_7_bw.jpg
+--- Book 4 | Scene 7 | COLOR ---
+Prompt: Same scene in warm, golden colors. The rain barrel...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_7_color.jpg
+--- Book 4 | Scene 8 | BW ---
+Prompt: A forest scene. Sam, Robo, and Ranger Jane stand a...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_8_bw.jpg
+--- Book 4 | Scene 8 | COLOR ---
+Prompt: Same scene, rich with color. The forest is deep gr...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_8_color.jpg
+--- Book 4 | Scene 9 | BW ---
+Prompt: Sam, Robo, and Ranger Jane planting trees. Sam dig...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_9_bw.jpg
+--- Book 4 | Scene 9 | COLOR ---
+Prompt: Same scene in warm, hopeful color. The new sapling...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_9_color.jpg
+--- Book 4 | Scene 10 | BW ---
+Prompt: Sam, Robo, Lily, and friends hiking up a mountain ...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_10_bw.jpg
+--- Book 4 | Scene 10 | COLOR ---
+Prompt: Same scene, glorious with color. The wildflowers a...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_10_color.jpg
+--- Book 4 | Scene 11 | BW ---
+Prompt: The mountain peak. A hidden cave entrance surround...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_11_bw.jpg
+--- Book 4 | Scene 11 | COLOR ---
+Prompt: Same scene, magical and radiant. The crystal glows...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_11_color.jpg
+--- Book 4 | Scene 12 | BW ---
+Prompt: Sam standing on the mountain peak, arms outstretch...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_12_bw.jpg
+--- Book 4 | Scene 12 | COLOR ---
+Prompt: Same scene, absolutely vibrant. The golden-green g...
+Successfully saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/images/4_12_color.jpg
+
+✅ Book 4 Processing Complete!
+Illustrated manuscript: /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM/book_4/manuscript/Sams_Fourth_Superpower_MASTER_ILLUSTRATED.md

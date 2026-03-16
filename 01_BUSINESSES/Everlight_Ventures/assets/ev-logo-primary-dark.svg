@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" width="800" height="200">
+  <rect width="400" height="100" fill="#0A0A0A"/>
+  <g transform="translate(10,18)">
+    <path d="M12,8 L40,8 M40,8 L52,44 L32,56 M32,56 L12,56 L12,8 M12,32 L36,32"
+          stroke="#D4AF37" stroke-width="4" fill="none"
+          stroke-linejoin="miter" stroke-linecap="butt"/>
+  </g>
+  <text x="95" y="48" font-family="Cormorant Garamond, Georgia, serif"
+        font-weight="600" font-size="32" letter-spacing="4" fill="#E5E5E5">
+    EVERLIGHT
+  </text>
+  <text x="95" y="72" font-family="Cormorant Garamond, Georgia, serif"
+        font-weight="600" font-size="18" letter-spacing="6" fill="#E5E5E5">
+    VENTURES
+  </text>
+</svg>

@@ -1,0 +1,9 @@
+[WAR ROOM UPDATE] {{agent_slug}}
+Task: {{task_id}} | {{task_type}}
+Status: {{status}}
+Done: {{1-2 line summary}}
+Need: {{dependency/blocker or "none"}}
+Delegated: {{agent_list or "none"}}
+Risk: {{low/medium/high}}
+Next: {{next_action}}
+ETA: {{eta}}

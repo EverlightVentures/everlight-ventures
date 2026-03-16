@@ -3,132 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trading Watchtower | Everlight Ventures</title>
+    <title>Trading Status | Everlight Ventures</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;700&family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #04070b;
-            --panel: rgba(8, 16, 18, 0.88);
-            --panel-soft: rgba(11, 23, 25, 0.72);
-            --line: rgba(255, 255, 255, 0.10);
-            --text: #f4fff9;
-            --muted: #b6c9c1;
-            --green: #47f0a2;
-            --amber: #f4c65b;
-            --red: #ff7f87;
-            --ink: #061113;
+            --bg: #071018;
+            --bg-soft: #0d1720;
+            --panel: rgba(10, 19, 27, 0.88);
+            --panel-strong: rgba(12, 23, 33, 0.96);
+            --line: rgba(190, 219, 233, 0.14);
+            --text: #eef8ff;
+            --muted: #a7bdca;
+            --green: #6df5b4;
+            --amber: #ffd36b;
+            --red: #ff8d93;
+            --blue: #85d2ff;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
+        * { box-sizing: border-box; }
         body {
-            background:
-                radial-gradient(circle at top left, rgba(71, 240, 162, 0.18), transparent 30%),
-                radial-gradient(circle at bottom right, rgba(244, 198, 91, 0.12), transparent 26%),
-                linear-gradient(180deg, #04070b 0%, #081114 48%, #04070b 100%);
-            color: var(--text);
-            font-family: "Space Grotesk", sans-serif;
-            line-height: 1.5;
+            margin: 0;
             min-height: 100vh;
+            color: var(--text);
+            font-family: "Manrope", sans-serif;
+            background:
+                radial-gradient(circle at 12% 10%, rgba(109, 245, 180, 0.18), transparent 28%),
+                radial-gradient(circle at 88% 18%, rgba(133, 210, 255, 0.14), transparent 28%),
+                radial-gradient(circle at 50% 100%, rgba(255, 211, 107, 0.10), transparent 30%),
+                linear-gradient(180deg, #061018 0%, #09131b 48%, #061018 100%);
         }
 
         body::before {
-            background:
-                linear-gradient(rgba(71, 240, 162, 0.06) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(71, 240, 162, 0.06) 1px, transparent 1px);
-            background-size: 44px 44px;
             content: "";
-            inset: 0;
-            opacity: 0.28;
-            pointer-events: none;
             position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(rgba(133, 210, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(133, 210, 255, 0.05) 1px, transparent 1px);
+            background-size: 48px 48px;
+            opacity: 0.35;
         }
 
-        .shell { margin: 0 auto; max-width: 1220px; padding: 28px 20px 92px; position: relative; }
+        .shell {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 28px 20px 84px;
+        }
 
         .nav {
-            align-items: center;
             display: flex;
             justify-content: space-between;
-            margin-bottom: 34px;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 28px;
         }
 
         .brand {
             color: var(--text);
-            font-family: "Cormorant Garamond", serif;
-            font-size: 1.7rem;
-            letter-spacing: 0.08em;
             text-decoration: none;
-            text-transform: uppercase;
+            font-family: "Fraunces", serif;
+            font-size: 1.6rem;
+            letter-spacing: 0.05em;
         }
 
         .nav-links {
             display: flex;
-            gap: 18px;
-            list-style: none;
+            gap: 16px;
+            flex-wrap: wrap;
         }
 
         .nav-links a {
             color: var(--muted);
-            font-size: 0.95rem;
             text-decoration: none;
+            font-size: 0.95rem;
         }
-
-        .nav-links a:hover { color: var(--text); }
 
         .hero {
             display: grid;
-            gap: 24px;
-            grid-template-columns: minmax(0, 1.45fr) minmax(300px, 0.85fr);
+            grid-template-columns: minmax(0, 1.3fr) minmax(300px, 0.9fr);
+            gap: 20px;
         }
 
         .panel {
             backdrop-filter: blur(18px);
             background: var(--panel);
             border: 1px solid var(--line);
-            border-radius: 24px;
-            box-shadow: 0 26px 72px rgba(0, 0, 0, 0.30);
-            overflow: hidden;
-            position: relative;
+            border-radius: 28px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.28);
         }
 
-        .hero-copy { padding: 38px; }
+        .hero-copy {
+            padding: 34px;
+        }
 
         .eyebrow,
-        .mini-label {
-            color: var(--green);
+        .mini {
             display: inline-flex;
-            font-size: 0.8rem;
-            font-weight: 700;
-            letter-spacing: 0.18em;
-            margin-bottom: 18px;
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.16em;
             text-transform: uppercase;
+            color: var(--green);
+            margin-bottom: 14px;
         }
 
         h1, h2 {
-            font-family: "Cormorant Garamond", serif;
-            font-weight: 700;
+            font-family: "Fraunces", serif;
             line-height: 0.96;
+            margin: 0;
         }
 
         h1 {
-            font-size: clamp(3.2rem, 9vw, 6rem);
+            font-size: clamp(3rem, 7vw, 5.8rem);
+            max-width: 10ch;
             margin-bottom: 18px;
-            max-width: 11ch;
         }
 
         h2 {
-            font-size: clamp(2.2rem, 5vw, 3.4rem);
+            font-size: clamp(2rem, 4vw, 3rem);
             margin-bottom: 10px;
         }
 
-        .hero-copy p,
         .lede,
-        .support-copy {
+        .copy,
+        .fine {
             color: var(--muted);
-            font-size: 1.03rem;
         }
 
         .hero-actions {
@@ -140,17 +143,19 @@
 
         .button,
         .ghost {
-            border-radius: 999px;
             display: inline-flex;
-            font-size: 0.94rem;
-            font-weight: 700;
-            padding: 13px 22px;
+            align-items: center;
+            justify-content: center;
+            padding: 13px 20px;
+            border-radius: 999px;
             text-decoration: none;
+            font-weight: 800;
+            font-size: 0.95rem;
         }
 
         .button {
-            background: linear-gradient(135deg, var(--green), #18bf7a);
-            color: #08100d;
+            background: linear-gradient(135deg, var(--green), #2aca83);
+            color: #04100b;
         }
 
         .ghost {
@@ -158,132 +163,134 @@
             color: var(--text);
         }
 
-        .status-panel { padding: 28px; }
+        .status-panel {
+            padding: 28px;
+        }
+
+        .pill-row,
+        .metric-grid,
+        .summary-grid,
+        .detail-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .pill-row {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            margin-top: 16px;
+        }
 
         .pill {
-            border: 1px solid transparent;
-            border-radius: 999px;
             display: inline-flex;
-            font-size: 0.76rem;
-            font-weight: 700;
-            letter-spacing: 0.1em;
-            padding: 7px 12px;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 12px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
             text-transform: uppercase;
+            border: 1px solid transparent;
         }
 
         .pill-healthy,
         .pill-active {
-            background: rgba(71, 240, 162, 0.12);
-            border-color: rgba(71, 240, 162, 0.28);
+            background: rgba(109, 245, 180, 0.12);
             color: var(--green);
+            border-color: rgba(109, 245, 180, 0.22);
         }
 
         .pill-degraded,
         .pill-watch {
-            background: rgba(255, 127, 135, 0.12);
-            border-color: rgba(255, 127, 135, 0.28);
+            background: rgba(255, 141, 147, 0.13);
             color: var(--red);
+            border-color: rgba(255, 141, 147, 0.22);
         }
 
-        .pill-pilot {
-            background: rgba(244, 198, 91, 0.14);
-            border-color: rgba(244, 198, 91, 0.32);
+        .pill-pilot,
+        .pill-unknown {
+            background: rgba(255, 211, 107, 0.14);
             color: var(--amber);
+            border-color: rgba(255, 211, 107, 0.24);
         }
 
-        .status-grid,
-        .signal-grid,
-        .grid-3,
-        .grid-2 {
-            display: grid;
-            gap: 16px;
-        }
-
-        .status-grid {
+        .metric-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
-            margin-top: 16px;
+            margin-top: 18px;
         }
 
-        .signal-grid {
+        .summary-grid {
             grid-template-columns: repeat(4, minmax(0, 1fr));
             margin-top: 24px;
         }
 
-        .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .detail-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            margin-top: 22px;
+        }
 
-        .metric,
-        .feature-card,
-        .trade-card,
-        .section-card {
-            background: var(--panel-soft);
+        .card {
+            background: var(--panel-strong);
             border: 1px solid var(--line);
             border-radius: 18px;
             padding: 18px;
         }
 
-        .metric span,
-        .feature-card span,
-        .trade-card span,
-        .status-label {
-            color: var(--muted);
+        .label {
             display: block;
-            font-size: 0.82rem;
-            margin-bottom: 8px;
+            font-size: 0.78rem;
             text-transform: uppercase;
-        }
-
-        .metric strong,
-        .feature-card strong,
-        .trade-card strong {
-            display: block;
-            font-size: 1.15rem;
-        }
-
-        .trade-card p,
-        .section-card p {
+            letter-spacing: 0.1em;
             color: var(--muted);
-            font-size: 0.94rem;
+            margin-bottom: 8px;
+        }
+
+        .value {
+            font-size: 1.18rem;
+            font-weight: 800;
+        }
+
+        .value.big {
+            font-size: clamp(1.8rem, 3.2vw, 2.6rem);
         }
 
         .section {
-            margin-top: 24px;
+            margin-top: 22px;
             padding: 30px;
         }
 
-        .lede { margin-bottom: 24px; max-width: 58ch; }
+        .section .lede {
+            max-width: 62ch;
+            margin-bottom: 20px;
+        }
 
-        .flag-list {
+        .flags {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
-            margin-top: 18px;
+            margin-top: 14px;
         }
 
         .flag {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--line);
+            padding: 9px 12px;
             border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.03);
             color: var(--muted);
-            font-size: 0.82rem;
-            padding: 8px 12px;
+            font-size: 0.84rem;
         }
 
-        .section-card strong {
-            display: block;
-            font-size: 1rem;
-            margin-bottom: 10px;
+        .fine {
+            font-size: 0.92rem;
         }
 
         .cta {
-            background:
-                radial-gradient(circle at top right, rgba(244, 198, 91, 0.14), transparent 30%),
-                linear-gradient(145deg, rgba(9, 16, 18, 0.96), rgba(5, 10, 12, 0.98));
-            display: grid;
-            gap: 20px;
-            grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
             margin-top: 24px;
-            padding: 34px;
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+            gap: 20px;
+            padding: 32px;
         }
 
         .form {
@@ -293,53 +300,50 @@
         }
 
         .form input {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid var(--line);
-            border-radius: 999px;
-            color: var(--text);
             flex: 1 1 240px;
-            font: inherit;
             padding: 14px 18px;
+            border-radius: 999px;
+            border: 1px solid var(--line);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text);
+            font: inherit;
         }
 
         .form button {
-            background: linear-gradient(135deg, var(--amber), #cf9f36);
             border: none;
             border-radius: 999px;
-            color: #1e1404;
-            cursor: pointer;
-            font: inherit;
-            font-weight: 700;
             padding: 14px 22px;
+            font: inherit;
+            font-weight: 800;
+            cursor: pointer;
+            background: linear-gradient(135deg, var(--amber), #d6a33a);
+            color: #1d1403;
         }
 
         .msg {
-            border-radius: 14px;
             display: none;
             margin-top: 14px;
             padding: 12px 14px;
+            border-radius: 14px;
         }
 
-        .msg.ok { background: rgba(71, 240, 162, 0.12); color: var(--green); display: block; }
-        .msg.err { background: rgba(255, 127, 135, 0.12); color: var(--red); display: block; }
+        .msg.ok { display: block; background: rgba(109, 245, 180, 0.12); color: var(--green); }
+        .msg.err { display: block; background: rgba(255, 141, 147, 0.12); color: var(--red); }
 
         footer {
-            color: var(--muted);
-            font-size: 0.84rem;
             margin-top: 24px;
             text-align: center;
+            color: var(--muted);
+            font-size: 0.84rem;
         }
 
-        @media (max-width: 940px) {
+        @media (max-width: 980px) {
             .hero,
-            .signal-grid,
-            .grid-3,
-            .grid-2,
+            .summary-grid,
+            .detail-grid,
             .cta { grid-template-columns: 1fr; }
-
-            .status-grid { grid-template-columns: 1fr 1fr; }
-            .nav { align-items: flex-start; flex-direction: column; gap: 12px; }
-            .nav-links { flex-wrap: wrap; }
+            .pill-row,
+            .metric-grid { grid-template-columns: 1fr 1fr; }
             .hero-copy,
             .status-panel,
             .section,
@@ -347,7 +351,9 @@
         }
 
         @media (max-width: 640px) {
-            .status-grid { grid-template-columns: 1fr; }
+            .pill-row,
+            .metric-grid { grid-template-columns: 1fr; }
+            .nav { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
@@ -355,70 +361,86 @@
     <div class="shell">
         <nav class="nav">
             <a class="brand" href="https://everlightventures.io">Everlight Ventures</a>
-            <ul class="nav-links">
-                <li><a href="/hivemind/">Hive Mind</a></li>
-                <li><a href="/os/">Business OS</a></li>
-                <li><a href="/broker/">Broker OS</a></li>
-            </ul>
+            <div class="nav-links">
+                <a href="/hivemind/">Hive Mind</a>
+                <a href="/os/">Business OS</a>
+                <a href="/broker/">Broker OS</a>
+            </div>
         </nav>
 
         <section class="hero">
             <div class="panel hero-copy">
-                <span class="eyebrow">Trading Watchtower</span>
-                <h1>Public proof that the machine is alive.</h1>
-                <p>
-                    This page exposes the live watchtower behind Everlight's XLM system: health, data quality,
-                    decision freshness, trade labels, and control boundaries. The point is not hype. The point is
-                    operational transparency.
+                <span class="eyebrow">Public Trading Status</span>
+                <h1>Clean public telemetry. No operator clutter.</h1>
+                <p class="copy">
+                    This page is the public status surface for Everlight’s XLM system. It is designed to show whether
+                    the machine is healthy, current, and behaving as expected without exposing private controls,
+                    balances, or internal operator tooling.
                 </p>
                 <div class="hero-actions">
-                    <a class="button" href="#updates">Get live updates</a>
-                    <a class="ghost" href="/hivemind/">See the operating system</a>
+                    <a class="button" href="#updates">Get updates</a>
+                    <a class="ghost" href="/broker/">See the business stack</a>
                 </div>
-                <div class="signal-grid">
-                    <div class="metric">
-                        <span>Bot State</span>
-                        <strong id="bot-state">{{ watchtower.bot_state|default:"unknown" }}</strong>
+
+                <div class="summary-grid">
+                    <div class="card">
+                        <span class="label">Live Price</span>
+                        <div class="value big" id="live-price">{{ public_summary.live_price }}</div>
+                        <div class="fine" id="live-price-age">{{ public_summary.live_price_age }}</div>
                     </div>
-                    <div class="metric">
-                        <span>Decision</span>
-                        <strong id="decision-reason">{{ watchtower.decision_reason|default:"n/a" }}</strong>
+                    <div class="card">
+                        <span class="label">System State</span>
+                        <div class="value" id="bot-state">{{ public_summary.system_state }}</div>
+                        <div class="fine" id="quality-tier">{{ public_summary.quality_tier }}</div>
                     </div>
-                    <div class="metric">
-                        <span>Entry Signal</span>
-                        <strong id="entry-signal">{{ watchtower.entry_signal|default:"n/a" }}</strong>
+                    <div class="card">
+                        <span class="label">Trade Setup</span>
+                        <div class="value" id="entry-signal">{{ public_summary.setup_state }}</div>
+                        <div class="fine" id="decision-age">{{ public_summary.decision_age }}</div>
                     </div>
-                    <div class="metric">
-                        <span>Telemetry Source</span>
-                        <strong id="telemetry-source">{{ telemetry_source_label }}</strong>
+                    <div class="card">
+                        <span class="label">Market Climate</span>
+                        <div class="value" id="pulse-regime">{{ public_summary.market_climate }}</div>
+                        <div class="fine" id="research-age">{{ public_summary.research_age }}</div>
                     </div>
                 </div>
             </div>
+
             <aside class="panel status-panel">
-                <span class="mini-label">Live Status</span>
-                <div style="display:flex; flex-wrap:wrap; gap:10px;">
-                    <span class="pill pill-{{ watchtower.data_quality_status|default:'pilot' }}" id="quality-pill">{{ watchtower.data_quality_status|default:"unknown" }}</span>
+                <span class="mini">Status Board</span>
+                <h2>Is the feed healthy?</h2>
+                <p class="lede" id="status-blurb">{{ public_summary.status_blurb }}</p>
+
+                <div class="pill-row">
+                    <span class="pill pill-{{ watchtower.data_quality_status|default:'unknown' }}" id="quality-pill">{{ watchtower.data_quality_status|default:"unknown" }}</span>
                     <span class="pill pill-{{ watchtower.stream_status|default:'pilot' }}" id="stream-pill">{{ watchtower.stream_status|default:"pilot" }}</span>
+                    <span class="pill pill-unknown" id="runtime-label">{{ public_summary.runtime_label }}</span>
                 </div>
-                <div class="status-grid">
-                    <div class="feature-card">
-                        <span>Pulse Regime</span>
-                        <strong id="pulse-regime">{{ watchtower.pulse_regime|default:"unknown" }}</strong>
+
+                <div class="metric-grid">
+                    <div class="card">
+                        <span class="label">Data Source</span>
+                        <div class="value" id="telemetry-source">{{ telemetry_source_label }}</div>
                     </div>
-                    <div class="feature-card">
-                        <span>Tick Health</span>
-                        <strong id="tick-health">{{ watchtower.tick_health|default:"unknown" }}</strong>
+                    <div class="card">
+                        <span class="label">What Just Happened</span>
+                        <div class="value" id="decision-reason">
+                            {% if watchtower.public_decision_label %}{{ watchtower.public_decision_label }}{% elif watchtower.decision_reason %}{{ watchtower.decision_reason }}{% else %}n/a{% endif %}
+                        </div>
                     </div>
-                    <div class="feature-card">
-                        <span>Brief Age</span>
-                        <strong id="brief-age">{% if watchtower.brief_age_min %}{{ watchtower.brief_age_min }} min{% else %}n/a{% endif %}</strong>
+                    <div class="card">
+                        <span class="label">Live Feed</span>
+                        <div class="value" id="tick-health">
+                            {% if watchtower.public_tick_status %}{{ watchtower.public_tick_status }}{% elif watchtower.tick_health %}{{ watchtower.tick_health }}{% else %}unknown{% endif %}
+                        </div>
                     </div>
-                    <div class="feature-card">
-                        <span>Decision Age</span>
-                        <strong id="decision-age">{% if watchtower.decision_age_min %}{{ watchtower.decision_age_min }} min{% else %}n/a{% endif %}</strong>
+                    <div class="card">
+                        <span class="label">Snapshot Age</span>
+                        <div class="value" id="brief-age">{% if watchtower.snapshot_age_min %}{{ watchtower.snapshot_age_min }} min{% else %}n/a{% endif %}</div>
                     </div>
                 </div>
-                <div class="flag-list" id="quality-flags">
+
+                <div class="flags" id="quality-flags">
                     {% for flag in quality_flags %}
                     <span class="flag">{{ flag }}</span>
                     {% empty %}
@@ -429,75 +451,63 @@
         </section>
 
         <section class="panel section">
-            <span class="mini-label">What This Shows</span>
-            <h2>Telemetry before storytelling.</h2>
+            <span class="mini">What This Means</span>
+            <h2>Plain English first.</h2>
             <p class="lede">
-                The watchtower is designed to show whether the system is fit to act. Fresh data beats loud claims.
-                If the feed is stale, the board says it. If the pulse is dangerous, the board says it. If the last
-                trade closed badly, the board says that too.
+                If the system is waiting, it means there is no confirmed edge yet. If the page says a setup is active,
+                it means the model and live market checks agree enough for the bot to pay attention. If the feed is stale,
+                this page will say so instead of pretending the data is live.
             </p>
-            <div class="grid-3">
-                <article class="section-card">
-                    <strong>Deterministic controls stay binding</strong>
-                    <p>Freshness gates, hard drawdown protections, pulse danger blocks, and risk checks are not optional marketing copy.</p>
-                </article>
-                <article class="section-card">
-                    <strong>Supabase is the public proof layer</strong>
-                    <p>Oracle exports metrics, feature snapshots, and trade labels into tables the site and Business OS can read.</p>
-                </article>
-                <article class="section-card">
-                    <strong>The board is one machine</strong>
-                    <p>Hive, n8n, Stripe, broker workflows, and the trading watchtower all roll up into the same operating view.</p>
-                </article>
+            <div class="detail-grid">
+                <div class="card">
+                    <span class="label">Research Snapshot</span>
+                    <div class="value">Background context, not a live quote</div>
+                    <p class="fine">Weekly and market research help frame the tape, but the live feed and structure still decide whether a trade is valid.</p>
+                </div>
+                <div class="card">
+                    <span class="label">Control Layer</span>
+                    <div class="value">Safety rules stay in charge</div>
+                    <p class="fine">Freshness checks, hard risk limits, and degraded-feed blocks stay binding even when the market narrative looks exciting.</p>
+                </div>
             </div>
         </section>
 
         <section class="panel section">
-            <span class="mini-label">Last Label</span>
-            <h2>Most recent trade outcome.</h2>
+            <span class="mini">Recent Outcome</span>
+            <h2>Most recent labeled trade.</h2>
             <p class="lede">
-                Trade labels are stored separately from live state so the system can review what happened, not just what it wanted to do.
+                This is a public summary of the most recent reviewed trade outcome. It is meant to show behavior and system quality, not reveal private execution detail.
             </p>
-            <div class="grid-2">
-                <article class="trade-card">
-                    <span>Status</span>
-                    <strong id="trade-status">{{ last_trade.status|default:"n/a" }}</strong>
-                    <p id="trade-side">Side: {{ last_trade.side|default:"n/a" }} | Result: {{ last_trade.result|default:"n/a" }}</p>
-                </article>
-                <article class="trade-card">
-                    <span>PnL / Hold</span>
-                    <strong id="trade-pnl">
-                        {% if last_trade.pnl_usd %}${{ last_trade.pnl_usd }}{% else %}n/a{% endif %}
-                    </strong>
-                    <p id="trade-meta">
-                        Hold: {% if last_trade.hold_minutes %}{{ last_trade.hold_minutes }} min{% else %}n/a{% endif %}
-                        | Exit: {{ last_trade.exit_reason|default:"n/a" }}
-                    </p>
-                </article>
-            </div>
-            <div class="grid-2" style="margin-top: 16px;">
-                <article class="trade-card">
-                    <span>AI Layer</span>
-                    <strong id="ai-action">{{ watchtower.ai_action|default:"advisory" }}</strong>
-                    <p id="ai-confidence">
-                        Confidence:
-                        {% if watchtower.ai_confidence %}{{ watchtower.ai_confidence }}{% else %}n/a{% endif %}
-                    </p>
-                </article>
-                <article class="trade-card">
-                    <span>Open Incident</span>
-                    <strong id="incident-summary">{{ open_alert.summary|default:"No open incident" }}</strong>
-                    <p id="incident-detail">{{ open_alert.detail|default:"System is within current watchtower thresholds." }}</p>
-                </article>
+            <div class="detail-grid">
+                <div class="card">
+                    <span class="label">Trade Status</span>
+                    <div class="value" id="trade-status">{{ last_trade.status|default:"n/a" }}</div>
+                    <p class="fine" id="trade-side">Side: {{ last_trade.side|default:"n/a" }} | Result: {{ last_trade.result|default:"n/a" }}</p>
+                </div>
+                <div class="card">
+                    <span class="label">PnL / Hold</span>
+                    <div class="value" id="trade-pnl">{% if last_trade.pnl_usd != None %}${{ last_trade.pnl_usd }}{% else %}n/a{% endif %}</div>
+                    <p class="fine" id="trade-meta">Hold: {% if last_trade.hold_minutes %}{{ last_trade.hold_minutes }} min{% else %}n/a{% endif %} | Exit: {{ last_trade.exit_reason|default:"n/a" }}</p>
+                </div>
+                <div class="card">
+                    <span class="label">AI Layer</span>
+                    <div class="value" id="ai-action">{{ watchtower.ai_action|default:"advisory" }}</div>
+                    <p class="fine" id="ai-confidence">Confidence: {{ watchtower.ai_confidence|default:"n/a" }}</p>
+                </div>
+                <div class="card">
+                    <span class="label">Open Incident</span>
+                    <div class="value" id="incident-summary">{{ open_alert.summary|default:"No open incident" }}</div>
+                    <p class="fine" id="incident-detail">{{ open_alert.detail|default:"System is inside current thresholds." }}</p>
+                </div>
             </div>
         </section>
 
         <section class="panel cta" id="updates">
             <div>
-                <span class="mini-label">Updates</span>
-                <h2>Follow the system as it hardens.</h2>
-                <p class="support-copy">
-                    Join the list for watchtower drops, architecture notes, public dashboard upgrades, and new operator tooling.
+                <span class="mini">Updates</span>
+                <h2>Follow the public build-out.</h2>
+                <p class="copy">
+                    Join the list for dashboard upgrades, system notes, and new public telemetry releases.
                 </p>
             </div>
             <div>
@@ -505,28 +515,27 @@
                     <input type="email" id="email" placeholder="you@example.com" required>
                     <button onclick="submitLead()">Send Me Updates</button>
                 </div>
-                <p class="support-copy" style="margin-top: 12px;">
+                <p class="fine" style="margin-top: 12px;">
                     Informational telemetry only. Nothing here is financial advice or a solicitation to invest.
                 </p>
                 <div class="msg" id="msg"></div>
             </div>
         </section>
 
-        <footer>Trading Watchtower by Everlight Ventures -- live system health, deterministic controls, and public telemetry.</footer>
+        <footer>Everlight Ventures public status board. Live feed health, current system state, and reviewed outcomes.</footer>
     </div>
 
     <script>
-    function setText(id, value, suffix = "") {
+    function setText(id, value) {
         const node = document.getElementById(id);
         if (!node) return;
-        const empty = value === null || value === undefined || value === "";
-        node.textContent = empty ? "n/a" : `${value}${suffix}`;
+        node.textContent = value === null || value === undefined || value === "" ? "n/a" : String(value);
     }
 
     function setPill(id, value) {
         const node = document.getElementById(id);
         if (!node) return;
-        const normalized = (value || "pilot").toLowerCase();
+        const normalized = (value || "unknown").toLowerCase();
         node.className = `pill pill-${normalized}`;
         node.textContent = value || "unknown";
     }
@@ -536,6 +545,13 @@
         const number = Number(value);
         if (Number.isNaN(number)) return String(value);
         return `$${number.toFixed(2)}`;
+    }
+
+    function formatPrice(value) {
+        if (value === null || value === undefined || value === "") return "Unavailable";
+        const number = Number(value);
+        if (Number.isNaN(number)) return String(value);
+        return `$${number.toFixed(6)}`;
     }
 
     function renderFlags(flags) {
@@ -551,35 +567,85 @@
         });
     }
 
+    function humanState(value) {
+        const mapping = {
+            IDLE: "Waiting for a valid setup",
+            FLAT: "Flat and waiting",
+            OPEN_POSITION: "Managing an open trade",
+            OPEN: "Managing an open trade",
+            IN_POSITION: "Managing an open trade",
+        };
+        const raw = (value || "").toString().trim();
+        return mapping[raw.toUpperCase()] || (raw ? raw.replaceAll("_", " ") : "Unknown");
+    }
+
+    function humanSignal(value) {
+        const raw = (value || "").toString().trim();
+        return raw ? raw.replaceAll("_", " ") : "No trade setup confirmed";
+    }
+
+    function humanTier(value) {
+        const raw = (value || "").toString().trim();
+        return raw ? raw.replaceAll("_", " ") : "Monitoring";
+    }
+
+    function humanAge(minutes) {
+        const number = Number(minutes);
+        if (Number.isNaN(number)) return "Unavailable";
+        if (number < 1) return "Updated just now";
+        if (number < 60) return `Updated ${Math.round(number)} min ago`;
+        return `Updated ${(number / 60).toFixed(1)}h ago`;
+    }
+
+    function humanPriceAge(value) {
+        if (value === null || value === undefined || value === "") return "Timestamp unavailable";
+        const parsed = Date.parse(value);
+        if (Number.isNaN(parsed)) return String(value);
+        const ageSec = Math.max(0, Math.round((Date.now() - parsed) / 1000));
+        if (ageSec < 60) return `${ageSec}s ago`;
+        return `${Math.round(ageSec / 60)} min ago`;
+    }
+
     async function refreshWatchtower() {
         try {
-            const resp = await fetch("/os/api/snapshot/", {cache: "no-store"});
+            const resp = await fetch("/os/api/snapshot/", { cache: "no-store" });
             if (!resp.ok) return;
             const data = await resp.json();
             const watchtower = data.trading_watchtower || {};
-            setText("bot-state", watchtower.bot_state);
-            setText("decision-reason", watchtower.decision_reason);
-            setText("entry-signal", watchtower.entry_signal);
+
+            setText("live-price", formatPrice(watchtower.price));
+            setText("live-price-age", watchtower.public_price_age_label || humanPriceAge(watchtower.price_ts || "Timestamp unavailable"));
+            setText("bot-state", watchtower.public_system_state || humanState(watchtower.bot_state));
+            setText("quality-tier", humanTier(watchtower.quality_tier));
+            setText("entry-signal", watchtower.public_setup_state || humanSignal(watchtower.entry_signal));
+            setText("decision-age", watchtower.public_decision_age_label || humanAge(watchtower.decision_age_min));
+            setText("pulse-regime", watchtower.public_market_climate || (watchtower.pulse_regime || "unknown").toString().replaceAll("_", " "));
+            setText("research-age", watchtower.public_brief_age_label || humanAge(watchtower.brief_age_min));
+            setPill("quality-pill", watchtower.data_quality_status || "unknown");
+            setPill("stream-pill", watchtower.stream_status || "pilot");
+            setText("runtime-label", `${watchtower.runtime_data_dir || "data"} / ${watchtower.runtime_logs_dir || "logs"}`);
             setText("telemetry-source", watchtower.telemetry_source === "supabase" ? "Supabase live telemetry" : "Workspace telemetry");
-            setPill("quality-pill", watchtower.data_quality_status);
-            setPill("stream-pill", watchtower.stream_status);
-            setText("pulse-regime", watchtower.pulse_regime);
-            setText("tick-health", watchtower.tick_health);
-            setText("brief-age", watchtower.brief_age_min, " min");
-            setText("decision-age", watchtower.decision_age_min, " min");
+            setText("decision-reason", watchtower.public_decision_label || (watchtower.decision_reason || "n/a").toString().replaceAll("_", " "));
+            setText("tick-health", watchtower.public_tick_status || watchtower.tick_health || "unknown");
+            setText("brief-age", watchtower.snapshot_age_min !== null && watchtower.snapshot_age_min !== undefined ? `${watchtower.snapshot_age_min} min` : "n/a");
+            setText("status-blurb", watchtower.public_status_blurb || ((watchtower.data_quality_status || "").toLowerCase() === "healthy"
+                ? "Data looks healthy and current."
+                : "Some telemetry is stale or degraded. Treat this page as informational until the feed recovers."));
             renderFlags(watchtower.quality_flags);
+
             const trade = watchtower.last_trade || {};
-            setText("trade-status", trade.status);
+            setText("trade-status", trade.status || "n/a");
             setText("trade-side", `Side: ${trade.side || "n/a"} | Result: ${trade.result || "n/a"}`);
             setText("trade-pnl", formatMoney(trade.pnl_usd));
             setText("trade-meta", `Hold: ${trade.hold_minutes || "n/a"} min | Exit: ${trade.exit_reason || "n/a"}`);
             setText("ai-action", watchtower.ai_action || "advisory");
             setText("ai-confidence", `Confidence: ${watchtower.ai_confidence || "n/a"}`);
+
             const incident = watchtower.open_alert || {};
             setText("incident-summary", incident.summary || "No open incident");
-            setText("incident-detail", incident.detail || "System is within current watchtower thresholds.");
+            setText("incident-detail", incident.detail || "System is inside current thresholds.");
         } catch (err) {
-            // Keep the last rendered state.
+            // Keep the last rendered state if refresh fails.
         }
     }
 
@@ -594,13 +660,13 @@
         try {
             const resp = await fetch("/funnel/capture/", {
                 method: "POST",
-                headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({email, product: "dashboard", source: "public_dashboard"}),
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, product: "dashboard", source: "public_dashboard" }),
             });
             const data = await resp.json();
             if (resp.ok) {
                 msg.className = "msg ok";
-                msg.textContent = "You are on the list. We will send live watchtower and launch updates.";
+                msg.textContent = "You are on the list. We will send public dashboard and system updates.";
                 document.getElementById("email").value = "";
             } else {
                 msg.className = "msg err";

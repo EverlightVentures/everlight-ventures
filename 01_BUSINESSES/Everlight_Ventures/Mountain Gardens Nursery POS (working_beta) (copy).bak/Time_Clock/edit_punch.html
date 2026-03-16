@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block page_title %}Edit Time Punch{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>✏️ Edit Time Punch</h1>
+    <p class="subtitle">Punch ID: {{ punch.Punch_ID }}</p>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; max-width: 900px;">
+    <!-- Current Values -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Current Values</h3>
+        </div>
+        <div style="padding: 20px;">
+            <div class="info-row">
+                <span class="label">Employee:</span>
+                <span class="value">{{ punch.Employee_Name }} ({{ punch.Employee_ID }})</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Date:</span>
+                <span class="value">{{ punch.Date }}</span>
+            </div>
+            <div class="info-row">
+                <span class="label">Time:</span>
+                <span class="value"><strong>{{ punch.Time }}</strong></span>
+            </div>
+            <div class="info-row">
+                <span class="label">Punch Type:</span>
+                <span class="value">
+                    <span class="badge badge-{{ 'success' if punch.Punch_Type == 'CLOCK_IN' else 'danger' if punch.Punch_Type == 'CLOCK_OUT' else 'warning' }}">
+                        {{ punch.Punch_Type }}
+                    </span>
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="label">Hours Today:</span>
+                <span class="value">{{ punch.Hours_Worked_Today }}</span>
+            </div>
+            {% if punch.Notes %}
+            <div class="info-row">
+                <span class="label">Notes:</span>
+                <span class="value">{{ punch.Notes }}</span>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Edit Form -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Make Changes</h3>
+        </div>
+        <form method="POST" style="padding: 20px;">
+            <input type="hidden" name="action" value="edit">
+            
+            <div class="form-group">
+                <label class="form-label">New Date</label>
+                <input type="date" name="new_date" class="form-input" value="{{ punch.Date }}">
+                <small class="form-hint">Leave unchanged to keep current date</small>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">New Time</label>
+                <input type="time" name="new_time" class="form-input" value="{{ punch.Time[:5] }}">
+                <small class="form-hint">Leave unchanged to keep current time</small>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Punch Type</label>
+                <select name="new_type" class="form-select">
+                    {% for ptype in punch_types %}
+                    <option value="{{ ptype }}" {% if punch.Punch_Type == ptype %}selected{% endif %}>
+                        {{ ptype }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Reason for Edit *</label>
+                <textarea name="reason" class="form-input" rows="3" required
+                          placeholder="Explain why this punch needs to be edited..."></textarea>
+                <small class="form-hint">This will be recorded in the audit log</small>
+            </div>
+            
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a href="{{ url_for('timeclock_manage', date=punch.Date) }}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Option -->
+<div class="card" style="max-width: 900px; margin-top: 24px; border-color: var(--danger);">
+    <div class="card-header" style="background: var(--danger-bg);">
+        <h3 style="color: var(--danger);">⚠️ Delete Punch</h3>
+    </div>
+    <form method="POST" style="padding: 20px;">
+        <input type="hidden" name="action" value="delete">
+        
+        <p>Deleting this punch will mark it as deleted (soft delete). It will be hidden from reports but kept for audit purposes.</p>
+        
+        <div class="form-group">
+            <label class="form-label">Reason for Deletion *</label>
+            <textarea name="reason" class="form-input" rows="2" required
+                      placeholder="Explain why this punch should be deleted..."></textarea>
+        </div>
+        
+        <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this punch?')">
+            Delete Punch
+        </button>
+    </form>
+</div>
+
+<style>
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+}
+.info-row:last-child { border-bottom: none; }
+.info-row .label { color: var(--text-muted); }
+.info-row .value { font-weight: 500; }
+</style>
+{% endblock %}

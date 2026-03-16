@@ -1,0 +1,41 @@
+[AGENT LOG]
+Agent: {{agent_name}}
+LLM: {{assigned_llm}}
+Channel: {{channel_name}}
+Task ID: {{task_id}}
+Task Type: {{task_type}}
+Status: {{status}}
+Priority: {{priority}}
+
+Objective:
+{{objective}}
+
+Actions Taken:
+- {{action_1}}
+- {{action_2}}
+- {{action_3}}
+
+Decisions:
+- {{decision_1}}
+- {{decision_2}}
+
+Delegated To:
+- {{agent_x}} ({{why}})
+- {{agent_y}} ({{why}})
+
+Artifacts:
+- {{artifact_1_path}}
+- {{artifact_2_path}}
+
+Blockers:
+- {{blocker_1}}
+- {{blocker_2}}
+
+Next Action:
+{{next_action}}
+
+ETA:
+{{eta}}
+
+Timestamp (PT):
+{{timestamp_pt}}

@@ -1,0 +1,10 @@
+{
+  "employees": {
+    "1001": {
+      "name": "Rich",
+      "created": "2025-11-26",
+      "active": true
+    }
+  },
+  "next_id": 1002
+}
