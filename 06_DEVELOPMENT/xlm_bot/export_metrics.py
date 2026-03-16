@@ -10,6 +10,7 @@ BASE = Path(os.environ.get("CRYPTO_BOT_DIR", os.path.dirname(os.path.abspath(__f
 DATA = BASE / "data"
 LOGS = BASE / "logs"
 OUT  = DATA / "metrics.json"
+FEATURE_LATEST = DATA / "feature_snapshot_latest.json"
 
 def load_state():
     p = DATA / "state.json"
@@ -35,6 +36,16 @@ def load_trades_today(day_str):
         pass
     return trades
 
+
+def load_json(path):
+    if not path.exists():
+        return {}
+    try:
+        payload = json.loads(path.read_text())
+        return payload if isinstance(payload, dict) else {}
+    except Exception:
+        return {}
+
 def heartbeat_age():
     # Primary: .heartbeat file. Fallback: state.json mtime.
     hb = BASE / ".heartbeat"
@@ -47,6 +58,7 @@ def heartbeat_age():
 
 def build_metrics():
     state = load_state()
+    feature = load_json(FEATURE_LATEST)
     now = datetime.now(timezone.utc)
     day_str = state.get("day", now.strftime("%Y-%m-%d"))
     trades = load_trades_today(day_str)
@@ -91,12 +103,50 @@ def build_metrics():
         "net_pnl_after_fees_usd": round(
             state.get("pnl_today_usd", 0) - total_fees - 0.0, 4
         ),
+        "bot_state": feature.get("bot_state"),
+        "quality_tier": feature.get("quality_tier"),
+        "route_tier": feature.get("route_tier"),
+        "entry_signal": feature.get("entry_signal"),
+        "latest_decision_reason": feature.get("reason"),
+        "signal_product_id": feature.get("signal_product_id"),
+        "spot_reference_product_id": feature.get("spot_reference_product_id"),
+        "contract_mark_price": feature.get("contract_mark_price"),
+        "contract_price_change_24h_pct": feature.get("contract_price_change_24h_pct"),
+        "orderbook_depth_bias": feature.get("orderbook_depth_bias"),
+        "orderbook_imbalance": feature.get("orderbook_imbalance"),
+        "orderbook_spread_bps": feature.get("orderbook_spread_bps"),
+        "liquidation_signal_source": feature.get("liquidation_signal_source"),
+        "liquidation_feed_live": feature.get("liquidation_feed_live"),
+        "liquidation_bias": feature.get("liquidation_bias"),
+        "liquidation_events_5m": feature.get("liquidation_events_5m"),
+        "liquidation_notional_5m_usd": feature.get("liquidation_notional_5m_usd"),
+        "futures_relativity_bias": feature.get("futures_relativity_bias"),
+        "futures_relativity_confidence": feature.get("futures_relativity_confidence"),
+        "cross_venue_oi_change_pct": feature.get("cross_venue_oi_change_pct"),
+        "cross_venue_funding_bias": feature.get("cross_venue_funding_bias"),
+        "pulse_regime": feature.get("pulse_regime"),
+        "pulse_health": feature.get("pulse_health"),
+        "tick_health": feature.get("tick_health"),
+        "tick_age_sec": feature.get("tick_age_sec"),
+        "brief_age_min": feature.get("brief_age_min"),
+        "news_risk": feature.get("news_risk"),
+        "ai_action": feature.get("ai_action"),
+        "ai_confidence": feature.get("ai_confidence"),
     }
 
-if __name__ == "__main__":
-    metrics = build_metrics()
+
+def write_metrics(metrics):
     tmp = str(OUT) + ".tmp"
     with open(tmp, "w") as f:
         json.dump(metrics, f, indent=2, default=str)
     os.rename(tmp, str(OUT))
+
+
+def main() -> int:
+    metrics = build_metrics()
+    write_metrics(metrics)
     print(json.dumps(metrics, indent=2, default=str))
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main())
