@@ -14,7 +14,12 @@ DATA="$BOT_DIR/data"
 STATE="$DATA/state.json"
 CB_STATE="$DATA/.circuit_breaker"
 CB_HISTORY="$DATA/.cb_trip_history"
-SLACK_WEBHOOK="https://hooks.slack.com/services/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"
+# Source secrets from central .env if not already set
+_ENV_FILE="${EVERLIGHT_ENV:-/home/opc/xlm-bot/secrets/runtime.env}"
+[ -f "$_ENV_FILE" ] || _ENV_FILE="/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/03_Credentials/.env"
+[ -f "$_ENV_FILE" ] && set -a && . "$_ENV_FILE" && set +a 2>/dev/null
+
+SLACK_WEBHOOK="${SLACK_WEBHOOK_URL:-}"
 
 # Thresholds
 ERROR_WINDOW_MIN=30

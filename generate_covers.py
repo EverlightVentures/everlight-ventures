@@ -3,7 +3,7 @@ import requests
 import time
 from pathlib import Path
 
-API_KEY = "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"
+API_KEY = os.environ.get("OPENAI_API_KEY", "")
 BASE_DIR = Path("/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM")
 
 COVERS = {

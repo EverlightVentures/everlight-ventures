@@ -10,7 +10,12 @@
 
 BOT_DIR="/home/opc/xlm-bot"
 LOG="$BOT_DIR/logs/watchdog.log"
-SLACK_WEBHOOK="https://hooks.slack.com/services/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"
+# Source secrets from central .env if not already set
+_ENV_FILE="${EVERLIGHT_ENV:-/home/opc/xlm-bot/secrets/runtime.env}"
+[ -f "$_ENV_FILE" ] || _ENV_FILE="/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/03_Credentials/.env"
+[ -f "$_ENV_FILE" ] && set -a && . "$_ENV_FILE" && set +a 2>/dev/null
+
+SLACK_WEBHOOK="${SLACK_WEBHOOK_ALERTS:-}"
 
 MEM_CRITICAL=97   # % - start killing non-essential processes (503MB max)
 MEM_WARNING=93    # % - clear caches

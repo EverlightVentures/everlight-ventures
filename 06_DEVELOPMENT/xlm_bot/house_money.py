@@ -19,7 +19,7 @@ BASE = Path(os.environ.get("CRYPTO_BOT_DIR", os.path.dirname(os.path.abspath(__f
 DATA = BASE / "data"
 STATE_FILE = DATA / "state.json"
 HM_FILE = DATA / "house_money.json"
-SLACK_WEBHOOK = "https://hooks.slack.com/services/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"
+SLACK_WEBHOOK = os.environ.get("SLACK_WEBHOOK_ALERTS", "")
 
 # Config
 INITIAL_CAPITAL = 310.55   # starting equity when bot went live

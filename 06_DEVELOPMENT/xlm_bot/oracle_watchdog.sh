@@ -20,7 +20,12 @@ INSTANCE_ID="ocid1.instance.oc1.us-sanjose-1.anzwuljrwtpnzgachuw5tsdglraq4cuco4q
 ORACLE_IP="163.192.19.196"
 ORACLE_USER="opc"
 SSH_KEY="/root/.ssh/oracle_key.pem"
-SLACK_WEBHOOK="https://hooks.slack.com/services/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"
+# Source secrets from central .env if not already set
+_ENV_FILE="${EVERLIGHT_ENV:-/home/opc/xlm-bot/secrets/runtime.env}"
+[ -f "$_ENV_FILE" ] || _ENV_FILE="/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/03_Credentials/.env"
+[ -f "$_ENV_FILE" ] && set -a && . "$_ENV_FILE" && set +a 2>/dev/null
+
+SLACK_WEBHOOK="${SLACK_WEBHOOK_ALERTS:-}"
 
 LOG="/tmp/oracle_watchdog.log"
 STATE_DIR="/tmp/oracle_wd_state"

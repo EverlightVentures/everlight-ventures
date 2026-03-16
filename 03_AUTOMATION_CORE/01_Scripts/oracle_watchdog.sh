@@ -14,7 +14,11 @@
 ORACLE_IP="163.192.19.196"
 ORACLE_USER="opc"
 SSH_KEY="$HOME/.ssh/oracle_key.pem"
-SLACK_WEBHOOK="https://hooks.slack.com/services/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"
+# Source secrets from central .env if not already set
+_ENV_FILE="${EVERLIGHT_ENV:-/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/03_Credentials/.env}"
+[ -f "$_ENV_FILE" ] && set -a && . "$_ENV_FILE" && set +a 2>/dev/null
+
+SLACK_WEBHOOK="${SLACK_WEBHOOK_URL:-}"
 LOG_DIR="/mnt/sdcard/AA_MY_DRIVE/_logs"
 LOG_FILE="$LOG_DIR/oracle_watchdog.log"
 STATE_FILE="$LOG_DIR/.oracle_state"

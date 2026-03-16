@@ -38,6 +38,7 @@ risk:
   max_daily_loss_pct: 0.08       # 8% daily loss cap - circuit breaker restored
   sl_atr_buffer_mult: 0.5
   max_risk_pct_per_trade: 0.15   # increased risk appetite for smart setups
+  smoke_check_stop_pct: 0.0025   # 0.25% preview stop for non-live bracket smoke checks
   # Tier-based R:R — weaker signals need better reward to compensate
   min_rr_ratio:
     MONSTER: 1.5                # CHANGED 1.0->1.5: best setups need 1.5:1 R:R
@@ -128,8 +129,62 @@ position_sizing:
     - max_equity: 99999
       risk_mult: 0.85    # slight pullback above $5000 — protect the bag
 
+  # Explicit bot growth ladder: compound first, income extraction later.
+  growth_ladder:
+    enabled: true
+    stages:
+      - label: BUILD_A
+        max_equity: 750
+        max_contracts: 1
+        base_risk_pct: 0.025
+        max_risk_pct: 0.04
+        daily_target_usd: 25
+        daily_stop_usd: 20
+        per_trade_risk_usd: 10
+        withdrawal_mode: compound
+      - label: BUILD_B
+        max_equity: 1500
+        max_contracts: 2
+        base_risk_pct: 0.03
+        max_risk_pct: 0.05
+        daily_target_usd: 40
+        daily_stop_usd: 30
+        per_trade_risk_usd: 18
+        withdrawal_mode: compound
+      - label: BUILD_C
+        max_equity: 3000
+        max_contracts: 3
+        base_risk_pct: 0.03
+        max_risk_pct: 0.06
+        daily_target_usd: 75
+        daily_stop_usd: 45
+        per_trade_risk_usd: 30
+        withdrawal_mode: compound
+      - label: BUILD_D
+        max_equity: 5000
+        max_contracts: 5
+        base_risk_pct: 0.025
+        max_risk_pct: 0.05
+        daily_target_usd: 125
+        daily_stop_usd: 60
+        per_trade_risk_usd: 45
+        withdrawal_mode: compound
+      - label: INCOME
+        max_equity: 99999
+        max_contracts: 5
+        base_risk_pct: 0.02
+        max_risk_pct: 0.04
+        daily_target_usd: 150
+        daily_stop_usd: 75
+        per_trade_risk_usd: 50
+        withdrawal_mode: siphon_excess
+  readiness:
+    contract_buffer_pct: 0.10
+    two_contract_buffer_pct: 0.10
+
 exits:
   attach_exchange_tp: false       # was true -- exchange TP causes phantom churn via reconciler
+  pending_fill_expiry_sec: 90     # if an entry fill is still unverified after this, force review/cleanup
   early_save_adverse_pct: 0.015
   early_save_bars: 12              # was 6 -- stop anxiety-exiting losers early (let SL work)
   time_stop_bars: 12              # was 8 -- 3 hours default hold
@@ -202,6 +257,39 @@ margin_policy:
     mode: auto             # auto = enable when equity sufficient, always = force on, never = force off
     min_equity_ratio: 1.20 # need equity >= 1.2x overnight margin to enable (e.g., $432*1.2 = $518)
     overnight_safe_mr: 0.85  # max overnight MR to allow entries during overnight hours
+  friday_break:
+    enabled: true
+    break_weekday: 4
+    break_start_hour_et: 17
+    break_start_minute_et: 0
+    break_end_hour_et: 18
+    break_end_minute_et: 0
+    pre_break_new_entry_lock_minutes: 60
+    force_flat_minutes_before_break: 20
+    reopen_cooldown_minutes: 10
+  playbook:
+    enabled: true
+    intraday:
+      label: INTRADAY_ATTACK
+      objective: press_A_plus_setups_and_close_before_cutoff
+      allow_multi_contract: true
+      max_new_contracts: 2
+      min_quality_for_multi_contract: FULL
+      force_exit_before_cutoff: true
+    pre_cutoff:
+      label: PRE_CUTOFF_DEFENSE
+      objective: no_new_risk_manage_existing_position_and_be_flat_before_overnight
+      block_new_entries: true
+      max_new_contracts: 1
+      force_exit_before_cutoff: true
+    overnight:
+      label: OVERNIGHT_DEFENSE
+      objective: preserve_capital_trade_small_only_if_overnight_margin_is_safe
+      block_new_entries_if_not_safe: true
+      block_new_entries_when_safe: false
+      allow_multi_contract_when_safe: false
+      max_new_contracts_when_safe: 1
+      max_new_contracts_when_unsafe: 1
 
 # Pre-Liquidation Rescue Ladder (PLRL-3): DISABLED per war room audit.
 # War room verdict: Martingale logic (averaging down on leverage) is retail behavior.
@@ -353,6 +441,14 @@ v4:
         tp_mult: 0.80
         min_profit_usd: 3.50
         decay_pct: 0.40
+      liquidity_sweep_continuation:
+        tp_mult: 0.70
+        min_profit_usd: 3.25
+        decay_pct: 0.32
+      liquidity_sweep_reversal:
+        tp_mult: 0.55
+        min_profit_usd: 2.75
+        decay_pct: 0.24
       # Trend entries: wide targets, patient holds, bigger expected wins
       breakout_retest:
         tp_mult: 1.00
@@ -647,6 +743,20 @@ v4:
     # Lane U: Macro MA Cross - 200 MA breakout on 1h with 4h confirmation
     lane_u_enabled: true
     lane_u_threshold: 45           # lower threshold - 200 MA crosses are rare but powerful
+    # Lane W: HTF Breakout Continuation - early weekly breakout continuation
+    lane_w_enabled: true
+    lane_w_threshold: 52
+    lane_w_distance_bypass: true
+    lane_w_min_signals: 6
+    lane_w_breakout_lookback_4h: 6
+    lane_w_breakout_lookback_1h: 12
+    lane_w_min_breakout_pct: 0.0015
+    lane_w_max_chase_atr: 0.80
+    lane_w_min_volume_ratio: 1.05
+    lane_w_min_close_strength: 0.68
+    lane_w_rsi_4h_long_min: 56
+    lane_w_rsi_4h_short_max: 44
+    lane_w_event_block_hours: 6
     # Lane V: Liquidity Sweep - bidirectional heatmap strategy (magnet + sweep reversal)
     lane_v_enabled: true
     lane_v_threshold: 55           # high bar - A+ trades only, requires 4-of-6 confluence
@@ -657,6 +767,15 @@ v4:
     lane_v_sweep_cooldown_bars: 3  # min bars between sweep trades
     lane_v_continuation_enabled: true   # allow pre-sweep continuation trades
     lane_v_reversal_enabled: true       # allow post-sweep reversal trades
+    lane_v_wick_score_min: 55
+    lane_v_max_reversal_chase_atr: 1.2
+    lane_v_continuation_tp_buffer_atr: 0.15
+    lane_v_reversal_tp_mode: fast_mean_reversion
+    lane_v_fail_fast_bars: 3
+    lane_v_skip_balanced_clusters: true
+    lane_v_min_cluster_strength: 30
+    lane_v_require_volume_spike_for_reversal: false
+    lane_v_require_fib_or_ema_stretch: true
     compression_breakout_enabled: true
     early_impulse_enabled: true
     early_impulse_body_mult: 1.5     # was 2.0 — catch more impulse moves
@@ -797,6 +916,19 @@ v4:
         VWAP_CONFIRM: 10
         DOUBLE_PATTERN: 12
 
+      # Lane W: Higher-timeframe breakout continuation
+      W:
+        HTF_BREAK: 24
+        EMA_ALIGN_SLOPE: 20
+        ADX_TREND: 14
+        ATR_EXPANDING: 12
+        VOLUME_SPIKE: 12
+        BB_EXPAND_OR_WALK: 10
+        MACD_MOMENTUM: 8
+        VWAP_CONFIRM: 8
+        CHANNEL_BREAKOUT: 12
+        FLAG_CONTINUATION: 12
+
   # Multi-TF alignment bonus
   alignment:
     enabled: true
@@ -812,6 +944,9 @@ liquidation_clusters:
   magnet_distance_max_atr: 5.0   # ignore clusters more than 5 ATR away
   sweep_zone_atr: 0.25           # price within 0.25 ATR of cluster center = in the zone
   bonus_max: 5                   # max score modifier from liquidation data (was 2)
+  continuation_bonus: 2
+  reversal_bonus: 4
+  balanced_penalty: 10
 
 # Contract-specific intelligence (OI, funding, basis)
 contract_context:
@@ -835,6 +970,12 @@ market_structure:
   imbalance_short_threshold: 0.42
   max_spread_bps: 12.0
   bonus_max: 4
+  absorption_bonus: 2
+  replenishment_bonus: 1
+  replenishment_floor: 0.92
+  flip_bonus: 1
+  spoof_penalty: 2
+  spoof_risk_threshold: 0.65
 
 # BTC correlation: penalize trades that fight BTC momentum
 btc_correlation:
@@ -861,9 +1002,9 @@ sentiment_gate:
 
 # Slack alerts
 slack:
-  bot_token: "xoxb-8645963765681-10542494223845-M2gIADgkLB2HYJN4F8lGpbuI"
-  client_secret: "482a4b8b3ddaf97a581deb4e2bcbd9aa"
-  signing_secret: "993a1a80d5be9b060e3af1f2eed9851b"
+  bot_token: "${SLACK_BOT_TOKEN}"
+  client_secret: "${SLACK_CLIENT_SECRET}"
+  signing_secret: "${SLACK_SIGNING_SECRET}"
   war_room_enabled: true
   hive_dashboard_url: ""
   # Live feed reports (replaces dashboard)
@@ -949,11 +1090,20 @@ market_intel:
   futures_relativity:
     bonus_max: 4
     min_confidence: 0.45
+  weekly_research:
+    enabled: true
+    refresh_hours: 6
+    window_refresh_hours: 2
+    sunday_start_hour_et: 18
+    monday_end_hour_et: 10
+    score_bonus_max: 3
+    min_confidence: 0.45
   liquidation_feed:
     symbol: XLMUSDT
     stale_seconds: 45
     window_seconds: 900
     reconnect_seconds: 3
+    recent_event_limit: 200
     min_notional_5m_usd: 25000
     bonus_max: 2
 
@@ -1051,6 +1201,9 @@ rolling_expectancy:
   min_ev_usd: -3.0                # block when avg trade loses more than $3
   min_profit_factor: 0.5          # block when profit factor below 0.5
   max_tail_losses: 5              # block after 5 consecutive losses at tail
+  promotion_min_size_mult: 1.15   # only promote size when realized edge is materially strong
+  promotion_cap: 1.5              # never let expectancy promotion outrun the rest of the caps
+  reduction_floor: 0.25           # keep some floor for size reductions before a hard kill-switch
 
 # Market pulse: composite health scoring (fuses sentiment + news + live tick)
 market_pulse:
