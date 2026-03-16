@@ -1,0 +1,8 @@
+#!/bin/bash
+# Echo Mind foreground loop — keeps server alive
+cd "$(dirname "$0")"
+while true; do
+    python3 server.py
+    echo "Echo Mind server exited, restarting in 3s..."
+    sleep 3
+done

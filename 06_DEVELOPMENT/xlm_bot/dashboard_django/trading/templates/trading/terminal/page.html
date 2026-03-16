@@ -1,0 +1,120 @@
+{% extends "trading/base.html" %}
+{% load trading_tags humanize %}
+
+{% block title %}Terminal | {{ app_name }}{% endblock %}
+{% block page_title %}Terminal{% endblock %}
+
+{% block content %}
+<!-- KPI Bar (HTMX polled) -->
+<div id="kpi-bar"
+     hx-get="{% url 'trading:api_kpi_bar' %}"
+     hx-trigger="every 5s"
+     hx-swap="innerHTML">
+  {% include "trading/partials/kpi_bar.html" %}
+</div>
+
+<!-- Position Badge (HTMX polled) -->
+<div id="position-badge"
+     hx-get="{% url 'trading:api_position_badge' %}"
+     hx-trigger="every 5s"
+     hx-swap="innerHTML">
+  {% include "trading/partials/position_badge.html" %}
+</div>
+
+<!-- Bot Analytics Row (HTMX polled) -->
+<div id="bot-analytics"
+     hx-get="{% url 'trading:api_bot_analytics' %}"
+     hx-trigger="every 10s"
+     hx-swap="innerHTML">
+  {% include "trading/partials/bot_analytics.html" %}
+</div>
+
+<!-- Tab Navigation -->
+<div class="tab-nav">
+  <button class="tab-btn {% if active_tab == 'overview' %}active{% endif %}"
+          hx-get="{% url 'trading:terminal' %}?tab=overview"
+          hx-target="#tab-content"
+          hx-swap="innerHTML"
+          hx-push-url="?tab=overview">
+    <i class="fa-solid fa-chart-line"></i> Overview
+  </button>
+  <button class="tab-btn {% if active_tab == 'intel' %}active{% endif %}"
+          hx-get="{% url 'trading:terminal' %}?tab=intel"
+          hx-target="#tab-content"
+          hx-swap="innerHTML"
+          hx-push-url="?tab=intel">
+    <i class="fa-solid fa-brain"></i> Intel Hub
+  </button>
+  <button class="tab-btn {% if active_tab == 'chat' %}active{% endif %}"
+          hx-get="{% url 'trading:terminal' %}?tab=chat"
+          hx-target="#tab-content"
+          hx-swap="innerHTML"
+          hx-push-url="?tab=chat">
+    <i class="fa-solid fa-comments"></i> Chat
+  </button>
+  <button class="tab-btn {% if active_tab == 'evolution' %}active{% endif %}"
+          hx-get="{% url 'trading:terminal' %}?tab=evolution"
+          hx-target="#tab-content"
+          hx-swap="innerHTML"
+          hx-push-url="?tab=evolution">
+    <i class="fa-solid fa-dna"></i> Evolution
+  </button>
+</div>
+
+<!-- Tab Content -->
+<div id="tab-content">
+  {% if active_tab == "overview" %}
+    {% include "trading/terminal/overview.html" %}
+  {% elif active_tab == "intel" %}
+    {% include "trading/terminal/intel_hub.html" %}
+  {% elif active_tab == "chat" %}
+    {% include "trading/terminal/chat.html" %}
+  {% elif active_tab == "evolution" %}
+    {% include "trading/terminal/evolution.html" %}
+  {% else %}
+    {% include "trading/terminal/overview.html" %}
+  {% endif %}
+</div>
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .tab-nav {
+    display: flex;
+    gap: 4px;
+    margin: 16px 0 12px;
+    padding: 4px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.04);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-base);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .tab-btn:hover {
+    color: var(--text-primary);
+    background: rgba(255,255,255,0.03);
+  }
+  .tab-btn.active {
+    color: var(--gold);
+    background: rgba(201,168,76,0.1);
+    border: 1px solid rgba(201,168,76,0.15);
+  }
+  .tab-btn i { font-size: 0.8rem; }
+</style>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% load trading_tags %}
+
+<div class="intel-card" style="margin-top:8px;">
+  <div class="thought-toolbar">
+    <span class="live"><span class="dot"></span>AGENT REASONING</span>
+  </div>
+  <div class="thought-feed">
+    {% for d in decisions %}
+    <div class="thought-post {{ d.tone|default:'info'|tone_class }}">
+      <div class="t">
+        {{ d.timestamp|pt_short }}
+        {% if d.cycle %}<span style="color:#6b7280;"> &middot; cycle {{ d.cycle }}</span>{% endif %}
+      </div>
+      {% if d.thought %}
+        <div class="h">{{ d.thought|truncatewords:20 }}</div>
+      {% endif %}
+      {% if d.entry_signal %}
+        <div class="b">
+          Signal: <strong>{{ d.entry_signal }}</strong>
+          {% if d.direction %}<span class="{{ d.direction|direction_color }}">{{ d.direction|upper }}</span>{% endif %}
+          {% if d.v4_selected_score %} &middot; Score {{ d.v4_selected_score|floatformat:0 }}{% endif %}
+        </div>
+      {% elif d.action %}
+        <div class="b">{{ d.action }}</div>
+      {% endif %}
+    </div>
+    {% empty %}
+    <div class="feed-mini">No recent decisions.</div>
+    {% endfor %}
+  </div>
+</div>

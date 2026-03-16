@@ -1,0 +1,32 @@
+{
+  "generated_at": "2026-02-28T19:16:40.827608+00:00",
+  "last_3_days": [
+    {
+      "date": "2026-02-27",
+      "trades": 1,
+      "pnl_usd": 8.4,
+      "max_single_loss_usd": 0.0,
+      "max_hold_minutes": 0.0,
+      "win_rate_pct": 100.0
+    },
+    {
+      "date": "2026-02-26",
+      "trades": 2,
+      "pnl_usd": -0.07,
+      "max_single_loss_usd": -2.3,
+      "max_hold_minutes": 0.0,
+      "win_rate_pct": 50.0
+    },
+    {
+      "date": "2026-02-25",
+      "trades": 1,
+      "pnl_usd": -64.9,
+      "max_single_loss_usd": -64.9,
+      "max_hold_minutes": 0.0,
+      "win_rate_pct": 0.0
+    }
+  ],
+  "total_3day_pnl_usd": -56.57,
+  "equity_trend": "declining",
+  "suggested_posture": "conservative"
+}

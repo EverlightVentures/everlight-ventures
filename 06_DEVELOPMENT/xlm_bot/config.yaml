@@ -1,0 +1,1224 @@
+# XLM PERP Confluence Engine v1
+symbol: XLM-PERP
+product_id: XLP-20DEC30-CDE
+leverage: 4
+paper: false
+signal_product_id: XLP-20DEC30-CDE
+data_product_id: XLM-USD
+timezone: America/Los_Angeles
+selector:
+  prefer_perp: true
+  min_volume_24h: 0
+  min_open_interest: 1
+  roll_days: 7
+
+data:
+  history_days_15m: 45
+  max_candle_age_min: 45   # block new entries if most recent 15m candle is older than this
+
+session_filter:
+  enabled: false
+  # UTC windows; adjust as needed
+  windows:
+    - start: "07:00"
+      end: "10:00"
+    - start: "12:00"
+      end: "15:00"
+
+risk:
+  max_trades_per_day: 8          # CHANGED: 24 to 8 - quality over quantity, fewer better trades
+  max_losses_per_day: 3          # CHANGED: 6 to 3 - 3 losses = done for the day
+  cooldown_minutes: 10           # CHANGED: 5 to 10 - force real patience between trades
+  cooldown_loss_threshold: 2     # CHANGED: 3 to 2 - cooldown after just 2 consecutive losses
+  revenge_cooldown_minutes: 15   # CHANGED: 5 to 15 - long cooldown after any loss
+  daily_profit_target_usd: 5000  # uncap the profit potential
+  loss_cooldown_requires_new_structure: false
+  capital_allocation_pct: 1.0
+  max_sl_pct: 0.03               # tightened: was 5%, 3% reduces loss per trade
+  max_daily_loss_pct: 0.08       # 8% daily loss cap - circuit breaker restored
+  sl_atr_buffer_mult: 0.5
+  max_risk_pct_per_trade: 0.15   # increased risk appetite for smart setups
+  smoke_check_stop_pct: 0.0025   # 0.25% preview stop for non-live bracket smoke checks
+  # Tier-based R:R — weaker signals need better reward to compensate
+  min_rr_ratio:
+    MONSTER: 1.5                # CHANGED 1.0->1.5: best setups need 1.5:1 R:R
+    SCALP: 3.0                  # CHANGED 2.0->3.0: weak signal needs 3:1 to justify fees
+    REDUCED: 2.5                # CHANGED 2.0->2.5: medium signal needs better reward
+    FULL: 2.0                   # CHANGED 1.5->2.0: strong signal needs 2:1 after fees
+    default: 2.0                # CHANGED 1.5->2.0: raised fallback
+
+risk_profile:
+  risk_pct: 0.15
+  target_pct: 0.025             # SCALP MODE: 2.5% base TP (was 8%) — was 0.05, let winners run further
+
+# Dynamic position sizing — compound growth engine
+position_sizing:
+  enabled: true
+  mode: equity_pct          # equity_pct = % of current equity (compounds naturally)
+  base_risk_pct: 0.03       # PHASE 1: conservative 3% while proving the system
+  max_risk_pct: 0.08        # 8% max risk per trade
+  min_contracts: 1           # PHASE 1: start with 1 contract, EARN the right to size up
+  max_contracts: auto        # AUTO COMPOUND: floor(equity / equity_per_contract) — grows with every win
+  equity_per_contract: 180   # default — overridden by margin window sizing below
+  max_contracts_hard_cap: 2  # PHASE 1: hard cap 2 contracts until account at $500+
+  # Margin-window-aware sizing: conservative until bot proves itself
+  margin_window_sizing:
+    enabled: true
+    intraday_equity_per_contract: 150   # at $306 equity = 2 contracts max, safe sizing
+    overnight_equity_per_contract: 200  # 1-2 contracts overnight only
+    pre_cutoff_equity_per_contract: 200 # conservative near cutoff
+
+  # Lane risk budgets (multiplier on base_risk_pct)
+  # Higher = safer strategies get bigger positions
+  lane_budgets:
+    A: 1.0    # trend following — proven, full budget
+    B: 0.9    # breakout — slightly riskier
+    C: 0.7    # sweep — counter-trend, smaller
+    E: 0.8    # squeeze — moderate risk
+    F: 0.7    # compression breakout — volatile
+    G: 0.6    # range scalp — tight range, small moves
+    H: 0.9    # trend structure — high conviction structure breaks
+    I: 0.7    # fib retrace — countertrend, conservative sizing
+    J: 0.5    # slow bleed — micro-scalps, conservative sizing
+
+    K: 0.7    # wick rejection - counter-trend, conservative
+    M: 0.6    # volume climax - high risk reversal
+    N: 0.8    # VWAP reversion - statistical edge
+    P: 0.6    # grid range - range-edge mean reversion, conservative sizing
+    Q: 0.7    # funding arb - directional bias from funding, moderate sizing
+    R: 0.6    # regime low vol - squeeze scalps, conservative sizing
+    S: 0.6    # stat arb proxy - z-score mean reversion, conservative sizing
+    T: 0.8    # orderflow imbalance - volume delta is strong edge
+    U: 0.9    # macro MA cross - rare but high conviction regime shift
+    V: 1.0    # liquidity sweep - full conviction when 4-of-6 confluence fires
+
+  # Quality tier multipliers on position size
+  tier_multipliers:
+    MONSTER: 1.5    # exceptional — go big on the best setups
+    FULL: 1.25      # full conviction — bigger than default
+    REDUCED: 0.75   # less conviction, smaller size
+    SCALP: 0.50     # low conviction, half size
+
+  # Multi-contract unlock: FULL quality + expansion regime can go to 2 contracts
+  # when equity covers margin for both contracts with buffer
+  multi_contract:
+    enabled: true
+    min_quality: MONSTER        # only unlock extra contracts on MONSTER tier setups
+    require_expansion: true     # only in expansion regime (trending/breakout)
+    max_contracts_unlock: 2     # PHASE 1: max 2 contracts even on best setups
+    margin_buffer_pct: 0.10     # 10% buffer (was 20% — tighter to maximize size)
+
+  # Streak adjustment (anti-martingale: grow on wins, shrink on losses)
+  streak:
+    enabled: true
+    win_streak_bonus: 0.10    # +10% size per consecutive win (max 3 wins = +30%)
+    win_streak_max: 3         # cap bonus at 3 wins
+    loss_streak_cut: 0.25     # -25% size per consecutive loss
+    loss_streak_max: 2        # cap cut at 2 losses (= -50%)
+
+  # Account tier scaling — COMPOUND MODE: stay aggressive as account grows
+  account_tiers:
+    - max_equity: 500
+      risk_mult: 1.3     # aggressive under $500 — need to build fast
+    - max_equity: 1000
+      risk_mult: 1.2     # still aggressive $500-$1000 — compounding phase
+    - max_equity: 2000
+      risk_mult: 1.1     # keep pushing $1000-$2000 — reinvest gains
+    - max_equity: 5000
+      risk_mult: 1.0     # standard above $2000 — account is working
+    - max_equity: 99999
+      risk_mult: 0.85    # slight pullback above $5000 — protect the bag
+
+  # Explicit bot growth ladder: compound first, income extraction later.
+  growth_ladder:
+    enabled: true
+    stages:
+      - label: BUILD_A
+        max_equity: 750
+        max_contracts: 1
+        base_risk_pct: 0.025
+        max_risk_pct: 0.04
+        daily_target_usd: 25
+        daily_stop_usd: 20
+        per_trade_risk_usd: 10
+        withdrawal_mode: compound
+      - label: BUILD_B
+        max_equity: 1500
+        max_contracts: 2
+        base_risk_pct: 0.03
+        max_risk_pct: 0.05
+        daily_target_usd: 40
+        daily_stop_usd: 30
+        per_trade_risk_usd: 18
+        withdrawal_mode: compound
+      - label: BUILD_C
+        max_equity: 3000
+        max_contracts: 3
+        base_risk_pct: 0.03
+        max_risk_pct: 0.06
+        daily_target_usd: 75
+        daily_stop_usd: 45
+        per_trade_risk_usd: 30
+        withdrawal_mode: compound
+      - label: BUILD_D
+        max_equity: 5000
+        max_contracts: 5
+        base_risk_pct: 0.025
+        max_risk_pct: 0.05
+        daily_target_usd: 125
+        daily_stop_usd: 60
+        per_trade_risk_usd: 45
+        withdrawal_mode: compound
+      - label: INCOME
+        max_equity: 99999
+        max_contracts: 5
+        base_risk_pct: 0.02
+        max_risk_pct: 0.04
+        daily_target_usd: 150
+        daily_stop_usd: 75
+        per_trade_risk_usd: 50
+        withdrawal_mode: siphon_excess
+  readiness:
+    contract_buffer_pct: 0.10
+    two_contract_buffer_pct: 0.10
+
+exits:
+  attach_exchange_tp: false       # was true -- exchange TP causes phantom churn via reconciler
+  pending_fill_expiry_sec: 90     # if an entry fill is still unverified after this, force review/cleanup
+  early_save_adverse_pct: 0.015
+  early_save_bars: 12              # was 6 -- stop anxiety-exiting losers early (let SL work)
+  time_stop_bars: 12              # was 8 -- 3 hours default hold
+  time_stop_min_move_pct: 0.001   # was 0.003 -- any positive PnL avoids time stop
+  tp1_move: 0.30                  # wider TP1 -- capture bigger swings
+  tp2_move: 0.60                  # wider TP2 -- let winners run
+  tp3_move: 1.00                  # wider TP3 -- full swing capture
+  tp_full_close_if_single_contract: true
+  breakeven_atr_trigger: 2.0       # was 1.0 -- breakeven = -$1.45 after fees, delay arming
+  breakeven_buffer_pct: 0.004     # was 0.001 -- buffer covers ~$1.50 in fees at $0.15 XLM
+  min_tp_pct: 0.005           # was 0.003 — don't bother with sub-$5 crumbs at 3+ contracts
+
+regime_gates:
+  atr_multiplier: 0.45
+  distance_from_value_atr_mult: 2.5
+  spread_max_pct: 0.0025
+  gate_routing: true
+
+futures_funding:
+  enforce: true
+  buffer_pct: 0.02
+  reserve_usd: 10
+  auto_transfer: true
+  currency: USDC
+  preferred_currencies: [USDC]
+  conversion_cost_bps: 0           # USDC→USDC = no conversion
+  monitor_currencies: [USD, USDC]
+  balance_delta_alert_usd: 0.5
+  profit_split_pct: 1.0            # sweep ALL profit back to spot USDC
+  min_transfer_usd: 5
+  spot_reserve_floor_usd: 5
+  max_transfer_per_day_usd: 2000
+  # Idle sweep: move derivatives balance → spot USDC when not in a trade
+  idle_sweep:
+    enabled: true
+    min_sweep_usd: 5               # don't sweep less than $5
+  rescue:
+    enabled: true
+    trigger_pct: 0.02
+    reserve_multiple: 1.0
+
+# Balance reconciliation — auto-correct wallet drift (spot vs derivatives)
+balance_reconciliation:
+  enabled: true
+  buffer_usdc: 2.0                 # keep $2 in derivatives for settlement
+  sweep_threshold_usdc: 5.0        # don't bother sweeping less than $5
+  auto_convert_usd: true           # auto-convert USD → USDC (1:1, zero fee on Coinbase)
+  require_all_usdc: false          # true = block entries if USD spot > $1
+  max_transfer_retries: 3
+  safe_mode_cooldown_minutes: 15
+  log_every_cycle: false           # true = log even when no drift (verbose)
+
+# Coinbase-style margin ratio guard (cross margin). Defaults are conservative and only block NEW entries.
+margin_policy:
+  enabled: true
+  enforcement: smart      # smart = block only when margin actually unsafe
+  # Coinbase CDE: intraday 8AM-4PM ET (5AM-1PM PT) = 8 hours lower margin
+  # Overnight: 4PM-8AM ET (1PM-5AM PT) = 16 hours higher margin
+  cutoff_hour_et: 16       # 4:00 PM ET = 1:00 PM PT — overnight margin kicks in
+  cutoff_minute_et: 0
+  intraday_start_hour_et: 8   # 8:00 AM ET = 5:00 AM PT — intraday margin resumes
+  intraday_start_minute_et: 0
+  pre_cutoff_minutes: 15   # stop new entries 15 min before cutoff (12:45 PM PT)
+  safe_lt: 0.85           # restored: block entries above 85% MR
+  warning_lt: 0.92
+  danger_lt: 0.98
+  liquidation_gte: 1.00
+  # Overnight auto-enable: when equity covers overnight margin with buffer, allow 24/7 trading
+  overnight_trading:
+    mode: auto             # auto = enable when equity sufficient, always = force on, never = force off
+    min_equity_ratio: 1.20 # need equity >= 1.2x overnight margin to enable (e.g., $432*1.2 = $518)
+    overnight_safe_mr: 0.85  # max overnight MR to allow entries during overnight hours
+  friday_break:
+    enabled: true
+    break_weekday: 4
+    break_start_hour_et: 17
+    break_start_minute_et: 0
+    break_end_hour_et: 18
+    break_end_minute_et: 0
+    pre_break_new_entry_lock_minutes: 60
+    force_flat_minutes_before_break: 20
+    reopen_cooldown_minutes: 10
+  playbook:
+    enabled: true
+    intraday:
+      label: INTRADAY_ATTACK
+      objective: press_A_plus_setups_and_close_before_cutoff
+      allow_multi_contract: true
+      max_new_contracts: 2
+      min_quality_for_multi_contract: FULL
+      force_exit_before_cutoff: true
+    pre_cutoff:
+      label: PRE_CUTOFF_DEFENSE
+      objective: no_new_risk_manage_existing_position_and_be_flat_before_overnight
+      block_new_entries: true
+      max_new_contracts: 1
+      force_exit_before_cutoff: true
+    overnight:
+      label: OVERNIGHT_DEFENSE
+      objective: preserve_capital_trade_small_only_if_overnight_margin_is_safe
+      block_new_entries_if_not_safe: true
+      block_new_entries_when_safe: false
+      allow_multi_contract_when_safe: false
+      max_new_contracts_when_safe: 1
+      max_new_contracts_when_unsafe: 1
+
+# Pre-Liquidation Rescue Ladder (PLRL-3): DISABLED per war room audit.
+# War room verdict: Martingale logic (averaging down on leverage) is retail behavior.
+# Dynamic % stops + circuit breakers now force exit BEFORE liquidation.
+# Emergency margin sweep kept as last-resort safety net only.
+plrl3:
+  enabled: false                # DISABLED: war room priority #1 -- cut losers, don't rescue
+  enforcement: log_only         # reverted to log_only since disabled
+  max_rescues: 0
+  liq_trigger_pct: 0.08
+  mr_triggers: [0.55, 0.70]
+  add_multipliers: [1, 2]
+  strict_initial_sizing: true
+  mr_max_allowed: 0.90
+  fail_mr: 0.92
+  max_projected_mr: 0.90
+  overnight_guard_mr: 0.85
+  disable_rescues_pre_cutoff_min: 30
+  # Emergency margin sweep still active -- sweeps spot USDC to prevent liquidation
+  # This is NOT Martingale (doesn't add to position, just protects margin)
+  aggressive_sweep: true
+
+# Strategy Engine v4 controls
+v4:
+  regime_mode: auto   # auto | dual | trend_only | mr_only
+  strict_score_gate: true
+  quality_tiers:
+    enabled: true
+    reduced_gap: 10
+    scalp_gap: 20
+    monster_above: 15   # score >= threshold + 15 = MONSTER (exceptional setup)
+    reduced:
+      breakeven_atr_trigger: 1.5      # was 0.5 -- 0.5 ATR arms too soon, BE = -$1.45 net
+      time_stop_bars: 12              # was 8 -- 3 hours for reduced tier
+      time_stop_min_move_pct: 0.005
+    scalp:
+      breakeven_atr_trigger: 1.0      # was 0.3 -- 0.3 ATR = $0.80 move, BE always loses $1.45
+      time_stop_bars: 6               # was 3 -- 90min for scalps (45min too tight)
+      time_stop_min_move_pct: 0.003
+      use_min_tp: true
+  entry_idempotency_sec: 90
+  exit:
+    dynamic_tp_enabled: true
+    trend_tp_atr: 2.00
+    mr_tp_atr: 1.00
+    reversal_min_bars: 4          # was 2 -- give trades 1hr before reversal exit
+    reversal_requires_nonpositive_pnl: true
+  reverse_on_exit:
+    enabled: true
+    allowed_exit_reasons: [reversal_signal, trend_flip, tp1, profit_lock, min_profit_floor, profit_decay, recovery_take_profit, moonshot_trail_stop, runner_trail_stop, runner_reversal, runner_floor_hit]
+    require_opposite_direction: true
+    require_profitable_exit: true
+    ignore_cooldown: true
+  profit_lock:
+    enabled: true
+    # Flat defaults (fallback for in-flight trades with unknown tier)
+    # Calibrated to XLM: 1 ATR(15m) ≈ $8.50 on 5000 contract
+    activate_usd: 4.00              # widened: was 2.50 - let trades develop before locking
+    keep_ratio: 0.50               # widened: was 0.65 - keep 50% of peak, not 65%
+    max_giveback_usd: 2.50         # widened: was 1.00 - stop exiting on normal pullbacks
+    min_bars_since_entry: 1
+    lock_min_usd: 0.50
+    # Tier-specific overrides — scaled to XLM tick economics
+    # SCALP: 1 ATR ($8) — quick lock, small wins
+    # FULL: 2 ATR ($17) — let medium moves play out
+    # MONSTER: 4 ATR ($34) — catch the big swings ($25-50)
+    tiers:
+      SCALP:
+        activate_usd: 3.00            # widened: was 2.00 - stop panic-locking tiny profits
+        keep_ratio: 0.50              # widened: was 0.70 - keep 50% of peak
+        max_giveback_usd: 1.50        # widened: was 0.75 - normal pullbacks are OK
+      REDUCED:
+        activate_usd: 4.00            # widened: was 2.50
+        keep_ratio: 0.50              # widened: was 0.65
+        max_giveback_usd: 2.00        # widened: was 1.25
+      FULL:
+        activate_usd: 5.00            # widened: was 3.50 - let medium moves play out
+        keep_ratio: 0.50
+        max_giveback_usd: 2.50        # widened: was 1.75
+      FULL_expansion:
+        activate_usd: 6.00            # widened: was 4.50
+        keep_ratio: 0.45
+        max_giveback_usd: 3.50
+      MONSTER:
+        activate_usd: 5.00
+        keep_ratio: 0.50
+        max_giveback_usd: 3.00
+      MONSTER_expansion:
+        activate_usd: 7.00            # tightened: was 8.00
+        keep_ratio: 0.45
+        max_giveback_usd: 4.00        # tightened: was 5.00
+  # Profit Protection Lanes — layered defense against giving back open profit
+  profit_protection:
+    # Lane 1: Hard minimum floor — once up this much, NEVER give it all back.
+    # Independent of profit_lock tiers. Fires before profit_lock activates.
+    min_floor:
+      enabled: true
+      floor_usd: 5.00          # widened: was 3.00 -- arm at $5, not $3 crumbs
+      min_bars: 4              # widened: was 2 -- arm after 1 hour, not 30min
+      trail_pct: 0.40          # NEW: trail at 40% of peak (replaces hard floor)
+    # Compression Scalp: faster profit capture when vol is low.
+    # Overrides min_floor + decay_arm to grab small profits quickly.
+    compression_scalp:
+      min_floor_usd: 3.50      # widened: was 2.50 -- stop scalping $2 crumbs
+      min_bars: 4              # widened: was 3 -- give trades 1 hour before arming
+      decay_arm_usd: 5.00      # widened: was 3.50 -- arm decay at $5
+      exempt_regimes: [trend]  # trend entries use wider entry_profile values, not scalp
+    # Lane 2: Momentum-confirmed decay exit — close when profit peaks and momentum dies.
+    # Only arms after unrealized exceeds arm_usd. Exits when retrace % exceeded AND momentum weak.
+    decay_exit:
+      enabled: true
+      arm_usd: 6.00            # widened: was 4.00 -- arm at $6, let profits grow
+      decay_pct: 0.70           # widened: was 0.40 -- 70% retrace required, not 40%
+      require_momentum: true   # re-enabled: require RSI/MACD weakness to confirm exit
+      # Strategy-specific decay thresholds
+      strategy_overrides:
+        trend:
+          decay_pct: 0.75       # widened: was 0.65 -- trends retrace 50%+ normally
+        mean_reversion:
+          decay_pct: 0.65       # widened: was 0.45 -- MR needs room to work
+        compression_range:
+          decay_pct: 0.60       # widened: was 0.50 -- compression needs patience
+    # Strategy-specific profit profiles — different entries have different expectations.
+    # tp_mult scales the base TP targets. min_profit_usd overrides the global floor.
+    # decay_pct overrides the decay exit threshold for that strategy combo.
+    entry_profiles:
+      # Quick scalps: small targets, tight protection, fast exits
+      # min_profit_usd is POST-FEE — fees already subtracted from PnL tracking
+      compression_range:
+        tp_mult: 0.40
+        min_profit_usd: 2.50
+        decay_pct: 0.25
+      early_impulse:
+        tp_mult: 0.50
+        min_profit_usd: 3.00
+        decay_pct: 0.30
+      # Standard entries: moderate expectations
+      # min_profit_usd is POST-FEE — fees already subtracted from PnL tracking
+      pullback:
+        tp_mult: 0.70
+        min_profit_usd: 3.00
+        decay_pct: 0.35
+      reversal_impulse:
+        tp_mult: 0.70
+        min_profit_usd: 3.00
+        decay_pct: 0.35
+      # Liquidity sweep entries: snapback is fast, capture the bounce
+      liquidity_sweep:
+        tp_mult: 0.80
+        min_profit_usd: 3.50
+        decay_pct: 0.40
+      liquidity_sweep_continuation:
+        tp_mult: 0.70
+        min_profit_usd: 3.25
+        decay_pct: 0.32
+      liquidity_sweep_reversal:
+        tp_mult: 0.55
+        min_profit_usd: 2.75
+        decay_pct: 0.24
+      # Trend entries: wide targets, patient holds, bigger expected wins
+      breakout_retest:
+        tp_mult: 1.00
+        min_profit_usd: 4.00
+        decay_pct: 0.40
+      compression_breakout:
+        tp_mult: 1.00
+        min_profit_usd: 4.00
+        decay_pct: 0.40
+      # Regime+entry combos (checked first — more specific = higher priority)
+      pullback_trend:
+        tp_mult: 1.20
+        min_profit_usd: 5.00
+        decay_pct: 0.45
+      breakout_retest_trend:
+        tp_mult: 1.50
+        min_profit_usd: 5.00
+        decay_pct: 0.50
+      # Structure-based trend continuation: ride the trend
+      trend_continuation:
+        tp_mult: 1.20
+        min_profit_usd: 5.00
+        decay_pct: 0.40
+      trend_continuation_trend:
+        tp_mult: 1.50
+        min_profit_usd: 5.00
+        decay_pct: 0.45
+      # Fib retrace: countertrend retracement plays — fib-based TP
+      fib_retrace:
+        tp_mult: 0.70
+        min_profit_usd: 3.00
+        decay_pct: 0.35
+      fib_retrace_mean_reversion:
+        tp_mult: 0.70
+        min_profit_usd: 3.00
+        decay_pct: 0.30
+      # Grid Range: range-edge mean reversion, tight targets, fast exits
+      grid_range:
+        tp_mult: 0.35
+        min_profit_usd: 2.00
+        decay_pct: 0.20
+      # Funding Arb Bias: ride the funding payment direction
+      funding_arb_bias:
+        tp_mult: 0.60
+        min_profit_usd: 3.00
+        decay_pct: 0.35
+      # Regime Low Vol: tight squeeze scalps at range edges
+      regime_low_vol:
+        tp_mult: 0.35
+        min_profit_usd: 2.00
+        decay_pct: 0.20
+      # Stat Arb Proxy: z-score mean reversion, moderate targets
+      stat_arb_proxy:
+        tp_mult: 0.50
+        min_profit_usd: 2.50
+        decay_pct: 0.30
+      # Orderflow Imbalance: momentum follow-through on volume delta
+      orderflow_imbalance:
+        tp_mult: 0.70
+        min_profit_usd: 3.00
+        decay_pct: 0.35
+      # Macro MA Cross: big regime shift, wide targets
+      macro_ma_cross:
+        tp_mult: 1.20
+        min_profit_usd: 5.00
+        decay_pct: 0.45
+      # Slow Bleed Hunter: rapid micro-scalps, grab small profits fast
+      slow_bleed_hunter:
+        tp_mult: 0.30
+        min_profit_usd: 2.00
+        decay_pct: 0.20
+  ev:
+    min_ev_usd: 1.00       # CHANGED: 0.50 to 1.00 - require $1+ expected value after fees
+    fee_model: balanced   # conservative | balanced | maker_bias
+    maker_fee_rate: 0.00085
+    taker_fee_rate: 0.00090
+    slippage_pct: 0.0002
+    funding_pct: 0.0
+  runtime_guard:
+    enabled: true
+    window_minutes: 20
+    max_bot_errors: 5
+    scan_lines: 4000
+  trend_ride:
+    enabled: true
+    time_stop_bars_trend: 24
+    suppress_tp1_trend: true
+  scaling:
+    enabled: true
+    add_size_pct: 0.25
+    max_adds: 2
+    min_minutes_between_adds: 30
+    profit_trigger_atr: 0.75
+    projected_mr_prefer_lt: 0.90
+    projected_mr_hard_lt: 0.95
+  recovery:
+    enabled: true
+    recovery_cap_per_trade: 12.0
+    high_quality_score: 75           # lower bar for recovery setups
+  recovery_mode:
+    enabled: true
+    # Trigger: enter RECOVERY when realized PnL today drops below this
+    loss_trigger_usd: 9999.0          # effectively disabled
+    # Goal: recover debt × this multiplier (2.0 = get back loss + double it)
+    goal_multiplier: 1.0             # just aim to get back to even
+    # Semi-aggressive sizing: multiply base size by this in recovery
+    size_multiplier: 1.0
+    max_size_multiplier: 1.0
+    # Max recovery trades before giving up and going back to normal
+    max_recovery_trades: 99
+    # Hard daily drawdown cap — triggers SAFE_MODE (no trades rest of day)
+    max_daily_drawdown_usd: 0           # DISABLED: replaced by dynamic % below
+    max_daily_drawdown_pct: 0.05       # 5% of equity = SAFE_MODE (war room: dynamic NAV %)
+    # Minimum score to enter a recovery trade (lower than normal high_quality)
+    min_score: 45
+    # Tighter TP in recovery: multiply normal TP distances by this (<1 = closer TP)
+    tp_tightness: 1.0
+    # Max time to hold a recovery trade (minutes)
+    max_hold_minutes: 120
+    # Cooldown after a recovery loss before trying again
+    cooldown_after_loss_minutes: 0    # no cooldown
+    # Post-TP bias: after any TP exit, prefer opposite side
+    post_tp_bias:
+      enabled: true
+      expire_minutes: 15
+      expire_after_trades: 1
+  kill_switches:
+    max_spread_pct: 0.0050           # wider tolerance for continuous trading
+    overnight_derisk_mr: 0.95        # higher margin tolerance
+    cutoff_pre_minutes: 5            # trade closer to cutoff
+  circuit_breaker:
+    enabled: true                    # ACTIVE: halt entries when streak+drawdown both hit
+    combo_loss_count: 2              # trip at just 2 losses + drawdown
+    # DYNAMIC: combo_drawdown now computed as % of equity (war room rec: no static $)
+    combo_drawdown_usd: 0            # DISABLED: replaced by combo_drawdown_pct below
+    combo_drawdown_pct: 0.04         # 4% of equity = dynamic drawdown trigger
+    # DYNAMIC: single trade max loss as % of equity (war room rec: no static $)
+    single_trade_max_loss_usd: 10    # RE-ENABLED: hard $10 dollar stop (catches bot-offline scenarios on restart)
+    single_trade_max_loss_pct: 0.03  # 3% of equity = hard exit on any single trade
+    max_hold_hours: 1.5              # TIGHTENED: 2 → 1.5 hours - faster exit on stalled trades
+    notify_slack: true
+
+  # 3-Tier escalation matrix (read by circuit_breaker.sh + ops runbook)
+  escalation_matrix:
+    tier1_soft_halt:
+      trigger_losses: 2              # CHANGED: 4 to 2 - stop early
+      trigger_drawdown_usd: 12.0     # CHANGED: $20 to $12
+      action: pause_entries
+      notify_slack: true
+      auto_recover: true
+      recover_after_minutes: 60      # CHANGED: 30 to 60 min cooldown
+    tier2_emergency:
+      trigger_losses: 4              # CHANGED: 6 to 4
+      trigger_drawdown_usd: 20.0     # CHANGED: $35 to $20
+      trigger_margin_ratio: 0.85     # CHANGED: 0.90 to 0.85
+      action: close_and_halt
+      notify_slack: true
+      auto_recover: false
+    tier3_kill:
+      trigger_losses: 6              # CHANGED: 8 to 6
+      trigger_drawdown_usd: 30.0     # CHANGED: $50 to $30
+      trigger_consecutive_errors: 5  # CHANGED: 10 to 5
+      trigger_margin_ratio: 0.90     # CHANGED: 0.95 to 0.90
+      action: stop_service
+      notify_slack: true
+      require_manual_restart: true
+  short_bias_distance_override:
+    enabled: false
+    require_direction: both
+    require_regime: trend
+    min_score: 90
+    min_ev_usd: 0.25
+  adaptive_threshold:
+    enabled: true           # self-learning: auto-raise thresholds for losing score buckets
+    min_sample_size: 5
+    lookback_trades: 30
+    target_win_rate: 0.50
+  short_bias_atr_override:
+    enabled: false
+    require_direction: both
+    require_regime: trend
+    require_entry_type: pullback
+    min_score: 80
+    min_adx_15m: 30
+    require_atr_expanding: true
+    require_bb_expanding: true
+    min_ev_usd: 0.25
+    allow_score_override: true
+    score_override_only_ema_bias_fail: true
+    score_override_min_score: 80
+  # Dip-retrace no-short gate: blocks shorts when price is bouncing back
+  # Prevents the classic "short the retrace after the dump" mistake
+  dip_retrace_gate:
+    enabled: true
+    rsi_rising_bars: 3            # RSI must be rising for 3+ bars to detect bounce
+    vwap_reclaim_pct: 0.002       # price within 0.2% of or above VWAP = reclaimed
+    min_higher_closes: 2          # 2+ consecutive higher closes = bounce confirmed
+    block_direction: short        # only block shorts during bounce (longs always allowed)
+    exempt_tiers: [MONSTER]       # MONSTER tier can still short (very high conviction)
+    exempt_entry_types:           # these entry types are exempt from the gate
+      - reversal_impulse          # reversals are designed for counter-trend
+      - volume_climax_reversal    # climax reversals trade after capitulation
+
+  # Top chart pattern recognition gates (Feb 28)
+  # Block entries that fight confirmed high-probability patterns
+  pattern_gates:
+    enabled: true
+    # Inverse H&S: block shorts when neckline breaks up (84% success)
+    inv_hs_block_shorts: true
+    # H&S: block longs when neckline breaks down (82% success)
+    hs_block_longs: true
+    # Double bottom: block shorts near second bounce (82% success)
+    double_bottom_block_shorts: true
+    # Channel: only trade in channel direction
+    channel_direction_only: true
+
+  moonshot:
+    enabled: true
+    velocity_threshold_pct: 0.015
+    min_pnl_pct: 0.008
+    trail_atr_mult: 3.0
+    require_oi_rising: false
+    require_trend_regime: false
+    max_stale_bars: 12
+
+  runner_mode:
+    enabled: true
+    trail_atr_mult: 2.5          # widened: was 1.5 -- 9 bps too tight, use 15 bps
+    fib_tighten_mult: 0.6
+    min_bars: 2
+    reversal_bars: 2
+    allowed_entry_types:
+      - pullback
+      - breakout_retest
+      - slow_bleed_hunter
+      - trend_continuation
+      - fib_retrace
+    require_trend_healthy: true
+
+  lane_scoring:
+    enabled: true
+    sweep_lookback: 3
+    sweep_reclaim_pct: 0.002
+    lane_a_threshold: 55
+    lane_a_mr_threshold: 55
+    lane_b_threshold: 50
+    lane_b_atr_bypass: true
+    lane_c_threshold: 45
+    lane_c_require_sweep_or_ri: true
+    lane_c_atr_bypass: true
+    lane_e_threshold: 50
+    lane_e_distance_bypass: true
+    lane_f_threshold: 40
+    lane_f_distance_bypass: true
+    lane_g_threshold: 40
+    lane_g_enabled: true
+    lane_h_threshold: 45
+    lane_h_enabled: true
+    lane_i_threshold: 45
+    lane_i_enabled: true
+    lane_j_threshold: 35
+    lane_j_enabled: true
+    # New lanes (Phase 3: self-learning playbook expansion)
+    lane_k_threshold: 50
+    lane_k_enabled: true
+    lane_l_enabled: true           # MTF conflict blocker (prevents entries, not an entry lane)
+    lane_l_mtf_rsi_gap: 20        # block when 15m vs 1h RSI gap > 20
+    lane_m_threshold: 55
+    lane_m_enabled: true
+    lane_m_vol_climax_mult: 2.5   # volume >= 2.5x avg = climax
+    lane_n_threshold: 50
+    lane_n_enabled: true
+    lane_n_vwap_dev_pct: 0.01     # 1% deviation from VWAP triggers reversion
+    lane_o_enabled: true           # exhaustion warning blocker
+    lane_o_rsi_extreme: 75         # RSI threshold for exhaustion detection
+    # Lane P: Grid Range (grid-bot-style mean-reversion at S/R edges)
+    lane_p_enabled: true
+    lane_p_threshold: 35           # low threshold - range edges are high probability
+    # Lane Q: Funding Arb Bias - trade direction that earns funding payments
+    lane_q_enabled: true
+    lane_q_threshold: 60           # moderate threshold - funding signal needs quality confluence
+    funding_arb_threshold: 0.0001  # min |funding_rate| to trigger (0.01%)
+    # Lane R: Regime Low Vol - BB squeeze + range edge scalps in dead markets
+    lane_r_enabled: true
+    lane_r_threshold: 55           # moderate - squeeze setups are reliable
+    # Lane S: Stat Arb Proxy - z-score mean reversion (>2 sigma deviation)
+    lane_s_enabled: true
+    lane_s_threshold: 50           # moderate - statistical edge is strong at 2+ sigma
+    # Lane T: Orderflow Imbalance - volume delta proxy (buy/sell ratio >2:1)
+    lane_t_enabled: true
+    lane_t_threshold: 65           # higher threshold - proxy signal needs extra confluence
+    # Lane U: Macro MA Cross - 200 MA breakout on 1h with 4h confirmation
+    lane_u_enabled: true
+    lane_u_threshold: 45           # lower threshold - 200 MA crosses are rare but powerful
+    # Lane W: HTF Breakout Continuation - early weekly breakout continuation
+    lane_w_enabled: true
+    lane_w_threshold: 52
+    lane_w_distance_bypass: true
+    lane_w_min_signals: 6
+    lane_w_breakout_lookback_4h: 6
+    lane_w_breakout_lookback_1h: 12
+    lane_w_min_breakout_pct: 0.0015
+    lane_w_max_chase_atr: 0.80
+    lane_w_min_volume_ratio: 1.05
+    lane_w_min_close_strength: 0.68
+    lane_w_rsi_4h_long_min: 56
+    lane_w_rsi_4h_short_max: 44
+    lane_w_event_block_hours: 6
+    # Lane V: Liquidity Sweep - bidirectional heatmap strategy (magnet + sweep reversal)
+    lane_v_enabled: true
+    lane_v_threshold: 55           # high bar - A+ trades only, requires 4-of-6 confluence
+    lane_v_min_signals: 4          # minimum core signals to fire
+    lane_v_wick_min_ratio: 0.35    # minimum wick-to-range ratio
+    lane_v_wick_strong_ratio: 0.50 # strong wick threshold
+    lane_v_cluster_zone_atr: 0.25  # cluster zone width in ATR multiples
+    lane_v_sweep_cooldown_bars: 3  # min bars between sweep trades
+    lane_v_continuation_enabled: true   # allow pre-sweep continuation trades
+    lane_v_reversal_enabled: true       # allow post-sweep reversal trades
+    lane_v_wick_score_min: 55
+    lane_v_max_reversal_chase_atr: 1.2
+    lane_v_continuation_tp_buffer_atr: 0.15
+    lane_v_reversal_tp_mode: fast_mean_reversion
+    lane_v_fail_fast_bars: 3
+    lane_v_skip_balanced_clusters: true
+    lane_v_min_cluster_strength: 30
+    lane_v_require_volume_spike_for_reversal: false
+    lane_v_require_fib_or_ema_stretch: true
+    compression_breakout_enabled: true
+    early_impulse_enabled: true
+    early_impulse_body_mult: 1.5     # was 2.0 — catch more impulse moves
+    early_impulse_vol_mult: 1.2      # was 1.5 — more opportunity in low-vol
+    early_impulse_close_pct: 0.75
+    squeeze_impulse_body_ratio: 0.6
+    squeeze_impulse_vol_ratio: 1.1
+    # Per-lane weight profiles (override default regime weights)
+    # Each lane maps flag names to weights (must sum to ~100).
+    # Empty or missing lane = use default regime-based weights.
+    lane_weights:
+      A:
+        HTF_BREAK: 20
+        EMA_ALIGN_SLOPE: 20
+        ADX_TREND: 15
+        ATR_EXPANDING: 15
+        VOLUME_SPIKE: 15
+        BB_EXPAND_OR_WALK: 10
+        MACD_MOMENTUM: 5
+        FLAG_CONTINUATION: 12
+      B:
+        HTF_BREAK: 25
+        ADX_TREND: 20
+        EMA_ALIGN_SLOPE: 15
+        ATR_EXPANDING: 15
+        VOLUME_SPIKE: 10
+        BB_EXPAND_OR_WALK: 10
+        MACD_MOMENTUM: 5
+        FLAG_CONTINUATION: 10
+      E:
+        HTF_LEVEL: 20
+        RSI_EXTREME: 15
+        VOLUME_SPIKE: 15
+        MACD_DIVERGENCE: 15
+        RSI_DIVERGENCE: 10
+        RSI_GAP_CLOSING: 12
+        OBV_DIVERGENCE: 8
+        ATR_EXPANDING: 15
+        BB_REJECTION: 10
+        FIB_ZONE: 10
+        CUP_HANDLE: 10
+        DOUBLE_PATTERN: 12
+      F:
+        HTF_LEVEL: 20
+        VOLUME_SPIKE: 20
+        ATR_EXPANDING: 15
+        FIB_ZONE: 15
+        BB_REJECTION: 10
+        MACD_DIVERGENCE: 10
+        RSI_EXTREME: 10
+      G:
+        RSI_EXTREME: 25
+        BB_REJECTION: 25
+        RSI_GAP_CLOSING: 15
+        FIB_ZONE: 15
+        VOLUME_SPIKE: 15
+        MACD_DIVERGENCE: 10
+        RSI_DIVERGENCE: 10
+        OBV_DIVERGENCE: 8
+        HTF_LEVEL: 10
+        CUP_HANDLE: 10
+        DOUBLE_PATTERN: 12
+
+      H:
+        EMA_ALIGN_SLOPE: 20
+        ADX_TREND: 15
+        MACD_MOMENTUM: 15
+        VOLUME_SPIKE: 15
+        BB_EXPAND_OR_WALK: 10
+        HTF_BREAK: 10
+        VWAP_CONFIRM: 10
+        FLAG_CONTINUATION: 10
+        CHANNEL_BREAKOUT: 10
+
+      I:
+        FIB_ZONE: 20
+        RSI_EXTREME: 20
+        BB_REJECTION: 15
+        VOLUME_SPIKE: 15
+        MACD_DIVERGENCE: 10
+        RSI_DIVERGENCE: 10
+        OBV_DIVERGENCE: 8
+        HTF_LEVEL: 10
+        DOUBLE_PATTERN: 12
+        CUP_HANDLE: 10
+
+      # Lane J: Slow Bleed Hunter — weights for gradual directional grinds
+      # Uses existing v4 flags that happen to fire during slow trends
+      J:
+        EMA_ALIGN_SLOPE: 25
+        ADX_TREND: 20
+        MACD_MOMENTUM: 15
+        VWAP_CONFIRM: 15
+        VOLUME_SPIKE: 10
+        BB_EXPAND_OR_WALK: 10
+        HTF_BREAK: 10
+        FLAG_CONTINUATION: 10
+
+      # Lane K: Wick Rejection - structure rejection reversals
+      K:
+        HTF_LEVEL: 25
+        RSI_EXTREME: 20
+        BB_REJECTION: 20
+        VOLUME_SPIKE: 15
+        FIB_ZONE: 10
+        MACD_DIVERGENCE: 10
+
+      # Lane M: Volume Climax Reversal - capitulation reversals
+      M:
+        VOLUME_SPIKE: 30
+        RSI_EXTREME: 20
+        MACD_DIVERGENCE: 15
+        BB_REJECTION: 15
+        HTF_LEVEL: 10
+        OBV_DIVERGENCE: 10
+
+      # Lane N: VWAP Reversion - fair value snap-back
+      N:
+        VWAP_CONFIRM: 25
+        RSI_EXTREME: 20
+        BB_REJECTION: 15
+        VOLUME_SPIKE: 15
+        MACD_DIVERGENCE: 10
+        FIB_ZONE: 10
+        HTF_LEVEL: 5
+
+      # Lane V: Liquidity Sweep - bidirectional heatmap + wick reversal
+      # Uses its own composite scoring via wick_score.py + liquidation_clusters.py
+      # These weights apply when Lane V falls through to v4_engine regime scoring
+      V:
+        HTF_LEVEL: 20
+        FIB_ZONE: 15
+        RSI_EXTREME: 15
+        BB_REJECTION: 15
+        VOLUME_SPIKE: 10
+        MACD_DIVERGENCE: 10
+        OBV_DIVERGENCE: 8
+        VWAP_CONFIRM: 10
+        DOUBLE_PATTERN: 12
+
+      # Lane W: Higher-timeframe breakout continuation
+      W:
+        HTF_BREAK: 24
+        EMA_ALIGN_SLOPE: 20
+        ADX_TREND: 14
+        ATR_EXPANDING: 12
+        VOLUME_SPIKE: 12
+        BB_EXPAND_OR_WALK: 10
+        MACD_MOMENTUM: 8
+        VWAP_CONFIRM: 8
+        CHANNEL_BREAKOUT: 12
+        FLAG_CONTINUATION: 12
+
+  # Multi-TF alignment bonus
+  alignment:
+    enabled: true
+    alignment_max_bonus: 8
+    alignment_max_penalty: 5
+
+# Liquidation cluster analysis (proxy heatmap from force order events)
+liquidation_clusters:
+  enabled: true
+  cluster_resolution_atr: 0.5    # group events into bands of 0.5 ATR width
+  min_cluster_events: 3          # minimum force order events to form a cluster
+  min_cluster_notional: 5000     # minimum USD notional to consider cluster "strong"
+  magnet_distance_max_atr: 5.0   # ignore clusters more than 5 ATR away
+  sweep_zone_atr: 0.25           # price within 0.25 ATR of cluster center = in the zone
+  bonus_max: 5                   # max score modifier from liquidation data (was 2)
+  continuation_bonus: 2
+  reversal_bonus: 4
+  balanced_penalty: 10
+
+# Contract-specific intelligence (OI, funding, basis)
+contract_context:
+  enabled: true
+  stale_seconds: 25.0
+  max_history: 200
+  crowding_penalty_max: 5
+  oi_signal_max: 5
+  basis_signal_max: 3
+  total_mod_max: 10
+  funding_mild_hr: 0.002
+  funding_extreme_hr: 0.005
+  cascade_price_threshold_pct: 0.015
+  cascade_oi_threshold_pct: 0.02
+
+market_structure:
+  enabled: true
+  stale_seconds: 8.0
+  depth_levels: 10
+  imbalance_long_threshold: 0.58
+  imbalance_short_threshold: 0.42
+  max_spread_bps: 12.0
+  bonus_max: 4
+  absorption_bonus: 2
+  replenishment_bonus: 1
+  replenishment_floor: 0.92
+  flip_bonus: 1
+  spoof_penalty: 2
+  spoof_risk_threshold: 0.65
+
+# BTC correlation: penalize trades that fight BTC momentum
+btc_correlation:
+  enabled: true
+  lookback_bars: 8              # 8 × 15m = 2 hours of BTC momentum
+  strong_move_pct: 0.005        # 0.5% BTC move = "strong"
+  bonus_pts: 5                  # +5 score when BTC confirms direction
+  penalty_pts: 5                # -5 score when BTC contradicts
+
+# Candlestick pattern detection: engulfing, hammer, star, pin bar, doji
+candle_patterns:
+  enabled: true
+  bonus_pts: 5                  # +5 score when pattern confirms direction
+  penalty_pts: 3                # -3 score when pattern contradicts
+
+# Sentiment gate -- block toxic trades during extreme fear/panic
+# Uses Crypto Fear & Greed Index (alternative.me, free, no auth)
+sentiment_gate:
+  enabled: true
+  block_all_below: 10         # F&G < 10 = catastrophic panic, block ALL entries
+  block_longs_below: 20       # F&G < 20 = extreme fear, block longs (shorts ok)
+  reduce_size_below: 30       # F&G < 30 = fear, reduce position size
+  fear_size_mult: 0.5         # half size when in fear zone
+
+# Slack alerts
+slack:
+  bot_token: "${SLACK_BOT_TOKEN}"
+  client_secret: "${SLACK_CLIENT_SECRET}"
+  signing_secret: "${SLACK_SIGNING_SECRET}"
+  war_room_enabled: true
+  hive_dashboard_url: ""
+  # Live feed reports (replaces dashboard)
+  reports:
+    pulse_interval_min: 15       # regime, vol, gates, direction bias
+    health_interval_min: 60      # balances, margin, PnL, equity
+    position_interval_min: 5     # unrealized PnL updates while in trade
+
+# Claude AI trade intelligence advisor
+ai:
+  enabled: true
+  model: opus
+  pre_entry_enabled: true           # fire entry eval before placing orders
+  exit_advisor_enabled: true        # fire exit eval while in trade
+  regime_advisor_enabled: true      # fire regime eval on vol transitions
+  skip_confidence_threshold: 0.55   # AI needs >= 55% confidence to skip entry (was 70% — too strict)
+  max_score_adjustment: 10          # max points AI can add/subtract from score
+  exit_tighten_on_exit_now: false   # was true -- stale AI cache causes premature decay exits
+  cache_ttl_entry: 0                # always fresh for entries (0 = no expiry)
+  cache_ttl_exit: 120               # recheck exit every 2 min
+  cache_ttl_regime: 300             # recheck regime every 5 min
+  # Executive mode: Claude makes the actual entry/exit decisions
+  executive_mode: true              # Claude is the boss — overrides strategy engine
+  executive_full_control: false     # advisory-only by default; deterministic risk and freshness gates stay binding
+  executive_min_confidence: 0.60    # lowered for overnight sprint — Opus needs to fire fast
+  executive_allow_soft_risk_override: false
+  executive_allow_no_signal_entries: false
+  executive_allow_size_override: false
+  executive_allow_gemini_takeover: false
+  cache_ttl_directive: 60           # 60 sec — fastest reaction time when the breakout comes
+  hard_min_score: 40                # ABSOLUTE floor — nothing below this trades, period
+  # Codex peer advisor (team mode): Codex analyzes in parallel, Opus stays boss.
+  codex:
+    enabled: true                   # safe default: keep off until you confirm Codex login/profile
+    cli_bin: codex                  # Codex CLI binary
+    model: gpt-5                    # Codex model for peer analysis
+    sandbox_mode: read-only         # prevents Codex exec from writing files
+    timeout_sec: 60
+    pre_entry_enabled: true
+    exit_advisor_enabled: true
+    regime_advisor_enabled: true
+    executive_mode: true            # produce codex_directive in parallel with Claude directive
+    cache_ttl_entry: 0
+    cache_ttl_exit: 120
+    cache_ttl_regime: 300
+    cache_ttl_directive: 60
+  # Gemini peer advisor (team member)
+  gemini:
+    enabled: true
+    model: gemini-1.5-pro-latest
+    pre_entry_enabled: true
+    exit_advisor_enabled: true
+    regime_advisor_enabled: true
+    executive_mode: true
+    cache_ttl_entry: 0
+    cache_ttl_exit: 120
+    cache_ttl_regime: 300
+    cache_ttl_directive: 60
+  # Inter-agent communication (live debate + consensus)
+  agent_comms:
+    enabled: true
+    challenge_round: true          # agents challenge each other's positions
+    consensus_required: false      # if true, requires 2/3 agreement to enter
+    exit_challenge_threshold: 0.70 # confidence needed for exit challenge
+    max_debate_time_sec: 30        # timeout for challenge round
+    log_debates: true              # log all debates to agent_debates.jsonl
+  # Perplexity News Sentinel (Intel)
+  perplexity:
+    enabled: true
+    # API Key loaded from .env or PERPLEXITY_API_KEY env var
+    # Fallback: uses Claude 'WebSearch' tool if no key found
+
+# Macro/market informer stream for dashboard + Slack digest.
+market_intel:
+  enabled: true
+  refresh_seconds: 300
+  timeout_sec: 3.5
+  binance_symbol: XLMUSDT
+  max_headlines: 24
+  slack_digest_enabled: true
+  slack_interval_minutes: 60
+  slack_max_items: 5
+  futures_relativity:
+    bonus_max: 4
+    min_confidence: 0.45
+  weekly_research:
+    enabled: true
+    refresh_hours: 6
+    window_refresh_hours: 2
+    sunday_start_hour_et: 18
+    monday_end_hour_et: 10
+    score_bonus_max: 3
+    min_confidence: 0.45
+  liquidation_feed:
+    symbol: XLMUSDT
+    stale_seconds: 45
+    window_seconds: 900
+    reconnect_seconds: 3
+    recent_event_limit: 200
+    min_notional_5m_usd: 25000
+    bonus_max: 2
+
+logging:
+  decisions_jsonl: logs/decisions.jsonl
+  trades_csv: logs/trades.csv
+
+paths:
+  data_dir: data
+  logs_dir: logs
+
+# Regime-based trading: adapt risk/exit params to market conditions
+# Uses vol_phase from expansion.py + ADX from v4_engine — no new indicators
+regime_manager:
+  enabled: true
+  compression:
+    adx_threshold: 25         # ADX below this = choppy
+    rsi_low: 40               # RSI must be in this range for compression
+    rsi_high: 60
+    size_multiplier: 0.7      # 30% smaller positions in chop
+    max_sl_pct: 0.025         # 2.5% max stop
+    tp_atr_mult: 1.0          # quick scalps: 1.0x ATR
+    time_stop_bars: 8         # was 3 -- 2hr time stop (45min too aggressive for fees)
+    early_save_bars: 8        # was 3 -- let SL handle risk, not early save
+  expansion:
+    adx_threshold: 25         # ADX above this = trending
+    atr_ratio_threshold: 1.15 # OR ATR ratio above this
+    size_multiplier: 1.3      # 30% bigger in trends
+    max_sl_pct: 0.03          # standard 3% stop
+    tp_atr_mult: 2.0          # LET WINNERS RUN in expansion
+    time_stop_bars: 24        # was 12 -- 6 hours for trend trades to develop
+    early_save_bars: 10       # was 8 -- don't cut winners early in trends
+  # Default thresholds for transition mode (uses base config values)
+  default_max_sl_pct: 0.04
+  default_tp_atr_mult: 1.0
+  default_time_stop_bars: 10    # was 6 -- 2.5hr default
+  default_early_save_bars: 8   # was 6
+
+# Fib Retrace Engine: countertrend entries at fib retracement levels
+fib_retrace:
+  enabled: true
+  min_swing_pct: 0.03
+  lookback_bars_1h: 48
+  swing_left: 3
+  swing_right: 3
+  retrace_depth_max: 0.35
+  min_confirmations: 2
+  min_rr_ratio: 1.5
+  sl_atr_buffer_mult: 0.3
+
+# Slow Bleed Hunter — catches gradual directional grinds
+slow_bleed_hunter:
+  enabled: true
+  min_consecutive_bars: 3       # 3+ lower-highs + lower-lows (or inverse)
+  ema_period: 20                # EMA-20 for direction confirmation
+  rsi_min: 30                   # RSI floor (avoid oversold bounces)
+  rsi_max: 65                   # RSI ceiling (avoid overbought fades)
+  volume_min_ratio: 0.8         # volume >= 80% of 10-bar avg (alive but not spiking)
+  body_consistency_max: 2.5     # max body size ratio (bleed = steady, not wild)
+  min_confirmations: 2          # need 2+ confluence beyond consecutive bars
+
+# HTF Trend Bias Filter
+# When the 1h trend is clearly bearish (crash), block new longs unless the
+# entry type is a confirmed capitulation reversal signal.
+# Symmetric logic applies to shorts in a bullish expansion.
+# Uses classify_htf_trend_bias() from strategy/regime_manager.py.
+htf_direction_filter:
+  enabled: true
+
+  # bearish_crash: RSI_1h < 30 + price below EMA21 + EMA21 below EMA55 + slope negative
+  # In this state, ONLY these entry types are allowed for longs:
+  capitulation_entry_types:
+    - reversal_impulse       # strong reversal candle + structure
+    - wick_rejection         # long wick off support with volume
+    - volume_climax_reversal # climactic selling exhaustion
+    - fib_retrace            # bounce from measured fib level
+
+  # Asymmetric sizing applied on top of all other multipliers.
+  # bearish_crash: longs get 0.4x (minimal), shorts get 1.2x (full conviction)
+  # bearish_trend: longs get 0.7x (cautious), shorts get 1.1x (slight edge)
+  # neutral: 1.0x both directions
+  # bullish_trend: longs 1.1x, shorts 0.7x
+  # bullish_expansion: longs 1.2x, shorts 0.4x (only reversals allowed)
+  # (These are baked into classify_htf_trend_bias() return values.
+  #  Set enabled: false to disable the filter and revert to symmetric sizing.)
+
+# Rolling expectancy gate: kill switch when bot is running cold
+rolling_expectancy:
+  enabled: true
+  lookback: 20                    # rolling window of last 20 closed trades
+  min_trades: 10                  # don't activate until 10+ trades exist
+  min_win_rate: 0.25              # block below 25% win rate
+  reduce_win_rate: 0.35           # reduce size below 35% win rate
+  reduce_size_mult: 0.5           # half size when in warning zone
+  min_ev_usd: -3.0                # block when avg trade loses more than $3
+  min_profit_factor: 0.5          # block when profit factor below 0.5
+  max_tail_losses: 5              # block after 5 consecutive losses at tail
+  promotion_min_size_mult: 1.15   # only promote size when realized edge is materially strong
+  promotion_cap: 1.5              # never let expectancy promotion outrun the rest of the caps
+  reduction_floor: 0.25           # keep some floor for size reductions before a hard kill-switch
+
+# Market pulse: composite health scoring (fuses sentiment + news + live tick)
+market_pulse:
+  enabled: true
+  cache_ttl_sec: 300              # recompute every 5 min
+  danger_block_entries: true      # danger regime is now a hard stop for new entries
+  danger_threshold: 20            # health < 20 = danger zone
+  risk_off_size_mult: 0.7         # 30% smaller positions in risk_off
+  notify_regime_change: true      # Slack alert on regime transitions
+
+freshness_gates:
+  enabled: true
+  max_live_tick_age_sec: 60
+  max_market_brief_age_min: 45
+  block_on_dead_tick: true
+  block_on_stale_market_brief: true
+  block_on_sentiment_stale_in_danger: true
+  block_on_pulse_danger: true

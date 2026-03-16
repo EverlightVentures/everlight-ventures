@@ -1,0 +1,29 @@
+{
+  "pulse": {
+    "health_score": 22,
+    "components": {
+      "sentiment_score": 50,
+      "sentiment_class": "Unknown",
+      "sentiment_stale": true,
+      "news_risk": "risk_off",
+      "news_confidence": 0.85,
+      "news_headlines": [
+        "XLM down 8-10% today to ~$0.15 amid broader crypto sell-off over 5.5% due to geopolitical tensions[5][2]",
+        "Bitcoin and crypto market under pressure, no specific BTC price but correlated downside[5]",
+        "S&P 500/Nasdaq not detailed; focus on crypto/macro volatility with no Fed news today[5]"
+      ],
+      "tick_age_sec": 171175.3,
+      "tick_price": 0.160925,
+      "tick_health": "dead",
+      "brief_age_min": 0.0
+    },
+    "regime": "danger",
+    "reasons": [
+      "sentiment data stale",
+      "news risk_off (conf 85%)",
+      "live tick dead (171175s)"
+    ],
+    "timestamp": "2026-02-28T19:16:53.981627+00:00"
+  },
+  "expires_ts": 1772306513.9816413
+}

@@ -1,0 +1,23 @@
+{% load trading_tags %}
+
+<div class="intel-card">
+  <div class="intel-title">TRADES TODAY</div>
+  {% if trades_today %}
+    {% for t in trades_today %}
+    <div class="trade-log-row {% if t.pnl_usd >= 0 %}win{% else %}loss{% endif %}">
+      <span style="color:#6b7280;font-size:11px;min-width:60px;">{{ t.time|pt_short }}</span>
+      <span class="{{ t.direction|direction_color }}" style="font-weight:600;min-width:45px;">{{ t.direction|upper }}</span>
+      <span style="min-width:70px;">{{ t.entry_price|price6 }}</span>
+      <span style="color:#6b7280;">&rarr;</span>
+      <span style="min-width:70px;">{{ t.exit_price|price6 }}</span>
+      <span class="{{ t.pnl_usd|pnl_color }}" style="font-weight:600;min-width:60px;">{{ t.pnl_usd|money_signed }}</span>
+      <span style="color:#6b7280;font-size:11px;">{{ t.duration|duration_fmt }}</span>
+      {% if t.exit_reason %}
+        <span style="color:#6b7280;font-size:10px;">{{ t.exit_reason }}</span>
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="feed-mini">No trades today.</div>
+  {% endif %}
+</div>

@@ -1,0 +1,23 @@
+{
+  "ROOT_TRUTH": "/mnt/sdcard/AA_MY_DRIVE",
+  "EVERLIGHT_OS": "/mnt/sdcard/AA_MY_DRIVE/everlight_os",
+  "CONTENT_ENGINE_ROOT": "/mnt/sdcard/AA_MY_DRIVE/content_engine",
+  "BOOKS_ROOT": "/mnt/sdcard/AA_MY_DRIVE/books",
+  "TRADING_ROOT": "/mnt/sdcard/AA_MY_DRIVE/trading/xlm_derivatives",
+  "TRADING_REPORTS": "/mnt/sdcard/AA_MY_DRIVE/trading/xlm_derivatives/reports",
+  "XLM_BOT": "/mnt/sdcard/AA_MY_DRIVE/xlm_bot",
+  "XLM_BOT_LOGS": "/mnt/sdcard/AA_MY_DRIVE/xlm_bot/logs",
+  "XLM_BOT_DATA": "/mnt/sdcard/AA_MY_DRIVE/xlm_bot/data",
+  "BUSINESSES": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES",
+  "CONTENT_FACTORY": "/mnt/sdcard/AA_MY_DRIVE/02_CONTENT_FACTORY",
+  "AUTOMATION_CORE": "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE",
+  "CREDENTIALS": "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/03_Credentials",
+  "PUBLISHING": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Publishing",
+  "SAM_BOOKS": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM",
+  "DASHBOARDS": "/mnt/sdcard/AA_MY_DRIVE/09_DASHBOARD",
+  "LOGS": "/mnt/sdcard/AA_MY_DRIVE/everlight_os/_logs",
+  "KNOWLEDGE": "/mnt/sdcard/AA_MY_DRIVE/everlight_os/knowledge",
+  "CONFIGS": "/mnt/sdcard/AA_MY_DRIVE/everlight_os/configs",
+  "META": "/mnt/sdcard/AA_MY_DRIVE/everlight_os/_meta",
+  "SAAS_FACTORY_ROOT": "/mnt/sdcard/AA_MY_DRIVE/saas_factory"
+}

@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# ddr - Django Dashboard Reload
+# Kills any previous Django dashboard process, then starts fresh on port 8503.
+
+set -euo pipefail
+
+DASH_DIR="/mnt/sdcard/AA_MY_DRIVE/xlm_bot/dashboard_django"
+DDR_PORT="${XLM_DASH_DJANGO_PORT:-8503}"
+PY=$(command -v python3.13 2>/dev/null || command -v python3)
+
+echo "[ddr] Target port: $DDR_PORT"
+
+# Kill any Django runserver bound to OUR port (pgrep works reliably in PRoot)
+PIDS=$(pgrep -f "manage.py runserver.*$DDR_PORT" 2>/dev/null || true)
+if [ -n "$PIDS" ]; then
+    echo "[ddr] Killing existing DDR on port $DDR_PORT (PIDs: $PIDS)..."
+    echo "$PIDS" | xargs kill -TERM 2>/dev/null || true
+    sleep 1
+    # Force kill survivors
+    for p in $PIDS; do
+        kill -0 $p 2>/dev/null && kill -KILL $p 2>/dev/null || true
+    done
+else
+    echo "[ddr] Port $DDR_PORT is free."
+fi
+
+cd "$DASH_DIR" || { echo "ERROR: $DASH_DIR not found"; exit 1; }
+
+echo "[ddr] Running migrations..."
+"$PY" manage.py migrate --run-syncdb 2>/dev/null || true
+
+echo "[ddr] Starting Django dashboard on port $DDR_PORT..."
+exec "$PY" manage.py runserver 0.0.0.0:$DDR_PORT

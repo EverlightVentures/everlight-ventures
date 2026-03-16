@@ -1,0 +1,11 @@
+Date,Time,Transaction_ID,Employee_ID,Employee_Name,Category,Subcategory,Item_Name,Quantity,Size,Item_Description,Unit_Price,Subtotal,Tax_Rate,Tax_Amount,Line_Total,Payment_Method,Amount_Received,Change_Due,Notes
+2025-11-28,14:59:30,TXN20251128145706,1001,richard,Animal,Other Animal,mouse,3,,mouse,3.99,11.97,0.0825,0.99,12.96,,,,
+2025-11-28,14:59:30,TXN20251128145706,1001,richard,,,=== INVOICE TOTAL ===,1,,,,11.97,0.0825,0.99,12.96,Cash,20.00,7.04,this was fun
+,,,,,,,,,,,,,,,,,,,
+2025-11-28,21:10:19,TXN20251128210811,1001,richard,Plant,Tree,Vanderwolf Pine,1,15 Gal,Tree,199.99,199.99,0.0825,16.50,216.49,,,,
+2025-11-28,21:10:19,TXN20251128210811,1001,richard,Animal,Other Animal,mouse,1,s,pinkie,3.99,3.99,0.0825,0.33,4.32,,,,
+2025-11-28,21:10:19,TXN20251128210811,1001,richard,,,=== INVOICE TOTAL ===,2,,,,203.98,0.0825,16.83,220.81,Cash,300.00,79.19,"great sale, thats one for me guys"
+,,,,,,,,,,,,,,,,,,,
+2025-11-28,21:19:53,TXN20251128211840,1002,Melina Tapiz,Animal,Dog,Dogo,1,XL,Arentino the handsome one,2000.00,2000.00,0.0825,165.00,2165.00,,,,
+2025-11-28,21:19:53,TXN20251128211840,1002,Melina Tapiz,,,=== INVOICE TOTAL ===,1,,,,2000.00,0.0825,165.00,2165.00,Cash,2500.00,335.00,Thanks for the buisness sexy lady in red
+,,,,,,,,,,,,,,,,,,,

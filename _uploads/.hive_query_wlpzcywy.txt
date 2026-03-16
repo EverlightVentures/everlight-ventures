@@ -1,0 +1,19 @@
+Im trying to implement this into my my system.  Whats.the best approach?
+
+
+
+[ATTACHED IMAGE 1: Screenshot_20260305_144716_Facebook.jpg]
+Image file path (absolute): /mnt/sdcard/AA_MY_DRIVE/_uploads/1772751394_0_Screenshot_20260305_144716_Facebook.compressed.jpg
+Content type: image/jpeg
+
+[ATTACHED IMAGE 2: Screenshot_20260305_144413_Instagram.jpg]
+Image file path (absolute): /mnt/sdcard/AA_MY_DRIVE/_uploads/1772751394_1_Screenshot_20260305_144413_Instagram.jpg
+Content type: image/jpeg
+
+[ATTACHED IMAGE 3: Screenshot_20260305_144153_Instagram.jpg]
+Image file path (absolute): /mnt/sdcard/AA_MY_DRIVE/_uploads/1772751394_2_Screenshot_20260305_144153_Instagram.compressed.jpg
+Content type: image/jpeg
+
+[ATTACHED IMAGE 4: Screenshot_20260305_144106_Instagram.jpg]
+Image file path (absolute): /mnt/sdcard/AA_MY_DRIVE/_uploads/1772751394_3_Screenshot_20260305_144106_Instagram.compressed.jpg
+Content type: image/jpeg

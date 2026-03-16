@@ -1,0 +1,51 @@
+# Course Overview
+Oython is program language. Easy to learn, large ecosystem, simple eyntax, easy to set up , many libraries, not limited to languages specfics, its exensive and a multipurpose language.  Categories are : write web applications, django and flask.   Python is popular from data science and machine learing and ai.  Python is used for data collection scrapping the web, to  save and process lataer.  Python has great libraies to autopate devoops, awes cloud.  Can automate general tasks with excel sheets libraries for mobile developments, game and desktop.  USe case expands into seeveral industry with automation and datascience.
+
+
+
+    Basic Builiding Blocks - Data types
+
+        Strings - double or single quotes for text
+
+        String Concatonation - "combine multiple strings"
+                             _ "Use plus sign (+) to add strings)
+                             -print ("20 Days are " + str(50) + " minutes")       
+                              or w/o plus sign
+                            -print (f"20 days are {50} minutes")  #add f before the string and use curly brackets.  no plus or conversion needed.
+
+       Numbers - whole numbers, negative numbers, intergers
+               - floats , numbers with decimls
+                    
+       Working with numbers ,can do any math formulas in python
+
+        booleans
+
+        variables and functions
+        
+        accept user input with conditionals
+        
+        error handling with try and except
+        
+        loop for loop and while loop
+    
+    Moduels
+
+       
+       write modules
+       
+       use built in modules
+     
+     Project Countdown
+       
+       User input and Output
+       
+       
+       Work dates and time 
+    
+    Packages Pypi and pip
+    
+    Project automation with Python
+    
+    OOP- Classes and Onjects
+    
+    Project APi Request to Gitlab

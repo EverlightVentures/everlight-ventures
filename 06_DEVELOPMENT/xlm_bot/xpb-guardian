@@ -1,0 +1,67 @@
+#!/bin/bash
+# xpb-guardian - keeps xpb-fg alive for a given config profile
+
+set -euo pipefail
+
+BOT_DIR="/mnt/sdcard/AA_MY_DRIVE/xlm_bot"
+CONFIG_FILE="${XLM_CONFIG_FILE:-config.yaml}"
+CHECK_SEC="${XLM_GUARDIAN_CHECK_SEC:-12}"
+LOG_DIR_DEFAULT="$BOT_DIR/logs"
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --config)
+      if [ $# -ge 2 ]; then
+        CONFIG_FILE="$2"
+        shift 2
+      else
+        echo "Missing value for --config"
+        exit 1
+      fi
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
+cd "$BOT_DIR" || exit 1
+
+LOG_DIR="$(CONFIG_FILE="$CONFIG_FILE" python3 - <<'PY'
+from pathlib import Path
+import os
+import yaml
+cfg_path=Path(os.environ.get("CONFIG_FILE","config.yaml"))
+if not cfg_path.is_absolute():
+  cfg_path=Path("/mnt/sdcard/AA_MY_DRIVE/xlm_bot")/cfg_path
+cfg=yaml.safe_load(cfg_path.read_text()) if cfg_path.exists() else {}
+paths=(cfg.get("paths") or {}) if isinstance(cfg,dict) else {}
+logs_dir=paths.get("logs_dir","logs")
+p=Path(logs_dir)
+if not p.is_absolute():
+  p=Path("/mnt/sdcard/AA_MY_DRIVE/xlm_bot")/p
+print(str(p))
+PY
+)"
+
+if [ -z "$LOG_DIR" ]; then
+  LOG_DIR="$LOG_DIR_DEFAULT"
+fi
+mkdir -p "$LOG_DIR"
+GLOG="$LOG_DIR/xpb_guardian.log"
+
+echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] guardian start config=$CONFIG_FILE check=${CHECK_SEC}s" >> "$GLOG"
+
+while true; do
+  if ! pgrep -af "xpb-fg --config $CONFIG_FILE" >/dev/null 2>&1; then
+    echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] xpb-fg missing; restarting" >> "$GLOG"
+    # Write guardian restart marker so the bot can log the event on next cycle.
+    DATA_DIR_MARKER="$BOT_DIR/data"
+    mkdir -p "$DATA_DIR_MARKER"
+    date -u +%Y-%m-%dT%H:%M:%SZ > "$DATA_DIR_MARKER/.guardian_restart"
+    nohup bash ./xpb-fg --config "$CONFIG_FILE" >> "$LOG_DIR/xpb_console.log" 2>&1 &
+    sleep 1
+  fi
+  sleep "$CHECK_SEC"
+done
+

@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  xlm-bot:
+    build:
+      context: .
+      # ARM64 for Oracle Cloud free tier (Ampere A1); also works on x86
+      # Works on both ARM (Oracle free tier) and x86 (trial credits)
+      platforms:
+        - linux/arm64
+        - linux/amd64
+    container_name: xlm-bot
+    restart: always
+    ports:
+      - "8502:8502"    # Dashboard
+    volumes:
+      # Mount your Coinbase API credentials (required)
+      - ./secrets/config.json:/app/secrets/config.json:ro
+      # Persist state and logs across restarts
+      - ./data:/app/data
+      - ./logs:/app/logs
+    environment:
+      - COINBASE_CONFIG_PATH=/app/secrets/config.json
+      - XLM_CONFIG_FILE=config.yaml
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL:-}
+      - TZ=America/Los_Angeles
+      # AI executive mode: Claude Opus + Hive Mind
+      # Set these in .env before running docker-compose up
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      # Vendored delegate paths (inside the image, no phone path needed)
+      - CLX_DELEGATE_BIN=/app/vendor/ai_workers/clx_delegate.py
+      - GMX_DELEGATE_BIN=/app/vendor/ai_workers/gemx_delegate.py

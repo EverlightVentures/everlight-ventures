@@ -1,0 +1,97 @@
+{
+  "directive": {
+    "result": {
+      "action": "FLAT",
+      "confidence": 0.82,
+      "reasoning": "Live tick is 47+ hours stale (171,238s) \u2014 data integrity is critically compromised, cannot trust real-time price picture. Market health 22/100 = DANGER zone which blocks most entries. COMPRESSION phase with 0.007 vol ratio and ATR ratio 0.159 means no momentum to trade. Macro is risk_off with XLM down 8-10% today. Conservative posture required given -$56.57 3-day drawdown.",
+      "market_read": "Price rallied from 0.148 to 0.154 on the last few 15m candles but volume died to 3,848 on the latest bar \u2014 the move has no follow-through, and with a 47-hour-stale live feed we cannot confirm current price action."
+    },
+    "timestamp": "2026-02-28T19:19:12.770063+00:00",
+    "expires_ts": 1772306412.7700758
+  },
+  "exit_eval": {
+    "result": {
+      "urgency": "hold",
+      "hold_confidence": 0.55,
+      "reasoning": "Just entered (0 bars), no giveback, flat PnL. Price action shows recovery from 0.1585 lows with higher lows forming. RSI neutral at 53, ADX 33 shows decent trend strength. However, score_self is weak at 30 and regime is neutral not supportive of mean_reversion entry. Vol compression with low ATR ratio (0.36) suggests a move is building. Hold for now but tighten quickly if price drops below 0.1600 support."
+    },
+    "timestamp": "2026-02-26T19:43:59.321475+00:00",
+    "expires_ts": 1772135159.3214977
+  },
+  "entry_eval": {
+    "result": {
+      "verdict": "skip",
+      "confidence": 0.78,
+      "score_adjustment": -5,
+      "reasoning": "Long pullback entry against a short HTF macro bias in a transition regime, with score 46 well below the 55 threshold and REDUCED quality tier. The bounce from 0.1586 to 0.1618 shows declining volume (last 15m candle only 25K vs 1.8M on the drop), suggesting weak buying conviction into a dead-cat retracement rather than genuine reversal. Recent history shows two consecutive long losses at higher prices (0.16380 and 0.16294), indicating this is re-entering the same losing long pattern in a bearish structure.",
+      "warnings": [
+        "HTF macro bias is short \u2014 long entry is countertrend",
+        "Score 46 below threshold 55 with no lane assignment",
+        "Volume on bounce is fraction of selloff volume \u2014 weak demand",
+        "Last 2 longs both lost money at higher prices \u2014 pattern repetition risk",
+        "ATR ratio 0.36 and compression conf only 20 \u2014 no clear volatility setup"
+      ]
+    },
+    "timestamp": "2026-02-26T19:43:32.487750+00:00",
+    "expires_ts": 1772135012.4877663
+  },
+  "regime_eval": {
+    "result": {
+      "regime_confidence": 0.72,
+      "trading_bias": "defensive",
+      "reasoning": "Transition from IGNITION to COMPRESSION is plausible: candles 1074-1079 show a sharp impulse move (~3% rally) now consolidating into a tightening range (1080 high-low spread narrowing to ~0.7%), consistent with post-impulse compression. However, vol_confidence at 10 is very low and with 1 consecutive loss and no confirming vol_reasons, the phase classification lacks strong backing. Recommend defensive bias \u2014 reduce size and wait for compression to resolve directionally before re-engaging."
+    },
+    "timestamp": "2026-02-28T19:17:02.866105+00:00",
+    "expires_ts": 1772306522.8661258
+  },
+  "codex_directive": {
+    "result": {
+      "action": "ENTER_SHORT",
+      "confidence": 0.57,
+      "size": 1,
+      "stop_loss_price": 0.1629,
+      "take_profit_price": 0.1593,
+      "reasoning": "Risk-off BTC/ETH, ADX 34 trending, price below VWAP/EMAs with BB expansion and LONGS_PAY funding favors short continuation. Size 1 scout due to oversold RSI and conservative overnight posture; stop above nearby resistance, TP near 30m Fib50.",
+      "market_read": "Downtrend continuation toward 0.1600; extended leg with oversold prints, clean fade zone 0.1628-0.1633 overhead."
+    },
+    "timestamp": "2026-02-27T11:01:29.784557+00:00",
+    "expires_ts": 1772190149.7845745
+  },
+  "codex_entry_eval": {
+    "result": {
+      "verdict": "skip",
+      "confidence": 0.66,
+      "score_adjustment": -6,
+      "reasoning": "Price is below VWAP in a compression/transition regime with HTF short bias, making a long pullback counter-trend and low quality. Signal score is below threshold and the bounce looks like chasing rather than a true pullback.",
+      "warnings": [
+        "Below VWAP; intraday skew against longs.",
+        "Signal score 46 below threshold 55; quality REDUCED.",
+        "Vol compression and low ATR ratio (0.36) imply weak follow-through.",
+        "HTF macro bias short; long entry is counter-trend.",
+        "RSI ~53.5 neutral; no divergence confirmation.",
+        "Recent long loss (1 consecutive) and immediate same-direction re-entry raise mild revenge risk.",
+        "Rally from 0.1586 to 0.1618 suggests chase, not pullback."
+      ]
+    },
+    "timestamp": "2026-02-26T19:43:09.198699+00:00",
+    "expires_ts": 1772134989.1988769
+  },
+  "codex_exit_eval": {
+    "result": {
+      "urgency": "hold",
+      "hold_confidence": 0.64,
+      "reasoning": "No profit giveback and the trade just opened; regime is neutral and RSI (~53) isn\u2019t deteriorating. Self-score (30) exceeds opposite (20) with no adverse shift, so holding is appropriate."
+    },
+    "timestamp": "2026-02-26T19:43:50.581917+00:00",
+    "expires_ts": 1772135150.5819614
+  },
+  "codex_regime_eval": {
+    "result": {
+      "regime_confidence": 0.46,
+      "trading_bias": "defensive",
+      "reasoning": "ATR slope and volume spikes support an ignition, but internal confidence is low (40) and the breakout failed with successive lower closes. Maintain a defensive stance until persistent follow-through confirms the short bias."
+    },
+    "timestamp": "2026-02-27T10:54:04.552228+00:00",
+    "expires_ts": 1772189944.5522447
+  }
+}

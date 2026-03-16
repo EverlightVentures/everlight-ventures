@@ -1,0 +1,12 @@
+since 
+goddess 
+shiver
+ upset 
+ gym
+  right 
+  expect 
+  october 
+    seek
+ door
+ magnet
+ before

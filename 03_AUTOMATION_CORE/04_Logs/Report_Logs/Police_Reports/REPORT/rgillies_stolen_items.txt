@@ -1,0 +1,76 @@
+#stolen_items.txt
+#case_number 23-02789
+#Richard Gillies , F2341734
+#Honda_Hrv , Blue, 8crv412
+#incident: car theft
+#location: Bjs Brewhouse 17:30 - 22:30
+#entry_point: back rear window
+
+#stolen_inventory
+fenruien Hardshell backpack
+79.99
+Samsung 7 Chronos 15 inch
+700
+Intel Nuc 10 MiniPc
+400
+innocent portable monitor
+249.99
+Netgear M5 Router
+629
+red magic 6r
+400
+Samsung Sd 256 Evo Select Micro_Sd
+39.99
+64gb 18n1 Linux Bootable Usb
+19.99
+Alfa_network adapter Awua036ACS
+29.99
+panda puo⁵ 300mbs
+65.99
+all_powers 100w foldable solar panel
+139
+Pny Tb sd pro Elite
+124.99
+i clever keyboard
+56.99
+Zmuipng 14 in 1usbc hub
+54.99
+kapurui power bank solar charger 36,800 mah
+59.99
+rainkeaf microfibre towel
+12.99
+Gtku portable charger 36800 qc 4.0 wireless fc
+45.99
+Limiao Portable Charger 100_000Mah
+39.99
+multiool hammer 15n1
+21.99
+shraddoo xl travel backpack 50l
+49.99
+jaaux USBC 60w 2pack
+15.99
+ainope 60w 2pack
+15.99
+Sunglasses: EazyRun 24k gold
+27.99
+neheui, 1tb usb
+37.99
+Elenase usb to USBC adapter
+8.99
+200w USBC 8 in 1 Mac, Linux, Desktop
+69.99
+Faraense USB C to DV
+36.99
+Faraense USB C to DV
+36.99
+Faraense USB C to DV
+36.99
+bojianixin 540 rotation magnetic charging cable 3 in 1
+20.99
+Vemote Solar Pannel 8mm adapter cable to MC4
+17.99
+Cerrxian 65w pd USBC male input to 5.5mm x 2.1mm Power Charging laptop cable
+11.99
+
+total_damage
+3489.77

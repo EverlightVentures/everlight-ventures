@@ -1,0 +1,59 @@
+{% load trading_tags humanize %}
+
+<!-- Trade Quality Scorecard -->
+<div class="intel-card" style="margin-top:8px;">
+  <div class="intel-title">TRADE QUALITY SCORECARD</div>
+  {% if op_metrics %}
+    <div class="scoreboard">
+      <div class="score-item">
+        <div class="score-num wins">{{ op_metrics.wins|default:"0" }}</div>
+        <div class="score-label">WINS</div>
+      </div>
+      <div class="score-item">
+        <div class="score-num losses">{{ op_metrics.losses|default:"0" }}</div>
+        <div class="score-label">LOSSES</div>
+      </div>
+      <div class="score-item">
+        <div class="score-num rate">{{ op_metrics.win_rate|default:"0"|pct }}</div>
+        <div class="score-label">WIN RATE</div>
+      </div>
+      <div class="score-item">
+        <div class="score-num {% if op_metrics.pnl_today >= 0 %}pnl-pos{% else %}pnl-neg{% endif %}">
+          {{ op_metrics.pnl_today|money_signed }}
+        </div>
+        <div class="score-label">P&L TODAY</div>
+      </div>
+    </div>
+  {% else %}
+    <div class="feed-mini">No trade data available yet.</div>
+  {% endif %}
+</div>
+
+<!-- Parameter Performance -->
+{% if param_perf %}
+<div class="intel-card" style="margin-top:8px;">
+  <div class="intel-title">PARAMETER PERFORMANCE</div>
+  <div style="overflow-x:auto;margin-top:8px;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.78rem;">
+      <thead>
+        <tr style="color:#6b7280;text-transform:uppercase;letter-spacing:0.8px;font-size:10px;">
+          <th style="text-align:left;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.06);">Group</th>
+          <th style="text-align:center;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.06);">Trades</th>
+          <th style="text-align:center;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.06);">Win%</th>
+          <th style="text-align:right;padding:6px 8px;border-bottom:1px solid rgba(255,255,255,0.06);">Avg P&L</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in param_perf %}
+        <tr style="border-bottom:1px solid rgba(255,255,255,0.03);">
+          <td style="padding:6px 8px;color:#d1d5db;">{{ row.group }}</td>
+          <td style="text-align:center;padding:6px 8px;color:#9ca3af;">{{ row.count }}</td>
+          <td style="text-align:center;padding:6px 8px;color:{% if row.win_rate >= 60 %}#34d399{% elif row.win_rate < 40 %}#f87171{% else %}#f59e0b{% endif %};">{{ row.win_rate|pct }}</td>
+          <td style="text-align:right;padding:6px 8px;" class="{{ row.avg_pnl|pnl_color }}">{{ row.avg_pnl|money_signed }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}

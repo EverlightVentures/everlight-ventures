@@ -1,0 +1,58 @@
+{
+  "task_id": "launch-book-004",
+  "parent_task_id": null,
+  "task_type": "book_launch",
+  "priority": "high",
+  "status": "running",
+  "owner_agent": "agent-book-showrunner",
+  "assigned_llm": "claude",
+  "requested_by": "user",
+  "created_at_pt": "2026-02-24T14:30:00-08:00",
+  "due_at_pt": "2026-02-25T10:00:00-08:00",
+  "title": "Launch Sam Book 4 campaign",
+  "objective": "Prepare and release launch assets for Amazon listing + social + affiliate tie-in",
+  "inputs": {
+    "book_title": "Sam and the Mystery of the Blends",
+    "amazon_asin": null,
+    "affiliate_links": [],
+    "asset_folder": "/outputs/launches/book-004/",
+    "constraints": [
+      "kid-safe copy",
+      "brand voice: playful + clear"
+    ]
+  },
+  "deliverables": [
+    "amazon_listing_copy",
+    "social_posts_pack",
+    "creative_prompts_pack",
+    "launch_schedule",
+    "kpi_tracking_sheet"
+  ],
+  "dependencies": [
+    "final_cover_image",
+    "manuscript_blurb_approved"
+  ],
+  "delegations": [
+    {
+      "to_agent": "agent-seo-keywords",
+      "reason": "keyword mapping needed before listing finalization",
+      "status": "sent"
+    }
+  ],
+  "artifacts": [
+    {
+      "name": "listing_strategy_v2.md",
+      "path": "/outputs/launches/book-004/listing_strategy_v2.md",
+      "type": "markdown"
+    }
+  ],
+  "notes": [
+    "Use same launch packet across IG, TikTok, FB with platform-specific copy variants"
+  ],
+  "risk_level": "medium",
+  "blockers": [
+    "Awaiting final cover image"
+  ],
+  "next_action": "Finalize listing after keyword map and cover approval",
+  "eta": "2h"
+}

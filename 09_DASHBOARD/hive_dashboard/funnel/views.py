@@ -1,6 +1,7 @@
 import json
 import os
 import logging
+from datetime import datetime, timezone as dt_timezone
 
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -13,6 +14,67 @@ from business_os.services import get_trading_watchtower
 from .models import Lead, FunnelEvent
 
 log = logging.getLogger(__name__)
+
+
+def _format_age_label(minutes) -> str:
+    try:
+        value = float(minutes)
+    except Exception:
+        return "Unavailable"
+    if value < 1:
+        return "Updated just now"
+    if value < 60:
+        return f"Updated {int(round(value))} min ago"
+    hours = value / 60.0
+    return f"Updated {hours:.1f}h ago"
+
+
+def _format_price(price) -> str:
+    try:
+        return f"${float(price):.6f}"
+    except Exception:
+        return "Unavailable"
+
+
+def _format_price_age(ts_value: str | None) -> str:
+    if not ts_value:
+        return "Timestamp unavailable"
+    try:
+        parsed = datetime.fromisoformat(str(ts_value).replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=dt_timezone.utc)
+        age_sec = max(0, int((datetime.now(dt_timezone.utc) - parsed.astimezone(dt_timezone.utc)).total_seconds()))
+        if age_sec < 60:
+            return f"{age_sec}s ago"
+        return f"{int(round(age_sec / 60.0))} min ago"
+    except Exception:
+        return "Timestamp unavailable"
+
+
+def _public_state_label(value: str) -> str:
+    mapping = {
+        "IDLE": "Waiting for a valid setup",
+        "FLAT": "Flat and waiting",
+        "OPEN_POSITION": "Managing an open trade",
+        "OPEN": "Managing an open trade",
+        "IN_POSITION": "Managing an open trade",
+    }
+    raw = str(value or "").strip()
+    return mapping.get(raw.upper(), raw.replace("_", " ").title() if raw else "Unknown")
+
+
+def _public_signal_label(value: str) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return "No trade setup confirmed"
+    return raw.replace("_", " ").title()
+
+
+def _public_quality_label(value: str) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return "Monitoring"
+    return raw.replace("_", " ").title()
 
 
 def onyx_landing(request):
@@ -30,11 +92,29 @@ def dashboard_landing(request):
         log.warning("Trading watchtower unavailable for public dashboard: %s", exc)
         watchtower = {}
 
+    public_summary = {
+        "system_state": watchtower.get("public_system_state") or _public_state_label(watchtower.get("bot_state")),
+        "setup_state": watchtower.get("public_setup_state") or _public_signal_label(watchtower.get("entry_signal")),
+        "quality_tier": _public_quality_label(watchtower.get("quality_tier")),
+        "market_climate": watchtower.get("public_market_climate") or str(watchtower.get("pulse_regime") or "unknown").replace("_", " ").title(),
+        "live_price": _format_price(watchtower.get("price")),
+        "live_price_age": watchtower.get("public_price_age_label") or _format_price_age(watchtower.get("price_ts")),
+        "decision_age": watchtower.get("public_decision_age_label") or _format_age_label(watchtower.get("decision_age_min")),
+        "research_age": watchtower.get("public_brief_age_label") or _format_age_label(watchtower.get("brief_age_min")),
+        "runtime_label": f"{watchtower.get('runtime_data_dir') or 'data'} / {watchtower.get('runtime_logs_dir') or 'logs'}",
+        "status_blurb": watchtower.get("public_status_blurb") or (
+            "Data looks healthy and current."
+            if str(watchtower.get("data_quality_status") or "").lower() == "healthy"
+            else "Some telemetry is stale or degraded. Treat this page as informational until the feed recovers."
+        ),
+    }
+
     return render(
         request,
         "funnel/dashboard_landing.html",
         {
             "watchtower": watchtower,
+            "public_summary": public_summary,
             "quality_flags": watchtower.get("quality_flags") or [],
             "last_trade": watchtower.get("last_trade") or {},
             "open_alert": watchtower.get("open_alert") or {},

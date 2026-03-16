@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AA Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="manifest" href="/static/manifest.json" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="orb orb-a"></div>
+    <div class="orb orb-b"></div>
+    <div class="orb orb-c"></div>
+
+    <div id="dock" class="dock"></div>
+<header class="topbar">
+      <div id="workspaceTabs" class="workspace-tabs"></div>
+      <div class="brand">
+        <div class="logo">AA</div>
+        <div>
+          <div class="title">AA Dashboard</div>
+          <div class="subtitle">Local file universe, alive.</div>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="saveWorkspaceBtn" class="btn ghost">Save Workspace</button>
+        <button id="saveLayoutBtn" class="btn ghost">Save Layout</button>
+        <button id="windowModeBtn" class="btn ghost">Window Mode</button>
+        <button id="splitModeBtn" class="btn ghost">Split View</button>
+        <button id="resetWindowsBtn" class="btn ghost">Reset Windows</button>
+        <button id="snapLeftBtn" class="btn ghost">Snap Left</button>
+        <button id="snapCenterBtn" class="btn ghost">Snap Center</button>
+        <button id="snapRightBtn" class="btn ghost">Snap Right</button>
+        <button id="refreshBtn" class="btn ghost">Refresh</button>
+        <button id="openProtonBtn" class="btn">Proton Suite</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel left">
+        <div class="panel-title">Roots</div>
+        <div id="roots" class="roots"></div>
+        <div class="panel-title">Search</div>
+        <div class="search">
+          <input id="searchInput" type="text" placeholder="Search everything..." />
+          <button id="searchBtn" class="btn">Go</button>
+        </div>
+                <div class="panel-title">Content Search</div>
+        <div class="search">
+          <input id="contentSearchInput" type="text" placeholder="Search inside files..." />
+          <button id="contentSearchBtn" class="btn">Go</button>
+        </div>
+        <div id="contentResults" class="content-results"></div>
+
+        <div class="panel-title">Apps</div>
+        <div id="appsGrid" class="apps-grid"></div>
+        <div class="panel-title">Proton</div>
+        <div class="proton">
+          <button data-url="https://drive.proton.me" class="btn proton-btn">Drive</button>
+          <button data-url="https://mail.proton.me" class="btn proton-btn">Mail</button>
+          <button data-url="https://calendar.proton.me" class="btn proton-btn">Calendar</button>
+          <button data-url="https://pass.proton.me" class="btn proton-btn">Pass</button>
+        </div>
+                <div class="panel-title">Smart Folders</div>
+        <div class="shortcuts">
+          <button data-smart="image" class="btn ghost">Photos</button>
+          <button data-smart="video" class="btn ghost">Videos</button>
+          <button data-smart="audio" class="btn ghost">Audio</button>
+          <button data-smart="doc" class="btn ghost">Docs</button>
+          <button data-smart="code" class="btn ghost">Code</button>
+        </div>
+
+        <div class="panel-title">Mode</div>
+        <div class="shortcuts">
+          <button id="filesMode" class="btn ghost">Files</button>
+          <button id="mediaAll" class="btn ghost">Media</button>
+          <button id="mediaImages" class="btn ghost">Images</button>
+          <button id="mediaVideo" class="btn ghost">Video</button>
+          <button id="mediaAudio" class="btn ghost">Audio</button>
+        </div>
+                <div class="panel-title">Actions</div>
+        <div class="shortcuts">
+          <button id="newFolderBtn" class="btn ghost">New Folder</button>
+          <button id="newFileBtn" class="btn ghost">New File</button>
+          <button id="uploadBtn" class="btn ghost">Upload</button>
+          <button id="renameBtn" class="btn ghost">Rename</button>
+          <button id="moveBtn" class="btn ghost">Move</button>
+          <button id="deleteBtn" class="btn ghost">Delete</button>
+          <button id="copyPathBtn" class="btn ghost">Copy Path</button>
+          <button id="vimCmdBtn" class="btn ghost">Vim Cmd</button>
+          <button id="terminalBtn" class="btn ghost">Terminal</button>
+          <input id="uploadInput" type="file" multiple hidden />
+        </div>
+
+        <div class="panel-title">Shortcuts</div>
+        <div class="shortcuts">
+          <button data-jump="/" class="btn ghost">Home</button>
+          <button data-jump="/04_MEDIA_LIBRARY" class="btn ghost">Media</button>
+          <button data-jump="/06_DEVELOPMENT" class="btn ghost">Dev</button>
+        </div>
+      </section>
+
+      <section class="panel center">
+        <div class="pathbar">
+          <div id="breadcrumbs" class="breadcrumbs"></div>
+          <div class="path-actions">
+            <button id="openTabBtn" class="btn ghost">Open In New Tab</button>
+          </div>
+        </div>
+        <div class="split" id="splitWrap">
+  <div class="pane">
+    <div id="grid" class="grid"></div>
+  </div>
+  <div class="pane secondary" id="secondaryPane">
+    <div id="breadcrumbs2" class="breadcrumbs"></div>
+    <div id="grid2" class="grid"></div>
+  </div>
+</div>
+      </section>
+
+      <section class="panel right">
+        <div class="panel-title">Notifications</div>
+        <div id="notifications" class="notifications"></div>
+        <div class="panel-title">System</div>
+        <div id="usageWidget" class="widget"></div>
+        <div class="panel-title">Services</div>
+        <div id="serviceStatus" class="service-status"></div>
+        <div id="serviceRefresh" class="service-refresh">Service status refresh: <span id="serviceTimer">30</span>s</div>
+        <div class="panel-title">Recent</div>
+        <div id="recentList" class="recent-list"></div>
+        <div class="panel-title">Preview</div>
+        <div id="preview" class="preview">
+          <div class="preview-empty">Pick a file to preview.</div>
+        </div>
+      </section>
+    </main>
+
+
+<div id="commandPalette" class="cmd hidden">
+  <div class="cmd-card">
+    <input id="cmdInput" type="text" placeholder="Type a command..." />
+    <div id="cmdList" class="cmd-list"></div>
+  </div>
+</div>
+
+    <div id="protonModal" class="modal hidden">
+      <div class="modal-card">
+        <div class="modal-title">Proton Suite</div>
+        <div class="modal-body">
+          <p>
+            Open Proton apps in new tabs. If you want Proton Drive as the default
+            storage, sync it locally and point AA Dashboard at that folder.
+          </p>
+          <div class="modal-actions">
+            <button data-url="https://drive.proton.me" class="btn proton-btn">Drive</button>
+            <button data-url="https://mail.proton.me" class="btn proton-btn">Mail</button>
+            <button data-url="https://calendar.proton.me" class="btn proton-btn">Calendar</button>
+            <button data-url="https://pass.proton.me" class="btn proton-btn">Pass</button>
+          </div>
+        </div>
+        <button id="closeProton" class="btn ghost">Close</button>
+      </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

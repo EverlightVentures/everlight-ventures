@@ -1,0 +1,29 @@
+# Red-day short-bias profile:
+# keeps ATR gate hard, but allows a guarded distance-from-value override
+# only for high-conviction trend shorts with positive EV.
+
+paper: false
+
+risk:
+  capital_allocation_pct: 0.125
+
+v4:
+  short_bias_distance_override:
+    enabled: true
+    require_direction: both
+    require_regime: trend
+    min_score: 90
+    min_ev_usd: 0.25
+  short_bias_atr_override:
+    enabled: true
+    require_direction: both
+    require_regime: trend
+    require_entry_type: pullback
+    min_score: 80
+    min_adx_15m: 30
+    require_atr_expanding: true
+    require_bb_expanding: true
+    min_ev_usd: 0.25
+    allow_score_override: true
+    score_override_only_ema_bias_fail: true
+    score_override_min_score: 80

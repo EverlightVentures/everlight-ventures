@@ -1,0 +1,23 @@
+{% load trading_tags %}
+
+{% if norm_position %}
+<div class="truth-banner truth-{{ norm_position.side|lower }}">
+  <span class="truth-label">EXCHANGE</span>
+  <span style="font-weight:600;">{{ norm_position.side|upper }}</span>
+  <span style="color:#9ca3af;">&middot;</span>
+  <span>{{ norm_position.size|default:"?" }} contracts</span>
+  <span style="color:#9ca3af;">&middot;</span>
+  <span>Mark ${{ norm_position.mark_price|floatformat:6 }}</span>
+  {% if norm_position.unrealized_pnl %}
+    <span style="color:#9ca3af;">&middot;</span>
+    <span class="{{ norm_position.unrealized_pnl|pnl_color }}">
+      {{ norm_position.unrealized_pnl|money_signed }}
+    </span>
+  {% endif %}
+</div>
+{% else %}
+<div class="truth-banner truth-none">
+  <span class="truth-label">EXCHANGE</span>
+  <span>No open position</span>
+</div>
+{% endif %}
