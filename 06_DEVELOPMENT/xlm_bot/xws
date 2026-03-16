@@ -1,0 +1,27 @@
+#!/bin/bash
+# xws - XLM websocket ticker (no .sh)
+# Writes logs/live_tick.json for the dashboard.
+
+set -euo pipefail
+
+BOT_DIR="/mnt/sdcard/AA_MY_DRIVE/xlm_bot"
+VENV="/tmp/xlm_bot_venv"
+cd "$BOT_DIR" || exit 1
+
+echo "Stopping existing websocket feed..."
+pkill -f "/tmp/xlm_bot_venv/bin/python.*live_ws.py" 2>/dev/null || true
+pkill -f "/tmp/xlm_bot_venv/bin/python3.*live_ws.py" 2>/dev/null || true
+pkill -f "bash.*xws-fg" 2>/dev/null || true
+sleep 1
+
+bash "$BOT_DIR/_venv.sh"
+
+echo "Starting websocket feed..."
+nohup /bin/sh -c "
+  cd \"$BOT_DIR\" || exit 1
+  exec bash ./xws-fg
+" > logs/live_ws.log 2>&1 &
+
+sleep 1
+echo "WS PID: $(pgrep -f '/tmp/xlm_bot_venv/bin/python.*live_ws.py.*--product XLM-USD' | head -n 1 || true)"
+echo "Logs: tail -f $BOT_DIR/logs/live_ws.log"

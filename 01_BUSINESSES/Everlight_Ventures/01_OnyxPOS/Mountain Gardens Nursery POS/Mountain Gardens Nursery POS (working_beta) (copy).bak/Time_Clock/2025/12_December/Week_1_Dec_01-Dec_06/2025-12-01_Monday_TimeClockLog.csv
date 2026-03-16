@@ -1,0 +1,2 @@
+Date,Time,Employee_ID,Employee_Name,Punch_Type,Break_Number,Hours_Worked_Today,Overtime_Hours,Notes,Timestamp
+2025-12-01,09:57:51,1001,richard,CLOCK_IN,,0.00,0.00,Shift started,2025-12-01 09:57:51

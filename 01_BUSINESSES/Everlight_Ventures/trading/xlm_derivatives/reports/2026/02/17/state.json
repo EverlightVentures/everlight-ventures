@@ -1,0 +1,344 @@
+{
+  "id": "3a3d854c",
+  "engine": "trading",
+  "intent": "daily_report",
+  "request": "trade report",
+  "status": "done",
+  "current_step": 5,
+  "steps": [
+    {
+      "name": "parse_logs",
+      "worker": "local",
+      "description": "Read xlm_bot decision/trade/incident logs",
+      "status": "done",
+      "output_path": "",
+      "started_at": "2026-02-17T05:30:40.071749+00:00",
+      "finished_at": "2026-02-17T05:30:40.367720+00:00",
+      "duration_s": 0.4,
+      "error": ""
+    },
+    {
+      "name": "compute_metrics",
+      "worker": "local",
+      "description": "Calculate gate pass rates, PnL, streaks, margin trajectory",
+      "status": "done",
+      "output_path": "",
+      "started_at": "2026-02-17T05:30:40.369956+00:00",
+      "finished_at": "2026-02-17T05:30:40.371662+00:00",
+      "duration_s": 0.4,
+      "error": ""
+    },
+    {
+      "name": "detect_anomalies",
+      "worker": "local",
+      "description": "Flag unusual patterns in metrics",
+      "status": "done",
+      "output_path": "",
+      "started_at": "2026-02-17T05:30:40.373239+00:00",
+      "finished_at": "2026-02-17T05:30:40.374337+00:00",
+      "duration_s": 0.4,
+      "error": ""
+    },
+    {
+      "name": "generate_report",
+      "worker": "openai",
+      "description": "Write natural-language daily report from metrics",
+      "status": "done",
+      "output_path": "/mnt/sdcard/AA_MY_DRIVE/trading/xlm_derivatives/reports/2026/02/17/daily_report.md",
+      "started_at": "2026-02-17T05:30:40.375472+00:00",
+      "finished_at": "2026-02-17T05:30:40.642914+00:00",
+      "duration_s": 0.6,
+      "error": ""
+    },
+    {
+      "name": "post_to_slack",
+      "worker": "slack",
+      "description": "Post report summary to Slack",
+      "status": "done",
+      "output_path": "",
+      "started_at": "2026-02-17T05:30:40.644465+00:00",
+      "finished_at": "2026-02-17T05:30:40.645668+00:00",
+      "duration_s": 0.6,
+      "error": ""
+    }
+  ],
+  "artifacts": [
+    "/mnt/sdcard/AA_MY_DRIVE/trading/xlm_derivatives/reports/2026/02/17/daily_report.md"
+  ],
+  "errors": [],
+  "project_dir": "/mnt/sdcard/AA_MY_DRIVE/trading/xlm_derivatives/reports/2026/02/17",
+  "created": "2026-02-17T05:30:40.066018+00:00",
+  "updated": "2026-02-17T13:32:59.733416+00:00",
+  "metadata": {
+    "analysis": {
+      "state": {
+        "day": "2026-02-17",
+        "trades": 0,
+        "losses": 0,
+        "cooldown_until": null,
+        "equity_start_usd": 195.7,
+        "pnl_today_usd": 0.0,
+        "transfers_today_usd": 0.0,
+        "open_position": null,
+        "loss_debt_usd": 0.0,
+        "consecutive_losses": 0,
+        "conversion_cost_today_usd": 0.0,
+        "last_spot_cash_map": {
+          "USD": 119.11,
+          "USDC": 65.87294540252701
+        },
+        "session_id": "cc7b11c4",
+        "last_cycle_ts": "2026-02-17T05:30:38.975031+00:00",
+        "vol_state": "COMPRESSION"
+      },
+      "snapshot": {
+        "ts": "2026-02-17T05:30:35.309568+00:00",
+        "product": "XLP-20DEC30-CDE",
+        "price": 0.168299,
+        "state": "IDLE_BLOCKED",
+        "regime": "mean_reversion",
+        "gates_pass": true,
+        "gate_reasons": [],
+        "entry_signal": "breakout_retest",
+        "direction": "long",
+        "trades_today": 0,
+        "losses_today": 0,
+        "pnl_today_usd": 0.0,
+        "active_mr": 0.0,
+        "mr_intraday": 0.0,
+        "mr_overnight": 0.0,
+        "maintenance_margin_requirement": 0.0,
+        "total_funds_for_margin": 195.7,
+        "liquidation_price": null,
+        "dist_to_liq": null,
+        "rescue_count": 0,
+        "scale_count": 0,
+        "confluence_score": 35,
+        "ev_estimate": null,
+        "last_action": "BLOCKED",
+        "gates": {
+          "atr_regime": true,
+          "session": true,
+          "distance_from_value": true,
+          "spread": true
+        },
+        "confluences": {
+          "EMA_BIAS": false,
+          "RSI_VALID": true,
+          "MACD_EXPAND": true,
+          "RVOL_OK": false,
+          "STRUCTURE_ZONE": true,
+          "FIB_ZONE": true
+        },
+        "confluence_count": 4,
+        "breakout_type": "neutral",
+        "margin_tier": "SAFE",
+        "thought": "signal seen, but quality filter blocked (EMA_ALIGN_SLOPE, ADX_TREND, ATR_EXPANDING).",
+        "max_trades_per_day": 5,
+        "transfers_today_usd": 0.0,
+        "conversion_cost_today_usd": 0.0,
+        "last_cash_movement": {
+          "timestamp": "2026-02-17T03:19:21.562668+00:00",
+          "type": "SPOT_BALANCE_DELTA",
+          "context": "account_observer",
+          "reason": "spot_balance_change",
+          "deltas": {
+            "USD": 119.11,
+            "USDC": 65.8729454
+          },
+          "spot_cash_before": {
+            "USD": 0.0,
+            "USDC": 0.0
+          },
+          "spot_cash_after": {
+            "USD": 119.11,
+            "USDC": 65.87294540252701
+          },
+          "threshold": 0.5,
+          "transfers_today_usd": 0.0,
+          "conversion_cost_today_usd": 0.0
+        },
+        "v4_score_short": 50,
+        "v4_selected_threshold": 65,
+        "v4_regime": "mean_reversion",
+        "lane_atr_bypassed": false,
+        "lane_distance_bypassed": false,
+        "sweep_detected": false,
+        "squeeze_detected": false,
+        "cooldown": false,
+        "vol_phase": "COMPRESSION",
+        "vol_direction": "NEUTRAL",
+        "v4_adx_15m": 19.29271140737182,
+        "entry_type_short": "pullback",
+        "v4_threshold_short": 70,
+        "v4_pass_long": false,
+        "v4_pass_short": false,
+        "lane_short": "A",
+        "lane_short_label": "mean_reversion",
+        "lane_short_reason": "default_neutral",
+        "candidate_long_pass": false,
+        "candidate_short_pass": false,
+        "long_block_reason": "score_40_below_65",
+        "short_block_reason": "score_50_below_70",
+        "htf_readiness": "SHORT_BIAS_WATCH",
+        "v4_score_long": 40,
+        "entry_type_long": "breakout_retest",
+        "v4_threshold_long": 65,
+        "lane_long": "B",
+        "lane_long_label": "breakout",
+        "lane_long_reason": "breakout_retest_entry",
+        "lane": "B",
+        "lane_label": "breakout",
+        "lane_reason": "breakout_retest_entry",
+        "htf_macro_bias": "short_bias",
+        "htf_micro_flags": {
+          "rejection_up": false,
+          "rejection_down": false,
+          "sweep_past": false,
+          "retest": false,
+          "breakout_above": false,
+          "breakout_below": false
+        },
+        "zone_bonus": 2,
+        "zone_bonus_reasons": [
+          "near_macro_zone",
+          "body_zone_compression",
+          "against_macro_bias_long_in_wick_high"
+        ],
+        "alignment_bonus": -4,
+        "alignment_reasons": [
+          "tf_align_0/3 (15m=N,1h=N,4h=N)"
+        ],
+        "lane_weights_used": "B",
+        "quality_tier": "NO_TRADE",
+        "v4_short_missing_pts": 20,
+        "long_unlock_hints": [
+          "RSI_EXTREME(+15)",
+          "MACD_DIVERGENCE(+15)",
+          "BB_REJECTION(+10)"
+        ],
+        "short_unlock_hints": [
+          "RSI_EXTREME(+15)",
+          "MACD_DIVERGENCE(+15)",
+          "BB_REJECTION(+10)"
+        ],
+        "next_play_long": {
+          "trigger_price": 0.16803,
+          "level_name": "fib fib_0.5",
+          "distance_atr": 0.38,
+          "readiness_pct": 61,
+          "score": 40,
+          "threshold": 65
+        },
+        "next_play_short": {
+          "trigger_price": 0.1703,
+          "level_name": "daily high",
+          "distance_atr": 2.8,
+          "readiness_pct": 71,
+          "score": 50,
+          "threshold": 70
+        },
+        "v4_long_missing_pts": 25
+      },
+      "decisions": {
+        "total_cycles": 3417,
+        "no_data_cycles": 0,
+        "gates_pass_total": 1130,
+        "gates_pass_rate": 0.331,
+        "gate_rates": {
+          "atr_regime": {
+            "pass_rate": 0.667,
+            "total": 1686
+          },
+          "session": {
+            "pass_rate": 1.0,
+            "total": 1686
+          },
+          "distance_from_value": {
+            "pass_rate": 1.0,
+            "total": 1686
+          },
+          "spread": {
+            "pass_rate": 1.0,
+            "total": 1686
+          }
+        },
+        "entry_signals": {
+          "pullback": 570,
+          "breakout_retest": 354
+        },
+        "block_reasons": {
+          "no_structure": 1405,
+          "score_50_below_70": 310,
+          "score_55_below_70": 144,
+          "score_40_below_65": 122,
+          "score_50_below_65": 110,
+          "score_60_below_65": 24,
+          "no_structure|no_product": 5,
+          "score_50_below_70|no_product": 4,
+          "score_50_below_65|no_product": 3,
+          "score_35_below_55|gates:atr_regime": 1
+        },
+        "avg_confluence_score": 3.3,
+        "score_range": [
+          3,
+          4
+        ],
+        "period_start": "2026-02-16T05:31:01.433931+00:00",
+        "period_end": "2026-02-17T05:30:35.309568+00:00"
+      },
+      "trades": {
+        "total_trades": 1,
+        "wins": 0,
+        "losses": 1,
+        "win_rate": 0.0,
+        "total_pnl_usd": -3.39,
+        "avg_pnl_usd": -3.39,
+        "max_win_streak": 0,
+        "max_loss_streak": 1,
+        "best_trade_usd": -3.39,
+        "worst_trade_usd": -3.39,
+        "trade_details": [
+          {
+            "timestamp": "2026-02-11T14:55:00.271239+00:00",
+            "side": "long",
+            "entry": "0.15405",
+            "exit": "0.153372",
+            "pnl_usd": "-3.3899999999999206",
+            "exit_reason": "reversal_signal"
+          }
+        ]
+      },
+      "margin": {
+        "total_entries": 1686,
+        "tier_distribution": {
+          "SAFE": 1684,
+          "UNKNOWN": 2
+        },
+        "action_distribution": {
+          "ALLOW_ENTRY": 1686
+        },
+        "latest_tier": "SAFE",
+        "latest_mr_intraday": 0.0,
+        "latest_mr_overnight": 0.0,
+        "latest_maintenance_margin": 0.0,
+        "latest_total_funds": 195.7
+      },
+      "incidents": {
+        "total_incidents": 0
+      },
+      "lookback_hours": 24,
+      "generated_at": "2026-02-17T05:30:40.367693+00:00"
+    },
+    "anomalies": [],
+    "report_result": {
+      "report_dir": "/mnt/sdcard/AA_MY_DRIVE/trading/xlm_derivatives/reports/2026/02/17",
+      "daily_report": "/mnt/sdcard/AA_MY_DRIVE/trading/xlm_derivatives/reports/2026/02/17/daily_report.md",
+      "metrics": "/mnt/sdcard/AA_MY_DRIVE/trading/xlm_derivatives/reports/2026/02/17/metrics.json",
+      "anomalies": "/mnt/sdcard/AA_MY_DRIVE/trading/xlm_derivatives/reports/2026/02/17/anomalies.json",
+      "recommended_changes": null,
+      "anomaly_count": 0,
+      "danger_count": 0
+    }
+  }
+}

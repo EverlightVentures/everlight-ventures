@@ -1,0 +1,335 @@
+{% extends "hive/base.html" %}
+{% load static humanize hive_tags %}
+
+{% block title %}{{ app_name }} -- Agents{% endblock %}
+{% block page_title %}Agents{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'hive:dashboard' %}">Hive</a>
+  <span class="sep">/</span> Agents
+{% endblock %}
+
+{% block content %}
+<style>
+  /* ===================================================================
+     AGENTS -- Grid
+     =================================================================== */
+  .agents-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  /* ===================================================================
+     AGENTS -- Profile Card
+     =================================================================== */
+  .agent-profile-card {
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+  }
+
+  .agent-profile-card:hover {
+    color: inherit;
+  }
+
+  .agent-profile-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 12px 12px 0 0;
+    opacity: 0.7;
+    transition: opacity var(--transition-base);
+  }
+
+  .agent-profile-card:hover::before {
+    opacity: 1;
+  }
+
+  .agent-card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 20px;
+  }
+
+  .agent-card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .agent-card-icon::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 16px;
+    opacity: 0.15;
+  }
+
+  .agent-card-info {
+    flex: 1;
+  }
+
+  .agent-card-name {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+
+  .agent-card-role {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .agent-card-active-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 6px;
+  }
+
+  .agent-card-active-badge.online {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+    color: #22c55e;
+  }
+
+  .agent-card-active-badge.offline {
+    background: rgba(107, 114, 128, 0.1);
+    border: 1px solid rgba(107, 114, 128, 0.25);
+    color: #6b7280;
+  }
+
+  /* ===================================================================
+     AGENTS -- Stats Row
+     =================================================================== */
+  .agent-card-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-subtle);
+    margin-bottom: 16px;
+  }
+
+  .agent-stat-block {
+    text-align: center;
+  }
+
+  .agent-stat-value {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1.1;
+  }
+
+  .agent-stat-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  /* ===================================================================
+     AGENTS -- Success Rate Bar
+     =================================================================== */
+  .agent-rate-section {
+    margin-bottom: 12px;
+  }
+
+  .agent-rate-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+
+  .agent-rate-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  .agent-rate-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.8s var(--ease-out-expo);
+  }
+
+  .agent-rate-fill.rate-green  { background: linear-gradient(90deg, #16a34a, #22c55e); }
+  .agent-rate-fill.rate-yellow { background: linear-gradient(90deg, #d97706, #f59e0b); }
+  .agent-rate-fill.rate-red    { background: linear-gradient(90deg, #dc2626, #ef4444); }
+
+  /* ===================================================================
+     AGENTS -- Duration Comparison
+     =================================================================== */
+  .agent-duration-section {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  .agent-dur-bar-track {
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .agent-dur-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: var(--purple);
+    opacity: 0.7;
+    transition: width 0.6s var(--ease-out-expo);
+  }
+
+  .agent-dur-bar-avg {
+    position: absolute;
+    top: -3px;
+    height: 10px;
+    width: 2px;
+    background: var(--gold);
+    border-radius: 1px;
+  }
+
+  .agent-card-link-arrow {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    opacity: 0;
+    transition: all var(--transition-base);
+  }
+
+  .agent-profile-card:hover .agent-card-link-arrow {
+    opacity: 1;
+    color: var(--gold);
+    transform: translateX(4px);
+  }
+
+  /* ===================================================================
+     AGENTS -- Responsive
+     =================================================================== */
+  @media (max-width: 900px) {
+    .agents-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<!-- ====================================================================
+     AGENT GRID
+     ==================================================================== -->
+<div class="agents-grid">
+  {% for agent in object_list %}
+  {% with stats=agent_stats|default_if_none:"" %}
+  <a href="{% url 'hive:agent_detail' pk=agent.pk %}" class="glass-card agent-profile-card" style="">
+    <!-- Top color stripe -->
+    <div style="position:absolute; top:0; left:0; right:0; height:3px; background:{{ agent.color|default:agent.name|agent_color }}; border-radius:12px 12px 0 0; opacity:0.7;"></div>
+
+    <div class="agent-card-top">
+      <div class="agent-card-icon" style="background: {{ agent.color|default:agent.name|agent_color }}18; color: {{ agent.color|default:agent.name|agent_color }};">
+        <i class="fa-solid {{ agent.icon_class|default:agent.name|agent_icon }}"></i>
+      </div>
+      <div class="agent-card-info">
+        <div class="agent-card-name">{{ agent.display_name }}</div>
+        <div class="agent-card-role">{{ agent.role }}</div>
+        {% if agent.is_active %}
+        <span class="agent-card-active-badge online">
+          <i class="fa-solid fa-circle" style="font-size: 0.4rem;"></i> Online
+        </span>
+        {% else %}
+        <span class="agent-card-active-badge offline">
+          <i class="fa-solid fa-circle" style="font-size: 0.4rem;"></i> Offline
+        </span>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="agent-card-stats">
+      <div class="agent-stat-block">
+        <div class="agent-stat-value">{{ agent.success_rate|floatformat:0 }}%</div>
+        <div class="agent-stat-label">Success</div>
+      </div>
+      <div class="agent-stat-block">
+        <div class="agent-stat-value">{{ agent.avg_duration|duration_fmt }}</div>
+        <div class="agent-stat-label">Avg Time</div>
+      </div>
+      <div class="agent-stat-block">
+        {% with agent_st=agent_stats|default:"" %}
+        <div class="agent-stat-value">{{ agent_st.total_responses|default:"0"|intcomma }}</div>
+        {% endwith %}
+        <div class="agent-stat-label">Responses</div>
+      </div>
+    </div>
+
+    <!-- Success Rate Bar -->
+    <div class="agent-rate-section">
+      <div class="agent-rate-header">
+        <span>Success Rate</span>
+        <span style="color: var(--gold); font-weight: 600;">{{ agent.success_rate|floatformat:1 }}%</span>
+      </div>
+      <div class="agent-rate-track">
+        <div class="agent-rate-fill {% if agent.success_rate >= 80 %}rate-green{% elif agent.success_rate >= 50 %}rate-yellow{% else %}rate-red{% endif %}"
+             style="width: {{ agent.success_rate|pct_bar_width }};"></div>
+      </div>
+    </div>
+
+    <!-- Duration vs Global Avg -->
+    {% if global_avg_duration %}
+    <div class="agent-duration-section">
+      <span>Duration</span>
+      <div class="agent-dur-bar-track">
+        {% widthratio agent.avg_duration global_avg_duration 100 as dur_pct %}
+        <div class="agent-dur-bar-fill" style="width: {% widthratio agent.avg_duration global_avg_duration 100 %}%;"></div>
+        <div class="agent-dur-bar-avg" style="left: 50%;" title="Global avg: {{ global_avg_duration|duration_fmt }}"></div>
+      </div>
+      <span>{{ agent.avg_duration|duration_fmt }}</span>
+    </div>
+    {% endif %}
+
+    <i class="fa-solid fa-arrow-right agent-card-link-arrow"></i>
+  </a>
+  {% endwith %}
+  {% empty %}
+  <div class="glass-card" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; color: var(--text-muted);">
+    <i class="fa-solid fa-users-slash" style="font-size: 2.5rem; opacity: 0.2; margin-bottom: 16px; display: block;"></i>
+    <div style="font-size: 1rem;">No agents configured.</div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

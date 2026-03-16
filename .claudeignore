@@ -1,0 +1,50 @@
+# .claudeignore - Prevents Claude Code from loading these into context
+# Reduces memory pressure and prevents ARM64/Bun segfaults during context compression
+
+# Logs (22GB+ - primary crash cause)
+_logs/
+
+# Archive directories
+_Archive_Root_Cleanup/
+_archive/
+**/Archive/
+
+# All images and binary assets (prevent image-read segfaults)
+**/*.jpg
+**/*.jpeg
+**/*.png
+**/*.gif
+**/*.webp
+**/*.svg
+**/*.ico
+**/*.bmp
+**/*.tiff
+**/*.pdf
+**/*.epub
+**/*.mobi
+
+# Audio/video
+**/*.mp3
+**/*.mp4
+**/*.wav
+**/*.avi
+**/*.mov
+
+# Large data files
+**/*.csv
+**/*.parquet
+**/*.db
+**/*.sqlite
+**/*.sqlite3
+
+# Node/Python artifacts
+**/node_modules/
+**/__pycache__/
+**/.venv/
+**/venv/
+**/*.pyc
+
+# Build artifacts
+**/dist/
+**/build/
+**/.next/

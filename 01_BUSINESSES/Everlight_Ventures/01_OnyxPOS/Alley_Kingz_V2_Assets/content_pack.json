@@ -1,0 +1,31 @@
+{
+  "version": "2.0",
+  "project": "Alley Kingz",
+  "phase": "V2 Hyper-Real Overhaul",
+  "created": "2026-03-01",
+  "schema_notes": "All assets must pass 3-stage validation before status = approved",
+  "review_statuses": ["pending", "ai_draft", "art_review", "performance_check", "approved", "rejected"],
+  "asset_types": ["character", "common_card", "rare_card", "epic_card", "legendary_card", "area_map", "shop_ui", "marketing"],
+  "mobile_spec": {
+    "character_card": {"max_texture": "2K", "max_poly": 45000, "compression": "ASTC 6x6"},
+    "character_ingame": {"max_texture": "1K", "max_poly": 20000, "compression": "ETC2"},
+    "background_map_tile": {"max_texture": "2K", "max_poly_per_scene": 50000, "compression": "ASTC 6x6"},
+    "shop_ui": {"max_texture": "1K", "compression": "PNG-8 where possible"},
+    "particle_fx": {"max_atlas": "512px", "note": "No alpha bleeding"},
+    "test_device_floor": "Snapdragon 665 / Mali-G52 / 4GB RAM @ 60FPS"
+  },
+  "color_palette": {
+    "Crown Gold": "#D4AF37",
+    "Midnight Deep": "#0D0D1A",
+    "Neon Cyan": "#00F5FF",
+    "Brick Warm": "#C1440E",
+    "Asphalt Grey": "#4A4A55"
+  },
+  "assets": [],
+  "outsource_budget": {
+    "phase_1_target": "20 hero cards + 3 maps + 5 marketing renders",
+    "budget_range_usd": "5000-10000",
+    "recommended_studios": ["Kevuru Games", "RocketBrush Studio"],
+    "brief_location": "08_Outsource_Briefs/"
+  }
+}

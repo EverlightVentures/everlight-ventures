@@ -1,0 +1,34 @@
+{
+  "timestamp": "20260305_233147",
+  "niche": "retail POS",
+  "persona": "founder",
+  "title": "[MOCK] Onyx Tip #1",
+  "hook": "I built a POS system because I was tired of paying Square 3% on every sale",
+  "keywords": [
+    "POS system",
+    "small business",
+    "retail tech",
+    "payment processing"
+  ],
+  "cta": "Try Onyx POS free for 14 days -- no credit card needed. Link in bio.",
+  "status": "dry_run_posted",
+  "posted_at": "2026-03-06T00:21:33.359768",
+  "post_results": [
+    {
+      "status": "dry_run",
+      "platform": "twitter"
+    },
+    {
+      "status": "dry_run",
+      "platform": "linkedin"
+    },
+    {
+      "status": "skipped",
+      "platform": "tiktok"
+    },
+    {
+      "status": "skipped",
+      "platform": "instagram"
+    }
+  ]
+}

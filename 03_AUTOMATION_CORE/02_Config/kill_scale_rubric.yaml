@@ -1,0 +1,127 @@
+# Everlight Kill / Fix / Scale Rubric
+# Version: 1.0 | Owner: 27_profit_maximizer
+# Purpose: Weekly scorecard to decide: KILL it, FIX it, or SCALE it
+# Review cadence: Every Wednesday during KPI review
+#
+# How to use:
+#   Score each active initiative (SaaS, content, affiliate, book series, etc.)
+#   against the dimensions below. Sum the score. Apply the threshold.
+#   NO initiative should stay in "fix" limbo for more than 2 review cycles.
+
+# SCORING DIMENSIONS (0-10 each, max total = 60)
+dimensions:
+  revenue_traction:
+    weight: 15
+    description: "Actual revenue or paid conversions in last 30 days"
+    thresholds:
+      - score: 0;  condition: "zero revenue, zero conversions"
+      - score: 3;  condition: "1-3 conversions or < $50"
+      - score: 6;  condition: "4-10 conversions or $50-$200"
+      - score: 9;  condition: ">10 conversions or $200-$500"
+      - score: 10; condition: ">$500 or 20+ conversions"
+
+  unit_economics:
+    weight: 15
+    description: "LTV/CAC ratio and contribution margin"
+    thresholds:
+      - score: 0;  condition: "unknown LTV/CAC, no margin data"
+      - score: 3;  condition: "LTV/CAC < 1 (losing money per customer)"
+      - score: 6;  condition: "LTV/CAC 1-2 (marginal)"
+      - score: 9;  condition: "LTV/CAC 2-5"
+      - score: 10; condition: "LTV/CAC > 5 and margin > 50%"
+
+  market_signal:
+    weight: 10
+    description: "External demand signal: organic search, inbound, referrals"
+    thresholds:
+      - score: 0;  condition: "no inbound, no organic traffic"
+      - score: 5;  condition: "some organic or referral interest"
+      - score: 10; condition: "clear pull: waitlist, inbound leads, press"
+
+  execution_velocity:
+    weight: 10
+    description: "Rate of shipping and iterating relative to plan"
+    thresholds:
+      - score: 0;  condition: "stalled > 2 weeks with no output"
+      - score: 5;  condition: "shipping but slower than planned"
+      - score: 10; condition: "on or ahead of plan, weekly deployments"
+
+  strategic_fit:
+    weight: 5
+    description: "Alignment with core Everlight mission + portfolio synergy"
+    thresholds:
+      - score: 0;  condition: "off-mission, no portfolio synergy"
+      - score: 5;  condition: "tangentially related"
+      - score: 10; condition: "directly on-mission, multiplies other initiatives"
+
+  founder_energy:
+    weight: 5
+    description: "Owner's genuine enthusiasm and bandwidth to execute"
+    thresholds:
+      - score: 0;  condition: "owner dreading it, no bandwidth"
+      - score: 5;  condition: "moderate energy, some bandwidth"
+      - score: 10; condition: "high energy, dedicated owner"
+
+# DECISION THRESHOLDS (out of 60 possible points)
+decision_thresholds:
+  scale:
+    min_score: 42
+    action: "Double down: increase budget, add resources, accelerate timeline"
+    review_cycle: "monthly"
+  fix:
+    min_score: 25
+    max_score: 41
+    action: "One fix cycle (max 2 weeks): identify and resolve one blocking issue"
+    review_cycle: "weekly"
+    fix_cycle_limit: 2  # After 2 fix cycles with no improvement: auto-kill
+  kill:
+    max_score: 24
+    action: "Stop all work, archive assets, capture learnings in _logs/killed_initiatives.jsonl"
+    review_cycle: "never"
+
+# FIX PROTOCOL (for initiatives in the 'fix' zone)
+fix_protocol:
+  max_cycles: 2
+  steps:
+    - "Identify the single highest-leverage blocker (not a list)"
+    - "Assign one owner with explicit ETA (max 14 days)"
+    - "Set a measurable success condition for the fix"
+    - "At next Wednesday review: did the metric move? If not -> kill"
+  escalation: "If fix owner misses ETA: escalate to 01_chief_operator immediately"
+
+# SCALE PROTOCOL
+scale_protocol:
+  steps:
+    - "Identify the growth ceiling (what breaks first when you 10x volume)"
+    - "Allocate additional budget/agent time proportional to LTV/CAC"
+    - "Build one new acquisition channel per scale cycle"
+    - "Set a 90-day stretch revenue target with weekly milestones"
+
+# KILL ARCHIVE FORMAT
+kill_archive:
+  path: "_logs/killed_initiatives.jsonl"
+  fields:
+    - "name"
+    - "killed_at"
+    - "final_score"
+    - "top_reason"
+    - "learnings"
+    - "assets_archived_to"
+
+# EXAMPLE SCORECARD ENTRY
+example_scorecard:
+  initiative: "SaaS Tool XYZ"
+  review_date: "2026-02-26"
+  scores:
+    revenue_traction: 3
+    unit_economics: 0
+    market_signal: 5
+    execution_velocity: 6
+    strategic_fit: 5
+    founder_energy: 7
+  total: 26
+  decision: "fix"
+  blocker: "No paying customers - need 3 conversions to validate unit economics"
+  fix_owner: "27_profit_maximizer"
+  fix_eta: "2026-03-11"
+  fix_success_condition: "3 paid conversions at any price"

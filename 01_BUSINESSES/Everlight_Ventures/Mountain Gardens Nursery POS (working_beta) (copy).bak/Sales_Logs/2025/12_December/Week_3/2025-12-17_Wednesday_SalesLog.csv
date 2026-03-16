@@ -1,0 +1,3 @@
+Date,Time,Transaction_ID,Employee_ID,Employee_Name,Category,Subcategory,Product_Name,Item_Name,SKU,Quantity,Size,Item_Description,Unit_Price,Unit_Cost,COGS_Line,Gross_Margin,Qty_Remaining_Before,Qty_Remaining_After,Subtotal,Tax_Rate,Tax_Amount,Line_Total,Payment_Method,Amount_Received,Change_Due,Notes
+2025-12-17,02:01:08,TRX202512170201088264,1001,Rich,Animal,Mouse,Mouse,Mouse,ANM-MOU-9CCC-1201,10,,Created from sale,5.98,3.69,36.90,22.90,57,47,59.80,0.0825,4.93,59.80,CASH,70.00,5.27,
+2025-12-17,16:25:57,TRX20251217162557a5c5,1001,Rich,Animal,Mouse,Mouse,Mouse,ANM-MOU-9CCC-1201,5,,Created from sale,5.98,2.99,14.95,14.95,47,42,29.90,0.0825,2.47,29.90,CASH,40.00,7.63,

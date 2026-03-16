@@ -1,0 +1,7 @@
+#!/bin/bash
+set -euo pipefail
+cd "/mnt/sdcard/AA_MY_DRIVE/xlm_bot" || exit 1
+export XLM_DASH_LOGS_DIR="logs_mr"
+export XLM_DASH_DATA_DIR="data_mr"
+export XLM_DASH_PORT="${XLM_DASH_PORT:-8503}"
+exec bash ./xdr "$@"

@@ -1,0 +1,15 @@
+#!/bin/bash
+# xws-fg - websocket ticker foreground (for startup supervisors)
+
+set -euo pipefail
+
+BOT_DIR="/mnt/sdcard/AA_MY_DRIVE/xlm_bot"
+VENV="/tmp/xlm_bot_venv"
+
+cd "$BOT_DIR" || exit 1
+bash "$BOT_DIR/_venv.sh"
+
+while true; do
+  "$VENV/bin/python" live_ws.py --product XLM-USD
+  sleep 2
+done

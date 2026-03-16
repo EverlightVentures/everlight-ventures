@@ -1,0 +1,15 @@
+paper: false
+
+risk:
+  capital_allocation_pct: 0.125
+
+v4:
+  regime_mode: trend_only
+
+paths:
+  data_dir: data_trend
+  logs_dir: logs_trend
+
+logging:
+  decisions_jsonl: decisions.jsonl
+  trades_csv: trades.csv

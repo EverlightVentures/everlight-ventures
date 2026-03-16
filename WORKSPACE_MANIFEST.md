@@ -141,6 +141,7 @@ AA_MY_DRIVE/
 | War Room Logs | `_logs/ai_war_room/` |
 | Everlight OS | `06_DEVELOPMENT/everlight_os/` |
 | Oracle observability deploy | `06_DEVELOPMENT/everlight_os/deploy_oracle_observability.sh` |
+| Site publish script | `03_AUTOMATION_CORE/01_Scripts/publish_everlight_site_repo.sh` |
 | Broker OS | `01_BUSINESSES/Everlight_Ventures/Broker_OS/` |
 | Broker OS Django app | `09_DASHBOARD/hive_dashboard/broker_ops/` |
 | Broker OS scripts | `03_AUTOMATION_CORE/01_Scripts/broker_*.py` |

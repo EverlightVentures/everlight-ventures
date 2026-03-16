@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block page_title %}Time Clock Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>⏰ Time Clock Management</h1>
+    <div class="header-actions">
+        <a href="{{ url_for('timeclock_add_punch') }}" class="btn btn-primary">
+            <i data-lucide="plus"></i> Add Punch
+        </a>
+        <a href="{{ url_for('timeclock_edit_history') }}" class="btn btn-secondary">
+            <i data-lucide="history"></i> Edit History
+        </a>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card" style="margin-bottom: 24px;">
+    <form method="GET" style="padding: 16px; display: flex; gap: 16px; align-items: end; flex-wrap: wrap;">
+        <div class="form-group" style="margin: 0;">
+            <label class="form-label">Date</label>
+            <input type="date" name="date" class="form-input" value="{{ selected_date }}" onchange="this.form.submit()">
+        </div>
+        <div class="form-group" style="margin: 0;">
+            <label class="form-label">Employee</label>
+            <select name="employee_id" class="form-select" onchange="this.form.submit()">
+                <option value="">All Employees</option>
+                {% for emp in employees %}
+                <option value="{{ emp.Employee_ID }}" {% if selected_employee == emp.Employee_ID %}selected{% endif %}>
+                    {{ emp.Employee_Name }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-secondary">Filter</button>
+    </form>
+</div>
+
+<!-- Time Punches -->
+<div class="card">
+    <div class="card-header">
+        <h3>📋 Time Punches for {{ selected_date }}</h3>
+    </div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Punch ID</th>
+                <th>Employee</th>
+                <th>Time</th>
+                <th>Type</th>
+                <th>Hours Today</th>
+                <th>Overtime</th>
+                <th>Notes</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for punch in punches %}
+            <tr>
+                <td><code>{{ punch.Punch_ID }}</code></td>
+                <td>{{ punch.Employee_Name }}</td>
+                <td><strong>{{ punch.Time }}</strong></td>
+                <td>
+                    <span class="badge badge-{{ 'success' if punch.Punch_Type == 'CLOCK_IN' else 'danger' if punch.Punch_Type == 'CLOCK_OUT' else 'warning' }}">
+                        {{ punch.Punch_Type }}
+                    </span>
+                </td>
+                <td>{{ punch.Hours_Worked_Today }} hrs</td>
+                <td>{{ punch.Overtime_Hours }} hrs</td>
+                <td>
+                    {% if '[EDITED' in punch.Notes or '[ADDED' in punch.Notes %}
+                    <span class="badge badge-info">Modified</span>
+                    {% endif %}
+                    {{ punch.Notes[:30] }}{% if punch.Notes|length > 30 %}...{% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('timeclock_edit_punch', punch_id=punch.Punch_ID) }}" class="btn btn-sm btn-secondary">
+                        Edit
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="8" class="text-center text-muted">No punches found for this date</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if deleted_punches %}
+<!-- Deleted Punches -->
+<div class="card" style="margin-top: 24px; opacity: 0.7;">
+    <div class="card-header">
+        <h3>🗑️ Deleted Punches</h3>
+    </div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Punch ID</th>
+                <th>Employee</th>
+                <th>Time</th>
+                <th>Original Type</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for punch in deleted_punches %}
+            <tr style="text-decoration: line-through;">
+                <td><code>{{ punch.Punch_ID }}</code></td>
+                <td>{{ punch.Employee_Name }}</td>
+                <td>{{ punch.Time }}</td>
+                <td>{{ punch.Punch_Type|replace('DELETED_', '') }}</td>
+                <td>{{ punch.Notes[:50] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<!-- Recent Edits -->
+{% if edit_history %}
+<div class="card" style="margin-top: 24px;">
+    <div class="card-header">
+        <h3>📝 Recent Edits (Last 7 Days)</h3>
+    </div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Edit Date</th>
+                <th>Editor</th>
+                <th>Punch ID</th>
+                <th>Change</th>
+                <th>Reason</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for edit in edit_history[:10] %}
+            <tr>
+                <td>{{ edit.Edit_Date }}</td>
+                <td>{{ edit.Editor_Name }}</td>
+                <td><code>{{ edit.Punch_ID }}</code></td>
+                <td>
+                    {% if edit.Original_Time %}
+                    {{ edit.Original_Time }} → {{ edit.New_Time }}
+                    {% else %}
+                    <span class="badge badge-success">Added</span>
+                    {% endif %}
+                </td>
+                <td>{{ edit.Reason[:40] }}{% if edit.Reason|length > 40 %}...{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}

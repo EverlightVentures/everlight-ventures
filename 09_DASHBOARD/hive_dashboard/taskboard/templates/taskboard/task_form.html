@@ -1,0 +1,335 @@
+{% extends "hive/base.html" %}
+{% load humanize %}
+
+{% block title %}{{ task.title }} -- Taskboard{% endblock %}
+
+{% block active_nav %}
+  <style>.sidebar-nav-link[data-nav="taskboard"] { color: var(--gold) !important; background: var(--gold-glow); }</style>
+{% endblock %}
+
+{% block content %}
+<style>
+  /* ── Task Form Luxury Styles ─────────────────────────────────── */
+  .tf-back {
+    display: inline-flex; align-items: center; gap: 8px;
+    color: var(--text-muted); font-size: 0.85rem; text-decoration: none;
+    margin-bottom: 1.5rem; transition: color var(--transition-base);
+  }
+  .tf-back:hover { color: var(--gold); }
+
+  .tf-hero {
+    background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+    border: 1px solid var(--glass-border); border-radius: 24px;
+    padding: 2rem 2.5rem; margin-bottom: 2rem; position: relative; overflow: hidden;
+  }
+  .tf-hero::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--purple), var(--gold));
+    background-size: 200% 100%;
+    animation: shimmer-bar 3s ease-in-out infinite;
+  }
+  @keyframes shimmer-bar {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  .tf-hero-top { display: flex; align-items: flex-start; gap: 1.2rem; }
+  .tf-hero-icon {
+    width: 56px; height: 56px; border-radius: 16px;
+    background: var(--gold-glow); border: 1px solid var(--gold-dim);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; color: var(--gold-bright); flex-shrink: 0;
+  }
+  .tf-hero h1 {
+    font-size: 1.5rem; font-family: var(--font-heading); line-height: 1.3;
+    margin-bottom: 6px;
+  }
+  .tf-hero-desc { color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5; }
+  .tf-hero-meta {
+    display: flex; gap: 1rem; margin-top: 1rem; flex-wrap: wrap;
+  }
+  .tf-meta-item {
+    font-size: 0.78rem; color: var(--text-muted); display: flex;
+    align-items: center; gap: 6px;
+  }
+  .tf-meta-item i { color: var(--gold-dim); }
+
+  /* Form Card */
+  .tf-form-card {
+    background: var(--bg-secondary); border: 1px solid var(--glass-border);
+    border-radius: 20px; padding: 2rem 2.5rem; margin-bottom: 1.5rem;
+  }
+  .tf-form-title {
+    font-size: 1.1rem; font-family: var(--font-heading); color: var(--text-primary);
+    margin-bottom: 1.5rem; padding-bottom: 0.8rem; border-bottom: 1px solid var(--border-subtle);
+  }
+
+  /* Form Fields */
+  .tf-field {
+    margin-bottom: 1.5rem; animation: field-in 0.4s ease-out both;
+  }
+  @keyframes field-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .tf-field:nth-child(1) { animation-delay: 0.05s; }
+  .tf-field:nth-child(2) { animation-delay: 0.1s; }
+  .tf-field:nth-child(3) { animation-delay: 0.15s; }
+  .tf-field:nth-child(4) { animation-delay: 0.2s; }
+  .tf-field:nth-child(5) { animation-delay: 0.25s; }
+  .tf-field:nth-child(6) { animation-delay: 0.3s; }
+  .tf-field:nth-child(7) { animation-delay: 0.35s; }
+  .tf-field:nth-child(8) { animation-delay: 0.4s; }
+
+  .tf-label {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 8px;
+    font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .tf-label .required { color: #ef4444; font-size: 0.7rem; }
+  .tf-label .type-badge {
+    font-size: 0.65rem; background: var(--glass-bg); border: 1px solid var(--border-subtle);
+    border-radius: 4px; padding: 1px 6px; color: var(--text-muted); text-transform: lowercase;
+    letter-spacing: 0;
+  }
+
+  .tf-input {
+    width: 100%; padding: 12px 16px; font-size: 0.95rem;
+    background: var(--bg-tertiary); border: 1px solid var(--border-subtle);
+    border-radius: 12px; color: var(--text-primary);
+    font-family: var(--font-body); transition: all var(--transition-base);
+    outline: none;
+  }
+  .tf-input:focus {
+    border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-glow);
+  }
+  .tf-input::placeholder { color: var(--text-muted); }
+  .tf-input.secret {
+    font-family: 'Courier New', monospace; letter-spacing: 0.05em;
+  }
+  .tf-input.secret:not(:focus) { -webkit-text-security: disc; }
+
+  textarea.tf-input { min-height: 100px; resize: vertical; }
+  select.tf-input { cursor: pointer; }
+
+  .tf-hint { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
+
+  .tf-checkbox-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; background: var(--bg-tertiary);
+    border: 1px solid var(--border-subtle); border-radius: 12px;
+    cursor: pointer; transition: all var(--transition-base);
+  }
+  .tf-checkbox-row:hover { border-color: var(--gold-dim); }
+  .tf-checkbox-row input[type="checkbox"] {
+    width: 18px; height: 18px; accent-color: var(--gold);
+  }
+
+  /* Secret field toggle */
+  .tf-secret-wrap { position: relative; }
+  .tf-secret-toggle {
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--text-muted); cursor: pointer;
+    font-size: 0.9rem; transition: color 0.2s;
+  }
+  .tf-secret-toggle:hover { color: var(--gold); }
+
+  /* Notes field */
+  .tf-notes-section {
+    background: var(--bg-secondary); border: 1px solid var(--glass-border);
+    border-radius: 20px; padding: 1.5rem 2rem; margin-bottom: 1.5rem;
+  }
+
+  /* Action buttons */
+  .tf-actions {
+    display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem;
+  }
+  .tf-btn {
+    padding: 14px 28px; font-size: 0.9rem; font-weight: 600;
+    border: none; border-radius: 12px; cursor: pointer;
+    transition: all var(--transition-base); font-family: var(--font-body);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .tf-btn-primary {
+    background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+    color: #0a0a0f; box-shadow: 0 4px 16px var(--gold-glow);
+  }
+  .tf-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px var(--gold-glow); }
+  .tf-btn-save {
+    background: var(--glass-bg); border: 1px solid var(--gold-dim);
+    color: var(--gold);
+  }
+  .tf-btn-save:hover { background: var(--gold-glow); }
+  .tf-btn-skip {
+    background: var(--glass-bg); border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+  }
+  .tf-btn-skip:hover { border-color: #ef4444; color: #ef4444; }
+  .tf-btn-block {
+    background: var(--glass-bg); border: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+  }
+  .tf-btn-block:hover { border-color: #f59e0b; color: #f59e0b; }
+
+  /* Status pill */
+  .tf-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 14px; border-radius: 20px; font-size: 0.75rem;
+    font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .tf-status.pending { background: var(--gold-glow); color: var(--gold-bright); }
+  .tf-status.in_progress { background: var(--purple-glow); color: var(--purple); }
+  .tf-status.completed { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
+</style>
+
+<a href="{% url 'taskboard:board' %}" class="tf-back">
+  <i class="fa-solid fa-arrow-left"></i> Back to Taskboard
+</a>
+
+<!-- Hero -->
+<div class="tf-hero">
+  <div class="tf-hero-top">
+    <div class="tf-hero-icon"><i class="{{ task.template.icon }}"></i></div>
+    <div>
+      <h1>{{ task.title }}</h1>
+      {% if task.description %}<div class="tf-hero-desc">{{ task.description }}</div>{% endif %}
+    </div>
+  </div>
+  <div class="tf-hero-meta">
+    <span class="tf-meta-item"><i class="fa-solid fa-layer-group"></i> {{ task.template.get_category_display }}</span>
+    <span class="tf-meta-item"><i class="fa-solid fa-clock"></i> {{ task.created_at|naturaltime }}</span>
+    {% if task.source_agent %}<span class="tf-meta-item"><i class="fa-solid fa-robot"></i> From: {{ task.source_agent }}</span>{% endif %}
+    {% if task.target_agent %}<span class="tf-meta-item"><i class="fa-solid fa-bullseye"></i> To: {{ task.target_agent }}</span>{% endif %}
+    {% if task.batch_id %}<span class="tf-meta-item"><i class="fa-solid fa-boxes-stacked"></i> {{ task.batch_id }}</span>{% endif %}
+    <span class="tf-status {{ task.status }}">
+      <span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>
+      {{ task.get_status_display }}
+    </span>
+  </div>
+</div>
+
+<!-- Dynamic Form -->
+<form method="post" action="{% url 'taskboard:task_submit' task.id %}">
+  {% csrf_token %}
+
+  <div class="tf-form-card">
+    <div class="tf-form-title"><i class="fa-solid fa-keyboard" style="margin-right:8px; color:var(--gold-dim);"></i>Fill In Your Details</div>
+
+    {% for field in fields %}
+    <div class="tf-field">
+      <label class="tf-label" for="field_{{ field.name }}">
+        {{ field.label|default:field.name }}
+        {% if field.required %}<span class="required">REQUIRED</span>{% endif %}
+        <span class="type-badge">{{ field.type|default:"text" }}</span>
+      </label>
+
+      {% if field.type == "secret" %}
+      <div class="tf-secret-wrap">
+        <input type="password" name="{{ field.name }}" id="field_{{ field.name }}"
+               class="tf-input secret" placeholder="{{ field.placeholder|default:'Enter securely...' }}"
+               value="{{ existing_data|default_if_none:'' }}"
+               {% if field.required %}required{% endif %}>
+        <button type="button" class="tf-secret-toggle" onclick="toggleSecret(this)" title="Show/hide">
+          <i class="fa-solid fa-eye"></i>
+        </button>
+      </div>
+      {% if field.hint %}<div class="tf-hint">{{ field.hint }}</div>{% endif %}
+
+      {% elif field.type == "textarea" %}
+      <textarea name="{{ field.name }}" id="field_{{ field.name }}"
+                class="tf-input" placeholder="{{ field.placeholder|default:'Enter details...' }}"
+                {% if field.required %}required{% endif %}>{{ existing_data|default_if_none:'' }}</textarea>
+
+      {% elif field.type == "select" %}
+      <select name="{{ field.name }}" id="field_{{ field.name }}" class="tf-input"
+              {% if field.required %}required{% endif %}>
+        <option value="">-- Select --</option>
+        {% for opt in field.options %}
+        <option value="{{ opt }}">{{ opt }}</option>
+        {% endfor %}
+      </select>
+
+      {% elif field.type == "checkbox" %}
+      <label class="tf-checkbox-row">
+        <input type="checkbox" name="{{ field.name }}" id="field_{{ field.name }}">
+        <span>{{ field.label|default:field.name }}</span>
+      </label>
+
+      {% elif field.type == "email" %}
+      <input type="email" name="{{ field.name }}" id="field_{{ field.name }}"
+             class="tf-input" placeholder="{{ field.placeholder|default:'you@example.com' }}"
+             value="{{ existing_data|default_if_none:'' }}"
+             {% if field.required %}required{% endif %}>
+
+      {% elif field.type == "url" %}
+      <input type="url" name="{{ field.name }}" id="field_{{ field.name }}"
+             class="tf-input" placeholder="{{ field.placeholder|default:'https://...' }}"
+             value="{{ existing_data|default_if_none:'' }}"
+             {% if field.required %}required{% endif %}>
+
+      {% elif field.type == "file_note" %}
+      <input type="text" name="{{ field.name }}" id="field_{{ field.name }}"
+             class="tf-input" placeholder="{{ field.placeholder|default:'Paste file path or description...' }}"
+             value="{{ existing_data|default_if_none:'' }}"
+             {% if field.required %}required{% endif %}>
+      {% if field.hint %}<div class="tf-hint">{{ field.hint }}</div>{% endif %}
+
+      {% else %}
+      <input type="text" name="{{ field.name }}" id="field_{{ field.name }}"
+             class="tf-input" placeholder="{{ field.placeholder|default:'' }}"
+             value="{{ existing_data|default_if_none:'' }}"
+             {% if field.required %}required{% endif %}>
+      {% if field.hint %}<div class="tf-hint">{{ field.hint }}</div>{% endif %}
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Notes -->
+  <div class="tf-notes-section">
+    <div class="tf-form-title"><i class="fa-solid fa-sticky-note" style="margin-right:8px; color:var(--gold-dim);"></i>Your Notes (optional)</div>
+    <textarea name="_notes" class="tf-input" placeholder="Anything you want to note for the AI agent...">{{ task.notes }}</textarea>
+  </div>
+
+  <!-- Actions -->
+  <div class="tf-actions">
+    <button type="submit" name="_action" value="complete" class="tf-btn tf-btn-primary">
+      <i class="fa-solid fa-check-circle"></i> Complete & Send to Agent
+    </button>
+    <button type="submit" name="_action" value="save" class="tf-btn tf-btn-save">
+      <i class="fa-solid fa-floppy-disk"></i> Save Draft
+    </button>
+  </div>
+</form>
+
+<!-- Skip / Block (separate forms) -->
+<div class="tf-actions" style="margin-top: 1rem;">
+  <form method="post" action="{% url 'taskboard:task_skip' task.id %}" style="display:inline;">
+    {% csrf_token %}
+    <button type="submit" class="tf-btn tf-btn-skip" onclick="return confirm('Skip this task?');">
+      <i class="fa-solid fa-forward"></i> Skip
+    </button>
+  </form>
+  <form method="post" action="{% url 'taskboard:task_block' task.id %}" style="display:inline;">
+    {% csrf_token %}
+    <input type="hidden" name="reason" value="Blocked by user">
+    <button type="submit" class="tf-btn tf-btn-block">
+      <i class="fa-solid fa-pause"></i> Mark Blocked
+    </button>
+  </form>
+</div>
+
+<script>
+function toggleSecret(btn) {
+  const input = btn.parentElement.querySelector('input');
+  const icon = btn.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'fa-solid fa-eye-slash';
+  } else {
+    input.type = 'password';
+    icon.className = 'fa-solid fa-eye';
+  }
+}
+</script>
+{% endblock %}

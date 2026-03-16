@@ -1,0 +1,8 @@
+Date,Time,Transaction_ID,Employee_ID,Employee_Name,Category,Subcategory,Product_Name,Item_Name,Quantity,Size,Item_Description,Unit_Price,Subtotal,Tax_Rate,Tax_Amount,Line_Total,Payment_Method,Amount_Received,Change_Due,Notes
+2025-11-30,13:50:52,TXN20251130134933,1001,richard,Animal,Snake,Snake,Snake,1,M,Coral Snake,69.99,69.99,0.0825,5.77,75.76,,,,
+2025-11-30,13:50:52,TXN20251130134933,1001,richard,Product,Pet Food & Supplies,Tetramin,Snake Bites,1,dL,Snake Food,19.99,19.99,0.0825,1.65,21.64,,,,
+2025-11-30,13:50:52,TXN20251130134933,1001,richard,,,=== INVOICE TOTAL ===,,2,,,89.98,0.0825,7.42,97.40,Cash,100.00,2.60,Good job
+,,,,,,,,,,,,,,,,,,,,
+2025-11-30,14:25:11,TXN20251130142404,1001,richard,Plant,Tree,West Covina,Vanderwolf Pine,2,"24"" Box",Christmas Tree Purchase,399.99,799.98,0.0825,66.00,865.98,,,,
+2025-11-30,14:25:11,TXN20251130142404,1001,richard,,,=== INVOICE TOTAL ===,,1,,,799.98,0.0825,66.00,865.98,Cash,1000.00,134.02,Merry Christmas
+,,,,,,,,,,,,,,,,,,,,

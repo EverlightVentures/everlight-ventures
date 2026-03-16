@@ -1,0 +1,177 @@
+: 1770141298:0;ls
+: 1770141307:0;cd RG_OS
+: 1770141308:0;ls
+: 1770141984:0;pacman Syu cursor
+: 1770142174:0;sudo pacman -Syu --needed git base-devel curl ca-certificates\
+sudo pacman -S --needed nodejs npm python python-pip\
+node -v && npm -v && python --version\
+
+: 1770143733:0;curl -fsSL https://claude.ai/install.sh | bash\
+
+: 1770143780:0;claude\
+
+: 1770143841:0;echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc\
+source ~/.zshrc\
+hash -r\
+claude --version\
+
+: 1770143852:0;echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.profile\
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc\
+source ~/.profile 2>/dev/null || true\
+source ~/.bashrc 2>/dev/null || true\
+hash -r\
+which claude\
+claude --help\
+
+: 1770143865:0;ls -lah ~/.local/bin/claude\
+file ~/.local/bin/claude\
+~/.local/bin/claude --version\
+
+: 1770143893:0;mkdir -p /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/bin\
+cat > /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/bin/claude <<'EOF'\
+#!/usr/bin/env bash\
+exec "$HOME/.local/bin/claude" "$@"\
+EOF\
+chmod +x /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/bin/claude\
+
+: 1770143902:0;mkdir -p ~/.config/everlight\
+nano ~/.config/everlight/ai.env\
+
+: 1770143920:0;claude
+: 1770144162:0;npm install -g @openai/codex\
+
+: 1770144212:0;codex --version\
+
+: 1770144216:0;\codex --version\
+
+: 1770144239:0;command codex --version\
+
+: 1770144251:0;unsetopt correct\
+unsetopt correct_all\
+
+: 1770144275:0;npm bin -g\
+
+: 1770144298:0;npm bin -g
+: 1770144311:0;clear
+: 1770144337:0;\codex --version\
+
+: 1770144361:0;node -v && npm -v\
+
+: 1770144371:0;npm install -g @openai/codex\
+
+: 1770144413:0;codex --version\
+
+: 1770144415:0;mkdir -p ~/.npm-global\
+npm config set prefix "$HOME/.npm-global"\
+
+: 1770144424:0;npm config get prefix\
+
+: 1770144438:0;echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.zshrc\
+source ~/.zshrc\
+hash -r\
+
+: 1770144452:0;npm uninstall -g @openai/codex\
+npm install -g @openai/codex\
+
+: 1770144463:0;ls -lah ~/.npm-global/bin\
+
+: 1770144473:0;cat >> ~/.zshrc <<'EOF'\
+\
+# === Everlight AI CLI aliases ===\
+alias cx='codex'\
+alias cl='claude'\
+EOF\
+\
+source ~/.zshrc\
+hash -r\
+
+: 1770144543:0;cx
+: 1770144546:0;mkdir -p ~/.config/fish\
+nano ~/.config/fish/config.fish\
+
+: 1770144612:0;source ~/.config/fish/config.fish\
+
+: 1770144668:0;which codex\
+codex --version\
+cx --version\
+cl --version\
+
+: 1770144672:0;fish -c 'source ~/.config/fish/config.fish; which codex; codex --version; cx --version; cl --version'\
+
+: 1770144682:0;echo 'export PATH="$HOME/.npm-global/bin:$PATH"' >> ~/.zshrc\
+
+: 1770144732:0;\
+\
+#\
+cat > ~/.zshrc <<'EOF'\
+# Safety\
+setopt nonomatch\
+unsetopt correct\
+unsetopt correct_all\
+\
+# PATH\
+export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"\
+\
+# Aliases\
+alias cx='codex'\
+alias cl='claude'\
+EOF\
+\
+#\
+mkdir -p ~/.config/fish\
+cat > ~/.config/fish/config.fish <<'EOF'\
+# PATH\
+set -gx PATH $HOME/.local/bin $HOME/.npm-global/bin $PATH\
+\
+# Aliases\
+alias cx 'codex'\
+alias cl 'claude'\
+EOF\
+\
+#\
+hash -r 2>/dev/null || true\
+
+: 1770144762:0;codex --version\
+cx --version\
+cl --version\
+
+: 1770144766:0;\
+\
+#\
+mkdir -p ~/.npm-global\
+npm config set prefix "$HOME/.npm-global"\
+\
+#\
+cat >> ~/.zshrc <<'ZEOF'\
+\
+# --- Everlight safety ---\
+setopt nonomatch\
+unsetopt correct\
+unsetopt correct_all\
+\
+# --- Everlight PATH ---\
+export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$PATH"\
+\
+# --- Everlight AI aliases ---\
+alias cx='codex'\
+alias cl='claude'\
+ZEOF\
+\
+#\
+mkdir -p ~/.config/fish\
+cat > ~/.config/fish/config.fish <<'FEOF'\
+# Everlight fish config\
+\
+set -gx PATH $HOME/.local/bin $HOME/.npm-global/bin $PATH\
+alias cx 'codex'\
+alias cl 'claude'\
+FEOF\
+\
+#\
+source ~/.zshrc 2>/dev/null || true\
+hash -r\
+\
+#\
+ls -lah ~/.npm-global/bin/codex\
+echo "DONE. Open a NEW terminal (fish or zsh) and run: cx --version ; cl --version"\
+

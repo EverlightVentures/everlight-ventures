@@ -1,0 +1,72 @@
+{% load trading_tags humanize %}
+
+<!-- Perplexity Market Brief -->
+{% if market_brief %}
+<div class="intel-card" style="margin-bottom:8px;">
+  <div class="intel-title">MARKET BRIEF <span class="pill" style="font-size:9px;">PERPLEXITY</span></div>
+  {% if market_brief.risk_modifier %}
+    <div style="margin:8px 0;font-size:0.82rem;color:#d1d5db;">
+      Risk: <span class="{{ market_brief.risk_modifier|pnl_color }}">{{ market_brief.risk_modifier }}</span>
+      {% if market_brief.horizon %} &middot; Horizon: {{ market_brief.horizon }}{% endif %}
+    </div>
+  {% endif %}
+  {% if market_brief.macro_bullets %}
+    <div style="margin-top:8px;">
+      {% for bullet in market_brief.macro_bullets %}
+        <div class="intel-event">&bull; {{ bullet }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+  {% if market_brief.xlm_catalysts %}
+    <div style="margin-top:8px;">
+      <div style="font-size:10px;color:#6b7280;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">XLM CATALYSTS</div>
+      {% for cat in market_brief.xlm_catalysts %}
+        <div class="intel-event">&bull; {{ cat }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- Agent Thoughts (HTMX polled) -->
+<div id="thought-feed-container"
+     hx-get="{% url 'trading:api_thought_feed' %}"
+     hx-trigger="every 5s"
+     hx-swap="innerHTML">
+  {% include "trading/partials/thought_feed.html" %}
+</div>
+
+<!-- AI Team Reports -->
+{% if ai_insight %}
+<div style="margin-top:12px;">
+  <div class="bot-analytics-header">TEAM PEER REPORTS</div>
+
+  {% for agent_name, agent_data in ai_insight.items %}
+  {% if agent_data.action or agent_data.directive %}
+  <div class="intel-card" style="margin:6px 0;border-left:3px solid {% if agent_name == 'claude' %}#8b5cf6{% elif agent_name == 'gemini' %}#22d3ee{% elif agent_name == 'codex' %}#22c55e{% else %}#f59e0b{% endif %};">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div class="intel-title" style="margin-bottom:0;">
+        <i class="fa-solid {% if agent_name == 'claude' %}fa-brain{% elif agent_name == 'gemini' %}fa-shield{% elif agent_name == 'codex' %}fa-code{% else %}fa-search{% endif %}"
+           style="color:{% if agent_name == 'claude' %}#8b5cf6{% elif agent_name == 'gemini' %}#22d3ee{% elif agent_name == 'codex' %}#22c55e{% else %}#f59e0b{% endif %};"></i>
+        {{ agent_name|upper }}
+        {% if agent_name == "claude" %}<span style="font-size:8px;color:#8b5cf6;">CHIEF</span>{% endif %}
+      </div>
+      {% if agent_data.confidence %}
+        <span class="pill" style="font-size:10px;">{{ agent_data.confidence }}%</span>
+      {% endif %}
+    </div>
+    {% if agent_data.action %}
+      <div style="font-size:0.85rem;color:#e5e7eb;font-weight:600;margin-top:6px;">
+        {{ agent_data.action }}
+      </div>
+    {% endif %}
+    {% if agent_data.reasoning %}
+      <div style="font-size:0.78rem;color:#9ca3af;margin-top:4px;line-height:1.5;">
+        {{ agent_data.reasoning }}
+      </div>
+    {% endif %}
+  </div>
+  {% endif %}
+  {% endfor %}
+</div>
+{% endif %}

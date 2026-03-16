@@ -1,0 +1,57 @@
+{
+    "name": "Slack-to-GPT-Chain-Aggregator",
+    "nodes": [
+        {
+            "name": "Slack Trigger",
+            "type": "trigger",
+            "description": "Initiates on Slack command or message"
+        },
+        {
+            "name": "Switch",
+            "type": "logic",
+            "description": "Routes based on command category (sales, finances, contacts, products, etc.)"
+        },
+        {
+            "name": "ClaudeGPT",
+            "type": "ai",
+            "description": "Handles long context, logical reasoning"
+        },
+        {
+            "name": "GeminiGPT",
+            "type": "ai",
+            "description": "Handles summaries and code clean-up"
+        },
+        {
+            "name": "Summarizer",
+            "type": "formatter",
+            "description": "Summarizes and formats results for clean Slack response"
+        },
+        {
+            "name": "Google Docs",
+            "type": "output",
+            "description": "Saves main report"
+        },
+        {
+            "name": "Google Sheets",
+            "type": "output",
+            "description": "Logs structured data"
+        },
+        {
+            "name": "Google Drive",
+            "type": "output",
+            "description": "Saves all files"
+        },
+        {
+            "name": "Slack Team Chat",
+            "type": "output",
+            "description": "Posts results to internal team"
+        },
+        {
+            "name": "Slack Client Chat",
+            "type": "output",
+            "description": "Posts invoice or final message to client"
+        }
+    ],
+    "description": "Chains GPTs, logs structured output to Drive/Sheets, and summarizes for internal and client-side Slack delivery.",
+    "version": "1.0"
+}

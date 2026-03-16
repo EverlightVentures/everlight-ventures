@@ -1,0 +1,666 @@
+{% extends "hive/base.html" %}
+{% load static humanize hive_tags %}
+
+{% block title %}{{ app_name }} -- Session {{ object.session_id|truncatechars:12 }}{% endblock %}
+{% block page_title %}Session Detail{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'hive:dashboard' %}">Hive</a>
+  <span class="sep">/</span>
+  <a href="{% url 'hive:sessions' %}">Sessions</a>
+  <span class="sep">/</span>
+  {{ object.session_id|truncatechars:12 }}
+{% endblock %}
+
+{% block content %}
+<style>
+  /* ===================================================================
+     SESSION DETAIL -- Header
+     =================================================================== */
+  .sd-header {
+    margin-bottom: 32px;
+  }
+
+  .sd-query-text {
+    font-family: var(--font-heading);
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.4;
+    margin-bottom: 16px;
+  }
+
+  .sd-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+  }
+
+  .sd-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sd-meta-item i {
+    font-size: 0.78rem;
+    opacity: 0.6;
+  }
+
+  .sd-session-id {
+    font-family: monospace;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  /* ===================================================================
+     SESSION DETAIL -- Collapsible Sections
+     =================================================================== */
+  .sd-section {
+    margin-bottom: 28px;
+  }
+
+  .sd-section-title {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .sd-section-title i {
+    color: var(--gold-dim);
+    font-size: 0.95rem;
+  }
+
+  .sd-collapse-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.78rem;
+    padding: 4px 10px;
+    border-radius: 6px;
+    transition: all var(--transition-base);
+    margin-left: auto;
+  }
+
+  .sd-collapse-btn:hover {
+    color: var(--gold);
+    background: rgba(201, 168, 76, 0.08);
+  }
+
+  .sd-collapsible {
+    overflow: hidden;
+    transition: max-height 0.35s var(--ease-out-expo);
+  }
+
+  .sd-collapsible.collapsed {
+    max-height: 0 !important;
+  }
+
+  /* ===================================================================
+     SESSION DETAIL -- Intel Summary
+     =================================================================== */
+  .sd-intel-content {
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    padding: 20px;
+  }
+
+  /* ===================================================================
+     SESSION DETAIL -- Agent Response Cards
+     =================================================================== */
+  .sd-responses-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .sd-response-card {
+    border-left: 3px solid var(--glass-border);
+  }
+
+  .sd-response-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .sd-response-agent-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+
+  .sd-response-agent-info {
+    flex: 1;
+  }
+
+  .sd-response-agent-name {
+    font-weight: 600;
+    font-size: 0.92rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sd-response-agent-meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  .sd-response-text {
+    font-size: 0.86rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+
+  .sd-error-box {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.82rem;
+    color: #ef4444;
+    margin-bottom: 12px;
+  }
+
+  .sd-error-box i {
+    margin-right: 6px;
+  }
+
+  .sd-employees-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .sd-employee-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    color: var(--purple);
+  }
+
+  /* ===================================================================
+     SESSION DETAIL -- Timeline
+     =================================================================== */
+  .sd-timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+
+  .sd-timeline::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--gold-dim), var(--glass-border), transparent);
+  }
+
+  .sd-timeline-item {
+    position: relative;
+    padding-bottom: 24px;
+  }
+
+  .sd-timeline-item:last-child {
+    padding-bottom: 0;
+  }
+
+  .sd-timeline-dot {
+    position: absolute;
+    left: -27px;
+    top: 4px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    background: var(--bg-primary);
+  }
+
+  .sd-timeline-dot.dot-done {
+    background: #22c55e;
+    border-color: #22c55e;
+  }
+
+  .sd-timeline-dot.dot-failed {
+    background: #ef4444;
+    border-color: #ef4444;
+  }
+
+  .sd-timeline-dot.dot-running {
+    border-color: var(--purple);
+    animation: hivePulse 2s ease-in-out infinite;
+  }
+
+  .sd-timeline-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+  }
+
+  .sd-timeline-detail {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+
+  /* ===================================================================
+     SESSION DETAIL -- War Room Files
+     =================================================================== */
+  .sd-files-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .sd-file-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 6px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+  }
+
+  .sd-file-item i {
+    color: var(--gold-dim);
+    font-size: 0.85rem;
+  }
+
+  /* ===================================================================
+     SESSION DETAIL -- Combined Summary
+     =================================================================== */
+  .sd-summary-content {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    padding: 20px;
+  }
+
+  /* ===================================================================
+     SESSION DETAIL -- Responsive
+     =================================================================== */
+  @media (max-width: 768px) {
+    .sd-query-text {
+      font-size: 1.2rem;
+    }
+
+    .sd-meta-row {
+      gap: 10px;
+      font-size: 0.78rem;
+    }
+  }
+
+  /* Copy button */
+  .copy-output-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    margin-left: auto;
+    border-radius: 8px;
+    border: 1px solid rgba(201, 168, 76, 0.25);
+    background: rgba(201, 168, 76, 0.08);
+    color: var(--gold);
+    font-size: 0.74rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-body);
+  }
+  .copy-output-btn:hover {
+    background: rgba(201, 168, 76, 0.18);
+    border-color: rgba(201, 168, 76, 0.4);
+  }
+  .copy-output-btn.copied {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+  }
+</style>
+
+<!-- ====================================================================
+     HEADER
+     ==================================================================== -->
+<div class="sd-header glass-card">
+  <div class="sd-query-text">{{ object.query }}</div>
+  <div class="sd-meta-row">
+    <span class="sd-meta-item">
+      <i class="fa-solid fa-fingerprint"></i>
+      <span class="sd-session-id">{{ object.session_id }}</span>
+    </span>
+    <span class="sd-meta-item">
+      <span class="sess-mode-badge" style="display:inline-block; padding:2px 10px; border-radius:9999px; font-size:0.7rem; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; border:1px solid var(--purple-dim); color:var(--purple); background:rgba(139,92,246,0.1);">{{ object.mode }}</span>
+    </span>
+    <span class="sd-meta-item">{{ object.status|status_badge }}</span>
+    <span class="sd-meta-item">
+      <i class="fa-solid fa-clock"></i>
+      {{ object.duration_seconds|duration_fmt }}
+    </span>
+    <span class="sd-meta-item">
+      <i class="fa-regular fa-calendar"></i>
+      {{ object.created_at|timesince }} ago
+    </span>
+    {% if object.routed_to %}
+    <span class="sd-meta-item">
+      <i class="fa-solid fa-route"></i>
+      Routed to: {{ object.routed_to }}
+    </span>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ====================================================================
+     INTEL SUMMARY (Perplexity)
+     ==================================================================== -->
+{% if object.intel_summary %}
+<div class="sd-section">
+  <div class="sd-section-title">
+    <i class="fa-solid fa-satellite-dish"></i>
+    Intel Summary
+    <button class="sd-collapse-btn" onclick="toggleCollapse(this)" data-target="intel-body">
+      <i class="fa-solid fa-chevron-up"></i>
+    </button>
+  </div>
+  <div class="glass-card sd-collapsible" id="intel-body">
+    <div class="sd-intel-content">{{ object.intel_summary|linebreaksbr }}</div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ====================================================================
+     AGENT RESPONSES
+     ==================================================================== -->
+<div class="sd-section">
+  <div class="sd-section-title">
+    <i class="fa-solid fa-comments"></i>
+    Agent Responses
+    <span style="font-family: var(--font-body); font-size: 0.75rem; color: var(--text-muted); font-weight: 400;">
+      {{ object.agents_succeeded }} of {{ object.agents_total }} succeeded
+    </span>
+    <button class="copy-output-btn" onclick="copyFullOutput(this)" style="margin-left:auto;">
+      <i class="fa-regular fa-copy"></i> Copy All
+    </button>
+    <a href="{% url 'hive:api_export_session' session_id=object.session_id %}" class="copy-output-btn" style="text-decoration:none;">
+      <i class="fa-solid fa-download"></i> Export .md
+    </a>
+  </div>
+  <div class="sd-responses-grid">
+    {% for resp in object.responses.all %}
+    <div class="glass-card sd-response-card" style="border-left-color: {{ resp.agent.name|agent_color }};">
+      <div class="sd-response-header">
+        <div class="sd-response-agent-icon" style="background: {{ resp.agent.name|agent_color }}22; color: {{ resp.agent.name|agent_color }};">
+          <i class="fa-solid {{ resp.agent.name|agent_icon }}"></i>
+        </div>
+        <div class="sd-response-agent-info">
+          <div class="sd-response-agent-name">
+            {{ resp.agent.display_name }}
+            {% agent_pulse resp.agent.name %}
+          </div>
+          <div class="sd-response-agent-meta">
+            {{ resp.status|status_badge }}
+            -- {{ resp.duration_seconds|duration_fmt }}
+          </div>
+        </div>
+        <button class="copy-output-btn" onclick="copyAgentResponse(this)" style="flex-shrink:0;">
+          <i class="fa-regular fa-copy"></i> Copy
+        </button>
+      </div>
+
+      {% if resp.error_message %}
+      <div class="sd-error-box">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        {{ resp.error_message }}
+      </div>
+      {% endif %}
+
+      {% if resp.response_text %}
+      <div class="sd-response-text">{{ resp.response_text|linebreaksbr }}</div>
+      {% endif %}
+
+      {% if resp.employees_consulted %}
+      <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 8px;">
+        <i class="fa-solid fa-user-group" style="margin-right: 4px;"></i> Employees consulted:
+      </div>
+      <div class="sd-employees-list">
+        {% for emp in resp.employees_consulted %}
+        <span class="sd-employee-tag">{{ emp }}</span>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+    {% empty %}
+    <div class="glass-card" style="text-align: center; padding: 40px; color: var(--text-muted);">
+      No agent responses recorded for this session.
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ====================================================================
+     TIMELINE
+     ==================================================================== -->
+{% if timeline %}
+<div class="sd-section">
+  <div class="sd-section-title">
+    <i class="fa-solid fa-timeline"></i>
+    Timeline
+  </div>
+  <div class="glass-card">
+    <div class="sd-timeline">
+      {% for event in timeline %}
+      <div class="sd-timeline-item">
+        <div class="sd-timeline-dot dot-{{ event.status|default:'done' }}"></div>
+        <div class="sd-timeline-label">{{ event.label }}</div>
+        <div class="sd-timeline-detail">
+          {% if event.agent %}{{ event.agent }} -- {% endif %}
+          {% if event.duration %}{{ event.duration|duration_fmt }}{% endif %}
+          {% if event.timestamp %} -- {{ event.timestamp }}{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ====================================================================
+     WAR ROOM FILES
+     ==================================================================== -->
+{% if war_room_files %}
+<div class="sd-section">
+  <div class="sd-section-title">
+    <i class="fa-solid fa-folder-tree"></i>
+    War Room Files
+  </div>
+  <div class="glass-card">
+    <div class="sd-files-list">
+      {% for fname in war_room_files %}
+      <div class="sd-file-item">
+        <i class="fa-solid fa-file-lines"></i>
+        <span>{{ fname }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ====================================================================
+     COMBINED SUMMARY
+     ==================================================================== -->
+{% if object.combined_summary %}
+<div class="sd-section">
+  <div class="sd-section-title">
+    <i class="fa-solid fa-merge"></i>
+    Combined Summary
+    <button class="sd-collapse-btn" onclick="toggleCollapse(this)" data-target="summary-body">
+      <i class="fa-solid fa-chevron-up"></i>
+    </button>
+  </div>
+  <div class="glass-card sd-collapsible" id="summary-body">
+    <div class="sd-summary-content">{{ object.combined_summary|linebreaksbr }}</div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function toggleCollapse(btn) {
+    var targetId = btn.getAttribute('data-target');
+    var target = document.getElementById(targetId);
+    if (!target) return;
+
+    var icon = btn.querySelector('i');
+    if (target.classList.contains('collapsed')) {
+      target.classList.remove('collapsed');
+      target.style.maxHeight = target.scrollHeight + 'px';
+      if (icon) { icon.className = 'fa-solid fa-chevron-up'; }
+    } else {
+      target.style.maxHeight = target.scrollHeight + 'px';
+      // Force reflow
+      target.offsetHeight;
+      target.classList.add('collapsed');
+      if (icon) { icon.className = 'fa-solid fa-chevron-down'; }
+    }
+  }
+
+  function copyAgentResponse(btn) {
+    var card = btn.closest('.sd-response-card');
+    if (!card) return;
+    var nameEl = card.querySelector('.sd-response-agent-name');
+    var textEl = card.querySelector('.sd-response-text');
+    var errEl  = card.querySelector('.sd-error-box');
+    var name   = nameEl ? nameEl.textContent.trim() : 'Agent';
+    var text   = textEl ? textEl.textContent.trim() : (errEl ? errEl.textContent.trim() : '');
+
+    var content = '--- ' + name + ' ---\n\n' + text;
+    navigator.clipboard.writeText(content).then(function() {
+      var orig = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
+    }).catch(function() {
+      var ta = document.createElement('textarea');
+      ta.value = content;
+      ta.style.cssText = 'position:fixed;left:-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); } catch(e) {}
+      document.body.removeChild(ta);
+      var orig = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  function copyFullOutput(btn) {
+    /* Gather all agent response text from the page */
+    var lines = [];
+    lines.push('============================================================');
+    lines.push('  E PLURIBUS UNUM -- HIVE MIND DELIBERATION');
+    lines.push('============================================================');
+    lines.push('  Session: {{ object.session_id }}');
+    lines.push('  Query: {{ object.query|truncatechars:100 }}');
+    lines.push('  Mode: {{ object.mode }}');
+    lines.push('  Duration: {{ object.duration_seconds|duration_fmt }}');
+    lines.push('============================================================');
+    lines.push('');
+
+    /* Extract each agent response card text */
+    var cards = document.querySelectorAll('.sd-response-card');
+    cards.forEach(function(card) {
+      var name = card.querySelector('.sd-response-agent-name');
+      var text = card.querySelector('.sd-response-text');
+      var err = card.querySelector('.sd-error-box');
+      var empTags = card.querySelectorAll('.sd-employee-tag');
+
+      var agentName = name ? name.textContent.trim() : 'Unknown';
+      lines.push('--- ' + agentName + ' ---');
+
+      if (empTags.length) {
+        var emps = [];
+        empTags.forEach(function(t) { emps.push(t.textContent.trim()); });
+        lines.push('Team: ' + emps.join(', '));
+      }
+      lines.push('');
+
+      if (text) {
+        lines.push(text.textContent.trim());
+      } else if (err) {
+        lines.push('ERROR: ' + err.textContent.trim());
+      } else {
+        lines.push('(no output)');
+      }
+      lines.push('');
+      lines.push('');
+    });
+
+    lines.push('============================================================');
+
+    var fullText = lines.join('\n');
+
+    navigator.clipboard.writeText(fullText).then(function() {
+      var orig = btn.innerHTML;
+      btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+      btn.classList.add('copied');
+      setTimeout(function() {
+        btn.innerHTML = orig;
+        btn.classList.remove('copied');
+      }, 2000);
+    }).catch(function() {
+      /* Fallback */
+      var ta = document.createElement('textarea');
+      ta.value = fullText;
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        var orig = btn.innerHTML;
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+        btn.classList.add('copied');
+        setTimeout(function() {
+          btn.innerHTML = orig;
+          btn.classList.remove('copied');
+        }, 2000);
+      } catch(e) { /* silent */ }
+      document.body.removeChild(ta);
+    });
+  }
+</script>
+{% endblock %}

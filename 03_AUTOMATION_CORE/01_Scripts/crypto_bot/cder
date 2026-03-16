@@ -1,0 +1,369 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+BOT_DIR="/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/crypto_bot"
+VENV="/tmp/crypto_bot_venv"
+VENV_PY="$VENV/bin/python"
+
+BOT_PID_FILE="$BOT_DIR/data/bot.pid"
+DASH_PID_FILE="$BOT_DIR/data/dashboard.pid"
+WD_PID_FILE="$BOT_DIR/data/watchdog.pid"
+
+LOG_BOT_CONSOLE="$BOT_DIR/logs/bot_console.log"
+LOG_DASHBOARD="$BOT_DIR/logs/dashboard.log"
+LOG_WATCHDOG="$BOT_DIR/logs/watchdog.log"
+
+FORCE=0
+MODE="all"  # all|bot|dash|dashboard|attach|status
+for arg in "$@"; do
+  case "$arg" in
+    --force)
+      FORCE=1
+      ;;
+    all|bot|dash|dashboard|attach|status)
+      MODE="$arg"
+      ;;
+  esac
+done
+
+ts() { date '+%Y-%m-%d %H:%M:%S'; }
+say() { echo "[$(ts)] $*"; }
+
+cd "$BOT_DIR"
+
+preflight() {
+  # Preflight must pass BEFORE we stop anything, to avoid breaking live trade management.
+  say "Preflight: syntax check (bot/dashboard/modules)..."
+  python3 -m py_compile \
+    "$BOT_DIR/bot.py" \
+    "$BOT_DIR/dashboard.py" \
+    "$BOT_DIR/utils/coinbase_api.py" \
+    "$BOT_DIR/utils/margin_policy.py" \
+    "$BOT_DIR/utils/plrl3.py"
+
+  say "Preflight: venv streamlit import..."
+  if [ ! -x "$VENV_PY" ]; then
+    say "WARN: venv missing at $VENV_PY (dashboard restart may fail)."
+  else
+    "$VENV_PY" -c "import streamlit" >/dev/null 2>&1 || {
+      say "ERROR: streamlit not importable in $VENV_PY"
+      return 1
+    }
+  fi
+}
+
+protective_check() {
+  if [ "$FORCE" = "1" ]; then
+    say "Protective check: skipped (--force)"
+    return 0
+  fi
+  say "Protective check: require exchange-side stop protection for any OPEN CFM position before restart..."
+  python3 - <<'PY'
+import json
+import sys
+from pathlib import Path
+
+BOT_DIR = Path("/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/crypto_bot")
+cfg = json.loads((BOT_DIR / "config.json").read_text())
+
+from utils.coinbase_api import CoinbaseAPI
+
+exch = cfg.get("exchange", {}) or {}
+api = CoinbaseAPI(
+    exch.get("api_key", ""),
+    exch.get("api_secret", ""),
+    sandbox=exch.get("sandbox", False),
+    use_perpetuals=True,
+)
+
+def find_key(obj, keys):
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            if k in keys:
+                return True
+            if find_key(v, keys):
+                return True
+    elif isinstance(obj, list):
+        for it in obj:
+            if find_key(it, keys):
+                return True
+    return False
+
+positions = api.get_futures_positions() or []
+if not positions:
+    print("No open CFM positions detected.")
+    sys.exit(0)
+
+bad = []
+for p in positions:
+    product_id = p.get("product_id") or p.get("productId") or p.get("symbol")
+    if not product_id:
+        continue
+    orders = api.get_open_orders(product_id) or []
+    # "Stop-like" if any stop trigger key exists anywhere in the order payload.
+    stop_like = any(find_key(o, {"stop_trigger_price", "stop_price", "stop"}) for o in orders)
+    if not stop_like:
+        bad.append(str(product_id))
+
+if bad:
+    print("ERROR: Open CFM position(s) appear to have NO exchange-side stop order:")
+    for pid in bad:
+        print(" -", pid)
+    print("Aborting restart to avoid an unprotected management gap.")
+    print("If you really want to restart anyway, run: CDER --force")
+    sys.exit(2)
+
+print("OK: Open CFM positions have stop protection visible in open orders.")
+sys.exit(0)
+PY
+}
+
+backup_state() {
+  local bdir="$BOT_DIR/data/_restart_backups/$(date '+%Y%m%d_%H%M%S')"
+  mkdir -p "$bdir"
+  for f in \
+    "$BOT_DIR/config.json" \
+    "$BOT_DIR/data/position_state.json" \
+    "$BOT_DIR/data/entry_prices.json" \
+    "$BOT_DIR/data/plrl3_state.json"
+  do
+    [ -f "$f" ] && cp -a "$f" "$bdir/" || true
+  done
+  say "State backup: $bdir"
+}
+
+find_bot_pid_by_fd() {
+  # Identify the correct bot process by the fact it has our bot_console.log open.
+  local pid
+  for pid in $(pgrep -f "python3 bot.py" 2>/dev/null || true) $(pgrep -f "python3 .*crypto_bot/bot.py" 2>/dev/null || true); do
+    [ -d "/proc/$pid/fd" ] || continue
+    for fd in /proc/"$pid"/fd/*; do
+      local tgt
+      tgt="$(readlink "$fd" 2>/dev/null || true)"
+      if [ "$tgt" = "$LOG_BOT_CONSOLE" ]; then
+        echo "$pid"
+        return 0
+      fi
+    done
+  done
+  return 1
+}
+
+is_bot_pid() {
+  local pid="${1:-}"
+  [ -n "${pid:-}" ] || return 1
+  [ -d "/proc/$pid" ] || return 1
+  # cmdline is NUL-separated
+  local cmd
+  cmd="$(tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null || true)"
+  echo "$cmd" | grep -q "crypto_bot/bot\\.py" || return 1
+  return 0
+}
+
+find_bot_pid() {
+  # Prefer pidfile (cb writes it), fall back to cmdline scan.
+  local pid=""
+  if [ -f "$BOT_PID_FILE" ]; then
+    pid="$(cat "$BOT_PID_FILE" 2>/dev/null || true)"
+    if is_bot_pid "$pid"; then
+      echo "$pid"
+      return 0
+    fi
+  fi
+  pid="$(pgrep -fo "python3 .*crypto_bot/bot\\.py" 2>/dev/null || true)"
+  if is_bot_pid "$pid"; then
+    echo "$pid"
+    return 0
+  fi
+  # Last resort (legacy): match by fd. This is brittle because stdout may be redirected elsewhere.
+  pid="$(find_bot_pid_by_fd 2>/dev/null || true)"
+  if is_bot_pid "$pid"; then
+    echo "$pid"
+    return 0
+  fi
+  return 1
+}
+
+stop_watchdog() {
+  say "Stopping watchdog..."
+  if [ -f "$WD_PID_FILE" ]; then
+    local pid
+    pid="$(cat "$WD_PID_FILE" 2>/dev/null || true)"
+    if [ -n "${pid:-}" ] && [ -d "/proc/$pid" ]; then
+      kill -TERM "$pid" 2>/dev/null || true
+      sleep 1
+    fi
+    rm -f "$WD_PID_FILE" 2>/dev/null || true
+  fi
+  # Kill any stray watchdog loop if pid file is stale.
+  pkill -f "bash .*crypto_bot/watchdog\\.sh" 2>/dev/null || true
+}
+
+stop_dashboard() {
+  say "Stopping dashboard..."
+  if [ -f "$DASH_PID_FILE" ]; then
+    local pid
+    pid="$(cat "$DASH_PID_FILE" 2>/dev/null || true)"
+    if [ -n "${pid:-}" ] && [ -d "/proc/$pid" ]; then
+      kill -TERM "$pid" 2>/dev/null || true
+      sleep 1
+    fi
+    rm -f "$DASH_PID_FILE" 2>/dev/null || true
+  fi
+  # Free the port if something is stuck.
+  if command -v lsof >/dev/null 2>&1; then
+    local pids
+    pids="$(lsof -ti:8501 2>/dev/null || true)"
+    if [ -n "${pids:-}" ]; then
+      say "Killing processes still bound to :8501 -> $pids"
+      kill -TERM $pids 2>/dev/null || true
+      sleep 1
+      kill -9 $pids 2>/dev/null || true
+    fi
+  fi
+}
+
+stop_bot() {
+  say "Stopping bot..."
+  # Preferred graceful shutdown via cb (it also cleans pid file).
+  bash "$BOT_DIR/cb" stop >/dev/null 2>&1 || true
+
+  # If still running, identify the real bot and stop it.
+  local pid
+  pid="$(find_bot_pid_by_fd 2>/dev/null || true)"
+  if [ -n "${pid:-}" ] && [ -d "/proc/$pid" ]; then
+    say "Stopping bot PID $pid (matched by fd)..."
+    kill -TERM "$pid" 2>/dev/null || true
+    sleep 2
+    [ -d "/proc/$pid" ] && kill -9 "$pid" 2>/dev/null || true
+  fi
+
+  rm -f "$BOT_PID_FILE" 2>/dev/null || true
+}
+
+start_bot() {
+  say "Starting bot..."
+  bash "$BOT_DIR/cb" start >/dev/null 2>&1 || true
+  sleep 1
+
+  local pid
+  pid="$(find_bot_pid 2>/dev/null || true)"
+  if [ -n "${pid:-}" ]; then
+    echo "$pid" > "$BOT_PID_FILE"
+    say "Bot running (PID: $pid)"
+  else
+    say "ERROR: bot did not come up (no bot pid found)."
+    # Show both stdout log and console log (bot may redirect stdout elsewhere).
+    if [ -f "$BOT_DIR/logs/bot_$(date +%Y%m%d).log" ]; then
+      tail -n 60 "$BOT_DIR/logs/bot_$(date +%Y%m%d).log" || true
+    fi
+    [ -f "$LOG_BOT_CONSOLE" ] && tail -n 40 "$LOG_BOT_CONSOLE" || true
+    return 1
+  fi
+}
+
+start_dashboard() {
+  say "Starting dashboard..."
+  bash "$BOT_DIR/run_dashboard.sh" >/dev/null 2>&1 || true
+  sleep 1
+  if [ -f "$DASH_PID_FILE" ]; then
+    local pid
+    pid="$(cat "$DASH_PID_FILE" 2>/dev/null || true)"
+    if [ -n "${pid:-}" ] && [ -d "/proc/$pid" ]; then
+      say "Dashboard running (PID: $pid) -> http://localhost:8501"
+      return 0
+    fi
+  fi
+  say "WARN: dashboard pidfile missing/stale; check $LOG_DASHBOARD"
+  [ -f "$LOG_DASHBOARD" ] && tail -n 50 "$LOG_DASHBOARD" || true
+}
+
+start_watchdog() {
+  say "Starting watchdog..."
+  # cb daemon spawns watchdog.sh; on noexec mounts we must ensure it uses bash internally.
+  bash "$BOT_DIR/cb" daemon >/dev/null 2>&1 || true
+  sleep 1
+  say "Watchdog: check $LOG_WATCHDOG"
+}
+
+status() {
+  say "Status:"
+  local pid
+  pid="$(find_bot_pid 2>/dev/null || true)"
+  if [ -n "${pid:-}" ]; then
+    say "  Bot: RUNNING (PID $pid)"
+  else
+    say "  Bot: STOPPED"
+  fi
+  if [ -f "$DASH_PID_FILE" ]; then
+    local dp
+    dp="$(cat "$DASH_PID_FILE" 2>/dev/null || true)"
+    if [ -n "${dp:-}" ] && [ -d "/proc/$dp" ]; then
+      say "  Dashboard: RUNNING (PID $dp) http://localhost:8501"
+    else
+      say "  Dashboard: STOPPED (stale pidfile)"
+    fi
+  else
+    say "  Dashboard: STOPPED"
+  fi
+  if [ -f "$WD_PID_FILE" ]; then
+    local wp
+    wp="$(cat "$WD_PID_FILE" 2>/dev/null || true)"
+    if [ -n "${wp:-}" ] && [ -d "/proc/$wp" ]; then
+      say "  Watchdog: RUNNING (PID $wp)"
+    else
+      say "  Watchdog: STOPPED (stale pidfile)"
+    fi
+  else
+    say "  Watchdog: STOPPED"
+  fi
+}
+
+case "$MODE" in
+  status)
+    status
+    ;;
+  dash|dashboard)
+    preflight
+    protective_check
+    backup_state
+    stop_dashboard
+    start_dashboard
+    status
+    ;;
+  attach)
+    # Non-disruptive: do NOT stop the bot. Useful when you're in a live position and only
+    # want the dashboard + watchdog to be running.
+    preflight
+    backup_state
+    start_dashboard
+    start_watchdog
+    status
+    ;;
+  bot)
+    preflight
+    protective_check
+    backup_state
+    stop_watchdog
+    stop_bot
+    start_bot
+    start_watchdog
+    status
+    ;;
+  all)
+    preflight
+    protective_check
+    backup_state
+    stop_watchdog
+    stop_dashboard
+    stop_bot
+    start_bot
+    start_dashboard
+    start_watchdog
+    status
+    ;;
+  *)
+    echo "Usage: CDER [all|bot|dash|attach|status] [--force]"
+    exit 2
+    ;;
+esac

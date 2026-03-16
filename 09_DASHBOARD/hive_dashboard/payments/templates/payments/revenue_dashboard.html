@@ -1,0 +1,217 @@
+{% extends "hive/base.html" %}
+{% load humanize %}
+
+{% block title %}Revenue Dashboard -- Everlight Ventures{% endblock %}
+
+{% block active_nav %}
+  <style>.sidebar-nav-link[data-nav="payments"] { color: var(--gold) !important; background: var(--gold-glow); }</style>
+{% endblock %}
+
+{% block content %}
+<style>
+  .rev-header { display:flex; align-items:center; gap:16px; margin-bottom:2rem; }
+  .rev-header h1 {
+    font-family:var(--font-heading); font-size:1.8rem;
+    background:linear-gradient(135deg, #22c55e, var(--gold-bright));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  }
+
+  .rev-kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:1rem; margin-bottom:2rem; }
+  .rev-kpi {
+    background:var(--bg-secondary); border:1px solid var(--glass-border);
+    border-radius:16px; padding:1.4rem; text-align:center;
+    transition:all var(--transition-base);
+  }
+  .rev-kpi:hover { border-color:var(--border-hover); transform:translateY(-2px); }
+  .rev-kpi-val {
+    font-size:2rem; font-weight:800; font-family:var(--font-heading);
+    line-height:1; margin-bottom:4px;
+  }
+  .rev-kpi-val.green { color:#22c55e; }
+  .rev-kpi-val.gold { color:var(--gold-bright); }
+  .rev-kpi-val.blue { color:#3b82f6; }
+  .rev-kpi-label { font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.05em; }
+
+  .rev-goal {
+    background:var(--bg-secondary); border:1px solid var(--glass-border);
+    border-radius:16px; padding:1.6rem; margin-bottom:2rem;
+  }
+  .rev-goal-bar { height:12px; background:var(--bg-tertiary); border-radius:6px; overflow:hidden; margin:12px 0; }
+  .rev-goal-fill {
+    height:100%; border-radius:6px; transition:width 1s ease;
+    background:linear-gradient(90deg, #22c55e, var(--gold-bright));
+  }
+
+  .rev-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:2rem; }
+  @media (max-width:800px) { .rev-grid { grid-template-columns:1fr; } }
+
+  .rev-card {
+    background:var(--bg-secondary); border:1px solid var(--glass-border);
+    border-radius:16px; padding:1.4rem;
+  }
+  .rev-card h3 {
+    font-size:0.9rem; font-weight:600; color:var(--text-primary);
+    margin-bottom:1rem; display:flex; align-items:center; gap:8px;
+  }
+
+  .rev-table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+  .rev-table th { text-align:left; color:var(--text-muted); font-weight:500; padding:6px 10px; font-size:0.7rem; text-transform:uppercase; }
+  .rev-table td { padding:8px 10px; border-top:1px solid var(--border-subtle); color:var(--text-secondary); }
+  .rev-table .amount { color:#22c55e; font-weight:600; font-family:var(--font-heading); }
+
+  .rev-chart { width:100%; height:200px; position:relative; }
+  .rev-chart canvas { width:100% !important; height:100% !important; }
+</style>
+
+<div class="rev-header">
+  <div>
+    <h1><i class="fa-solid fa-chart-line" style="margin-right:10px;"></i>Revenue Dashboard</h1>
+    <div style="color:var(--text-muted);font-size:0.85rem;">Everlight Ventures -- All Products</div>
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="rev-kpis">
+  <div class="rev-kpi">
+    <div class="rev-kpi-val green">${{ mrr|floatformat:0 }}</div>
+    <div class="rev-kpi-label">Monthly Recurring Revenue</div>
+  </div>
+  <div class="rev-kpi">
+    <div class="rev-kpi-val gold">${{ rev_month|floatformat:0 }}</div>
+    <div class="rev-kpi-label">Revenue This Month</div>
+  </div>
+  <div class="rev-kpi">
+    <div class="rev-kpi-val blue">${{ rev_today|floatformat:0 }}</div>
+    <div class="rev-kpi-label">Revenue Today</div>
+  </div>
+  <div class="rev-kpi">
+    <div class="rev-kpi-val gold">{{ active_subscriptions }}</div>
+    <div class="rev-kpi-label">Active Subscriptions</div>
+  </div>
+  <div class="rev-kpi">
+    <div class="rev-kpi-val blue">{{ total_customers }}</div>
+    <div class="rev-kpi-label">Total Customers</div>
+  </div>
+  <div class="rev-kpi">
+    <div class="rev-kpi-val green">+{{ new_today }}</div>
+    <div class="rev-kpi-label">New Today</div>
+  </div>
+</div>
+
+<!-- $10k Goal Tracker -->
+<div class="rev-goal">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <span style="font-weight:700;color:var(--text-primary);">Monthly Goal: ${{ goal|floatformat:0 }}</span>
+      <span style="color:var(--text-muted);font-size:0.8rem;margin-left:12px;">${{ rev_month|floatformat:0 }} / ${{ goal|floatformat:0 }}</span>
+    </div>
+    <span style="font-size:1.4rem;font-weight:800;font-family:var(--font-heading);color:{% if goal_pct >= 100 %}#22c55e{% elif goal_pct >= 50 %}var(--gold-bright){% else %}var(--text-muted){% endif %};">
+      {{ goal_pct }}%
+    </span>
+  </div>
+  <div class="rev-goal-bar">
+    <div class="rev-goal-fill" style="width:{{ goal_pct }}%;"></div>
+  </div>
+</div>
+
+<div class="rev-grid">
+  <!-- MRR by Product -->
+  <div class="rev-card">
+    <h3><i class="fa-solid fa-layer-group" style="color:var(--gold);"></i> MRR by Product</h3>
+    <table class="rev-table">
+      <thead><tr><th>Product</th><th>Subs</th><th>MRR</th></tr></thead>
+      <tbody>
+        {% for item in mrr_breakdown %}
+        <tr>
+          <td>{{ item.product }}</td>
+          <td>{{ item.count }}</td>
+          <td class="amount">${{ item.total|floatformat:0 }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" style="color:var(--text-muted);font-style:italic;">No active subscriptions yet</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Revenue by Product (This Month) -->
+  <div class="rev-card">
+    <h3><i class="fa-solid fa-coins" style="color:#22c55e;"></i> Revenue by Product (This Month)</h3>
+    <table class="rev-table">
+      <thead><tr><th>Product</th><th>Sales</th><th>Revenue</th></tr></thead>
+      <tbody>
+        {% for item in product_breakdown %}
+        <tr>
+          <td>{{ item.product }}</td>
+          <td>{{ item.count }}</td>
+          <td class="amount">${{ item.total|floatformat:0 }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3" style="color:var(--text-muted);font-style:italic;">No revenue this month yet</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Recent Payments -->
+<div class="rev-card" style="margin-bottom:2rem;">
+  <h3><i class="fa-solid fa-receipt" style="color:var(--gold);"></i> Recent Payments</h3>
+  <table class="rev-table">
+    <thead><tr><th>Customer</th><th>Product</th><th>Amount</th><th>Type</th><th>Date</th></tr></thead>
+    <tbody>
+      {% for p in recent_payments %}
+      <tr>
+        <td>{{ p.customer.email }}</td>
+        <td>{{ p.product }}</td>
+        <td class="amount">${{ p.amount_dollars|floatformat:2 }}</td>
+        <td>{{ p.payment_type }}</td>
+        <td>{{ p.created_at|naturaltime }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="5" style="color:var(--text-muted);font-style:italic;">No payments yet -- connect Stripe to start tracking</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- 30-Day Revenue Chart -->
+<div class="rev-card">
+  <h3><i class="fa-solid fa-chart-area" style="color:#3b82f6;"></i> 30-Day Revenue</h3>
+  <div class="rev-chart">
+    <canvas id="revenueChart"></canvas>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script>
+  const chartData = {{ chart_data|safe }};
+  const ctx = document.getElementById('revenueChart');
+  if (ctx) {
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: chartData.map(d => d.date.slice(5)),
+        datasets: [{
+          label: 'Daily Revenue ($)',
+          data: chartData.map(d => d.revenue),
+          borderColor: '#22c55e',
+          backgroundColor: 'rgba(34,197,94,0.1)',
+          fill: true,
+          tension: 0.3,
+          pointRadius: 2,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666', font: { size: 10 } } },
+          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#666', callback: v => '$' + v } }
+        }
+      }
+    });
+  }
+</script>
+{% endblock %}

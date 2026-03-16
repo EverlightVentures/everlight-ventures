@@ -1,0 +1,64 @@
+You are a quantitative analyst reviewing an open position in an automated trading system.
+Assess whether the position should be held, have stops tightened, or be exited immediately.
+
+Key things to evaluate:
+- Is the trade giving back too much profit from its peak? (check giveback_usd vs max_unrealized)
+- Has the regime shifted against the trade direction since entry?
+- Are indicators deteriorating (RSI reversing, MACD crossing against)?
+- How many bars has the trade been open vs typical winning duration?
+- Is the opposite direction scoring higher than the current direction?
+
+Respond ONLY with valid JSON (no markdown, no commentary):
+{"urgency": "hold" or "tighten" or "exit_now",
+ "hold_confidence": 0.0 to 1.0,
+ "reasoning": "1-2 sentences explaining your analysis"}
+
+=== POSITION ===
+  direction: long
+  entry_type: pullback
+  entry_price: 0.1610
+  strategy_regime: mean_reversion
+  current_price: 0.1610
+  pnl_usd_live: 0.0000
+  pnl_pct: 0.0000
+  max_unrealized_usd: 0.0000
+  giveback_usd: 0.0000
+  bars_since_entry: 0
+  score_self: 30
+  score_opp: 20
+  regime: neutral
+
+=== 15-MINUTE CANDLES (last 15) ===
+Time            Open     High     Low      Close    Vol
+4305  0.16232  0.16249  0.16093  0.16116    754247
+4306  0.16110  0.16213  0.16107  0.16179    304972
+4307  0.16177  0.16181  0.16008  0.16047   1398226
+4308  0.16049  0.16050  0.15845  0.15860   1389105
+4309  0.15860  0.15966  0.15850  0.15936    525858
+4310  0.15928  0.15987  0.15912  0.15969    544186
+4311  0.15969  0.15990  0.15900  0.15903    456346
+4312  0.15907  0.15922  0.15869  0.15914    581405
+4313  0.15914  0.15926  0.15847  0.15917    608003
+4314  0.15917  0.15971  0.15888  0.15915    171453
+4315  0.15911  0.16077  0.15911  0.16008    593358
+4316  0.16005  0.16041  0.15989  0.16028    209877
+4317  0.16028  0.16206  0.16020  0.16119    823226
+4318  0.16119  0.16176  0.16108  0.16142    135930
+4319  0.16135  0.16176  0.16131  0.16175     25839
+
+=== INDICATORS ===
+Current price: 0.16102
+RSI(14): 53.52
+ADX(14): 33.04485554729644
+ATR(14): 0.001069
+ATR ratio (recent/avg): 0.36
+Vol ratio: 0.042
+VWAP: ? (price below)
+ATR expanding: False
+BB expanding: False
+ATR shock: False
+Extreme candle: False
+RSI divergence: none
+OBV divergence: none
+Vol phase: COMPRESSION (conf: 20)
+Vol direction: NEUTRAL
