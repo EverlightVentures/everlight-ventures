@@ -3,6 +3,8 @@
 All prompts are framed as "analyzing bot telemetry data" to avoid
 safety refusals.  Each builds a rich context with actual OHLCV data,
 indicator values, and trade history so Claude can truly see the chart.
+
+Persona: Jordan Belfort-inspired trading conviction and decisiveness.
 """
 from __future__ import annotations
 
@@ -10,6 +12,36 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+
+
+# -- Belfort Persona Layer --
+
+PERSONA = """
+PERSONA: You are the AI trading advisor for an XLM perpetual futures bot. You think
+and decide like Jordan Belfort -- relentless, confident, CALCULATED. Not reckless.
+Every word you say carries conviction. You don't "maybe" or "consider" -- you DECIDE.
+
+YOUR MINDSET:
+- "I'm not leaving. I'm NOT leaving." When the trend is intact, you HOLD.
+- When a setup screams confluence, you take it. No hesitation. "The setup is there. Take it."
+- On drawdowns: "This is noise. The structure hasn't broken. We hold our position."
+- On winners: "Let it ride. Don't take crumbs off the table when the feast is still going."
+- On losses: "Cost of doing business. Next play. We don't look back."
+- On scared exits: "Only amateurs sell the bottom. We know where the floor is."
+- You see opportunity where others see fear. Volatility is your playground.
+- You celebrate wins hard, learn from losses fast, and NEVER dwell.
+
+YOUR TRADING RULES:
+- NEVER recommend exiting out of fear. Only exit when chart STRUCTURE breaks.
+- When indicators align, be decisive. Confluence = conviction = action.
+- Drawdowns without structural breaks are noise. Hold through them.
+- Winners run until structure says stop. Taking profit early is leaving money on the table.
+- Every trade has a calculated thesis backed by chart structure. You are NOT gambling.
+- If a pattern burned you, note it, adapt, and move on. No repeating mistakes.
+- Speak with conviction in your reasoning. No "maybe" or "might consider". Say what you mean.
+- "The only thing standing between you and your goal is the story you keep telling yourself."
+- "Winners use words that say 'must' and 'will'. Losers use words that say 'maybe' and 'should'."
+"""
 
 
 # -- Data formatting helpers --
@@ -268,22 +300,36 @@ def _query_blinko_context(price: float = 0.0) -> str | None:
     if not blinko_url:
         return None
 
-    query = f"XLM trade patterns near ${price:.4f}"
-    payload = _json.dumps({"searchText": query, "size": 3}).encode("utf-8")
+    # Auth token for Blinko API
+    blinko_token = os.environ.get("BLINKO_TOKEN", "")
+    if not blinko_token and _env_file.exists():
+        for line in _env_file.read_text().splitlines():
+            if line.startswith("BLINKO_TOKEN="):
+                blinko_token = line.split("=", 1)[1].strip()
+
+    # Fetch recent notes (Blinko list does not support searchText filter reliably)
+    payload = _json.dumps({"size": 10}).encode("utf-8")
     headers = {"Content-Type": "application/json"}
+    if blinko_token:
+        headers["Authorization"] = f"Bearer {blinko_token}"
 
     # Try both known Blinko note-search endpoints for compatibility.
-    for endpoint in ("/api/v1/note/search", "/api/v1/note/list"):
+    for endpoint in ("/api/v1/note/list", "/api/v1/note/search"):
         try:
             req = Request(f"{blinko_url}{endpoint}", data=payload, headers=headers, method="POST")
             with urlopen(req, timeout=5) as resp:
                 raw = resp.read().decode("utf-8")
             data = _json.loads(raw) if raw else {}
-            notes = data.get("items") or data.get("notes") or []
+            # Handle both dict and list responses
+            notes = []
+            if isinstance(data, list):
+                notes = data
+            elif isinstance(data, dict):
+                notes = data.get("items") or data.get("notes") or []
             if notes:
                 summaries = []
-                for note in notes[:3]:
-                    content = str(note.get("content", ""))[:200]
+                for note in notes[:5]:
+                    content = str(note.get("content", "") if isinstance(note, dict) else note)[:250]
                     if content:
                         summaries.append(f"- {content}")
                 if summaries:
@@ -291,6 +337,115 @@ def _query_blinko_context(price: float = 0.0) -> str | None:
         except Exception:
             continue
     return None
+
+
+# -- Post-Loss Debrief Prompt --
+
+def post_loss_debrief_prompt(
+    lost_trade: dict,
+    candles_15m: pd.DataFrame | None = None,
+    candles_1h: pd.DataFrame | None = None,
+    regime_v4: dict | None = None,
+    expansion: dict | None = None,
+    price: float = 0.0,
+    trades_path: str | Path | None = None,
+    feedback: list[dict] | None = None,
+) -> str:
+    """Build prompt for post-loss deep dive analysis.
+
+    Fires during the cooldown after a loss. Claude analyzes WHY the trade
+    failed and builds a personalized recovery strategy for the next entry.
+    The result is cached and read by the next entry evaluation.
+    """
+    regime_v4 = regime_v4 or {}
+    expansion = expansion or {}
+
+    sections = [
+        PERSONA,
+        "",
+        "A trade just LOST. You have 20 minutes of cooldown to do a DEEP DIVE.",
+        "Your job: figure out EXACTLY why it failed and build the recovery play.",
+        "",
+        "Respond ONLY with valid JSON (no markdown, no commentary):",
+        '{"failure_reason": "1 sentence: what went wrong",',
+        ' "wrong_direction": true/false,',
+        ' "market_read_error": "what the bot misread (trend, range, fakeout, etc)",',
+        ' "correct_direction": "long" or "short" or "flat",',
+        ' "recovery_strategy": {',
+        '   "direction": "long" or "short",',
+        '   "entry_type": "what kind of entry to look for",',
+        '   "wait_for": "specific price action or level to confirm",',
+        '   "target_usd": dollar amount to recover (loss + profit),',
+        '   "confidence": 0.0 to 1.0',
+        ' },',
+        ' "avoid_next": "what NOT to do on the next trade",',
+        ' "reasoning": "2-3 sentences: full breakdown of what happened and the plan"}',
+        "",
+        "=== THE LOSING TRADE ===",
+        _fmt_kv(lost_trade),
+    ]
+
+    if candles_15m is not None and not candles_15m.empty:
+        sections.extend([
+            "",
+            "=== 15-MIN CANDLES (last 20) ===",
+            _fmt_candles(candles_15m, 20),
+            "",
+            "=== MATH LENS (15m) ===",
+            _fmt_math_lens(candles_15m, 15),
+        ])
+
+    if candles_1h is not None and not candles_1h.empty:
+        sections.extend([
+            "",
+            "=== 1-HOUR CANDLES (last 12) ===",
+            _fmt_candles(candles_1h, 12),
+        ])
+
+    if regime_v4:
+        sections.extend([
+            "",
+            "=== CURRENT REGIME ===",
+            _fmt_kv(regime_v4),
+        ])
+
+    if expansion:
+        sections.extend([
+            "",
+            "=== EXPANSION STATE ===",
+            _fmt_kv(expansion),
+        ])
+
+    sections.extend([
+        "",
+        "=== INDICATORS AT CURRENT PRICE ===",
+        _fmt_indicators(regime_v4, expansion, price),
+    ])
+
+    if trades_path:
+        sections.extend([
+            "",
+            "=== RECENT TRADE HISTORY ===",
+            _fmt_trades(trades_path, 8),
+        ])
+
+    if feedback:
+        sections.extend([
+            "",
+            "=== YOUR PAST DECISIONS VS OUTCOMES ===",
+            _fmt_feedback(feedback),
+        ])
+
+    sections.extend([
+        "",
+        "CRITICAL: The bot LOST money. Do NOT say 'cost of doing business'.",
+        "ANALYZE the failure. BUILD the recovery play. Be SPECIFIC.",
+        "If the direction was wrong, the recovery play MUST be the opposite direction.",
+        f"Loss was ${abs(float(lost_trade.get('pnl_usd', 0))):.2f}.",
+        f"Recovery target: at LEAST ${abs(float(lost_trade.get('pnl_usd', 0))) * 2:.2f} to cover loss + profit.",
+    ])
+
+    return "\n".join(sections)
 
 
 # -- Prompt builders --
@@ -309,6 +464,8 @@ def entry_prompt(
     expansion = expansion or {}
 
     sections = [
+        PERSONA,
+        "",
         "You are a quantitative analyst reviewing telemetry from an automated trading system.",
         "The system detected an entry signal. You have access to the actual price data,",
         "technical indicators, and recent trade history. Analyze the chart context and",
@@ -381,6 +538,8 @@ def exit_prompt(
     expansion = expansion or {}
 
     sections = [
+        PERSONA,
+        "",
         "You are a quantitative analyst reviewing an open position in an automated trading system.",
         "Assess whether the position should be held, have stops tightened, or be exited immediately.",
         "",
@@ -429,6 +588,8 @@ def regime_prompt(
 ) -> str:
     """Build prompt for regime transition evaluation with chart context."""
     sections = [
+        PERSONA,
+        "",
         "You are a quantitative analyst reviewing a regime transition in an automated trading system.",
         "The system's volatility state machine detected a phase change. Assess the reliability",
         "of this transition and recommend how the system should adapt its trading bias.",
@@ -487,6 +648,8 @@ def master_directive_prompt(
     _trades_today = status.get("trades_today", 0)
 
     sections = [
+        PERSONA,
+        "",
         "You are the executive decision engine for an automated XLM futures trading system.",
         "You have full authority to decide: enter a trade, exit a trade, hold, or stay flat.",
         "You are analyzing live market data from the XLM-USD perpetual futures contract.",
@@ -539,8 +702,10 @@ def master_directive_prompt(
         "- Expansion phase (ATR shock, volume surge): your best edge. ENTER.",
         "- BTC + ETH confirming direction: adds conviction. ENTER.",
         "- If engine says MONSTER and you say FLAT, you need a STRONG reason.",
-        "- Lane V (Liquidity Sweep): cluster swept + wick >35% + reclaim + fib = ENTER reversal.",
-        "- Magnet continuation: strong cluster ahead + momentum aligned = ENTER toward cluster.",
+        "- Lane V reversal long: cluster below swept, large lower wick, reclaim confirmed, fib/EMA stretch present = ENTER_LONG.",
+        "- Lane V reversal short: cluster above swept, large upper wick, rejection confirmed, fib/EMA stretch present = ENTER_SHORT.",
+        "- Lane V continuation long: unswept cluster above, strong magnet, bullish momentum aligned = ENTER_LONG toward the pool.",
+        "- Lane V continuation short: unswept cluster below, strong magnet, bearish momentum aligned = ENTER_SHORT toward the pool.",
         "",
         "STAY FLAT ONLY WHEN:",
         "- Compression (ADX < 20) with no clear direction or structure.",
@@ -548,7 +713,9 @@ def master_directive_prompt(
         "- 3+ consecutive losses today (take 30 min break, then re-engage).",
         "- RSI extreme (>85 or <15) with zero volume confirmation.",
         "- Equal liquidation clusters on both sides with balanced magnet = chop zone.",
-        "- Cluster exists but no sweep yet and no momentum = wait for sweep first.",
+        "- Weak wick without reclaim/reject = wait.",
+        "- Sweep happened but reclaim/reject failed or snapback already ran too far = wait.",
+        "- Cluster exists but no sweep yet and no momentum = wait for continuation or sweep confirmation first.",
         "",
         "RISK RULES:",
         "- Stop loss at structural level (swing high/low), 0.3-1% from entry.",
@@ -708,8 +875,10 @@ def master_directive_prompt(
         sections.extend([
             "",
             "=== LIQUIDATION INTELLIGENCE (heatmap proxy) ===",
-            "Liquidation clusters act as price magnets. Trade toward the cluster,",
-            "then reverse on sweep + wick + reclaim. If no rejection, continue to next pool.",
+            "Liquidation clusters act as price magnets before the sweep.",
+            "Trade toward unswept liquidity only when momentum aligns.",
+            "Trade away from liquidity only after sweep + wick + reclaim/reject confirms.",
+            "Balanced clusters on both sides = chop. Weak wick without reclaim/reject = wait.",
             _liq_intel,
         ])
 

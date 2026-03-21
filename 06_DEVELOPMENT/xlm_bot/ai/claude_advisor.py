@@ -25,7 +25,7 @@ from typing import Any
 
 import pandas as pd
 
-from ai.prompts import entry_prompt, exit_prompt, regime_prompt, master_directive_prompt
+from ai.prompts import entry_prompt, exit_prompt, regime_prompt, master_directive_prompt, post_loss_debrief_prompt
 
 # ── Module state ────────────────────────────────────────────────────
 _ENABLED: bool = False
@@ -536,6 +536,46 @@ def evaluate_regime(
         _fire_background_codex("codex_regime_eval", prompt, cache_ttl=_ttl_codex)
 
 
+# ── Post-Loss Debrief ─────────────────────────────────────────────
+
+def debrief_loss(
+    lost_trade: dict,
+    state: dict,
+    df_15m: pd.DataFrame | None = None,
+    df_1h: pd.DataFrame | None = None,
+    regime_v4: dict | None = None,
+    expansion_state: dict | None = None,
+) -> None:
+    """Fire background post-loss analysis during cooldown. Non-blocking.
+
+    Claude analyzes why the trade failed and builds a personalized
+    recovery strategy. Result cached as 'loss_debrief' in ai_insight.json
+    and read by the next entry evaluation to inform direction + sizing.
+    """
+    if not _ENABLED:
+        return
+    price = float(lost_trade.get("exit_price") or lost_trade.get("price") or 0)
+    feedback = get_feedback_summary(15)
+    prompt = post_loss_debrief_prompt(
+        lost_trade=lost_trade,
+        candles_15m=df_15m,
+        candles_1h=df_1h,
+        regime_v4=regime_v4,
+        expansion=expansion_state,
+        price=price,
+        trades_path=str(_TRADES_PATH),
+        feedback=feedback,
+    )
+    # Cache for 30 min -- debrief stays relevant through cooldown + next few entries
+    _fire_background("loss_debrief", prompt, cache_ttl=1800)
+    _log(f"DEBRIEF fired for loss: ${lost_trade.get('pnl_usd', 0)}")
+
+
+def get_loss_debrief() -> dict | None:
+    """Read cached loss debrief if available and not expired."""
+    return get_cached_insight("loss_debrief")
+
+
 # ── Macro News via Perplexity ──────────────────────────────────────
 
 _NEWS_CACHE: dict = {"text": None, "expires": 0}
@@ -687,6 +727,22 @@ def request_directive(
         peer_intel=peer_intel,
         lane_perf_path=lane_perf_path,
     )
+    # Inject loss debrief if available -- Claude sees its own post-loss analysis
+    _debrief = get_loss_debrief()
+    if _debrief and isinstance(_debrief, dict):
+        _db_result = _debrief.get("result", {})
+        if _db_result:
+            _debrief_block = (
+                "\n\n=== LOSS DEBRIEF (your own analysis from after the last loss) ===\n"
+                f"Failure: {_db_result.get('failure_reason', 'unknown')}\n"
+                f"Wrong direction: {_db_result.get('wrong_direction', 'unknown')}\n"
+                f"Correct direction: {_db_result.get('correct_direction', 'unknown')}\n"
+                f"Recovery strategy: {json.dumps(_db_result.get('recovery_strategy', {}))}\n"
+                f"Avoid: {_db_result.get('avoid_next', 'unknown')}\n"
+                f"Reasoning: {_db_result.get('reasoning', '')}\n"
+                "USE THIS to inform your next decision. If you said go opposite, GO OPPOSITE.\n"
+            )
+            prompt += _debrief_block
     # Post assessment to agent_comms board for inter-agent debate
     try:
         from ai import agent_comms as _ac
