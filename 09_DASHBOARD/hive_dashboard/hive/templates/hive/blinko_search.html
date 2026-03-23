@@ -1,0 +1,75 @@
+{% extends "hive/base.html" %}
+
+{% block title %}Blinko RAG Search -- LUCREX{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:28px;">
+  <h1 style="font-family:var(--font-heading);font-size:1.8rem;color:var(--gold);margin-bottom:4px;">
+    <i class="fa-solid fa-brain" style="margin-right:8px;"></i>Blinko Knowledge Base
+  </h1>
+  <p style="color:var(--text-secondary);font-size:0.9rem;">Search the Hive Mind's memory (449+ notes)</p>
+</div>
+
+<!-- Search Form -->
+<form method="post" style="margin-bottom:24px;">
+  {% csrf_token %}
+  <div style="display:flex;gap:10px;">
+    <input type="text" name="q" value="{{ query }}" placeholder="Search Blinko notes..."
+           autofocus
+           style="flex:1;padding:12px 18px;background:var(--bg-card);border:1px solid var(--glass-border);
+                  border-radius:8px;color:var(--text-primary);font-size:0.95rem;font-family:var(--font-body);
+                  outline:none;transition:border-color var(--transition-base);"
+           onfocus="this.style.borderColor='var(--gold-dim)'"
+           onblur="this.style.borderColor='var(--glass-border)'">
+    <button type="submit"
+            style="padding:12px 24px;background:linear-gradient(135deg,var(--gold-dim),var(--gold));
+                   border:none;border-radius:8px;color:#0a0a0f;font-weight:600;font-size:0.9rem;
+                   cursor:pointer;white-space:nowrap;">
+      <i class="fa-solid fa-magnifying-glass" style="margin-right:6px;"></i>Search
+    </button>
+  </div>
+</form>
+
+{% if error %}
+<div style="padding:16px 20px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);
+            border-radius:8px;color:#fca5a5;margin-bottom:20px;">
+  <i class="fa-solid fa-triangle-exclamation" style="margin-right:8px;"></i>{{ error }}
+</div>
+{% endif %}
+
+{% if searched and results %}
+<div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:16px;">
+  {{ results|length }} result{{ results|length|pluralize }} for "{{ query }}"
+</div>
+<div style="display:grid;gap:12px;">
+  {% for note in results %}
+  <div style="padding:18px 22px;background:var(--bg-card);border:1px solid var(--glass-border);
+              border-radius:10px;transition:all var(--transition-base);"
+       onmouseover="this.style.borderColor='var(--gold-dim)'"
+       onmouseout="this.style.borderColor='var(--glass-border)'">
+    {% if note.tags %}
+    <div style="margin-bottom:8px;display:flex;flex-wrap:wrap;gap:6px;">
+      {% for tag in note.tags %}
+      <span style="padding:2px 10px;background:rgba(201,168,76,0.12);border:1px solid var(--gold-dim);
+                   border-radius:12px;font-size:0.7rem;color:var(--gold);font-weight:500;">
+        {{ tag }}
+      </span>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <div style="font-size:0.9rem;color:var(--text-primary);line-height:1.7;white-space:pre-wrap;word-break:break-word;">{{ note.content }}</div>
+    {% if note.created_at %}
+    <div style="margin-top:10px;font-size:0.75rem;color:var(--text-muted);">
+      <i class="fa-regular fa-clock" style="margin-right:4px;"></i>{{ note.created_at }}
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% elif searched %}
+<div style="text-align:center;padding:60px 20px;color:var(--text-muted);">
+  <i class="fa-solid fa-magnifying-glass" style="font-size:2.5rem;margin-bottom:12px;display:block;"></i>
+  <p>No results for "{{ query }}"</p>
+</div>
+{% endif %}
+{% endblock %}

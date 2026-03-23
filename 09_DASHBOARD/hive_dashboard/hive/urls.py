@@ -2,7 +2,6 @@
 Hive Mind Dashboard - URL Configuration
 """
 from django.urls import path
-from django.views.decorators.csrf import csrf_exempt
 
 from . import views
 
@@ -10,6 +9,8 @@ app_name = 'hive'
 
 urlpatterns = [
     # Pages
+    path('login/', views.hive_login, name='login'),
+    path('logout/', views.hive_logout, name='logout'),
     path('', views.DashboardView.as_view(), name='dashboard'),
     path('sessions/', views.SessionListView.as_view(), name='sessions'),
     path(
@@ -24,8 +25,16 @@ urlpatterns = [
         name='agent_detail',
     ),
     path('analytics/', views.AnalyticsView.as_view(), name='analytics'),
-    path('launch/', csrf_exempt(views.LaunchQueryView.as_view()), name='launch'),
+    path('launch/', views.LaunchQueryView.as_view(), name='launch'),
     path('events/', views.EventsView.as_view(), name='events'),
+    path('processes/', views.ProcessesView.as_view(), name='processes'),
+
+    # Intel pages (merged from :8080)
+    path('reports/', views.ReportsListView.as_view(), name='reports_list'),
+    path('reports/<str:report_hash>/', views.report_detail, name='report_detail'),
+    path('blinko/', views.BlinkoSearchView.as_view(), name='blinko_search'),
+    path('bot-intel/', views.BotIntelPageView.as_view(), name='bot_intel'),
+    path('agent-performance/', views.AgentPerformanceView.as_view(), name='agent_performance'),
 
     # API / AJAX endpoints
     path(
@@ -44,10 +53,11 @@ urlpatterns = [
         views.api_export_session,
         name='api_export_session',
     ),
+    path('api/agent-status/', views.api_agent_status, name='api_agent_status'),
     path('api/bot-intel/', views.api_bot_intel, name='api_bot_intel'),
     path(
         'api/upload-analyze/',
-        csrf_exempt(views.api_upload_analyze),
+        views.api_upload_analyze,
         name='api_upload_analyze',
     ),
 ]

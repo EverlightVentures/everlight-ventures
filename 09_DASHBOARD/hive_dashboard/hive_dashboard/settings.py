@@ -7,11 +7,19 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-7g)xhlbgyfm-(f@#8o9e8mm%=8xn%6(^-*jj-7h$l#x1(d@779'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'local-only-change-me')
 
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', '0') == '1'
 
-ALLOWED_HOSTS = ['*']
+default_hosts = ['127.0.0.1', 'localhost']
+ALLOWED_HOSTS = [
+    host.strip() for host in os.environ.get('DJANGO_ALLOWED_HOSTS', ','.join(default_hosts)).split(',')
+    if host.strip()
+]
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() for origin in os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
 
 # -- Hive data paths --
 HIVE_SESSIONS_JSONL = os.environ.get(
@@ -21,6 +29,14 @@ HIVE_SESSIONS_JSONL = os.environ.get(
 HIVE_WAR_ROOM_DIR = os.environ.get(
     'HIVE_WAR_ROOM_DIR',
     '/mnt/sdcard/AA_MY_DRIVE/_logs/ai_war_room',
+)
+REPORTS_DIR = os.environ.get(
+    'REPORTS_DIR',
+    '/home/opc/reports',  # Oracle production; override locally for dev
+)
+BLINKO_API_URL = os.environ.get(
+    'BLINKO_API_URL',
+    'http://129.159.38.250:1111',
 )
 
 INSTALLED_APPS = [
@@ -61,7 +77,14 @@ FB_OAUTH_CLIENT_SECRET = os.environ.get('FB_OAUTH_CLIENT_SECRET', '')
 # -- Session persistence (keeps login alive 30 days) --
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 30  # 30 days
 SESSION_SAVE_EVERY_REQUEST = True
-SESSION_COOKIE_SECURE = False  # Set True if HTTPS
+SESSION_COOKIE_SECURE = os.environ.get('DJANGO_SECURE_COOKIES', '0') == '1'
+CSRF_COOKIE_SECURE = SESSION_COOKIE_SECURE
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'SAMEORIGIN'  # Allow iframe embedding for premium reports
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = LOGIN_URL
 
 # -- Monetization pricing tiers (documented for reference) --
 # Chips (free): 1,000 signup bonus, 100/ad refill (10x/day), earned via play
@@ -121,7 +144,7 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STORAGES = {
     'staticfiles': {
-        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+        'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage',
     },
 }
 

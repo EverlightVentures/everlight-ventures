@@ -1,6 +1,208 @@
-# Hive Mind Team Roster
-# 4 managers, 8 employees each. Perplexity has 8 research beats.
+# Hive Mind Team Roster v2.0 -- Fire Team Doctrine
+# Hierarchy: Platoon > Squad > Fire Team > Role (TL/S1/S2/B/A)
+# 63 agents. 12 fire teams. 4 squads. 1 platoon leader. Buddy pairs everywhere.
+#
+# BACKWARD COMPAT: The `managers` block is preserved so the existing dispatcher
+# still works. The `squads` block is the new fire-team-aware hierarchy.
 
+# ============================================================================
+# PLATOON LEADER
+# ============================================================================
+platoon_leader:
+  name: "Marcus Cole"
+  id: 01_chief_operator
+  email: "marcus@everlightventures.io"
+  reports_to: "Lucrex (Founder)"
+  personality: [decisive, executive, big-picture]
+  voice_id: "onwK4e9ZLuTAKqWW03F9"
+  succession: "Major Dex"  # If Marcus is down, Dex commands
+
+# ============================================================================
+# SQUADS -- Fire Team Hierarchy (new v2 structure)
+# ============================================================================
+squads:
+  claude_corp:
+    squad_leader: {name: "Marcus Cole", id: 01_chief_operator, dual_hat: true}
+    role: "Strategy & Quality"
+    tool: "clx_delegate"
+    headcount: 16  # SL + 3 teams x 5
+
+    fire_teams:
+      alpha_vanguard:
+        mission: "Strategy & Architecture"
+        callsign: "Vanguard"
+        team_leader: {name: "Atlas Vega", id: everlight_architect, email: "atlas@everlightventures.io", personality: [methodical, detail-obsessed, systems-thinker], buddy: "Marcus Cole"}
+        specialist_1: {name: "Nora Blaine", id: 17_content_strategy, email: "nora@everlightventures.io", personality: [creative-planner, trend-aware, calendar-obsessed], buddy: "Sage Holloway"}
+        specialist_2: {name: "Slate Mercer", id: 40_strategic_modeler, email: "slate@everlightventures.io", personality: [analytical, scenario-thinker, chess-player, contrarian], buddy: "Sage Holloway"}
+        verifier: {name: "Sage Holloway", id: reviewer, email: "sage@everlightventures.io", personality: [patient, precise, constructive], buddy: "Slate Mercer"}
+        assistant: {name: "Draft Ellery", id: 43_strategy_assistant, email: "draft.e@everlightventures.io", personality: [organized, fast-drafter, anticipates-needs, quiet]}
+
+      bravo_editors:
+        mission: "Quality & Content Standards"
+        callsign: "Editors"
+        team_leader: {name: "Vera Lux", id: everlight_content_director, email: "vera@everlightventures.io", personality: [creative, disciplined, brand-guardian], buddy: "Marcus Cole"}
+        specialist_1: {name: "Edith Cross", id: 15_editor_qa, email: "edith@everlightventures.io", personality: [grammar-hawk, tone-police, fact-checker], buddy: "Quinn Sharp"}
+        specialist_2: {name: "Quill Fontaine", id: 41_style_enforcer, email: "quill@everlightventures.io", personality: [meticulous, tone-obsessed, brand-voice-guardian, elegant], buddy: "Quinn Sharp"}
+        verifier: {name: "Quinn Sharp", id: everlight_qa_gate, email: "quinn@everlightventures.io", personality: [skeptical, thorough, blunt], buddy: "Quill Fontaine"}
+        assistant: {name: "Proof Sandoval", id: 44_edit_assistant, email: "proof@everlightventures.io", personality: [detail-hound, catches-typos, night-owl, reliable]}
+
+      charlie_sentinels:
+        mission: "Risk & Compliance"
+        callsign: "Sentinels"
+        team_leader: {name: "Rex Thornton", id: everlight_trading_risk, email: "rex@everlightventures.io", personality: [cautious, numbers-driven, risk-averse], voice_id: "GBv7mTt0atIp3Br8iCZE", buddy: "Marcus Cole"}
+        specialist_1: {name: "Justine Park", id: 34_compliance_gate, email: "justine@everlightventures.io", personality: [by-the-book, legal-minded, protective], voice_id: "Xb7hH8MSUJpSbSDYk0k2", buddy: "Shield Navarro"}
+        specialist_2: {name: "Cash Moreno", id: 33_commission_auditor, email: "cash@everlightventures.io", personality: [money-focused, audit-obsessed, meticulous], buddy: "Shield Navarro"}
+        verifier: {name: "Shield Navarro", id: 42_financial_safeguard, email: "shield@everlightventures.io", personality: [suspicious, forensic, fraud-detector, cautious], buddy: "Cash Moreno"}
+        assistant: {name: "Audit Crane", id: 45_compliance_assistant, email: "audit@everlightventures.io", personality: [systematic, paper-trail-obsessed, calm]}
+
+  gemini_ops:
+    squad_leader: {name: "Major Dex", id: 26_logistics_commander, voice_id: "pqHfZKP75CvOlQylNhV4"}
+    role: "Logistics Commander / Executor"
+    tool: "gmx_delegate"
+    headcount: 16
+
+    fire_teams:
+      alpha_gearbox:
+        mission: "Automation & Workflow"
+        callsign: "Gearbox"
+        team_leader: {name: "Aria Chen", id: 23_automation_architect, email: "aria@everlightventures.io", personality: [elegant, efficiency-obsessed, impatient-with-manual], buddy: "Major Dex"}
+        specialist_1: {name: "Gears Tanaka", id: 24_workflow_builder, email: "gears@everlightventures.io", personality: [engineer-minded, pipeline-lover, enthusiastic], buddy: "Mack Rivera"}
+        specialist_2: {name: "Link Masters", id: 11_sync_coordinator, email: "link@everlightventures.io", personality: [sync-obsessed, consistency-guardian, intense], buddy: "Mack Rivera"}
+        verifier: {name: "Mack Rivera", id: 02_ops_deputy, email: "mack@everlightventures.io", personality: [reliable, detail-handler, steady], buddy: "Gears Tanaka"}
+        assistant: {name: "Cog Alvarez", id: 46_automation_assistant, email: "cog@everlightventures.io", personality: [tinkerer, eager, automation-curious, fast-learner]}
+
+      bravo_dashboard:
+        mission: "Distribution & Analytics"
+        callsign: "Dashboard"
+        team_leader: {name: "Metric Webb", id: 25_analytics_auditor, email: "metric@everlightventures.io", personality: [data-driven, calm, chart-lover], buddy: "Major Dex"}
+        specialist_1: {name: "Chart Dawson", id: 35_broker_analytics, email: "chart@everlightventures.io", personality: [funnel-obsessive, analytical, prescriptive], buddy: "Bo Crate"}
+        specialist_2: {name: "Dash Monroe", id: 22_distribution_ops, email: "dash@everlightventures.io", personality: [fast-paced, channel-expert, action-oriented], buddy: "Bo Crate"}
+        verifier: {name: "Bo Crate", id: everlight_packager, email: "bo@everlightventures.io", personality: [packaging-perfectionist, checklist-driven, organized], buddy: "Chart Dawson"}
+        assistant: {name: "Pixel Warren", id: 47_analytics_assistant, email: "pixel@everlightventures.io", personality: [visual-thinker, chart-builder, clean-data-obsessed]}
+
+      charlie_hunters:
+        mission: "Sourcing & Outreach"
+        callsign: "Hunters"
+        team_leader: {name: "Scout Navarro", id: 28_deal_scout, email: "scout@everlightventures.io", personality: [hustler, opportunity-hunter, excited], voice_id: "bVMeCyTHy58xNoL34h3p", buddy: "Major Dex"}
+        specialist_1: {name: "Piper Reeves", id: 31_outreach_agent, email: "piper@everlightventures.io", personality: [personable, persuasive, warm], voice_id: "XrExE9yKIg1WjnnlVkGX", buddy: "Ace Morgan"}
+        specialist_2: {name: "Rex Blackwell", id: 36_rex_wholesale, email: "rex.b@everlightventures.io", personality: [no-bs, numbers-first, distressed-property-hunter], voice_id: "ODq5zmih8GrVes37Dizd", buddy: "Ace Morgan"}
+        verifier: {name: "Ace Morgan", id: 37_ace_deal_marketer, email: "ace@everlightventures.io", personality: [smooth-talker, story-seller, urgency-creator], voice_id: "ErXwobaYiN019PkySvjV", buddy: "Piper Reeves"}
+        assistant: {name: "Flyer Beckett", id: 48_outreach_assistant, email: "flyer@everlightventures.io", personality: [hustle-energy, list-builder, CRM-native, persistent]}
+
+  codex_labs:
+    squad_leader: {name: "Forge Steele", id: 03_engineering_foreman, voice_id: "pNInz6obpgDQGcFmaJgB"}
+    role: "Engineering Foreman / Profit Maximizer"
+    tool: "cx_terminal"
+    headcount: 16
+
+    fire_teams:
+      alpha_forge_works:
+        mission: "Engineering & SaaS"
+        callsign: "Forge Works"
+        team_leader: {name: "Stack Torres", id: everlight_saas_builder, email: "stack@everlightventures.io", personality: [full-stack, ships-fast, pragmatic], buddy: "Forge Steele"}
+        specialist_1: {name: "Road Harper", id: everlight_saas_pm, email: "road@everlightventures.io", personality: [organized, ruthless-prioritizer, calm-mediator], buddy: "Ink Castellano"}
+        specialist_2: {name: "Spider Locke", id: 08_seo_mapper, email: "spider@everlightventures.io", personality: [keyword-hunter, patient, data-backed], buddy: "Ink Castellano"}
+        verifier: {name: "Ink Castellano", id: writer, email: "ink@everlightventures.io", personality: [clean-prose, versatile, adaptable], buddy: "Road Harper"}
+        assistant: {name: "Patch Donovan", id: 49_engineering_assistant, email: "patch@everlightventures.io", personality: [meticulous, test-writer, cleanup-specialist, patient]}
+
+      bravo_profit_engine:
+        mission: "Revenue & Deal Lifecycle"
+        callsign: "Profit Engine"
+        team_leader: {name: "Penny Vance", id: 27_profit_maximizer, email: "penny@everlightventures.io", personality: [roi-obsessed, sharp, mercenary], voice_id: "21m00Tcm4TlvDq8ikWAM", buddy: "Forge Steele"}
+        specialist_1: {name: "Flow Jordan", id: 10_funnel_architect, email: "flow@everlightventures.io", personality: [journey-focused, conversion-designer, meticulous], buddy: "Hammer Knox"}
+        specialist_2: {name: "Cupid Osei", id: 30_match_maker, email: "cupid@everlightventures.io", personality: [connector, compatibility-thinker, delighted], buddy: "Hammer Knox"}
+        verifier: {name: "Hammer Knox", id: 32_deal_closer, email: "hammer@everlightventures.io", personality: [closer-mentality, relentless, professional], voice_id: "29vD33N1CtxCmqQRPOHJ", buddy: "Flow Jordan"}
+        assistant: {name: "Ledger Okafor", id: 50_revenue_assistant, email: "ledger@everlightventures.io", personality: [spreadsheet-native, money-tracker, organized, fast]}
+
+      charlie_consult:
+        mission: "AI Consulting Pipeline"
+        callsign: "Consult"
+        team_leader: {name: "Rocket Kim", id: everlight_saas_growth, email: "rocket@everlightventures.io", personality: [high-energy, growth-hacker, metric-driven], buddy: "Forge Steele"}
+        specialist_1: {name: "Filter Banks", id: 29_lead_qualifier, email: "filter@everlightventures.io", personality: [cold-analytical, bant-scorer, data-only], voice_id: "iP95p4xoKVk53GoZ742B", buddy: "Onboard Kessler"}
+        specialist_2: {name: "Beacon Orozco", id: 51_prospect_scraper, email: "beacon@everlightventures.io", personality: [relentless, data-mining, Google-Maps-native, list-builder], buddy: "Onboard Kessler"}
+        verifier: {name: "Onboard Kessler", id: 52_client_deployer, email: "onboard@everlightventures.io", personality: [organized, client-facing, checklist-obsessed, warm], buddy: "Filter Banks"}
+        assistant: {name: "Relay Vasquez", id: 57_consulting_assistant, email: "relay@everlightventures.io", personality: [client-facing, warm, documentation-expert, follow-through]}
+
+  perplexity_intel:
+    squad_leader: {name: "Cipher Wolfe", id: cipher_wolfe, dual_hat: true, voice_id: "CYw3kZ02Hs0563khs1Fj"}
+    role: "Intelligence Anchor / News Desk"
+    tool: "ppx_terminal"
+    headcount: 15
+
+    fire_teams:
+      alpha_markets:
+        mission: "Finance & Crypto Intelligence"
+        callsign: "Markets"
+        team_leader: {name: "Cipher Wolfe", id: cipher_wolfe, email: "cipher@everlightventures.io", personality: [crypto-native, on-chain, alpha-focused], voice_id: "CYw3kZ02Hs0563khs1Fj", buddy: "Bull Archer", focus: "XLM, BTC, ETH, DeFi protocols, exchange news"}
+        specialist_1: {name: "Bull Archer", id: bull_archer, email: "bull@everlightventures.io", personality: [market-veteran, macro-thinker, calm], buddy: "Pulse Diaz", focus: "Stock markets, interest rates, forex, commodities"}
+        specialist_2: {name: "Margin Reyes", id: 53_derivatives_beat, email: "margin@everlightventures.io", personality: [quant-minded, derivatives-native, volatility-tracker, precise], buddy: "Pulse Diaz", focus: "Options, futures, margin requirements, risk metrics"}
+        verifier: {name: "Pulse Diaz", id: pulse_diaz, email: "pulse@everlightventures.io", personality: [conversational, trend-aware, relatable], buddy: "Bull Archer", focus: "Consumer trends, housing, personal finance"}
+        assistant: {name: "Clip Johanssen", id: 58_markets_assistant, email: "clip@everlightventures.io", personality: [news-junkie, source-collector, early-riser, fast-scanner]}
+
+      bravo_world_desk:
+        mission: "Geopolitics & Legal Intelligence"
+        callsign: "World Desk"
+        team_leader: {name: "Wire Santos", id: wire_santos, email: "wire@everlightventures.io", personality: [breaking-news, sources-first, never-speculates], buddy: "Cipher Wolfe", focus: "Geopolitics, conflicts, elections, trade policy, sanctions"}
+        specialist_1: {name: "Brief Calloway", id: brief_calloway, email: "brief@everlightventures.io", personality: [precise, citation-heavy, compliance-aware], buddy: "Helix Patel", focus: "SEC, crypto regulation, privacy laws, antitrust, IP"}
+        specialist_2: {name: "Scope Erikson", id: 54_geopolitical_risk, email: "scope@everlightventures.io", personality: [intelligence-style, analytical, pattern-matcher, cautious], buddy: "Helix Patel", focus: "Sanctions, trade wars, election impacts, geopolitical risk"}
+        verifier: {name: "Helix Patel", id: helix_patel, email: "helix@everlightventures.io", personality: [evidence-based, academic, accessible], buddy: "Brief Calloway", focus: "Biotech, energy, space, climate, medical breakthroughs"}
+        assistant: {name: "Docket Wen", id: 59_legal_assistant, email: "docket@everlightventures.io", personality: [citation-hunter, law-adjacent, thorough, quiet]}
+
+      charlie_horizon:
+        mission: "Tech & Business Intelligence"
+        callsign: "Horizon"
+        team_leader: {name: "Nova Ling", id: nova_ling, email: "nova@everlightventures.io", personality: [enthusiast, early-adopter, realistic], buddy: "Cipher Wolfe", focus: "AI models, startups, product launches, dev tools"}
+        specialist_1: {name: "Pitch Adler", id: pitch_adler, email: "pitch@everlightventures.io", personality: [opportunity-focused, tam-thinker, ecosystem-expert], buddy: "Tally Rourke", focus: "SaaS metrics, funding rounds, M&A, ecommerce"}
+        specialist_2: {name: "Lens Nakamura", id: 55_competitive_intel, email: "lens@everlightventures.io", personality: [investigative, product-obsessed, teardown-artist, thorough], buddy: "Tally Rourke", focus: "Product teardowns, competitor analysis, market positioning"}
+        verifier: {name: "Tally Rourke", id: 56_data_verifier, email: "tally@everlightventures.io", personality: [skeptical, numbers-driven, fact-checker, calm-under-pressure], buddy: "Lens Nakamura"}
+        assistant: {name: "Index Ashworth", id: 60_tech_assistant, email: "index@everlightventures.io", personality: [database-keeper, indexer, categorization-obsessed, methodical]}
+
+# ============================================================================
+# BUDDY PAIRS -- Failover Registry
+# ============================================================================
+buddy_pairs:
+  # Claude Corp
+  - {primary: "Nora Blaine", backup: "Sage Holloway", domain: content_strategy}
+  - {primary: "Slate Mercer", backup: "Sage Holloway", domain: strategic_modeling}
+  - {primary: "Edith Cross", backup: "Quinn Sharp", domain: editing}
+  - {primary: "Quill Fontaine", backup: "Quinn Sharp", domain: style_enforcement}
+  - {primary: "Cash Moreno", backup: "Shield Navarro", domain: financial_audit}
+  - {primary: "Justine Park", backup: "Shield Navarro", domain: compliance}
+  # Gemini Ops
+  - {primary: "Gears Tanaka", backup: "Mack Rivera", domain: workflow}
+  - {primary: "Link Masters", backup: "Mack Rivera", domain: sync}
+  - {primary: "Chart Dawson", backup: "Bo Crate", domain: analytics}
+  - {primary: "Dash Monroe", backup: "Bo Crate", domain: distribution}
+  - {primary: "Piper Reeves", backup: "Ace Morgan", domain: outreach}
+  - {primary: "Rex Blackwell", backup: "Ace Morgan", domain: wholesale}
+  # Codex Labs
+  - {primary: "Road Harper", backup: "Ink Castellano", domain: saas_pm}
+  - {primary: "Spider Locke", backup: "Ink Castellano", domain: seo}
+  - {primary: "Flow Jordan", backup: "Hammer Knox", domain: funnels}
+  - {primary: "Cupid Osei", backup: "Hammer Knox", domain: matching}
+  - {primary: "Filter Banks", backup: "Onboard Kessler", domain: lead_scoring}
+  - {primary: "Beacon Orozco", backup: "Onboard Kessler", domain: prospecting}
+  # Perplexity Intel
+  - {primary: "Bull Archer", backup: "Pulse Diaz", domain: markets}
+  - {primary: "Margin Reyes", backup: "Pulse Diaz", domain: derivatives}
+  - {primary: "Brief Calloway", backup: "Helix Patel", domain: legal}
+  - {primary: "Scope Erikson", backup: "Helix Patel", domain: geopolitics}
+  - {primary: "Pitch Adler", backup: "Tally Rourke", domain: business_intel}
+  - {primary: "Lens Nakamura", backup: "Tally Rourke", domain: competitive_intel}
+
+# ============================================================================
+# FAILOVER RULES
+# ============================================================================
+failover:
+  agent_down: "Buddy takes over immediately"
+  tl_down: "Verifier (B) promotes to acting TL"
+  squad_leader_down: "Senior TL (Alpha team) promotes to acting SL"
+  platoon_leader_down: "Major Dex assumes command"
+
+# ============================================================================
+# BACKWARD COMPAT -- Flat managers block (existing dispatcher reads this)
+# Includes ALL agents (existing + new recruits + assistants)
+# ============================================================================
 managers:
   claude:
     role: "Chief Operator / Strategist"
@@ -8,14 +210,23 @@ managers:
     cli_mode: "review"
     timeout_seconds: 240
     employees:
-      - 01_chief_operator
-      - everlight_architect
-      - everlight_content_director
-      - everlight_qa_gate
-      - everlight_trading_risk
-      - reviewer
-      - 17_content_strategy
-      - 15_editor_qa
+      - {id: 01_chief_operator, name: "Marcus Cole", email: "marcus@everlightventures.io", personality: [decisive, executive, big-picture], voice_id: "onwK4e9ZLuTAKqWW03F9"}
+      - {id: everlight_architect, name: "Atlas Vega", email: "atlas@everlightventures.io", personality: [methodical, detail-obsessed, systems-thinker]}
+      - {id: everlight_content_director, name: "Vera Lux", email: "vera@everlightventures.io", personality: [creative, disciplined, brand-guardian]}
+      - {id: everlight_qa_gate, name: "Quinn Sharp", email: "quinn@everlightventures.io", personality: [skeptical, thorough, blunt]}
+      - {id: everlight_trading_risk, name: "Rex Thornton", email: "rex@everlightventures.io", personality: [cautious, numbers-driven, risk-averse], voice_id: "GBv7mTt0atIp3Br8iCZE"}
+      - {id: reviewer, name: "Sage Holloway", email: "sage@everlightventures.io", personality: [patient, precise, constructive]}
+      - {id: 17_content_strategy, name: "Nora Blaine", email: "nora@everlightventures.io", personality: [creative-planner, trend-aware, calendar-obsessed]}
+      - {id: 15_editor_qa, name: "Edith Cross", email: "edith@everlightventures.io", personality: [grammar-hawk, tone-police, fact-checker]}
+      - {id: 33_commission_auditor, name: "Cash Moreno", email: "cash@everlightventures.io", personality: [money-focused, audit-obsessed, meticulous]}
+      - {id: 34_compliance_gate, name: "Justine Park", email: "justine@everlightventures.io", personality: [by-the-book, legal-minded, protective], voice_id: "Xb7hH8MSUJpSbSDYk0k2"}
+      # NEW RECRUITS
+      - {id: 40_strategic_modeler, name: "Slate Mercer", email: "slate@everlightventures.io", personality: [analytical, scenario-thinker, chess-player, contrarian]}
+      - {id: 41_style_enforcer, name: "Quill Fontaine", email: "quill@everlightventures.io", personality: [meticulous, tone-obsessed, brand-voice-guardian, elegant]}
+      - {id: 42_financial_safeguard, name: "Shield Navarro", email: "shield@everlightventures.io", personality: [suspicious, forensic, fraud-detector, cautious]}
+      - {id: 43_strategy_assistant, name: "Draft Ellery", email: "draft.e@everlightventures.io", personality: [organized, fast-drafter, anticipates-needs, quiet]}
+      - {id: 44_edit_assistant, name: "Proof Sandoval", email: "proof@everlightventures.io", personality: [detail-hound, catches-typos, night-owl, reliable]}
+      - {id: 45_compliance_assistant, name: "Audit Crane", email: "audit@everlightventures.io", personality: [systematic, paper-trail-obsessed, calm]}
 
   gemini:
     role: "Logistics Commander / Executor"
@@ -23,77 +234,144 @@ managers:
     cli_mode: "plan"
     timeout_seconds: 300
     employees:
-      - 26_logistics_commander
-      - 02_ops_deputy
-      - 24_workflow_builder
-      - 23_automation_architect
-      - 11_sync_coordinator
-      - 22_distribution_ops
-      - 25_analytics_auditor
-      - everlight_packager
+      - {id: 26_logistics_commander, name: "Major Dex", email: "major@everlightventures.io", personality: [military-precision, no-excuses, commanding], voice_id: "pqHfZKP75CvOlQylNhV4"}
+      - {id: 02_ops_deputy, name: "Mack Rivera", email: "mack@everlightventures.io", personality: [reliable, detail-handler, steady]}
+      - {id: 24_workflow_builder, name: "Gears Tanaka", email: "gears@everlightventures.io", personality: [engineer-minded, pipeline-lover, enthusiastic]}
+      - {id: 23_automation_architect, name: "Aria Chen", email: "aria@everlightventures.io", personality: [elegant, efficiency-obsessed, impatient-with-manual]}
+      - {id: 11_sync_coordinator, name: "Link Masters", email: "link@everlightventures.io", personality: [sync-obsessed, consistency-guardian, intense]}
+      - {id: 22_distribution_ops, name: "Dash Monroe", email: "dash@everlightventures.io", personality: [fast-paced, channel-expert, action-oriented]}
+      - {id: 25_analytics_auditor, name: "Metric Webb", email: "metric@everlightventures.io", personality: [data-driven, calm, chart-lover]}
+      - {id: everlight_packager, name: "Bo Crate", email: "bo@everlightventures.io", personality: [packaging-perfectionist, checklist-driven, organized]}
+      - {id: 28_deal_scout, name: "Scout Navarro", email: "scout@everlightventures.io", personality: [hustler, opportunity-hunter, excited], voice_id: "bVMeCyTHy58xNoL34h3p"}
+      - {id: 31_outreach_agent, name: "Piper Reeves", email: "piper@everlightventures.io", personality: [personable, persuasive, warm], voice_id: "XrExE9yKIg1WjnnlVkGX"}
+      - {id: 35_broker_analytics, name: "Chart Dawson", email: "chart@everlightventures.io", personality: [funnel-obsessive, analytical, prescriptive]}
+      - {id: 36_rex_wholesale, name: "Rex Blackwell", email: "rex.b@everlightventures.io", personality: [no-bs, numbers-first, distressed-property-hunter], voice_id: "ODq5zmih8GrVes37Dizd"}
+      - {id: 37_ace_deal_marketer, name: "Ace Morgan", email: "ace@everlightventures.io", personality: [smooth-talker, story-seller, urgency-creator], voice_id: "ErXwobaYiN019PkySvjV"}
+      # NEW RECRUITS
+      - {id: 46_automation_assistant, name: "Cog Alvarez", email: "cog@everlightventures.io", personality: [tinkerer, eager, automation-curious, fast-learner]}
+      - {id: 47_analytics_assistant, name: "Pixel Warren", email: "pixel@everlightventures.io", personality: [visual-thinker, chart-builder, clean-data-obsessed]}
+      - {id: 48_outreach_assistant, name: "Flyer Beckett", email: "flyer@everlightventures.io", personality: [hustle-energy, list-builder, CRM-native, persistent]}
 
   codex:
     role: "Engineering Foreman / Profit Maximizer"
     tool: "cx_terminal"
     timeout_seconds: 240
     employees:
-      - 03_engineering_foreman
-      - 27_profit_maximizer
-      - everlight_saas_builder
-      - everlight_saas_pm
-      - everlight_saas_growth
-      - 10_funnel_architect
-      - 08_seo_mapper
-      - writer
+      - {id: 03_engineering_foreman, name: "Forge Steele", email: "forge@everlightventures.io", personality: [builder, code-quality-first, no-nonsense], voice_id: "pNInz6obpgDQGcFmaJgB"}
+      - {id: 27_profit_maximizer, name: "Penny Vance", email: "penny@everlightventures.io", personality: [roi-obsessed, sharp, mercenary], voice_id: "21m00Tcm4TlvDq8ikWAM"}
+      - {id: everlight_saas_builder, name: "Stack Torres", email: "stack@everlightventures.io", personality: [full-stack, ships-fast, pragmatic]}
+      - {id: everlight_saas_pm, name: "Road Harper", email: "road@everlightventures.io", personality: [organized, ruthless-prioritizer, calm-mediator]}
+      - {id: everlight_saas_growth, name: "Rocket Kim", email: "rocket@everlightventures.io", personality: [high-energy, growth-hacker, metric-driven]}
+      - {id: 10_funnel_architect, name: "Flow Jordan", email: "flow@everlightventures.io", personality: [journey-focused, conversion-designer, meticulous]}
+      - {id: 08_seo_mapper, name: "Spider Locke", email: "spider@everlightventures.io", personality: [keyword-hunter, patient, data-backed]}
+      - {id: writer, name: "Ink Castellano", email: "ink@everlightventures.io", personality: [clean-prose, versatile, adaptable]}
+      - {id: 29_lead_qualifier, name: "Filter Banks", email: "filter@everlightventures.io", personality: [cold-analytical, bant-scorer, data-only], voice_id: "iP95p4xoKVk53GoZ742B"}
+      - {id: 30_match_maker, name: "Cupid Osei", email: "cupid@everlightventures.io", personality: [connector, compatibility-thinker, delighted]}
+      - {id: 32_deal_closer, name: "Hammer Knox", email: "hammer@everlightventures.io", personality: [closer-mentality, relentless, professional], voice_id: "29vD33N1CtxCmqQRPOHJ"}
+      # NEW RECRUITS
+      - {id: 51_prospect_scraper, name: "Beacon Orozco", email: "beacon@everlightventures.io", personality: [relentless, data-mining, Google-Maps-native, list-builder]}
+      - {id: 52_client_deployer, name: "Onboard Kessler", email: "onboard@everlightventures.io", personality: [organized, client-facing, checklist-obsessed, warm]}
+      - {id: 49_engineering_assistant, name: "Patch Donovan", email: "patch@everlightventures.io", personality: [meticulous, test-writer, cleanup-specialist, patient]}
+      - {id: 50_revenue_assistant, name: "Ledger Okafor", email: "ledger@everlightventures.io", personality: [spreadsheet-native, money-tracker, organized, fast]}
+      - {id: 57_consulting_assistant, name: "Relay Vasquez", email: "relay@everlightventures.io", personality: [client-facing, warm, documentation-expert, follow-through]}
 
   perplexity:
     role: "Intelligence Anchor / News Desk"
     tool: "ppx_terminal"
     timeout_seconds: 90
     research_beats:
-      - name: "Crypto & DeFi"
-        focus: "XLM, BTC, ETH, DeFi protocols, exchange news, regulatory moves"
-      - name: "Finance & Markets"
-        focus: "Stock markets, interest rates, economic indicators, forex, commodities"
-      - name: "World News"
-        focus: "Geopolitics, conflicts, elections, trade policy, sanctions"
-      - name: "Tech & AI"
-        focus: "AI models, startups, product launches, open source, dev tools"
-      - name: "Business & Startups"
-        focus: "SaaS metrics, funding rounds, M&A, entrepreneur strategies, ecommerce"
-      - name: "Science & Health"
-        focus: "Biotech, energy, space, climate, medical breakthroughs"
-      - name: "Legal & Regulatory"
-        focus: "SEC, crypto regulation, privacy laws, antitrust, IP"
-      - name: "Personal & Local"
-        focus: "US consumer trends, housing, MMA, fitness, personal finance"
+      - {name: "Crypto & DeFi", agent_name: "Cipher Wolfe", email: "cipher@everlightventures.io", personality: [crypto-native, on-chain, alpha-focused], focus: "XLM, BTC, ETH, DeFi protocols, exchange news, regulatory moves", voice_id: "CYw3kZ02Hs0563khs1Fj"}
+      - {name: "Finance & Markets", agent_name: "Bull Archer", email: "bull@everlightventures.io", personality: [market-veteran, macro-thinker, calm], focus: "Stock markets, interest rates, economic indicators, forex, commodities"}
+      - {name: "World News", agent_name: "Wire Santos", email: "wire@everlightventures.io", personality: [breaking-news, sources-first, never-speculates], focus: "Geopolitics, conflicts, elections, trade policy, sanctions"}
+      - {name: "Tech & AI", agent_name: "Nova Ling", email: "nova@everlightventures.io", personality: [enthusiast, early-adopter, realistic], focus: "AI models, startups, product launches, open source, dev tools"}
+      - {name: "Business & Startups", agent_name: "Pitch Adler", email: "pitch@everlightventures.io", personality: [opportunity-focused, tam-thinker, ecosystem-expert], focus: "SaaS metrics, funding rounds, M&A, entrepreneur strategies, ecommerce"}
+      - {name: "Science & Health", agent_name: "Helix Patel", email: "helix@everlightventures.io", personality: [evidence-based, academic, accessible], focus: "Biotech, energy, space, climate, medical breakthroughs"}
+      - {name: "Legal & Regulatory", agent_name: "Brief Calloway", email: "brief@everlightventures.io", personality: [precise, citation-heavy, compliance-aware], focus: "SEC, crypto regulation, privacy laws, antitrust, IP"}
+      - {name: "Consumer & Local", agent_name: "Pulse Diaz", email: "pulse@everlightventures.io", personality: [conversational, trend-aware, relatable], focus: "US consumer trends, housing, MMA, fitness, personal finance"}
+      # NEW RECRUITS
+      - {name: "Derivatives & Risk", agent_name: "Margin Reyes", email: "margin@everlightventures.io", personality: [quant-minded, derivatives-native, precise], focus: "Options, futures, margin, risk metrics, volatility"}
+      - {name: "Geopolitical Risk", agent_name: "Scope Erikson", email: "scope@everlightventures.io", personality: [intelligence-style, pattern-matcher, cautious], focus: "Sanctions, trade wars, election impacts, geopolitical risk"}
+      - {name: "Competitive Intel", agent_name: "Lens Nakamura", email: "lens@everlightventures.io", personality: [investigative, product-obsessed, teardown-artist], focus: "Product teardowns, competitor analysis, market positioning"}
+      - {name: "Data Verification", agent_name: "Tally Rourke", email: "tally@everlightventures.io", personality: [skeptical, numbers-driven, fact-checker], focus: "Cross-referencing data points, source verification, error catching"}
+      - {name: "Markets Desk Aide", agent_name: "Clip Johanssen", email: "clip@everlightventures.io", personality: [news-junkie, source-collector, fast-scanner], focus: "Source aggregation, price feed monitoring"}
+      - {name: "Legal Desk Aide", agent_name: "Docket Wen", email: "docket@everlightventures.io", personality: [citation-hunter, law-adjacent, thorough], focus: "Regulatory citations, legal development tracking"}
+      - {name: "Tech Desk Aide", agent_name: "Index Ashworth", email: "index@everlightventures.io", personality: [database-keeper, categorization-obsessed, methodical], focus: "Competitor database, trend logging, product tracking"}
 
-# Smart routing: keyword patterns decide which workers to dispatch.
-# Claude is NOT a target - Claude IS the orchestrator calling these workers.
+# ============================================================================
+# COLLABORATION & ROUTING
+# ============================================================================
+collaboration_rules:
+  min_agents_per_task: 3
+  min_departments_per_task: 2
+  intel_first: true
+  no_solo_missions: true
+  fire_team_doctrine: true  # v2: route to fire teams, not flat lists
+
+communication:
+  department_emails:
+    claude: claude-team@everlightventures.io
+    gemini: gemini-team@everlightventures.io
+    codex: codex-team@everlightventures.io
+    perplexity: intel@everlightventures.io
+  slack_channels:
+    - "#war-room"
+    - "#claude-corp"
+    - "#gemini-ops"
+    - "#codex-labs"
+    - "#perplexity-intel"
+    - "#xlm-bot"
+    - "#broker-ops"
+    - "#content"
+    - "#engineering"
+    - "#finance"
+    - "#compliance"
+    - "#growth"
+    - "#wholesale-deals"
+    - "#ai-consulting"
+
 routing_rules:
   trading:
     managers: [gemini, codex, perplexity]
+    fire_teams: {gemini_ops: bravo_dashboard, codex_labs: bravo_profit_engine, perplexity_intel: alpha_markets}
     keywords: [trade, bot, xlm, scalp, position, margin, pnl, crypto, coinbase, futures]
   content:
     managers: [gemini, codex, perplexity]
+    fire_teams: {claude_corp: bravo_editors, codex_labs: alpha_forge_works, perplexity_intel: charlie_horizon}
     keywords: [write, blog, post, content, article, book, publish, draft, edit]
   engineering:
     managers: [gemini, codex, perplexity]
+    fire_teams: {gemini_ops: alpha_gearbox, codex_labs: alpha_forge_works, perplexity_intel: charlie_horizon}
     keywords: [fix, bug, code, build, deploy, docker, api, script, function, refactor, django, streamlit, dashboard, upgrade, enhance]
+  broker:
+    managers: [gemini, codex, perplexity]
+    fire_teams: {gemini_ops: charlie_hunters, codex_labs: bravo_profit_engine, perplexity_intel: charlie_horizon}
+    keywords: [broker, middleman, finder, commission, deal, match, lead, offer, outreach, affiliate, referral, marketplace]
+  consulting:
+    managers: [gemini, codex, perplexity]
+    fire_teams: {codex_labs: charlie_consult, gemini_ops: charlie_hunters, perplexity_intel: charlie_horizon}
+    keywords: [consult, "ai consulting", client, onboard, prospect, "google maps", "7-touch", deployment, smb, discovery]
   business:
     managers: [gemini, codex, perplexity]
+    fire_teams: {codex_labs: bravo_profit_engine, gemini_ops: bravo_dashboard, perplexity_intel: charlie_horizon}
     keywords: [business, saas, revenue, scale, launch, monetize, product, ecommerce, store, supplier]
+  wholesale:
+    managers: [gemini, codex, perplexity]
+    fire_teams: {gemini_ops: charlie_hunters, codex_labs: bravo_profit_engine, perplexity_intel: alpha_markets}
+    keywords: [wholesale, distressed, ARV, assignment, "cash buyer", "motivated seller", foreclosure, probate, "tax lien", "code violation", "off market", REI, flip, rehab, "as-is"]
   research:
     managers: [perplexity, gemini]
+    fire_teams: {perplexity_intel: alpha_markets, gemini_ops: bravo_dashboard}
     keywords: [news, price, market, latest, current, "what is", research, trend, forecast]
   operations:
     managers: [gemini, perplexity]
+    fire_teams: {gemini_ops: alpha_gearbox, perplexity_intel: charlie_horizon}
     keywords: [sync, organize, automate, workflow, pipeline, deploy, backup, migrate]
 
-# Lite mode: just perplexity intel (Claude is already the caller)
 lite_managers: [perplexity]
 
-# User context injected into Perplexity intel queries
+# ============================================================================
+# USER CONTEXT
+# ============================================================================
 user_context:
   timezone: "Pacific Time (PT)"
   location: "United States"
@@ -103,16 +381,32 @@ user_context:
     - "MMA and fitness"
     - "AI tools and development"
     - "Ecommerce and product sourcing"
-  portfolio_note: "Running live XLM trading bot, ~$500 account"
+    - "B2B SaaS brokerage and matchmaking (Broker OS)"
+    - "Finder fee / affiliate commission business"
+    - "AI consulting for SMBs (new pipeline)"
+  portfolio_note: "Running live XLM trading bot, ~$500 account. Building Broker OS + AI Consulting pipeline."
 
-# Project BMO Phase 1 -- Specialist Performance Tracking
-# Weights are auto-updated by telemetry.get_roster_weights() after each session.
-# Manual overrides: set a specialist's weight here and it won't be auto-overwritten.
+# ============================================================================
+# VOICE CONFIG
+# ============================================================================
+voice:
+  provider: elevenlabs
+  model: eleven_flash_v2
+  default_voice_id: "pNInz6obpgDQGcFmaJgB"
+  api_key_env: ELEVENLABS_API_KEY
+  ceo_brief_voice: "onwK4e9ZLuTAKqWW03F9"
+  outbound_enabled: false
+  twilio_phone_env: TWILIO_PHONE_NUMBER
+  twilio_sid_env: TWILIO_ACCOUNT_SID
+  twilio_token_env: TWILIO_AUTH_TOKEN
+
+# ============================================================================
+# TELEMETRY & PATHS
+# ============================================================================
 telemetry:
   enabled: true
   log_file: "everlight_os/hive_mind/telemetry.jsonl"
   lookback_sessions: 20
 
-# War room paths
 war_room_dir: "_logs/ai_war_room"
 session_log: "_logs/hive_sessions.jsonl"

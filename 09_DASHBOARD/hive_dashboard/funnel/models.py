@@ -6,6 +6,7 @@ class Lead(models.Model):
         ("onyx", "Onyx POS"),
         ("hivemind", "Hive Mind SaaS"),
         ("dashboard", "Trading Watchtower"),
+        ("ai_consulting", "AI Consulting"),
     ]
     STAGE_CHOICES = [
         ("captured", "Captured"),

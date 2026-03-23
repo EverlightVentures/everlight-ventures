@@ -58,6 +58,23 @@ class HiveSession:
     def to_json(self) -> str:
         return json.dumps(self.to_dict(), indent=2)
 
+
+@dataclass
+class FireTeamResult:
+    """Result from a fire team's execution."""
+    squad: str = ""
+    fire_team: str = ""
+    team_leader: str = ""
+    agents_activated: List[str] = field(default_factory=list)
+    buddy_failovers: int = 0
+    status: str = "pending"
+    response_text: str = ""
+    duration_s: float = 0.0
+    error: str = ""
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
     @classmethod
     def from_dict(cls, d: dict) -> "HiveSession":
         return cls(**{k: v for k, v in d.items() if k in cls.__dataclass_fields__})

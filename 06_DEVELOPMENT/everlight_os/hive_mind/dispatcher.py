@@ -26,6 +26,8 @@ from .convergence import (
     update_war_room_session,
 )
 from .telemetry import log_session_telemetry
+from .messaging import send_message, broadcast, get_messages, format_messages_for_prompt
+from .agent_metrics import log_agent_performance
 
 
 # Map worker keys to their run functions (NO Claude - Claude is the caller)
@@ -167,6 +169,10 @@ def dispatch(
         employees = conf.get("employees", [])
         role = conf.get("role", key)
 
+        # Inject inter-agent messages from other workers (My Claw pattern)
+        agent_msgs = get_messages(key, sid)
+        msg_context = format_messages_for_prompt(agent_msgs)
+
         mgr_prompt = build_manager_prompt(
             manager_key=key,
             role=role,
@@ -174,6 +180,10 @@ def dispatch(
             user_prompt=user_prompt,
             intel_summary=session.intel_summary,
         )
+
+        # Append message context if other agents have sent messages
+        if msg_context:
+            mgr_prompt += f"\n\n{msg_context}"
 
         runner = _RUNNERS.get(key)
         if runner is None:
@@ -183,6 +193,7 @@ def dispatch(
             )
 
         # Attempt 1: primary runner
+        _worker_start = time.time()
         result = runner(mgr_prompt, conf)
         result.employees_consulted = employees
 
@@ -195,9 +206,40 @@ def dispatch(
             retry.employees_consulted = employees
             if retry.status == "done":
                 retry.error = f"(retry succeeded after: {result.error})"
-                return retry
-            # Both attempts failed -- return original error
-            result.error = f"2 attempts failed: {result.error}"
+                result = retry
+            else:
+                # Both attempts failed -- return original error
+                result.error = f"2 attempts failed: {result.error}"
+
+        # Broadcast result summary to other agents (inter-agent comms)
+        try:
+            summary = (result.response_text or "")[:500]
+            if summary:
+                broadcast(key, f"[{role}] {summary}", sid)
+        except Exception:
+            pass
+
+        # Log agent performance to Supabase (Meta performance review pattern)
+        try:
+            for emp in employees:
+                log_agent_performance(
+                    agent_name=emp,
+                    department=key,
+                    session_id=sid,
+                    task_type=locals().get("category", ""),
+                    success=result.status == "done",
+                    duration_s=result.duration_s,
+                    findings_count=len(
+                        [l for l in (result.response_text or "").split("\n")
+                         if l.strip().startswith("- Finding")]
+                    ),
+                    recommendations_count=len(
+                        [l for l in (result.response_text or "").split("\n")
+                         if "recommendation" in l.lower()]
+                    ),
+                )
+        except Exception:
+            pass  # metrics are best-effort
 
         return result
 

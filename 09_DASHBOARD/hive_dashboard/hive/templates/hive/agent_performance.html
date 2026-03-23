@@ -1,0 +1,91 @@
+{% extends "hive/base.html" %}
+{% load humanize %}
+
+{% block title %}Agent Performance -- LUCREX{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;">
+  <div>
+    <h1 style="font-family:var(--font-heading);font-size:1.8rem;color:var(--gold);margin-bottom:4px;">
+      <i class="fa-solid fa-ranking-star" style="margin-right:8px;"></i>Agent Performance
+    </h1>
+    <p style="color:var(--text-secondary);font-size:0.9rem;">
+      {{ total_agents }} agent{{ total_agents|pluralize }} tracked over {{ days }} days
+    </p>
+  </div>
+  <div style="display:flex;gap:8px;">
+    <a href="?days=7" style="padding:6px 14px;border-radius:6px;font-size:0.8rem;text-decoration:none;
+       {% if days == 7 %}background:var(--gold);color:#0a0a0f;font-weight:600;{% else %}background:var(--bg-card);border:1px solid var(--glass-border);color:var(--text-secondary);{% endif %}">7d</a>
+    <a href="?days=30" style="padding:6px 14px;border-radius:6px;font-size:0.8rem;text-decoration:none;
+       {% if days == 30 %}background:var(--gold);color:#0a0a0f;font-weight:600;{% else %}background:var(--bg-card);border:1px solid var(--glass-border);color:var(--text-secondary);{% endif %}">30d</a>
+    <a href="?days=90" style="padding:6px 14px;border-radius:6px;font-size:0.8rem;text-decoration:none;
+       {% if days == 90 %}background:var(--gold);color:#0a0a0f;font-weight:600;{% else %}background:var(--bg-card);border:1px solid var(--glass-border);color:var(--text-secondary);{% endif %}">90d</a>
+  </div>
+</div>
+
+<!-- Department Summary -->
+{% if departments %}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:28px;">
+  {% for dept in departments %}
+  <div style="padding:18px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:10px;">
+    <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:6px;">{{ dept.name }}</div>
+    <div style="font-size:1.4rem;font-weight:700;color:var(--text-primary);margin-bottom:4px;">{{ dept.agent_count }} agents</div>
+    <div style="font-size:0.85rem;color:var(--text-secondary);">
+      {{ dept.total_tasks }} tasks &middot;
+      <span style="color:{% if dept.avg_success_rate >= 80 %}#22c55e{% elif dept.avg_success_rate >= 50 %}#f59e0b{% else %}#ef4444{% endif %};">
+        {{ dept.avg_success_rate }}% success
+      </span>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Agent Leaderboard -->
+{% if scorecards %}
+<div style="background:var(--bg-card);border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;">
+  <div style="padding:14px 20px;border-bottom:1px solid var(--glass-border);display:grid;
+              grid-template-columns:40px 1fr 100px 90px 80px 80px 90px;gap:12px;align-items:center;
+              font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);font-weight:600;">
+    <span>#</span>
+    <span>Agent</span>
+    <span>Department</span>
+    <span style="text-align:right;">Tasks</span>
+    <span style="text-align:right;">Success</span>
+    <span style="text-align:right;">Avg Time</span>
+    <span style="text-align:right;">Findings</span>
+  </div>
+
+  {% for sc in scorecards %}
+  <div style="padding:12px 20px;border-bottom:1px solid var(--border-subtle);display:grid;
+              grid-template-columns:40px 1fr 100px 90px 80px 80px 90px;gap:12px;align-items:center;
+              transition:background var(--transition-base);"
+       onmouseover="this.style.background='var(--bg-card-hover)'"
+       onmouseout="this.style.background='transparent'">
+    <span style="font-size:0.85rem;font-weight:700;color:{% if forloop.counter <= 3 %}var(--gold){% else %}var(--text-muted){% endif %};">
+      {% if forloop.counter == 1 %}<i class="fa-solid fa-trophy" style="color:var(--gold);"></i>
+      {% elif forloop.counter == 2 %}<i class="fa-solid fa-medal" style="color:#c0c0c0;"></i>
+      {% elif forloop.counter == 3 %}<i class="fa-solid fa-medal" style="color:#cd7f32;"></i>
+      {% else %}{{ forloop.counter }}{% endif %}
+    </span>
+    <span style="font-weight:600;font-size:0.9rem;color:var(--text-primary);">{{ sc.agent_name }}</span>
+    <span style="font-size:0.8rem;color:var(--text-secondary);">{{ sc.department }}</span>
+    <span style="text-align:right;font-size:0.9rem;font-weight:600;color:var(--text-primary);">{{ sc.total_tasks }}</span>
+    <span style="text-align:right;font-size:0.9rem;font-weight:600;
+                 color:{% if sc.success_rate >= 80 %}#22c55e{% elif sc.success_rate >= 50 %}#f59e0b{% else %}#ef4444{% endif %};">
+      {{ sc.success_rate }}%
+    </span>
+    <span style="text-align:right;font-size:0.85rem;color:var(--text-secondary);">{{ sc.avg_duration_s }}s</span>
+    <span style="text-align:right;font-size:0.85rem;color:var(--text-secondary);">{{ sc.total_findings }}</span>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div style="text-align:center;padding:60px 20px;color:var(--text-muted);background:var(--bg-card);
+            border:1px solid var(--glass-border);border-radius:12px;">
+  <i class="fa-solid fa-chart-bar" style="font-size:2.5rem;margin-bottom:12px;display:block;"></i>
+  <p>No performance data yet. Run Hive dispatches to populate agent metrics.</p>
+  <p style="font-size:0.85rem;margin-top:8px;">Data sources: Supabase agent_performance table + local telemetry.jsonl</p>
+</div>
+{% endif %}
+{% endblock %}

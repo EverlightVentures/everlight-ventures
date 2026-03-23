@@ -1,0 +1,28 @@
+{% extends "hive/base.html" %}
+
+{% block title %}Report {{ report_hash }} -- LUCREX{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">
+  <div>
+    <a href="{% url 'hive:reports_list' %}" style="font-size:0.85rem;color:var(--text-secondary);">
+      <i class="fa-solid fa-arrow-left" style="margin-right:6px;"></i>All Reports
+    </a>
+    <h1 style="font-family:var(--font-heading);font-size:1.4rem;color:var(--gold);margin-top:6px;">
+      {{ report_hash }}
+    </h1>
+  </div>
+  <a href="{% url 'hive:report_detail' report_hash %}?raw=1" target="_blank"
+     style="padding:8px 16px;background:var(--bg-card);border:1px solid var(--gold-dim);
+            border-radius:6px;font-size:0.8rem;color:var(--gold);text-decoration:none;">
+    <i class="fa-solid fa-up-right-from-square" style="margin-right:4px;"></i>Open Full Screen
+  </a>
+</div>
+
+<div style="border:1px solid var(--glass-border);border-radius:12px;overflow:hidden;
+            background:var(--bg-card);">
+  <iframe src="{% url 'hive:report_detail' report_hash %}?raw=1"
+          style="width:100%;height:calc(100vh - 180px);border:none;display:block;"
+          loading="lazy"></iframe>
+</div>
+{% endblock %}

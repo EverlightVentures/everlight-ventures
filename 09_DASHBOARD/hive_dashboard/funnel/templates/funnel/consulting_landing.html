@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your AI Employee | Everlight Ventures</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Cormorant+Garamond:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    :root {
+      --bg: #0A0A0F;
+      --gold: #D4AF37;
+      --gold-dim: #8b7635;
+      --gold-bright: #e5c76b;
+      --text: #E8E6E3;
+      --text-dim: #9CA3AF;
+      --card-bg: rgba(255,255,255,0.04);
+      --card-border: rgba(255,255,255,0.08);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    .hero {
+      text-align: center;
+      padding: 80px 20px 60px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .hero h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 16px;
+      line-height: 1.15;
+    }
+    .hero .subtitle {
+      font-size: 1.15rem;
+      color: var(--text-dim);
+      max-width: 600px;
+      margin: 0 auto 32px;
+      line-height: 1.6;
+    }
+    .price-tag {
+      display: inline-block;
+      font-size: 3rem;
+      font-weight: 800;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+    .price-label {
+      font-size: 0.95rem;
+      color: var(--text-dim);
+      margin-bottom: 32px;
+    }
+    .cta-btn {
+      display: inline-block;
+      padding: 16px 48px;
+      background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+      color: #0A0A0F;
+      font-weight: 700;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 30px rgba(212,175,55,0.3);
+    }
+    .proof {
+      padding: 60px 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .proof h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.8rem;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .stat-card {
+      padding: 24px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      text-align: center;
+    }
+    .stat-card .number {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--gold);
+      margin-bottom: 6px;
+    }
+    .stat-card .label {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+    }
+    .benefits {
+      padding: 40px 20px 60px;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .benefit-item {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      align-items: flex-start;
+    }
+    .benefit-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(212,175,55,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: var(--gold);
+    }
+    .benefit-text h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .benefit-text p {
+      font-size: 0.9rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+    .form-section {
+      padding: 60px 20px;
+      max-width: 500px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .form-section h2 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      color: var(--gold);
+      margin-bottom: 24px;
+    }
+    .form-group {
+      margin-bottom: 14px;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: none;
+      border-color: var(--gold-dim);
+    }
+    .form-group select option { background: #1a1a2e; }
+    .footer {
+      text-align: center;
+      padding: 40px 20px;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      border-top: 1px solid var(--card-border);
+    }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Your AI Employee.<br>$1 to Meet Them.</h1>
+  <p class="subtitle">
+    Meta uses AI agents to run a $1.5 trillion company. We built the same technology for local businesses.
+    Get an AI that answers calls, follows up on leads, and books appointments -- 24/7.
+  </p>
+  <div class="price-tag">$1</div>
+  <div class="price-label">30-minute Discovery Session -- see AI in action for your business</div>
+  <a href="#book" class="cta-btn">Book Your Discovery Session</a>
+</div>
+
+<div class="proof">
+  <h2>We Practice What We Preach</h2>
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="number">42</div>
+      <div class="label">AI agents we run daily</div>
+    </div>
+    <div class="stat-card">
+      <div class="number">8</div>
+      <div class="label">Businesses automated</div>
+    </div>
+    <div class="stat-card">
+      <div class="number">24/7</div>
+      <div class="label">Always-on infrastructure</div>
+    </div>
+    <div class="stat-card">
+      <div class="number">15-20h</div>
+      <div class="label">Saved per week, per client</div>
+    </div>
+  </div>
+</div>
+
+<div class="benefits">
+  <div class="benefit-item">
+    <div class="benefit-icon"><i class="fa-solid fa-robot"></i></div>
+    <div class="benefit-text">
+      <h3>Lead Follow-Up Agent</h3>
+      <p>Responds to every inquiry in under 60 seconds. Qualifies leads and books appointments automatically.</p>
+    </div>
+  </div>
+  <div class="benefit-item">
+    <div class="benefit-icon"><i class="fa-solid fa-headset"></i></div>
+    <div class="benefit-text">
+      <h3>Customer Support Agent</h3>
+      <p>Handles FAQs, triages issues, and routes complex problems to your team. Works nights and weekends.</p>
+    </div>
+  </div>
+  <div class="benefit-item">
+    <div class="benefit-icon"><i class="fa-solid fa-calendar-check"></i></div>
+    <div class="benefit-text">
+      <h3>Appointment Setter</h3>
+      <p>Manages your calendar, sends reminders, follows up with no-shows. Zero missed appointments.</p>
+    </div>
+  </div>
+  <div class="benefit-item">
+    <div class="benefit-icon"><i class="fa-solid fa-chart-simple"></i></div>
+    <div class="benefit-text">
+      <h3>Monthly ROI Reports</h3>
+      <p>We track everything: leads generated, time saved, appointments booked. Proof the AI is working.</p>
+    </div>
+  </div>
+</div>
+
+<div class="form-section" id="book">
+  <h2>Book Your $1 Discovery Session</h2>
+  <form id="consulting-form" action="/funnel/capture/" method="post">
+    <input type="hidden" name="product" value="ai_consulting">
+    <input type="hidden" name="source" value="consulting_landing">
+    <div class="form-group">
+      <input type="text" name="name" placeholder="Your Name" required>
+    </div>
+    <div class="form-group">
+      <input type="email" name="email" placeholder="Email Address" required>
+    </div>
+    <div class="form-group">
+      <input type="text" name="business_name" placeholder="Business Name">
+    </div>
+    <div class="form-group">
+      <select name="vertical">
+        <option value="">What industry are you in?</option>
+        <option value="dental">Dental / Medical</option>
+        <option value="home_services">Home Services (HVAC, Plumbing, Electrical)</option>
+        <option value="legal">Legal</option>
+        <option value="real_estate">Real Estate</option>
+        <option value="agency">Marketing / Digital Agency</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <textarea name="pain_point" rows="3" placeholder="What's your biggest bottleneck right now?"></textarea>
+    </div>
+    <button type="submit" class="cta-btn" style="width:100%;margin-top:8px;">
+      <i class="fa-solid fa-bolt" style="margin-right:8px;"></i>Get Started for $1
+    </button>
+  </form>
+  <p style="margin-top:16px;font-size:0.8rem;color:var(--text-dim);">
+    After submitting, you'll be redirected to book your call. No spam, no pressure.
+  </p>
+</div>
+
+<div class="footer">
+  <p>Everlight Ventures &middot; AI Consulting Division &middot; California</p>
+  <p style="margin-top:6px;">consulting@everlightventures.io</p>
+</div>
+
+<script>
+document.getElementById('consulting-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const form = e.target;
+  const data = new FormData(form);
+  fetch(form.action, {
+    method: 'POST',
+    body: JSON.stringify(Object.fromEntries(data)),
+    headers: {'Content-Type': 'application/json'},
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (d.redirect) window.location.href = d.redirect;
+    else alert(d.error || 'Something went wrong');
+  })
+  .catch(() => alert('Network error. Please try again.'));
+});
+</script>
+
+</body>
+</html>

@@ -13,15 +13,16 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 from django.conf import settings
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Avg, Count, F, Max, Q, Sum
 from django.db.models.functions import TruncDate
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views import View
 from django.views.generic import DetailView, ListView, TemplateView
-
-from django.views.decorators.csrf import csrf_exempt
 
 from .models import Agent, AgentResponse, HiveSession, QueryLog, SystemEvent
 
@@ -39,6 +40,26 @@ logger = logging.getLogger(__name__)
 # Helpers
 # ---------------------------------------------------------------------------
 
+def hive_login(request):
+    next_url = request.GET.get('next') or request.POST.get('next') or '/'
+    if request.user.is_authenticated:
+        return redirect(next_url)
+    error = ''
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '')
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            return redirect(next_url)
+        error = 'Invalid credentials'
+    return render(request, 'hive/login.html', {'next': next_url, 'error': error})
+
+
+def hive_logout(request):
+    logout(request)
+    return redirect(settings.LOGIN_URL)
+
 def _is_htmx(request):
     """Check for HTMX request. Works with django-htmx middleware."""
     return getattr(request, 'htmx', False)
@@ -55,7 +76,7 @@ def _pick_template(request, full, partial):
 # 1. DashboardView - Home page
 # ---------------------------------------------------------------------------
 
-class DashboardView(TemplateView):
+class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = 'hive/dashboard.html'
 
     def get_template_names(self):
@@ -199,7 +220,7 @@ class DashboardView(TemplateView):
 # 2. SessionListView - Paginated, searchable, filterable
 # ---------------------------------------------------------------------------
 
-class SessionListView(ListView):
+class SessionListView(LoginRequiredMixin, ListView):
     model = HiveSession
     template_name = 'hive/sessions.html'
     context_object_name = 'sessions'
@@ -296,7 +317,7 @@ class SessionListView(ListView):
 # 3. SessionDetailView
 # ---------------------------------------------------------------------------
 
-class SessionDetailView(DetailView):
+class SessionDetailView(LoginRequiredMixin, DetailView):
     model = HiveSession
     template_name = 'hive/session_detail.html'
     context_object_name = 'session'
@@ -343,7 +364,7 @@ class SessionDetailView(DetailView):
 # 4. AgentListView
 # ---------------------------------------------------------------------------
 
-class AgentListView(ListView):
+class AgentListView(LoginRequiredMixin, ListView):
     model = Agent
     template_name = 'hive/agents.html'
     context_object_name = 'agents'
@@ -387,7 +408,7 @@ class AgentListView(ListView):
 # 5. AgentDetailView
 # ---------------------------------------------------------------------------
 
-class AgentDetailView(DetailView):
+class AgentDetailView(LoginRequiredMixin, DetailView):
     model = Agent
     template_name = 'hive/agent_detail.html'
     context_object_name = 'agent'
@@ -452,7 +473,7 @@ class AgentDetailView(DetailView):
 # 6. AnalyticsView - Chart data for JS
 # ---------------------------------------------------------------------------
 
-class AnalyticsView(TemplateView):
+class AnalyticsView(LoginRequiredMixin, TemplateView):
     template_name = 'hive/analytics.html'
 
     def get_context_data(self, **kwargs):
@@ -583,7 +604,7 @@ class AnalyticsView(TemplateView):
 # 7. LaunchQueryView - Dispatch a new hive query
 # ---------------------------------------------------------------------------
 
-class LaunchQueryView(View):
+class LaunchQueryView(LoginRequiredMixin, View):
     """GET: render query launch form. POST: dispatch hive command."""
 
     def get(self, request):
@@ -698,6 +719,7 @@ class LaunchQueryView(View):
 # 8. api_session_status - AJAX polling endpoint
 # ---------------------------------------------------------------------------
 
+@login_required
 def api_session_status(request, session_id):
     """Return session status + responses as JSON for polling."""
     session = get_object_or_404(HiveSession, session_id=session_id)
@@ -741,44 +763,63 @@ def api_session_status(request, session_id):
 # 9. api_live_feed - Read hive_sessions.jsonl directly
 # ---------------------------------------------------------------------------
 
+@login_required
 def api_live_feed(request):
     """
-    Return the latest 20 entries from hive_sessions.jsonl as JSON.
-    Reads the file directly for real-time feed without DB dependency.
+    Return the latest live sessions using the database as the source of truth,
+    supplemented by active progress files for in-flight runs.
     """
-    jsonl_path = getattr(
-        settings, 'HIVE_SESSIONS_JSONL',
-        '/mnt/sdcard/AA_MY_DRIVE/_logs/hive_sessions.jsonl'
-    )
     entries = []
+    seen_session_ids = set()
 
     try:
-        path = Path(jsonl_path)
-        if path.exists():
-            # Read last 20 lines efficiently
-            lines = path.read_text(encoding='utf-8').strip().splitlines()
-            tail = lines[-20:] if len(lines) > 20 else lines
-            for line in reversed(tail):
-                line = line.strip()
-                if not line:
+        recent_sessions = HiveSession.objects.order_by("-created_at")[:15]
+        for session in recent_sessions:
+            entries.append({
+                "session_id": session.session_id,
+                "prompt": session.query,
+                "status": session.status,
+                "mode": session.mode,
+                "category": session.category,
+                "total_duration_s": session.duration_seconds or 0,
+                "created_at": session.created_at.isoformat(),
+            })
+            seen_session_ids.add(session.session_id)
+
+        if HIVE_PROGRESS_DIR.exists():
+            progress_files = sorted(
+                HIVE_PROGRESS_DIR.glob("*.json"),
+                key=lambda path: path.stat().st_mtime,
+                reverse=True,
+            )
+            for progress_file in progress_files[:15]:
+                data = json.loads(progress_file.read_text(encoding="utf-8"))
+                sid = str(data.get("session_id") or "").strip()
+                if not sid or sid in seen_session_ids:
                     continue
-                try:
-                    entry = json.loads(line)
-                    entries.append(entry)
-                except json.JSONDecodeError:
-                    continue
+                entries.append({
+                    "session_id": sid,
+                    "prompt": data.get("query", ""),
+                    "status": data.get("status", "running"),
+                    "mode": data.get("mode", "full"),
+                    "category": data.get("category", ""),
+                    "total_duration_s": data.get("total_duration_s", 0),
+                    "created_at": data.get("started_at", ""),
+                })
     except Exception as e:
-        logger.error("Error reading live feed from %s: %s", jsonl_path, e)
+        logger.error("Error building live feed: %s", e)
         return JsonResponse({
             'status': 'error',
             'message': str(e),
             'entries': [],
         }, status=500)
 
+    entries.sort(key=lambda item: item.get("created_at", ""), reverse=True)
+
     return JsonResponse({
         'status': 'ok',
-        'count': len(entries),
-        'entries': entries,
+        'count': len(entries[:20]),
+        'entries': entries[:20],
     })
 
 
@@ -786,7 +827,7 @@ def api_live_feed(request):
 # 10. EventsView - System events paginated
 # ---------------------------------------------------------------------------
 
-class EventsView(ListView):
+class EventsView(LoginRequiredMixin, ListView):
     model = SystemEvent
     template_name = 'hive/events.html'
     context_object_name = 'events'
@@ -836,6 +877,7 @@ class EventsView(ListView):
 # 11. api_poll_session - Real-time progress polling for active sessions
 # ---------------------------------------------------------------------------
 
+@login_required
 def api_poll_session(request, session_id):
     """
     Poll a hive session's progress by reading the filesystem progress file.
@@ -872,6 +914,7 @@ def api_poll_session(request, session_id):
 # 12. api_export_session - Download session as markdown
 # ---------------------------------------------------------------------------
 
+@login_required
 def api_bot_intel(request):
     """
     Return XLM bot intelligence status: state, AI insight, daily brief,
@@ -987,7 +1030,7 @@ def api_bot_intel(request):
     return JsonResponse({'status': 'ok', **result})
 
 
-@csrf_exempt
+@login_required
 def api_upload_analyze(request):
     """
     Accept file/image upload(s) and dispatch to the Hive Mind for analysis.
@@ -1147,6 +1190,288 @@ def api_upload_analyze(request):
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
+@login_required
+def api_agent_status(request):
+    """
+    Return JSON with agent status, active sessions, and recent activity.
+    Reads from _logs/ai_war_room/ and _logs/hive_sessions.jsonl, plus the DB.
+    Also pushes loaded sessions to Supabase hive_sessions table.
+    """
+    war_room_dir = HIVE_WORKSPACE / '_logs' / 'ai_war_room'
+    sessions_jsonl = HIVE_WORKSPACE / '_logs' / 'hive_sessions.jsonl'
+
+    # Agent definitions with their colors
+    agent_defs = {
+        'claude': {'color': '#8b5cf6', 'icon': 'fa-brain'},
+        'gemini': {'color': '#22d3ee', 'icon': 'fa-gem'},
+        'codex': {'color': '#22c55e', 'icon': 'fa-code'},
+        'perplexity': {'color': '#f59e0b', 'icon': 'fa-search'},
+    }
+
+    agents_status = {}
+    for name, meta in agent_defs.items():
+        agents_status[name] = {
+            'name': name,
+            'display_name': name.capitalize(),
+            'color': meta['color'],
+            'icon': meta['icon'],
+            'status': 'idle',
+            'last_active': None,
+            'current_task': None,
+        }
+
+    # Read recent war room sessions (last 20 by mtime)
+    active_sessions = []
+    if war_room_dir.is_dir():
+        session_dirs = sorted(
+            [d for d in war_room_dir.iterdir() if d.is_dir() and d.name.startswith('hive_')],
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )[:20]
+
+        for sdir in session_dirs:
+            session_file = sdir / 'session.json'
+            if not session_file.exists():
+                continue
+            try:
+                data = json.loads(session_file.read_text(encoding='utf-8'))
+            except (json.JSONDecodeError, OSError):
+                continue
+
+            files_in_dir = [f.name for f in sdir.iterdir() if f.is_file()]
+            session_entry = {
+                'session_id': data.get('id', ''),
+                'prompt': (data.get('prompt', '') or '')[:120],
+                'status': data.get('status', 'unknown'),
+                'mode': data.get('mode', 'full'),
+                'routed_to': data.get('routed_to', []),
+                'total_duration_s': data.get('total_duration_s', 0),
+                'created_at': data.get('created', data.get('timestamp', '')),
+                'war_room_dir': str(sdir),
+                'files': files_in_dir,
+                'managers': [],
+            }
+
+            for mgr in data.get('managers', []):
+                mgr_name = mgr.get('manager', '')
+                mgr_entry = {
+                    'agent': mgr_name,
+                    'status': mgr.get('status', 'unknown'),
+                    'duration_s': mgr.get('duration_s', 0),
+                    'employees_consulted': mgr.get('employees_consulted', []),
+                    'started_at': mgr.get('started_at', ''),
+                    'finished_at': mgr.get('finished_at', ''),
+                }
+                session_entry['managers'].append(mgr_entry)
+
+                # Update agent last-active
+                if mgr_name in agents_status:
+                    finished = mgr.get('finished_at') or mgr.get('started_at', '')
+                    current_last = agents_status[mgr_name]['last_active']
+                    if finished and (not current_last or finished > current_last):
+                        agents_status[mgr_name]['last_active'] = finished
+                    if mgr.get('status') == 'running':
+                        agents_status[mgr_name]['status'] = 'active'
+                        agents_status[mgr_name]['current_task'] = (
+                            data.get('prompt', '')[:80]
+                        )
+
+            active_sessions.append(session_entry)
+
+    # Also check progress dir for in-flight sessions
+    if HIVE_PROGRESS_DIR.exists():
+        for pf in sorted(
+            HIVE_PROGRESS_DIR.glob('*.json'),
+            key=lambda p: p.stat().st_mtime,
+            reverse=True,
+        )[:5]:
+            try:
+                pdata = json.loads(pf.read_text(encoding='utf-8'))
+            except (json.JSONDecodeError, OSError):
+                continue
+            if pdata.get('status') in ('dispatched', 'running'):
+                for ag_name in pdata.get('routed_to', []):
+                    if ag_name in agents_status:
+                        ag_info = pdata.get('agents', {}).get(ag_name, {})
+                        if ag_info.get('status') == 'running':
+                            agents_status[ag_name]['status'] = 'active'
+                            agents_status[ag_name]['current_task'] = (
+                                pdata.get('query', '')[:80]
+                            )
+
+    # Mark agents with recent activity as 'ready' if not actively running
+    for name, info in agents_status.items():
+        if info['status'] == 'idle' and info['last_active']:
+            info['status'] = 'ready'
+
+    # Read recent entries from hive_sessions.jsonl for supplementary data
+    jsonl_entries = []
+    if sessions_jsonl.exists():
+        try:
+            lines = sessions_jsonl.read_text(encoding='utf-8').strip().split('\n')
+            for line in lines[-20:]:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    jsonl_entries.append(json.loads(line))
+                except json.JSONDecodeError:
+                    continue
+        except OSError:
+            pass
+
+    # Push to Supabase (best-effort, non-blocking)
+    _sync_sessions_to_supabase(active_sessions)
+
+    return JsonResponse({
+        'status': 'ok',
+        'agents': agents_status,
+        'active_sessions': active_sessions[:15],
+        'recent_jsonl': jsonl_entries[-10:],
+        'total_war_room_sessions': len(active_sessions),
+    })
+
+
+def _sync_sessions_to_supabase(sessions):
+    """
+    Push session data to Supabase hive_sessions table.
+    Best-effort -- errors are logged but do not break the response.
+    """
+    try:
+        from hive_dashboard.supabase_client import supabase_rest, is_configured
+        if not is_configured():
+            return
+        for sess in sessions[:5]:  # Only sync the 5 most recent
+            row = {
+                'session_id': sess.get('session_id', ''),
+                'prompt': (sess.get('prompt', '') or '')[:200],
+                'status': sess.get('status', 'unknown'),
+                'mode': sess.get('mode', 'full'),
+                'routed_to': sess.get('routed_to', []),
+                'total_duration_s': sess.get('total_duration_s', 0),
+                'created_at': sess.get('created_at', ''),
+            }
+            try:
+                supabase_rest(
+                    'hive_sessions',
+                    method='POST',
+                    data=row,
+                    extra_headers={'Prefer': 'resolution=merge-duplicates'},
+                    timeout=3.0,
+                )
+            except Exception as e:
+                logger.debug("Supabase sync failed for session %s: %s", row.get('session_id'), e)
+    except ImportError:
+        logger.debug("supabase_client not available, skipping sync")
+    except Exception as e:
+        logger.debug("Supabase sync batch error: %s", e)
+
+
+# ---------------------------------------------------------------------------
+# 14. ProcessesView -- Detailed process viewer
+# ---------------------------------------------------------------------------
+
+class ProcessesView(LoginRequiredMixin, TemplateView):
+    """Detailed view of all running/recent hive processes."""
+    template_name = 'hive/processes.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['active_page'] = 'processes'
+
+        war_room_dir = HIVE_WORKSPACE / '_logs' / 'ai_war_room'
+        sessions = []
+
+        # Filters from query params
+        agent_filter = self.request.GET.get('agent', '').strip().lower()
+        status_filter = self.request.GET.get('status', '').strip().lower()
+        date_from = self.request.GET.get('date_from', '').strip()
+        date_to = self.request.GET.get('date_to', '').strip()
+
+        if war_room_dir.is_dir():
+            session_dirs = sorted(
+                [d for d in war_room_dir.iterdir()
+                 if d.is_dir() and d.name.startswith('hive_')],
+                key=lambda p: p.stat().st_mtime,
+                reverse=True,
+            )[:50]
+
+            for sdir in session_dirs:
+                session_file = sdir / 'session.json'
+                if not session_file.exists():
+                    continue
+                try:
+                    data = json.loads(session_file.read_text(encoding='utf-8'))
+                except (json.JSONDecodeError, OSError):
+                    continue
+
+                created = data.get('created', data.get('timestamp', ''))
+
+                # Date filtering
+                if date_from and created:
+                    if created[:10] < date_from:
+                        continue
+                if date_to and created:
+                    if created[:10] > date_to:
+                        continue
+
+                # Status filtering
+                if status_filter and data.get('status', '') != status_filter:
+                    continue
+
+                files_in_dir = sorted([f.name for f in sdir.iterdir() if f.is_file()])
+                managers = data.get('managers', [])
+
+                # Agent filtering
+                if agent_filter:
+                    routed = data.get('routed_to', [])
+                    if agent_filter not in routed:
+                        continue
+
+                # Calculate total tokens (estimate from duration)
+                total_duration = data.get('total_duration_s', 0)
+
+                entry = {
+                    'session_id': data.get('id', ''),
+                    'prompt': data.get('prompt', ''),
+                    'status': data.get('status', 'unknown'),
+                    'mode': data.get('mode', 'full'),
+                    'routed_to': data.get('routed_to', []),
+                    'total_duration_s': total_duration,
+                    'created_at': created,
+                    'war_room_dir': str(sdir),
+                    'dir_name': sdir.name,
+                    'files': files_in_dir,
+                    'managers': [],
+                }
+
+                for mgr in managers:
+                    entry['managers'].append({
+                        'agent': mgr.get('manager', ''),
+                        'role': mgr.get('role', ''),
+                        'status': mgr.get('status', 'unknown'),
+                        'duration_s': mgr.get('duration_s', 0),
+                        'employees_consulted': mgr.get('employees_consulted', []),
+                        'error': mgr.get('error', ''),
+                    })
+
+                sessions.append(entry)
+
+        ctx['sessions'] = sessions
+        ctx['agent_filter'] = agent_filter
+        ctx['status_filter'] = status_filter
+        ctx['date_from'] = date_from
+        ctx['date_to'] = date_to
+        ctx['agent_choices'] = ['claude', 'gemini', 'codex', 'perplexity']
+        ctx['status_choices'] = ['done', 'running', 'partial', 'failed', 'timeout']
+        return ctx
+
+
+# ---------------------------------------------------------------------------
+# 15. api_export_session
+# ---------------------------------------------------------------------------
+
+@login_required
 def api_export_session(request, session_id):
     """Return a session as a downloadable markdown file."""
     session = get_object_or_404(HiveSession, session_id=session_id)
@@ -1194,3 +1519,322 @@ def api_export_session(request, session_id):
     resp_http = HttpResponse(content, content_type='text/markdown; charset=utf-8')
     resp_http['Content-Disposition'] = f'attachment; filename="{filename}"'
     return resp_http
+
+
+# ---------------------------------------------------------------------------
+# Premium Reports - Unified Dashboard (merged from :8080)
+# ---------------------------------------------------------------------------
+
+class ReportsListView(LoginRequiredMixin, TemplateView):
+    template_name = 'hive/reports_list.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['active_page'] = 'reports'
+        reports_dir = Path(getattr(settings, 'REPORTS_DIR', '/home/opc/reports'))
+        reports = []
+        if reports_dir.is_dir():
+            for f in reports_dir.iterdir():
+                if f.suffix == '.html' and f.is_file():
+                    stat = f.stat()
+                    reports.append({
+                        'hash': f.stem,
+                        'filename': f.name,
+                        'size_kb': round(stat.st_size / 1024, 1),
+                        'modified': datetime.fromtimestamp(
+                            stat.st_mtime, tz=timezone.get_current_timezone()
+                        ),
+                    })
+        reports.sort(key=lambda r: r['modified'], reverse=True)
+        ctx['reports'] = reports[:100]
+        ctx['total_reports'] = len(reports)
+        return ctx
+
+
+@login_required
+def report_detail(request, report_hash):
+    """Serve a premium HTML report - raw or wrapped in base layout."""
+    import re as _re
+    safe_hash = _re.sub(r'[^a-zA-Z0-9_-]', '', report_hash)
+    reports_dir = Path(getattr(settings, 'REPORTS_DIR', '/home/opc/reports'))
+    report_file = reports_dir / f'{safe_hash}.html'
+
+    if not report_file.is_file():
+        return HttpResponse('Report not found', status=404)
+
+    # Raw mode: serve the HTML directly (for iframe embedding)
+    if request.GET.get('raw') == '1':
+        return HttpResponse(
+            report_file.read_text(encoding='utf-8'),
+            content_type='text/html; charset=utf-8',
+        )
+
+    # Wrapped mode: render in base.html layout with iframe
+    return render(request, 'hive/report_detail.html', {
+        'active_page': 'reports',
+        'report_hash': safe_hash,
+        'report_file': report_file.name,
+    })
+
+
+# ---------------------------------------------------------------------------
+# Blinko RAG Search - Knowledge Base
+# ---------------------------------------------------------------------------
+
+class BlinkoSearchView(LoginRequiredMixin, TemplateView):
+    template_name = 'hive/blinko_search.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['active_page'] = 'blinko'
+        ctx['query'] = ''
+        ctx['results'] = []
+        ctx['searched'] = False
+        return ctx
+
+    def post(self, request, *args, **kwargs):
+        import urllib.request
+        import urllib.parse
+
+        query = request.POST.get('q', '').strip()
+        results = []
+        error = None
+
+        if query:
+            blinko_url = getattr(settings, 'BLINKO_API_URL', 'http://129.159.38.250:1111')
+            api_url = f'{blinko_url}/api/v1/note/list'
+            payload = json.dumps({
+                'searchText': query,
+                'page': 1,
+                'size': 20,
+            }).encode('utf-8')
+            req = urllib.request.Request(
+                api_url,
+                data=payload,
+                headers={'Content-Type': 'application/json'},
+                method='POST',
+            )
+            try:
+                with urllib.request.urlopen(req, timeout=10) as resp:
+                    data = json.loads(resp.read().decode('utf-8'))
+                    notes = data if isinstance(data, list) else data.get('items', data.get('notes', []))
+                    for note in notes[:20]:
+                        content = note.get('content', '')
+                        results.append({
+                            'id': note.get('id'),
+                            'content': content[:500] + ('...' if len(content) > 500 else ''),
+                            'tags': [t.get('name', t) if isinstance(t, dict) else t
+                                     for t in note.get('tags', [])],
+                            'created_at': note.get('createdAt', note.get('created_at', '')),
+                            'type': note.get('type', 0),
+                        })
+            except Exception as e:
+                error = f'Blinko unreachable: {e}'
+
+        return render(request, self.template_name, {
+            'active_page': 'blinko',
+            'query': query,
+            'results': results,
+            'searched': True,
+            'error': error,
+        })
+
+
+# ---------------------------------------------------------------------------
+# Bot Intel - Full Page View (merged from :8080)
+# ---------------------------------------------------------------------------
+
+class BotIntelPageView(LoginRequiredMixin, TemplateView):
+    template_name = 'hive/bot_intel.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['active_page'] = 'bot_intel'
+
+        # Reuse the same data extraction logic from api_bot_intel
+        state_file = XLM_BOT_DIR / 'data' / 'state.json'
+        if state_file.exists():
+            try:
+                state = json.loads(state_file.read_text(encoding='utf-8'))
+                ctx['bot_state'] = {
+                    'day': state.get('day'),
+                    'trades_today': state.get('trades', 0),
+                    'losses_today': state.get('losses', 0),
+                    'pnl_today_usd': state.get('pnl_today_usd', 0),
+                    'equity_start_usd': state.get('equity_start_usd', 0),
+                    'exchange_pnl_today_usd': state.get('exchange_pnl_today_usd', 0),
+                    'vol_state': state.get('vol_state', 'UNKNOWN'),
+                    'recovery_mode': state.get('recovery_mode', 'NORMAL'),
+                    'safe_mode': state.get('_safe_mode', False),
+                    'safe_mode_reason': state.get('safe_mode_reason'),
+                    'overnight_ok': state.get('_overnight_trading_ok', 'no'),
+                    'consecutive_losses': state.get('consecutive_losses', 0),
+                    'consecutive_wins': state.get('consecutive_wins', 0),
+                    'loss_debt_usd': state.get('loss_debt_usd', 0),
+                    'open_position': state.get('open_position'),
+                    'spot_usdc': (state.get('last_spot_cash_map') or {}).get('USDC', 0),
+                }
+            except (json.JSONDecodeError, OSError):
+                ctx['bot_state'] = None
+        else:
+            ctx['bot_state'] = None
+
+        # AI Insight
+        insight_file = XLM_BOT_DIR / 'data' / 'ai_insight.json'
+        if insight_file.exists():
+            try:
+                insight = json.loads(insight_file.read_text(encoding='utf-8'))
+                directive = insight.get('directive', {}).get('result', {})
+                codex_dir = insight.get('codex_directive', {}).get('result', {})
+                regime = insight.get('regime_eval', {}).get('result', {})
+                ctx['ai_insight'] = {
+                    'claude_action': directive.get('action', 'N/A'),
+                    'claude_confidence': directive.get('confidence', 0),
+                    'claude_reasoning': directive.get('reasoning', ''),
+                    'claude_market_read': directive.get('market_read', ''),
+                    'codex_action': codex_dir.get('action', 'N/A'),
+                    'codex_confidence': codex_dir.get('confidence', 0),
+                    'codex_reasoning': codex_dir.get('reasoning', ''),
+                    'regime_confidence': regime.get('regime_confidence', 0),
+                    'trading_bias': regime.get('trading_bias', 'N/A'),
+                    'regime_reasoning': regime.get('reasoning', ''),
+                }
+            except (json.JSONDecodeError, OSError):
+                ctx['ai_insight'] = None
+        else:
+            ctx['ai_insight'] = None
+
+        # Daily brief
+        brief_file = XLM_BOT_DIR / 'data' / 'daily_brief.json'
+        if brief_file.exists():
+            try:
+                brief = json.loads(brief_file.read_text(encoding='utf-8'))
+                ctx['daily_brief'] = {
+                    'last_3_days': brief.get('last_3_days', []),
+                    'total_3day_pnl': brief.get('total_3day_pnl_usd', 0),
+                    'equity_trend': brief.get('equity_trend', 'unknown'),
+                    'suggested_posture': brief.get('suggested_posture', 'unknown'),
+                }
+            except (json.JSONDecodeError, OSError):
+                ctx['daily_brief'] = None
+        else:
+            ctx['daily_brief'] = None
+
+        # Contract context
+        ctx_file = XLM_BOT_DIR / 'data' / 'contract_context.json'
+        if ctx_file.exists():
+            try:
+                cdata = json.loads(ctx_file.read_text(encoding='utf-8'))
+                ctx['contract'] = {
+                    'mark_price': cdata.get('mark_price'),
+                    'index_price': cdata.get('index_price'),
+                    'basis_bps': cdata.get('basis_bps'),
+                    'open_interest': cdata.get('open_interest'),
+                    'funding_rate_hr': cdata.get('funding_rate_hr'),
+                    'funding_bias': cdata.get('funding_bias'),
+                    'volume_24h': cdata.get('volume_24h'),
+                }
+            except (json.JSONDecodeError, OSError):
+                ctx['contract'] = None
+        else:
+            ctx['contract'] = None
+
+        # Heartbeat
+        heartbeat_file = XLM_BOT_DIR / 'data' / '.heartbeat'
+        if heartbeat_file.exists():
+            try:
+                import time
+                age_seconds = time.time() - heartbeat_file.stat().st_mtime
+                ctx['heartbeat_age_s'] = round(age_seconds, 1)
+                ctx['bot_alive'] = age_seconds < 120
+            except OSError:
+                ctx['heartbeat_age_s'] = None
+                ctx['bot_alive'] = False
+        else:
+            ctx['heartbeat_age_s'] = None
+            ctx['bot_alive'] = False
+
+        return ctx
+
+
+# ---------------------------------------------------------------------------
+# Agent Performance Leaderboard (Meta performance review pattern)
+# ---------------------------------------------------------------------------
+
+class AgentPerformanceView(LoginRequiredMixin, TemplateView):
+    template_name = 'hive/agent_performance.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['active_page'] = 'agent_performance'
+
+        days = int(self.request.GET.get('days', 30))
+        ctx['days'] = days
+
+        # Try Supabase first
+        scorecards = []
+        try:
+            import sys
+            metrics_path = str(Path('/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os'))
+            if metrics_path not in sys.path:
+                sys.path.insert(0, metrics_path)
+            from hive_mind.agent_metrics import get_all_agent_scorecards
+            scorecards = get_all_agent_scorecards(days=days)
+        except Exception:
+            pass
+
+        # Fallback to local telemetry JSONL
+        if not scorecards:
+            telemetry_file = Path('/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/hive_mind/telemetry.jsonl')
+            if telemetry_file.exists():
+                try:
+                    from collections import defaultdict
+                    by_agent = defaultdict(list)
+                    for line in telemetry_file.read_text(encoding='utf-8').strip().splitlines()[-500:]:
+                        entry = json.loads(line)
+                        by_agent[entry.get('specialist', 'unknown')].append(entry)
+
+                    for name, rows in by_agent.items():
+                        total = len(rows)
+                        active = sum(1 for r in rows if r.get('specialist_status') == 'ACTIVE')
+                        findings = sum(r.get('findings_count', 0) for r in rows)
+                        recs = sum(1 for r in rows if r.get('has_recommendation'))
+                        scorecards.append({
+                            'agent_name': name,
+                            'department': rows[0].get('manager', 'unknown'),
+                            'total_tasks': total,
+                            'success_rate': round(active / total * 100, 1) if total else 0,
+                            'avg_duration_s': round(
+                                sum(r.get('manager_duration_s', 0) for r in rows) / total, 1
+                            ) if total else 0,
+                            'total_findings': findings,
+                            'total_recommendations': recs,
+                        })
+                    scorecards.sort(key=lambda s: s['success_rate'], reverse=True)
+                except Exception:
+                    pass
+
+        ctx['scorecards'] = scorecards
+        ctx['total_agents'] = len(scorecards)
+
+        # Department summary
+        dept_stats = {}
+        for sc in scorecards:
+            dept = sc.get('department', 'unknown')
+            if dept not in dept_stats:
+                dept_stats[dept] = {'count': 0, 'tasks': 0, 'success_sum': 0}
+            dept_stats[dept]['count'] += 1
+            dept_stats[dept]['tasks'] += sc.get('total_tasks', 0)
+            dept_stats[dept]['success_sum'] += sc.get('success_rate', 0)
+
+        ctx['departments'] = [
+            {
+                'name': dept,
+                'agent_count': s['count'],
+                'total_tasks': s['tasks'],
+                'avg_success_rate': round(s['success_sum'] / s['count'], 1) if s['count'] else 0,
+            }
+            for dept, s in sorted(dept_stats.items())
+        ]
+
+        return ctx

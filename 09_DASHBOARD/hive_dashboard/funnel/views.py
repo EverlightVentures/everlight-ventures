@@ -3,6 +3,8 @@ import os
 import logging
 from datetime import datetime, timezone as dt_timezone
 
+from django.contrib.auth.decorators import login_required
+from django.core.cache import cache
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -14,6 +16,16 @@ from business_os.services import get_trading_watchtower
 from .models import Lead, FunnelEvent
 
 log = logging.getLogger(__name__)
+
+
+def _lead_capture_rate_limit(request, max_requests: int = 10, window_seconds: int = 3600):
+    ip = request.META.get("HTTP_X_FORWARDED_FOR", "").split(",")[0].strip() or request.META.get("REMOTE_ADDR", "unknown")
+    cache_key = f"ratelimit:funnel:capture:{ip}"
+    hits = cache.get(cache_key, 0)
+    if hits >= max_requests:
+        return JsonResponse({"error": "Rate limit exceeded. Try again later."}, status=429)
+    cache.set(cache_key, hits + 1, window_seconds)
+    return None
 
 
 def _format_age_label(minutes) -> str:
@@ -77,6 +89,10 @@ def _public_quality_label(value: str) -> str:
     return raw.replace("_", " ").title()
 
 
+def consulting_landing(request):
+    return render(request, "funnel/consulting_landing.html")
+
+
 def onyx_landing(request):
     return render(request, "funnel/onyx_landing.html")
 
@@ -136,6 +152,10 @@ def thank_you(request):
 @require_POST
 def capture_lead(request):
     """API endpoint for lead capture. Accepts JSON or form POST."""
+    rate_limited = _lead_capture_rate_limit(request)
+    if rate_limited:
+        return rate_limited
+
     if request.content_type == "application/json":
         try:
             data = json.loads(request.body)
@@ -149,7 +169,7 @@ def capture_lead(request):
         return JsonResponse({"error": "Valid email required"}, status=400)
 
     product = data.get("product", "onyx")
-    if product not in ("onyx", "hivemind", "dashboard"):
+    if product not in ("onyx", "hivemind", "dashboard", "ai_consulting"):
         return JsonResponse({"error": "Invalid product"}, status=400)
 
     lead, created = Lead.objects.get_or_create(
@@ -197,6 +217,7 @@ def _notify_slack(lead: Lead):
         log.warning(f"Slack notification failed: {e}")
 
 
+@login_required
 def funnel_stats(request):
     """Dashboard-facing stats endpoint (JSON)."""
     today = timezone.now().date()

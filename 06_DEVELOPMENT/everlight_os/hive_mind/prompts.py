@@ -244,3 +244,148 @@ What do you need from the other managers? Be specific:
 {user_prompt}
 """
     return prompt
+
+
+def build_fire_team_prompt(
+    squad_key: str,
+    squad_role: str,
+    fire_team: dict,
+    fire_team_name: str,
+    user_prompt: str,
+    intel_summary: str = "",
+    inter_agent_messages: str = "",
+) -> str:
+    """Build a fire-team-aware activation prompt (v2 doctrine).
+
+    fire_team dict has keys: mission, callsign, team_leader, specialist_1,
+    specialist_2, verifier, assistant -- each a dict with name, id, personality, buddy.
+    """
+    tl = fire_team.get("team_leader", {})
+    s1 = fire_team.get("specialist_1", {})
+    s2 = fire_team.get("specialist_2", {})
+    verifier = fire_team.get("verifier", {})
+    assistant = fire_team.get("assistant", {})
+    mission = fire_team.get("mission", "General operations")
+    callsign = fire_team.get("callsign", fire_team_name)
+
+    # Load full persona files and build briefings
+    weights = _load_weights()
+    role_map = [
+        ("TEAM LEADER", tl),
+        ("SPECIALIST 1", s1),
+        ("SPECIALIST 2", s2),
+        ("VERIFIER / BUDDY", verifier),
+        ("ASSISTANT", assistant),
+    ]
+
+    briefing_parts = []
+    for role_label, agent in role_map:
+        if not agent or not agent.get("id"):
+            continue
+        persona = _load_full_persona(agent["id"])
+        weight = weights.get(agent["id"], 0.5)
+        tier = _get_weight_label(weight)
+        buddy_name = agent.get("buddy", "unassigned")
+        briefing_parts.append(
+            f"### {role_label}: {agent.get('name', '?')} (`{agent.get('id', '')}`)\n"
+            f"**Buddy**: {buddy_name} | **Performance**: {tier} ({weight})\n\n"
+            f"{persona}"
+        )
+
+    briefings_text = "\n\n---\n\n".join(briefing_parts)
+
+    intel_section = ""
+    if intel_summary:
+        intel_section = (
+            "## INTELLIGENCE BRIEFING (Perplexity Scout)\n\n"
+            f"{intel_summary}\n\n---\n"
+        )
+
+    msg_section = ""
+    if inter_agent_messages:
+        msg_section = f"\n{inter_agent_messages}\n"
+
+    return f"""# FIRE TEAM ACTIVATION -- {callsign.upper()} ({squad_key})
+
+You are **{squad_role}** commanding fire team **{callsign}** ({mission}).
+
+## FIRE TEAM DOCTRINE
+Your team operates as a 4+1 tactical unit:
+- **TL**: {tl.get('name', 'N/A')} -- directs, makes calls, reports to Squad Leader
+- **S1**: {s1.get('name', 'N/A')} -- primary executor
+- **S2**: {s2.get('name', 'N/A')} -- complementary executor
+- **B (Verifier)**: {verifier.get('name', 'N/A')} -- verifies output, takes over on failure
+- **A (Assistant)**: {assistant.get('name', 'N/A')} -- prep, drafting, CRM, formatting
+
+## BUDDY PAIRS (failover)
+- {s1.get('name', 'S1')} <-> {verifier.get('name', 'B')} (execute <-> verify)
+- {s2.get('name', 'S2')} <-> {verifier.get('name', 'B')} (execute <-> verify)
+- {tl.get('name', 'TL')} <-> Squad Leader (escalation)
+
+If any agent fails, their buddy takes over immediately. No gaps. No excuses.
+
+{intel_section}
+{msg_section}
+
+## FIRE TEAM ROSTER -- FULL BRIEFINGS
+
+{briefings_text}
+
+---
+
+## ACTIVATION PROTOCOL
+
+1. **TL** reads the mission and assigns sub-tasks to S1, S2
+2. **S1** and **S2** execute in parallel where possible
+3. **Verifier (B)** checks ALL output before it leaves the team
+4. **Assistant (A)** handles prep, formatting, CRM updates
+5. TL synthesizes into one fire team report
+
+## OUTPUT FORMAT
+
+### Mission Status
+```
+Fire Team: {callsign} ({squad_key})
+Mission: {mission}
+Agents Activated: [N]/5
+Buddy Failovers: 0
+```
+
+### TL Assessment
+[{tl.get('name', 'TL')}'s unified assessment]
+
+### Agent Reports
+
+**{tl.get('name', 'TL')}** (TL) | STATUS: ACTIVE
+> Direction and delegation
+
+**{s1.get('name', 'S1')}** (S1) | STATUS: ACTIVE
+> Primary execution
+- Findings: [results]
+- Recommendation: [action]
+
+**{s2.get('name', 'S2')}** (S2) | STATUS: ACTIVE
+> Complementary execution
+- Findings: [results]
+- Recommendation: [action]
+
+**{verifier.get('name', 'B')}** (VERIFIER) | STATUS: ACTIVE
+> Verification of S1/S2 output
+- Verified: [what checks out]
+- Flagged: [corrections needed]
+
+**{assistant.get('name', 'A')}** (ASSISTANT) | STATUS: ACTIVE
+> Prep work completed
+
+### Consolidated Output
+[Merged findings, verified by B]
+
+### Cross-Squad Handoffs
+[What other fire teams need to pick up, which squad, which callsign]
+
+---
+
+## THE PROMPT
+
+{user_prompt}
+"""

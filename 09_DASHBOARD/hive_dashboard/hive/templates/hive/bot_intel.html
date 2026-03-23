@@ -1,0 +1,262 @@
+{% extends "hive/base.html" %}
+{% load humanize %}
+
+{% block title %}Bot Intel -- LUCREX{% endblock %}
+
+{% block content %}
+<div style="margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;">
+  <div>
+    <h1 style="font-family:var(--font-heading);font-size:1.8rem;color:var(--gold);margin-bottom:4px;">
+      <i class="fa-solid fa-chart-line" style="margin-right:8px;"></i>XLM Bot Intel
+    </h1>
+    <p style="color:var(--text-secondary);font-size:0.9rem;">
+      Live trading intelligence from Oracle
+      {% if bot_alive %}
+        <span style="color:#22c55e;margin-left:8px;"><i class="fa-solid fa-circle" style="font-size:0.5rem;vertical-align:middle;"></i> ALIVE</span>
+      {% else %}
+        <span style="color:#ef4444;margin-left:8px;"><i class="fa-solid fa-circle" style="font-size:0.5rem;vertical-align:middle;"></i> OFFLINE</span>
+      {% endif %}
+    </p>
+  </div>
+  <div hx-get="{% url 'hive:bot_intel' %}" hx-trigger="every 30s" hx-select="#bot-intel-content" hx-target="#bot-intel-content" hx-swap="outerHTML"
+       style="font-size:0.75rem;color:var(--text-muted);">
+    Auto-refresh: 30s
+  </div>
+</div>
+
+<div id="bot-intel-content">
+
+<!-- KPI Cards -->
+{% if bot_state %}
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px;">
+  <div style="padding:18px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:10px;">
+    <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:6px;">PnL Today</div>
+    <div style="font-size:1.6rem;font-weight:700;color:{% if bot_state.pnl_today_usd >= 0 %}#22c55e{% else %}#ef4444{% endif %};">
+      ${{ bot_state.pnl_today_usd|floatformat:2 }}
+    </div>
+  </div>
+  <div style="padding:18px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:10px;">
+    <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:6px;">Trades Today</div>
+    <div style="font-size:1.6rem;font-weight:700;color:var(--text-primary);">{{ bot_state.trades_today }}</div>
+  </div>
+  <div style="padding:18px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:10px;">
+    <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:6px;">Vol State</div>
+    <div style="font-size:1.3rem;font-weight:600;color:var(--gold);">{{ bot_state.vol_state }}</div>
+  </div>
+  <div style="padding:18px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:10px;">
+    <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:6px;">Recovery Mode</div>
+    <div style="font-size:1.3rem;font-weight:600;color:{% if bot_state.recovery_mode == 'NORMAL' %}#22c55e{% else %}#f59e0b{% endif %};">
+      {{ bot_state.recovery_mode }}
+    </div>
+  </div>
+  <div style="padding:18px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:10px;">
+    <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:6px;">Equity Start</div>
+    <div style="font-size:1.4rem;font-weight:700;color:var(--text-primary);">${{ bot_state.equity_start_usd|floatformat:2 }}</div>
+  </div>
+  <div style="padding:18px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:10px;">
+    <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:6px;">USDC Balance</div>
+    <div style="font-size:1.4rem;font-weight:700;color:var(--text-primary);">${{ bot_state.spot_usdc|floatformat:2 }}</div>
+  </div>
+</div>
+
+<!-- Bot Status Detail -->
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:24px;">
+  <div style="padding:12px 16px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:8px;font-size:0.85rem;">
+    <span style="color:var(--text-muted);">Losses:</span>
+    <span style="color:{% if bot_state.losses_today > 0 %}#ef4444{% else %}var(--text-primary){% endif %};font-weight:600;margin-left:4px;">
+      {{ bot_state.losses_today }}
+    </span>
+  </div>
+  <div style="padding:12px 16px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:8px;font-size:0.85rem;">
+    <span style="color:var(--text-muted);">Win Streak:</span>
+    <span style="color:#22c55e;font-weight:600;margin-left:4px;">{{ bot_state.consecutive_wins }}</span>
+  </div>
+  <div style="padding:12px 16px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:8px;font-size:0.85rem;">
+    <span style="color:var(--text-muted);">Loss Streak:</span>
+    <span style="color:#ef4444;font-weight:600;margin-left:4px;">{{ bot_state.consecutive_losses }}</span>
+  </div>
+  <div style="padding:12px 16px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:8px;font-size:0.85rem;">
+    <span style="color:var(--text-muted);">Safe Mode:</span>
+    <span style="color:{% if bot_state.safe_mode %}#f59e0b{% else %}#22c55e{% endif %};font-weight:600;margin-left:4px;">
+      {% if bot_state.safe_mode %}ON{% else %}OFF{% endif %}
+    </span>
+  </div>
+  <div style="padding:12px 16px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:8px;font-size:0.85rem;">
+    <span style="color:var(--text-muted);">Overnight:</span>
+    <span style="font-weight:600;margin-left:4px;">{{ bot_state.overnight_ok }}</span>
+  </div>
+  <div style="padding:12px 16px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:8px;font-size:0.85rem;">
+    <span style="color:var(--text-muted);">Loss Debt:</span>
+    <span style="color:#ef4444;font-weight:600;margin-left:4px;">${{ bot_state.loss_debt_usd|floatformat:2 }}</span>
+  </div>
+</div>
+
+{% if bot_state.open_position %}
+<div style="padding:16px 20px;background:rgba(201,168,76,0.08);border:1px solid var(--gold-dim);
+            border-radius:10px;margin-bottom:24px;">
+  <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gold);margin-bottom:8px;font-weight:600;">
+    Open Position
+  </div>
+  <div style="font-size:0.9rem;color:var(--text-primary);font-family:'JetBrains Mono',monospace;">
+    {{ bot_state.open_position }}
+  </div>
+</div>
+{% endif %}
+{% else %}
+<div style="padding:24px;text-align:center;color:var(--text-muted);background:var(--bg-card);
+            border:1px solid var(--glass-border);border-radius:10px;margin-bottom:24px;">
+  <i class="fa-solid fa-robot" style="font-size:2rem;margin-bottom:8px;display:block;"></i>
+  Bot state unavailable
+</div>
+{% endif %}
+
+<!-- AI Executive Insight -->
+{% if ai_insight %}
+<div style="margin-bottom:24px;">
+  <h2 style="font-family:var(--font-heading);font-size:1.2rem;color:var(--gold);margin-bottom:14px;">
+    <i class="fa-solid fa-wand-magic-sparkles" style="margin-right:8px;"></i>AI Executive Insight
+  </h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <!-- Claude Directive -->
+    <div style="padding:18px;background:var(--bg-card);border:1px solid rgba(139,92,246,0.3);border-radius:10px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--agent-claude);"></div>
+        <span style="font-size:0.8rem;font-weight:600;color:var(--agent-claude);">Claude</span>
+        <span style="margin-left:auto;padding:3px 10px;border-radius:12px;font-size:0.75rem;font-weight:600;
+                     background:rgba(139,92,246,0.15);color:var(--agent-claude);">
+          {{ ai_insight.claude_action }}
+        </span>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:4px;">
+        Confidence: {{ ai_insight.claude_confidence }}%
+      </div>
+      <div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;">
+        {{ ai_insight.claude_reasoning|truncatewords:60 }}
+      </div>
+    </div>
+    <!-- Codex Directive -->
+    <div style="padding:18px;background:var(--bg-card);border:1px solid rgba(34,197,94,0.3);border-radius:10px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="width:8px;height:8px;border-radius:50%;background:var(--agent-codex);"></div>
+        <span style="font-size:0.8rem;font-weight:600;color:var(--agent-codex);">Codex</span>
+        <span style="margin-left:auto;padding:3px 10px;border-radius:12px;font-size:0.75rem;font-weight:600;
+                     background:rgba(34,197,94,0.15);color:var(--agent-codex);">
+          {{ ai_insight.codex_action }}
+        </span>
+      </div>
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:4px;">
+        Confidence: {{ ai_insight.codex_confidence }}%
+      </div>
+      <div style="font-size:0.85rem;color:var(--text-secondary);line-height:1.6;">
+        {{ ai_insight.codex_reasoning|truncatewords:60 }}
+      </div>
+    </div>
+  </div>
+  {% if ai_insight.claude_market_read %}
+  <div style="margin-top:14px;padding:14px 18px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:10px;">
+    <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:6px;">Market Read</div>
+    <div style="font-size:0.9rem;color:var(--text-primary);line-height:1.6;">{{ ai_insight.claude_market_read }}</div>
+  </div>
+  {% endif %}
+  <div style="margin-top:14px;padding:14px 18px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:10px;">
+    <div style="font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:6px;">Regime</div>
+    <div style="font-size:0.9rem;color:var(--text-primary);">
+      Bias: <strong>{{ ai_insight.trading_bias }}</strong> &middot;
+      Confidence: <strong>{{ ai_insight.regime_confidence }}%</strong>
+    </div>
+    {% if ai_insight.regime_reasoning %}
+    <div style="font-size:0.85rem;color:var(--text-secondary);margin-top:6px;line-height:1.6;">{{ ai_insight.regime_reasoning|truncatewords:40 }}</div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Contract Context -->
+{% if contract %}
+<div style="margin-bottom:24px;">
+  <h2 style="font-family:var(--font-heading);font-size:1.2rem;color:var(--gold);margin-bottom:14px;">
+    <i class="fa-solid fa-file-contract" style="margin-right:8px;"></i>Contract Context
+  </h2>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;">
+    {% if contract.mark_price %}
+    <div style="padding:14px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:8px;">
+      <div style="font-size:0.7rem;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Mark Price</div>
+      <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary);">${{ contract.mark_price }}</div>
+    </div>
+    {% endif %}
+    {% if contract.index_price %}
+    <div style="padding:14px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:8px;">
+      <div style="font-size:0.7rem;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Index Price</div>
+      <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary);">${{ contract.index_price }}</div>
+    </div>
+    {% endif %}
+    {% if contract.basis_bps is not None %}
+    <div style="padding:14px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:8px;">
+      <div style="font-size:0.7rem;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Basis (bps)</div>
+      <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary);">{{ contract.basis_bps }}</div>
+    </div>
+    {% endif %}
+    {% if contract.funding_rate_hr %}
+    <div style="padding:14px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:8px;">
+      <div style="font-size:0.7rem;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Funding/hr</div>
+      <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary);">{{ contract.funding_rate_hr }}</div>
+    </div>
+    {% endif %}
+    {% if contract.funding_bias %}
+    <div style="padding:14px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:8px;">
+      <div style="font-size:0.7rem;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">Funding Bias</div>
+      <div style="font-size:1.1rem;font-weight:600;color:var(--gold);">{{ contract.funding_bias }}</div>
+    </div>
+    {% endif %}
+    {% if contract.volume_24h %}
+    <div style="padding:14px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:8px;">
+      <div style="font-size:0.7rem;text-transform:uppercase;color:var(--text-muted);margin-bottom:4px;">24h Volume</div>
+      <div style="font-size:1.1rem;font-weight:600;color:var(--text-primary);">{{ contract.volume_24h }}</div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Daily Brief -->
+{% if daily_brief %}
+<div style="margin-bottom:24px;">
+  <h2 style="font-family:var(--font-heading);font-size:1.2rem;color:var(--gold);margin-bottom:14px;">
+    <i class="fa-solid fa-newspaper" style="margin-right:8px;"></i>Daily Brief
+  </h2>
+  <div style="padding:18px;background:var(--bg-card);border:1px solid var(--glass-border);border-radius:10px;">
+    <div style="display:flex;gap:20px;margin-bottom:14px;flex-wrap:wrap;">
+      <div>
+        <span style="font-size:0.75rem;color:var(--text-muted);">3-Day PnL:</span>
+        <span style="font-weight:700;margin-left:4px;color:{% if daily_brief.total_3day_pnl >= 0 %}#22c55e{% else %}#ef4444{% endif %};">
+          ${{ daily_brief.total_3day_pnl|floatformat:2 }}
+        </span>
+      </div>
+      <div>
+        <span style="font-size:0.75rem;color:var(--text-muted);">Equity Trend:</span>
+        <span style="font-weight:600;margin-left:4px;color:var(--text-primary);">{{ daily_brief.equity_trend }}</span>
+      </div>
+      <div>
+        <span style="font-size:0.75rem;color:var(--text-muted);">Posture:</span>
+        <span style="font-weight:600;margin-left:4px;color:var(--gold);">{{ daily_brief.suggested_posture }}</span>
+      </div>
+    </div>
+    {% if daily_brief.last_3_days %}
+    <div style="display:grid;gap:8px;">
+      {% for day in daily_brief.last_3_days %}
+      <div style="padding:10px 14px;background:var(--bg-secondary);border-radius:6px;font-size:0.85rem;
+                  display:flex;justify-content:space-between;align-items:center;">
+        <span style="color:var(--text-secondary);">{{ day.date|default:"--" }}</span>
+        <span style="font-weight:600;color:{% if day.pnl_usd >= 0 %}#22c55e{% else %}#ef4444{% endif %};">
+          ${{ day.pnl_usd|floatformat:2|default:"--" }}
+        </span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+</div><!-- end #bot-intel-content -->
+{% endblock %}

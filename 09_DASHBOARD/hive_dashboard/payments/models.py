@@ -35,6 +35,7 @@ class Subscription(models.Model):
         ("hivemind_pro", "Hive Mind Pro -- $79/mo"),
         ("hivemind_enterprise", "Hive Mind Enterprise -- $149/mo"),
         ("alley_kingz_vip", "Alley Kingz VIP -- $4.99/mo"),
+        ("ai_consulting_retainer", "AI Consulting Retainer -- $2,000/mo"),
     ]
 
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="subscriptions")
@@ -85,6 +86,41 @@ class Payment(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+
+
+class ConsultingProject(models.Model):
+    """AI Consulting project pipeline tracker."""
+    STATUS_CHOICES = [
+        ("discovery", "Discovery Call"),
+        ("proposal", "Proposal Sent"),
+        ("building", "Building"),
+        ("delivered", "Delivered"),
+        ("retainer", "Active Retainer"),
+        ("churned", "Churned"),
+    ]
+
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name="consulting_projects")
+    business_name = models.CharField(max_length=200)
+    vertical = models.CharField(max_length=100, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="discovery")
+    discovery_date = models.DateTimeField(null=True, blank=True)
+    build_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    retainer_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    solutions_deployed = models.JSONField(default=list, blank=True,
+                                           help_text='["lead_gen_bot", "support_bot"]')
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.business_name} [{self.get_status_display()}]"
+
+    @property
+    def total_value(self):
+        return float(self.build_amount) + float(self.retainer_amount)
+
+    class Meta:
+        ordering = ["-updated_at"]
 
 
 class RevenueSnapshot(models.Model):
