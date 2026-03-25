@@ -17,7 +17,7 @@ from typing import Any, Dict, Optional
 import pandas as pd
 import yaml
 
-from data.candles import CandleStore, load_or_fetch, ensure_timeframe
+from data.candles import CandleStore, load_or_fetch, ensure_timeframe, fetch_5m_candles, fetch_1m_candles
 from execution.coinbase_advanced import CoinbaseAdvanced
 from execution.order_manager import OrderManager, OrderRequest
 from indicators.ema import ema
@@ -48,6 +48,9 @@ from market.sentiment_gate import get_sentiment, evaluate_sentiment_gate
 from market.rolling_expectancy import get_rolling_expectancy, evaluate_expectancy_gate, kelly_size_multiplier
 from ai import market_pulse
 from strategy.lane_scoring import detect_sweep, detect_reclaim_impulse, select_lane, lane_allowed_by_regime
+from strategy.micro_sweep import detect_micro_sweep, MicroSweepResult
+from strategy.wick_zones import build_wick_zones, zones_to_levels, zone_proximity_score, WickZone
+from strategy.pattern_memory import detect_patterns, pattern_score_modifier, PatternSignal
 from strategy.lane_consensus import evaluate_lane_consensus
 from strategy.telemetry import write_cycle_telemetry
 from risk.balance_reconciler import reconcile_balances as _reconcile_balances, ReconcileResult
@@ -3716,6 +3719,40 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     if df_4h.empty or len(df_4h) < 120:
         df_4h = _sanitize_ohlcv(load_or_fetch(store, data_product_id, symbol, "4h", days=max(90, history_days)))
 
+    # Higher timeframes: 1D, 1W, 1M resampled from 1h data for macro context.
+    # These feed structure levels, wick zones, regime classification, and alignment.
+    df_1d = pd.DataFrame()
+    df_1w = pd.DataFrame()
+    df_1mo = pd.DataFrame()
+    try:
+        # Use 1h as base for daily+ resampling (more data than 15m, less noise)
+        _htf_base = df_1h if not df_1h.empty and len(df_1h) >= 120 else df_15m
+        if not _htf_base.empty and len(_htf_base) >= 24:
+            df_1d = _sanitize_ohlcv(ensure_timeframe(_htf_base, "1d"))
+        if not _htf_base.empty and len(_htf_base) >= 168:
+            df_1w = _sanitize_ohlcv(ensure_timeframe(_htf_base, "1w"))
+        if not _htf_base.empty and len(_htf_base) >= 720:
+            df_1mo = _sanitize_ohlcv(ensure_timeframe(_htf_base, "1M"))
+    except Exception:
+        pass
+
+    # Fetch 5m and 1m candles for micro-sweep and wick zone detection
+    df_5m = pd.DataFrame()
+    df_1m = pd.DataFrame()
+    _pre_lane_cfg = ((config.get("v4") or {}).get("lane_scoring") or {}) if isinstance((config.get("v4") or {}).get("lane_scoring"), dict) else {}
+    if bool(_pre_lane_cfg.get("micro_sweep_enabled", False)):
+        try:
+            df_5m = _sanitize_ohlcv(fetch_5m_candles(store, data_product_id, symbol, days=2))
+        except Exception:
+            pass
+    # 1m candles: ultra-lightweight (4 hours, cached 3 min)
+    _wz_pre = (_pre_lane_cfg.get("wick_zones") or {}) if isinstance(_pre_lane_cfg.get("wick_zones"), dict) else {}
+    if bool(_wz_pre.get("enabled", True)) and bool(_wz_pre.get("enable_1m", True)):
+        try:
+            df_1m = _sanitize_ohlcv(fetch_1m_candles(store, data_product_id, symbol, hours=4))
+        except Exception:
+            pass
+
     if df_15m.empty or df_1h.empty or df_4h.empty:
         now = datetime.now(timezone.utc)
         log_decision(config, {
@@ -3857,12 +3894,49 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         zone_context = {"nearest": None, "inside_any_zone": False, "zones_top3": [],
                         "readiness_label": None, "readiness_reasons": [], "total_zones": 0}
 
-    levels = compute_structure_levels(df_4h)
+    # Use daily data for structure levels when available (more accurate macro S/R)
+    _levels_base = df_1d if not df_1d.empty and len(df_1d) >= 7 else df_4h
+    levels = compute_structure_levels(_levels_base)
     swing_high, swing_low = find_swing(df_4h, 60)
     fibs = fib_levels(swing_high, swing_low)
     v4_cfg = (config.get("v4") or {}) if isinstance(config.get("v4"), dict) else {}
     lane_cfg = (v4_cfg.get("lane_scoring") or {}) if isinstance(v4_cfg.get("lane_scoring"), dict) else {}
     lane_cfg = _deep_merge_dict(lane_cfg, {"liquidation_clusters": (config.get("liquidation_clusters") or {})})
+
+    # Multi-TF wick rejection/bounce zones (support + resistance from wick clusters)
+    _wick_zones: list[WickZone] = []
+    _wick_zone_levels: dict[str, float] = {}
+    _wz_cfg = (lane_cfg.get("wick_zones") or {}) if isinstance(lane_cfg.get("wick_zones"), dict) else {}
+    if bool(_wz_cfg.get("enabled", True)):
+        try:
+            _wick_zones = build_wick_zones(
+                df_5m=df_5m if not df_5m.empty else None,
+                df_15m=df_15m if not df_15m.empty else None,
+                df_1h=df_1h if not df_1h.empty else None,
+                df_4h=df_4h if not df_4h.empty else None,
+                config=_wz_cfg,
+                df_1m=df_1m if not df_1m.empty else None,
+                df_1d=df_1d if not df_1d.empty else None,
+                df_1w=df_1w if not df_1w.empty else None,
+            )
+            _wick_zone_levels = zones_to_levels(_wick_zones, price)
+            # Merge wick zones into structure levels so every entry lane benefits
+            levels.update(_wick_zone_levels)
+        except Exception:
+            pass
+
+    # Pattern detection: double tops/bottoms, channels, breakouts, fakeouts
+    _active_patterns: list[PatternSignal] = []
+    try:
+        if _wick_zones:
+            _atr_for_patterns = float(atr(df_15m, 14).iloc[-1]) if not df_15m.empty and len(df_15m) >= 15 else 0.0
+            if _atr_for_patterns > 0:
+                _active_patterns = detect_patterns(
+                    price, df_15m, _wick_zones, _atr_for_patterns,
+                    state=_st, config=_wz_cfg,
+                )
+    except Exception:
+        pass
 
     long_liquidation_intel: dict[str, Any] = {}
     short_liquidation_intel: dict[str, Any] = {}
@@ -3980,6 +4054,57 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     short_entry = short_entry or macro_ma_cross(price, df_1h, df_4h, "short")
     short_entry = short_entry or opening_range_breakout(price, df_15m, df_1h, "short", levels, config=config)
     short_entry = short_entry or hourly_continuation(price, df_15m, df_1h, "short", levels, config=config)
+    # --- 5m Micro-Sweep Entry Promotion ---
+    # If no 15m entry found but 5m detected a valid wick-reclaim, promote it.
+    _micro_sweep_promoted = False
+    _micro_sweep_source = None
+    if not long_entry and micro_sweep_long and micro_sweep_long.detected and not micro_sweep_long.htf_hostile:
+        long_entry = {
+            "type": "micro_sweep",
+            "mode": "reversal",
+            "entry_profile_key": "liquidity_sweep_reversal",
+            "micro_sweep": True,
+            "micro_sweep_score": micro_sweep_long.score,
+            "swept_level": micro_sweep_long.swept_level,
+            "reclaim_price": micro_sweep_long.reclaim_price,
+            "wick_ratio": micro_sweep_long.wick_ratio,
+            "wick_vs_atr": micro_sweep_long.wick_vs_atr,
+            "reclaim_bars": micro_sweep_long.reclaim_bars,
+            "fail_fast_bars": int(lane_cfg.get("micro_sweep_max_reclaim_bars", 3) or 3),
+            "lane_v_mode": "reversal",
+            "confluence": {
+                "MICRO_SWEEP_5M": True,
+                "WICK_RECLAIM": True,
+                "VOLUME_OK": micro_sweep_long.volume_ok,
+                "HTF_ALIGNED": not micro_sweep_long.htf_hostile,
+            },
+        }
+        _micro_sweep_promoted = True
+        _micro_sweep_source = micro_sweep_long
+    if not short_entry and micro_sweep_short and micro_sweep_short.detected and not micro_sweep_short.htf_hostile:
+        short_entry = {
+            "type": "micro_sweep",
+            "mode": "reversal",
+            "entry_profile_key": "liquidity_sweep_reversal",
+            "micro_sweep": True,
+            "micro_sweep_score": micro_sweep_short.score,
+            "swept_level": micro_sweep_short.swept_level,
+            "reclaim_price": micro_sweep_short.reclaim_price,
+            "wick_ratio": micro_sweep_short.wick_ratio,
+            "wick_vs_atr": micro_sweep_short.wick_vs_atr,
+            "reclaim_bars": micro_sweep_short.reclaim_bars,
+            "fail_fast_bars": int(lane_cfg.get("micro_sweep_max_reclaim_bars", 3) or 3),
+            "lane_v_mode": "reversal",
+            "confluence": {
+                "MICRO_SWEEP_5M": True,
+                "WICK_RECLAIM": True,
+                "VOLUME_OK": micro_sweep_short.volume_ok,
+                "HTF_ALIGNED": not micro_sweep_short.htf_hostile,
+            },
+        }
+        _micro_sweep_promoted = True
+        _micro_sweep_source = micro_sweep_short
+
     if _lane_v_cooldown_blocks_entry(_st, long_entry, atr_value=lane_v_atr_value, lane_cfg=lane_cfg, now=now):
         long_entry = None
     if _lane_v_cooldown_blocks_entry(_st, short_entry, atr_value=lane_v_atr_value, lane_cfg=lane_cfg, now=now):
@@ -4034,16 +4159,45 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     sweep_short = None
     squeeze_long = None
     squeeze_short = None
+    micro_sweep_long: MicroSweepResult | None = None
+    micro_sweep_short: MicroSweepResult | None = None
     try:
         if lane_cfg.get("enabled", False):
             sweep_long = detect_sweep(df_15m, df_1h, "long", lane_cfg)
             sweep_short = detect_sweep(df_15m, df_1h, "short", lane_cfg)
             squeeze_long = detect_reclaim_impulse(df_15m, df_1h, "long", expansion_state, lane_cfg)
             squeeze_short = detect_reclaim_impulse(df_15m, df_1h, "short", expansion_state, lane_cfg)
+            # --- Micro-Sweep Detection (5m + 1m) ---
+            if bool(lane_cfg.get("micro_sweep_enabled", False)):
+                _ms_cfg = {
+                    "min_wick_ratio": float(lane_cfg.get("micro_sweep_min_wick_ratio", 0.40) or 0.40),
+                    "min_wick_atr": float(lane_cfg.get("micro_sweep_min_wick_atr", 0.50) or 0.50),
+                    "max_reclaim_bars": int(lane_cfg.get("micro_sweep_max_reclaim_bars", 3) or 3),
+                    "min_volume_mult": float(lane_cfg.get("micro_sweep_min_volume_mult", 0.8) or 0.8),
+                    "lookback_bars": int(lane_cfg.get("micro_sweep_lookback_bars", 6) or 6),
+                    "min_score": int(lane_cfg.get("micro_sweep_min_score", 50) or 50),
+                    "max_chase_atr": float(lane_cfg.get("micro_sweep_max_chase_atr", 1.5) or 1.5),
+                }
+                # Run on 5m
+                if not df_5m.empty and len(df_5m) >= 6:
+                    micro_sweep_long = detect_micro_sweep(df_5m, df_15m, df_1h, "long", _ms_cfg)
+                    micro_sweep_short = detect_micro_sweep(df_5m, df_15m, df_1h, "short", _ms_cfg)
+                # Also run on 1m for faster detection - take the better score
+                if not df_1m.empty and len(df_1m) >= 12:
+                    _ms_cfg_1m = dict(_ms_cfg)
+                    _ms_cfg_1m["lookback_bars"] = 12  # scan last 12 one-minute candles
+                    _ms_cfg_1m["max_reclaim_bars"] = 5  # allow up to 5 bars (5 min) for reclaim on 1m
+                    _ms_1m_long = detect_micro_sweep(df_1m, df_15m, df_1h, "long", _ms_cfg_1m)
+                    _ms_1m_short = detect_micro_sweep(df_1m, df_15m, df_1h, "short", _ms_cfg_1m)
+                    # Keep whichever scored higher (5m or 1m)
+                    if _ms_1m_long.detected and (not micro_sweep_long or not micro_sweep_long.detected or _ms_1m_long.score > micro_sweep_long.score):
+                        micro_sweep_long = _ms_1m_long
+                    if _ms_1m_short.detected and (not micro_sweep_short or not micro_sweep_short.detected or _ms_1m_short.score > micro_sweep_short.score):
+                        micro_sweep_short = _ms_1m_short
     except Exception:
         pass
     reverse_cfg = (v4_cfg.get("reverse_on_exit") or {}) if isinstance(v4_cfg.get("reverse_on_exit"), dict) else {}
-    regime_v4 = classify_regime_v4(df_15m, df_1h)
+    regime_v4 = classify_regime_v4(df_15m, df_1h, df_4h=df_4h, df_1d=df_1d)
     high_vol_pause = bool(regime_v4.get("atr_shock") or regime_v4.get("extreme_candle"))
 
     # --- Regime Manager: adapt params to market conditions ---
@@ -5224,7 +5378,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             pnl_usd_live = -raw_live if direction == "short" else raw_live
         adverse = int(open_pos.get("adverse_bars") or 0)
 
-        regime_live = classify_regime_v4(df_15m, df_1h)
+        regime_live = classify_regime_v4(df_15m, df_1h, df_4h=df_4h, df_1d=df_1d)
         current_breakout_type = str(open_pos.get("breakout_type") or ("trend" if (regime_live.get("regime") == "trend") else "neutral"))
 
         # --- Trend health override: suppress premature exits when trend is objectively healthy ---
@@ -5856,6 +6010,21 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         if trend_healthy:
             _ts_bars = int(_tr_cfg.get("time_stop_bars_trend", 12) or 12)
         _ts_min_move = float(qt_exit_overrides.get("time_stop_min_move_pct") or config["exits"]["time_stop_min_move_pct"])
+
+        # Entry-type-specific time_stop override (Mar 21 fix)
+        # Reversal entries need more time to develop -- don't time-stop them early
+        _pos_entry_type = str(open_pos.get("entry_type") or "")
+        _et_ts_cfg = (config.get("exits") or {}).get("entry_type_time_stop") or {}
+        _et_override = _et_ts_cfg.get(_pos_entry_type) or {}
+        if _et_override:
+            _et_ts_bars = int(_et_override.get("time_stop_bars") or _ts_bars)
+            _et_ts_min = float(_et_override.get("time_stop_min_move_pct") or _ts_min_move)
+            # Entry-type override wins over default, but quality tier still wins over entry-type
+            if not qt_exit_overrides.get("time_stop_bars"):
+                _ts_bars = max(_ts_bars, _et_ts_bars)  # always use the MORE patient value
+            if not qt_exit_overrides.get("time_stop_min_move_pct"):
+                _ts_min_move = min(_ts_min_move, _et_ts_min)  # always use the LOOSER threshold
+
         time_stop = bars_since >= _ts_bars and pnl_pct < _ts_min_move
         tp_plan = tp_prices(
             entry_price,
@@ -6226,9 +6395,36 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         # Hard wall: max_hold_hours exceeded
         if not exit_reason and _max_hold_triggered:
             exit_reason = "max_hold_time"
-        # No mechanical stop-loss. Mirror strategy holds through drawdowns.
-        # Profit exits handle the winning side. Margin/circuit breaker handles catastrophic loss.
+        # SMART STRUCTURAL EXIT -- exits based on chart conditions, not arbitrary percentages.
+        # A dip to support that bounces is NOT an exit. A dip THROUGH support with volume IS.
         _sl_price = 0
+        try:
+            from strategy.smart_exit import should_exit as smart_should_exit
+            _smart_exit = smart_should_exit(
+                price=price,
+                direction=direction,
+                entry_price=entry_price,
+                df_15m=df_15m,
+                df_1h=df_1h,
+                pnl_usd=pnl_usd,
+                max_loss_usd=10.0,  # $10 absolute emergency floor to prevent exchange force-close
+            )
+            if _smart_exit["exit"] and not exit_reason:
+                exit_reason = _smart_exit["exit_type"]
+                log_decision(config, {
+                    "timestamp": now.isoformat(),
+                    "reason": "smart_exit",
+                    "exit_type": _smart_exit["exit_type"],
+                    "detail": _smart_exit["reason"],
+                    "confidence": _smart_exit["confidence"],
+                    "price": price,
+                    "entry_price": entry_price,
+                    "pnl_usd": pnl_usd,
+                    "support": _smart_exit.get("support", 0),
+                    "resistance": _smart_exit.get("resistance", 0),
+                })
+        except Exception:
+            pass  # if smart_exit fails, fall through to other exit logic
         # AI Executive: forced exit — Claude says EXIT or FLAT while in a trade
         _ai_d = ai_advisor.get_directive()
         _ai_min_conf = float((config.get("ai") or {}).get("executive_min_confidence", 0.6))
@@ -7074,12 +7270,45 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     except Exception:
         pass
 
+    # --- Wick zone proximity modifier ---
+    _wz_prox = {"near_zone": False}
+    try:
+        if direction and _wick_zones and selected_v4 is not None:
+            _atr_for_wz = float(atr(df_15m, 14).iloc[-1]) if not df_15m.empty else 0.0
+            _wz_prox = zone_proximity_score(price, _wick_zones, direction, _atr_for_wz)
+            if _wz_prox.get("near_zone") and _wz_prox.get("confidence", 0) >= 0.3:
+                _wz_bonus = int(min(8, _wz_prox["confidence"] * 12))
+                if _wz_bonus > 0:
+                    selected_v4 = dict(selected_v4)
+                    adjusted = int(selected_v4.get("score") or 0) + _wz_bonus
+                    selected_v4["score"] = max(0, min(100, adjusted))
+                    selected_v4["pass"] = bool(adjusted >= int(selected_v4.get("threshold") or 75))
+                    score_gate_pass = bool(selected_v4["pass"])
+                    score_gate_pass_effective = bool(score_gate_pass)
+    except Exception:
+        pass
+
+    # --- Pattern memory modifier (double tops, channels, breakouts, fakeouts) ---
+    _pattern_mod = 0
+    try:
+        if direction and _active_patterns and selected_v4 is not None:
+            _pattern_mod = pattern_score_modifier(_active_patterns, direction)
+            if _pattern_mod != 0:
+                selected_v4 = dict(selected_v4)
+                adjusted = int(selected_v4.get("score") or 0) + _pattern_mod
+                selected_v4["score"] = max(0, min(100, adjusted))
+                selected_v4["pass"] = bool(adjusted >= int(selected_v4.get("threshold") or 75))
+                score_gate_pass = bool(selected_v4["pass"])
+                score_gate_pass_effective = bool(score_gate_pass)
+    except Exception:
+        pass
+
     # --- Multi-TF alignment modifier ---
     alignment_mod = None
     try:
         align_cfg = (v4_cfg.get("alignment") or {}) if isinstance(v4_cfg.get("alignment"), dict) else {}
         if bool(align_cfg.get("enabled", False)) and direction and selected_v4 is not None:
-            alignment_mod = score_alignment_modifier(direction, df_15m, df_1h, df_4h, align_cfg)
+            alignment_mod = score_alignment_modifier(direction, df_15m, df_1h, df_4h, align_cfg, df_1d=df_1d, df_1w=df_1w)
             if alignment_mod and alignment_mod.bonus != 0:
                 selected_v4 = dict(selected_v4)
                 adjusted = int(selected_v4.get("score") or 0) + alignment_mod.bonus
@@ -7550,6 +7779,12 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         "htf_trend_slope_pct": _htf_bias.get("ema21_slope_pct") if _htf_bias else None,
         "zone_bonus": zone_mod.bonus if zone_mod else 0,
         "zone_bonus_reasons": zone_mod.reasons if zone_mod else [],
+        "wick_zone_near": _wz_prox.get("near_zone", False),
+        "wick_zone_confidence": _wz_prox.get("confidence", 0),
+        "wick_zone_bias": _wz_prox.get("bounce_bias", "none"),
+        "wick_zone_strongest_tf": _wz_prox.get("zone_strongest_tf"),
+        "pattern_mod": _pattern_mod,
+        "patterns_active": [{"pattern": p.pattern, "bias": p.direction_bias, "confidence": p.confidence, "level": p.zone_level, "desc": p.description} for p in _active_patterns[:3]] if _active_patterns else None,
         "alignment_bonus": alignment_mod.bonus if alignment_mod else 0,
         "alignment_reasons": alignment_mod.reasons if alignment_mod else [],
         "cooldown": cooldown,
@@ -7796,6 +8031,15 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         "sweep_detected": bool(sweep_long or sweep_short),
         "sweep_long": sweep_long,
         "sweep_short": sweep_short,
+        "micro_sweep_promoted": _micro_sweep_promoted,
+        "micro_sweep_long": {"detected": micro_sweep_long.detected, "score": micro_sweep_long.score, "wick_ratio": micro_sweep_long.wick_ratio} if micro_sweep_long and micro_sweep_long.detected else None,
+        "micro_sweep_short": {"detected": micro_sweep_short.detected, "score": micro_sweep_short.score, "wick_ratio": micro_sweep_short.wick_ratio} if micro_sweep_short and micro_sweep_short.detected else None,
+        "wick_zones_count": len(_wick_zones),
+        "wick_zones_top3": [{"level": z.level, "side": z.side, "strength": z.strength, "touches": z.touch_count, "strongest_tf": z.strongest_tf} for z in _wick_zones[:3]] if _wick_zones else None,
+        "htf_trend": regime_v4.get("htf_trend", "neutral"),
+        "adx_4h": regime_v4.get("adx_4h"),
+        "adx_1d": regime_v4.get("adx_1d"),
+        "htf_data_available": {"1d": not df_1d.empty if hasattr(df_1d, 'empty') else False, "1w": not df_1w.empty if hasattr(df_1w, 'empty') else False, "1mo": not df_1mo.empty if hasattr(df_1mo, 'empty') else False},
         "compression_range_target": (entry or {}).get("mid_range"),
         "sizing_meta": sizing_meta if sizing_meta else None,
         "consecutive_wins": int(state.get("consecutive_wins") or 0),
@@ -8112,7 +8356,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     # In "reduced" tier, only allow C/E/F/reversal_impulse/compression entries
     reduced_entry_blocked = False
     if route_tier_effective == "reduced" and entry:
-        allowed_reduced = {"reversal_impulse", "compression_breakout", "compression_range", "trend_continuation", "fib_retrace", "slow_bleed_hunter", "liquidity_sweep"}
+        allowed_reduced = {"reversal_impulse", "compression_breakout", "compression_range", "trend_continuation", "fib_retrace", "slow_bleed_hunter", "liquidity_sweep", "micro_sweep"}
         lane_name = (lane_result.lane if lane_result else "").upper() if lane_result else ""
         if lane_name in ("C", "E", "F", "G", "H", "I", "J", "V"):
             pass  # allowed
@@ -8160,6 +8404,41 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 # Do not enter - bounce in progress
                 entry = None
                 direction = None
+        except Exception:
+            pass
+
+    # --- Support Proximity Gate (Mar 21 fix) ---
+    # Block shorts when price is within X% of recent support (48h low on 1h)
+    # Reversal shorts at 0.165 lost because they shorted INTO support instead of after a break
+    if entry and direction and direction.lower() == "short":
+        try:
+            _spg_cfg = (v4_cfg.get("support_proximity_gate") or {}) if isinstance(v4_cfg.get("support_proximity_gate"), dict) else {}
+            if _spg_cfg.get("enabled", False):
+                _spg_lookback = int(_spg_cfg.get("lookback_bars_1h", 48))
+                _spg_proximity = float(_spg_cfg.get("proximity_pct", 0.005))
+                _spg_exempt_tiers = list(_spg_cfg.get("exempt_tiers") or [])
+                _spg_exempt_types = list(_spg_cfg.get("exempt_entry_types") or [])
+                _spg_blocked = False
+
+                if quality_tier not in _spg_exempt_tiers and selected_entry_type not in _spg_exempt_types:
+                    if df_1h is not None and len(df_1h) >= _spg_lookback:
+                        _recent_low = float(df_1h["low"].iloc[-_spg_lookback:].min())
+                        _dist_to_support = (price - _recent_low) / _recent_low if _recent_low > 0 else 999
+                        if _dist_to_support < _spg_proximity:
+                            _spg_blocked = True
+                            log_decision(config, {
+                                "timestamp": now.isoformat(),
+                                "reason": "support_proximity_gate_block",
+                                "direction": direction,
+                                "entry_type": selected_entry_type,
+                                "price": price,
+                                "support_level": _recent_low,
+                                "distance_pct": round(_dist_to_support, 6),
+                                "threshold_pct": _spg_proximity,
+                                "thought": f"Short blocked: price ${price:.5f} is only {_dist_to_support*100:.2f}% above 48h support ${_recent_low:.5f}. Wait for confirmed break below.",
+                            })
+                            entry = None
+                            direction = None
         except Exception:
             pass
 
@@ -8757,11 +9036,33 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             save_state(state)
             return
 
+    # Micro-sweep overnight override:
+    # Allow 1-contract micro-sweep entries during overnight IF margin is safe.
+    _micro_sweep_overnight_bypass = False
+    if (
+        _micro_sweep_promoted
+        and entry
+        and bool(entry.get("micro_sweep"))
+        and overnight_trading_ok
+        and bool(lane_cfg.get("micro_sweep_overnight_override", False))
+    ):
+        _micro_sweep_overnight_bypass = True
+        log_decision(config, {
+            "timestamp": now.isoformat(),
+            "reason": "micro_sweep_overnight_bypass",
+            "direction": direction,
+            "micro_sweep_score": entry.get("micro_sweep_score"),
+            "swept_level": entry.get("swept_level"),
+            "reclaim_price": entry.get("reclaim_price"),
+            "thought": "5m micro-sweep detected during overnight. Margin is safe, allowing 1-contract entry.",
+        })
+
     if (
         _margin_window_playbook.get("enabled")
         and _margin_window_playbook.get("block_new_entries")
         and not state.get("open_position")
         and not _ai_exec_override
+        and not _micro_sweep_overnight_bypass
     ):
         log_decision(config, {
             "timestamp": now.isoformat(),
@@ -8912,6 +9213,14 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             sizing_meta["recovery_size_mult"] = _rm_mult
             sizing_meta["pre_recovery_size"] = size
             size = _rm_size
+
+        # Micro-sweep size cap: conservative 1-contract only for this entry class.
+        if entry and bool(entry.get("micro_sweep")):
+            _ms_max = int(lane_cfg.get("micro_sweep_max_contracts", 1) or 1)
+            if size > _ms_max:
+                sizing_meta["micro_sweep_size_cap"] = _ms_max
+                sizing_meta["pre_micro_sweep_size"] = size
+                size = _ms_max
 
         # --- Equity % Risk Cap (10% of equity per trade) ---
         _max_risk_pct = float(config.get("risk", {}).get("max_risk_pct_per_trade", 0.10) or 0.10)

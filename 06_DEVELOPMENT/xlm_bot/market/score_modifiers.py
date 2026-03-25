@@ -255,14 +255,17 @@ def score_alignment_modifier(
     df_1h,
     df_4h,
     config: dict | None = None,
+    df_1d=None,
+    df_1w=None,
 ) -> ScoreModResult:
     """Multi-timeframe alignment bonus.
 
-    Checks EMA21 slope + RSI direction on 15m/1h/4h.
-    3 TFs aligned: +8, 2 aligned: +4, 1: 0, 0 (all against): -4.
+    Checks EMA21 slope + RSI direction on up to 5 timeframes.
+    Higher TFs carry more weight: 1W/1D alignment is a stronger signal.
+    5 TFs aligned: +10, 4: +8, 3: +5, 2: +2, 1: 0, 0: -5.
     """
     cfg = config or {}
-    max_bonus = int(cfg.get("alignment_max_bonus", 8) or 8)
+    max_bonus = int(cfg.get("alignment_max_bonus", 10) or 10)
     max_penalty = int(cfg.get("alignment_max_penalty", 5) or 5)
     result = ScoreModResult()
 
@@ -271,19 +274,43 @@ def score_alignment_modifier(
 
     d = direction.lower().strip()
     aligned_count = 0
+    total_tfs = 0
     tf_details = []
 
+    # Core TFs (always checked)
     for label, df in [("15m", df_15m), ("1h", df_1h), ("4h", df_4h)]:
         bias = _tf_directional_bias(df, d)
+        total_tfs += 1
         if bias > 0:
             aligned_count += 1
         tf_details.append(f"{label}={'Y' if bias > 0 else 'N'}")
 
-    bonus_map = {3: max_bonus, 2: 4, 1: 0, 0: -4}
-    raw = bonus_map.get(aligned_count, 0)
+    # Higher TFs (when available, weighted 1.5x in the bonus calc)
+    htf_aligned = 0
+    for label, df in [("1d", df_1d), ("1w", df_1w)]:
+        if df is None or (hasattr(df, "empty") and df.empty):
+            continue
+        bias = _tf_directional_bias(df, d)
+        total_tfs += 1
+        if bias > 0:
+            aligned_count += 1
+            htf_aligned += 1
+        tf_details.append(f"{label}={'Y' if bias > 0 else 'N'}")
+
+    # Scoring: more TFs aligned = bigger bonus, HTF alignment is extra valuable
+    if total_tfs <= 3:
+        bonus_map = {3: max_bonus, 2: 4, 1: 0, 0: -4}
+        raw = bonus_map.get(aligned_count, 0)
+    else:
+        bonus_map = {5: max_bonus, 4: 8, 3: 5, 2: 2, 1: 0, 0: -max_penalty}
+        raw = bonus_map.get(min(aligned_count, 5), 0)
+        # HTF alignment bonus: daily/weekly agreement is a strong macro signal
+        if htf_aligned >= 2:
+            raw = min(max_bonus, raw + 2)
+
     result.bonus = max(-max_penalty, min(max_bonus, raw))
     if result.bonus != 0:
-        result.reasons.append(f"tf_align_{aligned_count}/3 ({','.join(tf_details)})")
+        result.reasons.append(f"tf_align_{aligned_count}/{total_tfs} ({','.join(tf_details)})")
 
     return result
 

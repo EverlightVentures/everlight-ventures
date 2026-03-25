@@ -27,26 +27,26 @@ session_filter:
       end: "21:00"
 
 risk:
-  max_trades_per_day: 12           # AUDIT FIX: was 999, cap at 12
-  max_losses_per_day: 5            # AUDIT FIX: was 999, stop after 5 losses
-  cooldown_minutes: 0              # NO general cooldown -- re-enter immediately after wins
+  max_trades_per_day: 2            # SNIPER MODE: only 2 trades/day -- the absolute best setups only
+  max_losses_per_day: 1            # SNIPER MODE: 1 loss = done. Preserve capital, wait for tomorrow.
+  cooldown_minutes: 60             # SNIPER MODE: 60min cooldown between trades -- patience is the edge
   cooldown_loss_threshold: 1       # AUDIT FIX: was 999, cooldown after 1 loss
-  revenge_cooldown_minutes: 30     # AUDIT FIX: was 0, 30min revenge cooldown
+  revenge_cooldown_minutes: 120    # SNIPER MODE: 2hr revenge cooldown -- no emotional re-entries
   daily_profit_target_usd: 0       # uncapped
   loss_cooldown_requires_new_structure: true  # AUDIT FIX: require new structure after loss
   capital_allocation_pct: 1.0
-  max_sl_pct: 0.00               # DISABLED: never sell at a loss -- hold and average down
-  max_daily_loss_pct: 0.08       # 8% daily loss cap - circuit breaker restored
+  max_sl_pct: 0.00               # DISABLED: smart_exit.py handles exits based on chart structure, not dumb percentages. $10 emergency floor prevents exchange force-close.
+  max_daily_loss_pct: 0.02       # SNIPER MODE: 2% daily cap = ~$10. Max 1 stopped trade + fees.
   sl_atr_buffer_mult: 0.5
-  max_risk_pct_per_trade: 0.15   # increased risk appetite for smart setups
+  max_risk_pct_per_trade: 0.05   # TIGHTENED: 5% max risk per trade. Was 15% -- way too aggressive for a $525 account.
   smoke_check_stop_pct: 0.0025   # 0.25% preview stop for non-live bracket smoke checks
   # Tier-based R:R — weaker signals need better reward to compensate
   min_rr_ratio:
-    MONSTER: 1.5                # best setups can have slightly lower R:R
-    SCALP: 2.0                  # ENFORCED: minimum 2:1 R:R on all scalps
-    REDUCED: 2.0                # no trade unless reward is 2x risk
-    FULL: 2.0                   # same rule for all tiers
-    default: 2.0                # global floor: never risk $1 for less than $2
+    MONSTER: 2.5                # SNIPER MODE: even best setups need 2.5:1 -- wide targets, tight stops
+    SCALP: 3.5                  # SNIPER MODE: scalps need 3.5:1 to justify the fee drag
+    REDUCED: 3.0                # SNIPER MODE: 3:1 minimum on reduced conviction
+    FULL: 3.0                   # SNIPER MODE: 3:1 across the board
+    default: 3.0                # SNIPER MODE: global floor raised to 3:1 -- only asymmetric bets
 
 risk_profile:
   risk_pct: 0.15
@@ -61,13 +61,19 @@ position_sizing:
   min_contracts: 1           # PHASE 1: start with 1 contract, EARN the right to size up
   max_contracts: auto        # AUTO COMPOUND: floor(equity / equity_per_contract) — grows with every win
   equity_per_contract: 180   # default — overridden by margin window sizing below
-  max_contracts_hard_cap: 2  # PHASE 1: hard cap 2 contracts until account at $500+
+  max_contracts_hard_cap: 2  # SNIPER MODE: 2 contracts. $0.003 move = $60. Stop at 0.2% = $6.28. R:R = 10:1.
   # Margin-window-aware sizing: conservative until bot proves itself
   margin_window_sizing:
     enabled: true
     intraday_equity_per_contract: 150   # at $306 equity = 2 contracts max, safe sizing
     overnight_equity_per_contract: 200  # 1-2 contracts overnight only
     pre_cutoff_equity_per_contract: 200 # conservative near cutoff
+
+  # Compression regime override: cut size when vol is dead
+  compression_override:
+    enabled: true
+    max_contracts: 1        # 1 contract max during compression -- no sizing up in dead vol
+    size_multiplier: 0.5    # half normal size -- smaller bets in tighter ranges
 
   # Lane risk budgets (multiplier on base_risk_pct)
   # Higher = safer strategies get bigger positions
@@ -188,17 +194,39 @@ position_sizing:
 exits:
   attach_exchange_tp: false       # was true -- exchange TP causes phantom churn via reconciler
   pending_fill_expiry_sec: 90     # if an entry fill is still unverified after this, force review/cleanup
-  early_save_adverse_pct: 0.00     # DISABLED: don't sell losers -- average down instead
-  early_save_bars: 999             # DISABLED: never early-save a losing position
-  time_stop_bars: 24              # was 12 -- 6 hours default hold
-  time_stop_min_move_pct: 0.001   # was 0.003 -- any positive PnL avoids time stop
-  tp1_move: 0.15                  # TIGHTENED: was 0.30 -- take profit quick, don't wait for big swing
-  tp2_move: 0.30                  # TIGHTENED: was 0.60
-  tp3_move: 0.60                  # TIGHTENED: was 1.00
+  early_save_adverse_pct: 0.00     # SNIPER MODE: DISABLED -- let the hard stop do its job
+  early_save_bars: 999             # SNIPER MODE: DISABLED -- never early-save, hold until TP or stop
+  time_stop_bars: 999             # DISABLED: time is NOT a reason to exit. Only TP, SL, or structure break.
+  time_stop_min_move_pct: -1.0    # DISABLED: never time-stop a trade. Let it breathe.
+  # Entry-type-specific time_stop overrides (reversals need more time to develop)
+  # Mar 21 fix: reversal shorts were getting time-stopped before the move happened
+  entry_type_time_stop:
+    reversal_impulse:
+      time_stop_bars: 999            # DISABLED: hold until TP or SL. Time is irrelevant.
+      time_stop_min_move_pct: -1.0    # DISABLED
+    fib_retrace:
+      time_stop_bars: 999            # DISABLED
+      time_stop_min_move_pct: -1.0
+    volume_climax_reversal:
+      time_stop_bars: 999            # DISABLED
+      time_stop_min_move_pct: -1.0
+    wick_rejection:
+      time_stop_bars: 999            # DISABLED
+      time_stop_min_move_pct: -1.0
+  tp1_move: 0.40                  # SNIPER MODE: was 0.15 -- wide first target, aim for real swing move
+  tp2_move: 0.70                  # SNIPER MODE: was 0.30 -- let the swing develop
+  tp3_move: 1.20                  # SNIPER MODE: was 0.60 -- full swing target for 10-17hr holds
+  # Compression-specific TP overrides: tighter targets for low-vol scalps
+  compression_override:
+    tp1_mult: 0.15          # was 0.40 -- compression moves are tiny, grab what you can
+    tp2_mult: 0.30          # was 0.70 -- mid-range target in compression
+    tp3_mult: 0.50          # was 1.20 -- full compression range is the max target
+    decay_threshold: 0.20   # was 0.40 -- faster decay detection in low vol
+    min_profit_usd: 1.00    # was 2.00 -- accept smaller wins during compression
   tp_full_close_if_single_contract: true
-  breakeven_atr_trigger: 0.5       # TIGHTENED: was 1.0 -- arm breakeven sooner, lock in fee coverage
-  breakeven_buffer_pct: 0.004     # was 0.001 -- buffer covers ~$1.50 in fees at $0.15 XLM
-  min_tp_pct: 0.003           # LOWERED: was 0.005 -- allow $2+ exits, not unrealistic targets
+  breakeven_atr_trigger: 1.0       # SNIPER MODE: was 0.5 -- don't arm BE too early, give trade room to breathe
+  breakeven_buffer_pct: 0.004     # keep: buffer covers ~$1.50 in fees at $0.15 XLM
+  min_tp_pct: 0.005           # SNIPER MODE: was 0.003 -- minimum 0.5% TP = ~$2.50 at $500. No crumb hunting.
 
 regime_gates:
   atr_multiplier: 0.45
@@ -206,6 +234,31 @@ regime_gates:
   distance_from_value_breakout_mult: 5.0   # wider gate when 1h ATR is expanding (breakout)
   spread_max_pct: 0.0025
   gate_routing: true
+
+# Volatility regime gate: block entries during unfavorable vol phases
+regime:
+  compression_gate: true       # Block ALL new entries during COMPRESSION vol state
+  allowed_phases:
+    - IGNITION
+    - EXPANSION
+  blocked_phases:
+    - COMPRESSION
+    - EXHAUSTION
+  compression_range_override: true  # Allow compression_range strategy even in COMPRESSION
+
+# Compression range micro-strategy: scalp the range when vol is dead
+compression_range:
+  enabled: true
+  max_contracts: 1
+  tp_atr_mult: 0.15             # tiny TP: 0.15 ATR
+  sl_atr_mult: 0.10             # tight SL: 0.10 ATR beyond range edge
+  max_trades_per_range: 3       # max 3 trades per detected range
+  min_range_width_atr: 0.20     # range must be at least 0.20 ATR wide
+  max_range_width_atr: 1.0      # range must be less than 1.0 ATR wide
+  buy_zone_pct: 0.25            # buy in bottom 25% of range
+  sell_zone_pct: 0.25           # sell in top 25% of range
+  cooldown_after_loss_minutes: 30
+  min_rr: 1.5                   # minimum R:R for compression scalps
 
 futures_funding:
   enforce: true
@@ -235,8 +288,8 @@ balance_reconciliation:
   enabled: true
   buffer_usdc: 2.0                 # keep $2 in derivatives for settlement
   sweep_threshold_usdc: 5.0        # don't bother sweeping less than $5
-  auto_convert_usd: true           # auto-convert USD → USDC (1:1, zero fee on Coinbase)
-  require_all_usdc: false          # true = block entries if USD spot > $1
+  auto_convert_usd: false          # DISABLED: account is USDC-only, conversion API not supported
+  require_all_usdc: true           # block entries if non-USDC detected -- USDC only account
   max_transfer_retries: 3
   safe_mode_cooldown_minutes: 15
   log_every_cycle: false           # true = log even when no drift (verbose)
@@ -300,7 +353,7 @@ margin_policy:
 # Dynamic % stops + circuit breakers now force exit BEFORE liquidation.
 # Emergency margin sweep kept as last-resort safety net only.
 plrl3:
-  enabled: true                 # ENABLED: average down when underwater, sell when recovered
+  enabled: false                # SNIPER MODE: DISABLED. No averaging down. 1 contract, 1 stop, done.
   enforcement: active           # active enforcement -- actually add contracts
   max_rescues: 2                # max 2 add-ons (3 contracts total max)
   liq_trigger_pct: 0.08         # start rescue at 8% toward liquidation
@@ -317,43 +370,43 @@ plrl3:
 
 # Strategy Engine v4 controls
 v4:
-  regime_mode: auto   # auto | dual | trend_only | mr_only
+  regime_mode: mr_only   # SNIPER MODE: mean reversion ONLY. Data says 95% of XLM big moves are S/R bounces/rejections.
   strict_score_gate: true
   quality_tiers:
     enabled: true
-    reduced_gap: 10
-    scalp_gap: 20
-    monster_above: 15   # score >= threshold + 15 = MONSTER (exceptional setup)
+    reduced_gap: 3               # SNIPER MODE: razor-thin gap -- almost nothing qualifies as reduced
+    scalp_gap: 8                 # SNIPER MODE: raise scalp bar -- we want FULL+ tier only
+    monster_above: 25            # SNIPER MODE: only the top 1% setups get MONSTER
     reduced:
       breakeven_atr_trigger: 1.5      # was 0.5 -- 0.5 ATR arms too soon, BE = -$1.45 net
-      time_stop_bars: 12              # was 8 -- 3 hours for reduced tier
-      time_stop_min_move_pct: 0.005
+      time_stop_bars: 999             # DISABLED: no time exits
+      time_stop_min_move_pct: -1.0
     scalp:
       breakeven_atr_trigger: 1.0      # was 0.3 -- 0.3 ATR = $0.80 move, BE always loses $1.45
-      time_stop_bars: 6               # was 3 -- 90min for scalps (45min too tight)
-      time_stop_min_move_pct: 0.003
+      time_stop_bars: 999             # DISABLED: no time exits even on scalps
+      time_stop_min_move_pct: -1.0
       use_min_tp: true
   entry_idempotency_sec: 90
   exit:
     dynamic_tp_enabled: true
-    trend_tp_atr: 3.00            # bigger targets on trends, let them run
-    mr_tp_atr: 2.00              # MR needs 2 ATR minimum, not 1
-    reversal_min_bars: 8          # was 4 -- need 2hrs of confirmed reversal, not 1hr of noise
-    reversal_requires_nonpositive_pnl: false  # CHANGED: only exit on reversal when IN PROFIT, never sell a loser
-    reversal_min_hold_minutes: 120  # never exit on reversal signal before 2hr hold
+    trend_tp_atr: 3.50            # SNIPER MODE: wider trend TP (won't fire in mr_only but kept for safety)
+    mr_tp_atr: 3.00              # SNIPER MODE: 3x ATR targets -- data says big moves are 10-17hr swings, need wide nets
+    reversal_min_bars: 48         # SNIPER MODE: 12 hours minimum before any reversal signal exit. Hold the trade.
+    reversal_requires_nonpositive_pnl: true   # KEEP: only exit on reversal when in profit
+    reversal_min_hold_minutes: 720  # SNIPER MODE: 12 hour minimum hold. Data says swings last 10-17 hours.
   reverse_on_exit:
-    enabled: true
-    # ALL exit reasons -- after any exit (win OR loss), flip to opposite if signal exists
-    allowed_exit_reasons: [reversal_signal, trend_flip, tp1, profit_lock, min_profit_floor, profit_decay, recovery_take_profit, moonshot_trail_stop, runner_trail_stop, runner_reversal, runner_floor_hit, time_stop, max_hold_time, emergency_exit_mr, cutoff_derisk, exchange_side_close]
+    enabled: false                   # SNIPER MODE: DISABLED. No auto-reversals. Each trade is a deliberate sniper shot.
+    # ONLY reverse after WINNING exits. Never flip after a loss -- that is revenge trading.
+    allowed_exit_reasons: [tp1, profit_lock, min_profit_floor, runner_trail_stop, runner_floor_hit, moonshot_trail_stop]
     require_opposite_direction: true
-    require_profitable_exit: false   # CHANGED: flip after losses too -- wrong direction = go opposite
-    ignore_cooldown: true
+    require_profitable_exit: true    # CRITICAL FIX: only flip after WINS. Flipping after losses was the #2 killer.
+    ignore_cooldown: false           # CRITICAL FIX: respect cooldown after losses. Was true -- caused revenge trades.
   profit_lock:
     enabled: true
     # LOOSENED 2026-03-19: give trades room to breathe, stop choking winners
-    activate_usd: 4.00              # arm at $4 profit -- let it run before locking
-    keep_ratio: 0.50               # keep 50% of peak -- more room for pullbacks
-    max_giveback_usd: 3.00         # allow $3 giveback -- trades need space
+    activate_usd: 6.00              # SNIPER MODE: was $4 -- arm at $6, let swing develop before locking
+    keep_ratio: 0.40               # SNIPER MODE: was 0.50 -- keep 40% of peak, more room for swing pullbacks
+    max_giveback_usd: 5.00         # SNIPER MODE: was $3 -- allow $5 giveback for 10-17hr holds
     min_bars_since_entry: 1
     lock_min_usd: 0.50
     tiers:
@@ -541,7 +594,7 @@ v4:
     enabled: true
     min_rr: 2.0
   ev:
-    min_ev_usd: 2.00       # CHANGED: 1.00 to 2.00 - require $2+ expected value after fees
+    min_ev_usd: 3.00       # SNIPER MODE: was $2 -- require $3+ EV after fees. Only asymmetric bets.
     fee_model: balanced   # conservative | balanced | maker_bias
     maker_fee_rate: 0.00085
     taker_fee_rate: 0.00090
@@ -554,7 +607,7 @@ v4:
     scan_lines: 4000
   trend_ride:
     enabled: true
-    time_stop_bars_trend: 36
+    time_stop_bars_trend: 999    # DISABLED: trend trades hold until structure breaks
     suppress_tp1_trend: true
   scaling:
     enabled: true
@@ -569,7 +622,7 @@ v4:
     recovery_cap_per_trade: 12.0
     high_quality_score: 75           # lower bar for recovery setups
   recovery_mode:
-    enabled: true
+    enabled: false                   # SNIPER MODE: DISABLED. No revenge/recovery mode. 1 loss = done for day.
     # Trigger: enter RECOVERY when realized PnL today drops below this
     loss_trigger_usd: 5.0            # enter recovery after $5 loss
     # Goal: recover debt x this multiplier (2.0 = get back loss + double it)
@@ -601,28 +654,28 @@ v4:
     cutoff_pre_minutes: 5            # trade closer to cutoff
   circuit_breaker:
     enabled: true                    # ACTIVE: halt entries when streak+drawdown both hit
-    combo_loss_count: 2              # trip at just 2 losses + drawdown
+    combo_loss_count: 1              # SNIPER MODE: was 2 -- trip at 1 loss + drawdown. Zero tolerance.
     # DYNAMIC: combo_drawdown now computed as % of equity (war room rec: no static $)
     combo_drawdown_usd: 0            # DISABLED: replaced by combo_drawdown_pct below
     combo_drawdown_pct: 0.04         # 4% of equity = dynamic drawdown trigger
     # DYNAMIC: single trade max loss as % of equity (war room rec: no static $)
-    single_trade_max_loss_usd: 8     # AUDIT FIX: was $10, tighter $8 cap
-    single_trade_max_loss_pct: 0.025 # AUDIT FIX: was 3%, tighter 2.5%
-    max_hold_hours: 24.0             # WIDENED: hold up to 24hrs -- never force-sell a loser
+    single_trade_max_loss_usd: 5     # SNIPER MODE: was $8 -- max $5 loss per trade ($2.50 stop + fees)
+    single_trade_max_loss_pct: 0.01  # SNIPER MODE: was 2.5% -- 1% max loss per trade
+    max_hold_hours: 120.0            # DISABLED: 5 days. Time is not a reason to exit. TP or SL only.
     notify_slack: true
 
   # 3-Tier escalation matrix (read by circuit_breaker.sh + ops runbook)
   escalation_matrix:
     tier1_soft_halt:
-      trigger_losses: 2              # CHANGED: 4 to 2 - stop early
-      trigger_drawdown_usd: 12.0     # CHANGED: $20 to $12
+      trigger_losses: 1              # SNIPER MODE: was 2 -- 1 loss = soft halt, evaluate
+      trigger_drawdown_usd: 5.0      # SNIPER MODE: was $12 -- halt at $5 drawdown
       action: pause_entries
       notify_slack: true
       auto_recover: true
-      recover_after_minutes: 60      # CHANGED: 30 to 60 min cooldown
+      recover_after_minutes: 120     # SNIPER MODE: was 60 -- 2hr cooldown after soft halt
     tier2_emergency:
-      trigger_losses: 4              # CHANGED: 6 to 4
-      trigger_drawdown_usd: 20.0     # CHANGED: $35 to $20
+      trigger_losses: 2              # SNIPER MODE: was 4 -- 2 losses = emergency
+      trigger_drawdown_usd: 10.0     # SNIPER MODE: was $20 -- $10 drawdown = close everything
       trigger_margin_ratio: 0.85     # CHANGED: 0.90 to 0.85
       action: close_and_halt
       notify_slack: true
@@ -672,6 +725,31 @@ v4:
       - reversal_impulse          # reversals are designed for counter-trend
       - volume_climax_reversal    # climax reversals trade after capitulation
 
+  # Support proximity gate: block shorts when price is too close to support
+  # Mar 21 fix: reversal shorts at 0.165 lost because they shorted INTO support
+  # instead of waiting for support to break first
+  support_proximity_gate:
+    enabled: true
+    lookback_bars_1h: 48            # look back 48 1h bars (2 days) for support
+    proximity_pct: 0.005            # block shorts within 0.5% of 48h low
+    require_break_below: true       # require price to close below support, not just touch it
+    block_direction: short
+    exempt_tiers: [MONSTER]
+    exempt_entry_types: []          # no exemptions -- even reversal_impulse must respect support
+
+  # Short confirmation gate: reversal shorts require extra confirmation
+  # Mar 21 fix: reversal_impulse shorts entered on momentum exhaustion alone
+  # without confirming the breakdown was real
+  short_confirmation_gate:
+    enabled: true
+    entry_types: [reversal_impulse, wick_rejection]
+    require_any:
+      - lower_high_on_5m: true      # 5m chart shows lower high structure
+      - volume_expansion: 1.3       # sell volume >= 1.3x average on breakdown candle
+      - support_break_close: true   # candle CLOSED below nearest support, not just wicked
+    block_if_squeeze: true          # block shorts when price is between support and mid-band
+    squeeze_band: bollinger_mid     # reference band for squeeze detection
+
   # Top chart pattern recognition gates (Feb 28)
   # Block entries that fight confirmed high-probability patterns
   pattern_gates:
@@ -712,54 +790,54 @@ v4:
     enabled: true
     sweep_lookback: 3
     sweep_reclaim_pct: 0.002
-    lane_a_threshold: 55
-    lane_a_mr_threshold: 55
-    lane_b_threshold: 50
+    lane_a_threshold: 65            # SNIPER MODE: raised from 55 -- higher conviction required
+    lane_a_mr_threshold: 60        # SNIPER MODE: raised from 55 -- MR needs strong confluence
+    lane_b_threshold: 60           # SNIPER MODE: raised from 50
     lane_b_atr_bypass: true
-    lane_c_threshold: 45
+    lane_c_threshold: 55            # SNIPER MODE: raised from 45
     lane_c_require_sweep_or_ri: true
     lane_c_atr_bypass: true
-    lane_e_threshold: 50
+    lane_e_threshold: 60            # SNIPER MODE: raised from 50 -- squeeze entries need conviction
     lane_e_distance_bypass: true
-    lane_f_threshold: 40
+    lane_f_threshold: 55            # SNIPER MODE: raised from 40
     lane_f_distance_bypass: true
-    lane_g_threshold: 40
+    lane_g_threshold: 55            # SNIPER MODE: raised from 40 -- range scalp is our bread and butter now
     lane_g_enabled: true
-    lane_h_threshold: 45
+    lane_h_threshold: 55            # SNIPER MODE: raised from 45
     lane_h_enabled: true
-    lane_i_threshold: 45
+    lane_i_threshold: 55            # SNIPER MODE: raised from 45 -- fib retrace is key MR lane
     lane_i_enabled: true
-    lane_j_threshold: 35
+    lane_j_threshold: 50            # SNIPER MODE: raised from 35
     lane_j_enabled: true
     # New lanes (Phase 3: self-learning playbook expansion)
-    lane_k_threshold: 50
+    lane_k_threshold: 60            # SNIPER MODE: raised from 50 -- wick rejection needs strong confluence
     lane_k_enabled: true
     lane_l_enabled: true           # MTF conflict blocker (prevents entries, not an entry lane)
     lane_l_mtf_rsi_gap: 20        # block when 15m vs 1h RSI gap > 20
-    lane_m_threshold: 55
+    lane_m_threshold: 65            # SNIPER MODE: raised from 55 -- volume climax reversals need high confidence
     lane_m_enabled: true
     lane_m_vol_climax_mult: 2.5   # volume >= 2.5x avg = climax
-    lane_n_threshold: 50
+    lane_n_threshold: 60            # SNIPER MODE: raised from 50 -- VWAP reversion is core MR strategy
     lane_n_enabled: true
     lane_n_vwap_dev_pct: 0.01     # 1% deviation from VWAP triggers reversion
     lane_o_enabled: true           # exhaustion warning blocker
-    lane_o_rsi_extreme: 75         # RSI threshold for exhaustion detection
+    lane_o_rsi_extreme: 70         # SNIPER MODE: was 75 -- tighter exhaustion detection, block entries earlier
     # Lane P: Grid Range (grid-bot-style mean-reversion at S/R edges)
     lane_p_enabled: true
-    lane_p_threshold: 35           # low threshold - range edges are high probability
+    lane_p_threshold: 50           # SNIPER MODE: raised from 35 -- even range edge needs confluence
     # Lane Q: Funding Arb Bias - trade direction that earns funding payments
     lane_q_enabled: true
-    lane_q_threshold: 60           # moderate threshold - funding signal needs quality confluence
+    lane_q_threshold: 65           # SNIPER MODE: raised from 60
     funding_arb_threshold: 0.0001  # min |funding_rate| to trigger (0.01%)
     # Lane R: Regime Low Vol - BB squeeze + range edge scalps in dead markets
     lane_r_enabled: true
-    lane_r_threshold: 55           # moderate - squeeze setups are reliable
+    lane_r_threshold: 60           # SNIPER MODE: raised from 55 -- BB squeeze is key entry filter
     # Lane S: Stat Arb Proxy - z-score mean reversion (>2 sigma deviation)
     lane_s_enabled: true
-    lane_s_threshold: 50           # moderate - statistical edge is strong at 2+ sigma
+    lane_s_threshold: 60           # SNIPER MODE: raised from 50 -- z-score MR needs strong confluence
     # Lane T: Orderflow Imbalance - volume delta proxy (buy/sell ratio >2:1)
     lane_t_enabled: true
-    lane_t_threshold: 65           # higher threshold - proxy signal needs extra confluence
+    lane_t_threshold: 70           # SNIPER MODE: raised from 65
     # Lane U: Macro MA Cross - 200 MA breakout on 1h with 4h confirmation
     lane_u_enabled: true
     lane_u_threshold: 45           # lower threshold - 200 MA crosses are rare but powerful
@@ -792,6 +870,28 @@ v4:
     lane_v_continuation_tp_buffer_atr: 0.15
     lane_v_reversal_tp_mode: fast_mean_reversion
     lane_v_fail_fast_bars: 3
+    # Micro-Sweep: 5m wick flush + reclaim detector (catches moves the 15m misses)
+    micro_sweep_enabled: true
+    micro_sweep_min_wick_ratio: 0.40    # wick >= 40% of candle range
+    micro_sweep_min_wick_atr: 0.50      # wick >= 0.5x 5m ATR
+    micro_sweep_max_reclaim_bars: 3     # reclaim within 3 bars (15 min)
+    micro_sweep_min_volume_mult: 0.8    # volume >= 0.8x 20-bar average
+    micro_sweep_lookback_bars: 6        # scan last 6 five-minute candles
+    micro_sweep_min_score: 50           # minimum quality score to fire
+    micro_sweep_max_chase_atr: 1.5      # don't chase more than 1.5x ATR from swept level
+    micro_sweep_max_contracts: 1        # conservative: 1 contract only for this class
+    micro_sweep_overnight_override: true # allow during overnight if margin is safe
+    # Wick Zones: multi-TF wick cluster detection (support/resistance from bounce/rejection density)
+    wick_zones:
+      enabled: true
+      enable_1m: true             # include 1m candles for fastest micro-structure detection
+      min_wick_ratio: 0.30        # min wick-to-range ratio to count as rejection/bounce
+      lookback_bars: 60           # how many bars back to scan per timeframe (5m/15m/1h/4h)
+      lookback_bars_1m: 120       # 1m lookback (120 bars = 2 hours of micro-structure)
+      zone_width_pct: 0.003       # 0.3% clustering threshold
+      min_touches: 2              # need at least 2 touches to form a zone
+      min_strength: 15            # minimum composite strength score
+      max_zones: 10               # cap output to top 10 zones
     lane_v_skip_balanced_clusters: false
     lane_v_min_cluster_strength: 15
     lane_v_require_volume_spike_for_reversal: false
@@ -1145,27 +1245,27 @@ paths:
 regime_manager:
   enabled: true
   compression:
-    adx_threshold: 25         # ADX below this = choppy
+    adx_threshold: 25         # ADX below this = choppy -- SNIPER: this IS our environment
     rsi_low: 40               # RSI must be in this range for compression
     rsi_high: 60
-    size_multiplier: 0.7      # 30% smaller positions in chop
-    max_sl_pct: 0.00          # DISABLED: hold and average down, no SL
-    tp_atr_mult: 0.7          # TIGHTENED: was 1.0 -- take profit faster in chop
-    time_stop_bars: 8         # 2hr time stop
-    early_save_bars: 8        # was 3 -- let SL handle risk, not early save
+    size_multiplier: 1.0      # SNIPER MODE: was 0.7 -- compression IS the play, full size
+    max_sl_pct: 0.005         # SNIPER MODE: was 0.00 -- always have a hard stop, 0.5%
+    tp_atr_mult: 2.5          # SNIPER MODE: was 0.7 -- wide targets in compression, big move coming
+    time_stop_bars: 999        # DISABLED: no time exits in compression. Wait for the breakout.
+    early_save_bars: 999       # SNIPER MODE: DISABLED -- hold until TP or stop, no early exits
   expansion:
     adx_threshold: 25         # ADX above this = trending
     atr_ratio_threshold: 1.15 # OR ATR ratio above this
-    size_multiplier: 1.3      # 30% bigger in trends
-    max_sl_pct: 0.00          # DISABLED: hold and average down, no SL
-    tp_atr_mult: 1.2          # TIGHTENED: was 2.0 -- take profit, don't get greedy
-    time_stop_bars: 24        # was 12 -- 6 hours for trend trades to develop
-    early_save_bars: 10       # was 8 -- don't cut winners early in trends
+    size_multiplier: 1.0      # SNIPER MODE: was 1.3 -- equal size across regimes, we're MR only
+    max_sl_pct: 0.005         # SNIPER MODE: was 0.00 -- always have a hard stop
+    tp_atr_mult: 3.0          # SNIPER MODE: was 1.2 -- wide targets even in expansion
+    time_stop_bars: 999       # DISABLED: no time exits in expansion. Ride the wave.
+    early_save_bars: 999      # SNIPER MODE: DISABLED -- hold until TP or stop
   # Default thresholds for transition mode (uses base config values)
-  default_max_sl_pct: 0.00         # DISABLED: hold and average down, no SL
-  default_tp_atr_mult: 1.0
-  default_time_stop_bars: 10    # was 6 -- 2.5hr default
-  default_early_save_bars: 8   # was 6
+  default_max_sl_pct: 0.005        # SNIPER MODE: was 0.00 -- always have the 0.5% hard stop
+  default_tp_atr_mult: 2.5         # SNIPER MODE: was 1.0 -- wide TP targets across all regimes
+  default_time_stop_bars: 999   # DISABLED: no time exits. Only TP, SL, or structure break.
+  default_early_save_bars: 999  # SNIPER MODE: DISABLED -- no early saves, hold until TP or stop
 
 # Fib Retrace Engine: countertrend entries at fib retracement levels
 fib_retrace:
@@ -1247,3 +1347,64 @@ freshness_gates:
   block_on_stale_market_brief: true
   block_on_sentiment_stale_in_danger: true
   block_on_pulse_danger: true
+
+# ============================================================================
+# SNIPER MODE -- Active since 2026-03-22
+# ============================================================================
+# Strategy: Mean reversion at 24h range extremes with wide targets and patience.
+# Based on XLM move analysis showing:
+#   - 50% resistance rejections (sell the rip), 45% support bounces (buy the dip)
+#   - Big moves are slow swings lasting 10-17 hours
+#   - Best hours: 9-10 PM PT (biggest avg), 6-8 AM PT (most volume)
+#   - Top 10 realistic moves = ~$109/month at $500 account
+#   - Scalping small wiggles bleeds fees/losses
+#
+# Core principles:
+#   1. Only trade at extremes of 24h range (RSI <25 for longs, >75 for shorts)
+#   2. Mean reversion only (regime_mode: mr_only)
+#   3. Wide TP targets (2.5-3x ATR) -- let the swing develop
+#   4. Hold 4-12+ hours minimum (time_stop_bars: 48 = 12 hours)
+#   5. Max 2 trades per day (only the absolute best)
+#   6. Hard stop at 0.5% ($2.50 max loss per trade)
+#   7. No reversal signal exits for 12 hours minimum
+#   8. No reverse-on-exit (each trade is deliberate)
+#   9. 1 contract only (max_contracts_hard_cap: 1)
+#   10. No averaging down (PLRL3 disabled)
+#   11. No recovery mode (1 loss = done for day)
+#   12. All lane thresholds raised 10-15 points for extreme selectivity
+#   13. R:R floor raised to 3:1 (was 2:1) -- only asymmetric bets
+#   14. EV minimum raised to $3 (was $2) -- no crumb hunting
+#
+# To revert: search "SNIPER MODE" in this file and restore previous values.
+# Previous values are documented in each comment.
+# ============================================================================
+sniper_mode:
+  enabled: true
+  activated: "2026-03-22"
+  description: "Mean reversion at range extremes, wide targets, max patience"
+  # Entry filters (read by AI executive + scoring engine)
+  entry_filters:
+    rsi_oversold_max: 25           # longs only when RSI < 25 (extreme oversold)
+    rsi_overbought_min: 75         # shorts only when RSI > 75 (extreme overbought)
+    range_proximity_pct: 0.005     # price must be within 0.5% of 24h high (shorts) or low (longs)
+    require_bb_squeeze: true       # only enter when Bollinger Bands are tight (compression precedes move)
+    bb_squeeze_percentile: 20      # BB width must be in bottom 20th percentile (tightest 20% of readings)
+  # Hold parameters
+  hold:
+    min_hold_hours: 4              # absolute minimum 4 hours before any exit (except hard stop)
+    target_hold_hours: 12          # target hold for full swing capture
+    max_hold_hours: 18             # cut at 18 hours if nothing happened
+  # Risk
+  risk_per_trade:
+    max_loss_usd: 2.50             # hard ceiling on loss per trade
+    max_loss_pct: 0.005            # 0.5% of account
+    contracts: 1                   # always 1 contract
+  # Targets
+  targets:
+    tp_atr_mult: 3.0               # 3x ATR take profit
+    min_tp_pct: 0.005              # minimum 0.5% move to TP
+  # Scheduling
+  schedule:
+    max_trades_per_day: 2
+    preferred_hours_pt: [21, 22, 6, 7, 8]  # 9-10 PM PT (biggest), 6-8 AM PT (most volume)
+    cooldown_between_trades_min: 60

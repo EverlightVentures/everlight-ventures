@@ -31,16 +31,19 @@ def _rvol(df_15m: pd.DataFrame) -> float:
     return float(df_15m["volume"].iloc[-1] / base)
 
 
-def classify_regime_v4(df_15m: pd.DataFrame, df_1h: pd.DataFrame) -> dict:
+def classify_regime_v4(df_15m: pd.DataFrame, df_1h: pd.DataFrame, df_4h: pd.DataFrame | None = None, df_1d: pd.DataFrame | None = None) -> dict:
     out = {
         "regime": "neutral",
         "adx_15m": None,
         "adx_1h": None,
+        "adx_4h": None,
+        "adx_1d": None,
         "adx_rising": False,
         "atr_expanding": False,
         "bb_expanding": False,
         "atr_shock": False,
         "extreme_candle": False,
+        "htf_trend": "neutral",
     }
     if df_15m.empty or len(df_15m) < 40 or df_1h.empty or len(df_1h) < 40:
         return out
@@ -51,6 +54,22 @@ def classify_regime_v4(df_15m: pd.DataFrame, df_1h: pd.DataFrame) -> dict:
     a15_prev = float(adx_15m.iloc[-5]) if len(adx_15m) > 5 and not pd.isna(adx_15m.iloc[-5]) else a15
     a1h = float(adx_1h.iloc[-1]) if not pd.isna(adx_1h.iloc[-1]) else 0.0
     adx_rising = a15 > a15_prev
+
+    # 4h and daily ADX for macro regime context
+    a4h = 0.0
+    a1d_val = 0.0
+    if df_4h is not None and not df_4h.empty and len(df_4h) >= 30:
+        try:
+            _adx_4h = adx(df_4h, 14)
+            a4h = float(_adx_4h.iloc[-1]) if not pd.isna(_adx_4h.iloc[-1]) else 0.0
+        except Exception:
+            pass
+    if df_1d is not None and not df_1d.empty and len(df_1d) >= 20:
+        try:
+            _adx_1d = adx(df_1d, 14)
+            a1d_val = float(_adx_1d.iloc[-1]) if not pd.isna(_adx_1d.iloc[-1]) else 0.0
+        except Exception:
+            pass
 
     atr15 = atr(df_15m, 14)
     atr_recent = float(atr15.iloc[-1]) if not pd.isna(atr15.iloc[-1]) else 0.0
@@ -74,16 +93,33 @@ def classify_regime_v4(df_15m: pd.DataFrame, df_1h: pd.DataFrame) -> dict:
     elif a15 < 25 and not bb_expanding:
         regime = "mean_reversion"
 
+    # HTF trend: if 4h or daily ADX is strong, classify macro direction
+    htf_trend = "neutral"
+    try:
+        if a4h >= 25 or a1d_val >= 20:
+            _htf_df = df_4h if df_4h is not None and not df_4h.empty and len(df_4h) >= 30 else df_1h
+            _e21_htf = ema(_htf_df["close"], 21)
+            _slope_htf = float(_e21_htf.diff().tail(3).mean())
+            if _slope_htf > 0:
+                htf_trend = "bullish"
+            elif _slope_htf < 0:
+                htf_trend = "bearish"
+    except Exception:
+        pass
+
     out.update(
         {
             "regime": regime,
             "adx_15m": a15,
             "adx_1h": a1h,
+            "adx_4h": a4h,
+            "adx_1d": a1d_val,
             "adx_rising": adx_rising,
             "atr_expanding": atr_expanding,
             "bb_expanding": bb_expanding,
             "atr_shock": atr_shock,
             "extreme_candle": extreme_candle,
+            "htf_trend": htf_trend,
         }
     )
     return out
@@ -231,11 +267,36 @@ def confluence_score_v4(
     obv_div = obv_divergence(df_15m, direction)
     rsi_gap_sig = rsi_gap_signal(df_15m, direction)
 
-    # Chart pattern detection (flag, cup & handle, double bottom/top)
+    # Chart pattern detection (flag, cup & handle, double bottom/top, + v4 patterns)
     pattern_result = detect_patterns(df_15m, direction)
     flag_detected = pattern_result["flag"]["detected"]
     cup_handle_detected = pattern_result["cup_handle"]["detected"]
     double_pattern_detected = pattern_result["double_pattern"]["detected"]
+
+    # New v4 pattern detectors -- each returns {detected, direction, confidence}
+    # Only score when pattern direction confirms the proposed trade direction,
+    # or when the pattern is directionally neutral (symmetrical triangle, rectangle).
+    def _pattern_confirms(pat: dict, dir_: str) -> bool:
+        if not pat.get("detected"):
+            return False
+        pd_ = pat.get("direction", "neutral")
+        if pd_ == "neutral":
+            return True  # neutral patterns give small bonus either way
+        return (dir_ == "long" and pd_ == "bullish") or (dir_ == "short" and pd_ == "bearish")
+
+    _hs = pattern_result.get("head_shoulders", {})
+    _triple = pattern_result.get("triple_pattern", {})
+    _wedge = pattern_result.get("wedge", {})
+    _triangle = pattern_result.get("triangle", {})
+    _rectangle = pattern_result.get("rectangle", {})
+    _rounded = pattern_result.get("rounded_reversal", {})
+
+    head_shoulders_detected = _pattern_confirms(_hs, direction)
+    triple_pattern_detected = _pattern_confirms(_triple, direction)
+    wedge_detected = _pattern_confirms(_wedge, direction)
+    triangle_detected = _pattern_confirms(_triangle, direction)
+    rectangle_detected = _pattern_confirms(_rectangle, direction)
+    rounded_reversal_detected = _pattern_confirms(_rounded, direction)
 
     # VWAP confluence: price above VWAP for longs, below for shorts
     vwap_confirm = False
@@ -311,6 +372,11 @@ def confluence_score_v4(
         "CHANNEL_SUPPORT": channel_support,
         "CUP_HANDLE": cup_handle_detected,
         "DOUBLE_PATTERN": double_pattern_detected,
+        "HEAD_SHOULDERS": head_shoulders_detected,
+        "TRIPLE_PATTERN": triple_pattern_detected,
+        "WEDGE": wedge_detected,
+        "RECTANGLE": rectangle_detected,
+        "ROUNDED_REVERSAL": rounded_reversal_detected,
     }
     trend_flags = {
         "HTF_BREAK": trend_break,
@@ -325,13 +391,14 @@ def confluence_score_v4(
         "VWAP_CONFIRM": vwap_confirm,
         "CHANNEL_BREAKOUT": channel_breakout,
         "FLAG_CONTINUATION": flag_detected,
+        "TRIANGLE_BREAKOUT": triangle_detected,
     }
 
     mr_weights = {
-        "HTF_LEVEL": 20,
-        "FIB_ZONE": 15,
-        "RSI_EXTREME": 15,
-        "MACD_DIVERGENCE": 15,
+        "HTF_LEVEL": 25,
+        "FIB_ZONE": 20,
+        "RSI_EXTREME": 12,
+        "MACD_DIVERGENCE": 12,
         "RSI_DIVERGENCE": 10,
         "OBV_DIVERGENCE": 8,
         "RSI_GAP_CLOSING": 12,
@@ -344,6 +411,11 @@ def confluence_score_v4(
         "CHANNEL_SUPPORT": 10,
         "CUP_HANDLE": 12,
         "DOUBLE_PATTERN": 15,
+        "HEAD_SHOULDERS": 18,
+        "TRIPLE_PATTERN": 15,
+        "WEDGE": 12,
+        "RECTANGLE": 10,
+        "ROUNDED_REVERSAL": 8,
     }
     trend_weights = {
         "HTF_BREAK": 20,
@@ -358,6 +430,7 @@ def confluence_score_v4(
         "VWAP_CONFIRM": 5,
         "CHANNEL_BREAKOUT": 15,
         "FLAG_CONTINUATION": 12,
+        "TRIANGLE_BREAKOUT": 12,
     }
 
     mr_score = int(sum(w for k, w in mr_weights.items() if mr_flags.get(k)))
@@ -404,6 +477,10 @@ def confluence_score_v4(
             "ATR_EXPANDING": atr_expanding,
             "CUP_HANDLE": cup_handle_detected,
             "DOUBLE_PATTERN": double_pattern_detected,
+            "HEAD_SHOULDERS": head_shoulders_detected,
+            "TRIPLE_PATTERN": triple_pattern_detected,
+            "WEDGE": wedge_detected,
+            "ROUNDED_REVERSAL": rounded_reversal_detected,
         }
         ri_weights = {
             "HTF_LEVEL": 20,
@@ -418,6 +495,10 @@ def confluence_score_v4(
             "ATR_EXPANDING": 10,
             "CUP_HANDLE": 10,
             "DOUBLE_PATTERN": 12,
+            "HEAD_SHOULDERS": 18,
+            "TRIPLE_PATTERN": 15,
+            "WEDGE": 12,
+            "ROUNDED_REVERSAL": 8,
         }
         ri_score = int(sum(w for k, w in ri_weights.items() if ri_flags.get(k)))
         ri_threshold = 60  # Lower than trend (75) since reversal signals are inherently strong
@@ -455,6 +536,12 @@ def confluence_score_v4(
         "flag_detected": flag_detected,
         "cup_handle_detected": cup_handle_detected,
         "double_pattern_detected": double_pattern_detected,
+        "head_shoulders_detected": head_shoulders_detected,
+        "triple_pattern_detected": triple_pattern_detected,
+        "wedge_detected": wedge_detected,
+        "triangle_detected": triangle_detected,
+        "rectangle_detected": rectangle_detected,
+        "rounded_reversal_detected": rounded_reversal_detected,
         "pattern_detail": pattern_result,
     }
 
@@ -473,6 +560,9 @@ def expected_value_v4(
     funding_pct: float = 0.0,
     min_ev_usd: float = 0.0,
     profit_factor: float = 0.0,
+    tp1_price: float = 0.0,
+    stop_price: float = 0.0,
+    direction: str = "",
 ) -> dict:
     # Base win probability from score (expanded range vs old 0.40-0.65)
     p_win_base = _clamp(0.30 + 0.004 * float(score), 0.35, 0.70)
@@ -506,14 +596,42 @@ def expected_value_v4(
         eloss_mult = 1.5
 
     notional = float(price) * float(contract_size) * int(size)
-    ewin_usd = float(atr_value) * ewin_mult * float(contract_size) * int(size)
-    eloss_usd = float(atr_value) * eloss_mult * float(contract_size) * int(size)
+
+    # Use actual TP1/SL distances when available (real pips, not ATR estimates)
+    _cs = float(contract_size) * int(size)
+    _tp1 = float(tp1_price or 0)
+    _sl = float(stop_price or 0)
+    _p = float(price)
+    _dir = str(direction).lower()
+    if _tp1 > 0 and _p > 0:
+        if _dir == "long":
+            ewin_usd = max(0.0, (_tp1 - _p) * _cs)
+        elif _dir == "short":
+            ewin_usd = max(0.0, (_p - _tp1) * _cs)
+        else:
+            ewin_usd = float(atr_value) * ewin_mult * _cs
+    else:
+        ewin_usd = float(atr_value) * ewin_mult * _cs
+
+    if _sl > 0 and _p > 0:
+        if _dir == "long":
+            eloss_usd = max(0.0, (_p - _sl) * _cs)
+        elif _dir == "short":
+            eloss_usd = max(0.0, (_sl - _p) * _cs)
+        else:
+            eloss_usd = float(atr_value) * eloss_mult * _cs
+    else:
+        eloss_usd = float(atr_value) * eloss_mult * _cs
 
     # Entry/exit are generally maker for planned flow; keep taker component for safety premium.
     fees = notional * ((maker_fee_rate * 2.0) + (0.2 * taker_fee_rate))
     slip = notional * slippage_pct
     funding = notional * funding_pct
-    ev = (p_win * ewin_usd) - ((1.0 - p_win) * eloss_usd) - fees - slip - funding
+    total_costs = fees + slip + funding
+    ev = (p_win * ewin_usd) - ((1.0 - p_win) * eloss_usd) - total_costs
+    # Simple pip profit check: will TP1 cover fees even without probability?
+    net_tp1_profit = ewin_usd - total_costs
+    covers_fees = net_tp1_profit > 0
     return {
         "p_win": p_win,
         "p_win_base": p_win_base,
@@ -523,7 +641,10 @@ def expected_value_v4(
         "fees_usd": fees,
         "slippage_usd": slip,
         "funding_usd": funding,
+        "total_costs_usd": total_costs,
         "ev_usd": ev,
-        "pass": ev > float(min_ev_usd),
+        "net_tp1_profit_usd": net_tp1_profit,
+        "covers_fees": covers_fees,
+        "pass": ev > float(min_ev_usd) and covers_fees,
         "notional_usd": notional,
     }

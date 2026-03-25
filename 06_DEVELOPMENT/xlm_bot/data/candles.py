@@ -62,8 +62,19 @@ def fetch_coinbase_candles(product_id: str, start: datetime, end: datetime, gran
                 fail_streak = 0
             else:
                 fail_streak += 1
-        except requests.RequestException:
+                if resp.status_code == 404:
+                    import logging
+                    logging.getLogger("candles").warning(
+                        "Candle API 404 for %s -- wrong product_id?", product_id
+                    )
+                    break  # no point retrying a 404
+        except requests.RequestException as exc:
             fail_streak += 1
+            if fail_streak == 1:
+                import logging
+                logging.getLogger("candles").warning(
+                    "Candle fetch error for %s: %s", product_id, exc
+                )
         if fail_streak >= max_fail_streak:
             break
         current_start = current_end
@@ -94,13 +105,94 @@ def resample_ohlcv(df: pd.DataFrame, rule: str) -> pd.DataFrame:
 
 
 def ensure_timeframe(df: pd.DataFrame, timeframe: str) -> pd.DataFrame:
+    if timeframe == "1m":
+        return resample_ohlcv(df, "1min")
+    if timeframe == "5m":
+        return resample_ohlcv(df, "5min")
     if timeframe == "15m":
         return resample_ohlcv(df, "15min")
     if timeframe == "1h":
         return resample_ohlcv(df, "1h")
     if timeframe == "4h":
         return resample_ohlcv(df, "4h")
+    if timeframe == "1d":
+        return resample_ohlcv(df, "1D")
+    if timeframe == "1w":
+        return resample_ohlcv(df, "1W")
+    if timeframe == "1M":
+        return resample_ohlcv(df, "1ME")
     return df
+
+
+def fetch_5m_candles(
+    store: CandleStore,
+    product_id: str,
+    symbol: str,
+    days: int = 2,
+) -> pd.DataFrame:
+    """Fetch 5m candles for micro-sweep detection.
+
+    Lightweight: only pulls ~2 days of 5m data (576 candles).
+    Uses its own cache key so it doesn't interfere with the 15m base.
+    """
+    df = store.load(symbol, "5m")
+    if not df.empty and not _is_stale(df, max_age_minutes=10):
+        return df
+
+    end = datetime.now(timezone.utc)
+    start = end - timedelta(days=days)
+    fresh = fetch_coinbase_candles(product_id, start, end, granularity=300)
+    if fresh.empty:
+        return df if not df.empty else fresh
+
+    # Guard against truncated fetches (same logic as 15m)
+    if not df.empty and len(fresh) < len(df) * 0.8:
+        cached_last_ts = pd.to_datetime(df["timestamp"].iloc[-1], utc=True)
+        new_rows = fresh[fresh["timestamp"] > cached_last_ts]
+        if not new_rows.empty:
+            fresh = pd.concat([df, new_rows]).drop_duplicates(
+                subset=["timestamp"]
+            ).sort_values("timestamp").reset_index(drop=True)
+        else:
+            fresh = df
+
+    store.save(symbol, "5m", fresh)
+    return fresh
+
+
+def fetch_1m_candles(
+    store: CandleStore,
+    product_id: str,
+    symbol: str,
+    hours: int = 4,
+) -> pd.DataFrame:
+    """Fetch 1m candles for micro-structure detection.
+
+    Very lightweight: only pulls last 4 hours (240 candles).
+    Stale threshold is 3 minutes so the bot gets near-real-time data.
+    """
+    df = store.load(symbol, "1m")
+    if not df.empty and not _is_stale(df, max_age_minutes=3):
+        return df
+
+    end = datetime.now(timezone.utc)
+    start = end - timedelta(hours=hours)
+    fresh = fetch_coinbase_candles(product_id, start, end, granularity=60)
+    if fresh.empty:
+        return df if not df.empty else fresh
+
+    if not df.empty and len(fresh) < len(df) * 0.8:
+        cached_last_ts = pd.to_datetime(df["timestamp"].iloc[-1], utc=True)
+        new_rows = fresh[fresh["timestamp"] > cached_last_ts]
+        if not new_rows.empty:
+            fresh = pd.concat([df, new_rows]).drop_duplicates(
+                subset=["timestamp"]
+            ).sort_values("timestamp").reset_index(drop=True)
+        else:
+            fresh = df
+
+    store.save(symbol, "1m", fresh)
+    return fresh
 
 
 def _is_stale(df: pd.DataFrame, max_age_minutes: int = 30) -> bool:
