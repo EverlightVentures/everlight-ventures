@@ -4054,56 +4054,8 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     short_entry = short_entry or macro_ma_cross(price, df_1h, df_4h, "short")
     short_entry = short_entry or opening_range_breakout(price, df_15m, df_1h, "short", levels, config=config)
     short_entry = short_entry or hourly_continuation(price, df_15m, df_1h, "short", levels, config=config)
-    # --- 5m Micro-Sweep Entry Promotion ---
-    # If no 15m entry found but 5m detected a valid wick-reclaim, promote it.
     _micro_sweep_promoted = False
     _micro_sweep_source = None
-    if not long_entry and micro_sweep_long and micro_sweep_long.detected and not micro_sweep_long.htf_hostile:
-        long_entry = {
-            "type": "micro_sweep",
-            "mode": "reversal",
-            "entry_profile_key": "liquidity_sweep_reversal",
-            "micro_sweep": True,
-            "micro_sweep_score": micro_sweep_long.score,
-            "swept_level": micro_sweep_long.swept_level,
-            "reclaim_price": micro_sweep_long.reclaim_price,
-            "wick_ratio": micro_sweep_long.wick_ratio,
-            "wick_vs_atr": micro_sweep_long.wick_vs_atr,
-            "reclaim_bars": micro_sweep_long.reclaim_bars,
-            "fail_fast_bars": int(lane_cfg.get("micro_sweep_max_reclaim_bars", 3) or 3),
-            "lane_v_mode": "reversal",
-            "confluence": {
-                "MICRO_SWEEP_5M": True,
-                "WICK_RECLAIM": True,
-                "VOLUME_OK": micro_sweep_long.volume_ok,
-                "HTF_ALIGNED": not micro_sweep_long.htf_hostile,
-            },
-        }
-        _micro_sweep_promoted = True
-        _micro_sweep_source = micro_sweep_long
-    if not short_entry and micro_sweep_short and micro_sweep_short.detected and not micro_sweep_short.htf_hostile:
-        short_entry = {
-            "type": "micro_sweep",
-            "mode": "reversal",
-            "entry_profile_key": "liquidity_sweep_reversal",
-            "micro_sweep": True,
-            "micro_sweep_score": micro_sweep_short.score,
-            "swept_level": micro_sweep_short.swept_level,
-            "reclaim_price": micro_sweep_short.reclaim_price,
-            "wick_ratio": micro_sweep_short.wick_ratio,
-            "wick_vs_atr": micro_sweep_short.wick_vs_atr,
-            "reclaim_bars": micro_sweep_short.reclaim_bars,
-            "fail_fast_bars": int(lane_cfg.get("micro_sweep_max_reclaim_bars", 3) or 3),
-            "lane_v_mode": "reversal",
-            "confluence": {
-                "MICRO_SWEEP_5M": True,
-                "WICK_RECLAIM": True,
-                "VOLUME_OK": micro_sweep_short.volume_ok,
-                "HTF_ALIGNED": not micro_sweep_short.htf_hostile,
-            },
-        }
-        _micro_sweep_promoted = True
-        _micro_sweep_source = micro_sweep_short
 
     if _lane_v_cooldown_blocks_entry(_st, long_entry, atr_value=lane_v_atr_value, lane_cfg=lane_cfg, now=now):
         long_entry = None
@@ -4159,8 +4111,8 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     sweep_short = None
     squeeze_long = None
     squeeze_short = None
-    micro_sweep_long: MicroSweepResult | None = None
-    micro_sweep_short: MicroSweepResult | None = None
+    micro_sweep_long = None
+    micro_sweep_short = None
     try:
         if lane_cfg.get("enabled", False):
             sweep_long = detect_sweep(df_15m, df_1h, "long", lane_cfg)
@@ -4196,6 +4148,37 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                         micro_sweep_short = _ms_1m_short
     except Exception:
         pass
+
+    # --- 5m/1m Micro-Sweep Entry Promotion (after detection) ---
+    if not long_entry and micro_sweep_long and getattr(micro_sweep_long, "detected", False) and not getattr(micro_sweep_long, "htf_hostile", True):
+        long_entry = {
+            "type": "micro_sweep", "mode": "reversal", "entry_profile_key": "liquidity_sweep_reversal",
+            "micro_sweep": True, "micro_sweep_score": micro_sweep_long.score,
+            "swept_level": micro_sweep_long.swept_level, "reclaim_price": micro_sweep_long.reclaim_price,
+            "wick_ratio": micro_sweep_long.wick_ratio, "wick_vs_atr": micro_sweep_long.wick_vs_atr,
+            "reclaim_bars": micro_sweep_long.reclaim_bars,
+            "fail_fast_bars": int(lane_cfg.get("micro_sweep_max_reclaim_bars", 3) or 3),
+            "lane_v_mode": "reversal",
+            "confluence": {"MICRO_SWEEP_5M": True, "WICK_RECLAIM": True,
+                           "VOLUME_OK": micro_sweep_long.volume_ok, "HTF_ALIGNED": not micro_sweep_long.htf_hostile},
+        }
+        _micro_sweep_promoted = True
+        _micro_sweep_source = micro_sweep_long
+    if not short_entry and micro_sweep_short and getattr(micro_sweep_short, "detected", False) and not getattr(micro_sweep_short, "htf_hostile", True):
+        short_entry = {
+            "type": "micro_sweep", "mode": "reversal", "entry_profile_key": "liquidity_sweep_reversal",
+            "micro_sweep": True, "micro_sweep_score": micro_sweep_short.score,
+            "swept_level": micro_sweep_short.swept_level, "reclaim_price": micro_sweep_short.reclaim_price,
+            "wick_ratio": micro_sweep_short.wick_ratio, "wick_vs_atr": micro_sweep_short.wick_vs_atr,
+            "reclaim_bars": micro_sweep_short.reclaim_bars,
+            "fail_fast_bars": int(lane_cfg.get("micro_sweep_max_reclaim_bars", 3) or 3),
+            "lane_v_mode": "reversal",
+            "confluence": {"MICRO_SWEEP_5M": True, "WICK_RECLAIM": True,
+                           "VOLUME_OK": micro_sweep_short.volume_ok, "HTF_ALIGNED": not micro_sweep_short.htf_hostile},
+        }
+        _micro_sweep_promoted = True
+        _micro_sweep_source = micro_sweep_short
+
     reverse_cfg = (v4_cfg.get("reverse_on_exit") or {}) if isinstance(v4_cfg.get("reverse_on_exit"), dict) else {}
     regime_v4 = classify_regime_v4(df_15m, df_1h, df_4h=df_4h, df_1d=df_1d)
     high_vol_pause = bool(regime_v4.get("atr_shock") or regime_v4.get("extreme_candle"))
