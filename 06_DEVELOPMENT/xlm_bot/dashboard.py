@@ -26,11 +26,23 @@ _HAS_FRAGMENT = hasattr(st, "fragment")
 
 BASE_DIR = Path(__file__).parent
 WORKSPACE_ROOT = BASE_DIR.parent
-CLX_DELEGATE_PATH = WORKSPACE_ROOT / "03_AUTOMATION_CORE/01_Scripts/ai_workers/clx_delegate.py"
-GMX_DELEGATE_PATH = WORKSPACE_ROOT / "03_AUTOMATION_CORE/01_Scripts/ai_workers/gemx_delegate.py"
-CLAUDE_SETTINGS_PATH = WORKSPACE_ROOT / ".claude" / "settings.json"
-GEMINI_SETTINGS_PATH = WORKSPACE_ROOT / ".gemini" / "settings.json"
-MCP_CONFIG_PATH = WORKSPACE_ROOT / ".mcp.json"
+
+# Oracle Cloud detection: on Oracle, the bot lives at /home/opc/xlm-bot
+# and delegates are vendored inside the bot dir, not in WORKSPACE_ROOT.
+_IS_ORACLE = Path("/home/opc/xlm-bot").exists() or os.environ.get("XLM_ORACLE", "") == "1"
+
+if _IS_ORACLE:
+    CLX_DELEGATE_PATH = BASE_DIR / "vendor" / "ai_workers" / "clx_delegate.py"
+    GMX_DELEGATE_PATH = BASE_DIR / "vendor" / "ai_workers" / "gemx_delegate.py"
+    CLAUDE_SETTINGS_PATH = BASE_DIR / ".claude" / "settings.json"
+    GEMINI_SETTINGS_PATH = BASE_DIR / ".gemini" / "settings.json"
+    MCP_CONFIG_PATH = BASE_DIR / ".mcp.json"
+else:
+    CLX_DELEGATE_PATH = WORKSPACE_ROOT / "03_AUTOMATION_CORE/01_Scripts/ai_workers/clx_delegate.py"
+    GMX_DELEGATE_PATH = WORKSPACE_ROOT / "03_AUTOMATION_CORE/01_Scripts/ai_workers/gemx_delegate.py"
+    CLAUDE_SETTINGS_PATH = WORKSPACE_ROOT / ".claude" / "settings.json"
+    GEMINI_SETTINGS_PATH = WORKSPACE_ROOT / ".gemini" / "settings.json"
+    MCP_CONFIG_PATH = WORKSPACE_ROOT / ".mcp.json"
 
 
 def _resolve_dash_dir(env_key: str, default_rel: str) -> Path:
@@ -41,8 +53,80 @@ def _resolve_dash_dir(env_key: str, default_rel: str) -> Path:
     return p
 
 
-LOGS_DIR = _resolve_dash_dir("XLM_DASH_LOGS_DIR", "logs")
-DATA_DIR = _resolve_dash_dir("XLM_DASH_DATA_DIR", "data")
+def _fetch_blinko_notes(count: int = 5) -> list[dict]:
+    """Fetch recent notes from Blinko knowledge base."""
+    import urllib.request
+    import urllib.error
+    _blinko_url = os.environ.get("BLINKO_URL", "http://localhost:1111/api/v1/note/list")
+    _blinko_token = os.environ.get(
+        "BLINKO_TOKEN",
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic3VwZXJhZG1pbiIsIm5hbWUiOiJhZG1pbiIsInN1YiI6IjEiLCJleHAiOjQ5MjczNjgzNzIsImlhdCI6MTc3Mzc2ODM3Mn0.mnLSmtQpjcu7xjV0nLYcVRgrkwp4Jmlw-sQL0BvyiC0",
+    )
+    try:
+        req = urllib.request.Request(
+            _blinko_url,
+            data=json.dumps({"size": count}).encode(),
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {_blinko_token}",
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            data = json.loads(resp.read().decode())
+        if isinstance(data, list):
+            return data[:count]
+        if isinstance(data, dict):
+            return (data.get("items") or data.get("notes") or data.get("data") or [])[:count]
+        return []
+    except Exception:
+        return []
+
+
+def _runtime_pair_score(data_dir: Path, logs_dir: Path) -> int:
+    candidates = [
+        logs_dir / "dashboard_snapshot.json",
+        logs_dir / "decisions.jsonl",
+        logs_dir / "live_tick.json",
+        data_dir / "weekly_playbook.json",
+        data_dir / "market_brief.json",
+        data_dir / "state.json",
+    ]
+    score = 0
+    for path in candidates:
+        try:
+            if path.exists():
+                score = max(score, int(path.stat().st_mtime_ns))
+        except OSError:
+            continue
+    return score
+
+
+def _resolve_runtime_dirs() -> tuple[Path, Path]:
+    data_env = os.environ.get("XLM_DASH_DATA_DIR")
+    logs_env = os.environ.get("XLM_DASH_LOGS_DIR")
+    if data_env or logs_env:
+        return (
+            _resolve_dash_dir("XLM_DASH_LOGS_DIR", "logs"),
+            _resolve_dash_dir("XLM_DASH_DATA_DIR", "data"),
+        )
+
+    pairs = [
+        (BASE_DIR / "logs", BASE_DIR / "data"),
+        (BASE_DIR / "logs_trend", BASE_DIR / "data_trend"),
+        (BASE_DIR / "logs_mr", BASE_DIR / "data_mr"),
+    ]
+    best_logs, best_data = pairs[0]
+    best_score = -1
+    for logs_dir, data_dir in pairs:
+        score = _runtime_pair_score(data_dir, logs_dir)
+        if score > best_score:
+            best_score = score
+            best_logs, best_data = logs_dir, data_dir
+    return best_logs, best_data
+
+
+LOGS_DIR, DATA_DIR = _resolve_runtime_dirs()
 STATE_PATH = DATA_DIR / "state.json"
 DECISIONS_PATH = LOGS_DIR / "decisions.jsonl"
 TRADES_PATH = LOGS_DIR / "trades.csv"
@@ -71,6 +155,20 @@ else:
 if str(CRYPTO_BOT_DIR) not in sys.path:
     sys.path.insert(0, str(CRYPTO_BOT_DIR))
 
+try:
+    from claude_chat_api import start_chat_server as _start_chat_server
+except Exception:
+    _start_chat_server = None
+
+if _start_chat_server is not None:
+    try:
+        _start_chat_server(
+            port=int(os.environ.get("XLM_CHAT_PORT", "8504") or 8504),
+            host=os.environ.get("XLM_CHAT_HOST", "0.0.0.0"),
+        )
+    except Exception:
+        pass
+
 # Coinbase config path — consistent with main.py
 _COINBASE_CONFIG_PATH = Path(os.environ.get(
     "COINBASE_CONFIG_PATH",
@@ -84,16 +182,296 @@ except Exception:
 
 
 st.set_page_config(
-    page_title="XLM PERP | Command",
-    page_icon="◆",
+    page_title="The Wolf's Terminal | XLM PERP",
+    page_icon="🐺",
     layout="wide",
 )
+
+
+def _query_params() -> dict[str, list[str]]:
+    try:
+        params = st.query_params
+        return {str(k): ([str(v)] if isinstance(v, str) else [str(x) for x in v]) for k, v in params.items()}
+    except Exception:
+        try:
+            return {str(k): [str(x) for x in v] for k, v in st.experimental_get_query_params().items()}
+        except Exception:
+            return {}
+
+
+def _set_query_param(key: str, value: str) -> None:
+    try:
+        st.query_params[key] = value
+        return
+    except Exception:
+        pass
+    try:
+        params = st.experimental_get_query_params()
+        params[str(key)] = [str(value)]
+        st.experimental_set_query_params(**params)
+    except Exception:
+        pass
+
+
+def _render_boot_screen() -> None:
+    st.markdown(
+        """
+        <style>
+        .boot-wrap {
+            min-height: 92vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .boot-panel {
+            position: relative;
+            width: min(980px, 96vw);
+            border: 1px solid rgba(148,163,184,0.18);
+            border-radius: 22px;
+            background:
+              linear-gradient(180deg, rgba(15,23,42,0.96), rgba(3,7,18,0.98)),
+              radial-gradient(circle at top left, rgba(16,185,129,0.08), transparent 40%);
+            box-shadow: 0 30px 120px rgba(0,0,0,0.45);
+            overflow: hidden;
+        }
+        .boot-topbar {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(148,163,184,0.12);
+            background: rgba(2,6,23,0.82);
+        }
+        .boot-dot { width: 10px; height: 10px; border-radius: 999px; display: inline-block; }
+        .boot-dot.red { background: #ef4444; }
+        .boot-dot.yellow { background: #f59e0b; }
+        .boot-dot.green { background: #10b981; }
+        .boot-shell {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 0;
+        }
+        .boot-left {
+            padding: 28px 28px 20px 28px;
+            border-right: 1px solid rgba(148,163,184,0.10);
+            background:
+              linear-gradient(180deg, rgba(15,23,42,0.88), rgba(2,6,23,0.98)),
+              repeating-linear-gradient(
+                0deg,
+                rgba(148,163,184,0.035) 0px,
+                rgba(148,163,184,0.035) 1px,
+                transparent 1px,
+                transparent 26px
+              );
+        }
+        .boot-right {
+            padding: 28px;
+            background:
+              radial-gradient(circle at top right, rgba(59,130,246,0.12), transparent 42%),
+              linear-gradient(180deg, rgba(3,7,18,0.92), rgba(2,6,23,0.98));
+        }
+        .boot-kicker {
+            color: #94a3b8;
+            font-size: 12px;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+        .boot-title {
+            color: #f8fafc;
+            font-size: clamp(36px, 6vw, 68px);
+            line-height: 0.95;
+            font-weight: 800;
+            letter-spacing: -0.05em;
+            margin: 0;
+        }
+        .boot-title span {
+            color: #10b981;
+            display: block;
+        }
+        .boot-sub {
+            color: #cbd5e1;
+            font-size: 15px;
+            line-height: 1.7;
+            max-width: 56ch;
+            margin-top: 18px;
+        }
+        .boot-terminal {
+            margin-top: 26px;
+            border: 1px solid rgba(16,185,129,0.18);
+            border-radius: 16px;
+            background: rgba(2,6,23,0.88);
+            padding: 18px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace !important;
+            color: #d1fae5;
+            font-size: 13px;
+            line-height: 1.8;
+        }
+        .boot-terminal .muted { color: #64748b; }
+        .boot-terminal .ok { color: #34d399; }
+        .boot-terminal .warn { color: #fbbf24; }
+        .boot-card {
+            border: 1px solid rgba(148,163,184,0.12);
+            border-radius: 16px;
+            padding: 16px 18px;
+            background: rgba(15,23,42,0.68);
+            margin-bottom: 12px;
+        }
+        .boot-card h4 {
+            margin: 0 0 8px 0;
+            color: #e2e8f0;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+        .boot-card p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .boot-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(16,185,129,0.12);
+            color: #a7f3d0;
+            font-size: 12px;
+            border: 1px solid rgba(16,185,129,0.18);
+            margin-bottom: 14px;
+        }
+        </style>
+        <div class="boot-wrap">
+          <div class="boot-panel">
+            <div class="boot-topbar">
+              <span class="boot-dot red"></span>
+              <span class="boot-dot yellow"></span>
+              <span class="boot-dot green"></span>
+              <span style="margin-left:10px;color:#64748b;font-size:12px;">everlight/xlm-bot :: command-center</span>
+            </div>
+            <div class="boot-shell">
+              <div class="boot-left">
+                <div class="boot-kicker">Everlight Ventures / Oracle Runtime</div>
+                <h1 class="boot-title">XLM<span>Command Center</span></h1>
+                <div class="boot-sub">
+                  Live Coinbase futures execution, market-intel memory, liquidity scoring, session playbooks,
+                  and war-room telemetry in one operational surface.
+                </div>
+                <div class="boot-terminal">
+                  <div><span class="muted">$</span> boot --profile oracle-live --stack xlm-perp</div>
+                  <div><span class="ok">OK</span> contract feed pinned to <span class="warn">XLP-20DEC30-CDE</span></div>
+                  <div><span class="ok">OK</span> liquidation, crowding, and weekly research state loaded</div>
+                  <div><span class="ok">OK</span> execution safety, ladder, and margin playbook online</div>
+                  <div><span class="muted">></span> entering command center...</div>
+                </div>
+              </div>
+              <div class="boot-right">
+                <div class="boot-badge">github-style launch / live ops surface</div>
+                <div class="boot-card">
+                  <h4>Surface</h4>
+                  <p>Boot splash shows the system as an actual runtime, not just another dashboard tab.</p>
+                </div>
+                <div class="boot-card">
+                  <h4>Intent</h4>
+                  <p>Set the tone before the operator lands in live trading, research, and risk telemetry.</p>
+                </div>
+                <div class="boot-card">
+                  <h4>Mode</h4>
+                  <p>Short auto-continue, with a manual bypass so it feels deliberate without being annoying.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    components.html(
+        """
+        <script>
+        setTimeout(function () {
+          try {
+            const url = new URL(window.parent.location.href);
+            url.searchParams.set("boot", "1");
+            window.parent.location.replace(url.toString());
+          } catch (e) {}
+        }, 2400);
+        </script>
+        """,
+        height=0,
+    )
+    if st.button("Enter Command Center", type="primary", use_container_width=False):
+        _set_query_param("boot", "1")
+        st.rerun()
+
+
+def _render_report_view(report_id: str) -> bool:
+    report_id = str(report_id or "").strip()
+    if not report_id:
+        return False
+    history_path = LOGS_DIR / "report_history.jsonl"
+    archive_dir = LOGS_DIR / "report_archive"
+    match = None
+    if history_path.exists():
+        try:
+            with history_path.open("r", encoding="utf-8") as handle:
+                for raw in handle:
+                    row = json.loads(raw)
+                    if str(row.get("report_id") or "") == report_id:
+                        match = row
+                        break
+        except Exception:
+            match = None
+    st.title("XLM Bot Report")
+    if not match:
+        st.error(f"Report not found: {report_id}")
+        return True
+    st.caption(f"Report ID: {report_id}")
+    meta = match.get("metadata") if isinstance(match.get("metadata"), dict) else {}
+    cols = st.columns(4)
+    cols[0].metric("App", str(match.get("app") or "n/a"))
+    cols[1].metric("Kind", str(match.get("report_kind") or "report"))
+    cols[2].metric("Status", str(match.get("status") or "unknown"))
+    cols[3].metric("Created", str(match.get("created_at") or "n/a")[:19].replace("T", " "))
+    st.subheader(str(match.get("title") or "Untitled Report"))
+    if match.get("summary"):
+        st.markdown(str(match.get("summary")))
+    if match.get("doc_link"):
+        st.markdown(f"[Open Google Doc]({match['doc_link']})")
+    if meta:
+        with st.expander("Metadata", expanded=False):
+            st.json(meta)
+    content = ""
+    stored_path = Path(str(match.get("stored_path") or ""))
+    if stored_path.exists():
+        try:
+            content = stored_path.read_text(encoding="utf-8")
+        except Exception:
+            content = ""
+    if not content:
+        preview = str(match.get("preview") or "").strip()
+        content = preview or "No archived content available."
+    st.markdown("---")
+    st.markdown(content)
+    return True
 
 if os.environ.get("XLM_DASH_ULTRA_SAFE", "0") == "1":
     st.write("ULTRA SAFE MODE")
     st.stop()
 
-def _live_ticker_component(product_id: str = "XLM-USD", interval_ms: int = 1000, height: int = 48) -> None:
+_params = _query_params()
+_report_ids = _params.get("report_id") or []
+if _report_ids and _render_report_view(_report_ids[0]):
+    st.stop()
+_boot_seen = (_params.get("boot") or ["0"])[0] == "1"
+if not _boot_seen:
+    _render_boot_screen()
+    st.stop()
+
+def _live_ticker_component(product_id: str = "XLM-USD", interval_ms: int = 1000, height: int = 48, label: str = "SPOT REF") -> None:
     """
     Client-side price ticker (websocket-like feel) without rerunning the Streamlit script.
     Display-only: does not affect bot trading logic.
@@ -101,7 +479,7 @@ def _live_ticker_component(product_id: str = "XLM-USD", interval_ms: int = 1000,
     html = f"""
     <div style="display:flex;align-items:center;gap:10px;color:#9aa4af;font-size:12px;letter-spacing:0.6px;">
       <span style="display:inline-block;padding:4px 10px;border-radius:999px;background:rgba(16,185,129,0.15);color:#34d399;">
-        SPOT REF
+        {label}
       </span>
       <span>{product_id}</span>
       <span style="color:#6b7280;">•</span>
@@ -160,6 +538,37 @@ def _live_ws_summary(live: dict) -> tuple[str, str]:
         except Exception:
             age_str = "—"
     return price_str, age_str
+
+
+def _humanize_market_text(value: str) -> str:
+    text = str(value or "").strip()
+    if not text:
+        return text
+    replacements = [
+        ("weekly bias", "bigger-picture lean (weekly bias)"),
+        ("continuation setups", "trend-following entries (continuation setups)"),
+        ("order-book absorption", "big resting buyers or sellers soaking up orders (order-book absorption)"),
+        ("liquidation sweep", "forced-stop flush (liquidation sweep)"),
+        ("liquidation hunts", "forced-stop flushes (liquidation hunts)"),
+        ("mean reversion", "snap-back move toward the average (mean reversion)"),
+        ("crowding regime", "positioning pressure / crowding regime"),
+        ("macro regime", "macro backdrop (macro regime)"),
+    ]
+    out = text
+    for src, dst in replacements:
+        out = out.replace(src, dst)
+        out = out.replace(src.title(), dst)
+    return out
+
+
+def _friendly_crowding_label(value: str) -> str:
+    raw = str(value or "").strip().lower().replace("_", " ")
+    mapping = {
+        "balanced": "balanced positioning",
+        "crowded long": "too many longs leaning the same way",
+        "crowded short": "too many shorts leaning the same way",
+    }
+    return mapping.get(raw, raw or "balanced positioning")
 
 st.markdown(
     """
@@ -964,7 +1373,7 @@ st.markdown(
 
 def render_intel_hub(last_decision: dict, state: dict, pos_view: dict | None):
     """Render the News & Agent Intel Hub tab."""
-    st.markdown("<div class='panel-title'>Agent Intel Hub</div>", unsafe_allow_html=True)
+    st.markdown("<div class='panel-title'>The Wolf's Intel Hub</div>", unsafe_allow_html=True)
     
     # Load Market Brief (Perplexity)
     _brief_path = DATA_DIR / "market_brief.json"
@@ -973,6 +1382,15 @@ def render_intel_hub(last_decision: dict, state: dict, pos_view: dict | None):
         try:
             _raw_brief = json.loads(_brief_path.read_text())
             _brief_data = _raw_brief.get("brief") or {}
+        except Exception:
+            pass
+
+    _weekly_path = DATA_DIR / "weekly_market_research.json"
+    _weekly_data = {}
+    if _weekly_path.exists():
+        try:
+            _raw_weekly = json.loads(_weekly_path.read_text())
+            _weekly_data = _raw_weekly.get("research") or {}
         except Exception:
             pass
             
@@ -990,7 +1408,7 @@ def render_intel_hub(last_decision: dict, state: dict, pos_view: dict | None):
     with col1:
         # ── Market Brief (Perplexity) ──
         st.markdown("<div class='intel-card'>", unsafe_allow_html=True)
-        st.markdown("<div class='intel-title'>Perplexity Market Brief</div>", unsafe_allow_html=True)
+        st.markdown("<div class='intel-title'>Perplexity Market Brief / Research Snapshot</div>", unsafe_allow_html=True)
         if _brief_data:
             _rm = str(_brief_data.get("risk_modifier", "neutral")).upper()
             _rm_clr = "#10b981" if "ON" in _rm else "#ef4444" if "OFF" in _rm else "#f59e0b"
@@ -1011,6 +1429,46 @@ def render_intel_hub(last_decision: dict, state: dict, pos_view: dict | None):
                 st.markdown(f"<div class='intel-event'>&bull; {html.escape(xlm_bullet)}</div>", unsafe_allow_html=True)
         else:
             st.markdown("<div class='muted' style='padding:20px 0;'>Waiting for Perplexity intel cycle...</div>", unsafe_allow_html=True)
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        st.markdown("<div class='intel-card'>", unsafe_allow_html=True)
+        st.markdown("<div class='intel-title'>Weekly Strategic Research / Research Snapshot</div>", unsafe_allow_html=True)
+        if _weekly_data:
+            _wb = _safe_str(_weekly_data.get("directional_bias")) or "mixed"
+            _xb = _safe_str(_weekly_data.get("xlm_bias")) or "mixed"
+            _mr = _safe_str(_weekly_data.get("macro_regime")) or "neutral"
+            _wl = _safe_str(_weekly_data.get("window_label")) or "OUTSIDE_WEEKLY_WINDOW"
+            _conf = _safe_float(_weekly_data.get("confidence")) or 0.0
+            _review = _safe_float(_weekly_data.get("review_score"))
+            _mode = _safe_str(_weekly_data.get("source_mode")) or _safe_str(_weekly_data.get("generated_from")) or "unknown"
+            _tone = "#10b981" if _xb == "bullish" else "#ef4444" if _xb == "bearish" else "#f59e0b"
+            st.markdown(
+                f"<div style='display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;'>"
+                f"<span class='pill' style='background:{_tone}20;color:{_tone};'>XLM {html.escape(_xb.upper())}</span>"
+                f"<span class='pill' style='background:rgba(59,130,246,0.15);color:#93c5fd;'>{html.escape(_wb.upper())}</span>"
+                f"<span class='pill' style='background:rgba(245,158,11,0.15);color:#fbbf24;'>{html.escape(_mr.upper())}</span>"
+                f"<span class='pill' style='background:rgba(107,114,128,0.15);color:#d1d5db;'>{html.escape(_wl.replace('_', ' '))}</span>"
+                f"</div>"
+                f"<div class='muted' style='font-size:11px;margin-bottom:8px;'>"
+                f"Confidence {(_conf * 100):.0f}%"
+                f"{f' &bull; Review {_review:.0f}/100' if _review is not None else ''}"
+                f" &bull; Mode {html.escape(_mode)}"
+                f" &bull; Updated {html.escape(_safe_str(_weekly_data.get('updated_at')) or '?')}"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+            for theme in (_weekly_data.get("key_themes") or [])[:4]:
+                st.markdown(f"<div class='intel-event'>&bull; {html.escape(_humanize_market_text(str(theme)))}</div>", unsafe_allow_html=True)
+            if _weekly_data.get("trade_playbook"):
+                st.markdown("<div style='font-size:13px;color:#fbbf24;font-weight:600;margin-top:12px;margin-bottom:6px;'>Weekly Playbook</div>", unsafe_allow_html=True)
+                for item in (_weekly_data.get("trade_playbook") or [])[:4]:
+                    st.markdown(f"<div class='intel-event'>&bull; {html.escape(_humanize_market_text(str(item)))}</div>", unsafe_allow_html=True)
+            if _weekly_data.get("risks"):
+                st.markdown("<div style='font-size:13px;color:#f87171;font-weight:600;margin-top:12px;margin-bottom:6px;'>Key Risks</div>", unsafe_allow_html=True)
+                for item in (_weekly_data.get("risks") or [])[:3]:
+                    st.markdown(f"<div class='intel-event'>&bull; {html.escape(_humanize_market_text(str(item)))}</div>", unsafe_allow_html=True)
+        else:
+            st.markdown("<div class='muted' style='padding:20px 0;'>Waiting for weekly strategic research cache...</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
         # ── Agent Discussions (Thoughts) ──
@@ -2495,7 +2953,7 @@ def _fmt_ts(ts) -> str:
 
 def render_intel_hub(last_decision: dict, state: dict, pos_view: dict | None):
     """Render the News & Agent Intel Hub tab."""
-    st.markdown("<div class='panel-title'>Agent Intel Hub</div>", unsafe_allow_html=True)
+    st.markdown("<div class='panel-title'>The Wolf's Intel Hub</div>", unsafe_allow_html=True)
     
     # Load Market Brief (Perplexity)
     _brief_path = DATA_DIR / "market_brief.json"
@@ -2780,6 +3238,139 @@ def _parameter_performance(closed_trades: pd.DataFrame) -> dict:
     return result
 
 
+def _resolve_trade_session_bucket(ts, cfg: dict) -> str:
+    if ts is None:
+        return "UNKNOWN"
+    try:
+        if isinstance(ts, pd.Timestamp):
+            dt_utc = ts.to_pydatetime()
+        else:
+            dt_utc = pd.to_datetime(ts, utc=True, errors="coerce")
+            if pd.isna(dt_utc):
+                return "UNKNOWN"
+            dt_utc = dt_utc.to_pydatetime()
+        try:
+            from zoneinfo import ZoneInfo
+            dt_et = dt_utc.astimezone(ZoneInfo("America/New_York"))
+        except Exception:
+            dt_et = dt_utc
+        mp_cfg = (cfg.get("margin_policy") or {}) if isinstance(cfg.get("margin_policy"), dict) else {}
+        fb_cfg = (mp_cfg.get("friday_break") or {}) if isinstance(mp_cfg.get("friday_break"), dict) else {}
+        now_minutes = dt_et.hour * 60 + dt_et.minute
+        if bool(fb_cfg.get("enabled", True)) and int(dt_et.weekday()) == int(fb_cfg.get("break_weekday", 4) or 4):
+            break_start = int(fb_cfg.get("break_start_hour_et", 17) or 17) * 60 + int(fb_cfg.get("break_start_minute_et", 0) or 0)
+            break_end = int(fb_cfg.get("break_end_hour_et", 18) or 18) * 60 + int(fb_cfg.get("break_end_minute_et", 0) or 0)
+            pre_lock = int(fb_cfg.get("pre_break_new_entry_lock_minutes", 60) or 60)
+            reopen_cd = int(fb_cfg.get("reopen_cooldown_minutes", 10) or 10)
+            if break_start <= now_minutes < break_end:
+                return "FRIDAY_BREAK"
+            if (break_start - pre_lock) <= now_minutes < break_start:
+                return "FRIDAY_PRELOCK"
+            if break_end <= now_minutes < (break_end + reopen_cd):
+                return "FRIDAY_REOPEN"
+        cutoff_minutes = int(mp_cfg.get("cutoff_hour_et", 16) or 16) * 60 + int(mp_cfg.get("cutoff_minute_et", 0) or 0)
+        start_minutes = int(mp_cfg.get("intraday_start_hour_et", 8) or 8) * 60 + int(mp_cfg.get("intraday_start_minute_et", 0) or 0)
+        pre_cutoff = int(mp_cfg.get("pre_cutoff_minutes", 15) or 15)
+        if now_minutes < start_minutes or now_minutes >= cutoff_minutes:
+            return "OVERNIGHT"
+        if now_minutes >= (cutoff_minutes - pre_cutoff):
+            return "PRE_CUTOFF"
+        return "INTRADAY"
+    except Exception:
+        return "UNKNOWN"
+
+
+def _trade_expectancy_matrix(closed_trades: pd.DataFrame, cfg: dict, max_rows: int = 6) -> list[dict]:
+    if closed_trades.empty:
+        return []
+    df = closed_trades.copy()
+    if "pnl_usd" not in df.columns:
+        return []
+    df["pnl_usd"] = pd.to_numeric(df["pnl_usd"], errors="coerce")
+    df = df[df["pnl_usd"].notna()].copy()
+    if df.empty:
+        return []
+    if "entry_time" in df.columns:
+        df["_entry_ts"] = pd.to_datetime(df["entry_time"], utc=True, errors="coerce")
+    elif "timestamp" in df.columns:
+        df["_entry_ts"] = pd.to_datetime(df["timestamp"], utc=True, errors="coerce")
+    else:
+        df["_entry_ts"] = pd.NaT
+    df["_session"] = df["_entry_ts"].apply(lambda ts: _resolve_trade_session_bucket(ts, cfg))
+    df["_entry_type"] = df.get("entry_type", pd.Series(["unknown"] * len(df))).fillna("unknown").astype(str)
+    df["_regime"] = df.get("strategy_regime", pd.Series(["unknown"] * len(df))).fillna("unknown").astype(str)
+    df["_key"] = df["_entry_type"] + " | " + df["_session"] + " | " + df["_regime"]
+    rows: list[dict] = []
+    for key, grp in df.groupby("_key", dropna=False):
+        pnl = grp["pnl_usd"]
+        count = int(len(grp))
+        wins = int((pnl > 0).sum())
+        losses = count - wins
+        avg = float(pnl.mean()) if count else 0.0
+        gross_profit = float(pnl[pnl > 0].sum())
+        gross_loss = float(pnl[pnl < 0].sum())
+        pf = (gross_profit / abs(gross_loss)) if gross_loss < 0 else (999.0 if gross_profit > 0 else 0.0)
+        rows.append(
+            {
+                "label": str(key),
+                "count": count,
+                "wins": wins,
+                "losses": losses,
+                "win_rate": (wins / count) if count else 0.0,
+                "avg_pnl": avg,
+                "expectancy": avg,
+                "profit_factor": pf,
+            }
+        )
+    rows.sort(key=lambda r: (r["expectancy"], r["profit_factor"], r["count"]), reverse=True)
+    return rows[:max_rows]
+
+
+def _trade_cost_decomposition(closed_trades: pd.DataFrame, cfg: dict) -> dict:
+    empty = {
+        "closed_count": 0,
+        "realized_net_pnl_usd": 0.0,
+        "gross_before_fees_usd": 0.0,
+        "measured_fees_usd": 0.0,
+        "estimated_slippage_usd": 0.0,
+        "estimated_funding_usd": 0.0,
+        "net_after_known_costs_usd": 0.0,
+    }
+    if closed_trades.empty:
+        return empty
+    df = closed_trades.copy()
+    df["pnl_usd"] = pd.to_numeric(df.get("pnl_usd"), errors="coerce").fillna(0.0)
+    measured_fee_cols = []
+    for col in ("total_fees_usd", "fees_usd"):
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
+            measured_fee_cols.append(col)
+    fees = float(df[measured_fee_cols[0]].sum()) if measured_fee_cols else 0.0
+    for col in ("entry_price", "size"):
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0.0)
+    contract_size = float(cfg.get("contract_size", 5000) or 5000)
+    v4_cfg = (cfg.get("v4") or {}) if isinstance(cfg.get("v4"), dict) else {}
+    ev_cfg = (v4_cfg.get("ev") or {}) if isinstance(v4_cfg.get("ev"), dict) else {}
+    slippage_pct = float(ev_cfg.get("slippage_pct", 0.0002) or 0.0002)
+    funding_pct = float(ev_cfg.get("funding_pct", 0.0) or 0.0)
+    notional_series = df.get("entry_price", pd.Series([0.0] * len(df))) * contract_size * df.get("size", pd.Series([0.0] * len(df)))
+    est_slippage = float((notional_series * slippage_pct).sum())
+    est_funding = float((notional_series * funding_pct).sum())
+    realized_net = float(df["pnl_usd"].sum())
+    gross_before_fees = realized_net + fees
+    net_after_known = realized_net - est_slippage - est_funding
+    return {
+        "closed_count": int(len(df)),
+        "realized_net_pnl_usd": round(realized_net, 2),
+        "gross_before_fees_usd": round(gross_before_fees, 2),
+        "measured_fees_usd": round(fees, 2),
+        "estimated_slippage_usd": round(est_slippage, 2),
+        "estimated_funding_usd": round(est_funding, 2),
+        "net_after_known_costs_usd": round(net_after_known, 2),
+    }
+
+
 def _evaluate_path(
     *,
     sig_price: float,
@@ -2876,7 +3467,7 @@ def _evaluate_path(
 
 def render_intel_hub(last_decision: dict, state: dict, pos_view: dict | None):
     """Render the News & Agent Intel Hub tab."""
-    st.markdown("<div class='panel-title'>Agent Intel Hub</div>", unsafe_allow_html=True)
+    st.markdown("<div class='panel-title'>The Wolf's Intel Hub</div>", unsafe_allow_html=True)
     
     # Load Market Brief (Perplexity)
     _brief_path = DATA_DIR / "market_brief.json"
@@ -3037,6 +3628,25 @@ def render_intel_hub(last_decision: dict, state: dict, pos_view: dict | None):
                 "</div>",
                 unsafe_allow_html=True,
             )
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        # ── Blinko Knowledge Base ──
+        st.markdown("<div class='intel-card'>", unsafe_allow_html=True)
+        st.markdown("<div class='intel-title'>Blinko Knowledge Feed</div>", unsafe_allow_html=True)
+        _blinko_notes = _fetch_blinko_notes(5)
+        if _blinko_notes:
+            for _note in _blinko_notes:
+                _nc = str(_note.get("content", "")).strip()
+                if _nc:
+                    _nc_preview = html.escape(_nc[:280]) + ("..." if len(_nc) > 280 else "")
+                    st.markdown(
+                        f"<div class='thought-post info' style='border-left-color:#f59e0b;'>"
+                        f"<div class='b' style='font-size:11px;'>{_nc_preview}</div>"
+                        "</div>",
+                        unsafe_allow_html=True,
+                    )
+        else:
+            st.markdown("<div class='muted' style='padding:12px 0;font-size:11px;'>Blinko not reachable or no notes.</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
 
         # ── Position Alignment ──
@@ -3931,7 +4541,7 @@ with st.sidebar:
     except Exception:
         refresh_s = 2.0
     refresh_s = st.slider("Refresh (sec)", 0.0, 10.0, float(refresh_s), 0.5)
-    with st.expander("Thought Feed", expanded=False):
+    with st.expander("THE WOLF'S INNER MONOLOGUE", expanded=False):
         feed_rows = 10
         st.caption("Showing the latest 10 decisions (rolling live).")
         feed_noise_filter = st.toggle(
@@ -3960,7 +4570,7 @@ with st.sidebar:
 # ── Everlight Trading Header ────────────────────────────────────────────────
 st.markdown(
     "<div class='hub-top'>"
-    f"<div class='brand'>Everlight Venture: <span>Trading Center</span></div>"
+    f"<div class='brand'>The Wolf's Terminal <span style='font-size:10px;color:#94a3b8;'>by Everlight</span></div>"
     f"<div class='brand-sub'>"
     f"<span style='font-size:7px;letter-spacing:1px;color:#34d399;font-weight:600;'>AUTHORIZED</span> "
     f"<span class='pill'>{prod}</span> "
@@ -3984,7 +4594,7 @@ if last_age is not None and last_age > 60:
 
 # ── Coinbase Truth KPI Bar ───────────────────────────────────────────────────
 _hdr_pnl_live = _safe_float(last_decision.get("pnl_usd_live"))
-_bot_pill = "<span class='pill ok'>LIVE</span>" if _bot_is_alive else f"<span class='pill danger'>OFFLINE</span>"
+_bot_pill = "<span class='pill ok'>HUNTING</span>" if _bot_is_alive else f"<span class='pill danger'>OFFLINE</span>"
 _on_pill = "<span class='pill ok'>24/7</span>" if overnight_trading_ok else "<span class='pill danger'>DAY</span>"
 _safe_pill = " <span class='pill danger'>SAFE</span>" if safe_mode else ""
 _usdc_yield_day = spot_usdc * 0.035 / 365.0
@@ -4008,6 +4618,8 @@ if _hdr_pnl_live is not None and pos_view:
 # P&L Today
 _pnl_cls = "ok" if pnl_today_usd >= 0 else "danger"
 _pnl_html = f"<span class='{_pnl_cls}'>{'+' if pnl_today_usd >= 0 else ''}${pnl_today_usd:.2f}</span>"
+_pnl_badge_cls = "src-cb" if _pnl_source == "exchange" else "src-bot"
+_pnl_badge_label = "EQΔ" if _pnl_source == "exchange" else "BOT"
 
 st.markdown(
     "<div class='kpi-bar'>"
@@ -4029,7 +4641,7 @@ st.markdown(
     f"<div class='kpi-card'><span class='src-badge src-cb'>CB</span>"
     f"<div class='kpi-label'>Unrealized</div><div class='kpi-value'>{_unreal_html}</div></div>"
 
-    f"<div class='kpi-card'><span class='src-badge {'src-cb' if _pnl_source == 'exchange' else 'src-bot'}'>{'EQ\u0394' if _pnl_source == 'exchange' else 'BOT'}</span>"
+    f"<div class='kpi-card'><span class='src-badge {_pnl_badge_cls}'>{_pnl_badge_label}</span>"
     f"<div class='kpi-label'>P&L Today</div><div class='kpi-value'>{_pnl_html}</div></div>"
 
     # ── Bot Status cards ──
@@ -4154,6 +4766,540 @@ try:
 except Exception:
     pass
 
+# ── Lane V + Growth Ladder ───────────────────────────────────────────────────
+try:
+    _lv_mode = _safe_str(last_decision.get("lane_v_mode")) or "watch"
+    _lv_cluster = _safe_str(last_decision.get("lane_v_cluster_side")) or "—"
+    _lv_sweep = _safe_str(last_decision.get("lane_v_sweep_status")) or "—"
+    _lv_reason = _safe_str(last_decision.get("lane_v_no_trade_reason")) or "No Lane V block"
+    _lv_magnet = _safe_float(last_decision.get("lane_v_magnet_score"))
+    _lv_wick = _safe_float(last_decision.get("lane_v_wick_score"))
+    _lv_ratio = _safe_float(last_decision.get("lane_v_wick_ratio"))
+    _lv_reclaim = bool(last_decision.get("lane_v_reclaim_confirmed"))
+    _lv_reject = bool(last_decision.get("lane_v_rejection_confirmed"))
+    _sz_meta = last_decision.get("sizing_meta") or {}
+    _gl_stage = _safe_str(_sz_meta.get("growth_stage_label")) or "—"
+    _gl_mode = _safe_str(_sz_meta.get("growth_withdrawal_mode")) or "compound"
+    _gl_max_contracts = int(_safe_float(_sz_meta.get("growth_stage_max_contracts")) or 0)
+    _gl_target = _safe_float(_sz_meta.get("growth_daily_target_usd"))
+    _gl_stop = _safe_float(_sz_meta.get("growth_daily_stop_usd"))
+    _gl_risk = _safe_float(_sz_meta.get("growth_per_trade_risk_usd"))
+    _two_ready = bool(last_decision.get("two_contract_ready"))
+    _two_reason = _safe_str(last_decision.get("two_contract_ready_reason")) or "unknown"
+    _two_req = _safe_float(last_decision.get("two_contract_required_margin"))
+    _two_buf = _safe_float(last_decision.get("two_contract_required_with_buffer"))
+    _two_bp = _safe_float(last_decision.get("two_contract_buying_power"))
+    _two_headroom = _safe_float(last_decision.get("two_contract_headroom"))
+    st.markdown(
+        "<div style='display:grid;grid-template-columns:1.2fr 1fr;gap:10px;margin:6px 0 10px;'>"
+        "<div class='intel-card' style='padding:12px 14px;border-left:3px solid #60a5fa;'>"
+        "<div class='kpi-label'>Lane V</div>"
+        f"<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;'>"
+        f"<span class='pill'>{html.escape(_lv_mode.upper())}</span>"
+        f"<span class='pill'>{html.escape(_lv_cluster.upper())}</span>"
+        f"<span class='pill'>{html.escape(_lv_sweep.upper())}</span>"
+        "</div>"
+        f"<div style='display:flex;gap:18px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:#9ca3af;'>"
+        f"<span>Magnet <b style='color:#e5e7eb'>{_lv_magnet:.0f}</b></span>"
+        f"<span>Wick <b style='color:#e5e7eb'>{_lv_wick:.0f}</b></span>"
+        f"<span>Ratio <b style='color:#e5e7eb'>{_lv_ratio:.2f}</b></span>"
+        f"<span>Reclaim <b style='color:{'#10b981' if _lv_reclaim else '#6b7280'}'>{'YES' if _lv_reclaim else 'NO'}</b></span>"
+        f"<span>Reject <b style='color:{'#ef4444' if _lv_reject else '#6b7280'}'>{'YES' if _lv_reject else 'NO'}</b></span>"
+        "</div>"
+        f"<div style='margin-top:8px;font-size:12px;color:#9ca3af;'>{html.escape(_lv_reason)}</div>"
+        "</div>"
+        "<div class='intel-card' style='padding:12px 14px;border-left:3px solid #34d399;'>"
+        "<div class='kpi-label'>Capital Ladder</div>"
+        f"<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;'>"
+        f"<span class='pill'>{html.escape(_gl_stage)}</span>"
+        f"<span class='pill'>{html.escape(_gl_mode.upper())}</span>"
+        "</div>"
+        f"<div style='display:flex;gap:18px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:#9ca3af;'>"
+        f"<span>Max contracts <b style='color:#e5e7eb'>{_gl_max_contracts or 0}</b></span>"
+        f"<span>Daily target <b style='color:#10b981'>${(_gl_target or 0):.0f}</b></span>"
+        f"<span>Daily stop <b style='color:#ef4444'>${(_gl_stop or 0):.0f}</b></span>"
+        f"<span>Trade risk <b style='color:#e5e7eb'>${(_gl_risk or 0):.0f}</b></span>"
+        "</div>"
+        f"<div style='margin-top:8px;font-size:12px;color:#9ca3af;'>"
+        f"2-contract readiness: <b style='color:{'#10b981' if _two_ready else '#ef4444'}'>{'READY' if _two_ready else 'NOT READY'}</b>"
+        f" &bull; req ${(_two_req or 0):.2f}"
+        f" &bull; buffered ${(_two_buf or 0):.2f}"
+        f" &bull; BP ${(_two_bp or 0):.2f}"
+        f" &bull; headroom ${(_two_headroom or 0):.2f}"
+        f"</div>"
+        f"<div style='margin-top:4px;font-size:11px;color:#6b7280;'>{html.escape(_two_reason)}</div>"
+        "</div>"
+        "</div>",
+        unsafe_allow_html=True,
+    )
+except Exception:
+    pass
+
+# ── Margin Playbook + Execution Safety ──────────────────────────────────────
+try:
+    _pb_label = _safe_str(last_decision.get("margin_playbook_label")) or "SCHEDULE_FALLBACK"
+    _pb_obj = _safe_str(last_decision.get("margin_playbook_objective")) or "preserve_capital"
+    _pb_block = bool(last_decision.get("margin_playbook_block_new_entries"))
+    _pb_multi = bool(last_decision.get("margin_playbook_allow_multi_contract"))
+    _pb_max = int(_safe_float(last_decision.get("margin_playbook_max_new_contracts")) or 0)
+    _pb_cutoff = bool(last_decision.get("margin_playbook_force_exit_before_cutoff"))
+    _pb_mins = _safe_float(last_decision.get("margin_playbook_mins_to_cutoff"))
+    _pb_notes = last_decision.get("margin_playbook_notes") or []
+    if not isinstance(_pb_notes, list):
+        _pb_notes = [str(_pb_notes)]
+    _pb_window = _safe_str(last_decision.get("margin_window")) or "schedule_fallback"
+    _pb_tone = "#10b981" if "ATTACK" in _pb_label else "#f59e0b" if "PRE_CUTOFF" in _pb_label else "#60a5fa"
+
+    _exec_src = open_pos if isinstance(open_pos, dict) else {}
+    _exec_preflight = _exec_src.get("entry_preflight") if isinstance(_exec_src.get("entry_preflight"), dict) else {}
+    _exec_state = _exec_src.get("protection_state") if isinstance(_exec_src.get("protection_state"), dict) else {}
+    _exec_mode = _safe_str(_exec_src.get("protection_mode") or _exec_state.get("mode")) or ("flat" if not open_pos else "unknown")
+    _exec_preflight_ok = _exec_preflight.get("ok")
+    _exec_exchange_tp = bool(_exec_src.get("exchange_tp_armed") or _exec_state.get("exchange_tp_armed"))
+    _exec_soft = bool(_exec_src.get("software_protection_active") or _exec_state.get("software_protection_active"))
+    _exec_spread = _safe_float((_exec_preflight.get("spread") or {}).get("bps"))
+    _exec_margin_ratio = _safe_float((_exec_preflight.get("margin") or {}).get("required_ratio"))
+    _exec_position_txt = "LIVE POSITION" if open_pos else "STALKING"
+
+    _alpha_gaps: list[str] = []
+    if not bool(last_decision.get("liquidation_feed_live")):
+        _alpha_gaps.append("liquidation tape not live; bot is inferring from price and OI")
+    if _pb_window in ("unknown", "schedule_fallback"):
+        _alpha_gaps.append("Coinbase margin-window endpoint unavailable; using ET schedule fallback")
+    if _safe_str(last_decision.get("liquidation_signal_source")) == "exchange_inference_price_oi":
+        _alpha_gaps.append("liquidation signal is inferred, not full exchange-native event tape")
+    if (_safe_float(last_decision.get("futures_relativity_confidence")) or 0.0) < 55:
+        _alpha_gaps.append("cross-venue relativity confidence is still low")
+    if int(_safe_float(last_decision.get("orderbook_levels_sampled")) or 0) < 10:
+        _alpha_gaps.append("order book sample is thin; spoof/absorption read is weaker than ideal")
+    if (_safe_float(last_decision.get("contract_basis_bps")) is None) or (_safe_float(last_decision.get("contract_mark_price")) is None):
+        _alpha_gaps.append("contract basis context is incomplete on this cycle")
+    if not _alpha_gaps:
+        _alpha_gaps.append("no critical blind spot detected in current cycle")
+    _alpha_html = "".join(
+        f"<div style='padding:3px 0;font-size:11px;color:#d1d5db;'>&bull; {html.escape(str(g))}</div>"
+        for g in _alpha_gaps[:4]
+    )
+
+    st.markdown(
+        "<div style='display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:6px 0 12px;'>"
+        "<div class='intel-card' style='padding:12px 14px;border-left:3px solid {pb_tone};'>"
+        "<div class='kpi-label'>Session Playbook</div>"
+        "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;'>"
+        "<span class='pill' style='background:{pb_tone}20;color:{pb_tone};'>{pb_label}</span>"
+        "<span class='pill'>{pb_window}</span>"
+        "</div>"
+        "<div style='display:flex;gap:18px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:#9ca3af;'>"
+        "<span>New entries <b style='color:{pb_block_color};'>{pb_block_txt}</b></span>"
+        "<span>Multi-contract <b style='color:{pb_multi_color};'>{pb_multi_txt}</b></span>"
+        "<span>Max new <b style='color:#e5e7eb'>{pb_max}</b></span>"
+        "<span>Cutoff exit <b style='color:{pb_cutoff_color};'>{pb_cutoff_txt}</b></span>"
+        "</div>"
+        "<div style='margin-top:8px;font-size:12px;color:#9ca3af;'>"
+        "{pb_obj}"
+        "{pb_mins_html}"
+        "</div>"
+        "<div style='margin-top:6px;font-size:11px;color:#6b7280;'>{pb_notes}</div>"
+        "</div>"
+        "<div class='intel-card' style='padding:12px 14px;border-left:3px solid #f59e0b;'>"
+        "<div class='kpi-label'>Execution Safety</div>"
+        "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;'>"
+        "<span class='pill'>{exec_position}</span>"
+        "<span class='pill'>{exec_mode}</span>"
+        "</div>"
+        "<div style='display:flex;gap:18px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:#9ca3af;'>"
+        "<span>Preflight <b style='color:{exec_pf_color};'>{exec_pf_txt}</b></span>"
+        "<span>Exchange TP <b style='color:{exec_tp_color};'>{exec_tp_txt}</b></span>"
+        "<span>Software protect <b style='color:{exec_soft_color};'>{exec_soft_txt}</b></span>"
+        "<span>Spread <b style='color:#e5e7eb'>{exec_spread}</b></span>"
+        "<span>Margin ratio <b style='color:#e5e7eb'>{exec_margin_ratio}</b></span>"
+        "</div>"
+        "<div style='margin-top:8px;font-size:11px;color:#6b7280;'>"
+        "This is the live order-protection state the bot will carry into the next real entry."
+        "</div>"
+        "</div>"
+        "<div class='intel-card' style='padding:12px 14px;border-left:3px solid #a78bfa;'>"
+        "<div class='kpi-label'>Current Blind Spots</div>"
+        "<div style='margin-top:6px;font-size:11px;color:#9ca3af;'>"
+        "These are the missing inputs or degraded signals still limiting edge quality."
+        "</div>"
+        "{alpha_html}"
+        "</div>"
+        "</div>".format(
+            pb_tone=_pb_tone,
+            pb_label=html.escape(_pb_label),
+            pb_window=html.escape(_pb_window.upper()),
+            pb_block_color="#ef4444" if _pb_block else "#10b981",
+            pb_block_txt="BLOCKED" if _pb_block else "ALLOWED",
+            pb_multi_color="#10b981" if _pb_multi else "#ef4444",
+            pb_multi_txt="YES" if _pb_multi else "NO",
+            pb_max=_pb_max or 0,
+            pb_cutoff_color="#f59e0b" if _pb_cutoff else "#6b7280",
+            pb_cutoff_txt="YES" if _pb_cutoff else "NO",
+            pb_obj=html.escape(_pb_obj.replace("_", " ")),
+            pb_mins_html=(
+                f" &bull; <b style='color:#e5e7eb'>{int(_pb_mins)}</b> min to cutoff"
+                if _pb_mins is not None else ""
+            ),
+            pb_notes=html.escape(", ".join(str(n).replace("_", " ") for n in _pb_notes[:4])) or "no special notes",
+            exec_position=html.escape(_exec_position_txt),
+            exec_mode=html.escape(_exec_mode.upper()),
+            exec_pf_color="#10b981" if _exec_preflight_ok is True else "#ef4444" if _exec_preflight_ok is False else "#6b7280",
+            exec_pf_txt="OK" if _exec_preflight_ok is True else "BLOCKED" if _exec_preflight_ok is False else "WAITING",
+            exec_tp_color="#10b981" if _exec_exchange_tp else "#6b7280",
+            exec_tp_txt="ARMED" if _exec_exchange_tp else "OFF",
+            exec_soft_color="#f59e0b" if _exec_soft else "#6b7280",
+            exec_soft_txt="ACTIVE" if _exec_soft else "STANDBY",
+            exec_spread=f"{_exec_spread:.2f}bp" if _exec_spread is not None else "—",
+            exec_margin_ratio=f"{_exec_margin_ratio:.3f}" if _exec_margin_ratio is not None else "—",
+            alpha_html=_alpha_html,
+        ),
+        unsafe_allow_html=True,
+    )
+except Exception:
+    pass
+
+# ── Expectancy + Cost + Ladder + Friday Risk ────────────────────────────────
+try:
+    _closed_all = _get_closed_trades(trades)
+    _expectancy_rows = _trade_expectancy_matrix(_closed_all, cfg, max_rows=5)
+    _costs = _trade_cost_decomposition(_closed_all, cfg)
+    _ladder = last_decision.get("contract_ladder") if isinstance(last_decision.get("contract_ladder"), dict) else {}
+    _ladder_targets = []
+    for _t in ("1", "2", "3", "5"):
+        _status = _ladder.get(_t) if isinstance(_ladder.get(_t), dict) else {}
+        _ready = bool(_status.get("ready"))
+        _req = _safe_float(_status.get("required_with_buffer"))
+        _bp = _safe_float(_status.get("buying_power"))
+        _reason = _safe_str(_status.get("reason")) or "n/a"
+        _ladder_targets.append(
+            "<div style='display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);'>"
+            f"<span style='font-size:11px;color:#d1d5db;'>{_t} contract{'s' if _t != '1' else ''}</span>"
+            f"<span style='font-size:11px;color:{'#10b981' if _ready else '#ef4444'};'>{'READY' if _ready else 'WAIT'}</span>"
+            "</div>"
+            f"<div style='font-size:10px;color:#6b7280;padding-bottom:4px;'>req {f'${_req:.2f}' if _req is not None else '—'}"
+            f" &bull; BP {f'${_bp:.2f}' if _bp is not None else '—'}"
+            f" &bull; {html.escape(_reason.replace('_', ' '))}</div>"
+        )
+    _friday_label = _safe_str(last_decision.get("friday_break_label")) or "NORMAL"
+    _friday_active = bool(last_decision.get("friday_break_active"))
+    _friday_lock = bool(last_decision.get("friday_break_pre_break_lock"))
+    _friday_flat = bool(last_decision.get("friday_break_force_flat_now"))
+    _friday_reopen = bool(last_decision.get("friday_break_reopen_cooldown_active"))
+    _friday_mins_break = _safe_float(last_decision.get("friday_break_minutes_to_break"))
+    _friday_mins_reopen = _safe_float(last_decision.get("friday_break_minutes_to_reopen"))
+    _friday_notes = last_decision.get("friday_break_notes") or []
+    if not isinstance(_friday_notes, list):
+        _friday_notes = [str(_friday_notes)]
+    _friday_tone = "#ef4444" if _friday_active or _friday_flat else "#f59e0b" if _friday_lock or _friday_reopen else "#10b981"
+    _expectancy_html = "".join(
+        "<div style='display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);'>"
+        f"<span style='font-size:11px;color:#d1d5db;flex:1;'>{html.escape(str(r['label']))}</span>"
+        f"<span style='font-size:11px;color:{'#10b981' if r['expectancy'] >= 0 else '#ef4444'};'>{r['expectancy']:+.2f}</span>"
+        f"<span style='font-size:10px;color:#6b7280;'>{int(r['count'])}x</span>"
+        "</div>"
+        for r in _expectancy_rows
+    ) or "<div style='font-size:11px;color:#6b7280;'>No closed-trade expectancy data yet.</div>"
+    st.markdown(
+        "<div style='display:grid;grid-template-columns:1.05fr 1fr 1fr;gap:10px;margin:6px 0 12px;'>"
+        "<div class='intel-card' style='padding:12px 14px;border-left:3px solid #22c55e;'>"
+        "<div class='kpi-label'>Expectancy Matrix</div>"
+        "<div style='margin-top:6px;font-size:11px;color:#9ca3af;'>Best closed-trade combos by entry type, session window, and regime.</div>"
+        "{expectancy_html}"
+        "</div>"
+        "<div class='intel-card' style='padding:12px 14px;border-left:3px solid #f97316;'>"
+        "<div class='kpi-label'>Execution Cost Drag</div>"
+        "<div style='display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:#9ca3af;'>"
+        "<span>Closed <b style='color:#e5e7eb'>{closed_count}</b></span>"
+        "<span>Gross <b style='color:#e5e7eb'>${gross_before_fees:.2f}</b></span>"
+        "<span>Fees <b style='color:#ef4444'>-${fees:.2f}</b></span>"
+        "<span>Slip est <b style='color:#f59e0b'>-${slip:.2f}</b></span>"
+        "<span>Funding est <b style='color:#f59e0b'>-${funding:.2f}</b></span>"
+        "</div>"
+        "<div style='margin-top:8px;font-size:12px;color:#9ca3af;'>"
+        "Realized net <b style='color:{net_color};'>${net:.2f}</b>"
+        " &bull; after known cost drag <b style='color:{net_after_color};'>${net_after:.2f}</b>"
+        "</div>"
+        "<div style='margin-top:6px;font-size:11px;color:#6b7280;'>Fees are measured from closed trades. Slippage and funding are estimated from configured EV assumptions.</div>"
+        "</div>"
+        "<div class='intel-card' style='padding:12px 14px;border-left:3px solid #60a5fa;'>"
+        "<div class='kpi-label'>Contract Ladder + Friday Risk</div>"
+        "<div style='margin-top:6px;'>"
+        "{ladder_html}"
+        "</div>"
+        "<div style='margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.05);'>"
+        "<div style='display:flex;gap:8px;flex-wrap:wrap;'>"
+        "<span class='pill' style='background:{friday_tone}20;color:{friday_tone};'>{friday_label}</span>"
+        "</div>"
+        "<div style='display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:#9ca3af;'>"
+        "<span>Active <b style='color:{friday_active_color};'>{friday_active}</b></span>"
+        "<span>Pre-lock <b style='color:{friday_lock_color};'>{friday_lock}</b></span>"
+        "<span>Force flat <b style='color:{friday_flat_color};'>{friday_flat}</b></span>"
+        "</div>"
+        "<div style='margin-top:6px;font-size:11px;color:#6b7280;'>"
+        "{friday_mins}"
+        "{friday_notes}"
+        "</div>"
+        "</div>"
+        "</div>"
+        "</div>".format(
+            expectancy_html=_expectancy_html,
+            closed_count=int(_costs.get("closed_count") or 0),
+            gross_before_fees=float(_costs.get("gross_before_fees_usd") or 0.0),
+            fees=float(_costs.get("measured_fees_usd") or 0.0),
+            slip=float(_costs.get("estimated_slippage_usd") or 0.0),
+            funding=float(_costs.get("estimated_funding_usd") or 0.0),
+            net=float(_costs.get("realized_net_pnl_usd") or 0.0),
+            net_after=float(_costs.get("net_after_known_costs_usd") or 0.0),
+            net_color="#10b981" if float(_costs.get("realized_net_pnl_usd") or 0.0) >= 0 else "#ef4444",
+            net_after_color="#10b981" if float(_costs.get("net_after_known_costs_usd") or 0.0) >= 0 else "#ef4444",
+            ladder_html="".join(_ladder_targets) or "<div style='font-size:11px;color:#6b7280;'>No ladder state yet.</div>",
+            friday_tone=_friday_tone,
+            friday_label=html.escape(_friday_label.replace("_", " ")),
+            friday_active="YES" if _friday_active else "NO",
+            friday_lock="YES" if _friday_lock else "NO",
+            friday_flat="YES" if _friday_flat else "NO",
+            friday_active_color="#ef4444" if _friday_active else "#6b7280",
+            friday_lock_color="#f59e0b" if _friday_lock else "#6b7280",
+            friday_flat_color="#ef4444" if _friday_flat else "#6b7280",
+            friday_mins=(
+                f"{int(_friday_mins_break)} min to break"
+                if _friday_mins_break is not None else (
+                    f"{int(_friday_mins_reopen)} min to reopen" if _friday_mins_reopen is not None else "Friday window clear"
+                )
+            ),
+            friday_notes=(
+                " &bull; " + html.escape(", ".join(str(n).replace("_", " ") for n in _friday_notes[:3]))
+                if _friday_notes else ""
+            ),
+        ),
+        unsafe_allow_html=True,
+    )
+except Exception:
+    pass
+
+try:
+    _exp_mult = _safe_float(last_decision.get("expectancy_size_mult")) or 1.0
+    _kelly_mult = _safe_float(last_decision.get("kelly_size_mult")) or 1.0
+    _exp_reason = _safe_str(last_decision.get("expectancy_gate_reason")) or "n/a"
+    _lane_exp_mode = _safe_str(last_decision.get("lane_specific_expectancy_mode")) or "n/a"
+    _lane_exp_wr = _safe_float(last_decision.get("lane_specific_expectancy_win_rate"))
+    _lane_exp_avg = _safe_float(last_decision.get("lane_specific_expectancy_avg_pnl_usd"))
+    _ob_absorption = _safe_str(last_decision.get("orderbook_absorption_bias")) or "NEUTRAL"
+    _ob_spoof_risk = _safe_float(last_decision.get("orderbook_spoof_risk"))
+    _ob_spoof_side = _safe_str(last_decision.get("orderbook_spoof_side")) or "NONE"
+    _ob_bid_rep = _safe_float(last_decision.get("orderbook_bid_replenishment"))
+    _ob_ask_rep = _safe_float(last_decision.get("orderbook_ask_replenishment"))
+    _weekly_bias = _safe_str(last_decision.get("weekly_research_bias")) or "mixed"
+    _weekly_xlm_bias = _safe_str(last_decision.get("weekly_research_xlm_bias")) or "mixed"
+    _weekly_conf = _safe_float(last_decision.get("weekly_research_confidence")) or 0.0
+    st.markdown(
+        "<div style='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px;'>"
+        "<div class='intel-card' style='padding:12px 14px;border-left:3px solid #22c55e;'>"
+        "<div class='kpi-label'>Expectancy Promotion</div>"
+        "<div style='display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:12px;color:#9ca3af;'>"
+        "<span>Size mult <b style='color:{exp_color};'>{exp_mult:.2f}x</b></span>"
+        "<span>Kelly <b style='color:{kelly_color};'>{kelly_mult:.2f}x</b></span>"
+        "</div>"
+        "<div style='margin-top:8px;font-size:11px;color:#6b7280;'>Gate reason: {exp_reason}</div>"
+        "<div style='margin-top:4px;font-size:11px;color:#6b7280;'>Lane mode: {lane_exp_mode}{lane_exp_wr}{lane_exp_avg}</div>"
+        "</div>"
+        "<div class='intel-card' style='padding:12px 14px;border-left:3px solid #60a5fa;'>"
+        "<div class='kpi-label'>Book + Weekly Bias</div>"
+        "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;'>"
+        "<span class='pill' style='background:rgba(59,130,246,0.15);color:#93c5fd;'>{absorption}</span>"
+        "<span class='pill' style='background:rgba(245,158,11,0.15);color:#fbbf24;'>Spoof {spoof}</span>"
+        "<span class='pill' style='background:rgba(16,185,129,0.15);color:#34d399;'>Weekly {weekly_bias}</span>"
+        "<span class='pill' style='background:rgba(250,204,21,0.15);color:#fde68a;'>XLM {weekly_xlm_bias}</span>"
+        "</div>"
+        "<div style='margin-top:8px;font-size:11px;color:#6b7280;'>"
+        "Bid repl {bid_rep} &bull; Ask repl {ask_rep} &bull; Weekly confidence {weekly_conf:.0f}%"
+        "</div>"
+        "</div>"
+        "</div>".format(
+            exp_mult=_exp_mult,
+            kelly_mult=_kelly_mult,
+            exp_reason=html.escape(_exp_reason.replace("_", " ")),
+            lane_exp_mode=html.escape(_lane_exp_mode.replace("_", " ")),
+            lane_exp_wr=(f" · WR {_lane_exp_wr*100:.0f}%" if _lane_exp_wr is not None else ""),
+            lane_exp_avg=(f" · Avg ${_lane_exp_avg:.2f}" if _lane_exp_avg is not None else ""),
+            exp_color="#10b981" if _exp_mult > 1.0 else "#ef4444" if _exp_mult < 1.0 else "#d1d5db",
+            kelly_color="#10b981" if _kelly_mult > 1.0 else "#ef4444" if _kelly_mult < 1.0 else "#d1d5db",
+            absorption=html.escape(_ob_absorption.replace("_", " ")),
+            spoof=html.escape(f"{_ob_spoof_side} {_ob_spoof_risk:.2f}" if _ob_spoof_risk is not None else "none"),
+            weekly_bias=html.escape(_weekly_bias.upper()),
+            weekly_xlm_bias=html.escape(_weekly_xlm_bias.upper()),
+            bid_rep=f"{_ob_bid_rep:.2f}" if _ob_bid_rep is not None else "—",
+            ask_rep=f"{_ob_ask_rep:.2f}" if _ob_ask_rep is not None else "—",
+            weekly_conf=_weekly_conf * 100,
+        ),
+        unsafe_allow_html=True,
+    )
+except Exception:
+    pass
+
+try:
+    _playbook = {}
+    _event_calendar = {}
+    _source_board = {}
+    _crowding_summary = {}
+    for _path, _target in (
+        (DATA_DIR / "weekly_playbook.json", "_playbook"),
+        (DATA_DIR / "market_event_calendar.json", "_event_calendar"),
+        (DATA_DIR / "source_scoreboard.json", "_source_board"),
+        (DATA_DIR / "crowding_summary.json", "_crowding_summary"),
+    ):
+        try:
+            _payload = json.loads(_path.read_text()) if _path.exists() else {}
+        except Exception:
+            _payload = {}
+        if _target == "_playbook":
+            _playbook = _payload if isinstance(_payload, dict) else {}
+        elif _target == "_event_calendar":
+            _event_calendar = _payload if isinstance(_payload, dict) else {}
+        elif _target == "_source_board":
+            _source_board = _payload if isinstance(_payload, dict) else {}
+        else:
+            _crowding_summary = _payload if isinstance(_payload, dict) else {}
+
+    _next_event = _event_calendar.get("next_event") if isinstance(_event_calendar.get("next_event"), dict) else {}
+    _events = _event_calendar.get("events") if isinstance(_event_calendar.get("events"), list) else []
+    _sources = _source_board.get("top_sources") if isinstance(_source_board.get("top_sources"), list) else []
+    _playbook_setups = _playbook.get("top_setups") if isinstance(_playbook.get("top_setups"), list) else []
+    _playbook_risks = _playbook.get("risk_map") if isinstance(_playbook.get("risk_map"), list) else []
+    _playbook_ready = bool(_playbook.get("monday_ready"))
+    _event_html = "".join(
+        f"<div style='padding:3px 0;font-size:11px;color:#d1d5db;'>&bull; {html.escape(str(item.get('label') or 'event'))}"
+        f" <span style='color:#6b7280'>({html.escape(str(item.get('importance') or 'medium'))}"
+        + (f", {float(item.get('hours_to_event')):.1f}h" if _safe_float(item.get("hours_to_event")) is not None else "")
+        + ")</span></div>"
+        for item in _events[:4] if isinstance(item, dict)
+    ) or "<div style='font-size:11px;color:#6b7280;'>No structured events loaded.</div>"
+    _source_html = "".join(
+        f"<div style='padding:3px 0;font-size:11px;color:#d1d5db;'>&bull; {html.escape(str(item.get('source_name') or 'unknown'))}"
+        f" <span style='color:#6b7280'>score {float(item.get('weighted_score') or 0.0):.1f}, docs {int(item.get('documents') or 0)}</span></div>"
+        for item in _sources[:4] if isinstance(item, dict)
+    ) or "<div style='font-size:11px;color:#6b7280;'>No source scoreboard yet.</div>"
+    _playbook_html = "".join(
+        f"<div style='padding:3px 0;font-size:11px;color:#d1d5db;'>&bull; {html.escape(_humanize_market_text(str(item)))}</div>"
+        for item in _playbook_setups[:3]
+    ) or "<div style='font-size:11px;color:#6b7280;'>No playbook setup list yet.</div>"
+    _risk_html = "".join(
+        f"<div style='padding:3px 0;font-size:11px;color:#d1d5db;'>&bull; {html.escape(_humanize_market_text(str(item)))}</div>"
+        for item in _playbook_risks[:3]
+    ) or "<div style='font-size:11px;color:#6b7280;'>No risk map yet.</div>"
+    _playbook_generated = _safe_str(_playbook.get("generated_at")) or "unknown"
+    _ws_age_num = None
+    try:
+        _ws_age_num = int(ws_age) if ws_age and ws_age != "—" else None
+    except Exception:
+        pass
+    _live_price_line = ""
+    if _ws_age_num is not None and _ws_age_num <= 60 and ws_px != "—":
+        _live_price_line = f"Live now: {html.escape(ws_px)} from websocket ({int(_ws_age_num)}s ago)."
+    else:
+        _playbook_bot_px = _safe_float(last_decision.get('price'))
+        if _playbook_bot_px:
+            _live_price_line = f"Live now: ${_playbook_bot_px:.6f} from bot runtime."
+    st.markdown(
+        "<div style='display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin:0 0 12px;'>"
+        "<div class='intel-card' style='padding:12px 14px;border-left:3px solid #f59e0b;'>"
+        "<div class='kpi-label'>Event Calendar</div>"
+        "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;'>"
+        "<span class='pill'>{next_event}</span>"
+        "<span class='pill'>{event_count} tracked</span>"
+        "<span class='pill'>{high_risk} high-risk</span>"
+        "</div>"
+        "<div style='margin-top:8px;'>{event_html}</div>"
+        "</div>"
+        "<div class='intel-card' style='padding:12px 14px;border-left:3px solid #22c55e;'>"
+        "<div class='kpi-label'>Source Scoreboard</div>"
+        "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;'>"
+        "<span class='pill'>Diversity {src_div}</span>"
+        "<span class='pill'>Avg quality {src_quality}</span>"
+        "</div>"
+        "<div style='margin-top:8px;'>{source_html}</div>"
+        "</div>"
+        "<div class='intel-card' style='padding:12px 14px;border-left:3px solid #8b5cf6;'>"
+        "<div class='kpi-label'>Weekly Playbook</div>"
+        "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;'>"
+        "<span class='pill'>{playbook_label}</span>"
+        "<span class='pill' style='background:{ready_bg};color:{ready_fg};'>{ready_txt}</span>"
+        "<span class='pill'>{crowding}</span>"
+        "</div>"
+        "<div style='margin-top:8px;font-size:11px;color:#6b7280;'>Research snapshot generated {generated_at}</div>"
+        "<div style='margin-top:4px;font-size:11px;color:#93c5fd;'>{live_price_line}</div>"
+        "<div style='margin-top:8px;font-size:11px;color:#9ca3af;'>{thesis}</div>"
+        "<div style='margin-top:8px;'>{playbook_html}</div>"
+        "<div style='margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.05);'>{risk_html}</div>"
+        "</div>"
+        "</div>".format(
+            next_event=html.escape(str(_next_event.get("label") or "No immediate event")),
+            event_count=int(_event_calendar.get("event_count") or 0),
+            high_risk=int(_event_calendar.get("high_risk_count") or 0),
+            event_html=_event_html,
+            src_div=int(_source_board.get("source_diversity") or 0),
+            src_quality=f"{float(_source_board.get('avg_quality') or 0.0):.2f}",
+            source_html=_source_html,
+            playbook_label=html.escape(str(_playbook.get("label") or "OUTSIDE_WEEKLY_WINDOW").replace("_", " ")),
+            ready_bg="rgba(16,185,129,0.15)" if _playbook_ready else "rgba(239,68,68,0.15)",
+            ready_fg="#34d399" if _playbook_ready else "#fca5a5",
+            ready_txt="MONDAY READY" if _playbook_ready else "NEEDS FRESH REVIEW",
+            crowding=html.escape(_friendly_crowding_label(str(_crowding_summary.get("regime") or "balanced"))),
+            generated_at=html.escape(_playbook_generated),
+            live_price_line=_live_price_line or "Live price unavailable from current runtime.",
+            thesis=html.escape(_humanize_market_text(str(_playbook.get("thesis") or "No weekly thesis loaded."))),
+            playbook_html=_playbook_html,
+            risk_html=_risk_html,
+        ),
+        unsafe_allow_html=True,
+    )
+except Exception:
+    pass
+
+try:
+    _ob_hist_samples = int(_safe_float(last_decision.get("orderbook_history_samples")) or 0)
+    _ob_hist_bias = _safe_str(last_decision.get("orderbook_history_bias")) or "UNKNOWN"
+    _ob_hist_imb = _safe_float(last_decision.get("orderbook_history_avg_imbalance"))
+    _ob_hist_abs = _safe_float(last_decision.get("orderbook_history_absorption_rate"))
+    _ob_hist_spoof = _safe_float(last_decision.get("orderbook_history_spoof_rate"))
+    _ob_hist_flips = int(_safe_float(last_decision.get("orderbook_history_depth_flips")) or 0)
+    _crowd_bias = _safe_str(last_decision.get("crowding_bias")) or "mixed"
+    _crowd_regime = _safe_str(last_decision.get("crowding_regime")) or "balanced"
+    _crowd_funding = _safe_str(last_decision.get("crowding_funding_bias")) or "mixed"
+    _crowd_oi = _safe_float(last_decision.get("crowding_oi_change_pct"))
+    st.markdown(
+        "<div style='display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 12px;'>"
+        "<div class='intel-card' style='padding:12px 14px;border-left:3px solid #14b8a6;'>"
+        "<div class='kpi-label'>Order Book Memory</div>"
+        "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;'>"
+        "<span class='pill'>{bias}</span><span class='pill'>{samples} samples</span></div>"
+        "<div style='margin-top:8px;font-size:11px;color:#9ca3af;'>"
+        "Avg imbalance {imb} &bull; absorption rate {absr} &bull; spoof rate {spoof} &bull; depth flips {flips}"
+        "</div></div>"
+        "<div class='intel-card' style='padding:12px 14px;border-left:3px solid #3b82f6;'>"
+        "<div class='kpi-label'>Crowding History</div>"
+        "<div style='display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;'>"
+        "<span class='pill'>{regime}</span><span class='pill'>{bias2}</span><span class='pill'>{funding}</span></div>"
+        "<div style='margin-top:8px;font-size:11px;color:#9ca3af;'>OI change {oi}</div>"
+        "</div>"
+        "</div>".format(
+            bias=html.escape(_ob_hist_bias.replace("_", " ")),
+            samples=_ob_hist_samples,
+            imb=f"{_ob_hist_imb:.3f}" if _ob_hist_imb is not None else "—",
+            absr=f"{_ob_hist_abs:.2f}" if _ob_hist_abs is not None else "—",
+            spoof=f"{_ob_hist_spoof:.2f}" if _ob_hist_spoof is not None else "—",
+            flips=_ob_hist_flips,
+            regime=html.escape(_crowd_regime.replace("_", " ")),
+            bias2=html.escape(_crowd_bias.upper()),
+            funding=html.escape(_crowd_funding.replace("_", " ")),
+            oi=f"{_crowd_oi:+.3f}%" if _crowd_oi is not None else "—",
+        ),
+        unsafe_allow_html=True,
+    )
+except Exception:
+    pass
+
 # ── "As of" Timestamp ────────────────────────────────────────────────────────
 try:
     _as_of_utc = datetime.now(timezone.utc)
@@ -4261,7 +5407,9 @@ if major_events:
     )
 
 if client_tick:
-    _live_ticker_component("XLM-USD", interval_ms=1000, height=52)
+    _live_ref_product = prod or "XLP-20DEC30-CDE"
+    _live_ref_label = "CONTRACT REF" if str(_live_ref_product).startswith("XLP-") else "SPOT REF"
+    _live_ticker_component(_live_ref_product, interval_ms=1000, height=52, label=_live_ref_label)
 
 # Show bot's perp price alongside spot ticker for comparison
 _perp_px = _safe_float(last_decision.get("price"))
@@ -5157,6 +6305,67 @@ if page == "Terminal":
                         f"</div></div>",
                         unsafe_allow_html=True,
                     )
+        except Exception:
+            pass
+
+        # ── ROW 3.85: HTF Breakout Watch ──────────────────────────────
+        try:
+            if not _has_pos:
+                _bw_dir = _safe_str(last_decision.get("htf_breakout_selected_direction")) or "long"
+                _bw_ready = bool(last_decision.get("htf_breakout_selected_ready"))
+                _bw_reason = _safe_str(last_decision.get("htf_breakout_selected_reason")) or "watching"
+                _bw_pressure = _safe_float(last_decision.get("htf_breakout_selected_pressure_score")) or 0
+                _bw_follow = _safe_float(last_decision.get("htf_breakout_selected_followthrough_score")) or 0
+                _bw_conf = _safe_float(last_decision.get("htf_breakout_selected_confidence")) or 0
+                _bw_hold = _safe_float(last_decision.get("htf_breakout_selected_hold_score")) or 0
+                _bw_false = _safe_float(last_decision.get("htf_breakout_selected_false_break_risk")) or 0
+                _bw_mgmt = _safe_str(last_decision.get("htf_breakout_selected_management_bias")) or "watching"
+                _bw_level = _safe_float(last_decision.get("htf_breakout_selected_breakout_level"))
+                _bw_inv = _safe_float(last_decision.get("htf_breakout_selected_invalidation"))
+                _bw_chase = _safe_float(last_decision.get("htf_breakout_selected_chase_atr"))
+                _bw_evt_block = bool(last_decision.get("htf_breakout_selected_event_blocked"))
+                _bw_evt_label = _safe_str(last_decision.get("htf_breakout_selected_event_label")) or "none"
+                _bw_evt_hours = _safe_float(last_decision.get("htf_breakout_selected_event_hours"))
+                _bw_reasons = last_decision.get("htf_breakout_selected_reasons") or []
+                if isinstance(_bw_reasons, str):
+                    try:
+                        _bw_reasons = json.loads(_bw_reasons)
+                    except Exception:
+                        _bw_reasons = [_bw_reasons]
+                _bw_reasons = [str(x).replace("_", " ") for x in _bw_reasons[:4]]
+                _bw_color = "#34d399" if _bw_dir == "long" else "#f87171"
+                _bw_status = "READY" if _bw_ready else ("BLOCKED" if _bw_evt_block else "WATCH")
+                _bw_status_color = "#22c55e" if _bw_ready else ("#ef4444" if _bw_evt_block else "#fbbf24")
+                _bw_level_s = f"${_bw_level:.5f}" if _bw_level is not None else "—"
+                _bw_inv_s = f"${_bw_inv:.5f}" if _bw_inv is not None else "—"
+                _bw_evt_s = f"{_bw_evt_label} ({_bw_evt_hours:.1f}h)" if (_bw_evt_hours is not None and _bw_evt_label != "none") else _bw_evt_label
+                st.markdown(
+                    f"<div class='intel-card' style='padding:8px 14px;margin-top:4px;border-left:3px solid {_bw_color};'>"
+                    f"<div class='intel-title' style='margin-bottom:6px;'>HTF BREAKOUT WATCH</div>"
+                    f"<div style='display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;'>"
+                    f"<div><span class='label'>BIAS</span><br/><span class='metric' style='font-size:13px;color:{_bw_color};'>{html.escape(_bw_dir.upper())}</span></div>"
+                    f"<div><span class='label'>STATUS</span><br/><span class='metric' style='font-size:13px;color:{_bw_status_color};'>{html.escape(_bw_status)}</span></div>"
+                    f"<div><span class='label'>BREAKOUT LVL</span><br/><span class='metric' style='font-size:13px;'>{html.escape(_bw_level_s)}</span></div>"
+                    f"<div><span class='label'>INVALIDATION</span><br/><span class='metric' style='font-size:13px;'>{html.escape(_bw_inv_s)}</span></div>"
+                    f"</div>"
+                    f"<div style='display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:8px;font-size:11px;color:#cbd5e1;'>"
+                    f"<div><span class='label'>PRESSURE</span><br/>{_bw_pressure:.0f}/100</div>"
+                    f"<div><span class='label'>FOLLOW-THROUGH</span><br/>{_bw_follow:.0f}/100</div>"
+                    f"<div><span class='label'>CONFIDENCE</span><br/>{_bw_conf*100:.0f}%</div>"
+                    f"<div><span class='label'>CHASE</span><br/>{f'{_bw_chase:.2f} ATR' if _bw_chase is not None else '—'}</div>"
+                    f"</div>"
+                    f"<div style='display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:8px;font-size:11px;color:#cbd5e1;'>"
+                    f"<div><span class='label'>HOLD SCORE</span><br/>{_bw_hold:.0f}/100</div>"
+                    f"<div><span class='label'>FALSE BREAK</span><br/>{_bw_false:.0f}/100</div>"
+                    f"<div><span class='label'>PLAYBOOK</span><br/>{html.escape(_bw_mgmt.replace('_', ' '))}</div>"
+                    f"</div>"
+                    f"<div class='muted' style='font-size:11px;margin-top:8px;'>"
+                    f"Event risk: {html.escape(_bw_evt_s)} &nbsp;|&nbsp; Reason: {html.escape(_bw_reason.replace('_', ' '))}"
+                    f"</div>"
+                    + (f"<div class='muted' style='font-size:11px;margin-top:4px;'>Signals: {html.escape(' · '.join(_bw_reasons))}</div>" if _bw_reasons else "")
+                    + "</div>",
+                    unsafe_allow_html=True,
+                )
         except Exception:
             pass
 
@@ -6881,6 +8090,25 @@ elif page == "Portfolio":
             if _ne_gap:
                 _ne_footer_parts.append(f"avg gap: {int(_ne_gap)}m")
             _ne_footer = " · ".join(_ne_footer_parts)
+            _fc_dir = _safe_str(_ne.get("forecast_direction")) or "—"
+            _fc_contracts = int(_safe_float(_ne.get("forecast_contracts")) or 1)
+            _fc_trigger = _safe_float(_ne.get("forecast_trigger_price"))
+            _fc_target = _safe_float(_ne.get("forecast_target_price"))
+            _fc_profit_total = _safe_float(_ne.get("forecast_profit_total_usd"))
+            _fc_profit_per = _safe_float(_ne.get("forecast_profit_per_contract_usd"))
+            _fc_rr = _safe_float(_ne.get("forecast_rr"))
+            _fc_eta = _safe_str(_ne.get("eta_window_display")) or _ne_display
+            _fc_htf = _safe_str(_ne.get("htf_bias_summary")) or "HTF context unavailable"
+            _fc_logic = _safe_str(_ne.get("timeframe_logic")) or ""
+            _fc_price_logic = _safe_str(_ne.get("price_logic")) or ""
+            _fc_label = _safe_str(_ne.get("forecast_trigger_label")) or "trigger zone"
+            _fc_ready = _safe_float(_ne.get("forecast_readiness_pct")) or 0
+            _fc_dir_color = "#34d399" if _fc_dir == "long" else "#f87171" if _fc_dir == "short" else "#9ca3af"
+            _fc_trigger_s = f"${_fc_trigger:.5f}" if _fc_trigger is not None else "—"
+            _fc_target_s = f"${_fc_target:.5f}" if _fc_target is not None else "—"
+            _fc_profit_s = f"${_fc_profit_total:,.2f}" if _fc_profit_total is not None else "—"
+            _fc_profit_per_s = f"${_fc_profit_per:,.2f}/contract" if _fc_profit_per is not None else "—"
+            _fc_rr_s = f"{_fc_rr:.1f}R" if _fc_rr is not None else "—"
             st.markdown(
                 f"<div class='intel-card' style='padding:10px 14px;margin-top:8px;'>"
                 f"<div class='intel-title'>NEXT TRADE</div>"
@@ -6888,6 +8116,20 @@ elif page == "Portfolio":
                 f"<div><span class='label'>WATCHING</span><br/><span class='metric' style='font-size:14px;'>{_ne_setup}</span></div>"
                 f"<div style='text-align:right;'><span class='label'>STATUS</span><br/><span class='metric' style='font-size:14px;color:{_ne_status_color};'>{_ne_display}</span></div>"
                 f"</div>"
+                f"<div style='display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:8px;'>"
+                f"<div><span class='label'>LEAN</span><br/><span class='metric' style='font-size:13px;color:{_fc_dir_color};'>{html.escape(_fc_dir.upper())}</span></div>"
+                f"<div><span class='label'>ETA</span><br/><span class='metric' style='font-size:13px;'>{html.escape(_fc_eta)}</span></div>"
+                f"<div><span class='label'>TARGET</span><br/><span class='metric' style='font-size:13px;'>{html.escape(_fc_profit_s)}</span></div>"
+                f"<div><span class='label'>SIZE</span><br/><span class='metric' style='font-size:13px;'>{_fc_contracts} contract{'s' if _fc_contracts != 1 else ''}</span></div>"
+                f"</div>"
+                f"<div style='display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px;font-size:11px;color:#cbd5e1;'>"
+                f"<div><span class='label'>TRIGGER</span><br/>{html.escape(_fc_trigger_s)}<br/><span class='muted'>{html.escape(_fc_label)}</span></div>"
+                f"<div><span class='label'>TARGET PX</span><br/>{html.escape(_fc_target_s)}<br/><span class='muted'>{html.escape(_fc_profit_per_s)}</span></div>"
+                f"<div><span class='label'>READINESS</span><br/>{_fc_ready:.0f}%<br/><span class='muted'>{html.escape(_fc_rr_s)}</span></div>"
+                f"<div><span class='label'>HTF</span><br/><span class='muted'>{html.escape(_fc_htf)}</span></div>"
+                f"</div>"
+                + (f"<div class='muted' style='font-size:11px;margin-top:8px;'>{html.escape(_fc_logic)}</div>" if _fc_logic else "")
+                + (f"<div class='muted' style='font-size:11px;margin-top:4px;'>{html.escape(_fc_price_logic)}</div>" if _fc_price_logic else "")
                 + (f"<div class='muted' style='font-size:10px;margin-top:4px;'>{_ne_footer}</div>" if _ne_footer else "")
                 + f"</div>",
                 unsafe_allow_html=True,
@@ -7063,6 +8305,49 @@ elif page == "Portfolio":
                     _kpi("Expectancy", f"{'+'if _expectancy>=0 else ''}${_expectancy:.2f}", tone=("good" if _expectancy > 0 else "bad"))
     except Exception:
         pass
+
+    # ── Share Report to Slack ─────────────────────────────────────────────
+    st.markdown("<div style='height:10px;'></div>", unsafe_allow_html=True)
+    if st.button("Share Report to Slack", key="slack_share_portfolio"):
+        try:
+            import requests as _slack_req
+            _now_pt = datetime.now(timezone.utc).astimezone(PT)
+            _pos_label = state.get("open_position") or state.get("state") or "Flat"
+            _eq_val = state.get("equity_start_usd") or portfolio_value or 0
+            _pnl_val = state.get("pnl_today_usd") or 0
+            _trades_val = state.get("trades_today") or state.get("trades") or 0
+            _vol_val = state.get("vol_phase") or state.get("vol_state") or "unknown"
+            _consec_val = state.get("consecutive_losses") or 0
+            _report_text = (
+                f"*Rex Thornton* [DASHBOARD REPORT]\n"
+                f"## Trading Report -- {_now_pt.strftime('%B %d, %Y %I:%M %p PT')}\n\n"
+                f"Equity: ${float(_eq_val):,.2f}\n"
+                f"Position: {_pos_label}\n"
+                f"PnL Today: ${float(_pnl_val):,.2f}\n"
+                f"Trades Today: {_trades_val}\n"
+                f"Vol State: {_vol_val}\n"
+                f"Consecutive Losses: {_consec_val}\n"
+            )
+            _slack_token = os.environ.get("SLACK_BOT_TOKEN", "")
+            _slack_resp = _slack_req.post(
+                "https://slack.com/api/chat.postMessage",
+                headers={
+                    "Authorization": f"Bearer {_slack_token}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "channel": "C0AN8SG030W",
+                    "text": _report_text,
+                },
+                timeout=10,
+            )
+            if _slack_resp.ok and _slack_resp.json().get("ok"):
+                st.success("Report shared to #xlm-trading!")
+            else:
+                _err_msg = _slack_resp.json().get("error", _slack_resp.text[:100])
+                st.error(f"Slack error: {_err_msg}")
+        except Exception as _slack_err:
+            st.error(f"Failed to share: {str(_slack_err)[:120]}")
 
     st.markdown("<div class='panel-title' style='margin-top:14px;'>Open Positions (Exchange)</div>", unsafe_allow_html=True)
     if _cfm_positions:
@@ -7557,6 +8842,237 @@ elif page == "Signals":
                 f"OI {float(_cascade.get('oi_delta_pct', 0))*100:+.2f}%</span></div>",
                 unsafe_allow_html=True,
             )
+    except Exception:
+        pass
+
+    # == THE WOLF'S STRATEGY ARSENAL + REASONING ==============================
+    # Shows all 24 strategies, highlights the active one, wick zones, patterns,
+    # and Jordan Belfort-style market reasoning.
+
+    try:
+        _active_entry = _safe_str(last_decision.get("entry_signal") or last_decision.get("selected_entry_type") or last_decision.get("entry_type_long") or last_decision.get("entry_type_short"))
+        _active_lane = _safe_str(last_decision.get("lane"))
+        _active_dir = _safe_str(last_decision.get("direction"))
+        _v4_score = _safe_float(last_decision.get("v4_selected_score")) or 0
+        _v4_thresh = _safe_float(last_decision.get("v4_selected_threshold")) or 75
+        _regime = _safe_str(last_decision.get("v4_regime") or last_decision.get("regime")) or "neutral"
+        _vol_phase = _safe_str(last_decision.get("vol_phase")) or "?"
+        _htf_trend_val = _safe_str(last_decision.get("htf_trend")) or "neutral"
+        _align_bonus = int(_safe_float(last_decision.get("alignment_bonus")) or 0)
+        _zone_bonus = int(_safe_float(last_decision.get("zone_bonus")) or 0)
+        _pattern_mod_val = int(_safe_float(last_decision.get("pattern_mod")) or 0)
+        _wz_near = bool(last_decision.get("wick_zone_near"))
+        _wz_bias = _safe_str(last_decision.get("wick_zone_bias")) or "none"
+        _wz_conf = _safe_float(last_decision.get("wick_zone_confidence")) or 0
+        _wz_tf = _safe_str(last_decision.get("wick_zone_strongest_tf")) or ""
+        _wz_top3 = last_decision.get("wick_zones_top3") or []
+        _patterns_active = last_decision.get("patterns_active") or []
+        _ms_promoted = bool(last_decision.get("micro_sweep_promoted"))
+        _ms_long = last_decision.get("micro_sweep_long")
+        _ms_short = last_decision.get("micro_sweep_short")
+        _htf_avail = last_decision.get("htf_data_available") or {}
+        _overnight_ok = bool(last_decision.get("overnight_trading_ok"))
+        _sweep_det = bool(last_decision.get("sweep_detected"))
+        _squeeze_det = bool(last_decision.get("squeeze_detected"))
+        _price_now = _safe_float(last_decision.get("price")) or 0
+
+        # -- Strategy Arsenal --
+        st.markdown("<div class='panel-title' style='margin-top:18px;'>Strategy Arsenal</div>", unsafe_allow_html=True)
+
+        _strategies = [
+            ("A", "Trend Continuation", "trend_continuation", "#3b82f6", "Pullback into EMA trend + confluence"),
+            ("B", "Breakout Retest", "breakout_retest", "#10b981", "Level breakout + retest hold"),
+            ("C", "Sweep Recovery", "sweep_recovery", "#f59e0b", "Wick flush past swing + reclaim"),
+            ("E", "Squeeze Impulse", "compression_breakout", "#8b5cf6", "Vol compression to ignition transition"),
+            ("F", "Compression Breakout", "compression_breakout", "#ec4899", "BB squeeze pop with structure"),
+            ("G", "Range Scalp", "compression_range", "#06b6d4", "Mean reversion at range edges"),
+            ("H", "Trend Structure", "trend_continuation", "#0ea5e9", "Swing LH/LL + RSI slope"),
+            ("I", "Fib Retrace", "fib_retrace", "#14b8a6", "Fib level + reversal confirms"),
+            ("J", "Slow Bleed", "slow_bleed_hunter", "#64748b", "3+ directional candles + EMA align"),
+            ("K", "Wick Rejection", "wick_rejection", "#f97316", "60%+ wick at structure + body closes away"),
+            ("M", "Volume Climax", "volume_climax_reversal", "#dc2626", "2.5x volume spike + reversal close"),
+            ("N", "VWAP Reversion", "vwap_reversion", "#7c3aed", "1%+ from VWAP + reverting"),
+            ("P", "Grid Range", "grid_range", "#0891b2", "Compression + RSI extreme + S/R touch"),
+            ("Q", "Funding Arb", "funding_arb_bias", "#ca8a04", "Extreme funding rate + direction earns"),
+            ("R", "Low Vol Regime", "regime_low_vol", "#4f46e5", "BB squeeze + ATR declining + edge"),
+            ("S", "Stat Arb", "stat_arb_proxy", "#9333ea", "Z-score 2+ sigma mean reversion"),
+            ("T", "Orderflow", "orderflow_imbalance", "#059669", "Volume delta 2:1 + candle confirm"),
+            ("U", "Macro MA Cross", "macro_ma_cross", "#b91c1c", "200 MA cross on 1h + 4h confirms"),
+            ("V", "Liquidity Sweep", "liquidity_sweep", "#d97706", "Liquidation cluster sweep/magnet"),
+            ("W", "HTF Breakout", "htf_breakout_continuation", "#2563eb", "4h/1h breakout + EMA stack"),
+            ("X", "Hourly Continuation", "hourly_continuation", "#6366f1", "1h direction + 15m momentum"),
+            ("MS", "Micro-Sweep", "micro_sweep", "#ef4444", "1m/5m wick flush + fast reclaim"),
+        ]
+
+        _strat_html = "<div style='display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;'>"
+        for _s_lane, _s_name, _s_type, _s_color, _s_desc in _strategies:
+            _is_active = (_active_lane == _s_lane) or (_active_entry and _s_type in _active_entry) or (_s_lane == "MS" and _ms_promoted)
+            _bg = f"{_s_color}25" if _is_active else "rgba(30,41,59,0.5)"
+            _border = f"2px solid {_s_color}" if _is_active else "1px solid rgba(75,85,99,0.2)"
+            _glow = f"box-shadow:0 0 12px {_s_color}40;" if _is_active else ""
+            _active_badge = f"<span style='color:{_s_color};font-size:8px;font-weight:800;letter-spacing:1px;'>ACTIVE</span>" if _is_active else ""
+            _strat_html += (
+                f"<div style='background:{_bg};border:{_border};border-radius:8px;padding:8px 10px;{_glow}'>"
+                f"<div style='display:flex;justify-content:space-between;align-items:center;'>"
+                f"<span style='color:{_s_color};font-weight:700;font-size:12px;'>Lane {_s_lane}</span>"
+                f"{_active_badge}</div>"
+                f"<div style='color:#e2e8f0;font-size:11px;font-weight:600;margin:2px 0;'>{_s_name}</div>"
+                f"<div style='color:#9ca3af;font-size:9px;'>{_s_desc}</div>"
+                f"</div>"
+            )
+        _strat_html += "</div>"
+        st.markdown(_strat_html, unsafe_allow_html=True)
+
+        # -- Wick Zones Map --
+        if _wz_top3:
+            st.markdown("<div class='panel-title' style='margin-top:14px;'>Wick Zone Map (Multi-TF S/R)</div>", unsafe_allow_html=True)
+            _wz_html = ""
+            for _z in _wz_top3:
+                _z_side = str(_z.get("side", ""))
+                _z_level = float(_z.get("level", 0))
+                _z_strength = float(_z.get("strength", 0))
+                _z_touches = int(_z.get("touches", 0))
+                _z_tf = str(_z.get("strongest_tf", ""))
+                _z_color = "#10b981" if _z_side == "support" else "#ef4444"
+                _z_icon = "&#9650;" if _z_side == "support" else "&#9660;"
+                _z_bar_w = min(100, _z_strength)
+                _z_dist = ""
+                if _price_now > 0 and _z_level > 0:
+                    _z_dist_pct = ((_z_level - _price_now) / _price_now) * 100
+                    _z_dist = f"({_z_dist_pct:+.2f}%)"
+                _wz_html += (
+                    f"<div style='display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid rgba(75,85,99,0.15);'>"
+                    f"<span style='color:{_z_color};font-size:12px;width:16px;'>{_z_icon}</span>"
+                    f"<span style='color:{_z_color};font-size:10px;font-weight:700;text-transform:uppercase;width:60px;'>{_z_side}</span>"
+                    f"<span style='color:#e2e8f0;font-size:12px;font-weight:600;width:90px;'>${_z_level:.6f}</span>"
+                    f"<span style='color:#9ca3af;font-size:10px;width:50px;'>{_z_dist}</span>"
+                    f"<div style='flex:1;height:6px;background:#1f2937;border-radius:3px;overflow:hidden;'>"
+                    f"<div style='width:{_z_bar_w}%;height:100%;background:{_z_color};border-radius:3px;'></div></div>"
+                    f"<span style='color:#d1d5db;font-size:10px;width:35px;text-align:right;'>{_z_strength:.0f}</span>"
+                    f"<span style='color:#6b7280;font-size:9px;width:45px;text-align:right;'>{_z_touches}t / {_z_tf}</span>"
+                    f"</div>"
+                )
+            st.markdown(f"<div class='card' style='padding:10px 14px;'>{_wz_html}</div>", unsafe_allow_html=True)
+
+        # -- Active Patterns --
+        if _patterns_active:
+            st.markdown("<div class='panel-title' style='margin-top:14px;'>Chart Patterns Forming</div>", unsafe_allow_html=True)
+            _pat_html = ""
+            for _p in _patterns_active[:4]:
+                _p_name = str(_p.get("pattern", "")).replace("_", " ").upper()
+                _p_bias = str(_p.get("bias", ""))
+                _p_conf = float(_p.get("confidence", 0))
+                _p_desc = str(_p.get("desc", ""))
+                _p_color = "#10b981" if _p_bias == "long" else "#ef4444" if _p_bias == "short" else "#f59e0b"
+                _p_icon = "&#9650;" if _p_bias == "long" else "&#9660;" if _p_bias == "short" else "&#9679;"
+                _pat_html += (
+                    f"<div style='display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(75,85,99,0.15);'>"
+                    f"<span style='color:{_p_color};font-size:12px;'>{_p_icon}</span>"
+                    f"<span style='background:{_p_color}20;color:{_p_color};font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;'>{_p_name}</span>"
+                    f"<span style='color:#d1d5db;font-size:10px;flex:1;'>{_p_desc[:120]}</span>"
+                    f"<span style='color:#9ca3af;font-size:10px;'>{_p_conf:.0%}</span>"
+                    f"</div>"
+                )
+            st.markdown(f"<div class='card' style='padding:10px 14px;'>{_pat_html}</div>", unsafe_allow_html=True)
+
+        # -- The Wolf's Take (Jordan Belfort reasoning) --
+        st.markdown("<div class='panel-title' style='margin-top:14px;'>The Wolf's Take</div>", unsafe_allow_html=True)
+
+        _wolf_lines = []
+
+        # Market regime read
+        if _regime == "trend":
+            _wolf_lines.append("Market's got a PULSE right now. Trend regime. Money is MOVING. This is where you press, not where you sit on your hands.")
+        elif _regime == "mean_reversion":
+            _wolf_lines.append("Choppy waters. Mean reversion regime. The smart play is buying dips at support and selling rips at resistance. Discipline wins here.")
+        else:
+            _wolf_lines.append("Market's deciding what it wants to be. Neutral regime. We wait for the pitch we like, then we SWING.")
+
+        # HTF trend
+        if _htf_trend_val == "bullish":
+            _wolf_lines.append(f"The big picture is BULLISH. Daily and 4h trend pointing up. Shorts here are fighting the tide. You want to be buying dips, not picking tops.")
+        elif _htf_trend_val == "bearish":
+            _wolf_lines.append(f"The macro trend is BEARISH. Daily structure is pushing down. Longs are swimming upstream. Sell the rips, don't catch falling knives.")
+
+        # TF alignment
+        if _align_bonus >= 8:
+            _wolf_lines.append(f"ALL timeframes are aligned ({_align_bonus:+d} alignment). When the 1-minute, 15-minute, 1-hour, AND the daily all agree? That's not a coincidence. That's the market TELLING you which way it's going.")
+        elif _align_bonus >= 4:
+            _wolf_lines.append(f"Most timeframes agree ({_align_bonus:+d} alignment). Good confluence but not unanimous. Size accordingly.")
+        elif _align_bonus <= -3:
+            _wolf_lines.append(f"Timeframes are FIGHTING each other ({_align_bonus:+d} alignment). Mixed signals. This is where amateurs blow up. We stay small or we stay OUT.")
+
+        # Wick zones
+        if _wz_near and _wz_bias == "support_bounce":
+            _wolf_lines.append(f"Price is sitting RIGHT on a proven support zone (confidence {_wz_conf:.0%}, strongest on {_wz_tf}). This level has rejected sellers before. The buyers are HERE. That's your edge for longs.")
+        elif _wz_near and _wz_bias == "resistance_reject":
+            _wolf_lines.append(f"Price is pressing against a WALL of resistance (confidence {_wz_conf:.0%}, strongest on {_wz_tf}). Multiple rejections at this level. Sellers are defending it. Short bias until it breaks.")
+
+        # Patterns
+        for _p in _patterns_active[:2]:
+            _pn = str(_p.get("pattern", "")).replace("_", " ")
+            _pb = str(_p.get("bias", ""))
+            _pd = str(_p.get("desc", ""))
+            if "double_bottom" in str(_p.get("pattern", "")):
+                _wolf_lines.append(f"I see a DOUBLE BOTTOM forming. Price bounced off the same level twice. That's institutional accumulation. The smart money is loading up down there.")
+            elif "double_top" in str(_p.get("pattern", "")):
+                _wolf_lines.append(f"DOUBLE TOP in play. Two failed breakout attempts at the same resistance. Distribution pattern. The big boys are selling into strength.")
+            elif "channel" in str(_p.get("pattern", "")):
+                _wolf_lines.append(f"We're in a CHANNEL. Defined range. The play is simple: buy the bottom, sell the top. Grid range is the bread and butter here.")
+            elif "breakout" in str(_p.get("pattern", "")):
+                _wolf_lines.append(f"BREAKOUT through a tested level. When a level that held 3+ times finally breaks? That's conviction. Ride it.")
+            elif "fakeout" in str(_p.get("pattern", "")):
+                _wolf_lines.append(f"FAKEOUT detected. They pushed through the level to grab stops then snapped right back. Classic stop hunt. Fade the fakeout.")
+
+        # Micro sweep
+        if _ms_promoted:
+            _wolf_lines.append("MICRO-SWEEP fired on the 1-minute chart. Fast liquidation wick with immediate reclaim. This is the smart money grabbing liquidity. We ride with them, not against them.")
+        elif _ms_long and isinstance(_ms_long, dict) and _ms_long.get("detected"):
+            _wolf_lines.append(f"5m micro-sweep detected LONG (score {_ms_long.get('score', 0)}). Watching for entry confirmation.")
+        elif _ms_short and isinstance(_ms_short, dict) and _ms_short.get("detected"):
+            _wolf_lines.append(f"5m micro-sweep detected SHORT (score {_ms_short.get('score', 0)}). Watching for entry confirmation.")
+
+        # Active strategy
+        if _active_entry and _active_dir:
+            _wolf_lines.append(f"ACTIVE PLAY: {_active_entry.replace('_', ' ').upper()} going {_active_dir.upper()} via Lane {_active_lane}. Score {int(_v4_score)}/{int(_v4_thresh)}. The setup is there. Now we execute.")
+        elif not _active_entry:
+            if _v4_score > 0 and _v4_score < _v4_thresh:
+                _wolf_lines.append(f"Setup is BREWING but not ready. Score {int(_v4_score)}/{int(_v4_thresh)}. We need {int(_v4_thresh - _v4_score)} more points of confluence. Patience. The trade will come to us.")
+            else:
+                _wolf_lines.append("No play right now. And that's FINE. The best traders know when NOT to trade. We're watching, we're waiting, and when the setup comes? We'll be ready.")
+
+        # Overnight
+        if _overnight_ok:
+            _wolf_lines.append("Overnight margin is SAFE. We can trade through the night. No restrictions.")
+
+        # Vol phase
+        if _vol_phase == "COMPRESSION":
+            _wolf_lines.append("Volatility is compressed. The spring is LOADED. When this thing pops, it'll move fast. Be ready.")
+        elif _vol_phase == "EXPANSION":
+            _wolf_lines.append("Volatility is EXPANDING. The move is happening NOW. This is the window. Don't hesitate.")
+
+        _wolf_color = "#10b981" if _active_dir == "long" else "#ef4444" if _active_dir == "short" else "#f59e0b"
+        _wolf_text = " ".join(_wolf_lines) if _wolf_lines else "Scanning the markets... waiting for the perfect setup."
+        st.markdown(
+            f"<div class='card' style='padding:14px 16px;border-left:3px solid {_wolf_color};background:linear-gradient(90deg,rgba(15,23,42,0.95),rgba(30,41,59,0.8));'>"
+            f"<div style='color:{_wolf_color};font-size:10px;font-weight:800;letter-spacing:2px;margin-bottom:6px;'>THE WOLF SPEAKS</div>"
+            f"<div style='color:#e2e8f0;font-size:12px;line-height:1.7;'>{_wolf_text}</div>"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+
+        # -- Data Coverage Badge --
+        _tf_badges = []
+        for _tf_name, _tf_ok in [("1m", True), ("5m", True), ("15m", True), ("1h", True), ("4h", True),
+                                   ("1D", bool(_htf_avail.get("1d"))), ("1W", bool(_htf_avail.get("1w"))), ("1M", bool(_htf_avail.get("1mo")))]:
+            _tf_clr = "#10b981" if _tf_ok else "#4b5563"
+            _tf_badges.append(f"<span style='background:{_tf_clr}20;color:{_tf_clr};font-size:9px;font-weight:600;padding:2px 6px;border-radius:3px;'>{_tf_name}</span>")
+        st.markdown(
+            f"<div style='display:flex;align-items:center;gap:4px;margin-top:8px;'>"
+            f"<span style='color:#6b7280;font-size:9px;margin-right:4px;'>TIMEFRAME COVERAGE:</span>"
+            f"{' '.join(_tf_badges)}</div>",
+            unsafe_allow_html=True,
+        )
     except Exception:
         pass
 
@@ -8142,7 +9658,7 @@ elif page == "System":
 
         _paper_mode = bool(_c.get("paper", True))
         _mode_color = "#f59e0b" if _paper_mode else "#10b981"
-        _mode_text = "PAPER" if _paper_mode else "LIVE"
+        _mode_text = "PAPER" if _paper_mode else "HUNTING"
 
         _rows = "".join([
             _section("Identity"),
@@ -8282,13 +9798,30 @@ st.markdown("<div style='height:14px;'></div>", unsafe_allow_html=True)
 # ══════════════════════════════════════════════════════════════════════════
 # FLOATING CLAUDE CHAT WIDGET — injected on every page
 # ══════════════════════════════════════════════════════════════════════════
-# Chat API server started by xdr-fg on port 8504
+# Chat API server runs alongside the dashboard on port 8504.
+_chat_api_base = str(os.environ.get("XLM_CHAT_API_URL", "") or "").strip()
 
 components.html("""
 <script>
 (function() {
     const doc = window.parent.document;
     if (doc.getElementById('claude-float-btn')) return;
+    const explicitChatBase = __CHAT_API_BASE__;
+
+    function resolveChatBase() {
+        const explicit = String(explicitChatBase || '').trim();
+        if (explicit) {
+            return explicit.replace(/\\/?(ask|launch)?\\/?$/i, '').replace(/\\/+$/i, '');
+        }
+        try {
+            var current = new URL(window.location.href);
+            if (current.hostname && current.hostname !== 'about') {
+                return current.protocol + '//' + current.hostname + ':8504';
+            }
+        } catch(e) {}
+        return 'http://129.159.38.250:8504';
+    }
+    const chatBase = resolveChatBase();
 
     // --- CSS ---
     const style = doc.createElement('style');
@@ -8414,22 +9947,23 @@ components.html("""
     panel.innerHTML = `
         <div class="cc-header">
             <div>
-                <div class="cc-header-title">&#9670; AI Control Desk</div>
-                <div class="cc-header-sub">Claude/Gemini delegates with live bot context</div>
+                <div class="cc-header-title">&#128058; The Wolf's Desk</div>
+                <div class="cc-header-sub">Talk to The Wolf -- live bot context, Belfort energy</div>
             </div>
             <button class="cc-clear-btn" id="cc-clear">Clear</button>
         </div>
         <div class="cc-controls">
             <select class="cc-select" id="cc-engine">
-                <option value="claude" selected>Engine: Claude</option>
+                <option value="openai" selected>Engine: OpenAI</option>
+                <option value="claude">Engine: Claude</option>
                 <option value="gemini">Engine: Gemini</option>
             </select>
             <select class="cc-select" id="cc-mode">
-                <option value="review" selected>Mode: Review</option>
+                <option value="chat" selected>Mode: Chat</option>
+                <option value="review">Mode: Review</option>
                 <option value="plan">Mode: Plan</option>
-                <option value="execute">Mode: Execute</option>
             </select>
-            <input class="cc-mini-input" id="cc-model" placeholder="Model (haiku/sonnet/...)" />
+            <input class="cc-mini-input" id="cc-model" placeholder="Model (gpt-4o-mini/...)" />
             <input class="cc-mini-input" id="cc-agent" placeholder="Agent (optional)" />
             <label class="cc-web"><input type="checkbox" id="cc-web" />Allow WebSearch</label>
         </div>
@@ -8437,7 +9971,7 @@ components.html("""
             <div class="cc-empty" id="cc-empty">
                 <div class="cc-empty-icon">&#9670;</div>
                 <div class="cc-empty-text">Ask anything about your bot<br>
-                "Why no trades?" &bull; "What does Gemini veto?" &bull; "Give execution plan"</div>
+                "Why no trades?" &bull; "What's the play?" &bull; "Give me the wolf's plan"</div>
             </div>
         </div>
         <div class="cc-input-row">
@@ -8534,7 +10068,7 @@ components.html("""
         sendBtn.textContent = '...';
 
         try {
-            const res = await fetch('http://127.0.0.1:8504/ask', {
+            const res = await fetch(chatBase + '/ask', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
@@ -8570,16 +10104,16 @@ components.html("""
             <div class="cc-empty" id="cc-empty">
                 <div class="cc-empty-icon">&#9670;</div>
                 <div class="cc-empty-text">Ask anything about your bot<br>
-                "Why no trades?" &bull; "What does Gemini veto?" &bull; "Give execution plan"</div>
+                "Why no trades?" &bull; "What's the play?" &bull; "Give me the wolf's plan"</div>
             </div>`;
     };
 })();
 </script>
-""", height=0)
+""".replace("__CHAT_API_BASE__", json.dumps(_chat_api_base or "")), height=0)
 
 def _render_footer():
     st.markdown(
-        f"<div class='footer'>LIVE VIEW • {datetime.now(timezone.utc).astimezone(PT).strftime('%I:%M:%S %p UTC-8')}</div>",
+        f"<div class='footer'>THE WOLF IS WATCHING • {datetime.now(timezone.utc).astimezone(PT).strftime('%I:%M:%S %p PT')}</div>",
         unsafe_allow_html=True,
     )
 
