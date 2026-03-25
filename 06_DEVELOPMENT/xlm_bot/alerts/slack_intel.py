@@ -245,12 +245,10 @@ def post_cycle_intel(decision: dict, event: str = "cycle") -> None:
 
     try:
         if event == "trade_open" or event == "trade_close":
-            # High priority: post to multiple channels immediately
-            rex = rex_thornton_analysis(decision)
-            _THROTTLE_OVERRIDE = True
-            _post("xlm-trading", rex, "xlmbot")
+            # High priority: run full agent debate as a Slack thread
+            post_debate(decision)
             _post("war-room", marcus_cole_summary(decision), "warroom")
-            _post("hive-alerts", rex, "warroom")
+            _post("hive-alerts", rex_thornton_analysis(decision), "warroom")
 
         elif event == "regime_change":
             rex = rex_thornton_analysis(decision)
@@ -268,6 +266,66 @@ def post_cycle_intel(decision: dict, event: str = "cycle") -> None:
 
     except Exception as e:
         logger.warning("Slack intel post error: %s", e)
+
+
+def _post_thread(channel_key: str, parent_text: str, replies: list[str], bot: str = "warroom") -> bool:
+    """Post a parent message then replies as a thread."""
+    channel_id = CHANNELS.get(channel_key)
+    token = TOKENS.get(bot)
+    if not channel_id or not token:
+        return False
+
+    try:
+        # Post parent
+        resp = requests.post(
+            _SLACK_API,
+            headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+            json={"channel": channel_id, "text": parent_text, "unfurl_links": False},
+            timeout=10,
+        )
+        if resp.status_code != 200 or not resp.json().get("ok"):
+            return False
+        parent_ts = resp.json().get("ts")
+        if not parent_ts:
+            return False
+
+        # Post replies in thread
+        for reply in replies:
+            import time as _time
+            _time.sleep(0.5)  # rate limit
+            requests.post(
+                _SLACK_API,
+                headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json"},
+                json={"channel": channel_id, "text": reply, "thread_ts": parent_ts, "unfurl_links": False},
+                timeout=10,
+            )
+        return True
+    except Exception as e:
+        logger.warning("Thread post error: %s", e)
+        return False
+
+
+def post_debate(decision: dict) -> bool:
+    """Run the agent debate and post as a Slack thread in #xlm-trading.
+
+    MiroFish-style: agents analyze the candidate, post their takes in a thread,
+    Marcus breaks the tie. All visible in Slack.
+    """
+    try:
+        from ai.agent_debate import run_debate, debate_to_slack_blocks
+        result = run_debate(decision)
+        if not result:
+            return False
+        messages = debate_to_slack_blocks(result)
+        if not messages:
+            return False
+        # First message is parent (Marcus final call), rest are agent replies
+        parent = messages[0]
+        replies = messages[1:] if len(messages) > 1 else []
+        return _post_thread("xlm-trading", parent, replies, "xlmbot")
+    except Exception as e:
+        logger.warning("Debate post error: %s", e)
+        return False
 
 
 def post_hourly_summary(decision: dict) -> None:
