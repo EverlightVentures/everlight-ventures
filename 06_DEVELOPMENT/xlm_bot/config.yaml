@@ -312,7 +312,7 @@ margin_policy:
   # Overnight auto-enable: when equity covers overnight margin with buffer, allow 24/7 trading
   overnight_trading:
     mode: auto             # auto = enable when equity sufficient, always = force on, never = force off
-    min_equity_ratio: 1.20 # need equity >= 1.2x overnight margin to enable (e.g., $432*1.2 = $518)
+    min_equity_ratio: 1.05 # need equity >= 1.05x overnight margin (e.g., $432*1.05 = $454)
     overnight_safe_mr: 0.85  # max overnight MR to allow entries during overnight hours
   friday_break:
     enabled: true

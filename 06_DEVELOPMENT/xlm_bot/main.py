@@ -56,6 +56,7 @@ from strategy.telemetry import write_cycle_telemetry
 from risk.balance_reconciler import reconcile_balances as _reconcile_balances, ReconcileResult
 from alerts import slack as slack_alert
 from alerts import slack_reports as _slack_reports
+from alerts import slack_intel
 from ai import claude_advisor as ai_advisor
 from ai import gemini_advisor
 from ai import perplexity_advisor
@@ -5291,6 +5292,10 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 held_min=_emr_held, expected_hold_min=_emr_exp,
                 size=int(open_pos.get("size") or 1),
             )
+            try:
+                slack_intel.post_cycle_intel({"price": _emr_exit_price, "direction": direction, "pnl_usd": pnl_usd, "exit_reason": "emergency_exit_mr"}, event="trade_close")
+            except Exception:
+                pass
             state["last_exit_time"] = exit_time_iso
             state["open_position"] = None
             save_state(state)
@@ -8316,6 +8321,11 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             
         log_decision(config, log_payload)
         save_state(state)
+        # Post cycle intel to Slack (throttled, max 1 per 5 min)
+        try:
+            slack_intel.post_cycle_intel(log_payload, event="cycle")
+        except Exception:
+            pass
         return
 
     cooldown_loss_threshold = int(config.get("risk", {}).get("cooldown_loss_threshold", 3) or 3)
@@ -10106,6 +10116,12 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
 
     save_state(state)
     durable.set_kv("open_position", state["open_position"])
+
+    # Post trade open to Slack with agent analysis
+    try:
+        slack_intel.post_cycle_intel(log_payload, event="trade_open")
+    except Exception:
+        pass
 
 
 _shutdown_logged = False
