@@ -405,3 +405,402 @@ def debate_to_dashboard(result: DebateResult) -> list[dict]:
         "signals": [f"{result.go_count} go / {result.no_go_count} no_go"],
     })
     return feed
+
+
+# ---------------------------------------------------------------------------
+# WHOLESALE TEAM: Chart Dawson, Filter Banks, Hammer Knox, Marcus Cole
+# ---------------------------------------------------------------------------
+
+def run_wholesale_debate(data: dict) -> DebateResult | None:
+    """Wholesale pipeline debate. Data comes from rex_pipeline Supabase table.
+
+    Expected keys: leads (list), total_leads, tier1_count, tier2_count,
+    tier3_count, total_fees, contacted_count, buyer_count, top_lead (dict)
+    """
+    leads = data.get("leads") or []
+    total = int(data.get("total_leads") or len(leads))
+    t1 = int(data.get("tier1_count") or 0)
+    t2 = int(data.get("tier2_count") or 0)
+    t3 = int(data.get("tier3_count") or 0)
+    fees = float(data.get("total_fees") or 0)
+    contacted = int(data.get("contacted_count") or 0)
+    buyers = int(data.get("buyer_count") or 0)
+    top = data.get("top_lead") or {}
+
+    # --- Chart Dawson: Analytics ---
+    chart_signals = []
+    chart_verdict = "wait"
+    chart_conf = 0.5
+
+    if total >= 10:
+        chart_signals.append(f"{total} active leads in pipeline")
+        chart_conf += 0.1
+    elif total >= 5:
+        chart_signals.append(f"{total} leads - pipeline is thin")
+    else:
+        chart_signals.append(f"Only {total} leads - need to source more")
+        chart_conf -= 0.1
+
+    if t1 >= 3:
+        chart_signals.append(f"{t1} Tier 1 ready to close THIS WEEK")
+        chart_conf += 0.15
+        chart_verdict = "go"
+    elif t1 >= 1:
+        chart_signals.append(f"{t1} Tier 1 in play")
+        chart_conf += 0.05
+
+    if fees > 20000:
+        chart_signals.append(f"${fees:,.0f} total potential fees")
+        chart_conf += 0.1
+    elif fees > 5000:
+        chart_signals.append(f"${fees:,.0f} in potential fees")
+
+    contact_rate = (contacted / total * 100) if total > 0 else 0
+    if contact_rate < 50:
+        chart_signals.append(f"Only {contact_rate:.0f}% contacted - outreach gap")
+
+    if chart_verdict != "go":
+        chart_verdict = "go" if t1 >= 2 else "cautious" if total >= 5 else "wait"
+    chart_conf = max(0.1, min(1.0, chart_conf))
+
+    chart_text = f"Pipeline: {total} leads, {t1} Tier 1, {t2} Tier 2, {t3} Long Game. "
+    chart_text += f"Potential fees: ${fees:,.0f}. Contact rate: {contact_rate:.0f}%. "
+    if t1 >= 2:
+        chart_text += "Multiple Tier 1 deals ready. Time to close."
+    elif total < 5:
+        chart_text += "Pipeline is dry. Need fresh leads before anything else."
+    else:
+        chart_text += "Decent pipeline but nothing screaming close right now."
+
+    chart = AgentTake(
+        agent="Chart Dawson", role="Pipeline Analytics",
+        verdict=chart_verdict, confidence=chart_conf,
+        reasoning=chart_text, key_signals=chart_signals,
+    )
+
+    # --- Filter Banks: Lead Quality ---
+    filter_signals = []
+    filter_verdict = "cautious"
+    filter_conf = 0.5
+
+    if t1 > 0 and top:
+        arv = float(top.get("arv") or 0)
+        fee = float(top.get("assignment_fee") or 0)
+        has_email = bool(top.get("owner_email"))
+        filter_signals.append(f"Top lead: {top.get('address', '?')} ARV ${arv:,.0f} fee ${fee:,.0f}")
+        if has_email:
+            filter_signals.append("Has email contact")
+            filter_conf += 0.1
+        if fee >= 5000:
+            filter_signals.append(f"${fee:,.0f} fee - strong margin")
+            filter_conf += 0.15
+            filter_verdict = "go"
+        elif fee >= 2000:
+            filter_signals.append(f"${fee:,.0f} fee - decent")
+            filter_conf += 0.05
+
+    if buyers >= 3:
+        filter_signals.append(f"{buyers} active buyers in the network")
+        filter_conf += 0.1
+    elif buyers == 0:
+        filter_signals.append("No buyers loaded - need investor outreach")
+        filter_verdict = "no_go"
+        filter_conf = 0.7
+
+    filter_conf = max(0.1, min(1.0, filter_conf))
+    if filter_verdict == "go":
+        filter_text = "Lead quality checks out. " + " | ".join(filter_signals) + ". Green light to pursue."
+    elif filter_verdict == "no_go":
+        filter_text = "Blocking. " + " | ".join(filter_signals) + ". Fix this before chasing deals."
+    else:
+        filter_text = "Leads are OK but not exceptional. " + " | ".join(filter_signals) + ". Proceed with due diligence."
+
+    filt = AgentTake(
+        agent="Filter Banks", role="Lead Qualification",
+        verdict=filter_verdict, confidence=filter_conf,
+        reasoning=filter_text, key_signals=filter_signals,
+    )
+
+    # --- Hammer Knox: Closing ---
+    hammer_signals = []
+    hammer_verdict = "wait"
+    hammer_conf = 0.5
+
+    if t1 >= 1:
+        hammer_signals.append(f"{t1} deals ready to close this week")
+        hammer_verdict = "go"
+        hammer_conf = 0.7
+    if contacted > 0 and total > 0:
+        hammer_signals.append(f"{contacted}/{total} contacted")
+    if fees > 10000:
+        hammer_signals.append(f"${fees:,.0f} on the table if we execute")
+        hammer_conf += 0.1
+
+    if top and float(top.get("assignment_fee") or 0) >= 5000:
+        name = top.get("owner_name") or top.get("address") or "top lead"
+        hammer_signals.append(f"Priority: {name} at ${float(top.get('assignment_fee') or 0):,.0f}")
+        hammer_conf += 0.1
+
+    hammer_conf = max(0.1, min(1.0, hammer_conf))
+    if hammer_verdict == "go":
+        hammer_text = "Let me at them. " + " | ".join(hammer_signals) + ". I can close this."
+    else:
+        hammer_text = "Nothing ready to close right now. " + " | ".join(hammer_signals) + ". Keep working the pipeline."
+
+    hammer = AgentTake(
+        agent="Hammer Knox", role="Closer",
+        verdict=hammer_verdict, confidence=hammer_conf,
+        reasoning=hammer_text, key_signals=hammer_signals,
+    )
+
+    # --- Marcus: Final Call ---
+    agents = [chart, filt, hammer]
+    return _marcus_decides(agents, data.get("context", "wholesale pipeline"), "", "", 0, 0)
+
+
+# ---------------------------------------------------------------------------
+# BROKER TEAM: Cupid Osei, Piper Reeves, Cash Montgomery, Marcus Cole
+# ---------------------------------------------------------------------------
+
+def run_broker_debate(data: dict) -> DebateResult | None:
+    """Broker OS debate. Data from broker_ops Django models or Supabase."""
+    active_deals = int(data.get("active_deals") or 0)
+    pending_matches = int(data.get("pending_matches") or 0)
+    total_commission = float(data.get("total_commission") or 0)
+    offers = int(data.get("active_offers") or 0)
+    leads = int(data.get("active_leads") or 0)
+    recent_close = data.get("recent_close")
+    top_deal = data.get("top_deal") or {}
+
+    # --- Cupid Osei: Matching ---
+    cupid_signals = []
+    cupid_verdict = "wait"
+    cupid_conf = 0.5
+
+    if pending_matches >= 3:
+        cupid_signals.append(f"{pending_matches} matches waiting for approval")
+        cupid_verdict = "go"
+        cupid_conf = 0.7
+    elif pending_matches >= 1:
+        cupid_signals.append(f"{pending_matches} match pending")
+        cupid_verdict = "cautious"
+
+    if offers >= 5 and leads >= 5:
+        cupid_signals.append(f"{offers} offers x {leads} leads = strong matching pool")
+        cupid_conf += 0.1
+    elif offers == 0 or leads == 0:
+        cupid_signals.append("Need both offers AND leads to match. Missing one side.")
+        cupid_verdict = "no_go"
+        cupid_conf = 0.7
+
+    cupid_conf = max(0.1, min(1.0, cupid_conf))
+    if cupid_verdict == "go":
+        cupid_text = "Matches are ready. " + " | ".join(cupid_signals) + ". Approve and move to outreach."
+    elif cupid_verdict == "no_go":
+        cupid_text = "Cannot match. " + " | ".join(cupid_signals) + ". Source more inventory."
+    else:
+        cupid_text = "Matching pool is building. " + " | ".join(cupid_signals) + ". Not enough for high-quality matches yet."
+
+    cupid = AgentTake(agent="Cupid Osei", role="Matching", verdict=cupid_verdict, confidence=cupid_conf, reasoning=cupid_text, key_signals=cupid_signals)
+
+    # --- Piper Reeves: Outreach ---
+    piper_signals = []
+    piper_verdict = "cautious"
+    piper_conf = 0.5
+
+    if active_deals >= 3:
+        piper_signals.append(f"{active_deals} deals in active outreach")
+        piper_verdict = "go"
+        piper_conf = 0.65
+    elif active_deals >= 1:
+        piper_signals.append(f"{active_deals} deal in play")
+
+    if recent_close:
+        piper_signals.append(f"Recent close: ${float(recent_close.get('commission') or 0):,.0f} commission")
+        piper_conf += 0.1
+
+    piper_conf = max(0.1, min(1.0, piper_conf))
+    piper_text = f"Outreach status: {active_deals} active deals. "
+    if piper_verdict == "go":
+        piper_text += " | ".join(piper_signals) + ". Keep the pressure on. Follow up within 24h."
+    else:
+        piper_text += " | ".join(piper_signals) + ". Need more deals in the funnel."
+
+    piper = AgentTake(agent="Piper Reeves", role="Outreach", verdict=piper_verdict, confidence=piper_conf, reasoning=piper_text, key_signals=piper_signals)
+
+    # --- Cash Montgomery: Revenue ---
+    cash_signals = []
+    cash_verdict = "cautious"
+    cash_conf = 0.5
+
+    if total_commission >= 1000:
+        cash_signals.append(f"${total_commission:,.0f} total commission earned")
+        cash_conf += 0.15
+    elif total_commission > 0:
+        cash_signals.append(f"${total_commission:,.0f} commission so far")
+
+    if top_deal:
+        deal_val = float(top_deal.get("deal_value") or 0)
+        comm = float(top_deal.get("commission") or 0)
+        cash_signals.append(f"Top deal: ${deal_val:,.0f} value, ${comm:,.0f} commission")
+        if comm >= 500:
+            cash_verdict = "go"
+            cash_conf = 0.7
+
+    cash_conf = max(0.1, min(1.0, cash_conf))
+    cash_text = f"Revenue: ${total_commission:,.0f} earned. "
+    if cash_verdict == "go":
+        cash_text += " | ".join(cash_signals) + ". Numbers work. Execute."
+    else:
+        cash_text += " | ".join(cash_signals) + ". Need higher-value deals in the pipeline."
+
+    cash = AgentTake(agent="Cash Montgomery", role="Revenue", verdict=cash_verdict, confidence=cash_conf, reasoning=cash_text, key_signals=cash_signals)
+
+    agents = [cupid, piper, cash]
+    return _marcus_decides(agents, data.get("context", "broker pipeline"), "", "", 0, 0)
+
+
+# ---------------------------------------------------------------------------
+# ARCADE TEAM: Vera Lux, Penny Vance, Quinn Sharp, Marcus Cole
+# ---------------------------------------------------------------------------
+
+def run_arcade_debate(data: dict) -> DebateResult | None:
+    """Arcade/blackjack debate. Data from Supabase arcade_scores + player stats."""
+    active_players = int(data.get("active_players") or 0)
+    total_hands = int(data.get("total_hands") or 0)
+    total_chips_wagered = float(data.get("total_chips_wagered") or 0)
+    gem_revenue = float(data.get("gem_revenue_usd") or 0)
+    avg_session_min = float(data.get("avg_session_min") or 0)
+    retention_rate = float(data.get("retention_rate") or 0)
+    top_player = data.get("top_player") or {}
+
+    # --- Vera Lux: Engagement ---
+    vera_signals = []
+    vera_verdict = "cautious"
+    vera_conf = 0.5
+
+    if active_players >= 10:
+        vera_signals.append(f"{active_players} active players")
+        vera_verdict = "go"
+        vera_conf = 0.7
+    elif active_players >= 3:
+        vera_signals.append(f"{active_players} players online")
+    else:
+        vera_signals.append(f"Low traffic: {active_players} players")
+        vera_conf -= 0.1
+
+    if avg_session_min >= 15:
+        vera_signals.append(f"Avg session {avg_session_min:.0f} min - strong engagement")
+        vera_conf += 0.1
+    elif avg_session_min > 0:
+        vera_signals.append(f"Avg session {avg_session_min:.0f} min")
+
+    if retention_rate >= 0.3:
+        vera_signals.append(f"{retention_rate*100:.0f}% retention - healthy")
+        vera_conf += 0.1
+
+    vera_conf = max(0.1, min(1.0, vera_conf))
+    vera_text = f"Engagement: {active_players} players, {total_hands} hands played. "
+    vera_text += " | ".join(vera_signals) + "."
+
+    vera = AgentTake(agent="Vera Lux", role="Engagement", verdict=vera_verdict, confidence=vera_conf, reasoning=vera_text, key_signals=vera_signals)
+
+    # --- Penny Vance: Revenue ---
+    penny_signals = []
+    penny_verdict = "cautious"
+    penny_conf = 0.5
+
+    if gem_revenue >= 50:
+        penny_signals.append(f"${gem_revenue:.2f} gem revenue")
+        penny_verdict = "go"
+        penny_conf = 0.7
+    elif gem_revenue > 0:
+        penny_signals.append(f"${gem_revenue:.2f} gem revenue - some monetization")
+    else:
+        penny_signals.append("Zero gem revenue - no paying players yet")
+        penny_conf -= 0.1
+
+    if total_chips_wagered > 100000:
+        penny_signals.append(f"{total_chips_wagered:,.0f} chips wagered - high volume")
+
+    penny_conf = max(0.1, min(1.0, penny_conf))
+    penny_text = f"Monetization: ${gem_revenue:.2f} revenue. " + " | ".join(penny_signals) + "."
+
+    penny = AgentTake(agent="Penny Vance", role="Finance", verdict=penny_verdict, confidence=penny_conf, reasoning=penny_text, key_signals=penny_signals)
+
+    # --- Quinn Sharp: QA ---
+    quinn_signals = []
+    quinn_verdict = "go"
+    quinn_conf = 0.6
+
+    if total_hands > 0:
+        quinn_signals.append(f"{total_hands} hands dealt - game is functional")
+    else:
+        quinn_signals.append("No hands dealt - possible game issue")
+        quinn_verdict = "no_go"
+        quinn_conf = 0.8
+
+    quinn_text = "Game health: " + " | ".join(quinn_signals) + ". "
+    if quinn_verdict == "go":
+        quinn_text += "All systems running. No bugs detected."
+    else:
+        quinn_text += "Investigate game state before promoting."
+
+    quinn = AgentTake(agent="Quinn Sharp", role="QA", verdict=quinn_verdict, confidence=quinn_conf, reasoning=quinn_text, key_signals=quinn_signals)
+
+    agents = [vera, penny, quinn]
+    return _marcus_decides(agents, data.get("context", "arcade ops"), "", "", 0, 0)
+
+
+# ---------------------------------------------------------------------------
+# Shared: Marcus decides for any team
+# ---------------------------------------------------------------------------
+
+def _marcus_decides(agents: list[AgentTake], context: str, direction: str, entry_type: str, score: int, threshold: int) -> DebateResult:
+    """Marcus Cole breaks the tie for any team."""
+    go_count = sum(1 for a in agents if a.verdict == "go")
+    no_go_count = sum(1 for a in agents if a.verdict == "no_go")
+
+    if go_count >= 2 and no_go_count == 0:
+        consensus = "go"
+    elif no_go_count >= 2:
+        consensus = "no_go"
+    else:
+        consensus = "split"
+
+    if consensus == "go":
+        marcus_verdict = "go"
+        marcus_text = f"{go_count} out of {len(agents)} say go on {context}. Execute."
+    elif consensus == "no_go":
+        marcus_verdict = "no_go"
+        marcus_text = f"{no_go_count} out of {len(agents)} blocking {context}. Stand down."
+        blocked = [f"{a.agent.split()[0]}: {a.key_signals[0] if a.key_signals else 'risk'}" for a in agents if a.verdict == "no_go"]
+        if blocked:
+            marcus_text += " Reasons: " + "; ".join(blocked) + "."
+    else:
+        marcus_verdict = "wait"
+        marcus_text = f"Split on {context}. "
+        for a in agents:
+            marcus_text += f"{a.agent.split()[0]} says {a.verdict}. "
+        marcus_text += "Hold and reassess."
+
+    marcus = AgentTake(
+        agent="Marcus Cole", role="Chief of Staff",
+        verdict=marcus_verdict, confidence=0.9 if consensus != "split" else 0.5,
+        reasoning=marcus_text, key_signals=[f"consensus: {consensus}", f"{go_count} go / {no_go_count} no_go"],
+    )
+    agents.append(marcus)
+
+    return DebateResult(
+        timestamp=datetime.now(timezone.utc).isoformat(),
+        agents=agents,
+        consensus=consensus,
+        final_call=marcus_verdict,
+        final_reasoning=marcus_text,
+        go_count=go_count,
+        no_go_count=no_go_count,
+        direction=direction,
+        entry_type=entry_type,
+        score=score,
+        threshold=threshold,
+    )
