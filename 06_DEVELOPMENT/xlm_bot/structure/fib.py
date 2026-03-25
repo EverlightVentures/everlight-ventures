@@ -4,7 +4,7 @@ from typing import Dict, Tuple
 
 import pandas as pd
 
-FIB_LEVELS = [0.382, 0.5, 0.618, 0.786, 1.272, 1.618]
+FIB_LEVELS = [0.236, 0.382, 0.5, 0.618, 0.786, 1.272, 1.618]
 
 
 def find_swing(df: pd.DataFrame, lookback: int = 50) -> Tuple[float, float]:

@@ -22,13 +22,28 @@ def _clamp(v: float, lo: float, hi: float) -> float:
     return max(lo, min(hi, v))
 
 
-def _rvol(df_15m: pd.DataFrame) -> float:
-    if df_15m.empty or len(df_15m) < 25:
+def _rvol(df: pd.DataFrame) -> float:
+    """Relative volume: current bar vs 20-bar average. Works on any timeframe."""
+    if df is None or df.empty or len(df) < 25:
         return 0.0
-    base = df_15m["volume"].rolling(20).mean().iloc[-1]
+    base = df["volume"].rolling(20).mean().iloc[-1]
     if base <= 0 or pd.isna(base):
         return 0.0
-    return float(df_15m["volume"].iloc[-1] / base)
+    return float(df["volume"].iloc[-1] / base)
+
+
+def _bb_expanding(df: pd.DataFrame) -> bool:
+    """Check if Bollinger Band width is expanding on any timeframe."""
+    if df is None or df.empty or len(df) < 25:
+        return False
+    try:
+        bb = bollinger_bands(df["close"], 20, 2.0)
+        bb_w = bb["width"]
+        recent = float(bb_w.iloc[-1]) if not pd.isna(bb_w.iloc[-1]) else 0.0
+        mean20 = float(bb_w.rolling(20).mean().iloc[-1]) if len(bb_w) >= 20 and not pd.isna(bb_w.rolling(20).mean().iloc[-1]) else recent
+        return mean20 > 0 and recent > (1.10 * mean20)
+    except Exception:
+        return False
 
 
 def classify_regime_v4(df_15m: pd.DataFrame, df_1h: pd.DataFrame, df_4h: pd.DataFrame | None = None, df_1d: pd.DataFrame | None = None) -> dict:
@@ -77,20 +92,30 @@ def classify_regime_v4(df_15m: pd.DataFrame, df_1h: pd.DataFrame, df_4h: pd.Data
     atr_expanding = atr_mean20 > 0 and atr_recent > (1.15 * atr_mean20)
     atr_shock = atr_mean20 > 0 and atr_recent > (2.2 * atr_mean20)
 
-    bb = bollinger_bands(df_15m["close"], 20, 2.0)
-    bb_w = bb["width"]
-    bb_w_recent = float(bb_w.iloc[-1]) if not pd.isna(bb_w.iloc[-1]) else 0.0
-    bb_w_mean20 = float(bb_w.rolling(20).mean().iloc[-1]) if len(bb_w) >= 20 and not pd.isna(bb_w.rolling(20).mean().iloc[-1]) else bb_w_recent
-    bb_expanding = bb_w_mean20 > 0 and bb_w_recent > (1.10 * bb_w_mean20)
+    # Multi-TF Bollinger Band expansion (15m, 1h, 4h)
+    bb_expanding_15m = _bb_expanding(df_15m)
+    bb_expanding_1h = _bb_expanding(df_1h)
+    bb_expanding_4h = _bb_expanding(df_4h) if df_4h is not None else False
+    # Consensus: 15m is base, HTF confirmation strengthens signal
+    bb_expanding = bb_expanding_15m
+    bb_tf_count = sum([bb_expanding_15m, bb_expanding_1h, bb_expanding_4h])
+
+    # Multi-TF relative volume
+    rvol_15m = _rvol(df_15m)
+    rvol_1h = _rvol(df_1h)
+    rvol_4h = _rvol(df_4h) if df_4h is not None else 0.0
 
     c = df_15m.iloc[-1]
     candle_body = abs(float(c["close"]) - float(c["open"]))
     extreme_candle = atr_recent > 0 and (candle_body / atr_recent) > 2.5
 
     regime = "neutral"
+    # Stronger trend signal when multiple TFs show BB expansion
     if a15 >= 25 and adx_rising and atr_expanding and bb_expanding:
         regime = "trend"
-    elif a15 < 25 and not bb_expanding:
+    elif bb_tf_count >= 2 and (a15 >= 20 or a1h >= 25) and atr_expanding:
+        regime = "trend"  # multi-TF BB expansion overrides weak 15m ADX
+    elif a15 < 25 and not bb_expanding and not bb_expanding_1h:
         regime = "mean_reversion"
 
     # HTF trend: if 4h or daily ADX is strong, classify macro direction
@@ -117,6 +142,12 @@ def classify_regime_v4(df_15m: pd.DataFrame, df_1h: pd.DataFrame, df_4h: pd.Data
             "adx_rising": adx_rising,
             "atr_expanding": atr_expanding,
             "bb_expanding": bb_expanding,
+            "bb_expanding_1h": bb_expanding_1h,
+            "bb_expanding_4h": bb_expanding_4h,
+            "bb_tf_count": bb_tf_count,
+            "rvol_15m": round(rvol_15m, 2),
+            "rvol_1h": round(rvol_1h, 2),
+            "rvol_4h": round(rvol_4h, 2),
             "atr_shock": atr_shock,
             "extreme_candle": extreme_candle,
             "htf_trend": htf_trend,

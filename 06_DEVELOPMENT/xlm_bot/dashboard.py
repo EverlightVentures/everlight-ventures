@@ -182,7 +182,7 @@ except Exception:
 
 
 st.set_page_config(
-    page_title="The Wolf's Terminal | XLM PERP",
+    page_title="Everlight Command | XLM PERP",
     page_icon="🐺",
     layout="wide",
 )
@@ -1373,7 +1373,7 @@ st.markdown(
 
 def render_intel_hub(last_decision: dict, state: dict, pos_view: dict | None):
     """Render the News & Agent Intel Hub tab."""
-    st.markdown("<div class='panel-title'>The Wolf's Intel Hub</div>", unsafe_allow_html=True)
+    st.markdown("<div class='panel-title'>Intel Hub</div>", unsafe_allow_html=True)
     
     # Load Market Brief (Perplexity)
     _brief_path = DATA_DIR / "market_brief.json"
@@ -2953,7 +2953,7 @@ def _fmt_ts(ts) -> str:
 
 def render_intel_hub(last_decision: dict, state: dict, pos_view: dict | None):
     """Render the News & Agent Intel Hub tab."""
-    st.markdown("<div class='panel-title'>The Wolf's Intel Hub</div>", unsafe_allow_html=True)
+    st.markdown("<div class='panel-title'>Intel Hub</div>", unsafe_allow_html=True)
     
     # Load Market Brief (Perplexity)
     _brief_path = DATA_DIR / "market_brief.json"
@@ -3467,7 +3467,7 @@ def _evaluate_path(
 
 def render_intel_hub(last_decision: dict, state: dict, pos_view: dict | None):
     """Render the News & Agent Intel Hub tab."""
-    st.markdown("<div class='panel-title'>The Wolf's Intel Hub</div>", unsafe_allow_html=True)
+    st.markdown("<div class='panel-title'>Intel Hub</div>", unsafe_allow_html=True)
     
     # Load Market Brief (Perplexity)
     _brief_path = DATA_DIR / "market_brief.json"
@@ -4570,7 +4570,7 @@ with st.sidebar:
 # ── Everlight Trading Header ────────────────────────────────────────────────
 st.markdown(
     "<div class='hub-top'>"
-    f"<div class='brand'>The Wolf's Terminal <span style='font-size:10px;color:#94a3b8;'>by Everlight</span></div>"
+    f"<div class='brand'>Everlight Command <span style='font-size:10px;color:#94a3b8;'>by Everlight</span></div>"
     f"<div class='brand-sub'>"
     f"<span style='font-size:7px;letter-spacing:1px;color:#34d399;font-weight:600;'>AUTHORIZED</span> "
     f"<span class='pill'>{prod}</span> "
@@ -8017,8 +8017,166 @@ if page == "Terminal":
         except Exception:
             pass
 
+    # == STRATEGY COMMAND (on Terminal page) ==========
+    try:
+        _t_active_entry = _safe_str(last_decision.get("entry_signal") or last_decision.get("selected_entry_type") or "")
+        _t_active_lane = _safe_str(last_decision.get("lane"))
+        _t_active_dir = _safe_str(last_decision.get("direction"))
+        _t_regime = _safe_str(last_decision.get("v4_regime") or last_decision.get("regime")) or "neutral"
+        _t_htf = _safe_str(last_decision.get("htf_trend")) or "neutral"
+        _t_align = int(_safe_float(last_decision.get("alignment_bonus")) or 0)
+        _t_wz_top3 = last_decision.get("wick_zones_top3") or []
+        _t_patterns = last_decision.get("patterns_active") or []
+        _t_wz_near = bool(last_decision.get("wick_zone_near"))
+        _t_wz_bias = _safe_str(last_decision.get("wick_zone_bias")) or "none"
+        _t_vol = _safe_str(last_decision.get("vol_phase")) or "?"
+        _t_ms = bool(last_decision.get("micro_sweep_promoted"))
+        _t_v4s = _safe_float(last_decision.get("v4_selected_score")) or 0
+        _t_v4t = _safe_float(last_decision.get("v4_selected_threshold")) or 75
+        _t_price = _safe_float(last_decision.get("price")) or 0
+        _t_htf_avail = last_decision.get("htf_data_available") or {}
+
+        st.markdown(
+            "<div style='margin-top:20px;padding:16px 0 8px;border-top:1px solid rgba(148,163,184,0.1);'>"
+            "<span style='font-size:14px;font-weight:800;color:#e2e8f0;letter-spacing:2px;'>STRATEGY ARSENAL</span>"
+            "</div>", unsafe_allow_html=True)
+
+        _strats = [
+            ("A", "Trend", "trend_continuation", "#3b82f6"),
+            ("B", "Breakout", "breakout_retest", "#10b981"),
+            ("C", "Sweep", "sweep_recovery", "#f59e0b"),
+            ("E", "Squeeze", "compression_breakout", "#8b5cf6"),
+            ("G", "Range", "compression_range", "#06b6d4"),
+            ("I", "Fib", "fib_retrace", "#14b8a6"),
+            ("K", "Wick Rej", "wick_rejection", "#f97316"),
+            ("M", "Vol Climax", "volume_climax_reversal", "#dc2626"),
+            ("N", "VWAP Rev", "vwap_reversion", "#7c3aed"),
+            ("V", "Liq Sweep", "liquidity_sweep", "#d97706"),
+            ("W", "HTF Brk", "htf_breakout_continuation", "#2563eb"),
+            ("MS", "uSweep", "micro_sweep", "#ef4444"),
+        ]
+        _sg = "<div style='display:flex;flex-wrap:wrap;gap:5px;'>"
+        for _sl, _sn, _st2, _sc in _strats:
+            _is_on = (_t_active_lane == _sl) or (_t_active_entry and _st2 in _t_active_entry) or (_sl == "MS" and _t_ms)
+            if _is_on:
+                _sg += f"<div style='background:{_sc};color:#000;font-size:10px;font-weight:800;padding:4px 10px;border-radius:6px;box-shadow:0 0 12px {_sc}60;'>{_sl}: {_sn} ACTIVE</div>"
+            else:
+                _sg += f"<div style='background:{_sc}15;color:{_sc};font-size:9px;font-weight:600;padding:3px 8px;border-radius:5px;border:1px solid {_sc}30;'>{_sl}: {_sn}</div>"
+        _sg += "</div>"
+        st.markdown(_sg, unsafe_allow_html=True)
+
+        if _t_wz_top3:
+            st.markdown(
+                "<div style='margin-top:12px;'>"
+                "<span style='font-size:11px;font-weight:700;color:#94a3b8;letter-spacing:1px;'>WICK ZONES</span></div>",
+                unsafe_allow_html=True)
+            _wz_h = "<div style='display:flex;flex-wrap:wrap;gap:6px;'>"
+            for _z in _t_wz_top3[:5]:
+                _zs = str(_z.get("side", ""))
+                _zl = float(_z.get("level", 0))
+                _zst = float(_z.get("strength", 0))
+                _zt = int(_z.get("touches", 0))
+                _ztf = str(_z.get("strongest_tf", ""))
+                _zc = "#10b981" if _zs == "support" else "#ef4444"
+                _zi = "S" if _zs == "support" else "R"
+                _zdist = ""
+                if _t_price > 0 and _zl > 0:
+                    _zdp = ((_zl - _t_price) / _t_price) * 100
+                    _zdist = f" ({_zdp:+.1f}%)"
+                _wz_h += (
+                    f"<div style='background:{_zc}12;border:1px solid {_zc}30;border-radius:6px;padding:4px 8px;'>"
+                    f"<span style='color:{_zc};font-size:10px;font-weight:800;'>{_zi}</span> "
+                    f"<span style='color:#e2e8f0;font-size:10px;'>${_zl:.5f}{_zdist}</span> "
+                    f"<span style='color:#6b7280;font-size:8px;'>{_zst:.0f}pt {_zt}t {_ztf}</span>"
+                    f"</div>"
+                )
+            _wz_h += "</div>"
+            st.markdown(_wz_h, unsafe_allow_html=True)
+
+        if _t_patterns:
+            _pat_h = "<div style='display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;'>"
+            for _p in _t_patterns[:3]:
+                _pn = str(_p.get("pattern", "")).replace("_", " ").upper()
+                _pb = str(_p.get("bias", ""))
+                _pc2 = "#10b981" if _pb == "long" else "#ef4444" if _pb == "short" else "#f59e0b"
+                _pi = "^" if _pb == "long" else "v" if _pb == "short" else "o"
+                _pat_h += f"<div style='background:{_pc2}15;border:1px solid {_pc2}30;border-radius:6px;padding:4px 10px;color:{_pc2};font-size:10px;font-weight:700;'>{_pi} {_pn}</div>"
+            _pat_h += "</div>"
+            st.markdown(_pat_h, unsafe_allow_html=True)
+
+        _wolf = []
+        # Belfort-style market read: confident, uses real numbers, no hedging
+        if _t_regime == "trend":
+            _wolf.append("Trending. Money is moving and we are positioned to take it.")
+        elif _t_regime == "mean_reversion":
+            _wolf.append("Range-bound. We buy the bottom, sell the top. Simple as that.")
+        else:
+            _wolf.append("Consolidating. The move is coming, we just need to be patient and ready.")
+        if _t_htf == "bullish":
+            _wolf.append("Daily structure is UP. Every dip is a buying opportunity.")
+        elif _t_htf == "bearish":
+            _wolf.append("Daily structure is DOWN. Rallies are for selling, not for holding.")
+        if _t_align >= 8:
+            _wolf.append(f"Every single timeframe agrees ({_t_align:+d}). 1m, 5m, 15m, 1h, daily, weekly. That does not happen by accident.")
+        elif _t_align >= 4:
+            _wolf.append(f"Most timeframes agree ({_t_align:+d}). Good setup building.")
+        elif _t_align <= -3:
+            _wolf.append(f"Mixed signals across timeframes ({_t_align:+d}). This is where people lose money chasing. We sit tight.")
+        if _t_wz_near and "support" in _t_wz_bias:
+            _wolf.append("Sitting on a tested support level. This is where the buyers stepped in before and they will again.")
+        elif _t_wz_near and "resist" in _t_wz_bias:
+            _wolf.append("Pressing into resistance. Sellers have defended this level. Respect it until it breaks.")
+        for _p in (_t_patterns or [])[:1]:
+            _pn2 = str(_p.get("pattern", ""))
+            if "double_bottom" in _pn2:
+                _wolf.append("Double bottom forming. Institutional accumulation at this level.")
+            elif "double_top" in _pn2:
+                _wolf.append("Double top. Smart money distributing into strength here.")
+            elif "channel" in _pn2:
+                _wolf.append("Clean channel. Range edges are the play.")
+            elif "fakeout" in _pn2:
+                _wolf.append("Stop hunt absorbed. The fakeout tells us where the real money is.")
+            elif "breakout" in _pn2:
+                _wolf.append("Breakout through a level that held multiple times. That is conviction.")
+        if _t_ms:
+            _wolf.append("Liquidation sweep detected. Fast money just got flushed out. We trade with the smart money, not against it.")
+        if _t_active_entry and _t_active_dir:
+            _wolf.append(f"Active: {_t_active_entry.replace('_',' ').upper()} {_t_active_dir.upper()} | Lane {_t_active_lane} | Score {int(_t_v4s)}/{int(_t_v4t)}.")
+        elif not _t_active_entry:
+            if _t_v4s > 0 and _t_v4s < _t_v4t:
+                _wolf.append(f"Setup building. Score {int(_t_v4s)}/{int(_t_v4t)}. {int(_t_v4t - _t_v4s)} more points of confluence needed.")
+            else:
+                _wolf.append("Nothing worth taking right now. Discipline is the edge.")
+        if _t_vol == "COMPRESSION":
+            _wolf.append("Volatility is coiling. When it releases, the move will be fast.")
+        elif _t_vol == "EXPANSION":
+            _wolf.append("Volatility expanding. The move is live.")
+
+        _wc = "#10b981" if _t_active_dir == "long" else "#ef4444" if _t_active_dir == "short" else "#f59e0b"
+        _wolf_txt = " ".join(_wolf) if _wolf else "Scanning..."
+        st.markdown(
+            f"<div style='margin-top:12px;background:linear-gradient(135deg,rgba(15,23,42,0.95),rgba(30,41,59,0.85));border:1px solid {_wc}30;border-left:3px solid {_wc};border-radius:8px;padding:12px 14px;'>"
+            f"<div style='color:{_wc};font-size:9px;font-weight:800;letter-spacing:2px;margin-bottom:4px;'>MARKET READ</div>"
+            f"<div style='color:#e2e8f0;font-size:11px;line-height:1.6;'>{_wolf_txt}</div>"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+
+        _tfb = []
+        for _tn, _tok in [("1m", True), ("5m", True), ("15m", True), ("1h", True), ("4h", True),
+                           ("1D", bool(_t_htf_avail.get("1d"))), ("1W", bool(_t_htf_avail.get("1w"))), ("1M", bool(_t_htf_avail.get("1mo")))]:
+            _tc = "#10b981" if _tok else "#374151"
+            _tfb.append(f"<span style='background:{_tc}20;color:{_tc};font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px;'>{_tn}</span>")
+        st.markdown(
+            f"<div style='display:flex;gap:3px;margin-top:8px;align-items:center;'>"
+            f"<span style='color:#4b5563;font-size:8px;margin-right:2px;'>TF:</span>{' '.join(_tfb)}</div>",
+            unsafe_allow_html=True,
+        )
+    except Exception:
+        pass
+
 elif page == "Portfolio":
-    st.markdown("<div class='panel-title'>Portfolio — Coinbase Account</div>", unsafe_allow_html=True)
+    st.markdown("<div class='panel-title'>Portfolio / Coinbase Account</div>", unsafe_allow_html=True)
 
     # Row 1: Portfolio overview (matches Coinbase app)
     pc1, pc2, pc3, pc4 = st.columns(4)
@@ -9055,7 +9213,7 @@ elif page == "Signals":
         _wolf_text = " ".join(_wolf_lines) if _wolf_lines else "Scanning the markets... waiting for the perfect setup."
         st.markdown(
             f"<div class='card' style='padding:14px 16px;border-left:3px solid {_wolf_color};background:linear-gradient(90deg,rgba(15,23,42,0.95),rgba(30,41,59,0.8));'>"
-            f"<div style='color:{_wolf_color};font-size:10px;font-weight:800;letter-spacing:2px;margin-bottom:6px;'>THE WOLF SPEAKS</div>"
+            f"<div style='color:{_wolf_color};font-size:10px;font-weight:800;letter-spacing:2px;margin-bottom:6px;'>MARKET READ</div>"
             f"<div style='color:#e2e8f0;font-size:12px;line-height:1.7;'>{_wolf_text}</div>"
             f"</div>",
             unsafe_allow_html=True,
@@ -9947,7 +10105,7 @@ components.html("""
     panel.innerHTML = `
         <div class="cc-header">
             <div>
-                <div class="cc-header-title">&#128058; The Wolf's Desk</div>
+                <div class="cc-header-title"> Command Desk</div>
                 <div class="cc-header-sub">Talk to The Wolf -- live bot context, Belfort energy</div>
             </div>
             <button class="cc-clear-btn" id="cc-clear">Clear</button>
@@ -9971,7 +10129,7 @@ components.html("""
             <div class="cc-empty" id="cc-empty">
                 <div class="cc-empty-icon">&#9670;</div>
                 <div class="cc-empty-text">Ask anything about your bot<br>
-                "Why no trades?" &bull; "What's the play?" &bull; "Give me the wolf's plan"</div>
+                "Why no trades?" &bull; "What's the play?" &bull; "Give me the market plan"</div>
             </div>
         </div>
         <div class="cc-input-row">
@@ -10104,7 +10262,7 @@ components.html("""
             <div class="cc-empty" id="cc-empty">
                 <div class="cc-empty-icon">&#9670;</div>
                 <div class="cc-empty-text">Ask anything about your bot<br>
-                "Why no trades?" &bull; "What's the play?" &bull; "Give me the wolf's plan"</div>
+                "Why no trades?" &bull; "What's the play?" &bull; "Give me the market plan"</div>
             </div>`;
     };
 })();
