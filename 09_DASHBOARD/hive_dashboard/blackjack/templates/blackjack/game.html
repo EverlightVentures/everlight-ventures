@@ -256,6 +256,131 @@ body {
 .hand-value.bust { color: #e74c3c; }
 .hand-value.bj   { color: var(--gold); }
 
+/* Dealer Avatar Display */
+#dealer-portrait {
+  position: absolute;
+  top: 68px; left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  z-index: 15;
+  pointer-events: all;
+}
+#dealer-portrait .dp-avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  object-fit: cover;
+  box-shadow: 0 0 20px rgba(201,168,76,0.4);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+#dealer-portrait .dp-avatar:hover {
+  box-shadow: 0 0 30px rgba(201,168,76,0.7);
+  transform: scale(1.08);
+}
+#dealer-portrait .dp-info {
+  text-align: left;
+}
+#dealer-portrait .dp-name {
+  font-family: 'Cinzel', serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+#dealer-portrait .dp-title {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.5px;
+}
+#dealer-portrait .dp-speaking {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #27ae60;
+  display: none;
+  animation: pulse-speak 1s infinite;
+}
+@keyframes pulse-speak {
+  0%, 100% { opacity: 1; box-shadow: 0 0 4px #27ae60; }
+  50% { opacity: 0.4; box-shadow: 0 0 10px #27ae60; }
+}
+
+/* Dealer selector panel */
+#dealer-select-panel {
+  display: none;
+  position: absolute;
+  top: 140px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--panel-bg);
+  border: var(--border-gold);
+  border-radius: 16px;
+  padding: 20px;
+  z-index: 30;
+  backdrop-filter: blur(20px);
+  min-width: 340px;
+}
+#dealer-select-panel .ds-title {
+  font-family: 'Cinzel', serif;
+  font-size: 1rem;
+  color: var(--gold);
+  text-align: center;
+  margin-bottom: 16px;
+  letter-spacing: 2px;
+}
+.dealer-option {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+  margin-bottom: 8px;
+}
+.dealer-option:hover, .dealer-option.active {
+  background: rgba(201,168,76,0.1);
+  border-color: rgba(201,168,76,0.4);
+}
+.dealer-option.active {
+  border-color: var(--gold);
+}
+.dealer-option img {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  border: 2px solid rgba(201,168,76,0.3);
+  object-fit: cover;
+}
+.dealer-option .do-name {
+  font-family: 'Cinzel', serif;
+  font-size: 0.85rem;
+  color: #fff;
+  font-weight: 700;
+}
+.dealer-option .do-desc {
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.5);
+}
+.dealer-option .do-vip {
+  font-size: 0.6rem;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* Bot sitting out state */
+.bot-sitting-out {
+  opacity: 0.35;
+  filter: grayscale(0.7);
+}
+.bot-sitting-out .sitting-label {
+  color: rgba(255,255,255,0.3);
+  font-size: 0.55rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
 /* Result banner */
 #result-banner {
   display: none;
@@ -842,8 +967,23 @@ body {
       <button class="menu-btn" onclick="openPanel('shop-panel')">SHOP</button>
       <button class="menu-btn" onclick="openPanel('leaderboard-panel')">RANKS</button>
       <button class="menu-btn" onclick="openPanel('ad-panel')">FREE CHIPS</button>
+      <button class="menu-btn" id="music-toggle" onclick="toggleMusic()" title="Toggle Music">♫ ON</button>
+      <button class="menu-btn" id="voice-toggle" onclick="toggleVoice()" title="Toggle Dealer Voice">🔊</button>
     </div>
   </div>
+
+  <!-- Dealer Portrait -->
+  <div id="dealer-portrait" onclick="toggleDealerSelect()">
+    <img class="dp-avatar" id="dp-avatar" src="" alt="Dealer">
+    <div class="dp-info">
+      <div class="dp-name" id="dp-name">ARIA SINCLAIR</div>
+      <div class="dp-title" id="dp-title">House Dealer</div>
+    </div>
+    <div class="dp-speaking" id="dp-speaking"></div>
+  </div>
+
+  <!-- Dealer Select Panel -->
+  <div id="dealer-select-panel"></div>
 
   <!-- Presence indicator -->
   <div id="presence-indicator">
@@ -1286,27 +1426,59 @@ function buildScene() {
   placard.position.set(0, -0.38, -2.8);
   tableGroup.add(placard);
 
-  // === CHIP TRAY ===
-  const trayGeo = new THREE.BoxGeometry(2.5, 0.08, 0.4);
-  const trayMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.3, metalness: 0.5 });
-  const tray = new THREE.Mesh(trayGeo, trayMat);
-  tray.position.set(0, -0.41, -2.2);
-  tableGroup.add(tray);
+  // === CHIP TRAY (in front of dealer, between dealer and cards) ===
+  const trayGroup = new THREE.Group();
+  trayGroup.name = 'chip_tray';
 
-  // Chip stacks in tray
+  // Tray body (wider, slightly raised, with lip)
+  const trayGeo = new THREE.BoxGeometry(3.2, 0.12, 0.6);
+  const trayMat = new THREE.MeshStandardMaterial({
+    color: 0x1a1a1a, roughness: 0.2, metalness: 0.6,
+    emissive: 0x111111, emissiveIntensity: 0.1
+  });
+  const tray = new THREE.Mesh(trayGeo, trayMat);
+  trayGroup.add(tray);
+
+  // Tray front lip (gold accent)
+  const lipGeo = new THREE.BoxGeometry(3.3, 0.06, 0.04);
+  const lipMat = new THREE.MeshStandardMaterial({
+    color: 0xc9a84c, roughness: 0.1, metalness: 0.9,
+    emissive: 0xc9a84c, emissiveIntensity: 0.15
+  });
+  const lip = new THREE.Mesh(lipGeo, lipMat);
+  lip.position.set(0, 0.04, 0.3);
+  trayGroup.add(lip);
+
+  // Tray dividers
+  for (let d = 0; d < 4; d++) {
+    const divGeo = new THREE.BoxGeometry(0.02, 0.1, 0.55);
+    const divMat = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.3, metalness: 0.5 });
+    const div = new THREE.Mesh(divGeo, divMat);
+    div.position.set(-1.2 + d * 0.8, 0.02, 0);
+    trayGroup.add(div);
+  }
+
+  // Chip stacks in tray (5 colors, varying heights for realism)
   const chipColors = [0xe74c3c, 0x27ae60, 0x2980b9, 0x8e44ad, 0xc9a84c];
+  const stackHeights = [8, 6, 10, 5, 7];
   for (let ci = 0; ci < 5; ci++) {
-    for (let si = 0; si < 5; si++) {
-      const cGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.03, 16);
+    for (let si = 0; si < stackHeights[ci]; si++) {
+      const cGeo = new THREE.CylinderGeometry(0.13, 0.13, 0.025, 16);
       const cMat = new THREE.MeshStandardMaterial({
-        color: chipColors[ci], roughness: 0.3, metalness: 0.5,
-        emissive: chipColors[ci], emissiveIntensity: 0.05
+        color: chipColors[ci], roughness: 0.25, metalness: 0.6,
+        emissive: chipColors[ci], emissiveIntensity: 0.08
       });
       const chip = new THREE.Mesh(cGeo, cMat);
-      chip.position.set(-1.0 + ci * 0.5, -0.36 + si * 0.032, -2.2);
-      tableGroup.add(chip);
+      // Slight random offset for natural stacking look
+      const jx = (Math.random() - 0.5) * 0.02;
+      const jz = (Math.random() - 0.5) * 0.02;
+      chip.position.set(-1.2 + ci * 0.6 + jx, 0.07 + si * 0.026, jz);
+      trayGroup.add(chip);
     }
   }
+
+  trayGroup.position.set(0, -0.41, -1.8);
+  tableGroup.add(trayGroup);
 
   // === AMBIENT ATMOSPHERE ===
   // Room walls suggestion (dark panels far back)
@@ -1382,13 +1554,14 @@ function buildScene() {
 }
 
 function buildAvatarStands() {
-  // 5 player seats around table bottom arc
+  // 5 player seats in proper arc: Seat 1 (far left) to Seat 5 (far right)
+  // Seat 3 (center) = player. Arc follows standard blackjack table curve.
   const seats = [
-    { x: -3.0, z: 2.5, label: 'P1' },
-    { x: -1.5, z: 3.2, label: 'P2' },
-    { x:  0.0, z: 3.4, label: 'P3' },
-    { x:  1.5, z: 3.2, label: 'P4' },
-    { x:  3.0, z: 2.5, label: 'P5' },
+    { x: -3.0, z: 2.5, label: 'S1' },
+    { x: -1.5, z: 3.0, label: 'S2' },
+    { x:  0.0, z: 3.2, label: 'S3' },
+    { x:  1.5, z: 3.0, label: 'S4' },
+    { x:  3.0, z: 2.5, label: 'S5' },
   ];
 
   seats.forEach((seat, i) => {
@@ -1865,7 +2038,7 @@ async function handleSettlement(res) {
   updateHandValues();
   showResult(outcome);
 
-  // Dealer voice
+  // Dealer voice + personality reaction
   const dealerBust = outcome === 'win' && res.dealer_value > 21;
   if (dealerBust)                   dealerSpeak(dealerLine('dealer_bust'));
   else if (outcome === 'blackjack') dealerSpeak(dealerLine('blackjack'));
@@ -1873,6 +2046,8 @@ async function handleSettlement(res) {
   else if (outcome === 'bust')      dealerSpeak(dealerLine('bust'));
   else if (outcome === 'push')      dealerSpeak(dealerLine('push'));
   else if (outcome === 'surrender') dealerSpeak(dealerLine('surrender'));
+  dealerReact(outcome);
+  lastIdleChat = Date.now();
 
   // Update from server response
   updateChips(res.chips);
@@ -1909,6 +2084,8 @@ async function guestEndHand(outcome) {
   else if (outcome === 'bust')      dealerSpeak(dealerLine('bust'));
   else if (outcome === 'push')      dealerSpeak(dealerLine('push'));
   else if (outcome === 'surrender') dealerSpeak(dealerLine('surrender'));
+  dealerReact(outcome);
+  lastIdleChat = Date.now();
 
   await sleep(2200);
   resetForNextHand();
@@ -2008,6 +2185,12 @@ function animateParticles() {
 function updateChips(amount) {
   if (playerData) playerData.chips = amount;
   updateChipsDisplay(amount);
+}
+
+function updateGemsDisplay(amount) {
+  if (playerData) playerData.gems = amount;
+  document.getElementById('gem-count').textContent = parseInt(amount || 0).toLocaleString();
+  document.getElementById('shop-gems').textContent = parseInt(amount || 0).toLocaleString();
 }
 
 function updateChipsDisplay(amount) {
@@ -2343,8 +2526,7 @@ async function buyItem(itemId, currency) {
     if (res.success) {
       ownedItems.push(itemId);
       updateChips(res.chips);
-      document.getElementById('gem-count').textContent = res.gems;
-      document.getElementById('shop-gems').textContent = res.gems;
+      updateGemsDisplay(res.gems);
       renderShop();
       showToast('Item unlocked!');
     } else {
@@ -2592,19 +2774,60 @@ function renderGemPackages() {
     return;
   }
   grid.innerHTML = gemPackages.map(pkg => {
-    const total = (pkg.gems || 0) + (pkg.bonus_gems || 0);
-    return `<div class="gem-pkg${pkg.is_featured ? ' featured' : ''}" onclick="buyGems('${pkg.name}')">
+    const total = pkg.total_gems || ((pkg.gems || 0) + (pkg.bonus_gems || 0));
+    const unavailable = !pkg.checkout_ready;
+    return `<div class="gem-pkg${pkg.is_featured ? ' featured' : ''}${unavailable ? ' owned' : ''}" onclick="${unavailable ? '' : `buyGems(${pkg.id})`}">
       <div class="gem-count">&#128142; ${total}</div>
       ${pkg.bonus_gems > 0 ? `<div class="gem-bonus">+${pkg.bonus_gems} bonus!</div>` : '<div style="height:1.2rem"></div>'}
       <div class="gem-price">$${parseFloat(pkg.price_usd).toFixed(2)}</div>
+      ${unavailable ? '<div class="owned-badge">NOT LIVE</div>' : ''}
     </div>`;
   }).join('');
 }
 
-async function buyGems(pkgName) {
+async function buyGems(packageId) {
   if (isGuest) { openPanel('auth-panel'); return; }
-  showToast('Redirecting to payment...');
-  // Wire to Stripe via /payments/ app
+  try {
+    const res = await apiPost('/blackjack/api/checkout/gems/', { package_id: packageId });
+    if (res.url) {
+      showToast('Redirecting to checkout...');
+      window.location.href = res.url;
+      return;
+    }
+    showToast(res.error || 'Checkout unavailable');
+  } catch (e) {
+    showToast('Checkout error');
+  }
+}
+
+async function handleCheckoutReturn() {
+  if (isGuest) return;
+  const params = new URLSearchParams(window.location.search);
+  const checkout = params.get('checkout');
+  const sessionId = params.get('session_id');
+
+  if (checkout === 'canceled') {
+    showToast('Checkout canceled');
+  } else if (checkout === 'success' && sessionId) {
+    try {
+      const res = await apiPost('/blackjack/api/checkout/verify/', { session_id: sessionId });
+      if (res.success) {
+        updateGemsDisplay(res.gems);
+        showToast(res.already_verified ? 'Purchase already applied' : `Purchase complete: +${res.gems_added} gems`);
+      } else {
+        showToast(res.error || 'Purchase verification failed');
+      }
+    } catch (e) {
+      showToast('Purchase verification failed');
+    }
+  } else {
+    return;
+  }
+
+  params.delete('checkout');
+  params.delete('session_id');
+  const next = params.toString();
+  window.history.replaceState({}, '', next ? `${window.location.pathname}?${next}` : window.location.pathname);
 }
 
 // ============================================================
@@ -2627,99 +2850,253 @@ function sleep(ms) {
 }
 
 // ============================================================
-// DEALER VOICE (Web Speech API)
+// DEALER PERSONA SYSTEM + ELEVENLABS VOICE
 // ============================================================
+const DEALERS = {
+  aria: {
+    id: 'aria',
+    name: 'Aria Sinclair',
+    title: 'House Dealer',
+    voiceId: 'EXAVITQu4vr4xnSDxMaL',  // Sarah (warm female)
+    avatar: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#1a1a2e"/><circle cx="50" cy="38" r="18" fill="#c9a84c"/><ellipse cx="50" cy="78" rx="28" ry="22" fill="#c9a84c"/><circle cx="43" cy="35" r="2.5" fill="#1a1a2e"/><circle cx="57" cy="35" r="2.5" fill="#1a1a2e"/><path d="M44 43 Q50 48 56 43" stroke="#1a1a2e" fill="none" stroke-width="1.5"/><rect x="36" y="56" width="28" height="4" rx="2" fill="#e74c3c"/></svg>'),
+    personality: 'Elegant, composed, classic Vegas',
+    vip: false,
+    lines: {
+      deal:        ["Cards are out. Good luck.", "Let's see what you've got.", "Place your bet and let fate decide.", "Dealing now. May the odds be in your favor.", "The table is set. Let's play."],
+      hit:         ["Another card coming your way.", "You want another? Here you go.", "Bold move. Let's see it.", "Drawing one more."],
+      stand:       ["Standing pat. Wise choice.", "Player stands. Now it's my turn.", "Alright, dealer plays.", "You're done? Let me show you what I've got."],
+      bust:        ["Bust! Better luck next hand.", "Over twenty-one. Tough break.", "You've gone bust. The chips are mine."],
+      win:         ["Congratulations! Those chips are yours.", "Well played. The player wins.", "You beat the house. Impressive."],
+      blackjack:   ["Blackjack! A natural twenty-one. Outstanding!", "Natural twenty-one! The house is impressed.", "Blackjack! You're on fire tonight."],
+      push:        ["Push. Bet returned. No winner this hand.", "A tie. Let's go again.", "Even money. The bet is returned."],
+      dealer_bust: ["Dealer busts! Everyone at the table wins!", "I've gone over. The players take it!"],
+      dealer_draw: ["Dealer draws.", "House takes a card.", "Dealer hits."],
+      surrender:   ["Surrender accepted. Half your bet is returned."],
+      low_chips:   ["Running low? Watch an ad to top up your chips."],
+    },
+  },
+  marcus: {
+    id: 'marcus',
+    name: 'Marcus "The Shark" Vega',
+    title: 'High Roller Dealer',
+    voiceId: 'onwK4e9ZLuTAKqWW03F9',  // Deep male
+    avatar: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#0c1a2e"/><circle cx="50" cy="38" r="18" fill="#8B6914"/><ellipse cx="50" cy="78" rx="28" ry="22" fill="#2c3e50"/><circle cx="43" cy="35" r="2.5" fill="#fff"/><circle cx="57" cy="35" r="2.5" fill="#fff"/><rect x="37" y="30" width="26" height="3" rx="1" fill="#2c3e50"/><path d="M44 43 Q50 45 56 43" stroke="#fff" fill="none" stroke-width="1.5"/><rect x="30" y="18" width="40" height="10" rx="4" fill="#1a1a1a"/></svg>'),
+    personality: 'Intense, street-smart, no-nonsense',
+    vip: false,
+    lines: {
+      deal:        ["Cards on the felt. No mercy.", "Alright, let's see who's got nerve.", "Dealing. Don't blink.", "The Shark deals. Sink or swim."],
+      hit:         ["Another one? You got heart.", "Pulling hot. Bold.", "Hit. Let's see if you're lucky.", "More cards. More risk."],
+      stand:       ["Smart. Standing tall.", "Holding? Respect.", "Standing pat. Now watch me work."],
+      bust:        ["Bust. That's the game.", "Too greedy. House takes it.", "Busted. Better luck next time, champ."],
+      win:         ["You got me. Won't happen twice.", "Winner. Don't let it go to your head.", "Good play. Respect."],
+      blackjack:   ["Blackjack! The table bows.", "Natural twenty-one. That's how legends play.", "Blackjack! Now THAT'S a hand."],
+      push:        ["Push. We go again.", "Even. Nobody wins.", "Tied up. Next hand decides."],
+      dealer_bust: ["Even the Shark goes down sometimes.", "Bust. Enjoy it while it lasts."],
+      dealer_draw: ["Shark draws.", "My turn. Here it comes.", "Let me show you something."],
+      surrender:   ["Surrender? Smart enough to know when you're beat."],
+      low_chips:   ["Low on chips? Hustle up."],
+    },
+  },
+  kanisha: {
+    id: 'kanisha',
+    name: 'Kanisha Thompson',
+    title: 'VIP Lounge Dealer',
+    voiceId: 'XrExE9yKIg1WjnnlVkGX',  // Warm female 2
+    avatar: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="#2e1a2e"/><circle cx="50" cy="38" r="18" fill="#A0522D"/><ellipse cx="50" cy="78" rx="28" ry="22" fill="#8e44ad"/><circle cx="43" cy="35" r="2.5" fill="#1a1a2e"/><circle cx="57" cy="35" r="2.5" fill="#1a1a2e"/><path d="M44 43 Q50 48 56 43" stroke="#1a1a2e" fill="none" stroke-width="1.5"/><path d="M32 22 Q50 10 68 22 Q65 28 50 25 Q35 28 32 22Z" fill="#1a1a1a"/><circle cx="60" cy="28" r="3" fill="#c9a84c"/></svg>'),
+    personality: 'Warm, confident, showtime energy',
+    vip: true,
+    lines: {
+      deal:        ["Honey, cards are coming your way.", "Welcome to my table. Let's make magic.", "Dealing with style. That's how we do.", "Alright sugar, let's see what fate has for you."],
+      hit:         ["Another card? I like your confidence.", "Going big! That's the spirit.", "One more? You got it, babe."],
+      stand:       ["Standing? Smart and steady.", "Locking it in. I respect that.", "Player holds. Now let Kanisha work."],
+      bust:        ["Oh honey, that's a bust.", "Too much love for the cards.", "Bust. Shake it off, come back stronger."],
+      win:         ["Winner winner! Love to see it!", "You did THAT! Congratulations!", "The crown goes to you tonight."],
+      blackjack:   ["BLACKJACK! Oh you're THAT player!", "Natural twenty-one! The table is YOURS.", "Blackjack! I knew you had it in you!"],
+      push:        ["Push. We split the difference, darling.", "A tie. Drama for another hand."],
+      dealer_bust: ["Even I go over sometimes. Your lucky night!", "Dealer busts! Take your chips, beautiful."],
+      dealer_draw: ["Kanisha draws.", "Watch this.", "My turn, sugar."],
+      surrender:   ["Live to fight another hand. Smart."],
+      low_chips:   ["Need a top-up? We got you."],
+    },
+  },
+  bacardi: {
+    id: 'bacardi',
+    name: 'Bacardi Ice',
+    title: 'VIP Elite Dealer',
+    voiceId: 'onwK4e9ZLuTAKqWW03F9',  // Deep male voice
+    avatar: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0a0a1a"/><stop offset="100%" stop-color="#1a0c2e"/></linearGradient><linearGradient id="ice" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#b9f2ff"/><stop offset="100%" stop-color="#4dd9ff"/></linearGradient></defs><circle cx="50" cy="50" r="50" fill="url(#bg)"/><circle cx="50" cy="38" r="18" fill="#3a2a1a"/><ellipse cx="50" cy="78" rx="28" ry="22" fill="#0d0d0d"/><circle cx="43" cy="35" r="2.5" fill="url(#ice)"/><circle cx="57" cy="35" r="2.5" fill="url(#ice)"/><path d="M44 43 Q50 46 56 43" stroke="url(#ice)" fill="none" stroke-width="1.5"/><rect x="36" y="56" width="28" height="4" rx="2" fill="url(#ice)"/><path d="M30 20 Q50 8 70 20 Q68 26 50 23 Q32 26 30 20Z" fill="#0d0d0d"/><text x="50" y="96" text-anchor="middle" fill="#b9f2ff" font-size="8" font-family="serif" font-weight="bold">ICE</text></svg>'),
+    personality: 'Cold, calculated, VIP-only kingpin energy',
+    vip: true,
+    lines: {
+      deal:        ["Ice on the table. Let's see what you're made of.", "Cards are served. No second chances.", "Bacardi Ice deals. Play smart or go home.", "The VIP table is open. Show me something."],
+      hit:         ["Another card. Bold.", "You want more? Respect.", "Drawing. Let's see if you're built for this."],
+      stand:       ["Standing. Smart play.", "Locked in. Now watch me work.", "Player holds. Ice takes over."],
+      bust:        ["Bust. The ice doesn't melt for anyone.", "Over twenty-one. Tough break, player.", "Busted. VIP table takes no prisoners."],
+      win:         ["You beat the Ice. That's rare. Take your chips.", "Winner. Don't get comfortable.", "Good play. The house respects that."],
+      blackjack:   ["Blackjack! Even Ice has to bow to that.", "Natural twenty-one. The VIP table salutes you.", "Blackjack! Now THAT is elite."],
+      push:        ["Push. We run it back.", "Tied up. Nobody wins at the Ice table for free."],
+      dealer_bust: ["Even Ice cracks sometimes. Take your chips.", "Dealer busts. Enjoy it. It won't happen often."],
+      dealer_draw: ["Ice draws.", "My turn.", "Watch closely."],
+      surrender:   ["Surrender accepted. At least you knew when to walk."],
+      low_chips:   ["Running low at the VIP table? That's not a good look."],
+    },
+  },
+};
+
+let currentDealer = DEALERS.aria;
 let dealerVoiceEnabled = true;
-let dealerVoiceObj = null;
+const audioCache = new Map();
+let currentAudio = null;
 
 function initDealerVoice() {
-  if (!window.speechSynthesis) return;
-  // Load voices (async on some browsers)
-  const loadVoices = () => {
-    const voices = window.speechSynthesis.getVoices();
-    dealerVoiceObj = voices.find(v =>
-      v.name.includes('Male') || v.name.includes('Google UK English Male') ||
-      v.name.includes('Alex') || v.name.includes('Daniel')
-    ) || voices[0] || null;
-  };
-  loadVoices();
-  if (window.speechSynthesis.onvoiceschanged !== undefined) {
-    window.speechSynthesis.onvoiceschanged = loadVoices;
+  // Load saved dealer preference
+  const saved = localStorage.getItem('ev_bj_dealer');
+  if (saved && DEALERS[saved]) {
+    currentDealer = DEALERS[saved];
   }
+  updateDealerDisplay();
+  buildDealerSelectPanel();
 }
 
-function dealerSpeak(text, pitchOverride) {
-  if (!dealerVoiceEnabled || !window.speechSynthesis) return;
+function updateDealerDisplay() {
+  const avatar = document.getElementById('dp-avatar');
+  const name = document.getElementById('dp-name');
+  const title = document.getElementById('dp-title');
+  if (avatar) avatar.src = currentDealer.avatar;
+  if (name) name.textContent = currentDealer.name.toUpperCase();
+  if (title) title.textContent = currentDealer.title;
+}
+
+function buildDealerSelectPanel() {
+  const panel = document.getElementById('dealer-select-panel');
+  if (!panel) return;
+  let html = '<div class="ds-title">CHOOSE YOUR DEALER</div>';
+  for (const [key, d] of Object.entries(DEALERS)) {
+    const isVip = d.vip;
+    const isActive = d.id === currentDealer.id;
+    html += `<div class="dealer-option ${isActive ? 'active' : ''}" onclick="selectDealer('${key}')">
+      <img src="${d.avatar}" alt="${d.name}">
+      <div>
+        <div class="do-name">${d.name}</div>
+        <div class="do-desc">${d.personality}</div>
+        ${isVip ? '<div class="do-vip">VIP EXCLUSIVE</div>' : ''}
+      </div>
+    </div>`;
+  }
+  panel.innerHTML = html;
+}
+
+function selectDealer(key) {
+  if (!DEALERS[key]) return;
+  currentDealer = DEALERS[key];
+  localStorage.setItem('ev_bj_dealer', key);
+  updateDealerDisplay();
+  buildDealerSelectPanel();
+  document.getElementById('dealer-select-panel').style.display = 'none';
+  dealerSpeak(dealerLine('deal'));
+}
+
+function toggleDealerSelect() {
+  const panel = document.getElementById('dealer-select-panel');
+  if (!panel) return;
+  panel.style.display = panel.style.display === 'block' ? 'none' : 'block';
+}
+
+// ElevenLabs TTS with fallback to browser speech
+async function dealerSpeak(text) {
+  if (!dealerVoiceEnabled || !text) return;
+
+  // Show speaking indicator
+  const indicator = document.getElementById('dp-speaking');
+  if (indicator) indicator.style.display = 'block';
+
+  // Stop any current audio
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+
+  // Check cache first
+  const cacheKey = `${currentDealer.voiceId}:${text}`;
+  if (audioCache.has(cacheKey)) {
+    const audio = new Audio(audioCache.get(cacheKey));
+    currentAudio = audio;
+    audio.volume = 0.85;
+    audio.onended = () => { if (indicator) indicator.style.display = 'none'; currentAudio = null; };
+    audio.onerror = () => { if (indicator) indicator.style.display = 'none'; currentAudio = null; };
+    audio.play().catch(() => { if (indicator) indicator.style.display = 'none'; });
+    return;
+  }
+
+  // Try ElevenLabs via edge function
+  try {
+    const SUPABASE_URL = 'https://jdqqmsmwmbsnlnstyavl.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkcXFtc213bWJzbmxuc3R5YXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDExNTE3NzYsImV4cCI6MjA1NjcyNzc3Nn0.9BDviI2WR46sphcS3uzKapcKbslYpMO4PdSEPFrv3Ww';
+
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/dealer-speak`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON}`,
+        'apikey': SUPABASE_ANON,
+      },
+      body: JSON.stringify({ text, voice_id: currentDealer.voiceId }),
+    });
+
+    if (res.ok) {
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      // Cache (keep max 50 entries)
+      if (audioCache.size > 50) {
+        const first = audioCache.keys().next().value;
+        URL.revokeObjectURL(audioCache.get(first));
+        audioCache.delete(first);
+      }
+      audioCache.set(cacheKey, url);
+
+      const audio = new Audio(url);
+      currentAudio = audio;
+      audio.volume = 0.85;
+      audio.onended = () => { if (indicator) indicator.style.display = 'none'; currentAudio = null; };
+      audio.onerror = () => { if (indicator) indicator.style.display = 'none'; currentAudio = null; };
+      audio.play().catch(() => fallbackSpeak(text, indicator));
+      return;
+    }
+  } catch (e) {
+    console.warn('ElevenLabs unavailable, falling back to browser TTS', e);
+  }
+
+  // Fallback: browser speech synthesis
+  fallbackSpeak(text, indicator);
+}
+
+function fallbackSpeak(text, indicator) {
+  if (!window.speechSynthesis) {
+    if (indicator) indicator.style.display = 'none';
+    return;
+  }
   window.speechSynthesis.cancel();
   const utter = new SpeechSynthesisUtterance(text);
-  utter.rate  = 0.88;
-  utter.pitch = pitchOverride || 0.85;
+  utter.rate = 0.88;
+  utter.pitch = 0.85;
   utter.volume = 0.85;
-  if (dealerVoiceObj) utter.voice = dealerVoiceObj;
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find(v =>
+    v.name.includes('Male') || v.name.includes('Google UK English Male') ||
+    v.name.includes('Alex') || v.name.includes('Daniel')
+  ) || voices[0];
+  if (preferred) utter.voice = preferred;
+  utter.onend = () => { if (indicator) indicator.style.display = 'none'; };
   window.speechSynthesis.speak(utter);
 }
 
-const DEALER_LINES = {
-  deal: [
-    "Cards are out. Good luck.",
-    "Let's see what you've got.",
-    "Place your bet and let fate decide.",
-    "Dealing now. May the odds be in your favor.",
-    "The table is set. Let's play.",
-  ],
-  hit: [
-    "Another card coming your way.",
-    "You want another? Here you go.",
-    "Bold move. Let's see it.",
-    "Drawing one more.",
-  ],
-  stand: [
-    "Standing pat. Wise choice.",
-    "Player stands. Now it's my turn.",
-    "Alright, dealer plays.",
-    "You're done? Let me show you what I've got.",
-  ],
-  bust: [
-    "Bust! Better luck next hand.",
-    "Over twenty-one. Tough break.",
-    "You've gone bust. The chips are mine.",
-    "Too many cards. See you next round.",
-  ],
-  win: [
-    "Congratulations! Those chips are yours.",
-    "Well played. The player wins.",
-    "You beat the house. Impressive.",
-    "A winner! The table salutes you.",
-  ],
-  blackjack: [
-    "Blackjack! A natural twenty-one. Outstanding!",
-    "Natural twenty-one! The house is impressed.",
-    "Blackjack! You're on fire tonight.",
-  ],
-  push: [
-    "Push. Bet returned. No winner this hand.",
-    "A tie. Let's go again.",
-    "Even money. The bet is returned.",
-  ],
-  dealer_bust: [
-    "Dealer busts! Everyone at the table wins!",
-    "I've gone over. The players take it!",
-    "Well, the house busts. Congratulations all around.",
-  ],
-  dealer_draw: [
-    "Dealer draws.",
-    "House takes a card.",
-    "Dealer hits.",
-  ],
-  surrender: [
-    "Surrender accepted. Half your bet is returned.",
-    "A tactical retreat. Half your stake comes back.",
-  ],
-  low_chips: [
-    "Running low? Watch an ad to top up your chips.",
-    "The table can loan you chips via the ad screen.",
-  ],
-};
+// Per-dealer voice lines
+const DEALER_LINES = {};  // populated dynamically from currentDealer
+
+function dealerLine(category) {
+  const lines = (currentDealer && currentDealer.lines && currentDealer.lines[category]) || [];
+  return lines[Math.floor(Math.random() * lines.length)] || '';
+}
 
 function dealerLine(category) {
   const lines = DEALER_LINES[category] || [];
@@ -2732,7 +3109,7 @@ function dealerLine(category) {
 function initHUD() {
   if (playerData) {
     updateChipsDisplay(playerData.chips);
-    document.getElementById('gem-count').textContent = playerData.gems || 0;
+    updateGemsDisplay(playerData.gems || 0);
     updateXP(playerData.xp, 0, playerData.rank);
     updatePresenceDisplay();
     gameState.presenceMultiplier = playerData.presence_multiplier || 1.0;
@@ -2765,13 +3142,12 @@ function initHUD() {
 const BOT_NAMES = ['Vegas Vic', 'Lucky Lou', 'Miss Fortune', 'The Shark', 'Big Stack Bobby', 'Ace Rivera'];
 const BOT_COLORS = [0x27ae60, 0xe74c3c, 0x9b59b6, 0xe67e22, 0x1abc9c];
 const BOT_SEATS  = [0, 1, 3, 4]; // seats where bots sit (0-indexed, seat 2 = player)
+// Proper seat labels: Seat 1 (far left) through Seat 5 (far right), player = Seat 3
+const SEAT_LABELS = ['Seat 1', 'Seat 2', 'Seat 3', 'Seat 4', 'Seat 5'];
 
 // Basic blackjack strategy: hit on hard <= 16, stand on 17+
-// Also considers dealer upcard for doubles/splits (simplified)
 function botDecision(handVal, dealerUp, isHard) {
-  // 20% random
   if (Math.random() < 0.2) return Math.random() < 0.5 ? 'hit' : 'stand';
-  // Basic strategy (simplified hard totals)
   if (handVal >= 17) return 'stand';
   if (handVal <= 11) return 'hit';
   if (handVal === 12) return dealerUp >= 4 && dealerUp <= 6 ? 'stand' : 'hit';
@@ -2787,41 +3163,68 @@ function cardVal(card) {
   return Math.min(parseInt(r) || 10, 10);
 }
 
-// Active bot state
+// Active bot state -- includes sittingOut for display fix
 const bots = BOT_SEATS.map((seatIdx, i) => ({
   seatIdx,
   name: BOT_NAMES[i % BOT_NAMES.length],
   chips: 800 + Math.floor(Math.random() * 4000),
   color: BOT_COLORS[i % BOT_COLORS.length],
   active: false,
+  sittingOut: false,
   labelEl: null,
 }));
 
 function initBotLabels() {
-  const seatPositions = [
-    { x: -3.0, z: 2.5 }, { x: -1.5, z: 3.2 }, { x:  0.0, z: 3.4 },
-    { x:  1.5, z: 3.2 }, { x:  3.0, z: 2.5 },
-  ];
   const container = document.getElementById('hud');
   bots.forEach(bot => {
+    // 20% chance any bot starts sitting out
+    bot.sittingOut = Math.random() < 0.2;
+
     const label = document.createElement('div');
     label.style.cssText = `position:absolute;pointer-events:none;font-size:0.62rem;
       font-family:'Cinzel',serif;color:rgba(255,255,255,0.7);text-align:center;
-      text-shadow:0 1px 3px rgba(0,0,0,0.9);display:none;`;
-    label.innerHTML = `<div style="color:#aef">${bot.name}</div>
-      <div style="color:rgba(201,168,76,0.8)">${bot.chips.toLocaleString()} chips</div>`;
+      text-shadow:0 1px 3px rgba(0,0,0,0.9);display:none;transition:opacity 0.5s;`;
+    updateBotLabel(bot, label);
     container.appendChild(label);
     bot.labelEl = label;
   });
+
+  // Also add player seat label
+  const playerLabel = document.createElement('div');
+  playerLabel.id = 'player-seat-label';
+  playerLabel.style.cssText = `position:absolute;pointer-events:none;font-size:0.55rem;
+    font-family:'Cinzel',serif;color:rgba(201,168,76,0.5);text-align:center;
+    text-shadow:0 1px 3px rgba(0,0,0,0.9);display:none;letter-spacing:1px;`;
+  playerLabel.textContent = SEAT_LABELS[2];
+  container.appendChild(playerLabel);
+}
+
+function updateBotLabel(bot, el) {
+  if (!el) el = bot.labelEl;
+  if (!el) return;
+  if (bot.sittingOut) {
+    el.style.opacity = '0.35';
+    el.style.filter = 'grayscale(0.7)';
+    el.innerHTML = `<div style="color:#666">${bot.name}</div>
+      <div style="color:rgba(201,168,76,0.3)">${SEAT_LABELS[bot.seatIdx]}</div>
+      <div style="color:rgba(255,255,255,0.25);font-size:0.5rem;letter-spacing:1px;margin-top:2px">SITTING OUT</div>`;
+  } else {
+    el.style.opacity = '1';
+    el.style.filter = 'none';
+    el.innerHTML = `<div style="color:#aef">${bot.name}</div>
+      <div style="color:rgba(201,168,76,0.8)">${bot.chips.toLocaleString()} chips</div>
+      <div style="color:rgba(201,168,76,0.4);font-size:0.48rem;letter-spacing:1px">${SEAT_LABELS[bot.seatIdx]}</div>`;
+  }
 }
 
 function updateBotLabelPositions() {
   // Project 3D seat positions to 2D screen coords
+  // Seats 0,1 = left of player; Seats 3,4 = right of player
   const seatWorldPositions = [
-    new THREE.Vector3(-3.0, 1.8, 2.5),
-    new THREE.Vector3(-1.5, 1.8, 3.2),
-    new THREE.Vector3( 1.5, 1.8, 3.2),
-    new THREE.Vector3( 3.0, 1.8, 2.5),
+    new THREE.Vector3(-3.0, 1.8, 2.5),   // Seat 1
+    new THREE.Vector3(-1.5, 1.8, 3.2),   // Seat 2
+    new THREE.Vector3( 1.5, 1.8, 3.2),   // Seat 4
+    new THREE.Vector3( 3.0, 1.8, 2.5),   // Seat 5
   ];
   bots.forEach((bot, i) => {
     if (!bot.labelEl || !camera) return;
@@ -2833,12 +3236,34 @@ function updateBotLabelPositions() {
     bot.labelEl.style.top  = (y - 30) + 'px';
     bot.labelEl.style.display = 'block';
   });
+
+  // Position player seat label
+  const playerLabel = document.getElementById('player-seat-label');
+  if (playerLabel && camera) {
+    const pPos = new THREE.Vector3(0, 1.8, 3.4).project(camera);
+    const px = (pPos.x * 0.5 + 0.5) * window.innerWidth;
+    const py = (-pPos.y * 0.5 + 0.5) * window.innerHeight;
+    playerLabel.style.left = (px - 30) + 'px';
+    playerLabel.style.top  = (py + 20) + 'px';
+    playerLabel.style.display = 'block';
+  }
 }
 
 async function runBotRound() {
   // Simulate a bot playing a hand (visual only, no server calls)
   for (const bot of bots) {
     if (!bot.labelEl) continue;
+
+    // 10% chance to toggle sitting out each round
+    if (Math.random() < 0.1) {
+      bot.sittingOut = !bot.sittingOut;
+      updateBotLabel(bot);
+      continue;
+    }
+
+    // Skip bots that are sitting out
+    if (bot.sittingOut) continue;
+
     const bet = Math.min(Math.floor(50 + Math.random() * 150) * 10, bot.chips);
     if (bet <= 0) continue;
 
@@ -2848,7 +3273,7 @@ async function runBotRound() {
       { rank: randomRank(), suit: '♥' },
     ];
     let total = handTotal(hand);
-    const dealerUp = Math.floor(Math.random() * 9) + 2; // dealer upcard 2-10
+    const dealerUp = Math.floor(Math.random() * 9) + 2;
 
     // Bot decision loop
     let iterations = 0;
@@ -2862,7 +3287,7 @@ async function runBotRound() {
 
     // Outcome
     const bust = total > 21;
-    const dealerTotal = 17 + Math.floor(Math.random() * 7); // dealer 17-23
+    const dealerTotal = 17 + Math.floor(Math.random() * 7);
     const win = !bust && (dealerTotal > 21 || total > dealerTotal);
     const push = !bust && total === dealerTotal;
 
@@ -2870,14 +3295,16 @@ async function runBotRound() {
     else if (!push) bot.chips = Math.max(0, bot.chips - bet);
     if (bot.chips < 200) bot.chips = 800; // rebuy
 
-    // Update label briefly with action
+    // Update label briefly with action result
     const actionText = bust ? 'BUST' : win ? 'WIN +'+ bet : push ? 'PUSH' : 'LOSS -'+bet;
+    bot.labelEl.style.opacity = '1';
+    bot.labelEl.style.filter = 'none';
     bot.labelEl.innerHTML = `<div style="color:#aef">${bot.name}</div>
       <div style="color:rgba(201,168,76,0.8)">${bot.chips.toLocaleString()} chips</div>
-      <div style="color:${win?'#27ae60':bust||!push?'#e74c3c':'#aaa'};font-weight:700">${actionText}</div>`;
+      <div style="color:${win?'#27ae60':bust||!push?'#e74c3c':'#aaa'};font-weight:700">${actionText}</div>
+      <div style="color:rgba(201,168,76,0.4);font-size:0.48rem;letter-spacing:1px">${SEAT_LABELS[bot.seatIdx]}</div>`;
     await sleep(1200);
-    bot.labelEl.innerHTML = `<div style="color:#aef">${bot.name}</div>
-      <div style="color:rgba(201,168,76,0.8)">${bot.chips.toLocaleString()} chips</div>`;
+    updateBotLabel(bot);
   }
 }
 
@@ -2914,6 +3341,219 @@ async function botLoop() {
   }
 }
 
+// ============================================================
+// AMBIENT CASINO MUSIC (procedural lounge jazz via Web Audio API)
+// ============================================================
+let musicCtx = null;
+let musicGain = null;
+let musicPlaying = false;
+let musicNodes = [];
+
+function initMusic() {
+  try {
+    musicCtx = new (window.AudioContext || window.webkitAudioContext)();
+    musicGain = musicCtx.createGain();
+    musicGain.gain.value = 0.12; // soft background
+    musicGain.connect(musicCtx.destination);
+    // Auto-start on first user interaction (browser policy)
+    document.addEventListener('click', startMusicOnce, { once: true });
+    document.addEventListener('touchstart', startMusicOnce, { once: true });
+  } catch (e) {
+    console.warn('Web Audio not available for music');
+  }
+}
+
+function startMusicOnce() {
+  if (musicPlaying || !musicCtx) return;
+  if (musicCtx.state === 'suspended') musicCtx.resume();
+  playLoungeBeat();
+  musicPlaying = true;
+  updateMusicBtn();
+}
+
+function playLoungeBeat() {
+  if (!musicCtx || !musicGain) return;
+  // Smooth jazz chord loop using oscillators + filters
+  const chords = [
+    [261.63, 329.63, 392.00, 493.88],  // Cmaj7
+    [293.66, 369.99, 440.00, 554.37],  // Dm7
+    [349.23, 440.00, 523.25, 659.26],  // Fmaj7
+    [392.00, 493.88, 587.33, 698.46],  // G7
+    [261.63, 311.13, 392.00, 466.16],  // Cm7 (jazzy)
+    [220.00, 277.18, 329.63, 415.30],  // Am7
+  ];
+
+  let beat = 0;
+  function playChord() {
+    if (!musicPlaying || !musicCtx) return;
+    const chord = chords[beat % chords.length];
+    const now = musicCtx.currentTime;
+
+    chord.forEach((freq, i) => {
+      const osc = musicCtx.createOscillator();
+      const oscGain = musicCtx.createGain();
+      const filter = musicCtx.createBiquadFilter();
+
+      osc.type = i === 0 ? 'triangle' : 'sine';
+      osc.frequency.value = freq * (i < 2 ? 0.5 : 1); // bass notes octave down
+      filter.type = 'lowpass';
+      filter.frequency.value = 800 + Math.random() * 400;
+      filter.Q.value = 1;
+
+      oscGain.gain.setValueAtTime(0, now);
+      oscGain.gain.linearRampToValueAtTime(0.06 / chord.length, now + 0.3);
+      oscGain.gain.linearRampToValueAtTime(0.03 / chord.length, now + 2.8);
+      oscGain.gain.linearRampToValueAtTime(0, now + 3.8);
+
+      osc.connect(filter);
+      filter.connect(oscGain);
+      oscGain.connect(musicGain);
+
+      osc.start(now);
+      osc.stop(now + 4);
+    });
+
+    beat++;
+    setTimeout(playChord, 3800 + Math.random() * 400);
+  }
+  playChord();
+}
+
+function toggleMusic() {
+  if (!musicCtx) { initMusic(); startMusicOnce(); return; }
+  musicPlaying = !musicPlaying;
+  if (musicPlaying) {
+    if (musicCtx.state === 'suspended') musicCtx.resume();
+    playLoungeBeat();
+  } else {
+    musicGain.gain.linearRampToValueAtTime(0, musicCtx.currentTime + 0.5);
+    setTimeout(() => { if (!musicPlaying) musicGain.gain.value = 0.12; }, 600);
+  }
+  updateMusicBtn();
+}
+
+function toggleVoice() {
+  dealerVoiceEnabled = !dealerVoiceEnabled;
+  const btn = document.getElementById('voice-toggle');
+  if (btn) btn.textContent = dealerVoiceEnabled ? '🔊' : '🔇';
+}
+
+function updateMusicBtn() {
+  const btn = document.getElementById('music-toggle');
+  if (btn) btn.textContent = musicPlaying ? '♫ ON' : '♫ OFF';
+}
+
+// ============================================================
+// DEALER PERSONALITY ENGINE (mood, reactions, idle chatter)
+// ============================================================
+let dealerMood = 'neutral';  // neutral, impressed, annoyed, excited
+let playerWinStreak = 0;
+let playerLossStreak = 0;
+let handsThisSession = 0;
+let lastIdleChat = 0;
+
+function updateDealerMood(outcome) {
+  handsThisSession++;
+  if (outcome === 'win' || outcome === 'blackjack') {
+    playerWinStreak++;
+    playerLossStreak = 0;
+    if (playerWinStreak >= 3) dealerMood = 'impressed';
+    else dealerMood = 'neutral';
+  } else if (outcome === 'loss' || outcome === 'bust') {
+    playerLossStreak++;
+    playerWinStreak = 0;
+    if (playerLossStreak >= 3) dealerMood = 'annoyed';
+    else dealerMood = 'neutral';
+  } else {
+    dealerMood = 'neutral';
+  }
+}
+
+// Mood-aware dealer commentary (adds personality beyond scripted lines)
+function dealerReact(outcome) {
+  updateDealerMood(outcome);
+  const d = currentDealer;
+
+  // Streak-aware bonus comments
+  if (playerWinStreak === 3) {
+    const streakLines = {
+      aria:    "Three in a row. The table is watching you now.",
+      marcus:  "Three straight? You're on fire. Don't get cocky.",
+      kanisha: "A THREE streak? Honey, you're the main character tonight!",
+      bacardi: "Three wins. The Ice is starting to notice.",
+    };
+    if (streakLines[d.id]) setTimeout(() => dealerSpeak(streakLines[d.id]), 2500);
+  }
+  if (playerWinStreak === 5) {
+    const bigStreak = {
+      aria:    "Five wins. That's not luck anymore. That's skill.",
+      marcus:  "Five. The Shark respects that. Keep going.",
+      kanisha: "FIVE! Baby you are ON FIRE! The whole casino is watching!",
+      bacardi: "Five straight at the Ice table. Legend status.",
+    };
+    if (bigStreak[d.id]) setTimeout(() => dealerSpeak(bigStreak[d.id]), 2500);
+  }
+  if (playerLossStreak === 3) {
+    const coldStreak = {
+      aria:    "Rough patch. The cards will turn. They always do.",
+      marcus:  "Three losses. Shake it off. Or walk. No shame.",
+      kanisha: "Oh sugar, don't let it get to you. This table loves a comeback.",
+      bacardi: "Three down. The Ice table tests everyone. Prove you belong.",
+    };
+    if (coldStreak[d.id]) setTimeout(() => dealerSpeak(coldStreak[d.id]), 2500);
+  }
+
+  // Milestone comments
+  if (handsThisSession === 10) {
+    const milestone = {
+      aria:    "Ten hands in. You're a regular now.",
+      marcus:  "Ten rounds deep. The Shark likes a grinder.",
+      kanisha: "Ten hands! You really love my table, don't you?",
+      bacardi: "Ten at the Ice table. You've earned a seat.",
+    };
+    if (milestone[d.id]) setTimeout(() => dealerSpeak(milestone[d.id]), 3000);
+  }
+}
+
+// Idle chatter (fires every 45-90 seconds if no game action)
+function startIdleChatter() {
+  setInterval(() => {
+    if (!dealerVoiceEnabled) return;
+    const now = Date.now();
+    if (now - lastIdleChat < 45000) return;
+    if (gameState.phase === 'playing') return; // don't interrupt active play
+
+    const d = currentDealer;
+    const idles = {
+      aria: [
+        "The table is open. Take your time.",
+        "Cards don't deal themselves. Well... they could. But where's the fun?",
+        "Watching the room. Waiting for courage.",
+      ],
+      marcus: [
+        "You still here? Good. The table misses action.",
+        "Chips don't collect dust at MY table.",
+        "The felt is warm. Cards are ready. What are you waiting for?",
+      ],
+      kanisha: [
+        "Don't be shy, sugar. The cards are waiting for you.",
+        "Y'all, this table is too quiet. Let's make some noise!",
+        "Kanisha's table is the place to be. Come on now.",
+      ],
+      bacardi: [
+        "The Ice table doesn't wait. Make your move.",
+        "Silence at the VIP table. That's not how legends play.",
+        "Cards. Chips. Action. That's what we're here for.",
+      ],
+    };
+
+    const lines = idles[d.id] || idles.aria;
+    const line = lines[Math.floor(Math.random() * lines.length)];
+    dealerSpeak(line);
+    lastIdleChat = now;
+  }, 30000 + Math.random() * 30000);
+}
+
 async function boot() {
   const fill = document.getElementById('loading-fill');
   const status = document.getElementById('loading-status');
@@ -2936,7 +3576,10 @@ async function boot() {
   initThree();
   initHUD();
   initDealerVoice();
+  initMusic();
   initBotLabels();
+  startIdleChatter();
+  await handleCheckoutReturn();
 
   // Pre-build deck
   gameState.deck = buildDeck(6);
