@@ -403,12 +403,12 @@ v4:
     ignore_cooldown: false           # CRITICAL FIX: respect cooldown after losses. Was true -- caused revenge trades.
   profit_lock:
     enabled: true
-    # LOOSENED 2026-03-19: give trades room to breathe, stop choking winners
-    activate_usd: 6.00              # SNIPER MODE: was $4 -- arm at $6, let swing develop before locking
-    keep_ratio: 0.40               # SNIPER MODE: was 0.50 -- keep 40% of peak, more room for swing pullbacks
-    max_giveback_usd: 5.00         # SNIPER MODE: was $3 -- allow $5 giveback for 10-17hr holds
+    # PROFIT STRATEGY: let it run to $10-25, trail aggressively above $10
+    activate_usd: 6.00              # Don't lock until $6 -- $2-3 wins are not worth locking, let them grow
+    keep_ratio: 0.45               # Below $10: keep 45% of peak (floor handles the $2.50 minimum)
+    max_giveback_usd: 4.00         # Below $10: allow $4 pullback for the move to develop
     min_bars_since_entry: 1
-    lock_min_usd: 0.50
+    lock_min_usd: 2.00             # RAISED: never lock less than $2 net (fee coverage guarantee)
     tiers:
       SCALP:
         activate_usd: 4.00            # let scalps run to real profit before locking
@@ -434,21 +434,41 @@ v4:
         activate_usd: 10.00           # monster in expansion = max room to run
         keep_ratio: 0.35
         max_giveback_usd: 8.00
+    # Progressive trailing: tighten as profit grows (applied ON TOP of tier logic)
+    progressive_trail:
+      enabled: true
+      tiers:
+        # $6-10: standard trail, let the move develop
+        - min_usd: 6.0
+          keep_ratio: 0.45
+          max_giveback_usd: 4.00
+        # $10-15: tighten up, this is real money now
+        - min_usd: 10.0
+          keep_ratio: 0.60
+          max_giveback_usd: 3.00
+        # $15-25: aggressive trail, keep 65%+ of peak
+        - min_usd: 15.0
+          keep_ratio: 0.65
+          max_giveback_usd: 3.00
+        # $25+: DREAM TP -- take it. Keep 70% minimum.
+        - min_usd: 25.0
+          keep_ratio: 0.70
+          max_giveback_usd: 2.00
   # Profit Protection Lanes — layered defense against giving back open profit
   profit_protection:
     # Lane 1: Hard minimum floor — once up this much, NEVER give it all back.
     # Independent of profit_lock tiers. Fires before profit_lock activates.
     min_floor:
       enabled: true
-      floor_usd: 5.00          # don't lock until $5 real profit
-      min_bars: 4              # 1 hour minimum before floor activates
-      trail_pct: 0.40          # trail at 40% of peak, give room
+      floor_usd: 2.50          # LOWERED: $2.50 = fee coverage + guaranteed net positive. Never give back a winner.
+      min_bars: 2              # FASTER: arm after 30 min, not 1 hour. Trade 1 lost $6.75 because floor was too slow.
+      trail_pct: 0.30          # TIGHTER below $10: keep 30% of peak as absolute floor
     # Compression Scalp: faster profit capture when vol is low.
     # Overrides min_floor + decay_arm to grab small profits quickly.
     compression_scalp:
-      min_floor_usd: 4.00      # no locking crumbs, wait for real profit
-      min_bars: 4              # 1 hour before arming any exit
-      decay_arm_usd: 5.00      # match decay_exit arm level
+      min_floor_usd: 2.50      # LOWERED: match the new floor. Cover fees + net positive.
+      min_bars: 2              # FASTER: arm quickly in compression
+      decay_arm_usd: 4.00      # lower decay arm in compression
       exempt_regimes: [trend]  # trend entries use wider entry_profile values, not scalp
     # Lane 2: Momentum-confirmed decay exit — close when profit peaks and momentum dies.
     # Only arms after unrealized exceeds arm_usd. Exits when retrace % exceeded AND momentum weak.

@@ -6291,6 +6291,27 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 if giveback_usd >= max_giveback:
                     profit_lock_hit = True
 
+        # --- Progressive Trail: tighten as profit grows ---
+        _prog_trail_cfg = (profit_lock_cfg.get("progressive_trail") or {}) if isinstance(profit_lock_cfg.get("progressive_trail"), dict) else {}
+        if _prog_trail_cfg.get("enabled", False) and max_unrealized_usd > 0 and lock_armed:
+            _prog_tiers = list(_prog_trail_cfg.get("tiers") or [])
+            _prog_tiers.sort(key=lambda t: float(t.get("min_usd", 0)), reverse=True)
+            for _pt in _prog_tiers:
+                _pt_min = float(_pt.get("min_usd", 0))
+                if max_unrealized_usd >= _pt_min:
+                    _pt_keep = float(_pt.get("keep_ratio", 0.50))
+                    _pt_max_gb = float(_pt.get("max_giveback_usd", 5.0))
+                    _pt_floor = max_unrealized_usd * _pt_keep
+                    if _pt_floor > lock_floor_usd:
+                        lock_floor_usd = _pt_floor
+                    if _pt_max_gb < max_giveback:
+                        max_giveback = _pt_max_gb
+                    if curr_upnl <= lock_floor_usd:
+                        profit_lock_hit = True
+                    if giveback_usd >= max_giveback:
+                        profit_lock_hit = True
+                    break
+
         recovery_target = float(open_pos.get("recovery_target_usd") or 0.0)
         recovery_hit = bool(recovery_target > 0 and pnl_usd_live is not None and pnl_usd_live >= recovery_target)
 
