@@ -224,7 +224,7 @@ exits:
     decay_threshold: 0.20   # was 0.40 -- faster decay detection in low vol
     min_profit_usd: 1.00    # was 2.00 -- accept smaller wins during compression
   tp_full_close_if_single_contract: true
-  breakeven_atr_trigger: 1.0       # SNIPER MODE: was 0.5 -- don't arm BE too early, give trade room to breathe
+  breakeven_atr_trigger: 2.5       # RAISED: was 1.0 -- 1 ATR arms too fast in choppy downtrends, causes repeated BE exits + worse re-entries. Need 2.5 ATR real move before arming.
   breakeven_buffer_pct: 0.004     # keep: buffer covers ~$1.50 in fees at $0.15 XLM
   min_tp_pct: 0.005           # SNIPER MODE: was 0.003 -- minimum 0.5% TP = ~$2.50 at $500. No crumb hunting.
 
@@ -378,11 +378,11 @@ v4:
     scalp_gap: 8                 # SNIPER MODE: raise scalp bar -- we want FULL+ tier only
     monster_above: 25            # SNIPER MODE: only the top 1% setups get MONSTER
     reduced:
-      breakeven_atr_trigger: 1.5      # was 0.5 -- 0.5 ATR arms too soon, BE = -$1.45 net
+      breakeven_atr_trigger: 3.0      # RAISED: was 1.5 -- reduced-quality trades need MORE room, not less
       time_stop_bars: 999             # DISABLED: no time exits
       time_stop_min_move_pct: -1.0
     scalp:
-      breakeven_atr_trigger: 1.0      # was 0.3 -- 0.3 ATR = $0.80 move, BE always loses $1.45
+      breakeven_atr_trigger: 2.0      # RAISED: was 1.0 -- scalps still need room to breathe through pullbacks
       time_stop_bars: 999             # DISABLED: no time exits even on scalps
       time_stop_min_move_pct: -1.0
       use_min_tp: true
@@ -1408,3 +1408,71 @@ sniper_mode:
     max_trades_per_day: 2
     preferred_hours_pt: [21, 22, 6, 7, 8]  # 9-10 PM PT (biggest), 6-8 AM PT (most volume)
     cooldown_between_trades_min: 60
+
+# Reversal Engine (30 strategies from strategy/reversal_engine.py)
+reversal_engine:
+  enabled: true
+  # Score modifier capped at +/-15 pts
+
+# Weekend Mode: reduce risk on Saturday/Sunday
+weekend_mode:
+  enabled: true
+  size_mult: 0.5           # half size on weekends
+  be_buffer_mult: 1.5      # 50% wider break-even buffer
+
+# Time-based Stop Tightening: kill zombie trades
+# If trade hasn't moved 0.5 ATR in 2 hours, tighten break-even trigger
+exits:
+  time_tighten_bars: 8           # 2 hours (8 x 15min bars)
+  time_tighten_min_move_atr: 0.5 # must have moved at least 0.5 ATR
+  time_tighten_be_atr: 1.0       # tighten BE trigger to 1.0 ATR
+
+# Volume Profile (POC/VAH/VAL)
+volume_profile:
+  enabled: true
+  lookback_hours: 4         # session profile lookback
+  num_bins: 30              # price level bins
+  poc_score_neutral: 0      # at POC = no edge
+  discount_score_long: 8    # below VAL = long bias
+  premium_score_short: 8    # above VAH = short bias
+
+# Cumulative Volume Delta
+cvd:
+  enabled: true
+  divergence_lookback: 20
+  divergence_score: 8       # +/- points on divergence
+  absorption_window: 5
+
+# Liquidity Pools (equal highs/lows)
+liquidity_pools:
+  enabled: true
+  tolerance_pct: 0.001
+  min_touches: 2
+  proximity_atr: 1.5        # within 1.5 ATR = approaching pool
+  sweep_score: 10            # confirmed stop hunt = +10
+
+# Wyckoff Phase Detection
+wyckoff:
+  enabled: true
+  lookback_bars: 96          # 24 hours of 15m bars
+  accumulation_score_long: 8
+  distribution_score_short: 8
+  spring_score: 12           # spring/upthrust = high conviction
+
+# Premium/Discount Zone Filter
+premium_discount:
+  enabled: true
+  long_only_below_pct: 0.50  # only long below 50% of range
+  short_only_above_pct: 0.50 # only short above 50% of range
+  score_bonus: 6             # +6 when in correct zone
+
+# Weekly Chart Bias
+weekly_bias:
+  enabled: true
+  # Uses weekly EMA21 slope + RSI to determine macro direction
+  # long_only in weekly uptrend, short_only in weekly downtrend, both in neutral
+
+# Pattern Failure Trades
+pattern_failure:
+  enabled: true
+  score_bonus: 12            # failed patterns are high conviction signals

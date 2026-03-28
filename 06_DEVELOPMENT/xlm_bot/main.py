@@ -1462,6 +1462,109 @@ def _resolve_margin_window_playbook(
     }
 
 
+def _compute_adaptive_direction_bias(state: dict, config: dict) -> dict:
+    """Compute a direction bias from recent trade history.
+
+    Reads the last N closed trades and determines whether the bot should
+    favour longs, shorts, or stay neutral.  The logic is simple:
+
+    1. Count recent same-direction failures (loss or break_even exits).
+       - 2 consecutive failures in same direction → mild bias to flip
+       - 3+ consecutive failures → strong bias to flip
+    2. A winning trade CONFIRMS the current direction.
+    3. After a TP exit, bias toward the opposite direction (reversal).
+
+    Returns:
+        {
+          "bias": "long" | "short" | "neutral",
+          "strength": float (0.0 = neutral, 1.0 = strong),
+          "long_score_adj": int (added to long confluence score),
+          "short_score_adj": int (added to short confluence score),
+          "reasons": list[str],
+        }
+    """
+    history = list(state.get("adaptive_direction_history") or [])
+    if not history:
+        return {"bias": "neutral", "strength": 0.0, "long_score_adj": 0,
+                "short_score_adj": 0, "reasons": ["no_history"]}
+
+    reasons = []
+    long_adj = 0
+    short_adj = 0
+
+    # --- Signal 1: Consecutive same-direction failures ---
+    # Walk backwards through history counting consecutive non-wins in same direction
+    consec_fail_dir = None
+    consec_fail_count = 0
+    for trade in reversed(history):
+        d = trade.get("dir", "")
+        r = trade.get("result", "")
+        er = trade.get("exit_reason", "")
+        is_fail = r == "loss" or er in ("break_even", "min_profit_floor")
+        if is_fail:
+            if consec_fail_dir is None:
+                consec_fail_dir = d
+                consec_fail_count = 1
+            elif d == consec_fail_dir:
+                consec_fail_count += 1
+            else:
+                break  # different direction, stop counting
+        else:
+            break  # win or neutral exit, streak broken
+
+    if consec_fail_count >= 2 and consec_fail_dir:
+        flip_to = "long" if consec_fail_dir == "short" else "short"
+        strength = min(1.0, consec_fail_count * 0.3)  # 2=0.6, 3=0.9, 4+=1.0
+        adj = int(consec_fail_count * 5)  # 2=+10, 3=+15 to opposite direction
+        if flip_to == "long":
+            long_adj += adj
+            short_adj -= adj
+        else:
+            short_adj += adj
+            long_adj -= adj
+        reasons.append(f"{consec_fail_count}x_{consec_fail_dir}_fails→bias_{flip_to}")
+
+    # --- Signal 2: Recent wins confirm direction ---
+    recent_wins = [t for t in history[-3:] if t.get("result") == "win"]
+    for w in recent_wins:
+        d = w.get("dir", "")
+        if d == "long":
+            long_adj += 3
+            reasons.append("recent_long_win_confirms")
+        elif d == "short":
+            short_adj += 3
+            reasons.append("recent_short_win_confirms")
+
+    # --- Signal 3: Post-TP bias (already tracked, reinforce it here) ---
+    post_tp = state.get("post_tp_bias_side")
+    if post_tp and int(state.get("post_tp_bias_trades_since", 99)) < 2:
+        if post_tp == "long":
+            long_adj += 5
+        elif post_tp == "short":
+            short_adj += 5
+        reasons.append(f"post_tp_bias→{post_tp}")
+
+    # Compute net bias
+    net = long_adj - short_adj
+    if net > 5:
+        bias = "long"
+        strength = min(1.0, abs(net) / 20)
+    elif net < -5:
+        bias = "short"
+        strength = min(1.0, abs(net) / 20)
+    else:
+        bias = "neutral"
+        strength = 0.0
+
+    return {
+        "bias": bias,
+        "strength": round(strength, 2),
+        "long_score_adj": long_adj,
+        "short_score_adj": short_adj,
+        "reasons": reasons,
+    }
+
+
 def _evaluate_recovery_mode(state: dict, config: dict, now: datetime) -> dict:
     """
     Evaluate Recovery Mode state machine.
@@ -4245,6 +4348,54 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     except Exception:
         _htf_bias = {}
 
+    # --- Weekend mode: reduce risk on Saturday/Sunday ---
+    _is_weekend = now.weekday() >= 5  # 5=Saturday, 6=Sunday
+    _weekend_cfg = (config.get("weekend_mode") or {}) if isinstance(config.get("weekend_mode"), dict) else {}
+    _weekend_enabled = bool(_weekend_cfg.get("enabled", True))
+    if _is_weekend and _weekend_enabled:
+        _wk_size_mult = float(_weekend_cfg.get("size_mult", 0.5) or 0.5)
+        _wk_be_mult = float(_weekend_cfg.get("be_buffer_mult", 1.5) or 1.5)
+        # Store for use in sizing and exit logic later
+        _st["_weekend_mode_active"] = True
+        _st["_weekend_size_mult"] = _wk_size_mult
+        _st["_weekend_be_mult"] = _wk_be_mult
+
+    # --- Re-entry price protection: don't re-enter same direction at a worse price ---
+    # If we just closed a short at $X, don't re-short at $X+delta (higher = worse for short).
+    # If we just closed a long at $X, don't re-long at $X-delta (lower = worse for long).
+    _last_exit_price = float(_st.get("last_exit_price") or 0)
+    _last_exit_dir = str(_st.get("last_exit_direction") or "")
+    _reentry_window_min = 120  # only check within 2 hours of last exit
+    _last_exit_ts = _st.get("last_exit_time")
+    _reentry_check = False
+    if _last_exit_price > 0 and _last_exit_ts:
+        try:
+            _let = datetime.fromisoformat(str(_last_exit_ts).replace("Z", "+00:00"))
+            _reentry_check = (now - _let).total_seconds() < _reentry_window_min * 60
+        except Exception:
+            pass
+    if _reentry_check and _last_exit_price > 0:
+        if _last_exit_dir == "short" and short_entry and price > _last_exit_price:
+            log_decision(config, {
+                "timestamp": now.isoformat(),
+                "reason": "reentry_worse_price_blocked",
+                "direction": "short",
+                "current_price": price,
+                "last_exit_price": _last_exit_price,
+                "thought": f"Blocking short re-entry: price ${price:.5f} is ABOVE last exit ${_last_exit_price:.5f}. Would re-enter at worse level.",
+            })
+            short_entry = None
+        if _last_exit_dir == "long" and long_entry and price < _last_exit_price:
+            log_decision(config, {
+                "timestamp": now.isoformat(),
+                "reason": "reentry_worse_price_blocked",
+                "direction": "long",
+                "current_price": price,
+                "last_exit_price": _last_exit_price,
+                "thought": f"Blocking long re-entry: price ${price:.5f} is BELOW last exit ${_last_exit_price:.5f}. Would re-enter at worse level.",
+            })
+            long_entry = None
+
     long_v4 = None
     short_v4 = None
     if long_entry:
@@ -4397,6 +4548,34 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         v4_candidates.append(("short", short_entry, short_v4, breakout_type_short, lane_result_short))
     if v4_candidates:
         v4_candidates.sort(key=lambda it: (int((it[2] or {}).get("score") or 0), int(confluence_count((it[1] or {}).get("confluence") or {}))), reverse=True)
+        # Adaptive Direction Bias: learn from recent trade history
+        _adb = _compute_adaptive_direction_bias(_st, config)
+        _adb_bias = _adb.get("bias", "neutral")
+        _adb_long_adj = int(_adb.get("long_score_adj", 0))
+        _adb_short_adj = int(_adb.get("short_score_adj", 0))
+        if _adb_bias != "neutral":
+            for _ci, _cand in enumerate(v4_candidates):
+                _cv4 = _cand[2]
+                if _cv4 and isinstance(_cv4, dict):
+                    _orig_score = int(_cv4.get("score") or 0)
+                    if _cand[0] == "long":
+                        _cv4["score"] = _orig_score + _adb_long_adj
+                        _cv4["_adaptive_adj"] = _adb_long_adj
+                    elif _cand[0] == "short":
+                        _cv4["score"] = _orig_score + _adb_short_adj
+                        _cv4["_adaptive_adj"] = _adb_short_adj
+            v4_candidates.sort(key=lambda it: (int((it[2] or {}).get("score") or 0), int(confluence_count((it[1] or {}).get("confluence") or {}))), reverse=True)
+            log_decision(config, {
+                "timestamp": now.isoformat(),
+                "reason": "adaptive_direction_bias",
+                "bias": _adb_bias,
+                "strength": _adb.get("strength", 0),
+                "long_adj": _adb_long_adj,
+                "short_adj": _adb_short_adj,
+                "reasons": _adb.get("reasons", []),
+                "thought": f"Adaptive bias: {_adb_bias} str={_adb.get('strength',0):.1f} L={_adb_long_adj:+d} S={_adb_short_adj:+d}",
+            })
+
         # Recovery Mode / Post-TP bias: prefer specific direction if both sides qualify
         # (Use _st from load_state() at top of function — 'state' isn't defined until later)
         _bias_side = ""
@@ -4406,6 +4585,9 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             _bias_side = "long" if _last_loss == "short" else ("short" if _last_loss == "long" else "")
         elif str(_st.get("post_tp_bias_side") or ""):
             _bias_side = str(_st.get("post_tp_bias_side"))
+        # Adaptive direction can also set bias when recovery/post-TP do not
+        if not _bias_side and _adb_bias != "neutral":
+            _bias_side = _adb_bias
         if _bias_side and len(v4_candidates) > 1:
             # If both sides pass, prefer the biased side (as long as score is within 15 pts)
             _top_score = int((v4_candidates[0][2] or {}).get("score") or 0)
@@ -5297,6 +5479,8 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             except Exception:
                 pass
             state["last_exit_time"] = exit_time_iso
+            state["last_exit_price"] = float(price)
+            state["last_exit_direction"] = direction
             state["open_position"] = None
             save_state(state)
             durable.set_kv("open_position", None)
@@ -5831,6 +6015,8 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                         size=int(open_pos.get("size") or 1),
                     )
                     state["last_exit_time"] = exit_time_iso
+                    state["last_exit_price"] = float(price)
+                    state["last_exit_direction"] = direction
                     state["open_position"] = None
                     save_state(state)
                     durable.set_kv("open_position", None)
@@ -6296,6 +6482,18 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
 
         # (qt_exit_overrides already initialized above for time stop)
 
+        # Time-based stop tightening: if trade stalls, tighten BE trigger
+        # If held > 2 hours (8 bars) and never reached 0.5 ATR profit, tighten BE to 1.0 ATR
+        _time_tighten_bars = int((config.get("exits") or {}).get("time_tighten_bars", 8) or 8)
+        _time_tighten_min_move_atr = float((config.get("exits") or {}).get("time_tighten_min_move_atr", 0.5) or 0.5)
+        _time_tighten_be_atr = float((config.get("exits") or {}).get("time_tighten_be_atr", 1.0) or 1.0)
+        _time_tightened = False
+        if bars_since >= _time_tighten_bars and atr_exit > 0 and entry_price > 0:
+            _max_move_atr = float(open_pos.get("max_pnl_pct") or 0) * entry_price / atr_exit if atr_exit > 0 else 0
+            if _max_move_atr < _time_tighten_min_move_atr:
+                _time_tightened = True
+                # Will override be_atr_trigger below
+
         # Break-even check: compute before exit chain
         # Use mark price (_pnl_price) to avoid false triggers from spot/mark basis divergence.
         break_even_hit = False
@@ -6304,6 +6502,9 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         if atr_exit > 0 and _be_check_price > 0 and entry_price > 0:
             be_cfg = config.get("exits", {})
             be_atr_trigger = float(qt_exit_overrides.get("breakeven_atr_trigger") or be_cfg.get("breakeven_atr_trigger", 1.0) or 1.0)
+            # Time-based tightening: override if trade is stalling
+            if _time_tightened and _time_tighten_be_atr < be_atr_trigger:
+                be_atr_trigger = _time_tighten_be_atr
             be_buffer_pct = float(be_cfg.get("breakeven_buffer_pct", 0.001) or 0.001)
             # Has price ever moved far enough to arm the break-even?
             if pnl_pct >= (atr_exit / _be_check_price) * be_atr_trigger:
@@ -6618,6 +6819,18 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 if pnl_usd is not None:
                     state["pnl_today_usd"] = float(state.get("pnl_today_usd") or 0.0) + pnl_usd
 
+                # --- Adaptive Direction History: log trade outcome for direction bias ---
+                _adh = list(state.get("adaptive_direction_history") or [])
+                _adh.append({
+                    "dir": direction,
+                    "result": result,
+                    "exit_reason": str(exit_reason or ""),
+                    "pnl_usd": round(float(pnl_usd), 2) if pnl_usd is not None else 0.0,
+                    "ts": now.isoformat(),
+                })
+                # Keep last 10 trades only
+                state["adaptive_direction_history"] = _adh[-10:]
+
                 # Recovery Mode: track loss direction and recovery cooldown
                 if result == "loss":
                     state["last_loss_side"] = direction
@@ -6736,6 +6949,8 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             except Exception:
                 pass
             state["last_exit_time"] = exit_time_iso
+            state["last_exit_price"] = float(_verified_exit_price) if _verified_exit_price else float(price)
+            state["last_exit_direction"] = direction
             state["open_position"] = None
 
             # Post-loss debrief: fire AI deep dive during cooldown
@@ -7388,6 +7603,234 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 selected_v4["pass"] = bool(adjusted >= int(selected_v4.get("threshold") or 75))
                 score_gate_pass = bool(selected_v4["pass"])
                 score_gate_pass_effective = bool(score_gate_pass)
+    except Exception:
+        pass
+
+    # --- Reversal engine modifier (30 strategies) ---
+    _rev_signals = []
+    _rev_mod = 0
+    try:
+        _rev_cfg = (config.get("reversal_engine") or {}) if isinstance(config.get("reversal_engine"), dict) else {}
+        if _rev_cfg.get("enabled", True) and direction and selected_v4 is not None:
+            from strategy.reversal_engine import scan_reversal_signals, reversal_score_modifier
+            _rev_signals = scan_reversal_signals(
+                df_4h=df_4h,
+                df_1h=df_1h,
+                price=price,
+                config=_rev_cfg,
+            )
+            if _rev_signals:
+                _rev_mod = reversal_score_modifier(_rev_signals, direction)
+                if _rev_mod != 0:
+                    selected_v4 = dict(selected_v4)
+                    _rev_prev = int(selected_v4.get("score") or 0)
+                    selected_v4["score"] = max(0, min(100, _rev_prev + _rev_mod))
+                    selected_v4["pass"] = bool(selected_v4["score"] >= int(selected_v4.get("threshold") or 75))
+                    score_gate_pass = bool(selected_v4["pass"])
+                    score_gate_pass_effective = bool(score_gate_pass)
+                    selected_v4["_reversal_mod"] = _rev_mod
+                    selected_v4["_reversal_count"] = len(_rev_signals)
+                    selected_v4["_reversal_top"] = _rev_signals[0].strategy_name if _rev_signals else ""
+    except Exception:
+        pass
+
+    # --- Premium/Discount zone filter ---
+    _pd_mod = 0
+    try:
+        _pd_cfg = (config.get("premium_discount") or {}) if isinstance(config.get("premium_discount"), dict) else {}
+        if _pd_cfg.get("enabled", True) and direction and df_4h is not None and len(df_4h) >= 20:
+            _pd_high = float(df_4h["high"].rolling(48).max().iloc[-1])
+            _pd_low = float(df_4h["low"].rolling(48).min().iloc[-1])
+            _pd_range = _pd_high - _pd_low
+            if _pd_range > 0:
+                _pd_pct = (price - _pd_low) / _pd_range
+                _pd_bonus = int(_pd_cfg.get("score_bonus", 6) or 6)
+                if direction == "long" and _pd_pct < 0.50:
+                    _pd_mod = _pd_bonus  # discount zone, long is good
+                elif direction == "short" and _pd_pct > 0.50:
+                    _pd_mod = _pd_bonus  # premium zone, short is good
+                elif direction == "long" and _pd_pct > 0.70:
+                    _pd_mod = -_pd_bonus  # premium zone, long is bad
+                elif direction == "short" and _pd_pct < 0.30:
+                    _pd_mod = -_pd_bonus  # discount zone, short is bad
+                if _pd_mod != 0 and selected_v4 is not None:
+                    selected_v4 = dict(selected_v4)
+                    selected_v4["score"] = max(0, min(100, int(selected_v4.get("score") or 0) + _pd_mod))
+                    selected_v4["pass"] = bool(selected_v4["score"] >= int(selected_v4.get("threshold") or 75))
+                    score_gate_pass = bool(selected_v4["pass"])
+                    score_gate_pass_effective = bool(score_gate_pass)
+                    selected_v4["_pd_zone_mod"] = _pd_mod
+                    selected_v4["_pd_zone_pct"] = round(_pd_pct, 3)
+    except Exception:
+        pass
+
+    # --- OI divergence signal ---
+    _oi_div_mod = 0
+    try:
+        _oi_cfg = (config.get("contract_context") or {}) if isinstance(config.get("contract_context"), dict) else {}
+        if _oi_cfg.get("enabled", True) and direction and cc_mgr is not None:
+            _cc_snap = cc_mgr.get_snapshot() if hasattr(cc_mgr, "get_snapshot") else {}
+            _oi_trend = str(_cc_snap.get("oi_trend") or "FLAT")
+            # OI divergence: price up + OI down = bearish, price down + OI up = squeeze fuel
+            _price_up = price > float(df_15m["close"].iloc[-5]) if df_15m is not None and len(df_15m) > 5 else False
+            _price_down = price < float(df_15m["close"].iloc[-5]) if df_15m is not None and len(df_15m) > 5 else False
+            if _price_up and _oi_trend == "FALLING":
+                _oi_div_mod = -5 if direction == "long" else 5  # bearish OI divergence
+            elif _price_down and _oi_trend == "RISING":
+                _oi_div_mod = 5 if direction == "long" else -5  # squeeze fuel building
+            if _oi_div_mod != 0 and selected_v4 is not None:
+                selected_v4 = dict(selected_v4)
+                selected_v4["score"] = max(0, min(100, int(selected_v4.get("score") or 0) + _oi_div_mod))
+                selected_v4["pass"] = bool(selected_v4["score"] >= int(selected_v4.get("threshold") or 75))
+                score_gate_pass = bool(selected_v4["pass"])
+                score_gate_pass_effective = bool(score_gate_pass)
+                selected_v4["_oi_div_mod"] = _oi_div_mod
+    except Exception:
+        pass
+
+    # --- Weekly chart bias ---
+    _weekly_mod = 0
+    try:
+        _wk_cfg = (config.get("weekly_bias") or {}) if isinstance(config.get("weekly_bias"), dict) else {}
+        if _wk_cfg.get("enabled", True) and direction and df_4h is not None and len(df_4h) >= 42:
+            # Approximate weekly from 4h: 42 bars = 1 week
+            _wk_close = df_4h["close"]
+            _wk_ema21 = _wk_close.ewm(span=21, adjust=False).mean()
+            _wk_slope = float(_wk_ema21.iloc[-1] - _wk_ema21.iloc[-7]) / max(0.0001, float(_wk_ema21.iloc[-1]))
+            _wk_rsi_d = _wk_close.diff()
+            _wk_rsi_g = _wk_rsi_d.where(_wk_rsi_d > 0, 0.0).rolling(14).mean()
+            _wk_rsi_l = (-_wk_rsi_d.where(_wk_rsi_d < 0, 0.0)).rolling(14).mean()
+            _wk_rsi = float(100 - (100 / (1 + _wk_rsi_g.iloc[-1] / max(0.0001, _wk_rsi_l.iloc[-1]))))
+            if _wk_slope > 0.001 and _wk_rsi > 50:
+                _weekly_bias_dir = "long"
+            elif _wk_slope < -0.001 and _wk_rsi < 50:
+                _weekly_bias_dir = "short"
+            else:
+                _weekly_bias_dir = "neutral"
+            if _weekly_bias_dir != "neutral" and direction == _weekly_bias_dir:
+                _weekly_mod = 5  # with weekly trend
+            elif _weekly_bias_dir != "neutral" and direction != _weekly_bias_dir:
+                _weekly_mod = -5  # against weekly trend
+            if _weekly_mod != 0 and selected_v4 is not None:
+                selected_v4 = dict(selected_v4)
+                selected_v4["score"] = max(0, min(100, int(selected_v4.get("score") or 0) + _weekly_mod))
+                selected_v4["pass"] = bool(selected_v4["score"] >= int(selected_v4.get("threshold") or 75))
+                score_gate_pass = bool(selected_v4["pass"])
+                score_gate_pass_effective = bool(score_gate_pass)
+                selected_v4["_weekly_bias_mod"] = _weekly_mod
+    except Exception:
+        pass
+
+    # --- Volume Profile (POC/VAH/VAL) score modifier ---
+    _vp_mod = 0
+    try:
+        _vp_cfg = (config.get("volume_profile") or {}) if isinstance(config.get("volume_profile"), dict) else {}
+        if _vp_cfg.get("enabled", True) and direction and df_15m is not None and len(df_15m) >= 16:
+            from indicators.volume_profile import compute_volume_profile, volume_profile_bias
+            _vp_lookback = int(_vp_cfg.get("lookback_hours", 4) or 4) * 4  # 4 bars per hour
+            _vp_df = df_15m.tail(_vp_lookback) if len(df_15m) >= _vp_lookback else df_15m
+            _vp = compute_volume_profile(_vp_df, num_bins=int(_vp_cfg.get("num_bins", 30) or 30))
+            _vp_bias = volume_profile_bias(price, _vp["poc"], _vp["vah"], _vp["val"])
+            _vp_mod = int(_vp_bias.get("score_adj", 0))
+            if direction == "long" and _vp_bias.get("bias") == "short":
+                _vp_mod = -_vp_mod  # wrong side
+            elif direction == "short" and _vp_bias.get("bias") == "long":
+                _vp_mod = -_vp_mod
+            if _vp_mod != 0 and selected_v4 is not None:
+                selected_v4 = dict(selected_v4)
+                selected_v4["score"] = max(0, min(100, int(selected_v4.get("score") or 0) + _vp_mod))
+                selected_v4["pass"] = bool(selected_v4["score"] >= int(selected_v4.get("threshold") or 75))
+                score_gate_pass = bool(selected_v4["pass"])
+                score_gate_pass_effective = bool(score_gate_pass)
+                selected_v4["_vp_mod"] = _vp_mod
+                selected_v4["_vp_zone"] = _vp_bias.get("zone", "")
+                selected_v4["_vp_poc"] = _vp.get("poc", 0)
+    except Exception:
+        pass
+
+    # --- CVD divergence score modifier ---
+    _cvd_mod = 0
+    try:
+        _cvd_cfg = (config.get("cvd") or {}) if isinstance(config.get("cvd"), dict) else {}
+        if _cvd_cfg.get("enabled", True) and direction and df_15m is not None and len(df_15m) >= 25:
+            from indicators.cvd import cvd_divergence, cvd_absorption
+            _cvd_div = cvd_divergence(df_15m, lookback=int(_cvd_cfg.get("divergence_lookback", 20) or 20))
+            if direction == "long":
+                _cvd_mod += int(_cvd_div.get("score_adj_long", 0))
+            else:
+                _cvd_mod += int(_cvd_div.get("score_adj_short", 0))
+            # Also check absorption
+            _cvd_abs = cvd_absorption(df_15m, window=int(_cvd_cfg.get("absorption_window", 5) or 5))
+            if _cvd_abs.get("detected"):
+                _abs_type = _cvd_abs.get("type", "")
+                if _abs_type == "buying_absorption" and direction == "long":
+                    _cvd_mod += int(_cvd_abs.get("score_adj", 0))
+                elif _abs_type == "selling_absorption" and direction == "short":
+                    _cvd_mod += int(_cvd_abs.get("score_adj", 0))
+            if _cvd_mod != 0 and selected_v4 is not None:
+                selected_v4 = dict(selected_v4)
+                selected_v4["score"] = max(0, min(100, int(selected_v4.get("score") or 0) + _cvd_mod))
+                selected_v4["pass"] = bool(selected_v4["score"] >= int(selected_v4.get("threshold") or 75))
+                score_gate_pass = bool(selected_v4["pass"])
+                score_gate_pass_effective = bool(score_gate_pass)
+                selected_v4["_cvd_mod"] = _cvd_mod
+                selected_v4["_cvd_div"] = _cvd_div.get("divergence", "none")
+    except Exception:
+        pass
+
+    # --- Liquidity Pools score modifier ---
+    _lp_mod = 0
+    try:
+        _lp_cfg = (config.get("liquidity_pools") or {}) if isinstance(config.get("liquidity_pools"), dict) else {}
+        if _lp_cfg.get("enabled", True) and direction and df_15m is not None and len(df_15m) >= 20:
+            from strategy.liquidity_pools import detect_equal_levels, liquidity_bias, detect_stop_hunt
+            _atr_val = float(atr_exit) if atr_exit and atr_exit > 0 else 0.001
+            _lp_pools = detect_equal_levels(
+                df_15m,
+                tolerance_pct=float(_lp_cfg.get("tolerance_pct", 0.001) or 0.001),
+                min_touches=int(_lp_cfg.get("min_touches", 2) or 2),
+            )
+            _lp_bias = liquidity_bias(price, _lp_pools, _atr_val)
+            if direction == "long":
+                _lp_mod = int(_lp_bias.get("score_adj_long", 0))
+            else:
+                _lp_mod = int(_lp_bias.get("score_adj_short", 0))
+            # Check for confirmed stop hunt
+            _lp_hunt = detect_stop_hunt(df_15m, _lp_pools, _atr_val)
+            if _lp_hunt.get("detected"):
+                _hunt_type = _lp_hunt.get("type", "")
+                if (_hunt_type == "bullish_hunt" and direction == "long") or (_hunt_type == "bearish_hunt" and direction == "short"):
+                    _lp_mod += int(_lp_hunt.get("score_adj", 0))
+            if _lp_mod != 0 and selected_v4 is not None:
+                selected_v4 = dict(selected_v4)
+                selected_v4["score"] = max(0, min(100, int(selected_v4.get("score") or 0) + _lp_mod))
+                selected_v4["pass"] = bool(selected_v4["score"] >= int(selected_v4.get("threshold") or 75))
+                score_gate_pass = bool(selected_v4["pass"])
+                score_gate_pass_effective = bool(score_gate_pass)
+                selected_v4["_lp_mod"] = _lp_mod
+                selected_v4["_lp_nearest"] = _lp_bias.get("nearest_pool", "none")
+    except Exception:
+        pass
+
+    # --- Wyckoff Phase score modifier ---
+    _wyck_mod = 0
+    try:
+        _wyck_cfg = (config.get("wyckoff") or {}) if isinstance(config.get("wyckoff"), dict) else {}
+        if _wyck_cfg.get("enabled", True) and direction and df_15m is not None and len(df_15m) >= 48:
+            from strategy.wyckoff import detect_wyckoff_phase
+            _wyck = detect_wyckoff_phase(df_15m, lookback=int(_wyck_cfg.get("lookback_bars", 96) or 96))
+            if direction == "long":
+                _wyck_mod = int(_wyck.get("score_adj_long", 0))
+            else:
+                _wyck_mod = int(_wyck.get("score_adj_short", 0))
+            if _wyck_mod != 0 and selected_v4 is not None:
+                selected_v4 = dict(selected_v4)
+                selected_v4["score"] = max(0, min(100, int(selected_v4.get("score") or 0) + _wyck_mod))
+                selected_v4["pass"] = bool(selected_v4["score"] >= int(selected_v4.get("threshold") or 75))
+                score_gate_pass = bool(selected_v4["pass"])
+                score_gate_pass_effective = bool(score_gate_pass)
+                selected_v4["_wyckoff_mod"] = _wyck_mod
+                selected_v4["_wyckoff_phase"] = _wyck.get("phase", "unknown")
     except Exception:
         pass
 
@@ -9150,6 +9593,15 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                     sizing_meta["htf_bias"] = _htf_bias_state
                     sizing_meta["htf_size_mult"] = _htf_size_mult
                     sizing_meta["pre_htf_size"] = _pre_htf_size
+        # Weekend mode: reduce size on Sat/Sun
+        if _st.get("_weekend_mode_active"):
+            _wk_mult = float(_st.get("_weekend_size_mult") or 0.5)
+            _pre_wk_size = size
+            size = max(1, int(size * _wk_mult))
+            sizing_meta["weekend_mode"] = True
+            sizing_meta["weekend_size_mult"] = _wk_mult
+            sizing_meta["pre_weekend_size"] = _pre_wk_size
+
         # Sentiment gate: reduce size in fear conditions
         if _sentiment_size_mult < 1.0:
             _pre_sentiment_size = size
