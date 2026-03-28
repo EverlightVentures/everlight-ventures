@@ -27,11 +27,11 @@ session_filter:
       end: "21:00"
 
 risk:
-  max_trades_per_day: 2            # SNIPER MODE: only 2 trades/day -- the absolute best setups only
-  max_losses_per_day: 1            # SNIPER MODE: 1 loss = done. Preserve capital, wait for tomorrow.
-  cooldown_minutes: 60             # SNIPER MODE: 60min cooldown between trades -- patience is the edge
+  max_trades_per_day: 999          # UNLIMITED. If we're winning, keep trading. If we're losing, adapt and recover. Never stop.
+  max_losses_per_day: 999          # NO SHUTDOWN. Losses trigger recovery mode, not quit mode. The circuit breaker handles real emergencies.
+  cooldown_minutes: 15             # BIDIRECTIONAL: 15 min between trades. Pro traders flip at S/R levels without waiting an hour.
   cooldown_loss_threshold: 1       # AUDIT FIX: was 999, cooldown after 1 loss
-  revenge_cooldown_minutes: 120    # SNIPER MODE: 2hr revenge cooldown -- no emotional re-entries
+  revenge_cooldown_minutes: 30     # BIDIRECTIONAL: 30 min after a loss. Long enough to avoid revenge, short enough to catch the next move.
   daily_profit_target_usd: 0       # uncapped
   loss_cooldown_requires_new_structure: true  # AUDIT FIX: require new structure after loss
   capital_allocation_pct: 1.0
@@ -370,7 +370,7 @@ plrl3:
 
 # Strategy Engine v4 controls
 v4:
-  regime_mode: mr_only   # SNIPER MODE: mean reversion ONLY. Data says 95% of XLM big moves are S/R bounces/rejections.
+  regime_mode: dual      # BIDIRECTIONAL: both trend and MR. A pro plays both -- short the trend, long the bounce, short the rejection.
   strict_score_gate: true
   quality_tiers:
     enabled: true
@@ -391,16 +391,18 @@ v4:
     dynamic_tp_enabled: true
     trend_tp_atr: 3.50            # SNIPER MODE: wider trend TP (won't fire in mr_only but kept for safety)
     mr_tp_atr: 3.00              # SNIPER MODE: 3x ATR targets -- data says big moves are 10-17hr swings, need wide nets
-    reversal_min_bars: 48         # SNIPER MODE: 12 hours minimum before any reversal signal exit. Hold the trade.
+    reversal_min_bars: 8          # BIDIRECTIONAL: 2 hour minimum before reversal exit. Enough to filter noise, fast enough to flip.
     reversal_requires_nonpositive_pnl: true   # KEEP: only exit on reversal when in profit
-    reversal_min_hold_minutes: 720  # SNIPER MODE: 12 hour minimum hold. Data says swings last 10-17 hours.
+    reversal_min_hold_minutes: 60   # BIDIRECTIONAL: 1 hour minimum hold. If the chart says flip after 1hr, flip.
   reverse_on_exit:
-    enabled: false                   # SNIPER MODE: DISABLED. No auto-reversals. Each trade is a deliberate sniper shot.
-    # ONLY reverse after WINNING exits. Never flip after a loss -- that is revenge trading.
+    enabled: true                    # BIDIRECTIONAL: flip after WINNING exits. Short the drop -> take profit -> long the bounce.
+    # ONLY flip after PROFITABLE exits at key levels. Never flip after a loss.
     allowed_exit_reasons: [tp1, profit_lock, min_profit_floor, runner_trail_stop, runner_floor_hit, moonshot_trail_stop]
     require_opposite_direction: true
-    require_profitable_exit: true    # CRITICAL FIX: only flip after WINS. Flipping after losses was the #2 killer.
-    ignore_cooldown: false           # CRITICAL FIX: respect cooldown after losses. Was true -- caused revenge trades.
+    require_profitable_exit: true    # CRITICAL: only flip after WINS. Flipping after losses = revenge trading.
+    ignore_cooldown: true            # YES skip cooldown on profitable flips. The S/R level is right there. Don't wait 60 min.
+    min_profit_to_flip_usd: 2.00    # Must have netted at least $2 before flipping. No flipping on scratches.
+    require_signal: true             # Must have a valid signal in the opposite direction. No blind flips.
   profit_lock:
     enabled: true
     # PROFIT STRATEGY: let it run to $10-25, trail aggressively above $10
@@ -1425,9 +1427,9 @@ sniper_mode:
     min_tp_pct: 0.005              # minimum 0.5% move to TP
   # Scheduling
   schedule:
-    max_trades_per_day: 2
+    max_trades_per_day: 999
     preferred_hours_pt: [21, 22, 6, 7, 8]  # 9-10 PM PT (biggest), 6-8 AM PT (most volume)
-    cooldown_between_trades_min: 60
+    cooldown_between_trades_min: 15
 
 # Reversal Engine (30 strategies from strategy/reversal_engine.py)
 reversal_engine:

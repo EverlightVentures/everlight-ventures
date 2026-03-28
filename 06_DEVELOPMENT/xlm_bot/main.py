@@ -6972,6 +6972,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             state["last_exit_time"] = exit_time_iso
             state["last_exit_price"] = float(_verified_exit_price) if _verified_exit_price else float(price)
             state["last_exit_direction"] = direction
+            state["last_exit_result"] = result
             state["open_position"] = None
 
             # Post-loss debrief: fire AI deep dive during cooldown
@@ -7019,6 +7020,10 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 # Skip flip if exit was a loss and require_profitable_exit is on
                 _exit_was_profitable = (result == "win") or (pnl_usd is not None and pnl_usd > 0)
                 _profit_gate_ok = _exit_was_profitable or (not require_profitable)
+                # Min profit gate: must have netted at least $X to flip (no flipping on scratches)
+                _min_flip_usd = float(reverse_cfg.get("min_profit_to_flip_usd", 0) or 0)
+                if _min_flip_usd > 0 and (pnl_usd is None or pnl_usd < _min_flip_usd):
+                    _profit_gate_ok = False
 
                 # If no preselected candidate exists, synthesize one from opposite-side v4 score.
                 if (not candidate_entry or not candidate_dir) and exit_reason in allowed_reasons and _profit_gate_ok:
@@ -7045,6 +7050,9 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                     selected_v4_candidate = candidate_v4
                     breakout_type_candidate = candidate_breakout
                     continue_after_exit = True
+                    # Skip cooldown on profitable direction flips
+                    if bool(reverse_cfg.get("ignore_cooldown", False)) and _exit_was_profitable:
+                        state.pop("cooldown_until", None)
                     log_decision(
                         config,
                         {
@@ -8912,7 +8920,13 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         failed_gates = [k for k, v in gates_effective.items() if not bool(v)]
         if gate_blocked:
             block_reasons.append("gates_fail")
-        if cooldown:
+        # Direction-aware cooldown bypass: skip cooldown if flipping direction after a win
+        _last_exit_dir_cd = str(state.get("last_exit_direction") or "")
+        _last_exit_result = str(state.get("last_exit_result") or "")
+        _flipping_direction = bool(direction and _last_exit_dir_cd and direction != _last_exit_dir_cd)
+        _last_was_profitable = _last_exit_result == "win"
+        _cooldown_bypassed = bool(cooldown and _flipping_direction and _last_was_profitable)
+        if cooldown and not _cooldown_bypassed:
             block_reasons.append("cooldown")
         if not product_available:
             block_reasons.append("product_unavailable")
