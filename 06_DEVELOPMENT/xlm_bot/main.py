@@ -7802,6 +7802,111 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     except Exception:
         pass
 
+    # === PHASE 9: ORDER FLOW INTELLIGENCE ===
+    _ofi_mod = 0
+    try:
+        _ofi_cfg = (config.get("order_flow_intel") or {}) if isinstance(config.get("order_flow_intel"), dict) else {}
+        if _ofi_cfg.get("enabled", True) and direction and ob_mgr is not None:
+            # Deep book imbalance
+            from market.order_flow_intel import deep_book_imbalance, liquidity_vacuum_detector
+            _ob_snap = ob_mgr.get_snapshot() if hasattr(ob_mgr, "get_snapshot") else None
+            if _ob_snap and isinstance(_ob_snap, dict):
+                _bids = _ob_snap.get("bids", [])
+                _asks = _ob_snap.get("asks", [])
+                if _bids and _asks:
+                    _dbi = deep_book_imbalance(_bids, _asks)
+                    if direction == "long":
+                        _ofi_mod += int(_dbi.get("score_adj_long", 0))
+                    else:
+                        _ofi_mod += int(_dbi.get("score_adj_short", 0))
+                    # Liquidity vacuum check
+                    _cur_depth = float(_dbi.get("bid_vol", 0)) + float(_dbi.get("ask_vol", 0))
+                    _hist_depths = list(_st.get("_book_depth_history", []))
+                    _hist_depths.append(_cur_depth)
+                    _st["_book_depth_history"] = _hist_depths[-20:]
+                    if len(_hist_depths) >= 5:
+                        _vac = liquidity_vacuum_detector(_cur_depth, _hist_depths)
+                        if _vac.get("action") == "block":
+                            _ofi_mod = -20  # strong block signal
+                        elif _vac.get("action") == "caution":
+                            _ofi_mod -= 5
+            if _ofi_mod != 0 and selected_v4 is not None:
+                selected_v4 = dict(selected_v4)
+                selected_v4["score"] = max(0, min(100, int(selected_v4.get("score") or 0) + _ofi_mod))
+                selected_v4["pass"] = bool(selected_v4["score"] >= int(selected_v4.get("threshold") or 75))
+                score_gate_pass = bool(selected_v4["pass"])
+                score_gate_pass_effective = bool(score_gate_pass)
+                selected_v4["_order_flow_mod"] = _ofi_mod
+    except Exception:
+        pass
+
+    # === PHASE 10: FUNDING RATE TIMING ===
+    _fund_mod = 0
+    try:
+        _fund_cfg = (config.get("funding_timer") or {}) if isinstance(config.get("funding_timer"), dict) else {}
+        if _fund_cfg.get("enabled", True) and direction:
+            from strategy.funding_timer import get_next_funding_snapshot, funding_direction_bias, extreme_funding_signal
+            _fsnap = get_next_funding_snapshot(now)
+            _cc_snap = cc_mgr.get_snapshot() if cc_mgr and hasattr(cc_mgr, "get_snapshot") else {}
+            _cur_funding = float((_cc_snap or {}).get("funding_rate_pct") or 0)
+            # Directional bias from funding timing
+            _fbias = funding_direction_bias(_cur_funding, _fsnap.get("phase", "neutral"), direction)
+            _fund_mod += int(_fbias.get("score_adj", 0))
+            # Extreme funding signal
+            _fext = extreme_funding_signal(_cur_funding)
+            if _fext.get("extreme"):
+                _ext_dir = _fext.get("direction_bias", "neutral")
+                if _ext_dir == direction:
+                    _fund_mod += int(_fext.get("score_adj", 0))
+                elif _ext_dir != "neutral":
+                    _fund_mod -= int(_fext.get("score_adj", 0)) // 2
+            if _fund_mod != 0 and selected_v4 is not None:
+                selected_v4 = dict(selected_v4)
+                selected_v4["score"] = max(0, min(100, int(selected_v4.get("score") or 0) + _fund_mod))
+                selected_v4["pass"] = bool(selected_v4["score"] >= int(selected_v4.get("threshold") or 75))
+                score_gate_pass = bool(selected_v4["pass"])
+                score_gate_pass_effective = bool(score_gate_pass)
+                selected_v4["_funding_timer_mod"] = _fund_mod
+                selected_v4["_funding_phase"] = _fsnap.get("phase", "neutral")
+    except Exception:
+        pass
+
+    # === PHASE 11: INVENTORY INTELLIGENCE ===
+    _inv_size_mult = 1.0
+    try:
+        _inv_cfg = (config.get("inventory_intel") or {}) if isinstance(config.get("inventory_intel"), dict) else {}
+        if _inv_cfg.get("enabled", True):
+            from strategy.inventory_intel import session_pnl_aggression, basis_monitor
+            # Session P&L aggression
+            _spa = session_pnl_aggression(_st, _inv_cfg.get("session_aggression", {}))
+            _inv_size_mult = float(_spa.get("size_mult", 1.0))
+            # Basis monitor
+            if cc_mgr and hasattr(cc_mgr, "get_snapshot"):
+                _cc_s = cc_mgr.get_snapshot() or {}
+                _spot_p = float(_cc_s.get("spot_price") or price)
+                _perp_p = float(_cc_s.get("perp_price") or price)
+                if _spot_p > 0 and _perp_p > 0:
+                    _bm = basis_monitor(_spot_p, _perp_p)
+                    _bm_adj = int(_bm.get("score_adj", 0))
+                    if _bm_adj != 0 and direction:
+                        _basis_bias = _bm.get("bias", "neutral")
+                        if _basis_bias == direction:
+                            _fund_mod_extra = _bm_adj
+                        elif _basis_bias != "neutral":
+                            _fund_mod_extra = -_bm_adj // 2
+                        else:
+                            _fund_mod_extra = 0
+                        if _fund_mod_extra != 0 and selected_v4 is not None:
+                            selected_v4 = dict(selected_v4)
+                            selected_v4["score"] = max(0, min(100, int(selected_v4.get("score") or 0) + _fund_mod_extra))
+                            selected_v4["pass"] = bool(selected_v4["score"] >= int(selected_v4.get("threshold") or 75))
+                            score_gate_pass = bool(selected_v4["pass"])
+                            score_gate_pass_effective = bool(score_gate_pass)
+                            selected_v4["_basis_mod"] = _fund_mod_extra
+            _st["_inv_size_mult"] = round(_inv_size_mult, 3)
+    except Exception:
+        pass
+
     # === PHASE 5: SELF-AWARENESS ENGINE ===
 
     # --- Lane Performance Auto-Tuner ---
@@ -9833,6 +9938,14 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             size = max(1, int(size * _legend_mult))
             sizing_meta["legend_size_mult"] = _legend_mult
             sizing_meta["pre_legend_size"] = _pre_legend_size
+
+        # Inventory intelligence size multiplier (Phase 11: session P&L aggression)
+        _inv_mult = float(_st.get("_inv_size_mult") or 1.0)
+        if _inv_mult != 1.0:
+            _pre_inv_size = size
+            size = max(1, int(size * _inv_mult))
+            sizing_meta["inventory_size_mult"] = _inv_mult
+            sizing_meta["pre_inventory_size"] = _pre_inv_size
 
         # Sentiment gate: reduce size in fear conditions
         if _sentiment_size_mult < 1.0:

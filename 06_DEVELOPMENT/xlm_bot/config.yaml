@@ -1555,3 +1555,58 @@ risk_intel:
     enabled: true
     spike_ratio: 2.0              # current > 2x average = spike
     consecutive_threshold: 3      # must persist 3+ cycles to block
+
+# Phase 8: Smart Execution (maker orders, fee savings)
+smart_execution:
+  enabled: true
+  entry_timeout_sec: 30           # wait 30s for limit fill, then market
+  exit_normal_timeout_sec: 15     # normal exits: 15s limit, then market
+  exit_patient_timeout_sec: 45    # patient exits: 45s limit
+  poll_interval_sec: 3            # check fill every 3s
+  tick_size: 0.00001              # XLM price tick
+  use_limit_above_spread_pct: 0.05  # use limit if spread > 0.05%
+  force_market_above_atr_pct: 1.0   # use market if ATR > 1% (fast market)
+
+# Phase 9: Order Flow Intelligence
+order_flow_intel:
+  enabled: true
+  deep_imbalance:
+    strong_threshold: 0.75        # 75%+ on one side = strong signal
+    moderate_threshold: 0.65      # 65%+ = moderate
+    score_strong: 8               # +/-8 pts for strong imbalance
+    score_moderate: 5             # +/-5 pts for moderate
+  liquidity_vacuum:
+    threshold_pct: 0.50           # depth drops 50%+ from avg = vacuum
+    block_below_pct: 0.30         # depth drops 70%+ = block entries
+    lookback_readings: 20
+  aggressive_flow:
+    ratio_threshold: 3.0          # 3x more buy than sell = aggressive
+    window_sec: 60
+  spoof_detection:
+    min_snapshots: 3
+    large_order_mult: 2.0         # orders > 2x avg level size
+
+# Phase 10: Funding Rate Exploitation
+funding_timer:
+  enabled: true
+  snapshots_utc: [0, 8, 16]      # 00:00, 08:00, 16:00 UTC
+  pre_funding_minutes: 60         # position 60 min before snapshot
+  post_funding_minutes: 30
+  extreme_funding_threshold: 0.03 # 0.03% per 8hr = extreme
+  score_adj_pre_funding: 5
+  score_adj_extreme: 8
+
+# Phase 11: Inventory Intelligence
+inventory_intel:
+  enabled: true
+  position_heat:
+    cold_minutes: 15
+    hot_minutes: 60
+    overcooked_minutes: 240       # 4 hours with no move = stale
+  session_aggression:
+    crushing_pct: 3.0             # > 3% daily PnL = can press
+    solid_pct: 1.0
+    bleeding_pct: -1.0
+    crisis_pct: -3.0
+  basis_monitor:
+    extreme_basis_pct: 0.5        # > 0.5% basis = trading opportunity
