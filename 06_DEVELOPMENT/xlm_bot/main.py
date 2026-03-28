@@ -6211,6 +6211,29 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         )
         tp_hit = price >= tp_plan.tp1 if direction == "long" else price <= tp_plan.tp1
         dynamic_tp_price = None
+        # Structure-based TP: use nearest S/R level instead of arbitrary ATR
+        try:
+            _stp_cfg = (config.get("execution_intel") or {}).get("structure_based_tp") or {}
+            if _stp_cfg.get("enabled", True) and direction and entry_price > 0:
+                from strategy.execution_intel import structure_based_tp
+                _atr_v = float(atr_exit) if atr_exit and atr_exit > 0 else 0.001
+                _stp = structure_based_tp(
+                    df_15m=df_15m if "df_15m" in dir() else None,
+                    df_1h=df_1h if "df_1h" in dir() else None,
+                    direction=direction,
+                    entry_price=entry_price,
+                    atr=_atr_v,
+                )
+                _stp_price = float(_stp.get("tp_price", 0))
+                if _stp_price > 0:
+                    # Only use structure TP if it gives better R:R than dynamic TP
+                    dynamic_tp_price = _stp_price
+                    if open_pos:
+                        open_pos["_structure_tp"] = _stp_price
+                        open_pos["_structure_tp_source"] = _stp.get("tp_source", "unknown")
+                        open_pos["_structure_tp_rr"] = _stp.get("rr_ratio", 0)
+        except Exception:
+            pass
         if bool(exit_cfg.get("dynamic_tp_enabled", True)):
             atr_now = _to_float(self_score.get("atr_15m"), 0.0) or 0.0
             if atr_now > 0:
@@ -6851,6 +6874,35 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 })
                 # Keep last 10 trades only
                 state["adaptive_direction_history"] = _adh[-10:]
+
+                # Lane stats tracking for self-awareness engine
+                _entry_lane = str(open_pos.get("entry_type") or open_pos.get("lane_label") or "unknown")
+                _lane_stats = dict(state.get("lane_stats") or {})
+                if _entry_lane not in _lane_stats:
+                    _lane_stats[_entry_lane] = {"wins": 0, "losses": 0, "total_pnl": 0.0, "trades": 0}
+                _lane_stats[_entry_lane]["trades"] += 1
+                _lane_stats[_entry_lane]["total_pnl"] += round(float(pnl_usd or 0), 2)
+                if result == "win":
+                    _lane_stats[_entry_lane]["wins"] += 1
+                elif result == "loss":
+                    _lane_stats[_entry_lane]["losses"] += 1
+                state["lane_stats"] = _lane_stats
+
+                # Hourly stats tracking for time-of-day awareness
+                try:
+                    import pytz as _tz
+                    _pt_h = str(now.astimezone(_tz.timezone("America/Los_Angeles")).hour)
+                    _hourly = dict(state.get("hourly_stats") or {})
+                    if _pt_h not in _hourly:
+                        _hourly[_pt_h] = {"wins": 0, "losses": 0, "total_pnl": 0.0}
+                    _hourly[_pt_h]["total_pnl"] += round(float(pnl_usd or 0), 2)
+                    if result == "win":
+                        _hourly[_pt_h]["wins"] += 1
+                    elif result == "loss":
+                        _hourly[_pt_h]["losses"] += 1
+                    state["hourly_stats"] = _hourly
+                except Exception:
+                    pass
 
                 # Recovery Mode: track loss direction and recovery cooldown
                 if result == "loss":
@@ -7747,6 +7799,143 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 score_gate_pass = bool(selected_v4["pass"])
                 score_gate_pass_effective = bool(score_gate_pass)
                 selected_v4["_weekly_bias_mod"] = _weekly_mod
+    except Exception:
+        pass
+
+    # === PHASE 5: SELF-AWARENESS ENGINE ===
+
+    # --- Lane Performance Auto-Tuner ---
+    _lane_adj = 0
+    try:
+        _sa_cfg = (config.get("self_awareness") or {}) if isinstance(config.get("self_awareness"), dict) else {}
+        _lat_cfg = (_sa_cfg.get("lane_auto_tuner") or {}) if isinstance(_sa_cfg.get("lane_auto_tuner"), dict) else {}
+        if _lat_cfg.get("enabled", True) and direction and entry and selected_v4:
+            from strategy.self_awareness import lane_performance_auto_tuner
+            _lat = lane_performance_auto_tuner(_st, _lat_cfg)
+            _entry_lane = str((entry or {}).get("type") or "")
+            _lane_info = (_lat.get("lane_adjustments") or {}).get(_entry_lane, {})
+            _lane_adj = int(_lane_info.get("score_adj", 0))
+            if _lane_adj != 0 and selected_v4 is not None:
+                selected_v4 = dict(selected_v4)
+                selected_v4["score"] = max(0, min(100, int(selected_v4.get("score") or 0) + _lane_adj))
+                selected_v4["pass"] = bool(selected_v4["score"] >= int(selected_v4.get("threshold") or 75))
+                score_gate_pass = bool(selected_v4["pass"])
+                score_gate_pass_effective = bool(score_gate_pass)
+                selected_v4["_lane_tuner_adj"] = _lane_adj
+                selected_v4["_lane_tuner_action"] = _lane_info.get("action", "normal")
+    except Exception:
+        pass
+
+    # --- Win/Loss Streak Size Modifiers ---
+    _streak_size_mult = 1.0
+    try:
+        if _sa_cfg.get("win_streak_compounding", {}).get("enabled", True):
+            from strategy.self_awareness import win_streak_compounding, loss_streak_escalation
+            _ws = win_streak_compounding(_st, _sa_cfg.get("win_streak_compounding", {}))
+            _ls = loss_streak_escalation(_st, _sa_cfg.get("loss_streak_escalation", {}))
+            # Use the more conservative of the two
+            _streak_size_mult = min(float(_ws.get("size_mult", 1.0)), 1.0) if float(_ls.get("size_mult", 1.0)) < 1.0 else float(_ws.get("size_mult", 1.0))
+            if float(_ls.get("size_mult", 1.0)) < 1.0:
+                _streak_size_mult = float(_ls.get("size_mult", 1.0))  # loss streak overrides win streak
+    except Exception:
+        pass
+
+    # --- Time-of-Day Performance ---
+    _tod_size_mult = 1.0
+    try:
+        _tod_cfg = (_sa_cfg.get("time_of_day") or {}) if isinstance(_sa_cfg.get("time_of_day"), dict) else {}
+        if _tod_cfg.get("enabled", True):
+            from strategy.self_awareness import time_of_day_performance
+            import pytz as _tz_mod
+            _pt_hour = now.astimezone(_tz_mod.timezone("America/Los_Angeles")).hour
+            _tod = time_of_day_performance(_st, _tod_cfg, _pt_hour)
+            _tod_size_mult = float(_tod.get("size_mult", 1.0))
+    except Exception:
+        _tod_size_mult = 1.0
+
+    # === PHASE 7: RISK INTELLIGENCE ===
+
+    # --- Equity High-Water Mark ---
+    _hw_size_mult = 1.0
+    try:
+        _ri_cfg = (config.get("risk_intel") or {}) if isinstance(config.get("risk_intel"), dict) else {}
+        _hw_cfg = (_ri_cfg.get("equity_highwater") or {}) if isinstance(_ri_cfg.get("equity_highwater"), dict) else {}
+        if _hw_cfg.get("enabled", True):
+            from strategy.risk_intel import daily_equity_highwater
+            _cur_eq = float(_st.get("exchange_equity_usd") or _st.get("equity_start_usd") or 0)
+            if _cur_eq > 0:
+                _hw = daily_equity_highwater(_st, _cur_eq, _hw_cfg)
+                _hw_size_mult = float(_hw.get("size_mult", 1.0))
+                # Update highwater in state
+                _hw_update = _hw.get("update_state", {})
+                if isinstance(_hw_update, dict):
+                    for _hk, _hv in _hw_update.items():
+                        _st[_hk] = _hv
+    except Exception:
+        pass
+
+    # --- Spread Spike Detector ---
+    _spread_size_mult = 1.0
+    try:
+        _sp_cfg = (_ri_cfg.get("spread_spike") or {}) if isinstance(_ri_cfg.get("spread_spike"), dict) else {}
+        if _sp_cfg.get("enabled", True):
+            from strategy.risk_intel import spread_spike_detector
+            _cur_spread = float((selected_v4 or {}).get("spread_pct") or 0)
+            if _cur_spread > 0:
+                _sp = spread_spike_detector(_st, _cur_spread, _sp_cfg)
+                _spread_size_mult = float(_sp.get("size_mult", 1.0))
+    except Exception:
+        pass
+
+    # --- Combine all size multipliers from Phase 5+7 ---
+    _legend_size_mult = _streak_size_mult * _tod_size_mult * _hw_size_mult * _spread_size_mult
+    # Store for sizing logic to pick up later
+    _st["_legend_size_mult"] = round(_legend_size_mult, 3)
+
+    # === PHASE 6: EXECUTION INTELLIGENCE ===
+
+    # --- Fade the Extreme (RSI extreme + structure = high conviction counter-trend) ---
+    _fade_mod = 0
+    try:
+        _ei_cfg = (config.get("execution_intel") or {}) if isinstance(config.get("execution_intel"), dict) else {}
+        _fade_cfg = (_ei_cfg.get("fade_the_extreme") or {}) if isinstance(_ei_cfg.get("fade_the_extreme"), dict) else {}
+        if _fade_cfg.get("enabled", True) and direction and df_15m is not None and len(df_15m) >= 15:
+            from strategy.execution_intel import fade_the_extreme
+            _atr_v = float(atr_exit) if atr_exit and atr_exit > 0 else 0.001
+            _fade = fade_the_extreme(df_15m, price, _atr_v)
+            _fade_sig = _fade.get("signal", "none")
+            if _fade_sig == "fade_long" and direction == "long":
+                _fade_mod = int(_fade.get("score_adj", 0))
+            elif _fade_sig == "fade_short" and direction == "short":
+                _fade_mod = int(_fade.get("score_adj", 0))
+            elif _fade_sig == "fade_long" and direction == "short":
+                _fade_mod = -int(_fade.get("score_adj", 0))  # shorting into oversold = penalty
+            elif _fade_sig == "fade_short" and direction == "long":
+                _fade_mod = -int(_fade.get("score_adj", 0))  # longing into overbought = penalty
+            if _fade_mod != 0 and selected_v4 is not None:
+                selected_v4 = dict(selected_v4)
+                selected_v4["score"] = max(0, min(100, int(selected_v4.get("score") or 0) + _fade_mod))
+                selected_v4["pass"] = bool(selected_v4["score"] >= int(selected_v4.get("threshold") or 75))
+                score_gate_pass = bool(selected_v4["pass"])
+                score_gate_pass_effective = bool(score_gate_pass)
+                selected_v4["_fade_mod"] = _fade_mod
+                selected_v4["_fade_signal"] = _fade_sig
+    except Exception:
+        pass
+
+    # --- Session Open Volatility Detector ---
+    _session_vol_mult = 1.0
+    try:
+        _sess_cfg = (_ei_cfg.get("session_open") or {}) if isinstance(_ei_cfg.get("session_open"), dict) else {}
+        if _sess_cfg.get("enabled", True):
+            from strategy.execution_intel import session_open_detector
+            _sess = session_open_detector(now, _sess_cfg)
+            _session_vol_mult = float(_sess.get("vol_mult", 1.0))
+            # Store for dashboard display
+            if selected_v4 is not None:
+                selected_v4 = dict(selected_v4)
+                selected_v4["_session_phase"] = _sess.get("phase", "between_sessions")
+                selected_v4["_session_name"] = _sess.get("session", "none")
     except Exception:
         pass
 
@@ -9636,6 +9825,14 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             sizing_meta["weekend_mode"] = True
             sizing_meta["weekend_size_mult"] = _wk_mult
             sizing_meta["pre_weekend_size"] = _pre_wk_size
+
+        # Legend size multiplier (Phase 5+7: streaks, time-of-day, equity highwater, spread)
+        _legend_mult = float(_st.get("_legend_size_mult") or 1.0)
+        if _legend_mult != 1.0:
+            _pre_legend_size = size
+            size = max(1, int(size * _legend_mult))
+            sizing_meta["legend_size_mult"] = _legend_mult
+            sizing_meta["pre_legend_size"] = _pre_legend_size
 
         # Sentiment gate: reduce size in fear conditions
         if _sentiment_size_mult < 1.0:

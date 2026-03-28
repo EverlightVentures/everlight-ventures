@@ -1498,3 +1498,60 @@ weekly_bias:
 pattern_failure:
   enabled: true
   score_bonus: 12            # failed patterns are high conviction signals
+
+# Phase 5: Self-Awareness Engine
+self_awareness:
+  lane_auto_tuner:
+    enabled: true
+    min_trades_for_decision: 10   # need 10+ trades before disabling a lane
+    disable_below_win_rate: 0.35  # < 35% win rate = auto-disable
+    boost_above_win_rate: 0.60    # > 60% win rate = +10 score boost
+    reset_weekly: true
+  time_of_day:
+    enabled: true
+    min_trades_per_hour: 5        # need 5+ trades at that hour before acting
+    skip_below_win_rate: 0.30     # < 30% = skip hour entirely
+    reduce_below_win_rate: 0.40   # < 40% = half size
+    press_above_win_rate: 0.60    # > 60% = 1.25x size
+  loss_streak_escalation:
+    enabled: true
+    # Consecutive losses -> escalating response
+    # 1 loss: 85% size | 2 losses: 65% size + 2x cooldown | 3+: 50% size + 4x cooldown
+  win_streak_compounding:
+    enabled: true
+    max_size_mult: 1.75           # never exceed 1.75x base size on streaks
+    # 2 wins: 1.25x | 3 wins: 1.5x | 4+: 1.75x
+
+# Phase 6: Execution Intelligence
+execution_intel:
+  structure_based_tp:
+    enabled: true
+    min_rr: 1.5                   # minimum R:R for structure target
+    fallback_atr: 2.5             # if no structure found, use 2.5 ATR
+    max_search_atr: 5.0           # don't look beyond 5 ATR for targets
+  fade_the_extreme:
+    enabled: true
+    rsi_oversold: 20              # RSI below this = fade long candidate
+    rsi_overbought: 80            # RSI above this = fade short candidate
+    max_score_adj: 15             # max score boost for extreme fades
+    require_wick_zone: false      # wick zone confluence optional but adds points
+  session_open:
+    enabled: true
+    # Asia: 00:00 UTC, London: 08:00 UTC, NY: 13:30 UTC
+    pre_session_minutes: 15       # widen gates 15 min before
+    active_session_minutes: 30    # prime time for 30 min after open
+
+# Phase 7: Risk Intelligence
+risk_intel:
+  equity_highwater:
+    enabled: true
+    # Drawdown from daily peak -> size reduction
+    # 1-3%: 0.75x | 3-5%: 0.50x | 5%+: 0.25x
+  correlation_guard:
+    enabled: true
+    btc_caution_pct: 1.0          # BTC moves > 1% in 1hr = caution
+    btc_block_pct: 2.0            # BTC moves > 2% in 1hr = block 15 min
+  spread_spike:
+    enabled: true
+    spike_ratio: 2.0              # current > 2x average = spike
+    consecutive_threshold: 3      # must persist 3+ cycles to block
