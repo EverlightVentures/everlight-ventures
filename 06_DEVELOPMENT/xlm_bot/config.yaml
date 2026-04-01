@@ -101,6 +101,7 @@ position_sizing:
     W: 1.0    # ORB - opening range breakout, high conviction session play
     X: 0.9    # hourly continuation - 1h candle direction + 15m momentum shift
     Y: 1.0    # htf_swing -- 1H/4H wick reversals, highest conviction
+    Z: 1.0    # range_fvg_retest -- highest conviction, 3:1 R:R
 
   # Quality tier multipliers on position size
   tier_multipliers:
@@ -1768,3 +1769,12 @@ htf_swing:
   require_volume: true        # need volume confirmation
   # These trades get WIDER management -- ride the trend
   # Stop below the wick, let it run. Stop becomes TP1 via breakeven trigger.
+
+# Range FVG Retest -- One Candle strategy adapted for crypto
+# Priority #2 entry (after HTF swing, before 15m scalps)
+# Rule: NO trades inside the range. Only trade at edges after FVG + engulfing.
+range_fvg_retest:
+  enabled: true
+  range_mode: recent_4h          # recent_4h = last 4 completed 1H candles as range
+  range_buffer_pct: 0.002        # 0.2% buffer for inside range detection
+  min_rr: 3.0                    # fixed 3:1 risk-to-reward (as per the video strategy)

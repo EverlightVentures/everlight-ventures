@@ -3427,3 +3427,156 @@ def htf_swing_entry(
             break  # 4H signal found, don't check 1H
 
     return result
+
+# Lane Z: Range FVG Retest -- The One Candle Strategy (adapted for crypto)
+# ---------------------------------------------------------------------------
+
+def _detect_engulfing(df, direction, lookback=3):
+    """Detect engulfing candle in recent bars."""
+    if df is None or len(df) < 3:
+        return None
+    for offset in range(0, min(lookback, len(df) - 1)):
+        idx = -(1 + offset)
+        curr = df.iloc[idx]
+        prev = df.iloc[idx - 1]
+        c_open, c_close = float(curr["open"]), float(curr["close"])
+        c_high, c_low = float(curr["high"]), float(curr["low"])
+        p_open, p_close = float(prev["open"]), float(prev["close"])
+        c_body_high, c_body_low = max(c_open, c_close), min(c_open, c_close)
+        p_body_high, p_body_low = max(p_open, p_close), min(p_open, p_close)
+        c_body = c_body_high - c_body_low
+        c_range = c_high - c_low
+        if c_range <= 0 or c_body < 0.3 * c_range:
+            continue
+        if direction == "long":
+            if c_close > c_open and c_body_low <= p_body_low and c_body_high >= p_body_high:
+                return {"type": "bullish_engulfing", "price": c_close, "stop": c_low, "age": offset}
+        else:
+            if c_close < c_open and c_body_high >= p_body_high and c_body_low <= p_body_low:
+                return {"type": "bearish_engulfing", "price": c_close, "stop": c_high, "age": offset}
+    return None
+
+
+def _get_session_range(df_1h, config=None):
+    """Get session range for crypto. Uses recent 4H window as the battlefield."""
+    if df_1h is None or len(df_1h) < 6:
+        return None
+    cfg = ((config or {}).get("range_fvg_retest") or {})
+    range_mode = str(cfg.get("range_mode", "recent_4h"))
+    if range_mode == "prev_session":
+        lookback = min(24, len(df_1h) - 1)
+        prev_bars = df_1h.iloc[-(lookback + 1):-1]
+        return {"high": float(prev_bars["high"].max()), "low": float(prev_bars["low"].min()), "source": "prev_24h"}
+    # Default: recent 4H candles as range (most actionable for crypto)
+    recent = df_1h.iloc[-5:-1] if len(df_1h) >= 6 else df_1h.iloc[:-1]
+    return {"high": float(recent["high"].max()), "low": float(recent["low"].min()), "source": "recent_4h"}
+
+
+def range_fvg_retest(
+    price, df_1m, df_1h, df_15m, direction, fibs=None, levels=None, config=None,
+):
+    """Range FVG Retest -- Priority #2 entry.
+    
+    1. Define range from 1H data
+    2. Price must be OUTSIDE range (breakout)
+    3. FVG must exist in breakout direction
+    4. Price retraced INTO the FVG
+    5. Engulfing or strong momentum candle confirms
+    6. Stop below engulfing, 3:1 R:R target
+    
+    NO TRADES INSIDE THE RANGE.
+    """
+    cfg = ((config or {}).get("range_fvg_retest") or {}) if isinstance((config or {}).get("range_fvg_retest"), dict) else {}
+    if not cfg.get("enabled", True):
+        return None
+    if df_1h is None or len(df_1h) < 6:
+        return None
+    if df_15m is None or len(df_15m) < 10:
+        return None
+
+    session_range = _get_session_range(df_1h, config)
+    if session_range is None:
+        return None
+    range_high = session_range["high"]
+    range_low = session_range["low"]
+    if range_high - range_low <= 0:
+        return None
+
+    # CRITICAL: No trades inside the range
+    buffer_pct = float(cfg.get("range_buffer_pct", 0.002))
+    if price > (range_low * (1 + buffer_pct)) and price < (range_high * (1 - buffer_pct)):
+        return None
+
+    # Confirm breakout direction
+    if direction == "long" and price <= range_high:
+        return None
+    if direction == "short" and price >= range_low:
+        return None
+
+    # Look for FVG
+    from strategy.fvg import detect_fvg, nearest_fvg
+    fvgs_15m = detect_fvg(df_15m, lookback=20)
+    fvg = nearest_fvg(price, fvgs_15m, direction)
+    fvgs_1h = detect_fvg(df_1h, lookback=10)
+    fvg_1h = nearest_fvg(price, fvgs_1h, direction)
+    if fvg is None and fvg_1h is None:
+        return None
+
+    active_fvg = fvg_1h or fvg
+    fvg_high = active_fvg["high"]
+    fvg_low = active_fvg["low"]
+
+    # Price must be in/near the FVG zone
+    in_fvg = price >= fvg_low * 0.998 and price <= fvg_high * 1.002
+    if not in_fvg:
+        return None
+
+    # Engulfing or momentum candle confirmation
+    engulfing = _detect_engulfing(df_15m, direction, lookback=2)
+    momentum_candle = False
+    curr = df_15m.iloc[-1]
+    c_open, c_close = float(curr["open"]), float(curr["close"])
+    c_high, c_low = float(curr["high"]), float(curr["low"])
+    c_range = c_high - c_low
+    if c_range > 0:
+        body_pct = abs(c_close - c_open) / c_range
+        if direction == "long" and c_close > c_open and body_pct >= 0.60:
+            momentum_candle = True
+        elif direction == "short" and c_close < c_open and body_pct >= 0.60:
+            momentum_candle = True
+
+    if engulfing is None and not momentum_candle:
+        return None
+
+    # Stop and target (3:1 R:R)
+    min_rr = float(cfg.get("min_rr", 3.0))
+    if engulfing:
+        stop_price = engulfing["stop"]
+    else:
+        stop_price = fvg_low * 0.998 if direction == "long" else fvg_high * 1.002
+
+    if direction == "long":
+        risk = price - stop_price
+        if risk <= 0: return None
+        target_price = price + (risk * min_rr)
+    else:
+        risk = stop_price - price
+        if risk <= 0: return None
+        target_price = price - (risk * min_rr)
+
+    conf = {
+        "RANGE_BREAKOUT": True, "FVG_PRESENT": True, "FVG_RETEST": True,
+        "ENGULFING_CONFIRM": engulfing is not None, "MOMENTUM_CONFIRM": momentum_candle,
+        "DIRECTION_CONFIRM": True,
+    }
+    if sum(1 for v in conf.values() if v) < 4:
+        return None
+
+    return {
+        "type": "range_fvg_retest", "confluence": conf,
+        "range_high": round(range_high, 8), "range_low": round(range_low, 8),
+        "fvg_high": round(fvg_high, 8), "fvg_low": round(fvg_low, 8),
+        "stop_price": round(stop_price, 8), "target_price": round(target_price, 8),
+        "risk_reward": round(min_rr, 1), "engulfing": engulfing is not None,
+        "fvg_timeframe": "1h" if fvg_1h else "15m",
+    }

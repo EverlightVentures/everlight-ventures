@@ -25,7 +25,7 @@ from indicators.atr import atr
 from structure.levels import compute_structure_levels
 from structure.fib import find_swing, fib_levels
 from strategy.regime import run_regime_gates, compute_route_tier
-from strategy.entries import pullback_continuation, breakout_retest, reversal_impulse, compression_breakout, early_impulse, compression_range, trend_continuation, detect_15m_structure_bias, fib_retrace, _detect_swing_points, slow_bleed_hunter, wick_rejection, volume_climax_reversal, vwap_reversion, grid_range, funding_arb_bias, regime_low_vol, stat_arb_proxy, orderflow_imbalance, macro_ma_cross, mtf_conflict_block, exhaustion_warning_block, liquidity_sweep, htf_breakout_continuation, assess_htf_breakout_continuation, opening_range_breakout, hourly_continuation, htf_swing_entry
+from strategy.entries import pullback_continuation, breakout_retest, reversal_impulse, compression_breakout, early_impulse, compression_range, trend_continuation, detect_15m_structure_bias, fib_retrace, _detect_swing_points, slow_bleed_hunter, wick_rejection, volume_climax_reversal, vwap_reversion, grid_range, funding_arb_bias, regime_low_vol, stat_arb_proxy, orderflow_imbalance, macro_ma_cross, mtf_conflict_block, exhaustion_warning_block, liquidity_sweep, htf_breakout_continuation, assess_htf_breakout_continuation, opening_range_breakout, hourly_continuation, htf_swing_entry, range_fvg_retest
 from strategy.risk import stop_loss_price, sl_distance_ok
 from strategy.exits import tp_prices
 from strategy.confluence import compute_confluences, confluence_passes, confluence_count
@@ -4272,6 +4272,9 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     # HTF SWING: check 1H/4H wick reversals FIRST -- these are the big money trades
     long_htf_swing = htf_swing_entry(price, df_1h, df_4h, df_15m, "long", fibs=fibs, levels=levels, config=config)
     short_htf_swing = htf_swing_entry(price, df_1h, df_4h, df_15m, "short", fibs=fibs, levels=levels, config=config)
+    # RANGE FVG RETEST: Priority #2 -- breakout + FVG + engulfing confirmation
+    long_range_fvg = range_fvg_retest(price, df_15m, df_1h, df_15m, "long", fibs=fibs, levels=levels, config=config)
+    short_range_fvg = range_fvg_retest(price, df_15m, df_1h, df_15m, "short", fibs=fibs, levels=levels, config=config)
     long_breakout_retest_entry = breakout_retest(price, df_15m, levels, fibs, "long")
     short_breakout_retest_entry = breakout_retest(price, df_15m, levels, fibs, "short")
 
@@ -4282,7 +4285,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             long_entry["continuation_flip_source"] = failed_continuation_retest.get("source_direction")
             long_entry["continuation_flip_exit_reason"] = failed_continuation_retest.get("exit_reason")
     else:
-        long_entry = long_htf_swing or long_breakout_retest_entry
+        long_entry = long_htf_swing or long_range_fvg or long_breakout_retest_entry
         long_entry = long_entry or htf_breakout_continuation(price, df_4h, df_1h, df_15m, levels, fibs, "long", weekly_playbook=_lane_w_playbook, event_calendar=_lane_w_calendar, config=lane_w_cfg)
         long_entry = long_entry or trend_continuation(price, df_15m, df_1h, "long", state=_st)
         long_entry = long_entry or fib_retrace(price, df_1h, df_15m, "long", config=config)
@@ -4294,7 +4297,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             short_entry["continuation_flip_source"] = failed_continuation_retest.get("source_direction")
             short_entry["continuation_flip_exit_reason"] = failed_continuation_retest.get("exit_reason")
     else:
-        short_entry = short_htf_swing or short_breakout_retest_entry
+        short_entry = short_htf_swing or short_range_fvg or short_breakout_retest_entry
         short_entry = short_entry or htf_breakout_continuation(price, df_4h, df_1h, df_15m, levels, fibs, "short", weekly_playbook=_lane_w_playbook, event_calendar=_lane_w_calendar, config=lane_w_cfg)
         short_entry = short_entry or trend_continuation(price, df_15m, df_1h, "short", state=_st)
         short_entry = short_entry or fib_retrace(price, df_1h, df_15m, "short", config=config)
