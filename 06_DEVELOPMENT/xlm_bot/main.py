@@ -35,6 +35,31 @@ from strategy.adaptive import compute_adaptive_threshold, compute_vol_adaptive_t
 from strategy.expansion import compute_expansion, derive_vol_state
 from timing.trade_eta import estimate_close_eta, estimate_next_entry
 from strategy.regime_manager import classify_trading_regime, RegimeOverrides, classify_htf_trend_bias
+# Trading knowledge integrations (all wrapped in try/except, never crash the bot)
+try:
+    from strategy.band_navigator import evaluate_band_entry as _band_nav_eval
+    _HAS_BAND_NAV = True
+except ImportError:
+    _HAS_BAND_NAV = False
+
+try:
+    from indicators.divergence import detect_divergence as _detect_div
+    _HAS_DIVERGENCE = True
+except ImportError:
+    _HAS_DIVERGENCE = False
+
+try:
+    from strategy.profit_manager import evaluate_profit_management as _eval_profit_mgmt
+    _HAS_PROFIT_MGR = True
+except ImportError:
+    _HAS_PROFIT_MGR = False
+
+try:
+    from strategy.hedge_flip import should_hedge_flip as _should_hedge_flip
+    _HAS_HEDGE_FLIP = True
+except ImportError:
+    _HAS_HEDGE_FLIP = False
+
 from strategy.monthly_zones import compute_zone_context
 from market.contract_context import ContractContext
 from market.futures_relativity import score_futures_relativity
@@ -701,6 +726,33 @@ def _with_lifecycle_fields(
     return out
 
 
+def _trade_context_from_open_position(open_pos: dict | None) -> dict:
+    if not isinstance(open_pos, dict):
+        return {}
+    confluence_flags = open_pos.get("confluence_flags")
+    if isinstance(confluence_flags, dict):
+        confluence_flags = json.dumps(confluence_flags, sort_keys=True)
+    elif confluence_flags in (None, ""):
+        confluence_flags = None
+    return {
+        "order_id": open_pos.get("entry_order_id") or open_pos.get("order_id"),
+        "entry_order_id": open_pos.get("entry_order_id") or open_pos.get("order_id"),
+        "client_order_id": open_pos.get("client_order_id"),
+        "entry_type": open_pos.get("entry_type"),
+        "breakout_type": open_pos.get("breakout_type"),
+        "breakout_tf": open_pos.get("breakout_tf"),
+        "strategy_regime": open_pos.get("strategy_regime"),
+        "confluence_score": open_pos.get("confluence_score"),
+        "score_threshold": open_pos.get("score_threshold"),
+        "quality_tier": open_pos.get("quality_tier"),
+        "lane": open_pos.get("lane"),
+        "lane_label": open_pos.get("lane_label"),
+        "lane_reason": open_pos.get("lane_reason"),
+        "entry_profile_key": open_pos.get("entry_profile_key"),
+        "confluence_flags": confluence_flags,
+    }
+
+
 def _derive_state(prev_state: str, reason: str, payload: dict) -> str:
     r = str(reason or "").lower().strip()
     if r in ("no_data",):
@@ -825,7 +877,12 @@ def _resolve_entry_profile(pp_cfg: dict, entry_type: str, strategy_regime: str) 
     return {
         "tp_mult": float(combo.get("tp_mult") or base.get("tp_mult") or 1.0),
         "min_profit_usd": float(combo.get("min_profit_usd") or base.get("min_profit_usd") or 3.0),
+        "min_profit_bars": int(combo.get("min_profit_bars") or base.get("min_profit_bars") or 0),
         "decay_pct": float(combo.get("decay_pct") or base.get("decay_pct") or 0.45),
+        "decay_arm_usd": float(combo.get("decay_arm_usd") or base.get("decay_arm_usd") or 0.0),
+        "quick_take_profit_usd": float(combo.get("quick_take_profit_usd") or base.get("quick_take_profit_usd") or 0.0),
+        "quick_take_profit_bars": int(combo.get("quick_take_profit_bars") or base.get("quick_take_profit_bars") or 0),
+        "quick_take_profit_only_when_trend_weak": bool(combo.get("quick_take_profit_only_when_trend_weak") if "quick_take_profit_only_when_trend_weak" in combo else base.get("quick_take_profit_only_when_trend_weak", False)),
     }
 
 
@@ -1229,6 +1286,94 @@ def _score_weekly_research_modifier(
             bonus += 1
 
     return max(-max_bonus, min(max_bonus, bonus)), reasons
+
+
+def _score_manual_playbook_modifier(
+    direction: str,
+    entry: dict[str, Any] | None,
+    selected_v4: dict[str, Any] | None,
+    state: dict[str, Any] | None = None,
+    config: dict | None = None,
+) -> tuple[int, list[str], bool]:
+    if not direction or not isinstance(entry, dict):
+        return 0, [], False
+    mp_cfg = (config.get("manual_playbook") or {}) if isinstance(config, dict) else {}
+    if not bool(mp_cfg.get("enabled", False)):
+        return 0, [], False
+    rules = (mp_cfg.get("entry_type_bias") or {}) if isinstance(mp_cfg, dict) else {}
+    entry_type = str(entry.get("type") or "").lower().strip()
+    rule = rules.get(entry_type) if isinstance(rules, dict) else None
+
+    score = int((selected_v4 or {}).get("score") or 0)
+    bonus = 0
+    block = False
+    reasons: list[str] = []
+
+    active_entry_types = {str(v).lower().strip() for v in list(mp_cfg.get("active_entry_types") or []) if str(v).strip()}
+    if active_entry_types and entry_type not in active_entry_types:
+        block = True
+        reasons.append(f"manual_playbook_inactive_entry_{entry_type}")
+
+    blocked_entry_types = {str(v).lower().strip() for v in list(mp_cfg.get("blocked_entry_types") or []) if str(v).strip()}
+    if entry_type in blocked_entry_types:
+        block = True
+        reasons.append(f"manual_playbook_blocked_entry_{entry_type}")
+
+    if isinstance(rule, dict):
+        bonus += int(rule.get("score_bonus", 0) or 0)
+
+        min_score = int(rule.get("min_score", 0) or 0)
+        if min_score > 0 and score < min_score:
+            block = True
+            reasons.append(f"manual_playbook_min_score_{score}_below_{min_score}")
+
+        preferred_side = str(rule.get("preferred_side") or "both").lower().strip()
+        if preferred_side not in {"", "both", direction.lower().strip()}:
+            block = True
+            reasons.append(f"manual_playbook_side_{preferred_side}")
+
+    day_bias_cfg = (mp_cfg.get("day_bias") or {}) if isinstance(mp_cfg, dict) else {}
+    if bool(day_bias_cfg.get("enabled", False)):
+        realized_pnl = 0.0
+        if isinstance(state, dict):
+            exchange_pnl = float(state.get("exchange_pnl_today_usd") or 0.0)
+            pnl_today = float(state.get("pnl_today_usd") or 0.0)
+            realized_pnl = exchange_pnl if exchange_pnl != 0 else pnl_today
+        red_threshold = abs(float(day_bias_cfg.get("min_red_pnl_usd", 0.0) or 0.0))
+        favored_side = str(day_bias_cfg.get("favored_side") or "").lower().strip()
+        bias_entry_types = {str(v).lower().strip() for v in list(day_bias_cfg.get("entry_types") or []) if str(v).strip()}
+        if realized_pnl <= -red_threshold and favored_side and (not bias_entry_types or entry_type in bias_entry_types):
+            favored_bonus = int(day_bias_cfg.get("favored_bonus", 0) or 0)
+            opposite_penalty = int(day_bias_cfg.get("opposite_penalty", 0) or 0)
+            if direction.lower().strip() == favored_side:
+                bonus += favored_bonus
+                if favored_bonus:
+                    reasons.append(f"manual_playbook_red_day_bias_{favored_side}_{favored_bonus:+d}")
+            elif opposite_penalty:
+                bonus -= opposite_penalty
+                reasons.append(f"manual_playbook_red_day_opposite_{direction.lower().strip()}_{-opposite_penalty:+d}")
+
+    range_box_cfg = (mp_cfg.get("range_box") or {}) if isinstance(mp_cfg, dict) else {}
+    if bool(range_box_cfg.get("enabled", False)):
+        vol_state = str((state or {}).get("vol_state") or "").upper().strip()
+        allowed_vol_states = {str(v).upper().strip() for v in list(range_box_cfg.get("vol_states") or []) if str(v).strip()}
+        allowed_entry_types = {str(v).lower().strip() for v in list(range_box_cfg.get("entry_types") or []) if str(v).strip()}
+        allowed_regimes = {str(v).lower().strip() for v in list(range_box_cfg.get("selected_regimes") or []) if str(v).strip()}
+        selected_regime = str((selected_v4 or {}).get("regime") or "").lower().strip()
+        score_floor = int(range_box_cfg.get("score_floor", 35) or 35)
+        target_score = int(range_box_cfg.get("target_score", 60) or 60)
+        max_bonus = int(range_box_cfg.get("max_bonus", 25) or 25)
+        if (not allowed_vol_states or vol_state in allowed_vol_states) and (not allowed_entry_types or entry_type in allowed_entry_types) and (not allowed_regimes or selected_regime in allowed_regimes):
+            if score_floor <= score < target_score:
+                rb_bonus = min(max_bonus, target_score - score)
+                if rb_bonus > 0:
+                    bonus += rb_bonus
+                    reasons.append(f"manual_playbook_range_box_{entry_type}_{vol_state}_{rb_bonus:+d}")
+
+    if bonus:
+        reasons.append(f"manual_playbook_bonus_{bonus:+d}")
+
+    return bonus, reasons, block
 
 
 def _compute_friday_break_risk(
@@ -1724,6 +1869,29 @@ def _evaluate_post_tp_bias(state: dict, config: dict, now: datetime) -> str:
         return ""
 
     return bias_side
+
+
+def _get_failed_continuation_retest_state(state: dict, config: dict, now: datetime) -> dict:
+    cfg = (config.get("failed_continuation_retest") or {}) if isinstance(config.get("failed_continuation_retest"), dict) else {}
+    if not bool(cfg.get("enabled", False)):
+        return {}
+    armed = state.get("failed_continuation_retest")
+    if not isinstance(armed, dict):
+        return {}
+    direction = str(armed.get("direction") or "").lower().strip()
+    if direction not in {"long", "short"}:
+        state.pop("failed_continuation_retest", None)
+        return {}
+    armed_at = armed.get("armed_at")
+    expire_min = float(cfg.get("expire_minutes", 180) or 180)
+    if armed_at:
+        try:
+            if now > datetime.fromisoformat(str(armed_at).replace("Z", "+00:00")) + timedelta(minutes=expire_min):
+                state.pop("failed_continuation_retest", None)
+                return {}
+        except Exception:
+            pass
+    return dict(armed)
 
 
 def _compute_unlock_hints(v4_result: dict | None, n: int = 3) -> list[str]:
@@ -3491,31 +3659,14 @@ def _evaluate_hard_risk_gates(
     live_tick_age_sec: float | None = None,
 ) -> str | None:
     """
-    Evaluates hard risk gates that cannot be bypassed even by AI executive mode.
+    Evaluates non-PnL hard risk gates that cannot be bypassed even by AI executive mode.
     Returns the reason string if blocked, else None.
     """
-    max_daily_loss_pct = float(config.get("risk", {}).get("max_daily_loss_pct", 0.0) or 0.0)
-    
-    # HARD risk gate: daily loss cap is never bypassable
-    _pnl_for_daily_loss = float(state.get("exchange_pnl_today_usd") or 0.0)
-    if _pnl_for_daily_loss == 0.0:
-        _pnl_for_daily_loss = float(pnl_today or 0.0)
-        
-    max_loss_hit = bool(
-        max_daily_loss_pct > 0
-        and equity_start > 0
-        and _pnl_for_daily_loss <= -(equity_start * max_daily_loss_pct)
-    )
-    if max_loss_hit:
-        return "entry_blocked_max_daily_loss"
-
-    # SAFE_MODE gate disabled -- stay in the market, learn from losses
-    # if recovery_info.get("mode") == "SAFE_MODE":
-    #     return "entry_blocked_recovery_safe_mode"
-
-    # Force clear SAFE_MODE -- never want full shutdown
+    # Force clear stale daily-loss SAFE_MODE flags -- per-trade risk handles loss control.
     state.pop("_safe_mode", None)
     state.pop("safe_mode", None)
+    state.pop("_safe_mode_reason", None)
+    state.pop("safe_mode_reason", None)
 
     freshness_cfg = (config.get("freshness_gates") or {}) if isinstance(config.get("freshness_gates"), dict) else {}
     if bool(freshness_cfg.get("enabled", True)):
@@ -4116,48 +4267,39 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         config=lane_w_cfg,
     )
 
-    long_entry = htf_breakout_continuation(price, df_4h, df_1h, df_15m, levels, fibs, "long", weekly_playbook=_lane_w_playbook, event_calendar=_lane_w_calendar, config=lane_w_cfg)
-    long_entry = long_entry or trend_continuation(price, df_15m, df_1h, "long", state=_st)
-    long_entry = long_entry or fib_retrace(price, df_1h, df_15m, "long", config=config)
-    long_entry = long_entry or pullback_continuation(price, df_1h, df_4h, df_15m, levels, fibs, "long")
-    long_entry = long_entry or breakout_retest(price, df_15m, levels, fibs, "long")
-    long_entry = long_entry or reversal_impulse(price, df_1h, df_15m, levels, fibs, "long")
-    long_entry = long_entry or compression_breakout(price, df_15m, df_1h, expansion_state, levels, fibs, "long")
-    long_entry = long_entry or early_impulse(price, df_15m, expansion_state, "long")
-    long_entry = long_entry or compression_range(price, df_15m, expansion_state, "long")
-    long_entry = long_entry or slow_bleed_hunter(price, df_15m, "long", config=config)
-    long_entry = long_entry or liquidity_sweep(price, df_15m, df_1h, "long", levels, fibs, liquidation_intel=long_liquidation_intel, config=lane_cfg)
-    long_entry = long_entry or wick_rejection(price, df_15m, df_1h, levels, "long")
-    long_entry = long_entry or volume_climax_reversal(price, df_15m, "long")
-    long_entry = long_entry or vwap_reversion(price, df_15m, df_1h, "long")
-    long_entry = long_entry or grid_range(price, df_15m, df_1h, "long", levels, fibs, expansion_state)
-    long_entry = long_entry or regime_low_vol(price, df_15m, df_1h, "long", expansion_state, levels)
-    long_entry = long_entry or stat_arb_proxy(price, df_15m, df_1h, "long")
-    long_entry = long_entry or orderflow_imbalance(price, df_15m, "long")
-    long_entry = long_entry or macro_ma_cross(price, df_1h, df_4h, "long")
-    long_entry = long_entry or opening_range_breakout(price, df_15m, df_1h, "long", levels, config=config)
-    long_entry = long_entry or hourly_continuation(price, df_15m, df_1h, "long", levels, config=config)
-    short_entry = htf_breakout_continuation(price, df_4h, df_1h, df_15m, levels, fibs, "short", weekly_playbook=_lane_w_playbook, event_calendar=_lane_w_calendar, config=lane_w_cfg)
-    short_entry = short_entry or trend_continuation(price, df_15m, df_1h, "short", state=_st)
-    short_entry = short_entry or fib_retrace(price, df_1h, df_15m, "short", config=config)
-    short_entry = short_entry or pullback_continuation(price, df_1h, df_4h, df_15m, levels, fibs, "short")
-    short_entry = short_entry or breakout_retest(price, df_15m, levels, fibs, "short")
-    short_entry = short_entry or reversal_impulse(price, df_1h, df_15m, levels, fibs, "short")
-    short_entry = short_entry or compression_breakout(price, df_15m, df_1h, expansion_state, levels, fibs, "short")
-    short_entry = short_entry or early_impulse(price, df_15m, expansion_state, "short")
-    short_entry = short_entry or compression_range(price, df_15m, expansion_state, "short")
-    short_entry = short_entry or slow_bleed_hunter(price, df_15m, "short", config=config)
-    short_entry = short_entry or liquidity_sweep(price, df_15m, df_1h, "short", levels, fibs, liquidation_intel=short_liquidation_intel, config=lane_cfg)
-    short_entry = short_entry or wick_rejection(price, df_15m, df_1h, levels, "short")
-    short_entry = short_entry or volume_climax_reversal(price, df_15m, "short")
-    short_entry = short_entry or vwap_reversion(price, df_15m, df_1h, "short")
-    short_entry = short_entry or grid_range(price, df_15m, df_1h, "short", levels, fibs, expansion_state)
-    short_entry = short_entry or regime_low_vol(price, df_15m, df_1h, "short", expansion_state, levels)
-    short_entry = short_entry or stat_arb_proxy(price, df_15m, df_1h, "short")
-    short_entry = short_entry or orderflow_imbalance(price, df_15m, "short")
-    short_entry = short_entry or macro_ma_cross(price, df_1h, df_4h, "short")
-    short_entry = short_entry or opening_range_breakout(price, df_15m, df_1h, "short", levels, config=config)
-    short_entry = short_entry or hourly_continuation(price, df_15m, df_1h, "short", levels, config=config)
+    failed_continuation_retest = _get_failed_continuation_retest_state(_st, config, now)
+    _fcr_direction = str((failed_continuation_retest or {}).get("direction") or "").lower().strip()
+    long_breakout_retest_entry = breakout_retest(price, df_15m, levels, fibs, "long")
+    short_breakout_retest_entry = breakout_retest(price, df_15m, levels, fibs, "short")
+
+    if _fcr_direction == "long":
+        long_entry = dict(long_breakout_retest_entry) if isinstance(long_breakout_retest_entry, dict) else None
+        if long_entry:
+            long_entry["continuation_flip_playbook"] = True
+            long_entry["continuation_flip_source"] = failed_continuation_retest.get("source_direction")
+            long_entry["continuation_flip_exit_reason"] = failed_continuation_retest.get("exit_reason")
+    else:
+        long_entry = long_breakout_retest_entry
+        long_entry = long_entry or htf_breakout_continuation(price, df_4h, df_1h, df_15m, levels, fibs, "long", weekly_playbook=_lane_w_playbook, event_calendar=_lane_w_calendar, config=lane_w_cfg)
+        long_entry = long_entry or trend_continuation(price, df_15m, df_1h, "long", state=_st)
+        long_entry = long_entry or fib_retrace(price, df_1h, df_15m, "long", config=config)
+        long_entry = long_entry or hourly_continuation(price, df_15m, df_1h, "long", levels, config=config)
+    if _fcr_direction == "short":
+        short_entry = dict(short_breakout_retest_entry) if isinstance(short_breakout_retest_entry, dict) else None
+        if short_entry:
+            short_entry["continuation_flip_playbook"] = True
+            short_entry["continuation_flip_source"] = failed_continuation_retest.get("source_direction")
+            short_entry["continuation_flip_exit_reason"] = failed_continuation_retest.get("exit_reason")
+    else:
+        short_entry = short_breakout_retest_entry
+        short_entry = short_entry or htf_breakout_continuation(price, df_4h, df_1h, df_15m, levels, fibs, "short", weekly_playbook=_lane_w_playbook, event_calendar=_lane_w_calendar, config=lane_w_cfg)
+        short_entry = short_entry or trend_continuation(price, df_15m, df_1h, "short", state=_st)
+        short_entry = short_entry or fib_retrace(price, df_1h, df_15m, "short", config=config)
+        short_entry = short_entry or hourly_continuation(price, df_15m, df_1h, "short", levels, config=config)
+    if _fcr_direction == "long":
+        short_entry = None
+    elif _fcr_direction == "short":
+        long_entry = None
     _micro_sweep_promoted = False
     _micro_sweep_source = None
 
@@ -4334,14 +4476,16 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 long_entry = None
                 long_v4 = None
 
-            if _htf_state == "bullish_expansion" and short_entry and _short_type not in _cap_types:
+            # Exhaustion types: only these shorts allowed in a bull trend
+            _exhaust_types = {"reversal_impulse", "wick_rejection", "volume_climax_reversal", "fib_retrace"}
+            if _htf_state in ("bullish_trend", "bullish_expansion") and short_entry and _short_type not in _exhaust_types:
                 log_decision(config, {
                     "timestamp": now.isoformat(),
-                    "reason": "htf_short_blocked_bullish_expansion",
+                    "reason": "htf_short_blocked_bullish",
                     "htf_bias": _htf_bias.get("bias"),
                     "rsi_1h": _htf_bias.get("rsi_1h"),
                     "entry_type": _short_type,
-                    "thought": f"HTF bullish expansion (RSI={_htf_bias.get('rsi_1h'):.1f}): blocking non-exhaustion short ({_short_type}). Only reversals allowed.",
+                    "thought": f"HTF {_htf_state} (RSI={_htf_bias.get('rsi_1h'):.1f}): blocking non-reversal short ({_short_type}). Don't short a bull trend.",
                 })
                 short_entry = None
                 short_v4 = None
@@ -4395,6 +4539,20 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 "thought": f"Blocking long re-entry: price ${price:.5f} is BELOW last exit ${_last_exit_price:.5f}. Would re-enter at worse level.",
             })
             long_entry = None
+
+    if failed_continuation_retest:
+        _fcr_target_entry = long_entry if _fcr_direction == "long" else short_entry if _fcr_direction == "short" else None
+        log_decision(config, {
+            "timestamp": now.isoformat(),
+            "reason": "failed_continuation_retest_ready" if _fcr_target_entry else "failed_continuation_retest_wait",
+            "direction": _fcr_direction or None,
+            "entry_type": (_fcr_target_entry or {}).get("type") if isinstance(_fcr_target_entry, dict) else None,
+            "source_direction": failed_continuation_retest.get("source_direction"),
+            "source_exit_reason": failed_continuation_retest.get("exit_reason"),
+            "armed_at": failed_continuation_retest.get("armed_at"),
+            "trigger_exit_price": failed_continuation_retest.get("exit_price"),
+            "thought": "waiting for opposite breakout retest after failed trend continuation" if not _fcr_target_entry else "opposite breakout retest is live after failed trend continuation",
+        })
 
     long_v4 = None
     short_v4 = None
@@ -4549,11 +4707,19 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     if v4_candidates:
         v4_candidates.sort(key=lambda it: (int((it[2] or {}).get("score") or 0), int(confluence_count((it[1] or {}).get("confluence") or {}))), reverse=True)
         # Adaptive Direction Bias: learn from recent trade history
-        _adb = _compute_adaptive_direction_bias(_st, config)
+        _adb_cfg = (v4_cfg.get("adaptive_direction_bias") or {}) if isinstance(v4_cfg.get("adaptive_direction_bias"), dict) else {}
+        _adb_enabled = bool(_adb_cfg.get("enabled", False))
+        _adb = _compute_adaptive_direction_bias(_st, config) if _adb_enabled else {
+            "bias": "neutral",
+            "strength": 0.0,
+            "long_score_adj": 0,
+            "short_score_adj": 0,
+            "reasons": ["disabled"],
+        }
         _adb_bias = _adb.get("bias", "neutral")
         _adb_long_adj = int(_adb.get("long_score_adj", 0))
         _adb_short_adj = int(_adb.get("short_score_adj", 0))
-        if _adb_bias != "neutral":
+        if _adb_enabled and _adb_bias != "neutral":
             for _ci, _cand in enumerate(v4_candidates):
                 _cv4 = _cand[2]
                 if _cv4 and isinstance(_cv4, dict):
@@ -4586,7 +4752,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         elif str(_st.get("post_tp_bias_side") or ""):
             _bias_side = str(_st.get("post_tp_bias_side"))
         # Adaptive direction can also set bias when recovery/post-TP do not
-        if not _bias_side and _adb_bias != "neutral":
+        if not _bias_side and _adb_enabled and _adb_bias != "neutral":
             _bias_side = _adb_bias
         if _bias_side and len(v4_candidates) > 1:
             # If both sides pass, prefer the biased side (as long as score is within 15 pts)
@@ -4598,31 +4764,50 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                         v4_candidates.insert(0, v4_candidates.pop(_ci))
                     break
         direction, entry, selected_v4, breakout_type, lane_result = v4_candidates[0]
+
+        # --- Divergence + Fib Confluence score boost ---
+        if _HAS_DIVERGENCE and entry and selected_v4 and direction:
+            try:
+                _entry_type = str(entry.get("type") or "")
+                _boost_types = {"fib_retrace", "wick_rejection", "volume_climax_reversal", "liquidity_sweep", "micro_sweep"}
+                if _entry_type in _boost_types:
+                    _div_dir = "bullish" if direction == "long" else "bearish"
+                    _div = _detect_div(df_15m if "df_15m" in dir() else None, direction=_div_dir)
+                    if _div and _div.get("detected"):
+                        _div_boost = 10
+                        selected_v4["score"] = int(selected_v4.get("score") or 0) + _div_boost
+                        log_decision(config, {"timestamp": now.isoformat(), "reason": "divergence_confirmed", "direction": direction, "thought": str(_div.get("detail", ""))[:120]})
+            except Exception:
+                pass
     else:
-        # Backward-compatible fallback if neither side passes v4 threshold.
-        if long_entry and short_entry:
-            long_count = confluence_count(long_entry["confluence"])
-            short_count = confluence_count(short_entry["confluence"])
-            if long_count > short_count:
+        # Respect strict score gating: if neither side passed, stay flat.
+        # Falling back to raw confluence counts here can create one-sided drift
+        # because later modifiers are only applied to the already-selected side.
+        score_gate_strict_now = bool(v4_cfg.get("strict_score_gate", True))
+        if not score_gate_strict_now:
+            if long_entry and short_entry:
+                long_count = confluence_count(long_entry["confluence"])
+                short_count = confluence_count(short_entry["confluence"])
+                if long_count > short_count:
+                    entry = long_entry
+                    direction = "long"
+                    selected_v4 = long_v4
+                    breakout_type = breakout_type_long
+                elif short_count > long_count:
+                    entry = short_entry
+                    direction = "short"
+                    selected_v4 = short_v4
+                    breakout_type = breakout_type_short
+            elif long_entry:
                 entry = long_entry
                 direction = "long"
                 selected_v4 = long_v4
                 breakout_type = breakout_type_long
-            elif short_count > long_count:
+            elif short_entry:
                 entry = short_entry
                 direction = "short"
                 selected_v4 = short_v4
                 breakout_type = breakout_type_short
-        elif long_entry:
-            entry = long_entry
-            direction = "long"
-            selected_v4 = long_v4
-            breakout_type = breakout_type_long
-        elif short_entry:
-            entry = short_entry
-            direction = "short"
-            selected_v4 = short_v4
-            breakout_type = breakout_type_short
 
     regime_mode = str(v4_cfg.get("regime_mode", "dual") or "dual").lower().strip()
     selected_regime = str((selected_v4 or {}).get("regime") or regime_v4.get("regime") or "neutral").lower().strip()
@@ -5401,6 +5586,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 config,
                 _with_lifecycle_fields(
                     {
+                        **_trade_context_from_open_position(open_pos),
                         "timestamp": now.isoformat(),
                         "product_id": pos_product_id,
                         "side": direction,
@@ -6343,7 +6529,12 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
 
         # Entry profile overrides (frozen at entry time, stored in open_position)
         _ep_min_profit = float(open_pos.get("entry_profile_min_profit_usd") or 0)
+        _ep_min_profit_bars = int(open_pos.get("entry_profile_min_profit_bars") or 0)
         _ep_decay_pct = float(open_pos.get("entry_profile_decay_pct") or 0)
+        _ep_decay_arm = float(open_pos.get("entry_profile_decay_arm_usd") or 0)
+        _ep_quick_tp = float(open_pos.get("entry_profile_quick_take_profit_usd") or 0)
+        _ep_quick_tp_bars = int(open_pos.get("entry_profile_quick_take_profit_bars") or 0)
+        _ep_quick_tp_trend_weak_only = bool(open_pos.get("entry_profile_quick_take_profit_trend_weak_only") or False)
 
         # Lane 1: Hard minimum profit floor — once up $X, NEVER give it all back.
         # Uses entry profile min if available, otherwise global config.
@@ -6352,7 +6543,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         _min_floor_cfg = (_pp_cfg.get("min_floor") or {}) if isinstance(_pp_cfg.get("min_floor"), dict) else {}
         if bool(_min_floor_cfg.get("enabled", True)):
             _mf_usd = _ep_min_profit if _ep_min_profit > 0 else float(_min_floor_cfg.get("floor_usd", 3.0) or 3.0)
-            _mf_bars = int(_min_floor_cfg.get("min_bars", 2) or 2)
+            _mf_bars = _ep_min_profit_bars if _ep_min_profit_bars > 0 else int(_min_floor_cfg.get("min_bars", 2) or 2)
             # Compression scalp: lower floor + faster arm for quick profit capture
             # (exempt trend entries — they need wider leash from entry_profiles)
             _vol_phase = state.get("vol_state", "COMPRESSION")
@@ -6377,7 +6568,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         _decay_exit_hit = False
         _decay_cfg = (_pp_cfg.get("decay_exit") or {}) if isinstance(_pp_cfg.get("decay_exit"), dict) else {}
         if bool(_decay_cfg.get("enabled", True)):
-            _de_arm = float(_decay_cfg.get("arm_usd", 5.0) or 5.0)
+            _de_arm = _ep_decay_arm if _ep_decay_arm > 0 else float(_decay_cfg.get("arm_usd", 5.0) or 5.0)
             # Compression scalp: lower arm threshold so decay works on small moves
             # (exempt trend entries — they need wider leash)
             if state.get("vol_state") == "COMPRESSION":
@@ -6679,6 +6870,14 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         _hold_secs = (now - entry_time).total_seconds() if entry_time else 9999
         _min_hold_met = _hold_secs >= 60
 
+        # Entry-profile quick TP: fragile setups should bank small wins fast instead of
+        # being managed like runners. Used for pullbacks and continuation scouts.
+        _entry_profile_quick_tp_hit = False
+        if _ep_quick_tp > 0 and _ep_quick_tp_bars > 0 and _min_hold_met:
+            if curr_upnl >= _ep_quick_tp and bars_since <= _ep_quick_tp_bars:
+                if (not _ep_quick_tp_trend_weak_only) or (not trend_healthy):
+                    _entry_profile_quick_tp_hit = True
+
         # === HYBRID EXIT LOGIC: Chart-aware + Mechanical safety net ===
         # Chart signals get priority, but mechanical exits protect capital.
         # Re-enabled 2026-03-18: mirror-only strategy was bleeding money.
@@ -6686,6 +6885,30 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             exit_reason = "ai_executive_exit"
         elif _ai_exit_eval_force:
             exit_reason = "ai_exit_eval_force"
+        # --- Profit Manager: partial profits + break-even SL ---
+        if _HAS_PROFIT_MGR and not exit_reason:
+            try:
+                _pm_state = open_pos.get("_profit_state") or {}
+                _pm_atr = float(atr_exit) if "atr_exit" in dir() and atr_exit and atr_exit > 0 else 0.001
+                _pm_tp1 = float(tp_plan.tp1) if "tp_plan" in dir() and tp_plan and hasattr(tp_plan, "tp1") else 0
+                _pm_tp2 = float(tp_plan.tp2) if "tp_plan" in dir() and tp_plan and hasattr(tp_plan, "tp2") else 0
+                _pm_tp3 = float(tp_plan.tp3) if "tp_plan" in dir() and tp_plan and hasattr(tp_plan, "tp3") else 0
+                _pm_result = _eval_profit_mgmt(
+                    price=price, direction=direction, entry_price=entry_price,
+                    size=int(open_pos.get("size") or 1),
+                    tp1_price=_pm_tp1, tp2_price=_pm_tp2, tp3_price=_pm_tp3,
+                    atr=_pm_atr, profit_state=_pm_state,
+                )
+                open_pos["_profit_state"] = _pm_result.get("profit_state", _pm_state)
+                if _pm_result.get("action") == "FULL_EXIT":
+                    exit_reason = "profit_manager_exit"
+                elif _pm_result.get("action") == "MOVE_SL_TO_BE":
+                    log_decision(config, {"timestamp": now.isoformat(), "reason": "profit_manager_sl_to_be", "thought": "TP1 reached -- SL moved to breakeven"})
+                elif _pm_result.get("action") == "TRAIL_TIGHTEN":
+                    log_decision(config, {"timestamp": now.isoformat(), "reason": "profit_manager_trail_tighten", "thought": "Trail stop tightened"})
+            except Exception:
+                pass
+
         elif friday_break_derisk:
             exit_reason = "friday_break_derisk"
         elif cutoff_derisk:
@@ -6695,6 +6918,8 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         elif reversal:
             exit_reason = "reversal_signal"
         # --- PROFIT-SIDE MECHANICAL EXITS (lock wins, never cut losers) ---
+        elif _min_hold_met and _entry_profile_quick_tp_hit:
+            exit_reason = "entry_profile_quick_tp"
         elif _min_hold_met and tp_hit:
             exit_reason = "tp1"
         elif _min_hold_met and profit_lock_hit:
@@ -6904,14 +7129,63 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 except Exception:
                     pass
 
-                # Recovery Mode: track loss direction and recovery cooldown
+                # Recovery Mode: track loss direction only. Do not impose post-loss cooldowns.
                 if result == "loss":
                     state["last_loss_side"] = direction
-                    if bool(open_pos.get("is_recovery_trade")):
-                        v4_cfg_rm = config.get("v4", {}) if isinstance(config.get("v4"), dict) else {}
-                        rm_cfg_exit = v4_cfg_rm.get("recovery_mode", {}) if isinstance(v4_cfg_rm.get("recovery_mode"), dict) else {}
-                        _cool_min = float(rm_cfg_exit.get("cooldown_after_loss_minutes", 10) or 10)
-                        state["recovery_cooldown_until"] = (now + timedelta(minutes=_cool_min)).isoformat()
+                    state.pop("recovery_cooldown_until", None)
+
+                # --- Hedge Flip: auto-reverse on stop loss ---
+                if _HAS_HEDGE_FLIP and exit_reason:
+                    try:
+                        _hf_cfg = config.get("hedge_flip", {}) or {}
+                        if _hf_cfg.get("enabled", False):
+                            _hf_result = _should_hedge_flip(
+                                exit_reason=str(exit_reason), exited_direction=direction,
+                                price=price, entry_price=entry_price,
+                                htf_bias=_htf_bias if "_htf_bias" in dir() else None,
+                                atr=float(atr_exit) if "atr_exit" in dir() and atr_exit else 0.001,
+                                flips_today=int(state.get("hedge_flips_today", 0)),
+                            )
+                            if _hf_result.get("flip"):
+                                state["hedge_flip_pending"] = {"direction": _hf_result["direction"], "reason": _hf_result["reason"]}
+                                state["hedge_flips_today"] = int(state.get("hedge_flips_today", 0)) + 1
+                                log_decision(config, {"timestamp": now.isoformat(), "reason": "hedge_flip_queued", "thought": "Flipping to " + _hf_result["direction"]})
+                    except Exception:
+                        pass
+
+                # Failed trend-continuation playbook: arm opposite breakout retest.
+                try:
+                    _fcr_cfg = (config.get("failed_continuation_retest") or {}) if isinstance(config.get("failed_continuation_retest"), dict) else {}
+                    if bool(_fcr_cfg.get("enabled", False)) and str(open_pos.get("entry_type") or "") == "trend_continuation":
+                        _require_loss = bool(_fcr_cfg.get("require_loss", True))
+                        _is_failure = bool(result != "win" or (pnl_usd is not None and pnl_usd <= 0))
+                        if _is_failure or not _require_loss:
+                            _flip_dir = "long" if direction == "short" else "short"
+                            state["failed_continuation_retest"] = {
+                                "direction": _flip_dir,
+                                "source_direction": direction,
+                                "source_entry_type": str(open_pos.get("entry_type") or ""),
+                                "exit_reason": str(exit_reason or ""),
+                                "entry_price": float(entry_price or 0.0),
+                                "exit_price": float(_verified_exit_price or price or 0.0),
+                                "armed_at": now.isoformat(),
+                                "size_mult": float(_fcr_cfg.get("size_mult", 1.0) or 1.0),
+                            }
+                            log_decision(config, {
+                                "timestamp": now.isoformat(),
+                                "reason": "failed_continuation_retest_armed",
+                                "direction": _flip_dir,
+                                "source_direction": direction,
+                                "source_entry_type": str(open_pos.get("entry_type") or ""),
+                                "source_exit_reason": str(exit_reason or ""),
+                                "exit_pnl_usd": pnl_usd,
+                                "exit_price": float(_verified_exit_price or price or 0.0),
+                                "thought": f"failed trend continuation armed opposite breakout retest toward {_flip_dir}",
+                            })
+                        else:
+                            state.pop("failed_continuation_retest", None)
+                except Exception:
+                    pass
 
                 # Post-TP bias: after any TP exit, bias next trade opposite
                 if exit_reason and "tp" in str(exit_reason).lower():
@@ -6973,6 +7247,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 config,
                 _with_lifecycle_fields(
                     {
+                        **_trade_context_from_open_position(open_pos),
                         "timestamp": now.isoformat(),
                         "product_id": pos_product_id or product_id,
                         "side": direction,
@@ -7203,9 +7478,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             except Exception:
                 pass
             state["open_position"] = open_pos
-        _cd_thresh = int(config.get("risk", {}).get("cooldown_loss_threshold", 3) or 3)
-        if int(state.get("consecutive_losses") or 0) >= _cd_thresh:
-            _update_cooldown(state, now, int(config["risk"]["cooldown_minutes"]))
+        state.pop("cooldown_until", None)
         # Post-exit: reconcile balances (sweeps derivatives → spot USDC for yield)
         if not state.get("open_position") and not paper:
             try:
@@ -7297,28 +7570,14 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         save_state(state)
         return
 
-    # --- Hard dollar drawdown cap (AI executive CANNOT override this) ---
-    _rm_cfg_dd = (v4_cfg.get("recovery_mode") or {}) if isinstance(v4_cfg.get("recovery_mode"), dict) else {}
-    _hard_dd_cap = float(_rm_cfg_dd.get("max_daily_drawdown_usd", 9999.0) or 9999.0)
-    _hard_dd_cap_pct = float(_rm_cfg_dd.get("max_daily_drawdown_pct", 0) or 0)
-    if _hard_dd_cap_pct > 0 and equity_start > 0:
-        _hard_dd_cap = min(_hard_dd_cap if _hard_dd_cap < 9000 else 9999, equity_start * _hard_dd_cap_pct)
-    if _hard_dd_cap < 9000 and not open_pos:
-        _dd_today_hard = abs(min(0.0, float(state.get("pnl_today_usd", 0) or 0)))
-        if _dd_today_hard >= _hard_dd_cap:
-            _hard_dd_reason = f"hard_drawdown_cap: -${_dd_today_hard:.2f} today >= cap ${_hard_dd_cap:.2f}"
-            state["_safe_mode"] = True
-            state["safe_mode"] = True
-            state["safe_mode_reason"] = _hard_dd_reason
-            log_decision(config, {"timestamp": now.isoformat(), "reason": "hard_drawdown_cap", "detail": _hard_dd_reason})
-            slack_alert.send(
-                f":stop_sign: HARD DRAWDOWN CAP: -${_dd_today_hard:.2f} today (limit ${_hard_dd_cap:.2f}). No new entries until tomorrow.",
-                level="critical",
-            )
-            save_state(state)
-            return
+    # Daily drawdown is advisory only. Per-trade max loss remains the hard stop.
+    if str(state.get("safe_mode_reason") or "").startswith("hard_drawdown_cap"):
+        state.pop("_safe_mode", None)
+        state.pop("safe_mode", None)
+        state.pop("_safe_mode_reason", None)
+        state.pop("safe_mode_reason", None)
 
-    # --- Combined circuit breaker: streak + drawdown ---
+    # --- Combined circuit breaker: streak + drawdown (advisory only) ---
     cb_cfg = (v4_cfg.get("circuit_breaker") or {}) if isinstance(v4_cfg.get("circuit_breaker"), dict) else {}
     if bool(cb_cfg.get("enabled", False)) and not open_pos:
         _cb_losses = int(state.get("losses", 0) or 0)
@@ -7339,18 +7598,16 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 )
             log_decision(config, {
                 "timestamp": now.isoformat(),
-                "reason": "circuit_breaker_trip",
+                "reason": "circuit_breaker_warning",
                 "detail": _cb_reason,
                 "htf_bias": _htf_bias,
-                "thought": f"Circuit breaker tripped: {_cb_reason}{_cb_htf_str}. No new entries today.",
+                "thought": f"Circuit breaker warning: {_cb_reason}{_cb_htf_str}. Continue trading with per-trade risk limits only.",
             })
             if cb_cfg.get("notify_slack", True):
                 slack_alert.send(
-                    f":no_entry: CIRCUIT BREAKER: {_cb_losses} losses, -${_cb_dd:.2f} today{_cb_htf_str}. No new entries until next session.",
-                    level="critical",
+                    f":warning: CIRCUIT BREAKER WARNING: {_cb_losses} losses, -${_cb_dd:.2f} today{_cb_htf_str}. Daily loss is advisory only; per-trade stops remain active.",
+                    level="warning",
                 )
-            save_state(state)
-            return
 
     product_available = api.is_product_available(product_id) if product_id else False
     ks_cfg = (v4_cfg.get("kill_switches") or {}) if isinstance(v4_cfg.get("kill_switches"), dict) else {}
@@ -7524,6 +7781,30 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     except Exception:
         weekly_research_bonus = 0
         weekly_research_reasons = []
+
+    manual_playbook_bonus = 0
+    manual_playbook_reasons: list[str] = []
+    manual_playbook_blocked = False
+    try:
+        if direction and entry and selected_v4 is not None:
+            manual_playbook_bonus, manual_playbook_reasons, manual_playbook_blocked = _score_manual_playbook_modifier(
+                direction,
+                entry,
+                selected_v4,
+                state=state,
+                config=config,
+            )
+            if manual_playbook_bonus != 0:
+                selected_v4 = dict(selected_v4)
+                adjusted = int(selected_v4.get("score") or 0) + manual_playbook_bonus
+                selected_v4["score"] = max(0, min(100, adjusted))
+                selected_v4["pass"] = bool(adjusted >= int(selected_v4.get("threshold") or 75))
+                score_gate_pass = bool(selected_v4["pass"])
+                score_gate_pass_effective = bool(score_gate_pass)
+    except Exception:
+        manual_playbook_bonus = 0
+        manual_playbook_reasons = []
+        manual_playbook_blocked = False
 
     liquidation_mod = None
     try:
@@ -8702,6 +8983,9 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         "weekly_research_updated_at": (weekly_research or {}).get("updated_at") if isinstance(weekly_research, dict) else None,
         "weekly_research_mod_bonus": weekly_research_bonus,
         "weekly_research_mod_reasons": weekly_research_reasons,
+        "manual_playbook_bonus": manual_playbook_bonus,
+        "manual_playbook_reasons": manual_playbook_reasons,
+        "manual_playbook_blocked": manual_playbook_blocked,
         "research_intraday_review_score": (market_intel_state.get("intraday") or {}).get("review_score") if isinstance(market_intel_state.get("intraday"), dict) else None,
         "research_weekly_review_score": (market_intel_state.get("weekly") or {}).get("review_score") if isinstance(market_intel_state.get("weekly"), dict) else None,
         "research_source_diversity": _source_scoreboard.get("source_diversity"),
@@ -9094,10 +9378,8 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             pass
         return
 
-    cooldown_loss_threshold = int(config.get("risk", {}).get("cooldown_loss_threshold", 3) or 3)
-    if consecutive_losses >= cooldown_loss_threshold:
-        _update_cooldown(state, now, int(config["risk"]["cooldown_minutes"]))
-        cooldown = True
+    state.pop("cooldown_until", None)
+    cooldown = False
 
     runtime_guard_cfg = (v4_cfg.get("runtime_guard") or {}) if isinstance(v4_cfg.get("runtime_guard"), dict) else {}
     runtime_unstable = False
@@ -9130,19 +9412,48 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         else:
             reduced_entry_blocked = True
 
-    # MONSTER bypass: exceptional setups skip cooldown — these are too
-    # good to miss (the overnight ghost-trade disaster taught us this).
-    if cooldown and _TIER_RANK.get(quality_tier, 0) >= _TIER_RANK.get("FULL", 2):
-        log_decision(config, {
-            "timestamp": now.isoformat(),
-            "reason": "cooldown_bypassed",
-            "quality_tier": quality_tier,
-            "consecutive_losses": int(state.get("consecutive_losses") or 0),
-        })
-        cooldown = False
-
     # --- Dip-retrace no-short gate ---
     # Blocks shorts when price is bouncing (RSI rising + higher closes + VWAP reclaim)
+    # --- Band Navigator: multi-TF band zone + momentum turn (replaces dip_retrace_gate) ---
+    _bn_blocked = False
+    if _HAS_BAND_NAV and entry and direction:
+        try:
+            _bn_cfg = config.get("band_navigator", {}) or {}
+            if _bn_cfg.get("enabled", True):
+                _bn_result = _band_nav_eval(
+                    direction=direction,
+                    df_15m=df_15m if "df_15m" in dir() else None,
+                    df_1h=df_1h if "df_1h" in dir() else None,
+                    df_4h=df_4h if "df_4h" in dir() else None,
+                    require_turn=bool(_bn_cfg.get("require_momentum_turn", True)),
+                    min_timeframes_agree=int(_bn_cfg.get("min_timeframes_agree", 1)),
+                )
+                _bn_adj = int(_bn_result.get("score_adjustment", 0))
+                if _bn_adj != 0 and selected_v4 and isinstance(selected_v4, dict):
+                    selected_v4["score"] = int(selected_v4.get("score") or 0) + _bn_adj
+                if not _bn_result.get("allowed", True):
+                    _bn_zones = _bn_result.get("zones", {})
+                    log_decision(config, {
+                        "timestamp": now.isoformat(),
+                        "reason": "band_navigator_advisory",
+                        "direction": direction,
+                        "thought": "Band nav ADVISORY (not blocking): " + " | ".join(
+                            tf + ":" + zi.get("zone", "?") + "(RSI " + str(zi.get("rsi", "?")) + ", " + str(zi.get("momentum", {}).get("direction", "?")) + ")"
+                            for tf, zi in _bn_zones.items()
+                        )[:150],
+                    })
+                    # ADVISORY ONLY: band_navigator adjusts score but NEVER blocks entries
+                    # v4 scoring is the authority -- if it passes, the trade goes through
+                else:
+                    log_decision(config, {
+                        "timestamp": now.isoformat(),
+                        "reason": "band_navigator_confirmed",
+                        "direction": direction,
+                        "score_adj": _bn_adj,
+                        "thought": "Band nav confirms " + str(direction) + ": " + str(_bn_result.get("reason", ""))[:100],
+                    })
+        except Exception:
+            pass  # band_nav failure = fall through to existing logic
     _drg_blocked = False
     _drg_meta = {}
     if entry and direction:
@@ -9298,33 +9609,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         save_state(state)
         return
 
-    # ── Revenge trade blocker — default cooldown, AI can override with conviction ──
-    _revenge_cooldown_min = float(config.get("risk", {}).get("revenge_cooldown_minutes", 0))
-    if _revenge_cooldown_min > 0 and int(state.get("consecutive_losses", 0)) >= 1 and not _ai_exec_override:
-        _last_exit_str = state.get("last_exit_time")
-        if _last_exit_str:
-            try:
-                _last_exit_dt = datetime.fromisoformat(str(_last_exit_str))
-                _minutes_since_exit = (now - _last_exit_dt).total_seconds() / 60
-                if _minutes_since_exit < _revenge_cooldown_min:
-                    log_decision(
-                        config,
-                        {
-                            "timestamp": now.isoformat(),
-                            "reason": "revenge_blocked",
-                            "minutes_since_last_loss": round(_minutes_since_exit, 1),
-                            "revenge_cooldown_minutes": _revenge_cooldown_min,
-                            "consecutive_losses": state.get("consecutive_losses", 0),
-                        },
-                    )
-                    print(
-                        f"Revenge blocked: {_minutes_since_exit:.1f}min since last loss "
-                        f"(need {_revenge_cooldown_min}min cooldown)"
-                    )
-                    save_state(state)
-                    return
-            except (ValueError, TypeError):
-                pass
+    # Revenge cooldown disabled. Per-trade stop and setup quality govern re-entry timing.
 
     # -- Rolling expectancy gate: kill switch when bot is running cold --
     _re_cfg = config.get("rolling_expectancy", {}) or {}
@@ -9569,6 +9854,20 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         save_state(state)
         return
 
+    if manual_playbook_blocked and not _ai_exec_override:
+        log_decision(config, {
+            "timestamp": now.isoformat(),
+            "reason": "manual_playbook_block",
+            "score": _cur_score,
+            "quality_tier": quality_tier,
+            "direction": direction,
+            "entry_type": selected_entry_type,
+            "manual_playbook_reasons": manual_playbook_reasons,
+            "thought": "manual playbook blocked this setup",
+        })
+        save_state(state)
+        return
+
     # Gate C: Revenge trade detection — block if last 3 trades lost in same price zone
     try:
         _revenge_zone_pct = 0.005  # 0.5% price band = "same zone"
@@ -9777,6 +10076,17 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         _min_rr = float(_rr_cfg.get(quality_tier, _rr_cfg.get("default", 0.0)) or 0.0)
     else:
         _min_rr = float(_rr_cfg or 0.0)  # legacy: flat number
+    _mp_rr_cfg = ((config.get("manual_playbook") or {}).get("rr_overrides") or {}) if isinstance((config.get("manual_playbook") or {}).get("rr_overrides"), dict) else {}
+    _rr_override_keys = []
+    if bool((entry or {}).get("continuation_flip_playbook")):
+        _rr_override_keys.append("continuation_flip_playbook")
+    if selected_entry_type:
+        _rr_override_keys.append(str(selected_entry_type))
+    for _rr_key in _rr_override_keys:
+        _rr_override = _mp_rr_cfg.get(_rr_key)
+        if isinstance(_rr_override, dict):
+            _min_rr = float(_rr_override.get(quality_tier, _rr_override.get("default", _min_rr)) or _min_rr)
+            break
     _rr_bypass = _TIER_RANK.get(quality_tier, 0) >= _TIER_RANK.get("MONSTER", 3)
     if _min_rr > 0 and stop_price > 0 and price > 0 and not _rr_bypass:
         _sl_dist_rr = abs(price - stop_price)
@@ -9901,6 +10211,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             ps_cfg=ps_cfg,
         )
         # Regime size multiplier (compression = 0.7x, expansion/transition = 1.0x)
+        size = max(1, int(size))  # FLOOR: never go below 1 contract
         if regime_overrides.size_multiplier != 1.0:
             _pre_regime_size = size
             size = max(1, int(size * regime_overrides.size_multiplier))
@@ -9954,6 +10265,14 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             sizing_meta["sentiment_size_mult"] = _sentiment_size_mult
             sizing_meta["sentiment_score"] = _sentiment_data.get("score")
             sizing_meta["pre_sentiment_size"] = _pre_sentiment_size
+        _fcr_cfg_live = (config.get("failed_continuation_retest") or {}) if isinstance(config.get("failed_continuation_retest"), dict) else {}
+        if bool((entry or {}).get("continuation_flip_playbook")):
+            _fcr_size_mult = float(_fcr_cfg_live.get("size_mult", 1.0) or 1.0)
+            if _fcr_size_mult != 1.0:
+                _pre_fcr_size = size
+                size = max(1, int(size * _fcr_size_mult))
+                sizing_meta["failed_continuation_retest_size_mult"] = _fcr_size_mult
+                sizing_meta["pre_failed_continuation_retest_size"] = _pre_fcr_size
         # Rolling expectancy gate: reduce or promote size based on realized edge quality.
         if _re_size_mult != 1.0:
             _pre_re_size = size
@@ -10484,6 +10803,17 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 full_close_at_tp1=bool(exits_cfg.get("tp_full_close_if_single_contract", False)),
             )
             tp_attach = tp_seed.tp1
+            _ep_quick_tp = float(_entry_profile.get("quick_take_profit_usd") or 0.0)
+            _ep_quick_tp_trend_weak_only = bool(_entry_profile.get("quick_take_profit_only_when_trend_weak") or False)
+            _contract_size = float(contract_size or 0.0) if contract_size else 0.0
+            if _ep_quick_tp > 0 and not _ep_quick_tp_trend_weak_only and _contract_size > 0 and int(size) > 0:
+                _quick_move = _ep_quick_tp / (_contract_size * int(size))
+                if _quick_move > 0:
+                    _quick_tp_price = price + _quick_move if direction == "long" else price - _quick_move
+                    if direction == "long":
+                        tp_attach = min(float(tp_attach or _quick_tp_price), _quick_tp_price)
+                    else:
+                        tp_attach = max(float(tp_attach or _quick_tp_price), _quick_tp_price)
     except Exception:
         tp_attach = None
     # AI Executive: override TP with Claude's take_profit_price if set
@@ -10515,6 +10845,24 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         )
         save_state(state)
         return
+    mp_cfg = (config.get("manual_playbook") or {}) if isinstance(config.get("manual_playbook"), dict) else {}
+    if bool(mp_cfg.get("block_unlabeled_entries", False)) and not (lane_result and str(lane_result.lane or "").strip()) and not _ai_exec_override:
+        log_decision(
+            config,
+            {
+                "timestamp": now.isoformat(),
+                "reason": "manual_playbook_unlabeled_entry_block",
+                "product_id": product_id,
+                "direction": direction,
+                "entry_type": entry.get("type") if isinstance(entry, dict) else None,
+                "quality_tier": quality_tier,
+                "score": int((selected_v4 or {}).get("score") or 0),
+                "thought": "blocking entry because no validated lane was assigned",
+            },
+        )
+        save_state(state)
+        return
+
     # Generate strategy-tagged clientOrderId for order fingerprinting
     _entry_type_tag = str((entry or {}).get("type") or "unknown")[:12]
     _lane_tag = str((lane_result.lane if lane_result else "X"))[:2]
@@ -10572,6 +10920,9 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         save_state(state)
         return
 
+    if bool((entry or {}).get("continuation_flip_playbook")):
+        state.pop("failed_continuation_retest", None)
+
     # --- Fill verification: confirm the entry order actually filled on Coinbase ---
     _entry_fill = verify_fill(api, res.order_id) if res.order_id else None
     _entry_fill_verified = bool(_entry_fill and _entry_fill.get("filled"))
@@ -10605,6 +10956,12 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             "entry_type": entry.get("type"),
             "strategy_regime": str((selected_v4 or {}).get("regime") or ("trend" if breakout_type == "trend" else "mean_reversion")),
             "confluence_score": int((selected_v4 or {}).get("score") or 0),
+            "score_threshold": (selected_v4 or {}).get("threshold"),
+            "client_order_id": _client_oid,
+            "lane": lane_result.lane if lane_result else None,
+            "lane_label": lane_result.label if lane_result else None,
+            "lane_reason": lane_result.reason if lane_result else None,
+            "confluence_flags": dict(entry.get("confluence") or {}),
             "ev_snapshot": ev_snapshot,
             "scale_count": 0,
             "max_unrealized_usd": 0.0,
@@ -10648,6 +11005,10 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             "breakout_tf": breakout_tf, "fingerprint": fingerprint,
             "confluence": {k: v for k, v in entry.get("confluence", {}).items() if v},
             "selected_v4": dict(selected_v4) if isinstance(selected_v4, dict) else None,
+            "client_order_id": _client_oid,
+            "lane": lane_result.lane if lane_result else None,
+            "lane_label": lane_result.label if lane_result else None,
+            "lane_reason": lane_result.reason if lane_result else None,
             "ev_snapshot": ev_snapshot,
             "entry_preflight": _entry_preflight,
             "protection_state": _protection_state,
@@ -10676,7 +11037,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     state["last_entry_type"] = entry.get("type")
     if entry.get("type") == "liquidity_sweep":
         state["last_liquidity_sweep_anchor"] = float(entry.get("sweep_level") or entry.get("target_cluster_price") or 0.0)
-    _update_cooldown(state, now, config["risk"]["cooldown_minutes"])
+    state.pop("cooldown_until", None)
     state["last_order_fingerprint"] = fingerprint
     state["last_order_ts"] = now.isoformat()
     save_state(state)
@@ -10741,6 +11102,8 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 "paper": paper,
                 "result": res.message,
                 "order_id": res.order_id,
+                "entry_order_id": res.order_id,
+                "client_order_id": _client_oid,
                 "fill_verified": _entry_fill_verified,
                 "fees_usd": _entry_fees,
                 "confluence": ";".join([k for k, v in entry["confluence"].items() if v]),
@@ -10750,6 +11113,11 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 "strategy_regime": str((selected_v4 or {}).get("regime") or "unknown"),
                 "confluence_score": int((selected_v4 or {}).get("score") or 0),
                 "score_threshold": (selected_v4 or {}).get("threshold"),
+                "quality_tier": quality_tier,
+                "lane": lane_result.lane if lane_result else None,
+                "lane_label": lane_result.label if lane_result else None,
+                "lane_reason": lane_result.reason if lane_result else None,
+                "entry_profile_key": entry.get("entry_profile_key") or entry.get("type"),
                 "ev_usd": (ev_snapshot or {}).get("ev_usd") if isinstance(ev_snapshot, dict) else None,
                 "wait_since_last_exit_min": wait_since_last_exit_min,
                 "wait_since_last_entry_min": wait_since_last_entry_min,
@@ -10826,6 +11194,12 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         "entry_type": entry.get("type"),
         "strategy_regime": str((selected_v4 or {}).get("regime") or ("trend" if breakout_type == "trend" else "mean_reversion")),
         "confluence_score": int((selected_v4 or {}).get("score") or 0),
+        "score_threshold": (selected_v4 or {}).get("threshold"),
+        "client_order_id": _client_oid,
+        "lane": lane_result.lane if lane_result else None,
+        "lane_label": lane_result.label if lane_result else None,
+        "lane_reason": lane_result.reason if lane_result else None,
+        "confluence_flags": dict(entry.get("confluence") or {}),
         "ev_snapshot": ev_snapshot,
         "scale_count": 0,
         "max_unrealized_usd": 0.0,
@@ -10855,7 +11229,12 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         # Add estimated round-trip fees to min_profit so we never exit "profitable"
         # but actually lose money after Coinbase fees.
         "entry_profile_min_profit_usd": _entry_profile["min_profit_usd"] + _est_rt_fees,
+        "entry_profile_min_profit_bars": _entry_profile["min_profit_bars"],
         "entry_profile_decay_pct": _entry_profile["decay_pct"],
+        "entry_profile_decay_arm_usd": _entry_profile["decay_arm_usd"],
+        "entry_profile_quick_take_profit_usd": _entry_profile["quick_take_profit_usd"],
+        "entry_profile_quick_take_profit_bars": _entry_profile["quick_take_profit_bars"],
+        "entry_profile_quick_take_profit_trend_weak_only": _entry_profile["quick_take_profit_only_when_trend_weak"],
         "entry_profile_tp_mult": _entry_profile["tp_mult"],
         "estimated_round_trip_fees": _est_rt_fees,
     }
@@ -10984,6 +11363,16 @@ def _build_smoke_check_preview(config: dict, api: CoinbaseAdvanced, direction: s
     )
     attach_exchange_tp = bool(exits_cfg.get("attach_exchange_tp", True))
     take_profit = tp_seed.tp1 if attach_exchange_tp else None
+    _ep_quick_tp = float(_entry_profile.get("quick_take_profit_usd") or 0.0)
+    _ep_quick_tp_trend_weak_only = bool(_entry_profile.get("quick_take_profit_only_when_trend_weak") or False)
+    if attach_exchange_tp and _ep_quick_tp > 0 and not _ep_quick_tp_trend_weak_only and contract_size > 0 and max(int(size), 1) > 0:
+        _quick_move = _ep_quick_tp / (float(contract_size) * max(int(size), 1))
+        if _quick_move > 0:
+            _quick_tp_price = entry_price + _quick_move if direction == "long" else entry_price - _quick_move
+            if direction == "long":
+                take_profit = min(float(take_profit or _quick_tp_price), _quick_tp_price)
+            else:
+                take_profit = max(float(take_profit or _quick_tp_price), _quick_tp_price)
     bracket_valid = bool(
         (direction == "long" and stop_loss < entry_price and (take_profit is None or take_profit > entry_price))
         or (direction == "short" and stop_loss > entry_price and (take_profit is None or take_profit < entry_price))

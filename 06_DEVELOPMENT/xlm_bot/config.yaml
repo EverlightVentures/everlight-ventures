@@ -35,7 +35,7 @@ risk:
   daily_profit_target_usd: 0       # uncapped
   loss_cooldown_requires_new_structure: true  # AUDIT FIX: require new structure after loss
   capital_allocation_pct: 1.0
-  max_sl_pct: 0.00               # DISABLED: smart_exit.py handles exits based on chart structure, not dumb percentages. $10 emergency floor prevents exchange force-close.
+  max_sl_pct: 0.015              # DISABLED: smart_exit.py handles exits based on chart structure, not dumb percentages. $10 emergency floor prevents exchange force-close.
   max_daily_loss_pct: 0.02       # SNIPER MODE: 2% daily cap = ~$10. Max 1 stopped trade + fees.
   sl_atr_buffer_mult: 0.5
   max_risk_pct_per_trade: 0.05   # TIGHTENED: 5% max risk per trade. Was 15% -- way too aggressive for a $525 account.
@@ -224,8 +224,8 @@ exits:
     decay_threshold: 0.20   # was 0.40 -- faster decay detection in low vol
     min_profit_usd: 1.00    # was 2.00 -- accept smaller wins during compression
   tp_full_close_if_single_contract: true
-  breakeven_atr_trigger: 2.5       # RAISED: was 1.0 -- 1 ATR arms too fast in choppy downtrends, causes repeated BE exits + worse re-entries. Need 2.5 ATR real move before arming.
-  breakeven_buffer_pct: 0.004     # keep: buffer covers ~$1.50 in fees at $0.15 XLM
+  breakeven_atr_trigger: 1.5       # RAISED: was 1.0 -- 1 ATR arms too fast in choppy downtrends, causes repeated BE exits + worse re-entries. Need 2.5 ATR real move before arming.
+  breakeven_buffer_pct: 0.006     # keep: buffer covers ~$1.50 in fees at $0.15 XLM
   min_tp_pct: 0.005           # SNIPER MODE: was 0.003 -- minimum 0.5% TP = ~$2.50 at $500. No crumb hunting.
 
 regime_gates:
@@ -276,7 +276,8 @@ futures_funding:
   max_transfer_per_day_usd: 2000
   # Idle sweep: move derivatives balance → spot USDC when not in a trade
   idle_sweep:
-    enabled: true
+    min_derivatives_reserve: 450   # NEVER sweep below this -- need margin for 1 contract
+    enabled: false
     min_sweep_usd: 5               # don't sweep less than $5
   rescue:
     enabled: true
@@ -288,7 +289,7 @@ balance_reconciliation:
   enabled: true
   buffer_usdc: 2.0                 # keep $2 in derivatives for settlement
   sweep_threshold_usdc: 5.0        # don't bother sweeping less than $5
-  auto_convert_usd: false          # DISABLED: account is USDC-only, conversion API not supported
+  auto_convert_usd: false           # FIXED: auto-convert USD to USDC
   require_all_usdc: true           # block entries if non-USDC detected -- USDC only account
   max_transfer_retries: 3
   safe_mode_cooldown_minutes: 15
@@ -311,7 +312,7 @@ margin_policy:
   liquidation_gte: 1.00
   # Overnight auto-enable: when equity covers overnight margin with buffer, allow 24/7 trading
   overnight_trading:
-    mode: auto             # auto = enable when equity sufficient, always = force on, never = force off
+    mode: always          # FIXED: user allowed to trade overnight             # auto = enable when equity sufficient, always = force on, never = force off
     min_equity_ratio: 1.05 # need equity >= 1.05x overnight margin (e.g., $432*1.05 = $454)
     overnight_safe_mr: 0.85  # max overnight MR to allow entries during overnight hours
   friday_break:
@@ -342,7 +343,7 @@ margin_policy:
     overnight:
       label: OVERNIGHT_DEFENSE
       objective: preserve_capital_trade_small_only_if_overnight_margin_is_safe
-      block_new_entries_if_not_safe: true
+      block_new_entries_if_not_safe: false
       block_new_entries_when_safe: false
       allow_multi_contract_when_safe: false
       max_new_contracts_when_safe: 1
@@ -406,7 +407,7 @@ v4:
   profit_lock:
     enabled: true
     # PROFIT STRATEGY: let it run to $10-25, trail aggressively above $10
-    activate_usd: 6.00              # Don't lock until $6 -- $2-3 wins are not worth locking, let them grow
+    activate_usd: 8.00              # Don't lock until $6 -- $2-3 wins are not worth locking, let them grow
     keep_ratio: 0.45               # Below $10: keep 45% of peak (floor handles the $2.50 minimum)
     max_giveback_usd: 4.00         # Below $10: allow $4 pullback for the move to develop
     min_bars_since_entry: 1
@@ -421,7 +422,7 @@ v4:
         keep_ratio: 0.50
         max_giveback_usd: 4.00
       FULL:
-        activate_usd: 6.00            # lock only after $6 profit
+        activate_usd: 8.00            # lock only after $6 profit
         keep_ratio: 0.45
         max_giveback_usd: 5.00
       FULL_expansion:
@@ -464,7 +465,7 @@ v4:
       enabled: true
       floor_usd: 2.50          # LOWERED: $2.50 = fee coverage + guaranteed net positive. Never give back a winner.
       min_bars: 2              # FASTER: arm after 30 min, not 1 hour. Trade 1 lost $6.75 because floor was too slow.
-      trail_pct: 0.30          # TIGHTER below $10: keep 30% of peak as absolute floor
+      trail_pct: 0.50          # TIGHTER below $10: keep 30% of peak as absolute floor
     # Compression Scalp: faster profit capture when vol is low.
     # Overrides min_floor + decay_arm to grab small profits quickly.
     compression_scalp:
@@ -504,9 +505,14 @@ v4:
       # Standard entries: moderate expectations
       # min_profit_usd is POST-FEE — fees already subtracted from PnL tracking
       pullback:
-        tp_mult: 0.70
-        min_profit_usd: 2.00
-        decay_pct: 0.35
+        tp_mult: 0.35
+        min_profit_usd: 1.50
+        min_profit_bars: 1
+        decay_pct: 0.18
+        decay_arm_usd: 1.50
+        quick_take_profit_usd: 99.0
+        quick_take_profit_bars: 6
+        quick_take_profit_only_when_trend_weak: false
       reversal_impulse:
         tp_mult: 0.70
         min_profit_usd: 2.00
@@ -535,22 +541,37 @@ v4:
         decay_pct: 0.40
       # Regime+entry combos (checked first — more specific = higher priority)
       pullback_trend:
-        tp_mult: 0.6
-        min_profit_usd: 2.00
-        decay_pct: 0.45
+        tp_mult: 0.40
+        min_profit_usd: 1.75
+        min_profit_bars: 1
+        decay_pct: 0.20
+        decay_arm_usd: 1.75
+        quick_take_profit_usd: 99.0
+        quick_take_profit_bars: 6
+        quick_take_profit_only_when_trend_weak: false
       breakout_retest_trend:
         tp_mult: 0.75
         min_profit_usd: 2.00
         decay_pct: 0.50
       # Structure-based trend continuation: ride the trend
       trend_continuation:
-        tp_mult: 0.6
+        tp_mult: 0.45
         min_profit_usd: 2.00
-        decay_pct: 0.40
+        min_profit_bars: 2
+        decay_pct: 0.20
+        decay_arm_usd: 2.00
+        quick_take_profit_usd: 99.0
+        quick_take_profit_bars: 6
+        quick_take_profit_only_when_trend_weak: true
       trend_continuation_trend:
-        tp_mult: 0.75
-        min_profit_usd: 2.00
-        decay_pct: 0.45
+        tp_mult: 0.52
+        min_profit_usd: 2.25
+        min_profit_bars: 2
+        decay_pct: 0.24
+        decay_arm_usd: 2.25
+        quick_take_profit_usd: 99.0
+        quick_take_profit_bars: 8
+        quick_take_profit_only_when_trend_weak: true
       # Fib retrace: countertrend retracement plays — fib-based TP
       fib_retrace:
         tp_mult: 0.70
@@ -625,7 +646,7 @@ v4:
   runtime_guard:
     enabled: true
     window_minutes: 20
-    max_bot_errors: 5
+    max_bot_errors: 50
     scan_lines: 4000
   trend_ride:
     enabled: true
@@ -721,6 +742,9 @@ v4:
     min_sample_size: 5
     lookback_trades: 30
     target_win_rate: 0.50
+    max_threshold: 60
+  adaptive_direction_bias:
+    enabled: false          # disable the new side-learning by default; keep bidirectional selection deterministic
   short_bias_atr_override:
     enabled: false
     require_direction: both
@@ -746,6 +770,7 @@ v4:
     exempt_entry_types:           # these entry types are exempt from the gate
       - reversal_impulse          # reversals are designed for counter-trend
       - volume_climax_reversal    # climax reversals trade after capitulation
+      - pullback                  # pullback shorts expect a retrace -- dont block them
 
   # Support proximity gate: block shorts when price is too close to support
   # Mar 21 fix: reversal shorts at 0.165 lost because they shorted INTO support
@@ -1139,10 +1164,10 @@ candle_patterns:
 # Uses Crypto Fear & Greed Index (alternative.me, free, no auth)
 sentiment_gate:
   enabled: true
-  block_all_below: 10         # F&G < 10 = catastrophic panic, block ALL entries
-  block_longs_below: 20       # F&G < 20 = extreme fear, block longs (shorts ok)
+  block_all_below: 5         # F&G < 10 = catastrophic panic, block ALL entries
+  block_longs_below: 10       # F&G < 20 = extreme fear, block longs (shorts ok)
   reduce_size_below: 30       # F&G < 30 = fear, reduce position size
-  fear_size_mult: 0.5         # half size when in fear zone
+  fear_size_mult: 1.0         # half size when in fear zone
 
 # Slack alerts
 slack:
@@ -1157,11 +1182,92 @@ slack:
     health_interval_min: 60      # balances, margin, PnL, equity
     position_interval_min: 5     # unrealized PnL updates while in trade
 
+manual_playbook:
+  enabled: true
+  block_unlabeled_entries: true
+  active_entry_types:
+    - breakout_retest
+    - htf_breakout_continuation
+    - trend_continuation
+    - fib_retrace
+    - hourly_continuation
+    - micro_sweep
+    - liquidity_sweep
+  blocked_entry_types:
+    - pullback
+    - compression_breakout
+    - early_impulse
+    - compression_range
+    - slow_bleed_hunter
+    - wick_rejection
+    - volume_climax_reversal
+    - vwap_reversion
+    - grid_range
+    - regime_low_vol
+    - stat_arb_proxy
+    - orderflow_imbalance
+    - macro_ma_cross
+    - opening_range_breakout
+    - reversal_impulse
+  day_bias:
+    enabled: true
+    min_red_pnl_usd: 0.25
+    favored_side: short
+    entry_types: [breakout_retest, trend_continuation, htf_breakout_continuation]
+    favored_bonus: 3
+    opposite_penalty: 1
+  range_box:
+    enabled: true
+    vol_states: [COMPRESSION]
+    selected_regimes: [neutral, mean_reversion]
+    entry_types: [breakout_retest, micro_sweep]
+    score_floor: 35
+    target_score: 60
+    max_bonus: 25
+  rr_overrides:
+    breakout_retest:
+      MONSTER: 1.8
+      FULL: 2.2
+      REDUCED: 2.4
+      SCALP: 2.6
+      default: 2.2
+    continuation_flip_playbook:
+      MONSTER: 1.6
+      FULL: 1.9
+      REDUCED: 2.1
+      SCALP: 2.3
+      default: 1.9
+  entry_type_bias:
+    breakout_retest:
+      score_bonus: 6
+      min_score: 50
+    micro_sweep:
+      score_bonus: 0
+      min_score: 35
+    htf_breakout_continuation:
+      score_bonus: 2
+      min_score: 62
+    trend_continuation:
+      score_bonus: -1
+      min_score: 68
+    fib_retrace:
+      score_bonus: -1
+      min_score: 66
+    hourly_continuation:
+      score_bonus: 0
+      min_score: 64
+
+failed_continuation_retest:
+  enabled: true
+  expire_minutes: 180
+  require_loss: true
+  size_mult: 0.75
+
 # Claude AI trade intelligence advisor
 ai:
   enabled: true
   model: opus
-  pre_entry_enabled: true           # fire entry eval before placing orders
+  pre_entry_enabled: false          # keep AI advisory-only; do not let it skip or score-gate entries
   exit_advisor_enabled: true        # fire exit eval while in trade
   regime_advisor_enabled: true      # fire regime eval on vol transitions
   skip_confidence_threshold: 0.55   # AI needs >= 55% confidence to skip entry (was 70% — too strict)
@@ -1171,7 +1277,7 @@ ai:
   cache_ttl_exit: 120               # recheck exit every 2 min
   cache_ttl_regime: 300             # recheck regime every 5 min
   # Executive mode: Claude makes the actual entry/exit decisions
-  executive_mode: true              # Claude is the boss — overrides strategy engine
+  executive_mode: false             # deterministic engine decides; AI remains commentary only
   executive_full_control: false     # advisory-only by default; deterministic risk and freshness gates stay binding
   executive_min_confidence: 0.75    # raised: need strong conviction to exit, no panic sells
   executive_allow_soft_risk_override: false
@@ -1190,10 +1296,10 @@ ai:
     model: gpt-5                    # Codex model for peer analysis
     sandbox_mode: read-only         # prevents Codex exec from writing files
     timeout_sec: 60
-    pre_entry_enabled: true
+    pre_entry_enabled: false
     exit_advisor_enabled: true
     regime_advisor_enabled: true
-    executive_mode: true            # produce codex_directive in parallel with Claude directive
+    executive_mode: false
     cache_ttl_entry: 0
     cache_ttl_exit: 120
     cache_ttl_regime: 300
@@ -1202,10 +1308,10 @@ ai:
   gemini:
     enabled: true
     model: gemini-2.0-flash
-    pre_entry_enabled: true
+    pre_entry_enabled: false
     exit_advisor_enabled: true
     regime_advisor_enabled: true
-    executive_mode: true
+    executive_mode: false
     cache_ttl_entry: 0
     cache_ttl_exit: 120
     cache_ttl_regime: 300
@@ -1271,7 +1377,7 @@ regime_manager:
     rsi_low: 40               # RSI must be in this range for compression
     rsi_high: 60
     size_multiplier: 1.0      # SNIPER MODE: was 0.7 -- compression IS the play, full size
-    max_sl_pct: 0.005         # SNIPER MODE: was 0.00 -- always have a hard stop, 0.5%
+    max_sl_pct: 0.02         # FIXED: 1% was too tight, structure stops need 2% room
     tp_atr_mult: 2.5          # SNIPER MODE: was 0.7 -- wide targets in compression, big move coming
     time_stop_bars: 999        # DISABLED: no time exits in compression. Wait for the breakout.
     early_save_bars: 999       # SNIPER MODE: DISABLED -- hold until TP or stop, no early exits
@@ -1279,12 +1385,12 @@ regime_manager:
     adx_threshold: 25         # ADX above this = trending
     atr_ratio_threshold: 1.15 # OR ATR ratio above this
     size_multiplier: 1.0      # SNIPER MODE: was 1.3 -- equal size across regimes, we're MR only
-    max_sl_pct: 0.005         # SNIPER MODE: was 0.00 -- always have a hard stop
+    max_sl_pct: 0.02         # FIXED: 1% was too tight, structure stops need 2% room
     tp_atr_mult: 3.0          # SNIPER MODE: was 1.2 -- wide targets even in expansion
     time_stop_bars: 999       # DISABLED: no time exits in expansion. Ride the wave.
     early_save_bars: 999      # SNIPER MODE: DISABLED -- hold until TP or stop
   # Default thresholds for transition mode (uses base config values)
-  default_max_sl_pct: 0.005        # SNIPER MODE: was 0.00 -- always have the 0.5% hard stop
+  default_max_sl_pct: 0.02         # FIXED: 1% was too tight, structure stops need 2% room
   default_tp_atr_mult: 2.5         # SNIPER MODE: was 1.0 -- wide TP targets across all regimes
   default_time_stop_bars: 999   # DISABLED: no time exits. Only TP, SL, or structure break.
   default_early_save_bars: 999  # SNIPER MODE: DISABLED -- no early saves, hold until TP or stop
@@ -1327,7 +1433,8 @@ htf_direction_filter:
     - wick_rejection         # long wick off support with volume
     - volume_climax_reversal # climactic selling exhaustion
     - fib_retrace            # bounce from measured fib level
-
+    - micro_sweep            # FIX: was missing -- most common entry type needs to work both directions
+    - liquidity_sweep        # FIX: was missing -- sweep entries need to work bidirectionally
   # Asymmetric sizing applied on top of all other multipliers.
   # bearish_crash: longs get 0.4x (minimal), shorts get 1.2x (full conviction)
   # bearish_trend: longs get 0.7x (cautious), shorts get 1.1x (slight edge)
@@ -1439,12 +1546,11 @@ reversal_engine:
 # Weekend Mode: reduce risk on Saturday/Sunday
 weekend_mode:
   enabled: true
-  size_mult: 0.5           # half size on weekends
+  size_mult: 1.0           # half size on weekends
   be_buffer_mult: 1.5      # 50% wider break-even buffer
 
 # Time-based Stop Tightening: kill zombie trades
 # If trade hasn't moved 0.5 ATR in 2 hours, tighten break-even trigger
-exits:
   time_tighten_bars: 8           # 2 hours (8 x 15min bars)
   time_tighten_min_move_atr: 0.5 # must have moved at least 0.5 ATR
   time_tighten_be_atr: 1.0       # tighten BE trigger to 1.0 ATR
@@ -1610,3 +1716,33 @@ inventory_intel:
     crisis_pct: -3.0
   basis_monitor:
     extreme_basis_pct: 0.5        # > 0.5% basis = trading opportunity
+
+# === TRADING KNOWLEDGE INTEGRATION (2026-03-28) ===
+
+# Phase 1: Profit Manager -- partial profits + break-even SL
+profit_manager:
+  enabled: true
+
+# Phase 2: Hedge Flip -- auto-reverse on stop loss
+hedge_flip:
+  enabled: true               # start enabled, monitor closely
+  max_flips_per_day: 1         # cap at 1 flip to prevent whipsaw
+  min_score: 45                # minimum v4 score for opposite direction
+
+# Phase 3: Fib Confluence Boost -- premium setups at fib + S/R
+fib_confluence_boost:
+  enabled: true
+  sr_boost: 15                 # +15 score when fib aligns with S/R
+  vpoc_boost: 10               # +10 score when fib aligns with volume POC
+
+# Phase 4: Divergence Detection -- RSI confirmation boost
+divergence_boost:
+  enabled: true
+  score_boost: 10              # +10 score when divergence confirms entry
+  lookback: 25                 # bars to scan for divergence
+
+# Band Navigator -- adaptive multi-TF band zone + momentum turn
+band_navigator:
+  enabled: true
+  require_momentum_turn: true      # wait for RSI to turn before entering
+  min_timeframes_agree: 1          # at least 1 TF must agree (1=loose, 2=moderate, 3=strict)
