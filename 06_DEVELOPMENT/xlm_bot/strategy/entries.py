@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 import pandas as pd
 
@@ -22,6 +22,155 @@ def _ema_zone_hit(df_15m: pd.DataFrame) -> bool:
     return low <= price <= high
 
 
+def _safe_last(series: pd.Series) -> float:
+    try:
+        return float(series.iloc[-1])
+    except Exception:
+        return 0.0
+
+
+def _close_strength(row: pd.Series, direction: str) -> float:
+    high = float(row.get("high", 0.0))
+    low = float(row.get("low", 0.0))
+    close = float(row.get("close", 0.0))
+    rng = high - low
+    if rng <= 0:
+        return 0.0
+    if direction == "long":
+        return max(0.0, min(1.0, (close - low) / rng))
+    return max(0.0, min(1.0, (high - close) / rng))
+
+
+def _recent_zone_structure(
+    df_15m: pd.DataFrame,
+    direction: str,
+    lookback: int,
+    recent_bars: int,
+    breakout_buffer: float,
+    hold_buffer: float,
+    min_closes_above: int,
+) -> dict[str, Any]:
+    out: dict[str, Any] = {
+        "ready": False,
+        "zone_high": None,
+        "zone_low": None,
+        "recent_closes_above": 0,
+        "stair_step": False,
+    }
+    if df_15m is None or len(df_15m) < (lookback + recent_bars + 1):
+        return out
+
+    recent_bars = max(2, int(recent_bars))
+    lookback = max(8, int(lookback))
+    history = df_15m.iloc[-(lookback + recent_bars):-recent_bars]
+    recent = df_15m.iloc[-recent_bars:]
+    if history.empty or recent.empty:
+        return out
+
+    zone_high = float(history["high"].max())
+    zone_low = float(history["low"].min())
+    closes = recent["close"].astype(float)
+    lows = recent["low"].astype(float)
+    highs = recent["high"].astype(float)
+    out["zone_high"] = round(zone_high, 8)
+    out["zone_low"] = round(zone_low, 8)
+
+    if direction == "long":
+        closes_above = int((closes >= zone_high - hold_buffer * 0.2).sum())
+        stair_step = int((closes.diff().fillna(0.0) > 0).sum()) >= max(1, recent_bars - 2)
+        broke_zone = float(closes.iloc[-1]) >= zone_high + breakout_buffer * 0.25 or float(highs.max()) >= zone_high + breakout_buffer
+        held_zone = float(lows.min()) >= zone_high - hold_buffer
+    else:
+        closes_above = int((closes <= zone_low + hold_buffer * 0.2).sum())
+        stair_step = int((closes.diff().fillna(0.0) < 0).sum()) >= max(1, recent_bars - 2)
+        broke_zone = float(closes.iloc[-1]) <= zone_low - breakout_buffer * 0.25 or float(lows.min()) <= zone_low - breakout_buffer
+        held_zone = float(highs.max()) <= zone_low + hold_buffer
+
+    out["recent_closes_above"] = closes_above
+    out["stair_step"] = stair_step
+    out["ready"] = bool(broke_zone and held_zone and closes_above >= max(2, int(min_closes_above)) and stair_step)
+    return out
+
+
+def _multi_tf_zone_structures(
+    direction: str,
+    tf_frames: list[tuple[str, pd.DataFrame, int, int]],
+    min_breakout_pct: float,
+    breakout_buffer_atr: float,
+    hold_buffer_atr: float,
+) -> dict[str, Any]:
+    structures: dict[str, dict[str, Any]] = {}
+    ready_tfs: list[str] = []
+    for label, df, lookback, recent_bars in tf_frames:
+        if df is None or len(df) < (lookback + recent_bars + 1):
+            continue
+        last_close = _safe_last(df["close"])
+        atr_value = _safe_last(atr(df, 14))
+        if atr_value <= 0:
+            atr_value = max(last_close * 0.004, 1e-6)
+        breakout_buffer = max(last_close * min_breakout_pct * 0.2, atr_value * breakout_buffer_atr)
+        hold_buffer = max(last_close * min_breakout_pct * 0.15, atr_value * hold_buffer_atr)
+        min_closes = max(2, min(int(recent_bars), 3))
+        structure = _recent_zone_structure(
+            df,
+            direction,
+            lookback=lookback,
+            recent_bars=recent_bars,
+            breakout_buffer=breakout_buffer,
+            hold_buffer=hold_buffer,
+            min_closes_above=min_closes,
+        )
+        structures[label] = structure
+        if structure.get("ready"):
+            ready_tfs.append(label)
+    return {
+        "structures": structures,
+        "ready_tfs": ready_tfs,
+        "ready_count": len(ready_tfs),
+    }
+
+
+def _weekly_bias_alignment(weekly_playbook: dict | None, direction: str) -> bool:
+    if not isinstance(weekly_playbook, dict):
+        return False
+    blob = " ".join(
+        str(weekly_playbook.get(k) or "")
+        for k in ("label", "thesis", "risk_map")
+    ).lower()
+    for item in weekly_playbook.get("top_setups") or []:
+        if isinstance(item, dict):
+            blob += " " + " ".join(str(item.get(k) or "") for k in ("setup", "label", "bias", "reason"))
+        else:
+            blob += f" {item}"
+    if direction == "long":
+        return any(tok in blob for tok in ("bull", "breakout", "squeeze higher", "upside", "trend up"))
+    return any(tok in blob for tok in ("bear", "breakdown", "squeeze lower", "downside", "trend down"))
+
+
+def _event_risk_state(event_calendar: dict | None, cfg: dict | None = None) -> tuple[bool, dict[str, Any]]:
+    cfg = cfg or {}
+    details = {"label": None, "hours_to_event": None, "importance": None}
+    if not isinstance(event_calendar, dict):
+        return False, details
+    next_event = event_calendar.get("next_event") if isinstance(event_calendar.get("next_event"), dict) else {}
+    if not next_event:
+        return False, details
+    importance = str(next_event.get("importance") or "").lower()
+    hours_to_event = next_event.get("hours_to_event")
+    try:
+        hours_to_event = float(hours_to_event)
+    except Exception:
+        hours_to_event = None
+    details = {
+        "label": str(next_event.get("label") or ""),
+        "hours_to_event": hours_to_event,
+        "importance": importance or None,
+    }
+    block_hours = float(cfg.get("lane_w_event_block_hours", 6.0) or 6.0)
+    block = importance in {"high", "critical"} and hours_to_event is not None and hours_to_event <= block_hours
+    return block, details
+
+
 def pullback_continuation(
     price: float,
     df_1h: pd.DataFrame,
@@ -31,18 +180,84 @@ def pullback_continuation(
     fibs: Dict[str, float],
     direction: str,
 ) -> Optional[Dict]:
+    if df_15m is None or df_1h is None or df_4h is None:
+        return None
+    if len(df_15m) < 55 or len(df_1h) < 55 or len(df_4h) < 30:
+        return None
+
     conf = compute_confluences(price, df_1h, df_4h, df_15m, levels, fibs, direction)
     if not confluence_passes(conf):
         return None
-    # Direction trigger: price on correct side of EMA21
-    trigger = False
-    if direction == "long":
-        trigger = df_15m["close"].iloc[-1] > ema(df_15m["close"], 21).iloc[-1]
-    else:
-        trigger = df_15m["close"].iloc[-1] < ema(df_15m["close"], 21).iloc[-1]
-    if not trigger:
+
+    e21_15 = _safe_last(ema(df_15m["close"], 21))
+    e55_15 = _safe_last(ema(df_15m["close"], 55))
+    e21_1h = _safe_last(ema(df_1h["close"], 21))
+    e55_1h = _safe_last(ema(df_1h["close"], 55))
+    e21_4h = _safe_last(ema(df_4h["close"], 21))
+    e55_4h = _safe_last(ema(df_4h["close"], 55))
+    atr_15 = _safe_last(atr(df_15m, 14))
+    if min(e21_15, e55_15, e21_1h, e55_1h, e21_4h, e55_4h, atr_15) <= 0:
         return None
-    return {"type": "pullback", "confluence": conf}
+
+    curr = df_15m.iloc[-1]
+    prev = df_15m.iloc[-2]
+    recent = df_15m.tail(7).iloc[:-1]
+    if recent.empty:
+        return None
+
+    r = rsi(df_15m["close"], 14)
+    if len(r) < 3 or r.isna().iloc[-1] or r.isna().iloc[-2]:
+        return None
+    rsi_now = float(r.iloc[-1])
+    rsi_prev = float(r.iloc[-2])
+
+    close_strength = _close_strength(curr, direction)
+    curr_range = max(float(curr["high"]) - float(curr["low"]), 1e-9)
+    body_ratio = abs(float(curr["close"]) - float(curr["open"])) / curr_range
+    ema_zone = _ema_zone_hit(df_15m.tail(80))
+
+    if direction == "long":
+        trend_ok = e21_15 > e55_15 and e21_1h > e55_1h and e21_4h > e55_4h
+        if not trend_ok:
+            return None
+        touched_value = float(curr["low"]) <= e21_15 + atr_15 * 0.20
+        held_value = float(curr["close"]) >= e21_15 and float(curr["low"]) >= float(recent["low"].min()) - atr_15 * 0.15
+        reset_ok = 40 <= rsi_now <= 62 and rsi_now > rsi_prev
+        no_chase = (float(curr["close"]) - e21_15) <= atr_15 * 0.80
+        direction_close = float(curr["close"]) > float(curr["open"]) and float(curr["close"]) >= float(prev["close"])
+    else:
+        trend_ok = e21_15 < e55_15 and e21_1h < e55_1h and e21_4h < e55_4h
+        if not trend_ok:
+            return None
+        touched_value = float(curr["high"]) >= e21_15 - atr_15 * 0.20
+        held_value = float(curr["close"]) <= e21_15 and float(curr["high"]) <= float(recent["high"].max()) + atr_15 * 0.15
+        reset_ok = 38 <= rsi_now <= 60 and rsi_now < rsi_prev
+        no_chase = (e21_15 - float(curr["close"])) <= atr_15 * 0.80
+        direction_close = float(curr["close"]) < float(curr["open"]) and float(curr["close"]) <= float(prev["close"])
+
+    if not touched_value or not held_value or not reset_ok or not no_chase or not direction_close:
+        return None
+    if close_strength < 0.58 or body_ratio < 0.35:
+        return None
+    if not ema_zone and not (conf.get("STRUCTURE_ZONE") or conf.get("FIB_ZONE")):
+        return None
+
+    conf.update({
+        "EMA_RECLAIM": True,
+        "TREND_STACKED": True,
+        "PULLBACK_HELD": held_value,
+        "CLOSE_STRENGTH_OK": close_strength >= 0.58,
+        "RSI_RESET_OK": reset_ok,
+    })
+
+    return {
+        "type": "pullback",
+        "entry_profile_key": "pullback_trend",
+        "confluence": conf,
+        "ema21_15m": round(e21_15, 8),
+        "ema55_15m": round(e55_15, 8),
+        "close_strength": round(close_strength, 3),
+    }
 
 
 def breakout_retest(
@@ -535,62 +750,78 @@ def trend_continuation(
     direction: str,
     state: dict | None = None,
 ) -> Optional[Dict]:
-    """Structure-based trend continuation entry.
-
-    Fires when ALL of:
-      1. Swing structure confirmed (lower-H + lower-L for shorts, etc.)
-      2. Price breaks beyond the most recent swing low (short) / high (long)
-      3. RSI slope confirms direction
-      4. Current candle closed in entry direction
-    """
     if df_15m is None or df_15m.empty or len(df_15m) < 40:
+        return None
+    if df_1h is None or df_1h.empty or len(df_1h) < 55:
         return None
 
     window = df_15m.tail(60)
     swings = _detect_swing_points(window, left=2, right=2)
     structure = _classify_structure(swings, min_swings=2)
 
-    # --- direction alignment ---
     if direction == "short" and not structure["bearish_structure"]:
         return None
     if direction == "long" and not structure["bullish_structure"]:
         return None
 
-    # --- break of structure level ---
+    e21_15 = _safe_last(ema(df_15m["close"], 21))
+    e55_15 = _safe_last(ema(df_15m["close"], 55))
+    e21_1h = _safe_last(ema(df_1h["close"], 21))
+    e55_1h = _safe_last(ema(df_1h["close"], 55))
+    atr_15 = _safe_last(atr(df_15m, 14))
+    if min(e21_15, e55_15, e21_1h, e55_1h, atr_15) <= 0:
+        return None
+
     if direction == "short":
         trigger_level = structure["last_swing_low"]
         if trigger_level is None or price >= trigger_level:
             return None
+        htf_align = e21_15 < e55_15 and e21_1h < e55_1h
     else:
         trigger_level = structure["last_swing_high"]
         if trigger_level is None or price <= trigger_level:
             return None
+        htf_align = e21_15 > e55_15 and e21_1h > e55_1h
+    if not htf_align:
+        return None
 
-    # --- RSI slope confirmation ---
+    curr = df_15m.iloc[-1]
+    prev = df_15m.iloc[-2]
+    body = abs(float(curr["close"]) - float(curr["open"]))
+    rng = max(float(curr["high"]) - float(curr["low"]), 1e-9)
+    body_ratio = body / rng
+    close_strength = _close_strength(curr, direction)
+
     r = rsi(df_15m["close"], 14)
     if r.isna().iloc[-1] or r.isna().iloc[-3]:
         return None
     rsi_now = float(r.iloc[-1])
     rsi_prev = float(r.iloc[-3])
-    if direction == "short" and rsi_now >= rsi_prev:
+    if direction == "short" and (rsi_now >= rsi_prev - 1 or rsi_now > 58):
         return None
-    if direction == "long" and rsi_now <= rsi_prev:
-        return None
-
-    # --- direction-confirming candle close ---
-    curr = df_15m.iloc[-1]
-    if direction == "short" and float(curr["close"]) >= float(curr["open"]):
-        return None
-    if direction == "long" and float(curr["close"]) <= float(curr["open"]):
+    if direction == "long" and (rsi_now <= rsi_prev + 1 or rsi_now < 42):
         return None
 
-    # --- structure-based stop ---
     if direction == "short":
+        broke_level = float(curr["close"]) <= trigger_level - atr_15 * 0.05
+        held_break = max(float(curr["high"]), float(prev["high"])) <= trigger_level + atr_15 * 0.20
+        extension_atr = (trigger_level - float(curr["close"])) / atr_15
+        direction_close = float(curr["close"]) < float(curr["open"])
         structure_stop = structure["last_swing_high"]
     else:
+        broke_level = float(curr["close"]) >= trigger_level + atr_15 * 0.05
+        held_break = min(float(curr["low"]), float(prev["low"])) >= trigger_level - atr_15 * 0.20
+        extension_atr = (float(curr["close"]) - trigger_level) / atr_15
+        direction_close = float(curr["close"]) > float(curr["open"])
         structure_stop = structure["last_swing_low"]
 
-    # --- continuation re-entry ---
+    if not broke_level or not held_break or not direction_close:
+        return None
+    if extension_atr > 0.85:
+        return None
+    if close_strength < 0.62 or body_ratio < 0.40:
+        return None
+
     is_reentry = False
     if state and state.get("_last_trend_exit_structure_intact"):
         last_dir = str(state.get("_last_trend_exit_direction") or "")
@@ -600,20 +831,24 @@ def trend_continuation(
             if last_exit_px > 0 and last_entry_px > 0:
                 impulse = abs(last_exit_px - last_entry_px)
                 retrace = abs(price - last_exit_px)
-                if impulse > 0 and retrace < 0.50 * impulse:
+                if impulse > 0 and retrace < 0.40 * impulse:
                     is_reentry = True
 
     conf = {
         "BEARISH_STRUCTURE": structure["bearish_structure"],
         "BULLISH_STRUCTURE": structure["bullish_structure"],
         "SWING_BREAK": True,
+        "BREAK_HOLD": held_break,
+        "HTF_ALIGN": htf_align,
         "RSI_SLOPE_CONFIRM": True,
         "DIRECTION_CLOSE": True,
         "CONTINUATION_REENTRY": is_reentry,
+        "CLOSE_STRENGTH_OK": close_strength >= 0.62,
     }
 
     return {
         "type": "trend_continuation",
+        "entry_profile_key": "trend_continuation_trend",
         "confluence": conf,
         "structure_stop": round(structure_stop, 8) if structure_stop else None,
         "trigger_level": round(trigger_level, 8),
@@ -622,6 +857,8 @@ def trend_continuation(
         "prev_swing_high": structure["prev_swing_high"],
         "prev_swing_low": structure["prev_swing_low"],
         "is_reentry": is_reentry,
+        "close_strength": round(close_strength, 3),
+        "extension_atr": round(float(extension_atr), 3),
     }
 
 
@@ -2023,6 +2260,366 @@ def macro_ma_cross(
 
 
 # ---------------------------------------------------------------------------
+# Lane W: HTF Breakout Continuation
+# ---------------------------------------------------------------------------
+
+def assess_htf_breakout_continuation(
+    price: float,
+    df_4h: pd.DataFrame,
+    df_1h: pd.DataFrame,
+    df_15m: pd.DataFrame,
+    levels: Dict[str, float],
+    fibs: Dict[str, float],
+    direction: str,
+    weekly_playbook: Optional[Dict] = None,
+    event_calendar: Optional[Dict] = None,
+    config: Optional[Dict] = None,
+) -> Dict[str, Any]:
+    cfg = config or {}
+    d = direction.lower().strip()
+    out: Dict[str, Any] = {
+        "ready": False,
+        "direction": d,
+        "signal_count": 0,
+        "pressure_score": 0,
+        "followthrough_score": 0,
+        "confidence": 0.0,
+        "event_risk_blocked": False,
+        "reason": "insufficient_data",
+        "reasons": [],
+    }
+    if (
+        df_15m is None
+        or df_1h is None
+        or df_4h is None
+        or len(df_15m) < 40
+        or len(df_1h) < 40
+        or len(df_4h) < 20
+    ):
+        return out
+
+    breakout_4h = int(cfg.get("lane_w_breakout_lookback_4h", 6) or 6)
+    breakout_1h = int(cfg.get("lane_w_breakout_lookback_1h", 12) or 12)
+    min_breakout_pct = float(cfg.get("lane_w_min_breakout_pct", 0.0015) or 0.0015)
+    max_chase_atr = float(cfg.get("lane_w_max_chase_atr", 0.8) or 0.8)
+    min_vol_ratio = float(cfg.get("lane_w_min_volume_ratio", 1.05) or 1.05)
+    min_close_strength = float(cfg.get("lane_w_min_close_strength", 0.68) or 0.68)
+    min_signals = int(cfg.get("lane_w_min_signals", 6) or 6)
+    min_rsi_4h = float(cfg.get("lane_w_rsi_4h_long_min", 56) or 56)
+    max_rsi_4h = float(cfg.get("lane_w_rsi_4h_short_max", 44) or 44)
+    probe_atr = float(cfg.get("lane_w_probe_reclaim_atr", 0.35) or 0.35)
+    probe_close_strength = float(cfg.get("lane_w_probe_close_strength", max(min_close_strength, 0.72)) or max(min_close_strength, 0.72))
+    probe_volume_ratio = float(cfg.get("lane_w_probe_volume_ratio", max(min_vol_ratio, 1.15)) or max(min_vol_ratio, 1.15))
+    zone_lookback_15m = int(cfg.get("lane_w_zone_lookback_15m", 24) or 24)
+    zone_lookback_1h = int(cfg.get("lane_w_zone_lookback_1h", 18) or 18)
+    zone_lookback_4h = int(cfg.get("lane_w_zone_lookback_4h", 10) or 10)
+    zone_recent_bars = int(cfg.get("lane_w_zone_recent_bars", 4) or 4)
+    zone_recent_bars_1h = int(cfg.get("lane_w_zone_recent_bars_1h", 3) or 3)
+    zone_recent_bars_4h = int(cfg.get("lane_w_zone_recent_bars_4h", 2) or 2)
+    zone_breakout_buffer_atr = float(cfg.get("lane_w_zone_breakout_buffer_atr", 0.12) or 0.12)
+    zone_hold_buffer_atr = float(cfg.get("lane_w_zone_hold_buffer_atr", 0.20) or 0.20)
+
+    row_15m = df_15m.iloc[-1]
+    close_15m = float(row_15m["close"])
+    close_1h = float(df_1h["close"].iloc[-1])
+    close_4h = float(df_4h["close"].iloc[-1])
+    high_15m = float(row_15m["high"])
+    low_15m = float(row_15m["low"])
+
+    ema21_15m = _safe_last(ema(df_15m["close"], 21))
+    ema21_1h = _safe_last(ema(df_1h["close"], 21))
+    ema55_1h = _safe_last(ema(df_1h["close"], 55))
+    ema21_4h = _safe_last(ema(df_4h["close"], 21))
+    ema55_4h = _safe_last(ema(df_4h["close"], 55))
+    rsi_1h = _safe_last(rsi(df_1h["close"], 14))
+    rsi_4h = _safe_last(rsi(df_4h["close"], 14))
+    atr_15m = _safe_last(atr(df_15m, 14))
+    if atr_15m <= 0:
+        atr_15m = max(price * 0.004, 1e-6)
+
+    prior_4h_high = float(df_4h["high"].iloc[-(breakout_4h + 1):-1].max())
+    prior_4h_low = float(df_4h["low"].iloc[-(breakout_4h + 1):-1].min())
+    prior_1h_high = float(df_1h["high"].iloc[-(breakout_1h + 1):-1].max())
+    prior_1h_low = float(df_1h["low"].iloc[-(breakout_1h + 1):-1].min())
+    close_strength = _close_strength(row_15m, d)
+    vol_avg_15m = float(df_15m["volume"].iloc[-20:].mean()) if "volume" in df_15m.columns else 0.0
+    vol_ratio = (float(row_15m.get("volume", 0.0)) / vol_avg_15m) if vol_avg_15m > 0 else 1.0
+
+    event_blocked, event_details = _event_risk_state(event_calendar, cfg)
+    weekly_align = _weekly_bias_alignment(weekly_playbook, d)
+    conf = compute_confluences(price, df_1h, df_4h, df_15m, levels, fibs, d)
+
+    if d == "long":
+        ema_stack = ema21_4h > ema55_4h and ema21_1h > ema55_1h and close_15m >= ema21_15m
+        breakout_4h_ok = max(close_4h, price) > prior_4h_high * (1 + min_breakout_pct)
+        breakout_1h_ok = max(close_1h, price) > prior_1h_high * (1 + min_breakout_pct * 0.75)
+        momentum_ok = rsi_4h >= min_rsi_4h and rsi_1h >= 52
+        invalidation = max(prior_1h_high, ema21_1h) - atr_15m * 0.35
+        breakout_level = max(prior_4h_high, prior_1h_high)
+        price_above_breakout = price >= breakout_level
+        ema_stack_core = ema21_4h > ema55_4h and ema21_1h > ema55_1h
+    else:
+        ema_stack = ema21_4h < ema55_4h and ema21_1h < ema55_1h and close_15m <= ema21_15m
+        breakout_4h_ok = min(close_4h, price) < prior_4h_low * (1 - min_breakout_pct)
+        breakout_1h_ok = min(close_1h, price) < prior_1h_low * (1 - min_breakout_pct * 0.75)
+        momentum_ok = rsi_4h <= max_rsi_4h and rsi_1h <= 48
+        invalidation = min(prior_1h_low, ema21_1h) + atr_15m * 0.35
+        breakout_level = min(prior_4h_low, prior_1h_low)
+        price_above_breakout = price <= breakout_level
+        ema_stack_core = ema21_4h < ema55_4h and ema21_1h < ema55_1h
+
+    zone_bundle = _multi_tf_zone_structures(
+        d,
+        [
+            ("15m", df_15m, zone_lookback_15m, zone_recent_bars),
+            ("1h", df_1h, zone_lookback_1h, zone_recent_bars_1h),
+            ("4h", df_4h, zone_lookback_4h, zone_recent_bars_4h),
+        ],
+        min_breakout_pct=min_breakout_pct,
+        breakout_buffer_atr=zone_breakout_buffer_atr,
+        hold_buffer_atr=zone_hold_buffer_atr,
+    )
+    zone_structures = zone_bundle.get("structures") or {}
+    zone_ready_tfs = [str(tf) for tf in (zone_bundle.get("ready_tfs") or [])]
+    zone_breakout_hold_ok = bool(zone_ready_tfs)
+    zone_ready_count = int(zone_bundle.get("ready_count") or 0)
+    zone_active_tf = None
+    zone_structure = {}
+    active_trigger_level = breakout_level
+    if zone_breakout_hold_ok:
+        trigger_candidates: list[tuple[float, float, str]] = []
+        for tf in zone_ready_tfs:
+            structure = zone_structures.get(tf) or {}
+            level = structure.get("zone_high") if d == "long" else structure.get("zone_low")
+            try:
+                level_value = float(level)
+            except Exception:
+                continue
+            trigger_candidates.append((abs(price - level_value), level_value, tf))
+        if trigger_candidates:
+            _, active_trigger_level, zone_active_tf = min(trigger_candidates, key=lambda item: item[0])
+            zone_structure = zone_structures.get(zone_active_tf) or {}
+    if d == "long":
+        ltf_support_ok = (
+            close_15m >= ema21_15m
+            or (zone_breakout_hold_ok and close_15m >= ema21_15m - atr_15m * 0.25)
+            or (zone_active_tf in {"1h", "4h"} and close_15m >= active_trigger_level - atr_15m * 0.15)
+        )
+    else:
+        ltf_support_ok = (
+            close_15m <= ema21_15m
+            or (zone_breakout_hold_ok and close_15m <= ema21_15m + atr_15m * 0.25)
+            or (zone_active_tf in {"1h", "4h"} and close_15m <= active_trigger_level + atr_15m * 0.15)
+        )
+    htf_trend_ok = ema_stack_core or (zone_breakout_hold_ok and bool(conf.get("EMA_BIAS")))
+    ema_stack = bool(htf_trend_ok and ltf_support_ok)
+    chase_atr = abs(price - active_trigger_level) / atr_15m if active_trigger_level > 0 and atr_15m > 0 else 99.0
+    volume_ok = vol_ratio >= min_vol_ratio or bool(conf.get("RVOL_OK"))
+    followthrough_ok = close_strength >= min_close_strength
+    expansion_ok = bool(conf.get("VOLUME_SPIKE")) or bool(conf.get("CHANNEL_BREAKOUT")) or bool(conf.get("FLAG_CONTINUATION"))
+    vwap_ok = bool(conf.get("VWAP_CONFIRM"))
+    htf_break_ok = breakout_4h_ok or breakout_1h_ok
+    breakout_probe_ok = False
+    if breakout_level > 0 and atr_15m > 0:
+        probe_window = probe_atr * atr_15m
+        if d == "long":
+            probe_gap = breakout_level - price
+            breakout_probe_ok = (
+                probe_gap >= 0.0
+                and probe_gap <= probe_window
+                and high_15m >= breakout_level * (1 - min_breakout_pct * 0.25)
+                and max(close_15m, close_1h) >= breakout_level - probe_window * 0.5
+                and close_strength >= probe_close_strength
+                and vol_ratio >= probe_volume_ratio
+                and momentum_ok
+                and ema_stack
+            )
+        else:
+            probe_gap = price - breakout_level
+            breakout_probe_ok = (
+                probe_gap >= 0.0
+                and probe_gap <= probe_window
+                and low_15m <= breakout_level * (1 + min_breakout_pct * 0.25)
+                and min(close_15m, close_1h) <= breakout_level + probe_window * 0.5
+                and close_strength >= probe_close_strength
+                and vol_ratio >= probe_volume_ratio
+                and momentum_ok
+                and ema_stack
+            )
+    structure_ready_signal = htf_break_ok or breakout_probe_ok or zone_breakout_hold_ok
+
+    reasons: list[str] = []
+    signal_count = 0
+    for ok, label in (
+        (ema_stack, "ema_stack"),
+        (htf_break_ok, "htf_break"),
+        (breakout_probe_ok, "breakout_probe_reclaim"),
+        (momentum_ok, "htf_momentum"),
+        (followthrough_ok, "followthrough"),
+        (volume_ok, "volume"),
+        (expansion_ok, "expansion"),
+        (vwap_ok, "vwap_alignment"),
+        (weekly_align, "weekly_alignment"),
+        (price_above_breakout, "holding_above_breakout" if d == "long" else "holding_below_breakout"),
+    ):
+        if ok:
+            signal_count += 1
+            reasons.append(label)
+    for tf in zone_ready_tfs:
+        signal_count += 1
+        reasons.append(f"zone_breakout_hold_{tf}")
+
+    pressure_score = min(100, int(round((signal_count / 11.0) * 100)))
+    followthrough_score = int(round(((close_strength * 0.55) + min(1.5, vol_ratio) / 1.5 * 0.45) * 100))
+    confidence = round(min(1.0, (pressure_score * 0.6 + followthrough_score * 0.4) / 100.0), 3)
+    hold_score = int(round(
+        min(
+            100.0,
+            max(
+                0.0,
+                pressure_score * 0.35
+                + followthrough_score * 0.35
+                + (12.0 if weekly_align else 0.0)
+                + (8.0 if volume_ok else -8.0)
+                + (8.0 if htf_break_ok else (6.0 if zone_breakout_hold_ok else (4.0 if breakout_probe_ok else -10.0)))
+                + min(4.0, max(0.0, zone_ready_count - 1) * 2.0)
+                + (6.0 if ema_stack else -8.0)
+                - max(0.0, chase_atr - 0.75) * 18.0,
+            ),
+        )
+    ))
+    false_break_risk = int(round(
+        min(
+            100.0,
+            max(
+                0.0,
+                100.0
+                - hold_score
+                + (18.0 if event_blocked else 0.0)
+                + (12.0 if not volume_ok else 0.0)
+                + (10.0 if not followthrough_ok else 0.0)
+                + (8.0 if not htf_break_ok and not breakout_probe_ok and not zone_breakout_hold_ok else 0.0)
+                + (4.0 if zone_breakout_hold_ok and not htf_break_ok else 0.0)
+                + (6.0 if breakout_probe_ok and not htf_break_ok else 0.0)
+                - min(4.0, max(0.0, zone_ready_count - 1) * 2.0)
+                + max(0.0, chase_atr - 0.8) * 10.0,
+            ),
+        )
+    ))
+    management_bias = "hold_breakout" if hold_score >= max(58, false_break_risk) else "fade_failed_breakout"
+
+    out.update(
+        {
+            "signal_count": signal_count,
+            "pressure_score": pressure_score,
+            "followthrough_score": followthrough_score,
+            "confidence": confidence,
+            "hold_score": hold_score,
+            "false_break_risk": false_break_risk,
+            "management_bias": management_bias,
+            "weekly_alignment": weekly_align,
+            "event_risk_blocked": bool(event_blocked),
+            "event_risk_label": event_details.get("label"),
+            "event_risk_hours": event_details.get("hours_to_event"),
+            "event_risk_importance": event_details.get("importance"),
+            "ema_stack": ema_stack,
+            "htf_break_confirmed": htf_break_ok,
+            "breakout_probe_reclaim": breakout_probe_ok,
+            "zone_breakout_hold": zone_breakout_hold_ok,
+            "zone_breakout_tfs": zone_ready_tfs,
+            "zone_active_tf": zone_active_tf,
+            "zone_structures": zone_structures,
+            "zone_high": zone_structure.get("zone_high"),
+            "zone_low": zone_structure.get("zone_low"),
+            "zone_recent_closes": zone_structure.get("recent_closes_above"),
+            "zone_stair_step": zone_structure.get("stair_step"),
+            "volume_ratio": round(vol_ratio, 3),
+            "close_strength": round(close_strength, 3),
+            "breakout_level": round(float(breakout_level), 8) if breakout_level > 0 else None,
+            "trigger_price": round(float(active_trigger_level), 8) if active_trigger_level > 0 else None,
+            "invalidation_price": round(float(invalidation), 8) if invalidation > 0 else None,
+            "chase_atr": round(chase_atr, 3),
+            "reason": None,
+            "reasons": reasons,
+            "market_event_ok": not bool(event_blocked),
+            "confluence": conf,
+        }
+    )
+
+    if event_blocked:
+        out["reason"] = "event_risk_block"
+        return out
+    if chase_atr > max_chase_atr:
+        out["reason"] = "breakout_chase_too_far"
+        return out
+    if signal_count < min_signals:
+        out["reason"] = "insufficient_breakout_signals"
+        return out
+    if not (followthrough_ok and volume_ok and momentum_ok and ema_stack and structure_ready_signal):
+        out["reason"] = "breakout_quality_not_ready"
+        return out
+
+    out["ready"] = True
+    out["reason"] = "ready"
+    return out
+
+
+def htf_breakout_continuation(
+    price: float,
+    df_4h: pd.DataFrame,
+    df_1h: pd.DataFrame,
+    df_15m: pd.DataFrame,
+    levels: Dict[str, float],
+    fibs: Dict[str, float],
+    direction: str,
+    weekly_playbook: Optional[Dict] = None,
+    event_calendar: Optional[Dict] = None,
+    config: Optional[Dict] = None,
+) -> Optional[Dict]:
+    assessment = assess_htf_breakout_continuation(
+        price,
+        df_4h,
+        df_1h,
+        df_15m,
+        levels,
+        fibs,
+        direction,
+        weekly_playbook=weekly_playbook,
+        event_calendar=event_calendar,
+        config=config,
+    )
+    if not assessment.get("ready"):
+        return None
+    confluence = dict(assessment.get("confluence") or {})
+    confluence["HTF_BREAK"] = True
+    confluence["EMA_ALIGN_SLOPE"] = bool(assessment.get("ema_stack"))
+    confluence["VOLUME_SPIKE"] = bool((assessment.get("volume_ratio") or 0) >= 1.0)
+    confluence["VWAP_CONFIRM"] = bool(confluence.get("VWAP_CONFIRM"))
+    confluence["BREAKOUT_PROBE_RECLAIM"] = bool(assessment.get("breakout_probe_reclaim"))
+    confluence["ZONE_BREAKOUT_HOLD"] = bool(assessment.get("zone_breakout_hold"))
+    if assessment.get("zone_active_tf"):
+        confluence[f"ZONE_BREAKOUT_HOLD_{str(assessment.get('zone_active_tf')).upper()}"] = True
+    return {
+        "type": "htf_breakout_continuation",
+        "confluence": confluence,
+        "breakout_level": assessment.get("breakout_level"),
+        "zone_high": assessment.get("zone_high"),
+        "zone_low": assessment.get("zone_low"),
+        "zone_breakout_tfs": assessment.get("zone_breakout_tfs") or [],
+        "zone_active_tf": assessment.get("zone_active_tf"),
+        "trigger_price": assessment.get("trigger_price"),
+        "invalidation_price": assessment.get("invalidation_price"),
+        "followthrough_score": assessment.get("followthrough_score"),
+        "pressure_score": assessment.get("pressure_score"),
+        "confidence": assessment.get("confidence"),
+        "chase_atr": assessment.get("chase_atr"),
+        "weekly_alignment": assessment.get("weekly_alignment"),
+        "event_risk_blocked": assessment.get("event_risk_blocked"),
+        "reasons": assessment.get("reasons") or [],
+    }
+
+
+# ---------------------------------------------------------------------------
 # Lane V: Liquidity Sweep (bidirectional heatmap strategy)
 # ---------------------------------------------------------------------------
 
@@ -2034,6 +2631,7 @@ def liquidity_sweep(
     levels: Dict[str, float],
     fibs: Dict[str, float],
     liquidation_intel: Optional[Dict] = None,
+    config: dict | None = None,
 ) -> Optional[Dict]:
     """Liquidity Sweep -- bidirectional entry based on liquidation clusters.
 
@@ -2056,6 +2654,7 @@ def liquidity_sweep(
     if df_15m is None or df_15m.empty or len(df_15m) < 20:
         return None
 
+    cfg = config or {}
     intel = liquidation_intel or {}
     sweep_status = str(intel.get("sweep_status", "none"))
     sweep_side = str(intel.get("sweep_side", ""))
@@ -2065,32 +2664,58 @@ def liquidity_sweep(
     wick_ratio = float(intel.get("wick_ratio", 0))
     reclaim = bool(intel.get("reclaim_confirmed", False))
     rejection = bool(intel.get("rejection_confirmed", False))
+    followthrough = bool(intel.get("followthrough_confirmed", False))
+    failed_reclaim = bool(intel.get("failed_reclaim", False))
+    failed_rejection = bool(intel.get("failed_rejection", False))
     cluster_strength = float(intel.get("cluster_strength", 0))
+    cluster_side = str(intel.get("cluster_side", "balanced"))
+    distance_to_cluster_atr = float(intel.get("distance_to_cluster_atr") or 0.0)
     funding_lean = str(intel.get("funding_lean", "neutral"))
+    fib_hit = bool(intel.get("fib_hit", False))
+    ema_stretch = bool(intel.get("ema_stretch", False))
+    vwap_stretch = bool(intel.get("vwap_stretch", False))
+    volume_spike = bool(intel.get("volume_spike", False))
+    touched_cluster = bool(intel.get("touched_cluster", False))
+    no_trade_reason = str(intel.get("no_trade_reason") or "")
+    continuation_ok = bool(intel.get("continuation_ok", False))
+    reversal_ok = bool(intel.get("reversal_ok", False))
+    target_cluster_price = float(intel.get("target_cluster_price") or 0.0)
+    sweep_level = float(intel.get("sweep_level") or 0.0)
+    sweep_depth_atr = float(intel.get("sweep_depth_atr") or 0.0)
 
     d = direction.lower().strip()
+    min_cluster_strength = float(cfg.get("lane_v_min_cluster_strength", 30) or 30)
+    min_wick_ratio = float(cfg.get("lane_v_wick_min_ratio", 0.35) or 0.35)
+    min_wick_score = float(cfg.get("lane_v_wick_score_min", 55) or 55)
+    max_reversal_chase_atr = float(cfg.get("lane_v_max_reversal_chase_atr", 1.2) or 1.2)
+    tp_buffer_atr = float(cfg.get("lane_v_continuation_tp_buffer_atr", 0.15) or 0.15)
+    fail_fast_bars = int(cfg.get("lane_v_fail_fast_bars", 3) or 3)
+    require_volume_spike = bool(cfg.get("lane_v_require_volume_spike_for_reversal", False))
+    require_stretch = bool(cfg.get("lane_v_require_fib_or_ema_stretch", False))
+    skip_balanced = bool(cfg.get("lane_v_skip_balanced_clusters", True))
+    continuation_enabled = bool(cfg.get("lane_v_continuation_enabled", True))
+    reversal_enabled = bool(cfg.get("lane_v_reversal_enabled", True))
 
     # Check fib zone confluence
-    fib_hit = False
-    if fibs:
+    fib_hit_local = fib_hit
+    if fibs and not fib_hit_local:
         conf = compute_confluences(price, df_1h, df_1h, df_15m, levels, fibs, d)
-        fib_hit = bool(conf.get("FIB_ZONE"))
+        fib_hit_local = bool(conf.get("FIB_ZONE"))
 
     # Check EMA/VWAP stretch
-    ema_stretched = False
+    ema_stretched = ema_stretch or vwap_stretch
     try:
         e21 = ema(df_15m["close"], 21)
         e21_val = float(e21.iloc[-1])
         atr_val = float(atr(df_15m, 14).iloc[-1])
         if atr_val > 0 and e21_val > 0:
             distance_from_ema = abs(price - e21_val)
-            ema_stretched = distance_from_ema > atr_val
+            ema_stretched = ema_stretched or distance_from_ema > atr_val
     except Exception:
         pass
 
-    # Check volume spike
-    vol_spike = False
-    if "volume" in df_15m.columns and len(df_15m) >= 20:
+    vol_spike = volume_spike
+    if not vol_spike and "volume" in df_15m.columns and len(df_15m) >= 20:
         vol_avg = float(df_15m["volume"].rolling(20).mean().iloc[-1])
         vol_now = float(df_15m["volume"].iloc[-1])
         vol_spike = vol_avg > 0 and vol_now > vol_avg * 1.5
@@ -2102,52 +2727,84 @@ def liquidity_sweep(
     elif d == "short" and funding_lean == "short":
         funding_confirms = True  # crowd was short, got squeezed, now reversal
 
+    if skip_balanced and cluster_side == "balanced":
+        if wick_score_val < 70:  # strong wick overrides balanced filter
+            return None
+    if no_trade_reason:
+        return None
+
     # -- REVERSAL MODE --
-    if sweep_status == "completed":
+    reversal_signals = 0
+    if cluster_strength >= min_cluster_strength:
+        reversal_signals += 1
+    if fib_hit_local or ema_stretched:
+        reversal_signals += 1
+    if wick_ratio >= min_wick_ratio and wick_score_val >= min_wick_score:
+        reversal_signals += 1
+    if reclaim or rejection:
+        reversal_signals += 1
+    if followthrough:
+        reversal_signals += 1
+    if vol_spike:
+        reversal_signals += 1
+    if sweep_status in {"completed", "in_progress"} and reversal_enabled and (reversal_ok or reversal_signals >= int(cfg.get("lane_v_min_signals", 4) or 4)):
         # Direction check: sweep of longs below = long reversal, sweep of shorts above = short reversal
         if d == "long" and sweep_side != "long":
             pass  # wrong side for long reversal
         elif d == "short" and sweep_side != "short":
             pass  # wrong side for short reversal
         else:
-            # Count core signals
-            core_signals = 0
-            if cluster_strength >= 30:
-                core_signals += 1
-            if fib_hit:
-                core_signals += 1
-            if ema_stretched:
-                core_signals += 1
-            if wick_ratio >= 0.35:
-                core_signals += 1
-            if reclaim or rejection:
-                core_signals += 1
-
-            if core_signals >= 3:  # relaxed from 4 since not all data always available
+            if require_volume_spike and not vol_spike:
+                return None
+            if require_stretch and not (fib_hit_local or ema_stretched):
+                return None
+            if failed_reclaim or failed_rejection:
+                return None
+            if distance_to_cluster_atr > max_reversal_chase_atr:
+                return None
+            wick_strong = wick_ratio >= min_wick_ratio and wick_score_val >= min_wick_score
+            wick_very_strong = wick_score_val >= 70
+            has_reclaim_reject = reclaim or rejection
+            if (wick_strong and has_reclaim_reject) or wick_very_strong or (has_reclaim_reject and wick_ratio >= 0.20):
                 return {
                     "type": "liquidity_sweep",
                     "mode": "reversal",
+                    "entry_profile_key": "liquidity_sweep_reversal",
+                    "fail_fast_bars": fail_fast_bars,
+                    "lane_v_reversal_tp_mode": str(cfg.get("lane_v_reversal_tp_mode", "fast_mean_reversion") or "fast_mean_reversion"),
+                    "lane_v_mode": "reversal",
                     "confluence": {
                         "SWEEP_COMPLETED": True,
-                        "CLUSTER_STRONG": cluster_strength >= 30,
-                        "FIB_BAND_TAG": fib_hit,
+                        "CLUSTER_STRONG": cluster_strength >= min_cluster_strength,
+                        "FIB_BAND_TAG": fib_hit_local,
                         "EMA_VWAP_STRETCH": ema_stretched,
-                        "LARGE_WICK": wick_ratio >= 0.35,
+                        "LARGE_WICK": wick_ratio >= min_wick_ratio,
                         "RECLAIM_REJECT": reclaim or rejection,
+                        "FOLLOWTHROUGH": followthrough,
                         "FUNDING_CONFIRMS": funding_confirms,
                         "VOLUME_SPIKE": vol_spike,
                     },
-                    "core_signals": core_signals,
+                    "core_signals": reversal_signals,
                     "wick_score": wick_score_val,
                     "wick_ratio": round(wick_ratio, 4),
                     "sweep_side": sweep_side,
                     "cluster_strength": cluster_strength,
                     "magnet_score": magnet_score,
+                    "failed_reclaim": failed_reclaim,
+                    "failed_rejection": failed_rejection,
+                    "fib_hit": fib_hit_local,
+                    "ema_stretch": ema_stretched,
+                    "vwap_stretch": bool(vwap_stretch),
+                    "continuation_ok": False,
+                    "reversal_ok": True,
+                    "sweep_level": sweep_level,
+                    "target_cluster_price": target_cluster_price,
+                    "sweep_depth_atr": sweep_depth_atr,
                 }
 
     # -- CONTINUATION MODE --
     # Trade toward a strong cluster that has not been swept yet
-    if sweep_status == "none" and magnet_score >= 40:
+    if sweep_status == "none" and continuation_enabled and (continuation_ok or magnet_score >= 40):
         # Direction must align with magnet
         if d == "long" and magnet_side == "above":
             pass  # good: trading long toward cluster above
@@ -2168,21 +2825,37 @@ def liquidity_sweep(
         except Exception:
             pass
 
+        if touched_cluster:
+            return None
+        if cluster_strength < min_cluster_strength:
+            return None
+        if distance_to_cluster_atr <= tp_buffer_atr:
+            return None
+        if failed_reclaim or failed_rejection:
+            return None
         if momentum_ok:
             return {
                 "type": "liquidity_sweep",
                 "mode": "continuation",
+                "entry_profile_key": "liquidity_sweep_continuation",
+                "lane_v_mode": "continuation",
                 "confluence": {
                     "MAGNET_STRONG": True,
                     "MOMENTUM_ALIGNED": True,
                     "DIRECTION_MATCHES_MAGNET": True,
                     "FUNDING_CONFIRMS": funding_confirms,
                     "VOLUME_SPIKE": vol_spike,
+                    "CLUSTER_AHEAD": distance_to_cluster_atr > tp_buffer_atr,
                 },
                 "core_signals": 3,
                 "magnet_side": magnet_side,
                 "magnet_score": magnet_score,
                 "cluster_strength": cluster_strength,
+                "target_cluster_price": target_cluster_price,
+                "distance_to_cluster_atr": distance_to_cluster_atr,
+                "continuation_ok": True,
+                "reversal_ok": False,
+                "no_trade_reason": "",
             }
 
     return None
@@ -2282,3 +2955,475 @@ def exhaustion_warning_block(
         pass
 
     return warnings >= 3
+
+
+# ---------------------------------------------------------------------------
+# Lane W: Opening Range Breakout (ORB)
+# Marks the high/low of the first 15m candle at NY open (9:30 AM ET = 13:30 UTC).
+# Waits for breakout + retest of that range.
+# Targets previous day high/low. Requires 2:1 minimum R:R.
+# Also checks for FVG confirmation outside the range.
+# ---------------------------------------------------------------------------
+
+def _find_session_open_candle(
+    df_15m: pd.DataFrame,
+    session_hour_utc: int = 13,
+    session_minute_utc: int = 30,
+) -> Optional[pd.Series]:
+    """Find the most recent 15m candle that starts at the NY session open."""
+    if df_15m.empty:
+        return None
+    for i in range(len(df_15m) - 1, max(len(df_15m) - 40, -1), -1):
+        ts = df_15m["timestamp"].iloc[i]
+        if hasattr(ts, "hour"):
+            if ts.hour == session_hour_utc and ts.minute == session_minute_utc:
+                return df_15m.iloc[i]
+    return None
+
+
+def opening_range_breakout(
+    price: float,
+    df_15m: pd.DataFrame,
+    df_1h: pd.DataFrame,
+    direction: str,
+    levels: Dict[str, float],
+    config: dict = None,
+) -> Optional[Dict]:
+    """Opening Range Breakout entry using first 15m candle of NY session.
+
+    Strategy (from video research):
+    1. Mark high/low of first candle at 9:30 AM ET (13:30 UTC)
+    2. Wait for price to break above (long) or below (short) that range
+    3. Require retest of the broken level (support/resistance flip)
+    4. Target previous day high (long) or previous day low (short)
+    5. Minimum 2:1 R:R enforced
+    6. FVG confirmation adds confluence but is not required
+    """
+    if df_15m is None or len(df_15m) < 10:
+        return None
+
+    cfg = (config or {}).get("opening_range_breakout") or {}
+    if not cfg.get("enabled", True):
+        return None
+
+    # Find the session open candle
+    or_candle = _find_session_open_candle(df_15m)
+    if or_candle is None:
+        return None
+
+    or_high = float(or_candle["high"])
+    or_low = float(or_candle["low"])
+    or_range = or_high - or_low
+    if or_range <= 0:
+        return None
+
+    # Get previous day levels for targets
+    prev_high = levels.get("prev_daily_high", 0)
+    prev_low = levels.get("prev_daily_low", 0)
+    if prev_high <= 0 or prev_low <= 0:
+        return None
+
+    # Check breakout direction
+    min_break_pct = float(cfg.get("min_break_pct", 0.001))  # 0.1% beyond range
+
+    if direction == "long":
+        # Price must be above the OR high (breakout happened)
+        if price <= or_high * (1 + min_break_pct):
+            return None
+        # Check retest: did price come back to touch or_high recently?
+        retest_found = False
+        lookback = min(8, len(df_15m))
+        for i in range(-lookback, 0):
+            bar_low = float(df_15m["low"].iloc[i])
+            # Retest = bar low touched or_high zone (within 0.3%)
+            if bar_low <= or_high * 1.003 and bar_low >= or_high * 0.995:
+                retest_found = True
+                break
+        if not retest_found:
+            return None
+
+        # R:R check: SL below OR low, TP at prev day high
+        sl = or_low * 0.998  # tiny buffer below OR low
+        tp = prev_high
+        risk = price - sl
+        reward = tp - price
+
+    else:  # short
+        if price >= or_low * (1 - min_break_pct):
+            return None
+        retest_found = False
+        lookback = min(8, len(df_15m))
+        for i in range(-lookback, 0):
+            bar_high = float(df_15m["high"].iloc[i])
+            if bar_high >= or_low * 0.997 and bar_high <= or_low * 1.005:
+                retest_found = True
+                break
+        if not retest_found:
+            return None
+
+        sl = or_high * 1.002
+        tp = prev_low
+        risk = sl - price
+        reward = price - tp
+
+    if risk <= 0 or reward <= 0:
+        return None
+
+    rr = reward / risk
+    min_rr = float(cfg.get("min_rr", 2.0))
+    if rr < min_rr:
+        return None
+
+    # FVG confirmation (bonus confluence, not required)
+    from strategy.fvg import detect_fvg, nearest_fvg
+    fvgs = detect_fvg(df_15m, lookback=20)
+    fvg = nearest_fvg(price, fvgs, direction)
+    fvg_confirmed = fvg is not None
+
+    # Hourly candle continuation check (from video strategy 2)
+    hourly_aligned = False
+    if df_1h is not None and len(df_1h) >= 2:
+        prev_1h = df_1h.iloc[-2]
+        prev_1h_bullish = float(prev_1h["close"]) > float(prev_1h["open"])
+        if direction == "long" and prev_1h_bullish:
+            hourly_aligned = True
+        elif direction == "short" and not prev_1h_bullish:
+            hourly_aligned = True
+
+    # Volume check: current bar volume vs average
+    vol_ok = False
+    try:
+        vol_now = float(df_15m["volume"].iloc[-1])
+        vol_avg = float(df_15m["volume"].iloc[-20:].mean())
+        vol_ok = vol_now >= vol_avg * 0.8
+    except Exception:
+        vol_ok = True  # pass if can't compute
+
+    conf = {
+        "OPENING_RANGE_FORMED": True,
+        "BREAKOUT_CONFIRMED": True,
+        "RETEST_FOUND": retest_found,
+        "FVG_CONFIRMED": fvg_confirmed,
+        "HOURLY_ALIGNED": hourly_aligned,
+        "VOLUME_OK": vol_ok,
+        "MIN_RR_MET": True,
+    }
+
+    # Need at least 3 confluence flags (breakout + retest + one more)
+    passing = sum(1 for v in conf.values() if v)
+    if passing < 4:
+        return None
+
+    return {
+        "type": "opening_range_breakout",
+        "confluence": conf,
+        "or_high": round(or_high, 8),
+        "or_low": round(or_low, 8),
+        "target_price": round(tp, 8),
+        "stop_price": round(sl, 8),
+        "risk_reward": round(rr, 2),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Lane X: Hourly Candle Continuation
+# Trades in the direction of the previous 1h candle close.
+# Uses 15m chart for momentum shift entries (lower high / higher low patterns).
+# Fixed 2:1 R:R. Mechanical entry + stop to breakeven at 1.5R.
+# ---------------------------------------------------------------------------
+
+def hourly_continuation(
+    price: float,
+    df_15m: pd.DataFrame,
+    df_1h: pd.DataFrame,
+    direction: str,
+    levels: Dict[str, float],
+    config: dict = None,
+) -> Optional[Dict]:
+    """Hourly candle continuation entry.
+
+    Strategy (from video research):
+    1. Previous 1h candle sets directional bias (bullish close = buy, bearish = sell)
+    2. Current 1h candle must be aligned with bias
+    3. On 15m chart, look for momentum shift: higher highs/lows failing, then reversing
+    4. Enter on the break of the shift pattern
+    5. Fixed 2:1 R:R target
+    """
+    if df_1h is None or len(df_1h) < 3:
+        return None
+    if df_15m is None or len(df_15m) < 8:
+        return None
+
+    cfg = (config or {}).get("hourly_continuation") or {}
+    if not cfg.get("enabled", True):
+        return None
+
+    # Step 1: Previous 1h candle direction
+    prev_1h = df_1h.iloc[-2]
+    prev_open = float(prev_1h["open"])
+    prev_close = float(prev_1h["close"])
+    prev_bullish = prev_close > prev_open
+
+    if direction == "long" and not prev_bullish:
+        return None
+    if direction == "short" and prev_bullish:
+        return None
+
+    # Step 2: Current 1h candle must be aligned
+    curr_1h = df_1h.iloc[-1]
+    curr_open = float(curr_1h["open"])
+    curr_close = float(curr_1h["close"])
+    if direction == "long" and curr_close < curr_open:
+        return None  # current candle bearish, no long
+    if direction == "short" and curr_close > curr_open:
+        return None  # current candle bullish, no short
+
+    # Step 3: 15m momentum shift detection
+    # Look for failed continuation + reversal pattern
+    highs = [float(df_15m["high"].iloc[i]) for i in range(-6, 0)]
+    lows = [float(df_15m["low"].iloc[i]) for i in range(-6, 0)]
+
+    if direction == "long":
+        # Look for: price was making lower lows, then failed to make new low
+        # = higher low formation (momentum shifting bullish)
+        made_lower_lows = lows[1] < lows[0] or lows[2] < lows[1]
+        higher_low = lows[-1] > min(lows[:-1])
+        failed_new_low = higher_low and made_lower_lows
+        if not failed_new_low:
+            return None
+
+        # SL below recent swing low, TP at 2:1
+        sl = min(lows[-4:]) * 0.998
+        risk = price - sl
+        if risk <= 0:
+            return None
+        tp = price + (risk * 2.0)  # fixed 2:1
+
+    else:  # short
+        made_higher_highs = highs[1] > highs[0] or highs[2] > highs[1]
+        lower_high = highs[-1] < max(highs[:-1])
+        failed_new_high = lower_high and made_higher_highs
+        if not failed_new_high:
+            return None
+
+        sl = max(highs[-4:]) * 1.002
+        risk = sl - price
+        if risk <= 0:
+            return None
+        tp = price - (risk * 2.0)
+
+    # Step 4: ATR sanity check - risk shouldn't be > 2 ATR
+    atr_val = 0
+    try:
+        atr_series = atr(df_15m, 14)
+        if len(atr_series) > 0 and not pd.isna(atr_series.iloc[-1]):
+            atr_val = float(atr_series.iloc[-1])
+    except Exception:
+        pass
+    if atr_val > 0 and risk > 2.5 * atr_val:
+        return None  # risk too wide
+
+    # FVG bonus
+    from strategy.fvg import detect_fvg, nearest_fvg
+    fvgs = detect_fvg(df_15m, lookback=15)
+    fvg = nearest_fvg(price, fvgs, direction)
+    fvg_confirmed = fvg is not None
+
+    conf = {
+        "PREV_1H_ALIGNED": True,
+        "CURR_1H_ALIGNED": True,
+        "MOMENTUM_SHIFT": True,
+        "FVG_CONFIRMED": fvg_confirmed,
+        "ATR_REASONABLE": atr_val <= 0 or risk <= 2.5 * atr_val,
+    }
+
+    passing = sum(1 for v in conf.values() if v)
+    if passing < 3:
+        return None
+
+    return {
+        "type": "hourly_continuation",
+        "confluence": conf,
+        "target_price": round(tp, 8),
+        "stop_price": round(sl, 8),
+        "risk_reward": 2.0,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Lane Y: HTF Swing Entry -- 1H/4H Wick Reversal at Fib Levels
+# ---------------------------------------------------------------------------
+# The money-maker: catches the big swings visible on 1H/4H charts.
+# Enter on wick candle rejection at Fib levels, ride the trend.
+# Stop below the wick = TP1 once breakout confirmed.
+
+def htf_swing_entry(
+    price: float,
+    df_1h: pd.DataFrame,
+    df_4h: pd.DataFrame,
+    df_15m: pd.DataFrame,
+    direction: str,
+    fibs: Dict[str, float] = None,
+    levels: Dict[str, float] = None,
+    config: dict = None,
+) -> Optional[Dict]:
+    """HTF Swing Entry -- 1H/4H wick reversal at Fib levels.
+
+    Detects large wick candles at Fibonacci levels on 1H and 4H timeframes.
+    These are the big swings: $0.005+ moves = $25+ per contract.
+
+    Strategy:
+    1. Scan last 2 candles on 1H (and optionally 4H) for wick reversals
+    2. Wick must be >= 50% of candle range (institutional rejection)
+    3. Must be near a Fib level (0.236, 0.382, 0.5, 0.618, 0.786, 1.0, 1.272)
+    4. 15m momentum must confirm (not fighting the micro trend)
+    5. Stop below/above the wick, target next Fib level
+
+    This is the PRIMARY entry -- 15m scalps fill the gaps between these.
+    """
+    cfg = ((config or {}).get("htf_swing") or {}) if isinstance((config or {}).get("htf_swing"), dict) else {}
+    if not cfg.get("enabled", True):
+        return None
+
+    # Need at least 1H data
+    if df_1h is None or len(df_1h) < 5:
+        return None
+
+    min_wick_pct = float(cfg.get("min_wick_pct", 0.50))
+    fib_tolerance_pct = float(cfg.get("fib_tolerance_pct", 0.015))  # 1.5% from Fib level
+    require_volume = bool(cfg.get("require_volume", True))
+
+    result = None
+
+    # Check both 1H and 4H (4H has priority if both fire)
+    timeframes = [("1h", df_1h)]
+    if df_4h is not None and len(df_4h) >= 5:
+        timeframes.append(("4h", df_4h))
+
+    for tf_name, df_tf in reversed(timeframes):  # 4H checked first
+        # Check last 2 candles (current + previous)
+        for candle_idx in [-1, -2]:
+            candle = df_tf.iloc[candle_idx]
+            c_open = float(candle["open"])
+            c_close = float(candle["close"])
+            c_high = float(candle["high"])
+            c_low = float(candle["low"])
+            c_range = c_high - c_low
+            if c_range <= 0:
+                continue
+
+            # Body and wick analysis
+            body = abs(c_close - c_open)
+            wick_pct = 1.0 - (body / c_range) if c_range > 0 else 0
+
+            if wick_pct < min_wick_pct:
+                continue  # not a wick candle
+
+            # Direction-specific wick check
+            if direction == "long":
+                lower_wick = min(c_open, c_close) - c_low
+                if lower_wick < 0.40 * c_range:
+                    continue  # lower wick must be dominant for longs
+                # Candle should show rejection (close in upper half)
+                if c_close < (c_low + c_range * 0.4):
+                    continue
+            else:  # short
+                upper_wick = c_high - max(c_open, c_close)
+                if upper_wick < 0.40 * c_range:
+                    continue  # upper wick must be dominant for shorts
+                if c_close > (c_high - c_range * 0.4):
+                    continue
+
+            # Check proximity to Fib levels
+            near_fib = False
+            nearest_fib_name = None
+            nearest_fib_dist = float("inf")
+            if fibs:
+                for fib_name, fib_price in fibs.items():
+                    if fib_price <= 0:
+                        continue
+                    dist_pct = abs(price - fib_price) / price
+                    if dist_pct < fib_tolerance_pct and dist_pct < nearest_fib_dist:
+                        near_fib = True
+                        nearest_fib_name = fib_name
+                        nearest_fib_dist = dist_pct
+
+            # Also check structure levels
+            near_struct = False
+            if levels and not near_fib:
+                for lvl_name, lvl_price in levels.items():
+                    if lvl_price <= 0:
+                        continue
+                    dist_pct = abs(price - lvl_price) / price
+                    if dist_pct < fib_tolerance_pct:
+                        near_struct = True
+                        nearest_fib_name = lvl_name
+                        break
+
+            if not near_fib and not near_struct:
+                continue  # not near any key level
+
+            # Volume check (optional)
+            vol_ok = True
+            if require_volume and "volume" in df_tf.columns:
+                vol_avg = df_tf["volume"].iloc[-11:-1].mean() if len(df_tf) >= 12 else df_tf["volume"].mean()
+                vol_now = float(candle["volume"])
+                vol_ok = vol_avg <= 0 or vol_now >= 0.8 * vol_avg  # relaxed: 0.8x avg
+
+            if not vol_ok:
+                continue
+
+            # 15m momentum confirmation (don't fight the micro trend)
+            micro_aligned = True
+            if df_15m is not None and len(df_15m) >= 5:
+                recent_closes = [float(df_15m["close"].iloc[i]) for i in range(-3, 0)]
+                if direction == "long":
+                    # At least 2 of last 3 15m candles should not be strong red
+                    micro_aligned = sum(1 for i in range(1, len(recent_closes)) if recent_closes[i] >= recent_closes[i-1]) >= 1
+                else:
+                    micro_aligned = sum(1 for i in range(1, len(recent_closes)) if recent_closes[i] <= recent_closes[i-1]) >= 1
+
+            # Calculate stop and target
+            if direction == "long":
+                stop_price = c_low * 0.998  # just below the wick low
+                risk = price - stop_price
+                target_price = price + (risk * 3.0)  # 3:1 minimum R:R
+            else:
+                stop_price = c_high * 1.002  # just above the wick high
+                risk = stop_price - price
+                target_price = price - (risk * 3.0)
+
+            if risk <= 0:
+                continue
+
+            # Build confluence
+            conf = {
+                "HTF_WICK_REVERSAL": True,
+                "FIB_ZONE": near_fib,
+                "STRUCTURE_ZONE": near_struct or near_fib,
+                "VOLUME_OK": vol_ok,
+                "MICRO_ALIGNED": micro_aligned,
+                "DIRECTION_CONFIRM": True,
+            }
+
+            passing = sum(1 for v in conf.values() if v)
+            if passing < 3:
+                continue
+
+            result = {
+                "type": "htf_swing",
+                "confluence": conf,
+                "timeframe": tf_name,
+                "wick_pct": round(wick_pct, 3),
+                "near_level": nearest_fib_name,
+                "stop_price": round(stop_price, 8),
+                "target_price": round(target_price, 8),
+                "risk_reward": round(abs(target_price - price) / risk, 1) if risk > 0 else 0,
+                "candle_age": abs(candle_idx),  # 0 = current candle, 1 = previous
+            }
+            break  # found a signal on this timeframe
+
+        if result:
+            break  # 4H signal found, don't check 1H
+
+    return result

@@ -100,6 +100,7 @@ position_sizing:
     V: 1.0    # liquidity sweep - full conviction when 4-of-6 confluence fires
     W: 1.0    # ORB - opening range breakout, high conviction session play
     X: 0.9    # hourly continuation - 1h candle direction + 15m momentum shift
+    Y: 1.0    # htf_swing -- 1H/4H wick reversals, highest conviction
 
   # Quality tier multipliers on position size
   tier_multipliers:
@@ -601,6 +602,16 @@ v4:
         tp_mult: 0.50
         min_profit_usd: 2.00
         decay_pct: 0.30
+      # HTF Swing: the big money trades -- RIDE THE TREND
+      htf_swing:
+        tp_mult: 1.0
+        min_profit_usd: 3.00
+        min_profit_bars: 2
+        decay_pct: 0.70
+        decay_arm_usd: 8.00
+        quick_take_profit_usd: 99.0
+        quick_take_profit_bars: 999
+        quick_take_profit_only_when_trend_weak: false
       # Orderflow Imbalance: momentum follow-through on volume delta
       orderflow_imbalance:
         tp_mult: 0.70
@@ -1746,3 +1757,14 @@ band_navigator:
   enabled: true
   require_momentum_turn: true      # wait for RSI to turn before entering
   min_timeframes_agree: 1          # at least 1 TF must agree (1=loose, 2=moderate, 3=strict)
+
+# HTF Swing Entry -- the big money maker
+# Detects wick reversals at Fib levels on 1H/4H charts
+# Priority entry: checked BEFORE all 15m entries
+htf_swing:
+  enabled: true
+  min_wick_pct: 0.45          # 45% wick = clear rejection signal
+  fib_tolerance_pct: 0.015    # within 1.5% of a Fib level
+  require_volume: true        # need volume confirmation
+  # These trades get WIDER management -- ride the trend
+  # Stop below the wick, let it run. Stop becomes TP1 via breakeven trigger.
