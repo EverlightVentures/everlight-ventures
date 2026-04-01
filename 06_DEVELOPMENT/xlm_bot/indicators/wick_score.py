@@ -25,6 +25,15 @@ class WickAnalysis:
     wick_vs_atr: float         # wick length / ATR
     confirmation: bool         # next candle did NOT break wick extreme
     volume_above_avg: bool     # candle volume > 20-bar average
+    followthrough_confirmed: bool = False
+    body_failure: bool = False
+    reclaim_speed_bars: int = 0
+    rejection_speed_bars: int = 0
+    candidate_offset: int = 0   # bars back from latest candle for chosen sweep bar
+    sweep_depth_atr: float = 0.0
+    fib_hit: bool = False
+    ema_stretch: bool = False
+    vwap_stretch: bool = False
 
 
 @dataclass
@@ -34,6 +43,10 @@ class ReclaimRejectResult:
     rejection_confirmed: bool
     level: float
     type: str  # "reclaim_above", "rejection_below", "none"
+    followthrough_confirmed: bool = False
+    failed_reclaim: bool = False
+    failed_rejection: bool = False
+    confirm_bars: int = 0
 
 
 def analyze_wick(
@@ -41,6 +54,10 @@ def analyze_wick(
     atr_value: float,
     direction: str = "auto",
     config: dict | None = None,
+    *,
+    fib_hit: bool = False,
+    ema_stretch: bool = False,
+    vwap_stretch: bool = False,
 ) -> WickAnalysis:
     """Analyze the most recent candle for wick quality.
 
@@ -58,125 +75,159 @@ def analyze_wick(
     min_wick_ratio = float(cfg.get("wick_min_ratio", 0.35) or 0.35)
     strong_wick_ratio = float(cfg.get("wick_strong_ratio", 0.50) or 0.50)
     min_wick_atr = float(cfg.get("wick_min_atr", 0.3) or 0.3)
+    inspect_bars = max(2, int(cfg.get("wick_inspect_bars", 4) or 4))
+    confirm_bars = max(1, int(cfg.get("wick_confirm_bars", 3) or 3))
 
     if df is None or df.empty or len(df) < 2:
         return WickAnalysis(0, "none", 0, 0, 0, "middle_third", 0, False, False)
 
-    candle = df.iloc[-1]
-    o = float(candle["open"])
-    h = float(candle["high"])
-    l = float(candle["low"])
-    c = float(candle["close"])
-    vol = float(candle.get("volume", 0))
+    window = df.tail(max(inspect_bars, confirm_bars + 1)).copy()
+    best: WickAnalysis | None = None
+    best_idx = len(window) - 1
 
-    total_range = h - l
-    if total_range <= 0:
-        return WickAnalysis(0, "none", 0, 0, 0, "middle_third", 0, False, False)
+    for idx in range(len(window) - 1, -1, -1):
+        candle = window.iloc[idx]
+        o = float(candle["open"])
+        h = float(candle["high"])
+        l = float(candle["low"])
+        c = float(candle["close"])
+        vol = float(candle.get("volume", 0))
 
-    body = abs(c - o)
-    body_ratio = body / total_range
+        total_range = h - l
+        if total_range <= 0:
+            continue
 
-    lower_wick = min(o, c) - l
-    upper_wick = h - max(o, c)
+        body = abs(c - o)
+        body_ratio = body / total_range
 
-    # Determine which wick to analyze
-    if direction == "long":
-        wick_length = lower_wick
-        wick_type = "lower"
-    elif direction == "short":
-        wick_length = upper_wick
-        wick_type = "upper"
-    else:  # auto
-        if lower_wick >= upper_wick:
+        lower_wick = min(o, c) - l
+        upper_wick = h - max(o, c)
+
+        if direction == "long":
             wick_length = lower_wick
             wick_type = "lower"
-        else:
+        elif direction == "short":
             wick_length = upper_wick
             wick_type = "upper"
+        else:
+            if lower_wick >= upper_wick:
+                wick_length = lower_wick
+                wick_type = "lower"
+            else:
+                wick_length = upper_wick
+                wick_type = "upper"
 
-    wick_ratio = wick_length / total_range if total_range > 0 else 0
-    wick_vs_atr = wick_length / atr_value if atr_value > 0 else 0
+        wick_ratio = wick_length / total_range if total_range > 0 else 0
+        wick_vs_atr = wick_length / atr_value if atr_value > 0 else 0
 
-    # Close position within candle range
-    close_pct = (c - l) / total_range if total_range > 0 else 0.5
-    if close_pct >= 0.667:
-        close_position = "upper_third"
-    elif close_pct <= 0.333:
-        close_position = "lower_third"
-    else:
-        close_position = "middle_third"
+        close_pct = (c - l) / total_range if total_range > 0 else 0.5
+        if close_pct >= 0.667:
+            close_position = "upper_third"
+        elif close_pct <= 0.333:
+            close_position = "lower_third"
+        else:
+            close_position = "middle_third"
 
-    # Volume check: above 20-bar average
-    vol_avg = 0.0
-    if len(df) >= 20 and "volume" in df.columns:
-        vol_avg = float(df["volume"].rolling(20).mean().iloc[-1])
-    volume_above_avg = vol > vol_avg if vol_avg > 0 else False
+        vol_avg = 0.0
+        if len(df) >= 20 and "volume" in df.columns:
+            vol_avg = float(df["volume"].rolling(20).mean().iloc[-1])
+        volume_above_avg = vol > vol_avg if vol_avg > 0 else False
 
-    # Confirmation: check if the current candle did not break a prior wick extreme
-    confirmation = True
-    if len(df) >= 3:
-        prev_candle = df.iloc[-2]
-        prev_h = float(prev_candle["high"])
-        prev_l = float(prev_candle["low"])
-        prev_range = prev_h - prev_l
-        prev_lower_wick = min(float(prev_candle["open"]), float(prev_candle["close"])) - prev_l
-        prev_upper_wick = prev_h - max(float(prev_candle["open"]), float(prev_candle["close"]))
+        future = window.iloc[idx + 1: idx + 1 + confirm_bars]
+        confirmation = True
+        followthrough_confirmed = False
+        body_failure = False
+        reclaim_speed_bars = 0
+        rejection_speed_bars = 0
 
-        if wick_type == "lower" and prev_range > 0:
-            prev_wick_ratio = prev_lower_wick / prev_range
-            if prev_wick_ratio >= min_wick_ratio:
-                confirmation = l >= prev_l
-        elif wick_type == "upper" and prev_range > 0:
-            prev_wick_ratio = prev_upper_wick / prev_range
-            if prev_wick_ratio >= min_wick_ratio:
-                confirmation = h <= prev_h
+        if not future.empty:
+            if wick_type == "lower":
+                confirmation = float(future["low"].min()) >= l
+                future_closes = future["close"].astype(float)
+                future_highs = future["high"].astype(float)
+                followthrough_confirmed = bool((future_closes > c).any() or (future_highs > h).any())
+                body_failure = bool((future_closes < min(o, c)).any())
+                if followthrough_confirmed:
+                    for i, row in enumerate(future.itertuples(index=False), 1):
+                        if float(getattr(row, "close")) > c:
+                            reclaim_speed_bars = i
+                            break
+            else:
+                confirmation = float(future["high"].max()) <= h
+                future_closes = future["close"].astype(float)
+                future_lows = future["low"].astype(float)
+                followthrough_confirmed = bool((future_closes < c).any() or (future_lows < l).any())
+                body_failure = bool((future_closes > max(o, c)).any())
+                if followthrough_confirmed:
+                    for i, row in enumerate(future.itertuples(index=False), 1):
+                        if float(getattr(row, "close")) < c:
+                            rejection_speed_bars = i
+                            break
 
-    # Score calculation (0-100)
-    score = 0
+        score = 0
+        if wick_ratio >= strong_wick_ratio:
+            score += 32
+        elif wick_ratio >= min_wick_ratio:
+            score += 22
+        elif wick_ratio >= 0.20:
+            score += 8
 
-    # Wick ratio component (0-40 points)
-    if wick_ratio >= strong_wick_ratio:
-        score += 40
-    elif wick_ratio >= min_wick_ratio:
-        score += 25
-    elif wick_ratio >= 0.20:
-        score += 10
+        if wick_vs_atr >= 0.5:
+            score += 16
+        elif wick_vs_atr >= min_wick_atr:
+            score += 10
+        elif wick_vs_atr >= 0.15:
+            score += 4
 
-    # Wick vs ATR component (0-20 points)
-    if wick_vs_atr >= 0.5:
-        score += 20
-    elif wick_vs_atr >= min_wick_atr:
-        score += 12
-    elif wick_vs_atr >= 0.15:
-        score += 5
+        if wick_type == "lower" and close_position == "upper_third":
+            score += 12
+        elif wick_type == "upper" and close_position == "lower_third":
+            score += 12
+        elif close_position == "middle_third":
+            score += 4
 
-    # Close position component (0-15 points)
-    if wick_type == "lower" and close_position == "upper_third":
-        score += 15
-    elif wick_type == "upper" and close_position == "lower_third":
-        score += 15
-    elif close_position == "middle_third":
-        score += 5
+        if volume_above_avg:
+            score += 10
+        if confirmation:
+            score += 8
+        if followthrough_confirmed:
+            score += 12
+        if not body_failure:
+            score += 6
+        if fib_hit:
+            score += 5
+        if ema_stretch:
+            score += 5
+        if vwap_stretch:
+            score += 4
 
-    # Volume component (0-10 points)
-    if volume_above_avg:
-        score += 10
+        analysis = WickAnalysis(
+            wick_ratio=round(wick_ratio, 4),
+            wick_type=wick_type,
+            wick_length=round(wick_length, 8),
+            body_ratio=round(body_ratio, 4),
+            score=min(100, score),
+            close_position=close_position,
+            wick_vs_atr=round(wick_vs_atr, 3),
+            confirmation=confirmation,
+            volume_above_avg=volume_above_avg,
+            followthrough_confirmed=followthrough_confirmed,
+            body_failure=body_failure,
+            reclaim_speed_bars=reclaim_speed_bars,
+            rejection_speed_bars=rejection_speed_bars,
+            candidate_offset=(len(window) - 1 - idx),
+            sweep_depth_atr=round(wick_vs_atr, 3),
+            fib_hit=bool(fib_hit),
+            ema_stretch=bool(ema_stretch),
+            vwap_stretch=bool(vwap_stretch),
+        )
+        if best is None or analysis.score > best.score:
+            best = analysis
+            best_idx = idx
 
-    # Confirmation component (0-15 points)
-    if confirmation:
-        score += 15
-
-    return WickAnalysis(
-        wick_ratio=round(wick_ratio, 4),
-        wick_type=wick_type,
-        wick_length=round(wick_length, 8),
-        body_ratio=round(body_ratio, 4),
-        score=min(100, score),
-        close_position=close_position,
-        wick_vs_atr=round(wick_vs_atr, 3),
-        confirmation=confirmation,
-        volume_above_avg=volume_above_avg,
-    )
+    if best is not None:
+        return best
+    return WickAnalysis(0, "none", 0, 0, 0, "middle_third", 0, False, False)
 
 
 def detect_reclaim_reject(
@@ -201,25 +252,63 @@ def detect_reclaim_reject(
     if df is None or df.empty or sweep_level <= 0:
         return ReclaimRejectResult(False, False, 0, "none")
 
-    candle = df.iloc[-1]
-    c = float(candle["close"])
-    h = float(candle["high"])
-    l = float(candle["low"])
+    cfg = config or {}
+    confirm_bars = max(1, int(cfg.get("confirm_bars", 3) or 3))
+    fail_buffer_atr = float(cfg.get("fail_buffer_atr", 0.10) or 0.10)
+    fail_buffer = atr_value * fail_buffer_atr if atr_value > 0 else 0.0
+    window = df.tail(confirm_bars + 1).copy()
 
     d = direction.lower().strip()
+    reclaim_confirmed = False
+    rejection_confirmed = False
+    followthrough_confirmed = False
+    failed_reclaim = False
+    failed_rejection = False
+    confirm_speed = 0
 
-    if d == "long":
-        swept = l < sweep_level
-        reclaimed = c > sweep_level
-        if swept and reclaimed:
-            return ReclaimRejectResult(True, False, sweep_level, "reclaim_above")
+    for i, candle in enumerate(window.itertuples(index=False), 1):
+        c = float(getattr(candle, "close"))
+        h = float(getattr(candle, "high"))
+        l = float(getattr(candle, "low"))
+        if d == "long":
+            if l < sweep_level and c > sweep_level and not reclaim_confirmed:
+                reclaim_confirmed = True
+                confirm_speed = i
+            if reclaim_confirmed and c > sweep_level + fail_buffer:
+                followthrough_confirmed = True
+            if reclaim_confirmed and c < sweep_level - fail_buffer:
+                failed_reclaim = True
+        elif d == "short":
+            if h > sweep_level and c < sweep_level and not rejection_confirmed:
+                rejection_confirmed = True
+                confirm_speed = i
+            if rejection_confirmed and c < sweep_level - fail_buffer:
+                followthrough_confirmed = True
+            if rejection_confirmed and c > sweep_level + fail_buffer:
+                failed_rejection = True
 
-    elif d == "short":
-        swept = h > sweep_level
-        rejected = c < sweep_level
-        if swept and rejected:
-            return ReclaimRejectResult(False, True, sweep_level, "rejection_below")
-
+    if d == "long" and reclaim_confirmed:
+        return ReclaimRejectResult(
+            True,
+            False,
+            sweep_level,
+            "reclaim_above",
+            followthrough_confirmed=followthrough_confirmed,
+            failed_reclaim=failed_reclaim,
+            failed_rejection=False,
+            confirm_bars=confirm_speed,
+        )
+    if d == "short" and rejection_confirmed:
+        return ReclaimRejectResult(
+            False,
+            True,
+            sweep_level,
+            "rejection_below",
+            followthrough_confirmed=followthrough_confirmed,
+            failed_reclaim=False,
+            failed_rejection=failed_rejection,
+            confirm_bars=confirm_speed,
+        )
     return ReclaimRejectResult(False, False, sweep_level, "none")
 
 
@@ -260,6 +349,7 @@ def score_for_lane_v(
         "ema_vwap_stretch": ema_vwap_stretch,
         "large_wick": wick.wick_ratio >= min_wick_ratio,
         "reclaim_reject": reclaim_reject.reclaim_confirmed or reclaim_reject.rejection_confirmed,
+        "followthrough": reclaim_reject.followthrough_confirmed or wick.followthrough_confirmed,
         "funding_confirms": funding_confirms,
         "volume_spike": volume_spike,
     }
@@ -280,6 +370,8 @@ def score_for_lane_v(
         score += int(w_wick * wick_factor)
     if signals["reclaim_reject"]:
         score += w_reclaim
+    if signals["followthrough"]:
+        score += min(8, max(4, int(w_reclaim * 0.5)))
     if signals["funding_confirms"]:
         score += w_funding
     if signals["volume_spike"]:
@@ -303,4 +395,7 @@ def score_for_lane_v(
         "wick_score": wick.score,
         "wick_ratio": wick.wick_ratio,
         "wick_type": wick.wick_type,
+        "followthrough_confirmed": signals["followthrough"],
+        "failed_reclaim": reclaim_reject.failed_reclaim,
+        "failed_rejection": reclaim_reject.failed_rejection,
     }

@@ -3,7 +3,8 @@
 
 set -euo pipefail
 
-BOT_DIR="/mnt/sdcard/AA_MY_DRIVE/xlm_bot"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BOT_DIR="${CRYPTO_BOT_DIR:-$SCRIPT_DIR}"
 CONFIG_FILE="${XLM_CONFIG_FILE:-config.yaml}"
 CHECK_SEC="${XLM_GUARDIAN_CHECK_SEC:-12}"
 LOG_DIR_DEFAULT="$BOT_DIR/logs"
@@ -27,19 +28,20 @@ done
 
 cd "$BOT_DIR" || exit 1
 
-LOG_DIR="$(CONFIG_FILE="$CONFIG_FILE" python3 - <<'PY'
+LOG_DIR="$(BOT_DIR="$BOT_DIR" CONFIG_FILE="$CONFIG_FILE" python3 - <<'PY'
 from pathlib import Path
 import os
 import yaml
+bot_dir = Path(os.environ.get("BOT_DIR", "."))
 cfg_path=Path(os.environ.get("CONFIG_FILE","config.yaml"))
 if not cfg_path.is_absolute():
-  cfg_path=Path("/mnt/sdcard/AA_MY_DRIVE/xlm_bot")/cfg_path
+  cfg_path=bot_dir/cfg_path
 cfg=yaml.safe_load(cfg_path.read_text()) if cfg_path.exists() else {}
 paths=(cfg.get("paths") or {}) if isinstance(cfg,dict) else {}
 logs_dir=paths.get("logs_dir","logs")
 p=Path(logs_dir)
 if not p.is_absolute():
-  p=Path("/mnt/sdcard/AA_MY_DRIVE/xlm_bot")/p
+  p=bot_dir/p
 print(str(p))
 PY
 )"
@@ -64,4 +66,3 @@ while true; do
   fi
   sleep "$CHECK_SEC"
 done
-

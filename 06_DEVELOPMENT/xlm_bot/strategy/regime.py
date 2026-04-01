@@ -39,10 +39,12 @@ def session_gate(now: datetime, windows: list[dict]) -> bool:
     return False
 
 
-def distance_from_value_gate(price: float, ema21_1h: float, atr_1h: float, mult: float) -> bool:
+def distance_from_value_gate(price: float, ema21_1h: float, atr_1h: float, mult: float,
+                              breakout_mult: float = 0.0, atr_expanding: bool = False) -> bool:
     if ema21_1h <= 0 or atr_1h <= 0:
         return False
-    return abs(price - ema21_1h) <= mult * atr_1h
+    effective_mult = breakout_mult if (atr_expanding and breakout_mult > mult) else mult
+    return abs(price - ema21_1h) <= effective_mult * atr_1h
 
 
 def spread_gate(spread_estimate: float, max_pct: float) -> bool:
@@ -62,8 +64,21 @@ def run_regime_gates(
     gates = {}
     gates["atr_regime"] = atr_regime_gate(df_1h, config["regime_gates"]["atr_multiplier"])
     gates["session"] = session_gate(now, config["session_filter"]["windows"] if config["session_filter"]["enabled"] else [])
-    atr_1h = atr(df_1h, 14).iloc[-1] if not df_1h.empty else 0.0
-    gates["distance_from_value"] = distance_from_value_gate(price, ema21_1h, float(atr_1h), config["regime_gates"]["distance_from_value_atr_mult"])
+    atr_1h_series = atr(df_1h, 14) if not df_1h.empty else pd.Series(dtype=float)
+    atr_1h = float(atr_1h_series.iloc[-1]) if len(atr_1h_series) > 0 and not pd.isna(atr_1h_series.iloc[-1]) else 0.0
+    # Detect 1h ATR expansion: current ATR > 1.15x its 20-bar mean
+    atr_1h_expanding = False
+    if len(atr_1h_series) >= 20:
+        atr_1h_mean20 = atr_1h_series.rolling(20).mean().iloc[-1]
+        if not pd.isna(atr_1h_mean20) and atr_1h_mean20 > 0:
+            atr_1h_expanding = atr_1h > 1.15 * atr_1h_mean20
+    breakout_mult = float(config["regime_gates"].get("distance_from_value_breakout_mult", 4.0))
+    gates["distance_from_value"] = distance_from_value_gate(
+        price, ema21_1h, float(atr_1h),
+        config["regime_gates"]["distance_from_value_atr_mult"],
+        breakout_mult=breakout_mult,
+        atr_expanding=atr_1h_expanding,
+    )
     gates["spread"] = spread_gate(spread_estimate, config["regime_gates"]["spread_max_pct"])
     return gates
 

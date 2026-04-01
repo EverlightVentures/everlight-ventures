@@ -12,7 +12,7 @@
     {% endif %}
   </div>
   <span class="bot-status-label">
-    {% if bot_alive %}Engine Running{% else %}Engine Offline{% endif %}
+    {% if bot_alive %}The machine is hunting{% else %}Wolf is sleeping{% endif %}
   </span>
 </div>
 
@@ -27,7 +27,7 @@
     {% endif %}
   </div>
   <span class="bot-status-label">
-    {% if bot_state.open_position %}In Position{% else %}Flat{% endif %}
+    {% if bot_state.open_position %}Money on the table{% else %}Cash ready, stalking{% endif %}
   </span>
 </div>
 {% endif %}

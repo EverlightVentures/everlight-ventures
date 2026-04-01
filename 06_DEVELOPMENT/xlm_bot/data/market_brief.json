@@ -1,20 +1,30 @@
 {
   "brief": {
     "headline_bullets": [
-      "XLM down 8-10% today to ~$0.15 amid broader crypto sell-off over 5.5% due to geopolitical tensions[5][2]",
-      "Bitcoin and crypto market under pressure, no specific BTC price but correlated downside[5]",
-      "S&P 500/Nasdaq not detailed; focus on crypto/macro volatility with no Fed news today[5]",
-      "XLM technicals bearish: death cross, below all MAs, RSI nearing oversold[5][2][3]"
+      "Bitcoin and broader crypto markets in bearish consolidation with XLM down 34% over 3 months amid neutral technicals (RSI 56.13)",
+      "S&P 500/Nasdaq not directly covered; macro trends highlight global payment growth and regulatory clarity as tailwinds for utility tokens",
+      "Fed/macro news absent; focus on energy-efficient consensus aligning with ESG and institutional adoption drivers"
     ],
     "xlm_specific": [
-      "Short-term price pressure at $0.15, support $0.14, resistance $0.16; potential bounce to $0.18-0.20 if oversold triggers[2][3]",
-      "Bullish catalysts: CME XLM futures (Feb 9), MoneyGram/Circle partnerships, RWA/DeFi focus via Soroban[1]",
-      "Bearish signals: 26-27% 30d drop, declining volume, sellers in control[1][5]"
+      "RWA value nears $1B (up 10.8% recently), signaling real network growth and bullish foundation despite price hesitation",
+      "New developer toolkit with Soroban smart contracts accelerates ecosystem growth (March 15 update)",
+      "Price at ~$0.15-0.16 eyes $0.17-$0.25 breakout from oversold/consolidation; mixed signals with neutral RSI and potential above $0.16"
     ],
-    "risk_modifier": "risk_off",
-    "time_horizon": "24h",
-    "confidence": 0.85
+    "risk_modifier": "neutral",
+    "time_horizon": "7d",
+    "confidence": 0.75,
+    "macro_bullets": [
+      "Bitcoin and broader crypto markets in bearish consolidation with XLM down 34% over 3 months amid neutral technicals (RSI 56.13)",
+      "S&P 500/Nasdaq not directly covered; macro trends highlight global payment growth and regulatory clarity as tailwinds for utility tokens",
+      "Fed/macro news absent; focus on energy-efficient consensus aligning with ESG and institutional adoption drivers"
+    ],
+    "xlm_catalysts": [
+      "RWA value nears $1B (up 10.8% recently), signaling real network growth and bullish foundation despite price hesitation",
+      "New developer toolkit with Soroban smart contracts accelerates ecosystem growth (March 15 update)",
+      "Price at ~$0.15-0.16 eyes $0.17-$0.25 breakout from oversold/consolidation; mixed signals with neutral RSI and potential above $0.16"
+    ],
+    "horizon": "7d"
   },
-  "timestamp": "2026-02-28T19:16:46.560693+00:00",
-  "expires_ts": 1772307106.5607154
+  "timestamp": "2026-03-15T23:37:21.095553+00:00",
+  "expires_ts": 1773618741.0957255
 }

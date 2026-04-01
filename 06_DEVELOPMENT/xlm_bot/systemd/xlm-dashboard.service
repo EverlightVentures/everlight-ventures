@@ -5,12 +5,12 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/mnt/sdcard/AA_MY_DRIVE/xlm_bot
-ExecStart=/mnt/sdcard/AA_MY_DRIVE/xlm_bot/xdr-fg
+WorkingDirectory=/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/xlm_bot
+ExecStart=/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/xlm_bot/xdr-fg
 Restart=always
 RestartSec=3
-StandardOutput=append:/mnt/sdcard/AA_MY_DRIVE/xlm_bot/logs/dashboard_service.log
-StandardError=append:/mnt/sdcard/AA_MY_DRIVE/xlm_bot/logs/dashboard_service.log
+StandardOutput=append:/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/xlm_bot/logs/dashboard_service.log
+StandardError=append:/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/xlm_bot/logs/dashboard_service.log
 
 [Install]
 WantedBy=default.target

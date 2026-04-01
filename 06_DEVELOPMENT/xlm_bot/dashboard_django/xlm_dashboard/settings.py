@@ -5,13 +5,53 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 XLM_BOT_DIR = Path(os.environ.get("XLM_BOT_DIR", str(BASE_DIR.parent)))
 
+
+def _runtime_pair_score(data_dir: Path, logs_dir: Path) -> int:
+    score = 0
+    for path in (
+        logs_dir / "dashboard_snapshot.json",
+        logs_dir / "decisions.jsonl",
+        logs_dir / "live_tick.json",
+        data_dir / "weekly_playbook.json",
+        data_dir / "market_brief.json",
+        data_dir / "state.json",
+    ):
+        try:
+            if path.exists():
+                score = max(score, int(path.stat().st_mtime_ns))
+        except OSError:
+            continue
+    return score
+
+
+def _resolve_runtime_dirs() -> tuple[Path, Path]:
+    data_env = os.environ.get("XLM_DASH_DATA_DIR")
+    logs_env = os.environ.get("XLM_DASH_LOGS_DIR")
+    if data_env or logs_env:
+        data_dir = Path(data_env or str(XLM_BOT_DIR / "data"))
+        logs_dir = Path(logs_env or str(XLM_BOT_DIR / "logs"))
+        return data_dir.expanduser(), logs_dir.expanduser()
+
+    pairs = [
+        (XLM_BOT_DIR / "data", XLM_BOT_DIR / "logs"),
+        (XLM_BOT_DIR / "data_trend", XLM_BOT_DIR / "logs_trend"),
+        (XLM_BOT_DIR / "data_mr", XLM_BOT_DIR / "logs_mr"),
+    ]
+    best_data, best_logs = pairs[0]
+    best_score = -1
+    for data_dir, logs_dir in pairs:
+        score = _runtime_pair_score(data_dir, logs_dir)
+        if score > best_score:
+            best_score = score
+            best_data, best_logs = data_dir, logs_dir
+    return best_data, best_logs
+
 SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "dev-xlm-dashboard-insecure-change-in-prod")
 DEBUG = os.environ.get("DJANGO_DEBUG", "1") == "1"
 ALLOWED_HOSTS = ["*"]
 
 # -- XLM Bot data paths --
-XLM_DATA_DIR = Path(os.environ.get("XLM_DASH_DATA_DIR", str(XLM_BOT_DIR / "data")))
-XLM_LOGS_DIR = Path(os.environ.get("XLM_DASH_LOGS_DIR", str(XLM_BOT_DIR / "logs")))
+XLM_DATA_DIR, XLM_LOGS_DIR = _resolve_runtime_dirs()
 XLM_EXCHANGE_READ = os.environ.get("XLM_DASH_EXCHANGE_READ", "1") == "1"
 XLM_WORKSPACE_ROOT = Path(os.environ.get("WORKSPACE_ROOT", "/mnt/sdcard/AA_MY_DRIVE"))
 

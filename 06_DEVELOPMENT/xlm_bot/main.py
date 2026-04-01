@@ -84,6 +84,7 @@ from alerts import slack_reports as _slack_reports
 from alerts import slack_intel
 from ai import claude_advisor as ai_advisor
 from strategy.hindsight import analyze_missed_trades, scan_opportunities
+from strategy.macro_vision import get_vision_summary
 from ai import gemini_advisor
 from ai import perplexity_advisor
 from ai import codex_advisor
@@ -9759,6 +9760,26 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 "ai_directive": _ai_d_entry,
             })
         else:
+            # Macro Vision: cycle-aware intelligence
+            _macro_vision = {}
+            try:
+                _mv_btc = float(_st.get("btc_price", 0) or 0)
+                _mv_btc_chg = float(_st.get("btc_momentum_pct", 0) or 0) * 100
+                _macro_vision = get_vision_summary(price, df_1h, df_4h, _mv_btc, _mv_btc_chg)
+                if _macro_vision:
+                    log_decision(config, {
+                        "timestamp": now.isoformat(),
+                        "reason": "macro_vision",
+                        "phase": _macro_vision.get("phase", ""),
+                        "bias": _macro_vision.get("combined_bias", ""),
+                        "risk": _macro_vision.get("risk", ""),
+                        "position_mult": _macro_vision.get("position_mult", 1.0),
+                        "aligned": _macro_vision.get("aligned", False),
+                        "targets": (_macro_vision.get("macro") or {}).get("targets"),
+                        "thought": "; ".join(_macro_vision.get("capture_tips", [])),
+                    })
+            except Exception:
+                pass
             # Hindsight: analyze missed trades + scan opportunities
             try:
                 _hindsight = analyze_missed_trades(df_15m, df_1h, str(DATA_DIR / "decisions.jsonl"), lookback_hours=6)

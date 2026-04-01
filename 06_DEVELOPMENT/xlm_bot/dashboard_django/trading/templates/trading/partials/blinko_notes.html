@@ -1,0 +1,28 @@
+{% comment %}
+  Blinko knowledge base notes -- trading rules/lessons from the vault.
+  Context: blinko_notes (list of dicts with content, created, updated, tags)
+{% endcomment %}
+
+{% if blinko_notes %}
+<div class="blinko-notes">
+  {% for note in blinko_notes %}
+  <div class="blinko-note">
+    <div class="blinko-note-content">{{ note.content|truncatewords:60 }}</div>
+    {% if note.tags %}
+    <div class="blinko-note-tags">
+      {% for tag in note.tags %}
+      <span class="blinko-tag">{{ tag }}</span>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% if note.updated %}
+    <div class="blinko-note-time">{{ note.updated }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div style="font-size:0.8rem;color:#6b7280;padding:8px 0;">
+  Blinko offline or no notes found. The knowledge vault will populate when the connection is live.
+</div>
+{% endif %}

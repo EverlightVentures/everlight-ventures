@@ -8,6 +8,9 @@ set -e
 
 BOT_DIR="$HOME/xlm-bot"
 VENV="$BOT_DIR/venv"
+RUNTIME_ENV_FILE="$BOT_DIR/secrets/runtime.env"
+N8N_GDOCS_WEBHOOK_DEFAULT="${N8N_GDOCS_WEBHOOK:-http://127.0.0.1:5678/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdoc}"
+GDOCS_QUEUE_DIR_DEFAULT="${GDOCS_QUEUE_DIR:-$BOT_DIR/logs/gdocs_queue}"
 
 echo "======================================================="
 echo "  XLM Bot -- Oracle Linux 9 Native Setup"
@@ -56,6 +59,9 @@ echo "  OK: $($PY_CMD --version)"
 echo ""
 echo "[3/7] Creating directory structure..."
 mkdir -p "$BOT_DIR"/{secrets,data,logs}
+mkdir -p "$GDOCS_QUEUE_DIR_DEFAULT"
+touch "$RUNTIME_ENV_FILE"
+chmod 600 "$RUNTIME_ENV_FILE"
 echo "  OK: $BOT_DIR created"
 
 # ── 4. Create virtual environment ────────────────────────────────────
@@ -109,16 +115,19 @@ Wants=network-online.target
 Type=simple
 User=$USER
 WorkingDirectory=$BOT_DIR
+EnvironmentFile=-$RUNTIME_ENV_FILE
 Environment=IDLE_SLEEP=30
 Environment=IN_TRADE_SLEEP=5
 Environment=COINBASE_CONFIG_PATH=$BOT_DIR/secrets/config.json
 Environment=CRYPTO_BOT_DIR=$BOT_DIR
+Environment=N8N_GDOCS_WEBHOOK=$N8N_GDOCS_WEBHOOK_DEFAULT
+Environment=GDOCS_QUEUE_DIR=$GDOCS_QUEUE_DIR_DEFAULT
 Environment=TZ=America/Los_Angeles
-ExecStart=$BOT_DIR/run-bot.sh
+ExecStart=/bin/bash $BOT_DIR/run-bot.sh
 Restart=always
 RestartSec=5
-StandardOutput=append:$BOT_DIR/logs/xpb_service.log
-StandardError=append:$BOT_DIR/logs/xpb_service.log
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
@@ -135,15 +144,16 @@ Wants=network-online.target
 Type=simple
 User=$USER
 WorkingDirectory=$BOT_DIR
+EnvironmentFile=-$RUNTIME_ENV_FILE
 Environment=COINBASE_CONFIG_PATH=$BOT_DIR/secrets/config.json
 Environment=CRYPTO_BOT_DIR=$BOT_DIR
 Environment=TZ=America/Los_Angeles
 Environment=XLM_DASH_EXCHANGE_READ=1
-ExecStart=$BOT_DIR/run-dashboard.sh
+ExecStart=/bin/bash $BOT_DIR/run-dashboard.sh
 Restart=always
 RestartSec=5
-StandardOutput=append:$BOT_DIR/logs/dashboard_service.log
-StandardError=append:$BOT_DIR/logs/dashboard_service.log
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
@@ -160,19 +170,83 @@ Wants=network-online.target
 Type=simple
 User=$USER
 WorkingDirectory=$BOT_DIR
+EnvironmentFile=-$RUNTIME_ENV_FILE
 Environment=TZ=America/Los_Angeles
-ExecStart=$BOT_DIR/run-ws.sh
+ExecStart=/bin/bash $BOT_DIR/run-ws.sh
 Restart=always
 RestartSec=5
-StandardOutput=append:$BOT_DIR/logs/ws_service.log
-StandardError=append:$BOT_DIR/logs/ws_service.log
+StandardOutput=journal
+StandardError=journal
 
 [Install]
 WantedBy=multi-user.target
 SVCEOF
 
+# Liquidation feed service
+sudo tee /etc/systemd/system/xlm-liqfeed.service > /dev/null << SVCEOF
+[Unit]
+Description=XLM Bot Binance Liquidation Feed
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=$USER
+WorkingDirectory=$BOT_DIR
+EnvironmentFile=-$RUNTIME_ENV_FILE
+Environment=CRYPTO_BOT_DIR=$BOT_DIR
+Environment=BINANCE_LIQ_SYMBOL=XLMUSDT
+Environment=TZ=America/Los_Angeles
+ExecStart=/bin/bash -lc 'cd "$BOT_DIR" && source "$VENV/bin/activate" && python liquidation_feed_runner.py'
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
+SVCEOF
+
+# Watchtower service
+sudo tee /etc/systemd/system/xlm-watchtower.service > /dev/null << SVCEOF
+[Unit]
+Description=XLM Bot Trading Watchtower Sync
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=$USER
+WorkingDirectory=$BOT_DIR
+EnvironmentFile=-$RUNTIME_ENV_FILE
+Environment=CRYPTO_BOT_DIR=$BOT_DIR
+Environment=COINBASE_CONFIG_PATH=$BOT_DIR/secrets/config.json
+Environment=N8N_GDOCS_WEBHOOK=$N8N_GDOCS_WEBHOOK_DEFAULT
+Environment=GDOCS_QUEUE_DIR=$GDOCS_QUEUE_DIR_DEFAULT
+Environment=WATCHTOWER_PUSH_SUPABASE=1
+Environment=TZ=America/Los_Angeles
+ExecStart=/bin/bash -lc 'cd "$BOT_DIR" && source "$VENV/bin/activate" && python trading_watchtower_sync.py'
+StandardOutput=journal
+StandardError=journal
+SVCEOF
+
+# Watchtower timer
+sudo tee /etc/systemd/system/xlm-watchtower.timer > /dev/null << 'SVCEOF'
+[Unit]
+Description=Run XLM Trading Watchtower every minute
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=60s
+AccuracySec=10s
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+SVCEOF
+
 sudo systemctl daemon-reload
-echo "  OK: 3 systemd services created"
+echo "  OK: bot, dashboard, websocket, liquidation, and watchtower units created"
 
 # ── Create runner scripts (server-native, no hardcoded phone paths) ──
 cat > "$BOT_DIR/run-bot.sh" << 'RUNEOF'

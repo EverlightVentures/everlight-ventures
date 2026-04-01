@@ -28,7 +28,7 @@ from ai.prompts import entry_prompt, exit_prompt, regime_prompt, master_directiv
 _ENABLED: bool = False
 _CACHE_PATH: Path = Path(__file__).parent.parent / "data" / "ai_insight.json"
 _TRADES_PATH: Path = Path(__file__).parent.parent / "logs" / "trades.csv"
-_MODEL: str = "gemini-1.5-pro-latest"
+_MODEL: str = "gemini-2.0-flash"
 _GEMINI_BIN: str = "/root/.local/bin/gemini"
 _GMX_BIN: Path = Path(
     os.environ.get("GMX_DELEGATE_BIN")
@@ -60,7 +60,7 @@ def init(config: dict | None = None) -> None:
             _ENABLED = False
             return
 
-    _MODEL = str(gemini_cfg.get("model", "gemini-1.5-pro-latest"))
+    _MODEL = str(gemini_cfg.get("model", "gemini-2.0-flash"))
     _CONFIG = gemini_cfg
     _ENABLED = True
     
@@ -367,7 +367,7 @@ def audit_decision(
         "- Max daily loss: 10% of equity\n"
         "- Max trades/day: 8\n"
         "- Max losses/day: 5\n"
-        "- Size limits: Max 5 contracts. Reduce size after 2 consecutive losses.\n"
+        "- Size limits: Max 2 contracts. Reduce size after 2 consecutive losses.\n"
         "- Cooldown: 10 mins mandatory after any loss.\n\n"
         "Respond ONLY with valid JSON (Risk Math Report):\n"
         "{\n"

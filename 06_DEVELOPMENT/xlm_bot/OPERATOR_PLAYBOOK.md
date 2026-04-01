@@ -108,7 +108,7 @@
 - Role:
   Gemini provides long-context analysis and a "second opinion" to counter Claude's potential tunnel vision.
 - Enable in `config.yaml`:
-  Set `ai.gemini.enabled: true`. Defaults to `gemini-1.5-pro-latest`.
+  Set `ai.gemini.enabled: true`. Defaults to `gemini-2.0-flash`.
 - What gets logged:
   `gemini_entry_eval`, `gemini_exit_advice`, `gemini_regime`, and `gemini_directive` are cached in `data/ai_insight.json`.
 - Decision visibility:

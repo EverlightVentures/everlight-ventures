@@ -8,10 +8,16 @@
     {% if snap.direction %}
       {{ snap.direction|direction_badge }}
     {% endif %}
+    {% if snap.lane_v_mode %}
+      <span class="pill" style="font-size:10px;background:rgba(96,165,250,0.12);color:#60a5fa;">Lane V {{ snap.lane_v_mode|upper }}</span>
+    {% endif %}
     {% if snap.v4_selected_score %}
       <span class="pill" style="font-size:10px;">Score {{ snap.v4_selected_score|floatformat:0 }}</span>
     {% endif %}
   </div>
+  {% if snap.lane_v_no_trade_reason %}
+    <div style="font-size:0.75rem;color:#9ca3af;margin-top:6px;">{{ snap.lane_v_no_trade_reason }}</div>
+  {% endif %}
 </div>
 {% else %}
 <div class="feed-mini" style="color:#6b7280;">No active signal.</div>

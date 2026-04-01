@@ -1,6 +1,6 @@
 from django.views.generic import TemplateView
 
-from trading.services import file_reader, exchange, formatters, events, position, market
+from trading.services import file_reader, exchange, formatters, events, position, market, blinko
 
 
 def _is_htmx(request):
@@ -68,5 +68,8 @@ class TerminalView(TemplateView):
 
         # Operator metrics
         ctx["op_metrics"] = market.operator_metrics(ctx["decisions"], trades_df, cfg)
+
+        # Blinko knowledge notes
+        ctx["blinko_notes"] = blinko.fetch_notes(size=5)
 
         return ctx

@@ -442,6 +442,23 @@ def evaluate_entry(
     """Fire background entry evaluation with full chart context.  Non-blocking."""
     if not _ENABLED or not _CONFIG.get("pre_entry_enabled", True):
         return
+
+    # FIX 7: Hard override -- FLAT during COMPRESSION unless compression_range active
+    vol_state = (expansion_state or {}).get("phase", "unknown")
+    is_compression_range = decision.get("entry_signal") == "compression_range" or decision.get("lane_label") == "G"
+    if vol_state == "COMPRESSION" and not is_compression_range:
+        # Write a FLAT directive directly to cache -- skip the Claude call entirely
+        flat_result = {
+            "action": "FLAT",
+            "verdict": "skip",
+            "confidence": 0.95,
+            "score_adjustment": -20,
+            "reasoning": "COMPRESSION regime -- blocking entry. No vol = no edge. Wait for IGNITION/EXPANSION.",
+            "warnings": ["compression_gate_active"],
+        }
+        _write_cache("entry_eval", flat_result, ttl=60)
+        return
+
     signal = {
         "direction": decision.get("direction"),
         "entry_type": decision.get("entry_signal"),
@@ -460,6 +477,9 @@ def evaluate_entry(
         "recovery_mode": decision.get("recovery_mode", "NORMAL"),
         "htf_macro_bias": decision.get("htf_macro_bias"),
         "btc_trend": decision.get("btc_trend"),
+        "vol_state": (expansion_state or {}).get("phase", "unknown"),
+        "vol_state_duration": (expansion_state or {}).get("confidence", 0),
+        "vol_direction": (expansion_state or {}).get("direction", "NEUTRAL"),
     }
     price = float(decision.get("price") or 0)
     prompt = entry_prompt(

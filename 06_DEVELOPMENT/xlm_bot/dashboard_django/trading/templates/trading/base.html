@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="XLM Perp Trading Dashboard -- Everlight Ventures">
+  <meta name="description" content="The Wolf's Trading Terminal -- Everlight Ventures">
   <meta name="theme-color" content="#0a0a0f">
   <title>{% block title %}{{ app_name }} Dashboard{% endblock %}</title>
 
@@ -716,7 +716,7 @@
             <polygon class="hex-fill" points="20,2 36,11 36,29 20,38 4,29 4,11" />
           </svg>
         </div>
-        <span class="sidebar-title">Trading Center</span>
+        <span class="sidebar-title">The Wolf's Den</span>
       </div>
       <div class="sidebar-subtitle">EVERLIGHT VENTURES</div>
     </div>
@@ -799,12 +799,18 @@
         {% if bot_alive %}
         <div class="topbar-status-pill live">
           <span class="pill-dot"></span>
-          LIVE
+          HUNTING
         </div>
         {% else %}
         <div class="topbar-status-pill offline">
           <span class="pill-dot"></span>
-          OFFLINE
+          RELOADING
+        </div>
+        {% endif %}
+        {% if snap_stale %}
+        <div class="topbar-status-pill" style="background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);">
+          <i class="fa-solid fa-triangle-exclamation" style="font-size:0.6rem;"></i>
+          STALE DATA{% if snap_age_s %} ({{ snap_age_s }}s){% endif %}
         </div>
         {% endif %}
 
@@ -822,7 +828,7 @@
 
     <!-- Footer -->
     <footer class="trading-footer">
-      <span>Everlight Ventures</span> | {{ app_name }} Dashboard
+      <span>Everlight Ventures</span> | {{ app_name }} -- The only way to get rich is to not be afraid of losing
     </footer>
   </main>
 

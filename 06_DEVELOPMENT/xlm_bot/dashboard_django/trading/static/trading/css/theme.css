@@ -1808,3 +1808,55 @@ a:hover {
     font-size: 1.6rem;
   }
 }
+
+
+/* =====================================================================
+   BLINKO KNOWLEDGE NOTES
+   ===================================================================== */
+.blinko-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.blinko-note {
+  padding: 10px 14px;
+  background: rgba(139, 92, 246, 0.04);
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  border-left: 3px solid #8b5cf6;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.blinko-note:hover {
+  background: rgba(139, 92, 246, 0.08);
+  border-color: rgba(139, 92, 246, 0.2);
+}
+
+.blinko-note-content {
+  font-size: 0.82rem;
+  color: #d1d5db;
+  line-height: 1.55;
+}
+
+.blinko-note-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.blinko-tag {
+  font-size: 0.65rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(139, 92, 246, 0.12);
+  color: #a78bfa;
+  letter-spacing: 0.5px;
+}
+
+.blinko-note-time {
+  font-size: 0.68rem;
+  color: #6b7280;
+  margin-top: 4px;
+}

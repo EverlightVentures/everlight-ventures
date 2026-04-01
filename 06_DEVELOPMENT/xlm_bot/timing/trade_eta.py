@@ -1,6 +1,7 @@
 """Trade timing intelligence — close ETAs and next-entry estimates."""
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
 from typing import Any
 
@@ -29,6 +30,121 @@ _STATE_MULT = {
     "BUILDING": 1.0,
     "EXPANSION": 1.5,
 }
+
+
+def _safe_float(value: Any, default: float | None = None) -> float | None:
+    try:
+        if value is None or value == "":
+            return default
+        return float(value)
+    except Exception:
+        return default
+
+
+def _parse_dict(value: Any) -> dict[str, Any] | None:
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, str) and value.strip():
+        try:
+            parsed = json.loads(value)
+        except Exception:
+            return None
+        return parsed if isinstance(parsed, dict) else None
+    return None
+
+
+def _bias_matches(label: str | None, direction: str) -> bool:
+    text = str(label or "").strip().lower()
+    return bool(text and direction in text)
+
+
+def _describe_regime(regime: str | None, adx: float | None) -> str:
+    regime_txt = str(regime or "mixed").replace("_", " ").lower()
+    if adx is None:
+        return regime_txt
+    if adx >= 25:
+        return f"{regime_txt} with strong trend pressure"
+    if adx >= 20:
+        return f"{regime_txt} with building trend pressure"
+    return f"{regime_txt} with weak trend pressure"
+
+
+def _pick_ready_contracts(last_decision: dict[str, Any]) -> int:
+    ladder = _parse_dict(last_decision.get("contract_ladder")) or {}
+    playbook_cap = int(_safe_float(last_decision.get("margin_playbook_max_new_contracts"), 1) or 1)
+    ready_sizes: list[int] = []
+    for key, data in ladder.items():
+        item = _parse_dict(data) if not isinstance(data, dict) else data
+        if not item:
+            continue
+        try:
+            target = int(item.get("target_size") or key)
+        except Exception:
+            continue
+        if target <= max(playbook_cap, 1) and bool(item.get("ready")):
+            ready_sizes.append(target)
+    return max(ready_sizes) if ready_sizes else 1
+
+
+def _build_forecast_candidate(
+    *,
+    direction: str,
+    score: int,
+    threshold: int,
+    play: dict[str, Any] | None,
+    last_decision: dict[str, Any],
+) -> dict[str, Any]:
+    readiness = (score / max(threshold, 1) * 100.0) if threshold > 0 else 0.0
+    play_readiness = _safe_float((play or {}).get("readiness_pct"), readiness) or readiness
+    trigger_price = _safe_float((play or {}).get("trigger_price"))
+    distance_atr = _safe_float((play or {}).get("distance_atr"))
+    level_name = str((play or {}).get("level_name") or "trigger zone")
+    block_reason = str(last_decision.get(f"{direction}_block_reason") or "").strip()
+    htf_readiness = str(last_decision.get("htf_readiness") or "")
+    weekly_bias = str(last_decision.get("weekly_research_bias") or "")
+    weekly_xlm_bias = str(last_decision.get("weekly_research_xlm_bias") or "")
+    weekly_conf = _safe_float(last_decision.get("weekly_research_confidence"), 0.0) or 0.0
+    adx = _safe_float(last_decision.get("v4_adx_15m"))
+    market_regime = str(last_decision.get("market_regime") or last_decision.get("v4_regime") or "")
+    lane_label = str(last_decision.get(f"lane_{direction}_label") or last_decision.get("lane_label") or "").strip()
+
+    weighted = readiness * 0.55 + play_readiness * 0.20
+    if _bias_matches(htf_readiness, direction):
+        weighted += 18
+    if _bias_matches(weekly_xlm_bias, direction):
+        weighted += 14 * max(0.35, weekly_conf)
+    if _bias_matches(weekly_bias, direction):
+        weighted += 8 * max(0.35, weekly_conf)
+    if adx is not None:
+        if adx >= 25:
+            weighted += 8
+        elif adx < 18:
+            weighted -= 6
+    if "compression" in market_regime.lower():
+        weighted -= 7
+    if block_reason:
+        weighted -= 12
+    if lane_label:
+        weighted += 4
+
+    return {
+        "direction": direction,
+        "score": score,
+        "threshold": threshold,
+        "weighted": round(weighted, 2),
+        "readiness_pct": round(max(readiness, play_readiness), 1),
+        "trigger_price": trigger_price,
+        "distance_atr": distance_atr,
+        "level_name": level_name,
+        "lane_label": lane_label,
+        "block_reason": block_reason or None,
+        "market_regime": market_regime,
+        "adx": adx,
+        "htf_readiness": htf_readiness,
+        "weekly_bias": weekly_bias,
+        "weekly_xlm_bias": weekly_xlm_bias,
+        "weekly_confidence": weekly_conf,
+    }
 
 
 # ── Close ETA ────────────────────────────────────────────────────────
@@ -173,6 +289,10 @@ def estimate_next_entry(
     thresh_l = int(last_decision.get("v4_threshold_long") or 55)
     thresh_s = int(last_decision.get("v4_threshold_short") or 55)
     thought = str(last_decision.get("thought") or "")
+    price_now = _safe_float(last_decision.get("price"), 0.0) or 0.0
+    contract_size = _safe_float(last_decision.get("contract_size"), 5000.0) or 5000.0
+    next_long = _parse_dict(last_decision.get("next_play_long"))
+    next_short = _parse_dict(last_decision.get("next_play_short"))
 
     if score_s >= score_l:
         best_score, best_thresh, best_dir = score_s, thresh_s, "short"
@@ -258,11 +378,151 @@ def estimate_next_entry(
     else:
         result["avg_gap_min"] = None
 
+    # Build richer forecast
+    long_candidate = _build_forecast_candidate(
+        direction="long",
+        score=score_l,
+        threshold=thresh_l,
+        play=next_long,
+        last_decision=last_decision,
+    )
+    short_candidate = _build_forecast_candidate(
+        direction="short",
+        score=score_s,
+        threshold=thresh_s,
+        play=next_short,
+        last_decision=last_decision,
+    )
+    forecast = long_candidate if long_candidate["weighted"] >= short_candidate["weighted"] else short_candidate
+    planned_contracts = _pick_ready_contracts(last_decision)
+    result["forecast_direction"] = forecast["direction"]
+    result["forecast_contracts"] = planned_contracts
+    result["forecast_lane"] = forecast.get("lane_label")
+    result["forecast_trigger_price"] = forecast.get("trigger_price")
+    result["forecast_trigger_label"] = forecast.get("level_name")
+    result["forecast_readiness_pct"] = forecast.get("readiness_pct")
+    result["forecast_weighted_score"] = forecast.get("weighted")
+    result["forecast_block_reason"] = forecast.get("block_reason")
+
+    distance_atr = _safe_float(forecast.get("distance_atr"))
+    trigger_price = _safe_float(forecast.get("trigger_price"))
+    atr_est = None
+    if price_now > 0 and trigger_price and distance_atr and distance_atr > 0:
+        atr_est = abs(price_now - trigger_price) / distance_atr
+    elif price_now > 0:
+        atr_est = price_now * 0.004
+
+    adx = _safe_float(forecast.get("adx"))
+    regime = str(forecast.get("market_regime") or state.get("vol_state") or "mixed")
+    expected_atr_mult = 0.8
+    if "expansion" in regime.lower():
+        expected_atr_mult = 1.2
+    elif "compression" in regime.lower():
+        expected_atr_mult = 0.6
+    if _bias_matches(str(forecast.get("htf_readiness") or ""), forecast["direction"]):
+        expected_atr_mult += 0.2
+    if _bias_matches(str(forecast.get("weekly_xlm_bias") or ""), forecast["direction"]):
+        expected_atr_mult += 0.15
+    if adx is not None and adx >= 25:
+        expected_atr_mult += 0.15
+    expected_atr_mult = min(1.8, max(0.45, expected_atr_mult))
+
+    if atr_est and atr_est > 0 and trigger_price and trigger_price > 0:
+        move_points = atr_est * expected_atr_mult
+        stop_points = max(atr_est * 0.55, trigger_price * 0.0015)
+        target_price = trigger_price + move_points if forecast["direction"] == "long" else trigger_price - move_points
+        profit_per_contract = move_points * contract_size
+        result["forecast_target_price"] = round(target_price, 6)
+        result["forecast_move_points"] = round(move_points, 6)
+        result["forecast_move_bps"] = round((move_points / trigger_price) * 10000, 1)
+        result["forecast_profit_per_contract_usd"] = round(profit_per_contract, 2)
+        result["forecast_profit_total_usd"] = round(profit_per_contract * planned_contracts, 2)
+        result["forecast_rr"] = round(move_points / max(stop_points, 1e-9), 2)
+    else:
+        result["forecast_target_price"] = None
+        result["forecast_move_points"] = None
+        result["forecast_move_bps"] = None
+        result["forecast_profit_per_contract_usd"] = None
+        result["forecast_profit_total_usd"] = None
+        result["forecast_rr"] = None
+
+    eta_low = None
+    eta_high = None
+    if blocking:
+        if result.get("avg_gap_min"):
+            eta_low = float(result["avg_gap_min"])
+            eta_high = eta_low * 1.35
+    else:
+        readiness = float(forecast.get("readiness_pct") or 0.0)
+        if readiness >= 95 and (distance_atr is not None and distance_atr <= 0.25):
+            eta_low, eta_high = 3.0, 12.0
+        elif readiness >= 85 and (distance_atr is not None and distance_atr <= 0.45):
+            eta_low, eta_high = 10.0, 30.0
+        elif readiness >= 70:
+            eta_low, eta_high = 20.0, 75.0
+        elif result.get("avg_gap_min"):
+            avg_gap = float(result["avg_gap_min"])
+            eta_low, eta_high = avg_gap * 0.7, avg_gap * 1.3
+        else:
+            eta_low, eta_high = 45.0, 180.0
+        if "compression" in regime.lower():
+            eta_low *= 1.2
+            eta_high *= 1.35
+        elif "expansion" in regime.lower():
+            eta_low *= 0.75
+            eta_high *= 0.85
+
+    result["estimated_min"] = round(eta_low, 1) if eta_low is not None else None
+    result["estimated_window_max_min"] = round(eta_high, 1) if eta_high is not None else None
+    if eta_low is not None and eta_high is not None:
+        if eta_high - eta_low < 5:
+            result["eta_window_display"] = f"~{_fmt_dur(eta_low)}"
+        else:
+            result["eta_window_display"] = f"{_fmt_dur(eta_low)}-{_fmt_dur(eta_high)}"
+    else:
+        result["eta_window_display"] = "Watching..."
+
+    bias_parts: list[str] = []
+    weekly_xlm_bias = str(forecast.get("weekly_xlm_bias") or "").strip().lower()
+    weekly_bias = str(forecast.get("weekly_bias") or "").strip().lower()
+    htf_readiness = str(forecast.get("htf_readiness") or "").strip()
+    if weekly_xlm_bias and weekly_xlm_bias != "mixed":
+        bias_parts.append(f"weekly XLM bias {weekly_xlm_bias}")
+    if weekly_bias and weekly_bias != "mixed":
+        bias_parts.append(f"macro bias {weekly_bias}")
+    if htf_readiness:
+        bias_parts.append(f"HTF {htf_readiness.replace('_', ' ').lower()}")
+    bias_parts.append(_describe_regime(regime, adx))
+    result["htf_bias_summary"] = " | ".join(part for part in bias_parts if part)
+
+    if forecast["direction"] == "long":
+        result["timeframe_logic"] = (
+            f"Higher timeframes lean up, but the bot still wants a cleaner long trigger near "
+            f"{forecast.get('level_name') or 'support'} before paying up."
+        )
+    else:
+        result["timeframe_logic"] = (
+            f"Higher timeframes are not strong enough to force a breakout long, so the bot is still "
+            f"watching for a short fade or failed push near {forecast.get('level_name') or 'resistance'}."
+        )
+    if blocking:
+        result["timeframe_logic"] += f" Current blocker: {blocking}."
+    elif forecast.get("block_reason"):
+        result["timeframe_logic"] += f" Directional blocker: {forecast['block_reason']}."
+
+    result["price_logic"] = (
+        f"Current price ${price_now:.5f} vs trigger "
+        f"{('$' + format(trigger_price, '.5f')) if trigger_price else '—'}; "
+        f"stalking a {forecast['direction']} if readiness and structure stay aligned."
+    )
+
     # Build display string
     if blocking:
         result["estimated_display"] = f"Blocked: {blocking}"
     elif best_score >= best_thresh and best_score > 0:
         result["estimated_display"] = "Setup ready"
+    elif result.get("eta_window_display") and result["eta_window_display"] != "Watching...":
+        result["estimated_display"] = f"~{result['eta_window_display']}"
     elif result.get("avg_gap_min"):
         result["estimated_display"] = f"~{_fmt_dur(result['avg_gap_min'])}"
     else:

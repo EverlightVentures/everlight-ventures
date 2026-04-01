@@ -19,6 +19,9 @@ class ContractSnapshot:
     timestamp: str = ""
     mark_price: Optional[float] = None
     index_price: Optional[float] = None
+    price_change_24h_pct: Optional[float] = None
+    high_24h: Optional[float] = None
+    low_24h: Optional[float] = None
     basis: Optional[float] = None
     basis_bps: Optional[float] = None
     open_interest: Optional[float] = None
@@ -77,7 +80,11 @@ class ContractContext:
 
         ts_iso = datetime.now(timezone.utc).isoformat()
 
-        mark, oi_raw, cs, vol24 = self._fetch_perp_details()
+        perp = self._fetch_perp_details()
+        mark = perp.get("mark_price")
+        oi_raw = perp.get("open_interest")
+        cs = perp.get("contract_size")
+        vol24 = perp.get("volume_24h")
         index = self._fetch_index()
 
         basis = None
@@ -110,6 +117,9 @@ class ContractContext:
             timestamp=ts_iso,
             mark_price=mark,
             index_price=index,
+            price_change_24h_pct=_r(perp.get("price_change_24h_pct"), 4),
+            high_24h=_r(perp.get("high_24h"), 6),
+            low_24h=_r(perp.get("low_24h"), 6),
             basis=basis,
             basis_bps=_r(basis_bps, 2),
             open_interest=oi_raw,
@@ -147,20 +157,28 @@ class ContractContext:
     # Data fetching (all wrapped in try/except)
     # ------------------------------------------------------------------
 
-    def _fetch_perp_details(self) -> tuple[Optional[float], Optional[float], Optional[float], Optional[float]]:
-        """Returns (mark_price, open_interest, contract_size, volume_24h)."""
+    def _fetch_perp_details(self) -> dict[str, Optional[float]]:
+        """Returns contract market stats from the futures product payload."""
         try:
             d = self._api.get_product_details(self._perp_id)
             if not d:
-                return None, None, None, None
-            mark = _flt(d.get("price") or d.get("mid_market_price"))
+                return {}
+            mark = _flt(d.get("price") or d.get("mid_market_price") or d.get("mid"))
             fd = d.get("future_product_details") or {}
             oi = _flt(fd.get("open_interest"))
             cs = _flt(fd.get("contract_size"))
             vol = _flt(d.get("volume_24h"))
-            return mark, oi, cs, vol
+            return {
+                "mark_price": mark,
+                "open_interest": oi,
+                "contract_size": cs,
+                "volume_24h": vol,
+                "price_change_24h_pct": _flt(d.get("price_percentage_change_24h")),
+                "high_24h": _flt(d.get("high_24h")),
+                "low_24h": _flt(d.get("low_24h")),
+            }
         except Exception:
-            return None, None, None, None
+            return {}
 
     def _fetch_index(self) -> Optional[float]:
         """Returns spot/index price for the underlying."""
@@ -297,6 +315,10 @@ def _flt(v: Any) -> Optional[float]:
     if v is None:
         return None
     try:
+        if isinstance(v, str):
+            v = v.strip().replace(",", "")
+            if v.endswith("%"):
+                v = v[:-1]
         return float(v)
     except (ValueError, TypeError):
         return None

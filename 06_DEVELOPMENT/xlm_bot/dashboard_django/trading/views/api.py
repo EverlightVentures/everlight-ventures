@@ -3,7 +3,7 @@ import json
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 
-from trading.services import file_reader, exchange, formatters, events, market, position
+from trading.services import file_reader, exchange, formatters, events, market, position, blinko
 
 
 def _html(request, template, context):
@@ -115,4 +115,12 @@ def logs_tail(request):
     lines = file_reader.tail_log(log_type, n=50)
     return _html(request, "trading/partials/logs_tail.html", {
         "log_lines": lines, "log_type": log_type,
+    })
+
+
+def blinko_notes(request):
+    """Blinko knowledge base notes for Intel Hub."""
+    notes = blinko.fetch_notes(size=5)
+    return _html(request, "trading/partials/blinko_notes.html", {
+        "blinko_notes": notes,
     })

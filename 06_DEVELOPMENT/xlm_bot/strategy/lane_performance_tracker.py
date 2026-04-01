@@ -40,6 +40,7 @@ ENTRY_TYPE_TO_LANE: dict[str, str] = {
     "stat_arb_proxy": "S",
     "orderflow_imbalance": "T",
     "macro_ma_cross": "U",
+    "htf_breakout_continuation": "W",
     "ai_executive": "X",
 }
 

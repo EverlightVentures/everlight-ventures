@@ -8,7 +8,9 @@
 
 set -euo pipefail
 
-BOT_DIR="/mnt/sdcard/AA_MY_DRIVE/xlm_bot"
+# Resolve bot directory dynamically so this script works on phone and Oracle VM.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BOT_DIR="${CRYPTO_BOT_DIR:-$SCRIPT_DIR}"
 VENV="/tmp/xlm_bot_venv"
 cd "$BOT_DIR" || exit 1
 
@@ -49,31 +51,31 @@ pkill -f "xpb-fg --config $CONFIG_FILE" 2>/dev/null || true
 pkill -f "xpb-guardian --config $CONFIG_FILE" 2>/dev/null || true
 sleep 1
 
-is_paper="$(CONFIG_FILE="$CONFIG_FILE" python3 - <<'PY'
+is_paper="$(BOT_DIR="$BOT_DIR" CONFIG_FILE="$CONFIG_FILE" python3 - <<'PY'
 from pathlib import Path
 import os
 import yaml
 p=Path(os.environ.get("CONFIG_FILE", "config.yaml"))
 if not p.is_absolute():
-  p=Path("/mnt/sdcard/AA_MY_DRIVE/xlm_bot")/p
+  p=Path(os.environ.get("BOT_DIR","."))/p
 cfg=yaml.safe_load(p.read_text()) if p.exists() else {}
 print("true" if bool(cfg.get("paper", True)) else "false")
 PY
 )"
 
-LOG_DIR="$(CONFIG_FILE="$CONFIG_FILE" python3 - <<'PY'
+LOG_DIR="$(BOT_DIR="$BOT_DIR" CONFIG_FILE="$CONFIG_FILE" python3 - <<'PY'
 from pathlib import Path
 import os
 import yaml
 cfg_path=Path(os.environ.get("CONFIG_FILE","config.yaml"))
 if not cfg_path.is_absolute():
-  cfg_path=Path("/mnt/sdcard/AA_MY_DRIVE/xlm_bot")/cfg_path
+  cfg_path=Path(os.environ.get("BOT_DIR","."))/cfg_path
 cfg=yaml.safe_load(cfg_path.read_text()) if cfg_path.exists() else {}
 paths=(cfg.get("paths") or {}) if isinstance(cfg,dict) else {}
 logs_dir=paths.get("logs_dir","logs")
 p=Path(logs_dir)
 if not p.is_absolute():
-  p=Path("/mnt/sdcard/AA_MY_DRIVE/xlm_bot")/p
+  p=Path(os.environ.get("BOT_DIR","."))/p
 print(str(p))
 PY
 )"

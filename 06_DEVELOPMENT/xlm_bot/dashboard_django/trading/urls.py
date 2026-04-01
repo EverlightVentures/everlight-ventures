@@ -23,4 +23,5 @@ urlpatterns = [
     path("api/signals-current/", api.signals_current, name="api_signals_current"),
     path("api/major-events/", api.major_events, name="api_major_events"),
     path("api/logs-tail/", api.logs_tail, name="api_logs_tail"),
+    path("api/blinko-notes/", api.blinko_notes, name="api_blinko_notes"),
 ]

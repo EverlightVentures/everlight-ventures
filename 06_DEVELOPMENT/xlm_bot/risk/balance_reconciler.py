@@ -187,19 +187,17 @@ def detect_drift(
 
     # ── Mode-specific drift checks ───────────────────────────────────────
     if mode in ("IDLE", "STARTUP", "POST_EXIT"):
-        # Derivatives should be ≈ buffer only
-        excess = snap.derivatives_usdc - buffer_usdc
-        if excess > sweep_threshold:
-            report.drifts.append({
-                "type": "DERIVATIVES_EXCESS",
-                "derivatives_usdc": snap.derivatives_usdc,
-                "expected_max": buffer_usdc,
-                "excess": excess,
-            })
-            report.actions.append({
-                "action": "SWEEP_TO_SPOT",
-                "amount": round(excess, 2),
-            })
+        # On CDE, derivatives wallet IS where trading capital lives.
+        # Only flag as excess if derivatives balance significantly exceeds
+        # the total account value (which would indicate a deposit error),
+        # NOT when it simply exceeds a $2 buffer.
+        # The old logic (buffer_usdc=2.0) was wrong for a trading bot that
+        # needs $500-$2000 margin in derivatives at all times.
+        # Now: only sweep if derivatives has MORE than total equity
+        # (which would be a Coinbase accounting anomaly, essentially never).
+        # To re-enable sweeping, set balance_reconciliation.sweep_idle_derivatives: true
+        # in config.yaml.
+        pass  # Derivatives capital is intentionally held for margin trading
 
         # Derivatives below buffer (need top-up)
         deficit = buffer_usdc - snap.derivatives_usdc

@@ -30,12 +30,27 @@ def trading_globals(request):
             except (ValueError, TypeError):
                 price = None
 
+    # Staleness check -- warn if snapshot is older than 5 minutes
+    snap_stale = False
+    snap_age_s = None
+    if isinstance(snap, dict) and snap.get("timestamp"):
+        try:
+            from trading.services.file_reader import _coerce_ts_utc
+            snap_ts = _coerce_ts_utc(snap["timestamp"])
+            if snap_ts:
+                snap_age_s = int((datetime.now(timezone.utc) - snap_ts).total_seconds())
+                snap_stale = snap_age_s > 300
+        except Exception:
+            pass
+
     return {
         "now_pt": now_pt,
         "bot_alive": alive,
         "bot_age_s": bot_age_s,
         "current_price": price,
         "bot_state": state,
-        "app_name": "XLM PERP",
-        "app_version": "2.0",
+        "snap_stale": snap_stale,
+        "snap_age_s": snap_age_s,
+        "app_name": "Belfort Terminal",
+        "app_version": "2.1-wolf",
     }

@@ -61,7 +61,7 @@ position_sizing:
   min_contracts: 1           # PHASE 1: start with 1 contract, EARN the right to size up
   max_contracts: auto        # AUTO COMPOUND: floor(equity / equity_per_contract) — grows with every win
   equity_per_contract: 180   # default — overridden by margin window sizing below
-  max_contracts_hard_cap: 2  # SNIPER MODE: 2 contracts. $0.003 move = $60. Stop at 0.2% = $6.28. R:R = 10:1.
+  max_contracts_hard_cap: auto  # SNIPER MODE: 2 contracts. $0.003 move = $60. Stop at 0.2% = $6.28. R:R = 10:1.
   # Margin-window-aware sizing: conservative until bot proves itself
   margin_window_sizing:
     enabled: true
@@ -145,7 +145,7 @@ position_sizing:
     enabled: true
     stages:
       - label: BUILD_A
-        max_equity: 750
+        max_equity: 500
         max_contracts: 1
         base_risk_pct: 0.025
         max_risk_pct: 0.04
@@ -667,8 +667,8 @@ v4:
   scaling:
     enabled: true
     add_size_pct: 0.25
-    max_adds: 2
-    min_minutes_between_adds: 30
+    max_adds: 0
+    min_minutes_between_adds: 10
     profit_trigger_atr: 0.75
     projected_mr_prefer_lt: 0.90
     projected_mr_hard_lt: 0.95
@@ -829,7 +829,7 @@ v4:
     trail_atr_mult: 3.0
     require_oi_rising: false
     require_trend_regime: false
-    max_stale_bars: 12
+    max_stale_bars: 24
 
   runner_mode:
     enabled: true

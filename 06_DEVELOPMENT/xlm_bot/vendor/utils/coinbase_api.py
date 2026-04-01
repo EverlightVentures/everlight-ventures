@@ -5,6 +5,7 @@ Handles authentication and API calls to Coinbase Advanced Trade API
 Supports both legacy HMAC and newer JWT (ES256) authentication
 """
 
+from __future__ import annotations
 import time
 import json
 import logging
@@ -28,6 +29,9 @@ except ImportError:
     JWT_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
+
+_OPTIONAL_403_WARNED: set[str] = set()
+_DISABLED_OPTIONAL_PREFIXES: set[str] = set()
 
 
 class CoinbaseAPI:
@@ -64,6 +68,22 @@ class CoinbaseAPI:
 
         if sandbox:
             logger.info("Running in SANDBOX mode - no real trades")
+
+    @staticmethod
+    def _optional_403_prefix(path: str) -> str | None:
+        optional_prefixes = (
+            "/api/v3/brokerage/cfm/intraday/current_margin_window",
+            "/api/v3/brokerage/cfm/intraday/margin_setting",
+            "/api/v3/brokerage/cfm/sweeps",
+        )
+        for prefix in optional_prefixes:
+            if str(path).startswith(prefix):
+                return prefix
+        return None
+
+    def is_optional_endpoint_disabled(self, path: str) -> bool:
+        prefix = self._optional_403_prefix(path)
+        return bool(prefix and prefix in _DISABLED_OPTIONAL_PREFIXES)
 
     def _intx_allowed(self, path: str) -> bool:
         if "/intx/" in path and not self.use_perpetuals:
@@ -106,6 +126,10 @@ class CoinbaseAPI:
         request_params = None
 
         body = json.dumps(data) if data else ""
+        optional_prefix = self._optional_403_prefix(path)
+
+        if optional_prefix and optional_prefix in _DISABLED_OPTIONAL_PREFIXES:
+            return None
 
         if self.use_jwt:
             # JWT authentication - uri should NOT include query params
@@ -185,6 +209,14 @@ class CoinbaseAPI:
                     logger.error(f"Authentication failed (401) on {path} - check API keys")
                     return None
                 elif response.status_code == 403:
+                    if optional_prefix:
+                        _DISABLED_OPTIONAL_PREFIXES.add(optional_prefix)
+                        if optional_prefix not in _OPTIONAL_403_WARNED:
+                            logger.debug(
+                                f"Optional Coinbase endpoint forbidden (403): {optional_prefix} — using fallback behavior"
+                            )
+                            _OPTIONAL_403_WARNED.add(optional_prefix)
+                        return None
                     logger.error(f"Access forbidden (403) - check API permissions")
                     return None
                 elif response.status_code == 429:
@@ -364,6 +396,49 @@ class CoinbaseAPI:
                 return self._paginate(result, "accounts")
             return result["accounts"]
         return None
+
+    def get_account_by_currency(self, currency: str) -> Optional[dict]:
+        """Get the first active/ready account for a given currency."""
+        cc = str(currency or "").strip().upper()
+        if not cc:
+            return None
+        accounts = self.get_accounts()
+        if not accounts:
+            return None
+        candidates = []
+        for acc in accounts:
+            if not isinstance(acc, dict):
+                continue
+            if str(acc.get("currency") or "").upper() != cc:
+                continue
+            if acc.get("active") is False:
+                continue
+            if acc.get("ready") is False:
+                continue
+            candidates.append(acc)
+        if not candidates:
+            return None
+        candidates.sort(key=lambda a: 0 if a.get("default") else 1)
+        return candidates[0]
+
+    def create_convert_quote(self, from_account: str, to_account: str, amount: float) -> Optional[dict]:
+        """Create a convert quote using account UUIDs."""
+        endpoint = "/api/v3/brokerage/convert/quote"
+        data = {
+            "from_account": str(from_account),
+            "to_account": str(to_account),
+            "amount": str(amount),
+        }
+        return self._request("POST", endpoint, data=data)
+
+    def commit_convert_trade(self, trade_id: str, from_account: str, to_account: str) -> Optional[dict]:
+        """Commit a previously-created convert trade."""
+        endpoint = f"/api/v3/brokerage/convert/trade/{trade_id}"
+        data = {
+            "from_account": str(from_account),
+            "to_account": str(to_account),
+        }
+        return self._request("POST", endpoint, data=data)
 
     def get_products(self) -> Optional[List]:
         """Get all tradable products"""

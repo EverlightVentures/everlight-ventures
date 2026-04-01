@@ -22,6 +22,49 @@ Lane S -- Stat Arb Proxy     (threshold ~50, z-score mean reversion)
 Lane T -- Orderflow Imbalance (threshold ~65, volume delta proxy)
 Lane U -- Macro MA Cross     (threshold ~45, 200 MA breakout on higher TF)
 Lane V -- Liquidity Sweep    (threshold ~55, bidirectional liquidation heatmap strategy)
+Lane W -- HTF Breakout Continuation (threshold ~52, early weekly breakout continuation)
+Lane L -- Momentum Ignition  (threshold ~60, 3+ same-dir candles w/ expanding body+vol)
+Lane O -- ADX Trend Accel    (threshold ~55, ADX crosses above 25)
+Lane AA -- Supertrend Signal  (threshold ~50, supertrend flip)
+Lane AB -- Hull MA Cross      (threshold ~50, hull MA slope change)
+Lane AC -- BB Bounce          (threshold ~45, Bollinger Band bounce mean reversion)
+Lane AD -- RSI Divergence     (threshold ~55, RSI divergence entry)
+Lane AF -- Stochastic Extreme (threshold ~45, stochastic cross in OS/OB)
+Lane BB -- OI Divergence      (threshold ~60, open interest diverges from price)
+Lane BC -- Liquidation Cascade (threshold ~55, post-cascade mean reversion)
+Lane BD -- Basis Trade        (threshold ~45, spot-perp spread)
+Lane BH -- Order Block Entry  (threshold ~50, price returns to order block)
+Lane BI -- FVG Fill           (threshold ~45, fair value gap fill)
+Lane BK -- Market Structure Shift (threshold ~55, BOS/CHoCH)
+Lane CN -- ATR Channel Breakout (threshold ~55, ATR channel breakout)
+Lane CO -- Donchian Breakout  (threshold ~55, Donchian channel breakout)
+Lane CE -- Session Open Breakout (threshold ~55, session open breakout)
+Lane CF -- Power Hour Scalp   (threshold ~50, power hour scalp)
+Lane CG -- Weekend Gap Play   (threshold ~50, weekend gap mean reversion)
+Lane CH -- Rollover Period    (threshold ~50, rollover period mean reversion)
+Lane CI -- BTC Divergence     (threshold ~55, BTC divergence trend)
+Lane CJ -- Sector Rotation    (threshold ~60, sector rotation trend)
+Lane CM -- News Spike Fade    (threshold ~60, news spike fade mean reversion)
+Lane CP -- Keltner Bounce     (threshold ~45, Keltner channel bounce)
+Lane CQ -- Pivot Reversal     (threshold ~45, pivot point reversal)
+Lane CR -- Camarilla Pivot    (threshold ~50, Camarilla level mean reversion)
+Lane AE -- MACD Histogram Reversal (threshold ~50, MACD histogram reversal)
+Lane AG -- CCI Extreme        (threshold ~50, CCI extreme mean reversion)
+Lane AH -- Williams %R Reversal (threshold ~45, Williams %R reversal)
+Lane AI -- Volume Profile POC  (threshold ~50, volume profile POC entry)
+Lane AK -- Whale Alert        (threshold ~65, whale alert breakout)
+Lane BG -- Supply/Demand Zone (threshold ~50, supply_demand zone reversal)
+Lane BJ -- Breaker Block      (threshold ~55, breaker block breakout)
+Lane CA -- Change of Character (threshold ~60, CHoCH reversal)
+Lane CB -- BOS Continuation   (threshold ~50, BOS continuation trend)
+Lane CC -- Inducement Grab    (threshold ~50, inducement grab reversal)
+Lane CD -- Mitigation Block   (threshold ~50, mitigation block reversal)
+Lane X  -- MA Ribbon Entry    (threshold ~50, MA ribbon trend)
+Lane Y  -- Ichimoku Breakout  (threshold ~55, ichimoku cloud breakout)
+Lane Z  -- Parabolic SAR      (threshold ~50, SAR flip trend)
+Lane AJ -- Cumulative Delta Div (threshold ~60, delta divergence reversal)
+Lane BA -- Absorption Detect  (threshold ~55, absorption reversal)
+Lane BE -- Perp Premium Reversal (threshold ~50, premium reversal)
 """
 from __future__ import annotations
 
@@ -534,7 +577,7 @@ def select_lane(
         )
 
     # --- Lane V: Liquidity Sweep (bidirectional heatmap strategy) ---
-    if et == "liquidity_sweep" and bool(config.get("lane_v_enabled", True)):
+    if et.startswith("liquidity_sweep") and bool(config.get("lane_v_enabled", True)):
         thresh_v = int(config.get("lane_v_threshold", 55) or 55)
         return LaneResult(
             lane="V",
@@ -544,6 +587,566 @@ def select_lane(
             atr_gate_bypass=True,
             distance_gate_bypass=True,
             reason="liquidity_sweep_reversal_or_continuation",
+        )
+
+    # --- Lane W: Higher-Timeframe Breakout Continuation ---
+    if et == "htf_breakout_continuation" and bool(config.get("lane_w_enabled", True)):
+        thresh_w = int(config.get("lane_w_threshold", 52) or 52)
+        dist_bypass_w = bool(config.get("lane_w_distance_bypass", True))
+        return LaneResult(
+            lane="W",
+            label="htf_breakout",
+            threshold=thresh_w,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=dist_bypass_w,
+            reason="higher_timeframe_breakout_continuation",
+        )
+
+    # --- Lane L: Momentum Ignition (3+ same-dir candles, expanding body+vol) ---
+    if et.startswith("momentum_ignition") and bool(config.get("lane_l_enabled", True)):
+        thresh_l = int(config.get("lane_l_threshold", 60) or 60)
+        return LaneResult(
+            lane="L",
+            label="momentum_ignition",
+            threshold=thresh_l,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="momentum_ignition_expanding_bodies",
+        )
+
+    # --- Lane O: ADX Trend Acceleration (ADX crosses above 25) ---
+    if et == "adx_acceleration" and bool(config.get("lane_o_enabled", True)):
+        thresh_o = int(config.get("lane_o_threshold", 55) or 55)
+        return LaneResult(
+            lane="O",
+            label="adx_trend_accel",
+            threshold=thresh_o,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="adx_crosses_above_25",
+        )
+
+    # --- Lane AA: Supertrend Signal (supertrend flip) ---
+    if et == "supertrend_flip" and bool(config.get("lane_aa_enabled", True)):
+        thresh_aa = int(config.get("lane_aa_threshold", 50) or 50)
+        return LaneResult(
+            lane="AA",
+            label="supertrend_signal",
+            threshold=thresh_aa,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="supertrend_flip_signal",
+        )
+
+    # --- Lane AB: Hull MA Cross (hull MA slope change) ---
+    if et == "hull_ma_cross" and bool(config.get("lane_ab_enabled", True)):
+        thresh_ab = int(config.get("lane_ab_threshold", 50) or 50)
+        return LaneResult(
+            lane="AB",
+            label="hull_ma_cross",
+            threshold=thresh_ab,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="hull_ma_slope_change",
+        )
+
+    # --- Lane AC: BB Bounce (Bollinger Band bounce mean reversion) ---
+    if et == "bb_bounce" and bool(config.get("lane_ac_enabled", True)):
+        thresh_ac = int(config.get("lane_ac_threshold", 45) or 45)
+        return LaneResult(
+            lane="AC",
+            label="bb_bounce",
+            threshold=thresh_ac,
+            rescore_as="reversal_impulse",
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="bollinger_band_bounce",
+        )
+
+    # --- Lane AD: RSI Divergence Entry ---
+    if et == "rsi_divergence" and bool(config.get("lane_ad_enabled", True)):
+        thresh_ad = int(config.get("lane_ad_threshold", 55) or 55)
+        return LaneResult(
+            lane="AD",
+            label="rsi_divergence_entry",
+            threshold=thresh_ad,
+            rescore_as="reversal_impulse",
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="rsi_divergence_detected",
+        )
+
+    # --- Lane AF: Stochastic Extreme (stochastic cross in OS/OB) ---
+    if et == "stochastic_extreme" and bool(config.get("lane_af_enabled", True)):
+        thresh_af = int(config.get("lane_af_threshold", 45) or 45)
+        return LaneResult(
+            lane="AF",
+            label="stochastic_extreme",
+            threshold=thresh_af,
+            rescore_as=None,
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="stochastic_cross_extreme_zone",
+        )
+
+    # --- Lane BB: OI Divergence (open interest diverges from price) ---
+    if et == "oi_divergence" and bool(config.get("lane_bb_enabled", True)):
+        thresh_bb = int(config.get("lane_bb_threshold", 60) or 60)
+        return LaneResult(
+            lane="BB",
+            label="oi_divergence",
+            threshold=thresh_bb,
+            rescore_as="reversal_impulse",
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="oi_price_divergence",
+        )
+
+    # --- Lane BC: Liquidation Cascade (post-cascade mean reversion) ---
+    if et == "liquidation_cascade" and bool(config.get("lane_bc_enabled", True)):
+        thresh_bc = int(config.get("lane_bc_threshold", 55) or 55)
+        return LaneResult(
+            lane="BC",
+            label="liquidation_cascade",
+            threshold=thresh_bc,
+            rescore_as=None,
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="post_liquidation_cascade_reversion",
+        )
+
+    # --- Lane BD: Basis Trade (spot-perp spread) ---
+    if et == "basis_trade" and bool(config.get("lane_bd_enabled", True)):
+        thresh_bd = int(config.get("lane_bd_threshold", 45) or 45)
+        return LaneResult(
+            lane="BD",
+            label="basis_trade",
+            threshold=thresh_bd,
+            rescore_as=None,
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="spot_perp_basis_spread",
+        )
+
+    # --- Lane BH: Order Block Entry (price returns to order block) ---
+    if et == "order_block" and bool(config.get("lane_bh_enabled", True)):
+        thresh_bh = int(config.get("lane_bh_threshold", 50) or 50)
+        return LaneResult(
+            lane="BH",
+            label="order_block_entry",
+            threshold=thresh_bh,
+            rescore_as="reversal_impulse",
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="order_block_retest",
+        )
+
+    # --- Lane BI: FVG Fill (fair value gap fill) ---
+    if et == "fvg_fill" and bool(config.get("lane_bi_enabled", True)):
+        thresh_bi = int(config.get("lane_bi_threshold", 45) or 45)
+        return LaneResult(
+            lane="BI",
+            label="fvg_fill",
+            threshold=thresh_bi,
+            rescore_as=None,
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="fair_value_gap_fill",
+        )
+
+    # --- Lane BK: Market Structure Shift (BOS/CHoCH) ---
+    if et == "structure_shift" and bool(config.get("lane_bk_enabled", True)):
+        thresh_bk = int(config.get("lane_bk_threshold", 55) or 55)
+        return LaneResult(
+            lane="BK",
+            label="market_structure_shift",
+            threshold=thresh_bk,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="bos_choch_structure_shift",
+        )
+
+    # --- Lane CN: ATR Channel Breakout ---
+    if et == "atr_channel_break" and bool(config.get("lane_cn_enabled", True)):
+        thresh_cn = int(config.get("lane_cn_threshold", 55) or 55)
+        return LaneResult(
+            lane="CN",
+            label="atr_channel_breakout",
+            threshold=thresh_cn,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="atr_channel_breakout",
+        )
+
+    # --- Lane CO: Donchian Breakout ---
+    if et == "donchian_break" and bool(config.get("lane_co_enabled", True)):
+        thresh_co = int(config.get("lane_co_threshold", 55) or 55)
+        return LaneResult(
+            lane="CO",
+            label="donchian_breakout",
+            threshold=thresh_co,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="donchian_channel_breakout",
+        )
+
+    # --- Lane CE: Session Open Breakout ---
+    if et == "session_breakout" and bool(config.get("lane_ce_enabled", True)):
+        thresh_ce = int(config.get("lane_ce_threshold", 55) or 55)
+        return LaneResult(
+            lane="CE",
+            label="session_open_breakout",
+            threshold=thresh_ce,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="session_open_breakout",
+        )
+
+    # --- Lane CF: Power Hour Scalp ---
+    if et == "power_hour" and bool(config.get("lane_cf_enabled", True)):
+        thresh_cf = int(config.get("lane_cf_threshold", 50) or 50)
+        return LaneResult(
+            lane="CF",
+            label="power_hour_scalp",
+            threshold=thresh_cf,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="power_hour_scalp",
+        )
+
+    # --- Lane CG: Weekend Gap Play ---
+    if et == "weekend_gap" and bool(config.get("lane_cg_enabled", True)):
+        thresh_cg = int(config.get("lane_cg_threshold", 50) or 50)
+        return LaneResult(
+            lane="CG",
+            label="weekend_gap_play",
+            threshold=thresh_cg,
+            rescore_as="reversal_impulse",
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="weekend_gap_play",
+        )
+
+    # --- Lane CH: Rollover Period ---
+    if et == "rollover_play" and bool(config.get("lane_ch_enabled", True)):
+        thresh_ch = int(config.get("lane_ch_threshold", 50) or 50)
+        return LaneResult(
+            lane="CH",
+            label="rollover_period",
+            threshold=thresh_ch,
+            rescore_as=None,
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="rollover_period_play",
+        )
+
+    # --- Lane CI: BTC Divergence ---
+    if et == "btc_divergence" and bool(config.get("lane_ci_enabled", True)):
+        thresh_ci = int(config.get("lane_ci_threshold", 55) or 55)
+        return LaneResult(
+            lane="CI",
+            label="btc_divergence",
+            threshold=thresh_ci,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="btc_divergence_entry",
+        )
+
+    # --- Lane CJ: Sector Rotation ---
+    if et == "sector_rotation" and bool(config.get("lane_cj_enabled", True)):
+        thresh_cj = int(config.get("lane_cj_threshold", 60) or 60)
+        return LaneResult(
+            lane="CJ",
+            label="sector_rotation",
+            threshold=thresh_cj,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="sector_rotation_entry",
+        )
+
+    # --- Lane CM: News Spike Fade ---
+    if et == "news_fade" and bool(config.get("lane_cm_enabled", True)):
+        thresh_cm = int(config.get("lane_cm_threshold", 60) or 60)
+        return LaneResult(
+            lane="CM",
+            label="news_spike_fade",
+            threshold=thresh_cm,
+            rescore_as="reversal_impulse",
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="news_spike_fade",
+        )
+
+    # --- Lane CP: Keltner Bounce ---
+    if et == "keltner_bounce" and bool(config.get("lane_cp_enabled", True)):
+        thresh_cp = int(config.get("lane_cp_threshold", 45) or 45)
+        return LaneResult(
+            lane="CP",
+            label="keltner_bounce",
+            threshold=thresh_cp,
+            rescore_as="reversal_impulse",
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="keltner_channel_bounce",
+        )
+
+    # --- Lane CQ: Pivot Reversal ---
+    if et == "pivot_reversal" and bool(config.get("lane_cq_enabled", True)):
+        thresh_cq = int(config.get("lane_cq_threshold", 45) or 45)
+        return LaneResult(
+            lane="CQ",
+            label="pivot_reversal",
+            threshold=thresh_cq,
+            rescore_as="reversal_impulse",
+            atr_gate_bypass=True,
+            distance_gate_bypass=False,
+            reason="pivot_point_reversal",
+        )
+
+    # --- Lane CR: Camarilla Pivot ---
+    if et == "camarilla_level" and bool(config.get("lane_cr_enabled", True)):
+        thresh_cr = int(config.get("lane_cr_threshold", 50) or 50)
+        return LaneResult(
+            lane="CR",
+            label="camarilla_pivot",
+            threshold=thresh_cr,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="camarilla_level_entry",
+        )
+
+    # --- Lane AE: MACD Histogram Reversal ---
+    if et == "macd_reversal" and bool(config.get("lane_ae_enabled", True)):
+        thresh_ae = int(config.get("lane_ae_threshold", 50) or 50)
+        return LaneResult(
+            lane="AE",
+            label="macd_histogram_reversal",
+            threshold=thresh_ae,
+            rescore_as="reversal_impulse",
+            atr_gate_bypass=True,
+            distance_gate_bypass=False,
+            reason="macd_histogram_reversal",
+        )
+
+    # --- Lane AG: CCI Extreme ---
+    if et == "cci_extreme" and bool(config.get("lane_ag_enabled", True)):
+        thresh_ag = int(config.get("lane_ag_threshold", 50) or 50)
+        return LaneResult(
+            lane="AG",
+            label="cci_extreme",
+            threshold=thresh_ag,
+            rescore_as=None,
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="cci_extreme_entry",
+        )
+
+    # --- Lane AH: Williams %R Reversal ---
+    if et == "williams_r" and bool(config.get("lane_ah_enabled", True)):
+        thresh_ah = int(config.get("lane_ah_threshold", 45) or 45)
+        return LaneResult(
+            lane="AH",
+            label="williams_r_reversal",
+            threshold=thresh_ah,
+            rescore_as=None,
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="williams_r_reversal",
+        )
+
+    # --- Lane AI: Volume Profile POC ---
+    if et == "vp_poc_entry" and bool(config.get("lane_ai_enabled", True)):
+        thresh_ai = int(config.get("lane_ai_threshold", 50) or 50)
+        return LaneResult(
+            lane="AI",
+            label="volume_profile_poc",
+            threshold=thresh_ai,
+            rescore_as=None,
+            atr_gate_bypass=True,
+            distance_gate_bypass=False,
+            reason="volume_profile_poc_entry",
+        )
+
+    # --- Lane AK: Whale Alert ---
+    if et == "whale_alert" and bool(config.get("lane_ak_enabled", True)):
+        thresh_ak = int(config.get("lane_ak_threshold", 65) or 65)
+        return LaneResult(
+            lane="AK",
+            label="whale_alert",
+            threshold=thresh_ak,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="whale_alert_entry",
+        )
+
+    # --- Lane BG: Supply/Demand Zone ---
+    if et == "supply_demand" and bool(config.get("lane_bg_enabled", True)):
+        thresh_bg = int(config.get("lane_bg_threshold", 50) or 50)
+        return LaneResult(
+            lane="BG",
+            label="supply_demand_zone",
+            threshold=thresh_bg,
+            rescore_as="reversal_impulse",
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="supply_demand_zone_entry",
+        )
+
+    # --- Lane BJ: Breaker Block ---
+    if et == "breaker_block" and bool(config.get("lane_bj_enabled", True)):
+        thresh_bj = int(config.get("lane_bj_threshold", 55) or 55)
+        return LaneResult(
+            lane="BJ",
+            label="breaker_block",
+            threshold=thresh_bj,
+            rescore_as=None,
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="breaker_block_entry",
+        )
+
+    # --- Lane CA: Change of Character (CHoCH) ---
+    if et == "choch" and bool(config.get("lane_ca_enabled", True)):
+        thresh_ca = int(config.get("lane_ca_threshold", 60) or 60)
+        return LaneResult(
+            lane="CA",
+            label="change_of_character",
+            threshold=thresh_ca,
+            rescore_as="reversal_impulse",
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="change_of_character_reversal",
+        )
+
+    # --- Lane CB: BOS Continuation ---
+    if et == "bos_continuation" and bool(config.get("lane_cb_enabled", True)):
+        thresh_cb = int(config.get("lane_cb_threshold", 50) or 50)
+        return LaneResult(
+            lane="CB",
+            label="bos_continuation",
+            threshold=thresh_cb,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="bos_continuation_entry",
+        )
+
+    # --- Lane CC: Inducement Grab ---
+    if et == "inducement" and bool(config.get("lane_cc_enabled", True)):
+        thresh_cc = int(config.get("lane_cc_threshold", 50) or 50)
+        return LaneResult(
+            lane="CC",
+            label="inducement_grab",
+            threshold=thresh_cc,
+            rescore_as="reversal_impulse",
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="inducement_grab_entry",
+        )
+
+    # --- Lane CD: Mitigation Block ---
+    if et == "mitigation" and bool(config.get("lane_cd_enabled", True)):
+        thresh_cd = int(config.get("lane_cd_threshold", 50) or 50)
+        return LaneResult(
+            lane="CD",
+            label="mitigation_block",
+            threshold=thresh_cd,
+            rescore_as="reversal_impulse",
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="mitigation_block_entry",
+        )
+
+    # --- Lane X: MA Ribbon Entry ---
+    if et == "ma_ribbon" and bool(config.get("lane_x_enabled", True)):
+        thresh_x = int(config.get("lane_x_threshold", 50) or 50)
+        return LaneResult(
+            lane="X",
+            label="ma_ribbon_entry",
+            threshold=thresh_x,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="ma_ribbon_entry",
+        )
+
+    # --- Lane Y: Ichimoku Breakout ---
+    if et == "ichimoku_break" and bool(config.get("lane_y_enabled", True)):
+        thresh_y = int(config.get("lane_y_threshold", 55) or 55)
+        return LaneResult(
+            lane="Y",
+            label="ichimoku_breakout",
+            threshold=thresh_y,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="ichimoku_cloud_breakout",
+        )
+
+    # --- Lane Z: Parabolic SAR ---
+    if et == "sar_flip" and bool(config.get("lane_z_enabled", True)):
+        thresh_z = int(config.get("lane_z_threshold", 50) or 50)
+        return LaneResult(
+            lane="Z",
+            label="parabolic_sar",
+            threshold=thresh_z,
+            rescore_as=None,
+            atr_gate_bypass=False,
+            distance_gate_bypass=False,
+            reason="parabolic_sar_flip",
+        )
+
+    # --- Lane AJ: Cumulative Delta Divergence ---
+    if et == "delta_divergence" and bool(config.get("lane_aj_enabled", True)):
+        thresh_aj = int(config.get("lane_aj_threshold", 60) or 60)
+        return LaneResult(
+            lane="AJ",
+            label="cumulative_delta_div",
+            threshold=thresh_aj,
+            rescore_as="reversal_impulse",
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="cumulative_delta_divergence",
+        )
+
+    # --- Lane BA: Absorption Detect ---
+    if et == "absorption" and bool(config.get("lane_ba_enabled", True)):
+        thresh_ba = int(config.get("lane_ba_threshold", 55) or 55)
+        return LaneResult(
+            lane="BA",
+            label="absorption_detect",
+            threshold=thresh_ba,
+            rescore_as="reversal_impulse",
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="absorption_detected",
+        )
+
+    # --- Lane BE: Perp Premium Reversal ---
+    if et == "premium_reversal" and bool(config.get("lane_be_enabled", True)):
+        thresh_be = int(config.get("lane_be_threshold", 50) or 50)
+        return LaneResult(
+            lane="BE",
+            label="perp_premium_reversal",
+            threshold=thresh_be,
+            rescore_as=None,
+            atr_gate_bypass=True,
+            distance_gate_bypass=True,
+            reason="perp_premium_reversal_entry",
         )
 
     # --- Lane B: Breakout ---
@@ -598,6 +1201,7 @@ LANE_REGIME_MAP: dict[str, str] = {
     "D": "breakout",    # Moonshot
     "E": "breakout",    # Squeeze Impulse
     "F": "breakout",    # Compression Breakout
+    "W": "breakout",    # HTF Breakout Continuation
     "G": "mr",          # Compression Range
     "I": "mr",          # Fib Retrace
     "J": "mr",          # Slow Bleed Hunter
@@ -608,6 +1212,48 @@ LANE_REGIME_MAP: dict[str, str] = {
     "R": "mr",          # Regime Low Vol
     "S": "mr",          # Stat Arb Proxy
     "V": "mr",          # Liquidity Sweep (reversal-dominant)
+    "L": "trend",        # Momentum Ignition
+    "O": "trend",        # ADX Trend Acceleration
+    "AA": "trend",       # Supertrend Signal
+    "AB": "trend",       # Hull MA Cross
+    "AC": "mr",          # BB Bounce
+    "AD": "mr",          # RSI Divergence
+    "AF": "mr",          # Stochastic Extreme
+    "BB": "mr",          # OI Divergence
+    "BC": "mr",          # Liquidation Cascade
+    "BD": "mr",          # Basis Trade
+    "BH": "mr",          # Order Block Entry
+    "BI": "mr",          # FVG Fill
+    "BK": "breakout",    # Market Structure Shift
+    "CN": "breakout",    # ATR Channel Breakout
+    "CO": "breakout",    # Donchian Breakout
+    "CE": "breakout",    # Session Open Breakout
+    "CF": "trend",        # Power Hour Scalp
+    "CG": "mr",           # Weekend Gap Play
+    "CH": "mr",           # Rollover Period
+    "CI": "trend",        # BTC Divergence
+    "CJ": "trend",        # Sector Rotation
+    "CM": "mr",           # News Spike Fade
+    "CP": "mr",           # Keltner Bounce
+    "CQ": "mr",           # Pivot Reversal
+    "CR": "mr",           # Camarilla Pivot
+    "AE": "mr",           # MACD Histogram Reversal
+    "AG": "mr",           # CCI Extreme
+    "AH": "mr",           # Williams %R Reversal
+    "AI": "mr",           # Volume Profile POC
+    "AK": "breakout",     # Whale Alert
+    "BG": "mr",           # Supply/Demand Zone
+    "BJ": "breakout",     # Breaker Block
+    "CA": "mr",           # Change of Character
+    "CB": "trend",        # BOS Continuation
+    "CC": "mr",           # Inducement Grab
+    "CD": "mr",           # Mitigation Block
+    "X": "trend",         # MA Ribbon Entry
+    "Y": "breakout",      # Ichimoku Breakout
+    "Z": "trend",         # Parabolic SAR
+    "AJ": "mr",           # Cumulative Delta Divergence
+    "BA": "mr",           # Absorption Detect
+    "BE": "mr",           # Perp Premium Reversal
 }
 
 # Which lane regimes are allowed under each market regime.

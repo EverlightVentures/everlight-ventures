@@ -60,6 +60,16 @@ def _get_json(url: str, *, timeout: float, params: dict | None = None) -> dict |
         return None
 
 
+def _get_json_any(url: str, *, timeout: float, params: dict | None = None) -> Any:
+    try:
+        r = requests.get(url, params=params, headers=_UA, timeout=timeout)
+        if r.status_code != 200:
+            return None
+        return r.json()
+    except Exception:
+        return None
+
+
 def _get_text(url: str, *, timeout: float, params: dict | None = None) -> str | None:
     try:
         r = requests.get(url, params=params, headers=_UA, timeout=timeout)
@@ -135,7 +145,7 @@ def _fetch_okx_oi(timeout: float) -> float | None:
     payload = _get_json(
         "https://www.okx.com/api/v5/public/open-interest",
         timeout=timeout,
-        params={"instType": "SWAP", "uly": "BTC-USDT", "instId": "BTC-USDT-SWAP"},
+        params={"instType": "SWAP", "uly": "XLM-USDT", "instId": "XLM-USDT-SWAP"},
     )
     if not payload:
         return None
@@ -146,30 +156,138 @@ def _fetch_okx_oi(timeout: float) -> float | None:
     return _to_float(row.get("oiUsd") or row.get("oi"))
 
 
-def _fetch_deribit_oi(timeout: float) -> float | None:
-    payload = _get_json(
-        "https://www.deribit.com/api/v2/public/get_book_summary_by_currency",
+def _fetch_binance_oi(timeout: float, symbol: str = "XLMUSDT") -> dict:
+    current = _get_json(
+        "https://fapi.binance.com/fapi/v1/openInterest",
         timeout=timeout,
-        params={"currency": "BTC", "kind": "future"},
+        params={"symbol": symbol},
+    ) or {}
+    hist = _get_json_any(
+        "https://fapi.binance.com/futures/data/openInterestHist",
+        timeout=timeout,
+        params={"symbol": symbol, "period": "5m", "limit": 2},
     )
-    if not payload:
-        return None
-    rows = payload.get("result")
-    if not isinstance(rows, list):
-        return None
-    total = 0.0
-    count = 0
-    for r in rows:
-        if not isinstance(r, dict):
-            continue
-        oi = _to_float(r.get("open_interest"))
-        if oi is None:
-            continue
-        total += oi
-        count += 1
-    if count <= 0:
-        return None
-    return total
+
+    oi_contracts = _to_float(current.get("openInterest"))
+    oi_value = None
+    change_pct = None
+    if isinstance(hist, list) and hist:
+        latest = hist[-1] if isinstance(hist[-1], dict) else {}
+        prev = hist[-2] if len(hist) >= 2 and isinstance(hist[-2], dict) else {}
+        oi_value = _to_float(latest.get("sumOpenInterestValue"))
+        latest_oi = oi_value if oi_value is not None else _to_float(latest.get("sumOpenInterest"))
+        prev_oi = _to_float(prev.get("sumOpenInterestValue"))
+        if prev_oi is None:
+            prev_oi = _to_float(prev.get("sumOpenInterest"))
+        change_pct = _pct_change(latest_oi, prev_oi)
+        if oi_contracts is None:
+            oi_contracts = _to_float(latest.get("sumOpenInterest"))
+
+    return {
+        "value": oi_value if oi_value is not None else oi_contracts,
+        "contracts": oi_contracts,
+        "change_pct": change_pct,
+    }
+
+
+def _fetch_binance_funding(timeout: float, symbol: str = "XLMUSDT") -> dict:
+    rows = _get_json_any(
+        "https://fapi.binance.com/fapi/v1/fundingRate",
+        timeout=timeout,
+        params={"symbol": symbol, "limit": 1},
+    )
+    if not isinstance(rows, list) or not rows:
+        return {}
+    row = rows[-1] if isinstance(rows[-1], dict) else {}
+    funding_rate = _to_float(row.get("fundingRate"))
+    funding_time = row.get("fundingTime")
+    ts_iso = ""
+    try:
+        if funding_time is not None:
+            ts_iso = datetime.fromtimestamp(float(funding_time) / 1000.0, tz=timezone.utc).isoformat()
+    except Exception:
+        ts_iso = ""
+    return {
+        "rate": funding_rate,
+        "bias": _classify_funding_bias(funding_rate),
+        "timestamp": ts_iso,
+    }
+
+
+def _classify_funding_bias(rate: float | None, threshold: float = 0.0001) -> str:
+    if rate is None:
+        return "NEUTRAL"
+    if rate > threshold:
+        return "LONGS_PAY"
+    if rate < -threshold:
+        return "SHORTS_PAY"
+    return "NEUTRAL"
+
+
+def _build_futures_relativity(binance: dict, okx_value: float | None, okx_change: float | None) -> dict:
+    venue_count = 0
+    changes: list[float] = []
+    if binance.get("value") is not None:
+        venue_count += 1
+    if okx_value is not None:
+        venue_count += 1
+    if _to_float(binance.get("change_pct")) is not None:
+        changes.append(float(binance["change_pct"]))
+    if okx_change is not None:
+        changes.append(float(okx_change))
+
+    oi_change_avg = sum(changes) / len(changes) if changes else None
+    oi_trend = "FLAT"
+    if oi_change_avg is not None:
+        if oi_change_avg >= 0.75:
+            oi_trend = "RISING"
+        elif oi_change_avg <= -0.75:
+            oi_trend = "FALLING"
+
+    funding_bias = str((binance.get("funding") or {}).get("bias") or "NEUTRAL")
+    bias = "NEUTRAL"
+    if oi_trend == "RISING" and funding_bias == "SHORTS_PAY":
+        bias = "BULLISH_SQUEEZE_RISK"
+    elif oi_trend == "RISING" and funding_bias == "LONGS_PAY":
+        bias = "BEARISH_LONG_CROWDING"
+    elif oi_trend == "FALLING" and funding_bias == "SHORTS_PAY":
+        bias = "SHORTS_COVERING"
+    elif oi_trend == "FALLING" and funding_bias == "LONGS_PAY":
+        bias = "LONGS_DELEVERAGING"
+
+    confidence = 0.0
+    if venue_count:
+        confidence += min(0.6, venue_count * 0.3)
+    if funding_bias != "NEUTRAL":
+        confidence += 0.2
+    if oi_change_avg is not None and abs(oi_change_avg) >= 1.0:
+        confidence += 0.2
+    confidence = round(min(1.0, confidence), 2)
+
+    return {
+        "primary_guide": "coinbase_product_book",
+        "secondary_context": "binance_okx_futures_relativity",
+        "binance": {
+            "oi_value": binance.get("value"),
+            "oi_contracts": binance.get("contracts"),
+            "oi_change_pct": binance.get("change_pct"),
+            "funding_rate": (binance.get("funding") or {}).get("rate"),
+            "funding_bias": (binance.get("funding") or {}).get("bias"),
+            "funding_timestamp": (binance.get("funding") or {}).get("timestamp"),
+        },
+        "okx": {
+            "oi_value": okx_value,
+            "oi_change_pct": okx_change,
+        },
+        "composite": {
+            "venue_count": venue_count,
+            "oi_change_pct_avg": round(oi_change_avg, 3) if oi_change_avg is not None else None,
+            "oi_trend": oi_trend,
+            "funding_bias": funding_bias,
+            "bias": bias,
+            "confidence": confidence,
+        },
+    }
 
 
 def _rss_items(xml_text: str, topic: str, limit: int = 6) -> list[dict]:
@@ -264,11 +382,19 @@ def _risk_flags(payload: dict) -> list[str]:
 
     oi = payload.get("oi_proxy") if isinstance(payload.get("oi_proxy"), dict) else {}
     okx_chg = _to_float((oi.get("okx") or {}).get("change_pct"))
-    deribit_chg = _to_float((oi.get("deribit") or {}).get("change_pct"))
+    binance_chg = _to_float((oi.get("binance") or {}).get("change_pct"))
+    futures = payload.get("futures_relativity") if isinstance(payload.get("futures_relativity"), dict) else {}
+    composite = futures.get("composite") if isinstance(futures.get("composite"), dict) else {}
+    funding_bias = str(composite.get("funding_bias") or "NEUTRAL")
+    relativity_bias = str(composite.get("bias") or "NEUTRAL")
     if okx_chg is not None and abs(okx_chg) >= 7.0:
         out.append(f"OKX OI shift {okx_chg:+.1f}%")
-    if deribit_chg is not None and abs(deribit_chg) >= 7.0:
-        out.append(f"Deribit OI shift {deribit_chg:+.1f}%")
+    if binance_chg is not None and abs(binance_chg) >= 7.0:
+        out.append(f"Binance OI shift {binance_chg:+.1f}%")
+    if relativity_bias != "NEUTRAL":
+        out.append(f"Cross-venue {relativity_bias.lower()}")
+    if funding_bias != "NEUTRAL":
+        out.append(f"Binance funding {funding_bias.lower()}")
 
     heads = payload.get("headlines") if isinstance(payload.get("headlines"), list) else []
     joined = " | ".join(str(h.get("title") or "").lower() for h in heads[:12] if isinstance(h, dict))
@@ -315,11 +441,24 @@ def _summary(payload: dict) -> str:
 
     okx_oi = _to_float((oi.get("okx") or {}).get("value"))
     okx_chg = _to_float((oi.get("okx") or {}).get("change_pct"))
+    binance_oi = _to_float((oi.get("binance") or {}).get("value"))
+    binance_chg = _to_float((oi.get("binance") or {}).get("change_pct"))
+    futures = payload.get("futures_relativity") if isinstance(payload.get("futures_relativity"), dict) else {}
+    composite = futures.get("composite") if isinstance(futures.get("composite"), dict) else {}
     if okx_oi is not None:
         o = f"OKX OI {okx_oi:,.0f}"
         if okx_chg is not None:
             o += f" ({okx_chg:+.1f}%)"
         bits.append(o)
+    if binance_oi is not None:
+        b = f"Binance OI {binance_oi:,.0f}"
+        if binance_chg is not None:
+            b += f" ({binance_chg:+.1f}%)"
+        bits.append(b)
+    rel_bias = str(composite.get("bias") or "NEUTRAL")
+    rel_funding = str(composite.get("funding_bias") or "NEUTRAL")
+    if rel_bias != "NEUTRAL" or rel_funding != "NEUTRAL":
+        bits.append(f"Futures {rel_bias.lower()} / funding {rel_funding.lower()}")
 
     top = ""
     heads = payload.get("headlines") if isinstance(payload.get("headlines"), list) else []
@@ -374,18 +513,21 @@ def get_market_intel(
         prices = _fetch_crypto_prices(timeout)
         macro = _fetch_macro_prices(timeout)
         okx_oi = _fetch_okx_oi(timeout)
-        deribit_oi = _fetch_deribit_oi(timeout)
+        binance = _fetch_binance_oi(timeout, str(cfg.get("binance_symbol") or "XLMUSDT"))
+        binance["funding"] = _fetch_binance_funding(timeout, str(cfg.get("binance_symbol") or "XLMUSDT"))
         prev_oi = cached_payload.get("oi_proxy") if isinstance(cached_payload.get("oi_proxy"), dict) else {}
         prev_okx = _to_float((prev_oi.get("okx") or {}).get("value"))
-        prev_deribit = _to_float((prev_oi.get("deribit") or {}).get("value"))
+        okx_change = _pct_change(okx_oi, prev_okx)
+        futures_relativity = _build_futures_relativity(binance, okx_oi, okx_change)
         oi_proxy = {
+            "binance": {
+                "value": binance.get("value"),
+                "contracts": binance.get("contracts"),
+                "change_pct": binance.get("change_pct"),
+            },
             "okx": {
                 "value": okx_oi,
-                "change_pct": _pct_change(okx_oi, prev_okx),
-            },
-            "deribit": {
-                "value": deribit_oi,
-                "change_pct": _pct_change(deribit_oi, prev_deribit),
+                "change_pct": okx_change,
             },
         }
         headlines = _fetch_news(timeout, max_items=max_headlines)
@@ -394,6 +536,7 @@ def get_market_intel(
             "prices": prices,
             "macro": macro,
             "oi_proxy": oi_proxy,
+            "futures_relativity": futures_relativity,
             "headlines": headlines,
         }
         payload["risk_flags"] = _risk_flags(payload)

@@ -3,3 +3,24 @@
 
   URL: http://127.0.0.1:8502
 
+Traceback (most recent call last):
+  File "<string>", line 3, in <module>
+    start_chat_server(8504)
+    ~~~~~~~~~~~~~~~~~^^^^^^
+  File "/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/xlm_bot/claude_chat_api.py", line 218, in start_chat_server
+    server = HTTPServer(("127.0.0.1", port), _ChatHandler)
+  File "/usr/lib/python3.13/socketserver.py", line 457, in __init__
+    self.server_bind()
+    ~~~~~~~~~~~~~~~~^^
+  File "/usr/lib/python3.13/http/server.py", line 136, in server_bind
+    socketserver.TCPServer.server_bind(self)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/lib/python3.13/socketserver.py", line 478, in server_bind
+    self.socket.bind(self.server_address)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+OSError: [Errno 98] Address already in use
+
+  You can now view your Streamlit app in your browser.
+
+  URL: http://127.0.0.1:8502
+

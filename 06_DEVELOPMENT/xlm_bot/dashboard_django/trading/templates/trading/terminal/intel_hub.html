@@ -3,7 +3,7 @@
 <!-- Perplexity Market Brief -->
 {% if market_brief %}
 <div class="intel-card" style="margin-bottom:8px;">
-  <div class="intel-title">MARKET BRIEF <span class="pill" style="font-size:9px;">PERPLEXITY</span></div>
+  <div class="intel-title">MARKET BRIEF / RESEARCH SNAPSHOT <span class="pill" style="font-size:9px;">PERPLEXITY</span></div>
   {% if market_brief.risk_modifier %}
     <div style="margin:8px 0;font-size:0.82rem;color:#d1d5db;">
       Risk: <span class="{{ market_brief.risk_modifier|pnl_color }}">{{ market_brief.risk_modifier }}</span>
@@ -27,6 +27,18 @@
   {% endif %}
 </div>
 {% endif %}
+
+<!-- The Wolf's Playbook -- Blinko Knowledge (HTMX polled) -->
+<div class="intel-card" style="margin-bottom:8px;">
+  <div class="intel-title">THE WOLF'S PLAYBOOK <span class="pill" style="font-size:9px;background:rgba(139,92,246,0.12);color:#8b5cf6;">BLINKO</span></div>
+  <div style="font-size:0.75rem;color:#6b7280;margin-bottom:8px;">Trading rules, lessons, and market wisdom from the knowledge vault.</div>
+  <div id="blinko-notes-container"
+       hx-get="{% url 'trading:api_blinko_notes' %}"
+       hx-trigger="every 120s"
+       hx-swap="innerHTML">
+    {% include "trading/partials/blinko_notes.html" %}
+  </div>
+</div>
 
 <!-- Agent Thoughts (HTMX polled) -->
 <div id="thought-feed-container"

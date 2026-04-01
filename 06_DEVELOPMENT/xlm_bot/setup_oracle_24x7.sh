@@ -4,7 +4,7 @@
 
 set -e
 
-VM_IP="163.192.19.196"
+VM_IP="${VM_IP:-129.159.38.250}"
 VM_USER="opc"
 SSH_KEY="$HOME/.ssh/oracle_key.pem"
 SSH_OPTS="-o StrictHostKeyChecking=no -o ConnectTimeout=15 -o ServerAliveInterval=5"
@@ -24,18 +24,22 @@ scp -i "$SSH_KEY" $SSH_OPTS \
     "$LOCAL_DIR/memory_guard.sh" \
     "$LOCAL_DIR/circuit_breaker.sh" \
     "$LOCAL_DIR/log_rotate.sh" \
+    "$LOCAL_DIR/export_metrics.py" \
+    "$LOCAL_DIR/push_metrics_supabase.py" \
+    "$LOCAL_DIR/trading_watchtower_sync.py" \
     ${VM_USER}@${VM_IP}:${BOT_DIR}/
 
 echo ""
 echo "=== Step 3: Making scripts executable ==="
-ssh -i "$SSH_KEY" $SSH_OPTS ${VM_USER}@${VM_IP} "chmod +x ${BOT_DIR}/{watchdog,memory_guard,circuit_breaker,log_rotate}.sh"
+ssh -i "$SSH_KEY" $SSH_OPTS ${VM_USER}@${VM_IP} "chmod +x ${BOT_DIR}/{watchdog,memory_guard,circuit_breaker,log_rotate}.sh && mkdir -p ${BOT_DIR}/logs ${BOT_DIR}/data"
 
 echo ""
 echo "=== Step 4: Installing crontab ==="
 ssh -i "$SSH_KEY" $SSH_OPTS ${VM_USER}@${VM_IP} 'bash -s' <<'REMOTE'
 # Remove old XLM entries, add fresh ones
-(crontab -l 2>/dev/null | grep -v "XLM BOT" | grep -v "xlm_" | grep -v "memory_guard" | grep -v "watchdog" | grep -v "circuit_breaker" | grep -v "log_rotate"; \
+(crontab -l 2>/dev/null | grep -v "XLM BOT" | grep -v "xlm_" | grep -v "memory_guard" | grep -v "watchdog" | grep -v "circuit_breaker" | grep -v "log_rotate" | grep -v "trading_watchtower" | grep -v "export_metrics" | grep -v "push_metrics_supabase"; \
 echo "### XLM BOT AUTOMATION ###"; \
+echo "* * * * * cd /home/opc/xlm-bot && flock -xn /tmp/xlm_watchtower.lock env WATCHTOWER_PUSH_SUPABASE=1 /home/opc/xlm-bot/venv/bin/python trading_watchtower_sync.py >> /home/opc/xlm-bot/logs/trading_watchtower_sync.log 2>&1"; \
 echo "1-56/5 * * * * flock -xn /tmp/xlm_memguard.lock /home/opc/xlm-bot/memory_guard.sh"; \
 echo "2-57/5 * * * * flock -xn /tmp/xlm_watchdog.lock /home/opc/xlm-bot/watchdog.sh"; \
 echo "*/10 * * * * flock -xn /tmp/xlm_cb.lock /home/opc/xlm-bot/circuit_breaker.sh"; \
@@ -44,9 +48,13 @@ echo "### END XLM BOT AUTOMATION ###") | crontab -
 REMOTE
 
 echo ""
+echo "=== Step 4b: Enabling watchtower timer ==="
+ssh -i "$SSH_KEY" $SSH_OPTS ${VM_USER}@${VM_IP} "sudo systemctl enable xlm-watchtower.timer >/dev/null 2>&1 || true && sudo systemctl restart xlm-watchtower.timer >/dev/null 2>&1 || true && sudo systemctl start xlm-watchtower.service >/dev/null 2>&1 || true"
+
+echo ""
 echo "=== Step 5: Verifying ==="
-ssh -i "$SSH_KEY" $SSH_OPTS ${VM_USER}@${VM_IP} 'echo "--- Crontab ---" && crontab -l && echo "" && echo "--- Docker ---" && docker ps --format "table {{.Names}}\t{{.Status}}" && echo "" && echo "--- Scripts ---" && ls -la '"${BOT_DIR}"'/*.sh'
+ssh -i "$SSH_KEY" $SSH_OPTS ${VM_USER}@${VM_IP} 'echo "--- Crontab ---" && crontab -l && echo "" && echo "--- Systemd ---" && sudo systemctl is-active xlm-bot xlm-dashboard xlm-ws xlm-watchtower.timer && echo "" && echo "--- Scripts ---" && ls -la '"${BOT_DIR}"'/*.sh'
 
 echo ""
 echo "=== DONE! 24/7 automation installed ==="
-echo "Cron jobs: memory_guard (5m), watchdog (5m), circuit_breaker (10m), log_rotate (1h)"
+echo "Cron jobs: trading_watchtower_sync (1m), memory_guard (5m), watchdog (5m), circuit_breaker (10m), log_rotate (1h)"

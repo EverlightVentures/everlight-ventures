@@ -88,30 +88,31 @@
 <div class="status-banner {% if norm_position %}in-trade{% elif last.gates_pass %}ready{% else %}watching{% endif %}" style="margin-top:8px;">
   {% if norm_position %}
     <div class="status-icon">&#9889;</div>
-    <div class="status-headline">In Trade</div>
+    <div class="status-headline">Money on the Street</div>
     <div class="status-body">
       {{ norm_position.side|upper }} at <strong>${{ norm_position.entry_price|floatformat:4 }}</strong>
       {% if norm_position.unrealized_pnl %}
-        &middot; Unrealized: <span class="{{ norm_position.unrealized_pnl|pnl_color }}">${{ norm_position.unrealized_pnl|floatformat:2 }}</span>
+        &middot; P&L: <span class="{{ norm_position.unrealized_pnl|pnl_color }}">${{ norm_position.unrealized_pnl|floatformat:2 }}</span>
       {% endif %}
     </div>
   {% elif last.failed_gates %}
     <div class="status-icon">&#128683;</div>
-    <div class="status-headline">Blocked</div>
+    <div class="status-headline">Gates Locked</div>
     <div class="status-body">
+      Patience -- the setup isn't ripe yet.
       {% for g in last.failed_gates %}{{ g|gate_plain }}{% if not forloop.last %}, {% endif %}{% endfor %}
     </div>
   {% elif last.entry_signal %}
     <div class="status-icon">&#128161;</div>
-    <div class="status-headline">Signal Active</div>
+    <div class="status-headline">The Wolf Sees Prey</div>
     <div class="status-body">
       {{ last.entry_signal }} {{ last.direction|upper }}
-      {% if last.v4_selected_score %} &middot; Score {{ last.v4_selected_score|floatformat:0 }}/{{ last.v4_selected_threshold|floatformat:0 }}{% endif %}
+      {% if last.v4_selected_score %} &middot; Conviction {{ last.v4_selected_score|floatformat:0 }}/{{ last.v4_selected_threshold|floatformat:0 }}{% endif %}
     </div>
   {% else %}
     <div class="status-icon">&#128065;</div>
-    <div class="status-headline">Scanning</div>
-    <div class="status-body">Watching for setups</div>
+    <div class="status-headline">Stalking the Market</div>
+    <div class="status-body">Discipline beats impulse. Waiting for the right moment.</div>
   {% endif %}
 </div>
 
@@ -154,6 +155,92 @@
       </div>
       <span style="font-size:11px;color:#9ca3af;width:36px;text-align:right;">{{ snap.short_readiness|floatformat:0 }}%</span>
     </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Lane V Intelligence -->
+{% if last.lane_v_mode or last.cluster_side or last.lane_v_no_trade_reason %}
+<div style="display:grid;grid-template-columns:1.2fr 1fr;gap:8px;margin-top:8px;">
+  <div class="intel-card" style="padding:10px 14px;border-left:3px solid #60a5fa;">
+    <div class="intel-title">LANE V</div>
+    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px;">
+      {% if last.lane_v_mode %}
+        <span class="pill" style="background:rgba(96,165,250,0.12);color:#60a5fa;">{{ last.lane_v_mode|upper }}</span>
+      {% endif %}
+      {% if last.cluster_side %}
+        <span class="pill">{{ last.cluster_side|upper }}</span>
+      {% endif %}
+      {% if last.sweep_status %}
+        <span class="pill" style="background:rgba(245,158,11,0.12);color:#f59e0b;">{{ last.sweep_status|upper }}</span>
+      {% endif %}
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px 20px;font-size:0.8rem;color:#9ca3af;margin-top:8px;">
+      {% if last.cluster_strength is not None %}
+      <div>
+        <div style="font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:#6b7280;">Cluster</div>
+        <div style="font-weight:500;color:#e5e7eb;">{{ last.cluster_strength|floatformat:2 }}</div>
+      </div>
+      {% endif %}
+      {% if last.magnet_score is not None %}
+      <div>
+        <div style="font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:#6b7280;">Magnet</div>
+        <div style="font-weight:500;color:#e5e7eb;">{{ last.magnet_score|floatformat:0 }}</div>
+      </div>
+      {% endif %}
+      {% if last.wick_score is not None %}
+      <div>
+        <div style="font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:#6b7280;">Wick</div>
+        <div style="font-weight:500;color:#e5e7eb;">{{ last.wick_score|floatformat:0 }}</div>
+      </div>
+      {% endif %}
+      {% if last.wick_ratio is not None %}
+      <div>
+        <div style="font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:#6b7280;">Ratio</div>
+        <div style="font-weight:500;color:#e5e7eb;">{{ last.wick_ratio|floatformat:2 }}</div>
+      </div>
+      {% endif %}
+    </div>
+    {% if last.lane_v_no_trade_reason %}
+      <div style="font-size:0.75rem;color:#9ca3af;margin-top:8px;">{{ last.lane_v_no_trade_reason }}</div>
+    {% endif %}
+  </div>
+
+  <div class="intel-card" style="padding:10px 14px;border-left:3px solid #34d399;">
+    <div class="intel-title">CAPITAL LADDER</div>
+    {% if last.sizing_meta.growth_stage_label %}
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:4px;">
+        <span class="pill ok">{{ last.sizing_meta.growth_stage_label }}</span>
+        {% if last.sizing_meta.growth_withdrawal_mode %}
+          <span class="pill">{{ last.sizing_meta.growth_withdrawal_mode|upper }}</span>
+        {% endif %}
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:12px 20px;font-size:0.8rem;color:#9ca3af;margin-top:8px;">
+        {% if last.sizing_meta.growth_stage_max_contracts %}
+        <div>
+          <div style="font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:#6b7280;">Max Contracts</div>
+          <div style="font-weight:500;color:#e5e7eb;">{{ last.sizing_meta.growth_stage_max_contracts }}</div>
+        </div>
+        {% endif %}
+        {% if last.sizing_meta.growth_daily_target_usd %}
+        <div>
+          <div style="font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:#6b7280;">Daily Target</div>
+          <div style="font-weight:500;color:#34d399;">${{ last.sizing_meta.growth_daily_target_usd }}</div>
+        </div>
+        {% endif %}
+        {% if last.sizing_meta.growth_daily_stop_usd %}
+        <div>
+          <div style="font-size:10px;letter-spacing:0.8px;text-transform:uppercase;color:#6b7280;">Daily Stop</div>
+          <div style="font-weight:500;color:#f87171;">${{ last.sizing_meta.growth_daily_stop_usd }}</div>
+        </div>
+        {% endif %}
+      </div>
+      {% if last.sizing_meta.growth_per_trade_risk_usd %}
+        <div style="font-size:0.75rem;color:#9ca3af;margin-top:8px;">Risk per trade target: ${{ last.sizing_meta.growth_per_trade_risk_usd }}</div>
+      {% endif %}
+    {% else %}
+      <div style="font-size:0.8rem;color:#9ca3af;margin-top:6px;">Growth ladder data will appear after the next sizing cycle.</div>
+    {% endif %}
   </div>
 </div>
 {% endif %}

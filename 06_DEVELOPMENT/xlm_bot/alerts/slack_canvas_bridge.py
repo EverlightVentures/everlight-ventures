@@ -116,39 +116,16 @@ def _safe_filename(title: str) -> str:
     return (name.strip("_") or "report")[:96] + ".md"
 
 
-def _upload_markdown_to_channels(token, title, content, channel_ids=None):
-    """Upload a markdown file to Slack channels and return the first permalink."""
-    if not str(token or "").strip():
-        return {"uploaded": 0, "permalink": None}
-    if channel_ids is None:
-        channel_ids = _get_bot_channel_ids(token)
-    first_link = None
-    uploaded = 0
-    filename = _safe_filename(title)
-    payload = {
-        "filename": filename,
-        "title": title,
-        "filetype": "markdown",
-        "content": str(content or ""),
-    }
-    for ch_id in channel_ids:
-        try:
-            resp = requests.post(
-                "https://slack.com/api/files.upload",
-                headers={"Authorization": f"Bearer {token}"},
-                data={**payload, "channels": ch_id},
-                timeout=20,
-            )
-            data = resp.json()
-            if data.get("ok"):
-                uploaded += 1
-                if not first_link:
-                    first_link = ((data.get("file") or {}).get("permalink")) or ""
-            elif data.get("error") == "invalid_auth":
-                break
-        except Exception:
-            pass
-    return {"uploaded": uploaded, "permalink": first_link}
+def _format_plain_fallback(title, content, summary="", app_name="xlmbot"):
+    """Format report content as a clean plain Slack message (no Canvas, no file upload)."""
+    # Truncate content to fit Slack's 3000-char practical limit for readability
+    excerpt_lines = [line for line in content.splitlines() if line.strip()][:20]
+    excerpt = "\n".join(excerpt_lines)[:2600]
+    msg = f"*{app_name.upper()} Report: {title}*\n"
+    if summary:
+        msg += f"{summary}\n"
+    msg += f"```\n{excerpt}\n```"
+    return msg
 
 
 def create_native_canvas(content, title, app_name="warroom", metadata=None):
@@ -173,13 +150,13 @@ def create_native_canvas(content, title, app_name="warroom", metadata=None):
     doc_url = None
     history_entry = None
 
+    # Extract a short summary (first 2 non-empty lines)
+    lines = [l.strip() for l in content.split("\n") if l.strip() and not l.startswith("#")]
+    summary = " ".join(lines[:2])[:200]
+
     # Primary path: Google Docs via gdocs_bridge
     if _gdocs_available:
         try:
-            # Extract a short summary (first 2 non-empty lines)
-            lines = [l.strip() for l in content.split("\n") if l.strip() and not l.startswith("#")]
-            summary = " ".join(lines[:2])[:200]
-
             result = publish_report(
                 title=title,
                 content=content,
@@ -213,47 +190,17 @@ def create_native_canvas(content, title, app_name="warroom", metadata=None):
                 _post_message(token, webhook_url, message)
                 print(f"  [bridge] Google Doc created: {doc_url}")
                 return doc_url
-            elif result.get("local_path"):
-                print(f"  [bridge] Saved locally: {result['local_path']}")
-                upload_result = _upload_markdown_to_channels(token, title, content)
-                if upload_result.get("uploaded"):
-                    msg = (
-                        f"*{app_name.upper()} Report: {title}*\n"
-                        f"{summary}\n"
-                        f"External doc publishing is unavailable right now. Uploaded the markdown report to Slack instead.\n"
-                    )
-                    if history_entry and history_entry.get("history_link"):
-                        msg += f"<{history_entry['history_link']}|Open Report Page>\n"
-                    if upload_result.get("permalink"):
-                        msg += f"<{upload_result['permalink']}|Open Markdown Report>\n"
-                    elif history_entry:
-                        msg += f"Report ID: `{history_entry['report_id']}`\n"
-                    msg += f"Saved locally: `{result['local_path']}`"
-                    _post_message(token, webhook_url, msg)
-                else:
-                    excerpt = "\n".join([line for line in content.splitlines() if line.strip()][:18])[:2600]
-                    msg = (
-                        f"*{app_name.upper()} Report: {title}*\n"
-                        f"{summary}\n"
-                        f"External doc publishing is unavailable right now. Posting the report excerpt here instead.\n"
-                    )
-                    if history_entry and history_entry.get("history_link"):
-                        msg += f"<{history_entry['history_link']}|Open Report Page>\n"
-                    elif history_entry:
-                        msg += f"Report ID: `{history_entry['report_id']}`\n"
-                    msg += (
-                        f"```{excerpt}```\n"
-                        f"Saved locally: `{result['local_path']}`"
-                    )
-                    _post_message(token, webhook_url, msg)
-                return None
+            else:
+                # Google Doc creation failed -- fall through to plain message
+                local_path = result.get("local_path", "")
+                if local_path:
+                    print(f"  [bridge] Saved locally: {local_path}")
         except Exception as e:
             print(f"  [bridge] gdocs_bridge error: {e}")
 
-    # Fallback: post content as plain Slack message (no Canvas, no Doc)
+    # Fallback: post content as plain Slack message (NEVER Canvas, NEVER files.upload)
     print(f"  [bridge] Google Docs unavailable, posting as plain Slack message")
-    summary = " ".join([l.strip() for l in content.splitlines() if l.strip()][:2])[:200]
-    if record_report:
+    if record_report and not history_entry:
         history_entry = record_report(
             title=title,
             content=content,
@@ -262,15 +209,11 @@ def create_native_canvas(content, title, app_name="warroom", metadata=None):
             folder=folder,
             metadata=metadata or {},
         )
-    msg = (
-        f"*{app_name.upper()} Report: {title}*\n"
-        f"{summary}\n"
-    )
+    msg = _format_plain_fallback(title, content, summary, app_name)
     if history_entry and history_entry.get("history_link"):
-        msg += f"<{history_entry['history_link']}|Open Report History>\n"
+        msg += f"\n<{history_entry['history_link']}|Open Report History>"
     elif history_entry:
-        msg += f"Report ID: `{history_entry['report_id']}`\n"
-    msg += f"```\n{content[:2800]}\n```"
+        msg += f"\nReport ID: `{history_entry['report_id']}`"
     _post_message(token, webhook_url, msg)
     return None
 

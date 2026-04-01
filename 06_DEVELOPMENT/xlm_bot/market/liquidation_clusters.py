@@ -51,6 +51,8 @@ class SweepState:
     sweep_depth_atr: float
     bars_since_sweep: int
     wick_detected: bool
+    touched_cluster: bool = False
+    flushed_cluster: bool = False
 
 
 @dataclass
@@ -66,6 +68,14 @@ class LiquidationIntelligence:
     sweep_level: float
     funding_lean: str  # "long", "short", "neutral"
     raw_bias: str  # from liquidation_feed snapshot
+    cluster_side: str = "balanced"
+    cluster_strength: float = 0.0
+    distance_to_cluster_atr: float | None = None
+    next_pool_side: str = "balanced"
+    touched_cluster: bool = False
+    flushed_cluster: bool = False
+    absorbed_reclaim: bool = False
+    absorbed_reject: bool = False
 
 
 def _read_json(path: Path) -> dict[str, Any]:
@@ -109,56 +119,91 @@ def build_clusters(
     if band_width <= 0:
         return []
 
-    # Build proxy clusters from window aggregates
-    last_event = snapshot.get("last_event") or {}
-    last_price = float(last_event.get("price") or 0)
-
     clusters: list[LiquidationCluster] = []
+    recent_events = snapshot.get("recent_events") if isinstance(snapshot.get("recent_events"), list) else []
+    buckets: dict[int, dict[str, float]] = {}
 
-    for window_key, window_seconds in [("window_1m", 60), ("window_5m", 300), ("window_15m", 900)]:
-        w = snapshot.get(window_key) or {}
-        event_count = int(w.get("events", 0))
-        notional = float(w.get("notional_usd", 0))
-        longs_usd = float(w.get("longs_usd", 0))
-        shorts_usd = float(w.get("shorts_usd", 0))
+    for event in recent_events:
+        if not isinstance(event, dict):
+            continue
+        price = float(event.get("price") or 0.0)
+        notional = float(event.get("notional_usd") or 0.0)
+        if price <= 0 or notional <= 0:
+            continue
+        bucket_id = int(round(price / band_width))
+        bucket = buckets.setdefault(bucket_id, {"events": 0.0, "notional": 0.0, "longs": 0.0, "shorts": 0.0})
+        bucket["events"] += 1.0
+        bucket["notional"] += notional
+        if str(event.get("liquidated_side") or "").lower() == "longs":
+            bucket["longs"] += notional
+        elif str(event.get("liquidated_side") or "").lower() == "shorts":
+            bucket["shorts"] += notional
 
+    for bucket_id, bucket in buckets.items():
+        event_count = int(bucket["events"])
+        notional = float(bucket["notional"])
         if event_count < min_events or notional < min_notional:
             continue
-
-        # Estimate cluster center from last event price or current price
-        center = last_price if last_price > 0 else current_price
-
-        # Determine which side the cluster is on
-        distance = (center - current_price) / atr_value if atr_value > 0 else 0
+        center = bucket_id * band_width
+        distance = (center - current_price) / atr_value if atr_value > 0 else 0.0
         if abs(distance) > max_distance_atr:
             continue
-
         side = "above" if center > current_price else "below"
         band_low = center - (band_width / 2)
         band_high = center + (band_width / 2)
+        strength = min(100.0, (notional / max(min_notional, 1.0)) * 18.0 + event_count * 6.0)
+        clusters.append(
+            LiquidationCluster(
+                center_price=round(center, 6),
+                band_low=round(band_low, 6),
+                band_high=round(band_high, 6),
+                event_count=event_count,
+                total_notional_usd=round(notional, 2),
+                longs_notional=round(float(bucket["longs"]), 2),
+                shorts_notional=round(float(bucket["shorts"]), 2),
+                strength=round(strength, 1),
+                distance_atr=round(abs(distance), 2),
+                side=side,
+            )
+        )
 
-        # Strength score: normalized by notional and event count
-        strength = min(100, (notional / max(min_notional, 1)) * 20 + event_count * 5)
+    if not clusters:
+        # Fallback for old snapshots that only have window aggregates.
+        last_event = snapshot.get("last_event") or {}
+        last_price = float(last_event.get("price") or 0)
+        for window_key in ("window_1m", "window_5m", "window_15m"):
+            w = snapshot.get(window_key) or {}
+            event_count = int(w.get("events", 0))
+            notional = float(w.get("notional_usd", 0))
+            longs_usd = float(w.get("longs_usd", 0))
+            shorts_usd = float(w.get("shorts_usd", 0))
+            if event_count < min_events or notional < min_notional:
+                continue
+            center = last_price if last_price > 0 else current_price
+            distance = (center - current_price) / atr_value if atr_value > 0 else 0.0
+            if abs(distance) > max_distance_atr:
+                continue
+            side = "above" if center > current_price else "below"
+            band_low = center - (band_width / 2)
+            band_high = center + (band_width / 2)
+            strength = min(100.0, (notional / max(min_notional, 1.0)) * 20.0 + event_count * 5.0)
+            clusters.append(
+                LiquidationCluster(
+                    center_price=round(center, 6),
+                    band_low=round(band_low, 6),
+                    band_high=round(band_high, 6),
+                    event_count=event_count,
+                    total_notional_usd=round(notional, 2),
+                    longs_notional=round(longs_usd, 2),
+                    shorts_notional=round(shorts_usd, 2),
+                    strength=round(strength, 1),
+                    distance_atr=round(abs(distance), 2),
+                    side=side,
+                )
+            )
 
-        clusters.append(LiquidationCluster(
-            center_price=round(center, 6),
-            band_low=round(band_low, 6),
-            band_high=round(band_high, 6),
-            event_count=event_count,
-            total_notional_usd=round(notional, 2),
-            longs_notional=round(longs_usd, 2),
-            shorts_notional=round(shorts_usd, 2),
-            strength=round(strength, 1),
-            distance_atr=round(abs(distance), 2),
-            side=side,
-        ))
-
-    # Deduplicate overlapping clusters (keep strongest per side)
-    seen_sides: dict[str, LiquidationCluster] = {}
-    for c in sorted(clusters, key=lambda x: x.strength, reverse=True):
-        if c.side not in seen_sides or c.strength > seen_sides[c.side].strength:
-            seen_sides[c.side] = c
-    return list(seen_sides.values())
+    clusters.sort(key=lambda c: (c.distance_atr, -c.strength, -c.total_notional_usd))
+    return clusters[:6]
 
 
 def compute_magnet_bias(
@@ -267,6 +312,8 @@ def detect_cluster_sweep(
                 sweep_depth_atr=round(max(0, depth), 2),
                 bars_since_sweep=0,
                 wick_detected=False,
+                touched_cluster=True,
+                flushed_cluster=bool(max(0, depth) > 0.02),
             )
         elif entered_zone:
             return SweepState(
@@ -276,6 +323,8 @@ def detect_cluster_sweep(
                 sweep_depth_atr=round(max(0, depth), 2),
                 bars_since_sweep=0,
                 wick_detected=False,
+                touched_cluster=True,
+                flushed_cluster=bool(max(0, depth) > 0.02),
             )
 
     # No active sweep -- check if previous sweep is aging
@@ -287,6 +336,8 @@ def detect_cluster_sweep(
             sweep_depth_atr=float(prev.get("sweep_depth_atr", 0)),
             bars_since_sweep=prev_bars + 1,
             wick_detected=bool(prev.get("wick_detected", False)),
+            touched_cluster=bool(prev.get("touched_cluster", False)),
+            flushed_cluster=bool(prev.get("flushed_cluster", False)),
         )
 
     return SweepState(
@@ -296,6 +347,8 @@ def detect_cluster_sweep(
         sweep_depth_atr=0.0,
         bars_since_sweep=0,
         wick_detected=False,
+        touched_cluster=False,
+        flushed_cluster=False,
     )
 
 
@@ -336,6 +389,35 @@ def build_intelligence(
     else:
         funding_lean = "neutral"
 
+    cluster_side = "balanced"
+    cluster_strength = 0.0
+    distance_to_cluster_atr = None
+    next_pool_side = magnet.side
+    if above and below:
+        strength_gap = abs(above[0].strength - below[0].strength)
+        cluster_side = "balanced" if strength_gap < 12 else ("above" if above[0].strength > below[0].strength else "below")
+    elif above:
+        cluster_side = "above"
+    elif below:
+        cluster_side = "below"
+
+    relevant = None
+    if sweep.sweep_side == "long" and below:
+        relevant = below[0]
+        next_pool_side = "above" if above else "balanced"
+    elif sweep.sweep_side == "short" and above:
+        relevant = above[0]
+        next_pool_side = "below" if below else "balanced"
+    elif magnet.side == "above" and above:
+        relevant = above[0]
+    elif magnet.side == "below" and below:
+        relevant = below[0]
+    elif above or below:
+        relevant = (above or below)[0]
+    if relevant:
+        cluster_strength = float(relevant.strength)
+        distance_to_cluster_atr = float(relevant.distance_atr)
+
     return LiquidationIntelligence(
         clusters_above=above,
         clusters_below=below,
@@ -344,9 +426,17 @@ def build_intelligence(
         wick_score=wick_score,
         reclaim_confirmed=reclaim_confirmed,
         rejection_confirmed=rejection_confirmed,
-        sweep_level=sweep_level,
+        sweep_level=sweep_level or sweep.cluster_center,
         funding_lean=funding_lean,
         raw_bias=str(snapshot.get("bias", "BALANCED")),
+        cluster_side=cluster_side,
+        cluster_strength=round(cluster_strength, 1),
+        distance_to_cluster_atr=round(distance_to_cluster_atr, 2) if distance_to_cluster_atr is not None else None,
+        next_pool_side=next_pool_side,
+        touched_cluster=sweep.touched_cluster,
+        flushed_cluster=sweep.flushed_cluster,
+        absorbed_reclaim=bool(reclaim_confirmed and sweep.status in {"completed", "in_progress"}),
+        absorbed_reject=bool(rejection_confirmed and sweep.status in {"completed", "in_progress"}),
     )
 
 
@@ -380,6 +470,15 @@ def format_for_prompt(intel: LiquidationIntelligence) -> str:
         f"Sweep status: {intel.sweep.status.upper()} "
         f"(side: {intel.sweep.sweep_side.upper() or 'N/A'}, "
         f"depth: {intel.sweep.sweep_depth_atr:.1f} ATR)"
+    )
+    lines.append(
+        f"Cluster side: {intel.cluster_side.upper()} | "
+        f"strength: {intel.cluster_strength:.0f}/100 | "
+        f"distance: {intel.distance_to_cluster_atr if intel.distance_to_cluster_atr is not None else '?'} ATR"
+    )
+    lines.append(
+        f"Touched cluster: {intel.touched_cluster} | Flushed through: {intel.flushed_cluster} | "
+        f"Next pool: {intel.next_pool_side.upper()}"
     )
     if intel.sweep.status == "completed":
         lines.append(f"  Bars since sweep: {intel.sweep.bars_since_sweep}")
@@ -415,10 +514,18 @@ def to_dict(intel: LiquidationIntelligence) -> dict[str, Any]:
         "sweep_side": intel.sweep.sweep_side,
         "sweep_depth_atr": intel.sweep.sweep_depth_atr,
         "bars_since_sweep": intel.sweep.bars_since_sweep,
+        "touched_cluster": intel.sweep.touched_cluster,
+        "flushed_cluster": intel.sweep.flushed_cluster,
         "wick_score": intel.wick_score,
         "reclaim_confirmed": intel.reclaim_confirmed,
         "rejection_confirmed": intel.rejection_confirmed,
         "sweep_level": intel.sweep_level,
         "funding_lean": intel.funding_lean,
         "raw_bias": intel.raw_bias,
+        "cluster_side": intel.cluster_side,
+        "cluster_strength": intel.cluster_strength,
+        "distance_to_cluster_atr": intel.distance_to_cluster_atr,
+        "next_pool_side": intel.next_pool_side,
+        "absorbed_reclaim": intel.absorbed_reclaim,
+        "absorbed_reject": intel.absorbed_reject,
     }

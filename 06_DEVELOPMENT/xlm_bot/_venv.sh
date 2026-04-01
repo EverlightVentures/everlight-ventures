@@ -1,8 +1,10 @@
 #!/bin/bash
 set -euo pipefail
 
-BOT_DIR="/mnt/sdcard/AA_MY_DRIVE/xlm_bot"
-VENV="/tmp/xlm_bot_venv"
+# Resolve bot directory dynamically so this script works on phone and Oracle VM.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BOT_DIR="${CRYPTO_BOT_DIR:-$SCRIPT_DIR}"
+VENV="${XLM_BOT_VENV:-/tmp/xlm_bot_venv}"
 REQ="$BOT_DIR/requirements.txt"
 STAMP="$VENV/.req_stamp"
 

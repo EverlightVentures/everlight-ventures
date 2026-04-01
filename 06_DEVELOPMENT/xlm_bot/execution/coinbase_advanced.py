@@ -4,6 +4,7 @@ import os
 import json
 import sys
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Optional
 
@@ -19,7 +20,10 @@ else:
 if str(CRYPTO_BOT_DIR) not in sys.path:
     sys.path.insert(0, str(CRYPTO_BOT_DIR))
 
-from utils.coinbase_api import CoinbaseAPI
+try:
+    from utils.coinbase_api import CoinbaseAPI
+except ModuleNotFoundError:
+    from vendor.utils.coinbase_api import CoinbaseAPI
 
 
 @dataclass
@@ -173,7 +177,7 @@ class CoinbaseAdvanced:
             )
             result = self._parse_order_response(res)
             if result.success:
-                return result
+                return OrderResult(True, result.order_id, "order_placed_with_exchange_bracket")
             # Bracket rejected — fall back to plain order (bot manages SL/TP in software)
             import logging
             logging.getLogger(__name__).warning(
@@ -185,7 +189,10 @@ class CoinbaseAdvanced:
             base_size=size,
             client_order_id=client_order_id,
         )
-        return self._parse_order_response(res)
+        result = self._parse_order_response(res)
+        if result.success and (stop_loss is not None or take_profit is not None):
+            return OrderResult(True, result.order_id, "plain_fallback_no_bracket")
+        return result
 
     def get_futures_positions(self) -> list[dict]:
         """Return CFM futures positions (best-effort, empty list on failure)."""
@@ -272,6 +279,50 @@ class CoinbaseAdvanced:
             return self.api.get_current_margin_window() or {}
         except Exception:
             return {}
+
+    @staticmethod
+    def _find_margin_window_hint(obj: Any) -> str | None:
+        if isinstance(obj, dict):
+            for key, value in obj.items():
+                key_s = str(key).lower()
+                if key_s in {"window", "margin_window", "current_margin_window", "current_margin_window_type", "setting", "type", "status"}:
+                    hit = CoinbaseAdvanced._find_margin_window_hint(value)
+                    if hit:
+                        return hit
+                hit = CoinbaseAdvanced._find_margin_window_hint(value)
+                if hit:
+                    return hit
+        elif isinstance(obj, list):
+            for item in obj:
+                hit = CoinbaseAdvanced._find_margin_window_hint(item)
+                if hit:
+                    return hit
+        elif isinstance(obj, str):
+            s = obj.strip().lower()
+            if "intraday" in s:
+                return "intraday"
+            if "overnight" in s or "standard" in s:
+                return "overnight"
+        return None
+
+    @staticmethod
+    def _fallback_margin_window(now_utc: datetime | None = None) -> str:
+        now_utc = now_utc or datetime.now(timezone.utc)
+        try:
+            from zoneinfo import ZoneInfo
+            now_et = now_utc.astimezone(ZoneInfo("America/New_York"))
+            t_et = now_et.timetz().replace(tzinfo=None)
+        except Exception:
+            t_et = now_utc.timetz().replace(tzinfo=None)
+        # Coinbase CFM intraday window: 8:00 AM ET → 4:00 PM ET.
+        return "intraday" if (t_et.hour, t_et.minute) >= (8, 0) and (t_et.hour, t_et.minute) < (16, 0) else "overnight"
+
+    def resolve_margin_window(self, now_utc: datetime | None = None) -> str:
+        payload = self.get_current_margin_window()
+        hit = self._find_margin_window_hint(payload)
+        if hit:
+            return hit
+        return self._fallback_margin_window(now_utc=now_utc)
 
     def get_open_orders(self, product_id: str | None = None) -> list[dict]:
         """Return open orders (best-effort, empty list on failure)."""
@@ -489,21 +540,29 @@ class CoinbaseAdvanced:
             out["futures_uuid"] = candidates[0].get("uuid")
         return out
 
-    def estimate_required_margin(self, product_id: str, size: int, direction: str, price: float | None = None) -> dict:
+    def estimate_required_margin(self, product_id: str, size: int, direction: str, price: float | None = None, window: str = "auto") -> dict:
         details = self.get_product_details(product_id) or {}
         fpd = details.get("future_product_details") or {}
         contract_size = float(fpd.get("contract_size") or 0)
         if price is None:
             price = float(details.get("price") or details.get("mid_market_price") or 0)
+        active_window = str(window or "auto").strip().lower()
+        if active_window == "auto":
+            active_window = self.resolve_margin_window()
         intraday = fpd.get("intraday_margin_rate") or {}
-        margin_rate = float(intraday.get("long_margin_rate") or intraday.get("short_margin_rate") or 0)
+        overnight = fpd.get("overnight_margin_rate") or {}
+        rate_obj = overnight if active_window == "overnight" else intraday
+        margin_rate = float(rate_obj.get("long_margin_rate") or rate_obj.get("short_margin_rate") or 0)
+        if margin_rate <= 0 and active_window == "overnight":
+            margin_rate = float(intraday.get("long_margin_rate") or intraday.get("short_margin_rate") or 0)
         if direction == "short":
-            margin_rate = float(intraday.get("short_margin_rate") or margin_rate)
+            margin_rate = float(rate_obj.get("short_margin_rate") or margin_rate)
         notional = price * contract_size * size if price and contract_size else 0
         required = notional * margin_rate if notional and margin_rate else 0
         return {
             "contract_size": contract_size or None,
             "price": price or None,
+            "margin_window": active_window,
             "margin_rate": margin_rate or None,
             "required_margin": required or None,
             "notional": notional or None,
@@ -637,6 +696,11 @@ class CoinbaseAdvanced:
             result["reason"] = "invalid_amount"
             return result
         try:
+            if hasattr(self.api, "is_optional_endpoint_disabled") and self.api.is_optional_endpoint_disabled("/api/v3/brokerage/cfm/sweeps"):
+                result["ok"] = True
+                result["reason"] = "cfm_sweep_endpoint_unsupported_hold_funds_in_derivatives"
+                result["method"] = "skip_unsupported"
+                return result
             # Check if a CFM sweep is already pending; if so, don't spam another
             try:
                 pending = self.api.get_cfm_sweeps() or {}
@@ -684,11 +748,59 @@ class CoinbaseAdvanced:
         if float(amount or 0.0) < 1.0:
             result["reason"] = "amount_too_small"
             return result
-        # Coinbase deprecated from_currency/to_currency fields (Feb 2026).
-        # Convert API now requires account UUIDs which adds complexity.
-        # USD sitting in spot is harmless -- skip convert to avoid API spam.
-        result["reason"] = "convert_disabled_api_change"
-        return result
+        try:
+            usd_acc = self.api.get_account_by_currency("USD")
+            usdc_acc = self.api.get_account_by_currency("USDC")
+            if not usd_acc or not usdc_acc:
+                result["reason"] = "missing_convert_accounts"
+                return result
+            from_account = str(usd_acc.get("uuid") or "")
+            to_account = str(usdc_acc.get("uuid") or "")
+            if not from_account or not to_account:
+                result["reason"] = "missing_account_uuid"
+                return result
+            result["from_account"] = from_account
+            result["to_account"] = to_account
+
+            quote = self.api.create_convert_quote(from_account, to_account, float(amount))
+            result["quote_response"] = quote
+            if not isinstance(quote, dict):
+                result["reason"] = "quote_failed"
+                return result
+
+            trade_id = (
+                quote.get("trade_id")
+                or quote.get("tradeId")
+                or quote.get("conversion_id")
+                or quote.get("quote_id")
+            )
+            if not trade_id and isinstance(quote.get("trade"), dict):
+                trade_id = (
+                    quote["trade"].get("trade_id")
+                    or quote["trade"].get("tradeId")
+                    or quote["trade"].get("id")
+                )
+            if not trade_id:
+                result["reason"] = "missing_trade_id"
+                return result
+
+            commit = self.api.commit_convert_trade(str(trade_id), from_account, to_account)
+            result["commit_response"] = commit
+            result["trade_id"] = str(trade_id)
+            if isinstance(commit, dict):
+                success = commit.get("success")
+                if success is False:
+                    result["reason"] = "commit_failed"
+                    return result
+                result["ok"] = True
+                result["reason"] = "convert_committed"
+                return result
+            result["reason"] = "commit_failed"
+            return result
+        except Exception as e:
+            result["reason"] = "exception"
+            result["error"] = str(e)
+            return result
 
     def get_spread_pct(self, product_id: str) -> float | None:
         book = self.api.get_orderbook(product_id) or {}

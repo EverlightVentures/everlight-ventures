@@ -59,6 +59,7 @@ class LiquidationFeedCollector:
         self._stale_seconds = float(cfg.get("stale_seconds", 45.0) or 45.0)
         self._window_seconds = int(cfg.get("window_seconds", 900) or 900)
         self._reconnect_seconds = float(cfg.get("reconnect_seconds", 3.0) or 3.0)
+        self._recent_event_limit = max(20, int(cfg.get("recent_event_limit", 200) or 200))
         self._cache_path = Path(cache_dir) / "liquidation_feed.json"
         self._events: deque[dict[str, Any]] = deque()
 
@@ -178,6 +179,7 @@ class LiquidationFeedCollector:
         one_min = self._window_stats(60)
         five_min = self._window_stats(300)
         fifteen_min = self._window_stats(900)
+        recent_events = list(self._events)[-self._recent_event_limit:]
 
         bias = "BALANCED"
         long_flow = float(five_min.get("longs_usd") or 0.0)
@@ -198,6 +200,8 @@ class LiquidationFeedCollector:
             "last_event_at": latest.get("ts"),
             "last_event": latest,
             "bias": bias,
+            "recent_event_count": len(recent_events),
+            "recent_events": recent_events,
             "window_1m": one_min,
             "window_5m": five_min,
             "window_15m": fifteen_min,
