@@ -237,7 +237,7 @@ regime_gates:
 
 # Volatility regime gate: block entries during unfavorable vol phases
 regime:
-  compression_gate: true       # Block ALL new entries during COMPRESSION vol state
+  compression_gate: false       # Block ALL new entries during COMPRESSION vol state
   allowed_phases:
     - IGNITION
     - EXPANSION
