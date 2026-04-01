@@ -7634,6 +7634,50 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             selected_v4 = dict(selected_v4)
             selected_v4["threshold"] = adaptive_threshold
             selected_v4["pass"] = bool(int(selected_v4.get("score") or 0) >= adaptive_threshold)
+
+        # MACRO VISION: adjust threshold based on cycle position + direction alignment
+        try:
+            _mv = get_vision_summary(price, df_1h, df_4h,
+                                     float(_st.get("btc_price", 0) or 0),
+                                     float(_st.get("btc_momentum_pct", 0) or 0) * 100)
+            _mv_bias = _mv.get("combined_bias", "NEUTRAL")
+            _mv_aligned = _mv.get("aligned", False)
+            _mv_mult = float(_mv.get("position_mult", 1.0))
+            _mv_phase = _mv.get("phase", "")
+
+            if selected_v4 is not None and direction:
+                selected_v4 = dict(selected_v4)
+                _old_thresh = int(selected_v4.get("threshold") or 60)
+
+                # When macro agrees with trade direction, lower the bar
+                _macro_long_ok = direction == "long" and _mv_bias in ("LONG", "STRONG_LONG")
+                _macro_short_ok = direction == "short" and _mv_bias in ("SHORT", "STRONG_SHORT")
+
+                if _macro_long_ok and _mv_aligned:
+                    # Macro + median both say LONG and we want long = drop threshold 15 pts
+                    _macro_adj = -15
+                elif _macro_long_ok:
+                    _macro_adj = -10
+                elif _macro_short_ok and _mv_aligned:
+                    _macro_adj = -15
+                elif _macro_short_ok:
+                    _macro_adj = -10
+                elif direction == "long" and "SHORT" in _mv_bias:
+                    # Trying to go long when macro says short = raise threshold
+                    _macro_adj = +10
+                elif direction == "short" and "LONG" in _mv_bias:
+                    _macro_adj = +10
+                else:
+                    _macro_adj = 0
+
+                if _macro_adj != 0:
+                    _new_thresh = max(30, min(90, _old_thresh + _macro_adj))
+                    selected_v4["threshold"] = _new_thresh
+                    selected_v4["pass"] = bool(int(selected_v4.get("score") or 0) >= _new_thresh)
+                    selected_v4["_macro_adj"] = _macro_adj
+                    selected_v4["_macro_phase"] = _mv_phase
+        except Exception:
+            pass
     except Exception:
         adaptive_reason = "adaptive_error"
 
