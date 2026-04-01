@@ -1,0 +1,3771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patricia Flores | Mobile Bartending Business Kit</title>
+<style>
+  /* ===== GLOBAL RESET & TAB SYSTEM ===== */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0a;
+    --card: #141414;
+    --gold: #d4af37;
+    --gold-light: #f4e4a6;
+    --text: #e8e8e8;
+    --subtle: #888888;
+    --radius: 12px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== LANDING HERO ===== */
+  .hero {
+    text-align: center;
+    padding: 60px 20px 40px;
+  }
+
+  .hero .logo-mark {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    font-weight: 700;
+    color: #0a0a0a;
+    box-shadow: 0 0 40px rgba(212,175,55,0.2);
+    margin-bottom: 24px;
+  }
+
+  .hero h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  .hero .subtitle {
+    color: var(--subtle);
+    font-size: 1.05rem;
+    margin-bottom: 8px;
+  }
+
+  .hero .phone {
+    margin-bottom: 0;
+  }
+
+  .hero .phone a {
+    color: var(--gold);
+    text-decoration: none;
+    font-size: 1.15rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+  }
+
+  /* ===== TAB NAVIGATION ===== */
+  .tab-nav {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: rgba(10,10,10,0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+    display: flex;
+    justify-content: center;
+    gap: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--subtle);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 500;
+    padding: 14px 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease;
+  }
+
+  .tab-btn:hover {
+    color: var(--text);
+  }
+
+  .tab-btn.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+  }
+
+  /* ===== TAB PANELS ===== */
+  .tab-panel {
+    display: none;
+  }
+
+  .tab-panel.active {
+    display: block;
+  }
+
+  /* ===== FOOTER ===== */
+  .mega-footer {
+    text-align: center;
+    padding: 40px 20px;
+    border-top: 1px solid rgba(212,175,55,0.1);
+    margin-top: 40px;
+  }
+
+  .mega-footer p {
+    color: var(--subtle);
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+  }
+
+  .mega-footer .brand {
+    color: var(--gold);
+    font-weight: 500;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 12px;
+  }
+
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 1.8rem; }
+    .tab-btn { font-size: 0.78rem; padding: 12px 14px; }
+  }
+
+  @media print {
+    body { background: #fff; color: #000; }
+    .tab-nav { display: none; }
+    .tab-panel { display: block !important; page-break-before: always; }
+    .hero { padding: 20px; }
+    .mega-footer .brand { color: #666; }
+  }
+</style>
+
+<!-- SECTION-SPECIFIC STYLES (scoped by .panel-* class) -->
+<style>
+  .panel-pricing { position: relative; }
+  
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0a;
+    --card: #141414;
+    --gold: #d4af37;
+    --gold-light: #f4e4a6;
+    --text: #e8e8e8;
+    --subtle: #888888;
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --gold-border: 1px solid rgba(212,175,55,0.25);
+    --gold-glow: 0 0 20px rgba(212,175,55,0.08);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+    padding: 0 24px;
+  }
+  nav .nav-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px;
+  }
+  nav .nav-brand {
+    font-size: 1rem; font-weight: 600;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.04em;
+  }
+  nav .nav-links { display: flex; gap: 20px; flex-wrap: wrap; }
+  nav .nav-links a {
+    color: var(--subtle); text-decoration: none; font-size: 0.78rem;
+    letter-spacing: 0.03em; text-transform: uppercase; transition: color 0.25s;
+  }
+  nav .nav-links a:hover { color: var(--gold); }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+  section { padding: 72px 0; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 140px 0 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -60%; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(212,175,55,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-name {
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .hero-title {
+    font-size: clamp(0.85rem, 2vw, 1.05rem);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--subtle);
+    margin-bottom: 24px;
+  }
+  .hero-divider {
+    width: 60px; height: 1px; margin: 0 auto 24px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .hero-regions {
+    font-size: 0.95rem; color: var(--text); margin-bottom: 10px;
+    letter-spacing: 0.04em;
+  }
+  .hero-phone {
+    font-size: 1.1rem; color: var(--gold); font-weight: 500;
+    text-decoration: none; letter-spacing: 0.03em;
+  }
+  .hero-phone:hover { color: var(--gold-light); }
+
+  /* ── SECTION HEADERS ── */
+  .section-header {
+    text-align: center; margin-bottom: 48px;
+  }
+  .section-header h2 {
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .section-header p {
+    color: var(--subtle); font-size: 0.9rem; letter-spacing: 0.03em;
+  }
+  .section-divider {
+    width: 40px; height: 1px; margin: 16px auto 0;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  /* ── PACKAGE CARDS ── */
+  .packages-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 900px) {
+    .packages-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+  }
+
+  .pkg-card {
+    background: var(--card);
+    border: var(--gold-border);
+    border-radius: var(--radius);
+    padding: 36px 28px 32px;
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex; flex-direction: column;
+  }
+  .pkg-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow), var(--gold-glow);
+  }
+  .pkg-card.featured {
+    border-color: rgba(212,175,55,0.5);
+    box-shadow: var(--shadow), 0 0 30px rgba(212,175,55,0.1);
+  }
+
+  .pkg-badge {
+    position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--gold), #c9a22e);
+    color: #0a0a0a; font-size: 0.68rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 5px 18px; border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .pkg-name {
+    font-size: 1.3rem; font-weight: 400; color: var(--gold-light);
+    margin-bottom: 4px; letter-spacing: 0.03em;
+  }
+  .pkg-price {
+    font-size: 1.6rem; font-weight: 600; color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .pkg-price span { font-size: 0.85rem; font-weight: 400; color: var(--subtle); }
+  .pkg-min { font-size: 0.8rem; color: var(--subtle); margin-bottom: 20px; }
+
+  .pkg-list {
+    list-style: none; flex: 1; margin-bottom: 20px;
+  }
+  .pkg-list li {
+    position: relative; padding-left: 20px; margin-bottom: 10px;
+    font-size: 0.88rem; color: var(--text); line-height: 1.5;
+  }
+  .pkg-list li::before {
+    content: ''; position: absolute; left: 0; top: 7px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--gold);
+  }
+  .pkg-list .plus-label {
+    padding-left: 0; margin-top: 14px; margin-bottom: 10px;
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--gold); font-weight: 600;
+  }
+  .pkg-list .plus-label::before { display: none; }
+
+  .pkg-best {
+    background: rgba(212,175,55,0.06);
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 0.8rem; color: var(--gold-light);
+  }
+  .pkg-best strong { color: var(--gold); }
+
+  /* ── ADDON TABLE ── */
+  .addon-table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    background: var(--card); border-radius: var(--radius);
+    border: var(--gold-border); overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .addon-table th {
+    background: rgba(212,175,55,0.08);
+    color: var(--gold); font-size: 0.75rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 14px 20px; text-align: left; font-weight: 600;
+  }
+  .addon-table th:last-child { text-align: right; }
+  .addon-table td {
+    padding: 13px 20px; font-size: 0.88rem;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  .addon-table td:last-child {
+    text-align: right; color: var(--gold); font-weight: 500;
+    white-space: nowrap;
+  }
+  .addon-table tr:hover td { background: rgba(212,175,55,0.03); }
+
+  /* ── DRINK MENUS ── */
+  .menu-block { margin-bottom: 48px; }
+  .menu-block-title {
+    font-size: 1.2rem; font-weight: 400; color: var(--gold-light);
+    letter-spacing: 0.04em; margin-bottom: 20px; padding-bottom: 10px;
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+  }
+  .menu-subtitle {
+    font-size: 0.95rem; color: var(--gold); font-weight: 500;
+    margin: 24px 0 14px; letter-spacing: 0.03em;
+  }
+
+  .drinks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .drink-item {
+    background: rgba(20,20,20,0.7);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 8px; padding: 14px 16px;
+    transition: border-color 0.25s;
+  }
+  .drink-item:hover { border-color: rgba(212,175,55,0.2); }
+  .drink-name {
+    font-size: 0.92rem; font-weight: 500; color: var(--gold-light);
+    margin-bottom: 3px;
+  }
+  .drink-desc {
+    font-size: 0.8rem; color: var(--subtle); line-height: 1.45;
+  }
+  .drink-note {
+    font-size: 0.78rem; color: var(--gold); font-style: italic;
+    margin-top: 2px;
+  }
+
+  .plus-divider {
+    text-align: center; padding: 16px 0; color: var(--subtle);
+    font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+
+  /* ── CALCULATOR ── */
+  .calc-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px; margin-bottom: 36px;
+  }
+  .calc-card {
+    background: var(--card); border: var(--gold-border);
+    border-radius: var(--radius); padding: 28px 24px;
+    box-shadow: var(--shadow);
+  }
+  .calc-card h3 {
+    font-size: 1rem; font-weight: 500; color: var(--gold);
+    margin-bottom: 16px; letter-spacing: 0.04em;
+  }
+  .calc-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.88rem;
+  }
+  .calc-row:last-child { border-bottom: none; }
+  .calc-row .label { color: var(--text); }
+  .calc-row .value { color: var(--gold); font-weight: 500; }
+
+  .estimate-table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    background: var(--card); border-radius: var(--radius);
+    border: var(--gold-border); overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .estimate-table th {
+    background: rgba(212,175,55,0.08);
+    color: var(--gold); font-size: 0.7rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 12px 14px; text-align: center; font-weight: 600;
+  }
+  .estimate-table td {
+    padding: 12px 14px; font-size: 0.85rem; text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    color: var(--text);
+  }
+  .estimate-table tr:hover td { background: rgba(212,175,55,0.03); }
+
+  /* ── SERVICE AREAS ── */
+  .areas-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px; margin-bottom: 36px;
+  }
+  .area-card {
+    background: var(--card); border: var(--gold-border);
+    border-radius: var(--radius); padding: 28px 24px;
+    box-shadow: var(--shadow);
+  }
+  .area-card h3 {
+    font-size: 1.05rem; font-weight: 500; color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .area-card .area-tag {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--gold-light); margin-bottom: 14px;
+  }
+  .area-card ul { list-style: none; }
+  .area-card ul li {
+    padding: 5px 0; font-size: 0.88rem; color: var(--text);
+    position: relative; padding-left: 14px;
+  }
+  .area-card ul li::before {
+    content: ''; position: absolute; left: 0; top: 12px;
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--gold);
+  }
+  .area-note {
+    margin-top: 12px; padding: 10px 14px;
+    background: rgba(212,175,55,0.06);
+    border-radius: 8px; font-size: 0.82rem;
+    color: var(--gold-light);
+  }
+  .sf-pricing {
+    display: grid; grid-template-columns: 1fr; gap: 8px;
+    margin-top: 12px;
+  }
+  .sf-row {
+    display: flex; justify-content: space-between;
+    font-size: 0.85rem; padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .sf-row .label { color: var(--text); }
+  .sf-row .value { color: var(--gold); font-weight: 500; }
+
+  .travel-table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    background: var(--card); border-radius: var(--radius);
+    border: var(--gold-border); overflow: hidden;
+    box-shadow: var(--shadow); max-width: 500px;
+  }
+  .travel-table th {
+    background: rgba(212,175,55,0.08);
+    color: var(--gold); font-size: 0.7rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 12px 20px; text-align: left; font-weight: 600;
+  }
+  .travel-table th:last-child { text-align: right; }
+  .travel-table td {
+    padding: 11px 20px; font-size: 0.88rem;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  .travel-table td:last-child { text-align: right; color: var(--gold); font-weight: 500; }
+  .travel-table tr:hover td { background: rgba(212,175,55,0.03); }
+
+  /* ── BOOKING TERMS ── */
+  .terms-card {
+    background: var(--card); border: var(--gold-border);
+    border-radius: var(--radius); padding: 36px 32px;
+    box-shadow: var(--shadow); max-width: 700px; margin: 0 auto;
+  }
+  .terms-card ul { list-style: none; }
+  .terms-card ul li {
+    padding: 10px 0; font-size: 0.88rem; color: var(--text);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    position: relative; padding-left: 20px;
+  }
+  .terms-card ul li:last-child { border-bottom: none; }
+  .terms-card ul li::before {
+    content: ''; position: absolute; left: 0; top: 16px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--gold);
+  }
+  .terms-card ul li strong { color: var(--gold-light); }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center; padding: 48px 20px 32px;
+    border-top: 1px solid rgba(212,175,55,0.1);
+  }
+  .footer-name {
+    font-size: 1.1rem; font-weight: 400; color: var(--gold-light);
+    letter-spacing: 0.06em; margin-bottom: 4px;
+  }
+  .footer-phone {
+    font-size: 0.95rem; color: var(--gold);
+    text-decoration: none; letter-spacing: 0.02em;
+  }
+  .footer-phone:hover { color: var(--gold-light); }
+  .footer-credit {
+    margin-top: 28px; font-size: 0.72rem; color: var(--subtle);
+    letter-spacing: 0.06em;
+  }
+  .footer-credit a {
+    color: var(--gold); text-decoration: none;
+  }
+  .footer-credit a:hover { color: var(--gold-light); }
+
+  /* ── UTILITIES ── */
+  .text-center { text-align: center; }
+  .mb-sm { margin-bottom: 12px; }
+  .overflow-x { overflow-x: auto; }
+  .beer-wine-note {
+    font-size: 0.82rem; color: var(--subtle); font-style: italic;
+    margin-top: 14px;
+  }
+
+  @media (max-width: 600px) {
+    section { padding: 48px 0; }
+    .hero { padding: 110px 0 56px; }
+    .pkg-card { padding: 28px 20px 24px; }
+    .terms-card { padding: 24px 18px; }
+    nav .nav-links { gap: 12px; }
+    nav .nav-links a { font-size: 0.7rem; }
+    .estimate-table td, .estimate-table th { padding: 10px 8px; font-size: 0.75rem; }
+  }
+
+</style>
+<style>
+  .panel-contracts { position: relative; }
+  
+  /* ===== RESET & BASE ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+  }
+
+  body {
+    background: #0a0a0a;
+    color: #e8e8e8;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ===== LAYOUT ===== */
+  .page-wrapper {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  /* ===== HEADER ===== */
+  .header {
+    text-align: center;
+    padding: 60px 20px 48px;
+    border-bottom: 1px solid rgba(212,175,55,0.25);
+    margin-bottom: 48px;
+    position: relative;
+  }
+
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #d4af37, transparent);
+  }
+
+  .header h1 {
+    font-size: 3rem;
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    background: linear-gradient(135deg, #d4af37 0%, #f4e4a6 50%, #d4af37 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+
+  .header .subtitle {
+    font-size: 1.1rem;
+    color: #888888;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .header .doc-list {
+    font-size: 0.9rem;
+    color: #666666;
+    letter-spacing: 0.04em;
+  }
+
+  .ev-badge {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 6px 20px;
+    border: 1px solid rgba(212,175,55,0.3);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    color: #d4af37;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ===== TABLE OF CONTENTS ===== */
+  .toc-card {
+    background: #141414;
+    border: 1px solid rgba(212,175,55,0.2);
+    border-radius: 12px;
+    padding: 36px 40px;
+    margin-bottom: 56px;
+  }
+
+  .toc-card h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #d4af37;
+    margin-bottom: 20px;
+  }
+
+  .toc-card ol {
+    list-style: none;
+    counter-reset: toc;
+    padding: 0;
+  }
+
+  .toc-card ol li {
+    counter-increment: toc;
+    margin-bottom: 12px;
+  }
+
+  .toc-card ol li a {
+    color: #e8e8e8;
+    text-decoration: none;
+    font-size: 1.05rem;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: color 0.2s;
+  }
+
+  .toc-card ol li a:hover {
+    color: #f4e4a6;
+  }
+
+  .toc-card ol li a::before {
+    content: counter(toc);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid rgba(212,175,55,0.4);
+    font-size: 0.8rem;
+    color: #d4af37;
+    flex-shrink: 0;
+  }
+
+  .toc-card ol li .toc-desc {
+    display: block;
+    font-size: 0.8rem;
+    color: #666;
+    margin-left: 40px;
+    margin-top: 2px;
+  }
+
+  /* ===== DOCUMENT CARDS ===== */
+  .doc-section {
+    background: #141414;
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 12px;
+    padding: 48px 44px;
+    margin-bottom: 56px;
+    page-break-inside: avoid;
+  }
+
+  .doc-section .doc-header {
+    text-align: center;
+    margin-bottom: 36px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+  }
+
+  .doc-section .doc-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: linear-gradient(135deg, #d4af37 0%, #f4e4a6 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 4px;
+  }
+
+  .doc-section .doc-header .doc-label {
+    font-size: 0.85rem;
+    color: #888;
+    letter-spacing: 0.04em;
+  }
+
+  /* ===== CONTRACT FIELDS ===== */
+  .contract-field {
+    display: inline-block;
+    min-width: 200px;
+    border-bottom: 1px solid #555;
+    padding-bottom: 2px;
+    margin-bottom: 4px;
+    color: #888;
+  }
+
+  .contract-field.short { min-width: 100px; }
+  .contract-field.medium { min-width: 180px; }
+  .contract-field.long { min-width: 320px; }
+  .contract-field.full { display: block; width: 100%; min-width: unset; }
+
+  /* ===== TYPOGRAPHY ===== */
+  h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #d4af37;
+    margin-top: 32px;
+    margin-bottom: 14px;
+    letter-spacing: 0.02em;
+  }
+
+  h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #f4e4a6;
+    margin-top: 24px;
+    margin-bottom: 10px;
+  }
+
+  p {
+    margin-bottom: 12px;
+  }
+
+  .section-number {
+    color: #d4af37;
+    font-weight: 600;
+  }
+
+  .subsection {
+    margin-left: 20px;
+    margin-bottom: 10px;
+  }
+
+  .indent {
+    margin-left: 24px;
+  }
+
+  strong {
+    color: #f4e4a6;
+    font-weight: 600;
+  }
+
+  /* ===== PARTIES BLOCK ===== */
+  .parties-block {
+    background: rgba(212,175,55,0.04);
+    border: 1px solid rgba(212,175,55,0.12);
+    border-radius: 8px;
+    padding: 24px 28px;
+    margin: 20px 0;
+  }
+
+  .parties-block .party-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #d4af37;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .parties-block .party-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+  }
+
+  .parties-block .party-row .label {
+    color: #888;
+    min-width: 140px;
+    flex-shrink: 0;
+  }
+
+  .party-divider {
+    border: none;
+    border-top: 1px solid rgba(212,175,55,0.1);
+    margin: 20px 0;
+  }
+
+  /* ===== SIGNATURE BLOCKS ===== */
+  .sig-block {
+    margin-top: 40px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(212,175,55,0.15);
+  }
+
+  .sig-row {
+    display: flex;
+    gap: 48px;
+    flex-wrap: wrap;
+    margin-top: 24px;
+  }
+
+  .sig-col {
+    flex: 1;
+    min-width: 280px;
+  }
+
+  .sig-col .sig-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #d4af37;
+    margin-bottom: 20px;
+    font-weight: 600;
+  }
+
+  .sig-line {
+    border-bottom: 1px solid #555;
+    margin-bottom: 6px;
+    padding-bottom: 24px;
+  }
+
+  .sig-field-label {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 16px;
+  }
+
+  /* ===== TABLES ===== */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+  }
+
+  table th {
+    text-align: left;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #d4af37;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(212,175,55,0.25);
+    font-weight: 600;
+  }
+
+  table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    color: #e8e8e8;
+    vertical-align: top;
+  }
+
+  table tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* ===== CHECKBOXES ===== */
+  .checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 20px;
+    margin-bottom: 8px;
+  }
+
+  .checkbox .box {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid #888;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .checkbox-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 0;
+    margin: 8px 0;
+  }
+
+  .checkbox-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .checkbox-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+
+  .checkbox-list li .box {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 1.5px solid #888;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+
+  /* ===== BLOCKQUOTE / STATUTORY ===== */
+  .statutory-quote {
+    background: rgba(212,175,55,0.06);
+    border-left: 3px solid #d4af37;
+    border-radius: 0 8px 8px 0;
+    padding: 20px 24px;
+    margin: 20px 0;
+    font-style: italic;
+    color: #f4e4a6;
+    line-height: 1.8;
+  }
+
+  .initials-line {
+    margin-top: 16px;
+    font-style: normal;
+    color: #888;
+  }
+
+  .initials-line .contract-field {
+    min-width: 80px;
+  }
+
+  /* ===== DISCLAIMER ===== */
+  .disclaimer {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin-top: 32px;
+    font-size: 0.85rem;
+    color: #888;
+    text-align: center;
+  }
+
+  /* ===== FORM GRID ===== */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 32px;
+    margin: 12px 0;
+  }
+
+  .form-grid.single { grid-template-columns: 1fr; }
+
+  .form-field {
+    margin-bottom: 4px;
+  }
+
+  .form-field .field-label {
+    font-size: 0.8rem;
+    color: #888;
+    margin-bottom: 4px;
+  }
+
+  .form-field .field-input {
+    border-bottom: 1px solid #555;
+    padding-bottom: 4px;
+    min-height: 24px;
+    color: #e8e8e8;
+  }
+
+  /* ===== DIVIDERS ===== */
+  .gold-divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212,175,55,0.3), transparent);
+    margin: 40px 0;
+  }
+
+  .section-divider {
+    border: none;
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    margin: 28px 0;
+  }
+
+  /* ===== FOOTER ===== */
+  .footer {
+    text-align: center;
+    padding: 40px 20px 20px;
+    border-top: 1px solid rgba(212,175,55,0.15);
+    margin-top: 40px;
+  }
+
+  .footer .footer-name {
+    font-size: 1.1rem;
+    color: #d4af37;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+
+  .footer .footer-phone {
+    font-size: 0.95rem;
+    color: #888;
+    margin-bottom: 20px;
+  }
+
+  .footer .footer-ev {
+    font-size: 0.75rem;
+    color: #555;
+    letter-spacing: 0.04em;
+  }
+
+  /* ===== PAGE BREAKS ===== */
+  .page-break {
+    page-break-before: always;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 640px) {
+    .page-wrapper { padding: 20px 14px 60px; }
+    .doc-section { padding: 28px 20px; }
+    .toc-card { padding: 24px 20px; }
+    .header h1 { font-size: 2rem; }
+    .form-grid { grid-template-columns: 1fr; }
+    .sig-row { gap: 32px; }
+    .parties-block { padding: 16px; }
+    .parties-block .party-row { flex-direction: column; gap: 2px; }
+    .contract-field.long { min-width: 200px; }
+  }
+
+  /* ===== PRINT STYLES ===== */
+  @media print {
+    body {
+      background: #ffffff;
+      color: #111111;
+      font-size: 11pt;
+      line-height: 1.5;
+    }
+
+    .page-wrapper { max-width: 100%; padding: 0; }
+
+    .header {
+      border-bottom: 2px solid #333;
+      padding: 20px 0;
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      background: none;
+      -webkit-text-fill-color: #111;
+      color: #111;
+      font-size: 24pt;
+    }
+
+    .header .subtitle,
+    .header .doc-list { color: #444; }
+
+    .ev-badge {
+      border-color: #999;
+      color: #666;
+    }
+
+    .toc-card,
+    .doc-section {
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: none;
+    }
+
+    .toc-card h2,
+    .doc-section .doc-header h2,
+    h3, .section-number,
+    .parties-block .party-label,
+    .sig-col .sig-label {
+      color: #333;
+      background: none;
+      -webkit-text-fill-color: #333;
+    }
+
+    h4, strong, .statutory-quote { color: #222; }
+
+    .toc-card ol li a { color: #111; }
+    .toc-card ol li a::before { border-color: #999; color: #333; }
+
+    .parties-block {
+      background: #f9f9f9;
+      border-color: #ccc;
+    }
+
+    .contract-field,
+    .sig-line { border-bottom-color: #111; }
+
+    table th { color: #333; border-bottom-color: #333; }
+    table td { border-bottom-color: #ddd; color: #111; }
+
+    .checkbox .box,
+    .checkbox-list li .box { border-color: #333; }
+
+    .statutory-quote {
+      background: #f5f5f0;
+      border-left-color: #333;
+      color: #222;
+    }
+
+    .disclaimer {
+      background: #f9f9f9;
+      border-color: #ccc;
+      color: #666;
+    }
+
+    .footer { border-top-color: #ccc; }
+    .footer .footer-name { color: #333; }
+    .footer .footer-phone, .footer .footer-ev { color: #666; }
+
+    .gold-divider { background: #ccc; }
+    .section-divider { background: #ddd; }
+
+    .doc-section { page-break-inside: auto; }
+    .sig-block { page-break-inside: avoid; }
+    h3 { page-break-after: avoid; }
+
+    .form-field .field-label,
+    .parties-block .party-row .label,
+    .sig-field-label,
+    .initials-line { color: #555; }
+
+    .form-field .field-input { color: #111; }
+  }
+
+</style>
+<style>
+  .panel-launch { position: relative; }
+  
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: #0a0a0a;
+    color: #e8e8e8;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: #d4af37; color: #0a0a0a; }
+
+  .container { max-width: 900px; margin: 0 auto; padding: 0 20px; }
+
+  /* ── HEADER ────────────────────────────────────────── */
+  header {
+    text-align: center;
+    padding: 60px 20px 50px;
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 300px; height: 2px;
+    background: linear-gradient(90deg, transparent, #d4af37, transparent);
+  }
+  header h1 {
+    font-size: clamp(2.2rem, 6vw, 3.4rem);
+    font-weight: 700;
+    background: linear-gradient(135deg, #d4af37 0%, #f4e4a6 50%, #d4af37 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.02em;
+    margin-bottom: 12px;
+  }
+  header .subtitle {
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    color: #e8e8e8;
+    font-weight: 300;
+    margin-bottom: 20px;
+    letter-spacing: 0.03em;
+  }
+  header .prepared-by {
+    display: inline-block;
+    font-size: 0.85rem;
+    color: #888;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: 1px solid rgba(212,175,55,0.25);
+    padding: 6px 20px;
+    border-radius: 20px;
+  }
+
+  /* ── NAV ────────────────────────────────────────────── */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(212,175,55,0.1);
+    padding: 12px 0;
+    overflow-x: auto;
+  }
+  nav .container {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+  nav a {
+    font-size: 0.75rem;
+    color: #888;
+    text-decoration: none;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid transparent;
+    transition: all 0.25s;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  nav a:hover {
+    color: #d4af37;
+    border-color: rgba(212,175,55,0.3);
+  }
+
+  /* ── SECTIONS ──────────────────────────────────────── */
+  section {
+    padding: 60px 0;
+    border-bottom: 1px solid rgba(212,175,55,0.08);
+  }
+
+  .section-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #d4af37;
+    margin-bottom: 8px;
+    font-weight: 500;
+  }
+
+  h2 {
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    font-weight: 600;
+    color: #e8e8e8;
+    margin-bottom: 32px;
+    line-height: 1.2;
+  }
+  h2 .gold { color: #d4af37; }
+
+  h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #f4e4a6;
+    margin-bottom: 16px;
+  }
+
+  /* ── CARDS ─────────────────────────────────────────── */
+  .card {
+    background: #141414;
+    border: 1px solid rgba(212,175,55,0.12);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 20px;
+    transition: border-color 0.3s;
+  }
+  .card:hover { border-color: rgba(212,175,55,0.3); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(212,175,55,0.08);
+  }
+  .card-header .phase-badge {
+    background: linear-gradient(135deg, #d4af37, #b8941e);
+    color: #0a0a0a;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  .card-header h3 { margin-bottom: 0; }
+
+  .sub-header {
+    font-size: 0.85rem;
+    color: #d4af37;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin: 20px 0 12px;
+  }
+  .sub-header-note {
+    font-size: 0.8rem;
+    color: #888;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  /* ── CHECKLIST ─────────────────────────────────────── */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.03);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  .checklist li:last-child { border-bottom: none; }
+  .checkbox {
+    flex-shrink: 0;
+    width: 20px; height: 20px;
+    border: 2px solid rgba(212,175,55,0.5);
+    border-radius: 4px;
+    margin-top: 3px;
+    position: relative;
+  }
+  .checklist .detail {
+    display: block;
+    font-size: 0.82rem;
+    color: #888;
+    margin-top: 2px;
+  }
+
+  /* ── TIMELINE ──────────────────────────────────────── */
+  .timeline { position: relative; padding-left: 48px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 18px; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, #d4af37, rgba(212,175,55,0.1));
+    border-radius: 2px;
+  }
+  .timeline-item {
+    position: relative;
+    margin-bottom: 28px;
+  }
+  .timeline-item:last-child { margin-bottom: 0; }
+  .timeline-item .dot {
+    position: absolute;
+    left: -38px; top: 3px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: #0a0a0a;
+    border: 2px solid #d4af37;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.55rem;
+    color: #d4af37;
+    font-weight: 700;
+  }
+  .timeline-item .dot.active {
+    background: #d4af37;
+    color: #0a0a0a;
+  }
+  .timeline-item h4 {
+    font-size: 1rem;
+    color: #e8e8e8;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .timeline-item p {
+    font-size: 0.88rem;
+    color: #888;
+    line-height: 1.5;
+  }
+
+  /* ── COUNTY MAP CARDS ──────────────────────────────── */
+  .county-card {
+    background: #141414;
+    border: 1px solid rgba(212,175,55,0.12);
+    border-radius: 12px;
+    padding: 28px;
+    margin-bottom: 20px;
+    transition: border-color 0.3s;
+  }
+  .county-card:hover { border-color: rgba(212,175,55,0.3); }
+  .county-card .county-name {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #e8e8e8;
+    margin-bottom: 4px;
+  }
+  .county-card .county-tag {
+    font-size: 0.75rem;
+    color: #d4af37;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .county-card .info-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  .county-card .info-row .label {
+    color: #d4af37;
+    font-weight: 600;
+    flex-shrink: 0;
+    min-width: 65px;
+  }
+  .county-card .info-row .value { color: #ccc; }
+  .county-card .tip {
+    margin-top: 14px;
+    padding: 12px 16px;
+    background: rgba(212,175,55,0.04);
+    border-left: 3px solid rgba(212,175,55,0.3);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.85rem;
+    color: #aaa;
+    line-height: 1.6;
+  }
+
+  .sf-pricing {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    margin: 14px 0;
+  }
+  .sf-pricing .price-pill {
+    background: rgba(212,175,55,0.06);
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 8px;
+    padding: 10px 14px;
+    text-align: center;
+  }
+  .sf-pricing .price-pill .tier {
+    font-size: 0.7rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: block;
+    margin-bottom: 4px;
+  }
+  .sf-pricing .price-pill .amount {
+    font-size: 1.1rem;
+    color: #d4af37;
+    font-weight: 700;
+  }
+
+  /* ── TRAVEL TABLE ──────────────────────────────────── */
+  .travel-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  .travel-table th {
+    text-align: left;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #d4af37;
+    padding: 10px 16px;
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+  }
+  .travel-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.9rem;
+  }
+  .travel-table td:last-child {
+    color: #d4af37;
+    font-weight: 600;
+    text-align: right;
+  }
+  .travel-table th:last-child { text-align: right; }
+  .travel-table tr:last-child td { border-bottom: none; }
+
+  /* ── STAT GRID ─────────────────────────────────────── */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 16px;
+  }
+  .stat-card {
+    background: #141414;
+    border: 1px solid rgba(212,175,55,0.12);
+    border-radius: 12px;
+    padding: 24px 20px;
+    text-align: center;
+    transition: border-color 0.3s, transform 0.2s;
+  }
+  .stat-card:hover {
+    border-color: rgba(212,175,55,0.35);
+    transform: translateY(-2px);
+  }
+  .stat-card .stat-number {
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-weight: 700;
+    background: linear-gradient(135deg, #d4af37, #f4e4a6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    margin-bottom: 6px;
+  }
+  .stat-card .stat-label {
+    font-size: 0.78rem;
+    color: #888;
+    line-height: 1.4;
+  }
+
+  /* ── REVENUE TABLE ─────────────────────────────────── */
+  .revenue-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .revenue-table th {
+    text-align: left;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #d4af37;
+    padding: 10px 14px;
+    border-bottom: 1px solid rgba(212,175,55,0.2);
+  }
+  .revenue-table td {
+    padding: 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.9rem;
+  }
+  .revenue-table tr:last-child td { border-bottom: none; }
+  .revenue-table .highlight {
+    color: #d4af37;
+    font-weight: 600;
+  }
+  .revenue-table .note {
+    font-size: 0.82rem;
+    color: #888;
+    margin-top: 14px;
+    font-style: italic;
+  }
+
+  /* ── PRO TIP CARDS ─────────────────────────────────── */
+  .tip-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .tip-card {
+    background: #141414;
+    border: 1px solid rgba(212,175,55,0.18);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+  .tip-card:hover { border-color: rgba(212,175,55,0.4); }
+  .tip-card .tip-number {
+    position: absolute;
+    top: -1px; left: 20px;
+    background: linear-gradient(135deg, #d4af37, #b8941e);
+    color: #0a0a0a;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 0 0 6px 6px;
+    letter-spacing: 0.1em;
+  }
+  .tip-card p {
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: #ccc;
+    margin-top: 8px;
+  }
+
+  /* ── FOOTER ────────────────────────────────────────── */
+  footer {
+    text-align: center;
+    padding: 50px 20px;
+    border-top: 1px solid rgba(212,175,55,0.1);
+  }
+  footer .name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #e8e8e8;
+    margin-bottom: 2px;
+  }
+  footer .biz {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 8px;
+  }
+  footer .phone {
+    font-size: 1rem;
+    color: #d4af37;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    margin-bottom: 24px;
+  }
+  footer .divider {
+    width: 60px; height: 1px;
+    background: linear-gradient(90deg, transparent, #d4af37, transparent);
+    margin: 24px auto;
+  }
+  footer .ev-logo {
+    font-size: 0.75rem;
+    color: #555;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  footer .ev-link {
+    font-size: 0.8rem;
+    color: #d4af37;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+  }
+  footer .ev-link:hover { text-decoration: underline; }
+
+  /* ── RESPONSIVE ────────────────────────────────────── */
+  @media (max-width: 600px) {
+    .card, .county-card { padding: 20px; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .tip-grid { grid-template-columns: 1fr; }
+    nav .container { justify-content: flex-start; padding: 0 12px; }
+    section { padding: 40px 0; }
+    .sf-pricing { grid-template-columns: 1fr 1fr 1fr; }
+    .revenue-table { font-size: 0.82rem; }
+    .revenue-table td, .revenue-table th { padding: 10px 8px; }
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<div class="hero">
+  <div class="logo-mark">PF</div>
+  <h1>Patricia Flores</h1>
+  <p class="subtitle">Mobile Bartending Service<br>Woodland &bull; Solano &bull; San Francisco</p>
+  <p class="phone"><a href="tel:530-761-6711">530-761-6711</a></p>
+</div>
+
+<!-- ===== TAB NAV ===== -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('pricing')">Pricing &amp; Menus</button>
+  <button class="tab-btn" onclick="showTab('contracts')">Contracts &amp; Legal</button>
+  <button class="tab-btn" onclick="showTab('launch')">Launch Guide</button>
+</div>
+
+<!-- ===== TAB 1: PRICING & MENUS ===== -->
+<div id="tab-pricing" class="tab-panel panel-pricing active">
+
+
+<!-- ══════════════════════ NAV ══════════════════════ -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-brand">Patricia Flores</div>
+    <div class="nav-links">
+      <a href="#packages">Packages</a>
+      <a href="#addons">Add-Ons</a>
+      <a href="#menus">Menus</a>
+      <a href="#calculator">Calculator</a>
+      <a href="#areas">Areas</a>
+      <a href="#booking">Booking</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════ HERO ══════════════════════ -->
+<header class="hero">
+  <div class="container">
+    <h1 class="hero-name">Patricia Flores</h1>
+    <p class="hero-title">Mobile Bartending Service</p>
+    <div class="hero-divider"></div>
+    <p class="hero-regions">Woodland &nbsp;&middot;&nbsp; Solano &nbsp;&middot;&nbsp; San Francisco</p>
+    <a href="tel:5307616711" class="hero-phone">530-761-6711</a>
+  </div>
+</header>
+
+<!-- ══════════════════════ PACKAGES ══════════════════════ -->
+<section id="packages">
+  <div class="container">
+    <div class="section-header">
+      <h2>Packages</h2>
+      <p>Three tiers. Every detail covered.</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="packages-grid">
+
+      <!-- CLASSIC -->
+      <div class="pkg-card">
+        <div class="pkg-name">The Classic</div>
+        <div class="pkg-price">$45<span>/hr</span></div>
+        <div class="pkg-min">4-hour minimum &nbsp;=&nbsp; $180</div>
+        <ul class="pkg-list">
+          <li>1 professional bartender</li>
+          <li>Basic bar setup (folding table, bar mat, tools)</li>
+          <li>Standard cocktail menu (8-10 drinks)</li>
+          <li>Cups, napkins, straws, ice</li>
+          <li>Client provides all alcohol</li>
+        </ul>
+        <div class="pkg-best"><strong>Best for:</strong> House parties, small gatherings up to 50 guests</div>
+      </div>
+
+      <!-- SIGNATURE -->
+      <div class="pkg-card featured">
+        <div class="pkg-badge">Most Popular</div>
+        <div class="pkg-name">The Signature</div>
+        <div class="pkg-price">$55<span>/hr</span></div>
+        <div class="pkg-min">4-hour minimum &nbsp;=&nbsp; $220</div>
+        <ul class="pkg-list">
+          <li>Everything in The Classic</li>
+          <li class="plus-label">Plus</li>
+          <li>Custom cocktail menu (up to 5 signature drinks)</li>
+          <li>Garnish kit (fresh citrus, herbs, specialty garnishes)</li>
+          <li>Premium bar setup with branded signage</li>
+          <li>Glassware rental option</li>
+          <li>Pre-event consultation</li>
+        </ul>
+        <div class="pkg-best"><strong>Best for:</strong> Birthdays, corporate events, engagement parties, 50-100 guests</div>
+      </div>
+
+      <!-- EXPERIENCE -->
+      <div class="pkg-card">
+        <div class="pkg-name">The Experience</div>
+        <div class="pkg-price">$75<span>/hr</span></div>
+        <div class="pkg-min">4-hour minimum &nbsp;=&nbsp; $300</div>
+        <ul class="pkg-list">
+          <li>Everything in The Signature</li>
+          <li class="plus-label">Plus</li>
+          <li>Premium glassware (coupes, rocks, flutes)</li>
+          <li>Monogram cocktail napkin option</li>
+          <li>Champagne toast coordination</li>
+          <li>Dedicated bar back</li>
+          <li>Custom drink menu display (printed/framed/easel)</li>
+          <li>Pre-event tasting session (up to 5 cocktails)</li>
+          <li>Day-of coordination with venue/planner</li>
+        </ul>
+        <div class="pkg-best"><strong>Best for:</strong> Weddings, galas, upscale events, 100+ guests</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ ADD-ONS ══════════════════════ -->
+<section id="addons">
+  <div class="container">
+    <div class="section-header">
+      <h2>Add-Ons &amp; Upsells</h2>
+      <p>Customize your event down to the last detail.</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="overflow-x">
+      <table class="addon-table">
+        <thead>
+          <tr><th>Add-On</th><th>Price</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Extra bartender</td><td>$40/hr</td></tr>
+          <tr><td>Bar back / assistant</td><td>$25/hr</td></tr>
+          <tr><td>Full bar supply (we source everything)</td><td>$15-25/guest</td></tr>
+          <tr><td>Glassware rental</td><td>$2/glass</td></tr>
+          <tr><td>Specialty ice (large cubes, spheres)</td><td>$50 flat</td></tr>
+          <tr><td>Custom drink menu signage</td><td>$35</td></tr>
+          <tr><td>Non-alcoholic mocktail bar</td><td>$150 flat</td></tr>
+          <tr><td>Shot wall</td><td>$100-150</td></tr>
+          <tr><td>Champagne tower</td><td>$150-250</td></tr>
+          <tr><td>Travel fee (outside 30 mi)</td><td>$0.65/mile</td></tr>
+          <tr><td>Late night surcharge (after midnight)</td><td>+$15/hr</td></tr>
+          <tr><td>Holiday surcharge</td><td>+25%</td></tr>
+          <tr><td>Day-of venue coordination</td><td>$50</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ DRINK MENUS ══════════════════════ -->
+<section id="menus">
+  <div class="container">
+    <div class="section-header">
+      <h2>Drink Menus</h2>
+      <p>From timeless classics to custom creations.</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <!-- CLASSIC MENU -->
+    <div class="menu-block">
+      <h3 class="menu-block-title">Classic Menu &nbsp;&mdash;&nbsp; 8 Cocktails</h3>
+      <div class="drinks-grid">
+        <div class="drink-item">
+          <div class="drink-name">Margarita</div>
+          <div class="drink-desc">Tequila, fresh lime, triple sec, salted rim</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Moscow Mule</div>
+          <div class="drink-desc">Vodka, ginger beer, fresh lime, copper mug</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Gin &amp; Tonic</div>
+          <div class="drink-desc">London dry gin, premium tonic, lime wheel</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Vodka Soda</div>
+          <div class="drink-desc">Clean vodka, soda, citrus twist</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Whiskey Sour</div>
+          <div class="drink-desc">Bourbon, fresh lemon, simple syrup, optional egg white</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Mojito</div>
+          <div class="drink-desc">White rum, fresh mint, lime, sugar, soda</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Paloma</div>
+          <div class="drink-desc">Tequila, fresh grapefruit, lime, soda</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Rum &amp; Coke</div>
+          <div class="drink-desc">Dark or light rum, cola, lime wedge</div>
+        </div>
+      </div>
+      <p class="beer-wine-note">Plus beer and wine service included with every package.</p>
+    </div>
+
+    <!-- SIGNATURE MENU -->
+    <div class="menu-block">
+      <h3 class="menu-block-title">Signature Menu &nbsp;&mdash;&nbsp; 12 Cocktails + 3 Custom</h3>
+      <p style="font-size:0.85rem;color:var(--subtle);margin-bottom:18px;">Includes the full Classic Menu, plus:</p>
+      <div class="drinks-grid">
+        <div class="drink-item">
+          <div class="drink-name">Espresso Martini</div>
+          <div class="drink-desc">Vodka, fresh espresso, coffee liqueur, vanilla</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Aperol Spritz</div>
+          <div class="drink-desc">Aperol, prosecco, soda</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">French 75</div>
+          <div class="drink-desc">Gin, champagne, lemon, sugar</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Old Fashioned</div>
+          <div class="drink-desc">Bourbon, bitters, sugar, orange peel</div>
+        </div>
+      </div>
+
+      <div class="menu-subtitle">Signature Sips &nbsp;&mdash;&nbsp; Custom Per Event</div>
+      <div class="drinks-grid">
+        <div class="drink-item">
+          <div class="drink-name">Golden Hour</div>
+          <div class="drink-desc">Bourbon, honey syrup, lemon, lavender bitters</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">The Velvet Robe</div>
+          <div class="drink-desc">Empress gin, St-Germain, prosecco, lemon twist</div>
+          <div class="drink-note">Color-shifting</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Smoke Signal</div>
+          <div class="drink-desc">Mezcal, pineapple, jalape&ntilde;o syrup, lime, charred pineapple</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEASONAL MENUS -->
+    <div class="menu-block">
+      <h3 class="menu-block-title">Seasonal Menus</h3>
+
+      <div class="menu-subtitle">Spring / Summer</div>
+      <div class="drinks-grid">
+        <div class="drink-item">
+          <div class="drink-name">Watermelon Margarita</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Cucumber Collins</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Fros&eacute;</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Mango Chili Mule</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Aperol Spritz</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Lavender Lemonade</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Pineapple Rum Punch</div>
+        </div>
+      </div>
+
+      <div class="menu-subtitle">Fall / Winter</div>
+      <div class="drinks-grid">
+        <div class="drink-item">
+          <div class="drink-name">Maple Old Fashioned</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Hot Toddy</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Espresso Martini</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Spiced Pear Mule</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Cranberry Champagne Cocktail</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Apple Cider Sangria</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Chai White Russian</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Fireside Sour</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEDDING MENU -->
+    <div class="menu-block">
+      <h3 class="menu-block-title">Wedding Menu</h3>
+      <div class="drinks-grid">
+        <div class="drink-item">
+          <div class="drink-name">&ldquo;His&rdquo;</div>
+          <div class="drink-desc">Smoked Old Fashioned</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">&ldquo;Hers&rdquo;</div>
+          <div class="drink-desc">Rose Petal Spritz</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Champagne Toast</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">French 75</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Aperol Spritz</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Whiskey Sour</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Classic Margarita</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Wine &amp; Beer</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOCKTAIL MENU -->
+    <div class="menu-block">
+      <h3 class="menu-block-title">Mocktail Menu &nbsp;&mdash;&nbsp; $150 flat add-on</h3>
+      <div class="drinks-grid">
+        <div class="drink-item">
+          <div class="drink-name">Citrus Sunrise</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Virgin Mojito</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Berry Basil Smash</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Ginger Mango Fizz</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Sparkling Lavender Lemonade</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Cucumber Mint Cooler</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════ LIQUOR CALCULATOR ══════════════════════ -->
+<section id="calculator">
+  <div class="container">
+    <div class="section-header">
+      <h2>Liquor Calculator</h2>
+      <p>Plan your bar with confidence.</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="calc-grid">
+      <div class="calc-card">
+        <h3>Drinks Per Guest Per Hour</h3>
+        <div class="calc-row">
+          <span class="label">Light (brunch, daytime)</span>
+          <span class="value">1 drink</span>
+        </div>
+        <div class="calc-row">
+          <span class="label">Moderate (dinner, corporate)</span>
+          <span class="value">1.5 drinks</span>
+        </div>
+        <div class="calc-row">
+          <span class="label">Heavy (wedding, NYE)</span>
+          <span class="value">2 drinks</span>
+        </div>
+      </div>
+
+      <div class="calc-card">
+        <h3>Bottle Math</h3>
+        <div class="calc-row">
+          <span class="label">1 bottle liquor</span>
+          <span class="value">~16 cocktails</span>
+        </div>
+        <div class="calc-row">
+          <span class="label">1 case wine (12 btl)</span>
+          <span class="value">~60 glasses</span>
+        </div>
+        <div class="calc-row">
+          <span class="label">1 keg beer</span>
+          <span class="value">~165 pours</span>
+        </div>
+        <div class="calc-row">
+          <span class="label">1 bottle champagne</span>
+          <span class="value">6 flutes</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header" style="margin-bottom:24px;">
+      <h3 style="font-size:1rem;color:var(--gold-light);font-weight:500;letter-spacing:0.04em;">Quick Estimate &nbsp;&mdash;&nbsp; 4 Hours, Moderate</h3>
+    </div>
+
+    <div class="overflow-x">
+      <table class="estimate-table">
+        <thead>
+          <tr>
+            <th>Guests</th>
+            <th>Hours</th>
+            <th>Level</th>
+            <th>Total Drinks</th>
+            <th>Liquor Bottles</th>
+            <th>Wine Cases</th>
+            <th>Beer Cases</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>25</td><td>4</td><td>Moderate</td><td>~150</td><td>5-6</td><td>1</td><td>2</td>
+          </tr>
+          <tr>
+            <td>50</td><td>4</td><td>Moderate</td><td>~300</td><td>10-12</td><td>2</td><td>3</td>
+          </tr>
+          <tr>
+            <td>75</td><td>4</td><td>Moderate</td><td>~450</td><td>15-17</td><td>3</td><td>5</td>
+          </tr>
+          <tr>
+            <td>100</td><td>4</td><td>Moderate</td><td>~600</td><td>20-22</td><td>4</td><td>6</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════ SERVICE AREAS ══════════════════════ -->
+<section id="areas">
+  <div class="container">
+    <div class="section-header">
+      <h2>Service Areas</h2>
+      <p>Based in Woodland. Serving Northern California.</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="areas-grid">
+
+      <div class="area-card">
+        <h3>Yolo County</h3>
+        <div class="area-tag">Home Base</div>
+        <ul>
+          <li>Woodland</li>
+          <li>Davis</li>
+          <li>West Sacramento</li>
+          <li>Winters</li>
+        </ul>
+        <div class="area-note">No travel fee within 30 miles.</div>
+      </div>
+
+      <div class="area-card">
+        <h3>Solano County</h3>
+        <div class="area-tag">30-55 min from Woodland</div>
+        <ul>
+          <li>Vacaville (30 min)</li>
+          <li>Fairfield (40 min)</li>
+          <li>Vallejo (55 min)</li>
+          <li>Benicia (50 min)</li>
+          <li>Dixon (20 min)</li>
+        </ul>
+        <div class="area-note">Travel fee for locations beyond 30 miles.</div>
+      </div>
+
+      <div class="area-card">
+        <h3>San Francisco</h3>
+        <div class="area-tag">~90 min &middot; Premium Pricing</div>
+        <ul>
+          <li>+20-30% over base rates</li>
+        </ul>
+        <div class="sf-pricing">
+          <div class="sf-row">
+            <span class="label">SF Classic</span>
+            <span class="value">$55-60/hr</span>
+          </div>
+          <div class="sf-row">
+            <span class="label">SF Signature</span>
+            <span class="value">$65-70/hr</span>
+          </div>
+          <div class="sf-row">
+            <span class="label">SF Experience</span>
+            <span class="value">$90-95/hr</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section-header" style="margin-bottom:24px;">
+      <h3 style="font-size:1rem;color:var(--gold-light);font-weight:500;letter-spacing:0.04em;">Travel Fee Estimates from Woodland</h3>
+    </div>
+
+    <div class="overflow-x" style="display:flex;justify-content:center;">
+      <table class="travel-table">
+        <thead>
+          <tr><th>Destination</th><th>Fee</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Davis, West Sac, Dixon, Vacaville</td><td>No charge</td></tr>
+          <tr><td>Fairfield</td><td>~$10</td></tr>
+          <tr><td>Benicia</td><td>~$26</td></tr>
+          <tr><td>Vallejo</td><td>~$33</td></tr>
+          <tr><td>San Francisco</td><td>~$71 + $7 toll</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════ BOOKING TERMS ══════════════════════ -->
+<section id="booking">
+  <div class="container">
+    <div class="section-header">
+      <h2>Booking Terms</h2>
+      <p>Simple. Transparent. Professional.</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="terms-card">
+      <ul>
+        <li><strong>4-hour minimum</strong> on all packages.</li>
+        <li><strong>50% non-refundable deposit</strong> required to secure your date.</li>
+        <li><strong>Balance due 7 days</strong> before the event.</li>
+        <li><strong>Payment accepted:</strong> Venmo, Zelle, Square, cash, or check.</li>
+        <li><strong>Cancellation:</strong> Full refund (minus deposit) with 14+ days notice. No refund within 7 days.</li>
+        <li><strong>Overtime:</strong> 1.5x the hourly rate in 30-minute increments.</li>
+        <li><strong>Tips</strong> are not included but always appreciated.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ FOOTER ══════════════════════ -->
+<footer>
+  <div class="footer-name">Patricia Flores &nbsp;|&nbsp; Mobile Bartending</div>
+  <a href="tel:5307616711" class="footer-phone">530-761-6711</a>
+  <div class="footer-credit">
+    Prepared with care by <a href="https://everlightventures.io" target="_blank" rel="noopener">Everlight Ventures</a>
+  </div>
+</footer>
+
+
+</div>
+
+<!-- ===== TAB 2: CONTRACTS & LEGAL ===== -->
+<div id="tab-contracts" class="tab-panel panel-contracts">
+
+<div class="page-wrapper">
+
+<!-- ============================================================ -->
+<!-- HEADER -->
+<!-- ============================================================ -->
+<header class="header">
+  <h1>Patricia Flores</h1>
+  <p class="subtitle">Mobile Bartending &mdash; Legal Documents</p>
+  <p class="doc-list">Service Agreement &nbsp;|&nbsp; Booking Form &nbsp;|&nbsp; Liability Waiver</p>
+  <span class="ev-badge">Prepared by Everlight Ventures</span>
+</header>
+
+<!-- ============================================================ -->
+<!-- TABLE OF CONTENTS -->
+<!-- ============================================================ -->
+<nav class="toc-card">
+  <h2>Table of Contents</h2>
+  <ol>
+    <li>
+      <a href="#service-agreement">Mobile Bartending Service Agreement</a>
+      <span class="toc-desc">Full contract governing services, payment, liability, and compliance</span>
+    </li>
+    <li>
+      <a href="#booking-form">Event Booking Form (Exhibit A)</a>
+      <span class="toc-desc">Event details, service packages, pricing summary, and client acknowledgments</span>
+    </li>
+    <li>
+      <a href="#liability-waiver">Liability Waiver (Exhibit B)</a>
+      <span class="toc-desc">Assumption of risk, hold harmless, indemnification, and emergency contacts</span>
+    </li>
+  </ol>
+</nav>
+
+<!-- ============================================================ -->
+<!-- DOCUMENT 1: SERVICE AGREEMENT -->
+<!-- ============================================================ -->
+<section class="doc-section" id="service-agreement">
+  <div class="doc-header">
+    <h2>Mobile Bartending Service Agreement</h2>
+    <p class="doc-label">Document 1 of 3</p>
+  </div>
+
+  <div class="form-grid">
+    <div class="form-field">
+      <div class="field-label">Contract No.</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Date</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+  </div>
+
+  <!-- PARTIES -->
+  <h3>Parties</h3>
+  <p>This Mobile Bartending Service Agreement (&ldquo;Agreement&rdquo;) is entered into as of the date written above by and between:</p>
+
+  <div class="parties-block">
+    <div class="party-label">Bartender / Service Provider</div>
+    <div class="party-row"><span class="label">Name:</span> Patricia Flores</div>
+    <div class="party-row"><span class="label">DBA / Business Name:</span> <span class="contract-field long">&nbsp;</span></div>
+    <div class="party-row"><span class="label">Business Address:</span> <span class="contract-field long">&nbsp;</span></div>
+    <div class="party-row"><span class="label">City, State, ZIP:</span> <span class="contract-field long">&nbsp;</span></div>
+    <div class="party-row"><span class="label">Phone:</span> 530-761-6711</div>
+    <div class="party-row"><span class="label">Email:</span> <span class="contract-field long">&nbsp;</span></div>
+    <div class="party-row"><span class="label">CA ABC RBS Cert No.:</span> <span class="contract-field long">&nbsp;</span></div>
+    <p style="margin-top:12px;color:#888;font-size:0.9rem;">(hereinafter referred to as &ldquo;Bartender&rdquo; or &ldquo;Service Provider&rdquo;)</p>
+
+    <hr class="party-divider">
+
+    <div class="party-label">Client</div>
+    <div class="party-row"><span class="label">Name:</span> <span class="contract-field long">&nbsp;</span></div>
+    <div class="party-row"><span class="label">Address:</span> <span class="contract-field long">&nbsp;</span></div>
+    <div class="party-row"><span class="label">City, State, ZIP:</span> <span class="contract-field long">&nbsp;</span></div>
+    <div class="party-row"><span class="label">Phone:</span> <span class="contract-field long">&nbsp;</span></div>
+    <div class="party-row"><span class="label">Email:</span> <span class="contract-field long">&nbsp;</span></div>
+    <p style="margin-top:12px;color:#888;font-size:0.9rem;">(hereinafter referred to as &ldquo;Client&rdquo;)</p>
+  </div>
+
+  <hr class="gold-divider">
+
+  <!-- SECTION 1 -->
+  <h3><span class="section-number">1.</span> Scope of Services</h3>
+
+  <p><strong>1.1 Services.</strong> Bartender agrees to provide professional mobile bartending services for the Client&rsquo;s event as described in the attached Event Booking Form (Exhibit A). Services include:</p>
+  <ul class="indent" style="margin-bottom:12px;padding-left:20px;">
+    <li>Professional cocktail preparation and beverage service</li>
+    <li>Bar setup and breakdown</li>
+    <li>Drink menu consultation and customization (if applicable)</li>
+    <li>Ice, garnish, and standard bar tool provision (unless otherwise noted)</li>
+    <li>Responsible Beverage Service (RBS) in compliance with California ABC regulations</li>
+  </ul>
+
+  <p><strong>1.2 Event Types.</strong> Services may be provided for private events, corporate functions, weddings, birthday parties, holiday gatherings, and other lawful social occasions.</p>
+
+  <p><strong>1.3 Service Area.</strong> Yolo County (including Woodland and Davis), Solano County, and San Francisco County, California. Events outside this area may be accommodated with a travel surcharge.</p>
+
+  <p><strong>1.4 Exclusions.</strong> Bartender does not provide: DJ/entertainment, event planning, catering, venue rental, security, or guest transportation.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 2 -->
+  <h3><span class="section-number">2.</span> Independent Contractor Status</h3>
+
+  <p><strong>2.1</strong> Bartender is an independent contractor and not an employee, agent, partner, or joint venturer of Client.</p>
+
+  <p><strong>2.2</strong> Bartender is not entitled to any employee benefits from Client.</p>
+
+  <p><strong>2.3</strong> Bartender is solely responsible for all taxes arising from compensation received under this Agreement. Client will issue Form 1099-NEC if payments exceed $600/year.</p>
+
+  <p><strong>2.4</strong> The Parties acknowledge California AB5 and the ABC test (Labor Code Section 2775). Bartender represents that: (A) free from Client&rsquo;s control; (B) performs services outside Client&rsquo;s usual business; (C) independently established in the same trade.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 3 -->
+  <h3><span class="section-number">3.</span> Pricing and Payment</h3>
+
+  <p><strong>3.1 Hourly Rate:</strong> $<span class="contract-field short">&nbsp;</span> per hour, per bartender.</p>
+
+  <p><strong>3.2 Minimum Booking:</strong> Four (4) hours. Additional hours billed in 30-minute increments.</p>
+
+  <p><strong>3.3 Packages:</strong> Flat-rate packages per Event Booking Form supersede hourly rate.</p>
+
+  <p><strong>3.4 Deposit:</strong> Non-refundable deposit of $<span class="contract-field short">&nbsp;</span> or <span class="contract-field short">&nbsp;</span>% due upon signing to secure the date.</p>
+
+  <p><strong>3.5 Balance Due:</strong> No later than <span class="contract-field short">&nbsp;</span> business days before event. Overtime/extras due within 7 days post-event.</p>
+
+  <p><strong>3.6 Accepted Payment:</strong> Cash, Zelle, Venmo, CashApp, credit/debit card, check.</p>
+
+  <p><strong>3.7 Late Payment:</strong> 1.5% per month (18% per annum) or maximum permitted by CA Civil Code Section 1671.</p>
+
+  <p><strong>3.8 Overtime:</strong> 1.5x standard rate in 30-minute increments. Client must confirm authorization.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 4 -->
+  <h3><span class="section-number">4.</span> Liquor Provision</h3>
+
+  <p><strong>4.1 Client-Provided Alcohol (Standard).</strong> Client supplies all beverages. Bartender advises on quantities upon request.</p>
+
+  <p><strong>4.2 Bartender-Provided Alcohol (Optional Add-On).</strong> Bartender purchases as Client&rsquo;s agent. Client reimburses at cost plus <span class="contract-field short">&nbsp;</span>% procurement fee. Receipts provided. Does not constitute alcohol sale. No ABC license required for private events. If event structure changes to include alcohol sales, Client must obtain ABC permit.</p>
+
+  <p><strong>4.3 No ABC License Required for Private Events</strong> per CA Business and Professions Code Sections 23300&ndash;23399.</p>
+
+  <p><strong>4.4 Special Event Permits.</strong> Client&rsquo;s sole responsibility to obtain ABC Daily or Special Event Permits if required.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 5 -->
+  <h3><span class="section-number">5.</span> Responsible Beverage Service and ABC Compliance</h3>
+
+  <p><strong>5.1</strong> RBS Certification per CA Business and Professions Code Section 25681.</p>
+
+  <p><strong>5.2 Refusal of Service.</strong> Bartender reserves absolute right to refuse service to anyone who:</p>
+  <div class="indent">
+    <p>(a) appears under 21 without valid ID;</p>
+    <p>(b) presents fraudulent ID;</p>
+    <p>(c) appears visibly intoxicated per BPC Section 25602;</p>
+    <p>(d) exhibits aggressive or threatening behavior.</p>
+  </div>
+
+  <p><strong>5.3 No Service to Minors.</strong> Non-negotiable per BPC Section 25658.</p>
+
+  <p><strong>5.4 Client Cooperation.</strong> Client shall not pressure Bartender to serve refused persons. Violation constitutes material breach.</p>
+
+  <p><strong>5.5 Last Call.</strong> 30 minutes before scheduled end of service.</p>
+
+  <p><strong>5.6 No Service After 2:00 AM</strong> per BPC Section 25631.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 6 -->
+  <h3><span class="section-number">6.</span> Liability and Indemnification</h3>
+
+  <p><strong>6.1 Bartender Insurance.</strong> $1,000,000 per occurrence / $2,000,000 aggregate general liability, or $1,000,000 per-event liquor liability. Certificate of Insurance provided upon request.</p>
+
+  <p><strong>6.2 Client Indemnification of Bartender.</strong> Client indemnifies Bartender against claims arising from:</p>
+  <div class="indent">
+    <p>(a) guest conduct or negligence;</p>
+    <p>(b) Client&rsquo;s breach of this Agreement;</p>
+    <p>(c) failure to obtain required permits;</p>
+    <p>(d) injury or death not caused by Bartender&rsquo;s gross negligence;</p>
+    <p>(e) guest alcohol consumption before or after the event.</p>
+  </div>
+
+  <p><strong>6.3 Bartender Indemnification of Client.</strong> Bartender indemnifies Client against claims arising from Bartender&rsquo;s gross negligence or willful misconduct only.</p>
+
+  <p><strong>6.4 Limitation of Liability.</strong> Bartender&rsquo;s maximum liability shall not exceed the total fees paid for that event. No indirect, incidental, special, consequential, or punitive damages.</p>
+
+  <p><strong>6.5 Guest Behavior.</strong> Client assumes full responsibility for guest behavior, safety, and transportation.</p>
+
+  <p><strong>6.6 Venue Liability.</strong> Bartender is not responsible for venue damage except damage resulting from Bartender&rsquo;s direct negligence.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 7 -->
+  <h3><span class="section-number">7.</span> Cancellation and Rescheduling</h3>
+
+  <p><strong>7.1 Cancellation by Client:</strong></p>
+  <div class="indent">
+    <p>(a) <strong>30+ days before event:</strong> Full refund LESS deposit.</p>
+    <p>(b) <strong>7&ndash;29 days before event:</strong> Forfeit deposit. 50% refund of balance paid.</p>
+    <p>(c) <strong>48 hours to 6 days before event:</strong> No refund.</p>
+    <p>(d) <strong>Less than 48 hours / no-show:</strong> 100% of total contracted amount due.</p>
+  </div>
+
+  <p><strong>7.2 Rescheduling.</strong> One free reschedule with 14+ days&rsquo; notice within 90 days. Additional reschedules: $<span class="contract-field short">&nbsp;</span> fee.</p>
+
+  <p><strong>7.3 Cancellation by Bartender.</strong> Best efforts to provide replacement bartender. Full refund if no suitable replacement is available. Liability limited to refund of amounts paid.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 8 -->
+  <h3><span class="section-number">8.</span> Force Majeure</h3>
+
+  <p>Neither Party shall be liable for failure to perform obligations caused by events beyond reasonable control, including but not limited to natural disasters, government restrictions, pandemics, civil unrest, or other acts of God. If a force majeure event continues for 30 or more days, either Party may terminate this Agreement with a full refund of all amounts paid.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 9 -->
+  <h3><span class="section-number">9.</span> Setup, Breakdown, and Event Logistics</h3>
+
+  <p><strong>9.1 Arrival.</strong> Bartender will arrive 60 minutes before service start time.</p>
+
+  <p><strong>9.2 Bar Equipment Provided by Bartender:</strong> bar tools, drinkware, napkins, garnish tools, and portable bar or table covering.</p>
+
+  <p><strong>9.3 Client Provides:</strong></p>
+  <div class="indent">
+    <p>(a) bar area with 6-foot table;</p>
+    <p>(b) electrical outlets if needed;</p>
+    <p>(c) adequate lighting;</p>
+    <p>(d) weather protection for outdoor events;</p>
+    <p>(e) water and ice access;</p>
+    <p>(f) all beverages, unless Bartender-Provided Alcohol option is selected.</p>
+  </div>
+
+  <p><strong>9.4 Breakdown.</strong> Bartender will complete breakdown within 60 minutes of service end. Bartender is not responsible for general event cleanup.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 10 -->
+  <h3><span class="section-number">10.</span> Gratuity</h3>
+
+  <p><strong>10.1</strong> Gratuity is not included in the service fee.</p>
+
+  <p><strong>10.2</strong> A tip jar is permitted unless Client opts out on the Event Booking Form.</p>
+
+  <p><strong>10.3</strong> A pre-arranged gratuity of <span class="contract-field short">&nbsp;</span>% may be added to the invoice.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 11 -->
+  <h3><span class="section-number">11.</span> Damage and Breakage</h3>
+
+  <p><strong>11.1</strong> Client is responsible for damage to Bartender&rsquo;s equipment caused by guests.</p>
+
+  <p><strong>11.2</strong> Bartender will exercise reasonable care with Client&rsquo;s property.</p>
+
+  <p><strong>11.3</strong> Neither Party is liable for damage caused by force majeure events.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 12 -->
+  <h3><span class="section-number">12.</span> Dispute Resolution</h3>
+
+  <p><strong>12.1</strong> The Parties agree to attempt good-faith negotiation for 30 days before pursuing other remedies.</p>
+
+  <p><strong>12.2</strong> If negotiation fails, the Parties shall submit to mediation in the county where the event was held, or Yolo County if no event occurred.</p>
+
+  <p><strong>12.3</strong> If mediation fails, disputes of $12,500 or less shall be resolved in small claims court; disputes exceeding $12,500 shall be resolved through binding arbitration administered by JAMS in Sacramento, California.</p>
+
+  <p><strong>12.4</strong> This Agreement is governed by the laws of the State of California.</p>
+
+  <p><strong>12.5</strong> The prevailing Party in any dispute shall be entitled to reasonable attorneys&rsquo; fees and costs per CA Civil Code Section 1717.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 13 -->
+  <h3><span class="section-number">13.</span> General Provisions</h3>
+
+  <p><strong>13.1 Entire Agreement.</strong> This Agreement, together with Exhibit A (Event Booking Form) and Exhibit B (Liability Waiver), constitutes the entire agreement between the Parties and supersedes all prior negotiations, representations, or agreements.</p>
+
+  <p><strong>13.2 Amendments.</strong> This Agreement may only be amended by written instrument signed by both Parties.</p>
+
+  <p><strong>13.3 Severability.</strong> If any provision is found invalid or unenforceable, the remaining provisions shall continue in full force and effect.</p>
+
+  <p><strong>13.4 Waiver.</strong> Failure to enforce any provision shall not constitute a waiver of future enforcement.</p>
+
+  <p><strong>13.5 Assignment.</strong> Neither Party may assign this Agreement without the other Party&rsquo;s prior written consent.</p>
+
+  <p><strong>13.6 Notices.</strong> All notices shall be delivered by email, certified mail, or personal delivery to the addresses listed in this Agreement.</p>
+
+  <p><strong>13.7 Headings.</strong> Section headings are for convenience only and do not affect interpretation.</p>
+
+  <p><strong>13.8 Electronic Signatures.</strong> Electronic signatures are valid and enforceable per the Uniform Electronic Transactions Act (CA Civil Code 1633.1 et seq.) and the federal E-SIGN Act (15 USC 7001 et seq.).</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 14 -->
+  <h3><span class="section-number">14.</span> Term and Termination</h3>
+
+  <p><strong>14.1</strong> This Agreement is effective upon signing and continues through completion of all booked events.</p>
+
+  <p><strong>14.2 Termination for Convenience.</strong> Either Party may terminate with 30 days&rsquo; written notice.</p>
+
+  <p><strong>14.3 Termination for Cause.</strong> Either Party may terminate immediately upon material breach, provided the breaching Party is given a 10-day cure period.</p>
+
+  <p><strong>14.4 Survival.</strong> Sections 2 (Independent Contractor), 6 (Liability), 12 (Dispute Resolution), and 13 (General Provisions) survive termination.</p>
+
+  <!-- SIGNATURES -->
+  <div class="sig-block">
+    <h3>Signatures</h3>
+    <div class="sig-row">
+      <div class="sig-col">
+        <div class="sig-label">Bartender / Service Provider</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Signature</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Printed Name: Patricia Flores</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Title</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Date</div>
+      </div>
+      <div class="sig-col">
+        <div class="sig-label">Client</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Signature</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Printed Name</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Date</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>DISCLAIMER:</strong> This agreement template is provided for informational purposes. It is not a substitute for legal advice from a licensed attorney.
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- DOCUMENT 2: EVENT BOOKING FORM (EXHIBIT A) -->
+<!-- ============================================================ -->
+<section class="doc-section page-break" id="booking-form">
+  <div class="doc-header">
+    <h2>Event Booking Form</h2>
+    <p class="doc-label">Exhibit A &mdash; Document 2 of 3</p>
+  </div>
+
+  <!-- Booking Reference -->
+  <h3>Booking Reference</h3>
+  <div class="form-grid">
+    <div class="form-field">
+      <div class="field-label">Booking No.</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Contract No.</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Date of Booking</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Service Provider -->
+  <h3>Service Provider Information</h3>
+  <div class="form-grid">
+    <div class="form-field">
+      <div class="field-label">Business Name</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Contact Name</div>
+      <div class="field-input">Patricia Flores</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Phone</div>
+      <div class="field-input">530-761-6711</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Email</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Client Information -->
+  <h3>Client Information</h3>
+  <div class="form-grid">
+    <div class="form-field">
+      <div class="field-label">Full Name</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Phone</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Email</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Mailing Address</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">City, State, ZIP</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Event Details -->
+  <h3>Event Details</h3>
+
+  <h4>Event Type</h4>
+  <div class="checkbox-row">
+    <span class="checkbox"><span class="box"></span> Wedding</span>
+    <span class="checkbox"><span class="box"></span> Corporate</span>
+    <span class="checkbox"><span class="box"></span> Birthday</span>
+    <span class="checkbox"><span class="box"></span> Holiday Party</span>
+    <span class="checkbox"><span class="box"></span> Private Party</span>
+    <span class="checkbox"><span class="box"></span> Other: <span class="contract-field medium">&nbsp;</span></span>
+  </div>
+
+  <div class="form-grid">
+    <div class="form-field">
+      <div class="field-label">Event Name</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Event Date</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Event Start Time</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Event End Time</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Bar Service Start Time</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Bar Service End Time</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Setup Access Time</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Event Venue -->
+  <h3>Event Venue</h3>
+  <div class="form-grid">
+    <div class="form-field">
+      <div class="field-label">Venue Name</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Address</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">City, State, ZIP</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+  </div>
+
+  <h4>County</h4>
+  <div class="checkbox-row">
+    <span class="checkbox"><span class="box"></span> Yolo</span>
+    <span class="checkbox"><span class="box"></span> Solano</span>
+    <span class="checkbox"><span class="box"></span> San Francisco</span>
+    <span class="checkbox"><span class="box"></span> Other: <span class="contract-field medium">&nbsp;</span></span>
+  </div>
+
+  <div class="form-grid">
+    <div class="form-field">
+      <div class="field-label">Indoor / Outdoor</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Covered Area Available</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Venue Contact Name &amp; Phone</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Parking / Load-In Notes</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Guest Information -->
+  <h3>Guest Information</h3>
+  <div class="form-grid">
+    <div class="form-field">
+      <div class="field-label">Estimated Guest Count</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+  </div>
+  <p style="margin-top:8px;"><strong>Guests Under 21 Expected?</strong></p>
+  <div class="checkbox-row">
+    <span class="checkbox"><span class="box"></span> Yes</span>
+    <span class="checkbox"><span class="box"></span> No</span>
+  </div>
+  <p style="color:#888;font-size:0.85rem;margin-top:4px;">Note: All guests appearing under 30 will be asked for valid government-issued photo ID. No exceptions.</p>
+
+  <hr class="section-divider">
+
+  <!-- Service Package -->
+  <h3>Service Package</h3>
+
+  <h4>Option A &mdash; Hourly Rate</h4>
+  <table>
+    <tr>
+      <th>Item</th>
+      <th>Details</th>
+    </tr>
+    <tr>
+      <td>Number of Bartenders</td>
+      <td><span class="contract-field short">&nbsp;</span></td>
+    </tr>
+    <tr>
+      <td>Hourly Rate (per bartender)</td>
+      <td>$ <span class="contract-field short">&nbsp;</span></td>
+    </tr>
+    <tr>
+      <td>Number of Hours</td>
+      <td><span class="contract-field short">&nbsp;</span></td>
+    </tr>
+    <tr>
+      <td><strong>Subtotal</strong></td>
+      <td>$ <span class="contract-field short">&nbsp;</span></td>
+    </tr>
+  </table>
+
+  <h4>Option B &mdash; Flat-Rate Package</h4>
+  <table>
+    <tr>
+      <th>Item</th>
+      <th>Details</th>
+    </tr>
+    <tr>
+      <td>Package Name</td>
+      <td><span class="contract-field medium">&nbsp;</span></td>
+    </tr>
+    <tr>
+      <td>Package Price</td>
+      <td>$ <span class="contract-field short">&nbsp;</span></td>
+    </tr>
+    <tr>
+      <td>Package Includes</td>
+      <td><span class="contract-field long">&nbsp;</span></td>
+    </tr>
+  </table>
+
+  <p style="margin-top:16px;"><strong>Selected Option:</strong></p>
+  <div class="checkbox-row">
+    <span class="checkbox"><span class="box"></span> Option A (Hourly)</span>
+    <span class="checkbox"><span class="box"></span> Option B (Flat-Rate)</span>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Add-On Services -->
+  <h3>Add-On Services</h3>
+  <table>
+    <tr>
+      <th style="width:40px;"></th>
+      <th>Service</th>
+      <th>Price</th>
+    </tr>
+    <tr>
+      <td><span class="box" style="display:inline-block;width:16px;height:16px;border:1.5px solid #888;border-radius:3px;"></span></td>
+      <td>Bartender-provided alcohol procurement</td>
+      <td>Cost + <span class="contract-field short">&nbsp;</span>%</td>
+    </tr>
+    <tr>
+      <td><span class="box" style="display:inline-block;width:16px;height:16px;border:1.5px solid #888;border-radius:3px;"></span></td>
+      <td>Signature cocktail menu development</td>
+      <td>$ <span class="contract-field short">&nbsp;</span></td>
+    </tr>
+    <tr>
+      <td><span class="box" style="display:inline-block;width:16px;height:16px;border:1.5px solid #888;border-radius:3px;"></span></td>
+      <td>Premium portable bar rental</td>
+      <td>$ <span class="contract-field short">&nbsp;</span></td>
+    </tr>
+    <tr>
+      <td><span class="box" style="display:inline-block;width:16px;height:16px;border:1.5px solid #888;border-radius:3px;"></span></td>
+      <td>Glassware rental</td>
+      <td>$ <span class="contract-field short">&nbsp;</span></td>
+    </tr>
+    <tr>
+      <td><span class="box" style="display:inline-block;width:16px;height:16px;border:1.5px solid #888;border-radius:3px;"></span></td>
+      <td>Additional bartender(s)</td>
+      <td>$ <span class="contract-field short">&nbsp;</span> / hr</td>
+    </tr>
+    <tr>
+      <td><span class="box" style="display:inline-block;width:16px;height:16px;border:1.5px solid #888;border-radius:3px;"></span></td>
+      <td>Specialty ice</td>
+      <td>$ <span class="contract-field short">&nbsp;</span></td>
+    </tr>
+    <tr>
+      <td><span class="box" style="display:inline-block;width:16px;height:16px;border:1.5px solid #888;border-radius:3px;"></span></td>
+      <td>Non-alcoholic craft mocktail service</td>
+      <td>$ <span class="contract-field short">&nbsp;</span></td>
+    </tr>
+    <tr>
+      <td><span class="box" style="display:inline-block;width:16px;height:16px;border:1.5px solid #888;border-radius:3px;"></span></td>
+      <td>Other: <span class="contract-field medium">&nbsp;</span></td>
+      <td>$ <span class="contract-field short">&nbsp;</span></td>
+    </tr>
+  </table>
+
+  <hr class="section-divider">
+
+  <!-- Beverage Details -->
+  <h3>Beverage Details</h3>
+
+  <p><strong>Alcohol Provision:</strong></p>
+  <div class="checkbox-row">
+    <span class="checkbox"><span class="box"></span> Client-Provided</span>
+    <span class="checkbox"><span class="box"></span> Bartender-Procured</span>
+  </div>
+
+  <h4>Drink Menu</h4>
+  <div class="form-grid single">
+    <div class="form-field">
+      <div class="field-label">Beer (types / brands)</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Wine (types / brands)</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Spirits (types / brands)</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Signature Cocktails</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Mocktails / Non-Alcoholic</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Mixers, Garnishes, Extras</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Water / Ice Arrangements</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Special Requests / Dietary Notes</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Pricing Summary -->
+  <h3>Pricing Summary</h3>
+  <table>
+    <tr>
+      <th>Item</th>
+      <th style="text-align:right;">Amount</th>
+    </tr>
+    <tr>
+      <td>Base Service Fee</td>
+      <td style="text-align:right;">$ <span class="contract-field short">&nbsp;</span></td>
+    </tr>
+    <tr>
+      <td>Add-On Services</td>
+      <td style="text-align:right;">$ <span class="contract-field short">&nbsp;</span></td>
+    </tr>
+    <tr>
+      <td>Beverage Procurement (if applicable)</td>
+      <td style="text-align:right;">$ <span class="contract-field short">&nbsp;</span></td>
+    </tr>
+    <tr>
+      <td>Travel Surcharge (if applicable)</td>
+      <td style="text-align:right;">$ <span class="contract-field short">&nbsp;</span></td>
+    </tr>
+    <tr style="border-top:2px solid rgba(212,175,55,0.3);">
+      <td><strong>Estimated Total</strong></td>
+      <td style="text-align:right;"><strong>$ <span class="contract-field short">&nbsp;</span></strong></td>
+    </tr>
+    <tr>
+      <td>Deposit Due (non-refundable)</td>
+      <td style="text-align:right;">$ <span class="contract-field short">&nbsp;</span></td>
+    </tr>
+    <tr>
+      <td>Balance Due By</td>
+      <td style="text-align:right;"><span class="contract-field medium">&nbsp;</span></td>
+    </tr>
+  </table>
+
+  <hr class="section-divider">
+
+  <!-- Payment Schedule -->
+  <h3>Payment Schedule</h3>
+  <table>
+    <tr>
+      <th>Payment</th>
+      <th>Amount</th>
+      <th>Due Date</th>
+      <th>Method</th>
+      <th>Received</th>
+    </tr>
+    <tr>
+      <td>Deposit</td>
+      <td>$ <span class="contract-field short">&nbsp;</span></td>
+      <td><span class="contract-field short">&nbsp;</span></td>
+      <td><span class="contract-field short">&nbsp;</span></td>
+      <td><span class="contract-field short">&nbsp;</span></td>
+    </tr>
+    <tr>
+      <td>Balance</td>
+      <td>$ <span class="contract-field short">&nbsp;</span></td>
+      <td><span class="contract-field short">&nbsp;</span></td>
+      <td><span class="contract-field short">&nbsp;</span></td>
+      <td><span class="contract-field short">&nbsp;</span></td>
+    </tr>
+    <tr>
+      <td>Add-Ons / Overtime</td>
+      <td>$ <span class="contract-field short">&nbsp;</span></td>
+      <td><span class="contract-field short">&nbsp;</span></td>
+      <td><span class="contract-field short">&nbsp;</span></td>
+      <td><span class="contract-field short">&nbsp;</span></td>
+    </tr>
+  </table>
+
+  <hr class="section-divider">
+
+  <!-- Gratuity Preference -->
+  <h3>Gratuity Preference</h3>
+  <div class="checkbox-row">
+    <span class="checkbox"><span class="box"></span> Tip jar permitted</span>
+    <span class="checkbox"><span class="box"></span> No tip jar</span>
+    <span class="checkbox"><span class="box"></span> Pre-arranged gratuity: <span class="contract-field short">&nbsp;</span>%</span>
+    <span class="checkbox"><span class="box"></span> Other: <span class="contract-field medium">&nbsp;</span></span>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- Client Acknowledgments -->
+  <h3>Client Acknowledgments</h3>
+  <p style="color:#888;font-size:0.9rem;margin-bottom:12px;">By checking each box below, Client confirms the following:</p>
+
+  <ul class="checkbox-list">
+    <li><span class="box"></span> I have read and agree to the Mobile Bartending Service Agreement.</li>
+    <li><span class="box"></span> I have read and agree to the Liability Waiver (Exhibit B).</li>
+    <li><span class="box"></span> I understand that the Bartender reserves the right to refuse service to any guest who is underage, intoxicated, or presenting a safety concern.</li>
+    <li><span class="box"></span> I am responsible for the safe transportation of all guests, including those who have consumed alcohol.</li>
+    <li><span class="box"></span> I will provide all items described in Section 9.3 of the Service Agreement (table, power, lighting, weather protection, water/ice, beverages).</li>
+    <li><span class="box"></span> I understand the cancellation and refund policy as described in Section 7 of the Service Agreement.</li>
+  </ul>
+
+  <!-- Signatures -->
+  <div class="sig-block">
+    <h3>Signatures</h3>
+    <div class="sig-row">
+      <div class="sig-col">
+        <div class="sig-label">Client</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Signature</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Printed Name</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Date</div>
+      </div>
+      <div class="sig-col">
+        <div class="sig-label">Bartender / Service Provider</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Signature</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Printed Name: Patricia Flores</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Date</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- DOCUMENT 3: LIABILITY WAIVER (EXHIBIT B) -->
+<!-- ============================================================ -->
+<section class="doc-section page-break" id="liability-waiver">
+  <div class="doc-header">
+    <h2>Liability Waiver</h2>
+    <p class="doc-label">Exhibit B &mdash; Document 3 of 3</p>
+  </div>
+
+  <!-- PARTIES -->
+  <h3>Parties</h3>
+
+  <div class="parties-block">
+    <div class="party-row"><span class="label">Bartender:</span> Patricia Flores</div>
+    <div class="party-row"><span class="label">Client:</span> <span class="contract-field long">&nbsp;</span></div>
+    <div class="party-row"><span class="label">Agreement Date:</span> <span class="contract-field medium">&nbsp;</span></div>
+    <div class="party-row"><span class="label">Contract No.:</span> <span class="contract-field medium">&nbsp;</span></div>
+  </div>
+
+  <p style="margin-top:16px;">This Liability Waiver (&ldquo;Waiver&rdquo;) is attached to and incorporated into the Mobile Bartending Service Agreement identified above.</p>
+
+  <hr class="section-divider">
+
+  <!-- RECITALS -->
+  <h3>Recitals</h3>
+
+  <p><strong>WHEREAS</strong> Bartender will provide professional mobile bartending services at Client&rsquo;s event as described in the Service Agreement and Event Booking Form;</p>
+
+  <p><strong>WHEREAS</strong> the Event involves the preparation, service, and consumption of alcoholic beverages by adult guests;</p>
+
+  <p><strong>WHEREAS</strong> Client acknowledges that the service and consumption of alcoholic beverages carry inherent risks including, but not limited to, intoxication, impaired judgment, physical injury, property damage, and potential legal liability;</p>
+
+  <p><strong>NOW, THEREFORE,</strong> in consideration of the mutual covenants contained herein and in the Service Agreement, the Parties agree as follows:</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 1 -->
+  <h3><span class="section-number">1.</span> Acknowledgment of Responsible Beverage Service</h3>
+
+  <p><strong>1.1</strong> Bartender holds a valid Responsible Beverage Service (RBS) certification as required by California Business and Professions Code Section 25681.</p>
+
+  <p><strong>1.2</strong> Bartender will employ responsible service practices, including but not limited to:</p>
+  <div class="indent">
+    <p>(a) requesting valid government-issued photo identification from any guest who appears to be under 30 years of age;</p>
+    <p>(b) refusing service to any person under the age of 21, per BPC Section 25658;</p>
+    <p>(c) refusing service to any person who appears visibly intoxicated, per BPC Section 25602;</p>
+    <p>(d) monitoring guest alcohol consumption throughout the event;</p>
+    <p>(e) ceasing service to any individual as deemed appropriate by Bartender&rsquo;s professional judgment.</p>
+  </div>
+
+  <p><strong>1.3</strong> Client shall support and not interfere with any service decisions made by Bartender in accordance with the practices described above.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 2 -->
+  <h3><span class="section-number">2.</span> Client Responsibility for Guest Conduct and Safety</h3>
+
+  <p><strong>2.1 Host Responsibility.</strong> Client, as host of the event, assumes primary responsibility for the conduct and safety of all guests, invitees, and attendees.</p>
+
+  <p><strong>2.2 Guest Behavior.</strong> Bartender is not a security provider and shall not be expected to control, restrain, or manage guests. If Bartender determines that the environment has become unsafe due to guest behavior, Bartender reserves the right to cease service and leave the event immediately without refund.</p>
+
+  <p><strong>2.3 Impaired Driving Prevention.</strong> Client shall take reasonable steps to prevent intoxicated guests from operating motor vehicles, including but not limited to:</p>
+  <div class="indent">
+    <p>(a) arranging designated drivers;</p>
+    <p>(b) providing rideshare information (Uber, Lyft, taxi);</p>
+    <p>(c) arranging overnight accommodations when feasible;</p>
+    <p>(d) monitoring guest departures.</p>
+  </div>
+
+  <p><strong>2.4 Social Host Liability.</strong> Client acknowledges the doctrine of social host liability under California Civil Code Section 1714 and accepts responsibility as the host of the event.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 3 -->
+  <h3><span class="section-number">3.</span> Assumption of Risk</h3>
+
+  <p><strong>3.1</strong> Client acknowledges and understands the following risks inherent in events involving alcoholic beverages:</p>
+  <div class="indent">
+    <p>(a) guest intoxication and impaired judgment;</p>
+    <p>(b) physical injuries resulting from slips, falls, or accidents;</p>
+    <p>(c) property damage;</p>
+    <p>(d) allergic reactions to ingredients in beverages;</p>
+    <p>(e) slip-and-fall hazards related to spilled beverages or wet surfaces;</p>
+    <p>(f) altercations or disorderly conduct among guests.</p>
+  </div>
+
+  <p><strong>3.2</strong> Client voluntarily assumes all risks associated with the event, including the risks described above, except to the extent that such risks arise directly and solely from Bartender&rsquo;s gross negligence or willful misconduct.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 4 -->
+  <h3><span class="section-number">4.</span> Hold Harmless and Indemnification</h3>
+
+  <p><strong>4.1 Hold Harmless.</strong> Client agrees to hold harmless and release Bartender, and Bartender&rsquo;s agents, employees, subcontractors, heirs, and assigns (collectively, &ldquo;Released Parties&rdquo;) from any and all claims, demands, actions, causes of action, damages, losses, liabilities, costs, and expenses (including reasonable attorneys&rsquo; fees) arising out of or related to:</p>
+  <div class="indent">
+    <p>(a) the consumption of alcoholic beverages by any guest at the event;</p>
+    <p>(b) injuries sustained by intoxicated guests or by third parties as a result of an intoxicated guest&rsquo;s actions;</p>
+    <p>(c) DUI, traffic accidents, or other incidents involving a guest who consumed alcohol at the event;</p>
+    <p>(d) the conduct of guests or third parties at the event;</p>
+    <p>(e) damage to the event venue or third-party property;</p>
+    <p>(f) Client&rsquo;s breach of this Waiver or the Service Agreement.</p>
+  </div>
+
+  <p><strong>4.2 California Civil Code Section 1542 Waiver.</strong> Client expressly waives the provisions of California Civil Code Section 1542, which states:</p>
+
+  <div class="statutory-quote">
+    &ldquo;A general release does not extend to claims that the creditor or releasing party does not know or suspect to exist in his or her favor at the time of executing the release and that, if known by him or her, would have materially affected his or her settlement with the debtor or released party.&rdquo;
+  </div>
+
+  <p class="initials-line"><strong>Client&rsquo;s Initials:</strong> <span class="contract-field short">&nbsp;</span></p>
+
+  <p><strong>4.3 Indemnification.</strong> Client shall indemnify, defend, and hold harmless the Released Parties from and against any and all third-party claims, actions, proceedings, damages, judgments, and costs (including reasonable attorneys&rsquo; fees) arising out of or related to any matter covered by this Waiver.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 5 -->
+  <h3><span class="section-number">5.</span> Bartender&rsquo;s Retained Liability</h3>
+
+  <p><strong>5.1</strong> Notwithstanding any other provision of this Waiver, Bartender is <em>not</em> released from liability for:</p>
+  <div class="indent">
+    <p>(a) gross negligence or willful misconduct by Bartender;</p>
+    <p>(b) knowingly serving alcohol to a visibly intoxicated person in violation of BPC Section 25602(a);</p>
+    <p>(c) knowingly serving alcohol to a minor in violation of BPC Section 25658.</p>
+  </div>
+
+  <p><strong>5.2</strong> In all cases, Bartender&rsquo;s liability is limited as set forth in Section 6.4 of the Service Agreement.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 6 -->
+  <h3><span class="section-number">6.</span> Allergies and Dietary Restrictions</h3>
+
+  <p><strong>6.1</strong> Client acknowledges that cocktails and beverages may contain common allergens, including but not limited to: nuts, dairy, eggs, gluten, soy, and citrus.</p>
+
+  <p><strong>6.2</strong> Client is responsible for informing Bartender in writing of any known guest allergies or dietary restrictions prior to the event.</p>
+
+  <p><strong>6.3</strong> Client agrees to hold Bartender harmless for allergic reactions or adverse effects from beverages, unless Bartender was specifically informed of the allergy and failed to take reasonable precautions.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 7 -->
+  <h3><span class="section-number">7.</span> Photography and Media</h3>
+
+  <p><strong>7.1</strong> Client grants Bartender permission to take photographs and/or video during the event for use in Bartender&rsquo;s portfolio, social media, and marketing materials, unless Client opts out below.</p>
+
+  <div class="checkbox-row" style="margin-top:12px;">
+    <span class="checkbox"><span class="box"></span> <strong>OPT OUT:</strong> Client does <em>not</em> grant permission for photography or media use.</span>
+  </div>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 8 -->
+  <h3><span class="section-number">8.</span> Severability</h3>
+
+  <p>If any provision of this Waiver is held to be invalid, illegal, or unenforceable, the validity, legality, and enforceability of the remaining provisions shall not be affected or impaired.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 9 -->
+  <h3><span class="section-number">9.</span> Governing Law</h3>
+
+  <p>This Waiver shall be governed by and construed in accordance with the laws of the State of California, consistent with the dispute resolution provisions of Section 12 of the Service Agreement.</p>
+
+  <hr class="section-divider">
+
+  <!-- SECTION 10 -->
+  <h3><span class="section-number">10.</span> Voluntary Execution</h3>
+
+  <p>Client represents and warrants that:</p>
+  <div class="indent">
+    <p>(a) Client has carefully read this Waiver in its entirety and fully understands its contents;</p>
+    <p>(b) Client has had the opportunity to consult with independent legal counsel prior to signing;</p>
+    <p>(c) Client signs this Waiver voluntarily and without coercion;</p>
+    <p>(d) this Waiver is binding upon Client and Client&rsquo;s heirs, executors, administrators, and assigns;</p>
+    <p>(e) Client is at least 18 years of age and legally competent to enter into this Waiver.</p>
+  </div>
+
+  <!-- SIGNATURES -->
+  <div class="sig-block">
+    <h3>Signatures</h3>
+    <div class="sig-row">
+      <div class="sig-col">
+        <div class="sig-label">Client</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Signature</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Printed Name</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Date</div>
+        <br>
+        <p class="initials-line"><strong>Section 1542 Initials:</strong> <span class="contract-field short">&nbsp;</span></p>
+      </div>
+      <div class="sig-col">
+        <div class="sig-label">Bartender / Service Provider</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Signature</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Printed Name: Patricia Flores</div>
+        <div class="sig-line">&nbsp;</div>
+        <div class="sig-field-label">Date</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="gold-divider">
+
+  <!-- EMERGENCY CONTACT -->
+  <h3>Emergency Contact (Optional)</h3>
+
+  <div class="form-grid">
+    <div class="form-field">
+      <div class="field-label">Client&rsquo;s Emergency Contact Name</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Relationship</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Phone</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+    <div class="form-field">
+      <div class="field-label">Designated Driver Contact</div>
+      <div class="field-input">&nbsp;</div>
+    </div>
+  </div>
+
+  <p style="margin-top:16px;"><strong>Rideshare Planned:</strong></p>
+  <div class="checkbox-row">
+    <span class="checkbox"><span class="box"></span> Uber</span>
+    <span class="checkbox"><span class="box"></span> Lyft</span>
+    <span class="checkbox"><span class="box"></span> Taxi</span>
+    <span class="checkbox"><span class="box"></span> Designated Driver</span>
+    <span class="checkbox"><span class="box"></span> Other: <span class="contract-field medium">&nbsp;</span></span>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- FOOTER -->
+<!-- ============================================================ -->
+<footer class="footer">
+  <p class="footer-name">Patricia Flores &nbsp;|&nbsp; Mobile Bartending</p>
+  <p class="footer-phone">530-761-6711</p>
+  <p class="footer-ev">Prepared with care by Everlight Ventures</p>
+</footer>
+
+</div><!-- .page-wrapper -->
+
+</div>
+
+<!-- ===== TAB 3: LAUNCH GUIDE ===== -->
+<div id="tab-launch" class="tab-panel panel-launch">
+
+
+<!-- ═══════════════════ HEADER ═══════════════════ -->
+<header>
+  <h1>Patricia Flores</h1>
+  <p class="subtitle">Launch Guide &mdash; Your Roadmap to Opening Night</p>
+  <span class="prepared-by">Prepared by Everlight Ventures</span>
+</header>
+
+<!-- ═══════════════════ NAV ═══════════════════ -->
+<nav>
+  <div class="container">
+    <a href="#checklist">Checklist</a>
+    <a href="#first-booking">First Booking</a>
+    <a href="#counties">County Map</a>
+    <a href="#numbers">Quick Numbers</a>
+    <a href="#revenue">Revenue</a>
+    <a href="#tips">Pro Tips</a>
+  </div>
+</nav>
+
+<!-- ═══════════════════ SECTION 1: CHECKLIST ═══════════════════ -->
+<section id="checklist">
+  <div class="container">
+    <p class="section-label">Section 01</p>
+    <h2>Getting Started <span class="gold">Checklist</span></h2>
+
+    <!-- Phase 1 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="phase-badge">Phase 1</span>
+        <h3>Legal &amp; Licensing <span style="color:#888;font-weight:400;font-size:0.85rem;">&mdash; Week 1-2</span></h3>
+      </div>
+      <ul class="checklist">
+        <li>
+          <span class="checkbox"></span>
+          <div>RBS Certification <span class="detail">Required by CA law. Online at abcbiz.abc.ca.gov. 2-4 hours, ~$15-30.</span></div>
+        </li>
+        <li>
+          <span class="checkbox"></span>
+          <div>Business License <span class="detail">Yolo County Clerk's office. ~$50-100/year.</span></div>
+        </li>
+        <li>
+          <span class="checkbox"></span>
+          <div>DBA (Fictitious Business Name) <span class="detail">If using a business name. County Clerk, ~$40.</span></div>
+        </li>
+        <li>
+          <span class="checkbox"></span>
+          <div>EIN (Employer Identification Number) <span class="detail">Free from IRS at irs.gov. Needed for business banking.</span></div>
+        </li>
+        <li>
+          <span class="checkbox"></span>
+          <div>California Seller's Permit <span class="detail">Free from CA CDTFA.</span></div>
+        </li>
+        <li>
+          <span class="checkbox"></span>
+          <div>Consider an LLC <span class="detail">CA Secretary of State, ~$70. Franchise tax $800/yr (waived first year).</span></div>
+        </li>
+        <li>
+          <span class="checkbox"></span>
+          <div>Business Bank Account <span class="detail">Keep business and personal finances separate.</span></div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="phase-badge">Phase 2</span>
+        <h3>Insurance <span style="color:#888;font-weight:400;font-size:0.85rem;">&mdash; Week 2-3</span></h3>
+      </div>
+      <ul class="checklist">
+        <li>
+          <span class="checkbox"></span>
+          <div>General Liability <span class="detail">$1M per occurrence / $2M aggregate.</span></div>
+        </li>
+        <li>
+          <span class="checkbox"></span>
+          <div>Liquor Liability <span class="detail">Often bundled with general liability.</span></div>
+        </li>
+        <li>
+          <span class="checkbox"></span>
+          <div>Per-Event Policies <span class="detail">FLIP (~$100-200/event), Thimble, Next Insurance (~$300-500/year).</span></div>
+        </li>
+        <li>
+          <span class="checkbox"></span>
+          <div>Certificate of Insurance (COI) <span class="detail">Send to venues and clients for every event.</span></div>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="phase-badge">Phase 3</span>
+        <h3>Equipment</h3>
+      </div>
+
+      <p class="sub-header">Essential &mdash; Start Here <span class="sub-header-note">($200-400)</span></p>
+      <ul class="checklist">
+        <li><span class="checkbox"></span><div>Bar tool kit <span class="detail">Shaker, jigger, strainer, muddler, bar spoon, pour spouts, opener, corkscrew.</span></div></li>
+        <li><span class="checkbox"></span><div>Cutting board + paring knife</div></li>
+        <li><span class="checkbox"></span><div>Ice bucket + tongs + scoop</div></li>
+        <li><span class="checkbox"></span><div>Disposable cups <span class="detail">9oz, 12oz, 16oz.</span></div></li>
+        <li><span class="checkbox"></span><div>Cocktail napkins + speed pourers (set of 12)</div></li>
+        <li><span class="checkbox"></span><div>Bar mat (rubber, non-slip)</div></li>
+        <li><span class="checkbox"></span><div>Folding table (6ft) + black tablecloth/bar skirt</div></li>
+        <li><span class="checkbox"></span><div>Large cooler + trash bags + bus bins</div></li>
+      </ul>
+
+      <p class="sub-header">Level Up &mdash; Month 2-3 <span class="sub-header-note">($300-600)</span></p>
+      <ul class="checklist">
+        <li><span class="checkbox"></span><div>Portable bar (foldable/collapsible)</div></li>
+        <li><span class="checkbox"></span><div>LED lights or string lights</div></li>
+        <li><span class="checkbox"></span><div>Menu sign + easel</div></li>
+        <li><span class="checkbox"></span><div>Glassware set <span class="detail">36 each: coupes, rocks, highballs.</span></div></li>
+        <li><span class="checkbox"></span><div>Glass rack for transport</div></li>
+        <li><span class="checkbox"></span><div>Blender + beverage dispenser</div></li>
+      </ul>
+
+      <p class="sub-header">Premium &mdash; Month 4+ <span class="sub-header-note">($500-1,000)</span></p>
+      <ul class="checklist">
+        <li><span class="checkbox"></span><div>Branded signage <span class="detail">Logo, menu boards, napkins.</span></div></li>
+        <li><span class="checkbox"></span><div>Smoke gun for smoked cocktails</div></li>
+        <li><span class="checkbox"></span><div>Large format ice molds</div></li>
+        <li><span class="checkbox"></span><div>Professional branded bar mat</div></li>
+        <li><span class="checkbox"></span><div>Uniform/apron with branding</div></li>
+      </ul>
+    </div>
+
+    <!-- Phase 4 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="phase-badge">Phase 4</span>
+        <h3>Payment &amp; Booking <span style="color:#888;font-weight:400;font-size:0.85rem;">&mdash; Week 3-4</span></h3>
+      </div>
+      <ul class="checklist">
+        <li><span class="checkbox"></span><div>Payment processing <span class="detail">Venmo Business, Zelle, Square (free reader), cash.</span></div></li>
+        <li><span class="checkbox"></span><div>Invoicing <span class="detail">Square Invoices or Wave (both free).</span></div></li>
+        <li><span class="checkbox"></span><div>Contracts <span class="detail">HelloSign or DocuSign for e-signatures.</span></div></li>
+        <li><span class="checkbox"></span><div>Booking calendar <span class="detail">Google Calendar or Calendly.</span></div></li>
+        <li><span class="checkbox"></span><div>Client tracker <span class="detail">Google Sheet: name, date, package, deposit, balance, notes.</span></div></li>
+      </ul>
+    </div>
+
+    <!-- Phase 5 -->
+    <div class="card">
+      <div class="card-header">
+        <span class="phase-badge">Phase 5</span>
+        <h3>Marketing</h3>
+      </div>
+      <ul class="checklist">
+        <li><span class="checkbox"></span><div>Instagram business account <span class="detail">Your #1 channel. Post every event.</span></div></li>
+        <li><span class="checkbox"></span><div>Google Business Profile <span class="detail">Free. Gets you on Google Maps.</span></div></li>
+        <li><span class="checkbox"></span><div>Marketplace listings <span class="detail">Thumbtack, The Bash, GigSalad for early bookings.</span></div></li>
+        <li><span class="checkbox"></span><div>Business cards <span class="detail">Name, phone, IG handle, email.</span></div></li>
+        <li><span class="checkbox"></span><div>Partner with event planners and venues</div></li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════ SECTION 2: FIRST BOOKING ═══════════════════ -->
+<section id="first-booking">
+  <div class="container">
+    <p class="section-label">Section 02</p>
+    <h2>Your First <span class="gold">Booking</span></h2>
+    <p style="color:#888;margin-bottom:36px;font-size:0.95rem;">From inquiry to five-star review &mdash; every step of the client flow.</p>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="dot active">1</div>
+        <h4>Inquiry Comes In</h4>
+        <p>DM, call, text, or email. Respond within 1 hour if possible.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="dot active">2</div>
+        <h4>Qualify the Lead</h4>
+        <p>Date, location, guest count, budget, event type. Get the facts before quoting.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="dot active">3</div>
+        <h4>Send Pricing Guide + Drink Menus</h4>
+        <p>Let them see the packages. Attach sample menus. Make it visual.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="dot active">4</div>
+        <h4>Send Contracts</h4>
+        <p>Agreement + Booking Form + Liability Waiver. Use e-signatures.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="dot active">5</div>
+        <h4>Collect 50% Deposit</h4>
+        <p>Lock in the date. No deposit = no hold. This protects your time.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="dot active">6</div>
+        <h4>Pre-Event Consultation</h4>
+        <p>Design the drink menu together. Send the shopping list. Confirm details.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="dot active">7</div>
+        <h4>Collect Balance</h4>
+        <p>Full payment due 7 days before the event. No exceptions.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="dot active">8</div>
+        <h4>Day Of: Execute</h4>
+        <p>Arrive 1 hour early. Set up. Crush it. Break down. Leave the space better than you found it.</p>
+      </div>
+      <div class="timeline-item">
+        <div class="dot active">9</div>
+        <h4>Follow Up</h4>
+        <p>Send a thank you. Request a Google/Yelp review. Ask for referrals. Plant the next seed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ SECTION 3: COUNTY MAP ═══════════════════ -->
+<section id="counties">
+  <div class="container">
+    <p class="section-label">Section 03</p>
+    <h2>County <span class="gold">Service Map</span></h2>
+
+    <!-- Yolo -->
+    <div class="county-card">
+      <div class="county-name">Yolo County</div>
+      <span class="county-tag">Home Base &mdash; Woodland</span>
+      <div class="info-row"><span class="label">Cities</span><span class="value">Woodland, Davis, West Sacramento, Winters, Esparto</span></div>
+      <div class="info-row"><span class="label">Travel</span><span class="value">No fee within 30 miles</span></div>
+      <div class="info-row"><span class="label">Venues</span><span class="value">Community Center, private ranches, Yolo County Fairgrounds, UC Davis events, Berryessa Gap/Turkovich Vineyards (Winters), The Barn (West Sac)</span></div>
+      <div class="tip">Base rates work here. Lots of backyard and ranch events. UC Davis = graduation parties. Winters wine country is growing for weddings. Offer bilingual menus and traditional options &mdash; micheladas, palomas, agua frescas.</div>
+    </div>
+
+    <!-- Solano -->
+    <div class="county-card">
+      <div class="county-name">Solano County</div>
+      <span class="county-tag">Strong Mid-Market</span>
+      <div class="info-row"><span class="label">Cities</span><span class="value">Vacaville (30 min), Fairfield (40 min), Vallejo (55 min), Benicia (50 min), Dixon (20 min)</span></div>
+      <div class="info-row"><span class="label">Venues</span><span class="value">Nut Tree area, Jelly Belly Visitor Center, Travis AFB events, Mare Island, Benicia Arsenal waterfront</span></div>
+      <div class="tip">Middle-market pricing. Travis AFB = huge recurring military event opportunity. Vacaville is growing fast. Vallejo/Benicia waterfront events &mdash; price closer to SF rates.</div>
+    </div>
+
+    <!-- San Francisco -->
+    <div class="county-card">
+      <div class="county-name">San Francisco</div>
+      <span class="county-tag">Premium Market</span>
+      <div class="info-row"><span class="label">Travel</span><span class="value">~90 min (2-2.5 hrs in rush hour)</span></div>
+      <div class="info-row"><span class="label">Pricing</span><span class="value">+20-30% over base rates</span></div>
+
+      <div class="sf-pricing">
+        <div class="price-pill"><span class="tier">Classic</span><span class="amount">$55-60/hr</span></div>
+        <div class="price-pill"><span class="tier">Signature</span><span class="amount">$65-70/hr</span></div>
+        <div class="price-pill"><span class="tier">Experience</span><span class="amount">$90-95/hr</span></div>
+      </div>
+
+      <div class="tip">SF clients are cocktail-savvy. Signature and Experience packages sell best. Corporate events in FiDi/SOMA are lucrative. Partner with SF event planners. Factor parking ($25-50) + Bay Bridge toll ($7).</div>
+    </div>
+
+    <!-- Travel Fee Table -->
+    <div class="card" style="margin-top:28px;">
+      <h3>Travel Fee Reference</h3>
+      <table class="travel-table">
+        <thead>
+          <tr><th>Destination</th><th>Fee</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Davis, West Sac, Dixon, Vacaville</td><td>No charge</td></tr>
+          <tr><td>Fairfield</td><td>~$10</td></tr>
+          <tr><td>Benicia</td><td>~$26</td></tr>
+          <tr><td>Vallejo</td><td>~$33</td></tr>
+          <tr><td>San Francisco</td><td>~$71 + $7 toll</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<!-- ═══════════════════ SECTION 4: QUICK NUMBERS ═══════════════════ -->
+<section id="numbers">
+  <div class="container">
+    <p class="section-label">Section 04</p>
+    <h2>Quick <span class="gold">Numbers</span></h2>
+    <p style="color:#888;margin-bottom:32px;font-size:0.95rem;">The benchmarks every mobile bartender should know by heart.</p>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-number">1.5</div>
+        <div class="stat-label">drinks per guest<br>per hour (moderate)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">16</div>
+        <div class="stat-label">cocktails per<br>bottle of liquor</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">5</div>
+        <div class="stat-label">glasses per<br>bottle of wine</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">165</div>
+        <div class="stat-label">beers<br>per keg</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">50-75</div>
+        <div class="stat-label">max guests per<br>bartender</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">60 min</div>
+        <div class="stat-label">setup time<br>before event</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">4 hr</div>
+        <div class="stat-label">minimum<br>booking</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ SECTION 5: REVENUE ═══════════════════ -->
+<section id="revenue">
+  <div class="container">
+    <p class="section-label">Section 05</p>
+    <h2>Revenue <span class="gold">Projections</span></h2>
+
+    <div class="card">
+      <table class="revenue-table">
+        <thead>
+          <tr><th>Timeline</th><th>Events</th><th>Avg Revenue</th><th>Monthly</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Month 1-2</td><td>2-3</td><td>$250</td><td class="highlight">$500-750</td></tr>
+          <tr><td>Month 3-4</td><td>4-6</td><td>$350</td><td class="highlight">$1,400-2,100</td></tr>
+          <tr><td>Month 6</td><td>6-8</td><td>$400</td><td class="highlight">$2,400-3,200</td></tr>
+          <tr><td>Month 12</td><td>8-12</td><td>$500</td><td class="highlight">$4,000-6,000</td></tr>
+        </tbody>
+      </table>
+      <p class="revenue-table note">Does not include tips ($50-200/event) or upsells (signature cocktails, custom menus, extra hours).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ SECTION 6: PRO TIPS ═══════════════════ -->
+<section id="tips" style="border-bottom:none;">
+  <div class="container">
+    <p class="section-label">Section 06</p>
+    <h2>Pro <span class="gold">Tips</span></h2>
+
+    <div class="tip-grid">
+      <div class="tip-card">
+        <span class="tip-number">TIP 01</span>
+        <p>Always get the deposit before holding a date. No deposit = no hold. Your time is worth protecting.</p>
+      </div>
+      <div class="tip-card">
+        <span class="tip-number">TIP 02</span>
+        <p>Take photos at every event. Your Instagram IS your portfolio. Good lighting, clean pours, happy faces.</p>
+      </div>
+      <div class="tip-card">
+        <span class="tip-number">TIP 03</span>
+        <p>Build a signature drink that becomes YOUR thing. Clients remember the bartender with the house special.</p>
+      </div>
+      <div class="tip-card">
+        <span class="tip-number">TIP 04</span>
+        <p>Carry business cards and leave 5-10 at the bar. Guests become clients. Every event is a lead generator.</p>
+      </div>
+      <div class="tip-card">
+        <span class="tip-number">TIP 05</span>
+        <p>Learn 3-5 "showtime" moves. People film it and tag you. Free marketing that scales.</p>
+      </div>
+      <div class="tip-card">
+        <span class="tip-number">TIP 06</span>
+        <p>Never serve someone who's visibly intoxicated. Not worth the liability. RBS training covers this.</p>
+      </div>
+      <div class="tip-card">
+        <span class="tip-number">TIP 07</span>
+        <p>Over-prepare, under-promise. Running out of ice is amateur hour. Bring 20% more than you think you need.</p>
+      </div>
+      <div class="tip-card">
+        <span class="tip-number">TIP 08</span>
+        <p>Track every dollar. Mileage deduction: $0.67/mile for 2026. Receipts, gas, supplies &mdash; it all adds up at tax time.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════ FOOTER ═══════════════════ -->
+<footer>
+  <p class="name">Patricia Flores</p>
+  <p class="biz">Mobile Bartending</p>
+  <p class="phone">530-761-6711</p>
+  <div class="divider"></div>
+  <p class="ev-logo">Prepared with care by</p>
+  <a href="https://everlightventures.io" class="ev-link" target="_blank" rel="noopener">everlightventures.io</a>
+</footer>
+
+
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div class="mega-footer">
+  <p>Patricia Flores | Mobile Bartending | 530-761-6711</p>
+  <p>Woodland &bull; Solano County &bull; San Francisco</p>
+  <p class="brand">Prepared with care by Everlight Ventures</p>
+</div>
+
+<script>
+function showTab(name) {
+  // Hide all panels
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  // Deactivate all buttons
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  // Show selected panel
+  document.getElementById('tab-' + name).classList.add('active');
+  // Activate clicked button
+  event.target.classList.add('active');
+  // Scroll to top of content
+  window.scrollTo({ top: document.querySelector('.tab-nav').offsetTop, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
