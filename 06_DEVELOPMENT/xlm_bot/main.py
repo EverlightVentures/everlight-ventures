@@ -83,6 +83,7 @@ from alerts import slack as slack_alert
 from alerts import slack_reports as _slack_reports
 from alerts import slack_intel
 from ai import claude_advisor as ai_advisor
+from strategy.hindsight import analyze_missed_trades, scan_opportunities
 from ai import gemini_advisor
 from ai import perplexity_advisor
 from ai import codex_advisor
@@ -9758,6 +9759,26 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 "ai_directive": _ai_d_entry,
             })
         else:
+            # Hindsight: analyze missed trades + scan opportunities
+            try:
+                _hindsight = analyze_missed_trades(df_15m, df_1h, str(DATA_DIR / "decisions.jsonl"), lookback_hours=6)
+                _opp_scan = scan_opportunities(price, df_15m, df_1h, df_4h, fibs, levels, float(atr_value) if atr_value else 0.001)
+                if _hindsight.get("missed_count", 0) > 0 or _opp_scan.get("total_ready", 0) > 0:
+                    log_decision(config, {
+                        "timestamp": now.isoformat(),
+                        "reason": "hindsight_scan",
+                        "missed_count": _hindsight.get("missed_count", 0),
+                        "missed_usd": _hindsight.get("missed_usd", 0),
+                        "pattern": _hindsight.get("pattern", ""),
+                        "lesson": _hindsight.get("lesson", ""),
+                        "opp_ready": _opp_scan.get("total_ready", 0),
+                        "best_long": _opp_scan.get("best_long"),
+                        "best_short": _opp_scan.get("best_short"),
+                        "squeeze": _opp_scan.get("squeeze_detected", False),
+                        "thought": f"Missed {_hindsight.get('missed_count', 0)} trades (${_hindsight.get('missed_usd', 0):.0f}). {_opp_scan.get('total_ready', 0)} opps ready now.",
+                    })
+            except Exception:
+                pass
             log_decision(
                 config,
                 {
