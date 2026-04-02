@@ -85,6 +85,7 @@ from alerts import slack_intel
 from ai import claude_advisor as ai_advisor
 from strategy.hindsight import analyze_missed_trades, scan_opportunities
 from strategy.macro_vision import get_vision_summary
+from strategy.position_iq import evaluate_position as position_iq_eval
 from ai import gemini_advisor
 from ai import perplexity_advisor
 from ai import codex_advisor
@@ -6470,6 +6471,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         breakout_type = str(open_pos.get("breakout_type", "neutral"))
         reversal = False
         opp_conf = {}
+
         # Always compute reversal (needed for runner mode even with single-contract)
         try:
             opp_conf = compute_confluences(price, df_1h, df_4h, df_15m, levels, fibs, opp_dir)
@@ -6940,6 +6942,59 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             exit_reason = "recovery_take_profit"
         elif _min_hold_met and break_even_hit:
             exit_reason = "break_even"
+
+        # --- Position IQ: intelligent early exit ---
+        try:
+            _rsi_now = 50.0
+            _ema8_now = 0.0
+            _ema21_now = 0.0
+            if df_15m is not None and len(df_15m) >= 25:
+                _piq_closes = df_15m["close"].values
+                _piq_d = [float(_piq_closes[i]) - float(_piq_closes[i-1]) for i in range(-14, 0)]
+                _piq_g = [x for x in _piq_d if x > 0]
+                _piq_l = [-x for x in _piq_d if x < 0]
+                _ag = sum(_piq_g)/14 if _piq_g else 0
+                _al = sum(_piq_l)/14 if _piq_l else 0.001
+                _rsi_now = 100 - (100 / (1 + _ag/_al)) if _al > 0 else 50
+                _k8, _k21 = 2.0/9, 2.0/22
+                _e8 = float(_piq_closes[-25])
+                _e21 = float(_piq_closes[-25])
+                for _cv in _piq_closes[-25:]:
+                    _e8 = float(_cv) * _k8 + _e8 * (1-_k8)
+                    _e21 = float(_cv) * _k21 + _e21 * (1-_k21)
+                _ema8_now = _e8
+                _ema21_now = _e21
+            _piq = position_iq_eval(
+                direction=direction,
+                entry_price=entry_price,
+                current_price=price,
+                stop_price=float(open_pos.get("stop_loss") or 0),
+                df_15m=df_15m,
+                df_1h=df_1h,
+                rsi_15m=_rsi_now,
+                ema8=_ema8_now,
+                ema21=_ema21_now,
+                bars_since_entry=bars_since,
+            )
+            _piq_action = _piq.get("action", "HOLD")
+            _piq_conf = _piq.get("confidence", 0)
+            log_decision(config, {
+                "timestamp": now.isoformat(),
+                "reason": "position_iq",
+                "action": _piq_action,
+                "confidence": _piq_conf,
+                "pnl_usd": _piq.get("pnl_usd"),
+                "signals_against": _piq.get("signals_against"),
+                "signals_for": _piq.get("signals_for"),
+                "thought": "Position IQ: " + str(_piq_action) + " (" + str(_piq_conf) + "%) -- " + str(_piq.get("reason", "")),
+            })
+            if not exit_reason:  # only override if no other exit already triggered
+                if _piq_action == "CUT" and _piq_conf >= 70:
+                    exit_reason = "position_iq_cut"
+                elif _piq_action == "FLIP" and _piq_conf >= 80:
+                    exit_reason = "position_iq_flip"
+        except Exception:
+            pass
 
         # --- Moonshot exit override ---
         if moonshot_state and moonshot_state.active:
