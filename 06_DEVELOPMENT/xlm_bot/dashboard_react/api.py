@@ -1511,6 +1511,31 @@ def get_moonshot_status():
     }
 
 
+
+@app.get("/api/goals")
+def get_goals():
+    """Dynamic P&L goal tracking with loss recovery."""
+    import sys, csv
+    sys.path.insert(0, str(BOT_DIR))
+    try:
+        from strategy.goal_tracker import compute_goals
+        # Load today's trades from trades.csv
+        from datetime import datetime, timezone, timedelta
+        today = datetime.now(timezone(timedelta(hours=-7))).strftime("%Y-%m-%d")
+        trades_today = []
+        csv_path = BOT_DIR / "logs" / "trades.csv"
+        if csv_path.exists():
+            with open(csv_path) as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    ts = row.get("exit_time", row.get("timestamp", ""))[:10]
+                    if ts == today:
+                        trades_today.append(row)
+        return compute_goals(trades_today=trades_today)
+    except Exception as e:
+        return {"error": str(e)}
+
+
 # Serve React static files
 if STATIC_DIR.exists():
     app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")

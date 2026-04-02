@@ -17,6 +17,7 @@ import Reports from "./pages/Reports"
 import Settings from "./pages/Settings"
 import MarketIntel from "./pages/MarketIntel"
 import TradingChat from "./components/TradingChat"
+import GoalTracker from "./components/GoalTracker"
 
 // ── Loading / Welcome Screen ──
 function SplashScreen({ onDone }) {
@@ -195,6 +196,7 @@ function TradingPage({ status, candles, events, stratIq, activeStrat, decisions 
       {subTab === "chart" && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2 flex flex-col gap-4">
+            <GoalTracker />
             <div className="grid grid-cols-4 gap-3">
               <div className="card py-2 px-3"><div className="text-[9px] text-gray-500">Balance</div><div className="font-mono text-sm font-bold">$443</div></div>
               <div className="card py-2 px-3"><div className="text-[9px] text-gray-500">Trades</div><div className="font-mono text-sm font-bold">{wins + losses} <span className="text-[10px] text-gray-500">{wins}W/{losses}L</span></div></div>
