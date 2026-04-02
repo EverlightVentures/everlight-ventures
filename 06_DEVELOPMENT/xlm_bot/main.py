@@ -10106,6 +10106,29 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         if _fib_stop > 0:
             stop_price = _fib_stop
             _struct_stop_used = True
+    # FIX: validate stop is on correct side for direction
+    # Short stop must be ABOVE entry, Long stop must be BELOW entry
+    if stop_price > 0 and direction == "short" and stop_price < price:
+        # Stop is below entry for a short -- WRONG. Use ATR-based stop above.
+        try:
+            _fix_atr = float(atr(df_15m, 14).iloc[-1]) if df_15m is not None and len(df_15m) >= 14 else 0
+            if _fix_atr > 0:
+                stop_price = price + _fix_atr * 2.0  # 2 ATR above entry
+            else:
+                stop_price = price * 1.015  # 1.5% above entry
+        except Exception:
+            stop_price = price * 1.015
+    elif stop_price > 0 and direction == "long" and stop_price > price:
+        # Stop is above entry for a long -- WRONG. Use ATR-based stop below.
+        try:
+            _fix_atr = float(atr(df_15m, 14).iloc[-1]) if df_15m is not None and len(df_15m) >= 14 else 0
+            if _fix_atr > 0:
+                stop_price = price - _fix_atr * 2.0
+            else:
+                stop_price = price * 0.985
+        except Exception:
+            stop_price = price * 0.985
+
     _effective_max_sl = regime_overrides.max_sl_pct  # regime-aware SL cap
     # FULL/MONSTER quality gets 20% wider SL allowance — exceptional setups
     # shouldn't be killed by a 0.01% rounding edge case

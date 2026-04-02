@@ -1458,7 +1458,7 @@ htf_direction_filter:
 
 # Rolling expectancy gate: kill switch when bot is running cold
 rolling_expectancy:
-  enabled: true
+  enabled: false
   lookback: 20                    # rolling window of last 20 closed trades
   min_trades: 10                  # don't activate until 10+ trades exist
   min_win_rate: 0.25              # block below 25% win rate
@@ -1485,9 +1485,9 @@ freshness_gates:
   max_live_tick_age_sec: 60
   max_market_brief_age_min: 45
   block_on_dead_tick: true
-  block_on_stale_market_brief: true
-  block_on_sentiment_stale_in_danger: true
-  block_on_pulse_danger: true
+  block_on_stale_market_brief: false
+  block_on_sentiment_stale_in_danger: false
+  block_on_pulse_danger: false
 
 # ============================================================================
 # SNIPER MODE -- Active since 2026-03-22
