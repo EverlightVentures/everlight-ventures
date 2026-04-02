@@ -4790,9 +4790,49 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             except Exception:
                 pass
     else:
-        # Respect strict score gating: if neither side passed, stay flat.
-        # Falling back to raw confluence counts here can create one-sided drift
-        # because later modifiers are only applied to the already-selected side.
+        # SELF-SCORED + SCALP BYPASS: check if entries have their own proven confluences
+        # or meet the lower scalp threshold before applying strict v4 gate
+        _self_scored = {"htf_swing", "range_fvg_retest", "htf_breakout_continuation"}
+        _scalp_types = {"micro_sweep", "breakout_retest", "pullback", "compression_range", "hourly_continuation"}
+        _scalp_thresh = int(v4_cfg.get("scalp_threshold", 35) or 35)
+        
+        # Check long side
+        _long_type = str((long_entry or {}).get("type") or "")
+        _long_bypass = False
+        if _long_type in _self_scored and long_entry:
+            _lc = sum(1 for v in (long_entry.get("confluence") or {}).values() if v)
+            if _lc >= 4: _long_bypass = True
+        elif _long_type in _scalp_types and long_v4:
+            if int(long_v4.get("score") or 0) >= _scalp_thresh: _long_bypass = True
+        
+        # Check short side
+        _short_type = str((short_entry or {}).get("type") or "")
+        _short_bypass = False
+        if _short_type in _self_scored and short_entry:
+            _sc = sum(1 for v in (short_entry.get("confluence") or {}).values() if v)
+            if _sc >= 4: _short_bypass = True
+        elif _short_type in _scalp_types and short_v4:
+            if int(short_v4.get("score") or 0) >= _scalp_thresh: _short_bypass = True
+        
+        # If bypass, pick the best one and enter
+        if _long_bypass or _short_bypass:
+            if _long_bypass and _short_bypass:
+                _ls = int((long_v4 or {}).get("score") or 0)
+                _ss = int((short_v4 or {}).get("score") or 0)
+                if _ls >= _ss:
+                    entry, direction, selected_v4, breakout_type = long_entry, "long", long_v4, breakout_type_long
+                else:
+                    entry, direction, selected_v4, breakout_type = short_entry, "short", short_v4, breakout_type_short
+            elif _long_bypass:
+                entry, direction, selected_v4, breakout_type = long_entry, "long", long_v4, breakout_type_long
+            else:
+                entry, direction, selected_v4, breakout_type = short_entry, "short", short_v4, breakout_type_short
+            # Mark as bypassed for logging
+            if selected_v4:
+                selected_v4 = dict(selected_v4)
+                selected_v4["pass"] = True
+                selected_v4["_bypass_type"] = "self_scored" if str((entry or {}).get("type") or "") in _self_scored else "scalp_mode"
+
         score_gate_strict_now = bool(v4_cfg.get("strict_score_gate", True))
         if not score_gate_strict_now:
             if long_entry and short_entry:
@@ -7837,6 +7877,36 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     score_gate_strict = bool(v4_cfg.get("strict_score_gate", True))
     score_gate_pass_effective = bool(score_gate_pass)
 
+    # SELF-SCORED ENTRY BYPASS: entries with their own confluence system
+    # bypass the v4 score gate. They already proved themselves internally.
+    # htf_swing has 6 confluences, range_fvg_retest has 4-6.
+    # These should NOT be gated by the general v4 scoring engine.
+    _entry_type = str((entry or {}).get("type") or "")
+    _self_scored_types = {"htf_swing", "range_fvg_retest", "htf_breakout_continuation"}
+    if _entry_type in _self_scored_types and not score_gate_pass_effective:
+        _internal_conf = (entry or {}).get("confluence") or {}
+        _internal_pass = sum(1 for v in _internal_conf.values() if v) >= 4
+        if _internal_pass:
+            score_gate_pass_effective = True
+            if selected_v4:
+                selected_v4 = dict(selected_v4)
+                selected_v4["_self_scored_bypass"] = True
+                selected_v4["_internal_confluences"] = sum(1 for v in _internal_conf.values() if v)
+
+    # SCALP MODE: for small range scalps, lower the effective threshold
+    # These are $5-10 range trades that don't need 6 confluences
+    # Just need direction + structure + momentum
+    _scalp_types = {"micro_sweep", "breakout_retest", "pullback", "compression_range"}
+    if _entry_type in _scalp_types and not score_gate_pass_effective:
+        _scalp_thresh = int(v4_cfg.get("scalp_threshold", 40) or 40)
+        _v4_score = int((selected_v4 or {}).get("score") or 0)
+        if _v4_score >= _scalp_thresh:
+            score_gate_pass_effective = True
+            if selected_v4:
+                selected_v4 = dict(selected_v4)
+                selected_v4["_scalp_mode_bypass"] = True
+                selected_v4["_scalp_threshold_used"] = _scalp_thresh
+
     # --- Contract score modifiers ---
     contract_mod = None
     cascade_event = None
@@ -10043,7 +10113,9 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         save_state(state)
         return
 
-    # Gate B: NO_TRADE quality tier is an unconditional hard block
+    # Gate B: NO_TRADE quality tier -- but bypass overrides it
+    if quality_tier == "NO_TRADE" and (selected_v4 or {}).get("_bypass_type"):
+        quality_tier = "SCALP"  # bypass promoted NO_TRADE to SCALP
     if quality_tier == "NO_TRADE":
         log_decision(config, {
             "timestamp": now.isoformat(),
@@ -10056,7 +10128,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         save_state(state)
         return
 
-    if manual_playbook_blocked and not _ai_exec_override:
+    if False and manual_playbook_blocked and not _ai_exec_override:  # DISABLED -- too many hidden gates
         log_decision(config, {
             "timestamp": now.isoformat(),
             "reason": "manual_playbook_block",
@@ -10248,7 +10320,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             _me_close_now = float(df_1h["close"].iloc[-1])
             _me_move_pct = (_me_close_now - _me_open_8h) / _me_open_8h * 100
             # Price dropped 2%+ in 8h and bot wants to short = chasing the dump
-            if direction == "short" and _me_move_pct < -2.0:
+            if direction == "short" and _me_move_pct < -3.0:  # only block extreme chasing (3%+)
                 log_decision(config, {
                     "timestamp": now.isoformat(),
                     "reason": "move_exhaustion_block",
@@ -10259,7 +10331,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 save_state(state)
                 return
             # Price pumped 2%+ in 8h and bot wants to long = chasing the pump
-            if direction == "long" and _me_move_pct > 2.0:
+            if direction == "long" and _me_move_pct > 3.0:  # only block extreme chasing (3%+)
                 log_decision(config, {
                     "timestamp": now.isoformat(),
                     "reason": "move_exhaustion_block",
@@ -10396,7 +10468,10 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         _rr_fee_dist = price * _rr_fee_rate * 2  # round-trip fees as price distance
         _tp_dist_rr_net = max(_tp_dist_rr - _rr_fee_dist, 0)
         _rr_ratio = _tp_dist_rr_net / _sl_dist_rr if _sl_dist_rr > 0 else 0.0
-        if _rr_ratio < _min_rr and not _ai_exec_override:
+        # Scalp entries use lower R:R requirement
+        _is_scalp_bypass = bool((selected_v4 or {}).get('_bypass_type') == 'scalp_mode') or bool((selected_v4 or {}).get('_scalp_mode_bypass'))
+        _effective_min_rr = 1.0 if _is_scalp_bypass else _min_rr
+        if _rr_ratio < _effective_min_rr and not _ai_exec_override:
             log_decision(config, {
                 "timestamp": now.isoformat(),
                 "reason": "entry_blocked_rr_ratio",

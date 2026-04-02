@@ -375,6 +375,7 @@ plrl3:
 v4:
   regime_mode: dual      # BIDIRECTIONAL: both trend and MR. A pro plays both -- short the trend, long the bounce, short the rejection.
   strict_score_gate: true
+  scalp_threshold: 25          # scalp entries (micro_sweep, breakout_retest) use this lower bar
   quality_tiers:
     enabled: true
     reduced_gap: 3               # SNIPER MODE: razor-thin gap -- almost nothing qualifies as reduced
@@ -1196,7 +1197,7 @@ slack:
 
 manual_playbook:
   enabled: true
-  block_unlabeled_entries: true
+  block_unlabeled_entries: false
   active_entry_types:
     - breakout_retest
     - htf_breakout_continuation
