@@ -10129,6 +10129,78 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         except Exception:
             stop_price = price * 0.985
 
+    # MOVE EXHAUSTION CHECK: If the big move already happened, don't chase it.
+    # A 2%+ drop in 8h means the short is OVER -- look for the bounce instead.
+    # A 2%+ pump in 8h means the long is OVER -- look for the rejection instead.
+    try:
+        if df_1h is not None and len(df_1h) >= 8:
+            _me_open_8h = float(df_1h["open"].iloc[-8])
+            _me_close_now = float(df_1h["close"].iloc[-1])
+            _me_move_pct = (_me_close_now - _me_open_8h) / _me_open_8h * 100
+            # Price dropped 2%+ in 8h and bot wants to short = chasing the dump
+            if direction == "short" and _me_move_pct < -2.0:
+                log_decision(config, {
+                    "timestamp": now.isoformat(),
+                    "reason": "move_exhaustion_block",
+                    "direction": direction,
+                    "move_8h_pct": round(_me_move_pct, 2),
+                    "thought": f"EXHAUSTED SHORT: price already dropped {abs(_me_move_pct):.1f}% in 8h. The move is done. Wait for bounce to short, or go long.",
+                })
+                save_state(state)
+                return
+            # Price pumped 2%+ in 8h and bot wants to long = chasing the pump
+            if direction == "long" and _me_move_pct > 2.0:
+                log_decision(config, {
+                    "timestamp": now.isoformat(),
+                    "reason": "move_exhaustion_block",
+                    "direction": direction,
+                    "move_8h_pct": round(_me_move_pct, 2),
+                    "thought": f"EXHAUSTED LONG: price already pumped {_me_move_pct:.1f}% in 8h. The move is done. Wait for dip to buy, or go short.",
+                })
+                save_state(state)
+                return
+    except Exception:
+        pass
+
+    # RANGE POSITION GUARD: Don't short at the bottom, don't long at the top.
+    # The move already happened. Enter on the RIGHT side or wait.
+    try:
+        if df_1h is not None and len(df_1h) >= 8:
+            _rpg_lookback = min(12, len(df_1h))
+            _rpg_high = float(df_1h["high"].iloc[-_rpg_lookback:].max())
+            _rpg_low = float(df_1h["low"].iloc[-_rpg_lookback:].min())
+            _rpg_range = _rpg_high - _rpg_low
+            if _rpg_range > 0:
+                _rpg_position = (price - _rpg_low) / _rpg_range  # 0=at low, 1=at high
+                # Shorting in bottom 25% = short trap. The dump already happened.
+                if direction == "short" and _rpg_position < 0.25:
+                    log_decision(config, {
+                        "timestamp": now.isoformat(),
+                        "reason": "range_position_guard_block",
+                        "direction": direction,
+                        "range_position_pct": round(_rpg_position * 100, 1),
+                        "range_high": round(_rpg_high, 6),
+                        "range_low": round(_rpg_low, 6),
+                        "thought": f"SHORT TRAP: price at {_rpg_position*100:.0f}% of 12h range (bottom 25%). Dump is over. Need to be LONG here, not short.",
+                    })
+                    save_state(state)
+                    return
+                # Longing in top 25% = bull trap. The pump already happened.
+                if direction == "long" and _rpg_position > 0.75:
+                    log_decision(config, {
+                        "timestamp": now.isoformat(),
+                        "reason": "range_position_guard_block",
+                        "direction": direction,
+                        "range_position_pct": round(_rpg_position * 100, 1),
+                        "range_high": round(_rpg_high, 6),
+                        "range_low": round(_rpg_low, 6),
+                        "thought": f"BULL TRAP: price at {_rpg_position*100:.0f}% of 12h range (top 25%). Pump is over. Need to be SHORT here, not long.",
+                    })
+                    save_state(state)
+                    return
+    except Exception:
+        pass
+
     _effective_max_sl = regime_overrides.max_sl_pct  # regime-aware SL cap
     # FULL/MONSTER quality gets 20% wider SL allowance — exceptional setups
     # shouldn't be killed by a 0.01% rounding edge case
