@@ -1536,6 +1536,37 @@ def get_goals():
         return {"error": str(e)}
 
 
+
+@app.get("/api/mindset")
+def get_mindset():
+    """Bot's current trading mindset and work ethic."""
+    decisions = _read_jsonl_tail(BOT_DIR / "logs" / "decisions.jsonl", max_lines=50)
+    mindset = {}
+    for d in reversed(decisions):
+        if d.get("reason") == "trading_mindset":
+            mindset = d
+            break
+    goals = {}
+    try:
+        import sys, csv
+        sys.path.insert(0, str(BOT_DIR))
+        from strategy.goal_tracker import compute_goals
+        from datetime import datetime, timezone, timedelta
+        today = datetime.now(timezone(timedelta(hours=-7))).strftime("%Y-%m-%d")
+        trades_today = []
+        csv_path = BOT_DIR / "logs" / "trades.csv"
+        if csv_path.exists():
+            with open(csv_path) as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    if (row.get("exit_time", row.get("timestamp", ""))[:10]) == today:
+                        trades_today.append(row)
+        goals = compute_goals(trades_today=trades_today)
+    except Exception:
+        pass
+    return {"mindset": mindset, "goals": goals}
+
+
 # Serve React static files
 if STATIC_DIR.exists():
     app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")
