@@ -86,6 +86,7 @@ from ai import claude_advisor as ai_advisor
 from strategy.hindsight import analyze_missed_trades, scan_opportunities
 from strategy.macro_vision import get_vision_summary
 from strategy.position_iq import evaluate_position as position_iq_eval
+from strategy.trading_mindset import compute_mindset
 from ai import gemini_advisor
 from ai import perplexity_advisor
 from ai import codex_advisor
@@ -7733,6 +7734,60 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                     selected_v4["_macro_phase"] = _mv_phase
         except Exception:
             pass
+
+        # TRADING MINDSET: bot's work ethic adjusts threshold based on daily performance
+        try:
+            import csv as _csv_mod
+            _today_str = now.strftime("%Y-%m-%d")
+            _trades_today = []
+            _csv_path = LOGS_DIR / "trades.csv"
+            if _csv_path.exists():
+                with open(_csv_path) as _tf:
+                    for _row in _csv_mod.DictReader(_tf):
+                        if (_row.get("exit_time", _row.get("timestamp", ""))[:10]) == _today_str:
+                            _trades_today.append(_row)
+            _daily_pnl = sum(float(t.get("pnl_usd", 0) or 0) for t in _trades_today)
+            _daily_losses_sum = sum(abs(float(t.get("pnl_usd", 0) or 0)) for t in _trades_today if float(t.get("pnl_usd", 0) or 0) < 0)
+            _daily_wins = sum(1 for t in _trades_today if float(t.get("pnl_usd", 0) or 0) > 0)
+            _daily_loss_count = sum(1 for t in _trades_today if float(t.get("pnl_usd", 0) or 0) < 0)
+            _consec_l = int(_st.get("consecutive_losses", 0) or 0)
+            _consec_w = int(_st.get("consecutive_wins", 0) or 0)
+            _mindset = compute_mindset(
+                daily_pnl=_daily_pnl,
+                daily_min_goal=25.0 + _daily_losses_sum,
+                daily_ideal_goal=100.0 + _daily_losses_sum,
+                loss_debt=_daily_losses_sum,
+                consecutive_losses=_consec_l,
+                consecutive_wins=_consec_w,
+                trades_today=len(_trades_today),
+                wins_today=_daily_wins,
+                losses_today=_daily_loss_count,
+            )
+            _ms_mode = _mindset.get("mode", "STEADY")
+            _ms_thresh_adj = int(_mindset.get("threshold_adj", 0))
+            _ms_size_mult = float(_mindset.get("size_mult", 1.0))
+            # Apply threshold adjustment
+            if selected_v4 is not None and _ms_thresh_adj != 0:
+                selected_v4 = dict(selected_v4)
+                _old_t = int(selected_v4.get("threshold") or 60)
+                _new_t = max(30, min(95, _old_t + _ms_thresh_adj))
+                selected_v4["threshold"] = _new_t
+                selected_v4["pass"] = bool(int(selected_v4.get("score") or 0) >= _new_t)
+                selected_v4["_mindset_adj"] = _ms_thresh_adj
+                selected_v4["_mindset_mode"] = _ms_mode
+            log_decision(config, {
+                "timestamp": now.isoformat(),
+                "reason": "trading_mindset",
+                "mode": _ms_mode,
+                "threshold_adj": _ms_thresh_adj,
+                "size_mult": _ms_size_mult,
+                "daily_pnl": round(_daily_pnl, 2),
+                "work_ethic": _mindset.get("work_ethic"),
+                "thought": _mindset.get("message", ""),
+            })
+        except Exception:
+            pass
+
     except Exception:
         adaptive_reason = "adaptive_error"
 
