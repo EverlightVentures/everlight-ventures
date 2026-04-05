@@ -1,0 +1,39 @@
+version: '3.8'
+
+# Computer Use - Anthropic's desktop automation via Claude API
+# Runs headless Linux desktop (Xvfb) with browser for GUI automation.
+# Use cases: county recorder scraping, Fiverr/Upwork, web forms without APIs.
+#
+# Deploy on Oracle E5 via Podman (ARM64).
+# API: http://localhost:8501  |  VNC: localhost:5900 (debug only)
+
+services:
+  computer-use:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: everlight-computer-use
+    ports:
+      - "8501:8501"           # HTTP API for task submission
+      - "127.0.0.1:5900:5900" # VNC (localhost only, for debugging)
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - DISPLAY=:99
+      - WIDTH=1280
+      - HEIGHT=720
+      - MODEL=claude-sonnet-4-6
+    volumes:
+      - computer_use_data:/app/data
+      - computer_use_screenshots:/app/screenshots
+    mem_limit: 2g
+    restart: unless-stopped
+    networks:
+      - everlight
+
+volumes:
+  computer_use_data:
+  computer_use_screenshots:
+
+networks:
+  everlight:
+    external: true

@@ -28,6 +28,8 @@ urlpatterns = [
     path('launch/', views.LaunchQueryView.as_view(), name='launch'),
     path('events/', views.EventsView.as_view(), name='events'),
     path('processes/', views.ProcessesView.as_view(), name='processes'),
+    path('onboard/', views.onboard_page, name='onboard'),
+    path('onboard/submit/', views.onboard_submit, name='onboard_submit'),
 
     # Intel pages (merged from :8080)
     path('reports/', views.ReportsListView.as_view(), name='reports_list'),

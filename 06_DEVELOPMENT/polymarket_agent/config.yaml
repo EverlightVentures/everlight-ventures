@@ -1,0 +1,90 @@
+# Polymarket Prediction Agent - Configuration
+# Everlight Ventures | Cipher Wolfe's Alpha Markets Fire Team
+#
+# 5-Agent Pipeline: Scanner -> Researcher -> Predictor -> Risk -> Postmortem
+
+# Polymarket API
+polymarket:
+  api_url: "https://clob.polymarket.com"
+  gamma_url: "https://gamma-api.polymarket.com"
+  chain_id: 137  # Polygon mainnet
+  min_liquidity: 5000    # $5k minimum pool
+  min_volume_24h: 1000   # $1k daily volume floor
+  max_markets_scan: 300  # Markets per scan cycle
+
+# Data Sources (priority order)
+sources:
+  twitter:
+    enabled: true
+    api_key: "${TWITTER_BEARER_TOKEN}"
+    priority: 1  # Fastest signal
+    accounts_watch:
+      - "@tier10k"
+      - "@WatcherGuru"
+      - "@unusual_whales"
+      - "@DeItaone"
+      - "@disclosetv"
+      - "@zaborowsky"
+  telegram:
+    enabled: true
+    priority: 2
+    channels:
+      - "polymarket_alerts"
+      - "crypto_breaking"
+  rss:
+    enabled: true
+    priority: 3  # Backup/confirmation
+    feeds:
+      - "https://feeds.reuters.com/reuters/topNews"
+      - "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml"
+      - "https://feeds.bbci.co.uk/news/rss.xml"
+
+# Prediction Engine
+prediction:
+  model: "xgboost"
+  confidence_threshold: 0.65  # Only bet when >65% confident
+  llm_model: "claude-sonnet-4-6"  # For narrative analysis
+  features:
+    - market_price_vs_predicted
+    - sentiment_score
+    - source_credibility
+    - time_to_resolution
+    - volume_trend
+    - spread_width
+
+# Risk Management (Rex Thornton's rules)
+risk:
+  max_bet_pct: 5.0           # Max 5% of bankroll per bet
+  kelly_fraction: 0.25       # Quarter-Kelly for safety
+  max_daily_bets: 10
+  max_daily_loss_pct: 15.0   # Stop trading at -15% daily
+  min_edge: 0.05             # Need 5% edge over market
+  cooldown_after_loss: 300   # 5 min cooldown after loss
+
+# Bankroll
+bankroll:
+  initial: 100.0  # Start with $100 USDC
+  currency: "USDC"
+  target_daily_return: 0.02  # 2% daily target
+
+# Scheduling
+schedule:
+  scan_interval: 300       # Scan markets every 5 min
+  research_interval: 60    # Research on new signals every 1 min
+  postmortem_interval: 3600  # Review settled bets every hour
+
+# Slack Reporting
+slack:
+  bot_token: "${SLACK_BOT_TOKEN}"
+  channels:
+    trades: "C0AN8SG030W"      # #xlm-trading (reuse for all trading)
+    alerts: "C0ANPRCA4AD"      # #hive-alerts
+    markets: "C0AP56SFQG0"     # #ft-markets
+
+# Hive Mind Agent Mapping
+agents:
+  scanner: "cipher_wolfe"       # Christopher Wolfe - market scanner
+  researcher: "bull_archer"     # Bernard Archer - macro research
+  predictor: "cipher_wolfe"     # Cipher does final prediction
+  risk_manager: "everlight_trading_risk"  # Rex Thornton
+  postmortem: "56_data_verifier"  # Thomas Rourke - fact checker

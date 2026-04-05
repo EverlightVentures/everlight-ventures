@@ -1,0 +1,310 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hive Mind - Deploy Your AI Team</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0a0a;
+            color: #f0f0f0;
+            min-height: 100vh;
+        }
+
+        .container { max-width: 800px; margin: 0 auto; padding: 40px 24px; }
+
+        /* Gold accent bar */
+        .gold-bar { height: 3px; background: linear-gradient(90deg, #d4a017, #f5d060, #d4a017); margin-bottom: 40px; }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #d4a017, #f5d060);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+        .subtitle { color: #888; font-size: 1rem; margin-bottom: 40px; }
+
+        /* Steps */
+        .step {
+            background: #111;
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+        .step:hover { border-color: #d4a017; }
+        .step.active { border-color: #d4a017; box-shadow: 0 0 20px rgba(212, 160, 23, 0.1); }
+        .step.completed { border-color: #2a7d2a; opacity: 0.7; }
+
+        .step-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .step-number {
+            width: 36px; height: 36px;
+            background: linear-gradient(135deg, #d4a017, #b8860b);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 14px; color: #0a0a0a;
+        }
+        .step-title { font-size: 1.1rem; font-weight: 700; }
+
+        /* Form elements */
+        label { display: block; font-size: 0.85rem; color: #aaa; margin-bottom: 6px; margin-top: 14px; }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #f0f0f0;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #d4a017;
+        }
+
+        /* Checkboxes for agents */
+        .agent-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .agent-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .agent-card:hover { border-color: #d4a017; }
+        .agent-card.selected { border-color: #d4a017; background: #1a1500; }
+        .agent-card input { display: none; }
+        .agent-name { font-weight: 700; font-size: 0.9rem; }
+        .agent-role { font-size: 0.75rem; color: #888; }
+
+        /* Integrations */
+        .integration-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .integration-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 8px;
+            padding: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .integration-card:hover { border-color: #d4a017; }
+        .integration-card.selected { border-color: #d4a017; background: #1a1500; }
+        .integration-card input { display: none; }
+        .integration-icon { font-size: 1.5rem; margin-bottom: 4px; }
+        .integration-name { font-size: 0.8rem; font-weight: 600; }
+
+        /* Submit */
+        .btn-deploy {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #d4a017, #b8860b);
+            border: none;
+            border-radius: 10px;
+            color: #0a0a0a;
+            font-size: 1.1rem;
+            font-weight: 800;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-deploy:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(212, 160, 23, 0.3);
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            font-size: 0.8rem;
+            color: #555;
+        }
+        .footer a { color: #d4a017; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="gold-bar"></div>
+    <div class="container">
+        <h1>Deploy Your AI Team</h1>
+        <p class="subtitle">Connect your tools. Pick your agents. Go live in minutes.</p>
+
+        <form method="POST" action="{% url 'hive:onboard_submit' %}" id="onboard-form">
+            {% csrf_token %}
+
+            <!-- Step 1: Company Info -->
+            <div class="step active" id="step1">
+                <div class="step-header">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Your Company</div>
+                </div>
+                <label>Company Name</label>
+                <input type="text" name="company_name" required placeholder="Acme Corp">
+                <label>Your Name</label>
+                <input type="text" name="contact_name" required placeholder="Jane Smith">
+                <label>Email</label>
+                <input type="email" name="email" required placeholder="jane@acme.com">
+                <label>What does your business do?</label>
+                <textarea name="business_desc" rows="3" placeholder="We sell B2B SaaS to mid-market companies..."></textarea>
+            </div>
+
+            <!-- Step 2: Connect Slack -->
+            <div class="step" id="step2">
+                <div class="step-header">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Connect Slack</div>
+                </div>
+                <p style="color:#888;font-size:0.9rem;margin-bottom:12px;">
+                    Your AI team lives in Slack. They respond to @mentions, post updates, and deliver reports right in your channels.
+                </p>
+                <label>Slack Workspace URL</label>
+                <input type="url" name="slack_workspace" placeholder="https://your-team.slack.com">
+                <label>Slack Bot Token (we'll help you create this)</label>
+                <input type="text" name="slack_token" placeholder="xoxb-...">
+            </div>
+
+            <!-- Step 3: Pick Agents -->
+            <div class="step" id="step3">
+                <div class="step-header">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Pick Your Team</div>
+                </div>
+                <p style="color:#888;font-size:0.9rem;margin-bottom:12px;">
+                    Each agent is a specialist. Pick the ones your business needs.
+                </p>
+                <div class="agent-grid">
+                    <label class="agent-card" onclick="this.classList.toggle('selected')">
+                        <input type="checkbox" name="agents" value="strategist">
+                        <div class="agent-name">Marcus Cole</div>
+                        <div class="agent-role">Chief Operator -- dispatches your team, daily briefs</div>
+                    </label>
+                    <label class="agent-card" onclick="this.classList.toggle('selected')">
+                        <input type="checkbox" name="agents" value="outreach">
+                        <div class="agent-name">Piper Reeves</div>
+                        <div class="agent-role">Outreach -- personalized email campaigns, follow-ups</div>
+                    </label>
+                    <label class="agent-card" onclick="this.classList.toggle('selected')">
+                        <input type="checkbox" name="agents" value="analyst">
+                        <div class="agent-name">Penny Vance</div>
+                        <div class="agent-role">Profit -- revenue tracking, deal analysis, ROI reports</div>
+                    </label>
+                    <label class="agent-card" onclick="this.classList.toggle('selected')">
+                        <input type="checkbox" name="agents" value="deal_scout">
+                        <div class="agent-name">Sebastian Navarro</div>
+                        <div class="agent-role">Scout -- finds leads, opportunities, partnerships</div>
+                    </label>
+                    <label class="agent-card" onclick="this.classList.toggle('selected')">
+                        <input type="checkbox" name="agents" value="content">
+                        <div class="agent-name">Vera Lux</div>
+                        <div class="agent-role">Content -- blog posts, social media, brand voice</div>
+                    </label>
+                    <label class="agent-card" onclick="this.classList.toggle('selected')">
+                        <input type="checkbox" name="agents" value="engineer">
+                        <div class="agent-name">Franklin Steele</div>
+                        <div class="agent-role">Engineer -- builds tools, dashboards, automations</div>
+                    </label>
+                    <label class="agent-card" onclick="this.classList.toggle('selected')">
+                        <input type="checkbox" name="agents" value="compliance">
+                        <div class="agent-name">Justine Park</div>
+                        <div class="agent-role">Compliance -- legal review, CAN-SPAM, data safety</div>
+                    </label>
+                    <label class="agent-card" onclick="this.classList.toggle('selected')">
+                        <input type="checkbox" name="agents" value="intel">
+                        <div class="agent-name">Cipher Wolfe</div>
+                        <div class="agent-role">Intel -- market research, competitor analysis, trends</div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Step 4: Connect Tools -->
+            <div class="step" id="step4">
+                <div class="step-header">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Connect Your Tools</div>
+                </div>
+                <p style="color:#888;font-size:0.9rem;margin-bottom:12px;">
+                    Your agents work with the tools you already use. Connect what you need.
+                </p>
+                <div class="integration-grid">
+                    <label class="integration-card" onclick="this.classList.toggle('selected')">
+                        <input type="checkbox" name="integrations" value="gmail">
+                        <div class="integration-icon">&#9993;</div>
+                        <div class="integration-name">Gmail</div>
+                    </label>
+                    <label class="integration-card" onclick="this.classList.toggle('selected')">
+                        <input type="checkbox" name="integrations" value="google_sheets">
+                        <div class="integration-icon">&#128202;</div>
+                        <div class="integration-name">Google Sheets</div>
+                    </label>
+                    <label class="integration-card" onclick="this.classList.toggle('selected')">
+                        <input type="checkbox" name="integrations" value="stripe">
+                        <div class="integration-icon">&#128179;</div>
+                        <div class="integration-name">Stripe</div>
+                    </label>
+                    <label class="integration-card" onclick="this.classList.toggle('selected')">
+                        <input type="checkbox" name="integrations" value="hubspot">
+                        <div class="integration-icon">&#128161;</div>
+                        <div class="integration-name">HubSpot</div>
+                    </label>
+                    <label class="integration-card" onclick="this.classList.toggle('selected')">
+                        <input type="checkbox" name="integrations" value="notion">
+                        <div class="integration-icon">&#128221;</div>
+                        <div class="integration-name">Notion</div>
+                    </label>
+                    <label class="integration-card" onclick="this.classList.toggle('selected')">
+                        <input type="checkbox" name="integrations" value="github">
+                        <div class="integration-icon">&#128187;</div>
+                        <div class="integration-name">GitHub</div>
+                    </label>
+                    <label class="integration-card" onclick="this.classList.toggle('selected')">
+                        <input type="checkbox" name="integrations" value="salesforce">
+                        <div class="integration-icon">&#9729;</div>
+                        <div class="integration-name">Salesforce</div>
+                    </label>
+                    <label class="integration-card" onclick="this.classList.toggle('selected')">
+                        <input type="checkbox" name="integrations" value="jira">
+                        <div class="integration-icon">&#128736;</div>
+                        <div class="integration-name">Jira</div>
+                    </label>
+                    <label class="integration-card" onclick="this.classList.toggle('selected')">
+                        <input type="checkbox" name="integrations" value="calendar">
+                        <div class="integration-icon">&#128197;</div>
+                        <div class="integration-name">Google Calendar</div>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-deploy">Deploy Your AI Team</button>
+        </form>
+
+        <div class="footer">
+            <p>Powered by <a href="https://everlightventures.io">Everlight Ventures</a> Hive Mind</p>
+            <p style="margin-top:4px;">63 AI agents. 12 fire teams. Your business, on autopilot.</p>
+        </div>
+    </div>
+</body>
+</html>

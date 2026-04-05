@@ -80,6 +80,8 @@ def get_status():
 def get_decisions(limit: int = 200):
     items = _read_jsonl_tail(LOGS_DIR / "decisions.jsonl", max_lines=limit)
     return _filter_24h(items)
+_NOISE_EVENTS = {"startup", "manage_open_position", "balance_reconcile", "cash_movement", "market_intel_error"}
+
 @app.get("/api/events")
 def get_events(limit: int = 100):
     state_db = DATA_DIR / "bot_state.db"
@@ -88,9 +90,12 @@ def get_events(limit: int = 100):
     try:
         db = sqlite3.connect(str(state_db))
         cutoff = (datetime.now(timezone.utc) - timedelta(hours=24)).isoformat()
+        # Filter noise in SQL -- startup/manage events outnumber trade events 1000:1
+        noise_placeholders = ",".join(["?"] * len(_NOISE_EVENTS))
+        params = [cutoff] + list(_NOISE_EVENTS) + [limit]
         rows = db.execute(
-            "SELECT ts, type, payload_json FROM events WHERE ts > ? ORDER BY id DESC LIMIT ?",
-            (cutoff, limit)
+            f"SELECT ts, type, payload_json FROM events WHERE ts > ? AND type NOT IN ({noise_placeholders}) ORDER BY id DESC LIMIT ?",
+            params
         ).fetchall()
         db.close()
         return [{"ts": r[0], "type": r[1], "payload": json.loads(r[2])} for r in rows]
@@ -106,55 +111,554 @@ def get_trades():
             entry.update(e.get("payload", {}))
             trades.append(entry)
     return trades
+_IQ_REASONS = {
+    "unified_score", "unified_hold", "unified_hard_block",
+    "position_iq", "entry_fill_check", "exit_fill_check", "exit_order_sent",
+    "entry_blocked_preflight", "entry_blocked_no_signal",
+    "macro_vision", "hindsight_scan", "trading_mindset",
+    "band_navigator_confirmed", "dip_retrace_gate_block",
+    "profit_manager_sl_to_be", "profit_manager_trail_tighten",
+    "hedge_flip_queued", "divergence_confirmed", "fib_confluence_boost",
+}
+
+
 @app.get("/api/strategy-iq")
 def get_strategy_iq():
-    decisions = _read_jsonl_tail(LOGS_DIR / "decisions.jsonl", max_lines=500)
+    decisions = _read_jsonl_tail(LOGS_DIR / "decisions.jsonl", max_lines=1000)
     decisions_24h = _filter_24h(decisions)
-    counts = {
-        "sl_to_be": 0, "trail_tighten": 0,
-        "hedge_flip_queued": 0, "hedge_flip_rejected": 0,
-        "divergence_confirmed": 0, "fib_confluence_boost": 0,
-        "htf_blocked": 0, "total_decisions": len(decisions_24h),
-    }
+
+    # Collect meaningful strategy events
     iq_events = []
+    stats = {
+        "unified_scores": [],
+        "entries": 0,
+        "exits": 0,
+        "holds": 0,
+        "blocks": 0,
+        "position_iq_actions": {},
+        "strategies_seen": {},
+        "regimes_seen": {},
+        "total_decisions": len(decisions_24h),
+    }
+
     for d in decisions_24h:
         r = str(d.get("reason", ""))
-        if r == "profit_manager_sl_to_be":
-            counts["sl_to_be"] += 1
+
+        if r == "unified_score":
+            score = d.get("final_score", 0)
+            stats["unified_scores"].append(score)
+            rec = d.get("recommendation", "")
+            entry_type = d.get("entry_type", "unknown")
+            stats["strategies_seen"][entry_type] = stats["strategies_seen"].get(entry_type, 0) + 1
+            regime = d.get("regime", "")
+            if regime:
+                stats["regimes_seen"][regime] = stats["regimes_seen"].get(regime, 0) + 1
             iq_events.append(d)
-        elif r == "profit_manager_trail_tighten":
-            counts["trail_tighten"] += 1
+
+        elif r == "unified_hold":
+            stats["holds"] += 1
             iq_events.append(d)
-        elif r == "hedge_flip_queued":
-            counts["hedge_flip_queued"] += 1
+
+        elif r in ("unified_hard_block", "entry_blocked_preflight"):
+            stats["blocks"] += 1
             iq_events.append(d)
-        elif r == "hedge_flip_rejected":
-            counts["hedge_flip_rejected"] += 1
+
+        elif r == "position_iq":
+            action = d.get("action", "HOLD")
+            stats["position_iq_actions"][action] = stats["position_iq_actions"].get(action, 0) + 1
+            if action != "HOLD":
+                iq_events.append(d)
+
+        elif r in ("entry_fill_check",):
+            stats["entries"] += 1
             iq_events.append(d)
-        elif r == "divergence_confirmed":
-            counts["divergence_confirmed"] += 1
+
+        elif r in ("exit_fill_check", "exit_order_sent"):
+            stats["exits"] += 1
             iq_events.append(d)
-        elif r == "fib_confluence_boost":
-            counts["fib_confluence_boost"] += 1
+
+        elif r in _IQ_REASONS:
             iq_events.append(d)
-        elif "htf" in r and "blocked" in r:
-            counts["htf_blocked"] += 1
-            iq_events.append(d)
-    return {"counts": counts, "events": iq_events[-50:]}
+
+    # Compute summary stats
+    scores = stats["unified_scores"]
+    avg_score = round(sum(scores) / max(len(scores), 1), 1) if scores else 0
+    max_score = max(scores) if scores else 0
+    min_score = min(scores) if scores else 0
+    enter_count = sum(1 for s in scores if s >= 60)
+    hold_count = sum(1 for s in scores if s < 60)
+
+    return {
+        "summary": {
+            "total_decisions": stats["total_decisions"],
+            "unified_scores_count": len(scores),
+            "avg_score": avg_score,
+            "max_score": max_score,
+            "min_score": min_score,
+            "enter_signals": enter_count,
+            "hold_signals": hold_count,
+            "entries": stats["entries"],
+            "exits": stats["exits"],
+            "blocks": stats["blocks"],
+            "position_iq": stats["position_iq_actions"],
+            "strategies_seen": stats["strategies_seen"],
+            "regimes_seen": stats["regimes_seen"],
+        },
+        "events": iq_events[-60:],
+    }
+_ENTRY_TYPE_TF = {
+    "htf_swing": "4h",
+    "htf_breakout_continuation": "4h",
+    "range_fvg_retest": "1h",
+    "hourly_continuation": "1h",
+    "opening_range_breakout": "1h",
+}
+# Coinbase Exchange API supported granularities: 60, 300, 900, 3600, 21600, 86400
+# 4h is NOT supported -- use 1h with more candles to cover 4h of data
+_GRANULARITY_MAP = {
+    "1m": 60, "5m": 300, "15m": 900, "1h": 3600, "4h": 3600, "6h": 21600, "1d": 86400,
+}
+_CANDLE_COUNTS = {
+    "1m": 120, "5m": 120, "15m": 96, "1h": 96, "4h": 200, "6h": 90, "1d": 90,
+}
+
+
 @app.get("/api/candles")
-def get_candles():
-    """Return recent 15m candle data from the bot's cached history."""
+def get_candles(tf: str = "auto"):
+    """Return candle data. tf=auto picks timeframe based on position state.
+
+    No position -> 1d (daily overview).
+    In position -> timeframe the strategy trades on.
+    Manual override: tf=15m, tf=1h, tf=4h, tf=1d.
+    """
     try:
         import requests
+
+        # Determine timeframe
+        resolved_tf = tf
+        position_tf = None
+        if tf == "auto":
+            entry_type = ""
+            try:
+                import sqlite3
+                state_db = DATA_DIR / "bot_state.db"
+                if state_db.exists():
+                    db = sqlite3.connect(str(state_db))
+                    row = db.execute("SELECT value_json FROM kv WHERE key='open_position'").fetchone()
+                    if row:
+                        pos = json.loads(row[0]) if row[0] != "null" else None
+                        if pos:
+                            entry_type = pos.get("entry_type", "")
+                    db.close()
+            except Exception:
+                pass
+            if entry_type:
+                position_tf = _ENTRY_TYPE_TF.get(entry_type, "15m")
+                resolved_tf = position_tf
+            else:
+                resolved_tf = "1d"
+
+        granularity = _GRANULARITY_MAP.get(resolved_tf, 86400)
+        count = _CANDLE_COUNTS.get(resolved_tf, 90)
+
         r = requests.get(
             "https://api.exchange.coinbase.com/products/XLM-USD/candles",
-            params={"granularity": 900},
+            params={"granularity": granularity},
             timeout=10,
         )
-        candles = sorted(r.json()[:96])  # last 24h of 15m candles
-        return [{"t": c[0], "o": c[3], "h": c[2], "l": c[1], "c": c[4], "v": c[5]} for c in candles]
+        candles = sorted(r.json()[:count])
+
+        # Get position data from SQLite (same source as /api/status)
+        pos_data = None
+        try:
+            import sqlite3
+            state_db = DATA_DIR / "bot_state.db"
+            if state_db.exists():
+                db = sqlite3.connect(str(state_db))
+                row = db.execute("SELECT value_json FROM kv WHERE key='open_position'").fetchone()
+                if row:
+                    pos = json.loads(row[0]) if row[0] != "null" else None
+                    if pos and pos.get("entry_price"):
+                        pos_data = {
+                            "entry_price": float(pos["entry_price"]),
+                            "stop_loss": float(pos.get("stop_loss") or 0),
+                            "tp1": float(pos.get("tp1") or 0),
+                            "tp2": float(pos.get("tp2") or 0),
+                            "tp3": float(pos.get("tp3") or 0),
+                            "direction": pos.get("direction", ""),
+                            "entry_type": pos.get("entry_type", ""),
+                            "entry_time": pos.get("entry_time", ""),
+                            "quality_tier": pos.get("quality_tier", ""),
+                            "size": int(pos.get("size") or 1),
+                        }
+                db.close()
+        except Exception:
+            pass
+
+        return {
+            "candles": [{"t": c[0], "o": c[3], "h": c[2], "l": c[1], "c": c[4], "v": c[5]} for c in candles],
+            "timeframe": resolved_tf,
+            "position_tf": position_tf,
+            "position": pos_data,
+        }
     except Exception:
+        return {"candles": [], "timeframe": "1d", "position_tf": None, "position": None}
+
+
+def _fetch_coinbase_candles(granularity: int, count: int) -> list:
+    """Fetch XLM-USD candles from Coinbase Exchange API."""
+    import requests as _req
+    r = _req.get(
+        "https://api.exchange.coinbase.com/products/XLM-USD/candles",
+        params={"granularity": granularity},
+        timeout=10,
+    )
+    if not r.ok:
         return []
+    raw = sorted(r.json()[:count])
+    return [{"t": c[0], "o": c[3], "h": c[2], "l": c[1], "c": c[4], "v": c[5]} for c in raw]
+
+
+def _get_position_data() -> dict | None:
+    """Read open position from SQLite."""
+    try:
+        import sqlite3
+        state_db = DATA_DIR / "bot_state.db"
+        if not state_db.exists():
+            return None
+        db = sqlite3.connect(str(state_db))
+        row = db.execute("SELECT value_json FROM kv WHERE key='open_position'").fetchone()
+        db.close()
+        if not row:
+            return None
+        pos = json.loads(row[0]) if row[0] != "null" else None
+        if not pos or not pos.get("entry_price"):
+            return None
+        return {
+            "entry_price": float(pos["entry_price"]),
+            "stop_loss": float(pos.get("stop_loss") or 0),
+            "tp1": float(pos.get("tp1") or 0),
+            "tp2": float(pos.get("tp2") or 0),
+            "tp3": float(pos.get("tp3") or 0),
+            "direction": pos.get("direction", ""),
+            "entry_type": pos.get("entry_type", ""),
+            "entry_time": pos.get("entry_time", ""),
+            "quality_tier": pos.get("quality_tier", ""),
+            "size": int(pos.get("size") or 1),
+            "confluence_score": int(pos.get("confluence_score") or 0),
+            "score_threshold": int(pos.get("score_threshold") or 0),
+            "strategy_regime": pos.get("strategy_regime", ""),
+            "confluence_flags": pos.get("confluence_flags") or {},
+        }
+    except Exception:
+        return None
+
+
+def _get_strategy_context() -> dict:
+    """Read strategy visual context from dashboard snapshot (unified_eyeball)."""
+    try:
+        snap = _read_json(BOT_DIR / "logs" / "dashboard_snapshot.json")
+        if not snap:
+            return {}
+        eye = snap.get("unified_eyeball") or {}
+        return {
+            "patterns_detected": eye.get("patterns_detected") or [],
+            "confirmations": eye.get("confirmations") or [],
+            "indicators": eye.get("indicators") or {},
+            "fvg_detail": eye.get("fvg_detail"),
+            "channel_detail": eye.get("channel_detail"),
+            "structure_bias": eye.get("structure_bias", "neutral"),
+            "htf_trend": eye.get("htf_trend", "neutral"),
+            "vol_phase": eye.get("vol_phase", "COMPRESSION"),
+            "entry_details": eye.get("entry_details") or {},
+            "stop_price": eye.get("stop_price"),
+            "tp1_price": eye.get("tp1_price"),
+            "rr_ratio": eye.get("rr_ratio"),
+            "atr_expanding": eye.get("atr_expanding", False),
+            "bb_expanding": eye.get("bb_expanding", False),
+        }
+    except Exception:
+        return {}
+
+
+_market_cache = {"ts": 0, "data": None}
+
+
+@app.get("/api/charts")
+def get_all_charts():
+    """Returns all chart data in one call: 1m, 1d, monthly, trade TF + position + strategy."""
+    pos = _get_position_data()
+    entry_type = pos["entry_type"] if pos else ""
+    trade_tf = _ENTRY_TYPE_TF.get(entry_type, "15m") if entry_type else None
+    trade_gran = _GRANULARITY_MAP.get(trade_tf, 900) if trade_tf else None
+    trade_count = _CANDLE_COUNTS.get(trade_tf, 96) if trade_tf else None
+
+    result = {
+        "position": pos,
+        "strategy": _get_strategy_context(),
+        "trade_tf": trade_tf,
+    }
+
+    # 1-minute: 120 candles (2 hours)
+    try:
+        result["minute"] = _fetch_coinbase_candles(60, 120)
+    except Exception:
+        result["minute"] = []
+
+    # Daily: 90 candles (3 months)
+    try:
+        result["daily"] = _fetch_coinbase_candles(86400, 90)
+    except Exception:
+        result["daily"] = []
+
+    # Monthly: use daily candles, frontend groups them visually
+    result["monthly"] = result["daily"]
+
+    # Trade timeframe (dynamic)
+    if trade_tf and trade_gran:
+        try:
+            result["trade"] = _fetch_coinbase_candles(trade_gran, trade_count)
+        except Exception:
+            result["trade"] = []
+    else:
+        result["trade"] = []
+
+    return result
+
+
+@app.get("/api/market-context")
+def get_market_context():
+    """BTC, S&P 500, NASDAQ prices with 24h change. Cached 60s."""
+    import time as _time
+    now = _time.time()
+    if _market_cache["data"] and (now - _market_cache["ts"]) < 60:
+        return _market_cache["data"]
+
+    import requests as _req
+    out = {"btc": None, "spx": None, "ndx": None}
+
+    # BTC from Coinbase
+    try:
+        r = _req.get("https://api.exchange.coinbase.com/products/BTC-USD/stats", timeout=5)
+        if r.ok:
+            s = r.json()
+            last = float(s.get("last") or 0)
+            opn = float(s.get("open") or 0)
+            chg = last - opn
+            pct = (chg / opn * 100) if opn > 0 else 0
+            out["btc"] = {"price": round(last, 2), "change": round(chg, 2), "change_pct": round(pct, 2), "symbol": "BTC"}
+    except Exception:
+        pass
+
+    # SPX from Yahoo
+    try:
+        r = _req.get(
+            "https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC?interval=1d&range=2d",
+            headers={"User-Agent": "Mozilla/5.0"}, timeout=5,
+        )
+        if r.ok:
+            meta = r.json()["chart"]["result"][0]["meta"]
+            px = float(meta.get("regularMarketPrice") or 0)
+            prev = float(meta.get("chartPreviousClose") or meta.get("previousClose") or 0)
+            chg = px - prev
+            pct = (chg / prev * 100) if prev > 0 else 0
+            out["spx"] = {"price": round(px, 2), "change": round(chg, 2), "change_pct": round(pct, 2), "symbol": "S&P 500"}
+    except Exception:
+        pass
+
+    # NDX from Yahoo
+    try:
+        r = _req.get(
+            "https://query1.finance.yahoo.com/v8/finance/chart/%5EIXIC?interval=1d&range=2d",
+            headers={"User-Agent": "Mozilla/5.0"}, timeout=5,
+        )
+        if r.ok:
+            meta = r.json()["chart"]["result"][0]["meta"]
+            px = float(meta.get("regularMarketPrice") or 0)
+            prev = float(meta.get("chartPreviousClose") or meta.get("previousClose") or 0)
+            chg = px - prev
+            pct = (chg / prev * 100) if prev > 0 else 0
+            out["ndx"] = {"price": round(px, 2), "change": round(chg, 2), "change_pct": round(pct, 2), "symbol": "NASDAQ"}
+    except Exception:
+        pass
+
+    _market_cache["ts"] = now
+    _market_cache["data"] = out
+    return out
+
+
+@app.get("/api/daily-summary")
+def get_daily_summary():
+    """Clean daily P&L: closed trades + open position unrealized. Resets at midnight PT."""
+    from datetime import datetime, timezone, timedelta
+    import csv as _csv
+    # Use Pacific time for day boundary (UTC-7 or UTC-8 depending on DST)
+    # PDT (March-Nov) = UTC-7, PST (Nov-March) = UTC-8
+    # Current: PDT so UTC-7
+    pt_now = datetime.now(timezone.utc) - timedelta(hours=7)
+    today = pt_now.strftime("%Y-%m-%d")
+    day_start_utc = datetime.strptime(today, "%Y-%m-%d").replace(tzinfo=timezone.utc) + timedelta(hours=7)
+
+    closed_pnl = 0.0
+    wins = 0
+    losses = 0
+    trade_list = []
+    try:
+        trades_path = LOGS_DIR / "trades.csv"
+        if trades_path.exists():
+            with open(trades_path) as f:
+                for row in _csv.DictReader(f):
+                    xt = row.get("exit_time", "") or row.get("entry_time", "")
+                    if not xt:
+                        continue
+                    try:
+                        xt_dt = datetime.fromisoformat(xt.replace("Z", "+00:00"))
+                        if xt_dt < day_start_utc:
+                            continue
+                    except Exception:
+                        continue
+                    result = row.get("result", "")
+                    pnl = float(row.get("pnl_usd") or 0)
+                    if result in ("win", "loss"):
+                        # Detect churn trades (< 30s hold, < $3 PnL) from TP bracket bug
+                        _hold_sec = 0
+                        _is_churn = False
+                        try:
+                            _et_raw = row.get("entry_time", "")
+                            if _et_raw:
+                                _et_dt = datetime.fromisoformat(_et_raw.replace("Z", "+00:00"))
+                                _hold_sec = (xt_dt - _et_dt).total_seconds()
+                                _is_churn = _hold_sec < 30 and abs(pnl) < 3.0
+                        except Exception:
+                            pass
+
+                        # Always count in PnL (they're real fills)
+                        closed_pnl += pnl
+                        if result == "win":
+                            wins += 1
+                        else:
+                            losses += 1
+
+                        # Convert UTC to PT 12hr format with date
+                        pt_dt = xt_dt - timedelta(hours=7)
+                        time_12h = pt_dt.strftime("%m/%d %I:%M %p")
+                        trade_list.append({
+                            "time": time_12h,
+                            "time_sort": xt_dt.isoformat(),
+                            "direction": row.get("direction", ""),
+                            "result": result,
+                            "pnl": round(pnl, 2),
+                            "type": row.get("entry_type", ""),
+                            "exit_reason": row.get("exit_reason", ""),
+                            "hold_sec": int(_hold_sec),
+                            "churn": _is_churn,
+                        })
+    except Exception:
+        pass
+
+    # Open position unrealized
+    unrealized = 0.0
+    pos_info = None
+    try:
+        pos = _get_position_data()
+        if pos and pos.get("entry_price"):
+            tick = _read_json(LOGS_DIR / "live_tick.json")
+            px = float((tick or {}).get("price") or 0)
+            if px <= 0:
+                snap = _read_json(LOGS_DIR / "dashboard_snapshot.json")
+                px = float((snap or {}).get("price") or 0)
+            if px > 0:
+                entry = pos["entry_price"]
+                cs = 5000.0
+                size = pos.get("size", 1)
+                if pos.get("direction") == "short":
+                    unrealized = (entry - px) * cs * size
+                else:
+                    unrealized = (px - entry) * cs * size
+            pos_info = {
+                "direction": pos.get("direction", ""),
+                "entry_price": pos.get("entry_price", 0),
+                "entry_type": pos.get("entry_type", ""),
+                "quality_tier": pos.get("quality_tier", ""),
+                "unrealized": round(unrealized, 2),
+            }
+    except Exception:
+        pass
+
+    # Separate real trades from churn
+    real_trades = [t for t in trade_list if not t.get("churn")]
+    churn_trades = [t for t in trade_list if t.get("churn")]
+    real_pnl = sum(t["pnl"] for t in real_trades)
+    churn_pnl = sum(t["pnl"] for t in churn_trades)
+
+    # Sort newest first
+    real_trades.sort(key=lambda x: x.get("time_sort", ""), reverse=True)
+
+    total = closed_pnl + unrealized
+    return {
+        "closed_pnl": round(closed_pnl, 2),
+        "unrealized": round(unrealized, 2),
+        "total_pnl": round(total, 2),
+        "real_pnl": round(real_pnl, 2),
+        "churn_pnl": round(churn_pnl, 2),
+        "churn_count": len(churn_trades),
+        "wins": sum(1 for t in real_trades if t["result"] == "win"),
+        "losses": sum(1 for t in real_trades if t["result"] == "loss"),
+        "trades": real_trades,
+        "position": pos_info,
+    }
+
+
+@app.get("/api/shadow-trades")
+def get_shadow_trades():
+    """Shadow trade tracker -- blocked trades tracked for hindsight learning.
+
+    SEPARATE from real trades. Never contaminates PnL or trade history.
+    """
+    try:
+        shadow_dir = LOGS_DIR / "shadows"
+        shadows = []
+        if shadow_dir.exists():
+            for fname in ["entry_shadows.jsonl", "exit_shadows.jsonl", "flip_shadows.jsonl", "reentry_shadows.jsonl"]:
+                fpath = shadow_dir / fname
+                if fpath.exists():
+                    with open(fpath) as f:
+                        for line in f:
+                            line = line.strip()
+                            if line:
+                                shadows.append(json.loads(line))
+        if not shadows:
+            return {"active": [], "closed": [], "summary": {}}
+        active = [s for s in shadows if not s.get("closed")]
+        closed = [s for s in shadows if s.get("closed")]
+        winners = [s for s in closed if s.get("would_have_won")]
+        # Group by block reason
+        by_reason = {}
+        for s in closed:
+            r = s.get("block_reason", "unknown")
+            if r not in by_reason:
+                by_reason[r] = {"total": 0, "wins": 0, "losses": 0}
+            by_reason[r]["total"] += 1
+            if s.get("would_have_won"):
+                by_reason[r]["wins"] += 1
+            else:
+                by_reason[r]["losses"] += 1
+        return {
+            "active": active[-10:],
+            "closed": closed[-20:],
+            "summary": {
+                "total": len(shadows),
+                "active": len(active),
+                "closed": len(closed),
+                "would_have_won": len(winners),
+                "win_rate": round(len(winners) / max(len(closed), 1) * 100, 1),
+                "by_reason": by_reason,
+            },
+        }
+    except Exception:
+        return {"active": [], "closed": [], "summary": {}}
+
+
 @app.get("/api/pnl")
 def get_pnl():
     events = get_events(500)
@@ -1565,6 +2069,244 @@ def get_mindset():
     except Exception:
         pass
     return {"mindset": mindset, "goals": goals}
+
+
+@app.get("/api/report-card")
+def get_report_card():
+    """Unified scoring engine report card -- the play-call breakdown."""
+    snap = _read_json(BOT_DIR / "logs" / "dashboard_snapshot.json")
+    if not snap:
+        return {"active": False}
+
+    # Pull unified_* fields from snapshot
+    score = snap.get("unified_score")
+    if score is None:
+        return {"active": False}
+
+    return {
+        "active": True,
+        "score": int(score or 0),
+        "base_score": int(snap.get("unified_base") or 0),
+        "threshold": int(snap.get("unified_threshold") or 60),
+        "tier": snap.get("unified_tier", "NO_TRADE"),
+        "recommendation": snap.get("unified_recommendation", "HOLD"),
+        "direction": snap.get("unified_direction", ""),
+        "entry_type": snap.get("unified_entry_type", ""),
+        "regime": snap.get("unified_regime", "neutral"),
+        "modifiers": snap.get("unified_modifiers") or {},
+        "narrative": snap.get("unified_narrative", ""),
+        "reasons": snap.get("unified_reasons") or [],
+        "alternatives": snap.get("unified_alternatives") or [],
+        "p_win": float(snap.get("unified_p_win") or 0),
+        "rr_ratio": float(snap.get("unified_rr_ratio") or 0),
+        "profit_est": float(snap.get("unified_profit_est") or 0),
+        "eyeball": snap.get("unified_eyeball") or {},
+        "foresight": snap.get("foresight") or {},
+        "candle_math": snap.get("candle_math") or {},
+        "ai_advisor": _get_ai_advisor_state(),
+        "trap_analysis": snap.get("trap_analysis") or {},
+        "combo": {
+            "macro": snap.get("macro_regime") or (snap.get("foresight") or {}).get("bias", "").upper() or "NEUTRAL",
+            "mini": snap.get("mini_structure") or "RANGING",
+            "entry_tf": snap.get("entry_timeframe") or snap.get("unified_entry_type", ""),
+        },
+        "ts": snap.get("unified_ts", ""),
+    }
+
+
+def _get_ai_advisor_state() -> dict:
+    """Get AI advisor's current thinking from decisions log."""
+    try:
+        decisions = _read_jsonl_tail(LOGS_DIR / "decisions.jsonl", max_lines=200)
+        ai_state = {
+            "last_insight": None,
+            "last_directive": None,
+            "score_adjustment": 0,
+            "thought_process": [],
+            "modifiers_active": {},
+        }
+        # Get the latest unified_score with modifiers
+        snap = _read_json(BOT_DIR / "logs" / "dashboard_snapshot.json") or {}
+        mods = snap.get("unified_modifiers") or {}
+        ai_state["modifiers_active"] = {k: v for k, v in mods.items() if v != 0}
+
+        # Get recent AI-relevant decisions
+        for d in reversed(decisions):
+            r = d.get("reason", "")
+            if r == "unified_score":
+                ai_state["last_insight"] = {
+                    "score": d.get("final_score"),
+                    "threshold": d.get("threshold"),
+                    "direction": d.get("direction"),
+                    "entry_type": d.get("entry_type"),
+                    "recommendation": d.get("recommendation"),
+                    "narrative": d.get("narrative", ""),
+                    "quality_tier": d.get("quality_tier"),
+                }
+                break
+
+        # Get foresight
+        fs = snap.get("foresight") or {}
+        if fs:
+            ai_state["foresight_bias"] = fs.get("bias")
+            ai_state["foresight_rsi"] = fs.get("rsi_state")
+            ai_state["scenarios"] = fs.get("scenarios", [])
+            ai_state["projected_profit"] = "$%s-%s" % (
+                round(fs.get("projected_profit_conservative", 0)),
+                round(fs.get("projected_profit_best", 0)))
+
+        # Get recent thoughts (macro vision, mindset, hindsight)
+        thoughts = []
+        seen = set()
+        for d in reversed(decisions[-50:]):
+            r = d.get("reason", "")
+            t = d.get("thought", "")
+            if r in ("trading_mindset", "macro_vision", "hindsight_scan", "unified_score", "unified_hold") and t and r not in seen:
+                thoughts.append({"type": r, "thought": t[:200], "ts": d.get("timestamp", "")[11:19]})
+                seen.add(r)
+                if len(thoughts) >= 5:
+                    break
+        ai_state["thought_process"] = thoughts
+
+        # Current position awareness
+        pos = snap.get("position") or snap.get("open_position")
+        if isinstance(pos, dict) and pos.get("entry_price"):
+            ai_state["position_awareness"] = {
+                "direction": pos.get("direction"),
+                "entry_type": pos.get("entry_type"),
+                "quality_tier": pos.get("quality_tier"),
+            }
+
+        return ai_state
+    except Exception:
+        return {}
+
+
+# ============================================================
+# BROKER OS / WHOLESALE PIPELINE ENDPOINTS
+# ============================================================
+
+SUPABASE_URL = "https://jdqqmsmwmbsnlnstyavl.supabase.co"
+SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkcXFtc213bWJzbmxuc3R5YXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTk5ODMsImV4cCI6MjA4ODM5NTk4M30.9BDviI2WR46sphcS3uzKapcKbslYpMO4PdSEPFrv3Ww")
+
+def _sb_fetch(table, params=""):
+    """Fetch from Supabase REST API."""
+    import urllib.request
+    url = f"{SUPABASE_URL}/rest/v1/{table}?{params}"
+    req = urllib.request.Request(url)
+    req.add_header("apikey", SUPABASE_KEY)
+    req.add_header("Authorization", f"Bearer {SUPABASE_KEY}")
+    try:
+        resp = urllib.request.urlopen(req, timeout=10)
+        return json.loads(resp.read().decode())
+    except Exception:
+        return []
+
+@app.get("/api/broker/stats")
+def broker_stats():
+    """Pipeline KPIs."""
+    stats = {}
+    for status in ["new", "contacted", "negotiating", "under_contract", "marketing", "closed", "cold"]:
+        r = _sb_fetch("wholesale_sellers", f"status=eq.{status}&select=id")
+        stats[f"sellers_{status}"] = len(r) if isinstance(r, list) else 0
+
+    stats["sellers_total"] = sum(v for k, v in stats.items() if k.startswith("sellers_"))
+
+    buyers = _sb_fetch("wholesale_buyers", "select=id")
+    stats["buyers_total"] = len(buyers) if isinstance(buyers, list) else 0
+
+    deals = _sb_fetch("wholesale_deals", "select=id,status,assignment_fee,actual_profit")
+    stats["deals_total"] = len(deals) if isinstance(deals, list) else 0
+    stats["deals_active"] = sum(1 for d in deals if d.get("status") not in ("closed", "dead")) if isinstance(deals, list) else 0
+    stats["deals_closed"] = sum(1 for d in deals if d.get("status") == "closed") if isinstance(deals, list) else 0
+    stats["revenue_total"] = sum(float(d.get("actual_profit") or 0) for d in deals) if isinstance(deals, list) else 0
+    stats["pipeline_value"] = sum(float(d.get("assignment_fee") or 10000) for d in deals if d.get("status") not in ("closed", "dead")) if isinstance(deals, list) else 0
+
+    outreach = _sb_fetch("wholesale_outreach", "select=id,status")
+    if isinstance(outreach, list):
+        stats["outreach_sent"] = sum(1 for o in outreach if o.get("status") == "sent")
+        stats["outreach_replied"] = sum(1 for o in outreach if o.get("status") == "replied")
+        stats["outreach_bounced"] = sum(1 for o in outreach if o.get("status") == "bounced")
+        stats["outreach_pending"] = sum(1 for o in outreach if o.get("status") in ("draft", "pending"))
+
+    return stats
+
+@app.get("/api/broker/sellers")
+def broker_sellers(status: str = None, state: str = None, limit: int = 100):
+    """List wholesale sellers with optional filters."""
+    params = f"order=priority_score.desc&limit={limit}"
+    if status:
+        params += f"&status=eq.{status}"
+    if state:
+        params += f"&state=eq.{state}"
+    return _sb_fetch("wholesale_sellers", params)
+
+@app.get("/api/broker/buyers")
+def broker_buyers(state: str = None, limit: int = 100):
+    """List wholesale buyers."""
+    params = f"order=created_at.desc&limit={limit}"
+    if state:
+        params += f"&state=eq.{state}"
+    return _sb_fetch("wholesale_buyers", params)
+
+@app.get("/api/broker/deals")
+def broker_deals(status: str = None, limit: int = 50):
+    """List wholesale deals."""
+    params = f"order=created_at.desc&limit={limit}"
+    if status:
+        params += f"&status=eq.{status}"
+    return _sb_fetch("wholesale_deals", params)
+
+@app.get("/api/broker/outreach")
+def broker_outreach(limit: int = 50):
+    """Recent outreach activity."""
+    return _sb_fetch("wholesale_outreach", f"order=created_at.desc&limit={limit}")
+
+@app.get("/api/broker/states")
+def broker_states():
+    """State priority list."""
+    return _sb_fetch("wholesale_states", "order=ease_score.desc")
+
+
+# ── Onboarding endpoint ──
+@app.get("/api/onboard")
+def onboard_page():
+    """Client onboarding form (gold/black branded)."""
+    from fastapi.responses import HTMLResponse
+    html = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Deploy Your AI Team</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:Inter,-apple-system,sans-serif;background:#0a0a0a;color:#f0f0f0;min-height:100vh}.c{max-width:700px;margin:0 auto;padding:30px 20px}.gb{height:3px;background:linear-gradient(90deg,#d4a017,#f5d060,#d4a017);margin-bottom:30px}h1{font-size:2rem;font-weight:800;background:linear-gradient(135deg,#d4a017,#f5d060);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px}.sub{color:#888;font-size:.9rem;margin-bottom:30px}.s{background:#111;border:1px solid #222;border-radius:12px;padding:24px;margin-bottom:16px}.s:hover{border-color:#d4a017}.sh{display:flex;align-items:center;gap:12px;margin-bottom:12px}.sn{width:32px;height:32px;background:linear-gradient(135deg,#d4a017,#b8860b);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#0a0a0a}.st{font-size:1rem;font-weight:700}label{display:block;font-size:.8rem;color:#aaa;margin:10px 0 4px}input,textarea{width:100%;padding:10px 14px;background:#1a1a1a;border:1px solid #333;border-radius:8px;color:#f0f0f0;font-size:.9rem}input:focus,textarea:focus{outline:none;border-color:#d4a017}.ag{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}.ac{background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:10px;cursor:pointer}.ac:hover{border-color:#d4a017}.ac.sel{border-color:#d4a017;background:#1a1500}.an{font-weight:700;font-size:.85rem}.ar{font-size:.7rem;color:#888}.btn{display:block;width:100%;padding:14px;background:linear-gradient(135deg,#d4a017,#b8860b);border:none;border-radius:10px;color:#0a0a0a;font-size:1rem;font-weight:800;cursor:pointer;margin-top:24px}.btn:hover{box-shadow:0 8px 24px rgba(212,160,23,.3)}.ok{background:#1a2a1a;border:1px solid #2a7d2a;border-radius:12px;padding:24px;text-align:center;display:none}.ok h2{color:#4ade80;margin-bottom:8px}</style></head><body><div class="gb"></div><div class="c"><h1>Deploy Your AI Team</h1><p class="sub">Connect your tools. Pick your agents. Go live in minutes.</p><form id="f"><div class="s"><div class="sh"><div class="sn">1</div><div class="st">Your Company</div></div><label>Company Name</label><input name="company_name" required placeholder="Acme Corp"><label>Your Name</label><input name="contact_name" required placeholder="Jane Smith"><label>Email</label><input type="email" name="email" required placeholder="jane@acme.com"><label>Business Description</label><textarea name="desc" rows="2" placeholder="We sell B2B SaaS..."></textarea></div><div class="s"><div class="sh"><div class="sn">2</div><div class="st">Connect Slack</div></div><label>Slack Workspace URL</label><input name="slack" placeholder="https://your-team.slack.com"></div><div class="s"><div class="sh"><div class="sn">3</div><div class="st">Pick Your Team</div></div><div class="ag"><div class="ac" onclick="this.classList.toggle(\'sel\')"><div class="an">Marcus Cole</div><div class="ar">Chief Operator - dispatches team, daily briefs</div></div><div class="ac" onclick="this.classList.toggle(\'sel\')"><div class="an">Piper Reeves</div><div class="ar">Outreach - email campaigns, follow-ups</div></div><div class="ac" onclick="this.classList.toggle(\'sel\')"><div class="an">Penny Vance</div><div class="ar">Profit - revenue tracking, deal analysis</div></div><div class="ac" onclick="this.classList.toggle(\'sel\')"><div class="an">Cipher Wolfe</div><div class="ar">Intel - market research, trends</div></div><div class="ac" onclick="this.classList.toggle(\'sel\')"><div class="an">Vera Lux</div><div class="ar">Content - social, blog, brand voice</div></div><div class="ac" onclick="this.classList.toggle(\'sel\')"><div class="an">Franklin Steele</div><div class="ar">Engineer - tools, dashboards, code</div></div></div></div><button type="submit" class="btn">Deploy Your AI Team</button></form><div id="ok" class="ok"><h2>Team Deployed!</h2><p style="color:#aaa">We\'ll reach out within 24h to connect your Slack and activate your agents.</p></div></div><script>document.getElementById("f").onsubmit=function(e){e.preventDefault();var a=[];document.querySelectorAll(".ac.sel").forEach(function(c){a.push(c.querySelector(".an").textContent)});var d=new FormData(this);fetch("/api/onboard-submit",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({company:d.get("company_name"),contact:d.get("contact_name"),email:d.get("email"),desc:d.get("desc"),slack:d.get("slack"),agents:a})}).then(function(){document.getElementById("f").style.display="none";document.getElementById("ok").style.display="block"}).catch(function(){document.getElementById("f").style.display="none";document.getElementById("ok").style.display="block"})}</script></body></html>'
+    return HTMLResponse(content=html)
+
+
+@app.post("/api/onboard-submit")
+def onboard_submit(data: dict):
+    """Process onboarding -> Blinko + Slack #ai-consulting."""
+    import urllib.request as ur
+    company = data.get("company", "")
+    contact = data.get("contact", "")
+    email = data.get("email", "")
+    agents = data.get("agents", [])
+
+    # Log to Blinko
+    try:
+        note = f"# New Customer: {company}\n#hive/onboard #hive/customer\n\nContact: {contact} ({email})\nAgents: {', '.join(agents)}"
+        payload = json.dumps({"content": note, "type": 1}).encode()
+        req = ur.Request("http://129.159.38.250:1111/api/v1/note/upsert", data=payload, method="POST", headers={"Content-Type": "application/json"})
+        ur.urlopen(req, timeout=10)
+    except Exception:
+        pass
+
+    # Slack alert
+    try:
+        token = os.environ.get("SLACK_BOT_TOKEN", "")
+        if token:
+            msg = f":tada: *New Hive Mind Customer*\nCompany: {company}\nContact: {contact} ({email})\nAgents: {', '.join(agents)}"
+            payload = json.dumps({"channel": "C0AN8SGAS22", "text": msg}).encode()
+            req = ur.Request("https://slack.com/api/chat.postMessage", data=payload, method="POST", headers={"Content-Type": "application/json", "Authorization": f"Bearer {token}"})
+            ur.urlopen(req, timeout=10)
+    except Exception:
+        pass
+
+    return {"ok": True, "company": company}
 
 
 # Serve React static files

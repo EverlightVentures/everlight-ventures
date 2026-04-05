@@ -1838,3 +1838,80 @@ class AgentPerformanceView(LoginRequiredMixin, TemplateView):
         ]
 
         return ctx
+
+
+# ===========================================================================
+# ONBOARDING - Self-service Hive Mind deployment for customers
+# ===========================================================================
+
+def onboard_page(request):
+    """Public onboarding page -- no login required."""
+    from django.shortcuts import render
+    return render(request, 'hive/onboard.html')
+
+
+def onboard_submit(request):
+    """Process onboarding form submission."""
+    from django.shortcuts import render
+    if request.method != 'POST':
+        return render(request, 'hive/onboard.html')
+
+    company = request.POST.get('company_name', '')
+    contact = request.POST.get('contact_name', '')
+    email = request.POST.get('email', '')
+    desc = request.POST.get('business_desc', '')
+    slack_url = request.POST.get('slack_workspace', '')
+    agents = request.POST.getlist('agents')
+    integrations = request.POST.getlist('integrations')
+
+    # Log to Blinko
+    try:
+        import urllib.request
+        note = (
+            f"# New Hive Mind Customer: {company}\n"
+            f"#hive/onboard #hive/customer\n\n"
+            f"Contact: {contact} ({email})\n"
+            f"Business: {desc}\n"
+            f"Slack: {slack_url}\n"
+            f"Agents: {', '.join(agents)}\n"
+            f"Integrations: {', '.join(integrations)}\n"
+        )
+        payload = json.dumps({"content": note, "type": 1}).encode()
+        req = urllib.request.Request(
+            "http://129.159.38.250:1111/api/v1/note/upsert",
+            data=payload, method="POST",
+            headers={"Content-Type": "application/json"},
+        )
+        urllib.request.urlopen(req, timeout=10)
+    except Exception:
+        pass
+
+    # Post to Slack #ai-consulting
+    try:
+        import urllib.request
+        slack_token_env = os.environ.get('SLACK_BOT_TOKEN', '')
+        if slack_token_env:
+            msg = (
+                f":tada: *New Hive Mind Customer*\n"
+                f"Company: {company}\n"
+                f"Contact: {contact} ({email})\n"
+                f"Agents: {', '.join(agents)}\n"
+                f"Integrations: {', '.join(integrations)}"
+            )
+            payload = json.dumps({"channel": "C0AN8SGAS22", "text": msg}).encode()
+            req = urllib.request.Request(
+                "https://slack.com/api/chat.postMessage",
+                data=payload, method="POST",
+                headers={
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {slack_token_env}",
+                },
+            )
+            urllib.request.urlopen(req, timeout=10)
+    except Exception:
+        pass
+
+    return render(request, 'hive/onboard.html', {
+        'success': True,
+        'company': company,
+    })
