@@ -228,10 +228,16 @@ def classify_htf_trend_bias(df_1h: "pd.DataFrame") -> dict:
                 "reasons": reasons,
             }
 
+        # Detect RSI rollover from overbought: RSI was >70 recently but now dropping
+        # This means the bullish expansion is ENDING -- don't keep blocking shorts
+        _rsi_peak_5 = float(rv.iloc[-6:-1].max()) if len(rv) > 6 else rsi_val
+        _rsi_rolling_over = _rsi_peak_5 > 70 and rsi_val < _rsi_peak_5 - 3  # 3pt drop from peak
+
         if (rsi_val > 70
                 and price_vs_ema21 == "above"
                 and ema21_vs_ema55 == "above"
-                and slope_pct > 0.0005):
+                and slope_pct > 0.0005
+                and not _rsi_rolling_over):
             return {
                 "bias": "bullish_expansion",
                 "rsi_1h": rsi_val,
@@ -242,6 +248,26 @@ def classify_htf_trend_bias(df_1h: "pd.DataFrame") -> dict:
                 "size_mult_short": 0.4,
                 "long_require_capitulation": False,
                 "short_require_capitulation": True,
+                "rsi_rolling_over": False,
+                "reasons": reasons,
+            }
+
+        # RSI rolling over from overbought -> flip to neutral early
+        # This is key: RSI 70+ dropping means the trend is exhausting
+        # Blocking shorts here costs money (proven by backtest)
+        if _rsi_rolling_over and price_vs_ema21 == "above":
+            reasons.append("rsi_rollover_from_overbought")
+            return {
+                "bias": "neutral",
+                "rsi_1h": rsi_val,
+                "ema21_slope_pct": slope_pct,
+                "price_vs_ema21": price_vs_ema21,
+                "ema21_vs_ema55": ema21_vs_ema55,
+                "size_mult_long": 0.7,   # Reduce long size during rollover
+                "size_mult_short": 1.0,   # Normal short size
+                "long_require_capitulation": False,
+                "short_require_capitulation": False,
+                "rsi_rolling_over": True,
                 "reasons": reasons,
             }
 

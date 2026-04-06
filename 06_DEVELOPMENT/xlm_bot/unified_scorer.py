@@ -661,13 +661,22 @@ def score_setup(
     running += mod
 
     # -- FINAL SCORE --
-    # Cap total negative modifiers at -30 to prevent committee-kill on good setups
-    # A MONSTER setup should still enter even with headwinds
+    # Variable negative cap: weak base scores get tighter caps
+    # A MONSTER base (60+) can take headwinds; a marginal base (40) can't
     _total_negative = sum(v for v in modifiers.values() if v < 0)
-    if _total_negative < -30:
-        _excess = _total_negative + 30  # how much over the cap
-        running -= _excess  # add back the excess penalty
-        reasons.append("penalty cap: total negatives capped at -30 (was %d)" % _total_negative)
+    if running < 40:
+        _neg_cap = -15  # weak setup: penalties bite hard
+    elif running < 50:
+        _neg_cap = -20  # marginal setup: moderate penalty tolerance
+    elif running < 60:
+        _neg_cap = -25  # decent setup: reasonable headwind room
+    else:
+        _neg_cap = -35  # strong setup: can absorb penalties
+
+    if _total_negative < _neg_cap:
+        _excess = _total_negative - _neg_cap
+        running -= _excess
+        reasons.append("penalty cap (%d): negatives capped, was %d" % (_neg_cap, _total_negative))
 
     # Apply trade memory min_score override (be pickier after losses)
     effective_threshold = entry_threshold
@@ -679,7 +688,30 @@ def score_setup(
     result.modifiers = modifiers
     result.reasons = reasons
     result.quality_tier = _compute_tier(final, effective_threshold)
-    result.recommendation = "ENTER" if final >= effective_threshold else "HOLD"
+
+    # Dead zone: scores within dead_zone_width of threshold = HOLD for confirmation
+    _dead_zone = int(cfg.get("dead_zone_width", 0))
+    _min_tier = str(cfg.get("min_quality_tier", "SCALP")).upper()
+
+    if _dead_zone > 0 and 0 < (final - effective_threshold) < _dead_zone:
+        result.recommendation = "HOLD"
+        reasons.append(
+            "dead zone: score %d within %d pts of threshold %d -- hold for confirmation"
+            % (final, _dead_zone, effective_threshold)
+        )
+    elif final >= effective_threshold:
+        # Quality floor check: don't enter if tier is below minimum
+        _tier_rank = {"NO_TRADE": 0, "SCALP": 1, "REDUCED": 2, "FULL": 3, "MONSTER": 4}
+        if _tier_rank.get(result.quality_tier, 0) < _tier_rank.get(_min_tier, 0):
+            result.recommendation = "HOLD"
+            reasons.append(
+                "quality floor: tier %s below minimum %s" % (result.quality_tier, _min_tier)
+            )
+        else:
+            result.recommendation = "ENTER"
+    else:
+        result.recommendation = "HOLD"
+
     result.entry_threshold = effective_threshold
 
     # Summary breakdown for dashboard

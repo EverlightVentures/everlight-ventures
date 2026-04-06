@@ -43,9 +43,16 @@ from datetime import datetime, timedelta
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-# Add broker scripts to path for enrichment module
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "broker"))
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "06_DEVELOPMENT", "everlight_os"))
+# Add broker scripts to path for enrichment module (phone + Oracle)
+for _bp in [os.path.join(os.path.dirname(__file__), "broker"), "/home/opc/broker"]:
+    if os.path.isdir(_bp) and _bp not in sys.path:
+        sys.path.insert(0, _bp)
+for _np in [
+    os.path.join(os.path.dirname(__file__), "..", "..", "06_DEVELOPMENT", "everlight_os"),
+    "/home/opc/06_DEVELOPMENT/everlight_os",
+]:
+    if os.path.isdir(_np) and _np not in sys.path:
+        sys.path.insert(0, _np)
 from contact_enrichment import enrich_contact, extract_email_from_text as _enrich_extract_email
 try:
     from attom_enrichment import enrich_property as attom_enrich_property, format_enrichment_summary as attom_format
@@ -53,19 +60,29 @@ except ImportError:
     attom_enrich_property = None
     attom_format = None
 
-# Django bootstrap
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "09_DASHBOARD", "hive_dashboard"))
+# Django bootstrap (phone + Oracle)
+for _djp in [
+    os.path.join(os.path.dirname(__file__), "..", "..", "09_DASHBOARD", "hive_dashboard"),
+    "/home/opc/hive_django",
+]:
+    if os.path.isdir(_djp) and _djp not in sys.path:
+        sys.path.insert(0, _djp)
+        break
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hive_dashboard.settings")
 
-# Load .env
-env_path = os.path.join(os.path.dirname(__file__), "..", "03_Credentials", ".env")
-if os.path.exists(env_path):
-    with open(env_path) as f:
-        for line in f:
-            line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
-                k, v = line.split("=", 1)
-                os.environ.setdefault(k.strip(), v.strip())
+# Load .env (phone + Oracle)
+for env_path in [
+    os.path.join(os.path.dirname(__file__), "..", "03_Credentials", ".env"),
+    "/home/opc/.env",
+]:
+    if os.path.exists(env_path):
+        with open(env_path) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    k, v = line.split("=", 1)
+                    os.environ.setdefault(k.strip(), v.strip())
+        break
 
 import django
 django.setup()
@@ -125,7 +142,13 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-LOG_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "_logs", "broker_ops")
+# Log dir: phone or Oracle
+_log_candidates = [
+    os.path.join(os.path.dirname(__file__), "..", "..", "_logs", "broker_ops"),
+    "/home/opc/_logs/broker_ops",
+    "/tmp/broker_ops_logs",
+]
+LOG_DIR = next((p for p in _log_candidates if os.access(os.path.dirname(p) or "/tmp", os.W_OK)), _log_candidates[-1])
 os.makedirs(LOG_DIR, exist_ok=True)
 
 # SMTP config

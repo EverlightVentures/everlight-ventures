@@ -2209,9 +2209,26 @@ def log_decision(config: dict, payload: dict) -> None:
     base_payload = dict(payload or {}) if isinstance(payload, dict) else {"message": str(payload)}
     if not str(base_payload.get("thought") or "").strip():
         base_payload["thought"] = _decision_thought(base_payload)
+
+    # Tag paper vs live trades for clean separation
+    _reason = str(base_payload.get("reason", ""))
+    _order_id = str(base_payload.get("order_id", ""))
+    _is_paper = (
+        "paper" in _order_id.lower()
+        or _reason in ("simple_core_entry", "simple_core_filled")
+    )
+    base_payload["trade_type"] = "paper" if _is_paper else "live"
+
     safe_payload = _json_safe(base_payload)
-    with open(path, "a") as f:
-        f.write(json.dumps(safe_payload) + "\n")
+
+    # Paper trades go to separate file, real decisions stay in main log
+    if _is_paper:
+        paper_path = path.parent / "decisions_paper.jsonl"
+        with open(paper_path, "a") as f:
+            f.write(json.dumps(safe_payload) + "\n")
+    else:
+        with open(path, "a") as f:
+            f.write(json.dumps(safe_payload) + "\n")
     try:
         upd, append_series = _dashboard_update_from_decision(safe_payload if isinstance(safe_payload, dict) else {})
         _update_dashboard_feed(upd, append_timeseries=append_series)
@@ -4670,6 +4687,12 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                     "htf_bias": _htf_bias.get("bias"),
                     "rsi_1h": _htf_bias.get("rsi_1h"),
                     "entry_type": _long_type,
+                    "direction": "long",
+                    "entry_price": long_entry.get("price"),
+                    "stop_price": long_entry.get("stop"),
+                    "tp1": long_entry.get("tp1"),
+                    "rr_ratio": long_entry.get("rr"),
+                    "current_price": current_price if "current_price" in dir() else None,
                     "thought": f"HTF bearish crash (RSI={_htf_bias.get('rsi_1h'):.1f}): blocking non-capitulation long ({_long_type}). Only reversals allowed.",
                 })
                 long_entry = None
@@ -4684,6 +4707,12 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                     "htf_bias": _htf_bias.get("bias"),
                     "rsi_1h": _htf_bias.get("rsi_1h"),
                     "entry_type": _short_type,
+                    "direction": "short",
+                    "entry_price": short_entry.get("price"),
+                    "stop_price": short_entry.get("stop"),
+                    "tp1": short_entry.get("tp1"),
+                    "rr_ratio": short_entry.get("rr"),
+                    "current_price": current_price if "current_price" in dir() else None,
                     "thought": f"HTF {_htf_state} (RSI={_htf_bias.get('rsi_1h'):.1f}): blocking non-reversal short ({_short_type}). Don't short a bull trend.",
                 })
                 short_entry = None

@@ -22,6 +22,8 @@ const NAV_SECTIONS = [
   {
     label: "OPERATIONS",
     items: [
+      { id: "trade-history", label: "Trade History", icon: "H", color: "text-yellow-400" },
+      { id: "changelog", label: "Changelog", icon: "C", color: "text-lime-400" },
       { id: "taskboard", label: "Taskboard", icon: ">", color: "text-cyan-400" },
       { id: "sessions", label: "Hive Sessions", icon: "*", color: "text-pink-400" },
       { id: "reports", label: "Reports", icon: "R", color: "text-blue-400" },

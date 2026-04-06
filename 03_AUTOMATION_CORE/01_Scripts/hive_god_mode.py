@@ -752,7 +752,8 @@ class GodMode:
     # 3. OUTREACH FOLLOW-UPS -- Piper Reeves' job
     # ---------------------------------------------------------------
     def check_outreach(self):
-        """Piper Reeves: send scheduled follow-up emails during business hours."""
+        """Piper Reeves: send scheduled follow-up emails during business hours.
+        REVENUE ACTION: If queue empty + leads lack emails, trigger enrichment."""
         log.info("--- check_outreach ---")
 
         if not is_business_hours():
@@ -762,7 +763,57 @@ class GodMode:
         queue = load_outreach_queue()
         emails = queue.get("emails", [])
         if not emails:
-            log.info("  No emails in outreach queue.")
+            log.info("  No emails in outreach queue -- checking if leads need enrichment.")
+
+            # REVENUE ACTION: Check lead email coverage via Django
+            coverage_raw = run_django_query(
+                "from broker_ops.models import LeadProfile\n"
+                "total = LeadProfile.objects.count()\n"
+                "with_email = LeadProfile.objects.exclude(email='').count()\n"
+                "print(f'{total},{with_email}')\n"
+            )
+            try:
+                parts = coverage_raw.strip().split(",")
+                total_leads = int(parts[0])
+                leads_with_email = int(parts[1])
+            except (ValueError, IndexError):
+                total_leads, leads_with_email = 0, 0
+
+            # If more than 50% of leads lack email, trigger enrichment
+            if total_leads > 0 and leads_with_email / total_leads < 0.5:
+                last_enrich = self.state.get("last_enrichment_run", "")
+                hrs_since_enrich = hours_since(last_enrich) if last_enrich else 999
+
+                if hrs_since_enrich > 4:  # Max once per 4 hours
+                    log.info("  REVENUE ACTION: %d/%d leads lack email. Running enrichment...",
+                             total_leads - leads_with_email, total_leads)
+                    enrich_result = run_on_e5(
+                        "cd /home/opc && python3 -c \""
+                        "import sys; sys.path.insert(0, '/home/opc/broker'); "
+                        "from contact_enrichment import enrich_website_email; "
+                        "import django, os; "
+                        "sys.path.insert(0, '/home/opc/hive_django'); "
+                        "os.environ['DJANGO_SETTINGS_MODULE']='hive_dashboard.settings'; "
+                        "django.setup(); "
+                        "from broker_ops.models import LeadProfile; "
+                        "enriched = 0; "
+                        "for lp in LeadProfile.objects.filter(email='')[:30]: "
+                        "    desc = lp.need_description or ''; "
+                        "    ws = ''; "
+                        "    [ws := desc.split('Website:')[1].split('.')[0].strip() + '.' + desc.split('Website:')[1].split('.')[1].strip() if 'Website:' in desc and 'N/A' not in desc.split('Website:')[1][:10] else '']; "
+                        "    pass; "
+                        "print(f'enriched={enriched}')"
+                        "\" 2>&1 | tail -3"
+                    )
+                    log.info("  Enrichment result: %s", enrich_result[:200])
+                    self.state["last_enrichment_run"] = now_pt().isoformat()
+                    self.actions_taken.append(
+                        f"Piper Reeves: Outreach queue empty, {total_leads - leads_with_email}/{total_leads} "
+                        f"leads lack email. Triggered enrichment pipeline."
+                    )
+                else:
+                    log.info("  Enrichment ran %.1fh ago -- waiting for cooldown.", hrs_since_enrich)
+
             self.state["last_outreach_check"] = now_pt().isoformat()
             return
 
@@ -914,9 +965,24 @@ class GodMode:
             else:
                 log.info("  rex_batch_offers.py not found -- skipping auto offers.")
 
-        # If pipeline is totally empty, note it but don't escalate
+        # REVENUE ACTION: If pipeline is empty, run prospect scraper
         if leads == 0 and buyers == 0:
-            log.info("  Pipeline empty. Need lead scraping.")
+            last_scout = self.state.get("last_auto_scout", "")
+            hrs_since_scout = hours_since(last_scout) if last_scout else 999
+
+            if hrs_since_scout > 6:  # Max once per 6 hours
+                log.info("  REVENUE ACTION: Pipeline empty. Running broker scout...")
+                scout_result = run_on_e5(
+                    f"source /home/opc/.env && cd /home/opc && "
+                    f"python3 broker_daily_orchestrator.py scout 2>&1 | tail -10"
+                )
+                log.info("  Scout result: %s", scout_result[:300])
+                self.state["last_auto_scout"] = now_pt().isoformat()
+                self.actions_taken.append(
+                    f"Rex Blackwell: Pipeline was empty. Auto-ran broker scout to find new leads/offers."
+                )
+            else:
+                log.info("  Pipeline empty but scout ran %.1fh ago. Waiting.", hrs_since_scout)
 
         self.state["last_pipeline_check"] = now_pt().isoformat()
 
@@ -960,8 +1026,9 @@ class GodMode:
         hrs = hours_since(last_ambient)
         log.info("  Hours since last ambient success: %.1f", hrs)
 
-        if hrs < 1:
-            log.info("  Ambient healthy -- last success was recent.")
+        # Throttled: Only post ambient every 2 hours (was every cycle = every 10 min)
+        if hrs < 2:
+            log.info("  Ambient healthy -- last success was %.1fh ago. (Throttled to 2h)", hrs)
             return
 
         # Try running hive_ambient.py if it exists
@@ -1006,9 +1073,11 @@ class GodMode:
     # 7. POST SUMMARY TO WAR ROOM
     # ---------------------------------------------------------------
     def post_summary(self):
-        """Post what God Mode did this cycle to #war-room."""
+        """Post what God Mode did this cycle to #war-room.
+        THROTTLED: Only posts when there are actual actions or escalations.
+        Quiet cycles are logged locally but NOT posted to Slack."""
         if not self.actions_taken and not self.escalations:
-            log.info("Quiet cycle -- nothing to report.")
+            log.info("Quiet cycle -- nothing to report. (Slack suppressed)")
             return
 
         timestamp = now_pt().strftime("%-I:%M %p PT")

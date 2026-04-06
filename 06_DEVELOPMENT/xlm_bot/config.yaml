@@ -1591,9 +1591,11 @@ simple_core:
   use_exchange_stop: true
 unified_scorer:
   enabled: true
-  entry_threshold: 40
-  scalp_threshold: 25
-  htf_threshold: 40
+  entry_threshold: 55
+  scalp_threshold: 40
+  htf_threshold: 55
+  dead_zone_width: 5          # scores within 5 of threshold = HOLD for confirmation
+  min_quality_tier: FULL      # no REDUCED/SCALP entries from primary scorer
 reentry_patience:
   min_wait_minutes: 2
   retrace_atr_mult: 0.3

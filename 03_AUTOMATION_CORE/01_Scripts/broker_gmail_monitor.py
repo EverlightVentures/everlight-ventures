@@ -20,15 +20,38 @@ import requests
 from datetime import datetime, timezone
 from pathlib import Path
 
-# Django setup
-DASHBOARD_DIR = Path(__file__).resolve().parent.parent.parent / "09_DASHBOARD" / "hive_dashboard"
-sys.path.insert(0, str(DASHBOARD_DIR))
+# Django setup -- works on both phone and Oracle
+for _djp in [
+    str(Path(__file__).resolve().parent.parent.parent / "09_DASHBOARD" / "hive_dashboard"),
+    "/home/opc/hive_django",
+]:
+    if os.path.isdir(_djp):
+        sys.path.insert(0, _djp)
+        break
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hive_dashboard.settings")
 
 import django
 django.setup()
 
 from broker_ops.models import OfferListing, LeadProfile, BrokerMatch, Deal
+
+# Wire neuromorphic NLP for intelligent reply classification
+try:
+    for _nd in [
+        str(Path(__file__).resolve().parent.parent.parent / "06_DEVELOPMENT" / "everlight_os"),
+        "/home/opc/06_DEVELOPMENT/everlight_os",
+    ]:
+        if os.path.isdir(_nd) and _nd not in sys.path:
+            sys.path.insert(0, _nd)
+    from neuromorphic.nlp_engine import analyze_email_reply as nlp_analyze_reply
+except ImportError:
+    nlp_analyze_reply = None
+
+# Wire pipeline API for reply path recommendations
+try:
+    from neuromorphic.pipeline_api import recommend_reply_path
+except ImportError:
+    recommend_reply_path = None
 
 log = logging.getLogger("broker_gmail")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -91,9 +114,46 @@ def _find_offer_by_domain(domain):
 
 
 def _classify_reply(subject, snippet):
-    """Simple classification of reply intent."""
-    text = (subject + " " + snippet).lower()
+    """Classify reply intent using NLP engine (with keyword fallback).
 
+    Uses neuromorphic.nlp_engine.analyze_email_reply when available for
+    sentiment scoring, interest detection, and urgency analysis.
+    Falls back to keyword matching if NLP is not installed.
+    """
+    text = (subject + " " + snippet).lower()
+    full_text = f"Subject: {subject}\n\n{snippet}"
+
+    # Try NLP-powered classification first
+    if nlp_analyze_reply is not None:
+        try:
+            analysis = nlp_analyze_reply(full_text)
+            sentiment = analysis.get("reply_sentiment", 0)
+            is_interested = analysis.get("is_interested", False)
+            is_objection = analysis.get("is_objection", False)
+
+            if is_objection or sentiment < -0.3:
+                intent = "negative"
+            elif is_interested or sentiment > 0.3:
+                intent = "positive"
+            else:
+                intent = "neutral"
+
+            # Get recommended next action from pipeline API
+            next_action = None
+            if recommend_reply_path is not None:
+                try:
+                    path = recommend_reply_path(intent, reply_analysis=analysis)
+                    next_action = path.get("recommended_action")
+                except Exception:
+                    pass
+
+            log.info(f"NLP classification: {intent} (sentiment={sentiment:.2f}, "
+                     f"interested={is_interested}, next_action={next_action})")
+            return intent
+        except Exception as e:
+            log.warning(f"NLP classification failed, falling back to keywords: {e}")
+
+    # Keyword fallback
     positive_signals = [
         "interested", "yes", "sure", "let's", "sounds good",
         "tell me more", "send details", "how does it work",

@@ -22,8 +22,18 @@ from datetime import datetime, timedelta, timezone
 
 # ---------------------------------------------------------------------------
 # Django bootstrap -- must happen before any model imports
+# Works on both phone (/mnt/sdcard/...) and Oracle (/home/opc/hive_django)
 # ---------------------------------------------------------------------------
-DJANGO_PROJECT = "/mnt/sdcard/AA_MY_DRIVE/09_DASHBOARD/hive_dashboard"
+_DJANGO_PATHS = [
+    "/mnt/sdcard/AA_MY_DRIVE/09_DASHBOARD/hive_dashboard",
+    "/home/opc/hive_django",
+]
+for _dp in _DJANGO_PATHS:
+    if os.path.isdir(_dp):
+        DJANGO_PROJECT = _dp
+        break
+else:
+    DJANGO_PROJECT = _DJANGO_PATHS[0]
 sys.path.insert(0, DJANGO_PROJECT)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hive_dashboard.settings")
 
@@ -31,6 +41,18 @@ import django  # noqa: E402
 django.setup()
 
 from broker_ops.models import BrokerMatch, LeadProfile, OutreachSequence  # noqa: E402
+
+# Wire LLM Gateway for AI-powered email personalization
+try:
+    for _nd in [
+        os.path.join(os.path.dirname(__file__), "..", "..", "06_DEVELOPMENT", "everlight_os"),
+        "/home/opc/06_DEVELOPMENT/everlight_os",
+    ]:
+        if os.path.isdir(_nd) and _nd not in sys.path:
+            sys.path.insert(0, _nd)
+    from neuromorphic.llm_gateway import ask as llm_ask
+except ImportError:
+    llm_ask = None
 
 # ---------------------------------------------------------------------------
 # Config
@@ -154,13 +176,43 @@ def send_email(to: str, subject: str, body: str, agent_name: str = "Sage Hollowa
 # Email templates
 # ---------------------------------------------------------------------------
 
+def _ai_personalize_subject(lead_name: str, need: str, offer_title: str) -> str:
+    """Use LLM Gateway to generate a personalized subject line. Falls back to template."""
+    if llm_ask is None:
+        return ""
+    try:
+        prompt = (
+            f"Write a short, personalized email subject line (under 60 chars) for a cold outreach.\n"
+            f"Recipient: {lead_name}\n"
+            f"Their need: {need[:200]}\n"
+            f"Tool we're recommending: {offer_title}\n"
+            f"Tone: professional, helpful, not salesy. No emojis. No ALL CAPS.\n"
+            f"Return ONLY the subject line, nothing else."
+        )
+        result = llm_ask(prompt, model="fast", max_tokens=80, agent_name="piper_reeves")
+        result = result.strip().strip('"').strip("'")
+        if result and len(result) < 80:
+            return result
+    except Exception as e:
+        log.debug("AI subject personalization failed: %s", e)
+    return ""
+
+
 def build_intro_email(lead, offer, match):
-    """Build the first-touch personalized email for a broker match."""
+    """Build the first-touch personalized email for a broker match.
+    Uses AI personalization for subject lines when LLM Gateway is available."""
     first_name = lead.name.split()[0] if lead.name else "there"
     pricing = format_pricing(offer)
     category_label = dict(offer.CATEGORY_CHOICES).get(offer.category, offer.category)
 
-    subject = f"Found a tool that fits: {offer.title}"
+    # Try AI-personalized subject, fall back to template
+    subject = _ai_personalize_subject(
+        lead.name or "there",
+        lead.need_description or "",
+        offer.title,
+    )
+    if not subject:
+        subject = f"Found a tool that fits: {offer.title}"
 
     body = (
         f"Hi {first_name},\n\n"
@@ -236,23 +288,89 @@ def format_pricing(offer):
 # Lead email audit
 # ---------------------------------------------------------------------------
 
+def auto_enrich_leads(max_leads: int = 30) -> int:
+    """Attempt to enrich leads that have a website URL in their description but no email.
+    Returns number of leads successfully enriched."""
+    try:
+        # Try multiple paths (phone vs Oracle)
+        for bp in [os.path.join(os.path.dirname(__file__), "broker"), "/home/opc/broker"]:
+            if os.path.isdir(bp) and bp not in sys.path:
+                sys.path.insert(0, bp)
+        from contact_enrichment import extract_email_from_text, _fetch_text
+    except ImportError:
+        log.warning("Could not import contact_enrichment -- skipping auto-enrich")
+        return 0
+
+    # Find leads with no email OR placeholder email that have descriptions to work with
+    from django.db.models import Q
+    leads_needing_email = LeadProfile.objects.filter(
+        Q(email="") | Q(email__contains="@placeholder")
+    ).exclude(need_description="")[:max_leads]
+
+    enriched = 0
+    for lead in leads_needing_email:
+        desc = lead.need_description or ""
+        # Extract website from description
+        website = ""
+        if "Website:" in desc:
+            after_website = desc.split("Website:")[1].strip()
+            # Take until next period-space or newline
+            website = after_website.split(". ")[0].split("\n")[0].strip()
+            if website in ("N/A", "None", ""):
+                continue
+
+        if not website:
+            continue
+
+        if not website.startswith("http"):
+            website = f"https://{website}"
+
+        # Try to extract email from website
+        for suffix in ["", "/contact", "/about", "/contact-us"]:
+            try:
+                html = _fetch_text(website.rstrip("/") + suffix, timeout=8, max_bytes=20000)
+                email = extract_email_from_text(html) if html else ""
+                if email:
+                    lead.email = email
+                    lead.save(update_fields=["email", "updated_at"])
+                    enriched += 1
+                    log.info("AUTO-ENRICH: %s -> %s", lead.name, email)
+                    break
+            except Exception:
+                continue
+
+    return enriched
+
+
 def audit_lead_emails():
-    """Check how many LeadProfile records have email addresses."""
+    """Check how many LeadProfile records have REAL email addresses.
+    Filters out @placeholder.io (fake) emails. AUTO-ENRICHES when coverage is low."""
     total = LeadProfile.objects.count()
-    with_email = LeadProfile.objects.exclude(email="").count()
+    # Real emails: non-empty AND not placeholder
+    with_email = LeadProfile.objects.exclude(email="").exclude(
+        email__contains="@placeholder"
+    ).count()
     without_email = total - with_email
     pct = (with_email / total * 100) if total else 0
 
     log.info("LEAD EMAIL AUDIT: %d total | %d with email (%.0f%%) | %d missing email",
              total, with_email, pct, without_email)
 
-    if pct < 50:
-        log.warning(
-            "BLOCKER: Only %.0f%% of leads have email addresses (%d/%d). "
-            "Most outreach will be skipped. Enrich leads with emails before "
-            "expecting volume from this script.",
+    if pct < 50 and without_email > 0:
+        log.info(
+            "REVENUE ACTION: Only %.0f%% email coverage (%d/%d). "
+            "Auto-enriching leads with website scraping...",
             pct, with_email, total,
         )
+        enriched = auto_enrich_leads(max_leads=30)
+        if enriched > 0:
+            with_email += enriched
+            without_email -= enriched
+            pct = (with_email / total * 100) if total else 0
+            log.info("AUTO-ENRICH RESULT: +%d emails. New coverage: %d/%d (%.0f%%)",
+                     enriched, with_email, total, pct)
+        else:
+            log.info("AUTO-ENRICH: No new emails found from website scraping.")
 
     return {"total": total, "with_email": with_email, "without_email": without_email}
 
@@ -302,8 +420,8 @@ def run_fresh_outreach():
         lead = match.lead
         offer = match.offer
 
-        # Skip leads without email
-        if not lead.email:
+        # Skip leads without real email (blank or placeholder)
+        if not lead.email or "@placeholder" in lead.email:
             skipped_no_email += 1
             continue
 
@@ -403,7 +521,7 @@ def run_followups():
         lead = match.lead
         offer = match.offer
 
-        if not lead.email or lead.unsubscribed:
+        if not lead.email or "@placeholder" in lead.email or lead.unsubscribed:
             skipped += 1
             continue
 
@@ -459,17 +577,28 @@ def post_slack_summary(audit, fresh, followups):
         status="pending", match_score__gt=MIN_MATCH_SCORE
     ).count()
 
+    total_sent = fresh['sent'] + followups['sent']
+    email_pct = (audit['with_email'] / audit['total'] * 100) if audit['total'] else 0
+
+    if total_sent > 0:
+        status_icon = ":rocket:"
+        status_line = f"{total_sent} emails sent ({fresh['sent']} fresh, {followups['sent']} follow-ups)"
+    elif fresh['skipped_no_email'] > 0:
+        status_icon = ":warning:"
+        status_line = f"BLOCKED: {fresh['skipped_no_email']} matches skipped (no email). Auto-enrichment active."
+    else:
+        status_icon = ":mag:"
+        status_line = f"No eligible matches. {pending_count} pending (score>{MIN_MATCH_SCORE:.0f})."
+
     msg = (
-        f"*Broker OS SDR -- {TODAY}*\n"
-        f"Fresh intros sent: {fresh['sent']}\n"
-        f"Follow-ups sent: {followups['sent']}\n"
-        f"Skipped (no email): {fresh['skipped_no_email']}\n"
-        f"Skipped (unsubscribed): {fresh['skipped_unsub']}\n"
-        f"Errors: {fresh['errors']}\n\n"
-        f"Lead email coverage: {audit['with_email']}/{audit['total']} "
-        f"({audit['with_email']/audit['total']*100:.0f}% have email)\n"
-        f"Remaining pending matches (score>60): {pending_count}"
+        f"{status_icon} *Broker OS SDR -- {TODAY}*\n"
+        f"{status_line}\n"
+        f"Email coverage: {audit['with_email']}/{audit['total']} ({email_pct:.0f}%)\n"
+        f"Pipeline: {pending_count} pending matches"
     )
+
+    if fresh['errors'] > 0:
+        msg += f"\n:x: {fresh['errors']} send errors -- check Resend dashboard"
 
     try:
         requests.post(
@@ -556,6 +685,7 @@ def main(mode: str = "send"):
             )
             .select_related("lead", "offer")
             .exclude(lead__email="")
+            .exclude(lead__email__contains="@placeholder")
             .exclude(lead__unsubscribed=True)
             .order_by("-match_score")[:FRESH_OUTREACH_LIMIT]
         )

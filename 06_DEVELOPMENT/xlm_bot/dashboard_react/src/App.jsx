@@ -16,6 +16,8 @@ import HiveMind from "./pages/HiveMind"
 import Reports from "./pages/Reports"
 import Settings from "./pages/Settings"
 import MarketIntel from "./pages/MarketIntel"
+import TradeHistory from "./pages/TradeHistory"
+import Changelog from "./pages/Changelog"
 import TradingChat from "./components/TradingChat"
 import MindsetPanel from "./components/MindsetPanel"
 import TradeReportCard from "./components/TradeReportCard"
@@ -426,6 +428,8 @@ export default function App() {
             {page === "funnel" && <Funnel />}
             {page === "settings" && <Settings />}
             {page === "intel" && <MarketIntel />}
+            {page === "trade-history" && <TradeHistory />}
+            {page === "changelog" && <Changelog />}
           </div>
         </main>
       </div>

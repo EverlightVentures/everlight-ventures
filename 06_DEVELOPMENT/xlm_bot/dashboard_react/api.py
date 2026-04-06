@@ -2428,6 +2428,292 @@ def onboard_submit(data: dict):
     return {"ok": True, "company": company}
 
 
+# ===================================================================
+# CHANGELOG -- what was updated, when, organized by day
+# ===================================================================
+
+@app.get("/api/changelog")
+def get_changelog(date: str = "", week: str = "", month: str = ""):
+    """What we updated and when. Midnight-to-midnight PT days.
+
+    Query params:
+        date: YYYY-MM-DD -- single day
+        week: YYYY-WNN (e.g. 2026-W15) -- single week
+        month: YYYY-MM -- single month
+        (none) -- last 7 days
+    """
+    changelog_path = LOGS_DIR / "changelog.jsonl"
+    if not changelog_path.exists():
+        return {"days": [], "filter": {"date": date, "week": week, "month": month}}
+
+    entries = _read_jsonl_tail(changelog_path, max_lines=500)
+
+    # Filter
+    if date:
+        entries = [e for e in entries if e.get("date") == date]
+    elif week:
+        # Parse YYYY-WNN
+        entries = [e for e in entries if _entry_in_week(e, week)]
+    elif month:
+        entries = [e for e in entries if e.get("date", "").startswith(month)]
+    else:
+        # Default: last 7 days
+        from datetime import datetime, timezone, timedelta
+        cutoff = (datetime.now(timezone.utc) - timedelta(hours=7) - timedelta(days=7)).strftime("%Y-%m-%d")
+        entries = [e for e in entries if e.get("date", "") >= cutoff]
+
+    # Group by day
+    from collections import OrderedDict
+    days = OrderedDict()
+    for e in sorted(entries, key=lambda x: x.get("timestamp", "")):
+        d = e.get("date", "unknown")
+        if d not in days:
+            days[d] = {"date": d, "updates": []}
+        days[d]["updates"].append({
+            "time": e.get("time", ""),
+            "category": e.get("category", ""),
+            "summary": e.get("summary", ""),
+            "details": e.get("details", ""),
+            "files": e.get("files_changed", []),
+        })
+
+    return {
+        "days": list(days.values()),
+        "total_updates": len(entries),
+        "filter": {"date": date, "week": week, "month": month},
+    }
+
+
+@app.get("/api/changelog/today")
+def get_changelog_today():
+    """What was updated today."""
+    pt_now = datetime.now(timezone.utc) - timedelta(hours=7)
+    return get_changelog(date=pt_now.strftime("%Y-%m-%d"))
+
+
+def _entry_in_week(entry, week_str):
+    """Check if a changelog entry falls in a given ISO week (YYYY-WNN)."""
+    try:
+        d = entry.get("date", "")
+        if not d:
+            return False
+        from datetime import datetime as _dt
+        dt = _dt.strptime(d, "%Y-%m-%d")
+        iso = dt.isocalendar()
+        return week_str == f"{iso[0]}-W{iso[1]:02d}"
+    except Exception:
+        return False
+
+
+@app.post("/api/changelog/add")
+def add_changelog_entry(entry: dict):
+    """Add a changelog entry. Called by deploy scripts or manually."""
+    from datetime import datetime, timezone, timedelta
+    pt_now = datetime.now(timezone.utc) - timedelta(hours=7)
+    h = pt_now.hour
+    m = pt_now.minute
+    ampm = "am" if h < 12 else "pm"
+    h12 = h if 1 <= h <= 12 else (h - 12 if h > 12 else 12)
+
+    record = {
+        "timestamp": pt_now.isoformat(),
+        "date": pt_now.strftime("%Y-%m-%d"),
+        "time": f"{h12}:{m:02d} {ampm}",
+        "category": entry.get("category", "update"),
+        "summary": entry.get("summary", ""),
+        "details": entry.get("details", ""),
+        "files_changed": entry.get("files_changed", []),
+    }
+
+    changelog_path = LOGS_DIR / "changelog.jsonl"
+    with open(changelog_path, "a") as f:
+        f.write(json.dumps(record) + "\n")
+
+    return {"ok": True, "entry": record}
+
+
+# ===================================================================
+# ORGANIZED TRADE HISTORY -- midnight-to-midnight PT, by day/week/month
+# Paper/ghost trades in separate section. Real trades only in main view.
+# ===================================================================
+
+def _parse_all_trades_organized():
+    """Read trades_organized.csv (or trades.csv) and return structured data.
+    Separates real vs paper/ghost. Groups by day (midnight PT boundaries)."""
+    import csv as _csv
+    trades_path = LOGS_DIR / "trades_organized.csv"
+    if not trades_path.exists():
+        trades_path = LOGS_DIR / "trades.csv"
+    if not trades_path.exists():
+        return [], []
+
+    real = []
+    paper = []
+    with open(trades_path) as f:
+        for row in _csv.DictReader(f):
+            if not row.get("exit_price") or not row.get("pnl_usd"):
+                continue  # Skip entries without exits
+
+            pnl = float(row.get("pnl_usd") or 0)
+            fees = float(row.get("total_fees_usd") or 0)
+            result = row.get("result", "")
+            side = row.get("side", "")
+            entry_p = float(row.get("entry_price") or 0)
+            exit_p = float(row.get("exit_price") or 0)
+
+            # Use organized columns if available, otherwise parse
+            date_pt = row.get("date_pt", "")
+            time_pt = row.get("time_pt", "")
+            exit_date_pt = row.get("exit_date_pt", "")
+            exit_time_pt = row.get("exit_time_pt", "")
+            dur = row.get("duration_min", "")
+            session = row.get("session", "")
+
+            if not date_pt:
+                # Fallback: parse from timestamp
+                ts = row.get("entry_time") or row.get("timestamp", "")
+                try:
+                    dt = datetime.fromisoformat(ts.replace("Z", "+00:00"))
+                    pt_dt = dt - timedelta(hours=7)
+                    date_pt = pt_dt.strftime("%Y-%m-%d")
+                    time_pt = pt_dt.strftime("%H:%M:%S")
+                except Exception:
+                    continue
+
+            # 12hr format
+            def to_12hr(t24):
+                if not t24 or len(t24) < 5:
+                    return ""
+                h = int(t24[:2])
+                m = t24[3:5]
+                ampm = "am" if h < 12 else "pm"
+                h12 = h if 1 <= h <= 12 else (h - 12 if h > 12 else 12)
+                return f"{h12}:{m} {ampm}"
+
+            trade = {
+                "date": date_pt,
+                "time": to_12hr(time_pt),
+                "exit_date": exit_date_pt,
+                "exit_time": to_12hr(exit_time_pt),
+                "side": side,
+                "entry_price": entry_p,
+                "exit_price": exit_p,
+                "result": result,
+                "pnl": round(pnl, 2),
+                "fees": round(fees, 2),
+                "duration_min": float(dur) if dur else None,
+                "session": session,
+                "exit_reason": row.get("exit_reason", ""),
+                "entry_type": row.get("entry_type", ""),
+                "unified_score": row.get("unified_score", ""),
+                "order_id": row.get("order_id", ""),
+                "time_sort": time_pt,
+            }
+
+            # Separate paper/ghost from real
+            # Paper = explicitly marked paper OR has "paper" in order_id
+            # Real = everything else (including exchange_side_close with no order_id)
+            _paper_flag = str(row.get("paper", "")).strip().lower()
+            _order_id = row.get("order_id", "") or ""
+            is_paper = (_paper_flag == "true"
+                        or "paper" in _order_id.lower())
+            if is_paper:
+                trade["label"] = "paper"
+                paper.append(trade)
+            else:
+                trade["label"] = "real"
+                real.append(trade)
+
+    return real, paper
+
+
+@app.get("/api/trades/history")
+def get_trade_history(month: str = "", date: str = ""):
+    """Organized trade history grouped by day.
+    Each day: 12:00 am - 11:59 pm PT. Blank row between days.
+
+    Query params:
+        month: YYYY-MM (e.g. 2026-04) -- filter to month
+        date: YYYY-MM-DD -- filter to specific day
+
+    Returns real trades grouped by day + paper trades in separate section.
+    """
+    real, paper = _parse_all_trades_organized()
+
+    # Filter
+    if date:
+        real = [t for t in real if t["date"] == date]
+        paper = [t for t in paper if t["date"] == date]
+    elif month:
+        real = [t for t in real if t["date"].startswith(month)]
+        paper = [t for t in paper if t["date"].startswith(month)]
+
+    # Group by day
+    from collections import OrderedDict
+    days = OrderedDict()
+    for t in sorted(real, key=lambda x: x["date"] + " " + (x.get("time_sort") or "")):
+        d = t["date"]
+        if d not in days:
+            days[d] = {"date": d, "trades": [], "wins": 0, "losses": 0, "pnl": 0.0, "fees": 0.0}
+        days[d]["trades"].append(t)
+        days[d]["pnl"] += t["pnl"]
+        days[d]["fees"] += t["fees"]
+        if t["result"] == "win":
+            days[d]["wins"] += 1
+        elif t["result"] == "loss":
+            days[d]["losses"] += 1
+
+    # Round day totals
+    for d in days.values():
+        total = d["wins"] + d["losses"]
+        d["pnl"] = round(d["pnl"], 2)
+        d["fees"] = round(d["fees"], 2)
+        d["trade_count"] = total
+        d["win_rate"] = round(d["wins"] / total * 100) if total > 0 else 0
+
+    # Paper trades grouped same way
+    paper_days = OrderedDict()
+    for t in sorted(paper, key=lambda x: x["date"] + " " + (x.get("time_sort") or "")):
+        d = t["date"]
+        if d not in paper_days:
+            paper_days[d] = {"date": d, "trades": [], "count": 0}
+        paper_days[d]["trades"].append(t)
+        paper_days[d]["count"] += 1
+
+    # Available months for navigation
+    all_months = sorted(set(t["date"][:7] for t in real)) if real else []
+
+    # Grand totals
+    total_pnl = sum(d["pnl"] for d in days.values())
+    total_wins = sum(d["wins"] for d in days.values())
+    total_losses = sum(d["losses"] for d in days.values())
+    total_trades = total_wins + total_losses
+    total_fees = sum(d["fees"] for d in days.values())
+
+    return {
+        "days": list(days.values()),
+        "paper_trades": list(paper_days.values()),
+        "summary": {
+            "total_trades": total_trades,
+            "total_wins": total_wins,
+            "total_losses": total_losses,
+            "win_rate": round(total_wins / total_trades * 100) if total_trades > 0 else 0,
+            "total_pnl": round(total_pnl, 2),
+            "total_fees": round(total_fees, 2),
+        },
+        "months": all_months,
+        "filter": {"month": month, "date": date},
+    }
+
+
+@app.get("/api/trades/today")
+def get_trades_today():
+    """Today's trades only. 12:00 am - 11:59 pm PT. Real trades only."""
+    pt_now = datetime.now(timezone.utc) - timedelta(hours=7)
+    today = pt_now.strftime("%Y-%m-%d")
+    return get_trade_history(date=today)
+
+
 # Serve React static files
 if STATIC_DIR.exists():
     app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")

@@ -139,7 +139,15 @@ deploy_scripts() {
         /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/hive_deal_orchestrator.py \
         /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/hive_god_mode.py \
         /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/hive_watchdog.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/broker_outreach_sdr.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/broker_gmail_monitor.py \
         "$E5_VM:/home/opc/" 2>/dev/null
+
+    # AI Consulting prospect scraper (with enrichment)
+    ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "mkdir -p /home/opc/ai_consulting" 2>/dev/null
+    scp -o ConnectTimeout=10 -i "$KEY" \
+        /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/AI_Consulting/pipeline/prospect_scraper.py \
+        "$E5_VM:/home/opc/ai_consulting/" 2>/dev/null
 
     scp -o ConnectTimeout=10 -i "$KEY" \
         /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/gdocs_bridge.py \
@@ -160,6 +168,18 @@ deploy_scripts() {
         /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/hive_mind/agent_metrics.py \
         /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/hive_mind/messaging.py \
         "$E5_VM:/home/opc/06_DEVELOPMENT/everlight_os/hive_mind/" 2>/dev/null
+
+    # Neuromorphic modules (NLP, brain policy, LLM gateway, pipeline API)
+    ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "mkdir -p /home/opc/06_DEVELOPMENT/everlight_os/neuromorphic" 2>/dev/null
+    scp -o ConnectTimeout=10 -i "$KEY" \
+        /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/neuromorphic/__init__.py \
+        /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/neuromorphic/nlp_engine.py \
+        /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/neuromorphic/brain_policy.py \
+        /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/neuromorphic/pipeline_api.py \
+        /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/neuromorphic/llm_gateway.py \
+        /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/neuromorphic/ml_models.py \
+        /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/neuromorphic/deal_state_machine.py \
+        "$E5_VM:/home/opc/06_DEVELOPMENT/everlight_os/neuromorphic/" 2>/dev/null
 
     # Restart voice handler
     ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "sudo systemctl restart hive-voice" 2>/dev/null
@@ -279,5 +299,19 @@ slack_notify() {
         -d "{\"channel\": \"$SLACK_DEPLOY_CH\", \"text\": \"[DEPLOY] Code pushed to Oracle. $DEPLOYED\"}" 2>/dev/null
 }
 slack_notify
+
+# Log deploy to changelog (dashboard API)
+log_changelog() {
+    curl -s -X POST "http://127.0.0.1:8502/api/changelog/add" \
+        -H "Content-type: application/json" \
+        -d "{\"category\": \"deploy\", \"summary\": \"Deploy: $MODE -- $DEPLOYED\", \"details\": \"Auto-logged by deploy_to_oracle.sh\", \"files_changed\": [\"$DEPLOYED\"]}" 2>/dev/null
+    # Also append locally in case API is down
+    CHANGELOG="/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/xlm_bot/logs/changelog.jsonl"
+    PT_TIME=$(TZ=America/Los_Angeles date '+%Y-%m-%dT%H:%M:%S%z')
+    PT_DATE=$(TZ=America/Los_Angeles date '+%Y-%m-%d')
+    PT_12HR=$(TZ=America/Los_Angeles date '+%-I:%M %p')
+    echo "{\"timestamp\": \"$PT_TIME\", \"date\": \"$PT_DATE\", \"time\": \"$PT_12HR\", \"category\": \"deploy\", \"summary\": \"Deploy: $MODE -- $DEPLOYED\", \"details\": \"Auto-logged by deploy_to_oracle.sh\", \"files_changed\": [\"$DEPLOYED\"]}" >> "$CHANGELOG" 2>/dev/null
+}
+log_changelog
 
 log "Deploy complete: $MODE"
