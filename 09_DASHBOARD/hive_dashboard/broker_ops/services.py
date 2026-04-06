@@ -498,6 +498,49 @@ SEQUENCE_SCHEDULE = [
 ]
 
 
+def _ai_personalize_email(template_body: str, context: dict, step_name: str = "buyer_intro") -> str:
+    """Enhance a template email with AI personalization via LiteLLM.
+
+    Uses Piper Reeves' personality through the LLM gateway.
+    Falls back to the original template if AI is unavailable.
+    """
+    try:
+        import sys
+        for p in ["/home/opc/06_DEVELOPMENT/everlight_os/neuromorphic",
+                  "/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/neuromorphic"]:
+            if p not in sys.path:
+                sys.path.insert(0, p)
+
+        from llm_gateway import ask
+
+        lead_name = context.get("lead_name", "there")
+        offer_title = context.get("offer_title", "our solution")
+        need = context.get("need_description", context.get("need_description_short", ""))
+        pain = context.get("pain_point", "")
+
+        prompt = (
+            f"You are Piper Reeves, outreach specialist at Everlight Ventures. "
+            f"Warm, personable Nashville warmth meets Silicon Valley hustle. "
+            f"Rewrite this {step_name.replace('_', ' ')} email to be more personal and compelling. "
+            f"Keep it under 150 words. Keep the CAN-SPAM unsubscribe line. "
+            f"Lead: {lead_name}. They need: {need}. Pain point: {pain}. "
+            f"Product: {offer_title}.\n\n"
+            f"Original email:\n{template_body}\n\n"
+            f"Rewrite (keep same structure, make it warmer and more specific):"
+        )
+
+        result = ask(prompt, model="fast", agent_name="piper_reeves", max_tokens=300)
+        if result and len(result) > 50 and "STOP" not in result[:20]:
+            # Ensure unsubscribe line is preserved
+            if "STOP" not in result and "unsubscribe" not in result.lower():
+                result = result.rstrip() + "\n\n---\nReply STOP to unsubscribe."
+            return result
+    except Exception:
+        pass
+
+    return template_body
+
+
 def create_outreach_sequence(match: BrokerMatch) -> list[OutreachSequence]:
     """Create a multi-step outreach sequence for a match."""
     if not _is_real_email(match.lead.email):
@@ -522,13 +565,18 @@ def create_outreach_sequence(match: BrokerMatch) -> list[OutreachSequence]:
             "pain_point": pain_points[0] if pain_points else "operational bottlenecks",
         }
 
+        raw_body = template.get("body", "").format(**context)
+        # AI-personalize the first touch (buyer_intro) via LiteLLM/Piper
+        if step_name == "buyer_intro":
+            raw_body = _ai_personalize_email(raw_body, context, step_name)
+
         obj, created = OutreachSequence.objects.get_or_create(
             match=match,
             step=step_name,
             defaults={
                 "to_email": match.lead.email,
                 "subject": template.get("subject", "").format(**context),
-                "body": template.get("body", "").format(**context),
+                "body": raw_body,
                 "scheduled_at": base_time + timedelta(days=delay_days),
             }
         )
