@@ -1754,6 +1754,45 @@
   /* ------------------------------------------------------------------
      COPY FULL SESSION OUTPUT (exposed on window for onclick)
      ------------------------------------------------------------------ */
+  function writeTextToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).then(function() { return true; });
+    }
+
+    return new Promise(function(resolve) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      var copied = false;
+      try {
+        copied = document.execCommand('copy');
+      } catch(e) {
+        copied = false;
+      }
+      document.body.removeChild(ta);
+      resolve(copied);
+    });
+  }
+
+  function flashCopyState(btn, copied) {
+    if (!btn) return;
+    var origHtml = btn.innerHTML;
+    btn.innerHTML = copied
+      ? '<i class="fa-solid fa-check"></i> Copied!'
+      : '<i class="fa-solid fa-triangle-exclamation"></i> Copy failed';
+    btn.classList.toggle('copied', copied);
+    setTimeout(function() {
+      btn.innerHTML = origHtml;
+      btn.classList.remove('copied');
+    }, 2200);
+  }
+
   window.copySessionOutput = function(sessionId, btn) {
     var data = lastSessionData;
     if (!data || !data.agents) {
@@ -1808,39 +1847,8 @@
 
     var fullText = lines.join('\n');
 
-    navigator.clipboard.writeText(fullText).then(function() {
-      if (btn) {
-        var origHtml = btn.innerHTML;
-        btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
-        btn.classList.add('copied');
-        setTimeout(function() {
-          btn.innerHTML = origHtml;
-          btn.classList.remove('copied');
-        }, 2000);
-      }
-    }).catch(function() {
-      /* Fallback for older browsers / non-HTTPS */
-      var ta = document.createElement('textarea');
-      ta.value = fullText;
-      ta.style.position = 'fixed';
-      ta.style.left = '-9999px';
-      document.body.appendChild(ta);
-      ta.select();
-      try {
-        document.execCommand('copy');
-        if (btn) {
-          var origHtml = btn.innerHTML;
-          btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
-          btn.classList.add('copied');
-          setTimeout(function() {
-            btn.innerHTML = origHtml;
-            btn.classList.remove('copied');
-          }, 2000);
-        }
-      } catch(e) {
-        if (btn) { btn.textContent = 'Copy failed'; }
-      }
-      document.body.removeChild(ta);
+    writeTextToClipboard(fullText).then(function(copied) {
+      flashCopyState(btn, copied);
     });
   };
 

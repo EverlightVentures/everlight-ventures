@@ -1,0 +1,171 @@
+# Hive Mind Slack Channel Routing v2.0 -- Fire Team Doctrine
+# Maps every system/agent/fire team to the right Slack channel
+# Updated: 2026-03-23
+
+# Bot Tokens (webhooks are dead, use bot API with chat.postMessage)
+bot_tokens:
+  xlmbot: "xoxb-8645963765681-10542494223845-M2gIADgkLB2HYJN4F8lGpbuI"
+  warroom: "xoxb-8645963765681-10594020158069-eJRt13YP8qedI6DnQwupuFfy"
+
+# Legacy Webhooks (ALL DEAD as of 2026-03-23 -- kept for reference only)
+webhooks_dead:
+  main: "https://hooks.slack.com/services/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"
+  warroom: "https://hooks.slack.com/services/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"
+  alerts: "https://hooks.slack.com/services/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"
+
+# Channel IDs -- Master Registry
+channels:
+  # Command Channels
+  war-room: "C0ANAU30UQ2"
+  ceo-brief: "C0AP56SQM08"
+  hive-alerts: "C0ANPRCA4AD"
+
+  # Squad Channels (existing)
+  claude-corp: "C08JZUC0HMF"  # reuse all-everlightlogistics or create new
+  gemini-ops: "C0AHQ1UJ56W"   # reuse all-everlightventures
+  codex-labs: "C08L71WJWV9"   # reuse gpt_bot_30
+  perplexity-intel: "C08KK6XNTPZ"  # reuse trading_view
+
+  # Fire Team Channels (NEW)
+  ft-hunters: "C0AMVEWLT9D"
+  ft-consult: "C0ANEG19WQ4"
+  ft-profit-engine: "C0AN7FT5JBF"
+  ft-markets: "C0AP56SFQG0"
+
+  # Pipeline Channels
+  ai-consulting: "C0AN8SGAS22"
+  wholesale-deals: "C0ANLLV8JAC"
+  broker-pipeline: "C0AN7FTTK2R"
+  xlm-trading: "C0AN8SG030W"
+
+  # Operations
+  deploy-log: "C0AN4GSTMT5"
+  content-factory: "C0ANPRDUP0R"
+  revenue-dashboard: "C0AN4GU0MDH"
+
+  # Legacy (still active)
+  reports: "C08L365AECU"
+  ev-sales: "C0AK7590VT6"
+  ev-support: "C0AK1FBSX4N"
+  announcements: "C08KY6GT021"
+  daily_tasks: "C08KTKD0WTY"
+  projects: "C08L2LU2RS7"
+  fun_chat: "C0AHQ1Z1A74"
+  events: "C0AJJA43EQ0"
+
+# Routing: what posts where (v2 -- uses bot tokens + channel IDs)
+routing:
+  xlm_bot:
+    channel: xlm-trading
+    bot: xlmbot
+    agent: Rex Thornton
+    fire_team: alpha_markets
+    content: Trade alerts, P&L updates, position changes, daily scoreboard
+    frequency: Every trade + daily summary
+
+  ceo_brief:
+    channel: ceo-brief
+    bot: warroom
+    agent: Marcus Cole
+    content: Morning brief with money, bot, wholesale, system status + Google Doc link
+    frequency: Daily 7 AM PT
+
+  hourly_pulse:
+    channel: war-room
+    bot: warroom
+    agent: Marcus Cole
+    content: System status with Google Doc link
+    frequency: Every hour
+
+  wholesale:
+    channel: wholesale-deals
+    bot: warroom
+    agent: Charles Dawson
+    fire_team: charlie_hunters
+    content: Pipeline stats, new leads, deals in progress, buyer matches
+    frequency: After each pipeline run (3x daily)
+
+  deal_alerts:
+    channel: hive-alerts
+    bot: warroom
+    agent: Harrison Knox
+    fire_team: bravo_profit_engine
+    content: Contract sent, signature received, deal closed, assignment fee collected
+    frequency: Real-time
+
+  dispatch:
+    channel: war-room
+    bot: warroom
+    agent: Marcus Cole
+    content: Agent dispatch orders from voice calls or automated routing
+    frequency: Real-time
+
+  health:
+    channel: hive-alerts
+    bot: warroom
+    agent: Quinn Sharp
+    fire_team: bravo_editors
+    content: System health warnings, auto-fixes, failures
+    frequency: When issues detected (every 5 min check)
+
+  deploy:
+    channel: deploy-log
+    bot: warroom
+    agent: Franklin Steele
+    content: Code pushed to Oracle, bot restarted, config changed
+    frequency: On every deploy
+
+  compliance:
+    channel: hive-alerts
+    bot: warroom
+    agent: Justine Park
+    fire_team: charlie_sentinels
+    content: TCPA blocks, compliance warnings, legal flags
+    frequency: When triggered
+
+  seller_replies:
+    channel: ft-hunters
+    bot: warroom
+    agent: Piper Reeves
+    fire_team: charlie_hunters
+    content: New seller reply detected, sentiment, recommended action
+    frequency: Real-time (every 2 min check)
+
+  consulting_pipeline:
+    channel: ai-consulting
+    bot: warroom
+    agent: Ryan Kim
+    fire_team: charlie_consult
+    content: New prospects scraped, leads scored, outreach sent, clients onboarded
+    frequency: After each pipeline run
+
+  broker_deals:
+    channel: broker-pipeline
+    bot: warroom
+    agent: Calvin Osei
+    fire_team: bravo_profit_engine
+    content: New matches, approved deals, commission earned
+    frequency: After each matching run
+
+  content_drops:
+    channel: content-factory
+    bot: warroom
+    agent: Vera Lux
+    fire_team: bravo_editors
+    content: New content queued, published, IG posts scheduled
+    frequency: On publish
+
+  revenue_events:
+    channel: revenue-dashboard
+    bot: xlmbot
+    agent: Penny Vance
+    fire_team: bravo_profit_engine
+    content: MRR changes, new subscriptions, churns, Stripe events
+    frequency: Real-time from Stripe webhooks
+
+  premium_reports:
+    channel: reports
+    bot: warroom
+    agent: Marcus Cole
+    content: Premium HTML ops reports with agent narratives
+    frequency: On generation

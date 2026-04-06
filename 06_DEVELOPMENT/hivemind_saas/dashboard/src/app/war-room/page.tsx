@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
+import { getHiveSession, startHiveSession } from "@/lib/api";
 import { cn, getAgentColor, getStatusBadgeClass, getStatusLabel, getPulseDotClass } from "@/lib/utils";
 import type { Agent, AgentId, HiveLogEntry } from "@/types";
 
@@ -317,9 +318,10 @@ function LogEntry({ entry }: { entry: HiveLogEntry }) {
 export default function WarRoomPage() {
   const router = useRouter();
   const [prompt, setPrompt] = useState("");
-  const [isRunning, setIsRunning] = useState(true);
-  const [logEntries, setLogEntries] = useState<HiveLogEntry[]>(MOCK_LOG);
+  const [isRunning, setIsRunning] = useState(false);
+  const [logEntries, setLogEntries] = useState<HiveLogEntry[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const logEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -330,26 +332,85 @@ export default function WarRoomPage() {
   const totalTokens = logEntries.reduce((sum, e) => sum + (e.tokens ?? 0), 0);
   const activeAgentCount = AGENTS.filter((a) => a.status === "active" || a.status === "thinking").length;
 
-  const handleStartSession = () => {
+  useEffect(() => {
+    if (!activeSessionId) {
+      return;
+    }
+    let cancelled = false;
+    const interval = window.setInterval(async () => {
+      try {
+        const session = await getHiveSession(activeSessionId);
+        if (cancelled) return;
+        const entries: HiveLogEntry[] = [
+          {
+            id: `${session.session_id}-input`,
+            sessionId: session.session_id,
+            agentId: "claude",
+            message: session.prompt,
+            type: "input",
+            timestamp: new Date(session.started_at),
+            tokens: 0,
+          },
+          ...(session.results ?? []).map((result: any, index: number) => ({
+            id: `${session.session_id}-${result.agent}-${index}`,
+            sessionId: session.session_id,
+            agentId: result.agent as AgentId,
+            message: result.output,
+            type: "output" as const,
+            timestamp: new Date(),
+            tokens: result.tokens_used,
+          })),
+        ];
+        setLogEntries(entries);
+        const running = session.status === "queued" || session.status === "running";
+        setIsRunning(running);
+        if (!running) {
+          window.clearInterval(interval);
+        }
+      } catch (_error) {
+        if (!cancelled) {
+          setIsRunning(false);
+        }
+      }
+    }, 2000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(interval);
+    };
+  }, [activeSessionId]);
+
+  const handleStartSession = async () => {
     if (!prompt.trim()) return;
     setIsSubmitting(true);
-
-    // Simulate session start
-    setTimeout(() => {
-      const newEntry: HiveLogEntry = {
-        id: `l${Date.now()}`,
-        sessionId: "sess_new",
+    try {
+      const session = await startHiveSession(prompt.trim(), AGENTS.map((agent) => agent.id));
+      setActiveSessionId(session.session_id);
+      setLogEntries((prev) => [...prev, {
+        id: `start-${session.session_id}`,
+        sessionId: session.session_id,
         agentId: "claude",
-        message: `New session started: "${prompt.trim()}"`,
+        message: `Hive queued session ${session.session_id} for: "${prompt.trim()}"`,
         type: "system",
         timestamp: new Date(),
         tokens: 0,
-      };
-      setLogEntries((prev) => [...prev, newEntry]);
+      }]);
       setPrompt("");
-      setIsSubmitting(false);
       setIsRunning(true);
-    }, 1200);
+    } catch (error) {
+      setLogEntries((prev) => [...prev, {
+        id: `error-${Date.now()}`,
+        sessionId: "local",
+        agentId: "claude",
+        message: error instanceof Error ? error.message : "Failed to start session",
+        type: "error",
+        timestamp: new Date(),
+        tokens: 0,
+      }]);
+      setIsRunning(false);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

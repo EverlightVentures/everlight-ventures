@@ -5,6 +5,7 @@ Copy .env.example to .env and fill in values.
 
 from pydantic_settings import BaseSettings
 from typing import List
+from pathlib import Path
 
 
 class Settings(BaseSettings):
@@ -14,9 +15,10 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # Database (Supabase Postgres)
-    database_url: str = "postgresql+asyncpg://postgres:password@localhost:5432/hivemind"
+    database_url: str = "sqlite+aiosqlite:///./runtime/hivemind.db"
     supabase_url: str = ""
     supabase_service_key: str = ""
+    workspace_root: str = "/mnt/sdcard/AA_MY_DRIVE"
 
     # Auth (Supabase Auth or Clerk)
     jwt_secret: str = "change-me-in-production"
@@ -32,6 +34,8 @@ class Settings(BaseSettings):
     stripe_price_spark: str = ""    # $49/mo price ID
     stripe_price_hive: str = ""     # $129/mo price ID
     stripe_price_enterprise: str = ""  # $399/mo price ID
+    billing_base_url: str = "https://app.everlight.ai/settings/billing"
+    frontend_url: str = "http://localhost:3000"
 
     # Slack
     slack_bot_token: str = ""
@@ -50,6 +54,9 @@ class Settings(BaseSettings):
 
     # Redis (for pub/sub and job queues)
     redis_url: str = "redis://localhost:6379"
+    allow_signup: bool = True
+    bootstrap_email: str = "admin@local.hive"
+    bootstrap_password: str = "ChangeMe123!"
 
     class Config:
         env_file = ".env"
@@ -57,3 +64,6 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+
+
+Path("runtime").mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,28 @@
+[Unit]
+Description=Hive Mind Slack Agent -- Conversational AI for @mentions
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=opc
+WorkingDirectory=/home/opc
+ExecStart=/usr/bin/python3 /home/opc/hive_slack_agent.py --poll
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=hive-slack-agent
+
+# Environment
+EnvironmentFile=-/home/opc/.env
+Environment=HIVE_CLAUDE_MODEL=claude-sonnet-4-6
+Environment=HIVE_POLL_INTERVAL=5
+Environment=HIVE_ROSTER_PATH=/home/opc/roster.yaml
+Environment=HIVE_AGENT_DIR=/home/opc/agents/
+Environment=BLINKO_URL=http://129.159.38.250:1111
+Environment=BOT_STATE_DIR=/home/opc/xlm_bot/data/
+Environment=HIVE_CHANNELS=war-room,ft-hunters,ft-consult,ft-markets,ft-profit-engine,ai-consulting,xlm-trading
+
+[Install]
+WantedBy=multi-user.target

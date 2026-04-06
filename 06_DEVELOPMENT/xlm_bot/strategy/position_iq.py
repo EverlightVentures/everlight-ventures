@@ -97,17 +97,30 @@ def evaluate_position(
         "ema_aligned": ema_bullish if is_long else ema_bearish,
     }
 
-    # TRAIL: in profit + signals confirm
-    if pnl_usd > 2.0 and for_us > against:
-        result.update({
-            "action": "TRAIL",
-            "confidence": min(90, 50 + for_us * 10),
-            "reason": "in_profit_signals_confirm",
-            "urgency": "low",
-        })
+    # TRAIL: in profit -- always trail when green, even with mixed signals
+    # The old logic required for_us > against to trail. That meant the bot
+    # would HOLD at 30% confidence while $7 of profit evaporated.
+    # New rule: ANY profit above $1.50 = TRAIL. Protect the money.
+    if pnl_usd > 1.50:
+        # Strong trail if signals confirm, lighter trail if mixed
+        if for_us > against:
+            result.update({
+                "action": "TRAIL",
+                "confidence": min(95, 60 + for_us * 10),
+                "reason": "in_profit_signals_confirm",
+                "urgency": "low",
+            })
+        else:
+            # Mixed signals while profitable = trail tight, ready to exit
+            result.update({
+                "action": "TRAIL",
+                "confidence": min(75, 40 + pnl_usd * 5),
+                "reason": "in_profit_mixed_signals_tighten",
+                "urgency": "medium",
+            })
         return result
 
-    # HOLD: signals mixed, trade still has room
+    # HOLD: signals mixed, trade still has room, not yet profitable enough to trail
     if against <= for_us and dist_to_stop_pct > 0.3:
         result.update({
             "action": "HOLD",
@@ -117,8 +130,16 @@ def evaluate_position(
         })
         return result
 
-    # CUT: losing + majority signals against + taking -$1 to -$3 beats waiting for -$8
-    if pnl_usd < 0 and against > for_us and abs(pnl_usd) < max_loss_usd * 0.5:
+    # CUT: losing + majority signals against + taking small loss beats waiting for stop
+    # Guards: must be down at least $2, must have held at least 20 bars (~5 min on 15s cycles),
+    # and need strong signal imbalance (not just 3v2 in chop)
+    _min_loss_to_cut = 2.0
+    _min_bars_to_cut = 20
+    _min_signal_gap = 2  # need at least 2 more signals against than for
+    if (pnl_usd < -_min_loss_to_cut
+        and against > for_us + _min_signal_gap
+        and abs(pnl_usd) < max_loss_usd * 0.6
+        and bars_since_entry >= _min_bars_to_cut):
         result.update({
             "action": "CUT",
             "confidence": min(85, 40 + against * 15),
@@ -128,8 +149,8 @@ def evaluate_position(
         })
         return result
 
-    # FLIP: strong reversal signals + underwater
-    if pnl_usd < 0 and against >= 4 and against_pct >= 75:
+    # FLIP: strong reversal signals + underwater + held long enough
+    if pnl_usd < -_min_loss_to_cut and against >= 5 and against_pct >= 80 and bars_since_entry >= _min_bars_to_cut:
         result.update({
             "action": "FLIP",
             "confidence": min(90, 50 + against * 10),
@@ -139,8 +160,8 @@ def evaluate_position(
         })
         return result
 
-    # CUT: very close to stop + signals against (save what you can)
-    if pnl_usd < 0 and dist_to_stop_pct < 0.3 and against > for_us:
+    # CUT: very close to stop + strong signals against (save what you can)
+    if pnl_usd < -_min_loss_to_cut and dist_to_stop_pct < 0.2 and against > for_us + _min_signal_gap and bars_since_entry >= _min_bars_to_cut:
         result.update({
             "action": "CUT",
             "confidence": 70,

@@ -1,0 +1,436 @@
+
+Nice, you’re basically inventing **“Royale Credit”** – a single system that can:
+
+* Front players premium stuff now
+* Let them “pay it off” by **skill**, **grind**, or **cash**
+* Scale risk/reward via a **credit score**
+
+Let’s merge all 3 into *one* clean model you could actually implement.
+
+---
+
+## 1. One unified concept: **Advance Contracts**
+
+Name for players:
+
+> **Advance Contracts** – “Get premium rewards early, complete the contract to keep them.”
+
+Internally: every “loan” is just a **Contract** object with three axes:
+
+1. **What you’re advancing** (Principal)
+
+   * Premium Pass / Season Track
+   * Card upgrades / power boosts
+   * Cosmetics / access to special modes
+
+2. **How they earn it** (Conditions)
+
+   * **Skill** milestones (rank, wins, crowns)
+   * **Engagement** milestones (daily logins, games played, quests)
+   * **Hybrid** (player choice or system-chosen mix)
+
+3. **How risky / generous it is** (Credit Tier)
+
+   * Tied to a **Player Credit Score**
+   * Higher tier = bigger advances + softer penalties
+
+So the 3 variations become:
+
+* **Variation A (Skill)** → “Performance Contract”
+* **Variation B (Engagement)** → “Grind Contract”
+* **Variation C (Credit Score)** → “Credit Tier” that scales the first two
+
+All powered by the same underlying data model.
+
+---
+
+## 2. Data model for the unified system
+
+You could literally model everything like:
+
+### 2.1. Player Credit Profile
+
+```pseudo
+PlayerCreditProfile {
+  player_id
+  credit_score        // 0–100 or E/D/C/B/A/S
+  trust_tier          // Bronze / Silver / Gold / Platinum
+  total_contracts     // number ever taken
+  successful_contracts
+  failed_contracts
+  last_contract_end   // timestamp
+}
+```
+
+* **credit_score** goes up when they complete contracts, down when they fail.
+* **trust_tier** is a discretized version of the score (Bronze, Silver, Gold…).
+* Used to gate:
+
+  * Max principal value
+  * Max contracts per season
+  * Interest size / penalty severity
+
+---
+
+### 2.2. Generic Advance Contract
+
+```pseudo
+AdvanceContract {
+  contract_id
+  player_id
+
+  contract_type          // "PASS", "UPGRADE", "COSMETIC", "ACCESS"
+  reward_package_id      // look up what they get
+
+  // Timing
+  start_time
+  end_time
+
+  // Conditions (all optional, you can combine)
+  required_rank          // e.g. Gold League
+  required_wins          // e.g. 50 wins this season
+  required_crowns        // e.g. 200 crowns
+  required_play_days     // e.g. 10 unique days
+  required_matches       // e.g. 100 matches
+  required_quests        // e.g. complete 15 daily quests
+
+  // Outcomes
+  success_rewards        // what becomes permanent
+  failure_penalties      // what’s revoked / nerfed
+  failure_options        // e.g. "PAY_GEMS", "HARD_QUEST", "FORFEIT"
+
+  // Economy
+  principal_value        // internal $ value of the loaned package
+  expected_ARPU_impact   // for analytics
+  interest_soft_currency // gold fee, if any
+  interest_hard_currency // gem fee, if any
+
+  status                 // ACTIVE, SUCCEEDED, FAILED, SETTLED
+  progress_state         // cached counters for UI
+}
+```
+
+Everything you want (A/B/C) is just different **parameter sets** for this one object.
+
+---
+
+## 3. How the **three variations** live inside this model
+
+### 3.1. Variation A – **Performance Contract (Skill-based loan)**
+
+* `contract_type`: usually `"PASS"` or `"UPGRADE"`
+* Key condition fields:
+
+  * `required_rank`, `required_wins`, `required_crowns`
+* Example template:
+
+```pseudo
+PerformanceContractTemplate {
+  name: "Advance Gold Pass"
+  contract_type: "PASS"
+  duration_days: 28
+
+  required_rank: "Gold League"
+  required_wins: 80
+  required_crowns: 200
+
+  failure_options: ["PAY_GEMS", "FORFEIT_FINAL_REWARDS"]
+}
+```
+
+**How it uses credit score:**
+
+* Bronze: smaller goal (e.g. Silver League), fewer rewards
+* Gold: bigger pass, but maybe only rank OR wins required
+* Platinum: huge pass, generous conditions, low “interest”
+
+---
+
+### 3.2. Variation B – **Grind Contract (Engagement loan)**
+
+* `contract_type`: usually `"UPGRADE"` or `"ACCESS"`
+* Key condition fields:
+
+  * `required_play_days`, `required_matches`, `required_quests`
+* Example template:
+
+```pseudo
+GrindContractTemplate {
+  name: "Upgrade Bundle Advance"
+  contract_type: "UPGRADE"
+  duration_days: 14
+
+  required_play_days: 10
+  required_matches: 120
+  required_quests: 12
+
+  failure_options: ["PAY_GEMS", "EXTRA_QUEST_CHAIN"]
+}
+```
+
+**How it uses credit score:**
+
+* Low-tier players: lower daily demands (e.g., 5 days / 60 matches)
+* High-tier: more demanding grind, but **bigger upgrade bundle** upfront
+
+---
+
+### 3.3. Variation C – **Credit Tier (Loyalty-based scaling)**
+
+You don’t make “credit” its own contract; you use it to **scale all contracts**:
+
+Example tiers:
+
+| Tier   | Credit Score | Max Active Contracts | Max Principal per Season | Interest Style                  | Penalty Style                          |
+| ------ | ------------ | -------------------- | ------------------------ | ------------------------------- | -------------------------------------- |
+| Bronze | 0–20         | 1                    | Small (e.g. $3 value)    | None or very low soft-currency  | Mild: lose some rewards, no shaming    |
+| Silver | 21–50        | 2                    | Medium (e.g. $10 value)  | Soft-currency + tiny gem option | Medium: minor gem fee or downgrade     |
+| Gold   | 51–80        | 3                    | Large (e.g. $25 value)   | Mostly time-based, low gem fee  | Can lose some perks; cooldown on fail  |
+| Plat   | 81–100+      | 4                    | Very large (e.g. $50+)   | Very low interest, flexible     | Gentle: mainly cooldown, no heavy loss |
+
+Credit score updates:
+
+* **On success:**
+
+  * `credit_score += small_bonus + bonus_by_difficulty`
+  * Count `successful_contracts++`
+* **On fail & settle:**
+
+  * `credit_score -= penalty_based_on_severity`
+  * `failed_contracts++`
+  * Maybe temporary “loan cooldown” flag
+
+---
+
+## 4. Unified **player flow** (all 3 in action)
+
+Here’s what happens when a player clicks `“Get Advance”` in your game:
+
+1. **Eligibility check**
+
+   * Fetch `PlayerCreditProfile`.
+   * Check:
+
+     * Has fewer than `max_active_contracts` for their tier.
+     * No active **cooldown** flag.
+
+2. **Offer selection (variation A + B)**
+   You can show 3 choices – all driven by the same model:
+
+   * **Option 1: Performance Contract**
+
+     * “Reach Gold League *or* win 80 matches this season to keep the Gold Pass.”
+
+   * **Option 2: Grind Contract**
+
+     * “Play 10 days and complete 15 daily quests to keep these card upgrades.”
+
+   * **Option 3: Hybrid (Smart suggestion)**
+
+     * Based on their past stats (are they high winrate but low daily play, or vice versa), auto-highlight the contract they’re most likely to complete.
+
+3. **Scale by credit tier (variation C)**
+
+   * The same templates are scaled:
+
+     * Bronze: smaller rewards, easier conditions.
+     * Gold/Plat: bigger rewards, possibly tougher targets but more forgiving penalties.
+
+4. **Grant principal upfront**
+
+   * Immediately give:
+
+     * Premium track access, or
+     * Temporary boosted card levels, or
+     * Access to a special mode / event.
+   * Mark all such content as **“Advance”** in UI (icon/tag).
+
+5. **Track progress**
+
+   * Every match / login / quest updates `progress_state` of the active contracts.
+   * Big, visible progress bar on home screen.
+
+6. **Contract end**
+
+   * When `end_time` arrives:
+
+     * Evaluate conditions vs `required_*` fields.
+     * If success:
+
+       * Status → `SUCCEEDED`
+       * Convert all temp rewards into **permanent** ones.
+       * Boost credit score.
+     * If failure:
+
+       * Show a clear settlement screen:
+
+         * “You’re short by 10 wins or 2 play days.”
+         * Present **failure_options**:
+
+           * Pay small gem fee
+           * Accept downgraded rewards
+           * Take a “redemption questline”
+       * Adjust credit score & possibly apply a cooldown.
+
+7. **Update PlayerCreditProfile**
+
+   * Adjust `credit_score`, `trust_tier`, and counters.
+   * This affects what they’ll be offered next season.
+
+---
+
+## 5. Example: All 3 in one season for one player
+
+Let’s run a story for a player “Rich”:
+
+1. **Season start – Bronze Tier**
+
+   * Gets offered 1 **Advance Contract**:
+
+     * *Performance-based Gold Pass Advance* (small version).
+     * Goal: reach Silver League + 30 wins in 28 days.
+   * Principal: lightweight pass worth, say, $5.
+
+2. **Mid-season – Good performance**
+
+   * Rich completes the contract easily.
+   * Rewards become permanent, credit score jumps → now **Silver Tier**.
+   * Next season, system offers:
+
+     * Performance Contract: Full Gold Pass on credit (tougher rank goals).
+     * Grind Contract: Upgrade Bundle (play X days, watch some ads, finish quests).
+     * Both sized bigger because Silver Tier allows higher principal.
+
+3. **Later – He overreaches**
+
+   * As Silver/Gold Tier, he takes a **big Performance Contract**: full deluxe pass + juicy upgrades.
+   * Life happens, misses the rank goal.
+   * At season end:
+
+     * Gets “settlement screen”:
+
+       * Option A: pay cheap gem fee (less than full pass price)
+       * Option B: lose some premium tiers + go on 7-day loan cooldown
+     * He chooses gem fee → you monetize a failed contract *without* feeling like a scam because he had full season to achieve it.
+
+4. **System effect**
+
+   * Rich sees this as:
+
+     * “They let me play with the good stuff all season, I didn’t quite make it, I’ll just pay a bit.”
+   * You see:
+
+     * **Retention:** he played all season.
+     * **Revenue:** gem fee + likely future contracts.
+     * **Data:** his credit score & behaviour help you tune future offers.
+
+---
+
+## 6. UX / Safety / Store-friendly design
+
+To keep this cool (and not creepy):
+
+1. **Never call it “debt” or “loan” in the UI**
+
+   * Use words like **Advance**, **Contract**, **Early Unlock**, **Challenge**.
+
+2. **Radical clarity**
+
+   * One panel that always shows:
+
+     * What you got now
+     * What you must do
+     * By when
+     * What happens if you don’t
+
+3. **No real-world financial framing**
+
+   * No APR, interest %, “credit check” language.
+   * All “interest” is just in-game: extra grind, soft currency, tiny gem fee.
+
+4. **Always give a free escape**
+
+   * On failure, always allow:
+
+     * “Forfeit extras, I’ll just walk away.”
+   * No situation where player feels forced to spend real money.
+
+5. **Tune with data, not greed**
+
+   * If you see:
+
+     * High uptake + high success + good retention → you can be a bit more generous.
+     * High failure + churn → ease goals *or* soften penalties.
+
+---
+
+## 7. Text mind-map of the unified model
+
+You can copy-paste this into a doc or mind-mapping tool:
+
+* **Advance System (Core)**
+
+  * PlayerCreditProfile
+
+    * credit_score
+    * trust_tier (Bronze/Silver/Gold/Plat)
+    * successful_contracts
+    * failed_contracts
+    * cooldown_flags
+  * AdvanceContract
+
+    * contract_type (PASS/UPGRADE/COSMETIC/ACCESS)
+    * reward_package_id
+    * duration (start_time, end_time)
+    * Conditions
+
+      * required_rank
+      * required_wins
+      * required_crowns
+      * required_play_days
+      * required_matches
+      * required_quests
+    * Outcomes
+
+      * success_rewards (permanent unlocks)
+      * failure_penalties (downgrade, revoke, cooldown)
+      * failure_options (pay gems, extra quests, forfeit)
+    * Economy
+
+      * principal_value
+      * interest_soft_currency
+      * interest_hard_currency
+  * Contract Types
+
+    * Performance Contracts (Skill-based)
+
+      * Rank & win targets
+      * Great for Pass & high-value bundles
+    * Grind Contracts (Engagement-based)
+
+      * Daily logins, matches, quests, ads
+      * Great for upgrades & access
+    * Hybrid Contracts
+
+      * Player chooses skill vs grind route
+  * Credit Tier Scaling
+
+    * Bronze → small advances, easy contracts
+    * Silver → medium advances, balanced conditions
+    * Gold → big advances, tougher conditions, mild interest
+    * Plat → huge advances, most generous terms, long cooldown if abused
+  * Player Flow
+
+    * Check credit & cooldown
+    * Offer contract options (perf / grind / hybrid)
+    * Grant rewards upfront
+    * Track progress visually
+    * Settle at end (success / failure options)
+    * Update credit profile
+
+---
+
+If you want next, I can:
+
+* Turn this into a **simple JSON spec** you can plug into your backend, or
+* Design the **exact numbers** for a sample season (how many wins, how many days, how many gems, etc.) so you can A/B test in a prototype.

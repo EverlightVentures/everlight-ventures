@@ -1,16 +1,13 @@
-import React, { useMemo } from "react"
-import {
-  ComposedChart, Bar, Line, Area, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, ReferenceLine, Cell, Rectangle
-} from "recharts"
+import React, { useRef, useEffect, useMemo } from "react"
+import { createChart, CrosshairMode } from "lightweight-charts"
 
-/* ── Indicator math ─────────────────────────────────────────────── */
-function calcEMA(data, period, key = "c") {
+/* -- Indicator math -- */
+function calcEMA(data, period) {
   const k = 2 / (period + 1)
   const out = []
   let prev = null
   for (const d of data) {
-    const val = d[key]
+    const val = d.c
     if (val == null) { out.push(null); continue }
     if (prev == null) { prev = val; out.push(val); continue }
     prev = val * k + prev * (1 - k)
@@ -41,441 +38,367 @@ function calcRSI(data, period = 14) {
 }
 
 function calcBollinger(data, period = 20, mult = 2) {
-  const upper = [], lower = [], mid = []
+  const upper = [], lower = []
   for (let i = 0; i < data.length; i++) {
-    if (i < period - 1) { upper.push(null); lower.push(null); mid.push(null); continue }
+    if (i < period - 1) { upper.push(null); lower.push(null); continue }
     let sum = 0
     for (let j = i - period + 1; j <= i; j++) sum += data[j].c
     const mean = sum / period
     let sqSum = 0
     for (let j = i - period + 1; j <= i; j++) sqSum += (data[j].c - mean) ** 2
     const std = Math.sqrt(sqSum / period)
-    mid.push(mean)
     upper.push(mean + mult * std)
     lower.push(mean - mult * std)
   }
-  return { upper, lower, mid }
+  return { upper, lower }
 }
 
-/* ── Custom candlestick shape ───────────────────────────────────── */
-function CandlestickBar(props) {
-  const { x, y, width, height, payload } = props
-  if (!payload) return null
-  const { o, c, h, l, yScale } = payload
-  if (o == null || c == null || h == null || l == null || !yScale) return null
-
-  const bull = c >= o
-  const fill = bull ? "#00e676" : "#ff1744"
-  const fillBody = bull ? "rgba(0,230,118,0.85)" : "rgba(255,23,68,0.85)"
-
-  const bodyTop = yScale(Math.max(o, c))
-  const bodyBot = yScale(Math.min(o, c))
-  const bodyH = Math.max(bodyBot - bodyTop, 1)
-  const wickTop = yScale(h)
-  const wickBot = yScale(l)
-  const cx = x + width / 2
-
-  return (
-    <g>
-      {/* Wick */}
-      <line x1={cx} y1={wickTop} x2={cx} y2={wickBot} stroke={fill} strokeWidth={1} />
-      {/* Body */}
-      <rect
-        x={x + width * 0.15}
-        y={bodyTop}
-        width={width * 0.7}
-        height={bodyH}
-        fill={fillBody}
-        stroke={fill}
-        strokeWidth={0.5}
-        rx={1}
-      />
-    </g>
-  )
+/* -- Chart colors -- */
+const COLORS = {
+  bg: "#0a0a0f",
+  grid: "rgba(255,255,255,0.03)",
+  text: "#555",
+  crosshair: "#666",
+  bullCandle: "#00e676",
+  bearCandle: "#ff1744",
+  bullWick: "#00e676",
+  bearWick: "#ff1744",
+  ema8: "#00bcd4",
+  ema21: "#ff9100",
+  bbUpper: "rgba(179,136,255,0.35)",
+  bbLower: "rgba(179,136,255,0.35)",
+  volBull: "rgba(0,230,118,0.25)",
+  volBear: "rgba(255,23,68,0.25)",
+  rsiLine: "#b388ff",
+  rsiOver: "rgba(255,23,68,0.25)",
+  rsiUnder: "rgba(0,230,118,0.25)",
 }
 
-/* ── Custom tooltip ─────────────────────────────────────────────── */
-function ChartTooltip({ active, payload }) {
-  if (!active || !payload?.length) return null
-  const d = payload[0]?.payload
-  if (!d) return null
-  const bull = d.c >= d.o
-  return (
-    <div className="chart-tooltip" style={{ minWidth: 180 }}>
-      <div className="text-[10px] text-gray-400 mb-1.5 border-b border-gray-700 pb-1">{d.time}</div>
-      <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs font-mono">
-        <span className="text-gray-500">Open</span><span>{d.o?.toFixed(5)}</span>
-        <span className="text-gray-500">High</span><span className="text-green-400">{d.h?.toFixed(5)}</span>
-        <span className="text-gray-500">Low</span><span className="text-red-400">{d.l?.toFixed(5)}</span>
-        <span className="text-gray-500">Close</span>
-        <span className={bull ? "text-green-400" : "text-red-400"}>{d.c?.toFixed(5)}</span>
-        <span className="text-gray-500">Vol</span><span className="text-blue-300">{d.v?.toLocaleString()}</span>
-      </div>
-      {(d.ema8 != null || d.ema21 != null) && (
-        <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs font-mono mt-1 pt-1 border-t border-gray-700">
-          {d.ema8 != null && <><span className="text-cyan-500">EMA 8</span><span>{d.ema8.toFixed(5)}</span></>}
-          {d.ema21 != null && <><span className="text-amber-500">EMA 21</span><span>{d.ema21.toFixed(5)}</span></>}
-        </div>
-      )}
-      {d.rsi != null && (
-        <div className="text-xs font-mono mt-1 pt-1 border-t border-gray-700">
-          <span className="text-purple-400">RSI </span>
-          <span className={d.rsi > 70 ? "text-red-400" : d.rsi < 30 ? "text-green-400" : "text-gray-300"}>
-            {d.rsi.toFixed(1)}
-          </span>
-        </div>
-      )}
-    </div>
-  )
-}
-
-/* ── RSI Tooltip ────────────────────────────────────────────────── */
-function RSITooltip({ active, payload }) {
-  if (!active || !payload?.length) return null
-  const d = payload[0]?.payload
-  if (!d || d.rsi == null) return null
-  return (
-    <div className="chart-tooltip" style={{ padding: "4px 8px" }}>
-      <span className="text-[10px] text-gray-400">{d.time} </span>
-      <span className="text-xs font-mono text-purple-400">RSI {d.rsi?.toFixed(1)}</span>
-    </div>
-  )
-}
-
-/* ── Entry/Exit markers ─────────────────────────────────────────── */
-function EntryMarker({ cx, cy }) {
-  return (
-    <g>
-      <polygon points={`${cx},${cy - 14} ${cx - 6},${cy - 4} ${cx + 6},${cy - 4}`} fill="#00e676" stroke="#00e676" opacity={0.9} />
-      <circle cx={cx} cy={cy} r={3} fill="#00e676" />
-    </g>
-  )
-}
-
-function ExitMarker({ cx, cy }) {
-  return (
-    <g>
-      <polygon points={`${cx},${cy + 14} ${cx - 6},${cy + 4} ${cx + 6},${cy + 4}`} fill="#ff1744" stroke="#ff1744" opacity={0.9} />
-      <circle cx={cx} cy={cy} r={3} fill="#ff1744" />
-    </g>
-  )
-}
-
-/* ── Pulsing price dot ──────────────────────────────────────────── */
-function PulseDot(props) {
-  const { cx, cy, index, dataLength } = props
-  if (index !== dataLength - 1) return null
-  return (
-    <g>
-      <circle cx={cx} cy={cy} r={6} fill="none" stroke="#ffd740" strokeWidth={1.5} opacity={0.4}>
-        <animate attributeName="r" from="4" to="14" dur="2s" repeatCount="indefinite" />
-        <animate attributeName="opacity" from="0.6" to="0" dur="2s" repeatCount="indefinite" />
-      </circle>
-      <circle cx={cx} cy={cy} r={4} fill="#ffd740" stroke="#ffd740" strokeWidth={1} />
-    </g>
-  )
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   MAIN COMPONENT
-   ══════════════════════════════════════════════════════════════════ */
 export default function PriceChart({ candles, height = 400, position }) {
-  const data = useMemo(() => {
-    if (!candles?.length) return []
+  const mainRef = useRef(null)
+  const rsiRef = useRef(null)
+  const chartRef = useRef(null)
+  const rsiChartRef = useRef(null)
+
+  // Convert candle data
+  const { ohlc, vol, ema8Data, ema21Data, bbUp, bbLo, rsiData } = useMemo(() => {
+    if (!candles?.length) return { ohlc: [], vol: [], ema8Data: [], ema21Data: [], bbUp: [], bbLo: [], rsiData: [] }
     const ema8 = calcEMA(candles, 8)
     const ema21 = calcEMA(candles, 21)
     const rsi = calcRSI(candles, 14)
     const bb = calcBollinger(candles, 20, 2)
 
-    return candles.map((c, i) => ({
-      time: new Date(c.t * 1000).toLocaleTimeString("en-US", {
-        hour: "2-digit", minute: "2-digit", hour12: false, timeZone: "America/Los_Angeles"
-      }),
-      ts: c.t,
-      o: c.o, h: c.h, l: c.l, c: c.c, v: c.v,
-      ema8: ema8[i], ema21: ema21[i],
-      rsi: rsi[i],
-      bbUpper: bb.upper[i], bbLower: bb.lower[i], bbMid: bb.mid[i],
-      // Bollinger band fill range
-      bbRange: bb.upper[i] != null ? [bb.lower[i], bb.upper[i]] : undefined,
-      // For candlestick coloring
-      bull: c.c >= c.o,
-      // Volume color
-      volColor: c.c >= c.o ? "rgba(0,230,118,0.35)" : "rgba(255,23,68,0.35)",
-    }))
+    const ohlc = []
+    const vol = []
+    const ema8Data = []
+    const ema21Data = []
+    const bbUp = []
+    const bbLo = []
+    const rsiData = []
+
+    for (let i = 0; i < candles.length; i++) {
+      const c = candles[i]
+      const time = c.t
+      ohlc.push({ time, open: c.o, high: c.h, low: c.l, close: c.c })
+      vol.push({ time, value: c.v, color: c.c >= c.o ? COLORS.volBull : COLORS.volBear })
+      if (ema8[i] != null) ema8Data.push({ time, value: ema8[i] })
+      if (ema21[i] != null) ema21Data.push({ time, value: ema21[i] })
+      if (bb.upper[i] != null) bbUp.push({ time, value: bb.upper[i] })
+      if (bb.lower[i] != null) bbLo.push({ time, value: bb.lower[i] })
+      if (rsi[i] != null) rsiData.push({ time, value: rsi[i] })
+    }
+
+    return { ohlc, vol, ema8Data, ema21Data, bbUp, bbLo, rsiData }
   }, [candles])
 
-  // Attach yScale to data after computing domain
-  const { priceMin, priceMax, volMax } = useMemo(() => {
-    if (!data.length) return { priceMin: 0, priceMax: 1, volMax: 1 }
-    let pMin = Infinity, pMax = -Infinity, vMax = 0
-    for (const d of data) {
-      const lo = Math.min(d.l, d.bbLower ?? d.l)
-      const hi = Math.max(d.h, d.bbUpper ?? d.h)
-      if (lo < pMin) pMin = lo
-      if (hi > pMax) pMax = hi
-      if (d.v > vMax) vMax = d.v
+  const mainH = Math.round(height * 0.75)
+  const rsiH = Math.round(height * 0.22)
+
+  // Main chart
+  useEffect(() => {
+    if (!mainRef.current || !ohlc.length) return
+
+    // Clean up previous chart
+    if (chartRef.current) {
+      chartRef.current.remove()
+      chartRef.current = null
     }
-    const pad = (pMax - pMin) * 0.02
-    return { priceMin: pMin - pad, priceMax: pMax + pad, volMax }
-  }, [data])
 
-  // Entry/exit timestamps from position
-  const entryTs = position?.entry_ts
-  const exitTs = position?.exit_ts
+    const chart = createChart(mainRef.current, {
+      width: mainRef.current.clientWidth,
+      height: mainH,
+      layout: {
+        background: { color: "transparent" },
+        textColor: COLORS.text,
+        fontSize: 10,
+      },
+      grid: {
+        vertLines: { color: COLORS.grid },
+        horzLines: { color: COLORS.grid },
+      },
+      crosshair: {
+        mode: CrosshairMode.Normal,
+        vertLine: { color: COLORS.crosshair, width: 1, style: 3, labelBackgroundColor: "#1a1a2e" },
+        horzLine: { color: COLORS.crosshair, width: 1, style: 3, labelBackgroundColor: "#1a1a2e" },
+      },
+      rightPriceScale: {
+        borderColor: "rgba(255,255,255,0.05)",
+        scaleMargins: { top: 0.05, bottom: 0.2 },
+      },
+      timeScale: {
+        borderColor: "rgba(255,255,255,0.05)",
+        timeVisible: true,
+        secondsVisible: false,
+      },
+      handleScroll: { mouseWheel: true, pressedMouseMove: true },
+      handleScale: { mouseWheel: true, pinch: true },
+    })
 
-  if (!data.length) {
+    // Candlestick series
+    const candleSeries = chart.addCandlestickSeries({
+      upColor: COLORS.bullCandle,
+      downColor: COLORS.bearCandle,
+      wickUpColor: COLORS.bullWick,
+      wickDownColor: COLORS.bearWick,
+      borderUpColor: COLORS.bullCandle,
+      borderDownColor: COLORS.bearCandle,
+    })
+    candleSeries.setData(ohlc)
+
+    // Volume as histogram on same pane
+    const volSeries = chart.addHistogramSeries({
+      priceFormat: { type: "volume" },
+      priceScaleId: "vol",
+      scaleMargins: { top: 0.85, bottom: 0 },
+    })
+    chart.priceScale("vol").applyOptions({
+      scaleMargins: { top: 0.85, bottom: 0 },
+    })
+    volSeries.setData(vol)
+
+    // EMA 8
+    const ema8Series = chart.addLineSeries({
+      color: COLORS.ema8,
+      lineWidth: 1,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
+    })
+    ema8Series.setData(ema8Data)
+
+    // EMA 21
+    const ema21Series = chart.addLineSeries({
+      color: COLORS.ema21,
+      lineWidth: 1,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
+    })
+    ema21Series.setData(ema21Data)
+
+    // Bollinger upper
+    const bbUpSeries = chart.addLineSeries({
+      color: COLORS.bbUpper,
+      lineWidth: 1,
+      lineStyle: 2,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
+    })
+    bbUpSeries.setData(bbUp)
+
+    // Bollinger lower
+    const bbLoSeries = chart.addLineSeries({
+      color: COLORS.bbLower,
+      lineWidth: 1,
+      lineStyle: 2,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      crosshairMarkerVisible: false,
+    })
+    bbLoSeries.setData(bbLo)
+
+    // Position markers: entry, stop loss, TP levels
+    if (position?.entry_price) {
+      const isLong = position.direction === "long"
+      // Entry line
+      candleSeries.createPriceLine({
+        price: position.entry_price,
+        color: isLong ? "#00e676" : "#ff1744",
+        lineWidth: 2,
+        lineStyle: 0,
+        axisLabelVisible: true,
+        title: "ENTRY " + (position.entry_type || "").replace(/_/g, " ").toUpperCase(),
+      })
+      // Stop loss
+      if (position.stop_loss) {
+        candleSeries.createPriceLine({
+          price: position.stop_loss,
+          color: "rgba(255,23,68,0.6)",
+          lineWidth: 1,
+          lineStyle: 2,
+          axisLabelVisible: true,
+          title: "SL",
+        })
+      }
+      // TP1
+      if (position.tp1) {
+        candleSeries.createPriceLine({
+          price: position.tp1,
+          color: "rgba(0,230,118,0.5)",
+          lineWidth: 1,
+          lineStyle: 2,
+          axisLabelVisible: true,
+          title: "TP1",
+        })
+      }
+      // TP2
+      if (position.tp2) {
+        candleSeries.createPriceLine({
+          price: position.tp2,
+          color: "rgba(0,230,118,0.35)",
+          lineWidth: 1,
+          lineStyle: 3,
+          axisLabelVisible: true,
+          title: "TP2",
+        })
+      }
+      // TP3
+      if (position.tp3) {
+        candleSeries.createPriceLine({
+          price: position.tp3,
+          color: "rgba(0,230,118,0.2)",
+          lineWidth: 1,
+          lineStyle: 3,
+          axisLabelVisible: true,
+          title: "TP3",
+        })
+      }
+      // Entry time marker
+      if (position.entry_time) {
+        try {
+          const entryTs = Math.floor(new Date(position.entry_time).getTime() / 1000)
+          candleSeries.setMarkers([{
+            time: entryTs,
+            position: isLong ? "belowBar" : "aboveBar",
+            color: isLong ? "#00e676" : "#ff1744",
+            shape: isLong ? "arrowUp" : "arrowDown",
+            text: (position.quality_tier || "") + " " + (position.direction || "").toUpperCase(),
+          }])
+        } catch (e) {}
+      }
+    }
+
+    // Fit content
+    chart.timeScale().fitContent()
+
+    // Resize handler
+    const resize = () => {
+      if (mainRef.current) chart.applyOptions({ width: mainRef.current.clientWidth })
+    }
+    window.addEventListener("resize", resize)
+    chartRef.current = chart
+
+    return () => {
+      window.removeEventListener("resize", resize)
+      chart.remove()
+      chartRef.current = null
+    }
+  }, [ohlc, vol, ema8Data, ema21Data, bbUp, bbLo, mainH, position])
+
+  // RSI chart
+  useEffect(() => {
+    if (!rsiRef.current || !rsiData.length) return
+
+    if (rsiChartRef.current) {
+      rsiChartRef.current.remove()
+      rsiChartRef.current = null
+    }
+
+    const chart = createChart(rsiRef.current, {
+      width: rsiRef.current.clientWidth,
+      height: rsiH,
+      layout: {
+        background: { color: "transparent" },
+        textColor: COLORS.text,
+        fontSize: 9,
+      },
+      grid: {
+        vertLines: { color: COLORS.grid },
+        horzLines: { color: COLORS.grid },
+      },
+      crosshair: {
+        mode: CrosshairMode.Normal,
+        vertLine: { visible: false },
+        horzLine: { color: COLORS.crosshair, width: 1, style: 3 },
+      },
+      rightPriceScale: {
+        borderColor: "rgba(255,255,255,0.05)",
+        scaleMargins: { top: 0.05, bottom: 0.05 },
+      },
+      timeScale: { visible: false },
+      handleScroll: false,
+      handleScale: false,
+    })
+
+    const rsiSeries = chart.addLineSeries({
+      color: COLORS.rsiLine,
+      lineWidth: 1.5,
+      priceLineVisible: false,
+      lastValueVisible: true,
+      crosshairMarkerVisible: true,
+    })
+    rsiSeries.setData(rsiData)
+
+    // Overbought/oversold lines
+    rsiSeries.createPriceLine({ price: 70, color: COLORS.rsiOver, lineWidth: 1, lineStyle: 2, axisLabelVisible: false })
+    rsiSeries.createPriceLine({ price: 30, color: COLORS.rsiUnder, lineWidth: 1, lineStyle: 2, axisLabelVisible: false })
+    rsiSeries.createPriceLine({ price: 50, color: "rgba(100,100,130,0.15)", lineWidth: 1, lineStyle: 3, axisLabelVisible: false })
+
+    chart.timeScale().fitContent()
+
+    const resize = () => {
+      if (rsiRef.current) chart.applyOptions({ width: rsiRef.current.clientWidth })
+    }
+    window.addEventListener("resize", resize)
+    rsiChartRef.current = chart
+
+    return () => {
+      window.removeEventListener("resize", resize)
+      chart.remove()
+      rsiChartRef.current = null
+    }
+  }, [rsiData, rsiH])
+
+  if (!candles?.length) {
     return (
       <div className="flex items-center justify-center text-gray-600 text-sm" style={{ height }}>
         <div className="flex items-center gap-2">
-          <div className="live-indicator" style={{ background: "#555" }} />
+          <div className="w-2 h-2 rounded-full bg-gray-600 animate-pulse" />
           Loading chart data...
         </div>
       </div>
     )
   }
 
-  const mainH = Math.round(height * 0.75)
-  const rsiH = 80
-
   return (
     <div className="chart-container">
-      {/* ── Main price chart ──────────────────────────────────────── */}
-      <ResponsiveContainer width="100%" height={mainH}>
-        <ComposedChart data={data} margin={{ top: 8, right: 10, left: 0, bottom: 0 }}>
-          <defs>
-            <linearGradient id="bbFillGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#b388ff" stopOpacity={0.08} />
-              <stop offset="50%" stopColor="#b388ff" stopOpacity={0.04} />
-              <stop offset="100%" stopColor="#b388ff" stopOpacity={0.08} />
-            </linearGradient>
-            <linearGradient id="volGreenGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00e676" stopOpacity={0.4} />
-              <stop offset="100%" stopColor="#00e676" stopOpacity={0.1} />
-            </linearGradient>
-            <linearGradient id="volRedGrad" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#ff1744" stopOpacity={0.4} />
-              <stop offset="100%" stopColor="#ff1744" stopOpacity={0.1} />
-            </linearGradient>
-          </defs>
-
-          <XAxis
-            dataKey="time"
-            tick={{ fontSize: 9, fill: "#444" }}
-            tickLine={false}
-            axisLine={{ stroke: "#1a1a2e" }}
-            interval={Math.max(1, Math.floor(data.length / 8))}
-          />
-
-          {/* Price axis */}
-          <YAxis
-            yAxisId="price"
-            domain={[priceMin, priceMax]}
-            tick={{ fontSize: 9, fill: "#555" }}
-            tickLine={false}
-            axisLine={false}
-            tickFormatter={v => v.toFixed(4)}
-            width={62}
-            orientation="right"
-          />
-
-          {/* Volume axis (hidden, scaled to 30% of chart) */}
-          <YAxis
-            yAxisId="vol"
-            domain={[0, volMax * 3.3]}
-            hide
-          />
-
-          <Tooltip content={<ChartTooltip />} />
-
-          {/* Bollinger Band fill */}
-          <Area
-            yAxisId="price"
-            dataKey="bbUpper"
-            stroke="none"
-            fill="none"
-            dot={false}
-            activeDot={false}
-          />
-          <Area
-            yAxisId="price"
-            dataKey="bbLower"
-            stroke="none"
-            fill="url(#bbFillGradient)"
-            dot={false}
-            activeDot={false}
-            baseValue="dataMax"
-          />
-
-          {/* Bollinger lines */}
-          <Line
-            yAxisId="price"
-            dataKey="bbUpper"
-            stroke="rgba(179,136,255,0.25)"
-            strokeWidth={1}
-            strokeDasharray="4 4"
-            dot={false}
-            activeDot={false}
-          />
-          <Line
-            yAxisId="price"
-            dataKey="bbLower"
-            stroke="rgba(179,136,255,0.25)"
-            strokeWidth={1}
-            strokeDasharray="4 4"
-            dot={false}
-            activeDot={false}
-          />
-
-          {/* Volume bars */}
-          <Bar yAxisId="vol" dataKey="v" barSize={4} radius={[1, 1, 0, 0]}>
-            {data.map((d, i) => (
-              <Cell key={i} fill={d.bull ? "url(#volGreenGrad)" : "url(#volRedGrad)"} />
-            ))}
-          </Bar>
-
-          {/* Candlestick bodies rendered as custom bars on close price */}
-          <Bar
-            yAxisId="price"
-            dataKey="c"
-            barSize={8}
-            shape={(props) => {
-              const { payload, x, width } = props
-              if (!payload?.o || !payload?.c) return null
-              const bull = payload.c >= payload.o
-              const bodyTop = Math.max(payload.o, payload.c)
-              const bodyBot = Math.min(payload.o, payload.c)
-              // We need to convert prices to pixels using the y axis
-              // The YAxis domain and chart area give us the mapping
-              return null // placeholder, we use the custom rendering below
-            }}
-            hide
-          />
-
-          {/* EMA 8 */}
-          <Line
-            yAxisId="price"
-            dataKey="ema8"
-            stroke="#00bcd4"
-            strokeWidth={1.2}
-            dot={false}
-            activeDot={false}
-            connectNulls
-          />
-
-          {/* EMA 21 */}
-          <Line
-            yAxisId="price"
-            dataKey="ema21"
-            stroke="#ff9100"
-            strokeWidth={1.2}
-            dot={false}
-            activeDot={false}
-            connectNulls
-          />
-
-          {/* Price close line (thin, for structure) */}
-          <Line
-            yAxisId="price"
-            dataKey="c"
-            stroke="rgba(255,215,64,0.6)"
-            strokeWidth={1.5}
-            dot={(dotProps) => (
-              <PulseDot {...dotProps} dataLength={data.length} />
-            )}
-            activeDot={{ r: 3, fill: "#ffd740", stroke: "#ffd740" }}
-            connectNulls
-          />
-
-          {/* High/Low range as thin candle wicks */}
-          <Line
-            yAxisId="price"
-            dataKey="h"
-            stroke="none"
-            dot={false}
-            activeDot={false}
-          />
-
-          {/* Entry marker */}
-          {entryTs && (
-            <ReferenceLine
-              yAxisId="price"
-              x={data.find(d => d.ts >= entryTs)?.time}
-              stroke="#00e676"
-              strokeDasharray="3 3"
-              strokeWidth={1}
-              label={{ value: "ENTRY", position: "top", fill: "#00e676", fontSize: 9 }}
-            />
-          )}
-
-          {/* Exit marker */}
-          {exitTs && (
-            <ReferenceLine
-              yAxisId="price"
-              x={data.find(d => d.ts >= exitTs)?.time}
-              stroke="#ff1744"
-              strokeDasharray="3 3"
-              strokeWidth={1}
-              label={{ value: "EXIT", position: "top", fill: "#ff1744", fontSize: 9 }}
-            />
-          )}
-
-          {/* Entry price horizontal */}
-          {position?.entry_price && (
-            <ReferenceLine
-              yAxisId="price"
-              y={position.entry_price}
-              stroke="rgba(0,230,118,0.3)"
-              strokeDasharray="6 4"
-              strokeWidth={1}
-            />
-          )}
-        </ComposedChart>
-      </ResponsiveContainer>
-
-      {/* ── RSI sub-chart ─────────────────────────────────────────── */}
-      <div style={{ marginTop: -1 }}>
-        <ResponsiveContainer width="100%" height={rsiH}>
-          <ComposedChart data={data} margin={{ top: 4, right: 10, left: 0, bottom: 0 }}>
-            <XAxis dataKey="time" hide />
-            <YAxis
-              domain={[0, 100]}
-              tick={{ fontSize: 8, fill: "#444" }}
-              tickLine={false}
-              axisLine={false}
-              ticks={[30, 50, 70]}
-              width={62}
-              orientation="right"
-            />
-            <Tooltip content={<RSITooltip />} />
-
-            {/* Overbought/oversold zones */}
-            <ReferenceLine y={70} stroke="rgba(255,23,68,0.25)" strokeDasharray="3 3" />
-            <ReferenceLine y={30} stroke="rgba(0,230,118,0.25)" strokeDasharray="3 3" />
-            <ReferenceLine y={50} stroke="rgba(100,100,130,0.15)" strokeDasharray="2 4" />
-
-            {/* RSI fill above 70 */}
-            <Area
-              dataKey="rsi"
-              stroke="none"
-              fill="rgba(179,136,255,0.08)"
-              baseValue={50}
-              dot={false}
-              activeDot={false}
-              connectNulls
-            />
-
-            <Line
-              dataKey="rsi"
-              stroke="#b388ff"
-              strokeWidth={1.2}
-              dot={false}
-              activeDot={{ r: 2, fill: "#b388ff" }}
-              connectNulls
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
+      {/* Legend */}
+      <div className="flex items-center gap-3 mb-1 px-1">
+        <span className="text-[9px] text-gray-500">XLM-USD 15m</span>
+        <span className="flex items-center gap-1"><span className="w-3 h-0.5 rounded" style={{ background: COLORS.ema8 }} /><span className="text-[8px] text-gray-500">EMA 8</span></span>
+        <span className="flex items-center gap-1"><span className="w-3 h-0.5 rounded" style={{ background: COLORS.ema21 }} /><span className="text-[8px] text-gray-500">EMA 21</span></span>
+        <span className="flex items-center gap-1"><span className="w-3 h-0.5 rounded" style={{ background: COLORS.bbUpper, borderTop: "1px dashed rgba(179,136,255,0.5)" }} /><span className="text-[8px] text-gray-500">BB</span></span>
       </div>
+      {/* Main candlestick chart */}
+      <div ref={mainRef} style={{ width: "100%" }} />
+      {/* RSI label */}
+      <div className="flex items-center gap-2 mt-1 mb-0.5 px-1">
+        <span className="text-[8px] text-gray-500">RSI 14</span>
+        <span className="text-[8px] text-gray-600">70 / 30</span>
+      </div>
+      {/* RSI sub-chart */}
+      <div ref={rsiRef} style={{ width: "100%" }} />
     </div>
   )
 }

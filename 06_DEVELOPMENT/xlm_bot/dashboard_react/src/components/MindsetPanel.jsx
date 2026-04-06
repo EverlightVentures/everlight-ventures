@@ -38,9 +38,17 @@ const MODE_CONFIG = {
 
 export default function MindsetPanel() {
   const { data } = useApi("/mindset", 8000)
+  const { data: brain } = useApi("/brain/status", 30000)
   if (!data) return null
   const m = data.mindset || {}
   const g = data.goals || {}
+  const brainReady = !!brain?.available
+  const topTopics = brainReady ? (brain.top_topics || []).slice(0, 4) : []
+  const traits = brainReady ? (brain.cognitive_profile || {}) : {}
+  const highlights = brainReady ? (brain.highlights || []).slice(0, 2) : []
+  const repoStack = brainReady ? (brain.repo_stack || {}) : {}
+  const repoNext = brainReady ? (repoStack.recommended_next || []).slice(0, 3) : []
+  const agentRoster = brainReady ? ((brain.slack_routing || {}).agent_names || []).slice(0, 4) : []
   const mode = m.mode || "STEADY"
   const mc = MODE_CONFIG[mode] || MODE_CONFIG.STEADY
   const ethic = m.work_ethic || 50
@@ -164,6 +172,110 @@ export default function MindsetPanel() {
               )}
             </div>
           </div>
+        </div>
+
+        <div className="mt-3 pt-3 border-t border-white/5">
+          <div className="flex items-start justify-between gap-3 mb-2">
+            <div>
+              <div className="text-[9px] text-gray-500 uppercase tracking-wider">AI Brain Sync</div>
+              <div className={`text-[11px] font-semibold ${brainReady ? "text-cyan-300" : "text-gray-500"}`}>
+                {brainReady ? (brain.knowledge_mode || "knowledge online") : "syncing transcript corpus"}
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-[9px] font-mono text-gray-400">
+                {brainReady ? `${brain.documents || 0} docs` : "--"}
+              </div>
+              <div className="text-[8px] text-gray-600">
+                {brainReady ? `${brain.chunks || 0} memory chunks` : "waiting"}
+              </div>
+            </div>
+          </div>
+
+          {brainReady ? (
+            <>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {topTopics.map((topic) => (
+                  <span key={topic.topic} className="text-[8px] px-1.5 py-0.5 rounded bg-cyan-400/10 text-cyan-300 border border-cyan-400/15">
+                    {topic.topic.replace(/_/g, " ")} {topic.count}
+                  </span>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 mb-2">
+                {[
+                  ["Self-Healing", traits.self_healing],
+                  ["Emotional", traits.emotional_regulation],
+                  ["Decisive", traits.decisiveness],
+                  ["Logical", traits.logical_rigor],
+                ].map(([label, value]) => (
+                  <div key={label} className="bg-black/20 rounded-lg p-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[8px] text-gray-500 uppercase">{label}</span>
+                      <span className="text-[9px] font-mono text-cyan-300">{value || 0}</span>
+                    </div>
+                    <div className="h-1.5 bg-gray-800/50 rounded-full overflow-hidden">
+                      <div className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-blue-500" style={{ width: `${Math.max(0, Math.min(100, value || 0))}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {highlights.length > 0 && (
+                <div className="space-y-1.5">
+                  {highlights.map((item) => (
+                    <div key={item.path} className="bg-black/20 rounded-lg px-2.5 py-2 border border-white/5">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-[10px] text-gray-200 truncate">{item.title}</div>
+                        <div className="text-[8px] uppercase text-gray-500">{item.kind}</div>
+                      </div>
+                      <div className="text-[8px] text-gray-600 mt-0.5">
+                        {(item.topics || []).join(" • ") || "neuromorphic reference"}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="mt-2 grid grid-cols-2 gap-2">
+                <div className="bg-black/20 rounded-lg p-2 border border-white/5">
+                  <div className="text-[8px] text-gray-500 uppercase mb-1">Open Source Stack</div>
+                  <div className="text-[10px] text-gray-200">
+                    {repoStack.repos_total || 0} curated repos
+                  </div>
+                  <div className="text-[8px] text-gray-500 mt-0.5">
+                    {repoStack.installed_total || 0} installed / {repoStack.missing_total || 0} pending
+                  </div>
+                </div>
+                <div className="bg-black/20 rounded-lg p-2 border border-white/5">
+                  <div className="text-[8px] text-gray-500 uppercase mb-1">Formal Agent Roster</div>
+                  <div className="text-[10px] text-gray-200 truncate">
+                    {agentRoster.join(" • ") || "syncing"}
+                  </div>
+                </div>
+              </div>
+
+              {repoNext.length > 0 && (
+                <div className="mt-2 space-y-1.5">
+                  {repoNext.map((item) => (
+                    <div key={item.id} className="bg-black/20 rounded-lg px-2.5 py-2 border border-white/5">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-[10px] text-cyan-200">{item.id}</div>
+                        <div className="text-[8px] uppercase text-gray-500">{item.owner_agent}</div>
+                      </div>
+                      <div className="text-[8px] text-gray-500 mt-0.5">
+                        {item.category}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="text-[10px] text-gray-600 bg-black/20 rounded-lg px-3 py-2 border border-white/5">
+              Building local transcript-backed brain memory from the Ai_Brain corpus.
+            </div>
+          )}
         </div>
       </div>
     </div>

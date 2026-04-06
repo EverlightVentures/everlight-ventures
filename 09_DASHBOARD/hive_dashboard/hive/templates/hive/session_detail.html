@@ -538,6 +538,44 @@
 
 {% block extra_js %}
 <script>
+  function writeTextToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      return navigator.clipboard.writeText(text).then(function() { return true; });
+    }
+
+    return new Promise(function(resolve) {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      var copied = false;
+      try {
+        copied = document.execCommand('copy');
+      } catch (e) {
+        copied = false;
+      }
+      document.body.removeChild(ta);
+      resolve(copied);
+    });
+  }
+
+  function flashCopyState(btn, copied) {
+    var orig = btn.innerHTML;
+    btn.innerHTML = copied
+      ? '<i class="fa-solid fa-check"></i> Copied!'
+      : '<i class="fa-solid fa-triangle-exclamation"></i> Copy failed';
+    btn.classList.toggle('copied', copied);
+    setTimeout(function() {
+      btn.innerHTML = orig;
+      btn.classList.remove('copied');
+    }, 2200);
+  }
+
   function toggleCollapse(btn) {
     var targetId = btn.getAttribute('data-target');
     var target = document.getElementById(targetId);
@@ -567,23 +605,8 @@
     var text   = textEl ? textEl.textContent.trim() : (errEl ? errEl.textContent.trim() : '');
 
     var content = '--- ' + name + ' ---\n\n' + text;
-    navigator.clipboard.writeText(content).then(function() {
-      var orig = btn.innerHTML;
-      btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
-      btn.classList.add('copied');
-      setTimeout(function() { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
-    }).catch(function() {
-      var ta = document.createElement('textarea');
-      ta.value = content;
-      ta.style.cssText = 'position:fixed;left:-9999px';
-      document.body.appendChild(ta);
-      ta.select();
-      try { document.execCommand('copy'); } catch(e) {}
-      document.body.removeChild(ta);
-      var orig = btn.innerHTML;
-      btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
-      btn.classList.add('copied');
-      setTimeout(function() { btn.innerHTML = orig; btn.classList.remove('copied'); }, 2000);
+    writeTextToClipboard(content).then(function(copied) {
+      flashCopyState(btn, copied);
     });
   }
 
@@ -633,33 +656,8 @@
 
     var fullText = lines.join('\n');
 
-    navigator.clipboard.writeText(fullText).then(function() {
-      var orig = btn.innerHTML;
-      btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
-      btn.classList.add('copied');
-      setTimeout(function() {
-        btn.innerHTML = orig;
-        btn.classList.remove('copied');
-      }, 2000);
-    }).catch(function() {
-      /* Fallback */
-      var ta = document.createElement('textarea');
-      ta.value = fullText;
-      ta.style.position = 'fixed';
-      ta.style.left = '-9999px';
-      document.body.appendChild(ta);
-      ta.select();
-      try {
-        document.execCommand('copy');
-        var orig = btn.innerHTML;
-        btn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
-        btn.classList.add('copied');
-        setTimeout(function() {
-          btn.innerHTML = orig;
-          btn.classList.remove('copied');
-        }, 2000);
-      } catch(e) { /* silent */ }
-      document.body.removeChild(ta);
+    writeTextToClipboard(fullText).then(function(copied) {
+      flashCopyState(btn, copied);
     });
   }
 </script>

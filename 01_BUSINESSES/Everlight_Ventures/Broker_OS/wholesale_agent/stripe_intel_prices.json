@@ -1,0 +1,17 @@
+{
+  "intel-basic": {
+    "product_id": "prod_UBFk6PHYmZYnAe",
+    "price_id": "price_1TCtFJGd8n4Fz3nAD9WKMHgu",
+    "amount": 500
+  },
+  "intel-pro": {
+    "product_id": "prod_UBFkdDUyuQDL1Q",
+    "price_id": "price_1TCtFKGd8n4Fz3nAspWjcvsw",
+    "amount": 1000
+  },
+  "intel-enterprise": {
+    "product_id": "prod_UBFkdDmPBM7Crr",
+    "price_id": "price_1TCtFLGd8n4Fz3nAKHIjppzH",
+    "amount": 2000
+  }
+}

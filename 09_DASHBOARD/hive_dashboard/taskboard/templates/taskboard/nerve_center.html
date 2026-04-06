@@ -144,17 +144,17 @@
       <div class="nc-card-icon"><i class="fa-solid fa-list-check"></i></div>
       <div>
         <div class="nc-card-title">AI Taskboard</div>
-        <div class="nc-card-status">{{ taskboard.pending }} pending / {{ taskboard.completed }} done</div>
+        <div class="nc-card-status">{{ taskboard.ai_open }} AI open / {{ taskboard.human_open }} waiting on human input</div>
       </div>
     </div>
     <div class="nc-metrics">
       <div class="nc-metric">
-        <div class="nc-metric-val">{{ taskboard.pending }}</div>
-        <div class="nc-metric-label">Pending</div>
+        <div class="nc-metric-val">{{ taskboard.ai_open }}</div>
+        <div class="nc-metric-label">AI Open</div>
       </div>
       <div class="nc-metric">
-        <div class="nc-metric-val">{{ taskboard.in_progress }}</div>
-        <div class="nc-metric-label">In Progress</div>
+        <div class="nc-metric-val">{{ taskboard.human_open }}</div>
+        <div class="nc-metric-label">Needs Human</div>
       </div>
       <div class="nc-metric">
         <div class="nc-metric-val">{{ taskboard.completed }}</div>
@@ -171,6 +171,7 @@
     {% endif %}
     <div class="nc-actions">
       <a href="{% url 'taskboard:board' %}" class="nc-btn primary"><i class="fa-solid fa-arrow-right"></i> Open Taskboard</a>
+      <a href="{% url 'taskboard:secrets_hub' %}" class="nc-btn"><i class="fa-solid fa-key"></i> Secrets Hub</a>
     </div>
   </div>
 
@@ -193,6 +194,9 @@
       </tr>
       {% endfor %}
     </table>
+    <div class="nc-actions">
+      <a href="{% url 'taskboard:secrets_hub' %}" class="nc-btn primary"><i class="fa-solid fa-sliders"></i> Manage Secrets</a>
+    </div>
   </div>
 
   <!-- Content Pipeline -->

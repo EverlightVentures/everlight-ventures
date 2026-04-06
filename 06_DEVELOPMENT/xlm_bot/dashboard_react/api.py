@@ -6,6 +6,7 @@ from __future__ import annotations
 import json
 import os
 import sqlite3
+import sys
 import time
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
@@ -19,6 +20,24 @@ BOT_DIR = Path(os.environ.get("BOT_DIR", "/home/opc/xlm-bot"))
 DATA_DIR = BOT_DIR / "data"
 LOGS_DIR = BOT_DIR / "logs"
 STATIC_DIR = Path(__file__).parent / "dist"
+EVERLIGHT_OS_CANDIDATES = [
+    Path(__file__).resolve().parents[2] / "everlight_os",
+    Path(__file__).resolve().parent.parent / "everlight_os",
+    Path("/home/opc/06_DEVELOPMENT/everlight_os"),
+    Path("/home/opc/hive_django/everlight_os"),
+    Path("/home/opc/hive-ops/django/everlight_os"),
+]
+
+for everlight_os_dir in EVERLIGHT_OS_CANDIDATES:
+    if everlight_os_dir.exists() and str(everlight_os_dir) not in sys.path:
+        sys.path.insert(0, str(everlight_os_dir))
+
+try:
+    from neuromorphic.brain_knowledge import get_ai_brain_status, search_ai_brain
+except Exception:
+    get_ai_brain_status = None
+    search_ai_brain = None
+
 def _read_jsonl_tail(path: Path, max_lines: int = 500, max_bytes: int = 512_000) -> list[dict]:
     if not path.exists():
         return []
@@ -2071,6 +2090,32 @@ def get_mindset():
     return {"mindset": mindset, "goals": goals}
 
 
+@app.get("/api/brain/status")
+@app.get("/brain/status")
+def get_brain_status():
+    """Expose neuromorphic knowledge state for the React dashboard."""
+    if get_ai_brain_status is None:
+        return {"available": False, "error": "brain_knowledge_unavailable"}
+    try:
+        status = get_ai_brain_status()
+        return status if isinstance(status, dict) else {"available": False}
+    except Exception as e:
+        return {"available": False, "error": str(e)}
+
+
+@app.get("/api/brain/search")
+@app.get("/brain/search")
+def get_brain_search(q: str, limit: int = 5):
+    """Search the local AI brain knowledge corpus."""
+    if search_ai_brain is None:
+        return {"results": [], "error": "brain_knowledge_unavailable"}
+    try:
+        results = search_ai_brain(q, top_k=max(1, min(limit, 10)))
+        return {"results": results}
+    except Exception as e:
+        return {"results": [], "error": str(e)}
+
+
 @app.get("/api/report-card")
 def get_report_card():
     """Unified scoring engine report card -- the play-call breakdown."""
@@ -2266,6 +2311,34 @@ def broker_outreach(limit: int = 50):
 def broker_states():
     """State priority list."""
     return _sb_fetch("wholesale_states", "order=ease_score.desc")
+
+
+def _register_clean_dashboard_aliases():
+    """Support the React app's clean paths alongside /api/* endpoints."""
+    aliases = [
+        ("/status", get_status),
+        ("/decisions", get_decisions),
+        ("/events", get_events),
+        ("/candles", get_candles),
+        ("/charts", get_all_charts),
+        ("/market-context", get_market_context),
+        ("/daily-summary", get_daily_summary),
+        ("/active-strategy", get_active_strategy),
+        ("/macro-vision", get_macro_vision),
+        ("/hindsight", get_hindsight),
+        ("/opportunities", get_opportunities),
+        ("/cycle-history", get_cycle_history),
+        ("/trade-analytics", get_trade_analytics),
+        ("/moonshot-status", get_moonshot_status),
+        ("/goals", get_goals),
+        ("/mindset", get_mindset),
+        ("/report-card", get_report_card),
+    ]
+    for path, endpoint in aliases:
+        app.add_api_route(path, endpoint, methods=["GET"], include_in_schema=False)
+
+
+_register_clean_dashboard_aliases()
 
 
 # ── Onboarding endpoint ──

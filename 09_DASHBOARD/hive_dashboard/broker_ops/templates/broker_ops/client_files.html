@@ -1,0 +1,142 @@
+{% extends "hive/base.html" %}
+{% load humanize %}
+{% block title %}Client Files | Broker OS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-1">
+    <h2 class="mb-0">Client Files</h2>
+    <div>
+      <a href="{% url 'broker_ops:wholesale_dashboard' %}" class="btn btn-sm btn-outline-secondary">Wholesale Pipeline</a>
+      <a href="{% url 'broker_ops:dashboard' %}" class="btn btn-sm btn-outline-secondary">&larr; Broker OS</a>
+    </div>
+  </div>
+  <p class="text-muted mb-4">A-to-Z deal document timeline for every wholesale property.</p>
+
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-2">
+      <div class="card text-center">
+        <div class="card-body py-2">
+          <div class="h4 mb-0">{{ total }}</div>
+          <small class="text-muted">Total Files</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center">
+        <div class="card-body py-2">
+          <div class="h4 mb-0 text-success">{{ status_counts.active|default:"0" }}</div>
+          <small class="text-muted">Active</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center">
+        <div class="card-body py-2">
+          <div class="h4 mb-0 text-warning">{{ status_counts.under_contract|default:"0" }}</div>
+          <small class="text-muted">Under Contract</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center">
+        <div class="card-body py-2">
+          <div class="h4 mb-0 text-info">{{ status_counts.closing|default:"0" }}</div>
+          <small class="text-muted">Closing</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center bg-success bg-opacity-10">
+        <div class="card-body py-2">
+          <div class="h4 mb-0 text-success">${{ total_fees|intcomma }}</div>
+          <small class="text-muted">Pipeline Fees</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center bg-success bg-opacity-10">
+        <div class="card-body py-2">
+          <div class="h4 mb-0 text-success">${{ closed_revenue|intcomma }}</div>
+          <small class="text-muted">Closed Revenue</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="row g-2 mb-3">
+    <div class="col-auto">
+      <a href="{% url 'broker_ops:client_files' %}" class="btn btn-sm {% if not filter_status %}btn-dark{% else %}btn-outline-secondary{% endif %}">All</a>
+    </div>
+    {% for s in "active,under_contract,closing,closed,dead" %}
+    <div class="col-auto">
+      <a href="?status={{ s }}" class="btn btn-sm {% if filter_status == s %}btn-dark{% else %}btn-outline-secondary{% endif %}">
+        {{ s|title }}
+        {% if status_counts %}
+          <span class="badge bg-secondary ms-1">{{ status_counts|default_if_none:"" }}</span>
+        {% endif %}
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Client File Cards -->
+  {% if files %}
+  <div class="row g-3">
+    {% for f in files %}
+    <div class="col-12 col-md-6 col-lg-4">
+      <a href="{% url 'broker_ops:client_file_detail' f.id %}" class="text-decoration-none">
+        <div class="card h-100 border-start border-4
+          {% if f.status == 'active' %}border-success
+          {% elif f.status == 'under_contract' %}border-warning
+          {% elif f.status == 'closing' %}border-info
+          {% elif f.status == 'closed' %}border-primary
+          {% else %}border-secondary{% endif %}">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h6 class="card-title mb-0 text-dark">{{ f.property_address }}</h6>
+              <span class="badge
+                {% if f.status == 'active' %}bg-success
+                {% elif f.status == 'under_contract' %}bg-warning text-dark
+                {% elif f.status == 'closing' %}bg-info
+                {% elif f.status == 'closed' %}bg-primary
+                {% else %}bg-secondary{% endif %}">
+                {{ f.get_status_display }}
+              </span>
+            </div>
+            <p class="text-muted mb-1 small">{{ f.city }}, {{ f.state }} &bull; {{ f.client_name }}</p>
+            <div class="row g-2 mt-2">
+              <div class="col-4 text-center">
+                <small class="text-muted d-block">Contract</small>
+                <strong class="text-dark">${{ f.contract_price|intcomma }}</strong>
+              </div>
+              <div class="col-4 text-center">
+                <small class="text-muted d-block">Fee</small>
+                <strong class="text-success">${{ f.assignment_fee|intcomma }}</strong>
+              </div>
+              <div class="col-4 text-center">
+                <small class="text-muted d-block">Docs</small>
+                <strong class="text-dark">{{ f.document_count }}</strong>
+              </div>
+            </div>
+            {% if f.buyer %}
+            <p class="mb-0 mt-2 small"><span class="badge bg-dark">Buyer: {{ f.buyer.name }}</span></p>
+            {% endif %}
+            <p class="text-muted mb-0 mt-2" style="font-size:11px;">Updated {{ f.updated_at|timesince }} ago</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-secondary text-center mt-4">
+    <p class="mb-1">No client files yet.</p>
+    <small class="text-muted">Client files are created when property leads enter the pipeline. Go to
+      <a href="{% url 'broker_ops:wholesale_dashboard' %}">Wholesale Pipeline</a> to get started.</small>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

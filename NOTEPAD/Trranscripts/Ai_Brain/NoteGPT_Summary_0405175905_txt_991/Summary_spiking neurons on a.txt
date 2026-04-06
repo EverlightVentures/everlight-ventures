@@ -1,0 +1,53 @@
+- [00:00:00] **Introduction to Brains and Quadcopter**  
+  The video begins with a discussion about the relationship between brains and quadcopters. It highlights the groundbreaking experiments conducted by Hubel and Wiesel in the late 1950s on the visual cortex of cats.
+
+- [00:00:30] **Hubel and Wiesel’s Experiment**  
+  Hubel and Wiesel’s experiment involved a cat looking at a screen with a movable bar of light while the electrical activity in the visual cortex was recorded.  
+  - **Key Observations**:
+    - The neuron responded only when the bar was in a specific area and oriented in a certain direction.
+    - The auditory output of neuron activity was recorded and played back, allowing viewers to "listen" to neuronal spikes.
+
+- [00:01:27] **Understanding Neuronal Responses**  
+  A detailed look at the experiment's data reveals:
+  - The left column displays the angle of the bar of light, while the right shows the neuron's response over time.
+  - Each vertical tick mark indicates a neuron spike.
+  - **Example**: When the bar was horizontal, the neuron was quiet; when vertical, it spiked seven times.
+
+- [00:02:18] **Tuning Curve Analysis**  
+  The spike rates for different orientations of the bar were plotted to generate a tuning curve, illustrating the neuron’s output spike rate in response to input stimuli.  
+  - **General Concept**: The input-output relationship of neurons can vary, and tuning curves can take multiple forms, adapting to different stimuli.
+
+- [00:03:12] **Neural Circuitry**  
+  Hubel and Wiesel's Nobel Prize-winning work proposed specific neural circuits that mapped the flow of signals from the retina to the visual cortex.  
+  - This includes how the tuning of one layer of neurons affects the next, demonstrating a complex network of connectivity.
+
+- [00:03:45] **Transition to Quadcopter**  
+  The video shifts focus to quadcopters, introducing an omnibus F3 flight control board connected to a Raspberry Pi. The Raspberry Pi simulates neurons that are attuned to the roll angle of the quadcopter.
+
+- [00:04:03] **Quadcopter Experiment Setup**  
+  The quadcopter has two simulated neurons responsive to its roll angle:
+  - **Neuron 0**: Responds to counterclockwise roll
+  - **Neuron 1**: Responds to clockwise roll  
+  An auditory output of these neurons is demonstrated while the quadcopter maneuvers.
+
+- [00:05:29] **Neuronal Behavior During Flight**  
+  During quadcopter flight, the neurons behaved consistently with their ground-based responses. The video notes that these roll neurons are analogous to those in the inner ear, which help maintain balance.
+
+- [00:06:00] **Future Applications**  
+  The presenter hints at future discussions regarding how spiking neurons on a quadcopter can be used for further computations. The concept of the **neural engineering framework** is suggested for viewers interested in deeper exploration.
+
+- [00:06:30] **Conclusion**  
+  The video concludes with an invitation for viewers to engage by asking questions in the comments, and thanks them for watching.
+
+### Highlights
+- Hubel and Wiesel's experiments demonstrated specific neuronal responses to visual stimuli.
+- Tuning curves illustrate a neuron's output based on input stimuli.
+- Quadcopter experiments simulate neuronal behavior similar to biological systems.
+
+### Key Insights
+- **Neurons have specific tuning** for different stimuli (e.g., light orientation, quadcopter roll).
+- The concept of **neural circuits** is crucial for understanding how sensory information is processed.
+- **Simulations in robotics** can help explore biological principles of neuron function.
+
+### Keywords
+- Neurons, Tuning Curves, Neural Circuits, Quadcopter, Hubel and Wiesel, Spiking Activity, Sensory Processing, Neural Engineering Framework.

@@ -2,27 +2,73 @@
 > The central collaboration doctrine for Claude, Gemini, Codex, and Perplexity operating in `AA_MY_DRIVE`.
 
 ## The Quad Architecture
-Four AI systems act as a unified brain, each playing to their strengths.
+Four AI departments, 42 named employees, operating as one team. **No solo missions** -- every task activates 3+ employees across 2+ departments. Perplexity Intel always runs first.
 
-1.  **Claude (Chief Operator / Strategist)**
-    - Role: High-level planning, deep architectural review, complex synthesis, risk assessment
-    - Domain: `.claude/`
-    - 8 employees: chief_operator, architect, content_director, qa_gate, trading_risk, reviewer, content_strategy, editor_qa
+> **Full Employee Directory:** `06_DEVELOPMENT/everlight_os/hive_mind/EMPLOYEE_DIRECTORY.md`
+> **Team Roster Config:** `06_DEVELOPMENT/everlight_os/hive_mind/roster.yaml`
 
-2.  **Gemini (Logistics Commander / Executor)**
-    - Role: Rapid implementation, multi-tool orchestration, workflow automation, distribution
-    - Domain: `.gemini/`
-    - 8 employees: logistics_commander, ops_deputy, workflow_builder, automation_architect, sync_coordinator, distribution_ops, analytics_auditor, packager
+### 1. Claude Corp -- Strategy & Quality (10 employees)
+- **Dept Head:** Marcus Cole, Chief Operator (marcus@everlightventures.io)
+- **Domain:** `.claude/` | **Slack:** #claude-corp
+- **Team:** Marcus Cole (Chief), Atlas Vega (Architect), Vera Lux (Content Director), Quinn Sharp (QA), Rex Thornton (Trading Risk), Sage Holloway (Reviewer), Nora Blaine (Content Strategy), Edith Cross (Editor), Cash Moreno (Commission Auditor), Justine Park (Compliance)
+- **Owns:** Strategy, quality gates, risk, compliance, brand voice, legal review
 
-3.  **Codex (Engineering Foreman / Profit Maximizer)**
-    - Role: Code generation, ROI analysis, SaaS building, funnel architecture
-    - Domain: `.codex/`
-    - 8 employees: engineering_foreman, profit_maximizer, saas_builder, saas_pm, saas_growth, funnel_architect, seo_mapper, writer
+### 2. Gemini Ops -- Execution & Distribution (13 employees)
+- **Dept Head:** Major Dex, Logistics Commander (major@everlightventures.io)
+- **Domain:** `.gemini/` | **Slack:** #gemini-ops
+- **Team:** Major Dex (Commander), Mack Rivera (Deputy), Gears Tanaka (Workflows), Aria Chen (Automation), Link Masters (Sync), Dash Monroe (Distribution), Metric Webb (Analytics), Bo Crate (Packager), Scout Navarro (Deal Scout), Piper Reeves (Outreach), Chart Dawson (Broker Analytics), Rex Blackwell (Wholesale Scout), Ace Morgan (Deal Marketer)
+- **Owns:** Execution, automation, pipelines, distribution, deal sourcing, outreach
 
-4.  **Perplexity (Intelligence Anchor / News Desk)**
-    - Role: Real-time research, unbiased news, market data, sourced findings
-    - ALWAYS runs first as intel scout before other managers engage
-    - 8 research beats: Crypto/DeFi, Finance/Markets, World News, Tech/AI, Business/Startups, Science/Health, Legal/Regulatory, Personal/Local
+### 3. Codex Labs -- Engineering & Profit (11 employees)
+- **Dept Head:** Forge Steele, Engineering Foreman (forge@everlightventures.io)
+- **Domain:** `.codex/` | **Slack:** #codex-labs
+- **Team:** Forge Steele (Engineer Lead), Penny Vance (Profit Maximizer), Stack Torres (SaaS Builder), Road Harper (PM), Rocket Kim (Growth), Flow Jordan (Funnels), Spider Locke (SEO), Ink Castellano (Writer), Filter Banks (Lead Qualifier), Cupid Osei (Match Maker), Hammer Knox (Deal Closer)
+- **Owns:** Code, SaaS products, ROI, funnels, SEO, deal lifecycle (qualify to match to close)
+
+### 4. Perplexity Intel -- Research & Intelligence (8 beat reporters)
+- **Dept Head:** The Desk (collective newsroom) (intel@everlightventures.io)
+- **Domain:** `.perplexity/` | **Slack:** #perplexity-intel
+- **Beats:** Cipher Wolfe (Crypto), Bull Archer (Markets), Wire Santos (World), Nova Ling (Tech/AI), Pitch Adler (Business), Helix Patel (Science), Brief Calloway (Legal), Pulse Diaz (Personal)
+- **Owns:** Real-time sourced intelligence. ALWAYS runs first before any department moves
+
+### Collaboration Rules
+- **Min 3 agents per task, across 2+ departments** -- no exceptions
+- **Perplexity first** -- fresh intel before anyone deliberates
+- **Cross-dept Slack threads** are the norm for every deliverable
+- **War Room** for big decisions -- all 4 dept heads weigh in
+
+### Cross-Department Workflow: Dashboard Ops
+
+All dashboards (bot, broker, hive, public) are maintained by a 7-person cross-department team:
+
+| # | Employee | Dept | Responsibility |
+|---|----------|------|----------------|
+| 1 | Link Masters | Gemini/Sync | Data sync integrity across Supabase, Django, Lovable |
+| 2 | Metric Webb | Gemini/Analytics | KPI accuracy + anomaly detection |
+| 3 | Chart Dawson | Gemini/Broker Analytics | Broker pipeline dashboard accuracy |
+| 4 | Rex Thornton | Claude/Risk | XLM bot dashboard (P&L, drawdowns, margin, circuit breaker) |
+| 5 | Penny Vance | Codex/Profit | Profit relevance audit -- every widget must earn its screen space |
+| 6 | Quinn Sharp | Claude/QA | Dashboard QA (broken charts, stale data, slow loads, wrong dates) |
+| 7 | Major Dex | Gemini/Ops | Daily 5:30 AM health check coordination ("are all dashboards green?") |
+
+### Cross-Department Workflow: Wholesale Pipeline
+
+12-person crew handles every wholesale deal from scout to close:
+
+| # | Employee | Dept | Role in Pipeline |
+|---|----------|------|------------------|
+| 1 | Rex Blackwell | Gemini/Scout | Finds distressed properties, Zillow keywords, initial scoring |
+| 2 | Filter Banks | Codex/Qualifier | Property qualification (ARV, equity, motivation score) |
+| 3 | Penny Vance | Codex/Profit | Money math (MAO, repair costs, assignment fee calc) |
+| 4 | Cupid Osei | Codex/Matcher | Matches properties to cash buyers from investor list |
+| 5 | Ace Morgan | Gemini/Marketing | Custom investment pitches per property |
+| 6 | Piper Reeves | Gemini/Outreach | Seller outreach (SMS, email, direct mail) |
+| 7 | Hammer Knox | Codex/Closer | Contract to close, earnest money, deadlines |
+| 8 | Justine Park | Claude/Compliance | CA wholesaling rules, contract review |
+| 9 | Cash Moreno | Claude/Auditor | Assignment fee tracking, payment reconciliation |
+| 10 | Chart Dawson | Gemini/Analytics | Pipeline analytics, conversion tracking |
+| 11 | Brief Calloway | Perplexity/Legal | Wholesale regulation monitoring (CA AB 1850) |
+| 12 | Pitch Adler | Perplexity/Intel | Market intel on target cities, investor trends |
 
 ## How to Use the Hive
 
@@ -42,8 +88,8 @@ ws "analyze my bot performance"               # Open + broadcast to all 4
 
 ### Web Dashboard
 ```bash
-# Hive dashboard at localhost:8503
-cd 09_DASHBOARD/hive_dashboard && python manage.py runserver 0.0.0.0:8503
+# Hive dashboard at localhost:8504
+cd 09_DASHBOARD/hive_dashboard && ./start.sh
 ```
 Features: session browser, agent stats, analytics charts, live console (dispatch queries from browser), per-agent copy buttons, markdown export, date/sort filters, 7-day activity chart, query history chips.
 
@@ -114,7 +160,7 @@ Claude Opus acts as executive decision-maker, with Codex and Gemini as peer advi
 
 ## Deployment
 - **XLM Bot**: Oracle Cloud VM (Ampere A1 ARM64 free tier), Docker, always-on
-- **Dashboard**: `http://ORACLE_VM_IP:8502` (bot), `localhost:8503` (hive)
+- **Dashboard**: `http://ORACLE_VM_IP:8502` (bot), `localhost:8504` (hive)
 - **War Room**: local Termux tmux sessions
 - **Slack**: dual webhooks (trade alerts + war room deliberations)
 
@@ -125,6 +171,25 @@ Claude Opus acts as executive decision-maker, with Codex and Gemini as peer advi
 4. **Profit first** - All business operations checked against Profit Maximizer principles
 5. **Save tokens** - Lite mode for quick questions, full mode for big decisions
 6. **Zero toxic losses** - Bot guardrails (circuit breaker, sentiment gate, HTF filter) are non-negotiable
+
+## Data Flow Architecture (3-Lane Model)
+
+All production data flows through Supabase. Local dashboards are ops/dev tools.
+
+| Lane | Purpose | Stack | Data Flow |
+|------|---------|-------|-----------|
+| LOCAL OPS | Private internal dashboard, dev/test | Django 8504 | Reads/writes Supabase |
+| SUPABASE | Source of truth for all production data | PostgreSQL + Edge Functions | Both lanes read/write |
+| LOVABLE | Public customer-facing site | React on everlightventures.io | Reads from Supabase only |
+
+### Agent Data Rules
+- Production state MUST be written to Supabase, not local-only files
+- Django apps read/write Supabase via `hive_dashboard/supabase_client.py`
+- Lovable reads Supabase only -- never writes to local
+- After modifying game/business/broker state, ALWAYS push to Supabase
+- Supabase migrations go in `supabase/migrations/` with timestamp prefixes
+- Edge functions go in `supabase/functions/`
+- NEVER hardcode Supabase URLs -- use env vars or the shared client module
 
 ## SaaS Roadmap
 The Hive Mind is being evaluated for SaaS productization:

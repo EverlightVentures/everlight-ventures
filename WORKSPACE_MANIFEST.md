@@ -1,5 +1,5 @@
 # Workspace Manifest & Semantic Map
-*Last Synced: 2026-03-15*
+*Last Synced: 2026-03-19*
 
 This document is the absolute source of truth for the directory structure.
 ALL AI agents MUST use this map to locate data before executing file operations.
@@ -15,6 +15,7 @@ AA_MY_DRIVE/
 │   │   ├── 03_Content/              Drafts, published, assets, avatar assets
 │   │   ├── 04_Automation/           N8N workflows, scripts, logs
 │   │   ├── Alley_Kingz/             Mobile PvP game (HTML5 prototypes + Unity)
+│   │   ├── Everlight_Gaming/        Gaming projects (blackjack prototypes)
 │   │   ├── Everlight_Cannabis/      Cannabis venture docs
 │   │   ├── Everlight_Crypto/        BCARDI token, Zilliqa, crypto projects
 │   │   ├── Everlight_Foundations/   Core brand docs, SVG logos, plans, site copy
@@ -60,18 +61,15 @@ AA_MY_DRIVE/
 │   └── B_Security_Notebook/         Security notes
 │
 ├── 06_DEVELOPMENT/
-│   ├── Active_Projects/             Current dev projects
-│   ├── A_Projects/                  Project archives
 │   ├── Archives/                    Old/completed projects
 │   ├── everlight_os/                Everlight OS modules, infra stacks, and knowledge base
 │   ├── Experiments/                 Dev experiments
-│   ├── GetMyOS/                     Custom OS project
 │   ├── hivemind_saas/               Hive Mind SaaS codebase
 │   ├── HTML_Files/                  Standalone HTML tools
 │   ├── Learning/                    Dev learning materials
+│   ├── mcp_servers/                 MCP server implementations (broker_os, blinko_memory)
 │   ├── nextcloud/                   Nextcloud setup
 │   ├── RG_OS/                       RG OS project
-│   ├── saas_factory/                SaaS factory templates
 │   ├── xlm_bot/                     XLM trading bot (LIVE on Oracle Cloud)
 │   └── Zfold_Customizations/        Z Fold device configs
 │
@@ -125,6 +123,11 @@ AA_MY_DRIVE/
 |---------|------|
 | XLM Bot (LIVE) | `06_DEVELOPMENT/xlm_bot/` |
 | XLM feature store | `06_DEVELOPMENT/xlm_bot/feature_store.py` |
+| XLM order book context | `06_DEVELOPMENT/xlm_bot/market/orderbook_context.py` |
+| XLM futures relativity | `06_DEVELOPMENT/xlm_bot/market/futures_relativity.py` |
+| XLM liquidation feed | `06_DEVELOPMENT/xlm_bot/market/liquidation_feed.py` |
+| XLM report history | `06_DEVELOPMENT/xlm_bot/report_history.py` |
+| XLM Google Docs OAuth bootstrap | `06_DEVELOPMENT/xlm_bot/bootstrap_google_docs_oauth.py` |
 | Hive Mind SaaS | `06_DEVELOPMENT/hivemind_saas/` |
 | Onyx POS | `01_BUSINESSES/onyx_pos/` |
 | Alley Kingz | `01_BUSINESSES/Everlight_Ventures/Alley_Kingz/` |
@@ -137,22 +140,64 @@ AA_MY_DRIVE/
 | Django Dashboard | `09_DASHBOARD/hive_dashboard/` |
 | Business OS dashboard | `09_DASHBOARD/hive_dashboard/business_os/` |
 | Blackjack Django app | `09_DASHBOARD/hive_dashboard/blackjack/` |
+| Blackjack checkout bridge | `09_DASHBOARD/hive_dashboard/blackjack/checkout_bridge.py` |
 | Public funnel pages | `09_DASHBOARD/hive_dashboard/funnel/templates/funnel/` |
 | War Room Logs | `_logs/ai_war_room/` |
 | Everlight OS | `06_DEVELOPMENT/everlight_os/` |
 | Oracle observability deploy | `06_DEVELOPMENT/everlight_os/deploy_oracle_observability.sh` |
+| Oracle topology deploy | `03_AUTOMATION_CORE/01_Scripts/deploy_observability_topology.sh` |
 | Site publish script | `03_AUTOMATION_CORE/01_Scripts/publish_everlight_site_repo.sh` |
 | Broker OS | `01_BUSINESSES/Everlight_Ventures/Broker_OS/` |
 | Broker OS Django app | `09_DASHBOARD/hive_dashboard/broker_ops/` |
 | Broker OS scripts | `03_AUTOMATION_CORE/01_Scripts/broker_*.py` |
 | Broker OS MCP server | `06_DEVELOPMENT/mcp_servers/broker_os/` |
 | Business OS Supabase schema | `supabase/sql/business_os_schema.sql` |
+| XLM bot base migration | `supabase/migrations/20260315_xlm_bot_schema.sql` |
+| XLM bot report migration | `supabase/migrations/20260315212500_xlm_bot_report_history.sql` |
+| XLM bot liquidation migration | `supabase/migrations/20260315213200_xlm_bot_liquidation_feed_columns.sql` |
+| XLM margin window playbook | `09_DASHBOARD/reports/XLM_MARGIN_WINDOW_PLAYBOOK_2026.md` |
+| XLM hive audit | `09_DASHBOARD/reports/XLM_BOT_HIVE_AUDIT_2026.md` |
+| Supabase edge functions (deployable) | `supabase/functions/` |
+| Supabase checkout verifier | `supabase/functions/verify-checkout-session/` |
 | Blackjack audit | `09_DASHBOARD/reports/EVERLIGHT_BLACKJACK_OS_AUDIT_2026.md` |
 | Queue-mode n8n stack | `06_DEVELOPMENT/everlight_os/n8n/docker-compose.queue.yml` |
 | Uptime monitoring stack | `06_DEVELOPMENT/everlight_os/uptime_kuma/` |
 | Trading watchtower sync | `03_AUTOMATION_CORE/01_Scripts/trading_watchtower_sync.py` |
 | Bot-native watchtower sync | `06_DEVELOPMENT/xlm_bot/trading_watchtower_sync.py` |
 | Oracle deploy scripts | `06_DEVELOPMENT/xlm_bot/push_updates.sh` |
+| XLM native deploy script | `06_DEVELOPMENT/xlm_bot/deploy-native.sh` |
+| XLM native cloud setup | `06_DEVELOPMENT/xlm_bot/cloud-setup-native.sh` |
+| Supabase sync client | `09_DASHBOARD/hive_dashboard/hive_dashboard/supabase_client.py` |
+| MCP Servers | `06_DEVELOPMENT/mcp_servers/` |
+| Archived prototypes | `08_BACKUPS/archived_prototypes/` |
+
+## Architecture Lanes
+
+All production data flows through Supabase. Local dashboards are ops/dev tools.
+
+| Lane | Purpose | Stack | Data Flow |
+|------|---------|-------|-----------|
+| LOCAL OPS | Private internal dashboard, dev/test | Django 8504 | Reads/writes Supabase |
+| SUPABASE | Source of truth for all production data | PostgreSQL + Edge Functions | Both lanes read/write |
+| LOVABLE | Public customer-facing site | React on everlightventures.io | Reads from Supabase only |
+
+### Port Map
+
+| Port | Service | Stack |
+|------|---------|-------|
+| 8502 | XLM Bot Dashboard (LIVE on Oracle) | Streamlit |
+| 8503 | XLM Django Dashboard | Django |
+| 8504 | Hive Mind Dashboard (ops center) | Django |
+| 8765 | AA File Browser | FastAPI |
+| 8777 | AA Analytics | Streamlit |
+
+### Data Rules for Agents
+- Production state MUST be written to Supabase, not local-only files
+- Django apps read/write Supabase via `hive_dashboard/supabase_client.py`
+- Lovable reads Supabase only -- never writes to local
+- Supabase migrations go in `supabase/migrations/` with timestamp prefixes
+- Lovable prompts go in `01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/`
+- Edge functions go in `supabase/functions/`
 
 ## Agent File Save Rules
 
@@ -177,6 +222,11 @@ CRITICAL: Agents MUST save outputs to the correct project folder.
 | Onyx POS code | `01_BUSINESSES/onyx_pos/` |
 | Bot code & configs | `06_DEVELOPMENT/xlm_bot/` |
 | Bot feature store | `06_DEVELOPMENT/xlm_bot/feature_store.py` |
+| Bot order book context | `06_DEVELOPMENT/xlm_bot/market/orderbook_context.py` |
+| Bot futures relativity | `06_DEVELOPMENT/xlm_bot/market/futures_relativity.py` |
+| Bot liquidation feed | `06_DEVELOPMENT/xlm_bot/market/liquidation_feed.py` |
+| Bot report history | `06_DEVELOPMENT/xlm_bot/report_history.py` |
+| Bot Google Docs OAuth bootstrap | `06_DEVELOPMENT/xlm_bot/bootstrap_google_docs_oauth.py` |
 | Bot watchtower runtime | `06_DEVELOPMENT/xlm_bot/trading_watchtower_sync.py` |
 | Hive Mind SaaS code | `06_DEVELOPMENT/hivemind_saas/` |
 | Content drafts | `02_CONTENT_FACTORY/01_Queue/` |

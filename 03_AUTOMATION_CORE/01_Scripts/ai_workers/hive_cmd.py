@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Hive Mind CLI - dispatch prompts to all AI managers simultaneously.
-Enforced Policy: No raw text in Slack. All reports use Native Canvases.
+Enforced Policy: publish report links (Google Docs/Canvas) in Slack.
 """
 
 import argparse
@@ -19,39 +19,50 @@ if DEV_DIR not in sys.path:
 
 from everlight_os.hive_mind.dispatcher import dispatch
 
-# Import the bridge directly from its path
+# Import the Google Docs bridge (replaces Slack Canvas)
 BRIDGE_PATH = f"{ROOT_DIR}/03_AUTOMATION_CORE/01_Scripts/content_tools"
 if BRIDGE_PATH not in sys.path:
     sys.path.append(BRIDGE_PATH)
-import slack_canvas_bridge
+try:
+    from gdocs_bridge import publish_report as _gdocs_publish
+except ImportError:
+    _gdocs_publish = None
 
 def _post_hive_to_war_room(session, prompt: str) -> None:
-    """Post hive session results as Native Canvases ONLY."""
+    """Post hive session results as Google Docs with Slack summary links."""
     session_id = session.id or "unknown"
     war_dir = Path(session.war_room_dir) if session.war_room_dir else None
-    
+
     if not war_dir or not war_dir.exists():
         return
 
-    # 1. Canvas the Combined Summary first
-    summary_file = war_dir / "combined_summary.md"
-    if summary_file.exists():
-        slack_canvas_bridge.create_native_canvas(
-            summary_file.read_text(encoding="utf-8"),
-            summary_file.stem,
-            "warroom"
-        )
+    if _gdocs_publish:
+        # Google Docs mode: publish combined summary + individual reports
+        summary_file = war_dir / "combined_summary.md"
+        if summary_file.exists():
+            content = summary_file.read_text(encoding="utf-8")
+            first_lines = [l for l in content.split("\n") if l.strip() and not l.startswith("#")][:2]
+            _gdocs_publish(
+                title=f"Hive Session {session_id}",
+                content=content,
+                folder="05_AI_Workers/Hive_Mind_Logs",
+                summary=" ".join(first_lines)[:150] or "Hive mind session complete",
+            )
 
-    # 2. Canvas each individual agent report
-    report_files = sorted(war_dir.glob("*.md"))
-    for rf in report_files:
-        if rf.name == "combined_summary.md":
-            continue
-        slack_canvas_bridge.create_native_canvas(
-            rf.read_text(encoding="utf-8"),
-            rf.stem,
-            "warroom"
-        )
+        report_files = sorted(war_dir.glob("*.md"))
+        for rf in report_files:
+            if rf.name == "combined_summary.md":
+                continue
+            _gdocs_publish(
+                title=rf.stem,
+                content=rf.read_text(encoding="utf-8"),
+                folder="05_AI_Workers/Hive_Mind_Logs",
+                summary=f"Agent report: {rf.stem}",
+                slack_channel="#gpt_bot_30",
+            )
+    else:
+        # Canvas fallback removed: keep reports in war room files when bridge is unavailable.
+        print(f"[HIVE] gdocs_bridge unavailable; reports saved at: {war_dir}", file=sys.stderr)
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Hive Mind multi-agent deliberation")

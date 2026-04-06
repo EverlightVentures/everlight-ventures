@@ -1,0 +1,479 @@
+version: 1
+description: Curated open-source GitHub repo stack for Everlight OS integration.
+default_strategy:
+  install_policy: "Adopt in phases. Prefer optional sidecar services and isolated Python environments."
+  non_breaking_rules:
+    - "Do not install new LLM, vector, or scraping dependencies directly into the live XLM bot runtime without a separate smoke test."
+    - "Prefer Docker or sidecar services for stateful infrastructure: Ollama, Qdrant, Milvus, Weaviate, vLLM."
+    - "Prefer pip/uv in a feature venv for Python-only libraries before adding them to shared requirements."
+    - "Route all external model calls behind a single gateway or adapter layer when possible."
+    - "Keep xlm_bot/main.py unified scorer path untouched."
+
+repos:
+  - id: crewai
+    repo: "crewAIInc/crewAI"
+    url: "https://github.com/crewAIInc/crewAI"
+    category: "agent_runtime"
+    phase: "baseline"
+    priority: 1
+    current_status: "already_in_stack"
+    owner_agent: "Marcus Cole"
+    workflows: ["hive_mind", "broker", "consulting", "trading"]
+    complements: ["langgraph", "autogen", "litellm"]
+    install:
+      pip: "pip install -U crewai"
+    detection:
+      python_modules: ["crewai"]
+    integration_notes:
+      - "Keep CrewAI as the orchestrator of record."
+      - "Use other frameworks as point solutions or adapters, not as a full replacement."
+
+  - id: faiss
+    repo: "facebookresearch/faiss"
+    url: "https://github.com/facebookresearch/faiss"
+    category: "vector_index"
+    phase: "baseline"
+    priority: 2
+    current_status: "already_in_stack"
+    owner_agent: "Isaac Ashworth"
+    workflows: ["memory", "broker", "research"]
+    complements: ["qdrant", "milvus", "lancedb"]
+    install:
+      pip: "pip install -U faiss-cpu"
+      conda: "conda install -c pytorch faiss-cpu"
+    detection:
+      python_modules: ["faiss"]
+    integration_notes:
+      - "Keep FAISS for local, embedded semantic memory."
+      - "Promote to Qdrant or Milvus when multi-process or remote access is required."
+
+  - id: nengo
+    repo: "nengo/nengo"
+    url: "https://github.com/nengo/nengo"
+    category: "neuromorphic"
+    phase: "baseline"
+    priority: 3
+    current_status: "already_in_stack"
+    owner_agent: "Henry Patel"
+    workflows: ["neuromorphic", "decision_support"]
+    complements: ["brian2"]
+    install:
+      pip: "pip install -U nengo"
+    detection:
+      python_modules: ["nengo"]
+    integration_notes:
+      - "Keep Nengo as the spiking model foundation already used in neuromorphic/brain.py."
+      - "Use Brian2 only for experimental or research-grade SNN variants."
+
+  - id: langchain
+    repo: "langchain-ai/langchain"
+    url: "https://github.com/langchain-ai/langchain"
+    category: "agent_framework"
+    phase: "phase_2"
+    priority: 4
+    current_status: "candidate"
+    owner_agent: "Nathan Ling"
+    workflows: ["research", "consulting", "tool_integration"]
+    complements: ["crewai", "langgraph", "llama_index"]
+    install:
+      pip: "pip install -U langchain"
+    detection:
+      python_modules: ["langchain"]
+    integration_notes:
+      - "Use for provider integrations and mature tool adapters."
+      - "Do not replace CrewAI crews wholesale."
+
+  - id: langgraph
+    repo: "langchain-ai/langgraph"
+    url: "https://github.com/langchain-ai/langgraph"
+    category: "stateful_agent_graph"
+    phase: "phase_2"
+    priority: 5
+    current_status: "candidate"
+    owner_agent: "Nathan Ling"
+    workflows: ["research", "long_running_jobs", "human_in_loop"]
+    complements: ["langchain", "crewai"]
+    install:
+      pip: "pip install -U langgraph"
+    detection:
+      python_modules: ["langgraph"]
+    integration_notes:
+      - "Best fit for durable, resumable research or approval workflows."
+      - "Keep it behind dedicated services rather than mixing graph state into the trading bot."
+
+  - id: llama_index
+    repo: "run-llama/llama_index"
+    url: "https://github.com/run-llama/llama_index"
+    category: "rag_framework"
+    phase: "phase_2"
+    priority: 6
+    current_status: "candidate"
+    owner_agent: "Isaac Ashworth"
+    workflows: ["knowledge_base", "blinko", "document_qa"]
+    complements: ["faiss", "qdrant", "pgvector"]
+    install:
+      pip: "pip install -U llama-index"
+    detection:
+      python_modules: ["llama_index"]
+    integration_notes:
+      - "Strong fit for indexing Blinko notes or internal docs."
+      - "Use as a document ingestion/query layer over your existing vector memory."
+
+  - id: autogen
+    repo: "microsoft/autogen"
+    url: "https://github.com/microsoft/autogen"
+    category: "multi_agent_framework"
+    phase: "phase_3"
+    priority: 7
+    current_status: "candidate"
+    owner_agent: "Atlas Vega"
+    workflows: ["experimental_multi_agent", "simulation"]
+    complements: ["crewai", "langgraph"]
+    install:
+      pip: "pip install -U autogen-agentchat autogen-ext[openai]"
+    detection:
+      python_modules: ["autogen_agentchat"]
+    integration_notes:
+      - "Use only in isolated experiments for event-driven agent workflows."
+      - "Do not introduce AutoGen into production crews until role boundaries are clear."
+
+  - id: litellm
+    repo: "BerriAI/litellm"
+    url: "https://github.com/BerriAI/litellm"
+    category: "llm_gateway"
+    phase: "phase_1"
+    priority: 8
+    current_status: "candidate"
+    owner_agent: "Franklin Steele"
+    workflows: ["all"]
+    complements: ["ollama", "vllm", "crewai"]
+    install:
+      pip: "pip install -U 'litellm[proxy]'"
+      docker: "docker run -p 4000:4000 ghcr.io/berriai/litellm:main-stable"
+    detection:
+      python_modules: ["litellm"]
+      binaries: ["litellm"]
+    integration_notes:
+      - "Recommended as the single model gateway in front of Ollama, OpenAI-compatible servers, or vendor APIs."
+      - "Use to avoid hard-coding provider-specific logic across agents."
+
+  - id: ollama
+    repo: "ollama/ollama"
+    url: "https://github.com/ollama/ollama"
+    category: "local_llm_runtime"
+    phase: "phase_1"
+    priority: 9
+    current_status: "candidate"
+    owner_agent: "Franklin Steele"
+    workflows: ["local_llm", "crewai_reasoning", "research"]
+    complements: ["litellm", "open_web_ui", "llama_cpp"]
+    install:
+      shell: "curl -fsSL https://ollama.com/install.sh | sh"
+      docker: "docker run -d -p 11434:11434 -v ollama:/root/.ollama ollama/ollama"
+    detection:
+      binaries: ["ollama"]
+    integration_notes:
+      - "Best first local model runtime for your Oracle host."
+      - "Point CrewAI or LiteLLM at Ollama before attempting vLLM."
+
+  - id: llama_cpp
+    repo: "ggml-org/llama.cpp"
+    url: "https://github.com/ggml-org/llama.cpp"
+    category: "local_llm_runtime"
+    phase: "phase_2"
+    priority: 10
+    current_status: "candidate"
+    owner_agent: "Franklin Steele"
+    workflows: ["edge_inference", "low_memory_local_llm"]
+    complements: ["ollama", "llama_cpp_python"]
+    install:
+      shell: "git clone https://github.com/ggml-org/llama.cpp.git && cmake -B build && cmake --build build -j --config Release"
+    detection:
+      binaries: ["llama-server", "llama-cli"]
+    integration_notes:
+      - "Use when you need tighter control over quantized GGUF serving than Ollama provides."
+      - "Prefer sidecar deployment instead of embedding directly in core agents."
+
+  - id: llama_cpp_python
+    repo: "abetlen/llama-cpp-python"
+    url: "https://github.com/abetlen/llama-cpp-python"
+    category: "python_binding"
+    phase: "phase_2"
+    priority: 11
+    current_status: "candidate"
+    owner_agent: "Patrick Donovan"
+    workflows: ["local_llm", "python_tools"]
+    complements: ["llama_cpp", "ollama"]
+    install:
+      pip: "pip install -U llama-cpp-python"
+    detection:
+      python_modules: ["llama_cpp"]
+    integration_notes:
+      - "Use when a Python process needs direct local inference without a separate server."
+      - "Keep model files out of the repo and mount them at runtime."
+
+  - id: vllm
+    repo: "vllm-project/vllm"
+    url: "https://github.com/vllm-project/vllm"
+    category: "high_throughput_llm_serving"
+    phase: "phase_3"
+    priority: 12
+    current_status: "candidate"
+    owner_agent: "Sebastian Torres"
+    workflows: ["high_volume_inference", "shared_llm_service"]
+    complements: ["litellm", "ollama"]
+    install:
+      pip: "pip install -U vllm"
+      docker: "docker run --gpus all -p 8000:8000 vllm/vllm-openai:latest"
+    detection:
+      python_modules: ["vllm"]
+    integration_notes:
+      - "Only worth it once you need high-throughput OpenAI-compatible serving."
+      - "Requires GPU planning; do not make this your first local inference deployment."
+
+  - id: qdrant
+    repo: "qdrant/qdrant"
+    url: "https://github.com/qdrant/qdrant"
+    category: "vector_database"
+    phase: "phase_1"
+    priority: 13
+    current_status: "candidate"
+    owner_agent: "Isaac Ashworth"
+    workflows: ["memory", "blinko", "broker", "research"]
+    complements: ["faiss", "llama_index", "langchain"]
+    install:
+      docker: "docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant"
+      pip: "pip install -U qdrant-client"
+    detection:
+      python_modules: ["qdrant_client"]
+    integration_notes:
+      - "Recommended first remote vector database for your stack."
+      - "Good upgrade path from local FAISS when multiple services need the same memory."
+
+  - id: milvus
+    repo: "milvus-io/milvus"
+    url: "https://github.com/milvus-io/milvus"
+    category: "vector_database"
+    phase: "phase_3"
+    priority: 14
+    current_status: "candidate"
+    owner_agent: "Isaac Ashworth"
+    workflows: ["large_scale_memory", "multimodal_search"]
+    complements: ["faiss", "llama_index"]
+    install:
+      docker: "docker compose -f milvus-standalone-docker-compose.yml up -d"
+      pip: "pip install -U pymilvus"
+    detection:
+      python_modules: ["pymilvus"]
+    integration_notes:
+      - "Use only if Qdrant or pgvector become a scale bottleneck."
+      - "Milvus is infrastructure-heavy; deploy separately from live bot containers."
+
+  - id: weaviate
+    repo: "weaviate/weaviate"
+    url: "https://github.com/weaviate/weaviate"
+    category: "vector_database"
+    phase: "phase_3"
+    priority: 15
+    current_status: "candidate"
+    owner_agent: "Isaac Ashworth"
+    workflows: ["rag", "object_plus_vector_search"]
+    complements: ["llama_index", "langchain"]
+    install:
+      docker: "docker run -p 8080:8080 cr.weaviate.io/semitechnologies/weaviate:latest"
+      pip: "pip install -U weaviate-client"
+    detection:
+      python_modules: ["weaviate"]
+    integration_notes:
+      - "Strong fit when you want schema-rich object storage plus vector search."
+      - "Not necessary if pgvector or Qdrant already cover your use case."
+
+  - id: lancedb
+    repo: "lancedb/lancedb"
+    url: "https://github.com/lancedb/lancedb"
+    category: "embedded_vector_store"
+    phase: "phase_2"
+    priority: 16
+    current_status: "candidate"
+    owner_agent: "Isaac Ashworth"
+    workflows: ["local_rag", "offline_research", "experiments"]
+    complements: ["faiss", "pgvector"]
+    install:
+      pip: "pip install -U lancedb"
+    detection:
+      python_modules: ["lancedb"]
+    integration_notes:
+      - "Good local or file-backed alternative when you want richer querying than raw FAISS."
+      - "Use for notebook-scale or sidecar indexing jobs."
+
+  - id: pgvector
+    repo: "pgvector/pgvector"
+    url: "https://github.com/pgvector/pgvector"
+    category: "vector_database"
+    phase: "phase_1"
+    priority: 17
+    current_status: "candidate"
+    owner_agent: "Lincoln Masters"
+    workflows: ["supabase", "broker", "dashboard", "research"]
+    complements: ["faiss", "llama_index"]
+    install:
+      sql: "CREATE EXTENSION IF NOT EXISTS vector;"
+      pip: "pip install -U pgvector"
+    detection:
+      python_modules: ["pgvector"]
+    integration_notes:
+      - "Best fit if you want vector search where your data already lives."
+      - "Given your Supabase/Postgres footprint, this is the lowest-friction shared memory upgrade."
+
+  - id: firecrawl
+    repo: "firecrawl/firecrawl"
+    url: "https://github.com/firecrawl/firecrawl"
+    category: "web_extraction"
+    phase: "phase_2"
+    priority: 18
+    current_status: "candidate"
+    owner_agent: "Benjamin Orozco"
+    workflows: ["research", "competitive_intel", "lead_gen"]
+    complements: ["crawl4ai", "trafilatura", "playwright_python"]
+    install:
+      pip: "pip install -U firecrawl-py"
+    detection:
+      python_modules: ["firecrawl"]
+    integration_notes:
+      - "Good for hosted extraction workflows and difficult sites."
+      - "Use only where the hosted/API dependency is acceptable."
+
+  - id: crawl4ai
+    repo: "unclecode/crawl4ai"
+    url: "https://github.com/unclecode/crawl4ai"
+    category: "web_extraction"
+    phase: "phase_1"
+    priority: 19
+    current_status: "candidate"
+    owner_agent: "Benjamin Orozco"
+    workflows: ["research", "broker", "knowledge_ingest"]
+    complements: ["scrapy", "trafilatura", "faiss"]
+    install:
+      pip: "pip install -U crawl4ai"
+    detection:
+      python_modules: ["crawl4ai"]
+    integration_notes:
+      - "Recommended first scraping upgrade for LLM-ready markdown extraction."
+      - "Use it for Blinko ingest, prospect research, and long-form article capture."
+
+  - id: scrapy
+    repo: "scrapy/scrapy"
+    url: "https://github.com/scrapy/scrapy"
+    category: "crawler_framework"
+    phase: "phase_2"
+    priority: 20
+    current_status: "candidate"
+    owner_agent: "Benjamin Orozco"
+    workflows: ["high_volume_crawling", "lead_gen", "structured_scraping"]
+    complements: ["crawl4ai", "playwright_python"]
+    install:
+      pip: "pip install -U scrapy"
+    detection:
+      python_modules: ["scrapy"]
+    integration_notes:
+      - "Use when crawl breadth and queue control matter more than turnkey markdown extraction."
+      - "Best as a dedicated ingestion worker, not inline in Slack bots."
+
+  - id: playwright_python
+    repo: "microsoft/playwright-python"
+    url: "https://github.com/microsoft/playwright-python"
+    category: "browser_automation"
+    phase: "phase_1"
+    priority: 21
+    current_status: "candidate"
+    owner_agent: "Samuel Locke"
+    workflows: ["dynamic_sites", "authenticated_scraping", "ui_smoke_tests"]
+    complements: ["crawl4ai", "scrapy"]
+    install:
+      pip: "pip install -U playwright"
+      post_install: "playwright install"
+    detection:
+      python_modules: ["playwright"]
+      binaries: ["playwright"]
+    integration_notes:
+      - "Use only for JavaScript-heavy or login-gated pages."
+      - "Keep browser automation in its own service account and worker process."
+
+  - id: trafilatura
+    repo: "adbar/trafilatura"
+    url: "https://github.com/adbar/trafilatura"
+    category: "content_extraction"
+    phase: "phase_1"
+    priority: 22
+    current_status: "candidate"
+    owner_agent: "Isaac Ashworth"
+    workflows: ["article_cleanup", "research", "rag_prep"]
+    complements: ["crawl4ai", "playwright_python"]
+    install:
+      pip: "pip install -U trafilatura"
+    detection:
+      python_modules: ["trafilatura"]
+    integration_notes:
+      - "Best used after HTML fetch to extract the readable body and metadata."
+      - "Low-risk addition for article cleanup before vector indexing."
+
+  - id: whisper_cpp
+    repo: "ggml-org/whisper.cpp"
+    url: "https://github.com/ggml-org/whisper.cpp"
+    category: "speech_to_text"
+    phase: "phase_2"
+    priority: 23
+    current_status: "candidate"
+    owner_agent: "Rafael Vasquez"
+    workflows: ["voice", "call_notes", "meeting_transcription"]
+    complements: ["whisperx", "pyannote_audio"]
+    install:
+      shell: "git clone https://github.com/ggml-org/whisper.cpp.git && cmake -B build && cmake --build build -j --config Release"
+    detection:
+      binaries: ["whisper-cli"]
+    integration_notes:
+      - "Best offline STT runtime when you want small footprint and no Python dependency chain."
+      - "Good for Oracle sidecar transcription workers."
+
+  - id: whisperx
+    repo: "m-bain/whisperX"
+    url: "https://github.com/m-bain/whisperX"
+    category: "speech_to_text"
+    phase: "phase_1"
+    priority: 24
+    current_status: "candidate"
+    owner_agent: "Rafael Vasquez"
+    workflows: ["voice", "transcripts", "speaker_timestamps"]
+    complements: ["pyannote_audio", "silero_vad"]
+    install:
+      pip: "pip install -U whisperx"
+    detection:
+      python_modules: ["whisperx"]
+    integration_notes:
+      - "Recommended first transcription upgrade for word-level timestamps."
+      - "Use this before building any automated call-summary or reply-analysis workflow."
+
+  - id: pyannote_audio
+    repo: "pyannote/pyannote-audio"
+    url: "https://github.com/pyannote/pyannote-audio"
+    category: "speaker_diarization"
+    phase: "phase_2"
+    priority: 25
+    current_status: "candidate"
+    owner_agent: "Rafael Vasquez"
+    workflows: ["voice", "meetings", "call_analytics"]
+    complements: ["whisperx"]
+    install:
+      pip: "pip install -U pyannote.audio"
+    detection:
+      python_modules: ["pyannote.audio"]
+    integration_notes:
+      - "Use with WhisperX when you need 'who spoke when' instead of plain transcripts."
+      - "Requires model access configuration; keep tokens out of source control."
+
+considered_but_not_in_top_25:
+  - {repo: "All-Hands-AI/OpenHands", reason: "Powerful coding agent, but overlaps heavily with your Codex-led engineering flow and adds another agent runtime."}
+  - {repo: "langchain-ai/open_deep_research", reason: "Strong reference implementation for research flows, but LangGraph itself is the more reusable dependency."}
+  - {repo: "coqui-ai/TTS", reason: "Useful for voice output, but not as immediately valuable as STT and diarization for your current workflows."}
+  - {repo: "brian-team/brian2", reason: "Good neuroscience complement to Nengo, but lower operational leverage than LLM, vector, scraping, and transcription upgrades."}
+  - {repo: "SYSTRAN/faster-whisper", reason: "Excellent backend, but WhisperX already packages the more complete transcription path for your use case."}

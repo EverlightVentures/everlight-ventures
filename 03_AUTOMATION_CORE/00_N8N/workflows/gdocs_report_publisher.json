@@ -1,0 +1,143 @@
+{
+  "name": "Everlight -- Google Docs Report Publisher",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "hive-log-to-gdoc",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-receive",
+      "name": "Receive Report",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "name": "={{$json.filename}}",
+        "content": "={{$json.content}}",
+        "options": {}
+      },
+      "id": "gdocs-create",
+      "name": "Create Google Doc",
+      "type": "n8n-nodes-base.googleDocs",
+      "typeVersion": 1,
+      "position": [500, 300],
+      "credentials": {
+        "googleApi": "google_api_creds"
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Resolve folder path to Google Drive folder ID\n// Populate these IDs in n8n after the Drive tree exists.\nconst folderMap = {\n  '01_Broker_OS/Scout_Reports': '',\n  '01_Broker_OS/Match_Reports': '',\n  '01_Broker_OS/Outreach_Logs': '',\n  '01_Broker_OS/Seller_Replies': '',\n  '01_Broker_OS/Daily_KPI': '',\n  '02_XLM_Bot/Trade_Reports': '',\n  '02_XLM_Bot/Daily_Scoreboard': '',\n  '02_XLM_Bot/Risk_Alerts': '',\n  '02_XLM_Bot/AI_Advisor_Decisions': '',\n  '03_Content_Factory/Social_Posts': '',\n  '04_Revenue_Dashboard/Monthly_Revenue': '',\n  '05_AI_Workers/Hive_Mind_Logs': '',\n  '00_Command_Center/Daily_Briefings': '',\n  '00_Command_Center/War_Room': '',\n  '06_Infrastructure/Oracle_Cloud': ''\n};\nconst requestedFolder = $input.first().json.folder_path || '';\nconst folderId = folderMap[requestedFolder] || '';\nreturn [{ json: { folderId, requestedFolder } }];"
+      },
+      "id": "resolve-folder",
+      "name": "Resolve Folder",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 140]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "move",
+        "fileId": "={{$node['Create Google Doc'].json.documentId}}",
+        "driveId": "={{$node['Resolve Folder'].json.folderId}}"
+      },
+      "id": "gdrive-move",
+      "name": "Move to Folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [760, 190],
+      "credentials": {
+        "googleApi": "google_api_creds"
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "resource": "permission",
+        "operation": "create",
+        "fileId": "={{$node['Create Google Doc'].json.documentId}}",
+        "role": "reader",
+        "type": "anyone"
+      },
+      "id": "gdrive-share",
+      "name": "Set View Permission",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [760, 410],
+      "credentials": {
+        "googleApi": "google_api_creds"
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const receive = $node['Receive Report'].json || {};\nconst doc = $node['Create Google Doc'].json || {};\nreturn [{ json: {\n  ok: true,\n  filename: receive.filename || 'report',\n  doc_link: doc.webViewLink || '',\n  webViewLink: doc.webViewLink || '',\n  documentId: doc.documentId || '',\n  folder_path: receive.folder_path || '',\n  timestamp: receive.timestamp || '',\n  source: receive.source || 'Everlight Automation'\n} }];"
+      },
+      "id": "prepare-response",
+      "name": "Prepare Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1010, 300]
+    }
+  ],
+  "connections": {
+    "Receive Report": {
+      "main": [
+        [
+          {
+            "node": "Create Google Doc",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Resolve Folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Google Doc": {
+      "main": [
+        [
+          {
+            "node": "Move to Folder",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Set View Permission",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Prepare Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Los_Angeles"
+  },
+  "tags": [
+    {
+      "name": "google-docs"
+    },
+    {
+      "name": "reports"
+    },
+    {
+      "name": "automation"
+    }
+  ]
+}

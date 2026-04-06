@@ -31,4 +31,22 @@ urlpatterns = [
     # Public endpoints (no auth - for Lovable site forms)
     path("api/public/lead/",  views.public_submit_lead,  name="public_submit_lead"),
     path("api/public/offer/", views.public_submit_offer, name="public_submit_offer"),
+
+    # Wholesale pipeline
+    path("wholesale/",                              views.wholesale_dashboard,    name="wholesale_dashboard"),
+    path("api/import-leads/",                       views.api_import_leads,       name="api_import_leads"),
+    path("api/score-lead/<uuid:lead_id>/",          views.api_score_lead,         name="api_score_lead"),
+    path("api/match-buyers/<uuid:lead_id>/",        views.api_match_buyers,       name="api_match_buyers"),
+    path("api/outreach/<uuid:lead_id>/",            views.api_generate_outreach,  name="api_generate_outreach"),
+
+    # Public: investor buyer signup (no auth)
+    path("investor-signup/",                        views.public_investor_signup,  name="public_investor_signup"),
+
+    # Client Files: A-to-Z deal document management
+    path("client-files/",                                      views.client_files_dashboard,         name="client_files"),
+    path("client-files/<uuid:file_id>/",                       views.client_file_detail,             name="client_file_detail"),
+    path("client-files/doc/<uuid:doc_id>/preview/",            views.client_file_document_preview,   name="client_doc_preview"),
+    path("api/client-file/create/<uuid:lead_id>/",             views.api_create_client_file,         name="api_create_client_file"),
+    path("api/client-file/<uuid:file_id>/document/",           views.api_generate_document,          name="api_generate_document"),
+    path("api/client-file/<uuid:file_id>/status/",             views.api_update_client_file_status,  name="api_update_client_file_status"),
 ]

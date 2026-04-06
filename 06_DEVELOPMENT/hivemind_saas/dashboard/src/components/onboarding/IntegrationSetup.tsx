@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Check,
   Loader2,
@@ -13,6 +13,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { connectIntegration, listIntegrations } from "@/lib/api";
 import type { IntegrationProvider, IntegrationStatus } from "@/types";
 
 // ============================================================
@@ -579,13 +580,43 @@ export default function IntegrationSetup({ onComplete, initialStep = 0, classNam
   const [integrations, setIntegrations] = useState<Record<string, IntegrationState>>(
     Object.fromEntries(PROVIDERS.map((p) => [p.id, { status: "disconnected" as IntegrationStatus }]))
   );
+  const [isBootstrapping, setIsBootstrapping] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    listIntegrations()
+      .then((items) => {
+        if (!mounted) return;
+        setIntegrations((prev) => {
+          const next = { ...prev };
+          for (const item of items) {
+            next[item.provider] = {
+              ...next[item.provider],
+              status: item.connected ? "connected" : "disconnected",
+            };
+          }
+          return next;
+        });
+      })
+      .catch(() => {
+        if (!mounted) return;
+      })
+      .finally(() => {
+        if (mounted) {
+          setIsBootstrapping(false);
+        }
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const completeStep = (step: number) => {
     setCompletedSteps((prev) => [...new Set([...prev, step])]);
     setCurrentStep(step + 1);
   };
 
-  const handleConnect = (id: IntegrationProvider) => {
+  const handleConnect = async (id: IntegrationProvider) => {
     const provider = PROVIDERS.find((p) => p.id === id);
     if (!provider) return;
 
@@ -606,13 +637,29 @@ export default function IntegrationSetup({ onComplete, initialStep = 0, classNam
       [id]: { ...prev[id], status: "pending", error: undefined },
     }));
 
-    // Simulate OAuth/API verification
-    setTimeout(() => {
+    try {
+      await connectIntegration({
+        provider: id,
+        credential_type: provider.authType,
+        api_key: provider.authType === "api_key" ? integrations[id]?.apiKey ?? "" : undefined,
+        oauth_code: provider.authType === "oauth" ? `local-oauth-${id}` : undefined,
+        scopes: [],
+        label: provider.name,
+      });
       setIntegrations((prev) => ({
         ...prev,
         [id]: { ...prev[id], status: "connected" },
       }));
-    }, 1500);
+    } catch (error) {
+      setIntegrations((prev) => ({
+        ...prev,
+        [id]: {
+          ...prev[id],
+          status: "error",
+          error: error instanceof Error ? error.message : "Failed to connect integration",
+        },
+      }));
+    }
   };
 
   const handleApiKeyChange = (id: IntegrationProvider, key: string) => {
@@ -655,6 +702,10 @@ export default function IntegrationSetup({ onComplete, initialStep = 0, classNam
               Link your AI services and productivity tools. The Hive coordinates them to handle your workflows.
             </p>
           </div>
+
+          {isBootstrapping && (
+            <div className="text-[12px] text-[#A0A0B8]">Loading workspace integrations...</div>
+          )}
 
           {connectedCount > 0 && (
             <div

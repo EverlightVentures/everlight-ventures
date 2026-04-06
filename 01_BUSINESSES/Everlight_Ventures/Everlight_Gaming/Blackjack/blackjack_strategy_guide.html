@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Complete Blackjack Basic Strategy Guide</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #f1f5f9;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(45deg, #dc2626, #991b1b);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+        
+        .header h1 {
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .card-symbols {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 3em;
+            margin-top: 20px;
+        }
+        
+        .spade { color: #000; }
+        .heart { color: #dc2626; }
+        .diamond { color: #dc2626; }
+        .club { color: #000; }
+        
+        .section {
+            margin-bottom: 50px;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border: 1px solid #475569;
+        }
+        
+        .section-title {
+            font-size: 2.2em;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #fbbf24;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .section-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(45deg, #fbbf24, #f59e0b);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+        }
+        
+        .strategy-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #0f172a;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        }
+        
+        .strategy-table th {
+            background: linear-gradient(45deg, #374151, #4b5563);
+            color: #fbbf24;
+            font-weight: 600;
+            padding: 15px 10px;
+            text-align: center;
+            border: 1px solid #6b7280;
+        }
+        
+        .strategy-table td {
+            padding: 12px 10px;
+            text-align: center;
+            border: 1px solid #374151;
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+        
+        .strategy-table tr:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+        
+        .hand-column {
+            background: linear-gradient(45deg, #1e293b, #334155) !important;
+            color: #fbbf24 !important;
+            font-weight: 700 !important;
+        }
+        
+        .action-Y { background: #16a34a; color: white; }
+        .action-N { background: #dc2626; color: white; }
+        .action-H { background: #3b82f6; color: white; }
+        .action-S { background: #7c3aed; color: white; }
+        .action-D { background: #ea580c; color: white; }
+        .action-Ds { background: #f59e0b; color: white; }
+        .action-SUR { background: #ef4444; color: white; }
+        .action-YN { background: linear-gradient(45deg, #16a34a, #dc2626); color: white; }
+        
+        .memory-tips {
+            background: linear-gradient(135deg, #059669, #047857);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+        }
+        
+        .memory-tips h3 {
+            color: #fbbf24;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .memory-tip {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 5px solid #fbbf24;
+        }
+        
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .legend-item {
+            background: rgba(255,255,255,0.05);
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid #475569;
+        }
+        
+        .legend-color {
+            width: 30px;
+            height: 30px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .quick-reference {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #1e293b, #334155);
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            border: 1px solid #475569;
+            font-size: 0.9em;
+            max-width: 200px;
+        }
+        
+        .quick-reference h4 {
+            color: #fbbf24;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        @media print {
+            body { background: white; color: black; }
+            .quick-reference { display: none; }
+        }
+        
+        .card-visual {
+            display: inline-block;
+            width: 40px;
+            height: 60px;
+            background: white;
+            border: 2px solid #374151;
+            border-radius: 5px;
+            color: black;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.2;
+            padding: 2px;
+            margin: 0 2px;
+        }
+        
+        .dealer-cards {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .dealer-label {
+            font-size: 1.2em;
+            color: #fbbf24;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🂡 Complete Blackjack Basic Strategy Guide 🂮</h1>
+            <div class="subtitle">Master Every Decision | Memorize While You Play | Win More Consistently</div>
+            <div class="card-symbols">
+                <span class="spade">♠</span>
+                <span class="heart">♥</span>
+                <span class="diamond">♦</span>
+                <span class="club">♣</span>
+            </div>
+        </div>
+        
+        <div class="quick-reference">
+            <h4>Quick Memory Aid</h4>
+            <div><strong>Always Split:</strong> A,A & 8,8</div>
+            <div><strong>Never Split:</strong> 10,10 & 5,5</div>
+            <div><strong>Double 11:</strong> Against all</div>
+            <div><strong>Stand 17+:</strong> Always</div>
+            <div><strong>Bust Cards:</strong> 2-6</div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">
+                <div class="section-icon">🂱🂱</div>
+                Pair Splitting Strategy
+            </h2>
+            
+            <div class="memory-tips">
+                <h3>🧠 Memory Triggers:</h3>
+                <div class="memory-tip"><strong>Always Split Aces & Eights:</strong> "Aces are golden, eights escape eighteen"</div>
+                <div class="memory-tip"><strong>Never Split Tens & Fives:</strong> "Twenty is plenty, ten is a friend"</div>
+                <div class="memory-tip"><strong>Split 9s except vs 7,10,A:</strong> "Nine is fine, except lucky seven and high cards"</div>
+            </div>
+            
+            <div class="dealer-cards">
+                <div class="dealer-label">Dealer Upcard →</div>
+            </div>
+            
+            <table class="strategy-table">
+                <thead>
+                    <tr>
+                        <th>Your Pair</th>
+                        <th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
+                        <th>7</th><th>8</th><th>9</th><th>10</th><th>A</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="hand-column">A,A</td>
+                        <td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td>
+                        <td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">10,10</td>
+                        <td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td>
+                        <td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">9,9</td>
+                        <td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td>
+                        <td class="action-N">N</td><td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-N">N</td><td class="action-N">N</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">8,8</td>
+                        <td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td>
+                        <td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">7,7</td>
+                        <td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td>
+                        <td class="action-Y">Y</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">6,6</td>
+                        <td class="action-YN">Y/N</td><td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td>
+                        <td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">5,5</td>
+                        <td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td>
+                        <td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">4,4</td>
+                        <td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-YN">Y/N</td><td class="action-YN">Y/N</td>
+                        <td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">3,3</td>
+                        <td class="action-YN">Y/N</td><td class="action-YN">Y/N</td><td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td>
+                        <td class="action-Y">Y</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">2,2</td>
+                        <td class="action-YN">Y/N</td><td class="action-YN">Y/N</td><td class="action-Y">Y</td><td class="action-Y">Y</td><td class="action-Y">Y</td>
+                        <td class="action-Y">Y</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td><td class="action-N">N</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">
+                <div class="section-icon">🂡</div>
+                Soft Hands (Ace + Card)
+            </h2>
+            
+            <div class="memory-tips">
+                <h3>🧠 Memory Triggers:</h3>
+                <div class="memory-tip"><strong>A,7 vs Dealer 2-6:</strong> "Lucky seven doubles down on bust cards"</div>
+                <div class="memory-tip"><strong>A,6 through A,2 vs 5,6:</strong> "Double down when dealer might bust"</div>
+                <div class="memory-tip"><strong>Soft 18+ vs 7-A:</strong> "Stand strong against dealer strength"</div>
+            </div>
+            
+            <table class="strategy-table">
+                <thead>
+                    <tr>
+                        <th>Your Hand</th>
+                        <th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
+                        <th>7</th><th>8</th><th>9</th><th>10</th><th>A</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="hand-column">A,9 (20)</td>
+                        <td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td>
+                        <td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">A,8 (19)</td>
+                        <td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-Ds">Ds</td>
+                        <td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">A,7 (18)</td>
+                        <td class="action-Ds">Ds</td><td class="action-Ds">Ds</td><td class="action-Ds">Ds</td><td class="action-Ds">Ds</td><td class="action-Ds">Ds</td>
+                        <td class="action-S">S</td><td class="action-S">S</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">A,6 (17)</td>
+                        <td class="action-H">H</td><td class="action-D">D</td><td class="action-D">D</td><td class="action-D">D</td><td class="action-D">D</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">A,5 (16)</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-D">D</td><td class="action-D">D</td><td class="action-D">D</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">A,4 (15)</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-D">D</td><td class="action-D">D</td><td class="action-D">D</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">A,3 (14)</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-D">D</td><td class="action-D">D</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">A,2 (13)</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-D">D</td><td class="action-D">D</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">
+                <div class="section-icon">🂮</div>
+                Hard Hands (No Ace or Ace = 1)
+            </h2>
+            
+            <div class="memory-tips">
+                <h3>🧠 Memory Triggers:</h3>
+                <div class="memory-tip"><strong>Always Double 11:</strong> "Eleven is heaven against all"</div>
+                <div class="memory-tip"><strong>Stand 12 vs 4,5,6:</strong> "Twelve stands on dealer's worst three"</div>
+                <div class="memory-tip"><strong>Hit 16 vs 7+:</strong> "Sixteen is trouble against dealer strength"</div>
+                <div class="memory-tip"><strong>Double 10 vs 2-9:</strong> "Ten doubles except against ten and ace"</div>
+            </div>
+            
+            <table class="strategy-table">
+                <thead>
+                    <tr>
+                        <th>Your Hand</th>
+                        <th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
+                        <th>7</th><th>8</th><th>9</th><th>10</th><th>A</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="hand-column">17+</td>
+                        <td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td>
+                        <td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">16</td>
+                        <td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">15</td>
+                        <td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">14</td>
+                        <td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">13</td>
+                        <td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">12</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-S">S</td><td class="action-S">S</td><td class="action-S">S</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">11</td>
+                        <td class="action-D">D</td><td class="action-D">D</td><td class="action-D">D</td><td class="action-D">D</td><td class="action-D">D</td>
+                        <td class="action-D">D</td><td class="action-D">D</td><td class="action-D">D</td><td class="action-D">D</td><td class="action-D">D</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">10</td>
+                        <td class="action-D">D</td><td class="action-D">D</td><td class="action-D">D</td><td class="action-D">D</td><td class="action-D">D</td>
+                        <td class="action-D">D</td><td class="action-D">D</td><td class="action-D">D</td><td class="action-H">H</td><td class="action-H">H</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">9</td>
+                        <td class="action-H">H</td><td class="action-D">D</td><td class="action-D">D</td><td class="action-D">D</td><td class="action-D">D</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td>
+                    </tr>
+                    <tr>
+                        <td class="hand-column">8 or less</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td>
+                        <td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td><td class="action-H">H</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">
+                <div class="section-icon">🏳️</div>
+                Surrender (Late Surrender Only)
+            </h2>
+            
+            <div class="memory-tips">
+                <h3>🧠 Memory Triggers:</h3>
+                <div class="memory-tip"><strong>Surrender 16 vs 9,10,A:</strong> "Sixteen surrenders to the big three"</div>
+                <div class="memory-tip"><strong>Surrender 15 vs 10:</strong> "Fifteen fears the ten"</div>
+            </div>
+            
+            <table class="strategy-table">
+                <thead>
+                    <tr>
+                        <th>Your Hand</th>
+                        <th>2</th><th>3</th><th>4</th><th>5</th><th>6</th>
+                        <th>7</th><th>8</th><th>9</th><th>10</th><th>A</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="hand-column">16 (not 8,8)</td>
+                        <td>-</td><td>-</td><td>-</td><td>-</td><td>-</td>
+                        <td>-</td><td>-</td><td class="action-SUR">SUR

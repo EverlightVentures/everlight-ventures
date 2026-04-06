@@ -353,23 +353,39 @@ def _notify_slack(session: HiveSession, roster: dict) -> None:
         f"War Room: `{session.war_room_dir}`"
     )
 
-    # Try to create a Slack Canvas deep link from the combined summary
+    # Publish combined summary via docs bridge and append returned links.
     if session.war_room_dir:
         try:
             summary_file = Path(session.war_room_dir) / "combined_summary.md"
             if summary_file.exists():
-                import sys as _sys
-                canvas_tools = str(WORKSPACE / "03_AUTOMATION_CORE" / "01_Scripts" / "content_tools")
-                if canvas_tools not in _sys.path:
-                    _sys.path.insert(0, canvas_tools)
-                from slack_canvas_bridge import create_native_canvas
-                canvas_content = summary_file.read_text(encoding="utf-8")
-                canvas_title = f"Hive {session.id} | {session.prompt[:60]}"
-                deep_link = create_native_canvas(canvas_content, canvas_title, "warroom")
-                if deep_link:
-                    text += f"\n\ud83d\udcd1 <{deep_link}|Open Canvas Report>"
+                bridge_dir = str(WORKSPACE / "03_AUTOMATION_CORE" / "01_Scripts" / "content_tools")
+                if bridge_dir not in sys.path:
+                    sys.path.insert(0, bridge_dir)
+                from gdocs_bridge import publish_report
+
+                content = summary_file.read_text(encoding="utf-8")
+                summary_lines = [
+                    line.strip()
+                    for line in content.splitlines()
+                    if line.strip() and not line.strip().startswith("#")
+                ][:2]
+                report_result = publish_report(
+                    title=f"Hive Session {session.id}",
+                    content=content,
+                    folder="05_AI_Workers/Hive_Mind_Logs",
+                    slack_channel="#gpt_bot_30",
+                    summary=" ".join(summary_lines)[:180] or "Hive session summary",
+                    metadata={"session_id": session.id, "war_room_dir": session.war_room_dir},
+                    post_to_slack=False,
+                )
+                if report_result.get("doc_link"):
+                    text += f"\n<" + report_result["doc_link"] + "|Open Google Doc>"
+                if report_result.get("canvas_link"):
+                    text += f"\n<" + report_result["canvas_link"] + "|Open Canvas>"
+                if report_result.get("local_path"):
+                    text += f"\nMarkdown fallback: `{report_result['local_path']}`"
         except Exception:
-            pass  # Canvas creation is optional; falls through to plain text post
+            pass  # Link publishing is optional; falls through to plain text post
 
     try:
         import json as _json

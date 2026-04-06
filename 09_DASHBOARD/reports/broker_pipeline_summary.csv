@@ -1,0 +1,38 @@
+
+=== BROKER OS PIPELINE SUMMARY ===,,,
+Metric,Count,Details,
+Total Offers (Tools Listed),85,,
+  - With Real Email,20,,
+  - Scouted (placeholder),65,,
+Sellers Pitched,10,,
+Sellers Queued,10,,
+Total Leads (Buyers),66,,
+  - Real Buyers,0,,
+  - Test/Placeholder,66,,
+Total Matches,1878,,
+  - Approved,5,,
+  - Pending,1873,,
+Active Deals,0,(none yet -- need seller reply first),
+Outreach Emails Sent,5,,
+Outreach Emails Pending,85,,
+,,,
+=== REVENUE PROJECTIONS ===,,,
+Scenario,Deals/Month,Avg Monthly Rev,Annual Rev
+Conservative,3,$33.9/mo,$406.8/yr
+Target,5,$56.5/mo,$678.0/yr
+Stretch,10,$113.0/mo,$1356.0/yr
+Avg Commission Per Deal,,$135.6/yr,
+,,,
+=== PER-CLIENT DETAIL (PITCHED SELLERS) ===,,,
+Seller,Tool,Category,Mid Price/mo,Annual Commission @20%,Email Sent,Subject,Status,Matched Buyers,Next Step
+PostHog,PostHog,marketing,$225.0,$540.0,2026-03-12,Buyers looking for PostHog -- partnership?,Awaiting Reply,2,Auto follow-up day 7 if no reply
+Novu,Novu,dev_service,$125.0,$300.0,2026-03-12,Buyers looking for Novu -- partnership?,Awaiting Reply,8,Auto follow-up day 7 if no reply
+Crisp,Crisp Chat,ai_saas,$47.5,$114.0,2026-03-12,Buyers looking for Crisp Chat -- partnership?,Awaiting Reply,21,Auto follow-up day 7 if no reply
+Resend,Resend,dev_service,$40.0,$96.0,2026-03-12,Buyers looking for Resend -- partnership?,Awaiting Reply,8,Auto follow-up day 7 if no reply
+Dub,Dub.co,marketing,$29.5,$70.8,2026-03-12,Buyers looking for Dub.co -- partnership?,Awaiting Reply,2,Auto follow-up day 7 if no reply
+Plausible,Plausible Analytics,marketing,$29.0,$69.6,2026-03-12,Buyers looking for Plausible Analytics -- partnership?,Awaiting Reply,2,Auto follow-up day 7 if no reply
+Trigger,Trigger.dev,dev_service,$24.5,$58.8,2026-03-12,Buyers looking for Trigger.dev -- partnership?,Awaiting Reply,8,Auto follow-up day 7 if no reply
+Cal.com,Cal.com,dev_service,$15.0,$36.0,2026-03-12,Buyers looking for Cal.com -- partnership?,Awaiting Reply,8,Auto follow-up day 7 if no reply
+Documenso,Documenso,dev_service,$15.0,$36.0,2026-03-12,Buyers looking for Documenso -- partnership?,Awaiting Reply,8,Auto follow-up day 7 if no reply
+Tally,Tally Forms,ai_saas,$14.5,$34.8,2026-03-12,Buyers looking for Tally Forms -- partnership?,Awaiting Reply,21,Auto follow-up day 7 if no reply
+

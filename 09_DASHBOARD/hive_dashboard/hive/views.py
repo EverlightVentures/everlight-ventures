@@ -1915,3 +1915,89 @@ def onboard_submit(request):
         'success': True,
         'company': company,
     })
+
+
+# =====================================================================
+# INFRA HUB -- Proxmox-style server dashboard
+# =====================================================================
+
+ORACLE_SERVICES = [
+    {"id": "xlm-bot", "name": "XLM Bot", "icon": "fa-robot", "port": None, "desc": "Sniper trading engine"},
+    {"id": "xlm-dash-react", "name": "Lucrex Dashboard", "icon": "fa-chart-line", "port": 8502, "desc": "React trading dashboard"},
+    {"id": "xlm-ws", "name": "WS Price Feed", "icon": "fa-bolt", "port": None, "desc": "WebSocket spot price feed"},
+    {"id": "xlm-liqfeed", "name": "Liquidation Feed", "icon": "fa-water", "port": None, "desc": "Liquidation heatmap data"},
+    {"id": "n8n", "name": "n8n Automation", "icon": "fa-gears", "port": 5678, "desc": "Workflow automation engine"},
+    {"id": "blinko", "name": "Blinko RAG", "icon": "fa-brain", "port": 1111, "desc": "Knowledge base (458+ notes)"},
+    {"id": "hive-voice", "name": "Voice Handler", "icon": "fa-microphone", "port": 8200, "desc": "Marcus phone actions"},
+    {"id": "hive-django", "name": "Hive Dashboard", "icon": "fa-gauge-high", "port": 8504, "desc": "Ops command center"},
+    {"id": "hive-dashboard", "name": "Hive Dashboard (alt)", "icon": "fa-table-columns", "port": None, "desc": "Legacy dashboard"},
+    {"id": "hive-slack-agent", "name": "Slack Agent", "icon": "fa-hashtag", "port": None, "desc": "Slack bot with backoff"},
+    {"id": "wholesale-pipeline", "name": "Wholesale Pipeline", "icon": "fa-house-chimney", "port": None, "desc": "RE wholesale scout (2h cycles)"},
+]
+
+DASHBOARD_LINKS = [
+    {"name": "Lucrex Trading", "url": "http://129.159.38.250:8502", "icon": "fa-chart-candlestick", "color": "#c9a84c"},
+    {"name": "Hive Ops", "url": "http://129.159.38.250:8504", "icon": "fa-gauge-high", "color": "#8b5cf6"},
+    {"name": "n8n Workflows", "url": "http://129.159.38.250:5678", "icon": "fa-gears", "color": "#22c55e"},
+    {"name": "Blinko RAG", "url": "http://129.159.38.250:1111", "icon": "fa-brain", "color": "#22d3ee"},
+    {"name": "Voice Handler", "url": "http://129.159.38.250:8200", "icon": "fa-microphone", "color": "#f59e0b"},
+]
+
+
+class InfraHubView(LoginRequiredMixin, TemplateView):
+    template_name = 'hive/infra_hub.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['active_page'] = 'infra_hub'
+        ctx['services'] = ORACLE_SERVICES
+        ctx['dashboard_links'] = DASHBOARD_LINKS
+        ctx['oracle_ip'] = '129.159.38.250'
+        return ctx
+
+
+@login_required
+def api_infra_status(request):
+    """API endpoint: check Oracle service status via SSH."""
+    import shlex
+
+    oracle_ip = '129.159.38.250'
+    results = {}
+
+    for svc in ORACLE_SERVICES:
+        sid = svc['id']
+        try:
+            cmd = f"ssh -o ConnectTimeout=5 -o StrictHostKeyChecking=no opc@{oracle_ip} systemctl is-active {shlex.quote(sid)}"
+            proc = subprocess.run(
+                cmd, shell=True, capture_output=True, text=True, timeout=8,
+            )
+            status = proc.stdout.strip()
+            results[sid] = {
+                'status': status if status in ('active', 'inactive', 'failed', 'activating') else 'unknown',
+                'port': svc.get('port'),
+            }
+        except subprocess.TimeoutExpired:
+            results[sid] = {'status': 'timeout', 'port': svc.get('port')}
+        except Exception as e:
+            results[sid] = {'status': 'error', 'port': svc.get('port'), 'error': str(e)[:100]}
+
+    # Disk + RAM (single SSH call)
+    try:
+        cmd = f"ssh -o ConnectTimeout=5 opc@{oracle_ip} 'df -h / --output=pcent | tail -1; free -m | grep Mem'"
+        proc = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=8)
+        lines = proc.stdout.strip().split('\n')
+        disk_pct = lines[0].strip().replace('%', '') if lines else '?'
+        mem_parts = lines[1].split() if len(lines) > 1 else []
+        mem_total = mem_parts[1] if len(mem_parts) > 1 else '?'
+        mem_used = mem_parts[2] if len(mem_parts) > 2 else '?'
+    except Exception:
+        disk_pct, mem_total, mem_used = '?', '?', '?'
+
+    return JsonResponse({
+        'services': results,
+        'disk_pct': disk_pct,
+        'mem_total_mb': mem_total,
+        'mem_used_mb': mem_used,
+        'oracle_ip': oracle_ip,
+        'ts': timezone.now().isoformat(),
+    })

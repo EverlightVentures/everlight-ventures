@@ -36,6 +36,30 @@ if STRIPE_AVAILABLE:
     stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "")
 
 
+TEST_EMAIL_SUFFIXES = ("@example.com", "@example.org", "@example.net", "@placeholder.io")
+TEST_EMAIL_PREFIXES = ("test@", "demo@", "sample@", "noreply@", "no-reply@")
+
+
+def _is_real_email(email: str) -> bool:
+    raw = (email or "").strip().lower()
+    if not raw or "@" not in raw:
+        return False
+    if any(raw.endswith(suffix) for suffix in TEST_EMAIL_SUFFIXES):
+        return False
+    if any(raw.startswith(prefix) for prefix in TEST_EMAIL_PREFIXES):
+        return False
+    return True
+
+
+def _contactable_leads():
+    qs = LeadProfile.objects.filter(unsubscribed=False).exclude(email="")
+    for suffix in TEST_EMAIL_SUFFIXES:
+        qs = qs.exclude(email__iendswith=suffix)
+    for prefix in TEST_EMAIL_PREFIXES:
+        qs = qs.exclude(email__istartswith=prefix)
+    return qs
+
+
 def _emit_business_event(summary: str, **kwargs):
     try:
         from business_os.services import record_event, upsert_revenue_stream
@@ -132,10 +156,7 @@ def run_matching(min_score: float = 60.0, dry_run: bool = False) -> list[dict]:
     Returns list of match summaries.
     """
     offers = OfferListing.objects.filter(status="active")
-    # Gate 1: only real emails -- placeholder leads cannot be contacted
-    leads = LeadProfile.objects.filter(unsubscribed=False).exclude(
-        email__contains="@placeholder.io"
-    ).exclude(email="")
+    leads = _contactable_leads()
     results = []
 
     for offer in offers:
@@ -225,11 +246,15 @@ def auto_approve_high_score_matches(min_score: float = 65.0, limit: int = 20,
     candidates = BrokerMatch.objects.filter(
         status="pending",
         match_score__gte=min_score,
-    ).exclude(
-        lead__email__contains="@placeholder.io"
+        lead__unsubscribed=False,
     ).exclude(
         lead__email=""
-    ).order_by("-match_score")[:limit]
+    )
+    for suffix in TEST_EMAIL_SUFFIXES:
+        candidates = candidates.exclude(lead__email__iendswith=suffix)
+    for prefix in TEST_EMAIL_PREFIXES:
+        candidates = candidates.exclude(lead__email__istartswith=prefix)
+    candidates = candidates.order_by("-match_score")[:limit]
 
     count = 0
     for match in candidates:
@@ -475,7 +500,7 @@ SEQUENCE_SCHEDULE = [
 
 def create_outreach_sequence(match: BrokerMatch) -> list[OutreachSequence]:
     """Create a multi-step outreach sequence for a match."""
-    if not match.lead.email or "@placeholder" in match.lead.email:
+    if not _is_real_email(match.lead.email):
         return []
 
     steps = []
@@ -526,12 +551,17 @@ def create_outreach_sequence(match: BrokerMatch) -> list[OutreachSequence]:
 
 def get_due_outreach(limit: int = 20) -> list:
     """Get outreach steps that are due to send now."""
+    qs = OutreachSequence.objects.filter(
+        status="pending",
+        scheduled_at__lte=timezone.now(),
+        match__lead__unsubscribed=False,
+    )
+    for suffix in TEST_EMAIL_SUFFIXES:
+        qs = qs.exclude(to_email__iendswith=suffix)
+    for prefix in TEST_EMAIL_PREFIXES:
+        qs = qs.exclude(to_email__istartswith=prefix)
     return list(
-        OutreachSequence.objects.filter(
-            status="pending",
-            scheduled_at__lte=timezone.now(),
-            match__lead__unsubscribed=False,
-        ).select_related("match", "match__lead", "match__offer")
+        qs.select_related("match", "match__lead", "match__offer")
         .order_by("scheduled_at")[:limit]
     )
 

@@ -1,0 +1,244 @@
+{
+  "name": "Broker OS -- Master 24/7 Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {"field": "hours", "hoursInterval": 4, "triggerAtMinute": 0}
+          ]
+        }
+      },
+      "id": "scout-trigger",
+      "name": "Scout Timer (4h)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [100, 100],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {"field": "hours", "hoursInterval": 1, "triggerAtMinute": 0}
+          ]
+        }
+      },
+      "id": "sync-trigger",
+      "name": "Sync Timer (1h)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [100, 300],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {"field": "hours", "hoursInterval": 3, "triggerAtMinute": 30}
+          ]
+        }
+      },
+      "id": "match-trigger",
+      "name": "Match Timer (3h)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [100, 500],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {"field": "cronExpression", "expression": "0 14,19,0 * * *"}
+          ]
+        }
+      },
+      "id": "outreach-trigger",
+      "name": "Outreach Timer (3x daily)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [100, 700],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {"field": "cronExpression", "expression": "0 6,22 * * *"}
+          ]
+        }
+      },
+      "id": "followup-trigger",
+      "name": "Follow-Up Timer (2x daily)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [100, 900],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {"field": "cronExpression", "expression": "0 13 * * *"}
+          ]
+        }
+      },
+      "id": "full-trigger",
+      "name": "Full Cycle (daily 6 AM PT)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [100, 1100],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {"field": "cronExpression", "expression": "0 14,4 * * *"}
+          ]
+        }
+      },
+      "id": "report-trigger",
+      "name": "Report Timer (2x daily)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [100, 1300],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {"field": "cronExpression", "expression": "0 7,13,19,1 * * *"}
+          ]
+        }
+      },
+      "id": "heartbeat-trigger",
+      "name": "Heartbeat (6h)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [100, 1500],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "command": "cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/broker_daily_orchestrator.py scout"
+      },
+      "id": "scout-exec",
+      "name": "Run Scout",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [400, 100],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "command": "cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/broker_daily_orchestrator.py sync"
+      },
+      "id": "sync-exec",
+      "name": "Run Sync",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [400, 300],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "command": "cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/broker_daily_orchestrator.py match"
+      },
+      "id": "match-exec",
+      "name": "Run Match",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [400, 500],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "command": "cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/broker_daily_orchestrator.py outreach"
+      },
+      "id": "outreach-exec",
+      "name": "Run Outreach",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [400, 700],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "command": "cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/broker_daily_orchestrator.py followup"
+      },
+      "id": "followup-exec",
+      "name": "Run Follow-Up",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [400, 900],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "command": "cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/broker_daily_orchestrator.py full"
+      },
+      "id": "full-exec",
+      "name": "Run Full Cycle",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [400, 1100],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "command": "cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/broker_daily_orchestrator.py report"
+      },
+      "id": "report-exec",
+      "name": "Run Report",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [400, 1300],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "command": "cd /mnt/sdcard/AA_MY_DRIVE && python3 03_AUTOMATION_CORE/01_Scripts/broker_daily_orchestrator.py status --slack"
+      },
+      "id": "heartbeat-exec",
+      "name": "Run Heartbeat",
+      "type": "n8n-nodes-base.executeCommand",
+      "position": [400, 1500],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "={{$env.SLACK_WEBHOOK_URL}}",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=n8n Broker OS | {{$node.name}}: {{$json.exitCode === 0 ? 'SUCCESS' : 'FAILED (exit ' + $json.exitCode + ')'}}\nOutput: {{$json.stdout ? $json.stdout.slice(-200) : 'no output'}}"
+            }
+          ]
+        }
+      },
+      "id": "slack-notify",
+      "name": "Slack Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [700, 800],
+      "typeVersion": 4.2
+    }
+  ],
+  "connections": {
+    "Scout Timer (4h)": {"main": [[{"node": "Run Scout", "type": "main", "index": 0}]]},
+    "Sync Timer (1h)": {"main": [[{"node": "Run Sync", "type": "main", "index": 0}]]},
+    "Match Timer (3h)": {"main": [[{"node": "Run Match", "type": "main", "index": 0}]]},
+    "Outreach Timer (3x daily)": {"main": [[{"node": "Run Outreach", "type": "main", "index": 0}]]},
+    "Follow-Up Timer (2x daily)": {"main": [[{"node": "Run Follow-Up", "type": "main", "index": 0}]]},
+    "Full Cycle (daily 6 AM PT)": {"main": [[{"node": "Run Full Cycle", "type": "main", "index": 0}]]},
+    "Report Timer (2x daily)": {"main": [[{"node": "Run Report", "type": "main", "index": 0}]]},
+    "Heartbeat (6h)": {"main": [[{"node": "Run Heartbeat", "type": "main", "index": 0}]]},
+    "Run Scout": {"main": [[{"node": "Slack Alert", "type": "main", "index": 0}]]},
+    "Run Sync": {"main": [[{"node": "Slack Alert", "type": "main", "index": 0}]]},
+    "Run Match": {"main": [[{"node": "Slack Alert", "type": "main", "index": 0}]]},
+    "Run Outreach": {"main": [[{"node": "Slack Alert", "type": "main", "index": 0}]]},
+    "Run Follow-Up": {"main": [[{"node": "Slack Alert", "type": "main", "index": 0}]]},
+    "Run Full Cycle": {"main": [[{"node": "Slack Alert", "type": "main", "index": 0}]]},
+    "Run Report": {"main": [[{"node": "Slack Alert", "type": "main", "index": 0}]]},
+    "Run Heartbeat": {"main": [[{"node": "Slack Alert", "type": "main", "index": 0}]]}
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Los_Angeles"
+  },
+  "tags": [
+    {"name": "broker"},
+    {"name": "automation"},
+    {"name": "24/7"}
+  ]
+}

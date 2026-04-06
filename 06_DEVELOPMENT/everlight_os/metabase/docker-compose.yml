@@ -1,0 +1,49 @@
+version: "3.8"
+
+# Metabase BI Dashboards -- Oracle ARM64 Free Tier
+# Deploy: docker compose up -d
+# Access: http://<oracle-ip>:3200
+# Connect to Supabase Postgres for investor-ready revenue dashboards
+
+services:
+  metabase:
+    image: metabase/metabase:latest
+    container_name: metabase
+    restart: always
+    ports:
+      - "3200:3000"
+    environment:
+      # Use file-based H2 DB for Metabase's own metadata (lightweight)
+      MB_DB_TYPE: h2
+      MB_DB_FILE: /metabase-data/metabase.db
+
+      # Timezone
+      JAVA_TIMEZONE: America/Los_Angeles
+      MB_SITE_LOCALE: en
+      MB_SITE_NAME: Everlight Ventures
+
+      # Security
+      MB_PASSWORD_COMPLEXITY: strong
+      MB_SEND_NEW_SSO_USER_ADMIN_EMAIL: "false"
+    volumes:
+      - metabase_data:/metabase-data
+    networks:
+      - everlight
+
+  # After first boot, connect Metabase to Supabase via the UI:
+  # 1. Go to http://<ip>:3200/setup
+  # 2. Add Database -> PostgreSQL
+  # 3. Host: db.jdqqmsmwmbsnlnstyavl.supabase.co
+  # 4. Port: 5432
+  # 5. Database: postgres
+  # 6. Username: postgres
+  # 7. Password: (your Supabase DB password)
+  # 8. SSL: Required
+
+volumes:
+  metabase_data:
+
+networks:
+  everlight:
+    name: everlight
+    external: true

@@ -1,0 +1,316 @@
+{
+  "title": "Automated Real Estate Wholesaling System -- Research Packet",
+  "date": "2026-03-20",
+  "researcher": "Everlight Researcher Agent",
+  "monetization_relevance_score": 8,
+  "summary": "Real estate wholesaling is a viable revenue stream that can be substantially automated with AI. California is legal but faces pending legislation (AB 1850) that may require a license. Average assignment fees are $10k-$25k per deal. Zillow API is dead; alternatives exist at $0.01-$0.25/record.",
+
+  "sections": {
+    "1_zillow_data_access": {
+      "zillow_api_status": "DEPRECATED. Zillow sunset its original public API (Zillow Data API) in April 2021. All accounts were migrated to Bridge Interactive Data API. Zillow no longer offers a free public API for bulk listing data.",
+      "bridge_interactive": {
+        "description": "Zillow Group's replacement. Provides MLS listing data via RESO Web API standard.",
+        "access": "Requires MLS partnership or approved business use case. Not open to individual wholesalers.",
+        "url": "https://www.bridgeinteractive.com/developers/zillow-group-data/"
+      },
+      "zillow_scraping": {
+        "feasibility": "Technically possible via tools like Apify ($49+/mo) or ScrapingBee. Zillow pages are public.",
+        "legal_risk": "HIGH. Zillow's Terms of Service prohibit scraping. They have sent cease-and-desist letters. Not recommended as a primary data source for a business system.",
+        "note": "Scraping for personal lead research is common but building a commercial system on it is legally risky."
+      },
+      "recommended_alternatives": [
+        {
+          "name": "ATTOM Data API",
+          "cost": "$95/mo starting, 30-day free trial",
+          "coverage": "158M+ US properties. Deeds, mortgages, foreclosures, tax liens, owner info, property characteristics.",
+          "best_for": "Distressed property signals (pre-foreclosure, tax liens, high equity). Core data engine for wholesaling.",
+          "url": "https://www.attomdata.com/solutions/property-data-api/"
+        },
+        {
+          "name": "BatchData API",
+          "cost": "$0.01 per API call",
+          "coverage": "Property data, skip tracing, owner info. Now owned by PropStream.",
+          "best_for": "Pay-per-use model, good for startups.",
+          "url": "https://batchdata.io/"
+        },
+        {
+          "name": "Mashvisor API",
+          "cost": "Paid plans, pricing varies",
+          "coverage": "Property attributes, tax history, transactions, valuations, neighborhood scores.",
+          "best_for": "Investment analysis layer on top of lead data.",
+          "url": "https://www.mashvisor.com/"
+        },
+        {
+          "name": "Realtor.com API (via RapidAPI)",
+          "cost": "Free tier available, paid tiers for volume",
+          "coverage": "Active listings, property details, neighborhoods, schools.",
+          "best_for": "Supplemental listing data.",
+          "url": "https://rapidapi.com/"
+        },
+        {
+          "name": "PropStream (platform, not raw API)",
+          "cost": "$99/mo",
+          "coverage": "MLS data, county records, pre-foreclosures, absentee owners, tax liens, skip tracing built in.",
+          "best_for": "All-in-one wholesaling platform. Most wholesalers use this as their primary tool.",
+          "url": "https://www.propstream.com/"
+        },
+        {
+          "name": "Homesage.ai",
+          "cost": "Free tier available",
+          "coverage": "Property data provider with developer access.",
+          "best_for": "Budget-friendly starting point.",
+          "url": "https://homesage.ai/"
+        }
+      ]
+    },
+
+    "2_california_legality": {
+      "current_status": "LEGAL with conditions. Wholesaling via contract assignment is legal in California as of March 2026. No real estate license is required IF you only assign your contractual rights and do not market properties you do not own.",
+      "key_statutes": [
+        "CA Business & Professions Code Section 10016 -- defines real estate broker",
+        "CA Business & Professions Code Section 10130 -- licensure requirements",
+        "CA Business & Professions Code Section 10131 -- broker activities"
+      ],
+      "pending_legislation": {
+        "bill": "AB 1850 (California Assembly Bill 1850)",
+        "introduced": "2026-02-12",
+        "status": "Introduced, may be heard in committee March 14, 2026. NOT YET LAW.",
+        "impact": "Would REQUIRE a real estate license to wholesale. Would expand the definition of 'broker' to include anyone entering a purchase contract with intent to assign for profit.",
+        "disclosure_requirements": "Would require written disclosure to seller that wholesaler does not intend to take title. All ads must disclose the person does not hold legal title.",
+        "risk_assessment": "MEDIUM-HIGH. If passed, this fundamentally changes the wholesaling landscape in CA. Monitor closely.",
+        "url": "https://trackbill.com/bill/california-assembly-bill-1850-real-estate-wholesaling/2812838/"
+      },
+      "compliance_requirements_current": [
+        "Always disclose your role as assignor to the seller",
+        "Use explicit assignment clauses in purchase agreements",
+        "Seller must agree in writing that the contract can be assigned",
+        "Do NOT market the property itself -- market your contractual interest",
+        "Do NOT represent yourself as the owner or an agent",
+        "Keep all earnest money deposits in proper escrow"
+      ],
+      "assignment_vs_double_close": {
+        "assignment_fee": {
+          "description": "You sign a purchase agreement with seller (A-B contract), then assign your position to end buyer (C) for a fee. One closing. Simplest method.",
+          "pros": "Low cost, fast, no need to close yourself",
+          "cons": "Fee is visible to all parties. Some sellers/title companies refuse assignments.",
+          "typical_fee": "$5,000-$25,000"
+        },
+        "double_close": {
+          "description": "Two separate transactions: you buy from seller (A-B), then immediately sell to end buyer (B-C). Two closings, same day or within days.",
+          "pros": "Fee is hidden. Works when assignments are blocked. More professional appearance.",
+          "cons": "Higher closing costs (two sets of title fees). Need transactional funding ($500-2000 for short-term lending).",
+          "typical_fee": "Same range, but absorbed into the price spread"
+        },
+        "finder_fee": {
+          "description": "You simply refer a deal to an investor for a flat fee. No contract assignment.",
+          "pros": "Simplest, lowest risk",
+          "cons": "Smallest fees ($500-$2,000). May still constitute unlicensed brokerage in CA.",
+          "warning": "In California, accepting a finder's fee for real estate referrals without a license is legally gray. The DRE has taken the position this requires a license."
+        }
+      }
+    },
+
+    "3_automated_wholesaling_system": {
+      "distressed_seller_signals": [
+        {"signal": "Pre-foreclosure / Notice of Default", "data_source": "ATTOM API, PropStream, county recorder", "strength": "HIGH"},
+        {"signal": "Tax liens / delinquent taxes", "data_source": "ATTOM API, county tax assessor", "strength": "HIGH"},
+        {"signal": "Absentee owners (out-of-state)", "data_source": "PropStream, BatchData, county records", "strength": "MEDIUM-HIGH"},
+        {"signal": "High equity (>50% equity, no mortgage)", "data_source": "ATTOM API, PropStream", "strength": "MEDIUM"},
+        {"signal": "Long days on market (>90 days)", "data_source": "MLS data, Realtor.com API", "strength": "MEDIUM"},
+        {"signal": "Code violations", "data_source": "City/county records, PropStream", "strength": "HIGH"},
+        {"signal": "Probate / inherited property", "data_source": "County probate court, PropStream", "strength": "HIGH"},
+        {"signal": "Vacant properties", "data_source": "USPS vacancy data, PropStream, utility records", "strength": "MEDIUM-HIGH"},
+        {"signal": "Divorce filings", "data_source": "County court records", "strength": "MEDIUM"},
+        {"signal": "Expired/withdrawn MLS listings", "data_source": "MLS access required", "strength": "HIGH"}
+      ],
+      "deal_flow": [
+        "1. DATA PULL: Pull property lists filtered by distress signals (PropStream/ATTOM API)",
+        "2. SKIP TRACE: Append owner phone/email via skip tracing service",
+        "3. OUTREACH: Multi-channel automated contact (SMS, ringless voicemail, direct mail, cold call)",
+        "4. QUALIFY: Assess motivation, timeline, property condition, price expectations",
+        "5. OFFER: Calculate MAO (Maximum Allowable Offer) = ARV x 0.70 - Repairs - Your Fee",
+        "6. CONTRACT: Get property under purchase agreement with assignment clause",
+        "7. MARKET TO BUYERS: Blast deal to investor buyer list with property details and photos",
+        "8. ASSIGN: Execute assignment agreement with end buyer, collect assignment fee",
+        "9. CLOSE: Title company handles closing, you get paid at settlement"
+      ],
+      "building_buyer_list": [
+        "Attend local REIA (Real Estate Investors Association) meetings",
+        "Pull recent cash buyer transactions from county records (ATTOM API)",
+        "Facebook groups: local real estate investor groups",
+        "Craigslist: post deals, attract buyers",
+        "Build email list via landing page on your site",
+        "Network with hard money lenders (they know active buyers)",
+        "PropStream can filter for recent cash buyers in your target market"
+      ],
+      "automation_opportunities": {
+        "fully_automatable": [
+          "Data pulls and list building (API-driven)",
+          "Skip tracing (batch API calls)",
+          "SMS/email outreach campaigns (drip sequences)",
+          "CRM lead tracking and follow-up reminders",
+          "ARV/MAO calculations from comp data",
+          "Buyer list blast emails when new deals are found"
+        ],
+        "partially_automatable": [
+          "Seller qualification calls (AI voice agents emerging, but human touch still converts better)",
+          "Property condition assessment (can use satellite/street view imagery + AI, but walkthroughs matter)",
+          "Offer negotiation (AI can draft, human should handle)"
+        ],
+        "requires_human": [
+          "Contract signing (legal requirement)",
+          "Title company coordination",
+          "Complex negotiations with emotional sellers",
+          "Legal compliance review"
+        ]
+      }
+    },
+
+    "4_tools_and_pricing": {
+      "all_in_one_platforms": [
+        {
+          "name": "PropStream",
+          "cost": "$99/mo base + $27/mo for list management add-on + $0.25/skip trace",
+          "features": "Property data, MLS comps, pre-foreclosure lists, absentee owner lists, skip tracing, DNC scrubber, marketing tools",
+          "verdict": "Industry standard for wholesalers. Best starting point.",
+          "note": "Acquired BatchLeads and BatchDialer in July 2025."
+        },
+        {
+          "name": "BatchLeads (now PropStream-owned)",
+          "cost": "$99-$899/mo depending on tier",
+          "features": "Lead generation, skip tracing, SMS marketing, in-app calling, lead scoring",
+          "tiers": {
+            "Personal Basic": "$99/mo, 3 users, 10k leads/mo",
+            "Personal Plus": "$299/mo, 25k leads, lead scoring, SMS",
+            "Team Basic": "$599/mo, 75k leads, 10 users",
+            "Team Plus": "$899/mo, 150k leads, 200 users"
+          }
+        },
+        {
+          "name": "DealMachine",
+          "cost": "~$99/mo (pricing varies by plan)",
+          "features": "Driving for dollars app, skip tracing, direct mail, CRM",
+          "verdict": "Best for driving-for-dollars strategy. Good mobile app."
+        },
+        {
+          "name": "REIPro",
+          "cost": "~$99-149/mo",
+          "features": "Lead generation, CRM, contract templates, comps, marketing automation",
+          "verdict": "Good all-in-one but less market share than PropStream."
+        },
+        {
+          "name": "REsimpli",
+          "cost": "$99-299/mo",
+          "features": "CRM, lead management, skip tracing, SMS, direct mail, KPI tracking",
+          "verdict": "Strong CRM focus. Good for tracking conversion funnel metrics."
+        },
+        {
+          "name": "Propwire",
+          "cost": "Free tier available, paid plans for volume",
+          "features": "Property data, skip tracing, SMS campaigns, CRM",
+          "verdict": "Budget-friendly option for getting started."
+        }
+      ],
+      "skip_tracing_services": [
+        {"name": "Tracerfy", "cost": "$0.02/matched lead", "accuracy": "70-95%", "note": "Cheapest option. 10k leads for ~$90."},
+        {"name": "REISkip", "cost": "$0.10-0.15/lead", "accuracy": "85-90%", "note": "Good accuracy for the price."},
+        {"name": "BatchSkipTracing", "cost": "$0.20/result", "accuracy": "Industry standard", "note": "No subscription required. Pay per use."},
+        {"name": "PropStream built-in", "cost": "$0.25/trace", "accuracy": "Good", "note": "Convenient if already on PropStream."}
+      ],
+      "data_apis_for_custom_build": [
+        {"name": "ATTOM Data API", "cost": "$95/mo + usage", "note": "Best raw property data API. 30-day free trial."},
+        {"name": "BatchData API", "cost": "$0.01/call", "note": "Cheapest per-call option."},
+        {"name": "Realtor.com via RapidAPI", "cost": "Free tier + paid", "note": "Listing data supplement."},
+        {"name": "Homesage.ai", "cost": "Free tier", "note": "Newer entrant, limited but free."},
+        {"name": "County recorder APIs", "cost": "Free (varies by county)", "note": "Direct source for deeds, liens, foreclosures. Many CA counties have online portals."}
+      ],
+      "outreach_automation": [
+        {"channel": "SMS/Text", "tools": "BatchDialer, Launch Control, REISift, Propwire", "cost": "$0.01-0.05/message", "note": "Highest response rate. Must comply with TCPA and 10DLC registration."},
+        {"channel": "Ringless Voicemail", "tools": "SlyBroadcast, Drop Cowboy", "cost": "$0.02-0.05/drop", "note": "Goes straight to voicemail. Less intrusive."},
+        {"channel": "Direct Mail", "tools": "Ballpoint Marketing, Yellow Letter HQ, PropStream", "cost": "$0.50-2.00/piece", "note": "Still effective. Handwritten-style letters perform best."},
+        {"channel": "Cold Calling", "tools": "BatchDialer, Mojo Dialer", "cost": "$99-149/mo for dialer + VA at $4-8/hr", "note": "Outsource to VAs for scale."},
+        {"channel": "Email", "tools": "Any ESP + skip traced emails", "cost": "Near zero", "note": "Low response rate but nearly free at scale."}
+      ]
+    },
+
+    "5_revenue_model": {
+      "assignment_fee_ranges": {
+        "national_average": "$13,000",
+        "typical_range": "$5,000-$20,000",
+        "high_markets": "$20,000-$50,000+ (CA, NY, FL metro areas)",
+        "low_markets": "$5,000-$10,000 (rural, low-value areas)",
+        "california_metros": "$15,000-$30,000 typical for LA, SF Bay Area, San Diego due to high property values",
+        "source": "Real Estate Bees 2026 survey, PropPipeline 2025 report"
+      },
+      "conversion_funnel": {
+        "marketing_to_lead": "0.5-2% response rate on outreach (direct mail, SMS, cold call)",
+        "lead_to_appointment": "~50% of inbound leads go to appointments",
+        "offers_made_to_accepted": "~13.5% offer acceptance rate",
+        "leads_to_deal": "~1 deal per 23 inbound leads (4.3% conversion)",
+        "overall_marketing_to_deal": "Roughly 1 deal per 1,000-3,000 outreach touches",
+        "example_math": {
+          "send": "3,000 SMS messages",
+          "responses": "30-60 leads (1-2% response)",
+          "appointments": "15-30",
+          "offers_made": "10-20",
+          "contracts_signed": "2-3",
+          "deals_closed": "1-2",
+          "revenue": "$13,000-$30,000"
+        }
+      },
+      "solo_operator_realistic_volume": {
+        "beginner_first_6_months": "0-1 deals/month",
+        "intermediate_with_systems": "1-2 deals/month",
+        "advanced_with_ai_automation": "2-4 deals/month",
+        "top_performers": "6-10 deals/month (usually have team or VAs)",
+        "note": "AI automation can meaningfully reduce the gap between intermediate and advanced by automating list building, skip tracing, and initial outreach. The human bottleneck is seller negotiations and contract execution."
+      },
+      "monthly_cost_to_operate": {
+        "minimum_viable": {
+          "PropStream": "$99",
+          "skip_tracing": "$50-200 (depends on volume)",
+          "SMS_marketing": "$100-300",
+          "total": "$250-600/mo"
+        },
+        "scaled_with_automation": {
+          "PropStream_plus_addons": "$150",
+          "ATTOM_API": "$95",
+          "skip_tracing_volume": "$200-500",
+          "multi_channel_marketing": "$500-1500",
+          "VA_for_cold_calling": "$500-1000",
+          "total": "$1,500-3,200/mo"
+        }
+      },
+      "roi_estimate": {
+        "conservative": "1 deal/mo at $15k fee - $600 costs = $14,400/mo net",
+        "moderate": "2 deals/mo at $15k fee - $2,000 costs = $28,000/mo net",
+        "aggressive": "4 deals/mo at $20k fee - $3,200 costs = $76,800/mo net"
+      }
+    },
+
+    "6_everlight_integration_opportunities": {
+      "broker_os_synergy": "Wholesaling deal flow can feed into Broker OS as a deal type. Investor buyer matching is essentially B2B matchmaking -- same architecture.",
+      "django_dashboard": "Deal pipeline tracking, KPI dashboards, seller/buyer CRM can all live in the existing Django hive_dashboard.",
+      "supabase_backend": "Lead data, deal status, buyer lists, assignment contracts can all be stored in Supabase tables.",
+      "ai_automation_layer": "Claude/AI agents can handle: list scoring, offer calculation (MAO formula), outreach copy generation, deal analysis summaries for buyers.",
+      "revenue_stream_fit": "At $15k+ per deal, even 1 deal/month would be the highest-margin revenue stream in the Everlight portfolio.",
+      "recommended_mvp": [
+        "1. Sign up for PropStream ($99/mo) -- immediate access to distressed property lists in your target CA market",
+        "2. Use ATTOM API free trial to prototype automated data pulls",
+        "3. Build a simple lead pipeline in Supabase: leads -> contacted -> qualified -> under_contract -> assigned -> closed",
+        "4. Use Tracerfy ($0.02/lead) for skip tracing",
+        "5. Set up SMS outreach via BatchDialer or Launch Control",
+        "6. Build a buyer list landing page on everlightventures.io",
+        "7. First deal target: 60-90 days from start"
+      ]
+    }
+  },
+
+  "risk_notes": [
+    "CRITICAL: Monitor CA AB 1850. If passed, wholesaling in CA will require a real estate license. This could add 135+ hours of coursework and exam requirements.",
+    "TCPA compliance for SMS/calls is non-negotiable. Violations are $500-$1,500 per message. Register for 10DLC, scrub DNC lists.",
+    "Zillow scraping for commercial use carries legal risk. Use legitimate APIs.",
+    "Assignment fee visibility can cause deal friction. Consider double-close capability.",
+    "Title companies vary in willingness to handle assignments. Build relationships with investor-friendly title companies early."
+  ]
+}

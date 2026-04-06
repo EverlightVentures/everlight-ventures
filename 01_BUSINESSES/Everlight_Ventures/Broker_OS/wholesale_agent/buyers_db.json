@@ -1,0 +1,1787 @@
+[
+  {
+    "name": "Maximum Cash Home Buyers",
+    "company": "Maximum Cash Home Buyers",
+    "email": "info@maximumcashhomebuyers.com",
+    "phone": "(678) 902-2000",
+    "city": "Atlanta",
+    "state": "GA",
+    "buy_criteria": "SFR any condition Atlanta metro",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-21",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Atlanta",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Vlancia Home Buyers",
+    "company": "Vlancia Home Buyers",
+    "email": "info@vlanciahomebuyers.com",
+    "phone": "(404) 490-1526",
+    "city": "Atlanta",
+    "state": "GA",
+    "buy_criteria": "SFR as-is Atlanta",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-21",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Atlanta",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Atlanta Home Buyers",
+    "company": "Atlanta Home Buyers",
+    "email": "info@atlantahomebuyers.com",
+    "phone": "(404) 400-5400",
+    "city": "Atlanta",
+    "state": "GA",
+    "buy_criteria": "Houses any condition Atlanta",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Atlanta",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Crawford Home Buyers",
+    "company": "Crawford Home Buyers",
+    "email": "info@webuyhousesinatlanta.com",
+    "phone": "(770) 727-3158",
+    "city": "Atlanta",
+    "state": "GA",
+    "buy_criteria": "SFR cash close Atlanta",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Atlanta",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "7_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "ATL Cash Home Buyers",
+    "company": "ATL Cash Home Buyers",
+    "email": "info@atlcashhomebuyers.com",
+    "phone": "(404) 439-9984",
+    "city": "Atlanta",
+    "state": "GA",
+    "buy_criteria": "SFR as-is Atlanta metro",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Atlanta",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Arbor View Properties LLC",
+    "company": "Arbor View Properties LLC",
+    "email": "info@arborviewhomebuyers.com",
+    "phone": "(770) 810-5715",
+    "city": "Atlanta",
+    "state": "GA",
+    "buy_criteria": "SFR any condition Georgia",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Atlanta",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Metro GA Home Buyers",
+    "company": "Metro GA Home Buyers",
+    "email": "info@metrogahomebuyers.com",
+    "phone": "(678) 218-4021",
+    "city": "Atlanta",
+    "state": "GA",
+    "buy_criteria": "Houses for cash Georgia",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-21",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Atlanta",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "ATLFairOffer",
+    "company": "ATLFairOffer",
+    "email": "info@atlfairoffer.com",
+    "phone": "(404) 800-1744",
+    "city": "Atlanta",
+    "state": "GA",
+    "buy_criteria": "Houses any condition Atlanta",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Atlanta",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Heather Faires",
+    "company": "Big Texas Home Buyers",
+    "email": "heather@bigtexashomebuyers.com",
+    "phone": "(214) 444-9385",
+    "city": "Dallas",
+    "state": "TX",
+    "buy_criteria": "SFR any condition DFW",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Dallas",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Ninebird Properties",
+    "company": "Ninebird Properties",
+    "email": "info@ninebp.com",
+    "phone": "(972) 996-1839",
+    "city": "Dallas",
+    "state": "TX",
+    "buy_criteria": "SFR cash close Dallas",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Dallas",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "7_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Southern Hills Home Buyers",
+    "company": "Southern Hills Home Buyers",
+    "email": "info@southernhillshomebuyers.com",
+    "phone": "(214) 225-3042",
+    "city": "Dallas",
+    "state": "TX",
+    "buy_criteria": "Houses any condition DFW metro",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-21",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Dallas",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Legacy Home Buyers",
+    "company": "Legacy Home Buyers",
+    "email": "admin@legacybuyers.com",
+    "phone": "(469) 771-0915",
+    "city": "Dallas",
+    "state": "TX",
+    "buy_criteria": "SFR as-is DFW",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-21",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Dallas",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "TX Home Buying Pros",
+    "company": "TX Home Buying Pros",
+    "email": "team@txhomebuyingpros.com",
+    "phone": "(214) 296-2343",
+    "city": "Dallas",
+    "state": "TX",
+    "buy_criteria": "Houses any condition Texas",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Dallas",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Cash House Buyers DFW",
+    "company": "Cash House Buyers DFW",
+    "email": "info@cashhousebuyersdfw.com",
+    "phone": "(214) 272-2177",
+    "city": "Dallas",
+    "state": "TX",
+    "buy_criteria": "SFR as-is DFW metro",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Dallas",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Dallas Home Buyers",
+    "company": "Dallas Home Buyers",
+    "email": "info@dallashomebuyers.net",
+    "phone": "(214) 615-1255",
+    "city": "Dallas",
+    "state": "TX",
+    "buy_criteria": "Cash close any condition Dallas",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-21",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Dallas",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "7_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Joe Lieber",
+    "company": "Cleveland House Buyers",
+    "email": "info@clevelandhousebuyers.com",
+    "phone": "(440) 577-6552",
+    "city": "Cleveland",
+    "state": "OH",
+    "buy_criteria": "SFR any condition Cleveland metro",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-21",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Cleveland",
+    "preferred_markets": [
+      "Cleveland"
+    ],
+    "property_types": [
+      "land",
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 20000,
+    "price_range_max": 200000
+  },
+  {
+    "name": "Cleveland Cash Offers",
+    "company": "Cleveland Cash Offers",
+    "email": "info@clecashoffers.com",
+    "phone": "(216) 200-4160",
+    "city": "Cleveland",
+    "state": "OH",
+    "buy_criteria": "Houses for cash Cleveland",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Cleveland",
+    "preferred_markets": [
+      "Cleveland"
+    ],
+    "property_types": [
+      "land",
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 20000,
+    "price_range_max": 200000
+  },
+  {
+    "name": "Speedy Offers Ohio",
+    "company": "Speedy Offers Ohio",
+    "email": "info@speedyoffersohio.com",
+    "phone": "(216) 306-4896",
+    "city": "Cleveland",
+    "state": "OH",
+    "buy_criteria": "SFR as-is Greater Cleveland",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Cleveland",
+    "preferred_markets": [
+      "Cleveland"
+    ],
+    "property_types": [
+      "land",
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 20000,
+    "price_range_max": 200000
+  },
+  {
+    "name": "Cleveland Cash Buyer",
+    "company": "Cleveland Cash Buyer",
+    "email": "ipaycashforhome@gmail.com",
+    "phone": "(216) 526-1323",
+    "city": "Cleveland",
+    "state": "OH",
+    "buy_criteria": "Houses any condition Cleveland",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Cleveland",
+    "preferred_markets": [
+      "Cleveland"
+    ],
+    "property_types": [
+      "land",
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 20000,
+    "price_range_max": 200000
+  },
+  {
+    "name": "Legacy Home Solutions",
+    "company": "Legacy Home Solutions",
+    "email": "info@legacyhomesol.com",
+    "phone": "(440) 973-6024",
+    "city": "Cleveland",
+    "state": "OH",
+    "buy_criteria": "SFR cash close Cleveland metro",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-21",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Cleveland",
+    "preferred_markets": [
+      "Cleveland"
+    ],
+    "property_types": [
+      "land",
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "7_days",
+    "price_range_min": 20000,
+    "price_range_max": 200000
+  },
+  {
+    "name": "Mission Home Buyers",
+    "company": "Mission Home Buyers",
+    "email": "info@missionhomebuyers.com",
+    "phone": "(980) 533-4950",
+    "city": "Charlotte",
+    "state": "NC",
+    "buy_criteria": "SFR any condition Charlotte",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-21",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Charlotte",
+    "preferred_markets": [
+      "Charlotte"
+    ],
+    "property_types": [
+      "land",
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Solution Home Buyers LLC",
+    "company": "Solution Home Buyers LLC",
+    "email": "info@solutionhomebuyers.com",
+    "phone": "(704) 870-2100",
+    "city": "Charlotte",
+    "state": "NC",
+    "buy_criteria": "Houses cash close Charlotte",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Charlotte",
+    "preferred_markets": [
+      "Charlotte"
+    ],
+    "property_types": [
+      "land",
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "7_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Carolina House Buyers",
+    "company": "Carolina House Buyers",
+    "email": "info@thecarolinahousebuyers.com",
+    "phone": "(704) 686-8441",
+    "city": "Charlotte",
+    "state": "NC",
+    "buy_criteria": "SFR as-is Charlotte metro",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-21",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Charlotte",
+    "preferred_markets": [
+      "Charlotte"
+    ],
+    "property_types": [
+      "land",
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "CLT Buyers",
+    "company": "CLT Buyers",
+    "email": "info@cltbuyers.com",
+    "phone": "(704) 741-3399",
+    "city": "Charlotte",
+    "state": "NC",
+    "buy_criteria": "Houses any condition Charlotte NC",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Charlotte",
+    "preferred_markets": [
+      "Charlotte"
+    ],
+    "property_types": [
+      "land",
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Harmony Home Buyers",
+    "company": "Harmony Home Buyers",
+    "email": "info@harmonyhomebuyers.com",
+    "phone": "(704) 285-2485",
+    "city": "Charlotte",
+    "state": "NC",
+    "buy_criteria": "SFR cash close Charlotte metro",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-21",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Charlotte",
+    "preferred_markets": [
+      "Charlotte"
+    ],
+    "property_types": [
+      "land",
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "7_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Robang Properties",
+    "company": "Robang Properties",
+    "email": "info@robangproperties.com",
+    "phone": "(314) 648-3499",
+    "city": "St. Louis",
+    "state": "MO",
+    "buy_criteria": "SFR any condition St Louis metro",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-21",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "St. Louis",
+    "preferred_markets": [
+      "St. Louis"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 20000,
+    "price_range_max": 200000
+  },
+  {
+    "name": "Missouri Cash Home Buyers",
+    "company": "Missouri Cash Home Buyers",
+    "email": "info@missouricashhomebuyers.com",
+    "phone": "(314) 326-4900",
+    "city": "St. Louis",
+    "state": "MO",
+    "buy_criteria": "Houses for cash St Louis",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "St. Louis",
+    "preferred_markets": [
+      "St. Louis"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 20000,
+    "price_range_max": 200000
+  },
+  {
+    "name": "Show Me Cash Offer",
+    "company": "Show Me Cash Offer",
+    "email": "info@showmecashoffer.com",
+    "phone": "(314) 916-1466",
+    "city": "St. Louis",
+    "state": "MO",
+    "buy_criteria": "SFR as-is St Louis",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-21",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "St. Louis",
+    "preferred_markets": [
+      "St. Louis"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 20000,
+    "price_range_max": 200000
+  },
+  {
+    "name": "I Buy STL",
+    "company": "I Buy STL",
+    "email": "hello@ibuystl.com",
+    "phone": "(314) 325-0757",
+    "city": "St. Louis",
+    "state": "MO",
+    "buy_criteria": "Houses cash close St Louis metro",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "St. Louis",
+    "preferred_markets": [
+      "St. Louis"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "7_days",
+    "price_range_min": 20000,
+    "price_range_max": 200000
+  },
+  {
+    "name": "Chris Buys Homes STL",
+    "company": "Chris Buys Homes STL",
+    "email": "info@chrisbuyshomesstl.com",
+    "phone": "(314) 334-1481",
+    "city": "St. Louis",
+    "state": "MO",
+    "buy_criteria": "SFR any condition St Louis",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-21",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "St. Louis",
+    "preferred_markets": [
+      "St. Louis"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 20000,
+    "price_range_max": 200000
+  },
+  {
+    "name": "Duval Home Buyers",
+    "company": "Duval Home Buyers",
+    "email": "info@duvalhomebuyers.com",
+    "phone": "(904) 346-0600",
+    "city": "Jacksonville",
+    "state": "FL",
+    "buy_criteria": "SFR any condition Jacksonville",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Jacksonville",
+    "preferred_markets": [
+      "Jacksonville"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Henry",
+    "company": "Henry Buys Homes",
+    "email": "henry@henrybuyshomes.com",
+    "phone": "(904) 878-2473",
+    "city": "Jacksonville",
+    "state": "FL",
+    "buy_criteria": "Houses for cash Jacksonville",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Jacksonville",
+    "preferred_markets": [
+      "Jacksonville"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Jax Cash Buyers",
+    "company": "Jax Cash Buyers",
+    "email": "sales@jaxcashbuyers.com",
+    "phone": "(904) 513-0229",
+    "city": "Jacksonville",
+    "state": "FL",
+    "buy_criteria": "SFR as-is Jacksonville metro",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-21",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Jacksonville",
+    "preferred_markets": [
+      "Jacksonville"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Evergreen Home Buyers",
+    "company": "Evergreen Home Buyers",
+    "email": "info@selltoevergreenjax.com",
+    "phone": "(904) 342-3216",
+    "city": "Jacksonville",
+    "state": "FL",
+    "buy_criteria": "SFR cash close Jacksonville",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-21",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Jacksonville",
+    "preferred_markets": [
+      "Jacksonville"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "7_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Blue Sky Home Buyers",
+    "company": "Blue Sky Home Buyers",
+    "email": "info@selltoblueskyjax.com",
+    "phone": "(904) 867-7775",
+    "city": "Jacksonville",
+    "state": "FL",
+    "buy_criteria": "Houses any condition Jacksonville",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Jacksonville",
+    "preferred_markets": [
+      "Jacksonville"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Sunshine Cash Buyers",
+    "company": "Sunshine Cash Buyers",
+    "email": "info@sunshinecashbuyers.com",
+    "phone": "(904) 372-1794",
+    "city": "Jacksonville",
+    "state": "FL",
+    "buy_criteria": "SFR as-is Duval County FL",
+    "added_date": "2026-03-20",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-03-20",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-03-20",
+    "market": "Jacksonville",
+    "preferred_markets": [
+      "Jacksonville"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Diamond Equity Investments",
+    "company": "Diamond Equity Investments",
+    "email": "info@diamondequity.com",
+    "phone": "(404) 721-1553",
+    "city": "Atlanta",
+    "state": "GA",
+    "market": "Atlanta",
+    "buy_criteria": "Cash buyer in Atlanta GA",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "We Buy Ugly Houses",
+    "company": "We Buy Ugly Houses",
+    "email": "atlanta@webuyuglyhouses.com",
+    "phone": "(404) 921-0091",
+    "city": "Atlanta",
+    "state": "GA",
+    "market": "Atlanta",
+    "buy_criteria": "Cash buyer in Atlanta GA",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Real Ventures LLC",
+    "company": "Real Ventures LLC",
+    "email": "info@realventuresllc.com",
+    "phone": "(770) 609-9085",
+    "city": "Atlanta",
+    "state": "GA",
+    "market": "Atlanta",
+    "buy_criteria": "Cash buyer in Atlanta GA",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Maximum Cash Home Buyers",
+    "company": "Maximum Cash Home Buyers",
+    "email": "offers@maximumcashhomebuyers.com",
+    "phone": "(404) 525-2675",
+    "city": "Atlanta",
+    "state": "GA",
+    "market": "Atlanta",
+    "buy_criteria": "Cash buyer in Atlanta GA",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "New Horizon Home Buyers",
+    "company": "New Horizon Home Buyers",
+    "email": "info@newhorizonhomebuyers.com",
+    "phone": "(404) 400-6105",
+    "city": "Atlanta",
+    "state": "GA",
+    "market": "Atlanta",
+    "buy_criteria": "Cash buyer in Atlanta GA",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Cash Out House",
+    "company": "Cash Out House",
+    "email": "info@cashouthouse.com",
+    "phone": "(678) 540-4725",
+    "city": "Atlanta",
+    "state": "GA",
+    "market": "Atlanta",
+    "buy_criteria": "Cash buyer in Atlanta GA",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Clever Offers",
+    "company": "Clever Offers",
+    "email": "support@cleveroffers.com",
+    "phone": "(888) 850-2636",
+    "city": "Atlanta",
+    "state": "GA",
+    "market": "Atlanta",
+    "buy_criteria": "Cash buyer in Atlanta GA",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Atlanta",
+      "Cleveland"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Homeinc",
+    "company": "Homeinc",
+    "email": "info@homeinc.com",
+    "phone": "(888) 850-2636",
+    "city": "Atlanta",
+    "state": "GA",
+    "market": "Atlanta",
+    "buy_criteria": "Cash buyer in Atlanta GA",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Local Key, LLC",
+    "company": "Local Key, LLC",
+    "email": "offers@localkeyoffer.com",
+    "phone": "(678) 769-4544",
+    "city": "Atlanta",
+    "state": "GA",
+    "market": "Atlanta",
+    "buy_criteria": "Cash buyer in Atlanta GA",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Georgia Real Estate Investors Association (GaREIA)",
+    "company": "Georgia Real Estate Investors Association (GaREIA)",
+    "email": "info@gareia.com",
+    "phone": "(770) 451-8800",
+    "city": "Atlanta",
+    "state": "GA",
+    "market": "Atlanta",
+    "buy_criteria": "Cash buyer in Atlanta GA",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Atlanta Real Estate Investors Alliance (Atlanta REIA)",
+    "company": "Atlanta Real Estate Investors Alliance (Atlanta REIA)",
+    "email": "admin@atlantareia.com",
+    "phone": "(678) 701-7160",
+    "city": "Atlanta",
+    "state": "GA",
+    "market": "Atlanta",
+    "buy_criteria": "Cash buyer in Atlanta GA",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Roger Howard",
+    "company": "Roger Howard",
+    "email": "roger@simpsonorg.com",
+    "phone": "(404) 870-3546",
+    "city": "Atlanta",
+    "state": "GA",
+    "market": "Atlanta",
+    "buy_criteria": "Cash buyer in Atlanta GA",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "TX Cash Home Buyers",
+    "company": "TX Cash Home Buyers",
+    "email": "info@txcashhomebuyers.com",
+    "phone": "(281) 595-7550",
+    "city": "Dallas",
+    "state": "TX",
+    "market": "Dallas",
+    "buy_criteria": "Cash buyer in Dallas TX",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Starfish Group Properties",
+    "company": "Starfish Group Properties",
+    "email": "info@starfishgroupproperties.com",
+    "phone": "(817) 859-6677",
+    "city": "Dallas",
+    "state": "TX",
+    "market": "Dallas",
+    "buy_criteria": "Cash buyer in Dallas TX",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "TX Home Buying Pros",
+    "company": "TX Home Buying Pros",
+    "email": "info@txhomebuyingpros.com",
+    "phone": "(214) 296-2343",
+    "city": "Dallas",
+    "state": "TX",
+    "market": "Dallas",
+    "buy_criteria": "Cash buyer in Dallas TX",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "CHC Equity Group",
+    "company": "CHC Equity Group",
+    "email": "info@chcequity.com",
+    "phone": "(972) 590-1200",
+    "city": "Dallas",
+    "state": "TX",
+    "market": "Dallas",
+    "buy_criteria": "Cash buyer in Dallas TX",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Home Buying Guys",
+    "company": "Home Buying Guys",
+    "email": "info@homebuyingguys.com",
+    "phone": "(214) 617-2000",
+    "city": "Dallas",
+    "state": "TX",
+    "market": "Dallas",
+    "buy_criteria": "Cash buyer in Dallas TX",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Keyroo",
+    "company": "Keyroo",
+    "email": "info@keyroo.com",
+    "phone": "(214) 306-5044",
+    "city": "Dallas",
+    "state": "TX",
+    "market": "Dallas",
+    "buy_criteria": "Cash buyer in Dallas TX",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Legacy Home Buyers",
+    "company": "Legacy Home Buyers",
+    "email": "info@legacybuyers.com",
+    "phone": "(214) 306-5044",
+    "city": "Dallas",
+    "state": "TX",
+    "market": "Dallas",
+    "buy_criteria": "Cash buyer in Dallas TX",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Investor's Realty, LLC",
+    "company": "Investor's Realty, LLC",
+    "email": "info@awdallas.com",
+    "phone": "214.754.7171",
+    "city": "Dallas",
+    "state": "TX",
+    "market": "Dallas",
+    "buy_criteria": "Cash buyer in Dallas TX",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "REIA Dallas",
+    "company": "REIA Dallas",
+    "email": "info@reiadallas.com",
+    "phone": "972-375-9484",
+    "city": "Dallas",
+    "state": "TX",
+    "market": "Dallas",
+    "buy_criteria": "Cash buyer in Dallas TX",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Texas REIAs Dallas",
+    "company": "Texas REIAs Dallas",
+    "email": "help@texasreias.com",
+    "phone": "",
+    "city": "Dallas",
+    "state": "TX",
+    "market": "Dallas",
+    "buy_criteria": "Cash buyer in Dallas TX",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "EZ Sell Homebuyers",
+    "company": "EZ Sell Homebuyers",
+    "email": "info@ezsellhomebuyers.com",
+    "phone": "(937) 598-2274",
+    "city": "Cleveland",
+    "state": "OH",
+    "market": "Cleveland",
+    "buy_criteria": "Cash buyer in Cleveland OH",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Cleveland"
+    ],
+    "property_types": [
+      "land",
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 20000,
+    "price_range_max": 200000
+  },
+  {
+    "name": "Snap Sell Homebuyers",
+    "company": "Snap Sell Homebuyers",
+    "email": "info@snapsellhomebuyers.com",
+    "phone": "(330) 578-7886",
+    "city": "Cleveland",
+    "state": "OH",
+    "market": "Cleveland",
+    "buy_criteria": "Cash buyer in Cleveland OH",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Cleveland"
+    ],
+    "property_types": [
+      "land",
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 20000,
+    "price_range_max": 200000
+  },
+  {
+    "name": "Sell My House Fast Ohio",
+    "company": "Sell My House Fast Ohio",
+    "email": "info@webuyhousescashohio.com",
+    "phone": "(440) 973-6024",
+    "city": "Cleveland",
+    "state": "OH",
+    "market": "Cleveland",
+    "buy_criteria": "Cash buyer in Cleveland OH",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Cleveland"
+    ],
+    "property_types": [
+      "land",
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 20000,
+    "price_range_max": 200000
+  },
+  {
+    "name": "Lorain County Homebuyers",
+    "company": "Lorain County Homebuyers",
+    "email": "info@loraincountyhomebuyers.com",
+    "phone": "(440) 681-2114",
+    "city": "Cleveland",
+    "state": "OH",
+    "market": "Cleveland",
+    "buy_criteria": "Cash buyer in Cleveland OH",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Cleveland"
+    ],
+    "property_types": [
+      "land",
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 20000,
+    "price_range_max": 200000
+  },
+  {
+    "name": "All Ohio Home Buyers",
+    "company": "All Ohio Home Buyers",
+    "email": "info@allohiohomebuyers.com",
+    "phone": "(216) 208-0450",
+    "city": "Cleveland",
+    "state": "OH",
+    "market": "Cleveland",
+    "buy_criteria": "Cash buyer in Cleveland OH",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Cleveland"
+    ],
+    "property_types": [
+      "land",
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 20000,
+    "price_range_max": 200000
+  },
+  {
+    "name": "Ohio Cash Buyers",
+    "company": "Ohio Cash Buyers",
+    "email": "info@ohiocashbuyers.com",
+    "phone": "(513) 318-5648",
+    "city": "Cleveland",
+    "state": "OH",
+    "market": "Cleveland",
+    "buy_criteria": "Cash buyer in Cleveland OH",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Cleveland"
+    ],
+    "property_types": [
+      "land"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 20000,
+    "price_range_max": 200000
+  },
+  {
+    "name": "Clever Offers",
+    "company": "Clever Offers",
+    "email": "support@listwithclever.com",
+    "phone": "(888) 524-5337",
+    "city": "Cleveland",
+    "state": "OH",
+    "market": "Cleveland",
+    "buy_criteria": "Cash buyer in Cleveland OH",
+    "status": "contacted",
+    "outreach_count": 1,
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "last_outreach": "2026-03-21",
+    "preferred_markets": [
+      "Cleveland"
+    ],
+    "property_types": [
+      "land"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 20000,
+    "price_range_max": 200000
+  }
+]

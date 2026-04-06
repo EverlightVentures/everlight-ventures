@@ -288,3 +288,29 @@ class GemPackage(models.Model):
     def __str__(self):
         total = self.gems + self.bonus_gems
         return f"{self.name}: {total} gems for ${self.price_usd}"
+
+
+class GemPurchase(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("paid", "Paid"),
+        ("failed", "Failed"),
+    ]
+
+    player = models.ForeignKey(PlayerProfile, on_delete=models.CASCADE, related_name="gem_purchases")
+    package = models.ForeignKey(GemPackage, on_delete=models.SET_NULL, null=True, blank=True)
+    session_id = models.CharField(max_length=255, unique=True)
+    stripe_payment_intent_id = models.CharField(max_length=255, blank=True, default="")
+    amount_cents = models.IntegerField(default=0)
+    currency = models.CharField(max_length=10, default="usd")
+    gems_awarded = models.IntegerField(default=0)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    purchased_at = models.DateTimeField(auto_now_add=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = "bj_gem_purchase"
+        ordering = ["-purchased_at"]
+
+    def __str__(self):
+        return f"{self.player.avatar_name} | {self.session_id} | {self.status}"

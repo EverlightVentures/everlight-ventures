@@ -1,0 +1,10 @@
+{"timestamp": "2026-03-21T10:59:30.332801+00:00", "scout_type": "distress_finder", "market": "Atlanta, GA", "queries_run": 7, "properties_found": 13, "imported_new": 13, "skip_traced": 1}
+{"timestamp": "2026-03-21T11:00:13.730234+00:00", "scout_type": "distress_finder", "market": "Dallas, TX", "queries_run": 7, "properties_found": 14, "imported_new": 14, "skip_traced": 0}
+{"timestamp": "2026-03-21T11:01:39.090682+00:00", "scout_type": "distress_finder", "market": "Cleveland, OH", "queries_run": 7, "properties_found": 12, "imported_new": 12, "skip_traced": 0}
+{"timestamp": "2026-03-21T11:02:16.299754+00:00", "scout_type": "distress_finder", "market": "St. Louis, MO", "queries_run": 7, "properties_found": 0, "imported_new": 0, "skip_traced": 0}
+{"timestamp": "2026-03-21T11:03:00.948894+00:00", "scout_type": "distress_finder", "market": "Jacksonville, FL", "queries_run": 7, "properties_found": 2, "imported_new": 2, "skip_traced": 0}
+{"timestamp": "2026-03-21T20:56:11.189371+00:00", "scout_type": "distress_finder", "market": "Atlanta, GA", "queries_run": 7, "properties_found": 0, "imported_new": 0, "skip_traced": 0}
+{"timestamp": "2026-03-21T20:56:52.020119+00:00", "scout_type": "distress_finder", "market": "Dallas, TX", "queries_run": 7, "properties_found": 9, "imported_new": 0, "skip_traced": 0}
+{"timestamp": "2026-03-21T20:57:33.082412+00:00", "scout_type": "distress_finder", "market": "Cleveland, OH", "queries_run": 7, "properties_found": 0, "imported_new": 0, "skip_traced": 0}
+{"timestamp": "2026-03-21T20:58:11.190256+00:00", "scout_type": "distress_finder", "market": "St. Louis, MO", "queries_run": 7, "properties_found": 0, "imported_new": 0, "skip_traced": 0}
+{"timestamp": "2026-03-21T20:58:56.684741+00:00", "scout_type": "distress_finder", "market": "Jacksonville, FL", "queries_run": 7, "properties_found": 2, "imported_new": 2, "skip_traced": 1}

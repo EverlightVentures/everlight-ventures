@@ -1,0 +1,47 @@
+- [00:00:01] **Introduction and Acknowledgments**  
+The speaker introduces their PhD project, highlighting the collaborative effort and acknowledging key contributors, particularly Sandra Kiming, their daily supervisor. They emphasize the importance of constant communication with individuals from various backgrounds due to their diverse expertise.
+
+- [00:01:01] **Control in Biology**  
+The speaker discusses the prevalence of control mechanisms in biology, citing examples such as the control of neuromuscular units and hormonal regulation for maintaining homeostasis. They note the significance of **spiking activity** in brain communication, which is often irregular yet crucial for precise control.
+
+- [00:02:04] **Modeling Control Dilemma**  
+A dilemma arises in modeling control due to the irregularity of spiking activity, which can be perceived as noise. The speaker poses three critical questions regarding existing control paradigms in literature:
+  - Does the model include spikes?
+  - How can control be made efficient without unrealistic spiking?
+  - How are spikes involved in computing the control?
+
+- [00:02:58] **Literature Review**  
+The speaker reviews existing approaches in the literature, noting three types:
+  - Rate-based control that does not utilize spikes.
+  - Approximations of rate-based networks that include spikes but lack realistic spiking.
+  - Approaches with regular non-realistic spiking activity.
+
+- [00:03:54] **Developing a New Approach**  
+Dissatisfied with existing models, the speaker aims to create their own approach, utilizing a **greedy spiking hypothesis** which involves a single neuron firing based on a local loss metric. They propose a **spring-mass damper system** as the control system of choice.
+
+- [00:04:51] **Classical Control Approach**  
+The classical control method involves setting a target state and calculating a control signal to adjust the mass's position. The speaker illustrates this with examples of oscillation and stabilization of the mass.
+
+- [00:06:47] **Substituting Classical Control with Spiking Neural Networks**  
+The speaker describes the substitution of classical control methods with spiking neural networks, where spikes represent the control signal but do not compute it directly.
+
+- [00:07:45] **Direct Spiking Control**  
+The speaker proposes a direct spiking control method, where spikes are injected directly into the system's dynamics, allowing the system to evolve in an open-loop fashion until the next spike.
+
+- [00:08:44] **Predictive Spiking Control**  
+The speaker introduces a predictive approach where spikes are applied with a delay to account for the system's dynamics. This method allows for more realistic control by considering future states.
+
+- [00:10:41] **Control Loop Setup**  
+The proposed control loop includes forward connections mapping quantities into a recurrent network that produces spikes as control signals, effectively controlling the system's velocity.
+
+- [00:11:42] **Complex Systems and Coupled Oscillators**  
+The speaker extends the model to a more complex system involving ten coupled spring-mass-damper systems. The network's robustness to cell silencing is highlighted, demonstrating effective control with sparse and irregular activity.
+
+- [00:13:40] **Future Outlook**  
+The speaker expresses intentions to explore unknown dynamics and tackle nonlinear systems in their future work, inviting suggestions for further research directions.
+
+- [00:14:37] **Acknowledgments and Conclusion**  
+The speaker acknowledges collaborators and concludes the presentation by inviting questions.
+
+- [00:15:44] **Q&A Session**  
+During the Q&A, the speaker discusses the relationship of their predictive controller to existing control theories, the implications of sparse connectivity, and the potential for applying their model to unstable systems like the inverted pendulum. They express excitement about future research avenues that stem from these discussions.

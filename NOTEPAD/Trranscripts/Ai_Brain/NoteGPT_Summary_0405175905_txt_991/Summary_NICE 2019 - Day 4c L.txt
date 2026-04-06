@@ -1,0 +1,45 @@
+- [00:00:01] **Summary of the Session:** The session introduces the Loihi team from Intel, including software development lead On Swallow and architect Andreas Wild. The day's agenda is outlined, focusing on both chip architecture and software architecture for Loihi, with different content in the morning and afternoon sessions.
+
+- [00:01:26] **Morning Session Focus:**
+  - **Chip Architecture:** In-depth coverage of Loihi’s internal features and architecture.
+  - **Software Stack:** Overview of the software stack designed for Loihi from the user perspective.
+  - **Demo:** Live demonstrations of using features through Jupyter notebooks, showcasing operations with a Capoho Bay device and DBS camera.
+  - **Multi-compartment Neuron Construction:** Discussion on neuron construction, though attendees cannot follow along on their laptops due to overhead constraints.
+
+- [00:03:15] **Afternoon Session Focus:**
+  - **Algorithmic Overview:** A brief recap of the architectural software to assist those who missed the morning.
+  - **Performance Metrics:** Discussion on performance and power measurement based on benchmarking results.
+  - **Nangou Integration:** Demonstration of running Nangou examples and its programming style.
+  - **Graph Search Example:** Examining a graph search example to illustrate the scalability of the system across multiple chips.
+
+- [00:04:19] **Topics Covered:**
+  - DNN to SNN translation via the Nangou DL package.
+  - **Algorithms:** Focus on various algorithms including Lasso LTA, stochastic SNN, and parallel graph search.
+
+- [00:05:31] **Community Engagement Goals:**
+  - **Accelerating Progress:** Intel aims to pull in a broader network of researchers to advance neuromorphic computing technology.
+  - **Commercialization Focus:** Emphasizing the need for viable technologies over pure neuroscience.
+  - **Community Feedback:** Utilizing input from the community to inform the development of future chips.
+
+- [00:06:30] **Joining the IRC:**
+  - **Proposal Submission:** Interested parties must submit a written proposal outlining their goals.
+  - **Access to Resources:** Members gain access to presentations, documentation, and an active GitHub repository for code sharing.
+  - **Workshops:** Participation in workshops is encouraged for deeper engagement.
+
+- [00:09:25] **Engagement Process:**
+  - **Contact Information:** An email address provided for inquiries and submission of proposals.
+  - **Legal Agreements:** Necessary agreements must be signed by an authority in the organization before gaining remote access to Intel systems and hardware.
+
+- [00:11:27] **Hardware Overview:**
+  - **Capoho Bay System:** A system with a DVS camera interface designed for neuromorphic applications.
+  - **Future Developments:** Introduction of Poho Leaky Springs, a system anticipated to support significant neuron and synapse counts.
+
+- [00:14:47] **System Architecture:**
+  - **General Overview:** The architecture includes hosts that orchestrate the execution of neuromorphic tasks.
+  - **Programming Flexibility:** The system allows for flexible interfacing with sensors and external devices.
+
+- [00:16:49] **NX SDK Overview:**
+  - **Programming Approach:** Emphasizes a user-friendly programming model, abstracting hardware details to focus on network design.
+  - **Interfacing:** The SDK is designed to be scalable and integrate easily with third-party frameworks.
+
+- [00:19:51] **Conclusion of the Session:** The session wraps up by encouraging participants to engage with the Loihi system, highlighting the hands-on tutorials and the available software tools for experimentation.

@@ -408,6 +408,273 @@
 </div>
 
 <!-- ====================================================================
+     LIVE PROCESSES PANEL (auto-refresh via HTMX every 15s)
+     ==================================================================== -->
+<div class="dash-section-header">
+  <h2 class="dash-section-title">Live Processes</h2>
+  <a href="{% url 'hive:processes' %}" class="dash-section-link">Full View <i class="fa-solid fa-arrow-right" style="font-size:0.7rem;"></i></a>
+</div>
+
+<div id="liveProcessesPanel"
+     hx-get="{% url 'hive:api_agent_status' %}"
+     hx-trigger="load, every 15s"
+     hx-swap="innerHTML"
+     hx-headers='{"X-Requested-With": "XMLHttpRequest"}'
+     class="glass-card" style="margin-bottom:32px; padding:20px;">
+  <div style="text-align:center; padding:20px; color:var(--text-muted);">
+    <i class="fa-solid fa-spinner fa-spin" style="margin-right:8px;"></i>Loading agent status...
+  </div>
+</div>
+
+<style>
+  /* ===================================================================
+     LIVE PROCESSES -- Agent Status Dots Row
+     =================================================================== */
+  .live-agents-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .live-agent-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .live-agent-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .live-agent-dot.active {
+    animation: agentPulse 1.2s ease-in-out infinite;
+  }
+
+  .live-agent-dot.active::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: inherit;
+    opacity: 0.3;
+    animation: hivePulse 2s ease-in-out infinite;
+  }
+
+  .live-agent-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .live-agent-name {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .live-agent-detail {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .live-agent-time {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+
+  .live-session-item {
+    display: grid;
+    grid-template-columns: 80px 1fr 100px 80px;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.015);
+    margin-bottom: 6px;
+  }
+
+  .live-session-id {
+    font-family: monospace;
+    font-size: 0.78rem;
+    color: var(--gold);
+  }
+
+  .live-session-prompt {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .live-session-agents {
+    display: flex;
+    gap: 4px;
+  }
+
+  .live-session-agent-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .live-session-duration {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 1200px) {
+    .live-agents-row {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .live-agents-row {
+      grid-template-columns: 1fr;
+    }
+    .live-session-item {
+      grid-template-columns: 60px 1fr 60px;
+    }
+    .live-session-agents { display: none; }
+  }
+</style>
+
+<script>
+/* ====================================================================
+   LIVE PROCESSES -- Render JSON from api/agent-status/ into HTML
+   ==================================================================== */
+(function() {
+  var panel = document.getElementById('liveProcessesPanel');
+  if (!panel) return;
+
+  var agentColors = {
+    claude: '#8b5cf6',
+    gemini: '#22d3ee',
+    codex: '#22c55e',
+    perplexity: '#f59e0b'
+  };
+
+  var statusLabels = {
+    active: 'Working',
+    ready: 'Ready',
+    idle: 'Idle'
+  };
+
+  function formatTimeAgo(isoStr) {
+    if (!isoStr) return 'Never';
+    var then = new Date(isoStr);
+    var now = new Date();
+    var diffMs = now - then;
+    var diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 1) return 'Just now';
+    if (diffMin < 60) return diffMin + 'm ago';
+    var diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return diffHr + 'h ago';
+    var diffDay = Math.floor(diffHr / 24);
+    return diffDay + 'd ago';
+  }
+
+  function formatDuration(seconds) {
+    if (!seconds) return '0s';
+    if (seconds < 60) return seconds.toFixed(1) + 's';
+    return Math.floor(seconds / 60) + 'm ' + Math.round(seconds % 60) + 's';
+  }
+
+  function renderPanel(data) {
+    if (data.status !== 'ok') {
+      panel.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-muted);">Failed to load agent status.</div>';
+      return;
+    }
+
+    var agents = data.agents || {};
+    var sessions = data.active_sessions || [];
+    var html = '';
+
+    /* Agent status row */
+    html += '<div class="live-agents-row">';
+    var agentNames = ['claude', 'gemini', 'codex', 'perplexity'];
+    for (var i = 0; i < agentNames.length; i++) {
+      var name = agentNames[i];
+      var ag = agents[name] || {};
+      var color = agentColors[name] || '#6b7280';
+      var isActive = ag.status === 'active';
+      var dotClass = isActive ? 'live-agent-dot active' : 'live-agent-dot';
+      var statusColor = isActive ? color : (ag.status === 'ready' ? '#22c55e' : '#6b7280');
+      var statusText = statusLabels[ag.status] || ag.status || 'Unknown';
+      var detail = ag.current_task || statusText;
+
+      html += '<div class="live-agent-card">';
+      html += '<div class="' + dotClass + '" style="background:' + color + ';box-shadow:0 0 8px ' + color + ';"></div>';
+      html += '<div class="live-agent-info">';
+      html += '<div class="live-agent-name">' + (ag.display_name || name) + '</div>';
+      html += '<div class="live-agent-detail" title="' + detail.replace(/"/g, '&quot;') + '">';
+      html += '<span style="color:' + statusColor + ';font-weight:600;">' + statusText + '</span>';
+      if (ag.current_task) {
+        html += ' -- ' + ag.current_task.substring(0, 50);
+      }
+      html += '</div>';
+      html += '</div>';
+      html += '<div class="live-agent-time">' + formatTimeAgo(ag.last_active) + '</div>';
+      html += '</div>';
+    }
+    html += '</div>';
+
+    /* Recent sessions list */
+    if (sessions.length > 0) {
+      html += '<div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:8px;">Recent Sessions</div>';
+      var showCount = Math.min(sessions.length, 5);
+      for (var j = 0; j < showCount; j++) {
+        var sess = sessions[j];
+        html += '<div class="live-session-item">';
+        html += '<span class="live-session-id">' + (sess.session_id || '').substring(0, 8) + '</span>';
+        html += '<span class="live-session-prompt" title="' + (sess.prompt || '').replace(/"/g, '&quot;') + '">' + (sess.prompt || '').substring(0, 80) + '</span>';
+        html += '<span class="live-session-agents">';
+        var routed = sess.routed_to || [];
+        for (var k = 0; k < routed.length; k++) {
+          var ac = agentColors[routed[k]] || '#6b7280';
+          html += '<span class="live-session-agent-dot" style="background:' + ac + ';" title="' + routed[k] + '"></span>';
+        }
+        html += '</span>';
+        html += '<span class="live-session-duration">' + formatDuration(sess.total_duration_s || 0) + '</span>';
+        html += '</div>';
+      }
+    } else {
+      html += '<div style="text-align:center;padding:16px;color:var(--text-muted);font-size:0.82rem;">No recent sessions found in the war room.</div>';
+    }
+
+    panel.innerHTML = html;
+  }
+
+  /* Override HTMX swap to parse JSON and render custom HTML */
+  panel.addEventListener('htmx:beforeSwap', function(evt) {
+    try {
+      var jsonData = JSON.parse(evt.detail.xhr.responseText);
+      renderPanel(jsonData);
+      evt.detail.shouldSwap = false;
+    } catch (e) {
+      /* If not JSON, let HTMX handle it normally */
+    }
+  });
+})();
+</script>
+
+<!-- ====================================================================
      BOT INTELLIGENCE PANEL
      ==================================================================== -->
 <div class="dash-section-header">

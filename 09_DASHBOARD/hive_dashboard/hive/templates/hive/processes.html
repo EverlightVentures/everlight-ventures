@@ -1,0 +1,370 @@
+{% extends "hive/base.html" %}
+{% load static humanize hive_tags %}
+
+{% block title %}{{ app_name }} -- Processes{% endblock %}
+{% block page_title %}Processes{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'hive:dashboard' %}">Hive</a>
+  <span class="sep">/</span> Processes
+{% endblock %}
+
+{% block content %}
+<style>
+  /* ===================================================================
+     PROCESSES PAGE
+     =================================================================== */
+  .proc-filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .proc-filter-select,
+  .proc-filter-input {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    color: var(--text-primary);
+    font-size: 0.82rem;
+    font-family: var(--font-body);
+    outline: none;
+  }
+
+  .proc-filter-select:focus,
+  .proc-filter-input:focus {
+    border-color: var(--gold);
+  }
+
+  .proc-filter-btn {
+    padding: 8px 18px;
+    border-radius: 8px;
+    border: none;
+    background: var(--gold);
+    color: #0a0a0f;
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all var(--transition-base);
+  }
+
+  .proc-filter-btn:hover {
+    background: var(--gold-bright);
+  }
+
+  .proc-filter-clear {
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all var(--transition-base);
+  }
+
+  .proc-filter-clear:hover {
+    border-color: var(--gold-dim);
+    color: var(--text-primary);
+  }
+
+  .proc-card {
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .proc-card-header {
+    display: grid;
+    grid-template-columns: 100px 1fr 100px 120px 80px 40px;
+    gap: 16px;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    padding: 16px 20px;
+  }
+
+  .proc-session-id {
+    font-family: monospace;
+    font-size: 0.84rem;
+    color: var(--gold);
+    font-weight: 600;
+  }
+
+  .proc-prompt {
+    font-size: 0.84rem;
+    color: var(--text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .proc-agents {
+    display: flex;
+    gap: 5px;
+  }
+
+  .proc-agent-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    box-shadow: 0 0 6px currentColor;
+  }
+
+  .proc-duration {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .proc-time {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    text-align: right;
+  }
+
+  .proc-expand-icon {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-align: center;
+    transition: transform 0.2s ease;
+  }
+
+  .proc-expand-icon.open {
+    transform: rotate(90deg);
+  }
+
+  .proc-detail {
+    display: none;
+    padding: 0 20px 20px 20px;
+    border-top: 1px solid var(--border-subtle);
+  }
+
+  .proc-detail.open {
+    display: block;
+  }
+
+  .proc-detail-section {
+    margin-top: 16px;
+  }
+
+  .proc-detail-title {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .proc-manager-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 100px 80px;
+    gap: 12px;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.015);
+    margin-bottom: 4px;
+  }
+
+  .proc-manager-name {
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+
+  .proc-manager-role {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+  }
+
+  .proc-manager-employees {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .proc-file-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .proc-file-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 6px;
+    background: rgba(201, 168, 76, 0.06);
+    border: 1px solid rgba(201, 168, 76, 0.12);
+    font-size: 0.72rem;
+    color: var(--gold-dim);
+    font-family: monospace;
+  }
+
+  .proc-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+
+  .proc-empty i {
+    font-size: 2.5rem;
+    opacity: 0.2;
+    display: block;
+    margin-bottom: 16px;
+  }
+
+  .proc-count-badge {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--gold);
+    background: rgba(201, 168, 76, 0.1);
+    padding: 2px 10px;
+    border-radius: 12px;
+    margin-left: 8px;
+  }
+
+  @media (max-width: 768px) {
+    .proc-card-header {
+      grid-template-columns: 70px 1fr 60px;
+    }
+    .proc-agents, .proc-duration, .proc-time { display: none; }
+    .proc-manager-row {
+      grid-template-columns: 80px 1fr 70px;
+    }
+    .proc-manager-employees { display: none; }
+  }
+</style>
+
+<!-- Filters -->
+<form method="get" action="{% url 'hive:processes' %}" class="proc-filters">
+  <select name="agent" class="proc-filter-select">
+    <option value="">All Agents</option>
+    {% for agent in agent_choices %}
+    <option value="{{ agent }}" {% if agent_filter == agent %}selected{% endif %}>{{ agent|title }}</option>
+    {% endfor %}
+  </select>
+
+  <select name="status" class="proc-filter-select">
+    <option value="">All Statuses</option>
+    {% for st in status_choices %}
+    <option value="{{ st }}" {% if status_filter == st %}selected{% endif %}>{{ st|title }}</option>
+    {% endfor %}
+  </select>
+
+  <input type="date" name="date_from" value="{{ date_from }}" class="proc-filter-input" placeholder="From">
+  <input type="date" name="date_to" value="{{ date_to }}" class="proc-filter-input" placeholder="To">
+
+  <button type="submit" class="proc-filter-btn">Filter</button>
+  <a href="{% url 'hive:processes' %}" class="proc-filter-clear">Clear</a>
+</form>
+
+<!-- Results count -->
+<div style="margin-bottom:16px; font-size:0.82rem; color:var(--text-secondary);">
+  Showing {{ sessions|length }} session{{ sessions|length|pluralize }}
+  <span class="proc-count-badge">{{ sessions|length }}</span>
+</div>
+
+<!-- Session List -->
+{% for sess in sessions %}
+<div class="glass-card proc-card" data-session="{{ sess.session_id }}">
+  <div class="proc-card-header" onclick="toggleProcDetail('{{ sess.session_id }}')">
+    <span class="proc-session-id">{{ sess.session_id|truncatechars:8 }}</span>
+    <span class="proc-prompt" title="{{ sess.prompt }}">{{ sess.prompt|truncatechars:80 }}</span>
+    <span class="proc-agents">
+      {% for agent in sess.routed_to %}
+      <span class="proc-agent-dot" style="color:{{ agent|agent_color }}; background:{{ agent|agent_color }};"></span>
+      {% endfor %}
+    </span>
+    <span>{{ sess.status|status_badge }}</span>
+    <span class="proc-duration">{{ sess.total_duration_s|duration_fmt }}</span>
+    <span class="proc-expand-icon" id="expandIcon_{{ sess.session_id }}">
+      <i class="fa-solid fa-chevron-right"></i>
+    </span>
+  </div>
+
+  <div class="proc-detail" id="detail_{{ sess.session_id }}">
+    <!-- Metadata -->
+    <div style="display:flex; gap:24px; flex-wrap:wrap; font-size:0.78rem; color:var(--text-muted); margin-top:12px;">
+      <span>Created: <strong style="color:var(--text-secondary);">{{ sess.created_at|truncatechars:19 }}</strong></span>
+      <span>Mode: <strong style="color:var(--purple);">{{ sess.mode|upper }}</strong></span>
+      <span>Duration: <strong style="color:var(--gold);">{{ sess.total_duration_s|duration_fmt }}</strong></span>
+      <span>Agents: <strong style="color:var(--text-secondary);">{{ sess.routed_to|join:", " }}</strong></span>
+    </div>
+
+    <!-- Agent Details -->
+    {% if sess.managers %}
+    <div class="proc-detail-section">
+      <div class="proc-detail-title">Agent Responses</div>
+      {% for mgr in sess.managers %}
+      <div class="proc-manager-row">
+        <span class="proc-manager-name" style="color:{{ mgr.agent|agent_color }};">
+          <i class="fa-solid {{ mgr.agent|agent_icon }}" style="margin-right:4px; font-size:0.75rem;"></i>
+          {{ mgr.agent|title }}
+        </span>
+        <span class="proc-manager-role" title="{{ mgr.role }}">{{ mgr.role|truncatechars:50 }}</span>
+        <span>{{ mgr.status|status_badge }}</span>
+        <span class="proc-duration">{{ mgr.duration_s|duration_fmt }}</span>
+      </div>
+      {% if mgr.employees_consulted %}
+      <div class="proc-manager-employees" style="padding:2px 12px 8px 12px;">
+        Team: {{ mgr.employees_consulted|join:", "|truncatechars:120 }}
+      </div>
+      {% endif %}
+      {% if mgr.error %}
+      <div style="padding:4px 12px 8px 12px; font-size:0.76rem; color:#ef4444;">
+        Error: {{ mgr.error }}
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Files -->
+    {% if sess.files %}
+    <div class="proc-detail-section">
+      <div class="proc-detail-title">War Room Files</div>
+      <div class="proc-file-list">
+        {% for fname in sess.files %}
+        <span class="proc-file-tag">{{ fname }}</span>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- War Room Path -->
+    <div style="margin-top:12px; font-size:0.7rem; color:var(--text-muted); font-family:monospace; word-break:break-all;">
+      {{ sess.war_room_dir }}
+    </div>
+  </div>
+</div>
+{% empty %}
+<div class="glass-card proc-empty">
+  <i class="fa-solid fa-folder-open"></i>
+  No sessions found matching your filters.
+</div>
+{% endfor %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function toggleProcDetail(sessionId) {
+  var detail = document.getElementById('detail_' + sessionId);
+  var icon = document.getElementById('expandIcon_' + sessionId);
+  if (!detail) return;
+  var isOpen = detail.classList.contains('open');
+  if (isOpen) {
+    detail.classList.remove('open');
+    if (icon) icon.classList.remove('open');
+  } else {
+    detail.classList.add('open');
+    if (icon) icon.classList.add('open');
+  }
+}
+</script>
+{% endblock %}

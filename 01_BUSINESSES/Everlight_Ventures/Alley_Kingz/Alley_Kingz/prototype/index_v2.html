@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Alley Kingz - Street Kings</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+canvas{display:block;width:100%;height:100%}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+// ============================================================
+// ALLEY KINGZ - Street Kings v2.0
+// Urban car battle strategy - GTA x Clash Royale x Dragon City
+// ============================================================
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+const ARENA_W = 18;
+const ARENA_H = 30;
+const RIVER_Y = 15;
+const RIVER_H = 1.2;
+const BRIDGE_W = 3;
+const BRIDGE_LX = 3;
+const BRIDGE_RX = 15;
+const REGULAR_TIME = 120;
+const DOUBLE_ELIXIR_TIME = 60;
+const OVERTIME_TIME = 60;
+const COUNTDOWN_TIME = 3;
+const ELIXIR_MAX = 10;
+const ELIXIR_RATE = 1 / 2.8;
+const ELIXIR_RATE_2X = ELIXIR_RATE * 2;
+const START_ELIXIR = 5;
+const DECK_SIZE = 8;
+
+const TOWER_STATS = {
+  escort: { maxHp: 1400, dmg: 55, range: 6, atkSpd: 0.9, label: 'ESCORT' },
+  hq:     { maxHp: 2600, dmg: 90, range: 7, atkSpd: 0.75, label: 'HQ VAN' }
+};
+
+// 12 cards with varied drive speeds (0.45 crawl to 2.0 turbo)
+const ALL_CARDS = {
+  enforcer: {
+    id:'enforcer', name:'Enforcer', cost:3, hp:720, dmg:80, speed:1.0,
+    range:0.9, atkSpd:1.2, type:'troop', targets:'all',
+    isArea:false, count:1, color:'#DAA520', accent:'#8B6914',
+    icon:'[E]', speedLabel:'Normal'
+  },
+  slingers: {
+    id:'slingers', name:'Slingers', cost:3, hp:260, dmg:44, speed:1.1,
+    range:5.0, atkSpd:1.2, type:'troop', targets:'all',
+    isArea:false, count:2, color:'#FF69B4', accent:'#A0134A',
+    icon:'[S]', speedLabel:'Fast'
+  },
+  molotov: {
+    id:'molotov', name:'Molotov', cost:4, dmg:340, radius:2.5,
+    type:'spell', color:'#FF4500', accent:'#CC2200',
+    icon:'[M]'
+  },
+  shrapnel: {
+    id:'shrapnel', name:'Shrapnel', cost:3, dmg:148, radius:4.0,
+    type:'spell', color:'#7CFC00', accent:'#44AA00',
+    icon:'[X]'
+  },
+  bruiser: {
+    id:'bruiser', name:'Bruiser', cost:5, hp:2200, dmg:110, speed:0.45,
+    range:0.9, atkSpd:1.5, type:'troop', targets:'buildings',
+    isArea:false, count:1, color:'#8B4513', accent:'#5C2E0A',
+    icon:'[B]', speedLabel:'Crawl'
+  },
+  sniper: {
+    id:'sniper', name:'Sniper', cost:4, hp:360, dmg:105, speed:0.85,
+    range:6.0, atkSpd:1.1, type:'troop', targets:'all',
+    isArea:false, count:1, color:'#9370DB', accent:'#5B3B9E',
+    icon:'[N]', speedLabel:'Slow'
+  },
+  blade: {
+    id:'blade', name:'Blade', cost:4, hp:620, dmg:270, speed:1.6,
+    range:0.9, atkSpd:1.8, type:'troop', targets:'all',
+    isArea:false, count:1, color:'#4169E1', accent:'#1A3FA0',
+    icon:'[D]', speedLabel:'Blazing'
+  },
+  demo: {
+    id:'demo', name:'Demo', cost:3, hp:210, dmg:105, speed:1.0,
+    range:4.5, atkSpd:1.9, type:'troop', targets:'all',
+    isArea:true, areaRadius:1.5, count:1, color:'#FF6347', accent:'#C03020',
+    icon:'[Q]', speedLabel:'Normal'
+  },
+  racer: {
+    id:'racer', name:'Racer', cost:3, hp:180, dmg:155, speed:2.0,
+    range:0.9, atkSpd:2.2, type:'troop', targets:'all',
+    isArea:false, count:1, color:'#00CED1', accent:'#007A7A',
+    icon:'[R]', speedLabel:'Turbo'
+  },
+  lowrider: {
+    id:'lowrider', name:'Lowrider', cost:4, hp:900, dmg:120, speed:0.65,
+    range:0.9, atkSpd:1.0, type:'troop', targets:'all',
+    isArea:true, areaRadius:1.2, count:1, color:'#8B008B', accent:'#500050',
+    icon:'[L]', speedLabel:'Slow'
+  },
+  nitro: {
+    id:'nitro', name:'Nitro', cost:3, hp:400, dmg:130, speed:1.5,
+    range:1.2, atkSpd:1.6, type:'troop', targets:'all',
+    isArea:false, count:1, color:'#FF8C00', accent:'#CC5500',
+    icon:'[Z]', speedLabel:'Rapid'
+  },
+  crusher: {
+    id:'crusher', name:'Crusher', cost:5, hp:1600, dmg:160, speed:0.55,
+    range:0.9, atkSpd:1.3, type:'troop', targets:'all',
+    isArea:true, areaRadius:1.8, count:1, color:'#556B2F', accent:'#2E3E12',
+    icon:'[C]', speedLabel:'Grind'
+  }
+};
+
+let playerCollection = Object.keys(ALL_CARDS);
+let playerDeck = ['enforcer','slingers','molotov','shrapnel','bruiser','sniper','blade','demo'];
+let playerTrophies = 1200;
+let playerChests = 1;
+
+let W, H, scale, offX, offY, arenaPixH, hudY, hudH;
+let cardSlots = [];
+
+function resize() {
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = W; canvas.height = H;
+  hudH = Math.floor(H * 0.22); hudY = H - hudH; arenaPixH = hudY;
+  const sx = W / ARENA_W, sy = arenaPixH / ARENA_H;
+  scale = Math.min(sx, sy);
+  offX = (W - ARENA_W * scale) / 2;
+  offY = (arenaPixH - ARENA_H * scale) / 2;
+  const cardW = Math.floor(W * 0.19), cardH = Math.floor(hudH * 0.62);
+  const gap = Math.floor(W * 0.02);
+  const totalW = cardW * 4 + gap * 3;
+  const startX = Math.floor((W - totalW) / 2);
+  const cardY = hudY + Math.floor(hudH * 0.32);
+  cardSlots = [];
+  for (let i = 0; i < 4; i++) cardSlots.push({ x: startX + i * (cardW + gap), y: cardY, w: cardW, h: cardH });
+}
+
+function toScr(gx, gy) { return [offX + gx * scale, offY + gy * scale]; }
+function toGame(sx, sy) { return [(sx - offX) / scale, (sy - offY) / scale]; }
+
+class Tower {
+  constructor(x, y, type, owner) {
+    this.x = x; this.y = y; this.type = type; this.owner = owner;
+    const s = TOWER_STATS[type];
+    this.maxHp = s.maxHp; this.hp = s.maxHp; this.dmg = s.dmg;
+    this.range = s.range; this.atkSpd = s.atkSpd; this.atkCD = 0;
+    this.active = type !== 'hq'; this.destroyed = false; this.crownCounted = false;
+  }
+  takeDamage(d) {
+    if (this.destroyed) return;
+    this.hp = Math.max(0, this.hp - d);
+    if (this.hp <= 0) this.destroyed = true;
+  }
+}
+
+let _uid = 0;
+class Unit {
+  constructor(card, owner, x, y) {
+    this.id = _uid++; this.card = card; this.owner = owner;
+    this.x = x; this.y = y;
+    this.maxHp = card.hp; this.hp = card.hp; this.dmg = card.dmg;
+    this.speed = card.speed; this.range = card.range; this.atkSpd = card.atkSpd;
+    this.atkCD = 0; this.target = null; this.alive = true;
+    this.angle = owner === 0 ? -Math.PI / 2 : Math.PI / 2;
+  }
+  takeDamage(d) {
+    if (!this.alive) return;
+    this.hp = Math.max(0, this.hp - d);
+    if (this.hp <= 0) { this.hp = 0; this.alive = false; }
+  }
+  dist(ox, oy) { return Math.hypot(this.x - ox, this.y - oy); }
+}
+
+let effects = [];
+function addEffect(type, x, y, text, color, dur) {
+  effects.push({ type, x, y, text, color, dur: dur || 1, t: 0, alive: true });
+}
+
+let screen = 'menu';
+let menuTab = 'main';
+let storeTab = 'chests';
+let battleMode = '1v1';
+let phase = 'countdown';
+let phaseTimer = 0;
+let cdTimer = COUNTDOWN_TIME;
+let totalTime = 0;
+let units = [];
+let selectedCard = -1;
+let battleResult = '';
+let deployPreview = null;
+let trophyChange = 0;
+let showChest = false;
+let chestAnim = 0;
+let deckBuilderDeck = [...playerDeck];
+let deckBtns = [];
+let menuBtns = {};
+let pgBtns = {};
+
+let player = { elixir: START_ELIXIR, crowns: 0, towers: [], hand: [], queue: [] };
+let opponent = { elixir: START_ELIXIR, crowns: 0, towers: [], hand: [], queue: [], aiCD: 0, aiNext: 2 };
+
+// ============================================================
+// BATTLE LOGIC
+// ============================================================
+
+function initBattle() {
+  screen = 'battle'; phase = 'countdown'; cdTimer = COUNTDOWN_TIME; phaseTimer = 0;
+  totalTime = 0; units = []; effects = []; selectedCard = -1;
+  battleResult = ''; _uid = 0; deployPreview = null;
+  trophyChange = 0; showChest = false; chestAnim = 0;
+
+  player.towers = [new Tower(3, 25.5,'escort',0), new Tower(15,25.5,'escort',0), new Tower(9,28,'hq',0)];
+  player.elixir = START_ELIXIR; player.crowns = 0;
+  opponent.towers = [new Tower(3,4.5,'escort',1), new Tower(15,4.5,'escort',1), new Tower(9,2,'hq',1)];
+  opponent.elixir = START_ELIXIR; opponent.crowns = 0;
+
+  setupDeck(player, playerDeck);
+  const aiCards = Object.keys(ALL_CARDS).sort(() => Math.random() - 0.5).slice(0, 8);
+  setupDeck(opponent, aiCards);
+  opponent.aiCD = 0; opponent.aiNext = 1.5 + Math.random() * 2;
+}
+
+function setupDeck(p, deckIds) {
+  const d = [...deckIds];
+  for (let i = d.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [d[i], d[j]] = [d[j], d[i]]; }
+  p.hand = d.slice(0, 4); p.queue = d.slice(4);
+}
+
+function cycleCard(p, idx) { const played = p.hand[idx]; const next = p.queue.shift(); p.queue.push(played); p.hand[idx] = next; }
+
+function playCard(p, idx, gx, gy) {
+  const cardId = p.hand[idx]; const card = ALL_CARDS[cardId];
+  if (!card || p.elixir < card.cost) return false;
+  p.elixir -= card.cost;
+  if (card.type === 'spell') {
+    applySpell(card, p === player ? 0 : 1, gx, gy);
+  } else {
+    const cnt = card.count || 1;
+    for (let i = 0; i < cnt; i++) {
+      const ox = cnt > 1 ? (i - (cnt - 1) / 2) * 0.8 : 0;
+      units.push(new Unit(card, p === player ? 0 : 1, gx + ox, gy));
+    }
+    addEffect('spawn', gx, gy, '', card.color, 0.4);
+  }
+  cycleCard(p, idx); return true;
+}
+
+function applySpell(card, ownerId, gx, gy) {
+  const r = card.radius || 2; const d = card.dmg; const enemyOwner = 1 - ownerId;
+  units.forEach(u => {
+    if (u.owner !== enemyOwner || !u.alive) return;
+    if (Math.hypot(u.x - gx, u.y - gy) <= r) { u.takeDamage(d); addEffect('dmg', u.x, u.y - 0.4, '-' + d, '#FF0000', 0.7); }
+  });
+  const eTowers = ownerId === 0 ? opponent.towers : player.towers;
+  eTowers.forEach(t => {
+    if (t.destroyed) return;
+    if (Math.hypot(t.x - gx, t.y - gy) <= r + 1.2) { t.takeDamage(d); addEffect('dmg', t.x, t.y - 0.4, '-' + d, '#FF0000', 0.7); checkTowerDeath(t, ownerId); }
+  });
+  addEffect('spell', gx, gy, '', card.color, 0.6);
+}
+
+function checkTowerDeath(t, attackerOwner) {
+  if (!t.destroyed || t.crownCounted) return;
+  t.crownCounted = true;
+  const atk = attackerOwner === 0 ? player : opponent;
+  atk.crowns++;
+  const def = attackerOwner === 0 ? opponent : player;
+  const hq = def.towers.find(tt => tt.type === 'hq');
+  if (hq && !hq.active) hq.active = true;
+  if (atk.crowns >= 3) endBattle();
+}
+
+function updateBattle(dt) {
+  if (phase === 'countdown') { cdTimer -= dt; if (cdTimer <= 0) { phase = 'regular'; phaseTimer = REGULAR_TIME; } return; }
+  if (phase === 'ended') { if (showChest) chestAnim += dt; return; }
+  phaseTimer -= dt; totalTime += dt;
+  if (phaseTimer <= 0) {
+    if (phase === 'regular') { phase = 'double'; phaseTimer = DOUBLE_ELIXIR_TIME; }
+    else if (phase === 'double') {
+      if (player.crowns === opponent.crowns) { phase = 'overtime'; phaseTimer = OVERTIME_TIME; }
+      else { endBattle(); return; }
+    } else if (phase === 'overtime') { endBattle(); return; }
+  }
+  const rate = (phase === 'double' || phase === 'overtime') ? ELIXIR_RATE_2X : ELIXIR_RATE;
+  player.elixir = Math.min(ELIXIR_MAX, player.elixir + rate * dt);
+  opponent.elixir = Math.min(ELIXIR_MAX, opponent.elixir + rate * dt);
+  updateUnits(dt); updateTowerAttacks(dt); updateAI(dt);
+  effects.forEach(e => { e.t += dt; if (e.t >= e.dur) e.alive = false; });
+  effects = effects.filter(e => e.alive);
+  units = units.filter(u => u.alive);
+}
+
+function updateUnits(dt) {
+  for (const u of units) {
+    if (!u.alive) continue;
+    if (u.atkCD > 0) u.atkCD -= dt;
+    findTarget(u);
+    if (u.target) {
+      const d = u.dist(u.target.x, u.target.y);
+      const hitRange = u.range + (u.target instanceof Tower ? 1.0 : 0.3);
+      if (d <= hitRange) { if (u.atkCD <= 0) unitAttack(u); }
+      else {
+        const px = u.x, py = u.y;
+        moveUnit(u, u.target.x, u.target.y, dt);
+        const dx = u.x - px, dy = u.y - py;
+        if (Math.hypot(dx, dy) > 0.01) u.angle = Math.atan2(dy, dx);
+      }
+    } else {
+      const ek = (u.owner === 0 ? opponent : player).towers.find(t => t.type === 'hq');
+      if (ek) { const px = u.x, py = u.y; moveUnit(u, ek.x, ek.y, dt); const dx = u.x - px, dy = u.y - py; if (Math.hypot(dx, dy) > 0.01) u.angle = Math.atan2(dy, dx); }
+    }
+  }
+}
+
+function findTarget(u) {
+  u.target = null; let best = Infinity; const enemy = 1 - u.owner; const bldOnly = u.card.targets === 'buildings';
+  if (!bldOnly) { for (const o of units) { if (o.owner === u.owner || !o.alive) continue; const d = u.dist(o.x, o.y); if (d < best) { best = d; u.target = o; } } }
+  const eTowers = enemy === 1 ? opponent.towers : player.towers;
+  const escortAlive = eTowers.filter(t => t.type === 'escort' && !t.destroyed).length;
+  if (!u.target || bldOnly) {
+    for (const t of eTowers) {
+      if (t.destroyed) continue; if (t.type === 'hq' && escortAlive === 2) continue;
+      const d = u.dist(t.x, t.y); if (d < best) { best = d; u.target = t; }
+    }
+  }
+  if (bldOnly) {
+    let bt = null, bd = Infinity;
+    for (const t of eTowers) { if (t.destroyed) continue; if (t.type === 'hq' && escortAlive === 2) continue; const d = u.dist(t.x, t.y); if (d < bd) { bd = d; bt = t; } }
+    if (bt) u.target = bt;
+  }
+}
+
+function moveUnit(u, tx, ty, dt) {
+  const onPlayerSide = u.y > RIVER_Y + RIVER_H / 2;
+  const targetOtherSide = (u.owner === 0) ? (ty < RIVER_Y) : (ty > RIVER_Y);
+  const needBridge = (u.owner === 0 && onPlayerSide && targetOtherSide) || (u.owner === 1 && !onPlayerSide && targetOtherSide);
+  let mx = tx, my = ty;
+  if (needBridge) {
+    const nearL = Math.abs(u.x - BRIDGE_LX), nearR = Math.abs(u.x - BRIDGE_RX);
+    const atBridge = (nearL < BRIDGE_W / 2 + 0.5) || (nearR < BRIDGE_W / 2 + 0.5);
+    if (!atBridge) { mx = nearL < nearR ? BRIDGE_LX : BRIDGE_RX; my = RIVER_Y + (u.owner === 0 ? -0.3 : 0.3); }
+  }
+  const dx = mx - u.x, dy = my - u.y, d = Math.hypot(dx, dy);
+  if (d > 0.05) { const m = Math.min(u.speed * dt * 2.5, d); u.x += (dx / d) * m; u.y += (dy / d) * m; }
+}
+
+function unitAttack(u) {
+  if (!u.target) return;
+  if (u.card.isArea) {
+    const ar = u.card.areaRadius || 1.5, cx = u.target.x, cy = u.target.y;
+    for (const o of units) { if (o.owner === u.owner || !o.alive) continue; if (Math.hypot(o.x - cx, o.y - cy) <= ar) o.takeDamage(u.dmg); }
+    addEffect('boom', cx, cy, '-' + u.dmg, '#FF4444', 0.6);
+  } else {
+    u.target.takeDamage(u.dmg);
+    addEffect('dmg', u.target.x, u.target.y - 0.3, '-' + u.dmg, '#FF4444', 0.5);
+  }
+  if (u.target instanceof Tower) checkTowerDeath(u.target, u.owner);
+  u.atkCD = 1 / u.atkSpd;
+}
+
+function updateTowerAttacks(dt) {
+  for (const t of [...player.towers, ...opponent.towers]) {
+    if (t.destroyed || !t.active) continue; t.atkCD -= dt; if (t.atkCD > 0) continue;
+    let tgt = null, bd = t.range;
+    for (const u of units) { if (u.owner === t.owner || !u.alive) continue; const d = Math.hypot(u.x - t.x, u.y - t.y); if (d < bd) { bd = d; tgt = u; } }
+    if (tgt) { tgt.takeDamage(t.dmg); addEffect('tshot', t.x, t.y, '', t.owner === 0 ? '#4488FF' : '#FF4444', 0.3); addEffect('dmg', tgt.x, tgt.y - 0.3, '-' + t.dmg, '#FFAA00', 0.4); t.atkCD = 1 / t.atkSpd; }
+  }
+}
+
+function updateAI(dt) {
+  opponent.aiCD += dt; if (opponent.aiCD < opponent.aiNext) return;
+  opponent.aiCD = 0; opponent.aiNext = 1.5 + Math.random() * 3;
+  const playable = [];
+  opponent.hand.forEach((cid, i) => { const c = ALL_CARDS[cid]; if (c && opponent.elixir >= c.cost) playable.push({ i, cid, c }); });
+  if (!playable.length) return;
+  const threats = units.filter(u => u.owner === 0 && u.y < RIVER_Y);
+  let choice, gx, gy;
+  if (threats.length > 0) {
+    const troop = playable.find(p => p.c.type === 'troop'), spell = playable.find(p => p.c.type === 'spell');
+    if (threats.length >= 3 && spell) { choice = spell; const avg = threats.reduce((a, u) => ({ x: a.x + u.x, y: a.y + u.y }), { x: 0, y: 0 }); gx = avg.x / threats.length; gy = avg.y / threats.length; }
+    else { choice = troop || playable[0]; gx = clamp(threats[0].x + (Math.random() - 0.5) * 2, 1, 17); gy = clamp(threats[0].y + 1.5, 2, 12); }
+  } else {
+    const troop = playable.find(p => p.c.type === 'troop'); if (!troop) return;
+    choice = troop; const lane = Math.random() < 0.5 ? 'L' : 'R';
+    gx = lane === 'L' ? 3 + Math.random() * 3 : 12 + Math.random() * 3; gy = 4 + Math.random() * 5;
+  }
+  if (choice) playCard(opponent, choice.i, gx, gy);
+}
+
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+function endBattle() {
+  phase = 'ended';
+  if (player.crowns > opponent.crowns) { battleResult = 'win'; trophyChange = 25 + player.crowns * 5; playerTrophies += trophyChange; playerChests++; showChest = true; }
+  else if (opponent.crowns > player.crowns) { battleResult = 'lose'; trophyChange = -(15 + opponent.crowns * 3); playerTrophies = Math.max(0, playerTrophies + trophyChange); }
+  else { battleResult = 'draw'; trophyChange = 3; playerTrophies += trophyChange; }
+  screen = 'postgame';
+}
+
+// ============================================================
+// RENDERING
+// ============================================================
+
+function render() {
+  ctx.clearRect(0, 0, W, H);
+  if (screen === 'menu') { renderMenu(); return; }
+  if (screen === 'modeselect') { renderModeSelect(); return; }
+  if (screen === 'deckbuilder') { renderDeckBuilder(); return; }
+  renderArena(); renderDeployZone(); renderTowers(); renderUnits(); renderEffects();
+  renderTopBar(); renderHUD(); renderCards();
+  if (phase === 'countdown') renderCountdown();
+  if (screen === 'postgame') renderPostGame();
+}
+
+// ============================================================
+// MENU SCREENS
+// ============================================================
+
+function renderMenu() {
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#080014'); grad.addColorStop(0.6, '#120822'); grad.addColorStop(1, '#0a0a0a');
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+  ctx.save();
+  ctx.strokeStyle = '#FF450020'; ctx.lineWidth = 1;
+  for (let i = 0; i < 10; i++) { ctx.beginPath(); ctx.moveTo(0, H * 0.06 + i * H * 0.09); ctx.lineTo(W, H * 0.09 + i * H * 0.09); ctx.stroke(); }
+  ctx.restore();
+  menuBtns = {};
+  if (menuTab === 'main') renderMainTab();
+  else if (menuTab === 'garage') renderGarageTab();
+  else if (menuTab === 'collection') renderCollectionTab();
+  else if (menuTab === 'store') renderStoreTab();
+  renderNavBar();
+}
+
+function renderMainTab() {
+  ctx.save();
+  ctx.shadowColor = '#FF4500'; ctx.shadowBlur = 30;
+  ctx.fillStyle = '#FFD700'; ctx.font = 'bold ' + Math.floor(W * 0.15) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('ALLEY', W / 2, H * 0.18);
+  ctx.shadowColor = '#00BFFF'; ctx.shadowBlur = 20;
+  ctx.fillText('KINGZ', W / 2, H * 0.29);
+  ctx.restore();
+
+  ctx.fillStyle = '#888'; ctx.font = Math.floor(W * 0.036) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('Street Kings Edition', W / 2, H * 0.37);
+
+  ctx.fillStyle = '#FFD700'; ctx.font = 'bold ' + Math.floor(W * 0.05) + 'px Arial';
+  ctx.fillText('Trophies: ' + playerTrophies, W / 2, H * 0.44);
+
+  const bw = W * 0.72, bh = H * 0.085, bx = W / 2 - bw / 2, by = H * 0.49;
+  menuBtns.battle = { x: bx, y: by, w: bw, h: bh };
+  drawGlowBtn(bx, by, bw, bh, '#2a0800', '#FF4500', 'BATTLE!', W * 0.065, '#fff');
+
+  const sw = bw * 0.46, sh = bh * 0.82, sy2 = by + bh + H * 0.014;
+  menuBtns.deck = { x: bx, y: sy2, w: sw, h: sh };
+  menuBtns.modes = { x: bx + bw - sw, y: sy2, w: sw, h: sh };
+  drawGlowBtn(bx, sy2, sw, sh, '#111', '#4488FF', 'DECK', W * 0.042, '#4488FF');
+  drawGlowBtn(bx + bw - sw, sy2, sw, sh, '#111', '#9933CC', 'MODES', W * 0.042, '#CC88FF');
+
+  if (playerChests > 0) {
+    ctx.fillStyle = '#44FF44'; ctx.font = 'bold ' + Math.floor(W * 0.036) + 'px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(playerChests + ' chest' + (playerChests > 1 ? 's' : '') + ' ready!', W / 2, H * 0.73);
+  }
+  ctx.fillStyle = '#444'; ctx.font = Math.floor(W * 0.03) + 'px Arial';
+  ctx.fillText('Mode: ' + battleMode.toUpperCase() + '  v2.0', W / 2, H * 0.79);
+}
+
+function renderNavBar() {
+  const nbH = H * 0.1, nbY = H - nbH;
+  ctx.fillStyle = '#0d0d1a'; ctx.fillRect(0, nbY, W, nbH);
+  ctx.strokeStyle = '#FF450055'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, nbY); ctx.lineTo(W, nbY); ctx.stroke();
+  const tabs = [{ id: 'main', label: 'HOME' }, { id: 'garage', label: 'GARAGE' }, { id: 'collection', label: 'CARDS' }, { id: 'store', label: 'STORE' }];
+  const tw = W / tabs.length;
+  tabs.forEach((tab, i) => {
+    const tx = i * tw, sel = menuTab === tab.id;
+    menuBtns['nav_' + tab.id] = { x: tx, y: nbY, w: tw, h: nbH };
+    if (sel) { ctx.fillStyle = '#FF450022'; ctx.fillRect(tx, nbY, tw, nbH); }
+    ctx.fillStyle = sel ? '#FF4500' : '#555';
+    ctx.font = (sel ? 'bold ' : '') + Math.floor(nbH * 0.28) + 'px Arial';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(tab.label, tx + tw / 2, nbY + nbH * 0.55);
+  });
+}
+
+function renderModeSelect() {
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#080014'); grad.addColorStop(1, '#0a0a0a');
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+  menuBtns = {};
+
+  ctx.fillStyle = '#FFD700'; ctx.font = 'bold ' + Math.floor(W * 0.08) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('SELECT MODE', W / 2, H * 0.1);
+
+  const modes = [
+    { id: '1v1',      label: '1v1',      sub: 'Classic street duel',           color: '#FF4500' },
+    { id: '2v2',      label: '2v2',      sub: 'Team turf war (AI fill)',        color: '#4488FF' },
+    { id: 'ranked',   label: 'RANKED',   sub: 'Ladder - trophies on the line',  color: '#FFD700' },
+    { id: 'friendly', label: 'FRIENDLY', sub: 'No trophy risk',                 color: '#44CC44' },
+  ];
+  const bh = H * 0.14, bw = W * 0.84, bx = W / 2 - bw / 2;
+  modes.forEach((m, i) => {
+    const by = H * 0.18 + i * (bh + H * 0.018);
+    menuBtns['mode_' + m.id] = { x: bx, y: by, w: bw, h: bh };
+    const sel = battleMode === m.id;
+    ctx.fillStyle = sel ? m.color + '33' : '#111';
+    roundRect(bx, by, bw, bh, 12); ctx.fill();
+    ctx.strokeStyle = sel ? m.color : '#2a2a2a'; ctx.lineWidth = sel ? 2.5 : 1;
+    roundRect(bx, by, bw, bh, 12); ctx.stroke();
+    ctx.fillStyle = m.color; ctx.font = 'bold ' + Math.floor(W * 0.058) + 'px Arial';
+    ctx.textAlign = 'left'; ctx.fillText(m.label, bx + 20, by + bh * 0.38);
+    ctx.fillStyle = '#888'; ctx.font = Math.floor(W * 0.032) + 'px Arial';
+    ctx.fillText(m.sub, bx + 20, by + bh * 0.72);
+    if (sel) { ctx.fillStyle = m.color; ctx.font = 'bold ' + Math.floor(W * 0.05) + 'px Arial'; ctx.textAlign = 'right'; ctx.fillText('v', bx + bw - 20, by + bh * 0.5); }
+  });
+  const backY = H * 0.87;
+  menuBtns.back = { x: bx, y: backY, w: bw, h: H * 0.07 };
+  drawGlowBtn(bx, backY, bw, H * 0.07, '#111', '#555', 'BACK', W * 0.042, '#aaa');
+}
+
+function renderDeckBuilder() {
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, '#0a0814'); grad.addColorStop(1, '#0a0a0a');
+  ctx.fillStyle = grad; ctx.fillRect(0, 0, W, H);
+  menuBtns = {};
+
+  ctx.fillStyle = '#FFD700'; ctx.font = 'bold ' + Math.floor(W * 0.07) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('BUILD YOUR DECK', W / 2, H * 0.065);
+
+  const ok = deckBuilderDeck.length === DECK_SIZE;
+  ctx.fillStyle = ok ? '#44FF44' : '#FF6666'; ctx.font = Math.floor(W * 0.038) + 'px Arial';
+  ctx.fillText(deckBuilderDeck.length + '/' + DECK_SIZE + ' selected', W / 2, H * 0.115);
+
+  const cols = 3, cw = Math.floor(W * 0.28), ch = Math.floor(H * 0.155);
+  const gapX = Math.floor(W * 0.03), gapY = Math.floor(H * 0.012);
+  const startX = Math.floor((W - (cols * cw + (cols - 1) * gapX)) / 2);
+  const startY = H * 0.145;
+
+  deckBtns = [];
+  Object.keys(ALL_CARDS).forEach((cid, idx) => {
+    const col = idx % cols, row = Math.floor(idx / cols);
+    const cx = startX + col * (cw + gapX), cy = startY + row * (ch + gapY);
+    const card = ALL_CARDS[cid], inDeck = deckBuilderDeck.includes(cid);
+    deckBtns.push({ x: cx, y: cy, w: cw, h: ch, cid });
+
+    ctx.globalAlpha = inDeck ? 1 : 0.4;
+    const cg = ctx.createLinearGradient(cx, cy, cx, cy + ch);
+    cg.addColorStop(0, card.color); cg.addColorStop(1, card.accent || card.color);
+    ctx.fillStyle = cg; roundRect(cx, cy, cw, ch, 8); ctx.fill();
+    ctx.strokeStyle = inDeck ? '#FFD700' : 'rgba(255,255,255,0.12)'; ctx.lineWidth = inDeck ? 2.5 : 1;
+    roundRect(cx, cy, cw, ch, 8); ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    if (inDeck) { ctx.fillStyle = '#FFD700'; ctx.font = 'bold ' + Math.floor(ch * 0.18) + 'px Arial'; ctx.textAlign = 'right'; ctx.textBaseline = 'top'; ctx.fillText('v', cx + cw - 5, cy + 3); }
+    ctx.fillStyle = '#fff'; ctx.font = 'bold ' + Math.floor(ch * 0.2) + 'px Arial';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(card.icon, cx + cw / 2, cy + ch * 0.32);
+    ctx.font = 'bold ' + Math.floor(ch * 0.12) + 'px Arial';
+    ctx.fillText(card.name, cx + cw / 2, cy + ch * 0.57);
+    ctx.fillStyle = '#CC88FF'; ctx.font = 'bold ' + Math.floor(ch * 0.115) + 'px Arial';
+    ctx.fillText(card.cost ? (card.cost + ' elx') : 'spell', cx + cw / 2, cy + ch * 0.73);
+    if (card.speedLabel) { ctx.fillStyle = '#aaa'; ctx.font = Math.floor(ch * 0.09) + 'px Arial'; ctx.fillText(card.speedLabel, cx + cw / 2, cy + ch * 0.88); }
+  });
+
+  const by = H * 0.895;
+  menuBtns.saveDeck = { x: W * 0.05, y: by, w: W * 0.42, h: H * 0.068 };
+  menuBtns.backDeck = { x: W * 0.53, y: by, w: W * 0.42, h: H * 0.068 };
+  ctx.globalAlpha = ok ? 1 : 0.38;
+  drawGlowBtn(W * 0.05, by, W * 0.42, H * 0.068, '#0d2a0d', '#44CC44', 'SAVE DECK', W * 0.038, '#44FF44');
+  ctx.globalAlpha = 1;
+  drawGlowBtn(W * 0.53, by, W * 0.42, H * 0.068, '#1a1a1a', '#666', 'BACK', W * 0.038, '#aaa');
+}
+
+function renderGarageTab() {
+  ctx.fillStyle = '#FFD700'; ctx.font = 'bold ' + Math.floor(W * 0.08) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('GARAGE', W / 2, H * 0.1);
+  ctx.fillStyle = '#888'; ctx.font = Math.floor(W * 0.034) + 'px Arial';
+  ctx.fillText('Breed cars to create hybrids!', W / 2, H * 0.165);
+
+  const sw = W * 0.36, sh = H * 0.2, sY = H * 0.22;
+  drawCarSlot(W * 0.06, sY, sw, sh, 'enforcer', '#DAA520');
+  drawCarSlot(W * 0.58, sY, sw, sh, 'blade', '#4169E1');
+
+  ctx.fillStyle = '#FFD700'; ctx.font = 'bold ' + Math.floor(W * 0.1) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('+', W / 2, sY + sh / 2);
+  ctx.fillStyle = '#888'; ctx.font = Math.floor(W * 0.06) + 'px Arial';
+  ctx.fillText('v', W / 2, sY + sh + H * 0.04);
+
+  const rY = sY + sh + H * 0.1, rW = W * 0.5, rH = sh;
+  const rX = W / 2 - rW / 2;
+  ctx.fillStyle = '#111'; ctx.strokeStyle = '#FF450066'; ctx.lineWidth = 2;
+  ctx.setLineDash([8, 4]); roundRect(rX, rY, rW, rH, 12); ctx.fill();
+  roundRect(rX, rY, rW, rH, 12); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = '#555'; ctx.font = Math.floor(W * 0.04) + 'px Arial';
+  ctx.fillText('??? HYBRID ???', W / 2, rY + rH * 0.38);
+  ctx.fillStyle = '#333'; ctx.font = Math.floor(W * 0.027) + 'px Arial';
+  ctx.fillText('5% Legendary - 20% Rare - 75% Common', W / 2, rY + rH * 0.62);
+  ctx.fillText('Rarity affects HP, speed, abilities', W / 2, rY + rH * 0.82);
+
+  const fuseY = rY + rH + H * 0.02;
+  menuBtns.fuse = { x: W * 0.2, y: fuseY, w: W * 0.6, h: H * 0.065 };
+  drawGlowBtn(W * 0.2, fuseY, W * 0.6, H * 0.065, '#1a0a2e', '#9933CC', 'FUSE CARS', W * 0.046, '#CC44FF');
+  ctx.fillStyle = '#2a2a2a'; ctx.font = Math.floor(W * 0.026) + 'px Arial';
+  ctx.fillText('Garage breeding - coming next patch', W / 2, fuseY + H * 0.082);
+}
+
+function drawCarSlot(x, y, w, h, cardId, color) {
+  const card = ALL_CARDS[cardId];
+  ctx.fillStyle = '#111'; roundRect(x, y, w, h, 10); ctx.fill();
+  ctx.strokeStyle = color; ctx.lineWidth = 2; roundRect(x, y, w, h, 10); ctx.stroke();
+  ctx.fillStyle = color; ctx.font = 'bold ' + Math.floor(h * 0.22) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(card.icon, x + w / 2, y + h * 0.4);
+  ctx.fillStyle = '#fff'; ctx.font = 'bold ' + Math.floor(h * 0.14) + 'px Arial';
+  ctx.fillText(card.name, x + w / 2, y + h * 0.72);
+  ctx.fillStyle = '#aaa'; ctx.font = Math.floor(h * 0.11) + 'px Arial';
+  ctx.fillText(card.speedLabel || '', x + w / 2, y + h * 0.87);
+}
+
+function renderCollectionTab() {
+  ctx.fillStyle = '#FFD700'; ctx.font = 'bold ' + Math.floor(W * 0.072) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('COLLECTION', W / 2, H * 0.09);
+  ctx.fillStyle = '#888'; ctx.font = Math.floor(W * 0.033) + 'px Arial';
+  ctx.fillText(playerCollection.length + '/' + Object.keys(ALL_CARDS).length + ' unlocked', W / 2, H * 0.145);
+
+  const cols = 3, cw = Math.floor(W * 0.28), ch = Math.floor(H * 0.148);
+  const gapX = Math.floor(W * 0.03), gapY = Math.floor(H * 0.01);
+  const startX = Math.floor((W - (cols * cw + (cols - 1) * gapX)) / 2);
+  const startY = H * 0.185;
+
+  Object.keys(ALL_CARDS).forEach((cid, idx) => {
+    const col = idx % cols, row = Math.floor(idx / cols);
+    const cx = startX + col * (cw + gapX), cy = startY + row * (ch + gapY);
+    const card = ALL_CARDS[cid], owned = playerCollection.includes(cid);
+    ctx.globalAlpha = owned ? 1 : 0.22;
+    const cg = ctx.createLinearGradient(cx, cy, cx, cy + ch);
+    cg.addColorStop(0, card.color); cg.addColorStop(1, card.accent || card.color);
+    ctx.fillStyle = cg; roundRect(cx, cy, cw, ch, 8); ctx.fill();
+    ctx.strokeStyle = owned ? 'rgba(255,255,255,0.25)' : '#2a2a2a'; ctx.lineWidth = 1;
+    roundRect(cx, cy, cw, ch, 8); ctx.stroke();
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = owned ? '#fff' : '#555';
+    ctx.font = 'bold ' + Math.floor(ch * 0.18) + 'px Arial';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(owned ? card.icon : '[?]', cx + cw / 2, cy + ch * 0.35);
+    ctx.font = 'bold ' + Math.floor(ch * 0.12) + 'px Arial';
+    ctx.fillText(card.name, cx + cw / 2, cy + ch * 0.6);
+    if (owned && card.speedLabel) { ctx.fillStyle = '#aaa'; ctx.font = Math.floor(ch * 0.09) + 'px Arial'; ctx.fillText(card.speedLabel, cx + cw / 2, cy + ch * 0.8); }
+  });
+}
+
+function renderStoreTab() {
+  ctx.fillStyle = '#FFD700'; ctx.font = 'bold ' + Math.floor(W * 0.072) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('STORE', W / 2, H * 0.09);
+
+  const tw = W * 0.4, th = H * 0.055, t1x = W * 0.06, t2x = W * 0.54, tY = H * 0.15;
+  menuBtns.storeChests = { x: t1x, y: tY, w: tw, h: th };
+  menuBtns.storePass = { x: t2x, y: tY, w: tw, h: th };
+
+  const isChests = storeTab === 'chests';
+  ctx.fillStyle = isChests ? '#FF4500' : '#111'; roundRect(t1x, tY, tw, th, 8); ctx.fill();
+  ctx.strokeStyle = '#FF4500'; ctx.lineWidth = 1; roundRect(t1x, tY, tw, th, 8); ctx.stroke();
+  ctx.fillStyle = isChests ? '#fff' : '#888'; ctx.font = 'bold ' + Math.floor(W * 0.036) + 'px Arial';
+  ctx.fillText('CHESTS', t1x + tw / 2, tY + th / 2);
+
+  ctx.fillStyle = !isChests ? '#9933CC' : '#111'; roundRect(t2x, tY, tw, th, 8); ctx.fill();
+  ctx.strokeStyle = '#9933CC'; roundRect(t2x, tY, tw, th, 8); ctx.stroke();
+  ctx.fillStyle = !isChests ? '#fff' : '#888';
+  ctx.fillText('CAR PASS', t2x + tw / 2, tY + th / 2);
+
+  if (storeTab === 'chests') renderChestStore(); else renderCarPass();
+}
+
+function renderChestStore() {
+  const chests = [
+    { name: 'Silver Chest', sub: '3-5 cards', price: 'FREE', pColor: '#44FF44' },
+    { name: 'Gold Chest',   sub: '6-10 cards + bonus', price: '$0.99', pColor: '#FFD700' },
+    { name: 'Crown Chest',  sub: '10-15 cards + legendary', price: '$2.99', pColor: '#FF4500' },
+  ];
+  chests.forEach((ch, i) => {
+    const bw = W * 0.88, bh = H * 0.12, bx = W * 0.06, by = H * 0.24 + i * (bh + H * 0.018);
+    ctx.fillStyle = '#111'; roundRect(bx, by, bw, bh, 10); ctx.fill();
+    ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 1; roundRect(bx, by, bw, bh, 10); ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold ' + Math.floor(W * 0.04) + 'px Arial'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(ch.name, bx + 14, by + bh * 0.38);
+    ctx.fillStyle = '#888'; ctx.font = Math.floor(W * 0.03) + 'px Arial';
+    ctx.fillText(ch.sub, bx + 14, by + bh * 0.7);
+    ctx.fillStyle = ch.pColor; ctx.font = 'bold ' + Math.floor(W * 0.042) + 'px Arial'; ctx.textAlign = 'right';
+    ctx.fillText(ch.price, bx + bw - 14, by + bh / 2);
+  });
+
+  if (playerChests > 0) {
+    const by2 = H * 0.64;
+    menuBtns.openChest = { x: W * 0.1, y: by2, w: W * 0.8, h: H * 0.07 };
+    drawGlowBtn(W * 0.1, by2, W * 0.8, H * 0.07, '#0d2a0d', '#44CC44', 'OPEN FREE CHEST (' + playerChests + ')', W * 0.04, '#44FF44');
+  }
+  ctx.fillStyle = '#333'; ctx.font = Math.floor(W * 0.028) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('Free chest every 8 hours after battle', W / 2, H * 0.75);
+
+  ctx.fillStyle = '#1a1a1a'; roundRect(W * 0.06, H * 0.78, W * 0.88, H * 0.065, 8); ctx.fill();
+  ctx.fillStyle = '#FF8C00'; ctx.font = 'bold ' + Math.floor(W * 0.034) + 'px Arial';
+  ctx.fillText('Draw Prize: Win 3 crowns for a free SPIN!', W / 2, H * 0.813);
+}
+
+function renderCarPass() {
+  const grad = ctx.createLinearGradient(W * 0.05, 0, W * 0.95, 0);
+  grad.addColorStop(0, '#1a003a'); grad.addColorStop(0.5, '#2a0066'); grad.addColorStop(1, '#1a003a');
+  ctx.fillStyle = grad; roundRect(W * 0.05, H * 0.22, W * 0.9, H * 0.22, 14); ctx.fill();
+  ctx.strokeStyle = '#9933CC'; ctx.lineWidth = 2; roundRect(W * 0.05, H * 0.22, W * 0.9, H * 0.22, 14); ctx.stroke();
+
+  ctx.fillStyle = '#FFD700'; ctx.font = 'bold ' + Math.floor(W * 0.065) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('CAR PASS', W / 2, H * 0.285);
+  ctx.fillStyle = '#CC88FF'; ctx.font = Math.floor(W * 0.034) + 'px Arial';
+  ctx.fillText('Season 1 - Street Kings', W / 2, H * 0.34);
+  ctx.fillStyle = '#666'; ctx.font = Math.floor(W * 0.028) + 'px Arial';
+  ctx.fillText('Unlock exclusive rides and rewards', W / 2, H * 0.4);
+
+  const feats = [
+    'Exclusive Legendary car each season',
+    '2x chest reward multiplier',
+    'Custom paint jobs and neon trails',
+    '15 bonus elixir per battle',
+    'Exclusive season trophy banner',
+    'Daily Draw Prize spin included',
+  ];
+  feats.forEach((f, i) => {
+    ctx.fillStyle = '#ccc'; ctx.font = Math.floor(W * 0.031) + 'px Arial'; ctx.textAlign = 'left';
+    ctx.fillText('> ' + f, W * 0.1, H * 0.48 + i * H * 0.052);
+  });
+
+  menuBtns.buyPass = { x: W * 0.1, y: H * 0.79, w: W * 0.8, h: H * 0.075 };
+  drawGlowBtn(W * 0.1, H * 0.79, W * 0.8, H * 0.075, '#1a003a', '#9933CC', 'GET CAR PASS - $4.99/season', W * 0.036, '#CC88FF');
+  ctx.fillStyle = '#333'; ctx.font = Math.floor(W * 0.025) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('Renews each season. Cancel anytime.', W / 2, H * 0.88);
+}
+
+// ============================================================
+// STREET ARENA
+// ============================================================
+
+function renderArena() {
+  ctx.fillStyle = '#1a1a1a'; ctx.fillRect(0, 0, W, hudY);
+  const [ax0, ay0] = toScr(0, 0), [ax1, ay1] = toScr(ARENA_W, ARENA_H);
+  const aw = ax1 - ax0, ah = ay1 - ay0;
+  const [, ryMid] = toScr(0, RIVER_Y);
+
+  ctx.fillStyle = '#222'; ctx.fillRect(ax0, ryMid, aw, ay1 - ryMid);
+  ctx.fillStyle = '#1e1e1e'; ctx.fillRect(ax0, ay0, aw, ryMid - ay0);
+
+  const swW = toScr(1.2, 0)[0] - ax0;
+  ctx.fillStyle = '#2d2d2d';
+  ctx.fillRect(ax0, ay0, swW, ah);
+  ctx.fillRect(ax1 - swW, ay0, swW, ah);
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.15)'; ctx.lineWidth = Math.max(1, scale * 0.07);
+  ctx.setLineDash([scale * 1.1, scale * 0.8]);
+  for (let lx = 3; lx < ARENA_W; lx += 3) {
+    const [slx] = toScr(lx, 0); ctx.beginPath(); ctx.moveTo(slx, ay0); ctx.lineTo(slx, ay1); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  const [cx] = toScr(ARENA_W / 2, 0);
+  ctx.strokeStyle = '#FFD700'; ctx.lineWidth = Math.max(1.5, scale * 0.1);
+  ctx.setLineDash([scale * 1.5, scale * 0.5]);
+  ctx.beginPath(); ctx.moveTo(cx, ay0); ctx.lineTo(cx, ay1); ctx.stroke();
+  ctx.setLineDash([]);
+
+  const [, rv0] = toScr(0, RIVER_Y - RIVER_H / 2), [, rv1] = toScr(0, RIVER_Y + RIVER_H / 2);
+  ctx.fillStyle = '#2a2a2a'; ctx.fillRect(ax0, rv0, aw, rv1 - rv0);
+  ctx.fillStyle = 'rgba(255,255,255,0.09)';
+  const sw = scale * 1.1, sg = scale * 0.55;
+  for (let sx = ax0 + sw; sx < ax1; sx += sw + sg) ctx.fillRect(sx, rv0, sw, rv1 - rv0);
+
+  ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 2; ctx.globalAlpha = 0.45;
+  ctx.beginPath(); ctx.moveTo(ax0, rv0); ctx.lineTo(ax1, rv0); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(ax0, rv1); ctx.lineTo(ax1, rv1); ctx.stroke();
+  ctx.globalAlpha = 1;
+
+  const bwPx = BRIDGE_W * scale;
+  const [blx] = toScr(BRIDGE_LX - BRIDGE_W / 2, 0), [brx] = toScr(BRIDGE_RX - BRIDGE_W / 2, 0);
+  ctx.fillStyle = '#2e2e2e';
+  ctx.fillRect(blx, rv0 - 4, bwPx, rv1 - rv0 + 8);
+  ctx.fillRect(brx, rv0 - 4, bwPx, rv1 - rv0 + 8);
+
+  ctx.strokeStyle = '#FFD70044'; ctx.lineWidth = 1;
+  ctx.setLineDash([scale * 0.5, scale * 0.5]);
+  [[BRIDGE_LX], [BRIDGE_RX]].forEach(([bx_]) => {
+    const [sbx] = toScr(bx_, 0);
+    ctx.beginPath(); ctx.moveTo(sbx, rv0 - 4); ctx.lineTo(sbx, rv1 + 4); ctx.stroke();
+  });
+  ctx.setLineDash([]);
+
+  ctx.save(); ctx.globalAlpha = 0.05; ctx.fillStyle = '#FF4500';
+  ctx.font = 'bold ' + Math.floor(scale * 3.5) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('ALLEY KINGZ', (ax0 + ax1) / 2, (ay0 + ryMid) / 2);
+  ctx.fillText('ALLEY KINGZ', (ax0 + ax1) / 2, (ryMid + ay1) / 2);
+  ctx.globalAlpha = 1; ctx.restore();
+
+  ctx.strokeStyle = '#3a3a3a'; ctx.lineWidth = 2; ctx.setLineDash([]);
+  ctx.strokeRect(ax0, ay0, aw, ah);
+}
+
+// ============================================================
+// CAR SHAPES
+// ============================================================
+
+function drawCarShape(sx, sy, carW, carH, color, accent, angle, isHQ) {
+  ctx.save();
+  ctx.translate(sx, sy); ctx.rotate(angle);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.fillRect(-carW / 2 + 3, -carH / 2 + 3, carW, carH);
+
+  const bg = ctx.createLinearGradient(-carW / 2, -carH / 2, carW / 2, carH / 2);
+  bg.addColorStop(0, accent); bg.addColorStop(0.5, color); bg.addColorStop(1, accent);
+  ctx.fillStyle = bg;
+  if (isHQ) {
+    roundRectLocal(-carW / 2, -carH / 2, carW, carH, 5); ctx.fill();
+    ctx.fillStyle = 'rgba(180,220,255,0.45)';
+    roundRectLocal(-carW * 0.35, -carH / 2 + carH * 0.07, carW * 0.7, carH * 0.24, 3); ctx.fill();
+    ctx.fillStyle = color;
+    roundRectLocal(-carW * 0.4, carH * 0.05, carW * 0.8, carH * 0.42, 4); ctx.fill();
+  } else {
+    roundRectLocal(-carW / 2, -carH / 2, carW, carH, 7); ctx.fill();
+    ctx.fillStyle = 'rgba(180,220,255,0.4)';
+    roundRectLocal(-carW * 0.3, -carH / 2 + carH * 0.09, carW * 0.6, carH * 0.2, 3); ctx.fill();
+  }
+
+  const wr = carW * 0.155;
+  [[-carW * 0.38, -carH * 0.36], [carW * 0.38, -carH * 0.36],
+   [-carW * 0.38,  carH * 0.36], [carW * 0.38,  carH * 0.36]].forEach(([wx, wy]) => {
+    ctx.fillStyle = '#1a1a1a';
+    ctx.beginPath(); ctx.ellipse(wx, wy, wr, wr * 0.68, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#444'; ctx.lineWidth = 0.8; ctx.stroke();
+  });
+  ctx.restore();
+}
+
+function roundRectLocal(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+
+function renderDeployZone() {
+  if (selectedCard < 0 || phase === 'countdown' || phase === 'ended') return;
+  const card = ALL_CARDS[player.hand[selectedCard]]; if (!card) return;
+  const isSpell = card.type === 'spell';
+  const [ax0, ay0] = toScr(0, 0), [ax1, ay1] = toScr(ARENA_W, ARENA_H);
+  ctx.globalAlpha = 0.11;
+  if (isSpell) { ctx.fillStyle = card.color; ctx.fillRect(ax0, ay0, ax1 - ax0, ay1 - ay0); }
+  else { const [, dy0] = toScr(0, RIVER_Y + RIVER_H / 2 + 0.5); ctx.fillStyle = '#44FF44'; ctx.fillRect(ax0, dy0, ax1 - ax0, ay1 - dy0); }
+  ctx.globalAlpha = 1;
+  if (deployPreview) {
+    const [px, py] = toScr(deployPreview.x, deployPreview.y);
+    ctx.strokeStyle = card.color; ctx.lineWidth = 2; ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    if (isSpell) ctx.arc(px, py, (card.radius || 2) * scale, 0, Math.PI * 2);
+    else ctx.arc(px, py, scale * 0.8, 0, Math.PI * 2);
+    ctx.stroke(); ctx.setLineDash([]);
+  }
+}
+
+function renderTowers() {
+  for (const t of [...opponent.towers, ...player.towers]) {
+    const [sx, sy] = toScr(t.x, t.y);
+    const isHQ = t.type === 'hq';
+    const carW = (isHQ ? 2.0 : 1.55) * scale, carH = (isHQ ? 2.9 : 2.1) * scale;
+    const pColor = t.owner === 0 ? '#2255BB' : '#BB2222';
+    const pAccent = t.owner === 0 ? '#1144AA' : '#AA1111';
+    const angle = t.owner === 0 ? -Math.PI / 2 : Math.PI / 2;
+
+    if (t.destroyed) {
+      ctx.globalAlpha = 0.35;
+      ctx.fillStyle = '#333'; roundRect(sx - carW / 2, sy - carH / 2, carW, carH, 4); ctx.fill();
+      ctx.fillStyle = '#FF4400'; ctx.font = Math.floor(carH * 0.45) + 'px Arial';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('[X]', sx, sy);
+      ctx.globalAlpha = 1; continue;
+    }
+
+    drawCarShape(sx, sy, carW, carH, pColor, pAccent, angle, isHQ);
+
+    if (isHQ && t.active) {
+      ctx.shadowColor = t.owner === 0 ? '#4488FF' : '#FF4444'; ctx.shadowBlur = 14;
+      ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(sx, sy, carW * 0.85, 0, Math.PI * 2); ctx.stroke();
+      ctx.shadowBlur = 0;
+    }
+
+    ctx.fillStyle = t.owner === 0 ? '#88AAFF' : '#FF8888';
+    ctx.font = 'bold ' + Math.floor(scale * 0.26) + 'px Arial';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(TOWER_STATS[t.type].label, sx, sy - carH * 0.58);
+
+    const bw = carW * 1.4, bh = Math.max(4, scale * 0.17), bx = sx - bw / 2, by = sy - carH / 2 - bh - 2;
+    ctx.fillStyle = '#222'; ctx.fillRect(bx, by, bw, bh);
+    const pct = t.hp / t.maxHp;
+    ctx.fillStyle = pct > 0.6 ? '#44FF44' : pct > 0.3 ? '#FFAA00' : '#FF3333';
+    ctx.fillRect(bx, by, bw * pct, bh);
+    ctx.strokeStyle = '#000'; ctx.lineWidth = 1; ctx.strokeRect(bx, by, bw, bh);
+    ctx.fillStyle = '#fff'; ctx.font = Math.floor(scale * 0.22) + 'px Arial';
+    ctx.fillText(Math.ceil(t.hp), sx, by - 1);
+  }
+}
+
+function renderUnits() {
+  const sorted = [...units].filter(u => u.alive).sort((a, b) => a.y - b.y);
+  for (const u of sorted) {
+    const [sx, sy] = toScr(u.x, u.y);
+    const r = scale * 0.46;
+    const sizeMult = 0.68 + (Math.min(u.card.speed, 2.0) / 2.0) * 0.3;
+    const cw = r * 1.75 * sizeMult, ch = r * 2.5 * sizeMult;
+
+    drawCarShape(sx, sy, cw, ch, u.card.color, u.card.accent || u.card.color, u.angle, false);
+
+    ctx.strokeStyle = u.owner === 0 ? '#4488FF' : '#FF4444'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(sx, sy, r + 2, 0, Math.PI * 2); ctx.stroke();
+
+    ctx.fillStyle = u.owner === 0 ? '#88AAFF' : '#FF8888';
+    ctx.font = 'bold ' + Math.floor(r * 0.7) + 'px Arial';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(u.card.icon, sx, sy);
+
+    const bw = r * 2.2, bh = 3, bx = sx - bw / 2, by = sy - r * 1.45 - 4;
+    ctx.fillStyle = '#222'; ctx.fillRect(bx, by, bw, bh);
+    const pct = u.hp / u.maxHp;
+    ctx.fillStyle = u.owner === 0 ? '#4488FF' : '#FF4444';
+    ctx.fillRect(bx, by, bw * pct, bh);
+  }
+}
+
+function renderEffects() {
+  for (const e of effects) {
+    const [sx, sy] = toScr(e.x, e.y), p = e.t / e.dur;
+    if (e.type === 'dmg') {
+      ctx.globalAlpha = 1 - p; ctx.fillStyle = e.color;
+      ctx.font = 'bold ' + Math.floor(scale * 0.5) + 'px Arial';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(e.text, sx, sy - p * scale * 1.3); ctx.globalAlpha = 1;
+    } else if (e.type === 'boom') {
+      ctx.globalAlpha = 0.5 * (1 - p); ctx.fillStyle = e.color;
+      ctx.beginPath(); ctx.arc(sx, sy, scale * 1.8 * (0.3 + p * 0.7), 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+    } else if (e.type === 'spell') {
+      ctx.globalAlpha = 0.38 * (1 - p); ctx.fillStyle = e.color;
+      ctx.beginPath(); ctx.arc(sx, sy, scale * 2.5 * (0.3 + p * 0.7), 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+    } else if (e.type === 'spawn') {
+      ctx.globalAlpha = 0.5 * (1 - p); ctx.strokeStyle = e.color; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(sx, sy, scale * (0.5 + p * 1.5), 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
+    } else if (e.type === 'tshot') {
+      ctx.globalAlpha = 0.6 * (1 - p); ctx.fillStyle = e.color;
+      ctx.beginPath(); ctx.arc(sx, sy, scale * 0.28 * (1 - p), 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+    }
+  }
+}
+
+function renderTopBar() {
+  const h = Math.max(offY, 32);
+  ctx.fillStyle = 'rgba(8,8,18,0.92)'; ctx.fillRect(0, 0, W, h);
+  const rem = Math.max(0, phaseTimer);
+  const tStr = Math.floor(rem / 60) + ':' + String(Math.floor(rem % 60)).padStart(2, '0');
+  ctx.fillStyle = (phase === 'double' || phase === 'overtime') ? '#FF4500' : '#fff';
+  ctx.font = 'bold ' + Math.floor(h * 0.55) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(tStr, W / 2, h * 0.42);
+  if (phase === 'double') { ctx.fillStyle = '#FF4500'; ctx.font = Math.floor(h * 0.28) + 'px Arial'; ctx.fillText('x2 ELIXIR', W / 2, h * 0.82); }
+  else if (phase === 'overtime') { ctx.fillStyle = '#FF0000'; ctx.font = 'bold ' + Math.floor(h * 0.3) + 'px Arial'; ctx.fillText('OVERTIME!', W / 2, h * 0.82); }
+  ctx.textAlign = 'left'; ctx.fillStyle = '#4488FF'; ctx.font = 'bold ' + Math.floor(h * 0.5) + 'px Arial';
+  ctx.fillText(player.crowns + ' crowns', 8, h * 0.5);
+  ctx.textAlign = 'right'; ctx.fillStyle = '#FF4444';
+  ctx.fillText(opponent.crowns + ' crowns', W - 8, h * 0.5);
+}
+
+function renderHUD() {
+  const hg = ctx.createLinearGradient(0, hudY, 0, H);
+  hg.addColorStop(0, '#0e0e1e'); hg.addColorStop(1, '#08080e');
+  ctx.fillStyle = hg; ctx.fillRect(0, hudY, W, hudH);
+  ctx.strokeStyle = '#FF450088'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(0, hudY); ctx.lineTo(W, hudY); ctx.stroke();
+
+  const pad = 10, ebW = W - pad * 2, ebH = Math.max(14, Math.floor(hudH * 0.13)), ebY = hudY + 6;
+  ctx.fillStyle = '#1a1a1a'; roundRect(pad, ebY, ebW, ebH, 4); ctx.fill();
+  const ePct = player.elixir / ELIXIR_MAX;
+  const eg = ctx.createLinearGradient(pad, 0, pad + ebW * ePct, 0);
+  eg.addColorStop(0, '#7722BB'); eg.addColorStop(1, '#BB33EE');
+  ctx.fillStyle = eg; roundRect(pad, ebY, ebW * ePct, ebH, 4); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+  for (let i = 1; i < ELIXIR_MAX; i++) { const x = pad + ebW * i / ELIXIR_MAX; ctx.beginPath(); ctx.moveTo(x, ebY); ctx.lineTo(x, ebY + ebH); ctx.stroke(); }
+  ctx.fillStyle = '#fff'; ctx.font = 'bold ' + Math.floor(ebH * 0.85) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(Math.floor(player.elixir) + ' elixir', W / 2, ebY + ebH / 2 + 1);
+}
+
+function renderCards() {
+  for (let i = 0; i < 4; i++) {
+    const s = cardSlots[i]; if (!s) continue;
+    const cid = player.hand[i], c = ALL_CARDS[cid]; if (!c) continue;
+    const afford = player.elixir >= c.cost, sel = selectedCard === i;
+
+    if (sel) {
+      ctx.shadowColor = '#FFD700'; ctx.shadowBlur = 14;
+      ctx.fillStyle = '#FFD700'; roundRect(s.x - 4, s.y - 4, s.w + 8, s.h + 8, 10); ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    ctx.globalAlpha = afford ? 1 : 0.36;
+    const cg = ctx.createLinearGradient(s.x, s.y, s.x, s.y + s.h);
+    cg.addColorStop(0, c.color); cg.addColorStop(1, c.accent || c.color);
+    ctx.fillStyle = cg; roundRect(s.x, s.y, s.w, s.h, 8); ctx.fill();
+    ctx.strokeStyle = sel ? '#FFD700' : 'rgba(255,255,255,0.15)'; ctx.lineWidth = sel ? 2.5 : 1;
+    roundRect(s.x, s.y, s.w, s.h, 8); ctx.stroke();
+
+    ctx.fillStyle = '#fff'; ctx.font = 'bold ' + Math.floor(s.h * 0.22) + 'px Arial';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(c.icon, s.x + s.w / 2, s.y + s.h * 0.32);
+    ctx.font = 'bold ' + Math.floor(s.h * 0.115) + 'px Arial';
+    ctx.fillText(c.name, s.x + s.w / 2, s.y + s.h * 0.6);
+    if (c.speedLabel) { ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.font = Math.floor(s.h * 0.09) + 'px Arial'; ctx.fillText(c.speedLabel, s.x + s.w / 2, s.y + s.h * 0.74); }
+
+    const cr = s.w * 0.2, cy = s.y + s.h - cr - 4;
+    ctx.fillStyle = '#5511AA'; ctx.beginPath(); ctx.arc(s.x + s.w / 2, cy, cr, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#9933CC'; ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.font = 'bold ' + Math.floor(cr * 1.3) + 'px Arial';
+    ctx.fillText(c.cost, s.x + s.w / 2, cy + 1);
+    ctx.globalAlpha = 1;
+  }
+
+  if (player.queue.length > 0 && cardSlots[3]) {
+    const nc = ALL_CARDS[player.queue[0]], ls = cardSlots[3];
+    if (nc) {
+      const nx = ls.x + ls.w + 6, nw = Math.floor(W * 0.09), nh = Math.floor(ls.h * 0.55), ny = ls.y + (ls.h - nh) / 2;
+      ctx.fillStyle = nc.color; ctx.globalAlpha = 0.48; roundRect(nx, ny, nw, nh, 5); ctx.fill(); ctx.globalAlpha = 1;
+      ctx.fillStyle = '#aaa'; ctx.font = Math.floor(nw * 0.28) + 'px Arial';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('next', nx + nw / 2, ny - 5);
+      ctx.fillStyle = '#fff'; ctx.font = 'bold ' + Math.floor(nh * 0.35) + 'px Arial';
+      ctx.fillText(nc.icon, nx + nw / 2, ny + nh / 2);
+    }
+  }
+}
+
+function renderCountdown() {
+  ctx.fillStyle = 'rgba(0,0,0,0.65)'; ctx.fillRect(0, 0, W, H);
+  const num = Math.ceil(cdTimer);
+  ctx.save(); ctx.shadowColor = '#FF4500'; ctx.shadowBlur = 38;
+  ctx.fillStyle = '#FFD700'; ctx.font = 'bold ' + Math.floor(W * 0.28) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(num > 0 ? num : 'GO!', W / 2, H * 0.38);
+  ctx.restore();
+  ctx.fillStyle = '#777'; ctx.font = Math.floor(W * 0.038) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('Mode: ' + battleMode.toUpperCase(), W / 2, H * 0.54);
+}
+
+function renderPostGame() {
+  ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(0, 0, W, H);
+  pgBtns = {};
+
+  let txt, col;
+  if (battleResult === 'win') { txt = 'VICTORY!'; col = '#FFD700'; }
+  else if (battleResult === 'lose') { txt = 'DEFEAT'; col = '#FF4444'; }
+  else { txt = 'DRAW'; col = '#aaa'; }
+
+  ctx.save(); ctx.shadowColor = col; ctx.shadowBlur = 28;
+  ctx.fillStyle = col; ctx.font = 'bold ' + Math.floor(W * 0.13) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(txt, W / 2, H * 0.16); ctx.restore();
+
+  ctx.fillStyle = '#fff'; ctx.font = Math.floor(W * 0.055) + 'px Arial'; ctx.textAlign = 'center';
+  ctx.fillText(player.crowns + ' crowns vs ' + opponent.crowns + ' crowns', W / 2, H * 0.26);
+
+  const tSign = trophyChange >= 0 ? '+' : '';
+  ctx.fillStyle = trophyChange >= 0 ? '#FFD700' : '#FF6666';
+  ctx.font = 'bold ' + Math.floor(W * 0.052) + 'px Arial';
+  ctx.fillText(tSign + trophyChange + ' trophies  (' + playerTrophies + ')', W / 2, H * 0.33);
+
+  ctx.fillStyle = '#666'; ctx.font = Math.floor(W * 0.032) + 'px Arial';
+  ctx.fillText('Time: ' + Math.floor(totalTime) + 's  Mode: ' + battleMode.toUpperCase(), W / 2, H * 0.39);
+
+  if (showChest) {
+    const bounce = Math.sin(chestAnim * 4) * 5;
+    ctx.fillStyle = '#FFD700'; ctx.font = Math.floor(W * 0.11) + 'px Arial';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('[CHEST]', W / 2, H * 0.5 + bounce);
+    ctx.fillStyle = '#44FF44'; ctx.font = 'bold ' + Math.floor(W * 0.036) + 'px Arial';
+    ctx.fillText('CHEST EARNED!', W / 2, H * 0.58);
+    pgBtns.openChest = { x: W * 0.18, y: H * 0.615, w: W * 0.64, h: H * 0.065 };
+    drawGlowBtn(W * 0.18, H * 0.615, W * 0.64, H * 0.065, '#0d2a0d', '#44CC44', 'OPEN CHEST', W * 0.038, '#44FF44');
+  }
+
+  const baseY = showChest ? H * 0.7 : H * 0.54;
+  const bw = W * 0.66, bh = H * 0.075, bx = W / 2 - bw / 2;
+  pgBtns.again = { x: bx, y: baseY, w: bw, h: bh };
+  drawGlowBtn(bx, baseY, bw, bh, '#2a0800', '#FF4500', 'BATTLE AGAIN', W * 0.054, '#fff');
+  const mY = baseY + bh + H * 0.014;
+  pgBtns.menu = { x: bx, y: mY, w: bw, h: bh * 0.82 };
+  drawGlowBtn(bx, mY, bw, bh * 0.82, '#111', '#555', 'MAIN MENU', W * 0.04, '#aaa');
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+function drawGlowBtn(x, y, w, h, bg, glow, label, fs, textColor) {
+  ctx.save();
+  ctx.shadowColor = glow; ctx.shadowBlur = 10;
+  ctx.fillStyle = bg; roundRect(x, y, w, h, 10); ctx.fill();
+  ctx.shadowBlur = 0; ctx.strokeStyle = glow; ctx.lineWidth = 1.5;
+  roundRect(x, y, w, h, 10); ctx.stroke();
+  ctx.fillStyle = textColor || '#fff'; ctx.font = 'bold ' + Math.floor(fs) + 'px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(label, x + w / 2, y + h / 2 + 1);
+  ctx.restore();
+}
+
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y); ctx.closePath();
+}
+
+function inRect(x, y, r) { return x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h; }
+
+// ============================================================
+// INPUT
+// ============================================================
+
+let touchActive = false;
+
+function handleTap(sx, sy) {
+  if (screen === 'modeselect') {
+    for (const [k, btn] of Object.entries(menuBtns)) {
+      if (!inRect(sx, sy, btn)) continue;
+      if (k.startsWith('mode_')) battleMode = k.replace('mode_', '');
+      else if (k === 'back') screen = 'menu';
+    }
+    return;
+  }
+
+  if (screen === 'deckbuilder') {
+    for (const btn of deckBtns) {
+      if (!inRect(sx, sy, btn)) continue;
+      const { cid } = btn;
+      if (deckBuilderDeck.includes(cid)) deckBuilderDeck = deckBuilderDeck.filter(c => c !== cid);
+      else if (deckBuilderDeck.length < DECK_SIZE) deckBuilderDeck.push(cid);
+      return;
+    }
+    if (menuBtns.saveDeck && inRect(sx, sy, menuBtns.saveDeck) && deckBuilderDeck.length === DECK_SIZE) {
+      playerDeck = [...deckBuilderDeck]; screen = 'menu'; menuTab = 'main';
+    }
+    if (menuBtns.backDeck && inRect(sx, sy, menuBtns.backDeck)) { screen = 'menu'; menuTab = 'main'; }
+    return;
+  }
+
+  if (screen === 'postgame') {
+    if (pgBtns.openChest && inRect(sx, sy, pgBtns.openChest)) { playerChests = Math.max(0, playerChests - 1); showChest = false; return; }
+    if (pgBtns.again && inRect(sx, sy, pgBtns.again)) { initBattle(); return; }
+    if (pgBtns.menu && inRect(sx, sy, pgBtns.menu)) { screen = 'menu'; menuTab = 'main'; return; }
+    return;
+  }
+
+  if (screen === 'battle') {
+    if (phase === 'countdown' || phase === 'ended') return;
+    for (let i = 0; i < 4; i++) {
+      if (inRect(sx, sy, cardSlots[i])) {
+        const card = ALL_CARDS[player.hand[i]]; if (!card) return;
+        selectedCard = (selectedCard === i) ? -1 : (player.elixir >= card.cost ? i : selectedCard);
+        deployPreview = null; return;
+      }
+    }
+    if (selectedCard >= 0 && sy < hudY) {
+      const [gx, gy] = toGame(sx, sy), card = ALL_CARDS[player.hand[selectedCard]];
+      if (!card || player.elixir < card.cost) { selectedCard = -1; return; }
+      if (card.type === 'spell') {
+        if (gx > 0.5 && gx < ARENA_W - 0.5 && gy > 0.5 && gy < ARENA_H - 0.5) { playCard(player, selectedCard, gx, gy); selectedCard = -1; deployPreview = null; }
+      } else {
+        if (gx > 0.5 && gx < ARENA_W - 0.5 && gy > RIVER_Y + RIVER_H / 2 + 0.3 && gy < ARENA_H - 0.5) { playCard(player, selectedCard, gx, gy); selectedCard = -1; deployPreview = null; }
+      }
+      return;
+    }
+    if (sy < hudY) { selectedCard = -1; deployPreview = null; }
+    return;
+  }
+
+  if (screen === 'menu') {
+    for (const [k, btn] of Object.entries(menuBtns)) {
+      if (!inRect(sx, sy, btn)) continue;
+      if (k === 'battle') { initBattle(); return; }
+      if (k === 'deck') { deckBuilderDeck = [...playerDeck]; screen = 'deckbuilder'; return; }
+      if (k === 'modes') { screen = 'modeselect'; return; }
+      if (k === 'fuse') return;
+      if (k === 'openChest' && playerChests > 0) { playerChests = Math.max(0, playerChests - 1); return; }
+      if (k === 'storeChests') { storeTab = 'chests'; return; }
+      if (k === 'storePass') { storeTab = 'carpass'; return; }
+      if (k === 'buyPass') return;
+      if (k.startsWith('nav_')) { menuTab = k.replace('nav_', ''); return; }
+    }
+  }
+}
+
+function handleMove(sx, sy) {
+  if (screen === 'battle' && selectedCard >= 0 && sy < hudY) {
+    const [gx, gy] = toGame(sx, sy); deployPreview = { x: gx, y: gy };
+  }
+}
+
+canvas.addEventListener('touchstart', e => { e.preventDefault(); touchActive = true; handleTap(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+canvas.addEventListener('touchmove', e => { e.preventDefault(); if (touchActive) handleMove(e.touches[0].clientX, e.touches[0].clientY); }, { passive: false });
+canvas.addEventListener('touchend', e => { e.preventDefault(); touchActive = false; deployPreview = null; }, { passive: false });
+canvas.addEventListener('click', e => { if (!touchActive) handleTap(e.clientX, e.clientY); });
+canvas.addEventListener('mousemove', e => { if (screen === 'battle' && selectedCard >= 0) handleMove(e.clientX, e.clientY); });
+
+// ============================================================
+// GAME LOOP
+// ============================================================
+
+let lastT = 0;
+function loop(ts) {
+  const dt = Math.min((ts - lastT) / 1000, 0.05);
+  lastT = ts;
+  if (screen === 'battle' || screen === 'postgame') updateBattle(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize', resize);
+resize();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

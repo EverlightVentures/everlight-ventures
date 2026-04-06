@@ -2,10 +2,15 @@
 Billing API - Stripe subscription management.
 """
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import BaseModel
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from api.deps import RequestContext, get_request_context
 from core.config import settings
+from core.database import get_db
+from models.tenant import HiveSession, Integration, Tenant, User
 
 router = APIRouter()
 
@@ -78,7 +83,11 @@ class SubscribeRequest(BaseModel):
 
 
 @router.post("/subscribe")
-async def create_checkout(body: SubscribeRequest):
+async def create_checkout(
+    body: SubscribeRequest,
+    context: RequestContext = Depends(get_request_context),
+    db: AsyncSession = Depends(get_db),
+):
     """
     Create a Stripe Checkout session. Returns a redirect URL.
     Client redirects user to stripe_checkout_url.
@@ -87,35 +96,83 @@ async def create_checkout(body: SubscribeRequest):
     if not plan:
         raise HTTPException(status_code=400, detail="Invalid plan ID")
 
-    if not settings.stripe_secret_key:
-        raise HTTPException(status_code=503, detail="Stripe not configured")
+    price_lookup = {
+        ("spark", "monthly"): settings.stripe_price_spark,
+        ("spark", "annual"): settings.stripe_price_spark,
+        ("hive", "monthly"): settings.stripe_price_hive,
+        ("hive", "annual"): settings.stripe_price_hive,
+        ("enterprise", "monthly"): settings.stripe_price_enterprise,
+        ("enterprise", "annual"): settings.stripe_price_enterprise,
+    }
 
-    # TODO: create Stripe checkout session via stripe-python
-    # import stripe
-    # stripe.api_key = settings.stripe_secret_key
-    # price_id = settings.stripe_price_hive if body.plan_id == "hive" else ...
-    # session = stripe.checkout.Session.create(...)
-    # return {"checkout_url": session.url}
+    if settings.stripe_secret_key and price_lookup.get((body.plan_id, body.billing_cycle)):
+        import stripe
 
-    raise HTTPException(status_code=501, detail="Stripe not yet connected")
+        stripe.api_key = settings.stripe_secret_key
+        checkout = stripe.checkout.Session.create(
+            mode="subscription",
+            line_items=[{"price": price_lookup[(body.plan_id, body.billing_cycle)], "quantity": 1}],
+            success_url=body.success_url,
+            cancel_url=body.cancel_url,
+            customer_email=context.user.email,
+            metadata={
+                "tenant_id": context.tenant.id,
+                "plan_id": body.plan_id,
+                "billing_cycle": body.billing_cycle,
+            },
+        )
+        return {"checkout_url": checkout.url, "mode": "stripe"}
+
+    return {
+        "checkout_url": f"{settings.billing_base_url}?tenant_id={context.tenant.id}&plan={body.plan_id}&cycle={body.billing_cycle}",
+        "mode": "manual",
+        "message": "Stripe is not configured; falling back to manual billing link.",
+    }
 
 
 @router.post("/portal")
-async def billing_portal():
+async def billing_portal(context: RequestContext = Depends(get_request_context)):
     """Create a Stripe Customer Portal session for self-service billing management."""
-    # TODO: stripe.billing_portal.Session.create(...)
-    raise HTTPException(status_code=501, detail="Stripe not yet connected")
+    if settings.stripe_secret_key and context.tenant.stripe_customer_id:
+        import stripe
+
+        stripe.api_key = settings.stripe_secret_key
+        session = stripe.billing_portal.Session.create(
+            customer=context.tenant.stripe_customer_id,
+            return_url=settings.frontend_url,
+        )
+        return {"portal_url": session.url, "mode": "stripe"}
+
+    return {
+        "portal_url": f"{settings.billing_base_url}?tenant_id={context.tenant.id}",
+        "mode": "manual",
+        "message": "Stripe billing portal is not configured.",
+    }
 
 
 @router.get("/usage")
-async def get_usage():
+async def get_usage(
+    context: RequestContext = Depends(get_request_context),
+    db: AsyncSession = Depends(get_db),
+):
     """Return current month usage for the tenant (sessions, tokens, seats)."""
-    # TODO: query DB aggregate
+    plan = next((item for item in PLANS if item["id"] == context.tenant.plan_tier), PLANS[0])
+    sessions_used = await db.scalar(
+        select(func.count()).select_from(HiveSession).where(HiveSession.tenant_id == context.tenant.id)
+    ) or 0
+    seats_used = await db.scalar(
+        select(func.count()).select_from(User).where(User.tenant_id == context.tenant.id, User.is_active.is_(True))
+    ) or 0
+    integrations_count = await db.scalar(
+        select(func.count()).select_from(Integration).where(Integration.tenant_id == context.tenant.id, Integration.is_active.is_(True))
+    ) or 0
+
     return {
-        "sessions_used": 0,
-        "sessions_limit": 100,
-        "seats_used": 1,
-        "seats_limit": 1,
-        "integrations_count": 0,
-        "integrations_limit": 3,
+        "plan_id": plan["id"],
+        "sessions_used": sessions_used,
+        "sessions_limit": plan["limits"]["sessions_per_month"],
+        "seats_used": seats_used,
+        "seats_limit": plan["limits"]["seats"],
+        "integrations_count": integrations_count,
+        "integrations_limit": plan["limits"]["integrations"],
     }

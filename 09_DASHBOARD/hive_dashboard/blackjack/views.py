@@ -3,6 +3,7 @@ Everlight Blackjack - Views
 Handles: game rendering, auth, ad rewards, shop, avatar, game API
 """
 import json
+import os
 import uuid
 import random
 import logging
@@ -22,9 +23,18 @@ from django.utils import timezone
 from django.db import transaction
 from django.conf import settings
 
+try:
+    import stripe
+    STRIPE_AVAILABLE = True
+except Exception:
+    stripe = None
+    STRIPE_AVAILABLE = False
+
+from .catalog import resolve_gem_package_config
+from . import checkout_bridge
 from .models import (
     PlayerProfile, CosmeticItem, PlayerInventory,
-    GameSession, AdRewardLog, GemPackage
+    GameSession, AdRewardLog, GemPackage, GemPurchase
 )
 
 logger = logging.getLogger(__name__)
@@ -101,6 +111,35 @@ def _coerce_int(value: Any, default: int = 0) -> int:
         return int(value)
     except (TypeError, ValueError):
         return default
+
+
+def _stripe_is_configured() -> bool:
+    return STRIPE_AVAILABLE and bool(os.environ.get("STRIPE_SECRET_KEY", "").strip())
+
+
+def _checkout_is_configured() -> bool:
+    return _stripe_is_configured() or checkout_bridge.bridge_enabled()
+
+
+def _get_stripe_client():
+    if not _stripe_is_configured():
+        raise RuntimeError("Stripe checkout is not configured")
+    stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "").strip()
+    return stripe
+
+
+def _serialize_gem_package(package: GemPackage) -> dict[str, Any]:
+    config = resolve_gem_package_config(package)
+    return {
+        "id": package.id,
+        "name": config["name"],
+        "gems": config["gems"],
+        "bonus_gems": config["bonus_gems"],
+        "total_gems": config["total_gems"],
+        "price_usd": config["price_usd"],
+        "is_featured": config["is_featured"],
+        "checkout_ready": checkout_bridge.package_checkout_ready(config) and _checkout_is_configured(),
+    }
 
 
 def _normalize_card(card: Any) -> dict[str, str] | None:
@@ -226,6 +265,82 @@ def _update_rank(profile):
     profile.save(update_fields=['rank'])
 
 
+def _build_checkout_return_urls(request) -> tuple[str, str]:
+    success_url = request.build_absolute_uri(
+        "/blackjack/?checkout=success&session_id={CHECKOUT_SESSION_ID}"
+    )
+    cancel_url = request.build_absolute_uri("/blackjack/?checkout=canceled")
+    return success_url, cancel_url
+
+
+def _create_gem_checkout_session(request, profile: PlayerProfile, package: GemPackage):
+    config = resolve_gem_package_config(package)
+    if not checkout_bridge.package_checkout_ready(config):
+        raise RuntimeError("This gem package is not live yet")
+
+    success_url, cancel_url = _build_checkout_return_urls(request)
+    if checkout_bridge.bridge_enabled():
+        payload = checkout_bridge.create_gem_checkout(
+            slug=checkout_bridge.resolve_gem_package_slug(config),
+            success_url=success_url,
+            cancel_url=cancel_url,
+            metadata={
+                "product": "blackjack_gems",
+                "blackjack_profile_id": str(profile.id),
+                "package_id": str(package.id),
+                "package_name": package.name,
+                "gems_awarded": str(config["total_gems"]),
+                "app_source": "django_blackjack",
+            },
+        )
+        return type(
+            "SupabaseCheckoutSession",
+            (),
+            {
+                "id": str(payload.get("session_id") or ""),
+                "url": str(payload.get("url") or ""),
+            },
+        )()
+
+    client = _get_stripe_client()
+    return client.checkout.Session.create(
+        mode="payment",
+        line_items=[{"price": config["stripe_price_id"], "quantity": 1}],
+        success_url=success_url,
+        cancel_url=cancel_url,
+        client_reference_id=str(profile.id),
+        customer_email=request.user.email or None,
+        metadata={
+            "product": "blackjack_gems",
+            "blackjack_profile_id": str(profile.id),
+            "package_id": str(package.id),
+            "package_name": package.name,
+            "gems_awarded": str(config["total_gems"]),
+        },
+    )
+
+
+def _load_checkout_session_payload(session_id: str) -> dict[str, Any]:
+    if checkout_bridge.bridge_enabled():
+        payload = checkout_bridge.verify_checkout_session(session_id=session_id)
+        if payload:
+            return payload
+
+    session = _get_stripe_client().checkout.Session.retrieve(
+        session_id,
+        expand=["payment_intent"],
+    )
+    metadata = dict(session.metadata or {})
+    return {
+        "session_id": session.id,
+        "payment_status": session.payment_status,
+        "metadata": metadata,
+        "amount_total": int(session.amount_total or 0),
+        "currency": str(session.currency or "usd"),
+        "payment_intent_id": getattr(session.payment_intent, "id", "") or str(session.payment_intent or ""),
+    }
+
+
 # -- Auth Views --
 
 def register_view(request):
@@ -260,8 +375,9 @@ def register_view(request):
 
 
 def login_view(request):
+    next_url = request.GET.get('next') or request.POST.get('next') or '/blackjack/'
     if request.user.is_authenticated:
-        return redirect('blackjack:game')
+        return redirect(next_url)
     if request.method == 'POST':
         ct = request.content_type or ''
         if 'json' in ct:
@@ -270,12 +386,13 @@ def login_view(request):
             data = request.POST
         username = data.get('username', '')
         password = data.get('password', '')
+        next_url = data.get('next') or next_url
         user = authenticate(request, username=username, password=password)
         if user:
             login(request, user)
-            return JsonResponse({'success': True, 'redirect': '/blackjack/'})
+            return JsonResponse({'success': True, 'redirect': next_url})
         return JsonResponse({'error': 'Invalid credentials'}, status=401)
-    return render(request, 'blackjack/auth.html', {'mode': 'login'})
+    return render(request, 'blackjack/auth.html', {'mode': 'login', 'next': next_url})
 
 
 def logout_view(request):
@@ -512,9 +629,11 @@ def game_view(request):
             'is_vip': profile.is_vip,
         }
 
-    gem_packages = list(GemPackage.objects.filter(is_active=True).values(
-        'name', 'gems', 'bonus_gems', 'price_usd', 'is_featured'
-    ))
+    gem_packages = [
+        _serialize_gem_package(package)
+        for package in GemPackage.objects.filter(is_active=True).order_by("price_usd")
+        if resolve_gem_package_config(package).get("is_active", True)
+    ]
 
     return render(request, 'blackjack/game.html', {
         'player_data_json': json.dumps(player_data),
@@ -629,6 +748,19 @@ def _settle_hand(gs, profile, outcome):
         _update_rank(profile)
 
     new_achievements = _check_achievements(profile, outcome, chips_delta)
+    _record_business_event(
+        "blackjack_hand_settled",
+        f"Hand settled as {outcome} for {profile.user.username}.",
+        status="completed",
+        payload={
+            "session_id": gs.session_id,
+            "outcome": outcome,
+            "bet_chips": gs.bet_chips,
+            "chips_delta": chips_delta,
+            "player_value": gs.player_value,
+            "dealer_value": gs.dealer_value,
+        },
+    )
 
     return {
         'outcome': outcome,
@@ -732,6 +864,17 @@ def api_deal(request):
 
     _log_action(gs, 'deal')
     gs.save(update_fields=['action_log'])
+    _record_business_event(
+        "blackjack_hand_started",
+        f"New blackjack hand started for {profile.user.username}.",
+        status="completed",
+        payload={
+            "session_id": session_id,
+            "bet_chips": bet,
+            "side_bet_chips": side_bet,
+            "presence_multiplier": presence,
+        },
+    )
 
     player_val = _hand_value(player_hand)
 
@@ -935,6 +1078,17 @@ def api_ad_reward(request):
             ad_unit_id=ad_unit_id,
         )
 
+    _record_business_event(
+        "blackjack_ad_reward",
+        f"Ad reward granted to {profile.user.username}.",
+        status="completed",
+        payload={
+            "chips_awarded": 100,
+            "refills_remaining": profile.refills_remaining,
+            "ad_unit_id": ad_unit_id,
+        },
+    )
+
     return JsonResponse({
         'chips_awarded': 100,
         'chips': profile.chips,
@@ -1000,6 +1154,8 @@ def api_purchase_cosmetic(request):
     rank_order = list(RANK_CONFIG.keys())
     if rank_order.index(profile.rank) < rank_order.index(item.rank_required):
         return JsonResponse({'error': f'Requires {item.rank_required} rank'}, status=403)
+    if item.is_vip_only and not profile.is_vip:
+        return JsonResponse({'error': 'Requires VIP membership'}, status=403)
 
     with transaction.atomic():
         if currency == 'chips':
@@ -1023,7 +1179,198 @@ def api_purchase_cosmetic(request):
             player=profile, item=item, acquisition_method='purchase'
         )
 
+    _record_business_event(
+        "blackjack_cosmetic_purchase",
+        f"{profile.user.username} purchased cosmetic {item.item_id}.",
+        status="completed",
+        payload={
+            "item_id": item.item_id,
+            "currency": currency,
+            "price_chips": item.price_chips,
+            "price_gems": item.price_gems,
+        },
+    )
+
     return JsonResponse({'success': True, 'chips': profile.chips, 'gems': profile.gems, 'item_id': item_id})
+
+
+@login_required
+@require_POST
+def api_gem_checkout(request):
+    profile = _get_or_create_profile(request.user)
+    data = json.loads(request.body)
+    package_id = _coerce_int(data.get("package_id"))
+
+    try:
+        package = GemPackage.objects.get(id=package_id, is_active=True)
+    except GemPackage.DoesNotExist:
+        return JsonResponse({"error": "Gem package not found"}, status=404)
+
+    config = resolve_gem_package_config(package)
+    if not config.get("is_active", True):
+        return JsonResponse({"error": "This gem package is not for sale"}, status=400)
+
+    try:
+        session = _create_gem_checkout_session(request, profile, package)
+    except RuntimeError as exc:
+        _record_business_event(
+            "blackjack_checkout_unavailable",
+            f"Gem checkout unavailable for {package.name}.",
+            status="failed",
+            payload={"package_id": package_id, "reason": str(exc)},
+        )
+        return JsonResponse({"error": str(exc)}, status=503)
+    except Exception as exc:
+        logger.exception("Blackjack gem checkout failed")
+        _record_business_event(
+            "blackjack_checkout_failed",
+            f"Gem checkout creation failed for {package.name}.",
+            status="failed",
+            payload={"package_id": package_id, "reason": str(exc)},
+        )
+        return JsonResponse({"error": "Unable to start checkout"}, status=500)
+
+    _record_business_event(
+        "blackjack_checkout_started",
+        f"{request.user.username} started gem checkout for {package.name}.",
+        status="completed",
+        payload={
+            "package_id": package.id,
+            "session_id": session.id,
+            "price_id": config["stripe_price_id"],
+            "gems_awarded": config["total_gems"],
+        },
+    )
+
+    return JsonResponse({"url": session.url, "session_id": session.id})
+
+
+@login_required
+@require_POST
+def api_verify_gem_checkout(request):
+    profile = _get_or_create_profile(request.user)
+    data = json.loads(request.body)
+    session_id = str(data.get("session_id") or "").strip()
+
+    if not session_id:
+        return JsonResponse({"error": "Missing session_id"}, status=400)
+    if not _checkout_is_configured():
+        return JsonResponse({"error": "Checkout bridge is not configured"}, status=503)
+
+    try:
+        session_payload = _load_checkout_session_payload(session_id)
+    except Exception as exc:
+        logger.exception("Gem checkout verification failed")
+        _record_business_event(
+            "blackjack_checkout_verify_failed",
+            f"Gem checkout verify failed for session {session_id}.",
+            status="failed",
+            payload={"session_id": session_id, "reason": str(exc)},
+        )
+        return JsonResponse({"error": "Unable to verify checkout"}, status=500)
+
+    payment_status = str(session_payload.get("payment_status") or "")
+    if payment_status != "paid":
+        return JsonResponse(
+            {"error": "Payment not completed", "payment_status": payment_status},
+            status=402,
+        )
+
+    metadata = session_payload.get("metadata") if isinstance(session_payload.get("metadata"), dict) else {}
+    package_id = _coerce_int(metadata.get("package_id"))
+    expected_profile_id = str(metadata.get("blackjack_profile_id") or "")
+    if expected_profile_id and expected_profile_id != str(profile.id):
+        _record_business_event(
+            "blackjack_checkout_profile_mismatch",
+            f"Checkout session {session_id} attempted against the wrong player.",
+            status="failed",
+            payload={
+                "session_id": session_id,
+                "expected_profile_id": expected_profile_id,
+                "actual_profile_id": profile.id,
+            },
+        )
+        return JsonResponse({"error": "Checkout session does not belong to this player"}, status=403)
+
+    try:
+        package = GemPackage.objects.get(id=package_id)
+    except GemPackage.DoesNotExist:
+        return JsonResponse({"error": "Gem package not found for checkout"}, status=404)
+
+    config = resolve_gem_package_config(package)
+    amount_cents = _coerce_int(session_payload.get("amount_total"))
+    currency = str(session_payload.get("currency") or "usd")
+    payment_intent = str(session_payload.get("payment_intent_id") or "")
+
+    with transaction.atomic():
+        locked_profile = PlayerProfile.objects.select_for_update().get(pk=profile.pk)
+        purchase = GemPurchase.objects.select_for_update().filter(session_id=session_id).first()
+        if purchase and purchase.player_id != locked_profile.id:
+            return JsonResponse({"error": "Checkout session already belongs to another player"}, status=403)
+
+        created = False
+        if not purchase:
+            locked_profile.gems += config["total_gems"]
+            locked_profile.save(update_fields=["gems"])
+            purchase = GemPurchase.objects.create(
+                player=locked_profile,
+                package=package,
+                session_id=session_id,
+                stripe_payment_intent_id=payment_intent,
+                amount_cents=amount_cents,
+                currency=currency,
+                gems_awarded=config["total_gems"],
+                status="paid",
+                verified_at=timezone.now(),
+            )
+            created = True
+        elif purchase.status != "paid":
+            locked_profile.gems += purchase.gems_awarded or config["total_gems"]
+            locked_profile.save(update_fields=["gems"])
+            purchase.stripe_payment_intent_id = payment_intent
+            purchase.amount_cents = amount_cents
+            purchase.currency = currency
+            purchase.gems_awarded = purchase.gems_awarded or config["total_gems"]
+            purchase.status = "paid"
+            purchase.verified_at = timezone.now()
+            purchase.save(
+                update_fields=[
+                    "stripe_payment_intent_id",
+                    "amount_cents",
+                    "currency",
+                    "gems_awarded",
+                    "status",
+                    "verified_at",
+                ]
+            )
+            created = True
+        else:
+            locked_profile = purchase.player
+
+    if created:
+        _record_business_event(
+            "blackjack_checkout_paid",
+            f"Gem checkout completed for {request.user.username}.",
+            status="completed",
+            payload={
+                "session_id": session_id,
+                "package_id": package.id,
+                "gems_awarded": config["total_gems"],
+                "amount_cents": amount_cents,
+                "currency": currency,
+            },
+        )
+
+    return JsonResponse(
+        {
+            "success": True,
+            "verified": True,
+            "already_verified": not created,
+            "gems_added": purchase.gems_awarded,
+            "gems": locked_profile.gems,
+            "package_name": package.name,
+        }
+    )
 
 
 def api_shop_items(request):

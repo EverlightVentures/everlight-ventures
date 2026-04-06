@@ -1,0 +1,516 @@
+# Hive Mind Email Infrastructure
+# Domain: everlightventures.io (Namecheap)
+# Last updated: 2026-03-21
+
+# ============================================
+# INDIVIDUAL EMPLOYEE EMAILS
+# ============================================
+# All emails forward to the master inbox unless overridden.
+# Format: address -> display_name, department, forward_to
+
+master_inbox: "admin@everlightventures.io"
+
+employees:
+  # -- CLAUDE CORP (Strategy & Quality) --
+  marcus:
+    email: marcus@everlightventures.io
+    name: "Marcus Cole"
+    title: "Chief Operator"
+    department: claude_corp
+    forward_to: admin@everlightventures.io
+    auto_reply: true
+    signature: "Marcus Cole | Chief Operator | Everlight Ventures"
+
+  atlas:
+    email: atlas@everlightventures.io
+    name: "Atlas Vega"
+    title: "System Architect"
+    department: claude_corp
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Atlas Vega | System Architect | Everlight Ventures"
+
+  vera:
+    email: vera@everlightventures.io
+    name: "Vera Lux"
+    title: "Content Director"
+    department: claude_corp
+    forward_to: admin@everlightventures.io
+    auto_reply: true
+    signature: "Vera Lux | Content Director | Everlight Ventures"
+
+  quinn:
+    email: quinn@everlightventures.io
+    name: "Quinn Sharp"
+    title: "QA Lead"
+    department: claude_corp
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Quinn Sharp | Quality Assurance | Everlight Ventures"
+
+  rex:
+    email: rex@everlightventures.io
+    name: "Rex Thornton"
+    title: "Trading Risk Analyst"
+    department: claude_corp
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Rex Thornton | Trading Risk | Everlight Ventures"
+
+  sage:
+    email: sage@everlightventures.io
+    name: "Sage Holloway"
+    title: "Senior Code Reviewer"
+    department: claude_corp
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Sage Holloway | Code Review | Everlight Ventures"
+
+  nora:
+    email: nora@everlightventures.io
+    name: "Nora Blaine"
+    title: "Content Strategist"
+    department: claude_corp
+    forward_to: admin@everlightventures.io
+    auto_reply: true
+    signature: "Nora Blaine | Content Strategy | Everlight Ventures"
+
+  edith:
+    email: edith@everlightventures.io
+    name: "Edith Cross"
+    title: "Senior Editor"
+    department: claude_corp
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Edith Cross | Editorial | Everlight Ventures"
+
+  cash:
+    email: cash@everlightventures.io
+    name: "Cash Moreno"
+    title: "Commission Auditor"
+    department: claude_corp
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Cash Moreno | Finance & Audit | Everlight Ventures"
+
+  justine:
+    email: justine@everlightventures.io
+    name: "Justine Park"
+    title: "Compliance Officer"
+    department: claude_corp
+    forward_to: admin@everlightventures.io
+    auto_reply: true
+    signature: "Justine Park | Legal & Compliance | Everlight Ventures"
+
+  # -- GEMINI OPS (Execution & Distribution) --
+  major:
+    email: major@everlightventures.io
+    name: "Major Dex"
+    title: "Logistics Commander"
+    department: gemini_ops
+    forward_to: admin@everlightventures.io
+    auto_reply: true
+    signature: "Major Dex | Operations | Everlight Ventures"
+
+  mack:
+    email: mack@everlightventures.io
+    name: "Mack Rivera"
+    title: "Operations Deputy"
+    department: gemini_ops
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Mack Rivera | Operations | Everlight Ventures"
+
+  gears:
+    email: gears@everlightventures.io
+    name: "Gary Tanaka"
+    title: "Workflow Engineer"
+    department: gemini_ops
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Gary Tanaka | Workflow Engineering | Everlight Ventures"
+
+  aria:
+    email: aria@everlightventures.io
+    name: "Aria Chen"
+    title: "Automation Architect"
+    department: gemini_ops
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Aria Chen | Automation | Everlight Ventures"
+
+  link:
+    email: link@everlightventures.io
+    name: "Lincoln Masters"
+    title: "Data Sync Coordinator"
+    department: gemini_ops
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Lincoln Masters | Data Sync | Everlight Ventures"
+
+  dash:
+    email: dash@everlightventures.io
+    name: "Daniel Monroe"
+    title: "Distribution Manager"
+    department: gemini_ops
+    forward_to: admin@everlightventures.io
+    auto_reply: true
+    signature: "Daniel Monroe | Distribution | Everlight Ventures"
+
+  metric:
+    email: metric@everlightventures.io
+    name: "Marcus Webb"
+    title: "Analytics Auditor"
+    department: gemini_ops
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Marcus Webb | Analytics | Everlight Ventures"
+
+  bo:
+    email: bo@everlightventures.io
+    name: "Benjamin Crate"
+    title: "Output Packager"
+    department: gemini_ops
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Benjamin Crate | Packaging | Everlight Ventures"
+
+  scout:
+    email: scout@everlightventures.io
+    name: "Scout Navarro"
+    title: "Deal Scout"
+    department: gemini_ops
+    forward_to: admin@everlightventures.io
+    auto_reply: true
+    signature: "Scout Navarro | Business Development | Everlight Ventures"
+
+  piper:
+    email: piper@everlightventures.io
+    name: "Piper Reeves"
+    title: "Outreach Specialist"
+    department: gemini_ops
+    forward_to: admin@everlightventures.io
+    auto_reply: true
+    signature: "Piper Reeves | Outreach | Everlight Ventures"
+
+  chart:
+    email: chart@everlightventures.io
+    name: "Chart Dawson"
+    title: "Broker Analytics Lead"
+    department: gemini_ops
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Chart Dawson | Broker Analytics | Everlight Ventures"
+
+  # -- CODEX LABS (Engineering & Profit) --
+  forge:
+    email: forge@everlightventures.io
+    name: "Forge Steele"
+    title: "Engineering Foreman"
+    department: codex_labs
+    forward_to: admin@everlightventures.io
+    auto_reply: true
+    signature: "Forge Steele | Engineering | Everlight Ventures"
+
+  penny:
+    email: penny@everlightventures.io
+    name: "Penny Vance"
+    title: "Profit Maximizer"
+    department: codex_labs
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Penny Vance | Revenue Strategy | Everlight Ventures"
+
+  stack:
+    email: stack@everlightventures.io
+    name: "Sebastian Torres"
+    title: "SaaS Builder"
+    department: codex_labs
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Sebastian Torres | SaaS Engineering | Everlight Ventures"
+
+  road:
+    email: road@everlightventures.io
+    name: "Raymond Harper"
+    title: "Product Manager"
+    department: codex_labs
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Raymond Harper | Product | Everlight Ventures"
+
+  rocket:
+    email: rocket@everlightventures.io
+    name: "Rocket Kim"
+    title: "Growth Hacker"
+    department: codex_labs
+    forward_to: admin@everlightventures.io
+    auto_reply: true
+    signature: "Rocket Kim | Growth | Everlight Ventures"
+
+  flow:
+    email: flow@everlightventures.io
+    name: "Franklin Jordan"
+    title: "Funnel Architect"
+    department: codex_labs
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Franklin Jordan | Conversion Funnels | Everlight Ventures"
+
+  spider:
+    email: spider@everlightventures.io
+    name: "Samuel Locke"
+    title: "SEO Specialist"
+    department: codex_labs
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Samuel Locke | SEO | Everlight Ventures"
+
+  ink:
+    email: ink@everlightventures.io
+    name: "Isaac Castellano"
+    title: "Staff Writer"
+    department: codex_labs
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Isaac Castellano | Content | Everlight Ventures"
+
+  filter:
+    email: filter@everlightventures.io
+    name: "Filter Banks"
+    title: "Lead Qualifier"
+    department: codex_labs
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Filter Banks | Lead Qualification | Everlight Ventures"
+
+  cupid:
+    email: cupid@everlightventures.io
+    name: "Cupid Osei"
+    title: "Match Maker"
+    department: codex_labs
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Cupid Osei | Matching | Everlight Ventures"
+
+  hammer:
+    email: hammer@everlightventures.io
+    name: "Hammer Knox"
+    title: "Deal Closer"
+    department: codex_labs
+    forward_to: admin@everlightventures.io
+    auto_reply: true
+    signature: "Hammer Knox | Deals | Everlight Ventures"
+
+  # -- PERPLEXITY INTEL (Research & Intelligence) --
+  cipher:
+    email: cipher@everlightventures.io
+    name: "Cipher Wolfe"
+    title: "Crypto Beat Reporter"
+    department: perplexity_intel
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Cipher Wolfe | Crypto Intel | Everlight Ventures"
+
+  bull:
+    email: bull@everlightventures.io
+    name: "Bull Archer"
+    title: "Markets Reporter"
+    department: perplexity_intel
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Bull Archer | Market Intel | Everlight Ventures"
+
+  wire:
+    email: wire@everlightventures.io
+    name: "Wire Santos"
+    title: "World News Reporter"
+    department: perplexity_intel
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Wire Santos | World News | Everlight Ventures"
+
+  nova:
+    email: nova@everlightventures.io
+    name: "Nova Ling"
+    title: "Tech Reporter"
+    department: perplexity_intel
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Nova Ling | Tech Intel | Everlight Ventures"
+
+  pitch:
+    email: pitch@everlightventures.io
+    name: "Pitch Adler"
+    title: "Business Reporter"
+    department: perplexity_intel
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Pitch Adler | Business Intel | Everlight Ventures"
+
+  helix:
+    email: helix@everlightventures.io
+    name: "Helix Patel"
+    title: "Science Reporter"
+    department: perplexity_intel
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Helix Patel | Science Intel | Everlight Ventures"
+
+  brief:
+    email: brief@everlightventures.io
+    name: "Brief Calloway"
+    title: "Legal Beat Reporter"
+    department: perplexity_intel
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Brief Calloway | Legal Intel | Everlight Ventures"
+
+  pulse:
+    email: pulse@everlightventures.io
+    name: "Pulse Diaz"
+    title: "Consumer Reporter"
+    department: perplexity_intel
+    forward_to: admin@everlightventures.io
+    auto_reply: false
+    signature: "Pulse Diaz | Consumer Intel | Everlight Ventures"
+
+# ============================================
+# DEPARTMENT GROUP ALIASES
+# ============================================
+group_aliases:
+  claude-team:
+    email: claude-team@everlightventures.io
+    members: [marcus, atlas, vera, quinn, rex, sage, nora, edith, cash, justine]
+    forward_to: admin@everlightventures.io
+
+  gemini-team:
+    email: gemini-team@everlightventures.io
+    members: [major, mack, gears, aria, link, dash, metric, bo, scout, piper, chart]
+    forward_to: admin@everlightventures.io
+
+  codex-team:
+    email: codex-team@everlightventures.io
+    members: [forge, penny, stack, road, rocket, flow, spider, ink, filter, cupid, hammer]
+    forward_to: admin@everlightventures.io
+
+  intel:
+    email: intel@everlightventures.io
+    members: [cipher, bull, wire, nova, pitch, helix, brief, pulse]
+    forward_to: admin@everlightventures.io
+
+  # Cross-department functional groups
+  dashboard-ops:
+    email: dashboard-ops@everlightventures.io
+    members: [link, metric, chart, rex, penny, quinn, major]
+    forward_to: admin@everlightventures.io
+
+  broker-team:
+    email: broker-team@everlightventures.io
+    members: [scout, filter, cupid, piper, hammer, cash, justine, chart]
+    forward_to: admin@everlightventures.io
+
+  content-team:
+    email: content-team@everlightventures.io
+    members: [vera, nora, edith, ink, spider, dash]
+    forward_to: admin@everlightventures.io
+
+  engineering-team:
+    email: engineering-team@everlightventures.io
+    members: [forge, stack, atlas, quinn, sage, gears, aria]
+    forward_to: admin@everlightventures.io
+
+  xlm-team:
+    email: xlm-team@everlightventures.io
+    members: [rex, cipher, bull, penny, marcus]
+    forward_to: admin@everlightventures.io
+
+# ============================================
+# EMAIL ROUTING RULES
+# ============================================
+routing:
+  # Inbound email handling
+  inbound:
+    - pattern: "invoice|payment|receipt"
+      route_to: [cash, penny]
+      cc: admin@everlightventures.io
+
+    - pattern: "contract|agreement|terms|legal"
+      route_to: [justine, brief]
+      cc: [marcus, admin@everlightventures.io]
+
+    - pattern: "bug|error|broken|down"
+      route_to: [quinn, forge]
+      cc: [major, admin@everlightventures.io]
+
+    - pattern: "lead|prospect|interested|demo"
+      route_to: [filter, scout, piper]
+      cc: admin@everlightventures.io
+
+    - pattern: "partnership|collaborate|deal"
+      route_to: [scout, cupid, hammer]
+      cc: [marcus, admin@everlightventures.io]
+
+    - pattern: "content|blog|article|press"
+      route_to: [vera, nora, ink]
+      cc: admin@everlightventures.io
+
+    - pattern: "deploy|server|outage|infra"
+      route_to: [forge, gears, aria]
+      cc: [major, admin@everlightventures.io]
+
+  # Outbound email rules
+  outbound:
+    # All external-facing emails must go through these agents
+    cold_outreach: piper  # Piper owns all cold emails
+    distribution: dash    # Dash owns all blast/newsletter emails
+    legal_notices: justine  # Justine reviews all legal correspondence
+    deal_comms: hammer    # Hammer owns all active deal communication
+
+    # CC rules for outbound
+    always_cc_admin: true
+    cc_compliance_on: [contracts, legal, financial, broker]
+
+# ============================================
+# SETUP INSTRUCTIONS
+# ============================================
+# Option A: Namecheap Email Forwarding (Free, simplest)
+# 1. Log into Namecheap > Domain List > everlightventures.io > Email Forwarding
+# 2. Add each employee email as a forwarder to admin@everlightventures.io
+# 3. Add group aliases the same way
+# 4. Limitation: forwarding only, cannot SEND as these addresses
+#
+# Option B: Namecheap Private Email (Paid, full send/receive)
+# 1. Subscribe to Namecheap Private Email ($1.48/mo per mailbox)
+# 2. Create a catch-all or individual mailboxes
+# 3. Configure SMTP in the Hive dispatcher to send as each employee
+# 4. Best for: outreach (Piper), deals (Hammer), distribution (Dash)
+#
+# Option C: Google Workspace or Zoho Mail (Full suite)
+# 1. Add domain to Google Workspace ($7/user/mo) or Zoho ($1/user/mo)
+# 2. Create aliases (free) or full accounts per employee
+# 3. Use Gmail API / Zoho API for programmatic send/receive
+# 4. Best for: full automation, API access, calendar integration
+#
+# RECOMMENDED: Start with Option A (free forwarding) for all 40.
+# Then add Option B for the 5 outbound-facing agents:
+# piper, hammer, dash, scout, rocket
+# These 5 need to SEND emails, not just receive.
+
+# ============================================
+# SEND-AS PRIORITY (agents that need outbound email)
+# ============================================
+send_as_priority:
+  tier_1_must_send:
+    - piper   # Cold outreach -- must send as piper@everlightventures.io
+    - hammer  # Deal comms -- must send as hammer@everlightventures.io
+    - dash    # Distribution/newsletters -- must send as dash@everlightventures.io
+  tier_2_should_send:
+    - scout   # Initial contact with prospects
+    - rocket  # Launch announcements, Product Hunt outreach
+    - marcus  # Executive communications
+    - justine # Legal notices and compliance letters
+  tier_3_nice_to_have:
+    - vera    # Brand communications
+    - nora    # Content partnership outreach
+    - forge   # Technical partnership comms

@@ -1,0 +1,534 @@
+Cool, let’s lock this in like an actual game design doc you could hand to a dev team.
+
+I’ll do two things:
+
+1. Full **feature spec for the Advance Contract Advisor (AI module)**
+2. A **total project overview** (systems, monetization, AI, roadmap, and a text mind map)
+
+---
+
+## 1. Project Overview – “Arena Advance” (working name)
+
+**Core concept:**
+Real-time PvP arena game (Clash Royale–style) where players:
+
+* Battle in 2–4 minute matches using small decks and elixir.
+* Progress through arenas, unlock cards, cosmetics, and modes.
+* Use **Advance Challenges** (your “loan” system) to unlock premium content early.
+* Get **AI-powered coaching, matchmaking, and advice** to keep the game sweaty, fair, and sticky.
+
+### 1.1 Core pillars & what they do
+
+| Pillar                | What it is                                           | Key Features                                                  | Why it makes money                                        |
+| --------------------- | ---------------------------------------------------- | ------------------------------------------------------------- | --------------------------------------------------------- |
+| Core PvP Gameplay     | Fast, readable, high-skill 1v1 & 2v2                 | Arenas, decks, elixir, lanes, tower defense                   | Fun + skill fantasy = players stick around long-term      |
+| Economy & Progression | Cards, levels, arenas, chests                        | Time-gated rewards, upgrade costs, rarity system              | Slow but steady F2P progress nudges players into spending |
+| Monetization Stack    | Pass, VIP sub, gem packs, Advance Challenges         | Season Pass, VIP, cosmetic bundles, “Early Unlock Challenges” | Multiple spend types across F2P, dolphins, whales         |
+| Advance Challenges    | Your “loan” system framed as Early Unlock Challenges | Performance, Engagement, Hybrid contracts + settlement        | Drives strong engagement + monetizes “near misses”        |
+| AI Systems            | Smart helper + optimizer layer                       | Matchmaking, Coach, Contract Advisor, offers, highlights      | Higher retention, better conversion, safer economy tuning |
+
+---
+
+## 2. System Components Overview
+
+### 2.1 High-level technical blocks
+
+| Component                      | Role                                                                         | Tech-ish notes                                            |
+| ------------------------------ | ---------------------------------------------------------------------------- | --------------------------------------------------------- |
+| **Client App (Mobile)**        | Game rendering, UI, controls, local logic, offline training                  | Unity / Unreal / Godot; Android + iOS                     |
+| **Game Server**                | Authoritative state, combat resolution, anti-cheat                           | Authoritative, tick-based; handles matches and ladders    |
+| **Matchmaker Service**         | Builds fair matches using ratings, deck power, contracts                     | Separate service for scalability                          |
+| **Economy & Contract Service** | Manages currencies, chests, passes, Advance Challenges                       | Stores PlayerCreditProfile + AdvanceContract objects      |
+| **AI Services**                | Contract Advisor, Coach, meta-analysis, offer targeting, highlight detection | Can be microservices; early versions rule-based, later ML |
+| **Analytics & Live-Ops**       | Events, A/B tests, dashboards, balance data                                  | Tracks retention, ARPDAU, contract success/fail, subs     |
+| **Auth & Account**             | Login, cloud saves, anti-smurf tools                                         | Google/Apple login + guest, cloud persistence             |
+
+---
+
+## 3. Detailed Feature Spec – **Advance Contract Advisor (AI Module)**
+
+This is the “brain” that tells players whether a given **Advance Challenge** is right for them and structures goals to be **hard but fair**, not trap-y.
+
+### 3.1 Goals
+
+* **Primary:**
+
+  * Estimate **probability of success** for a given player + contract combo.
+  * Suggest **contract difficulty / variant** that’s challenging but achievable.
+  * Stop players from feeling scammed (“I never had a chance”) → ethical.
+
+* **Secondary:**
+
+  * Increase **contract uptake rate** (more players try Advance).
+  * Increase **completion OR gem settlement** without spiking churn.
+  * Feed data for **economy tuning** and balancing.
+
+---
+
+### 3.2 User stories
+
+1. **New player, low skill**
+
+   * “I want to know if this challenge is realistic for me or if I should pick an easier version.”
+
+2. **Mid-core grinder**
+
+   * “I want a challenge that pushes me but doesn’t require no-life grinding.”
+
+3. **Whale / hardcore**
+
+   * “I want the biggest challenge and rewards; tell me if it’s even worth it.”
+
+4. **Designer / Live-ops**
+
+   * “I want to see, per segment, how likely players are to clear these contracts so I can tune them.”
+
+---
+
+### 3.3 Inputs (data this AI uses)
+
+For each player:
+
+* **Gameplay stats**
+
+  * Current trophies / MMR
+  * Recent winrate (last 20–100 matches)
+  * Average number of matches per day
+  * Session length (avg minutes/day)
+  * Preferred modes (ladder, 2v2, events)
+  * Rage quit/surrender frequency
+
+* **Progression stats**
+
+  * Card levels vs ladder norm (underleveled, on par, overleveled)
+  * Number of viable decks
+  * Arena/League
+
+* **Monetization / engagement**
+
+  * Has the player ever spent (Y/N)?
+  * VIP subscriber (Y/N)?
+  * Contrasts: previous contract attempts, success/failure rate
+
+* **Contract parameters**
+
+  * Type: Performance/Engagement/Hybrid
+  * Goals: wins, rank, days, matches, quests
+  * Duration: # of days left in season
+  * Reward package value (internal $ estimate)
+
+---
+
+### 3.4 Outputs (what the Advisor returns)
+
+For a given **player + proposed contract**:
+
+* **Success probability estimate**
+
+  * `success_prob` = 0.0–1.0
+  * Buckets: Easy / Fair / Hard / Extreme
+
+* **Recommended difficulty variant**
+
+  * Suggest:
+
+    * “Lite” version
+    * “Standard” version
+    * “Pro” version
+  * Or confirm current one is appropriate.
+
+* **Key recommendations**
+
+  * 2–3 bullet “notes” for UI:
+
+    * “You typically play 5–7 matches/day; this challenge expects ~4/day.”
+    * “You completed 2 similar challenges last season.”
+
+* **Risk flags**
+
+  * `churn_risk_if_fail`: low/medium/high
+  * Might tell the system to avoid offering too punishing contracts to at-risk players.
+
+---
+
+### 3.5 Implementation phases
+
+#### Phase 1 – Heuristic (rule-based)
+
+Start simple, no ML needed:
+
+* Estimate matches left in season = `(days_remaining * avg_matches_per_day)`
+* Estimate expected wins = `matches_left * recent_winrate`
+* Compare to contract requirements (wins, rank, etc.)
+* Assign:
+
+```text
+if expected_wins >= 1.2 * required_wins -> Easy
+if expected_wins between 0.8–1.2 * required_wins -> Fair
+if expected_wins between 0.5–0.8 * required_wins -> Hard
+else -> Extreme
+```
+
+* Adjust based on:
+
+  * If they improved a lot recently → bump difficulty rating down a notch.
+  * If they failed last 2 contracts in a row → treat the next one as “harder” psychologically.
+
+#### Phase 2 – ML / predictive
+
+* Train a model on historical contracts:
+
+  * Inputs: stats at the time of acceptance + contract parameters.
+  * Output: success or failure.
+* Model:
+
+  * Logistic regression / tree-based model (XGBoost / LightGBM).
+* This model then predicts `success_prob` for new combinations.
+
+---
+
+### 3.6 API contract (pseudo)
+
+**Service name:** `contract-advisor`
+
+**Endpoint (internal):** `POST /api/contract/advice`
+
+**Request (simplified):**
+
+```json
+{
+  "player_id": "12345",
+  "candidate_contract": {
+    "type": "PASS",
+    "variant": "STANDARD",
+    "required_wins": 80,
+    "required_rank": "Gold",
+    "required_play_days": 10,
+    "duration_days": 28,
+    "reward_value_usd": 10.0
+  }
+}
+```
+
+**Response:**
+
+```json
+{
+  "success_prob": 0.63,
+  "difficulty_bucket": "FAIR",
+  "recommended_variant": "STANDARD",
+  "notes": [
+    "You typically play 6 matches/day; this challenge expects around 4/day.",
+    "You completed 2 out of 3 similar challenges last season."
+  ],
+  "risk_flags": {
+    "churn_if_fail": "medium"
+  }
+}
+```
+
+The **Economy & Contracts service** uses this response to:
+
+* Decide which difficulty variant to show by default.
+* Decide whether to even offer the contract at all for fragile/new players.
+
+---
+
+### 3.7 UX flow with Advisor integrated
+
+**Flow: Player opens an Advance Challenge offer**
+
+1. Client → Contracts Service:
+
+   * “Get available contracts for player 12345”
+2. Contracts Service:
+
+   * Builds several candidate contract templates (Lite, Standard, Pro).
+   * Calls `contract-advisor` for each template.
+3. Advisor returns:
+
+   * `success_prob`, `difficulty_bucket`, etc.
+4. Contracts Service chooses:
+
+   * Show 1–3 options:
+
+     * Highlight the one that’s **Fair** for the player.
+5. Client UI:
+
+> **Advance Gold Pass – Recommended Challenge**
+> Difficulty: **Fair** (Estimated 60% success chance based on your usual play)
+>
+> **Goal by Season End (28 days):**
+> • Reach Gold League **or** win 80 ranked matches
+>
+> Based on your history (6–8 matches/day, 55% winrate), this is a solid challenge.
+
+Optional button: “Show easier version” (Advisor-prepared Lite).
+
+---
+
+### 3.8 Integration with monetization + ethics
+
+**Monetization linkage:**
+
+* Players trust the Advisor → more likely to accept Advance Challenges.
+* Fair difficulty → more completions → more **happy** users.
+* Some will fail but be close → will pay gem settlement → $$$.
+* Advisor also tells you who is **safe** to offer higher-value contracts (big whales, high-engagement people) → bigger potential revenue.
+
+**Ethical safety:**
+
+* Advisor explicitly avoids:
+
+  * Showing **Extreme difficulty** contracts as “normal.”
+  * Pushing very hard contracts to high churn-risk users.
+* This keeps your system from sliding into “predatory loan” vibes.
+
+---
+
+### 3.9 Key metrics to track for this module
+
+* Contract **acceptance rate** by difficulty bucket.
+* Contract **success rate** vs Advisor’s predicted probability.
+* **Settlement rate** (how many failures choose gem vs forfeit).
+* **Churn rate** after failure, by difficulty bucket.
+* ARPDAU / LTV changes for:
+
+  * Players with Advisor-guided contracts vs control.
+* % of players who:
+
+  * Try a contract once.
+  * Try multiple seasons in a row.
+
+Use A/B testing:
+
+* Group A: Contracts with Advisor guidance in UI.
+* Group B: Same contracts without success probability hints.
+
+---
+
+## 4. Total Project View – Systems + Money + AI
+
+### 4.1 Game Feature Stack (bird’s eye)
+
+1. **Core Game**
+
+   * 1v1, 2v2 arenas (2–4 min)
+   * 8-card decks, elixir, lane control
+   * Arenas/leagues progression
+
+2. **Progression & Economy**
+
+   * Cards (rarities, levels)
+   * Chests, keys, timers
+   * Gold (soft), Gems (premium)
+   * Cosmetic skins, banners, emotes
+
+3. **Monetization**
+
+   * **Season Pass:** $5–$10, non-renewing
+   * **VIP Subscription:** $5–$8/month
+
+     * Extra daily rewards
+     * Better Advance terms, extra slots, AI Coach features
+   * **Gem Packs & Bundles**
+   * **Advance Challenges:**
+
+     * Performance, Engagement, Hybrid
+     * Gem settlement / partial loss / redemption quests
+
+4. **AI Layers**
+
+   * **Contract Advisor** (spec above)
+   * **AI Coach**
+
+     * Post-match analysis
+     * Deck suggestions
+     * VIP “advanced breakdown”
+   * **Smart Matchmaking**
+
+     * Uses MMR, deck power, tilt, contracts
+   * **Meta Analyzer**
+
+     * Detects OP decks, suggests balance targets
+   * **Offer Targeting**
+
+     * Segments players, shows relevant bundles (no abusive dynamic pricing)
+   * **Churn Prediction**
+
+     * Grace bundles & easy contracts for at-risk players
+   * **Highlight & Social AI**
+
+     * Auto-clips best moments
+     * Optional AI “caster” text overlays
+
+5. **Live-Ops / Events**
+
+   * Seasons (4–6 weeks)
+   * Weekly events and special modes
+   * Contract themes (e.g., “Spell Season”, “Tank Season”)
+   * Tournaments and clan wars
+
+---
+
+## 5. Roadmap (phased build)
+
+### Phase 0 – Foundations (Prototype)
+
+* Build:
+
+  * Minimal 1v1 gameplay prototype (core combat loop).
+  * Basic deck & card system.
+  * Simple matchmaker.
+
+* No monetization yet – just core fun and feel.
+
+---
+
+### Phase 1 – Core F2P & Manual Contracts
+
+* Add:
+
+  * Chests, soft/hard currencies.
+  * Basic ladder & arenas.
+  * **Advance Challenges v1 (manual tuning, no AI)**:
+
+    * Static contracts (e.g., “Win 50 games this season”).
+    * Simple success/failure handling.
+
+* Track:
+
+  * Player engagement and completion without AI Advisor.
+
+---
+
+### Phase 2 – Monetization Stack
+
+* Add:
+
+  * Season Pass
+  * Gem store
+  * VIP Subscription basics
+  * Better shop offers
+
+* Connect:
+
+  * Advance Challenge failures to **gem settlement** flows.
+  * Pass / VIP bonuses to contracts (extra slot, small bonuses).
+
+---
+
+### Phase 3 – AI Systems
+
+* Implement:
+
+  * **Contract Advisor v1 (heuristic)** integrated into contract offers.
+  * **AI Coach v1** – basic post-match tips.
+  * Smarter matchmaking rules (simple, not ML yet).
+  * Offer targeting by segment (F2P, light spender, whale, VIP).
+
+* Run A/B tests:
+
+  * With vs without Advisor hints.
+  * With vs without AI Coach overlays.
+
+---
+
+### Phase 4 – Live-ops & ML Upgrades
+
+* Convert heuristic models → ML where it’s worth it:
+
+  * Contract success prediction.
+  * Churn prediction.
+
+* Add:
+
+  * Auto highlight system.
+  * Event & tournament AI overlays.
+  * Deeper clan AI assistant.
+
+* Build:
+
+  * Live-ops dashboard for balancing contracts, offers, and passes.
+
+---
+
+## 6. Text Mind Map – Whole Project
+
+You can paste this into a doc / diagram:
+
+* **Arena Advance (Project)**
+
+  * **Core Game**
+
+    * Real-time PvP (1v1, 2v2)
+    * 2–4 min matches
+    * Decks, elixir, lanes, towers
+    * Arenas & leagues
+  * **Progression & Economy**
+
+    * Cards (rarities, levels)
+    * Chests & timers
+    * Gold (soft), Gems (premium)
+    * Cosmetics & banners
+  * **Monetization**
+
+    * Season Pass (per season)
+    * VIP Subscription (monthly)
+    * Gem packs & bundles
+    * Advance Challenges (Early Unlock)
+
+      * Performance contracts
+      * Engagement contracts
+      * Hybrid contracts
+      * Settlement: gems, partial loss, redemption quests
+  * **Advance System**
+
+    * PlayerCreditProfile
+
+      * credit_score, trust_tier
+      * successful/failed contracts
+    * AdvanceContract
+
+      * type (PASS/UPGRADE/COSMETIC/ACCESS)
+      * conditions (wins, rank, days, matches, quests)
+      * success_rewards, failure_penalties, failure_options
+  * **AI Layer**
+
+    * Contract Advisor
+
+      * Inputs: player stats, contract params
+      * Outputs: success_prob, difficulty_bucket, recommended variant
+      * Used for: offer selection, difficulty hints, safety
+    * AI Coach
+
+      * Post-match analysis, tips, deck suggestions
+      * VIP advanced reports
+    * Smart Matchmaking
+
+      * Rating, deck strength, tilting, contracts
+    * Meta Analyzer
+
+      * Winrate/pickrate, balance suggestions
+    * Monetization AI
+
+      * Segmentation, contextual offers, economy tuning
+      * Churn prediction & comeback offers
+    * Social AI
+
+      * Highlight detection, AI caster overlays
+      * Clan assistant (war strategy, performance reports)
+  * **Live-Ops & Analytics**
+
+    * Seasonal events, weekly modes
+    * A/B tests for offers & contracts
+    * Dashboards: retention, ARPDAU, contract stats
+  * **Tech Stack**
+
+    * Client: mobile engine (Unity/Unreal/etc.)
+    * Server: authoritative game server, contract service, AI microservices
+    * Data: player profiles, contracts, telemetry
+
+---
+
+If you want, next I can drill into **AI Coach v1** the same way (inputs, outputs, how the advice shows in UI, and how to gate advanced coaching behind VIP/subscription).

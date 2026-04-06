@@ -5,6 +5,7 @@ Seeds cosmetic items, gem packages, and default avatar options.
 Safe to run multiple times (uses get_or_create).
 """
 from django.core.management.base import BaseCommand
+from blackjack.catalog import DEFAULT_GEM_PACKAGE_CATALOG
 from blackjack.models import CosmeticItem, GemPackage
 
 
@@ -107,11 +108,8 @@ COSMETICS = [
 ]
 
 GEM_PACKAGES = [
-    dict(name='Starter Pack',  gems=100, bonus_gems=0,  price_usd='0.99', is_featured=False),
-    dict(name='Player Pack',   gems=500, bonus_gems=100, price_usd='4.99', is_featured=False),
-    dict(name='High Roller',   gems=1200, bonus_gems=400, price_usd='9.99', is_featured=True),
-    dict(name='VIP Bundle',    gems=3000, bonus_gems=1000, price_usd='24.99', is_featured=False),
-    dict(name='Casino Boss',   gems=7000, bonus_gems=3000, price_usd='49.99', is_featured=False),
+    {"name": name, **config}
+    for name, config in DEFAULT_GEM_PACKAGE_CATALOG.items()
 ]
 
 
@@ -142,7 +140,11 @@ class Command(BaseCommand):
                 name=data['name'],
                 defaults=data,
             )
-            if created:
+            if not created:
+                for key, value in data.items():
+                    setattr(obj, key, value)
+                obj.save()
+            else:
                 created_pkgs += 1
 
         self.stdout.write(f'Gem packages: {created_pkgs} created')

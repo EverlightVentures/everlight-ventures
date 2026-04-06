@@ -141,12 +141,23 @@
   .tb-filter-btn:hover, .tb-filter-btn.active {
     border-color: var(--gold-dim); color: var(--gold); background: var(--gold-glow);
   }
+  .tb-actions { display:flex; gap:0.8rem; align-items:center; flex-wrap:wrap; }
+  .tb-search {
+    min-width: 240px; background: var(--glass-bg); border: 1px solid var(--glass-border);
+    border-radius: 10px; padding: 10px 14px; color: var(--text-primary);
+  }
+  .tb-refresh-note { font-size: 0.75rem; color: var(--text-muted); }
 </style>
 
 <div class="tb-header">
   <div>
     <h1><i class="fa-solid fa-list-check" style="margin-right:10px;"></i>AI Taskboard</h1>
-    <div class="subtitle">Tasks from your AI agents that need your input</div>
+    <div class="subtitle">Unified queue for AI execution, human input requests, and completed handoffs</div>
+  </div>
+  <div class="tb-actions">
+    <a href="{% url 'taskboard:secrets_hub' %}" class="tb-filter-btn">Secrets Hub</a>
+    <a href="{% url 'taskboard:nerve_center' %}" class="tb-filter-btn">Nerve Center</a>
+    <button type="button" class="tb-filter-btn" id="refreshToggle" data-enabled="true">Auto Refresh: On</button>
   </div>
 </div>
 
@@ -154,19 +165,23 @@
 <div class="tb-stats">
   <div class="tb-stat-card {% if stats.pending > 0 %}pulse{% endif %}">
     <div class="tb-stat-number">{{ stats.pending }}</div>
-    <div class="tb-stat-label">Pending</div>
+    <div class="tb-stat-label">Open Items</div>
   </div>
   <div class="tb-stat-card">
     <div class="tb-stat-number" style="color: var(--purple);">{{ stats.in_progress }}</div>
     <div class="tb-stat-label">In Progress</div>
   </div>
   <div class="tb-stat-card">
-    <div class="tb-stat-number" style="color: #22c55e;">{{ stats.completed_today }}</div>
-    <div class="tb-stat-label">Done Today</div>
+    <div class="tb-stat-number" style="color: #22c55e;">{{ stats.ai_open }}</div>
+    <div class="tb-stat-label">AI Queue</div>
   </div>
   <div class="tb-stat-card">
-    <div class="tb-stat-number" style="color: var(--text-secondary);">{{ stats.total_completed }}</div>
-    <div class="tb-stat-label">All-Time Done</div>
+    <div class="tb-stat-number" style="color: var(--gold-bright);">{{ stats.human_open }}</div>
+    <div class="tb-stat-label">Needs Human</div>
+  </div>
+  <div class="tb-stat-card">
+    <div class="tb-stat-number" style="color: #22c55e;">{{ stats.completed_today }}</div>
+    <div class="tb-stat-label">Done Today</div>
   </div>
   <div class="tb-stat-card glow">
     <div class="tb-stat-number">{{ stats.awaiting_retrieval }}</div>
@@ -177,15 +192,25 @@
 <!-- Filters -->
 <div class="tb-filters">
   <a href="{% url 'taskboard:board' %}" class="tb-filter-btn {% if not status_filter and not category_filter %}active{% endif %}">All</a>
+  <a href="?owner=ai{% if category_filter %}&category={{ category_filter }}{% endif %}" class="tb-filter-btn {% if owner_filter == 'ai' %}active{% endif %}">AI Owned</a>
+  <a href="?owner=human{% if category_filter %}&category={{ category_filter }}{% endif %}" class="tb-filter-btn {% if owner_filter == 'human' %}active{% endif %}">Needs Human</a>
   {% for cat_val, cat_label in categories %}
-  <a href="?category={{ cat_val }}" class="tb-filter-btn {% if category_filter == cat_val %}active{% endif %}">{{ cat_label }}</a>
+  <a href="?category={{ cat_val }}{% if owner_filter %}&owner={{ owner_filter }}{% endif %}" class="tb-filter-btn {% if category_filter == cat_val %}active{% endif %}">{{ cat_label }}</a>
   {% endfor %}
   {% for b in batches %}
-  <a href="?batch={{ b }}" class="tb-filter-btn {% if batch_filter == b %}active{% endif %}">
+  <a href="?batch={{ b }}{% if owner_filter %}&owner={{ owner_filter }}{% endif %}" class="tb-filter-btn {% if batch_filter == b %}active{% endif %}">
     <i class="fa-solid fa-layer-group" style="margin-right:4px;"></i>{{ b|truncatechars:20 }}
   </a>
   {% endfor %}
+  <form method="get" style="display:flex; gap:0.5rem; margin-left:auto; flex-wrap:wrap;">
+    {% if owner_filter %}<input type="hidden" name="owner" value="{{ owner_filter }}">{% endif %}
+    {% if category_filter %}<input type="hidden" name="category" value="{{ category_filter }}">{% endif %}
+    {% if batch_filter %}<input type="hidden" name="batch" value="{{ batch_filter }}">{% endif %}
+    <input class="tb-search" type="search" name="q" value="{{ search_query }}" placeholder="Search tasks by title...">
+    <button class="tb-filter-btn active" type="submit">Search</button>
+  </form>
 </div>
+<div class="tb-refresh-note">Board refreshes every 20 seconds while auto refresh is on.</div>
 
 <!-- Kanban Board -->
 <div class="tb-kanban">
@@ -197,7 +222,7 @@
       <span class="tb-column-count">{{ pending|length }}</span>
     </div>
     {% for task in pending %}
-    <a href="{% url 'taskboard:task_form' task.id %}" class="tb-card priority-{{ task.priority }}">
+    <a href="{% url 'taskboard:task_form' task.id %}" class="tb-card priority-{{ task.priority }}" data-task-card>
       <div class="tb-card-top">
         <div class="tb-card-icon"><i class="{{ task.template.icon }}"></i></div>
         <div>
@@ -207,6 +232,10 @@
       </div>
       <div class="tb-card-meta">
         <span class="tb-badge category">{{ task.template.get_category_display }}</span>
+        <span class="tb-badge">{{ task.get_request_kind_display }}</span>
+        <span class="tb-badge {% if task.owner_type == 'ai' %}agent{% endif %}">
+          {% if task.owner_type == 'ai' %}AI owned{% else %}Human owned{% endif %}
+        </span>
         {% if task.source_agent %}<span class="tb-badge agent">from: {{ task.source_agent }}</span>{% endif %}
         <span class="tb-badge">{{ task.created_at|naturaltime }}</span>
       </div>
@@ -227,7 +256,7 @@
       <span class="tb-column-count">{{ in_progress|length }}</span>
     </div>
     {% for task in in_progress %}
-    <a href="{% url 'taskboard:task_form' task.id %}" class="tb-card priority-{{ task.priority }}">
+    <a href="{% url 'taskboard:task_form' task.id %}" class="tb-card priority-{{ task.priority }}" data-task-card>
       <div class="tb-card-top">
         <div class="tb-card-icon"><i class="{{ task.template.icon }}"></i></div>
         <div>
@@ -237,6 +266,10 @@
       </div>
       <div class="tb-card-meta">
         <span class="tb-badge category">{{ task.template.get_category_display }}</span>
+        <span class="tb-badge">{{ task.get_request_kind_display }}</span>
+        <span class="tb-badge {% if task.owner_type == 'ai' %}agent{% endif %}">
+          {% if task.owner_type == 'ai' %}AI owned{% else %}Human owned{% endif %}
+        </span>
         {% if task.target_agent %}<span class="tb-badge agent">to: {{ task.target_agent }}</span>{% endif %}
       </div>
     </a>
@@ -256,7 +289,7 @@
       <span class="tb-column-count">{{ completed|length }}</span>
     </div>
     {% for task in completed %}
-    <div class="tb-card priority-{{ task.priority }}" style="opacity:0.7;">
+    <div class="tb-card priority-{{ task.priority }}" style="opacity:0.7;" data-task-card>
       <div class="tb-card-top">
         <div class="tb-card-icon" style="color:#22c55e;"><i class="fa-solid fa-check"></i></div>
         <div>
@@ -267,8 +300,19 @@
             {% else %}
               <span style="color:var(--gold);"><i class="fa-solid fa-clock"></i> Awaiting agent pickup</span>
             {% endif %}
+            {% if task.result_summary %}
+              <br>{{ task.result_summary|truncatechars:90 }}
+            {% endif %}
           </div>
         </div>
+      </div>
+      <div class="tb-card-meta">
+        <span class="tb-badge">{{ task.get_request_kind_display }}</span>
+        {% if task.completed_by %}
+        <span class="tb-badge {% if task.completed_by == 'ai' %}agent{% endif %}">
+          Completed by {{ task.get_completed_by_display }}
+        </span>
+        {% endif %}
       </div>
     </div>
     {% empty %}
@@ -288,7 +332,7 @@
       <span class="tb-column-count">{{ blocked|length }}</span>
     </div>
     {% for task in blocked %}
-    <a href="{% url 'taskboard:task_form' task.id %}" class="tb-card priority-{{ task.priority }}">
+    <a href="{% url 'taskboard:task_form' task.id %}" class="tb-card priority-{{ task.priority }}" data-task-card>
       <div class="tb-card-top">
         <div class="tb-card-icon" style="color:#ef4444;"><i class="fa-solid fa-ban"></i></div>
         <div>
@@ -301,4 +345,26 @@
   </div>
   {% endif %}
 </div>
+
+<script>
+  (() => {
+    const toggle = document.getElementById("refreshToggle");
+    let refreshEnabled = true;
+    let intervalId = window.setInterval(() => {
+      if (refreshEnabled && document.visibilityState === "visible") {
+        window.location.reload();
+      }
+    }, 20000);
+
+    toggle?.addEventListener("click", () => {
+      refreshEnabled = !refreshEnabled;
+      toggle.dataset.enabled = refreshEnabled ? "true" : "false";
+      toggle.textContent = `Auto Refresh: ${refreshEnabled ? "On" : "Off"}`;
+    });
+
+    window.addEventListener("beforeunload", () => {
+      window.clearInterval(intervalId);
+    });
+  })();
+</script>
 {% endblock %}

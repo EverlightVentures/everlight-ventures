@@ -18,8 +18,12 @@ import Settings from "./pages/Settings"
 import MarketIntel from "./pages/MarketIntel"
 import TradingChat from "./components/TradingChat"
 import MindsetPanel from "./components/MindsetPanel"
+import TradeReportCard from "./components/TradeReportCard"
+import AIAdvisor from "./components/AIAdvisor"
+import MarketContextBar from "./components/MarketContextBar"
+import TradingCharts from "./components/TradingCharts"
 
-// ── Loading / Welcome Screen ──
+// -- Loading / Welcome Screen --
 function SplashScreen({ onDone }) {
   const [phase, setPhase] = useState(0)
   useEffect(() => {
@@ -32,15 +36,16 @@ function SplashScreen({ onDone }) {
 
   return (
     <div className="fixed inset-0 bg-[#0a0a0f] z-[100] flex items-center justify-center">
-      {/* Ambient orbs */}
       <div className="absolute w-[400px] h-[400px] rounded-full bg-amber-500/[0.04] blur-[100px] animate-pulse" />
       <div className="absolute w-[300px] h-[300px] rounded-full bg-purple-500/[0.03] blur-[80px] animate-pulse" style={{ animationDelay: "1s" }} />
 
       <div className="relative text-center">
-        {/* Logo */}
+        {/* Logo mp4 icon */}
         <div className={`transition-all duration-700 ${phase >= 0 ? "opacity-100 scale-100" : "opacity-0 scale-50"}`}>
-          <div className="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-amber-400 via-orange-500 to-red-600 flex items-center justify-center text-3xl font-black text-black shadow-2xl shadow-amber-500/30 mb-6">
-            L
+          <div className="w-20 h-20 mx-auto rounded-2xl overflow-hidden shadow-2xl shadow-amber-500/30 mb-6">
+            <video autoPlay muted playsInline loop className="w-full h-full object-cover">
+              <source src="/lucrex_logo.mp4" type="video/mp4" />
+            </video>
           </div>
         </div>
 
@@ -74,28 +79,39 @@ function SplashScreen({ onDone }) {
   )
 }
 
-// ── Header Bar ──
-function Header({ price, pnlToday, winRate, alive }) {
+// -- Header Bar --
+function Header({ price, pnlToday, pnlClosed, pnlUnrealized, winRate, wins, losses, alive, position }) {
   return (
     <header className="h-14 bg-[#0a0a0f]/80 backdrop-blur-xl border-b border-white/[0.04] flex items-center justify-between px-5 flex-shrink-0">
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
           <span className={`w-2 h-2 rounded-full ${alive ? "bg-green-400 pulse-live" : "bg-red-500"}`} />
-          <span className={`text-[10px] font-mono tracking-wider ${alive ? "text-green-400/80" : "text-red-400"}`}>{alive ? "SYSTEMS ONLINE" : "OFFLINE"}</span>
+          <span className={`text-[10px] font-mono tracking-wider ${alive ? "text-green-400/80" : "text-red-400"}`}>{alive ? "ONLINE" : "OFFLINE"}</span>
         </div>
+        {/* Position status */}
+        {position ? (
+          <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full border ${position.direction === "long" ? "border-green-400/30 bg-green-400/5" : "border-red-400/30 bg-red-400/5"}`}>
+            <span className={`text-[10px] font-bold uppercase ${position.direction === "long" ? "text-green-400" : "text-red-400"}`}>{position.direction}</span>
+            <span className={`font-mono text-[11px] font-bold ${pnlUnrealized >= 0 ? "text-green-400" : "text-red-400"}`}>{pnlUnrealized >= 0 ? "+" : ""}{formatUSD(pnlUnrealized)}</span>
+            <span className="text-[8px] text-gray-500">{(position.entry_type || "").replace(/_/g, " ")}</span>
+          </div>
+        ) : (
+          <span className="text-[10px] text-gray-500 px-2">SCANNING</span>
+        )}
       </div>
-      <div className="flex items-center gap-8">
+      <div className="flex items-center gap-6">
         <div className="text-right">
-          <div className="text-[8px] text-gray-600 tracking-widest">XLM-USD</div>
+          <div className="text-[8px] text-gray-600 tracking-widest">XLM</div>
           <div className="font-mono text-lg font-bold bg-gradient-to-r from-amber-300 to-amber-500 bg-clip-text text-transparent">{formatPrice(price)}</div>
         </div>
         <div className="text-right">
-          <div className="text-[8px] text-gray-600 tracking-widest">P&L TODAY</div>
-          <div className={`font-mono text-lg font-bold ${pnlToday >= 0 ? "text-green-400" : "text-red-400"}`}>{formatUSD(pnlToday)}</div>
+          <div className="text-[8px] text-gray-600 tracking-widest">DAY P&L</div>
+          <div className={`font-mono text-xl font-black ${pnlToday >= 0 ? "text-green-400" : "text-red-400"}`}>{pnlToday >= 0 ? "+" : ""}{formatUSD(pnlToday)}</div>
+          <div className="text-[8px] text-gray-600">closed {formatUSD(pnlClosed)} {pnlUnrealized !== 0 ? `+ open ${formatUSD(pnlUnrealized)}` : ""}</div>
         </div>
         <div className="text-right hidden md:block">
-          <div className="text-[8px] text-gray-600 tracking-widest">WIN RATE</div>
-          <div className="font-mono text-lg font-bold">{winRate}<span className="text-xs text-gray-600">%</span></div>
+          <div className="text-[8px] text-gray-600 tracking-widest">RECORD</div>
+          <div className="font-mono text-sm font-bold"><span className="text-green-400">{wins}W</span><span className="text-gray-600">/</span><span className="text-red-400">{losses}L</span> <span className="text-gray-500 text-xs">{winRate}%</span></div>
         </div>
       </div>
     </header>
@@ -160,8 +176,23 @@ function PositionCard({ position, price, activeStrategy }) {
   )
 }
 
-// ── Trading Page ──
-function TradingPage({ status, candles, events, stratIq, activeStrat, decisions }) {
+// -- Error boundary for components that might crash --
+class SafeRender extends React.Component {
+  constructor(props) { super(props); this.state = { error: null } }
+  static getDerivedStateFromError(error) { return { error: error.message } }
+  render() {
+    if (this.state.error) return (
+      <div className="card border border-red-400/20 text-center py-4">
+        <div className="text-[10px] text-red-400">Component error</div>
+        <div className="text-[9px] text-gray-600 mt-1">{this.state.error}</div>
+      </div>
+    )
+    return this.props.children
+  }
+}
+
+// -- Trading Page --
+function TradingPage({ status, candles, chartTf, chartPosition, events, stratIq, activeStrat, decisions, daily }) {
   const [subTab, setSubTab] = useState("chart")
   const price = status?.price || 0
   const pos = status?.position
@@ -170,7 +201,7 @@ function TradingPage({ status, candles, events, stratIq, activeStrat, decisions 
   let pnlToday = 0, wins = 0, losses = 0
   ;(events || []).forEach(e => {
     const p = e.payload || {}
-    if (p.pnl_usd != null && ["exit_position", "exchange_side_close_detected"].includes(e.type)) {
+    if (p.pnl_usd != null && ["exit_position", "exit_position_pnl", "exchange_side_close_detected"].includes(e.type)) {
       pnlToday += Number(p.pnl_usd)
       if (Number(p.pnl_usd) > 0) wins++; else if (Number(p.pnl_usd) < 0) losses++
     }
@@ -178,6 +209,8 @@ function TradingPage({ status, candles, events, stratIq, activeStrat, decisions 
 
   const subTabs = [
     { id: "chart", label: "Chart" },
+    { id: "report", label: "Report Card" },
+    { id: "advisor", label: "AI Advisor" },
     { id: "iq", label: "Strategy IQ" },
     { id: "feed", label: "Decisions" },
   ]
@@ -194,46 +227,71 @@ function TradingPage({ status, candles, events, stratIq, activeStrat, decisions 
       </div>
 
       {subTab === "chart" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <div className="lg:col-span-2 flex flex-col gap-4">
-            <MindsetPanel />
-            <div className="grid grid-cols-4 gap-3">
-              <div className="card py-2 px-3"><div className="text-[9px] text-gray-500">Balance</div><div className="font-mono text-sm font-bold">$443</div></div>
-              <div className="card py-2 px-3"><div className="text-[9px] text-gray-500">Trades</div><div className="font-mono text-sm font-bold">{wins + losses} <span className="text-[10px] text-gray-500">{wins}W/{losses}L</span></div></div>
-              <div className="card py-2 px-3"><div className="text-[9px] text-gray-500">Margin</div><div className="font-mono text-sm font-bold">{status?.margin?.tier || "--"}</div></div>
-              <div className="card py-2 px-3"><div className="text-[9px] text-gray-500">Signal</div><div className={`font-mono text-sm font-bold ${last.direction === "long" ? "text-green-400" : last.direction === "short" ? "text-red-400" : "text-gray-400"}`}>{last.direction || "--"}</div></div>
-            </div>
-            <div className="card">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium">XLM-USD 15m</span>
-                <span className="text-[10px] text-gray-500">24h</span>
+        <div className="flex flex-col gap-3">
+          {/* Market Context + Stats Row */}
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <SafeRender><MarketContextBar /></SafeRender>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.03]">
+                <span className="text-[8px] text-gray-500">Trades</span>
+                <span className="font-mono text-[10px] font-bold text-white">{wins + losses}</span>
+                <span className="text-[8px] text-gray-500">{wins}W/{losses}L</span>
               </div>
-              <PriceChart candles={candles || []} height={340} />
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.03]">
+                <span className="text-[8px] text-gray-500">Margin</span>
+                <span className="font-mono text-[10px] font-bold text-white">{status?.margin?.tier || "--"}</span>
+              </div>
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.03]">
+                <span className="text-[8px] text-gray-500">Signal</span>
+                <span className={`font-mono text-[10px] font-bold ${last.direction === "long" ? "text-green-400" : last.direction === "short" ? "text-red-400" : "text-gray-400"}`}>{last.direction || "--"}</span>
+              </div>
             </div>
           </div>
-          <div className="flex flex-col gap-4">
+
+          {/* Mindset + Position row */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <div className="lg:col-span-2"><MindsetPanel /></div>
             <PositionCard position={pos} price={price} activeStrategy={activeStrat} />
-            {/* Recent trades mini */}
-            <div className="card p-0 overflow-hidden">
-              <div className="px-3 py-2 border-b border-gray-800 text-xs font-medium">Recent Trades</div>
-              <div className="max-h-[280px] overflow-y-auto">
-                {(events || []).filter(e => ["entered_position", "exit_position", "exchange_side_close_detected"].includes(e.type)).reverse().slice(0, 10).map((t, i) => {
-                  const p = t.payload || {}
-                  return (
-                    <div key={i} className="px-3 py-2 border-b border-gray-800/30 flex justify-between items-center text-[11px]">
-                      <span className={`font-bold uppercase ${t.type.includes("enter") ? "text-blue-400" : "text-purple-400"}`}>
-                        {t.type.includes("enter") ? "ENTER" : "EXIT"}
+          </div>
+
+          {/* Multi-chart grid */}
+          <SafeRender><TradingCharts /></SafeRender>
+
+          {/* Today's Trades -- newest first */}
+          <div className="card p-0 overflow-hidden">
+            <div className="px-3 py-2 border-b border-gray-800 flex justify-between items-center">
+              <span className="text-xs font-medium">Today's Trades (PT)</span>
+              <span className="text-[10px] text-gray-500">{(daily?.trades || []).length} trades</span>
+            </div>
+            <div className="max-h-[300px] overflow-y-auto">
+              {(daily?.trades || []).length === 0 ? (
+                <div className="text-center py-4 text-[11px] text-gray-600">No trades today yet</div>
+              ) : (
+                (daily?.trades || []).map((t, i) => (
+                  <div key={i} className={`px-3 py-2 border-b border-gray-800/30 flex justify-between items-center ${t.pnl >= 0 ? "bg-green-400/[0.02]" : "bg-red-400/[0.02]"}`}>
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${t.result === "win" ? "bg-green-400/10 text-green-400" : "bg-red-400/10 text-red-400"}`}>
+                        {t.result === "win" ? "WIN" : "LOSS"}
                       </span>
-                      <span className="text-gray-400">{p.direction} {p.exit_reason ? `(${p.exit_reason})` : ""}</span>
-                      {p.pnl_usd != null && <span className={`font-mono ${Number(p.pnl_usd) >= 0 ? "text-green-400" : "text-red-400"}`}>{formatUSD(p.pnl_usd)}</span>}
+                      <span className={`text-[10px] font-bold uppercase ${t.direction === "long" ? "text-green-400" : t.direction === "short" ? "text-red-400" : "text-gray-400"}`}>{t.direction || "?"}</span>
+                      <span className="text-[9px] text-gray-500">{(t.type || "").replace(/_/g, " ") || "exchange"}</span>
                     </div>
-                  )
-                })}
-              </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[9px] text-gray-600">{t.exit_reason ? t.exit_reason.replace(/_/g, " ") : ""}</span>
+                      <span className={`font-mono text-[12px] font-bold ${t.pnl >= 0 ? "text-green-400" : "text-red-400"}`}>
+                        {t.pnl >= 0 ? "+" : ""}{formatUSD(t.pnl)}
+                      </span>
+                      <span className="text-[9px] text-gray-500 font-mono min-w-[90px] text-right">{t.time}</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
       )}
+      {subTab === "report" && <SafeRender><TradeReportCard /></SafeRender>}
+      {subTab === "advisor" && <SafeRender><AIAdvisor /></SafeRender>}
       {subTab === "iq" && <StrategyIQ data={stratIq} />}
       {subTab === "feed" && <DecisionFeed decisions={decisions || []} />}
     </div>
@@ -260,22 +318,26 @@ export default function App() {
   const { data: status } = useApi("/status", 3000)
   const { data: decisions } = useApi("/decisions?limit=100", 5000)
   const { data: events } = useApi("/events?limit=200", 10000)
-  const { data: candles } = useApi("/candles", 30000)
+  const { data: candleResp } = useApi("/candles", 15000)
+  const candles = Array.isArray(candleResp?.candles) ? candleResp.candles : Array.isArray(candleResp) ? candleResp : []
+  const chartTf = candleResp?.timeframe || "15m"
+  const chartPosition = candleResp?.position || null
   const { data: stratIq } = useApi("/strategy-iq", 8000)
   const { data: activeStrat } = useApi("/active-strategy", 3000)
+  const { data: daily } = useApi("/daily-summary", 5000)
 
   const price = status?.price || 0
   const alive = status?.bot_alive
 
-  let pnlToday = 0, wins = 0, losses = 0
-  ;(events || []).forEach(e => {
-    const p = e.payload || {}
-    if (p.pnl_usd != null && ["exit_position", "exchange_side_close_detected"].includes(e.type)) {
-      pnlToday += Number(p.pnl_usd)
-      if (Number(p.pnl_usd) > 0) wins++; else if (Number(p.pnl_usd) < 0) losses++
-    }
-  })
+  const pnlClosed = daily?.real_pnl || daily?.closed_pnl || 0
+  const pnlUnrealized = daily?.unrealized || 0
+  const pnlToday = (daily?.real_pnl || daily?.closed_pnl || 0) + (daily?.unrealized || 0)
+  const wins = daily?.wins || 0
+  const losses = daily?.losses || 0
+  const churnCount = daily?.churn_count || 0
+  const churnPnl = daily?.churn_pnl || 0
   const winRate = (wins + losses) > 0 ? Math.round(wins / (wins + losses) * 100) : 0
+  const dailyPos = daily?.position || null
 
   if (showSplash) return <SplashScreen onDone={() => setShowSplash(false)} />
 
@@ -288,12 +350,12 @@ export default function App() {
       <Sidebar active={page} onNav={setPage} collapsed={sidebarCollapsed} />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <Header price={price} pnlToday={pnlToday} winRate={winRate} alive={alive} />
+        <Header price={price} pnlToday={pnlToday} pnlClosed={pnlClosed} pnlUnrealized={pnlUnrealized} winRate={winRate} wins={wins} losses={losses} alive={alive} position={dailyPos} />
 
         <main className="flex-1 overflow-y-auto px-5 py-4">
           <div className="max-w-[1400px] mx-auto page-enter">
             {page === "hivemind" && <HiveMind />}
-            {page === "trading" && <TradingPage status={status} candles={candles} events={events} stratIq={stratIq} activeStrat={activeStrat} decisions={decisions} />}
+            {page === "trading" && <TradingPage status={status} candles={candles} chartTf={chartTf} chartPosition={chartPosition} events={events} stratIq={stratIq} activeStrat={activeStrat} decisions={decisions} daily={daily} />}
             {page === "portfolio" && <Portfolio />}
             {page === "control" && <ControlPanel />}
             {page === "revenue" && <Revenue />}

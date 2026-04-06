@@ -226,16 +226,46 @@ deploy_polymarket() {
     log "Polymarket agent deployed"
 }
 
+# Deploy Django hive_dashboard to Oracle E5
+deploy_django() {
+    log "Deploying Django hive_dashboard to Oracle E5..."
+    LOCAL_DJANGO="/mnt/sdcard/AA_MY_DRIVE/09_DASHBOARD/hive_dashboard"
+    REMOTE_DJANGO="/home/opc/hive_django"
+
+    # Sync all Django apps
+    for app in hive payments funnel broker_ops taskboard blackjack rewards business_os hive_dashboard; do
+        rsync -az --delete -e "ssh -o ConnectTimeout=10 -i $KEY" \
+            "$LOCAL_DJANGO/$app/" "$E5_VM:$REMOTE_DJANGO/$app/" 2>/dev/null
+    done
+
+    # Sync templates
+    rsync -az -e "ssh -o ConnectTimeout=10 -i $KEY" \
+        "$LOCAL_DJANGO/staticfiles/" "$E5_VM:$REMOTE_DJANGO/staticfiles/" 2>/dev/null
+
+    # Sync manage.py and start.sh
+    scp -o ConnectTimeout=10 -i "$KEY" \
+        "$LOCAL_DJANGO/manage.py" \
+        "$LOCAL_DJANGO/start.sh" \
+        "$E5_VM:$REMOTE_DJANGO/" 2>/dev/null
+
+    # Restart Django
+    ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "sudo systemctl restart hive-django" 2>/dev/null
+
+    DEPLOYED="$DEPLOYED [django]"
+    log "Django deployed to E5"
+}
+
 case "$MODE" in
     bot) deploy_bot ;;
     scripts) deploy_scripts ;;
     config) deploy_config ;;
+    django) deploy_django ;;
     watchdog) deploy_scripts; install_watchdog_cron ;;
     broker-crons) install_broker_crons ;;
     computer-use) deploy_computer_use ;;
     polymarket) deploy_polymarket ;;
-    all) deploy_bot; deploy_scripts; install_watchdog_cron; install_broker_crons ;;
-    full) deploy_bot; deploy_scripts; install_watchdog_cron; install_broker_crons; deploy_computer_use; deploy_polymarket ;;
+    all) deploy_bot; deploy_scripts; deploy_django; install_watchdog_cron; install_broker_crons ;;
+    full) deploy_bot; deploy_scripts; deploy_django; install_watchdog_cron; install_broker_crons; deploy_computer_use; deploy_polymarket ;;
 esac
 
 # Save hash to skip unchanged deploys

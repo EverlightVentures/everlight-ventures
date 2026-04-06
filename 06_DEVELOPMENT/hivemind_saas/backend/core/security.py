@@ -2,9 +2,11 @@
 JWT auth helpers and API key encryption.
 """
 
+import base64
+import hashlib
 from datetime import datetime, timedelta, timezone
 from typing import Optional
-import jwt
+from jose import jwt
 from cryptography.fernet import Fernet
 from passlib.context import CryptContext
 
@@ -33,9 +35,11 @@ def decode_token(token: str) -> dict:
 
 def get_fernet() -> Fernet:
     """Return a Fernet cipher for encrypting tenant API keys."""
-    if not settings.encryption_key:
-        raise RuntimeError("ENCRYPTION_KEY not set in environment")
-    return Fernet(settings.encryption_key.encode())
+    if settings.encryption_key:
+        return Fernet(settings.encryption_key.encode())
+    digest = hashlib.sha256(settings.jwt_secret.encode()).digest()
+    derived_key = base64.urlsafe_b64encode(digest)
+    return Fernet(derived_key)
 
 
 def encrypt_credential(plaintext: str) -> str:

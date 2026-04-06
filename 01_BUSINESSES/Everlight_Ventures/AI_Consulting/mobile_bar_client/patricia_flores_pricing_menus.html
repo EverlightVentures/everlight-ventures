@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Patricia Flores | Mobile Bartending Service</title>
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0a;
+    --card: #141414;
+    --gold: #d4af37;
+    --gold-light: #f4e4a6;
+    --text: #e8e8e8;
+    --subtle: #888888;
+    --radius: 12px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --gold-border: 1px solid rgba(212,175,55,0.25);
+    --gold-glow: 0 0 20px rgba(212,175,55,0.08);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,10,10,0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+    padding: 0 24px;
+  }
+  nav .nav-inner {
+    max-width: 1100px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px;
+  }
+  nav .nav-brand {
+    font-size: 1rem; font-weight: 600;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.04em;
+  }
+  nav .nav-links { display: flex; gap: 20px; flex-wrap: wrap; }
+  nav .nav-links a {
+    color: var(--subtle); text-decoration: none; font-size: 0.78rem;
+    letter-spacing: 0.03em; text-transform: uppercase; transition: color 0.25s;
+  }
+  nav .nav-links a:hover { color: var(--gold); }
+
+  /* ── LAYOUT ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 20px; }
+  section { padding: 72px 0; }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 140px 0 80px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -60%; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(212,175,55,0.06) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-name {
+    font-size: clamp(2.4rem, 6vw, 4rem);
+    font-weight: 300;
+    letter-spacing: 0.08em;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light), var(--gold));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .hero-title {
+    font-size: clamp(0.85rem, 2vw, 1.05rem);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--subtle);
+    margin-bottom: 24px;
+  }
+  .hero-divider {
+    width: 60px; height: 1px; margin: 0 auto 24px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  .hero-regions {
+    font-size: 0.95rem; color: var(--text); margin-bottom: 10px;
+    letter-spacing: 0.04em;
+  }
+  .hero-phone {
+    font-size: 1.1rem; color: var(--gold); font-weight: 500;
+    text-decoration: none; letter-spacing: 0.03em;
+  }
+  .hero-phone:hover { color: var(--gold-light); }
+
+  /* ── SECTION HEADERS ── */
+  .section-header {
+    text-align: center; margin-bottom: 48px;
+  }
+  .section-header h2 {
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-weight: 300;
+    letter-spacing: 0.06em;
+    background: linear-gradient(135deg, var(--gold), var(--gold-light));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .section-header p {
+    color: var(--subtle); font-size: 0.9rem; letter-spacing: 0.03em;
+  }
+  .section-divider {
+    width: 40px; height: 1px; margin: 16px auto 0;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  /* ── PACKAGE CARDS ── */
+  .packages-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+  @media (max-width: 900px) {
+    .packages-grid { grid-template-columns: 1fr; max-width: 480px; margin: 0 auto; }
+  }
+
+  .pkg-card {
+    background: var(--card);
+    border: var(--gold-border);
+    border-radius: var(--radius);
+    padding: 36px 28px 32px;
+    position: relative;
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex; flex-direction: column;
+  }
+  .pkg-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow), var(--gold-glow);
+  }
+  .pkg-card.featured {
+    border-color: rgba(212,175,55,0.5);
+    box-shadow: var(--shadow), 0 0 30px rgba(212,175,55,0.1);
+  }
+
+  .pkg-badge {
+    position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--gold), #c9a22e);
+    color: #0a0a0a; font-size: 0.68rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 5px 18px; border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .pkg-name {
+    font-size: 1.3rem; font-weight: 400; color: var(--gold-light);
+    margin-bottom: 4px; letter-spacing: 0.03em;
+  }
+  .pkg-price {
+    font-size: 1.6rem; font-weight: 600; color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .pkg-price span { font-size: 0.85rem; font-weight: 400; color: var(--subtle); }
+  .pkg-min { font-size: 0.8rem; color: var(--subtle); margin-bottom: 20px; }
+
+  .pkg-list {
+    list-style: none; flex: 1; margin-bottom: 20px;
+  }
+  .pkg-list li {
+    position: relative; padding-left: 20px; margin-bottom: 10px;
+    font-size: 0.88rem; color: var(--text); line-height: 1.5;
+  }
+  .pkg-list li::before {
+    content: ''; position: absolute; left: 0; top: 7px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--gold);
+  }
+  .pkg-list .plus-label {
+    padding-left: 0; margin-top: 14px; margin-bottom: 10px;
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--gold); font-weight: 600;
+  }
+  .pkg-list .plus-label::before { display: none; }
+
+  .pkg-best {
+    background: rgba(212,175,55,0.06);
+    border: 1px solid rgba(212,175,55,0.15);
+    border-radius: 8px; padding: 10px 14px;
+    font-size: 0.8rem; color: var(--gold-light);
+  }
+  .pkg-best strong { color: var(--gold); }
+
+  /* ── ADDON TABLE ── */
+  .addon-table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    background: var(--card); border-radius: var(--radius);
+    border: var(--gold-border); overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .addon-table th {
+    background: rgba(212,175,55,0.08);
+    color: var(--gold); font-size: 0.75rem;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 14px 20px; text-align: left; font-weight: 600;
+  }
+  .addon-table th:last-child { text-align: right; }
+  .addon-table td {
+    padding: 13px 20px; font-size: 0.88rem;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  .addon-table td:last-child {
+    text-align: right; color: var(--gold); font-weight: 500;
+    white-space: nowrap;
+  }
+  .addon-table tr:hover td { background: rgba(212,175,55,0.03); }
+
+  /* ── DRINK MENUS ── */
+  .menu-block { margin-bottom: 48px; }
+  .menu-block-title {
+    font-size: 1.2rem; font-weight: 400; color: var(--gold-light);
+    letter-spacing: 0.04em; margin-bottom: 20px; padding-bottom: 10px;
+    border-bottom: 1px solid rgba(212,175,55,0.15);
+  }
+  .menu-subtitle {
+    font-size: 0.95rem; color: var(--gold); font-weight: 500;
+    margin: 24px 0 14px; letter-spacing: 0.03em;
+  }
+
+  .drinks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 14px;
+  }
+  .drink-item {
+    background: rgba(20,20,20,0.7);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 8px; padding: 14px 16px;
+    transition: border-color 0.25s;
+  }
+  .drink-item:hover { border-color: rgba(212,175,55,0.2); }
+  .drink-name {
+    font-size: 0.92rem; font-weight: 500; color: var(--gold-light);
+    margin-bottom: 3px;
+  }
+  .drink-desc {
+    font-size: 0.8rem; color: var(--subtle); line-height: 1.45;
+  }
+  .drink-note {
+    font-size: 0.78rem; color: var(--gold); font-style: italic;
+    margin-top: 2px;
+  }
+
+  .plus-divider {
+    text-align: center; padding: 16px 0; color: var(--subtle);
+    font-size: 0.8rem; letter-spacing: 0.08em; text-transform: uppercase;
+  }
+
+  /* ── CALCULATOR ── */
+  .calc-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px; margin-bottom: 36px;
+  }
+  .calc-card {
+    background: var(--card); border: var(--gold-border);
+    border-radius: var(--radius); padding: 28px 24px;
+    box-shadow: var(--shadow);
+  }
+  .calc-card h3 {
+    font-size: 1rem; font-weight: 500; color: var(--gold);
+    margin-bottom: 16px; letter-spacing: 0.04em;
+  }
+  .calc-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 0.88rem;
+  }
+  .calc-row:last-child { border-bottom: none; }
+  .calc-row .label { color: var(--text); }
+  .calc-row .value { color: var(--gold); font-weight: 500; }
+
+  .estimate-table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    background: var(--card); border-radius: var(--radius);
+    border: var(--gold-border); overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .estimate-table th {
+    background: rgba(212,175,55,0.08);
+    color: var(--gold); font-size: 0.7rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 12px 14px; text-align: center; font-weight: 600;
+  }
+  .estimate-table td {
+    padding: 12px 14px; font-size: 0.85rem; text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    color: var(--text);
+  }
+  .estimate-table tr:hover td { background: rgba(212,175,55,0.03); }
+
+  /* ── SERVICE AREAS ── */
+  .areas-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px; margin-bottom: 36px;
+  }
+  .area-card {
+    background: var(--card); border: var(--gold-border);
+    border-radius: var(--radius); padding: 28px 24px;
+    box-shadow: var(--shadow);
+  }
+  .area-card h3 {
+    font-size: 1.05rem; font-weight: 500; color: var(--gold);
+    margin-bottom: 4px;
+  }
+  .area-card .area-tag {
+    font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--gold-light); margin-bottom: 14px;
+  }
+  .area-card ul { list-style: none; }
+  .area-card ul li {
+    padding: 5px 0; font-size: 0.88rem; color: var(--text);
+    position: relative; padding-left: 14px;
+  }
+  .area-card ul li::before {
+    content: ''; position: absolute; left: 0; top: 12px;
+    width: 4px; height: 4px; border-radius: 50%;
+    background: var(--gold);
+  }
+  .area-note {
+    margin-top: 12px; padding: 10px 14px;
+    background: rgba(212,175,55,0.06);
+    border-radius: 8px; font-size: 0.82rem;
+    color: var(--gold-light);
+  }
+  .sf-pricing {
+    display: grid; grid-template-columns: 1fr; gap: 8px;
+    margin-top: 12px;
+  }
+  .sf-row {
+    display: flex; justify-content: space-between;
+    font-size: 0.85rem; padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .sf-row .label { color: var(--text); }
+  .sf-row .value { color: var(--gold); font-weight: 500; }
+
+  .travel-table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    background: var(--card); border-radius: var(--radius);
+    border: var(--gold-border); overflow: hidden;
+    box-shadow: var(--shadow); max-width: 500px;
+  }
+  .travel-table th {
+    background: rgba(212,175,55,0.08);
+    color: var(--gold); font-size: 0.7rem;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    padding: 12px 20px; text-align: left; font-weight: 600;
+  }
+  .travel-table th:last-child { text-align: right; }
+  .travel-table td {
+    padding: 11px 20px; font-size: 0.88rem;
+    border-top: 1px solid rgba(255,255,255,0.04);
+  }
+  .travel-table td:last-child { text-align: right; color: var(--gold); font-weight: 500; }
+  .travel-table tr:hover td { background: rgba(212,175,55,0.03); }
+
+  /* ── BOOKING TERMS ── */
+  .terms-card {
+    background: var(--card); border: var(--gold-border);
+    border-radius: var(--radius); padding: 36px 32px;
+    box-shadow: var(--shadow); max-width: 700px; margin: 0 auto;
+  }
+  .terms-card ul { list-style: none; }
+  .terms-card ul li {
+    padding: 10px 0; font-size: 0.88rem; color: var(--text);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    position: relative; padding-left: 20px;
+  }
+  .terms-card ul li:last-child { border-bottom: none; }
+  .terms-card ul li::before {
+    content: ''; position: absolute; left: 0; top: 16px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--gold);
+  }
+  .terms-card ul li strong { color: var(--gold-light); }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center; padding: 48px 20px 32px;
+    border-top: 1px solid rgba(212,175,55,0.1);
+  }
+  .footer-name {
+    font-size: 1.1rem; font-weight: 400; color: var(--gold-light);
+    letter-spacing: 0.06em; margin-bottom: 4px;
+  }
+  .footer-phone {
+    font-size: 0.95rem; color: var(--gold);
+    text-decoration: none; letter-spacing: 0.02em;
+  }
+  .footer-phone:hover { color: var(--gold-light); }
+  .footer-credit {
+    margin-top: 28px; font-size: 0.72rem; color: var(--subtle);
+    letter-spacing: 0.06em;
+  }
+  .footer-credit a {
+    color: var(--gold); text-decoration: none;
+  }
+  .footer-credit a:hover { color: var(--gold-light); }
+
+  /* ── UTILITIES ── */
+  .text-center { text-align: center; }
+  .mb-sm { margin-bottom: 12px; }
+  .overflow-x { overflow-x: auto; }
+  .beer-wine-note {
+    font-size: 0.82rem; color: var(--subtle); font-style: italic;
+    margin-top: 14px;
+  }
+
+  @media (max-width: 600px) {
+    section { padding: 48px 0; }
+    .hero { padding: 110px 0 56px; }
+    .pkg-card { padding: 28px 20px 24px; }
+    .terms-card { padding: 24px 18px; }
+    nav .nav-links { gap: 12px; }
+    nav .nav-links a { font-size: 0.7rem; }
+    .estimate-table td, .estimate-table th { padding: 10px 8px; font-size: 0.75rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════ NAV ══════════════════════ -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-brand">Patricia Flores</div>
+    <div class="nav-links">
+      <a href="#packages">Packages</a>
+      <a href="#addons">Add-Ons</a>
+      <a href="#menus">Menus</a>
+      <a href="#calculator">Calculator</a>
+      <a href="#areas">Areas</a>
+      <a href="#booking">Booking</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════ HERO ══════════════════════ -->
+<header class="hero">
+  <div class="container">
+    <h1 class="hero-name">Patricia Flores</h1>
+    <p class="hero-title">Mobile Bartending Service</p>
+    <div class="hero-divider"></div>
+    <p class="hero-regions">Woodland &nbsp;&middot;&nbsp; Solano &nbsp;&middot;&nbsp; San Francisco</p>
+    <a href="tel:5307616711" class="hero-phone">530-761-6711</a>
+  </div>
+</header>
+
+<!-- ══════════════════════ PACKAGES ══════════════════════ -->
+<section id="packages">
+  <div class="container">
+    <div class="section-header">
+      <h2>Packages</h2>
+      <p>Three tiers. Every detail covered.</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="packages-grid">
+
+      <!-- CLASSIC -->
+      <div class="pkg-card">
+        <div class="pkg-name">The Classic</div>
+        <div class="pkg-price">$45<span>/hr</span></div>
+        <div class="pkg-min">4-hour minimum &nbsp;=&nbsp; $180</div>
+        <ul class="pkg-list">
+          <li>1 professional bartender</li>
+          <li>Basic bar setup (folding table, bar mat, tools)</li>
+          <li>Standard cocktail menu (8-10 drinks)</li>
+          <li>Cups, napkins, straws, ice</li>
+          <li>Client provides all alcohol</li>
+        </ul>
+        <div class="pkg-best"><strong>Best for:</strong> House parties, small gatherings up to 50 guests</div>
+      </div>
+
+      <!-- SIGNATURE -->
+      <div class="pkg-card featured">
+        <div class="pkg-badge">Most Popular</div>
+        <div class="pkg-name">The Signature</div>
+        <div class="pkg-price">$55<span>/hr</span></div>
+        <div class="pkg-min">4-hour minimum &nbsp;=&nbsp; $220</div>
+        <ul class="pkg-list">
+          <li>Everything in The Classic</li>
+          <li class="plus-label">Plus</li>
+          <li>Custom cocktail menu (up to 5 signature drinks)</li>
+          <li>Garnish kit (fresh citrus, herbs, specialty garnishes)</li>
+          <li>Premium bar setup with branded signage</li>
+          <li>Glassware rental option</li>
+          <li>Pre-event consultation</li>
+        </ul>
+        <div class="pkg-best"><strong>Best for:</strong> Birthdays, corporate events, engagement parties, 50-100 guests</div>
+      </div>
+
+      <!-- EXPERIENCE -->
+      <div class="pkg-card">
+        <div class="pkg-name">The Experience</div>
+        <div class="pkg-price">$75<span>/hr</span></div>
+        <div class="pkg-min">4-hour minimum &nbsp;=&nbsp; $300</div>
+        <ul class="pkg-list">
+          <li>Everything in The Signature</li>
+          <li class="plus-label">Plus</li>
+          <li>Premium glassware (coupes, rocks, flutes)</li>
+          <li>Monogram cocktail napkin option</li>
+          <li>Champagne toast coordination</li>
+          <li>Dedicated bar back</li>
+          <li>Custom drink menu display (printed/framed/easel)</li>
+          <li>Pre-event tasting session (up to 5 cocktails)</li>
+          <li>Day-of coordination with venue/planner</li>
+        </ul>
+        <div class="pkg-best"><strong>Best for:</strong> Weddings, galas, upscale events, 100+ guests</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ ADD-ONS ══════════════════════ -->
+<section id="addons">
+  <div class="container">
+    <div class="section-header">
+      <h2>Add-Ons &amp; Upsells</h2>
+      <p>Customize your event down to the last detail.</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="overflow-x">
+      <table class="addon-table">
+        <thead>
+          <tr><th>Add-On</th><th>Price</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Extra bartender</td><td>$40/hr</td></tr>
+          <tr><td>Bar back / assistant</td><td>$25/hr</td></tr>
+          <tr><td>Full bar supply (we source everything)</td><td>$15-25/guest</td></tr>
+          <tr><td>Glassware rental</td><td>$2/glass</td></tr>
+          <tr><td>Specialty ice (large cubes, spheres)</td><td>$50 flat</td></tr>
+          <tr><td>Custom drink menu signage</td><td>$35</td></tr>
+          <tr><td>Non-alcoholic mocktail bar</td><td>$150 flat</td></tr>
+          <tr><td>Shot wall</td><td>$100-150</td></tr>
+          <tr><td>Champagne tower</td><td>$150-250</td></tr>
+          <tr><td>Travel fee (outside 30 mi)</td><td>$0.65/mile</td></tr>
+          <tr><td>Late night surcharge (after midnight)</td><td>+$15/hr</td></tr>
+          <tr><td>Holiday surcharge</td><td>+25%</td></tr>
+          <tr><td>Day-of venue coordination</td><td>$50</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ DRINK MENUS ══════════════════════ -->
+<section id="menus">
+  <div class="container">
+    <div class="section-header">
+      <h2>Drink Menus</h2>
+      <p>From timeless classics to custom creations.</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <!-- CLASSIC MENU -->
+    <div class="menu-block">
+      <h3 class="menu-block-title">Classic Menu &nbsp;&mdash;&nbsp; 8 Cocktails</h3>
+      <div class="drinks-grid">
+        <div class="drink-item">
+          <div class="drink-name">Margarita</div>
+          <div class="drink-desc">Tequila, fresh lime, triple sec, salted rim</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Moscow Mule</div>
+          <div class="drink-desc">Vodka, ginger beer, fresh lime, copper mug</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Gin &amp; Tonic</div>
+          <div class="drink-desc">London dry gin, premium tonic, lime wheel</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Vodka Soda</div>
+          <div class="drink-desc">Clean vodka, soda, citrus twist</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Whiskey Sour</div>
+          <div class="drink-desc">Bourbon, fresh lemon, simple syrup, optional egg white</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Mojito</div>
+          <div class="drink-desc">White rum, fresh mint, lime, sugar, soda</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Paloma</div>
+          <div class="drink-desc">Tequila, fresh grapefruit, lime, soda</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Rum &amp; Coke</div>
+          <div class="drink-desc">Dark or light rum, cola, lime wedge</div>
+        </div>
+      </div>
+      <p class="beer-wine-note">Plus beer and wine service included with every package.</p>
+    </div>
+
+    <!-- SIGNATURE MENU -->
+    <div class="menu-block">
+      <h3 class="menu-block-title">Signature Menu &nbsp;&mdash;&nbsp; 12 Cocktails + 3 Custom</h3>
+      <p style="font-size:0.85rem;color:var(--subtle);margin-bottom:18px;">Includes the full Classic Menu, plus:</p>
+      <div class="drinks-grid">
+        <div class="drink-item">
+          <div class="drink-name">Espresso Martini</div>
+          <div class="drink-desc">Vodka, fresh espresso, coffee liqueur, vanilla</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Aperol Spritz</div>
+          <div class="drink-desc">Aperol, prosecco, soda</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">French 75</div>
+          <div class="drink-desc">Gin, champagne, lemon, sugar</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Old Fashioned</div>
+          <div class="drink-desc">Bourbon, bitters, sugar, orange peel</div>
+        </div>
+      </div>
+
+      <div class="menu-subtitle">Signature Sips &nbsp;&mdash;&nbsp; Custom Per Event</div>
+      <div class="drinks-grid">
+        <div class="drink-item">
+          <div class="drink-name">Golden Hour</div>
+          <div class="drink-desc">Bourbon, honey syrup, lemon, lavender bitters</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">The Velvet Robe</div>
+          <div class="drink-desc">Empress gin, St-Germain, prosecco, lemon twist</div>
+          <div class="drink-note">Color-shifting</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Smoke Signal</div>
+          <div class="drink-desc">Mezcal, pineapple, jalape&ntilde;o syrup, lime, charred pineapple</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SEASONAL MENUS -->
+    <div class="menu-block">
+      <h3 class="menu-block-title">Seasonal Menus</h3>
+
+      <div class="menu-subtitle">Spring / Summer</div>
+      <div class="drinks-grid">
+        <div class="drink-item">
+          <div class="drink-name">Watermelon Margarita</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Cucumber Collins</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Fros&eacute;</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Mango Chili Mule</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Aperol Spritz</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Lavender Lemonade</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Pineapple Rum Punch</div>
+        </div>
+      </div>
+
+      <div class="menu-subtitle">Fall / Winter</div>
+      <div class="drinks-grid">
+        <div class="drink-item">
+          <div class="drink-name">Maple Old Fashioned</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Hot Toddy</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Espresso Martini</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Spiced Pear Mule</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Cranberry Champagne Cocktail</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Apple Cider Sangria</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Chai White Russian</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Fireside Sour</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WEDDING MENU -->
+    <div class="menu-block">
+      <h3 class="menu-block-title">Wedding Menu</h3>
+      <div class="drinks-grid">
+        <div class="drink-item">
+          <div class="drink-name">&ldquo;His&rdquo;</div>
+          <div class="drink-desc">Smoked Old Fashioned</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">&ldquo;Hers&rdquo;</div>
+          <div class="drink-desc">Rose Petal Spritz</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Champagne Toast</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">French 75</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Aperol Spritz</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Whiskey Sour</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Classic Margarita</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Wine &amp; Beer</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOCKTAIL MENU -->
+    <div class="menu-block">
+      <h3 class="menu-block-title">Mocktail Menu &nbsp;&mdash;&nbsp; $150 flat add-on</h3>
+      <div class="drinks-grid">
+        <div class="drink-item">
+          <div class="drink-name">Citrus Sunrise</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Virgin Mojito</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Berry Basil Smash</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Ginger Mango Fizz</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Sparkling Lavender Lemonade</div>
+        </div>
+        <div class="drink-item">
+          <div class="drink-name">Cucumber Mint Cooler</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════ LIQUOR CALCULATOR ══════════════════════ -->
+<section id="calculator">
+  <div class="container">
+    <div class="section-header">
+      <h2>Liquor Calculator</h2>
+      <p>Plan your bar with confidence.</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="calc-grid">
+      <div class="calc-card">
+        <h3>Drinks Per Guest Per Hour</h3>
+        <div class="calc-row">
+          <span class="label">Light (brunch, daytime)</span>
+          <span class="value">1 drink</span>
+        </div>
+        <div class="calc-row">
+          <span class="label">Moderate (dinner, corporate)</span>
+          <span class="value">1.5 drinks</span>
+        </div>
+        <div class="calc-row">
+          <span class="label">Heavy (wedding, NYE)</span>
+          <span class="value">2 drinks</span>
+        </div>
+      </div>
+
+      <div class="calc-card">
+        <h3>Bottle Math</h3>
+        <div class="calc-row">
+          <span class="label">1 bottle liquor</span>
+          <span class="value">~16 cocktails</span>
+        </div>
+        <div class="calc-row">
+          <span class="label">1 case wine (12 btl)</span>
+          <span class="value">~60 glasses</span>
+        </div>
+        <div class="calc-row">
+          <span class="label">1 keg beer</span>
+          <span class="value">~165 pours</span>
+        </div>
+        <div class="calc-row">
+          <span class="label">1 bottle champagne</span>
+          <span class="value">6 flutes</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-header" style="margin-bottom:24px;">
+      <h3 style="font-size:1rem;color:var(--gold-light);font-weight:500;letter-spacing:0.04em;">Quick Estimate &nbsp;&mdash;&nbsp; 4 Hours, Moderate</h3>
+    </div>
+
+    <div class="overflow-x">
+      <table class="estimate-table">
+        <thead>
+          <tr>
+            <th>Guests</th>
+            <th>Hours</th>
+            <th>Level</th>
+            <th>Total Drinks</th>
+            <th>Liquor Bottles</th>
+            <th>Wine Cases</th>
+            <th>Beer Cases</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>25</td><td>4</td><td>Moderate</td><td>~150</td><td>5-6</td><td>1</td><td>2</td>
+          </tr>
+          <tr>
+            <td>50</td><td>4</td><td>Moderate</td><td>~300</td><td>10-12</td><td>2</td><td>3</td>
+          </tr>
+          <tr>
+            <td>75</td><td>4</td><td>Moderate</td><td>~450</td><td>15-17</td><td>3</td><td>5</td>
+          </tr>
+          <tr>
+            <td>100</td><td>4</td><td>Moderate</td><td>~600</td><td>20-22</td><td>4</td><td>6</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════ SERVICE AREAS ══════════════════════ -->
+<section id="areas">
+  <div class="container">
+    <div class="section-header">
+      <h2>Service Areas</h2>
+      <p>Based in Woodland. Serving Northern California.</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="areas-grid">
+
+      <div class="area-card">
+        <h3>Yolo County</h3>
+        <div class="area-tag">Home Base</div>
+        <ul>
+          <li>Woodland</li>
+          <li>Davis</li>
+          <li>West Sacramento</li>
+          <li>Winters</li>
+        </ul>
+        <div class="area-note">No travel fee within 30 miles.</div>
+      </div>
+
+      <div class="area-card">
+        <h3>Solano County</h3>
+        <div class="area-tag">30-55 min from Woodland</div>
+        <ul>
+          <li>Vacaville (30 min)</li>
+          <li>Fairfield (40 min)</li>
+          <li>Vallejo (55 min)</li>
+          <li>Benicia (50 min)</li>
+          <li>Dixon (20 min)</li>
+        </ul>
+        <div class="area-note">Travel fee for locations beyond 30 miles.</div>
+      </div>
+
+      <div class="area-card">
+        <h3>San Francisco</h3>
+        <div class="area-tag">~90 min &middot; Premium Pricing</div>
+        <ul>
+          <li>+20-30% over base rates</li>
+        </ul>
+        <div class="sf-pricing">
+          <div class="sf-row">
+            <span class="label">SF Classic</span>
+            <span class="value">$95-100/hr</span>
+          </div>
+          <div class="sf-row">
+            <span class="label">SF Signature</span>
+            <span class="value">$120-125/hr</span>
+          </div>
+          <div class="sf-row">
+            <span class="label">SF Experience</span>
+            <span class="value">$155-160/hr</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="section-header" style="margin-bottom:24px;">
+      <h3 style="font-size:1rem;color:var(--gold-light);font-weight:500;letter-spacing:0.04em;">Travel Fee Estimates from Woodland</h3>
+    </div>
+
+    <div class="overflow-x" style="display:flex;justify-content:center;">
+      <table class="travel-table">
+        <thead>
+          <tr><th>Destination</th><th>Fee</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Davis, West Sac, Dixon, Vacaville</td><td>No charge</td></tr>
+          <tr><td>Fairfield</td><td>~$10</td></tr>
+          <tr><td>Benicia</td><td>~$26</td></tr>
+          <tr><td>Vallejo</td><td>~$33</td></tr>
+          <tr><td>San Francisco</td><td>~$71 + $7 toll</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════════════════════ BOOKING TERMS ══════════════════════ -->
+<section id="booking">
+  <div class="container">
+    <div class="section-header">
+      <h2>Booking Terms</h2>
+      <p>Simple. Transparent. Professional.</p>
+      <div class="section-divider"></div>
+    </div>
+
+    <div class="terms-card">
+      <ul>
+        <li><strong>4-hour minimum</strong> on all packages.</li>
+        <li><strong>50% non-refundable deposit</strong> required to secure your date.</li>
+        <li><strong>Balance due 7 days</strong> before the event.</li>
+        <li><strong>Payment accepted:</strong> Venmo, Zelle, Square, cash, or check.</li>
+        <li><strong>Cancellation:</strong> Full refund (minus deposit) with 14+ days notice. No refund within 7 days.</li>
+        <li><strong>Overtime:</strong> 1.5x the hourly rate in 30-minute increments.</li>
+        <li><strong>Tips</strong> are not included but always appreciated.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ FOOTER ══════════════════════ -->
+<footer>
+  <div class="footer-name">Patricia Flores &nbsp;|&nbsp; Mobile Bartending</div>
+  <a href="tel:5307616711" class="footer-phone">530-761-6711</a>
+  <div class="footer-credit">
+    Prepared with care by <a href="https://everlightventures.io" target="_blank" rel="noopener">Everlight Ventures</a>
+  </div>
+</footer>
+
+</body>
+</html>

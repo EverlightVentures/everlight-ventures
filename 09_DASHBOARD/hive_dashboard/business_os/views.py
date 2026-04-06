@@ -1,3 +1,5 @@
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 from django.views.generic import TemplateView
 
@@ -6,7 +8,7 @@ from broker_ops.models import BrokerMatch, Deal
 from .services import get_ceo_snapshot
 
 
-class BusinessOSDashboardView(TemplateView):
+class BusinessOSDashboardView(LoginRequiredMixin, TemplateView):
     template_name = "business_os/dashboard.html"
 
     def get_context_data(self, **kwargs):
@@ -26,6 +28,7 @@ class BusinessOSDashboardView(TemplateView):
         return ctx
 
 
+@login_required
 def api_snapshot(request):
     snapshot = get_ceo_snapshot()
     payload = {

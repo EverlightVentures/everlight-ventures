@@ -1,0 +1,161 @@
+version: "3.8"
+
+# n8n Queue Mode - production-oriented layout
+# Official docs:
+# https://docs.n8n.io/hosting/scaling/queue-mode/
+#
+# This is an alternative to docker-compose.yml, not something to run alongside it.
+
+services:
+  n8nq-db:
+    image: postgres:16-alpine
+    container_name: n8nq-db
+    restart: always
+    environment:
+      POSTGRES_DB: n8n
+      POSTGRES_USER: n8n
+      POSTGRES_PASSWORD: ${N8N_DB_PASSWORD:-n8n_secure_change_me}
+    volumes:
+      - n8nq_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U n8n"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - everlight
+
+  n8n-redis:
+    image: redis:7-alpine
+    container_name: n8n-redis
+    restart: always
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - n8nq_redis_data:/data
+    networks:
+      - everlight
+
+  n8n-main:
+    image: n8nio/n8n:latest
+    container_name: n8n-main
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: n8nq-db
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: n8n
+      DB_POSTGRESDB_PASSWORD: ${N8N_DB_PASSWORD:-n8n_secure_change_me}
+      EXECUTIONS_MODE: queue
+      QUEUE_BULL_REDIS_HOST: n8n-redis
+      QUEUE_BULL_REDIS_PORT: 6379
+      N8N_DISABLE_PRODUCTION_MAIN_PROCESS: "true"
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: ${N8N_USER:-admin}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_PASSWORD:-everlight_n8n_2026}
+      N8N_HOST: 0.0.0.0
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      WEBHOOK_URL: ${N8N_WEBHOOK_URL:-http://localhost:5679}
+      GENERIC_TIMEZONE: America/Los_Angeles
+      TZ: America/Los_Angeles
+      EXECUTIONS_DATA_SAVE_ON_ERROR: all
+      EXECUTIONS_DATA_SAVE_ON_SUCCESS: all
+      EXECUTIONS_DATA_SAVE_ON_PROGRESS: "true"
+      EXECUTIONS_DATA_MAX_AGE: 168
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+    volumes:
+      - n8nq_main_data:/home/node/.n8n
+    depends_on:
+      n8nq-db:
+        condition: service_healthy
+      n8n-redis:
+        condition: service_started
+    networks:
+      - everlight
+
+  n8n-webhook:
+    image: n8nio/n8n:latest
+    container_name: n8n-webhook
+    restart: always
+    command: ["n8n", "webhook"]
+    ports:
+      - "5679:5678"
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: n8nq-db
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: n8n
+      DB_POSTGRESDB_PASSWORD: ${N8N_DB_PASSWORD:-n8n_secure_change_me}
+      EXECUTIONS_MODE: queue
+      QUEUE_BULL_REDIS_HOST: n8n-redis
+      QUEUE_BULL_REDIS_PORT: 6379
+      N8N_BASIC_AUTH_ACTIVE: "true"
+      N8N_BASIC_AUTH_USER: ${N8N_USER:-admin}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_PASSWORD:-everlight_n8n_2026}
+      N8N_HOST: 0.0.0.0
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      WEBHOOK_URL: ${N8N_WEBHOOK_URL:-http://localhost:5679}
+      GENERIC_TIMEZONE: America/Los_Angeles
+      TZ: America/Los_Angeles
+    depends_on:
+      n8nq-db:
+        condition: service_healthy
+      n8n-redis:
+        condition: service_started
+    networks:
+      - everlight
+
+  n8n-worker:
+    image: n8nio/n8n:latest
+    container_name: n8n-worker
+    restart: always
+    command: ["n8n", "worker", "--concurrency=10"]
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: n8nq-db
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_DATABASE: n8n
+      DB_POSTGRESDB_USER: n8n
+      DB_POSTGRESDB_PASSWORD: ${N8N_DB_PASSWORD:-n8n_secure_change_me}
+      EXECUTIONS_MODE: queue
+      QUEUE_BULL_REDIS_HOST: n8n-redis
+      QUEUE_BULL_REDIS_PORT: 6379
+      QUEUE_HEALTH_CHECK_ACTIVE: "true"
+      GENERIC_TIMEZONE: America/Los_Angeles
+      TZ: America/Los_Angeles
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      SLACK_WEBHOOK_URL: ${SLACK_WEBHOOK_URL:-}
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY:-}
+    depends_on:
+      n8nq-db:
+        condition: service_healthy
+      n8n-redis:
+        condition: service_started
+    networks:
+      - everlight
+
+volumes:
+  n8nq_main_data:
+  n8nq_db_data:
+  n8nq_redis_data:
+
+networks:
+  everlight:
+    name: everlight
+    external: true
+

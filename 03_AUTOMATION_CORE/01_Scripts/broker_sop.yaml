@@ -1,0 +1,111 @@
+# Broker OS - Standard Operating Procedure
+# Everlight Ventures - Middleman Matchmaking Engine
+# Updated: 2026-03-12
+
+pipeline:
+  name: "Broker OS Daily Run"
+  goal: "Source 50-200 qualified offers/leads per day. Match. Close at 15-20% commission."
+
+# ---------------------------------------------------------------------------
+# Stage 1: Source Ingest (runs 6 AM PT daily)
+# ---------------------------------------------------------------------------
+ingest:
+  schedule: "0 6 * * *"   # 6 AM PT daily
+  sources:
+    product_hunt:
+      enabled: true
+      limit: 50
+      api_token_env: PRODUCT_HUNT_API_TOKEN
+      note: "Free API. Get token at producthunt.com/v2/oauth/applications"
+    indiehackers:
+      enabled: true
+      limit: 30
+      no_auth: true
+    hn_show:
+      enabled: true
+      limit: 20
+      no_auth: true
+    csv_drop:
+      enabled: true
+      watch_dir: /mnt/sdcard/AA_MY_DRIVE/07_STAGING/Inbox
+      pattern: "broker_*.csv"
+  command: "python3 /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/broker_ingest.py --source all --limit 50"
+
+# ---------------------------------------------------------------------------
+# Stage 2: Auto-Match (runs 7 AM PT daily, after ingest)
+# ---------------------------------------------------------------------------
+matching:
+  schedule: "0 7 * * *"   # 7 AM PT daily
+  min_score: 40            # Minimum score to create a BrokerMatch record
+  auto_approve_threshold: 75  # Auto-approve matches above this score
+  command: "curl -s http://127.0.0.1:8504/broker/api/match/run/?min_score=40"
+  notify_slack: true
+  slack_channel: "#broker-ops"
+
+# ---------------------------------------------------------------------------
+# Stage 3: Outreach (human-reviewed, then triggered)
+# ---------------------------------------------------------------------------
+outreach:
+  review_required: true     # Staff must approve in /broker/ dashboard before outreach
+  max_per_day: 20           # Hard cap - avoid domain burns
+  channels:
+    - email
+    - direct_dm
+  templates:
+    seller_intro: |
+      Hi [seller_name], I came across [tool_name] on [source].
+      I work with B2B startups who need exactly what you're building.
+      Would you be open to a referral arrangement? I bring qualified buyers, you pay 20% on close.
+      No upfront cost. Let me know.
+    buyer_intro: |
+      Hi [buyer_name], I specialize in connecting [company_type] teams with vetted AI/SaaS tools.
+      Based on your [signal], I have a few options that may fit your [need].
+      Worth a 15-min intro call?
+
+# ---------------------------------------------------------------------------
+# Stage 4: Deal Closing
+# ---------------------------------------------------------------------------
+deals:
+  agreement_template: "https://docs.google.com/document/d/FINDER_FEE_TEMPLATE"
+  payment_via: "Stripe invoice (stripe.com/invoicing)"
+  commission_timing: "Invoice seller on deal close, net-30"
+  legal_note: >
+    Finder fee arrangements are generally permissible for <2 deals/yr without broker license.
+    For volume operations, review state rules. CA, NY, TX have specific thresholds.
+    Document each arrangement with a signed finder fee agreement.
+
+# ---------------------------------------------------------------------------
+# Stage 5: Reporting (runs 8 AM PT daily)
+# ---------------------------------------------------------------------------
+reporting:
+  schedule: "0 8 * * *"
+  command: "curl -s http://127.0.0.1:8504/broker/api/commissions/"
+  slack_channel: "#05-revenue"
+
+# ---------------------------------------------------------------------------
+# ICP (Ideal Customer Profile)
+# ---------------------------------------------------------------------------
+icp:
+  buyers:
+    - type: "B2B SaaS founders"
+      size: "1-50 employees"
+      need: "AI workflow automation, Stripe/Supabase integration"
+      pain: "Too many tools to evaluate, no time, trust issues"
+    - type: "SMB owners"
+      size: "10-200 employees"
+      need: "Compliance, fintech setup, operational SaaS"
+      pain: "Don't know what's available or who to trust"
+  sellers:
+    - type: "Indie dev / solo founder"
+      product: "AI SaaS MVP, automation tool, API service"
+      pain: "Built it but can't find buyers, outreach is slow"
+
+# ---------------------------------------------------------------------------
+# Commission targets
+# ---------------------------------------------------------------------------
+targets:
+  monthly_deals: 5
+  avg_deal_value: 5000
+  avg_commission_pct: 20
+  projected_monthly_revenue: 5000   # 5 x $5k x 20%
+  stretch_monthly_revenue: 20000    # 4 x $25k deals

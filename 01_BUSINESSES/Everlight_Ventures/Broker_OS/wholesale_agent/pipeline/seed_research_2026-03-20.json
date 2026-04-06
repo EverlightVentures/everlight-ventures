@@ -1,0 +1,298 @@
+{
+  "generated": "2026-03-20",
+  "summary": {
+    "total_buyers_found": 36,
+    "markets_covered": 6,
+    "confirmed_emails": 8,
+    "inferred_info_emails": 28,
+    "code_violation_dbs": 6,
+    "lis_pendens_sources": 6,
+    "bulk_data_sources": 6
+  },
+
+  "buyers_by_market": {
+    "atlanta_ga": [
+      {"company": "Maximum Cash Home Buyers", "email": "info@maximumcashhomebuyers.com", "phone": "(678) 902-2000", "website": "maximumcashhomebuyers.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Vlancia Home Buyers", "email": "info@vlanciahomebuyers.com", "phone": "(404) 490-1526", "website": "vlanciahomebuyers.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Atlanta Home Buyers", "email": "info@atlantahomebuyers.com", "phone": "(404) 400-5400", "website": "atlantahomebuyers.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Crawford Home Buyers", "email": "info@webuyhousesinatlanta.com", "phone": "(770) 727-3158", "website": "webuyhousesinatlanta.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "ATL Cash Home Buyers", "email": "info@atlcashhomebuyers.com", "phone": "(404) 439-9984", "website": "atlcashhomebuyers.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Arbor View Properties LLC", "email": "info@arborviewhomebuyers.com", "phone": "(770) 810-5715", "website": "arborviewhomebuyers.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Metro GA Home Buyers", "email": "info@metrogahomebuyers.com", "phone": "(678) 218-4021", "website": "metrogahomebuyers.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "ATLFairOffer", "email": "info@atlfairoffer.com", "phone": "(404) 800-1744", "website": "atlfairoffer.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"}
+    ],
+    "dallas_tx": [
+      {"company": "Big Texas Home Buyers", "contact_name": "Heather Faires", "email": "heather@bigtexashomebuyers.com", "phone": "(214) 444-9385", "website": "bigtexashomebuyers.com", "buyer_type": "cash_buyer", "email_confidence": "confirmed"},
+      {"company": "Ninebird Properties", "email": "info@ninebp.com", "phone": "(972) 996-1839", "website": "ninebp.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Southern Hills Home Buyers", "email": "info@southernhillshomebuyers.com", "phone": "(214) 225-3042", "website": "southernhillshomebuyers.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Legacy Home Buyers", "email": "admin@legacybuyers.com", "phone": "(469) 771-0915", "website": "legacybuyers.com", "buyer_type": "cash_buyer", "email_confidence": "confirmed"},
+      {"company": "TX Home Buying Pros", "email": "team@txhomebuyingpros.com", "phone": "(214) 296-2343", "website": "txhomebuyingpros.com", "buyer_type": "cash_buyer", "email_confidence": "confirmed"},
+      {"company": "Cash House Buyers DFW", "email": "info@cashhousebuyersdfw.com", "phone": "(214) 272-2177", "website": "cashhousebuyersdfw.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Dallas Home Buyers", "email": "info@dallashomebuyers.net", "phone": "(214) 615-1255", "website": "dallashomebuyers.net", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"}
+    ],
+    "cleveland_oh": [
+      {"company": "Cleveland House Buyers", "contact_name": "Joe Lieber", "email": "info@clevelandhousebuyers.com", "phone": "(440) 577-6552", "website": "clevelandhousebuyers.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Cleveland Cash Offers", "email": "info@clecashoffers.com", "phone": "(216) 200-4160", "website": "clecashoffers.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Speedy Offers Ohio", "email": "info@speedyoffersohio.com", "phone": "(216) 306-4896", "website": "speedyoffersohio.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Cleveland Cash Buyer", "email": "ipaycashforhome@gmail.com", "phone": "(216) 526-1323", "website": "clevelandcashbuyer.com", "buyer_type": "cash_buyer", "email_confidence": "confirmed"},
+      {"company": "Legacy Home Solutions", "email": "info@legacyhomesol.com", "phone": "(440) 973-6024", "website": "legacyhomesol.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"}
+    ],
+    "charlotte_nc": [
+      {"company": "Mission Home Buyers", "email": "info@missionhomebuyers.com", "phone": "(980) 533-4950", "website": "missionhomebuyers.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Solution Home Buyers LLC", "email": "info@solutionhomebuyers.com", "phone": "(704) 870-2100", "website": "solutionhomebuyers.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Carolina House Buyers", "email": "info@thecarolinahousebuyers.com", "phone": "(704) 686-8441", "website": "thecarolinahousebuyers.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "CLT Buyers", "email": "info@cltbuyers.com", "phone": "(704) 741-3399", "website": "cltbuyers.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Harmony Home Buyers", "email": "info@harmonyhomebuyers.com", "phone": "(704) 285-2485", "website": "harmonyhomebuyers.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"}
+    ],
+    "st_louis_mo": [
+      {"company": "Robang Properties", "email": "info@robangproperties.com", "phone": "(314) 648-3499", "website": "robangproperties.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Missouri Cash Home Buyers", "email": "info@missouricashhomebuyers.com", "phone": "(314) 326-4900", "website": "missouricashhomebuyers.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Show Me Cash Offer", "email": "info@showmecashoffer.com", "phone": "(314) 916-1466", "website": "showmecashoffer.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "I Buy STL", "email": "hello@ibuystl.com", "phone": "(314) 325-0757", "website": "ibuystl.com", "buyer_type": "cash_buyer", "email_confidence": "confirmed"},
+      {"company": "Chris Buys Homes STL", "email": "info@chrisbuyshomesstl.com", "phone": "(314) 334-1481", "website": "chrisbuyshomesstl.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"}
+    ],
+    "jacksonville_fl": [
+      {"company": "Duval Home Buyers", "email": "info@duvalhomebuyers.com", "phone": "(904) 346-0600", "website": "duvalhomebuyers.com", "buyer_type": "cash_buyer", "email_confidence": "confirmed"},
+      {"company": "Henry Buys Homes", "contact_name": "Henry", "email": "henry@henrybuyshomes.com", "phone": "(904) 878-2473", "website": "henrybuyshomes.com", "buyer_type": "cash_buyer", "email_confidence": "confirmed"},
+      {"company": "Jax Cash Buyers", "email": "sales@jaxcashbuyers.com", "phone": "(904) 513-0229", "website": "jaxcashbuyers.com", "buyer_type": "cash_buyer", "email_confidence": "confirmed"},
+      {"company": "Evergreen Home Buyers", "email": "info@selltoevergreenjax.com", "phone": "(904) 342-3216", "website": "selltoevergreenjax.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Blue Sky Home Buyers", "email": "info@selltoblueskyjax.com", "phone": "(904) 867-7775", "website": "selltoblueskyjax.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"},
+      {"company": "Sunshine Cash Buyers", "email": "info@sunshinecashbuyers.com", "phone": "(904) 372-1794", "website": "sunshinecashbuyers.com", "buyer_type": "cash_buyer", "email_confidence": "inferred_info@"}
+    ]
+  },
+
+  "investor_directories": {
+    "reia_associations": [
+      {"name": "Atlanta REIA (Atlanta Real Estate Investors Alliance)", "website": "atlantareia.com", "phone": "(770) 379-4501", "meetings": "Every Wednesday 7-9pm, Keller Williams Duluth GA", "membership_cost": "$100/year"},
+      {"name": "Georgia Real Estate Investors Association (GaREIA)", "website": "gareia.com", "notes": "Largest GA investor association, statewide community"},
+      {"name": "REIA Dallas", "website": "reiadallas.com", "notes": "Member of Texas Wealth Network, monthly networking events in Dallas/Arlington"},
+      {"name": "REIANO Plus Cleveland", "address": "8696 Brook Park Road, Cleveland OH 44102", "phone": "(216) 651-6655", "email": "info@reiano.com", "meetings": "3rd or 4th Wednesday at 7pm"},
+      {"name": "Great Lakes REIA", "website": "greatlakesreia.com", "phone": "(440) 941-7342", "email": "info@greatlakesreia.com"},
+      {"name": "Greater Cleveland REIA", "website": "greaterclevelandreia.com"},
+      {"name": "Metrolina Real Estate Investors Association", "notes": "Charlotte NC area"},
+      {"name": "Charlotte Real Estate Investors Council", "notes": "Charlotte NC area"},
+      {"name": "St. Louis Real Estate Investors Association (STLREIA)", "website": "stlreia.com"},
+      {"name": "Lifeonaire REIA STL", "address": "12301 Lackland Rd, St. Louis MO 63146", "phone": "(636) 600-6282", "email": "stlhelp@lifeonaire.com", "meetings": "2nd Wednesday at 7pm"},
+      {"name": "Jacksonville Real Estate Investors Association (Jax REIA)", "facebook": "facebook.com/JaxReia/"},
+      {"name": "National REIA", "website": "nationalreia.org/find-a-reia/", "notes": "120+ chapters, 40,000 members nationwide, use Find a REIA tool"}
+    ],
+    "online_directories": [
+      {"name": "HouseCashin Cash Buyers Directory", "website": "housecashin.com/cash-buyers/", "notes": "Free for investors to join. 500+ off-market properties daily. Search by city for active cash buyers. Lists contact info for registered buyers."},
+      {"name": "BiggerPockets Network", "website": "biggerpockets.com", "notes": "3M+ members. Use Networking button to search investors by state. Forums have active wholesale sections. Team Builder for finding wholesale companies."},
+      {"name": "REIClub State Directories", "website": "reiclub.com/real-estate-clubs/", "notes": "Directory of RE investor clubs by state with contact info"},
+      {"name": "Larry Goins REIA Directory", "website": "larrygoins.com/reia-directory/", "notes": "Comprehensive nationwide REIA club directory"}
+    ],
+    "facebook_groups": [
+      {"name": "Georgia Wholesale Real Estate Deals - Buy Sell Trade", "url": "facebook.com/groups/410132136501614/"},
+      {"name": "ATL Real Estate Investors Group", "url": "facebook.com/groups/276603520353/"},
+      {"name": "Real Estate Cash Buyers, Investors Club", "url": "facebook.com/groups/RealEstateCashBuyersClub/"},
+      {"name": "Real Estate Mastermind", "members": "196,000+"},
+      {"name": "Off Market Real Estate", "members": "96,977+"},
+      {"name": "Real Estate Wholesale Deals", "members": "88,718+"},
+      {"name": "Wholesale Real Estate Investor Network", "members": "66,690+"},
+      {"name": "Dallas Fort Worth Real Estate Investors (search Facebook)", "notes": "Search FB for DFW specific groups"},
+      {"name": "Cleveland Real Estate Investors (search Facebook)", "notes": "Search FB for Cleveland specific groups"},
+      {"name": "Charlotte Real Estate Investors (search Facebook)", "notes": "Search FB for Charlotte specific groups"},
+      {"name": "St Louis Real Estate Investors (search Facebook)", "notes": "Search FB for STL specific groups"},
+      {"name": "Jacksonville Real Estate Investors (search Facebook)", "notes": "Search FB for Jax specific groups"}
+    ],
+    "paid_email_list_providers": [
+      {"name": "FrescoData", "website": "frescodata.com", "notes": "300M+ database, real estate investor segment"},
+      {"name": "DMDatabases", "website": "dmdatabases.com", "notes": "Consumer real estate investor email lists"},
+      {"name": "InfoGlobalData", "website": "infoglobaldata.com", "notes": "100% verified real estate investor leads"},
+      {"name": "US Marketing Management", "website": "usmarketingmanagement.com", "notes": "7.3M real estate investors in database"},
+      {"name": "AverickMedia", "website": "averickmedia.com", "notes": "45,357 real estate investor database"},
+      {"name": "ExactData", "website": "exactdata.com", "notes": "Real estate investor mailing lists"}
+    ]
+  },
+
+  "code_violation_databases": {
+    "atlanta_ga": {
+      "name": "City of Atlanta Accela Citizen Access",
+      "url": "https://aca-prod.accela.com/ATLANTA_GA/Cap/CapHome.aspx?module=Enforcement&TabName=Enforcement",
+      "free": true,
+      "searchable": true,
+      "search_by": "address or parcel number",
+      "notes": "Search complaints by site address or parcel number"
+    },
+    "fulton_county_ga_open_data": {
+      "name": "Fulton County Code Enforcement Open Data",
+      "url": "https://gisdata.fultoncountyga.gov/datasets/bdf41b531e304b968a61fb82b5c5647c",
+      "free": true,
+      "searchable": true,
+      "notes": "Downloadable GIS dataset of code enforcement cases"
+    },
+    "dallas_tx": {
+      "name": "Dallas OpenData Code Violations",
+      "url": "https://www.dallasopendata.com/Archive/Code-Violations/x9pz-kdq9",
+      "free": true,
+      "searchable": true,
+      "search_by": "address, filter by date/type",
+      "notes": "Bulk downloadable dataset of all code violations"
+    },
+    "cleveland_oh": {
+      "name": "Cleveland Accela Citizen Access",
+      "url": "https://aca-prod.accela.com/COC/Default.aspx",
+      "free": true,
+      "searchable": true,
+      "search_by": "address or parcel number",
+      "notes": "Search permits, inspections, code enforcement cases"
+    },
+    "charlotte_nc": {
+      "name": "City of Charlotte Code Cases",
+      "url": "https://www.charlottenc.gov/Streets-and-Neighborhoods/Code-Enforcement/Code-Cases",
+      "free": true,
+      "searchable": true,
+      "search_by": "parcel ID, address, or case number"
+    },
+    "charlotte_nc_open_data": {
+      "name": "Charlotte Code Enforcement Cases Open Data",
+      "url": "https://data.charlottenc.gov/datasets/charlotte::code-enforcement-cases-all/about",
+      "free": true,
+      "searchable": true,
+      "notes": "Bulk downloadable dataset -- housing, commercial, zoning, nuisance violations"
+    },
+    "mecklenburg_county_nc": {
+      "name": "Mecklenburg County Code Enforcement",
+      "url": "https://code.mecknc.gov/",
+      "free": true,
+      "searchable": true,
+      "notes": "County-level code enforcement for unincorporated areas"
+    },
+    "st_louis_mo": {
+      "name": "City of St. Louis Address & Property Info Search",
+      "url": "https://www.stlouis-mo.gov/data/address-search/index.cfm",
+      "free": true,
+      "searchable": true,
+      "search_by": "address only (no name search)",
+      "notes": "Property database includes code violation info"
+    },
+    "st_louis_county_mo": {
+      "name": "St. Louis County Code Enforcement Records",
+      "url": "https://stlouiscountymo.gov/st-louis-county-departments/transportation-and-public-works/sunshine-requests/what-code-enforcement-records-are-available/",
+      "free": true,
+      "searchable": false,
+      "notes": "Available via Sunshine (FOIA) requests"
+    },
+    "jacksonville_fl": {
+      "name": "Jacksonville Municipal Code Compliance (Jax EPICS)",
+      "url": "https://jaxepics.coj.net/",
+      "free": true,
+      "searchable": true,
+      "email_for_requests": "codeenforcement@coj.net",
+      "phone": "(904) 630-2489",
+      "notes": "Also report/search via 311"
+    }
+  },
+
+  "lis_pendens_pre_foreclosure_sources": {
+    "fulton_county_ga": {
+      "name": "Fulton County Clerk of Superior Court eServices",
+      "url": "https://www.fultonclerk.org/144/eServices",
+      "search_url": "https://www.fultonclerk.org/536/Records-Search-Center",
+      "free": true,
+      "notes": "Search Real Estate and Judicial records online. Also search via GSCCCA (gsccca.org/search). $5/4hrs for in-person terminal access.",
+      "recording_fee": "$25 for lis pendens"
+    },
+    "dallas_county_tx": {
+      "name": "Dallas County Official Record Search",
+      "url": "https://dallas.tx.publicsearch.us/",
+      "foreclosure_search": "https://www.dallascounty.org/government/county-clerk/recording/foreclosures.php",
+      "free": true,
+      "notes": "Free public record search. Select 'Foreclosure' from dropdown to filter. Can filter by sale date or city."
+    },
+    "cuyahoga_county_oh": {
+      "name": "Cuyahoga County Clerk of Courts Docket",
+      "url": "https://cpdocket.cp.cuyahogacounty.gov/Search.aspx",
+      "records_search": "https://cuyahoga.oh.publicsearch.us/",
+      "sheriff_sale": "https://cuyahogacounty.gov/sheriff/civil/foreclosure-sales",
+      "free": true,
+      "notes": "Search by case number or address. All downloads free. Sheriff sale list also available online."
+    },
+    "mecklenburg_county_nc": {
+      "name": "Mecklenburg County Register of Deeds",
+      "url": "https://deeds.mecknc.gov/services/real-estate-records",
+      "alt_url": "https://meckrod.manatron.com/",
+      "free": true,
+      "notes": "Search real estate documents from March 1990 to present. Lis pendens recorded here. Also check NC eCourts Portal for case info."
+    },
+    "st_louis_county_mo": {
+      "name": "St. Louis County Recorder of Deeds",
+      "url": "https://stlouiscountymo.gov/st-louis-county-departments/revenue/recorder-of-deeds/deed-search/",
+      "free": true,
+      "notes": "Online search via Laredo/Tapestry/Monarch. Records from 1974+. Search by party name and recorded date."
+    },
+    "st_louis_city_mo": {
+      "name": "St. Louis City Recorder of Deeds",
+      "url": "https://stlouiscityrecorder.org/land/",
+      "free": true,
+      "notes": "City of St. Louis (independent city) separate from county"
+    },
+    "duval_county_fl": {
+      "name": "Duval County Clerk CORE Portal",
+      "url": "https://or.duvalclerk.com/",
+      "foreclosure_info": "https://www.duvalclerk.com/departments/civil-court-services/foreclosure",
+      "foreclosure_sales": "https://www.duval.realforeclose.com",
+      "free": true,
+      "notes": "CORE portal for non-confidential court records. Lis pendens filed with clerk. Foreclosure sales held online."
+    }
+  },
+
+  "bulk_property_data_downloads": {
+    "fulton_county_ga": {
+      "open_data_portal": "https://gisdata.fultoncountyga.gov/",
+      "open_data_catalog": "https://data.fultoncountyga.gov/",
+      "assessor": "https://fultonassessor.org/",
+      "qpublic_search": "https://qpublic.schneidercorp.com/Application.aspx?App=FultonCountyGA&Layer=Parcels&PageType=Search",
+      "property_map_viewer": "https://gis.fultoncountyga.gov/Apps/PropertyMapViewer/",
+      "free": true,
+      "formats": "Shapefile, GeoJSON, CSV",
+      "notes": "Open data portal has downloadable parcel datasets. Export via GIS Data Center."
+    },
+    "dallas_county_tx": {
+      "appraisal_district": "https://www.dallascad.org/",
+      "gis_data_products": "https://www.dallascad.org/gisdataproducts.aspx",
+      "property_map": "https://maps.dcad.org/prd/dpm/",
+      "free": true,
+      "formats": "Shapefile (large ZIP files)",
+      "notes": "DCAD provides free GIS data products as shapefile downloads. Large files."
+    },
+    "cuyahoga_county_oh": {
+      "open_data": "https://data-cuyahoga.opendata.arcgis.com/",
+      "gis_data_hub": "https://geospatial.gis.cuyahogacounty.gov/pages/data",
+      "fiscal_gis_hub": "https://fiscalhub.gis.cuyahogacounty.gov",
+      "myplace_search": "https://myplace.cuyahogacounty.gov/",
+      "free": true,
+      "formats": "GeoJSON, CSV, Shapefile via ArcGIS Hub",
+      "notes": "Excellent open data portal. Downloadable parcel and assessment datasets."
+    },
+    "mecklenburg_county_nc": {
+      "gis_portal": "https://gis.mecknc.gov/",
+      "data_center": "https://gis.mecknc.gov/data-center",
+      "polaris": "https://polaris3g.mecklenburgcountync.gov",
+      "charlotte_open_data": "https://data.charlottenc.gov/datasets/charlotte::parcel-look-up/about",
+      "free": "mostly free, bulk downloads may have fees",
+      "notes": "POLARIS has 80+ mapping overlays. Open Mapping site has direct downloads. Bulk data may require fee."
+    },
+    "st_louis_county_mo": {
+      "open_data": "https://data-stlcogis.opendata.arcgis.com/",
+      "property_lookup": "https://data.stlouisco.com/datasets/property-lookup",
+      "assessor": "https://stlouiscountymo.gov/st-louis-county-government/county-assessor/",
+      "free": true,
+      "formats": "ArcGIS Hub exports (GeoJSON, CSV, Shapefile)",
+      "notes": "Open Government data portal with parcel data. Property Lookup app for individual searches."
+    },
+    "st_louis_city_mo": {
+      "parcel_data": "https://www.stlouis-mo.gov/data/datasets/dataset.cfm?id=82",
+      "free": true,
+      "notes": "City of St. Louis parcel data available as open dataset"
+    },
+    "duval_county_fl": {
+      "property_appraiser": "https://www.jacksonville.gov/departments/property-appraiser/information-offerings",
+      "gis": "https://www.jacksonville.gov/departments/finance/information-technologies/geographic-information-systems-(gis)",
+      "free": true,
+      "formats": "ACCESS, TXT, Shapefile",
+      "notes": "Property Appraiser provides downloadable tax roll data (ACCESS and TXT), GIS shapefiles, and sales data. JaxGIS has interactive maps."
+    }
+  }
+}

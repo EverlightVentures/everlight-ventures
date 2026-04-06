@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hive Login</title>
+  <style>
+    :root {
+      --bg: #0c0d12;
+      --panel: #141720;
+      --border: rgba(255,255,255,0.08);
+      --text: #f2f4f8;
+      --muted: #9aa4b2;
+      --gold: #c9a84c;
+      --accent: #4cc9b0;
+      --danger: #ff6b6b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at top, rgba(76, 201, 176, 0.12), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(201, 168, 76, 0.12), transparent 28%),
+        var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", sans-serif;
+    }
+    .card {
+      width: min(440px, calc(100vw - 32px));
+      padding: 28px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(20,23,32,0.96), rgba(12,13,18,0.98));
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 80px rgba(0,0,0,0.45);
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      letter-spacing: 0.03em;
+    }
+    p {
+      margin: 0 0 22px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    label {
+      display: block;
+      margin: 0 0 8px;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    input {
+      width: 100%;
+      padding: 14px 15px;
+      margin: 0 0 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.03);
+      color: var(--text);
+      font-size: 15px;
+    }
+    button {
+      width: 100%;
+      padding: 14px 15px;
+      border: 0;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--gold), #f3d77b);
+      color: #121212;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .meta {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+    .error {
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255, 107, 107, 0.12);
+      border: 1px solid rgba(255, 107, 107, 0.25);
+      color: #ffd0d0;
+      font-size: 14px;
+    }
+    .badge {
+      display: inline-block;
+      margin-bottom: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(76, 201, 176, 0.24);
+      background: rgba(76, 201, 176, 0.08);
+      color: var(--accent);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    code {
+      color: var(--gold);
+      font-family: monospace;
+    }
+  </style>
+</head>
+<body>
+  <form class="card" method="post">
+    {% csrf_token %}
+    <div class="badge">Hive Mind Access</div>
+    <h1>Enter the Hive</h1>
+    <p>This login is for the Hive dashboard and operating system, not the Blackjack game.</p>
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <label for="username">Username</label>
+    <input id="username" name="username" type="text" autocomplete="username" required>
+    <label for="password">Password</label>
+    <input id="password" name="password" type="password" autocomplete="current-password" required>
+    <button type="submit">Open Hive Dashboard</button>
+    <div class="meta">Blackjack remains available at <code>/blackjack/</code>.</div>
+  </form>
+</body>
+</html>

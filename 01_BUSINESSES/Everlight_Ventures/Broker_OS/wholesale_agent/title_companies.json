@@ -1,0 +1,29 @@
+{
+  "atlanta": [
+    {"name": "Katz Durell LLC", "phone": "(404) 487-0040", "email": "", "website": "katzdurell.com/investors", "contact": "Joshua Katz", "handles_assignments": true, "notes": "Routinely closes for wholesalers. Double closings and assignments."},
+    {"name": "Bagwell & Associates PC", "phone": "(678) 528-1908", "website": "bagwellassociates.com", "contact": "", "handles_assignments": true, "notes": "Specializes in wholesaling, assignments, novation, subject-to. Free initial consultation."}
+  ],
+  "dallas": [
+    {"name": "1st Option Title", "phone": "(972) 271-1700", "website": "1stoptiontitle.com", "contact": "", "handles_assignments": true, "notes": "Specializes in double closing, assignments, and owner finance for investors."},
+    {"name": "Affinity Title LLC", "phone": "(817) 381-7913", "website": "affinitytitletx.com", "contact": "Christopher Pettigrew", "handles_assignments": true, "notes": "Investor-friendly, serves DFW wholesale investors."}
+  ],
+  "cleveland": [
+    {"name": "Black Tie Title", "phone": "(216) 333-1295", "email": "sales@blacktietitle.net", "website": "blacktietitle.net", "contact": "", "handles_assignments": true, "notes": "Incredibly investor-friendly. Experienced with wholesalers."},
+    {"name": "Ohio Real Title Agency", "phone": "(866) 373-9900", "email": "info@ohiorealtitle.com", "website": "ohiorealtitle.com", "contact": "", "handles_assignments": true, "notes": "BiggerPockets recommended for wholesale closings."}
+  ],
+  "charlotte": [
+    {"name": "Harry Marsh Law", "phone": "(704) 956-7465", "website": "harrymarshlaw.com", "contact": "Harry Marsh", "handles_assignments": true, "notes": "The king of investor/creative closings in Charlotte. Attorney-close state."},
+    {"name": "Hankin & Pack PLLC", "phone": "", "website": "hankinpacklaw.com", "contact": "", "handles_assignments": true, "notes": "Investor-oriented closing firm. Confirm assignment handling."}
+  ],
+  "st_louis": [
+    {"name": "Freedom Title", "phone": "(314) 786-4000", "email": "Ryan@Freedom-Title.com", "website": "freedom-title.com", "contact": "Ryan Kerner", "handles_assignments": true, "notes": "12 locations across STL. Investor-focused leadership."},
+    {"name": "Investors Title Company", "phone": "(314) 862-0303", "website": "investors-title.com", "contact": "", "handles_assignments": true, "notes": "50+ years in STL. 20+ locations. Confirm assignment policy by phone."}
+  ],
+  "jacksonville": [
+    {"name": "Marina Title", "phone": "(855) 513-5880", "email": "Info@MarinaTitle.com", "website": "marinatitle.com", "contact": "", "handles_assignments": true, "notes": "Explicitly serves wholesalers. Assignment, double close, novation."},
+    {"name": "FL Title Closings", "phone": "1 (833) FL-TITLE", "website": "fltitleclosings.com", "contact": "", "handles_assignments": true, "notes": "Explicitly serves investors, wholesalers, iBuyers."}
+  ],
+  "national_backup": [
+    {"name": "CLOSED Title", "phone": "", "website": "closedtitle.com/investors", "contact": "", "handles_assignments": true, "notes": "Multi-state. Can close in 24 hours. Digital-first. Check coverage for all 6 markets."}
+  ]
+}

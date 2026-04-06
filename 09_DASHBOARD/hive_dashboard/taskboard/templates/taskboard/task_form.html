@@ -1,5 +1,5 @@
 {% extends "hive/base.html" %}
-{% load humanize %}
+{% load humanize taskboard_tags %}
 
 {% block title %}{{ task.title }} -- Taskboard{% endblock %}
 
@@ -193,6 +193,15 @@
     <div>
       <h1>{{ task.title }}</h1>
       {% if task.description %}<div class="tf-hero-desc">{{ task.description }}</div>{% endif %}
+      {% if task.is_ai_owned %}
+      <div class="tf-hero-desc" style="margin-top:10px;color:#22c55e;">
+        This is an AI-owned execution item. Agents should complete it through the taskboard API and attach a result summary.
+      </div>
+      {% elif task.requires_human_input %}
+      <div class="tf-hero-desc" style="margin-top:10px;">
+        This item is waiting on your input before the Hive can continue.
+      </div>
+      {% endif %}
     </div>
   </div>
   <div class="tf-hero-meta">
@@ -201,6 +210,8 @@
     {% if task.source_agent %}<span class="tf-meta-item"><i class="fa-solid fa-robot"></i> From: {{ task.source_agent }}</span>{% endif %}
     {% if task.target_agent %}<span class="tf-meta-item"><i class="fa-solid fa-bullseye"></i> To: {{ task.target_agent }}</span>{% endif %}
     {% if task.batch_id %}<span class="tf-meta-item"><i class="fa-solid fa-boxes-stacked"></i> {{ task.batch_id }}</span>{% endif %}
+    <span class="tf-meta-item"><i class="fa-solid fa-flag-checkered"></i> {{ task.get_request_kind_display }}</span>
+    <span class="tf-meta-item"><i class="fa-solid fa-user-gear"></i> {% if task.owner_type == 'ai' %}AI owned{% else %}Human owned{% endif %}</span>
     <span class="tf-status {{ task.status }}">
       <span style="width:6px;height:6px;border-radius:50%;background:currentColor;"></span>
       {{ task.get_status_display }}
@@ -227,7 +238,7 @@
       <div class="tf-secret-wrap">
         <input type="password" name="{{ field.name }}" id="field_{{ field.name }}"
                class="tf-input secret" placeholder="{{ field.placeholder|default:'Enter securely...' }}"
-               value="{{ existing_data|default_if_none:'' }}"
+               value="{{ existing_data|get_item:field.name|default_if_none:'' }}"
                {% if field.required %}required{% endif %}>
         <button type="button" class="tf-secret-toggle" onclick="toggleSecret(this)" title="Show/hide">
           <i class="fa-solid fa-eye"></i>
@@ -238,46 +249,46 @@
       {% elif field.type == "textarea" %}
       <textarea name="{{ field.name }}" id="field_{{ field.name }}"
                 class="tf-input" placeholder="{{ field.placeholder|default:'Enter details...' }}"
-                {% if field.required %}required{% endif %}>{{ existing_data|default_if_none:'' }}</textarea>
+                {% if field.required %}required{% endif %}>{{ existing_data|get_item:field.name|default_if_none:'' }}</textarea>
 
       {% elif field.type == "select" %}
       <select name="{{ field.name }}" id="field_{{ field.name }}" class="tf-input"
               {% if field.required %}required{% endif %}>
         <option value="">-- Select --</option>
         {% for opt in field.options %}
-        <option value="{{ opt }}">{{ opt }}</option>
+        <option value="{{ opt }}" {% if existing_data|get_item:field.name == opt %}selected{% endif %}>{{ opt }}</option>
         {% endfor %}
       </select>
 
       {% elif field.type == "checkbox" %}
       <label class="tf-checkbox-row">
-        <input type="checkbox" name="{{ field.name }}" id="field_{{ field.name }}">
+        <input type="checkbox" name="{{ field.name }}" id="field_{{ field.name }}" {% if existing_data|get_item:field.name %}checked{% endif %}>
         <span>{{ field.label|default:field.name }}</span>
       </label>
 
       {% elif field.type == "email" %}
       <input type="email" name="{{ field.name }}" id="field_{{ field.name }}"
              class="tf-input" placeholder="{{ field.placeholder|default:'you@example.com' }}"
-             value="{{ existing_data|default_if_none:'' }}"
+             value="{{ existing_data|get_item:field.name|default_if_none:'' }}"
              {% if field.required %}required{% endif %}>
 
       {% elif field.type == "url" %}
       <input type="url" name="{{ field.name }}" id="field_{{ field.name }}"
              class="tf-input" placeholder="{{ field.placeholder|default:'https://...' }}"
-             value="{{ existing_data|default_if_none:'' }}"
+             value="{{ existing_data|get_item:field.name|default_if_none:'' }}"
              {% if field.required %}required{% endif %}>
 
       {% elif field.type == "file_note" %}
       <input type="text" name="{{ field.name }}" id="field_{{ field.name }}"
              class="tf-input" placeholder="{{ field.placeholder|default:'Paste file path or description...' }}"
-             value="{{ existing_data|default_if_none:'' }}"
+             value="{{ existing_data|get_item:field.name|default_if_none:'' }}"
              {% if field.required %}required{% endif %}>
       {% if field.hint %}<div class="tf-hint">{{ field.hint }}</div>{% endif %}
 
       {% else %}
       <input type="text" name="{{ field.name }}" id="field_{{ field.name }}"
              class="tf-input" placeholder="{{ field.placeholder|default:'' }}"
-             value="{{ existing_data|default_if_none:'' }}"
+             value="{{ existing_data|get_item:field.name|default_if_none:'' }}"
              {% if field.required %}required{% endif %}>
       {% if field.hint %}<div class="tf-hint">{{ field.hint }}</div>{% endif %}
       {% endif %}
@@ -291,10 +302,15 @@
     <textarea name="_notes" class="tf-input" placeholder="Anything you want to note for the AI agent...">{{ task.notes }}</textarea>
   </div>
 
+  <div class="tf-notes-section">
+    <div class="tf-form-title"><i class="fa-solid fa-flag-checkered" style="margin-right:8px; color:var(--gold-dim);"></i>Completion Summary</div>
+    <textarea name="_result_summary" class="tf-input" placeholder="What was completed, changed, or handed back to the Hive?">{{ task.result_summary }}</textarea>
+  </div>
+
   <!-- Actions -->
   <div class="tf-actions">
     <button type="submit" name="_action" value="complete" class="tf-btn tf-btn-primary">
-      <i class="fa-solid fa-check-circle"></i> Complete & Send to Agent
+      <i class="fa-solid fa-check-circle"></i> Mark Complete
     </button>
     <button type="submit" name="_action" value="save" class="tf-btn tf-btn-save">
       <i class="fa-solid fa-floppy-disk"></i> Save Draft

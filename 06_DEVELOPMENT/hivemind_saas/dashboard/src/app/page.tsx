@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   Bell,
@@ -20,6 +20,7 @@ import {
 import Sidebar from "@/components/layout/Sidebar";
 import KpiCard from "@/components/dashboard/KpiCard";
 import HiveStatusPanel from "@/components/dashboard/HiveStatusPanel";
+import { getDashboardSnapshot } from "@/lib/api";
 import { formatRelativeTime } from "@/lib/utils";
 import type { KpiMetric, ActivityItem } from "@/types";
 
@@ -267,11 +268,83 @@ const KPI_ICONS: Record<string, React.ReactNode> = {
 // Main Dashboard Page
 // ============================================================
 export default function DashboardPage() {
+  const [metrics, setMetrics] = useState<KpiMetric[]>(KPI_DATA);
+  const [activity, setActivity] = useState<ActivityItem[]>(ACTIVITY_ITEMS);
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
   });
+
+  useEffect(() => {
+    let mounted = true;
+    getDashboardSnapshot()
+      .then((snapshot) => {
+        if (!mounted) return;
+        const sessions = snapshot.sessions.sessions ?? [];
+        const usage = snapshot.usage ?? {};
+        const integrations = snapshot.integrations ?? [];
+        setMetrics([
+          {
+            id: "sessions",
+            label: "Sessions",
+            value: usage.sessions_used ?? 0,
+            previousValue: 0,
+            change: 0,
+            trend: "neutral",
+            description: "workspace total",
+            glowColor: "violet",
+          },
+          {
+            id: "tasks",
+            label: "Integrations",
+            value: usage.integrations_count ?? integrations.length,
+            previousValue: 0,
+            change: 0,
+            trend: "neutral",
+            description: "connected services",
+            glowColor: "gold",
+          },
+          {
+            id: "agents",
+            label: "Seats Used",
+            value: usage.seats_used ?? 1,
+            previousValue: usage.seats_limit ?? 1,
+            change: 0,
+            trend: "neutral",
+            description: "active operators",
+            glowColor: "success",
+          },
+          {
+            id: "revenue",
+            label: "Plan",
+            value: String(snapshot.tenant.plan || "spark").toUpperCase(),
+            previousValue: "",
+            change: 0,
+            trend: "neutral",
+            description: snapshot.tenant.name,
+            glowColor: "gold",
+          },
+        ]);
+        setActivity(
+          sessions.map((session: any, index: number) => ({
+            id: session.session_id,
+            type: session.status === "failed" ? "error" : "agent_completed",
+            title: `${session.status === "completed" ? "Hive completed" : "Hive session"} ${session.session_id.slice(0, 8)}`,
+            description: session.prompt,
+            agentId: (session.agents?.[0] || "claude"),
+            timestamp: new Date(session.started_at || Date.now() - index * 60000),
+          }))
+        );
+      })
+      .catch(() => {
+        if (!mounted) return;
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-void">
@@ -314,7 +387,7 @@ export default function DashboardPage() {
 
             {/* KPI grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              {KPI_DATA.map((metric, i) => (
+              {metrics.map((metric, i) => (
                 <KpiCard
                   key={metric.id}
                   metric={metric}
@@ -356,7 +429,7 @@ export default function DashboardPage() {
 
                 {/* Feed list */}
                 <div className="px-4 overflow-y-auto" style={{ maxHeight: "420px" }}>
-                  {ACTIVITY_ITEMS.map((item) => (
+                  {activity.map((item) => (
                     <ActivityRow key={item.id} item={item} />
                   ))}
                 </div>

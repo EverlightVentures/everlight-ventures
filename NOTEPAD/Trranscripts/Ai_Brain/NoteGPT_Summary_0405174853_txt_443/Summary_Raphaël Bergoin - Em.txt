@@ -1,0 +1,57 @@
+- [00:00:01] **Introduction and Context**  
+The presentation focuses on the emergence and dynamics of modularity in neural networks, specifically using Adaptive Bienenstock, Cooper, and Munro (ABN) and anti-Bienenstock, Cooper, and Munro (anti-BN) models. The speaker conducted this research during their PhD in Paris and Barcelona.
+
+- [00:01:19] **Modular Brain Organization**  
+Research indicates that the brain is organized in a **modular structure**, allowing for the segregation of information. The initial organization is influenced by genetics, while **neural activity**, sensory experience, and environmental factors shape this organization over time. The presentation aims to understand how inputs can shape modular structures and how memories can be recalled and consolidated over the long term.
+
+- [00:02:37] **Experimental Model**  
+The speaker's model consists of a network of nine **chromatic integrate-and-fire neurons** (QIF), with parameters set for external and synaptic inputs. Three populations of neurons are considered: excitatory, inhibitory following anti-BN learning, and another population that follows BN learning. This structure aims to replicate biological realities where inhibitory neurons are critical in networks.
+
+- [00:04:58] **Plasticity Functions**  
+Different plasticity functions are applied based on the nature of the neurons:
+  - **Excitatory Neurons**: Follow classical ABN STDP (Spike-Timing-Dependent Plasticity).
+  - **First Inhibitory Population**: Follows anti-BN STDP, potentiating when spikes are correlated.
+  - **Second Inhibitory Population**: Utilizes a distinct function that depresses when spikes are correlated.
+
+- [00:06:19] **Learning Protocol**  
+The experiments are divided into three phases:
+  1. **Spontaneous Activity Phase**: Visualizing the original state of the network.
+  2. **Training Phase**: Simulating excitatory and inhibitory neurons with external positive input.
+  3. **Post-Activity Phase**: Observing network dynamics during rest without external stimulation.
+
+- [00:08:49] **Inhibition and Network Activity**  
+Initial conditions with only excitatory neurons led to a **runaway activity** without modular structures. Introducing inhibition with anti-BN plasticity resulted in the formation of modular structures but still experienced activity explosions. The model evolved to include different plasticity mechanisms to manage network dynamics effectively.
+
+- [00:10:00] **Final Network Structure**  
+In a configuration with all three populations, the model exhibited asynchronous activity with synchronized patterns within clusters but not across them, effectively reflecting a **modular structure** with spontaneous recall capabilities.
+
+- [00:12:26] **Memory Consolidation**  
+The recalls observed during spontaneous activity increased firing rates and were correlated with significant weight changes, indicating that recalls strengthen synaptic connectivity. During quiescent periods, weight connectivity gradually decreased, yet spontaneous recalls compensated for this loss.
+
+- [00:13:37] **Conclusions**  
+The findings highlight the importance of external stimuli in forming structural clusters associated with memory items. **Feedback inhibition** helps regulate network activity, preventing runaway excitation, while **feedforward inhibition** enhances input selectivity. Spontaneous recalls strengthen synaptic connections, contributing to memory consolidation and preventing long-term forgetting.
+
+- [00:14:54] **Q&A Session**  
+The presenter addresses questions regarding the choice of QIF neurons over other models, the implementation of the network in C programming, and the mechanisms preventing weight saturation in the plasticity models. The discussion emphasizes the balance between realistic modeling and computational efficiency.
+
+### Highlights  
+- **Key Focus**: Emergence and dynamics of modularity in neural networks.
+- **Methodology**: Use of QIF neurons and structured learning protocols.
+- **Findings**: Spontaneous recalls strengthen memory consolidation and prevent forgetting.
+
+### Key Insights  
+- **Modular Structures**: Essential for effective information processing in neural networks.  
+- **Inhibition**: Critical in managing network dynamics and preventing runaway activity.  
+- **Memory Dynamics**: Spontaneous recalls are vital in maintaining neural connectivity over time.  
+
+### Core Concepts  
+- **ABN and Anti-BN Models**: Used to explore neural network plasticity.  
+- **Plasticity Functions**: Different functions for excitatory and inhibitory neurons.  
+- **Synchronized Patterns**: Observed within neural clusters without inter-cluster synchronization.  
+
+### Keywords  
+- Neural Networks, Modularity, Plasticity, Memory Consolidation, Inhibition, Spontaneous Recall.  
+
+### FAQ  
+- **Why QIF Neurons?**: Balances realism with computational efficiency, allowing for larger simulations.
+- **Memory Saturation Prevention**: Implemented through soft bounds on weight values.

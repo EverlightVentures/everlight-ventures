@@ -38,6 +38,9 @@ urlpatterns = [
     path('bot-intel/', views.BotIntelPageView.as_view(), name='bot_intel'),
     path('agent-performance/', views.AgentPerformanceView.as_view(), name='agent_performance'),
 
+    # Infra Hub
+    path('infra/', views.InfraHubView.as_view(), name='infra_hub'),
+
     # API / AJAX endpoints
     path(
         'api/session/<str:session_id>/status/',
@@ -56,6 +59,7 @@ urlpatterns = [
         name='api_export_session',
     ),
     path('api/agent-status/', views.api_agent_status, name='api_agent_status'),
+    path('api/infra-status/', views.api_infra_status, name='api_infra_status'),
     path('api/bot-intel/', views.api_bot_intel, name='api_bot_intel'),
     path(
         'api/upload-analyze/',

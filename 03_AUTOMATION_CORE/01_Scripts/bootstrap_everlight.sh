@@ -67,7 +67,7 @@ ssh_cmd() {
     local retries=3
     local attempt=0
     while [ $attempt -lt $retries ]; do
-        if ssh -o ConnectTimeout=15 -o BatchMode=yes "$ORACLE_HOST" "$@" 2>>"$LOG_FILE"; then
+        if ssh -o ConnectTimeout=15 -o ConnectionAttempts=1 -o ServerAliveInterval=5 -o ServerAliveCountMax=6 -o BatchMode=yes "$ORACLE_HOST" "$@" 2>>"$LOG_FILE"; then
             return 0
         fi
         attempt=$((attempt + 1))
@@ -87,8 +87,8 @@ scp_cmd() {
 # ===========================================================================
 step_test_oracle() {
     step "Testing Oracle Cloud connectivity"
-    if ssh_cmd "echo 'Oracle SSH OK' && sudo docker --version && sudo docker compose version"; then
-        log "Oracle Cloud connected. Docker ready."
+    if ssh_cmd "echo 'Oracle SSH OK'"; then
+        log "Oracle Cloud connected."
         return 0
     else
         err "Cannot reach Oracle Cloud. Check SSH key and network."

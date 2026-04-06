@@ -26,6 +26,8 @@ urlpatterns = [
     path('api/avatar/', views.api_update_avatar, name='api_avatar'),
     path('api/shop/', views.api_shop_items, name='api_shop'),
     path('api/purchase/', views.api_purchase_cosmetic, name='api_purchase'),
+    path('api/checkout/gems/', views.api_gem_checkout, name='api_gem_checkout'),
+    path('api/checkout/verify/', views.api_verify_gem_checkout, name='api_verify_gem_checkout'),
     path('api/leaderboard/', views.api_leaderboard, name='api_leaderboard'),
     path('api/history/', views.api_history, name='api_history'),
 ]

@@ -1,0 +1,161 @@
+{
+  "run_id": "20260321_204125",
+  "timestamp": "2026-03-21T20:41:26.025532+00:00",
+  "mode": "dry_run",
+  "pipeline_elapsed_sec": 0.1,
+  "stages_run": 7,
+  "total_scripts": 18,
+  "total_passed": 0,
+  "total_failed": 0,
+  "stages": [
+    {
+      "stage_id": "scout",
+      "stage_name": "Stage 1: Property Scouting",
+      "team_member": "Rex Blackwell (Gemini/Scout)",
+      "elapsed_sec": 0.0,
+      "scripts_run": 6,
+      "succeeded": 0,
+      "failed": 0,
+      "results": [
+        {
+          "script": "rex_zillow_keyword_scraper.py",
+          "status": "dry_run"
+        },
+        {
+          "script": "rex_autonomous.py",
+          "status": "dry_run"
+        },
+        {
+          "script": "rex_distress_finder.py",
+          "status": "dry_run"
+        },
+        {
+          "script": "rex_tax_delinquency_scout.py",
+          "status": "dry_run"
+        },
+        {
+          "script": "rex_probate_scout.py",
+          "status": "dry_run"
+        },
+        {
+          "script": "rex_teardown_finder.py",
+          "status": "dry_run"
+        }
+      ]
+    },
+    {
+      "stage_id": "qualify",
+      "stage_name": "Stage 2: Lead Qualification",
+      "team_member": "Filter Banks (Codex/Qualifier) + Penny Vance (Codex/Profit)",
+      "elapsed_sec": 0.0,
+      "scripts_run": 4,
+      "succeeded": 0,
+      "failed": 0,
+      "results": [
+        {
+          "script": "rex_lead_scorer_v2.py",
+          "status": "dry_run"
+        },
+        {
+          "script": "rex_enrichment_engine.py",
+          "status": "dry_run"
+        },
+        {
+          "script": "rex_comp_validator.py",
+          "status": "dry_run"
+        },
+        {
+          "script": "rex_repair_estimator.py",
+          "status": "dry_run"
+        }
+      ]
+    },
+    {
+      "stage_id": "match",
+      "stage_name": "Stage 3: Buyer Matching",
+      "team_member": "Cupid Osei (Codex/Matcher)",
+      "elapsed_sec": 0.0,
+      "scripts_run": 1,
+      "succeeded": 0,
+      "failed": 0,
+      "results": [
+        {
+          "script": "rex_buyer_segmenter.py",
+          "status": "dry_run"
+        }
+      ]
+    },
+    {
+      "stage_id": "pitch",
+      "stage_name": "Stage 4: Deal Marketing",
+      "team_member": "Ace Morgan (Gemini/Marketing)",
+      "elapsed_sec": 0.0,
+      "scripts_run": 1,
+      "succeeded": 0,
+      "failed": 0,
+      "results": [
+        {
+          "script": "rex_deal_sheet.py",
+          "status": "dry_run"
+        }
+      ]
+    },
+    {
+      "stage_id": "outreach",
+      "stage_name": "Stage 5: Outreach",
+      "team_member": "Piper Reeves (Gemini/Outreach)",
+      "elapsed_sec": 0.0,
+      "scripts_run": 2,
+      "succeeded": 0,
+      "failed": 0,
+      "results": [
+        {
+          "script": "rex_sdr.py",
+          "status": "dry_run"
+        },
+        {
+          "script": "rex_buyer_acquisition.py",
+          "status": "dry_run"
+        }
+      ]
+    },
+    {
+      "stage_id": "followup",
+      "stage_name": "Stage 6: Follow-Up & Nurture",
+      "team_member": "Piper Reeves (Gemini/Outreach) + Hammer Knox (Codex/Closer)",
+      "elapsed_sec": 0.0,
+      "scripts_run": 3,
+      "succeeded": 0,
+      "failed": 0,
+      "results": [
+        {
+          "script": "rex_sdr.py",
+          "status": "dry_run"
+        },
+        {
+          "script": "rex_sdr.py",
+          "status": "dry_run"
+        },
+        {
+          "script": "rex_closer.py",
+          "status": "dry_run"
+        }
+      ]
+    },
+    {
+      "stage_id": "report",
+      "stage_name": "Stage 7: Pipeline Report",
+      "team_member": "Chart Dawson (Gemini/Analytics) + Cash Moreno (Claude/Auditor)",
+      "elapsed_sec": 0.0,
+      "scripts_run": 1,
+      "succeeded": 0,
+      "failed": 0,
+      "results": [
+        {
+          "script": "rex_health.py",
+          "status": "dry_run"
+        }
+      ]
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import logging
 import os
 from datetime import timedelta
 
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
@@ -12,7 +13,17 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from django.db.models import Sum, Count, Q
 
+from hive_dashboard.security import internal_api_required
+from hive_dashboard.supabase_client import supabase_rest
 from .models import Customer, Subscription, Payment, RevenueSnapshot
+
+# Lazy import to avoid circular import issues at module load
+def _get_rewards_service():
+    try:
+        from rewards import services as rewards_svc
+        return rewards_svc
+    except Exception:
+        return None
 
 log = logging.getLogger(__name__)
 
@@ -157,6 +168,10 @@ def _handle_checkout(data):
         f"NEW SALE: ${amount/100:.2f} -- {product} -- {customer.email}"
     )
 
+    # Sync to Supabase + trigger onboarding
+    _sync_customer_to_supabase(customer)
+    _trigger_onboarding(customer, product)
+
 
 def _handle_payment(data):
     """Process successful payment."""
@@ -186,6 +201,14 @@ def _handle_payment(data):
         f"PAYMENT: ${amount/100:.2f} -- {product} -- {customer.email}"
     )
 
+    # Award loyalty points for this payment
+    svc = _get_rewards_service()
+    if svc:
+        try:
+            svc.award_purchase_points(customer, amount, payment_id=payment_id, product=product)
+        except Exception as e:
+            log.warning(f"Rewards points award failed: {e}")
+
 
 def _handle_invoice_paid(data):
     """Process paid invoice (subscription renewals)."""
@@ -210,6 +233,14 @@ def _handle_invoice_paid(data):
     )
 
     _send_receipt_email(customer, payment)
+
+    # Award loyalty points for subscription renewals
+    svc = _get_rewards_service()
+    if svc:
+        try:
+            svc.award_purchase_points(customer, amount, payment_id=payment_id, product=product)
+        except Exception as e:
+            log.warning(f"Rewards points award failed on invoice: {e}")
 
 
 def _handle_subscription_update(data):
@@ -250,6 +281,10 @@ def _handle_subscription_update(data):
             f"NEW SUBSCRIPTION: {product} -- ${amount/100:.2f}/mo -- {customer.email}"
         )
 
+    # Sync to Supabase
+    _sync_customer_to_supabase(customer)
+    _sync_subscription_to_supabase(sub)
+
 
 def _handle_subscription_canceled(data):
     """Handle subscription cancellation."""
@@ -262,10 +297,13 @@ def _handle_subscription_canceled(data):
         _notify_slack(
             f"CHURN: {sub.product} canceled -- {sub.customer.email}"
         )
+        # Sync cancellation to Supabase
+        _sync_subscription_to_supabase(sub)
 
 
 # -- Revenue Dashboard -------------------------------------------------------
 
+@login_required
 def revenue_dashboard(request):
     """Revenue overview for the ops dashboard."""
     now = timezone.now()
@@ -348,6 +386,7 @@ def revenue_dashboard(request):
 
 
 @csrf_exempt
+@internal_api_required
 @require_GET
 def api_revenue_summary(request):
     """API endpoint for revenue data (used by Jupyter notebooks, agents)."""
@@ -370,3 +409,111 @@ def api_revenue_summary(request):
         "goal": 10000,
         "goal_pct": min(int(rev_month / 100 / 10000 * 100), 100),
     })
+
+
+# =====================================================================
+# Supabase Sync -- push customer/subscription data for public site
+# =====================================================================
+
+def _sync_customer_to_supabase(customer):
+    """Upsert a Django Customer to Supabase customers table."""
+    try:
+        supabase_rest(
+            "customers",
+            method="POST",
+            data={
+                "django_id": customer.id,
+                "stripe_customer_id": customer.stripe_customer_id or None,
+                "email": customer.email,
+                "name": customer.name or "",
+                "product": customer.source or "unknown",
+                "status": "active",
+                "updated_at": timezone.now().isoformat(),
+            },
+            extra_headers={
+                "Prefer": "resolution=merge-duplicates",
+            },
+        )
+        log.info(f"Synced customer {customer.email} to Supabase")
+    except Exception as e:
+        log.warning(f"Supabase customer sync failed for {customer.email}: {e}")
+
+
+def _sync_subscription_to_supabase(subscription):
+    """Upsert a Django Subscription to Supabase subscriptions table."""
+    try:
+        # Find the Supabase customer UUID by django_id
+        customer = subscription.customer
+        rows = []
+        try:
+            from hive_dashboard.supabase_client import supabase_rest_rows
+            rows = supabase_rest_rows(
+                "customers",
+                params={"select": "id", "django_id": f"eq.{customer.id}"},
+            )
+        except Exception:
+            pass
+
+        if not rows:
+            _sync_customer_to_supabase(customer)
+            rows = supabase_rest_rows(
+                "customers",
+                params={"select": "id", "django_id": f"eq.{customer.id}"},
+            )
+
+        sb_customer_id = rows[0]["id"] if rows else None
+        if not sb_customer_id:
+            return
+
+        supabase_rest(
+            "subscriptions",
+            method="POST",
+            data={
+                "customer_id": sb_customer_id,
+                "stripe_subscription_id": subscription.stripe_subscription_id or None,
+                "product": subscription.product or "unknown",
+                "plan_tier": subscription.plan_tier or "starter",
+                "status": subscription.status or "active",
+                "mrr_cents": subscription.mrr_cents or 0,
+                "updated_at": timezone.now().isoformat(),
+            },
+            extra_headers={
+                "Prefer": "resolution=merge-duplicates",
+            },
+        )
+        log.info(f"Synced subscription {subscription.stripe_subscription_id} to Supabase")
+    except Exception as e:
+        log.warning(f"Supabase subscription sync failed: {e}")
+
+
+def _trigger_onboarding(customer, product):
+    """Create onboarding steps in Supabase for a new customer."""
+    try:
+        from hive_dashboard.supabase_client import supabase_rest_rows
+        rows = supabase_rest_rows(
+            "customers",
+            params={"select": "id", "django_id": f"eq.{customer.id}"},
+        )
+        if not rows:
+            return
+        sb_id = rows[0]["id"]
+
+        steps = ["welcome_email", "slack_setup", "api_keys", "first_session", "training_call"]
+        for step in steps:
+            try:
+                supabase_rest(
+                    "onboarding_steps",
+                    method="POST",
+                    data={
+                        "customer_id": sb_id,
+                        "step": step,
+                        "status": "pending",
+                    },
+                    extra_headers={"Prefer": "resolution=merge-duplicates"},
+                )
+            except Exception:
+                pass
+
+        log.info(f"Created onboarding steps for {customer.email} ({product})")
+    except Exception as e:
+        log.warning(f"Onboarding trigger failed for {customer.email}: {e}")

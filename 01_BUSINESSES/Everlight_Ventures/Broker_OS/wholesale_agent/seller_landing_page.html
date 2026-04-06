@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Everlight Ventures | Private Acquisitions</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Segoe UI',Helvetica,Arial,sans-serif;background:#0d0d1a;color:#f0f0f0;line-height:1.6}
+  a{color:#c9a84c;text-decoration:none}
+  a:hover{text-decoration:underline}
+
+  /* ---- HEADER ---- */
+  .header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);padding:24px 0;border-bottom:2px solid #c9a84c}
+  .header-inner{max-width:960px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .logo{font-size:22px;font-weight:700;letter-spacing:1px;color:#fff}
+  .logo span{color:#c9a84c}
+  .header-contact{font-size:14px;color:#ccc}
+  .header-contact a{color:#c9a84c}
+
+  /* ---- HERO ---- */
+  .hero{background:linear-gradient(180deg,#1a1a2e 0%,#0d0d1a 100%);text-align:center;padding:80px 24px 60px}
+  .hero h1{font-size:clamp(28px,5vw,48px);font-weight:700;color:#fff;margin-bottom:16px}
+  .hero h1 span{color:#c9a84c}
+  .hero p.tagline{font-size:clamp(16px,2.5vw,22px);color:#ccc;max-width:640px;margin:0 auto 32px}
+  .hero .cta-btn{display:inline-block;background:#c9a84c;color:#0d0d1a;font-size:18px;font-weight:700;padding:16px 40px;border-radius:6px;text-transform:uppercase;letter-spacing:1px;transition:background .2s}
+  .hero .cta-btn:hover{background:#ddb85e;text-decoration:none}
+
+  /* ---- STEPS ---- */
+  .steps{background:#111125;padding:64px 24px}
+  .steps-inner{max-width:960px;margin:0 auto}
+  .steps h2{text-align:center;font-size:28px;color:#fff;margin-bottom:48px}
+  .steps h2 span{color:#c9a84c}
+  .steps-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:32px}
+  .step{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:10px;padding:32px 24px;text-align:center;transition:transform .2s,border-color .2s}
+  .step:hover{transform:translateY(-4px);border-color:#c9a84c}
+  .step-number{display:inline-flex;align-items:center;justify-content:center;width:48px;height:48px;border-radius:50%;background:#c9a84c;color:#0d0d1a;font-size:22px;font-weight:700;margin-bottom:16px}
+  .step h3{font-size:18px;color:#fff;margin-bottom:8px}
+  .step p{font-size:14px;color:#aaa}
+
+  /* ---- FORM ---- */
+  .form-section{background:#0d0d1a;padding:64px 24px}
+  .form-inner{max-width:560px;margin:0 auto;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:12px;padding:40px 32px}
+  .form-inner h2{text-align:center;font-size:26px;color:#fff;margin-bottom:8px}
+  .form-inner p.subtitle{text-align:center;color:#aaa;margin-bottom:32px;font-size:14px}
+  .form-group{margin-bottom:20px}
+  .form-group label{display:block;font-size:13px;font-weight:600;color:#ccc;margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+  .form-group input{width:100%;padding:12px 16px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#f0f0f0;font-size:15px;transition:border-color .2s}
+  .form-group input:focus{outline:none;border-color:#c9a84c}
+  .form-group input::placeholder{color:#555}
+  .form-submit{width:100%;padding:16px;background:#c9a84c;color:#0d0d1a;font-size:16px;font-weight:700;border:none;border-radius:6px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;transition:background .2s}
+  .form-submit:hover{background:#ddb85e}
+  .optional-note{font-size:11px;color:#666;font-weight:400;text-transform:none;letter-spacing:0}
+
+  /* ---- TRUST ---- */
+  .trust{background:#111125;padding:64px 24px}
+  .trust-inner{max-width:960px;margin:0 auto;text-align:center}
+  .trust h2{font-size:28px;color:#fff;margin-bottom:40px}
+  .trust h2 span{color:#c9a84c}
+  .trust-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px;margin-bottom:40px}
+  .trust-card{background:#1a1a2e;border:1px solid #2a2a4a;border-radius:10px;padding:24px 16px}
+  .trust-card .icon{font-size:32px;margin-bottom:12px}
+  .trust-card h4{font-size:15px;color:#c9a84c;margin-bottom:6px}
+  .trust-card p{font-size:13px;color:#aaa}
+  .markets{margin-top:32px}
+  .markets h3{font-size:16px;color:#fff;margin-bottom:12px}
+  .market-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:10px}
+  .market-tag{background:#1a1a2e;border:1px solid #c9a84c;border-radius:20px;padding:6px 18px;font-size:13px;color:#c9a84c}
+
+  /* ---- FOOTER ---- */
+  .footer{background:#0a0a16;padding:32px 24px;text-align:center;border-top:1px solid #1a1a2e}
+  .footer p{font-size:13px;color:#666;margin-bottom:4px}
+  .footer a{color:#c9a84c}
+
+  /* ---- UTILITY ---- */
+  .divider{width:60px;height:3px;background:#c9a84c;margin:0 auto 24px;border-radius:2px}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">EVERLIGHT <span>VENTURES</span></div>
+    <div class="header-contact">
+      <a href="mailto:rich@everlightventures.io">rich@everlightventures.io</a>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+  <h1>Private <span>Acquisitions</span></h1>
+  <p class="tagline">We buy properties for cash. Fast close. No fees. No hassle.</p>
+  <a href="#contact-form" class="cta-btn">Get My Cash Offer</a>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="steps">
+  <div class="steps-inner">
+    <h2>How It <span>Works</span></h2>
+    <div class="divider"></div>
+    <div class="steps-grid">
+      <div class="step">
+        <div class="step-number">1</div>
+        <h3>Tell Us About Your Property</h3>
+        <p>Fill out the short form below with your property details. No obligation, no pressure -- just information.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <h3>Get a Cash Offer in 24 Hours</h3>
+        <p>Our acquisitions team reviews your property and delivers a fair, no-obligation cash offer within one business day.</p>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <h3>Close on Your Timeline</h3>
+        <p>Pick your closing date -- 7 days or 60 days. We handle title, inspections, and all the paperwork. You just show up and get paid.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT FORM -->
+<section class="form-section" id="contact-form">
+  <div class="form-inner">
+    <h2>Get Your Cash Offer</h2>
+    <p class="subtitle">No fees. No commissions. No repairs needed.</p>
+    <div class="divider"></div>
+    <form action="mailto:rich@everlightventures.io" method="POST" enctype="text/plain">
+      <div class="form-group">
+        <label for="name">Full Name</label>
+        <input type="text" id="name" name="Name" placeholder="John Smith" required>
+      </div>
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" name="Email" placeholder="john@example.com" required>
+      </div>
+      <div class="form-group">
+        <label for="address">Property Address</label>
+        <input type="text" id="address" name="Property Address" placeholder="123 Main St, Atlanta, GA 30301" required>
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone <span class="optional-note">(optional)</span></label>
+        <input type="tel" id="phone" name="Phone" placeholder="(555) 123-4567">
+      </div>
+      <button type="submit" class="form-submit">Get My Cash Offer</button>
+    </form>
+  </div>
+</section>
+
+<!-- TRUST SIGNALS -->
+<section class="trust">
+  <div class="trust-inner">
+    <h2>Why Sellers <span>Choose Us</span></h2>
+    <div class="divider"></div>
+    <div class="trust-grid">
+      <div class="trust-card">
+        <div class="icon">&#9989;</div>
+        <h4>Licensed &amp; Insured</h4>
+        <p>Fully licensed real estate operation backed by Everlight Logistics LLC.</p>
+      </div>
+      <div class="trust-card">
+        <div class="icon">&#11088;</div>
+        <h4>A+ Rated</h4>
+        <p>Committed to the highest standards of integrity and professionalism in every transaction.</p>
+      </div>
+      <div class="trust-card">
+        <div class="icon">&#128176;</div>
+        <h4>Properties Acquired Nationwide</h4>
+        <p>Active acquisitions across multiple major metro markets with a growing portfolio.</p>
+      </div>
+      <div class="trust-card">
+        <div class="icon">&#9201;</div>
+        <h4>Close in as Few as 7 Days</h4>
+        <p>Cash on hand means no bank delays, no appraisals, and no financing contingencies.</p>
+      </div>
+    </div>
+    <div class="markets">
+      <h3>Currently Serving</h3>
+      <div class="market-tags">
+        <span class="market-tag">Atlanta, GA</span>
+        <span class="market-tag">Dallas, TX</span>
+        <span class="market-tag">Cleveland, OH</span>
+        <span class="market-tag">St. Louis, MO</span>
+        <span class="market-tag">Jacksonville, FL</span>
+        <span class="market-tag">Charlotte, NC</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p><strong>Everlight Ventures</strong> | Everlight Logistics LLC</p>
+  <p><a href="mailto:rich@everlightventures.io">rich@everlightventures.io</a> | <a href="https://everlightventures.io" target="_blank">everlightventures.io</a></p>
+  <p style="margin-top:12px;font-size:11px;color:#444">&copy; 2026 Everlight Ventures. All rights reserved.</p>
+</footer>
+
+</body>
+</html>

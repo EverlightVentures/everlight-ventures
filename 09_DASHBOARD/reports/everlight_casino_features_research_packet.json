@@ -1,0 +1,438 @@
+{
+  "meta": {
+    "report_title": "Everlight Casino -- Modern Feature Research Packet",
+    "date": "2026-03-10",
+    "project": "Everlight Casino (Social Casino Blackjack)",
+    "stack": "Lovable (React SPA) + Supabase + Stripe",
+    "researcher": "Everlight Researcher Agent",
+    "monetization_relevance_overall": 9,
+    "risk_notes": [
+      "Web3/NFT features carry regulatory risk in some jurisdictions for social casino apps",
+      "AI voice costs (ElevenLabs) scale with usage -- budget carefully",
+      "iOS does not support Vibration API -- haptics are Android-only on web",
+      "WebXR headset penetration is still low -- treat as future-proof investment, not core",
+      "Battle pass / loot box mechanics may face regional regulation (Belgium, Netherlands)"
+    ]
+  },
+  "categories": [
+    {
+      "id": 1,
+      "category": "AI Integration",
+      "recommendations": [
+        {
+          "name": "AI Dealer Personalities (LLM-Powered)",
+          "description": "Each dealer avatar gets a distinct personality powered by an LLM (Claude or GPT). The dealer makes contextual comments during hands -- teasing on a bust, congratulating on blackjack, making small talk between hands. Uses the OpenAI or Anthropic API with a system prompt per dealer persona.",
+          "why_powerful": "Transforms the game from mechanical card-flipping to a social experience. Players form emotional attachment to favorite dealers, increasing retention. 36% of new mobile game releases now incorporate AI-based mechanics.",
+          "implementation": "Supabase Edge Function calls LLM API with game state context (cards dealt, player streak, time of day). Returns 1-2 sentence dealer comment. Display as chat bubble above dealer avatar. Cache common responses to reduce API costs. Estimated latency: 500-800ms, which is acceptable between hands.",
+          "feasibility": "HIGH -- straightforward API integration. Cost: ~$0.001-0.01 per interaction with GPT-4o-mini or Claude Haiku.",
+          "priority": "MUST-HAVE",
+          "monetization_relevance": 9
+        },
+        {
+          "name": "AI Blackjack Coach / Strategy Advisor",
+          "description": "Optional AI coach that analyzes the player's hand and the dealer's up card, then suggests optimal basic strategy moves. Toggle-able so experienced players can turn it off. Shows win probability percentages.",
+          "why_powerful": "Lowers barrier for new players. Creates a learning loop that increases session time. Can be a premium/game-pass feature.",
+          "implementation": "Basic strategy is a deterministic lookup table -- no AI needed for core logic. Layer an LLM explanation on top for natural language tips like 'You have a soft 17 against a 6 -- doubling down is the play here because the dealer is likely to bust.' Supabase Edge Function or client-side logic.",
+          "feasibility": "HIGH -- basic strategy table is simple. LLM explanations are a premium upsell.",
+          "priority": "HIGH-VALUE",
+          "monetization_relevance": 8
+        },
+        {
+          "name": "AI-Generated Daily Challenges and Missions",
+          "description": "Use an LLM to generate unique daily/weekly challenges based on the player's skill level and play history. Examples: 'Win 3 hands in a row without busting' or 'Play 5 hands using only the Stand or Hit buttons (no splits/doubles).'",
+          "why_powerful": "Infinite content generation. Personalized difficulty keeps all skill levels engaged. Drives daily return behavior.",
+          "implementation": "Nightly Supabase cron job calls LLM with player stats from the database, generates 3 daily + 1 weekly challenge. Store in challenges table. Client fetches on login.",
+          "feasibility": "HIGH -- batch generation is cheap and can be pre-computed.",
+          "priority": "HIGH-VALUE",
+          "monetization_relevance": 7
+        },
+        {
+          "name": "AI Player Analytics Dashboard",
+          "description": "Personal stats page showing AI-analyzed trends: 'You tend to hit too aggressively on soft 17s' or 'Your win rate improves 12% in the evening.' Visual charts plus natural language insights.",
+          "why_powerful": "Creates a reason to keep playing beyond chips. Players who track progress are stickier. Premium feature for game pass subscribers.",
+          "implementation": "Aggregate hand history from Supabase. Run periodic analysis via Edge Function + LLM. Store insights in player_insights table. Display with Recharts or similar React charting library.",
+          "feasibility": "MEDIUM -- requires good hand history tracking and thoughtful prompt engineering.",
+          "priority": "HIGH-VALUE",
+          "monetization_relevance": 8
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "category": "Voice and Audio",
+      "recommendations": [
+        {
+          "name": "AI Voice for Dealers (ElevenLabs TTS)",
+          "description": "Each dealer avatar speaks their lines aloud using AI text-to-speech. Different voice profiles per dealer personality -- smooth jazz dealer, energetic hype dealer, calm zen dealer. Uses ElevenLabs Turbo model for sub-500ms streaming latency.",
+          "why_powerful": "Massive immersion upgrade. Makes the game feel like a real casino experience. Voice is the single biggest differentiator from every other browser-based card game.",
+          "implementation": "ElevenLabs API call from Supabase Edge Function. Stream audio to client via Web Audio API. Pre-generate common phrases ('Blackjack!', 'Dealer busts!', 'Insurance?') and cache as audio files to reduce costs. Only use live TTS for dynamic/personalized dealer comments. ElevenLabs starts at $5/month for 30,000 characters.",
+          "feasibility": "MEDIUM -- API integration is straightforward but cost management requires caching strategy. Pre-generated audio for common phrases keeps costs low.",
+          "priority": "MUST-HAVE",
+          "monetization_relevance": 9
+        },
+        {
+          "name": "Spatial Audio / Ambient Casino Soundscape",
+          "description": "Web Audio API-powered ambient sounds: chip clinking, card shuffling, background chatter, slot machine ambiance. Sounds pan based on table position. Volume adjusts based on game state (quieter during decision-making, louder on wins).",
+          "why_powerful": "Audio is 50% of immersion and most web games ignore it completely. Creates the 'casino feel' that keeps people playing.",
+          "implementation": "Web Audio API is fully supported in all modern browsers. Use Howler.js or Tone.js for React-friendly audio management. Layer 4-6 ambient tracks with dynamic mixing. Total audio asset size: ~2-5MB compressed.",
+          "feasibility": "HIGH -- well-supported APIs, lightweight implementation.",
+          "priority": "MUST-HAVE",
+          "monetization_relevance": 7
+        },
+        {
+          "name": "Voice Chat at Tables (WebRTC)",
+          "description": "Optional voice chat between players at the same table. Push-to-talk or always-on with noise gate.",
+          "why_powerful": "Social casino is about the social. Voice chat at a blackjack table mimics real casino energy.",
+          "implementation": "WebRTC for peer-to-peer audio. Libraries like LiveKit or Daily.co provide React SDKs. Supabase Realtime for signaling. Moderation is the hard part -- need a report/mute system.",
+          "feasibility": "LOW-MEDIUM -- technically possible but moderation, abuse prevention, and infrastructure costs are significant. Better as a Phase 2 feature.",
+          "priority": "NICE-TO-HAVE",
+          "monetization_relevance": 5
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "category": "AR / VR / XR and 3D",
+      "recommendations": [
+        {
+          "name": "3D Card Animations with React Three Fiber",
+          "description": "Replace flat 2D card sprites with 3D card models that flip, spin, and deal with physics-based animations. Cards catch light realistically. Chip stacks are 3D with satisfying stacking/unstacking animations.",
+          "why_powerful": "Major visual upgrade that makes the game feel premium. 3D browser games grew 4.9x in two years. WebGPU support in Three.js (since r171) means buttery performance.",
+          "implementation": "React Three Fiber integrates directly into your React app. Model cards as simple box geometries with texture maps. Use @react-three/drei for camera controls, shadows, and post-processing. Automatic WebGL 2 fallback for older browsers. Can be implemented incrementally -- start with card flip animations, then add table environment.",
+          "feasibility": "MEDIUM -- React Three Fiber has great React integration but requires 3D development skills. Start small with card animations only.",
+          "priority": "HIGH-VALUE",
+          "monetization_relevance": 8
+        },
+        {
+          "name": "3D Casino Table Environment",
+          "description": "Full 3D felt table with camera that can be rotated slightly. Other players' avatars sit around the table in 3D space. Dealer stands behind the table. Lighting changes based on time of day or table theme.",
+          "why_powerful": "Creates the premium feel that justifies virtual chip purchases. Screenshots and streams look impressive, driving organic growth.",
+          "implementation": "React Three Fiber scene with a table model (can be procedurally generated or a low-poly GLTF). Player avatars as 2D sprites on 3D cards or simple 3D busts. Post-processing bloom for neon table themes. Keep polygon count low for mobile performance.",
+          "feasibility": "MEDIUM -- more complex than card animations alone. Good Phase 2 target.",
+          "priority": "HIGH-VALUE",
+          "monetization_relevance": 8
+        },
+        {
+          "name": "WebXR VR Mode",
+          "description": "Optional VR mode for headset users. Sit at a virtual blackjack table in VR. Look around the casino. Pick up and throw cards with hand tracking.",
+          "why_powerful": "Future-proof investment. VR headset adoption is growing. Could be a headline marketing feature even if few use it.",
+          "implementation": "WebXR API + Three.js have native support. React Three Fiber via @react-three/xr. Requires the 3D table environment as a prerequisite. Meta Quest browser supports WebXR natively.",
+          "feasibility": "LOW -- requires full 3D environment first. Small audience. Marketing value exceeds usage value.",
+          "priority": "NICE-TO-HAVE",
+          "monetization_relevance": 4
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "category": "Personalization and Adaptive AI",
+      "recommendations": [
+        {
+          "name": "Player Style Profiling",
+          "description": "AI analyzes hand history to classify player style: Conservative (stands early), Aggressive (always doubles), Balanced, Learner. Display as a fun badge on profile. Dealer AI adapts commentary based on style.",
+          "why_powerful": "Players love being categorized (like personality tests). Creates shareable identity. Dealers who 'know you' feel personal.",
+          "implementation": "Simple statistical analysis of hit/stand/double/split ratios from hand_history table in Supabase. No LLM needed for classification -- just thresholds. LLM generates the personality description once. Update weekly.",
+          "feasibility": "HIGH -- pure data analysis on existing game data.",
+          "priority": "HIGH-VALUE",
+          "monetization_relevance": 7
+        },
+        {
+          "name": "Adaptive Dealer Difficulty / Table Selection",
+          "description": "Recommend tables based on player skill. New players get tables with slower pace and more coaching hints. Experienced players get faster-paced tables with side bets. The game subtly adjusts to keep players in flow state.",
+          "why_powerful": "Prevents new player frustration and experienced player boredom. Flow state = longer sessions = more monetization opportunities.",
+          "implementation": "Player skill score derived from hands played, win rate, and strategy accuracy. Supabase query matches players to appropriate tables. No actual odds manipulation needed -- just pacing and feature gating.",
+          "feasibility": "HIGH -- matchmaking logic on existing data.",
+          "priority": "HIGH-VALUE",
+          "monetization_relevance": 8
+        },
+        {
+          "name": "Personalized Bonus Offers",
+          "description": "AI determines optimal timing and size of bonus chip offers based on player behavior. Player on a losing streak? Offer a comeback bonus. Player about to churn (no login in 3 days)? Send a push notification with free chips.",
+          "why_powerful": "Targeted retention is 3-5x more effective than blanket promotions. Reduces churn while optimizing spend.",
+          "implementation": "Supabase cron job analyzes player activity patterns. Simple rules engine (no ML needed initially): if last_login > 48h, trigger re-engagement. If current_chips < 100 AND session_count > 10, offer bonus. Send via web push notifications.",
+          "feasibility": "HIGH -- rules-based system, no ML required.",
+          "priority": "MUST-HAVE",
+          "monetization_relevance": 10
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "category": "Web3 and Blockchain",
+      "recommendations": [
+        {
+          "name": "NFT Card Backs and Table Skins",
+          "description": "Limited-edition card back designs and table felt skins minted as NFTs on a low-cost chain (Polygon, Base, or Solana). Players can trade, sell, and showcase. Purely cosmetic -- no gameplay advantage.",
+          "why_powerful": "Creates scarcity and collector culture. NFT holders become brand ambassadors. Secondary market royalties generate passive revenue. The term 'digital collectibles' has replaced 'NFT' in 2026 and is seeing renewed interest with utility focus.",
+          "implementation": "Thirdweb or Crossmint SDK for gasless minting (user does not need a wallet). Store NFT ownership reference in Supabase. Display owned skins client-side. Estimated cost: <$0.01 per mint on Polygon/Base.",
+          "feasibility": "MEDIUM -- SDK integration is straightforward but requires legal review for social casino context. Gasless minting removes user friction.",
+          "priority": "NICE-TO-HAVE",
+          "monetization_relevance": 6,
+          "risk_notes": "Consult legal counsel on NFT + social casino intersection. Avoid anything that could be construed as real-money value for virtual chips."
+        },
+        {
+          "name": "On-Chain Achievement Badges (Soulbound Tokens)",
+          "description": "Non-transferable achievement badges minted on-chain. '1000 Hands Played', 'First Blackjack', 'Tournament Champion'. Soulbound means they cannot be sold -- purely proof of accomplishment.",
+          "why_powerful": "Portable reputation across games. Players can flex achievements on social media. Zero regulatory risk since soulbound tokens have no market value.",
+          "implementation": "ERC-5192 (soulbound) standard on Base or Polygon. Mint via Supabase Edge Function when achievement triggered. Display on player profile.",
+          "feasibility": "MEDIUM -- simpler than tradeable NFTs since no marketplace needed.",
+          "priority": "NICE-TO-HAVE",
+          "monetization_relevance": 4
+        },
+        {
+          "name": "Token-Gated VIP Rooms",
+          "description": "Hold a specific NFT or token to access exclusive VIP table rooms with unique themes, higher limits, and exclusive dealer personalities.",
+          "why_powerful": "Creates aspirational tiers. NFT holders feel special. Drives demand for NFT purchases.",
+          "implementation": "Check wallet for token ownership via Thirdweb SDK. Gate Supabase room access based on verification. Wallet connection via WalletConnect or embedded wallet.",
+          "feasibility": "MEDIUM -- requires wallet integration but Thirdweb makes it relatively painless.",
+          "priority": "NICE-TO-HAVE",
+          "monetization_relevance": 6
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "category": "Live Events",
+      "recommendations": [
+        {
+          "name": "Weekly Tournament System",
+          "description": "Scheduled tournaments with buy-in (virtual chips), brackets, and prize pools. Sit-and-go format: 8 players, elimination rounds. Leaderboard tracks season standings.",
+          "why_powerful": "Tournaments are the top retention driver in social casinos. Creates appointment viewing. Players return specifically for tournament times. SpinBlitz and LuckyStake both use tournaments as core features.",
+          "implementation": "Supabase tables for tournament brackets, registrations, and results. Realtime subscriptions for live bracket updates. Cron job to start tournaments at scheduled times. React bracket visualization component.",
+          "feasibility": "MEDIUM -- requires bracket logic and scheduling but no new infrastructure.",
+          "priority": "MUST-HAVE",
+          "monetization_relevance": 10
+        },
+        {
+          "name": "Seasonal Events and Themed Tables",
+          "description": "Monthly themes with unique table designs, limited-time dealer costumes, exclusive card backs, and bonus chip multipliers. Halloween casino, Holiday casino, Summer Beach casino, etc.",
+          "why_powerful": "Creates FOMO and urgency. Limited-time cosmetics drive purchases. Content calendar drives marketing.",
+          "implementation": "Themed CSS/asset swaps on a schedule. Store event config in Supabase. Seasonal achievement tracks. Time-limited items in the shop.",
+          "feasibility": "HIGH -- primarily an art/design effort. Code infrastructure is simple timer-based gating.",
+          "priority": "MUST-HAVE",
+          "monetization_relevance": 9
+        },
+        {
+          "name": "Live Streamed Dealer Events",
+          "description": "Special events where a real human dealer streams via webcam to a virtual table. Players interact through chat. Limited seats create exclusivity.",
+          "why_powerful": "Creates appointment content. Streamable moments for social media. Celebrity dealer partnerships possible.",
+          "implementation": "Embed a live stream (YouTube Live, Twitch, or Mux) in the game UI. Overlay game mechanics on the stream. Chat via Supabase Realtime.",
+          "feasibility": "LOW-MEDIUM -- requires a human dealer setup, streaming infrastructure, and scheduling. Good for special events, not daily.",
+          "priority": "NICE-TO-HAVE",
+          "monetization_relevance": 7
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "category": "Monetization Innovation",
+      "recommendations": [
+        {
+          "name": "Casino Season Pass (Battle Pass)",
+          "description": "Monthly/seasonal pass with free and premium tracks. Free track: basic rewards (small chip bonuses, common emotes). Premium track ($4.99-$9.99): exclusive dealer skins, rare card backs, chip multipliers, VIP table access. 30 tiers, unlock via XP from playing.",
+          "why_powerful": "41% of top-grossing games use season passes. Creates predictable recurring revenue. Players who buy a pass play 3-5x more to 'get their money's worth.' Typical $5-15 price point is proven.",
+          "implementation": "Season pass table in Supabase with tier rewards. XP accumulation tracked per player per season. Stripe checkout for pass purchase. React component showing progress bar and upcoming rewards. Reset each season.",
+          "feasibility": "HIGH -- standard e-commerce + progress tracking. Already have Stripe.",
+          "priority": "MUST-HAVE",
+          "monetization_relevance": 10
+        },
+        {
+          "name": "Cosmetic Marketplace",
+          "description": "Shop for card backs, table themes, chip designs, dealer outfit skins, avatar frames, emote packs, and chat effects. Rotating 'daily deals' and 'featured items.'",
+          "why_powerful": "Cosmetics are the heart of successful F2P monetization. No gameplay advantage means no pay-to-win complaints. Dynamic marketplace with rotating stock creates urgency.",
+          "implementation": "Products table in Supabase. Stripe for purchases. Player inventory table. Client-side rendering of owned cosmetics. Admin panel for managing the shop catalog.",
+          "feasibility": "HIGH -- inventory system + Stripe. Biggest effort is creating the cosmetic assets.",
+          "priority": "MUST-HAVE",
+          "monetization_relevance": 10
+        },
+        {
+          "name": "VIP Subscription Tiers",
+          "description": "Monthly subscription with escalating perks. Silver ($2.99): daily chip bonus, exclusive emote. Gold ($5.99): all Silver perks + priority tournament entry + AI coach. Platinum ($9.99): all Gold + VIP tables + monthly exclusive cosmetic + ad-free.",
+          "why_powerful": "Predictable MRR. VIP subscriptions are the dominant model in social casino. Tiered pricing captures value across willingness-to-pay segments.",
+          "implementation": "Stripe Subscriptions with webhooks to Supabase. Subscription status gates feature access. Daily chip bonus via Supabase cron job checking active subscriptions.",
+          "feasibility": "HIGH -- Stripe subscriptions are well-documented. Already have Stripe.",
+          "priority": "MUST-HAVE",
+          "monetization_relevance": 10
+        },
+        {
+          "name": "Lucky Loot Boxes (Ethical Implementation)",
+          "description": "Mystery cosmetic boxes purchasable with virtual chips (not real money) or as season pass rewards. Always show exact odds. No duplicates until all items in tier are collected. Never contain gameplay advantages.",
+          "why_powerful": "Excitement of opening loot boxes drives engagement. Using virtual chips (not real money) avoids most regulatory issues. Transparent odds build trust.",
+          "implementation": "Loot table in Supabase with item rarities and probabilities. Client-side opening animation. Dupe protection logic server-side. Display odds prominently in UI.",
+          "feasibility": "HIGH -- random selection from weighted table. Animation is the main development effort.",
+          "priority": "HIGH-VALUE",
+          "monetization_relevance": 8,
+          "risk_notes": "Purchase with virtual chips only (not direct real money) to stay clear of gambling regulations. Show odds. Check Belgium/Netherlands regulations if serving EU."
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "category": "Social Innovation",
+      "recommendations": [
+        {
+          "name": "Casino Clubs / Guilds",
+          "description": "Player-created clubs with shared chip banks, club leaderboards, club tournaments, and club chat. Club XP earned collectively. Weekly club challenges. Supercell's latest Brawl Stars update features partner clubs with exclusive cosmetics.",
+          "why_powerful": "Social bonds are the top retention mechanism. Players who join a club have 3-5x higher retention than solo players. Club competition drives engagement organically.",
+          "implementation": "Clubs table in Supabase with members, roles (owner/officer/member), and shared stats. Club chat via Supabase Realtime. Club leaderboard computed weekly. Club tournaments as a special bracket type.",
+          "feasibility": "MEDIUM -- standard social features but requires moderation tools and club management UI.",
+          "priority": "MUST-HAVE",
+          "monetization_relevance": 9
+        },
+        {
+          "name": "Spectator / Watch Mode",
+          "description": "Any player can spectate live tables and watch high-stakes games. Spectators can cheer/react with emotes. 'Featured Table' highlights exciting games on the lobby screen.",
+          "why_powerful": "Creates content and community even for players who are out of chips. Watching high-rollers is aspirational. Drives chip purchases ('I want to play at that level').",
+          "implementation": "Supabase Realtime already powers the multiplayer game state. Spectator mode is a read-only subscription to the same channel. Add spectator count display and emote reactions overlay.",
+          "feasibility": "HIGH -- minimal new infrastructure since realtime game state already exists.",
+          "priority": "HIGH-VALUE",
+          "monetization_relevance": 8
+        },
+        {
+          "name": "Content Creator Tools / Replay System",
+          "description": "Record and share memorable hands as short clips. Auto-generate highlight reels of best plays. Share to social media with branded overlays. Fortnite's creator economy shows UGC drives 36.5% of total playtime.",
+          "why_powerful": "Free marketing through player-generated content. Branded clips spread on social media. Replays create emotional moments worth sharing.",
+          "implementation": "Store hand sequences in replay_history table. Client-side replay renderer plays back the hand with animations. 'Share' button generates a video via Canvas API recording or a shareable link that replays in-browser.",
+          "feasibility": "MEDIUM -- replay renderer is moderate effort. Video export is complex but shareable links are simpler.",
+          "priority": "HIGH-VALUE",
+          "monetization_relevance": 7
+        },
+        {
+          "name": "In-Game Social Feed / Activity Stream",
+          "description": "Live feed showing friend activity: 'Alex just hit a Blackjack!', 'Casino Club Aces won the weekly tournament', 'New seasonal table unlocked.' Similar to Clash Royale's new Social Tab replacing the Clan Tab.",
+          "why_powerful": "Creates social pressure and FOMO. Players see friends playing and want to join. Activity feeds drive re-engagement.",
+          "implementation": "Activity events table in Supabase. Write events on key game actions. Client-side feed component with Supabase Realtime subscription for live updates.",
+          "feasibility": "HIGH -- event logging + feed UI.",
+          "priority": "HIGH-VALUE",
+          "monetization_relevance": 7
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "category": "Haptics and Sensory",
+      "recommendations": [
+        {
+          "name": "Vibration Feedback on Key Game Events (Android)",
+          "description": "Short haptic pulses on: card deal (light tap), blackjack win (strong double pulse), bust (long rumble), chip collection (quick staccato). Uses the Web Vibration API.",
+          "why_powerful": "Tactile feedback makes wins feel more rewarding and losses more real. Adds a physical dimension to a digital game. WebHaptics library provides React-native integration.",
+          "implementation": "navigator.vibrate() API calls triggered on game events. Pattern library: deal = [30], blackjack = [100, 50, 100], bust = [200], chips = [20, 20, 20, 20]. Use WebHaptics npm package for React integration. Feature detection for unsupported browsers (iOS).",
+          "feasibility": "HIGH -- trivial to implement. One-liner API calls.",
+          "priority": "HIGH-VALUE",
+          "monetization_relevance": 5,
+          "risk_notes": "iOS Safari does NOT support Vibration API. This is Android Chrome and desktop only. Degrade gracefully."
+        },
+        {
+          "name": "Screen Effects and Visual Feedback",
+          "description": "Screen shake on bust. Gold particle explosion on blackjack. Confetti rain on jackpot. Subtle screen glow color changes based on win/loss streaks. CSS animations and canvas overlays.",
+          "why_powerful": "Visual juice makes the game feel alive. Every interaction should have satisfying feedback. Works on ALL platforms including iOS.",
+          "implementation": "CSS keyframe animations for screen shake. Canvas overlay or React-based particle library (tsParticles or react-particles) for confetti/explosions. CSS filter changes for ambient glow. Zero API cost -- pure client-side.",
+          "feasibility": "HIGH -- CSS animations and particle libraries are lightweight and well-supported.",
+          "priority": "MUST-HAVE",
+          "monetization_relevance": 7
+        },
+        {
+          "name": "Dynamic Theme Based on Time of Day",
+          "description": "Game environment shifts subtly: warm golden lighting in evening, cool blue at night, bright and airy in morning. Matches real-world time of day or player preference.",
+          "why_powerful": "Creates a living, breathing environment. Players notice and appreciate the attention to detail. Encourages play at different times to see different moods.",
+          "implementation": "CSS custom properties (variables) for theme colors. JavaScript Date check on load to set theme. Optional override in settings. Smooth CSS transitions between themes.",
+          "feasibility": "HIGH -- CSS variables and a time check. Minimal effort, maximum polish.",
+          "priority": "HIGH-VALUE",
+          "monetization_relevance": 4
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "category": "Gamification",
+      "recommendations": [
+        {
+          "name": "Multi-Track XP System",
+          "description": "Separate XP tracks for different activities: Play XP (from hands), Social XP (from chat, friends, clubs), Collector XP (from cosmetics, achievements). Each track has its own level with themed rewards. Total player level is the sum.",
+          "why_powerful": "Multiple progression paths mean every player type has something to chase. Social players level up through social XP even if they lose chips. Prevents the 'nothing left to do' plateau.",
+          "implementation": "Three XP columns in player profile table. XP award rules in a config table. Level thresholds follow a curve (e.g., level N requires N*100 + N^1.5 XP). Supabase trigger or Edge Function awards XP on qualifying events.",
+          "feasibility": "HIGH -- database columns and event triggers.",
+          "priority": "MUST-HAVE",
+          "monetization_relevance": 8
+        },
+        {
+          "name": "Daily Login Streak with Escalating Rewards",
+          "description": "Day 1: 100 chips. Day 2: 200 chips. Day 3: 500 chips. Day 7: 2000 chips + rare emote. Day 30: exclusive card back. Missing a day resets the streak (or use a 'streak freeze' consumable that can be purchased).",
+          "why_powerful": "Taps into loss aversion -- players do not want to break their streak. Streak freezes are a monetizable consumable. Simple but incredibly effective for daily retention.",
+          "implementation": "last_login_date and streak_count columns on player table. Check on login, increment or reset. Reward lookup table. Streak freeze as a purchasable item in shop.",
+          "feasibility": "HIGH -- trivial database logic.",
+          "priority": "MUST-HAVE",
+          "monetization_relevance": 9
+        },
+        {
+          "name": "Achievement System with Rarity Tiers",
+          "description": "Achievements in tiers: Common (play 10 hands), Rare (win 5 in a row), Epic (hit blackjack 3 times in one session), Legendary (win a tournament). Display on profile with rarity colors. Achievement hunting becomes a meta-game.",
+          "why_powerful": "Achievements provide goals beyond chip accumulation. Rarity creates bragging rights. Achievement hunters are some of the most engaged players in any game.",
+          "implementation": "Achievements table with conditions, rarity, and reward. Server-side check on game events against achievement conditions. Unlock notification component. Profile display grid.",
+          "feasibility": "HIGH -- event-driven checks against a conditions table.",
+          "priority": "HIGH-VALUE (you already have achievements -- enhance with rarity tiers)",
+          "monetization_relevance": 7
+        },
+        {
+          "name": "Weekly Missions Board",
+          "description": "3 rotating weekly missions with bigger rewards than dailies. Complete all 3 for a bonus reward. Examples: 'Play at 3 different tables this week', 'Send 10 emotes to other players', 'Join a club tournament.'",
+          "why_powerful": "Drives exploration of different game features. Weekly cadence captures the weekend-warrior player segment. Bonus for completing all 3 creates a mini-quest.",
+          "implementation": "Missions generated weekly (AI-generated or from a curated pool). Progress tracked via event counters in Supabase. UI shows mission card with progress bar.",
+          "feasibility": "HIGH -- counter-based tracking on existing events.",
+          "priority": "HIGH-VALUE",
+          "monetization_relevance": 7
+        }
+      ]
+    }
+  ],
+  "implementation_priority_matrix": {
+    "phase_1_must_haves": [
+      "AI Dealer Personalities",
+      "AI Voice for Dealers (ElevenLabs)",
+      "Ambient Casino Soundscape",
+      "Personalized Bonus Offers",
+      "Weekly Tournament System",
+      "Seasonal Events and Themed Tables",
+      "Casino Season Pass (Battle Pass)",
+      "Cosmetic Marketplace",
+      "VIP Subscription Tiers",
+      "Casino Clubs / Guilds",
+      "Screen Effects and Visual Feedback",
+      "Multi-Track XP System",
+      "Daily Login Streak"
+    ],
+    "phase_2_high_value": [
+      "AI Blackjack Coach",
+      "AI-Generated Daily Challenges",
+      "AI Player Analytics Dashboard",
+      "Player Style Profiling",
+      "Adaptive Dealer Difficulty",
+      "3D Card Animations (React Three Fiber)",
+      "Spectator / Watch Mode",
+      "Content Creator Tools / Replay System",
+      "In-Game Social Feed",
+      "Vibration Feedback (Android)",
+      "Dynamic Time-of-Day Theme",
+      "Achievement Rarity Tiers",
+      "Weekly Missions Board",
+      "Lucky Loot Boxes (Ethical)"
+    ],
+    "phase_3_nice_to_have": [
+      "3D Casino Table Environment",
+      "WebXR VR Mode",
+      "Voice Chat at Tables",
+      "NFT Card Backs",
+      "On-Chain Achievement Badges",
+      "Token-Gated VIP Rooms",
+      "Live Streamed Dealer Events"
+    ]
+  },
+  "estimated_monthly_costs": {
+    "ai_dealer_llm_calls": "$10-50/month (GPT-4o-mini at scale with caching)",
+    "elevenlabs_tts": "$5-22/month (Starter plan + pre-cached common phrases)",
+    "supabase": "$25-75/month (Pro plan for realtime and edge functions)",
+    "stripe_fees": "2.9% + $0.30 per transaction",
+    "nft_minting": "<$1/month for gasless mints on Polygon/Base",
+    "total_infrastructure": "$50-150/month at launch, scaling with users"
+  }
+}

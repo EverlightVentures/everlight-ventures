@@ -1,7 +1,7 @@
 """
 Broker OS - Views
 
-Dashboard + JSON API endpoints + Stripe payment integration.
+Dashboard + JSON API endpoints + Stripe payment integration + Wholesale pipeline.
 """
 import json
 import logging
@@ -9,13 +9,23 @@ import os
 from decimal import Decimal
 
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
+from django.db.models import Avg, Count, Q, Sum
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 
-from .models import BrokerMatch, Deal, LeadProfile, OfferListing
+from hive_dashboard.security import internal_api_required, staff_or_internal_required
+from .models import BrokerMatch, ClientDocument, ClientFile, Deal, InvestorBuyer, LeadProfile, OfferListing, PropertyLead
+from .wholesale import (
+    generate_buyer_blast,
+    generate_outreach_sms,
+    import_csv_leads_from_upload,
+    match_property_to_buyers,
+    score_property,
+)
 from .services import (
     check_stripe_payment_status,
     close_deal,
@@ -39,6 +49,7 @@ logger = logging.getLogger(__name__)
 # DASHBOARD
 # ---------------------------------------------------------------------------
 
+@login_required
 @staff_member_required
 def dashboard(request):
     summary = get_commission_summary()
@@ -62,6 +73,7 @@ def dashboard(request):
 # ---------------------------------------------------------------------------
 
 @csrf_exempt
+@internal_api_required
 @require_POST
 def api_ingest_lead(request):
     try:
@@ -83,6 +95,7 @@ def api_ingest_lead(request):
 # ---------------------------------------------------------------------------
 
 @csrf_exempt
+@internal_api_required
 @require_POST
 def api_ingest_offer(request):
     try:
@@ -103,7 +116,7 @@ def api_ingest_offer(request):
 # API: Run matching engine
 # ---------------------------------------------------------------------------
 
-@staff_member_required
+@staff_or_internal_required
 def api_run_matching(request):
     min_score = float(request.GET.get("min_score", 40.0))
     dry_run   = request.GET.get("dry_run", "false").lower() == "true"
@@ -117,7 +130,7 @@ def api_run_matching(request):
 
 @csrf_exempt
 @require_POST
-@staff_member_required
+@staff_or_internal_required
 def api_approve_match(request, match_id):
     match = get_object_or_404(BrokerMatch, id=match_id)
     try:
@@ -142,7 +155,7 @@ def api_approve_match(request, match_id):
 
 @csrf_exempt
 @require_POST
-@staff_member_required
+@staff_or_internal_required
 def api_close_deal(request, deal_id):
     deal = get_object_or_404(Deal, id=deal_id)
     body = {}
@@ -159,7 +172,7 @@ def api_close_deal(request, deal_id):
 # API: Commission summary
 # ---------------------------------------------------------------------------
 
-@staff_member_required
+@staff_or_internal_required
 def api_commission_summary(request):
     return JsonResponse(get_commission_summary())
 
@@ -316,7 +329,7 @@ def stripe_webhook(request):
 
 @csrf_exempt
 @require_POST
-@staff_member_required
+@staff_or_internal_required
 def api_create_invoice(request, deal_id):
     """
     Staff endpoint to generate a Stripe invoice for a deal's finder fee.
@@ -355,7 +368,7 @@ def api_create_invoice(request, deal_id):
 
 @csrf_exempt
 @require_POST
-@staff_member_required
+@staff_or_internal_required
 def api_create_checkout(request, deal_id):
     """
     Staff endpoint to create a Stripe Checkout link for a deal's finder fee.
@@ -390,7 +403,7 @@ def api_create_checkout(request, deal_id):
 # STRIPE: Check payment status for a deal (staff only)
 # ---------------------------------------------------------------------------
 
-@staff_member_required
+@staff_or_internal_required
 def api_check_payment(request, deal_id):
     """
     Staff endpoint to check the Stripe payment status for a deal.
@@ -412,7 +425,7 @@ def api_check_payment(request, deal_id):
 
 @csrf_exempt
 @require_POST
-@staff_member_required
+@staff_or_internal_required
 def api_generate_contract(request, deal_id):
     """
     Staff endpoint to generate a Finder Fee Agreement for a deal.
@@ -456,3 +469,472 @@ def api_generate_contract(request, deal_id):
     except Exception as e:
         logger.error(f"Contract generation failed for deal {deal_id}: {e}")
         return JsonResponse({"ok": False, "error": str(e)}, status=500)
+
+
+# ===========================================================================
+# WHOLESALE PIPELINE
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Wholesale Dashboard
+# ---------------------------------------------------------------------------
+
+@login_required
+@staff_member_required
+def wholesale_dashboard(request):
+    """
+    Wholesale real estate pipeline dashboard.
+
+    Shows property leads by status, top-scored leads, buyer count,
+    and pipeline value stats.
+    """
+    leads = PropertyLead.objects.all()
+
+    # Status counts
+    status_counts = {}
+    for row in leads.values("status").annotate(count=Count("id")):
+        status_counts[row["status"]] = row["count"]
+
+    # Aggregated stats
+    total_leads = leads.count()
+    avg_score = leads.aggregate(avg=Avg("motivation_score"))["avg"] or 0
+    total_buyers = InvestorBuyer.objects.filter(is_active=True).count()
+
+    # Pipeline value -- sum of assignment fees for leads that are under_contract or assigned
+    pipeline_qs = leads.filter(status__in=["under_contract", "assigned"])
+    pipeline_value = pipeline_qs.aggregate(total=Sum("assignment_fee"))["total"] or 0
+
+    # Top 10 highest-scored leads
+    top_leads = leads.order_by("-motivation_score", "-created_at")[:10]
+
+    # All leads for table (with optional filters)
+    filter_status = request.GET.get("status", "")
+    filter_lead_type = request.GET.get("lead_type", "")
+    filter_state = request.GET.get("state", "")
+    filter_min_score = request.GET.get("min_score", "")
+
+    filtered_leads = leads
+    if filter_status:
+        filtered_leads = filtered_leads.filter(status=filter_status)
+    if filter_lead_type:
+        filtered_leads = filtered_leads.filter(lead_type=filter_lead_type)
+    if filter_state:
+        filtered_leads = filtered_leads.filter(state__iexact=filter_state)
+    if filter_min_score:
+        try:
+            filtered_leads = filtered_leads.filter(motivation_score__gte=int(filter_min_score))
+        except ValueError:
+            pass
+
+    filtered_leads = filtered_leads.order_by("-motivation_score", "-created_at")[:100]
+
+    return render(request, "broker_ops/wholesale.html", {
+        "active_page": "wholesale",
+        "status_counts": status_counts,
+        "total_leads": total_leads,
+        "avg_score": avg_score,
+        "total_buyers": total_buyers,
+        "pipeline_value": pipeline_value,
+        "top_leads": top_leads,
+        "leads": filtered_leads,
+        # Current filters for the template
+        "filter_status": filter_status,
+        "filter_lead_type": filter_lead_type,
+        "filter_state": filter_state,
+        "filter_min_score": filter_min_score,
+        # Choices for filter dropdowns
+        "status_choices": PropertyLead.STATUS_CHOICES,
+        "lead_type_choices": PropertyLead.LEAD_TYPE_CHOICES,
+    })
+
+
+# ---------------------------------------------------------------------------
+# API: Import CSV leads
+# ---------------------------------------------------------------------------
+
+@csrf_exempt
+@require_POST
+@staff_or_internal_required
+def api_import_leads(request):
+    """
+    Staff endpoint to import property leads from a CSV file upload.
+
+    POST /broker/api/import-leads/
+    Content-Type: multipart/form-data with a 'file' field.
+    Optional form field 'source' (default: "propstream").
+    """
+    csv_file = request.FILES.get("file")
+    if not csv_file:
+        return JsonResponse({"error": "No file uploaded. Include a 'file' field."}, status=400)
+
+    if not csv_file.name.lower().endswith(".csv"):
+        return JsonResponse({"error": "File must be a .csv"}, status=400)
+
+    # Cap file size at 10MB
+    if csv_file.size > 10 * 1024 * 1024:
+        return JsonResponse({"error": "File too large. Max 10MB."}, status=400)
+
+    source = request.POST.get("source", "propstream")
+    result = import_csv_leads_from_upload(csv_file, source=source)
+    return JsonResponse({"ok": True, **result})
+
+
+# ---------------------------------------------------------------------------
+# API: Re-score a property lead
+# ---------------------------------------------------------------------------
+
+@csrf_exempt
+@require_POST
+@staff_or_internal_required
+def api_score_lead(request, lead_id):
+    """
+    Staff endpoint to re-score a property lead's motivation score.
+
+    POST /broker/api/score-lead/<uuid>/
+    """
+    lead = get_object_or_404(PropertyLead, id=lead_id)
+    old_score = lead.motivation_score
+    new_score = score_property(lead)
+    lead.motivation_score = new_score
+    lead.save(update_fields=["motivation_score", "updated_at"])
+
+    return JsonResponse({
+        "ok": True,
+        "lead_id": str(lead.id),
+        "old_score": old_score,
+        "new_score": new_score,
+    })
+
+
+# ---------------------------------------------------------------------------
+# API: Match buyers for a property
+# ---------------------------------------------------------------------------
+
+@staff_or_internal_required
+def api_match_buyers(request, lead_id):
+    """
+    Staff endpoint to find matching cash buyers for a property lead.
+
+    GET /broker/api/match-buyers/<uuid>/
+    """
+    lead = get_object_or_404(PropertyLead, id=lead_id)
+    matches = match_property_to_buyers(lead)
+
+    return JsonResponse({
+        "ok": True,
+        "lead_id": str(lead.id),
+        "address": lead.address,
+        "match_count": len(matches),
+        "matches": matches,
+    })
+
+
+# ---------------------------------------------------------------------------
+# API: Generate outreach SMS
+# ---------------------------------------------------------------------------
+
+@staff_or_internal_required
+def api_generate_outreach(request, lead_id):
+    """
+    Staff endpoint to generate an SMS outreach message for a property lead.
+
+    GET /broker/api/outreach/<uuid>/
+    """
+    lead = get_object_or_404(PropertyLead, id=lead_id)
+    sms = generate_outreach_sms(lead)
+
+    return JsonResponse({
+        "ok": True,
+        "lead_id": str(lead.id),
+        "owner_name": lead.owner_name,
+        "owner_phone": lead.owner_phone,
+        "sms_text": sms,
+        "char_count": len(sms),
+    })
+
+
+# ---------------------------------------------------------------------------
+# PUBLIC: Investor buyer signup (no auth required)
+# ---------------------------------------------------------------------------
+
+@csrf_exempt
+@require_POST
+def public_investor_signup(request):
+    """
+    Public endpoint for cash buyers / investors to join our buyer list.
+
+    POST /broker/investor-signup/
+    Accepts JSON body with buyer details.
+    Also pushes to Supabase broker_leads table.
+    """
+    rate_limited = _check_rate_limit(request, "public_investor_signup")
+    if rate_limited:
+        return rate_limited
+
+    try:
+        payload = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    required = ["name", "email"]
+    missing = [f for f in required if not payload.get(f)]
+    if missing:
+        return JsonResponse({"error": f"Missing fields: {missing}"}, status=400)
+
+    # Sanitize inputs
+    name = str(payload.get("name", ""))[:200].strip()
+    email = str(payload.get("email", "")).strip().lower()[:254]
+    phone = str(payload.get("phone", ""))[:20].strip()
+    company = str(payload.get("company", ""))[:200].strip()
+
+    # Validate buyer_type against choices
+    valid_buyer_types = [c[0] for c in InvestorBuyer.BUYER_TYPE_CHOICES]
+    buyer_type = str(payload.get("buyer_type", "fix_flip"))[:20]
+    if buyer_type not in valid_buyer_types:
+        buyer_type = "fix_flip"
+
+    markets = payload.get("markets", [])
+    if not isinstance(markets, list):
+        markets = []
+    markets = [str(m)[:100] for m in markets[:50]]
+
+    property_types = payload.get("property_types", [])
+    if not isinstance(property_types, list):
+        property_types = []
+    valid_ptypes = [c[0] for c in PropertyLead.PROPERTY_TYPE_CHOICES]
+    property_types = [p for p in property_types if p in valid_ptypes][:10]
+
+    budget_min = min(float(payload.get("budget_min", 0) or 0), 99999999)
+    budget_max = min(float(payload.get("budget_max", 0) or 0), 99999999)
+    cash_buyer = bool(payload.get("cash_buyer", True))
+
+    # Check for existing buyer by email
+    existing = InvestorBuyer.objects.filter(email=email).first()
+    if existing:
+        return JsonResponse({
+            "ok": True,
+            "buyer_id": str(existing.id),
+            "message": "You are already on our buyer list. We will reach out with matching deals.",
+        })
+
+    buyer = InvestorBuyer.objects.create(
+        name=name,
+        email=email,
+        phone=phone,
+        company=company,
+        buyer_type=buyer_type,
+        markets=markets,
+        property_types=property_types,
+        budget_min=Decimal(str(budget_min)),
+        budget_max=Decimal(str(budget_max)),
+        cash_buyer=cash_buyer,
+        source="investor_signup",
+    )
+
+    # Push to Supabase broker_leads table
+    try:
+        from hive_dashboard.supabase_client import supabase_rest
+        supabase_rest("broker_leads", method="POST", data={
+            "name": name,
+            "email": email,
+            "phone": phone,
+            "company": company,
+            "buyer_type": buyer_type,
+            "markets": markets,
+            "property_types": property_types,
+            "budget_min": budget_min,
+            "budget_max": budget_max,
+            "cash_buyer": cash_buyer,
+            "source": "investor_signup",
+            "lead_type": "investor_buyer",
+        })
+    except Exception as exc:
+        # Non-fatal -- local record is saved, Supabase sync is best-effort
+        logger.warning("Supabase push failed for investor signup %s: %s", email, exc)
+
+    return JsonResponse({
+        "ok": True,
+        "buyer_id": str(buyer.id),
+        "message": "You are on the list. We will send you matching deals.",
+    })
+
+
+# ---------------------------------------------------------------------------
+# CLIENT FILES: A-to-Z deal document management
+# ---------------------------------------------------------------------------
+
+@staff_or_internal_required
+def client_files_dashboard(request):
+    """
+    Client Files dashboard: shows all deals as cards with document timelines.
+    Filter by status: active, under_contract, closing, closed, dead.
+    """
+    files = ClientFile.objects.all()
+
+    # Filters
+    filter_status = request.GET.get("status", "")
+    if filter_status:
+        files = files.filter(status=filter_status)
+
+    filter_state = request.GET.get("state", "")
+    if filter_state:
+        files = files.filter(state=filter_state.upper())
+
+    # Stats
+    total = ClientFile.objects.count()
+    status_counts = {}
+    for row in ClientFile.objects.values("status").annotate(count=Count("id")):
+        status_counts[row["status"]] = row["count"]
+
+    total_fees = ClientFile.objects.filter(
+        status__in=["under_contract", "closing", "closed"]
+    ).aggregate(total=Sum("assignment_fee"))["total"] or 0
+
+    closed_revenue = ClientFile.objects.filter(
+        status="closed"
+    ).aggregate(total=Sum("assignment_fee"))["total"] or 0
+
+    context = {
+        "files": files[:50],
+        "total": total,
+        "status_counts": status_counts,
+        "total_fees": total_fees,
+        "closed_revenue": closed_revenue,
+        "filter_status": filter_status,
+        "filter_state": filter_state,
+    }
+    return render(request, "broker_ops/client_files.html", context)
+
+
+@staff_or_internal_required
+def client_file_detail(request, file_id):
+    """
+    Client File detail: document timeline for a single deal.
+    Shows all documents in chronological order with branded HTML previews.
+    """
+    cf = get_object_or_404(ClientFile, id=file_id)
+    documents = cf.documents.all()
+
+    # Document type progress tracker
+    doc_types = [c[0] for c in ClientDocument.DOC_TYPE_CHOICES[:8]]  # Core 8 steps
+    doc_type_labels = dict(ClientDocument.DOC_TYPE_CHOICES)
+    existing_types = set(documents.values_list("doc_type", flat=True))
+
+    timeline = []
+    for i, dt in enumerate(doc_types, 1):
+        doc = documents.filter(doc_type=dt).first()
+        timeline.append({
+            "step": i,
+            "type": dt,
+            "label": doc_type_labels.get(dt, dt),
+            "doc": doc,
+            "completed": dt in existing_types,
+        })
+
+    context = {
+        "cf": cf,
+        "documents": documents,
+        "timeline": timeline,
+        "doc_count": documents.count(),
+    }
+    return render(request, "broker_ops/client_file_detail.html", context)
+
+
+@staff_or_internal_required
+def client_file_document_preview(request, doc_id):
+    """Serve a branded HTML document as a standalone page."""
+    doc = get_object_or_404(ClientDocument, id=doc_id)
+    return HttpResponse(doc.html_content, content_type="text/html")
+
+
+@staff_or_internal_required
+@require_POST
+def api_create_client_file(request, lead_id):
+    """Create a client file from a property lead, generating initial docs."""
+    from .client_files import generate_full_client_file, sync_client_file_to_supabase
+
+    lead = get_object_or_404(PropertyLead, id=lead_id)
+    cf = generate_full_client_file(lead)
+    sync_client_file_to_supabase(cf)
+
+    return JsonResponse({
+        "ok": True,
+        "client_file_id": str(cf.id),
+        "address": cf.property_address,
+        "documents": cf.document_count,
+    })
+
+
+@staff_or_internal_required
+@require_POST
+def api_generate_document(request, file_id):
+    """Generate a specific document type for a client file."""
+    from .client_files import (
+        generate_assignment_contract,
+        generate_buyer_pitch,
+        generate_closing_statement,
+        generate_deal_sheet,
+        generate_payment_receipt,
+        generate_seller_outreach,
+        sync_client_file_to_supabase,
+    )
+
+    cf = get_object_or_404(ClientFile, id=file_id)
+
+    try:
+        payload = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    doc_type = payload.get("doc_type", "")
+    generators = {
+        "seller_outreach": lambda: generate_seller_outreach(cf),
+        "deal_sheet": lambda: generate_deal_sheet(cf),
+        "assignment_contract": lambda: generate_assignment_contract(cf),
+        "closing_statement": lambda: generate_closing_statement(cf),
+        "payment_receipt": lambda: generate_payment_receipt(cf),
+    }
+
+    if doc_type == "buyer_pitch":
+        buyer_id = payload.get("buyer_id")
+        if not buyer_id:
+            return JsonResponse({"error": "buyer_id required for buyer_pitch"}, status=400)
+        buyer = get_object_or_404(InvestorBuyer, id=buyer_id)
+        doc = generate_buyer_pitch(cf, buyer)
+    elif doc_type in generators:
+        doc = generators[doc_type]()
+    else:
+        return JsonResponse({"error": f"Unknown doc_type: {doc_type}"}, status=400)
+
+    sync_client_file_to_supabase(cf)
+
+    return JsonResponse({
+        "ok": True,
+        "document_id": str(doc.id),
+        "doc_type": doc.doc_type,
+        "title": doc.title,
+    })
+
+
+@staff_or_internal_required
+@require_POST
+def api_update_client_file_status(request, file_id):
+    """Update client file status."""
+    from .client_files import sync_client_file_to_supabase, update_client_file_status
+
+    cf = get_object_or_404(ClientFile, id=file_id)
+
+    try:
+        payload = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+
+    new_status = payload.get("status", "")
+    valid = [c[0] for c in ClientFile.STATUS_CHOICES]
+    if new_status not in valid:
+        return JsonResponse({"error": f"Invalid status. Use: {valid}"}, status=400)
+
+    update_client_file_status(cf, new_status)
+    sync_client_file_to_supabase(cf)
+
+    return JsonResponse({"ok": True, "status": cf.status})

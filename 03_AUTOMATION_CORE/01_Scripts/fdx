@@ -1,0 +1,29 @@
+#!/bin/bash
+# fdx - MMA Command Center (Fight Camp Dashboard)
+# Runs locally on :8504 or opens Oracle dashboard
+# Usage: fdx        (run local)
+#        fdx oracle  (open Oracle URL)
+#        fdx deploy  (deploy to Oracle)
+
+DJANGO_DIR="/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlightventures/09_DASHBOARD/hive_dashboard"
+ORACLE="opc@129.159.38.250"
+KEY="/root/.ssh/oracle_key.pem"
+
+case "${1:-local}" in
+  local)
+    echo "Starting MMA Command Center on :8504..."
+    cd "$DJANGO_DIR" && python3 manage.py runserver 0.0.0.0:8504
+    ;;
+  oracle)
+    echo "MMA Command Center is live at: http://129.159.38.250:8504/fight/"
+    ;;
+  deploy)
+    echo "Deploying fight_camp to Oracle..."
+    scp -i "$KEY" -r "$DJANGO_DIR/fight_camp/" "$ORACLE:/home/opc/hive_django/fight_camp/"
+    ssh -i "$KEY" "$ORACLE" "cd /home/opc/hive_django && python3 manage.py migrate fight_camp && sudo systemctl restart hive-django"
+    echo "Deployed and restarted."
+    ;;
+  *)
+    echo "Usage: fdx [local|oracle|deploy]"
+    ;;
+esac

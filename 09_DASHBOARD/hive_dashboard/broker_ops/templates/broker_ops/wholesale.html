@@ -1,0 +1,303 @@
+{% extends "hive/base.html" %}
+{% load humanize %}
+{% block title %}Wholesale Pipeline | Broker OS{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-1">
+    <h2 class="mb-0">Wholesale Pipeline</h2>
+    <a href="{% url 'broker_ops:dashboard' %}" class="btn btn-sm btn-outline-secondary">&larr; Broker OS</a>
+  </div>
+  <p class="text-muted mb-4">Distressed property leads -- find motivated sellers, assign to cash buyers, collect fees.</p>
+
+  <!-- KPI cards -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-2">
+      <div class="card text-center">
+        <div class="card-body py-2">
+          <div class="h4 mb-0">{{ total_leads }}</div>
+          <small class="text-muted">Total Leads</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center">
+        <div class="card-body py-2">
+          <div class="h4 mb-0 text-warning">{{ status_counts.under_contract|default:"0" }}</div>
+          <small class="text-muted">Under Contract</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center">
+        <div class="card-body py-2">
+          <div class="h4 mb-0 text-info">{{ status_counts.assigned|default:"0" }}</div>
+          <small class="text-muted">Assigned</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center">
+        <div class="card-body py-2">
+          <div class="h4 mb-0 text-success">{{ status_counts.closed|default:"0" }}</div>
+          <small class="text-muted">Closed</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center">
+        <div class="card-body py-2">
+          <div class="h4 mb-0">{{ total_buyers }}</div>
+          <small class="text-muted">Active Buyers</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-2">
+      <div class="card text-center">
+        <div class="card-body py-2">
+          <div class="h4 mb-0 text-success">${{ pipeline_value|floatformat:0|intcomma }}</div>
+          <small class="text-muted">Pipeline Value</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick stats row -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body py-2 text-center">
+          <small class="text-muted">Avg Motivation Score</small>
+          <div class="h5 mb-0">{{ avg_score|floatformat:0 }} / 100</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body py-2 text-center">
+          <small class="text-muted">New Leads</small>
+          <div class="h5 mb-0">{{ status_counts.new|default:"0" }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card">
+        <div class="card-body py-2 text-center">
+          <small class="text-muted">Contacted</small>
+          <div class="h5 mb-0">{{ status_counts.contacted|default:"0" }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CSV Upload -->
+  <div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <span>Import Leads (CSV)</span>
+    </div>
+    <div class="card-body py-2">
+      <form id="csv-upload-form" enctype="multipart/form-data" class="d-flex align-items-center gap-3">
+        {% csrf_token %}
+        <input type="file" name="file" accept=".csv" class="form-control form-control-sm" style="max-width:300px" required>
+        <select name="source" class="form-select form-select-sm" style="max-width:180px">
+          <option value="propstream">PropStream</option>
+          <option value="tax_records">Tax Records</option>
+          <option value="driving_for_dollars">Driving for Dollars</option>
+          <option value="other">Other</option>
+        </select>
+        <button type="submit" class="btn btn-sm btn-primary">Upload</button>
+        <span id="upload-result" class="text-muted small"></span>
+      </form>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card mb-4">
+    <div class="card-header">Filters</div>
+    <div class="card-body py-2">
+      <form method="get" class="d-flex flex-wrap gap-3 align-items-end">
+        <div>
+          <label class="form-label small mb-0">Status</label>
+          <select name="status" class="form-select form-select-sm" style="min-width:140px">
+            <option value="">All</option>
+            {% for val, label in status_choices %}
+            <option value="{{ val }}" {% if filter_status == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="form-label small mb-0">Lead Type</label>
+          <select name="lead_type" class="form-select form-select-sm" style="min-width:160px">
+            <option value="">All</option>
+            {% for val, label in lead_type_choices %}
+            <option value="{{ val }}" {% if filter_lead_type == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="form-label small mb-0">State</label>
+          <input type="text" name="state" value="{{ filter_state }}" class="form-control form-control-sm" placeholder="CA" style="width:70px" maxlength="2">
+        </div>
+        <div>
+          <label class="form-label small mb-0">Min Score</label>
+          <input type="number" name="min_score" value="{{ filter_min_score }}" class="form-control form-control-sm" placeholder="0" style="width:80px" min="0" max="100">
+        </div>
+        <div>
+          <button type="submit" class="btn btn-sm btn-outline-primary">Filter</button>
+          <a href="{% url 'broker_ops:wholesale_dashboard' %}" class="btn btn-sm btn-outline-secondary">Reset</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Property leads table -->
+  <div class="card">
+    <div class="card-header">Property Leads ({{ leads|length }} shown, {{ total_leads }} total)</div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-sm mb-0">
+          <thead>
+            <tr>
+              <th>Address</th>
+              <th>City/State</th>
+              <th>Type</th>
+              <th>Lead Type</th>
+              <th>Score</th>
+              <th>Asking</th>
+              <th>ARV</th>
+              <th>MAO</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for lead in leads %}
+            <tr>
+              <td>{{ lead.address|truncatechars:35 }}</td>
+              <td>{{ lead.city }}, {{ lead.state }}</td>
+              <td>{{ lead.get_property_type_display }}</td>
+              <td><span class="badge bg-secondary">{{ lead.get_lead_type_display }}</span></td>
+              <td>
+                <span class="badge bg-{% if lead.motivation_score >= 70 %}success{% elif lead.motivation_score >= 40 %}warning{% else %}secondary{% endif %}">
+                  {{ lead.motivation_score }}
+                </span>
+              </td>
+              <td>${{ lead.asking_price|floatformat:0|intcomma }}</td>
+              <td>${{ lead.estimated_arv|floatformat:0|intcomma }}</td>
+              <td>${{ lead.mao|floatformat:0|intcomma }}</td>
+              <td>
+                <span class="badge bg-{% if lead.status == 'closed' %}success{% elif lead.status == 'under_contract' %}warning{% elif lead.status == 'assigned' %}info{% elif lead.status == 'dead' %}danger{% else %}secondary{% endif %}">
+                  {{ lead.get_status_display }}
+                </span>
+              </td>
+              <td class="text-nowrap">
+                <button class="btn btn-xs btn-outline-primary btn-score" data-id="{{ lead.id }}" title="Re-score">Score</button>
+                <button class="btn btn-xs btn-outline-info btn-match" data-id="{{ lead.id }}" title="Find buyers">Match</button>
+                <button class="btn btn-xs btn-outline-success btn-sms" data-id="{{ lead.id }}" title="Generate SMS">SMS</button>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="10" class="text-center text-muted py-3">No property leads found. Import a CSV to get started.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for action results -->
+<div id="action-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
+  <div style="background:var(--bg-tertiary, #1a1a2e); border:1px solid var(--border-subtle, #333); border-radius:8px; padding:24px; max-width:600px; width:90%; max-height:80vh; overflow-y:auto;">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h5 id="modal-title" class="mb-0">Result</h5>
+      <button onclick="document.getElementById('action-modal').style.display='none'" class="btn btn-sm btn-outline-secondary">X</button>
+    </div>
+    <pre id="modal-body" style="white-space:pre-wrap; font-size:13px; color:var(--text-primary, #e8e6e3);"></pre>
+  </div>
+</div>
+
+<script>
+function getCsrfToken() {
+  const el = document.querySelector('[name=csrfmiddlewaretoken]');
+  return el ? el.value : '';
+}
+
+function showModal(title, content) {
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').textContent = typeof content === 'object' ? JSON.stringify(content, null, 2) : content;
+  document.getElementById('action-modal').style.display = 'flex';
+}
+
+// CSV upload
+document.getElementById('csv-upload-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const form = this;
+  const resultEl = document.getElementById('upload-result');
+  resultEl.textContent = 'Uploading...';
+
+  const fd = new FormData(form);
+  fetch('{% url "broker_ops:api_import_leads" %}', {
+    method: 'POST',
+    headers: {'X-CSRFToken': getCsrfToken()},
+    body: fd
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) {
+      resultEl.textContent = 'Created: ' + data.created + ', Skipped: ' + data.skipped + (data.errors && data.errors.length ? ', Errors: ' + data.errors.length : '');
+      if (data.created > 0) setTimeout(() => location.reload(), 1500);
+    } else {
+      resultEl.textContent = 'Error: ' + (data.error || 'Unknown');
+    }
+  })
+  .catch(err => { resultEl.textContent = 'Upload failed: ' + err; });
+});
+
+// Score button
+document.querySelectorAll('.btn-score').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const id = this.dataset.id;
+    fetch('/broker/api/score-lead/' + id + '/', {
+      method: 'POST',
+      headers: {'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/json'}
+    })
+    .then(r => r.json())
+    .then(data => {
+      showModal('Score Updated', data);
+      if (data.ok) setTimeout(() => location.reload(), 1000);
+    })
+    .catch(err => showModal('Error', err.toString()));
+  });
+});
+
+// Match button
+document.querySelectorAll('.btn-match').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const id = this.dataset.id;
+    fetch('/broker/api/match-buyers/' + id + '/')
+    .then(r => r.json())
+    .then(data => showModal('Buyer Matches (' + (data.match_count || 0) + ')', data))
+    .catch(err => showModal('Error', err.toString()));
+  });
+});
+
+// SMS button
+document.querySelectorAll('.btn-sms').forEach(btn => {
+  btn.addEventListener('click', function() {
+    const id = this.dataset.id;
+    fetch('/broker/api/outreach/' + id + '/')
+    .then(r => r.json())
+    .then(data => showModal('Outreach SMS (' + (data.char_count || 0) + ' chars)', data.sms_text || JSON.stringify(data)))
+    .catch(err => showModal('Error', err.toString()));
+  });
+});
+
+// Close modal on backdrop click
+document.getElementById('action-modal').addEventListener('click', function(e) {
+  if (e.target === this) this.style.display = 'none';
+});
+</script>
+{% endblock %}

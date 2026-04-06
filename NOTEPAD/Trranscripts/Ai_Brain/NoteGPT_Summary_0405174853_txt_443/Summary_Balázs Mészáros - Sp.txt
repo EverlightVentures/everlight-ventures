@@ -1,0 +1,49 @@
+- [00:00:00] **Introduction and Background**
+  - The speaker shares their journey of discovering the Snufa YouTube channel, which sparked their interest in a specific research area and led to pursuing a PhD.
+  - They mention a pivotal paper that inspired their work, focusing on how embedding neurons in space and applying L1 regularization can lead to interesting outcomes, particularly when combined with a Euclidean distance-based cost.
+
+- [00:00:58] **Delays in Neural Networks**
+  - Delays have garnered attention in neuroscience and machine learning, with some studies suggesting they can be influenced by myelin plasticity.
+  - The speaker aims to discuss delays related to network structure, specifically referencing a well-known example of axonal delay lines in the owl brainstem used for sound localization.
+
+- [00:03:01] **Delay Learning Algorithm**
+  - The speaker describes their event-based delay learning algorithm for leaky integrate-and-fire neurons, highlighting its efficiency as updates only occur at spike times.
+  - They emphasize the importance of recurrent delays in trained networks and present examples from datasets like spiking hydra digits and speech commands.
+
+- [00:04:00] **Connecting Delays to Spatial Properties**
+  - The speaker proposes a method to define delays as Euclidean distances between neurons, leading to a novel delay gradient update rule.
+  - Key properties of the learnable delay matrix include:
+    - Zero diagonals, indicating immediate updates for auto-synaptic connections.
+    - Symmetry, where the delay from neuron I to J equals the delay from J to I.
+    - Triangular inequality, ensuring the shortest path is the direct connection between neurons.
+
+- [00:06:06] **Training Networks with Spatial Constraints**
+  - The focus shifts to networks trained on spiking hydra digits, assessing whether spatial constraints hinder learning.
+  - Comparisons are made between networks with and without delays, indicating that networks utilizing distance-based delays outperform those without.
+
+- [00:08:18] **Predicting Neuron Positions**
+  - The speaker discusses attempts to predict hidden neuron positions based on input connectivity patterns.
+  - They find that networks with regularization can better predict neuron positions, indicating a relationship between input patterns and spatial computation.
+
+- [00:09:21] **Visualization and Sensitivity Analysis**
+  - Visualization techniques are employed to assess input neuron sensitivity, showing that similar computations occur in analogous physical spaces.
+  - The analysis reveals how neuron sensitivity changes over time, indicating a shift in focus during computation.
+
+- [00:11:24] **Training Dynamics and Metrics**
+  - The speaker explores the training dynamics of various networks, measuring modularity, entropy, and small-worldness.
+  - Results show that networks with distance costs achieve higher modularity and lower entropy in weight matrices.
+
+- [00:13:29] **Pruning and Performance Analysis**
+  - The speaker examines the pruning of network connections, noting that performance declines faster in non-spatial networks when pruning based on delay length.
+  - The learned delay matrices show that spatially embedded networks have concentrated delays, while non-spatial networks exhibit a broader distribution.
+
+- [00:14:34] **Conclusions and Future Directions**
+  - The speaker concludes that position learning networks lead to more localized solutions and greater modularity, with spatially close neurons sharing computational responsibilities.
+  - They acknowledge the aesthetic appeal of visualizations despite their limited scientific utility.
+
+- [00:15:31] **Acknowledgments and Further Research**
+  - The speaker expresses gratitude to their supervisors and collaborators, mentioning the availability of their preprint and inviting questions from the audience.
+
+- [00:16:31] **Q&A Highlights**
+  - The speaker addresses questions regarding the relationship between delays and path lengths and the implications of not adhering to Dale's law in their models.
+  - They acknowledge the potential impact of separating excitatory and inhibitory neurons on spatial organization and express an interest in exploring adaptive learning based on spatial coordinates in future research.

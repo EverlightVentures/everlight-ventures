@@ -1,0 +1,76 @@
+{
+  "generated_at": "2026-03-21T23:45:00Z",
+  "generated_at_pt": "4:45 PM PT",
+  "checks": [
+    {
+      "name": "Slack",
+      "status": "fail",
+      "message": "Slack webhook returned HTTP -1: HTTP Error 400: Bad Request",
+      "auto_fixed": false,
+      "checked_at": "2026-03-21T23:44:59Z"
+    },
+    {
+      "name": "Resend",
+      "status": "fail",
+      "message": "Resend API key invalid/expired",
+      "auto_fixed": false,
+      "checked_at": "2026-03-21T23:44:59Z"
+    },
+    {
+      "name": "Blinko",
+      "status": "warn",
+      "message": "Blinko not running, BlinkoLite fallback failed",
+      "auto_fixed": false,
+      "checked_at": "2026-03-21T23:44:59Z"
+    },
+    {
+      "name": "Google Docs",
+      "status": "warn",
+      "message": "Google Docs webhook returned HTTP -1: HTTP Error 404: Not Found",
+      "auto_fixed": false,
+      "checked_at": "2026-03-21T23:44:59Z"
+    },
+    {
+      "name": "n8n Tunnel",
+      "status": "ok",
+      "message": "Tunnel process alive (PID 27229)",
+      "auto_fixed": false,
+      "checked_at": "2026-03-21T23:44:59Z"
+    },
+    {
+      "name": "ImprovMX",
+      "status": "ok",
+      "message": "MX records point to ImprovMX",
+      "auto_fixed": false,
+      "checked_at": "2026-03-21T23:44:59Z"
+    },
+    {
+      "name": "Pipeline",
+      "status": "ok",
+      "message": "Last run 2.7h ago",
+      "auto_fixed": false,
+      "checked_at": "2026-03-21T23:44:59Z"
+    },
+    {
+      "name": "n8n",
+      "status": "ok",
+      "message": "n8n healthy (Oracle E5)",
+      "auto_fixed": false,
+      "checked_at": "2026-03-21T23:44:59Z"
+    },
+    {
+      "name": "XLM Bot",
+      "status": "ok",
+      "message": "xlm-bot.service active (Oracle Micro)",
+      "auto_fixed": false,
+      "checked_at": "2026-03-21T23:45:00Z"
+    }
+  ],
+  "summary": {
+    "total": 9,
+    "ok": 5,
+    "warn": 2,
+    "fail": 2,
+    "auto_fixed": 0
+  }
+}

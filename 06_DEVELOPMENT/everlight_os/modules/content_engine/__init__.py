@@ -4,6 +4,7 @@ Turns any topic into a complete content bundle.
 """
 
 import json
+import sys
 from pathlib import Path
 from typing import TYPE_CHECKING
 
@@ -24,6 +25,17 @@ def register_handlers(orch):
     def _get_slack():
         from ...core.slack_client import get_client
         return get_client()
+
+    def _get_gdocs_publish():
+        """Load Google Docs bridge publish function if available."""
+        bridge_dir = Path("/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
+        if str(bridge_dir) not in sys.path:
+            sys.path.append(str(bridge_dir))
+        try:
+            from gdocs_bridge import publish_report as publish_fn
+            return publish_fn
+        except Exception:
+            return None
 
     def handle_research(state, step: dict, project_dir: Path) -> str:
         """Step 1: Research the topic using Perplexity."""
@@ -103,6 +115,44 @@ def register_handlers(orch):
         from ...core.filesystem import write_json
         write_json(project_dir / "content_pack.json", manifest)
 
+        # Publish blog markdown to Google Docs, then include links in approval message.
+        gdocs_lines = []
+        publish_fn = _get_gdocs_publish()
+        blog_path = project_dir / "blog.md"
+        if publish_fn and blog_path.exists():
+            try:
+                doc_summary = (
+                    f"{status} content pack for {topic}. "
+                    f"{passed}/{len(checks)} checks passed."
+                )
+                gdocs_result = publish_fn(
+                    title=f"Content Pack {topic}",
+                    content=blog_path.read_text(encoding="utf-8"),
+                    folder="03_Content_Factory/Publishing_Pipeline",
+                    slack_channel="#all-everlightventures",
+                    summary=doc_summary,
+                    metadata={"project_id": state.id, "project_dir": str(project_dir)},
+                    post_to_slack=False,
+                )
+                if gdocs_result.get("doc_link"):
+                    gdocs_lines.append(
+                        f"- Google Doc: <{gdocs_result['doc_link']}|Open Report>"
+                    )
+                if gdocs_result.get("canvas_link"):
+                    gdocs_lines.append(
+                        f"- Canvas: <{gdocs_result['canvas_link']}|Open Canvas>"
+                    )
+                if gdocs_result.get("local_path"):
+                    gdocs_lines.append(
+                        f"- Markdown fallback: `{gdocs_result['local_path']}`"
+                    )
+            except Exception:
+                gdocs_lines.append("- Report publishing failed; blog remains in local project dir.")
+        elif not blog_path.exists():
+            gdocs_lines.append("- `blog.md` not found, skipped report publishing.")
+        else:
+            gdocs_lines.append("- Google Docs bridge unavailable, skipped report publishing.")
+
         # Slack summary
         summary = f"""*Content Pack — {topic}*
 
@@ -123,6 +173,8 @@ def register_handlers(orch):
 - publish_checklist.md
 
 _Output: `{project_dir}`_"""
+        if gdocs_lines:
+            summary += "\n\n*Report Links:*\n" + "\n".join(gdocs_lines)
 
         slack = _get_slack()
         slack.post_approval(state.id, summary, "content")

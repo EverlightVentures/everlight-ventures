@@ -1,0 +1,433 @@
+{
+  "test_id": "20260321_194554",
+  "timestamp": "2026-03-21T19:46:48.527193+00:00",
+  "recipient": "admin@everlightventures.io",
+  "total": 40,
+  "sent": 0,
+  "failed": 40,
+  "dry_run": 0,
+  "by_department": {
+    "claude_corp": {
+      "sent": 0,
+      "failed": 10,
+      "dry_run": 0
+    },
+    "gemini_ops": {
+      "sent": 0,
+      "failed": 11,
+      "dry_run": 0
+    },
+    "codex_labs": {
+      "sent": 0,
+      "failed": 11,
+      "dry_run": 0
+    },
+    "perplexity_intel": {
+      "sent": 0,
+      "failed": 8,
+      "dry_run": 0
+    }
+  },
+  "results": [
+    {
+      "employee": "marcus",
+      "name": "Marcus Cole",
+      "email": "marcus@everlightventures.io",
+      "department": "claude_corp",
+      "title": "Chief Operator",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "atlas",
+      "name": "Atlas Vega",
+      "email": "atlas@everlightventures.io",
+      "department": "claude_corp",
+      "title": "System Architect",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "vera",
+      "name": "Vera Lux",
+      "email": "vera@everlightventures.io",
+      "department": "claude_corp",
+      "title": "Content Director",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "quinn",
+      "name": "Quinn Sharp",
+      "email": "quinn@everlightventures.io",
+      "department": "claude_corp",
+      "title": "QA Lead",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "rex",
+      "name": "Rex Thornton",
+      "email": "rex@everlightventures.io",
+      "department": "claude_corp",
+      "title": "Trading Risk Analyst",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "sage",
+      "name": "Sage Holloway",
+      "email": "sage@everlightventures.io",
+      "department": "claude_corp",
+      "title": "Senior Code Reviewer",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "nora",
+      "name": "Nora Blaine",
+      "email": "nora@everlightventures.io",
+      "department": "claude_corp",
+      "title": "Content Strategist",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "edith",
+      "name": "Edith Cross",
+      "email": "edith@everlightventures.io",
+      "department": "claude_corp",
+      "title": "Senior Editor",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "cash",
+      "name": "Cash Moreno",
+      "email": "cash@everlightventures.io",
+      "department": "claude_corp",
+      "title": "Commission Auditor",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "justine",
+      "name": "Justine Park",
+      "email": "justine@everlightventures.io",
+      "department": "claude_corp",
+      "title": "Compliance Officer",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "major",
+      "name": "Major Dex",
+      "email": "major@everlightventures.io",
+      "department": "gemini_ops",
+      "title": "Logistics Commander",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "mack",
+      "name": "Mack Rivera",
+      "email": "mack@everlightventures.io",
+      "department": "gemini_ops",
+      "title": "Operations Deputy",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "gears",
+      "name": "Gears Tanaka",
+      "email": "gears@everlightventures.io",
+      "department": "gemini_ops",
+      "title": "Workflow Engineer",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "aria",
+      "name": "Aria Chen",
+      "email": "aria@everlightventures.io",
+      "department": "gemini_ops",
+      "title": "Automation Architect",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "link",
+      "name": "Link Masters",
+      "email": "link@everlightventures.io",
+      "department": "gemini_ops",
+      "title": "Data Sync Coordinator",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "dash",
+      "name": "Dash Monroe",
+      "email": "dash@everlightventures.io",
+      "department": "gemini_ops",
+      "title": "Distribution Manager",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "metric",
+      "name": "Metric Webb",
+      "email": "metric@everlightventures.io",
+      "department": "gemini_ops",
+      "title": "Analytics Auditor",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "bo",
+      "name": "Bo Crate",
+      "email": "bo@everlightventures.io",
+      "department": "gemini_ops",
+      "title": "Output Packager",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "scout",
+      "name": "Scout Navarro",
+      "email": "scout@everlightventures.io",
+      "department": "gemini_ops",
+      "title": "Deal Scout",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "piper",
+      "name": "Piper Reeves",
+      "email": "piper@everlightventures.io",
+      "department": "gemini_ops",
+      "title": "Outreach Specialist",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "chart",
+      "name": "Chart Dawson",
+      "email": "chart@everlightventures.io",
+      "department": "gemini_ops",
+      "title": "Broker Analytics Lead",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "forge",
+      "name": "Forge Steele",
+      "email": "forge@everlightventures.io",
+      "department": "codex_labs",
+      "title": "Engineering Foreman",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "penny",
+      "name": "Penny Vance",
+      "email": "penny@everlightventures.io",
+      "department": "codex_labs",
+      "title": "Profit Maximizer",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "stack",
+      "name": "Stack Torres",
+      "email": "stack@everlightventures.io",
+      "department": "codex_labs",
+      "title": "SaaS Builder",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "road",
+      "name": "Road Harper",
+      "email": "road@everlightventures.io",
+      "department": "codex_labs",
+      "title": "Product Manager",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "rocket",
+      "name": "Rocket Kim",
+      "email": "rocket@everlightventures.io",
+      "department": "codex_labs",
+      "title": "Growth Hacker",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "flow",
+      "name": "Flow Jordan",
+      "email": "flow@everlightventures.io",
+      "department": "codex_labs",
+      "title": "Funnel Architect",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "spider",
+      "name": "Spider Locke",
+      "email": "spider@everlightventures.io",
+      "department": "codex_labs",
+      "title": "SEO Specialist",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "ink",
+      "name": "Ink Castellano",
+      "email": "ink@everlightventures.io",
+      "department": "codex_labs",
+      "title": "Staff Writer",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "filter",
+      "name": "Filter Banks",
+      "email": "filter@everlightventures.io",
+      "department": "codex_labs",
+      "title": "Lead Qualifier",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "cupid",
+      "name": "Cupid Osei",
+      "email": "cupid@everlightventures.io",
+      "department": "codex_labs",
+      "title": "Match Maker",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "hammer",
+      "name": "Hammer Knox",
+      "email": "hammer@everlightventures.io",
+      "department": "codex_labs",
+      "title": "Deal Closer",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "cipher",
+      "name": "Cipher Wolfe",
+      "email": "cipher@everlightventures.io",
+      "department": "perplexity_intel",
+      "title": "Crypto Beat Reporter",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "bull",
+      "name": "Bull Archer",
+      "email": "bull@everlightventures.io",
+      "department": "perplexity_intel",
+      "title": "Markets Reporter",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "wire",
+      "name": "Wire Santos",
+      "email": "wire@everlightventures.io",
+      "department": "perplexity_intel",
+      "title": "World News Reporter",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "nova",
+      "name": "Nova Ling",
+      "email": "nova@everlightventures.io",
+      "department": "perplexity_intel",
+      "title": "Tech Reporter",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "pitch",
+      "name": "Pitch Adler",
+      "email": "pitch@everlightventures.io",
+      "department": "perplexity_intel",
+      "title": "Business Reporter",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "helix",
+      "name": "Helix Patel",
+      "email": "helix@everlightventures.io",
+      "department": "perplexity_intel",
+      "title": "Science Reporter",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "brief",
+      "name": "Brief Calloway",
+      "email": "brief@everlightventures.io",
+      "department": "perplexity_intel",
+      "title": "Legal Beat Reporter",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    },
+    {
+      "employee": "pulse",
+      "name": "Pulse Diaz",
+      "email": "pulse@everlightventures.io",
+      "department": "perplexity_intel",
+      "title": "Consumer Reporter",
+      "test_id": "20260321_194554",
+      "status": "failed",
+      "error": "{'statusCode': 429, 'message': 'You have reached your daily email sending quota.', 'name': 'daily_quota_exceeded'}"
+    }
+  ]
+}

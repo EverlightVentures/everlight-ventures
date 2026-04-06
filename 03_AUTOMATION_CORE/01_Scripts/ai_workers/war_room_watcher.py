@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 War Room Watcher - auto-execute and notify on new hive sessions.
-Enforced Policy: No raw text in Slack. All reports use Native Canvases.
+Enforced Policy: publish report links (Google Docs/Canvas) in Slack.
 """
 
 import argparse
@@ -17,22 +17,35 @@ from pathlib import Path
 WORKSPACE = Path("/mnt/sdcard/AA_MY_DRIVE")
 sys.path.insert(0, str(WORKSPACE))
 
-# Import the bridge directly from its path
+# Import the Google Docs bridge (replaces Slack Canvas)
 sys.path.append(f"{WORKSPACE}/03_AUTOMATION_CORE/01_Scripts/content_tools")
-import slack_canvas_bridge
+try:
+    from gdocs_bridge import publish_report as _gdocs_publish
+except ImportError:
+    _gdocs_publish = None
 
 WAR_ROOM_DIR = WORKSPACE / "_logs" / "ai_war_room"
 STATE_FILE = WORKSPACE / "_logs" / ".war_room_watcher_state.json"
 POLL_INTERVAL = 30  # seconds
 
-def _post_slack_canvas(file_path, channel="war-room"):
-    """Trigger the canvas bridge for a specific log file."""
+def _post_report_links(file_path, channel="war-room"):
+    """Publish war room log as Google Doc + Slack summary link."""
     try:
         content = Path(file_path).read_text(encoding="utf-8")
         title = Path(file_path).stem
-        slack_canvas_bridge.create_native_canvas(content, title, "warroom")
+        if _gdocs_publish:
+            first_lines = [l for l in content.split("\n") if l.strip() and not l.startswith("#")][:2]
+            summary = " ".join(first_lines)[:150]
+            _gdocs_publish(
+                title=title,
+                content=content,
+                folder="00_Command_Center/War_Room",
+                summary=summary or "War room update",
+            )
+        else:
+            print(f"[WATCHER] gdocs_bridge unavailable; report saved locally: {file_path}")
     except Exception as e:
-        print(f"[WATCHER] Canvas Bridge failed: {e}")
+        print(f"[WATCHER] Publish failed: {e}")
 
 def _load_state():
     """Load watcher state from disk."""
@@ -96,7 +109,7 @@ def _extract_query(session_dir):
     return "(unknown query)"
 
 def scan_once(state, auto_execute=True, notify=True, verbose=False):
-    """Scan for new/updated sessions and CANVAS them."""
+    """Scan for new/updated sessions and publish report links."""
     if not WAR_ROOM_DIR.exists(): return state
     sessions = state.setdefault("sessions", {})
 
@@ -111,10 +124,9 @@ def scan_once(state, auto_execute=True, notify=True, verbose=False):
 
         # -- New session found --
         if not entry.get("summary_notified"):
-            if verbose: print(f"[WATCHER] New session: {dir_name}. Canvassing...")
+            if verbose: print(f"[WATCHER] New session: {dir_name}. Publishing links...")
             if notify:
-                # Trigger Canvas for the summary
-                threading.Thread(target=_post_slack_canvas, args=(combined, "war-room")).start()
+                threading.Thread(target=_post_report_links, args=(combined, "war-room")).start()
 
             if auto_execute and not exec_report.exists():
                 summary_text = combined.read_text(encoding="utf-8")
@@ -128,10 +140,9 @@ def scan_once(state, auto_execute=True, notify=True, verbose=False):
 
         # -- Execution report arrived --
         if not entry.get("execution_notified") and exec_report.exists():
-            if verbose: print(f"[WATCHER] Execution report found: {dir_name}. Canvassing...")
+            if verbose: print(f"[WATCHER] Execution report found: {dir_name}. Publishing links...")
             if notify:
-                # Trigger Canvas for the execution report
-                threading.Thread(target=_post_slack_canvas, args=(exec_report, "war-room")).start()
+                threading.Thread(target=_post_report_links, args=(exec_report, "war-room")).start()
             entry["execution_notified"] = True
             sessions[dir_name] = entry
 

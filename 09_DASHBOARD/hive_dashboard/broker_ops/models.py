@@ -1,9 +1,11 @@
 """
 Broker OS - Models
 
-Pure middleman matchmaking engine:
-- OfferListing: what sellers have (AI SaaS, services, tools)
-- LeadProfile:  what buyers need (startups, SMBs, CTOs)
+Multi-vertical matchmaking engine:
+- OfferListing: what sellers have (SaaS, services, tools, real estate)
+- LeadProfile:  what buyers need (startups, SMBs, CTOs, investors)
+- PropertyLead: real estate wholesale pipeline (distressed properties)
+- InvestorBuyer: cash buyer list for wholesale assignments
 - BrokerMatch:  AI-scored pairing
 - Deal:         closed/active deal
 - CommissionRecord: immutable ledger, audit-ready
@@ -26,6 +28,8 @@ class OfferListing(models.Model):
         ("healthtech",   "Healthtech / Privacy"),
         ("marketing",    "Marketing / Growth"),
         ("logistics",    "Logistics / Operations"),
+        ("real_estate",  "Real Estate / Property"),
+        ("website",      "Website / Domain"),
         ("other",        "Other"),
     ]
     STATUS_CHOICES = [
@@ -37,7 +41,7 @@ class OfferListing(models.Model):
 
     id            = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     seller_name   = models.CharField(max_length=200)
-    seller_email  = models.EmailField()
+    seller_email  = models.EmailField(blank=True, default="")
     seller_url    = models.URLField(blank=True)
 
     title         = models.CharField(max_length=300)
@@ -307,3 +311,296 @@ class CommissionRecord(models.Model):
 
     def __str__(self):
         return f"{self.record_type} ${self.amount} | Deal {str(self.deal_id)[:8]}"
+
+
+# ---------------------------------------------------------------------------
+# REAL ESTATE WHOLESALE: property leads + investor buyers
+# ---------------------------------------------------------------------------
+
+class PropertyLead(models.Model):
+    """Distressed or motivated-seller property for wholesale assignment."""
+    LEAD_TYPE_CHOICES = [
+        ("pre_foreclosure", "Pre-Foreclosure"),
+        ("tax_lien",        "Tax Lien / Delinquent"),
+        ("probate",         "Probate / Estate"),
+        ("absentee",        "Absentee Owner"),
+        ("divorce",         "Divorce"),
+        ("code_violation",  "Code Violation"),
+        ("high_equity",     "High Equity / Tired Landlord"),
+        ("vacant",          "Vacant Property"),
+        ("fsbo",            "For Sale By Owner"),
+        ("expired_listing", "Expired MLS Listing"),
+        ("zillow",          "Zillow / Public Listing"),
+        ("other",           "Other"),
+    ]
+    STATUS_CHOICES = [
+        ("new",          "New Lead"),
+        ("contacted",    "Contacted"),
+        ("negotiating",  "Negotiating"),
+        ("under_contract", "Under Contract"),
+        ("assigned",     "Assigned to Buyer"),
+        ("closed",       "Closed"),
+        ("dead",         "Dead / No Deal"),
+    ]
+    PROPERTY_TYPE_CHOICES = [
+        ("sfr",         "Single Family"),
+        ("multi",       "Multi-Family (2-4)"),
+        ("apartment",   "Apartment (5+)"),
+        ("condo",       "Condo / Townhouse"),
+        ("land",        "Vacant Land"),
+        ("commercial",  "Commercial"),
+        ("mobile",      "Mobile Home"),
+    ]
+
+    id              = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    # Property info
+    address         = models.CharField(max_length=300)
+    city            = models.CharField(max_length=100)
+    state           = models.CharField(max_length=2)
+    zip_code        = models.CharField(max_length=10)
+    county          = models.CharField(max_length=100, blank=True)
+    property_type   = models.CharField(max_length=20, choices=PROPERTY_TYPE_CHOICES, default="sfr")
+    bedrooms        = models.IntegerField(default=0)
+    bathrooms       = models.DecimalField(max_digits=3, decimal_places=1, default=0)
+    sqft            = models.IntegerField(default=0)
+    lot_sqft        = models.IntegerField(default=0)
+    year_built      = models.IntegerField(default=0)
+
+    # Owner info
+    owner_name      = models.CharField(max_length=200, blank=True)
+    owner_phone     = models.CharField(max_length=20, blank=True)
+    owner_email     = models.EmailField(blank=True)
+    owner_mailing   = models.CharField(max_length=300, blank=True, help_text="If different from property address")
+    is_absentee     = models.BooleanField(default=False)
+
+    # Deal numbers
+    asking_price    = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    estimated_arv   = models.DecimalField(max_digits=12, decimal_places=2, default=0,
+                                           help_text="After Repair Value")
+    estimated_repair = models.DecimalField(max_digits=12, decimal_places=2, default=0,
+                                            help_text="Estimated repair costs")
+    max_offer       = models.DecimalField(max_digits=12, decimal_places=2, default=0,
+                                           help_text="70% ARV - repairs - assignment fee")
+    assignment_fee  = models.DecimalField(max_digits=12, decimal_places=2, default=10000,
+                                           help_text="Our wholesale fee (typically $5k-$25k)")
+
+    # Scoring
+    lead_type       = models.CharField(max_length=20, choices=LEAD_TYPE_CHOICES, default="other")
+    motivation_score = models.IntegerField(default=0, help_text="0-100, how motivated is the seller")
+    equity_pct      = models.DecimalField(max_digits=5, decimal_places=2, default=0,
+                                           help_text="Estimated equity percentage")
+    days_on_market  = models.IntegerField(default=0)
+
+    # Status
+    status          = models.CharField(max_length=20, choices=STATUS_CHOICES, default="new", db_index=True)
+    source          = models.CharField(max_length=100, blank=True, help_text="zillow, propstream, tax_records, driving_for_dollars")
+    source_url      = models.URLField(blank=True)
+    zillow_url      = models.URLField(blank=True)
+
+    # Outreach
+    last_contacted  = models.DateTimeField(null=True, blank=True)
+    contact_count   = models.IntegerField(default=0)
+    contact_method  = models.CharField(max_length=30, blank=True, help_text="sms, cold_call, direct_mail, email")
+
+    # Linked deal (if assigned)
+    deal            = models.ForeignKey(Deal, on_delete=models.SET_NULL, null=True, blank=True, related_name="properties")
+
+    created_at      = models.DateTimeField(auto_now_add=True)
+    updated_at      = models.DateTimeField(auto_now=True)
+    notes           = models.TextField(blank=True)
+    raw_data        = models.JSONField(default=dict, help_text="Original scraped data")
+
+    class Meta:
+        ordering = ["-motivation_score", "-created_at"]
+        verbose_name = "Property Lead"
+
+    def __str__(self):
+        return f"{self.address}, {self.city} {self.state} | {self.lead_type} | {self.status}"
+
+    @property
+    def spread(self):
+        """Profit spread: ARV - repair - asking price."""
+        return float(self.estimated_arv) - float(self.estimated_repair) - float(self.asking_price)
+
+    @property
+    def mao(self):
+        """Maximum Allowable Offer = 70% ARV - repairs - assignment fee."""
+        return float(self.estimated_arv) * 0.70 - float(self.estimated_repair) - float(self.assignment_fee)
+
+    def save(self, *args, **kwargs):
+        if self.estimated_arv and not self.max_offer:
+            self.max_offer = self.mao
+        super().save(*args, **kwargs)
+
+
+class InvestorBuyer(models.Model):
+    """Cash buyer / investor for wholesale property assignments."""
+    BUYER_TYPE_CHOICES = [
+        ("fix_flip",    "Fix & Flip"),
+        ("buy_hold",    "Buy & Hold / Rental"),
+        ("developer",   "Developer / New Construction"),
+        ("landlord",    "Landlord Portfolio"),
+        ("fund",        "Investment Fund / REIT"),
+        ("owner_occ",   "Owner Occupant"),
+        ("other",       "Other"),
+    ]
+
+    id              = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    name            = models.CharField(max_length=200)
+    company         = models.CharField(max_length=200, blank=True)
+    email           = models.EmailField()
+    phone           = models.CharField(max_length=20, blank=True)
+
+    buyer_type      = models.CharField(max_length=20, choices=BUYER_TYPE_CHOICES, default="fix_flip")
+    markets         = models.JSONField(default=list, help_text="List of city/state or zip codes they buy in")
+    property_types  = models.JSONField(default=list, help_text="sfr, multi, land, etc.")
+    budget_min      = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    budget_max      = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    can_close_days  = models.IntegerField(default=14, help_text="How fast they can close (days)")
+    cash_buyer      = models.BooleanField(default=True)
+    proof_of_funds  = models.BooleanField(default=False, help_text="Has provided POF")
+
+    deals_closed    = models.IntegerField(default=0, help_text="Total deals closed with us")
+    total_volume    = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+    avg_response_hrs = models.FloatField(default=0, help_text="Avg hours to respond to a deal")
+
+    is_active       = models.BooleanField(default=True)
+    last_deal_at    = models.DateTimeField(null=True, blank=True)
+    source          = models.CharField(max_length=100, blank=True, help_text="reia, facebook, direct, referral")
+
+    created_at      = models.DateTimeField(auto_now_add=True)
+    updated_at      = models.DateTimeField(auto_now=True)
+    notes           = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-deals_closed", "-created_at"]
+        verbose_name = "Investor Buyer"
+
+    def __str__(self):
+        return f"{self.name} | {self.buyer_type} | ${self.budget_min}-${self.budget_max} | {self.can_close_days}d close"
+
+
+# ---------------------------------------------------------------------------
+# CLIENT FILES: A-to-Z deal lifecycle document management
+# ---------------------------------------------------------------------------
+
+class ClientFile(models.Model):
+    """Per-deal client folder tracking the full document lifecycle."""
+    STATUS_CHOICES = [
+        ("active",         "Active"),
+        ("under_contract", "Under Contract"),
+        ("closing",        "Closing"),
+        ("closed",         "Closed"),
+        ("dead",           "Dead"),
+    ]
+
+    id              = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    property_lead   = models.OneToOneField(PropertyLead, on_delete=models.CASCADE,
+                                            related_name="client_file", null=True, blank=True)
+    deal            = models.OneToOneField(Deal, on_delete=models.SET_NULL,
+                                            null=True, blank=True, related_name="client_file")
+
+    # Denormalized for quick display
+    client_name     = models.CharField(max_length=200, help_text="Seller / property owner name")
+    property_address = models.CharField(max_length=300)
+    city            = models.CharField(max_length=100, blank=True)
+    state           = models.CharField(max_length=2, blank=True)
+    status          = models.CharField(max_length=20, choices=STATUS_CHOICES, default="active", db_index=True)
+
+    # Deal numbers (snapshot)
+    contract_price  = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    assignment_fee  = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    buyer_price     = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    estimated_arv   = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    # Matched buyer (once assigned)
+    buyer           = models.ForeignKey(InvestorBuyer, on_delete=models.SET_NULL,
+                                         null=True, blank=True, related_name="client_files")
+    title_company   = models.CharField(max_length=200, blank=True)
+    title_contact   = models.CharField(max_length=200, blank=True)
+    title_email     = models.EmailField(blank=True)
+
+    created_at      = models.DateTimeField(auto_now_add=True)
+    updated_at      = models.DateTimeField(auto_now=True)
+    closed_at       = models.DateTimeField(null=True, blank=True)
+    notes           = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-updated_at"]
+        verbose_name = "Client File"
+
+    def __str__(self):
+        return f"{self.property_address} | {self.client_name} | {self.status}"
+
+    @property
+    def document_count(self):
+        return self.documents.count()
+
+    @property
+    def latest_document(self):
+        return self.documents.order_by("-created_at").first()
+
+
+class ClientDocument(models.Model):
+    """Individual document in a client file timeline."""
+    DOC_TYPE_CHOICES = [
+        ("seller_outreach",    "Seller Outreach Email"),
+        ("deal_sheet",         "Deal Sheet / Investor Presentation"),
+        ("assignment_contract", "Assignment Contract"),
+        ("buyer_pitch",        "Buyer Pitch Email"),
+        ("title_engagement",   "Title Company Engagement"),
+        ("signed_contract",    "Signed Contract"),
+        ("closing_statement",  "Closing Statement"),
+        ("payment_receipt",    "Payment Receipt"),
+        ("addendum",           "Addendum / Amendment"),
+        ("note",               "Internal Note"),
+        ("other",              "Other"),
+    ]
+    STATUS_CHOICES = [
+        ("draft",    "Draft"),
+        ("sent",     "Sent"),
+        ("signed",   "Signed"),
+        ("final",    "Final"),
+        ("voided",   "Voided"),
+    ]
+
+    id              = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    client_file     = models.ForeignKey(ClientFile, on_delete=models.CASCADE, related_name="documents")
+
+    doc_type        = models.CharField(max_length=30, choices=DOC_TYPE_CHOICES, db_index=True)
+    title           = models.CharField(max_length=300)
+    status          = models.CharField(max_length=20, choices=STATUS_CHOICES, default="draft")
+
+    # Content - stored as branded HTML
+    html_content    = models.TextField(blank=True, help_text="Branded HTML document content")
+    plain_text      = models.TextField(blank=True, help_text="Plain text fallback")
+
+    # Email tracking (for outreach docs)
+    to_email        = models.EmailField(blank=True)
+    sent_at         = models.DateTimeField(null=True, blank=True)
+    opened_at       = models.DateTimeField(null=True, blank=True)
+
+    # Metadata
+    generated_by    = models.CharField(max_length=50, blank=True, help_text="Agent name: piper, rex, ace, hammer")
+    slack_message_id = models.CharField(max_length=100, blank=True)
+    supabase_id     = models.CharField(max_length=100, blank=True, help_text="Synced Supabase record ID")
+
+    created_at      = models.DateTimeField(auto_now_add=True)
+    updated_at      = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["created_at"]
+        verbose_name = "Client Document"
+
+    def __str__(self):
+        return f"{self.get_doc_type_display()} | {self.title} | {self.status}"
+
+    @property
+    def step_number(self):
+        """Position in the deal timeline (1-based)."""
+        order = [c[0] for c in self.DOC_TYPE_CHOICES]
+        try:
+            return order.index(self.doc_type) + 1
+        except ValueError:
+            return 99

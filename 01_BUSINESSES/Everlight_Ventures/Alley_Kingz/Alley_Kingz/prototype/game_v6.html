@@ -1,0 +1,3558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Alley Kingz v0.6.4 -- 3D Street Kingz</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:none;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+canvas{display:block;width:100%;height:100%}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+// ============================================================
+// ALLEY KINGZ v0.6.4 -- 3D STREET KINGZ + CLASH ROYALE POLISH
+// Pseudo-3D Perspective | Math-Driven Combat | Physics Engine
+// State Machine Combat | Enhanced VFX | Algebra + Geometry + Trigonometry + Calculus
+// ============================================================
+const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+
+// --- CONSTANTS ---
+const ARENA_W=18,ARENA_H=30,RIVER_Y=15,RIVER_H=1.4,BRIDGE_W=3,BRIDGE_LX=4,BRIDGE_RX=14;
+const REGULAR_TIME=180,OVERTIME_TIME=60,DOUBLE_TIME=60,COUNTDOWN_TIME=3;
+const ELIXIR_MAX=10,ELIXIR_RATE=1/2.8,ELIXIR_RATE_15X=ELIXIR_RATE*1.5,ELIXIR_RATE_3X=ELIXIR_RATE*3,START_ELIXIR=5;
+const TOWER_STATS={princess:{model:'Crew Car',hp:1400,dmg:50,range:6,atkSpd:0.8,w:1.4,h:0.9},king:{model:'HQ Van',hp:2800,dmg:90,range:7,atkSpd:0.7,w:1.8,h:1.2}};
+const CITY_BUILDINGS=[0.22,0.31,0.17,0.28,0.24,0.35,0.19,0.26,0.32,0.14,0.25,0.29];
+const DEG2RAD=Math.PI/180,RAD2DEG=180/Math.PI;
+
+// ============================================================
+// 3D PERSPECTIVE ENGINE (Trigonometry + Geometry)
+// Converts 2D arena coords to pseudo-3D screen coords
+// Uses vanishing point projection: objects farther away shrink
+// ============================================================
+const PERSPECTIVE={
+  vanishX:0.5,   // vanishing point X (fraction of screen width)
+  vanishY:-0.15, // vanishing point Y (above screen)
+  depthScale:0.55,// how much the far end shrinks (0=flat, 1=extreme)
+  tiltAngle:12,   // camera tilt in degrees (trigonometry)
+};
+
+// Perspective depth factor: calculates scale based on Y position
+// Uses linear interpolation: scale = 1 - depthScale * (1 - y/ARENA_H)
+// Far objects (y=0) are smaller, near objects (y=ARENA_H) are full size
+function getDepthFactor(gy){
+  const t=gy/ARENA_H; // 0=top(far), 1=bottom(near)
+  return 1-PERSPECTIVE.depthScale*(1-t);
+}
+
+// 3D projection: arena coords -> screen coords with perspective
+// Uses geometry: trapezoidal projection from vanishing point
+function toScr3D(gx,gy){
+  const df=getDepthFactor(gy);
+  const cx=offX+ARENA_W*scale/2+shakeOffX; // center X
+  const baseX=offX+gx*scale+shakeOffX;
+  const baseY=offY+gy*scale+shakeOffY;
+  // Lerp X toward vanishing point based on depth
+  const vx=cx+W*(PERSPECTIVE.vanishX-0.5);
+  const sx=vx+(baseX-vx)*df;
+  const sy=baseY;
+  return[sx,sy,df]; // returns [screenX, screenY, depthFactor]
+}
+
+// Inverse 3D: screen coords -> arena coords (for input)
+function toGame3D(sx,sy){
+  const baseY=(sy-shakeOffY-offY)/scale;
+  const df=getDepthFactor(baseY);
+  const cx=offX+ARENA_W*scale/2+shakeOffX;
+  const vx=cx+W*(PERSPECTIVE.vanishX-0.5);
+  const baseX=(sx-vx)/df+vx;
+  return[(baseX-shakeOffX-offX)/scale,baseY];
+}
+
+// ============================================================
+// PHYSICS ENGINE (Calculus -- integration of acceleration)
+// Smooth movement with acceleration, deceleration, easing
+// ============================================================
+// Quadratic easing: f(t) = t^2 (acceleration)
+function easeInQuad(t){return t*t;}
+// Inverse quadratic: f(t) = t*(2-t) (deceleration)
+function easeOutQuad(t){return t*(2-t);}
+// Smooth step: f(t) = 3t^2 - 2t^3 (S-curve, calculus smooth interpolation)
+function smoothStep(t){return t*t*(3-2*t);}
+// Cubic bezier easing (calculus -- parametric curve evaluation)
+function easeInOutCubic(t){return t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+
+// Exponential decay (calculus): value * e^(-k*t)
+// Used for damage falloff, speed decay, visual fading
+function expDecay(value,k,t){return value*Math.exp(-k*t);}
+
+// Velocity integration: position += velocity * dt + 0.5 * accel * dt^2
+// (Calculus -- second-order integration of motion)
+function integrateMotion(pos,vel,accel,dt){
+  return{
+    pos:pos+vel*dt+0.5*accel*dt*dt,
+    vel:vel+accel*dt
+  };
+}
+
+// ============================================================
+// PROJECTILE PHYSICS (Trigonometry + Calculus)
+// Parabolic arc: y = y0 + v0*sin(theta)*t - 0.5*g*t^2
+// x = x0 + v0*cos(theta)*t
+// ============================================================
+let projectiles=[];
+
+function launchProjectile(fromX,fromY,toX,toY,speed,dmg,owner,color,type,aoe){
+  const dx=toX-fromX,dy=toY-fromY;
+  const dist=Math.hypot(dx,dy);
+  // Trigonometry: calculate launch angle
+  const angle=Math.atan2(dy,dx);
+  // Calculate time of flight (guard against zero distance)
+  const tof=Math.max(0.05,dist/(speed*2.5));
+  // Arc height: higher for longer distances (quadratic relationship)
+  const arcH=Math.min(dist*0.4,4); // max arc height
+  projectiles.push({
+    x:fromX,y:fromY,z:0, // z = height above ground
+    startX:fromX,startY:fromY,
+    targetX:toX,targetY:toY,
+    angle:angle,
+    vx:Math.cos(angle)*speed*2.5, // trig: x-component of velocity
+    vy:Math.sin(angle)*speed*2.5, // trig: y-component of velocity
+    vz:arcH/tof*4, // FIXED: peak now reaches full arcH (calculus: v0 for parabolic arc)
+    gravity:arcH/tof/tof*8, // FIXED: matching gravity for full arc height
+    t:0,tof:tof,
+    dmg:dmg,owner:owner,color:color,type:type||'bullet',
+    aoe:aoe||0,alive:true,trail:[]
+  });
+}
+
+function updateProjectiles(dt){
+  for(const p of projectiles){
+    if(!p.alive)continue;
+    p.t+=dt;
+    // Calculus: integrate position
+    // x(t) = x0 + vx*t
+    p.x=p.startX+p.vx*p.t;
+    // y(t) = y0 + vy*t
+    p.y=p.startY+p.vy*p.t;
+    // z(t) = vz*t - 0.5*g*t^2 (parabolic arc from calculus)
+    p.z=p.vz*p.t-0.5*p.gravity*p.t*p.t;
+    // Trail particles (store last 5 positions)
+    p.trail.push({x:p.x,y:p.y,z:p.z,t:0});
+    if(p.trail.length>8)p.trail.shift();
+    p.trail.forEach(tr=>tr.t+=dt);
+    // Check if projectile has landed (z <= 0 after peak)
+    if(p.t>=p.tof||p.z<-0.1){
+      p.alive=false;
+      // Apply damage at impact point
+      applyProjectileDamage(p);
+      addExplosionParticles(p.targetX,p.targetY,p.color,6);
+      addShake(0.06);
+    }
+  }
+  projectiles=projectiles.filter(p=>p.alive);
+}
+
+function applyProjectileDamage(p){
+  const enemyOwner=1-p.owner;
+  if(p.aoe>0){
+    // Geometry: circle-based AoE
+    // Damage falloff (calculus): dmg * e^(-2*dist/radius)
+    units.forEach(u=>{
+      if(u.owner!==enemyOwner||!u.alive)return;
+      const d=Math.hypot(u.x-p.targetX,u.y-p.targetY);
+      if(d<=p.aoe){
+        const falloff=expDecay(p.dmg,2,d/p.aoe); // exponential damage falloff
+        u.takeDamage(Math.floor(falloff));
+        addEffect('dmg',u.x,u.y-0.4,'-'+Math.floor(falloff),'#FF0000',0.7);
+      }
+    });
+  } else {
+    // Single target: find nearest enemy to impact
+    let best=null,bd=1.5;
+    units.forEach(u=>{
+      if(u.owner!==enemyOwner||!u.alive)return;
+      const d=Math.hypot(u.x-p.targetX,u.y-p.targetY);
+      if(d<bd){bd=d;best=u;}
+    });
+    if(best){best.takeDamage(p.dmg);addEffect('dmg',best.x,best.y-0.4,'-'+p.dmg,'#FF4444',0.5);}
+  }
+  // Also check tower hits
+  const eTowers=p.owner===0?opponent.towers:player.towers;
+  eTowers.forEach(t=>{
+    if(t.destroyed)return;
+    const d=Math.hypot(t.x-p.targetX,t.y-p.targetY);
+    if(d<=(p.aoe||1.2)){
+      const dmg2=p.aoe>0?Math.floor(expDecay(p.dmg,2,d/Math.max(p.aoe,1))):p.dmg;
+      t.takeDamage(dmg2);sfxTowerHit();checkTowerDeath(t,p.owner);
+    }
+  });
+}
+
+// ============================================================
+// COMBO & SYNERGY MATH ENGINE (Algebra)
+// Eff_Power = Sum(Card_Power) * (1 + Synergy_Coeff) / Avg_Cost
+// Combo multiplier: base * (1 + 0.15 * chain)^1.5
+// ============================================================
+let comboChain={count:0,timer:0,lastOwner:-1};
+let maxCombo=0; // track peak combo for postgame
+
+function getComboMultiplier(){
+  if(comboChain.count<=0)return 1;
+  // Algebra: polynomial combo scaling, CAPPED at 2.5x
+  // mult = min(2.5, (1 + 0.15 * count)^1.5)
+  return Math.min(2.5,Math.pow(1+0.15*comboChain.count,1.5));
+}
+
+function registerCombo(owner){
+  if(owner===comboChain.lastOwner&&comboChain.timer>0){
+    comboChain.count++;
+    comboChain.timer=4; // 4 second window
+    maxCombo=Math.max(maxCombo,comboChain.count);
+    if(comboChain.count>=3){
+      addEffect('announce',ARENA_W/2,ARENA_H*0.4,comboChain.count+'x COMBO!',DESIGN.colors.crownGold,1.5);
+      addShake(0.1*Math.min(comboChain.count,6));
+    }
+  } else {
+    comboChain.count=1;comboChain.timer=4;comboChain.lastOwner=owner;
+    maxCombo=Math.max(maxCombo,1);
+  }
+}
+
+function updateCombo(dt){
+  if(comboChain.timer>0){comboChain.timer-=dt;if(comboChain.timer<=0)comboChain.count=0;}
+}
+
+// Synergy power calculation (Algebra)
+// Eff_Power = Sum(Card_Power) * (1 + Synergy_Coefficient) / Avg_Cost
+function calcSynergyBonus(deckIds){
+  const syns=getDeckSynergies(deckIds);
+  let coeff=0;
+  syns.forEach(s=>{
+    // Each synergy pair adds 0.08, each triple adds 0.15, 4+ adds 0.25
+    if(s.count>=4)coeff+=0.25;
+    else if(s.count>=3)coeff+=0.15;
+    else if(s.count>=2)coeff+=0.08;
+  });
+  return 1+coeff;
+}
+
+// Damage formula with armor (Algebra):
+// effective_dmg = raw_dmg * 100 / (100 + armor)
+// With distance falloff (Calculus): * e^(-k*dist)
+function calcDamage(raw,armor,dist,maxRange){
+  const armorReduction=100/(100+(armor||0));
+  const distFalloff=maxRange>0?expDecay(1,1.5,Math.max(0,dist-maxRange*0.5)/maxRange):1;
+  return Math.floor(raw*armorReduction*distFalloff*getComboMultiplier());
+}
+
+// ============================================================
+// SCREEN SHAKE (Trigonometry -- Perlin-like oscillation)
+// ============================================================
+let shakeTrauma=0,shakeOffX=0,shakeOffY=0;
+function addShake(a){shakeTrauma=Math.min(1,shakeTrauma+a);}
+function updateShake(dt){
+  if(shakeTrauma>0){
+    shakeTrauma=Math.max(0,shakeTrauma-dt*3.5);
+    const t=shakeTrauma*shakeTrauma;
+    // Trigonometry: use sin waves at different frequencies for organic shake
+    const time=performance.now()*0.001;
+    shakeOffX=Math.sin(time*23.7)*t*12+Math.cos(time*17.3)*t*6;
+    shakeOffY=Math.sin(time*19.1)*t*12+Math.cos(time*29.8)*t*6;
+  } else {shakeOffX=0;shakeOffY=0;}
+}
+
+// ============================================================
+// 10 CITY ARENAS
+// ============================================================
+const CITY_ARENAS=[
+  {name:'COMPTON',lvl:[1,10],sky1:'#0D0D1A',sky2:'#1a0010',road:'#1a1a1a',walk:'#252520',n1:'#C1440E',n2:'#FF4500',acc:'#D4AF37',tag:'COMPTON',style:'hood',fog:{color:'#C1440E',density:0.12},weather:null},
+  {name:'DETROIT',lvl:[11,20],sky1:'#0D0D1A',sky2:'#181410',road:'#161412',walk:'#201c18',n1:'#FF6600',n2:'#DD4400',acc:'#CC3300',tag:'MOTOR CITY',style:'industrial',fog:{color:'#4A4A55',density:0.18},weather:null},
+  {name:'CHICAGO',lvl:[21,30],sky1:'#0D0D1A',sky2:'#000820',road:'#141820',walk:'#1c2028',n1:'#0066FF',n2:'#0044CC',acc:'#0088FF',tag:'CHI-TOWN',style:'elevated',fog:{color:'#0066FF',density:0.15},weather:'rain'},
+  {name:'BROOKLYN',lvl:[31,40],sky1:'#0D0D1A',sky2:'#120018',road:'#181020',walk:'#201828',n1:'#AA00FF',n2:'#8800CC',acc:'#CC44FF',tag:'BK ALL DAY',style:'rooftop',fog:{color:'#AA00FF',density:0.1},weather:null},
+  {name:'ATLANTA',lvl:[41,50],sky1:'#0D0D1A',sky2:'#1a0005',road:'#1a0808',walk:'#251010',n1:'#FF0033',n2:'#CC0022',acc:'#FF2244',tag:'ATL TRAP',style:'trap',fog:{color:'#FF0033',density:0.12},weather:null},
+  {name:'OAKLAND',lvl:[51,60],sky1:'#0D0D1A',sky2:'#001018',road:'#101818',walk:'#182020',n1:'#00BBAA',n2:'#009988',acc:'#00DDCC',tag:'THE TOWN',style:'harbor',fog:{color:'#00BBAA',density:0.2},weather:null},
+  {name:'MIAMI',lvl:[61,70],sky1:'#0D0D1A',sky2:'#100020',road:'#101428',walk:'#181c30',n1:'#FF44AA',n2:'#FF0088',acc:'#FF66CC',tag:'305 VICE',style:'neon',fog:{color:'#FF44AA',density:0.15},weather:null},
+  {name:'LAS VEGAS',lvl:[71,80],sky1:'#0D0D1A',sky2:'#100a00',road:'#1a1500',walk:'#252000',n1:'#D4AF37',n2:'#FFAA00',acc:'#D4AF37',tag:'SIN CITY',style:'casino',fog:{color:'#D4AF37',density:0.1},weather:null},
+  {name:'NEO TOKYO',lvl:[81,90],sky1:'#0D0D1A',sky2:'#000018',road:'#080010',walk:'#0c0018',n1:'#00F5FF',n2:'#FF00FF',acc:'#00F5FF',tag:'CYBER',style:'cyber',fog:{color:'#00F5FF',density:0.25},weather:'rain'},
+  {name:'KINGZ COURT',lvl:[91,100],sky1:'#0D0D1A',sky2:'#150e00',road:'#1a1400',walk:'#222000',n1:'#D4AF37',n2:'#CC44FF',acc:'#D4AF37',tag:'KINGZ',style:'throne',fog:{color:'#D4AF37',density:0.15},weather:null}
+];
+function getArena(lvl){for(const a of CITY_ARENAS){if(lvl>=a.lvl[0]&&lvl<=a.lvl[1])return a;}return CITY_ARENAS[0];}
+
+// --- BATTLE EMOJIS ---
+const EMOJIS=[
+  {i:'🏎💨',l:'Speed'},{i:'🚗💥',l:'Crash'},{i:'🏍🔥',l:'Burn'},{i:'🚛💀',l:'Crush'},
+  {i:'😈',l:'Evil'},{i:'🤣',l:'LOL'},{i:'💀',l:'Dead'},{i:'👋',l:'Bye'},
+  {i:'🤡',l:'Clown'},{i:'💅',l:'Easy'},{i:'👑',l:'King'},{i:'🔥',l:'Fire'}
+];
+let emojiOpen=false,emojiCD=0,floatingEmojis=[];
+
+// ============================================================
+// CARDS -- 41 Street Kingz + SPEED CURVES (Calculus)
+// Each card now has: accel (acceleration), armor, comboTag
+// Speed uses calculus: v(t) = v_max * (1 - e^(-accel*t))
+// ============================================================
+const CARS={
+  // === COMPTON (Lvl 1-10) ===
+  scrapyard:{id:'scrapyard',name:'Scrapyard',cost:5,hp:2200,dmg:140,speed:0.45,accel:1.2,armor:15,range:0.9,atkSpd:1.4,type:'troop',targets:'all',isArea:true,areaRadius:1.6,count:1,carColor:'#CC6600',bodyW:1.15,bodyH:0.7,icon:'🚛',ability:'CHAIN',abilityCD:8,locked:false,syn:['heavy_metal','fire_starter'],comboTag:'heavy',desc:'Junkyard tow truck. CHAIN WHIP: area flail every 8s.'},
+  corner_boyz:{id:'corner_boyz',name:'Corner Boyz',cost:2,hp:180,dmg:35,speed:1.4,accel:3.0,armor:0,range:0.9,atkSpd:1.2,type:'troop',targets:'all',count:3,carColor:'#FF8C00',bodyW:0.38,bodyH:0.28,icon:'🏃',ability:'SWARM',locked:false,syn:['street_gang'],comboTag:'swarm',desc:'3-unit block swarm.'},
+  prospect:{id:'prospect',name:'Prospect',cost:1,hp:140,dmg:28,speed:1.65,accel:4.5,armor:0,range:0.9,atkSpd:0.8,type:'troop',targets:'all',count:1,carColor:'#AAA',bodyW:0.35,bodyH:0.25,icon:'🛵',locked:false,syn:['speed_demon','street_gang'],comboTag:'cycle',desc:'Cycle card. Fastest deploy.'},
+  // === DETROIT (Lvl 11-20) ===
+  dead_mile:{id:'dead_mile',name:'Dead Mile',cost:4,hp:760,dmg:95,speed:0.88,accel:2.0,armor:8,range:0.9,atkSpd:1.2,type:'troop',targets:'all',count:1,carColor:'#8B0000',bodyW:0.95,bodyH:0.55,icon:'🚗',ability:'RAM',abilityCD:8,locked:false,syn:['heavy_metal'],comboTag:'ram',desc:'Amnesiac racer. RAM: 2x first hit every 8s.'},
+  axle_grind:{id:'axle_grind',name:'Axle Grind',cost:5,hp:1100,dmg:170,speed:0.55,accel:1.0,armor:20,range:0.9,atkSpd:1.5,type:'troop',targets:'all',isArea:true,areaRadius:1.4,count:1,carColor:'#B8860B',bodyW:1.1,bodyH:0.8,icon:'🎡',ability:'CRUSH',abilityCD:6,locked:false,syn:['heavy_metal','fire_starter'],comboTag:'heavy',desc:'Wheel rig. CRUSH: grinds everything nearby.'},
+  rust_bucket:{id:'rust_bucket',name:'Rust Bucket',cost:2,hp:340,dmg:45,speed:1.05,accel:2.5,armor:3,range:0.9,atkSpd:1.0,type:'troop',targets:'all',count:1,carColor:'#8B7355',bodyW:0.85,bodyH:0.5,icon:'💀',ability:'BACKFIRE',locked:false,syn:['street_gang'],comboTag:'trap',desc:'Explodes on death for 200 area dmg.'},
+  // === CHICAGO (Lvl 21-30) ===
+  blue_line:{id:'blue_line',name:'Blue Line',cost:5,hp:1200,dmg:90,speed:0.65,accel:1.5,armor:12,range:5.5,atkSpd:1.0,type:'troop',targets:'all',count:1,carColor:'#1E90FF',bodyW:1.0,bodyH:0.7,icon:'🚔',ability:'TASER',abilityCD:7,locked:false,syn:['ghost_rider'],comboTag:'ranged',desc:'Police SUV. TASER: chain zap 3 targets.'},
+  grim_ride:{id:'grim_ride',name:'Grim Ride',cost:3,hp:380,dmg:220,speed:1.85,accel:5.0,armor:0,range:0.9,atkSpd:2.0,type:'troop',targets:'all',count:1,carColor:'#2F4F4F',bodyW:0.6,bodyH:0.35,icon:'💀',ability:'REAPER',locked:false,syn:['speed_demon'],comboTag:'assassin',desc:'Death bike. Glass cannon assassin.'},
+  drill_van:{id:'drill_van',name:'Drill Van',cost:4,hp:420,dmg:105,speed:0.75,accel:1.8,armor:5,range:6.0,atkSpd:1.1,type:'troop',targets:'all',count:1,carColor:'#7B2FBE',bodyW:1.0,bodyH:0.7,icon:'🔊',ability:'SPRAY',locked:false,syn:['fire_starter'],comboTag:'ranged',desc:'Chicago drill. Long-range spray.'},
+  // === BROOKLYN (Lvl 31-40) ===
+  phantom:{id:'phantom',name:'Phantom',cost:4,hp:480,dmg:160,speed:1.4,accel:3.5,armor:3,range:5.0,atkSpd:1.5,type:'troop',targets:'all',count:1,carColor:'#9400D3',bodyW:0.78,bodyH:0.44,icon:'👻',ability:'GHOST_SHOT',locked:true,unlockLevel:32,syn:['speed_demon','ghost_rider'],comboTag:'ranged',desc:'Blacked-out racer. Homing ghost missiles.'},
+  no_face:{id:'no_face',name:'No Face',cost:3,hp:550,dmg:130,speed:1.1,accel:2.2,armor:10,range:0.9,atkSpd:1.0,type:'troop',targets:'all',count:1,carColor:'#483D8B',bodyW:0.82,bodyH:0.48,icon:'🎭',ability:'SHOCK',locked:true,unlockLevel:35,syn:['heavy_metal'],comboTag:'stun',desc:'Masked boxer. SHOCK RAM: stuns on hit 1s.'},
+  cabbie:{id:'cabbie',name:'Cabbie',cost:3,hp:500,dmg:90,speed:1.2,accel:2.8,armor:5,range:0.9,atkSpd:1.1,type:'troop',targets:'all',count:1,carColor:'#D4AF37',bodyW:0.85,bodyH:0.5,icon:'🚕',ability:'UNDERGROUND',locked:true,unlockLevel:38,syn:['ghost_rider'],comboTag:'flank',desc:'Ghost taxi. Bypasses units, hits backline.'},
+  // === ATLANTA (Lvl 41-50) ===
+  preacher:{id:'preacher',name:'Preacher',cost:5,hp:680,dmg:120,speed:0.6,accel:1.5,armor:8,range:6.5,atkSpd:1.3,type:'troop',targets:'all',count:1,carColor:'#800000',bodyW:1.0,bodyH:0.7,icon:'✝',ability:'HOLY_FIRE',locked:true,unlockLevel:42,syn:['fire_starter','ghost_rider'],comboTag:'ranged',desc:'Church van. Homing fire crosses. High range.'},
+  trap_king:{id:'trap_king',name:'Trap King',cost:6,hp:1900,dmg:130,speed:0.42,accel:0.8,armor:25,range:0.9,atkSpd:1.2,type:'troop',targets:'all',count:1,carColor:'#DC143C',bodyW:1.15,bodyH:0.75,icon:'🛡',ability:'BARRAGE',abilityCD:10,locked:true,unlockLevel:45,syn:['heavy_metal'],comboTag:'heavy',desc:'APC tank. BARRAGE: 3-missile burst every 10s.'},
+  dirty_south:{id:'dirty_south',name:'Dirty South',cost:3,hp:250,dmg:55,speed:1.8,accel:4.0,armor:0,range:0.9,atkSpd:1.2,type:'troop',targets:'all',count:2,carColor:'#FF2244',bodyW:0.48,bodyH:0.32,icon:'🏍',ability:'WHEELIE',abilityCD:8,locked:true,unlockLevel:48,syn:['speed_demon','street_gang'],comboTag:'cycle',desc:'ATL bike duo. Fast flanking pair.'},
+  // === OAKLAND (Lvl 51-60) ===
+  sideshow:{id:'sideshow',name:'Sideshow',cost:4,hp:720,dmg:80,speed:0.95,accel:2.0,armor:8,range:0.9,atkSpd:0.8,type:'troop',targets:'all',isArea:true,areaRadius:1.8,count:1,carColor:'#00CED1',bodyW:0.95,bodyH:0.55,icon:'🌀',ability:'DONUT',locked:true,unlockLevel:52,syn:['fire_starter','speed_demon'],comboTag:'aoe',desc:'Donk car. SIDESHOW spin: constant area dmg.'},
+  dock_boss:{id:'dock_boss',name:'Dock Boss',cost:7,hp:3200,dmg:210,speed:0.32,accel:0.6,armor:30,range:0.9,atkSpd:1.3,type:'troop',targets:'all',isArea:true,areaRadius:2.0,count:1,carColor:'#2E8B57',bodyW:1.3,bodyH:0.9,icon:'📦',ability:'CONTAINER',locked:true,unlockLevel:55,syn:['heavy_metal','fire_starter'],comboTag:'heavy',desc:'Container truck. Throws shipping containers.'},
+  hyphy:{id:'hyphy',name:'Hyphy',cost:2,hp:300,dmg:50,speed:1.45,accel:3.5,armor:0,range:0.9,atkSpd:1.0,type:'troop',targets:'all',count:1,carColor:'#20B2AA',bodyW:0.8,bodyH:0.45,icon:'🎶',ability:'GHOST_RIDE',locked:true,unlockLevel:58,syn:['street_gang','speed_demon'],comboTag:'cycle',desc:'Bay ghost ride. Keeps moving 3s after death.'},
+  // === MIAMI (Lvl 61-70) ===
+  vice_queen:{id:'vice_queen',name:'Vice Queen',cost:4,hp:520,dmg:260,speed:1.55,accel:4.5,armor:2,range:0.9,atkSpd:1.9,type:'troop',targets:'all',count:1,carColor:'#FF1493',bodyW:0.78,bodyH:0.44,icon:'👑',ability:'NITRO',abilityCD:12,locked:true,unlockLevel:62,syn:['speed_demon'],comboTag:'assassin',desc:'Pink lambo. NITRO: +50% speed burst.'},
+  bass_cannon:{id:'bass_cannon',name:'Bass Cannon',cost:5,hp:650,dmg:100,speed:0.55,accel:1.2,armor:10,range:6.0,atkSpd:1.2,type:'troop',targets:'all',isArea:true,areaRadius:2.0,count:1,carColor:'#FF00FF',bodyW:1.1,bodyH:0.75,icon:'🔊',ability:'BASS_DROP',locked:true,unlockLevel:65,syn:['fire_starter','ghost_rider'],comboTag:'aoe',desc:'Bass van. Pushback wave + area damage.'},
+  jet_runner:{id:'jet_runner',name:'Jet Runner',cost:2,hp:260,dmg:65,speed:2.0,accel:5.5,armor:0,range:0.9,atkSpd:1.1,type:'troop',targets:'all',count:1,carColor:'#FF69B4',bodyW:0.55,bodyH:0.3,icon:'🏄',ability:'WAVE_DASH',locked:true,unlockLevel:68,syn:['speed_demon'],comboTag:'cycle',desc:'Jet ski racer. Crosses river instantly.'},
+  // === LAS VEGAS (Lvl 71-80) ===
+  ice_kream:{id:'ice_kream',name:'Ice Kream',cost:6,hp:1600,dmg:280,speed:0.65,accel:1.2,armor:15,range:5.0,atkSpd:2.0,type:'troop',targets:'all',count:1,carColor:'#FF4500',bodyW:1.1,bodyH:0.75,icon:'🤡',ability:'CLOWN_MISSILE',abilityCD:15,locked:true,unlockLevel:72,syn:['heavy_metal','dark_carnival'],comboTag:'heavy',desc:'Flaming clown truck. Giant homing missile.'},
+  high_roller:{id:'high_roller',name:'High Roller',cost:5,hp:900,dmg:155,speed:0.7,accel:1.5,armor:10,range:0.9,atkSpd:1.1,type:'troop',targets:'all',count:1,carColor:'#D4AF37',bodyW:1.05,bodyH:0.6,icon:'🎰',ability:'JACKPOT',abilityCD:6,locked:true,unlockLevel:75,syn:['dark_carnival','heavy_metal'],comboTag:'gamble',desc:'Gold Rolls. JACKPOT: random 1x-3x damage.'},
+  showgirl:{id:'showgirl',name:'Showgirl',cost:3,hp:380,dmg:60,speed:1.3,accel:3.0,armor:2,range:0.9,atkSpd:0.9,type:'troop',targets:'all',count:1,carColor:'#FF6EC7',bodyW:0.75,bodyH:0.42,icon:'💃',ability:'DAZZLE',abilityCD:8,locked:true,unlockLevel:78,syn:['dark_carnival','speed_demon'],comboTag:'stun',desc:'Neon convertible. DAZZLE: AoE stun 1.5s.'},
+  // === NEO TOKYO (Lvl 81-90) ===
+  mecha:{id:'mecha',name:'Mecha',cost:7,hp:3500,dmg:95,speed:0.35,accel:0.5,armor:35,range:3.0,atkSpd:0.4,type:'troop',targets:'all',isArea:true,areaRadius:2.2,count:1,carColor:'#00FFFF',bodyW:1.3,bodyH:0.9,icon:'🤖',ability:'FLAMETHROWER',locked:true,unlockLevel:82,syn:['heavy_metal','ghost_rider'],comboTag:'heavy',desc:'Cyber tank. Continuous fire stream.'},
+  drone_lord:{id:'drone_lord',name:'Drone Lord',cost:4,hp:260,dmg:85,speed:2.2,accel:6.0,armor:0,range:5.5,atkSpd:1.5,type:'troop',targets:'all',count:2,carColor:'#00CED1',bodyW:0.48,bodyH:0.32,icon:'✈',ability:'MISSILES',locked:true,unlockLevel:85,syn:['ghost_rider','speed_demon'],comboTag:'ranged',desc:'Drone pair. Air missiles from above.'},
+  neon_blade:{id:'neon_blade',name:'Neon Blade',cost:3,hp:420,dmg:95,speed:1.65,accel:4.0,armor:3,range:0.9,atkSpd:1.3,type:'troop',targets:'all',count:1,carColor:'#FF00FF',bodyW:0.65,bodyH:0.38,icon:'⚔',ability:'STEALTH',locked:true,unlockLevel:88,syn:['speed_demon','ghost_rider'],comboTag:'assassin',desc:'Cyber ninja bike. Invisible 3s on deploy.'},
+  // === KINGZ COURT (Lvl 91-100) ===
+  kingpin:{id:'kingpin',name:'Kingpin',cost:6,hp:1800,dmg:130,speed:0.55,accel:1.0,armor:20,range:0.9,atkSpd:1.0,type:'troop',targets:'all',count:1,carColor:'#D4AF37',bodyW:1.1,bodyH:0.65,icon:'👑',ability:'BOSS_BUFF',locked:true,unlockLevel:92,syn:['heavy_metal','dark_carnival'],comboTag:'heavy',desc:'Gold limo. Buffs all allies nearby.'},
+  warhawk:{id:'warhawk',name:'Warhawk',cost:8,hp:2000,dmg:250,speed:1.8,accel:3.0,armor:10,range:6.0,atkSpd:2.5,type:'troop',targets:'all',isArea:true,areaRadius:2.5,count:1,carColor:'#FF0000',bodyW:1.2,bodyH:0.6,icon:'🚁',ability:'AIRSTRIKE',locked:true,unlockLevel:95,syn:['fire_starter','ghost_rider'],comboTag:'aoe',desc:'Attack gunship. Ultimate air superiority.'},
+  shadow_king:{id:'shadow_king',name:'Shadow King',cost:5,hp:800,dmg:170,speed:0.85,accel:1.8,armor:12,range:0.9,atkSpd:1.2,type:'troop',targets:'all',count:1,carColor:'#1C1C1C',bodyW:1.0,bodyH:0.65,icon:'⚰',ability:'COFFIN',abilityCD:10,locked:true,unlockLevel:98,syn:['dark_carnival','ghost_rider'],comboTag:'trap',desc:'Death hearse. Deploys coffin bomb on death.'},
+  // === SPELLS ===
+  napalm:{id:'napalm',name:'Napalm',cost:4,dmg:325,radius:2.5,type:'spell',carColor:'#FF4500',icon:'🔥',locked:false,syn:['fire_starter','spell_cycle'],desc:'Burning area damage.'},
+  blackout:{id:'blackout',name:'Blackout',cost:3,dmg:144,radius:4.0,type:'spell',carColor:'#7CFC00',icon:'⚡',locked:false,syn:['spell_cycle','ghost_rider'],desc:'Wide energy blast.'},
+  turbo_boost:{id:'turbo_boost',name:'Turbo',cost:3,dmg:0,radius:3.5,type:'spell',carColor:'#00CED1',icon:'💨',locked:false,syn:['speed_demon','spell_cycle'],desc:'Allies +60% speed 3s.'},
+  drive_by:{id:'drive_by',name:'Drive-By',cost:2,dmg:220,radius:0.5,type:'spell',carColor:'#FF6347',icon:'🔫',locked:false,syn:['spell_cycle'],desc:'Fast targeted shot.'},
+  oil_slick:{id:'oil_slick',name:'Oil Slick',cost:2,dmg:60,radius:3.0,type:'spell',carColor:'#555',icon:'🛢',locked:false,syn:['spell_cycle'],desc:'Slow + damage over time.'},
+  spike_strip:{id:'spike_strip',name:'Spike Strip',cost:3,dmg:180,radius:2.0,type:'spell',carColor:'#DD5500',icon:'⛓',locked:false,syn:['spell_cycle'],desc:'Trap: damage + slow.'},
+  smoke_screen:{id:'smoke_screen',name:'Smoke',cost:1,dmg:0,radius:3.0,type:'spell',carColor:'#666',icon:'🌫',locked:false,syn:['spell_cycle'],desc:'Stuns enemies 1.5s.'},
+  calypso_wish:{id:'calypso_wish',name:'Calypso',cost:3,dmg:0,radius:3.0,type:'spell',carColor:'#CC44FF',icon:'🎪',locked:false,syn:['dark_carnival','spell_cycle'],desc:'Random: heal/damage/speed.'},
+  // === BUILDINGS ===
+  car_bomb:{id:'car_bomb',name:'Car Bomb',cost:3,hp:500,dmg:350,speed:0,range:2.5,atkSpd:0.5,type:'building',targets:'all',count:1,carColor:'#8B4513',bodyW:0.9,bodyH:0.55,icon:'💥',ability:'TRAP',locked:false,syn:['fire_starter'],desc:'Parked explosive. Boom.'},
+  chop_shop:{id:'chop_shop',name:'Chop Shop',cost:4,hp:800,dmg:0,speed:0,range:0,atkSpd:0,type:'building',targets:'all',count:1,carColor:'#AA6633',bodyW:1.1,bodyH:0.7,icon:'🔧',ability:'SPAWN',abilityCD:12,locked:false,syn:['street_gang'],desc:'Spawns Rust Bucket every 12s.'},
+  turret_nest:{id:'turret_nest',name:'Turret Nest',cost:3,hp:450,dmg:75,speed:0,range:5.0,atkSpd:0.7,type:'building',targets:'all',count:1,carColor:'#556B2F',bodyW:0.7,bodyH:0.7,icon:'🗼',ability:'TURRET',locked:false,syn:['ghost_rider'],desc:'Auto-targeting defense tower.'}
+};
+
+const ALL_CAR_IDS=Object.keys(CARS);
+const UNLOCKED_IDS=ALL_CAR_IDS.filter(id=>!CARS[id].locked);
+const DEFAULT_DECK=['dead_mile','scrapyard','corner_boyz','grim_ride','napalm','blackout','drive_by','prospect'];
+
+// ============================================================
+// DESIGN TOKENS -- Centralized visual constants
+// ============================================================
+const DESIGN={
+  colors:{
+    crownGold:'#D4AF37',midnightDeep:'#0D0D1A',neonCyan:'#00F5FF',
+    brickWarm:'#C1440E',asphaltGrey:'#4A4A55',
+    bloodOrange:'#FF4500',ivoryCream:'#F5F0E8',
+    bg:'#0D0D1A',panel:'#16213e',accent:'#C1440E',gold:'#D4AF37',
+    text:'#F5F0E8',textDim:'#4A4A55',success:'#44FF44',danger:'#FF4444'},
+  radius:{sm:6,md:10,lg:16,xl:24},
+  spacing:{xs:4,sm:8,md:16,lg:24,xl:32},
+  font:{sm:12,md:16,lg:22,xl:32,title:40},
+  timing:{fast:0.12,med:0.25,slow:0.4,spring:0.35},
+  easing:{
+    outCubic:t=>1-Math.pow(1-t,3),
+    inOutCubic:t=>t<0.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2,
+    bounce:t=>{const n=7.5625,d=2.75;if(t<1/d)return n*t*t;if(t<2/d)return n*(t-=1.5/d)*t+0.75;if(t<2.5/d)return n*(t-=2.25/d)*t+0.9375;return n*(t-=2.625/d)*t+0.984375;}
+  }
+};
+
+// ============================================================
+// BUTTON MICROINTERACTION STATE
+// ============================================================
+let btnAnimState={x:0,y:0,t:0,phase:'idle'};
+function triggerBtnAnim(sx,sy){btnAnimState={x:sx,y:sy,t:0,phase:'press'};}
+function updateBtnAnimations(dt){
+  if(btnAnimState.phase==='idle')return;
+  btnAnimState.t+=dt;
+  if(btnAnimState.phase==='press'&&btnAnimState.t>=DESIGN.timing.fast){
+    btnAnimState.t=0;btnAnimState.phase='release';
+  }
+  if(btnAnimState.phase==='release'&&btnAnimState.t>=DESIGN.timing.spring){
+    btnAnimState.phase='idle';
+  }
+}
+
+// ============================================================
+// SCREEN TRANSITION STATE
+// ============================================================
+let screenTransition={active:false,from:'',to:'',t:0,dur:0.3};
+let prevScreenForRender='menu';
+function transitionTo(newScreen){
+  if(screenTransition.active||screen===newScreen)return;
+  screenTransition={active:true,from:screen,to:newScreen,t:0,dur:0.3};
+  prevScreenForRender=screen;
+  screen=newScreen;
+}
+function updateTransition(dt){
+  if(!screenTransition.active)return;
+  screenTransition.t+=dt;
+  if(screenTransition.t>=screenTransition.dur){screenTransition.active=false;}
+}
+
+// ============================================================
+// UPGRADE CELEBRATION STATE
+// ============================================================
+let celebrationState={active:false,particles:[],ring:{r:0,alpha:1},text:{y:0,alpha:1},t:0};
+function triggerCelebration(cx,cy){
+  const parts=[];
+  for(let i=0;i<20;i++){
+    const ang=Math.random()*Math.PI*2,spd=80+Math.random()*120;
+    parts.push({x:cx,y:cy,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,life:0.6+Math.random()*0.4,t:0,
+      size:3+Math.random()*4,color:Math.random()>0.3?DESIGN.colors.gold:'#FFF8DC'});
+  }
+  celebrationState={active:true,particles:parts,ring:{x:cx,y:cy,r:0,alpha:1},text:{x:cx,y:cy-30,alpha:1},t:0};
+  sfxLevelUp();
+}
+function updateCelebration(dt){
+  if(!celebrationState.active)return;
+  celebrationState.t+=dt;
+  const s=celebrationState;
+  s.ring.r+=dt*200;s.ring.alpha=Math.max(0,1-s.t/0.6);
+  s.text.y-=dt*40;s.text.alpha=Math.max(0,1-s.t/1.0);
+  for(const p of s.particles){p.t+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=200*dt;}
+  if(s.t>1.2)s.active=false;
+}
+function renderCelebration(){
+  if(!celebrationState.active)return;
+  const s=celebrationState;
+  // Ring
+  if(s.ring.alpha>0){
+    ctx.strokeStyle=DESIGN.colors.gold;ctx.lineWidth=3;ctx.globalAlpha=s.ring.alpha;
+    ctx.beginPath();ctx.arc(s.ring.x,s.ring.y,s.ring.r,0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;
+  }
+  // Particles
+  for(const p of s.particles){
+    if(p.t>=p.life)continue;
+    ctx.globalAlpha=1-p.t/p.life;ctx.fillStyle=p.color;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.size*(1-p.t/p.life),0,Math.PI*2);ctx.fill();
+  }
+  ctx.globalAlpha=1;
+  // Text
+  if(s.text.alpha>0){
+    ctx.globalAlpha=s.text.alpha;ctx.fillStyle=DESIGN.colors.gold;
+    ctx.font='bold '+Math.floor(W*0.07)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.shadowColor=DESIGN.colors.gold;ctx.shadowBlur=15;
+    ctx.fillText('LEVEL UP!',s.text.x,s.text.y);
+    ctx.shadowBlur=0;ctx.globalAlpha=1;
+  }
+}
+
+// ============================================================
+// DRAG-DROP DEPLOY STATE
+// ============================================================
+let dragState={active:false,cardIdx:-1,x:0,y:0,holdTimer:0,startX:0,startY:0};
+const DRAG_HOLD_MS=150;
+
+// ============================================================
+// CARD DETAIL STATE
+// ============================================================
+let selectedDetailCard=null;
+let cardDetailSource='';
+
+// ============================================================
+// CARD RARITY SYSTEM -- 5 tiers with visual effects
+// ============================================================
+const RARITY={
+  COMMON:{name:'Common',color:'#4A4A55',glow:null,borderW:1.5,shimmer:false,borderStyle:'steel'},
+  RARE:{name:'Rare',color:'#00F5FF',glow:'#00F5FF',borderW:2,shimmer:false,borderStyle:'chrome'},
+  EPIC:{name:'Epic',color:'#C1440E',glow:'#FF4500',borderW:2.5,shimmer:true,borderStyle:'flame'},
+  LEGENDARY:{name:'Legendary',color:'#D4AF37',glow:'#D4AF37',borderW:3,shimmer:true,borderStyle:'holographic'},
+  CHAMPION:{name:'Champion',color:'#FF4500',glow:'#FF4500',borderW:3.5,shimmer:true,borderStyle:'holographic'}
+};
+const CARD_RARITY={
+  scrapyard:'RARE',corner_boyz:'COMMON',prospect:'COMMON',
+  dead_mile:'RARE',axle_grind:'EPIC',rust_bucket:'COMMON',
+  blue_line:'EPIC',grim_ride:'RARE',drill_van:'RARE',
+  phantom:'EPIC',no_face:'EPIC',cabbie:'RARE',
+  preacher:'EPIC',trap_king:'LEGENDARY',dirty_south:'RARE',
+  sideshow:'EPIC',dock_boss:'LEGENDARY',hyphy:'RARE',
+  vice_queen:'LEGENDARY',bass_cannon:'EPIC',jet_runner:'RARE',
+  ice_kream:'LEGENDARY',high_roller:'EPIC',showgirl:'RARE',
+  mecha:'CHAMPION',drone_lord:'EPIC',neon_blade:'LEGENDARY',
+  kingpin:'CHAMPION',warhawk:'CHAMPION',shadow_king:'LEGENDARY',
+  napalm:'RARE',blackout:'COMMON',turbo_boost:'RARE',drive_by:'COMMON',
+  oil_slick:'COMMON',spike_strip:'RARE',smoke_screen:'COMMON',calypso_wish:'EPIC',
+  car_bomb:'RARE',chop_shop:'EPIC',turret_nest:'RARE'
+};
+function getCardRarity(cardId){return RARITY[CARD_RARITY[cardId]||'COMMON'];}
+
+// ============================================================
+// CARD UPGRADE SYSTEM -- Levels 1-13, +10% stats per level
+// ============================================================
+const cardLevels={};
+function getCardLevel(cardId){return cardLevels[cardId]||1;}
+function getUpgradeCost(lvl){return Math.floor(50*Math.pow(2,lvl-1));}
+function cardLevelScale(cardId){return 1+(getCardLevel(cardId)-1)*0.10;}
+function upgradeCard(cardId){
+  const lvl=getCardLevel(cardId);if(lvl>=13)return false;
+  const cost=getUpgradeCost(lvl);if(playerProfile.fuel<cost)return false;
+  playerProfile.fuel-=cost;cardLevels[cardId]=lvl+1;sfxLevelUp();return true;
+}
+
+// ============================================================
+// CHEST / REWARD SYSTEM
+// ============================================================
+const CHEST_TIERS={
+  wood:{name:'Wood Chest',fuel:[50,100],gears:[1,3],gems:[0,0],cards:1,color:'#8B4513',icon:'\uD83E\uDDF0'},
+  silver:{name:'Silver Chest',fuel:[100,250],gears:[3,8],gems:[0,2],cards:2,color:'#C0C0C0',icon:'\uD83E\uDDF1'},
+  gold:{name:'Gold Chest',fuel:[250,500],gears:[8,15],gems:[2,5],cards:3,color:DESIGN.colors.crownGold,icon:'\uD83D\uDC51'}
+};
+let rewardState=null;
+function generateRewards(crowns){
+  const tier=crowns>=3?'gold':crowns>=2?'silver':'wood';
+  const ch=CHEST_TIERS[tier];
+  const rn=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+  const fuel=rn(ch.fuel[0],ch.fuel[1]),gears=rn(ch.gears[0],ch.gears[1]),gems=rn(ch.gems[0],ch.gems[1]);
+  const unlockable=ALL_CAR_IDS.filter(id=>!playerProfile.collection.includes(id)&&CARS[id]);
+  const newCards=[];
+  for(let i=0;i<ch.cards&&unlockable.length>0;i++){
+    const idx=Math.floor(Math.random()*unlockable.length);
+    newCards.push(unlockable.splice(idx,1)[0]);
+  }
+  return{tier,name:ch.name,color:ch.color,icon:ch.icon,fuel,gears,gems,newCards,phase:'chest',t:0};
+}
+
+// ============================================================
+// BATTLE PASS / SEASON TRACK
+// ============================================================
+const SEASON_CONFIG={maxTier:30,xpPerTier:100,winXP:30,lossXP:10,drawXP:15};
+const SEASON_REWARDS=[];
+(function buildSeasonRewards(){
+  for(let i=1;i<=SEASON_CONFIG.maxTier;i++){
+    const free=i%5===0?{type:'gems',amount:5}:i%3===0?{type:'gears',amount:3+i}:{type:'fuel',amount:50+i*10};
+    const premium=i%10===0?{type:'card',id:ALL_CAR_IDS[Math.min(i+10,ALL_CAR_IDS.length-1)]}:i%5===0?{type:'gems',amount:10}:{type:'fuel',amount:100+i*15};
+    SEASON_REWARDS.push({tier:i,free,premium});
+  }
+})();
+function addSeasonXP(amount){
+  playerProfile.seasonXP=(playerProfile.seasonXP||0)+amount;
+  while(playerProfile.seasonXP>=SEASON_CONFIG.xpPerTier&&(playerProfile.seasonTier||0)<SEASON_CONFIG.maxTier){
+    playerProfile.seasonXP-=SEASON_CONFIG.xpPerTier;
+    playerProfile.seasonTier=(playerProfile.seasonTier||0)+1;
+    const rwd=SEASON_REWARDS[playerProfile.seasonTier-1];
+    if(rwd){
+      const r=rwd.free;
+      if(r.type==='fuel')playerProfile.fuel+=r.amount;
+      else if(r.type==='gears')playerProfile.gears+=r.amount;
+      else if(r.type==='gems')playerProfile.gems+=r.amount;
+    }
+    sfxLevelUp();
+  }
+}
+
+// ============================================================
+// DAILY SHOP OFFER ENGINE
+// ============================================================
+const SHOP_OFFERS_DB=[
+  {id:'fuel_small',label:'Fuel Can',sub:'500 FUEL',price:50,currency:'gears',reward:{type:'fuel',amount:500},col:DESIGN.colors.crownGold,ic:'\u26FD'},
+  {id:'fuel_big',label:'Fuel Barrel',sub:'2000 FUEL',price:150,currency:'gears',reward:{type:'fuel',amount:2000},col:'#FF8800',ic:'\uD83D\uDEE2'},
+  {id:'gear_pack',label:'Gear Pack',sub:'25 GEARS',price:5,currency:'gems',reward:{type:'gears',amount:25},col:'#AAA',ic:'\u2699'},
+  {id:'gem_pouch',label:'Gem Pouch',sub:'10 GEMS',price:2000,currency:'fuel',reward:{type:'gems',amount:10},col:'#AA44FF',ic:'\uD83D\uDC8E'},
+  {id:'wood_chest',label:'Wood Chest',sub:'Random card + fuel',price:30,currency:'gears',reward:{type:'chest',tier:'wood'},col:'#8B4513',ic:'\uD83E\uDDF0'},
+  {id:'silver_chest',label:'Silver Chest',sub:'2 cards + gears',price:8,currency:'gems',reward:{type:'chest',tier:'silver'},col:'#C0C0C0',ic:'\uD83E\uDDF1'},
+  {id:'gold_chest',label:'Gold Chest',sub:'3 cards + gems',price:25,currency:'gems',reward:{type:'chest',tier:'gold'},col:DESIGN.colors.crownGold,ic:'\uD83D\uDC51'},
+  {id:'nos_boost',label:'NOS Boost',sub:'+100 NOS Bottles',price:40,currency:'gears',reward:{type:'nos',amount:100},col:'#00CED1',ic:'\uD83D\uDCA8'},
+];
+const shopSoldOut={};
+function seededRandom(seed){let s=seed%2147483647;if(s<=0)s+=2147483646;return()=>{s=s*16807%2147483647;return(s-1)/2147483646;};}
+function getDailyOffers(){
+  const dayNum=Math.floor(Date.now()/(1000*60*60*24));
+  const rng=seededRandom(dayNum*31337);
+  const shuffled=[...SHOP_OFFERS_DB].sort(()=>rng()-0.5);
+  const featured=shuffled[0];
+  const others=shuffled.slice(1,4);
+  return{featured,others,dayNum};
+}
+function buyShopItem(item){
+  const cur=item.currency;
+  if(cur==='fuel'&&playerProfile.fuel<item.price)return false;
+  if(cur==='gears'&&playerProfile.gears<item.price)return false;
+  if(cur==='gems'&&playerProfile.gems<item.price)return false;
+  if(shopSoldOut[item.id])return false;
+  if(cur==='fuel')playerProfile.fuel-=item.price;
+  else if(cur==='gears')playerProfile.gears-=item.price;
+  else if(cur==='gems')playerProfile.gems-=item.price;
+  const r=item.reward;
+  if(r.type==='fuel')playerProfile.fuel+=r.amount;
+  else if(r.type==='gears')playerProfile.gears+=r.amount;
+  else if(r.type==='gems')playerProfile.gems+=r.amount;
+  else if(r.type==='nos')playerProfile.nosBottles+=r.amount;
+  else if(r.type==='chest'){const rw=generateRewards(r.tier==='gold'?3:r.tier==='silver'?2:1);applyRewards(rw);}
+  shopSoldOut[item.id]=true;sfxChestOpen();return true;
+}
+function applyRewards(rw){
+  playerProfile.fuel+=rw.fuel;playerProfile.gears+=rw.gears;playerProfile.gems+=rw.gems;
+  rw.newCards.forEach(id=>{if(!playerProfile.collection.includes(id))playerProfile.collection.push(id);});
+}
+
+const DECK_PRESETS={
+  fast_cycle:{name:'Speed Demon (1.9)',ids:['prospect','corner_boyz','grim_ride','jet_runner','drive_by','oil_slick','blackout','smoke_screen']},
+  beatdown:{name:'Heavy Metal (5.0)',ids:['scrapyard','axle_grind','dead_mile','dock_boss','napalm','turbo_boost','blackout','car_bomb']},
+  control:{name:'Ghost Rider (2.8)',ids:['blue_line','drill_van','turret_nest','chop_shop','blackout','oil_slick','napalm','rust_bucket']},
+  bridge_spam:{name:'Street Gang (2.6)',ids:['grim_ride','dirty_south','corner_boyz','prospect','drive_by','blackout','dead_mile','rust_bucket']},
+  balanced:{name:'Dark Carnival (3.4)',ids:['dead_mile','scrapyard','grim_ride','drill_van','napalm','blackout','drive_by','corner_boyz']}
+};
+
+// --- SYNERGY ---
+const SYN_INFO={speed_demon:{n:'Speed Demon',c:'#00BFFF'},street_gang:{n:'Street Gang',c:'#FF8C00'},heavy_metal:{n:'Heavy Metal',c:'#8B4513'},spell_cycle:{n:'Spell Cycle',c:'#7CFC00'},ghost_rider:{n:'Ghost Rider',c:'#9400D3'},fire_starter:{n:'Fire Starter',c:'#FF4500'},dark_carnival:{n:'Dark Carnival',c:'#CC44FF'}};
+function getDeckSynergies(ids){const t={};ids.forEach(id=>{const c=CARS[id];if(c&&c.syn)c.syn.forEach(s=>{t[s]=(t[s]||0)+1;});});const r=[];for(const[k,v]of Object.entries(t)){if(v>=2&&SYN_INFO[k])r.push({tag:k,...SYN_INFO[k],count:v});}return r;}
+
+// ============================================================
+// PLAYER PROFILE
+// ============================================================
+const playerProfile={name:'Street King',nosBottles:847,level:7,fuel:2400,gears:88,gems:35,deck:[...DEFAULT_DECK],collection:[...UNLOCKED_IDS],completedLevels:[1,2,3,4,5],seasonTier:0,seasonXP:0,hasBattlePass:false};
+function getArenaName(nos){if(nos<200)return'Street Corner';if(nos<500)return'Block Hustler';if(nos<1000)return'Turf Runner';if(nos<2000)return'City Boss';if(nos<4000)return'Crime Lord';return'Street Legend';}
+function getLevelDifficulty(lvl){if(lvl<=10)return'Rookie';if(lvl<=20)return'Street Kid';if(lvl<=30)return'Grinder';if(lvl<=50)return'Hustler';if(lvl<=80)return'Kingpin';return'Legend';}
+
+// ============================================================
+// AUDIO ENGINE
+// ============================================================
+let audioCtx=null;
+function getAudio(){if(!audioCtx)try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}return audioCtx;}
+function playTone(freq,type,dur,vol,freqEnd){
+  const ac=getAudio();if(!ac)return;
+  try{const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type=type||'sine';o.frequency.setValueAtTime(freq,ac.currentTime);if(freqEnd)o.frequency.exponentialRampToValueAtTime(Math.max(20,freqEnd),ac.currentTime+dur);g.gain.setValueAtTime(vol||0.3,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);o.start(ac.currentTime);o.stop(ac.currentTime+dur+0.05);}catch(e){}
+}
+function playNoise(dur,vol,fType,fFreq){
+  const ac=getAudio();if(!ac)return;
+  try{const buf=ac.createBuffer(1,ac.sampleRate*dur,ac.sampleRate),d=buf.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);const src=ac.createBufferSource(),g=ac.createGain();src.buffer=buf;if(fType){const f=ac.createBiquadFilter();f.type=fType;f.frequency.value=fFreq||1000;src.connect(f);f.connect(g);}else{src.connect(g);}g.connect(ac.destination);g.gain.setValueAtTime(vol||0.2,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+dur);src.start();src.stop(ac.currentTime+dur);}catch(e){}
+}
+function sfxDeploy(){playTone(280,'sawtooth',0.15,0.2,120);playNoise(0.08,0.1,'highpass',3000);}
+function sfxDeath(){playNoise(0.35,0.25,'lowpass',1500);playTone(120,'sawtooth',0.25,0.2,30);addShake(0.15);}
+function sfxTowerHit(){playTone(55,'sine',0.18,0.35,35);playNoise(0.06,0.12,'lowpass',600);addShake(0.08);}
+function sfxHQDead(){playTone(60,'sawtooth',1.2,0.5,20);playNoise(0.8,0.45,'lowpass',800);addShake(0.7);}
+function sfxVictory(){[261,329,392,523,659].forEach((f,i)=>setTimeout(()=>playTone(f,'triangle',0.5,0.3,f*1.01),i*140));}
+function sfxDefeat(){[392,329,261,196,147].forEach((f,i)=>setTimeout(()=>playTone(f,'sine',0.5,0.22,f*0.95),i*180));}
+function sfxElixirFull(){playTone(880,'triangle',0.08,0.12);}
+function sfxEmoji(){playTone(600,'square',0.06,0.15,900);}
+function sfxCardPlay(){playTone(400,'triangle',0.1,0.15,250);}
+function sfxSpell(){playTone(150,'sawtooth',0.4,0.3,500);playNoise(0.3,0.2,'bandpass',1000);addShake(0.2);}
+function sfxPhaseChange(){playTone(440,'triangle',0.3,0.25,880);setTimeout(()=>playTone(660,'triangle',0.3,0.2,1320),150);}
+function sfxProjectile(){playTone(500,'sawtooth',0.12,0.15,200);playNoise(0.06,0.08,'highpass',5000);}
+// Enhanced SFX with pitch randomization
+function playToneRand(freq,type,dur,vol,freqEnd){
+  const p=0.9+Math.random()*0.2;
+  playTone(freq*p,type,dur,vol,freqEnd?freqEnd*p:undefined);
+}
+function sfxMeleeHit(){
+  playNoise(0.04,0.1,'highpass',4000);
+  setTimeout(()=>{playToneRand(180,'square',0.06,0.15,80);playNoise(0.05,0.12,'bandpass',1200);},20);
+  setTimeout(()=>playNoise(0.03,0.06,'highpass',6000),50);
+}
+function sfxRangedHit(){
+  playToneRand(900,'sawtooth',0.03,0.1,400);
+  setTimeout(()=>playToneRand(120,'sine',0.05,0.12,60),15);
+}
+function sfxCritHit(){
+  playToneRand(1200,'triangle',0.08,0.15,2400);
+  playToneRand(80,'sine',0.04,0.2,40);
+  setTimeout(()=>playNoise(0.06,0.1,'bandpass',3000),30);
+}
+function sfxCardSelect(){playToneRand(440,'triangle',0.05,0.1,550);}
+function sfxButtonPress(){playToneRand(300,'square',0.03,0.08,200);}
+function sfxChestOpen(){[330,440,550,660,880].forEach((f,i)=>setTimeout(()=>playToneRand(f,'triangle',0.2,0.15),i*80));}
+function sfxLevelUp(){[523,659,784,1047].forEach((f,i)=>setTimeout(()=>playToneRand(f,'triangle',0.3,0.2),i*120));}
+function sfxRewardReveal(){playToneRand(660,'triangle',0.15,0.12,880);}
+
+// ============================================================
+// SCREEN SCALING (with 3D perspective metrics)
+// ============================================================
+let W,H,scale,offX,offY,arenaPixH,hudY,hudH,cardSlots=[],cardHoverIdx=-1;
+function resize(){
+  W=window.innerWidth;H=window.innerHeight;canvas.width=W;canvas.height=H;
+  hudH=Math.floor(H*0.22);hudY=H-hudH;arenaPixH=hudY;
+  const sx=W/ARENA_W,sy=arenaPixH/ARENA_H;scale=Math.min(sx,sy);
+  offX=(W-ARENA_W*scale)/2;offY=(arenaPixH-ARENA_H*scale)/2;
+  const cardW=Math.floor(W*0.19),cardH=Math.floor(hudH*0.62),gap=Math.floor(W*0.02);
+  const totalW=cardW*4+gap*3,startX=Math.floor((W-totalW)/2),cardY=hudY+Math.floor(hudH*0.32);
+  cardSlots=[];for(let i=0;i<4;i++)cardSlots.push({x:startX+i*(cardW+gap),y:cardY,w:cardW,h:cardH});
+}
+// Legacy 2D fallback (used for menus)
+function toScr(gx,gy){return[offX+gx*scale+shakeOffX,offY+gy*scale+shakeOffY];}
+function toGame(sx,sy){return[(sx-offX-shakeOffX)/scale,(sy-offY-shakeOffY)/scale];}
+
+// ============================================================
+// GAME CLASSES (with physics)
+// ============================================================
+class Tower {
+  constructor(x,y,type,owner){
+    this.x=x;this.y=y;this.type=type;this.owner=owner;
+    const s=TOWER_STATS[type];
+    this.maxHp=s.hp;this.hp=s.hp;this.dmg=s.dmg;this.range=s.range;this.atkSpd=s.atkSpd;this.atkCD=0;
+    this.active=(type!=='king');this.destroyed=false;this.crownCounted=false;this.facing=owner===0?-1:1;
+    this.hitFlash=0; // visual feedback timer
+  }
+  takeDamage(d){if(this.destroyed)return;this.hp=Math.max(0,this.hp-d);this.hitFlash=0.15;if(this.hp<=0){this.destroyed=true;this.hp=0;}}
+}
+
+let _uid=0;
+
+// Unit State Machine enum
+const USTATE={DEPLOY:'deploy',MOVE:'move',ACQUIRE:'acquire',WINDUP:'windup',ATTACK:'attack',RECOVER:'recover',HIT:'hit',DIE:'die'};
+
+class Unit {
+  constructor(card,owner,x,y){
+    this.id=_uid++;this.card=card;this.owner=owner;this.x=x;this.y=y;
+    this.maxHp=card.hp;this.hp=card.hp;this.dmg=card.dmg;
+    // Physics: current velocity starts at 0, accelerates to card.speed
+    // Calculus: v(t) = v_max * (1 - e^(-accel*t))
+    this.maxSpeed=card.speed;this.currentSpeed=0;
+    this.accel=card.accel||2.0;this.armor=card.armor||0;
+    this.range=card.range;this.atkSpd=card.atkSpd;this.atkCD=0;this.abilityCD=card.abilityCD||0;
+    this.target=null;this.alive=true;
+    this.angle=owner===0?-Math.PI/2:Math.PI/2;
+    this.targetAngle=this.angle; // smooth rotation
+    this.nitroActive=false;this.nitroTimer=0;this.bobOffset=Math.random()*Math.PI*2;
+    this.stealthTimer=card.ability==='STEALTH'?3:0;this.stunTimer=0;this.slowTimer=0;
+    this.spawnTime=0; // starts at 0, DEPLOY state handles intro
+    this.hitFlash=0;
+    this.deathTimer=-1; // -1=alive, 0+=dying animation
+    this.zHeight=0; // for 3D jump effects
+    // --- STATE MACHINE ---
+    this.state=USTATE.DEPLOY;this.stateTimer=0;
+    this.deployScale=0;       // 0->1 scale-up during DEPLOY
+    this.prevX=x;this.prevY=y;// previous position for trail VFX
+    this.acquireTarget=null;  // locked target during ACQUIRE->WINDUP->ATTACK
+    this.windupOffset=0;      // visual pullback during WINDUP
+    this.hitKnockX=0;this.hitKnockY=0;// knockback displacement
+    this.hitSourceAngle=0;    // angle from which damage came
+    this.deathPhase=0;        // 0=freeze, 1=flash+shockwave, 2=debris
+  }
+  takeDamage(d,sourceX,sourceY){
+    if(!this.alive)return;
+    // Apply armor reduction ONLY (Algebra): effective = raw * 100/(100+armor)
+    const effective=Math.floor(d*100/(100+(this.armor||0)));
+    this.hp=Math.max(0,this.hp-effective);this.hitFlash=0.12;
+    // Trigger HIT state interrupt (if alive after damage)
+    if(this.hp>0&&this.state!==USTATE.DIE&&this.state!==USTATE.DEPLOY){
+      this.state=USTATE.HIT;this.stateTimer=0;
+      if(sourceX!==undefined&&sourceY!==undefined){
+        this.hitSourceAngle=Math.atan2(this.y-sourceY,this.x-sourceX);
+      }else{this.hitSourceAngle=this.angle+Math.PI;}
+      this.hitKnockX=0;this.hitKnockY=0;
+    }
+    // VFX: big damage pop for heavy hits
+    if(effective>=150)addBigDamagePop(this.x,this.y,effective);
+    if(this.hp<=0){
+      this.hp=0;this.alive=false;this.deathTimer=0;
+      this.state=USTATE.DIE;this.stateTimer=0;this.deathPhase=0;
+      sfxDeath();
+      // Death VFX handled by state machine phases
+    }
+  }
+  dist(ox,oy){return Math.hypot(this.x-ox,this.y-oy);}
+  // Calculus: current speed based on acceleration curve
+  // v(t) = v_max * (1 - e^(-accel * t))
+  getSpeed(){
+    const base=this.maxSpeed*(1-Math.exp(-this.accel*this.spawnTime));
+    if(this.nitroActive)return base*1.5;
+    if(this.slowTimer>0)return base*0.5;
+    return base;
+  }
+}
+
+// ============================================================
+// 3D PARTICLES (with depth)
+// ============================================================
+let particles=[];
+function addSparkParticles(gx,gy,color){
+  for(let i=0;i<10;i++){
+    const angle=Math.random()*Math.PI*2,spd=1.5+Math.random()*3;
+    particles.push({x:gx,y:gy,z:0.3+Math.random()*0.5,
+      vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd,vz:2+Math.random()*3,
+      color:color||'#FF8800',t:0,dur:0.5+Math.random()*0.4,type:'spark',sz:0.08+Math.random()*0.06});
+  }
+}
+function addExplosionParticles(gx,gy,color,count){
+  for(let i=0;i<(count||12);i++){
+    const angle=Math.random()*Math.PI*2,spd=2+Math.random()*4;
+    particles.push({x:gx,y:gy,z:0.5+Math.random(),
+      vx:Math.cos(angle)*spd,vy:Math.sin(angle)*spd,vz:3+Math.random()*4,
+      color:color||'#FF4400',t:0,dur:0.6+Math.random()*0.5,type:'explosion',sz:0.12+Math.random()*0.1});
+  }
+  for(let i=0;i<6;i++){
+    particles.push({x:gx+(Math.random()-0.5)*0.8,y:gy-(Math.random()*0.5),z:1+Math.random(),
+      vx:(Math.random()-0.5)*0.5,vy:-0.3,vz:1+Math.random(),
+      color:'#555',t:0,dur:1.0+Math.random()*0.5,type:'smoke',sz:0.15});
+  }
+}
+function addSmokeParticle(gx,gy){
+  particles.push({x:gx+(Math.random()-0.5)*0.6,y:gy,z:0.5,vx:(Math.random()-0.5)*0.3,vy:0,vz:1.5+Math.random(),color:'#888',t:0,dur:0.8,type:'smoke',sz:0.1});
+}
+function addNeonTrail(gx,gy,color){
+  particles.push({x:gx,y:gy,z:0.2,vx:0,vy:0,vz:0,color:color,t:0,dur:0.4,type:'neon',sz:0.2});
+}
+// --- ENHANCED VFX: Impact Puffs (melee hit dust cloud) ---
+function addImpactPuff(gx,gy,color){
+  // Expanding white ring
+  particles.push({x:gx,y:gy,z:0.1,vx:0,vy:0,vz:0,color:'#ffffff',t:0,dur:0.25,type:'impact_ring',sz:0.05});
+  // 3-4 small debris particles
+  const cnt=3+Math.floor(Math.random()*2);
+  for(let i=0;i<cnt;i++){
+    const a=Math.random()*Math.PI*2,s=0.8+Math.random()*1.5;
+    particles.push({x:gx,y:gy,z:0.05+Math.random()*0.1,vx:Math.cos(a)*s,vy:Math.sin(a)*s,vz:1+Math.random()*2,color:color||'#aaa',t:0,dur:0.3+Math.random()*0.15,type:'debris',sz:0.03+Math.random()*0.03});
+  }
+  // Dust cloud
+  for(let i=0;i<2;i++){
+    particles.push({x:gx+(Math.random()-0.5)*0.3,y:gy+(Math.random()-0.5)*0.2,z:0.15,vx:(Math.random()-0.5)*0.4,vy:(Math.random()-0.5)*0.3,vz:0.5+Math.random(),color:'#ccc',t:0,dur:0.35,type:'smoke',sz:0.06});
+  }
+}
+// --- ENHANCED VFX: Deploy Ring ---
+function addDeployRingVFX(gx,gy,color){
+  particles.push({x:gx,y:gy,z:0,vx:0,vy:0,vz:0,color:color,t:0,dur:0.4,type:'deploy_ring',sz:0.1});
+}
+// --- ENHANCED VFX: Death Shockwave ---
+function addDeathShockwave(gx,gy,color){
+  particles.push({x:gx,y:gy,z:0.1,vx:0,vy:0,vz:0,color:'#ffffff',t:0,dur:0.3,type:'death_flash',sz:0.3});
+  particles.push({x:gx,y:gy,z:0,vx:0,vy:0,vz:0,color:color,t:0,dur:0.35,type:'death_shockwave',sz:0.15});
+  triggerFlash('#ffffff',0.15,0.08);
+}
+// --- ENHANCED VFX: Death Debris ---
+function addDeathDebris(gx,gy,color){
+  const cnt=8+Math.floor(Math.random()*5);
+  for(let i=0;i<cnt;i++){
+    const a=Math.random()*Math.PI*2,s=2+Math.random()*4;
+    particles.push({x:gx,y:gy,z:0.3+Math.random()*0.4,vx:Math.cos(a)*s,vy:Math.sin(a)*s,vz:3+Math.random()*5,color:color,t:0,dur:0.6+Math.random()*0.4,type:'death_debris',sz:0.04+Math.random()*0.06});
+  }
+  for(let i=0;i<5;i++){
+    particles.push({x:gx+(Math.random()-0.5)*0.6,y:gy+(Math.random()-0.5)*0.3,z:0.5+Math.random()*0.5,vx:(Math.random()-0.5)*0.4,vy:-0.2-Math.random()*0.3,vz:2+Math.random()*2,color:'#444',t:0,dur:0.8+Math.random()*0.5,type:'smoke',sz:0.1+Math.random()*0.08});
+  }
+}
+// --- ENHANCED VFX: Big Damage Pop ---
+function addBigDamagePop(gx,gy,amount){
+  effects.push({type:'bigdmg',x:gx,y:gy,text:'-'+amount+'!',color:'#FF2222',dur:1.0,t:0,alive:true});
+}
+// --- ENHANCED VFX: Combo Text ---
+function addComboText(gx,gy,multiplier){
+  effects.push({type:'combopop',x:gx,y:gy,text:multiplier.toFixed(1)+'x COMBO!',color:DESIGN.colors.crownGold,dur:1.2,t:0,alive:true});
+}
+function updateParticles(dt){
+  particles.forEach(p=>{
+    p.t+=dt;
+    p.x+=p.vx*dt*2;p.y+=p.vy*dt*2;
+    // Calculus: gravity on z-axis: z += vz*dt - 0.5*g*dt^2
+    p.z+=(p.vz||0)*dt;p.vz=(p.vz||0)-9.8*dt; // gravity
+    if(p.z<0){p.z=0;p.vz=Math.abs(p.vz)*0.3;} // bounce
+    if(p.type==='smoke'){p.sz+=dt*0.3;}
+  });
+  particles=particles.filter(p=>p.t<p.dur);
+  // Cap particles to prevent unbounded growth
+  if(particles.length>300)particles=particles.slice(-300);
+}
+
+function renderParticles(){
+  particles.forEach(p=>{
+    const prog=p.t/p.dur;
+    const[sx,sy,df]=toScr3D(p.x,p.y);
+    const zOff=p.z*scale*df*0.8; // 3D height offset
+    const sz=scale*p.sz*df; // depth-scaled size
+    if(p.type==='spark'||p.type==='explosion'){
+      ctx.globalAlpha=(1-prog)*0.9;ctx.fillStyle=p.color;
+      ctx.beginPath();ctx.arc(sx,sy-zOff,Math.max(1,sz*(1-prog*0.5)),0,Math.PI*2);ctx.fill();
+      if(p.type==='explosion'){
+        ctx.globalAlpha=(1-prog)*0.4;ctx.fillStyle=DESIGN.colors.crownGold;
+        ctx.beginPath();ctx.arc(sx,sy-zOff,sz*0.5*(1-prog),0,Math.PI*2);ctx.fill();
+      }
+    } else if(p.type==='smoke'){
+      ctx.globalAlpha=(1-prog)*0.3;ctx.fillStyle=p.color;
+      ctx.beginPath();ctx.arc(sx,sy-zOff,sz+prog*scale*0.3*df,0,Math.PI*2);ctx.fill();
+    } else if(p.type==='neon'){
+      ctx.globalAlpha=(1-prog)*0.5;ctx.shadowColor=p.color;ctx.shadowBlur=10*df;
+      ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(sx,sy-zOff,sz*(1-prog),0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+    } else if(p.type==='impact_ring'){
+      const ringR=sz+prog*scale*0.4*df;
+      ctx.globalAlpha=(1-prog)*0.5;ctx.strokeStyle='#ffffff';ctx.lineWidth=(2-prog*1.5)*df;
+      ctx.beginPath();ctx.arc(sx,sy-zOff,ringR,0,Math.PI*2);ctx.stroke();
+    } else if(p.type==='debris'){
+      ctx.globalAlpha=(1-prog)*0.8;ctx.fillStyle=p.color;
+      ctx.save();ctx.translate(sx,sy-zOff);ctx.rotate(prog*Math.PI*4);
+      const half=Math.max(1,sz*(1-prog*0.5));ctx.fillRect(-half,-half,half*2,half*2);ctx.restore();
+    } else if(p.type==='deploy_ring'){
+      const ringR=prog*scale*1.2*df;
+      ctx.globalAlpha=(1-prog)*0.6;ctx.strokeStyle=p.color;ctx.lineWidth=(3-prog*2.5)*df;
+      ctx.shadowColor=p.color;ctx.shadowBlur=6*df;
+      ctx.beginPath();ctx.arc(sx,sy-zOff,ringR,0,Math.PI*2);ctx.stroke();
+      ctx.globalAlpha=(1-prog)*0.15;ctx.fillStyle=p.color;
+      ctx.beginPath();ctx.arc(sx,sy-zOff,ringR,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+    } else if(p.type==='death_flash'){
+      const flashR=sz*df*scale*(0.5+prog*2);
+      ctx.globalAlpha=(1-prog*prog)*0.7;ctx.fillStyle='#ffffff';
+      ctx.shadowColor='#ffffff';ctx.shadowBlur=15*df;
+      ctx.beginPath();ctx.arc(sx,sy-zOff,flashR,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;
+    } else if(p.type==='death_shockwave'){
+      const ringR=prog*scale*2*df;
+      ctx.globalAlpha=(1-prog)*0.6;ctx.strokeStyle=p.color;ctx.lineWidth=(4-prog*3)*df;
+      ctx.beginPath();ctx.arc(sx,sy-zOff,ringR,0,Math.PI*2);ctx.stroke();
+    } else if(p.type==='death_debris'){
+      ctx.globalAlpha=(1-prog)*0.85;ctx.fillStyle=p.color;
+      ctx.save();ctx.translate(sx,sy-zOff);ctx.rotate(prog*Math.PI*6);
+      const half=Math.max(1,sz*(1-prog*0.3));ctx.fillRect(-half,-half,half*2,half*2);ctx.restore();
+      if(prog<0.3){ctx.globalAlpha=(0.3-prog)*2;ctx.fillStyle=DESIGN.colors.crownGold;
+        ctx.beginPath();ctx.arc(sx,sy-zOff,Math.max(1,sz*0.6),0,Math.PI*2);ctx.fill();}
+    }
+    ctx.globalAlpha=1;
+  });
+}
+
+// Render projectiles in 3D
+function renderProjectiles(){
+  for(const p of projectiles){
+    if(!p.alive)continue;
+    const[sx,sy,df]=toScr3D(p.x,p.y);
+    const zOff=p.z*scale*df; // height above ground
+    const sz=scale*0.15*df;
+    // Shadow on ground
+    ctx.globalAlpha=0.3;ctx.fillStyle='#000';
+    ctx.beginPath();ctx.ellipse(sx,sy,sz*1.5,sz*0.5,0,0,Math.PI*2);ctx.fill();
+    // Projectile body
+    ctx.globalAlpha=1;
+    ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=8*df;
+    ctx.beginPath();ctx.arc(sx,sy-zOff,Math.max(2,sz),0,Math.PI*2);ctx.fill();
+    // Trail (trigonometry: fading trail segments)
+    ctx.shadowBlur=0;
+    for(let i=0;i<p.trail.length;i++){
+      const tr=p.trail[i];
+      const[tx,ty,tdf]=toScr3D(tr.x,tr.y);
+      const tzOff=tr.z*scale*tdf;
+      const alpha=(1-i/p.trail.length)*0.4;
+      ctx.globalAlpha=alpha;ctx.fillStyle=p.color;
+      ctx.beginPath();ctx.arc(tx,ty-tzOff,Math.max(1,sz*(1-i/p.trail.length)),0,Math.PI*2);ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
+}
+
+// ============================================================
+// SCREEN EFFECTS
+// ============================================================
+let screenFlash={active:false,color:'#fff',alpha:0,dur:0,t:0};
+let doubleElixirAnnounced=false,overtimeAnnounced=false;
+let overtimePulseT=0;
+let hqDeadScreen={active:false,winner:-1,t:0};
+function triggerFlash(color,alpha,dur){screenFlash={active:true,color,alpha,dur,t:0};}
+
+// ============================================================
+// GAME STATE
+// ============================================================
+let screen='menu',phase='countdown',phaseTimer=0,cdTimer=COUNTDOWN_TIME,totalTime=0;
+let units=[],selectedCard=-1,battleResult='',deployPreview=null,selectedMode='1v1';
+let animT=0,currentLevel=1,deckBuilderFilter='ALL',prevElixir=START_ELIXIR;
+let lastPlayedCard=null;
+let effects=[];
+function addEffect(type,x,y,text,color,dur){effects.push({type,x,y,text,color,dur:dur||1,t:0,alive:true});}
+
+let player={elixir:START_ELIXIR,crowns:0,towers:[],hand:[],queue:[]};
+let opponent={elixir:START_ELIXIR,crowns:0,towers:[],hand:[],queue:[],aiCD:0,aiNext:2};
+let deckPickSelected=[...playerProfile.deck];
+let menuBtns={},deckPickBtns={},shopBtns={},levelBtns={},deckBuilderBtns={};
+let endPlayerHP=0,endOpponentHP=0;
+
+// ============================================================
+// INIT BATTLE
+// ============================================================
+function getLevelScale(lvl){return 1+Math.min((lvl-1)*0.025,2.5);} // scales through lvl 100, caps at 3.5x
+
+function initBattle(){
+  screen='battle';phase='countdown';cdTimer=COUNTDOWN_TIME;
+  phaseTimer=0;totalTime=0;units=[];effects=[];particles=[];projectiles=[];floatingEmojis=[];
+  selectedCard=-1;battleResult='';deployPreview=null;_uid=0;
+  doubleElixirAnnounced=false;overtimeAnnounced=false;
+  overtimePulseT=0;shakeTrauma=0;shakeOffX=0;shakeOffY=0;maxCombo=0;
+  hqDeadScreen={active:false,winner:-1,t:0};prevElixir=START_ELIXIR;
+  emojiOpen=false;emojiCD=0;endPlayerHP=0;endOpponentHP=0;lastPlayedCard=null;
+  comboChain={count:0,timer:0,lastOwner:-1};
+  initRain();
+
+  const sc=getLevelScale(currentLevel);
+  player.towers=[new Tower(4,25.5,'princess',0),new Tower(14,25.5,'princess',0),new Tower(9,28,'king',0)];
+  player.elixir=START_ELIXIR;player.crowns=0;
+
+  opponent.towers=[new Tower(4,4.5,'princess',1),new Tower(14,4.5,'princess',1),new Tower(9,2,'king',1)];
+  opponent.towers.forEach(t=>{t.maxHp=Math.floor(t.maxHp*sc);t.hp=t.maxHp;t.dmg=Math.floor(t.dmg*sc);});
+  opponent.elixir=START_ELIXIR;opponent.crowns=0;
+
+  setupDeck(player,playerProfile.deck);
+  const aiDeck=getAIDeck(currentLevel);
+  setupDeck(opponent,aiDeck);
+  opponent.aiCD=0;opponent.aiNext=1.5+Math.random()*2;
+}
+
+function getAIDeck(lvl){
+  if(lvl<=10) return['rust_bucket','corner_boyz','dead_mile','prospect','blackout','oil_slick','drive_by','scrapyard'];
+  if(lvl<=20) return['dead_mile','scrapyard','grim_ride','axle_grind','napalm','blackout','drill_van','corner_boyz'];
+  if(lvl<=40) return['grim_ride','phantom','no_face','dirty_south','napalm','turbo_boost','blackout','car_bomb'];
+  if(lvl<=60) return['axle_grind','blue_line','preacher','sideshow','napalm','turbo_boost','dead_mile','blackout'];
+  return DEFAULT_DECK;
+}
+
+function setupDeck(p,deckIds){
+  const d=[...deckIds];for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}
+  p.hand=d.slice(0,4);p.queue=d.slice(4);
+}
+function cycleCard(p,idx){const played=p.hand[idx];const next=p.queue.shift();p.queue.push(played);p.hand[idx]=next;}
+
+// ============================================================
+// CARD PLAY + SPELLS
+// ============================================================
+function playCard(p,idx,gx,gy){
+  const cardId=p.hand[idx];const card=CARS[cardId];
+  if(!card||p.elixir<card.cost)return false;
+  p.elixir-=card.cost;
+
+  if(card.type==='building'){
+    // Buildings spawn as units at position (not as spells)
+    const bUnit=new Unit(card,p===player?0:1,gx,gy);
+    bUnit.maxSpeed=0;bUnit.currentSpeed=0;bUnit.accel=0; // buildings don't move
+    units.push(bUnit);
+    addEffect('deploy',gx,gy,'',card.carColor||'#fff',0.5);
+    if(p===player){sfxDeploy();sfxCardPlay();registerCombo(0);}
+    else{registerCombo(1);}
+  } else if(card.type==='spell'){
+    applySpell(card,p===player?0:1,gx,gy);
+    if(p===player){sfxSpell();registerCombo(0);}
+    else{registerCombo(1);}
+  } else {
+    const cnt=card.count||1;
+    for(let i=0;i<cnt;i++){
+      const ox=cnt>1?(i-(cnt-1)/2)*0.8:0;
+      units.push(new Unit(card,p===player?0:1,gx+ox,gy));
+    }
+    addEffect('deploy',gx,gy,'',card.carColor||'#fff',0.5);
+    if(p===player){sfxDeploy();sfxCardPlay();registerCombo(0);}
+    else{registerCombo(1);}
+  }
+  if(p===player)lastPlayedCard=cardId;
+  cycleCard(p,idx);
+  return true;
+}
+
+function applySpell(card,ownerId,gx,gy){
+  const r=card.radius||2,d=card.dmg||0,enemyOwner=1-ownerId;
+  if(card.id==='turbo_boost'){
+    units.forEach(u=>{
+      if(u.owner!==ownerId||!u.alive)return;
+      if(Math.hypot(u.x-gx,u.y-gy)<=r){u.nitroActive=true;u.nitroTimer=3;addEffect('ability',u.x,u.y,'TURBO!','#00CED1',0.8);}
+    });
+    addEffect('spell',gx,gy,'','#00CED1',0.7);return;
+  }
+  if(card.id==='smoke_screen'){
+    units.forEach(u=>{
+      if(u.owner!==enemyOwner||!u.alive)return;
+      if(Math.hypot(u.x-gx,u.y-gy)<=r){u.stunTimer=1.5;addEffect('ability',u.x,u.y,'STUN!','#666',0.8);}
+    });
+    addEffect('spell',gx,gy,'','#888',0.7);return;
+  }
+  if(card.id==='oil_slick'||card.id==='spike_strip'){
+    units.forEach(u=>{
+      if(u.owner!==enemyOwner||!u.alive)return;
+      if(Math.hypot(u.x-gx,u.y-gy)<=r){u.takeDamage(d);u.slowTimer=3;addEffect('dmg',u.x,u.y-0.4,'-'+d,'#FF0000',0.7);}
+    });
+    addEffect('spell',gx,gy,'',card.carColor||'#555',0.6);return;
+  }
+  if(card.id==='calypso_wish'){
+    const roll=Math.random();
+    if(roll<0.33){
+      units.forEach(u=>{if(u.owner===ownerId&&u.alive&&Math.hypot(u.x-gx,u.y-gy)<=r){u.hp=Math.min(u.maxHp,u.hp+200);addEffect('ability',u.x,u.y,'+200','#44FF44',0.8);}});
+      addEffect('spell',gx,gy,'HEAL!','#44FF44',1.0);
+    } else if(roll<0.66){
+      units.forEach(u=>{if(u.owner===enemyOwner&&u.alive&&Math.hypot(u.x-gx,u.y-gy)<=r){u.takeDamage(250);addEffect('dmg',u.x,u.y-0.4,'-250','#FF0000',0.7);}});
+      const eTowers=ownerId===0?opponent.towers:player.towers;
+      eTowers.forEach(t=>{if(!t.destroyed&&Math.hypot(t.x-gx,t.y-gy)<=r+1.2){t.takeDamage(250);sfxTowerHit();checkTowerDeath(t,ownerId);}});
+      addEffect('spell',gx,gy,'CHAOS!','#FF4444',1.0);addExplosionParticles(gx,gy,'#CC44FF',10);
+    } else {
+      units.forEach(u=>{if(u.owner===ownerId&&u.alive&&Math.hypot(u.x-gx,u.y-gy)<=r){u.nitroActive=true;u.nitroTimer=4;addEffect('ability',u.x,u.y,'BOOST!','#CC44FF',0.8);}});
+      addEffect('spell',gx,gy,'SPEED!','#CC44FF',1.0);
+    }
+    return;
+  }
+  // Standard damage spell
+  units.forEach(u=>{
+    if(u.owner!==enemyOwner||!u.alive)return;
+    if(Math.hypot(u.x-gx,u.y-gy)<=r){u.takeDamage(d);addEffect('dmg',u.x,u.y-0.4,'-'+d,'#FF0000',0.7);}
+  });
+  const eTowers=ownerId===0?opponent.towers:player.towers;
+  eTowers.forEach(t=>{
+    if(t.destroyed)return;
+    if(Math.hypot(t.x-gx,t.y-gy)<=r+1.2){t.takeDamage(d);addEffect('dmg',t.x,t.y-0.4,'-'+d,'#FF0000',0.7);sfxTowerHit();checkTowerDeath(t,ownerId);}
+  });
+  addEffect('spell',gx,gy,'',card.carColor||'#fff',0.6);
+  addExplosionParticles(gx,gy,card.carColor,8);
+}
+
+// ============================================================
+// BATTLE UPDATE (Physics integration)
+// ============================================================
+function checkHQDead(){
+  const pKing=player.towers.find(t=>t.type==='king');
+  const oKing=opponent.towers.find(t=>t.type==='king');
+  if(pKing&&pKing.destroyed&&!pKing.crownCounted){
+    pKing.crownCounted=true;sfxHQDead();addExplosionParticles(pKing.x,pKing.y,'#FF4444',20);
+    hqDeadScreen={active:true,winner:1,t:0};endBattle();return true;
+  }
+  if(oKing&&oKing.destroyed&&!oKing.crownCounted){
+    oKing.crownCounted=true;sfxHQDead();addExplosionParticles(oKing.x,oKing.y,'#4488FF',20);
+    hqDeadScreen={active:true,winner:0,t:0};endBattle();return true;
+  }
+  return false;
+}
+
+function checkTowerDeath(t,attackerOwner){
+  if(!t.destroyed||t.crownCounted)return;
+  t.crownCounted=true;
+  const atk=attackerOwner===0?player:opponent;
+  if(t.type==='king'){
+    atk.crowns=3; // King = automatic 3 crowns
+  } else {
+    atk.crowns++;
+  }
+  addExplosionParticles(t.x,t.y,attackerOwner===0?'#4488FF':'#FF4444',15);
+  const def=attackerOwner===0?opponent:player;
+  const king=def.towers.find(tt=>tt.type==='king');
+  if(king&&!king.active)king.active=true;
+  if(atk.crowns>=3)endBattle();
+}
+
+function updateBattle(dt){
+  if(phase==='countdown'){cdTimer-=dt;if(cdTimer<=0){phase='regular';phaseTimer=REGULAR_TIME;}return;}
+  if(phase==='ended')return;
+
+  phaseTimer-=dt;totalTime+=dt;
+  updateShake(dt);updateCombo(dt);updateRain(dt);
+  if(screenFlash.active){screenFlash.t+=dt;if(screenFlash.t>=screenFlash.dur)screenFlash.active=false;}
+  if(hqDeadScreen.active)hqDeadScreen.t+=dt;
+
+  if(emojiCD>0)emojiCD-=dt;
+  floatingEmojis.forEach(e=>{e.t+=dt;e.y-=dt*40;});
+  floatingEmojis=floatingEmojis.filter(e=>e.t<2.5);
+
+  // Phase transitions
+  if(phase==='regular'&&phaseTimer<=10&&!overtimeAnnounced){
+    overtimeAnnounced=true;addEffect('announce',ARENA_W/2,ARENA_H/2,'OVERTIME COMING!','#FF8800',2.0);
+  }
+  if(phaseTimer<=0){
+    if(phase==='regular'){phase='overtime';phaseTimer=OVERTIME_TIME;triggerFlash('#FF8800',0.6,0.5);addEffect('announce',ARENA_W/2,ARENA_H/2,'OVERTIME! 1.5x ELIXIR','#FF8800',2.5);sfxPhaseChange();addShake(0.3);}
+    else if(phase==='overtime'){phase='double';phaseTimer=DOUBLE_TIME;doubleElixirAnnounced=true;triggerFlash('#FF0000',0.7,0.5);addEffect('announce',ARENA_W/2,ARENA_H/2,'DOUBLE TIME! 3x ELIXIR','#FF0000',2.5);sfxPhaseChange();addShake(0.4);}
+    else if(phase==='double'){endBattle();return;}
+  }
+  if(phase==='overtime'||phase==='double')overtimePulseT+=dt;
+
+  const rate=phase==='double'?ELIXIR_RATE_3X:phase==='overtime'?ELIXIR_RATE_15X:ELIXIR_RATE;
+  const wasMax=player.elixir>=ELIXIR_MAX;
+  player.elixir=Math.min(ELIXIR_MAX,player.elixir+rate*dt);
+  opponent.elixir=Math.min(ELIXIR_MAX,opponent.elixir+rate*dt);
+  if(!wasMax&&player.elixir>=ELIXIR_MAX)sfxElixirFull();
+
+  // Tower hit flash decay
+  [...player.towers,...opponent.towers].forEach(t=>{if(t.hitFlash>0)t.hitFlash-=dt;});
+
+  // Tower smoke
+  const pKing=player.towers.find(t=>t.type==='king');
+  const oKing=opponent.towers.find(t=>t.type==='king');
+  if(pKing&&!pKing.destroyed&&pKing.hp/pKing.maxHp<0.3&&Math.random()<0.15)addSmokeParticle(pKing.x,pKing.y-0.8);
+  if(oKing&&!oKing.destroyed&&oKing.hp/oKing.maxHp<0.3&&Math.random()<0.15)addSmokeParticle(oKing.x,oKing.y-0.8);
+
+  updateUnits(dt);updateTowerAttacks(dt);updateProjectiles(dt);updateAI(dt);updateParticles(dt);
+  checkHQDead();
+  effects.forEach(e=>{e.t+=dt;if(e.t>=e.dur)e.alive=false;});
+  effects=effects.filter(e=>e.alive);
+  // Process death abilities before removing
+  units.forEach(u=>{
+    if(!u.alive&&u.deathTimer>=0&&u.deathTimer<0.1+dt&&u.deathTimer>=0.1){
+      // BACKFIRE: explode on death for 200 area dmg
+      if(u.card.ability==='BACKFIRE'){
+        const enemyOwner=1-u.owner;
+        units.forEach(o=>{if(o.owner===enemyOwner&&o.alive&&Math.hypot(o.x-u.x,o.y-u.y)<=2.5){o.takeDamage(200);addEffect('dmg',o.x,o.y-0.3,'-200','#FF4400',0.7);}});
+        const bTowers=u.owner===0?opponent.towers:player.towers;
+        bTowers.forEach(t2=>{if(!t2.destroyed&&Math.hypot(t2.x-u.x,t2.y-u.y)<=2.5){t2.takeDamage(200);sfxTowerHit();checkTowerDeath(t2,u.owner);}});
+        addExplosionParticles(u.x,u.y,'#FF4400',15);addShake(0.25);
+        addEffect('ability',u.x,u.y,'BACKFIRE!','#FF4500',1.0);
+      }
+      // COFFIN: deploy coffin bomb on death
+      if(u.card.ability==='COFFIN'){
+        const enemyOwner=1-u.owner;
+        units.forEach(o=>{if(o.owner===enemyOwner&&o.alive&&Math.hypot(o.x-u.x,o.y-u.y)<=2.0){o.takeDamage(300);o.stunTimer=1.5;addEffect('dmg',o.x,o.y-0.3,'-300','#1C1C1C',0.7);}});
+        addExplosionParticles(u.x,u.y,'#1C1C1C',12);
+        addEffect('ability',u.x,u.y,'COFFIN BOMB!','#8B008B',1.2);
+      }
+      // GHOST_RIDE: keeps moving 3s after death (simplified as damage zone)
+      if(u.card.ability==='GHOST_RIDE'){
+        const gy2=u.owner===0?u.y-3:u.y+3;
+        const enemyOwner=1-u.owner;
+        units.forEach(o=>{if(o.owner===enemyOwner&&o.alive&&Math.hypot(o.x-u.x,o.y-gy2)<=2.0){o.takeDamage(100);addEffect('dmg',o.x,o.y-0.3,'-100','#20B2AA',0.6);}});
+        addEffect('ability',u.x,u.y,'GHOST RIDE!','#20B2AA',1.0);
+        addNeonTrail(u.x,u.y,'#20B2AA');addNeonTrail(u.x,gy2,'#20B2AA');
+      }
+    }
+  });
+  // Remove dead units after death animation
+  units=units.filter(u=>u.alive||u.deathTimer<0.5);
+}
+
+function updateUnits(dt){
+  for(const u of units){
+    // --- DEAD UNIT: just tick death timer ---
+    if(!u.alive){
+      if(u.deathTimer>=0)u.deathTimer+=dt;
+      if(u.state===USTATE.DIE)_updateDeathState(u,dt);
+      continue;
+    }
+    // --- TICK COMMON TIMERS ---
+    u.spawnTime+=dt;
+    if(u.abilityCD>0)u.abilityCD-=dt;
+    if(u.stealthTimer>0)u.stealthTimer-=dt;
+    if(u.hitFlash>0)u.hitFlash-=dt;
+    if(u.slowTimer>0)u.slowTimer-=dt;
+    if(u.nitroActive){u.nitroTimer-=dt;if(u.nitroTimer<=0)u.nitroActive=false;}
+    // --- STUN overrides all states except DEPLOY/DIE ---
+    if(u.stunTimer>0){u.stunTimer-=dt;continue;}
+    // Save previous position for trail VFX
+    u.prevX=u.x;u.prevY=u.y;
+    u.bobOffset+=dt*3;
+    // Smooth angle rotation (Trigonometry: angular interpolation)
+    const angleDiff=((u.targetAngle-u.angle+Math.PI*3)%(Math.PI*2))-Math.PI;
+    u.angle+=angleDiff*Math.min(1,dt*8);
+    u.stateTimer+=dt;
+    // --- STATE MACHINE ---
+    switch(u.state){
+      case USTATE.DEPLOY:_updateDeployState(u,dt);break;
+      case USTATE.MOVE:_updateMoveState(u,dt);break;
+      case USTATE.ACQUIRE:_updateAcquireState(u,dt);break;
+      case USTATE.WINDUP:_updateWindupState(u,dt);break;
+      case USTATE.ATTACK:_updateAttackState(u,dt);break;
+      case USTATE.RECOVER:_updateRecoverState(u,dt);break;
+      case USTATE.HIT:_updateHitState(u,dt);break;
+    }
+  }
+}
+function _enterState(u,s){u.state=s;u.stateTimer=0;}
+function _isTargetValid(t){if(!t)return false;if(t instanceof Tower)return!t.destroyed;return t.alive;}
+function _updateDeployState(u,dt){
+  const DUR=0.3;u.deployScale=Math.min(1,u.stateTimer/DUR);
+  if(u.stateTimer<dt*1.5)addDeployRingVFX(u.x,u.y,u.card.carColor||'#fff');
+  if(u.stateTimer>=DUR){u.deployScale=1;_enterState(u,USTATE.MOVE);}
+}
+function _updateMoveState(u,dt){
+  // Chop Shop spawner
+  if(u.card.id==='chop_shop'&&u.card.type==='building'){
+    if(u.abilityCD<=0){u.abilityCD=12;const sc=CARS['rust_bucket'];
+      if(sc)units.push(new Unit(sc,u.owner,u.x+(Math.random()-0.5),u.y+(u.owner===0?-1:1)));
+      addEffect('ability',u.x,u.y,'SPAWN!','#AA6633',0.8);}
+    return;
+  }
+  if(u.card.type==='building'){
+    if(u.atkCD>0){u.atkCD-=dt;return;}
+    findTarget(u);if(u.target){u.acquireTarget=u.target;_enterState(u,USTATE.ACQUIRE);}return;
+  }
+  if(u.atkCD>0)u.atkCD-=dt;
+  findTarget(u);
+  if(u.target){
+    const hitRange=u.range+(u.target instanceof Tower?1.0:0.3);
+    const d=u.dist(u.target.x,u.target.y);
+    if(d<=hitRange){if(u.atkCD<=0){u.acquireTarget=u.target;_enterState(u,USTATE.ACQUIRE);}}
+    else moveToward(u,u.target.x,u.target.y,dt);
+  }else{
+    const ek=(u.owner===0?opponent:player).towers.find(t=>t.type==='king');
+    if(ek)moveToward(u,ek.x,ek.y,dt);
+  }
+}
+function _updateAcquireState(u,dt){
+  const DUR=0.1;
+  if(!_isTargetValid(u.acquireTarget)){u.acquireTarget=null;_enterState(u,USTATE.MOVE);return;}
+  const dx=u.acquireTarget.x-u.x,dy=u.acquireTarget.y-u.y;u.targetAngle=Math.atan2(dy,dx);
+  if(u.stateTimer>=DUR)_enterState(u,USTATE.WINDUP);
+}
+function _updateWindupState(u,dt){
+  const DUR=0.15;
+  if(!_isTargetValid(u.acquireTarget)){u.acquireTarget=null;u.windupOffset=0;_enterState(u,USTATE.MOVE);return;}
+  const prog=u.stateTimer/DUR;u.windupOffset=-Math.sin(prog*Math.PI)*0.15;
+  if(u.stateTimer>=DUR)_enterState(u,USTATE.ATTACK);
+}
+function _updateAttackState(u,dt){
+  u.windupOffset=0;
+  if(!_isTargetValid(u.acquireTarget)){u.acquireTarget=null;_enterState(u,USTATE.MOVE);return;}
+  u.target=u.acquireTarget;unitAttack(u);
+  // Melee impact puff VFX
+  if(u.range<=2&&u.target)addImpactPuff(u.target.x,u.target.y,u.card.carColor||'#fff');
+  _enterState(u,USTATE.RECOVER);
+}
+function _updateRecoverState(u,dt){
+  if(u.atkCD>0)u.atkCD-=dt;
+  if(u.atkCD<=0){u.acquireTarget=null;_enterState(u,USTATE.MOVE);}
+}
+function _updateHitState(u,dt){
+  const DUR=0.08,KNOCK=0.12;
+  const prog=u.stateTimer/DUR,kp=1-prog;
+  u.hitKnockX=Math.cos(u.hitSourceAngle)*KNOCK*kp;
+  u.hitKnockY=Math.sin(u.hitSourceAngle)*KNOCK*kp;
+  u.x+=u.hitKnockX*dt*10;u.y+=u.hitKnockY*dt*10;
+  if(u.stateTimer>=DUR){u.hitKnockX=0;u.hitKnockY=0;_enterState(u,USTATE.MOVE);}
+}
+function _updateDeathState(u,dt){
+  const t=u.deathTimer;
+  if(t<0.1){u.deathPhase=0;}
+  else if(t<0.3){if(u.deathPhase<1){u.deathPhase=1;addDeathShockwave(u.x,u.y,u.card.carColor||'#FF4400');}}
+  else if(t<0.5){if(u.deathPhase<2){u.deathPhase=2;addDeathDebris(u.x,u.y,u.card.carColor||'#FF4400');}}
+}
+
+function findTarget(u){
+  u.target=null;let best=Infinity;const bldOnly=u.card.targets==='buildings';
+  if(!bldOnly){
+    for(const o of units){
+      if(o.owner===u.owner||!o.alive)continue;if(o.stealthTimer>0)continue;
+      const d=u.dist(o.x,o.y);if(d<best){best=d;u.target=o;}
+    }
+  }
+  const eTowers=u.owner===0?opponent.towers:player.towers;
+  const princAlive=eTowers.filter(t=>t.type==='princess'&&!t.destroyed).length;
+  if(!u.target||bldOnly){
+    for(const t of eTowers){
+      if(t.destroyed)continue;if(t.type==='king'&&princAlive===2)continue;
+      const d=u.dist(t.x,t.y);if(d<best){best=d;u.target=t;}
+    }
+  }
+}
+
+function moveToward(u,tx,ty,dt){
+  const onPlayerSide=u.y>RIVER_Y+RIVER_H/2;
+  const targetOtherSide=u.owner===0?(ty<RIVER_Y):(ty>RIVER_Y);
+  const needBridge=(u.owner===0&&onPlayerSide&&targetOtherSide)||(u.owner===1&&!onPlayerSide&&targetOtherSide);
+  let mx=tx,my=ty;
+  if(needBridge){
+    const nearL=Math.abs(u.x-BRIDGE_LX),nearR=Math.abs(u.x-BRIDGE_RX);
+    const atBridge=(nearL<BRIDGE_W/2+0.5)||(nearR<BRIDGE_W/2+0.5);
+    if(!atBridge){mx=nearL<nearR?BRIDGE_LX:BRIDGE_RX;my=RIVER_Y+(u.owner===0?-0.3:0.3);}
+  }
+  const dx=mx-u.x,dy=my-u.y,d=Math.hypot(dx,dy);
+  if(d>0.05){
+    // Calculus: use acceleration curve for speed
+    // v(t) = v_max * (1 - e^(-accel * t))
+    const spd=u.getSpeed()*dt*2.5;
+    const m=Math.min(spd,d);
+    u.x+=(dx/d)*m;u.y+=(dy/d)*m;
+    // Trigonometry: calculate facing angle
+    u.targetAngle=Math.atan2(dy,dx);
+  }
+}
+
+function unitAttack(u){
+  if(!u.target)return;
+  let d=u.dmg;
+  // Apply combo multiplier (both player and AI can build combos)
+  const comboMult=getComboMultiplier();
+  registerCombo(u.owner);
+  // Enhanced VFX: combo pop when multiplier > 1.5x
+  if(comboMult>1.5&&u.target)addComboText(u.target.x,u.target.y-0.5,comboMult);
+
+  // Ranged units fire projectiles (Trigonometry: launch angle)
+  if(u.range>2&&u.target){
+    const tx=u.target.x,ty=u.target.y;
+    sfxProjectile();
+    if(u.card.isArea){
+      launchProjectile(u.x,u.y,tx,ty,u.range*0.8,Math.floor(d*comboMult),u.owner,u.card.carColor||'#FF4400','aoe',u.card.areaRadius||1.5);
+    } else {
+      launchProjectile(u.x,u.y,tx,ty,u.range*0.8,Math.floor(d*comboMult),u.owner,u.card.carColor||'#FF4400','bullet',0);
+    }
+    u.atkCD=1/u.atkSpd;
+    // Trigger abilities
+    doAbilities(u,d);
+    return;
+  }
+
+  // Melee abilities
+  if(u.card.ability==='RAM'&&u.abilityCD<=0){d*=2;u.abilityCD=u.card.abilityCD||8;addEffect('ability',u.x,u.y,'RAM!','#FF4500',0.9);}
+  if(u.card.ability==='SHOCK'&&u.abilityCD<=0){u.abilityCD=5;if(u.target&&!(u.target instanceof Tower)){u.target.stunTimer=1;addEffect('ability',u.target.x,u.target.y,'STUN!','#FFFF00',0.8);}}
+  if(u.card.ability==='JACKPOT'&&u.abilityCD<=0){const mult=1+Math.floor(Math.random()*3);d*=mult;u.abilityCD=u.card.abilityCD||6;addEffect('ability',u.x,u.y,mult+'x JACKPOT!',DESIGN.colors.crownGold,1.0);}
+  if(u.card.ability==='DAZZLE'&&u.abilityCD<=0){u.abilityCD=u.card.abilityCD||8;units.forEach(o=>{if(o.owner!==u.owner&&o.alive&&u.dist(o.x,o.y)<=3){o.stunTimer=1.5;addEffect('ability',o.x,o.y,'DAZZLE!','#FF6EC7',0.8);}});}
+
+  d=Math.floor(d*comboMult);
+  if(u.card.isArea){
+    const ar=u.card.areaRadius||1.5;
+    // Geometry: circle intersection for AoE damage
+    // Damage falls off with distance (Calculus: exponential decay)
+    for(const o of units){
+      if(o.owner===u.owner||!o.alive)continue;
+      const dist=Math.hypot(o.x-u.target.x,o.y-u.target.y);
+      if(dist<=ar){
+        const falloffDmg=Math.floor(d*expDecay(1,1.5,dist/ar));
+        o.takeDamage(falloffDmg);
+      }
+    }
+    // AoE also damages towers in radius (Bug #3 fix)
+    const aeTowers=u.owner===0?opponent.towers:player.towers;
+    aeTowers.forEach(t2=>{
+      if(t2.destroyed)return;
+      const td=Math.hypot(t2.x-u.target.x,t2.y-u.target.y);
+      if(td<=ar+1.0){const tdmg=Math.floor(d*expDecay(1,1.5,td/ar));t2.takeDamage(tdmg);sfxTowerHit();checkTowerDeath(t2,u.owner);}
+    });
+    addEffect('dmg',u.target.x,u.target.y-0.3,'-'+d,'#FF4444',0.5);
+    addSparkParticles(u.target.x,u.target.y,u.card.carColor);
+  } else {
+    u.target.takeDamage(d,u.x,u.y);addEffect('dmg',u.target.x,u.target.y-0.3,'-'+d,'#FF4444',0.5);
+  }
+  if(u.target instanceof Tower){sfxTowerHit();checkTowerDeath(u.target,u.owner);}
+  u.atkCD=1/u.atkSpd;
+  doAbilities(u,d);
+}
+
+function doAbilities(u,d){
+  if(u.card.ability==='TASER'&&u.abilityCD<=0){
+    u.abilityCD=u.card.abilityCD||7;let chain=0;
+    units.forEach(o=>{if(o.owner!==u.owner&&o.alive&&u.dist(o.x,o.y)<=5.5&&chain<3){o.takeDamage(Math.floor(d*0.6));chain++;addEffect('ability',o.x,o.y,'ZAP!','#1E90FF',0.6);}});
+  }
+  if(u.card.ability==='CHAIN'&&u.abilityCD<=0){
+    u.abilityCD=u.card.abilityCD||8;
+    // Chain whip: area flail damage around self
+    units.forEach(o=>{if(o.owner!==u.owner&&o.alive&&u.dist(o.x,o.y)<=2.5){o.takeDamage(Math.floor(d*0.8));addEffect('dmg',o.x,o.y-0.3,'-'+Math.floor(d*0.8),'#CC6600',0.6);}});
+    addEffect('ability',u.x,u.y,'CHAIN WHIP!','#CC6600',1.0);addShake(0.12);
+    addSparkParticles(u.x,u.y,'#CC6600');
+  }
+  if(u.card.ability==='BARRAGE'&&u.abilityCD<=0){
+    u.abilityCD=u.card.abilityCD||10;
+    // Fire 3 projectiles in a spread (Trigonometry: angle offsets)
+    if(u.target){
+      const baseAngle=Math.atan2(u.target.y-u.y,u.target.x-u.x);
+      for(let i=-1;i<=1;i++){
+        const spreadAngle=baseAngle+i*0.15; // 0.15 radians spread
+        const dist2=u.dist(u.target.x,u.target.y);
+        const tx2=u.x+Math.cos(spreadAngle)*dist2;
+        const ty2=u.y+Math.sin(spreadAngle)*dist2;
+        setTimeout(()=>{if(u.alive)launchProjectile(u.x,u.y,tx2,ty2,5,Math.floor(d*0.4),u.owner,'#DC143C','aoe',1.2);},i===0?0:i===-1?150:300);
+      }
+      addEffect('ability',u.x,u.y,'BARRAGE!','#DC143C',0.9);
+    }
+  }
+  if(u.card.ability==='NITRO'&&!u.nitroActive&&u.abilityCD<=0){
+    u.nitroActive=true;u.nitroTimer=2.5;u.abilityCD=u.card.abilityCD||12;
+    addEffect('ability',u.x,u.y,'NITRO!','#00BFFF',0.9);
+  }
+  if(u.card.ability==='BASS_DROP'){
+    units.forEach(o=>{if(o.owner!==u.owner&&o.alive&&u.dist(o.x,o.y)<=4.5)o.slowTimer=Math.max(o.slowTimer,2);});
+  }
+  if(u.card.ability==='FLAMETHROWER'&&u.abilityCD<=0){
+    u.abilityCD=1.5; // fires every 1.5s
+    units.forEach(o=>{if(o.owner!==u.owner&&o.alive&&u.dist(o.x,o.y)<=3.5){o.takeDamage(Math.floor(d*0.35));addEffect('dmg',o.x,o.y-0.3,'-'+Math.floor(d*0.35),'#FF4500',0.4);}});
+    addSparkParticles(u.x+(u.owner===0?-0.5:0.5),u.y,'#FF4500');
+    addEffect('ability',u.x,u.y,'FIRE!','#FF4500',0.6);
+  }
+  if(u.card.ability==='BOSS_BUFF'&&u.abilityCD<=0){
+    u.abilityCD=8;
+    units.forEach(o=>{if(o.owner===u.owner&&o.alive&&o.id!==u.id&&u.dist(o.x,o.y)<=4){
+      o.dmg=Math.floor(o.dmg*1.3);addEffect('ability',o.x,o.y,'BUFFED!',DESIGN.colors.crownGold,0.8);
+    }});
+    addEffect('ability',u.x,u.y,'BOSS BUFF!',DESIGN.colors.crownGold,1.0);
+  }
+  if(u.card.ability==='SPRAY'&&u.abilityCD<=0){
+    u.abilityCD=5;
+    // Spray: multiple small projectiles
+    if(u.target){
+      for(let i=-2;i<=2;i++){
+        const angle2=Math.atan2(u.target.y-u.y,u.target.x-u.x)+i*0.1;
+        const tx3=u.x+Math.cos(angle2)*6;const ty3=u.y+Math.sin(angle2)*6;
+        launchProjectile(u.x,u.y,tx3,ty3,5,Math.floor(d*0.25),u.owner,'#7B2FBE','bullet',0);
+      }
+      addEffect('ability',u.x,u.y,'SPRAY!','#7B2FBE',0.8);
+    }
+  }
+  if(u.card.ability==='CRUSH'&&u.abilityCD<=0){
+    u.abilityCD=u.card.abilityCD||6;
+    units.forEach(o=>{if(o.owner!==u.owner&&o.alive&&u.dist(o.x,o.y)<=2.0){o.takeDamage(Math.floor(d*1.5));o.stunTimer=0.5;addEffect('dmg',o.x,o.y-0.3,'-'+Math.floor(d*1.5),'#B8860B',0.7);}});
+    addEffect('ability',u.x,u.y,'CRUSH!','#B8860B',0.9);addShake(0.15);
+  }
+}
+
+function updateTowerAttacks(dt){
+  for(const t of [...player.towers,...opponent.towers]){
+    if(t.destroyed||!t.active)continue;
+    t.atkCD-=dt;if(t.atkCD>0)continue;
+    let tgt=null,bd=t.range;
+    for(const u of units){
+      if(u.owner===t.owner||!u.alive)continue;if(u.stealthTimer>0)continue;
+      const d=Math.hypot(u.x-t.x,u.y-t.y);if(d<bd){bd=d;tgt=u;}
+    }
+    if(tgt){
+      // Towers fire projectiles for 3D visual
+      launchProjectile(t.x,t.y-0.5,tgt.x,tgt.y,6,t.dmg,t.owner,t.owner===0?'#4488FF':'#FF4444','bullet',0);
+      sfxProjectile();
+      t.atkCD=1/t.atkSpd;
+    }
+  }
+}
+
+// ============================================================
+// AI
+// ============================================================
+function updateAI(dt){
+  opponent.aiCD+=dt;
+  const aiDelay=Math.max(0.6,3.5-currentLevel*0.04);
+  if(opponent.aiCD<aiDelay)return;
+  opponent.aiCD=0;
+  const playable=[];
+  opponent.hand.forEach((cid,i)=>{const c=CARS[cid];if(c&&opponent.elixir>=c.cost)playable.push({i,cid,c});});
+  if(!playable.length)return;
+  if(currentLevel<=10&&opponent.elixir<7)return;
+  if(currentLevel<=20&&opponent.elixir<5)return;
+  const threats=units.filter(u=>u.owner===0&&u.y<RIVER_Y);
+  let choice,gx,gy;
+  if(threats.length>0){
+    const spell=playable.find(p=>p.c.type==='spell');
+    const troop=playable.find(p=>p.c.type==='troop');
+    if(threats.length>=3&&spell){
+      choice=spell;const avg=threats.reduce((a,u)=>({x:a.x+u.x,y:a.y+u.y}),{x:0,y:0});gx=avg.x/threats.length;gy=avg.y/threats.length;
+    } else {choice=troop||playable[0];const t2=threats[0];gx=clamp(t2.x+(Math.random()-0.5)*2,1,17);gy=clamp(t2.y+1.5,2,12);}
+  } else {
+    const troop=playable.find(p=>p.c.type==='troop');if(!troop)return;choice=troop;
+    const lane=Math.random()<0.5?'L':'R';gx=lane==='L'?3+Math.random()*3:12+Math.random()*3;gy=4+Math.random()*5;
+  }
+  if(choice)playCard(opponent,choice.i,gx,gy);
+}
+
+function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+function calcTotalHP(p,isPlayer){
+  let hp=0;p.towers.forEach(t=>{if(!t.destroyed)hp+=t.hp;});
+  units.forEach(u=>{if(u.alive&&u.owner===(isPlayer?0:1))hp+=u.hp;});
+  return hp;
+}
+
+function endBattle(){
+  phase='ended';emojiOpen=false;
+  endPlayerHP=calcTotalHP(player,true);endOpponentHP=calcTotalHP(opponent,false);
+  if(player.crowns===opponent.crowns){
+    if(endPlayerHP>endOpponentHP)battleResult='win';
+    else if(endOpponentHP>endPlayerHP)battleResult='lose';
+    else battleResult='draw';
+  } else if(player.crowns>opponent.crowns)battleResult='win';
+  else battleResult='lose';
+  if(battleResult==='win'){
+    playerProfile.nosBottles+=25+player.crowns*5;
+    if(!playerProfile.completedLevels.includes(currentLevel))playerProfile.completedLevels.push(currentLevel);
+    playerProfile.fuel+=100;
+    rewardState=generateRewards(player.crowns);
+    addSeasonXP(SEASON_CONFIG.winXP);
+    sfxVictory();
+  } else if(battleResult==='lose'){
+    playerProfile.nosBottles=Math.max(0,playerProfile.nosBottles-15);
+    addSeasonXP(SEASON_CONFIG.lossXP);
+    rewardState=null;sfxDefeat();
+  } else {
+    playerProfile.nosBottles+=5;
+    addSeasonXP(SEASON_CONFIG.drawXP);
+    rewardState=null;
+  }
+  screen='postgame';
+}
+
+// ============================================================
+// 3D RENDER ENGINE
+// ============================================================
+function renderScreenByName(s){
+  if(s==='menu'){renderMenu();return;}
+  if(s==='mode_select'){renderModeSelect();return;}
+  if(s==='deck_pick'||s==='deckBuilder'){renderDeckBuilder();return;}
+  if(s==='collection'){renderCollection();return;}
+  if(s==='store'){renderStore();return;}
+  if(s==='levels'){renderLevels();return;}
+  if(s==='season'){renderSeason();return;}
+  if(s==='rewards'){renderRewardScreen();return;}
+  if(s==='cardDetail'){renderCardDetail();return;}
+  if(s==='postgame'){renderPostGame();return;}
+}
+function render(ts){
+  animT=(ts||0)/1000;ctx.clearRect(0,0,W,H);
+  // Screen transition overlay
+  if(screenTransition.active){
+    const p=Math.min(1,screenTransition.t/screenTransition.dur);
+    const ease=DESIGN.easing.outCubic(p);
+    const slideX=W*0.15;
+    // Outgoing screen (slide left + fade)
+    ctx.save();ctx.globalAlpha=1-ease;ctx.translate(-slideX*ease,0);
+    renderScreenByName(screenTransition.from);
+    ctx.restore();
+    // Incoming screen (slide in from right + fade)
+    ctx.save();ctx.globalAlpha=ease;ctx.translate(slideX*(1-ease),0);
+    renderScreenByName(screenTransition.to);
+    ctx.restore();
+    renderCelebration();
+    return;
+  }
+  if(screen==='menu'){renderMenu();renderCelebration();return;}
+  if(screen==='mode_select'){renderModeSelect();renderCelebration();return;}
+  if(screen==='deck_pick'||screen==='deckBuilder'){renderDeckBuilder();renderCelebration();return;}
+  if(screen==='collection'){renderCollection();renderCelebration();return;}
+  if(screen==='store'){renderStore();renderCelebration();return;}
+  if(screen==='levels'){renderLevels();renderCelebration();return;}
+  if(screen==='season'){renderSeason();renderCelebration();return;}
+  if(screen==='rewards'){renderRewardScreen();renderCelebration();return;}
+  if(screen==='cardDetail'){renderCardDetail();renderCelebration();return;}
+  renderArena3D();renderArenaFog();renderGodRays();
+  renderDeployZone();renderTowers3D();renderUnits3D();
+  renderWeather();renderProjectiles();renderParticles();
+  renderEffects();renderTopBar();renderHUD();renderCards();renderEmojiPanel();renderFloatingEmojis();
+  // Drag ghost during battle
+  if(dragState.active)renderDragGhost();
+  // Combo display
+  if(comboChain.count>=2&&comboChain.timer>0){
+    ctx.fillStyle=DESIGN.colors.crownGold;ctx.font='bold '+Math.floor(W*0.04)+'px Arial';
+    ctx.textAlign='right';ctx.textBaseline='top';
+    ctx.globalAlpha=Math.min(1,comboChain.timer);
+    ctx.fillText(comboChain.count+'x COMBO',W-10,offY+10);
+    ctx.globalAlpha=1;
+  }
+  if(phase==='countdown')renderCountdown();
+  renderVignette();renderColorGrade();
+  renderScreenFlash();
+  if(phase==='overtime'||phase==='double')renderOvertimePulse();
+  if(hqDeadScreen.active)renderHQDeadScreen();
+  if(screen==='postgame')renderPostGame();
+  renderCelebration();
+}
+
+function renderScreenFlash(){
+  if(!screenFlash.active)return;const p=screenFlash.t/screenFlash.dur;
+  ctx.globalAlpha=screenFlash.alpha*(1-p);ctx.fillStyle=screenFlash.color;ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;
+}
+function renderOvertimePulse(){
+  const pulse=Math.sin(overtimePulseT*Math.PI)*0.5;if(pulse<0)return;
+  ctx.globalAlpha=0.12*pulse;ctx.fillStyle=phase==='double'?'#FF0000':'#FF8800';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;
+}
+function renderHQDeadScreen(){
+  const t=hqDeadScreen.t;if(t>3)return;
+  const alpha=Math.min(1,t*3);ctx.globalAlpha=alpha*0.92;ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);ctx.globalAlpha=1;
+  const playerWon=hqDeadScreen.winner===0;
+  const msg=playerWon?'ENEMY HQ WRECKED':'YOUR CREW IS DOWN';
+  const col=playerWon?DESIGN.colors.crownGold:'#FF3333';
+  ctx.save();ctx.shadowColor=col;ctx.shadowBlur=40;ctx.fillStyle=col;
+  ctx.font='bold '+Math.floor(W*0.09)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(msg,W/2,H*0.35);ctx.shadowBlur=0;
+  ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(W*0.055)+'px Arial';
+  ctx.fillText(playerWon?'VICTORY!':'GAME OVER',W/2,H*0.5);ctx.restore();
+}
+
+// ============================================================
+// 3D ARENA RENDER (Perspective projection + depth)
+// Uses trapezoid geometry for the arena floor
+// ============================================================
+function renderArena3D(){
+  const arena=getArena(currentLevel);
+
+  // Sky gradient with parallax layers
+  const skyG=ctx.createLinearGradient(0,0,0,hudY);
+  skyG.addColorStop(0,arena.sky1);skyG.addColorStop(1,arena.sky2);
+  ctx.fillStyle=skyG;ctx.fillRect(0,0,W,hudY);
+
+  // 3D Perspective arena floor (Geometry: trapezoid)
+  // Top edge is narrower (far), bottom edge is wider (near)
+  const[tlx,tly]=toScr3D(0,0);          // top-left (far)
+  const[trx,_]=toScr3D(ARENA_W,0);       // top-right (far)
+  const[blx,bly]=toScr3D(0,ARENA_H);    // bottom-left (near)
+  const[brx,bry]=toScr3D(ARENA_W,ARENA_H); // bottom-right (near)
+
+  // Draw trapezoid arena floor
+  ctx.fillStyle=arena.road;
+  ctx.beginPath();ctx.moveTo(tlx,tly);ctx.lineTo(trx,tly);ctx.lineTo(brx,bry);ctx.lineTo(blx,bly);ctx.closePath();ctx.fill();
+
+  // 3D Sidewalks (narrower at top due to perspective)
+  const swFrac=BRIDGE_LX/ARENA_W;
+  const[swlx1]=toScr3D(BRIDGE_LX-1.2,0);
+  const[swlx2]=toScr3D(BRIDGE_LX-1.2,ARENA_H);
+  const[swrx1]=toScr3D(ARENA_W-BRIDGE_LX+1.2,0);
+  const[swrx2]=toScr3D(ARENA_W-BRIDGE_LX+1.2,ARENA_H);
+  ctx.fillStyle=arena.walk;
+  ctx.beginPath();ctx.moveTo(tlx,tly);ctx.lineTo(swlx1,tly);ctx.lineTo(swlx2,bly);ctx.lineTo(blx,bly);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(swrx1,tly);ctx.lineTo(trx,tly);ctx.lineTo(brx,bry);ctx.lineTo(swrx2,bry);ctx.closePath();ctx.fill();
+
+  // Neon sidewalk borders with perspective
+  ctx.strokeStyle=arena.n1+'66';ctx.lineWidth=2;
+  ctx.shadowColor=arena.n1;ctx.shadowBlur=6;
+  ctx.beginPath();ctx.moveTo(swlx1,tly);ctx.lineTo(swlx2,bly);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(swrx1,tly);ctx.lineTo(swrx2,bry);ctx.stroke();
+  ctx.shadowBlur=0;
+
+  // Perspective grid lines (converge toward vanishing point)
+  ctx.strokeStyle='rgba(255,255,255,0.06)';ctx.lineWidth=1;
+  for(let r=2;r<ARENA_H;r+=3){
+    const[lx,ly]=toScr3D(0,r);const[rx]=toScr3D(ARENA_W,r);
+    ctx.beginPath();ctx.moveTo(lx,ly);ctx.lineTo(rx,ly);ctx.stroke();
+  }
+
+  // Center lane dashes (perspective-corrected)
+  ctx.strokeStyle='rgba(255,200,0,0.45)';ctx.lineWidth=Math.max(2,scale*0.08);
+  for(let y=0;y<ARENA_H;y+=1.5){
+    const[cx1,cy1]=toScr3D(ARENA_W/2,y);
+    const[cx2,cy2]=toScr3D(ARENA_W/2,y+0.7);
+    ctx.beginPath();ctx.moveTo(cx1,cy1);ctx.lineTo(cx2,cy2);ctx.stroke();
+  }
+
+  // River / crosswalk with perspective
+  const[,rv0]=toScr3D(0,RIVER_Y-RIVER_H/2);const[,rv1]=toScr3D(0,RIVER_Y+RIVER_H/2);
+  const[rlx0]=toScr3D(0,RIVER_Y-RIVER_H/2);const[rrx0]=toScr3D(ARENA_W,RIVER_Y-RIVER_H/2);
+  const[rlx1]=toScr3D(0,RIVER_Y+RIVER_H/2);const[rrx1]=toScr3D(ARENA_W,RIVER_Y+RIVER_H/2);
+  ctx.fillStyle=arena.road==='#141820'?'#0a1020':'#252526';
+  ctx.beginPath();ctx.moveTo(rlx0,rv0);ctx.lineTo(rrx0,rv0);ctx.lineTo(rrx1,rv1);ctx.lineTo(rlx1,rv1);ctx.closePath();ctx.fill();
+  // Crosswalk stripes
+  ctx.fillStyle='rgba(255,255,255,0.18)';
+  for(let x=2;x<ARENA_W-1;x+=0.7){
+    const[sx1,sy1]=toScr3D(x,RIVER_Y-RIVER_H/2);const[sx2,sy2]=toScr3D(x+0.25,RIVER_Y+RIVER_H/2);
+    const df1=getDepthFactor(RIVER_Y);
+    ctx.fillRect(sx1,sy1,Math.max(2,(sx2-sx1)),sy2-sy1);
+  }
+
+  // Traffic lights (3D positioned)
+  drawTrafficLight3D(BRIDGE_LX-1,RIVER_Y-RIVER_H/2-1.5,arena);
+  drawTrafficLight3D(BRIDGE_RX+1,RIVER_Y-RIVER_H/2-1.5,arena);
+
+  // Lane labels
+  const[blxp,blyp]=toScr3D(BRIDGE_LX,RIVER_Y-RIVER_H/2-0.3);
+  const[brxp]=toScr3D(BRIDGE_RX,RIVER_Y-RIVER_H/2-0.3);
+  const df=getDepthFactor(RIVER_Y);
+  ctx.fillStyle=arena.n1+'77';ctx.font=Math.floor(scale*0.32*df)+'px Arial';ctx.textAlign='center';
+  ctx.fillText('LEFT LANE',blxp,blyp);ctx.fillText('RIGHT LANE',brxp,blyp);
+
+  // City graffiti watermark (depth-scaled)
+  ctx.save();ctx.globalAlpha=0.04;ctx.fillStyle=arena.acc;
+  ctx.font='bold '+(scale*3*getDepthFactor(ARENA_H*0.2))+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+  const[gwx,gwy]=toScr3D(ARENA_W/2,ARENA_H*0.2);
+  ctx.fillText(arena.tag,gwx,gwy);ctx.restore();
+
+  // 3D building silhouettes on sides (Trigonometry: perspective scaling)
+  renderBuildingSilhouettes3D(arena);
+
+  // Neon border glow
+  ctx.strokeStyle=arena.n1+'55';ctx.lineWidth=3;
+  ctx.shadowColor=arena.n1;ctx.shadowBlur=8;
+  ctx.beginPath();ctx.moveTo(tlx,tly);ctx.lineTo(trx,tly);ctx.lineTo(brx,bry);ctx.lineTo(blx,bly);ctx.closePath();ctx.stroke();
+  ctx.shadowBlur=0;
+
+  // City-specific effects
+  if(arena.style==='cyber'||arena.style==='neon'){
+    ctx.globalAlpha=0.03;ctx.fillStyle='#00FFFF';
+    for(let y=tly;y<bly;y+=4){
+      const prog=(y-tly)/(bly-tly);
+      const lx2=tlx+(blx-tlx)*prog;const rx2=trx+(brx-trx)*prog;
+      ctx.fillRect(lx2,y,rx2-lx2,1);
+    }
+    ctx.globalAlpha=1;
+  }
+  if(arena.style==='casino'&&Math.random()<0.08){
+    const rx2=Math.random()*ARENA_W,ry2=Math.random()*ARENA_H;
+    const[spx,spy,spdf]=toScr3D(rx2,ry2);
+    ctx.fillStyle=DESIGN.colors.crownGold+'66';ctx.beginPath();ctx.arc(spx,spy,2*spdf,0,Math.PI*2);ctx.fill();
+  }
+  // Wet asphalt reflections -- mirrored neon lines + puddles
+  ctx.save();ctx.globalAlpha=0.06;
+  ctx.strokeStyle=arena.n1;ctx.lineWidth=1;
+  for(let r=4;r<ARENA_H;r+=5){
+    const[lx,ly]=toScr3D(0,r);const[rx]=toScr3D(ARENA_W,r);
+    ctx.beginPath();ctx.moveTo(lx,ly+1);ctx.lineTo(rx,ly+1);ctx.stroke();
+  }
+  ctx.globalAlpha=0.04;
+  for(let p=0;p<5;p++){
+    const px2=2+p*(ARENA_W-4)/4,py2=3+p*4.2;
+    const[ppx,ppy,ppd]=toScr3D(px2,py2);
+    ctx.fillStyle=arena.n1;ctx.beginPath();ctx.ellipse(ppx,ppy+2,12*ppd,4*ppd,0,0,Math.PI*2);ctx.fill();
+  }
+  ctx.restore();
+}
+
+// ============================================================
+// ATMOSPHERIC EFFECTS (Art Bible v2)
+// ============================================================
+let rainDrops=[];
+function initRain(){rainDrops=[];for(let i=0;i<80;i++)rainDrops.push({x:Math.random()*W,y:Math.random()*H,speed:300+Math.random()*200,len:8+Math.random()*12});}
+function updateRain(dt){for(let i=0;i<rainDrops.length;i++){const d=rainDrops[i];d.y+=d.speed*dt;d.x-=d.speed*dt*0.15;if(d.y>H){d.y=-d.len;d.x=Math.random()*W;}if(d.x<-20)d.x=W+10;}}
+
+function renderArenaFog(){
+  const arena=getArena(currentLevel);if(!arena.fog)return;
+  const[,ry0]=toScr3D(0,RIVER_Y-2);const[,ry1]=toScr3D(0,RIVER_Y+3);
+  const fogCY=(ry0+ry1)/2,fogR=Math.max(W*0.5,(ry1-ry0)*2);
+  ctx.save();ctx.globalAlpha=arena.fog.density||0.08;
+  const drift=Math.sin(animT*0.4)*W*0.02;
+  const fg=ctx.createRadialGradient(W/2+drift,fogCY,0,W/2+drift,fogCY,fogR);
+  fg.addColorStop(0,arena.fog.color||'#ffffff');fg.addColorStop(0.6,(arena.fog.color||'#ffffff')+'44');fg.addColorStop(1,'transparent');
+  ctx.fillStyle=fg;ctx.fillRect(0,ry0-fogR*0.3,W,fogR*1.2);
+  ctx.restore();
+}
+
+function renderGodRays(){
+  const arena=getArena(currentLevel);
+  const rayCol=arena.style==='cyber'||arena.style==='neon'?DESIGN.colors.neonCyan:DESIGN.colors.crownGold;
+  ctx.save();ctx.globalAlpha=0.04;
+  for(let r=0;r<3;r++){
+    const sway=Math.sin(animT*0.3+r*2.1)*W*0.06;
+    const rx=W*0.15+r*W*0.3+sway;
+    const rw=W*0.12;
+    const rg=ctx.createLinearGradient(rx,0,rx+rw,hudY*0.8);
+    rg.addColorStop(0,rayCol+'66');rg.addColorStop(0.5,rayCol+'22');rg.addColorStop(1,'transparent');
+    ctx.fillStyle=rg;
+    ctx.beginPath();ctx.moveTo(rx,0);ctx.lineTo(rx+rw*0.3,0);ctx.lineTo(rx+rw,hudY*0.8);ctx.lineTo(rx+rw*0.4,hudY*0.8);ctx.closePath();ctx.fill();
+  }
+  ctx.restore();
+}
+
+function renderWeather(){
+  const arena=getArena(currentLevel);if(arena.weather!=='rain')return;
+  ctx.save();ctx.strokeStyle=DESIGN.colors.neonCyan+'33';ctx.lineWidth=1;
+  for(let i=0;i<rainDrops.length;i++){
+    const d=rainDrops[i];
+    ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(d.x-d.len*0.15,d.y+d.len);ctx.stroke();
+  }
+  ctx.restore();
+}
+
+// --- Post-Processing Stack (Art Bible v2) ---
+function renderVignette(){
+  const vg=ctx.createRadialGradient(W/2,H/2,W*0.25,W/2,H/2,W*0.75);
+  vg.addColorStop(0,'transparent');vg.addColorStop(0.7,'transparent');vg.addColorStop(1,DESIGN.colors.midnightDeep+'80');
+  ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);
+}
+function renderColorGrade(){
+  ctx.save();ctx.globalCompositeOperation='multiply';ctx.globalAlpha=0.04;
+  ctx.fillStyle=DESIGN.colors.crownGold;ctx.fillRect(0,0,W,H);
+  ctx.restore();
+}
+
+// ============================================================
+// GRAFFITI SYSTEM -- Per-city street art on building walls
+// ============================================================
+const GRAFFITI_DB={
+  hood:{tags:['CPT','NO LACKIN','BLOCK HOT'],styles:['bubble','drip','stencil'],colors:['#FF6600','#FF4500',DESIGN.colors.crownGold],icon:'crown',dripChance:0.7},
+  industrial:{tags:['MOTOR CITY','RUST BELT','D-TOWN'],styles:['stencil','block','drip'],colors:['#FF6600','#DD4400','#FFAA00'],icon:'gear',dripChance:0.5},
+  elevated:{tags:['CHI-TOWN','DRILL SZN','SOUTH SIDE'],styles:['wildstyle','drip','stencil'],colors:['#0088FF','#00BBFF','#4488FF'],icon:'star',dripChance:0.4},
+  rooftop:{tags:['BK','ALL DAY','BRIDGE CITY'],styles:['bubble','wildstyle','stencil'],colors:['#CC44FF','#AA00FF','#8800CC'],icon:'bridge',dripChance:0.5},
+  trap:{tags:['ATL','TRAP OR DIE','DIRTY SOUTH'],styles:['drip','block','stencil'],colors:['#FF0033','#CC0022','#FF2244'],icon:'diamond',dripChance:0.8},
+  harbor:{tags:['THE TOWN','BAY AREA','HYPHY'],styles:['bubble','stencil','wildstyle'],colors:['#00DDCC','#00BBAA','#20B2AA'],icon:'anchor',dripChance:0.4},
+  neon:{tags:['305','VICE CITY','DALE'],styles:['bubble','neonOutline','drip'],colors:['#FF44AA','#FF0088','#FF66CC'],icon:'palm',dripChance:0.3},
+  casino:{tags:['SIN CITY','ALL IN','JACKPOT'],styles:['block','neonOutline','bubble'],colors:[DESIGN.colors.crownGold,'#FFAA00','#FF8800'],icon:'spade',dripChance:0.3},
+  cyber:{tags:['NEO','GHOST NET','HACK'],styles:['neonOutline','wildstyle','glitch'],colors:['#00FFFF','#FF00FF','#00FF88'],icon:'circuit',dripChance:0.2},
+  throne:{tags:['KINGZ','LONG LIVE','CROWN ME'],styles:['wildstyle','block','drip'],colors:[DESIGN.colors.crownGold,'#CC44FF','#FF8800'],icon:'royalCrown',dripChance:0.6}
+};
+
+function hashStr(s){let h=0;for(let i=0;i<s.length;i++)h=((h<<5)-h)+s.charCodeAt(i)|0;return Math.abs(h);}
+
+function renderGraffiti(x,y,w,h,tagIdx,graf,side){
+  if(w<15||h<20)return; // too small
+  const tag=graf.tags[tagIdx%graf.tags.length];
+  const style=graf.styles[tagIdx%graf.styles.length];
+  const color=graf.colors[tagIdx%graf.colors.length];
+  const seed=hashStr(tag+side+tagIdx);
+  const fontSize=Math.max(7,Math.min(w*0.35,h*0.22));
+  ctx.save();
+  ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip(); // clip to wall
+  ctx.globalAlpha=0.55;
+  const tx=x+w*0.15+(seed%3)*w*0.08;
+  const ty=y+h*0.3+(seed%5)*h*0.06;
+  if(style==='bubble'){
+    ctx.font='bold '+fontSize+'px Arial';ctx.textAlign='left';ctx.textBaseline='middle';
+    // Fat outline
+    ctx.lineWidth=Math.max(2,fontSize*0.15);ctx.strokeStyle='#000';ctx.lineJoin='round';
+    ctx.strokeText(tag,tx,ty);
+    ctx.fillStyle=color;ctx.fillText(tag,tx,ty);
+    // Highlight
+    ctx.globalAlpha=0.3;ctx.fillStyle='#fff';
+    ctx.fillText(tag,tx-1,ty-1);
+  } else if(style==='drip'){
+    ctx.font='italic bold '+fontSize+'px Arial';ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillStyle=color;ctx.fillText(tag,tx,ty);
+    // Paint drips
+    if(seed%100<graf.dripChance*100){
+      const dripCount=2+(seed%3);
+      for(let d=0;d<dripCount;d++){
+        const dx=tx+(seed*(d+1))%Math.max(1,Math.floor(w*0.5));
+        const dLen=8+(seed*(d+2))%Math.max(1,Math.floor(h*0.3));
+        ctx.fillStyle=color;ctx.globalAlpha=0.4;
+        ctx.fillRect(dx,ty+fontSize*0.4,Math.max(1,fontSize*0.08),dLen);
+        ctx.beginPath();ctx.arc(dx+fontSize*0.04,ty+fontSize*0.4+dLen,fontSize*0.06,0,Math.PI*2);ctx.fill();
+      }
+    }
+  } else if(style==='stencil'){
+    ctx.font='900 '+fontSize+'px Arial';ctx.textAlign='left';ctx.textBaseline='middle';
+    // Spray haze behind
+    ctx.globalAlpha=0.15;ctx.fillStyle=color;
+    ctx.beginPath();ctx.arc(tx+w*0.15,ty,fontSize*1.2,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=0.55;ctx.fillStyle=color;ctx.fillText(tag.toUpperCase(),tx,ty);
+  } else if(style==='block'){
+    ctx.font='900 '+fontSize+'px Arial';ctx.textAlign='left';ctx.textBaseline='middle';
+    // 3D shadow stack
+    for(let s=3;s>0;s--){
+      ctx.globalAlpha=0.2;ctx.fillStyle='#000';
+      ctx.fillText(tag,tx+s,ty+s);
+    }
+    ctx.globalAlpha=0.6;ctx.fillStyle=color;ctx.fillText(tag,tx,ty);
+    // Top highlight
+    ctx.globalAlpha=0.25;ctx.fillStyle='#fff';ctx.fillRect(tx,ty-fontSize*0.5,w*0.4,2);
+  } else if(style==='wildstyle'){
+    ctx.save();ctx.translate(tx+w*0.1,ty);ctx.rotate(-0.12+(seed%5)*0.04);
+    ctx.font='italic bold '+fontSize+'px Arial';ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.strokeStyle=color;ctx.lineWidth=2;ctx.globalAlpha=0.5;
+    ctx.strokeText(tag,0,0);
+    ctx.fillStyle=color;ctx.globalAlpha=0.6;ctx.fillText(tag,0,0);
+    // Arrow accents
+    ctx.strokeStyle=color;ctx.lineWidth=1.5;ctx.globalAlpha=0.4;
+    ctx.beginPath();ctx.moveTo(-5,-fontSize*0.3);ctx.lineTo(-10,-fontSize*0.6);ctx.lineTo(-3,-fontSize*0.5);ctx.stroke();
+    ctx.restore();
+  } else if(style==='neonOutline'){
+    ctx.font='bold '+fontSize+'px Arial';ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.strokeStyle=color;ctx.lineWidth=2;ctx.globalAlpha=0.6;
+    ctx.shadowColor=color;ctx.shadowBlur=8;
+    ctx.strokeText(tag,tx,ty);
+    ctx.shadowBlur=4;ctx.strokeText(tag,tx,ty);
+    ctx.shadowBlur=0;
+  } else if(style==='glitch'){
+    ctx.font='bold '+fontSize+'px monospace';ctx.textAlign='left';ctx.textBaseline='middle';
+    // RGB split
+    ctx.globalAlpha=0.35;ctx.fillStyle='#00FFFF';ctx.fillText(tag,tx-2,ty);
+    ctx.fillStyle='#FF00FF';ctx.fillText(tag,tx+2,ty+1);
+    ctx.globalAlpha=0.55;ctx.fillStyle=color;ctx.fillText(tag,tx,ty);
+    // Scanline
+    ctx.globalAlpha=0.1;ctx.fillStyle='#000';
+    for(let sl=0;sl<h;sl+=3)ctx.fillRect(x,y+sl,w,1);
+  }
+  // City icon (on select buildings)
+  if(tagIdx%3===0&&graf.icon){
+    renderGraffitiIcon(graf.icon,x+w*0.6,y+h*0.65,Math.min(w*0.25,h*0.2),color);
+  }
+  ctx.restore();
+  ctx.globalAlpha=1;
+}
+
+function renderGraffitiIcon(icon,x,y,sz,color){
+  ctx.globalAlpha=0.4;ctx.fillStyle=color;ctx.strokeStyle=color;ctx.lineWidth=1.5;
+  if(icon==='crown'){
+    ctx.beginPath();ctx.moveTo(x-sz/2,y+sz*0.3);ctx.lineTo(x-sz/2,y-sz*0.2);ctx.lineTo(x-sz*0.25,y+sz*0.05);ctx.lineTo(x,y-sz*0.4);ctx.lineTo(x+sz*0.25,y+sz*0.05);ctx.lineTo(x+sz/2,y-sz*0.2);ctx.lineTo(x+sz/2,y+sz*0.3);ctx.closePath();ctx.fill();
+  } else if(icon==='gear'){
+    ctx.beginPath();for(let i=0;i<8;i++){const a=i*Math.PI/4;const r1=sz*0.35,r2=sz*0.5;ctx.lineTo(x+Math.cos(a)*r1,y+Math.sin(a)*r1);ctx.lineTo(x+Math.cos(a+Math.PI/8)*r2,y+Math.sin(a+Math.PI/8)*r2);}ctx.closePath();ctx.fill();
+    ctx.fillStyle='#000';ctx.beginPath();ctx.arc(x,y,sz*0.15,0,Math.PI*2);ctx.fill();
+  } else if(icon==='star'){
+    ctx.beginPath();for(let i=0;i<12;i++){const a=i*Math.PI/6-Math.PI/2;const r=i%2===0?sz*0.45:sz*0.2;ctx.lineTo(x+Math.cos(a)*r,y+Math.sin(a)*r);}ctx.closePath();ctx.fill();
+  } else if(icon==='diamond'){
+    ctx.beginPath();ctx.moveTo(x,y-sz*0.45);ctx.lineTo(x+sz*0.3,y);ctx.lineTo(x,y+sz*0.45);ctx.lineTo(x-sz*0.3,y);ctx.closePath();ctx.fill();
+    ctx.globalAlpha=0.2;ctx.strokeStyle='#fff';ctx.beginPath();ctx.moveTo(x-sz*0.15,y-sz*0.15);ctx.lineTo(x+sz*0.15,y+sz*0.15);ctx.stroke();
+  } else if(icon==='spade'){
+    ctx.beginPath();ctx.moveTo(x,y-sz*0.45);ctx.bezierCurveTo(x-sz*0.5,y-sz*0.1,x-sz*0.5,y+sz*0.3,x,y+sz*0.15);ctx.bezierCurveTo(x+sz*0.5,y+sz*0.3,x+sz*0.5,y-sz*0.1,x,y-sz*0.45);ctx.fill();
+    ctx.fillRect(x-sz*0.06,y+sz*0.1,sz*0.12,sz*0.3);
+  } else if(icon==='circuit'){
+    ctx.beginPath();ctx.arc(x,y,sz*0.12,0,Math.PI*2);ctx.fill();
+    for(let i=0;i<8;i++){const a=i*Math.PI/4;ctx.beginPath();ctx.moveTo(x+Math.cos(a)*sz*0.12,y+Math.sin(a)*sz*0.12);const mx=x+Math.cos(a)*sz*0.35;const my=y+Math.sin(a)*sz*0.35;if(i%2===0){ctx.lineTo(mx,y+Math.sin(a)*sz*0.12);ctx.lineTo(mx,my);}else{ctx.lineTo(x+Math.cos(a)*sz*0.12,my);ctx.lineTo(mx,my);}ctx.stroke();}
+  } else if(icon==='royalCrown'){
+    ctx.beginPath();ctx.moveTo(x-sz*0.45,y+sz*0.25);ctx.lineTo(x-sz*0.45,y-sz*0.1);ctx.lineTo(x-sz*0.25,y+sz*0.1);ctx.lineTo(x-sz*0.1,y-sz*0.3);ctx.lineTo(x,y+sz*0.05);ctx.lineTo(x+sz*0.1,y-sz*0.3);ctx.lineTo(x+sz*0.25,y+sz*0.1);ctx.lineTo(x+sz*0.45,y-sz*0.1);ctx.lineTo(x+sz*0.45,y+sz*0.25);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#FF0000';[x-sz*0.1,x,x+sz*0.1].forEach(jx=>{ctx.beginPath();ctx.arc(jx,y-sz*0.25,sz*0.06,0,Math.PI*2);ctx.fill();});
+  } else {
+    // fallback: simple tag mark
+    ctx.beginPath();ctx.arc(x,y,sz*0.3,0,Math.PI*2);ctx.stroke();
+  }
+}
+
+// 3D building silhouettes along arena edges (with graffiti)
+function renderBuildingSilhouettes3D(arena){
+  const graf=GRAFFITI_DB[arena.style]||GRAFFITI_DB.hood;
+  const bCount=8;
+  for(let i=0;i<bCount;i++){
+    const gy=i*(ARENA_H/bCount);
+    const df=getDepthFactor(gy);
+    const bh=CITY_BUILDINGS[i%CITY_BUILDINGS.length]*H*0.4*df;
+    // Left side buildings
+    const[lx,ly]=toScr3D(-0.5,gy);
+    const bw=scale*1.5*df;
+    ctx.fillStyle=arena.sky2;ctx.fillRect(lx-bw,ly-bh,bw,bh);
+    // Windows (flickering with trig)
+    for(let row=0;row<3;row++){
+      for(let col=0;col<2;col++){
+        const flicker=Math.sin(animT*2+i+row)>0.3?1:0.4;
+        ctx.fillStyle='rgba(255,240,120,'+(0.15+flicker*0.15)+')';
+        ctx.fillRect(lx-bw+col*(bw/2.5)+4,ly-bh+row*(bh/3.5)+8,bw*0.2,bh*0.08);
+      }
+    }
+    // Graffiti on left wall (staggered: indices 0,1,3,5,7)
+    if(i%2===0||i===1||i===5){
+      renderGraffiti(lx-bw+2,ly-bh*0.6,bw-4,bh*0.45,i,graf,'L');
+    }
+    // Neon accent
+    if(i%2===0){
+      ctx.fillStyle=arena.n1+'44';ctx.fillRect(lx-bw+2,ly-bh*0.5,bw-4,2*df);
+    }
+    // Right side buildings
+    const[rx]=toScr3D(ARENA_W+0.5,gy);
+    ctx.fillStyle=arena.sky2;ctx.fillRect(rx,ly-bh*0.8,bw,bh*0.8);
+    for(let row=0;row<3;row++){
+      for(let col=0;col<2;col++){
+        const flicker2=Math.sin(animT*2.3+i*3+row)>0.2?1:0.4;
+        ctx.fillStyle='rgba(255,240,120,'+(0.15+flicker2*0.15)+')';
+        ctx.fillRect(rx+col*(bw/2.5)+4,ly-bh*0.8+row*(bh*0.8/3.5)+8,bw*0.2,bh*0.06);
+      }
+    }
+    // Graffiti on right wall (staggered: indices 1,2,4,6)
+    if(i%2===1||i===2||i===6){
+      renderGraffiti(rx+2,ly-bh*0.5,bw-4,bh*0.35,(i+3)%graf.tags.length,graf,'R');
+    }
+  }
+}
+
+function drawTrafficLight3D(gx,gy,arena){
+  const[sx,sy,df]=toScr3D(gx,gy);
+  const w=scale*0.18*df,h=scale*0.55*df;
+  // 3D pole
+  ctx.fillStyle='#333';ctx.fillRect(sx-w*0.15,sy,w*0.3,h*0.6);
+  // Light box with 3D shading
+  ctx.fillStyle='#1a1a1a';ctx.fillRect(sx-w/2,sy-h*0.1,w,h);
+  ctx.fillStyle='#111';ctx.fillRect(sx-w/2,sy-h*0.1,w*0.15,h); // left shadow face
+  const phase2=Math.floor(animT)%3;
+  ctx.fillStyle=phase2===0?(arena?arena.n1:'#FF2200'):'#222';ctx.beginPath();ctx.arc(sx,sy+h*0.15,w*0.28,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=phase2===1?'#FFAA00':'#222';ctx.beginPath();ctx.arc(sx,sy+h*0.42,w*0.28,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle=phase2===2?'#22DD22':'#222';ctx.beginPath();ctx.arc(sx,sy+h*0.69,w*0.28,0,Math.PI*2);ctx.fill();
+  // Glow
+  if(phase2===0&&arena){ctx.shadowColor=arena.n1;ctx.shadowBlur=6*df;ctx.beginPath();ctx.arc(sx,sy+h*0.15,w*0.2,0,Math.PI*2);ctx.fill();ctx.shadowBlur=0;}
+}
+
+// ============================================================
+// 3D TOWER RENDER (Pseudo-3D with top face + shadows)
+// ============================================================
+function renderTowers3D(){
+  // Sort by Y for depth ordering
+  const allTowers=[...opponent.towers,...player.towers].sort((a,b)=>a.y-b.y);
+  for(const t of allTowers){
+    const[sx,sy,df]=toScr3D(t.x,t.y);const stats=TOWER_STATS[t.type];
+    const cW=stats.w*scale*df,cH=stats.h*scale*df;
+    const towerH=cH*0.6; // 3D height
+
+    if(t.destroyed){
+      // Rubble with smoke
+      ctx.globalAlpha=0.5;ctx.fillStyle='#111';
+      ctx.beginPath();ctx.ellipse(sx,sy,cW*0.6,cH*0.3,0,0,Math.PI*2);ctx.fill();
+      const fp=(animT*3)%1;ctx.globalAlpha=0.6;
+      ctx.fillStyle='rgba(255,'+(Math.floor(80+fp*120))+',0,0.7)';
+      ctx.beginPath();ctx.arc(sx,sy-towerH*0.3,cW*(0.2+fp*0.05)*df,0,Math.PI*2);ctx.fill();
+      ctx.globalAlpha=1;continue;
+    }
+
+    const isCrit=t.hp/t.maxHp<0.3;
+    const bodyCol=t.owner===0?(isCrit?'#441111':'#2255BB'):(isCrit?'#441111':'#BB2222');
+    const roofCol=t.owner===0?(isCrit?'#882222':'#3377EE'):(isCrit?'#882222':'#EE4444');
+    const topCol=t.owner===0?(isCrit?'#993333':'#4499FF'):(isCrit?'#993333':'#FF6666');
+
+    // Hit flash
+    const flashMix=t.hitFlash>0?0.5:0;
+
+    // Ground shadow (Geometry: ellipse)
+    ctx.globalAlpha=0.35;ctx.fillStyle='#000';
+    ctx.beginPath();ctx.ellipse(sx+cW*0.1,sy+cH*0.15,cW*0.6,cH*0.25,0,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=1;
+
+    // Active glow
+    if(t.type==='king'&&t.active){ctx.shadowColor=t.owner===0?'#4488FF':'#FF4444';ctx.shadowBlur=14*df;}
+    if(isCrit){ctx.shadowColor='#FF0000';ctx.shadowBlur=12*df;}
+
+    // 3D body: front face
+    ctx.fillStyle=flashMix>0?lerpColor(bodyCol,'#fff',flashMix):bodyCol;
+    rr(sx-cW/2,sy-towerH,cW,towerH,cH*0.12*df);ctx.fill();
+
+    // 3D body: top face (lighter shade - creates 3D illusion)
+    ctx.fillStyle=flashMix>0?lerpColor(topCol,'#fff',flashMix):topCol;
+    ctx.beginPath();
+    ctx.moveTo(sx-cW/2,sy-towerH);
+    ctx.lineTo(sx-cW/2+cW*0.15,sy-towerH-cH*0.2);
+    ctx.lineTo(sx+cW/2+cW*0.15,sy-towerH-cH*0.2);
+    ctx.lineTo(sx+cW/2,sy-towerH);
+    ctx.closePath();ctx.fill();
+
+    // 3D body: right face (darker shade)
+    ctx.fillStyle=darkenColor(bodyCol,0.6);
+    ctx.beginPath();
+    ctx.moveTo(sx+cW/2,sy-towerH);
+    ctx.lineTo(sx+cW/2+cW*0.15,sy-towerH-cH*0.2);
+    ctx.lineTo(sx+cW/2+cW*0.15,sy-cH*0.2);
+    ctx.lineTo(sx+cW/2,sy);
+    ctx.closePath();ctx.fill();
+
+    // Roof detail
+    ctx.fillStyle=roofCol;
+    rr(sx-cW*0.35,sy-towerH+towerH*0.15,cW*0.7,towerH*0.3,cH*0.08*df);ctx.fill();
+    // Crown Gold accent stripe (player towers)
+    if(t.owner===0){ctx.save();ctx.globalAlpha=0.35;ctx.fillStyle=DESIGN.colors.crownGold;ctx.fillRect(sx-cW*0.35,sy-towerH+towerH*0.48,cW*0.7,towerH*0.04);ctx.restore();}
+
+    // Windows (perspective-scaled)
+    ctx.fillStyle='rgba(120,210,255,0.5)';
+    ctx.fillRect(sx-cW*0.25,sy-towerH+towerH*0.1,cW*0.5,towerH*0.2);
+
+    // Wheels at base
+    ctx.fillStyle='#111';const ww=cW*0.18,wh=cH*0.15;
+    ctx.beginPath();ctx.ellipse(sx-cW*0.35,sy,ww/2,wh/2,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(sx+cW*0.35,sy,ww/2,wh/2,0,0,Math.PI*2);ctx.fill();
+
+    ctx.shadowBlur=0;
+
+    // HQ label
+    if(t.type==='king'){
+      ctx.fillStyle=DESIGN.colors.crownGold;ctx.font='bold '+(cH*0.22)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('HQ',sx,sy-towerH*0.5);
+    }
+
+    // HP bar (3D positioned above tower)
+    const bw2=cW*1.2,bh2=4*df,bx2=sx-bw2/2,by2=sy-towerH-cH*0.35;
+    ctx.fillStyle='#1a1a1a';ctx.fillRect(bx2,by2,bw2,bh2);
+    const pct=t.hp/t.maxHp;ctx.fillStyle=pct>0.5?'#44EE44':pct>0.25?'#FFAA00':'#FF3333';
+    ctx.fillRect(bx2,by2,bw2*pct,bh2);ctx.strokeStyle='#000';ctx.lineWidth=1;ctx.strokeRect(bx2,by2,bw2,bh2);
+    ctx.fillStyle='#fff';ctx.font=Math.floor(bh2*2.5)+'px Arial';ctx.textAlign='center';ctx.textBaseline='bottom';
+    ctx.fillText(Math.ceil(t.hp),sx,by2);
+  }
+}
+
+// ============================================================
+// 3D UNIT RENDER (Pseudo-3D cars with depth + shadows)
+// ============================================================
+function renderUnits3D(){
+  // Depth sort: render far units first (lower Y = farther)
+  const sorted=[...units].filter(u=>u.alive||u.deathTimer<0.5).sort((a,b)=>a.y-b.y);
+  for(const u of sorted){
+    if(u.stealthTimer>0&&u.owner===1)continue;
+
+    const[sx,sy,df]=toScr3D(u.x,u.y);const card=u.card;
+    // Depth-scaled body dimensions
+    const bW=(card.bodyW||0.9)*scale*df;
+    const bH=(card.bodyH||0.55)*scale*df;
+    const bodyH3D=bH*0.5; // 3D height of car body
+    // Trigonometry: bobbing using sin wave
+    const bob=Math.sin(u.bobOffset)*scale*0.04*df;
+    // Jump height for abilities
+    const zOff=u.zHeight*scale*df;
+    // STATE MACHINE: deploy scale-up
+    const dScale=(u.state===USTATE.DEPLOY)?u.deployScale:1;
+    // STATE MACHINE: windup pullback offset
+    const windupOff=(u.windupOffset||0)*scale*df;
+
+    // Status auras (drawn UNDER unit body)
+    if(u.alive)renderStatusAuras(u,sx,sy,bW,bH,df);
+
+    // Death animation: upgraded 3-phase sequence
+    if(!u.alive&&u.deathTimer>=0){
+      renderDeathVFX(u,sx,sy,bW,bH,bodyH3D,df);
+      continue;
+    }
+
+    // Stealth: semi-transparent
+    if(u.stealthTimer>0)ctx.globalAlpha=0.3;
+
+    // Ground shadow (Geometry: ellipse scaled by depth)
+    ctx.globalAlpha=u.stealthTimer>0?0.1:0.35;
+    ctx.fillStyle='#000';
+    ctx.beginPath();ctx.ellipse(sx+bW*0.08,sy+bH*0.1,bW*0.5*dScale,bH*0.2*dScale,0,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=u.stealthTimer>0?0.3:1;
+
+    ctx.save();
+    ctx.translate(sx+Math.cos(u.angle)*windupOff,sy+bob-zOff+Math.sin(u.angle)*windupOff);
+    // Deploy scale-up animation
+    if(dScale<1)ctx.scale(dScale,dScale);
+
+    // Rotate car body (Trigonometry: angle-based rotation)
+    const drawAngle=u.angle+Math.PI/2;
+    ctx.rotate(drawAngle);
+
+    // Hit flash effect + HIT state white overlay
+    const flashAmt=u.hitFlash>0?0.4:0;
+    const hitMult=(u.state===USTATE.HIT)?0.6:0;
+    let baseColor=flashAmt>0?lerpColor(card.carColor||'#888','#fff',flashAmt):(card.carColor||'#888');
+    if(hitMult>0)baseColor=lerpColor(baseColor,'#ffffff',hitMult);
+
+    // 3D Car body: main face
+    ctx.fillStyle=baseColor;
+    rr(-bW/2,-bH/2,bW,bH,bH*0.25);ctx.fill();
+
+    // 3D top face (lighter -- creates volume illusion)
+    const topShade=lightenColor(baseColor,0.3);
+    ctx.fillStyle=topShade;
+    ctx.beginPath();
+    ctx.moveTo(-bW/2,-bH/2);
+    ctx.lineTo(-bW/2+bW*0.1,-bH/2-bodyH3D);
+    ctx.lineTo(bW/2-bW*0.1,-bH/2-bodyH3D);
+    ctx.lineTo(bW/2,-bH/2);
+    ctx.closePath();ctx.fill();
+
+    // Side face (darker)
+    ctx.fillStyle=darkenColor(baseColor,0.5);
+    ctx.beginPath();
+    ctx.moveTo(bW/2,-bH/2);
+    ctx.lineTo(bW/2-bW*0.1,-bH/2-bodyH3D);
+    ctx.lineTo(bW/2-bW*0.1,bH/2-bodyH3D*0.3);
+    ctx.lineTo(bW/2,bH/2);
+    ctx.closePath();ctx.fill();
+
+    // Windshield (reflective)
+    ctx.fillStyle='rgba(150,220,255,0.45)';
+    ctx.fillRect(-bW*0.25,-bH/2-bodyH3D*0.8,bW*0.5,bodyH3D*0.6);
+
+    // Rim light (Ivory Cream edge highlight, left side)
+    ctx.save();ctx.globalAlpha=0.25;ctx.strokeStyle=DESIGN.colors.ivoryCream;ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(-bW/2,-bH/2);ctx.lineTo(-bW/2+bW*0.1,-bH/2-bodyH3D);ctx.lineTo(-bW/2+bW*0.12,-bH/2-bodyH3D*0.3);ctx.stroke();ctx.restore();
+
+    // Owner border glow
+    ctx.strokeStyle=u.owner===0?'#4488FF':'#FF4444';
+    ctx.lineWidth=u.nitroActive?2.5*df:1.5*df;
+    if(u.nitroActive){ctx.shadowColor='#00BFFF';ctx.shadowBlur=8*df;}
+    if(u.stunTimer>0){ctx.strokeStyle='#FFFF00';ctx.lineWidth=3*df;}
+    if(u.slowTimer>0){ctx.strokeStyle='#666';ctx.lineWidth=2*df;}
+    rr(-bW/2,-bH/2,bW,bH,bH*0.25);ctx.stroke();
+    ctx.shadowBlur=0;
+
+    // Wheels (3D ellipses)
+    ctx.fillStyle='#111';
+    const wheelW=bW*0.18,wheelH=bH*0.15;
+    ctx.beginPath();ctx.ellipse(-bW*0.38,-bH*0.35,wheelW,wheelH,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(bW*0.38,-bH*0.35,wheelW,wheelH,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(-bW*0.38,bH*0.35,wheelW,wheelH,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(bW*0.38,bH*0.35,wheelW,wheelH,0,0,Math.PI*2);ctx.fill();
+
+    // Speed trail (Trigonometry: sin-wave exhaust)
+    if(u.getSpeed()>0.5&&u.alive){
+      ctx.globalAlpha=0.3;ctx.fillStyle=u.nitroActive?'#00BFFF':'#888';
+      for(let ti=1;ti<=3;ti++){
+        const trailAlpha=0.3-ti*0.08;
+        ctx.globalAlpha=Math.max(0,trailAlpha);
+        const ty2=bH/2+ti*bH*0.3;
+        const tw=bW*0.15*(1-ti*0.2);
+        const wobble=Math.sin(animT*15+ti*2)*tw*0.3;
+        ctx.beginPath();ctx.arc(wobble,ty2,tw,0,Math.PI*2);ctx.fill();
+      }
+    }
+
+    ctx.restore();
+    ctx.globalAlpha=1;
+
+    // HP bar above unit (3D positioned)
+    if(u.alive){
+      const barW=bW*0.9,barH=3*df,barX=sx-barW/2,barY=sy+bob-zOff-bH/2-bodyH3D-6*df;
+      ctx.fillStyle='#1a1a1a';ctx.fillRect(barX,barY,barW,barH);
+      const hpPct=u.hp/u.maxHp;ctx.fillStyle=u.owner===0?'#4488FF':'#FF4444';
+      ctx.fillRect(barX,barY,barW*hpPct,barH);
+    }
+    // Stun indicator
+    if(u.stunTimer>0&&u.alive){ctx.fillStyle='#FFFF00';ctx.font=(scale*0.3*df)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('\u{1F4AB}',sx,sy-bH-bodyH3D);}
+  }
+}
+
+// ============================================================
+// STATUS AURAS (VFX System 2B) - drawn under unit body
+// ============================================================
+function renderStatusAuras(u,sx,sy,bW,bH,df){
+  const t=animT;
+  // STUN: yellow lightning bolts orbiting
+  if(u.stunTimer>0){
+    ctx.save();
+    for(let i=0;i<3;i++){
+      const oa=t*6+(i*Math.PI*2/3),orbR=bW*0.55;
+      const bx=sx+Math.cos(oa)*orbR,by=sy+Math.sin(oa)*orbR*0.5;
+      ctx.strokeStyle='#FFFF00';ctx.lineWidth=1.5*df;ctx.globalAlpha=0.8;
+      ctx.shadowColor='#FFFF00';ctx.shadowBlur=6*df;
+      const bSz=bW*0.12;
+      ctx.beginPath();ctx.moveTo(bx,by-bSz);ctx.lineTo(bx+bSz*0.3,by-bSz*0.2);
+      ctx.lineTo(bx-bSz*0.2,by+bSz*0.1);ctx.lineTo(bx+bSz*0.1,by+bSz);ctx.stroke();
+    }
+    ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.restore();
+  }
+  // SLOW: blue ice crystals below
+  if(u.slowTimer>0){
+    ctx.save();ctx.globalAlpha=0.6;
+    for(let i=0;i<4;i++){
+      const ca=(i*Math.PI*2/4)+t*0.5,cR=bW*0.45;
+      const cx2=sx+Math.cos(ca)*cR,cy2=sy+bH*0.15+Math.sin(ca)*cR*0.3,cSz=bW*0.06;
+      ctx.fillStyle='#88CCFF';ctx.shadowColor='#4488FF';ctx.shadowBlur=4*df;
+      ctx.beginPath();ctx.moveTo(cx2,cy2-cSz*1.5);ctx.lineTo(cx2+cSz,cy2);
+      ctx.lineTo(cx2,cy2+cSz*0.8);ctx.lineTo(cx2-cSz,cy2);ctx.closePath();ctx.fill();
+    }
+    ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.restore();
+  }
+  // NITRO: cyan speed lines trailing behind
+  if(u.nitroActive){
+    ctx.save();ctx.globalAlpha=0.4;
+    const ta=u.angle+Math.PI;
+    for(let i=0;i<3;i++){
+      const off=(i-1)*bW*0.2;
+      const tx=sx+Math.cos(ta)*bW*(0.4+i*0.15)+Math.cos(ta+Math.PI/2)*off;
+      const ty=sy+Math.sin(ta)*bW*(0.4+i*0.15)+Math.sin(ta+Math.PI/2)*off;
+      const len=bW*(0.25+Math.random()*0.15);
+      ctx.strokeStyle='#00DDFF';ctx.lineWidth=(2-i*0.4)*df;
+      ctx.shadowColor='#00BFFF';ctx.shadowBlur=4*df;
+      ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(tx+Math.cos(ta)*len,ty+Math.sin(ta)*len);ctx.stroke();
+    }
+    ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.restore();
+  }
+  // STEALTH: ghostly shimmer (player units only)
+  if(u.stealthTimer>0&&u.owner===0){
+    ctx.save();const sh=Math.sin(t*8)*0.15+0.15;
+    ctx.globalAlpha=sh;ctx.strokeStyle='#AADDFF';ctx.lineWidth=1*df;
+    ctx.setLineDash([3*df,5*df]);ctx.beginPath();
+    ctx.ellipse(sx,sy,bW*0.55,bH*0.35,0,0,Math.PI*2);ctx.stroke();
+    ctx.setLineDash([]);ctx.globalAlpha=1;ctx.restore();
+  }
+  // LOW HP (<25%): red pulsing danger glow
+  if(u.hp/u.maxHp<0.25&&u.hp>0){
+    ctx.save();const pulse=(Math.sin(t*10)+1)/2;
+    ctx.globalAlpha=0.15+pulse*0.2;ctx.fillStyle='#FF0000';
+    ctx.shadowColor='#FF0000';ctx.shadowBlur=12*df;
+    ctx.beginPath();ctx.ellipse(sx,sy,bW*0.6,bH*0.4,0,0,Math.PI*2);ctx.fill();
+    ctx.shadowBlur=0;ctx.globalAlpha=1;ctx.restore();
+  }
+}
+
+// ============================================================
+// DEATH VFX (VFX System 2D) - 3-phase death render
+// ============================================================
+function renderDeathVFX(u,sx,sy,bW,bH,bodyH3D,df){
+  const t=u.deathTimer;
+  if(t<0.1){
+    // Phase 0: time freeze -- white overlay intensifying
+    const fp=t/0.1;
+    ctx.fillStyle='rgba(255,255,255,'+(fp*0.4)+')';
+    ctx.beginPath();ctx.ellipse(sx,sy,bW*0.5,bH*0.35,0,0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=1-fp*0.1;ctx.fillStyle=u.card.carColor||'#888';
+    ctx.save();ctx.translate(sx,sy);ctx.scale(1-fp*0.05,1-fp*0.05);
+    rr(-bW/2,-bH/2,bW,bH,bH*0.25);ctx.fill();ctx.restore();
+  }else if(t<0.3){
+    // Phase 1: white flash + expanding shockwave ring
+    const p1=(t-0.1)/0.2;
+    ctx.globalAlpha=(1-p1)*0.6;ctx.fillStyle='#ffffff';
+    ctx.beginPath();ctx.arc(sx,sy,bW*(0.4+p1*0.8),0,Math.PI*2);ctx.fill();
+    ctx.globalAlpha=(1-p1)*0.8;ctx.strokeStyle=u.card.carColor||'#FF4400';
+    ctx.lineWidth=(3-p1*2)*df;ctx.beginPath();ctx.arc(sx,sy,bW*p1*2.5,0,Math.PI*2);ctx.stroke();
+  }else{
+    // Phase 2: fading ghost ring
+    const p2=(t-0.3)/0.2;
+    ctx.globalAlpha=Math.max(0,0.2-p2*0.2);ctx.strokeStyle=u.card.carColor||'#FF4400';
+    ctx.lineWidth=1*df;ctx.setLineDash([2*df,4*df]);
+    ctx.beginPath();ctx.arc(sx,sy,bW*(1+p2),0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);
+  }
+  ctx.globalAlpha=1;
+}
+
+// ============================================================
+// Color utility functions for 3D shading
+// ============================================================
+function parseColor(c){
+  if(c[0]==='#'){
+    let hex=c.slice(1);if(hex.length===3)hex=hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+    return[parseInt(hex.slice(0,2),16),parseInt(hex.slice(2,4),16),parseInt(hex.slice(4,6),16)];
+  }
+  return[128,128,128];
+}
+function lightenColor(c,amt){
+  const[r,g,b]=parseColor(c);
+  return'rgb('+Math.min(255,r+Math.floor((255-r)*amt))+','+Math.min(255,g+Math.floor((255-g)*amt))+','+Math.min(255,b+Math.floor((255-b)*amt))+')';
+}
+function darkenColor(c,amt){
+  const[r,g,b]=parseColor(c);
+  return'rgb('+Math.floor(r*amt)+','+Math.floor(g*amt)+','+Math.floor(b*amt)+')';
+}
+function lerpColor(c1,c2,t){
+  const[r1,g1,b1]=parseColor(c1),[r2,g2,b2]=parseColor(c2);
+  return'rgb('+Math.floor(r1+(r2-r1)*t)+','+Math.floor(g1+(g2-g1)*t)+','+Math.floor(b1+(b2-b1)*t)+')';
+}
+
+// ============================================================
+// EFFECTS (3D positioned)
+// ============================================================
+function renderEffects(){
+  for(const e of effects){
+    const[sx,sy,df]=toScr3D(e.x,e.y);const p=e.t/e.dur;
+    if(e.type==='dmg'||e.type==='ability'){
+      ctx.globalAlpha=1-p;ctx.fillStyle=e.color;
+      if(e.type==='ability'){ctx.shadowColor=e.color;ctx.shadowBlur=8*df;}
+      ctx.font='bold '+(scale*(e.type==='ability'?0.65:0.52)*df)+'px Arial';
+      ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(e.text,sx,sy-p*scale*1.8*df);
+      ctx.shadowBlur=0;ctx.globalAlpha=1;
+    } else if(e.type==='announce'){
+      const sc2=1+Math.sin(p*Math.PI)*0.15;
+      ctx.save();ctx.translate(W/2,H*0.45);ctx.scale(sc2,sc2);
+      ctx.globalAlpha=(p<0.5?p*2:2-p*2)*0.95;
+      ctx.shadowColor=e.color;ctx.shadowBlur=20;ctx.fillStyle=e.color;
+      ctx.font='bold '+(W*0.06)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(e.text,0,0);ctx.restore();ctx.globalAlpha=1;
+    } else if(e.type==='spell'){
+      ctx.globalAlpha=0.38*(1-p);ctx.fillStyle=e.color;
+      ctx.beginPath();ctx.arc(sx,sy,scale*2.5*df*(0.3+p*0.7),0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+    } else if(e.type==='deploy'){
+      ctx.globalAlpha=0.7*(1-p);ctx.fillStyle=e.color;
+      ctx.beginPath();ctx.arc(sx,sy,scale*df*(0.3+p*1.8),0,Math.PI*2);ctx.fill();
+      ctx.globalAlpha=0.5*(1-p);ctx.strokeStyle='#fff';ctx.lineWidth=2;
+      ctx.beginPath();ctx.arc(sx,sy,scale*df*(0.5+p*2),0,Math.PI*2);ctx.stroke();ctx.globalAlpha=1;
+    } else if(e.type==='tshot'){
+      ctx.globalAlpha=0.55*(1-p);ctx.fillStyle=e.color;
+      ctx.beginPath();ctx.arc(sx,sy,scale*0.28*df*(1-p),0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+    } else if(e.type==='bigdmg'){
+      // Bouncing enlarged red damage number
+      const bounce=Math.abs(Math.sin(p*Math.PI*3))*(1-p)*0.5;
+      const fScale=1.0+(1-p)*0.5;
+      ctx.globalAlpha=1-p*p;ctx.fillStyle=e.color;
+      ctx.shadowColor='#FF0000';ctx.shadowBlur=8*df;
+      ctx.font='bold '+(scale*0.75*df*fScale)+'px Arial';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(e.text,sx,sy-p*scale*2*df-bounce*scale*df);
+      ctx.strokeStyle='#fff';ctx.lineWidth=1.5*df;
+      ctx.strokeText(e.text,sx,sy-p*scale*2*df-bounce*scale*df);
+      ctx.shadowBlur=0;ctx.globalAlpha=1;
+    } else if(e.type==='combopop'){
+      // Gold combo text with scale pulse
+      const pulse=1+Math.sin(p*Math.PI*2)*0.15;
+      ctx.globalAlpha=(1-p)*0.9;ctx.save();
+      ctx.translate(sx,sy-p*scale*2.5*df);ctx.scale(pulse,pulse);
+      ctx.fillStyle=DESIGN.colors.crownGold;ctx.shadowColor='#FF8800';ctx.shadowBlur=10*df;
+      ctx.font='bold '+(scale*0.6*df)+'px Arial';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText(e.text,0,0);ctx.strokeStyle='#AA6600';ctx.lineWidth=1*df;
+      ctx.strokeText(e.text,0,0);ctx.restore();
+      ctx.shadowBlur=0;ctx.globalAlpha=1;
+    }
+  }
+}
+
+// ============================================================
+// TOP BAR + HUD + CARDS (same as v5 with synergy bonus display)
+// ============================================================
+function renderTopBar(){
+  const arena=getArena(currentLevel);const h=Math.max(offY,32);
+  ctx.fillStyle='rgba(3,3,12,0.92)';ctx.fillRect(0,0,W,h);
+  ctx.strokeStyle=arena.n1+'33';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(0,h);ctx.lineTo(W,h);ctx.stroke();
+  const rem=Math.max(0,phaseTimer);
+  const tStr=Math.floor(rem/60)+':'+String(Math.floor(rem%60)).padStart(2,'0');
+  ctx.fillStyle=phase==='double'?'#FF0000':phase==='overtime'?'#FF8800':'#fff';
+  ctx.font='bold '+(h*0.55)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(tStr,W/2,h*0.42);
+  if(phase==='double'){ctx.fillStyle='#FF0000';ctx.font='bold '+(h*0.27)+'px Arial';ctx.fillText('3x DOUBLE TIME!',W/2,h*0.82);}
+  else if(phase==='overtime'){ctx.fillStyle='#FF8800';ctx.font='bold '+(h*0.27)+'px Arial';ctx.fillText('OVERTIME 1.5x',W/2,h*0.82);}
+  ctx.fillStyle=arena.acc;ctx.font=(h*0.25)+'px Arial';ctx.textAlign='left';
+  ctx.fillText(arena.name+' Lv.'+currentLevel,8,h*0.3);
+  ctx.textAlign='left';ctx.fillStyle='#4488FF';ctx.font='bold '+(h*0.5)+'px Arial';
+  ctx.fillText('\u2605'.repeat(player.crowns)+'\u2606'.repeat(3-player.crowns),8,h*0.72);
+  ctx.textAlign='right';ctx.fillStyle='#FF4444';
+  ctx.fillText('\u2605'.repeat(opponent.crowns)+'\u2606'.repeat(3-opponent.crowns),W-8,h*0.72);
+}
+
+function renderHUD(){
+  const arena=getArena(currentLevel);
+  const hg=ctx.createLinearGradient(0,hudY,0,H);hg.addColorStop(0,'#080814');hg.addColorStop(1,'#040408');
+  ctx.fillStyle=hg;ctx.fillRect(0,hudY,W,hudH);
+  ctx.strokeStyle=arena.n1+'77';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,hudY);ctx.lineTo(W,hudY);ctx.stroke();
+  const pad=10,ebW=W-pad*2,ebH=Math.floor(hudH*0.13),ebY=hudY+6;
+  ctx.fillStyle='#180a22';rr(pad,ebY,ebW,ebH,3);ctx.fill();
+  const ePct=player.elixir/ELIXIR_MAX;
+  const eg=ctx.createLinearGradient(pad,0,pad+ebW,0);eg.addColorStop(0,'#5500AA');eg.addColorStop(ePct,'#CC44FF');eg.addColorStop(1,'#1a0033');
+  ctx.fillStyle=eg;rr(pad,ebY,ebW*ePct,ebH,3);ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.12)';ctx.lineWidth=1;
+  for(let i=1;i<ELIXIR_MAX;i++){const x=pad+ebW*i/ELIXIR_MAX;ctx.beginPath();ctx.moveTo(x,ebY);ctx.lineTo(x,ebY+ebH);ctx.stroke();}
+  ctx.fillStyle='#fff';ctx.font='bold '+(ebH*0.9)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('ELIXIR '+Math.floor(player.elixir),W/2,ebY+ebH/2+1);
+  const phaseLabel=phase==='regular'?'':phase==='overtime'?'1.5x':'3x';
+  if(phaseLabel){ctx.fillStyle=phase==='double'?'#FF0000':'#FF8800';ctx.font='bold '+(ebH*0.7)+'px Arial';ctx.textAlign='right';ctx.fillText(phaseLabel,W-pad-4,ebY+ebH/2+1);}
+  // Synergy bonus indicator
+  const synBonus=calcSynergyBonus(playerProfile.deck);
+  if(synBonus>1){
+    ctx.fillStyle=DESIGN.colors.crownGold;ctx.font='bold '+(ebH*0.6)+'px Arial';ctx.textAlign='left';
+    ctx.fillText('SYN +'+(Math.round((synBonus-1)*100))+'%',pad+4,ebY+ebH/2+1);
+  }
+}
+
+// --- Art Bible v2 Card Helpers ---
+function drawFrostedGlass(x,y,w,h,radius,opacity){
+  ctx.save();ctx.globalAlpha=opacity||0.15;
+  const g=ctx.createLinearGradient(x,y,x,y+h);
+  g.addColorStop(0,'rgba(255,255,255,0.12)');g.addColorStop(0.5,'rgba(200,210,230,0.06)');g.addColorStop(1,'rgba(255,255,255,0.03)');
+  ctx.fillStyle=g;rr(x,y,w,h,radius);ctx.fill();
+  ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=1;rr(x,y,w,h,radius);ctx.stroke();
+  ctx.restore();
+}
+function drawRarityBorder(x,y,w,h,radius,rar,t){
+  const style=rar.borderStyle||'steel';
+  ctx.save();
+  if(style==='steel'){
+    const g=ctx.createLinearGradient(x,y,x+w,y);
+    g.addColorStop(0,'#666');g.addColorStop(0.3,'#999');g.addColorStop(0.5,'#777');g.addColorStop(0.7,'#AAA');g.addColorStop(1,'#666');
+    ctx.strokeStyle=g;ctx.lineWidth=rar.borderW;rr(x,y,w,h,radius);ctx.stroke();
+  } else if(style==='chrome'){
+    const pulse=0.5+0.5*Math.sin(t*3);
+    ctx.shadowColor=DESIGN.colors.neonCyan;ctx.shadowBlur=4+pulse*6;
+    const g=ctx.createLinearGradient(x,y,x+w,y+h);
+    g.addColorStop(0,'#4488CC');g.addColorStop(0.5,DESIGN.colors.neonCyan);g.addColorStop(1,'#4488CC');
+    ctx.strokeStyle=g;ctx.lineWidth=rar.borderW;rr(x,y,w,h,radius);ctx.stroke();
+    ctx.shadowBlur=0;
+  } else if(style==='flame'){
+    const flicker=0.7+0.3*Math.sin(t*8);
+    ctx.shadowColor=DESIGN.colors.bloodOrange;ctx.shadowBlur=6*flicker;
+    const g=ctx.createLinearGradient(x,y,x,y+h);
+    g.addColorStop(0,DESIGN.colors.crownGold);g.addColorStop(0.5,DESIGN.colors.brickWarm);g.addColorStop(1,DESIGN.colors.bloodOrange);
+    ctx.strokeStyle=g;ctx.lineWidth=rar.borderW;rr(x,y,w,h,radius);ctx.stroke();
+    ctx.shadowBlur=0;
+  } else if(style==='holographic'){
+    const hue=Math.floor((t*60)%360);
+    const pulse=0.6+0.4*Math.sin(t*2);
+    ctx.shadowColor='hsl('+hue+',100%,60%)';ctx.shadowBlur=8*pulse;
+    ctx.strokeStyle='hsl('+hue+',80%,55%)';ctx.lineWidth=rar.borderW;rr(x,y,w,h,radius);ctx.stroke();
+    ctx.strokeStyle='hsl('+((hue+120)%360)+',70%,50%)';ctx.lineWidth=rar.borderW*0.5;rr(x+1,y+1,w-2,h-2,Math.max(2,radius-1));ctx.stroke();
+    ctx.shadowBlur=0;
+  }
+  ctx.restore();
+}
+
+function renderCards(){
+  for(let i=0;i<4;i++){
+    const s=cardSlots[i];if(!s)continue;
+    const cid=player.hand[i],c=CARS[cid];if(!c)continue;
+    const afford=player.elixir>=c.cost,sel=selectedCard===i,hover=cardHoverIdx===i;
+    const scl=sel||hover?1.08:1;
+    const dx=s.x+(1-scl)*s.w/2,dy=s.y+(1-scl)*s.h/2,dw=s.w*scl,dh=s.h*scl;
+    const rar=getCardRarity(cid);
+    ctx.globalAlpha=afford?1:0.38;
+    // Card base -- Midnight Deep gradient with car tint
+    const cc=c.carColor||'#333';
+    const cg=ctx.createLinearGradient(dx,dy,dx,dy+dh);
+    cg.addColorStop(0,DESIGN.colors.midnightDeep);cg.addColorStop(0.6,cc+'44');cg.addColorStop(1,DESIGN.colors.midnightDeep);
+    ctx.fillStyle=cg;rr(dx,dy,dw,dh,8);ctx.fill();
+    // Selection glow
+    if(sel){ctx.save();ctx.shadowColor=DESIGN.colors.crownGold;ctx.shadowBlur=14;ctx.strokeStyle=DESIGN.colors.crownGold;ctx.lineWidth=3;rr(dx-2,dy-2,dw+4,dh+4,10);ctx.stroke();ctx.shadowBlur=0;ctx.restore();}
+    // Animated rarity border
+    drawRarityBorder(dx,dy,dw,dh,8,rar,animT);
+    // Emoji icon (fills top 55%)
+    ctx.font=(dh*0.3)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';
+    ctx.fillText(c.icon||'?',dx+dw/2,dy+dh*0.3);
+    // Type badge top-left
+    const badgeW=dw*0.4,badgeH=dh*0.12;
+    ctx.fillStyle=rar.color+'44';rr(dx+2,dy+2,badgeW,badgeH,4);ctx.fill();
+    ctx.fillStyle=rar.color;ctx.font='bold '+(badgeH*0.6)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(c.type==='troop'?'CREW':c.type==='spell'?'SPELL':'STRUCT',dx+2+badgeW/2,dy+2+badgeH/2);
+    // Level badge top-right
+    const lvl=getCardLevel(cid);
+    const lBW=dw*0.28,lBH=badgeH;
+    ctx.fillStyle='rgba(0,0,0,0.5)';rr(dx+dw-lBW-2,dy+2,lBW,lBH,4);ctx.fill();
+    ctx.fillStyle=rar.color;ctx.font='bold '+(lBH*0.6)+'px Arial';ctx.textAlign='center';
+    ctx.fillText('L'+lvl,dx+dw-lBW/2-2,dy+2+lBH/2);
+    // Frosted glass name plate (bottom 40%)
+    const npY=dy+dh*0.55,npH=dh*0.45;
+    drawFrostedGlass(dx,npY,dw,npH,6,0.25);
+    ctx.fillStyle=DESIGN.colors.ivoryCream;ctx.font='bold '+(dh*0.09)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(c.name,dx+dw/2,npY+npH*0.18);
+    // Mini stat bars inside nameplate
+    const stY=npY+npH*0.32,stH=npH*0.08,stW=dw*0.75,stX=dx+dw*0.125;
+    if(c.hp){ctx.fillStyle=DESIGN.colors.asphaltGrey;ctx.fillRect(stX,stY,stW,stH);ctx.fillStyle='#22BB22';ctx.fillRect(stX,stY,stW*Math.min(c.hp/4000,1),stH);}
+    if(c.dmg&&c.hp){ctx.fillStyle=DESIGN.colors.asphaltGrey;ctx.fillRect(stX,stY+stH+1,stW,stH);ctx.fillStyle='#BB2222';ctx.fillRect(stX,stY+stH+1,stW*Math.min(c.dmg/400,1),stH);}
+    if(c.armor&&c.armor>0){ctx.fillStyle=DESIGN.colors.asphaltGrey;ctx.fillRect(stX,stY+(stH+1)*2,stW,stH);ctx.fillStyle='#4488FF';ctx.fillRect(stX,stY+(stH+1)*2,stW*Math.min(c.armor/35,1),stH);}
+    // Cost diamond
+    const dSz=dw*0.22,diamX=dx+dSz*0.6,diamY=dy+dh-dSz*0.6;
+    ctx.fillStyle='#5511AA';ctx.save();ctx.translate(diamX,diamY);ctx.rotate(Math.PI/4);ctx.fillRect(-dSz/2,-dSz/2,dSz,dSz);ctx.restore();
+    ctx.strokeStyle=rar.color;ctx.lineWidth=1.5;ctx.save();ctx.translate(diamX,diamY);ctx.rotate(Math.PI/4);ctx.strokeRect(-dSz/2,-dSz/2,dSz,dSz);ctx.restore();
+    ctx.fillStyle='#fff';ctx.font='bold '+(dSz*0.7)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(c.cost,diamX,diamY);
+    ctx.globalAlpha=1;
+  }
+  // Next card preview
+  if(player.queue.length>0&&cardSlots[3]){
+    const nc=CARS[player.queue[0]];if(!nc)return;
+    const ls=cardSlots[3],nx=ls.x+ls.w+6,nw=Math.floor(W*0.09),nh=Math.floor(ls.h*0.55),ny=ls.y+(ls.h-nh)/2;
+    ctx.fillStyle=nc.carColor||'#333';ctx.globalAlpha=0.5;rr(nx,ny,nw,nh,5);ctx.fill();ctx.globalAlpha=1;
+    ctx.fillStyle='#999';ctx.font=(nw*0.27)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('Next',nx+nw/2,ny-6);ctx.font=(nh*0.33)+'px Arial';ctx.fillStyle='#fff';ctx.fillText(nc.icon||'?',nx+nw/2,ny+nh/2);
+  }
+}
+
+function renderDeployZone(){
+  if(selectedCard<0||phase==='countdown'||phase==='ended')return;
+  const card=CARS[player.hand[selectedCard]];if(!card)return;
+  const isSpell=card.type==='spell'||card.type==='building';
+  // Use 3D projection for deploy zone
+  const[ax0,ay0]=toScr3D(0,0);const[ax1,ay1]=toScr3D(ARENA_W,ARENA_H);
+  ctx.globalAlpha=0.11;
+  if(isSpell){ctx.fillStyle=card.carColor||'#fff';ctx.fillRect(0,ay0,W,ay1-ay0);}
+  else{const[,dy0]=toScr3D(0,RIVER_Y+RIVER_H/2+0.5);ctx.fillStyle='#44FF44';ctx.fillRect(0,dy0,W,ay1-dy0);}
+  ctx.globalAlpha=1;
+  if(deployPreview){
+    const[px,py,pdf]=toScr3D(deployPreview.x,deployPreview.y);
+    ctx.strokeStyle=card.carColor||'#fff';ctx.lineWidth=2;ctx.setLineDash([4,4]);
+    ctx.beginPath();
+    if(isSpell)ctx.arc(px,py,(card.radius||2)*scale*pdf,0,Math.PI*2);
+    else ctx.arc(px,py,scale*0.8*pdf,0,Math.PI*2);
+    ctx.stroke();ctx.setLineDash([]);
+  }
+}
+
+function renderCountdown(){
+  ctx.fillStyle='rgba(0,0,0,0.68)';ctx.fillRect(0,0,W,H);
+  const arena=getArena(currentLevel);const num=Math.ceil(cdTimer);
+  ctx.save();ctx.shadowColor=arena.acc;ctx.shadowBlur=30;ctx.fillStyle=DESIGN.colors.crownGold;
+  ctx.font='bold '+(W*0.3)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(num>0?num:'GO!',W/2,H*0.32);ctx.restore();
+  ctx.fillStyle=arena.acc;ctx.font='bold '+(W*0.06)+'px Arial';ctx.textAlign='center';
+  ctx.fillText(arena.name,W/2,H*0.48);
+  ctx.fillStyle='#888';ctx.font=(W*0.035)+'px Arial';
+  ctx.fillText('Level '+currentLevel+' - '+getLevelDifficulty(currentLevel),W/2,H*0.56);
+  // Show synergy and math info
+  const synBonus=calcSynergyBonus(playerProfile.deck);
+  ctx.fillStyle=DESIGN.colors.crownGold;ctx.font=(W*0.025)+'px Arial';
+  ctx.fillText('Synergy Bonus: +'+(Math.round((synBonus-1)*100))+'% | Armor System Active | Combo Chains Enabled',W/2,H*0.64);
+  ctx.fillStyle='#555';ctx.font=(W*0.022)+'px Arial';
+  ctx.fillText('3min + 1min OT(1.5x) + 1min DT(3x) | Projectile Physics | 3D Arena',W/2,H*0.69);
+}
+
+// ============================================================
+// EMOJI PANEL
+// ============================================================
+function renderEmojiPanel(){
+  if(screen!=='battle'||phase==='countdown'||phase==='ended')return;
+  const btnSz=Math.floor(W*0.09),btnX=W-btnSz-6,btnY=hudY-btnSz-6;
+  menuBtns.emojiBtn={x:btnX,y:btnY,w:btnSz,h:btnSz};
+  ctx.fillStyle=emojiOpen?'rgba(255,100,0,0.8)':'rgba(30,30,50,0.8)';
+  rr(btnX,btnY,btnSz,btnSz,8);ctx.fill();
+  ctx.strokeStyle='#FF4500';ctx.lineWidth=1.5;rr(btnX,btnY,btnSz,btnSz,8);ctx.stroke();
+  ctx.fillStyle='#fff';ctx.font=(btnSz*0.5)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('\u{1F608}',btnX+btnSz/2,btnY+btnSz/2);
+  if(!emojiOpen)return;
+  const cols=4,rows=3,eW=Math.floor(W*0.18),eH=Math.floor(H*0.06);
+  const pW=cols*eW+cols*4+8,pH=rows*eH+rows*4+8;
+  const pX=W-pW-4,pY=btnY-pH-4;
+  ctx.fillStyle='rgba(10,10,20,0.95)';rr(pX,pY,pW,pH,10);ctx.fill();
+  ctx.strokeStyle='#FF4500';ctx.lineWidth=2;rr(pX,pY,pW,pH,10);ctx.stroke();
+  menuBtns.emojis={};
+  EMOJIS.forEach((em,idx)=>{
+    const col=idx%cols,row=Math.floor(idx/cols);
+    const ex=pX+4+col*(eW+4),ey=pY+4+row*(eH+4);
+    menuBtns.emojis[idx]={x:ex,y:ey,w:eW,h:eH};
+    const canUse=emojiCD<=0;ctx.globalAlpha=canUse?1:0.3;
+    ctx.fillStyle='#1a1a2e';rr(ex,ey,eW,eH,6);ctx.fill();
+    ctx.strokeStyle='#444';ctx.lineWidth=1;rr(ex,ey,eW,eH,6);ctx.stroke();
+    ctx.fillStyle='#fff';ctx.font=(eH*0.55)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(em.i,ex+eW/2,ey+eH/2);ctx.globalAlpha=1;
+  });
+}
+function renderFloatingEmojis(){
+  floatingEmojis.forEach(e=>{
+    const prog=e.t/2.5;ctx.globalAlpha=1-prog;
+    ctx.font='bold '+Math.floor(W*0.12)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(e.emoji,e.x,e.y);ctx.globalAlpha=1;
+  });
+}
+function sendEmoji(idx){
+  if(emojiCD>0||idx<0||idx>=EMOJIS.length)return;
+  emojiCD=3;sfxEmoji();
+  floatingEmojis.push({emoji:EMOJIS[idx].i,x:W/2,y:H*0.4,t:0});emojiOpen=false;
+  setTimeout(()=>{const ri=Math.floor(Math.random()*EMOJIS.length);floatingEmojis.push({emoji:EMOJIS[ri].i,x:W/2,y:H*0.25,t:0});sfxEmoji();},1000+Math.random()*1500);
+}
+
+function drawNosIcon(x,y,sz,col){
+  col=col||'#00CED1';ctx.fillStyle=col;rr(x,y,sz*0.45,sz,4);ctx.fill();
+  ctx.fillStyle='#888';ctx.fillRect(x+sz*0.08,y-sz*0.18,sz*0.28,sz*0.18);
+  ctx.fillStyle='rgba(255,255,255,0.3)';ctx.fillRect(x+sz*0.05,y+sz*0.35,sz*0.35,sz*0.12);
+}
+
+// ============================================================
+// MENUS (kept from v5, updated version label)
+// ============================================================
+function renderMenu(){
+  const arena=getArena(currentLevel);
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,arena.sky1);grad.addColorStop(0.45,arena.sky2);grad.addColorStop(1,'#0d0508');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+  drawCitySilhouette(arena);drawNeonRoad(arena);
+  const pcW=W*0.38,pcH=H*0.095,pcX=W-pcW-W*0.02,pcY=H*0.02;
+  ctx.fillStyle=DESIGN.colors.midnightDeep+'dd';rr(pcX,pcY,pcW,pcH,10);ctx.fill();
+  drawFrostedGlass(pcX,pcY,pcW,pcH,10,0.2);
+  ctx.strokeStyle=DESIGN.colors.crownGold+'66';ctx.lineWidth=1.2;rr(pcX,pcY,pcW,pcH,10);ctx.stroke();
+  ctx.fillStyle=DESIGN.colors.crownGold;ctx.font='bold '+(pcH*0.32)+'px Arial';ctx.textAlign='left';ctx.textBaseline='middle';
+  ctx.fillText(playerProfile.name,pcX+pcH*0.12,pcY+pcH*0.28);
+  ctx.fillStyle=DESIGN.colors.ivoryCream;ctx.font=(pcH*0.22)+'px Arial';
+  ctx.fillText('Lv.'+playerProfile.level+' '+getArenaName(playerProfile.nosBottles),pcX+pcH*0.12,pcY+pcH*0.6);
+  ctx.fillStyle=DESIGN.colors.neonCyan;ctx.font='bold '+(pcH*0.28)+'px Arial';ctx.textAlign='right';
+  ctx.fillText(playerProfile.nosBottles,pcX+pcW-pcH*0.1,pcY+pcH*0.35);
+  ctx.font=(pcH*0.18)+'px Arial';ctx.fillStyle=DESIGN.colors.asphaltGrey;ctx.fillText('NOS BOTTLES',pcX+pcW-pcH*0.1,pcY+pcH*0.65);
+  try{drawNosIcon(pcX+pcW-pcH*1.05,pcY+pcH*0.1,pcH*0.7,DESIGN.colors.neonCyan);}catch(e){}
+  ctx.fillStyle=arena.acc;ctx.font='bold '+(W*0.03)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('ARENA: '+arena.name+' (Lv.'+arena.lvl[0]+'-'+arena.lvl[1]+')',W/2,H*0.065);
+  const pulse=0.96+0.04*Math.sin(animT*2);
+  ctx.save();ctx.shadowColor=arena.n1;ctx.shadowBlur=22;
+  ctx.fillStyle=DESIGN.colors.crownGold;ctx.font='bold '+Math.floor(W*0.14*pulse)+'px Arial';
+  ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('ALLEY',W/2,H*0.15);
+  ctx.shadowColor=arena.n2;ctx.fillStyle=arena.acc;ctx.fillText('KINGZ',W/2,H*0.26);ctx.restore();
+  ctx.fillStyle='#777';ctx.font=(W*0.033)+'px Arial';ctx.textAlign='center';
+  ctx.fillText('Rule the Streets. Build Your Fleet.',W/2,H*0.34);
+  ctx.fillStyle=DESIGN.colors.crownGold;ctx.font=(W*0.025)+'px Arial';
+  ctx.fillText('v0.6.4 -- 3D | Card Rarity | Shop | Battle Pass',W/2,H*0.375);
+  const bw=W*0.68,bh=H*0.09,bx=W/2-bw/2,by=H*0.42;
+  menuBtns.battle={x:bx,y:by,w:bw,h:bh};
+  glowBtn(bx,by,bw,bh,'#3a0d00',arena.acc,'BATTLE!',W*0.066,14,2.5,DESIGN.colors.crownGold);
+  const nw=W*0.42,nh=H*0.065,ngap=W*0.04;
+  const n1x=W/2-nw-ngap/2,n2x=W/2+ngap/2,ny=by+bh+H*0.018;
+  menuBtns.deck={x:n1x,y:ny,w:nw,h:nh};menuBtns.collection={x:n2x,y:ny,w:nw,h:nh};
+  glowBtn(n1x,ny,nw,nh,'#0d1a33','#4488FF','MY DECK',W*0.036,10,1.5);
+  glowBtn(n2x,ny,nw,nh,'#0d2a1e','#44CCAA','GARAGE',W*0.036,10,1.5);
+  const row2Y=ny+nh+H*0.016,hw=W*0.42,hh=H*0.065;
+  menuBtns.levels={x:W/2-hw-ngap/2,y:row2Y,w:hw,h:hh};
+  menuBtns.deckBuilder={x:W/2+ngap/2,y:row2Y,w:hw,h:hh};
+  glowBtn(menuBtns.levels.x,row2Y,hw,hh,'#1a0d2e','#9933FF','LEVELS',W*0.036,10,1.5);
+  glowBtn(menuBtns.deckBuilder.x,row2Y,hw,hh,'#1a2200','#88FF44','DECK BUILDER',W*0.036,10,1.5);
+  const cpY=row2Y+hh+H*0.016,cpH=H*0.052;
+  menuBtns.carpass={x:W*0.05,y:cpY,w:W*0.9,h:cpH};
+  const cpg=ctx.createLinearGradient(W*0.05,cpY,W*0.95,cpY);
+  cpg.addColorStop(0,'#160830');cpg.addColorStop(0.5,'#2e1266');cpg.addColorStop(1,'#160830');
+  ctx.fillStyle=cpg;rr(W*0.05,cpY,W*0.9,cpH,8);ctx.fill();
+  ctx.strokeStyle='#8822EE';ctx.lineWidth=1.5;rr(W*0.05,cpY,W*0.9,cpH,8);ctx.stroke();
+  ctx.fillStyle=DESIGN.colors.crownGold;ctx.font='bold '+(W*0.031)+'px Arial';ctx.textAlign='center';
+  const sTier=playerProfile.seasonTier||0;
+  ctx.fillText('BATTLE PASS S1 | Tier '+sTier+'/30'+(playerProfile.hasBattlePass?' PREMIUM':' | 50 Gems'),W/2,cpY+cpH/2+2);
+  const stY=cpY+cpH+H*0.012,stH=H*0.05;
+  menuBtns.store={x:W*0.05,y:stY,w:W*0.9,h:stH};
+  glowBtn(W*0.05,stY,W*0.9,stH,'#1e0d00','#FF9900','SHOP',W*0.036,8,1);
+  ctx.fillStyle='#555';ctx.font=(W*0.024)+'px Arial';ctx.textAlign='center';
+  ctx.fillText('v0.6.4 -- Rarity System | Daily Shop | Battle Pass | Card Upgrades',W/2,H*0.965);
+}
+
+function drawCitySilhouette(arena){
+  const n=CITY_BUILDINGS.length,bw=W/n,baseY=H*0.54;
+  CITY_BUILDINGS.forEach((frac,i)=>{
+    const bh=H*frac,bx=i*bw,by=baseY-bh;
+    ctx.fillStyle=arena?arena.sky2:'#060614';ctx.fillRect(bx,by,bw-2,bh);
+    for(let row=0;row<4;row++)for(let col=0;col<3;col++){
+      if(((i*13+row*7+col*5)%10)<=3)continue;
+      const flicker=Math.sin(animT*2+i+row)>0.3?1:0.5;
+      ctx.fillStyle='rgba(255,240,120,'+(0.2+flicker*0.15)+')';
+      ctx.fillRect(bx+col*(bw/3.5)+4,by+row*18+8,7,5);
+    }
+    if(i%3===0&&arena){ctx.fillStyle=arena.n1+'88';ctx.fillRect(bx+2,by+bh*0.3,bw-4,3);ctx.shadowColor=arena.n1;ctx.shadowBlur=8;ctx.fillRect(bx+2,by+bh*0.3,bw-4,3);ctx.shadowBlur=0;}
+  });
+}
+function drawNeonRoad(arena){
+  const roadY=H*0.54;
+  ctx.fillStyle=arena?arena.road:'#0c0c18';ctx.fillRect(0,roadY,W,H-roadY);
+  ctx.strokeStyle='rgba(255,200,0,0.25)';ctx.lineWidth=1.5;ctx.setLineDash([W*0.04,W*0.035]);
+  ctx.beginPath();ctx.moveTo(0,roadY+(H-roadY)*0.45);ctx.lineTo(W,roadY+(H-roadY)*0.45);ctx.stroke();ctx.setLineDash([]);
+  if(arena){ctx.strokeStyle=arena.n1+'44';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,roadY);ctx.lineTo(W,roadY);ctx.stroke();ctx.shadowColor=arena.n1;ctx.shadowBlur=6;ctx.beginPath();ctx.moveTo(0,roadY);ctx.lineTo(W,roadY);ctx.stroke();ctx.shadowBlur=0;}
+}
+
+// ============================================================
+// REMAINING SCREENS (Mode Select, Levels, Deck Builder, Collection, Store, PostGame)
+// ============================================================
+function renderModeSelect(){
+  darkBg();labelTxt('GAME MODES',W/2,H*0.08,DESIGN.colors.crownGold,'bold '+(W*0.075)+'px Arial');
+  const modes=[
+    {id:'1v1',label:'1v1 CLASSIC',sub:'Standard street duel',col:'#FF4500',avail:true},
+    {id:'ranked',label:'RANKED LADDER',sub:'Climb the NOS wall',col:DESIGN.colors.crownGold,avail:true},
+    {id:'2v2',label:'2v2 TURF WAR',sub:'Team up -- Coming Soon',col:'#444',avail:false},
+    {id:'3v3',label:'3v3 RAID',sub:'Full crew -- Coming Soon',col:'#444',avail:false},
+  ];
+  menuBtns.modes={};
+  modes.forEach((m,i)=>{
+    const mw=W*0.85,mh=H*0.1,mx=W/2-mw/2,my=H*0.17+i*(mh+H*0.025);
+    menuBtns.modes[m.id]={x:mx,y:my,w:mw,h:mh};
+    ctx.globalAlpha=m.avail?1:0.35;
+    glowBtn(mx,my,mw,mh,'#0e0e1e',m.col,m.label,W*0.044,12,2);ctx.globalAlpha=1;
+    ctx.fillStyle='#666';ctx.font=(W*0.028)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(m.sub,mx+mw/2,my+mh+H*0.008);
+  });
+  menuBtns.back={x:W*0.05,y:H*0.88,w:W*0.3,h:H*0.06};
+  glowBtn(menuBtns.back.x,menuBtns.back.y,menuBtns.back.w,menuBtns.back.h,'#1a1a1a','#555','BACK',W*0.034,8,1);
+}
+
+function renderLevels(){
+  darkBg();
+  const arena=getArena(currentLevel);
+  labelTxt('LEVELS',W/2,H*0.04,DESIGN.colors.crownGold,'bold '+(W*0.065)+'px Arial');
+  ctx.fillStyle=arena.acc;ctx.font='bold '+(W*0.028)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(arena.name+' | Level '+currentLevel+' ('+getLevelDifficulty(currentLevel)+')',W/2,H*0.085);
+  const cols=10,rows=10,pad=W*0.02;
+  const cellW=Math.floor((W-pad*2)/cols)-2,cellH=Math.floor((H*0.7)/rows)-2;
+  const startX=pad,startY=H*0.11;
+  levelBtns={};
+  for(let i=0;i<100;i++){
+    const lvl=i+1,col=i%cols,row=Math.floor(i/cols);
+    const cx=startX+col*(cellW+2),cy=startY+row*(cellH+2);
+    levelBtns[lvl]={x:cx,y:cy,w:cellW,h:cellH};
+    const cityIdx=Math.floor(i/10);const city=CITY_ARENAS[cityIdx];
+    const isSelected=currentLevel===lvl,isDone=playerProfile.completedLevels.includes(lvl);
+    ctx.fillStyle=isSelected?city.acc:(isDone?city.sky2:'#0a0a12');
+    rr(cx,cy,cellW,cellH,2);ctx.fill();
+    ctx.strokeStyle=isSelected?DESIGN.colors.crownGold:city.n1;ctx.lineWidth=isSelected?2:0.8;
+    rr(cx,cy,cellW,cellH,2);ctx.stroke();
+    ctx.fillStyle=isSelected?'#000':(isDone?city.acc:'#555');
+    ctx.font='bold '+(cellH*0.4)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(lvl,cx+cellW/2,cy+cellH*(isDone?0.35:0.5));
+    if(isDone){ctx.fillStyle=DESIGN.colors.crownGold;ctx.font=(cellH*0.3)+'px Arial';ctx.fillText('\u2713',cx+cellW/2,cy+cellH*0.72);}
+  }
+  const legY=H*0.83,legH=H*0.06;
+  ctx.fillStyle='rgba(10,10,20,0.9)';rr(W*0.02,legY,W*0.96,legH,6);ctx.fill();
+  CITY_ARENAS.forEach((c,i)=>{
+    const lx=W*0.02+i*(W*0.096),sz=legH*0.35;
+    ctx.fillStyle=c.n1;ctx.fillRect(lx+2,legY+legH*0.2,sz,sz);
+    ctx.fillStyle='#888';ctx.font=(sz*0.8)+'px Arial';ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText(c.name.slice(0,4),lx+sz+3,legY+legH/2);
+  });
+  menuBtns.levelBack={x:W*0.05,y:H*0.91,w:W*0.35,h:H*0.055};
+  menuBtns.levelPlay={x:W*0.42,y:H*0.91,w:W*0.53,h:H*0.055};
+  glowBtn(menuBtns.levelBack.x,menuBtns.levelBack.y,menuBtns.levelBack.w,menuBtns.levelBack.h,'#1a1a1a','#555','BACK',W*0.034,8,1);
+  glowBtn(menuBtns.levelPlay.x,menuBtns.levelPlay.y,menuBtns.levelPlay.w,menuBtns.levelPlay.h,'#1a2a00','#44FF44','PLAY '+arena.name+' Lv.'+currentLevel,W*0.034,8,2);
+}
+
+function renderDeckBuilder(){
+  darkBg();labelTxt('DECK BUILDER',W/2,H*0.035,DESIGN.colors.crownGold,'bold '+(W*0.055)+'px Arial');
+  const presetKeys=Object.keys(DECK_PRESETS);
+  const pbH=H*0.04,pbW=W*0.18,pbGap=4;
+  const pbTotalW=presetKeys.length*(pbW+pbGap);
+  const pbStartX=Math.max(4,(W-pbTotalW)/2),pbY=H*0.07;
+  menuBtns.presets={};
+  presetKeys.forEach((k,i)=>{
+    const px=pbStartX+i*(pbW+pbGap);
+    menuBtns.presets[k]={x:px,y:pbY,w:pbW,h:pbH};
+    ctx.fillStyle='#1a1a2e';rr(px,pbY,pbW,pbH,4);ctx.fill();
+    ctx.strokeStyle='#FF4500';ctx.lineWidth=1;rr(px,pbY,pbW,pbH,4);ctx.stroke();
+    ctx.fillStyle='#fff';ctx.font=(pbH*0.42)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(DECK_PRESETS[k].name.slice(0,12),px+pbW/2,pbY+pbH/2);
+  });
+  const tabs=['ALL','CREW','SPELL','STRUCT'];
+  const tabW=W*0.2,tabH=H*0.045,tabGap2=W*0.01;
+  const tabX=W/2-(tabs.length*(tabW+tabGap2))/2,tabY2=pbY+pbH+H*0.01;
+  deckBuilderBtns={tabs:{}};
+  tabs.forEach((tab,i)=>{
+    const tx=tabX+i*(tabW+tabGap2);deckBuilderBtns.tabs[tab]={x:tx,y:tabY2,w:tabW,h:tabH};
+    const active=deckBuilderFilter===tab;
+    ctx.fillStyle=active?'#FF4500':'#1a1a2a';rr(tx,tabY2,tabW,tabH,5);ctx.fill();
+    ctx.strokeStyle=active?DESIGN.colors.crownGold:'#444';ctx.lineWidth=active?2:1;rr(tx,tabY2,tabW,tabH,5);ctx.stroke();
+    ctx.fillStyle=active?'#fff':'#888';ctx.font='bold '+(tabH*0.45)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(tab,tx+tabW/2,tabY2+tabH/2);
+  });
+  const filterFn=(car)=>{
+    if(deckBuilderFilter==='ALL')return true;if(deckBuilderFilter==='CREW')return car.type==='troop';
+    if(deckBuilderFilter==='SPELL')return car.type==='spell';if(deckBuilderFilter==='STRUCT')return car.type==='building';return true;
+  };
+  const displayIds=playerProfile.collection.filter(id=>{const c=CARS[id];return c&&filterFn(c);});
+  const cardCols=4,cW=Math.floor(W*0.22),cH=Math.floor(H*0.14);
+  const gX=Math.floor(W*0.015),gY=Math.floor(H*0.01);
+  const totW=cardCols*cW+(cardCols-1)*gX;
+  const sX=Math.floor((W-totW)/2),sY=tabY2+tabH+H*0.012;
+  deckBuilderBtns.cards={};
+  displayIds.forEach((cid,idx)=>{
+    const car=CARS[cid];if(!car)return;
+    const col2=idx%cardCols,row=Math.floor(idx/cardCols);
+    const cx2=sX+col2*(cW+gX),cy2=sY+row*(cH+gY);
+    if(cy2+cH>H*0.78)return;
+    deckBuilderBtns.cards[cid]={x:cx2,y:cy2,w:cW,h:cH};
+    const inDeck=deckPickSelected.includes(cid);
+    const dbRar=getCardRarity(cid);
+    ctx.fillStyle=DESIGN.colors.midnightDeep;rr(cx2,cy2,cW,cH,7);ctx.fill();
+    if(inDeck){ctx.strokeStyle='#00FF88';ctx.lineWidth=2.5;rr(cx2,cy2,cW,cH,7);ctx.stroke();}
+    else{drawRarityBorder(cx2,cy2,cW,cH,7,dbRar,animT);}
+    ctx.font=(cH*0.22)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';
+    ctx.fillText(car.icon||'?',cx2+cW/2,cy2+cH*0.32);
+    ctx.font='bold '+(cH*0.1)+'px Arial';ctx.fillStyle='#fff';ctx.fillText(car.name,cx2+cW/2,cy2+cH*0.58);
+    ctx.fillStyle='#5511AA';ctx.font='bold '+(cH*0.14)+'px Arial';ctx.fillText(car.cost,cx2+cW-cH*0.15,cy2+cH*0.15);
+    if(inDeck){ctx.fillStyle='rgba(0,255,136,0.2)';rr(cx2,cy2,cW,cH,7);ctx.fill();ctx.fillStyle='#00FF88';ctx.font=(cH*0.18)+'px Arial';ctx.fillText('\u2713',cx2+cH*0.12,cy2+cH*0.15);}
+  });
+  const synergies=getDeckSynergies(deckPickSelected);
+  const synY=H*0.79,synH=H*0.04;
+  if(synergies.length>0){
+    ctx.fillStyle='rgba(10,10,20,0.9)';rr(W*0.04,synY,W*0.92,synH,6);ctx.fill();
+    synergies.forEach((s,i)=>{
+      const sx2=W*0.06+i*(W*0.3);
+      ctx.fillStyle=s.c;ctx.font='bold '+(synH*0.55)+'px Arial';ctx.textAlign='left';ctx.textBaseline='middle';
+      ctx.fillText(s.n+' x'+s.count,sx2,synY+synH/2);
+    });
+  }
+  // Synergy power bonus (Algebra)
+  const synBonus=calcSynergyBonus(deckPickSelected);
+  const statY=H*0.84,statH2=H*0.05;
+  ctx.fillStyle='rgba(10,10,20,0.9)';rr(W*0.04,statY,W*0.92,statH2,8);ctx.fill();
+  const avgCost=deckPickSelected.length>0?(deckPickSelected.reduce((s,id)=>s+(CARS[id]?CARS[id].cost:0),0)/deckPickSelected.length).toFixed(1):'0.0';
+  ctx.fillStyle=DESIGN.colors.crownGold;ctx.font='bold '+(statH2*0.45)+'px Arial';ctx.textAlign='left';ctx.textBaseline='middle';
+  ctx.fillText('AVG: '+avgCost+' | SYN: +'+(Math.round((synBonus-1)*100))+'%',W*0.07,statY+statH2/2);
+  ctx.fillStyle='#00FF88';ctx.textAlign='right';ctx.fillText('CARDS: '+deckPickSelected.length+'/8',W*0.93,statY+statH2/2);
+  menuBtns.deckBuilderBack={x:W*0.05,y:H*0.91,w:W*0.38,h:H*0.055};
+  menuBtns.deckBuilderSave={x:W*0.48,y:H*0.91,w:W*0.47,h:H*0.055};
+  glowBtn(menuBtns.deckBuilderBack.x,menuBtns.deckBuilderBack.y,menuBtns.deckBuilderBack.w,menuBtns.deckBuilderBack.h,'#1a1a1a','#555','BACK',W*0.034,8,1);
+  const canSave=deckPickSelected.length===8;
+  ctx.globalAlpha=canSave?1:0.4;
+  glowBtn(menuBtns.deckBuilderSave.x,menuBtns.deckBuilderSave.y,menuBtns.deckBuilderSave.w,menuBtns.deckBuilderSave.h,'#0e2a0e','#44FF44',canSave?'SAVE DECK':'Pick 8 Cards',W*0.04,8,2);
+  ctx.globalAlpha=1;
+}
+
+function renderDeckPick(){renderDeckBuilder();}
+
+function renderCollection(){
+  darkBg();labelTxt('YOUR GARAGE',W/2,H*0.055,DESIGN.colors.crownGold,'bold '+(W*0.065)+'px Arial');
+  const cols3=3,cW3=Math.floor(W*0.29),cH3=Math.floor(H*0.17);
+  const gX3=Math.floor(W*0.025),gY3=Math.floor(H*0.012);
+  const totW3=cols3*cW3+(cols3-1)*gX3;
+  const sX3=Math.floor((W-totW3)/2),sY3=H*0.11;
+  ALL_CAR_IDS.forEach((cid,idx)=>{
+    const car=CARS[cid];if(!car)return;
+    const col3=idx%cols3,row3=Math.floor(idx/cols3);
+    const cx3=sX3+col3*(cW3+gX3),cy3=sY3+row3*(cH3+gY3);
+    if(cy3+cH3>H*0.88)return;
+    const owned=playerProfile.collection.includes(cid);
+    ctx.globalAlpha=owned?1:0.28;
+    ctx.fillStyle=owned?DESIGN.colors.midnightDeep:'#0a0a0a';rr(cx3,cy3,cW3,cH3,8);ctx.fill();
+    const colRar=getCardRarity(cid);
+    if(owned){drawRarityBorder(cx3,cy3,cW3,cH3,8,colRar,animT+idx*0.3);}
+    else{ctx.strokeStyle='#222';ctx.lineWidth=1;rr(cx3,cy3,cW3,cH3,8);ctx.stroke();}
+    ctx.font=(cH3*0.22)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';
+    ctx.fillText(owned?(car.icon||'?'):'\uD83D\uDD12',cx3+cW3/2,cy3+cH3*0.28);
+    ctx.font='bold '+(cH3*0.1)+'px Arial';ctx.fillStyle=owned?colRar.color:'#444';
+    ctx.fillText(car.name,cx3+cW3/2,cy3+cH3*0.5);
+    if(owned){ctx.fillStyle=colRar.color;ctx.font=(cH3*0.07)+'px Arial';ctx.fillText(colRar.name+' Lv.'+getCardLevel(cid),cx3+cW3/2,cy3+cH3*0.4);}
+    if(owned&&car.type==='troop'){ctx.fillStyle='#88AAFF';ctx.font=(cH3*0.08)+'px Arial';ctx.fillText('SPD '+car.speed.toFixed(1)+' DMG '+car.dmg+' ARM '+(car.armor||0),cx3+cW3/2,cy3+cH3*0.63);}
+    else if(!owned){ctx.fillStyle='#7733BB';ctx.font=(cH3*0.08)+'px Arial';ctx.fillText('Unlock Lv.'+(car.unlockLevel||'?'),cx3+cW3/2,cy3+cH3*0.68);}
+    ctx.globalAlpha=1;
+  });
+  menuBtns.collBack={x:W*0.05,y:H*0.9,w:W*0.35,h:H*0.06};
+  glowBtn(menuBtns.collBack.x,menuBtns.collBack.y,menuBtns.collBack.w,menuBtns.collBack.h,'#1a1a1a','#555','BACK',W*0.034,8,1);
+}
+
+function renderStore(){
+  darkBg();
+  // Diagonal Crown Gold stripe pattern (luxury bg)
+  ctx.save();ctx.globalAlpha=0.02;ctx.strokeStyle=DESIGN.colors.crownGold;ctx.lineWidth=1;
+  for(let s=-H;s<W+H;s+=W*0.06){ctx.beginPath();ctx.moveTo(s,0);ctx.lineTo(s+H*0.4,H);ctx.stroke();}
+  ctx.restore();
+  labelTxt('DAILY SHOP',W/2,H*0.045,DESIGN.colors.crownGold,'bold '+(W*0.065)+'px Arial');
+  // Currency bar
+  const cBarY=H*0.09,cBarH=H*0.05,cBarW=W*0.28;
+  [{lbl:'FUEL',val:playerProfile.fuel,col:DESIGN.colors.crownGold,ic:'\u26FD'},
+   {lbl:'GEARS',val:playerProfile.gears,col:'#AAA',ic:'\u2699'},
+   {lbl:'GEMS',val:playerProfile.gems,col:'#AA44FF',ic:'\uD83D\uDC8E'}
+  ].forEach((cur,i)=>{
+    const cx4=W*0.03+i*(cBarW+W*0.015);
+    ctx.fillStyle=DESIGN.colors.midnightDeep+'ee';rr(cx4,cBarY,cBarW,cBarH,8);ctx.fill();
+    drawFrostedGlass(cx4,cBarY,cBarW,cBarH,8,0.15);
+    ctx.strokeStyle=cur.col;ctx.lineWidth=1.5;rr(cx4,cBarY,cBarW,cBarH,8);ctx.stroke();
+    ctx.fillStyle=cur.col;ctx.font='bold '+(cBarH*0.38)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(cur.ic+' '+cur.lbl+': '+cur.val,cx4+cBarW/2,cBarY+cBarH/2);
+  });
+  // Daily offers
+  const offers=getDailyOffers();
+  shopBtns={};
+  // Featured deal (larger, frosted glass)
+  const fW=W*0.88,fH=H*0.14,fX=W*0.06,fY=H*0.16;
+  const feat=offers.featured;const fSold=shopSoldOut[feat.id];
+  ctx.fillStyle=DESIGN.colors.midnightDeep+'ee';rr(fX,fY,fW,fH,12);ctx.fill();
+  drawFrostedGlass(fX,fY,fW,fH,12,0.2);
+  ctx.strokeStyle=fSold?'#333':DESIGN.colors.crownGold;ctx.lineWidth=fSold?1:2.5;rr(fX,fY,fW,fH,12);ctx.stroke();
+  ctx.globalAlpha=fSold?0.3:1;
+  ctx.fillStyle=DESIGN.colors.crownGold;ctx.font='bold '+(W*0.025)+'px Arial';ctx.textAlign='left';ctx.textBaseline='middle';
+  ctx.fillText('\u2B50 FEATURED DEAL',fX+fH*0.15,fY+fH*0.2);
+  ctx.font=(fH*0.4)+'px Arial';ctx.fillText(feat.ic,fX+fH*0.15,fY+fH*0.55);
+  ctx.fillStyle=feat.col;ctx.font='bold '+(fH*0.25)+'px Arial';ctx.fillText(feat.label,fX+fH*0.6,fY+fH*0.35);
+  ctx.fillStyle='#888';ctx.font=(fH*0.16)+'px Arial';ctx.fillText(feat.sub,fX+fH*0.6,fY+fH*0.55);
+  shopBtns[feat.id]={x:fX+fW*0.65,y:fY+fH*0.2,w:fW*0.3,h:fH*0.6};
+  if(!fSold)glowBtn(shopBtns[feat.id].x,shopBtns[feat.id].y,shopBtns[feat.id].w,shopBtns[feat.id].h,'#2a1a00',DESIGN.colors.crownGold,feat.price+' '+feat.currency.toUpperCase(),fH*0.18,8,2);
+  else{ctx.fillStyle='#FF4444';ctx.font='bold '+(fH*0.22)+'px Arial';ctx.textAlign='center';ctx.fillText('SOLD OUT',fX+fW*0.8,fY+fH/2);}
+  ctx.globalAlpha=1;
+  // Other offers (3 in a row)
+  const oW=(W*0.88-W*0.04)/3,oH=H*0.22,oY=fY+fH+H*0.02;
+  offers.others.forEach((item,i)=>{
+    const ox=W*0.06+i*(oW+W*0.02);const sold=shopSoldOut[item.id];
+    ctx.fillStyle='rgba(10,10,25,0.9)';rr(ox,oY,oW,oH,10);ctx.fill();
+    ctx.strokeStyle=sold?'#333':item.col;ctx.lineWidth=sold?1:1.5;rr(ox,oY,oW,oH,10);ctx.stroke();
+    ctx.globalAlpha=sold?0.3:1;
+    ctx.font=(oH*0.25)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';
+    ctx.fillText(item.ic,ox+oW/2,oY+oH*0.2);
+    ctx.fillStyle=item.col;ctx.font='bold '+(oH*0.12)+'px Arial';ctx.fillText(item.label,ox+oW/2,oY+oH*0.42);
+    ctx.fillStyle='#888';ctx.font=(oH*0.09)+'px Arial';ctx.fillText(item.sub,ox+oW/2,oY+oH*0.55);
+    shopBtns[item.id]={x:ox+oW*0.1,y:oY+oH*0.65,w:oW*0.8,h:oH*0.25};
+    if(!sold)glowBtn(shopBtns[item.id].x,shopBtns[item.id].y,shopBtns[item.id].w,shopBtns[item.id].h,'#1a0a2a',item.col,item.price+' '+item.currency.toUpperCase(),oH*0.1,6,1.5);
+    else{ctx.fillStyle='#FF4444';ctx.font='bold '+(oH*0.12)+'px Arial';ctx.fillText('SOLD',ox+oW/2,oY+oH*0.78);}
+    ctx.globalAlpha=1;
+  });
+  // Timer hint
+  ctx.fillStyle='#555';ctx.font=(W*0.022)+'px Arial';ctx.textAlign='center';
+  ctx.fillText('Offers refresh daily. Day #'+offers.dayNum,W/2,oY+oH+H*0.02);
+  // Upgrade cards section
+  const ugY=oY+oH+H*0.04,ugH=H*0.13;
+  ctx.fillStyle='rgba(10,10,25,0.9)';rr(W*0.06,ugY,W*0.88,ugH,10);ctx.fill();
+  ctx.strokeStyle='#44FF44';ctx.lineWidth=1;rr(W*0.06,ugY,W*0.88,ugH,10);ctx.stroke();
+  labelTxt('UPGRADE CARDS',W/2,ugY+ugH*0.15,'#44FF44','bold '+(W*0.03)+'px Arial');
+  // Show first 4 deck cards with upgrade buttons
+  shopBtns.upgrades={};
+  const ugCardW=(W*0.78)/4;
+  playerProfile.deck.slice(0,4).forEach((cid,i)=>{
+    const car=CARS[cid];if(!car)return;
+    const lvl=getCardLevel(cid),cost=getUpgradeCost(lvl);
+    const cx=W*0.1+i*ugCardW;
+    ctx.fillStyle='#fff';ctx.font=(ugH*0.2)+'px Arial';ctx.textAlign='center';
+    ctx.fillText(car.icon,cx+ugCardW/2,ugY+ugH*0.38);
+    ctx.fillStyle='#aaa';ctx.font=(ugH*0.12)+'px Arial';
+    ctx.fillText('Lv.'+lvl+(lvl>=13?' MAX':''),cx+ugCardW/2,ugY+ugH*0.55);
+    if(lvl<13){
+      shopBtns.upgrades[cid]={x:cx+ugCardW*0.1,y:ugY+ugH*0.65,w:ugCardW*0.8,h:ugH*0.25};
+      const canAfford=playerProfile.fuel>=cost;
+      ctx.globalAlpha=canAfford?1:0.4;
+      glowBtn(shopBtns.upgrades[cid].x,shopBtns.upgrades[cid].y,shopBtns.upgrades[cid].w,shopBtns.upgrades[cid].h,'#0a1a0a','#44FF44',cost+'\u26FD',ugH*0.12,4,1);
+      ctx.globalAlpha=1;
+    }
+  });
+  menuBtns.storeBack={x:W*0.05,y:H*0.91,w:W*0.35,h:H*0.06};
+  glowBtn(menuBtns.storeBack.x,menuBtns.storeBack.y,menuBtns.storeBack.w,menuBtns.storeBack.h,'#1a1a1a','#555','BACK',W*0.034,8,1);
+}
+
+let pgBtn=null,pgMenuBtn=null;
+function renderPostGame(){
+  if(hqDeadScreen.active&&hqDeadScreen.t<2.5)return;
+  ctx.fillStyle='rgba(0,0,0,0.85)';ctx.fillRect(0,0,W,H);
+  const arena=getArena(currentLevel);
+  let vtxt,vcol,tdelta;
+  if(battleResult==='win'){vtxt='VICTORY!';vcol=DESIGN.colors.crownGold;tdelta='+'+(25+player.crowns*5);}
+  else if(battleResult==='lose'){vtxt='DEFEAT';vcol='#FF4444';tdelta='-15';}
+  else{vtxt='DRAW';vcol='#aaa';tdelta='+5';}
+  ctx.save();ctx.shadowColor=vcol;ctx.shadowBlur=30;ctx.fillStyle=vcol;
+  ctx.font='bold '+(W*0.13)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(vtxt,W/2,H*0.18);ctx.restore();
+  labelTxt('\u2605'.repeat(player.crowns)+'  vs  '+'\u2605'.repeat(opponent.crowns),W/2,H*0.28,'#fff',(W*0.058)+'px Arial');
+  labelTxt(playerProfile.nosBottles+' NOS BOTTLES ('+tdelta+')',W/2,H*0.35,'#00CED1','bold '+(W*0.04)+'px Arial');
+  // Math stats
+  ctx.fillStyle='#888';ctx.font=(W*0.025)+'px Arial';ctx.textAlign='center';
+  ctx.fillText('Max Combo: '+maxCombo+'x | Synergy Bonus: +'+(Math.round((calcSynergyBonus(playerProfile.deck)-1)*100))+'%',W/2,H*0.395);
+  ctx.fillStyle='rgba(20,20,40,0.9)';rr(W*0.08,H*0.42,W*0.84,H*0.1,8);ctx.fill();
+  ctx.strokeStyle='#444';ctx.lineWidth=1;rr(W*0.08,H*0.42,W*0.84,H*0.1,8);ctx.stroke();
+  labelTxt('TOTAL HP',W/2,H*0.44,'#888',(W*0.025)+'px Arial');
+  const maxHP=Math.max(endPlayerHP,endOpponentHP,1);
+  ctx.fillStyle='#4488FF';rr(W*0.1,H*0.465,W*0.36*(endPlayerHP/maxHP),H*0.025,3);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font=(W*0.025)+'px Arial';ctx.textAlign='left';ctx.textBaseline='middle';
+  ctx.fillText('YOU: '+Math.floor(endPlayerHP),W*0.1,H*0.5);
+  ctx.fillStyle='#FF4444';rr(W*0.54,H*0.465,W*0.36*(endOpponentHP/maxHP),H*0.025,3);ctx.fill();
+  ctx.textAlign='right';ctx.fillText('OPP: '+Math.floor(endOpponentHP),W*0.9,H*0.5);
+  if(battleResult==='win'){
+    const ry=H*0.53,rh=H*0.1;
+    ctx.fillStyle='rgba(20,50,20,0.85)';rr(W*0.1,ry,W*0.8,rh,10);ctx.fill();
+    ctx.strokeStyle='#44FF44';ctx.lineWidth=1.5;rr(W*0.1,ry,W*0.8,rh,10);ctx.stroke();
+    labelTxt('REWARDS',W/2,ry+rh*0.3,'#44FF44','bold '+(W*0.04)+'px Arial');
+    if(rewardState){
+      const pulse2=0.8+0.2*Math.sin(animT*4);
+      ctx.globalAlpha=pulse2;
+      labelTxt('\uD83C\uDF81 TAP TO OPEN '+rewardState.name.toUpperCase()+'!',W/2,ry+rh*0.7,rewardState.color,'bold '+(W*0.031)+'px Arial');
+      ctx.globalAlpha=1;
+    } else {
+      labelTxt('+100 FUEL  +'+player.crowns+' Crowns',W/2,ry+rh*0.7,'#fff',(W*0.031)+'px Arial');
+    }
+  }
+  const btnY=H*(battleResult==='win'?0.66:0.55),bw2=W*0.55,bh2=H*0.075,bx2=W/2-bw2/2;
+  pgBtn={x:bx2,y:btnY,w:bw2,h:bh2};
+  glowBtn(bx2,btnY,bw2,bh2,'#2a0a00',arena.acc,'BATTLE AGAIN',W*0.05,10,2.5,DESIGN.colors.crownGold);
+  const mby=btnY+bh2+14;
+  pgMenuBtn={x:bx2,y:mby,w:bw2,h:bh2*0.85};
+  glowBtn(bx2,mby,bw2,bh2*0.85,'#0d0d22','#4488FF','MAIN MENU',W*0.042,10,1.5);
+  ctx.fillStyle='#444';ctx.font=(W*0.025)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(arena.name+' | Time: '+Math.floor(totalTime)+'s | Level '+currentLevel,W/2,mby+bh2*0.85+18);
+}
+
+// ============================================================
+// REWARD SCREEN -- Chest opening animation
+// ============================================================
+function renderRewardScreen(){
+  if(!rewardState){screen='postgame';return;}
+  darkBg();
+  rewardState.t+=0.016;
+  const t=rewardState.t;
+  if(rewardState.phase==='chest'){
+    // Chest bounce-in animation
+    const arena=getArena(currentLevel);
+    const sc=Math.min(1,t*2);const bounce=sc<1?sc*sc*(3-2*sc):1;
+    ctx.save();ctx.translate(W/2,H*0.35);ctx.scale(bounce,bounce);
+    // Chest glow
+    ctx.shadowColor=rewardState.color;ctx.shadowBlur=30+Math.sin(t*6)*10;
+    ctx.fillStyle=rewardState.color;ctx.font=(W*0.2)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(rewardState.icon,0,0);ctx.shadowBlur=0;ctx.restore();
+    // Label
+    ctx.fillStyle=rewardState.color;ctx.font='bold '+(W*0.06)+'px Arial';ctx.textAlign='center';
+    ctx.fillText(rewardState.name,W/2,H*0.52);
+    ctx.fillStyle='#888';ctx.font=(W*0.03)+'px Arial';
+    ctx.fillText('Tap to open!',W/2,H*0.58);
+    // Tap to open
+    menuBtns.rewardTap={x:0,y:0,w:W,h:H};
+    if(t>0.8){
+      // Shimmer particles
+      if(Math.random()<0.3){
+        const px=W*0.3+Math.random()*W*0.4,py=H*0.2+Math.random()*H*0.25;
+        ctx.fillStyle=rewardState.color;ctx.globalAlpha=0.5;
+        ctx.beginPath();ctx.arc(px,py,2+Math.random()*3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+      }
+    }
+  } else if(rewardState.phase==='reveal'){
+    // Reveal rewards one by one
+    const revealT=rewardState.t-rewardState.revealStart;
+    ctx.fillStyle=rewardState.color;ctx.font='bold '+(W*0.055)+'px Arial';ctx.textAlign='center';
+    ctx.fillText(rewardState.name+' OPENED!',W/2,H*0.08);
+    // Reward items
+    const items=[];
+    if(rewardState.fuel>0)items.push({label:'+'+rewardState.fuel+' FUEL',col:DESIGN.colors.crownGold,ic:'\u26FD'});
+    if(rewardState.gears>0)items.push({label:'+'+rewardState.gears+' GEARS',col:'#AAA',ic:'\u2699'});
+    if(rewardState.gems>0)items.push({label:'+'+rewardState.gems+' GEMS',col:'#AA44FF',ic:'\uD83D\uDC8E'});
+    rewardState.newCards.forEach(cid=>{
+      const car=CARS[cid];if(car){
+        const rar=getCardRarity(cid);
+        items.push({label:'NEW: '+car.name,col:rar.color,ic:car.icon});
+      }
+    });
+    const itemH=H*0.08,startY=H*0.15;
+    items.forEach((item,i)=>{
+      const delay=i*0.3;
+      if(revealT<delay)return;
+      const itemT=Math.min(1,(revealT-delay)*3);
+      const slideX=W*0.5+(1-itemT)*W*0.3;
+      ctx.globalAlpha=itemT;
+      ctx.fillStyle='rgba(15,15,30,0.9)';rr(W*0.12,startY+i*itemH*1.3,W*0.76,itemH,8);ctx.fill();
+      ctx.strokeStyle=item.col;ctx.lineWidth=1.5;rr(W*0.12,startY+i*itemH*1.3,W*0.76,itemH,8);ctx.stroke();
+      ctx.font=(itemH*0.45)+'px Arial';ctx.textAlign='left';ctx.fillStyle='#fff';
+      ctx.fillText(item.ic,W*0.16,startY+i*itemH*1.3+itemH/2);
+      ctx.fillStyle=item.col;ctx.font='bold '+(itemH*0.35)+'px Arial';
+      ctx.fillText(item.label,W*0.28,startY+i*itemH*1.3+itemH/2);
+      ctx.globalAlpha=1;
+      if(revealT-delay<0.1&&revealT-delay>0)sfxRewardReveal();
+    });
+    // Continue button (after all revealed)
+    if(revealT>items.length*0.3+0.5){
+      const btnY=H*0.82,bw=W*0.5,bh=H*0.07;
+      menuBtns.rewardContinue={x:W/2-bw/2,y:btnY,w:bw,h:bh};
+      glowBtn(W/2-bw/2,btnY,bw,bh,'#1a2a00','#44FF44','CONTINUE',W*0.04,10,2);
+    }
+  }
+}
+
+// ============================================================
+// SEASON / BATTLE PASS SCREEN
+// ============================================================
+let seasonScrollX=0;
+function renderSeason(){
+  darkBg();
+  const arena=getArena(currentLevel);
+  labelTxt('BATTLE PASS - SEASON 1',W/2,H*0.045,DESIGN.colors.crownGold,'bold '+(W*0.055)+'px Arial');
+  // XP bar
+  const xpBarW=W*0.8,xpBarH=H*0.035,xpBarX=W*0.1,xpBarY=H*0.09;
+  ctx.fillStyle='#1a1a2e';rr(xpBarX,xpBarY,xpBarW,xpBarH,4);ctx.fill();
+  const xpPct=Math.min(1,(playerProfile.seasonXP||0)/SEASON_CONFIG.xpPerTier);
+  ctx.fillStyle=DESIGN.colors.crownGold;rr(xpBarX,xpBarY,xpBarW*xpPct,xpBarH,4);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='bold '+(xpBarH*0.7)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('Tier '+(playerProfile.seasonTier||0)+'/'+SEASON_CONFIG.maxTier+' | '+Math.floor(playerProfile.seasonXP||0)+'/'+SEASON_CONFIG.xpPerTier+' XP',W/2,xpBarY+xpBarH/2);
+  // Horizontal scrolling reward track
+  const tileW=W*0.18,tileH=H*0.28,tileGap=W*0.02;
+  const trackY=H*0.16,trackH=tileH+H*0.06;
+  ctx.fillStyle='rgba(10,10,25,0.8)';ctx.fillRect(0,trackY-H*0.01,W,trackH+H*0.02);
+  ctx.save();ctx.beginPath();ctx.rect(0,trackY-H*0.01,W,trackH+H*0.02);ctx.clip();
+  const currentTier=playerProfile.seasonTier||0;
+  // Auto-scroll to current tier
+  const targetScroll=Math.max(0,currentTier*(tileW+tileGap)-W*0.3);
+  seasonScrollX+=(targetScroll-seasonScrollX)*0.1;
+  for(let i=0;i<SEASON_CONFIG.maxTier;i++){
+    const tx=W*0.05+i*(tileW+tileGap)-seasonScrollX;
+    if(tx>W+tileW||tx<-tileW)continue;
+    const rwd=SEASON_REWARDS[i];if(!rwd)continue;
+    const claimed=i<currentTier;const current=i===currentTier;
+    // Free track tile
+    ctx.fillStyle=claimed?'#1a3a1a':'#0e0e1e';rr(tx,trackY,tileW,tileH*0.45,6);ctx.fill();
+    ctx.strokeStyle=current?DESIGN.colors.crownGold:claimed?'#44FF44':'#444';ctx.lineWidth=current?2:1;
+    rr(tx,trackY,tileW,tileH*0.45,6);ctx.stroke();
+    ctx.fillStyle=claimed?'#44FF44':'#888';ctx.font='bold '+(tileW*0.15)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText('T'+(i+1),tx+tileW/2,trackY+tileH*0.08);
+    ctx.fillStyle=claimed?'#fff':'#aaa';ctx.font=(tileW*0.12)+'px Arial';
+    const freeR=rwd.free;ctx.fillText(freeR.type==='fuel'?'\u26FD'+freeR.amount:freeR.type==='gears'?'\u2699'+freeR.amount:'\uD83D\uDC8E'+freeR.amount,tx+tileW/2,trackY+tileH*0.22);
+    ctx.fillStyle='#888';ctx.font=(tileW*0.1)+'px Arial';ctx.fillText('FREE',tx+tileW/2,trackY+tileH*0.36);
+    // Premium track tile
+    const premY=trackY+tileH*0.5;
+    ctx.fillStyle=claimed&&playerProfile.hasBattlePass?'#2a1a3a':'#0a0a14';rr(tx,premY,tileW,tileH*0.45,6);ctx.fill();
+    ctx.strokeStyle=playerProfile.hasBattlePass?(current?DESIGN.colors.crownGold:'#AA44FF'):'#333';ctx.lineWidth=current?2:1;
+    rr(tx,premY,tileW,tileH*0.45,6);ctx.stroke();
+    const premR=rwd.premium;
+    ctx.fillStyle=playerProfile.hasBattlePass?'#CC88FF':'#555';ctx.font=(tileW*0.12)+'px Arial';
+    ctx.fillText(premR.type==='card'?(CARS[premR.id]?CARS[premR.id].icon:'?'):premR.type==='fuel'?'\u26FD'+premR.amount:'\uD83D\uDC8E'+premR.amount,tx+tileW/2,premY+tileH*0.2);
+    ctx.fillStyle='#AA44FF';ctx.font=(tileW*0.1)+'px Arial';ctx.fillText('PREMIUM',tx+tileW/2,premY+tileH*0.36);
+    if(claimed){ctx.fillStyle='rgba(0,255,100,0.15)';rr(tx,trackY,tileW,tileH,6);ctx.fill();}
+  }
+  ctx.restore();
+  // Battle pass purchase button
+  if(!playerProfile.hasBattlePass){
+    const bpY=H*0.5,bpW=W*0.7,bpH=H*0.07;
+    menuBtns.buyPass={x:W/2-bpW/2,y:bpY,w:bpW,h:bpH};
+    glowBtn(W/2-bpW/2,bpY,bpW,bpH,'#1a0a2e','#AA44FF','BUY BATTLE PASS - 50 GEMS',W*0.035,10,2);
+  }
+  // Swipe hint
+  ctx.fillStyle='#555';ctx.font=(W*0.025)+'px Arial';ctx.textAlign='center';
+  ctx.fillText('< Swipe to scroll >',W/2,H*0.6);
+  // Stats
+  ctx.fillStyle='rgba(10,10,25,0.9)';rr(W*0.08,H*0.65,W*0.84,H*0.12,8);ctx.fill();
+  ctx.fillStyle=DESIGN.colors.crownGold;ctx.font='bold '+(W*0.03)+'px Arial';ctx.textAlign='left';
+  ctx.fillText('Season Progress',W*0.12,H*0.69);
+  ctx.fillStyle='#aaa';ctx.font=(W*0.025)+'px Arial';
+  ctx.fillText('Win = +'+SEASON_CONFIG.winXP+' XP | Loss = +'+SEASON_CONFIG.lossXP+' XP | Draw = +'+SEASON_CONFIG.drawXP+' XP',W*0.12,H*0.735);
+  // Back button
+  menuBtns.seasonBack={x:W*0.05,y:H*0.82,w:W*0.35,h:H*0.06};
+  glowBtn(menuBtns.seasonBack.x,menuBtns.seasonBack.y,menuBtns.seasonBack.w,menuBtns.seasonBack.h,'#1a1a1a','#555','BACK',W*0.034,8,1);
+}
+
+// ============================================================
+// CARD DETAIL POPUP
+// ============================================================
+function renderCardDetail(){
+  darkBg();
+  if(!selectedDetailCard||!CARS[selectedDetailCard])return;
+  const c=CARS[selectedDetailCard],rar=getCardRarity(selectedDetailCard),lvl=getCardLevel(selectedDetailCard);
+  const cW=W*0.7,cH=H*0.6,cX=(W-cW)/2,cY=H*0.06;
+  // Card background -- Midnight Deep + frosted glass
+  ctx.fillStyle=DESIGN.colors.midnightDeep;rr(cX,cY,cW,cH,DESIGN.radius.lg);ctx.fill();
+  drawFrostedGlass(cX,cY,cW,cH,DESIGN.radius.lg,0.2);
+  // Rarity border
+  drawRarityBorder(cX,cY,cW,cH,DESIGN.radius.lg,rar,animT);
+  // Icon
+  ctx.font=(cW*0.3)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(c.icon,W/2,cY+cH*0.14);
+  // Name plate -- frosted glass strip
+  const npY=cY+cH*0.25,npH=cH*0.12;
+  drawFrostedGlass(cX+4,npY,cW-8,npH,8,0.3);
+  ctx.fillStyle=DESIGN.colors.ivoryCream;ctx.font='bold '+(W*0.055)+'px Arial';
+  ctx.fillText(c.name,W/2,npY+npH*0.35);
+  ctx.fillStyle=rar.color;ctx.font=(W*0.028)+'px Arial';
+  ctx.fillText(rar.name+' | Level '+lvl+'/13',W/2,npY+npH*0.75);
+  // Type + cost
+  ctx.fillStyle=DESIGN.colors.asphaltGrey;ctx.font=(W*0.026)+'px Arial';
+  ctx.fillText(c.type.toUpperCase()+' | Cost: '+c.cost+' Fuel',W/2,cY+cH*0.41);
+  // Stats bars
+  const statY=cY+cH*0.46,statH=H*0.023,statGap=H*0.033,statLX=cX+cW*0.08,statRX=cX+cW*0.92;
+  const sc2=cardLevelScale(selectedDetailCard);
+  const stats=[];
+  if(c.hp)stats.push({label:'HP',val:Math.floor(c.hp*sc2),max:2000,col:'#44FF44'});
+  if(c.dmg)stats.push({label:'DMG',val:Math.floor(c.dmg*sc2),max:500,col:'#FF4444'});
+  if(c.speed)stats.push({label:'SPD',val:c.speed,max:4,col:DESIGN.colors.neonCyan});
+  if(c.range)stats.push({label:'RNG',val:c.range,max:8,col:'#FFAA00'});
+  if(c.atkSpd)stats.push({label:'ATK SPD',val:c.atkSpd,max:2,col:'#FF66FF'});
+  for(let i=0;i<stats.length;i++){
+    const s=stats[i],sy=statY+i*statGap,barW=statRX-statLX-W*0.18;
+    ctx.fillStyle=DESIGN.colors.asphaltGrey;ctx.font='bold '+(W*0.024)+'px Arial';ctx.textAlign='left';ctx.textBaseline='middle';
+    ctx.fillText(s.label,statLX,sy+statH/2);
+    const bx=statLX+W*0.15;
+    ctx.fillStyle=DESIGN.colors.midnightDeep;rr(bx,sy,barW,statH,3);ctx.fill();
+    ctx.fillStyle=s.col;rr(bx,sy,barW*Math.min(1,s.val/s.max),statH,3);ctx.fill();
+    ctx.fillStyle=DESIGN.colors.ivoryCream;ctx.font=(W*0.022)+'px Arial';ctx.textAlign='right';
+    ctx.fillText(s.val.toFixed?s.val.toFixed(1):s.val,statRX,sy+statH/2);
+  }
+  // Ability
+  const aY=statY+stats.length*statGap+H*0.01;
+  if(c.ability){
+    ctx.fillStyle=DESIGN.colors.crownGold;ctx.font='bold '+(W*0.028)+'px Arial';ctx.textAlign='center';
+    ctx.fillText('Ability: '+c.ability,W/2,aY);
+  }
+  // Description
+  ctx.fillStyle=DESIGN.colors.ivoryCream;ctx.font=(W*0.025)+'px Arial';ctx.textAlign='center';
+  ctx.fillText(c.desc||'',W/2,aY+H*0.035);
+  // Synergies
+  if(c.syn&&c.syn.length>0){
+    const synY=aY+H*0.065;
+    ctx.fillStyle=DESIGN.colors.neonCyan;ctx.font=(W*0.022)+'px Arial';
+    const synTxt=c.syn.map(s=>SYN_INFO[s]?SYN_INFO[s].n:s).join(' / ');
+    ctx.fillText('Synergies: '+synTxt,W/2,synY);
+  }
+  // Upgrade button
+  if(lvl<13){
+    const cost=getUpgradeCost(lvl),afford=playerProfile.fuel>=cost;
+    const ubW=W*0.5,ubH=H*0.06,ubX=(W-ubW)/2,ubY=H*0.82;
+    menuBtns.cardDetailUpgrade={x:ubX,y:ubY,w:ubW,h:ubH};
+    glowBtn(ubX,ubY,ubW,ubH,afford?'#0a1a0a':'#1a1a1a',afford?'#44FF44':'#555',
+      'UPGRADE Lv.'+(lvl+1)+' - '+cost+' FUEL',W*0.032,DESIGN.radius.md,2);
+  } else {
+    menuBtns.cardDetailUpgrade=null;
+    ctx.fillStyle=DESIGN.colors.crownGold;ctx.font='bold '+(W*0.035)+'px Arial';ctx.textAlign='center';
+    ctx.fillText('MAX LEVEL',W/2,H*0.85);
+  }
+  // Back button
+  menuBtns.cardDetailBack={x:W*0.05,y:H*0.92,w:W*0.35,h:H*0.055};
+  glowBtn(menuBtns.cardDetailBack.x,menuBtns.cardDetailBack.y,menuBtns.cardDetailBack.w,menuBtns.cardDetailBack.h,'#1a1a1a','#555','BACK',W*0.034,8,1);
+}
+
+// ============================================================
+// DRAG-DROP GHOST RENDERER
+// ============================================================
+function renderDragGhost(){
+  if(!dragState.active||dragState.cardIdx<0)return;
+  const cid=player.hand[dragState.cardIdx];if(!cid)return;
+  const c=CARS[cid];if(!c)return;
+  const ghostW=W*0.15,ghostH=W*0.2;
+  ctx.globalAlpha=0.7;
+  ctx.fillStyle=c.carColor||'#444';rr(dragState.x-ghostW/2,dragState.y-ghostH/2,ghostW,ghostH,8);ctx.fill();
+  ctx.strokeStyle=DESIGN.colors.crownGold;ctx.lineWidth=2;rr(dragState.x-ghostW/2,dragState.y-ghostH/2,ghostW,ghostH,8);ctx.stroke();
+  ctx.fillStyle='#fff';ctx.font=(ghostW*0.5)+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(c.icon,dragState.x,dragState.y-ghostH*0.1);
+  ctx.font='bold '+(ghostW*0.2)+'px Arial';
+  ctx.fillText(c.name,dragState.x,dragState.y+ghostH*0.25);
+  ctx.globalAlpha=1;
+  // Valid deploy zone highlight
+  if(dragState.y<hudY){
+    const[gx,gy]=toGame3D(dragState.x,dragState.y);
+    const valid=c.type==='spell'||c.type==='building'?
+      (gx>0.5&&gx<ARENA_W-0.5&&gy>0.5&&gy<ARENA_H-0.5):
+      (gx>0.5&&gx<ARENA_W-0.5&&gy>RIVER_Y+RIVER_H/2+0.3&&gy<ARENA_H-0.5);
+    if(valid){
+      ctx.fillStyle='rgba(68,255,68,0.15)';ctx.beginPath();ctx.arc(dragState.x,dragState.y,W*0.06,0,Math.PI*2);ctx.fill();
+    }
+  }
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function rr(x,y,w,h,r){
+  r=Math.min(Math.abs(r||0),Math.abs(w)/2,Math.abs(h)/2);
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);
+  ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath();
+}
+function glowBtn(x,y,w,h,bg,glow,label,fs,radius,sw,textCol){
+  let sc=1;
+  if(btnAnimState.phase!=='idle'){
+    const bx=btnAnimState.x,by=btnAnimState.y;
+    if(bx>=x&&bx<=x+w&&by>=y&&by<=y+h){
+      if(btnAnimState.phase==='press'){
+        const p=Math.min(1,btnAnimState.t/DESIGN.timing.fast);
+        sc=1-0.08*DESIGN.easing.outCubic(p);
+      } else {
+        const p=Math.min(1,btnAnimState.t/DESIGN.timing.spring);
+        sc=0.92+0.08*DESIGN.easing.outCubic(p)+(p<0.3?0.05*Math.sin(p/0.3*Math.PI):0);
+      }
+    }
+  }
+  if(sc!==1){ctx.save();ctx.translate(x+w/2,y+h/2);ctx.scale(sc,sc);ctx.translate(-(x+w/2),-(y+h/2));}
+  ctx.shadowColor=glow;ctx.shadowBlur=10;ctx.fillStyle=bg;rr(x,y,w,h,radius);ctx.fill();ctx.shadowBlur=0;
+  ctx.strokeStyle=glow;ctx.lineWidth=sw;rr(x,y,w,h,radius);ctx.stroke();
+  ctx.save();ctx.globalAlpha=0.08;ctx.strokeStyle=DESIGN.colors.crownGold;ctx.lineWidth=1;rr(x+2,y+2,w-4,h-4,Math.max(2,radius-2));ctx.stroke();ctx.restore();
+  ctx.fillStyle=textCol||'#fff';ctx.font='bold '+fs+'px Arial';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(label,x+w/2,y+h/2+1);
+  if(sc!==1)ctx.restore();
+}
+function labelTxt(t,x,y,col,font){ctx.fillStyle=col;ctx.font=font;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(t,x,y);}
+function darkBg(){
+  const arena=getArena(currentLevel);
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,arena.sky1);g.addColorStop(1,arena.sky2);
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle=DESIGN.colors.neonCyan+'05';ctx.lineWidth=1;
+  for(let x=0;x<W;x+=W/18){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=0;y<H;y+=H/28){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+}
+function inRect(x,y,r){return r&&x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h;}
+
+// ============================================================
+// INPUT (uses 3D inverse projection for arena clicks)
+// ============================================================
+let touchActive=false;
+
+function handleTap(sx,sy){
+  if(audioCtx&&audioCtx.state==='suspended')audioCtx.resume();
+  try{const ac=getAudio();if(ac&&ac.state==='suspended')ac.resume();}catch(e){}
+  triggerBtnAnim(sx,sy);
+
+  // Card detail popup -- long press handled separately
+  if(screen==='cardDetail'){
+    if(inRect(sx,sy,menuBtns.cardDetailBack)){selectedDetailCard=null;transitionTo(cardDetailSource||'menu');return;}
+    if(selectedDetailCard&&menuBtns.cardDetailUpgrade&&inRect(sx,sy,menuBtns.cardDetailUpgrade)){
+      const cx=menuBtns.cardDetailUpgrade.x+menuBtns.cardDetailUpgrade.w/2;
+      const cy=menuBtns.cardDetailUpgrade.y;
+      if(upgradeCard(selectedDetailCard)){triggerCelebration(cx,cy);}return;
+    }
+    return;
+  }
+
+  if(screen==='menu'){
+    if(inRect(sx,sy,menuBtns.battle)){transitionTo('mode_select');return;}
+    if(inRect(sx,sy,menuBtns.deck)){deckPickSelected=[...playerProfile.deck];transitionTo('deckBuilder');return;}
+    if(inRect(sx,sy,menuBtns.collection)){transitionTo('collection');return;}
+    if(inRect(sx,sy,menuBtns.carpass)){transitionTo('season');return;}
+    if(inRect(sx,sy,menuBtns.store)){transitionTo('store');return;}
+    if(inRect(sx,sy,menuBtns.levels)){transitionTo('levels');return;}
+    if(inRect(sx,sy,menuBtns.deckBuilder)){deckPickSelected=[...playerProfile.deck];transitionTo('deckBuilder');return;}
+    return;
+  }
+  if(screen==='mode_select'){
+    if(menuBtns.modes){
+      if(inRect(sx,sy,menuBtns.modes['1v1'])){selectedMode='1v1';initBattle();return;}
+      if(inRect(sx,sy,menuBtns.modes['ranked'])){selectedMode='ranked';initBattle();return;}
+    }
+    if(inRect(sx,sy,menuBtns.back)){transitionTo('menu');return;}
+    return;
+  }
+  if(screen==='levels'){
+    for(const[lvl,rect]of Object.entries(levelBtns)){if(inRect(sx,sy,rect)){currentLevel=parseInt(lvl);return;}}
+    if(inRect(sx,sy,menuBtns.levelBack)){transitionTo('menu');return;}
+    if(inRect(sx,sy,menuBtns.levelPlay)){initBattle();return;}
+    return;
+  }
+  if(screen==='deckBuilder'||screen==='deck_pick'){
+    if(menuBtns.presets){for(const[k,rect]of Object.entries(menuBtns.presets)){if(inRect(sx,sy,rect)){const preset=DECK_PRESETS[k];if(preset){deckPickSelected=[...preset.ids];return;}}}}
+    if(deckBuilderBtns&&deckBuilderBtns.tabs){for(const[tab,rect]of Object.entries(deckBuilderBtns.tabs)){if(inRect(sx,sy,rect)){deckBuilderFilter=tab;return;}}}
+    if(deckBuilderBtns&&deckBuilderBtns.cards){
+      for(const[cid,rect]of Object.entries(deckBuilderBtns.cards)){
+        if(inRect(sx,sy,rect)){
+          const idx=deckPickSelected.indexOf(cid);
+          if(idx>=0)deckPickSelected.splice(idx,1);
+          else if(deckPickSelected.length<8)deckPickSelected.push(cid);
+          return;
+        }
+      }
+    }
+    if(inRect(sx,sy,menuBtns.deckBuilderSave)&&deckPickSelected.length===8){playerProfile.deck=[...deckPickSelected];transitionTo('menu');return;}
+    if(inRect(sx,sy,menuBtns.deckBuilderBack)){transitionTo('menu');return;}
+    return;
+  }
+  if(screen==='collection'){
+    // Long-press on card opens detail
+    if(deckBuilderBtns&&deckBuilderBtns.cards){
+      for(const[cid,rect]of Object.entries(deckBuilderBtns.cards)){
+        if(inRect(sx,sy,rect)){selectedDetailCard=cid;cardDetailSource='collection';transitionTo('cardDetail');return;}
+      }
+    }
+    if(inRect(sx,sy,menuBtns.collBack)){transitionTo('menu');}return;
+  }
+  if(screen==='store'){
+    if(inRect(sx,sy,menuBtns.storeBack)){transitionTo('menu');return;}
+    // Shop buy buttons
+    const offers=getDailyOffers();
+    const allOffers=[offers.featured,...offers.others];
+    for(const item of allOffers){
+      if(shopBtns[item.id]&&inRect(sx,sy,shopBtns[item.id])){buyShopItem(item);sfxButtonPress();return;}
+    }
+    // Upgrade buttons
+    if(shopBtns.upgrades){
+      for(const[cid,rect]of Object.entries(shopBtns.upgrades)){
+        if(inRect(sx,sy,rect)){if(upgradeCard(cid))triggerCelebration(rect.x+rect.w/2,rect.y);return;}
+      }
+    }
+    return;
+  }
+  if(screen==='season'){
+    if(inRect(sx,sy,menuBtns.seasonBack)){transitionTo('menu');return;}
+    if(menuBtns.buyPass&&inRect(sx,sy,menuBtns.buyPass)&&!playerProfile.hasBattlePass&&playerProfile.gems>=50){
+      playerProfile.gems-=50;playerProfile.hasBattlePass=true;sfxChestOpen();return;
+    }
+    return;
+  }
+  if(screen==='rewards'){
+    if(rewardState&&rewardState.phase==='chest'&&rewardState.t>0.5){
+      rewardState.phase='reveal';rewardState.revealStart=rewardState.t;
+      applyRewards(rewardState);sfxChestOpen();return;
+    }
+    if(rewardState&&rewardState.phase==='reveal'&&menuBtns.rewardContinue&&inRect(sx,sy,menuBtns.rewardContinue)){
+      rewardState=null;transitionTo('postgame');return;
+    }
+    return;
+  }
+  if(screen==='postgame'){
+    // Show reward screen on first tap if rewards exist
+    if(rewardState&&rewardState.phase==='chest'){transitionTo('rewards');return;}
+    if(inRect(sx,sy,pgBtn)){initBattle();return;}
+    if(inRect(sx,sy,pgMenuBtn)){transitionTo('menu');return;}
+    return;
+  }
+  if(screen!=='battle'||phase==='countdown'||phase==='ended')return;
+
+  if(inRect(sx,sy,menuBtns.emojiBtn)){emojiOpen=!emojiOpen;return;}
+  if(emojiOpen&&menuBtns.emojis){
+    for(const[idx,rect]of Object.entries(menuBtns.emojis)){if(inRect(sx,sy,rect)){sendEmoji(parseInt(idx));return;}}
+    emojiOpen=false;return;
+  }
+
+  for(let i=0;i<4;i++){
+    if(inRect(sx,sy,cardSlots[i])){
+      const card=CARS[player.hand[i]];if(!card)return;
+      if(selectedCard===i)selectedCard=-1;
+      else if(player.elixir>=card.cost)selectedCard=i;
+      deployPreview=null;return;
+    }
+  }
+  // Deploy using 3D inverse projection
+  if(selectedCard>=0&&sy<hudY){
+    const[gx,gy]=toGame3D(sx,sy);
+    const card=CARS[player.hand[selectedCard]];
+    if(!card||player.elixir<card.cost){selectedCard=-1;return;}
+    if(card.type==='spell'||card.type==='building'){
+      if(gx>0.5&&gx<ARENA_W-0.5&&gy>0.5&&gy<ARENA_H-0.5){playCard(player,selectedCard,gx,gy);selectedCard=-1;deployPreview=null;}
+    } else {
+      if(gx>0.5&&gx<ARENA_W-0.5&&gy>RIVER_Y+RIVER_H/2+0.3&&gy<ARENA_H-0.5){playCard(player,selectedCard,gx,gy);selectedCard=-1;deployPreview=null;}
+    }
+    return;
+  }
+  if(sy<hudY){selectedCard=-1;deployPreview=null;}
+}
+
+function handleMove(sx,sy){
+  if(selectedCard>=0&&sy<hudY){const[gx,gy]=toGame3D(sx,sy);deployPreview={x:gx,y:gy};}
+  cardHoverIdx=-1;
+  for(let i=0;i<4;i++){if(cardSlots[i]&&inRect(sx,sy,cardSlots[i])){cardHoverIdx=i;break;}}
+}
+
+canvas.addEventListener('touchstart',e=>{
+  e.preventDefault();touchActive=true;
+  const sx=e.touches[0].clientX,sy=e.touches[0].clientY;
+  // Drag-drop: if tapping a card during battle, start hold timer
+  if(screen==='battle'&&phase!=='countdown'&&phase!=='ended'){
+    for(let i=0;i<4;i++){
+      if(cardSlots[i]&&inRect(sx,sy,cardSlots[i])){
+        const card=CARS[player.hand[i]];
+        if(card&&player.elixir>=card.cost){
+          dragState={active:false,cardIdx:i,x:sx,y:sy,holdTimer:0,startX:sx,startY:sy};
+        }
+        break;
+      }
+    }
+  }
+  handleTap(sx,sy);
+},{passive:false});
+canvas.addEventListener('touchmove',e=>{
+  e.preventDefault();if(!touchActive)return;
+  const sx=e.touches[0].clientX,sy=e.touches[0].clientY;
+  // Drag detection: if we have a pending drag and moved enough
+  if(dragState.cardIdx>=0&&!dragState.active){
+    const dx=sx-dragState.startX,dy=sy-dragState.startY;
+    if(Math.abs(dx)+Math.abs(dy)>15){dragState.active=true;selectedCard=dragState.cardIdx;}
+  }
+  if(dragState.active){dragState.x=sx;dragState.y=sy;}
+  handleMove(sx,sy);
+},{passive:false});
+canvas.addEventListener('touchend',e=>{
+  e.preventDefault();touchActive=false;
+  // Drag-drop deploy
+  if(dragState.active&&dragState.cardIdx>=0&&dragState.y<hudY){
+    const[gx,gy]=toGame3D(dragState.x,dragState.y);
+    const card=CARS[player.hand[dragState.cardIdx]];
+    if(card&&player.elixir>=card.cost){
+      const valid=card.type==='spell'||card.type==='building'?
+        (gx>0.5&&gx<ARENA_W-0.5&&gy>0.5&&gy<ARENA_H-0.5):
+        (gx>0.5&&gx<ARENA_W-0.5&&gy>RIVER_Y+RIVER_H/2+0.3&&gy<ARENA_H-0.5);
+      if(valid){playCard(player,dragState.cardIdx,gx,gy);selectedCard=-1;}
+    }
+  }
+  dragState={active:false,cardIdx:-1,x:0,y:0,holdTimer:0,startX:0,startY:0};
+  deployPreview=null;
+},{passive:false});
+canvas.addEventListener('click',e=>{if(!touchActive)handleTap(e.clientX,e.clientY);});
+canvas.addEventListener('mousemove',e=>{handleMove(e.clientX,e.clientY);});
+
+// ============================================================
+// GAME LOOP
+// ============================================================
+let lastT=0;
+function loop(ts){
+  const dt=Math.min((ts-lastT)/1000,0.05);lastT=ts;
+  if(screen==='battle')updateBattle(dt);
+  updateBtnAnimations(dt);
+  updateTransition(dt);
+  updateCelebration(dt);
+  render(ts);
+  requestAnimationFrame(loop);
+}
+window.addEventListener('resize',resize);
+resize();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

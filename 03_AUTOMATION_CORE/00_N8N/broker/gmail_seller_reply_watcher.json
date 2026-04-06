@@ -1,0 +1,118 @@
+{
+  "name": "Broker OS -- Gmail Seller Reply Watcher",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {"field": "minutes", "minutesInterval": 15}
+          ]
+        }
+      },
+      "id": "gmail-poll-trigger",
+      "name": "Check Gmail (15min)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [100, 300],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": false,
+        "limit": 20,
+        "filters": {
+          "q": "to:sage@everlightventures.io is:unread -from:noreply -from:mailer-daemon",
+          "labelIds": ["INBOX"]
+        }
+      },
+      "id": "gmail-fetch",
+      "name": "Fetch Unread Sage Emails",
+      "type": "n8n-nodes-base.gmail",
+      "position": [350, 300],
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gmail-oauth",
+          "name": "Gmail sage@everlightventures.io"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.from}}",
+              "operation": "contains",
+              "value2": "crisp.chat,plausible.io,cal.com,resend.com,dub.co,tally.so,posthog.com,novu.co,documenso.com,trigger.dev,hatchet.run,rallly.co,hanko.io,papermark.io,getlago.com"
+            }
+          ]
+        }
+      },
+      "id": "is-seller-reply",
+      "name": "Is Seller Reply?",
+      "type": "n8n-nodes-base.if",
+      "position": [600, 300],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "url": "={{$env.SLACK_WEBHOOK_URL}}",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=SELLER REPLY DETECTED!\nFrom: {{$json.from}}\nSubject: {{$json.subject}}\nSnippet: {{$json.snippet}}\n\nAction: Check Gmail and update deal stage in Broker OS"
+            }
+          ]
+        }
+      },
+      "id": "slack-seller-alert",
+      "name": "Slack: Seller Reply Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [900, 200],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "url": "={{$env.SLACK_WEBHOOK_URL}}",
+        "method": "POST",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=New email to sage@: From {{$json.from}} | Subject: {{$json.subject}}"
+            }
+          ]
+        }
+      },
+      "id": "slack-general",
+      "name": "Slack: General Inbox",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [900, 400],
+      "typeVersion": 4.2
+    }
+  ],
+  "connections": {
+    "Check Gmail (15min)": {"main": [[{"node": "Fetch Unread Sage Emails", "type": "main", "index": 0}]]},
+    "Fetch Unread Sage Emails": {"main": [[{"node": "Is Seller Reply?", "type": "main", "index": 0}]]},
+    "Is Seller Reply?": {
+      "main": [
+        [{"node": "Slack: Seller Reply Alert", "type": "main", "index": 0}],
+        [{"node": "Slack: General Inbox", "type": "main", "index": 0}]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Los_Angeles"
+  },
+  "tags": [
+    {"name": "broker"},
+    {"name": "gmail"},
+    {"name": "seller-tracking"}
+  ]
+}

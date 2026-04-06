@@ -1,0 +1,59 @@
+- [00:00:04] **Introduction and Background**
+  - The speaker discusses their experience in giving talks worldwide and expresses excitement about returning home for this presentation.
+  - Clarifies their academic qualifications, indicating they hold a single PhD that encompasses philosophy, neuroscience, and psychology.
+  - They are jointly appointed in systems design engineering and philosophy and have students in computer science.
+  - The talk will explore brain computation and its implications for artificial intelligence (AI), referencing work from Applied Brain Research (ABR).
+
+- [00:00:57] **Brain Function and AI**
+  - AI aims to replicate specific brain functions, such as controlling complex systems and robust recognition in challenging environments.
+  - The brain operates efficiently on approximately 20 watts of power, in stark contrast to AI systems like AlphaGo, which consumed around 85 kilowatts.
+  - The speaker emphasizes the importance of developing low-power algorithms for practical applications in mobile robotics, drones, and self-driving cars.
+
+- [00:02:47] **Power Consumption Challenges**
+  - A significant portion of energy (10-20%) is used for computing, with AI consuming an increasing share of this energy.
+  - The speaker urges the need to explore algorithms that can function within power constraints, reflecting on the practical implications for AI deployment.
+
+- [00:04:31] **Spiking Neural Networks vs. Non-Spiking Networks**
+  - The speaker contrasts biological neural computation, which utilizes spikes for information processing, with traditional artificial neural networks (ANNs) that operate on continuous values.
+  - They introduce the concept of **neuromorphic hardware**, which is designed to handle spiking computation, offering potential advantages in energy efficiency.
+
+- [00:06:11] **Understanding Spiking Neural Networks**
+  - Explanation of spiking neurons and their voltage response to constant inputs, highlighting differences from non-spiking neurons.
+  - Discusses the computational advantages of spiking neurons, including reduced communication overhead and lower computational requirements.
+
+- [00:11:03] **Tools for Spiking Neural Networks**
+  - Introduction of **Mango**, a tool developed for creating large-scale spiking neural networks, allowing for flexibility in implementation across different hardware platforms.
+  - The speaker mentions the **Spawn model**, which is noted as the world's largest functional brain model with over 6.6 million neurons.
+
+- [00:14:33] **Hardware Design and Neuromorphic Advances**
+  - Discussion on how hardware design has evolved towards brain-like architectures, from CPUs to GPUs and specialized accelerators like TPUs.
+  - The importance of matching algorithms to hardware constraints is emphasized to avoid inefficiencies.
+
+- [00:17:09] **Current State of Neuromorphic Hardware**
+  - The Intel Loihi chip is highlighted as a significant development in neuromorphic hardware, featuring 128 cores and intrinsic spiking capabilities.
+  - The speaker notes the lack of commercially available neuromorphic hardware, which limits broader deployment.
+
+- [00:18:55] **Applications of Neuromorphic Hardware**
+  - The speaker outlines the potential applications of spiking neural networks in real-time scenarios (e.g., self-driving cars, drones) where temporal processing is critical.
+  - Emphasizes the efficiency of spiking networks in dynamic environments.
+
+- [00:20:38] **Empirical Data on Performance**
+  - Presents empirical results showing the power efficiency of spiking networks compared to non-spiking networks in real-world applications.
+  - The spiking network implementation demonstrated a 110 times improvement in power consumption over GPU implementations in a keyword spotting task.
+
+- [00:24:10] **Adaptive Control with Spiking Neural Networks**
+  - Illustrates a robot arm control experiment showcasing the adaptability of spiking networks to changing dynamics.
+  - Highlights the ability of spiking networks to learn and adjust controllers in real time, making them suitable for dynamic industrial environments.
+
+- [00:28:19] **Legendre Memory Unit (LMU)**
+  - Introduction of the LMU, a new recurrent neural network architecture designed to efficiently store and process time-varying data.
+  - The LMU outperforms traditional LSTM networks, particularly in memory efficiency and accuracy.
+
+- [00:39:58] **Performance Comparison with LSTMs**
+  - The LMU demonstrates superior performance in tasks requiring time-series processing, achieving state-of-the-art results while utilizing fewer parameters.
+  - The speaker emphasizes the LMU's robustness to spiking implementations.
+
+- [00:43:29] **Conclusion and Future Directions**
+  - The speaker concludes by asserting the synergy between neuromorphic hardware, spiking algorithms, and the biological inspiration behind these technologies.
+  - They suggest that spiking neural networks will play a vital role in future AI applications, especially where power efficiency is critical.
+  - The talk ends with an invitation for questions, reinforcing the collaborative nature of AI development.

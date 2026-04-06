@@ -3,7 +3,7 @@
 This is the top-level context for `/mnt/sdcard/AA_MY_DRIVE`.
 
 ## The Hive Mind Protocol
-You are operating as part of an AI Triad (Claude, Gemini, Codex). 
+You are operating as part of an AI Triad (Claude, Gemini, Codex).
 - **Collaboration Rules:** Read `HIVE_MIND.md`.
 - **War Room:** Log handoffs and progress in `_logs/ai_war_room/`.
 
@@ -29,40 +29,30 @@ You are operating as part of an AI Triad (Claude, Gemini, Codex).
   - `activate_skill ev_review`: Security/QA review.
   - `activate_skill ticket-manager`: Manage project tickets.
 
-## Data Flow & Automation
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    DATA FLOW                                │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│   USB/Upload ──┐                                            │
-│                │                                            │
-│   Downloads ───┼──▶ STAGING ──▶ ORGANIZE ──▶ LOCAL TREE    │
-│                │                                ↓           │
-│   Phone ───────┘                          PROTON DRIVE      │
-│                                                             │
-└─────────────────────────────────────────────────────────────┘
-```
+## Workspace Structure
+- **Source of truth:** `WORKSPACE_MANIFEST.md` (updated 2026-03-06)
+- ALWAYS refer to WORKSPACE_MANIFEST.md before executing file operations.
+- See that file for the full Agent File Save Rules table.
 
-### File Destinations
-| Type | Extensions | Destination |
-|------|------------|-------------|
-| Photos | .jpg .png .heic | `B_Media/All_Pictures/[subfolder]` |
-| Videos | .mp4 .mkv .mov | `B_Media/All_MP4s/YYYY-MM/` |
-| Audio | .mp3 .flac .m4a | `B_Media/Music/` |
-| Docs | .pdf .docx | `A_My_Docs/G_PDF_Files/` |
-| Spreadsheets | .xlsx .csv | `A_My_Docs/F_Spreadsheets/` |
-| Text | .txt .md .org | `A_My_Docs/B_Text_Files/` |
-| Code | .py .js .sh | `A_My_Docs/A_Python_Scripts/` |
-| Ebooks | .epub .mobi | `A_My_Docs/G_Literature/` |
-| Archives | .zip .tar .7z | `D_Backups/` |
+## Key Project Paths
+| Project | Path |
+|---------|------|
+| Alley Kingz | `01_BUSINESSES/Everlight_Ventures/Alley_Kingz/` |
+| Books/Publishing | `01_BUSINESSES/Everlight_Ventures/Everlight_Literature/` |
+| Brand/Site docs | `01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/` |
+| Onyx POS | `01_BUSINESSES/onyx_pos/` |
+| XLM Bot | `06_DEVELOPMENT/xlm_bot/` |
+| Hive Mind SaaS | `06_DEVELOPMENT/hivemind_saas/` |
+| Content drafts | `02_CONTENT_FACTORY/01_Queue/` |
+| Scripts | `03_AUTOMATION_CORE/01_Scripts/` |
+| Reports | `09_DASHBOARD/reports/` |
 
-### Naming Convention
-- `YYYY-MM-DD_OriginalFilename_[tags].ext`
+## CRITICAL: File Save Rules
+- NEVER save project outputs to the workspace root or random directories.
+- Each project has a designated folder. See WORKSPACE_MANIFEST.md for the routing table.
+- Unsorted files go to `07_STAGING/Inbox/`.
 
 ## Claude Integration
-All existing Claude skills, agents, and plans have been successfully migrated to `.gemini/`. 
-- **Skills:** Found in `.gemini/skills/`
-- **Agents:** Found in `.gemini/agents/`
-- **Original Context:** Refer to `CLAUDE.md` and `A_Rich/CLAUDE.md` for legacy details.
-- **Workspace Structure & Mind Map:** The exact layout of the workspace (and the Mermaid semantic map) is located in `WORKSPACE_MANIFEST.md`. ALWAYS refer to this file before executing file operations or making data-driven business recommendations.
+- **Skills:** Found in `.claude/skills/`, `.gemini/skills/`
+- **Agents:** Found in `.claude/agents/`, `.gemini/agents/`, `.codex/agents/`
+- **Modes:** `.claude/modes/`, `.gemini/plan/`, `.gemini/explain/`

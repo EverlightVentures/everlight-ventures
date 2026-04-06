@@ -6,9 +6,10 @@ from datetime import timedelta
 from decimal import Decimal
 from pathlib import Path
 
-import requests
 from django.db.models import Count, Sum
 from django.utils import timezone
+
+from hive_dashboard.supabase_client import supabase_rest_rows
 
 from .models import BusinessAlert, BusinessEvent, RevenueStream
 
@@ -20,20 +21,6 @@ EVENT_LOG = LOG_DIR / "events.jsonl"
 ALERT_LOG = LOG_DIR / "alerts.jsonl"
 TRADING_WATCHTOWER_STATUS = LOG_DIR / "trading_watchtower_status.json"
 BLACKJACK_WATCHTOWER_STATUS = LOG_DIR / "blackjack_watchtower_status.json"
-SUPABASE_URL = os.environ.get(
-    "SUPABASE_URL",
-    "https://jdqqmsmwmbsnlnstyavl.supabase.co",
-)
-SUPABASE_KEY = (
-    os.environ.get("SUPABASE_ANON_KEY")
-    or os.environ.get("SUPABASE_KEY")
-    or os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
-    or (
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
-        "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkcXFtc213bWJzbmxuc3R5YXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTk5ODMs"
-        "ImV4cCI6MjA4ODM5NTk4M30.9BDviI2WR46sphcS3uzKapcKbslYpMO4PdSEPFrv3Ww"
-    )
-)
 
 DEFAULT_STREAMS = [
     {
@@ -196,33 +183,9 @@ def _brief_age_minutes(path: Path) -> float | None:
     return _minutes_old(str(wrapper.get("timestamp") or ""))
 
 
-def _supabase_headers() -> dict[str, str] | None:
-    if not SUPABASE_URL or not SUPABASE_KEY:
-        return None
-    return {
-        "apikey": SUPABASE_KEY,
-        "Authorization": f"Bearer {SUPABASE_KEY}",
-        "Accept": "application/json",
-    }
-
-
 def _read_supabase_rows(table: str, *, params: dict[str, str]) -> list[dict]:
-    headers = _supabase_headers()
-    if not headers:
-        return []
-    try:
-        response = requests.get(
-            f"{SUPABASE_URL}/rest/v1/{table}",
-            headers=headers,
-            params=params,
-            timeout=4,
-        )
-        response.raise_for_status()
-        payload = response.json()
-        return payload if isinstance(payload, list) else []
-    except Exception as exc:
-        logger.debug("Supabase read failed for %s: %s", table, exc)
-        return []
+    """Read rows from Supabase via the shared client module."""
+    return supabase_rest_rows(table, params=params)
 
 
 def _read_live_trading_supabase() -> tuple[dict, dict, dict]:

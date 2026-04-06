@@ -187,5 +187,29 @@ if __name__ == "__main__":
     print(f"\nSaved to: {out}")
 
     if "--slack" in sys.argv:
-        slack_post(report)
-        print("Posted to Slack.")
+        # Publish to Google Docs + Slack summary link
+        try:
+            sys.path.insert(0, str(Path(__file__).parent / "content_tools"))
+            from gdocs_bridge import publish_report
+
+            trades = load_trades()
+            by_day, by_week, by_month = bucket_trades(trades)
+            now_pt = datetime.now(PT)
+            cur_week = now_pt.strftime("%Y-W%W")
+            week_stats = summarize(by_week.get(cur_week, []), now_pt.weekday() + 1)
+            summary = (
+                f"Week: {week_stats['trades']} trades | "
+                f"WR: {week_stats['win_rate']} | "
+                f"Net: ${week_stats['net_pnl']:+.2f}"
+            )
+            publish_report(
+                title="XLM Bot Profit Scoreboard",
+                content=report,
+                folder="02_XLM_Bot/Daily_Scoreboard",
+                summary=summary,
+                app="xlmbot",
+            )
+            print("Published to Google Docs + Slack.")
+        except ImportError:
+            slack_post(report)
+            print("Posted raw to Slack (gdocs_bridge unavailable).")

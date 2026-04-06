@@ -45,6 +45,7 @@ from email.mime.text import MIMEText
 
 # Add broker scripts to path for enrichment module
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "broker"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "06_DEVELOPMENT", "everlight_os"))
 from contact_enrichment import enrich_contact, extract_email_from_text as _enrich_extract_email
 try:
     from attom_enrichment import enrich_property as attom_enrich_property, format_enrichment_summary as attom_format
@@ -86,6 +87,27 @@ from broker_ops.services import (
     ingest_lead,
     ingest_offer,
 )
+
+try:
+    from neuromorphic.nlp_engine import analyze_email_reply
+except Exception:
+    analyze_email_reply = None
+
+try:
+    from neuromorphic.pipeline_api import should_outreach as pipeline_should_outreach, recommend_reply_path
+except Exception:
+    pipeline_should_outreach = None
+    recommend_reply_path = None
+
+try:
+    from neuromorphic.brain_policy import recommend_match_priority
+except Exception:
+    recommend_match_priority = None
+
+try:
+    from hive_mind.slack_router import send_as_agent
+except Exception:
+    send_as_agent = None
 
 try:
     from business_os.services import record_alert, record_event
@@ -237,6 +259,59 @@ def get_emails_sent_today():
         sent_at__gte=today_start,
         status="sent"
     ).count()
+
+
+def _recent_outreach_health(days=14):
+    window_start = timezone.now() - timedelta(days=days)
+    return {
+        "recent_bounces": OutreachSequence.objects.filter(sent_at__gte=window_start, status="bounced").count(),
+        "recent_unsubscribes": LeadProfile.objects.filter(updated_at__gte=window_start, unsubscribed=True).count(),
+        "recent_failures": OutreachSequence.objects.filter(created_at__gte=window_start, status__in=["bounced", "skipped"]).count(),
+    }
+
+
+def _company_size_signal(company_size):
+    return {
+        "1_10": 0.25,
+        "11_50": 0.45,
+        "51_200": 0.7,
+        "200_plus": 0.9,
+    }.get(company_size or "", 0.4)
+
+
+def _budget_signal(lead):
+    budget = 0.0
+    for value in [lead.budget_max, lead.budget_min]:
+        if value is None:
+            continue
+        try:
+            budget = max(budget, float(value))
+        except Exception:
+            continue
+    return max(0.0, min(1.0, budget / 50000.0))
+
+
+def _match_category_fit(match):
+    categories = {str(cat).lower() for cat in (match.lead.categories_needed or [])}
+    offer_category = (match.offer.category or "").lower()
+    return 1.0 if offer_category and offer_category in categories else 0.5
+
+
+def _brain_reply_context(match_result=None):
+    context = {}
+    if not match_result:
+        return context
+    if match_result.get("type") == "buyer_reply":
+        broker_match = match_result.get("match")
+        if broker_match is not None:
+            context["match_score"] = broker_match.match_score
+            context["lead_intent"] = broker_match.lead.intent
+    elif match_result.get("type") == "seller_reply":
+        offer = match_result.get("offer")
+        if offer is not None:
+            context["pricing_model"] = offer.pricing_model
+            context["category"] = offer.category
+    return context
 
 
 # ===========================================================================
@@ -1077,15 +1152,48 @@ def step_create_sequences(dry_run=False):
         outreach_steps__isnull=True  # no existing sequences
     ).order_by("-match_score")[:30]
 
-    created = 0
+    ranked_matches = []
     for match in matches:
+        priority = {
+            "priority_score": round(float(match.match_score) / 100.0, 4),
+            "priority_band": "high" if match.match_score >= 75 else "normal",
+            "learning_mode": "stabilize",
+        }
+        if recommend_match_priority is not None:
+            try:
+                priority = recommend_match_priority({
+                    "match_score": match.match_score,
+                    "lead_intent": match.lead.intent,
+                    "budget_signal": _budget_signal(match.lead),
+                    "category_fit": _match_category_fit(match),
+                })
+            except Exception as e:
+                log.warning(f"  Brain match priority failed for {match.id}: {e}")
+        ranked_matches.append((priority.get("priority_score", 0.0), priority, match))
+
+    created = 0
+    for _, priority, match in sorted(ranked_matches, key=lambda item: item[0], reverse=True):
         if dry_run:
-            log.info(f"  [DRY] Would create sequence: {match.lead.email} <-> {match.offer.title[:30]}")
+            log.info(
+                "  [DRY] Would create sequence: %s <-> %s [%s %.2f]",
+                match.lead.email,
+                match.offer.title[:30],
+                priority.get("priority_band", "normal"),
+                priority.get("priority_score", 0.0),
+            )
             created += 1
             continue
 
         steps = create_outreach_sequence(match)
         if steps:
+            note_line = (
+                f"\n[BRAIN_PRIORITY] {datetime.now().isoformat()} "
+                f"band={priority.get('priority_band', 'normal')} "
+                f"score={priority.get('priority_score', 0.0):.2f} "
+                f"mode={priority.get('learning_mode', 'stabilize')}"
+            )
+            match.notes = (match.notes or "") + note_line
+            match.save(update_fields=["notes", "updated_at"])
             created += 1
 
     log.info(f"  Sequences created: {created}")
@@ -1172,6 +1280,7 @@ def step_send_outreach(dry_run=False):
     daily_limit = get_daily_limit()
     sent_today = get_emails_sent_today()
     remaining = max(0, daily_limit - sent_today)
+    outreach_health = _recent_outreach_health()
 
     if remaining == 0:
         log.info(f"  Daily limit reached ({daily_limit}). Skipping.")
@@ -1181,6 +1290,51 @@ def step_send_outreach(dry_run=False):
     sent = 0
 
     for step in due_steps:
+        brain_decision = None
+        if pipeline_should_outreach is not None:
+            try:
+                lead = step.match.lead
+                offer = step.match.offer
+                last_contacted = lead.last_contacted or lead.created_at
+                days_since_contact = max(0.0, (timezone.now() - last_contacted).total_seconds() / 86400.0)
+                brain_decision = pipeline_should_outreach({
+                    "lead_score": float(step.match.match_score) / 100.0,
+                    "urgency": {"hot": 0.95, "warm": 0.65, "cold": 0.35}.get(lead.intent, 0.5),
+                    "days_since_contact": days_since_contact,
+                    "total_touches": float(lead.contact_count or 0),
+                    "last_reply_sentiment": 0.0,
+                    "hour": timezone.now().hour,
+                    "day_of_week": timezone.now().weekday(),
+                    "industry_match": _match_category_fit(step.match),
+                    "deal_stage": 0.7 if hasattr(step.match, "deal") and step.match.deal_id else 0.2,
+                    "company_size": _company_size_signal(lead.company_size),
+                    **outreach_health,
+                })
+            except Exception as e:
+                log.warning(f"  Brain outreach policy failed for {step.to_email}: {e}")
+
+        if brain_decision and not brain_decision.get("should_outreach", True):
+            delay_days = max(1, int(brain_decision.get("followup_delay_days", 1)))
+            if dry_run:
+                log.info(
+                    "  [DRY] Would defer %s to %s by %sd (%s)",
+                    step.step,
+                    step.to_email,
+                    delay_days,
+                    brain_decision.get("reason", "defer"),
+                )
+                continue
+            step.scheduled_at = max(step.scheduled_at, timezone.now()) + timedelta(days=delay_days)
+            note = (
+                f"\n[BRAIN_DEFERRED] {datetime.now().isoformat()} "
+                f"action={brain_decision.get('reason', 'defer')} "
+                f"delay_days={delay_days}"
+            )
+            step.notes = (step.notes or "") + note
+            step.save(update_fields=["scheduled_at", "notes"])
+            log.info(f"  Deferred {step.step} to {step.to_email} by {delay_days}d via brain policy")
+            continue
+
         if dry_run:
             log.info(f"  [DRY] Would send {step.step} to {step.to_email}")
             sent += 1
@@ -1188,6 +1342,12 @@ def step_send_outreach(dry_run=False):
 
         if _send_email(step.to_email, step.subject, step.body):
             mark_outreach_sent(step)
+            if brain_decision:
+                step.notes = (step.notes or "") + (
+                    f"\n[BRAIN_SENT] {datetime.now().isoformat()} "
+                    f"action={brain_decision.get('reason', 'send_now')}"
+                )
+                step.save(update_fields=["notes"])
             sent += 1
             log.info(f"  Sent {step.step} to {step.to_email}")
 
@@ -1328,6 +1488,74 @@ def _match_reply_to_outreach(sender_email, subject):
     return None
 
 
+def _analyze_reply(subject, body):
+    """Run spaCy reply analysis when neuromorphic NLP is available."""
+    if analyze_email_reply is None:
+        return {}
+    text = "\n".join(part.strip() for part in [subject or "", body or ""] if part and part.strip())
+    if not text:
+        return {}
+    try:
+        return analyze_email_reply(text) or {}
+    except Exception as e:
+        log.warning(f"  Reply NLP analysis failed: {e}")
+        return {}
+
+
+def _reply_analysis_lines(reply_analysis, reply_policy=None):
+    """Format reply analysis for Slack and notes."""
+    lines = []
+    if not reply_analysis and not reply_policy:
+        return lines
+    if reply_analysis:
+        objections = ", ".join(reply_analysis.get("objections") or ["none"])
+        key_phrases = ", ".join((reply_analysis.get("key_phrases") or [])[:3]) or "n/a"
+        sentiment = reply_analysis.get("sentiment_label", "unknown")
+        sentiment_score = float(reply_analysis.get("reply_sentiment", 0.0))
+        lines.extend([
+            f"NLP sentiment: {sentiment} ({sentiment_score:+.2f})",
+            f"NLP interested: {'yes' if reply_analysis.get('is_interested') else 'no'}",
+            f"Objections: {objections}",
+            f"Suggested next action: {reply_analysis.get('next_action', 'follow_up_3d')}",
+            f"Key phrases: {key_phrases}",
+        ])
+    if reply_policy:
+        lines.extend([
+            f"Brain action: {reply_policy.get('recommended_action', 'review')}",
+            f"Brain priority: {reply_policy.get('priority', 'normal')}",
+            f"Escalation score: {float(reply_policy.get('escalation_score', 0.0)):.2f}",
+        ])
+    return lines
+
+
+def _reply_analysis_note(reply_analysis, reply_policy=None):
+    """Compact note-friendly summary of reply analysis."""
+    lines = _reply_analysis_lines(reply_analysis, reply_policy=reply_policy)
+    return " | ".join(lines[:4]) if lines else ""
+
+
+def _route_reply_alert(event_type, audience, message):
+    """Send reply alerts through Slack routing config when available."""
+    if send_as_agent is None:
+        return False
+
+    route_names = ["seller_replies"] if audience == "seller" else ["broker_deals"]
+    if "INTERESTED" in event_type.upper():
+        route_names.append("dispatch")
+
+    posted = False
+    seen = set()
+    for route_name in route_names:
+        if route_name in seen:
+            continue
+        seen.add(route_name)
+        try:
+            posted = send_as_agent(None, route_name, message, route_name=route_name) or posted
+        except Exception as e:
+            log.warning(f"  Routed Slack post failed for {route_name}: {e}")
+    return posted
+
+
 def step_check_replies(dry_run=False):
     """
     Check inbox for replies to outreach emails.
@@ -1420,11 +1648,37 @@ def step_check_replies(dry_run=False):
 
         # Classify the reply
         classification = _classify_reply(subject, body, sender_email)
+        reply_analysis = _analyze_reply(subject, body)
 
         # Match to outreach record
         match_result = _match_reply_to_outreach(sender_email, subject)
+        reply_policy = {}
+        if recommend_reply_path is not None:
+            try:
+                reply_policy = recommend_reply_path(
+                    classification,
+                    reply_analysis=reply_analysis,
+                    context=_brain_reply_context(match_result),
+                ) or {}
+            except Exception as e:
+                log.warning(f"  Brain reply policy failed: {e}")
 
         log.info(f"  Reply from {sender_email}: [{classification}] {subject[:50]}")
+        if reply_analysis:
+            log.info(
+                "    NLP: sentiment=%s interest=%s objections=%s next=%s",
+                reply_analysis.get("sentiment_label", "unknown"),
+                "yes" if reply_analysis.get("is_interested") else "no",
+                ",".join(reply_analysis.get("objections") or ["none"]),
+                reply_analysis.get("next_action", "follow_up_3d"),
+            )
+        if reply_policy:
+            log.info(
+                "    Brain: action=%s priority=%s escalation=%.2f",
+                reply_policy.get("recommended_action", "review"),
+                reply_policy.get("priority", "normal"),
+                float(reply_policy.get("escalation_score", 0.0)),
+            )
 
         if dry_run:
             processed += 1
@@ -1462,15 +1716,19 @@ def step_check_replies(dry_run=False):
                         deal_value = price * 12
                     else:
                         deal_value = price
+                    note_suffix = _reply_analysis_note(reply_analysis, reply_policy=reply_policy)
+                    if note_suffix:
+                        note_suffix = f" | {note_suffix}"
                     deal = create_deal_from_match(
                         broker_match, deal_value,
-                        notes=f"Auto-created: buyer replied interested. Reply: {body[:200]}"
+                        notes=f"Auto-created: buyer replied interested. Reply: {body[:200]}{note_suffix}"
                     )
                     log.info(f"    DEAL CREATED: ${deal_value} from buyer reply!")
 
                     # Slack notification
                     _slack_notify_reply("BUYER INTERESTED", sender_email, lead.name,
-                                       broker_match.offer.title, body[:200])
+                                       broker_match.offer.title, body[:200],
+                                       reply_analysis=reply_analysis, reply_policy=reply_policy, audience="buyer")
 
                 log.info(f"    Lead upgraded to HOT: {lead.name}")
 
@@ -1498,7 +1756,8 @@ def step_check_replies(dry_run=False):
                 lead.intent = "warm"
                 lead.save(update_fields=["intent", "updated_at"])
                 _slack_notify_reply("BUYER REPLIED (neutral)", sender_email,
-                                   lead.name, broker_match.offer.title, body[:200])
+                                   lead.name, broker_match.offer.title, body[:200],
+                                   reply_analysis=reply_analysis, reply_policy=reply_policy, audience="buyer")
                 log.info(f"    Neutral reply logged for review: {lead.name}")
 
         # --- HANDLE SELLER REPLIES ---
@@ -1507,10 +1766,17 @@ def step_check_replies(dry_run=False):
 
             if classification == "interested":
                 # Mark offer as partner-ready
-                offer.notes = (offer.notes or "") + f"\n[SELLER_INTERESTED] {datetime.now().isoformat()} Reply: {body[:200]}"
+                analysis_note = _reply_analysis_note(reply_analysis, reply_policy=reply_policy)
+                if analysis_note:
+                    analysis_note = f" | {analysis_note}"
+                offer.notes = (
+                    (offer.notes or "")
+                    + f"\n[SELLER_INTERESTED] {datetime.now().isoformat()} Reply: {body[:200]}{analysis_note}"
+                )
                 offer.save(update_fields=["notes", "updated_at"])
                 _slack_notify_reply("SELLER INTERESTED", sender_email,
-                                   offer.seller_name, offer.title, body[:200])
+                                   offer.seller_name, offer.title, body[:200],
+                                   reply_analysis=reply_analysis, reply_policy=reply_policy, audience="seller")
                 log.info(f"    SELLER INTERESTED: {offer.seller_name} ({offer.title})")
 
             elif classification == "unsubscribe":
@@ -1520,10 +1786,17 @@ def step_check_replies(dry_run=False):
                 log.info(f"    Seller declined: {offer.seller_name}")
 
             else:  # neutral or bounce
-                offer.notes = (offer.notes or "") + f"\n[SELLER_REPLIED] {datetime.now().isoformat()} [{classification}] {body[:100]}"
+                analysis_note = _reply_analysis_note(reply_analysis, reply_policy=reply_policy)
+                if analysis_note:
+                    analysis_note = f" | {analysis_note}"
+                offer.notes = (
+                    (offer.notes or "")
+                    + f"\n[SELLER_REPLIED] {datetime.now().isoformat()} [{classification}] {body[:100]}{analysis_note}"
+                )
                 offer.save(update_fields=["notes", "updated_at"])
                 _slack_notify_reply(f"SELLER REPLIED ({classification})", sender_email,
-                                   offer.seller_name, offer.title, body[:200])
+                                   offer.seller_name, offer.title, body[:200],
+                                   reply_analysis=reply_analysis, reply_policy=reply_policy, audience="seller")
                 log.info(f"    Seller reply ({classification}): {offer.seller_name}")
 
         processed += 1
@@ -1533,7 +1806,7 @@ def step_check_replies(dry_run=False):
     return processed
 
 
-def _slack_notify_reply(event_type, sender, name, product, body_preview):
+def _slack_notify_reply(event_type, sender, name, product, body_preview, reply_analysis=None, reply_policy=None, audience="seller"):
     """Send Slack alert for a reply via bot token."""
     msg = (
         f"*{event_type}*\n"
@@ -1541,7 +1814,14 @@ def _slack_notify_reply(event_type, sender, name, product, body_preview):
         f"Product: {product}\n"
         f"Reply: _{body_preview}_"
     )
-    # Hot leads go to war-room AND ft-hunters
+    analysis_lines = _reply_analysis_lines(reply_analysis, reply_policy=reply_policy)
+    if analysis_lines:
+        msg += "\n" + "\n".join(analysis_lines)
+
+    if _route_reply_alert(event_type, audience, msg):
+        return
+
+    # Fallback to legacy hardcoded channels
     if "INTERESTED" in event_type.upper():
         _slack_post_bot(f":fire: {msg}", channel=SLACK_CH_WAR_ROOM)
         _slack_post_bot(msg, channel=SLACK_CH_FT_HUNTERS)

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import BrokerMatch, CommissionRecord, Deal, LeadProfile, OfferListing, OutreachSequence
+from .models import BrokerMatch, ClientDocument, ClientFile, CommissionRecord, Deal, LeadProfile, OfferListing, OutreachSequence
 
 
 @admin.register(OfferListing)
@@ -60,3 +60,29 @@ class CommissionRecordAdmin(admin.ModelAdmin):
     list_filter   = ("record_type", "currency")
     search_fields = ("description", "reference", "stripe_payout_id")
     readonly_fields = ("id", "created_at")
+
+
+class ClientDocumentInline(admin.TabularInline):
+    model = ClientDocument
+    extra = 0
+    fields = ("doc_type", "title", "status", "generated_by", "to_email", "created_at")
+    readonly_fields = ("id", "created_at")
+
+
+@admin.register(ClientFile)
+class ClientFileAdmin(admin.ModelAdmin):
+    list_display  = ("property_address", "client_name", "state", "status",
+                     "assignment_fee", "document_count", "updated_at")
+    list_filter   = ("status", "state")
+    search_fields = ("property_address", "client_name", "city")
+    readonly_fields = ("id", "created_at", "updated_at")
+    list_editable  = ("status",)
+    inlines = [ClientDocumentInline]
+
+
+@admin.register(ClientDocument)
+class ClientDocumentAdmin(admin.ModelAdmin):
+    list_display  = ("title", "doc_type", "status", "generated_by", "to_email", "created_at")
+    list_filter   = ("doc_type", "status", "generated_by")
+    search_fields = ("title", "to_email")
+    readonly_fields = ("id", "created_at", "updated_at")

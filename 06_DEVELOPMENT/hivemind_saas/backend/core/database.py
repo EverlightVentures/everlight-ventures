@@ -10,12 +10,16 @@ from typing import AsyncGenerator
 
 from core.config import settings
 
-engine = create_async_engine(
-    settings.database_url,
-    echo=settings.debug,
-    pool_size=10,
-    max_overflow=20,
-)
+engine_kwargs = {
+    "echo": settings.debug,
+}
+if not settings.database_url.startswith("sqlite+"):
+    engine_kwargs.update({
+        "pool_size": 10,
+        "max_overflow": 20,
+    })
+
+engine = create_async_engine(settings.database_url, **engine_kwargs)
 
 AsyncSessionLocal = async_sessionmaker(
     engine,
@@ -30,6 +34,8 @@ class Base(DeclarativeBase):
 
 async def init_db():
     """Create tables if they don't exist (dev only - use Alembic migrations in prod)."""
+    import models  # noqa: F401 - ensure metadata is populated before create_all
+
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

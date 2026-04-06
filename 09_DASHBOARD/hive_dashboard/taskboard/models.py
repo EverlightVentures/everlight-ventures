@@ -1,6 +1,6 @@
 import json
-import base64
 import os
+from pathlib import Path
 try:
     from cryptography.fernet import Fernet
 except ImportError:
@@ -18,14 +18,17 @@ def _get_fernet():
         )
     key = os.environ.get("TASKBOARD_ENCRYPT_KEY")
     if not key:
-        key_file = os.path.join(os.path.dirname(__file__), ".encrypt_key")
-        if os.path.exists(key_file):
-            key = open(key_file).read().strip()
+        vault_key_file = Path("/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/03_Credentials/taskboard_fernet.key")
+        legacy_key_file = Path(os.path.dirname(__file__)) / ".encrypt_key"
+        if vault_key_file.exists():
+            key = vault_key_file.read_text(encoding="utf-8").strip()
+        elif legacy_key_file.exists():
+            key = legacy_key_file.read_text(encoding="utf-8").strip()
         else:
             key = Fernet.generate_key().decode()
-            with open(key_file, "w") as f:
-                f.write(key)
-            os.chmod(key_file, 0o600)
+            vault_key_file.parent.mkdir(parents=True, exist_ok=True)
+            vault_key_file.write_text(key, encoding="utf-8")
+            os.chmod(vault_key_file, 0o600)
     return Fernet(key.encode() if isinstance(key, str) else key)
 
 
@@ -92,6 +95,21 @@ class TaskItem(models.Model):
         (4, "Low"),
         (5, "Optional"),
     ]
+    OWNER_TYPE_CHOICES = [
+        ("ai", "AI"),
+        ("human", "Human"),
+    ]
+    REQUEST_KIND_CHOICES = [
+        ("execution", "AI Execution"),
+        ("input", "Human Input"),
+        ("approval", "Approval"),
+    ]
+    COMPLETED_BY_CHOICES = [
+        ("", "Unknown"),
+        ("ai", "AI"),
+        ("human", "Human"),
+        ("system", "System"),
+    ]
 
     template = models.ForeignKey(TaskTemplate, on_delete=models.CASCADE, related_name="tasks")
     title = models.CharField(max_length=300)
@@ -101,8 +119,12 @@ class TaskItem(models.Model):
     source_agent = models.CharField(max_length=100, blank=True, help_text="Which AI agent created this")
     target_agent = models.CharField(max_length=100, blank=True, help_text="Which agent should receive the data")
     batch_id = models.CharField(max_length=100, blank=True, help_text="Groups related tasks together")
+    owner_type = models.CharField(max_length=20, choices=OWNER_TYPE_CHOICES, default="human", db_index=True)
+    request_kind = models.CharField(max_length=20, choices=REQUEST_KIND_CHOICES, default="input", db_index=True)
     data_encrypted = models.TextField(blank=True, help_text="Encrypted submitted form data")
     notes = models.TextField(blank=True, help_text="Human notes during completion")
+    result_summary = models.TextField(blank=True, help_text="Execution summary or final handoff details")
+    completed_by = models.CharField(max_length=20, choices=COMPLETED_BY_CHOICES, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     completed_at = models.DateTimeField(null=True, blank=True)
@@ -129,9 +151,20 @@ class TaskItem(models.Model):
         raw = f.decrypt(self.data_encrypted.encode())
         return json.loads(raw.decode())
 
-    def mark_completed(self):
+    @property
+    def requires_human_input(self) -> bool:
+        return self.request_kind in {"input", "approval"} or self.owner_type == "human"
+
+    @property
+    def is_ai_owned(self) -> bool:
+        return self.owner_type == "ai" and self.request_kind == "execution"
+
+    def mark_completed(self, actor: str = "system", summary: str = ""):
         self.status = "completed"
         self.completed_at = timezone.now()
+        self.completed_by = actor
+        if summary:
+            self.result_summary = summary
         self.save()
 
     def mark_retrieved(self):

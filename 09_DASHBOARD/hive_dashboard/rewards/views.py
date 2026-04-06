@@ -6,6 +6,7 @@ Public API endpoints (called by frontend/apps) + staff admin dashboard.
 import json
 import logging
 
+from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Sum
 from django.http import JsonResponse
@@ -14,6 +15,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
+from hive_dashboard.security import internal_api_required
 from payments.models import Customer
 from rewards.models import (
     LoyaltyAccount,
@@ -33,6 +35,7 @@ log = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 
 @csrf_exempt
+@internal_api_required
 @require_GET
 def api_account(request, email):
     """GET /rewards/api/account/<email>/  -- loyalty account summary."""
@@ -46,6 +49,7 @@ def api_account(request, email):
 
 
 @csrf_exempt
+@internal_api_required
 @require_POST
 def api_daily_login(request):
     """
@@ -72,6 +76,7 @@ def api_daily_login(request):
 
 
 @csrf_exempt
+@internal_api_required
 @require_POST
 def api_referral_apply(request):
     """
@@ -108,6 +113,7 @@ def api_referral_apply(request):
 
 
 @csrf_exempt
+@internal_api_required
 @require_POST
 def api_redeem_comp(request):
     """
@@ -160,6 +166,7 @@ def referral_landing(request, code):
 # Staff admin dashboard
 # ---------------------------------------------------------------------------
 
+@login_required
 @staff_member_required
 def admin_dashboard(request):
     """
@@ -197,9 +204,9 @@ def admin_dashboard(request):
     return render(request, "rewards/admin_dashboard.html", context)
 
 
+@login_required
 @staff_member_required
 @require_POST
-@csrf_exempt
 def admin_fulfill_comp(request, comp_id):
     """Mark a comp as fulfilled."""
     comp = get_object_or_404(CompReward, id=comp_id)

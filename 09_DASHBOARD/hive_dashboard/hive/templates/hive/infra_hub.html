@@ -1,0 +1,406 @@
+{% extends "hive/base.html" %}
+{% load static %}
+
+{% block title %}Infra Hub -- Oracle Command Center{% endblock %}
+
+{% block content %}
+<style>
+  .infra-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .svc-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all var(--transition-base);
+    position: relative;
+    overflow: hidden;
+  }
+  .svc-card:hover {
+    border-color: var(--gold-dim);
+    box-shadow: 0 0 24px var(--gold-glow);
+    transform: translateY(-2px);
+  }
+  .svc-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .svc-card-header .svc-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    background: rgba(201, 168, 76, 0.12);
+    color: var(--gold);
+  }
+  .svc-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .svc-status.active { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .svc-status.inactive { background: rgba(107,114,128,0.15); color: #6b7280; }
+  .svc-status.failed { background: rgba(239,68,68,0.15); color: #ef4444; }
+  .svc-status.loading { background: rgba(201,168,76,0.15); color: var(--gold); }
+  .svc-status.unknown { background: rgba(107,114,128,0.15); color: #6b7280; }
+  .svc-status-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: currentColor;
+    animation: pulse-dot 2s infinite;
+  }
+  .svc-status.active .svc-status-dot { background: #22c55e; }
+  .svc-status.failed .svc-status-dot { background: #ef4444; animation: none; }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .svc-card-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+  .svc-card-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+  }
+  .svc-card-port {
+    font-size: 0.7rem;
+    color: var(--gold-dim);
+    margin-top: 8px;
+    font-family: monospace;
+  }
+
+  /* Dashboard links */
+  .dash-links {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .dash-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all var(--transition-base);
+  }
+  .dash-link:hover {
+    border-color: var(--gold);
+    box-shadow: 0 0 20px var(--gold-glow);
+    transform: translateY(-1px);
+  }
+  .dash-link i {
+    font-size: 1.2rem;
+    width: 24px;
+    text-align: center;
+  }
+  .dash-link span {
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  /* System metrics bar */
+  .sys-metrics {
+    display: flex;
+    gap: 24px;
+    padding: 16px 20px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  .sys-metric {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sys-metric-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .sys-metric-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    font-family: monospace;
+  }
+  .sys-metric-value.warn { color: #f59e0b; }
+  .sys-metric-value.danger { color: #ef4444; }
+
+  /* Section headers */
+  .infra-section {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    color: var(--gold);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .infra-section i {
+    font-size: 0.9rem;
+    opacity: 0.7;
+  }
+
+  /* Auto-refresh indicator */
+  .refresh-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .refresh-timer {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+  .refresh-btn {
+    background: rgba(201,168,76,0.12);
+    color: var(--gold);
+    border: 1px solid var(--gold-dim);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all var(--transition-base);
+  }
+  .refresh-btn:hover {
+    background: rgba(201,168,76,0.25);
+  }
+  .refresh-btn.loading { opacity: 0.6; pointer-events: none; }
+
+  /* Summary counts */
+  .svc-summary {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .svc-count {
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .svc-count .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+  }
+  .svc-count.up .dot { background: #22c55e; }
+  .svc-count.down .dot { background: #ef4444; }
+  .svc-count.other .dot { background: #6b7280; }
+</style>
+
+<!-- Page header -->
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;">
+  <div>
+    <h1 style="font-family:var(--font-heading);font-size:1.8rem;color:var(--gold);margin-bottom:4px;">
+      <i class="fa-solid fa-server" style="margin-right:8px;"></i>Infra Hub
+    </h1>
+    <p style="color:var(--text-secondary);font-size:0.85rem;">Oracle E5 -- {{ oracle_ip }} -- All services at a glance</p>
+  </div>
+  <div class="refresh-bar" style="margin-bottom:0;">
+    <span class="refresh-timer" id="refreshTimer">Auto-refresh: 30s</span>
+    <button class="refresh-btn" id="refreshBtn" onclick="fetchStatus()">
+      <i class="fa-solid fa-arrows-rotate"></i> Refresh
+    </button>
+  </div>
+</div>
+
+<!-- System metrics -->
+<div class="sys-metrics" id="sysMetrics">
+  <div class="sys-metric">
+    <span class="sys-metric-label">Host</span>
+    <span class="sys-metric-value">{{ oracle_ip }}</span>
+  </div>
+  <div class="sys-metric">
+    <span class="sys-metric-label">Disk</span>
+    <span class="sys-metric-value" id="metricDisk">--</span>
+  </div>
+  <div class="sys-metric">
+    <span class="sys-metric-label">RAM</span>
+    <span class="sys-metric-value" id="metricRam">--</span>
+  </div>
+  <div class="sys-metric">
+    <span class="sys-metric-label">Services</span>
+    <span class="sys-metric-value" id="metricSvcs">{{ services|length }}</span>
+  </div>
+  <div class="sys-metric">
+    <span class="sys-metric-label">Last Check</span>
+    <span class="sys-metric-value" id="metricTs" style="font-size:0.85rem;">--</span>
+  </div>
+</div>
+
+<!-- Summary counts -->
+<div class="svc-summary" id="svcSummary">
+  <span class="svc-count up"><span class="dot"></span> <span id="countUp">--</span> Running</span>
+  <span class="svc-count down"><span class="dot"></span> <span id="countDown">0</span> Failed</span>
+  <span class="svc-count other"><span class="dot"></span> <span id="countOther">0</span> Other</span>
+</div>
+
+<!-- Dashboard links -->
+<div class="infra-section">
+  <i class="fa-solid fa-arrow-up-right-from-square"></i> Quick Access
+</div>
+<div class="dash-links">
+  {% for link in dashboard_links %}
+  <a href="{{ link.url }}" target="_blank" rel="noopener" class="dash-link">
+    <i class="fa-solid {{ link.icon }}" style="color:{{ link.color }};"></i>
+    <span>{{ link.name }}</span>
+  </a>
+  {% endfor %}
+</div>
+
+<!-- Service cards -->
+<div class="infra-section">
+  <i class="fa-solid fa-cubes"></i> Services
+</div>
+<div class="infra-grid" id="serviceGrid">
+  {% for svc in services %}
+  <div class="svc-card" id="svc-{{ svc.id }}" data-svc-id="{{ svc.id }}">
+    <div class="svc-card-header">
+      <div class="svc-icon"><i class="fa-solid {{ svc.icon }}"></i></div>
+      <span class="svc-status loading" id="status-{{ svc.id }}">
+        <span class="svc-status-dot"></span>
+        <span class="svc-status-text">checking...</span>
+      </span>
+    </div>
+    <div class="svc-card-name">{{ svc.name }}</div>
+    <div class="svc-card-desc">{{ svc.desc }}</div>
+    {% if svc.port %}
+    <div class="svc-card-port">:{{ svc.port }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+<script>
+  var VALID_STATUSES = ['active', 'inactive', 'failed', 'activating', 'unknown', 'timeout', 'error'];
+  var refreshInterval;
+  var countdown = 30;
+
+  function sanitizeStatus(raw) {
+    var s = String(raw || 'unknown').toLowerCase().trim();
+    return VALID_STATUSES.indexOf(s) !== -1 ? s : 'unknown';
+  }
+
+  function statusClass(status) {
+    if (status === 'active') return 'active';
+    if (status === 'failed') return 'failed';
+    if (status === 'inactive') return 'inactive';
+    return 'unknown';
+  }
+
+  function updateStatusBadge(svcId, status) {
+    var el = document.getElementById('status-' + svcId);
+    if (!el) return;
+    var clean = sanitizeStatus(status);
+    el.className = 'svc-status ' + statusClass(clean);
+    var textEl = el.querySelector('.svc-status-text');
+    if (textEl) textEl.textContent = clean;
+  }
+
+  function fetchStatus() {
+    var btn = document.getElementById('refreshBtn');
+    btn.classList.add('loading');
+    var btnIcon = btn.querySelector('i');
+    if (btnIcon) {
+      btnIcon.className = 'fa-solid fa-spinner fa-spin';
+    }
+
+    fetch('{% url "hive:api_infra_status" %}')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var svcs = data.services || {};
+        var up = 0, down = 0, other = 0;
+
+        Object.keys(svcs).forEach(function(sid) {
+          var info = svcs[sid];
+          var status = sanitizeStatus(info.status);
+          updateStatusBadge(sid, status);
+
+          if (status === 'active') up++;
+          else if (status === 'failed') down++;
+          else other++;
+        });
+
+        document.getElementById('countUp').textContent = up;
+        document.getElementById('countDown').textContent = down;
+        document.getElementById('countOther').textContent = other;
+        document.getElementById('metricSvcs').textContent = up + '/' + Object.keys(svcs).length;
+
+        // Disk
+        var diskPct = parseInt(data.disk_pct, 10);
+        var diskEl = document.getElementById('metricDisk');
+        diskEl.textContent = (isNaN(diskPct) ? '?' : diskPct) + '%';
+        diskEl.className = 'sys-metric-value' + (diskPct > 85 ? ' danger' : diskPct > 70 ? ' warn' : '');
+
+        // RAM
+        var memUsed = parseInt(data.mem_used_mb, 10);
+        var memTotal = parseInt(data.mem_total_mb, 10);
+        var ramEl = document.getElementById('metricRam');
+        if (!isNaN(memUsed) && !isNaN(memTotal) && memTotal > 0) {
+          var ramPct = Math.round((memUsed / memTotal) * 100);
+          ramEl.textContent = memUsed + ' / ' + memTotal + ' MB (' + ramPct + '%)';
+          ramEl.className = 'sys-metric-value' + (ramPct > 90 ? ' danger' : ramPct > 75 ? ' warn' : '');
+        }
+
+        // Timestamp
+        if (data.ts) {
+          var t = new Date(data.ts);
+          document.getElementById('metricTs').textContent = t.toLocaleTimeString();
+        }
+
+        countdown = 30;
+      })
+      .catch(function(err) {
+        console.error('Infra check failed:', err);
+      })
+      .finally(function() {
+        btn.classList.remove('loading');
+        var icon = btn.querySelector('i');
+        if (icon) icon.className = 'fa-solid fa-arrows-rotate';
+        var textNode = btn.lastChild;
+        if (textNode && textNode.nodeType === 3) textNode.textContent = ' Refresh';
+      });
+  }
+
+  // Auto-refresh every 30s
+  function tick() {
+    countdown--;
+    document.getElementById('refreshTimer').textContent = 'Auto-refresh: ' + countdown + 's';
+    if (countdown <= 0) {
+      fetchStatus();
+    }
+  }
+
+  // Initial fetch + timer
+  fetchStatus();
+  refreshInterval = setInterval(tick, 1000);
+</script>
+{% endblock %}

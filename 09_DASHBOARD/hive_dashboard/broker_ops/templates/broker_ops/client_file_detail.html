@@ -1,0 +1,200 @@
+{% extends "hive/base.html" %}
+{% load humanize %}
+{% block title %}{{ cf.property_address }} | Client File{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-1">
+    <div>
+      <a href="{% url 'broker_ops:client_files' %}" class="text-muted text-decoration-none small">&larr; All Client Files</a>
+      <h2 class="mb-0 mt-1">{{ cf.property_address }}</h2>
+      <p class="text-muted mb-0">{{ cf.city }}, {{ cf.state }} &bull; {{ cf.client_name }}</p>
+    </div>
+    <span class="badge fs-6
+      {% if cf.status == 'active' %}bg-success
+      {% elif cf.status == 'under_contract' %}bg-warning text-dark
+      {% elif cf.status == 'closing' %}bg-info
+      {% elif cf.status == 'closed' %}bg-primary
+      {% else %}bg-secondary{% endif %}">
+      {{ cf.get_status_display }}
+    </span>
+  </div>
+
+  <!-- Deal Numbers -->
+  <div class="row g-3 my-3">
+    <div class="col-6 col-md-3">
+      <div class="card">
+        <div class="card-body py-2 text-center">
+          <small class="text-muted d-block">Contract Price</small>
+          <strong>${{ cf.contract_price|intcomma }}</strong>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-success bg-opacity-10">
+        <div class="card-body py-2 text-center">
+          <small class="text-muted d-block">Assignment Fee</small>
+          <strong class="text-success">${{ cf.assignment_fee|intcomma }}</strong>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card">
+        <div class="card-body py-2 text-center">
+          <small class="text-muted d-block">Buyer Price</small>
+          <strong>${{ cf.buyer_price|intcomma }}</strong>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card">
+        <div class="card-body py-2 text-center">
+          <small class="text-muted d-block">ARV</small>
+          <strong class="text-info">${{ cf.estimated_arv|intcomma }}</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Parties -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="text-muted text-uppercase" style="font-size:11px;letter-spacing:1px;">Seller</h6>
+          <strong>{{ cf.client_name }}</strong>
+          {% if cf.property_lead %}
+          <br><small class="text-muted">{{ cf.property_lead.owner_phone }}</small>
+          <br><small class="text-muted">{{ cf.property_lead.owner_email }}</small>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="text-muted text-uppercase" style="font-size:11px;letter-spacing:1px;">Buyer</h6>
+          {% if cf.buyer %}
+          <strong>{{ cf.buyer.name }}</strong>
+          <br><small class="text-muted">{{ cf.buyer.company }}</small>
+          <br><small class="text-muted">{{ cf.buyer.email }}</small>
+          {% else %}
+          <span class="text-muted">Not yet assigned</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card h-100">
+        <div class="card-body">
+          <h6 class="text-muted text-uppercase" style="font-size:11px;letter-spacing:1px;">Title Company</h6>
+          {% if cf.title_company %}
+          <strong>{{ cf.title_company }}</strong>
+          <br><small class="text-muted">{{ cf.title_contact }}</small>
+          <br><small class="text-muted">{{ cf.title_email }}</small>
+          {% else %}
+          <span class="text-muted">Not yet assigned</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Document Timeline -->
+  <h4 class="mb-3">Document Timeline <span class="badge bg-dark">{{ doc_count }}</span></h4>
+
+  <div class="position-relative" style="padding-left:40px;">
+    <!-- Vertical line -->
+    <div style="position:absolute;left:18px;top:0;bottom:0;width:2px;background:#dee2e6;"></div>
+
+    {% for step in timeline %}
+    <div class="mb-4 position-relative">
+      <!-- Step circle -->
+      <div style="position:absolute;left:-40px;top:2px;width:36px;height:36px;border-radius:50%;
+                  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;
+                  {% if step.completed %}background:#198754;color:#fff;{% else %}background:#e9ecef;color:#6c757d;{% endif %}">
+        {% if step.completed %}&#10003;{% else %}{{ step.step }}{% endif %}
+      </div>
+
+      {% if step.doc %}
+      <!-- Completed document card -->
+      <div class="card border-start border-3
+        {% if step.doc.status == 'draft' %}border-secondary
+        {% elif step.doc.status == 'sent' %}border-primary
+        {% elif step.doc.status == 'signed' %}border-success
+        {% elif step.doc.status == 'final' %}border-success
+        {% else %}border-danger{% endif %}">
+        <div class="card-body py-3">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h6 class="mb-1">{{ step.label }}</h6>
+              <p class="text-muted mb-1 small">{{ step.doc.title }}</p>
+              <div class="d-flex gap-2 align-items-center">
+                <span class="badge bg-secondary">{{ step.doc.get_status_display }}</span>
+                {% if step.doc.generated_by %}
+                <small class="text-muted">by {{ step.doc.generated_by }}</small>
+                {% endif %}
+                <small class="text-muted">{{ step.doc.created_at|timesince }} ago</small>
+              </div>
+            </div>
+            <a href="{% url 'broker_ops:client_doc_preview' step.doc.id %}"
+               target="_blank" class="btn btn-sm btn-outline-dark">
+              View
+            </a>
+          </div>
+          {% if step.doc.to_email %}
+          <small class="text-muted d-block mt-1">To: {{ step.doc.to_email }}</small>
+          {% endif %}
+          {% if step.doc.sent_at %}
+          <small class="text-success d-block">Sent {{ step.doc.sent_at|timesince }} ago</small>
+          {% endif %}
+        </div>
+      </div>
+      {% else %}
+      <!-- Pending step -->
+      <div class="card bg-light border-0">
+        <div class="card-body py-3">
+          <h6 class="mb-0 text-muted">{{ step.label }}</h6>
+          <small class="text-muted">Pending</small>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+
+    <!-- Additional documents (addenda, notes, etc.) -->
+    {% for doc in documents %}
+      {% if doc.doc_type == "addendum" or doc.doc_type == "note" or doc.doc_type == "other" %}
+      <div class="mb-4 position-relative">
+        <div style="position:absolute;left:-40px;top:2px;width:36px;height:36px;border-radius:50%;
+                    display:flex;align-items:center;justify-content:center;
+                    background:#6c757d;color:#fff;font-size:12px;">+</div>
+        <div class="card">
+          <div class="card-body py-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h6 class="mb-1">{{ doc.get_doc_type_display }}</h6>
+                <p class="text-muted mb-0 small">{{ doc.title }}</p>
+              </div>
+              <a href="{% url 'broker_ops:client_doc_preview' doc.id %}"
+                 target="_blank" class="btn btn-sm btn-outline-dark">View</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- Notes -->
+  {% if cf.notes %}
+  <div class="card mt-4">
+    <div class="card-body">
+      <h6 class="text-muted text-uppercase" style="font-size:11px;">Notes</h6>
+      <p class="mb-0">{{ cf.notes|linebreaksbr }}</p>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

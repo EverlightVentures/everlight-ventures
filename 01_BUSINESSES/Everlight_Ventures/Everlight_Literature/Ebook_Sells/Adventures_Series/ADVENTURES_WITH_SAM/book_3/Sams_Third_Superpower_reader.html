@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sam's Third Superpower &mdash; Adventures with Sam &amp; Robo, Book 3</title>
+    <style>
+        :root {
+            --bg: #fdf8f0;
+            --text: #3e2c1a;
+            --accent: #c47f17;
+            --accent-light: #e6a23c;
+            --accent-warm: #d4380d;
+            --chapter-bg: #ffffff;
+            --sidebar-bg: #f5eed8;
+            --sidebar-text: #5a4a30;
+            --border: #d4c4a0;
+            --scene-break: #c4a060;
+            --interactive-bg: #fff8e1;
+            --interactive-border: #f9a825;
+            --qa-bg: #e8f5e9;
+            --qa-border: #43a047;
+            --illustration-bg: #f3e5f5;
+            --illustration-border: #ab47bc;
+            --values-bg: #fce4ec;
+            --values-border: #ef5350;
+        }
+        [data-theme="dark"] {
+            --bg: #2a2010;
+            --text: #e0d8c8;
+            --accent: #e6a23c;
+            --accent-light: #f0c060;
+            --accent-warm: #ff6e40;
+            --chapter-bg: #33291a;
+            --sidebar-bg: #221a0a;
+            --sidebar-text: #b0a080;
+            --border: #504020;
+            --scene-break: #8a7040;
+            --interactive-bg: #3e3520;
+            --interactive-border: #c49000;
+            --qa-bg: #1a2e1a;
+            --qa-border: #388e3c;
+            --illustration-bg: #2e1a3e;
+            --illustration-border: #7a3a9a;
+            --values-bg: #3e1a2a;
+            --values-border: #c44040;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.9;
+            transition: all 0.3s ease;
+        }
+        .progress-bar {
+            position: fixed;
+            top: 0; left: 0;
+            height: 3px;
+            background: var(--accent);
+            z-index: 300;
+            transition: width 0.1s;
+        }
+        .sidebar {
+            position: fixed;
+            left: 0; top: 0; bottom: 0;
+            width: 280px;
+            background: var(--sidebar-bg);
+            border-right: 2px solid var(--border);
+            overflow-y: auto;
+            padding: 2rem 1.5rem;
+            z-index: 100;
+            transform: translateX(0);
+            transition: transform 0.3s ease;
+        }
+        .sidebar.hidden { transform: translateX(-280px); }
+        .sidebar h1 {
+            font-size: 1.15rem;
+            color: var(--accent);
+            margin-bottom: 0.3rem;
+            letter-spacing: 0.03em;
+            font-weight: 700;
+        }
+        .sidebar .subtitle {
+            font-size: 0.8rem;
+            color: var(--sidebar-text);
+            font-style: italic;
+            margin-bottom: 0.5rem;
+        }
+        .sidebar .series {
+            font-size: 0.7rem;
+            color: var(--sidebar-text);
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .sidebar .superpower-tracker {
+            font-size: 0.7rem;
+            color: var(--accent);
+            margin-bottom: 1.2rem;
+            padding: 0.6rem;
+            background: rgba(196,127,23,0.08);
+            border-radius: 8px;
+            line-height: 1.6;
+        }
+        .sidebar .superpower-tracker .sp-label { font-weight: 600; }
+        .sidebar .sp-locked { opacity: 0.4; }
+        .sidebar ul { list-style: none; }
+        .sidebar li { margin-bottom: 0.4rem; }
+        .sidebar a {
+            color: var(--sidebar-text);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+            display: block;
+            padding: 0.4rem 0.6rem;
+            border-radius: 6px;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            color: var(--accent);
+            background: rgba(196,127,23,0.1);
+        }
+        .sidebar a .ch-num {
+            display: inline-block;
+            width: 22px; height: 22px;
+            line-height: 22px;
+            text-align: center;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-right: 0.5rem;
+        }
+        .controls {
+            position: fixed;
+            top: 1rem; right: 1rem;
+            z-index: 200;
+            display: flex;
+            gap: 0.5rem;
+        }
+        .controls button {
+            background: var(--sidebar-bg);
+            border: 1px solid var(--border);
+            color: var(--sidebar-text);
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        .controls button:hover {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        .menu-btn {
+            position: fixed;
+            top: 1rem; left: 1rem;
+            z-index: 200;
+            background: var(--sidebar-bg);
+            border: 1px solid var(--border);
+            color: var(--sidebar-text);
+            padding: 0.5rem 0.8rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: none;
+        }
+        .main {
+            margin-left: 280px;
+            transition: margin-left 0.3s ease;
+        }
+        .main.full { margin-left: 0; }
+        .title-page {
+            text-align: center;
+            padding: 6rem 2rem 4rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .title-page .book-number {
+            display: inline-block;
+            width: 60px; height: 60px;
+            line-height: 60px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+        }
+        .title-page h1 {
+            font-size: 2.6rem;
+            color: var(--accent);
+            margin-bottom: 0.3rem;
+            font-weight: 800;
+        }
+        .title-page .subtitle {
+            font-size: 1.1rem;
+            color: var(--sidebar-text);
+            font-style: italic;
+            margin-bottom: 2rem;
+        }
+        .title-page .series-name {
+            font-size: 0.9rem;
+            color: var(--sidebar-text);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .title-page .superpower-badge {
+            display: inline-block;
+            margin-top: 2rem;
+            padding: 0.8rem 1.5rem;
+            background: rgba(196,127,23,0.1);
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            color: var(--accent);
+            font-weight: 600;
+        }
+        .chapter {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 3rem 2rem 4rem;
+        }
+        .chapter-title {
+            font-size: 1.6rem;
+            color: var(--accent);
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+        .chapter-body p {
+            margin-bottom: 1.2rem;
+            font-size: 1.05rem;
+        }
+        .chapter-body p em { color: var(--accent); }
+        .illustration-note {
+            margin: 2rem 0;
+            padding: 1rem 1.2rem;
+            background: var(--illustration-bg);
+            border: 1px dashed var(--illustration-border);
+            border-radius: 10px;
+            font-size: 0.85rem;
+            color: var(--illustration-border);
+            line-height: 1.7;
+        }
+        .illustration-note .ill-label {
+            font-weight: 700;
+            color: var(--illustration-border);
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        .illustration-note.collapsed .ill-content { display: none; }
+        .illustration-note .ill-toggle { cursor: pointer; user-select: none; }
+        .illustration-note .ill-toggle::after { content: ' [hide]'; font-size: 0.7rem; opacity: 0.6; }
+        .illustration-note.collapsed .ill-toggle::after { content: ' [show]'; }
+        .interactive {
+            margin: 2rem 0;
+            padding: 1.2rem 1.5rem;
+            background: var(--interactive-bg);
+            border: 2px solid var(--interactive-border);
+            border-radius: 12px;
+        }
+        .interactive .int-label {
+            font-weight: 700;
+            color: var(--interactive-border);
+            margin-bottom: 0.5rem;
+        }
+        .interactive p {
+            color: var(--accent-warm);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .qa-section {
+            margin: 2rem 0;
+            padding: 1.2rem 1.5rem;
+            background: var(--qa-bg);
+            border: 2px solid var(--qa-border);
+            border-radius: 12px;
+        }
+        .qa-section .qa-q {
+            font-weight: 700;
+            color: var(--qa-border);
+            margin-bottom: 0.5rem;
+        }
+        .qa-section .qa-a { font-style: italic; }
+        .qa-section .qa-a .reveal-btn {
+            cursor: pointer;
+            background: var(--qa-border);
+            color: white;
+            border: none;
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-family: inherit;
+        }
+        .qa-section .qa-a .answer-text { display: none; }
+        .qa-section .qa-a .answer-text.shown { display: inline; }
+        .values-box {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: var(--values-bg);
+            border: 2px solid var(--values-border);
+            border-radius: 12px;
+        }
+        .values-box h3 { color: var(--values-border); margin-bottom: 1rem; }
+        .back-matter {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 3rem 2rem 6rem;
+        }
+        .back-matter h2 {
+            font-size: 1.5rem;
+            color: var(--accent);
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        .back-matter h3 {
+            font-size: 1.2rem;
+            color: var(--accent);
+            margin: 2rem 0 1rem;
+        }
+        .back-matter p { margin-bottom: 1rem; font-size: 1rem; }
+        .back-matter ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+        .back-matter li { margin-bottom: 0.5rem; }
+        .sp-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        .sp-table th, .sp-table td {
+            padding: 0.6rem 1rem;
+            border: 1px solid var(--border);
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        .sp-table th { background: var(--sidebar-bg); font-weight: 600; }
+        .sp-table .current { background: rgba(196,127,23,0.1); font-weight: 600; }
+        .scene-break {
+            text-align: center;
+            margin: 2rem 0;
+            color: var(--scene-break);
+            font-size: 1.2rem;
+            letter-spacing: 0.5rem;
+        }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-280px); }
+            .sidebar.visible { transform: translateX(0); }
+            .main { margin-left: 0; }
+            .menu-btn { display: block; }
+            .chapter { padding: 2rem 1.2rem 3rem; }
+            .title-page { padding: 4rem 1.5rem 3rem; }
+            .title-page h1 { font-size: 1.8rem; }
+        }
+        body.font-sm { font-size: 15px; }
+        body.font-md { font-size: 18px; }
+        body.font-lg { font-size: 21px; }
+        body.font-xl { font-size: 24px; }
+        html { scroll-behavior: smooth; }
+        .audio-sample {
+            margin: 2rem auto;
+            max-width: 700px;
+            padding: 1.2rem 2rem;
+            background: var(--interactive-bg);
+            border: 2px solid var(--interactive-border);
+            border-radius: 12px;
+            text-align: center;
+        }
+        .audio-sample audio {
+            width: 100%;
+            max-width: 420px;
+            border-radius: 8px;
+        }
+        .audio-sample .sample-label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--sidebar-text);
+            margin-top: 0.6rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body class="font-md">
+    <div class="progress-bar" id="progressBar"></div>
+    <button class="menu-btn" onclick="toggleSidebar()">&#9776;</button>
+
+    <nav class="sidebar" id="sidebar">
+        <h1>Sam's Third Superpower</h1>
+        <div class="subtitle">Adventures with Sam &amp; Robo</div>
+        <div class="series">Everlight Kids &mdash; Book 3 of 5</div>
+        <div class="superpower-tracker">
+            <div class="sp-label">Superpowers Unlocked:</div>
+            &#9889; Understanding Animals (Book 1)<br>
+            &#9889; Scientific Tasks (Book 2)<br>
+            &#9889; <strong>Heightened Senses (Book 3)</strong><br>
+            <span class="sp-locked">&#10067; Book 4 &mdash; ???</span><br>
+            <span class="sp-locked">&#10067; Book 5 &mdash; ???</span>
+        </div>
+        <ul>
+            <li><a href="#title-page">Title Page</a></li>
+            <li><a href="#ch1"><span class="ch-num">1</span>The Mysterious Note</a></li>
+            <li><a href="#ch2"><span class="ch-num">2</span>The Missing Ring</a></li>
+            <li><a href="#ch3"><span class="ch-num">3</span>Garden Adventure</a></li>
+            <li><a href="#ch4"><span class="ch-num">4</span>The Missing Toy</a></li>
+            <li><a href="#ch5"><span class="ch-num">5</span>Playground Treasure</a></li>
+            <li><a href="#backmatter">Back Matter</a></li>
+        </ul>
+    </nav>
+
+    <div class="controls">
+        <button onclick="changeFontSize(-1)" title="Smaller text">A-</button>
+        <button onclick="changeFontSize(1)" title="Larger text">A+</button>
+        <button onclick="toggleTheme()" id="themeBtn" title="Toggle dark mode">&#9790;</button>
+        <button onclick="toggleIllustrations()" id="illBtn" title="Toggle illustration notes">&#127912;</button>
+    </div>
+
+    <div class="main" id="main">
+
+        <div class="title-page" id="title-page">
+            <div class="book-number">3</div>
+            <h1>Sam's Third Superpower</h1>
+            <div class="subtitle">Adventures with Sam &amp; Robo &mdash; Book 3</div>
+            <div class="series-name">Everlight Kids &bull; Everlight Ventures</div>
+            <div class="superpower-badge">&#9889; Superpower: Heightened Senses</div>
+        </div>
+
+        <!-- SAMPLE AUDIO BOOK (ElevenLabs Hollywood Voice) -->
+        <div class="audio-sample">
+            <audio controls preload="metadata">
+                <source src="audiobook/trailer_sample.mp3" type="audio/mpeg">
+                Your browser does not support audio playback.
+            </audio>
+            <span class="sample-label">Sample audio book</span>
+        </div>
+
+        <!-- CHAPTER 1 -->
+        <section class="chapter" id="ch1">
+            <h2 class="chapter-title">Chapter 1: The Mysterious Note</h2>
+            <div class="chapter-body">
+
+                <div class="illustration-note">
+                    <div class="ill-toggle ill-label" onclick="toggleIll(this)">&#127912; Illustration &mdash; Sam &amp; Robo find a mysterious note on the front porch</div>
+                    <div class="ill-content">
+                        <p>Scene: Bright sunny morning. Sam holds a mysterious note while Robo beeps beside him on the porch. B&amp;W coloring version on left page, full color on right.</p>
+                        <p>Images: 3_1_bw.jpg / 3_1_color.jpg</p>
+                    </div>
+                </div>
+
+                <p>Sam &amp; Robo woke up to a bright and sunny day, ready for a new adventure. They remembered their past adventures and the valuable lessons they had learned about phonics, healthy habits, and helping others. Today felt like another day to put those lessons to good use.</p>
+                <p>As they stepped outside, they noticed a strange note on their front porch. Sam picked it up and saw that it was filled with words using blends and digraphs, along with some familiar sight words they had learned before.</p>
+                <p>"Look, Robo! A mystery note!" Sam exclaimed.</p>
+                <p>Robo beeped with excitement. "Let's decode it, Sam! We'll use our new blends and digraphs skills and review what we learned before."</p>
+                <p>The note read: "Find the <em>blue</em> plant by the <em>stream</em> and <em>check</em> the <em>chest</em> for the next clue."</p>
+                <p>"Blends like '<em>bl</em>' in blue and '<em>st</em>' in stream, and digraphs like '<em>ch</em>' in check and '<em>sh</em>' in chest," Robo pointed out.</p>
+                <p>"Wow! This is going to be fun!" Sam said. They repeated the blends and digraphs together: "<em>bl, st, ch, sh.</em>"</p>
+                <p>Using their new phonics skills, they decoded the note and set off to find the blue plant by the stream. As they walked, they practiced sight words like "<em>what</em>," "<em>where</em>," and "<em>which</em>," and reviewed the ones they had learned before like "the," "and," "can."</p>
+                <p>"What will we find by the stream?" Sam wondered aloud.</p>
+                <p>"Where could the chest be hidden?" Robo asked.</p>
+                <p>On their way, they bumped into their old friends, Lily and the farmer. Sam shared the mystery with them, and they all decided to help.</p>
+                <p>Lily said, "I remember when we grew that sunflower plant together. We can use our gardening skills to help find the plant."</p>
+                <p>The farmer added, "And remember, hard work pays off. Let's find that blue plant and solve this mystery together!"</p>
+
+                <div class="scene-break">&#10045; &#10045; &#10045;</div>
+
+                <div class="illustration-note">
+                    <div class="ill-toggle ill-label" onclick="toggleIll(this)">&#127912; Illustration &mdash; Finding the blue plant and chest by the stream</div>
+                    <div class="ill-content">
+                        <p>Scene: Sam &amp; Robo at a sparkling stream, discovering a glowing blue plant and a small treasure chest. Lily and the farmer watch from behind.</p>
+                        <p>Images: 3_2_bw.jpg / 3_2_color.jpg</p>
+                    </div>
+                </div>
+
+                <p>As they reached the stream, they saw the blue plant and a small chest beside it. Sam opened the chest and found another note inside.</p>
+                <p>"This is just the beginning, Robo. Let's keep going and solve the mystery!" Sam said with determination.</p>
+                <p>They felt proud of their new skills and the lessons they had learned. They knew that with teamwork, hard work, and their phonics skills, they could solve any mystery.</p>
+
+                <div class="interactive">
+                    <div class="int-label">&#11088; Interactive Moment</div>
+                    <p>Can you help Sam find the blue plant? Point to where you think it might be!</p>
+                </div>
+
+                <div class="qa-section">
+                    <div class="qa-q">Question: What are the two blends that Sam &amp; Robo first learn about?</div>
+                    <div class="qa-a">
+                        <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+                        <span class="answer-text">"bl" and "st".</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CHAPTER 2 -->
+        <section class="chapter" id="ch2">
+            <h2 class="chapter-title">Chapter 2: The Missing Ring</h2>
+            <div class="chapter-body">
+
+                <div class="illustration-note">
+                    <div class="ill-toggle ill-label" onclick="toggleIll(this)">&#127912; Illustration &mdash; Sam &amp; Robo searching behind trees</div>
+                    <div class="ill-content">
+                        <p>Scene: Sam &amp; Robo look behind small trees, reading clue notes. B&amp;W coloring version on left page, full color on right.</p>
+                        <p>Images: 3_33_bw.jpg / 3_33_color.jpg</p>
+                    </div>
+                </div>
+
+                <p>With the new clue in hand, Sam &amp; Robo set off to solve the first mystery. The note from the chest read: "Look behind the <em>small</em> tree to find the missing ring."</p>
+                <p>"Look, there's another blend &mdash; '<em>sm</em>' in small," Robo pointed out.</p>
+                <p>Sam nodded. "And we already know 'the' and 'find' from our sight words. Let's go!"</p>
+                <p>They walked towards the small tree, repeating the blends and digraphs as they went: "<em>sm, bl, st, ch, sh.</em>" Along the way, they encountered various objects and scenarios that required their reading and decoding skills.</p>
+                <p>They reached the tree and looked behind it, but there was nothing there. Sam scratched his head. "Hmm, maybe we need to read the clue again."</p>
+                <p>Robo beeped and read aloud, "Look behind the small tree to find the missing ring."</p>
+                <p>They looked around and noticed several small trees nearby. "We need to check each one," Sam suggested.</p>
+                <p>As they searched, they found other notes hidden along the way, each with blends and digraphs. One note read: "The ring is near the stream by the big rock."</p>
+
+                <div class="scene-break">&#10045; &#10045; &#10045;</div>
+
+                <div class="illustration-note">
+                    <div class="ill-toggle ill-label" onclick="toggleIll(this)">&#127912; Illustration &mdash; Finding the shiny ring by the big rock</div>
+                    <div class="ill-content">
+                        <p>Scene: Sam &amp; Robo at the stream, discovering a shiny ring in the grass near a big rock. Excitement on their faces.</p>
+                        <p>Images: 3_4_bw.jpg / 3_4_color.jpg</p>
+                    </div>
+                </div>
+
+                <p>When they reached the big rock, they looked around and finally found a shiny ring hidden in the grass. "We did it, Robo! We found the missing ring!"</p>
+                <p>They both high-fived and read the next clue, which said: "Take the ring to Lily's house to find the next clue."</p>
+                <p>As they walked to Lily's house, they practiced more blends and sight words, feeling more confident with each step. When they arrived, Lily greeted them warmly.</p>
+                <p>"Great job finding the ring! Now let's see what the next clue says," Lily said, handing them another note.</p>
+                <p>The note read: "Solve the next mystery by helping your friends with their garden."</p>
+
+                <div class="interactive">
+                    <div class="int-label">&#11088; Interactive Moment</div>
+                    <p>Can you help Sam &amp; Robo find the missing ring? Where should they look next?</p>
+                </div>
+
+                <div class="qa-section">
+                    <div class="qa-q">Question: Where did Sam &amp; Robo find the missing ring?</div>
+                    <div class="qa-a">
+                        <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+                        <span class="answer-text">Near the stream by the big rock.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CHAPTER 3 -->
+        <section class="chapter" id="ch3">
+            <h2 class="chapter-title">Chapter 3: Garden Adventure</h2>
+            <div class="chapter-body">
+
+                <div class="illustration-note">
+                    <div class="ill-toggle ill-label" onclick="toggleIll(this)">&#127912; Illustration &mdash; Planting sunflower seeds in Lily's garden</div>
+                    <div class="ill-content">
+                        <p>Scene: Sam, Robo, and Lily in a sunny garden, planting sunflower seeds. Soil, water, and gardening tools visible.</p>
+                        <p>Images: 3_5_bw.jpg / 3_5_color.jpg</p>
+                    </div>
+                </div>
+
+                <p>The next clue led Sam &amp; Robo to their friend Lily's garden. "We need to help Lily with her garden to solve the mystery," Sam said.</p>
+                <p>Lily greeted them with a smile. "Thank you for helping! We need to grow a sunflower plant to find the next clue."</p>
+                <p>Robo beeped, "Let's use our knowledge of plants from our last adventure!"</p>
+                <p>They gathered seeds, soil, and water. "First, we plant the seeds in the soil," Sam explained. They patted the soil gently and made sure the seeds were well-covered.</p>
+                <p>"Next, we water the soil to help the seeds grow," Robo added. They took turns watering the soil and placed the pot in a sunny spot.</p>
+                <p>"Sunflower plants need plenty of sunlight and water to grow strong," Lily reminded them.</p>
+                <p>As they waited for the plant to grow, Robo suggested, "Let's learn some simple coding to unlock the digital clue while we wait."</p>
+                <p>Sam agreed. They used a tablet to follow simple coding instructions, which helped them unlock a digital clue: "The next clue is hidden under the big oak tree."</p>
+                <p>They all cheered when they saw the sunflower sprout. "We did it!" Sam said.</p>
+                <p>"Great teamwork!" Lily praised.</p>
+
+                <div class="interactive">
+                    <div class="int-label">&#11088; Interactive Moment</div>
+                    <p>Can you help Sam &amp; Robo plant the sunflower seeds? Point to the spot where they should plant them!</p>
+                </div>
+
+                <div class="qa-section">
+                    <div class="qa-q">Question: What do sunflower plants need to grow strong?</div>
+                    <div class="qa-a">
+                        <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+                        <span class="answer-text">Plenty of sunlight and water.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CHAPTER 4 -->
+        <section class="chapter" id="ch4">
+            <h2 class="chapter-title">Chapter 4: The Missing Toy</h2>
+            <div class="chapter-body">
+
+                <div class="illustration-note">
+                    <div class="ill-toggle ill-label" onclick="toggleIll(this)">&#127912; Illustration &mdash; Sam &amp; Robo help Max find his missing toy</div>
+                    <div class="ill-content">
+                        <p>Scene: Sam, Robo, and Max at a playground. Max looks sad, then happy when they find the toy under a bench.</p>
+                        <p>Images: 3_7_bw.jpg / 3_7_color.jpg</p>
+                    </div>
+                </div>
+
+                <p>With the next clue in hand, Sam &amp; Robo headed to the big oak tree. On the way, they met their friend Max, who looked sad.</p>
+                <p>"What's wrong, Max?" Sam asked, concerned.</p>
+                <p>Max sighed, "I lost my favorite toy, and I can't find it anywhere."</p>
+                <p>Robo beeped, "Don't worry, Max. We'll help you find it!"</p>
+                <p>Sam remembered what Robo had taught him about empathy. "It's important to understand how others feel and help them," Sam said.</p>
+                <p>They searched around and found a note with blends and digraphs: "Look near the bench for the missing toy."</p>
+                <p>Max brightened up. "Let's go check the bench!"</p>
+                <p>They reached the bench and found Max's toy hidden underneath. Max hugged his toy tightly. "Thank you, Sam &amp; Robo! You really understand how I feel."</p>
+                <p>"Helping friends feels great," Sam said with a smile.</p>
+                <p>They continued to the big oak tree, feeling proud of their empathy and teamwork. Under the tree, they found another note: "The final clue is at the playground."</p>
+                <p>"Let's go to the playground and solve the final mystery!" Robo exclaimed.</p>
+
+                <div class="interactive">
+                    <div class="int-label">&#11088; Interactive Moment</div>
+                    <p>Can you help Sam &amp; Robo find Max's toy? Point to where you think it might be!</p>
+                </div>
+
+                <div class="qa-section">
+                    <div class="qa-q">Question: How did Sam &amp; Robo help Max with his problem?</div>
+                    <div class="qa-a">
+                        <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+                        <span class="answer-text">They found his missing toy and showed empathy.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CHAPTER 5 -->
+        <section class="chapter" id="ch5">
+            <h2 class="chapter-title">Chapter 5: Playground Treasure</h2>
+            <div class="chapter-body">
+
+                <div class="illustration-note">
+                    <div class="ill-toggle ill-label" onclick="toggleIll(this)">&#127912; Illustration &mdash; Discovering the treasure box near the slide</div>
+                    <div class="ill-content">
+                        <p>Scene: Sam &amp; Robo at the playground, digging up a treasure box hidden in the sand near a colorful slide.</p>
+                        <p>Images: 3_8_bw.jpg / 3_8_color.jpg</p>
+                    </div>
+                </div>
+
+                <p>Sam &amp; Robo arrived at the playground, excited to solve the final mystery. The note they found under the oak tree said: "Find the hidden box near the slide."</p>
+                <p>Using their heightened senses and new phonics skills, they searched around the slide. "Let's look carefully," Sam suggested.</p>
+                <p>Robo beeped, "I hear something under the slide!"</p>
+                <p>They found a small box hidden in the sand. Inside was a medal and a final note: "Congratulations, Sam &amp; Robo! You've unlocked the superpower of heightened senses. Use your skills to help your community."</p>
+                <p>Sam &amp; Robo beamed with pride. "We did it! We solved all the mysteries and unlocked a new superpower!"</p>
+                <p>They celebrated with their friends, feeling accomplished and ready for more adventures.</p>
+                <p>"Remember to use your skills to help others," Sam said. "And always work together as a team."</p>
+                <p>"Let's keep learning and growing!" Robo added.</p>
+                <p>With their new superpower, Sam &amp; Robo felt prepared to tackle any challenge and make a positive impact on the world around them.</p>
+
+                <div class="interactive">
+                    <div class="int-label">&#11088; Interactive Moment</div>
+                    <p>Can you help Sam &amp; Robo find the hidden box near the slide? Point to where you think it might be!</p>
+                </div>
+
+                <div class="qa-section">
+                    <div class="qa-q">Question: What new superpower did Sam gain by the end of the book?</div>
+                    <div class="qa-a">
+                        <button class="reveal-btn" onclick="revealAnswer(this)">Show Answer</button>
+                        <span class="answer-text">The ability to use heightened senses to detect clues.</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BACK MATTER -->
+        <section class="back-matter" id="backmatter">
+            <h2>Back Matter</h2>
+
+            <div class="values-box">
+                <h3>The Values Moment</h3>
+                <p>Sam learned some really important things on his third adventure.</p>
+                <p>He learned that <strong>teamwork</strong> makes everything better. Sam couldn't have solved the mysteries alone. When you work together, you can accomplish amazing things.</p>
+                <p>He learned that <strong>perseverance</strong> means never giving up. When the first tree didn't have the ring, Sam didn't quit. He kept searching until he found the answer.</p>
+                <p>He learned that <strong>empathy</strong> is always important. When Max was sad about his lost toy, Sam stopped, understood how Max felt, and helped. That's what friends do.</p>
+                <p>He learned that <strong>community</strong> matters. Everyone in Sam's neighborhood helps each other. When you help your community, your community helps you.</p>
+                <p>And he learned that <strong>problem-solving</strong> is a superpower all by itself. Every clue required Sam to think, read carefully, and try different approaches.</p>
+                <p><strong>You can do all of these things too. Right now. Today.</strong></p>
+            </div>
+
+            <h3>The Learning Corner</h3>
+            <p><strong>Blends and Digraphs: The Next Step in Reading</strong></p>
+            <p>A <strong>blend</strong> is when two consonant sounds work together, and you can hear BOTH sounds:</p>
+            <ul>
+                <li><strong>bl-</strong>: blue, blend, block</li>
+                <li><strong>st-</strong>: stream, strong, step</li>
+                <li><strong>sm-</strong>: small, smile, smart</li>
+            </ul>
+            <p>A <strong>digraph</strong> is when two letters make ONE brand-new sound:</p>
+            <ul>
+                <li><strong>ch-</strong>: chest, check, cheered</li>
+                <li><strong>sh-</strong>: shiny, share, shell</li>
+            </ul>
+            <p><strong>Sight Words:</strong> what, where, which, find (plus review: the, and, can)</p>
+
+            <h3>Activity: Blend &amp; Digraph Treasure Hunt</h3>
+            <p>Go on a hunt around your home or classroom! Find objects that start with: <strong>bl-</strong>, <strong>st-</strong>, <strong>sm-</strong>, <strong>ch-</strong>, <strong>sh-</strong>. Write down or draw each thing you find!</p>
+            <p><strong>Bonus:</strong> Write a mystery note for a friend using blends and digraphs!</p>
+
+            <h3>All Five Superpowers</h3>
+            <table class="sp-table">
+                <thead>
+                    <tr><th>Book</th><th>Superpower</th><th>What Sam Learned</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>1</td><td>Understanding Animals</td><td>Listen. Be kind. Show up for others.</td></tr>
+                    <tr><td>2</td><td>Scientific Tasks</td><td>Observe. Experiment. Ask why.</td></tr>
+                    <tr class="current"><td><strong>3</strong></td><td><strong>Heightened Senses</strong></td><td><strong>Work together. Never give up. Help your community.</strong></td></tr>
+                    <tr><td>4</td><td>Communicate with Nature</td><td><em>Coming in Book 4...</em></td></tr>
+                    <tr><td>5</td><td>???</td><td><em>Coming in Book 5...</em></td></tr>
+                </tbody>
+            </table>
+
+            <p style="text-align:center; margin-top:3rem; color:var(--sidebar-text); font-size:0.85rem;">
+                <em>Everlight Kids &mdash; A division of Everlight Ventures</em><br>
+                <em>"Every word is a door. And every door is an adventure."</em>
+            </p>
+        </section>
+
+    </div>
+
+    <script>
+        const sizes = ['font-sm','font-md','font-lg','font-xl'];
+        let sizeIdx = 1;
+        function changeFontSize(dir) {
+            sizeIdx = Math.max(0, Math.min(sizes.length-1, sizeIdx+dir));
+            document.body.className = sizes[sizeIdx];
+        }
+        function toggleTheme() {
+            const d = document.documentElement;
+            const dark = d.getAttribute('data-theme') === 'dark';
+            d.setAttribute('data-theme', dark ? '' : 'dark');
+            document.getElementById('themeBtn').textContent = dark ? '\u263E' : '\u2600';
+        }
+        function toggleSidebar() {
+            const s = document.getElementById('sidebar');
+            s.classList.toggle('visible');
+            s.classList.toggle('hidden');
+            document.getElementById('main').classList.toggle('full');
+        }
+        function toggleIll(el) {
+            el.parentElement.classList.toggle('collapsed');
+        }
+        function toggleIllustrations() {
+            const notes = document.querySelectorAll('.illustration-note');
+            const allCollapsed = [...notes].every(n => n.classList.contains('collapsed'));
+            notes.forEach(n => { if (allCollapsed) n.classList.remove('collapsed'); else n.classList.add('collapsed'); });
+        }
+        function revealAnswer(btn) {
+            const ans = btn.nextElementSibling;
+            ans.classList.toggle('shown');
+            btn.textContent = ans.classList.contains('shown') ? 'Hide Answer' : 'Show Answer';
+        }
+        window.addEventListener('scroll', () => {
+            const h = document.documentElement;
+            const pct = (h.scrollTop / (h.scrollHeight - h.clientHeight)) * 100;
+            document.getElementById('progressBar').style.width = pct + '%';
+        });
+        // Highlight active chapter in sidebar
+        const chapters = document.querySelectorAll('section[id], div[id]');
+        const links = document.querySelectorAll('.sidebar a');
+        const observer = new IntersectionObserver(entries => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    links.forEach(l => l.classList.remove('active'));
+                    const active = document.querySelector('.sidebar a[href="#'+e.target.id+'"]');
+                    if (active) active.classList.add('active');
+                }
+            });
+        }, { threshold: 0.3 });
+        chapters.forEach(ch => observer.observe(ch));
+    </script>
+</body>
+</html>

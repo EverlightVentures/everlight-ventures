@@ -1,0 +1,168 @@
+{
+  "name": "Fiverr Order Notification Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fiverr-order",
+        "responseMode": "onReceived",
+        "responseData": "allEntries",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Fiverr Order Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Parse the incoming Fiverr order data\nconst body = $input.item.json.body || $input.item.json;\n\nconst buyerName = body.buyer_name || body.buyerName || body.name || 'Unknown Buyer';\nconst gigType = body.gig_type || body.gigType || body.gig || body.service || 'Unknown Gig';\nconst price = body.price || body.amount || body.total || '0';\nconst requirements = body.requirements || body.details || body.notes || 'No requirements provided';\nconst orderNumber = body.order_number || body.orderId || body.order_id || 'N/A';\nconst deadline = body.deadline || body.delivery_date || body.due || 'TBD';\n\nconst timestamp = new Date().toLocaleString('en-US', { timeZone: 'America/Los_Angeles' });\n\nreturn {\n  json: {\n    buyerName,\n    gigType,\n    price,\n    requirements,\n    orderNumber,\n    deadline,\n    timestamp,\n    raw: body\n  }\n};"
+      },
+      "id": "parse-order",
+      "name": "Parse Order Data",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [470, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://slack.com/api/chat.postMessage",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer xoxb-8645963765681-10594020158069-eJRt13YP8qedI6DnQwupuFfy"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "channel",
+              "value": "C0ANPRCA4AD"
+            },
+            {
+              "name": "text",
+              "value": "=`:money_with_wings: *NEW FIVERR ORDER*\\n\\n*Buyer:* ${$json.buyerName}\\n*Gig:* ${$json.gigType}\\n*Price:* $${$json.price}\\n*Order #:* ${$json.orderNumber}\\n*Deadline:* ${$json.deadline}\\n\\n*Requirements:*\\n${$json.requirements}\\n\\n_Received: ${$json.timestamp}_`"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "slack-notify",
+      "name": "Post to Slack #hive-alerts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [690, 180]
+    },
+    {
+      "parameters": {
+        "url": "https://api.twilio.com/2010-04-01/Accounts/ACf38fd83f8ebdea75944943e35e1b653c/Messages.json",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "From",
+              "value": "+17073869709"
+            },
+            {
+              "name": "To",
+              "value": "+18888966772"
+            },
+            {
+              "name": "Body",
+              "value": "=`FIVERR ORDER: ${$json.gigType} from ${$json.buyerName} - $${$json.price}. Order #${$json.orderNumber}. Deadline: ${$json.deadline}`"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "twilio-sms",
+      "name": "SMS Alert to Boss",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [690, 300],
+      "credentials": {
+        "_comment": "Use HTTP Basic Auth: username=ACf38fd83f8ebdea75944943e35e1b653c, password=0b67cf19f64bc1b31f2e9fa4d0a7f937"
+      }
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:1111/api/v1/note/upsert",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "content",
+              "value": "=`# Fiverr Order: ${$json.gigType}\\n#fiverr #revenue #order\\n\\nBuyer: ${$json.buyerName}\\nPrice: $${$json.price}\\nOrder: ${$json.orderNumber}\\nDeadline: ${$json.deadline}\\n\\nRequirements:\\n${$json.requirements}\\n\\nReceived: ${$json.timestamp}`"
+            },
+            {
+              "name": "type",
+              "value": 1
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "blinko-save",
+      "name": "Save to Blinko Memory",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 3,
+      "position": [690, 420]
+    }
+  ],
+  "connections": {
+    "Fiverr Order Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Order Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Order Data": {
+      "main": [
+        [
+          {
+            "node": "Post to Slack #hive-alerts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "SMS Alert to Boss",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save to Blinko Memory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "fiverr"
+    },
+    {
+      "name": "revenue"
+    }
+  ]
+}

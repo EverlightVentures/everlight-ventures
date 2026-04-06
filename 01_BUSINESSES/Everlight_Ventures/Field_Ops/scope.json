@@ -1,0 +1,51 @@
+{
+  "slug": "field-ops",
+  "product_name": "Everlight Field Ops",
+  "one_liner": "AI-to-human field task marketplace for proof-based B2B verification work",
+  "problem": "AI agents can plan and reason but cannot physically verify real-world conditions -- shelf placement, property condition, delivery confirmation. The gap between AI capability and physical verification is growing, and no API-native platform exists to bridge it.",
+  "solution": "A verticalized two-sided marketplace connecting AI agents and businesses with verified local humans who execute field tasks (retail audits, property checks, local logistics, event verification) and return structured, GPS-validated proof.",
+  "icp": "Amazon FBA sellers doing $50k+/yr needing retail shelf verification across multiple locations; solar installation companies doing 50+ installs/yr needing pre-site qualification; real estate investors managing 20+ properties remotely needing on-demand visual checks; AI agent developers building autonomous workflows that require real-world verification steps.",
+  "revenue_model": {
+    "primary": "18% platform take rate on completed tasks (avg $35/task = $6.30/task)",
+    "secondary": "API subscriptions: Starter $49/mo (50 tasks), Growth $149/mo (500 tasks), Enterprise custom",
+    "tertiary": "Worker subscriptions: Verified $9.99/mo, Pro $24.99/mo",
+    "margin_plays": "Express payout fee ($1.50/instant), premium worker placement ($4.99/wk)",
+    "pricing_hypothesis": "$49/mo Starter tier for businesses, 18% take rate competitive with TaskRabbit (15%) and Uber (25-30%)",
+    "gross_margin_per_task": "77.5% on platform fee after variable costs"
+  },
+  "moat": "AI-native architecture (MCP server + REST API for agent integration), vertical proof schemas with Claude vision validation, accumulated validation training data, existing Everlight infrastructure (Supabase, Oracle, Stripe, Django) enabling near-zero incremental cost, B2B-first economics with higher LTV than consumer gig platforms",
+  "competitors": [
+    {"name": "TaskRabbit", "weakness": "Consumer-focused, no API, no AI integration, no proof validation layer"},
+    {"name": "RentAHuman.ai", "weakness": "Generic, not verticalized, no structured proof schemas, early stage"},
+    {"name": "Thumbtack", "weakness": "Service marketplace, not task marketplace, no B2B API"},
+    {"name": "Gigwalk", "weakness": "Retail audit only, legacy platform, no AI agent integration"},
+    {"name": "Field Agent", "weakness": "Retail/CPG only, enterprise-only pricing, no MCP/API-first design"}
+  ],
+  "mvp_scope": [
+    "Supabase schema (7 tables with RLS)",
+    "Worker signup + profile (React/Vite (Cloudflare Pages))",
+    "Business signup + API key generation",
+    "Task posting via REST API",
+    "Geospatial worker matching (PostGIS)",
+    "Proof upload with GPS validation",
+    "Claude Haiku proof validation",
+    "Stripe Connect payouts",
+    "MCP server package (8 tools)",
+    "Business dashboard (task management + proof review)",
+    "Django ops tab (monitoring + disputes)"
+  ],
+  "risks": [
+    {"risk": "Marketplace chicken-and-egg: no workers without tasks, no tasks without workers", "severity": "HIGH", "mitigation": "Seed 50 workers in 3 cities with guaranteed minimum earnings before opening demand side"},
+    {"risk": "Worker safety liability for field tasks", "severity": "MEDIUM", "mitigation": "Task category restrictions, emergency button, independent contractor ToS, platform liability insurance"},
+    {"risk": "Proof fraud by workers submitting fake photos", "severity": "MEDIUM", "mitigation": "EXIF validation, GPS trail matching, Claude vision analysis, random human spot-checks on 5%"},
+    {"risk": "California AB5 contractor classification", "severity": "MEDIUM", "mitigation": "Workers choose tasks, set rates, use own equipment (pass ABC test), consult employment attorney pre-launch"},
+    {"risk": "Low initial task volume makes economics unattractive for workers", "severity": "MEDIUM", "mitigation": "Guaranteed minimum earnings for first 5 tasks, focus on 3 metro areas initially"}
+  ],
+  "viable": true,
+  "confidence": "HIGH",
+  "scoped_by": "Road Harper (SaaS PM, Codex Labs)",
+  "scoped_at": "2026-03-24T12:00:00-08:00",
+  "reviewed_by": ["Atlas Vega", "Slate Mercer", "Justine Park", "Cash Moreno", "Marcus Cole"],
+  "phase": "0_scoped",
+  "next_action": "Begin Week 1 sprint: Supabase migration + worker signup + landing page"
+}
