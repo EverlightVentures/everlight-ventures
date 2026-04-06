@@ -257,34 +257,93 @@ function TradingPage({ status, candles, chartTf, chartPosition, events, stratIq,
           {/* Multi-chart grid */}
           <SafeRender><TradingCharts /></SafeRender>
 
-          {/* Today's Trades -- newest first */}
+          {/* P&L Summary Bar */}
+          {daily && (
+            <div className="card p-3 grid grid-cols-5 gap-2 text-center">
+              <div>
+                <div className="text-[9px] text-gray-500 uppercase">Gross P&L</div>
+                <div className={`font-mono text-sm font-bold ${(daily.gross_pnl||0) >= 0 ? "text-green-400" : "text-red-400"}`}>
+                  {(daily.gross_pnl||0) >= 0 ? "+" : ""}{formatUSD(daily.gross_pnl||0)}
+                </div>
+              </div>
+              <div>
+                <div className="text-[9px] text-gray-500 uppercase">Fees Paid</div>
+                <div className="font-mono text-sm font-bold text-amber-400">-{formatUSD(daily.total_fees||0)}</div>
+              </div>
+              <div>
+                <div className="text-[9px] text-gray-500 uppercase">Net P&L</div>
+                <div className={`font-mono text-sm font-bold ${(daily.net_pnl||0) >= 0 ? "text-green-400" : "text-red-400"}`}>
+                  {(daily.net_pnl||0) >= 0 ? "+" : ""}{formatUSD(daily.net_pnl||0)}
+                </div>
+              </div>
+              <div>
+                <div className="text-[9px] text-gray-500 uppercase">Avg Fee</div>
+                <div className="font-mono text-sm text-amber-400">{formatUSD(daily.avg_fee_per_trade||0)}</div>
+              </div>
+              <div>
+                <div className="text-[9px] text-gray-500 uppercase">BE Move</div>
+                <div className="font-mono text-sm text-gray-400">${(daily.breakeven_move||0).toFixed(5)}</div>
+              </div>
+            </div>
+          )}
+
+          {/* Today's Trades - full P&L breakdown */}
           <div className="card p-0 overflow-hidden">
             <div className="px-3 py-2 border-b border-gray-800 flex justify-between items-center">
               <span className="text-xs font-medium">Today's Trades (PT)</span>
               <span className="text-[10px] text-gray-500">{(daily?.trades || []).length} trades</span>
             </div>
-            <div className="max-h-[300px] overflow-y-auto">
+            <div className="overflow-x-auto">
               {(daily?.trades || []).length === 0 ? (
                 <div className="text-center py-4 text-[11px] text-gray-600">No trades today yet</div>
               ) : (
-                (daily?.trades || []).map((t, i) => (
-                  <div key={i} className={`px-3 py-2 border-b border-gray-800/30 flex justify-between items-center ${t.pnl >= 0 ? "bg-green-400/[0.02]" : "bg-red-400/[0.02]"}`}>
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${t.result === "win" ? "bg-green-400/10 text-green-400" : "bg-red-400/10 text-red-400"}`}>
-                        {t.result === "win" ? "WIN" : "LOSS"}
-                      </span>
-                      <span className={`text-[10px] font-bold uppercase ${t.direction === "long" ? "text-green-400" : t.direction === "short" ? "text-red-400" : "text-gray-400"}`}>{t.direction || "?"}</span>
-                      <span className="text-[9px] text-gray-500">{(t.type || "").replace(/_/g, " ") || "exchange"}</span>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-[9px] text-gray-600">{t.exit_reason ? t.exit_reason.replace(/_/g, " ") : ""}</span>
-                      <span className={`font-mono text-[12px] font-bold ${t.pnl >= 0 ? "text-green-400" : "text-red-400"}`}>
-                        {t.pnl >= 0 ? "+" : ""}{formatUSD(t.pnl)}
-                      </span>
-                      <span className="text-[9px] text-gray-500 font-mono min-w-[90px] text-right">{t.time}</span>
-                    </div>
-                  </div>
-                ))
+                <table className="w-full text-[10px]">
+                  <thead>
+                    <tr className="text-gray-500 border-b border-gray-800/50">
+                      <th className="px-2 py-1.5 text-left">Time</th>
+                      <th className="px-2 py-1.5 text-left">Side</th>
+                      <th className="px-2 py-1.5 text-left">Type</th>
+                      <th className="px-2 py-1.5 text-right">Entry</th>
+                      <th className="px-2 py-1.5 text-right">Exit</th>
+                      <th className="px-2 py-1.5 text-right">Move</th>
+                      <th className="px-2 py-1.5 text-right">Gross</th>
+                      <th className="px-2 py-1.5 text-right">Fees</th>
+                      <th className="px-2 py-1.5 text-right font-bold">Net</th>
+                      <th className="px-2 py-1.5 text-center">W/L</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(daily?.trades || []).map((t, i) => {
+                      const net = t.net_pnl != null ? t.net_pnl : t.pnl || 0
+                      return (
+                      <tr key={i} className={`border-b border-gray-800/20 ${net >= 0 ? "bg-green-400/[0.02]" : "bg-red-400/[0.02]"}`}>
+                        <td className="px-2 py-1.5 text-gray-400 font-mono">{t.time}</td>
+                        <td className={`px-2 py-1.5 font-bold uppercase ${t.side === "long" ? "text-green-400" : "text-red-400"}`}>{t.side || "?"}</td>
+                        <td className="px-2 py-1.5 text-gray-500">{(t.type || "").replace(/_/g, " ") || "..."}</td>
+                        <td className="px-2 py-1.5 text-right font-mono text-gray-300">{t.entry_price ? "$" + t.entry_price.toFixed(5) : "..."}</td>
+                        <td className="px-2 py-1.5 text-right font-mono text-gray-300">{t.exit_price ? "$" + t.exit_price.toFixed(5) : "..."}</td>
+                        <td className={`px-2 py-1.5 text-right font-mono ${(t.price_move_pct||0) >= 0 ? "text-green-400" : "text-red-400"}`}>
+                          {t.price_move_pct ? (t.price_move_pct >= 0 ? "+" : "") + t.price_move_pct.toFixed(3) + "%" : "..."}
+                        </td>
+                        <td className={`px-2 py-1.5 text-right font-mono ${(t.gross_pnl||0) >= 0 ? "text-green-400" : "text-red-400"}`}>
+                          {t.gross_pnl != null ? (t.gross_pnl >= 0 ? "+" : "") + formatUSD(t.gross_pnl) : "..."}
+                        </td>
+                        <td className="px-2 py-1.5 text-right font-mono text-amber-400">
+                          {t.total_fees ? "-" + formatUSD(t.total_fees) : "..."}
+                        </td>
+                        <td className={`px-2 py-1.5 text-right font-mono font-bold ${net >= 0 ? "text-green-400" : "text-red-400"}`}>
+                          {net >= 0 ? "+" : ""}{formatUSD(net)}
+                        </td>
+                        <td className="px-2 py-1.5 text-center">
+                          <span className={`font-bold uppercase px-1.5 py-0.5 rounded text-[9px] ${t.result === "win" ? "bg-green-400/10 text-green-400" : "bg-red-400/10 text-red-400"}`}>
+                            {t.result === "win" ? "W" : "L"}
+                          </span>
+                        </td>
+                      </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
               )}
             </div>
           </div>

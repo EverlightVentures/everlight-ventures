@@ -561,16 +561,49 @@ def get_daily_summary():
                         # Convert UTC to PT 12hr format with date
                         pt_dt = xt_dt - timedelta(hours=7)
                         time_12h = pt_dt.strftime("%m/%d %I:%M %p")
+
+                        # Fee and price breakdown for Coinbase reconciliation
+                        entry_price = float(row.get("entry_price") or 0)
+                        exit_price = float(row.get("exit_price") or 0)
+                        entry_fees = float(row.get("entry_fees_usd") or 0)
+                        exit_fees = float(row.get("exit_fees_usd") or 0)
+                        total_fees = float(row.get("total_fees_usd") or 0)
+                        if total_fees <= 0:
+                            total_fees = entry_fees + exit_fees
+
+                        # Gross PnL (price movement only, no fees)
+                        side = row.get("side", row.get("direction", "long"))
+                        contract_size = 5000.0  # XLM perp contract size
+                        _tsize = int(row.get("size") or 1)
+                        if entry_price > 0 and exit_price > 0:
+                            price_move = exit_price - entry_price
+                            if side == "short":
+                                price_move = -price_move
+                            gross_pnl = round(price_move * contract_size * _tsize, 2)
+                        else:
+                            price_move = 0
+                            gross_pnl = round(pnl + total_fees, 2)
+
                         trade_list.append({
                             "time": time_12h,
                             "time_sort": xt_dt.isoformat(),
-                            "direction": row.get("direction", ""),
+                            "side": side,
                             "result": result,
-                            "pnl": round(pnl, 2),
+                            "entry_price": entry_price,
+                            "exit_price": exit_price,
+                            "price_move": round(price_move, 6),
+                            "price_move_pct": round(price_move / entry_price * 100, 4) if entry_price > 0 else 0,
+                            "gross_pnl": gross_pnl,
+                            "total_fees": round(total_fees, 2),
+                            "entry_fees": round(entry_fees, 2),
+                            "exit_fees": round(exit_fees, 2),
+                            "net_pnl": round(pnl, 2),
                             "type": row.get("entry_type", ""),
                             "exit_reason": row.get("exit_reason", ""),
                             "hold_sec": int(_hold_sec),
                             "churn": _is_churn,
+                            "unified_score": row.get("unified_score", ""),
+                            "rsi": row.get("rsi", ""),
                         })
     except Exception:
         pass
@@ -607,13 +640,19 @@ def get_daily_summary():
     # Separate real trades from churn
     real_trades = [t for t in trade_list if not t.get("churn")]
     churn_trades = [t for t in trade_list if t.get("churn")]
-    real_pnl = sum(t["pnl"] for t in real_trades)
-    churn_pnl = sum(t["pnl"] for t in churn_trades)
+    real_pnl = sum(t.get("net_pnl", t.get("pnl", 0)) for t in real_trades)
+    churn_pnl = sum(t.get("net_pnl", t.get("pnl", 0)) for t in churn_trades)
 
     # Sort newest first
     real_trades.sort(key=lambda x: x.get("time_sort", ""), reverse=True)
 
     total = closed_pnl + unrealized
+
+    # Fee and P&L breakdown totals
+    total_gross = sum(t.get("gross_pnl", 0) for t in real_trades)
+    total_fees_paid = sum(t.get("total_fees", 0) for t in real_trades)
+    total_net = sum(t.get("net_pnl", 0) for t in real_trades)
+
     return {
         "closed_pnl": round(closed_pnl, 2),
         "unrealized": round(unrealized, 2),
@@ -623,6 +662,13 @@ def get_daily_summary():
         "churn_count": len(churn_trades),
         "wins": sum(1 for t in real_trades if t["result"] == "win"),
         "losses": sum(1 for t in real_trades if t["result"] == "loss"),
+        # Fee breakdown
+        "gross_pnl": round(total_gross, 2),
+        "total_fees": round(total_fees_paid, 2),
+        "net_pnl": round(total_net, 2),
+        "fee_pct": round(total_fees_paid / max(total_gross, 0.01) * 100, 1) if total_gross > 0 else 0,
+        "avg_fee_per_trade": round(total_fees_paid / max(len(real_trades), 1), 2),
+        "breakeven_move": round(total_fees_paid / max(len(real_trades), 1) / 5000, 6),  # min price move to cover fees
         "trades": real_trades,
         "position": pos_info,
     }
