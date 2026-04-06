@@ -1,0 +1,185 @@
+{% extends "hive/base.html" %}
+{% block title %}Team Directory -- Hive Mind{% endblock %}
+{% block content %}
+<style>
+  .team-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .agent-card {
+    background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 12px;
+    padding: 16px; transition: all var(--transition-base); cursor: pointer;
+  }
+  .agent-card:hover { border-color: var(--gold-dim); box-shadow: 0 0 20px var(--gold-glow); transform: translateY(-2px); }
+  .agent-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .agent-avatar {
+    width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, var(--gold-dim), var(--purple-dim));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; font-weight: 700; color: var(--bg-primary);
+  }
+  .agent-name { font-size: 0.95rem; font-weight: 600; color: var(--text-primary); }
+  .agent-title { font-size: 0.72rem; color: var(--gold); }
+  .agent-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .agent-badge {
+    font-size: 0.6rem; padding: 2px 8px; border-radius: 10px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .badge-voice { background: rgba(34,197,94,0.15); color: #22c55e; }
+  .badge-email { background: rgba(139,92,246,0.15); color: #8b5cf6; }
+  .badge-no-voice { background: rgba(107,114,128,0.1); color: #6b7280; }
+  .agent-bio { font-size: 0.72rem; color: var(--text-muted); margin-top: 8px; line-height: 1.4; }
+  .agent-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .agent-actions a {
+    font-size: 0.65rem; padding: 4px 10px; border-radius: 6px; text-decoration: none;
+    border: 1px solid var(--border-subtle); color: var(--text-secondary); transition: all 0.2s;
+  }
+  .agent-actions a:hover { border-color: var(--gold); color: var(--gold); }
+  .team-stats { display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+  .team-stat {
+    background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 10px;
+    padding: 12px 20px; display: flex; flex-direction: column; gap: 2px;
+  }
+  .team-stat-value { font-size: 1.4rem; font-weight: 700; color: var(--gold); font-family: monospace; }
+  .team-stat-label { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+  .search-bar {
+    width: 100%; padding: 10px 16px; background: var(--bg-card); border: 1px solid var(--border-subtle);
+    border-radius: 10px; color: var(--text-primary); font-size: 0.85rem; margin-bottom: 16px;
+  }
+  .search-bar:focus { outline: none; border-color: var(--gold-dim); }
+  .copilot-panel {
+    position: fixed; right: -400px; top: 0; bottom: 0; width: 400px; background: var(--bg-secondary);
+    border-left: 1px solid var(--border-subtle); z-index: 1000; transition: right 0.3s; overflow-y: auto; padding: 20px;
+  }
+  .copilot-panel.open { right: 0; }
+  .copilot-close { cursor: pointer; float: right; color: var(--text-muted); font-size: 1.2rem; }
+</style>
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+  <div>
+    <h1 style="font-family:var(--font-heading);font-size:1.6rem;color:var(--gold);margin-bottom:4px;">
+      <i class="fa-solid fa-id-badge" style="margin-right:8px;"></i>Team Directory
+    </h1>
+    <p style="color:var(--text-secondary);font-size:0.8rem;">{{ total_agents }} agents -- Everlight Hive Mind</p>
+  </div>
+</div>
+
+<div class="team-stats">
+  <div class="team-stat"><span class="team-stat-value">{{ total_agents }}</span><span class="team-stat-label">Total Agents</span></div>
+  <div class="team-stat"><span class="team-stat-value">{{ with_voice }}</span><span class="team-stat-label">With Voice</span></div>
+  <div class="team-stat"><span class="team-stat-value">{{ with_email }}</span><span class="team-stat-label">With Email</span></div>
+</div>
+
+<input type="text" class="search-bar" id="agentSearch" placeholder="Search agents by name, role, or skill..." oninput="filterAgents()">
+
+<div class="team-grid" id="teamGrid">
+  {% for agent in agents %}
+  <div class="agent-card" data-slug="{{ agent.slug }}" data-name="{{ agent.name }}" data-title="{{ agent.title }}" onclick="openCopilot('{{ agent.slug }}')">
+    <div class="agent-header">
+      <div class="agent-avatar">{{ agent.name|first }}</div>
+      <div>
+        <div class="agent-name">{{ agent.name }}</div>
+        <div class="agent-title">{{ agent.title }}</div>
+      </div>
+    </div>
+    <div class="agent-meta">
+      {% if agent.has_voice %}
+      <span class="agent-badge badge-voice"><i class="fa-solid fa-microphone"></i> Voice</span>
+      {% else %}
+      <span class="agent-badge badge-no-voice">No Voice</span>
+      {% endif %}
+      {% if agent.email %}
+      <span class="agent-badge badge-email"><i class="fa-solid fa-envelope"></i> Email</span>
+      {% endif %}
+    </div>
+    <div class="agent-bio">{{ agent.bio|truncatewords:20 }}</div>
+    <div class="agent-actions">
+      {% if agent.email %}<a href="mailto:{{ agent.email }}"><i class="fa-solid fa-envelope"></i> Email</a>{% endif %}
+      <a href="#" onclick="event.stopPropagation()"><i class="fa-solid fa-calendar"></i> Book</a>
+      <a href="#" onclick="event.stopPropagation()"><i class="fa-solid fa-address-card"></i> vCard</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Co-pilot slide-out panel -->
+<div class="copilot-panel" id="copilotPanel">
+  <span class="copilot-close" onclick="closeCopilot()">&times;</span>
+  <div id="copilotContent">
+    <p style="color:var(--text-muted);">Select an agent to view co-pilot data</p>
+  </div>
+</div>
+
+<script>
+  function filterAgents() {
+    var query = document.getElementById('agentSearch').value.toLowerCase();
+    var cards = document.querySelectorAll('.agent-card');
+    cards.forEach(function(card) {
+      var name = (card.dataset.name || '').toLowerCase();
+      var title = (card.dataset.title || '').toLowerCase();
+      card.style.display = (name.indexOf(query) !== -1 || title.indexOf(query) !== -1) ? '' : 'none';
+    });
+  }
+
+  function _el(tag, attrs, children) {
+    var el = document.createElement(tag);
+    if (attrs) { for (var k in attrs) { if (k === 'text') el.textContent = attrs[k]; else el.setAttribute(k, attrs[k]); } }
+    if (children) { children.forEach(function(c) { if (c) el.appendChild(c); }); }
+    return el;
+  }
+
+  function openCopilot(slug) {
+    var panel = document.getElementById('copilotPanel');
+    var content = document.getElementById('copilotContent');
+    panel.classList.add('open');
+    content.textContent = 'Loading co-pilot data...';
+
+    fetch('/api/team/' + encodeURIComponent(slug) + '/copilot/')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var agent = data.agent || {};
+        content.textContent = '';
+
+        // Header
+        var h3 = _el('h3', {text: agent.name, style: 'color:var(--gold);font-family:var(--font-heading);margin-bottom:12px;'});
+        content.appendChild(h3);
+        content.appendChild(_el('p', {text: agent.title, style: 'color:var(--text-secondary);font-size:0.8rem;margin-bottom:6px;'}));
+        content.appendChild(_el('p', {text: agent.bio || '', style: 'color:var(--text-muted);font-size:0.75rem;margin-bottom:16px;'}));
+
+        // Contact section
+        var contactLabel = _el('div', {text: 'Contact', style: 'font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);margin-bottom:6px;'});
+        content.appendChild(contactLabel);
+        if (agent.email) {
+          content.appendChild(_el('div', {text: agent.email, style: 'font-size:0.78rem;color:var(--text-secondary);margin-bottom:4px;'}));
+        }
+
+        // Activity section
+        var actLabel = _el('div', {text: 'Recent Activity', style: 'font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);margin:16px 0 6px;'});
+        content.appendChild(actLabel);
+        var sessions = data.recent_sessions || [];
+        if (sessions.length === 0) {
+          content.appendChild(_el('div', {text: 'No recent activity', style: 'font-size:0.75rem;color:var(--text-muted);'}));
+        }
+        sessions.forEach(function(s) {
+          content.appendChild(_el('div', {text: s.query, style: 'font-size:0.72rem;color:var(--text-secondary);padding:4px 0;border-bottom:1px solid var(--border-subtle);'}));
+        });
+
+        // Stats
+        var statsLabel = _el('div', {text: 'Outreach Stats', style: 'font-size:0.65rem;text-transform:uppercase;color:var(--text-muted);margin:16px 0 6px;'});
+        content.appendChild(statsLabel);
+        var stats = data.outreach_stats || {};
+        var statsRow = _el('div', {style: 'display:flex;gap:16px;'});
+        ['sent', 'replied', 'booked'].forEach(function(key) {
+          var col = _el('div', {style: 'text-align:center;'});
+          col.appendChild(_el('div', {text: String(stats[key] || 0), style: 'font-size:1.1rem;font-weight:700;color:var(--gold);'}));
+          col.appendChild(_el('div', {text: key, style: 'font-size:0.55rem;color:var(--text-muted);text-transform:uppercase;'}));
+          statsRow.appendChild(col);
+        });
+        content.appendChild(statsRow);
+      })
+      .catch(function() {
+        content.textContent = 'Error loading co-pilot data';
+      });
+  }
+
+  function closeCopilot() {
+    document.getElementById('copilotPanel').classList.remove('open');
+  }
+</script>
+{% endblock %}

@@ -2001,3 +2001,93 @@ def api_infra_status(request):
         'oracle_ip': oracle_ip,
         'ts': timezone.now().isoformat(),
     })
+
+
+# =====================================================================
+# TEAM DIRECTORY + CO-PILOT DASHBOARD
+# =====================================================================
+
+class TeamDirectoryView(LoginRequiredMixin, TemplateView):
+    """Team directory showing all 78 agents with profiles and activity."""
+    template_name = 'hive/team_directory.html'
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['active_page'] = 'team'
+
+        # Load agent profiles
+        profiles_path = Path('/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/all_profiles.json')
+        if not profiles_path.exists():
+            profiles_path = Path('/home/opc/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/all_profiles.json')
+
+        agents = []
+        if profiles_path.exists():
+            try:
+                agents = json.loads(profiles_path.read_text())
+            except Exception:
+                pass
+
+        ctx['agents'] = agents
+        ctx['total_agents'] = len(agents)
+        ctx['with_voice'] = sum(1 for a in agents if a.get('has_voice'))
+        ctx['with_email'] = sum(1 for a in agents if a.get('email'))
+        return ctx
+
+
+@login_required
+def api_team_roster(request):
+    """API: Full agent roster with profiles."""
+    profiles_path = Path('/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/all_profiles.json')
+    if not profiles_path.exists():
+        profiles_path = Path('/home/opc/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/all_profiles.json')
+
+    if profiles_path.exists():
+        agents = json.loads(profiles_path.read_text())
+    else:
+        agents = []
+
+    return JsonResponse({'agents': agents, 'total': len(agents)})
+
+
+@login_required
+def api_agent_copilot(request, slug):
+    """API: Co-pilot data for a specific agent -- calls, meetings, logs."""
+    # Load agent profile
+    profiles_path = Path('/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/all_profiles.json')
+    if not profiles_path.exists():
+        profiles_path = Path('/home/opc/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/all_profiles.json')
+
+    agent = None
+    if profiles_path.exists():
+        for a in json.loads(profiles_path.read_text()):
+            if a.get('slug') == slug:
+                agent = a
+                break
+
+    if not agent:
+        return JsonResponse({'error': 'agent_not_found'}, status=404)
+
+    # Gather co-pilot data from various sources
+    copilot = {
+        'agent': agent,
+        'recent_sessions': [],
+        'call_log': [],
+        'meetings': [],
+        'outreach_stats': {'sent': 0, 'replied': 0, 'booked': 0},
+        'activity_feed': [],
+    }
+
+    # Pull recent sessions for this agent from Hive sessions
+    try:
+        from .models import HiveSession, AgentResponse
+        sessions = HiveSession.objects.filter(
+            agent_responses__agent__name__icontains=agent['name']
+        ).distinct().order_by('-created_at')[:10]
+        copilot['recent_sessions'] = [
+            {'id': s.session_id, 'query': s.query[:100], 'created': s.created_at.isoformat()}
+            for s in sessions
+        ]
+    except Exception:
+        pass
+
+    return JsonResponse(copilot)

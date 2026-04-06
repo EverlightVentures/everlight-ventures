@@ -41,6 +41,9 @@ urlpatterns = [
     # Infra Hub
     path('infra/', views.InfraHubView.as_view(), name='infra_hub'),
 
+    # Team Directory + Co-Pilot
+    path('team/', views.TeamDirectoryView.as_view(), name='team_directory'),
+
     # API / AJAX endpoints
     path(
         'api/session/<str:session_id>/status/',
@@ -60,6 +63,8 @@ urlpatterns = [
     ),
     path('api/agent-status/', views.api_agent_status, name='api_agent_status'),
     path('api/infra-status/', views.api_infra_status, name='api_infra_status'),
+    path('api/team/', views.api_team_roster, name='api_team_roster'),
+    path('api/team/<str:slug>/copilot/', views.api_agent_copilot, name='api_agent_copilot'),
     path('api/bot-intel/', views.api_bot_intel, name='api_bot_intel'),
     path(
         'api/upload-analyze/',

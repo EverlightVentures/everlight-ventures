@@ -895,6 +895,13 @@
         <span>Infra Hub</span>
       </a>
 
+      <a href="{% url 'hive:team_directory' %}"
+         class="sidebar-nav-link {% if active_page == 'team' %}active{% endif %}"
+         data-nav="team">
+        <i class="fa-solid fa-id-badge"></i>
+        <span>Team</span>
+      </a>
+
       <a href="{% url 'hive:agent_performance' %}"
          class="sidebar-nav-link {% if active_page == 'agent_performance' %}active{% endif %}"
          data-nav="agent_performance">
