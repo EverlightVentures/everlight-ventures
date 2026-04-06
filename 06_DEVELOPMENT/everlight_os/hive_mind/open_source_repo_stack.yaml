@@ -90,7 +90,7 @@ repos:
   category: agent_framework
   phase: phase_2
   priority: 4
-  current_status: candidate
+  current_status: already_in_stack
   owner_agent: Nathan Ling
   workflows:
   - research
@@ -114,7 +114,7 @@ repos:
   category: stateful_agent_graph
   phase: phase_2
   priority: 5
-  current_status: candidate
+  current_status: already_in_stack
   owner_agent: Nathan Ling
   workflows:
   - research
@@ -138,7 +138,7 @@ repos:
   category: rag_framework
   phase: phase_2
   priority: 6
-  current_status: candidate
+  current_status: already_in_stack
   owner_agent: Isaac Ashworth
   workflows:
   - knowledge_base
@@ -162,7 +162,7 @@ repos:
   category: multi_agent_framework
   phase: phase_3
   priority: 7
-  current_status: candidate
+  current_status: already_in_stack
   owner_agent: Atlas Vega
   workflows:
   - experimental_multi_agent
@@ -235,7 +235,7 @@ repos:
   category: local_llm_runtime
   phase: phase_2
   priority: 10
-  current_status: candidate
+  current_status: already_in_stack
   owner_agent: Franklin Steele
   workflows:
   - edge_inference
@@ -259,7 +259,7 @@ repos:
   category: python_binding
   phase: phase_2
   priority: 11
-  current_status: candidate
+  current_status: already_in_stack
   owner_agent: Patrick Donovan
   workflows:
   - local_llm
@@ -281,7 +281,7 @@ repos:
   category: high_throughput_llm_serving
   phase: phase_3
   priority: 12
-  current_status: candidate
+  current_status: already_in_stack
   owner_agent: Sebastian Torres
   workflows:
   - high_volume_inference
@@ -304,7 +304,7 @@ repos:
   category: vector_database
   phase: phase_1
   priority: 13
-  current_status: candidate
+  current_status: already_in_stack
   owner_agent: Isaac Ashworth
   workflows:
   - memory
@@ -330,7 +330,7 @@ repos:
   category: vector_database
   phase: phase_3
   priority: 14
-  current_status: candidate
+  current_status: already_in_stack
   owner_agent: Isaac Ashworth
   workflows:
   - large_scale_memory
@@ -353,7 +353,7 @@ repos:
   category: vector_database
   phase: phase_3
   priority: 15
-  current_status: candidate
+  current_status: already_in_stack
   owner_agent: Isaac Ashworth
   workflows:
   - rag
@@ -399,7 +399,7 @@ repos:
   category: vector_database
   phase: phase_1
   priority: 17
-  current_status: candidate
+  current_status: already_in_stack
   owner_agent: Lincoln Masters
   workflows:
   - supabase
@@ -425,7 +425,7 @@ repos:
   category: web_extraction
   phase: phase_2
   priority: 18
-  current_status: candidate
+  current_status: already_in_stack
   owner_agent: Benjamin Orozco
   workflows:
   - research
@@ -545,7 +545,7 @@ repos:
   category: speech_to_text
   phase: phase_2
   priority: 23
-  current_status: candidate
+  current_status: already_in_stack
   owner_agent: Rafael Vasquez
   workflows:
   - voice
@@ -570,7 +570,7 @@ repos:
   category: speech_to_text
   phase: phase_1
   priority: 24
-  current_status: candidate
+  current_status: already_in_stack
   owner_agent: Rafael Vasquez
   workflows:
   - voice
@@ -593,7 +593,7 @@ repos:
   category: speaker_diarization
   phase: phase_2
   priority: 25
-  current_status: candidate
+  current_status: already_in_stack
   owner_agent: Rafael Vasquez
   workflows:
   - voice
