@@ -2702,6 +2702,95 @@ def get_trades_today():
     return get_trade_history(date=today)
 
 
+# ===================================================================
+# POSITION AGGREGATOR -- Coinbase-style flat-to-flat P&L + fee intel
+# ===================================================================
+
+@app.get("/api/positions")
+def get_positions(date: str = ""):
+    """Aggregate partial fills into Coinbase-style positions.
+
+    Groups fills into flat-to-flat round trips. Shows:
+    - Avg entry/exit price per position
+    - Number of partial fills
+    - Total fees vs gross P&L
+    - Loss attribution (fees vs signal vs slippage)
+
+    This matches what Coinbase shows in the portfolio view.
+    """
+    try:
+        import sys as _sys
+        _strategy_dir = str(BOT_DIR / "strategy")
+        if _strategy_dir not in _sys.path:
+            _sys.path.insert(0, _strategy_dir)
+        from fee_intelligence import aggregate_positions_from_csv
+    except ImportError:
+        return {"error": "fee_intelligence module not found", "positions": []}
+
+    csv_path = LOGS_DIR / "trades_organized.csv"
+    if not csv_path.exists():
+        csv_path = LOGS_DIR / "trades.csv"
+
+    positions = aggregate_positions_from_csv(str(csv_path))
+
+    # Filter by date
+    if date:
+        positions = [p for p in positions if p.get("date") == date]
+
+    # Summary
+    closed = [p for p in positions if p.get("result") != "open"]
+    wins = sum(1 for p in closed if p.get("result") == "win")
+    losses = sum(1 for p in closed if p.get("result") == "loss")
+    total_pnl = sum(p.get("net_pnl", 0) for p in closed)
+    total_fees = sum(p.get("total_fees", 0) for p in closed)
+    total_gross = sum(p.get("gross_pnl", 0) for p in closed)
+
+    # Fee attribution breakdown
+    fee_caused = sum(1 for p in closed if p.get("loss_cause") == "fees")
+    signal_caused = sum(1 for p in closed if p.get("loss_cause") == "signal")
+
+    return {
+        "positions": positions[-50:],  # last 50
+        "summary": {
+            "total_positions": len(closed),
+            "wins": wins,
+            "losses": losses,
+            "win_rate": round(wins / max(wins + losses, 1) * 100),
+            "net_pnl": round(total_pnl, 2),
+            "gross_pnl": round(total_gross, 2),
+            "total_fees": round(total_fees, 2),
+            "fee_pct_of_gross": round(total_fees / max(abs(total_gross), 0.01) * 100, 1),
+            "losses_from_fees": fee_caused,
+            "losses_from_signal": signal_caused,
+        },
+        "filter": {"date": date},
+    }
+
+
+@app.get("/api/positions/today")
+def get_positions_today():
+    pt_now = datetime.now(timezone.utc) - timedelta(hours=7)
+    return get_positions(date=pt_now.strftime("%Y-%m-%d"))
+
+
+@app.get("/api/fee-intel")
+def get_fee_intel():
+    """Fee intelligence dashboard -- churn detection, lane health, fee attribution."""
+    try:
+        import sys as _sys
+        _strategy_dir = str(BOT_DIR / "strategy")
+        if _strategy_dir not in _sys.path:
+            _sys.path.insert(0, _strategy_dir)
+        from fee_intelligence import get_fee_intelligence_summary
+    except ImportError:
+        return {"error": "fee_intelligence module not found"}
+
+    # Load bot state to get fee intel data
+    state_path = LOGS_DIR / "dashboard_snapshot.json"
+    state = _read_json(state_path)
+    return get_fee_intelligence_summary(state)
+
+
 # Serve React static files
 if STATIC_DIR.exists():
     app.mount("/assets", StaticFiles(directory=STATIC_DIR / "assets"), name="assets")

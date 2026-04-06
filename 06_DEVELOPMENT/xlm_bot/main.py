@@ -104,6 +104,7 @@ import trade_reviewer
 import market_intel_service
 from unified_scorer import score_setup as unified_score_setup, build_alternatives as unified_build_alternatives, UnifiedScore
 from strategy.trade_memory import evaluate_trade_memory, count_consecutive_same_dir_losses, TradeMemoryResult
+from strategy.fee_intelligence import evaluate_fee_intelligence, record_closed_trade as fi_record_closed, FeeIntelResult
 from strategy.candle_math import compute_candle_math, CandleMathResult
 from strategy.foresight import compute_foresight, ForesightResult
 from strategy.autonomous_ops import run_autonomous_check
@@ -3158,11 +3159,39 @@ def _sweep_derivatives_to_spot(
         return False
 
 
-def log_trade(config: dict, row: dict) -> None:
+def log_trade(config: dict, row: dict, state: dict | None = None) -> None:
     logging_cfg = (config.get("logging") or {}) if isinstance(config.get("logging"), dict) else {}
     path = _resolve_output_path(logging_cfg.get("trades_csv", "trades.csv"), LOGS_DIR)
     path.parent.mkdir(parents=True, exist_ok=True)
     row = _json_safe(row)
+
+    # Feed fee intelligence learning on closed trades
+    if state is not None and row.get("exit_price"):
+        try:
+            _pnl = float(row.get("pnl_usd") or 0)
+            _fees = float(row.get("total_fees_usd") or 0)
+            _dur = 0
+            if row.get("entry_time") and row.get("exit_time"):
+                from datetime import datetime as _dt
+                _et = _dt.fromisoformat(str(row["entry_time"]).replace("Z", "+00:00"))
+                _xt = _dt.fromisoformat(str(row["exit_time"]).replace("Z", "+00:00"))
+                _dur = (_xt - _et).total_seconds()
+            _gross = float(row.get("gross_pnl") or (_pnl + _fees))
+            _lane = str(row.get("entry_type") or row.get("lane") or "unknown")
+            _attribution = fi_record_closed(
+                state=state,
+                lane=_lane,
+                pnl_usd=_pnl,
+                fees_usd=_fees,
+                duration_sec=_dur,
+                gross_pnl_usd=_gross,
+                result=str(row.get("result", "")),
+            )
+            if _attribution:
+                row["loss_attribution"] = _attribution
+        except Exception:
+            pass
+
     # Feed structured audit logger (war room: everlight_packager)
     try:
         _audit_logger.record_trade(row)
@@ -10433,6 +10462,22 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         except Exception:
             pass
 
+        # Run fee intelligence BEFORE unified scorer
+        try:
+            _us_fee_intel = evaluate_fee_intelligence(
+                state=state,
+                direction=direction,
+                entry_type=selected_entry_type or "",
+                lane=selected_entry_type or "",
+                expected_pnl_usd=float((_us_ev or {}).get("ev_usd") or 0),
+                estimated_fees_usd=float((_us_ev or {}).get("fees_usd") or 0),
+                entry_price=price,
+                trade_size=1,
+                atr_value=float(state.get("atr_value") or 0),
+            )
+        except Exception:
+            _us_fee_intel = FeeIntelResult()
+
         # Run the unified scorer
         _unified_result = unified_score_setup(
             v4_score=int((selected_v4 or {}).get("score") or 0),
@@ -10469,6 +10514,9 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             trade_memory_score=_us_tm.total_modifier,
             trade_memory_min_override=_us_tm.min_score_override,
             trade_memory_reasons=_us_tm.reasons,
+            fee_intel_score=_us_fee_intel.score_modifier,
+            fee_intel_block=_us_fee_intel.block_entry,
+            fee_intel_reasons=_us_fee_intel.reasons,
             entry_type=selected_entry_type or "",
             config=config,
         )

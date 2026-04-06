@@ -195,6 +195,8 @@ DEFAULT_WEIGHTS = {
     "trap_detector":         {"max": 10, "min": -12},
     # Session quality (prime trading hours = better moves)
     "session_quality":       {"max": 8, "min": -3},
+    # Fee intelligence (cost awareness -- churn, fee-dominated edges, lane health)
+    "fee_intelligence":      {"max": 0, "min": -25},
 }
 
 # --- Threshold defaults ---
@@ -312,6 +314,11 @@ def score_setup(
     trade_memory_score: int = 0,
     trade_memory_min_override: int = 0,
     trade_memory_reasons: list[str] | None = None,
+
+    # Fee intelligence (from strategy.fee_intelligence)
+    fee_intel_score: int = 0,
+    fee_intel_block: bool = False,
+    fee_intel_reasons: list[str] | None = None,
 
     # Entry type (for scalp vs HTF threshold selection)
     entry_type: str = "",
@@ -659,6 +666,18 @@ def score_setup(
         reasons.extend(trade_memory_reasons or [])
     modifiers["trade_memory"] = mod
     running += mod
+
+    # -- MODIFIER 22: Fee intelligence --
+    # Fee-aware expectancy, churn detection, lane fee health
+    mod = max(-25, min(0, fee_intel_score))  # only penalties, max -25
+    if mod != 0:
+        reasons.extend(fee_intel_reasons or [])
+    modifiers["fee_intelligence"] = mod
+    running += mod
+    # Hard block from fee intelligence
+    if fee_intel_block:
+        running = min(running, 20)  # crush score below any threshold
+        reasons.append("FEE INTEL HARD BLOCK: lane disabled or fee+churn combo")
 
     # -- FINAL SCORE --
     # Variable negative cap: weak base scores get tighter caps
