@@ -48,12 +48,25 @@ CRITICAL_SERVICES = [
     "blinko",
     "hive-django",
     "hive-slack-agent",
+    "ollama",
+    "netdata",
+]
+
+# Container services (managed by podman, checked differently)
+CONTAINER_SERVICES = [
+    "langfuse",
+    "nextcloud",
+    "polymarket",
+    "computer-use",
 ]
 
 # Health check endpoints
 HEALTH_CHECKS = {
     "n8n": "http://localhost:5678",
     "blinko": "http://localhost:1111",
+    "langfuse": "http://localhost:3100",
+    "nextcloud": "http://localhost:8580/status.php",
+    "ollama": "http://localhost:11434/api/tags",
 }
 
 # Thresholds
@@ -247,6 +260,27 @@ def main():
             else:
                 issues.append(f"{service} restart FAILED")
                 log(f"RESTART FAILED: {service}", "ERROR")
+
+    # --- Check container services ---
+    for service in CONTAINER_SERVICES:
+        is_active = check_service(service)
+        if is_active:
+            continue
+
+        restart_count = get_restart_count_last_hour(state, service)
+        if restart_count >= MAX_RESTARTS_PER_HOUR:
+            flapping.append(f"{service} (container, restarted {restart_count}x in last hour)")
+            log(f"FLAPPING: {service} container -- alerting instead", "WARN")
+        else:
+            log(f"DOWN: {service} container -- attempting restart")
+            success = restart_service(service)
+            if success:
+                record_restart(state, service)
+                restarts_done.append(service)
+                log(f"RESTARTED: {service} container")
+            else:
+                issues.append(f"{service} container restart FAILED")
+                log(f"RESTART FAILED: {service} container", "ERROR")
 
     # --- Check live tick freshness ---
     tick_fresh, tick_age = check_live_tick_freshness()
