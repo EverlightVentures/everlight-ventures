@@ -87,6 +87,14 @@ def get_status():
             pass
     decisions = _read_jsonl_tail(LOGS_DIR / "decisions.jsonl", max_lines=5)
     last_decision = decisions[-1] if decisions else {}
+    # Get accurate trade count from the shared parser (same source as /daily-summary)
+    _real_today, _ = _parse_all_trades_organized()
+    _pt_today = (datetime.now(timezone.utc) - timedelta(hours=7)).strftime("%Y-%m-%d")
+    _today_trades = [t for t in _real_today if t.get("date") == _pt_today]
+    _today_wins = sum(1 for t in _today_trades if t["result"] == "win")
+    _today_losses = sum(1 for t in _today_trades if t["result"] == "loss")
+    _today_pnl = sum(t["pnl"] for t in _today_trades)
+
     return {
         "price": float(tick.get("price", 0)),
         "price_ts": tick.get("timestamp", ""),
@@ -94,6 +102,10 @@ def get_status():
         "margin": margin,
         "last_decision": last_decision,
         "bot_alive": bool(decisions and (datetime.now(timezone.utc) - datetime.fromisoformat(str(decisions[-1].get("timestamp", "2000-01-01T00:00:00+00:00")).replace("Z", "+00:00"))).total_seconds() < 120),
+        "trades_today": _today_wins + _today_losses,
+        "wins_today": _today_wins,
+        "losses_today": _today_losses,
+        "pnl_today": round(_today_pnl, 2),
     }
 @app.get("/api/decisions")
 def get_decisions(limit: int = 200):
@@ -508,105 +520,68 @@ def get_market_context():
 
 @app.get("/api/daily-summary")
 def get_daily_summary():
-    """Clean daily P&L: closed trades + open position unrealized. Resets at midnight PT."""
+    """Clean daily P&L: closed trades + open position unrealized. Resets at midnight PT.
+
+    IMPORTANT: Trade data is sourced from _parse_all_trades_organized() which
+    reads trades_organized.csv. This is the SAME source as /api/trades/today
+    and /api/trades/history to ensure all endpoints agree on trade counts and P&L.
+    """
     from datetime import datetime, timezone, timedelta
-    import csv as _csv
-    # Use Pacific time for day boundary (UTC-7 or UTC-8 depending on DST)
-    # PDT (March-Nov) = UTC-7, PST (Nov-March) = UTC-8
-    # Current: PDT so UTC-7
+
     pt_now = datetime.now(timezone.utc) - timedelta(hours=7)
     today = pt_now.strftime("%Y-%m-%d")
-    day_start_utc = datetime.strptime(today, "%Y-%m-%d").replace(tzinfo=timezone.utc) + timedelta(hours=7)
 
-    closed_pnl = 0.0
-    wins = 0
-    losses = 0
+    # Use the SHARED trade parser -- same source as /api/trades/today
+    real_from_csv, paper_from_csv = _parse_all_trades_organized()
+    today_trades_raw = [t for t in real_from_csv if t.get("date") == today]
+
+    closed_pnl = sum(t["pnl"] for t in today_trades_raw)
+    wins = sum(1 for t in today_trades_raw if t["result"] == "win")
+    losses = sum(1 for t in today_trades_raw if t["result"] == "loss")
+
+    # Build trade_list in the format the frontend expects
     trade_list = []
-    try:
-        trades_path = LOGS_DIR / "trades.csv"
-        if trades_path.exists():
-            with open(trades_path) as f:
-                for row in _csv.DictReader(f):
-                    xt = row.get("exit_time", "") or row.get("entry_time", "")
-                    if not xt:
-                        continue
-                    try:
-                        xt_dt = datetime.fromisoformat(xt.replace("Z", "+00:00"))
-                        if xt_dt < day_start_utc:
-                            continue
-                    except Exception:
-                        continue
-                    result = row.get("result", "")
-                    pnl = float(row.get("pnl_usd") or 0)
-                    if result in ("win", "loss"):
-                        # Detect churn trades (< 30s hold, < $3 PnL) from TP bracket bug
-                        _hold_sec = 0
-                        _is_churn = False
-                        try:
-                            _et_raw = row.get("entry_time", "")
-                            if _et_raw:
-                                _et_dt = datetime.fromisoformat(_et_raw.replace("Z", "+00:00"))
-                                _hold_sec = (xt_dt - _et_dt).total_seconds()
-                                _is_churn = _hold_sec < 30 and abs(pnl) < 3.0
-                        except Exception:
-                            pass
+    for t in today_trades_raw:
+        entry_price = t.get("entry_price", 0)
+        exit_price = t.get("exit_price", 0)
+        side = t.get("side", "long")
+        pnl = t.get("pnl", 0)
+        fees = t.get("fees", 0)
 
-                        # Always count in PnL (they're real fills)
-                        closed_pnl += pnl
-                        if result == "win":
-                            wins += 1
-                        else:
-                            losses += 1
+        # Gross PnL
+        if entry_price > 0 and exit_price > 0:
+            price_move = exit_price - entry_price
+            if side == "short":
+                price_move = -price_move
+            gross_pnl = round(price_move * 5000.0, 2)  # contract size
+        else:
+            gross_pnl = round(pnl + fees, 2)
 
-                        # Convert UTC to PT 12hr format with date
-                        pt_dt = xt_dt - timedelta(hours=7)
-                        time_12h = pt_dt.strftime("%m/%d %I:%M %p")
+        # Duration and churn detection
+        dur_min = t.get("duration_min")
+        _is_churn = dur_min is not None and dur_min < 0.5 and abs(pnl) < 3.0
 
-                        # Fee and price breakdown for Coinbase reconciliation
-                        entry_price = float(row.get("entry_price") or 0)
-                        exit_price = float(row.get("exit_price") or 0)
-                        entry_fees = float(row.get("entry_fees_usd") or 0)
-                        exit_fees = float(row.get("exit_fees_usd") or 0)
-                        total_fees = float(row.get("total_fees_usd") or 0)
-                        if total_fees <= 0:
-                            total_fees = entry_fees + exit_fees
-
-                        # Gross PnL (price movement only, no fees)
-                        side = row.get("side", row.get("direction", "long"))
-                        contract_size = 5000.0  # XLM perp contract size
-                        _tsize = int(row.get("size") or 1)
-                        if entry_price > 0 and exit_price > 0:
-                            price_move = exit_price - entry_price
-                            if side == "short":
-                                price_move = -price_move
-                            gross_pnl = round(price_move * contract_size * _tsize, 2)
-                        else:
-                            price_move = 0
-                            gross_pnl = round(pnl + total_fees, 2)
-
-                        trade_list.append({
-                            "time": time_12h,
-                            "time_sort": xt_dt.isoformat(),
-                            "side": side,
-                            "result": result,
-                            "entry_price": entry_price,
-                            "exit_price": exit_price,
-                            "price_move": round(price_move, 6),
-                            "price_move_pct": round(price_move / entry_price * 100, 4) if entry_price > 0 else 0,
-                            "gross_pnl": gross_pnl,
-                            "total_fees": round(total_fees, 2),
-                            "entry_fees": round(entry_fees, 2),
-                            "exit_fees": round(exit_fees, 2),
-                            "net_pnl": round(pnl, 2),
-                            "type": row.get("entry_type", ""),
-                            "exit_reason": row.get("exit_reason", ""),
-                            "hold_sec": int(_hold_sec),
-                            "churn": _is_churn,
-                            "unified_score": row.get("unified_score", ""),
-                            "rsi": row.get("rsi", ""),
-                        })
-    except Exception:
-        pass
+        trade_list.append({
+            "time": t.get("time", ""),
+            "time_sort": t.get("time_sort", ""),
+            "side": side,
+            "result": t["result"],
+            "entry_price": entry_price,
+            "exit_price": exit_price,
+            "price_move": round(price_move if entry_price > 0 else 0, 6),
+            "price_move_pct": round((price_move / entry_price * 100) if entry_price > 0 else 0, 4),
+            "gross_pnl": gross_pnl,
+            "total_fees": round(fees, 2),
+            "entry_fees": 0,
+            "exit_fees": 0,
+            "net_pnl": round(pnl, 2),
+            "type": t.get("entry_type", ""),
+            "exit_reason": t.get("exit_reason", ""),
+            "hold_sec": int(dur_min * 60) if dur_min else 0,
+            "churn": _is_churn,
+            "unified_score": t.get("unified_score", ""),
+            "rsi": "",
+        })
 
     # Open position unrealized
     unrealized = 0.0
@@ -653,23 +628,36 @@ def get_daily_summary():
     total_fees_paid = sum(t.get("total_fees", 0) for t in real_trades)
     total_net = sum(t.get("net_pnl", 0) for t in real_trades)
 
+    # ALL trades (churn + real) for consistent counting
+    all_trades = real_trades + churn_trades
+    all_trades.sort(key=lambda x: x.get("time_sort", ""), reverse=True)
+    all_wins = sum(1 for t in all_trades if t["result"] == "win")
+    all_losses = sum(1 for t in all_trades if t["result"] == "loss")
+    all_fees = sum(t.get("total_fees", 0) for t in all_trades)
+    all_gross = sum(t.get("gross_pnl", 0) for t in all_trades)
+
     return {
+        # CONSISTENT totals -- includes ALL trades (churn + real)
         "closed_pnl": round(closed_pnl, 2),
         "unrealized": round(unrealized, 2),
         "total_pnl": round(total, 2),
-        "real_pnl": round(real_pnl, 2),
-        "churn_pnl": round(churn_pnl, 2),
+        "wins": all_wins,
+        "losses": all_losses,
+        "trades_today": all_wins + all_losses,
+        # Fee breakdown (all trades)
+        "gross_pnl": round(all_gross, 2),
+        "total_fees": round(all_fees, 2),
+        "net_pnl": round(closed_pnl, 2),
+        "fee_pct": round(all_fees / max(abs(all_gross), 0.01) * 100, 1) if all_gross != 0 else 0,
+        "avg_fee_per_trade": round(all_fees / max(len(all_trades), 1), 2),
+        "breakeven_move": round(all_fees / max(len(all_trades), 1) / 5000, 6),
+        # Churn breakdown (still visible but not hidden)
         "churn_count": len(churn_trades),
-        "wins": sum(1 for t in real_trades if t["result"] == "win"),
-        "losses": sum(1 for t in real_trades if t["result"] == "loss"),
-        # Fee breakdown
-        "gross_pnl": round(total_gross, 2),
-        "total_fees": round(total_fees_paid, 2),
-        "net_pnl": round(total_net, 2),
-        "fee_pct": round(total_fees_paid / max(total_gross, 0.01) * 100, 1) if total_gross > 0 else 0,
-        "avg_fee_per_trade": round(total_fees_paid / max(len(real_trades), 1), 2),
-        "breakeven_move": round(total_fees_paid / max(len(real_trades), 1) / 5000, 6),  # min price move to cover fees
-        "trades": real_trades,
+        "churn_pnl": round(churn_pnl, 2),
+        "real_count": len(real_trades),
+        "real_pnl": round(real_pnl, 2),
+        # Full trade list -- ALL trades, churn tagged
+        "trades": all_trades,
         "position": pos_info,
     }
 
