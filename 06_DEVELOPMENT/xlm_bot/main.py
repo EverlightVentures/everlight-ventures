@@ -5943,7 +5943,11 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                 _total_fees = float(open_pos.get("estimated_round_trip_fees") or 0)
             if pnl_usd is not None and _total_fees > 0:
                 pnl_usd -= _total_fees
-            result = "win" if pnl_pct > 0 else "loss" if pnl_pct < 0 else "flat"
+            # Classify win/loss on NET PnL (after fees), not gross price movement
+            if pnl_usd is not None:
+                result = "win" if pnl_usd > 0 else "loss" if pnl_usd < 0 else "flat"
+            else:
+                result = "win" if pnl_pct > 0 else "loss" if pnl_pct < 0 else "flat"
             log_trade(
                 config,
                 _with_lifecycle_fields(
@@ -6570,7 +6574,11 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
                         _total_plrl_fees = float(open_pos.get("estimated_round_trip_fees") or 0)
                     if pnl_usd_live is not None and _total_plrl_fees > 0:
                         pnl_usd_live -= _total_plrl_fees
-                    result = "win" if pnl_pct > 0 else "loss" if pnl_pct < 0 else "flat"
+                    # Classify on NET PnL (after fees), not gross
+                    if pnl_usd_live is not None:
+                        result = "win" if pnl_usd_live > 0 else "loss" if pnl_usd_live < 0 else "flat"
+                    else:
+                        result = "win" if pnl_pct > 0 else "loss" if pnl_pct < 0 else "flat"
                     # Guard against double-counting
                     _last_counted_entry = str(state.get("_last_exit_counted_entry") or "")
                     _this_entry = str(entry_time_raw or "")
@@ -7552,8 +7560,12 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             if pnl_usd_live is not None and _total_fees > 0:
                 pnl_usd_live -= _total_fees
 
-            result = "win" if pnl_pct > 0 else "loss" if pnl_pct < 0 else "flat"
             pnl_usd = pnl_usd_live
+            # Classify on NET PnL (after fees), not gross price movement
+            if pnl_usd is not None:
+                result = "win" if pnl_usd > 0 else "loss" if pnl_usd < 0 else "flat"
+            else:
+                result = "win" if pnl_pct > 0 else "loss" if pnl_pct < 0 else "flat"
             # Guard: only count win/loss ONCE per unique entry_time to prevent
             # double-counting when close_cfm_position reports success but exchange
             # still holds the position (reconcile re-opens → exit fires again).
