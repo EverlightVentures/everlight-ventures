@@ -20,6 +20,7 @@ from django.db.models import Avg, Count, F, Max, Q, Sum
 from django.db.models.functions import TruncDate
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.views import View
 from django.views.generic import DetailView, ListView, TemplateView
@@ -2091,3 +2092,79 @@ def api_agent_copilot(request, slug):
         pass
 
     return JsonResponse(copilot)
+
+
+# =====================================================================
+# PUBLIC BOOKING PAGE -- prospects can book meetings with agents
+# =====================================================================
+
+def agent_booking_page(request, agent_slug):
+    """Public booking page for an agent. No auth required."""
+    profiles_path = Path('/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/all_profiles.json')
+    if not profiles_path.exists():
+        profiles_path = Path('/home/opc/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/all_profiles.json')
+
+    agent = None
+    if profiles_path.exists():
+        for a in json.loads(profiles_path.read_text()):
+            if a.get('slug') == agent_slug:
+                agent = a
+                break
+
+    if not agent:
+        return render(request, 'hive/booking_404.html', status=404)
+
+    return render(request, 'hive/booking.html', {
+        'agent': agent,
+        'success': request.GET.get('booked') == '1',
+    })
+
+
+@require_POST
+def agent_booking_submit(request, agent_slug):
+    """Handle booking form submission."""
+    profiles_path = Path('/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/all_profiles.json')
+    if not profiles_path.exists():
+        profiles_path = Path('/home/opc/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/all_profiles.json')
+
+    agent = None
+    if profiles_path.exists():
+        for a in json.loads(profiles_path.read_text()):
+            if a.get('slug') == agent_slug:
+                agent = a
+                break
+
+    if not agent:
+        return HttpResponse(status=404)
+
+    # Get form data
+    prospect_name = request.POST.get('name', '')
+    prospect_email = request.POST.get('email', '')
+    date_time = request.POST.get('datetime', '')
+    notes = request.POST.get('notes', '')
+
+    if not prospect_name or not prospect_email or not date_time:
+        return redirect(f'/book/{agent_slug}/?error=missing_fields')
+
+    # Book via our lightweight system
+    try:
+        import sys
+        neuro_path = '/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/neuromorphic'
+        if not os.path.exists(neuro_path):
+            neuro_path = '/home/opc/06_DEVELOPMENT/everlight_os/neuromorphic'
+        if neuro_path not in sys.path:
+            sys.path.insert(0, neuro_path)
+
+        from booking_system import book_meeting
+        result = book_meeting(
+            agent_slug=agent_slug,
+            agent_name=agent.get('name', agent_slug),
+            prospect_name=prospect_name,
+            prospect_email=prospect_email,
+            start_time=date_time,
+            notes=notes,
+        )
+    except Exception as e:
+        log.warning(f"Booking failed: {e}")
+
+    return redirect(f'/book/{agent_slug}/?booked=1')

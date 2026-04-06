@@ -26,7 +26,8 @@
     ],
     "department": "",
     "role_id": "01_chief_operator",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/marcus-cole.svg"
   },
   {
     "name": "Atlas Vega",
@@ -55,7 +56,8 @@
     ],
     "department": "",
     "role_id": "everlight_architect",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/atlas-vega.svg"
   },
   {
     "name": "Nora Blaine",
@@ -84,7 +86,8 @@
     ],
     "department": "",
     "role_id": "17_content_strategy",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/nora-blaine.svg"
   },
   {
     "name": "Slate Mercer",
@@ -115,7 +118,8 @@
     ],
     "department": "",
     "role_id": "40_strategic_modeler",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/slate-mercer.svg"
   },
   {
     "name": "Sage Holloway",
@@ -144,7 +148,8 @@
     ],
     "department": "",
     "role_id": "reviewer",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/sage-holloway.svg"
   },
   {
     "name": "Derek Ellis",
@@ -175,7 +180,8 @@
     ],
     "department": "",
     "role_id": "43_strategy_assistant",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/derek-ellis.svg"
   },
   {
     "name": "Vera Lux",
@@ -204,7 +210,8 @@
     ],
     "department": "",
     "role_id": "everlight_content_director",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/vera-lux.svg"
   },
   {
     "name": "Edith Cross",
@@ -233,7 +240,8 @@
     ],
     "department": "",
     "role_id": "15_editor_qa",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/edith-cross.svg"
   },
   {
     "name": "Quinn Fontaine",
@@ -264,7 +272,8 @@
     ],
     "department": "",
     "role_id": "41_style_enforcer",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/quinn-fontaine.svg"
   },
   {
     "name": "Quinn Sharp",
@@ -293,7 +302,8 @@
     ],
     "department": "",
     "role_id": "everlight_qa_gate",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/quinn-sharp.svg"
   },
   {
     "name": "Paul Sandoval",
@@ -324,7 +334,8 @@
     ],
     "department": "",
     "role_id": "44_edit_assistant",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/paul-sandoval.svg"
   },
   {
     "name": "Rex Thornton",
@@ -353,7 +364,8 @@
     ],
     "department": "",
     "role_id": "everlight_trading_risk",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/rex-thornton.svg"
   },
   {
     "name": "Justine Park",
@@ -382,7 +394,8 @@
     ],
     "department": "",
     "role_id": "34_compliance_gate",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/justine-park.svg"
   },
   {
     "name": "Carlos Moreno",
@@ -411,7 +424,8 @@
     ],
     "department": "",
     "role_id": "33_commission_auditor",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/carlos-moreno.svg"
   },
   {
     "name": "Samuel Navarro",
@@ -442,7 +456,8 @@
     ],
     "department": "",
     "role_id": "42_financial_safeguard",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/samuel-navarro.svg"
   },
   {
     "name": "Augustine Crane",
@@ -471,7 +486,8 @@
     ],
     "department": "",
     "role_id": "45_compliance_assistant",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/augustine-crane.svg"
   },
   {
     "name": "Major Dex",
@@ -492,7 +508,8 @@
     "skills": [],
     "department": "",
     "role_id": "26_logistics_commander",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/major-dex.svg"
   },
   {
     "name": "Aria Chen",
@@ -521,7 +538,8 @@
     ],
     "department": "",
     "role_id": "23_automation_architect",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/aria-chen.svg"
   },
   {
     "name": "Gary Tanaka",
@@ -550,7 +568,8 @@
     ],
     "department": "",
     "role_id": "24_workflow_builder",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/gary-tanaka.svg"
   },
   {
     "name": "Lincoln Masters",
@@ -579,7 +598,8 @@
     ],
     "department": "",
     "role_id": "11_sync_coordinator",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/lincoln-masters.svg"
   },
   {
     "name": "Mack Rivera",
@@ -608,7 +628,8 @@
     ],
     "department": "",
     "role_id": "02_ops_deputy",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/mack-rivera.svg"
   },
   {
     "name": "Carlos Alvarez",
@@ -639,7 +660,8 @@
     ],
     "department": "",
     "role_id": "46_automation_assistant",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/carlos-alvarez.svg"
   },
   {
     "name": "Marcus Webb",
@@ -668,7 +690,8 @@
     ],
     "department": "",
     "role_id": "25_analytics_auditor",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/marcus-webb.svg"
   },
   {
     "name": "Charles Dawson",
@@ -697,7 +720,8 @@
     ],
     "department": "",
     "role_id": "35_broker_analytics",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/charles-dawson.svg"
   },
   {
     "name": "Daniel Monroe",
@@ -726,7 +750,8 @@
     ],
     "department": "",
     "role_id": "22_distribution_ops",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/daniel-monroe.svg"
   },
   {
     "name": "Benjamin Crate",
@@ -755,7 +780,8 @@
     ],
     "department": "",
     "role_id": "everlight_packager",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/benjamin-crate.svg"
   },
   {
     "name": "Philip Warren",
@@ -784,7 +810,8 @@
     ],
     "department": "",
     "role_id": "47_analytics_assistant",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/philip-warren.svg"
   },
   {
     "name": "Sebastian Navarro",
@@ -813,7 +840,8 @@
     ],
     "department": "",
     "role_id": "28_deal_scout",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/sebastian-navarro.svg"
   },
   {
     "name": "Piper Reeves",
@@ -842,7 +870,8 @@
     ],
     "department": "",
     "role_id": "31_outreach_agent",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/piper-reeves.svg"
   },
   {
     "name": "Rex Blackwell",
@@ -871,7 +900,8 @@
     ],
     "department": "",
     "role_id": "36_rex_wholesale",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/rex-blackwell.svg"
   },
   {
     "name": "Adrian Morgan",
@@ -900,7 +930,8 @@
     ],
     "department": "",
     "role_id": "37_ace_deal_marketer",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/adrian-morgan.svg"
   },
   {
     "name": "Frederick Beckett",
@@ -931,7 +962,8 @@
     ],
     "department": "",
     "role_id": "48_outreach_assistant",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/frederick-beckett.svg"
   },
   {
     "name": "Franklin Steele",
@@ -952,7 +984,8 @@
     "skills": [],
     "department": "",
     "role_id": "03_engineering_foreman",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/franklin-steele.svg"
   },
   {
     "name": "Sebastian Torres",
@@ -981,7 +1014,8 @@
     ],
     "department": "",
     "role_id": "everlight_saas_builder",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/sebastian-torres.svg"
   },
   {
     "name": "Raymond Harper",
@@ -1010,7 +1044,8 @@
     ],
     "department": "",
     "role_id": "everlight_saas_pm",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/raymond-harper.svg"
   },
   {
     "name": "Samuel Locke",
@@ -1039,7 +1074,8 @@
     ],
     "department": "",
     "role_id": "08_seo_mapper",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/samuel-locke.svg"
   },
   {
     "name": "Isaac Castellano",
@@ -1068,7 +1104,8 @@
     ],
     "department": "",
     "role_id": "writer",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/isaac-castellano.svg"
   },
   {
     "name": "Patrick Donovan",
@@ -1099,7 +1136,8 @@
     ],
     "department": "",
     "role_id": "49_engineering_assistant",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/patrick-donovan.svg"
   },
   {
     "name": "Penny Vance",
@@ -1128,7 +1166,8 @@
     ],
     "department": "",
     "role_id": "27_profit_maximizer",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/penny-vance.svg"
   },
   {
     "name": "Franklin Jordan",
@@ -1157,7 +1196,8 @@
     ],
     "department": "",
     "role_id": "10_funnel_architect",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/franklin-jordan.svg"
   },
   {
     "name": "Calvin Osei",
@@ -1186,7 +1226,8 @@
     ],
     "department": "",
     "role_id": "30_match_maker",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/calvin-osei.svg"
   },
   {
     "name": "Harrison Knox",
@@ -1215,7 +1256,8 @@
     ],
     "department": "",
     "role_id": "32_deal_closer",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/harrison-knox.svg"
   },
   {
     "name": "Lawrence Okafor",
@@ -1246,7 +1288,8 @@
     ],
     "department": "",
     "role_id": "50_revenue_assistant",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/lawrence-okafor.svg"
   },
   {
     "name": "Ryan Kim",
@@ -1275,7 +1318,8 @@
     ],
     "department": "",
     "role_id": "everlight_saas_growth",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/ryan-kim.svg"
   },
   {
     "name": "Frederick Banks",
@@ -1304,7 +1348,8 @@
     ],
     "department": "",
     "role_id": "29_lead_qualifier",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/frederick-banks.svg"
   },
   {
     "name": "Benjamin Orozco",
@@ -1335,7 +1380,8 @@
     ],
     "department": "",
     "role_id": "51_prospect_scraper",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/benjamin-orozco.svg"
   },
   {
     "name": "Oliver Kessler",
@@ -1366,7 +1412,8 @@
     ],
     "department": "",
     "role_id": "52_client_deployer",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/oliver-kessler.svg"
   },
   {
     "name": "Rafael Vasquez",
@@ -1397,7 +1444,8 @@
     ],
     "department": "",
     "role_id": "57_consulting_assistant",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/rafael-vasquez.svg"
   },
   {
     "name": "Christopher Wolfe",
@@ -1418,7 +1466,8 @@
     "skills": [],
     "department": "",
     "role_id": "cipher_wolfe",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/christopher-wolfe.svg"
   },
   {
     "name": "Bernard Archer",
@@ -1447,7 +1496,8 @@
     ],
     "department": "",
     "role_id": "bull_archer",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/bernard-archer.svg"
   },
   {
     "name": "Miguel Reyes",
@@ -1478,7 +1528,8 @@
     ],
     "department": "",
     "role_id": "53_derivatives_beat",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/miguel-reyes.svg"
   },
   {
     "name": "Pedro Diaz",
@@ -1507,7 +1558,8 @@
     ],
     "department": "",
     "role_id": "pulse_diaz",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/pedro-diaz.svg"
   },
   {
     "name": "Christopher Johanssen",
@@ -1538,7 +1590,8 @@
     ],
     "department": "",
     "role_id": "58_markets_assistant",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/christopher-johanssen.svg"
   },
   {
     "name": "William Santos",
@@ -1567,7 +1620,8 @@
     ],
     "department": "",
     "role_id": "wire_santos",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/william-santos.svg"
   },
   {
     "name": "Bernard Calloway",
@@ -1596,7 +1650,8 @@
     ],
     "department": "",
     "role_id": "brief_calloway",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/bernard-calloway.svg"
   },
   {
     "name": "Stewart Erikson",
@@ -1627,7 +1682,8 @@
     ],
     "department": "",
     "role_id": "54_geopolitical_risk",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/stewart-erikson.svg"
   },
   {
     "name": "Henry Patel",
@@ -1656,7 +1712,8 @@
     ],
     "department": "",
     "role_id": "helix_patel",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/henry-patel.svg"
   },
   {
     "name": "David Wen",
@@ -1687,7 +1744,8 @@
     ],
     "department": "",
     "role_id": "59_legal_assistant",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/david-wen.svg"
   },
   {
     "name": "Nathan Ling",
@@ -1716,7 +1774,8 @@
     ],
     "department": "",
     "role_id": "nova_ling",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/nathan-ling.svg"
   },
   {
     "name": "Peter Adler",
@@ -1745,7 +1804,8 @@
     ],
     "department": "",
     "role_id": "pitch_adler",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/peter-adler.svg"
   },
   {
     "name": "Leonard Nakamura",
@@ -1776,7 +1836,8 @@
     ],
     "department": "",
     "role_id": "55_competitive_intel",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/leonard-nakamura.svg"
   },
   {
     "name": "Thomas Rourke",
@@ -1807,7 +1868,8 @@
     ],
     "department": "",
     "role_id": "56_data_verifier",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/thomas-rourke.svg"
   },
   {
     "name": "Isaac Ashworth",
@@ -1838,7 +1900,8 @@
     ],
     "department": "",
     "role_id": "60_tech_assistant",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/isaac-ashworth.svg"
   },
   {
     "name": "Crypto & DeFi",
@@ -1867,7 +1930,8 @@
     ],
     "department": "",
     "role_id": "",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/crypto-defi.svg"
   },
   {
     "name": "Finance & Markets",
@@ -1896,7 +1960,8 @@
     ],
     "department": "",
     "role_id": "",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/finance-markets.svg"
   },
   {
     "name": "World News",
@@ -1925,7 +1990,8 @@
     ],
     "department": "",
     "role_id": "",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/world-news.svg"
   },
   {
     "name": "Tech & AI",
@@ -1954,7 +2020,8 @@
     ],
     "department": "",
     "role_id": "",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/tech-ai.svg"
   },
   {
     "name": "Business & Startups",
@@ -1983,7 +2050,8 @@
     ],
     "department": "",
     "role_id": "",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/business-startups.svg"
   },
   {
     "name": "Science & Health",
@@ -2012,7 +2080,8 @@
     ],
     "department": "",
     "role_id": "",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/science-health.svg"
   },
   {
     "name": "Legal & Regulatory",
@@ -2041,7 +2110,8 @@
     ],
     "department": "",
     "role_id": "",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/legal-regulatory.svg"
   },
   {
     "name": "Consumer & Local",
@@ -2070,7 +2140,8 @@
     ],
     "department": "",
     "role_id": "",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/consumer-local.svg"
   },
   {
     "name": "Derivatives & Risk",
@@ -2099,7 +2170,8 @@
     ],
     "department": "",
     "role_id": "",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/derivatives-risk.svg"
   },
   {
     "name": "Geopolitical Risk",
@@ -2128,7 +2200,8 @@
     ],
     "department": "",
     "role_id": "",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/geopolitical-risk.svg"
   },
   {
     "name": "Competitive Intel",
@@ -2157,7 +2230,8 @@
     ],
     "department": "",
     "role_id": "",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/competitive-intel.svg"
   },
   {
     "name": "Data Verification",
@@ -2186,7 +2260,8 @@
     ],
     "department": "",
     "role_id": "",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/data-verification.svg"
   },
   {
     "name": "Markets Desk Aide",
@@ -2215,7 +2290,8 @@
     ],
     "department": "",
     "role_id": "",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/markets-desk-aide.svg"
   },
   {
     "name": "Legal Desk Aide",
@@ -2244,7 +2320,8 @@
     ],
     "department": "",
     "role_id": "",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/legal-desk-aide.svg"
   },
   {
     "name": "Tech Desk Aide",
@@ -2273,6 +2350,7 @@
     ],
     "department": "",
     "role_id": "",
-    "esign_url": "https://docuseal.com"
+    "esign_url": "https://docuseal.com",
+    "avatar_svg": "/team/avatars/tech-desk-aide.svg"
   }
 ]

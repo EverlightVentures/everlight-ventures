@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book a Meeting with {{ agent.name }} -- Everlight Ventures</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0f; --bg2: #0f0f18; --gold: #c9a84c; --gold-dim: #8b7635;
+      --text: #e8e6e3; --text2: #9ca3af; --border: rgba(255,255,255,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .booking-card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 16px;
+      padding: 32px; max-width: 480px; width: 90%; box-shadow: 0 0 40px rgba(201,168,76,0.08);
+    }
+    .agent-info { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+    .agent-avatar {
+      width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, var(--gold-dim), #8b5cf6);
+      display: flex; align-items: center; justify-content: center; font-size: 1.4rem; font-weight: 700; color: var(--bg);
+    }
+    .agent-name { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--gold); }
+    .agent-title { font-size: 0.8rem; color: var(--text2); }
+    .agent-bio { font-size: 0.78rem; color: var(--text2); line-height: 1.5; margin-bottom: 20px; }
+    .brand { font-size: 0.65rem; color: var(--gold-dim); text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 20px; }
+    label { display: block; font-size: 0.75rem; color: var(--text2); margin-bottom: 6px; font-weight: 500; }
+    input, textarea, select {
+      width: 100%; padding: 10px 14px; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-size: 0.85rem; margin-bottom: 14px; font-family: inherit;
+    }
+    input:focus, textarea:focus { outline: none; border-color: var(--gold-dim); }
+    textarea { resize: vertical; min-height: 60px; }
+    button {
+      width: 100%; padding: 12px; background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+      color: var(--bg); font-size: 0.9rem; font-weight: 600; border: none; border-radius: 8px;
+      cursor: pointer; transition: all 0.2s; margin-top: 8px;
+    }
+    button:hover { opacity: 0.9; transform: translateY(-1px); }
+    .success {
+      background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.3);
+      border-radius: 8px; padding: 16px; text-align: center; color: #22c55e; margin-bottom: 16px;
+    }
+    .footer { text-align: center; margin-top: 20px; font-size: 0.65rem; color: var(--text2); }
+  </style>
+</head>
+<body>
+  <div class="booking-card">
+    <div class="brand">Everlight Ventures</div>
+
+    <div class="agent-info">
+      <div class="agent-avatar">{{ agent.name|first }}</div>
+      <div>
+        <div class="agent-name">{{ agent.name }}</div>
+        <div class="agent-title">{{ agent.title }}</div>
+      </div>
+    </div>
+
+    <div class="agent-bio">{{ agent.bio }}</div>
+
+    {% if success %}
+    <div class="success">
+      Meeting booked successfully. You'll receive a confirmation email shortly.
+    </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'hive:agent_booking_submit' agent.slug %}">
+      {% csrf_token %}
+      <label for="name">Your Name</label>
+      <input type="text" id="name" name="name" required placeholder="Jane Smith">
+
+      <label for="email">Your Email</label>
+      <input type="email" id="email" name="email" required placeholder="jane@company.com">
+
+      <label for="datetime">Preferred Date &amp; Time (PT)</label>
+      <input type="datetime-local" id="datetime" name="datetime" required>
+
+      <label for="notes">What would you like to discuss?</label>
+      <textarea id="notes" name="notes" placeholder="Brief description of your needs..."></textarea>
+
+      <button type="submit">Book Meeting with {{ agent.name|first }}{{ agent.name|slice:"1:" }}</button>
+    </form>
+
+    <div class="footer">
+      Powered by Everlight Ventures AI | {{ agent.email }}
+    </div>
+  </div>
+</body>
+</html>

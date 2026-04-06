@@ -44,6 +44,10 @@ urlpatterns = [
     # Team Directory + Co-Pilot
     path('team/', views.TeamDirectoryView.as_view(), name='team_directory'),
 
+    # Public booking page (no auth required)
+    path('book/<str:agent_slug>/', views.agent_booking_page, name='agent_booking'),
+    path('book/<str:agent_slug>/submit/', views.agent_booking_submit, name='agent_booking_submit'),
+
     # API / AJAX endpoints
     path(
         'api/session/<str:session_id>/status/',
