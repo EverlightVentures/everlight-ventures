@@ -66,27 +66,19 @@ def trace_ollama_call(
     duration_ms: float = 0,
     metadata: dict | None = None,
 ):
-    """Log an Ollama LLM call to Langfuse."""
+    """Log an Ollama LLM call to Langfuse (v3 SDK)."""
     lf = _get_langfuse()
     if lf is None:
         return
 
     try:
-        trace = lf.trace(
+        span = lf.start_span(
             name=f"ollama/{agent_name}",
-            metadata={
-                "agent": agent_name,
-                "model": model,
-                **(metadata or {}),
-            },
+            input={"prompt": prompt[:500]},
+            metadata={"agent": agent_name, "model": model, **(metadata or {})},
         )
-        trace.generation(
-            name=f"{agent_name}_generation",
-            model=model,
-            input=prompt,
-            output=response,
-            metadata={"duration_ms": duration_ms},
-        )
+        span.update(output={"response": response[:500], "duration_ms": duration_ms})
+        span.end()
         lf.flush()
     except Exception as e:
         log.debug(f"Langfuse trace failed: {e}")
@@ -102,31 +94,19 @@ def trace_claude_call(
     duration_ms: float = 0,
     metadata: dict | None = None,
 ):
-    """Log a Claude API call to Langfuse."""
+    """Log a Claude API call to Langfuse (v3 SDK)."""
     lf = _get_langfuse()
     if lf is None:
         return
 
     try:
-        trace = lf.trace(
+        span = lf.start_span(
             name=f"claude/{agent_name}",
-            metadata={
-                "agent": agent_name,
-                "model": model,
-                **(metadata or {}),
-            },
+            input={"prompt": prompt[:500]},
+            metadata={"agent": agent_name, "model": model, **(metadata or {})},
         )
-        trace.generation(
-            name=f"{agent_name}_generation",
-            model=model,
-            input=prompt,
-            output=response,
-            usage={
-                "input": tokens_in,
-                "output": tokens_out,
-            },
-            metadata={"duration_ms": duration_ms},
-        )
+        span.update(output={"response": response[:500], "tokens_in": tokens_in, "tokens_out": tokens_out})
+        span.end()
         lf.flush()
     except Exception as e:
         log.debug(f"Langfuse trace failed: {e}")
@@ -146,17 +126,13 @@ def trace_agent_action(
         return
 
     try:
-        trace = lf.trace(
+        span = lf.start_span(
             name=f"agent/{agent_name}/{action}",
-            metadata={"agent": agent_name, "action": action},
-        )
-        trace.span(
-            name=action,
             input=input_data,
-            output=output_data,
-            level=level,
-            metadata={"duration_ms": duration_ms},
+            metadata={"agent": agent_name, "action": action, "level": level},
         )
+        span.update(output=output_data or {"duration_ms": duration_ms})
+        span.end()
         lf.flush()
     except Exception as e:
         log.debug(f"Langfuse span failed: {e}")
