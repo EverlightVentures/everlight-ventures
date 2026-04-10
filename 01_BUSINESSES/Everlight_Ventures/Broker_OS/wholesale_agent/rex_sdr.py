@@ -39,6 +39,11 @@ REPLY_TO = "rich@everlightventures.io"
 SLACK_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
 SLACK_CHANNEL = "C0ANLLV8JAC"
 
+try:
+    from gdocs_bridge import publish_report
+except ImportError:
+    publish_report = None
+
 NOW = datetime.now(timezone.utc)
 TODAY = NOW.strftime("%Y-%m-%d")
 
@@ -395,9 +400,6 @@ def run_reengagement():
 
 
 def post_slack_summary(fresh: int, followups: int, reengages: int):
-    if not SLACK_TOKEN:
-        return
-    import requests
     leads = load_leads()
     total = len(leads)
     with_email = sum(1 for l in leads if l.get("owner_email"))
@@ -411,6 +413,24 @@ def post_slack_summary(fresh: int, followups: int, reengages: int):
         f"  Re-engagements: {reengages}\n\n"
         f"Pipeline: {total} total leads | {with_email} with email | {active} active conversations"
     )
+    # Try branded GDoc first
+    if publish_report is not None:
+        try:
+            result = publish_report(
+                title="Rex SDR Daily Summary",
+                content=msg,
+                folder="01_Broker_OS/Outreach_Logs",
+                summary=msg[:200],
+                agent="piper_reeves",
+            )
+            if result.get("ok"):
+                return
+        except Exception:
+            pass
+    # Fallback: raw text post
+    if not SLACK_TOKEN:
+        return
+    import requests
     requests.post("https://slack.com/api/chat.postMessage",
         headers={"Authorization": f"Bearer {SLACK_TOKEN}", "Content-Type": "application/json"},
         json={"channel": SLACK_CHANNEL, "text": msg}, timeout=10)

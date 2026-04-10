@@ -32,7 +32,7 @@ HIVE_WAR_ROOM_DIR = os.environ.get(
 )
 REPORTS_DIR = os.environ.get(
     'REPORTS_DIR',
-    '/home/opc/reports',  # Oracle production; override locally for dev
+    '/home/opc/hive_reports',  # Oracle production; centralized report directory
 )
 BLINKO_API_URL = os.environ.get(
     'BLINKO_API_URL',
@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'rewards',
     'business_os',
     'broker_ops',
+    'flip_os',
 ]
 
 # -- Blackjack / Gaming --

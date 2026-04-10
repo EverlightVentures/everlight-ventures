@@ -225,12 +225,12 @@ def build_report(xlm, wholesale, failures):
 
     stage_defs = [
         ("scout", "Rex Blackwell", "Gemini/Scout"),
-        ("qualify", "Filter Banks + Penny", "Codex"),
-        ("match", "Cupid Osei", "Codex/Matcher"),
-        ("pitch", "Ace Morgan", "Gemini/Marketing"),
+        ("qualify", "Frederick Banks + Penny", "Codex"),
+        ("match", "Calvin Osei", "Codex/Matcher"),
+        ("pitch", "Adrian Morgan", "Gemini/Marketing"),
         ("outreach", "Piper Reeves", "Gemini/Outreach"),
-        ("followup", "Piper + Hammer", "Codex/Closer"),
-        ("report", "Chart + Cash", "Gemini/Analytics"),
+        ("followup", "Piper + Harrison", "Codex/Closer"),
+        ("report", "Charles + Carlos", "Gemini/Analytics"),
     ]
 
     for sid, team, dept in stage_defs:
@@ -276,7 +276,7 @@ def build_report(xlm, wholesale, failures):
     lines.append("| Team Member | Department | Activity |")
     lines.append("|-------------|-----------|----------|")
     lines.append("| Rex Blackwell | Gemini/Scout | Property scouting |")
-    lines.append("| Filter Banks | Codex/Qualifier | Lead qualification |")
+    lines.append("| Frederick Banks | Codex/Qualifier | Lead qualification |")
     lines.append("| Piper Reeves | Gemini/Outreach | Email + follow-up |")
     lines.append("| Rex Thornton | Claude/Risk | Risk analysis |")
     lines.append("| Marcus Cole | Claude/Chief | This report |")

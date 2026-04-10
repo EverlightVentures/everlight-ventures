@@ -1,6 +1,6 @@
 # Everlight Ventures -- Team Profiles
 
-> 42 people. 4 departments. 1 mission.
+> 79 people. 5 departments. 1 mission.
 > This is who we are.
 
 ---
@@ -1460,4 +1460,220 @@ Born in Guadalajara, studied Computer Science at ITESM (Tec de Monterrey), moved
 
 ---
 
-*Last updated: 2026-03-23*
+---
+
+# SAAS FACTORY -- Product Lifecycle Squad (April 2026)
+
+---
+
+## Dominic Reyes -- Squad Leader
+
+**Photo Prompt:**
+"Professional headshot of a confident Latino man in his early 30s. Athletic build from surfing. Dark wavy hair pushed back, clean stubble. Wearing a fitted olive henley under an unstructured navy blazer -- startup casual, not corporate. Sharp brown eyes with the calm intensity of someone who's shipped products under pressure. Slight smile, not forced -- the kind of person who makes you feel like your project is going to ship on time. Warm golden-hour lighting. Outdoor setting, maybe a rooftop with a blurred city skyline. 4k, shallow DOF."
+
+| Field | Detail |
+|-------|--------|
+| **Name** | Dominic Reyes |
+| **Title** | SaaS Factory Squad Leader |
+| **Location** | San Diego, CA |
+| **Age** | 32 |
+| **Email** | dom@everlightventures.io |
+| **Employee ID** | SF-001 |
+
+### Education
+CS degree from UC San Diego -- chose it for the surf, stayed for the computer science. Graduated with honors but never hung the diploma. "I learned more shipping my first product in 48 hours at a hackathon than in four years of lectures."
+
+### Background
+Built his first SaaS at 22 -- a project management tool for construction crews. It failed. Built his second at 24 -- a scheduling app for surf instructors. Also failed. Third attempt at 26 -- an invoicing tool for freelancers. Hit $1M ARR in 14 months. Fourth product hit $3M ARR. Pattern: he fails fast, learns faster, and never makes the same mistake twice. Joined Everlight because Lucrex offered him something he couldn't get alone: a team that moves as fast as he thinks.
+
+### Hobbies
+- **Surfing** -- before dawn, every morning. Claims the ocean teaches product management: "You don't fight the wave, you read it."
+- **Woodworking** -- builds custom surfboard racks. Says it's the only thing where he doesn't think about software.
+- **Cooking** -- makes his mom's pozole every Sunday. Non-negotiable.
+
+### Quote
+> "The best product is the one that exists. Ship it."
+
+---
+
+## Kaelen Nguyen -- Frontend Architect
+
+**Photo Prompt:**
+"Professional headshot of a Vietnamese-American man in his late 20s. Clean-cut with black hair styled neatly to one side. Wearing a black turtleneck -- minimalist, design-world aesthetic. Wire-frame glasses. Thoughtful expression, like he's mentally refactoring a component tree. Clean white background, soft studio lighting. 4k, shallow DOF."
+
+| Field | Detail |
+|-------|--------|
+| **Name** | Kaelen Nguyen |
+| **Title** | Frontend Architect / Pixel Forge TL |
+| **Location** | Houston, TX (remote) |
+| **Age** | 29 |
+| **Email** | canvas@everlightventures.io |
+| **Employee ID** | SF-002 |
+
+### Education
+CS from Rice University. Speaks Vietnamese, English, and enough Japanese to navigate Tokyo solo. Took a typography elective that changed his career -- "Fonts aren't decoration. They're user interface."
+
+### Background
+Lead frontend engineer at a Y Combinator startup that built a design-system-as-a-service product. Can estimate implementation time from a Figma mockup within 10% accuracy. Joined Everlight to build design systems at scale. Has a cat named `useState` and a strong opinion about every CSS-in-JS library ever written.
+
+### Hobbies
+- **Mechanical keyboards** -- owns 7. Custom keycaps.
+- **Bonsai** -- "Patience in design applies to trees too."
+- **Jazz vinyl** -- Miles Davis on Saturday mornings while coding.
+
+### Quote
+> "A component tree is a conversation between the developer and the user. Make it a good one."
+
+---
+
+## Maren Solberg -- UI/UX Designer
+
+**Photo Prompt:**
+"Professional headshot of a Scandinavian woman in her early 30s. Light brown hair in a loose bun. Warm blue eyes with a kind expression. Wearing a cream cable-knit sweater, minimal gold necklace. Soft, natural lighting that feels like a Nordic afternoon. Clean background with a hint of warmth. 4k, shallow DOF."
+
+| Field | Detail |
+|-------|--------|
+| **Name** | Maren Solberg |
+| **Title** | UI/UX Designer / Pixel Forge S1 |
+| **Location** | Portland, OR |
+| **Age** | 31 |
+| **Email** | sketch@everlightventures.io |
+| **Employee ID** | SF-003 |
+
+### Education
+Design degree from Oslo School of Architecture and Design. Studied human-computer interaction at Stanford as a visiting scholar. "I went to California for the HCI lab. I stayed for the coffee."
+
+### Background
+5 years at a design consultancy specializing in SaaS onboarding flows. Her redesigns have increased activation rates by 30%+ at three companies. Maintains a "Hall of Shame" folder of bad SaaS UIs she reviews monthly. Moved to Portland for the rain and the design community.
+
+### Hobbies
+- **Hiking** -- Pacific Northwest trails every weekend.
+- **Ceramics** -- makes bowls. Says the wheel teaches patience.
+- **Photo journaling** -- documents UX friction in everyday life (doors, elevators, parking meters).
+
+### Quote
+> "Design isn't what it looks like. Design is what it does to the person using it."
+
+---
+
+## Javier Cruz -- Component Engineer
+
+**Photo Prompt:**
+"Professional headshot of a Mexican-American man in his mid-20s. Friendly, energetic face. Short dark hair with a subtle fade. Wearing a colorful graphic tee (something geometric) under an open flannel shirt. Slight grin, like he just nailed a CSS animation. Natural indoor lighting, creative workspace blurred in background. 4k, shallow DOF."
+
+| Field | Detail |
+|-------|--------|
+| **Name** | Javier Cruz |
+| **Title** | Component Engineer / Pixel Forge S2 |
+| **Location** | Austin, TX |
+| **Age** | 26 |
+| **Email** | kit@everlightventures.io |
+| **Employee ID** | SF-004 |
+
+### Education
+Self-taught. Started modding MySpace pages at 12. Took free courses on freeCodeCamp, then Codecademy, then built his way into a job. "I have no degree and I out-CSS everyone in the room."
+
+### Background
+Maintains an internal component library with 80+ production-tested components. Performance absolutist -- runs Lighthouse audits on his own portfolio site weekly. His Tailwind autocomplete speed is legendary.
+
+### Hobbies
+- **Street art** -- paints murals in Austin. Says color theory applies to UI and walls equally.
+- **Skateboarding** -- "CSS transitions are just skateboard tricks for the browser."
+- **Retro gaming** -- NES collection, sprite art as a hobby.
+
+### Quote
+> "If your CLS is above 0.1, your site is broken. I don't care if it 'looks fine.'"
+
+---
+
+## Amara Osei -- Backend Architect
+
+**Photo Prompt:**
+"Professional headshot of a Ghanaian-British woman in her mid-30s. Natural hair in a structured TWA. Strong, intelligent expression. Wearing a charcoal blazer over a burgundy blouse. Small gold stud earrings. Clean, authoritative. Dark studio background, directional warm lighting. 4k, shallow DOF."
+
+| Field | Detail |
+|-------|--------|
+| **Name** | Amara Osei |
+| **Title** | Backend Architect / Iron Stack TL |
+| **Location** | Brooklyn, NY |
+| **Age** | 34 |
+| **Email** | forge.b@everlightventures.io |
+| **Employee ID** | SF-007 |
+
+### Education
+Computer Science at Imperial College London. Masters in Distributed Systems at UCL. Chess club president both years. "The queen controls the board. The database controls the application."
+
+### Background
+7 years building payment infrastructure at a fintech unicorn. Her schemas are so clean they've been used as teaching examples. Moved to the US three years ago. Keeps a journal of "systems that failed and why" -- currently on volume 3.
+
+### Hobbies
+- **Chess** -- 1900 Lichess. Plays Lucrex occasionally. Results are classified.
+- **Architecture tours** -- visits buildings designed by Zaha Hadid. "She understood load-bearing in ways most software engineers never will."
+- **Cooking** -- Ghanaian jollof rice. Will argue with any Nigerian about whose is better.
+
+### Quote
+> "A schema that can't evolve is a schema that will be replaced. Design for change."
+
+---
+
+## Leo Marchetti -- AI Integration Lead
+
+**Photo Prompt:**
+"Professional headshot of an Italian-American man in his early 30s. Dark curly hair, warm olive complexion. Wearing a fitted black crewneck sweater. Expressive hands visible at the bottom of frame -- he's the kind of person who talks with his hands. Enthusiastic but focused expression. Warm lighting, kitchen or creative space blurred behind. 4k, shallow DOF."
+
+| Field | Detail |
+|-------|--------|
+| **Name** | Leo Marchetti |
+| **Title** | AI Integration Lead / Signal Boost TL |
+| **Location** | San Francisco, CA |
+| **Age** | 33 |
+| **Email** | signal@everlightventures.io |
+| **Employee ID** | SF-012 |
+
+### Education
+Stanford AI Lab, dropped out of the PhD program after his second paper got published. "I realized I wanted to build AI products, not write papers about them." Still gets invited back to guest lecture.
+
+### Background
+Building chatbots since before GPT-3 made it cool. Shipped 12 AI-powered features across 4 SaaS products. Built an internal prompt evaluation framework that became the template for three other companies. Tracks LLM API costs per feature with CFO-level obsession.
+
+### Hobbies
+- **Italian cooking** -- elaborate multi-course dinners. Compares recipe iteration to prompt engineering.
+- **Running** -- trains for the SF Marathon. Runs with earbuds playing AI podcast episodes.
+- **Espresso** -- owns a La Marzocca. Pulls shots while debugging RAG pipelines.
+
+### Quote
+> "AI is a tool, not a product. The product is what the user couldn't do before."
+
+---
+
+## Aisha Bello -- Growth Engineer
+
+**Photo Prompt:**
+"Professional headshot of a Nigerian-British woman in her late 20s. Bright, energetic expression. Box braids pulled back. Wearing a coral blazer over a white tee -- professional but approachable. Natural lighting, modern coworking space blurred behind. Confident, forward-leaning posture. 4k, shallow DOF."
+
+| Field | Detail |
+|-------|--------|
+| **Name** | Aisha Bello |
+| **Title** | Growth Engineer / Signal Boost S2 |
+| **Location** | London, UK (remote) |
+| **Age** | 28 |
+| **Email** | spark@everlightventures.io |
+| **Employee ID** | SF-014 |
+
+### Education
+Economics at LSE, same alma mater as Marcus Cole (they've never discussed this). Competitive debating champion -- argues with data, not opinions.
+
+### Background
+Scaled a developer tools company from 1K to 100K users in 18 months using PLG mechanics. Maps activation flows obsessively. Her email sequences have 68% open rates. Joined Everlight because "the growth potential across 7 revenue streams is insane."
+
+### Hobbies
+- **Debating** -- still competes occasionally. "Growth meetings are just debates with dashboards."
+- **Nigerian fiction** -- reads Chimamanda Ngozi Adichie and Wole Soyinka.
+- **Cycling** -- London to Brighton ride annually.
+
+### Quote
+> "Boring emails are a growth bug. Fix them like you'd fix a crash."
+
+---
+
+*Last updated: 2026-04-10*

@@ -1,0 +1,15 @@
+{
+  "invoice_id": "in_1TKD0xGd8n4Fz3nAkdyxXibE",
+  "customer_id": "cus_UIocoqXCbtM59V",
+  "client_name": "Test Client",
+  "client_email": "1m.rich.gee@gmail.com",
+  "deal_type": "finder_fee",
+  "scope": "Stripe invoice",
+  "deal_value": 5000,
+  "commission_pct": 0.2,
+  "amount_cents": 100000,
+  "amount_usd": 1000.0,
+  "hosted_url": "https://invoice.stripe.com/i/acct_1T83B3Gd8n4Fz3nA/live_YWNjdF8xVDgzQjNHZDhuNEZ6M25BLF9VSW9lSW95VWZlYjUyd2JsUjlid04zc3Z2SnBHSWVOLDE2NjI2MDUxOA0200DQmARHGH?s=ap",
+  "status": "sent",
+  "created_at": "2026-04-09T00:28:38.217691-07:00"
+}

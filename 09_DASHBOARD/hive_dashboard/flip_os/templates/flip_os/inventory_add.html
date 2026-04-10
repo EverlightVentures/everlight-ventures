@@ -1,0 +1,116 @@
+{% extends "hive/base.html" %}
+{% block title %}Add Item -- Flip OS{% endblock %}
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding: 24px;">
+  <h1 style="font-family: var(--font-heading); color: var(--gold); margin-bottom: 24px;">
+    <i class="fas fa-plus-circle"></i> Add to Inventory
+  </h1>
+
+  {% if error %}
+  <div style="padding: 12px; margin-bottom: 16px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 8px; color: #ef4444;">
+    {{ error }}
+  </div>
+  {% endif %}
+
+  <form method="POST" style="display: flex; flex-direction: column; gap: 16px;">
+    {% csrf_token %}
+    {% if form.intel_id %}<input type="hidden" name="intel_id" value="{{ form.intel_id }}">{% endif %}
+
+    <div>
+      <label style="color: var(--text-muted); font-size: 0.85rem;">Item Name *</label>
+      <input type="text" name="item_name" value="{{ form.item_name|default:'' }}" required
+             style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px; font-size: 1rem;">
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+      <div>
+        <label style="color: var(--text-muted); font-size: 0.85rem;">SKU</label>
+        <input type="text" name="item_sku" value="{{ form.item_sku|default:'' }}"
+               style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px;">
+      </div>
+      <div>
+        <label style="color: var(--text-muted); font-size: 0.85rem;">Category</label>
+        <select name="category" style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px;">
+          {% for cat in "tools,electrical,plumbing,lighting,appliances,hardware,storage,flooring,outdoor,garden,kitchen,bath,paint,decor,seasonal,unknown"|make_list %}{% endfor %}
+          <option value="tools" {% if form.category == "tools" %}selected{% endif %}>Tools</option>
+          <option value="electrical" {% if form.category == "electrical" %}selected{% endif %}>Electrical</option>
+          <option value="plumbing" {% if form.category == "plumbing" %}selected{% endif %}>Plumbing</option>
+          <option value="lighting" {% if form.category == "lighting" %}selected{% endif %}>Lighting</option>
+          <option value="appliances" {% if form.category == "appliances" %}selected{% endif %}>Appliances</option>
+          <option value="hardware" {% if form.category == "hardware" %}selected{% endif %}>Hardware</option>
+          <option value="storage" {% if form.category == "storage" %}selected{% endif %}>Storage</option>
+          <option value="outdoor" {% if form.category == "outdoor" %}selected{% endif %}>Outdoor</option>
+          <option value="garden" {% if form.category == "garden" %}selected{% endif %}>Garden</option>
+          <option value="kitchen" {% if form.category == "kitchen" %}selected{% endif %}>Kitchen</option>
+          <option value="bath" {% if form.category == "bath" %}selected{% endif %}>Bath</option>
+          <option value="decor" {% if form.category == "decor" %}selected{% endif %}>Decor</option>
+          <option value="seasonal" {% if form.category == "seasonal" %}selected{% endif %}>Seasonal</option>
+          <option value="unknown" {% if form.category == "unknown" or not form.category %}selected{% endif %}>Unknown</option>
+        </select>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+      <div>
+        <label style="color: var(--text-muted); font-size: 0.85rem;">Buy Price ($) *</label>
+        <input type="number" name="buy_price" step="0.01" value="{{ form.buy_price|default:'0.01' }}" required
+               style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px;">
+      </div>
+      <div>
+        <label style="color: var(--text-muted); font-size: 0.85rem;">Est. Sell Price ($)</label>
+        <input type="number" name="est_sell_price" step="0.01" value="{{ form.est_sell_price|default:'' }}"
+               style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px;">
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+      <div>
+        <label style="color: var(--text-muted); font-size: 0.85rem;">Source</label>
+        <select name="buy_source" style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px;">
+          <option value="home_depot">Home Depot</option>
+          <option value="walmart">Walmart</option>
+          <option value="target">Target</option>
+          <option value="lowes">Lowe's</option>
+          <option value="thrift">Thrift Store</option>
+          <option value="fb_marketplace">FB Marketplace</option>
+          <option value="garage_sale">Garage Sale</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div>
+        <label style="color: var(--text-muted); font-size: 0.85rem;">Condition</label>
+        <select name="condition" style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px;">
+          <option value="new">New</option>
+          <option value="like_new">Like New</option>
+          <option value="good">Good</option>
+          <option value="fair">Fair</option>
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <label style="color: var(--text-muted); font-size: 0.85rem;">Storage Location</label>
+      <select name="storage_location" style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px;">
+        <option value="unit_a">Storage Unit</option>
+        <option value="home">With Me</option>
+        <option value="car">In Car</option>
+      </select>
+    </div>
+
+    <div>
+      <label style="color: var(--text-muted); font-size: 0.85rem;">Notes</label>
+      <textarea name="notes" rows="3"
+                style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px; resize: vertical;"></textarea>
+    </div>
+
+    <div style="display: flex; gap: 12px; margin-top: 8px;">
+      <button type="submit" style="flex: 1; padding: 14px; background: var(--gold); color: #000; border: none; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer;">
+        <i class="fas fa-plus"></i> Add to Storage
+      </button>
+      <a href="{% url 'flip_os:dashboard' %}" style="padding: 14px 24px; border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-secondary); text-decoration: none; display: flex; align-items: center;">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

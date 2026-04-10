@@ -193,12 +193,16 @@ class BrokerMatch(models.Model):
 
 class Deal(models.Model):
     STAGE_CHOICES = [
-        ("intro",       "Intro Made"),
-        ("negotiating", "Negotiating"),
-        ("contracted",  "Contracted"),
-        ("active",      "Active / In Progress"),
-        ("closed_won",  "Closed Won"),
-        ("closed_lost", "Closed Lost"),
+        ("intro",          "Intro Made"),
+        ("negotiating",    "Negotiating"),
+        ("contracted",     "Contracted"),
+        ("legal_review",   "Legal Review (Justine)"),
+        ("signing",        "Awaiting Signatures"),
+        ("title_engaged",  "Title Company Engaged"),
+        ("closing",        "Closing in Progress"),
+        ("active",         "Active / In Progress"),
+        ("closed_won",     "Closed Won"),
+        ("closed_lost",    "Closed Lost"),
     ]
 
     id          = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -604,3 +608,124 @@ class ClientDocument(models.Model):
             return order.index(self.doc_type) + 1
         except ValueError:
             return 99
+
+
+# ---------------------------------------------------------------------------
+# DEAL EVENTS: full timeline / audit trail for every deal action
+# ---------------------------------------------------------------------------
+
+class DealEvent(models.Model):
+    """Immutable timeline entry for deal lifecycle tracking."""
+    EVENT_TYPE_CHOICES = [
+        ("stage_change",      "Stage Change"),
+        ("contract_generated", "Contract Generated"),
+        ("legal_review",      "Legal Review"),
+        ("legal_approved",    "Legal Approved"),
+        ("legal_flagged",     "Legal Issue Flagged"),
+        ("doc_sent",          "Document Sent"),
+        ("doc_signed",        "Document Signed"),
+        ("title_engaged",     "Title Company Engaged"),
+        ("emd_deposited",     "EMD Deposited"),
+        ("emd_released",      "EMD Released"),
+        ("invoice_created",   "Invoice Created"),
+        ("invoice_paid",      "Invoice Paid"),
+        ("call_logged",       "Call Logged"),
+        ("email_sent",        "Email Sent"),
+        ("email_received",    "Email Received"),
+        ("note",              "Internal Note"),
+        ("closing_scheduled", "Closing Scheduled"),
+        ("funds_disbursed",   "Funds Disbursed"),
+    ]
+
+    id          = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    deal        = models.ForeignKey(Deal, on_delete=models.CASCADE, related_name="events")
+    event_type  = models.CharField(max_length=30, choices=EVENT_TYPE_CHOICES, db_index=True)
+    title       = models.CharField(max_length=300)
+    detail      = models.TextField(blank=True)
+    agent_name  = models.CharField(max_length=50, blank=True, help_text="Hive agent who performed action")
+    metadata    = models.JSONField(default=dict, blank=True)
+    created_at  = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Deal Event"
+
+    def __str__(self):
+        return f"{self.event_type} | {self.title} | {self.created_at:%Y-%m-%d %H:%M}"
+
+
+# ---------------------------------------------------------------------------
+# CALL LOG: mid-call tools, notes, outcomes, follow-ups
+# ---------------------------------------------------------------------------
+
+class CallLog(models.Model):
+    """Track every phone/video call with sellers, buyers, title companies."""
+    CALL_TYPE_CHOICES = [
+        ("seller_intro",   "Seller Introduction"),
+        ("seller_followup", "Seller Follow-up"),
+        ("negotiation",    "Negotiation Call"),
+        ("buyer_pitch",    "Buyer Pitch"),
+        ("buyer_followup", "Buyer Follow-up"),
+        ("title_company",  "Title Company"),
+        ("legal_review",   "Legal / Compliance"),
+        ("closing_call",   "Closing Coordination"),
+        ("other",          "Other"),
+    ]
+    OUTCOME_CHOICES = [
+        ("connected",     "Connected - Positive"),
+        ("connected_neg", "Connected - Negative / Not Interested"),
+        ("voicemail",     "Left Voicemail"),
+        ("no_answer",     "No Answer"),
+        ("callback",      "Callback Scheduled"),
+        ("deal_advanced", "Deal Advanced to Next Stage"),
+        ("dead",          "Lead Dead"),
+    ]
+
+    id              = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    deal            = models.ForeignKey(Deal, on_delete=models.CASCADE, related_name="calls",
+                                         null=True, blank=True)
+    property_lead   = models.ForeignKey(PropertyLead, on_delete=models.SET_NULL,
+                                         null=True, blank=True, related_name="calls")
+    investor_buyer  = models.ForeignKey(InvestorBuyer, on_delete=models.SET_NULL,
+                                         null=True, blank=True, related_name="calls")
+
+    call_type       = models.CharField(max_length=20, choices=CALL_TYPE_CHOICES)
+    outcome         = models.CharField(max_length=20, choices=OUTCOME_CHOICES, blank=True)
+    direction       = models.CharField(max_length=10,
+                                        choices=[("outbound", "Outbound"), ("inbound", "Inbound")],
+                                        default="outbound")
+
+    # Who was on the call
+    caller_agent    = models.CharField(max_length=50, help_text="Hive agent: piper, hammer, harrison")
+    contact_name    = models.CharField(max_length=200, blank=True)
+    contact_phone   = models.CharField(max_length=20, blank=True)
+    contact_email   = models.EmailField(blank=True)
+
+    # Timing
+    started_at      = models.DateTimeField(default=timezone.now)
+    duration_secs   = models.IntegerField(default=0)
+
+    # Mid-call notes (agent fills these DURING the call)
+    notes           = models.TextField(blank=True, help_text="Free-form notes during call")
+    seller_mood     = models.CharField(max_length=20, blank=True,
+                                        choices=[("motivated", "Motivated"), ("neutral", "Neutral"),
+                                                 ("resistant", "Resistant"), ("hostile", "Hostile")])
+    price_discussed = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True,
+                                           help_text="Price mentioned on call")
+    objections      = models.JSONField(default=list, blank=True,
+                                        help_text="List of objections raised")
+    commitments     = models.JSONField(default=list, blank=True,
+                                        help_text="List of commitments/next steps agreed")
+
+    # Follow-up
+    followup_date   = models.DateTimeField(null=True, blank=True)
+    followup_action = models.CharField(max_length=300, blank=True)
+
+    created_at      = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-started_at"]
+        verbose_name = "Call Log"
+
+    def __str__(self):
+        return f"{self.call_type} | {self.contact_name} | {self.outcome} | {self.started_at:%Y-%m-%d}"

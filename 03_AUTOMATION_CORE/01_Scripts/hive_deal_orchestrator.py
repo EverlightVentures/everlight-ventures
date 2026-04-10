@@ -236,7 +236,37 @@ def resolve_channel_id(channel_name: str) -> str:
 
 
 def post_to_slack(channel_name: str, text: str) -> bool:
-    """Post a message to Slack via bot token."""
+    """Post to Slack through the standard report publisher, then fall back to raw chat."""
+    folder_map = {
+        "war-room": "00_Command_Center/War_Room",
+        "broker-pipeline": "01_Broker_OS/Deal_Pipeline",
+        "ft-markets": "02_XLM_Bot/Daily_Scoreboard",
+        "hive-alerts": "00_Command_Center/System_Status",
+        "deploy-log": "06_Infrastructure/N8N_Workflow_Logs",
+    }
+    try:
+        try:
+            from content_tools.gdocs_bridge import publish_report
+        except Exception:
+            sys.path.insert(0, "/home/opc/content_tools")
+            from gdocs_bridge import publish_report
+        lines = [line.strip(" *") for line in str(text).splitlines() if line.strip()]
+        title = lines[0][:120] if lines else f"Hive Deal Orchestrator Update ({channel_name})"
+        summary = " ".join(lines[:2])[:220] if lines else "Hive deal orchestrator update."
+        result = publish_report(
+            title=title,
+            content=str(text),
+            folder=folder_map.get(channel_name, "00_Command_Center/System_Status"),
+            slack_channel=f"#{channel_name}",
+            summary=summary,
+            post_to_slack=True,
+            agent="marcus_cole",
+        )
+        if result.get("slack_posted"):
+            return True
+    except Exception as exc:
+        log.warning("Report publish fallback to raw Slack for %s: %s", channel_name, exc)
+
     cid = CHANNELS.get(channel_name)
     if not cid or not SLACK_BOT_TOKEN:
         log.warning("Slack skip: channel=%s token=%s", channel_name, bool(SLACK_BOT_TOKEN))

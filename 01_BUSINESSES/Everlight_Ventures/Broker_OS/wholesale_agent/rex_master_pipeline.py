@@ -29,6 +29,11 @@ from pathlib import Path
 AGENT_DIR = Path(__file__).parent
 sys.path.insert(0, str(AGENT_DIR))
 
+try:
+    from gdocs_bridge import publish_report
+except ImportError:
+    publish_report = None
+
 logging.basicConfig(
     level=logging.INFO,
     format="[Rex Pipeline %(asctime)s] %(message)s",
@@ -51,7 +56,23 @@ SLACK_CHANNEL = "C0ANLLV8JAC"
 BLINKO_URL = "http://129.159.38.250:1111/api/v1/note/upsert"
 
 
-def post_slack(text: str):
+def post_slack(text: str, title: str = "Rex Master Pipeline"):
+    """Post to Slack, creating a GDoc first when possible."""
+    # Try branded GDoc first
+    if publish_report is not None:
+        try:
+            result = publish_report(
+                title=title,
+                content=text,
+                folder="01_Broker_OS/Scout_Reports",
+                summary=text[:200],
+                agent="marcus_cole",
+            )
+            if result.get("ok"):
+                return
+        except Exception:
+            pass
+    # Fallback: raw text post
     try:
         import requests
         if SLACK_TOKEN:

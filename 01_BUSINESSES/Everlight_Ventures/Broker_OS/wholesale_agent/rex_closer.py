@@ -42,6 +42,25 @@ REPLY_TO = "rich@everlightventures.io"
 SLACK_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
 SLACK_CHANNEL = "C0ANLLV8JAC"
 
+try:
+    from gdocs_bridge import publish_report
+except ImportError:
+    publish_report = None
+
+# Contract generation + Stripe invoicing
+try:
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from contract_generator import generate_wholesale_contract, generate_finder_agreement
+except ImportError:
+    generate_wholesale_contract = None
+    generate_finder_agreement = None
+
+try:
+    from stripe_invoicer import invoice_deal as stripe_invoice_deal
+except ImportError:
+    stripe_invoice_deal = None
+
 NOW = datetime.now(timezone.utc)
 TODAY = NOW.strftime("%Y-%m-%d")
 
@@ -93,7 +112,23 @@ def send_email(to: str, subject: str, body: str) -> bool:
         return False
 
 
-def post_slack(text: str):
+def post_slack(text: str, title: str = "Rex Closer Update"):
+    """Post to Slack, creating a GDoc first when possible."""
+    # Try branded GDoc first
+    if publish_report is not None:
+        try:
+            result = publish_report(
+                title=title,
+                content=text,
+                folder="01_Broker_OS/Deal_Pipeline",
+                summary=text[:200],
+                agent="harrison_knox",
+            )
+            if result.get("ok"):
+                return
+        except Exception:
+            pass
+    # Fallback: raw text post
     if not SLACK_TOKEN:
         log.info(f"[Slack offline] {text[:300]}")
         return
@@ -613,7 +648,27 @@ def process_seller_acceptance(deal: dict) -> bool:
     email = deal.get("owner_email", "")
     slug = deal.get("address_slug", make_slug(addr))
 
-    # Generate and save purchase agreement
+    # Generate and save purchase agreement (PDF if available, text fallback)
+    pdf_path = None
+    if generate_wholesale_contract:
+        try:
+            pdf_path = generate_wholesale_contract({
+                "property_address": addr,
+                "seller_name": deal.get("owner_name", ""),
+                "seller_email": deal.get("owner_email", ""),
+                "buyer_name": "TBD (Assignment)",
+                "buyer_email": "",
+                "purchase_price": deal.get("offer", 0),
+                "assignment_fee": deal.get("assignment_fee", deal.get("offer", 0) * 0.10),
+                "earnest_money": min(1000, deal.get("offer", 0) * 0.01),
+                "closing_date": deal.get("close_date", "Within 14 days"),
+                "title_company": deal.get("title_company", "TBD"),
+                "inspection_days": 14,
+            })
+            log.info(f"PDF contract generated: {pdf_path}")
+        except Exception as e:
+            log.warning(f"PDF contract generation failed, using text fallback: {e}")
+
     agreement = generate_purchase_agreement(deal)
     contract_path = CONTRACTS_DIR / f"{slug}_purchase_agreement.txt"
     contract_path.write_text(agreement)
@@ -1076,6 +1131,109 @@ def process_interested_leads():
     if processed:
         LEADS_DB.write_text(json.dumps(leads, indent=2, default=str))
     log.info(f"Processed {processed} interested leads")
+
+
+# ---------------------------------------------------------------------------
+# DEAL CLOSE -- buyer accepts assignment, invoice goes out
+# ---------------------------------------------------------------------------
+
+def close_deal(deal: dict, buyer: dict) -> dict:
+    """
+    Close a wholesale deal: generate finder agreement PDF, send Stripe invoice.
+
+    Args:
+        deal: deal dict with address, offer, assignment_fee, etc.
+        buyer: dict with name, email, company
+
+    Returns: dict with contract_path, invoice_result
+    """
+    addr = deal.get("address", "")
+    slug = deal.get("address_slug", make_slug(addr))
+    assignment_fee = deal.get("assignment_fee", deal.get("offer", 0) * 0.10)
+    buyer_name = buyer.get("name", buyer.get("company", ""))
+    buyer_email = buyer.get("email", "")
+
+    result = {"contract_path": None, "invoice": None}
+
+    # 1. Generate finder fee agreement PDF
+    if generate_finder_agreement:
+        try:
+            contract_path = generate_finder_agreement({
+                "client_name": buyer_name,
+                "client_contact": buyer_name,
+                "client_email": buyer_email,
+                "scope": "Real estate wholesale assignment - %s" % addr,
+                "commission_pct": 0,
+                "deal_value": deal.get("offer", 0),
+                "term_months": 12,
+                "state": "California",
+            })
+            result["contract_path"] = contract_path
+            log.info("Finder agreement PDF: %s" % contract_path)
+        except Exception as e:
+            log.error("Finder agreement generation failed: %s" % e)
+
+    # 2. Send Stripe invoice for assignment fee
+    if stripe_invoice_deal and buyer_email:
+        try:
+            inv = stripe_invoice_deal({
+                "client_name": buyer_name,
+                "client_email": buyer_email,
+                "deal_type": "wholesale_assignment",
+                "scope": "Assignment fee - %s" % addr,
+                "deal_value": deal.get("offer", 0),
+                "commission_amount": assignment_fee,
+                "due_days": 3,
+                "auto_send": True,
+            })
+            result["invoice"] = inv
+            if inv.get("success"):
+                log.info("Stripe invoice sent: %s ($%.2f)" % (inv["invoice_id"], inv["amount_usd"]))
+            else:
+                log.error("Stripe invoice failed: %s" % inv.get("error"))
+        except Exception as e:
+            log.error("Stripe invoicing error: %s" % e)
+
+    # 3. Update deal stage
+    deal["stage"] = "closed"
+    deal["buyer_name"] = buyer_name
+    deal["buyer_email"] = buyer_email
+    deal["assignment_fee"] = assignment_fee
+    deal["closed_at"] = datetime.now(timezone.utc).isoformat()
+    deal["invoice_id"] = (result.get("invoice") or {}).get("invoice_id")
+    deal["invoice_url"] = (result.get("invoice") or {}).get("invoice_url")
+    deal["conversation"].append({
+        "role": "rex",
+        "message": "DEAL CLOSED. Buyer: %s. Assignment fee: $%s. Invoice sent." % (
+            buyer_name, "{:,.0f}".format(assignment_fee)
+        ),
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+    })
+    save_deal(deal)
+
+    # 4. Post to Slack
+    invoice_url = (result.get("invoice") or {}).get("invoice_url", "")
+    post_slack(
+        "*DEAL CLOSED*\n"
+        "Property: %s\n"
+        "Purchase Price: $%s\n"
+        "Assignment Fee: $%s\n"
+        "Buyer: %s\n"
+        "Invoice: %s\n"
+        "Contract: %s" % (
+            addr,
+            "{:,.0f}".format(deal.get("offer", 0)),
+            "{:,.0f}".format(assignment_fee),
+            buyer_name,
+            invoice_url or "Manual",
+            result.get("contract_path", "N/A"),
+        )
+    )
+
+    log.info("DEAL CLOSED: %s | Buyer: %s | Fee: $%s" % (
+        addr, buyer_name, "{:,.0f}".format(assignment_fee)
+    ))
+    return result
 
 
 if __name__ == "__main__":

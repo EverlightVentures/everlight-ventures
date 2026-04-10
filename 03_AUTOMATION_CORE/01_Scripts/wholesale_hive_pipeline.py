@@ -34,6 +34,14 @@ FAILURE_LOG = os.path.join(LOG_DIR, "wholesale_pipeline_failures.jsonl")
 # Slack webhook for #wholesale-deals
 SLACK_WEBHOOK = None  # loaded from env
 
+# Workbook logger for unified tracking
+sys.path.insert(0, WHOLESALE_DIR)
+try:
+    from workbook_logger import wb as _wb
+    _WB_AVAILABLE = True
+except Exception:
+    _WB_AVAILABLE = False
+
 
 def load_env():
     """Load environment variables from .env file."""
@@ -146,7 +154,7 @@ STAGES = [
     {
         "id": "qualify",
         "name": "Stage 2: Lead Qualification",
-        "team_member": "Filter Banks (Codex/Qualifier) + Penny Vance (Codex/Profit)",
+        "team_member": "Frederick Banks (Lead Qualifier) + Penny Vance (Profit Maximizer)",
         "description": "Score, enrich, and run money math on all new leads",
         "scripts": [
             {"name": "rex_lead_scorer_v2.py", "timeout": 300},
@@ -158,7 +166,7 @@ STAGES = [
     {
         "id": "match",
         "name": "Stage 3: Buyer Matching",
-        "team_member": "Cupid Osei (Codex/Matcher)",
+        "team_member": "Calvin Osei (Match Maker)",
         "description": "Match qualified properties to cash buyers from investor list",
         "scripts": [
             {"name": "rex_buyer_segmenter.py", "timeout": 300},
@@ -167,7 +175,7 @@ STAGES = [
     {
         "id": "pitch",
         "name": "Stage 4: Deal Marketing",
-        "team_member": "Ace Morgan (Gemini/Marketing)",
+        "team_member": "Adrian Morgan (Deal Marketer)",
         "description": "Create custom investment pitches for hot deals",
         "scripts": [
             {"name": "rex_deal_sheet.py", "timeout": 300},
@@ -186,7 +194,7 @@ STAGES = [
     {
         "id": "followup",
         "name": "Stage 6: Follow-Up & Nurture",
-        "team_member": "Piper Reeves (Gemini/Outreach) + Hammer Knox (Codex/Closer)",
+        "team_member": "Piper Reeves (Outreach) + Harrison Knox (Deal Closer)",
         "description": "Follow up on warm leads, push deals toward close",
         "scripts": [
             {"name": "rex_sdr.py", "args": ["--mode", "followup"], "timeout": 300},
@@ -197,7 +205,7 @@ STAGES = [
     {
         "id": "report",
         "name": "Stage 7: Pipeline Report",
-        "team_member": "Chart Dawson (Gemini/Analytics) + Cash Moreno (Claude/Auditor)",
+        "team_member": "Charles Dawson (Analytics) + Carlos Moreno (Commission Auditor)",
         "description": "Generate daily pipeline stats and post to Slack",
         "scripts": [
             {"name": "rex_health.py", "timeout": 120},
@@ -403,6 +411,41 @@ Stage breakdown:"""
                 log(f"Published to Google Docs: {gdocs_result.get('doc_link', '')}")
         except Exception:
             pass
+
+    # Log to workbooks
+    if not dry_run and _WB_AVAILABLE:
+        try:
+            # Map stage results to agent performance
+            _agent_map = {
+                "scout": "rex_blackwell",
+                "qualify": "frederick_banks",
+                "match": "calvin_osei",
+                "pitch": "adrian_morgan",
+                "outreach": "piper_reeves",
+                "followup": "harrison_knox",
+                "report": "carlos_moreno",
+            }
+            for r in stage_results:
+                agent = _agent_map.get(r["stage_id"], r["stage_id"])
+                _wb.log_agent_task(
+                    agent=agent,
+                    task=r["stage_id"],
+                    success=r["failed"] == 0,
+                    count=r["succeeded"],
+                )
+            _wb.snapshot_daily()
+            _wb.flush()
+
+            # Sync to external systems
+            _wb.sync_to_supabase()
+            summary_text = _wb.generate_summary()
+            _wb.post_to_slack(f"*Wholesale Pipeline* {run_id}\n{summary_text}")
+            _wb.log_to_blinko(
+                f"Run: {run_id}\n{summary_text}\nScripts: {total_passed}/{total_scripts} passed in {pipeline_elapsed}s"
+            )
+            log(f"Workbook sync complete: {summary_text}")
+        except Exception as e:
+            log(f"Workbook logging failed (non-fatal): {e}", "WARN")
 
     log(f"\nReport saved: {report_path}")
     return report

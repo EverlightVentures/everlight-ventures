@@ -19,6 +19,11 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any, Callable, Optional
 
+try:
+    from gdocs_bridge import publish_report
+except ImportError:
+    publish_report = None
+
 logging.basicConfig(level=logging.INFO, format="[Rex Utils %(asctime)s] %(message)s", datefmt="%H:%M")
 log = logging.getLogger("rex_utils")
 
@@ -85,11 +90,76 @@ def retry(func: Callable, max_retries: int = 3, delay: float = 5,
 # SAFE EMAIL SENDER (with retry + dead letter queue)
 # ---------------------------------------------------------------------------
 
+# Dead-end email domains that will never respond to outreach
+DEAD_END_DOMAINS = {
+    # Government
+    "clevelandohio.gov", "city.cleveland.oh.us", "gov", "state.oh.us",
+    "state.tx.us", "state.ga.us", "state.fl.us", "state.mo.us",
+    "ci.cleveland.oh.us", "cityofatlanta.gov",
+    # Generic government patterns (checked via suffix)
+    # Land banks, mayors, city departments
+    # Institutions
+    "edu", "ac.uk",
+    # Religious / nonprofits that won't sell
+    "dosafl.com", "magdalenhouse.org",
+    # Defunct / dead domains
+    "worldnet.att.net", "city.cleveland.oh.us",
+}
+
+DEAD_END_PREFIXES = [
+    "noreply@", "no-reply@", "donotreply@",
+    "info@", "admin@", "webmaster@",
+    "support@", "help@", "abuse@",
+    "postmaster@", "mailer-daemon@",
+]
+
+DEAD_END_KEYWORDS = [
+    "landbank", "mayor", "clerk", "assessor", "treasurer",
+    "council", "sheriff", "police", "fire", "court",
+]
+
+
+def is_dead_end_email(email: str) -> bool:
+    """Check if an email address is a dead-end that won't respond to outreach."""
+    if not email:
+        return True
+    email = email.lower().strip()
+
+    # Check prefixes
+    for prefix in DEAD_END_PREFIXES:
+        if email.startswith(prefix):
+            return True
+
+    # Check domain
+    domain = email.split("@")[-1] if "@" in email else ""
+
+    # Government TLDs
+    if domain.endswith(".gov") or domain.endswith(".gov.us"):
+        return True
+
+    # Education
+    if domain.endswith(".edu") or domain.endswith(".ac.uk"):
+        return True
+
+    # Exact domain matches
+    if domain in DEAD_END_DOMAINS:
+        return True
+
+    # Keywords in the local part
+    local = email.split("@")[0] if "@" in email else ""
+    for kw in DEAD_END_KEYWORDS:
+        if kw in local:
+            return True
+
+    return False
+
+
 def safe_send_email(to: str, subject: str, body: str,
                     max_retries: int = 3) -> bool:
     """
     Send email via Resend with retry and dead letter queue on failure.
     Returns True if sent, False if queued to dead letter.
+    Auto-skips government, institutional, and dead-end addresses.
     """
     if not RESEND_KEY:
         log.warning("No RESEND_API_KEY set -- queuing to dead letter")
@@ -97,6 +167,10 @@ def safe_send_email(to: str, subject: str, body: str,
         return False
 
     if not to:
+        return False
+
+    if is_dead_end_email(to):
+        log.info("SKIP dead-end email: %s" % to)
         return False
 
     import requests
@@ -556,8 +630,23 @@ def get_hot_zips(market: str, state: str, count: int = 10) -> list[dict]:
 # SLACK HELPER
 # ---------------------------------------------------------------------------
 
-def _post_slack(text: str):
-    """Post to Slack #wholesale-deals."""
+def _post_slack(text: str, title: str = "Rex Scout Report"):
+    """Post to Slack #wholesale-deals, creating a GDoc first when possible."""
+    # Try branded GDoc first
+    if publish_report is not None:
+        try:
+            result = publish_report(
+                title=title,
+                content=text,
+                folder="01_Broker_OS/Scout_Reports",
+                summary=text[:200],
+                agent="rex_blackwell",
+            )
+            if result.get("ok"):
+                return
+        except Exception:
+            pass
+    # Fallback: raw text post
     if not SLACK_TOKEN:
         log.info(f"[Slack offline] {text[:200]}")
         return

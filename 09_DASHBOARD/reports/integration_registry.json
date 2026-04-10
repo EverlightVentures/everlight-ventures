@@ -1,0 +1,270 @@
+{
+  "meta": {
+    "name": "Everlight Integration Registry",
+    "version": "1.0.0",
+    "created": "2026-04-07",
+    "purpose": "Master tracking of every integration, sync path, and output channel. Single source of truth so phone, CLI, and Oracle are never out of sync.",
+    "sync_targets": [
+      "supabase:integration_registry",
+      "blinko",
+      "gdocs:00_Command_Center"
+    ],
+    "last_synced": "2026-04-07T08:09:53.005133+00:00"
+  },
+  "platforms": {
+    "phone": {
+      "role": "Control plane + development",
+      "path": "/mnt/sdcard/AA_MY_DRIVE/",
+      "credentials": "03_AUTOMATION_CORE/03_Credentials/.env"
+    },
+    "oracle_e5": {
+      "role": "Production server (24/7)",
+      "ip": "129.159.38.250",
+      "path": "/home/opc/",
+      "credentials": "/home/opc/.env"
+    },
+    "supabase": {
+      "role": "Source of truth database",
+      "url": "https://jdqqmsmwmbsnlnstyavl.supabase.co",
+      "project_id": "jdqqmsmwmbsnlnstyavl"
+    },
+    "slack": {
+      "role": "Notifications + GDoc links",
+      "method": "Bot token API (webhooks dead)"
+    },
+    "gdocs": {
+      "role": "Branded reports + formatted output",
+      "method": "n8n webhook -> Google Docs API",
+      "webhook": "http://localhost:5678/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdoc"
+    },
+    "blinko": {
+      "role": "RAG knowledge base",
+      "url": "http://129.159.38.250:1111"
+    }
+  },
+  "output_channels": {
+    "slack_channels": {
+      "C0AN4GSTMT5": {
+        "name": "#deploy-log",
+        "purpose": "Deploy notifications",
+        "format": "gdoc_link"
+      },
+      "C0ANLLV8JAC": {
+        "name": "#wholesale-deals",
+        "purpose": "Wholesale pipeline",
+        "format": "gdoc_link"
+      },
+      "C08N1KV3WMW": {
+        "name": "#hive-alerts",
+        "purpose": "Agent alerts",
+        "format": "gdoc_link"
+      },
+      "C08N14H1X1A": {
+        "name": "#ft-hunters",
+        "purpose": "Surplus funds + deal hunting",
+        "format": "gdoc_link"
+      },
+      "C08JZUBNHL1": {
+        "name": "#all-everlightventures",
+        "purpose": "Main channel - all reports",
+        "format": "gdoc_link"
+      },
+      "C08N1KV3YYY": {
+        "name": "#war-room",
+        "purpose": "CEO brief + critical alerts",
+        "format": "gdoc_link"
+      },
+      "C0AN4GSTXYZ": {
+        "name": "#ceo-brief",
+        "purpose": "Daily CEO brief",
+        "format": "gdoc_link"
+      },
+      "C0ANLLV8XLM": {
+        "name": "#xlm-trading",
+        "purpose": "Bot trade decisions",
+        "format": "gdoc_link"
+      }
+    },
+    "gdoc_folders": {
+      "00_Command_Center/Daily_Briefings": "CEO daily brief",
+      "00_Command_Center/War_Room": "Critical ops",
+      "01_Broker_OS/Scout_Reports": "Property scouting",
+      "01_Broker_OS/Match_Reports": "Buyer-seller matches",
+      "01_Broker_OS/Outreach_Logs": "Email campaigns",
+      "01_Broker_OS/Deal_Pipeline": "Active deals",
+      "01_Broker_OS/Daily_KPI": "Pipeline metrics",
+      "01_Broker_OS/Follow_Up_Tracker": "Follow-up status",
+      "02_XLM_Bot/Trade_Reports": "Trade decisions",
+      "02_XLM_Bot/Daily_Scoreboard": "Bot performance",
+      "04_Revenue_Dashboard/Stripe_Reports": "Revenue data"
+    }
+  },
+  "scripts_registry": [
+    {
+      "script": "wholesale_hive_pipeline.py",
+      "location_phone": "03_AUTOMATION_CORE/01_Scripts/",
+      "location_oracle": "/home/opc/",
+      "cron": "0 14 * * *",
+      "outputs_to": [
+        "gdocs:01_Broker_OS/Scout_Reports",
+        "slack:#wholesale-deals",
+        "supabase:wholesale_metrics",
+        "blinko"
+      ],
+      "uses_gdocs_bridge": true,
+      "uses_workbook_logger": true,
+      "status": "deployed"
+    },
+    {
+      "script": "broker_daily_orchestrator.py",
+      "location_phone": "03_AUTOMATION_CORE/01_Scripts/",
+      "location_oracle": "/home/opc/",
+      "cron": "0 */2 * * * (replies) | 0 17,0 * * * (outreach)",
+      "outputs_to": [
+        "gdocs:01_Broker_OS/Daily_KPI",
+        "slack:#all-everlightventures",
+        "supabase:wholesale_metrics"
+      ],
+      "uses_gdocs_bridge": true,
+      "uses_workbook_logger": true,
+      "status": "deployed"
+    },
+    {
+      "script": "broker_gmail_monitor.py",
+      "location_phone": "03_AUTOMATION_CORE/01_Scripts/",
+      "location_oracle": "/home/opc/",
+      "cron": "30 */4 * * *",
+      "outputs_to": [
+        "gdocs:01_Broker_OS/Seller_Replies",
+        "slack:#wholesale-deals",
+        "workbook:outreach_log"
+      ],
+      "uses_gdocs_bridge": true,
+      "uses_workbook_logger": true,
+      "status": "deployed"
+    },
+    {
+      "script": "hive_deal_orchestrator.py",
+      "location_phone": "03_AUTOMATION_CORE/01_Scripts/",
+      "location_oracle": "/home/opc/",
+      "cron": "15 * * * *",
+      "outputs_to": [
+        "slack:#war-room",
+        "gdocs:01_Broker_OS/Deal_Pipeline"
+      ],
+      "uses_gdocs_bridge": false,
+      "status": "deployed - needs gdocs wiring"
+    },
+    {
+      "script": "rex_master_pipeline.py",
+      "location_phone": "01_BUSINESSES/.../wholesale_agent/",
+      "location_oracle": "/home/opc/wholesale_agent/",
+      "cron": "0 15,19,0 * * *",
+      "outputs_to": [
+        "gdocs:01_Broker_OS/Scout_Reports",
+        "slack:#wholesale-deals"
+      ],
+      "uses_gdocs_bridge": true,
+      "status": "deployed"
+    },
+    {
+      "script": "rex_sdr.py",
+      "location_phone": "01_BUSINESSES/.../wholesale_agent/",
+      "location_oracle": "/home/opc/wholesale_agent/",
+      "cron": "via rex_master_pipeline",
+      "outputs_to": [
+        "gdocs:01_Broker_OS/Outreach_Logs",
+        "slack:#wholesale-deals"
+      ],
+      "uses_gdocs_bridge": true,
+      "status": "deployed"
+    },
+    {
+      "script": "rex_closer.py",
+      "location_phone": "01_BUSINESSES/.../wholesale_agent/",
+      "location_oracle": "/home/opc/wholesale_agent/",
+      "cron": "via rex_master_pipeline",
+      "outputs_to": [
+        "gdocs:01_Broker_OS/Deal_Pipeline",
+        "slack:#wholesale-deals"
+      ],
+      "uses_gdocs_bridge": true,
+      "status": "deployed"
+    },
+    {
+      "script": "rex_health.py",
+      "location_phone": "01_BUSINESSES/.../wholesale_agent/",
+      "location_oracle": "/home/opc/wholesale_agent/",
+      "cron": "via wholesale_hive_pipeline",
+      "outputs_to": [
+        "gdocs:01_Broker_OS/Daily_KPI",
+        "slack:#wholesale-deals"
+      ],
+      "uses_gdocs_bridge": true,
+      "status": "deployed"
+    },
+    {
+      "script": "perplexity_poller.py",
+      "location_phone": "06_DEVELOPMENT/xlm_bot/",
+      "location_oracle": "/home/opc/xlm-bot/",
+      "cron": "5 * * * *",
+      "outputs_to": [
+        "json:data/perplexity_context.json",
+        "workbook:perplexity_integration_log"
+      ],
+      "uses_gdocs_bridge": false,
+      "status": "deployed"
+    },
+    {
+      "script": "ceo_daily_brief.py",
+      "location_phone": "03_AUTOMATION_CORE/01_Scripts/",
+      "location_oracle": "/home/opc/",
+      "cron": "0 14 * * * (7 AM PT)",
+      "outputs_to": [
+        "gdocs:00_Command_Center/Daily_Briefings",
+        "slack:#ceo-brief"
+      ],
+      "uses_gdocs_bridge": true,
+      "status": "deployed"
+    }
+  ],
+  "workbooks": [
+    {
+      "name": "pipeline_master.json",
+      "path": "wholesale_agent/data/workbooks/",
+      "syncs_to": "supabase:wholesale_pipeline_log"
+    },
+    {
+      "name": "outreach_log.json",
+      "path": "wholesale_agent/data/workbooks/",
+      "syncs_to": "supabase:wholesale_outreach_log"
+    },
+    {
+      "name": "deal_tracker.json",
+      "path": "wholesale_agent/data/workbooks/",
+      "syncs_to": "supabase:wholesale_client_files"
+    },
+    {
+      "name": "performance_metrics.json",
+      "path": "wholesale_agent/data/workbooks/",
+      "syncs_to": "supabase:wholesale_metrics"
+    },
+    {
+      "name": "perplexity_integration_log.json",
+      "path": "xlm_bot/data/",
+      "syncs_to": "local"
+    }
+  ],
+  "format_standard": {
+    "rule": "ALL Slack posts MUST go through gdocs_bridge.publish_report(). No raw text.",
+    "brand_colors": {
+      "gold": "#D4AF37",
+      "dark_bg": "#1a1a2e",
+      "light_text": "#f0f0f0",
+      "accent_green": "#4CAF50",
+      "accent_red": "#e74c3c"
+    },
+    "slack_format": "Bold title + 1-2 line summary + Google Doc link. Never dump raw data.",
+    "gdoc_format": "Branded header (Everlight Ventures + timestamp + agent name) + content + branded footer"
+  }
+}

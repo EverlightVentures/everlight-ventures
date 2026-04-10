@@ -1,0 +1,70 @@
+{
+  "meta": {
+    "name": "Wholesale Pipeline Master Workbook",
+    "version": "1.0.0",
+    "created": "2026-04-07",
+    "purpose": "Single source of truth for every lead from scout to close. Tracks full funnel with stage timestamps.",
+    "schema_version": "1.0",
+    "sync_targets": ["supabase:wholesale_pipeline_log", "slack:#wholesale-deals", "blinko", "gdocs"]
+  },
+  "funnel_stages": [
+    "scouted", "scored", "qualified", "matched", "outreach_sent",
+    "response_received", "negotiating", "under_contract", "closing", "closed", "paid", "dead"
+  ],
+  "daily_rollups": [],
+  "leads": [],
+  "changelog": [
+    {
+      "date": "2026-04-07",
+      "version": "1.0.0",
+      "changes": [
+        "Initial workbook creation",
+        "Schema: lead entry with full stage progression timestamps",
+        "Syncs to Supabase, Slack, Blinko, Google Docs"
+      ]
+    }
+  ],
+  "_lead_schema": {
+    "id": "uuid",
+    "address": "string",
+    "city": "string",
+    "state": "string",
+    "zip": "string",
+    "lead_type": "pre_foreclosure|tax_lien|probate|absentee|divorce|code_violation|vacant|expired_listing|zsbo|other",
+    "source": "attom|zillow|lis_pendens|probate_court|tax_assessor|manual|referral",
+    "owner_name": "string",
+    "owner_phone": "string|null",
+    "owner_email": "string|null",
+    "estimated_arv": "float",
+    "asking_price": "float|null",
+    "motivation_score": "int 0-100",
+    "stage": "one of funnel_stages",
+    "stage_history": [
+      {"stage": "string", "entered_at": "ISO timestamp", "exited_at": "ISO timestamp|null", "agent": "string", "notes": "string"}
+    ],
+    "buyer_matches": [
+      {"buyer_id": "string", "match_score": "int 0-100", "matched_at": "ISO timestamp"}
+    ],
+    "outreach": {
+      "emails_sent": "int",
+      "last_email_at": "ISO timestamp|null",
+      "opens": "int",
+      "replies": "int",
+      "last_reply_at": "ISO timestamp|null",
+      "reply_sentiment": "hot|warm|cold|dead|null"
+    },
+    "deal": {
+      "contract_price": "float|null",
+      "assignment_fee": "float|null",
+      "buyer_price": "float|null",
+      "title_company": "string|null",
+      "contract_date": "ISO date|null",
+      "close_date": "ISO date|null",
+      "commission_usd": "float|null",
+      "stripe_invoice_id": "string|null",
+      "paid": "bool"
+    },
+    "created_at": "ISO timestamp",
+    "updated_at": "ISO timestamp"
+  }
+}

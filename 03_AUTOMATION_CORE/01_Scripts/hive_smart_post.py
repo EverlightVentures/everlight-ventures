@@ -84,11 +84,9 @@ AGENT_STYLES: Dict[str, str] = {
     "Samuel Navarro": "Careful, thorough. Flags risk before it becomes a problem.",
     "Atlas Vega": "Strategic. Big picture. Calm under pressure.",
     "Nora Blaine": "Detail-oriented. Catches what others miss. Quietly proud.",
-    "Filter Banks": "Numbers only. No small talk. 'Score: 87. Next.'",
-    "Cash Monroe": "Revenue-obsessed. 'What's the take?' Always closing.",
-    "Cupid Chase": "Matchmaker energy. 'This buyer and this deal? Perfect fit.'",
-    "Chart Dawson": "Analytics geek. 'Look at this trend line.' Loves dashboards.",
-    "Hammer Voss": "Follow-up machine. 'Champ, circling back.' Never lets a lead drop.",
+    "Frederick Banks": "Numbers only. No small talk. 'Score: 87. Next.'",
+    "Carlos Moreno": "Revenue-obsessed. 'What's the take?' Always closing.",
+    "Calvin Osei": "Matchmaker energy. 'This buyer and this deal? Perfect fit.'",
     "Forge Maddox": "Builder. 'Shipped.' Cares about clean code and fast deploys.",
     "Cipher Voss": "Intel analyst. 'Pattern detected.' Connects dots no one else sees.",
     "Lucrex": "King of Divine Light. Confident, calculated, street-smart. Never hedges. The mind behind the money.",
@@ -607,8 +605,8 @@ def major_dex_posts(channel: str, data: str, event_type: str = "update", title: 
     return smart_post(channel, "Major Dex", data, event_type, title, **kw)
 
 def hammer_posts(channel: str, data: str, event_type: str = "update", title: Optional[str] = None, **kw) -> Dict[str, Any]:
-    """Hammer Voss posts as the follow-up machine."""
-    return smart_post(channel, "Hammer Voss", data, event_type, title, **kw)
+    """Harrison Knox posts as the follow-up machine."""
+    return smart_post(channel, "Harrison Knox", data, event_type, title, **kw)
 
 def forge_posts(channel: str, data: str, event_type: str = "update", title: Optional[str] = None, **kw) -> Dict[str, Any]:
     """Forge Maddox posts as the builder."""
@@ -619,12 +617,12 @@ def cipher_posts(channel: str, data: str, event_type: str = "update", title: Opt
     return smart_post(channel, "Cipher Voss", data, event_type, title, **kw)
 
 def filter_posts(channel: str, data: str, event_type: str = "update", title: Optional[str] = None, **kw) -> Dict[str, Any]:
-    """Filter Banks posts with numbers only."""
-    return smart_post(channel, "Filter Banks", data, event_type, title, **kw)
+    """Frederick Banks posts with numbers only."""
+    return smart_post(channel, "Frederick Banks", data, event_type, title, **kw)
 
 def chart_posts(channel: str, data: str, event_type: str = "update", title: Optional[str] = None, **kw) -> Dict[str, Any]:
-    """Chart Dawson posts with analytics."""
-    return smart_post(channel, "Chart Dawson", data, event_type, title, **kw)
+    """Charles Dawson posts with analytics."""
+    return smart_post(channel, "Charles Dawson", data, event_type, title, **kw)
 
 
 # ---------------------------------------------------------------------------

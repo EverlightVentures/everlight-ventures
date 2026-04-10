@@ -3,7 +3,7 @@ Apify Lead Gen Wrapper -- Uses Apify actors to pull property leads at scale.
 Free tier: 50 runs/month = potentially 5,000-10,000 leads.
 
 Part of the Everlight Ventures wholesale pipeline.
-Agent: Rex Blackwell (lead scout) feeds into Filter Banks (scorer).
+Agent: Rex Blackwell (lead scout) feeds into Frederick Banks (scorer).
 
 IMPORTANT: Verify actor IDs at apify.com/store before running.
 Community actors change slugs occasionally. The ones below were valid

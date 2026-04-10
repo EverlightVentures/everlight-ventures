@@ -1,0 +1,19 @@
+# Avatar Pipeline -- Environment Variables
+# Copy this to .env and fill in real values.
+# NEVER commit .env to git.
+
+# Anthropic (script generation)
+ANTHROPIC_API_KEY=sk-ant-...
+
+# ElevenLabs (TTS voices)
+ELEVENLABS_API_KEY=...
+ELEVENLABS_VOICE_ID=EXAVITQu4vr4xnSDxMaL  # Default: Bella. Replace with your cloned voice ID.
+
+# HeyGen (avatar talking-head video)
+HEYGEN_API_KEY=...
+
+# Optional: Buffer or social posting API
+BUFFER_API_KEY=...
+
+# Optional: n8n webhook trigger URL
+N8N_WEBHOOK_URL=http://localhost:5678/webhook/avatar-pipeline

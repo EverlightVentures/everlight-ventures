@@ -1,0 +1,82 @@
+{
+  "meta": {
+    "name": "Perplexity Context Integration - Master Workbook",
+    "version": "1.0.0",
+    "created": "2026-04-07",
+    "purpose": "Chronological log of all Perplexity watchlist feeds, how they influenced trades, and performance impact",
+    "architecture": "Perplexity phone watchlist -> perplexity_poller.py (hourly) -> perplexity_context.json -> unified_scorer.py modifier (+5/-8) -> trade decision"
+  },
+  "changelog": [
+    {
+      "date": "2026-04-07",
+      "version": "1.0.0",
+      "changes": [
+        "Initial build: poller script, unified_scorer modifier, breakout proximity gate",
+        "Decision: Hybrid-C (directional filter with teeth, not pure tiebreaker)",
+        "Weight: +5 confirm, -8 counter-trend, -6 breakout proximity penalty",
+        "Source: Perplexity watchlist on Z Fold 7 -> Oracle bot via shared JSON"
+      ]
+    }
+  ],
+  "components": {
+    "perplexity_poller": {
+      "file": "perplexity_poller.py",
+      "location": "06_DEVELOPMENT/xlm_bot/perplexity_poller.py",
+      "schedule": "hourly cron on Oracle",
+      "output": "data/perplexity_context.json",
+      "description": "Fetches XLM macro context (RSI, Fib, volume, sentiment) and writes structured JSON"
+    },
+    "context_file": {
+      "file": "data/perplexity_context.json",
+      "schema": {
+        "updated_at": "ISO timestamp",
+        "momentum_bias": "LEAN_BULLISH | LEAN_BEARISH | NEUTRAL",
+        "rsi_14": "float 0-100",
+        "nearest_fib": "string (e.g. '23.6%')",
+        "nearest_fib_price": "float",
+        "fib_distance_pct": "float (how far price is from nearest fib)",
+        "volume_ratio": "float (current vol / 20d avg)",
+        "breakout_proximity": {
+          "to_90d_high_pct": "float",
+          "to_90d_low_pct": "float",
+          "range_position": "float 0-1 (0=at low, 1=at high)"
+        },
+        "price": "float (spot XLM-USD)",
+        "price_change_24h_pct": "float",
+        "price_change_7d_pct": "float",
+        "price_change_30d_pct": "float",
+        "crypto_sentiment": "BULLISH | BEARISH | UNCERTAIN | NEUTRAL",
+        "alerts": [
+          "list of active alert strings"
+        ],
+        "stale": "bool (true if data > 2 hours old)"
+      }
+    },
+    "unified_scorer_modifier": {
+      "name": "perplexity_context",
+      "weight": {
+        "max": 5,
+        "min": -8
+      },
+      "logic": "Confirms trade direction = +5, counter-trend when bias strong = -8, neutral = 0. Breakout proximity sub-gate: within 5% of range edge going counter = extra -6"
+    }
+  },
+  "performance_tracking": {
+    "description": "Logged after each trade cycle where perplexity_context was non-zero",
+    "entries": []
+  },
+  "feed_history": {
+    "description": "Last 100 hourly snapshots for backtesting",
+    "entries": [
+      {
+        "ts": "2026-04-07T06:13:06.645006+00:00",
+        "price": 0.155248,
+        "rsi": 26.03,
+        "bias": "LEAN_BEARISH",
+        "vol_ratio": 0.16,
+        "range_pos": 0.1726,
+        "alerts": 1
+      }
+    ]
+  }
+}

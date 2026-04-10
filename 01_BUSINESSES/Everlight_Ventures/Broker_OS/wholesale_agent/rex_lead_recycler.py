@@ -22,6 +22,7 @@ Cron: 0 16 * * 0 (Sundays at 8 AM PT / 16:00 UTC)
 
 import json
 import logging
+import os
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
@@ -31,6 +32,11 @@ logging.basicConfig(
     datefmt="%H:%M",
 )
 log = logging.getLogger("rex_recycler")
+
+try:
+    from gdocs_bridge import publish_report
+except ImportError:
+    publish_report = None
 
 AGENT_DIR = Path(__file__).parent
 LEADS_DB = AGENT_DIR / "leads_db.json"
@@ -429,12 +435,7 @@ def recycle_leads() -> dict:
 
 
 def _post_slack_summary(stats: dict):
-    """Post recycle summary to Slack."""
-    slack_token = os.environ.get("SLACK_BOT_TOKEN", "")
-    if not slack_token:
-        return
-
-    import os as _os
+    """Post recycle summary to Slack, creating a GDoc first when possible."""
     text = (
         f"*Rex Lead Recycler*\n"
         f"Recycled: {stats['recycled']} leads (new messaging angle)\n"
@@ -442,6 +443,26 @@ def _post_slack_summary(stats: dict):
         f"Permanently dead: {stats['permanently_dead']}\n"
         f"Dead leads get a second chance. Never stop following up."
     )
+
+    # Try branded GDoc first
+    if publish_report is not None:
+        try:
+            result = publish_report(
+                title="Rex Lead Recycler",
+                content=text,
+                folder="01_Broker_OS/Follow_Up_Tracker",
+                summary=text[:200],
+                agent="piper_reeves",
+            )
+            if result.get("ok"):
+                return
+        except Exception:
+            pass
+
+    # Fallback: raw text post
+    slack_token = os.environ.get("SLACK_BOT_TOKEN", "")
+    if not slack_token:
+        return
 
     try:
         import requests

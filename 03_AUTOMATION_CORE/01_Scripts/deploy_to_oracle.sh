@@ -81,7 +81,7 @@ deploy_bot() {
     DEPLOYED="$DEPLOYED market/"
 
     # Root-level modules (unified_scorer, risk_gate, etc)
-    for f in unified_scorer.py risk_gate.py feature_store.py trade_reviewer.py market_intel_service.py state_store.py stop_watcher.py house_money.py recovery.py live_ws.py export_metrics.py push_metrics_supabase.py; do
+    for f in unified_scorer.py risk_gate.py feature_store.py trade_reviewer.py market_intel_service.py state_store.py stop_watcher.py house_money.py recovery.py live_ws.py export_metrics.py push_metrics_supabase.py perplexity_poller.py; do
         [ -f "$LOCAL_BOT/$f" ] && scp -o ConnectTimeout=10 -i "$KEY" "$LOCAL_BOT/$f" "$BOT_VM:$REMOTE_BOT/$f" 2>/dev/null
     done
     DEPLOYED="$DEPLOYED root-modules"
@@ -151,6 +151,7 @@ deploy_scripts() {
 
     scp -o ConnectTimeout=10 -i "$KEY" \
         /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/gdocs_bridge.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/report_template.py \
         "$E5_VM:/home/opc/content_tools/" 2>/dev/null
 
     # Broker enrichment modules
@@ -181,8 +182,33 @@ deploy_scripts() {
         /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/neuromorphic/deal_state_machine.py \
         "$E5_VM:/home/opc/06_DEVELOPMENT/everlight_os/neuromorphic/" 2>/dev/null
 
+    # Flip OS retail arbitrage pipeline
+    ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "mkdir -p /home/opc/flip_os" 2>/dev/null
+    scp -o ConnectTimeout=10 -i "$KEY" \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/flip_os/__init__.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/flip_os/penny_scraper.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/flip_os/demand_scorer.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/flip_os/daily_brief.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/flip_os/run_pipeline.py \
+        "$E5_VM:/home/opc/flip_os/" 2>/dev/null
+
     # Restart voice handler
     ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "sudo systemctl restart hive-voice" 2>/dev/null
+
+    # CRITICAL: Fix phone paths in deployed scripts
+    # Scripts are written with /mnt/sdcard/AA_MY_DRIVE (phone dev env)
+    # but Oracle uses /home/opc as the base directory
+    log "Fixing phone paths in Oracle scripts..."
+    ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "
+        for f in /home/opc/*.py /home/opc/ai_consulting/*.py /home/opc/broker/*.py /home/opc/content_tools/*.py /home/opc/flip_os/*.py; do
+            [ -f \"\$f\" ] && sed -i 's|/mnt/sdcard/AA_MY_DRIVE|/home/opc|g' \"\$f\" 2>/dev/null
+        done
+        # Also fix Django app (excluding migrations)
+        find /home/opc/hive_django -name '*.py' -not -path '*/migrations/*' -not -path '*__pycache__*' -exec grep -l '/mnt/sdcard/AA_MY_DRIVE' {} \; 2>/dev/null | while read f; do
+            sed -i 's|/mnt/sdcard/AA_MY_DRIVE|/home/opc|g' \"\$f\" 2>/dev/null
+        done
+    " 2>/dev/null
+    log "Phone paths fixed on Oracle"
 
     log "Scripts deployed to E5"
 }
@@ -203,21 +229,21 @@ install_watchdog_cron() {
     log "Watchdog cron installed (*/2 * * * *)"
 }
 
-# Install broker execution crons on Oracle (idempotent)
+# Install broker execution crons on Oracle (idempotent, uses markers)
 install_broker_crons() {
     log "Installing broker execution crons on Oracle E5..."
     ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" '
-        EXISTING=$(crontab -l 2>/dev/null | grep -v "broker_daily_orchestrator.py replies" | grep -v "broker_daily_orchestrator.py outreach" | grep -v "ceo_daily_brief.py")
-        NEW_CRONS="# Broker reply check every 2 hours
-0 */2 * * * cd /home/opc && source .env && python3 broker_daily_orchestrator.py replies >> /tmp/broker_replies.log 2>&1
-# Broker outreach sends 2x/day (10AM + 4PM PT = 17:00 + 00:00 UTC)
-0 17,0 * * * cd /home/opc && source .env && python3 broker_daily_orchestrator.py outreach >> /tmp/broker_outreach.log 2>&1
-# CEO daily brief 7AM PT = 14:00 UTC
-0 14 * * * cd /home/opc && source .env && python3 ceo_daily_brief.py >> /tmp/ceo_brief.log 2>&1"
-        echo "$EXISTING
-$NEW_CRONS" | crontab -
+        # Remove everything between BEGIN/END BROKER markers, then re-insert
+        crontab -l 2>/dev/null | sed "/^# --- BEGIN BROKER CRONS/,/^# --- END BROKER CRONS/d" | {
+            cat
+            echo "# --- BEGIN BROKER CRONS (managed by deploy script) ---"
+            echo "0 */2 * * * cd /home/opc && source .env && python3 broker_daily_orchestrator.py replies >> /tmp/broker_replies.log 2>&1"
+            echo "0 17,0 * * * cd /home/opc && source .env && python3 broker_daily_orchestrator.py outreach >> /tmp/broker_outreach.log 2>&1"
+            echo "15 * * * * cd /home/opc && python3 hive_deal_orchestrator.py --pipeline broker >> /tmp/hive_orchestrator_broker.log 2>&1"
+            echo "# --- END BROKER CRONS ---"
+        } | crontab -
     ' 2>/dev/null
-    log "Broker crons installed: replies (2h), outreach (2x/day), CEO brief (7AM PT)"
+    log "Broker crons installed (marker-based, no duplicates)"
 }
 
 # Deploy Computer Use container via Podman
@@ -231,6 +257,33 @@ deploy_computer_use() {
         cd /home/opc/computer_use && podman-compose up -d --build
     " 2>/dev/null
     log "Computer Use container deployed"
+}
+
+# Deploy Stark AI voice command center
+deploy_stark() {
+    log "Deploying Stark AI to Oracle E5..."
+    ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "mkdir -p /home/opc/stark-ai" 2>/dev/null
+    scp -o ConnectTimeout=10 -i "$KEY" \
+        /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/stark_ai/{server.py,config.py,auth.py,voice.py,commands.py,__init__.py,requirements.txt} \
+        "$E5_VM:/home/opc/stark-ai/" 2>/dev/null
+
+    # Install service if not present
+    ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "
+        if [ ! -f /etc/systemd/system/stark-ai.service ]; then
+            sudo cp /home/opc/stark-ai/stark-ai.service /etc/systemd/system/
+            sudo systemctl daemon-reload
+            sudo systemctl enable stark-ai
+        fi
+        sudo systemctl restart stark-ai
+    " 2>/dev/null
+
+    # Copy service file for future updates
+    scp -o ConnectTimeout=10 -i "$KEY" \
+        /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/stark_ai/stark-ai.service \
+        "$E5_VM:/home/opc/stark-ai/" 2>/dev/null
+
+    DEPLOYED="$DEPLOYED [stark-ai]"
+    log "Stark AI deployed to E5"
 }
 
 # Deploy Polymarket prediction agent via Podman
@@ -253,7 +306,7 @@ deploy_django() {
     REMOTE_DJANGO="/home/opc/hive_django"
 
     # Sync all Django apps
-    for app in hive payments funnel broker_ops taskboard blackjack rewards business_os hive_dashboard; do
+    for app in hive payments funnel broker_ops taskboard blackjack rewards business_os flip_os hive_dashboard; do
         rsync -az --delete -e "ssh -o ConnectTimeout=10 -i $KEY" \
             "$LOCAL_DJANGO/$app/" "$E5_VM:$REMOTE_DJANGO/$app/" 2>/dev/null
     done
@@ -275,6 +328,20 @@ deploy_django() {
     log "Django deployed to E5"
 }
 
+# Install Flip OS daily pipeline cron on Oracle (idempotent, uses markers)
+install_flip_crons() {
+    log "Installing Flip OS crons on Oracle E5..."
+    ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" '
+        crontab -l 2>/dev/null | sed "/^# --- BEGIN FLIP OS CRONS/,/^# --- END FLIP OS CRONS/d" | {
+            cat
+            echo "# --- BEGIN FLIP OS CRONS (managed by deploy script) ---"
+            echo "0 12 * * * cd /home/opc/flip_os && source /home/opc/.env && python3 run_pipeline.py >> /tmp/flip_os.log 2>&1"
+            echo "# --- END FLIP OS CRONS ---"
+        } | crontab -
+    ' 2>/dev/null
+    log "Flip OS cron installed (marker-based, no duplicates)"
+}
+
 case "$MODE" in
     bot) deploy_bot ;;
     scripts) deploy_scripts ;;
@@ -282,10 +349,12 @@ case "$MODE" in
     django) deploy_django ;;
     watchdog) deploy_scripts; install_watchdog_cron ;;
     broker-crons) install_broker_crons ;;
+    flip-crons) install_flip_crons ;;
     computer-use) deploy_computer_use ;;
     polymarket) deploy_polymarket ;;
-    all) deploy_bot; deploy_scripts; deploy_django; install_watchdog_cron; install_broker_crons ;;
-    full) deploy_bot; deploy_scripts; deploy_django; install_watchdog_cron; install_broker_crons; deploy_computer_use; deploy_polymarket ;;
+    stark) deploy_stark ;;
+    all) deploy_bot; deploy_scripts; deploy_django; deploy_stark; install_watchdog_cron; install_broker_crons; install_flip_crons ;;
+    full) deploy_bot; deploy_scripts; deploy_django; deploy_stark; install_watchdog_cron; install_broker_crons; install_flip_crons; deploy_computer_use; deploy_polymarket ;;
 esac
 
 # Save hash to skip unchanged deploys
@@ -313,5 +382,19 @@ log_changelog() {
     echo "{\"timestamp\": \"$PT_TIME\", \"date\": \"$PT_DATE\", \"time\": \"$PT_12HR\", \"category\": \"deploy\", \"summary\": \"Deploy: $MODE -- $DEPLOYED\", \"details\": \"Auto-logged by deploy_to_oracle.sh\", \"files_changed\": [\"$DEPLOYED\"]}" >> "$CHANGELOG" 2>/dev/null
 }
 log_changelog
+
+# Log deploy to Supabase hive_master_log (master ledger)
+log_supabase() {
+    SUPA_URL="https://jdqqmsmwmbsnlnstyavl.supabase.co"
+    SUPA_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkcXFtc213bWJzbmxuc3R5YXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTk5ODMsImV4cCI6MjA4ODM5NTk4M30.9BDviI2WR46sphcS3uzKapcKbslYpMO4PdSEPFrv3Ww"
+    PT_TIME=$(TZ=America/Los_Angeles date '+%Y-%m-%dT%H:%M:%S%z')
+    curl -s -X POST "$SUPA_URL/rest/v1/hive_master_log" \
+        -H "Content-Type: application/json" \
+        -H "apikey: $SUPA_KEY" \
+        -H "Authorization: Bearer $SUPA_KEY" \
+        -H "Prefer: return=minimal" \
+        -d "[{\"source\":\"deploy_script\",\"category\":\"deploy\",\"action\":\"Deploy: $MODE\",\"details\":\"$DEPLOYED\",\"system\":\"infrastructure\",\"status\":\"completed\"}]" 2>/dev/null
+}
+log_supabase
 
 log "Deploy complete: $MODE"

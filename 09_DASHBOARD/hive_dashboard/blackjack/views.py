@@ -1,3 +1,4 @@
+from __future__ import annotations
 """
 Everlight Blackjack - Views
 Handles: game rendering, auth, ad rewards, shop, avatar, game API

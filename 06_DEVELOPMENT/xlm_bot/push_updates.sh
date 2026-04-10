@@ -24,6 +24,7 @@ $SCP_CMD "$BOT_DIR/ai/claude_advisor.py" "$ORACLE:~/xlm-bot/ai/claude_advisor.py
 $SCP_CMD "$BOT_DIR/ai/prompts.py" "$ORACLE:~/xlm-bot/ai/prompts.py"
 $SCP_CMD "$BOT_DIR/alerts/slack_reports.py" "$ORACLE:~/xlm-bot/alerts/slack_reports.py"
 $SCP_CMD "$BOT_DIR/vendor/gdocs_bridge.py" "$ORACLE:~/xlm-bot/vendor/gdocs_bridge.py"
+$SCP_CMD "$BOT_DIR/vendor/report_template.py" "$ORACLE:~/xlm-bot/vendor/report_template.py"
 $SCP_CMD "$BOT_DIR/feature_store.py" "$ORACLE:~/xlm-bot/feature_store.py"
 $SCP_CMD "$BOT_DIR/house_money.py" "$ORACLE:~/xlm-bot/house_money.py"
 $SCP_CMD "$BOT_DIR/export_metrics.py" "$ORACLE:~/xlm-bot/export_metrics.py"

@@ -18,6 +18,7 @@ import Settings from "./pages/Settings"
 import MarketIntel from "./pages/MarketIntel"
 import TradeHistory from "./pages/TradeHistory"
 import Changelog from "./pages/Changelog"
+import Stark from "./pages/Stark"
 import TradingChat from "./components/TradingChat"
 import MindsetPanel from "./components/MindsetPanel"
 import TradeReportCard from "./components/TradeReportCard"
@@ -415,6 +416,7 @@ export default function App() {
 
         <main className="flex-1 overflow-y-auto px-5 py-4">
           <div className="max-w-[1400px] mx-auto page-enter">
+            {page === "stark" && <Stark />}
             {page === "hivemind" && <HiveMind />}
             {page === "trading" && <TradingPage status={status} candles={candles} chartTf={chartTf} chartPosition={chartPosition} events={events} stratIq={stratIq} activeStrat={activeStrat} decisions={decisions} daily={daily} />}
             {page === "portfolio" && <Portfolio />}

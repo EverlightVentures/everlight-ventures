@@ -1,0 +1,18 @@
+[Unit]
+Description=Stark AI -- Voice Command Center
+After=network.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=opc
+WorkingDirectory=/home/opc/stark-ai
+ExecStart=/usr/bin/python3 server.py
+Restart=always
+RestartSec=5
+Environment=STARK_PORT=8511
+Environment=WORKSPACE=/home/opc
+Environment=TTS_CACHE=/home/opc/tts_cache/stark
+
+[Install]
+WantedBy=multi-user.target

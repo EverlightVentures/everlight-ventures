@@ -8,6 +8,7 @@ import logging
 import os
 from decimal import Decimal
 
+from django.utils import timezone
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
@@ -18,7 +19,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 
 from hive_dashboard.security import internal_api_required, staff_or_internal_required
-from .models import BrokerMatch, ClientDocument, ClientFile, Deal, InvestorBuyer, LeadProfile, OfferListing, PropertyLead
+from .models import BrokerMatch, ClientDocument, ClientFile, Deal, InvestorBuyer, LeadProfile, OfferListing, OutreachSequence, PropertyLead
 from .wholesale import (
     generate_buyer_blast,
     generate_outreach_sms,
@@ -177,6 +178,20 @@ def api_commission_summary(request):
     return JsonResponse(get_commission_summary())
 
 
+@staff_or_internal_required
+@require_GET
+def api_deal_history(request, deal_id):
+    """Full deal timeline: events + calls + documents merged chronologically."""
+    deal = get_object_or_404(Deal, id=deal_id)
+    from .services import get_deal_history
+    timeline = get_deal_history(deal)
+    # Serialize timestamps
+    for entry in timeline:
+        entry["timestamp"] = entry["timestamp"].isoformat() if entry.get("timestamp") else None
+    return JsonResponse({"ok": True, "deal_id": str(deal.id), "stage": deal.stage,
+                          "timeline": timeline, "count": len(timeline)})
+
+
 # ---------------------------------------------------------------------------
 # RATE LIMITING (IP-based, 5 submissions per hour per endpoint)
 # ---------------------------------------------------------------------------
@@ -321,6 +336,286 @@ def stripe_webhook(request):
         logger.debug(f"Broker webhook ignored (not broker_ops): {event_type}")
 
     return HttpResponse(status=200)
+
+
+# ---------------------------------------------------------------------------
+# EVENT WEBHOOKS: inbound triggers from n8n, Gmail, external systems
+# ---------------------------------------------------------------------------
+
+@csrf_exempt
+@require_POST
+def webhook_email_reply(request):
+    """Webhook for email reply detection. Called by n8n Gmail monitor or broker_gmail_monitor.
+
+    POST /broker/webhook/email-reply/
+    Body: {
+        "from_email": "seller@example.com",
+        "from_name": "John Doe",
+        "subject": "Re: ...",
+        "body": "I'm interested...",
+        "in_reply_to": "original-message-id",
+        "reply_type": "seller" | "buyer" | "title_company",
+        "sentiment": "positive" | "neutral" | "negative",
+        "interest_level": "high" | "medium" | "low" | "none"
+    }
+    """
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"ok": False, "error": "Invalid JSON"}, status=400)
+
+    from_email = data.get("from_email", "").strip().lower()
+    from_name = data.get("from_name", "")
+    reply_type = data.get("reply_type", "seller")
+    sentiment = data.get("sentiment", "neutral")
+    interest = data.get("interest_level", "medium")
+    subject = data.get("subject", "")
+
+    if not from_email:
+        return JsonResponse({"ok": False, "error": "from_email required"}, status=400)
+
+    logger.info(f"[WEBHOOK] Email reply from {from_email} ({reply_type}, {sentiment})")
+
+    results = {"matched": False, "action_taken": "none"}
+
+    if reply_type == "seller":
+        # Match to PropertyLead by owner_email
+        props = PropertyLead.objects.filter(
+            owner_email__iexact=from_email,
+            status__in=["new", "contacted"],
+        )
+        if props.exists():
+            prop = props.first()
+            # Advance status based on sentiment
+            if interest in ("high", "medium") and sentiment != "negative":
+                prop.status = "negotiating"
+                prop.contact_count = (prop.contact_count or 0) + 1
+                prop.last_contacted = timezone.now()
+                prop.notes = (prop.notes or "") + f"\n[{timezone.now():%Y-%m-%d}] Reply: {subject[:100]} (sentiment={sentiment})"
+                prop.save(update_fields=["status", "contact_count", "last_contacted", "notes"])
+                results = {"matched": True, "action_taken": "advanced_to_negotiating",
+                           "property": prop.address, "lead_id": str(prop.id)}
+            else:
+                prop.notes = (prop.notes or "") + f"\n[{timezone.now():%Y-%m-%d}] Reply (negative/low interest): {subject[:100]}"
+                prop.save(update_fields=["notes"])
+                results = {"matched": True, "action_taken": "noted_negative",
+                           "property": prop.address}
+        else:
+            # Try matching to LeadProfile (B2B)
+            leads = LeadProfile.objects.filter(email__iexact=from_email)
+            if leads.exists():
+                lead = leads.first()
+                lead.intent = "hot" if interest == "high" else "warm"
+                lead.contact_count = (lead.contact_count or 0) + 1
+                lead.last_contacted = timezone.now()
+                lead.save(update_fields=["intent", "contact_count", "last_contacted"])
+
+                # Check for outreach sequence
+                outreach = OutreachSequence.objects.filter(
+                    to_email__iexact=from_email,
+                    status="sent",
+                ).order_by("-sent_at").first()
+                if outreach:
+                    outreach.status = "replied"
+                    outreach.save(update_fields=["status"])  # This triggers the signal!
+
+                results = {"matched": True, "action_taken": "lead_updated",
+                           "lead_id": str(lead.id)}
+
+    elif reply_type == "buyer":
+        # Match to InvestorBuyer
+        buyers = InvestorBuyer.objects.filter(email__iexact=from_email)
+        if buyers.exists():
+            buyer = buyers.first()
+            buyer.notes = (buyer.notes or "") + f"\n[{timezone.now():%Y-%m-%d}] Reply: {subject[:100]}"
+            buyer.save(update_fields=["notes"])
+            results = {"matched": True, "action_taken": "buyer_reply_logged",
+                       "buyer_id": str(buyer.id)}
+
+    return JsonResponse({"ok": True, **results})
+
+
+@csrf_exempt
+@require_POST
+def webhook_deal_advance(request):
+    """Push a deal through the pipeline stages. Called by n8n, crons, or human approval.
+
+    POST /broker/webhook/deal-advance/
+    Body: {
+        "deal_id": "uuid",
+        "action": "legal_review" | "approve_legal" | "engage_title" | "close_won" | "close_lost",
+        "title_company": "First American Title",  (optional, for engage_title)
+        "title_contact": "Jane Smith",
+        "title_email": "jane@firstam.com",
+        "agent": "Marcus Cole"  (who triggered this)
+    }
+    """
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"ok": False, "error": "Invalid JSON"}, status=400)
+
+    deal_id = data.get("deal_id", "")
+    action = data.get("action", "")
+    agent = data.get("agent", "system")
+
+    if not deal_id or not action:
+        return JsonResponse({"ok": False, "error": "deal_id and action required"}, status=400)
+
+    import uuid as _uuid
+    try:
+        _uuid.UUID(str(deal_id))
+    except ValueError:
+        return JsonResponse({"ok": False, "error": "Invalid deal_id (must be UUID)"}, status=400)
+
+    deal = Deal.objects.filter(id=deal_id).first()
+    if not deal:
+        return JsonResponse({"ok": False, "error": f"Deal {deal_id} not found"}, status=404)
+
+    from .services import (
+        advance_to_legal_review,
+        approve_legal_and_send_for_signing,
+        close_deal as svc_close_deal,
+        engage_title_company,
+        _log_deal_event,
+    )
+
+    logger.info(f"[WEBHOOK] Deal advance: {deal_id} action={action} by {agent}")
+
+    try:
+        if action == "legal_review":
+            deal = advance_to_legal_review(deal)
+        elif action == "approve_legal":
+            deal = approve_legal_and_send_for_signing(deal)
+        elif action == "engage_title":
+            deal = engage_title_company(
+                deal,
+                title_company=data.get("title_company", ""),
+                title_contact=data.get("title_contact", ""),
+                title_email=data.get("title_email", ""),
+            )
+        elif action == "close_won":
+            deal = svc_close_deal(deal, won=True)
+        elif action == "close_lost":
+            deal = svc_close_deal(deal, won=False)
+        else:
+            return JsonResponse({"ok": False, "error": f"Unknown action: {action}"}, status=400)
+
+        return JsonResponse({
+            "ok": True,
+            "deal_id": str(deal.id),
+            "new_stage": deal.stage,
+            "action": action,
+            "triggered_by": agent,
+        })
+
+    except Exception as e:
+        logger.error(f"[WEBHOOK] Deal advance failed: {e}")
+        return JsonResponse({"ok": False, "error": str(e)}, status=500)
+
+
+@csrf_exempt
+@require_POST
+def webhook_event_trigger(request):
+    """Generic event trigger. n8n or any system can fire events into the pipeline.
+
+    POST /broker/webhook/event/
+    Body: {
+        "event": "seller_replied" | "buyer_interested" | "document_signed" | "payment_received" | "call_completed",
+        "deal_id": "uuid" (optional),
+        "property_id": "uuid" (optional),
+        "data": { ...arbitrary payload... },
+        "agent": "Piper Reeves"
+    }
+    """
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"ok": False, "error": "Invalid JSON"}, status=400)
+
+    event = data.get("event", "")
+    deal_id = data.get("deal_id")
+    property_id = data.get("property_id")
+    payload = data.get("data", {})
+    agent = data.get("agent", "system")
+
+    if not event:
+        return JsonResponse({"ok": False, "error": "event required"}, status=400)
+
+    logger.info(f"[WEBHOOK] Event trigger: {event} agent={agent}")
+
+    from .services import _log_deal_event, log_call
+
+    result = {"event": event, "processed": True}
+
+    if event == "call_completed" and deal_id:
+        deal = Deal.objects.filter(id=deal_id).first()
+        prop = PropertyLead.objects.filter(id=property_id).first() if property_id else None
+
+        call = log_call(
+            deal=deal,
+            property_lead=prop,
+            call_type=payload.get("call_type", "other"),
+            direction=payload.get("direction", "outbound"),
+            caller_agent=agent,
+            contact_name=payload.get("contact_name", ""),
+            contact_phone=payload.get("contact_phone", ""),
+            duration_secs=payload.get("duration_secs", 0),
+            notes=payload.get("notes", ""),
+            seller_mood=payload.get("seller_mood", ""),
+            price_discussed=payload.get("price_discussed"),
+            objections=payload.get("objections", []),
+            commitments=payload.get("commitments", []),
+            outcome=payload.get("outcome", ""),
+            followup_action=payload.get("followup_action", ""),
+        )
+        result["call_id"] = str(call.id)
+
+    elif event == "seller_replied" and property_id:
+        prop = PropertyLead.objects.filter(id=property_id).first()
+        if prop and prop.status in ("new", "contacted"):
+            prop.status = "negotiating"
+            prop.save(update_fields=["status"])
+            result["new_status"] = "negotiating"
+
+    elif event == "buyer_interested" and deal_id:
+        deal = Deal.objects.filter(id=deal_id).first()
+        if deal and deal.stage in ("negotiating", "contracted"):
+            deal.stage = "contracted"
+            deal.save(update_fields=["stage"])  # Signal fires automatically
+            result["new_stage"] = "contracted"
+
+    elif event == "document_signed":
+        doc_id = payload.get("document_id")
+        if doc_id:
+            from .models import ClientDocument
+            doc = ClientDocument.objects.filter(id=doc_id).first()
+            if doc:
+                doc.status = "signed"
+                doc.save(update_fields=["status"])  # Signal fires automatically
+                result["document"] = doc.title
+
+    elif event == "payment_received" and deal_id:
+        deal = Deal.objects.filter(id=deal_id).first()
+        if deal:
+            from .services import record_commission
+            record_commission(
+                deal, "paid",
+                Decimal(str(payload.get("amount", deal.commission_due))),
+                description=f"Payment received via {payload.get('method', 'stripe')}",
+                stripe_payout_id=payload.get("stripe_payout_id", ""),
+            )
+            result["commission_recorded"] = True
+
+    else:
+        # Log as generic deal event
+        if deal_id:
+            deal = Deal.objects.filter(id=deal_id).first()
+            if deal:
+                _log_deal_event(deal, "note", f"External event: {event}",
+                                 json.dumps(payload)[:500], agent_name=agent)
+
+    return JsonResponse({"ok": True, **result})
 
 
 # ---------------------------------------------------------------------------
@@ -528,6 +823,20 @@ def wholesale_dashboard(request):
 
     filtered_leads = filtered_leads.order_by("-motivation_score", "-created_at")[:100]
 
+    # Recent outreach emails sent
+    recent_outreach = OutreachSequence.objects.filter(
+        sent_at__isnull=False,
+    ).select_related("match", "match__lead", "match__offer").order_by("-sent_at")[:20]
+
+    # Outreach stats
+    from django.utils.timezone import now as tz_now
+    from datetime import timedelta as _td
+    _today = tz_now().date()
+    emails_today = OutreachSequence.objects.filter(sent_at__date=_today).count()
+    emails_7d = OutreachSequence.objects.filter(sent_at__gte=tz_now() - _td(days=7)).count()
+    emails_total = OutreachSequence.objects.filter(sent_at__isnull=False).count()
+    emails_replied = OutreachSequence.objects.filter(reply_count__gt=0).count()
+
     return render(request, "broker_ops/wholesale.html", {
         "active_page": "wholesale",
         "status_counts": status_counts,
@@ -537,6 +846,11 @@ def wholesale_dashboard(request):
         "pipeline_value": pipeline_value,
         "top_leads": top_leads,
         "leads": filtered_leads,
+        "recent_outreach": recent_outreach,
+        "emails_today": emails_today,
+        "emails_7d": emails_7d,
+        "emails_total": emails_total,
+        "emails_replied": emails_replied,
         # Current filters for the template
         "filter_status": filter_status,
         "filter_lead_type": filter_lead_type,
@@ -938,3 +1252,167 @@ def api_update_client_file_status(request, file_id):
     sync_client_file_to_supabase(cf)
 
     return JsonResponse({"ok": True, "status": cf.status})
+
+
+# ---------------------------------------------------------------------------
+# API: Piper Outreach -- sends personalized seller email
+# ---------------------------------------------------------------------------
+
+@csrf_exempt
+@require_POST
+@staff_or_internal_required
+def api_piper_outreach(request, lead_id):
+    """
+    Have Piper Reeves send a personalized outreach email to a property lead.
+
+    POST /broker/api/piper-outreach/<lead_id>/
+
+    Piper's style: Nashville warmth, empathetic, uses "y'all", gentle persuader.
+    She personalizes based on lead_type, city, and property details.
+    """
+    import smtplib
+    import os
+    import random
+    from email.mime.multipart import MIMEMultipart
+    from email.mime.text import MIMEText
+
+    try:
+        lead = PropertyLead.objects.get(pk=lead_id)
+    except PropertyLead.DoesNotExist:
+        return JsonResponse({"error": "Lead not found"}, status=404)
+
+    if not lead.owner_email:
+        return JsonResponse({"error": "No email address for this lead"}, status=400)
+
+    # Piper's personality
+    piper_hooks = [
+        f"I came across your property on {lead.address.split(',')[0] if lead.address else 'your street'} while doing some research in {lead.city}, and I wanted to reach out personally.",
+        f"I know this might come out of the blue, but I've been working with homeowners in {lead.city} who are looking for simple, no-hassle solutions for their properties.",
+        f"A colleague of mine flagged your property at {lead.address.split(',')[0] if lead.address else 'your address'} and I thought I'd reach out -- sometimes the timing just works out for everyone.",
+    ]
+
+    lead_context = {
+        "pre_foreclosure": "I understand you might be dealing with some financial pressure on the property, and I want you to know there are options that don't involve the bank taking over.",
+        "tax_lien": "Tax situations can be stressful -- y'all shouldn't have to lose a property over back taxes when there are people ready to help.",
+        "probate": "I know dealing with an inherited property on top of everything else can feel overwhelming. My family went through something similar.",
+        "absentee": "Managing a property from a distance is no small thing. A lot of the folks I work with just want a clean, simple transaction.",
+        "divorce": "I completely understand that this is a difficult time. My goal is to make the property side of things as stress-free as possible.",
+        "code_violation": "Code violations can pile up fast. The good news is, our buyers take properties as-is -- no repairs needed on your end.",
+        "vacant": "Vacant properties can become a real headache with maintenance, taxes, and liability. I'd love to take that off your plate.",
+        "expired_listing": "I noticed your listing didn't work out on the MLS. That happens more than you'd think. Our approach is different -- direct, fast, and no agent commissions.",
+    }
+
+    context_line = lead_context.get(lead.lead_type, "I'd love to chat about your property and see if we might be a good fit to work together.")
+    hook = random.choice(piper_hooks)
+
+    owner_first = lead.owner_name.split()[0] if lead.owner_name else "there"
+
+    body_text = f"""Hi {owner_first},
+
+{hook}
+
+{context_line}
+
+We work with cash buyers who can close quickly -- usually 10 to 14 days -- and we handle all the paperwork and closing costs. No repairs, no showings, no agent fees. Just a fair offer and a simple close.
+
+If you'd be open to a quick conversation about what that might look like for your property, I'd love to hear from you. No pressure at all -- I'm here whenever the timing feels right.
+
+Best,
+Piper Reeves
+Outreach Specialist | Everlight Ventures
+piper@everlightventures.io | everlightventures.io"""
+
+    subject_lines = [
+        f"Quick question about {lead.address.split(',')[0] if lead.address else 'your property'}",
+        f"Reaching out about your {lead.city} property",
+        f"Cash offer for {lead.address.split(',')[0] if lead.address else 'your property'} -- no obligation",
+    ]
+    subject = random.choice(subject_lines)
+
+    # Build HTML email
+    body_html = body_text.replace("\n\n", "</p><p>").replace("\n", "<br>")
+    html_email = f"""<!DOCTYPE html><html><body style="font-family:Georgia,serif;font-size:15px;color:#333;line-height:1.7;max-width:600px;margin:0 auto;padding:20px;">
+<p>{body_html}</p>
+<div style="margin-top:30px;padding-top:15px;border-top:1px solid #ddd;font-size:12px;color:#888;">
+<p>Everlight Ventures | Sacramento, CA</p>
+<p><a href="mailto:unsubscribe@everlightventures.io" style="color:#888;">Unsubscribe</a></p>
+</div>
+</body></html>"""
+
+    # Load SMTP credentials from env
+    for env_path in ["/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/03_Credentials/.env", "/home/opc/.env"]:
+        if os.path.exists(env_path):
+            with open(env_path) as f:
+                for line in f:
+                    if "=" in line and not line.startswith("#"):
+                        k, v = line.strip().split("=", 1)
+                        os.environ.setdefault(k.strip(), v.strip())
+            break
+
+    smtp_host = os.environ.get("SMTP_HOST", "smtp.resend.com")
+    smtp_port = int(os.environ.get("SMTP_PORT", "465"))
+    smtp_user = os.environ.get("SMTP_USER", "resend")
+    smtp_pass = os.environ.get("SMTP_PASS", os.environ.get("RESEND_API_KEY", ""))
+
+    if not smtp_pass:
+        return JsonResponse({"error": "SMTP credentials not configured"}, status=500)
+
+    # Send email
+    try:
+        msg = MIMEMultipart("alternative")
+        msg["From"] = "Piper Reeves <piper@everlightventures.io>"
+        msg["To"] = lead.owner_email
+        msg["Reply-To"] = "piper@everlightventures.io"
+        msg["Subject"] = subject
+        msg.attach(MIMEText(body_text, "plain"))
+        msg.attach(MIMEText(html_email, "html"))
+
+        with smtplib.SMTP_SSL(smtp_host, smtp_port) as server:
+            server.login(smtp_user, smtp_pass)
+            server.sendmail("piper@everlightventures.io", [lead.owner_email], msg.as_string())
+
+        # Update lead status
+        if lead.status == "new":
+            lead.status = "contacted"
+        lead.notes = (lead.notes or "") + f"\n[PIPER_OUTREACH] {datetime.now(tz=timezone.get_current_timezone()).strftime('%Y-%m-%d %H:%M')} | Subject: {subject}"
+        lead.save(update_fields=["status", "notes", "updated_at"])
+
+        # Save styled HTML report of the email + post to Slack with link
+        try:
+            import sys as _sys
+            for _p in ["/home/opc/wholesale_agent", "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent"]:
+                if os.path.isdir(_p) and _p not in _sys.path:
+                    _sys.path.insert(0, _p)
+            from gdocs_bridge import publish_report as _publish
+            _report_content = (
+                f"## Seller Outreach Email\n\n"
+                f"**To:** {lead.owner_email}\n"
+                f"**Subject:** {subject}\n"
+                f"**Property:** {lead.address}, {lead.city}, {lead.state}\n"
+                f"**Lead Type:** {lead.get_lead_type_display()}\n"
+                f"**Motivation Score:** {lead.motivation_score}/100\n\n"
+                f"---\n\n"
+                f"{body_text}"
+            )
+            _publish(
+                title=f"Piper Outreach -- {lead.city}, {lead.state}",
+                content=_report_content,
+                folder="01_Broker_OS/Outreach_Logs",
+                slack_channel="#wholesale-deals",
+                summary=f"Piper sent outreach to {lead.owner_name or lead.owner_email} re: {lead.address[:30]}",
+                agent="piper_reeves",
+                app="warroom",
+            )
+        except Exception:
+            pass  # never block the response on Slack/report failure
+
+        return JsonResponse({
+            "ok": True,
+            "to_email": lead.owner_email,
+            "subject": subject,
+            "preview": body_text[:300],
+            "agent": "Piper Reeves",
+        })
+
+    except Exception as e:
+        return JsonResponse({"error": f"Email send failed: {str(e)}"}, status=500)

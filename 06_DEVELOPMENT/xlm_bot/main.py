@@ -26,6 +26,7 @@ from structure.levels import compute_structure_levels
 from structure.fib import find_swing, fib_levels
 from strategy.regime import run_regime_gates, compute_route_tier
 from strategy.entries import pullback_continuation, breakout_retest, reversal_impulse, compression_breakout, early_impulse, compression_range, trend_continuation, detect_15m_structure_bias, fib_retrace, _detect_swing_points, slow_bleed_hunter, wick_rejection, volume_climax_reversal, vwap_reversion, grid_range, funding_arb_bias, regime_low_vol, stat_arb_proxy, orderflow_imbalance, macro_ma_cross, mtf_conflict_block, exhaustion_warning_block, liquidity_sweep, htf_breakout_continuation, assess_htf_breakout_continuation, opening_range_breakout, hourly_continuation, htf_swing_entry, range_fvg_retest
+from strategy.auction_model import auction_entry
 from strategy.risk import stop_loss_price, sl_distance_ok
 from strategy.exits import tp_prices
 from strategy.confluence import compute_confluences, confluence_passes, confluence_count
@@ -4413,7 +4414,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             _sc_cooldown_ok = (now - _sc_let).total_seconds() > 120  # 2 min minimum
         except Exception:
             pass
-    if bool(_simple_cfg.get("enabled", False)) and not _st.get("open_position") and _sc_cooldown_ok:
+    if False and bool(_simple_cfg.get("enabled", False)) and not _st.get("open_position") and _sc_cooldown_ok:
         try:
             _simple = evaluate_simple_setup(df_15m, df_1h, price, config, df_1m=df_1m, df_4h=df_4h, df_1d=df_1d)
             if _simple:
@@ -4506,78 +4507,22 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         except Exception:
             pass  # simple core failed, fall through to legacy
 
-    failed_continuation_retest = _get_failed_continuation_retest_state(_st, config, now)
-    _fcr_direction = str((failed_continuation_retest or {}).get("direction") or "").lower().strip()
-    # HTF SWING: check 1H/4H wick reversals FIRST -- these are the big money trades
-    long_htf_swing = htf_swing_entry(price, df_1h, df_4h, df_15m, "long", fibs=fibs, levels=levels, config=config)
-    short_htf_swing = htf_swing_entry(price, df_1h, df_4h, df_15m, "short", fibs=fibs, levels=levels, config=config)
-    # RANGE FVG RETEST: Priority #2 -- breakout + FVG + engulfing confirmation
-    long_range_fvg = range_fvg_retest(price, df_15m, df_1h, df_15m, "long", fibs=fibs, levels=levels, config=config)
-    short_range_fvg = range_fvg_retest(price, df_15m, df_1h, df_15m, "short", fibs=fibs, levels=levels, config=config)
-    long_breakout_retest_entry = breakout_retest(price, df_15m, levels, fibs, "long")
-    short_breakout_retest_entry = breakout_retest(price, df_15m, levels, fibs, "short")
-
-    if _fcr_direction == "long":
-        long_entry = dict(long_breakout_retest_entry) if isinstance(long_breakout_retest_entry, dict) else None
-        if long_entry:
-            long_entry["continuation_flip_playbook"] = True
-            long_entry["continuation_flip_source"] = failed_continuation_retest.get("source_direction")
-            long_entry["continuation_flip_exit_reason"] = failed_continuation_retest.get("exit_reason")
-    else:
-        long_entry = long_htf_swing or long_range_fvg or long_breakout_retest_entry
-        long_entry = long_entry or htf_breakout_continuation(price, df_4h, df_1h, df_15m, levels, fibs, "long", weekly_playbook=_lane_w_playbook, event_calendar=_lane_w_calendar, config=lane_w_cfg)
-        long_entry = long_entry or trend_continuation(price, df_15m, df_1h, "long", state=_st)
-        long_entry = long_entry or fib_retrace(price, df_1h, df_15m, "long", config=config)
-        long_entry = long_entry or hourly_continuation(price, df_15m, df_1h, "long", levels, config=config)
-    if _fcr_direction == "short":
-        short_entry = dict(short_breakout_retest_entry) if isinstance(short_breakout_retest_entry, dict) else None
-        if short_entry:
-            short_entry["continuation_flip_playbook"] = True
-            short_entry["continuation_flip_source"] = failed_continuation_retest.get("source_direction")
-            short_entry["continuation_flip_exit_reason"] = failed_continuation_retest.get("exit_reason")
-    else:
-        short_entry = short_htf_swing or short_range_fvg or short_breakout_retest_entry
-        short_entry = short_entry or htf_breakout_continuation(price, df_4h, df_1h, df_15m, levels, fibs, "short", weekly_playbook=_lane_w_playbook, event_calendar=_lane_w_calendar, config=lane_w_cfg)
-        short_entry = short_entry or trend_continuation(price, df_15m, df_1h, "short", state=_st)
-        short_entry = short_entry or fib_retrace(price, df_1h, df_15m, "short", config=config)
-        short_entry = short_entry or hourly_continuation(price, df_15m, df_1h, "short", levels, config=config)
-    if _fcr_direction == "long":
-        short_entry = None
-    elif _fcr_direction == "short":
-        long_entry = None
+    # ===================================================================
+    # AUCTION MARKET MODEL (Fabio Valentina inspired)
+    # Only TWO entry models: auction_trend + auction_reversion
+    # All legacy strategies disabled. Read the market, don't predict.
+    # ===================================================================
+    failed_continuation_retest = None
+    _fcr_direction = ""
     _micro_sweep_promoted = False
     _micro_sweep_source = None
-
-    if _lane_v_cooldown_blocks_entry(_st, long_entry, atr_value=lane_v_atr_value, lane_cfg=lane_cfg, now=now):
-        long_entry = None
-    if _lane_v_cooldown_blocks_entry(_st, short_entry, atr_value=lane_v_atr_value, lane_cfg=lane_cfg, now=now):
-        short_entry = None
-
-    # Blocking lanes: MTF conflict (Lane L) and exhaustion warning (Lane O)
     _mtf_blocked = False
     _exhaustion_blocked = False
-    try:
-        if long_entry:
-            _mtf_blocked = mtf_conflict_block(df_15m, df_1h, df_4h, "long")
-            _exhaustion_blocked = exhaustion_warning_block(df_15m, "long", expansion_state)
-            if _mtf_blocked or _exhaustion_blocked:
-                long_entry = None
-        if short_entry:
-            _mtf_blocked = mtf_conflict_block(df_15m, df_1h, df_4h, "short")
-            _exhaustion_blocked = exhaustion_warning_block(df_15m, "short", expansion_state)
-            if _mtf_blocked or _exhaustion_blocked:
-                short_entry = None
-    except Exception:
-        pass
-
-    # Compute structure bias for countertrend blocking (used in gate chain)
-    try:
-        _structure_bias = detect_15m_structure_bias(df_15m)
-    except Exception:
-        _structure_bias = "neutral"
-
+    _structure_bias = "neutral"
     contract_ctx = {}
     orderbook_ctx = {}
+
+    # Fetch contract context (still useful for margin/fees)
     try:
         _ctx_product_id = execution_product_id or signal_product_id
         if cc_mgr and _ctx_product_id:
@@ -4591,12 +4536,10 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     except Exception:
         pass
 
-    # Late-bind Lane Q: funding_arb_bias needs contract_ctx (populated above)
-    _q_cfg = ((config.get("v4") or {}).get("lane_scoring") or {}) if isinstance(config.get("v4"), dict) else {}
-    if contract_ctx and not long_entry:
-        long_entry = funding_arb_bias(price, df_15m, "long", contract_ctx, config=_q_cfg)
-    if contract_ctx and not short_entry:
-        short_entry = funding_arb_bias(price, df_15m, "short", contract_ctx, config=_q_cfg)
+    # Auction model entries -- the ONLY entry path
+    _atr_for_auction = lane_v_atr_value if lane_v_atr_value and lane_v_atr_value > 0 else 0.001
+    long_entry = auction_entry(price, df_15m, df_1h, "long", _atr_for_auction, config=config)
+    short_entry = auction_entry(price, df_15m, df_1h, "short", _atr_for_auction, config=config)
 
     sweep_long = None
     sweep_short = None
@@ -4640,8 +4583,8 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     except Exception:
         pass
 
-    # --- 5m/1m Micro-Sweep Entry Promotion (after detection) ---
-    if not long_entry and micro_sweep_long and getattr(micro_sweep_long, "detected", False) and not getattr(micro_sweep_long, "htf_hostile", True):
+    # --- 5m/1m Micro-Sweep Entry Promotion DISABLED (auction model only) ---
+    if False and not long_entry and micro_sweep_long and getattr(micro_sweep_long, "detected", False) and not getattr(micro_sweep_long, "htf_hostile", True):
         long_entry = {
             "type": "micro_sweep", "mode": "reversal", "entry_profile_key": "liquidity_sweep_reversal",
             "micro_sweep": True, "micro_sweep_score": micro_sweep_long.score,
@@ -4655,7 +4598,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         }
         _micro_sweep_promoted = True
         _micro_sweep_source = micro_sweep_long
-    if not short_entry and micro_sweep_short and getattr(micro_sweep_short, "detected", False) and not getattr(micro_sweep_short, "htf_hostile", True):
+    if False and not short_entry and micro_sweep_short and getattr(micro_sweep_short, "detected", False) and not getattr(micro_sweep_short, "htf_hostile", True):
         short_entry = {
             "type": "micro_sweep", "mode": "reversal", "entry_profile_key": "liquidity_sweep_reversal",
             "micro_sweep": True, "micro_sweep_score": micro_sweep_short.score,
@@ -4769,7 +4712,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     _last_exit_price = float(_st.get("last_exit_price") or 0)
     _last_exit_dir = str(_st.get("last_exit_direction") or "")
     _last_exit_result = str(_st.get("last_exit_result") or "")
-    _reentry_window_min = 120
+    _reentry_window_min = 20
     _last_exit_ts = _st.get("last_exit_time")
     _reentry_check = False
     _minutes_since_exit = 9999
@@ -4792,13 +4735,13 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
     try:
         if df_15m is not None and len(df_15m) >= 5 and _minutes_since_exit > 3:
             _exit_candles = max(1, int(_minutes_since_exit / 15))
-            if _exit_candles >= 2:
+            if _exit_candles >= 1:
                 _recent = df_15m.tail(min(_exit_candles, 20))
                 _atr_p = float(atr(df_15m, 14).iloc[-1]) if len(df_15m) >= 14 else 0
                 if _atr_p > 0:
                     _new_h = float(_recent["high"].max())
                     _new_l = float(_recent["low"].min())
-                    if abs(_new_h - _last_exit_price) > _atr_p or abs(_new_l - _last_exit_price) > _atr_p:
+                    if abs(_new_h - _last_exit_price) > _atr_p * 0.4 or abs(_new_l - _last_exit_price) > _atr_p * 0.4:
                         _patience_structure_changed = True
     except Exception:
         pass
@@ -4847,17 +4790,17 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             if df_15m is not None and len(df_15m) >= 5:
                 # Count candles since exit
                 _exit_candles = max(1, int(_minutes_since_exit / 15))
-                if _exit_candles >= 3:
+                if _exit_candles >= 1:
                     # Check if a new high or low formed since exit
                     _recent = df_15m.tail(min(_exit_candles, 20))
                     _new_high = float(_recent["high"].max())
                     _new_low = float(_recent["low"].min())
                     _atr_check = float(atr(df_15m, 14).iloc[-1]) if len(df_15m) >= 14 else 0
                     if _atr_check > 0:
-                        # New zone: price made a move of 1+ ATR from exit price
-                        if abs(_new_high - _last_exit_price) > _atr_check:
+                        # New zone: price moved 0.4 ATR from exit = new structure
+                        if abs(_new_high - _last_exit_price) > _atr_check * 0.4:
                             _structure_changed = True
-                        if abs(_new_low - _last_exit_price) > _atr_check:
+                        if abs(_new_low - _last_exit_price) > _atr_check * 0.4:
                             _structure_changed = True
                     # Also check: did a new candle pattern form? (entry signal exists = new setup)
                     if entry and entry.get("type") != _st.get("last_entry_type"):
@@ -5599,6 +5542,8 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             rec_pnl = _to_float(rec_trade.get("pnl_usd"))
             rec_result = str(rec_trade.get("result") or "")
             state["last_exit_time"] = str(rec_trade.get("exit_time") or now.isoformat())
+            # ESC is a real loss -- enforce 30min cooldown to stop re-entry loops
+            _update_cooldown(state, now, 30)
             # exchange_side_close is NOT a strategy failure — don't count toward
             # consecutive_losses or trigger cooldown.  PnL and debt still tracked.
             if rec_pnl is not None:
@@ -10344,6 +10289,14 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
         except Exception:
             pass
 
+        # Perplexity context -- macro watchlist from hourly poller
+        _us_pctx = None
+        try:
+            from perplexity_poller import read_context as _read_pctx
+            _us_pctx = _read_pctx()
+        except Exception:
+            pass
+
         # Sentiment -- always fetch, use direction or default to "long" for gate eval
         _us_sent_result = {}
         _us_sent_data = {}
@@ -10518,6 +10471,7 @@ def decide_and_trade(config: dict, paper: bool = True) -> None:
             fee_intel_block=_us_fee_intel.block_entry,
             fee_intel_reasons=_us_fee_intel.reasons,
             entry_type=selected_entry_type or "",
+            perplexity_context=_us_pctx,
             config=config,
         )
 

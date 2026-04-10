@@ -166,9 +166,9 @@ DEFAULT_WEIGHTS = {
     # Dip retrace (bounce detection for shorts)
     "dip_retrace":           {"max": 0,  "min": -10},
     # Support proximity (shorts near support)
-    "support_proximity":     {"max": 0,  "min": -10},
+    "support_proximity":     {"max": 0,  "min": -5},
     # Range chase (entered too far into range)
-    "range_chase":           {"max": 0,  "min": -10},
+    "range_chase":           {"max": 0,  "min": -5},
     # Regime mode
     "regime_mode":           {"max": 0,  "min": -12},
     # Lane V cooldown
@@ -176,7 +176,7 @@ DEFAULT_WEIGHTS = {
     # Daily profit target proximity
     "daily_target":          {"max": 0,  "min": -8},
     # Revenge pattern (3 losses same zone)
-    "revenge_pattern":       {"max": 0,  "min": -18},
+    "revenge_pattern":       {"max": 0,  "min": -5},
     # Macro vision alignment
     "macro_vision":          {"max": 8,  "min": -5},
     # Contract context (OI / funding / basis)
@@ -185,8 +185,8 @@ DEFAULT_WEIGHTS = {
     "btc_correlation":       {"max": 5,  "min": -5},
     # Consensus bonus (multiple lanes agree)
     "lane_consensus":        {"max": 8,  "min": 0},
-    # Trade memory (learns from recent wins/losses -- reduced from -25 to -15)
-    "trade_memory":          {"max": 15, "min": -15},
+    # Trade memory (learns from recent wins/losses -- capped to prevent paralysis)
+    "trade_memory":          {"max": 15, "min": -8},
     # Candle math (market is moving enough to hit TP?)
     "candle_aggression":     {"max": 10, "min": -5},
     # Foresight (does this trade match an anticipated scenario?)
@@ -195,8 +195,10 @@ DEFAULT_WEIGHTS = {
     "trap_detector":         {"max": 10, "min": -12},
     # Session quality (prime trading hours = better moves)
     "session_quality":       {"max": 8, "min": -3},
-    # Fee intelligence (cost awareness -- churn, fee-dominated edges, lane health)
-    "fee_intelligence":      {"max": 0, "min": -25},
+    # Fee intelligence (cost awareness -- capped to prevent paralysis)
+    "fee_intelligence":      {"max": 0, "min": -8},
+    # Perplexity context (directional filter from macro watchlist)
+    "perplexity_context":    {"max": 5, "min": -8},
 }
 
 # --- Threshold defaults ---
@@ -322,6 +324,9 @@ def score_setup(
 
     # Entry type (for scalp vs HTF threshold selection)
     entry_type: str = "",
+
+    # Perplexity context (macro watchlist data)
+    perplexity_context: dict[str, Any] | None = None,
 
     # Config overrides
     config: dict[str, Any] | None = None,
@@ -679,6 +684,63 @@ def score_setup(
         running = min(running, 20)  # crush score below any threshold
         reasons.append("FEE INTEL HARD BLOCK: lane disabled or fee+churn combo")
 
+    # -- MODIFIER 23: Perplexity context (macro directional filter) --
+    # Reads data/perplexity_context.json written by hourly poller.
+    # Hybrid-C: directional filter with breakout proximity sub-gate.
+    # Confirms direction = +5, counter-trend when bias strong = -8,
+    # near range edge going counter = extra penalty (breakout proximity).
+    w = weights.get("perplexity_context", {"max": 5, "min": -8})
+    pctx = perplexity_context or {}
+    pctx_mod = 0
+    if pctx and not pctx.get("stale", True) and direction:
+        bias = str(pctx.get("momentum_bias", "NEUTRAL")).upper()
+        bp = pctx.get("breakout_proximity") or {}
+        range_pos = float(bp.get("range_position", 0.5))
+
+        # Directional alignment check
+        bias_bullish = bias in ("LEAN_BULLISH", "BULLISH")
+        bias_bearish = bias in ("LEAN_BEARISH", "BEARISH")
+        confirms = (
+            (direction == "long" and bias_bullish) or
+            (direction == "short" and bias_bearish)
+        )
+        conflicts = (
+            (direction == "long" and bias_bearish) or
+            (direction == "short" and bias_bullish)
+        )
+
+        if confirms:
+            pctx_mod = w["max"]
+            reasons.append(f"perplexity bias {bias} confirms {direction} (+{pctx_mod})")
+        elif conflicts:
+            pctx_mod = w["min"]
+            reasons.append(f"perplexity bias {bias} vs {direction} ({pctx_mod})")
+
+        # Breakout proximity sub-gate: penalize counter-trend near range edges
+        # Longing near 90d low with bearish bias = -6 extra
+        # Shorting near 90d high with bullish bias = -6 extra
+        near_low = range_pos < 0.15
+        near_high = range_pos > 0.85
+        if near_low and direction == "short" and not bias_bearish:
+            pctx_mod = min(pctx_mod, pctx_mod - 6)
+            reasons.append(f"breakout proximity: shorting near 90d low (range {range_pos:.0%}) (-6)")
+        elif near_high and direction == "long" and not bias_bullish:
+            pctx_mod = min(pctx_mod, pctx_mod - 6)
+            reasons.append(f"breakout proximity: longing near 90d high (range {range_pos:.0%}) (-6)")
+
+        # RSI extreme override: if RSI confirms the trade direction, soften penalty
+        pctx_rsi = float(pctx.get("rsi_14", 50))
+        if conflicts and pctx_rsi < 30 and direction == "long":
+            # RSI oversold = mean reversion long is valid even if bias is bearish
+            pctx_mod = max(pctx_mod, -3)
+            reasons.append(f"perplexity RSI oversold ({pctx_rsi:.0f}) softens bearish penalty")
+        elif conflicts and pctx_rsi > 70 and direction == "short":
+            pctx_mod = max(pctx_mod, -3)
+            reasons.append(f"perplexity RSI overbought ({pctx_rsi:.0f}) softens bullish penalty")
+
+    modifiers["perplexity_context"] = pctx_mod
+    running += pctx_mod
+
     # -- FINAL SCORE --
     # Variable negative cap: weak base scores get tighter caps
     # A MONSTER base (60+) can take headwinds; a marginal base (40) can't
@@ -697,10 +759,10 @@ def score_setup(
         running -= _excess
         reasons.append("penalty cap (%d): negatives capped, was %d" % (_neg_cap, _total_negative))
 
-    # Apply trade memory min_score override (be pickier after losses)
+    # Trade memory can nudge threshold but never raise it more than 10 pts
     effective_threshold = entry_threshold
     if trade_memory_min_override > entry_threshold:
-        effective_threshold = trade_memory_min_override
+        effective_threshold = min(trade_memory_min_override, entry_threshold + 10)
 
     final = max(0, min(100, running))
     result.final_score = final

@@ -21,37 +21,37 @@ session_filter:
   - start: '18:00'
     end: '21:00'
 risk:
-  max_trades_per_day: 20
-  max_losses_per_day: 5
-  cooldown_minutes: 15
+  max_trades_per_day: 5
+  max_losses_per_day: 3
+  cooldown_minutes: 30
   cooldown_loss_threshold: 1
-  revenge_cooldown_minutes: 30
+  revenge_cooldown_minutes: 60
   daily_profit_target_usd: 0
   loss_cooldown_requires_new_structure: true
   capital_allocation_pct: 1.0
-  max_sl_pct: 0.008
+  max_sl_pct: 0.005
   max_daily_loss_pct: 0.02
-  sl_atr_buffer_mult: 0.5
-  max_risk_pct_per_trade: 0.02
-  smoke_check_stop_pct: 0.0025
+  sl_atr_buffer_mult: 0.3
+  max_risk_pct_per_trade: 0.005
+  smoke_check_stop_pct: 0.002
   min_rr_ratio:
-    MONSTER: 0.8
-    FULL: 1.0
-    REDUCED: 1.2
-    SCALP: 1.5
-    default: 1.0
+    MONSTER: 1.5
+    FULL: 1.5
+    REDUCED: 2.0
+    SCALP: 2.5
+    default: 1.5
 risk_profile:
   risk_pct: 0.02
   target_pct: 0.003
 position_sizing:
   enabled: true
   mode: equity_pct
-  base_risk_pct: 0.03
-  max_risk_pct: 0.08
+  base_risk_pct: 0.005
+  max_risk_pct: 0.01
   min_contracts: 1
-  max_contracts: auto
-  equity_per_contract: 180
-  max_contracts_hard_cap: auto
+  max_contracts: 1
+  equity_per_contract: 300
+  max_contracts_hard_cap: 1
   margin_window_sizing:
     enabled: true
     intraday_equity_per_contract: 150
@@ -86,10 +86,10 @@ position_sizing:
     Y: 1.0
     Z: 1.0
   tier_multipliers:
-    MONSTER: 1.5
-    FULL: 1.25
-    REDUCED: 0.75
-    SCALP: 0.5
+    MONSTER: 1.0
+    FULL: 1.0
+    REDUCED: 1.0
+    SCALP: 1.0
   multi_contract:
     enabled: true
     min_quality: MONSTER
@@ -119,11 +119,11 @@ position_sizing:
     - label: BUILD_A
       max_equity: 500
       max_contracts: 1
-      base_risk_pct: 0.025
-      max_risk_pct: 0.04
-      daily_target_usd: 25
-      daily_stop_usd: 20
-      per_trade_risk_usd: 10
+      base_risk_pct: 0.005
+      max_risk_pct: 0.01
+      daily_target_usd: 10
+      daily_stop_usd: 10
+      per_trade_risk_usd: 3
       withdrawal_mode: compound
     - label: BUILD_B
       max_equity: 1500
@@ -165,11 +165,11 @@ position_sizing:
     contract_buffer_pct: 0.1
     two_contract_buffer_pct: 0.1
 exits:
-  attach_exchange_tp: false
-  pending_fill_expiry_sec: 90
-  early_save_adverse_pct: 0.003
-  early_save_bars: 20
-  time_stop_bars: 480
+  attach_exchange_tp: true
+  pending_fill_expiry_sec: 60
+  early_save_adverse_pct: 0.002
+  early_save_bars: 10
+  time_stop_bars: 120
   time_stop_min_move_pct: 0.001
   entry_type_time_stop:
     reversal_impulse:
@@ -1594,8 +1594,8 @@ unified_scorer:
   entry_threshold: 55
   scalp_threshold: 40
   htf_threshold: 55
-  dead_zone_width: 5          # scores within 5 of threshold = HOLD for confirmation
-  min_quality_tier: FULL      # no REDUCED/SCALP entries from primary scorer
+  dead_zone_width: 0          # disabled -- was causing paralysis
+  min_quality_tier: REDUCED   # allow REDUCED entries, not just FULL
 reentry_patience:
   min_wait_minutes: 2
   retrace_atr_mult: 0.3

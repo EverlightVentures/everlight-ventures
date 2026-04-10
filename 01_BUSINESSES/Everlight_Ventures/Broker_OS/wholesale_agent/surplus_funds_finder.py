@@ -10,7 +10,7 @@ Revenue model: 15-30% commission on recovered funds. No upfront cost to owner.
 
 Agents involved:
   - Rex Blackwell (lead scout)
-  - Filter Banks (lead scoring)
+  - Frederick Banks (lead scoring)
   - Piper Reeves (outreach)
   - Samuel Navarro (compliance)
 

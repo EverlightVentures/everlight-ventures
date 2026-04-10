@@ -9,16 +9,12 @@ and posts alerts to #hive-alerts if a service is flapping.
 Cron: */2 * * * * /usr/bin/python3 /home/opc/hive_watchdog.py >> /tmp/hive_watchdog.log 2>&1
 
 Monitors:
-  - xlm-bot, xlm-ws, xlm-dashboard, xlm-liqfeed (trading stack)
-  - n8n, blinko (automation + knowledge)
+  - xlm-bot, xlm-ws, xlm-liqfeed (trading stack)
+  - n8n, blinko, ollama, netdata (infra + knowledge)
   - hive-django, hive-slack-agent (ops)
+  - nextcloud, polymarket, computer-use (containers)
 
-Also checks:
-  - XLM WS live tick freshness (stale data = dead feed)
-  - n8n HTTP health
-  - Blinko HTTP health
-  - Disk usage > 85%
-  - RAM usage > 90%
+Auto-restarts zombie processes (systemd active but HTTP dead).
 """
 import json
 import os
@@ -42,12 +38,12 @@ SLACK_CHANNEL = "C0ANPRCA4AD"  # #hive-alerts
 CRITICAL_SERVICES = [
     "xlm-bot",
     "xlm-ws",
-    "xlm-dashboard",
     "xlm-liqfeed",
     "n8n",
     "blinko",
     "hive-django",
     "hive-slack-agent",
+    "hive-reports",
     "ollama",
     "netdata",
 ]
@@ -109,7 +105,31 @@ def save_state(state: dict) -> None:
 
 
 def slack_alert(message: str) -> None:
-    """Post alert to #hive-alerts via Slack API."""
+    """Post alert through the standard report publisher, then fall back to raw Slack."""
+    try:
+        import sys
+        try:
+            from content_tools.gdocs_bridge import publish_report
+        except Exception:
+            sys.path.insert(0, "/home/opc/content_tools")
+            from gdocs_bridge import publish_report
+        lines = [line.strip(" *") for line in str(message).splitlines() if line.strip()]
+        title = lines[0][:120] if lines else "Hive Watchdog Alert"
+        summary = " ".join(lines[:2])[:220] if lines else "Hive watchdog alert."
+        result = publish_report(
+            title=title,
+            content=str(message),
+            folder="00_Command_Center/System_Status",
+            slack_channel="#hive-alerts",
+            summary=summary,
+            post_to_slack=True,
+            agent="marcus_cole",
+        )
+        if result.get("slack_posted"):
+            return
+    except Exception as e:
+        log(f"Report publish fallback to raw Slack: {e}", "WARN")
+
     try:
         payload = json.dumps({
             "channel": SLACK_CHANNEL,
@@ -133,13 +153,13 @@ def slack_alert(message: str) -> None:
 
 
 def check_service(name: str) -> bool:
-    """Check if a systemd service is active. Returns True if active."""
+    """Check if a systemd service is active or starting. Returns True if active/activating."""
     try:
         result = subprocess.run(
             ["systemctl", "is-active", name],
             capture_output=True, text=True, timeout=5,
         )
-        return result.stdout.strip() == "active"
+        return result.stdout.strip() in ("active", "activating")
     except Exception:
         return False
 
@@ -187,13 +207,19 @@ def check_live_tick_freshness() -> tuple[bool, float]:
         return False, float("inf")
 
 
-def check_http_health(url: str, timeout: int = 5) -> bool:
-    """Check if an HTTP endpoint is responding."""
+def check_http_health(url: str, timeout: int = 5, method: str = "GET", post_data: bytes | None = None) -> bool:
+    """Check if an HTTP endpoint is responding. Any HTTP response (even 4xx) = alive."""
     try:
-        req = urllib.request.Request(url)
+        req = urllib.request.Request(url, method=method, data=post_data)
+        if post_data:
+            req.add_header("Content-Type", "application/json")
         with urllib.request.urlopen(req, timeout=timeout) as resp:
-            return resp.status < 500
-    except Exception:
+            return True
+    except urllib.error.HTTPError:
+        # Server responded with an error code -- but it IS responding (alive)
+        return True
+    except (urllib.error.URLError, OSError, TimeoutError):
+        # Connection refused, timeout, DNS failure -- actually dead
         return False
 
 
@@ -289,11 +315,32 @@ def main():
         issues.append(f"xlm-ws tick stale ({age_str})")
         log(f"STALE: live_tick.json age={age_str}", "WARN")
 
-    # --- HTTP health checks ---
+    # --- HTTP health checks (auto-restart if service is running but HTTP is dead) ---
     for name, url in HEALTH_CHECKS.items():
         if not check_http_health(url):
-            issues.append(f"{name} HTTP not responding")
             log(f"HTTP DOWN: {name} at {url}", "WARN")
+            # If the systemd service is "active" but HTTP is dead, restart it
+            # (zombie process -- running but unresponsive)
+            all_services = CRITICAL_SERVICES + CONTAINER_SERVICES
+            if name in all_services and check_service(name):
+                restart_count = get_restart_count_last_hour(state, name)
+                if restart_count >= MAX_RESTARTS_PER_HOUR:
+                    flapping.append(f"{name} HTTP zombie (restarted {restart_count}x in last hour)")
+                    log(f"FLAPPING: {name} HTTP zombie -- alerting instead", "WARN")
+                else:
+                    log(f"ZOMBIE: {name} active but HTTP dead -- restarting")
+                    success = restart_service(name)
+                    if success:
+                        record_restart(state, name)
+                        restarts_done.append(f"{name} (HTTP zombie)")
+                        log(f"RESTARTED: {name} (HTTP zombie fix)")
+                        continue  # Skip adding to issues since we fixed it
+                    else:
+                        issues.append(f"{name} HTTP zombie restart FAILED")
+                        log(f"RESTART FAILED: {name} HTTP zombie", "ERROR")
+                        continue
+            issues.append(f"{name} HTTP not responding")
+            log(f"HTTP ISSUE: {name} (not a restartable service)", "WARN")
 
     # --- Disk usage ---
     disk_ok, disk_pct = check_disk_usage()

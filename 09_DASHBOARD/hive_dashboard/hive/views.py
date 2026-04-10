@@ -1191,6 +1191,11 @@ def api_upload_analyze(request):
         return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
 
 
+def api_hub_status(request):
+    """Health check endpoint for action engine. No auth required."""
+    return JsonResponse({"status": "ok", "service": "hive-django"})
+
+
 @login_required
 def api_agent_status(request):
     """
@@ -1530,25 +1535,68 @@ class ReportsListView(LoginRequiredMixin, TemplateView):
     template_name = 'hive/reports_list.html'
 
     def get_context_data(self, **kwargs):
+        import re as _re
         ctx = super().get_context_data(**kwargs)
         ctx['active_page'] = 'reports'
-        reports_dir = Path(getattr(settings, 'REPORTS_DIR', '/home/opc/reports'))
+        # Check both report directories (hive_reports is primary, reports is legacy)
+        report_dirs = [
+            Path(getattr(settings, 'REPORTS_DIR', '/home/opc/hive_reports')),
+            Path('/home/opc/reports'),
+        ]
+        seen = set()
         reports = []
-        if reports_dir.is_dir():
+        for reports_dir in report_dirs:
+            if not reports_dir.is_dir():
+                continue
             for f in reports_dir.iterdir():
-                if f.suffix == '.html' and f.is_file():
+                if f.suffix == '.html' and f.is_file() and f.name not in seen:
+                    seen.add(f.name)
                     stat = f.stat()
+                    # Extract title from HTML <title> tag
+                    title = f.stem.replace('_', ' ').title()
+                    try:
+                        head = f.read_text(encoding='utf-8')[:2000]
+                        m = _re.search(r'<title>([^<]+)', head)
+                        if m:
+                            raw_title = m.group(1).replace(' | Everlight Ventures', '').strip()
+                            if raw_title:
+                                title = raw_title
+                    except Exception:
+                        pass
+                    # Determine category from filename or content
+                    category = 'general'
+                    fname_lower = f.name.lower()
+                    if 'pipeline' in fname_lower or 'wholesale' in fname_lower:
+                        category = 'pipeline'
+                    elif 'deal' in fname_lower or 'contract' in fname_lower:
+                        category = 'deals'
+                    elif 'outreach' in fname_lower or 'email' in fname_lower:
+                        category = 'outreach'
+                    elif 'lucrex' in fname_lower or 'operations' in fname_lower:
+                        category = 'operations'
+                    elif 'intel' in fname_lower or 'bot' in fname_lower:
+                        category = 'trading'
+                    elif 'landing' in fname_lower:
+                        category = 'landing'
                     reports.append({
                         'hash': f.stem,
                         'filename': f.name,
+                        'title': title,
+                        'category': category,
                         'size_kb': round(stat.st_size / 1024, 1),
                         'modified': datetime.fromtimestamp(
                             stat.st_mtime, tz=timezone.get_current_timezone()
                         ),
+                        'dir': str(reports_dir),
                     })
         reports.sort(key=lambda r: r['modified'], reverse=True)
         ctx['reports'] = reports[:100]
         ctx['total_reports'] = len(reports)
+        # Category counts for filter tabs
+        cats = {}
+        for r in reports:
+            cats[r['category']] = cats.get(r['category'], 0) + 1
+        ctx['categories'] = cats
         return ctx
 
 
@@ -1556,11 +1604,15 @@ class ReportsListView(LoginRequiredMixin, TemplateView):
 def report_detail(request, report_hash):
     """Serve a premium HTML report - raw or wrapped in base layout."""
     import re as _re
-    safe_hash = _re.sub(r'[^a-zA-Z0-9_-]', '', report_hash)
-    reports_dir = Path(getattr(settings, 'REPORTS_DIR', '/home/opc/reports'))
-    report_file = reports_dir / f'{safe_hash}.html'
+    safe_hash = _re.sub(r'[^a-zA-Z0-9_.-]', '', report_hash)
+    report_file = None
+    for d in [Path('/home/opc/hive_reports'), Path(getattr(settings, 'REPORTS_DIR', '/home/opc/reports'))]:
+        candidate = d / f'{safe_hash}.html'
+        if candidate.is_file():
+            report_file = candidate
+            break
 
-    if not report_file.is_file():
+    if not report_file or not report_file.is_file():
         return HttpResponse('Report not found', status=404)
 
     # Raw mode: serve the HTML directly (for iframe embedding)

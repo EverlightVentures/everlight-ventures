@@ -244,7 +244,35 @@ def restart_service(svc: str, host: str) -> str:
 
 
 def post_to_slack(channel_name: str, text: str) -> bool:
-    """Post a message to Slack via bot token (stdlib urllib)."""
+    """Post through the standard report publisher, then fall back to raw Slack."""
+    folder_map = {
+        "war-room": "00_Command_Center/War_Room",
+        "hive-alerts": "00_Command_Center/System_Status",
+        "deploy-log": "06_Infrastructure/N8N_Workflow_Logs",
+    }
+    try:
+        try:
+            from content_tools.gdocs_bridge import publish_report
+        except Exception:
+            sys.path.insert(0, "/home/opc/content_tools")
+            from gdocs_bridge import publish_report
+        lines = [line.strip(" *") for line in str(text).splitlines() if line.strip()]
+        title = lines[0][:120] if lines else f"Hive God Mode Update ({channel_name})"
+        summary = " ".join(lines[:2])[:220] if lines else "Hive God Mode update."
+        result = publish_report(
+            title=title,
+            content=str(text),
+            folder=folder_map.get(channel_name, "00_Command_Center/System_Status"),
+            slack_channel=f"#{channel_name}",
+            summary=summary,
+            post_to_slack=True,
+            agent="marcus_cole",
+        )
+        if result.get("slack_posted"):
+            return True
+    except Exception as exc:
+        log.warning("Report publish fallback to raw Slack for %s: %s", channel_name, exc)
+
     if not SLACK_BOT_TOKEN:
         log.warning("Slack skip: no SLACK_BOT_TOKEN")
         return False
@@ -1053,8 +1081,8 @@ class GodMode:
             "Quinn here -- just verified all services are green across the board.",
             "Rex T checking in. Markets are moving, bot is watching. Stay sharp.",
             "Piper here -- outreach sequences are queued and on schedule.",
-            "Filter Banks: Pipeline numbers look solid this cycle. No anomalies.",
-            "Chart Dawson: Dashboard metrics updated. Everything tracking to target.",
+            "Frederick Banks: Pipeline numbers look solid this cycle. No anomalies.",
+            "Charles Dawson: Dashboard metrics updated. Everything tracking to target.",
             "Hammer Reeves: Following up on all open threads today. Nothing slips.",
             "Marcus Cole: God Mode running smooth. The Hive never sleeps.",
         ]

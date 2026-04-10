@@ -1,0 +1,10 @@
+{
+  "type": "wholesale_purchase_agreement",
+  "property": "1234 Oak St, Cleveland OH 44102",
+  "seller": "John Doe",
+  "buyer": "REI Capital LLC",
+  "purchase_price": 85000,
+  "assignment_fee": 12000,
+  "generated_at": "2026-04-08T17:48:22.540099-07:00",
+  "pdf_path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/contracts/wholesale_1234 Oak St_ Cleveland OH 44102_20260408.pdf"
+}

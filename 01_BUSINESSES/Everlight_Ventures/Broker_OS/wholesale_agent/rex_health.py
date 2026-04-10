@@ -24,6 +24,11 @@ log = logging.getLogger("rex_health")
 AGENT_DIR = Path(__file__).parent
 sys.path.insert(0, str(AGENT_DIR))
 
+try:
+    from gdocs_bridge import publish_report
+except ImportError:
+    publish_report = None
+
 SLACK_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
 SLACK_CHANNEL = "C0ANLLV8JAC"
 
@@ -34,8 +39,23 @@ NOW_PT = datetime.now(timezone.utc) + PT_OFFSET
 TODAY_DISPLAY = NOW_PT.strftime("%B %d, %Y")
 
 
-def post_slack(text: str):
-    """Post to Slack."""
+def post_slack(text: str, title: str = "Rex Daily Health Report"):
+    """Post to Slack, creating a GDoc first when possible."""
+    # Try branded GDoc first
+    if publish_report is not None:
+        try:
+            result = publish_report(
+                title=title,
+                content=text,
+                folder="01_Broker_OS/Daily_KPI",
+                summary=text[:200],
+                agent="charles_dawson",
+            )
+            if result.get("ok"):
+                return True
+        except Exception:
+            pass
+    # Fallback: raw text post
     if not SLACK_TOKEN:
         log.info(f"[Slack offline] Would post:\n{text}")
         return False

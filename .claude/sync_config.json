@@ -1,0 +1,20 @@
+{
+  "staging_folders": [
+    "C_Downloads/Download",
+    "C_Downloads",
+    "B_Media/Organize"
+  ],
+  "sync_folders": [
+    "A_My_Docs",
+    "B_Media",
+    "D_Backups",
+    "Research",
+    "_WORK"
+  ],
+  "rclone_remote": "protondrive",
+  "remote_base": "AA_MY_DRIVE",
+  "sync_interval_seconds": 300,
+  "conflict_resolve": "newer",
+  "auto_organize": true,
+  "auto_sync": true
+}

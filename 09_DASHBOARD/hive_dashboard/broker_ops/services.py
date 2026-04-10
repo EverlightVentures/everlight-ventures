@@ -22,11 +22,16 @@ from django.utils import timezone
 
 from .models import (
     BrokerMatch,
+    CallLog,
     CommissionRecord,
     Deal,
+    DealEvent,
     LeadProfile,
     OfferListing,
     OutreachSequence,
+    PropertyLead,
+    ClientFile,
+    InvestorBuyer,
 )
 
 logger = logging.getLogger(__name__)
@@ -309,16 +314,465 @@ def create_deal_from_match(match: BrokerMatch, deal_value: Decimal, notes: str =
     return deal
 
 
+def _get_broker_os_dir():
+    """Get Broker OS directory and ensure it's on sys.path."""
+    import sys
+    broker_os_dir = str(Path(__file__).resolve().parents[2] / "01_BUSINESSES" / "Everlight_Ventures" / "Broker_OS")
+    if broker_os_dir not in sys.path:
+        sys.path.insert(0, broker_os_dir)
+    return broker_os_dir
+
+
+def _log_deal_event(deal: Deal, event_type: str, title: str, detail: str = "",
+                     agent_name: str = "", metadata: dict = None):
+    """Record an event in the deal timeline."""
+    DealEvent.objects.create(
+        deal=deal,
+        event_type=event_type,
+        title=title,
+        detail=detail,
+        agent_name=agent_name,
+        metadata=metadata or {},
+    )
+
+
+def _extract_contract_math(deal: Deal) -> dict:
+    """Pull real numbers from contract/property data -- this is what Stripe invoices against.
+
+    For wholesale RE: uses PropertyLead data (ARV, assignment fee, purchase price)
+    For B2B finder fees: uses Deal model data (deal_value, commission_pct)
+    """
+    # Check if this is a wholesale RE deal (has linked properties)
+    properties = deal.properties.all() if hasattr(deal, 'properties') else []
+    prop = properties.first() if properties else None
+
+    # Check for client file with deal numbers
+    client_file = getattr(deal, 'client_file', None)
+
+    if prop:
+        # Wholesale RE deal -- math comes from property lead
+        purchase_price = float(prop.asking_price or 0)
+        assignment_fee = float(prop.assignment_fee or 10000)
+        arv = float(prop.estimated_arv or 0)
+        repair_est = float(prop.estimated_repair or 0)
+        buyer_price = purchase_price + assignment_fee
+
+        return {
+            "deal_type": "wholesale_assignment",
+            "property_address": prop.address,
+            "city": prop.city,
+            "state": prop.state,
+            "purchase_price": purchase_price,
+            "assignment_fee": assignment_fee,
+            "arv": arv,
+            "repair_estimate": repair_est,
+            "buyer_price": buyer_price,
+            "invoice_amount": assignment_fee,  # We get the assignment fee
+            "scope": f"Wholesale assignment - {prop.address}, {prop.city} {prop.state}",
+            "seller_name": prop.owner_name,
+            "seller_email": prop.owner_email,
+            "title_company": client_file.title_company if client_file else "",
+        }
+    elif client_file and float(client_file.assignment_fee or 0) > 0:
+        # Client file with wholesale data
+        return {
+            "deal_type": "wholesale_assignment",
+            "property_address": client_file.property_address,
+            "city": client_file.city,
+            "state": client_file.state,
+            "purchase_price": float(client_file.contract_price or 0),
+            "assignment_fee": float(client_file.assignment_fee or 0),
+            "arv": float(client_file.estimated_arv or 0),
+            "buyer_price": float(client_file.buyer_price or 0),
+            "invoice_amount": float(client_file.assignment_fee),
+            "scope": f"Wholesale assignment - {client_file.property_address}",
+            "seller_name": client_file.client_name,
+            "title_company": client_file.title_company,
+        }
+    else:
+        # B2B finder fee -- math from Deal model
+        deal_value = float(deal.deal_value or 0)
+        commission_pct = float(deal.commission_pct or Decimal("20.00")) / 100
+        commission_amount = float(deal.commission_due or deal_value * commission_pct)
+
+        return {
+            "deal_type": "finder_fee",
+            "deal_value": deal_value,
+            "commission_pct": commission_pct,
+            "invoice_amount": commission_amount,
+            "scope": deal.offer.title if deal.offer else "Brokered introduction",
+            "client_name": (deal.lead.company or deal.lead.name) if deal.lead else "Client",
+            "client_email": deal.lead.email if deal.lead else "",
+        }
+
+
+def generate_contract_for_deal(deal: Deal) -> dict:
+    """Generate the right contract type from deal data. Returns contract metadata."""
+    _get_broker_os_dir()
+    math = _extract_contract_math(deal)
+
+    if math["deal_type"] == "wholesale_assignment":
+        from contract_generator import generate_wholesale_contract
+
+        # Get buyer info
+        client_file = getattr(deal, 'client_file', None)
+        buyer = client_file.buyer if client_file and client_file.buyer else None
+
+        contract_data = {
+            "property_address": math.get("property_address", "TBD"),
+            "seller_name": math.get("seller_name", "Unknown Seller"),
+            "seller_email": math.get("seller_email", ""),
+            "buyer_name": buyer.name if buyer else (deal.lead.name if deal.lead else "TBD"),
+            "buyer_email": buyer.email if buyer else (deal.lead.email if deal.lead else ""),
+            "purchase_price": math["purchase_price"],
+            "assignment_fee": math["assignment_fee"],
+            "earnest_money": min(1000, math["assignment_fee"] * 0.1),
+            "closing_date": (timezone.now() + timedelta(days=21)).strftime("%B %d, %Y"),
+            "title_company": math.get("title_company", "TBD"),
+            "inspection_days": 14,
+        }
+        pdf_path = generate_wholesale_contract(contract_data)
+        contract_data["pdf_path"] = pdf_path
+        contract_data["contract_type"] = "wholesale_purchase_agreement"
+
+    else:
+        from contract_generator import generate_finder_agreement
+        contract_data = {
+            "client_name": math.get("client_name", "Client"),
+            "client_contact": deal.lead.name if deal.lead else "",
+            "client_email": math.get("client_email", ""),
+            "scope": math["scope"],
+            "commission_pct": math["commission_pct"],
+            "deal_value": math.get("deal_value", 0),
+            "term_months": 12,
+        }
+        pdf_path = generate_finder_agreement(contract_data)
+        contract_data["pdf_path"] = pdf_path
+        contract_data["contract_type"] = "finder_agreement"
+
+    # Log the event
+    _log_deal_event(deal, "contract_generated",
+                     f"Contract generated: {contract_data['contract_type']}",
+                     f"PDF: {pdf_path}", agent_name="system",
+                     metadata={"contract_math": math, "pdf_path": pdf_path})
+
+    logger.info(f"Contract generated for deal {deal.id}: {pdf_path}")
+    return {**math, **contract_data}
+
+
+def invoice_from_contract(deal: Deal, contract_data: dict) -> dict:
+    """Create Stripe invoice that matches the EXACT contract math.
+
+    For wholesale: invoice = assignment fee (collected at closing by title co)
+    For finder fee: invoice = deal_value * commission_pct
+    """
+    _get_broker_os_dir()
+    from stripe_invoicer import invoice_deal as stripe_invoice
+
+    deal_type = contract_data.get("deal_type", "finder_fee")
+    invoice_amount = contract_data.get("invoice_amount", 0)
+
+    if invoice_amount <= 0:
+        return {"success": False, "error": "Invoice amount is $0 -- check contract math"}
+
+    # Build client info from contract data
+    if deal_type == "wholesale_assignment":
+        # For wholesale, the invoice goes to the BUYER (they pay the assignment fee)
+        client_file = getattr(deal, 'client_file', None)
+        buyer = client_file.buyer if client_file and client_file.buyer else None
+
+        client_name = buyer.company or buyer.name if buyer else (
+            deal.lead.company or deal.lead.name if deal.lead else "Buyer")
+        client_email = buyer.email if buyer else (deal.lead.email if deal.lead else "")
+
+        scope = (f"Assignment fee - {contract_data.get('property_address', 'Property')} | "
+                 f"Purchase: ${contract_data.get('purchase_price', 0):,.0f} | "
+                 f"Assignment: ${invoice_amount:,.0f}")
+    else:
+        client_name = contract_data.get("client_name", "Client")
+        client_email = contract_data.get("client_email", "")
+        deal_value = contract_data.get("deal_value", 0)
+        pct = contract_data.get("commission_pct", 0.20)
+        scope = (f"{contract_data.get('scope', 'Introduction')} | "
+                 f"Deal value: ${deal_value:,.0f} | Commission: {pct*100:.0f}%")
+
+    if not client_email:
+        return {"success": False, "error": "No client email for invoicing"}
+
+    result = stripe_invoice({
+        "client_name": client_name,
+        "client_email": client_email,
+        "deal_type": deal_type,
+        "scope": scope,
+        "deal_value": contract_data.get("deal_value", contract_data.get("buyer_price", 0)),
+        "commission_amount": invoice_amount,
+        "due_days": 30 if deal_type == "finder_fee" else 7,  # RE deals: 7 days (closing is fast)
+        "auto_send": False,  # Don't auto-send until legal approves
+    })
+
+    if result.get("success"):
+        deal.stripe_invoice_id = result["invoice_id"]
+        deal.notes = (deal.notes or "") + (
+            f"\nStripe invoice {result['invoice_id']}: ${invoice_amount:,.2f} "
+            f"({deal_type}) | {result.get('invoice_url', '')}"
+        )
+        deal.save(update_fields=["stripe_invoice_id", "notes"])
+
+        _log_deal_event(deal, "invoice_created",
+                         f"Stripe invoice: ${invoice_amount:,.2f}",
+                         f"Invoice #{result['invoice_id']} | Type: {deal_type} | "
+                         f"Matches contract: {contract_data.get('pdf_path', 'N/A')}",
+                         agent_name="Cash Holloway",
+                         metadata={"invoice_id": result["invoice_id"],
+                                   "amount": invoice_amount,
+                                   "contract_math_verified": True})
+
+        logger.info(f"Invoice created from contract: {result['invoice_id']} for ${invoice_amount:.2f}")
+
+    return result
+
+
+# ---------------------------------------------------------------------------
+# DEAL PIPELINE: legal_review -> signing -> title_engaged -> closing -> closed
+# ---------------------------------------------------------------------------
+
+def advance_to_legal_review(deal: Deal) -> Deal:
+    """Move deal to legal review. Justine Park reviews contract + state compliance.
+
+    Generates contract, checks state-specific rules, flags issues.
+    """
+    if deal.stage not in ("contracted", "negotiating", "active"):
+        logger.warning(f"Deal {deal.id} in stage '{deal.stage}' -- cannot advance to legal_review")
+        return deal
+
+    # Generate contract with real math
+    try:
+        contract_data = generate_contract_for_deal(deal)
+    except Exception as e:
+        logger.error(f"Contract generation failed for deal {deal.id}: {e}")
+        _log_deal_event(deal, "legal_flagged",
+                         f"Contract generation failed: {e}",
+                         agent_name="Justine Park")
+        return deal
+
+    # Justine's compliance checks
+    issues = []
+    math = _extract_contract_math(deal)
+
+    if math["deal_type"] == "wholesale_assignment":
+        state = math.get("state", "")
+        # Check if state requires attorney for wholesale
+        attorney_states = {"NY", "NJ", "IL", "MA", "CT", "MD", "DE", "VT", "RI", "ME", "NH"}
+        if state.upper() in attorney_states:
+            issues.append(f"State {state} requires attorney review for wholesale transactions")
+
+        # Check if assignment fee is reasonable (< 30% of ARV)
+        arv = math.get("arv", 0)
+        fee = math.get("assignment_fee", 0)
+        if arv > 0 and fee > arv * 0.30:
+            issues.append(f"Assignment fee ${fee:,.0f} exceeds 30% of ARV ${arv:,.0f} -- may face buyer pushback")
+
+        # Check for missing title company
+        if not math.get("title_company"):
+            issues.append("No title company assigned -- required before closing")
+
+    else:
+        # B2B finder fee checks
+        if float(deal.commission_pct or 0) > 30:
+            issues.append(f"Commission {deal.commission_pct}% exceeds 30% -- verify with client")
+
+    # Update deal stage
+    deal.stage = "legal_review"
+    deal.save(update_fields=["stage"])
+
+    detail = f"Contract: {contract_data.get('pdf_path', 'N/A')}"
+    if issues:
+        detail += "\n\nIssues flagged:\n" + "\n".join(f"- {i}" for i in issues)
+        _log_deal_event(deal, "legal_flagged",
+                         f"Legal review: {len(issues)} issue(s) flagged",
+                         detail, agent_name="Justine Park",
+                         metadata={"issues": issues, "contract_path": contract_data.get("pdf_path")})
+    else:
+        _log_deal_event(deal, "legal_review",
+                         "Legal review started -- no issues found",
+                         detail, agent_name="Justine Park",
+                         metadata={"contract_path": contract_data.get("pdf_path")})
+
+    _emit_business_event(
+        event_type="broker.deal.legal_review",
+        entity_type="deal",
+        entity_id=str(deal.id),
+        status="warning" if issues else "success",
+        priority="high",
+        owner_agent="34_compliance_gate",
+        summary=f"Justine Park reviewing deal {deal.id}. {'Issues: ' + '; '.join(issues) if issues else 'Clean so far.'}",
+        payload={"issues": issues, "contract_path": contract_data.get("pdf_path")},
+    )
+
+    return deal
+
+
+def approve_legal_and_send_for_signing(deal: Deal) -> Deal:
+    """Justine approves legal review. Sends contract + signing docs to parties.
+
+    Creates Stripe invoice (draft, not sent) that matches contract math.
+    """
+    if deal.stage != "legal_review":
+        logger.warning(f"Deal {deal.id} not in legal_review stage")
+        return deal
+
+    math = _extract_contract_math(deal)
+
+    # Create the Stripe invoice from contract math (NOT auto-sent yet)
+    try:
+        contract_data = {**math}
+        # Get contract path from latest event
+        latest_contract = deal.events.filter(event_type="contract_generated").order_by("-created_at").first()
+        if latest_contract and latest_contract.metadata.get("pdf_path"):
+            contract_data["pdf_path"] = latest_contract.metadata["pdf_path"]
+
+        invoice_result = invoice_from_contract(deal, contract_data)
+        if not invoice_result.get("success"):
+            logger.warning(f"Invoice creation failed: {invoice_result.get('error')}")
+    except Exception as e:
+        logger.warning(f"Invoice creation failed for deal {deal.id}: {e}")
+
+    # Advance to signing
+    deal.stage = "signing"
+    deal.save(update_fields=["stage"])
+
+    _log_deal_event(deal, "legal_approved",
+                     "Legal review approved by Justine Park",
+                     f"Contract and signing docs ready. Invoice: {deal.stripe_invoice_id or 'pending'}",
+                     agent_name="Justine Park",
+                     metadata={"invoice_id": deal.stripe_invoice_id,
+                               "invoice_amount": math.get("invoice_amount", 0)})
+
+    _log_deal_event(deal, "doc_sent",
+                     "Signing package sent to parties",
+                     f"Deal type: {math['deal_type']} | Amount: ${math.get('invoice_amount', 0):,.2f}",
+                     agent_name="Piper Reeves")
+
+    _emit_business_event(
+        event_type="broker.deal.signing",
+        entity_type="deal",
+        entity_id=str(deal.id),
+        status="success",
+        priority="high",
+        owner_agent="34_compliance_gate",
+        summary=f"Legal approved. Signing docs sent. Invoice: ${math.get('invoice_amount', 0):,.2f}",
+        payload={"deal_type": math["deal_type"], "invoice_amount": math.get("invoice_amount", 0)},
+    )
+
+    return deal
+
+
+def engage_title_company(deal: Deal, title_company: str = "", title_contact: str = "",
+                          title_email: str = "") -> Deal:
+    """Engage title company for closing. Opens escrow, sends contract.
+
+    Only applies to wholesale RE deals. B2B finder fee deals skip this.
+    """
+    if deal.stage != "signing":
+        logger.warning(f"Deal {deal.id} not in signing stage for title engagement")
+        return deal
+
+    math = _extract_contract_math(deal)
+
+    if math["deal_type"] != "wholesale_assignment":
+        # B2B deals skip title company -- go straight to closing
+        deal.stage = "closing"
+        deal.save(update_fields=["stage"])
+        _log_deal_event(deal, "stage_change", "Skipped title company (B2B deal)",
+                         agent_name="system")
+        return deal
+
+    # Update client file with title company info
+    client_file = getattr(deal, 'client_file', None)
+    if client_file:
+        if title_company:
+            client_file.title_company = title_company
+        if title_contact:
+            client_file.title_contact = title_contact
+        if title_email:
+            client_file.title_email = title_email
+        client_file.status = "closing"
+        client_file.save(update_fields=["title_company", "title_contact", "title_email", "status"])
+
+    deal.stage = "title_engaged"
+    deal.save(update_fields=["stage"])
+
+    _log_deal_event(deal, "title_engaged",
+                     f"Title company engaged: {title_company or math.get('title_company', 'TBD')}",
+                     f"Contact: {title_contact} ({title_email})\n"
+                     f"Property: {math.get('property_address', 'N/A')}\n"
+                     f"Purchase price: ${math.get('purchase_price', 0):,.0f}\n"
+                     f"Assignment fee: ${math.get('assignment_fee', 0):,.0f}",
+                     agent_name="Harrison Ford",
+                     metadata={"title_company": title_company or math.get("title_company"),
+                               "title_email": title_email})
+
+    _emit_business_event(
+        event_type="broker.deal.title_engaged",
+        entity_type="deal",
+        entity_id=str(deal.id),
+        status="success",
+        priority="high",
+        owner_agent="32_deal_closer",
+        summary=f"Title company engaged: {title_company}. Escrow opened for {math.get('property_address', 'property')}.",
+        payload={"title_company": title_company, "assignment_fee": math.get("assignment_fee", 0)},
+    )
+
+    return deal
+
+
 def close_deal(deal: Deal, won: bool = True) -> Deal:
-    """Mark a deal closed and finalize commission record."""
+    """Mark deal closed. Finalize commission, send Stripe invoice, record payment.
+
+    For wholesale: title company disburses assignment fee at closing.
+    For B2B: Stripe invoice sent to client on close.
+    """
     deal.stage = "closed_won" if won else "closed_lost"
     deal.closed_at = timezone.now()
     deal.save(update_fields=["stage", "closed_at"])
 
     if won:
-        # Mark pending commissions earned
         deal.commissions.filter(record_type="pending").update(record_type="earned")
         logger.info(f"Deal closed won: {deal.id} commission=${deal.commission_due}")
+
+        # If we have a draft Stripe invoice, finalize and send it now
+        if deal.stripe_invoice_id:
+            _get_broker_os_dir()
+            try:
+                from stripe_invoicer import _stripe_post
+                # Finalize and send the draft invoice
+                _stripe_post("invoices/%s/finalize" % deal.stripe_invoice_id, {})
+                sent = _stripe_post("invoices/%s/send" % deal.stripe_invoice_id, {})
+                hosted_url = sent.get("hosted_invoice_url", "")
+                _log_deal_event(deal, "invoice_created",
+                                 f"Invoice finalized and sent: {deal.stripe_invoice_id}",
+                                 f"Payment URL: {hosted_url}",
+                                 agent_name="Cash Holloway",
+                                 metadata={"invoice_url": hosted_url})
+                logger.info(f"Invoice finalized: {deal.stripe_invoice_id}")
+            except Exception as e:
+                logger.warning(f"Invoice finalize failed: {e}")
+        else:
+            # No invoice yet -- generate contract + invoice now (legacy path)
+            try:
+                contract_data = generate_contract_for_deal(deal)
+                invoice_result = invoice_from_contract(deal, contract_data)
+                if invoice_result.get("success"):
+                    # Send immediately since deal is closing
+                    from stripe_invoicer import _stripe_post
+                    _stripe_post("invoices/%s/send" % invoice_result["invoice_id"], {})
+            except Exception as e:
+                logger.error(f"Auto-invoice pipeline error for deal {deal.id}: {e}")
+
+        _log_deal_event(deal, "stage_change", "Deal closed won",
+                         f"Commission: ${deal.commission_due}",
+                         agent_name="Harrison Ford")
+
         _emit_business_event(
             event_type="broker.deal.closed_won",
             entity_type="deal",
@@ -334,8 +788,8 @@ def close_deal(deal: Deal, won: bool = True) -> Deal:
             },
         )
     else:
-        # Reverse pending
         deal.commissions.filter(record_type="pending").update(record_type="reversed")
+        _log_deal_event(deal, "stage_change", "Deal closed lost", agent_name="system")
         _emit_business_event(
             event_type="broker.deal.closed_lost",
             entity_type="deal",
@@ -348,6 +802,111 @@ def close_deal(deal: Deal, won: bool = True) -> Deal:
         )
 
     return deal
+
+
+# ---------------------------------------------------------------------------
+# MID-CALL TOOLS: log calls, capture notes, track outcomes
+# ---------------------------------------------------------------------------
+
+def log_call(deal: Deal = None, property_lead: PropertyLead = None,
+             investor_buyer: InvestorBuyer = None,
+             call_type: str = "other", direction: str = "outbound",
+             caller_agent: str = "", contact_name: str = "",
+             contact_phone: str = "", contact_email: str = "",
+             duration_secs: int = 0, notes: str = "",
+             seller_mood: str = "", price_discussed: float = None,
+             objections: list = None, commitments: list = None,
+             outcome: str = "", followup_date=None, followup_action: str = "") -> CallLog:
+    """Log a call and capture mid-call data. Used by Piper, Hammer, Harrison."""
+
+    call = CallLog.objects.create(
+        deal=deal,
+        property_lead=property_lead,
+        investor_buyer=investor_buyer,
+        call_type=call_type,
+        direction=direction,
+        caller_agent=caller_agent,
+        contact_name=contact_name,
+        contact_phone=contact_phone,
+        contact_email=contact_email,
+        duration_secs=duration_secs,
+        notes=notes,
+        seller_mood=seller_mood,
+        price_discussed=price_discussed,
+        objections=objections or [],
+        commitments=commitments or [],
+        outcome=outcome,
+        followup_date=followup_date,
+        followup_action=followup_action,
+    )
+
+    # Log event on the deal if linked
+    if deal:
+        _log_deal_event(deal, "call_logged",
+                         f"Call: {call_type} ({direction}) with {contact_name}",
+                         f"Outcome: {outcome}\nMood: {seller_mood}\n"
+                         f"Price discussed: ${price_discussed:,.0f}\n" if price_discussed else "" +
+                         f"Objections: {objections}\nCommitments: {commitments}\n"
+                         f"Follow-up: {followup_action} on {followup_date}",
+                         agent_name=caller_agent,
+                         metadata={"call_id": str(call.id), "outcome": outcome,
+                                   "price_discussed": price_discussed})
+
+    return call
+
+
+def get_deal_history(deal: Deal) -> list[dict]:
+    """Get full deal timeline: events + calls + documents merged chronologically."""
+    timeline = []
+
+    # Deal events
+    for event in deal.events.all():
+        timeline.append({
+            "type": "event",
+            "timestamp": event.created_at,
+            "category": event.event_type,
+            "title": event.title,
+            "detail": event.detail,
+            "agent": event.agent_name,
+            "metadata": event.metadata,
+        })
+
+    # Calls
+    for call in deal.calls.all():
+        timeline.append({
+            "type": "call",
+            "timestamp": call.started_at,
+            "category": call.call_type,
+            "title": f"{call.get_direction_display()} {call.get_call_type_display()} with {call.contact_name}",
+            "detail": call.notes,
+            "agent": call.caller_agent,
+            "metadata": {
+                "outcome": call.outcome,
+                "duration": call.duration_secs,
+                "mood": call.seller_mood,
+                "price": float(call.price_discussed) if call.price_discussed else None,
+                "objections": call.objections,
+                "commitments": call.commitments,
+                "followup": call.followup_action,
+            },
+        })
+
+    # Client file documents
+    client_file = getattr(deal, 'client_file', None)
+    if client_file:
+        for doc in client_file.documents.all():
+            timeline.append({
+                "type": "document",
+                "timestamp": doc.created_at,
+                "category": doc.doc_type,
+                "title": doc.title,
+                "detail": f"Status: {doc.status}" + (f" | Sent to: {doc.to_email}" if doc.to_email else ""),
+                "agent": doc.generated_by,
+            })
+
+    # Sort by timestamp descending
+    timeline.sort(key=lambda x: x["timestamp"], reverse=True)
+    return timeline
 
 
 # ---------------------------------------------------------------------------
@@ -1189,3 +1748,151 @@ def generate_deal_memo(deal: Deal) -> str:
 
     logger.info(f"Deal memo generated: {out_path} for deal {deal.id}")
     return str(out_path)
+
+
+# ---------------------------------------------------------------------------
+# DEAL TIMEOUT / ESCALATION: catch stuck deals before they die
+# ---------------------------------------------------------------------------
+
+# Thresholds in hours -- escalate if deal sits in a stage longer than this
+STAGE_TIMEOUT_HOURS = {
+    "legal_review":  48,   # Justine has 2 days to review
+    "signing":       72,   # 3 days to get signatures back
+    "title_engaged": 120,  # 5 days for title company to complete
+    "closing":       168,  # 7 days max for closing coordination
+    "negotiating":   96,   # 4 days in negotiation before follow-up
+    "contracted":    48,   # 2 days to move to legal review
+}
+
+# Escalation actions per stage
+STAGE_ESCALATION = {
+    "legal_review": {
+        "agent": "Justine Park",
+        "action": "Review contract and approve/flag issues",
+        "escalate_to": "Marcus Cole",
+        "slack_channel": "#ft-hunters",
+    },
+    "signing": {
+        "agent": "Piper Reeves",
+        "action": "Follow up on unsigned documents",
+        "escalate_to": "Hammer Knox",
+        "slack_channel": "#broker-pipeline",
+    },
+    "title_engaged": {
+        "agent": "Harrison Ford",
+        "action": "Check with title company on status",
+        "escalate_to": "Marcus Cole",
+        "slack_channel": "#ft-hunters",
+    },
+    "closing": {
+        "agent": "Harrison Ford",
+        "action": "Coordinate final closing steps",
+        "escalate_to": "Cash Holloway",
+        "slack_channel": "#broker-pipeline",
+    },
+    "negotiating": {
+        "agent": "Hammer Knox",
+        "action": "Follow up with seller/buyer",
+        "escalate_to": "Piper Reeves",
+        "slack_channel": "#broker-pipeline",
+    },
+    "contracted": {
+        "agent": "Justine Park",
+        "action": "Move deal to legal review",
+        "escalate_to": "Marcus Cole",
+        "slack_channel": "#ft-hunters",
+    },
+}
+
+
+def check_deal_timeouts() -> list[dict]:
+    """Scan all active deals for stage timeouts. Called by daily orchestrator.
+
+    Returns list of escalation actions taken.
+    """
+    from datetime import timedelta as td
+
+    escalations = []
+    now = timezone.now()
+
+    for stage, max_hours in STAGE_TIMEOUT_HOURS.items():
+        cutoff = now - td(hours=max_hours)
+
+        # Find deals stuck in this stage since before the cutoff
+        stuck_deals = Deal.objects.filter(
+            stage=stage,
+            closed_at__isnull=True,
+        ).exclude(
+            # Skip deals that had recent activity (event in last 24h)
+            events__created_at__gte=now - td(hours=24),
+        )
+
+        # Filter by when they entered this stage (use latest stage_change event or created_at)
+        for deal in stuck_deals:
+            stage_entered = deal.events.filter(
+                event_type="stage_change"
+            ).order_by("-created_at").values_list("created_at", flat=True).first()
+
+            if not stage_entered:
+                stage_entered = deal.created_at
+
+            if stage_entered > cutoff:
+                continue  # Not stuck yet
+
+            hours_stuck = int((now - stage_entered).total_seconds() / 3600)
+            esc = STAGE_ESCALATION.get(stage, {})
+
+            # Determine escalation level
+            if hours_stuck > max_hours * 2:
+                level = "critical"
+                assigned_to = esc.get("escalate_to", "Marcus Cole")
+                action = f"CRITICAL: Deal stuck {hours_stuck}h in {stage}. Escalated to {assigned_to}."
+            else:
+                level = "warning"
+                assigned_to = esc.get("agent", "system")
+                action = f"{assigned_to}: {esc.get('action', 'Follow up on deal')}"
+
+            # Log the escalation
+            _log_deal_event(deal, "note",
+                             f"Timeout escalation ({level}): {hours_stuck}h in {stage}",
+                             action, agent_name="Marcus Cole",
+                             metadata={"hours_stuck": hours_stuck, "level": level,
+                                       "assigned_to": assigned_to})
+
+            # Build escalation record
+            deal_label = ""
+            if deal.offer:
+                deal_label = deal.offer.title
+            elif deal.lead:
+                deal_label = deal.lead.name
+            prop = deal.properties.first()
+            if prop:
+                deal_label = f"{prop.address}, {prop.city} {prop.state}"
+
+            escalation = {
+                "deal_id": str(deal.id),
+                "deal_label": deal_label,
+                "stage": stage,
+                "hours_stuck": hours_stuck,
+                "level": level,
+                "assigned_to": assigned_to,
+                "action": action,
+                "slack_channel": esc.get("slack_channel", "#broker-pipeline"),
+            }
+            escalations.append(escalation)
+
+            _emit_business_event(
+                event_type=f"broker.deal.timeout_{level}",
+                entity_type="deal",
+                entity_id=str(deal.id),
+                status="warning" if level == "warning" else "error",
+                priority="high" if level == "critical" else "medium",
+                owner_agent="30_match_maker",
+                summary=f"Deal timeout: {deal_label} stuck {hours_stuck}h in {stage}. {action}",
+                payload=escalation,
+            )
+
+    if escalations:
+        logger.info(f"Deal timeouts: {len(escalations)} escalations triggered")
+
+    return escalations

@@ -1,0 +1,63 @@
+{
+  "updated_at": "2026-04-07T06:13:06.645006+00:00",
+  "price": 0.155248,
+  "price_change_24h_pct": -0.25,
+  "price_change_7d_pct": -8.3,
+  "price_change_30d_pct": 2.98,
+  "momentum_bias": "LEAN_BEARISH",
+  "crypto_sentiment": "UNCERTAIN",
+  "rsi_14": 26.03,
+  "nearest_fib": "23.6%",
+  "nearest_fib_price": 0.16227,
+  "fib_distance_pct": 4.52,
+  "volume_ratio": 0.16,
+  "breakout_proximity": {
+    "to_90d_high_pct": 59.05,
+    "to_90d_low_pct": 12.32,
+    "range_position": 0.1726,
+    "swing_high": 0.246923,
+    "swing_low": 0.13612
+  },
+  "fib_levels": [
+    {
+      "level": "0% (Swing Low)",
+      "fib": 0.0,
+      "price": 0.13612
+    },
+    {
+      "level": "23.6%",
+      "fib": 0.236,
+      "price": 0.16227
+    },
+    {
+      "level": "38.2%",
+      "fib": 0.382,
+      "price": 0.178447
+    },
+    {
+      "level": "50%",
+      "fib": 0.5,
+      "price": 0.191522
+    },
+    {
+      "level": "61.8%",
+      "fib": 0.618,
+      "price": 0.204596
+    },
+    {
+      "level": "78.6%",
+      "fib": 0.786,
+      "price": 0.223211
+    },
+    {
+      "level": "100% (Swing High)",
+      "fib": 1.0,
+      "price": 0.246923
+    }
+  ],
+  "alerts": [
+    "RSI OVERSOLD (26.0)"
+  ],
+  "stale": false,
+  "candle_count": 90
+}

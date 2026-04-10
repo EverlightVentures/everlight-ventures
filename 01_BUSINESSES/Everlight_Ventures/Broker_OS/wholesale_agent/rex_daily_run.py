@@ -31,6 +31,11 @@ from zillow_scout import generate_search_urls, save_search_csv, MARKETS
 from free_skip_tracer import skip_trace_owner, export_skip_trace_csv, SkipTraceResult
 from land_analyzer import LandDeal, ZoningInfo, analyze_land_deal
 
+try:
+    from gdocs_bridge import publish_report
+except ImportError:
+    publish_report = None
+
 logging.basicConfig(level=logging.INFO, format="[Rex %(asctime)s] %(message)s", datefmt="%H:%M:%S")
 log = logging.getLogger("rex")
 
@@ -50,8 +55,23 @@ SLACK_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
 SLACK_CHANNEL = "C0ANLLV8JAC"  # #wholesale-deals
 
 
-def post_slack(text: str):
-    """Post message to #wholesale-deals."""
+def post_slack(text: str, title: str = "Rex Daily Pipeline"):
+    """Post message to #wholesale-deals, creating a GDoc first when possible."""
+    # Try branded GDoc first
+    if publish_report is not None:
+        try:
+            result = publish_report(
+                title=title,
+                content=text,
+                folder="01_Broker_OS/Scout_Reports",
+                summary=text[:200],
+                agent="rex_blackwell",
+            )
+            if result.get("ok"):
+                return
+        except Exception:
+            pass
+    # Fallback: raw text post
     if not SLACK_TOKEN:
         log.warning("No SLACK_BOT_TOKEN -- skipping Slack post")
         return

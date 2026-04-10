@@ -1,0 +1,30 @@
+{% extends "hive/base.html" %}
+{% block title %}Daily Briefs -- Flip OS{% endblock %}
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto; padding: 24px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+    <h1 style="font-family: var(--font-heading); color: var(--gold);">
+      <i class="fas fa-newspaper"></i> Daily Briefs
+    </h1>
+    <a href="{% url 'flip_os:dashboard' %}" style="color: var(--text-secondary); text-decoration: none;">
+      <i class="fas fa-arrow-left"></i> Dashboard
+    </a>
+  </div>
+
+  {% for brief in briefs %}
+  <div class="glass-card" style="padding: 24px; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border-subtle); margin-bottom: 16px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+      <h2 style="color: var(--text-primary); font-size: 1.1rem;">{{ brief.brief_date }}</h2>
+      {% if brief.posted_to_slack %}
+      <span style="color: #22c55e; font-size: 0.8rem;"><i class="fab fa-slack"></i> Posted</span>
+      {% endif %}
+    </div>
+    <pre style="color: var(--text-secondary); font-family: var(--font-body); font-size: 0.9rem; white-space: pre-wrap; line-height: 1.6;">{{ brief.brief_text }}</pre>
+  </div>
+  {% empty %}
+  <p style="color: var(--text-muted); text-align: center; padding: 40px;">
+    No briefs yet. Pipeline runs at 5 AM PT daily.
+  </p>
+  {% endfor %}
+</div>
+{% endblock %}

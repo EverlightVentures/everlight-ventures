@@ -960,6 +960,44 @@ def django_broker():
         return r.json()
     except Exception as e:
         return {"error": str(e)}
+@app.get("/api/django/reports")
+def django_reports():
+    """List all styled HTML reports from hive_reports directory."""
+    import re
+    from pathlib import Path
+    reports_dir = Path("/home/opc/hive_reports")
+    reports = []
+    if reports_dir.is_dir():
+        for f in sorted(reports_dir.glob("*.html"), key=lambda x: x.stat().st_mtime, reverse=True):
+            title = f.stem.replace("_", " ").title()
+            try:
+                head = f.read_text()[:2000]
+                m = re.search(r"<title>([^<]+)", head)
+                if m:
+                    raw = m.group(1).replace(" | Everlight Ventures", "").strip()
+                    if raw:
+                        title = raw
+            except Exception:
+                pass
+            cat = "general"
+            fn = f.name.lower()
+            if "pipeline" in fn or "wholesale" in fn: cat = "pipeline"
+            elif "deal" in fn or "contract" in fn: cat = "deals"
+            elif "outreach" in fn or "email" in fn: cat = "outreach"
+            elif "lucrex" in fn or "operations" in fn: cat = "operations"
+            elif "intel" in fn or "bot" in fn: cat = "trading"
+            elif "landing" in fn: cat = "landing"
+            reports.append({
+                "filename": f.name,
+                "title": title,
+                "category": cat,
+                "size_kb": round(f.stat().st_size / 1024, 1),
+                "modified": datetime.fromtimestamp(f.stat().st_mtime).isoformat(),
+                "url": f"http://129.159.38.250:8504/reports/{f.stem}",
+                "raw_url": f"http://129.159.38.250:8504/reports/{f.stem}?raw=1",
+            })
+    return {"reports": reports[:50], "total": len(reports)}
+
 @app.get("/api/blinko/search")
 def blinko_search(q: str = "", limit: int = 10):
     """Search Blinko knowledge base directly."""

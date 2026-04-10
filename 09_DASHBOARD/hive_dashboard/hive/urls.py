@@ -65,6 +65,7 @@ urlpatterns = [
         views.api_export_session,
         name='api_export_session',
     ),
+    path('api/hub-status/', views.api_hub_status, name='api_hub_status'),
     path('api/agent-status/', views.api_agent_status, name='api_agent_status'),
     path('api/infra-status/', views.api_infra_status, name='api_infra_status'),
     path('api/team/', views.api_team_roster, name='api_team_roster'),

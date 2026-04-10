@@ -926,6 +926,13 @@
         <span>Broker OS</span>
       </a>
 
+      <a href="{% url 'flip_os:dashboard' %}"
+         class="sidebar-nav-link {% if active_page == 'flip_os' %}active{% endif %}"
+         data-nav="flip_os">
+        <i class="fa-solid fa-recycle"></i>
+        <span>Flip OS</span>
+      </a>
+
       <a href="{% url 'taskboard:board' %}"
          class="sidebar-nav-link {% if active_page == 'taskboard' %}active{% endif %}"
          data-nav="taskboard">
@@ -945,6 +952,38 @@
          data-nav="payments">
         <i class="fa-solid fa-chart-line"></i>
         <span>Revenue</span>
+      </a>
+
+      <!-- Wholesale (inside Broker OS but important enough for its own link) -->
+      <a href="{% url 'broker_ops:wholesale_dashboard' %}"
+         class="sidebar-nav-link {% if active_page == 'wholesale' %}active{% endif %}"
+         data-nav="wholesale">
+        <i class="fa-solid fa-house-chimney-crack"></i>
+        <span>Wholesale</span>
+      </a>
+
+      <!-- More Apps -->
+      <div style="margin:14px 16px 6px;font-size:0.6rem;text-transform:uppercase;letter-spacing:0.15em;color:var(--text-muted);font-weight:600;">More</div>
+
+      <a href="{% url 'funnel:consulting_landing' %}"
+         class="sidebar-nav-link {% if active_page == 'funnel' %}active{% endif %}"
+         data-nav="funnel">
+        <i class="fa-solid fa-filter"></i>
+        <span>Funnel</span>
+      </a>
+
+      <a href="{% url 'blackjack:game' %}"
+         class="sidebar-nav-link {% if active_page == 'blackjack' %}active{% endif %}"
+         data-nav="blackjack">
+        <i class="fa-solid fa-cards"></i>
+        <span>Blackjack</span>
+      </a>
+
+      <a href="{% url 'rewards:admin_dashboard' %}"
+         class="sidebar-nav-link {% if active_page == 'rewards' %}active{% endif %}"
+         data-nav="rewards">
+        <i class="fa-solid fa-gift"></i>
+        <span>Rewards</span>
       </a>
     </nav>
 

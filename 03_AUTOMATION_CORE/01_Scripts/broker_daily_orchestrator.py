@@ -110,6 +110,21 @@ try:
 except Exception:
     analyze_email_reply = None
 
+# Workbook logger for unified tracking
+_WB_PATHS = [
+    "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent",
+    "/home/opc/wholesale_agent",
+]
+for _wbp in _WB_PATHS:
+    if os.path.isdir(_wbp) and _wbp not in sys.path:
+        sys.path.insert(0, _wbp)
+        break
+try:
+    from workbook_logger import wb as _wb
+    _WB_OK = True
+except Exception:
+    _WB_OK = False
+
 try:
     from neuromorphic.pipeline_api import should_outreach as pipeline_should_outreach, recommend_reply_path
 except Exception:
@@ -988,7 +1003,7 @@ def step_enrich_properties(dry_run=False, limit=20):
 
     # Find leads with addresses that haven't been ATTOM-enriched yet
     leads = LeadProfile.objects.filter(
-        category__in=["real_estate", "logistics", "wholesale"],
+        categories_needed__icontains="real_estate",
         unsubscribed=False,
     ).exclude(
         notes__contains="[ATTOM_ENRICHED]"
@@ -2245,6 +2260,19 @@ def run_full(args):
     report = step_report()                                           # 9
     if not args.dry_run:
         step_slack_report(report)                                    # 10
+
+    # Log to workbooks
+    if not args.dry_run and _WB_OK:
+        try:
+            _wb.log_agent_task("piper_reeves", "outreach", success=True,
+                               count=report.get("emails_sent", 0) if isinstance(report, dict) else 0)
+            _wb.log_agent_task("rex_blackwell", "scout", success=True,
+                               count=report.get("leads_new", 0) if isinstance(report, dict) else 0)
+            _wb.snapshot_daily()
+            _wb.flush()
+            _wb.sync_to_supabase()
+        except Exception:
+            pass
     return report
 
 

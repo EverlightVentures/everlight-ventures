@@ -1,0 +1,6 @@
+Crash guard for this ARM Linux device:
+
+- Do not use Read on local image files under /mnt/sdcard/DCIM/, especially /mnt/sdcard/DCIM/Screenshots/.
+- Avoid opening .jpg, .jpeg, .png, .webp files from local storage directly in Claude Code unless the user explicitly asks to risk a crash.
+- If screenshot context is needed, ask the user to attach the image, describe it, or provide the path for external/manual inspection instead of reading the image directly.
+- Normal text/code/file reads are fine.

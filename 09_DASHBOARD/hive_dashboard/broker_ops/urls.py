@@ -38,6 +38,15 @@ urlpatterns = [
     path("api/score-lead/<uuid:lead_id>/",          views.api_score_lead,         name="api_score_lead"),
     path("api/match-buyers/<uuid:lead_id>/",        views.api_match_buyers,       name="api_match_buyers"),
     path("api/outreach/<uuid:lead_id>/",            views.api_generate_outreach,  name="api_generate_outreach"),
+    path("api/piper-outreach/<uuid:lead_id>/",      views.api_piper_outreach,     name="api_piper_outreach"),
+
+    # Event webhooks (called by n8n, Gmail monitor, external systems)
+    path("webhook/email-reply/",                    views.webhook_email_reply,     name="webhook_email_reply"),
+    path("webhook/deal-advance/",                   views.webhook_deal_advance,    name="webhook_deal_advance"),
+    path("webhook/event/",                          views.webhook_event_trigger,   name="webhook_event_trigger"),
+
+    # Deal pipeline stage APIs
+    path("api/deal/<uuid:deal_id>/history/",        views.api_deal_history,        name="api_deal_history"),
 
     # Public: investor buyer signup (no auth)
     path("investor-signup/",                        views.public_investor_signup,  name="public_investor_signup"),

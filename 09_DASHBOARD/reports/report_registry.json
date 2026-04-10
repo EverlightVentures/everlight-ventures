@@ -1,0 +1,137 @@
+{
+  "meta": {
+    "name": "Everlight Report Registry",
+    "version": "1.0.0",
+    "created": "2026-04-07",
+    "purpose": "Central registry of every report, template, and styled HTML output. All reports live in /home/opc/hive_reports/ on Oracle, served at :8504/reports/",
+    "report_dir_oracle": "/home/opc/hive_reports/",
+    "report_url_base": "http://129.159.38.250:8504/reports/",
+    "style_template": "report_template.py (Playfair Display + Inter, #D4A843 gold, #0A0A0A black)",
+    "generation_module": "gdocs_bridge.py -> report_template.py"
+  },
+  "style_spec": {
+    "fonts": "Playfair Display (headers), Inter (body)",
+    "colors": {
+      "gold": "#D4A843",
+      "bg_primary": "#0A0A0A",
+      "bg_card": "#111111",
+      "bg_header": "#1A1A1A",
+      "text": "#E8E8E8",
+      "text_dim": "#999999",
+      "border": "#222222",
+      "green": "#4CAF50",
+      "red": "#F44336",
+      "orange": "#FF9800"
+    },
+    "features": ["gold left-border cards", "uppercase gold table headers", "agent signature block", "branded header/footer", "KPI grid", "badges"]
+  },
+  "reports": [
+    {
+      "filename": "state_contract_matrix__8_markets_20260324_0513.html",
+      "title": "State Contract Matrix - 8 Markets",
+      "category": "legal",
+      "agent": "Justine Park",
+      "created": "2026-03-24",
+      "size_kb": 40,
+      "url": "http://129.159.38.250:8504/reports/state_contract_matrix__8_markets_20260324_0513.html"
+    },
+    {
+      "filename": "buyer_outreach_emails__march_24_20260324_0513.html",
+      "title": "Buyer Outreach Emails - March 24",
+      "category": "outreach",
+      "agent": "Piper Reeves",
+      "created": "2026-03-24",
+      "size_kb": 12,
+      "url": "http://129.159.38.250:8504/reports/buyer_outreach_emails__march_24_20260324_0513.html"
+    },
+    {
+      "filename": "lucrex_operations_report.html",
+      "title": "LUCREX Operations Report",
+      "category": "operations",
+      "agent": "Marcus Cole",
+      "created": "2026-03-24",
+      "size_kb": 17,
+      "url": "http://129.159.38.250:8504/reports/lucrex_operations_report.html"
+    },
+    {
+      "filename": "deal_sheet_preview.html",
+      "title": "Deal Sheet Preview Template",
+      "category": "template",
+      "agent": "Adrian Morgan",
+      "created": "2026-03-20",
+      "size_kb": 9,
+      "url": "http://129.159.38.250:8504/reports/deal_sheet_preview.html"
+    },
+    {
+      "filename": "demo_deal_sheet.html",
+      "title": "Demo Deal Sheet - 1234 Oak Street",
+      "category": "deal_sheet",
+      "agent": "Adrian Morgan",
+      "created": "2026-03-20",
+      "size_kb": 6,
+      "url": "http://129.159.38.250:8504/reports/demo_deal_sheet.html"
+    },
+    {
+      "filename": "seller_landing_page.html",
+      "title": "Seller Landing Page - Private Acquisitions",
+      "category": "landing_page",
+      "agent": "Piper Reeves",
+      "created": "2026-03-20",
+      "size_kb": 9,
+      "url": "http://129.159.38.250:8504/reports/seller_landing_page.html"
+    },
+    {
+      "filename": "intel_hub.html",
+      "title": "XLM Bot Intel Hub",
+      "category": "trading",
+      "agent": "Rex Thornton",
+      "created": "2026-03-28",
+      "size_kb": 3,
+      "url": "http://129.159.38.250:8504/reports/intel_hub.html"
+    },
+    {
+      "filename": "wholesale_pipeline_daily_report_20260407_0058.html",
+      "title": "Wholesale Pipeline Daily Report",
+      "category": "pipeline",
+      "agent": "Rex Blackwell",
+      "created": "2026-04-07",
+      "size_kb": 6,
+      "url": "http://129.159.38.250:8504/reports/wholesale_pipeline_daily_report_20260407_0058.html",
+      "gdoc": "https://docs.google.com/document/d/1-B8OR7j4qcIsURQlKDFyuK-gYc8sf2bvT1jLC40-tdw/edit"
+    }
+  ],
+  "templates": [
+    {
+      "name": "report_template.py",
+      "location": "wholesale_agent/report_template.py",
+      "purpose": "Generates full styled HTML reports matching state_contract_matrix style",
+      "functions": ["render_report()", "kpi_grid()", "table()", "card()", "badge()", "safe_filename()"]
+    },
+    {
+      "name": "client_files.py",
+      "location": "broker_ops/client_files.py",
+      "purpose": "Deal-specific HTML generation (outreach, deal sheets, contracts)",
+      "functions": ["generate_seller_outreach()", "generate_deal_sheet()", "generate_assignment_contract()"]
+    },
+    {
+      "name": "rex_deal_sheet.py",
+      "location": "wholesale_agent/rex_deal_sheet.py",
+      "purpose": "Dynamic deal sheet generation with comps and financials"
+    },
+    {
+      "name": "ace_pitch_engine.py",
+      "location": "wholesale_agent/ace_pitch_engine.py",
+      "purpose": "Investment pitch one-pagers (HTML, email, SMS)"
+    }
+  ],
+  "output_flow": {
+    "description": "Every pipeline output follows this flow",
+    "steps": [
+      "1. Script calls publish_report() from gdocs_bridge.py",
+      "2. report_template.py generates styled HTML (Playfair+Inter gold theme)",
+      "3. HTML saved to /home/opc/hive_reports/ (served at :8504/reports/)",
+      "4. GDoc created via n8n webhook (searchable backup)",
+      "5. Slack gets message with 3 links: Styled Report | Google Doc | Canvas"
+    ]
+  }
+}

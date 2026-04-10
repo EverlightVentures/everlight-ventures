@@ -1,0 +1,66 @@
+{
+  "meta": {
+    "name": "Wholesale Outreach Log",
+    "version": "1.0.0",
+    "created": "2026-04-07",
+    "purpose": "Every email sent, opened, bounced, replied. Tracks warm-up limits and daily budget.",
+    "sync_targets": ["supabase:wholesale_outreach_log", "slack:#wholesale-deals"]
+  },
+  "warmup_config": {
+    "week_1_daily_max": 5,
+    "week_2_daily_max": 10,
+    "week_3_daily_max": 15,
+    "week_4_plus_daily_max": 20,
+    "account_start_date": "2026-03-20",
+    "sender_domains": ["everlightventures.io"],
+    "sender_personas": {
+      "piper": {"name": "Piper Reeves", "email": "piper@everlightventures.io", "role": "Outreach Specialist"},
+      "sage": {"name": "Sage Holloway", "email": "sage@everlightventures.io", "role": "Business Development"},
+      "rex": {"name": "Rex Blackwell", "email": "rex@everlightventures.io", "role": "Acquisitions"}
+    }
+  },
+  "daily_stats": [],
+  "emails": [],
+  "bounces": [],
+  "changelog": [
+    {
+      "date": "2026-04-07",
+      "version": "1.0.0",
+      "changes": ["Initial outreach log creation", "Warm-up tracking, persona tracking, bounce management"]
+    }
+  ],
+  "_email_schema": {
+    "id": "uuid",
+    "lead_id": "uuid (ref pipeline_master)",
+    "direction": "outbound|inbound",
+    "type": "seller_intro|buyer_pitch|followup_1|followup_2|followup_3|breakup|reply|manual",
+    "sender_persona": "piper|sage|rex",
+    "from_email": "string",
+    "to_email": "string",
+    "to_name": "string",
+    "subject": "string",
+    "template_used": "string|null",
+    "sent_at": "ISO timestamp",
+    "delivered": "bool",
+    "opened_at": "ISO timestamp|null",
+    "open_count": "int",
+    "clicked_at": "ISO timestamp|null",
+    "replied_at": "ISO timestamp|null",
+    "reply_sentiment": "hot|warm|cold|dead|null",
+    "bounced": "bool",
+    "bounce_reason": "string|null",
+    "resend_message_id": "string|null"
+  },
+  "_daily_stats_schema": {
+    "date": "ISO date",
+    "budget": "int (max emails allowed today based on warmup)",
+    "sent": "int",
+    "delivered": "int",
+    "bounced": "int",
+    "opened": "int",
+    "replied": "int",
+    "reply_rate_pct": "float",
+    "by_persona": {"piper": "int", "sage": "int", "rex": "int"},
+    "by_type": {"seller_intro": "int", "buyer_pitch": "int", "followup_1": "int"}
+  }
+}

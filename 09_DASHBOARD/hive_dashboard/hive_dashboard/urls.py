@@ -14,5 +14,6 @@ urlpatterns = [
     path('blackjack/', include('blackjack.urls', namespace='blackjack')),
     path('rewards/', include('rewards.urls', namespace='rewards')),
     path('broker/', include('broker_ops.urls', namespace='broker_ops')),
+    path('flip/', include('flip_os.urls', namespace='flip_os')),
     path('', include('hive.urls')),
 ]

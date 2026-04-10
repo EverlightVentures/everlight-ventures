@@ -1,6 +1,6 @@
-# Hive Mind Team Roster v2.0 -- Fire Team Doctrine
+# Hive Mind Team Roster v3.0 -- Fire Team Doctrine + SaaS Factory
 # Hierarchy: Platoon > Squad > Fire Team > Role (TL/S1/S2/B/A)
-# 63 agents. 12 fire teams. 4 squads. 1 platoon leader. Buddy pairs everywhere.
+# 79 agents. 15 fire teams. 5 squads. 1 platoon leader. Buddy pairs everywhere.
 #
 # BACKWARD COMPAT: The `managers` block is preserved so the existing dispatcher
 # still works. The `squads` block is the new fire-team-aware hierarchy.
@@ -157,6 +157,40 @@ squads:
         verifier: {name: "Thomas Rourke", id: 56_data_verifier, email: "tally@everlightventures.io", personality: [skeptical, numbers-driven, fact-checker, calm-under-pressure], buddy: "Leonard Nakamura"}
         assistant: {name: "Isaac Ashworth", id: 60_tech_assistant, email: "index@everlightventures.io", personality: [database-keeper, indexer, categorization-obsessed, methodical]}
 
+  saas_factory:
+    squad_leader: {name: "Dominic Reyes", id: 61_saas_factory_lead, email: "dom@everlightventures.io", personality: [product-visionary, ship-obsessed, cross-functional, calm-under-deadline]}
+    role: "SaaS Product Lifecycle"
+    tool: "sf_terminal"
+    headcount: 16
+
+    fire_teams:
+      alpha_pixel_forge:
+        mission: "Architecture & Frontend"
+        callsign: "Pixel Forge"
+        team_leader: {name: "Kaelen Nguyen", id: 62_frontend_architect, email: "canvas@everlightventures.io", personality: [design-systems-obsessed, component-thinker, accessibility-first, aesthetic-but-functional], buddy: "Dominic Reyes"}
+        specialist_1: {name: "Maren Solberg", id: 63_ui_ux_designer, email: "sketch@everlightventures.io", personality: [wireframe-first, user-research-driven, Figma-native, empathy-designer], buddy: "Tobias Engel"}
+        specialist_2: {name: "Javier Cruz", id: 64_component_engineer, email: "kit@everlightventures.io", personality: [pixel-perfect, animation-obsessed, performance-hawk, Tailwind-wizard], buddy: "Tobias Engel"}
+        verifier: {name: "Tobias Engel", id: 65_frontend_qa, email: "lens.f@everlightventures.io", personality: [cross-browser-obsessed, accessibility-auditor, breaks-everything, methodical], buddy: "Maren Solberg"}
+        assistant: {name: "Priya Chakraborty", id: 66_frontend_assistant, email: "priya@everlightventures.io", personality: [eager-learner, documentation-writer, component-cataloger, organized]}
+
+      bravo_iron_stack:
+        mission: "Backend & Infrastructure"
+        callsign: "Iron Stack"
+        team_leader: {name: "Amara Osei", id: 67_backend_architect, email: "forge.b@everlightventures.io", personality: [systems-thinker, security-paranoid, database-whisperer, scalability-obsessed], buddy: "Dominic Reyes"}
+        specialist_1: {name: "Henrik Strand", id: 68_devops_engineer, email: "pipe@everlightventures.io", personality: [infrastructure-as-code, CI-CD-evangelist, Docker-native, uptime-obsessed], buddy: "Elias Varga"}
+        specialist_2: {name: "Zara Khoury", id: 69_security_engineer, email: "vault@everlightventures.io", personality: [threat-modeler, auth-specialist, paranoid-by-design, zero-trust-advocate], buddy: "Elias Varga"}
+        verifier: {name: "Elias Varga", id: 70_infrastructure_qa, email: "probe@everlightventures.io", personality: [load-tester, chaos-engineer, SLA-guardian, skeptical-of-green-dashboards], buddy: "Henrik Strand"}
+        assistant: {name: "Nina Okoye", id: 71_backend_assistant, email: "nina@everlightventures.io", personality: [migration-specialist, env-wrangler, log-reader, dependable]}
+
+      charlie_signal_boost:
+        mission: "AI Integration & Growth"
+        callsign: "Signal Boost"
+        team_leader: {name: "Leo Marchetti", id: 72_ai_integration_lead, email: "signal@everlightventures.io", personality: [LLM-native, RAG-architect, prompt-engineer, pragmatic-AI-realist], buddy: "Dominic Reyes"}
+        specialist_1: {name: "Suki Tanaka", id: 73_search_analytics, email: "seek@everlightventures.io", personality: [search-obsessed, relevance-tuner, data-pipeline-builder, metrics-driven], buddy: "Ruben Delgado"}
+        specialist_2: {name: "Aisha Bello", id: 74_growth_engineer, email: "spark@everlightventures.io", personality: [growth-loop-designer, viral-coefficient-tracker, onboarding-optimizer, experiment-driven], buddy: "Ruben Delgado"}
+        verifier: {name: "Ruben Delgado", id: 75_growth_qa, email: "proof.g@everlightventures.io", personality: [conversion-skeptic, A-B-test-purist, false-positive-hunter, statistical-rigor], buddy: "Suki Tanaka"}
+        assistant: {name: "Yuki Arakawa", id: 76_growth_assistant, email: "yuki@everlightventures.io", personality: [community-builder, support-scripts-writer, onboarding-helper, feedback-collector]}
+
 # ============================================================================
 # BUDDY PAIRS -- Failover Registry
 # ============================================================================
@@ -189,6 +223,13 @@ buddy_pairs:
   - {primary: "Stewart Erikson", backup: "Henry Patel", domain: geopolitics}
   - {primary: "Peter Adler", backup: "Thomas Rourke", domain: business_intel}
   - {primary: "Leonard Nakamura", backup: "Thomas Rourke", domain: competitive_intel}
+  # SaaS Factory
+  - {primary: "Maren Solberg", backup: "Tobias Engel", domain: ui_ux_design}
+  - {primary: "Javier Cruz", backup: "Tobias Engel", domain: frontend_engineering}
+  - {primary: "Henrik Strand", backup: "Elias Varga", domain: devops}
+  - {primary: "Zara Khoury", backup: "Elias Varga", domain: security}
+  - {primary: "Suki Tanaka", backup: "Ruben Delgado", domain: search_analytics}
+  - {primary: "Aisha Bello", backup: "Ruben Delgado", domain: growth_engineering}
 
 # ============================================================================
 # FAILOVER RULES
@@ -275,6 +316,28 @@ managers:
       - {id: 50_revenue_assistant, name: "Lawrence Okafor", email: "ledger@everlightventures.io", personality: [spreadsheet-native, money-tracker, organized, fast]}
       - {id: 57_consulting_assistant, name: "Rafael Vasquez", email: "relay@everlightventures.io", personality: [client-facing, warm, documentation-expert, follow-through]}
 
+  saas_factory:
+    role: "SaaS Product Lifecycle"
+    tool: "sf_terminal"
+    timeout_seconds: 300
+    employees:
+      - {id: 61_saas_factory_lead, name: "Dominic Reyes", email: "dom@everlightventures.io", personality: [product-visionary, ship-obsessed, cross-functional, calm-under-deadline]}
+      - {id: 62_frontend_architect, name: "Kaelen Nguyen", email: "canvas@everlightventures.io", personality: [design-systems-obsessed, component-thinker, accessibility-first]}
+      - {id: 63_ui_ux_designer, name: "Maren Solberg", email: "sketch@everlightventures.io", personality: [wireframe-first, user-research-driven, Figma-native]}
+      - {id: 64_component_engineer, name: "Javier Cruz", email: "kit@everlightventures.io", personality: [pixel-perfect, animation-obsessed, performance-hawk, Tailwind-wizard]}
+      - {id: 65_frontend_qa, name: "Tobias Engel", email: "lens.f@everlightventures.io", personality: [cross-browser-obsessed, accessibility-auditor, breaks-everything]}
+      - {id: 66_frontend_assistant, name: "Priya Chakraborty", email: "priya@everlightventures.io", personality: [eager-learner, documentation-writer, component-cataloger]}
+      - {id: 67_backend_architect, name: "Amara Osei", email: "forge.b@everlightventures.io", personality: [systems-thinker, security-paranoid, database-whisperer, scalability-obsessed]}
+      - {id: 68_devops_engineer, name: "Henrik Strand", email: "pipe@everlightventures.io", personality: [infrastructure-as-code, CI-CD-evangelist, Docker-native, uptime-obsessed]}
+      - {id: 69_security_engineer, name: "Zara Khoury", email: "vault@everlightventures.io", personality: [threat-modeler, auth-specialist, paranoid-by-design, zero-trust-advocate]}
+      - {id: 70_infrastructure_qa, name: "Elias Varga", email: "probe@everlightventures.io", personality: [load-tester, chaos-engineer, SLA-guardian]}
+      - {id: 71_backend_assistant, name: "Nina Okoye", email: "nina@everlightventures.io", personality: [migration-specialist, env-wrangler, log-reader, dependable]}
+      - {id: 72_ai_integration_lead, name: "Leo Marchetti", email: "signal@everlightventures.io", personality: [LLM-native, RAG-architect, prompt-engineer, pragmatic-AI-realist]}
+      - {id: 73_search_analytics, name: "Suki Tanaka", email: "seek@everlightventures.io", personality: [search-obsessed, relevance-tuner, data-pipeline-builder]}
+      - {id: 74_growth_engineer, name: "Aisha Bello", email: "spark@everlightventures.io", personality: [growth-loop-designer, viral-coefficient-tracker, onboarding-optimizer]}
+      - {id: 75_growth_qa, name: "Ruben Delgado", email: "proof.g@everlightventures.io", personality: [conversion-skeptic, A-B-test-purist, false-positive-hunter]}
+      - {id: 76_growth_assistant, name: "Yuki Arakawa", email: "yuki@everlightventures.io", personality: [community-builder, support-scripts-writer, onboarding-helper]}
+
   perplexity:
     role: "Intelligence Anchor / News Desk"
     tool: "ppx_terminal"
@@ -313,6 +376,7 @@ communication:
     gemini: gemini-team@everlightventures.io
     codex: codex-team@everlightventures.io
     perplexity: intel@everlightventures.io
+    saas_factory: saas-factory@everlightventures.io
   slack_channels:
     - "#war-room"
     - "#claude-corp"
@@ -328,6 +392,11 @@ communication:
     - "#growth"
     - "#wholesale-deals"
     - "#ai-consulting"
+    - "#saas-factory"
+    - "#frontend"
+    - "#backend-infra"
+    - "#ai-integrations"
+    - "#growth-eng"
 
 routing_rules:
   trading:
@@ -366,6 +435,22 @@ routing_rules:
     managers: [gemini, perplexity]
     fire_teams: {gemini_ops: alpha_gearbox, perplexity_intel: charlie_horizon}
     keywords: [sync, organize, automate, workflow, pipeline, deploy, backup, migrate]
+  saas_product:
+    managers: [saas_factory, codex, perplexity]
+    fire_teams: {saas_factory: alpha_pixel_forge, codex_labs: alpha_forge_works, perplexity_intel: charlie_horizon}
+    keywords: [saas, product, mvp, app, frontend, react, nextjs, component, ui, ux, wireframe, design, landing, shadcn, tailwind, vue]
+  infrastructure:
+    managers: [saas_factory, gemini, perplexity]
+    fire_teams: {saas_factory: bravo_iron_stack, gemini_ops: alpha_gearbox, perplexity_intel: charlie_horizon}
+    keywords: [devops, docker, ci, cd, pipeline, vercel, railway, cloudflare, database, supabase, postgres, migration, schema, auth, security, ssl, dns, monitoring, kubernetes, terraform]
+  ai_integration:
+    managers: [saas_factory, codex, perplexity]
+    fire_teams: {saas_factory: charlie_signal_boost, codex_labs: alpha_forge_works, perplexity_intel: charlie_horizon}
+    keywords: [ai, llm, rag, embeddings, vector, prompt, mcp, anthropic, openai, search, meilisearch, typesense, chatbot, agent, huggingface]
+  growth_launch:
+    managers: [saas_factory, codex, gemini]
+    fire_teams: {saas_factory: charlie_signal_boost, codex_labs: charlie_consult, gemini_ops: bravo_dashboard}
+    keywords: [growth, launch, onboarding, activation, churn, retention, plg, referral, analytics, posthog, seo, email, sequence, pricing, freemium, trial, conversion]
 
 lite_managers: [perplexity]
 

@@ -173,13 +173,133 @@ def _classify_reply(subject, snippet):
     return "neutral"
 
 
+def _fetch_gmail_standalone():
+    """Fetch recent emails using IMAP (standalone mode, no n8n needed).
+
+    Connects to Gmail IMAP with app-specific credentials from .env:
+      GMAIL_IMAP_USER=sage@everlightventures.io
+      GMAIL_IMAP_PASS=<app password>
+
+    If IMAP credentials are not set, falls back to ImprovMX/Resend
+    forwarding check via the Supabase broker_email_log table.
+    """
+    import imaplib
+    import email
+    from email.header import decode_header
+
+    imap_user = os.environ.get("GMAIL_IMAP_USER", "sage@everlightventures.io")
+    imap_pass = os.environ.get("GMAIL_IMAP_PASS", "")
+    imap_host = os.environ.get("GMAIL_IMAP_HOST", "imap.gmail.com")
+
+    if not imap_pass:
+        log.warning("No GMAIL_IMAP_PASS set. Trying Supabase fallback for inbound emails.")
+        return _fetch_from_supabase_inbox()
+
+    results = []
+    try:
+        mail = imaplib.IMAP4_SSL(imap_host)
+        mail.login(imap_user, imap_pass)
+        mail.select("INBOX")
+
+        # Search for messages from the last 3 days
+        from datetime import timedelta
+        since_date = (datetime.now() - timedelta(days=3)).strftime("%d-%b-%Y")
+        status, msg_ids = mail.search(None, f'(SINCE "{since_date}")')
+
+        if status != "OK" or not msg_ids[0]:
+            log.info("No recent emails found via IMAP")
+            mail.logout()
+            return results
+
+        ids = msg_ids[0].split()
+        # Process last 50 max
+        for msg_id in ids[-50:]:
+            status, msg_data = mail.fetch(msg_id, "(RFC822)")
+            if status != "OK":
+                continue
+            raw_email = msg_data[0][1]
+            msg = email.message_from_bytes(raw_email)
+
+            from_header = msg.get("From", "")
+            subject_raw = msg.get("Subject", "")
+            # Decode subject if encoded
+            decoded_parts = decode_header(subject_raw)
+            subject = ""
+            for part, enc in decoded_parts:
+                if isinstance(part, bytes):
+                    subject += part.decode(enc or "utf-8", errors="replace")
+                else:
+                    subject += str(part)
+
+            # Extract body snippet
+            snippet = ""
+            if msg.is_multipart():
+                for part in msg.walk():
+                    if part.get_content_type() == "text/plain":
+                        try:
+                            snippet = part.get_payload(decode=True).decode("utf-8", errors="replace")[:500]
+                        except Exception:
+                            pass
+                        break
+            else:
+                try:
+                    snippet = msg.get_payload(decode=True).decode("utf-8", errors="replace")[:500]
+                except Exception:
+                    pass
+
+            # Extract just the email address from "Name <email>" format
+            from_email = from_header
+            if "<" in from_header:
+                from_email = from_header.split("<")[1].rstrip(">").strip()
+
+            results.append({
+                "id": msg_id.decode() if isinstance(msg_id, bytes) else str(msg_id),
+                "from": from_email,
+                "subject": subject,
+                "snippet": snippet[:300],
+            })
+
+        mail.logout()
+        log.info(f"Fetched {len(results)} emails via IMAP")
+    except Exception as e:
+        log.error(f"IMAP fetch failed: {e}")
+        return _fetch_from_supabase_inbox()
+
+    return results
+
+
+def _fetch_from_supabase_inbox():
+    """Fallback: check Supabase for any inbound email records."""
+    try:
+        from urllib.request import urlopen, Request
+        url = os.environ.get("SUPABASE_URL", "")
+        key = os.environ.get("SUPABASE_SERVICE_ROLE_KEY", os.environ.get("SUPABASE_ANON_KEY", ""))
+        if not url or not key:
+            return []
+        req = Request(
+            f"{url}/rest/v1/broker_leads?select=name,email,need_description&order=created_at.desc&limit=20",
+            headers={"apikey": key, "Authorization": f"Bearer {key}"},
+        )
+        resp = urlopen(req, timeout=10)
+        leads = json.loads(resp.read())
+        # Convert to email-like format for the reply checker
+        return [
+            {"id": str(i), "from": l.get("email", ""), "subject": "Inbound lead",
+             "snippet": l.get("need_description", "")[:300]}
+            for i, l in enumerate(leads) if l.get("email")
+        ]
+    except Exception as e:
+        log.error(f"Supabase inbox fallback failed: {e}")
+        return []
+
+
 def check_replies(gmail_results=None):
     """
-    Check for seller replies. Can accept pre-fetched Gmail results
-    or will need external Gmail data passed in.
-
-    In production, this is called by n8n which fetches Gmail via its
-    Gmail node, then passes results to this script via stdin JSON.
+    Check for seller replies. Sources (in priority order):
+    1. Pre-fetched Gmail results (passed directly)
+    2. Stdin JSON (from n8n pipe)
+    3. IMAP standalone fetch (new - no n8n needed)
+    4. Supabase inbound lead fallback
     """
     _load_seller_domains()
 
@@ -191,9 +311,13 @@ def check_replies(gmail_results=None):
                 gmail_results = json.loads(raw) if raw.strip() else []
             except json.JSONDecodeError:
                 gmail_results = []
-        else:
-            log.info("No Gmail data provided. Pass JSON via stdin or use n8n integration.")
-            log.info(f"Watching {len(SELLER_DOMAINS)} seller domains: {sorted(SELLER_DOMAINS)[:10]}...")
+
+    # Standalone mode: fetch via IMAP if no data from stdin/n8n
+    if not gmail_results:
+        log.info("No stdin data. Fetching emails standalone via IMAP...")
+        gmail_results = _fetch_gmail_standalone()
+        if not gmail_results:
+            log.info(f"No emails found. Watching {len(SELLER_DOMAINS)} seller domains.")
             return
 
     seller_replies = []
@@ -283,6 +407,29 @@ def check_replies(gmail_results=None):
             _slack(f"Broker Gmail Monitor -- {len(seller_replies)} seller replies detected:\n{reply_text}")
     else:
         log.info(f"No seller replies found. {len(other_emails)} other emails to sage@.")
+
+    # Log to workbooks
+    try:
+        _wb_paths = [
+            str(Path(__file__).resolve().parent.parent.parent / "01_BUSINESSES" / "Everlight_Ventures" / "Broker_OS" / "wholesale_agent"),
+            "/home/opc/wholesale_agent",
+        ]
+        for _wbp in _wb_paths:
+            if os.path.isdir(_wbp) and _wbp not in sys.path:
+                sys.path.insert(0, _wbp)
+                break
+        from workbook_logger import wb as _wb
+        for reply in seller_replies:
+            sentiment_map = {"positive": "hot", "neutral": "warm", "negative": "cold"}
+            _wb.log_email_reply(
+                lead_id=reply.get("msg_id", "unknown"),
+                from_email=reply["from"],
+                sentiment=sentiment_map.get(reply["intent"], "warm"),
+            )
+        _wb.log_agent_task("harrison_knox", "reply_check", success=True, count=len(seller_replies))
+        _wb.flush()
+    except Exception:
+        pass
 
     # Output results as JSON for n8n
     result = {

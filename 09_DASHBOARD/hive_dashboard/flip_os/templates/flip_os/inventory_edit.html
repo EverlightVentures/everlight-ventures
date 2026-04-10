@@ -1,0 +1,80 @@
+{% extends "hive/base.html" %}
+{% block title %}Edit Item -- Flip OS{% endblock %}
+{% block content %}
+<div style="max-width: 600px; margin: 0 auto; padding: 24px;">
+  <h1 style="font-family: var(--font-heading); color: var(--gold); margin-bottom: 24px;">
+    <i class="fas fa-edit"></i> Edit: {{ item.item_name|truncatechars:30 }}
+  </h1>
+
+  <form method="POST" style="display: flex; flex-direction: column; gap: 16px;">
+    {% csrf_token %}
+    <div>
+      <label style="color: var(--text-muted); font-size: 0.85rem;">Item Name</label>
+      <input type="text" name="item_name" value="{{ item.item_name }}"
+             style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px;">
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+      <div>
+        <label style="color: var(--text-muted); font-size: 0.85rem;">Est. Sell Price ($)</label>
+        <input type="number" name="est_sell_price" step="0.01" value="{{ item.est_sell_price|default:'' }}"
+               style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px;">
+      </div>
+      <div>
+        <label style="color: var(--text-muted); font-size: 0.85rem;">Listed Price ($)</label>
+        <input type="number" name="listed_price" step="0.01" value="{{ item.listed_price|default:'' }}"
+               style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px;">
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+      <div>
+        <label style="color: var(--text-muted); font-size: 0.85rem;">Status</label>
+        <select name="status" style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px;">
+          <option value="in_storage" {% if item.status == "in_storage" %}selected{% endif %}>In Storage</option>
+          <option value="listed" {% if item.status == "listed" %}selected{% endif %}>Listed</option>
+          <option value="sold" {% if item.status == "sold" %}selected{% endif %}>Sold</option>
+          <option value="returned" {% if item.status == "returned" %}selected{% endif %}>Returned</option>
+          <option value="donated" {% if item.status == "donated" %}selected{% endif %}>Donated</option>
+        </select>
+      </div>
+      <div>
+        <label style="color: var(--text-muted); font-size: 0.85rem;">Location</label>
+        <select name="storage_location" style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px;">
+          <option value="unit_a" {% if item.storage_location == "unit_a" %}selected{% endif %}>Storage Unit</option>
+          <option value="home" {% if item.storage_location == "home" %}selected{% endif %}>With Me</option>
+          <option value="car" {% if item.storage_location == "car" %}selected{% endif %}>In Car</option>
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <label style="color: var(--text-muted); font-size: 0.85rem;">Category</label>
+      <select name="category" style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px;">
+        {% for cat in "tools,electrical,plumbing,lighting,appliances,hardware,storage,outdoor,garden,kitchen,bath,decor,seasonal,unknown"|split:"," %}
+        <option value="{{ cat }}" {% if item.category == cat %}selected{% endif %}>{{ cat|title }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <label style="color: var(--text-muted); font-size: 0.85rem;">Notes</label>
+      <textarea name="notes" rows="3"
+                style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px; resize: vertical;">{{ item.notes|default:'' }}</textarea>
+    </div>
+
+    <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; color: var(--text-secondary); font-size: 0.85rem;">
+      <strong>Cost:</strong> ${{ item.buy_price }} | <strong>Source:</strong> {{ item.buy_source }} | <strong>Bought:</strong> {{ item.buy_date }}
+    </div>
+
+    <div style="display: flex; gap: 12px; margin-top: 8px;">
+      <button type="submit" style="flex: 1; padding: 14px; background: var(--gold); color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
+        <i class="fas fa-save"></i> Save Changes
+      </button>
+      <a href="{% url 'flip_os:dashboard' %}" style="padding: 14px 24px; border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-secondary); text-decoration: none; display: flex; align-items: center;">
+        Cancel
+      </a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,240 @@
+{% extends "hive/base.html" %}
+{% load humanize %}
+
+{% block title %}Flip OS -- Retail Arbitrage{% endblock %}
+
+{% block content %}
+<div style="max-width: 1400px; margin: 0 auto; padding: 24px;">
+
+  <!-- Header -->
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+    <div>
+      <h1 style="font-family: var(--font-heading); font-size: 2rem; color: var(--gold);">
+        <i class="fas fa-recycle" style="margin-right: 8px;"></i>Flip OS
+      </h1>
+      <p style="color: var(--text-secondary); margin-top: 4px;">Retail Arbitrage Intelligence</p>
+    </div>
+    <div style="display: flex; gap: 12px;">
+      <a href="{% url 'flip_os:inventory_add' %}" class="btn-gold" style="padding: 10px 20px; border-radius: 8px; background: var(--gold); color: #000; text-decoration: none; font-weight: 600;">
+        <i class="fas fa-plus"></i> Add Item
+      </a>
+      <a href="{% url 'flip_os:intel_list' %}" style="padding: 10px 20px; border-radius: 8px; border: 1px solid var(--border-subtle); color: var(--text-primary); text-decoration: none;">
+        <i class="fas fa-radar"></i> Intel Feed
+      </a>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px;">
+    <div class="glass-card" style="padding: 20px; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border-subtle);">
+      <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">In Storage</div>
+      <div style="font-size: 2rem; font-weight: 700; color: var(--text-primary); margin-top: 4px;">{{ stats.items_in_storage }}</div>
+      <div style="color: var(--text-secondary); font-size: 0.85rem;">Est. value: ${{ stats.inventory_value|floatformat:0 }}</div>
+    </div>
+    <div class="glass-card" style="padding: 20px; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border-subtle);">
+      <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Listed</div>
+      <div style="font-size: 2rem; font-weight: 700; color: var(--purple); margin-top: 4px;">{{ stats.items_listed }}</div>
+      <div style="color: var(--text-secondary); font-size: 0.85rem;">Active listings</div>
+    </div>
+    <div class="glass-card" style="padding: 20px; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border-subtle);">
+      <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Sold (Month)</div>
+      <div style="font-size: 2rem; font-weight: 700; color: #22c55e; margin-top: 4px;">{{ stats.items_sold }}</div>
+      <div style="color: var(--text-secondary); font-size: 0.85rem;">Revenue: ${{ stats.revenue|floatformat:0 }}</div>
+    </div>
+    <div class="glass-card" style="padding: 20px; border-radius: 12px; background: var(--bg-card); border: 1px solid {% if stats.net >= 0 %}rgba(34,197,94,0.3){% else %}rgba(239,68,68,0.3){% endif %};">
+      <div style="color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Net P&L</div>
+      <div style="font-size: 2rem; font-weight: 700; color: {% if stats.net >= 0 %}#22c55e{% else %}#ef4444{% endif %}; margin-top: 4px;">
+        {% if stats.net >= 0 %}+{% endif %}${{ stats.net|floatformat:0 }}
+      </div>
+      <div style="color: var(--text-secondary); font-size: 0.85rem;">After ${{ stats.rent|floatformat:0 }} rent</div>
+    </div>
+  </div>
+
+  <!-- Two column layout -->
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+
+    <!-- GO Items (Hunt Today) -->
+    <div class="glass-card" style="padding: 24px; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border-subtle);">
+      <h2 style="font-family: var(--font-heading); color: var(--gold); margin-bottom: 16px;">
+        <i class="fas fa-crosshairs"></i> Hunt Today
+      </h2>
+      {% if go_items %}
+        {% for item in go_items %}
+        <div style="padding: 12px; margin-bottom: 8px; background: rgba(201,168,76,0.08); border-radius: 8px; border-left: 3px solid var(--gold);">
+          <div style="display: flex; justify-content: space-between; align-items: start;">
+            <div>
+              <strong style="color: var(--text-primary);">{{ item.item_name|truncatechars:45 }}</strong>
+              {% if item.penny_confirmed %}
+                <span style="background: #22c55e; color: #000; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700; margin-left: 6px;">PENNY</span>
+              {% endif %}
+              <div style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 4px;">
+                {{ item.store|default:"Any HD" }} | {{ item.category }}
+              </div>
+            </div>
+            <div style="text-align: right;">
+              <div style="color: var(--gold); font-weight: 700;">Score: {{ item.demand_score }}</div>
+              <div style="color: #22c55e; font-size: 0.85rem;">${{ item.est_resale|floatformat:0 }} resale</div>
+            </div>
+          </div>
+          <div style="margin-top: 8px;">
+            <a href="{% url 'flip_os:inventory_add' %}?intel_id={{ item.id }}" style="color: var(--gold); font-size: 0.8rem; text-decoration: none;">
+              <i class="fas fa-plus-circle"></i> I got this -- add to inventory
+            </a>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
+        <p style="color: var(--text-muted); padding: 20px; text-align: center;">
+          No GO items today. Check PennyCentral manually or visit stores.
+        </p>
+      {% endif %}
+    </div>
+
+    <!-- Recent Intel -->
+    <div class="glass-card" style="padding: 24px; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border-subtle);">
+      <h2 style="font-family: var(--font-heading); color: var(--purple); margin-bottom: 16px;">
+        <i class="fas fa-satellite-dish"></i> Recent Intel
+      </h2>
+      {% for item in intel_recent %}
+      <div style="padding: 8px 12px; margin-bottom: 6px; border-bottom: 1px solid var(--border-subtle);">
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: var(--text-primary); font-size: 0.9rem;">{{ item.item_name|truncatechars:40 }}</span>
+          <span style="color: {% if item.demand_score >= 70 %}var(--gold){% elif item.demand_score >= 50 %}var(--text-secondary){% else %}var(--text-muted){% endif %}; font-weight: 600; font-size: 0.85rem;">
+            {% if item.demand_score %}{{ item.demand_score }}{% else %}--{% endif %}
+          </span>
+        </div>
+        <div style="color: var(--text-muted); font-size: 0.75rem;">
+          {{ item.source }} | {{ item.category|default:"?" }}
+          {% if item.est_resale %} | ~${{ item.est_resale|floatformat:0 }}{% endif %}
+        </div>
+      </div>
+      {% empty %}
+      <p style="color: var(--text-muted); text-align: center; padding: 20px;">No intel yet. Scraper runs at 5 AM PT.</p>
+      {% endfor %}
+      <div style="margin-top: 12px; text-align: center;">
+        <a href="{% url 'flip_os:intel_list' %}" style="color: var(--purple); text-decoration: none; font-size: 0.85rem;">
+          View all intel <i class="fas fa-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Inventory Table -->
+  <div class="glass-card" style="padding: 24px; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border-subtle); margin-top: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+      <h2 style="font-family: var(--font-heading); color: var(--text-primary);">
+        <i class="fas fa-warehouse"></i> Storage Inventory
+      </h2>
+      <a href="{% url 'flip_os:inventory_list' %}" style="color: var(--purple); text-decoration: none; font-size: 0.85rem;">
+        View all <i class="fas fa-arrow-right"></i>
+      </a>
+    </div>
+
+    {% if in_storage %}
+    <div style="overflow-x: auto;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 1px solid var(--border-subtle);">
+            <th style="text-align: left; padding: 8px; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Item</th>
+            <th style="text-align: left; padding: 8px; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Category</th>
+            <th style="text-align: right; padding: 8px; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Cost</th>
+            <th style="text-align: right; padding: 8px; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Est. Sell</th>
+            <th style="text-align: right; padding: 8px; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Days</th>
+            <th style="text-align: center; padding: 8px; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in in_storage %}
+          <tr style="border-bottom: 1px solid var(--border-subtle);">
+            <td style="padding: 10px 8px; color: var(--text-primary);">{{ item.item_name|truncatechars:35 }}</td>
+            <td style="padding: 10px 8px; color: var(--text-secondary); font-size: 0.85rem;">{{ item.category|default:"-" }}</td>
+            <td style="padding: 10px 8px; text-align: right; color: var(--text-secondary);">${{ item.buy_price }}</td>
+            <td style="padding: 10px 8px; text-align: right; color: var(--gold);">${{ item.est_sell_price|default:"?" }}</td>
+            <td style="padding: 10px 8px; text-align: right; color: var(--text-muted);">
+              {% for s in stale %}{% if s.id == item.id %}<span style="color: #ef4444;">{{ s.days_held }}d</span>{% endif %}{% endfor %}
+            </td>
+            <td style="padding: 10px 8px; text-align: center;">
+              <a href="{% url 'flip_os:inventory_edit' item.id %}" style="color: var(--purple); text-decoration: none; margin-right: 8px;" title="Edit">
+                <i class="fas fa-edit"></i>
+              </a>
+              <a href="#" onclick="showSellModal({{ item.id }}, '{{ item.item_name|escapejs }}')" style="color: #22c55e; text-decoration: none;" title="Mark Sold">
+                <i class="fas fa-dollar-sign"></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p style="color: var(--text-muted); text-align: center; padding: 30px;">
+      No items in storage. Go hunt some penny deals!
+    </p>
+    {% endif %}
+  </div>
+
+  <!-- Stale Items Warning -->
+  {% if stale %}
+  <div style="margin-top: 16px; padding: 16px; border-radius: 8px; background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3);">
+    <strong style="color: #ef4444;"><i class="fas fa-exclamation-triangle"></i> {{ stale|length }} items sitting >14 days</strong>
+    <span style="color: var(--text-secondary); font-size: 0.85rem;"> -- Consider dropping price or listing on more platforms.</span>
+  </div>
+  {% endif %}
+
+</div>
+
+<!-- Sell Modal -->
+<div id="sell-modal" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 999; justify-content: center; align-items: center;">
+  <div style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 32px; max-width: 400px; width: 90%;">
+    <h3 style="color: var(--gold); margin-bottom: 16px;">Mark as Sold</h3>
+    <p id="sell-item-name" style="color: var(--text-secondary); margin-bottom: 16px;"></p>
+    <form id="sell-form" method="POST">
+      {% csrf_token %}
+      <div style="margin-bottom: 12px;">
+        <label style="color: var(--text-muted); font-size: 0.85rem;">Sold Price ($)</label>
+        <input type="number" name="sold_price" step="0.01" required style="width: 100%; padding: 10px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px;">
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="color: var(--text-muted); font-size: 0.85rem;">Platform</label>
+        <select name="sold_platform" style="width: 100%; padding: 10px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px;">
+          <option value="fb_marketplace">Facebook Marketplace</option>
+          <option value="ebay">eBay</option>
+          <option value="offerup">OfferUp</option>
+          <option value="amazon">Amazon</option>
+          <option value="in_person">In Person</option>
+        </select>
+      </div>
+      <div style="margin-bottom: 12px;">
+        <label style="color: var(--text-muted); font-size: 0.85rem;">Shipping ($)</label>
+        <input type="number" name="shipping_cost" step="0.01" value="0" style="width: 100%; padding: 10px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px;">
+      </div>
+      <div style="margin-bottom: 16px;">
+        <label style="color: var(--text-muted); font-size: 0.85rem;">Platform Fees ($)</label>
+        <input type="number" name="fees" step="0.01" value="0" style="width: 100%; padding: 10px; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-primary); margin-top: 4px;">
+      </div>
+      <div style="display: flex; gap: 12px;">
+        <button type="submit" style="flex: 1; padding: 12px; background: #22c55e; color: #000; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">
+          <i class="fas fa-check"></i> Confirm Sale
+        </button>
+        <button type="button" onclick="closeSellModal()" style="padding: 12px 20px; background: transparent; border: 1px solid var(--border-subtle); border-radius: 8px; color: var(--text-secondary); cursor: pointer;">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function showSellModal(itemId, itemName) {
+  document.getElementById('sell-form').action = '/flip/' + itemId + '/sell/';
+  document.getElementById('sell-item-name').textContent = itemName;
+  document.getElementById('sell-modal').style.display = 'flex';
+}
+function closeSellModal() {
+  document.getElementById('sell-modal').style.display = 'none';
+}
+document.getElementById('sell-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeSellModal();
+});
+</script>
+{% endblock %}

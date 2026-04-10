@@ -1,0 +1,184 @@
+{
+  "meta": {
+    "name": "Wholesale Performance Metrics",
+    "version": "1.0.0",
+    "created": "2026-04-07",
+    "purpose": "Rolling 30/60/90 day scoreboard. Conversion rates, cost per lead, revenue, agent performance.",
+    "sync_targets": [
+      "supabase:wholesale_metrics",
+      "slack:#ceo-brief",
+      "gdocs:weekly"
+    ]
+  },
+  "current_period": {
+    "start_date": "2026-04-07",
+    "end_date": null,
+    "days_active": 0
+  },
+  "funnel_metrics": {
+    "30d": {
+      "scouted": 0,
+      "scored": 0,
+      "qualified": 0,
+      "matched": 0,
+      "outreach_sent": 0,
+      "responses": 0,
+      "negotiating": 0,
+      "under_contract": 0,
+      "closed": 0,
+      "paid": 0,
+      "dead": 0
+    },
+    "60d": {
+      "scouted": 0,
+      "scored": 0,
+      "qualified": 0,
+      "matched": 0,
+      "outreach_sent": 0,
+      "responses": 0,
+      "negotiating": 0,
+      "under_contract": 0,
+      "closed": 0,
+      "paid": 0,
+      "dead": 0
+    },
+    "90d": {
+      "scouted": 0,
+      "scored": 0,
+      "qualified": 0,
+      "matched": 0,
+      "outreach_sent": 0,
+      "responses": 0,
+      "negotiating": 0,
+      "under_contract": 0,
+      "closed": 0,
+      "paid": 0,
+      "dead": 0
+    },
+    "all_time": {
+      "scouted": 0,
+      "scored": 0,
+      "qualified": 0,
+      "matched": 0,
+      "outreach_sent": 0,
+      "responses": 0,
+      "negotiating": 0,
+      "under_contract": 0,
+      "closed": 0,
+      "paid": 0,
+      "dead": 0
+    }
+  },
+  "conversion_rates": {
+    "scout_to_qualified_pct": 0,
+    "qualified_to_outreach_pct": 0,
+    "outreach_to_response_pct": 0,
+    "response_to_negotiation_pct": 0,
+    "negotiation_to_contract_pct": 0,
+    "contract_to_close_pct": 0,
+    "overall_close_rate_pct": 0
+  },
+  "revenue": {
+    "total_pipeline_value_usd": 0,
+    "total_commission_earned_usd": 0,
+    "total_commission_paid_usd": 0,
+    "avg_deal_value_usd": 0,
+    "avg_assignment_fee_usd": 0,
+    "avg_commission_usd": 0
+  },
+  "costs": {
+    "attom_api_calls": 0,
+    "attom_cost_usd": 0,
+    "resend_emails_sent": 0,
+    "resend_cost_usd": 0,
+    "total_cost_usd": 0,
+    "cost_per_lead_usd": 0,
+    "cost_per_deal_usd": 0
+  },
+  "velocity": {
+    "avg_days_scout_to_outreach": 0,
+    "avg_days_outreach_to_response": 0,
+    "avg_days_response_to_contract": 0,
+    "avg_days_contract_to_close": 0,
+    "avg_days_total_cycle": 0
+  },
+  "by_lead_source": {},
+  "by_state": {},
+  "by_lead_type": {},
+  "agent_performance": {
+    "rex_blackwell": {
+      "tasks_run": 1,
+      "success": 1,
+      "fail": 0,
+      "leads_found": 0
+    },
+    "frederick_banks": {
+      "tasks_run": 0,
+      "success": 0,
+      "fail": 0,
+      "leads_scored": 0
+    },
+    "piper_reeves": {
+      "tasks_run": 0,
+      "success": 0,
+      "fail": 0,
+      "emails_sent": 0,
+      "replies_received": 0
+    },
+    "harrison_knox": {
+      "tasks_run": 0,
+      "success": 0,
+      "fail": 0,
+      "deals_progressed": 0
+    },
+    "adrian_morgan": {
+      "tasks_run": 0,
+      "success": 0,
+      "fail": 0,
+      "pitches_created": 0
+    },
+    "calvin_osei": {
+      "tasks_run": 0,
+      "success": 0,
+      "fail": 0,
+      "matches_created": 0
+    },
+    "carlos_moreno": {
+      "tasks_run": 0,
+      "success": 0,
+      "fail": 0,
+      "commissions_logged": 0
+    }
+  },
+  "daily_snapshots": [
+    {
+      "date": "2026-04-07",
+      "funnel_30d": {
+        "scouted": 0,
+        "scored": 0,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    }
+  ],
+  "changelog": [
+    {
+      "date": "2026-04-07",
+      "version": "1.0.0",
+      "changes": [
+        "Initial metrics workbook",
+        "Funnel tracking, conversion rates, revenue, costs, velocity, agent performance"
+      ]
+    }
+  ]
+}

@@ -4,6 +4,7 @@ const NAV_SECTIONS = [
   {
     label: "COMMAND",
     items: [
+      { id: "stark", label: "Stark AI", icon: "★", color: "text-amber-400" },
       { id: "hivemind", label: "Hive Mind", icon: "L", color: "text-amber-400" },
       { id: "trading", label: "Trading", icon: "~", color: "text-green-400" },
       { id: "intel", label: "Market Intel", icon: "M", color: "text-amber-400" },

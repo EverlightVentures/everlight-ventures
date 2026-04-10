@@ -43,12 +43,15 @@ _logs/blinko_lite.db
 **/*.epub
 **/*.mobi
 
-# ---- SECRETS & CREDENTIALS (NEVER push) ----
-03_AUTOMATION_CORE/03_Credentials/
+# ---- SECRETS & CREDENTIALS ----
+# Credentials ARE tracked for PC transfer (repo MUST stay PRIVATE)
+# WARNING: If this repo EVER becomes public, rotate ALL keys immediately
+!03_AUTOMATION_CORE/03_Credentials/
 **/credentials/
 **/*.json.secret
-**/*.env
-**/.env*
+# Track .env files for portability (repo is PRIVATE)
+# **/*.env
+# **/.env*
 **/config.json
 **/secrets/
 **/api_keys*
@@ -115,8 +118,11 @@ Thumbs.db
 *.swo
 *~
 
-# ---- CLAUDE / AI CONTEXT (local only) ----
-.claude/
+# ---- CLAUDE / AI CONTEXT ----
+# Track everything in .claude/ EXCEPT runtime caches
+!.claude/
+.claude/__pycache__/
+.claude/.credentials.json
 .gemini/
 .codex/
 .perplexity/

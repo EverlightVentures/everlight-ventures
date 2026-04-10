@@ -1,14 +1,14 @@
 """
-Google Docs Bridge -- publish markdown reports and share links in Slack.
+Google Docs Bridge -- publish reports in the standard 3 formats.
 
-All bot/agent outputs go to Google Docs (formatted markdown).
-Slack gets summary + report links (Google Doc and Canvas when available).
+Every report should exist as:
+  1. Styled HTML served from :8504/reports/
+  2. Google Doc in Drive
+  3. Slack post linking to the other formats
 
-Two modes:
-  1. n8n mode (default): POST to n8n webhook which creates the Google Doc
-     via its Google Docs node and posts the link to Slack.
-  2. Direct mode: Uses Google Docs/Drive API directly with service account
-     credentials (fallback if n8n is down).
+Two Google Docs modes:
+  1. Direct mode (preferred): Uses Google Docs/Drive API directly
+  2. n8n mode (fallback): POST to the n8n webhook which creates the Google Doc
 
 Usage:
     from content_tools.gdocs_bridge import publish_report
@@ -48,8 +48,8 @@ def _candidate_webhook_urls():
     urls = []
     preferred = os.environ.get("N8N_GDOCS_WEBHOOK", "").strip()
     defaults = [
-        "http://127.0.0.1:5678/webhook/hive-log-to-gdoc",
-        "http://localhost:5678/webhook/hive-log-to-gdoc",
+        "http://127.0.0.1:5678/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdoc",
+        "http://localhost:5678/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdoc",
     ]
     for url in ([preferred] if preferred else []) + defaults:
         clean = str(url or "").strip()
@@ -57,19 +57,20 @@ def _candidate_webhook_urls():
             urls.append(clean)
     return urls
 
+
+def _n8n_enabled():
+    value = str(
+        os.environ.get("GDOCS_DISABLE_N8N", os.environ.get("N8N_GDOCS_DISABLE", ""))
+    ).strip().lower()
+    return value not in {"1", "true", "yes", "on"}
+
 # Slack webhook (for posting summary + link)
 SLACK_WEBHOOK_URL = os.environ.get("SLACK_WEBHOOK_URL", "")
 
-# Slack bot tokens for targeted channel posting
+# Slack bot tokens for targeted channel posting (from env vars only, no hardcoded fallbacks)
 SLACK_TOKENS = {
-    "xlmbot": os.environ.get(
-        "SLACK_TOKEN_XLMBOT",
-        "xoxb-8645963765681-10542494223845-M2gIADgkLB2HYJN4F8lGpbuI"
-    ),
-    "warroom": os.environ.get(
-        "SLACK_TOKEN_WARROOM",
-        "xoxb-8645963765681-10594020158069-eJRt13YP8qedI6DnQwupuFfy"
-    ),
+    "xlmbot": os.environ.get("SLACK_TOKEN_XLMBOT", "") or os.environ.get("SLACK_BOT_TOKEN", ""),
+    "warroom": os.environ.get("SLACK_TOKEN_WARROOM", "") or os.environ.get("SLACK_WARROOM_TOKEN", ""),
 }
 
 # Slack channel name -> ID mapping (populated on first use)
@@ -263,6 +264,9 @@ def _candidate_google_client_secret_paths():
     paths = [
         os.environ.get("GOOGLE_DOCS_CLIENT_SECRET_FILE", "").strip(),
         str(bot_dir / "secrets" / "google_client_secret.json"),
+        str(Path("/home/opc/secrets/google_client_secret.json")),
+        str(Path("/home/opc/xlm-bot/secrets/google_client_secret.json")),
+        str(Path("/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/xlm_bot/secrets/google_client_secret.json")),
         "/mnt/sdcard/AA_MY_DRIVE/08_BACKUPS/Credentials_Plaintext_Backup/client_secret_864189495801-pssn6fg438ahieth9vqih41a188smghu.apps.googleusercontent.com.json",
     ]
     return [Path(p).expanduser() for p in paths if p]
@@ -273,6 +277,9 @@ def _candidate_google_token_paths():
     paths = [
         os.environ.get("GOOGLE_DOCS_TOKEN_FILE", "").strip(),
         str(bot_dir / "secrets" / "google_docs_token.json"),
+        str(Path("/home/opc/secrets/google_docs_token.json")),
+        str(Path("/home/opc/xlm-bot/secrets/google_docs_token.json")),
+        str(Path("/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/xlm_bot/secrets/google_docs_token.json")),
     ]
     return [Path(p).expanduser() for p in paths if p]
 
@@ -314,7 +321,59 @@ def _direct_docs_ready():
     )
 
 
-def _ensure_drive_folder(drive_service, folder_path):
+def _load_authorized_user_info():
+    for token_path in _candidate_google_token_paths():
+        if not token_path.exists():
+            continue
+        try:
+            data = json.loads(token_path.read_text(encoding="utf-8"))
+        except Exception as exc:
+            log.warning(f"Google token load failed from {token_path}: {exc}")
+            continue
+        if data.get("refresh_token") and data.get("client_id") and data.get("client_secret"):
+            return data
+    return None
+
+
+def _refresh_google_access_token(auth_info):
+    token_uri = auth_info.get("token_uri") or "https://oauth2.googleapis.com/token"
+    resp = requests.post(
+        token_uri,
+        data={
+            "client_id": auth_info["client_id"],
+            "client_secret": auth_info["client_secret"],
+            "refresh_token": auth_info["refresh_token"],
+            "grant_type": "refresh_token",
+        },
+        timeout=30,
+    )
+    resp.raise_for_status()
+    payload = resp.json()
+    access_token = payload.get("access_token", "").strip()
+    if not access_token:
+        raise RuntimeError("google_oauth_missing_access_token")
+    return access_token
+
+
+def _google_api_request(method, url, access_token, *, params=None, json_body=None):
+    resp = requests.request(
+        method,
+        url,
+        headers={
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json",
+        },
+        params=params,
+        json=json_body,
+        timeout=30,
+    )
+    resp.raise_for_status()
+    if not resp.text.strip():
+        return {}
+    return resp.json()
+
+
+def _ensure_drive_folder(access_token, folder_path):
     folder_path = str(folder_path or "").strip().strip("/")
     if not folder_path:
         return ""
@@ -330,12 +389,17 @@ def _ensure_drive_folder(drive_service, folder_path):
         if parent_id:
             query.append(f"'{parent_id}' in parents")
 
-        response = drive_service.files().list(
-            q=" and ".join(query),
-            spaces="drive",
-            fields="files(id,name)",
-            pageSize=10,
-        ).execute()
+        response = _google_api_request(
+            "GET",
+            "https://www.googleapis.com/drive/v3/files",
+            access_token,
+            params={
+                "q": " and ".join(query),
+                "spaces": "drive",
+                "fields": "files(id,name)",
+                "pageSize": 10,
+            },
+        )
         matches = response.get("files") or []
         if matches:
             parent_id = matches[0]["id"]
@@ -347,7 +411,13 @@ def _ensure_drive_folder(drive_service, folder_path):
         }
         if parent_id:
             body["parents"] = [parent_id]
-        created = drive_service.files().create(body=body, fields="id").execute()
+        created = _google_api_request(
+            "POST",
+            "https://www.googleapis.com/drive/v3/files",
+            access_token,
+            params={"fields": "id"},
+            json_body=body,
+        )
         parent_id = created["id"]
 
     return parent_id or ""
@@ -357,41 +427,46 @@ def _post_direct_google_doc(title, content, folder=None):
     if not _direct_docs_ready():
         return {"ok": False, "error": "google_oauth_not_ready"}
 
-    creds = _load_google_credentials()
-    if not creds:
+    auth_info = _load_authorized_user_info()
+    if not auth_info:
         return {"ok": False, "error": "google_oauth_missing_token"}
 
     try:
-        from googleapiclient.discovery import build
-    except Exception as exc:
-        log.warning(f"Google API client unavailable: {exc}")
-        return {"ok": False, "error": "google_api_client_unavailable"}
-
-    try:
-        docs_service = build("docs", "v1", credentials=creds, cache_discovery=False)
-        drive_service = build("drive", "v3", credentials=creds, cache_discovery=False)
-
-        created = docs_service.documents().create(body={"title": title}).execute()
+        access_token = _refresh_google_access_token(auth_info)
+        created = _google_api_request(
+            "POST",
+            "https://docs.googleapis.com/v1/documents",
+            access_token,
+            json_body={"title": title},
+        )
         document_id = created["documentId"]
         text = str(content or "")
         if text:
-            docs_service.documents().batchUpdate(
-                documentId=document_id,
-                body={"requests": [{"insertText": {"location": {"index": 1}, "text": text}}]},
-            ).execute()
+            _google_api_request(
+                "POST",
+                f"https://docs.googleapis.com/v1/documents/{document_id}:batchUpdate",
+                access_token,
+                json_body={"requests": [{"insertText": {"location": {"index": 1}, "text": text}}]},
+            )
 
-        folder_id = _ensure_drive_folder(drive_service, folder)
-        file_meta = drive_service.files().get(fileId=document_id, fields="id,webViewLink,parents").execute()
+        folder_id = _ensure_drive_folder(access_token, folder)
+        file_meta = _google_api_request(
+            "GET",
+            f"https://www.googleapis.com/drive/v3/files/{document_id}",
+            access_token,
+            params={"fields": "id,webViewLink,parents"},
+        )
         previous_parents = ",".join(file_meta.get("parents") or [])
         if folder_id:
-            update_args = {
-                "fileId": document_id,
-                "addParents": folder_id,
-                "fields": "id,webViewLink",
-            }
+            params = {"addParents": folder_id, "fields": "id,webViewLink"}
             if previous_parents:
-                update_args["removeParents"] = previous_parents
-            file_meta = drive_service.files().update(**update_args).execute()
+                params["removeParents"] = previous_parents
+            file_meta = _google_api_request(
+                "PATCH",
+                f"https://www.googleapis.com/drive/v3/files/{document_id}",
+                access_token,
+                params=params,
+            )
 
         doc_link = file_meta.get("webViewLink") or f"https://docs.google.com/document/d/{document_id}/edit"
         log.info(f"Google Doc created via direct API: {doc_link}")
@@ -431,25 +506,50 @@ def _resolve_channel_id(channel_name, token):
     return None
 
 
-def _post_to_slack(channel, summary, title, links=None, local_path=None, app="warroom"):
+# Agent commentary styles for Slack posts.
+AGENT_COMMENTARY = {
+    "rex_blackwell": {"prefix": "Just wrapped up the numbers.", "emoji": ":cowboy_hat_face:"},
+    "piper_reeves": {"prefix": "Hey y'all, here's the latest.", "emoji": ":wave:"},
+    "frederick_banks": {"prefix": "Data's in. Here are the scores.", "emoji": ":bar_chart:"},
+    "harrison_knox": {"prefix": "Champ, got an update for you.", "emoji": ":handshake:"},
+    "adrian_morgan": {"prefix": "Put together something for you.", "emoji": ":briefcase:"},
+    "carlos_moreno": {"prefix": "Revenue update. Let's talk money.", "emoji": ":money_with_wings:"},
+    "calvin_osei": {"prefix": "Found a match you're going to love.", "emoji": ":sparkles:"},
+    "charles_dawson": {"prefix": "Look at this trend line.", "emoji": ":chart_with_upwards_trend:"},
+    "marcus_cole": {"prefix": "Here's the brief.", "emoji": ":crown:"},
+}
+
+
+def _post_to_slack(channel, summary, title, links=None, local_path=None, app="warroom", agent=None):
     """Post a summary + report links to Slack."""
     links = links or {}
     doc_link = links.get("doc_link", "")
+    html_link = links.get("html_link", "")
     canvas_link = links.get("canvas_link", "")
 
-    link_lines = []
+    sig = AGENT_SIGNATURES.get(agent or "", AGENT_SIGNATURES["default"])
+    commentary = AGENT_COMMENTARY.get(agent or "", {})
+    agent_name = sig.get("name", "Everlight Ventures")
+    agent_emoji = commentary.get("emoji", ":robot_face:")
+    agent_intro = commentary.get("prefix", "Report ready.")
+
+    link_parts = []
+    if html_link:
+        link_parts.append(f":page_facing_up: <{html_link}|Styled Report>")
     if doc_link:
-        link_lines.append(f"<{doc_link}|Open Google Doc>")
-    # canvas_link intentionally omitted -- Slack Canvas links deprecated in favor of Google Docs
-    if local_path:
-        link_lines.append(f"Markdown fallback: `{local_path}`")
-    if not link_lines:
-        link_lines.append("(report link unavailable)")
+        link_parts.append(f":memo: <{doc_link}|Google Doc>")
+    if canvas_link:
+        link_parts.append(f":clipboard: <{canvas_link}|Canvas>")
+    if local_path and not link_parts:
+        link_parts.append(f"File: `{local_path}`")
+    links_line = "  |  ".join(link_parts) if link_parts else "(report link unavailable)"
 
     message = (
+        f"{agent_emoji} *{agent_name}*\n"
+        f"{agent_intro}\n\n"
         f"*{title}*\n"
         f"{summary}\n"
-        + "\n".join(link_lines)
+        f"{links_line}"
     )
 
     # Try chat.postMessage first (richer formatting)
@@ -527,11 +627,237 @@ def _save_local_fallback(title, content, folder=None):
     return str(filepath)
 
 
+# --- Agent Signatures for Professional Reports ---
+AGENT_SIGNATURES = {
+    "rex_blackwell": {
+        "name": "Rex Blackwell",
+        "title": "Director of Acquisitions",
+        "email": "rex.b@everlightventures.io",
+        "sign_off": "Regards,",
+        "style": "Direct, numbers-first, no fluff.",
+    },
+    "piper_reeves": {
+        "name": "Piper Reeves",
+        "title": "Outreach Specialist",
+        "email": "piper@everlightventures.io",
+        "sign_off": "Best,",
+        "style": "Warm, personable, detail-oriented.",
+    },
+    "frederick_banks": {
+        "name": "Frederick Banks",
+        "title": "Lead Qualification Analyst",
+        "email": "filter@everlightventures.io",
+        "sign_off": "Regards,",
+        "style": "Data-driven, concise, scores and metrics.",
+    },
+    "harrison_knox": {
+        "name": "Harrison Knox",
+        "title": "Deal Closer",
+        "email": "hammer@everlightventures.io",
+        "sign_off": "Looking forward,",
+        "style": "Relentless follow-up, professional urgency.",
+    },
+    "adrian_morgan": {
+        "name": "Adrian Morgan",
+        "title": "Investment Analyst",
+        "email": "ace@everlightventures.io",
+        "sign_off": "Best regards,",
+        "style": "Polished, investment-grade presentation.",
+    },
+    "carlos_moreno": {
+        "name": "Carlos Moreno",
+        "title": "Revenue & Commission Auditor",
+        "email": "cash@everlightventures.io",
+        "sign_off": "Regards,",
+        "style": "Revenue-focused, audit-ready numbers.",
+    },
+    "calvin_osei": {
+        "name": "Calvin Osei",
+        "title": "Matching Specialist",
+        "email": "cupid@everlightventures.io",
+        "sign_off": "Best,",
+        "style": "Connector energy, compatibility analysis.",
+    },
+    "charles_dawson": {
+        "name": "Charles Dawson",
+        "title": "Analytics Lead",
+        "email": "chart@everlightventures.io",
+        "sign_off": "Regards,",
+        "style": "Data storyteller, KPI-focused.",
+    },
+    "marcus_cole": {
+        "name": "Marcus Cole",
+        "title": "Chief Operating Officer",
+        "email": "marcus@everlightventures.io",
+        "sign_off": "Best,",
+        "style": "Executive summary, strategic oversight.",
+    },
+    "default": {
+        "name": "Everlight Ventures",
+        "title": "Automated Intelligence",
+        "email": "hello@everlightventures.io",
+        "sign_off": "Regards,",
+        "style": "Professional, clean, branded.",
+    },
+}
+
+
+def _wrap_professional_report(title, content, agent=None):
+    """Wrap raw content into a professional branded report with agent signature.
+
+    Adds:
+    - Everlight branded header with timestamp
+    - Agent introduction line
+    - The actual content
+    - Professional sign-off with agent signature block
+    """
+    ts = _timestamp()
+    sig = AGENT_SIGNATURES.get(agent or "", AGENT_SIGNATURES["default"])
+
+    header = (
+        f"# {title}\n\n"
+        f"**EVERLIGHT VENTURES**\n"
+        f"*{ts}*\n\n"
+        f"---\n\n"
+    )
+
+    # Agent intro
+    if agent and agent != "default":
+        header += f"*Prepared by {sig['name']}, {sig['title']}*\n\n"
+
+    # Professional sign-off
+    footer = (
+        f"\n\n---\n\n"
+        f"{sig['sign_off']}\n\n"
+        f"**{sig['name']}**\n"
+        f"{sig['title']}\n"
+        f"Everlight Ventures\n"
+        f"{sig['email']} | everlightventures.io\n\n"
+        f"---\n"
+        f"*This report was generated by the Everlight Hive Mind automation platform.*\n"
+        f"*Everlight Ventures | Sacramento, CA | everlightventures.io*"
+    )
+
+    return header + content + footer
+
+
+def _save_styled_html_report(title, content_md, agent=None):
+    """Generate and save the styled HTML report served by Django at :8504/reports/."""
+    try:
+        from report_template import render_report, safe_filename
+    except ImportError:
+        return {"ok": False, "error": "report_template not available"}
+
+    sig = AGENT_SIGNATURES.get(agent or "", AGENT_SIGNATURES["default"])
+
+    import re
+
+    lines = str(content_md or "").split("\n")
+    out_lines = []
+    in_list = False
+    in_table = False
+    table_rows = []
+    headers = []
+
+    def close_list():
+        nonlocal in_list
+        if in_list:
+            out_lines.append("</ul>")
+            in_list = False
+
+    def close_table():
+        nonlocal in_table, table_rows, headers
+        if not in_table or not headers:
+            return
+        th = "".join(f"<th>{h}</th>" for h in headers)
+        trs = "\n".join(
+            "<tr>" + "".join(f"<td>{c}</td>" for c in row) + "</tr>"
+            for row in table_rows
+        )
+        out_lines.append(f"<table><thead><tr>{th}</tr></thead><tbody>{trs}</tbody></table>")
+        in_table = False
+        table_rows = []
+        headers = []
+
+    for line in lines:
+        stripped = line.strip()
+        if stripped.startswith("|") and stripped.endswith("|"):
+            close_list()
+            cells = [c.strip() for c in stripped.strip("|").split("|")]
+            if all(c.replace("-", "").strip() == "" for c in cells):
+                continue
+            if not in_table:
+                headers = cells
+                in_table = True
+            else:
+                table_rows.append(cells)
+            continue
+
+        close_table()
+
+        if stripped.startswith("- "):
+            if not in_list:
+                out_lines.append("<ul>")
+                in_list = True
+            processed = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", stripped[2:])
+            out_lines.append(f"<li>{processed}</li>")
+            continue
+
+        close_list()
+
+        if stripped.startswith("### "):
+            out_lines.append(f"<h3>{stripped[4:]}</h3>")
+        elif stripped.startswith("## "):
+            out_lines.append(f"<h2>{stripped[3:]}</h2>")
+        elif stripped.startswith("# "):
+            out_lines.append(f"<h2>{stripped[2:]}</h2>")
+        elif stripped:
+            processed = re.sub(r"\*\*(.+?)\*\*", r"<strong>\1</strong>", stripped)
+            out_lines.append(f"<p>{processed}</p>")
+        else:
+            out_lines.append("")
+
+    close_table()
+    close_list()
+
+    html = render_report(
+        title=title,
+        content_html="\n".join(out_lines),
+        agent_name=sig["name"],
+        agent_title=sig["title"],
+        agent_email=sig["email"],
+    )
+
+    filename = safe_filename(title)
+    html_dirs = [
+        Path(os.environ.get("HIVE_REPORTS_DIR", "")).expanduser() if os.environ.get("HIVE_REPORTS_DIR") else None,
+        Path("/home/opc/hive_reports"),
+        Path("/mnt/sdcard/AA_MY_DRIVE/09_DASHBOARD/reports"),
+    ]
+    saved = False
+    for html_dir in html_dirs:
+        if not html_dir:
+            continue
+        try:
+            html_dir.mkdir(parents=True, exist_ok=True)
+            (html_dir / filename).write_text(html, encoding="utf-8")
+            saved = True
+        except Exception as exc:
+            log.warning(f"Failed to save HTML report to {html_dir}: {exc}")
+
+    if not saved:
+        return {"ok": False, "error": "html_save_failed"}
+
+    report_base = os.environ.get("REPORT_URL_BASE", "http://129.159.38.250:8504/reports/").rstrip("/") + "/"
+    return {"ok": True, "html_link": f"{report_base}{filename}", "html_path": filename, "html": html}
+
+
 def publish_report(title, content, folder=None, slack_channel=None,
                    summary=None, app="warroom", metadata=None,
-                   post_to_slack=True):
+                   post_to_slack=True, agent=None):
     """
-    Main entry point. Creates a Google Doc and posts summary + link to Slack.
+    Main entry point. Creates a professional branded HTML report, creates a
+    Google Doc backup, and posts both links to Slack.
 
     Args:
         title: Report title (e.g. "Broker Scout Report")
@@ -541,10 +867,15 @@ def publish_report(title, content, folder=None, slack_channel=None,
         summary: 1-2 line summary for Slack (auto-generated if None)
         app: Slack app to use ("warroom" or "xlmbot")
         metadata: Extra metadata dict to pass to n8n
+        agent: Agent key (e.g. "rex_blackwell") for signature block
 
     Returns:
-        dict with keys: ok, link, doc_link, canvas_link, local_path, slack_posted
+        dict with keys: ok, link, doc_link, html_link, canvas_link, local_path, slack_posted
     """
+    html_result = _save_styled_html_report(title, content, agent=agent)
+
+    content = _wrap_professional_report(title, content, agent=agent)
+
     # Generate doc title
     doc_title = _make_doc_title(title, folder)
 
@@ -565,44 +896,51 @@ def publish_report(title, content, folder=None, slack_channel=None,
         "ok": False,
         "link": None,
         "doc_link": None,
+        "html_link": None,
         "canvas_link": None,
         "local_path": None,
         "slack_posted": False,
     }
 
-    # Step 1: Create Google Doc via n8n or direct API
-    n8n_result = _post_to_n8n(doc_title, content, folder, metadata)
-
-    if n8n_result["ok"] and n8n_result.get("doc_link"):
+    if html_result.get("ok"):
         result["ok"] = True
-        result["link"] = n8n_result.get("doc_link")  # canvas_link intentionally excluded
-        result["doc_link"] = n8n_result.get("doc_link")
-        result["canvas_link"] = None  # never surface canvas links
+        result["html_link"] = html_result.get("html_link")
+        result["link"] = result["html_link"]
+
+    direct_result = _post_direct_google_doc(doc_title, content, folder)
+    if direct_result.get("ok") and direct_result.get("doc_link"):
+        result["ok"] = True
+        result["doc_link"] = direct_result.get("doc_link")
+        if not result["link"]:
+            result["link"] = result["doc_link"]
     else:
-        direct_result = _post_direct_google_doc(doc_title, content, folder)
-        if direct_result.get("ok") and direct_result.get("doc_link"):
+        n8n_result = {"ok": False, "error": "n8n_disabled"}
+        if _n8n_enabled():
+            n8n_result = _post_to_n8n(doc_title, content, folder, metadata)
+        if n8n_result["ok"] and n8n_result.get("doc_link"):
             result["ok"] = True
-            result["link"] = direct_result.get("doc_link")
-            result["doc_link"] = direct_result.get("doc_link")
-            result["canvas_link"] = None
-        else:
-            # Fallback: save locally for later upload
+            result["doc_link"] = n8n_result.get("doc_link")
+            result["canvas_link"] = n8n_result.get("canvas_link") or None
+            if not result["link"]:
+                result["link"] = result["doc_link"]
+        elif not result.get("ok"):
             local_path = _save_local_fallback(title, content, folder)
             result["local_path"] = local_path
-            log.warning(f"Google Doc creation failed, saved locally: {local_path}")
+            log.warning(f"All report methods failed, saved locally: {local_path}")
 
-    # Step 2: Post summary + link to Slack
     if post_to_slack:
         slack_ok = _post_to_slack(
             slack_channel,
             summary,
             title,
             links={
+                "html_link": result.get("html_link") or "",
                 "doc_link": result.get("doc_link") or "",
                 "canvas_link": result.get("canvas_link") or "",
             },
             local_path=result.get("local_path"),
             app=app,
+            agent=agent,
         )
         result["slack_posted"] = slack_ok
 

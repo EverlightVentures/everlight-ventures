@@ -1,221 +1,361 @@
 {% extends "hive/base.html" %}
 {% load humanize %}
-{% block title %}Wholesale Pipeline | Broker OS{% endblock %}
+{% block title %}Wholesale Pipeline | Everlight Ventures{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-  <div class="d-flex justify-content-between align-items-center mb-1">
-    <h2 class="mb-0">Wholesale Pipeline</h2>
-    <a href="{% url 'broker_ops:dashboard' %}" class="btn btn-sm btn-outline-secondary">&larr; Broker OS</a>
-  </div>
-  <p class="text-muted mb-4">Distressed property leads -- find motivated sellers, assign to cash buyers, collect fees.</p>
+<style>
+  .ws-header { margin-bottom: 28px; }
+  .ws-header h1 {
+    font-family: var(--font-heading, 'Playfair Display', serif);
+    font-size: 1.8rem; color: var(--gold); margin-bottom: 4px;
+  }
+  .ws-header p { color: var(--text-secondary); font-size: 0.9rem; }
 
-  <!-- KPI cards -->
-  <div class="row g-3 mb-4">
-    <div class="col-6 col-md-2">
-      <div class="card text-center">
-        <div class="card-body py-2">
-          <div class="h4 mb-0">{{ total_leads }}</div>
-          <small class="text-muted">Total Leads</small>
-        </div>
-      </div>
-    </div>
-    <div class="col-6 col-md-2">
-      <div class="card text-center">
-        <div class="card-body py-2">
-          <div class="h4 mb-0 text-warning">{{ status_counts.under_contract|default:"0" }}</div>
-          <small class="text-muted">Under Contract</small>
-        </div>
-      </div>
-    </div>
-    <div class="col-6 col-md-2">
-      <div class="card text-center">
-        <div class="card-body py-2">
-          <div class="h4 mb-0 text-info">{{ status_counts.assigned|default:"0" }}</div>
-          <small class="text-muted">Assigned</small>
-        </div>
-      </div>
-    </div>
-    <div class="col-6 col-md-2">
-      <div class="card text-center">
-        <div class="card-body py-2">
-          <div class="h4 mb-0 text-success">{{ status_counts.closed|default:"0" }}</div>
-          <small class="text-muted">Closed</small>
-        </div>
-      </div>
-    </div>
-    <div class="col-6 col-md-2">
-      <div class="card text-center">
-        <div class="card-body py-2">
-          <div class="h4 mb-0">{{ total_buyers }}</div>
-          <small class="text-muted">Active Buyers</small>
-        </div>
-      </div>
-    </div>
-    <div class="col-6 col-md-2">
-      <div class="card text-center">
-        <div class="card-body py-2">
-          <div class="h4 mb-0 text-success">${{ pipeline_value|floatformat:0|intcomma }}</div>
-          <small class="text-muted">Pipeline Value</small>
-        </div>
-      </div>
-    </div>
-  </div>
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+  .kpi-card {
+    background: var(--bg-card, #111); border: 1px solid var(--glass-border, #222);
+    border-radius: 10px; padding: 16px; text-align: center;
+    transition: all 0.2s;
+  }
+  .kpi-card:hover { border-color: var(--gold-dim); }
+  .kpi-value {
+    font-size: 1.8rem; font-weight: 700; color: var(--gold);
+    font-family: var(--font-heading, 'Playfair Display', serif);
+  }
+  .kpi-value.green { color: #22c55e; }
+  .kpi-value.blue { color: #3b82f6; }
+  .kpi-value.orange { color: #f59e0b; }
+  .kpi-label {
+    font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--text-muted); margin-top: 4px;
+  }
 
-  <!-- Quick stats row -->
-  <div class="row g-3 mb-4">
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-body py-2 text-center">
-          <small class="text-muted">Avg Motivation Score</small>
-          <div class="h5 mb-0">{{ avg_score|floatformat:0 }} / 100</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-body py-2 text-center">
-          <small class="text-muted">New Leads</small>
-          <div class="h5 mb-0">{{ status_counts.new|default:"0" }}</div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="card">
-        <div class="card-body py-2 text-center">
-          <small class="text-muted">Contacted</small>
-          <div class="h5 mb-0">{{ status_counts.contacted|default:"0" }}</div>
-        </div>
-      </div>
-    </div>
-  </div>
+  .section-card {
+    background: var(--bg-card, #111); border: 1px solid var(--glass-border, #222);
+    border-radius: 10px; margin-bottom: 20px; overflow: hidden;
+  }
+  .section-header {
+    padding: 14px 20px; border-bottom: 1px solid var(--glass-border, #222);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .section-title {
+    font-family: var(--font-heading, 'Playfair Display', serif);
+    font-size: 1.1rem; color: var(--gold);
+  }
+  .section-body { padding: 0; }
+  .section-body.padded { padding: 16px 20px; }
 
-  <!-- CSV Upload -->
-  <div class="card mb-4">
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <span>Import Leads (CSV)</span>
-    </div>
-    <div class="card-body py-2">
-      <form id="csv-upload-form" enctype="multipart/form-data" class="d-flex align-items-center gap-3">
-        {% csrf_token %}
-        <input type="file" name="file" accept=".csv" class="form-control form-control-sm" style="max-width:300px" required>
-        <select name="source" class="form-select form-select-sm" style="max-width:180px">
-          <option value="propstream">PropStream</option>
-          <option value="tax_records">Tax Records</option>
-          <option value="driving_for_dollars">Driving for Dollars</option>
-          <option value="other">Other</option>
-        </select>
-        <button type="submit" class="btn btn-sm btn-primary">Upload</button>
-        <span id="upload-result" class="text-muted small"></span>
-      </form>
-    </div>
-  </div>
+  .ws-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .ws-table th {
+    background: rgba(212, 168, 67, 0.08); color: var(--gold); text-align: left;
+    padding: 10px 14px; font-weight: 600; font-size: 0.7rem;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .ws-table td { padding: 10px 14px; border-bottom: 1px solid var(--glass-border, #1a1a1a); }
+  .ws-table tr:hover td { background: rgba(212, 168, 67, 0.04); }
 
-  <!-- Filters -->
-  <div class="card mb-4">
-    <div class="card-header">Filters</div>
-    <div class="card-body py-2">
-      <form method="get" class="d-flex flex-wrap gap-3 align-items-end">
-        <div>
-          <label class="form-label small mb-0">Status</label>
-          <select name="status" class="form-select form-select-sm" style="min-width:140px">
-            <option value="">All</option>
-            {% for val, label in status_choices %}
-            <option value="{{ val }}" {% if filter_status == val %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div>
-          <label class="form-label small mb-0">Lead Type</label>
-          <select name="lead_type" class="form-select form-select-sm" style="min-width:160px">
-            <option value="">All</option>
-            {% for val, label in lead_type_choices %}
-            <option value="{{ val }}" {% if filter_lead_type == val %}selected{% endif %}>{{ label }}</option>
-            {% endfor %}
-          </select>
-        </div>
-        <div>
-          <label class="form-label small mb-0">State</label>
-          <input type="text" name="state" value="{{ filter_state }}" class="form-control form-control-sm" placeholder="CA" style="width:70px" maxlength="2">
-        </div>
-        <div>
-          <label class="form-label small mb-0">Min Score</label>
-          <input type="number" name="min_score" value="{{ filter_min_score }}" class="form-control form-control-sm" placeholder="0" style="width:80px" min="0" max="100">
-        </div>
-        <div>
-          <button type="submit" class="btn btn-sm btn-outline-primary">Filter</button>
-          <a href="{% url 'broker_ops:wholesale_dashboard' %}" class="btn btn-sm btn-outline-secondary">Reset</a>
-        </div>
-      </form>
-    </div>
-  </div>
+  .badge-score {
+    display: inline-block; padding: 2px 8px; border-radius: 10px;
+    font-size: 0.75rem; font-weight: 600;
+  }
+  .badge-score.hot { background: #22c55e22; color: #22c55e; }
+  .badge-score.warm { background: #f59e0b22; color: #f59e0b; }
+  .badge-score.cold { background: #6b728022; color: #6b7280; }
 
-  <!-- Property leads table -->
-  <div class="card">
-    <div class="card-header">Property Leads ({{ leads|length }} shown, {{ total_leads }} total)</div>
-    <div class="card-body p-0">
-      <div class="table-responsive">
-        <table class="table table-sm mb-0">
-          <thead>
-            <tr>
-              <th>Address</th>
-              <th>City/State</th>
-              <th>Type</th>
-              <th>Lead Type</th>
-              <th>Score</th>
-              <th>Asking</th>
-              <th>ARV</th>
-              <th>MAO</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for lead in leads %}
-            <tr>
-              <td>{{ lead.address|truncatechars:35 }}</td>
-              <td>{{ lead.city }}, {{ lead.state }}</td>
-              <td>{{ lead.get_property_type_display }}</td>
-              <td><span class="badge bg-secondary">{{ lead.get_lead_type_display }}</span></td>
-              <td>
-                <span class="badge bg-{% if lead.motivation_score >= 70 %}success{% elif lead.motivation_score >= 40 %}warning{% else %}secondary{% endif %}">
-                  {{ lead.motivation_score }}
-                </span>
-              </td>
-              <td>${{ lead.asking_price|floatformat:0|intcomma }}</td>
-              <td>${{ lead.estimated_arv|floatformat:0|intcomma }}</td>
-              <td>${{ lead.mao|floatformat:0|intcomma }}</td>
-              <td>
-                <span class="badge bg-{% if lead.status == 'closed' %}success{% elif lead.status == 'under_contract' %}warning{% elif lead.status == 'assigned' %}info{% elif lead.status == 'dead' %}danger{% else %}secondary{% endif %}">
-                  {{ lead.get_status_display }}
-                </span>
-              </td>
-              <td class="text-nowrap">
-                <button class="btn btn-xs btn-outline-primary btn-score" data-id="{{ lead.id }}" title="Re-score">Score</button>
-                <button class="btn btn-xs btn-outline-info btn-match" data-id="{{ lead.id }}" title="Find buyers">Match</button>
-                <button class="btn btn-xs btn-outline-success btn-sms" data-id="{{ lead.id }}" title="Generate SMS">SMS</button>
-              </td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="10" class="text-center text-muted py-3">No property leads found. Import a CSV to get started.</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+  .badge-status {
+    display: inline-block; padding: 2px 10px; border-radius: 12px;
+    font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .badge-status.new { background: #3b82f622; color: #3b82f6; }
+  .badge-status.contacted { background: #8b5cf622; color: #8b5cf6; }
+  .badge-status.negotiating { background: #f59e0b22; color: #f59e0b; }
+  .badge-status.under_contract { background: #22c55e22; color: #22c55e; }
+  .badge-status.assigned { background: #06b6d422; color: #06b6d4; }
+  .badge-status.closed { background: #22c55e; color: #0a0a0a; }
+  .badge-status.dead { background: #ef444422; color: #ef4444; }
+
+  .badge-type {
+    display: inline-block; padding: 2px 8px; border-radius: 8px;
+    font-size: 0.7rem; background: rgba(212, 168, 67, 0.1); color: var(--gold-dim);
+  }
+
+  .btn-action {
+    padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: 600;
+    border: 1px solid; cursor: pointer; transition: all 0.15s; background: transparent;
+  }
+  .btn-piper { border-color: #8b5cf6; color: #8b5cf6; }
+  .btn-piper:hover { background: #8b5cf622; }
+  .btn-score-lead { border-color: var(--gold-dim); color: var(--gold); }
+  .btn-score-lead:hover { background: rgba(212, 168, 67, 0.15); }
+  .btn-match-lead { border-color: #06b6d4; color: #06b6d4; }
+  .btn-match-lead:hover { background: #06b6d422; }
+  .btn-contract { border-color: #22c55e; color: #22c55e; }
+  .btn-contract:hover { background: #22c55e22; }
+
+  .outreach-row { display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-bottom: 1px solid var(--glass-border, #1a1a1a); }
+  .outreach-row:last-child { border-bottom: none; }
+  .outreach-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .outreach-dot.sent { background: #3b82f6; }
+  .outreach-dot.opened { background: #22c55e; }
+  .outreach-dot.replied { background: var(--gold); }
+  .outreach-info { flex: 1; }
+  .outreach-to { font-weight: 500; font-size: 0.85rem; }
+  .outreach-meta { font-size: 0.75rem; color: var(--text-muted); }
+
+  .filter-bar {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; padding: 14px 20px;
+  }
+  .filter-group label { display: block; font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+  .filter-group select, .filter-group input {
+    background: var(--bg-primary, #0a0a0f); color: var(--text-primary);
+    border: 1px solid var(--glass-border, #333); border-radius: 6px; padding: 6px 10px; font-size: 0.8rem;
+  }
+  .filter-btn {
+    padding: 6px 14px; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--gold-dim); color: var(--gold); background: transparent;
+  }
+  .filter-btn:hover { background: rgba(212, 168, 67, 0.15); }
+
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text-muted); }
+  .empty-state i { font-size: 2rem; margin-bottom: 8px; display: block; }
+</style>
+
+<!-- Header -->
+<div class="ws-header">
+  <h1><i class="fa-solid fa-house-chimney-crack" style="margin-right:8px;"></i>Wholesale Pipeline</h1>
+  <p>Distressed properties to cash buyers. Piper reaches out, Harrison closes, you collect.</p>
+</div>
+
+<!-- KPI Row -->
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-value">{{ total_leads }}</div>
+    <div class="kpi-label">Total Leads</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value orange">{{ status_counts.under_contract|default:"0" }}</div>
+    <div class="kpi-label">Under Contract</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value blue">{{ status_counts.assigned|default:"0" }}</div>
+    <div class="kpi-label">Assigned</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value green">{{ status_counts.closed|default:"0" }}</div>
+    <div class="kpi-label">Closed Deals</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value">{{ total_buyers }}</div>
+    <div class="kpi-label">Cash Buyers</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value green">${{ pipeline_value|floatformat:0|intcomma }}</div>
+    <div class="kpi-label">Pipeline Value</div>
+  </div>
+</div>
+
+<!-- Outreach Stats -->
+<div class="kpi-grid" style="grid-template-columns: repeat(4, 1fr);">
+  <div class="kpi-card">
+    <div class="kpi-value" style="font-size:1.4rem;">{{ emails_today }}</div>
+    <div class="kpi-label">Emails Today</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value" style="font-size:1.4rem;">{{ emails_7d }}</div>
+    <div class="kpi-label">Emails (7d)</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value" style="font-size:1.4rem;">{{ emails_total }}</div>
+    <div class="kpi-label">Total Sent</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-value" style="font-size:1.4rem;">{{ emails_replied }}</div>
+    <div class="kpi-label">Replies</div>
+  </div>
+</div>
+
+<!-- Pipeline Funnel -->
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title"><i class="fa-solid fa-filter" style="margin-right:6px;"></i>Pipeline Funnel</div>
+    <span style="font-size:0.8rem;color:var(--text-muted);">{{ avg_score|floatformat:0 }}/100 avg score</span>
+  </div>
+  <div class="section-body padded">
+    <div style="display:flex;gap:4px;height:32px;border-radius:6px;overflow:hidden;">
+      {% if status_counts.new %}<div style="flex:{{ status_counts.new }};background:#3b82f6;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:600;" title="New: {{ status_counts.new }}">{{ status_counts.new }}</div>{% endif %}
+      {% if status_counts.contacted %}<div style="flex:{{ status_counts.contacted }};background:#8b5cf6;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:600;" title="Contacted: {{ status_counts.contacted }}">{{ status_counts.contacted }}</div>{% endif %}
+      {% if status_counts.negotiating %}<div style="flex:{{ status_counts.negotiating }};background:#f59e0b;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:600;" title="Negotiating: {{ status_counts.negotiating }}">{{ status_counts.negotiating }}</div>{% endif %}
+      {% if status_counts.under_contract %}<div style="flex:{{ status_counts.under_contract }};background:#22c55e;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:600;" title="Under Contract: {{ status_counts.under_contract }}">{{ status_counts.under_contract }}</div>{% endif %}
+      {% if status_counts.assigned %}<div style="flex:{{ status_counts.assigned }};background:#06b6d4;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:600;" title="Assigned: {{ status_counts.assigned }}">{{ status_counts.assigned }}</div>{% endif %}
+      {% if status_counts.closed %}<div style="flex:{{ status_counts.closed }};background:#059669;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:600;" title="Closed: {{ status_counts.closed }}">{{ status_counts.closed }}</div>{% endif %}
+      {% if status_counts.dead %}<div style="flex:{{ status_counts.dead }};background:#374151;display:flex;align-items:center;justify-content:center;font-size:0.7rem;font-weight:600;" title="Dead: {{ status_counts.dead }}">{{ status_counts.dead }}</div>{% endif %}
+    </div>
+    <div style="display:flex;gap:16px;margin-top:8px;font-size:0.7rem;color:var(--text-muted);flex-wrap:wrap;">
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#3b82f6;margin-right:4px;"></span>New {{ status_counts.new|default:"0" }}</span>
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#8b5cf6;margin-right:4px;"></span>Contacted {{ status_counts.contacted|default:"0" }}</span>
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#f59e0b;margin-right:4px;"></span>Negotiating {{ status_counts.negotiating|default:"0" }}</span>
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#22c55e;margin-right:4px;"></span>Under Contract {{ status_counts.under_contract|default:"0" }}</span>
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#06b6d4;margin-right:4px;"></span>Assigned {{ status_counts.assigned|default:"0" }}</span>
+      <span><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:#059669;margin-right:4px;"></span>Closed {{ status_counts.closed|default:"0" }}</span>
     </div>
   </div>
 </div>
 
-<!-- Modal for action results -->
-<div id="action-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:center;">
-  <div style="background:var(--bg-tertiary, #1a1a2e); border:1px solid var(--border-subtle, #333); border-radius:8px; padding:24px; max-width:600px; width:90%; max-height:80vh; overflow-y:auto;">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h5 id="modal-title" class="mb-0">Result</h5>
-      <button onclick="document.getElementById('action-modal').style.display='none'" class="btn btn-sm btn-outline-secondary">X</button>
+<!-- Filters -->
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title"><i class="fa-solid fa-sliders" style="margin-right:6px;"></i>Filters</div>
+  </div>
+  <form method="get" class="filter-bar">
+    <div class="filter-group">
+      <label>Status</label>
+      <select name="status">
+        <option value="">All</option>
+        {% for val, label in status_choices %}
+        <option value="{{ val }}" {% if filter_status == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
     </div>
-    <pre id="modal-body" style="white-space:pre-wrap; font-size:13px; color:var(--text-primary, #e8e6e3);"></pre>
+    <div class="filter-group">
+      <label>Lead Type</label>
+      <select name="lead_type">
+        <option value="">All</option>
+        {% for val, label in lead_type_choices %}
+        <option value="{{ val }}" {% if filter_lead_type == val %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="filter-group">
+      <label>State</label>
+      <input type="text" name="state" value="{{ filter_state }}" placeholder="GA" maxlength="2" style="width:60px;">
+    </div>
+    <div class="filter-group">
+      <label>Min Score</label>
+      <input type="number" name="min_score" value="{{ filter_min_score }}" placeholder="0" style="width:70px;" min="0" max="100">
+    </div>
+    <div class="filter-group" style="align-self:flex-end;">
+      <button type="submit" class="filter-btn">Apply</button>
+      <a href="{% url 'broker_ops:wholesale_dashboard' %}" class="filter-btn" style="text-decoration:none;display:inline-block;margin-left:4px;color:var(--text-muted);border-color:var(--glass-border);">Reset</a>
+    </div>
+  </form>
+</div>
+
+<!-- Property Leads Table -->
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title"><i class="fa-solid fa-house" style="margin-right:6px;"></i>Property Leads ({{ leads|length }} of {{ total_leads }})</div>
+    <div style="display:flex;gap:6px;">
+      <form id="csv-upload-form" enctype="multipart/form-data" style="display:flex;gap:6px;align-items:center;">
+        {% csrf_token %}
+        <input type="file" name="file" accept=".csv" style="font-size:0.75rem;max-width:180px;background:var(--bg-primary);color:var(--text-primary);border:1px solid var(--glass-border);border-radius:4px;padding:3px 6px;" required>
+        <button type="submit" class="btn-action btn-score-lead">Import CSV</button>
+        <span id="upload-result" style="font-size:0.75rem;color:var(--text-muted);"></span>
+      </form>
+    </div>
+  </div>
+  <div class="section-body">
+    {% if leads %}
+    <div style="overflow-x:auto;">
+      <table class="ws-table">
+        <thead>
+          <tr>
+            <th>Property</th>
+            <th>Type</th>
+            <th>Score</th>
+            <th>Asking / ARV</th>
+            <th>Owner</th>
+            <th>Status</th>
+            <th style="text-align:right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lead in leads %}
+          <tr>
+            <td>
+              <div style="font-weight:500;">{{ lead.address|truncatechars:40 }}</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);">{{ lead.city }}, {{ lead.state }} {{ lead.zip_code }}</div>
+            </td>
+            <td><span class="badge-type">{{ lead.get_lead_type_display }}</span></td>
+            <td>
+              <span class="badge-score {% if lead.motivation_score >= 70 %}hot{% elif lead.motivation_score >= 40 %}warm{% else %}cold{% endif %}">
+                {{ lead.motivation_score }}
+              </span>
+            </td>
+            <td>
+              <div>${{ lead.asking_price|floatformat:0|intcomma }}</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);">ARV ${{ lead.estimated_arv|floatformat:0|intcomma }}</div>
+            </td>
+            <td>
+              <div style="font-size:0.85rem;">{{ lead.owner_name|truncatechars:25|default:"-" }}</div>
+              {% if lead.owner_email %}<div style="font-size:0.7rem;color:var(--text-muted);">{{ lead.owner_email }}</div>{% endif %}
+            </td>
+            <td><span class="badge-status {{ lead.status }}">{{ lead.get_status_display }}</span></td>
+            <td style="text-align:right;white-space:nowrap;">
+              {% if lead.owner_email and lead.status == 'new' %}
+              <button class="btn-action btn-piper" data-id="{{ lead.id }}" onclick="piperOutreach('{{ lead.id }}')" title="Piper sends personalized email">
+                <i class="fa-solid fa-envelope"></i> Piper
+              </button>
+              {% endif %}
+              <button class="btn-action btn-score-lead" onclick="scoreLead('{{ lead.id }}')" title="Re-score">Score</button>
+              <button class="btn-action btn-match-lead" onclick="matchLead('{{ lead.id }}')" title="Find buyers">Match</button>
+              {% if lead.status == 'negotiating' or lead.status == 'under_contract' %}
+              <button class="btn-action btn-contract" onclick="sendContract('{{ lead.id }}')" title="Generate contract">Contract</button>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <i class="fa-solid fa-house-circle-xmark"></i>
+      <p>No leads match your filters. Try adjusting or import a CSV.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Recent Outreach -->
+<div class="section-card">
+  <div class="section-header">
+    <div class="section-title"><i class="fa-solid fa-paper-plane" style="margin-right:6px;"></i>Recent Outreach</div>
+    <span style="font-size:0.8rem;color:var(--text-muted);">{{ emails_total }} total sent</span>
+  </div>
+  <div class="section-body">
+    {% if recent_outreach %}
+    {% for seq in recent_outreach %}
+    <div class="outreach-row">
+      <div class="outreach-dot {% if seq.reply_count > 0 %}replied{% elif seq.open_count > 0 %}opened{% else %}sent{% endif %}"></div>
+      <div class="outreach-info">
+        <div class="outreach-to">
+          {% if seq.match and seq.match.offer %}{{ seq.match.offer.seller_email|default:"Unknown" }}{% else %}{{ seq.to_email|default:"Unknown" }}{% endif %}
+        </div>
+        <div class="outreach-meta">
+          {{ seq.get_step_display|default:seq.step }} | Sent {{ seq.sent_at|timesince }} ago
+          {% if seq.open_count > 0 %} | Opened {{ seq.open_count }}x{% endif %}
+          {% if seq.reply_count > 0 %} | <span style="color:var(--gold);">Replied</span>{% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state">
+      <i class="fa-solid fa-inbox"></i>
+      <p>No outreach sent yet. Click "Piper" on a lead to send the first email.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Action Modal -->
+<div id="action-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9999;justify-content:center;align-items:center;">
+  <div style="background:var(--bg-card,#111);border:1px solid var(--glass-border,#222);border-radius:12px;padding:24px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+      <h3 id="modal-title" style="font-family:var(--font-heading);color:var(--gold);margin:0;"></h3>
+      <button onclick="document.getElementById('action-modal').style.display='none'" style="background:none;border:none;color:var(--text-muted);font-size:1.2rem;cursor:pointer;">X</button>
+    </div>
+    <div id="modal-body" style="font-size:0.85rem;line-height:1.6;white-space:pre-wrap;"></div>
   </div>
 </div>
 
@@ -231,71 +371,70 @@ function showModal(title, content) {
   document.getElementById('action-modal').style.display = 'flex';
 }
 
-// CSV upload
-document.getElementById('csv-upload-form').addEventListener('submit', function(e) {
-  e.preventDefault();
-  const form = this;
-  const resultEl = document.getElementById('upload-result');
-  resultEl.textContent = 'Uploading...';
-
-  const fd = new FormData(form);
-  fetch('{% url "broker_ops:api_import_leads" %}', {
+function piperOutreach(leadId) {
+  const btn = event.target.closest('.btn-piper');
+  if (btn) { btn.textContent = 'Sending...'; btn.disabled = true; }
+  fetch('/broker/api/piper-outreach/' + leadId + '/', {
     method: 'POST',
-    headers: {'X-CSRFToken': getCsrfToken()},
-    body: fd
+    headers: {'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/json'}
   })
   .then(r => r.json())
   .then(data => {
     if (data.ok) {
-      resultEl.textContent = 'Created: ' + data.created + ', Skipped: ' + data.skipped + (data.errors && data.errors.length ? ', Errors: ' + data.errors.length : '');
-      if (data.created > 0) setTimeout(() => location.reload(), 1500);
+      showModal('Email Sent by Piper', 'To: ' + data.to_email + '\nSubject: ' + data.subject + '\n\n' + (data.preview || 'Sent successfully'));
+      if (btn) { btn.textContent = 'Sent!'; btn.style.borderColor = '#22c55e'; btn.style.color = '#22c55e'; }
     } else {
-      resultEl.textContent = 'Error: ' + (data.error || 'Unknown');
+      showModal('Outreach Error', data.error || 'Unknown error');
+      if (btn) { btn.textContent = 'Piper'; btn.disabled = false; }
     }
   })
-  .catch(err => { resultEl.textContent = 'Upload failed: ' + err; });
+  .catch(err => { showModal('Error', err.toString()); if (btn) { btn.textContent = 'Piper'; btn.disabled = false; } });
+}
+
+function scoreLead(leadId) {
+  fetch('/broker/api/score-lead/' + leadId + '/', {
+    method: 'POST',
+    headers: {'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/json'}
+  })
+  .then(r => r.json())
+  .then(data => { showModal('Score Updated', data); if (data.ok) setTimeout(() => location.reload(), 1000); })
+  .catch(err => showModal('Error', err.toString()));
+}
+
+function matchLead(leadId) {
+  fetch('/broker/api/match-buyers/' + leadId + '/')
+  .then(r => r.json())
+  .then(data => showModal('Buyer Matches (' + (data.match_count || 0) + ')', data))
+  .catch(err => showModal('Error', err.toString()));
+}
+
+function sendContract(leadId) {
+  fetch('/broker/api/generate-contract/' + leadId + '/', {
+    method: 'POST',
+    headers: {'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/json'}
+  })
+  .then(r => r.json())
+  .then(data => showModal('Contract Generated', data))
+  .catch(err => showModal('Error', err.toString()));
+}
+
+// CSV upload
+document.getElementById('csv-upload-form').addEventListener('submit', function(e) {
+  e.preventDefault();
+  const resultEl = document.getElementById('upload-result');
+  resultEl.textContent = 'Uploading...';
+  const fd = new FormData(this);
+  fetch('{% url "broker_ops:api_import_leads" %}', {
+    method: 'POST', headers: {'X-CSRFToken': getCsrfToken()}, body: fd
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.ok) { resultEl.textContent = data.created + ' imported'; if (data.created > 0) setTimeout(() => location.reload(), 1500); }
+    else resultEl.textContent = 'Error: ' + (data.error || 'Unknown');
+  })
+  .catch(err => { resultEl.textContent = 'Failed: ' + err; });
 });
 
-// Score button
-document.querySelectorAll('.btn-score').forEach(btn => {
-  btn.addEventListener('click', function() {
-    const id = this.dataset.id;
-    fetch('/broker/api/score-lead/' + id + '/', {
-      method: 'POST',
-      headers: {'X-CSRFToken': getCsrfToken(), 'Content-Type': 'application/json'}
-    })
-    .then(r => r.json())
-    .then(data => {
-      showModal('Score Updated', data);
-      if (data.ok) setTimeout(() => location.reload(), 1000);
-    })
-    .catch(err => showModal('Error', err.toString()));
-  });
-});
-
-// Match button
-document.querySelectorAll('.btn-match').forEach(btn => {
-  btn.addEventListener('click', function() {
-    const id = this.dataset.id;
-    fetch('/broker/api/match-buyers/' + id + '/')
-    .then(r => r.json())
-    .then(data => showModal('Buyer Matches (' + (data.match_count || 0) + ')', data))
-    .catch(err => showModal('Error', err.toString()));
-  });
-});
-
-// SMS button
-document.querySelectorAll('.btn-sms').forEach(btn => {
-  btn.addEventListener('click', function() {
-    const id = this.dataset.id;
-    fetch('/broker/api/outreach/' + id + '/')
-    .then(r => r.json())
-    .then(data => showModal('Outreach SMS (' + (data.char_count || 0) + ' chars)', data.sms_text || JSON.stringify(data)))
-    .catch(err => showModal('Error', err.toString()));
-  });
-});
-
-// Close modal on backdrop click
 document.getElementById('action-modal').addEventListener('click', function(e) {
   if (e.target === this) this.style.display = 'none';
 });

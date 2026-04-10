@@ -1,0 +1,13 @@
+{
+  "type": "finder_agreement",
+  "client": "TechCorp Inc",
+  "contact": "Jane Smith",
+  "email": "jane@techcorp.com",
+  "scope": "AI-powered customer support chatbot implementation",
+  "commission_pct": 0.2,
+  "deal_value": 25000,
+  "term_months": 12,
+  "state": "California",
+  "generated_at": "2026-04-08T17:48:22.521265-07:00",
+  "pdf_path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/contracts/finder_agreement_TechCorp Inc_20260408.pdf"
+}

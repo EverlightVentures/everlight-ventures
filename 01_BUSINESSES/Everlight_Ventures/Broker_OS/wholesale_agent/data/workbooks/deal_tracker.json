@@ -1,0 +1,83 @@
+{
+  "meta": {
+    "name": "Wholesale Deal Tracker",
+    "version": "1.0.0",
+    "created": "2026-04-07",
+    "purpose": "One entry per active deal from first contact to commission paid. Full document timeline.",
+    "sync_targets": ["supabase:wholesale_client_files", "django:broker_ops.Deal", "slack:#war-room"]
+  },
+  "active_deals": [],
+  "closed_deals": [],
+  "dead_deals": [],
+  "commission_ledger": [],
+  "changelog": [
+    {
+      "date": "2026-04-07",
+      "version": "1.0.0",
+      "changes": ["Initial deal tracker creation", "8-document timeline, commission ledger, title company tracking"]
+    }
+  ],
+  "_deal_schema": {
+    "id": "uuid",
+    "lead_id": "uuid (ref pipeline_master)",
+    "property_address": "string",
+    "city": "string",
+    "state": "string",
+    "seller_name": "string",
+    "seller_contact": {"phone": "string|null", "email": "string|null"},
+    "buyer_name": "string|null",
+    "buyer_company": "string|null",
+    "buyer_contact": {"phone": "string|null", "email": "string|null"},
+    "stage": "intro|negotiating|under_contract|closing|closed_won|closed_lost",
+    "stage_history": [
+      {"stage": "string", "entered_at": "ISO timestamp", "agent": "string", "notes": "string"}
+    ],
+    "financials": {
+      "estimated_arv": "float",
+      "purchase_price": "float|null",
+      "assignment_fee": "float|null",
+      "buyer_price": "float|null",
+      "repair_estimate": "float|null",
+      "mao_70pct": "float|null (ARV * 0.70 - repairs - fee)",
+      "profit_usd": "float|null"
+    },
+    "title_company": {
+      "name": "string|null",
+      "contact": "string|null",
+      "email": "string|null",
+      "phone": "string|null",
+      "wholesale_friendly": "bool"
+    },
+    "documents": [
+      {
+        "doc_type": "seller_outreach|deal_sheet|assignment_contract|buyer_pitch|title_engagement|signed_contract|closing_statement|payment_receipt|addendum|note",
+        "status": "draft|sent|signed|final|voided",
+        "created_at": "ISO timestamp",
+        "sent_at": "ISO timestamp|null",
+        "signed_at": "ISO timestamp|null",
+        "file_path": "string|null",
+        "generated_by": "agent name"
+      }
+    ],
+    "commission": {
+      "rate_pct": "float (default 20)",
+      "amount_usd": "float|null",
+      "status": "pending|earned|invoiced|paid",
+      "stripe_invoice_id": "string|null",
+      "paid_at": "ISO date|null"
+    },
+    "created_at": "ISO timestamp",
+    "updated_at": "ISO timestamp",
+    "closed_at": "ISO timestamp|null"
+  },
+  "_commission_schema": {
+    "id": "uuid",
+    "deal_id": "uuid",
+    "type": "earned|paid|adjusted|reversed",
+    "amount_usd": "float",
+    "description": "string",
+    "stripe_invoice_id": "string|null",
+    "stripe_payout_id": "string|null",
+    "created_at": "ISO timestamp"
+  }
+}

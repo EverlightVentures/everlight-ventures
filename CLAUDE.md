@@ -17,6 +17,16 @@ Operating model:
 3. Execute in small, verifiable steps.
 4. Summarize outcome, risks, and rollback.
 
+3-Format Reporting Standard:
+- Use one publishing path only: `03_AUTOMATION_CORE/01_Scripts/content_tools/gdocs_bridge.py`.
+- Every report must produce:
+  1. HTML in `/home/opc/hive_reports/` served at `http://129.159.38.250:8504/reports/`
+  2. Google Doc in Drive
+  3. Slack post with links to the HTML and Google Doc
+- Oracle repair + handoff script: `03_AUTOMATION_CORE/01_Scripts/repair_3_format_reports.sh`
+- Oracle deploy must also ship `content_tools/report_template.py` and `xlm_bot/vendor/report_template.py`
+- If Google Docs direct publish breaks, rebuild `/home/opc/secrets/google_docs_token.json` from the n8n Google credential using the handoff script. Do not patch raw Slack wrappers again.
+
 Hive Mind Auto-Dispatch (ALWAYS ON):
 Every query automatically routes through the 42-person Hive Mind team. You do NOT wait
 for the user to say "use the Hive" -- it is ALWAYS active. For every task:
