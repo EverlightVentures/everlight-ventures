@@ -231,11 +231,9 @@ async def create_sale(sale: SaleCreate, tenant_id: str = Depends(get_tenant_id))
         li["transaction_id"] = tx_id
     supabase.table("onyx_line_items").insert(line_items).execute()
 
-    # Update stock quantities
+    # Update stock quantities (read-then-write)
     for item in sale.items:
         if item.product_id:
-            supabase.rpc("", {}).execute()  # Would use a Postgres function for atomic decrement
-            # For now, read-then-write
             prod = supabase.table("onyx_products").select("stock_quantity").eq("id", item.product_id).single().execute()
             if prod.data and prod.data["stock_quantity"] is not None:
                 new_qty = prod.data["stock_quantity"] - item.quantity
