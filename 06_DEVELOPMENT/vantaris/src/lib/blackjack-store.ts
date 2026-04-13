@@ -46,9 +46,9 @@ interface BotPlayer {
 }
 
 interface PlayerState {
-  chips: number
-  gems: number
-  sweepsCoins: number
+  chips: number          // Gold Coins (GC) -- purchased, social play, NOT redeemable
+  gems: number           // Premium currency for cosmetics
+  sweepsCoins: number    // Sweep Chips (SC) -- never sold, bonus only, redeemable for cash
   xp: number
   rank: string
   handsPlayed: number
@@ -64,7 +64,14 @@ interface PlayerState {
   equippedAura: string
   equippedDeckSkin: string
   equippedCardBack: string
+  // Sweepstakes tracking
+  scPlaythroughRequired: number  // total SC that must be wagered before redemption
+  scPlaythroughWagered: number   // SC wagered so far
+  kycVerified: boolean           // KYC verification status
 }
+
+// Game mode: GC (social, no cash value) or SC (sweepstakes, redeemable)
+export type GameMode = 'gc' | 'sc'
 
 // ============================================================
 // MULTI-SEAT: Each seat the player occupies is independent
@@ -138,6 +145,7 @@ interface BlackjackStore {
   musicEnabled: boolean
   voiceEnabled: boolean
   autoRebet: boolean
+  gameMode: GameMode  // 'gc' for social play, 'sc' for sweepstakes
 
   // Timers
   resultTimer: number | null
@@ -242,6 +250,10 @@ const FRESH_PLAYER: PlayerState = {
   equippedAura: 'none',
   equippedDeckSkin: 'classic',
   equippedCardBack: 'classic_navy',
+  // Sweepstakes
+  scPlaythroughRequired: 0,
+  scPlaythroughWagered: 0,
+  kycVerified: false,
 }
 
 export const useBlackjackStore = create<BlackjackStore>()(
@@ -324,6 +336,7 @@ export const useBlackjackStore = create<BlackjackStore>()(
   musicEnabled: false,
   voiceEnabled: false,
   autoRebet: false,
+  gameMode: 'gc' as GameMode,
 
   resultTimer: null,
 
@@ -916,6 +929,7 @@ export const useBlackjackStore = create<BlackjackStore>()(
           musicEnabled: persisted.musicEnabled ?? false,
           voiceEnabled: persisted.voiceEnabled ?? false,
           autoRebet: persisted.autoRebet ?? false,
+          gameMode: (persisted as any).gameMode ?? 'gc',
           selectedChip: persisted.selectedChip ?? 100,
           betAmount: persisted.betAmount ?? 100,
           activeDealer,
