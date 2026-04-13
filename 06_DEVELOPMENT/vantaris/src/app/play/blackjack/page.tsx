@@ -1232,7 +1232,22 @@ export default function BlackjackPage() {
             <div className="flex gap-1.5 md:gap-3 items-end flex-wrap justify-center">
               {[10, 25, 100, 500, 1000, 5000].filter(v => v <= store.player.chips).map(v => (
                 <CasinoChip key={v} value={v} selected={store.selectedChip === v}
-                  onClick={() => handleChipSelect(v)} size={store.selectedChip === v ? 56 : 44} />
+                  onClick={() => handleChipSelect(v)}
+                  onDragEnd={(chipValue, dropX, dropY) => {
+                    // Check where the chip was dropped
+                    const gameArea = document.getElementById('game-area')
+                    if (!gameArea) return
+                    const rect = gameArea.getBoundingClientRect()
+                    const relY = (dropY - rect.top) / rect.height
+
+                    if (relY < 0.7) {
+                      // Dropped on the table area -> add to main bet
+                      const newBet = Math.min(store.betAmount + chipValue, store.player.chips, store.config.maxBet)
+                      store.setBet(newBet)
+                      playChipClink()
+                    }
+                  }}
+                  size={store.selectedChip === v ? 56 : 44} />
               ))}
             </div>
             <div className="flex gap-2">
