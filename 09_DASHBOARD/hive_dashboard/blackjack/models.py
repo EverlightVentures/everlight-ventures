@@ -11,10 +11,24 @@ import json
 class PlayerProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='bj_profile')
     # Currencies
-    chips = models.BigIntegerField(default=1000)          # Free currency
+    chips = models.BigIntegerField(default=1000)          # Free currency (Gold Coins in sweepstakes)
     gems = models.IntegerField(default=0)                  # Premium currency ($)
+    sweeps_coins = models.DecimalField(max_digits=12, decimal_places=2, default=0)  # Redeemable for cash (1 SC = $1)
     total_chips_won = models.BigIntegerField(default=0)
     total_chips_lost = models.BigIntegerField(default=0)
+    total_sc_won = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    total_sc_redeemed = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    # Crypto wallet (for international OnyxBet)
+    crypto_balance_usd = models.DecimalField(max_digits=12, decimal_places=2, default=0)  # USD equivalent
+    crypto_deposit_address = models.CharField(max_length=128, blank=True, default='')
+    preferred_crypto = models.CharField(max_length=10, default='BTC')  # BTC, ETH, XLM, USDT
+
+    # Player region (determines sweepstakes vs crypto mode)
+    region = models.CharField(max_length=10, default='us')  # us, intl
+    country_code = models.CharField(max_length=2, default='US')
+    kyc_verified = models.BooleanField(default=False)
+    kyc_verified_at = models.DateTimeField(null=True, blank=True)
 
     # Stats
     hands_played = models.IntegerField(default=0)
@@ -314,3 +328,155 @@ class GemPurchase(models.Model):
 
     def __str__(self):
         return f"{self.player.avatar_name} | {self.session_id} | {self.status}"
+
+
+# ============================================================
+# CASINO EXPANSION: Provably Fair + Multi-Game + Sweepstakes
+# ============================================================
+
+class ProvablyFairSeed(models.Model):
+    """Server seed pairs for provably fair games.
+
+    Each player gets an active seed pair. After rotation (or game end),
+    the server seed is revealed so the player can verify.
+    """
+    player = models.ForeignKey(PlayerProfile, on_delete=models.CASCADE, related_name='pf_seeds')
+    server_seed = models.CharField(max_length=64)          # hex, NEVER shown until rotated
+    server_seed_hash = models.CharField(max_length=64)     # SHA-256 of server_seed, shown to player
+    client_seed = models.CharField(max_length=32)          # player-provided or auto-generated
+    nonce = models.IntegerField(default=0)                  # increments per game round
+    is_active = models.BooleanField(default=True)           # only one active pair per player
+    revealed = models.BooleanField(default=False)           # True after rotation (seed exposed)
+    games_played = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
+    revealed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'casino_pf_seeds'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        status = "ACTIVE" if self.is_active else "REVEALED" if self.revealed else "EXPIRED"
+        return f"{self.player.avatar_name} | {status} | nonce={self.nonce}"
+
+
+class CasinoGameRound(models.Model):
+    """Universal game round record. Works for ALL casino games."""
+    GAME_CHOICES = [
+        ('blackjack', 'Blackjack'),
+        ('roulette', 'Roulette'),
+        ('crash', 'Crash'),
+        ('dice', 'Dice'),
+        ('plinko', 'Plinko'),
+        ('mines', 'Mines'),
+    ]
+    CURRENCY_CHOICES = [
+        ('chips', 'Chips / Gold Coins'),
+        ('sc', 'Sweeps Coins'),
+        ('crypto', 'Crypto (USD equivalent)'),
+    ]
+
+    round_id = models.CharField(max_length=40, unique=True, default=uuid.uuid4)
+    player = models.ForeignKey(PlayerProfile, on_delete=models.CASCADE, related_name='casino_rounds')
+    game = models.CharField(max_length=20, choices=GAME_CHOICES)
+    currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES, default='chips')
+
+    # Bet + outcome
+    bet_amount = models.DecimalField(max_digits=12, decimal_places=2)
+    win_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    net = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    multiplier = models.DecimalField(max_digits=10, decimal_places=4, default=0)
+
+    # Provably fair reference
+    seed_pair = models.ForeignKey(ProvablyFairSeed, on_delete=models.SET_NULL, null=True, blank=True)
+    nonce_used = models.IntegerField(default=0)
+
+    # Game-specific data (the full result JSON)
+    game_data = models.JSONField(default=dict)
+
+    # XP earned
+    xp_earned = models.IntegerField(default=0)
+
+    played_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'casino_game_round'
+        ordering = ['-played_at']
+
+    def __str__(self):
+        return f"{self.player.avatar_name} | {self.game} | {self.net:+} {self.currency}"
+
+
+class CashoutRequest(models.Model):
+    """Sweeps Coin or crypto withdrawal request."""
+    STATUS_CHOICES = [
+        ('pending', 'Pending Review'),
+        ('kyc_required', 'KYC Required'),
+        ('approved', 'Approved'),
+        ('processing', 'Processing'),
+        ('completed', 'Completed'),
+        ('denied', 'Denied'),
+    ]
+    METHOD_CHOICES = [
+        ('paypal', 'PayPal'),
+        ('bank', 'Bank Transfer'),
+        ('crypto', 'Cryptocurrency'),
+        ('skrill', 'Skrill'),
+    ]
+
+    player = models.ForeignKey(PlayerProfile, on_delete=models.CASCADE, related_name='cashout_requests')
+    # Amount
+    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    currency = models.CharField(max_length=10, default='sc')  # sc or crypto
+    method = models.CharField(max_length=20, choices=METHOD_CHOICES, default='paypal')
+    destination = models.CharField(max_length=255)  # PayPal email, bank details, crypto address
+
+    # Status
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    denial_reason = models.TextField(blank=True, default='')
+
+    # Transaction reference
+    external_tx_id = models.CharField(max_length=255, blank=True, default='')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'casino_cashout_request'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.player.avatar_name} | ${self.amount} {self.currency} | {self.status}"
+
+
+class SweepsPromotion(models.Model):
+    """Free Sweeps Coin distribution events (legally required for sweepstakes model).
+
+    Every SC distribution must be logged for compliance.
+    """
+    PROMO_TYPES = [
+        ('daily_login', 'Daily Login Bonus'),
+        ('mail_in', 'AMOE Mail-In'),
+        ('social_media', 'Social Media Giveaway'),
+        ('purchase_bonus', 'GC Purchase Bonus'),
+        ('referral', 'Referral Bonus'),
+        ('event', 'Special Event'),
+    ]
+
+    player = models.ForeignKey(PlayerProfile, on_delete=models.CASCADE, related_name='sc_promos')
+    promo_type = models.CharField(max_length=20, choices=PROMO_TYPES)
+    sc_awarded = models.DecimalField(max_digits=8, decimal_places=2)
+    gc_purchased = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # if bundled with GC purchase
+
+    # For AMOE tracking
+    amoe_reference = models.CharField(max_length=100, blank=True, default='')  # mail tracking number
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'casino_sweeps_promo'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.player.avatar_name} | +{self.sc_awarded} SC | {self.promo_type}"

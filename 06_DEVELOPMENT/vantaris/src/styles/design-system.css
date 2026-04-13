@@ -1,0 +1,454 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * VANTARIS DESIGN SYSTEM
+ * "The darkest star burns brightest."
+ *
+ * Design philosophy:
+ * - Apple restraint (negative space IS luxury)
+ * - Sony PS5 immersion (depth, glow, haptic responsiveness)
+ * - Tesla data density (information without noise)
+ * - Linear precision (60fps, keyboard-first, zero jank)
+ * - Balenciaga fashion (typography as art, 80% whitespace)
+ * - Casino psychology (anticipation gap, near-miss dopamine, variable reward)
+ *
+ * The single most important rule:
+ * BLACK IS THE CANVAS. GOLD IS THE MONEY. EVERYTHING ELSE IS WHISPER.
+ */
+
+/* ============================================================
+ * CSS CUSTOM PROPERTIES (Design Tokens)
+ * ============================================================ */
+
+:root {
+  /* === COLORS === */
+
+  /* Backgrounds (layered depth, never flat) */
+  --vanta-void: #050507;         /* The deepest black. Main canvas. */
+  --vanta-abyss: #0a0a10;        /* Card backgrounds. Slightly lifted. */
+  --vanta-surface: #0f0f18;      /* Elevated surfaces. Modals. */
+  --vanta-elevated: #151520;     /* Highest surface. Dropdowns. Tooltips. */
+  --vanta-glass: rgba(15, 15, 24, 0.72);  /* Glass morphism panels */
+
+  /* Borders (barely visible, just structure) */
+  --vanta-border: rgba(255, 255, 255, 0.06);
+  --vanta-border-hover: rgba(255, 255, 255, 0.12);
+  --vanta-border-active: rgba(201, 168, 76, 0.3);
+
+  /* Text hierarchy */
+  --text-primary: #f0f0f5;       /* Headlines. Bold. Demands attention. */
+  --text-secondary: #8b8b9e;     /* Body. Comfortable to read. */
+  --text-tertiary: #4a4a5e;      /* Captions. Whisper. */
+  --text-disabled: #2a2a3e;
+
+  /* Accent: Supernova Gold (money, wins, status) */
+  --gold: #c9a84c;
+  --gold-bright: #e8c55a;
+  --gold-dim: #8a7333;
+  --gold-glow: rgba(201, 168, 76, 0.15);
+  --gold-gradient: linear-gradient(135deg, #c9a84c 0%, #e8c55a 50%, #c9a84c 100%);
+
+  /* State colors */
+  --win: #00e676;                 /* Green: profit, safe, go */
+  --win-glow: rgba(0, 230, 118, 0.12);
+  --loss: #ff2d55;                /* Red: danger, crash, stop */
+  --loss-glow: rgba(255, 45, 85, 0.12);
+  --info: #58a6ff;                /* Blue: info, neutral, dice */
+  --info-glow: rgba(88, 166, 255, 0.12);
+  --warning: #ff6b35;             /* Orange: caution, plinko, ember */
+  --warning-glow: rgba(255, 107, 53, 0.12);
+
+  /* Tier colors */
+  --tier-ember: #ff6b35;
+  --tier-shadow: #6a5acd;
+  --tier-eclipse: #1a0a2e;
+  --tier-supernova: #c9a84c;
+  --tier-vanta-black: #050507;
+
+  /* === TYPOGRAPHY === */
+
+  /* Font families */
+  --font-display: 'Cinzel', 'Playfair Display', Georgia, serif;  /* Headlines, casino gold, luxury */
+  --font-body: 'Inter', -apple-system, sans-serif;           /* UI text, readable, clean */
+  --font-mono: 'JetBrains Mono', 'SF Mono', monospace;      /* Numbers, amounts, codes */
+
+  /* Font sizes (fluid, responsive) */
+  --text-xs: clamp(0.625rem, 0.5vw + 0.5rem, 0.75rem);     /* 10-12px */
+  --text-sm: clamp(0.75rem, 0.6vw + 0.55rem, 0.875rem);    /* 12-14px */
+  --text-base: clamp(0.875rem, 0.7vw + 0.6rem, 1rem);      /* 14-16px */
+  --text-lg: clamp(1rem, 0.8vw + 0.7rem, 1.125rem);        /* 16-18px */
+  --text-xl: clamp(1.125rem, 1vw + 0.75rem, 1.5rem);       /* 18-24px */
+  --text-2xl: clamp(1.5rem, 1.5vw + 1rem, 2rem);           /* 24-32px */
+  --text-3xl: clamp(2rem, 2vw + 1.25rem, 3rem);            /* 32-48px */
+  --text-hero: clamp(3rem, 4vw + 1.5rem, 6rem);            /* 48-96px */
+
+  /* Line heights */
+  --leading-tight: 1.1;
+  --leading-snug: 1.3;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.7;
+
+  /* Letter spacing */
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.05em;
+  --tracking-ultra: 0.15em;  /* Used for VANTARIS wordmark */
+
+  /* === SPACING === */
+  --space-1: 0.25rem;    /* 4px */
+  --space-2: 0.5rem;     /* 8px */
+  --space-3: 0.75rem;    /* 12px */
+  --space-4: 1rem;       /* 16px */
+  --space-6: 1.5rem;     /* 24px */
+  --space-8: 2rem;       /* 32px */
+  --space-12: 3rem;      /* 48px */
+  --space-16: 4rem;      /* 64px */
+  --space-24: 6rem;      /* 96px */
+  --space-32: 8rem;      /* 128px */
+
+  /* === RADIUS === */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-full: 9999px;
+
+  /* === SHADOWS (glow-based, not drop shadows) === */
+  --glow-gold: 0 0 20px rgba(201, 168, 76, 0.15), 0 0 60px rgba(201, 168, 76, 0.05);
+  --glow-win: 0 0 20px rgba(0, 230, 118, 0.2), 0 0 60px rgba(0, 230, 118, 0.05);
+  --glow-loss: 0 0 20px rgba(255, 45, 85, 0.2);
+  --glow-info: 0 0 20px rgba(88, 166, 255, 0.15);
+  --glow-subtle: 0 0 40px rgba(255, 255, 255, 0.02);
+
+  /* === BLUR (glass morphism) === */
+  --blur-sm: blur(8px);
+  --blur-md: blur(16px);
+  --blur-lg: blur(24px);
+  --blur-xl: blur(40px);
+
+  /* === TRANSITIONS === */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);          /* Smooth deceleration */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);   /* Bounce at end */
+  --ease-anticipate: cubic-bezier(0.36, 0, 0.66, -0.56); /* Pull back then go */
+
+  --duration-instant: 100ms;
+  --duration-fast: 200ms;
+  --duration-normal: 350ms;
+  --duration-slow: 600ms;
+  --duration-dramatic: 1200ms;
+
+  /* === Z-INDEX SCALE === */
+  --z-base: 0;
+  --z-elevated: 10;
+  --z-dropdown: 20;
+  --z-modal: 30;
+  --z-toast: 40;
+  --z-celebration: 50;  /* Confetti, win animations */
+  --z-max: 100;
+}
+
+/* ============================================================
+ * BASE RESET + GLOBAL STYLES
+ * ============================================================ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--text-primary);
+  background: var(--vanta-void);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100dvh;
+  background: var(--vanta-void);
+  overflow-x: hidden;
+}
+
+/* Prevent text selection on game elements */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ============================================================
+ * TYPOGRAPHY UTILITIES
+ * ============================================================ */
+
+.font-display { font-family: var(--font-display); }
+.font-body    { font-family: var(--font-body); }
+.font-mono    { font-family: var(--font-mono); }
+
+/* Amount display: the number that shows money */
+.amount {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.amount-gold {
+  composes: amount;
+  background: var(--gold-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ============================================================
+ * GLASS MORPHISM PANEL
+ * Used for: game cards, wallet, sidebar, modals
+ * ============================================================ */
+
+.glass {
+  background: var(--vanta-glass);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  border: 1px solid var(--vanta-border);
+  border-radius: var(--radius-lg);
+}
+
+.glass:hover {
+  border-color: var(--vanta-border-hover);
+}
+
+.glass-elevated {
+  background: rgba(21, 21, 32, 0.85);
+  backdrop-filter: var(--blur-lg);
+  border: 1px solid var(--vanta-border-hover);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--glow-subtle);
+}
+
+/* ============================================================
+ * GLOW EFFECTS (the signature Vantaris look)
+ * ============================================================ */
+
+/* Gold glow on win/important elements */
+.glow-gold {
+  box-shadow: var(--glow-gold);
+  border-color: rgba(201, 168, 76, 0.2);
+}
+
+/* Pulsing glow animation (for active jackpots, live games) */
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(201, 168, 76, 0.1); }
+  50%      { box-shadow: 0 0 40px rgba(201, 168, 76, 0.25); }
+}
+
+.glow-pulse {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* ============================================================
+ * BUTTON SYSTEM
+ * ============================================================ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: all var(--duration-fast) var(--ease-out);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Primary: Gold gradient, used for bets and CTAs */
+.btn-primary {
+  background: var(--gold-gradient);
+  color: var(--vanta-void);
+  box-shadow: var(--glow-gold);
+}
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 30px rgba(201, 168, 76, 0.3), 0 0 80px rgba(201, 168, 76, 0.1);
+}
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* Ghost: Transparent with border */
+.btn-ghost {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--vanta-border);
+}
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--vanta-border-hover);
+}
+
+/* Danger: Red, used for cashout, stop */
+.btn-danger {
+  background: var(--loss);
+  color: white;
+}
+
+/* Win: Green, used for collect, claim */
+.btn-win {
+  background: var(--win);
+  color: var(--vanta-void);
+}
+
+/* ============================================================
+ * CARD SYSTEM (game cards, stat cards, etc.)
+ * ============================================================ */
+
+.card {
+  background: var(--vanta-abyss);
+  border: 1px solid var(--vanta-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.card:hover {
+  border-color: var(--vanta-border-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--glow-subtle);
+}
+
+/* Game card: the clickable game thumbnail in the lobby */
+.game-card {
+  position: relative;
+  aspect-ratio: 4/3;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.game-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, var(--vanta-void) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.game-card:hover {
+  transform: scale(1.03);
+  box-shadow: var(--glow-gold);
+}
+
+/* ============================================================
+ * ANIMATIONS
+ * ============================================================ */
+
+/* Fade in from below (page transitions, card reveals) */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fade-up var(--duration-normal) var(--ease-out) both;
+}
+
+/* Scale in (modals, celebrations) */
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Counter tick animation (for amounts changing) */
+@keyframes counter-tick {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-100%); }
+  50.01% { transform: translateY(100%); }
+  100% { transform: translateY(0); }
+}
+
+/* Win flash (screen border glow on big wins) */
+@keyframes win-flash {
+  0%   { box-shadow: inset 0 0 0 0 rgba(0, 230, 118, 0); }
+  50%  { box-shadow: inset 0 0 100px 20px rgba(0, 230, 118, 0.15); }
+  100% { box-shadow: inset 0 0 0 0 rgba(0, 230, 118, 0); }
+}
+
+.win-flash {
+  animation: win-flash 1.2s var(--ease-out);
+}
+
+/* Crash line glow */
+@keyframes crash-glow {
+  0%   { filter: drop-shadow(0 0 2px var(--win)); }
+  100% { filter: drop-shadow(0 0 12px var(--win)) drop-shadow(0 0 30px var(--win-glow)); }
+}
+
+/* Shake on loss */
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20%      { transform: translateX(-4px); }
+  40%      { transform: translateX(4px); }
+  60%      { transform: translateX(-3px); }
+  80%      { transform: translateX(2px); }
+}
+
+.shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* ============================================================
+ * RESPONSIVE BREAKPOINTS
+ * ============================================================ */
+
+/* Mobile first. These are enhancement breakpoints. */
+@media (min-width: 640px)  { /* sm: tablet portrait */ }
+@media (min-width: 768px)  { /* md: tablet landscape */ }
+@media (min-width: 1024px) { /* lg: desktop */ }
+@media (min-width: 1280px) { /* xl: wide desktop */ }
+@media (min-width: 1536px) { /* 2xl: ultra-wide */ }
+
+/* ============================================================
+ * SCROLLBAR (custom, minimal)
+ * ============================================================ */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--vanta-border-hover);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* ============================================================
+ * NOISE TEXTURE OVERLAY (subtle grain for luxury feel)
+ * ============================================================ */
+
+.noise-overlay::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  opacity: 0.015;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: var(--z-max);
+}

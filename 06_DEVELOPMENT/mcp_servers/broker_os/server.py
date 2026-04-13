@@ -125,6 +125,10 @@ def _is_relevant(text: str) -> bool:
 
 def _guess_category(text: str) -> str:
     t = text.lower()
+    if any(k in t for k in ["computer vision", "opencv", "image recognition", "face detection",
+                              "object detection", "ocr", "image processing", "visual inspection",
+                              "defect detection", "receipt scan"]):
+        return "computer_vision"
     if any(k in t for k in ["fintech", "compliance", "stripe", "payment", "bank", "crypto"]):
         return "fintech"
     if any(k in t for k in ["health", "hipaa", "clinic", "medical"]):
@@ -133,10 +137,14 @@ def _guess_category(text: str) -> str:
         return "marketing"
     if any(k in t for k in ["logistic", "shipping", "supply"]):
         return "logistics"
+    if any(k in t for k in ["real estate", "property", "wholesale", "mls"]):
+        return "real_estate"
     if any(k in t for k in ["ai", "gpt", "agent", "llm", "automation", "saas"]):
         return "ai_saas"
     if any(k in t for k in ["dev", "api", "backend", "frontend", "code"]):
         return "dev_service"
+    if any(k in t for k in ["website", "domain", "landing page"]):
+        return "website"
     return "other"
 
 
@@ -223,7 +231,7 @@ TOOLS = [
                 "seller_email": {"type": "string", "default": ""},
                 "title": {"type": "string"},
                 "description": {"type": "string"},
-                "category": {"type": "string", "enum": ["ai_saas", "dev_service", "fintech", "healthtech", "marketing", "logistics", "other"], "default": "ai_saas"},
+                "category": {"type": "string", "enum": ["ai_saas", "computer_vision", "dev_service", "fintech", "healthtech", "marketing", "logistics", "real_estate", "website", "other"], "default": "ai_saas"},
                 "keywords": {"type": "array", "items": {"type": "string"}, "default": []},
                 "price_min": {"type": "number", "default": 0},
                 "price_max": {"type": "number", "default": 0},

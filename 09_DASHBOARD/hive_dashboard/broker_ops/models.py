@@ -22,15 +22,16 @@ from django.utils import timezone
 
 class OfferListing(models.Model):
     CATEGORY_CHOICES = [
-        ("ai_saas",      "AI / SaaS Tool"),
-        ("dev_service",  "Dev / Implementation Service"),
-        ("fintech",      "Fintech / Compliance"),
-        ("healthtech",   "Healthtech / Privacy"),
-        ("marketing",    "Marketing / Growth"),
-        ("logistics",    "Logistics / Operations"),
-        ("real_estate",  "Real Estate / Property"),
-        ("website",      "Website / Domain"),
-        ("other",        "Other"),
+        ("ai_saas",          "AI / SaaS Tool"),
+        ("computer_vision",  "Computer Vision / Image AI"),
+        ("dev_service",      "Dev / Implementation Service"),
+        ("fintech",          "Fintech / Compliance"),
+        ("healthtech",       "Healthtech / Privacy"),
+        ("marketing",        "Marketing / Growth"),
+        ("logistics",        "Logistics / Operations"),
+        ("real_estate",      "Real Estate / Property"),
+        ("website",          "Website / Domain"),
+        ("other",            "Other"),
     ]
     STATUS_CHOICES = [
         ("active",    "Active"),

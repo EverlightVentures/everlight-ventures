@@ -31,6 +31,9 @@
 3. Digital agencies under 50 employees (understand AI, need implementation)
 4. Legal practices (document processing, intake automation)
 5. Real estate teams (lead follow-up, CRM automation)
+6. Manufacturing/QA (computer vision defect detection, quality inspection)
+7. Retail/inventory (CV-powered stock counting, shelf audit, receipt scanning)
+8. Property management (access control, security camera analytics)
 
 ## Sales Process
 1. Prospect scraper finds SMBs via Google Maps API
@@ -45,7 +48,30 @@
 - We run 42 AI agents across 8 businesses (proof of concept)
 - We built a POS system, trading bot, broker platform, publishing engine -- all AI-powered
 - Not just chatbots -- full agentic workflows that replace manual processes
+- Computer vision capabilities: receipt scanning, quality inspection, facial recognition access control
 - California-based, not offshore
+
+## Computer Vision Service Tier (NEW)
+
+### CV Build ($3,000 - $5,000)
+- Custom OpenCV pipeline for specific business use case
+- Document/receipt scanning, inventory counting, defect detection, or access control
+- FastAPI backend + cloud deployment (Oracle/Railway)
+- 2-3 week delivery
+- Includes Tesseract OCR integration where applicable
+
+### CV Monthly ($1,500/mo)
+- Ongoing model tuning + maintenance
+- New detection categories as needed
+- Monitoring + accuracy reports
+- Priority support
+
+### Target CV Clients
+- Manufacturing: visual QA inspection on production lines
+- Retail: shelf stock counting, receipt digitization
+- Property management: facial recognition access control
+- Agriculture: drone image crop health analysis
+- Sports/fitness: technique analysis from video (MMA/BJJ studios)
 
 ## Revenue Target
 - 5 clients/month at $3k build + $2k retainer = $25k/mo within 6 months
