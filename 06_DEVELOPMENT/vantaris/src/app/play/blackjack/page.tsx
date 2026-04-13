@@ -119,19 +119,19 @@ const DEALER_LINES: Record<string, Record<string, string[]>> = {
     idle: ["The VIP lounge is waiting!", "Take your time, superstar."],
   },
   bacardi: {
-    deal: ["Cards are cold. Like me.", "The ice table is open. Play or leave."],
-    hit: ["Another card. Brave or foolish. We will see."],
-    stand: ["Standing. The ice approves."],
-    bust: ["Busted. The ice is unforgiving."],
-    win: ["You beat the Ice. That does not happen often."],
-    blackjack: ["Natural 21 at the ice table. Legends will speak of this."],
-    push: ["Push. The ice and the player are equal. For now."],
-    dealer_bust: ["The ice cracked. It will not happen twice."],
-    surrender: ["Surrendering at the ice table? Smart. Most do not survive."],
-    insurance: ["Ace in the frost. Insure yourself. Or do not."],
-    split: ["Splitting at the ice table. Dangerous. I like it."],
-    charlie: ["Six cards against the Ice. You have earned my respect."],
-    idle: ["The ice waits for no one.", "Still here? Then play."],
+    deal: ["Cards are cold. Like me.", "The ice table is open. Play or leave.", "Fresh deck. Fresh victims.", "Let us see who freezes first.", "The frost deals. You receive."],
+    hit: ["Another card. Brave or foolish. We will see.", "You want more? Bold.", "Drawing from the frost.", "Take your card. Feel the chill.", "Interesting choice. The ice watches."],
+    stand: ["Standing. The ice approves.", "Firm. Like permafrost.", "You hold your ground. Noted.", "Standing pat. Calculated."],
+    bust: ["Busted. The ice is unforgiving.", "Over 21. The frost claims another.", "Too greedy. The ice punishes greed.", "Busted. Cold."],
+    win: ["You beat the Ice. That does not happen often.", "Victory at the frost table. Impressive.", "A rare thaw. Take your chips.", "The Ice bows. Do not expect it again.", "You earned that. Respect."],
+    blackjack: ["Natural 21 at the ice table. Legends will speak of this.", "Blackjack. The frost has never seen that play.", "Twenty one. Pure. Cold. Perfect.", "Flawless. Even Bacardi Ice is speechless."],
+    push: ["Push. The ice and the player are equal. For now.", "A draw. Neither breaks.", "Stalemate. The frost holds."],
+    dealer_bust: ["The ice cracked. It will not happen twice.", "I busted. Savor it. It is rare.", "The frost melted. Temporarily.", "Take your chips. The ice will rebuild."],
+    surrender: ["Surrendering at the ice table? Smart. Most do not survive.", "Walking away. The survivors always do."],
+    insurance: ["Ace in the frost. Insure yourself. Or do not.", "An Ace stares you down. Your call."],
+    split: ["Splitting at the ice table. Dangerous. I like it.", "Two hands against the frost. Ambitious."],
+    charlie: ["Six cards against the Ice. You have earned my respect.", "Six and still standing. The frost salutes you."],
+    idle: ["The ice waits for no one.", "Still here? Then play.", "Silence at the frost table. That is either wisdom or fear.", "The longer you wait, the colder it gets.", "Make your move. The ice does not negotiate."],
   },
 }
 
@@ -217,12 +217,22 @@ async function speakLine(text: string, voiceId: string) {
   }
 }
 
+const lastSpokenRef: Record<string, string> = {}
+
 function useDealerSpeak() {
   const { activeDealer, voiceEnabled, phase, outcome } = useBlackjackStore()
 
   const speak = useCallback((category: string) => {
     const lines = DEALER_LINES[activeDealer.id]?.[category] || DEALER_LINES.aria.idle
-    const line = lines[Math.floor(Math.random() * lines.length)]
+    // Never repeat the last spoken line in this category
+    const lastKey = `${activeDealer.id}:${category}`
+    let line = lines[Math.floor(Math.random() * lines.length)]
+    if (lines.length > 1 && line === lastSpokenRef[lastKey]) {
+      // Pick a different one
+      const others = lines.filter(l => l !== lastSpokenRef[lastKey])
+      line = others[Math.floor(Math.random() * others.length)]
+    }
+    lastSpokenRef[lastKey] = line
     useBlackjackStore.getState().setDealerLine(line)
     if (voiceEnabled) {
       speakLine(line, activeDealer.voiceId)
