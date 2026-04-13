@@ -392,9 +392,9 @@ function DealerPanel() {
   ]
 
   return (
-    <div className="absolute right-2 md:right-4 top-[60px] md:top-[70px] z-20">
+    <div className="absolute left-1/2 -translate-x-1/2 top-[55px] md:top-[65px] z-20">
       <motion.div
-        className="glass p-2 md:p-3 rounded-xl flex items-start gap-2 md:gap-3 max-w-[200px] md:max-w-[260px] cursor-pointer"
+        className="glass p-2 md:p-3 rounded-xl flex items-center gap-2 md:gap-3 max-w-[240px] md:max-w-[300px] cursor-pointer"
         onClick={() => togglePanel('dealerSelect')}
         key={dealerLine}
         initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
@@ -512,6 +512,69 @@ function OutcomeOverlay() {
         )}
       </div>
     </motion.div>
+  )
+}
+
+// ============================================================
+// PROGRESSIVE JACKPOT
+// ============================================================
+
+function ProgressiveJackpot({ betAmount, phase }: { betAmount: number; phase: string }) {
+  const [jackpot, setJackpot] = useState(() => {
+    if (typeof window === 'undefined') return 500000
+    const saved = localStorage.getItem('vantaris_jackpot')
+    return saved ? parseInt(saved) : 500000
+  })
+
+  // Increment over time (every second) + on bets
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setJackpot(prev => {
+        const next = prev + Math.floor(10 + Math.random() * 40) // 10-50 per second
+        if (next >= 5000000) {
+          // JACKPOT HIT! Reset
+          localStorage.setItem('vantaris_jackpot', '500000')
+          return 500000
+        }
+        localStorage.setItem('vantaris_jackpot', String(next))
+        return next
+      })
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  // Add to jackpot when player deals (1% of bet goes to pot)
+  useEffect(() => {
+    if (phase === 'dealing' && betAmount > 0) {
+      setJackpot(prev => {
+        const next = prev + Math.floor(betAmount * 0.01)
+        localStorage.setItem('vantaris_jackpot', String(next))
+        return next
+      })
+    }
+  }, [phase])
+
+  return (
+    <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 text-center">
+      <p className="text-[7px] md:text-[8px] uppercase tracking-widest" style={{
+        color: 'rgba(201,168,76,0.5)', fontFamily: "'Cinzel', serif", letterSpacing: '2px',
+      }}>
+        PROGRESSIVE JACKPOT
+      </p>
+      <motion.p
+        key={jackpot}
+        className="font-mono text-lg md:text-xl font-black"
+        style={{
+          background: 'linear-gradient(135deg, #c9a84c, #f0d080, #c9a84c)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          textShadow: 'none',
+          filter: 'drop-shadow(0 0 8px rgba(201,168,76,0.3))',
+        }}
+      >
+        {jackpot.toLocaleString()} GC
+      </motion.p>
+    </div>
   )
 }
 
@@ -940,7 +1003,10 @@ export default function BlackjackPage() {
         {/* Side bet results */}
         <SideBetResults />
 
-        {/* Dealer panel */}
+        {/* Progressive Jackpot -- top center, grows in real-time */}
+        <ProgressiveJackpot betAmount={store.betAmount} phase={store.phase} />
+
+        {/* Dealer panel -- centered on table */}
         <DealerPanel />
 
         {/* Presence indicator (top left) */}
@@ -1086,18 +1152,25 @@ export default function BlackjackPage() {
             <div className="flex gap-2 md:gap-3 items-center">
               <p className="text-[8px] uppercase tracking-wider mr-1" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: "'Cinzel', serif" }}>SIDE BETS</p>
               {([
-                { key: 'perfectPairs' as const, label: 'PAIRS', desc: 'Same rank pair', payout: '5:1 - 25:1', color: '#9b59b6', amount: 25 },
-                { key: 'twentyOnePlus3' as const, label: '21+3', desc: '3-card poker', payout: '5:1 - 100:1', color: '#e67e22', amount: 25 },
-                { key: 'luckyLadies' as const, label: 'LADIES', desc: 'Total = 20', payout: '4:1 - 1000:1', color: '#e91e63', amount: 10 },
+                { key: 'perfectPairs' as const, label: 'LUCKY LUCKY', desc: 'Same rank pair', payout: '5:1 - 25:1', color: '#2196f3' },
+                { key: 'twentyOnePlus3' as const, label: '21+3', desc: '3-card poker', payout: '5:1 - 100:1', color: '#e67e22' },
+                { key: 'luckyLadies' as const, label: 'BAD BUSTER', desc: 'Dealer busts', payout: '4:1 - 1000:1', color: '#f44336' },
               ]).map(sb => {
                 const active = store.sideBets[sb.key].active
+                const currentBet = store.sideBets[sb.key].bet
+                // Use selected chip for side bet amount (tap chip first, then tap side bet)
+                const betAmount = store.selectedChip || 10
                 return (
                   <motion.button
                     key={sb.key}
                     onClick={() => {
-                      store.toggleSideBet(sb.key, sb.amount)
-                      if (!active) {
-                        toastInfo(`${sb.label} Side Bet ON`, `${sb.amount} GC per hand. Pays ${sb.payout}`)
+                      if (active) {
+                        // Turn off
+                        store.toggleSideBet(sb.key, 0)
+                      } else {
+                        // Turn on with selected chip amount
+                        store.toggleSideBet(sb.key, betAmount)
+                        toastInfo(`${sb.label} ON`, `${betAmount} GC per hand. Pays ${sb.payout}`)
                       }
                     }}
                     className="px-3 md:px-4 py-2 md:py-2.5 rounded-xl text-center min-w-[70px]"
@@ -1116,7 +1189,7 @@ export default function BlackjackPage() {
                       {sb.label}
                     </p>
                     <p className="text-[8px] md:text-[9px] font-mono" style={{ color: active ? '#fff' : 'rgba(255,255,255,0.2)' }}>
-                      {active ? `${sb.amount} GC` : sb.payout}
+                      {active ? `${currentBet} GC` : sb.payout}
                     </p>
                     {active && (
                       <div className="mt-0.5 text-[7px] font-bold px-1.5 py-0.5 rounded-full inline-block"

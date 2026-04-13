@@ -100,19 +100,32 @@ function CasinoTable() {
       </group>
       {/* End oval scale group */}
 
-      {/* 5 Betting circles on the felt */}
+      {/* Per-seat side bet spots: Lucky Lucky (left) + Bad Buster (right) */}
       {bettingSpots.map((spot, i) => (
-        <mesh key={`bet-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[spot.x, -0.42, spot.z]}>
-          <ringGeometry args={[0.38, 0.42, 32]} />
-          <meshStandardMaterial
-            color={i === 2 ? '#c9a84c' : '#1a7a3e'}
-            emissive={i === 2 ? '#c9a84c' : '#1a7a3e'}
-            emissiveIntensity={i === 2 ? 0.25 : 0.1}
-            side={THREE.DoubleSide}
-            transparent
-            opacity={i === 2 ? 0.7 : 0.4}
-          />
-        </mesh>
+        <group key={`sidebets-${i}`}>
+          {/* Lucky Lucky -- small circle LEFT of seat */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[spot.x - 0.55, -0.42, spot.z - 0.15]}>
+            <circleGeometry args={[0.15, 24]} />
+            <meshStandardMaterial
+              color="#2196f3"
+              emissive="#1565c0"
+              emissiveIntensity={0.15}
+              transparent opacity={0.35}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+          {/* Bad Buster -- small circle RIGHT of seat */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[spot.x + 0.55, -0.42, spot.z - 0.15]}>
+            <circleGeometry args={[0.15, 24]} />
+            <meshStandardMaterial
+              color="#f44336"
+              emissive="#c62828"
+              emissiveIntensity={0.15}
+              transparent opacity={0.35}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+        </group>
       ))}
 
       {/* Insurance arc (semi-circle in front of dealer) */}

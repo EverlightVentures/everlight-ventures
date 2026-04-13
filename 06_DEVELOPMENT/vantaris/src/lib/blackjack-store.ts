@@ -332,7 +332,12 @@ export const useBlackjackStore = create<BlackjackStore>()(
   // ============================================================
 
   setBet: (amount) => set({ betAmount: amount }),
-  selectChip: (value) => set({ selectedChip: value, betAmount: value }),
+  selectChip: (value) => {
+    const state = get()
+    // Stack chips: add chip value to current bet (capped at player chips and table max)
+    const newBet = Math.min(state.betAmount + value, state.player.chips, state.config.maxBet)
+    set({ selectedChip: value, betAmount: newBet })
+  },
 
   toggleSeat: (seatIndex: number) => {
     const state = get()
