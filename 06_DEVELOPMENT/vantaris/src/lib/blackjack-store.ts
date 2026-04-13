@@ -134,6 +134,8 @@ interface BlackjackStore {
   setDealer: (dealer: DealerPersona) => void
   togglePanel: (panel: string) => void
   setDealerLine: (line: string) => void
+  toggleSideBet: (bet: 'perfectPairs' | 'twentyOnePlus3' | 'luckyLadies', amount: number) => void
+  setTableVariant: (variant: string) => void
 }
 
 // ============================================================
@@ -275,8 +277,9 @@ export const useBlackjackStore = create<BlackjackStore>()(
     let shoe = state.shoe
     if (needsReshuffle(shoe)) shoe = createShoe(state.config.deckCount)
 
-    // Deduct bet
-    const newChips = state.player.chips - state.betAmount
+    // Deduct bet + side bets + lightning fee
+    const sideBetTotal = Object.values(state.sideBets).reduce((sum, sb) => sum + (sb.active ? sb.bet : 0), 0)
+    const newChips = state.player.chips - state.betAmount - sideBetTotal
 
     // Generate deal sequence
     const { events, remainingShoe } = generateDealSequence(shoe)
@@ -359,16 +362,18 @@ export const useBlackjackStore = create<BlackjackStore>()(
           s.lightning.active && s.lightning.multipliedTotal === 21 ? s.lightning.multiplier : 1,
         )
         const xp = calculateXP(settled.outcome!)
+        const bjSideBetPayout = Object.values(s.sideBets).reduce((sum, sb) => sum + (sb.active ? sb.payout : 0), 0)
+        const bjTotalPayout = settled.payout + bjSideBetPayout
         set({
           phase: 'settled',
           mainHand: settled,
           dealerHand: { ...s.dealerHand, cards: s.dealerHand.cards.map(c => ({ ...c, faceDown: false })) },
           outcome: settled.outcome,
-          winAmount: settled.payout,
+          winAmount: bjTotalPayout,
           xpEarned: xp,
           player: {
             ...s.player,
-            chips: s.player.chips + settled.payout,
+            chips: s.player.chips + bjTotalPayout,
             xp: s.player.xp + xp,
             handsPlayed: s.player.handsPlayed + 1,
             handsWon: s.player.handsWon + 1,
@@ -502,7 +507,9 @@ export const useBlackjackStore = create<BlackjackStore>()(
           settledSplit = settleHand(s2.splitHand, s2.dealerHand, s2.config, s2.player.presenceMultiplier, 1)
         }
 
-        const totalPayout = settledMain.payout + (settledSplit?.payout || 0)
+        // Side bet payouts (already calculated during deal)
+        const sideBetPayout = Object.values(s2.sideBets).reduce((sum, sb) => sum + (sb.active ? sb.payout : 0), 0)
+        const totalPayout = settledMain.payout + (settledSplit?.payout || 0) + sideBetPayout
         const mainOutcome = settledMain.outcome!
         const xp = calculateXP(mainOutcome)
         const isWin = mainOutcome === 'win' || mainOutcome === 'blackjack' || mainOutcome === 'charlie'
@@ -664,6 +671,35 @@ export const useBlackjackStore = create<BlackjackStore>()(
   togglePanel: (panel) => {
     const key = `show${panel.charAt(0).toUpperCase() + panel.slice(1)}` as keyof BlackjackStore
     set({ [key]: !get()[key] } as any)
+  },
+
+  toggleSideBet: (bet, amount) => {
+    const state = get()
+    const sideBets = { ...state.sideBets }
+    const current = sideBets[bet]
+    if (current.active) {
+      // Turn off -- refund bet
+      sideBets[bet] = { ...current, active: false, bet: 0 }
+    } else {
+      // Turn on -- place bet
+      if (state.player.chips >= amount + state.betAmount) {
+        sideBets[bet] = { ...current, active: true, bet: amount }
+      }
+    }
+    set({ sideBets })
+  },
+
+  setTableVariant: (variant) => {
+    set({
+      config: createTableConfig(variant),
+      shoe: createShoe(createTableConfig(variant).deckCount),
+      phase: 'betting' as GamePhase,
+      mainHand: { ...EMPTY_HAND },
+      splitHand: null,
+      dealerHand: { ...EMPTY_HAND },
+      sideBets: { ...EMPTY_SIDE_BETS },
+      lightning: { ...EMPTY_LIGHTNING },
+    })
   },
 }),
     {

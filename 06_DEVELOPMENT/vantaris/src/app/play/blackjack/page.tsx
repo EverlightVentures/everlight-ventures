@@ -560,6 +560,8 @@ export default function BlackjackPage() {
   const [particleTrigger, setParticleTrigger] = useState(0)
   const [particleType, setParticleType] = useState<'blackjack' | 'win' | 'loss' | null>(null)
 
+  const [showTablePicker, setShowTablePicker] = useState(false)
+
   // Seat positions projected from 3D scene (for bot labels)
   const defaultSeats: SeatPosition[] = Array(5).fill({ x: 0, y: 0, visible: false })
   const [seatPositions, setSeatPositions] = useState<SeatPosition[]>(defaultSeats)
@@ -712,10 +714,55 @@ export default function BlackjackPage() {
         style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.85), transparent)', borderColor: 'transparent' }}>
 
         <div className="flex items-center gap-1.5 md:gap-3">
-          <h1 className="text-sm md:text-base font-bold tracking-widest"
-            style={{ fontFamily: "'Cinzel', serif", background: 'linear-gradient(135deg, #c9a84c, #e8c55a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            VANTARIS
-          </h1>
+          <div className="relative">
+            <button onClick={() => setShowTablePicker(!showTablePicker)} className="flex items-center gap-1.5">
+              <h1 className="text-sm md:text-base font-bold tracking-widest"
+                style={{ fontFamily: "'Cinzel', serif", background: 'linear-gradient(135deg, #c9a84c, #e8c55a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                VANTARIS
+              </h1>
+              <span className="text-[8px] px-1.5 py-0.5 rounded uppercase tracking-wider font-bold"
+                style={{
+                  background: store.config.lightningEnabled ? 'rgba(241,196,15,0.15)' : 'rgba(201,168,76,0.1)',
+                  color: store.config.lightningEnabled ? '#f1c40f' : 'rgba(201,168,76,0.6)',
+                  border: `1px solid ${store.config.lightningEnabled ? 'rgba(241,196,15,0.3)' : 'rgba(201,168,76,0.2)'}`,
+                  fontFamily: "'Cinzel', serif",
+                }}>
+                {store.config.variant || 'classic'}
+              </span>
+            </button>
+
+            <AnimatePresence>
+              {showTablePicker && (
+                <motion.div
+                  initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                  className="absolute top-full left-0 mt-2 z-50 glass-elevated rounded-xl p-2 w-[260px] space-y-1"
+                >
+                  {[
+                    { id: 'classic', name: 'Classic', desc: '$10-$5K, 6 deck, 3:2 BJ', icon: '\u2663', color: '#27ae60' },
+                    { id: 'lightning', name: 'Lightning', desc: '$50-$25K, random 2x-25x', icon: '\u26A1', color: '#f1c40f' },
+                    { id: 'speed', name: 'Speed', desc: '$25-$10K, fast pace', icon: '\uD83D\uDCA8', color: '#3498db' },
+                    { id: 'switch', name: 'Switch', desc: '$100-$25K, 6:5 BJ payout', icon: '\uD83D\uDD00', color: '#9b59b6' },
+                    { id: 'highroller', name: 'High Roller', desc: '$500-$50K, all features', icon: '\uD83D\uDC8E', color: '#e74c3c' },
+                  ].map(t => (
+                    <button key={t.id}
+                      onClick={() => { store.setTableVariant(t.id); setShowTablePicker(false) }}
+                      className="w-full flex items-center gap-2.5 p-2 rounded-lg text-left transition-colors hover:bg-white/5"
+                      style={{
+                        background: (store.config.variant || 'classic') === t.id ? `${t.color}12` : 'transparent',
+                        border: `1px solid ${(store.config.variant || 'classic') === t.id ? t.color + '40' : 'transparent'}`,
+                      }}
+                    >
+                      <span className="text-base">{t.icon}</span>
+                      <div>
+                        <p className="text-xs font-semibold" style={{ color: t.color, fontFamily: "'Cinzel', serif" }}>{t.name}</p>
+                        <p className="text-[9px]" style={{ color: 'var(--text-tertiary)' }}>{t.desc}</p>
+                      </div>
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
           {/* Chips */}
           <div className="flex items-center gap-1 px-2 md:px-3 py-1 rounded-full" style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(201,168,76,0.4)' }}>
             <span className="text-[10px] md:text-xs">{'\uD83E\uDE99'}</span>
@@ -874,6 +921,41 @@ export default function BlackjackPage() {
               <button onClick={() => store.setBet(Math.min(store.player.chips, store.config.maxBet))} className="btn-ghost text-xs px-3 py-1">MAX</button>
               <button onClick={() => store.setBet(0)} className="btn-ghost text-xs px-3 py-1" style={{ color: 'var(--loss)' }}>CLEAR</button>
             </div>
+
+            {/* Side Bets */}
+            <div className="flex gap-2 md:gap-3 items-center">
+              {([
+                { key: 'perfectPairs' as const, label: 'PAIRS', desc: 'up to 25:1', color: '#9b59b6', amount: 25 },
+                { key: 'twentyOnePlus3' as const, label: '21+3', desc: 'up to 100:1', color: '#e67e22', amount: 25 },
+                { key: 'luckyLadies' as const, label: 'LADIES', desc: 'up to 1000:1', color: '#e91e63', amount: 10 },
+              ]).map(sb => {
+                const active = store.sideBets[sb.key].active
+                return (
+                  <motion.button
+                    key={sb.key}
+                    onClick={() => store.toggleSideBet(sb.key, sb.amount)}
+                    className="px-3 md:px-4 py-1.5 rounded-lg text-center"
+                    style={{
+                      background: active ? `${sb.color}25` : 'rgba(255,255,255,0.04)',
+                      border: `1px solid ${active ? sb.color + '60' : 'rgba(255,255,255,0.1)'}`,
+                      boxShadow: active ? `0 0 12px ${sb.color}20` : 'none',
+                    }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <p className="text-[9px] md:text-[10px] font-bold tracking-wider" style={{
+                      color: active ? sb.color : 'rgba(255,255,255,0.4)',
+                      fontFamily: "'Cinzel', serif",
+                    }}>
+                      {sb.label}
+                    </p>
+                    <p className="text-[7px] md:text-[8px]" style={{ color: active ? sb.color + 'aa' : 'rgba(255,255,255,0.2)' }}>
+                      {active ? `${sb.amount} GC` : sb.desc}
+                    </p>
+                  </motion.button>
+                )
+              })}
+            </div>
+
             <motion.button onClick={handleDeal}
               className="px-14 py-3 text-sm tracking-widest font-bold rounded-xl"
               style={{ background: 'linear-gradient(135deg, #c9a84c, #f0d080)', color: '#000', fontFamily: "'Cinzel', serif", letterSpacing: '2px', boxShadow: '0 0 20px rgba(201,168,76,0.5)' }}
