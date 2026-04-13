@@ -251,9 +251,9 @@ function PlayingCard({ card, index, skinId }: { card: CardData; index: number; s
   if (card.faceDown) {
     return (
       <motion.div
-        initial={{ opacity: 0, x: 120, y: -150, rotateY: 180, scale: 0.3 }}
+        initial={{ opacity: 0, x: 40, y: -60, rotateY: 90, scale: 0.7 }}
         animate={{ opacity: 1, x: 0, y: 0, rotateY: 0, scale: 1 }}
-        transition={{ duration: 0.5, delay: index * 0.4, type: 'spring', stiffness: 100, damping: 15 }}
+        transition={{ duration: 0.25, delay: index * 0.15, ease: [0.34, 1.56, 0.64, 1] }}
         className="absolute top-0 w-[70px] h-[100px] md:w-[80px] md:h-[115px] rounded-lg no-select flex items-center justify-center"
         style={{
           left: `${overlap}px`,
@@ -279,9 +279,9 @@ function PlayingCard({ card, index, skinId }: { card: CardData; index: number; s
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 120, y: -150, rotateY: -180, scale: 0.3 }}
+      initial={{ opacity: 0, x: 40, y: -60, rotateY: -90, scale: 0.7 }}
       animate={{ opacity: 1, x: 0, y: 0, rotateY: 0, scale: 1 }}
-      transition={{ duration: 0.6, delay: index * 0.4, type: 'spring', stiffness: 90, damping: 14 }}
+      transition={{ duration: 0.3, delay: index * 0.15, ease: [0.34, 1.56, 0.64, 1] }}
       className="absolute top-0 w-[70px] h-[100px] md:w-[80px] md:h-[115px] rounded-lg flex flex-col justify-between p-1.5 no-select"
       style={{
         left: `${overlap}px`,
@@ -391,7 +391,7 @@ function DealerPanel() {
     { id: 'aria', name: 'Aria Sinclair', title: 'House Dealer', vip: false, voiceId: 'EXAVITQu4vr4xnSDxMaL', color: '#c9a84c' },
     { id: 'marcus', name: 'Marcus Vega', title: 'High Roller', vip: false, voiceId: 'onwK4e9ZLuTAKqWW03F9', color: '#ff6b35' },
     { id: 'kanisha', name: 'Kanisha Thompson', title: 'VIP Lounge', vip: true, voiceId: 'XrExE9yKIg1WjnnlVkGX', color: '#e91e63' },
-    { id: 'bacardi', name: 'Bacardi Ice', title: 'VIP Elite', vip: true, voiceId: 'onwK4e9ZLuTAKqWW03F9', color: '#00bcd4' },
+    { id: 'bacardi', name: 'Bacardi Ice', title: 'VIP Elite', vip: true, voiceId: 'pNInz6obpgDQGcFmaJgB', color: '#00bcd4' },
   ]
 
   return (
@@ -822,9 +822,9 @@ export default function BlackjackPage() {
     store.playerStand(); speak('stand'); playStand()
   }
   const handleDouble = () => {
-    // DOUBLE DOWN MADNESS -- maximum drama
+    // DOUBLE DOWN MADNESS -- progressive doubling (double bet + draw card, can repeat)
     queueNarration('seat_doubles', { seat: store.currentSeatIndex + 1 })
-    store.playerDouble(); speak('hit'); playCardDeal(); playChipClink()
+    store.playerDoubleHit(); speak('hit'); playCardDeal(); playChipClink()
 
     const gameArea = document.getElementById('game-area')
     if (gameArea) {
@@ -868,7 +868,7 @@ export default function BlackjackPage() {
       { id: 'aria', name: 'Aria Sinclair', title: 'House Dealer', vip: false, voiceId: 'EXAVITQu4vr4xnSDxMaL', color: '#c9a84c' },
       { id: 'marcus', name: 'Marcus Vega', title: 'High Roller', vip: false, voiceId: 'onwK4e9ZLuTAKqWW03F9', color: '#ff6b35' },
       { id: 'kanisha', name: 'Kanisha Thompson', title: 'VIP Lounge', vip: true, voiceId: 'XrExE9yKIg1WjnnlVkGX', color: '#e91e63' },
-      { id: 'bacardi', name: 'Bacardi Ice', title: 'VIP Elite', vip: true, voiceId: 'onwK4e9ZLuTAKqWW03F9', color: '#00bcd4' },
+      { id: 'bacardi', name: 'Bacardi Ice', title: 'VIP Elite', vip: true, voiceId: 'pNInz6obpgDQGcFmaJgB', color: '#00bcd4' },
     ]
     const dealer = dealers.find(d => d.id === dealerId) || dealers[0]
     store.setDealer(dealer)
@@ -1271,14 +1271,26 @@ export default function BlackjackPage() {
             </div>
 
             <div className="flex gap-3 items-center">
-              {/* REBET button (shows last bet amount) */}
-              {lastBet > 0 && store.betAmount === 0 && (
+              {/* REBET + 2x buttons */}
+              {lastBet > 0 && (
                 <motion.button onClick={handleRebet}
-                  className="px-6 py-3 text-xs tracking-widest font-bold rounded-xl"
+                  className="px-4 md:px-6 py-3 text-xs tracking-widest font-bold rounded-xl"
                   style={{ background: 'rgba(255,255,255,0.08)', color: '#c9a84c', fontFamily: "'Cinzel', serif", letterSpacing: '1px', border: '1px solid rgba(201,168,76,0.3)' }}
                   whileHover={{ background: 'rgba(201,168,76,0.15)', y: -2 }}
                   whileTap={{ scale: 0.97 }}>
-                  REBET {lastBet}
+                  REBET
+                </motion.button>
+              )}
+              {store.betAmount > 0 && (
+                <motion.button onClick={() => {
+                  const doubled = Math.min(store.betAmount * 2, store.player.chips, store.config.maxBet)
+                  store.setBet(doubled)
+                }}
+                  className="px-4 py-3 text-xs tracking-widest font-bold rounded-xl"
+                  style={{ background: 'rgba(255,255,255,0.08)', color: '#58a6ff', fontFamily: "'Cinzel', serif", border: '1px solid rgba(88,166,255,0.3)' }}
+                  whileHover={{ background: 'rgba(88,166,255,0.1)', y: -2 }}
+                  whileTap={{ scale: 0.97 }}>
+                  2x
                 </motion.button>
               )}
 
@@ -1343,12 +1355,13 @@ export default function BlackjackPage() {
               whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
               STAND
             </motion.button>
-            {canDouble && (
+            {/* Double Down Madness: always available, doubles bet + hits (progressive) */}
+            {store.mainHand.cards.length >= 2 && store.player.chips >= store.mainHand.bet && (
               <motion.button onClick={handleDouble}
                 className="px-5 md:px-8 py-2 md:py-2.5 text-xs md:text-sm tracking-widest font-bold rounded-xl"
                 style={{ background: 'linear-gradient(135deg, #c9a84c, #f0d080)', color: '#000', fontFamily: "'Cinzel', serif", boxShadow: '0 0 15px rgba(201,168,76,0.4)' }}
                 whileHover={{ scale: 1.05, boxShadow: '0 0 25px rgba(201,168,76,0.6)' }} whileTap={{ scale: 0.95 }}>
-                DOUBLE DOWN
+                DOUBLE ({store.mainHand.bet} {'\u2192'} {store.mainHand.bet * 2})
               </motion.button>
             )}
             {canSplit && (

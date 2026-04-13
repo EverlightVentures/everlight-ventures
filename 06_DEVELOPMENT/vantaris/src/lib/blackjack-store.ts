@@ -156,6 +156,7 @@ interface BlackjackStore {
   toggleSeat: (seatIndex: number) => void   // activate/deactivate a seat
   deal: () => void
   playerHit: () => void
+  playerDoubleHit: () => void  // Double Down Madness: double bet then hit (can repeat)
   playerStand: () => void
   playerDouble: () => void
   playerSplit: () => void
@@ -593,6 +594,63 @@ export const useBlackjackStore = create<BlackjackStore>()(
     set(update as any)
   },
 
+  // DOUBLE DOWN MADNESS: double current bet then hit (can repeat every card)
+  playerDoubleHit: () => {
+    const state = get()
+    if (state.phase !== 'player_turn' && state.phase !== 'split_turn') return
+
+    const isMainHand = state.currentHandIndex === 0
+    const currentHand = isMainHand ? state.mainHand : state.splitHand!
+
+    // Double the current hand's bet (check player has enough)
+    const doubleCost = currentHand.bet
+    const isScMode = state.gameMode === 'sc'
+    const balance = isScMode ? state.player.sweepsCoins : state.player.chips
+    if (doubleCost > balance) return // can't afford to double
+
+    // Double the bet on this hand
+    const doubledHand: HandState = { ...currentHand, bet: currentHand.bet * 2, doubled: true }
+
+    // Deduct the additional bet
+    const playerUpdate = isScMode
+      ? { sweepsCoins: state.player.sweepsCoins - doubleCost, scPlaythroughWagered: state.player.scPlaythroughWagered + doubleCost }
+      : { chips: state.player.chips - doubleCost }
+
+    // Now hit
+    const result = hit(doubledHand, state.shoe)
+
+    const update: any = {
+      shoe: result.shoe,
+      player: { ...state.player, ...playerUpdate },
+    }
+
+    if (isMainHand) {
+      update.mainHand = result.hand
+    } else {
+      update.splitHand = result.hand
+    }
+
+    // If bust, advance to next seat
+    if (result.autoBust) {
+      if (isMainHand) {
+        update.mainHand = { ...result.hand, outcome: 'bust', payout: 0 }
+      } else {
+        update.splitHand = { ...result.hand, outcome: 'bust', payout: 0 }
+      }
+      set(update)
+      setTimeout(() => get().playerStand(), 100)
+      return
+    }
+
+    // Update available actions (still allow another doubleHit)
+    const activeHand = isMainHand ? result.hand : result.hand
+    update.availableActions = getAvailableActions(
+      activeHand, state.config, (state.player.chips - (isScMode ? 0 : doubleCost)), state.dealerHand.cards[0], !!state.splitHand,
+    )
+
+    set(update)
+  },
+
   playerStand: () => {
     const state = get()
     if (state.phase !== 'player_turn' && state.phase !== 'split_turn') return
@@ -770,9 +828,18 @@ export const useBlackjackStore = create<BlackjackStore>()(
 
     const result = split(state.mainHand, state.shoe)
 
+    // Update both root-level AND per-seat splitHand
+    const seats = [...state.seats]
+    seats[state.currentSeatIndex] = {
+      ...seats[state.currentSeatIndex],
+      hand: result.mainHand,
+      splitHand: result.splitHand,
+    }
+
     set({
       mainHand: result.mainHand,
       splitHand: result.splitHand,
+      seats,
       shoe: result.shoe,
       currentHandIndex: 0,
       player: { ...state.player, chips: state.player.chips - state.betAmount },
