@@ -115,6 +115,7 @@ interface BlackjackStore {
   showDealerSelect: boolean
   musicEnabled: boolean
   voiceEnabled: boolean
+  autoRebet: boolean
 
   // Timers
   resultTimer: number | null
@@ -253,6 +254,7 @@ export const useBlackjackStore = create<BlackjackStore>()(
   showDealerSelect: false,
   musicEnabled: false,
   voiceEnabled: false,
+  autoRebet: false,
 
   resultTimer: null,
 
@@ -640,7 +642,7 @@ export const useBlackjackStore = create<BlackjackStore>()(
       outcome: null,
       winAmount: 0,
       xpEarned: 0,
-      betAmount: state.selectedChip,
+      betAmount: state.autoRebet ? state.betAmount : state.selectedChip,
     })
   },
 
@@ -651,7 +653,13 @@ export const useBlackjackStore = create<BlackjackStore>()(
       localStorage.setItem('vantaris_dealer', dealer.id)
     }
   },
-  setDealerLine: (line) => set({ dealerLine: line }),
+  setDealerLine: (line) => {
+    set({ dealerLine: line, speaking: true })
+    // Auto-stop speaking indicator after 2.5s
+    setTimeout(() => {
+      if (get().dealerLine === line) set({ speaking: false })
+    }, 2500)
+  },
 
   togglePanel: (panel) => {
     const key = `show${panel.charAt(0).toUpperCase() + panel.slice(1)}` as keyof BlackjackStore
@@ -665,6 +673,7 @@ export const useBlackjackStore = create<BlackjackStore>()(
         player: state.player,
         musicEnabled: state.musicEnabled,
         voiceEnabled: state.voiceEnabled,
+        autoRebet: state.autoRebet,
         selectedChip: state.selectedChip,
         betAmount: state.betAmount,
       }),
@@ -685,6 +694,7 @@ export const useBlackjackStore = create<BlackjackStore>()(
           player: { ...FRESH_PLAYER, ...(persisted.player || {}) },
           musicEnabled: persisted.musicEnabled ?? false,
           voiceEnabled: persisted.voiceEnabled ?? false,
+          autoRebet: persisted.autoRebet ?? false,
           selectedChip: persisted.selectedChip ?? 100,
           betAmount: persisted.betAmount ?? 100,
           activeDealer,

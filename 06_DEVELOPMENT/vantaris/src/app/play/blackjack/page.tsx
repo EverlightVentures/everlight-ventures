@@ -9,6 +9,7 @@ import {
   GemStore, FreeChips, AvatarBuilder, DEFAULT_AVATAR,
   PlayerProfilePanel, Leaderboard, CasinoScene3D, CasinoChip,
   BotPlayers, ToastContainer, DealerAvatar,
+  WelcomeScreen, isNewPlayer,
 } from '@/components/blackjack'
 import type { Achievement, AvatarConfig, SeatPosition } from '@/components/blackjack'
 import type { Card as CardData } from '@/lib/blackjack-engine'
@@ -137,6 +138,7 @@ const DEALER_LINES: Record<string, Record<string, string[]>> = {
 const SUPABASE_URL = 'https://jdqqmsmwmbsnlnstyavl.supabase.co'
 
 async function speakLine(text: string, voiceId: string) {
+  useBlackjackStore.setState({ speaking: true })
   try {
     const resp = await fetch(`${SUPABASE_URL}/functions/v1/dealer-speak`, {
       method: 'POST',
@@ -147,15 +149,31 @@ async function speakLine(text: string, voiceId: string) {
       const blob = await resp.blob()
       const audio = new Audio(URL.createObjectURL(blob))
       audio.volume = 0.7
+      audio.onended = () => useBlackjackStore.setState({ speaking: false })
       await audio.play()
+      return
     }
   } catch {
-    if ('speechSynthesis' in window) {
-      const utter = new SpeechSynthesisUtterance(text)
-      utter.rate = 0.88
-      utter.pitch = 0.85
-      window.speechSynthesis.speak(utter)
-    }
+    // ElevenLabs failed -- fall through to Web Speech API
+  }
+  // Web Speech API fallback (free, works offline)
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel() // cancel any pending speech
+    const utter = new SpeechSynthesisUtterance(text)
+    utter.rate = 0.88
+    utter.pitch = 0.85
+    utter.volume = 0.85
+    utter.onend = () => useBlackjackStore.setState({ speaking: false })
+    utter.onerror = () => useBlackjackStore.setState({ speaking: false })
+    // Try to find a good voice
+    const voices = window.speechSynthesis.getVoices()
+    const preferred = voices.find(v => v.name.includes('Google') && v.lang.startsWith('en'))
+      || voices.find(v => v.lang.startsWith('en-US'))
+      || voices.find(v => v.lang.startsWith('en'))
+    if (preferred) utter.voice = preferred
+    window.speechSynthesis.speak(utter)
+  } else {
+    setTimeout(() => useBlackjackStore.setState({ speaking: false }), 2000)
   }
 }
 
@@ -537,6 +555,7 @@ function LoadingScreen({ onComplete }: { onComplete: () => void }) {
 export default function BlackjackPage() {
   const store = useBlackjackStore()
   const speak = useDealerSpeak()
+  const [showWelcome, setShowWelcome] = useState(() => isNewPlayer())
   const [loading, setLoading] = useState(true)
   const [particleTrigger, setParticleTrigger] = useState(0)
   const [particleType, setParticleType] = useState<'blackjack' | 'win' | 'loss' | null>(null)
@@ -657,6 +676,20 @@ export default function BlackjackPage() {
   const handleDeal = () => { store.deal(); playButtonClick(); playChipClink() }
   const handleChipSelect = (v: number) => { store.selectChip(v); playChipClink() }
   const handleNewRound = () => { store.newRound(); playButtonClick() }
+
+  if (showWelcome) return <WelcomeScreen onComplete={(playerName, dealerId) => {
+    // Set chosen dealer
+    const dealers = [
+      { id: 'aria', name: 'Aria Sinclair', title: 'House Dealer', vip: false, voiceId: 'EXAVITQu4vr4xnSDxMaL', color: '#c9a84c' },
+      { id: 'marcus', name: 'Marcus Vega', title: 'High Roller', vip: false, voiceId: 'onwK4e9ZLuTAKqWW03F9', color: '#ff6b35' },
+      { id: 'kanisha', name: 'Kanisha Thompson', title: 'VIP Lounge', vip: true, voiceId: 'XrExE9yKIg1WjnnlVkGX', color: '#e91e63' },
+      { id: 'bacardi', name: 'Bacardi Ice', title: 'VIP Elite', vip: true, voiceId: 'onwK4e9ZLuTAKqWW03F9', color: '#00bcd4' },
+    ]
+    const dealer = dealers.find(d => d.id === dealerId) || dealers[0]
+    store.setDealer(dealer)
+    localStorage.setItem('vantaris_player_name', playerName)
+    setShowWelcome(false)
+  }} />
 
   if (loading) return <LoadingScreen onComplete={() => setLoading(false)} />
 
@@ -944,11 +977,12 @@ export default function BlackjackPage() {
           soundEnabled: store.voiceEnabled,
           musicEnabled: store.musicEnabled,
           voiceEnabled: store.voiceEnabled,
-          autoRebet: false,
+          autoRebet: store.autoRebet,
           onToggle: (key, value) => {
             if (key === 'music') useBlackjackStore.setState({ musicEnabled: value })
             else if (key === 'voice') useBlackjackStore.setState({ voiceEnabled: value })
             else if (key === 'sound') useBlackjackStore.setState({ voiceEnabled: value })
+            else if (key === 'autorebet') useBlackjackStore.setState({ autoRebet: value })
           },
         }}
       />
@@ -1029,7 +1063,15 @@ export default function BlackjackPage() {
         dailyClaimed={dailyClaimed}
       />
 
-      <Leaderboard isOpen={showLeaderboard} onClose={() => setShowLeaderboard(false)} />
+      <Leaderboard isOpen={showLeaderboard} onClose={() => setShowLeaderboard(false)}
+        playerStats={{
+          name: localStorage.getItem('vantaris_player_name') || 'Player',
+          tier: store.player.rank,
+          chipsWon: store.player.biggestWin,
+          hands: store.player.handsPlayed,
+          winRate: store.player.handsPlayed > 0 ? (store.player.handsWon / store.player.handsPlayed) * 100 : 0,
+        }}
+      />
     </div>
   )
 }

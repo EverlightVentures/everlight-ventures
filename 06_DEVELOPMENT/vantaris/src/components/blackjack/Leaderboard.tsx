@@ -10,7 +10,9 @@ import { useState } from 'react'
  * Gold/silver/bronze styling for top 3.
  */
 
-const MOCK_LEADERS = [
+interface Leader { rank: number; name: string; tier: string; chipsWon: number; hands: number; winRate: number }
+
+const ALL_TIME: Leader[] = [
   { rank: 1, name: 'DarkStar', tier: 'Legend', chipsWon: 847200, hands: 2341, winRate: 54.2 },
   { rank: 2, name: 'xMidas', tier: 'Diamond', chipsWon: 623100, hands: 1872, winRate: 52.8 },
   { rank: 3, name: 'Phantom_x', tier: 'Diamond', chipsWon: 518900, hands: 1654, winRate: 51.1 },
@@ -22,6 +24,34 @@ const MOCK_LEADERS = [
   { rank: 9, name: 'NightOwl22', tier: 'Silver', chipsWon: 156800, hands: 743, winRate: 46.8 },
   { rank: 10, name: 'xVenus', tier: 'Silver', chipsWon: 123400, hands: 654, winRate: 45.9 },
 ]
+
+const WEEKLY: Leader[] = [
+  { rank: 1, name: 'Phantom_x', tier: 'Diamond', chipsWon: 89400, hands: 312, winRate: 55.1 },
+  { rank: 2, name: 'NightKing', tier: 'Platinum', chipsWon: 72100, hands: 287, winRate: 51.9 },
+  { rank: 3, name: 'xMidas', tier: 'Diamond', chipsWon: 65800, hands: 245, winRate: 53.1 },
+  { rank: 4, name: 'DarkStar', tier: 'Legend', chipsWon: 54200, hands: 198, winRate: 56.3 },
+  { rank: 5, name: 'LuckyAce', tier: 'Gold', chipsWon: 43900, hands: 176, winRate: 50.6 },
+  { rank: 6, name: 'CryptoWolf', tier: 'Platinum', chipsWon: 38700, hands: 165, winRate: 48.5 },
+  { rank: 7, name: 'NovaBlaze', tier: 'Gold', chipsWon: 31200, hands: 142, winRate: 49.3 },
+  { rank: 8, name: 'IceQueen_v', tier: 'Gold', chipsWon: 27800, hands: 131, winRate: 47.3 },
+  { rank: 9, name: 'Velocity', tier: 'Gold', chipsWon: 22100, hands: 118, winRate: 48.3 },
+  { rank: 10, name: 'xRaven', tier: 'Silver', chipsWon: 18900, hands: 105, winRate: 46.7 },
+]
+
+const DAILY: Leader[] = [
+  { rank: 1, name: 'NightKing', tier: 'Platinum', chipsWon: 18700, hands: 62, winRate: 58.1 },
+  { rank: 2, name: 'NovaBlaze', tier: 'Gold', chipsWon: 14200, hands: 48, winRate: 54.2 },
+  { rank: 3, name: 'Phantom_x', tier: 'Diamond', chipsWon: 11800, hands: 41, winRate: 51.2 },
+  { rank: 4, name: 'IceQueen_v', tier: 'Gold', chipsWon: 9400, hands: 38, winRate: 50.0 },
+  { rank: 5, name: 'xMidas', tier: 'Diamond', chipsWon: 8200, hands: 35, winRate: 48.6 },
+  { rank: 6, name: 'LuckyAce', tier: 'Gold', chipsWon: 6100, hands: 28, winRate: 53.6 },
+  { rank: 7, name: 'CryptoWolf', tier: 'Platinum', chipsWon: 5400, hands: 25, winRate: 48.0 },
+  { rank: 8, name: 'xRaven', tier: 'Silver', chipsWon: 3800, hands: 22, winRate: 45.5 },
+  { rank: 9, name: 'Velocity', tier: 'Gold', chipsWon: 2900, hands: 19, winRate: 47.4 },
+  { rank: 10, name: 'ShadowKing', tier: 'Gold', chipsWon: 1200, hands: 15, winRate: 46.7 },
+]
+
+const PERIOD_DATA: Record<string, Leader[]> = { daily: DAILY, weekly: WEEKLY, alltime: ALL_TIME }
 
 const RANK_MEDAL: Record<number, { color: string; bg: string }> = {
   1: { color: '#ffd700', bg: 'rgba(255,215,0,0.1)' },
@@ -37,11 +67,14 @@ const TIER_COLORS: Record<string, string> = {
 export function Leaderboard({
   isOpen,
   onClose,
+  playerStats,
 }: {
   isOpen: boolean
   onClose: () => void
+  playerStats?: { name: string; tier: string; chipsWon: number; hands: number; winRate: number }
 }) {
   const [period, setPeriod] = useState<'daily' | 'weekly' | 'alltime'>('weekly')
+  const leaders = PERIOD_DATA[period] || WEEKLY
 
   return (
     <AnimatePresence>
@@ -87,7 +120,7 @@ export function Leaderboard({
 
             {/* Rankings */}
             <div className="flex-1 overflow-y-auto">
-              {MOCK_LEADERS.map((leader, idx) => {
+              {leaders.map((leader, idx) => {
                 const medal = RANK_MEDAL[leader.rank]
                 return (
                   <motion.div
@@ -144,6 +177,40 @@ export function Leaderboard({
                   </motion.div>
                 )
               })}
+
+              {/* Player's own entry */}
+              {playerStats && (
+                <div className="px-5 py-3 border-t-2 sticky bottom-0"
+                  style={{ borderColor: 'var(--gold)', background: 'rgba(201,168,76,0.05)' }}>
+                  <div className="flex items-center gap-3">
+                    <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                      style={{ color: 'var(--gold)', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)' }}>
+                      --
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-semibold truncate" style={{ color: 'var(--gold)' }}>
+                          {playerStats.name} (You)
+                        </span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full font-semibold"
+                          style={{ color: TIER_COLORS[playerStats.tier], background: `${TIER_COLORS[playerStats.tier]}15` }}>
+                          {playerStats.tier}
+                        </span>
+                      </div>
+                      <div className="flex gap-3 mt-0.5">
+                        <span className="text-[10px] font-mono" style={{ color: 'var(--text-tertiary)' }}>{playerStats.hands} hands</span>
+                        <span className="text-[10px] font-mono" style={{ color: playerStats.winRate >= 50 ? 'var(--win)' : 'var(--text-tertiary)' }}>
+                          {playerStats.winRate.toFixed(1)}% win rate
+                        </span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-mono text-sm font-bold" style={{ color: 'var(--gold)' }}>{playerStats.chipsWon.toLocaleString()}</p>
+                      <p className="text-[9px]" style={{ color: 'var(--text-tertiary)' }}>GC won</p>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
         </motion.div>

@@ -687,6 +687,7 @@ export const TABLE_PRESETS: Record<string, Partial<TableConfig>> = {
     maxBet: 5000,
     blackjackPays: '3:2',
     lightningEnabled: false,
+    dealerHitsSoft17: true,
   },
   lightning: {
     variant: 'lightning',
