@@ -536,8 +536,19 @@ export const useBlackjackStore = create<BlackjackStore>()(
 
     const result = hit(currentHand, state.shoe)
 
+    // Sync to seats array so card display updates
+    const seats = [...state.seats]
+    const seatData = { ...seats[state.currentSeatIndex] }
+    if (isMainHand) {
+      seatData.hand = result.hand
+    } else {
+      seatData.splitHand = result.hand
+    }
+    seats[state.currentSeatIndex] = seatData
+
     const update: Partial<BlackjackStore> = {
       shoe: result.shoe,
+      seats: seats as any,
     }
 
     if (isMainHand) {
@@ -619,8 +630,19 @@ export const useBlackjackStore = create<BlackjackStore>()(
     // Now hit
     const result = hit(doubledHand, state.shoe)
 
+    // Sync to both root state AND seats array
+    const seats = [...state.seats]
+    const seatData = { ...seats[state.currentSeatIndex] }
+    if (isMainHand) {
+      seatData.hand = result.hand
+    } else {
+      seatData.splitHand = result.hand
+    }
+    seats[state.currentSeatIndex] = seatData
+
     const update: any = {
       shoe: result.shoe,
+      seats,
       player: { ...state.player, ...playerUpdate },
     }
 
@@ -634,16 +656,18 @@ export const useBlackjackStore = create<BlackjackStore>()(
     if (result.autoBust) {
       if (isMainHand) {
         update.mainHand = { ...result.hand, outcome: 'bust', payout: 0 }
+        seats[state.currentSeatIndex] = { ...seatData, hand: { ...result.hand, outcome: 'bust', payout: 0 } }
       } else {
         update.splitHand = { ...result.hand, outcome: 'bust', payout: 0 }
       }
+      update.seats = seats
       set(update)
       setTimeout(() => get().playerStand(), 100)
       return
     }
 
     // Update available actions (still allow another doubleHit)
-    const activeHand = isMainHand ? result.hand : result.hand
+    const activeHand = result.hand
     update.availableActions = getAvailableActions(
       activeHand, state.config, (state.player.chips - (isScMode ? 0 : doubleCost)), state.dealerHand.cards[0], !!state.splitHand,
     )
