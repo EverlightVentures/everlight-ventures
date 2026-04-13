@@ -157,7 +157,6 @@ function CasinoTable() {
         anchorX="center"
         anchorY="middle"
         fillOpacity={0.15}
-        font="/fonts/cinzel.woff"
         letterSpacing={0.15}
       >
         VANTARIS CASINO
@@ -173,6 +172,58 @@ function CasinoTable() {
         letterSpacing={0.2}
       >
         BY EVERLIGHT VENTURES
+      </Text>
+      {/* RG initials (owner branding) */}
+      <Text
+        position={[0, -0.41, -0.4]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        fontSize={0.5}
+        color="#c9a84c"
+        anchorX="center"
+        anchorY="middle"
+        fillOpacity={0.08}
+        letterSpacing={0.3}
+      >
+        RG
+      </Text>
+      {/* INSURANCE PAYS 2 TO 1 arc text */}
+      <Text
+        position={[0, -0.41, -1.0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        fontSize={0.1}
+        color="#c9a84c"
+        anchorX="center"
+        anchorY="middle"
+        fillOpacity={0.2}
+        letterSpacing={0.08}
+      >
+        INSURANCE PAYS 2 TO 1
+      </Text>
+      {/* DEALER MUST HIT SOFT 17 */}
+      <Text
+        position={[0, -0.41, -1.5]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        fontSize={0.08}
+        color="#c9a84c"
+        anchorX="center"
+        anchorY="middle"
+        fillOpacity={0.15}
+        letterSpacing={0.05}
+      >
+        DEALER MUST HIT SOFT 17
+      </Text>
+      {/* BLACKJACK PAYS 3 TO 2 */}
+      <Text
+        position={[0, -0.41, -2.0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        fontSize={0.08}
+        color="#c9a84c"
+        anchorX="center"
+        anchorY="middle"
+        fillOpacity={0.15}
+        letterSpacing={0.05}
+      >
+        BLACKJACK PAYS 3 TO 2
       </Text>
     </group>
   )
