@@ -246,7 +246,6 @@ function PlayingCard({ card, index, skinId }: { card: CardData; index: number; s
   const rarityEffect = getRarityEffect(rarity)
 
   if (card.faceDown) {
-    const back = getCardBack(useBlackjackStore.getState().player.equippedCardBack)
     return (
       <motion.div
         initial={{ opacity: 0, x: 200, rotateY: 180, scale: 0 }}
@@ -255,19 +254,19 @@ function PlayingCard({ card, index, skinId }: { card: CardData; index: number; s
         className="absolute top-0 w-[70px] h-[100px] md:w-[80px] md:h-[115px] rounded-lg no-select flex items-center justify-center"
         style={{
           left: `${overlap}px`,
-          background: back.background,
-          border: `2px solid ${back.borderColor}`,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
+          background: 'linear-gradient(135deg, #1a1a2e, #0a0a15)',
+          border: '2px solid #c9a84c',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.6), 0 0 12px rgba(201,168,76,0.15)',
           zIndex: index,
         }}
       >
-        <span style={{ fontSize: '2rem', color: back.iconColor }}>{back.centerIcon}</span>
+        <span style={{ fontSize: '1.6rem', color: '#c9a84c' }}>{'\u2666'}</span>
       </motion.div>
     )
   }
 
   const isRed = card.suit === 'hearts' || card.suit === 'diamonds'
-  const suitColor = isRed ? skin.redSuitColor : skin.blackSuitColor
+  const suitColor = isRed ? '#e8c55a' : '#c9a84c' // Gold tones for VIP look
   const symbol = SUIT_SYMBOLS[card.suit]
   const isFace = ['J', 'Q', 'K', 'A'].includes(card.rank)
 
@@ -283,11 +282,11 @@ function PlayingCard({ card, index, skinId }: { card: CardData; index: number; s
       className="absolute top-0 w-[70px] h-[100px] md:w-[80px] md:h-[115px] rounded-lg flex flex-col justify-between p-1.5 no-select"
       style={{
         left: `${overlap}px`,
-        background: skin.cardBg,
-        border: `1px solid ${isFace ? skin.cardBorder : '#ddd'}`,
-        boxShadow: `0 4px 20px rgba(0,0,0,0.6)${rarityGlow ? `, ${rarityGlow}` : ''}${skin.hoverGlow ? `, 0 0 8px ${skin.hoverGlow}20` : ''}`,
+        background: 'linear-gradient(145deg, #1a1a1a, #0d0d0d)',
+        border: `1px solid ${isFace ? '#c9a84c' : '#333'}`,
+        boxShadow: `0 4px 20px rgba(0,0,0,0.7), 0 0 ${isFace ? '15' : '8'}px rgba(201,168,76,${isFace ? '0.25' : '0.1'})${rarityGlow ? `, ${rarityGlow}` : ''}`,
         zIndex: index,
-        fontFamily: skin.rankFont,
+        fontFamily: "'Cinzel', serif",
         overflow: 'hidden',
       }}
     >
@@ -726,14 +725,28 @@ export default function BlackjackPage() {
     store.playerStand(); speak('stand'); playStand()
   }
   const handleDouble = () => {
+    // DOUBLE DOWN MADNESS -- maximum drama
+    queueNarration('seat_doubles', { seat: store.currentSeatIndex + 1 })
     store.playerDouble(); speak('hit'); playCardDeal(); playChipClink()
-    // Double down dramatic flash
+
     const gameArea = document.getElementById('game-area')
     if (gameArea) {
+      // Triple flash + heavy shake
       lightningFlash(gameArea)
-      screenShake(gameArea, 3, 0.25)
+      setTimeout(() => lightningFlash(gameArea), 150)
+      setTimeout(() => lightningFlash(gameArea), 300)
+      screenShake(gameArea, 8, 0.5)
     }
-    if (navigator.vibrate) navigator.vibrate([30, 20, 60, 20, 100])
+
+    // Gold particle burst for double down
+    setParticleType('blackjack')
+    setParticleTrigger(p => p + 1)
+
+    // Heavy haptic
+    if (navigator.vibrate) navigator.vibrate([50, 30, 80, 30, 120, 50, 200])
+
+    // Play blackjack fanfare for the drama
+    playBlackjack()
   }
   const handleSplit = () => { store.playerSplit(); speak('split'); playSplit() }
   const handleSurrender = () => { store.playerSurrender(); speak('surrender'); playStand() }
@@ -1129,9 +1142,9 @@ export default function BlackjackPage() {
             {canDouble && (
               <motion.button onClick={handleDouble}
                 className="px-5 md:px-8 py-2 md:py-2.5 text-xs md:text-sm tracking-widest font-bold rounded-xl"
-                style={{ background: 'rgba(52,152,219,0.9)', color: '#fff', fontFamily: "'Cinzel', serif" }}
-                whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                DOUBLE
+                style={{ background: 'linear-gradient(135deg, #c9a84c, #f0d080)', color: '#000', fontFamily: "'Cinzel', serif", boxShadow: '0 0 15px rgba(201,168,76,0.4)' }}
+                whileHover={{ scale: 1.05, boxShadow: '0 0 25px rgba(201,168,76,0.6)' }} whileTap={{ scale: 0.95 }}>
+                DOUBLE DOWN
               </motion.button>
             )}
             {canSplit && (

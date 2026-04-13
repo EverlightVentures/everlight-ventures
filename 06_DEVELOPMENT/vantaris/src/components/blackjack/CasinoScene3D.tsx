@@ -4,7 +4,7 @@ import { useRef, useMemo, useCallback } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import {
   Environment, Float, MeshReflectorMaterial,
-  Sparkles, ContactShadows,
+  Sparkles, ContactShadows, Text,
 } from '@react-three/drei'
 import {
   EffectComposer, Bloom, Vignette, ChromaticAberration,
@@ -49,51 +49,56 @@ function CasinoTable() {
 
   return (
     <group>
-      {/* Table base -- dark wood, circular */}
+      {/* Table base -- dark wood, LUXURY OVAL */}
       <mesh position={[0, -0.8, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[4.2, 4.0, 0.5, 64]} />
+        <cylinderGeometry args={[4.8, 4.5, 0.6, 64]} />
         <meshStandardMaterial
-          color="#2a1505"
-          roughness={0.4}
-          metalness={0.2}
+          color="#1a0d08"
+          roughness={0.35}
+          metalness={0.25}
         />
       </mesh>
 
-      {/* Felt surface -- CASINO GREEN (matches reference #0d5c2e) */}
-      <mesh ref={feltRef} position={[0, -0.46, 0]} receiveShadow>
-        <cylinderGeometry args={[4.0, 4.0, 0.08, 64]} />
-        <meshStandardMaterial
-          color="#0d5c2e"
-          roughness={0.95}
-          metalness={0.0}
-          emissive="#0a4a24"
-          emissiveIntensity={0.02}
-        />
-      </mesh>
+      {/* Oval scale group */}
+      <group scale={[1.3, 1, 1]}>
+        {/* Felt surface -- CASINO GREEN on luxury oval */}
+        <mesh ref={feltRef} position={[0, -0.46, 0]} receiveShadow>
+          <cylinderGeometry args={[3.6, 3.6, 0.06, 64]} />
+          <meshStandardMaterial
+            color="#0d5c2e"
+            roughness={0.92}
+            metalness={0.02}
+            emissive="#0a4a24"
+            emissiveIntensity={0.03}
+          />
+        </mesh>
 
-      {/* Gold trim ring */}
-      <mesh position={[0, -0.42, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[4.05, 0.07, 12, 128]} />
-        <meshStandardMaterial
-          color="#c9a84c"
-          roughness={0.2}
-          metalness={0.9}
-          emissive="#c9a84c"
+        {/* Inner gold stitch line */}
+        <mesh position={[0, -0.42, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[3.2, 0.015, 8, 128]} />
+          <meshStandardMaterial
+            color="#c9a84c"
+            roughness={0.2}
+            metalness={0.8}
+            emissive="#c9a84c"
+            emissiveIntensity={0.3}
+          />
+        </mesh>
+
+        {/* Outer gold trim ring */}
+        <mesh position={[0, -0.43, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[3.65, 0.06, 12, 128]} />
+          <meshStandardMaterial
+            color="#c9a84c"
+            roughness={0.15}
+            metalness={0.95}
+            emissive="#c9a84c"
           emissiveIntensity={0.15}
         />
       </mesh>
 
-      {/* Inner stitch line */}
-      <mesh position={[0, -0.41, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[3.5, 0.01, 8, 128]} />
-        <meshStandardMaterial
-          color="#c9a84c"
-          roughness={0.3}
-          metalness={0.7}
-          emissive="#c9a84c"
-          emissiveIntensity={0.2}
-        />
-      </mesh>
+      </group>
+      {/* End oval scale group */}
 
       {/* 5 Betting circles on the felt */}
       {bettingSpots.map((spot, i) => (
@@ -135,11 +140,40 @@ function CasinoTable() {
         />
       </mesh>
 
-      {/* Central table leg */}
-      <mesh position={[0, -1.4, 0]} castShadow>
-        <cylinderGeometry args={[0.2, 0.25, 0.8, 16]} />
-        <meshStandardMaterial color="#2a1505" roughness={0.4} metalness={0.2} />
-      </mesh>
+      {/* Table legs (4 for oval) */}
+      {[[-2.5, -2], [2.5, -2], [-2.5, 2], [2.5, 2]].map(([x, z], i) => (
+        <mesh key={`leg-${i}`} position={[x, -1.3, z]} castShadow>
+          <cylinderGeometry args={[0.12, 0.16, 0.9, 12]} />
+          <meshStandardMaterial color="#1a0d08" roughness={0.3} metalness={0.3} />
+        </mesh>
+      ))}
+
+      {/* VANTARIS CASINO branding on felt */}
+      <Text
+        position={[0, -0.41, 0.1]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        fontSize={0.35}
+        color="#c9a84c"
+        anchorX="center"
+        anchorY="middle"
+        fillOpacity={0.15}
+        font="/fonts/cinzel.woff"
+        letterSpacing={0.15}
+      >
+        VANTARIS CASINO
+      </Text>
+      <Text
+        position={[0, -0.41, 0.55]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        fontSize={0.12}
+        color="#c9a84c"
+        anchorX="center"
+        anchorY="middle"
+        fillOpacity={0.1}
+        letterSpacing={0.2}
+      >
+        BY EVERLIGHT VENTURES
+      </Text>
     </group>
   )
 }
@@ -378,7 +412,7 @@ function CameraRig() {
 // HOLOGRAM PLAYER SEATS
 // ============================================================
 
-function HologramSeats() {
+function SeatMarkers() {
   const seats = [
     { x: -3.5, z: 2.8 },  // Seat 1 far left
     { x: -1.8, z: 3.4 },  // Seat 2
@@ -391,41 +425,42 @@ function HologramSeats() {
     <>
       {seats.map((seat, i) => (
         <group key={i} position={[seat.x, 0, seat.z]}>
-          {/* Base disc -- cyan glow */}
-          <mesh position={[0, -0.4, 0]}>
-            <cylinderGeometry args={[0.35, 0.35, 0.03, 32]} />
+          {/* Seat disc -- flat marker on felt (no cones) */}
+          <mesh position={[0, -0.42, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+            <circleGeometry args={[0.4, 32]} />
             <meshStandardMaterial
-              color="#00aaff"
-              emissive="#0055ff"
-              emissiveIntensity={i === 2 ? 1.2 : 0.6}
+              color={i === 2 ? '#c9a84c' : '#0d7a3e'}
+              emissive={i === 2 ? '#c9a84c' : '#0a5a2e'}
+              emissiveIntensity={i === 2 ? 0.2 : 0.05}
               transparent
-              opacity={i === 2 ? 0.85 : 0.5}
-              roughness={0.1}
-              metalness={0.9}
-            />
-          </mesh>
-
-          {/* Hologram beam (cone of light) */}
-          <mesh position={[0, 0.6, 0]}>
-            <cylinderGeometry args={[0.02, 0.35, 1.8, 16, 1, true]} />
-            <meshStandardMaterial
-              color={i === 2 ? '#c9a84c' : '#0088ff'}
-              emissive={i === 2 ? '#c9a84c' : '#0044ff'}
-              emissiveIntensity={0.4}
-              transparent
-              opacity={i === 2 ? 0.12 : 0.08}
+              opacity={i === 2 ? 0.4 : 0.2}
               side={THREE.DoubleSide}
             />
           </mesh>
 
-          {/* Chip area marker ring */}
+          {/* Gold ring around seat */}
+          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.415, 0]}>
+            <ringGeometry args={[0.38, 0.42, 32]} />
+            <meshStandardMaterial
+              color="#c9a84c"
+              emissive="#c9a84c"
+              emissiveIntensity={i === 2 ? 0.3 : 0.12}
+              side={THREE.DoubleSide}
+              transparent
+              opacity={i === 2 ? 0.7 : 0.35}
+            />
+          </mesh>
+
+          {/* Chip area marker ring (in front of seat) */}
           <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.43, 0.55]}>
             <ringGeometry args={[0.22, 0.28, 32]} />
             <meshStandardMaterial
               color="#c9a84c"
               emissive="#c9a84c"
-              emissiveIntensity={0.25}
+              emissiveIntensity={0.2}
               side={THREE.DoubleSide}
+              transparent
+              opacity={0.4}
             />
           </mesh>
         </group>
@@ -526,7 +561,7 @@ export function CasinoScene3D({ onSeatPositions }: { onSeatPositions?: (position
         <GoldDust />
         <BackgroundAtmosphere />
         {/* Hologram seat stands */}
-        <HologramSeats />
+        <SeatMarkers />
 
         {/* Projects 3D seat positions to 2D for bot labels */}
         <SeatProjector onProject={handleProject} />

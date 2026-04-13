@@ -215,19 +215,40 @@ function BotLabel({ bot, position, outcome, cards }: {
 function PlayerSeatLabel({ position }: { position: SeatPosition }) {
   if (!position.visible) return null
 
+  const playerName = typeof window !== 'undefined'
+    ? localStorage.getItem('vantaris_player_name') || 'Player'
+    : 'Player'
+  const initial = playerName.charAt(0).toUpperCase()
+
   return (
     <div
       className="absolute pointer-events-none text-center"
       style={{
         left: `${position.x}px`,
-        top: `${position.y + 24}px`,
-        transform: 'translate(-50%, 0)',
+        top: `${position.y}px`,
+        transform: 'translate(-50%, -50%)',
         fontFamily: "'Cinzel', serif",
         transition: 'left 0.1s linear, top 0.1s linear',
       }}
     >
-      <div className="text-[0.55rem] tracking-wider" style={{
-        color: 'rgba(201,168,76,0.5)',
+      {/* Player avatar circle */}
+      <div className="mx-auto mb-1 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+        style={{
+          background: 'linear-gradient(135deg, #c9a84c, #e8c55a)',
+          color: '#000',
+          boxShadow: '0 0 12px rgba(201,168,76,0.4), 0 2px 8px rgba(0,0,0,0.5)',
+          border: '2px solid rgba(201,168,76,0.6)',
+        }}>
+        {initial}
+      </div>
+      <div className="text-[0.55rem] font-semibold" style={{
+        color: '#c9a84c',
+        textShadow: '0 1px 3px rgba(0,0,0,0.9)',
+      }}>
+        {playerName}
+      </div>
+      <div className="text-[0.45rem] tracking-wider" style={{
+        color: 'rgba(201,168,76,0.4)',
         letterSpacing: '1px',
         textShadow: '0 1px 3px rgba(0,0,0,0.9)',
       }}>
