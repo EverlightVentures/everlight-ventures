@@ -360,13 +360,18 @@ export const useBlackjackStore = create<BlackjackStore>()(
     if (state.phase !== 'betting') return
     const seats = [...state.seats]
     const seat = seats[seatIndex]
-    // Can't toggle if a bot sits there (seats 0,1,3,4 have bots unless overridden)
-    const botSeats = state.bots.map(b => b.seat)
-    if (botSeats.includes(seatIndex) && !seat.active) return // can't take bot seat
+
+    // If a bot is at this seat, remove the bot (player takes priority)
+    const bots = [...state.bots]
+    const botIdx = bots.findIndex(b => b.seat === seatIndex)
+    if (botIdx >= 0 && !seat.active) {
+      bots[botIdx] = { ...bots[botIdx], sittingOut: true }
+    }
+
     seats[seatIndex] = { ...seat, active: !seat.active }
     const active = seats.filter(s => s.active).map(s => s.index)
     if (active.length === 0) return // must have at least one seat
-    set({ seats, activeSeatIndices: active })
+    set({ seats, activeSeatIndices: active, bots })
   },
 
   deal: () => {

@@ -37,7 +37,7 @@ import {
 } from '@/lib/dealer-intelligence'
 
 // Toast helpers (for inline handlers)
-import { toastWin, toastInfo } from '@/components/blackjack/VantarisToast'
+import { toast, toastWin, toastInfo } from '@/components/blackjack/VantarisToast'
 
 // Django backend sync (for production deployment)
 import { initDjangoSync, syncHandResult } from '@/lib/django-sync'
@@ -533,20 +533,36 @@ function OutcomeOverlay() {
 // PROGRESSIVE JACKPOT
 // ============================================================
 
-function ProgressiveJackpot({ betAmount, phase }: { betAmount: number; phase: string }) {
+// Check for suited 7-7-7 (progressive jackpot trigger)
+function checkSuited777(cards: CardData[]): boolean {
+  if (cards.length < 3) return false
+  const sevens = cards.filter(c => c.rank === '7')
+  if (sevens.length < 3) return false
+  // Check if any 3 sevens share the same suit
+  const suitCounts: Record<string, number> = {}
+  for (const c of sevens) {
+    suitCounts[c.suit] = (suitCounts[c.suit] || 0) + 1
+    if (suitCounts[c.suit] >= 3) return true
+  }
+  return false
+}
+
+function ProgressiveJackpot({ betAmount, phase, cards, luckyLuckyActive }: {
+  betAmount: number; phase: string; cards: CardData[]; luckyLuckyActive: boolean
+}) {
   const [jackpot, setJackpot] = useState(() => {
     if (typeof window === 'undefined') return 500000
     const saved = localStorage.getItem('vantaris_jackpot')
     return saved ? parseInt(saved) : 500000
   })
+  const [won, setWon] = useState(false)
 
   // Increment over time (every second) + on bets
   useEffect(() => {
     const timer = setInterval(() => {
       setJackpot(prev => {
-        const next = prev + Math.floor(10 + Math.random() * 40) // 10-50 per second
+        const next = prev + Math.floor(10 + Math.random() * 40)
         if (next >= 5000000) {
-          // JACKPOT HIT! Reset
           localStorage.setItem('vantaris_jackpot', '500000')
           return 500000
         }
@@ -557,14 +573,32 @@ function ProgressiveJackpot({ betAmount, phase }: { betAmount: number; phase: st
     return () => clearInterval(timer)
   }, [])
 
-  // Add to jackpot when player deals (1% of bet goes to pot)
+  // Add to jackpot when player deals (1% of Lucky Lucky bets)
   useEffect(() => {
-    if (phase === 'dealing' && betAmount > 0) {
+    if (phase === 'dealing' && betAmount > 0 && luckyLuckyActive) {
       setJackpot(prev => {
-        const next = prev + Math.floor(betAmount * 0.01)
+        const next = prev + Math.floor(betAmount * 0.05) // 5% of bet feeds jackpot
         localStorage.setItem('vantaris_jackpot', String(next))
         return next
       })
+    }
+  }, [phase])
+
+  // Check for suited 7-7-7 on settle
+  useEffect(() => {
+    if (phase === 'settled' && luckyLuckyActive && cards.length >= 3) {
+      if (checkSuited777(cards)) {
+        // JACKPOT HIT!
+        setWon(true)
+        const winAmount = jackpot
+        useBlackjackStore.setState(s => ({
+          player: { ...s.player, chips: s.player.chips + winAmount },
+        }))
+        toast({ type: 'achievement', title: 'PROGRESSIVE JACKPOT!', message: `Suited 7-7-7! You won ${winAmount.toLocaleString()} GC!`, icon: '\uD83C\uDFC6', duration: 8000 })
+        setJackpot(500000)
+        localStorage.setItem('vantaris_jackpot', '500000')
+        setTimeout(() => setWon(false), 5000)
+      }
     }
   }, [phase])
 
@@ -1037,6 +1071,103 @@ export default function BlackjackPage() {
         {/* Bot players at projected seat positions */}
         <BotPlayers seatPositions={seatPositions} />
 
+        {/* Interactive seat drop zones (betting phase only) */}
+        {store.phase === 'betting' && (
+          <div className="absolute inset-0 z-12" style={{ zIndex: 12 }}>
+            {seatPositions.map((pos, seatIdx) => {
+              if (!pos.visible) return null
+              const botSeats = store.bots.map(b => b.seat)
+              const isBot = botSeats.includes(seatIdx)
+              const isActive = store.activeSeatIndices.includes(seatIdx)
+              const seatBet = store.seats[seatIdx]?.bet || 0
+
+              return (
+                <div key={seatIdx} className="absolute" style={{
+                  left: `${pos.x}px`, top: `${pos.y}px`,
+                  transform: 'translate(-50%, -50%)',
+                }}>
+                  {/* Main bet drop zone / seat selector */}
+                  {!isBot && (
+                    <button
+                      onClick={() => {
+                        if (!isActive) {
+                          // Activate this seat
+                          store.toggleSeat(seatIdx)
+                          toastInfo(`Seat ${seatIdx + 1}`, 'You sat down! Place your bet.')
+                        } else {
+                          // Add selected chip to this seat's bet
+                          const newBet = Math.min(store.betAmount + store.selectedChip, store.player.chips, store.config.maxBet)
+                          store.setBet(newBet)
+                          playChipClink()
+                        }
+                      }}
+                      className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center"
+                      id={`drop-zone-seat-${seatIdx}`}
+                      style={{
+                        background: isActive
+                          ? 'rgba(201,168,76,0.15)'
+                          : 'rgba(255,255,255,0.04)',
+                        border: `2px dashed ${isActive ? 'rgba(201,168,76,0.5)' : 'rgba(255,255,255,0.15)'}`,
+                        transition: 'all 0.2s',
+                      }}
+                    >
+                      {isActive ? (
+                        <div className="text-center">
+                          {seatBet > 0 ? (
+                            <span className="text-xs font-mono font-bold" style={{ color: 'var(--gold)' }}>{store.betAmount}</span>
+                          ) : (
+                            <span className="text-[8px] uppercase tracking-wider" style={{ color: 'rgba(201,168,76,0.6)' }}>DROP CHIP</span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-[7px] uppercase tracking-wider text-center leading-tight" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                          TAP TO{'\n'}SIT
+                        </span>
+                      )}
+                    </button>
+                  )}
+
+                  {/* Side bet zones (only for active seats) */}
+                  {isActive && !isBot && (
+                    <div className="flex gap-8 mt-1 justify-center">
+                      {/* Lucky Lucky */}
+                      <button
+                        onClick={() => {
+                          store.toggleSideBet('perfectPairs', store.selectedChip || 25)
+                          if (!store.sideBets.perfectPairs.active) playChipClink()
+                        }}
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-[6px] uppercase"
+                        style={{
+                          background: store.sideBets.perfectPairs.active ? 'rgba(33,150,243,0.3)' : 'rgba(33,150,243,0.08)',
+                          border: `1px solid ${store.sideBets.perfectPairs.active ? '#2196f3' : 'rgba(33,150,243,0.2)'}`,
+                          color: store.sideBets.perfectPairs.active ? '#2196f3' : 'rgba(33,150,243,0.4)',
+                        }}
+                      >
+                        LL
+                      </button>
+                      {/* Bad Buster */}
+                      <button
+                        onClick={() => {
+                          store.toggleSideBet('luckyLadies', store.selectedChip || 10)
+                          if (!store.sideBets.luckyLadies.active) playChipClink()
+                        }}
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-[6px] uppercase"
+                        style={{
+                          background: store.sideBets.luckyLadies.active ? 'rgba(244,67,54,0.3)' : 'rgba(244,67,54,0.08)',
+                          border: `1px solid ${store.sideBets.luckyLadies.active ? '#f44336' : 'rgba(244,67,54,0.2)'}`,
+                          color: store.sideBets.luckyLadies.active ? '#f44336' : 'rgba(244,67,54,0.4)',
+                        }}
+                      >
+                        BB
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+
         {/* Emoji reaction system */}
         <EmojiReactions seatPositions={seatPositions} />
 
@@ -1055,7 +1186,8 @@ export default function BlackjackPage() {
         <SideBetResults />
 
         {/* Progressive Jackpot -- top center, grows in real-time */}
-        <ProgressiveJackpot betAmount={store.betAmount} phase={store.phase} />
+        <ProgressiveJackpot betAmount={store.betAmount} phase={store.phase}
+          cards={store.mainHand.cards} luckyLuckyActive={store.sideBets.perfectPairs.active} />
 
         {/* Dealer panel -- centered on table */}
         <DealerPanel />
@@ -1234,14 +1366,28 @@ export default function BlackjackPage() {
                 <CasinoChip key={v} value={v} selected={store.selectedChip === v}
                   onClick={() => handleChipSelect(v)}
                   onDragEnd={(chipValue, dropX, dropY) => {
-                    // Check where the chip was dropped
+                    // Check if chip was dropped on a seat drop zone
+                    for (let si = 0; si < 5; si++) {
+                      const zone = document.getElementById(`drop-zone-seat-${si}`)
+                      if (!zone) continue
+                      const rect = zone.getBoundingClientRect()
+                      if (dropX >= rect.left && dropX <= rect.right && dropY >= rect.top && dropY <= rect.bottom) {
+                        // Dropped on this seat
+                        if (!store.activeSeatIndices.includes(si)) {
+                          store.toggleSeat(si)
+                          toastInfo(`Seat ${si + 1}`, 'You sat down!')
+                        }
+                        const newBet = Math.min(store.betAmount + chipValue, store.player.chips, store.config.maxBet)
+                        store.setBet(newBet)
+                        playChipClink()
+                        return
+                      }
+                    }
+                    // Fallback: dropped anywhere on table
                     const gameArea = document.getElementById('game-area')
                     if (!gameArea) return
                     const rect = gameArea.getBoundingClientRect()
-                    const relY = (dropY - rect.top) / rect.height
-
-                    if (relY < 0.7) {
-                      // Dropped on the table area -> add to main bet
+                    if (dropY < rect.top + rect.height * 0.75) {
                       const newBet = Math.min(store.betAmount + chipValue, store.player.chips, store.config.maxBet)
                       store.setBet(newBet)
                       playChipClink()
