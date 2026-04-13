@@ -8,6 +8,7 @@
  */
 
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import type {
   Card, GamePhase, Outcome, HandState, SideBetState,
   LightningState, TableConfig, DealEvent, DealerDrawEvent,
@@ -185,9 +186,24 @@ const DEFAULT_DEALERS: DealerPersona[] = [
 // CREATE STORE
 // ============================================================
 
-export const useBlackjackStore = create<BlackjackStore>((set, get) => ({
+// Fresh player defaults (for first-time visitors)
+const FRESH_PLAYER: PlayerState = {
+  chips: 1000, gems: 10, sweepsCoins: 5.00, xp: 0, rank: 'Bronze',
+  handsPlayed: 0, handsWon: 0, blackjacks: 0, currentStreak: 0,
+  bestStreak: 0, biggestWin: 0, presenceMultiplier: 1.0,
+  unlockedAchievements: [],
+  ownedItems: ['default_suit'],
+  equippedOutfit: 'default_suit',
+  equippedAura: 'none',
+  equippedDeckSkin: 'classic',
+  equippedCardBack: 'classic_navy',
+}
+
+export const useBlackjackStore = create<BlackjackStore>()(
+  persist(
+    (set, get) => ({
   // Initial state
-  phase: 'betting',
+  phase: 'betting' as GamePhase,
   shoe: createShoe(6),
   config: createTableConfig('classic'),
   betAmount: 100,
@@ -226,17 +242,7 @@ export const useBlackjackStore = create<BlackjackStore>((set, get) => ({
     }))
   })(),
 
-  player: {
-    chips: 12450, gems: 45, sweepsCoins: 24.50, xp: 3200, rank: 'Gold',
-    handsPlayed: 87, handsWon: 41, blackjacks: 6, currentStreak: 0,
-    bestStreak: 7, biggestWin: 5000, presenceMultiplier: 1.0,
-    unlockedAchievements: ['first_win'],
-    ownedItems: ['default_suit'],
-    equippedOutfit: 'default_suit',
-    equippedAura: 'none',
-    equippedDeckSkin: 'classic',
-    equippedCardBack: 'classic_navy',
-  },
+  player: { ...FRESH_PLAYER },
 
   showBoutique: false,
   showGemStore: false,
@@ -638,11 +644,52 @@ export const useBlackjackStore = create<BlackjackStore>((set, get) => ({
     })
   },
 
-  setDealer: (dealer) => set({ activeDealer: dealer, showDealerSelect: false }),
+  setDealer: (dealer) => {
+    set({ activeDealer: dealer, showDealerSelect: false })
+    // Persist dealer selection
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('vantaris_dealer', dealer.id)
+    }
+  },
   setDealerLine: (line) => set({ dealerLine: line }),
 
   togglePanel: (panel) => {
     const key = `show${panel.charAt(0).toUpperCase() + panel.slice(1)}` as keyof BlackjackStore
     set({ [key]: !get()[key] } as any)
   },
-}))
+}),
+    {
+      name: 'vantaris-player',
+      // Only persist player data + settings. NEVER persist game state (shoe, hands, phase).
+      partialize: (state) => ({
+        player: state.player,
+        musicEnabled: state.musicEnabled,
+        voiceEnabled: state.voiceEnabled,
+        selectedChip: state.selectedChip,
+        betAmount: state.betAmount,
+      }),
+      // Merge persisted data with fresh defaults on hydration
+      merge: (persisted: any, current) => {
+        if (!persisted) return current
+        // Restore dealer from localStorage
+        let activeDealer = current.activeDealer
+        if (typeof window !== 'undefined') {
+          const savedDealerId = localStorage.getItem('vantaris_dealer')
+          if (savedDealerId) {
+            const found = DEFAULT_DEALERS.find(d => d.id === savedDealerId)
+            if (found) activeDealer = found
+          }
+        }
+        return {
+          ...current,
+          player: { ...FRESH_PLAYER, ...(persisted.player || {}) },
+          musicEnabled: persisted.musicEnabled ?? false,
+          voiceEnabled: persisted.voiceEnabled ?? false,
+          selectedChip: persisted.selectedChip ?? 100,
+          betAmount: persisted.betAmount ?? 100,
+          activeDealer,
+        }
+      },
+    },
+  ),
+)

@@ -50,6 +50,7 @@ export function PlayerProfilePanel({
   unlockedAchievements,
   onOpenAvatar,
   onLogout,
+  settings,
 }: {
   isOpen: boolean
   onClose: () => void

@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { motion } from 'framer-motion'
 
 /**
@@ -184,7 +185,7 @@ function BacardiSVG() {
 // MAIN COMPONENT
 // ============================================================
 
-const AVATAR_MAP: Record<string, () => JSX.Element> = {
+const AVATAR_MAP: Record<string, () => React.ReactElement> = {
   aria: AriaSVG,
   marcus: MarcusSVG,
   kanisha: KanishaSVG,

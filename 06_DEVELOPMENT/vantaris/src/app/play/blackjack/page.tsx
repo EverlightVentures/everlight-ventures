@@ -338,9 +338,9 @@ function DealerPanel() {
   ]
 
   return (
-    <div className="absolute right-4 top-[70px] z-20">
+    <div className="absolute right-2 md:right-4 top-[60px] md:top-[70px] z-20">
       <motion.div
-        className="glass p-3 rounded-xl flex items-start gap-3 max-w-[260px] cursor-pointer"
+        className="glass p-2 md:p-3 rounded-xl flex items-start gap-2 md:gap-3 max-w-[200px] md:max-w-[260px] cursor-pointer"
         onClick={() => togglePanel('dealerSelect')}
         key={dealerLine}
         initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
@@ -363,7 +363,7 @@ function DealerPanel() {
         {showDealerSelect && (
           <motion.div
             initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-            className="glass-elevated p-3 rounded-xl mt-2 w-[280px] space-y-1.5"
+            className="glass-elevated p-3 rounded-xl mt-2 w-[240px] md:w-[280px] space-y-1.5"
           >
             {dealers.map(d => (
               <div key={d.id} onClick={() => setDealer(d)}
@@ -675,46 +675,48 @@ export default function BlackjackPage() {
       <ToastContainer />
 
       {/* === TOP BAR === */}
-      <div className="flex items-center justify-between px-4 md:px-6 py-2.5 border-b relative z-20"
+      <div className="flex items-center justify-between px-2 md:px-6 py-2 md:py-2.5 border-b relative z-20"
         style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.85), transparent)', borderColor: 'transparent' }}>
 
-        <div className="flex items-center gap-3">
-          <h1 className="text-base font-bold tracking-widest"
+        <div className="flex items-center gap-1.5 md:gap-3">
+          <h1 className="text-sm md:text-base font-bold tracking-widest"
             style={{ fontFamily: "'Cinzel', serif", background: 'linear-gradient(135deg, #c9a84c, #e8c55a)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
             VANTARIS
           </h1>
           {/* Chips */}
-          <div className="flex items-center gap-1 px-3 py-1 rounded-full" style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(201,168,76,0.4)' }}>
-            <span className="text-xs">&#x1FA99;</span>
-            <span className="font-mono text-sm font-bold" style={{ color: 'var(--gold)' }}>{store.player.chips.toLocaleString()}</span>
+          <div className="flex items-center gap-1 px-2 md:px-3 py-1 rounded-full" style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(201,168,76,0.4)' }}>
+            <span className="text-[10px] md:text-xs">{'\uD83E\uDE99'}</span>
+            <span className="font-mono text-xs md:text-sm font-bold" style={{ color: 'var(--gold)' }}>{store.player.chips.toLocaleString()}</span>
           </div>
           {/* Gems */}
-          <div className="flex items-center gap-1 px-3 py-1 rounded-full" style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(52,152,219,0.3)' }}>
-            <span className="text-xs">&#x1F48E;</span>
-            <span className="font-mono text-sm font-bold" style={{ color: '#58a6ff' }}>{store.player.gems}</span>
+          <div className="flex items-center gap-1 px-2 md:px-3 py-1 rounded-full" style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(52,152,219,0.3)' }}>
+            <span className="text-[10px] md:text-xs">{'\uD83D\uDC8E'}</span>
+            <span className="font-mono text-xs md:text-sm font-bold" style={{ color: '#58a6ff' }}>{store.player.gems}</span>
           </div>
-          {/* Rank */}
-          <div className="px-2 py-1 rounded-full text-[10px] font-bold tracking-wider"
+          {/* Rank (hidden on small mobile) */}
+          <div className="hidden sm:block px-2 py-1 rounded-full text-[10px] font-bold tracking-wider"
             style={{ background: `${rankColor}15`, color: rankColor, border: `1px solid ${rankColor}30`, fontFamily: "'Cinzel', serif" }}>
             {store.player.rank}
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <XPBar xp={store.player.xp} streak={store.player.currentStreak} />
+        <div className="flex items-center gap-1 md:gap-2">
+          <div className="hidden md:block">
+            <XPBar xp={store.player.xp} streak={store.player.currentStreak} />
+          </div>
 
-          {/* Menu buttons */}
+          {/* Menu buttons -- icons on mobile, text on desktop */}
           {[
-            { label: 'PROFILE', onClick: () => setShowProfile(true), color: 'var(--text-secondary)' },
-            { label: 'SHOP', onClick: () => setShowBoutique(true), color: 'var(--text-secondary)' },
-            { label: 'GEMS', onClick: () => setShowGemStore(true), color: '#58a6ff' },
-            { label: 'FREE', onClick: () => setShowFreeChips(true), color: 'var(--win)' },
-            { label: 'RANKS', onClick: () => setShowLeaderboard(true), color: 'var(--gold)' },
+            { label: 'PROFILE', icon: '\uD83D\uDC64', onClick: () => setShowProfile(true), color: 'var(--text-secondary)' },
+            { label: 'SHOP', icon: '\uD83D\uDECD\uFE0F', onClick: () => setShowBoutique(true), color: 'var(--text-secondary)' },
+            { label: 'FREE', icon: '\uD83C\uDF81', onClick: () => setShowFreeChips(true), color: 'var(--win)' },
+            { label: 'RANKS', icon: '\uD83C\uDFC6', onClick: () => setShowLeaderboard(true), color: 'var(--gold)' },
           ].map(btn => (
             <button key={btn.label} onClick={btn.onClick}
-              className="text-[10px] px-2 py-1 rounded transition-colors hover:bg-white/5"
+              className="text-[10px] px-1.5 md:px-2 py-1 rounded transition-colors hover:bg-white/5"
               style={{ color: btn.color, fontFamily: "'Cinzel', serif", letterSpacing: '1px' }}>
-              {btn.label}
+              <span className="md:hidden">{btn.icon}</span>
+              <span className="hidden md:inline">{btn.label}</span>
             </button>
           ))}
 
@@ -755,10 +757,11 @@ export default function BlackjackPage() {
         <DealerPanel />
 
         {/* Presence indicator (top left) */}
-        <div className="absolute top-[60px] left-4 z-10 px-3 py-2 rounded-lg"
+        {/* Presence indicator -- hidden on very small mobile */}
+        <div className="absolute top-[55px] md:top-[60px] left-2 md:left-4 z-10 px-2 md:px-3 py-1.5 md:py-2 rounded-lg hidden sm:block"
           style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(201,168,76,0.4)' }}>
-          <p className="text-[8px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)', letterSpacing: '1px' }}>TABLE PRESENCE</p>
-          <p className="text-base font-bold" style={{ color: 'var(--gold)', fontFamily: "'Cinzel', serif" }}>
+          <p className="text-[7px] md:text-[8px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)', letterSpacing: '1px' }}>PRESENCE</p>
+          <p className="text-sm md:text-base font-bold" style={{ color: 'var(--gold)', fontFamily: "'Cinzel', serif" }}>
             {store.player.presenceMultiplier.toFixed(2)}x
           </p>
         </div>
@@ -815,21 +818,21 @@ export default function BlackjackPage() {
       </div>
 
       {/* === CONTROLS === */}
-      <div className="px-4 md:px-8 py-4 relative z-20"
+      <div className="px-2 md:px-8 py-3 md:py-4 relative z-20"
         style={{ background: 'linear-gradient(0deg, rgba(0,0,0,0.9), transparent)' }}>
 
         {/* BETTING PHASE */}
         {store.phase === 'betting' && (
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center gap-3">
+            className="flex flex-col items-center gap-2 md:gap-3">
             <div className="text-center">
-              <p className="text-[9px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Cinzel', serif", letterSpacing: '2px' }}>YOUR BET</p>
-              <p className="font-mono text-2xl md:text-3xl font-bold" style={{ color: 'var(--gold)' }}>{store.betAmount.toLocaleString()}</p>
+              <p className="text-[8px] md:text-[9px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Cinzel', serif", letterSpacing: '2px' }}>YOUR BET</p>
+              <p className="font-mono text-xl md:text-3xl font-bold" style={{ color: 'var(--gold)' }}>{store.betAmount.toLocaleString()}</p>
             </div>
-            <div className="flex gap-3 items-end">
+            <div className="flex gap-1.5 md:gap-3 items-end flex-wrap justify-center">
               {[10, 25, 100, 500, 1000, 5000].filter(v => v <= store.player.chips).map(v => (
                 <CasinoChip key={v} value={v} selected={store.selectedChip === v}
-                  onClick={() => handleChipSelect(v)} size={store.selectedChip === v ? 68 : 56} />
+                  onClick={() => handleChipSelect(v)} size={store.selectedChip === v ? 56 : 44} />
               ))}
             </div>
             <div className="flex gap-2">
@@ -875,22 +878,22 @@ export default function BlackjackPage() {
         {/* PLAYER ACTION PHASE */}
         {showPlayerActions && (
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-center gap-3 flex-wrap">
+            className="flex items-center justify-center gap-2 md:gap-3 flex-wrap">
             <motion.button onClick={handleHit}
-              className="px-8 py-2.5 text-sm tracking-widest font-bold rounded-xl"
+              className="px-6 md:px-8 py-2 md:py-2.5 text-xs md:text-sm tracking-widest font-bold rounded-xl"
               style={{ background: 'rgba(39,174,96,0.9)', color: '#fff', fontFamily: "'Cinzel', serif" }}
               whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
               HIT
             </motion.button>
             <motion.button onClick={handleStand}
-              className="px-8 py-2.5 text-sm tracking-widest font-bold rounded-xl"
+              className="px-6 md:px-8 py-2 md:py-2.5 text-xs md:text-sm tracking-widest font-bold rounded-xl"
               style={{ background: 'rgba(231,76,60,0.9)', color: '#fff', fontFamily: "'Cinzel', serif" }}
               whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
               STAND
             </motion.button>
             {canDouble && (
               <motion.button onClick={handleDouble}
-                className="px-8 py-2.5 text-sm tracking-widest font-bold rounded-xl"
+                className="px-5 md:px-8 py-2 md:py-2.5 text-xs md:text-sm tracking-widest font-bold rounded-xl"
                 style={{ background: 'rgba(52,152,219,0.9)', color: '#fff', fontFamily: "'Cinzel', serif" }}
                 whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                 DOUBLE
@@ -898,7 +901,7 @@ export default function BlackjackPage() {
             )}
             {canSplit && (
               <motion.button onClick={handleSplit}
-                className="px-8 py-2.5 text-sm tracking-widest font-bold rounded-xl"
+                className="px-5 md:px-8 py-2 md:py-2.5 text-xs md:text-sm tracking-widest font-bold rounded-xl"
                 style={{ background: 'rgba(142,68,173,0.9)', color: '#fff', fontFamily: "'Cinzel', serif" }}
                 whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                 SPLIT
