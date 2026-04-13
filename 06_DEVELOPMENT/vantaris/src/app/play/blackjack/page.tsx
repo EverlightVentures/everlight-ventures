@@ -1146,14 +1146,24 @@ export default function BlackjackPage() {
             // Center seat shows larger + lower, side seats show at their projected position
             if (isCenterSeat) {
               return (
-                <div key={si} className="absolute left-1/2 -translate-x-1/2" style={{ top: seat.splitHand ? '52%' : '58%' }}>
-                  <Hand cards={seat.hand.cards}
-                    label={store.activeSeatIndices.length > 1 ? `SEAT ${si + 1}` : 'YOUR HAND'}
-                    active={isCurrentSeat && (store.phase === 'player_turn' || store.phase === 'split_turn')}
-                    showValue={seat.hand.cards.length > 0} skinId={skinId} />
+                <div key={si} className="absolute left-1/2 -translate-x-1/2" style={{ top: seat.splitHand ? '48%' : '58%' }}>
+                  {/* Main hand */}
+                  <div style={{
+                    opacity: seat.splitHand && store.currentHandIndex === 1 ? 0.5 : 1,
+                    transition: 'opacity 0.3s',
+                  }}>
+                    <Hand cards={seat.hand.cards}
+                      label={seat.splitHand ? 'HAND 1' : (store.activeSeatIndices.length > 1 ? `SEAT ${si + 1}` : 'YOUR HAND')}
+                      active={isCurrentSeat && store.phase === 'player_turn' && store.currentHandIndex === 0}
+                      showValue={seat.hand.cards.length > 0} skinId={skinId} />
+                  </div>
+                  {/* Split hand -- clearly separated below */}
                   {seat.splitHand && (
-                    <div className="mt-2">
-                      <Hand cards={seat.splitHand.cards} label="SPLIT"
+                    <div className="mt-4" style={{
+                      opacity: store.currentHandIndex === 0 ? 0.5 : 1,
+                      transition: 'opacity 0.3s',
+                    }}>
+                      <Hand cards={seat.splitHand.cards} label="HAND 2"
                         active={isCurrentSeat && store.phase === 'split_turn' && store.currentHandIndex === 1}
                         showValue={true} skinId={skinId} />
                     </div>
@@ -1178,12 +1188,9 @@ export default function BlackjackPage() {
             )
           })}
 
-          {/* Legacy split hand support for center seat */}
-          {store.seats[2]?.splitHand && store.activeSeatIndices.includes(2) && (
-            <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '72%' }}>
-              <Hand cards={store.seats[2].splitHand.cards} label="SPLIT HAND"
-                active={store.currentSeatIndex === 2 && store.phase === 'split_turn' && store.currentHandIndex === 1}
-                showValue={true} skinId={skinId} />
+          {/* Split hand rendered inside each seat's block above -- no legacy duplicate needed */}
+          {false && (
+            <div>
             </div>
           )}
         </div>
