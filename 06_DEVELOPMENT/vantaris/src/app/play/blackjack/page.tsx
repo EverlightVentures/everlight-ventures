@@ -39,6 +39,9 @@ import {
 // Toast helpers (for inline handlers)
 import { toastWin, toastInfo } from '@/components/blackjack/VantarisToast'
 
+// Django backend sync (for production deployment)
+import { initDjangoSync, syncHandResult } from '@/lib/django-sync'
+
 /**
  * Vantaris Blackjack -- Full Refactor
  *
@@ -724,6 +727,7 @@ export default function BlackjackPage() {
   // Dealer idle chatter (45-90s interval during betting)
   useEffect(() => {
     startIdleChatter()
+    initDjangoSync() // prepare backend connection (no-op in dev)
     // Pre-warm speech cache with common dealer phrases (background, non-blocking)
     if (store.voiceEnabled) {
       prewarmSpeechCache(store.activeDealer.voiceId)
@@ -787,6 +791,16 @@ export default function BlackjackPage() {
     // Run dealer intelligence (achievements, mood, history, reshuffle)
     // Narrate per-seat results
     narrateResults()
+
+    // Sync hand result to Django backend (no-op in dev)
+    syncHandResult({
+      outcome: store.outcome || 'loss',
+      player_total: store.mainHand.value,
+      dealer_total: store.dealerHand.value,
+      bet: store.mainHand.bet,
+      payout: store.winAmount,
+      side_bets: {},
+    })
 
     const moodLine = postHandSettle()
     if (moodLine) {
