@@ -331,7 +331,8 @@ export function BotPlayers({ seatPositions }: { seatPositions: SeatPosition[] })
         setOutcomes(prev => ({ ...prev, [bot.seat]: null }))
       }, 1200)
 
-      await new Promise(r => setTimeout(r, 300))
+      // Think delay: 1.2-3.2s per bot (simulates real player thinking)
+      await new Promise(r => setTimeout(r, 1200 + Math.random() * 2000))
     }
 
     useBlackjackStore.setState({ bots: updatedBots })

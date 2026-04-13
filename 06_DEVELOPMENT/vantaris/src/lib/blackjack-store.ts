@@ -282,13 +282,31 @@ export const useBlackjackStore = create<BlackjackStore>()(
   speaking: false,
 
   bots: (() => {
-    // Pick 4 random names from the pool each session
-    const pool = ['Vegas Vic', 'Lucky Lou', 'Miss Fortune', 'The Shark', 'Big Stack Bobby', 'Ace Rivera', 'Diamond Dolly', 'Neon Nick']
+    // 36 diverse NPC names (from V4 GDD spec)
+    const pool = [
+      'Marcus', 'DeShawn', 'Aaliyah', 'Jaylen', 'Keisha', 'Darius', 'Imani',
+      'Tremaine', 'Latoya', 'Malik', 'Brianna', 'Jamal', 'Tanisha', 'Elijah',
+      'Monique', 'Xavier', 'Shanice', 'Devon', 'Kamila', 'Tyrone', 'Destiny',
+      'Isaiah', 'Nadia', 'Quinton', 'Zara', 'Reginald', 'Tamara', 'Calvin',
+      'Precious', 'Derrick', 'Amara', 'Jordan', 'Simone', 'Anthony', 'Crystal',
+    ]
     const shuffled = pool.sort(() => Math.random() - 0.5).slice(0, 4)
+    // Weighted starting chip stacks (from V4: $50-$500 range)
+    const chipTiers = [50, 75, 100, 150, 200, 300, 500]
+    const chipWeights = [0.10, 0.15, 0.30, 0.20, 0.15, 0.07, 0.03]
+    function npcChips() {
+      const r = Math.random()
+      let c = 0
+      for (let i = 0; i < chipTiers.length; i++) {
+        c += chipWeights[i]
+        if (r <= c) return chipTiers[i] * 10 // scale to GC
+      }
+      return 1000
+    }
     return shuffled.map((name, i) => ({
-      name, chips: 800 + Math.floor(Math.random() * 4000),
-      hand: [], bet: 0, outcome: null,
-      sittingOut: Math.random() < 0.2,
+      name, chips: npcChips(),
+      hand: [] as Card[], bet: 0, outcome: null,
+      sittingOut: Math.random() < 0.15,
       color: ['#27ae60', '#e74c3c', '#9b59b6', '#e67e22'][i],
       seat: [0, 1, 3, 4][i],
     }))

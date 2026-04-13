@@ -199,6 +199,7 @@ export function DealerAvatar({ dealerId, color, speaking, size = 48 }: {
   size?: number
 }) {
   const AvatarSVG = AVATAR_MAP[dealerId] || AriaSVG
+  const isVideo = dealerId === 'bacardi'
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -211,9 +212,21 @@ export function DealerAvatar({ dealerId, color, speaking, size = 48 }: {
         }}
       />
 
-      {/* Avatar */}
+      {/* Avatar -- video for Bacardi, SVG for others */}
       <div className="w-full h-full rounded-full overflow-hidden">
-        <AvatarSVG />
+        {isVideo ? (
+          <video
+            src="/dealers/bacardi_live.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+            style={{ transform: 'scale(1.3)' }}
+          />
+        ) : (
+          <AvatarSVG />
+        )}
       </div>
 
       {/* Speaking indicator -- pulsing green dot */}

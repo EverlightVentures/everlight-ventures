@@ -9,7 +9,7 @@ import {
   GemStore, FreeChips, AvatarBuilder, DEFAULT_AVATAR,
   PlayerProfilePanel, Leaderboard, CasinoScene3D, CasinoChip,
   BotPlayers, ToastContainer, DealerAvatar,
-  WelcomeScreen, isNewPlayer, EmojiReactions,
+  WelcomeScreen, isNewPlayer, EmojiReactions, DealerChat,
 } from '@/components/blackjack'
 import type { Achievement, AvatarConfig, SeatPosition } from '@/components/blackjack'
 import type { Card as CardData } from '@/lib/blackjack-engine'
@@ -138,8 +138,42 @@ const DEALER_LINES: Record<string, Record<string, string[]>> = {
 
 const SUPABASE_URL = 'https://jdqqmsmwmbsnlnstyavl.supabase.co'
 
+// Speech cache: pre-warm common phrases for zero-latency dealer voice
+const SPEECH_CACHE = new Map<string, Blob>()
+const PREWARM_PHRASES = [
+  'Place your bets.', 'Cards are dealt.', 'Bust. Dealer wins.',
+  'Dealer stands.', 'Blackjack! Congratulations.', 'Winner winner.',
+  'Push. No winner this hand.', 'No more bets.',
+]
+
+async function prewarmSpeechCache(voiceId: string) {
+  for (const phrase of PREWARM_PHRASES) {
+    try {
+      const resp = await fetch(`${SUPABASE_URL}/functions/v1/dealer-speak`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: phrase, voice_id: voiceId }),
+      })
+      if (resp.ok) {
+        SPEECH_CACHE.set(`${voiceId}:${phrase}`, await resp.blob())
+      }
+    } catch {}
+  }
+}
+
 async function speakLine(text: string, voiceId: string) {
   useBlackjackStore.setState({ speaking: true })
+
+  // Check cache first (zero latency for pre-warmed phrases)
+  const cacheKey = `${voiceId}:${text}`
+  if (SPEECH_CACHE.has(cacheKey)) {
+    const audio = new Audio(URL.createObjectURL(SPEECH_CACHE.get(cacheKey)!))
+    audio.volume = 0.7
+    audio.onended = () => useBlackjackStore.setState({ speaking: false })
+    await audio.play()
+    return
+  }
+
   try {
     const resp = await fetch(`${SUPABASE_URL}/functions/v1/dealer-speak`, {
       method: 'POST',
@@ -148,6 +182,8 @@ async function speakLine(text: string, voiceId: string) {
     })
     if (resp.ok) {
       const blob = await resp.blob()
+      // Cache for next time
+      if (SPEECH_CACHE.size < 50) SPEECH_CACHE.set(cacheKey, blob)
       const audio = new Audio(URL.createObjectURL(blob))
       audio.volume = 0.7
       audio.onended = () => useBlackjackStore.setState({ speaking: false })
@@ -604,6 +640,10 @@ export default function BlackjackPage() {
   // Dealer idle chatter (45-90s interval during betting)
   useEffect(() => {
     startIdleChatter()
+    // Pre-warm speech cache with common dealer phrases (background, non-blocking)
+    if (store.voiceEnabled) {
+      prewarmSpeechCache(store.activeDealer.voiceId)
+    }
     return () => stopIdleChatter()
   }, [])
 
@@ -851,6 +891,9 @@ export default function BlackjackPage() {
 
         {/* Emoji reaction system */}
         <EmojiReactions seatPositions={seatPositions} />
+
+        {/* AI dealer chat / strategy coach */}
+        <DealerChat />
 
         {/* Win particles */}
         <WinParticles trigger={particleTrigger} type={particleType} />
