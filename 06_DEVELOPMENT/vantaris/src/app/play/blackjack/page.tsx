@@ -703,6 +703,7 @@ export default function BlackjackPage() {
   // Free chips state (persisted in localStorage)
   const [adRefills, setAdRefills] = useState(10)
   const [dailyClaimed, setDailyClaimed] = useState(false)
+  const [lastBet, setLastBet] = useState(0)
 
   // Load free chip state from localStorage on mount
   useEffect(() => {
@@ -836,9 +837,15 @@ export default function BlackjackPage() {
   const handleSurrender = () => { store.playerSurrender(); speak('surrender'); playStand() }
   const handleInsurance = (take: boolean) => { store.playerInsurance(take); speak(take ? 'insurance' : 'deal'); if (take) playChipClink() }
   const handleDeal = () => {
+    setLastBet(store.betAmount) // save for REBET
     clearNarrationQueue()
     queueNarration('cards_out')
     store.deal(); playButtonClick(); playChipClink()
+  }
+  const handleRebet = () => {
+    if (lastBet > 0 && lastBet <= store.player.chips) {
+      store.setBet(lastBet)
+    }
   }
   const handleChipSelect = (v: number) => { store.selectChip(v); playChipClink() }
   const handleNewRound = () => { store.newRound(); playButtonClick() }
@@ -1200,14 +1207,28 @@ export default function BlackjackPage() {
               })}
             </div>
 
-            <motion.button onClick={handleDeal}
-              className="px-14 py-3 text-sm tracking-widest font-bold rounded-xl"
-              style={{ background: 'linear-gradient(135deg, #c9a84c, #f0d080)', color: '#000', fontFamily: "'Cinzel', serif", letterSpacing: '2px', boxShadow: '0 0 20px rgba(201,168,76,0.5)' }}
-              whileHover={{ boxShadow: '0 0 35px rgba(201,168,76,0.8)', y: -2 }}
-              whileTap={{ scale: 0.97 }}
-              disabled={store.betAmount <= 0 || store.betAmount * store.activeSeatIndices.length > store.player.chips}>
-              {store.activeSeatIndices.length > 1 ? `DEAL (${store.activeSeatIndices.length} SEATS)` : 'DEAL'}
-            </motion.button>
+            <div className="flex gap-3 items-center">
+              {/* REBET button (shows last bet amount) */}
+              {lastBet > 0 && store.betAmount === 0 && (
+                <motion.button onClick={handleRebet}
+                  className="px-6 py-3 text-xs tracking-widest font-bold rounded-xl"
+                  style={{ background: 'rgba(255,255,255,0.08)', color: '#c9a84c', fontFamily: "'Cinzel', serif", letterSpacing: '1px', border: '1px solid rgba(201,168,76,0.3)' }}
+                  whileHover={{ background: 'rgba(201,168,76,0.15)', y: -2 }}
+                  whileTap={{ scale: 0.97 }}>
+                  REBET {lastBet}
+                </motion.button>
+              )}
+
+              {/* DEAL button */}
+              <motion.button onClick={handleDeal}
+                className="px-12 md:px-14 py-3 text-sm tracking-widest font-bold rounded-xl"
+                style={{ background: 'linear-gradient(135deg, #c9a84c, #f0d080)', color: '#000', fontFamily: "'Cinzel', serif", letterSpacing: '2px', boxShadow: '0 0 20px rgba(201,168,76,0.5)' }}
+                whileHover={{ boxShadow: '0 0 35px rgba(201,168,76,0.8)', y: -2 }}
+                whileTap={{ scale: 0.97 }}
+                disabled={store.betAmount <= 0 || store.betAmount < store.config.minBet || store.betAmount * store.activeSeatIndices.length > store.player.chips}>
+                {store.activeSeatIndices.length > 1 ? `DEAL (${store.activeSeatIndices.length} SEATS)` : 'DEAL'}
+              </motion.button>
+            </div>
           </motion.div>
         )}
 

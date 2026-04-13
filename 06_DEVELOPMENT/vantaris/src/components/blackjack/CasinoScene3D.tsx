@@ -537,12 +537,13 @@ function SeatMarkers() {
 // SEAT PROJECTOR (3D -> 2D screen coords every frame)
 // ============================================================
 
+// Seat positions ON the table surface (lower Y = on the felt, not floating above)
 const SEAT_WORLD_POSITIONS = [
-  new THREE.Vector3(-3.5, 1.8, 2.8),   // Seat 1
-  new THREE.Vector3(-1.8, 1.8, 3.4),   // Seat 2
-  new THREE.Vector3( 0.0, 1.8, 3.6),   // Seat 3 (player)
-  new THREE.Vector3( 1.8, 1.8, 3.4),   // Seat 4
-  new THREE.Vector3( 3.5, 1.8, 2.8),   // Seat 5
+  new THREE.Vector3(-3.5, 0.2, 2.8),   // Seat 1 -- just above felt
+  new THREE.Vector3(-1.8, 0.2, 3.4),   // Seat 2
+  new THREE.Vector3( 0.0, 0.2, 3.6),   // Seat 3 (player)
+  new THREE.Vector3( 1.8, 0.2, 3.4),   // Seat 4
+  new THREE.Vector3( 3.5, 0.2, 2.8),   // Seat 5
 ]
 
 function SeatProjector({ onProject }: { onProject: (positions: SeatPosition[]) => void }) {

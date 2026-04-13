@@ -172,6 +172,24 @@ export function DealerChat() {
       id: msgId++, type: 'dealer', name: activeDealer.name,
       text: reply, timestamp: Date.now(),
     }])
+
+    // Random bot might respond to player chat (30% chance)
+    const allBots = useBlackjackStore.getState().bots.filter(b => !b.sittingOut)
+    if (allBots.length > 0 && Math.random() < 0.3) {
+      const bot = allBots[Math.floor(Math.random() * allBots.length)]
+      const botResponses = [
+        'For real!', 'I agree', 'Haha', 'Good point', 'Same here',
+        'True that', 'Yep', 'No doubt', 'Facts', 'Right?',
+        'lol', 'I feel that', '100%', 'Big mood', 'Say less',
+      ]
+      setTimeout(() => {
+        setMessages(prev => [...prev, {
+          id: msgId++, type: 'player' as const, name: bot.name,
+          text: botResponses[Math.floor(Math.random() * botResponses.length)],
+          timestamp: Date.now(),
+        }])
+      }, 1000 + Math.random() * 2000)
+    }
   }
 
   return (
