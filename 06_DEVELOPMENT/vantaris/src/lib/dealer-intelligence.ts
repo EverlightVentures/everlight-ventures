@@ -497,3 +497,143 @@ export function recalculatePresence(): void {
     })
   }
 }
+
+// ============================================================
+// DEALER NARRATION SYSTEM
+// Queues voice lines that play sequentially with timing.
+// Makes the dealer call out every phase like a real pit.
+// ============================================================
+
+const NARRATION_LINES: Record<string, Record<string, string[]>> = {
+  aria: {
+    fresh_shoe: ['Fresh shoe. Cards are live.', 'New shoe, fresh chances.'],
+    cards_out: ['Cards are out.', 'Here we go.'],
+    seat_action: ['Seat {seat}, your action.', 'Seat {seat}, what will it be?'],
+    seat_hits: ['Seat {seat} takes a hit.', 'Another card for seat {seat}.'],
+    seat_stands: ['Seat {seat} stands.', 'Seat {seat} is firm.'],
+    seat_doubles: ['Seat {seat} doubles down. Bold move.', 'Double down at seat {seat}. High roller alert.'],
+    seat_busts: ['Seat {seat} busts.', 'Over 21 at seat {seat}.'],
+    seat_blackjack: ['Blackjack at seat {seat}. Beautiful.', 'Natural 21 at seat {seat}.'],
+    dealer_reveals: ['Dealer reveals.', 'Let me show you what I have.'],
+    dealer_hits: ['Dealer must hit.', 'Dealer draws.'],
+    dealer_stands: ['Dealer stands at {total}.', 'Dealer has {total}. Standing.'],
+    dealer_busts: ['Dealer busts! The table wins.', 'Over 21 for the house.'],
+    result_win: ['Seat {seat} wins.', 'Winner at seat {seat}.'],
+    result_loss: ['Seat {seat} loses.', 'The house takes seat {seat}.'],
+    result_push: ['Seat {seat} pushes.', 'Tie at seat {seat}.'],
+    result_bust: ['Seat {seat} busted earlier.', 'Already busted at seat {seat}.'],
+  },
+  marcus: {
+    fresh_shoe: ['New shoe. No mercy.', 'Deck is fresh. Let us see what you got.'],
+    cards_out: ['Cards down.', 'Here come the cards.'],
+    seat_action: ['Seat {seat}. Your move.', 'Seat {seat}, clock is ticking.'],
+    seat_hits: ['Seat {seat} wants another.', 'Hit at seat {seat}.'],
+    seat_stands: ['Seat {seat} holds.', 'Standing at seat {seat}. Smart or scared?'],
+    seat_doubles: ['Seat {seat} goes all in. Respect.', 'Double down seat {seat}. Big dog energy.'],
+    seat_busts: ['Busted at seat {seat}. Tough.', 'Seat {seat} is done. Over 21.'],
+    seat_blackjack: ['Blackjack seat {seat}. Even The Shark is impressed.', '21 at seat {seat}. Clean.'],
+    dealer_reveals: ['Let me show you.', 'Flipping the hole card.'],
+    dealer_hits: ['Dealer hits.', 'Taking another.'],
+    dealer_stands: ['Dealer at {total}.', 'Standing on {total}. Let us settle up.'],
+    dealer_busts: ['Dealer busts. Your chips.', 'House goes over. Take your money.'],
+    result_win: ['Seat {seat} takes it.', 'Win at seat {seat}.'],
+    result_loss: ['Seat {seat} loses. The Shark eats.', 'House wins seat {seat}.'],
+    result_push: ['Push at seat {seat}.', 'Tied at seat {seat}. Nobody wins.'],
+    result_bust: ['Seat {seat} already busted.', 'Seat {seat} went over.'],
+  },
+  kanisha: {
+    fresh_shoe: ['Fresh shoe! Let us GO!', 'New deck, new energy!'],
+    cards_out: ['Cards are OUT! Showtime!', 'Here we go y\'all!'],
+    seat_action: ['Seat {seat}! Your moment!', 'Seat {seat}, what\'s it gonna be?!'],
+    seat_hits: ['Seat {seat} hits! I love the energy!', 'Another card at seat {seat}!'],
+    seat_stands: ['Seat {seat} stands strong!', 'Holding at seat {seat}!'],
+    seat_doubles: ['DOUBLE DOWN at seat {seat}! OH my!', 'Seat {seat} is going BIG!'],
+    seat_busts: ['Ooh seat {seat} busts! It happens!', 'Over at seat {seat}! You\'ll bounce back!'],
+    seat_blackjack: ['BLACKJACK seat {seat}! The VIP lounge goes CRAZY!', 'Twenty-one at seat {seat}! LEGENDARY!'],
+    dealer_reveals: ['Let me show you what mama got!', 'Revealing!'],
+    dealer_hits: ['Dealer has to hit!', 'Taking one more!'],
+    dealer_stands: ['Dealer at {total}!', 'Standing on {total}!'],
+    dealer_busts: ['DEALER BUSTS! Tonight is YOUR night!', 'The house FALLS! VIP energy!'],
+    result_win: ['WINNER at seat {seat}!', 'Seat {seat} TAKES IT!'],
+    result_loss: ['Seat {seat} this time. Next hand!', 'House takes seat {seat}. Shake it off!'],
+    result_push: ['Push at seat {seat}! Drama!', 'Tied at seat {seat}!'],
+    result_bust: ['Seat {seat} busted earlier!', 'Already over at seat {seat}!'],
+  },
+  bacardi: {
+    fresh_shoe: ['Fresh shoe. The ice is ready.', 'New deck. Play or leave.'],
+    cards_out: ['Cards.', 'Here.'],
+    seat_action: ['Seat {seat}.', 'Seat {seat}. Decide.'],
+    seat_hits: ['Hit at {seat}.', 'Another card. Seat {seat}.'],
+    seat_stands: ['Seat {seat} stands.', 'Standing. Seat {seat}.'],
+    seat_doubles: ['Double at seat {seat}. Brave.', 'Seat {seat} doubles. Interesting.'],
+    seat_busts: ['Bust. Seat {seat}.', 'Over. Seat {seat}.'],
+    seat_blackjack: ['21 at seat {seat}. The Ice acknowledges.', 'Blackjack seat {seat}. Rare praise.'],
+    dealer_reveals: ['Revealing.', 'The ice shows.'],
+    dealer_hits: ['Hit.', 'Drawing.'],
+    dealer_stands: ['{total}. Standing.', 'Dealer {total}. Done.'],
+    dealer_busts: ['The ice cracked. Take your chips.', 'Bust. It will not happen twice.'],
+    result_win: ['Seat {seat} wins.', 'Victory. Seat {seat}.'],
+    result_loss: ['Seat {seat} falls.', 'The ice takes seat {seat}.'],
+    result_push: ['Push. Seat {seat}.', 'Tie. Seat {seat}.'],
+    result_bust: ['Already over. Seat {seat}.', 'Seat {seat} busted.'],
+  },
+}
+
+function pickNarration(category: string, vars: Record<string, string | number> = {}): string {
+  const state = useBlackjackStore.getState()
+  const dealerId = state.activeDealer.id
+  const lines = NARRATION_LINES[dealerId]?.[category] || NARRATION_LINES.aria[category] || ['']
+  let line = lines[Math.floor(Math.random() * lines.length)]
+  // Replace template vars
+  for (const [key, val] of Object.entries(vars)) {
+    line = line.replace(`{${key}}`, String(val))
+  }
+  return line
+}
+
+// Queue of lines to speak in sequence
+let narrationQueue: string[] = []
+let narrationPlaying = false
+
+export function queueNarration(category: string, vars: Record<string, string | number> = {}) {
+  const line = pickNarration(category, vars)
+  narrationQueue.push(line)
+  if (!narrationPlaying) processNarrationQueue()
+}
+
+export function queueLine(line: string) {
+  narrationQueue.push(line)
+  if (!narrationPlaying) processNarrationQueue()
+}
+
+function processNarrationQueue() {
+  if (narrationQueue.length === 0) {
+    narrationPlaying = false
+    return
+  }
+  narrationPlaying = true
+  const line = narrationQueue.shift()!
+  useBlackjackStore.getState().setDealerLine(line)
+
+  // Estimate speech duration (~80ms per character, min 1.5s)
+  const duration = Math.max(1500, line.length * 80)
+  setTimeout(processNarrationQueue, duration)
+}
+
+export function clearNarrationQueue() {
+  narrationQueue = []
+  narrationPlaying = false
+}
+
+// Convenience: narrate seat-by-seat results
+export function narrateResults() {
+  const state = useBlackjackStore.getState()
+  for (const r of state.seatResults) {
+    const seatNum = r.seatIndex + 1
+    if (r.outcome === 'blackjack') queueNarration('seat_blackjack', { seat: seatNum })
+    else if (r.outcome === 'win' || r.outcome === 'charlie') queueNarration('result_win', { seat: seatNum })
+    else if (r.outcome === 'push') queueNarration('result_push', { seat: seatNum })
+    else if (r.outcome === 'bust') queueNarration('result_bust', { seat: seatNum })
+    else queueNarration('result_loss', { seat: seatNum })
+  }
+}

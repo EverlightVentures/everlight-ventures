@@ -33,6 +33,7 @@ import {
 import {
   postHandSettle, startIdleChatter, stopIdleChatter,
   getDealerDrawLine, getDealerBustLine, recalculatePresence,
+  queueNarration, narrateResults, clearNarrationQueue,
 } from '@/lib/dealer-intelligence'
 
 // Toast helpers (for inline handlers)
@@ -660,9 +661,11 @@ export default function BlackjackPage() {
     }
 
     // Run dealer intelligence (achievements, mood, history, reshuffle)
+    // Narrate per-seat results
+    narrateResults()
+
     const moodLine = postHandSettle()
     if (moodLine) {
-      // Mood line overrides the outcome line after a short delay
       setTimeout(() => {
         useBlackjackStore.setState({ dealerLine: moodLine })
       }, 1500)
@@ -674,8 +677,14 @@ export default function BlackjackPage() {
   }, [store.outcome])
 
   // Speak on actions
-  const handleHit = () => { store.playerHit(); speak('hit'); playHit(); playCardDeal() }
-  const handleStand = () => { store.playerStand(); speak('stand'); playStand() }
+  const handleHit = () => {
+    queueNarration('seat_hits', { seat: store.currentSeatIndex + 1 })
+    store.playerHit(); speak('hit'); playHit(); playCardDeal()
+  }
+  const handleStand = () => {
+    queueNarration('seat_stands', { seat: store.currentSeatIndex + 1 })
+    store.playerStand(); speak('stand'); playStand()
+  }
   const handleDouble = () => {
     store.playerDouble(); speak('hit'); playCardDeal(); playChipClink()
     // Double down dramatic flash
@@ -689,7 +698,11 @@ export default function BlackjackPage() {
   const handleSplit = () => { store.playerSplit(); speak('split'); playSplit() }
   const handleSurrender = () => { store.playerSurrender(); speak('surrender'); playStand() }
   const handleInsurance = (take: boolean) => { store.playerInsurance(take); speak(take ? 'insurance' : 'deal'); if (take) playChipClink() }
-  const handleDeal = () => { store.deal(); playButtonClick(); playChipClink() }
+  const handleDeal = () => {
+    clearNarrationQueue()
+    queueNarration('cards_out')
+    store.deal(); playButtonClick(); playChipClink()
+  }
   const handleChipSelect = (v: number) => { store.selectChip(v); playChipClink() }
   const handleNewRound = () => { store.newRound(); playButtonClick() }
 
