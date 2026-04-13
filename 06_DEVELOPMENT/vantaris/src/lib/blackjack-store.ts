@@ -224,7 +224,7 @@ const DEFAULT_DEALERS: DealerPersona[] = [
   { id: 'aria', name: 'Aria Sinclair', title: 'House Dealer', vip: false, voiceId: 'EXAVITQu4vr4xnSDxMaL', color: '#c9a84c' },
   { id: 'marcus', name: 'Marcus Vega', title: 'High Roller', vip: false, voiceId: 'onwK4e9ZLuTAKqWW03F9', color: '#ff6b35' },
   { id: 'kanisha', name: 'Kanisha Thompson', title: 'VIP Lounge', vip: true, voiceId: 'XrExE9yKIg1WjnnlVkGX', color: '#e91e63' },
-  { id: 'bacardi', name: 'Bacardi Ice', title: 'VIP Elite', vip: true, voiceId: 'onwK4e9ZLuTAKqWW03F9', color: '#00bcd4' },
+  { id: 'bacardi', name: 'Bacardi Ice', title: 'VIP Elite', vip: true, voiceId: 'pNInz6obpgDQGcFmaJgB', color: '#00bcd4' },
 ]
 
 // ============================================================
@@ -905,9 +905,14 @@ export const useBlackjackStore = create<BlackjackStore>()(
             if (found) activeDealer = found
           }
         }
+        // One-time test deposit: 10K chips if below 100
+        const mergedPlayer = { ...FRESH_PLAYER, ...(persisted.player || {}) }
+        if (mergedPlayer.chips < 100) {
+          mergedPlayer.chips += 10000
+        }
         return {
           ...current,
-          player: { ...FRESH_PLAYER, ...(persisted.player || {}) },
+          player: mergedPlayer,
           musicEnabled: persisted.musicEnabled ?? false,
           voiceEnabled: persisted.voiceEnabled ?? false,
           autoRebet: persisted.autoRebet ?? false,

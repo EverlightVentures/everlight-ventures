@@ -596,9 +596,7 @@ function SideBetResults() {
     if (sb.perfectPairs.active) {
       allResults.push({ name: 'PAIRS', result: sb.perfectPairs.result || 'Miss', payout: sb.perfectPairs.payout, seat: si })
     }
-    if (sb.twentyOnePlus3.active) {
-      allResults.push({ name: '21+3', result: sb.twentyOnePlus3.result || 'Miss', payout: sb.twentyOnePlus3.payout, seat: si })
-    }
+    // 21+3 removed from UI per user request
     if (sb.luckyLadies.active) {
       allResults.push({ name: 'LADIES', result: sb.luckyLadies.result || 'Miss', payout: sb.luckyLadies.payout, seat: si })
     }
@@ -1174,7 +1172,6 @@ export default function BlackjackPage() {
               <p className="text-[8px] uppercase tracking-wider mr-1" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: "'Cinzel', serif" }}>SIDE BETS</p>
               {([
                 { key: 'perfectPairs' as const, label: 'LUCKY LUCKY', desc: 'Same rank pair', payout: '5:1 - 25:1', color: '#2196f3' },
-                { key: 'twentyOnePlus3' as const, label: '21+3', desc: '3-card poker', payout: '5:1 - 100:1', color: '#e67e22' },
                 { key: 'luckyLadies' as const, label: 'BAD BUSTER', desc: 'Dealer busts', payout: '4:1 - 1000:1', color: '#f44336' },
               ]).map(sb => {
                 const active = store.sideBets[sb.key].active

@@ -49,21 +49,31 @@ function CasinoTable() {
 
   return (
     <group>
-      {/* Table base -- dark wood, LUXURY OVAL */}
-      <mesh position={[0, -0.8, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[4.8, 4.5, 0.6, 64]} />
-        <meshStandardMaterial
-          color="#1a0d08"
-          roughness={0.35}
-          metalness={0.25}
-        />
-      </mesh>
-
-      {/* Oval scale group */}
+      {/* ENTIRE TABLE in oval scale group (1.3x width = luxury oval) */}
       <group scale={[1.3, 1, 1]}>
-        {/* Felt surface -- CASINO GREEN on luxury oval */}
+        {/* Table base -- dark wood */}
+        <mesh position={[0, -0.8, 0]} castShadow receiveShadow>
+          <cylinderGeometry args={[4.2, 4.0, 0.5, 64]} />
+          <meshStandardMaterial
+            color="#1a0d08"
+            roughness={0.35}
+            metalness={0.25}
+          />
+        </mesh>
+
+        {/* Padded rail (leather cushion around edge) */}
+        <mesh position={[0, -0.5, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[4.05, 0.12, 12, 128]} />
+          <meshStandardMaterial
+            color="#1a0d08"
+            roughness={0.6}
+            metalness={0.1}
+          />
+        </mesh>
+
+        {/* Felt surface -- CASINO GREEN */}
         <mesh ref={feltRef} position={[0, -0.46, 0]} receiveShadow>
-          <cylinderGeometry args={[3.6, 3.6, 0.06, 64]} />
+          <cylinderGeometry args={[3.9, 3.9, 0.06, 64]} />
           <meshStandardMaterial
             color="#0d5c2e"
             roughness={0.92}
@@ -75,58 +85,29 @@ function CasinoTable() {
 
         {/* Inner gold stitch line */}
         <mesh position={[0, -0.42, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[3.2, 0.015, 8, 128]} />
+          <torusGeometry args={[3.5, 0.012, 8, 128]} />
           <meshStandardMaterial
             color="#c9a84c"
             roughness={0.2}
             metalness={0.8}
             emissive="#c9a84c"
-            emissiveIntensity={0.3}
+            emissiveIntensity={0.25}
           />
         </mesh>
 
         {/* Outer gold trim ring */}
         <mesh position={[0, -0.43, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[3.65, 0.06, 12, 128]} />
+          <torusGeometry args={[3.95, 0.05, 12, 128]} />
           <meshStandardMaterial
             color="#c9a84c"
             roughness={0.15}
             metalness={0.95}
             emissive="#c9a84c"
-          emissiveIntensity={0.15}
-        />
-      </mesh>
-
+            emissiveIntensity={0.15}
+          />
+        </mesh>
       </group>
-      {/* End oval scale group */}
-
-      {/* Per-seat side bet spots: Lucky Lucky (left) + Bad Buster (right) */}
-      {bettingSpots.map((spot, i) => (
-        <group key={`sidebets-${i}`}>
-          {/* Lucky Lucky -- small circle LEFT of seat */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[spot.x - 0.55, -0.42, spot.z - 0.15]}>
-            <circleGeometry args={[0.15, 24]} />
-            <meshStandardMaterial
-              color="#2196f3"
-              emissive="#1565c0"
-              emissiveIntensity={0.15}
-              transparent opacity={0.35}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-          {/* Bad Buster -- small circle RIGHT of seat */}
-          <mesh rotation={[-Math.PI / 2, 0, 0]} position={[spot.x + 0.55, -0.42, spot.z - 0.15]}>
-            <circleGeometry args={[0.15, 24]} />
-            <meshStandardMaterial
-              color="#f44336"
-              emissive="#c62828"
-              emissiveIntensity={0.15}
-              transparent opacity={0.35}
-              side={THREE.DoubleSide}
-            />
-          </mesh>
-        </group>
-      ))}
+      {/* End oval scale group -- EVERYTHING above is oval */}
 
       {/* Insurance arc (semi-circle in front of dealer) */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.415, -0.5]}>
