@@ -365,6 +365,7 @@ export const useBlackjackStore = create<BlackjackStore>()(
     const seats = [...state.seats]
     const dealerCards: Card[] = [shoe.pop()!, shoe.pop()!]
     dealerCards[1] = { ...dealerCards[1], faceDown: true }
+    const dealerEvalEarly = evaluateHand(dealerCards)
 
     for (const si of activeSeats) {
       const pCards: Card[] = [shoe.pop()!, shoe.pop()!]
@@ -386,7 +387,7 @@ export const useBlackjackStore = create<BlackjackStore>()(
         currentHandIndex: 0,
       }
 
-      // Evaluate side bets for this seat
+      // Evaluate ALL side bets for this seat
       if (seats[si].sideBets.perfectPairs.active) {
         const pp = evaluatePerfectPairs(pCards[0], pCards[1])
         seats[si].sideBets.perfectPairs.result = pp.result
@@ -396,6 +397,12 @@ export const useBlackjackStore = create<BlackjackStore>()(
         const t3 = evaluate21Plus3(pCards[0], pCards[1], dealerCards[0])
         seats[si].sideBets.twentyOnePlus3.result = t3.result
         seats[si].sideBets.twentyOnePlus3.payout = t3.result ? seats[si].sideBets.twentyOnePlus3.bet * t3.multiplier : 0
+      }
+      if (seats[si].sideBets.luckyLadies.active) {
+        const dealerBJ = dealerEvalEarly.isBlackjack
+        const ll = evaluateLuckyLadies(pCards[0], pCards[1], dealerBJ)
+        seats[si].sideBets.luckyLadies.result = ll.result
+        seats[si].sideBets.luckyLadies.payout = ll.result ? seats[si].sideBets.luckyLadies.bet * ll.multiplier : 0
       }
     }
 

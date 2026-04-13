@@ -520,27 +520,48 @@ function OutcomeOverlay() {
 // ============================================================
 
 function SideBetResults() {
-  const { sideBets, phase } = useBlackjackStore()
+  const { sideBets, phase, seats, activeSeatIndices } = useBlackjackStore()
   if (phase !== 'settled') return null
 
-  const results = [
-    sideBets.perfectPairs.result ? { name: 'Perfect Pairs', result: sideBets.perfectPairs.result, payout: sideBets.perfectPairs.payout } : null,
-    sideBets.twentyOnePlus3.result ? { name: '21+3', result: sideBets.twentyOnePlus3.result, payout: sideBets.twentyOnePlus3.payout } : null,
-    sideBets.luckyLadies.result ? { name: 'Lucky Ladies', result: sideBets.luckyLadies.result, payout: sideBets.luckyLadies.payout } : null,
-  ].filter(Boolean)
+  // Collect side bet results from all active seats
+  const allResults: { name: string; result: string; payout: number; seat: number }[] = []
+  for (const si of activeSeatIndices) {
+    const sb = seats[si]?.sideBets || sideBets
+    if (sb.perfectPairs.active) {
+      allResults.push({ name: 'PAIRS', result: sb.perfectPairs.result || 'Miss', payout: sb.perfectPairs.payout, seat: si })
+    }
+    if (sb.twentyOnePlus3.active) {
+      allResults.push({ name: '21+3', result: sb.twentyOnePlus3.result || 'Miss', payout: sb.twentyOnePlus3.payout, seat: si })
+    }
+    if (sb.luckyLadies.active) {
+      allResults.push({ name: 'LADIES', result: sb.luckyLadies.result || 'Miss', payout: sb.luckyLadies.payout, seat: si })
+    }
+  }
 
-  if (results.length === 0) return null
+  if (allResults.length === 0) return null
 
   return (
     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-      className="absolute bottom-[180px] left-1/2 -translate-x-1/2 z-20 flex gap-2">
-      {results.map((r, i) => (
-        <div key={i} className="glass px-3 py-1.5 rounded-lg text-center">
-          <p className="text-[9px] uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>{r!.name}</p>
-          <p className="text-xs font-mono font-bold" style={{ color: r!.payout > 0 ? 'var(--win)' : 'var(--loss)' }}>
-            {r!.payout > 0 ? `+${r!.payout}` : 'Miss'}
-          </p>
-        </div>
+      className="absolute bottom-[180px] left-1/2 -translate-x-1/2 z-20 flex gap-2 flex-wrap justify-center">
+      {allResults.map((r, i) => (
+        <motion.div key={i} initial={{ scale: 0.8 }} animate={{ scale: 1 }}
+          transition={{ delay: i * 0.15, type: 'spring' }}
+          className="px-3 py-2 rounded-xl text-center"
+          style={{
+            background: r.payout > 0 ? 'rgba(0,230,118,0.12)' : 'rgba(255,45,85,0.08)',
+            border: `1px solid ${r.payout > 0 ? 'rgba(0,230,118,0.3)' : 'rgba(255,45,85,0.2)'}`,
+            boxShadow: r.payout > 0 ? '0 0 12px rgba(0,230,118,0.15)' : 'none',
+          }}>
+          <p className="text-[8px] uppercase tracking-wider font-bold" style={{ color: r.payout > 0 ? 'var(--win)' : 'var(--loss)' }}>{r.name}</p>
+          {r.payout > 0 ? (
+            <>
+              <p className="text-[9px]" style={{ color: 'rgba(255,255,255,0.6)' }}>{r.result}</p>
+              <p className="text-sm font-mono font-bold" style={{ color: 'var(--win)' }}>+{r.payout.toLocaleString()}</p>
+            </>
+          ) : (
+            <p className="text-[10px] font-mono" style={{ color: 'var(--loss)' }}>Miss</p>
+          )}
+        </motion.div>
       ))}
     </motion.div>
   )
@@ -1061,35 +1082,46 @@ export default function BlackjackPage() {
               <button onClick={() => store.setBet(0)} className="btn-ghost text-xs px-3 py-1" style={{ color: 'var(--loss)' }}>CLEAR</button>
             </div>
 
-            {/* Side Bets */}
+            {/* Side Bets -- tap to toggle, clearly shows ON/OFF state */}
             <div className="flex gap-2 md:gap-3 items-center">
+              <p className="text-[8px] uppercase tracking-wider mr-1" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: "'Cinzel', serif" }}>SIDE BETS</p>
               {([
-                { key: 'perfectPairs' as const, label: 'PAIRS', desc: 'up to 25:1', color: '#9b59b6', amount: 25 },
-                { key: 'twentyOnePlus3' as const, label: '21+3', desc: 'up to 100:1', color: '#e67e22', amount: 25 },
-                { key: 'luckyLadies' as const, label: 'LADIES', desc: 'up to 1000:1', color: '#e91e63', amount: 10 },
+                { key: 'perfectPairs' as const, label: 'PAIRS', desc: 'Same rank pair', payout: '5:1 - 25:1', color: '#9b59b6', amount: 25 },
+                { key: 'twentyOnePlus3' as const, label: '21+3', desc: '3-card poker', payout: '5:1 - 100:1', color: '#e67e22', amount: 25 },
+                { key: 'luckyLadies' as const, label: 'LADIES', desc: 'Total = 20', payout: '4:1 - 1000:1', color: '#e91e63', amount: 10 },
               ]).map(sb => {
                 const active = store.sideBets[sb.key].active
                 return (
                   <motion.button
                     key={sb.key}
-                    onClick={() => store.toggleSideBet(sb.key, sb.amount)}
-                    className="px-3 md:px-4 py-1.5 rounded-lg text-center"
-                    style={{
-                      background: active ? `${sb.color}25` : 'rgba(255,255,255,0.04)',
-                      border: `1px solid ${active ? sb.color + '60' : 'rgba(255,255,255,0.1)'}`,
-                      boxShadow: active ? `0 0 12px ${sb.color}20` : 'none',
+                    onClick={() => {
+                      store.toggleSideBet(sb.key, sb.amount)
+                      if (!active) {
+                        toastInfo(`${sb.label} Side Bet ON`, `${sb.amount} GC per hand. Pays ${sb.payout}`)
+                      }
                     }}
-                    whileTap={{ scale: 0.95 }}
+                    className="px-3 md:px-4 py-2 md:py-2.5 rounded-xl text-center min-w-[70px]"
+                    style={{
+                      background: active ? `${sb.color}30` : 'rgba(255,255,255,0.04)',
+                      border: `2px solid ${active ? sb.color : 'rgba(255,255,255,0.08)'}`,
+                      boxShadow: active ? `0 0 16px ${sb.color}30, inset 0 0 8px ${sb.color}10` : 'none',
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.92 }}
                   >
-                    <p className="text-[9px] md:text-[10px] font-bold tracking-wider" style={{
-                      color: active ? sb.color : 'rgba(255,255,255,0.4)',
+                    <p className="text-[10px] md:text-[11px] font-bold tracking-wider" style={{
+                      color: active ? sb.color : 'rgba(255,255,255,0.35)',
                       fontFamily: "'Cinzel', serif",
                     }}>
                       {sb.label}
                     </p>
-                    <p className="text-[7px] md:text-[8px]" style={{ color: active ? sb.color + 'aa' : 'rgba(255,255,255,0.2)' }}>
-                      {active ? `${sb.amount} GC` : sb.desc}
+                    <p className="text-[8px] md:text-[9px] font-mono" style={{ color: active ? '#fff' : 'rgba(255,255,255,0.2)' }}>
+                      {active ? `${sb.amount} GC` : sb.payout}
                     </p>
+                    {active && (
+                      <div className="mt-0.5 text-[7px] font-bold px-1.5 py-0.5 rounded-full inline-block"
+                        style={{ background: sb.color, color: '#fff' }}>ON</div>
+                    )}
                   </motion.button>
                 )
               })}
