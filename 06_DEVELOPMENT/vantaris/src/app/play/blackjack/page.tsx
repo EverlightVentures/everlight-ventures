@@ -1103,24 +1103,60 @@ export default function BlackjackPage() {
 
         {/* Card areas (absolute positioned over 3D scene) */}
         <div className="absolute inset-0 z-10 pointer-events-none">
-          {/* Dealer hand at 30% from top (matches reference) */}
-          <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '30%' }}>
+          {/* Dealer hand at 25% from top */}
+          <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '22%' }}>
             <Hand cards={store.dealerHand.cards} label="DEALER" active={store.phase === 'dealer_turn'}
               showValue={store.phase === 'dealer_turn' || store.phase === 'settled'} skinId={skinId} />
           </div>
 
-          {/* Player main hand at 62% from top (matches reference) */}
-          <div className="absolute left-1/2 -translate-x-1/2" style={{ top: store.splitHand ? '55%' : '62%' }}>
-            <Hand cards={store.mainHand.cards} label={store.splitHand ? 'HAND 1' : 'YOUR HAND'}
-              active={store.phase === 'player_turn' && store.currentHandIndex === 0}
-              showValue={store.mainHand.cards.length > 0} skinId={skinId} />
-          </div>
+          {/* All active seats' cards positioned around the table */}
+          {store.activeSeatIndices.map(si => {
+            const seat = store.seats[si]
+            if (!seat || seat.hand.cards.length === 0) return null
+            const seatPos = seatPositions[si]
+            const isCurrentSeat = si === store.currentSeatIndex
+            const isCenterSeat = si === 2
 
-          {/* Split hand (if active) at 76% */}
-          {store.splitHand && (
-            <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '76%' }}>
-              <Hand cards={store.splitHand.cards} label="HAND 2"
-                active={store.phase === 'split_turn' && store.currentHandIndex === 1}
+            // Center seat shows larger + lower, side seats show at their projected position
+            if (isCenterSeat) {
+              return (
+                <div key={si} className="absolute left-1/2 -translate-x-1/2" style={{ top: seat.splitHand ? '52%' : '58%' }}>
+                  <Hand cards={seat.hand.cards}
+                    label={store.activeSeatIndices.length > 1 ? `SEAT ${si + 1}` : 'YOUR HAND'}
+                    active={isCurrentSeat && (store.phase === 'player_turn' || store.phase === 'split_turn')}
+                    showValue={seat.hand.cards.length > 0} skinId={skinId} />
+                  {seat.splitHand && (
+                    <div className="mt-2">
+                      <Hand cards={seat.splitHand.cards} label="SPLIT"
+                        active={isCurrentSeat && store.phase === 'split_turn' && store.currentHandIndex === 1}
+                        showValue={true} skinId={skinId} />
+                    </div>
+                  )}
+                </div>
+              )
+            }
+
+            // Non-center seats: position near their table seat
+            if (!seatPos?.visible) return null
+            return (
+              <div key={si} className="absolute" style={{
+                left: `${seatPos.x}px`,
+                top: `${Math.min(seatPos.y - 60, window?.innerHeight * 0.55 || 400)}px`,
+                transform: 'translate(-50%, 0) scale(0.75)',
+                opacity: isCurrentSeat ? 1 : 0.8,
+              }}>
+                <Hand cards={seat.hand.cards} label={`SEAT ${si + 1}`}
+                  active={isCurrentSeat && store.phase === 'player_turn'}
+                  showValue={seat.hand.cards.length > 0} skinId={skinId} />
+              </div>
+            )
+          })}
+
+          {/* Legacy split hand support for center seat */}
+          {store.seats[2]?.splitHand && store.activeSeatIndices.includes(2) && (
+            <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '72%' }}>
+              <Hand cards={store.seats[2].splitHand.cards} label="SPLIT HAND"
+                active={store.currentSeatIndex === 2 && store.phase === 'split_turn' && store.currentHandIndex === 1}
                 showValue={true} skinId={skinId} />
             </div>
           )}

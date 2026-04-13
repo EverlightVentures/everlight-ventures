@@ -1,8 +1,9 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useBlackjackStore } from '@/lib/blackjack-store'
 
 /**
  * Vantaris Casino Lobby
@@ -118,17 +119,23 @@ function TierBadge({ tier }: { tier: string }) {
 }
 
 // Sidebar component
-function Sidebar() {
-  const [walletOpen, setWalletOpen] = useState(false)
+function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+  const player = useBlackjackStore(s => s.player)
+  const playerName = typeof window !== 'undefined' ? localStorage.getItem('vantaris_player_name') || 'Player' : 'Player'
 
   return (
-    <aside
-      className="fixed left-0 top-0 bottom-0 w-64 flex flex-col z-20 border-r"
-      style={{
-        background: 'var(--vanta-abyss)',
-        borderColor: 'var(--vanta-border)',
-      }}
-    >
+    <>
+      {/* Mobile backdrop */}
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/60 z-30 md:hidden" onClick={onClose} />
+      )}
+      <aside
+        className={`fixed left-0 top-0 bottom-0 w-64 flex flex-col z-40 border-r transition-transform duration-300 ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}
+        style={{
+          background: 'var(--vanta-abyss)',
+          borderColor: 'var(--vanta-border)',
+        }}
+      >
       {/* Logo */}
       <div className="p-6 border-b" style={{ borderColor: 'var(--vanta-border)' }}>
         <h1
@@ -150,12 +157,11 @@ function Sidebar() {
       <nav className="flex-1 py-4 overflow-y-auto">
         {[
           { label: 'Casino', href: '/lobby', icon: '\u2605', active: true },
-          { label: 'Predictions', href: '/predictions', icon: '\u26A1' },
-          { label: 'PvP', href: '/pvp', icon: '\u2694' },
-          { label: 'Tournaments', href: '/tournaments', icon: '\u1F3C6' },
-          { label: 'Drops', href: '/drops', icon: '\u2B50' },
+          { label: 'Rewards', href: '/rewards', icon: '\uD83C\uDF81' },
+          { label: 'Profile', href: '/profile', icon: '\uD83D\uDC64' },
+          { label: 'Tournaments', href: '/tournaments', icon: '\uD83C\uDFC6' },
           { label: 'Social', href: '/social', icon: '\u2764' },
-          { label: 'Leaderboard', href: '/leaderboard', icon: '\u1F451' },
+          { label: 'Leaderboard', href: '/leaderboard', icon: '\uD83D\uDC51' },
         ].map((item) => (
           <Link key={item.label} href={item.href}>
             <div
@@ -177,7 +183,7 @@ function Sidebar() {
       <div
         className="p-4 border-t cursor-pointer"
         style={{ borderColor: 'var(--vanta-border)' }}
-        onClick={() => setWalletOpen(!walletOpen)}
+        onClick={() => {}}
       >
         <div className="flex justify-between items-center mb-2">
           <span className="text-xs uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
@@ -186,10 +192,13 @@ function Sidebar() {
           <TierBadge tier="Shadow" />
         </div>
         <div className="font-mono text-lg font-bold" style={{ color: 'var(--gold)' }}>
-          12,450 GC
+          {player.chips.toLocaleString()} GC
         </div>
         <div className="font-mono text-sm" style={{ color: 'var(--win)' }}>
-          24.50 SC
+          {player.sweepsCoins.toFixed(2)} SC
+        </div>
+        <div className="font-mono text-xs" style={{ color: '#58a6ff' }}>
+          {player.gems} Gems
         </div>
       </div>
 
@@ -200,13 +209,14 @@ function Sidebar() {
           style={{ background: 'linear-gradient(135deg, #6a5acd, #c9a84c)' }}
         />
         <div>
-          <div className="text-sm font-medium">Player</div>
+          <div className="text-sm font-medium">{playerName}</div>
           <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-            Level 12
+            {player.rank} &middot; {player.xp.toLocaleString()} XP
           </div>
         </div>
       </div>
     </aside>
+    </>
   )
 }
 
@@ -214,7 +224,7 @@ function Sidebar() {
 function LiveWinTicker() {
   return (
     <div
-      className="fixed bottom-0 left-64 right-0 h-10 flex items-center overflow-hidden z-10 border-t"
+      className="fixed bottom-0 left-0 md:left-64 right-0 h-10 flex items-center overflow-hidden z-10 border-t"
       style={{
         background: 'var(--vanta-abyss)',
         borderColor: 'var(--vanta-border)',
@@ -340,13 +350,22 @@ function LobbyGameCard({ game }: { game: typeof GAMES[0] }) {
 }
 
 export default function LobbyPage() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
   return (
     <div className="min-h-screen" style={{ background: 'var(--vanta-void)' }}>
-      <Sidebar />
+      {/* Mobile hamburger */}
+      <button onClick={() => setSidebarOpen(true)}
+        className="fixed top-4 left-4 z-50 md:hidden w-10 h-10 rounded-lg flex items-center justify-center"
+        style={{ background: 'var(--vanta-surface)', border: '1px solid var(--vanta-border)' }}>
+        <span className="text-lg">{'\u2630'}</span>
+      </button>
+
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <LiveWinTicker />
 
       {/* Main content area (offset by sidebar) */}
-      <main className="ml-64 pb-16 px-8 pt-8">
+      <main className="ml-0 md:ml-64 pb-16 px-4 md:px-8 pt-16 md:pt-8">
         {/* Jackpot */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
