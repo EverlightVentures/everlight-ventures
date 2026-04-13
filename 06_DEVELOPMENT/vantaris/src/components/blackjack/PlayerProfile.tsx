@@ -2,13 +2,13 @@
 
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState } from 'react'
+import { getHandHistory, type HandRecord } from '@/lib/dealer-intelligence'
 
 /**
  * Player Profile Panel
  *
  * Slide-out from left. Shows full stats, achievements,
  * hand history, and settings.
- * Migrated from the Everlight PlayerProfile.tsx.
  */
 
 const ACHIEVEMENT_DEFS = [
@@ -57,8 +57,15 @@ export function PlayerProfilePanel({
   unlockedAchievements: string[]
   onOpenAvatar: () => void
   onLogout: () => void
+  settings?: {
+    soundEnabled: boolean
+    musicEnabled: boolean
+    voiceEnabled: boolean
+    autoRebet: boolean
+    onToggle: (key: string, value: boolean) => void
+  }
 }) {
-  const [tab, setTab] = useState<'stats' | 'achievements' | 'settings'>('stats')
+  const [tab, setTab] = useState<'stats' | 'achievements' | 'history' | 'settings'>('stats')
   const winRate = stats.handsPlayed > 0 ? ((stats.handsWon / stats.handsPlayed) * 100).toFixed(1) : '0.0'
 
   return (
@@ -138,7 +145,7 @@ export function PlayerProfilePanel({
 
             {/* Tabs */}
             <div className="flex border-b" style={{ borderColor: 'var(--vanta-border)' }}>
-              {(['stats', 'achievements', 'settings'] as const).map(t => (
+              {(['stats', 'achievements', 'history', 'settings'] as const).map(t => (
                 <button
                   key={t}
                   onClick={() => setTab(t)}
@@ -204,33 +211,67 @@ export function PlayerProfilePanel({
                 </div>
               )}
 
+              {tab === 'history' && (() => {
+                const history = getHandHistory()
+                if (history.length === 0) return (
+                  <div className="text-center py-8">
+                    <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>No hands played yet.</p>
+                    <p className="text-[10px] mt-1" style={{ color: 'var(--text-tertiary)' }}>Play a hand to see your history.</p>
+                  </div>
+                )
+                return (
+                  <div className="space-y-1.5">
+                    {history.map(h => {
+                      const isWin = h.outcome === 'win' || h.outcome === 'blackjack' || h.outcome === 'charlie'
+                      const isPush = h.outcome === 'push'
+                      const color = isWin ? 'var(--win)' : isPush ? '#58a6ff' : 'var(--loss)'
+                      const ago = Math.floor((Date.now() - h.timestamp) / 60000)
+                      const timeStr = ago < 1 ? 'just now' : ago < 60 ? `${ago}m ago` : `${Math.floor(ago / 60)}h ago`
+                      return (
+                        <div key={h.id} className="flex items-center gap-3 p-2.5 rounded-lg" style={{ background: 'var(--vanta-surface)', border: '1px solid var(--vanta-border)' }}>
+                          <div className="w-16 text-center">
+                            <p className="text-[10px] font-bold uppercase tracking-wider" style={{ color }}>{h.outcome}</p>
+                          </div>
+                          <div className="flex-1 flex items-center gap-2 text-[10px]" style={{ color: 'var(--text-tertiary)' }}>
+                            <span>P:{h.playerValue}</span>
+                            <span>vs</span>
+                            <span>D:{h.dealerValue}</span>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-mono text-xs font-bold" style={{ color }}>
+                              {h.chipsDelta >= 0 ? '+' : ''}{h.chipsDelta.toLocaleString()}
+                            </p>
+                            <p className="text-[9px]" style={{ color: 'var(--text-tertiary)' }}>{timeStr}</p>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+              })()}
+
               {tab === 'settings' && (
                 <div className="space-y-4">
                   {[
-                    { label: 'Sound Effects', key: 'sound' },
-                    { label: 'Music', key: 'music' },
-                    { label: 'Dealer Voice', key: 'voice' },
-                    { label: 'Auto-Rebet', key: 'autorebet' },
-                    { label: 'Haptic Feedback', key: 'haptic' },
+                    { label: 'Sound Effects', key: 'sound', active: settings?.soundEnabled ?? true },
+                    { label: 'Music', key: 'music', active: settings?.musicEnabled ?? false },
+                    { label: 'Dealer Voice', key: 'voice', active: settings?.voiceEnabled ?? false },
+                    { label: 'Auto-Rebet', key: 'autorebet', active: settings?.autoRebet ?? false },
                   ].map(setting => (
                     <div key={setting.key} className="flex justify-between items-center">
                       <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>{setting.label}</span>
-                      <button className="w-10 h-5 rounded-full transition-colors" style={{ background: 'var(--gold)' }}>
-                        <div className="w-4 h-4 rounded-full bg-white ml-auto mr-0.5" />
+                      <button
+                        onClick={() => settings?.onToggle(setting.key, !setting.active)}
+                        className="w-10 h-5 rounded-full transition-colors relative"
+                        style={{ background: setting.active ? 'var(--gold)' : 'rgba(255,255,255,0.15)' }}
+                      >
+                        <div
+                          className="w-4 h-4 rounded-full bg-white absolute top-0.5 transition-all"
+                          style={{ left: setting.active ? '22px' : '2px' }}
+                        />
                       </button>
                     </div>
                   ))}
-
-                  <div className="pt-4 border-t" style={{ borderColor: 'var(--vanta-border)' }}>
-                    <p className="text-[10px] uppercase tracking-wider mb-2" style={{ color: 'var(--text-tertiary)' }}>Card Speed</p>
-                    <div className="flex gap-2">
-                      {['Normal', 'Fast'].map(s => (
-                        <button key={s} className="text-xs px-3 py-1.5 rounded-lg" style={{ background: s === 'Normal' ? 'var(--gold-glow)' : 'var(--vanta-surface)', color: s === 'Normal' ? 'var(--gold)' : 'var(--text-tertiary)', border: '1px solid var(--vanta-border)' }}>
-                          {s}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
 
                   <button
                     onClick={onLogout}

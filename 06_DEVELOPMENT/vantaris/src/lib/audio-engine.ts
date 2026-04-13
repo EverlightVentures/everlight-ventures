@@ -31,7 +31,7 @@ async function loadTone() {
 }
 
 // ============================================================
-// AMBIENT CASINO MUSIC (Tone.js procedural jazz)
+// AMBIENT CASINO MUSIC (Tone.js procedural lounge jazz)
 // ============================================================
 
 let ambientPlaying = false
@@ -44,49 +44,122 @@ export async function startAmbientMusic() {
   await T.start()
   ambientPlaying = true
 
-  // Jazz chord progression (Cmaj7 -> Dm7 -> Fmaj7 -> G7 -> Cm7 -> Am7)
+  // Rich jazz voicings with 9ths and 13ths (casino lounge feel)
   const chords = [
-    ['C3', 'E3', 'G3', 'B3'],   // Cmaj7
-    ['D3', 'F3', 'A3', 'C4'],   // Dm7
-    ['F3', 'A3', 'C4', 'E4'],   // Fmaj7
-    ['G3', 'B3', 'D4', 'F4'],   // G7
-    ['C3', 'Eb3', 'G3', 'Bb3'], // Cm7
-    ['A2', 'C3', 'E3', 'G3'],   // Am7
+    ['C3', 'E3', 'G3', 'B3', 'D4'],     // Cmaj9
+    ['D3', 'F3', 'A3', 'C4', 'E4'],     // Dm9
+    ['G2', 'B2', 'D3', 'F3', 'A3'],     // G13
+    ['C3', 'E3', 'G3', 'B3'],           // Cmaj7
+    ['A2', 'C3', 'E3', 'G3', 'B3'],     // Am9
+    ['D3', 'F3', 'A3', 'C4'],           // Dm7
+    ['G2', 'F3', 'A3', 'B3', 'D4'],     // G9
+    ['C3', 'Eb3', 'G3', 'Bb3', 'D4'],   // Cm9
   ]
 
-  // Soft pad synth
-  const padSynth = new T.PolySynth(T.Synth, {
-    oscillator: { type: 'triangle' },
-    envelope: { attack: 0.8, decay: 1.5, sustain: 0.3, release: 2.0 },
-    volume: -28,
-  }).toDestination()
+  // Walking bass roots (matches chord progression)
+  const bassRoots = ['C2', 'D2', 'G1', 'C2', 'A1', 'D2', 'G1', 'C2']
+  // Walking bass passing tones (chromatic approach notes)
+  const bassWalk = [
+    ['C2', 'E2', 'G2', 'Db2'],   // walk to Dm
+    ['D2', 'F2', 'A2', 'Gb2'],   // walk to G
+    ['G1', 'B1', 'D2', 'Bb1'],   // walk to C
+    ['C2', 'G2', 'E2', 'Ab1'],   // walk to Am
+    ['A1', 'C2', 'E2', 'Db2'],   // walk to Dm
+    ['D2', 'A2', 'F2', 'Gb2'],   // walk to G
+    ['G1', 'D2', 'B1', 'B1'],    // walk to Cm
+    ['C2', 'Eb2', 'G2', 'B1'],   // walk back to Cmaj
+  ]
 
-  // Bass
+  // Room reverb for that smoky lounge feel
+  const reverb = new T.Reverb({ decay: 3.5, wet: 0.35 }).toDestination()
+
+  // Electric piano pad (Rhodes-like: sine + slight detune)
+  const padSynth = new T.PolySynth(T.Synth, {
+    oscillator: { type: 'sine', partialCount: 3, partials: [1, 0.3, 0.08] },
+    envelope: { attack: 0.6, decay: 2.0, sustain: 0.25, release: 2.5 },
+    volume: -26,
+  }).connect(reverb)
+
+  // Warm low-pass for pad
+  const padFilter = new T.Filter({ frequency: 1200, type: 'lowpass', Q: 0.7 }).connect(reverb)
+  padSynth.connect(padFilter)
+
+  // Upright bass (triangle + gentle attack)
   const bassSynth = new T.Synth({
     oscillator: { type: 'triangle' },
-    envelope: { attack: 0.3, decay: 0.8, sustain: 0.4, release: 1.5 },
-    volume: -22,
+    envelope: { attack: 0.04, decay: 0.5, sustain: 0.3, release: 0.8 },
+    volume: -18,
+  }).connect(reverb)
+
+  const bassFilter = new T.Filter({ frequency: 500, type: 'lowpass', Q: 1.0 }).connect(reverb)
+  bassSynth.connect(bassFilter)
+
+  // Brush hi-hat (filtered noise, very subtle)
+  const brushSynth = new T.NoiseSynth({
+    noise: { type: 'pink' },
+    envelope: { attack: 0.002, decay: 0.06, sustain: 0, release: 0.04 },
+    volume: -32,
   }).toDestination()
 
-  // Low-pass filter for warmth
-  const filter = new T.Filter({ frequency: 800, type: 'lowpass' }).toDestination()
-  padSynth.connect(filter)
-  bassSynth.connect(filter)
+  const brushFilter = new T.Filter({ frequency: 6000, type: 'highpass' }).toDestination()
+  brushSynth.connect(brushFilter)
+
+  // Ride cymbal shimmer (filtered white noise, longer decay)
+  const rideSynth = new T.NoiseSynth({
+    noise: { type: 'white' },
+    envelope: { attack: 0.001, decay: 0.25, sustain: 0.02, release: 0.15 },
+    volume: -35,
+  }).toDestination()
+
+  const rideFilter = new T.Filter({ frequency: 8000, type: 'highpass' }).toDestination()
+  rideSynth.connect(rideFilter)
 
   let chordIdx = 0
 
-  const loop = new T.Loop((time: number) => {
+  // Chord changes: every 2 measures (slow, luxurious)
+  const chordLoop = new T.Loop((time: number) => {
     const chord = chords[chordIdx % chords.length]
-    padSynth.triggerAttackRelease(chord, '2n', time)
-    bassSynth.triggerAttackRelease(chord[0].replace(/\d/, (m: string) => String(parseInt(m) - 1)), '2n', time)
+    padSynth.triggerAttackRelease(chord, '1m', time)
     chordIdx++
-  }, '2m') // every 2 measures
+  }, '2m')
 
-  loop.start(0)
-  T.Transport.bpm.value = 72
+  // Walking bass: quarter notes within each chord
+  let bassStep = 0
+  const bassLoop = new T.Loop((time: number) => {
+    const ci = Math.floor(bassStep / 4) % bassWalk.length
+    const si = bassStep % 4
+    const note = bassWalk[ci][si]
+    bassSynth.triggerAttackRelease(note, '8n', time)
+    bassStep++
+  }, '4n')
+
+  // Brush pattern: steady 8th notes with slight swing
+  const brushLoop = new T.Loop((time: number) => {
+    brushSynth.triggerAttackRelease('32n', time)
+  }, '8n')
+
+  // Ride: every 2 beats (half notes) with random skip for feel
+  const rideLoop = new T.Loop((time: number) => {
+    if (Math.random() > 0.15) {
+      rideSynth.triggerAttackRelease('16n', time)
+    }
+  }, '2n')
+
+  chordLoop.start(0)
+  bassLoop.start(0)
+  brushLoop.start('1m') // drums enter after first chord
+  rideLoop.start('1m')
+
+  T.Transport.bpm.value = 76
+  T.Transport.swing = 0.15 // subtle swing feel
   T.Transport.start()
 
-  ambientParts.push(loop, padSynth, bassSynth, filter)
+  ambientParts.push(
+    chordLoop, bassLoop, brushLoop, rideLoop,
+    padSynth, bassSynth, brushSynth, rideSynth,
+    padFilter, bassFilter, brushFilter, rideFilter,
+    reverb
+  )
 }
 
 export async function stopAmbientMusic() {

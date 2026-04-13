@@ -1,7 +1,7 @@
 'use client'
 
-import { useRef, useMemo } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { useRef, useMemo, useCallback } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import {
   Environment, Float, MeshReflectorMaterial,
   Sparkles, ContactShadows,
@@ -10,6 +10,7 @@ import {
   EffectComposer, Bloom, Vignette, ChromaticAberration,
 } from '@react-three/postprocessing'
 import * as THREE from 'three'
+import type { SeatPosition } from './BotPlayers'
 
 /**
  * Vantaris Casino 3D Scene
@@ -391,10 +392,51 @@ function HologramSeats() {
 }
 
 // ============================================================
+// SEAT PROJECTOR (3D -> 2D screen coords every frame)
+// ============================================================
+
+const SEAT_WORLD_POSITIONS = [
+  new THREE.Vector3(-3.5, 1.8, 2.8),   // Seat 1
+  new THREE.Vector3(-1.8, 1.8, 3.4),   // Seat 2
+  new THREE.Vector3( 0.0, 1.8, 3.6),   // Seat 3 (player)
+  new THREE.Vector3( 1.8, 1.8, 3.4),   // Seat 4
+  new THREE.Vector3( 3.5, 1.8, 2.8),   // Seat 5
+]
+
+function SeatProjector({ onProject }: { onProject: (positions: SeatPosition[]) => void }) {
+  const { camera, size } = useThree()
+  const lastRef = useRef<string>('')
+
+  useFrame(() => {
+    const positions: SeatPosition[] = SEAT_WORLD_POSITIONS.map(worldPos => {
+      const pos = worldPos.clone().project(camera)
+      return {
+        x: (pos.x * 0.5 + 0.5) * size.width,
+        y: (-pos.y * 0.5 + 0.5) * size.height,
+        visible: pos.z > 0 && pos.z < 1,
+      }
+    })
+
+    // Only call back when positions actually change (avoid re-render thrash)
+    const key = positions.map(p => `${Math.round(p.x)},${Math.round(p.y)}`).join('|')
+    if (key !== lastRef.current) {
+      lastRef.current = key
+      onProject(positions)
+    }
+  })
+
+  return null
+}
+
+// ============================================================
 // MAIN SCENE EXPORT
 // ============================================================
 
-export function CasinoScene3D() {
+export function CasinoScene3D({ onSeatPositions }: { onSeatPositions?: (positions: SeatPosition[]) => void }) {
+  const handleProject = useCallback((positions: SeatPosition[]) => {
+    onSeatPositions?.(positions)
+  }, [onSeatPositions])
+
   return (
     <div className="absolute inset-0" style={{ zIndex: 1 }}>
       <Canvas
@@ -442,6 +484,9 @@ export function CasinoScene3D() {
         <BackgroundAtmosphere />
         {/* Hologram seat stands */}
         <HologramSeats />
+
+        {/* Projects 3D seat positions to 2D for bot labels */}
+        <SeatProjector onProject={handleProject} />
 
         <CameraRig />
 

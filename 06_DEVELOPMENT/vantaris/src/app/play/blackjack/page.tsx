@@ -8,8 +8,9 @@ import {
   WinParticles, XPBar, AchievementPopup, VantarisBoutique,
   GemStore, FreeChips, AvatarBuilder, DEFAULT_AVATAR,
   PlayerProfilePanel, Leaderboard, CasinoScene3D, CasinoChip,
+  BotPlayers, ToastContainer, DealerAvatar,
 } from '@/components/blackjack'
-import type { Achievement, AvatarConfig } from '@/components/blackjack'
+import type { Achievement, AvatarConfig, SeatPosition } from '@/components/blackjack'
 import type { Card as CardData } from '@/lib/blackjack-engine'
 import { useState, useRef } from 'react'
 
@@ -26,6 +27,15 @@ import {
 import {
   screenShake, lightningFlash, animateCounter,
 } from '@/lib/gsap-animations'
+
+// Dealer intelligence (mood, chatter, achievements, history)
+import {
+  postHandSettle, startIdleChatter, stopIdleChatter,
+  getDealerDrawLine, getDealerBustLine, recalculatePresence,
+} from '@/lib/dealer-intelligence'
+
+// Toast helpers (for inline handlers)
+import { toastWin, toastInfo } from '@/components/blackjack/VantarisToast'
 
 /**
  * Vantaris Blackjack -- Full Refactor
@@ -318,7 +328,7 @@ function Hand({ cards, label, active, showValue, skinId }: {
 // ============================================================
 
 function DealerPanel() {
-  const { activeDealer, dealerLine, showDealerSelect, togglePanel, setDealer } = useBlackjackStore()
+  const { activeDealer, dealerLine, speaking, showDealerSelect, togglePanel, setDealer } = useBlackjackStore()
 
   const dealers = [
     { id: 'aria', name: 'Aria Sinclair', title: 'House Dealer', vip: false, voiceId: 'EXAVITQu4vr4xnSDxMaL', color: '#c9a84c' },
@@ -330,14 +340,13 @@ function DealerPanel() {
   return (
     <div className="absolute right-4 top-[70px] z-20">
       <motion.div
-        className="glass p-3 rounded-xl flex items-start gap-3 max-w-[240px] cursor-pointer"
+        className="glass p-3 rounded-xl flex items-start gap-3 max-w-[260px] cursor-pointer"
         onClick={() => togglePanel('dealerSelect')}
         key={dealerLine}
         initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
       >
-        <div className="w-11 h-11 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-          style={{ background: `${activeDealer.color}30`, color: activeDealer.color, border: `2px solid ${activeDealer.color}60`, boxShadow: `0 0 20px ${activeDealer.color}30` }}>
-          {activeDealer.name[0]}
+        <div className="flex-shrink-0">
+          <DealerAvatar dealerId={activeDealer.id} color={activeDealer.color} speaking={speaking} size={48} />
         </div>
         <div className="min-w-0">
           <p className="text-xs font-semibold" style={{ color: activeDealer.color, fontFamily: "'Cinzel', serif" }}>
@@ -354,7 +363,7 @@ function DealerPanel() {
         {showDealerSelect && (
           <motion.div
             initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-            className="glass-elevated p-3 rounded-xl mt-2 w-[260px] space-y-1.5"
+            className="glass-elevated p-3 rounded-xl mt-2 w-[280px] space-y-1.5"
           >
             {dealers.map(d => (
               <div key={d.id} onClick={() => setDealer(d)}
@@ -363,10 +372,7 @@ function DealerPanel() {
                   background: activeDealer.id === d.id ? `${d.color}12` : 'transparent',
                   border: `1px solid ${activeDealer.id === d.id ? d.color + '40' : 'transparent'}`,
                 }}>
-                <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-                  style={{ background: d.color + '25', color: d.color }}>
-                  {d.name[0]}
-                </div>
+                <DealerAvatar dealerId={d.id} color={d.color} speaking={false} size={36} />
                 <div className="flex-1">
                   <p className="text-xs font-semibold" style={{ color: d.color }}>{d.name}</p>
                   <p className="text-[9px]" style={{ color: 'var(--text-tertiary)' }}>{d.title}</p>
@@ -535,6 +541,10 @@ export default function BlackjackPage() {
   const [particleTrigger, setParticleTrigger] = useState(0)
   const [particleType, setParticleType] = useState<'blackjack' | 'win' | 'loss' | null>(null)
 
+  // Seat positions projected from 3D scene (for bot labels)
+  const defaultSeats: SeatPosition[] = Array(5).fill({ x: 0, y: 0, visible: false })
+  const [seatPositions, setSeatPositions] = useState<SeatPosition[]>(defaultSeats)
+
   // Overlay panel state (local since these don't affect game)
   const [showBoutique, setShowBoutique] = useState(false)
   const [showGemStore, setShowGemStore] = useState(false)
@@ -544,12 +554,31 @@ export default function BlackjackPage() {
   const [showAvatarBuilder, setShowAvatarBuilder] = useState(false)
   const [avatar, setAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR)
 
+  // Free chips state (persisted in localStorage)
+  const [adRefills, setAdRefills] = useState(() => {
+    if (typeof window === 'undefined') return 10
+    try {
+      const saved = JSON.parse(localStorage.getItem('vantaris_ad_refills') || '{}')
+      return saved.date === new Date().toDateString() ? saved.count : 10
+    } catch { return 10 }
+  })
+  const [dailyClaimed, setDailyClaimed] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return localStorage.getItem('vantaris_daily') === new Date().toDateString()
+  })
+
   // Music effect (Tone.js procedural jazz)
   useEffect(() => {
     if (store.musicEnabled) startAmbientMusic()
     else stopAmbientMusic()
     return () => { stopAmbientMusic() }
   }, [store.musicEnabled])
+
+  // Dealer idle chatter (45-90s interval during betting)
+  useEffect(() => {
+    startIdleChatter()
+    return () => stopIdleChatter()
+  }, [])
 
   // Sound enabled sync
   useEffect(() => {
@@ -604,8 +633,17 @@ export default function BlackjackPage() {
       speak('surrender')
     }
 
-    // Auto-reset after 2.2 seconds
-    const timer = setTimeout(() => store.newRound(), 2200)
+    // Run dealer intelligence (achievements, mood, history, reshuffle)
+    const moodLine = postHandSettle()
+    if (moodLine) {
+      // Mood line overrides the outcome line after a short delay
+      setTimeout(() => {
+        useBlackjackStore.setState({ dealerLine: moodLine })
+      }, 1500)
+    }
+
+    // Auto-reset after 2.5 seconds (slightly longer to allow toasts)
+    const timer = setTimeout(() => store.newRound(), 2500)
     return () => clearTimeout(timer)
   }, [store.outcome])
 
@@ -632,6 +670,9 @@ export default function BlackjackPage() {
 
   return (
     <div className="min-h-screen h-screen flex flex-col overflow-hidden" style={{ background: 'var(--vanta-void)' }}>
+
+      {/* Toast notification system */}
+      <ToastContainer />
 
       {/* === TOP BAR === */}
       <div className="flex items-center justify-between px-4 md:px-6 py-2.5 border-b relative z-20"
@@ -694,7 +735,10 @@ export default function BlackjackPage() {
       <div id="game-area" className="flex-1 relative overflow-hidden">
 
         {/* 3D Casino Scene */}
-        <CasinoScene3D />
+        <CasinoScene3D onSeatPositions={setSeatPositions} />
+
+        {/* Bot players at projected seat positions */}
+        <BotPlayers seatPositions={seatPositions} />
 
         {/* Win particles */}
         <WinParticles trigger={particleTrigger} type={particleType} />
@@ -746,22 +790,22 @@ export default function BlackjackPage() {
 
         {/* Card areas (absolute positioned over 3D scene) */}
         <div className="absolute inset-0 z-10 pointer-events-none">
-          {/* Dealer hand at 25% from top */}
-          <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '22%' }}>
+          {/* Dealer hand at 30% from top (matches reference) */}
+          <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '30%' }}>
             <Hand cards={store.dealerHand.cards} label="DEALER" active={store.phase === 'dealer_turn'}
               showValue={store.phase === 'dealer_turn' || store.phase === 'settled'} skinId={skinId} />
           </div>
 
-          {/* Player main hand at 58% from top */}
-          <div className="absolute left-1/2 -translate-x-1/2" style={{ top: store.splitHand ? '52%' : '58%' }}>
+          {/* Player main hand at 62% from top (matches reference) */}
+          <div className="absolute left-1/2 -translate-x-1/2" style={{ top: store.splitHand ? '55%' : '62%' }}>
             <Hand cards={store.mainHand.cards} label={store.splitHand ? 'HAND 1' : 'YOUR HAND'}
               active={store.phase === 'player_turn' && store.currentHandIndex === 0}
               showValue={store.mainHand.cards.length > 0} skinId={skinId} />
           </div>
 
-          {/* Split hand (if active) at 72% */}
+          {/* Split hand (if active) at 76% */}
           {store.splitHand && (
-            <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '72%' }}>
+            <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '76%' }}>
               <Hand cards={store.splitHand.cards} label="HAND 2"
                 active={store.phase === 'split_turn' && store.currentHandIndex === 1}
                 showValue={true} skinId={skinId} />
@@ -792,6 +836,7 @@ export default function BlackjackPage() {
               <button onClick={() => store.setBet(Math.max(10, Math.floor(store.betAmount / 2)))} className="btn-ghost text-xs px-3 py-1">1/2</button>
               <button onClick={() => store.setBet(Math.min(store.player.chips, store.betAmount * 2))} className="btn-ghost text-xs px-3 py-1">2x</button>
               <button onClick={() => store.setBet(Math.min(store.player.chips, store.config.maxBet))} className="btn-ghost text-xs px-3 py-1">MAX</button>
+              <button onClick={() => store.setBet(0)} className="btn-ghost text-xs px-3 py-1" style={{ color: 'var(--loss)' }}>CLEAR</button>
             </div>
             <motion.button onClick={handleDeal}
               className="px-14 py-3 text-sm tracking-widest font-bold rounded-xl"
@@ -891,24 +936,95 @@ export default function BlackjackPage() {
       <PlayerProfilePanel isOpen={showProfile} onClose={() => setShowProfile(false)}
         stats={store.player} unlockedAchievements={store.player.unlockedAchievements}
         onOpenAvatar={() => { setShowProfile(false); setShowAvatarBuilder(true) }}
-        onLogout={() => console.log('logout')} />
+        onLogout={() => console.log('logout')}
+        settings={{
+          soundEnabled: store.voiceEnabled,
+          musicEnabled: store.musicEnabled,
+          voiceEnabled: store.voiceEnabled,
+          autoRebet: false,
+          onToggle: (key, value) => {
+            if (key === 'music') useBlackjackStore.setState({ musicEnabled: value })
+            else if (key === 'voice') useBlackjackStore.setState({ voiceEnabled: value })
+            else if (key === 'sound') useBlackjackStore.setState({ voiceEnabled: value })
+          },
+        }}
+      />
 
       <AvatarBuilder isOpen={showAvatarBuilder} onClose={() => setShowAvatarBuilder(false)}
         currentAvatar={avatar} onSave={setAvatar} />
 
       <VantarisBoutique isOpen={showBoutique} onClose={() => setShowBoutique(false)}
         chips={store.player.chips} gems={store.player.gems}
-        ownedItems={['default_suit']} equippedItems={{ outfit: 'default_suit' }}
-        onPurchase={() => {}} onEquip={() => {}} />
+        ownedItems={store.player.ownedItems}
+        equippedItems={{ outfit: store.player.equippedOutfit, aura: store.player.equippedAura, deck: store.player.equippedDeckSkin, card_back: store.player.equippedCardBack }}
+        onPurchase={(item, currency) => {
+          const p = store.player
+          if (currency === 'chips' && p.chips >= item.priceChips) {
+            useBlackjackStore.setState({ player: { ...p, chips: p.chips - item.priceChips, ownedItems: [...p.ownedItems, item.id] } })
+            toastWin('Purchased!', `${item.name} is now yours.`)
+          } else if (currency === 'gems' && p.gems >= item.priceGems) {
+            useBlackjackStore.setState({ player: { ...p, gems: p.gems - item.priceGems, ownedItems: [...p.ownedItems, item.id] } })
+            toastWin('Purchased!', `${item.name} is now yours.`)
+          }
+        }}
+        onEquip={(item) => {
+          const p = store.player
+          const updates: Record<string, string> = {}
+          if (item.category === 'outfit') updates.equippedOutfit = item.id
+          else if (item.category === 'aura') updates.equippedAura = item.id
+          else if (item.category === 'card_back') updates.equippedCardBack = item.id
+          useBlackjackStore.setState({ player: { ...p, ...updates } })
+          recalculatePresence()
+          toastInfo('Equipped', `${item.name} equipped!`)
+        }}
+      />
 
       <GemStore isOpen={showGemStore} onClose={() => setShowGemStore(false)}
-        currentGems={store.player.gems} onPurchase={() => setShowGemStore(false)} />
+        currentGems={store.player.gems}
+        onPurchase={(packageId) => {
+          const packs: Record<string, { gems: number; bonus: number; gc: number }> = {
+            starter: { gems: 100, bonus: 0, gc: 500 },
+            player: { gems: 500, bonus: 100, gc: 2500 },
+            high_roller: { gems: 1200, bonus: 300, gc: 5000 },
+            vip_bundle: { gems: 3000, bonus: 1000, gc: 15000 },
+            casino_boss: { gems: 7000, bonus: 3000, gc: 50000 },
+          }
+          const pack = packs[packageId]
+          if (pack) {
+            const p = store.player
+            useBlackjackStore.setState({
+              player: { ...p, gems: p.gems + pack.gems + pack.bonus, chips: p.chips + pack.gc }
+            })
+            toastWin('Gems Credited!', `+${pack.gems + pack.bonus} gems and +${pack.gc.toLocaleString()} GC`)
+          }
+          setShowGemStore(false)
+        }}
+      />
 
       <FreeChips isOpen={showFreeChips} onClose={() => setShowFreeChips(false)}
-        refillsRemaining={10} currentStreak={store.player.currentStreak}
-        onWatchAd={() => useBlackjackStore.setState(s => ({ player: { ...s.player, chips: s.player.chips + 100 } }))}
-        onClaimDaily={() => useBlackjackStore.setState(s => ({ player: { ...s.player, chips: s.player.chips + 100 } }))}
-        dailyClaimed={false} />
+        refillsRemaining={adRefills} currentStreak={store.player.currentStreak}
+        onWatchAd={() => {
+          if (adRefills > 0) {
+            const p = store.player
+            useBlackjackStore.setState({ player: { ...p, chips: p.chips + 100 } })
+            setAdRefills(prev => prev - 1)
+            localStorage.setItem('vantaris_ad_refills', JSON.stringify({ count: adRefills - 1, date: new Date().toDateString() }))
+            toastWin('+100 GC', 'Ad reward claimed!')
+          }
+        }}
+        onClaimDaily={() => {
+          if (!dailyClaimed) {
+            const p = store.player
+            const streakBonus = Math.min(p.currentStreak * 10, 200)
+            const reward = 100 + streakBonus
+            useBlackjackStore.setState({ player: { ...p, chips: p.chips + reward } })
+            setDailyClaimed(true)
+            localStorage.setItem('vantaris_daily', new Date().toDateString())
+            toastWin(`+${reward} GC`, `Daily bonus! ${streakBonus > 0 ? `(+${streakBonus} streak bonus)` : ''}`)
+          }
+        }}
+        dailyClaimed={dailyClaimed}
+      />
 
       <Leaderboard isOpen={showLeaderboard} onClose={() => setShowLeaderboard(false)} />
     </div>

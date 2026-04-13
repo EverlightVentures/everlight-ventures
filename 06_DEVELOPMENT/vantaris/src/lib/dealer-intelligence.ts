@@ -1,0 +1,499 @@
+/**
+ * Dealer Intelligence Engine
+ *
+ * Makes the table feel ALIVE. Three systems:
+ *
+ * 1. MOOD SYSTEM -- Dealers react to player streaks and milestones
+ *    States: neutral | impressed | annoyed | excited
+ *    Transitions based on win/loss streaks and hand count
+ *
+ * 2. IDLE CHATTER -- Dealers talk when nothing is happening
+ *    Fires every 45-90s during betting phase
+ *    Unique per dealer persona
+ *
+ * 3. ACHIEVEMENT ENGINE -- Checks unlock conditions after each hand
+ *    9 achievements with GC rewards
+ *    Fires toast notifications on unlock
+ *
+ * 4. HAND HISTORY -- Tracks last 20 hands for profile display
+ */
+
+import { useBlackjackStore } from './blackjack-store'
+import {
+  toast, toastAchievement, toastXP, toastRankUp, toastWarning, toastInfo,
+} from '@/components/blackjack/VantarisToast'
+
+// ============================================================
+// MOOD SYSTEM
+// ============================================================
+
+export type DealerMood = 'neutral' | 'impressed' | 'annoyed' | 'excited'
+
+const MOOD_LINES: Record<string, Record<DealerMood, string[]>> = {
+  aria: {
+    neutral: ['The table is yours.', 'Let the cards decide.'],
+    impressed: ['You are making this look effortless.', 'The table is yours tonight. Truly.', 'I may need to call the pit boss. You are on a tear.'],
+    annoyed: ['The cards will turn. They always do.', 'Patience is a virtue at this table.', 'Even the best players have cold streaks.'],
+    excited: ['This is extraordinary! The table is electric!', 'I have not seen a run like this in ages.', 'The entire casino is watching you right now.'],
+  },
+  marcus: {
+    neutral: ['Cards do not lie.', 'Let us see what you got.'],
+    impressed: ['Alright, I see you. You came to play.', 'Not bad. Not bad at all.', 'You are making the house nervous. I respect that.'],
+    annoyed: ['Tough run. The Shark has seen worse.', 'You going to keep bleeding or change it up?', 'The deck does not owe you anything.'],
+    excited: ['Yo. This is getting DANGEROUS. I love it.', 'The Shark is actually sweating. That never happens.', 'You are about to break this table. For real.'],
+  },
+  kanisha: {
+    neutral: ['The VIP lounge is yours, superstar!', 'Ready when you are!'],
+    impressed: ['OH you are COOKING tonight!', 'The lounge is buzzing! Everyone sees you!', 'Somebody get this player a crown!'],
+    annoyed: ['It happens to the best, sugar. Keep your head up!', 'The comeback is always more fun than the lead!', 'Shake it off! The next hand is yours!'],
+    excited: ['I am SCREAMING! This is LEGENDARY!', 'The VIP lounge has NEVER seen anything like this!', 'History! You are making HISTORY right now!'],
+  },
+  bacardi: {
+    neutral: ['The ice waits.', 'Play or leave.'],
+    impressed: ['Interesting. You have earned my attention.', 'The ice respects strength. Continue.', 'Few survive this long at the ice table.'],
+    annoyed: ['The ice does not care about your feelings.', 'Weakness. The table smells it.', 'Cold. Like your chip stack.'],
+    excited: ['I have never said this before. You have impressed the Ice.', 'The temperature is rising. That should not be possible here.', 'Even Bacardi Ice must acknowledge greatness.'],
+  },
+}
+
+// Extra voice line categories
+const DEALER_DRAW_LINES: Record<string, string[]> = {
+  aria: ['Drawing...', 'Another card for the house.', 'The dealer must hit.'],
+  marcus: ['The Shark draws.', 'Let us see what is under here.', 'House takes a card.'],
+  kanisha: ['Dealer draws! Drama!', 'Ooh what is coming next?!', 'The suspense!'],
+  bacardi: ['The ice draws.', 'Another card. Cold as always.', 'The house takes what it needs.'],
+}
+
+const DEALER_BUST_LINES: Record<string, string[]> = {
+  aria: ['The house falls. Well played.', 'Dealer busts. The table wins.', 'Over 21 for the house. Fortune smiled on you.'],
+  marcus: ['The Shark busted. Do not get used to it.', 'House goes over. Enjoy your chips.', 'That will not happen again.'],
+  kanisha: ['DEALER BUSTED! The VIP lounge goes WILD!', 'The house is DOWN! Your chips, superstar!', 'OH NO the house busted! Tonight is YOUR night!'],
+  bacardi: ['The ice cracked. Rare.', 'Dealer busts. It will not happen twice.', 'A flaw in the frost. Take your winnings.'],
+}
+
+const LOW_CHIPS_LINES: Record<string, string[]> = {
+  aria: ['Your stack is getting thin. Perhaps a more conservative approach?', 'Running low. The free chips are always there if you need them.'],
+  marcus: ['You are almost tapped. Time to grind or go home.', 'Low stack. Either go big or claim those free chips.'],
+  kanisha: ['Ooh, running a little low there! Hit that free chips button, superstar!', 'The lounge has free chips waiting for you, no shame in that!'],
+  bacardi: ['Your stack is melting. Like ice in the sun.', 'Almost gone. The ice table does not give refunds.'],
+}
+
+const MILESTONE_LINES: Record<string, Record<number, string>> = {
+  aria: {
+    10: 'Ten hands already. You are settling in nicely.',
+    25: 'Twenty-five hands. You belong at this table.',
+    50: 'Fifty hands. A true regular.',
+    100: 'One hundred hands. You have earned the respect of the house.',
+  },
+  marcus: {
+    10: 'Ten deep. You are not just passing through.',
+    25: 'Twenty-five. You got stamina. Respect.',
+    50: 'Half a hundred. The Shark remembers faces like yours.',
+    100: 'A hundred hands with The Shark. That is a story worth telling.',
+  },
+  kanisha: {
+    10: 'Ten hands in the VIP! You are officially a regular!',
+    25: 'Twenty-five! The lounge LOVES you!',
+    50: 'FIFTY hands! You are VIP royalty now!',
+    100: 'ONE HUNDRED HANDS! Somebody get this legend a plaque!',
+  },
+  bacardi: {
+    10: 'Ten hands on the ice. Most do not last five.',
+    25: 'Twenty-five. You are harder than I thought.',
+    50: 'Fifty hands. The ice table has claimed you.',
+    100: 'One hundred. In all my years, few have matched this.',
+  },
+}
+
+// ============================================================
+// IDLE CHATTER
+// ============================================================
+
+const IDLE_LINES: Record<string, string[]> = {
+  aria: [
+    'Take your time. The cards are patient.',
+    'The felt remembers every hand. Make this one count.',
+    'I have seen fortunes change in a single card.',
+    'The best players know when to breathe.',
+    'The chandelier has seen ten thousand hands. It still watches yours.',
+  ],
+  marcus: [
+    'You going to play or just stare?',
+    'Clock is ticking. The Shark does not wait forever.',
+    'I have seen better. I have seen worse. Show me something.',
+    'The table is getting cold. Heat it up.',
+    'Every second you wait, the deck is plotting.',
+  ],
+  kanisha: [
+    'The VIP lounge is waiting for its star!',
+    'Take your time, superstar! The spotlight is not going anywhere!',
+    'I can feel the next big hand coming. Can you?',
+    'The lounge is quiet. Let us change that!',
+    'Ready when you are, VIP!',
+  ],
+  bacardi: [
+    'The ice waits for no one.',
+    'Still here? Then play.',
+    'Silence at the ice table. That is either wisdom or fear.',
+    'The frost is patient. You should not be.',
+    'Every moment of hesitation, the ice grows colder.',
+  ],
+}
+
+let idleTimer: ReturnType<typeof setTimeout> | null = null
+
+export function startIdleChatter() {
+  stopIdleChatter()
+  scheduleIdleChatter()
+}
+
+export function stopIdleChatter() {
+  if (idleTimer) clearTimeout(idleTimer)
+  idleTimer = null
+}
+
+function scheduleIdleChatter() {
+  // 45-90 second random interval
+  const delay = 45000 + Math.random() * 45000
+  idleTimer = setTimeout(() => {
+    const state = useBlackjackStore.getState()
+    if (state.phase === 'betting') {
+      const dealerId = state.activeDealer.id
+      const lines = IDLE_LINES[dealerId] || IDLE_LINES.aria
+      const line = lines[Math.floor(Math.random() * lines.length)]
+      useBlackjackStore.setState({ dealerLine: line })
+    }
+    scheduleIdleChatter()
+  }, delay)
+}
+
+// ============================================================
+// MOOD ENGINE
+// ============================================================
+
+let currentMood: DealerMood = 'neutral'
+
+export function getDealerMood(): DealerMood {
+  return currentMood
+}
+
+export function updateMoodAfterHand(): string | null {
+  const state = useBlackjackStore.getState()
+  const dealerId = state.activeDealer.id
+  const streak = state.player.currentStreak
+  const hands = state.player.handsPlayed
+  const outcome = state.outcome
+
+  let newMood: DealerMood = 'neutral'
+
+  // Win streak thresholds
+  if (streak >= 7) newMood = 'excited'
+  else if (streak >= 3) newMood = 'impressed'
+  // Loss detection (streak resets to 0 on loss)
+  else if (streak === 0 && (outcome === 'loss' || outcome === 'bust')) {
+    // Check if this is a continued losing run by checking hands won ratio
+    const recentLossRatio = state.player.handsPlayed > 0
+      ? state.player.handsWon / state.player.handsPlayed
+      : 0.5
+    if (recentLossRatio < 0.35) newMood = 'annoyed'
+  }
+
+  // Mood changed -- speak
+  let moodLine: string | null = null
+  if (newMood !== currentMood) {
+    currentMood = newMood
+    const lines = MOOD_LINES[dealerId]?.[newMood] || MOOD_LINES.aria[newMood]
+    moodLine = lines[Math.floor(Math.random() * lines.length)]
+  }
+
+  // Milestone check
+  const milestone = MILESTONE_LINES[dealerId]?.[hands]
+  if (milestone) {
+    // Milestone overrides mood line
+    moodLine = milestone
+    toastInfo('Milestone', `${hands} hands played!`)
+  }
+
+  // Low chips warning
+  if (state.player.chips < 200 && state.player.chips > 0) {
+    const lowLines = LOW_CHIPS_LINES[dealerId] || LOW_CHIPS_LINES.aria
+    moodLine = lowLines[Math.floor(Math.random() * lowLines.length)]
+    toastWarning('Low Chips', 'Claim free chips or visit the gem store!')
+  }
+
+  return moodLine
+}
+
+export function getDealerDrawLine(): string {
+  const dealerId = useBlackjackStore.getState().activeDealer.id
+  const lines = DEALER_DRAW_LINES[dealerId] || DEALER_DRAW_LINES.aria
+  return lines[Math.floor(Math.random() * lines.length)]
+}
+
+export function getDealerBustLine(): string {
+  const dealerId = useBlackjackStore.getState().activeDealer.id
+  const lines = DEALER_BUST_LINES[dealerId] || DEALER_BUST_LINES.aria
+  return lines[Math.floor(Math.random() * lines.length)]
+}
+
+// ============================================================
+// ACHIEVEMENT ENGINE
+// ============================================================
+
+interface AchievementDef {
+  id: string
+  name: string
+  description: string
+  icon: string
+  reward: number
+  check: (player: any, outcome: string | null) => boolean
+}
+
+const ACHIEVEMENTS: AchievementDef[] = [
+  {
+    id: 'first_win',
+    name: 'First Blood',
+    description: 'Win your first hand',
+    icon: '\uD83C\uDFC6',
+    reward: 50,
+    check: (p, o) => o === 'win' || o === 'blackjack' || o === 'charlie',
+  },
+  {
+    id: 'first_blackjack',
+    name: 'Natural 21',
+    description: 'Get your first blackjack',
+    icon: '\uD83C\uDCCF',
+    reward: 200,
+    check: (p, o) => o === 'blackjack',
+  },
+  {
+    id: 'hot_streak_5',
+    name: 'On Fire',
+    description: 'Win 5 hands in a row',
+    icon: '\uD83D\uDD25',
+    reward: 500,
+    check: (p) => p.currentStreak >= 5,
+  },
+  {
+    id: 'hot_streak_10',
+    name: 'Unstoppable',
+    description: 'Win 10 hands in a row',
+    icon: '\u26A1',
+    reward: 2000,
+    check: (p) => p.currentStreak >= 10,
+  },
+  {
+    id: 'centurion',
+    name: 'Centurion',
+    description: 'Play 100 hands',
+    icon: '\uD83C\uDFDB\uFE0F',
+    reward: 1000,
+    check: (p) => p.handsPlayed >= 100,
+  },
+  {
+    id: 'big_winner',
+    name: 'High Roller',
+    description: 'Win 10,000+ chips in one hand',
+    icon: '\uD83D\uDCB0',
+    reward: 0,
+    check: (p) => p.biggestWin >= 10000,
+  },
+  {
+    id: 'gold_rank',
+    name: 'Going for Gold',
+    description: 'Reach Gold rank',
+    icon: '\uD83E\uDD47',
+    reward: 2500,
+    check: (p) => p.xp >= 5000,
+  },
+  {
+    id: 'diamond_rank',
+    name: 'Diamond Club',
+    description: 'Reach Diamond rank',
+    icon: '\uD83D\uDC8E',
+    reward: 10000,
+    check: (p) => p.xp >= 40000,
+  },
+  {
+    id: 'lucky_seven',
+    name: 'Lucky Seven',
+    description: 'Win 7 blackjacks',
+    icon: '\uD83C\uDFB0',
+    reward: 777,
+    check: (p) => p.blackjacks >= 7,
+  },
+]
+
+export function checkAchievements(): void {
+  const state = useBlackjackStore.getState()
+  const player = state.player
+  const outcome = state.outcome
+  const unlocked = new Set(player.unlockedAchievements)
+  let chipsBonus = 0
+  let newUnlocks: string[] = []
+
+  for (const ach of ACHIEVEMENTS) {
+    if (unlocked.has(ach.id)) continue
+    if (ach.check(player, outcome)) {
+      newUnlocks.push(ach.id)
+      chipsBonus += ach.reward
+
+      // Stagger toast notifications
+      const delay = newUnlocks.length * 1800
+      setTimeout(() => {
+        toastAchievement(ach.name, ach.description, ach.reward)
+      }, delay)
+    }
+  }
+
+  if (newUnlocks.length > 0) {
+    useBlackjackStore.setState({
+      player: {
+        ...player,
+        chips: player.chips + chipsBonus,
+        unlockedAchievements: [...player.unlockedAchievements, ...newUnlocks],
+      },
+    })
+  }
+
+  // XP toast
+  if (state.xpEarned > 0) {
+    toastXP(state.xpEarned)
+  }
+
+  // Rank-up check
+  const RANKS: [string, number][] = [
+    ['Bronze', 0], ['Silver', 1000], ['Gold', 5000],
+    ['Platinum', 15000], ['Diamond', 40000], ['Legend', 100000],
+  ]
+  const currentXP = player.xp
+  const newRank = RANKS.reduce((r, [name, min]) => currentXP >= min ? name : r, 'Bronze')
+  if (newRank !== player.rank) {
+    toastRankUp(newRank)
+    useBlackjackStore.setState({
+      player: { ...useBlackjackStore.getState().player, rank: newRank },
+    })
+  }
+}
+
+// ============================================================
+// HAND HISTORY
+// ============================================================
+
+export interface HandRecord {
+  id: number
+  outcome: string
+  playerValue: number
+  dealerValue: number
+  chipsDelta: number
+  bet: number
+  timestamp: number
+}
+
+let handHistory: HandRecord[] = []
+let historyId = 0
+
+export function recordHand(): void {
+  const state = useBlackjackStore.getState()
+  if (!state.outcome) return
+
+  const record: HandRecord = {
+    id: historyId++,
+    outcome: state.outcome,
+    playerValue: state.mainHand.value,
+    dealerValue: state.dealerHand.value,
+    chipsDelta: state.winAmount - state.mainHand.bet,
+    bet: state.mainHand.bet,
+    timestamp: Date.now(),
+  }
+
+  handHistory = [record, ...handHistory].slice(0, 20)
+}
+
+export function getHandHistory(): HandRecord[] {
+  return handHistory
+}
+
+// ============================================================
+// RESHUFFLE NOTIFICATION
+// ============================================================
+
+export function checkReshuffle(): void {
+  const state = useBlackjackStore.getState()
+  if (state.shoe.length < 20) {
+    toastInfo('Deck Reshuffled', 'The shoe has been reshuffled.')
+  }
+}
+
+// ============================================================
+// MASTER POST-HAND HOOK
+// Called after every hand settles. Runs all intelligence systems.
+// ============================================================
+
+export function postHandSettle(): string | null {
+  // 1. Record hand history
+  recordHand()
+
+  // 2. Check achievements
+  checkAchievements()
+
+  // 3. Update dealer mood (returns mood line if changed)
+  const moodLine = updateMoodAfterHand()
+
+  // 4. Check for reshuffle
+  checkReshuffle()
+
+  // 5. Recalculate presence multiplier
+  recalculatePresence()
+
+  return moodLine
+}
+
+// ============================================================
+// PRESENCE MULTIPLIER CALCULATOR
+// ============================================================
+
+// Maps item IDs to their presence scores
+const OUTFIT_SCORES: Record<string, number> = {
+  default_suit: 1.0,
+  gold_tux: 1.15,
+  diamond_blazer: 1.25,
+  neon_suit: 1.20,
+  royal_robe: 1.35,
+  legendary_drip: 1.50,
+}
+
+const AURA_SCORES: Record<string, number> = {
+  none: 1.0,
+  golden_glow: 1.05,
+  hologram_blue: 1.10,
+  fire_aura: 1.15,
+  legend_aura: 1.25,
+}
+
+const RANK_BONUSES: Record<string, number> = {
+  Bronze: 0,
+  Silver: 0.05,
+  Gold: 0.10,
+  Platinum: 0.15,
+  Diamond: 0.20,
+  Legend: 0.30,
+}
+
+export function calculatePresence(outfitId: string, auraId: string, rank: string): number {
+  const outfitScore = OUTFIT_SCORES[outfitId] || 1.0
+  const auraScore = AURA_SCORES[auraId] || 1.0
+  const rankBonus = RANK_BONUSES[rank] || 0
+  return Math.round((outfitScore * auraScore * (1 + rankBonus)) * 100) / 100
+}
+
+export function recalculatePresence(): void {
+  const state = useBlackjackStore.getState()
+  const player = state.player
+  const newPresence = calculatePresence(player.equippedOutfit, player.equippedAura, player.rank)
+  if (newPresence !== player.presenceMultiplier) {
+    useBlackjackStore.setState({
+      player: { ...player, presenceMultiplier: newPresence },
+    })
+  }
+}

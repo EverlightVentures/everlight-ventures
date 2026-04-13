@@ -58,6 +58,9 @@ interface PlayerState {
   biggestWin: number
   presenceMultiplier: number
   unlockedAchievements: string[]
+  ownedItems: string[]
+  equippedOutfit: string
+  equippedAura: string
   equippedDeckSkin: string
   equippedCardBack: string
 }
@@ -210,19 +213,27 @@ export const useBlackjackStore = create<BlackjackStore>((set, get) => ({
   dealerLine: 'Take your time. The cards are patient.',
   speaking: false,
 
-  bots: ['Vegas Vic', 'Lucky Lou', 'Miss Fortune', 'Big Stack Bobby'].map((name, i) => ({
-    name, chips: 800 + Math.floor(Math.random() * 4000),
-    hand: [], bet: 0, outcome: null,
-    sittingOut: Math.random() < 0.2,
-    color: ['#27ae60', '#e74c3c', '#9b59b6', '#e67e22'][i],
-    seat: [0, 1, 3, 4][i],
-  })),
+  bots: (() => {
+    // Pick 4 random names from the pool each session
+    const pool = ['Vegas Vic', 'Lucky Lou', 'Miss Fortune', 'The Shark', 'Big Stack Bobby', 'Ace Rivera', 'Diamond Dolly', 'Neon Nick']
+    const shuffled = pool.sort(() => Math.random() - 0.5).slice(0, 4)
+    return shuffled.map((name, i) => ({
+      name, chips: 800 + Math.floor(Math.random() * 4000),
+      hand: [], bet: 0, outcome: null,
+      sittingOut: Math.random() < 0.2,
+      color: ['#27ae60', '#e74c3c', '#9b59b6', '#e67e22'][i],
+      seat: [0, 1, 3, 4][i],
+    }))
+  })(),
 
   player: {
     chips: 12450, gems: 45, sweepsCoins: 24.50, xp: 3200, rank: 'Gold',
     handsPlayed: 87, handsWon: 41, blackjacks: 6, currentStreak: 0,
-    bestStreak: 7, biggestWin: 5000, presenceMultiplier: 1.25,
+    bestStreak: 7, biggestWin: 5000, presenceMultiplier: 1.0,
     unlockedAchievements: ['first_win'],
+    ownedItems: ['default_suit'],
+    equippedOutfit: 'default_suit',
+    equippedAura: 'none',
     equippedDeckSkin: 'classic',
     equippedCardBack: 'classic_navy',
   },
