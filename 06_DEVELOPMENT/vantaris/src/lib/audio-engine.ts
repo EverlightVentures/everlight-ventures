@@ -273,31 +273,57 @@ export async function playBlackjack() {
   const T = await loadTone()
   if (!T) return
 
-  // Brass fanfare: stacked major chord with shimmer
-  const synth = new T.PolySynth(T.Synth, {
-    oscillator: { type: 'sawtooth' },
-    envelope: { attack: 0.05, decay: 0.6, sustain: 0.3, release: 1.2 },
-    volume: -10,
-  }).toDestination()
+  const reverb = new T.Reverb({ decay: 2.5, wet: 0.3 }).toDestination()
 
-  const filter = new T.Filter({ frequency: 2000, type: 'lowpass', Q: 2 }).toDestination()
-  synth.connect(filter)
+  // Progressive ascending chime (crystal bells climbing up)
+  const chime = new T.PolySynth(T.Synth, {
+    oscillator: { type: 'sine', partialCount: 3, partials: [1, 0.5, 0.2] },
+    envelope: { attack: 0.01, decay: 0.3, sustain: 0.05, release: 0.6 },
+    volume: -14,
+  }).connect(reverb)
 
-  // Dramatic chord
-  synth.triggerAttackRelease(['C4', 'E4', 'G4', 'C5'], '2n')
+  // Ascending notes: builds anticipation
+  const notes = ['E4', 'G4', 'B4', 'E5', 'G5', 'B5']
+  notes.forEach((note, i) => {
+    setTimeout(() => chime.triggerAttackRelease(note, '16n'), i * 80)
+  })
 
-  // Shimmer (delayed high octave)
+  // Climax chord at peak (bright major with sparkle)
   setTimeout(() => {
-    const shimmer = new T.Synth({
+    const climax = new T.PolySynth(T.Synth, {
       oscillator: { type: 'sine' },
-      envelope: { attack: 0.1, decay: 0.8, sustain: 0.1, release: 1.0 },
-      volume: -15,
-    }).toDestination()
-    shimmer.triggerAttackRelease('C6', '4n')
-    setTimeout(() => shimmer.dispose(), 2000)
-  }, 300)
+      envelope: { attack: 0.02, decay: 0.8, sustain: 0.2, release: 1.5 },
+      volume: -10,
+    }).connect(reverb)
+    climax.triggerAttackRelease(['C5', 'E5', 'G5', 'C6'], '2n')
+    setTimeout(() => climax.dispose(), 3000)
+  }, 500)
 
-  setTimeout(() => { synth.dispose(); filter.dispose() }, 3000)
+  // High shimmer sparkle (the "ding" at the top)
+  setTimeout(() => {
+    const sparkle = new T.Synth({
+      oscillator: { type: 'sine' },
+      envelope: { attack: 0.005, decay: 1.2, sustain: 0, release: 0.8 },
+      volume: -12,
+    }).connect(reverb)
+    sparkle.triggerAttackRelease('E6', '8n')
+    setTimeout(() => sparkle.dispose(), 2500)
+  }, 600)
+
+  // Crowd "cheers" -- filtered noise burst (simulates crowd reaction)
+  setTimeout(() => {
+    const crowd = new T.NoiseSynth({
+      noise: { type: 'pink' },
+      envelope: { attack: 0.1, decay: 1.5, sustain: 0.2, release: 1.0 },
+      volume: -22,
+    }).connect(reverb)
+    const crowdFilter = new T.Filter({ frequency: 2000, type: 'bandpass', Q: 0.5 }).connect(reverb)
+    crowd.connect(crowdFilter)
+    crowd.triggerAttackRelease('2n')
+    setTimeout(() => { crowd.dispose(); crowdFilter.dispose() }, 3000)
+  }, 700)
+
+  setTimeout(() => { chime.dispose(); reverb.dispose() }, 4000)
 }
 
 export async function playLoss() {

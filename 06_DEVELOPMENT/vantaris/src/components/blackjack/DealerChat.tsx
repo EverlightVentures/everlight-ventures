@@ -104,24 +104,47 @@ export function DealerChat() {
     }
   }, [isOpen])
 
-  // Auto-coach after each hand
+  // Auto-coach after each hand + bot chatter
   useEffect(() => {
     if (!outcome || !isOpen) return
-    setTyping(true)
-    const gs = {
-      player_total: mainHand.value,
-      dealer_upcard: dealerHand.cards[0]?.rank,
-      dealer_total: dealerHand.value,
-      last_result: outcome,
-      phase: 'result',
-    }
-    getDealerResponse('how was that hand?', gs).then(reply => {
-      setTyping(false)
-      setMessages(prev => [...prev, {
-        id: msgId++, type: 'coach', name: 'Coach',
-        text: reply, timestamp: Date.now(),
-      }])
+
+    // Bot chat messages (random 1-2 bots react in chat)
+    const bots = useBlackjackStore.getState().bots.filter(b => !b.sittingOut)
+    const chatBots = bots.sort(() => Math.random() - 0.5).slice(0, Math.random() < 0.4 ? 1 : 2)
+    const botWinLines = ['Nice hand!', 'GG!', 'Big money!', 'Let\'s go!', 'You\'re on fire']
+    const botLossLines = ['Tough luck', 'Next one', 'Happens to the best', 'The cards will turn', 'Keep playing']
+    const botBJLines = ['BLACKJACK! Wow!', 'That\'s insane!', 'Legend status!', 'No way!', 'Unreal!']
+
+    chatBots.forEach((bot, i) => {
+      setTimeout(() => {
+        const isPlayerWin = outcome === 'win' || outcome === 'blackjack' || outcome === 'charlie'
+        const pool = outcome === 'blackjack' ? botBJLines : isPlayerWin ? botWinLines : botLossLines
+        setMessages(prev => [...prev, {
+          id: msgId++, type: 'player' as const, name: bot.name,
+          text: pool[Math.floor(Math.random() * pool.length)],
+          timestamp: Date.now(),
+        }])
+      }, 800 + i * 1500)
     })
+
+    // Dealer coaching (after bots chat)
+    setTimeout(() => {
+      setTyping(true)
+      const gs = {
+        player_total: mainHand.value,
+        dealer_upcard: dealerHand.cards[0]?.rank,
+        dealer_total: dealerHand.value,
+        last_result: outcome,
+        phase: 'result',
+      }
+      getDealerResponse('how was that hand?', gs).then(reply => {
+        setTyping(false)
+        setMessages(prev => [...prev, {
+          id: msgId++, type: 'coach', name: 'Coach',
+          text: reply, timestamp: Date.now(),
+        }])
+      })
+    }, 1500 + chatBots.length * 1500)
   }, [outcome])
 
   const handleSend = async () => {
@@ -175,7 +198,7 @@ export function DealerChat() {
           >
             <div className="px-3 py-2 flex items-center gap-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <span className="text-xs">{'\uD83C\uDCCF'}</span>
-              <span className="text-xs font-semibold" style={{ color: '#c9a84c', fontFamily: "'Cinzel', serif" }}>DEALER CHAT</span>
+              <span className="text-xs font-semibold" style={{ color: '#c9a84c', fontFamily: "'Cinzel', serif" }}>TABLE CHAT</span>
               <span className="text-[9px] ml-auto" style={{ color: 'rgba(255,255,255,0.4)' }}>{activeDealer.name}</span>
             </div>
 
