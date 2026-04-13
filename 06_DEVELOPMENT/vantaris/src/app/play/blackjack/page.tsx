@@ -259,6 +259,7 @@ function PlayingCard({ card, index, skinId }: { card: CardData; index: number; s
   const rarityEffect = getRarityEffect(rarity)
 
   if (card.faceDown) {
+    const back = getCardBack(useBlackjackStore.getState().player.equippedCardBack)
     return (
       <motion.div
         initial={{ opacity: 0, x: 40, y: -60, rotateY: 90, scale: 0.7 }}
@@ -267,13 +268,13 @@ function PlayingCard({ card, index, skinId }: { card: CardData; index: number; s
         className="absolute top-0 w-[70px] h-[100px] md:w-[80px] md:h-[115px] rounded-lg no-select flex items-center justify-center"
         style={{
           left: `${overlap}px`,
-          background: 'linear-gradient(135deg, #1a1a2e, #0a0a15)',
-          border: '2px solid #c9a84c',
-          boxShadow: '0 4px 20px rgba(0,0,0,0.6), 0 0 12px rgba(201,168,76,0.15)',
+          background: back.background,
+          border: `2px solid ${back.borderColor}`,
+          boxShadow: `0 4px 20px rgba(0,0,0,0.6), 0 0 12px ${back.borderColor}30`,
           zIndex: index,
         }}
       >
-        <span style={{ fontSize: '1.6rem', color: '#c9a84c' }}>{'\u2666'}</span>
+        <span style={{ fontSize: '1.6rem', color: back.iconColor }}>{back.centerIcon}</span>
       </motion.div>
     )
   }
@@ -1026,7 +1027,12 @@ export default function BlackjackPage() {
       <div id="game-area" className="flex-1 relative overflow-hidden">
 
         {/* 3D Casino Scene */}
-        <CasinoScene3D onSeatPositions={setSeatPositions} />
+        <CasinoScene3D onSeatPositions={setSeatPositions} feltColor={
+          store.player.equippedFelt === 'felt_crimson' ? '#5c0d0d' :
+          store.player.equippedFelt === 'felt_midnight' ? '#0d1a5c' :
+          store.player.equippedFelt === 'felt_legend' ? '#0a0a0a' :
+          '#0d5c2e'
+        } />
 
         {/* Bot players at projected seat positions */}
         <BotPlayers seatPositions={seatPositions} />
@@ -1482,6 +1488,7 @@ export default function BlackjackPage() {
           if (item.category === 'outfit') updates.equippedOutfit = item.id
           else if (item.category === 'aura') updates.equippedAura = item.id
           else if (item.category === 'card_back') updates.equippedCardBack = item.id
+          else if (item.category === 'table_felt') updates.equippedFelt = item.id
           useBlackjackStore.setState({ player: { ...p, ...updates } })
           recalculatePresence()
           toastInfo('Equipped', `${item.name} equipped!`)

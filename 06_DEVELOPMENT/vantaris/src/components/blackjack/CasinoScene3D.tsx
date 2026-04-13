@@ -28,6 +28,9 @@ import type { SeatPosition } from './BotPlayers'
 // OVAL CASINO TABLE
 // ============================================================
 
+// Module-level felt color (set by parent CasinoScene3D)
+let _feltColor = '#0d5c2e'
+
 function CasinoTable() {
   const feltRef = useRef<THREE.Mesh>(null)
 
@@ -75,7 +78,7 @@ function CasinoTable() {
         <mesh ref={feltRef} position={[0, -0.46, 0]} receiveShadow>
           <cylinderGeometry args={[3.9, 3.9, 0.06, 64]} />
           <meshStandardMaterial
-            color="#0d5c2e"
+            color={_feltColor}
             roughness={0.92}
             metalness={0.02}
             emissive="#0a4a24"
@@ -556,7 +559,8 @@ function SeatProjector({ onProject }: { onProject: (positions: SeatPosition[]) =
 // MAIN SCENE EXPORT
 // ============================================================
 
-export function CasinoScene3D({ onSeatPositions }: { onSeatPositions?: (positions: SeatPosition[]) => void }) {
+export function CasinoScene3D({ onSeatPositions, feltColor = '#0d5c2e' }: { onSeatPositions?: (positions: SeatPosition[]) => void; feltColor?: string }) {
+  _feltColor = feltColor // pass to CasinoTable via module scope
   const handleProject = useCallback((positions: SeatPosition[]) => {
     onSeatPositions?.(positions)
   }, [onSeatPositions])

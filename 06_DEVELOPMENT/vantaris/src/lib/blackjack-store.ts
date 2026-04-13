@@ -64,6 +64,7 @@ interface PlayerState {
   equippedAura: string
   equippedDeckSkin: string
   equippedCardBack: string
+  equippedFelt: string
   // Sweepstakes tracking
   scPlaythroughRequired: number  // total SC that must be wagered before redemption
   scPlaythroughWagered: number   // SC wagered so far
@@ -251,6 +252,7 @@ const FRESH_PLAYER: PlayerState = {
   equippedAura: 'none',
   equippedDeckSkin: 'classic',
   equippedCardBack: 'classic_navy',
+  equippedFelt: 'default',
   // Sweepstakes
   scPlaythroughRequired: 0,
   scPlaythroughWagered: 0,
