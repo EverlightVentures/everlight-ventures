@@ -36,82 +36,113 @@ function ChipSVG({ config, size = 64 }: { config: ChipConfig; size?: number }) {
   const cx = size / 2
   const cy = size / 2
   const outerR = size / 2 - 2
-  const innerR = outerR * 0.72
-  const coreR = outerR * 0.55
-  const notchCount = 8
-  const notchW = 4
-  const notchH = outerR * 0.22
+  const innerR = outerR * 0.75
+  const coreR = outerR * 0.52
+  const spotCount = 6 // edge inlay spots (like real Paulson chips)
 
   const label = config.value >= 1000 ? `${config.value / 1000}K` : config.value.toString()
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
       <defs>
-        {/* Metallic sheen gradient */}
-        <radialGradient id={`sheen-${config.value}`} cx="35%" cy="35%" r="65%">
-          <stop offset="0%" stopColor="rgba(255,255,255,0.25)" />
-          <stop offset="50%" stopColor="rgba(255,255,255,0.05)" />
-          <stop offset="100%" stopColor="rgba(0,0,0,0.15)" />
+        {/* Premium sheen -- top-left highlight simulating overhead light */}
+        <radialGradient id={`sheen-${config.value}`} cx="30%" cy="25%" r="70%">
+          <stop offset="0%" stopColor="rgba(255,255,255,0.35)" />
+          <stop offset="40%" stopColor="rgba(255,255,255,0.08)" />
+          <stop offset="100%" stopColor="rgba(0,0,0,0.2)" />
         </radialGradient>
-        {/* Edge shadow */}
-        <filter id={`shadow-${config.value}`}>
-          <feDropShadow dx="0" dy="2" stdDeviation="3" floodOpacity="0.5" />
-        </filter>
+        {/* Clay texture overlay */}
+        <radialGradient id={`clay-${config.value}`} cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stopColor="rgba(255,255,255,0.06)" />
+          <stop offset="100%" stopColor="rgba(0,0,0,0.08)" />
+        </radialGradient>
+        {/* Gold emboss for center */}
+        <linearGradient id={`emboss-${config.value}`} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="rgba(255,255,255,0.15)" />
+          <stop offset="50%" stopColor="rgba(255,255,255,0)" />
+          <stop offset="100%" stopColor="rgba(0,0,0,0.12)" />
+        </linearGradient>
       </defs>
 
-      {/* Outer circle -- main color */}
-      <circle cx={cx} cy={cy} r={outerR} fill={config.primary} />
+      {/* Base shadow ring (depth) */}
+      <circle cx={cx} cy={cy + 1} r={outerR} fill="rgba(0,0,0,0.3)" />
 
-      {/* Edge notches (8, evenly spaced) */}
-      {Array.from({ length: notchCount }).map((_, i) => {
-        const angle = (i * 360) / notchCount - 90
+      {/* Outer rim -- slightly darker than primary */}
+      <circle cx={cx} cy={cy} r={outerR} fill={config.ring} />
+
+      {/* Main body */}
+      <circle cx={cx} cy={cy} r={outerR - 1.5} fill={config.primary} />
+
+      {/* Edge inlay spots (6 colored spots like real chips) */}
+      {Array.from({ length: spotCount }).map((_, i) => {
+        const angle = (i * 360) / spotCount - 90
         const rad = (angle * Math.PI) / 180
-        const nx = cx + (outerR - notchH / 2) * Math.cos(rad)
-        const ny = cy + (outerR - notchH / 2) * Math.sin(rad)
+        const spotR = outerR - 4
+        const sx = cx + spotR * Math.cos(rad)
+        const sy = cy + spotR * Math.sin(rad)
         return (
-          <rect
-            key={i}
-            x={nx - notchW / 2}
-            y={ny - notchH / 2}
-            width={notchW}
-            height={notchH}
-            rx={1.5}
-            fill={config.secondary}
-            transform={`rotate(${angle + 90}, ${nx}, ${ny})`}
-          />
+          <g key={i}>
+            {/* Spot background (white/secondary color inlay) */}
+            <circle cx={sx} cy={sy} r={size * 0.06} fill={config.secondary} opacity={0.9} />
+            {/* Spot inner dot */}
+            <circle cx={sx} cy={sy} r={size * 0.025} fill="#fff" opacity={0.3} />
+          </g>
         )
       })}
 
-      {/* Middle ring */}
-      <circle cx={cx} cy={cy} r={innerR} fill="none" stroke={config.ring} strokeWidth={2} opacity={0.6} />
+      {/* Outer ring groove */}
+      <circle cx={cx} cy={cy} r={innerR + 2} fill="none" stroke={config.ring} strokeWidth={1.5} opacity={0.5} />
 
-      {/* Inner dashed ring */}
-      <circle
-        cx={cx} cy={cy} r={innerR - 4}
-        fill="none" stroke={config.secondary} strokeWidth={1}
-        strokeDasharray="3 3" opacity={0.4}
-      />
+      {/* Inner decorative ring */}
+      <circle cx={cx} cy={cy} r={innerR} fill="none" stroke={config.secondary} strokeWidth={1.2} opacity={0.4} />
 
-      {/* Core circle */}
+      {/* Thin gold accent ring */}
+      <circle cx={cx} cy={cy} r={innerR - 3} fill="none" stroke="#c9a84c" strokeWidth={0.5} opacity={0.3} />
+
+      {/* Core circle (denomination area) */}
+      <circle cx={cx} cy={cy} r={coreR + 2} fill={config.ring} />
       <circle cx={cx} cy={cy} r={coreR} fill={config.primary} />
-      <circle cx={cx} cy={cy} r={coreR - 2} fill="none" stroke={config.secondary} strokeWidth={0.8} opacity={0.5} />
 
-      {/* Metallic sheen overlay */}
-      <circle cx={cx} cy={cy} r={outerR} fill={`url(#sheen-${config.value})`} />
+      {/* Core emboss effect */}
+      <circle cx={cx} cy={cy} r={coreR} fill={`url(#emboss-${config.value})`} />
+
+      {/* Core inner accent ring */}
+      <circle cx={cx} cy={cy} r={coreR - 1.5} fill="none" stroke={config.secondary} strokeWidth={0.6} opacity={0.4} />
+
+      {/* Clay texture overlay */}
+      <circle cx={cx} cy={cy} r={outerR - 1.5} fill={`url(#clay-${config.value})`} />
+
+      {/* Premium sheen (simulates overhead casino light) */}
+      <circle cx={cx} cy={cy} r={outerR - 1.5} fill={`url(#sheen-${config.value})`} />
 
       {/* Denomination text */}
       <text
         x={cx}
-        y={cy + 1}
+        y={cy}
         textAnchor="middle"
         dominantBaseline="central"
         fill={config.text}
-        fontSize={config.value >= 1000 ? size * 0.22 : size * 0.28}
-        fontWeight="800"
+        fontSize={config.value >= 1000 ? size * 0.2 : size * 0.26}
+        fontWeight="900"
         fontFamily="'Cinzel', serif"
-        style={{ textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}
+        letterSpacing={config.value >= 1000 ? -0.5 : 0}
       >
         {label}
+      </text>
+
+      {/* Small "GC" under denomination */}
+      <text
+        x={cx}
+        y={cy + size * 0.15}
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill={config.text}
+        fontSize={size * 0.09}
+        fontWeight="600"
+        opacity={0.5}
+        fontFamily="'Inter', sans-serif"
+      >
+        GC
       </text>
     </svg>
   )
@@ -137,23 +168,29 @@ export function CasinoChip({
       style={{
         width: size,
         height: size,
+        // Bigger touch target (padding around the chip)
+        padding: 4,
+        margin: -4,
         filter: selected
-          ? `drop-shadow(0 0 12px ${config.secondary}80) drop-shadow(0 0 24px ${config.secondary}30)`
-          : `drop-shadow(0 2px 6px rgba(0,0,0,0.6))`,
+          ? `drop-shadow(0 0 14px ${config.secondary}90) drop-shadow(0 0 28px ${config.secondary}40)`
+          : `drop-shadow(0 3px 8px rgba(0,0,0,0.7))`,
       }}
-      whileHover={{ translateY: -6, scale: 1.1 }}
-      whileTap={{ translateY: 0, scale: 0.92 }}
-      animate={selected ? { scale: [1, 1.05, 1] } : {}}
+      whileHover={{ translateY: -8, scale: 1.12 }}
+      whileTap={{ translateY: 0, scale: 0.88 }}
+      animate={selected ? { scale: [1, 1.06, 1] } : {}}
       transition={selected ? { duration: 1.5, repeat: Infinity } : { duration: 0.15 }}
     >
       <ChipSVG config={config} size={size} />
 
-      {/* Selection ring */}
+      {/* Selection glow ring */}
       {selected && (
         <motion.div
-          className="absolute inset-[-3px] rounded-full"
-          style={{ border: '2px solid #fff', opacity: 0.6 }}
-          animate={{ opacity: [0.4, 0.8, 0.4] }}
+          className="absolute inset-[-4px] rounded-full"
+          style={{
+            border: `2px solid ${config.secondary}`,
+            boxShadow: `0 0 10px ${config.secondary}60`,
+          }}
+          animate={{ opacity: [0.5, 1, 0.5], scale: [1, 1.02, 1] }}
           transition={{ duration: 1.5, repeat: Infinity }}
         />
       )}
