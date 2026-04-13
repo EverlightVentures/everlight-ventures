@@ -80,6 +80,12 @@ interface BotCardData {
   faceDown: boolean
 }
 
+// Bot thought bubble phrases
+const BOT_WIN_THOUGHTS = ['Nice hand!', 'Let\'s go!', 'Easy money', 'On fire!', 'Yes!']
+const BOT_LOSS_THOUGHTS = ['Ouch...', 'Tough break', 'Next one', 'Ugh', 'Cold deck']
+const BOT_BJ_THOUGHTS = ['WOW!', 'Incredible!', 'No way!', 'Legend!', 'GOAT move']
+const BOT_IDLE_THOUGHTS = ['Hmm...', 'Hit or stand?', 'Feeling lucky', 'Let me think...', 'Risky...']
+
 const SUIT_SYMBOLS: Record<string, string> = {
   s: '\u2660', h: '\u2665', d: '\u2666', c: '\u2663',
 }
@@ -133,11 +139,12 @@ function MiniCard({ card, index }: { card: BotCardData; index: number }) {
 // BOT LABEL (with cards)
 // ============================================================
 
-function BotLabel({ bot, position, outcome, cards }: {
+function BotLabel({ bot, position, outcome, cards, thought }: {
   bot: { name: string; chips: number; seat: number; sittingOut: boolean; color: string }
   position: SeatPosition
   outcome: BotOutcome | null
   cards: BotCardData[]
+  thought: string | null
 }) {
   if (!position.visible) return null
 
@@ -154,6 +161,27 @@ function BotLabel({ bot, position, outcome, cards }: {
         filter: bot.sittingOut ? 'grayscale(0.7)' : 'none',
       }}
     >
+      {/* Thought bubble */}
+      <AnimatePresence>
+        {thought && (
+          <motion.div
+            initial={{ opacity: 0, y: 6, scale: 0.8 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.9 }}
+            className="mb-1 px-2 py-0.5 rounded-lg text-[0.5rem]"
+            style={{
+              background: 'rgba(0,0,0,0.75)',
+              border: '1px solid rgba(255,255,255,0.15)',
+              color: 'rgba(255,255,255,0.7)',
+              backdropFilter: 'blur(4px)',
+              maxWidth: '80px',
+            }}
+          >
+            {thought}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Bot cards (mini hand) */}
       {cards.length > 0 && (
         <div className="flex justify-center mb-1" style={{ minHeight: '42px' }}>
@@ -266,6 +294,7 @@ export function BotPlayers({ seatPositions }: { seatPositions: SeatPosition[] })
   const bots = useBlackjackStore(s => s.bots)
   const phase = useBlackjackStore(s => s.phase)
   const [outcomes, setOutcomes] = useState<Record<number, BotOutcome | null>>({})
+  const [thoughts, setThoughts] = useState<Record<number, string | null>>({})
   const [botCards, setBotCards] = useState<Record<number, BotCardData[]>>({})
 
   // Deal face-down cards to bots when player's hand is dealt
@@ -350,10 +379,15 @@ export function BotPlayers({ seatPositions }: { seatPositions: SeatPosition[] })
       setOutcomes(prev => ({ ...prev, [bot.seat]: { text: outcomeText, color: outcomeColor } }))
       setTimeout(() => {
         setOutcomes(prev => ({ ...prev, [bot.seat]: null }))
-      }, 1200)
+      }, 1800)
 
-      // Think delay: 1.2-3.2s per bot (simulates real player thinking)
-      await new Promise(r => setTimeout(r, 1200 + Math.random() * 2000))
+      // Show outcome thought bubble
+      const thoughtPool = bust ? BOT_LOSS_THOUGHTS : win ? BOT_WIN_THOUGHTS : BOT_IDLE_THOUGHTS
+      setThoughts(prev => ({ ...prev, [bot.seat]: thoughtPool[Math.floor(Math.random() * thoughtPool.length)] }))
+      setTimeout(() => setThoughts(prev => ({ ...prev, [bot.seat]: null })), 2500)
+
+      // Think delay: 1.5-4s per bot (well spaced, simulates real player thinking)
+      await new Promise(r => setTimeout(r, 1500 + Math.random() * 2500))
     }
 
     useBlackjackStore.setState({ bots: updatedBots })
@@ -381,6 +415,7 @@ export function BotPlayers({ seatPositions }: { seatPositions: SeatPosition[] })
           position={position}
           outcome={outcomes[bot.seat] || null}
           cards={botCards[bot.seat] || []}
+          thought={thoughts[bot.seat] || null}
         />
       ))}
       <PlayerSeatLabel position={seatPositions[2] || { x: 0, y: 0, visible: false }} />

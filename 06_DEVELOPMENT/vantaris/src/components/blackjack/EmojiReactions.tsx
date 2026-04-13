@@ -61,16 +61,20 @@ export function EmojiReactions({ seatPositions }: { seatPositions: SeatPosition[
     setShowBar(false)
   }, [spawnEmoji])
 
-  // Bots react to player outcomes
+  // Bots react to player outcomes -- well-staggered, only 1-2 bots react
   useEffect(() => {
     if (!outcome) return
-    const botSeats = [0, 1, 3, 4]
+    const botSeats = [0, 1, 3, 4].sort(() => Math.random() - 0.5) // random order
+    let reactCount = 0
+    const maxReact = Math.random() < 0.3 ? 1 : 2 // 1-2 bots react, not all 4
 
-    // Stagger bot reactions 500-1500ms after outcome
     botSeats.forEach((seat, i) => {
-      // 40% chance each bot reacts
-      if (Math.random() > 0.4) return
-      const delay = 500 + Math.random() * 1000 + i * 200
+      if (reactCount >= maxReact) return
+      if (Math.random() > 0.5) return // 50% chance to skip
+      reactCount++
+
+      // Well-staggered: 1-4 seconds apart, sequential
+      const delay = 1000 + i * 2000 + Math.random() * 1500
 
       setTimeout(() => {
         let pool: string[]

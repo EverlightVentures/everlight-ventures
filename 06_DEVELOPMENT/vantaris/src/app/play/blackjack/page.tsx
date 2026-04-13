@@ -1032,6 +1032,21 @@ export default function BlackjackPage() {
             <div className="text-center">
               <p className="text-[8px] md:text-[9px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Cinzel', serif", letterSpacing: '2px' }}>YOUR BET</p>
               <p className="font-mono text-xl md:text-3xl font-bold" style={{ color: 'var(--gold)' }}>{store.betAmount.toLocaleString()}</p>
+              {/* Guidance messages */}
+              {store.betAmount === 0 && (
+                <p className="text-[9px] mt-1" style={{ color: '#ffb300' }}>Tap a chip to place your bet</p>
+              )}
+              {store.betAmount > 0 && store.betAmount < store.config.minBet && (
+                <p className="text-[9px] mt-1" style={{ color: '#ff5252' }}>Minimum bet: {store.config.minBet} GC</p>
+              )}
+              {store.betAmount > store.player.chips && (
+                <p className="text-[9px] mt-1" style={{ color: '#ff5252' }}>Not enough chips! Claim free chips or lower your bet</p>
+              )}
+              {store.betAmount >= store.config.minBet && store.betAmount <= store.player.chips && (
+                <p className="text-[9px] mt-1" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                  Table: {store.config.minBet}-{store.config.maxBet.toLocaleString()} GC
+                </p>
+              )}
             </div>
             <div className="flex gap-1.5 md:gap-3 items-end flex-wrap justify-center">
               {[10, 25, 100, 500, 1000, 5000].filter(v => v <= store.player.chips).map(v => (
