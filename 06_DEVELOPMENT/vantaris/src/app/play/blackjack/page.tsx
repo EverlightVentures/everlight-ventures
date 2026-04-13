@@ -251,9 +251,9 @@ function PlayingCard({ card, index, skinId }: { card: CardData; index: number; s
   if (card.faceDown) {
     return (
       <motion.div
-        initial={{ opacity: 0, x: 200, rotateY: 180, scale: 0 }}
-        animate={{ opacity: 1, x: 0, rotateY: 0, scale: 1 }}
-        transition={{ duration: 0.4, delay: index * 0.3, ease: [0.34, 1.56, 0.64, 1] }}
+        initial={{ opacity: 0, x: 120, y: -150, rotateY: 180, scale: 0.3 }}
+        animate={{ opacity: 1, x: 0, y: 0, rotateY: 0, scale: 1 }}
+        transition={{ duration: 0.5, delay: index * 0.4, type: 'spring', stiffness: 100, damping: 15 }}
         className="absolute top-0 w-[70px] h-[100px] md:w-[80px] md:h-[115px] rounded-lg no-select flex items-center justify-center"
         style={{
           left: `${overlap}px`,
@@ -279,9 +279,9 @@ function PlayingCard({ card, index, skinId }: { card: CardData; index: number; s
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 200, rotateY: -180, scale: 0 }}
-      animate={{ opacity: 1, x: 0, rotateY: 0, scale: 1 }}
-      transition={{ duration: 0.5, delay: index * 0.3, type: 'spring', stiffness: 120, damping: 14 }}
+      initial={{ opacity: 0, x: 120, y: -150, rotateY: -180, scale: 0.3 }}
+      animate={{ opacity: 1, x: 0, y: 0, rotateY: 0, scale: 1 }}
+      transition={{ duration: 0.6, delay: index * 0.4, type: 'spring', stiffness: 90, damping: 14 }}
       className="absolute top-0 w-[70px] h-[100px] md:w-[80px] md:h-[115px] rounded-lg flex flex-col justify-between p-1.5 no-select"
       style={{
         left: `${overlap}px`,
