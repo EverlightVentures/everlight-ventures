@@ -31,72 +31,115 @@ import type { SeatPosition } from './BotPlayers'
 function CasinoTable() {
   const feltRef = useRef<THREE.Mesh>(null)
 
-  // Subtle felt shimmer animation
   useFrame((state) => {
     if (feltRef.current) {
       const mat = feltRef.current.material as THREE.MeshStandardMaterial
-      mat.emissiveIntensity = 0.03 + Math.sin(state.clock.elapsedTime * 0.5) * 0.01
+      mat.emissiveIntensity = 0.02 + Math.sin(state.clock.elapsedTime * 0.5) * 0.008
     }
   })
 
+  // 5 betting circle positions (matches seat positions)
+  const bettingSpots = [
+    { x: -2.4, z: 1.8 },  // Seat 1
+    { x: -1.2, z: 2.3 },  // Seat 2
+    { x: 0.0,  z: 2.5 },  // Seat 3 (player)
+    { x: 1.2,  z: 2.3 },  // Seat 4
+    { x: 2.4,  z: 1.8 },  // Seat 5
+  ]
+
   return (
     <group>
-      {/* Table base -- dark wood, oval */}
+      {/* Table base -- dark wood, circular */}
       <mesh position={[0, -0.8, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[4.8, 4.5, 0.6, 64, 1, false]} />
+        <cylinderGeometry args={[4.2, 4.0, 0.5, 64]} />
         <meshStandardMaterial
-          color="#1a0d08"
-          roughness={0.35}
-          metalness={0.25}
+          color="#2a1505"
+          roughness={0.4}
+          metalness={0.2}
         />
       </mesh>
 
-      {/* Scale to make it oval */}
-      <group scale={[1.3, 1, 1]}>
-        {/* Felt surface -- dark purple/black with gold undertone */}
-        <mesh ref={feltRef} position={[0, -0.46, 0]} receiveShadow>
-          <cylinderGeometry args={[3.6, 3.6, 0.06, 64]} />
-          <meshStandardMaterial
-            color="#0d0815"
-            roughness={0.92}
-            metalness={0.02}
-            emissive="#1a0a2e"
-            emissiveIntensity={0.04}
-          />
-        </mesh>
+      {/* Felt surface -- CASINO GREEN (matches reference #0d5c2e) */}
+      <mesh ref={feltRef} position={[0, -0.46, 0]} receiveShadow>
+        <cylinderGeometry args={[4.0, 4.0, 0.08, 64]} />
+        <meshStandardMaterial
+          color="#0d5c2e"
+          roughness={0.95}
+          metalness={0.0}
+          emissive="#0a4a24"
+          emissiveIntensity={0.02}
+        />
+      </mesh>
 
-        {/* Inner felt accent -- subtle gold stitch line */}
-        <mesh position={[0, -0.42, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[3.2, 0.015, 8, 128]} />
-          <meshStandardMaterial
-            color="#c9a84c"
-            roughness={0.2}
-            metalness={0.8}
-            emissive="#c9a84c"
-            emissiveIntensity={0.3}
-          />
-        </mesh>
+      {/* Gold trim ring */}
+      <mesh position={[0, -0.42, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[4.05, 0.07, 12, 128]} />
+        <meshStandardMaterial
+          color="#c9a84c"
+          roughness={0.2}
+          metalness={0.9}
+          emissive="#c9a84c"
+          emissiveIntensity={0.15}
+        />
+      </mesh>
 
-        {/* Outer gold trim ring */}
-        <mesh position={[0, -0.43, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[3.65, 0.06, 12, 128]} />
-          <meshStandardMaterial
-            color="#c9a84c"
-            roughness={0.15}
-            metalness={0.95}
-            emissive="#c9a84c"
-            emissiveIntensity={0.2}
-          />
-        </mesh>
-      </group>
+      {/* Inner stitch line */}
+      <mesh position={[0, -0.41, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[3.5, 0.01, 8, 128]} />
+        <meshStandardMaterial
+          color="#c9a84c"
+          roughness={0.3}
+          metalness={0.7}
+          emissive="#c9a84c"
+          emissiveIntensity={0.2}
+        />
+      </mesh>
 
-      {/* Table legs (4 legs for oval) */}
-      {[[-2.5, -2], [2.5, -2], [-2.5, 2], [2.5, 2]].map(([x, z], i) => (
-        <mesh key={i} position={[x, -1.3, z]} castShadow>
-          <cylinderGeometry args={[0.12, 0.16, 0.9, 12]} />
-          <meshStandardMaterial color="#1a0d08" roughness={0.3} metalness={0.3} />
+      {/* 5 Betting circles on the felt */}
+      {bettingSpots.map((spot, i) => (
+        <mesh key={`bet-${i}`} rotation={[-Math.PI / 2, 0, 0]} position={[spot.x, -0.42, spot.z]}>
+          <ringGeometry args={[0.38, 0.42, 32]} />
+          <meshStandardMaterial
+            color={i === 2 ? '#c9a84c' : '#1a7a3e'}
+            emissive={i === 2 ? '#c9a84c' : '#1a7a3e'}
+            emissiveIntensity={i === 2 ? 0.25 : 0.1}
+            side={THREE.DoubleSide}
+            transparent
+            opacity={i === 2 ? 0.7 : 0.4}
+          />
         </mesh>
       ))}
+
+      {/* Insurance arc (semi-circle in front of dealer) */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.415, -0.5]}>
+        <torusGeometry args={[2.2, 0.012, 8, 64, Math.PI]} />
+        <meshStandardMaterial
+          color="#c9a84c"
+          emissive="#c9a84c"
+          emissiveIntensity={0.15}
+          side={THREE.DoubleSide}
+          transparent
+          opacity={0.35}
+        />
+      </mesh>
+
+      {/* Dealer nameplate (gold placard) */}
+      <mesh position={[0, -0.38, -2.8]}>
+        <boxGeometry args={[1.5, 0.04, 0.3]} />
+        <meshStandardMaterial
+          color="#c9a84c"
+          emissive="#c9a84c"
+          emissiveIntensity={0.2}
+          metalness={0.9}
+          roughness={0.1}
+        />
+      </mesh>
+
+      {/* Central table leg */}
+      <mesh position={[0, -1.4, 0]} castShadow>
+        <cylinderGeometry args={[0.2, 0.25, 0.8, 16]} />
+        <meshStandardMaterial color="#2a1505" roughness={0.4} metalness={0.2} />
+      </mesh>
     </group>
   )
 }
@@ -116,10 +159,10 @@ function ChipTray() {
   const stackHeights = [8, 6, 10, 5, 7]
 
   return (
-    <group position={[0, -0.42, -2.2]}>
+    <group position={[0, -0.41, -1.8]}>
       {/* Tray body */}
       <mesh>
-        <boxGeometry args={[3.4, 0.1, 0.5]} />
+        <boxGeometry args={[3.2, 0.12, 0.6]} />
         <meshStandardMaterial
           color="#111111"
           roughness={0.2}

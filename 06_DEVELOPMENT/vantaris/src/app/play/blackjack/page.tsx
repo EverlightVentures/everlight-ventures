@@ -9,7 +9,7 @@ import {
   GemStore, FreeChips, AvatarBuilder, DEFAULT_AVATAR,
   PlayerProfilePanel, Leaderboard, CasinoScene3D, CasinoChip,
   BotPlayers, ToastContainer, DealerAvatar,
-  WelcomeScreen, isNewPlayer,
+  WelcomeScreen, isNewPlayer, EmojiReactions,
 } from '@/components/blackjack'
 import type { Achievement, AvatarConfig, SeatPosition } from '@/components/blackjack'
 import type { Card as CardData } from '@/lib/blackjack-engine'
@@ -671,7 +671,16 @@ export default function BlackjackPage() {
   // Speak on actions
   const handleHit = () => { store.playerHit(); speak('hit'); playHit(); playCardDeal() }
   const handleStand = () => { store.playerStand(); speak('stand'); playStand() }
-  const handleDouble = () => { store.playerDouble(); speak('hit'); playCardDeal(); playChipClink() }
+  const handleDouble = () => {
+    store.playerDouble(); speak('hit'); playCardDeal(); playChipClink()
+    // Double down dramatic flash
+    const gameArea = document.getElementById('game-area')
+    if (gameArea) {
+      lightningFlash(gameArea)
+      screenShake(gameArea, 3, 0.25)
+    }
+    if (navigator.vibrate) navigator.vibrate([30, 20, 60, 20, 100])
+  }
   const handleSplit = () => { store.playerSplit(); speak('split'); playSplit() }
   const handleSurrender = () => { store.playerSurrender(); speak('surrender'); playStand() }
   const handleInsurance = (take: boolean) => { store.playerInsurance(take); speak(take ? 'insurance' : 'deal'); if (take) playChipClink() }
@@ -822,6 +831,9 @@ export default function BlackjackPage() {
         {/* Bot players at projected seat positions */}
         <BotPlayers seatPositions={seatPositions} />
 
+        {/* Emoji reaction system */}
+        <EmojiReactions seatPositions={seatPositions} />
+
         {/* Win particles */}
         <WinParticles trigger={particleTrigger} type={particleType} />
 
@@ -846,15 +858,53 @@ export default function BlackjackPage() {
           </p>
         </div>
 
-        {/* Streak display (top center) */}
+        {/* Streak display (top center) -- with fire effects at 3+, golden aura at 5+, lightning at 10+ */}
         {store.player.currentStreak >= 2 && store.phase !== 'betting' && (
           <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }}
-            className="absolute top-[60px] left-1/2 -translate-x-1/2 text-center z-10">
-            <span className="text-2xl font-black block" style={{ fontFamily: "'Cinzel', serif", color: '#e67e22' }}>
+            className="absolute top-[55px] md:top-[60px] left-1/2 -translate-x-1/2 text-center z-10 px-4 py-2 rounded-xl"
+            style={{
+              background: store.player.currentStreak >= 5
+                ? 'radial-gradient(circle, rgba(201,168,76,0.15), transparent 70%)'
+                : store.player.currentStreak >= 3
+                  ? 'radial-gradient(circle, rgba(230,126,34,0.12), transparent 70%)'
+                  : 'transparent',
+              boxShadow: store.player.currentStreak >= 10
+                ? '0 0 40px rgba(241,196,15,0.3), 0 0 80px rgba(241,196,15,0.1)'
+                : store.player.currentStreak >= 5
+                  ? '0 0 25px rgba(201,168,76,0.2)'
+                  : 'none',
+            }}
+          >
+            {/* Fire emoji for 3+ streak */}
+            {store.player.currentStreak >= 3 && (
+              <motion.span
+                animate={{ y: [0, -3, 0], scale: [1, 1.1, 1] }}
+                transition={{ duration: 0.6, repeat: Infinity }}
+                className="text-lg block mb-0.5"
+              >
+                {store.player.currentStreak >= 10 ? '\u26A1' : store.player.currentStreak >= 5 ? '\uD83D\uDD25' : '\uD83D\uDCA5'}
+              </motion.span>
+            )}
+            <motion.span
+              className="text-2xl md:text-3xl font-black block"
+              style={{
+                fontFamily: "'Cinzel', serif",
+                color: store.player.currentStreak >= 10 ? '#f1c40f' : store.player.currentStreak >= 5 ? '#c9a84c' : '#e67e22',
+                textShadow: store.player.currentStreak >= 5
+                  ? '0 0 20px rgba(201,168,76,0.5), 0 0 40px rgba(201,168,76,0.2)'
+                  : '0 0 10px rgba(230,126,34,0.3)',
+              }}
+              animate={store.player.currentStreak >= 5 ? { scale: [1, 1.08, 1] } : {}}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            >
               {store.player.currentStreak}
-            </span>
-            <span className="text-[9px] uppercase tracking-widest" style={{ color: '#e67e22', fontFamily: "'Cinzel', serif" }}>
-              WIN STREAK
+            </motion.span>
+            <span className="text-[8px] md:text-[9px] uppercase tracking-widest block" style={{
+              color: store.player.currentStreak >= 5 ? '#c9a84c' : '#e67e22',
+              fontFamily: "'Cinzel', serif",
+              letterSpacing: '2px',
+            }}>
+              {store.player.currentStreak >= 10 ? 'LEGENDARY STREAK' : store.player.currentStreak >= 5 ? 'HOT STREAK' : 'WIN STREAK'}
             </span>
           </motion.div>
         )}

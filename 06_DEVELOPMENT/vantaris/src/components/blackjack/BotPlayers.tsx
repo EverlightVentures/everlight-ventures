@@ -74,14 +74,70 @@ interface BotOutcome {
   color: string
 }
 
+interface BotCardData {
+  rank: string
+  suit: string
+  faceDown: boolean
+}
+
+const SUIT_SYMBOLS: Record<string, string> = {
+  s: '\u2660', h: '\u2665', d: '\u2666', c: '\u2663',
+}
+const SUIT_POOL = ['s', 'h', 'd', 'c']
+
+function randomSuit(): string {
+  return SUIT_POOL[Math.floor(Math.random() * 4)]
+}
+
 // ============================================================
-// BOT LABEL
+// MINI CARD (40x56px for bot hands)
 // ============================================================
 
-function BotLabel({ bot, position, outcome }: {
+function MiniCard({ card, index }: { card: BotCardData; index: number }) {
+  const isRed = card.suit === 'h' || card.suit === 'd'
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0, rotateY: 180 }}
+      animate={{ opacity: 1, scale: 1, rotateY: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.15, type: 'spring', stiffness: 200, damping: 18 }}
+      className="rounded"
+      style={{
+        width: '28px', height: '40px',
+        marginLeft: index > 0 ? '-12px' : '0',
+        background: card.faceDown
+          ? 'linear-gradient(135deg, #1a3a6b, #0d1f3c)'
+          : '#fff',
+        border: card.faceDown ? '1px solid #c9a84c' : '1px solid #ddd',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.5)',
+        display: 'flex', flexDirection: 'column' as const,
+        alignItems: 'center', justifyContent: 'center',
+        fontSize: '0.5rem', fontWeight: 700,
+        color: card.faceDown ? '#c9a84c' : isRed ? '#c0392b' : '#111',
+        zIndex: index,
+        position: 'relative' as const,
+      }}
+    >
+      {card.faceDown ? (
+        <span style={{ fontSize: '0.7rem' }}>{'\u2666'}</span>
+      ) : (
+        <>
+          <span style={{ fontSize: '0.55rem', lineHeight: 1 }}>{card.rank}</span>
+          <span style={{ fontSize: '0.45rem', lineHeight: 1 }}>{SUIT_SYMBOLS[card.suit]}</span>
+        </>
+      )}
+    </motion.div>
+  )
+}
+
+// ============================================================
+// BOT LABEL (with cards)
+// ============================================================
+
+function BotLabel({ bot, position, outcome, cards }: {
   bot: { name: string; chips: number; seat: number; sittingOut: boolean; color: string }
   position: SeatPosition
   outcome: BotOutcome | null
+  cards: BotCardData[]
 }) {
   if (!position.visible) return null
 
@@ -98,6 +154,13 @@ function BotLabel({ bot, position, outcome }: {
         filter: bot.sittingOut ? 'grayscale(0.7)' : 'none',
       }}
     >
+      {/* Bot cards (mini hand) */}
+      {cards.length > 0 && (
+        <div className="flex justify-center mb-1" style={{ minHeight: '42px' }}>
+          {cards.map((c, i) => <MiniCard key={i} card={c} index={i} />)}
+        </div>
+      )}
+
       <div className="text-[0.62rem] font-semibold" style={{
         color: bot.sittingOut ? '#666' : '#aaeeff',
         textShadow: '0 1px 3px rgba(0,0,0,0.9)',
@@ -182,6 +245,25 @@ export function BotPlayers({ seatPositions }: { seatPositions: SeatPosition[] })
   const bots = useBlackjackStore(s => s.bots)
   const phase = useBlackjackStore(s => s.phase)
   const [outcomes, setOutcomes] = useState<Record<number, BotOutcome | null>>({})
+  const [botCards, setBotCards] = useState<Record<number, BotCardData[]>>({})
+
+  // Deal face-down cards to bots when player's hand is dealt
+  useEffect(() => {
+    if (phase === 'dealing') {
+      const cards: Record<number, BotCardData[]> = {}
+      bots.forEach(bot => {
+        if (!bot.sittingOut) {
+          cards[bot.seat] = [
+            { rank: randomRank(), suit: randomSuit(), faceDown: true },
+            { rank: randomRank(), suit: randomSuit(), faceDown: true },
+          ]
+        }
+      })
+      setBotCards(cards)
+    } else if (phase === 'betting') {
+      setBotCards({})
+    }
+  }, [phase])
 
   const runBotRound = useCallback(async () => {
     const store = useBlackjackStore.getState()
@@ -190,7 +272,6 @@ export function BotPlayers({ seatPositions }: { seatPositions: SeatPosition[] })
     for (let i = 0; i < updatedBots.length; i++) {
       const bot = { ...updatedBots[i] }
 
-      // 10% chance to toggle sitting out
       if (Math.random() < 0.1) {
         bot.sittingOut = !bot.sittingOut
         updatedBots[i] = bot
@@ -198,21 +279,37 @@ export function BotPlayers({ seatPositions }: { seatPositions: SeatPosition[] })
       }
       if (bot.sittingOut) { updatedBots[i] = bot; continue }
 
-      // Place bet
       const bet = Math.min(Math.floor(50 + Math.random() * 150) * 10, bot.chips)
       if (bet <= 0) { updatedBots[i] = bot; continue }
 
-      // Deal + play hand
-      const hand = [randomRank(), randomRank()]
+      // Use the pre-dealt cards or generate new ones
+      const existingCards = botCards[bot.seat] || []
+      const hand = existingCards.length >= 2
+        ? existingCards.map(c => c.rank)
+        : [randomRank(), randomRank()]
       let total = handTotal(hand)
       const dealerUp = Math.floor(Math.random() * 9) + 2
+
+      // Build visible card data (reveal face-down cards)
+      const visibleCards: BotCardData[] = hand.map((r, idx) => ({
+        rank: r,
+        suit: existingCards[idx]?.suit || randomSuit(),
+        faceDown: false,
+      }))
+
+      // Bot plays (hit more cards)
       let iterations = 0
       while (total < 21 && iterations < 5) {
         if (botDecision(total, dealerUp) === 'stand') break
-        hand.push(randomRank())
+        const newRank = randomRank()
+        hand.push(newRank)
+        visibleCards.push({ rank: newRank, suit: randomSuit(), faceDown: false })
         total = handTotal(hand)
         iterations++
       }
+
+      // Reveal cards at this bot's seat
+      setBotCards(prev => ({ ...prev, [bot.seat]: visibleCards }))
 
       // Outcome
       const bust = total > 21
@@ -234,12 +331,11 @@ export function BotPlayers({ seatPositions }: { seatPositions: SeatPosition[] })
         setOutcomes(prev => ({ ...prev, [bot.seat]: null }))
       }, 1200)
 
-      // Stagger 300ms between bots
       await new Promise(r => setTimeout(r, 300))
     }
 
     useBlackjackStore.setState({ bots: updatedBots })
-  }, [])
+  }, [botCards])
 
   // Trigger bot round when player hand settles
   useEffect(() => {
@@ -262,6 +358,7 @@ export function BotPlayers({ seatPositions }: { seatPositions: SeatPosition[] })
           bot={bot}
           position={position}
           outcome={outcomes[bot.seat] || null}
+          cards={botCards[bot.seat] || []}
         />
       ))}
       <PlayerSeatLabel position={seatPositions[2] || { x: 0, y: 0, visible: false }} />
