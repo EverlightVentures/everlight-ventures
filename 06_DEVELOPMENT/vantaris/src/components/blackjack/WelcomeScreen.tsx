@@ -144,7 +144,9 @@ export function WelcomeScreen({ onComplete }: {
   )
 }
 
+// NOTE: Do NOT call this during render/SSR. Use in useEffect only.
 export function isNewPlayer(): boolean {
-  if (typeof window === 'undefined') return false
-  return !localStorage.getItem('vantaris_welcomed')
+  try {
+    return !localStorage.getItem('vantaris_welcomed')
+  } catch { return false }
 }

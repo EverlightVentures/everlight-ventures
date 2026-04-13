@@ -555,7 +555,12 @@ function LoadingScreen({ onComplete }: { onComplete: () => void }) {
 export default function BlackjackPage() {
   const store = useBlackjackStore()
   const speak = useDealerSpeak()
-  const [showWelcome, setShowWelcome] = useState(() => isNewPlayer())
+  const [showWelcome, setShowWelcome] = useState(false)
+
+  // Check localStorage on mount only (avoids SSR hydration mismatch)
+  useEffect(() => {
+    if (isNewPlayer()) setShowWelcome(true)
+  }, [])
   const [loading, setLoading] = useState(true)
   const [particleTrigger, setParticleTrigger] = useState(0)
   const [particleType, setParticleType] = useState<'blackjack' | 'win' | 'loss' | null>(null)
@@ -576,17 +581,17 @@ export default function BlackjackPage() {
   const [avatar, setAvatar] = useState<AvatarConfig>(DEFAULT_AVATAR)
 
   // Free chips state (persisted in localStorage)
-  const [adRefills, setAdRefills] = useState(() => {
-    if (typeof window === 'undefined') return 10
+  const [adRefills, setAdRefills] = useState(10)
+  const [dailyClaimed, setDailyClaimed] = useState(false)
+
+  // Load free chip state from localStorage on mount
+  useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem('vantaris_ad_refills') || '{}')
-      return saved.date === new Date().toDateString() ? saved.count : 10
-    } catch { return 10 }
-  })
-  const [dailyClaimed, setDailyClaimed] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return localStorage.getItem('vantaris_daily') === new Date().toDateString()
-  })
+      if (saved.date === new Date().toDateString()) setAdRefills(saved.count)
+      if (localStorage.getItem('vantaris_daily') === new Date().toDateString()) setDailyClaimed(true)
+    } catch {}
+  }, [])
 
   // Music effect (Tone.js procedural jazz)
   useEffect(() => {
@@ -1011,8 +1016,8 @@ export default function BlackjackPage() {
               style={{ background: 'linear-gradient(135deg, #c9a84c, #f0d080)', color: '#000', fontFamily: "'Cinzel', serif", letterSpacing: '2px', boxShadow: '0 0 20px rgba(201,168,76,0.5)' }}
               whileHover={{ boxShadow: '0 0 35px rgba(201,168,76,0.8)', y: -2 }}
               whileTap={{ scale: 0.97 }}
-              disabled={store.betAmount <= 0 || store.betAmount > store.player.chips}>
-              DEAL
+              disabled={store.betAmount <= 0 || store.betAmount * store.activeSeatIndices.length > store.player.chips}>
+              {store.activeSeatIndices.length > 1 ? `DEAL (${store.activeSeatIndices.length} SEATS)` : 'DEAL'}
             </motion.button>
           </motion.div>
         )}
@@ -1043,7 +1048,16 @@ export default function BlackjackPage() {
         {/* PLAYER ACTION PHASE */}
         {showPlayerActions && (
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-center gap-2 md:gap-3 flex-wrap">
+            className="flex flex-col items-center gap-2">
+            {/* Current seat indicator */}
+            {store.activeSeatIndices.length > 1 && (
+              <p className="text-[10px] uppercase tracking-widest" style={{
+                color: 'var(--gold)', fontFamily: "'Cinzel', serif", letterSpacing: '2px',
+              }}>
+                SEAT {store.currentSeatIndex + 1} &mdash; YOUR ACTION
+              </p>
+            )}
+            <div className="flex items-center justify-center gap-2 md:gap-3 flex-wrap">
             <motion.button onClick={handleHit}
               className="px-6 md:px-8 py-2 md:py-2.5 text-xs md:text-sm tracking-widest font-bold rounded-xl"
               style={{ background: 'rgba(39,174,96,0.9)', color: '#fff', fontFamily: "'Cinzel', serif" }}
@@ -1080,6 +1094,7 @@ export default function BlackjackPage() {
                 SURRENDER
               </motion.button>
             )}
+            </div>
           </motion.div>
         )}
 
@@ -1092,11 +1107,33 @@ export default function BlackjackPage() {
           </div>
         )}
 
-        {/* SETTLED -- handled by auto-reset timer in useEffect */}
+        {/* SETTLED -- per-seat results + auto-reset */}
         {store.phase === 'settled' && (
-          <div className="text-center py-2">
-            <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Next hand in a moment...</p>
-          </div>
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+            className="text-center py-2">
+            {/* Multi-seat result breakdown */}
+            {store.seatResults.length > 1 && (
+              <div className="flex justify-center gap-3 mb-2">
+                {store.seatResults.map((r, i) => {
+                  const isWin = r.outcome === 'win' || r.outcome === 'blackjack' || r.outcome === 'charlie'
+                  const isPush = r.outcome === 'push'
+                  const color = isWin ? 'var(--win)' : isPush ? '#58a6ff' : 'var(--loss)'
+                  return (
+                    <div key={i} className="glass px-3 py-1.5 rounded-lg">
+                      <p className="text-[8px] uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
+                        Seat {r.seatIndex + 1}
+                      </p>
+                      <p className="text-xs font-bold uppercase" style={{ color }}>{r.outcome}</p>
+                      <p className="text-[10px] font-mono" style={{ color }}>
+                        {r.payout > 0 ? `+${r.payout.toLocaleString()}` : r.payout === 0 ? 'PUSH' : `-${store.betAmount}`}
+                      </p>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            <p className="text-[10px]" style={{ color: 'var(--text-tertiary)' }}>Next hand in a moment...</p>
+          </motion.div>
         )}
       </div>
 

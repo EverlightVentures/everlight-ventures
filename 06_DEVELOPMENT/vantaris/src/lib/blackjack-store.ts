@@ -66,6 +66,22 @@ interface PlayerState {
   equippedCardBack: string
 }
 
+// ============================================================
+// MULTI-SEAT: Each seat the player occupies is independent
+// ============================================================
+
+interface SeatState {
+  index: number           // 0-4 (table position)
+  active: boolean         // player is occupying this seat
+  bet: number
+  hand: HandState
+  splitHand: HandState | null
+  sideBets: SideBetState
+  outcome: Outcome | null
+  payout: number
+  currentHandIndex: number // 0 = main, 1 = split (within this seat)
+}
+
 interface BlackjackStore {
   // Game state
   phase: GamePhase
@@ -74,14 +90,19 @@ interface BlackjackStore {
   betAmount: number
   selectedChip: number
 
-  // Hands
+  // Multi-seat model
+  seats: SeatState[]           // all 5 table seats
+  activeSeatIndices: number[]  // which seats the player occupies (e.g. [1, 2, 3])
+  currentSeatIndex: number     // which seat is currently acting (during player_turn)
+
+  // Legacy single-hand accessors (computed from current seat for backward compat)
   mainHand: HandState
   splitHand: HandState | null
   dealerHand: HandState
   currentHandIndex: number
   availableActions: string[]
 
-  // Side bets
+  // Side bets (for the CURRENT seat being bet on)
   sideBets: SideBetState
   lightning: LightningState
 
@@ -89,10 +110,11 @@ interface BlackjackStore {
   dealQueue: DealEvent[]
   dealerDrawQueue: DealerDrawEvent[]
 
-  // Outcome
-  outcome: Outcome | null
-  winAmount: number
+  // Outcome (summary of all seats)
+  outcome: Outcome | null       // primary outcome (first seat or worst)
+  winAmount: number             // total across all seats
   xpEarned: number
+  seatResults: { seatIndex: number; outcome: Outcome; payout: number }[]
 
   // Dealer
   activeDealer: DealerPersona
@@ -123,6 +145,7 @@ interface BlackjackStore {
   // Actions
   setBet: (amount: number) => void
   selectChip: (value: number) => void
+  toggleSeat: (seatIndex: number) => void   // activate/deactivate a seat
   deal: () => void
   playerHit: () => void
   playerStand: () => void
@@ -158,6 +181,25 @@ const EMPTY_HAND: HandState = {
   insured: false,
   insuranceBet: 0,
   insurancePayout: 0,
+}
+
+function createEmptySeat(index: number, active = false): SeatState {
+  return {
+    index,
+    active,
+    bet: 0,
+    hand: { ...EMPTY_HAND },
+    splitHand: null,
+    sideBets: { ...EMPTY_SIDE_BETS },
+    outcome: null,
+    payout: 0,
+    currentHandIndex: 0,
+  }
+}
+
+function createInitialSeats(): SeatState[] {
+  // 5 seats. Player starts at seat 2 (center).
+  return [0, 1, 2, 3, 4].map(i => createEmptySeat(i, i === 2))
 }
 
 const EMPTY_SIDE_BETS: SideBetState = {
@@ -212,6 +254,12 @@ export const useBlackjackStore = create<BlackjackStore>()(
   betAmount: 100,
   selectedChip: 100,
 
+  // Multi-seat state
+  seats: createInitialSeats(),
+  activeSeatIndices: [2],      // player starts at center seat
+  currentSeatIndex: 2,
+
+  // Legacy accessors (point to current seat for backward compat)
   mainHand: { ...EMPTY_HAND },
   splitHand: null,
   dealerHand: { ...EMPTY_HAND },
@@ -227,6 +275,7 @@ export const useBlackjackStore = create<BlackjackStore>()(
   outcome: null,
   winAmount: 0,
   xpEarned: 0,
+  seatResults: [],
 
   activeDealer: DEFAULT_DEALERS[0],
   dealerLine: 'Take your time. The cards are patient.',
@@ -267,113 +316,138 @@ export const useBlackjackStore = create<BlackjackStore>()(
   setBet: (amount) => set({ betAmount: amount }),
   selectChip: (value) => set({ selectedChip: value, betAmount: value }),
 
+  toggleSeat: (seatIndex: number) => {
+    const state = get()
+    if (state.phase !== 'betting') return
+    const seats = [...state.seats]
+    const seat = seats[seatIndex]
+    // Can't toggle if a bot sits there (seats 0,1,3,4 have bots unless overridden)
+    const botSeats = state.bots.map(b => b.seat)
+    if (botSeats.includes(seatIndex) && !seat.active) return // can't take bot seat
+    seats[seatIndex] = { ...seat, active: !seat.active }
+    const active = seats.filter(s => s.active).map(s => s.index)
+    if (active.length === 0) return // must have at least one seat
+    set({ seats, activeSeatIndices: active })
+  },
+
   deal: () => {
     const state = get()
     if (state.phase !== 'betting') return
     if (state.betAmount < state.config.minBet) return
-    if (state.betAmount > state.player.chips) return
 
-    // Reshuffle if needed
+    const activeSeats = state.activeSeatIndices
+    const totalBet = state.betAmount * activeSeats.length
+    const sideBetTotal = Object.values(state.sideBets).reduce((sum, sb) => sum + (sb.active ? sb.bet : 0), 0) * activeSeats.length
+    if (totalBet + sideBetTotal > state.player.chips) return
+
     let shoe = state.shoe
     if (needsReshuffle(shoe)) shoe = createShoe(state.config.deckCount)
 
-    // Deduct bet + side bets + lightning fee
-    const sideBetTotal = Object.values(state.sideBets).reduce((sum, sb) => sum + (sb.active ? sb.bet : 0), 0)
-    const newChips = state.player.chips - state.betAmount - sideBetTotal
+    // Deal to each active seat + dealer
+    const seats = [...state.seats]
+    const dealerCards: Card[] = [shoe.pop()!, shoe.pop()!]
+    dealerCards[1] = { ...dealerCards[1], faceDown: true }
 
-    // Generate deal sequence
-    const { events, remainingShoe } = generateDealSequence(shoe)
+    for (const si of activeSeats) {
+      const pCards: Card[] = [shoe.pop()!, shoe.pop()!]
+      const ev = evaluateHand(pCards)
+      seats[si] = {
+        ...seats[si],
+        bet: state.betAmount,
+        hand: {
+          ...EMPTY_HAND,
+          cards: pCards,
+          value: ev.value, softValue: ev.softValue, isSoft: ev.isSoft,
+          isBust: ev.isBust, isBlackjack: ev.isBlackjack, isCharlie: ev.isCharlie,
+          bet: state.betAmount,
+        },
+        splitHand: null,
+        sideBets: { ...state.sideBets },
+        outcome: null,
+        payout: 0,
+        currentHandIndex: 0,
+      }
 
-    // Build initial hands from deal events
-    const playerCards = events.filter(e => e.target === 'player').map(e => e.card)
-    const dealerCards = events.filter(e => e.target === 'dealer').map(e => e.card)
+      // Evaluate side bets for this seat
+      if (seats[si].sideBets.perfectPairs.active) {
+        const pp = evaluatePerfectPairs(pCards[0], pCards[1])
+        seats[si].sideBets.perfectPairs.result = pp.result
+        seats[si].sideBets.perfectPairs.payout = pp.result ? seats[si].sideBets.perfectPairs.bet * pp.multiplier : 0
+      }
+      if (seats[si].sideBets.twentyOnePlus3.active) {
+        const t3 = evaluate21Plus3(pCards[0], pCards[1], dealerCards[0])
+        seats[si].sideBets.twentyOnePlus3.result = t3.result
+        seats[si].sideBets.twentyOnePlus3.payout = t3.result ? seats[si].sideBets.twentyOnePlus3.bet * t3.multiplier : 0
+      }
+    }
 
-    const playerEval = evaluateHand(playerCards)
     const dealerEval = evaluateHand(dealerCards)
+    const dealerHand: HandState = {
+      ...EMPTY_HAND,
+      cards: dealerCards,
+      value: dealerEval.value, softValue: dealerEval.softValue,
+      isSoft: dealerEval.isSoft, isBust: dealerEval.isBust,
+      isBlackjack: dealerEval.isBlackjack,
+    }
 
     // Lightning
     let lightning = { ...EMPTY_LIGHTNING }
     if (state.config.lightningEnabled) {
       lightning = generateLightning()
-      lightning.fee = state.betAmount // 100% fee
+      lightning.fee = state.betAmount
     }
 
-    // Side bets evaluation (if any are active)
-    const sideBets = { ...state.sideBets }
-    if (sideBets.perfectPairs.active) {
-      const pp = evaluatePerfectPairs(playerCards[0], playerCards[1])
-      sideBets.perfectPairs.result = pp.result
-      sideBets.perfectPairs.payout = pp.result ? sideBets.perfectPairs.bet * pp.multiplier : 0
-    }
-    if (sideBets.twentyOnePlus3.active) {
-      const dealerUpcard = dealerCards[0]
-      const t3 = evaluate21Plus3(playerCards[0], playerCards[1], dealerUpcard)
-      sideBets.twentyOnePlus3.result = t3.result
-      sideBets.twentyOnePlus3.payout = t3.result ? sideBets.twentyOnePlus3.bet * t3.multiplier : 0
-    }
-
-    const mainHand: HandState = {
-      ...EMPTY_HAND,
-      cards: playerCards,
-      value: playerEval.value,
-      softValue: playerEval.softValue,
-      isSoft: playerEval.isSoft,
-      isBust: playerEval.isBust,
-      isBlackjack: playerEval.isBlackjack,
-      isCharlie: playerEval.isCharlie,
-      bet: state.betAmount,
-    }
-
-    const dealerHand: HandState = {
-      ...EMPTY_HAND,
-      cards: dealerCards,
-      value: dealerEval.value,
-      softValue: dealerEval.softValue,
-      isSoft: dealerEval.isSoft,
-      isBust: dealerEval.isBust,
-      isBlackjack: dealerEval.isBlackjack,
-      isCharlie: false,
-    }
+    // First active seat becomes current (for legacy mainHand compat)
+    const firstSeat = activeSeats[0]
+    const newChips = state.player.chips - totalBet - sideBetTotal
 
     set({
       phase: 'dealing',
-      shoe: remainingShoe,
-      mainHand,
-      splitHand: null,
+      shoe,
+      seats,
       dealerHand,
-      dealQueue: events,
+      mainHand: seats[firstSeat].hand,
+      splitHand: null,
+      currentSeatIndex: firstSeat,
+      currentHandIndex: 0,
       outcome: null,
       winAmount: 0,
       xpEarned: 0,
-      sideBets,
+      seatResults: [],
+      sideBets: seats[firstSeat].sideBets,
       lightning,
-      currentHandIndex: 0,
+      dealQueue: [],
       player: { ...state.player, chips: newChips },
     })
 
-    // After deal animation completes (~1200ms), check for blackjack or move to player turn
+    // After deal animation (~1200ms), start seat-by-seat play
     setTimeout(() => {
       const s = get()
-      if (s.mainHand.isBlackjack) {
-        // Natural blackjack -- settle immediately
+      const firstActive = s.activeSeatIndices[0]
+      const firstSeatHand = s.seats[firstActive].hand
+
+      // Check for natural blackjack on first seat
+      if (firstSeatHand.isBlackjack && s.activeSeatIndices.length === 1) {
+        // Single seat BJ: settle immediately
         const settled = settleHand(
-          s.mainHand, { ...s.dealerHand, cards: s.dealerHand.cards.map(c => ({ ...c, faceDown: false })) },
+          firstSeatHand,
+          { ...s.dealerHand, cards: s.dealerHand.cards.map(c => ({ ...c, faceDown: false })) },
           s.config, s.player.presenceMultiplier,
           s.lightning.active && s.lightning.multipliedTotal === 21 ? s.lightning.multiplier : 1,
         )
         const xp = calculateXP(settled.outcome!)
-        const bjSideBetPayout = Object.values(s.sideBets).reduce((sum, sb) => sum + (sb.active ? sb.payout : 0), 0)
-        const bjTotalPayout = settled.payout + bjSideBetPayout
+        const sbPayout = Object.values(s.seats[firstActive].sideBets).reduce((sum, sb) => sum + (sb.active ? sb.payout : 0), 0)
         set({
           phase: 'settled',
           mainHand: settled,
           dealerHand: { ...s.dealerHand, cards: s.dealerHand.cards.map(c => ({ ...c, faceDown: false })) },
           outcome: settled.outcome,
-          winAmount: bjTotalPayout,
+          winAmount: settled.payout + sbPayout,
           xpEarned: xp,
+          seatResults: [{ seatIndex: firstActive, outcome: settled.outcome!, payout: settled.payout + sbPayout }],
           player: {
             ...s.player,
-            chips: s.player.chips + bjTotalPayout,
+            chips: s.player.chips + settled.payout + sbPayout,
             xp: s.player.xp + xp,
             handsPlayed: s.player.handsPlayed + 1,
             handsWon: s.player.handsWon + 1,
@@ -382,16 +456,18 @@ export const useBlackjackStore = create<BlackjackStore>()(
             bestStreak: Math.max(s.player.bestStreak, s.player.currentStreak + 1),
             biggestWin: Math.max(s.player.biggestWin, settled.payout),
           },
-          dealQueue: [],
         })
       } else {
-        // Check if dealer shows Ace (insurance opportunity)
+        // Start player turn on first seat
         const dealerUpcard = s.dealerHand.cards[0]
         const nextPhase = dealerUpcard.rank === 'A' ? 'insurance' as GamePhase : 'player_turn' as GamePhase
-        const actions = getAvailableActions(s.mainHand, s.config, s.player.chips, dealerUpcard, false)
+        const actions = getAvailableActions(firstSeatHand, s.config, s.player.chips, dealerUpcard, false)
 
         set({
           phase: nextPhase,
+          currentSeatIndex: firstActive,
+          mainHand: firstSeatHand,
+          splitHand: null,
           availableActions: actions,
           dealQueue: [],
         })
@@ -426,17 +502,17 @@ export const useBlackjackStore = create<BlackjackStore>()(
         update.phase = 'split_turn'
         update.mainHand = { ...result.hand, outcome: 'bust', payout: 0 }
       } else {
-        // Final bust -- settle
+        // Bust on this seat -- save and advance to next seat via playerStand
         const hand = result.hand
-        update.phase = 'settled'
-        update.outcome = 'bust'
-        update.winAmount = hand.bet
-        update.xpEarned = calculateXP('bust')
         if (isMainHand) {
           update.mainHand = { ...hand, outcome: 'bust', payout: 0 }
         } else {
           update.splitHand = { ...hand, outcome: 'bust', payout: 0 }
         }
+        // Apply update first, then trigger stand to advance to next seat
+        set(update as any)
+        setTimeout(() => get().playerStand(), 100)
+        return
       }
     } else if (result.autoCharlie && state.config.sixCardCharlie) {
       // Six Card Charlie -- auto-win
@@ -470,16 +546,56 @@ export const useBlackjackStore = create<BlackjackStore>()(
     const state = get()
     if (state.phase !== 'player_turn' && state.phase !== 'split_turn') return
 
+    // If split hand active, move to split first
     if (state.splitHand && state.currentHandIndex === 0) {
-      // Standing on main hand, move to split hand
       set({ currentHandIndex: 1, phase: 'split_turn' })
       return
     }
 
-    // All player hands done -- dealer plays
-    set({ phase: 'dealer_turn' })
+    // Save current seat state back to seats array
+    const seats = [...state.seats]
+    seats[state.currentSeatIndex] = {
+      ...seats[state.currentSeatIndex],
+      hand: state.mainHand,
+      splitHand: state.splitHand,
+    }
 
-    // 300ms anticipation gap before dealer reveal
+    // Find next active seat
+    const activeSeats = state.activeSeatIndices
+    const currentIdx = activeSeats.indexOf(state.currentSeatIndex)
+    const nextIdx = currentIdx + 1
+
+    if (nextIdx < activeSeats.length) {
+      // Move to next seat
+      const nextSeat = activeSeats[nextIdx]
+      const nextHand = seats[nextSeat].hand
+      const dealerUpcard = state.dealerHand.cards[0]
+
+      // Skip seats with natural blackjack
+      if (nextHand.isBlackjack) {
+        seats[nextSeat] = { ...seats[nextSeat], outcome: 'blackjack' }
+        set({ seats, currentSeatIndex: nextSeat, mainHand: nextHand, splitHand: null })
+        // Recurse to skip to next
+        setTimeout(() => get().playerStand(), 100)
+        return
+      }
+
+      const actions = getAvailableActions(nextHand, state.config, state.player.chips, dealerUpcard, false)
+      set({
+        seats,
+        currentSeatIndex: nextSeat,
+        mainHand: nextHand,
+        splitHand: seats[nextSeat].splitHand,
+        currentHandIndex: 0,
+        availableActions: actions,
+        phase: 'player_turn',
+      })
+      return
+    }
+
+    // ALL seats done -- dealer plays
+    set({ seats, phase: 'dealer_turn' })
+
     setTimeout(() => {
       const s = get()
       const dealerResult = playDealer(s.dealerHand, s.shoe, s.config)
@@ -490,51 +606,77 @@ export const useBlackjackStore = create<BlackjackStore>()(
         shoe: dealerResult.shoe,
       })
 
-      // After dealer draws complete, settle
       const totalDrawTime = dealerResult.draws.length > 0
         ? dealerResult.draws[dealerResult.draws.length - 1].delayMs + 600
         : 300
 
       setTimeout(() => {
         const s2 = get()
-        const lightningMult = s2.lightning.active && s2.lightning.multipliedTotal
-          ? (s2.mainHand.value === s2.lightning.multipliedTotal ? s2.lightning.multiplier : 1)
-          : 1
+        const allSeats = [...s2.seats]
+        let totalPayout = 0
+        let totalXp = 0
+        let handsWon = 0
+        let bjCount = 0
+        const results: { seatIndex: number; outcome: Outcome; payout: number }[] = []
 
-        const settledMain = settleHand(s2.mainHand, s2.dealerHand, s2.config, s2.player.presenceMultiplier, lightningMult)
-        let settledSplit: HandState | null = null
-        if (s2.splitHand) {
-          settledSplit = settleHand(s2.splitHand, s2.dealerHand, s2.config, s2.player.presenceMultiplier, 1)
+        // Settle ALL active seats against dealer
+        for (const si of s2.activeSeatIndices) {
+          const seat = allSeats[si]
+          const lightningMult = s2.lightning.active && s2.lightning.multipliedTotal
+            ? (seat.hand.value === s2.lightning.multipliedTotal ? s2.lightning.multiplier : 1)
+            : 1
+
+          const settledMain = settleHand(seat.hand, s2.dealerHand, s2.config, s2.player.presenceMultiplier, lightningMult)
+          let settledSplit: HandState | null = null
+          if (seat.splitHand) {
+            settledSplit = settleHand(seat.splitHand, s2.dealerHand, s2.config, s2.player.presenceMultiplier, 1)
+          }
+
+          const sbPayout = Object.values(seat.sideBets).reduce((sum, sb) => sum + (sb.active ? sb.payout : 0), 0)
+          const seatPayout = settledMain.payout + (settledSplit?.payout || 0) + sbPayout
+          const seatOutcome = settledMain.outcome!
+          const isWin = seatOutcome === 'win' || seatOutcome === 'blackjack' || seatOutcome === 'charlie'
+
+          allSeats[si] = { ...seat, hand: settledMain, splitHand: settledSplit, outcome: seatOutcome, payout: seatPayout }
+          results.push({ seatIndex: si, outcome: seatOutcome, payout: seatPayout })
+
+          totalPayout += seatPayout
+          totalXp += calculateXP(seatOutcome)
+          if (isWin) handsWon++
+          if (seatOutcome === 'blackjack') bjCount++
         }
 
-        // Side bet payouts (already calculated during deal)
-        const sideBetPayout = Object.values(s2.sideBets).reduce((sum, sb) => sum + (sb.active ? sb.payout : 0), 0)
-        const totalPayout = settledMain.payout + (settledSplit?.payout || 0) + sideBetPayout
-        const mainOutcome = settledMain.outcome!
-        const xp = calculateXP(mainOutcome)
-        const isWin = mainOutcome === 'win' || mainOutcome === 'blackjack' || mainOutcome === 'charlie'
+        // Primary outcome = most dramatic result
+        const primaryOutcome = results.find(r => r.outcome === 'blackjack')?.outcome
+          || results.find(r => r.outcome === 'win')?.outcome
+          || results.find(r => r.outcome === 'charlie')?.outcome
+          || results.find(r => r.outcome === 'push')?.outcome
+          || results[0]?.outcome || 'loss'
 
         set({
           phase: 'settled',
-          mainHand: settledMain,
-          splitHand: settledSplit,
-          outcome: mainOutcome,
+          seats: allSeats,
+          mainHand: allSeats[s2.activeSeatIndices[0]].hand,
+          splitHand: allSeats[s2.activeSeatIndices[0]].splitHand,
+          outcome: primaryOutcome,
           winAmount: totalPayout,
-          xpEarned: xp,
+          xpEarned: totalXp,
+          seatResults: results,
           dealerDrawQueue: [],
           player: {
             ...s2.player,
             chips: s2.player.chips + totalPayout,
-            xp: s2.player.xp + xp,
-            handsPlayed: s2.player.handsPlayed + 1,
-            handsWon: s2.player.handsWon + (isWin ? 1 : 0),
-            currentStreak: isWin ? s2.player.currentStreak + 1 : 0,
-            bestStreak: isWin ? Math.max(s2.player.bestStreak, s2.player.currentStreak + 1) : s2.player.bestStreak,
+            xp: s2.player.xp + totalXp,
+            handsPlayed: s2.player.handsPlayed + s2.activeSeatIndices.length,
+            handsWon: s2.player.handsWon + handsWon,
+            blackjacks: s2.player.blackjacks + bjCount,
+            currentStreak: handsWon > 0 ? s2.player.currentStreak + 1 : 0,
+            bestStreak: handsWon > 0 ? Math.max(s2.player.bestStreak, s2.player.currentStreak + 1) : s2.player.bestStreak,
             biggestWin: Math.max(s2.player.biggestWin, totalPayout),
           },
         })
       }, totalDrawTime)
-    }, 300) // THE anticipation gap
+    }, 300)
   },
 
   playerDouble: () => {
@@ -634,13 +776,20 @@ export const useBlackjackStore = create<BlackjackStore>()(
     let shoe = state.shoe
     if (needsReshuffle(shoe)) shoe = createShoe(state.config.deckCount)
 
+    // Reset all seats but keep which ones are active
+    const seats = state.seats.map(s => ({
+      ...createEmptySeat(s.index, s.active),
+    }))
+
     set({
       phase: 'betting',
       shoe,
+      seats,
       mainHand: { ...EMPTY_HAND },
       splitHand: null,
       dealerHand: { ...EMPTY_HAND },
       currentHandIndex: 0,
+      currentSeatIndex: state.activeSeatIndices[0] || 2,
       availableActions: [],
       sideBets: { ...EMPTY_SIDE_BETS },
       lightning: { ...EMPTY_LIGHTNING },
@@ -649,6 +798,7 @@ export const useBlackjackStore = create<BlackjackStore>()(
       outcome: null,
       winAmount: 0,
       xpEarned: 0,
+      seatResults: [],
       betAmount: state.autoRebet ? state.betAmount : state.selectedChip,
     })
   },
