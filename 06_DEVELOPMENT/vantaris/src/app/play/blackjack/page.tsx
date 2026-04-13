@@ -983,6 +983,22 @@ export default function BlackjackPage() {
             </button>
           ))}
 
+          {/* GC/SC Mode Toggle */}
+          <button onClick={() => {
+            const newMode = store.gameMode === 'gc' ? 'sc' : 'gc'
+            useBlackjackStore.setState({ gameMode: newMode })
+            toastInfo(newMode === 'sc' ? 'Sweepstakes Mode' : 'Social Mode',
+              newMode === 'sc' ? 'Playing with SC. Wins redeemable!' : 'Playing with GC. Fun play.')
+          }}
+            className="text-[9px] px-2 py-1 rounded-full font-bold"
+            style={{
+              background: store.gameMode === 'sc' ? 'rgba(0,230,118,0.15)' : 'rgba(201,168,76,0.1)',
+              color: store.gameMode === 'sc' ? 'var(--win)' : 'var(--gold)',
+              border: `1px solid ${store.gameMode === 'sc' ? 'rgba(0,230,118,0.3)' : 'rgba(201,168,76,0.2)'}`,
+            }}>
+            {store.gameMode === 'sc' ? 'SC' : 'GC'}
+          </button>
+
           {/* Music */}
           <button onClick={() => useBlackjackStore.setState({ musicEnabled: !store.musicEnabled })}
             className="text-sm px-1.5 py-1 rounded" style={{ color: store.musicEnabled ? 'var(--gold)' : 'var(--text-tertiary)' }}>

@@ -374,7 +374,9 @@ export const useBlackjackStore = create<BlackjackStore>()(
     const activeSeats = state.activeSeatIndices
     const totalBet = state.betAmount * activeSeats.length
     const sideBetTotal = Object.values(state.sideBets).reduce((sum, sb) => sum + (sb.active ? sb.bet : 0), 0) * activeSeats.length
-    if (totalBet + sideBetTotal > state.player.chips) return
+    const isScMode = state.gameMode === 'sc'
+    const balance = isScMode ? state.player.sweepsCoins : state.player.chips
+    if (totalBet + sideBetTotal > balance) return
 
     let shoe = state.shoe
     if (needsReshuffle(shoe)) shoe = createShoe(state.config.deckCount)
@@ -442,7 +444,13 @@ export const useBlackjackStore = create<BlackjackStore>()(
 
     // First active seat becomes current (for legacy mainHand compat)
     const firstSeat = activeSeats[0]
-    const newChips = state.player.chips - totalBet - sideBetTotal
+    // Deduct from correct currency based on game mode
+    const newChips = isScMode ? state.player.chips : state.player.chips - totalBet - sideBetTotal
+    const newSC = isScMode ? state.player.sweepsCoins - totalBet - sideBetTotal : state.player.sweepsCoins
+    // Track SC wagers for playthrough
+    const newSCWagered = isScMode
+      ? state.player.scPlaythroughWagered + totalBet + sideBetTotal
+      : state.player.scPlaythroughWagered
 
     set({
       phase: 'dealing',
@@ -460,7 +468,7 @@ export const useBlackjackStore = create<BlackjackStore>()(
       sideBets: seats[firstSeat].sideBets,
       lightning,
       dealQueue: [],
-      player: { ...state.player, chips: newChips },
+      player: { ...state.player, chips: newChips, sweepsCoins: newSC, scPlaythroughWagered: newSCWagered },
     })
 
     // After deal animation (~1200ms), start seat-by-seat play
@@ -903,6 +911,7 @@ export const useBlackjackStore = create<BlackjackStore>()(
         musicEnabled: state.musicEnabled,
         voiceEnabled: state.voiceEnabled,
         autoRebet: state.autoRebet,
+        gameMode: state.gameMode,
         selectedChip: state.selectedChip,
         betAmount: state.betAmount,
       }),
