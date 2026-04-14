@@ -203,8 +203,8 @@ export function BettingLayout({ seatPositions }: { seatPositions: SeatPosition[]
         )
       })}
 
-      {/* Chip tray at bottom center */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-auto">
+      {/* Chip tray -- positioned above the DEAL bar */}
+      <div className="absolute bottom-[80px] left-1/2 -translate-x-1/2 pointer-events-auto">
         <div className="flex gap-1.5 items-end p-2 rounded-xl"
           style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(201,168,76,0.2)' }}>
           {[10, 25, 100, 500, 1000, 5000].filter(v => v <= balance).map(v => (

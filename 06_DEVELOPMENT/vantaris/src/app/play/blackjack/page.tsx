@@ -7,7 +7,7 @@ import { getSkin, getCardBack, getRarityEffect } from '@/lib/card-skins'
 import {
   WinParticles, XPBar, AchievementPopup, VantarisBoutique,
   GemStore, FreeChips, AvatarBuilder, DEFAULT_AVATAR,
-  PlayerProfilePanel, Leaderboard, CasinoScene3D, CasinoChip,
+  PlayerProfilePanel, Leaderboard, CasinoScene3D,
   BotPlayers, ToastContainer, DealerAvatar,
   WelcomeScreen, isNewPlayer, EmojiReactions, DealerChat, BettingLayout,
 } from '@/components/blackjack'
