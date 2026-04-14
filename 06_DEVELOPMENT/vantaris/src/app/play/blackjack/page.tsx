@@ -1293,46 +1293,37 @@ export default function BlackjackPage() {
               )}
             </div>
 
-            {/* Quick bet buttons */}
-            <div className="flex gap-2">
-              <button onClick={() => store.setBet(0)} className="btn-ghost text-xs px-3 py-1" style={{ color: 'var(--loss)' }}>CLEAR</button>
-              <button onClick={() => store.setBet(Math.min(store.player.chips, store.config.maxBet))} className="btn-ghost text-xs px-3 py-1">MAX</button>
-            </div>
-
-            {/* Side bets now on the table (BettingLayout Mickey ears) */}
-
-            <div className="flex gap-3 items-center">
-              {/* REBET + 2x buttons */}
+            {/* Compact action row: CLEAR | REBET | 2x | MAX | DEAL */}
+            <div className="flex gap-1.5 md:gap-2 items-center justify-center flex-wrap">
+              <button onClick={() => store.setBet(0)}
+                className="text-[10px] md:text-xs px-2 md:px-3 py-1.5 rounded-lg"
+                style={{ background: 'rgba(255,45,85,0.08)', color: 'var(--loss)', border: '1px solid rgba(255,45,85,0.2)' }}>
+                CLEAR
+              </button>
               {lastBet > 0 && (
-                <motion.button onClick={handleRebet}
-                  className="px-4 md:px-6 py-3 text-xs tracking-widest font-bold rounded-xl"
-                  style={{ background: 'rgba(255,255,255,0.08)', color: '#c9a84c', fontFamily: "'Cinzel', serif", letterSpacing: '1px', border: '1px solid rgba(201,168,76,0.3)' }}
-                  whileHover={{ background: 'rgba(201,168,76,0.15)', y: -2 }}
-                  whileTap={{ scale: 0.97 }}>
+                <button onClick={handleRebet}
+                  className="text-[10px] md:text-xs px-2 md:px-3 py-1.5 rounded-lg"
+                  style={{ background: 'rgba(201,168,76,0.08)', color: '#c9a84c', border: '1px solid rgba(201,168,76,0.2)' }}>
                   REBET
-                </motion.button>
+                </button>
               )}
-              {store.betAmount > 0 && (
-                <motion.button onClick={() => {
-                  const doubled = Math.min(store.betAmount * 2, store.player.chips, store.config.maxBet)
-                  store.setBet(doubled)
-                }}
-                  className="px-4 py-3 text-xs tracking-widest font-bold rounded-xl"
-                  style={{ background: 'rgba(255,255,255,0.08)', color: '#58a6ff', fontFamily: "'Cinzel', serif", border: '1px solid rgba(88,166,255,0.3)' }}
-                  whileHover={{ background: 'rgba(88,166,255,0.1)', y: -2 }}
-                  whileTap={{ scale: 0.97 }}>
-                  2x
-                </motion.button>
-              )}
-
-              {/* DEAL button */}
+              <button onClick={() => store.setBet(Math.min(store.betAmount * 2, store.player.chips, store.config.maxBet))}
+                className="text-[10px] md:text-xs px-2 md:px-3 py-1.5 rounded-lg"
+                style={{ background: 'rgba(88,166,255,0.08)', color: '#58a6ff', border: '1px solid rgba(88,166,255,0.2)' }}>
+                2x
+              </button>
+              <button onClick={() => store.setBet(Math.min(store.player.chips, store.config.maxBet))}
+                className="text-[10px] md:text-xs px-2 md:px-3 py-1.5 rounded-lg"
+                style={{ background: 'rgba(255,255,255,0.04)', color: 'var(--text-tertiary)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                MAX
+              </button>
               <motion.button onClick={handleDeal}
-                className="px-12 md:px-14 py-3 text-sm tracking-widest font-bold rounded-xl"
-                style={{ background: 'linear-gradient(135deg, #c9a84c, #f0d080)', color: '#000', fontFamily: "'Cinzel', serif", letterSpacing: '2px', boxShadow: '0 0 20px rgba(201,168,76,0.5)' }}
-                whileHover={{ boxShadow: '0 0 35px rgba(201,168,76,0.8)', y: -2 }}
+                className="px-6 md:px-10 py-2 md:py-2.5 text-xs md:text-sm tracking-widest font-bold rounded-xl"
+                style={{ background: 'linear-gradient(135deg, #c9a84c, #f0d080)', color: '#000', fontFamily: "'Cinzel', serif", letterSpacing: '2px', boxShadow: '0 0 15px rgba(201,168,76,0.4)' }}
+                whileHover={{ boxShadow: '0 0 25px rgba(201,168,76,0.7)', y: -1 }}
                 whileTap={{ scale: 0.97 }}
                 disabled={store.betAmount <= 0 || store.betAmount < store.config.minBet || store.betAmount * store.activeSeatIndices.length > store.player.chips}>
-                {store.activeSeatIndices.length > 1 ? `DEAL (${store.activeSeatIndices.length} SEATS)` : 'DEAL'}
+                {store.activeSeatIndices.length > 1 ? `DEAL (${store.activeSeatIndices.length})` : 'DEAL'}
               </motion.button>
             </div>
           </motion.div>

@@ -910,13 +910,62 @@ export const useBlackjackStore = create<BlackjackStore>()(
 
     if (take) {
       const insured = takeInsurance(state.mainHand)
+      const newChips = state.player.chips - insured.insuranceBet
+
+      // DEALER PEEK: check if dealer has blackjack
+      const dealerHand = state.dealerHand
+      const revealedDealer = { ...dealerHand, cards: dealerHand.cards.map(c => ({ ...c, faceDown: false })) }
+      const dealerEval = evaluateHand(revealedDealer.cards)
+
+      if (dealerEval.isBlackjack) {
+        // Dealer HAS blackjack -- reveal hole card, settle immediately
+        // Insurance pays 2:1
+        const insurancePayout = insured.insuranceBet * 3 // original bet back + 2:1
+        set({
+          phase: 'settled',
+          mainHand: { ...insured, outcome: 'loss', payout: insurancePayout },
+          dealerHand: revealedDealer,
+          outcome: 'loss',
+          winAmount: insurancePayout,
+          xpEarned: 2,
+          player: {
+            ...state.player,
+            chips: newChips + insurancePayout,
+            handsPlayed: state.player.handsPlayed + 1,
+          },
+        })
+        return
+      }
+
+      // Dealer does NOT have blackjack -- continue to player turn
       set({
         mainHand: insured,
         phase: 'player_turn',
-        player: { ...state.player, chips: state.player.chips - insured.insuranceBet },
-        availableActions: getAvailableActions(insured, state.config, state.player.chips - insured.insuranceBet, state.dealerHand.cards[0], false),
+        player: { ...state.player, chips: newChips },
+        availableActions: getAvailableActions(insured, state.config, newChips, state.dealerHand.cards[0], false),
       })
     } else {
+      // Declined insurance -- still peek
+      const dealerHand = state.dealerHand
+      const dealerEval = evaluateHand(dealerHand.cards)
+
+      if (dealerEval.isBlackjack) {
+        // Dealer has BJ -- reveal and settle (player loses, no insurance)
+        const revealedDealer = { ...dealerHand, cards: dealerHand.cards.map(c => ({ ...c, faceDown: false })) }
+        set({
+          phase: 'settled',
+          dealerHand: revealedDealer,
+          outcome: 'loss',
+          winAmount: 0,
+          xpEarned: 2,
+          player: {
+            ...state.player,
+            handsPlayed: state.player.handsPlayed + 1,
+          },
+        })
+        return
+      }
+
       set({
         phase: 'player_turn',
         availableActions: getAvailableActions(state.mainHand, state.config, state.player.chips, state.dealerHand.cards[0], false),
