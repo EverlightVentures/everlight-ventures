@@ -9,7 +9,7 @@ import {
   GemStore, FreeChips, AvatarBuilder, DEFAULT_AVATAR,
   PlayerProfilePanel, Leaderboard, CasinoScene3D, CasinoChip,
   BotPlayers, ToastContainer, DealerAvatar,
-  WelcomeScreen, isNewPlayer, EmojiReactions, DealerChat,
+  WelcomeScreen, isNewPlayer, EmojiReactions, DealerChat, BettingLayout,
 } from '@/components/blackjack'
 import type { Achievement, AvatarConfig, SeatPosition } from '@/components/blackjack'
 import type { Card as CardData } from '@/lib/blackjack-engine'
@@ -1084,102 +1084,8 @@ export default function BlackjackPage() {
         {/* Bot players at projected seat positions */}
         <BotPlayers seatPositions={seatPositions} />
 
-        {/* Interactive seat drop zones (betting phase only) */}
-        {store.phase === 'betting' && (
-          <div className="absolute inset-0 z-12" style={{ zIndex: 12 }}>
-            {seatPositions.map((pos, seatIdx) => {
-              if (!pos.visible) return null
-              const botSeats = store.bots.map(b => b.seat)
-              const isBot = botSeats.includes(seatIdx)
-              const isActive = store.activeSeatIndices.includes(seatIdx)
-              const seatBet = store.seats[seatIdx]?.bet || 0
-
-              return (
-                <div key={seatIdx} className="absolute" style={{
-                  left: `${pos.x}px`, top: `${pos.y}px`,
-                  transform: 'translate(-50%, -50%)',
-                }}>
-                  {/* Main bet drop zone / seat selector */}
-                  {!isBot && (
-                    <button
-                      onClick={() => {
-                        if (!isActive) {
-                          // Activate this seat
-                          store.toggleSeat(seatIdx)
-                          toastInfo(`Seat ${seatIdx + 1}`, 'You sat down! Place your bet.')
-                        } else {
-                          // Add selected chip to this seat's bet
-                          const newBet = Math.min(store.betAmount + store.selectedChip, store.player.chips, store.config.maxBet)
-                          store.setBet(newBet)
-                          playChipClink()
-                        }
-                      }}
-                      className="w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center"
-                      id={`drop-zone-seat-${seatIdx}`}
-                      style={{
-                        background: isActive
-                          ? 'rgba(201,168,76,0.15)'
-                          : 'rgba(255,255,255,0.04)',
-                        border: `2px dashed ${isActive ? 'rgba(201,168,76,0.5)' : 'rgba(255,255,255,0.15)'}`,
-                        transition: 'all 0.2s',
-                      }}
-                    >
-                      {isActive ? (
-                        <div className="text-center">
-                          {seatBet > 0 ? (
-                            <span className="text-xs font-mono font-bold" style={{ color: 'var(--gold)' }}>{store.betAmount}</span>
-                          ) : (
-                            <span className="text-[8px] uppercase tracking-wider" style={{ color: 'rgba(201,168,76,0.6)' }}>DROP CHIP</span>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-[7px] uppercase tracking-wider text-center leading-tight" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                          TAP TO{'\n'}SIT
-                        </span>
-                      )}
-                    </button>
-                  )}
-
-                  {/* Side bet zones (only for active seats) */}
-                  {isActive && !isBot && (
-                    <div className="flex gap-8 mt-1 justify-center">
-                      {/* Lucky Lucky */}
-                      <button
-                        onClick={() => {
-                          store.toggleSideBet('perfectPairs', store.selectedChip || 25)
-                          if (!store.sideBets.perfectPairs.active) playChipClink()
-                        }}
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-[6px] uppercase"
-                        style={{
-                          background: store.sideBets.perfectPairs.active ? 'rgba(33,150,243,0.3)' : 'rgba(33,150,243,0.08)',
-                          border: `1px solid ${store.sideBets.perfectPairs.active ? '#2196f3' : 'rgba(33,150,243,0.2)'}`,
-                          color: store.sideBets.perfectPairs.active ? '#2196f3' : 'rgba(33,150,243,0.4)',
-                        }}
-                      >
-                        LL
-                      </button>
-                      {/* Bad Buster */}
-                      <button
-                        onClick={() => {
-                          store.toggleSideBet('luckyLadies', store.selectedChip || 10)
-                          if (!store.sideBets.luckyLadies.active) playChipClink()
-                        }}
-                        className="w-8 h-8 rounded-full flex items-center justify-center text-[6px] uppercase"
-                        style={{
-                          background: store.sideBets.luckyLadies.active ? 'rgba(244,67,54,0.3)' : 'rgba(244,67,54,0.08)',
-                          border: `1px solid ${store.sideBets.luckyLadies.active ? '#f44336' : 'rgba(244,67,54,0.2)'}`,
-                          color: store.sideBets.luckyLadies.active ? '#f44336' : 'rgba(244,67,54,0.4)',
-                        }}
-                      >
-                        BB
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        )}
+        {/* Betting layout: Mickey Mouse ear circles on table with chip tray */}
+        <BettingLayout seatPositions={seatPositions} />
 
         {/* Emoji reaction system */}
         <EmojiReactions seatPositions={seatPositions} />
@@ -1351,14 +1257,15 @@ export default function BlackjackPage() {
       <div className="px-2 md:px-8 py-3 md:py-4 relative z-20"
         style={{ background: 'linear-gradient(0deg, rgba(0,0,0,0.9), transparent)' }}>
 
-        {/* BETTING PHASE */}
+        {/* BETTING PHASE -- chips and circles are on the table (BettingLayout), this is just the DEAL bar */}
         {store.phase === 'betting' && (
           <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-            className="flex flex-col items-center gap-2 md:gap-3">
-            <div className="text-center">
-              <p className="text-[8px] md:text-[9px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Cinzel', serif", letterSpacing: '2px' }}>YOUR BET</p>
-              <p className="font-mono text-xl md:text-3xl font-bold" style={{ color: store.gameMode === 'sc' ? 'var(--win)' : 'var(--gold)' }}>
-                {store.betAmount.toLocaleString()} <span className="text-sm">{store.gameMode === 'sc' ? 'SC' : 'GC'}</span>
+            className="flex items-center justify-center gap-3 flex-wrap">
+            {/* Bet display */}
+            <div className="text-center px-4">
+              <p className="text-[8px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Cinzel', serif" }}>YOUR BET</p>
+              <p className="font-mono text-lg md:text-2xl font-bold" style={{ color: store.gameMode === 'sc' ? 'var(--win)' : 'var(--gold)' }}>
+                {store.betAmount.toLocaleString()} <span className="text-xs">{store.gameMode === 'sc' ? 'SC' : 'GC'}</span>
               </p>
               {/* Guidance messages */}
               {store.betAmount === 0 && (
@@ -1376,98 +1283,14 @@ export default function BlackjackPage() {
                 </p>
               )}
             </div>
-            <div className="flex gap-1.5 md:gap-3 items-end flex-wrap justify-center">
-              {[10, 25, 100, 500, 1000, 5000].filter(v => v <= store.player.chips).map(v => (
-                <CasinoChip key={v} value={v} selected={store.selectedChip === v}
-                  onClick={() => handleChipSelect(v)}
-                  onDragEnd={(chipValue, dropX, dropY) => {
-                    // Check if chip was dropped on a seat drop zone
-                    for (let si = 0; si < 5; si++) {
-                      const zone = document.getElementById(`drop-zone-seat-${si}`)
-                      if (!zone) continue
-                      const rect = zone.getBoundingClientRect()
-                      if (dropX >= rect.left && dropX <= rect.right && dropY >= rect.top && dropY <= rect.bottom) {
-                        // Dropped on this seat
-                        if (!store.activeSeatIndices.includes(si)) {
-                          store.toggleSeat(si)
-                          toastInfo(`Seat ${si + 1}`, 'You sat down!')
-                        }
-                        const newBet = Math.min(store.betAmount + chipValue, store.player.chips, store.config.maxBet)
-                        store.setBet(newBet)
-                        playChipClink()
-                        return
-                      }
-                    }
-                    // Fallback: dropped anywhere on table
-                    const gameArea = document.getElementById('game-area')
-                    if (!gameArea) return
-                    const rect = gameArea.getBoundingClientRect()
-                    if (dropY < rect.top + rect.height * 0.75) {
-                      const newBet = Math.min(store.betAmount + chipValue, store.player.chips, store.config.maxBet)
-                      store.setBet(newBet)
-                      playChipClink()
-                    }
-                  }}
-                  size={store.selectedChip === v ? 56 : 44} />
-              ))}
-            </div>
+
+            {/* Quick bet buttons */}
             <div className="flex gap-2">
-              <button onClick={() => store.setBet(Math.max(10, Math.floor(store.betAmount / 2)))} className="btn-ghost text-xs px-3 py-1">1/2</button>
-              <button onClick={() => store.setBet(Math.min(store.player.chips, store.betAmount * 2))} className="btn-ghost text-xs px-3 py-1">2x</button>
-              <button onClick={() => store.setBet(Math.min(store.player.chips, store.config.maxBet))} className="btn-ghost text-xs px-3 py-1">MAX</button>
               <button onClick={() => store.setBet(0)} className="btn-ghost text-xs px-3 py-1" style={{ color: 'var(--loss)' }}>CLEAR</button>
+              <button onClick={() => store.setBet(Math.min(store.player.chips, store.config.maxBet))} className="btn-ghost text-xs px-3 py-1">MAX</button>
             </div>
 
-            {/* Side Bets -- tap to toggle, clearly shows ON/OFF state */}
-            <div className="flex gap-2 md:gap-3 items-center">
-              <p className="text-[8px] uppercase tracking-wider mr-1" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: "'Cinzel', serif" }}>SIDE BETS</p>
-              {([
-                { key: 'perfectPairs' as const, label: 'LUCKY LUCKY', desc: 'Same rank pair', payout: '5:1 - 25:1', color: '#2196f3' },
-                { key: 'luckyLadies' as const, label: 'LUCKY LADIES', desc: 'Hand totals 20', payout: '4:1 - 1000:1', color: '#e91e63' },
-              ]).map(sb => {
-                const active = store.sideBets[sb.key].active
-                const currentBet = store.sideBets[sb.key].bet
-                // Use selected chip for side bet amount (tap chip first, then tap side bet)
-                const betAmount = store.selectedChip || 10
-                return (
-                  <motion.button
-                    key={sb.key}
-                    onClick={() => {
-                      if (active) {
-                        // Turn off
-                        store.toggleSideBet(sb.key, 0)
-                      } else {
-                        // Turn on with selected chip amount
-                        store.toggleSideBet(sb.key, betAmount)
-                        toastInfo(`${sb.label} ON`, `${betAmount} GC per hand. Pays ${sb.payout}`)
-                      }
-                    }}
-                    className="px-3 md:px-4 py-2 md:py-2.5 rounded-xl text-center min-w-[70px]"
-                    style={{
-                      background: active ? `${sb.color}30` : 'rgba(255,255,255,0.04)',
-                      border: `2px solid ${active ? sb.color : 'rgba(255,255,255,0.08)'}`,
-                      boxShadow: active ? `0 0 16px ${sb.color}30, inset 0 0 8px ${sb.color}10` : 'none',
-                    }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.92 }}
-                  >
-                    <p className="text-[10px] md:text-[11px] font-bold tracking-wider" style={{
-                      color: active ? sb.color : 'rgba(255,255,255,0.35)',
-                      fontFamily: "'Cinzel', serif",
-                    }}>
-                      {sb.label}
-                    </p>
-                    <p className="text-[8px] md:text-[9px] font-mono" style={{ color: active ? '#fff' : 'rgba(255,255,255,0.2)' }}>
-                      {active ? `${currentBet} GC` : sb.payout}
-                    </p>
-                    {active && (
-                      <div className="mt-0.5 text-[7px] font-bold px-1.5 py-0.5 rounded-full inline-block"
-                        style={{ background: sb.color, color: '#fff' }}>ON</div>
-                    )}
-                  </motion.button>
-                )
-              })}
-            </div>
+            {/* Side bets now on the table (BettingLayout Mickey ears) */}
 
             <div className="flex gap-3 items-center">
               {/* REBET + 2x buttons */}
