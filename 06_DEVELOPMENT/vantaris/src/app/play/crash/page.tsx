@@ -251,12 +251,17 @@ export default function CrashGamePage() {
   return (
     <div className="min-h-screen flex" style={{ background: 'var(--vanta-void)' }}>
       {/* Game area */}
-      <div className="flex-1 flex flex-col p-6 ml-64">
+      <div className="flex-1 flex flex-col p-4 md:p-6">
 
         {/* Header: Game name + crash history */}
         <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="font-display text-2xl font-bold">Crash</h1>
+          <div className="flex items-center gap-3">
+            <a href="/lobby" className="text-sm" style={{ color: 'var(--text-tertiary)' }}>{'\u2190'}</a>
+            <h1 className="font-display text-2xl font-bold tracking-widest" style={{
+              fontFamily: "'Cinzel', serif",
+              background: 'linear-gradient(135deg, #00e676, #69f0ae)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+            }}>CRASH</h1>
             <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
               How high do you dare?
             </p>
