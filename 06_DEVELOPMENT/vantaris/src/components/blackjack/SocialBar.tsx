@@ -112,7 +112,7 @@ export function SocialBar({ seatPositions }: { seatPositions: SeatPosition[] }) 
       {/* Social action bar near player seat */}
       <div className="absolute" style={{
         left: `${playerPos.x}px`,
-        top: `${playerPos.y + 50}px`,
+        top: `${playerPos.y + 90}px`,
         transform: 'translate(-50%, 0)',
         zIndex: 20,
       }}>
