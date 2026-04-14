@@ -531,6 +531,8 @@ function OutcomeOverlay() {
 
 // ============================================================
 // PROGRESSIVE JACKPOT
+const JACKPOT_START = 500000
+const JACKPOT_MAX = 5000000
 // ============================================================
 
 // Check for suited 7-7-7 (progressive jackpot trigger)
@@ -551,7 +553,7 @@ function ProgressiveJackpot({ betAmount, phase, cards, luckyLuckyActive }: {
   betAmount: number; phase: string; cards: CardData[]; luckyLuckyActive: boolean
 }) {
   const [jackpot, setJackpot] = useState(() => {
-    if (typeof window === 'undefined') return 500000
+    if (typeof window === 'undefined') return JACKPOT_START
     const saved = localStorage.getItem('vantaris_jackpot')
     return saved ? parseInt(saved) : 500000
   })
@@ -562,9 +564,9 @@ function ProgressiveJackpot({ betAmount, phase, cards, luckyLuckyActive }: {
     const timer = setInterval(() => {
       setJackpot(prev => {
         const next = prev + Math.floor(10 + Math.random() * 40)
-        if (next >= 5000000) {
+        if (next >= JACKPOT_MAX) {
           localStorage.setItem('vantaris_jackpot', '500000')
-          return 500000
+          return JACKPOT_START
         }
         localStorage.setItem('vantaris_jackpot', String(next))
         return next

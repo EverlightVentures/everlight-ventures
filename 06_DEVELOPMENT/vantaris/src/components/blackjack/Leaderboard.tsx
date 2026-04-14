@@ -96,7 +96,7 @@ export function Leaderboard({
                 <h2 className="font-display text-xl font-bold" style={{ color: 'var(--gold)' }}>
                   Hall of Legends
                 </h2>
-                <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Top players by chips won</p>
+                <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Top players by chips won (live rankings coming soon)</p>
               </div>
               <button onClick={onClose} className="text-lg" style={{ color: 'var(--text-tertiary)' }}>&times;</button>
             </div>

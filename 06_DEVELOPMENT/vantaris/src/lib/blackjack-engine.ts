@@ -643,6 +643,22 @@ export function evaluateLuckyLadies(
 }
 
 // ============================================================
+// WAR BLACKJACK SIDE BET
+// Player's first card vs dealer's upcard -- higher card wins
+// ============================================================
+
+export function evaluateWarBlackjack(
+  playerCard: Card, dealerUpcard: Card,
+): { result: string | null; multiplier: number } {
+  const pVal = cardValue(playerCard)
+  const dVal = cardValue(dealerUpcard)
+
+  if (pVal > dVal) return { result: 'war_win', multiplier: 2 }
+  if (pVal === dVal) return { result: 'war_tie', multiplier: 1 } // push
+  return { result: null, multiplier: 0 } // loss
+}
+
+// ============================================================
 // LIGHTNING SYSTEM
 // ============================================================
 
