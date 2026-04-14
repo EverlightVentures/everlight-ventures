@@ -643,6 +643,77 @@ export function evaluateLuckyLadies(
 }
 
 // ============================================================
+// BAD BUSTER SIDE BET
+// Pays when the DEALER BUSTS. Higher payout for more cards.
+// ============================================================
+
+export function evaluateBadBuster(
+  dealerHand: HandState,
+): { result: string | null; multiplier: number } {
+  if (!dealerHand.isBust) return { result: null, multiplier: 0 }
+
+  const cardCount = dealerHand.cards.length
+  // Payouts based on how many cards dealer busts with
+  if (cardCount === 3) return { result: 'bust_3_cards', multiplier: 2 }    // 2:1
+  if (cardCount === 4) return { result: 'bust_4_cards', multiplier: 4 }    // 4:1
+  if (cardCount === 5) return { result: 'bust_5_cards', multiplier: 8 }    // 8:1
+  if (cardCount === 6) return { result: 'bust_6_cards', multiplier: 15 }   // 15:1
+  if (cardCount === 7) return { result: 'bust_7_cards', multiplier: 50 }   // 50:1
+  if (cardCount >= 8) return { result: 'bust_8_plus', multiplier: 250 }    // 250:1
+  return { result: 'bust', multiplier: 2 }
+}
+
+// ============================================================
+// PROGRESSIVE SIDE BET
+// Suited diamond 7-7-7 = full jackpot
+// Other poker hands pay percentages
+// ============================================================
+
+export function evaluateProgressive(
+  playerCards: Card[], dealerUpcard: Card,
+): { result: string | null; multiplier: number; isJackpot: boolean } {
+  const allCards = [...playerCards.slice(0, 2), dealerUpcard] // first 2 player + dealer up
+
+  // Check for suited 7-7-7 (JACKPOT)
+  const sevens = allCards.filter(c => c.rank === '7')
+  if (sevens.length === 3 && sevens.every(c => c.suit === 'diamonds')) {
+    return { result: 'suited_777_diamonds', multiplier: 0, isJackpot: true } // pays from progressive pool
+  }
+
+  // Suited 7-7-7 any suit
+  if (sevens.length === 3 && sevens[0].suit === sevens[1].suit && sevens[1].suit === sevens[2].suit) {
+    return { result: 'suited_777', multiplier: 500, isJackpot: false }
+  }
+
+  // Any 7-7-7
+  if (sevens.length === 3) {
+    return { result: 'any_777', multiplier: 100, isJackpot: false }
+  }
+
+  // Suited three of a kind
+  if (allCards[0].rank === allCards[1].rank && allCards[1].rank === allCards[2].rank &&
+      allCards[0].suit === allCards[1].suit && allCards[1].suit === allCards[2].suit) {
+    return { result: 'suited_trips', multiplier: 200, isJackpot: false }
+  }
+
+  // Three of a kind
+  if (allCards[0].rank === allCards[1].rank && allCards[1].rank === allCards[2].rank) {
+    return { result: 'trips', multiplier: 30, isJackpot: false }
+  }
+
+  // Straight flush (3 cards in sequence, same suit)
+  const vals = allCards.map(c => cardValue(c)).sort((a, b) => a - b)
+  const sameSuit = allCards[0].suit === allCards[1].suit && allCards[1].suit === allCards[2].suit
+  const isSequence = vals[2] - vals[1] === 1 && vals[1] - vals[0] === 1
+
+  if (sameSuit && isSequence) return { result: 'straight_flush', multiplier: 40, isJackpot: false }
+  if (isSequence) return { result: 'straight', multiplier: 10, isJackpot: false }
+  if (sameSuit) return { result: 'flush', multiplier: 5, isJackpot: false }
+
+  return { result: null, multiplier: 0, isJackpot: false }
+}
+
+// ============================================================
 // WAR BLACKJACK SIDE BET
 // Player's first card vs dealer's upcard -- higher card wins
 // ============================================================
