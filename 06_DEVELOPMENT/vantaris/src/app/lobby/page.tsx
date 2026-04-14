@@ -161,7 +161,7 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
           { label: 'Redeem SC', href: '/redeem', icon: '\u2714' },
           { label: 'Profile', href: '/profile', icon: '\u263A' },
           { label: 'Rules', href: '/rules', icon: '\u2696' },
-          { label: 'Leaderboard', href: '/leaderboard', icon: '\u265A' },
+          { label: 'Tables', href: '/tables', icon: '\u265A' },
           { label: 'Sign In', href: '/auth', icon: '\u26BF' },
         ].map((item) => (
           <Link key={item.label} href={item.href}>

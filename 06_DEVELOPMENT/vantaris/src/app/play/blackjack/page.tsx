@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { useEffect, useCallback, useMemo } from 'react'
+import { useEffect, useCallback, useState, useRef } from 'react'
 import { useBlackjackStore } from '@/lib/blackjack-store'
 import { getSkin, getCardBack, getRarityEffect } from '@/lib/card-skins'
 import {
@@ -13,7 +13,6 @@ import {
 } from '@/components/blackjack'
 import type { Achievement, AvatarConfig, SeatPosition } from '@/components/blackjack'
 import type { Card as CardData } from '@/lib/blackjack-engine'
-import { useState, useRef } from 'react'
 
 // Audio engine (Tone.js procedural sounds)
 import {
@@ -1245,11 +1244,6 @@ export default function BlackjackPage() {
             )
           })}
 
-          {/* Split hand rendered inside each seat's block above -- no legacy duplicate needed */}
-          {false && (
-            <div>
-            </div>
-          )}
         </div>
       </div>
 

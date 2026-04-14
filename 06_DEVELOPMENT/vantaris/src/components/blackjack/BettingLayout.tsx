@@ -140,10 +140,10 @@ export function BettingLayout({ seatPositions }: { seatPositions: SeatPosition[]
             ) : (
               // Active seat: Mickey Mouse ear layout
               <div className="relative">
-                {/* Lucky Lucky ear (top-left) */}
-                <div className="absolute" style={{ top: -20, left: -18 }}>
+                {/* Lucky Lucky ear (top-left) -- Perfect Pairs */}
+                <div className="absolute" style={{ top: -22, left: -16 }}>
                   <BetCircle
-                    label="LL"
+                    label="LUCKY"
                     amount={store.sideBets.perfectPairs.active ? store.sideBets.perfectPairs.bet : 0}
                     color="#2196f3"
                     size={28}
@@ -157,12 +157,12 @@ export function BettingLayout({ seatPositions }: { seatPositions: SeatPosition[]
                   />
                 </div>
 
-                {/* Buster ear (top-right) */}
-                <div className="absolute" style={{ top: -20, right: -18 }}>
+                {/* Lucky Ladies ear (top-right) -- Hand totals 20 */}
+                <div className="absolute" style={{ top: -22, right: -16 }}>
                   <BetCircle
-                    label="BB"
+                    label="LADIES"
                     amount={store.sideBets.luckyLadies.active ? store.sideBets.luckyLadies.bet : 0}
-                    color="#f44336"
+                    color="#e91e63"
                     size={28}
                     onClick={() => {
                       if (store.sideBets.luckyLadies.active) {

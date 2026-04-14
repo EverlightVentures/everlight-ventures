@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useBlackjackStore } from '@/lib/blackjack-store'
 
 /**
  * Vantaris Rewards Center
@@ -47,6 +48,17 @@ export default function RewardsPage() {
   const [activeTab, setActiveTab] = useState<'daily' | 'missions' | 'battlepass'>('daily')
   const [loginStreak, setLoginStreak] = useState(0)
   const [claimedDays, setClaimedDays] = useState<number[]>([])
+  const player = useBlackjackStore(s => s.player)
+
+  // Mission progress from real player stats
+  const missionProgress: Record<string, number> = {
+    m1: Math.min(player.handsPlayed, 10),     // Play 10 hands
+    m2: Math.min(player.handsWon, 5),          // Win 5 hands
+    m3: Math.min(player.blackjacks, 1),        // Hit blackjack
+    m4: player.currentStreak >= 3 ? 1 : 0,    // 3-win streak
+    m5: player.biggestWin > 0 ? 1 : 0,        // Double down win (approx)
+    m6: 1,                                      // Play all tables (placeholder)
+  }
 
   useEffect(() => {
     try {
@@ -153,8 +165,16 @@ export default function RewardsPage() {
                   <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{m.desc}</p>
                   {/* Progress bar */}
                   <div className="mt-2 h-1.5 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
-                    <div className="h-full rounded-full" style={{ width: '0%', background: 'var(--gold)' }} />
+                    <motion.div className="h-full rounded-full"
+                      style={{ background: (missionProgress[m.id] || 0) >= m.target ? 'var(--win)' : 'var(--gold)' }}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(100, ((missionProgress[m.id] || 0) / m.target) * 100)}%` }}
+                      transition={{ duration: 0.8 }}
+                    />
                   </div>
+                  <p className="text-[9px] mt-0.5 font-mono" style={{ color: 'var(--text-tertiary)' }}>
+                    {missionProgress[m.id] || 0} / {m.target}
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className="font-mono text-sm font-bold" style={{ color: 'var(--gold)' }}>{m.reward}</p>
