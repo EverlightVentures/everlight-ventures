@@ -9,7 +9,7 @@ import {
   GemStore, FreeChips, AvatarBuilder, DEFAULT_AVATAR,
   PlayerProfilePanel, Leaderboard, CasinoScene3D,
   BotPlayers, ToastContainer, DealerAvatar,
-  WelcomeScreen, isNewPlayer, EmojiReactions, DealerChat, BettingLayout,
+  WelcomeScreen, isNewPlayer, EmojiReactions, DealerChat, BettingLayout, SocialBar,
 } from '@/components/blackjack'
 import type { Achievement, AvatarConfig, SeatPosition } from '@/components/blackjack'
 import type { Card as CardData } from '@/lib/blackjack-engine'
@@ -1066,6 +1066,18 @@ export default function BlackjackPage() {
             className="text-sm px-1.5 py-1 rounded" style={{ color: store.voiceEnabled ? 'var(--win)' : 'var(--text-tertiary)' }}>
             {store.voiceEnabled ? '\uD83D\uDD0A' : '\uD83D\uDD07'}
           </button>
+
+          {/* Fullscreen */}
+          <button onClick={() => {
+            if (!document.fullscreenElement) {
+              document.documentElement.requestFullscreen?.()
+            } else {
+              document.exitFullscreen?.()
+            }
+          }}
+            className="text-sm px-1.5 py-1 rounded" style={{ color: 'var(--text-tertiary)' }}>
+            {'\u26F6'}
+          </button>
         </div>
       </div>
 
@@ -1086,7 +1098,10 @@ export default function BlackjackPage() {
         {/* Betting layout: Mickey Mouse ear circles on table with chip tray */}
         <BettingLayout seatPositions={seatPositions} />
 
-        {/* Emoji reaction system */}
+        {/* Social bar: emojis + gifts + chat (near player seat) */}
+        <SocialBar seatPositions={seatPositions} />
+
+        {/* Bot emoji reactions (they still react to outcomes) */}
         <EmojiReactions seatPositions={seatPositions} />
 
         {/* AI dealer chat / strategy coach */}

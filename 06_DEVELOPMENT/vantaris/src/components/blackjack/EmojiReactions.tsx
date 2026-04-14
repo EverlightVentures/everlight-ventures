@@ -88,7 +88,7 @@ export function EmojiReactions({ seatPositions }: { seatPositions: SeatPosition[
 
   return (
     <>
-      {/* Floating emojis */}
+      {/* Bot floating emoji reactions (auto-triggered on outcomes) */}
       <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 25 }}>
         <AnimatePresence>
           {floating.map(f => (
@@ -107,8 +107,8 @@ export function EmojiReactions({ seatPositions }: { seatPositions: SeatPosition[
         </AnimatePresence>
       </div>
 
-      {/* Quick emoji bar (bottom-left, toggleable) */}
-      <div className="absolute bottom-[100px] left-2 md:left-4 z-20">
+      {/* Player emoji bar moved to SocialBar component (near player seat) */}
+      {false && <div className="absolute bottom-[100px] left-2 md:left-4 z-20">
         <AnimatePresence>
           {showBar && (
             <motion.div
@@ -131,18 +131,7 @@ export function EmojiReactions({ seatPositions }: { seatPositions: SeatPosition[
           )}
         </AnimatePresence>
 
-        <motion.button
-          onClick={() => setShowBar(!showBar)}
-          className="w-10 h-10 rounded-full flex items-center justify-center text-lg glass"
-          style={{
-            border: showBar ? '1px solid rgba(201,168,76,0.4)' : '1px solid rgba(255,255,255,0.1)',
-            boxShadow: showBar ? '0 0 12px rgba(201,168,76,0.2)' : 'none',
-          }}
-          whileTap={{ scale: 0.9 }}
-        >
-          {'\uD83D\uDE00'}
-        </motion.button>
-      </div>
+      </div>}
     </>
   )
 }

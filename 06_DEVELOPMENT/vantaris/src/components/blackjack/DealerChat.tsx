@@ -196,6 +196,7 @@ export function DealerChat() {
     <>
       {/* Chat toggle */}
       <motion.button
+        data-chat-toggle="true"
         onClick={() => setIsOpen(!isOpen)}
         className="absolute bottom-[100px] right-2 md:right-4 z-20 w-10 h-10 rounded-full flex items-center justify-center glass"
         style={{
