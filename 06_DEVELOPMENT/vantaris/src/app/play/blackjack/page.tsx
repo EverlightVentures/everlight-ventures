@@ -613,15 +613,26 @@ function ProgressiveJackpot({ betAmount, phase, cards, luckyLuckyActive }: {
         key={jackpot}
         className="font-mono text-lg md:text-xl font-black"
         style={{
-          background: 'linear-gradient(135deg, #c9a84c, #f0d080, #c9a84c)',
+          background: won
+            ? 'linear-gradient(135deg, #00e676, #69f0ae, #00e676)'
+            : 'linear-gradient(135deg, #c9a84c, #f0d080, #c9a84c)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           textShadow: 'none',
-          filter: 'drop-shadow(0 0 8px rgba(201,168,76,0.3))',
+          filter: won
+            ? 'drop-shadow(0 0 20px rgba(0,230,118,0.6))'
+            : 'drop-shadow(0 0 8px rgba(201,168,76,0.3))',
         }}
+        animate={won ? { scale: [1, 1.3, 1] } : {}}
+        transition={won ? { duration: 0.5, repeat: 5 } : {}}
       >
-        {jackpot.toLocaleString()} GC
+        {won ? 'JACKPOT WON!' : `${jackpot.toLocaleString()} GC`}
       </motion.p>
+      {won && (
+        <p className="text-[9px] font-bold" style={{ color: 'var(--win)' }}>
+          Suited 7-7-7! Congratulations!
+        </p>
+      )}
     </div>
   )
 }
@@ -1344,20 +1355,22 @@ export default function BlackjackPage() {
             className="flex flex-col items-center gap-2 md:gap-3">
             <div className="text-center">
               <p className="text-[8px] md:text-[9px] uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: "'Cinzel', serif", letterSpacing: '2px' }}>YOUR BET</p>
-              <p className="font-mono text-xl md:text-3xl font-bold" style={{ color: 'var(--gold)' }}>{store.betAmount.toLocaleString()}</p>
+              <p className="font-mono text-xl md:text-3xl font-bold" style={{ color: store.gameMode === 'sc' ? 'var(--win)' : 'var(--gold)' }}>
+                {store.betAmount.toLocaleString()} <span className="text-sm">{store.gameMode === 'sc' ? 'SC' : 'GC'}</span>
+              </p>
               {/* Guidance messages */}
               {store.betAmount === 0 && (
                 <p className="text-[9px] mt-1" style={{ color: '#ffb300' }}>Tap a chip to place your bet</p>
               )}
               {store.betAmount > 0 && store.betAmount < store.config.minBet && (
-                <p className="text-[9px] mt-1" style={{ color: '#ff5252' }}>Minimum bet: {store.config.minBet} GC</p>
+                <p className="text-[9px] mt-1" style={{ color: '#ff5252' }}>Minimum bet: {store.config.minBet} {store.gameMode === 'sc' ? 'SC' : 'GC'}</p>
               )}
               {store.betAmount > store.player.chips && (
                 <p className="text-[9px] mt-1" style={{ color: '#ff5252' }}>Not enough chips! Claim free chips or lower your bet</p>
               )}
               {store.betAmount >= store.config.minBet && store.betAmount <= store.player.chips && (
                 <p className="text-[9px] mt-1" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                  Table: {store.config.minBet}-{store.config.maxBet.toLocaleString()} GC
+                  Table: {store.config.minBet}-{store.config.maxBet.toLocaleString()} {store.gameMode === 'sc' ? 'SC' : 'GC'}
                 </p>
               )}
             </div>
@@ -1408,7 +1421,7 @@ export default function BlackjackPage() {
               <p className="text-[8px] uppercase tracking-wider mr-1" style={{ color: 'rgba(255,255,255,0.3)', fontFamily: "'Cinzel', serif" }}>SIDE BETS</p>
               {([
                 { key: 'perfectPairs' as const, label: 'LUCKY LUCKY', desc: 'Same rank pair', payout: '5:1 - 25:1', color: '#2196f3' },
-                { key: 'luckyLadies' as const, label: 'BAD BUSTER', desc: 'Dealer busts', payout: '4:1 - 1000:1', color: '#f44336' },
+                { key: 'luckyLadies' as const, label: 'LUCKY LADIES', desc: 'Hand totals 20', payout: '4:1 - 1000:1', color: '#e91e63' },
               ]).map(sb => {
                 const active = store.sideBets[sb.key].active
                 const currentBet = store.sideBets[sb.key].bet

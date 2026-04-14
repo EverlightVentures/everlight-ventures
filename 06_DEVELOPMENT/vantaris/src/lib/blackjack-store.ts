@@ -506,7 +506,8 @@ export const useBlackjackStore = create<BlackjackStore>()(
           seatResults: [{ seatIndex: firstActive, outcome: settled.outcome!, payout: settled.payout + sbPayout }],
           player: {
             ...s.player,
-            chips: s.player.chips + settled.payout + sbPayout,
+            chips: s.gameMode === 'sc' ? s.player.chips : s.player.chips + settled.payout + sbPayout,
+            sweepsCoins: s.gameMode === 'sc' ? s.player.sweepsCoins + settled.payout + sbPayout : s.player.sweepsCoins,
             xp: s.player.xp + xp,
             handsPlayed: s.player.handsPlayed + 1,
             handsWon: s.player.handsWon + 1,
@@ -805,7 +806,9 @@ export const useBlackjackStore = create<BlackjackStore>()(
           dealerDrawQueue: [],
           player: {
             ...s2.player,
-            chips: s2.player.chips + totalPayout,
+            // Add winnings to correct currency based on game mode
+            chips: s2.gameMode === 'sc' ? s2.player.chips : s2.player.chips + totalPayout,
+            sweepsCoins: s2.gameMode === 'sc' ? s2.player.sweepsCoins + totalPayout : s2.player.sweepsCoins,
             xp: s2.player.xp + totalXp,
             handsPlayed: s2.player.handsPlayed + s2.activeSeatIndices.length,
             handsWon: s2.player.handsWon + handsWon,
@@ -893,7 +896,8 @@ export const useBlackjackStore = create<BlackjackStore>()(
       xpEarned: xp,
       player: {
         ...state.player,
-        chips: state.player.chips + result.payout,
+        chips: state.gameMode === 'sc' ? state.player.chips : state.player.chips + result.payout,
+        sweepsCoins: state.gameMode === 'sc' ? state.player.sweepsCoins + result.payout : state.player.sweepsCoins,
         xp: state.player.xp + xp,
         handsPlayed: state.player.handsPlayed + 1,
       },
