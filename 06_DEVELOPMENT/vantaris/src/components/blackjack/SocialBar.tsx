@@ -34,6 +34,7 @@ const GIFTS = [
   { id: 'ice', emoji: '\uD83E\uDDCA', label: 'Ice Cold', cost: 10, troll: true },
   { id: 'clown', emoji: '\uD83E\uDD21', label: 'Clown', cost: 15, troll: true },
   { id: 'skull', emoji: '\uD83D\uDC80', label: 'RIP', cost: 5, troll: true },
+  { id: 'tip', emoji: '\uD83D\uDCB5', label: 'Tip Dealer', cost: 25, troll: false },
 ]
 
 interface FlyingItem {
@@ -83,6 +84,21 @@ export function SocialBar({ seatPositions }: { seatPositions: SeatPosition[] }) 
     if (player.chips < gift.cost) return
     useBlackjackStore.setState({ player: { ...player, chips: player.chips - gift.cost } })
     sendFlying(gift.emoji, toSeatIdx)
+
+    // Bot reacts to receiving a gift
+    const bot = bots.find(b => b.seat === toSeatIdx)
+    if (bot) {
+      const reactions = gift.troll
+        ? ['Hey!', 'Rude!', 'Seriously?', 'Oh come on!', 'Not cool']
+        : ['Thanks!', 'Cheers!', 'Appreciate it!', 'You rock!', 'How kind!']
+      const reaction = reactions[Math.floor(Math.random() * reactions.length)]
+      // Show as a toast
+      setTimeout(() => {
+        const { toast } = require('@/components/blackjack/VantarisToast')
+        toast({ type: gift.troll ? 'loss' : 'win', title: bot.name, message: reaction, duration: 2500 })
+      }, 1200)
+    }
+
     setShowGifts(false)
     setTargetSeat(null)
   }, [player, sendFlying])
@@ -96,12 +112,12 @@ export function SocialBar({ seatPositions }: { seatPositions: SeatPosition[] }) 
         <AnimatePresence>
           {flyingItems.map(f => (
             <motion.div key={f.id}
-              initial={{ x: f.fromX, y: f.fromY, scale: 0.5, opacity: 1 }}
-              animate={{ x: f.toX, y: f.toY, scale: 1.3, opacity: 0 }}
+              initial={{ x: f.fromX, y: f.fromY, scale: 0.8, opacity: 1 }}
+              animate={{ x: f.toX, y: f.toY, scale: 2, opacity: 0 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 1.2, ease: 'easeOut' }}
-              className="absolute text-3xl"
-              style={{ transform: 'translate(-50%, -50%)' }}
+              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+              className="absolute text-4xl"
+              style={{ transform: 'translate(-50%, -50%)', filter: 'drop-shadow(0 0 8px rgba(201,168,76,0.5))' }}
             >
               {f.emoji}
             </motion.div>
