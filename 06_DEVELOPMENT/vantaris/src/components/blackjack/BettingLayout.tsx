@@ -155,50 +155,54 @@ export function BettingLayout({ seatPositions }: { seatPositions: SeatPosition[]
             ) : (
               /* Active seat with Mickey Mouse ear layout */
               <div className="relative">
-                {/* Lucky Lucky (top-left ear) */}
-                <div className="absolute" style={{ top: -24, left: -14 }}
+                {/* Lucky Lucky side bet (top-left ear) -- BIGGER during drag */}
+                <div className="absolute" style={{ top: dragging ? -32 : -24, left: dragging ? -20 : -14, transition: 'all 0.2s' }}
                   data-drop-zone={ZONE_LL} data-seat={seatIdx}>
                   <motion.button
                     onClick={() => {
                       if (sideBets.perfectPairs.active) store.toggleSideBet('perfectPairs', 0)
                       else store.toggleSideBet('perfectPairs', selectedChip || 25)
                     }}
-                    className="w-8 h-8 rounded-full flex items-center justify-center"
+                    className="rounded-full flex flex-col items-center justify-center"
                     style={{
-                      background: sideBets.perfectPairs.active ? 'rgba(33,150,243,0.35)' : dragging ? 'rgba(33,150,243,0.15)' : 'rgba(33,150,243,0.06)',
-                      border: `2px solid ${sideBets.perfectPairs.active ? '#2196f3' : dragging ? 'rgba(33,150,243,0.4)' : 'rgba(33,150,243,0.15)'}`,
-                      boxShadow: sideBets.perfectPairs.active ? '0 0 10px rgba(33,150,243,0.3)' : 'none',
+                      width: dragging ? 44 : 34, height: dragging ? 44 : 34,
+                      transition: 'all 0.2s',
+                      background: sideBets.perfectPairs.active ? 'rgba(33,150,243,0.35)' : dragging ? 'rgba(33,150,243,0.2)' : 'rgba(33,150,243,0.06)',
+                      border: `2px solid ${sideBets.perfectPairs.active ? '#2196f3' : dragging ? '#2196f3' : 'rgba(33,150,243,0.15)'}`,
+                      boxShadow: sideBets.perfectPairs.active || dragging ? '0 0 12px rgba(33,150,243,0.3)' : 'none',
                     }}
                     whileTap={{ scale: 0.85 }}
                   >
                     {sideBets.perfectPairs.active ? (
-                      <span className="text-[7px] font-mono font-bold" style={{ color: '#2196f3' }}>{sideBets.perfectPairs.bet}</span>
+                      <span className="text-[8px] font-mono font-bold" style={{ color: '#2196f3' }}>{sideBets.perfectPairs.bet}</span>
                     ) : (
-                      <span className="text-[5px] font-bold" style={{ color: 'rgba(33,150,243,0.5)' }}>LL</span>
+                      <span className="text-[7px] font-bold" style={{ color: dragging ? '#2196f3' : 'rgba(33,150,243,0.4)' }}>LL</span>
                     )}
                   </motion.button>
                 </div>
 
-                {/* Lucky Ladies (top-right ear) */}
-                <div className="absolute" style={{ top: -24, right: -14 }}
+                {/* Bad Buster / Lucky Ladies side bet (top-right ear) -- BIGGER during drag */}
+                <div className="absolute" style={{ top: dragging ? -32 : -24, right: dragging ? -20 : -14, transition: 'all 0.2s' }}
                   data-drop-zone={ZONE_LADIES} data-seat={seatIdx}>
                   <motion.button
                     onClick={() => {
                       if (sideBets.luckyLadies.active) store.toggleSideBet('luckyLadies', 0)
                       else store.toggleSideBet('luckyLadies', selectedChip || 10)
                     }}
-                    className="w-8 h-8 rounded-full flex items-center justify-center"
+                    className="rounded-full flex flex-col items-center justify-center"
                     style={{
-                      background: sideBets.luckyLadies.active ? 'rgba(233,30,99,0.35)' : dragging ? 'rgba(233,30,99,0.15)' : 'rgba(233,30,99,0.06)',
-                      border: `2px solid ${sideBets.luckyLadies.active ? '#e91e63' : dragging ? 'rgba(233,30,99,0.4)' : 'rgba(233,30,99,0.15)'}`,
-                      boxShadow: sideBets.luckyLadies.active ? '0 0 10px rgba(233,30,99,0.3)' : 'none',
+                      width: dragging ? 44 : 34, height: dragging ? 44 : 34,
+                      transition: 'all 0.2s',
+                      background: sideBets.luckyLadies.active ? 'rgba(233,30,99,0.35)' : dragging ? 'rgba(233,30,99,0.2)' : 'rgba(233,30,99,0.06)',
+                      border: `2px solid ${sideBets.luckyLadies.active ? '#e91e63' : dragging ? '#e91e63' : 'rgba(233,30,99,0.15)'}`,
+                      boxShadow: sideBets.luckyLadies.active || dragging ? '0 0 12px rgba(233,30,99,0.3)' : 'none',
                     }}
                     whileTap={{ scale: 0.85 }}
                   >
                     {sideBets.luckyLadies.active ? (
-                      <span className="text-[7px] font-mono font-bold" style={{ color: '#e91e63' }}>{sideBets.luckyLadies.bet}</span>
+                      <span className="text-[8px] font-mono font-bold" style={{ color: '#e91e63' }}>{sideBets.luckyLadies.bet}</span>
                     ) : (
-                      <span className="text-[5px] font-bold" style={{ color: 'rgba(233,30,99,0.5)' }}>20</span>
+                      <span className="text-[7px] font-bold" style={{ color: dragging ? '#e91e63' : 'rgba(233,30,99,0.4)' }}>BB</span>
                     )}
                   </motion.button>
                 </div>
@@ -243,8 +247,8 @@ export function BettingLayout({ seatPositions }: { seatPositions: SeatPosition[]
         )
       })}
 
-      {/* === CHIP TRAY (luxury SVG chips, draggable) === */}
-      <div className="absolute bottom-[75px] left-1/2 -translate-x-1/2">
+      {/* === CHIP TRAY (luxury SVG chips, draggable) -- at very bottom of game area === */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 pb-1">
         <div className="flex gap-2 items-end px-3 py-2 rounded-xl"
           style={{ background: 'rgba(0,0,0,0.8)', border: '1px solid rgba(201,168,76,0.2)' }}>
           {[10, 25, 100, 500, 1000, 5000].filter(v => v <= balance).map(v => (
