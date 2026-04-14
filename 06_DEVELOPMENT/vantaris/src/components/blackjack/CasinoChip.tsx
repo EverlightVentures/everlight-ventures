@@ -152,13 +152,11 @@ export function CasinoChip({
   value,
   selected,
   onClick,
-  onDragEnd,
   size = 64,
 }: {
   value: number
   selected: boolean
   onClick: () => void
-  onDragEnd?: (value: number, x: number, y: number) => void
   size?: number
 }) {
   const config = CHIP_CONFIGS.find(c => c.value === value) || CHIP_CONFIGS[0]
@@ -166,25 +164,12 @@ export function CasinoChip({
   return (
     <motion.button
       onClick={onClick}
-      drag={!!onDragEnd}
-      dragSnapToOrigin
-      dragElastic={0.1}
-      onDragEnd={(_e, info) => {
-        if (onDragEnd && (Math.abs(info.offset.x) > 30 || Math.abs(info.offset.y) > 30)) {
-          // Get the screen position where chip was dropped
-          const el = (_e.target as HTMLElement)?.getBoundingClientRect()
-          if (el) {
-            onDragEnd(value, el.left + el.width / 2 + info.offset.x, el.top + el.height / 2 + info.offset.y)
-          }
-        }
-      }}
-      className="relative no-select cursor-grab active:cursor-grabbing"
+      className="relative no-select cursor-pointer"
       style={{
         width: size,
         height: size,
         padding: 4,
         margin: -4,
-        touchAction: 'none',
         filter: selected
           ? `drop-shadow(0 0 14px ${config.secondary}90) drop-shadow(0 0 28px ${config.secondary}40)`
           : `drop-shadow(0 3px 8px rgba(0,0,0,0.7))`,
