@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useBlackjackStore } from '@/lib/blackjack-store'
+import { toast as showToast } from './VantarisToast'
 import type { SeatPosition } from './BotPlayers'
 
 /**
@@ -94,8 +95,7 @@ export function SocialBar({ seatPositions }: { seatPositions: SeatPosition[] }) 
       const reaction = reactions[Math.floor(Math.random() * reactions.length)]
       // Show as a toast
       setTimeout(() => {
-        const { toast } = require('@/components/blackjack/VantarisToast')
-        toast({ type: gift.troll ? 'loss' : 'win', title: bot.name, message: reaction, duration: 2500 })
+        showToast({ type: gift.troll ? 'loss' : 'win', title: bot.name, message: reaction, duration: 2500 })
       }, 1200)
     }
 

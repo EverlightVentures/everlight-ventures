@@ -18,6 +18,7 @@ import {
   generateDealSequence, hit, doubleDown, split, surrender,
   takeInsurance, playDealer, settleHand, getAvailableActions,
   evaluatePerfectPairs, evaluate21Plus3, evaluateLuckyLadies,
+  evaluateBadBuster, evaluateProgressive,
   generateLightning, calculateXP, createTableConfig,
 } from './blackjack-engine'
 
@@ -167,7 +168,7 @@ interface BlackjackStore {
   setDealer: (dealer: DealerPersona) => void
   togglePanel: (panel: string) => void
   setDealerLine: (line: string) => void
-  toggleSideBet: (bet: 'perfectPairs' | 'twentyOnePlus3' | 'luckyLadies', amount: number) => void
+  toggleSideBet: (bet: 'perfectPairs' | 'twentyOnePlus3' | 'luckyLadies' | 'progressive', amount: number) => void
   setTableVariant: (variant: string) => void
 }
 
@@ -426,11 +427,15 @@ export const useBlackjackStore = create<BlackjackStore>()(
         seats[si].sideBets.twentyOnePlus3.result = t3.result
         seats[si].sideBets.twentyOnePlus3.payout = t3.result ? seats[si].sideBets.twentyOnePlus3.bet * t3.multiplier : 0
       }
-      if (seats[si].sideBets.luckyLadies.active) {
-        const dealerBJ = dealerEvalEarly.isBlackjack
-        const ll = evaluateLuckyLadies(pCards[0], pCards[1], dealerBJ)
-        seats[si].sideBets.luckyLadies.result = ll.result
-        seats[si].sideBets.luckyLadies.payout = ll.result ? seats[si].sideBets.luckyLadies.bet * ll.multiplier : 0
+      // luckyLadies slot = BAD BUSTER (evaluated at settlement, not deal)
+      // Bad Buster needs dealer's final hand to check if dealer busted
+      // Progressive side bet (evaluated on deal -- poker hands from first 2 + dealer upcard)
+      if (seats[si].sideBets.progressive.active) {
+        const prog = evaluateProgressive(pCards, dealerCards[0])
+        seats[si].sideBets.progressive.result = prog.result
+        seats[si].sideBets.progressive.payout = prog.result
+          ? (prog.isJackpot ? 0 : seats[si].sideBets.progressive.bet * prog.multiplier) // jackpot paid from pool
+          : 0
       }
     }
 
@@ -773,6 +778,12 @@ export const useBlackjackStore = create<BlackjackStore>()(
             settledSplit = settleHand(seat.splitHand, s2.dealerHand, s2.config, s2.player.presenceMultiplier, 1)
           }
 
+          // Evaluate Bad Buster NOW (needs dealer's final hand to check bust)
+          if (seat.sideBets.luckyLadies.active && s2.dealerHand.isBust) {
+            const bb = evaluateBadBuster(s2.dealerHand)
+            seat.sideBets.luckyLadies.result = bb.result
+            seat.sideBets.luckyLadies.payout = bb.result ? seat.sideBets.luckyLadies.bet * bb.multiplier : 0
+          }
           const sbPayout = Object.values(seat.sideBets).reduce((sum, sb) => sum + (sb.active ? sb.payout : 0), 0)
           const seatPayout = settledMain.payout + (settledSplit?.payout || 0) + sbPayout
           const seatOutcome = settledMain.outcome!

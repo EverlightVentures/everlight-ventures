@@ -101,6 +101,15 @@ export function BettingLayout({ seatPositions }: { seatPositions: SeatPosition[]
             }
             return
           }
+          if (type === 'progressive') {
+            if (!sideBets.progressive.active) {
+              store.toggleSideBet('progressive', value)
+            } else {
+              store.toggleSideBet('progressive', 0)
+              store.toggleSideBet('progressive', sideBets.progressive.bet + value)
+            }
+            return
+          }
         }
       }
     }
@@ -187,8 +196,8 @@ export function BettingLayout({ seatPositions }: { seatPositions: SeatPosition[]
                   <div data-drop-zone="progressive" data-seat={seatIdx}>
                     <motion.button
                       onClick={() => {
-                        if (sideBets.progressive.active) store.toggleSideBet('luckyLadies', 0) // reuse slot
-                        else store.toggleSideBet('luckyLadies', selectedChip || 5)
+                        if (sideBets.progressive.active) store.toggleSideBet('progressive', 0)
+                        else store.toggleSideBet('progressive', selectedChip || 5)
                       }}
                       className="rounded-full flex flex-col items-center justify-center"
                       style={{
