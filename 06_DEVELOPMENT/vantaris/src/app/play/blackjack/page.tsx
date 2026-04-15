@@ -1295,7 +1295,13 @@ export default function BlackjackPage() {
 
             {/* Compact action row: CLEAR | REBET | 2x | MAX | DEAL */}
             <div className="flex gap-1.5 md:gap-2 items-center justify-center flex-wrap">
-              <button onClick={() => store.setBet(0)}
+              <button onClick={() => {
+                store.setBet(0)
+                // Also clear all side bets
+                if (store.sideBets.perfectPairs.active) store.toggleSideBet('perfectPairs', 0)
+                if (store.sideBets.luckyLadies.active) store.toggleSideBet('luckyLadies', 0)
+                if (store.sideBets.progressive.active) store.toggleSideBet('progressive', 0)
+              }}
                 className="text-[10px] md:text-xs px-2 md:px-3 py-1.5 rounded-lg"
                 style={{ background: 'rgba(255,45,85,0.08)', color: 'var(--loss)', border: '1px solid rgba(255,45,85,0.2)' }}>
                 CLEAR
