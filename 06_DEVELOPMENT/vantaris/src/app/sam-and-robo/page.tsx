@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { EmailCapture } from '@/components/shared/EmailCapture'
 
 const fadeUp = {
   hidden: { opacity: 0, y: 30 },
@@ -9,78 +10,85 @@ const fadeUp = {
 }
 const stagger = { visible: { transition: { staggerChildren: 0.12 } } }
 
-const BOOKS_IN_SERIES = [
-  { title: 'Sam & Robo: First Friends', desc: 'Sam finds a broken robot in his garage and brings it to life. The beginning of a beautiful friendship.' },
-  { title: 'Sam & Robo: The Big Adventure', desc: 'Sam and Robo explore the neighborhood and learn that the world is bigger than they thought.' },
-  { title: 'Sam & Robo: Feelings Are Hard', desc: 'Robo tries to understand human emotions. Sam learns that being different is what makes you special.' },
+const BOOKS = [
+  { num: 1, title: "Sam's First Superpower", theme: 'Emotional Intelligence', desc: 'Sam discovers a glowing book under an old oak tree. Out pops Robo -- a small robot with kind eyes and a glowing display screen. Together they learn that understanding your feelings is the first superpower.' },
+  { num: 2, title: "Sam's Second Superpower", theme: 'Science & Curiosity', desc: 'Sam and Robo explore a science lab full of wonders. They learn to ask questions, test ideas, and discover that curiosity is the engine that drives everything worth knowing.' },
+  { num: 3, title: "Sam's Third Superpower", theme: 'Problem Solving', desc: 'A challenge that looks impossible teaches Sam and Robo that breaking big problems into small steps is a superpower anyone can learn.' },
+  { num: 4, title: "Sam's Fourth Superpower", theme: 'Environmental Awareness', desc: 'Sam and Robo discover that taking care of the world around you is not just good -- it is necessary. Small actions, big impact.' },
+  { num: 5, title: "Sam's Fifth Superpower", theme: 'Teamwork', desc: 'The greatest superpower of all is the one you share with others. Sam and Robo learn that nobody builds anything worth building alone.' },
 ]
 
 export default function SamAndRoboPage() {
   return (
-    <main className="min-h-screen" style={{ background: 'var(--vanta-void)' }}>
+    <main className="min-h-screen" style={{ background: '#0A0A0A' }}>
 
-      <section className="min-h-[80vh] flex flex-col items-center justify-center px-6 text-center">
+      <section className="min-h-[60vh] flex flex-col items-center justify-center px-6 text-center">
         <motion.div initial="hidden" animate="visible" variants={stagger} className="max-w-3xl">
-          <motion.p variants={fadeUp} className="text-xs uppercase tracking-widest mb-4" style={{ color: '#58a6ff', letterSpacing: '4px' }}>
-            EVERLIGHT LITERATURE
-          </motion.p>
           <motion.h1 variants={fadeUp} className="text-5xl md:text-7xl font-bold"
-            style={{ fontFamily: "'Playfair Display', serif", background: 'linear-gradient(135deg, #58a6ff, #8ec5ff, #58a6ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            Sam &amp; Robo
+            style={{ fontFamily: "'Cormorant Garamond', serif", color: '#E8B84B' }}>
+            SAM &amp; ROBO
           </motion.h1>
-          <motion.p variants={fadeUp} className="mt-2 text-sm uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>
-            A Children's Book Series -- Ages 4-8
+          <motion.p variants={fadeUp} className="mt-4 text-xl italic" style={{ color: '#E5E5E5', fontFamily: "'Cormorant Garamond', serif" }}>
+            Every word is a door. And every door is an adventure.
           </motion.p>
-          <motion.p variants={fadeUp} className="mt-6 text-lg leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-            A heartwarming series about a young boy named Sam and his AI robot best friend Robo. Together they learn about friendship, technology, kindness, and what it really means to be human.
+          <motion.p variants={fadeUp} className="mt-4 text-sm" style={{ color: '#8A8A8A' }}>
+            Ages 3-8 | Phonics-Based | Interactive Coloring Hybrid | 5 Complete Books | Full Audiobooks | 60+ Illustrations
           </motion.p>
-          <motion.div variants={fadeUp} className="mt-8 flex gap-4 justify-center flex-wrap">
-            <a href="https://www.amazon.com/s?k=sam+and+robo+everlight" target="_blank" rel="noopener noreferrer">
-              <motion.button className="px-8 py-3 rounded-xl text-sm font-bold tracking-widest"
-                style={{ background: 'linear-gradient(135deg, #58a6ff, #8ec5ff)', color: '#000', fontFamily: "'Cinzel', serif" }}
-                whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                READ ON AMAZON
-              </motion.button>
-            </a>
-            <Link href="/publishing">
-              <motion.button className="px-8 py-3 rounded-xl text-sm font-bold tracking-widest"
-                style={{ background: 'rgba(255,255,255,0.06)', color: '#fff', border: '1px solid rgba(255,255,255,0.15)' }}
-                whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                ALL BOOKS
-              </motion.button>
-            </Link>
+        </motion.div>
+      </section>
+
+      {/* Books */}
+      <section className="py-20 px-6">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-3xl mx-auto">
+          <motion.p variants={fadeUp} className="text-sm mb-8" style={{ color: '#8A8A8A' }}>
+            Five books. Five superpowers. Each one complete with manuscript, 12 paired illustrations, full audiobook, EPUB, and KDP-ready files.
+          </motion.p>
+          <div className="space-y-4">
+            {BOOKS.map(b => (
+              <motion.div key={b.num} variants={fadeUp} className="p-6 rounded-xl" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
+                <span className="text-[10px] uppercase tracking-wider" style={{ color: '#8A8A8A' }}>Book {b.num}</span>
+                <h3 className="text-base font-bold mt-1 mb-1" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#E8B84B' }}>{b.title}</h3>
+                <p className="text-[10px] uppercase tracking-wider mb-2" style={{ color: '#5DAE72' }}>Theme: {b.theme}</p>
+                <p className="text-xs leading-relaxed mb-3" style={{ color: '#8A8A8A' }}>{b.desc}</p>
+                <p className="text-xs" style={{ color: '#E5E5E5' }}>Digital: $6.99</p>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Bundle */}
+          <motion.div variants={fadeUp} className="mt-6 p-6 rounded-xl text-center" style={{ background: '#E8B84B08', border: '1px solid #E8B84B20' }}>
+            <h3 className="text-base font-bold" style={{ color: '#E8B84B', fontFamily: "'Cormorant Garamond', serif" }}>Complete Series Bundle</h3>
+            <p className="text-xs mt-1" style={{ color: '#8A8A8A' }}>All 5 Adventures with Sam & Robo</p>
+            <p className="text-2xl font-bold mt-2" style={{ color: '#E5E5E5' }}>$29.99 <span className="text-xs font-normal" style={{ color: '#8A8A8A' }}>(save $5)</span></p>
           </motion.div>
         </motion.div>
       </section>
 
-      {/* Books in series */}
+      {/* For Parents */}
       <section className="py-20 px-6">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-3xl mx-auto">
-          <motion.h2 variants={fadeUp} className="text-2xl font-bold text-center mb-8" style={{ fontFamily: "'Playfair Display', serif", color: '#58a6ff' }}>
-            Books in the Series
-          </motion.h2>
-          <div className="space-y-4">
-            {BOOKS_IN_SERIES.map((b, i) => (
-              <motion.div key={b.title} variants={fadeUp} className="p-6 rounded-2xl"
-                style={{ background: 'rgba(88,166,255,0.05)', border: '1px solid rgba(88,166,255,0.15)' }}>
-                <span className="text-[10px] uppercase tracking-wider" style={{ color: 'var(--text-tertiary)' }}>Book {i + 1}</span>
-                <h3 className="text-sm font-bold mt-1 mb-2" style={{ color: '#58a6ff', fontFamily: "'Playfair Display', serif" }}>{b.title}</h3>
-                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-secondary)' }}>{b.desc}</p>
-              </motion.div>
-            ))}
-          </div>
+          <motion.h2 variants={fadeUp} className="text-xl font-bold mb-4" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#E8B84B' }}>For Parents & Teachers</motion.h2>
+          <motion.div variants={fadeUp} className="text-sm leading-relaxed space-y-2" style={{ color: '#8A8A8A' }}>
+            <p>Each book introduces a new phonics progression. CVC words build to blends, digraphs, and fluency. Vocabulary is age-appropriate for ages 3-8.</p>
+            <p>Left page: B/W illustration for coloring. Right page: same scene in full color. Story time and activity time in one product.</p>
+            <p>Aligned with the Science of Reading framework.</p>
+          </motion.div>
         </motion.div>
       </section>
 
-      <section className="py-20 px-6">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-2xl mx-auto text-center">
-          <motion.h2 variants={fadeUp} className="text-xl font-bold mb-4" style={{ fontFamily: "'Playfair Display', serif", color: '#58a6ff' }}>
-            For Parents
-          </motion.h2>
-          <motion.p variants={fadeUp} className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-            Sam &amp; Robo teaches kids about technology, empathy, and friendship in a way that feels natural. No screen time guilt -- these are real books with real illustrations. Each story is designed to spark conversation about what makes us human in an age of AI.
-          </motion.p>
+      {/* Free Coloring Pages */}
+      <section className="py-20 px-6 text-center">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
+          <motion.h2 variants={fadeUp} className="text-xl font-bold mb-2" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#E8B84B' }}>Free Coloring Pages</motion.h2>
+          <motion.p variants={fadeUp} className="text-sm mb-6" style={{ color: '#8A8A8A' }}>Five free coloring pages -- one from each adventure. Download as a lead magnet.</motion.p>
+          <motion.div variants={fadeUp} className="max-w-md mx-auto">
+            <EmailCapture source="consulting" color="#E8B84B" buttonText="DOWNLOAD" successTitle="Check your email!" successDesc="5 free coloring pages on the way." />
+          </motion.div>
         </motion.div>
+      </section>
+
+      <section className="py-8 px-6 text-center">
+        <Link href="/publishing" className="text-xs" style={{ color: '#8A8A8A' }}>&larr; Back to Publishing</Link>
       </section>
     </main>
   )

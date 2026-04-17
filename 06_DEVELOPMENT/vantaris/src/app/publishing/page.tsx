@@ -9,84 +9,77 @@ const fadeUp = {
 }
 const stagger = { visible: { transition: { staggerChildren: 0.12 } } }
 
-const BOOKS = [
-  {
-    title: 'Beyond the Veil',
-    series: 'Standalone Thriller',
-    desc: 'A gripping supernatural thriller that explores the thin boundary between the living and the dead. When a skeptical detective is forced to investigate a series of impossible murders, he discovers that the veil between worlds is thinner than anyone imagined.',
-    color: '#9b59b6',
-    href: '/beyond-the-veil',
-    status: 'AVAILABLE',
-  },
-  {
-    title: 'Sam & Robo',
-    series: "Children's Series",
-    desc: "A heartwarming children's series about a young boy named Sam and his AI robot best friend Robo. Together they learn about friendship, technology, and what it means to be human. Perfect for ages 4-8.",
-    color: '#58a6ff',
-    href: '/sam-and-robo',
-    status: 'SERIES',
-  },
-  {
-    title: 'The Streets Within',
-    series: 'Urban Fiction',
-    desc: 'Raw, unfiltered urban fiction. Stories from the streets that shaped us. Coming to Amazon KDP.',
-    color: '#ff6b35',
-    href: '#',
-    status: 'COMING SOON',
-  },
-]
-
 export default function PublishingPage() {
   return (
-    <main className="min-h-screen" style={{ background: 'var(--vanta-void)' }}>
+    <main className="min-h-screen" style={{ background: '#0A0A0A' }}>
 
-      <section className="min-h-[70vh] flex flex-col items-center justify-center px-6 text-center">
+      <section className="min-h-[60vh] flex flex-col items-center justify-center px-6 text-center">
         <motion.div initial="hidden" animate="visible" variants={stagger}>
-          <motion.p variants={fadeUp} className="text-xs uppercase tracking-widest mb-4" style={{ color: '#e91e63', letterSpacing: '4px' }}>
-            EVERLIGHT LITERATURE
-          </motion.p>
-          <motion.h1 variants={fadeUp} className="text-5xl md:text-7xl font-bold"
-            style={{ fontFamily: "'Playfair Display', serif", background: 'linear-gradient(135deg, #e91e63, #ff6b8a, #e91e63)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            Publishing
+          <motion.h1 variants={fadeUp} className="text-4xl md:text-6xl font-bold"
+            style={{ fontFamily: "'Cormorant Garamond', serif", color: '#7B5EA7' }}>
+            EVERLIGHT PUBLISHING
           </motion.h1>
-          <motion.p variants={fadeUp} className="mt-4 text-xl max-w-2xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
-            Independent books for independent minds. From supernatural thrillers to children's stories. Available on Amazon KDP and direct.
+          <motion.p variants={fadeUp} className="mt-2 text-lg" style={{ color: '#7B5EA7' }}>Stories Built to Last</motion.p>
+          <motion.p variants={fadeUp} className="mt-4 text-sm max-w-2xl mx-auto leading-relaxed" style={{ color: '#8A8A8A' }}>
+            We do not publish content. We finish books. Every title in this catalog has a complete manuscript, professional illustrations, a full audiobook, and distribution-ready files. Independent publishing done right.
           </motion.p>
         </motion.div>
       </section>
 
+      {/* Everlight Kids */}
       <section className="py-20 px-6">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-4xl mx-auto">
-          <div className="space-y-6">
-            {BOOKS.map(book => (
-              <motion.div key={book.title} variants={fadeUp}>
-                <Link href={book.href}>
-                  <motion.div className="p-8 rounded-2xl cursor-pointer"
-                    style={{ background: `${book.color}06`, border: `1px solid ${book.color}20` }}
-                    whileHover={{ borderColor: `${book.color}40`, boxShadow: `0 0 30px ${book.color}10` }}>
-                    <div className="flex items-start justify-between flex-wrap gap-4">
-                      <div>
-                        <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: `${book.color}15`, color: book.color }}>{book.status}</span>
-                        <h3 className="text-xl font-bold mt-3 mb-1" style={{ fontFamily: "'Playfair Display', serif", color: book.color }}>{book.title}</h3>
-                        <p className="text-xs uppercase tracking-wider mb-3" style={{ color: 'var(--text-tertiary)' }}>{book.series}</p>
-                        <p className="text-sm leading-relaxed max-w-xl" style={{ color: 'var(--text-secondary)' }}>{book.desc}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-3xl mx-auto">
+          <motion.h2 variants={fadeUp} className="text-2xl font-bold mb-2" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#E8B84B' }}>Everlight Kids</motion.h2>
+          <motion.p variants={fadeUp} className="text-sm mb-6" style={{ color: '#E5E5E5' }}>Adventures with Sam & Robo -- 5 Books Available Now</motion.p>
+          <motion.p variants={fadeUp} className="text-sm leading-relaxed mb-4" style={{ color: '#8A8A8A' }}>
+            A curious boy. A robot with a heart. Five adventures that teach kids ages 3 to 8 how to read while teaching them how to think. Each book follows a phonics progression built on the Science of Reading. Each one is an interactive coloring hybrid -- left page black and white for coloring, right page in full color. Two books in one.
+          </motion.p>
+          <motion.div variants={fadeUp} className="flex gap-3 flex-wrap">
+            <Link href="/sam-and-robo">
+              <motion.button className="px-6 py-2 rounded-lg text-xs font-bold tracking-wider" style={{ background: '#E8B84B', color: '#0A0A0A' }}
+                whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                VIEW THE SERIES
+              </motion.button>
+            </Link>
+          </motion.div>
         </motion.div>
       </section>
 
-      <section className="py-20 px-6 text-center">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
-          <motion.p variants={fadeUp} className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
-            Everlight Literature -- a division of Everlight Ventures LLC
-          </motion.p>
-          <motion.p variants={fadeUp} className="mt-2 text-sm" style={{ color: 'var(--text-tertiary)' }}>
-            Available on Amazon Kindle, paperback, and hardcover.
+      {/* Adult Fiction */}
+      <section className="py-20 px-6">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-3xl mx-auto">
+          <motion.h2 variants={fadeUp} className="text-2xl font-bold mb-8" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#D4871C' }}>Adult Fiction</motion.h2>
+
+          {/* Beyond the Veil */}
+          <motion.div variants={fadeUp} className="p-6 rounded-xl mb-4" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
+            <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: '#D4871C15', color: '#D4871C' }}>COMING 2026</span>
+            <h3 className="text-lg font-bold mt-3 mb-1" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#D4871C' }}>Beyond the Veil</h3>
+            <p className="text-xs uppercase tracking-wider mb-3" style={{ color: '#8A8A8A' }}>The Hailey Pink Chronicles | A Quantum Western Thriller</p>
+            <p className="text-sm leading-relaxed mb-3" style={{ color: '#8A8A8A' }}>
+              100,000 words. 11 chapters. Full audiobook. Hidden ciphers woven into every chapter. A deputy in a dying Western town escapes her bruises every night by leaving her body behind. The astral realm is not a dream. The worlds are connected. And something is crossing over.
+            </p>
+            <p className="text-sm" style={{ color: '#E5E5E5' }}>Digital: $6.99</p>
+            <Link href="/beyond-the-veil" className="text-xs font-semibold uppercase tracking-wider mt-2 inline-block" style={{ color: '#D4871C' }}>Read More &rarr;</Link>
+          </motion.div>
+
+          {/* The Silent Witness */}
+          <motion.div variants={fadeUp} className="p-6 rounded-xl" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
+            <span className="text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full" style={{ background: '#4A6FA515', color: '#4A6FA5' }}>IN DEVELOPMENT</span>
+            <h3 className="text-lg font-bold mt-3 mb-1" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#4A6FA5' }}>The Silent Witness</h3>
+            <p className="text-xs uppercase tracking-wider mb-3" style={{ color: '#8A8A8A' }}>A Detective Kiara Estrella Novel | A Mystery Thriller</p>
+            <p className="text-sm leading-relaxed" style={{ color: '#8A8A8A' }}>
+              A decorated Chicago homicide detective catches a case that leads straight to the most protected office in the city. Corruption, community, and the cost of doing what is right.
+            </p>
+          </motion.div>
+        </motion.div>
+      </section>
+
+      {/* For Educators */}
+      <section className="py-16 px-6">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-3xl mx-auto text-center">
+          <motion.h2 variants={fadeUp} className="text-xl font-bold mb-4" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#7B5EA7' }}>For Educators</motion.h2>
+          <motion.p variants={fadeUp} className="text-sm leading-relaxed" style={{ color: '#8A8A8A' }}>
+            Our children's books are built on the Science of Reading. Phonics progressions, decodable text, and vocabulary scaffolding are woven directly into the stories. Download our Educator Guide for classroom use, lesson alignment, and discussion prompts.
           </motion.p>
         </motion.div>
       </section>

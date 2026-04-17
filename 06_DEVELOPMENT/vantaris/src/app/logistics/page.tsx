@@ -11,47 +11,53 @@ const fadeUp = {
 const stagger = { visible: { transition: { staggerChildren: 0.12 } } }
 
 const SERVICES = [
-  { title: 'Fulfillment', desc: 'We pick, pack, and ship your orders. Same-day processing. Real-time tracking. You sell, we handle the rest.', icon: '\u2B23' },
-  { title: 'Warehousing', desc: 'Secure storage in Northern California. Climate controlled. Inventory management included. Scale up or down.', icon: '\u2302' },
-  { title: 'Last-Mile Delivery', desc: 'Local delivery for small businesses. Same-day and next-day options. Bay Area and Sacramento coverage.', icon: '\u2708' },
-  { title: 'Returns Processing', desc: 'We handle returns, inspect items, restock or dispose. Full reporting on return rates and reasons.', icon: '\u21BA' },
+  { title: 'E-COMMERCE FULFILLMENT', desc: 'Pick, pack, and ship. Integrated with your storefront. Shopify, WooCommerce, and custom API supported.' },
+  { title: 'LAST-MILE DELIVERY', desc: 'Fast, trackable delivery to your customer\'s door. Regional carrier partnerships and route optimization keep costs low.' },
+  { title: 'WAREHOUSE MANAGEMENT', desc: 'Scalable storage with real-time inventory visibility. Barcode tracking, cycle counting, zero shrinkage target.' },
+  { title: 'SUPPLY CHAIN CONSULTING', desc: 'We audit your logistics stack and build a plan to cut costs, reduce transit times, and eliminate failure points.' },
 ]
 
-const STATS = [
-  { number: '24hr', label: 'Average fulfillment time' },
-  { number: '99.2%', label: 'Order accuracy rate' },
-  { number: '$0', label: 'Setup fees' },
-  { number: '50+', label: 'Small businesses served' },
+const PROOF = [
+  { title: 'SPEED', desc: 'Two-day fulfillment standard. Same-day processing on orders received before 2 PM PT.' },
+  { title: 'RELIABILITY', desc: '99.8% order accuracy. Every package scanned, verified, and tracked from warehouse to doorstep.' },
+  { title: 'OPERATOR-BUILT', desc: 'This company was built by someone who ships product. Not a consultant. Not a broker. An operator.' },
 ]
 
 function QuoteForm() {
   const [name, setName] = useState('')
+  const [company, setCompany] = useState('')
   const [email, setEmail] = useState('')
-  const [message, setMessage] = useState('')
+  const [phone, setPhone] = useState('')
+  const [volume, setVolume] = useState('')
+  const [services, setServices] = useState('')
   const { loading, submitted, error, handleSubmit } = useLeadForm({ source: 'logistics' })
 
   if (submitted) {
     return (
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 rounded-2xl text-center" style={{ background: 'rgba(155,89,182,0.08)', border: '1px solid rgba(155,89,182,0.3)' }}>
-        <p className="text-lg font-bold" style={{ color: '#9b59b6', fontFamily: "'Cinzel', serif" }}>Quote Request Received</p>
-        <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>We'll get back to you within 24 hours.</p>
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6 rounded-xl text-center" style={{ background: '#1A1A1A', border: '1px solid #D4963A30' }}>
+        <p className="text-lg font-bold" style={{ color: '#D4963A', fontFamily: "'Cormorant Garamond', serif" }}>Quote Request Received</p>
+        <p className="text-sm mt-2" style={{ color: '#8A8A8A' }}>We will put together a custom logistics plan within 48 hours.</p>
       </motion.div>
     )
   }
 
+  const inputStyle = { background: '#1A1A1A', border: '1px solid #2A2A2A', color: '#E5E5E5' }
+
   return (
-    <form onSubmit={e => { e.preventDefault(); handleSubmit({ email, name, message }) }} className="space-y-4">
-      <input type="text" placeholder="Your name" value={name} onChange={e => setName(e.target.value)} required
-        className="w-full px-4 py-3 rounded-xl text-sm outline-none" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} />
-      <input type="email" placeholder="Email address" value={email} onChange={e => setEmail(e.target.value)} required
-        className="w-full px-4 py-3 rounded-xl text-sm outline-none" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} />
-      <textarea placeholder="Tell us about your fulfillment needs" value={message} onChange={e => setMessage(e.target.value)} rows={3} required
-        className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }} />
+    <form onSubmit={e => { e.preventDefault(); handleSubmit({ email, name, phone, message: services, metadata: { company, volume } }) }} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <input type="text" placeholder="Name" value={name} onChange={e => setName(e.target.value)} required className="w-full px-4 py-3 rounded-xl text-sm outline-none" style={inputStyle} />
+        <input type="text" placeholder="Company" value={company} onChange={e => setCompany(e.target.value)} className="w-full px-4 py-3 rounded-xl text-sm outline-none" style={inputStyle} />
+        <input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required className="w-full px-4 py-3 rounded-xl text-sm outline-none" style={inputStyle} />
+        <input type="tel" placeholder="Phone" value={phone} onChange={e => setPhone(e.target.value)} className="w-full px-4 py-3 rounded-xl text-sm outline-none" style={inputStyle} />
+      </div>
+      <input type="text" placeholder="Monthly Volume (e.g. 500 orders/mo)" value={volume} onChange={e => setVolume(e.target.value)} className="w-full px-4 py-3 rounded-xl text-sm outline-none" style={inputStyle} />
+      <textarea placeholder="Services Needed" value={services} onChange={e => setServices(e.target.value)} rows={3} className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none" style={inputStyle} />
       {error && <p className="text-xs text-red-400">{error}</p>}
       <motion.button type="submit" disabled={loading} className="w-full py-3 rounded-xl text-sm font-bold tracking-widest"
-        style={{ background: 'linear-gradient(135deg, #9b59b6, #c39bd3)', color: '#000', fontFamily: "'Cinzel', serif", opacity: loading ? 0.6 : 1 }}
+        style={{ background: '#D4963A', color: '#0A0A0A', opacity: loading ? 0.6 : 1 }}
         whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
-        {loading ? 'SUBMITTING...' : 'GET A QUOTE'}
+        {loading ? 'SUBMITTING...' : 'REQUEST A QUOTE'}
       </motion.button>
     </form>
   )
@@ -59,61 +65,60 @@ function QuoteForm() {
 
 export default function LogisticsPage() {
   return (
-    <main className="min-h-screen" style={{ background: 'var(--vanta-void)' }}>
+    <main className="min-h-screen" style={{ background: '#0A0A0A' }}>
 
       <section className="min-h-[70vh] flex flex-col items-center justify-center px-6 text-center">
         <motion.div initial="hidden" animate="visible" variants={stagger}>
-          <motion.p variants={fadeUp} className="text-xs uppercase tracking-widest mb-4" style={{ color: '#9b59b6', letterSpacing: '4px' }}>
-            EVERLIGHT VENTURES
-          </motion.p>
-          <motion.h1 variants={fadeUp} className="text-5xl md:text-7xl font-bold"
-            style={{ fontFamily: "'Cinzel', serif", background: 'linear-gradient(135deg, #9b59b6, #c39bd3, #9b59b6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-            LOGISTICS
+          <motion.h1 variants={fadeUp} className="text-4xl md:text-6xl font-bold"
+            style={{ fontFamily: "'Cormorant Garamond', serif", color: '#D4963A' }}>
+            EVERLIGHT LOGISTICS
           </motion.h1>
-          <motion.p variants={fadeUp} className="mt-4 text-xl max-w-2xl mx-auto" style={{ color: 'var(--text-secondary)' }}>
-            Fulfillment, warehousing, and last-mile delivery for small businesses. You focus on selling. We handle moving product.
+          <motion.p variants={fadeUp} className="mt-2 text-lg" style={{ color: '#D4963A' }}>Where it all started.</motion.p>
+          <motion.p variants={fadeUp} className="mt-4 text-sm max-w-2xl mx-auto leading-relaxed" style={{ color: '#8A8A8A' }}>
+            Everlight Logistics LLC is the legal entity behind every venture on this site. Before the books, the game, the software, and the AI -- there was freight. Real shipments, real clients, real margins. We handle fulfillment, warehousing, last-mile delivery, and supply chain consulting for small businesses and e-commerce operators.
           </motion.p>
-          <motion.div variants={fadeUp} className="mt-8 max-w-md mx-auto">
-            <QuoteForm />
-          </motion.div>
         </motion.div>
-      </section>
-
-      {/* Stats */}
-      <section className="py-16 px-6">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
-          {STATS.map(s => (
-            <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center">
-              <p className="text-3xl font-bold" style={{ color: '#9b59b6', fontFamily: "'Cinzel', serif" }}>{s.number}</p>
-              <p className="text-[10px] uppercase tracking-wider mt-1" style={{ color: 'var(--text-tertiary)' }}>{s.label}</p>
-            </motion.div>
-          ))}
-        </div>
       </section>
 
       {/* Services */}
       <section className="py-20 px-6">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-4xl mx-auto">
-          <motion.h2 variants={fadeUp} className="text-2xl md:text-4xl font-bold text-center mb-12" style={{ fontFamily: "'Cinzel', serif", color: '#9b59b6' }}>
-            What We Do
-          </motion.h2>
+          <motion.h2 variants={fadeUp} className="text-2xl font-bold mb-8" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#D4963A' }}>What We Do</motion.h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {SERVICES.map(s => (
-              <motion.div key={s.title} variants={fadeUp} className="p-6 rounded-2xl"
-                style={{ background: 'rgba(155,89,182,0.05)', border: '1px solid rgba(155,89,182,0.15)' }}>
-                <span className="text-2xl block mb-3" style={{ color: '#9b59b6' }}>{s.icon}</span>
-                <h3 className="text-sm font-bold tracking-wider mb-2" style={{ color: '#9b59b6', fontFamily: "'Cinzel', serif" }}>{s.title}</h3>
-                <p className="text-xs leading-relaxed" style={{ color: 'var(--text-tertiary)' }}>{s.desc}</p>
+              <motion.div key={s.title} variants={fadeUp} className="p-6 rounded-xl" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
+                <h3 className="text-xs font-bold tracking-wider mb-2" style={{ color: '#D4963A' }}>{s.title}</h3>
+                <p className="text-xs leading-relaxed" style={{ color: '#8A8A8A' }}>{s.desc}</p>
               </motion.div>
             ))}
           </div>
         </motion.div>
       </section>
 
-      <section className="py-16 px-6 text-center">
-        <motion.p initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
-          Everlight Logistics LLC -- Fairfield, California. Serving the Bay Area and beyond.
-        </motion.p>
+      {/* Why Us */}
+      <section className="py-20 px-6">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-4xl mx-auto">
+          <motion.h2 variants={fadeUp} className="text-2xl font-bold mb-8" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#D4963A' }}>Why Us</motion.h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {PROOF.map(p => (
+              <motion.div key={p.title} variants={fadeUp} className="p-6 rounded-xl" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
+                <h3 className="text-xs font-bold tracking-wider mb-2" style={{ color: '#D4963A' }}>{p.title}</h3>
+                <p className="text-xs leading-relaxed" style={{ color: '#8A8A8A' }}>{p.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Quote Form */}
+      <section className="py-20 px-6">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-2xl mx-auto">
+          <motion.h2 variants={fadeUp} className="text-2xl font-bold mb-2" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#D4963A' }}>Get a Quote</motion.h2>
+          <motion.p variants={fadeUp} className="text-sm mb-8" style={{ color: '#8A8A8A' }}>Tell us what you ship and how much. We will put together a custom logistics plan within 48 hours.</motion.p>
+          <motion.div variants={fadeUp}>
+            <QuoteForm />
+          </motion.div>
+        </motion.div>
       </section>
     </main>
   )
