@@ -746,6 +746,7 @@ export default function BlackjackPage() {
   const [particleType, setParticleType] = useState<'blackjack' | 'win' | 'loss' | null>(null)
 
   const [showTablePicker, setShowTablePicker] = useState(false)
+  const [showNavMenu, setShowNavMenu] = useState(false)
 
   // Seat positions projected from 3D scene (for bot labels)
   const defaultSeats: SeatPosition[] = Array(5).fill({ x: 0, y: 0, visible: false })
@@ -958,6 +959,42 @@ export default function BlackjackPage() {
         style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.85), transparent)', borderColor: 'transparent' }}>
 
         <div className="flex items-center gap-1.5 md:gap-3">
+          {/* Back to lobby */}
+          <a href="/lobby" className="text-sm px-1.5 py-1 rounded hover:bg-white/5" style={{ color: 'var(--text-tertiary)' }}>
+            {'\u2190'}
+          </a>
+
+          {/* Nav menu */}
+          <div className="relative">
+            <button onClick={() => setShowNavMenu(!showNavMenu)}
+              className="text-sm px-1.5 py-1 rounded hover:bg-white/5" style={{ color: 'var(--text-tertiary)' }}>
+              {'\u2630'}
+            </button>
+            <AnimatePresence>
+              {showNavMenu && (
+                <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                  className="absolute top-full left-0 mt-2 z-50 glass-elevated rounded-xl p-2 w-[180px] space-y-0.5">
+                  {[
+                    { label: 'Lobby', href: '/lobby', icon: '\u2605' },
+                    { label: 'Wallet', href: '/wallet', icon: '\u2668' },
+                    { label: 'Rewards', href: '/rewards', icon: '\u2B50' },
+                    { label: 'Profile', href: '/profile', icon: '\u263A' },
+                    { label: 'Redeem SC', href: '/redeem', icon: '\u2714' },
+                    { label: 'Settings', href: '/settings', icon: '\u2699' },
+                    { label: 'Support', href: '/support', icon: '\u2753' },
+                  ].map(item => (
+                    <a key={item.label} href={item.href}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs hover:bg-white/5 transition-colors"
+                      style={{ color: 'var(--text-secondary)' }}>
+                      <span>{item.icon}</span>
+                      <span>{item.label}</span>
+                    </a>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           <div className="relative">
             <button onClick={() => setShowTablePicker(!showTablePicker)} className="flex items-center gap-1.5">
               <h1 className="text-sm md:text-base font-bold tracking-widest"
