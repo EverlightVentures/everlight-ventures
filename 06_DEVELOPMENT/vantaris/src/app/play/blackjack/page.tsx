@@ -1291,7 +1291,7 @@ export default function BlackjackPage() {
             return (
               <div key={si} className="absolute" style={{
                 left: `${seatPos.x}px`,
-                top: `${Math.min(seatPos.y - 60, window?.innerHeight * 0.55 || 400)}px`,
+                top: `${Math.min(seatPos.y - 60, 400)}px`,
                 transform: 'translate(-50%, 0) scale(0.75)',
                 opacity: isCurrentSeat ? 1 : 0.8,
               }}>

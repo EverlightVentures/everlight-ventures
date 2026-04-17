@@ -1123,6 +1123,10 @@ export const useBlackjackStore = create<BlackjackStore>()(
         if (mergedPlayer.chips < 100) {
           mergedPlayer.chips += 10000
         }
+        // One-time SC test deposit
+        if (mergedPlayer.sweepsCoins < 100) {
+          mergedPlayer.sweepsCoins += 1000
+        }
         return {
           ...current,
           player: mergedPlayer,
