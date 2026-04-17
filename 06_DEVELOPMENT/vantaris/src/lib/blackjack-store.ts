@@ -591,20 +591,23 @@ export const useBlackjackStore = create<BlackjackStore>()(
         return
       }
     } else if (result.autoCharlie && state.config.sixCardCharlie) {
-      // Six Card Charlie -- auto-win
+      // Six Card Charlie -- auto-win, advance to next seat via playerStand
       const hand = result.hand
       if (isMainHand) {
         update.mainHand = { ...hand, outcome: 'charlie', payout: hand.bet * 2 }
       } else {
         update.splitHand = { ...hand, outcome: 'charlie', payout: hand.bet * 2 }
       }
-      // Move to next hand or dealer
-      if (state.splitHand && isMainHand) {
-        update.currentHandIndex = 1
-        update.phase = 'split_turn'
-      } else {
-        update.phase = 'dealer_turn'
-      }
+      // Sync to seats then advance
+      const charlieSeats = [...state.seats]
+      const charlieSeat = { ...charlieSeats[state.currentSeatIndex] }
+      if (isMainHand) charlieSeat.hand = { ...hand, outcome: 'charlie', payout: hand.bet * 2 }
+      else charlieSeat.splitHand = { ...hand, outcome: 'charlie', payout: hand.bet * 2 }
+      charlieSeats[state.currentSeatIndex] = charlieSeat
+      update.seats = charlieSeats as any
+      set(update as any)
+      setTimeout(() => get().playerStand(), 100)
+      return
     }
 
     // Update available actions
@@ -626,14 +629,15 @@ export const useBlackjackStore = create<BlackjackStore>()(
     const isMainHand = state.currentHandIndex === 0
     const currentHand = isMainHand ? state.mainHand : state.splitHand!
 
-    // Double the current hand's bet (check player has enough)
-    const doubleCost = currentHand.bet
+    // Double for less: use whatever the player can afford, up to the full double
+    const fullDoubleCost = currentHand.bet
     const isScMode = state.gameMode === 'sc'
     const balance = isScMode ? state.player.sweepsCoins : state.player.chips
-    if (doubleCost > balance) return // can't afford to double
+    if (balance <= 0) return // completely broke
+    const doubleCost = Math.min(fullDoubleCost, balance) // double for less if needed
 
-    // Double the bet on this hand
-    const doubledHand: HandState = { ...currentHand, bet: currentHand.bet * 2, doubled: true }
+    // Add the double amount to the hand's bet
+    const doubledHand: HandState = { ...currentHand, bet: currentHand.bet + doubleCost, doubled: true }
 
     // Deduct the additional bet
     const playerUpdate = isScMode

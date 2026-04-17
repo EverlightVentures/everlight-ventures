@@ -1387,15 +1387,21 @@ export default function BlackjackPage() {
               whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
               STAND
             </motion.button>
-            {/* Double Down Madness: always available, doubles bet + hits (progressive) */}
-            {store.mainHand.cards.length >= 2 && store.player.chips >= store.mainHand.bet && (
-              <motion.button onClick={handleDouble}
-                className="px-5 md:px-8 py-2 md:py-2.5 text-xs md:text-sm tracking-widest font-bold rounded-xl"
-                style={{ background: 'linear-gradient(135deg, #c9a84c, #f0d080)', color: '#000', fontFamily: "'Cinzel', serif", boxShadow: '0 0 15px rgba(201,168,76,0.4)' }}
-                whileHover={{ scale: 1.05, boxShadow: '0 0 25px rgba(201,168,76,0.6)' }} whileTap={{ scale: 0.95 }}>
-                DOUBLE ({store.mainHand.bet} {'\u2192'} {store.mainHand.bet * 2})
-              </motion.button>
-            )}
+            {/* Double Down Madness: available if player has ANY chips left */}
+            {store.mainHand.cards.length >= 2 && store.player.chips > 0 && (() => {
+              const canFullDouble = store.player.chips >= store.mainHand.bet
+              const doubleAmount = Math.min(store.mainHand.bet, store.player.chips)
+              return (
+                <motion.button onClick={handleDouble}
+                  className="px-4 md:px-6 py-2 md:py-2.5 text-[10px] md:text-xs tracking-widest font-bold rounded-xl"
+                  style={{ background: 'linear-gradient(135deg, #c9a84c, #f0d080)', color: '#000', fontFamily: "'Cinzel', serif", boxShadow: '0 0 15px rgba(201,168,76,0.4)' }}
+                  whileHover={{ scale: 1.05, boxShadow: '0 0 25px rgba(201,168,76,0.6)' }} whileTap={{ scale: 0.95 }}>
+                  {canFullDouble
+                    ? `DOUBLE (${store.mainHand.bet} \u2192 ${store.mainHand.bet * 2})`
+                    : `DOUBLE FOR LESS (+${doubleAmount})`}
+                </motion.button>
+              )
+            })()}
             {canSplit && (
               <motion.button onClick={handleSplit}
                 className="px-5 md:px-8 py-2 md:py-2.5 text-xs md:text-sm tracking-widest font-bold rounded-xl"
