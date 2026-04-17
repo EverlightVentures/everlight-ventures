@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useBlackjackStore } from '@/lib/blackjack-store'
+import { CasinoAmbience } from '@/components/shared/CasinoAmbience'
 
 /**
  * Vantaris Casino Lobby
@@ -29,9 +30,13 @@ const GAMES = [
     tagline: 'Classic 21. Beat the dealer.',
     color: '#c9a84c',
     gradient: 'linear-gradient(135deg, #c9a84c20, #0a0a1005)',
-    icon: '\u2660', // spade
+    icon: '\u2660',
     hot: true,
     players: 1247,
+    rtp: 99.5,
+    minBet: 100,
+    maxBet: 100000,
+    features: ['Multi-Seat', 'Side Bets', 'AI Dealers'],
   },
   {
     id: 'crash',
@@ -39,9 +44,13 @@ const GAMES = [
     tagline: 'How high do you dare?',
     color: '#00e676',
     gradient: 'linear-gradient(135deg, #00e67620, #0a0a1005)',
-    icon: '\u2191', // up arrow
+    icon: '\u2191',
     hot: true,
     players: 3891,
+    rtp: 97.0,
+    minBet: 50,
+    maxBet: 500000,
+    features: ['Auto Cashout', 'Live Graph', 'Multiplayer'],
   },
   {
     id: 'roulette',
@@ -49,9 +58,13 @@ const GAMES = [
     tagline: 'Where fortune meets obsidian.',
     color: '#ff2d55',
     gradient: 'linear-gradient(135deg, #ff2d5520, #0a0a1005)',
-    icon: '\u25CF', // circle
+    icon: '\u25CF',
     hot: false,
     players: 892,
+    rtp: 97.3,
+    minBet: 100,
+    maxBet: 200000,
+    features: ['European', 'Single Zero', 'Neighbors'],
   },
   {
     id: 'dice',
@@ -59,9 +72,13 @@ const GAMES = [
     tagline: 'Roll the obsidian.',
     color: '#58a6ff',
     gradient: 'linear-gradient(135deg, #58a6ff20, #0a0a1005)',
-    icon: '\u2684', // die
+    icon: '\u2684',
     hot: false,
     players: 654,
+    rtp: 99.0,
+    minBet: 50,
+    maxBet: 1000000,
+    features: ['Custom Odds', 'Auto Roll', 'Provably Fair'],
   },
   {
     id: 'plinko',
@@ -69,9 +86,13 @@ const GAMES = [
     tagline: 'Watch it fall. Pray it lands.',
     color: '#ff6b35',
     gradient: 'linear-gradient(135deg, #ff6b3520, #0a0a1005)',
-    icon: '\u25BD', // down triangle
+    icon: '\u25BD',
     hot: false,
     players: 421,
+    rtp: 97.0,
+    minBet: 100,
+    maxBet: 100000,
+    features: ['3 Risk Levels', '16 Rows', 'Physics Engine'],
   },
   {
     id: 'mines',
@@ -79,9 +100,13 @@ const GAMES = [
     tagline: 'Every tap could be your fortune.',
     color: '#00ff41',
     gradient: 'linear-gradient(135deg, #00ff4120, #0a0a1005)',
-    icon: '\u2B23', // hexagon
+    icon: '\u2B23',
     hot: true,
     players: 1832,
+    rtp: 97.0,
+    minBet: 50,
+    maxBet: 500000,
+    features: ['1-24 Mines', 'Auto Pick', 'Cashout Anytime'],
   },
 ]
 
@@ -223,8 +248,32 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
   )
 }
 
+// Generate random win for the live feed
+const PLAYER_NAMES = ['ShadowKing', 'NightOwl22', 'xVenus', 'CryptoWolf', 'LuckyAce', 'Phantom_x', 'DarkMatter', 'GoldRush99', 'AceHigh', 'NeonDrift', 'VoidWalker', 'BetBoss', 'QueenB', 'RoyalFlush', 'DiamondHands']
+const GAME_NAMES = ['Blackjack', 'Crash', 'Roulette', 'Dice', 'Plinko', 'Mines']
+function randomWin() {
+  return {
+    player: PLAYER_NAMES[Math.floor(Math.random() * PLAYER_NAMES.length)],
+    game: GAME_NAMES[Math.floor(Math.random() * GAME_NAMES.length)],
+    amount: Math.floor(Math.random() * 50000) + 100,
+    multiplier: +(Math.random() * 50 + 1.1).toFixed(1),
+    currency: Math.random() > 0.3 ? 'GC' : 'SC',
+  }
+}
+
 // Live win ticker at bottom
 function LiveWinTicker() {
+  const [wins, setWins] = useState(() => [...LIVE_WINS])
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setWins(prev => [randomWin(), ...prev.slice(0, 19)])
+    }, 4000 + Math.random() * 6000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const allWins = [...wins, ...wins, ...wins]
+
   return (
     <div
       className="fixed bottom-0 left-0 md:left-64 right-0 h-10 flex items-center overflow-hidden z-10 border-t"
@@ -235,10 +284,10 @@ function LiveWinTicker() {
     >
       <motion.div
         className="flex gap-8 whitespace-nowrap"
-        animate={{ x: [0, -1500] }}
-        transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
+        animate={{ x: [0, -2000] }}
+        transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
       >
-        {[...LIVE_WINS, ...LIVE_WINS, ...LIVE_WINS].map((win, i) => (
+        {allWins.map((win, i) => (
           <span key={i} className="text-xs flex items-center gap-2">
             <span style={{ color: 'var(--text-secondary)' }}>{win.player}</span>
             <span style={{ color: 'var(--text-tertiary)' }}>won</span>
@@ -256,8 +305,17 @@ function LiveWinTicker() {
   )
 }
 
-// Jackpot banner
+// Jackpot banner with live ticking counter
 function JackpotBanner() {
+  const [jackpot, setJackpot] = useState(127450)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setJackpot(prev => prev + Math.floor(Math.random() * 50) + 5)
+    }, 2000 + Math.random() * 3000)
+    return () => clearInterval(interval)
+  }, [])
+
   return (
     <motion.div
       className="glass-elevated p-6 rounded-2xl mb-8 text-center relative overflow-hidden"
@@ -271,9 +329,12 @@ function JackpotBanner() {
       transition={{ duration: 3, repeat: Infinity }}
     >
       <p className="text-xs uppercase tracking-widest mb-2" style={{ color: 'var(--text-tertiary)' }}>
-        Vantaris Jackpot
+        Vantaris Progressive Jackpot
       </p>
-      <p
+      <motion.p
+        key={jackpot}
+        initial={{ scale: 1.05, opacity: 0.7 }}
+        animate={{ scale: 1, opacity: 1 }}
         className="font-mono text-4xl md:text-5xl font-bold"
         style={{
           background: 'linear-gradient(135deg, #c9a84c, #e8c55a, #c9a84c)',
@@ -281,8 +342,8 @@ function JackpotBanner() {
           WebkitTextFillColor: 'transparent',
         }}
       >
-        127,450 GC
-      </p>
+        {jackpot.toLocaleString()} GC
+      </motion.p>
       <p className="text-xs mt-2" style={{ color: 'var(--text-tertiary)' }}>
         Grows with every bet. Could hit any moment.
       </p>
@@ -290,7 +351,7 @@ function JackpotBanner() {
   )
 }
 
-// Game card in the lobby grid
+// Game card in the lobby grid -- rich preview with RTP, bet range, features
 function LobbyGameCard({ game }: { game: typeof GAMES[0] }) {
   return (
     <Link href={`/play/${game.id}`}>
@@ -307,11 +368,14 @@ function LobbyGameCard({ game }: { game: typeof GAMES[0] }) {
         }}
         transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
       >
+        {/* Glow bar at top */}
+        <div className="h-1 w-full" style={{ background: `linear-gradient(90deg, transparent, ${game.color}, transparent)`, opacity: 0.4 }} />
+
         <div className="p-6 md:p-8">
           {/* Hot badge */}
           {game.hot && (
             <div
-              className="absolute top-4 right-4 text-xs font-semibold px-2 py-1 rounded-full"
+              className="absolute top-5 right-4 text-[10px] font-bold px-2 py-1 rounded-full animate-pulse"
               style={{ background: '#ff2d5520', color: '#ff2d55', border: '1px solid #ff2d5530' }}
             >
               HOT
@@ -320,8 +384,8 @@ function LobbyGameCard({ game }: { game: typeof GAMES[0] }) {
 
           {/* Icon */}
           <div
-            className="text-4xl mb-4 opacity-60 group-hover:opacity-100 transition-opacity"
-            style={{ color: game.color }}
+            className="text-5xl mb-4 opacity-50 group-hover:opacity-100 transition-opacity duration-300"
+            style={{ color: game.color, filter: `drop-shadow(0 0 8px ${game.color}40)` }}
           >
             {game.icon}
           </div>
@@ -332,12 +396,34 @@ function LobbyGameCard({ game }: { game: typeof GAMES[0] }) {
           </h3>
 
           {/* Tagline */}
-          <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-sm mb-3" style={{ color: 'var(--text-secondary)' }}>
             {game.tagline}
           </p>
 
+          {/* Feature tags */}
+          <div className="flex flex-wrap gap-1 mb-4">
+            {game.features.map(f => (
+              <span key={f} className="text-[9px] px-1.5 py-0.5 rounded-full font-medium"
+                style={{ background: `${game.color}12`, color: game.color, border: `1px solid ${game.color}20` }}>
+                {f}
+              </span>
+            ))}
+          </div>
+
+          {/* Stats row */}
+          <div className="flex items-center justify-between border-t pt-3" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
+            <div>
+              <span className="text-[9px] uppercase tracking-wider block" style={{ color: 'var(--text-tertiary)' }}>RTP</span>
+              <span className="text-xs font-mono font-bold" style={{ color: game.color }}>{game.rtp}%</span>
+            </div>
+            <div className="text-right">
+              <span className="text-[9px] uppercase tracking-wider block" style={{ color: 'var(--text-tertiary)' }}>Bet Range</span>
+              <span className="text-[10px] font-mono" style={{ color: 'var(--text-secondary)' }}>{game.minBet.toLocaleString()} - {game.maxBet.toLocaleString()}</span>
+            </div>
+          </div>
+
           {/* Live players */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mt-3">
             <div
               className="w-2 h-2 rounded-full animate-pulse"
               style={{ background: game.color }}
@@ -366,6 +452,7 @@ export default function LobbyPage() {
 
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <LiveWinTicker />
+      <CasinoAmbience />
 
       {/* Main content area (offset by sidebar) */}
       <main className="ml-0 md:ml-64 pb-16 px-4 md:px-8 pt-16 md:pt-8">

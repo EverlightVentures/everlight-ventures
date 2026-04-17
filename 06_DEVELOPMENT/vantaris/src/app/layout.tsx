@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import '../styles/design-system.css'
-import { SiteNav } from '@/components/layout/SiteNav'
-import { SiteFooter } from '@/components/layout/SiteFooter'
+import { ClientLayout } from '@/components/layout/ClientLayout'
 
 export const metadata: Metadata = {
   title: 'Everlight Ventures | Innovation Meets Opportunity',
@@ -25,9 +24,7 @@ export default function RootLayout({
         />
       </head>
       <body className="noise-overlay">
-        <SiteNav />
-        {children}
-        <SiteFooter />
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   )

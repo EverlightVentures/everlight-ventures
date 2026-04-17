@@ -1,8 +1,10 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, lazy, Suspense } from 'react'
 import Link from 'next/link'
+
+const GoldParticles = lazy(() => import('@/components/shared/GoldParticles').then(m => ({ default: m.GoldParticles })))
 
 /**
  * Everlight Ventures Homepage
@@ -34,8 +36,9 @@ export default function HomePage() {
     <main className="min-h-screen" style={{ background: 'var(--vanta-void)' }}>
 
       {/* Hero */}
-      <section className="min-h-[90vh] flex flex-col items-center justify-center px-6 text-center">
-        <motion.div initial="hidden" animate="visible" variants={stagger}>
+      <section className="min-h-[90vh] flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
+        <Suspense fallback={null}><GoldParticles /></Suspense>
+        <motion.div initial="hidden" animate="visible" variants={stagger} className="relative z-10">
           <motion.p variants={fadeUp} className="text-xs uppercase tracking-widest mb-4" style={{ color: 'var(--text-tertiary)', letterSpacing: '4px' }}>
             EVERLIGHT VENTURES
           </motion.p>
