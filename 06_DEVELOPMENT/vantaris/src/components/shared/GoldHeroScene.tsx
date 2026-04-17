@@ -33,37 +33,56 @@ function Crystal() {
   return (
     <Float speed={1.2} rotationIntensity={0.2} floatIntensity={0.6}>
       <group>
-        {/* Main crystal -- bright champagne/platinum */}
+        {/* Main crystal -- translucent faces, glowing from within */}
         <mesh ref={meshRef}>
           <octahedronGeometry args={[1.6, 0]} />
           <meshPhysicalMaterial
-            color="#F0E6D0"
-            metalness={1}
+            color="#FFF8E8"
+            metalness={0.1}
             roughness={0.05}
+            transparent
+            opacity={0.25}
             emissive="#E8D48B"
-            emissiveIntensity={0.3}
+            emissiveIntensity={0.6}
             clearcoat={1}
-            clearcoatRoughness={0.1}
-            reflectivity={1}
-            envMapIntensity={2}
+            clearcoatRoughness={0.05}
+            transmission={0.6}
+            thickness={1.5}
+            ior={2.4}
+            side={THREE.DoubleSide}
           />
         </mesh>
 
-        {/* Outer glow shell */}
-        <mesh ref={glowRef} scale={1.6}>
+        {/* Dark wireframe edges */}
+        <mesh ref={glowRef}>
+          <octahedronGeometry args={[1.61, 0]} />
+          <meshBasicMaterial
+            color="#1a1520"
+            wireframe
+            transparent
+            opacity={0.7}
+          />
+        </mesh>
+
+        {/* Inner glow core */}
+        <mesh scale={0.6}>
           <octahedronGeometry args={[1.6, 0]} />
           <meshBasicMaterial
             color="#E8D48B"
             transparent
-            opacity={0.03}
-            side={THREE.BackSide}
+            opacity={0.15}
           />
         </mesh>
 
-        {/* Inner wireframe */}
-        <mesh rotation={[Math.PI / 4, 0, Math.PI / 4]}>
-          <octahedronGeometry args={[1.2, 0]} />
-          <meshBasicMaterial color="#F5EED5" wireframe transparent opacity={0.1} />
+        {/* Outer aura shell */}
+        <mesh scale={1.8}>
+          <octahedronGeometry args={[1.6, 0]} />
+          <meshBasicMaterial
+            color="#E8D48B"
+            transparent
+            opacity={0.02}
+            side={THREE.BackSide}
+          />
         </mesh>
       </group>
     </Float>

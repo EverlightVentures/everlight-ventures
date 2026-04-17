@@ -1,10 +1,8 @@
 'use client'
 
 import { motion, useScroll, useTransform, useMotionValueEvent, useInView } from 'framer-motion'
-import { lazy, Suspense, useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import Link from 'next/link'
-
-const GoldHeroScene = lazy(() => import('@/components/shared/GoldHeroScene').then(m => ({ default: m.GoldHeroScene })))
 import { TextReveal } from '@/components/shared/TextReveal'
 
 /* ================================================================
@@ -21,6 +19,7 @@ const VENTURES = [
   { name: 'Hive Mind', desc: 'Claude, Gemini, Codex, Perplexity. 42 agents. One command layer. The OS that runs Everlight.', href: '/hivemind', color: '#7C3AED', cta: 'Waitlist' },
   { name: 'HIM Loadout', desc: 'Curated gear for men. Researched. Filtered. Honest. Affiliate model, same price for you.', href: '/him-loadout', color: '#4A7C9B', cta: 'Browse Drops' },
   { name: 'Logistics', desc: 'Fulfillment, warehousing, last-mile. Where Everlight started. The legal backbone of everything.', href: '/logistics', color: '#D4963A', cta: 'Get Quote' },
+  { name: 'Sell Your Property', desc: 'Need to sell fast? We buy houses as-is for cash. No agents, no fees, no repairs. Close in as little as 7 days.', href: '/sell', color: '#27ae60', cta: 'Get Cash Offer' },
 ]
 
 // Animated counter
@@ -62,20 +61,18 @@ export default function HomePage() {
           ============================================ */}
       <section className="h-screen flex flex-col items-center justify-center px-6 text-center relative overflow-hidden">
 
-        {/* Layered ambient gradients */}
+        {/* Video background */}
+        <video
+          autoPlay muted loop playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: 0.35 }}>
+          <source src="/videos/hero-loop.mp4" type="video/mp4" />
+        </video>
+
+        {/* Gradient overlay on top of video for readability */}
         <div className="absolute inset-0" style={{
-          background: `
-            radial-gradient(ellipse 80% 60% at 50% 45%, rgba(212,175,55,0.07) 0%, transparent 70%),
-            radial-gradient(ellipse 60% 40% at 20% 80%, rgba(123,94,167,0.04) 0%, transparent 60%),
-            radial-gradient(ellipse 50% 50% at 85% 15%, rgba(212,150,58,0.03) 0%, transparent 50%)
-          `,
+          background: 'radial-gradient(ellipse 60% 60% at 50% 50%, transparent 30%, rgba(8,8,12,0.8) 100%)',
         }} />
-
-        {/* Horizontal light band */}
-        <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 h-[1px] opacity-[0.04]"
-          style={{ background: 'linear-gradient(90deg, transparent 10%, #D4AF37, transparent 90%)' }} />
-
-        <Suspense fallback={null}><GoldHeroScene /></Suspense>
 
         <motion.div style={{ y: heroY }} className="relative z-10 max-w-5xl">
 
@@ -187,8 +184,15 @@ export default function HomePage() {
       {/* ============================================
           PORTFOLIO -- Glass cards, hover lift, glow edge
           ============================================ */}
-      <section id="portfolio" className="py-32 px-6">
-        <div className="max-w-6xl mx-auto">
+      <section id="portfolio" className="py-32 px-6 relative overflow-hidden">
+        {/* Crystal video floating in background -- visible */}
+        <div className="absolute -top-20 -right-20 w-[500px] h-[500px] pointer-events-none hidden lg:block" style={{ opacity: 0.45 }}>
+          <video autoPlay muted loop playsInline className="w-full h-full object-contain" style={{ filter: 'saturate(1.2) brightness(1.1)' }}>
+            <source src="/videos/crystal-loop.mp4" type="video/mp4" />
+          </video>
+        </div>
+
+        <div className="max-w-6xl mx-auto relative z-10">
           {/* Section header */}
           <motion.div
             initial={{ opacity: 0, y: 40 }}
@@ -197,7 +201,7 @@ export default function HomePage() {
             transition={{ duration: 1 }}>
             <p className="text-[10px] uppercase tracking-[0.4em] font-medium mb-4" style={{ color: '#D4AF37' }}>Portfolio</p>
             <h2 className="text-4xl md:text-6xl font-bold leading-[1.05]" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#f0f0f5' }}>
-              Six ventures.<br />
+              Seven ventures.<br />
               <span style={{ color: '#4a4a5e' }}>One vision.</span>
             </h2>
             <p className="mt-6 text-sm max-w-lg leading-relaxed" style={{ color: '#4a4a5e' }}>
@@ -228,6 +232,23 @@ export default function HomePage() {
                       y: -3,
                     }}
                     transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
+
+                    {/* Video backgrounds per card */}
+                    {v.name === 'Vantaris Casino' && (
+                      <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover rounded-2xl" style={{ opacity: 0.25 }}>
+                        <source src="/videos/casino-lobby.mp4" type="video/mp4" />
+                      </video>
+                    )}
+                    {v.name === 'Hive Mind' && (
+                      <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover rounded-2xl" style={{ opacity: 0.2 }}>
+                        <source src="/videos/hivemind-loop.mp4" type="video/mp4" />
+                      </video>
+                    )}
+                    {v.name === 'Sell Your Property' && (
+                      <video autoPlay muted loop playsInline className="absolute inset-0 w-full h-full object-cover rounded-2xl" style={{ opacity: 0.2 }}>
+                        <source src="/videos/wholesale-loop.mp4" type="video/mp4" />
+                      </video>
+                    )}
 
                     {/* Frosted top edge highlight */}
                     <div className="absolute top-0 left-0 right-0 h-px"
@@ -264,7 +285,13 @@ export default function HomePage() {
       {/* ============================================
           BUILT TO LAST -- Clean, confident, not arrogant
           ============================================ */}
-      <section className="py-32 px-6 relative">
+      <section className="py-32 px-6 relative overflow-hidden">
+        {/* Crystal accent on left */}
+        <div className="absolute -left-32 top-1/2 -translate-y-1/2 w-[350px] h-[350px] pointer-events-none hidden md:block" style={{ opacity: 0.3 }}>
+          <video autoPlay muted loop playsInline className="w-full h-full object-contain" style={{ filter: 'saturate(1.3)' }}>
+            <source src="/videos/crystal-loop.mp4" type="video/mp4" />
+          </video>
+        </div>
         {/* Subtle silver ambient */}
         <div className="absolute inset-0 pointer-events-none" style={{
           background: 'radial-gradient(ellipse 50% 40% at 70% 40%, rgba(200,200,220,0.02) 0%, transparent 70%)',
@@ -342,7 +369,7 @@ export default function HomePage() {
               {[
                 ['Home', '/'], ['Publishing', '/publishing'], ['Casino', '/vantaris'],
                 ['Onyx', '/onyx'], ['Hive Mind', '/hivemind'], ['Logistics', '/logistics'],
-                ['Wholesale', '/sell'],
+                ['We Buy Houses', '/sell'],
               ].map(([label, href]) => (
                 <Link key={label} href={href} className="hover:text-white transition-colors duration-500">{label}</Link>
               ))}

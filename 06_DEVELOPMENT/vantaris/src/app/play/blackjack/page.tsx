@@ -949,7 +949,17 @@ export default function BlackjackPage() {
   const canSurrender = store.availableActions.includes('surrender')
 
   return (
-    <div className="min-h-screen h-screen flex flex-col overflow-hidden" style={{ background: 'var(--vanta-void)' }}>
+    <div className="min-h-screen h-screen flex flex-col overflow-hidden relative" style={{ background: 'var(--vanta-void)' }}>
+
+      {/* Environment video -- FULL visibility, the room you're playing in */}
+      <video autoPlay muted loop playsInline
+        className="fixed top-0 left-0 w-screen h-screen object-cover"
+        style={{ opacity: 0.7, zIndex: 0, pointerEvents: 'none' }}>
+        <source src="/videos/vip-penthouse.mp4" type="video/mp4" />
+      </video>
+      {/* Subtle vignette only at edges, center stays visible */}
+      <div className="fixed top-0 left-0 w-screen h-screen"
+        style={{ background: 'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 40%, rgba(5,5,7,0.6) 100%)', zIndex: 0, pointerEvents: 'none' }} />
 
       {/* Toast notification system */}
       <ToastContainer />
@@ -960,7 +970,7 @@ export default function BlackjackPage() {
 
         <div className="flex items-center gap-1.5 md:gap-3">
           {/* Back to lobby */}
-          <a href="/lobby" className="text-sm px-1.5 py-1 rounded hover:bg-white/5" style={{ color: 'var(--text-tertiary)' }}>
+          <a href="/vantaris" className="text-sm px-1.5 py-1 rounded hover:bg-white/5" style={{ color: 'var(--text-tertiary)' }}>
             {'\u2190'}
           </a>
 
@@ -1124,8 +1134,8 @@ export default function BlackjackPage() {
         </div>
       </div>
 
-      {/* === TABLE AREA === */}
-      <div id="game-area" className="flex-1 relative overflow-hidden">
+      {/* === TABLE AREA === transparent so penthouse environment shows through */}
+      <div id="game-area" className="flex-1 relative overflow-hidden" style={{ opacity: 0.8 }}>
 
         {/* 3D Casino Scene */}
         <CasinoScene3D onSeatPositions={setSeatPositions} feltColor={

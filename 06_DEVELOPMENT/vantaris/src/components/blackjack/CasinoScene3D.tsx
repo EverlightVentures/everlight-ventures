@@ -572,6 +572,7 @@ export function CasinoScene3D({ onSeatPositions, feltColor = '#0d5c2e' }: { onSe
         dpr={[1, 1.5]}
         gl={{
           antialias: true,
+          alpha: true,
           toneMapping: THREE.ACESFilmicToneMapping,
           toneMappingExposure: 1.1,
         }}
@@ -581,12 +582,12 @@ export function CasinoScene3D({ onSeatPositions, feltColor = '#0d5c2e' }: { onSe
           far: 200,
           position: [0, 5.5, 7.5],
         }}
+        style={{ background: 'transparent' }}
       >
-        {/* Fog */}
-        <fog attach="fog" args={['#04040a', 5, 30]} />
+        {/* Fog -- lighter so environment shows through */}
+        <fog attach="fog" args={['#04040a', 8, 35]} />
 
-        {/* Background color */}
-        <color attach="background" args={['#04040a']} />
+        {/* NO background color -- transparent canvas so video shows through */}
 
         {/* Ambient light -- very dim purple-dark */}
         <ambientLight color="#110a18" intensity={0.6} />

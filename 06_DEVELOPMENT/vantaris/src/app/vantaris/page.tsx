@@ -1,10 +1,11 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useBlackjackStore } from '@/lib/blackjack-store'
 import { CasinoAmbience } from '@/components/shared/CasinoAmbience'
+import { CasinoLoader } from '@/components/shared/CasinoLoader'
 
 /**
  * Vantaris Casino Lobby
@@ -440,9 +441,19 @@ function LobbyGameCard({ game }: { game: typeof GAMES[0] }) {
 
 export default function LobbyPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [casinoReady, setCasinoReady] = useState(false)
+  const onLoaderComplete = useCallback(() => setCasinoReady(true), [])
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--vanta-void)' }}>
+    <div className="min-h-screen relative" style={{ background: 'var(--vanta-void)' }}>
+      {/* Casino entry loading screen */}
+      {!casinoReady && <CasinoLoader onComplete={onLoaderComplete} />}
+
+      {/* Casino ambience video */}
+      <video autoPlay muted loop playsInline className="fixed inset-0 w-full h-full object-cover pointer-events-none" style={{ opacity: 0.1, zIndex: 0 }}>
+        <source src="/videos/casino-lobby.mp4" type="video/mp4" />
+      </video>
+
       {/* Mobile hamburger */}
       <button onClick={() => setSidebarOpen(true)}
         className="fixed top-4 left-4 z-50 md:hidden w-10 h-10 rounded-lg flex items-center justify-center"

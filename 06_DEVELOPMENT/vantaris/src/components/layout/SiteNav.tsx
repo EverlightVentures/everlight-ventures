@@ -12,7 +12,7 @@ const NAV_ITEMS = [
   { label: 'Hive Mind', href: '/hivemind' },
   { label: 'HIM Loadout', href: '/him-loadout' },
   { label: 'Logistics', href: '/logistics' },
-  { label: 'Wholesale', href: '/sell' },
+  { label: 'We Buy Houses', href: '/sell' },
 ]
 
 // Hide nav on game pages (games have their own HUD)

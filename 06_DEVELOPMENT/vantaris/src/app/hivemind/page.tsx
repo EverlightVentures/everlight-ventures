@@ -35,7 +35,12 @@ const TIERS = [
 
 export default function HiveMindPage() {
   return (
-    <main className="min-h-screen" style={{ background: 'linear-gradient(180deg, #08080c 0%, #0c0c12 50%, #0a0a10 100%)' }}>
+    <main className="min-h-screen relative" style={{ background: 'linear-gradient(180deg, #08080c 0%, #0c0c12 50%, #0a0a10 100%)' }}>
+      {/* Ambient video background */}
+      <video autoPlay muted loop playsInline className="fixed inset-0 w-full h-full object-cover pointer-events-none" style={{ opacity: 0.12, zIndex: 0 }}>
+        <source src="/videos/hivemind-loop.mp4" type="video/mp4" />
+      </video>
+      <div className="fixed inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 50%, transparent 30%, rgba(8,8,12,0.9) 100%)', zIndex: 0 }} />
 
       <PageHero
         overline="Hive Mind"
