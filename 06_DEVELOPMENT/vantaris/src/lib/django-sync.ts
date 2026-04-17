@@ -26,14 +26,19 @@
  * - POST /blackjack/api/checkout/gems/
  */
 
-// Detect if we're on the real domain vs localhost
-const IS_PRODUCTION = typeof window !== 'undefined' &&
-  window.location.hostname.includes('everlightventures')
+// Detect if we're on a production server (Oracle or domain)
+const IS_PRODUCTION = typeof window !== 'undefined' && (
+  window.location.hostname.includes('everlightventures') ||
+  window.location.hostname === '129.159.38.250' ||
+  window.location.hostname.includes('casino.')
+)
 
-// Django API base URL (Oracle E5 server)
+// Django API base URL -- Django runs on :8504 on the same Oracle server
 const DJANGO_BASE = IS_PRODUCTION
-  ? '' // same-origin on production
-  : 'https://everlightventures.io' // cross-origin in dev (won't work, that's fine)
+  ? (typeof window !== 'undefined' && window.location.hostname === '129.159.38.250'
+    ? 'http://129.159.38.250:8504'  // direct Oracle access
+    : '/api')                        // proxied on domain
+  : ''  // dev mode: no-op
 
 // CSRF token from Django cookie
 function getCSRFToken(): string {
@@ -170,6 +175,57 @@ export async function claimAdReward(): Promise<{ success: boolean; chips_added: 
 }
 
 // ============================================================
+// SHOP ITEMS (load from Django DB)
+// ============================================================
+
+export async function loadShopItems(): Promise<any[] | null> {
+  const res = await djangoFetch('/blackjack/api/shop/')
+  if (!res?.ok) return null
+  return res.json()
+}
+
+// ============================================================
+// HAND HISTORY
+// ============================================================
+
+export async function loadHandHistory(): Promise<any[] | null> {
+  const res = await djangoFetch('/blackjack/api/history/')
+  if (!res?.ok) return null
+  return res.json()
+}
+
+// ============================================================
+// GEM CHECKOUT (Stripe)
+// ============================================================
+
+export async function createGemCheckout(packageId: string): Promise<string | null> {
+  const res = await djangoFetch('/blackjack/api/checkout/gems/', {
+    method: 'POST',
+    body: JSON.stringify({ package_id: packageId }),
+  })
+  if (!res?.ok) return null
+  const data = await res.json()
+  return data.checkout_url || null
+}
+
+export async function verifyGemCheckout(sessionId: string): Promise<boolean> {
+  const res = await djangoFetch('/blackjack/api/checkout/verify/', {
+    method: 'POST',
+    body: JSON.stringify({ session_id: sessionId }),
+  })
+  return res?.ok || false
+}
+
+// ============================================================
+// GOOGLE OAUTH
+// ============================================================
+
+export function getGoogleLoginURL(): string {
+  if (!IS_PRODUCTION) return '/auth'
+  return `${DJANGO_BASE}/blackjack/oauth/google/`
+}
+
+// ============================================================
 // MIGRATION HELPER
 // Called on first load on production to sync localStorage
 // state UP to Django (one-time migration for existing players)
@@ -212,12 +268,50 @@ export async function migrateLocalToServer(): Promise<void> {
 // AUTO-INIT (call on page mount)
 // ============================================================
 
-export function initDjangoSync(): void {
+export async function initDjangoSync(): Promise<void> {
   if (!IS_PRODUCTION) {
     console.log('[django-sync] Dev mode -- syncing disabled, using localStorage')
     return
   }
   console.log('[django-sync] Production mode -- syncing to Django backend')
+
+  // Try to load profile from Django (if user is logged in via session cookie)
+  try {
+    const profile = await loadProfile()
+    if (profile) {
+      console.log('[django-sync] Profile loaded from Django:', profile)
+      // Lazy import to avoid circular dependency
+      const { useBlackjackStore } = await import('./blackjack-store')
+      const current = useBlackjackStore.getState().player
+      useBlackjackStore.setState({
+        player: {
+          ...current,
+          chips: profile.chips ?? current.chips,
+          gems: profile.gems ?? current.gems,
+          sweepsCoins: profile.sweeps_coins ?? current.sweepsCoins,
+          xp: profile.xp ?? current.xp,
+          rank: profile.rank ?? current.rank,
+          handsPlayed: profile.hands_played ?? current.handsPlayed,
+          handsWon: profile.hands_won ?? current.handsWon,
+          blackjacks: profile.blackjacks ?? current.blackjacks,
+          bestStreak: profile.best_streak ?? current.bestStreak,
+          biggestWin: profile.biggest_win ?? current.biggestWin,
+          presenceMultiplier: profile.presence_multiplier ?? current.presenceMultiplier,
+          unlockedAchievements: profile.achievements ?? current.unlockedAchievements,
+          ownedItems: profile.owned_items ?? current.ownedItems,
+          equippedOutfit: profile.avatar?.avatar_outfit ?? current.equippedOutfit,
+          equippedAura: profile.avatar?.avatar_aura ?? current.equippedAura,
+        },
+      })
+      // Store player name
+      if (profile.avatar?.avatar_name) {
+        localStorage.setItem('vantaris_player_name', profile.avatar.avatar_name)
+      }
+    }
+  } catch (err) {
+    console.warn('[django-sync] Could not load profile:', err)
+  }
+
   migrateLocalToServer()
 }
 

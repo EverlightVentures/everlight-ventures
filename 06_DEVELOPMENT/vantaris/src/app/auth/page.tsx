@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { djangoLogin, djangoRegister, djangoGuestLogin, loadProfile, IS_PRODUCTION } from '@/lib/django-sync'
+import { djangoLogin, djangoRegister, djangoGuestLogin, loadProfile, IS_PRODUCTION, getGoogleLoginURL } from '@/lib/django-sync'
 import { useBlackjackStore } from '@/lib/blackjack-store'
 
 /**
@@ -87,7 +87,7 @@ export default function AuthPage() {
   const handleGoogle = () => {
     if (IS_PRODUCTION) {
       // Django-allauth Google OAuth redirect
-      window.location.href = '/accounts/google/login/'
+      window.location.href = getGoogleLoginURL()
     } else {
       handleGuest()
     }
