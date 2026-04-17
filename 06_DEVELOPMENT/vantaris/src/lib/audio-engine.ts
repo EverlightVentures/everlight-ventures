@@ -430,13 +430,3 @@ export function setSoundEnabled(enabled: boolean) {
   soundEnabled = enabled
 }
 
-export function isSoundEnabled(): boolean {
-  return soundEnabled
-}
-
-// Wrapper that checks if sound is enabled before playing
-export function withSound(fn: () => Promise<void>) {
-  return async () => {
-    if (soundEnabled) await fn()
-  }
-}

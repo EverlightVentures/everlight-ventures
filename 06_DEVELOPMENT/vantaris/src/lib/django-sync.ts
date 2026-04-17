@@ -200,7 +200,9 @@ export async function migrateLocalToServer(): Promise<void> {
           body: JSON.stringify(parsed.state.player),
         })
       }
-    } catch {}
+    } catch (err) {
+      console.warn('[django-sync] Migration failed:', err)
+    }
   }
 
   localStorage.setItem('vantaris_migrated', 'true')

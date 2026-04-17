@@ -173,7 +173,7 @@ function scheduleIdleChatter() {
 
 let currentMood: DealerMood = 'neutral'
 
-export function getDealerMood(): DealerMood {
+function getDealerMood(): DealerMood {
   return currentMood
 }
 
@@ -224,13 +224,13 @@ export function updateMoodAfterHand(): string | null {
   return moodLine
 }
 
-export function getDealerDrawLine(): string {
+function getDealerDrawLine(): string {
   const dealerId = useBlackjackStore.getState().activeDealer.id
   const lines = DEALER_DRAW_LINES[dealerId] || DEALER_DRAW_LINES.aria
   return lines[Math.floor(Math.random() * lines.length)]
 }
 
-export function getDealerBustLine(): string {
+function getDealerBustLine(): string {
   const dealerId = useBlackjackStore.getState().activeDealer.id
   const lines = DEALER_BUST_LINES[dealerId] || DEALER_BUST_LINES.aria
   return lines[Math.floor(Math.random() * lines.length)]
@@ -597,11 +597,6 @@ let narrationPlaying = false
 
 export function queueNarration(category: string, vars: Record<string, string | number> = {}) {
   const line = pickNarration(category, vars)
-  narrationQueue.push(line)
-  if (!narrationPlaying) processNarrationQueue()
-}
-
-export function queueLine(line: string) {
   narrationQueue.push(line)
   if (!narrationPlaying) processNarrationQueue()
 }

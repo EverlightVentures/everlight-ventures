@@ -65,7 +65,9 @@ export default function RewardsPage() {
       const saved = JSON.parse(localStorage.getItem('vantaris_daily_rewards') || '{}')
       if (saved.streak) setLoginStreak(saved.streak)
       if (saved.claimed) setClaimedDays(saved.claimed)
-    } catch {}
+    } catch (err) {
+      console.warn('[rewards] Failed to load daily rewards:', err)
+    }
   }, [])
 
   const handleClaimDaily = (day: number) => {

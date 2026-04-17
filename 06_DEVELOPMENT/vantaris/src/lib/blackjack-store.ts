@@ -15,7 +15,7 @@ import type {
 } from './blackjack-engine'
 import {
   createShoe, needsReshuffle, evaluateHand,
-  generateDealSequence, hit, doubleDown, split, surrender,
+  hit, doubleDown, split, surrender,
   takeInsurance, playDealer, settleHand, getAvailableActions,
   evaluatePerfectPairs, evaluate21Plus3, evaluateLuckyLadies,
   evaluateBadBuster, evaluateProgressive,

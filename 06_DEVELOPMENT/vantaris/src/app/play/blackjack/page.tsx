@@ -19,19 +19,19 @@ import {
   startAmbientMusic, stopAmbientMusic,
   playCardDeal, playChipClink, playHit, playStand,
   playWin, playBlackjack, playLoss, playBust, playSplit,
-  playButtonClick, playNotification,
+  playButtonClick,
   setSoundEnabled,
 } from '@/lib/audio-engine'
 
 // GSAP cinematic animations
 import {
-  screenShake, lightningFlash, animateCounter,
+  screenShake, lightningFlash,
 } from '@/lib/gsap-animations'
 
 // Dealer intelligence (mood, chatter, achievements, history)
 import {
   postHandSettle, startIdleChatter, stopIdleChatter,
-  getDealerDrawLine, getDealerBustLine, recalculatePresence,
+  recalculatePresence,
   queueNarration, narrateResults, clearNarrationQueue,
 } from '@/lib/dealer-intelligence'
 
@@ -159,7 +159,9 @@ async function prewarmSpeechCache(voiceId: string) {
       if (resp.ok) {
         SPEECH_CACHE.set(`${voiceId}:${phrase}`, await resp.blob())
       }
-    } catch {}
+    } catch (err) {
+      console.warn('[tts] Speech cache prewarm failed for:', phrase, err)
+    }
   }
 }
 
@@ -769,7 +771,9 @@ export default function BlackjackPage() {
       const saved = JSON.parse(localStorage.getItem('vantaris_ad_refills') || '{}')
       if (saved.date === new Date().toDateString()) setAdRefills(saved.count)
       if (localStorage.getItem('vantaris_daily') === new Date().toDateString()) setDailyClaimed(true)
-    } catch {}
+    } catch (err) {
+      console.warn('[blackjack] Failed to load free chip state:', err)
+    }
   }, [])
 
   // Music effect (Tone.js procedural jazz)

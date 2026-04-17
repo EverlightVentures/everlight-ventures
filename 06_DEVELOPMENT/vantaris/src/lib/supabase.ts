@@ -70,7 +70,8 @@ export async function dealerSpeak(text: string, voiceId: string): Promise<Blob |
     })
     if (error) throw error
     return data as Blob
-  } catch {
+  } catch (err) {
+    console.warn('[supabase] dealerSpeak failed:', err)
     return null
   }
 }

@@ -157,12 +157,14 @@ function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) 
       <nav className="flex-1 py-4 overflow-y-auto">
         {[
           { label: 'Casino', href: '/lobby', icon: '\u2605', active: true },
+          { label: 'Wallet', href: '/wallet', icon: '\u2668' },
           { label: 'Rewards', href: '/rewards', icon: '\u2B50' },
-          { label: 'Redeem SC', href: '/redeem', icon: '\u2714' },
           { label: 'Profile', href: '/profile', icon: '\u263A' },
-          { label: 'Rules', href: '/rules', icon: '\u2696' },
-          { label: 'Tables', href: '/tables', icon: '\u265A' },
-          { label: 'Sign In', href: '/auth', icon: '\u26BF' },
+          { label: 'Redeem SC', href: '/redeem', icon: '\u2714' },
+          { label: 'Settings', href: '/settings', icon: '\u2699' },
+          { label: 'Fairness', href: '/fairness', icon: '\u2696' },
+          { label: 'Support', href: '/support', icon: '\u2753' },
+          { label: 'Rules', href: '/rules', icon: '\u2706' },
         ].map((item) => (
           <Link key={item.label} href={item.href}>
             <div

@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useBlackjackStore } from '@/lib/blackjack-store'
 
 /**
  * Vantaris Character Customization
@@ -55,7 +56,7 @@ const ACCESSORIES = [
   { id: 'crown', label: 'Crown', icon: '\uD83D\uDC51' },
 ]
 
-interface AvatarConfig {
+interface ProfileAvatarConfig {
   skinTone: string
   hairstyle: string
   outfit: string
@@ -65,7 +66,7 @@ interface AvatarConfig {
 }
 
 export default function ProfilePage() {
-  const [avatar, setAvatar] = useState<AvatarConfig>({
+  const [avatar, setAvatar] = useState<ProfileAvatarConfig>({
     skinTone: 'medium', hairstyle: 'short', outfit: 'default_suit',
     aura: 'none', accessory: 'none', name: '',
   })
@@ -77,11 +78,22 @@ export default function ProfilePage() {
       if (saved.skinTone) setAvatar(prev => ({ ...prev, ...saved }))
       const name = localStorage.getItem('vantaris_player_name') || ''
       setAvatar(prev => ({ ...prev, name }))
-    } catch {}
+    } catch (err) {
+      console.warn('[profile] Failed to load saved avatar:', err)
+    }
   }, [])
 
   const handleSave = () => {
     localStorage.setItem('vantaris_avatar', JSON.stringify(avatar))
+    // Also update Zustand store so equipped items persist and affect gameplay
+    const player = useBlackjackStore.getState().player
+    useBlackjackStore.setState({
+      player: {
+        ...player,
+        equippedOutfit: avatar.outfit,
+        equippedAura: avatar.aura,
+      },
+    })
     if (avatar.name) localStorage.setItem('vantaris_player_name', avatar.name)
   }
 
