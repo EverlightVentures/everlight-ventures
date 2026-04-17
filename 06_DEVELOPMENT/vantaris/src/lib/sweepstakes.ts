@@ -21,6 +21,7 @@
 
 import { useBlackjackStore, type GameMode } from './blackjack-store'
 import { toastWin, toastInfo } from '@/components/blackjack/VantarisToast'
+import { IS_PRODUCTION } from './django-sync'
 
 // ============================================================
 // GC PURCHASE PACKAGES (SC is always a bonus, never sold)
@@ -49,21 +50,36 @@ export const GC_PACKAGES: GCPackage[] = [
 // PURCHASE FLOW
 // ============================================================
 
-export function purchaseGCPackage(packageId: string): void {
+export async function purchaseGCPackage(packageId: string): Promise<void> {
   const pkg = GC_PACKAGES.find(p => p.id === packageId)
   if (!pkg) return
 
+  if (IS_PRODUCTION && pkg.stripePriceId) {
+    // PRODUCTION: Create Stripe checkout via Django, redirect to payment
+    try {
+      const { createGemCheckout } = await import('./django-sync')
+      const checkoutUrl = await createGemCheckout(packageId)
+      if (checkoutUrl) {
+        window.location.href = checkoutUrl
+        return
+      }
+      // Checkout creation failed -- fall through to local credit as fallback
+      toastInfo('Checkout Error', 'Could not create payment session. Credits applied locally.')
+    } catch {
+      toastInfo('Checkout Error', 'Payment unavailable. Credits applied locally.')
+    }
+  }
+
+  // DEV MODE or fallback: credit locally
   const state = useBlackjackStore.getState()
   const player = state.player
 
-  // Credit GC + SC bonus + Gems
   useBlackjackStore.setState({
     player: {
       ...player,
       chips: player.chips + pkg.gcAmount,
       sweepsCoins: player.sweepsCoins + pkg.scBonus,
       gems: player.gems + pkg.gemsBonus,
-      // SC playthrough: new SC must be wagered 1x before redemption
       scPlaythroughRequired: player.scPlaythroughRequired + pkg.scBonus,
     },
   })
