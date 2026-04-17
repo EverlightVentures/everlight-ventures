@@ -38,11 +38,11 @@ export interface GCPackage {
 }
 
 export const GC_PACKAGES: GCPackage[] = [
-  { id: 'starter', name: 'Starter', gcAmount: 10000, scBonus: 1.00, gemsBonus: 0, priceUSD: 0.99, featured: false, stripePriceId: '' },
-  { id: 'player', name: 'Player Pack', gcAmount: 50000, scBonus: 5.00, gemsBonus: 10, priceUSD: 4.99, featured: false, stripePriceId: '' },
-  { id: 'high_roller', name: 'High Roller', gcAmount: 120000, scBonus: 15.00, gemsBonus: 30, priceUSD: 9.99, featured: true, stripePriceId: '' },
-  { id: 'vip', name: 'VIP Bundle', gcAmount: 300000, scBonus: 50.00, gemsBonus: 100, priceUSD: 24.99, featured: false, stripePriceId: '' },
-  { id: 'whale', name: 'Casino Boss', gcAmount: 750000, scBonus: 150.00, gemsBonus: 300, priceUSD: 49.99, featured: false, stripePriceId: '' },
+  { id: 'starter', name: 'Starter', gcAmount: 10000, scBonus: 1.00, gemsBonus: 0, priceUSD: 0.99, featured: false, stripePriceId: 'price_1TN5NsGd8n4Fz3nAohDXKsrQ' },
+  { id: 'player', name: 'Player Pack', gcAmount: 50000, scBonus: 5.00, gemsBonus: 10, priceUSD: 4.99, featured: false, stripePriceId: 'price_1TN5NtGd8n4Fz3nAMSYyYMFW' },
+  { id: 'high_roller', name: 'High Roller', gcAmount: 120000, scBonus: 15.00, gemsBonus: 30, priceUSD: 9.99, featured: true, stripePriceId: 'price_1TN5NuGd8n4Fz3nAygL0m0BD' },
+  { id: 'vip', name: 'VIP Bundle', gcAmount: 300000, scBonus: 50.00, gemsBonus: 100, priceUSD: 24.99, featured: false, stripePriceId: 'price_1TN5NuGd8n4Fz3nAp7pPQKQ0' },
+  { id: 'whale', name: 'Casino Boss', gcAmount: 750000, scBonus: 150.00, gemsBonus: 300, priceUSD: 49.99, featured: false, stripePriceId: 'price_1TN5NvGd8n4Fz3nAowxalCQ2' },
 ]
 
 // ============================================================
