@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
 import '../styles/design-system.css'
+import { SiteNav } from '@/components/layout/SiteNav'
+import { SiteFooter } from '@/components/layout/SiteFooter'
 
 export const metadata: Metadata = {
-  title: 'Vantaris | The Darkest Star Burns Brightest',
-  description: 'Provably fair online casino. Crypto + Sweepstakes. 6 games. AI dealers. You didn\'t find Vantaris. Vantaris found you.',
-  keywords: 'casino, crypto casino, sweepstakes, provably fair, blackjack, crash, roulette, dice, plinko, mines',
+  title: 'Everlight Ventures | Innovation Meets Opportunity',
+  description: 'Everlight Ventures -- AI consulting, casino gaming, publishing, SaaS products, and real estate. Built by the Hive Mind.',
+  keywords: 'everlight ventures, vantaris casino, alley kingz, onyx pos, hive mind, publishing, wholesale',
 }
 
 export default function RootLayout({
@@ -23,7 +25,9 @@ export default function RootLayout({
         />
       </head>
       <body className="noise-overlay">
+        <SiteNav />
         {children}
+        <SiteFooter />
       </body>
     </html>
   )
