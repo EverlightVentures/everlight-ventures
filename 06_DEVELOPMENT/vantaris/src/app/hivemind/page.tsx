@@ -1,130 +1,119 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { PageHero } from '@/components/shared/PageHero'
+import { GlassCard } from '@/components/shared/GlassCard'
+import { SectionDivider } from '@/components/shared/SectionDivider'
 import { EmailCapture } from '@/components/shared/EmailCapture'
 
+const C = '#7C3AED'
+
 const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 40 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
 }
-const stagger = { visible: { transition: { staggerChildren: 0.12 } } }
+const stagger = { visible: { transition: { staggerChildren: 0.1 } } }
 
 const CAPABILITIES = [
-  { title: 'COMMAND PLANE', desc: 'Hive routes requests across coding, broker ops, automation, content, and trading review. One prompt enters. The right agents, tools, and workflows activate.' },
-  { title: 'SHARED MEMORY', desc: 'MCP resources, workspace manifests, RAG, and notes give every agent the same project context. Less repetition. Better hand-offs.' },
-  { title: 'EXECUTIVE BOARD', desc: 'Business OS shows revenue streams, incidents, approvals, broker pipeline, and the trading watchtower in one board. You see what is moving and what is broken without opening six apps.' },
-  { title: 'MONETIZATION LAYER', desc: 'Stripe, funnels, outreach, affiliate drops, digital products, and services all feed the same system instead of living as disconnected side projects.' },
+  { title: 'COMMAND PLANE', desc: 'One prompt enters. The right agents, tools, and workflows activate. Coding, ops, content, trading, brokerage -- all routed automatically.' },
+  { title: 'SHARED MEMORY', desc: 'RAG knowledge base, workspace manifests, and persistent notes give every agent the same context. No more repeating yourself.' },
+  { title: 'EXECUTIVE BOARD', desc: 'Revenue, incidents, approvals, broker pipeline, trading watchtower. One board. Zero tab-switching.' },
+  { title: 'MONETIZATION LAYER', desc: 'Stripe, funnels, outreach, digital products, services. One system instead of twelve disconnected side projects.' },
 ]
 
 const STEPS = [
-  { num: '01', title: 'CONNECT THE STACK', desc: 'Your models, your APIs, your revenue rails. Supabase, Stripe, GitHub, Google, n8n, and your chosen agents connect into one operating layer.' },
-  { num: '02', title: 'DEFINE THE CONTROL FLOW', desc: 'Workflows decide what can run automatically, what needs approval, what gets escalated, and what goes back into memory.' },
-  { num: '03', title: 'LET THE HIVE RUN', desc: 'One command triggers agents, tools, workflows, and notifications. The result comes back with context, artifacts, telemetry, and a record of what the system actually did.' },
+  { num: '01', title: 'CONNECT', desc: 'Your models, APIs, and revenue rails. Supabase, Stripe, GitHub, Google, n8n. One operating layer.' },
+  { num: '02', title: 'DEFINE', desc: 'Workflows decide what runs automatically, what needs approval, what gets escalated, what goes to memory.' },
+  { num: '03', title: 'DEPLOY', desc: 'One command triggers agents, tools, workflows, notifications. Results come back with context and a full audit trail.' },
 ]
 
 const TIERS = [
-  { name: 'Solo', price: '$29', desc: 'For solo operators who need the command plane and shared memory.' },
-  { name: 'Pro', price: '$59', desc: 'Business OS dashboard, multi-agent workflows, persistent memory, and public/private telemetry surfaces.', featured: true },
-  { name: 'Team', price: '$99', desc: 'Everything in Pro plus multi-user access, shared workflows, and approvals across the team.' },
+  { name: 'Solo', price: '$29', desc: 'Command plane + shared memory for solo operators.' },
+  { name: 'Pro', price: '$59', desc: 'Business OS, multi-agent workflows, persistent memory, telemetry.', featured: true },
+  { name: 'Team', price: '$99', desc: 'Everything in Pro + multi-user, shared workflows, approvals.' },
 ]
 
 export default function HiveMindPage() {
   return (
-    <main className="min-h-screen" style={{ background: '#0A0A0A' }}>
+    <main className="min-h-screen" style={{ background: 'linear-gradient(180deg, #08080c 0%, #0c0c12 50%, #0a0a10 100%)' }}>
 
-      <section className="min-h-[70vh] flex flex-col items-center justify-center px-6 text-center">
-        <motion.div initial="hidden" animate="visible" variants={stagger}>
-          <motion.h1 variants={fadeUp} className="text-4xl md:text-6xl font-bold"
-            style={{ fontFamily: "'Cormorant Garamond', serif", color: '#7C3AED' }}>
-            HIVE MIND
-          </motion.h1>
-          <motion.p variants={fadeUp} className="mt-4 text-xl max-w-2xl mx-auto" style={{ color: '#E5E5E5' }}>
-            Stop juggling tools. Start running one operating system.
-          </motion.p>
-          <motion.p variants={fadeUp} className="mt-4 text-sm max-w-xl mx-auto" style={{ color: '#8A8A8A' }}>
-            Agents. Workflows. Shared memory. Approvals. Revenue telemetry. One command layer for the whole machine. This is the system running Everlight Ventures right now. We are packaging it for operators who think the same way.
-          </motion.p>
-          <motion.div variants={fadeUp} className="mt-8 max-w-md mx-auto">
-            <EmailCapture source="hivemind" color="#7C3AED" buttonText="JOIN WAITLIST" successTitle="You're on the list." successDesc="Founding pricing for the first 50 members." placeholder="your@email.com" />
-          </motion.div>
-          <motion.p variants={fadeUp} className="mt-3 text-xs" style={{ color: '#8A8A8A' }}>Early access opening Q2 2026. Limited seats.</motion.p>
-        </motion.div>
-      </section>
+      <PageHero
+        overline="Hive Mind"
+        title="One operating system. Not twelve tools."
+        subtitle="Agents. Workflows. Memory. Revenue. One layer."
+        description="This is the system running Everlight Ventures right now. We are packaging it for operators who think the same way."
+        color={C}>
+        <div className="mt-10 max-w-md mx-auto">
+          <EmailCapture source="hivemind" color={C} buttonText="JOIN WAITLIST" successTitle="You're on the list." successDesc="Founding pricing for the first 50." placeholder="your@email.com" />
+          <p className="mt-3 text-[11px]" style={{ color: '#555' }}>Early access opening Q2 2026. Limited seats.</p>
+        </div>
+      </PageHero>
 
-      {/* The Problem */}
-      <section className="py-20 px-6">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-3xl mx-auto">
-          <motion.h2 variants={fadeUp} className="text-2xl font-bold mb-6" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#7C3AED' }}>
-            You have AI subscriptions. You do not have an operating system.
-          </motion.h2>
-          <motion.p variants={fadeUp} className="text-sm leading-relaxed mb-4" style={{ color: '#8A8A8A' }}>
-            Right now you are still the middleware. Strategy lives in one chat. Code lives in another. Ops tasks sit in notes. Stripe events, leads, alerts, and broker deals all happen in separate tools. The work may be smart, but the system is still fragmented.
-          </motion.p>
-          <motion.p variants={fadeUp} className="text-sm leading-relaxed" style={{ color: '#8A8A8A' }}>
-            Every context switch costs time. Every missing hand-off costs money. Every stale dashboard costs trust. If your business only runs when you are watching it, you do not have leverage yet.
-          </motion.p>
-        </motion.div>
-      </section>
+      <SectionDivider color={C} />
 
-      {/* What It Is */}
-      <section className="py-20 px-6">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-4xl mx-auto">
-          <motion.h2 variants={fadeUp} className="text-2xl font-bold mb-8" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#7C3AED' }}>
-            What It Actually Is
+      {/* Capabilities */}
+      <section className="py-28 px-6">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-100px' }} variants={stagger} className="max-w-5xl mx-auto">
+          <motion.p variants={fadeUp} className="text-[10px] uppercase tracking-[0.4em] font-medium mb-4" style={{ color: C }}>Architecture</motion.p>
+          <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-bold mb-16" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#f0f0f5' }}>
+            What it actually is.
           </motion.h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {CAPABILITIES.map(c => (
-              <motion.div key={c.title} variants={fadeUp} className="p-6 rounded-xl" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
-                <h3 className="text-xs font-bold tracking-wider mb-2" style={{ color: '#7C3AED' }}>{c.title}</h3>
-                <p className="text-xs leading-relaxed" style={{ color: '#8A8A8A' }}>{c.desc}</p>
+              <motion.div key={c.title} variants={fadeUp}>
+                <GlassCard color={C}><div className="p-7">
+                  <h3 className="text-[11px] font-bold tracking-[0.15em] mb-3" style={{ color: C }}>{c.title}</h3>
+                  <p className="text-[13px] leading-[1.8]" style={{ color: '#888' }}>{c.desc}</p>
+                </div></GlassCard>
               </motion.div>
             ))}
           </div>
         </motion.div>
       </section>
+
+      <SectionDivider color={C} />
 
       {/* How It Works */}
-      <section className="py-20 px-6">
+      <section className="py-28 px-6">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-3xl mx-auto">
-          <motion.h2 variants={fadeUp} className="text-2xl font-bold mb-8" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#7C3AED' }}>How It Works</motion.h2>
+          <motion.p variants={fadeUp} className="text-[10px] uppercase tracking-[0.4em] font-medium mb-4" style={{ color: C }}>Process</motion.p>
+          <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-bold mb-16" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#f0f0f5' }}>
+            Three steps.
+          </motion.h2>
           <div className="space-y-4">
             {STEPS.map(s => (
-              <motion.div key={s.num} variants={fadeUp} className="p-6 rounded-xl flex gap-5 items-start" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
-                <span className="text-2xl font-bold shrink-0" style={{ color: '#7C3AED', opacity: 0.4 }}>{s.num}</span>
-                <div>
-                  <h3 className="text-xs font-bold tracking-wider mb-1" style={{ color: '#7C3AED' }}>{s.title}</h3>
-                  <p className="text-xs leading-relaxed" style={{ color: '#8A8A8A' }}>{s.desc}</p>
-                </div>
+              <motion.div key={s.num} variants={fadeUp}>
+                <GlassCard color={C}><div className="p-7 flex gap-6 items-start">
+                  <span className="text-3xl font-bold shrink-0" style={{ fontFamily: "'Cormorant Garamond', serif", color: `${C}30` }}>{s.num}</span>
+                  <div>
+                    <h3 className="text-[11px] font-bold tracking-[0.15em] mb-2" style={{ color: C }}>{s.title}</h3>
+                    <p className="text-[13px] leading-[1.8]" style={{ color: '#888' }}>{s.desc}</p>
+                  </div>
+                </div></GlassCard>
               </motion.div>
             ))}
           </div>
         </motion.div>
       </section>
 
-      {/* Built In Production */}
-      <section className="py-16 px-6">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-3xl mx-auto text-center">
-          <motion.p variants={fadeUp} className="text-sm leading-relaxed" style={{ color: '#8A8A8A' }}>
-            Hive Mind is the internal system that runs Everlight Ventures. It is not being designed. It is being used. It manages broker workflows, the trading watchtower, lead funnels, content systems, and internal ops across the portfolio. What we are building for you is a productized version of what already exists. When it ships, it will not be version one. It will be the version we have been running on ourselves.
-          </motion.p>
-        </motion.div>
-      </section>
+      <SectionDivider color={C} />
 
       {/* Pricing */}
-      <section className="py-20 px-6">
+      <section className="py-28 px-6">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-4xl mx-auto">
-          <motion.h2 variants={fadeUp} className="text-2xl font-bold text-center mb-8" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#7C3AED' }}>Pricing (Planned)</motion.h2>
+          <motion.h2 variants={fadeUp} className="text-3xl font-bold text-center mb-12" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#f0f0f5' }}>Pricing (Planned)</motion.h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {TIERS.map(t => (
-              <motion.div key={t.name} variants={fadeUp} className="p-6 rounded-xl text-center"
-                style={{ background: t.featured ? '#7C3AED08' : '#1A1A1A', border: `1px solid ${t.featured ? '#7C3AED30' : '#2A2A2A'}` }}>
-                <h3 className="text-sm font-bold tracking-wider mb-3" style={{ color: t.featured ? '#7C3AED' : '#8A8A8A' }}>{t.name}</h3>
-                <p className="text-3xl font-bold" style={{ color: '#E5E5E5' }}>{t.price}<span className="text-sm font-normal" style={{ color: '#8A8A8A' }}>/mo</span></p>
-                <p className="text-xs mt-3" style={{ color: '#8A8A8A' }}>{t.desc}</p>
+              <motion.div key={t.name} variants={fadeUp}>
+                <GlassCard color={t.featured ? C : '#fff'} hover={false}><div className="p-8 text-center">
+                  <p className="text-[11px] font-bold tracking-[0.15em] mb-4" style={{ color: t.featured ? C : '#666' }}>{t.name}</p>
+                  <p className="text-4xl font-bold mb-4" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#f0f0f5' }}>{t.price}<span className="text-sm font-light" style={{ color: '#555' }}>/mo</span></p>
+                  <p className="text-[13px] leading-[1.7]" style={{ color: '#777' }}>{t.desc}</p>
+                </div></GlassCard>
               </motion.div>
             ))}
           </div>
-          <p className="text-xs text-center mt-4" style={{ color: '#8A8A8A' }}>Founding members get their tier price locked for life.</p>
+          <p className="text-[11px] text-center mt-6" style={{ color: '#555' }}>Founding members get their tier price locked for life.</p>
         </motion.div>
       </section>
     </main>

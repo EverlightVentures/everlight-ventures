@@ -1,13 +1,18 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { PageHero } from '@/components/shared/PageHero'
+import { GlassCard } from '@/components/shared/GlassCard'
+import { SectionDivider } from '@/components/shared/SectionDivider'
 import { EmailCapture } from '@/components/shared/EmailCapture'
 
+const C = '#4A7C9B'
+
 const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
+  hidden: { opacity: 0, y: 40 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
 }
-const stagger = { visible: { transition: { staggerChildren: 0.12 } } }
+const stagger = { visible: { transition: { staggerChildren: 0.1 } } }
 
 const CATEGORIES = [
   { name: 'TECH', desc: 'Gadgets, chargers, audio, and accessories that actually perform.' },
@@ -18,70 +23,70 @@ const CATEGORIES = [
   { name: 'STYLE', desc: 'Watches, bags, sunglasses, and wardrobe picks with substance.' },
 ]
 
-const STEPS = [
-  { num: '01', title: 'WE FIND IT', desc: 'Every product gets researched. If it is overpriced, overhyped, or under-built, it does not make the cut.' },
-  { num: '02', title: 'YOU DECIDE', desc: 'Browse by category. Every listing includes honest specs, use cases, and what we actually think. No paid placements.' },
-  { num: '03', title: 'YOU BUY DIRECT', desc: 'Links go straight to the brand or retailer. We earn a small affiliate commission. You pay the same price either way. No inventory. No markup. No tricks.' },
-]
-
 export default function HIMLoadoutPage() {
   return (
-    <main className="min-h-screen" style={{ background: '#0A0A0A' }}>
+    <main className="min-h-screen" style={{ background: 'linear-gradient(180deg, #08080c 0%, #0c0c12 50%, #0a0a10 100%)' }}>
 
-      <section className="min-h-[70vh] flex flex-col items-center justify-center px-6 text-center">
-        <motion.div initial="hidden" animate="visible" variants={stagger}>
-          <motion.h1 variants={fadeUp} className="text-4xl md:text-6xl font-bold"
-            style={{ fontFamily: "'Cormorant Garamond', serif", color: '#4A7C9B' }}>
-            HIM LOADOUT
-          </motion.h1>
-          <motion.p variants={fadeUp} className="mt-4 text-xl max-w-2xl mx-auto" style={{ color: '#E5E5E5' }}>
-            Gear for men who do not have time to scroll through garbage.
-          </motion.p>
-          <motion.p variants={fadeUp} className="mt-4 text-sm" style={{ color: '#8A8A8A' }}>
-            We find the products worth buying so you do not have to dig through 47 Amazon pages of sponsored junk. New drops every week.
-          </motion.p>
-        </motion.div>
-      </section>
+      <PageHero
+        overline="HIM Loadout"
+        title="Gear that earns its place."
+        subtitle="Researched. Filtered. No sponsored junk."
+        description="We find the products worth buying so you do not have to dig through 47 Amazon pages. New drops every week. You pay the same price -- we earn a commission."
+        color={C} />
+
+      <SectionDivider color={C} />
 
       {/* Categories */}
-      <section className="py-20 px-6">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-4xl mx-auto">
+      <section className="py-28 px-6">
+        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, margin: '-100px' }} variants={stagger} className="max-w-5xl mx-auto">
+          <motion.p variants={fadeUp} className="text-[10px] uppercase tracking-[0.4em] font-medium mb-4" style={{ color: C }}>Categories</motion.p>
+          <motion.h2 variants={fadeUp} className="text-3xl md:text-5xl font-bold mb-16" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#f0f0f5' }}>
+            Six verticals.<br /><span style={{ color: '#555' }}>Zero filler.</span>
+          </motion.h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {CATEGORIES.map(c => (
-              <motion.div key={c.name} variants={fadeUp} className="p-6 rounded-xl" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
-                <h3 className="text-xs font-bold tracking-wider mb-2" style={{ color: '#4A7C9B' }}>{c.name}</h3>
-                <p className="text-xs leading-relaxed" style={{ color: '#8A8A8A' }}>{c.desc}</p>
+            {CATEGORIES.map((c, i) => (
+              <motion.div key={c.name} variants={fadeUp}>
+                <GlassCard color={C}><div className="p-7">
+                  <span className="text-[40px] font-bold leading-none block mb-3" style={{ fontFamily: "'Cormorant Garamond', serif", color: 'rgba(255,255,255,0.03)' }}>{String(i + 1).padStart(2, '0')}</span>
+                  <h3 className="text-[11px] font-bold tracking-[0.15em] mb-3" style={{ color: C }}>{c.name}</h3>
+                  <p className="text-[13px] leading-[1.8]" style={{ color: '#888' }}>{c.desc}</p>
+                </div></GlassCard>
               </motion.div>
             ))}
           </div>
         </motion.div>
       </section>
 
+      <SectionDivider color={C} />
+
       {/* How It Works */}
-      <section className="py-20 px-6">
+      <section className="py-28 px-6">
         <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger} className="max-w-3xl mx-auto">
-          <motion.h2 variants={fadeUp} className="text-2xl font-bold mb-8" style={{ fontFamily: "'Cormorant Garamond', serif", color: '#4A7C9B' }}>How It Works</motion.h2>
-          <div className="space-y-4">
-            {STEPS.map(s => (
-              <motion.div key={s.num} variants={fadeUp} className="p-6 rounded-xl flex gap-5 items-start" style={{ background: '#1A1A1A', border: '1px solid #2A2A2A' }}>
-                <span className="text-2xl font-bold shrink-0" style={{ color: '#4A7C9B', opacity: 0.4 }}>{s.num}</span>
+          {[
+            { num: '01', title: 'WE FIND IT', desc: 'Every product gets researched. Overpriced, overhyped, or under-built? Cut.' },
+            { num: '02', title: 'YOU DECIDE', desc: 'Honest specs, real use cases, what we actually think. No paid placements.' },
+            { num: '03', title: 'YOU BUY DIRECT', desc: 'Links go to the brand. We earn a small affiliate cut. You pay the same either way.' },
+          ].map(s => (
+            <motion.div key={s.num} variants={fadeUp} className="mb-4">
+              <GlassCard color={C}><div className="p-7 flex gap-6 items-start">
+                <span className="text-3xl font-bold shrink-0" style={{ fontFamily: "'Cormorant Garamond', serif", color: `${C}30` }}>{s.num}</span>
                 <div>
-                  <h3 className="text-xs font-bold tracking-wider mb-1" style={{ color: '#4A7C9B' }}>{s.title}</h3>
-                  <p className="text-xs leading-relaxed" style={{ color: '#8A8A8A' }}>{s.desc}</p>
+                  <h3 className="text-[11px] font-bold tracking-[0.15em] mb-2" style={{ color: C }}>{s.title}</h3>
+                  <p className="text-[13px] leading-[1.8]" style={{ color: '#888' }}>{s.desc}</p>
                 </div>
-              </motion.div>
-            ))}
-          </div>
+              </div></GlassCard>
+            </motion.div>
+          ))}
         </motion.div>
       </section>
 
       {/* Subscribe */}
-      <section className="py-20 px-6 text-center">
-        <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={stagger}>
-          <motion.p variants={fadeUp} className="text-sm mb-6" style={{ color: '#8A8A8A' }}>New drops hit every week. Get them before they go mainstream.</motion.p>
-          <motion.div variants={fadeUp} className="max-w-md mx-auto">
-            <EmailCapture source="alley-kingz" color="#4A7C9B" buttonText="SUBSCRIBE" successTitle="You're in." successDesc="New drops straight to your inbox." />
-          </motion.div>
+      <section className="py-28 px-6 text-center">
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
+          <p className="text-sm mb-6" style={{ color: '#666' }}>New drops every week. Get them before they go mainstream.</p>
+          <div className="max-w-md mx-auto">
+            <EmailCapture source="alley-kingz" color={C} buttonText="SUBSCRIBE" successTitle="You're in." successDesc="Drops straight to your inbox." />
+          </div>
         </motion.div>
       </section>
     </main>

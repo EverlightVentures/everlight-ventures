@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation'
 
 const NAV_ITEMS = [
   { label: 'Publishing', href: '/publishing' },
-  { label: 'Casino', href: '/lobby' },
+  { label: 'Casino', href: '/vantaris' },
   { label: 'Onyx', href: '/onyx' },
   { label: 'Hive Mind', href: '/hivemind' },
   { label: 'HIM Loadout', href: '/him-loadout' },
