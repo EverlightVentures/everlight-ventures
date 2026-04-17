@@ -1047,7 +1047,9 @@ export default function BlackjackPage() {
           {/* Chips */}
           <div className="flex items-center gap-1 px-2 md:px-3 py-1 rounded-full" style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(201,168,76,0.4)' }}>
             <span className="text-[10px] md:text-xs">{'\uD83E\uDE99'}</span>
-            <span className="font-mono text-xs md:text-sm font-bold" style={{ color: 'var(--gold)' }}>{store.player.chips.toLocaleString()}</span>
+            <span className="font-mono text-xs md:text-sm font-bold" style={{ color: store.gameMode === 'sc' ? 'var(--win)' : 'var(--gold)' }}>
+              {store.gameMode === 'sc' ? store.player.sweepsCoins.toFixed(2) : store.player.chips.toLocaleString()}
+            </span>
           </div>
           {/* Gems */}
           <div className="flex items-center gap-1 px-2 md:px-3 py-1 rounded-full" style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(52,152,219,0.3)' }}>
@@ -1324,10 +1326,10 @@ export default function BlackjackPage() {
               {store.betAmount > 0 && store.betAmount < store.config.minBet && (
                 <p className="text-[9px] mt-1" style={{ color: '#ff5252' }}>Minimum bet: {store.config.minBet} {store.gameMode === 'sc' ? 'SC' : 'GC'}</p>
               )}
-              {store.betAmount > store.player.chips && (
+              {store.betAmount > (store.gameMode === 'sc' ? store.player.sweepsCoins : store.player.chips) && (
                 <p className="text-[9px] mt-1" style={{ color: '#ff5252' }}>Not enough chips! Claim free chips or lower your bet</p>
               )}
-              {store.betAmount >= store.config.minBet && store.betAmount <= store.player.chips && (
+              {store.betAmount >= store.config.minBet && store.betAmount <= (store.gameMode === 'sc' ? store.player.sweepsCoins : store.player.chips) && (
                 <p className="text-[9px] mt-1" style={{ color: 'rgba(255,255,255,0.25)' }}>
                   Table: {store.config.minBet}-{store.config.maxBet.toLocaleString()} {store.gameMode === 'sc' ? 'SC' : 'GC'}
                 </p>

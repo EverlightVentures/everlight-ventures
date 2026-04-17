@@ -348,11 +348,14 @@ export const useBlackjackStore = create<BlackjackStore>()(
   // ACTIONS
   // ============================================================
 
+  // Helper: get current balance based on game mode
+  // (not exported, used internally by all actions)
+
   setBet: (amount) => set({ betAmount: amount }),
   selectChip: (value) => {
     const state = get()
-    // Stack chips: add chip value to current bet (capped at player chips and table max)
-    const newBet = Math.min(state.betAmount + value, state.player.chips, state.config.maxBet)
+    const bal = state.gameMode === 'sc' ? state.player.sweepsCoins : state.player.chips
+    const newBet = Math.min(state.betAmount + value, bal, state.config.maxBet)
     set({ selectedChip: value, betAmount: newBet })
   },
 
@@ -840,7 +843,9 @@ export const useBlackjackStore = create<BlackjackStore>()(
   playerDouble: () => {
     const state = get()
     if (state.phase !== 'player_turn' && state.phase !== 'split_turn') return
-    if (state.player.chips < state.betAmount) return
+    const isScMode = state.gameMode === 'sc'
+    const bal = isScMode ? state.player.sweepsCoins : state.player.chips
+    if (bal < state.betAmount) return
 
     const isMainHand = state.currentHandIndex === 0
     const currentHand = isMainHand ? state.mainHand : state.splitHand!
@@ -851,7 +856,12 @@ export const useBlackjackStore = create<BlackjackStore>()(
       shoe: result.shoe,
       mainHand: isMainHand ? result.hand : state.mainHand,
       splitHand: isMainHand ? state.splitHand : result.hand,
-      player: { ...state.player, chips: state.player.chips - state.betAmount },
+      player: {
+        ...state.player,
+        chips: isScMode ? state.player.chips : state.player.chips - state.betAmount,
+        sweepsCoins: isScMode ? state.player.sweepsCoins - state.betAmount : state.player.sweepsCoins,
+        scPlaythroughWagered: isScMode ? state.player.scPlaythroughWagered + state.betAmount : state.player.scPlaythroughWagered,
+      },
     })
 
     // After double, auto-stand (or bust)
@@ -873,7 +883,9 @@ export const useBlackjackStore = create<BlackjackStore>()(
   playerSplit: () => {
     const state = get()
     if (state.phase !== 'player_turn') return
-    if (state.player.chips < state.betAmount) return
+    const isScMode = state.gameMode === 'sc'
+    const bal = isScMode ? state.player.sweepsCoins : state.player.chips
+    if (bal < state.betAmount) return
 
     const result = split(state.mainHand, state.shoe)
 
@@ -891,8 +903,13 @@ export const useBlackjackStore = create<BlackjackStore>()(
       seats,
       shoe: result.shoe,
       currentHandIndex: 0,
-      player: { ...state.player, chips: state.player.chips - state.betAmount },
-      availableActions: getAvailableActions(result.mainHand, state.config, state.player.chips - state.betAmount, state.dealerHand.cards[0], true),
+      player: {
+        ...state.player,
+        chips: isScMode ? state.player.chips : state.player.chips - state.betAmount,
+        sweepsCoins: isScMode ? state.player.sweepsCoins - state.betAmount : state.player.sweepsCoins,
+        scPlaythroughWagered: isScMode ? state.player.scPlaythroughWagered + state.betAmount : state.player.scPlaythroughWagered,
+      },
+      availableActions: getAvailableActions(result.mainHand, state.config, bal - state.betAmount, state.dealerHand.cards[0], true),
     })
   },
 
@@ -922,10 +939,14 @@ export const useBlackjackStore = create<BlackjackStore>()(
   playerInsurance: (take) => {
     const state = get()
     if (state.phase !== 'insurance') return
+    const isScMode = state.gameMode === 'sc'
 
     if (take) {
       const insured = takeInsurance(state.mainHand)
-      const newChips = state.player.chips - insured.insuranceBet
+      const cost = insured.insuranceBet
+      const newBal = isScMode
+        ? state.player.sweepsCoins - cost
+        : state.player.chips - cost
 
       // DEALER PEEK: check if dealer has blackjack
       const dealerHand = state.dealerHand
@@ -933,9 +954,7 @@ export const useBlackjackStore = create<BlackjackStore>()(
       const dealerEval = evaluateHand(revealedDealer.cards)
 
       if (dealerEval.isBlackjack) {
-        // Dealer HAS blackjack -- reveal hole card, settle immediately
-        // Insurance pays 2:1
-        const insurancePayout = insured.insuranceBet * 3 // original bet back + 2:1
+        const insurancePayout = insured.insuranceBet * 3
         set({
           phase: 'settled',
           mainHand: { ...insured, outcome: 'loss', payout: insurancePayout },
@@ -945,7 +964,8 @@ export const useBlackjackStore = create<BlackjackStore>()(
           xpEarned: 2,
           player: {
             ...state.player,
-            chips: newChips + insurancePayout,
+            chips: isScMode ? state.player.chips : newBal + insurancePayout,
+            sweepsCoins: isScMode ? newBal + insurancePayout : state.player.sweepsCoins,
             handsPlayed: state.player.handsPlayed + 1,
           },
         })
@@ -956,8 +976,12 @@ export const useBlackjackStore = create<BlackjackStore>()(
       set({
         mainHand: insured,
         phase: 'player_turn',
-        player: { ...state.player, chips: newChips },
-        availableActions: getAvailableActions(insured, state.config, newChips, state.dealerHand.cards[0], false),
+        player: {
+          ...state.player,
+          chips: isScMode ? state.player.chips : newBal,
+          sweepsCoins: isScMode ? newBal : state.player.sweepsCoins,
+        },
+        availableActions: getAvailableActions(insured, state.config, newBal, state.dealerHand.cards[0], false),
       })
     } else {
       // Declined insurance -- still peek
@@ -1049,7 +1073,8 @@ export const useBlackjackStore = create<BlackjackStore>()(
       sideBets[bet] = { ...current, active: false, bet: 0 }
     } else {
       // Turn on -- place bet
-      if (state.player.chips >= amount + state.betAmount) {
+      const bal = state.gameMode === 'sc' ? state.player.sweepsCoins : state.player.chips
+      if (bal >= amount + state.betAmount) {
         sideBets[bet] = { ...current, active: true, bet: amount }
       }
     }
