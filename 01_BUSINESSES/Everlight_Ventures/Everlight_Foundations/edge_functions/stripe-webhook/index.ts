@@ -1,25 +1,6 @@
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-const SUPABASE_URL = "https://jdqqmsmwmbsnlnstyavl.supabase.co";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, stripe-signature",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
-
-async function postSlack(webhookUrl: string, text: string): Promise<void> {
-  try {
-    await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-    });
-  } catch (err) {
-    console.error("Slack notification failed:", err);
-  }
-}
+import { SUPABASE_URL, corsHeaders, postSlack } from "../_shared/mod.ts";
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -63,8 +44,8 @@ Deno.serve(async (req: Request) => {
         signature,
         webhookSecret
       );
-    } catch (err) {
-      console.error("Webhook signature verification failed:", err.message);
+    } catch (err: unknown) {
+      console.error("Webhook signature verification failed:", (err as Error).message);
       return ok();
     }
 
@@ -146,6 +127,12 @@ Deno.serve(async (req: Request) => {
             .maybeSingle();
 
           if (!existing) {
+            // Map slug to gem amount
+            const GEM_AMOUNTS: Record<string, number> = {
+              "gems-100": 100, "gems-600": 600, "gems-1500": 1500, "gems-4000": 4000,
+            };
+            const gemAmount = GEM_AMOUNTS[slug] || 0;
+
             await supabaseAdmin.from("gem_purchases").insert({
               session_id: session.id,
               slug,
@@ -154,9 +141,105 @@ Deno.serve(async (req: Request) => {
               purchased_at: new Date().toISOString(),
             });
 
-            if (slackUrl) {
-              await postSlack(slackUrl, `[Webhook fallback] Gems "${slug}" recorded`);
+            // CREDIT GEMS to player account
+            if (gemAmount > 0) {
+              const email = session.customer_details?.email;
+              if (email) {
+                const { data: player } = await supabaseAdmin
+                  .from("player_accounts")
+                  .select("player_id")
+                  .eq("email", email)
+                  .maybeSingle();
+
+                if (player) {
+                  // Update game_currencies gems balance
+                  const { data: gemRow } = await supabaseAdmin
+                    .from("game_currencies")
+                    .select("balance")
+                    .eq("player_id", player.player_id)
+                    .eq("game_id", "blackjack")
+                    .eq("currency_name", "gems")
+                    .maybeSingle();
+
+                  if (gemRow) {
+                    await supabaseAdmin
+                      .from("game_currencies")
+                      .update({ balance: (gemRow.balance || 0) + gemAmount, updated_at: new Date().toISOString() })
+                      .eq("player_id", player.player_id)
+                      .eq("game_id", "blackjack")
+                      .eq("currency_name", "gems");
+                  } else {
+                    await supabaseAdmin.from("game_currencies").insert({
+                      player_id: player.player_id,
+                      game_id: "blackjack",
+                      currency_name: "gems",
+                      balance: gemAmount,
+                    });
+                  }
+                }
+              }
             }
+
+            if (slackUrl) {
+              await postSlack(slackUrl, `[Gems] ${gemAmount} gems credited for "${slug}" ($${((session.amount_total || 0) / 100).toFixed(2)})`);
+            }
+          }
+        } else if (productType === "chips") {
+          // CHIP PURCHASE FULFILLMENT
+          const CHIP_AMOUNTS: Record<string, number> = {
+            "chips-500": 5000, "chips-3000": 30000, "chips-8000": 80000,
+          };
+          const chipAmount = CHIP_AMOUNTS[slug] || 0;
+          const email = session.customer_details?.email;
+
+          if (chipAmount > 0 && email) {
+            const { data: player } = await supabaseAdmin
+              .from("player_accounts")
+              .select("player_id, chip_balance")
+              .eq("email", email)
+              .maybeSingle();
+
+            if (player) {
+              // Credit chip_balance on player_accounts
+              await supabaseAdmin
+                .from("player_accounts")
+                .update({ chip_balance: (player.chip_balance || 0) + chipAmount })
+                .eq("player_id", player.player_id);
+
+              // Also update game_currencies chips balance
+              const { data: chipRow } = await supabaseAdmin
+                .from("game_currencies")
+                .select("balance")
+                .eq("player_id", player.player_id)
+                .eq("game_id", "blackjack")
+                .eq("currency_name", "chips")
+                .maybeSingle();
+
+              if (chipRow) {
+                await supabaseAdmin
+                  .from("game_currencies")
+                  .update({ balance: (chipRow.balance || 0) + chipAmount, updated_at: new Date().toISOString() })
+                  .eq("player_id", player.player_id)
+                  .eq("game_id", "blackjack")
+                  .eq("currency_name", "chips");
+              } else {
+                await supabaseAdmin.from("game_currencies").insert({
+                  player_id: player.player_id,
+                  game_id: "blackjack",
+                  currency_name: "chips",
+                  balance: chipAmount,
+                });
+              }
+
+              if (slackUrl) {
+                await postSlack(slackUrl, `[Chips] ${chipAmount.toLocaleString()} GC credited to ${email} for "${slug}" ($${((session.amount_total || 0) / 100).toFixed(2)})`);
+              }
+            }
+          }
+        } else if (productType === "nos") {
+          // NOS Bottle purchase (Alley Kingz) -- record only for now
+          if (slackUrl) {
+            await postSlack(slackUrl, `[NOS] "${slug}" purchased ($${((session.amount_total || 0) / 100).toFixed(2)})`);
           }
         }
         break;
@@ -239,7 +322,7 @@ Deno.serve(async (req: Request) => {
     }
 
     return ok();
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("stripe-webhook top-level error:", err);
     // ALWAYS return 200 to Stripe
     return new Response(
