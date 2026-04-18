@@ -5,7 +5,7 @@ import { ClientLayout } from '@/components/layout/ClientLayout'
 export const metadata: Metadata = {
   title: 'Everlight Ventures | Innovation Meets Opportunity',
   description: 'Everlight Ventures -- AI consulting, casino gaming, publishing, SaaS products, and real estate. Built by the Hive Mind.',
-  keywords: 'everlight ventures, vantaris casino, alley kingz, onyx pos, hive mind, publishing, wholesale',
+  keywords: 'everlight ventures, vantaris casino, alley kingz, onyx pos, hive mind, publishing, we buy houses, sell my house fast',
 }
 
 export default function RootLayout({

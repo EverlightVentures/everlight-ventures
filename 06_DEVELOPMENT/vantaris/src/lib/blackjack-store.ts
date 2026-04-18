@@ -1045,7 +1045,9 @@ export const useBlackjackStore = create<BlackjackStore>()(
   },
 
   setDealer: (dealer) => {
-    set({ activeDealer: dealer, showDealerSelect: false })
+    // Always use the latest voiceId from DEFAULT_DEALERS
+    const canonical = DEFAULT_DEALERS.find(d => d.id === dealer.id) || dealer
+    set({ activeDealer: canonical, showDealerSelect: false })
     // Persist dealer selection
     if (typeof window !== 'undefined') {
       localStorage.setItem('vantaris_dealer', dealer.id)

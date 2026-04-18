@@ -15,9 +15,9 @@ const fadeUp = {
 const stagger = { visible: { transition: { staggerChildren: 0.1 } } }
 
 const CAPABILITIES = [
-  { title: 'COMMAND PLANE', desc: 'One prompt enters. The right agents, tools, and workflows activate. Coding, ops, content, trading, brokerage -- all routed automatically.' },
+  { title: 'COMMAND PLANE', desc: 'One prompt enters. The right agents, tools, and workflows activate. Coding, ops, content, marketing, sales -- all routed automatically.' },
   { title: 'SHARED MEMORY', desc: 'RAG knowledge base, workspace manifests, and persistent notes give every agent the same context. No more repeating yourself.' },
-  { title: 'EXECUTIVE BOARD', desc: 'Revenue, incidents, approvals, broker pipeline, trading watchtower. One board. Zero tab-switching.' },
+  { title: 'EXECUTIVE BOARD', desc: 'Revenue, incidents, approvals, deal pipeline, performance metrics. One board. Zero tab-switching.' },
   { title: 'MONETIZATION LAYER', desc: 'Stripe, funnels, outreach, digital products, services. One system instead of twelve disconnected side projects.' },
 ]
 

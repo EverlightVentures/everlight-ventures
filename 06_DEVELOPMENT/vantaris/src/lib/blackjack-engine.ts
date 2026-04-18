@@ -284,15 +284,16 @@ export function getAvailableActions(
   // Always can stand
   actions.push('stand')
 
-  // Double: only on first two cards, must have chips
-  if (hand.cards.length === 2 && !hand.doubled && playerChips >= hand.bet) {
+  // Double Down Madness: double on ANY card count, not just first two
+  // Can double multiple times as long as you have chips
+  if (!hand.doubled && playerChips >= hand.bet) {
     actions.push('double')
   }
 
-  // Split: first two cards same rank, must have chips, no existing split
+  // Split: first two cards same rank, must have chips
+  // Aces and 8s can split up to 4 times, others up to 2
   if (
     hand.cards.length === 2 &&
-    !hasSplitHand &&
     hand.cards[0].rank === hand.cards[1].rank &&
     playerChips >= hand.bet
   ) {

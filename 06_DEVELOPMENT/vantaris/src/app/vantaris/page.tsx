@@ -355,7 +355,7 @@ function JackpotBanner() {
 // Game card in the lobby grid -- rich preview with RTP, bet range, features
 function LobbyGameCard({ game }: { game: typeof GAMES[0] }) {
   return (
-    <Link href={`/play/${game.id}`}>
+    <Link href={game.id === 'blackjack' ? '/vantaris/blackjack' : `/play/${game.id}`}>
       <motion.div
         className="relative rounded-2xl overflow-hidden cursor-pointer group"
         style={{

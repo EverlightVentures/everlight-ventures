@@ -25,7 +25,7 @@ const VENTURES = [
   { name: 'HIM Loadout', desc: 'Curated gear for the modern man.', href: '/him-loadout', color: '#ff2d55', icon: '\u2606' },
   { name: 'Publishing', desc: 'Independent books. Thriller + children\'s series.', href: '/publishing', color: '#e91e63', icon: '\u270E' },
   { name: 'Logistics', desc: 'Fulfillment and last-mile delivery.', href: '/logistics', color: '#9b59b6', icon: '\u2708' },
-  { name: 'Wholesale', desc: 'Off-market properties for cash buyers.', href: '/wholesale', color: '#27ae60', icon: '\u2302' },
+  { name: 'We Buy Houses', desc: 'Need to sell fast? Cash offer in 24 hours.', href: '/sell', color: '#27ae60', icon: '\u2302' },
 ]
 
 export default function ArcadePage() {

@@ -399,11 +399,12 @@ function Hand({ cards, label, active, showValue, skinId }: {
 function DealerPanel() {
   const { activeDealer, dealerLine, speaking, showDealerSelect, togglePanel, setDealer } = useBlackjackStore()
 
+  // Use the store's DEFAULT_DEALERS as single source of truth for voice IDs
   const dealers = [
     { id: 'aria', name: 'Aria Sinclair', title: 'House Dealer', vip: false, voiceId: 'EXAVITQu4vr4xnSDxMaL', color: '#c9a84c' },
     { id: 'marcus', name: 'Marcus Vega', title: 'High Roller', vip: false, voiceId: 'onwK4e9ZLuTAKqWW03F9', color: '#ff6b35' },
-    { id: 'kanisha', name: 'Kanisha Thompson', title: 'VIP Lounge', vip: true, voiceId: 'XrExE9yKIg1WjnnlVkGX', color: '#e91e63' },
-    { id: 'bacardi', name: 'Bacardi Ice', title: 'VIP Elite', vip: true, voiceId: 'pNInz6obpgDQGcFmaJgB', color: '#00bcd4' },
+    { id: 'kanisha', name: 'Kanisha Thompson', title: 'VIP Lounge', vip: false, voiceId: 'XrExE9yKIg1WjnnlVkGX', color: '#e91e63' },
+    { id: 'bacardi', name: 'Bacardi Ice', title: 'VIP Elite', vip: false, voiceId: 'DwwuoY7Uz8AP8zrY5TAo', color: '#00bcd4' },
   ]
 
   return (
@@ -795,6 +796,14 @@ export default function BlackjackPage() {
     return () => stopIdleChatter()
   }, [])
 
+  // When dealer changes, clear speech cache and pre-warm new voice
+  useEffect(() => {
+    SPEECH_CACHE.clear()
+    if (store.voiceEnabled) {
+      prewarmSpeechCache(store.activeDealer.voiceId)
+    }
+  }, [store.activeDealer.id, store.voiceEnabled])
+
   // Sound enabled sync
   useEffect(() => {
     setSoundEnabled(store.voiceEnabled)
@@ -924,19 +933,12 @@ export default function BlackjackPage() {
   const handleChipSelect = (v: number) => { store.selectChip(v); playChipClink() }
   const handleNewRound = () => { store.newRound(); playButtonClick() }
 
-  if (showWelcome) return <WelcomeScreen onComplete={(playerName, dealerId) => {
-    // Set chosen dealer
-    const dealers = [
-      { id: 'aria', name: 'Aria Sinclair', title: 'House Dealer', vip: false, voiceId: 'EXAVITQu4vr4xnSDxMaL', color: '#c9a84c' },
-      { id: 'marcus', name: 'Marcus Vega', title: 'High Roller', vip: false, voiceId: 'onwK4e9ZLuTAKqWW03F9', color: '#ff6b35' },
-      { id: 'kanisha', name: 'Kanisha Thompson', title: 'VIP Lounge', vip: true, voiceId: 'XrExE9yKIg1WjnnlVkGX', color: '#e91e63' },
-      { id: 'bacardi', name: 'Bacardi Ice', title: 'VIP Elite', vip: true, voiceId: 'pNInz6obpgDQGcFmaJgB', color: '#00bcd4' },
-    ]
-    const dealer = dealers.find(d => d.id === dealerId) || dealers[0]
-    store.setDealer(dealer)
-    localStorage.setItem('vantaris_player_name', playerName)
+  // Skip welcome screen -- table/dealer selection now happens at /vantaris/blackjack
+  // If somehow a new player lands here directly, just mark as welcomed and continue
+  if (showWelcome) {
+    localStorage.setItem('vantaris_welcomed', 'true')
     setShowWelcome(false)
-  }} />
+  }
 
   if (loading) return <LoadingScreen onComplete={() => setLoading(false)} />
 

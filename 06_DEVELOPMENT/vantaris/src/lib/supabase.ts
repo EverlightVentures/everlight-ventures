@@ -38,7 +38,7 @@ export async function signIn(email: string, password: string) {
 export async function signInWithGoogle() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
-    options: { redirectTo: window.location.origin + '/play/blackjack' },
+    options: { redirectTo: window.location.origin + '/vantaris' },
   })
   if (error) throw error
   return data
