@@ -1675,15 +1675,20 @@ export default function BlackjackPage() {
         currentChips={store.player.chips}
         onPurchase={async (slug) => {
           try {
-            const { createCheckout } = await import('@/lib/supabase')
-            const result = await createCheckout(slug, '')
-            if (result?.url) {
-              window.location.href = result.url
-            } else {
-              console.error('No checkout URL returned:', result)
-            }
-          } catch (err) {
-            console.error('Checkout error:', err)
+            const { supabase } = await import('@/lib/supabase')
+            const { data, error } = await supabase.functions.invoke('create-checkout', {
+              body: {
+                slug,
+                success_url: window.location.origin + '/play/blackjack?checkout=success',
+                cancel_url: window.location.origin + '/play/blackjack?checkout=canceled',
+                metadata: { slug, product_type: slug.startsWith('gems') ? 'gems' : 'chips' },
+              },
+            })
+            if (error) { alert(`Payment error: ${error.message}`); return }
+            if (data?.url) { window.location.href = data.url }
+            else { alert('Could not create checkout. Try again.') }
+          } catch (err: any) {
+            alert(`Payment unavailable: ${err?.message || 'Unknown error'}`)
           }
         }}
       />

@@ -54,9 +54,10 @@ export async function purchaseGCPackage(packageId: string): Promise<void> {
   const pkg = GC_PACKAGES.find(p => p.id === packageId)
   if (!pkg) return
 
-  // ALWAYS go through Stripe -- no free credits
+  // ALWAYS go through Stripe -- no free credits, no fallbacks, no exceptions
   try {
-    const { createCheckout } = await import('./supabase')
+    const { supabase } = await import('./supabase')
+
     // Map package to the Stripe slug
     const slugMap: Record<string, string> = {
       starter: 'chips-500',
@@ -66,15 +67,28 @@ export async function purchaseGCPackage(packageId: string): Promise<void> {
       whale: 'chips-8000',
     }
     const slug = slugMap[packageId] || 'chips-500'
-    const result = await createCheckout(slug, '')
-    if (result?.url) {
-      window.location.href = result.url
+
+    const { data, error } = await supabase.functions.invoke('create-checkout', {
+      body: {
+        slug,
+        success_url: window.location.origin + '/play/blackjack?checkout=success',
+        cancel_url: window.location.origin + '/wallet?checkout=canceled',
+        metadata: { slug, product_type: 'chips' },
+      },
+    })
+
+    if (error) {
+      alert(`Payment error: ${error.message}. Please try again.`)
       return
     }
-    toastInfo('Checkout Error', 'Could not create payment session. Please try again.')
-  } catch (err) {
-    console.error('Stripe checkout error:', err)
-    toastInfo('Checkout Error', 'Payment unavailable. Please try again.')
+
+    if (data?.url) {
+      window.location.href = data.url
+    } else {
+      alert('Could not create checkout session. Please try again.')
+    }
+  } catch (err: any) {
+    alert(`Payment unavailable: ${err?.message || 'Unknown error'}. Please try again.`)
   }
 }
 
