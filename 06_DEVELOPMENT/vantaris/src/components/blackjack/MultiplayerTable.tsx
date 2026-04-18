@@ -308,9 +308,9 @@ export default function MultiplayerTable({ tableId }: { tableId: string }) {
         </div>
       </div>
 
-      {/* ===== MIDDLE: Seats (scrollable row, all visible) ===== */}
-      <div className="relative z-10 flex-1 flex items-center justify-center px-2 min-h-0">
-        <div className="flex items-end justify-center gap-1 w-full max-w-[500px]">
+      {/* ===== MIDDLE: Seats (horizontal row, all visible, no overflow) ===== */}
+      <div className="relative z-10 flex-1 flex items-center justify-center px-1 min-h-0 overflow-visible">
+        <div className="flex items-end justify-between w-full max-w-[420px] px-1">
           {seats.slice(0, table.max_seats).map((seat, i) => {
             const isCurrent = isPlayerTurn && activeSeatIndex === seat.seat_index
             const isMe = seat.user_id === myUserId

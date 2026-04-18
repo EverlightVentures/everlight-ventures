@@ -120,34 +120,41 @@ export default function SeatRenderer({
         ? 'rgba(100,100,255,0.3)'
         : 'rgba(255,255,255,0.08)'
 
-  // Empty seat -- show "Sit Down" and optionally "Invite"
+  // Empty seat -- show "Sit Down" and "Invite Friend"
   if (isEmpty) {
     return (
-      <div className="flex flex-col items-center gap-1.5">
+      <div className="flex flex-col items-center gap-1 w-[68px]">
         <motion.div
-          className="w-14 h-14 rounded-full flex items-center justify-center cursor-pointer group transition-colors"
+          className="w-10 h-10 rounded-full flex items-center justify-center cursor-pointer transition-colors"
           style={{
-            background: 'rgba(255,255,255,0.03)',
-            border: '2px dashed rgba(255,255,255,0.1)',
+            background: 'rgba(255,255,255,0.04)',
+            border: '2px dashed rgba(255,255,255,0.12)',
           }}
-          whileHover={{ scale: 1.05, borderColor: 'rgba(255,255,255,0.25)' }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.1, borderColor: 'rgba(201,168,76,0.4)' }}
+          whileTap={{ scale: 0.9 }}
           onClick={onSitDown}
         >
-          <span className="text-lg opacity-30 group-hover:opacity-60 transition-opacity">+</span>
+          <span className="text-sm opacity-40">+</span>
         </motion.div>
-        <span
-          className="text-[9px] opacity-30 hover:opacity-60 cursor-pointer transition-opacity"
+        <motion.button
           onClick={onSitDown}
+          className="text-[8px] font-bold tracking-wider px-2 py-1 rounded-md w-full"
+          style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)' }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
         >
-          SIT DOWN
-        </span>
+          SIT
+        </motion.button>
         {showInviteOption && onInvite && (
           <motion.button
             onClick={(e) => { e.stopPropagation(); onInvite(); }}
-            className="text-[8px] px-2 py-0.5 rounded-full"
-            style={{ background: 'rgba(100,100,255,0.1)', color: 'rgba(100,150,255,0.7)', border: '1px solid rgba(100,100,255,0.15)' }}
-            whileHover={{ scale: 1.05 }}
+            className="text-[8px] font-bold tracking-wider px-2 py-1 rounded-md w-full"
+            style={{
+              background: 'linear-gradient(135deg, rgba(100,100,255,0.15), rgba(150,100,255,0.1))',
+              color: 'rgba(130,160,255,1)',
+              border: '1px solid rgba(100,100,255,0.25)',
+            }}
+            whileHover={{ scale: 1.05, boxShadow: '0 0 8px rgba(100,100,255,0.2)' }}
             whileTap={{ scale: 0.95 }}
           >
             INVITE
@@ -159,8 +166,8 @@ export default function SeatRenderer({
 
   return (
     <motion.div
-      className="flex flex-col items-center gap-1.5 relative"
-      animate={{ scale: isCurrent ? 1.05 : 1 }}
+      className="flex flex-col items-center gap-1 relative w-[68px]"
+      animate={{ scale: isCurrent ? 1.08 : 1 }}
       transition={{ duration: 0.3 }}
     >
       {/* Turn timer ring */}
@@ -186,7 +193,7 @@ export default function SeatRenderer({
 
       {/* Avatar */}
       <div
-        className="w-12 h-12 rounded-full overflow-hidden flex items-center justify-center relative"
+        className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center relative"
         style={{
           border: `2px solid ${borderColor}`,
           boxShadow: isCurrent ? `0 0 12px ${borderColor}` : 'none',
