@@ -76,13 +76,14 @@ export async function dealerSpeak(text: string, voiceId: string): Promise<Blob |
   }
 }
 
-export async function createCheckout(packageId: string, profileId: string) {
+export async function createCheckout(slug: string, profileId: string) {
   const { data, error } = await supabase.functions.invoke('create-checkout', {
     body: {
-      package_id: packageId,
+      slug,
       profile_id: profileId,
       success_url: window.location.origin + '/play/blackjack?checkout=success',
       cancel_url: window.location.origin + '/play/blackjack?checkout=canceled',
+      metadata: { slug, product_type: slug.startsWith('gems') ? 'gems' : 'chips' },
     },
   })
   if (error) throw error

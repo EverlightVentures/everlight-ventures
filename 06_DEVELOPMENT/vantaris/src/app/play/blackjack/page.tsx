@@ -1672,23 +1672,19 @@ export default function BlackjackPage() {
 
       <GemStore isOpen={showGemStore} onClose={() => setShowGemStore(false)}
         currentGems={store.player.gems}
-        onPurchase={(packageId) => {
-          const packs: Record<string, { gems: number; bonus: number; gc: number }> = {
-            starter: { gems: 100, bonus: 0, gc: 500 },
-            player: { gems: 500, bonus: 100, gc: 2500 },
-            high_roller: { gems: 1200, bonus: 300, gc: 5000 },
-            vip_bundle: { gems: 3000, bonus: 1000, gc: 15000 },
-            casino_boss: { gems: 7000, bonus: 3000, gc: 50000 },
+        currentChips={store.player.chips}
+        onPurchase={async (slug) => {
+          try {
+            const { createCheckout } = await import('@/lib/supabase')
+            const result = await createCheckout(slug, '')
+            if (result?.url) {
+              window.location.href = result.url
+            } else {
+              console.error('No checkout URL returned:', result)
+            }
+          } catch (err) {
+            console.error('Checkout error:', err)
           }
-          const pack = packs[packageId]
-          if (pack) {
-            const p = store.player
-            useBlackjackStore.setState({
-              player: { ...p, gems: p.gems + pack.gems + pack.bonus, chips: p.chips + pack.gc }
-            })
-            toastWin('Gems Credited!', `+${pack.gems + pack.bonus} gems and +${pack.gc.toLocaleString()} GC`)
-          }
-          setShowGemStore(false)
         }}
       />
 
