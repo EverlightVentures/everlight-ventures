@@ -54,40 +54,28 @@ export async function purchaseGCPackage(packageId: string): Promise<void> {
   const pkg = GC_PACKAGES.find(p => p.id === packageId)
   if (!pkg) return
 
-  if (IS_PRODUCTION && pkg.stripePriceId) {
-    // PRODUCTION: Create Stripe checkout via Django, redirect to payment
-    try {
-      const { createGemCheckout } = await import('./django-sync')
-      const checkoutUrl = await createGemCheckout(packageId)
-      if (checkoutUrl) {
-        window.location.href = checkoutUrl
-        return
-      }
-      // Checkout creation failed -- fall through to local credit as fallback
-      toastInfo('Checkout Error', 'Could not create payment session. Credits applied locally.')
-    } catch {
-      toastInfo('Checkout Error', 'Payment unavailable. Credits applied locally.')
+  // ALWAYS go through Stripe -- no free credits
+  try {
+    const { createCheckout } = await import('./supabase')
+    // Map package to the Stripe slug
+    const slugMap: Record<string, string> = {
+      starter: 'chips-500',
+      player: 'chips-500',
+      high_roller: 'chips-3000',
+      vip: 'chips-3000',
+      whale: 'chips-8000',
     }
+    const slug = slugMap[packageId] || 'chips-500'
+    const result = await createCheckout(slug, '')
+    if (result?.url) {
+      window.location.href = result.url
+      return
+    }
+    toastInfo('Checkout Error', 'Could not create payment session. Please try again.')
+  } catch (err) {
+    console.error('Stripe checkout error:', err)
+    toastInfo('Checkout Error', 'Payment unavailable. Please try again.')
   }
-
-  // DEV MODE or fallback: credit locally
-  const state = useBlackjackStore.getState()
-  const player = state.player
-
-  useBlackjackStore.setState({
-    player: {
-      ...player,
-      chips: player.chips + pkg.gcAmount,
-      sweepsCoins: player.sweepsCoins + pkg.scBonus,
-      gems: player.gems + pkg.gemsBonus,
-      scPlaythroughRequired: player.scPlaythroughRequired + pkg.scBonus,
-    },
-  })
-
-  toastWin(
-    `+${pkg.gcAmount.toLocaleString()} GC`,
-    `Plus ${pkg.scBonus.toFixed(2)} SC free bonus!`
-  )
 }
 
 // ============================================================
