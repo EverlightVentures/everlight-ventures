@@ -1160,6 +1160,11 @@ export default function BlackjackPage() {
               )}
             </AnimatePresence>
           </div>
+          {/* Google profile pic */}
+          {typeof window !== 'undefined' && localStorage.getItem('vantaris_avatar_url') && (
+            <img src={localStorage.getItem('vantaris_avatar_url') || ''} alt=""
+              className="w-7 h-7 rounded-full border" style={{ borderColor: 'rgba(201,168,76,0.5)' }} />
+          )}
           {/* Chips */}
           <div className="flex items-center gap-1 px-2 md:px-3 py-1 rounded-full" style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(201,168,76,0.4)' }}>
             <span className="text-[10px] md:text-xs">{'\uD83E\uDE99'}</span>

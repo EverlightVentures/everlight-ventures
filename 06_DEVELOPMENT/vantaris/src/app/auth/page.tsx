@@ -22,10 +22,7 @@ export default function AuthPage() {
         const name = session.user.user_metadata?.display_name || session.user.email?.split('@')[0] || 'Player'
         localStorage.setItem('vantaris_player_name', name)
         localStorage.setItem('vantaris_welcomed', 'true')
-        // VIP check for 1m.rich.gee@gmail.com
-        if (session.user.email === '1m.rich.gee@gmail.com') {
-          localStorage.setItem('vantaris_vip', 'true')
-        }
+        // VIP handled by AuthProvider
         router.push('/vantaris')
       }
     })
@@ -40,9 +37,7 @@ export default function AuthPage() {
         const name = data.user.user_metadata?.display_name || email.split('@')[0]
         localStorage.setItem('vantaris_player_name', name)
         localStorage.setItem('vantaris_welcomed', 'true')
-        if (data.user.email === '1m.rich.gee@gmail.com') {
-          localStorage.setItem('vantaris_vip', 'true')
-        }
+        // VIP handled by AuthProvider
         router.push('/vantaris')
       }
     } catch (e: any) {
