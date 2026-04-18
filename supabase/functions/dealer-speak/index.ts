@@ -30,10 +30,10 @@ Deno.serve(async (req) => {
 
     // Allow per-dealer voice override (validated against allowlist)
     const ALLOWED_VOICES = [
-      "EXAVITQu4vr4xnSDxMaL", // Sarah (Aria)
-      "onwK4e9ZLuTAKqWW03F9", // Marcus
-      "XrExE9yKIg1WjnnlVkGX", // Kanisha
-      "pNInz6obpgDQGcFmaJgB", // James
+      "EXAVITQu4vr4xnSDxMaL", // Aria Sinclair
+      "onwK4e9ZLuTAKqWW03F9", // Marcus Vega
+      "XrExE9yKIg1WjnnlVkGX", // Kanisha Thompson
+      "DwwuoY7Uz8AP8zrY5TAo", // Bacardi Ice (grizzly male)
     ];
     const voiceId = (voice_id && ALLOWED_VOICES.includes(voice_id))
       ? voice_id

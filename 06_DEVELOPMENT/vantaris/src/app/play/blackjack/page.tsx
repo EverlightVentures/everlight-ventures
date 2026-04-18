@@ -13,6 +13,7 @@ import {
 } from '@/components/blackjack'
 import type { Achievement, AvatarConfig, SeatPosition } from '@/components/blackjack'
 import type { Card as CardData } from '@/lib/blackjack-engine'
+import { Natural21Overlay } from '@/components/blackjack/Natural21'
 
 // Audio engine (Tone.js procedural sounds)
 import {
@@ -118,19 +119,98 @@ const DEALER_LINES: Record<string, Record<string, string[]>> = {
     idle: ["The VIP lounge is waiting!", "Take your time, superstar."],
   },
   bacardi: {
-    deal: ["Cards are cold. Like me.", "The ice table is open. Play or leave.", "Fresh deck. Fresh victims.", "Let us see who freezes first.", "The frost deals. You receive."],
-    hit: ["Another card. Brave or foolish. We will see.", "You want more? Bold.", "Drawing from the frost.", "Take your card. Feel the chill.", "Interesting choice. The ice watches."],
-    stand: ["Standing. The ice approves.", "Firm. Like permafrost.", "You hold your ground. Noted.", "Standing pat. Calculated."],
-    bust: ["Busted. The ice is unforgiving.", "Over 21. The frost claims another.", "Too greedy. The ice punishes greed.", "Busted. Cold."],
-    win: ["You beat the Ice. That does not happen often.", "Victory at the frost table. Impressive.", "A rare thaw. Take your chips.", "The Ice bows. Do not expect it again.", "You earned that. Respect."],
-    blackjack: ["Natural 21 at the ice table. Legends will speak of this.", "Blackjack. The frost has never seen that play.", "Twenty one. Pure. Cold. Perfect.", "Flawless. Even Bacardi Ice is speechless."],
-    push: ["Push. The ice and the player are equal. For now.", "A draw. Neither breaks.", "Stalemate. The frost holds."],
-    dealer_bust: ["The ice cracked. It will not happen twice.", "I busted. Savor it. It is rare.", "The frost melted. Temporarily.", "Take your chips. The ice will rebuild."],
-    surrender: ["Surrendering at the ice table? Smart. Most do not survive.", "Walking away. The survivors always do."],
-    insurance: ["Ace in the frost. Insure yourself. Or do not.", "An Ace stares you down. Your call."],
-    split: ["Splitting at the ice table. Dangerous. I like it.", "Two hands against the frost. Ambitious."],
-    charlie: ["Six cards against the Ice. You have earned my respect.", "Six and still standing. The frost salutes you."],
-    idle: ["The ice waits for no one.", "Still here? Then play.", "Silence at the frost table. That is either wisdom or fear.", "The longer you wait, the colder it gets.", "Make your move. The ice does not negotiate."],
+    deal: [
+      "Cards are cold. Like me.", "The ice table is open. Play or leave.", "Fresh deck. Fresh victims.",
+      "Let us see who freezes first.", "The frost deals. You receive.", "Your cards. Handle them wisely.",
+      "Dealt. The frost shows no favorites.", "The game begins. The ice watches everything.",
+      "Two cards. One decision. Infinite consequences.", "The table is live. Show me what you have.",
+      "I deal. You decide. That is the arrangement.", "Every card I give you is a test.",
+    ],
+    hit: [
+      "Another card. Brave or foolish. We will see.", "You want more? Bold.", "Drawing from the frost.",
+      "Take your card. Feel the chill.", "Interesting choice. The ice watches.",
+      "Hitting. The brave and the reckless make the same move. Intent separates them.",
+      "One more from the deck. The frost does not judge. I do.",
+      "You want another. Confidence or desperation. We will find out.",
+      "Drawing. Every card changes the equation.", "Hit. The ice delivers what the ice delivers.",
+    ],
+    stand: [
+      "Standing. The ice approves.", "Firm. Like permafrost.", "You hold your ground. Noted.",
+      "Standing pat. Calculated.", "Discipline. The frost respects it.",
+      "You stopped. That takes more courage than hitting sometimes.", "Holding. Smart.",
+      "Standing firm. The mark of a player who understands the game.",
+    ],
+    bust: [
+      "Busted. The ice is unforgiving.", "Over 21. The frost claims another.",
+      "Too greedy. The ice punishes greed.", "Busted. Cold.",
+      "Over. The table takes what the table takes.", "Gone. The frost does not mourn.",
+      "Twenty-one was the ceiling. You broke through it. Wrong direction.",
+      "Bust. Every chip you bet on that hand belongs to the frost now.",
+    ],
+    win: [
+      "You beat the Ice. That does not happen often.", "Victory at the frost table. Impressive.",
+      "A rare thaw. Take your chips.", "The Ice bows. Do not expect it again.",
+      "You earned that. Respect.", "Winner. The frost acknowledges skill when it sees it.",
+      "Take your chips. You earned every one of them.", "Victory. Cold and clean. Just how I like it.",
+      "You outplayed the house. That is not luck. That is talent.",
+      "The ice lost. It happens. Rarely. You made it happen.",
+    ],
+    blackjack: [
+      "Natural 21 at the ice table. Legends will speak of this.",
+      "Blackjack. The frost has never seen that play.", "Twenty one. Pure. Cold. Perfect.",
+      "Flawless. Even Bacardi Ice is speechless.",
+      "Natural blackjack. In twenty years, that moment never gets old.",
+      "Twenty-one on the first two cards. The ice table has a new chapter in its history.",
+      "Blackjack. If I could feel warmth, I would feel it now.",
+      "Natural 21. The kind of hand that makes other players leave the table.",
+      "That is the hand that separates tourists from players. Congratulations.",
+      "Blackjack. The frost cracks. The crowd stares. This is why you came here.",
+    ],
+    push: [
+      "Push. The ice and the player are equal. For now.", "A draw. Neither breaks.",
+      "Stalemate. The frost holds.", "Push. Respect between equals.",
+      "Neither wins. That is rare at this table. Most hands have a clear loser.",
+    ],
+    dealer_bust: [
+      "The ice cracked. It will not happen twice.", "I busted. Savor it. It is rare.",
+      "The frost melted. Temporarily.", "Take your chips. The ice will rebuild.",
+      "Even I make mistakes. Enjoy it. It will not happen again tonight.",
+      "The house fell. A rare sight. The frost rebuilds faster than you think.",
+    ],
+    surrender: [
+      "Surrendering at the ice table? Smart. Most do not survive.",
+      "Walking away. The survivors always do.", "Half your bet back. Half your dignity. Fair trade.",
+      "Surrender. The wise know when to fold. The foolish call it weakness.",
+    ],
+    insurance: [
+      "Ace in the frost. Insure yourself. Or do not.", "An Ace stares you down. Your call.",
+      "Insurance. The question is whether you trust the ice or fear it.",
+      "My Ace is showing. You decide how much that frightens you.",
+    ],
+    split: [
+      "Splitting at the ice table. Dangerous. I like it.", "Two hands against the frost. Ambitious.",
+      "Split. Now you fight the ice on two fronts. Bold strategy.",
+      "Splitting. Twice the risk. Twice the reward. Twice the ways to lose.",
+    ],
+    charlie: [
+      "Six cards against the Ice. You have earned my respect.",
+      "Six and still standing. The frost salutes you.",
+      "Six cards without busting. In all my years, I have seen this maybe five times.",
+    ],
+    idle: [
+      "The ice waits for no one.", "Still here? Then play.",
+      "Silence at the frost table. That is either wisdom or fear.",
+      "The longer you wait, the colder it gets.", "Make your move. The ice does not negotiate.",
+      "I do not fill silence with small talk. I fill it with expectation.",
+      "The table is open. Your chips are waiting. Your excuses are not.",
+      "Thinking is good. Overthinking is fatal.", "The frost respects decisiveness.",
+      "Every second you hesitate, I learn something about you.",
+      "I have all night. Your bankroll does not.",
+      "The ice table was not built for the timid.",
+      "Place a bet or vacate the seat. Those are the only two options.",
+      "Quiet at the table. Good. Noise is for amateurs.",
+      "You are studying the cards. I am studying you.",
+    ],
   },
 }
 
@@ -220,23 +300,31 @@ async function speakLine(text: string, voiceId: string) {
 
 const lastSpokenRef: Record<string, string> = {}
 
+// Hard-coded voice ID map -- single source of truth, cannot be overridden by stale cache
+const VOICE_IDS: Record<string, string> = {
+  aria: 'EXAVITQu4vr4xnSDxMaL',
+  marcus: 'onwK4e9ZLuTAKqWW03F9',
+  kanisha: 'XrExE9yKIg1WjnnlVkGX',
+  bacardi: 'DwwuoY7Uz8AP8zrY5TAo',
+}
+
 function useDealerSpeak() {
   const { activeDealer, voiceEnabled, phase, outcome } = useBlackjackStore()
 
   const speak = useCallback((category: string) => {
     const lines = DEALER_LINES[activeDealer.id]?.[category] || DEALER_LINES.aria.idle
-    // Never repeat the last spoken line in this category
     const lastKey = `${activeDealer.id}:${category}`
     let line = lines[Math.floor(Math.random() * lines.length)]
     if (lines.length > 1 && line === lastSpokenRef[lastKey]) {
-      // Pick a different one
       const others = lines.filter(l => l !== lastSpokenRef[lastKey])
       line = others[Math.floor(Math.random() * others.length)]
     }
     lastSpokenRef[lastKey] = line
     useBlackjackStore.getState().setDealerLine(line)
     if (voiceEnabled) {
-      speakLine(line, activeDealer.voiceId)
+      // ALWAYS use the hard-coded voice ID, never trust persisted state
+      const voiceId = VOICE_IDS[activeDealer.id] || activeDealer.voiceId
+      speakLine(line, voiceId)
     }
   }, [activeDealer, voiceEnabled])
 
@@ -737,12 +825,17 @@ export default function BlackjackPage() {
   const store = useBlackjackStore()
   const speak = useDealerSpeak()
   const [showWelcome, setShowWelcome] = useState(false)
+  const [showNatural21, setShowNatural21] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  // SSR guard -- nothing renders until client-side mount
+  useEffect(() => { setMounted(true) }, [])
 
   // Check localStorage on mount only (avoids SSR hydration mismatch)
   useEffect(() => {
     if (isNewPlayer()) setShowWelcome(true)
   }, [])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [particleTrigger, setParticleTrigger] = useState(0)
   const [particleType, setParticleType] = useState<'blackjack' | 'win' | 'loss' | null>(null)
 
@@ -791,7 +884,7 @@ export default function BlackjackPage() {
     initDjangoSync() // prepare backend connection (no-op in dev)
     // Pre-warm speech cache with common dealer phrases (background, non-blocking)
     if (store.voiceEnabled) {
-      prewarmSpeechCache(store.activeDealer.voiceId)
+      prewarmSpeechCache(VOICE_IDS[store.activeDealer.id] || store.activeDealer.voiceId)
     }
     return () => stopIdleChatter()
   }, [])
@@ -800,7 +893,8 @@ export default function BlackjackPage() {
   useEffect(() => {
     SPEECH_CACHE.clear()
     if (store.voiceEnabled) {
-      prewarmSpeechCache(store.activeDealer.voiceId)
+      const vid = VOICE_IDS[store.activeDealer.id] || store.activeDealer.voiceId
+      prewarmSpeechCache(vid)
     }
   }, [store.activeDealer.id, store.voiceEnabled])
 
@@ -825,6 +919,7 @@ export default function BlackjackPage() {
     const gameArea = document.getElementById('game-area')
 
     if (store.outcome === 'blackjack') {
+      setShowNatural21(true) // trigger video celebration
       setParticleType('blackjack')
       setParticleTrigger(p => p + 1)
       playBlackjack()      // brass fanfare + shimmer
@@ -919,8 +1014,10 @@ export default function BlackjackPage() {
   const handleSplit = () => { store.playerSplit(); speak('split'); playSplit() }
   const handleSurrender = () => { store.playerSurrender(); speak('surrender'); playStand() }
   const handleInsurance = (take: boolean) => { store.playerInsurance(take); speak(take ? 'insurance' : 'deal'); if (take) playChipClink() }
+  const [lastSideBets, setLastSideBets] = useState<typeof store.sideBets | null>(null)
   const handleDeal = () => {
     setLastBet(store.betAmount) // save for REBET
+    setLastSideBets({ ...store.sideBets }) // save side bets for REBET
     clearNarrationQueue()
     queueNarration('cards_out')
     store.deal(); playButtonClick(); playChipClink()
@@ -928,19 +1025,23 @@ export default function BlackjackPage() {
   const handleRebet = () => {
     if (lastBet > 0 && lastBet <= store.player.chips) {
       store.setBet(lastBet)
+      // Restore side bets from last hand
+      if (lastSideBets) {
+        useBlackjackStore.setState({ sideBets: { ...lastSideBets, luckyLadies: { ...lastSideBets.luckyLadies, result: null, payout: 0 }, progressive: { ...lastSideBets.progressive, result: null, payout: 0 } } })
+      }
     }
   }
   const handleChipSelect = (v: number) => { store.selectChip(v); playChipClink() }
   const handleNewRound = () => { store.newRound(); playButtonClick() }
 
+  // SSR guard -- return nothing during server-side prerender
+  if (!mounted) return <div className="min-h-screen" style={{ background: '#050507' }} />
+
   // Skip welcome screen -- table/dealer selection now happens at /vantaris/blackjack
-  // If somehow a new player lands here directly, just mark as welcomed and continue
   if (showWelcome) {
     localStorage.setItem('vantaris_welcomed', 'true')
     setShowWelcome(false)
   }
-
-  if (loading) return <LoadingScreen onComplete={() => setLoading(false)} />
 
   const skinId = store.player.equippedDeckSkin
   const rankColor = RANK_COLORS[store.player.rank] || '#888'
@@ -965,6 +1066,9 @@ export default function BlackjackPage() {
 
       {/* Toast notification system */}
       <ToastContainer />
+
+      {/* Natural 21 video celebration */}
+      <Natural21Overlay show={showNatural21} onDone={() => setShowNatural21(false)} />
 
       {/* === TOP BAR === */}
       <div className="flex items-center justify-between px-2 md:px-6 py-2 md:py-2.5 border-b relative z-20"

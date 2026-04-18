@@ -1070,13 +1070,22 @@ export const useBlackjackStore = create<BlackjackStore>()(
     const state = get()
     const sideBets = { ...state.sideBets }
     const current = sideBets[bet]
-    if (current.active) {
-      // Turn off -- refund bet
+
+    if (amount === 0) {
+      // Clear this side bet (called when user long-presses or wants to remove)
       sideBets[bet] = { ...current, active: false, bet: 0 }
-    } else {
-      // Turn on -- place bet
+    } else if (current.active) {
+      // Already active -- ADD more chips to it (stack bets)
       const bal = state.gameMode === 'sc' ? state.player.sweepsCoins : state.player.chips
-      if (bal >= amount + state.betAmount) {
+      const totalBets = state.betAmount + Object.values(sideBets).reduce((sum, sb) => sum + sb.bet, 0)
+      if (bal >= totalBets + amount) {
+        sideBets[bet] = { ...current, bet: current.bet + amount }
+      }
+    } else {
+      // Turn on -- place initial bet
+      const bal = state.gameMode === 'sc' ? state.player.sweepsCoins : state.player.chips
+      const totalBets = state.betAmount + Object.values(sideBets).reduce((sum, sb) => sum + sb.bet, 0)
+      if (bal >= totalBets + amount) {
         sideBets[bet] = { ...current, active: true, bet: amount }
       }
     }
@@ -1111,14 +1120,14 @@ export const useBlackjackStore = create<BlackjackStore>()(
       // Merge persisted data with fresh defaults on hydration
       merge: (persisted: any, current) => {
         if (!persisted) return current
-        // Restore dealer from localStorage
+        // ALWAYS restore dealer from DEFAULT_DEALERS (source of truth for voice IDs)
+        // Check both localStorage key and persisted state for dealer ID
         let activeDealer = current.activeDealer
-        if (typeof window !== 'undefined') {
-          const savedDealerId = localStorage.getItem('vantaris_dealer')
-          if (savedDealerId) {
-            const found = DEFAULT_DEALERS.find(d => d.id === savedDealerId)
-            if (found) activeDealer = found
-          }
+        const savedId = (typeof window !== 'undefined' ? localStorage.getItem('vantaris_dealer') : null)
+          || persisted?.activeDealer?.id
+        if (savedId) {
+          const found = DEFAULT_DEALERS.find(d => d.id === savedId)
+          if (found) activeDealer = found // Always uses latest voice IDs
         }
         // One-time test deposit: 10K chips if below 100
         const mergedPlayer = { ...FRESH_PLAYER, ...(persisted.player || {}) }
