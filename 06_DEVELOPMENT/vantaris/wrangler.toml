@@ -1,0 +1,17 @@
+# Vantaris -- Cloudflare Pages deployment config
+#
+# This file tells Wrangler how to deploy the Next.js app to Cloudflare Pages.
+# The actual project is managed through the Cloudflare dashboard (auto-deploy
+# on git push), but this file allows local `npm run pages:deploy` commands
+# and declares environment bindings.
+
+name = "vantaris"
+compatibility_date = "2026-04-18"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
+
+# Environment variables available at build + runtime.
+# Secrets (API keys) are set in the Cloudflare dashboard, NOT here.
+[vars]
+NEXT_PUBLIC_SUPABASE_URL = "https://jdqqmsmwmbsnlnstyavl.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkcXFtc213bWJzbmxuc3R5YXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTk5ODMsImV4cCI6MjA4ODM5NTk4M30.9BDviI2WR46sphcS3uzKapcKbslYpMO4PdSEPFrv3Ww"
