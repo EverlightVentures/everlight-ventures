@@ -8,8 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "pages:build": "npx @cloudflare/next-on-pages@1",
-    "pages:deploy": "npm run pages:build && npx wrangler pages deploy .vercel/output/static"
+    "deploy": "npm run build && npx wrangler pages deploy out --project-name=everlightventures"
   },
   "dependencies": {
     "next": "^15.2.0",
@@ -34,7 +33,6 @@
     "@types/node": "^22.0.0",
     "@types/three": "^0.184.0",
     "postcss": "^8.5.0",
-    "@cloudflare/next-on-pages": "^1.13.0",
     "wrangler": "^3.90.0"
   },
   "engines": {
