@@ -1,0 +1,62 @@
+name: Deploy Vantaris to Cloudflare Pages
+
+# Triggers: every push to main that changes files in 06_DEVELOPMENT/vantaris
+# or the workflow itself. Also manually via "Run workflow" button.
+# This replaces the dead Cloudflare Pages GitHub App webhook that broke
+# when Lovable was removed from the account.
+on:
+  push:
+    branches: [main]
+    paths:
+      - '06_DEVELOPMENT/vantaris/**'
+      - '.github/workflows/deploy-vantaris.yml'
+  workflow_dispatch: {}
+
+# Prevent multiple concurrent deploys racing each other
+concurrency:
+  group: deploy-vantaris-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    defaults:
+      run:
+        working-directory: 06_DEVELOPMENT/vantaris
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Build for Cloudflare Pages
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: https://jdqqmsmwmbsnlnstyavl.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkcXFtc213bWJzbmxuc3R5YXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTk5ODMsImV4cCI6MjA4ODM5NTk4M30.9BDviI2WR46sphcS3uzKapcKbslYpMO4PdSEPFrv3Ww
+        run: npx @cloudflare/next-on-pages@1
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # Keeps the EXISTING project -- same URL, same custom domain
+          command: pages deploy .vercel/output/static --project-name=everlightventures --branch=main
+          workingDirectory: 06_DEVELOPMENT/vantaris
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print deploy URL
+        if: always()
+        run: |
+          echo "::notice::Deployed https://everlightventures.pages.dev"
+          echo "::notice::Custom domain https://everlightventures.io"
