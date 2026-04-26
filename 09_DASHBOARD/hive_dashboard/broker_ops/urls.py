@@ -29,8 +29,9 @@ urlpatterns = [
     path("api/commissions/", views.api_commission_summary, name="api_commission_summary"),
 
     # Public endpoints (no auth - for Lovable site forms)
-    path("api/public/lead/",  views.public_submit_lead,  name="public_submit_lead"),
-    path("api/public/offer/", views.public_submit_offer, name="public_submit_offer"),
+    path("api/public/lead/",          views.public_submit_lead,           name="public_submit_lead"),
+    path("api/public/offer/",         views.public_submit_offer,          name="public_submit_offer"),
+    path("api/public/property-lead/", views.public_submit_property_lead,  name="public_submit_property_lead"),
 
     # Wholesale pipeline
     path("wholesale/",                              views.wholesale_dashboard,    name="wholesale_dashboard"),

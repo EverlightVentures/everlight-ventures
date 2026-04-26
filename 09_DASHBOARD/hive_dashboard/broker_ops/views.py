@@ -286,6 +286,170 @@ def public_submit_offer(request):
 
 
 # ---------------------------------------------------------------------------
+# PUBLIC: Seller property lead intake from /sell page on everlightventures.io
+# Creates PropertyLead with status=new, organic source, high motivation.
+# Compliance gates: CA pre-foreclosure flagged for attorney review, NC blocked.
+# ---------------------------------------------------------------------------
+
+# Active wholesale states from Wholesale/compliance/state_gates.json (mirrored here
+# for fast access without filesystem hits per request).
+ACTIVE_WHOLESALE_STATES = {"GA", "TX", "FL", "MO", "AZ", "TN", "CA", "OH"}
+LICENSE_REQUIRED_STATES = {"NC"}  # block list per HB 797
+PREFORECLOSURE_BLOCKED_STATES = {"CA"}  # CC 2945 + 1695 attorney wrapper required
+
+# Phrases that indicate seller is in pre-foreclosure / AB 519 expanded default.
+# CC 1695 + 2945 territory. Per Justine 2026-04-25.
+_PF_KEYWORDS = (
+    "foreclosure", "foreclos", "nod ", "notice of default",
+    "behind on", "behind payments", "missed payment", "late on mortgage",
+    "bank taking", "losing my home", "losing the house",
+    "cant pay", "can't pay", "can not pay",
+)
+# Stronger signal: auction or trustee sale scheduled. Distinct because the
+# rescission window collapses to 8am day-of-sale -- no compliant timeline.
+_AUCTION_KEYWORDS = (
+    "auction", "trustee sale", "trustees sale", "trustee's sale",
+    "sale date", "sheriff sale", "scheduled to be sold",
+)
+
+
+def _detect_state(address: str) -> str:
+    """Best-effort 2-letter state extraction from a free-text US address.
+    Prefer the 2-letter code immediately preceding a 5-digit zip; fall back
+    to the trailing 2-letter code. Avoids picking city abbreviations
+    like ", LA," for Los Angeles when CA appears later before the zip."""
+    import re
+    if not address:
+        return ""
+    up = address.upper().strip().rstrip(".,")
+    # Strongest signal: STATE ZIP at the end.
+    m = re.search(r"\b([A-Z]{2})[ ,]+\d{5}(?:-\d{4})?\s*$", up)
+    if m:
+        return m.group(1)
+    # Fallback: last ", XX" before end-of-string.
+    m = re.search(r",\s*([A-Z]{2})\s*$", up)
+    return m.group(1) if m else ""
+
+
+def _detect_preforeclosure(text: str) -> bool:
+    if not text:
+        return False
+    low = text.lower()
+    return any(k in low for k in _PF_KEYWORDS)
+
+
+def _detect_auction(text: str) -> bool:
+    if not text:
+        return False
+    low = text.lower()
+    return any(k in low for k in _AUCTION_KEYWORDS)
+
+
+@csrf_exempt
+@require_POST
+def public_submit_property_lead(request):
+    """
+    Public endpoint for inbound seller leads from everlightventures.io/sell.
+
+    These are ORGANIC leads (seller raised hand) so we create them at high
+    motivation and route to a human-callback queue rather than auto-outreach.
+
+    Compliance: CA + foreclosure-language => freeze auto-actions, flag for
+    attorney review per CC 2945/1695. NC => create but mark blocked.
+    """
+    rate_limited = _check_rate_limit(request, "public_submit_property_lead", max_requests=20, window_seconds=60)
+    if rate_limited:
+        return rate_limited
+
+    try:
+        payload = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "invalid JSON"}, status=400)
+
+    name = str(payload.get("name", "")).strip()[:200]
+    email = str(payload.get("email", "")).strip().lower()[:254]
+    phone = str(payload.get("phone", "")).strip()[:30]
+    address = str(payload.get("address", "")).strip()[:300]
+    situation = str(payload.get("situation", "")).strip()[:2000]
+    user_flagged_pf = bool(payload.get("preforeclosure", False))
+
+    if not (name and email and address):
+        return JsonResponse({"error": "missing required: name, email, address"}, status=400)
+
+    state = (str(payload.get("state", "")).strip().upper() or _detect_state(address))[:2]
+    is_pf = user_flagged_pf or _detect_preforeclosure(situation)
+    has_auction = _detect_auction(situation)
+
+    tags = ["organic", "public_form"]
+    notes_lines = [f"Source: everlightventures.io/sell", f"Submitted situation: {situation or '(none)'}"]
+
+    # Compliance gates
+    if state in LICENSE_REQUIRED_STATES:
+        tags.append("state_blocked_license")
+        notes_lines.append(f"COMPLIANCE: {state} requires broker license (NC HB 797). Do not contact, refer out or pass.")
+    elif state and state not in ACTIVE_WHOLESALE_STATES:
+        tags.append("state_not_active")
+        notes_lines.append(f"NOTE: {state} is not in active wholesale rotation. Manual review for JV referral.")
+
+    # Auction-scheduled = harder block than NOD-filed (rescission collapses to 8am DOS).
+    if has_auction and state in PREFORECLOSURE_BLOCKED_STATES:
+        tags.append("ca_auction_NO_OUTRIGHT")
+        notes_lines.append(
+            "COMPLIANCE: CA + auction/trustee sale language. "
+            "Per CC 1695 the rescission window collapses to 8am day-of-sale. "
+            "No compliant timeline exists. REFER OUT, do not contract."
+        )
+    elif is_pf and state in PREFORECLOSURE_BLOCKED_STATES:
+        tags.append("ca_preforeclosure_BLOCKED")
+        notes_lines.append(
+            "COMPLIANCE: CA + AB 519 expanded default. CC 1695/2945 apply. "
+            "Notarized 5-day rescission, Spanish translation if applicable. "
+            "Do not contact without attorney supervision."
+        )
+    elif is_pf:
+        tags.append("preforeclosure_flagged")
+        notes_lines.append("Pre-foreclosure flag set. Use state-specific disclosure pack (SB1577/HB2537/etc).")
+
+    lead_type = "pre_foreclosure" if (is_pf or has_auction) else "other"
+    # Organic inbound starts high. Compliance-flagged drops until reviewed.
+    if "ca_auction_NO_OUTRIGHT" in tags or "ca_preforeclosure_BLOCKED" in tags:
+        motivation = 0  # do not auto-route
+    elif is_pf:
+        motivation = 60
+    else:
+        motivation = 75
+
+    notes_lines.insert(0, f"Tags: {', '.join(tags)}")
+
+    try:
+        lead = PropertyLead.objects.create(
+            address=address,
+            city="",  # parsed later by the agent
+            state=state,
+            zip_code="",
+            owner_name=name,
+            owner_email=email,
+            owner_phone=phone,
+            lead_type=lead_type,
+            motivation_score=motivation,
+            status="new",
+            source="public_form",
+            notes="\n".join(notes_lines),
+        )
+    except Exception as e:
+        logger.exception("public_submit_property_lead failed")
+        return JsonResponse({"error": "create failed", "detail": str(e)}, status=500)
+
+    return JsonResponse({
+        "ok": True,
+        "lead_id": str(lead.id),
+        "state_detected": state or None,
+        "preforeclosure_flag": is_pf,
+        "compliance_tags": [t for t in tags if t.startswith(("state_", "ca_", "preforeclosure"))],
+    })
+
+
+# ---------------------------------------------------------------------------
 # STRIPE: Webhook handler for broker_ops events
 # ---------------------------------------------------------------------------
 
