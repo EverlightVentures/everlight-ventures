@@ -28,7 +28,7 @@ fi
 log "Starting Drive→phone sync..."
 
 # Find the latest oracle_e5_backup_* folder on Drive
-LATEST=$(rclone lsd drive_everlight:Everlight 2>/dev/null | grep -oE 'oracle_e5_backup_[0-9TZ]+' | sort | tail -1)
+LATEST=$(rclone lsd drive_everlight_crypt:oracle_e5_backups 2>/dev/null | grep -oE 'oracle_e5_backup_[0-9TZ]+' | sort | tail -1)
 if [ -z "$LATEST" ]; then
     log "  no oracle_e5_backup_* folder found on Drive yet"
     exit 0
@@ -37,7 +37,7 @@ log "  latest Drive backup: $LATEST"
 
 # Sync to phone (only newer files; deletes nothing locally)
 rclone copy --transfers 4 --no-update-modtime \
-    "drive_everlight:Everlight/$LATEST/" \
+    "drive_everlight_crypt:oracle_e5_backups/$LATEST/" \
     "$DEST/$LATEST/" \
     2>&1 | tee -a "$LOG" | tail -20
 

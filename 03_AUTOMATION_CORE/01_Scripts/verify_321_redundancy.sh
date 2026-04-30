@@ -42,12 +42,12 @@ if ! command -v rclone >/dev/null; then
     log "  FAIL: rclone not installed"
     exit 1
 fi
-DRIVE_LATEST=$(rclone lsd drive_everlight:Everlight 2>/dev/null | grep -oE 'oracle_e5_backup_[0-9TZ]+' | sort | tail -1)
+DRIVE_LATEST=$(rclone lsd drive_everlight_crypt:oracle_e5_backups 2>/dev/null | grep -oE 'oracle_e5_backup_[0-9TZ]+' | sort | tail -1)
 if [ -z "$DRIVE_LATEST" ]; then
     log "  FAIL: no oracle_e5_backup_* folder on Drive"
     exit 1
 fi
-DRIVE_SIZE=$(rclone size "drive_everlight:Everlight/$DRIVE_LATEST/" 2>&1 | grep "Total size" | head -1)
+DRIVE_SIZE=$(rclone size "drive_everlight_crypt:oracle_e5_backups/$DRIVE_LATEST/" 2>&1 | grep "Total size" | head -1)
 log "  ✓ Drive copy: $DRIVE_LATEST ($DRIVE_SIZE)"
 
 # Check 3: Oracle orphan still exists

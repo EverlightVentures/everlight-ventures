@@ -158,8 +158,8 @@ export RCLONE_CONFIG=/home/opc/.rclone.conf
 for src in /mnt/recovery/home/opc /mnt/recovery/var/lib/blinko /mnt/recovery/var/lib/n8n /mnt/recovery/var/log /mnt/recovery/etc/systemd/system; do
     if [ -d \"\$src\" ]; then
         relname=\$(echo \"\$src\" | sed 's|/mnt/recovery/||g; s|/|_|g')
-        echo \"--- pushing \$src to drive_everlight:Everlight/${DRIVE_FOLDER}/\$relname/ ---\"
-        rclone copy --config /home/opc/.rclone.conf -v --transfers 4 \"\$src\" \"drive_everlight:Everlight/${DRIVE_FOLDER}/\$relname/\" 2>&1 | tail -5
+        echo \"--- pushing \$src to drive_everlight_crypt:oracle_e5_backups/${DRIVE_FOLDER}/\$relname/ ---\"
+        rclone copy --config /home/opc/.rclone.conf -v --transfers 4 \"\$src\" \"drive_everlight_crypt:oracle_e5_backups/${DRIVE_FOLDER}/\$relname/\" 2>&1 | tail -5
     fi
 done
 
@@ -167,7 +167,7 @@ done
 echo '--- generating SHA256 manifest ---'
 sudo find /mnt/recovery/home/opc /mnt/recovery/var/lib/blinko 2>/dev/null -type f | head -5000 | sudo xargs sha256sum > /tmp/oracle_321_manifest.txt 2>/dev/null
 wc -l /tmp/oracle_321_manifest.txt
-rclone copy --config /home/opc/.rclone.conf /tmp/oracle_321_manifest.txt \"drive_everlight:Everlight/${DRIVE_FOLDER}/\" 2>&1 | tail -3
+rclone copy --config /home/opc/.rclone.conf /tmp/oracle_321_manifest.txt \"drive_everlight_crypt:oracle_e5_backups/${DRIVE_FOLDER}/\" 2>&1 | tail -3
 
 echo '=== DRIVE PUSH COMPLETE ==='
 echo \"Drive folder: Everlight/${DRIVE_FOLDER}/\"
