@@ -1,12 +1,5 @@
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
-
-const SUPABASE_URL = "https://jdqqmsmwmbsnlnstyavl.supabase.co";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+import { SUPABASE_URL, corsHeaders } from "../_shared/mod.ts";
 
 const PRICE_MAP: Record<string, string> = {
   "sam-book-1": "price_1T86XVGd8n4Fz3nAs7ubL82A",
@@ -101,10 +94,10 @@ Deno.serve(async (req: Request) => {
       JSON.stringify({ url: session.url, session_id: session.id }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("create-checkout error:", err);
     return new Response(
-      JSON.stringify({ error: err.message ?? "Internal server error" }),
+      JSON.stringify({ error: (err as Error).message ?? "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

@@ -104,37 +104,43 @@ def send_offer_email(
     body_text: str,
     body_html: str | None = None,
 ) -> dict:
-    """Send an offer email via Resend API.
+    """Send a creative-finance offer letter via the branded mailer so every
+    offer arrives in the Everlight luxury template (gold header + Piper signature).
 
-    Returns dict with send status and message_id.
+    Returns dict with send status and message_id (compatible with prior shape).
     """
-    if not RESEND_API_KEY:
-        log.error("No RESEND_API_KEY set -- cannot send emails")
-        return {"success": False, "error": "No API key"}
-
-    payload = {
-        "from": f"{FROM_NAME} <{FROM_EMAIL}>",
-        "to": [to_email],
-        "reply_to": REPLY_TO,
-        "subject": subject,
-        "text": body_text,
-    }
-    if body_html:
-        payload["html"] = body_html
-
-    headers = {
-        "Authorization": f"Bearer {RESEND_API_KEY}",
-        "Content-Type": "application/json",
-    }
-
+    # Route through branded_mailer (luxury template mandatory post-2026-04-22).
     try:
-        r = requests.post(RESEND_URL, headers=headers, json=payload, timeout=15)
-        r.raise_for_status()
-        data = r.json()
-        return {"success": True, "message_id": data.get("id", ""), "status_code": r.status_code}
-    except requests.RequestException as exc:
-        log.error("Failed to send email to %s: %s", to_email, exc)
-        return {"success": False, "error": str(exc)}
+        import sys
+        from pathlib import Path as _P
+        content_tools = _P("/home/opc/content_tools") if _P("/home/opc/content_tools").exists() \
+            else _P("/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
+        sys.path.insert(0, str(content_tools))
+        from branded_mailer import send_branded_email
+    except ImportError as e:
+        log.error(f"branded_mailer unavailable: {e}")
+        return {"success": False, "error": f"branded_mailer import: {e}"}
+
+    # Prefer provided HTML; otherwise convert text to simple HTML for the template body.
+    content_html = body_html if body_html else (body_text or "").replace("\n", "<br>\n")
+
+    result = send_branded_email(
+        to=to_email,
+        subject=subject,
+        content_html=content_html,
+        title=subject,
+        from_name=FROM_NAME,
+        from_email=FROM_EMAIL,
+        reply_to=REPLY_TO,
+        agent_name=FROM_NAME,
+        agent_title="Everlight Ventures Acquisitions",
+        agent_email=FROM_EMAIL,
+        plain_text_fallback=body_text,
+    )
+
+    if result.ok:
+        return {"success": True, "message_id": result.message_id, "status_code": 200}
+    return {"success": False, "error": result.error}
 
 
 def text_to_html(text: str) -> str:

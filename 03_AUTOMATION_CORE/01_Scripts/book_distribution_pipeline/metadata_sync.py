@@ -19,16 +19,16 @@ from datetime import datetime
 BOOK = {
     "title": "Beyond the Veil",
     "subtitle": "",  # Add if applicable
-    "author": "",    # TODO: Fill in author name
-    "narrator": "",  # TODO: Fill in once contracted
+    "author": "",    # Required before publish
+    "narrator": "",  # Set once narrator is contracted
     "series": "",    # If part of a series
     "series_number": 1,
     "language": "English",
-    "description": "",  # TODO: Back-cover blurb (250-400 words for best conversion)
+    "description": "",  # Back-cover blurb, 250-400 words for best conversion
     "short_description": "",  # 100 words max for social/ads
     "keywords": [
-        # TODO: Fill with 7 high-traffic keywords (use Publisher Rocket or Amazon autocomplete)
-        # Example: "supernatural thriller", "mystery suspense", "dark secrets"
+        # 7 high-traffic keywords (use Publisher Rocket or Amazon autocomplete)
+        # e.g. "supernatural thriller", "mystery suspense", "dark secrets"
     ],
     "categories": {
         "kdp_primary": "",   # E.g., "Mystery, Thriller & Suspense > Thrillers > Supernatural"
@@ -47,8 +47,8 @@ BOOK = {
         "hardcover": "",
         "audiobook": "",  # ACX assigns ASIN
     },
-    "pages_estimated": 0,   # TODO: fill
-    "word_count": 0,        # TODO: fill
+    "pages_estimated": 0,   # Set from final manuscript
+    "word_count": 0,        # Set from final manuscript
     "audio_hours_estimated": 0,  # word_count / 9000
     "publication_date": "",  # YYYY-MM-DD; leave blank until ready
     "copyright_year": datetime.now().year,
@@ -133,7 +133,7 @@ def build_ingram_metadata():
         "isbn_paperback": BOOK["isbn"]["paperback"],
         "isbn_hardcover": BOOK["isbn"]["hardcover"],
         "language": BOOK["language"],
-        "bisac_code": "",  # TODO: Add BISAC code (e.g., FIC031010 for Thrillers)
+        "bisac_code": "",  # e.g. FIC031010 for Thrillers
         "description": BOOK["description"][:10000],
         "pricing": {
             "paperback_usd": BOOK["pricing"]["paperback_usd"],
@@ -214,7 +214,7 @@ def main():
             json.dump(data, f, indent=2)
         print(f"Written: {outfile}")
 
-    print("\nNext: Fill in TODO fields in BOOK config at top of this file, then re-run.")
+    print("\nNext: Fill in empty BOOK fields at top of this file, then re-run.")
 
 
 if __name__ == "__main__":

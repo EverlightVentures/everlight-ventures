@@ -353,30 +353,40 @@ def log_to_blinko(summary: str, details: str):
 
 
 def send_email(to: str, subject: str, html_body: str, from_name: str = "Piper Reeves",
-               from_email: str = "piper@everlightventures.io") -> bool:
-    """Send an email via Resend API."""
-    if not RESEND_API_KEY:
-        log.warning("No RESEND_API_KEY -- email skipped")
-        return False
+               from_email: str = "piper@everlightventures.io",
+               budget_category: str = "nurture") -> bool:
+    """Send an email via branded_mailer (gold template, budget-gated).
+
+    Defaults to budget_category='nurture' because deal-orchestrator emails are
+    follow-ups to existing matches, not cold blasts.
+    """
     try:
-        r = requests.post(
-            "https://api.resend.com/emails",
-            headers={
-                "Authorization": f"Bearer {RESEND_API_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "from": f"{from_name} <{from_email}>",
-                "to": [to],
-                "subject": subject,
-                "html": html_body,
-            },
-            timeout=15,
-        )
-        return r.status_code == 200
-    except Exception as e:
-        log.error("Email send failed: %s", e)
+        import sys as _sys
+        for _p in ("/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools",
+                   "/home/opc/content_tools"):
+            if _p not in _sys.path:
+                _sys.path.insert(0, _p)
+        from branded_mailer import send_branded_email  # type: ignore
+    except Exception as exc:
+        log.error("branded_mailer unavailable, send aborted: %s", exc)
         return False
+
+    result = send_branded_email(
+        to=to,
+        subject=subject,
+        content_html=html_body,
+        title=subject,
+        from_name=from_name,
+        from_email=from_email,
+        reply_to=from_email,
+        agent_name=from_name,
+        agent_title="Deal Orchestrator",
+        agent_email=from_email,
+        budget_category=budget_category,
+    )
+    if not result.ok:
+        log.warning("branded_mailer deal-email failed for %s: %s", to, result.error)
+    return result.ok
 
 
 # ---------------------------------------------------------------------------

@@ -537,7 +537,17 @@ def get_settings():
     blinko_up = _check("http://localhost:1111/api/v1/note/list", 3)
     django_up = _check("http://localhost:8504/api/hub-status/", 3)
     n8n_up = _check("http://localhost:5678/", 3)
-    gdocs_up = _check("http://localhost:5678/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdoc", 3)
+    # Google Docs now publishes via direct API (Python n8n_replacements.publish_gdoc).
+    # Healthy when the secrets/google_docs_token.json is present and parses.
+    import os, json as _json
+    gdocs_up = False
+    try:
+        _tok = "/home/opc/secrets/google_docs_token.json"
+        if os.path.exists(_tok):
+            _td = _json.load(open(_tok))
+            gdocs_up = bool(_td.get("refresh_token"))
+    except Exception:
+        gdocs_up = False
 
     # Blinko note count
     blinko_notes = 0
@@ -561,7 +571,7 @@ def get_settings():
             "supabase": {"status": "connected", "via": "MCP", "editable": True},
             "coinbase": {"status": "connected", "via": "REST API + WebSocket", "editable": True},
             "github": {"status": "connected", "via": "SSH deploy key", "editable": True},
-            "google_docs": {"status": "connected" if gdocs_up else "degraded", "via": "n8n webhook" if gdocs_up else "n8n webhook (workflow inactive)", "editable": True},
+            "google_docs": {"status": "connected" if gdocs_up else "degraded", "via": "Python direct API (gdocs_bridge)" if gdocs_up else "OAuth token expired -- run reauth_google_docs.py", "editable": True},
             "resend": {"status": "connected", "emails": 42, "via": "API", "editable": True},
         },
         "ai_accounts": {

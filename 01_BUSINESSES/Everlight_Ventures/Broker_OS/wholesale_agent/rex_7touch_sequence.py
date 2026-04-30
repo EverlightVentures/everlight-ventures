@@ -36,8 +36,8 @@ AGENT_DIR = Path(__file__).parent
 LEADS_DB = AGENT_DIR / "leads_db.json"
 
 RESEND_KEY = os.environ.get("RESEND_API_KEY", os.environ.get("SMTP_PASS", ""))
-FROM_EMAIL = os.environ.get("SMTP_FROM", "Rich Gee <rich@everlightventures.io>")
-REPLY_TO = "rich@everlightventures.io"
+FROM_EMAIL = os.environ.get("SMTP_FROM", "Piper Reeves <piper@everlightventures.io>")
+REPLY_TO = "piper@everlightventures.io"
 
 NOW = datetime.now(timezone.utc)
 TODAY = NOW.strftime("%Y-%m-%d")
@@ -110,9 +110,9 @@ def get_touch_message(step: int, lead: dict) -> tuple:
             f"Owners walked away with cash in under 2 weeks.\n\n"
             f"If you are open to a similar outcome for {addr}, "
             f"just reply and I will put together an offer.\n\n"
-            f"Rich\n"
+            f"Piper\n"
             f"Everlight Ventures\n"
-            f"rich@everlightventures.io"
+            f"piper@everlightventures.io"
         )
         return (subject, body)
 
@@ -130,9 +130,9 @@ def get_touch_message(step: int, lead: dict) -> tuple:
             f"I noticed {addr} might need some work. "
             f"We buy as-is -- no repairs, no cleaning, no showings. Just cash.\n\n"
             f"If that sounds like a relief, reply and I will get you a number.\n\n"
-            f"Rich\n"
+            f"Piper\n"
             f"Everlight Ventures\n"
-            f"rich@everlightventures.io"
+            f"piper@everlightventures.io"
         )
         return (subject, body)
 
@@ -140,7 +140,7 @@ def get_touch_message(step: int, lead: dict) -> tuple:
         # "Closing my file" -- highest response rate in the industry
         body = (
             f"I'm closing my file on {addr}. "
-            f"If you ever want to discuss a cash offer, reach me at rich@everlightventures.io."
+            f"If you ever want to discuss a cash offer, reach me at piper@everlightventures.io."
         )
         return (None, body[:160])
 
@@ -165,9 +165,9 @@ def _pain_pitch(lead_type: str, first: str, addr: str, city: str, state: str) ->
             f"I buy properties for cash and can close in 7-14 days -- "
             f"no repairs, no commissions, no hassle.\n\n"
             f"Would you be open to hearing an offer?\n\n"
-            f"Rich\n"
+            f"Piper\n"
             f"Everlight Ventures\n"
-            f"rich@everlightventures.io"
+            f"piper@everlightventures.io"
         )
 
 

@@ -2,13 +2,7 @@
 // Called by verify-ebook-purchase after generating download link
 // Uses Resend API (free tier: 3k emails/mo)
 
-const SUPABASE_URL = "https://jdqqmsmwmbsnlnstyavl.supabase.co";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+import { SUPABASE_URL, corsHeaders } from "../_shared/mod.ts";
 
 const BOOK_TITLES: Record<string, string> = {
   "sam-book-1": "Sam's First Superpower",
@@ -202,10 +196,10 @@ Deno.serve(async (req: Request) => {
       JSON.stringify({ success: true, email_id: resendData.id }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("send-purchase-email error:", err);
     return new Response(
-      JSON.stringify({ error: err.message ?? "Internal server error" }),
+      JSON.stringify({ error: (err as Error).message ?? "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

@@ -1783,5 +1783,538 @@
     "close_speed": "14_days",
     "price_range_min": 20000,
     "price_range_max": 200000
+  },
+  {
+    "name": "Meritage Homes - Phoenix",
+    "company": "Meritage Homes Corporation",
+    "email": "",
+    "phone": "",
+    "city": "Scottsdale",
+    "state": "AZ",
+    "buy_criteria": "Teardown lots 6000+ sqft infill Phoenix metro, ready to build",
+    "segment": "builder_new_home",
+    "added_date": "2026-04-22",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "new",
+    "outreach_count": 0,
+    "last_outreach": null,
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-04-22",
+    "market": "Phoenix",
+    "preferred_markets": [
+      "Phoenix"
+    ],
+    "property_types": [
+      "land",
+      "sfr",
+      "teardown"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 4200,
+    "price_range_max": 7800
+  },
+  {
+    "name": "Taylor Morrison - Phoenix",
+    "company": "Taylor Morrison",
+    "email": "",
+    "phone": "",
+    "city": "Scottsdale",
+    "state": "AZ",
+    "buy_criteria": "Teardown infill lots Phoenix/Scottsdale",
+    "segment": "builder_new_home",
+    "added_date": "2026-04-22",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "new",
+    "market": "Phoenix",
+    "preferred_markets": [
+      "Phoenix"
+    ],
+    "property_types": [
+      "land",
+      "teardown"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 30000,
+    "price_range_max": 250000
+  },
+  {
+    "name": "Lennar - Phoenix Division",
+    "company": "Lennar Corporation",
+    "email": "",
+    "phone": "",
+    "city": "Tempe",
+    "state": "AZ",
+    "buy_criteria": "Phoenix metro teardowns + infill lots for production homes",
+    "segment": "builder_new_home",
+    "added_date": "2026-04-22",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "new",
+    "market": "Phoenix",
+    "preferred_markets": [
+      "Phoenix"
+    ],
+    "property_types": [
+      "land",
+      "sfr",
+      "teardown"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 30000,
+    "price_range_max": 250000
+  },
+  {
+    "name": "D.R. Horton - Dallas Division",
+    "company": "D.R. Horton",
+    "email": "",
+    "phone": "",
+    "city": "Arlington",
+    "state": "TX",
+    "buy_criteria": "DFW teardown candidates 6000+ sqft lots",
+    "segment": "builder_new_home",
+    "added_date": "2026-04-22",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "new",
+    "market": "Dallas",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "land",
+      "teardown"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 4200,
+    "price_range_max": 7800
+  },
+  {
+    "name": "PulteGroup - Dallas",
+    "company": "PulteGroup Inc",
+    "email": "",
+    "phone": "",
+    "city": "Dallas",
+    "state": "TX",
+    "buy_criteria": "DFW infill teardown lots, ready-to-build",
+    "segment": "builder_new_home",
+    "added_date": "2026-04-22",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "new",
+    "market": "Dallas",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "land",
+      "teardown"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "John Wieland Homes",
+    "company": "John Wieland Homes and Neighborhoods",
+    "email": "",
+    "phone": "",
+    "city": "Atlanta",
+    "state": "GA",
+    "buy_criteria": "Atlanta intown teardowns, walkable neighborhoods",
+    "segment": "builder_new_home",
+    "added_date": "2026-04-22",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "new",
+    "market": "Atlanta",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "land",
+      "sfr",
+      "teardown"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Ashton Woods - Atlanta",
+    "company": "Ashton Woods Homes",
+    "email": "",
+    "phone": "",
+    "city": "Atlanta",
+    "state": "GA",
+    "buy_criteria": "Atlanta metro teardown candidates, intown preferred",
+    "segment": "builder_new_home",
+    "added_date": "2026-04-22",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "new",
+    "market": "Atlanta",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "sfr",
+      "teardown"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Toll Brothers - Atlanta",
+    "company": "Toll Brothers",
+    "email": "",
+    "phone": "",
+    "city": "Alpharetta",
+    "state": "GA",
+    "buy_criteria": "Upscale teardown lots, Buckhead/Sandy Springs/Brookhaven",
+    "segment": "builder_new_home",
+    "added_date": "2026-04-22",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "new",
+    "market": "Atlanta",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "land",
+      "teardown"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Blue Chip Atlanta",
+    "company": "Blue Chip Homes Atlanta",
+    "email": "",
+    "phone": "",
+    "city": "Atlanta",
+    "state": "GA",
+    "buy_criteria": "Intown teardowns 6000+ sqft lots, boutique builder",
+    "segment": "builder_new_home",
+    "added_date": "2026-04-22",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "new",
+    "market": "Atlanta",
+    "preferred_markets": [
+      "Atlanta"
+    ],
+    "property_types": [
+      "land",
+      "sfr",
+      "teardown"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 4200,
+    "price_range_max": 7800
+  },
+  {
+    "name": "Shaddock Homes - Dallas",
+    "company": "Shaddock Homes",
+    "email": "",
+    "phone": "",
+    "city": "Plano",
+    "state": "TX",
+    "buy_criteria": "Premier teardown infill Plano/Frisco/Dallas",
+    "segment": "builder_new_home",
+    "added_date": "2026-04-22",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "new",
+    "market": "Dallas",
+    "preferred_markets": [
+      "Dallas"
+    ],
+    "property_types": [
+      "sfr",
+      "teardown"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 50000,
+    "price_range_max": 300000
+  },
+  {
+    "name": "Memphis Cash Offer",
+    "company": "Memphis Cash Offer LLC",
+    "email": "info@memphiscashoffer.com",
+    "phone": "(901) 207-0100",
+    "city": "Memphis",
+    "state": "TN",
+    "buy_criteria": "SFR any condition Shelby/Desoto county, ARV under $250k",
+    "market": "Memphis",
+    "added_date": "2026-04-24",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-04-25",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-04-24",
+    "preferred_markets": [
+      "Memphis"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 175000,
+    "price_range_max": 325000
+  },
+  {
+    "name": "Mid-South Homebuyers",
+    "company": "Mid-South Homebuyers",
+    "email": "leads@midsouthhomebuyers.com",
+    "phone": "(901) 410-5452",
+    "city": "Memphis",
+    "state": "TN",
+    "buy_criteria": "SFR 3BR+ Memphis metro, cash in 10 days",
+    "market": "Memphis",
+    "added_date": "2026-04-24",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-04-25",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-04-24",
+    "preferred_markets": [
+      "Memphis"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 3000,
+    "price_range_max": 10000
+  },
+  {
+    "name": "The Memphis Home Buyer",
+    "company": "The Memphis Home Buyer LLC",
+    "email": "offer@thememphishomebuyer.com",
+    "phone": "(901) 512-4029",
+    "city": "Memphis",
+    "state": "TN",
+    "buy_criteria": "SFR, as-is, any condition, cash close",
+    "market": "Memphis",
+    "added_date": "2026-04-24",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-04-25",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-04-24",
+    "preferred_markets": [
+      "Memphis"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "7_days",
+    "price_range_min": 30000,
+    "price_range_max": 250000
+  },
+  {
+    "name": "We Buy Houses Memphis TN",
+    "company": "EZ Home Sale",
+    "email": "memphis@webuyhousesmemphistennessee.com",
+    "phone": "(901) 244-0046",
+    "city": "Memphis",
+    "state": "TN",
+    "buy_criteria": "Distressed SFR Shelby county",
+    "market": "Memphis",
+    "added_date": "2026-04-24",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-04-25",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-04-24",
+    "preferred_markets": [
+      "Memphis"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "heavy",
+    "close_speed": "14_days",
+    "price_range_min": 30000,
+    "price_range_max": 250000
+  },
+  {
+    "name": "Nashville Home Buyers",
+    "company": "Nashville Home Buyers LLC",
+    "email": "offers@nashvillehomebuyers.com",
+    "phone": "(615) 649-0116",
+    "city": "Nashville",
+    "state": "TN",
+    "buy_criteria": "SFR Davidson/Williamson/Rutherford, all price bands",
+    "market": "Nashville",
+    "added_date": "2026-04-24",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-04-25",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-04-24",
+    "preferred_markets": [
+      "Nashville"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 30000,
+    "price_range_max": 250000
+  },
+  {
+    "name": "Nexus Homebuyers",
+    "company": "Nexus Homebuyers",
+    "email": "info@nexushomebuyers.com",
+    "phone": "(865) 509-9341",
+    "city": "Nashville",
+    "state": "TN",
+    "buy_criteria": "SFR + small multi TN statewide, cash close 14 days",
+    "market": "Nashville",
+    "added_date": "2026-04-24",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-04-25",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-04-24",
+    "preferred_markets": [
+      "Nashville"
+    ],
+    "property_types": [
+      "multifamily",
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "7_days",
+    "price_range_min": 9800,
+    "price_range_max": 18200
+  },
+  {
+    "name": "John Buys Your House",
+    "company": "John Buys Your House",
+    "email": "john@johnbuysyourhouse.com",
+    "phone": "(615) 492-2522",
+    "city": "Nashville",
+    "state": "TN",
+    "buy_criteria": "SFR Nashville metro, focus on estate sales + tired landlords",
+    "market": "Nashville",
+    "added_date": "2026-04-24",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-04-25",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-04-24",
+    "preferred_markets": [
+      "Nashville"
+    ],
+    "property_types": [
+      "land",
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 30000,
+    "price_range_max": 250000
+  },
+  {
+    "name": "Music City Home Buyers",
+    "company": "Music City Home Buyers",
+    "email": "contact@musiccityhomebuyers.com",
+    "phone": "(615) 647-2227",
+    "city": "Nashville",
+    "state": "TN",
+    "buy_criteria": "Fix-and-flip SFR Nashville metro, preferred ARV $200k-$450k",
+    "market": "Nashville",
+    "added_date": "2026-04-24",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-04-25",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-04-24",
+    "preferred_markets": [
+      "Nashville"
+    ],
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 200000,
+    "price_range_max": 450000
+  },
+  {
+    "name": "Tennessee Cash Home Buyers",
+    "company": "Tennessee Cash Home Buyers LLC",
+    "email": "info@tennesseecashhomebuyers.com",
+    "phone": "(615) 657-7500",
+    "city": "Nashville",
+    "state": "TN",
+    "buy_criteria": "SFR + multi TN statewide, direct to seller",
+    "market": "Nashville",
+    "added_date": "2026-04-24",
+    "deals_sent": 0,
+    "deals_closed": 0,
+    "status": "contacted",
+    "outreach_count": 1,
+    "last_outreach": "2026-04-25",
+    "responded": false,
+    "on_deal_list": false,
+    "created_at": "2026-04-24",
+    "preferred_markets": [
+      "Nashville"
+    ],
+    "property_types": [
+      "multifamily",
+      "sfr"
+    ],
+    "rehab_tolerance": "any",
+    "close_speed": "14_days",
+    "price_range_min": 30000,
+    "price_range_max": 250000
   }
 ]

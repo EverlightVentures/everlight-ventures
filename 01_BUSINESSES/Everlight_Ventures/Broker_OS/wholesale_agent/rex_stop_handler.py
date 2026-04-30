@@ -33,8 +33,8 @@ LEADS_DB = AGENT_DIR / "leads_db.json"
 SUPPRESSION_FILE = AGENT_DIR / "opted_out_emails.json"
 
 RESEND_KEY = os.environ.get("RESEND_API_KEY", "")
-FROM_EMAIL = "Rich Gee <rich@everlightventures.io>"
-REPLY_TO = "rich@everlightventures.io"
+FROM_EMAIL = "Justine Park <justine@everlightventures.io>"
+REPLY_TO = "justine@everlightventures.io"
 
 # Patterns that trigger opt-out (case-insensitive)
 OPT_OUT_PATTERNS = [
@@ -57,7 +57,7 @@ CONFIRMATION_SUBJECT = "You've been removed"
 CONFIRMATION_BODY = (
     "You've been removed. We won't contact you again. "
     "Sorry for the inconvenience.\n\n"
-    "- Rich Gee, Everlight Ventures"
+    "- Justine Park, Everlight Ventures"
 )
 
 

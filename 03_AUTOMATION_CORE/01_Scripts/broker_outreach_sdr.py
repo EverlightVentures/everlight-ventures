@@ -145,31 +145,38 @@ def send_email(to: str, subject: str, body: str, agent_name: str = "Sage Hollowa
     )
     html = _body_to_html(body, agent_name, agent_title, agent_email)
 
-    import requests
+    # Route every SDR send through the branded mailer so the gold template
+    # wraps the inner HTML, the resend_guard blocks owner/internal addresses,
+    # and the monthly budget gate paces the send against Resend quota.
     try:
-        resp = requests.post(
-            "https://api.resend.com/emails",
-            headers={
-                "Authorization": f"Bearer {RESEND_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "from": f"{agent_name} at Everlight <{FROM_EMAIL}>",
-                "to": [to],
-                "subject": subject,
-                "text": body + plain_footer,
-                "html": html,
-                "reply_to": agent_email,
-            },
-            timeout=10,
-        )
-        if resp.status_code in (200, 201):
-            return True
-        log.error("Resend API returned %d for %s: %s", resp.status_code, to, resp.text[:200])
-        return False
+        import sys as _sys
+        for _p in ("/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools",
+                   "/home/opc/content_tools"):
+            if _p not in _sys.path:
+                _sys.path.insert(0, _p)
+        from branded_mailer import send_branded_email  # type: ignore
     except Exception as exc:
-        log.error("Email send failed for %s: %s", to, exc)
+        log.error("branded_mailer unavailable, send aborted for %s: %s", to, exc)
         return False
+
+    result = send_branded_email(
+        to=to,
+        subject=subject,
+        content_html=html,
+        title=subject,
+        from_name=f"{agent_name} at Everlight",
+        from_email=FROM_EMAIL,
+        reply_to=agent_email,
+        agent_name=agent_name,
+        agent_title=agent_title,
+        agent_email=agent_email,
+        plain_text_fallback=body + plain_footer,
+        budget_category="bulk",
+    )
+    if result.ok:
+        return True
+    log.error("branded_mailer send failed for %s: %s", to, result.error)
+    return False
 
 
 # ---------------------------------------------------------------------------

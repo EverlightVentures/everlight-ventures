@@ -44,8 +44,8 @@ for d in ["pipeline", "contracts", "outreach_sent", "replies", "closed_deals"]:
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY", os.environ.get("SMTP_PASS", ""))
 SLACK_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
 SLACK_CHANNEL = "C0ANLLV8JAC"
-FROM_EMAIL = os.environ.get("SMTP_FROM", "Rich Gee <rich@everlightventures.io>")
-REX_EMAIL = "rich@everlightventures.io"
+FROM_EMAIL = os.environ.get("SMTP_FROM", "Piper Reeves <piper@everlightventures.io>")
+REX_EMAIL = "piper@everlightventures.io"
 
 
 # ---------------------------------------------------------------------------
@@ -341,7 +341,7 @@ If you're open to hearing a no-obligation offer, just reply to this email or cal
 Best,
 Rich
 Everlight Ventures
-rich@everlightventures.io"""
+piper@everlightventures.io"""
 
     elif lead.lead_type in ("code_violation", "vacant"):
         body = f"""Hi {lead.owner_name.split()[0] if lead.owner_name else 'there'},
@@ -352,7 +352,7 @@ I specialize in buying properties in any condition -- as-is, no repairs needed. 
 
 If you've been thinking about selling or just want to know what your property is worth to a cash buyer, I'd love to chat.
 
-Reply to this email anytime or reach me at rich@everlightventures.io.
+Reply to this email anytime or reach me at piper@everlightventures.io.
 
 Best,
 Rich
@@ -365,7 +365,7 @@ I came across your property at {lead.address}, {lead.city}, {lead.state} {lead.z
 
 I buy properties as-is -- no repairs, no commissions, fast close. If you're open to it, I'd love to discuss.
 
-Just reply to this email or reach me at rich@everlightventures.io.
+Just reply to this email or reach me at piper@everlightventures.io.
 
 Best,
 Rich

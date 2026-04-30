@@ -107,52 +107,154 @@
   "by_lead_type": {},
   "agent_performance": {
     "rex_blackwell": {
+      "tasks_run": 3,
+      "success": 3,
+      "fail": 0,
+      "leads_found": 0,
+      "scout_count": 6
+    },
+    "frederick_banks": {
       "tasks_run": 1,
       "success": 1,
       "fail": 0,
-      "leads_found": 0
-    },
-    "frederick_banks": {
-      "tasks_run": 0,
-      "success": 0,
-      "fail": 0,
-      "leads_scored": 0
+      "leads_scored": 0,
+      "qualify_count": 4
     },
     "piper_reeves": {
-      "tasks_run": 0,
-      "success": 0,
+      "tasks_run": 2,
+      "success": 2,
       "fail": 0,
       "emails_sent": 0,
-      "replies_received": 0
+      "replies_received": 0,
+      "outreach_count": 2
     },
     "harrison_knox": {
-      "tasks_run": 0,
-      "success": 0,
+      "tasks_run": 1,
+      "success": 1,
       "fail": 0,
-      "deals_progressed": 0
+      "deals_progressed": 0,
+      "followup_count": 3
     },
     "adrian_morgan": {
-      "tasks_run": 0,
-      "success": 0,
+      "tasks_run": 1,
+      "success": 1,
       "fail": 0,
-      "pitches_created": 0
+      "pitches_created": 0,
+      "pitch_count": 1
     },
     "calvin_osei": {
-      "tasks_run": 0,
-      "success": 0,
+      "tasks_run": 1,
+      "success": 1,
       "fail": 0,
-      "matches_created": 0
+      "matches_created": 0,
+      "match_count": 1
     },
     "carlos_moreno": {
-      "tasks_run": 0,
-      "success": 0,
+      "tasks_run": 2,
+      "success": 2,
       "fail": 0,
-      "commissions_logged": 0
+      "commissions_logged": 0,
+      "report_count": 2
     }
   },
   "daily_snapshots": [
     {
       "date": "2026-04-07",
+      "funnel_30d": {
+        "scouted": 0,
+        "scored": 0,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-04-24",
+      "funnel_30d": {
+        "scouted": 0,
+        "scored": 0,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-04-24",
+      "funnel_30d": {
+        "scouted": 0,
+        "scored": 0,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-04-24",
+      "funnel_30d": {
+        "scouted": 0,
+        "scored": 0,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-04-25",
+      "funnel_30d": {
+        "scouted": 0,
+        "scored": 0,
+        "qualified": 0,
+        "matched": 0,
+        "outreach_sent": 0,
+        "responses": 0,
+        "negotiating": 0,
+        "under_contract": 0,
+        "closed": 0,
+        "paid": 0,
+        "dead": 0
+      },
+      "outreach_today": {},
+      "active_deals": 0,
+      "pipeline_leads": 0
+    },
+    {
+      "date": "2026-04-25",
       "funnel_30d": {
         "scouted": 0,
         "scored": 0,

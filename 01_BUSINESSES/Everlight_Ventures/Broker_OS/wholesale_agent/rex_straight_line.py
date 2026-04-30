@@ -95,7 +95,7 @@ def get_qualifying_message(first_name: str = "there") -> str:
         f"4. {QUALIFYING_QUESTIONS['motivation']}\n"
         f"5. {QUALIFYING_QUESTIONS['competition']}\n\n"
         "Reply and I'll have a cash offer for you within the hour.\n\n"
-        "Rich\nEverlight Ventures"
+        "Piper\nEverlight Ventures"
     )
     return questions
 
@@ -163,7 +163,7 @@ def analyze_seller_response(message: str, deal: dict) -> dict:
             f"Once you sign, we can close within 7 days and you'll have your "
             f"cash in hand.\n\n"
             f"Anything else you need from me before we move forward?\n\n"
-            f"Rich\nEverlight Ventures"
+            f"Piper\nEverlight Ventures"
         )
 
     elif lowest_axis == "product":
@@ -182,7 +182,7 @@ def analyze_seller_response(message: str, deal: dict) -> dict:
             f"and time on market, my offer nets you about the same -- but you "
             f"get certainty and speed.\n\n"
             f"What number would make this work for you?\n\n"
-            f"Rich\nEverlight Ventures"
+            f"Piper\nEverlight Ventures"
         )
 
     elif lowest_axis == "company":
@@ -201,7 +201,7 @@ def analyze_seller_response(message: str, deal: dict) -> dict:
             f"- You can verify us at everlightventures.io\n\n"
             f"I'm happy to provide references from sellers we've worked with. "
             f"Would that help?\n\n"
-            f"Rich\nEverlight Ventures"
+            f"Piper\nEverlight Ventures"
         )
 
     elif lowest_axis == "person":
@@ -219,7 +219,7 @@ def analyze_seller_response(message: str, deal: dict) -> dict:
             f"could sell for today, I'm happy to walk you through the numbers "
             f"with zero obligation.\n\n"
             f"What questions can I answer for you?\n\n"
-            f"Rich\nEverlight Ventures"
+            f"Piper\nEverlight Ventures"
         )
 
     result = {
@@ -557,7 +557,7 @@ def generate_response(deal: dict, seller_message: str) -> dict:
                 f"${seller_counter:,.0f} works for me. I'll have the "
                 f"purchase agreement for {addr} sent over today. Once you "
                 f"sign, we close within 7 days.\n\n"
-                f"Rich\nEverlight Ventures"
+                f"Piper\nEverlight Ventures"
             )
             action = "accept"
 
@@ -575,14 +575,14 @@ def generate_response(deal: dict, seller_message: str) -> dict:
                     f"${split:,.0f} and get this done today.\n\n"
                     f"If that works, I'll have the paperwork over within "
                     f"the hour.\n\n"
-                    f"Rich\nEverlight Ventures"
+                    f"Piper\nEverlight Ventures"
                 )
                 tactic_used = "split_difference"
             else:
                 response_text = (
                     f"Hi {first},\n\n"
                     f"{counter_details['script']}\n\n"
-                    f"Rich\nEverlight Ventures"
+                    f"Piper\nEverlight Ventures"
                 )
             action = "counter"
 
@@ -590,7 +590,7 @@ def generate_response(deal: dict, seller_message: str) -> dict:
             response_text = (
                 f"Hi {first},\n\n"
                 f"{counter_details['script']}\n\n"
-                f"Rich\nEverlight Ventures"
+                f"Piper\nEverlight Ventures"
             )
             action = "walk"
 
@@ -614,7 +614,7 @@ def generate_response(deal: dict, seller_message: str) -> dict:
             response_text = (
                 f"Hi {first},\n\n"
                 f"{tactic_result['message']}\n\n"
-                f"Rich\nEverlight Ventures"
+                f"Piper\nEverlight Ventures"
             )
 
     result = {
@@ -682,7 +682,7 @@ def get_nibble_message(deal: dict) -> str:
         f"to 14 days instead of 30? That actually saves us both money on "
         f"carrying costs and gets you your cash faster.\n\n"
         f"I'll have the updated agreement over shortly.\n\n"
-        f"Rich\nEverlight Ventures"
+        f"Piper\nEverlight Ventures"
     )
 
 

@@ -53,18 +53,33 @@ def slack_post(text, webhook=None):
         pass
 
 def send_email(to, subject, body, from_name="Marcus Cole", from_email="marcus@everlightventures.io"):
+    """Voice-triggered emails go out through branded_mailer. Category is vip_reply
+    since voice calls indicate a serious, engaged contact deserving gold template
+    and protected quota."""
     try:
-        r = requests.post("https://api.resend.com/emails",
-            headers={"Authorization": f"Bearer {RESEND_KEY}", "Content-Type": "application/json"},
-            json={
-                "from": f"{from_name} <{from_email}>",
-                "to": [to],
-                "subject": subject,
-                "html": body
-            }, timeout=10)
-        return r.status_code in (200, 201), r.text
-    except Exception as e:
-        return False, str(e)
+        import sys as _sys
+        for _p in ("/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools",
+                   "/home/opc/content_tools"):
+            if _p not in _sys.path:
+                _sys.path.insert(0, _p)
+        from branded_mailer import send_branded_email  # type: ignore
+    except Exception as exc:
+        return False, f"branded_mailer_import_failed: {exc}"
+
+    result = send_branded_email(
+        to=to,
+        subject=subject,
+        content_html=body,
+        title=subject,
+        from_name=from_name,
+        from_email=from_email,
+        reply_to=from_email,
+        agent_name=from_name,
+        agent_title="Everlight Ventures",
+        agent_email=from_email,
+        budget_category="vip_reply",
+    )
+    return result.ok, (result.message_id if result.ok else result.error)
 
 def get_bot_status():
     try:

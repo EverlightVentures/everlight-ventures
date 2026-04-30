@@ -8,3 +8,8 @@
 {"timestamp": "2026-03-21T20:59:14.711642+00:00", "scout_type": "tax_delinquency", "county": "Cuyahoga County, OH", "properties_found": 0, "attom_enriched": 0, "imported_new": 0, "skip_traced": 0}
 {"timestamp": "2026-03-21T20:59:19.646350+00:00", "scout_type": "tax_delinquency", "county": "St. Louis City, MO", "properties_found": 0, "attom_enriched": 0, "imported_new": 0, "skip_traced": 0}
 {"timestamp": "2026-03-21T20:59:24.255284+00:00", "scout_type": "tax_delinquency", "county": "Duval County, FL", "properties_found": 0, "attom_enriched": 0, "imported_new": 0, "skip_traced": 0}
+{"timestamp": "2026-04-24T22:07:23.438679+00:00", "scout_type": "tax_delinquency", "county": "Fulton County, GA", "properties_found": 0, "attom_enriched": 0, "imported_new": 0, "skip_traced": 0}
+{"timestamp": "2026-04-24T22:07:31.018186+00:00", "scout_type": "tax_delinquency", "county": "Dallas County, TX", "properties_found": 0, "attom_enriched": 0, "imported_new": 0, "skip_traced": 0}
+{"timestamp": "2026-04-24T22:07:49.745489+00:00", "scout_type": "tax_delinquency", "county": "Cuyahoga County, OH", "properties_found": 2, "attom_enriched": 0, "imported_new": 2, "skip_traced": 1}
+{"timestamp": "2026-04-24T22:07:55.142222+00:00", "scout_type": "tax_delinquency", "county": "St. Louis City, MO", "properties_found": 0, "attom_enriched": 0, "imported_new": 0, "skip_traced": 0}
+{"timestamp": "2026-04-24T22:08:00.865609+00:00", "scout_type": "tax_delinquency", "county": "Duval County, FL", "properties_found": 0, "attom_enriched": 0, "imported_new": 0, "skip_traced": 0}

@@ -238,6 +238,111 @@ def _extract_owner(prop: dict) -> Optional[str]:
     return None
 
 
+def discover_properties_in_zip(
+    zipcode: str,
+    *,
+    page_size: int = 50,
+    page: int = 1,
+    min_universal_size: int = 600,
+) -> list[dict]:
+    """Pull a page of properties in a zip via ATTOM's snapshot endpoint.
+
+    Uses `/property/snapshot?postalcode=XXXXX&pagesize=N&page=P`. Returns a list
+    of normalized lead dicts ready to write into leads_db.json.
+
+    ATTOM free tier quota applies (single call per page).
+    """
+    params = {
+        "postalcode": zipcode,
+        "pagesize": str(page_size),
+        "page": str(page),
+        "orderby": "assessment.assessed.assdTtlValue desc",  # high-value first
+    }
+    data = _attom_request("property/snapshot", params)
+    if not data:
+        return []
+
+    props = data.get("property") or []
+    if not isinstance(props, list):
+        return []
+
+    leads: list[dict] = []
+    for prop in props:
+        address_obj = prop.get("address", {}) or {}
+        line1 = address_obj.get("line1") or address_obj.get("oneLine") or ""
+        if not line1:
+            continue
+        assessment = prop.get("assessment") or {}
+        assessed = (assessment.get("assessed") or {})
+        market = (assessment.get("market") or {})
+        sale = prop.get("sale") or {}
+        sale_amt = ((sale.get("amount") or {}).get("saleAmt") or 0)
+        building = prop.get("building") or {}
+        size_info = building.get("size") or {}
+        rooms = building.get("rooms") or {}
+        summary = prop.get("summary") or {}
+
+        sqft = _safe_int(size_info.get("universalSize") or size_info.get("livingSize"))
+        if sqft and sqft < min_universal_size:
+            continue
+
+        lead = {
+            "address":       line1,
+            "city":          address_obj.get("locality", ""),
+            "state":         address_obj.get("countrySubd", ""),
+            "zip_code":      address_obj.get("postal1", "") or zipcode,
+            "owner_name":    _extract_owner(prop) or "",
+            "owner_email":   "",
+            "owner_phone":   "",
+            "estimated_arv": _safe_int(market.get("mktTtlValue")) or _safe_int(assessed.get("assdTtlValue")) or 0,
+            "beds":          _safe_int(rooms.get("beds")) or "",
+            "baths":         _safe_int(rooms.get("bathsTotal") or rooms.get("bathsFull")) or "",
+            "sqft":          sqft or "",
+            "year_built":    _safe_int(building.get("summary", {}).get("yearBuilt") or summary.get("yearBuilt")) or "",
+            "last_sale_price": _safe_int(sale_amt) or 0,
+            "last_sale_date":  sale.get("saleTransDate") or "",
+            "property_type":   summary.get("propType", ""),
+            "lead_type":       "attom_snapshot",
+            "source":          f"attom_snapshot:{zipcode}:p{page}",
+            "status":          "new",
+        }
+        leads.append(lead)
+    return leads
+
+
+# ---------------------------------------------------------------------------
+# Metro zip batches -- pre-picked high-wholesale-opportunity zips
+# ---------------------------------------------------------------------------
+
+PHOENIX_METRO_ZIPS = [
+    "85003", "85006", "85008", "85017", "85019",  # central Phoenix
+    "85021", "85033", "85041", "85043", "85051",  # south/west Phoenix
+    "85301", "85302", "85303",                    # Glendale
+    "85282", "85283",                             # Tempe
+    "85201", "85202",                             # Mesa
+]
+
+MEMPHIS_METRO_ZIPS = [
+    "38104", "38105", "38106", "38107", "38108",  # Memphis core
+    "38109", "38111", "38112", "38114",           # south / midtown
+    "38115", "38116", "38117",                    # southeast
+    "38118", "38122", "38126", "38127",           # inner ring
+]
+
+
+def discover_metro(metro: str, *, page_size: int = 40) -> list[dict]:
+    """Convenience: pull page 1 for every zip in a named metro."""
+    zips = {"phoenix": PHOENIX_METRO_ZIPS, "memphis": MEMPHIS_METRO_ZIPS}.get(metro.lower())
+    if not zips:
+        raise ValueError(f"unknown metro {metro!r}")
+    out: list[dict] = []
+    for z in zips:
+        batch = discover_properties_in_zip(z, page_size=page_size, page=1)
+        log.info("  %s zip %s -> %d leads", metro, z, len(batch))
+        out.extend(batch)
+    return out
+
+
 def format_enrichment_summary(data: dict) -> str:
     """Format enrichment data for display in broker pipeline."""
     if not data.get("success"):

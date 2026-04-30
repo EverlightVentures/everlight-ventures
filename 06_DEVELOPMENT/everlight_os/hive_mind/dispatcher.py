@@ -76,6 +76,25 @@ def dispatch(
         status="running",
     )
 
+    # Hive Logger: canonical run. Swallows all logging errors so dispatch never breaks.
+    _hive_run = None
+    try:
+        import sys as _sys
+        _ct = str(WORKSPACE / "03_AUTOMATION_CORE" / "01_Scripts" / "content_tools")
+        if _ct not in _sys.path:
+            _sys.path.insert(0, _ct)
+        import hive_logger as _hive_logger  # type: ignore
+        _hive_run = _hive_logger.start(
+            agent="hive_dispatcher",
+            task=f"dispatch-{mode}",
+            inputs={"prompt": user_prompt[:300], "mode": mode},
+            tags=["#hive/session", "#hive/war-room"],
+        )
+        # Align hive_logger session_id with the existing sid for dashboard cross-ref
+        _hive_run.session_id = sid
+    except Exception:
+        _hive_run = None
+
     # Write initial progress for dashboard polling
     _write_progress(sid, {
         "session_id": sid,
@@ -408,5 +427,20 @@ def dispatch(
         "started_at": session.created,
         "finished_at": session.finished,
     })
+
+    # Hive Logger: finalize. Registers war_room_dir as a file artifact.
+    if _hive_run is not None:
+        try:
+            _hive_run.artifact(
+                "file",
+                path=str(war_room_path),
+                title=f"war_room/{sid[:12]}",
+            )
+            _hive_run.finish(
+                status="done" if session.status != "failed" else "failed",
+                summary=(session.combined_summary or "")[:500],
+            )
+        except Exception:
+            pass
 
     return session

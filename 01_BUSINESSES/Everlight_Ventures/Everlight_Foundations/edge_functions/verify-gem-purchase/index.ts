@@ -1,13 +1,6 @@
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-const SUPABASE_URL = "https://jdqqmsmwmbsnlnstyavl.supabase.co";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+import { SUPABASE_URL, corsHeaders, postSlack } from "../_shared/mod.ts";
 
 const GEM_COUNT_MAP: Record<string, number> = {
   "gems-100": 100,
@@ -15,18 +8,6 @@ const GEM_COUNT_MAP: Record<string, number> = {
   "gems-1500": 1500,
   "gems-4000": 4000,
 };
-
-async function postSlack(webhookUrl: string, text: string): Promise<void> {
-  try {
-    await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-    });
-  } catch (err) {
-    console.error("Slack notification failed:", err);
-  }
-}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -152,10 +133,10 @@ Deno.serve(async (req: Request) => {
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("verify-gem-purchase error:", err);
     return new Response(
-      JSON.stringify({ error: err.message ?? "Internal server error" }),
+      JSON.stringify({ error: (err as Error).message ?? "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

@@ -319,39 +319,45 @@ def _web_search(query: str) -> list[dict]:
 
 
 def _send_email(to_email: str, subject: str, body_text: str, from_name: str = "Piper Reeves") -> dict:
-    """Send email via Resend API. Returns {"id": ..., "status": "sent"} or {"error": ...}."""
+    """Send via branded_mailer (gold template + budget gate + owner-block guard).
+
+    The body's plain text is wrapped automatically by the Everlight template;
+    the Georgia/serif HTML wrapper this function used to build is discarded
+    in favor of Playfair/Inter consistency. CAN-SPAM footer is appended via
+    plain_text_fallback so non-HTML clients still see compliance text.
+    """
     body_html = body_text.replace("\n", "<br>")
-    full_html = f"""<!DOCTYPE html>
-<html><head><meta charset="utf-8"></head>
-<body style="margin:0;padding:0;background:#f5f5f5;font-family:Georgia,serif;">
-<div style="max-width:620px;margin:0 auto;background:#fff;padding:30px 25px;border-radius:8px;">
-<div style="color:#333;font-size:15px;line-height:1.7;">{body_html}</div>
-{CAN_SPAM_FOOTER_HTML}
-</div></body></html>"""
+    plain_with_footer = body_text + "\n\n---\n" + (CAN_SPAM_FOOTER_HTML.replace("<br>", "\n").replace("<", "").replace(">", "") if isinstance(CAN_SPAM_FOOTER_HTML, str) else "")
 
-    send_data = json.dumps({
-        "from": f"{from_name} <piper@everlightventures.io>",
-        "to": [to_email],
-        "subject": subject,
-        "html": full_html,
-        "reply_to": "piper@everlightventures.io",
-    }).encode()
-
-    req = urllib.request.Request(
-        "https://api.resend.com/emails",
-        data=send_data,
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {RESEND_KEY}",
-        },
-    )
     try:
-        resp = urllib.request.urlopen(req, timeout=15)
-        resp_data = json.loads(resp.read().decode())
-        return {"id": resp_data.get("id", "sent"), "status": "sent"}
-    except Exception as e:
-        _log(f"Email send error to {to_email}: {e}")
-        return {"error": str(e)}
+        import sys as _sys
+        for _p in ("/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools",
+                   "/home/opc/content_tools"):
+            if _p not in _sys.path:
+                _sys.path.insert(0, _p)
+        from branded_mailer import send_branded_email  # type: ignore
+    except Exception as exc:
+        _log(f"branded_mailer unavailable: {exc}")
+        return {"error": f"branded_mailer_import_failed: {exc}"}
+
+    result = send_branded_email(
+        to=to_email,
+        subject=subject,
+        content_html=body_html + ("\n<br>" + CAN_SPAM_FOOTER_HTML if CAN_SPAM_FOOTER_HTML else ""),
+        title=subject,
+        from_name=f"{from_name} at Everlight",
+        from_email="piper@everlightventures.io",
+        reply_to="piper@everlightventures.io",
+        agent_name=from_name,
+        agent_title="Wholesale Outreach",
+        agent_email="piper@everlightventures.io",
+        plain_text_fallback=plain_with_footer,
+        budget_category="bulk",
+    )
+    if result.ok:
+        return {"id": result.message_id or "sent", "status": "sent"}
+    _log(f"Email send error to {to_email}: {result.error}")
+    return {"error": result.error}
 
 
 def _get_mao(seller: dict) -> int:

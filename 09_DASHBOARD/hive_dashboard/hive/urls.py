@@ -76,4 +76,16 @@ urlpatterns = [
         views.api_upload_analyze,
         name='api_upload_analyze',
     ),
+
+    # Hive Logger: canonical log line ingest + artifact search
+    path(
+        'api/logger/ingest/',
+        views.api_hive_log_ingest,
+        name='api_hive_log_ingest',
+    ),
+    path(
+        'api/artifacts/search/',
+        views.api_hive_artifact_search,
+        name='api_hive_artifact_search',
+    ),
 ]

@@ -157,31 +157,50 @@ def _send_confirmation(meeting: dict):
         return
 
     agent_email = f"{meeting['agent_slug']}@everlightventures.io"
-    payload = {
-        "from": f"{meeting['agent_name']} <{agent_email}>",
-        "to": meeting["prospect_email"],
-        "subject": f"Meeting Confirmed: {meeting['agent_name']} - {meeting['start_time'][:10]}",
-        "text": (
-            f"Hi {meeting['prospect_name']},\n\n"
-            f"Your meeting with {meeting['agent_name']} at Everlight Ventures is confirmed.\n\n"
-            f"Date/Time: {meeting['start_time']}\n"
-            f"Duration: {meeting['duration_min']} minutes\n\n"
-            f"Looking forward to speaking with you.\n\n"
-            f"Best,\n{meeting['agent_name']}\n"
-            f"Everlight Ventures"
-        ),
-    }
+    plain_body = (
+        f"Hi {meeting['prospect_name']},\n\n"
+        f"Your meeting with {meeting['agent_name']} at Everlight Ventures is confirmed.\n\n"
+        f"Date/Time: {meeting['start_time']}\n"
+        f"Duration: {meeting['duration_min']} minutes\n\n"
+        f"Looking forward to speaking with you.\n\n"
+        f"Best,\n{meeting['agent_name']}\n"
+        f"Everlight Ventures"
+    )
+    html_body = (
+        f"<h2>Meeting Confirmed</h2>"
+        f"<p>Hi {meeting['prospect_name']},</p>"
+        f"<p>Your meeting with <strong>{meeting['agent_name']}</strong> at Everlight Ventures is confirmed.</p>"
+        f"<ul>"
+        f"<li><strong>Date/Time:</strong> {meeting['start_time']}</li>"
+        f"<li><strong>Duration:</strong> {meeting['duration_min']} minutes</li>"
+        f"</ul>"
+        f"<p>Looking forward to speaking with you.</p>"
+    )
 
     try:
-        req = urllib.request.Request(
-            "https://api.resend.com/emails",
-            data=json.dumps(payload).encode(),
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {resend_key}",
-            },
+        import sys as _sys
+        for _p in ("/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools",
+                   "/home/opc/content_tools"):
+            if _p not in _sys.path:
+                _sys.path.insert(0, _p)
+        from branded_mailer import send_branded_email  # type: ignore
+        result = send_branded_email(
+            to=meeting["prospect_email"],
+            subject=f"Meeting Confirmed: {meeting['agent_name']} - {meeting['start_time'][:10]}",
+            content_html=html_body,
+            title="Meeting Confirmed",
+            from_name=meeting["agent_name"],
+            from_email=agent_email,
+            reply_to=agent_email,
+            agent_name=meeting["agent_name"],
+            agent_title="Everlight Ventures",
+            agent_email=agent_email,
+            plain_text_fallback=plain_body,
+            # Booking confirmations are vip_reply -- the prospect already raised their hand.
+            budget_category="vip_reply",
         )
-        urllib.request.urlopen(req, timeout=10)
+        if not result.ok:
+            log.warning(f"Confirmation email failed: {result.error}")
     except Exception as e:
         log.warning(f"Confirmation email failed: {e}")
 

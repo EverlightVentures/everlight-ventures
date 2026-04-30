@@ -2,9 +2,9 @@
   "available": true,
   "source_dir": "/mnt/sdcard/AA_MY_DRIVE/NOTEPAD/Trranscripts/Ai_Brain",
   "documents": 38,
-  "chunks": 745,
+  "chunks": 742,
   "indexed": true,
-  "last_ingested_at": "2026-04-06T01:26:46.471392+00:00",
+  "last_ingested_at": "2026-04-24T19:03:15.392577+00:00",
   "top_topics": [
     {
       "topic": "neuromorphic_hardware",
@@ -107,216 +107,216 @@
     }
   ],
   "manifest": {
-    "digest": "a04befce8dc58a2c8ba36b8d18ecf7da50cd2f760d60e56f8fb3837602605aff",
+    "digest": "3924ad4d797f03c03fc0e00cde917d2b0e9445a10b0fbdbac69d383070d9f316",
     "files": [
       {
         "path": "NoteGPT_Summary_0405174853_txt_443/Summary_Bal\u00e1zs M\u00e9sz\u00e1ros - Sp.txt",
         "size": 4289,
-        "mtime_ns": 1775443732000000000
+        "mtime_ns": 1776486287689154910
       },
       {
         "path": "NoteGPT_Summary_0405174853_txt_443/Summary_Chengcheng Huang - S.txt",
         "size": 4648,
-        "mtime_ns": 1775443732000000000
+        "mtime_ns": 1776486287701154910
       },
       {
         "path": "NoteGPT_Summary_0405174853_txt_443/Summary_Christoph Miehl - As.txt",
         "size": 4512,
-        "mtime_ns": 1775443732000000000
+        "mtime_ns": 1776486287705154910
       },
       {
         "path": "NoteGPT_Summary_0405174853_txt_443/Summary_Claudia Cusseddu - S.txt",
         "size": 4876,
-        "mtime_ns": 1775443732000000000
+        "mtime_ns": 1776486287717154910
       },
       {
         "path": "NoteGPT_Summary_0405174853_txt_443/Summary_Elisabetta Chicca - .txt",
         "size": 4412,
-        "mtime_ns": 1775443732000000000
+        "mtime_ns": 1776486287725154910
       },
       {
         "path": "NoteGPT_Summary_0405174853_txt_443/Summary_Jason Eshraghian - N.txt",
         "size": 6636,
-        "mtime_ns": 1775443732000000000
+        "mtime_ns": 1776486287733154910
       },
       {
         "path": "NoteGPT_Summary_0405174853_txt_443/Summary_Paolo Agliati - Spik.txt",
         "size": 3975,
-        "mtime_ns": 1775443732000000000
+        "mtime_ns": 1776486287745154910
       },
       {
         "path": "NoteGPT_Summary_0405174853_txt_443/Summary_Rapha\u00ebl Bergoin - Em.txt",
         "size": 4993,
-        "mtime_ns": 1775443732000000000
+        "mtime_ns": 1776486287753154910
       },
       {
         "path": "NoteGPT_Summary_0405174853_txt_443/Summary_SNUFA 2025 - Flash t.txt",
         "size": 4227,
-        "mtime_ns": 1775443732000000000
+        "mtime_ns": 1776486287761154910
       },
       {
         "path": "NoteGPT_Summary_0405174853_txt_443/Summary_Tomoki Fukai - Spont.txt",
         "size": 4185,
-        "mtime_ns": 1775443732000000000
+        "mtime_ns": 1776486287769154910
       },
       {
         "path": "NoteGPT_Summary_0405175318_txt_476/Summary_CSCE 790- Neuromorph.txt",
         "size": 5775,
-        "mtime_ns": 1775443998000000000
+        "mtime_ns": 1776486287777154910
       },
       {
         "path": "NoteGPT_Summary_0405175905_txt_991/Summary_7.3 Spike Response M.txt",
         "size": 4142,
-        "mtime_ns": 1775444344000000000
+        "mtime_ns": 1776486287789154910
       },
       {
         "path": "NoteGPT_Summary_0405175905_txt_991/Summary_Convolutional Neural.txt",
         "size": 3120,
-        "mtime_ns": 1775444344000000000
+        "mtime_ns": 1776486287801154910
       },
       {
         "path": "NoteGPT_Summary_0405175905_txt_991/Summary_End to End Learning .txt",
         "size": 110,
-        "mtime_ns": 1775444344000000000
+        "mtime_ns": 1776486287821154910
       },
       {
         "path": "NoteGPT_Summary_0405175905_txt_991/Summary_IEE/CSE 598- Lecture.txt",
         "size": 5908,
-        "mtime_ns": 1775444344000000000
+        "mtime_ns": 1776486287833154910
       },
       {
         "path": "NoteGPT_Summary_0405175905_txt_991/Summary_Mike Davies- Realizi.txt",
         "size": 4562,
-        "mtime_ns": 1775444344000000000
+        "mtime_ns": 1776486287849154910
       },
       {
         "path": "NoteGPT_Summary_0405175905_txt_991/Summary_NICE 2019 - Day 4c L.txt",
         "size": 3625,
-        "mtime_ns": 1775444344000000000
+        "mtime_ns": 1776486287857154910
       },
       {
         "path": "NoteGPT_Summary_0405175905_txt_991/Summary_Spiking Neural Netwo.txt",
         "size": 5151,
-        "mtime_ns": 1775444344000000000
+        "mtime_ns": 1776486287869154910
       },
       {
         "path": "NoteGPT_Summary_0405175905_txt_991/Summary_spiking neurons on a.txt",
         "size": 3785,
-        "mtime_ns": 1775444344000000000
+        "mtime_ns": 1776486287877154910
       },
       {
         "path": "NoteGPT_Transcript_0405174844_txt_187/Default_medium_Bal\u00e1zs M\u00e9sz\u00e1ros - Space as Tim_0G7vHD4M3WI.txt",
         "size": 18440,
-        "mtime_ns": 1775443724000000000
+        "mtime_ns": 1776486287885154910
       },
       {
         "path": "NoteGPT_Transcript_0405174844_txt_187/Default_medium_Chengcheng Huang - State modul__wqjVwBTurA.txt",
         "size": 36769,
-        "mtime_ns": 1775443724000000000
+        "mtime_ns": 1776486287901154910
       },
       {
         "path": "NoteGPT_Transcript_0405174844_txt_187/Default_medium_Christoph Miehl - Assembly-bas_r5djP6bXxk4.txt",
         "size": 20315,
-        "mtime_ns": 1775443724000000000
+        "mtime_ns": 1776486287909154910
       },
       {
         "path": "NoteGPT_Transcript_0405174844_txt_187/Default_medium_Claudia Cusseddu - Synaptic Pl_hMWbKFe-cJM.txt",
         "size": 18098,
-        "mtime_ns": 1775443724000000000
+        "mtime_ns": 1776486287925154910
       },
       {
         "path": "NoteGPT_Transcript_0405174844_txt_187/Default_medium_Elisabetta Chicca - Event-Base_CGYT6g80Ku8.txt",
         "size": 37299,
-        "mtime_ns": 1775443724000000000
+        "mtime_ns": 1776486287933154910
       },
       {
         "path": "NoteGPT_Transcript_0405174844_txt_187/Default_medium_Jason Eshraghian - Neuromorphi_jlFARECk2zE.txt",
         "size": 44517,
-        "mtime_ns": 1775443724000000000
+        "mtime_ns": 1776486287937154910
       },
       {
         "path": "NoteGPT_Transcript_0405174844_txt_187/Default_medium_Paolo Agliati - Spiking neuron_f1RxbDeL27E.txt",
         "size": 19538,
-        "mtime_ns": 1775443724000000000
+        "mtime_ns": 1776486287945154910
       },
       {
         "path": "NoteGPT_Transcript_0405174844_txt_187/Default_medium_Rapha\u00ebl Bergoin - Emergence an_oQiQLUyS1qM.txt",
         "size": 16927,
-        "mtime_ns": 1775443724000000000
+        "mtime_ns": 1776486287957154910
       },
       {
         "path": "NoteGPT_Transcript_0405174844_txt_187/Default_medium_SNUFA 2025 - Flash talks_ucL5AvmdD1E.txt",
         "size": 16730,
-        "mtime_ns": 1775443724000000000
+        "mtime_ns": 1776486287965154910
       },
       {
         "path": "NoteGPT_Transcript_0405174844_txt_187/Default_medium_Tomoki Fukai - Spontaneous rep_lPbxx3iIWGo.txt",
         "size": 28536,
-        "mtime_ns": 1775443724000000000
+        "mtime_ns": 1776486287977154910
       },
       {
         "path": "NoteGPT_Transcript_0405175312_txt_815/Default_medium_CSCE 790_ Neuromorphic Computi_FxTMH9VRsgk.txt",
         "size": 46440,
-        "mtime_ns": 1775443992000000000
+        "mtime_ns": 1776486287985154910
       },
       {
         "path": "NoteGPT_Transcript_0405175846_txt_353/Default_medium_7.3 Spike Response Model (SRM)_HfSZzKvDV5s.txt",
         "size": 9686,
-        "mtime_ns": 1775444326000000000
+        "mtime_ns": 1776486287989154910
       },
       {
         "path": "NoteGPT_Transcript_0405175846_txt_353/Default_medium_Convolutional Neural Networks _YRhxdVk_sIs.txt",
         "size": 8554,
-        "mtime_ns": 1775444326000000000
+        "mtime_ns": 1776486287993154910
       },
       {
         "path": "NoteGPT_Transcript_0405175846_txt_353/Default_medium_End to End Learning of Spiking_xRkonYlbzjs.txt",
         "size": 0,
-        "mtime_ns": 1775444326000000000
+        "mtime_ns": 1776486287997154910
       },
       {
         "path": "NoteGPT_Transcript_0405175846_txt_353/Default_medium_IEE_CSE 598_ Lecture 7G (2020-_ICw2_49dSNw.txt",
         "size": 53809,
-        "mtime_ns": 1775444326000000000
+        "mtime_ns": 1776486288009154910
       },
       {
         "path": "NoteGPT_Transcript_0405175846_txt_353/Default_medium_Mike Davies_ Realizing the Pro_jhQgElvtb1s.txt",
         "size": 26926,
-        "mtime_ns": 1775444326000000000
+        "mtime_ns": 1776486288025154910
       },
       {
         "path": "NoteGPT_Transcript_0405175846_txt_353/Default_medium_NICE 2019 - Day 4c Loihi Overv_BO2PlEtfruo.txt",
         "size": 19326,
-        "mtime_ns": 1775444326000000000
+        "mtime_ns": 1776486288029154910
       },
       {
         "path": "NoteGPT_Transcript_0405175846_txt_353/Default_medium_Spiking Neural Networks for Mo_PeW-TN3P1hk.txt",
         "size": 63305,
-        "mtime_ns": 1775444326000000000
+        "mtime_ns": 1776486288033154910
       },
       {
         "path": "NoteGPT_Transcript_0405175846_txt_353/Default_medium_spiking neurons on a quadcopte_D3NdnImFVfE.txt",
         "size": 6106,
-        "mtime_ns": 1775444326000000000
+        "mtime_ns": 1776486288037154910
       },
       {
         "path": "NoteGPT_Transcript_0405180036_txt_378/Default_IEE 598_ Lecture 7F (2025-04-24)_ Spikin.txt",
         "size": 66183,
-        "mtime_ns": 1775444436000000000
+        "mtime_ns": 1776486288041154910
       }
     ]
   },
   "memory": {
     "name": "ai_brain",
-    "entries": 745,
+    "entries": 742,
     "indexed": true,
-    "index_size": 745
+    "index_size": 742
   },
   "repo_stack": {
     "available": true,
     "repos_total": 25,
-    "installed_total": 5,
-    "missing_total": 20,
+    "installed_total": 18,
+    "missing_total": 7,
     "phase_1_total": 8,
     "phase_1_ready": true,
     "top_workflows": [
@@ -343,34 +343,16 @@
     ],
     "recommended_next": [
       {
-        "id": "litellm",
-        "owner_agent": "Franklin Steele",
-        "category": "llm_gateway",
-        "install": "docker run -p 4000:4000 ghcr.io/berriai/litellm:main-stable"
-      },
-      {
         "id": "ollama",
         "owner_agent": "Franklin Steele",
         "category": "local_llm_runtime",
         "install": "docker run -d -p 11434:11434 -v ollama:/root/.ollama ollama/ollama"
       },
       {
-        "id": "qdrant",
-        "owner_agent": "Isaac Ashworth",
-        "category": "vector_database",
-        "install": "docker run -p 6333:6333 -p 6334:6334 qdrant/qdrant"
-      },
-      {
-        "id": "pgvector",
-        "owner_agent": "Lincoln Masters",
-        "category": "vector_database",
-        "install": "pip install -U pgvector"
-      },
-      {
-        "id": "crawl4ai",
-        "owner_agent": "Benjamin Orozco",
-        "category": "web_extraction",
-        "install": "pip install -U crawl4ai"
+        "id": "whisperx",
+        "owner_agent": "Rafael Vasquez",
+        "category": "speech_to_text",
+        "install": "pip install -U whisperx"
       }
     ],
     "owner_agents": [
@@ -385,8 +367,11 @@
       "crewai",
       "faiss",
       "nengo",
-      "lancedb",
-      "playwright_python"
+      "langchain",
+      "langgraph",
+      "llama_index",
+      "autogen",
+      "litellm"
     ]
   },
   "slack_routing": {

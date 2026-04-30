@@ -21,8 +21,8 @@ import Sidebar from "@/components/layout/Sidebar";
 import KpiCard from "@/components/dashboard/KpiCard";
 import HiveStatusPanel from "@/components/dashboard/HiveStatusPanel";
 import { getDashboardSnapshot } from "@/lib/api";
-import { formatRelativeTime } from "@/lib/utils";
-import type { KpiMetric, ActivityItem } from "@/types";
+import { formatRelativeTime, getAgentColor } from "@/lib/utils";
+import type { KpiMetric, ActivityItem, AgentId } from "@/types";
 
 // ============================================================
 // Mock data
@@ -120,13 +120,6 @@ const ACTIVITY_ITEMS: ActivityItem[] = [
   },
 ];
 
-const AGENT_COLORS: Record<string, string> = {
-  claude: "#F59E0B",
-  gemini: "#3B82F6",
-  codex: "#10B981",
-  perplexity: "#7C3AED",
-};
-
 const ACTIVITY_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
   agent_completed: CheckCircle2,
   integration_connected: GitMerge,
@@ -211,7 +204,7 @@ function Header() {
 // ============================================================
 function ActivityRow({ item }: { item: ActivityItem }) {
   const IconComponent = ACTIVITY_ICONS[item.type] ?? CheckCircle2;
-  const agentColor = item.agentId ? AGENT_COLORS[item.agentId] : null;
+  const agentColor = item.agentId ? getAgentColor(item.agentId as AgentId) : null;
   const isError = item.type === "error";
 
   return (
@@ -327,7 +320,7 @@ export default function DashboardPage() {
           },
         ]);
         setActivity(
-          sessions.map((session: any, index: number) => ({
+          sessions.map((session: Record<string, unknown>, index: number) => ({
             id: session.session_id,
             type: session.status === "failed" ? "error" : "agent_completed",
             title: `${session.status === "completed" ? "Hive completed" : "Hive session"} ${session.session_id.slice(0, 8)}`,

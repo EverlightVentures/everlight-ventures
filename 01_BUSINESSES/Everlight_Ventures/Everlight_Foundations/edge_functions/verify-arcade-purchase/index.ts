@@ -1,46 +1,24 @@
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { SUPABASE_URL, corsHeaders, postSlack } from "../_shared/mod.ts";
 
-const SUPABASE_URL = "https://jdqqmsmwmbsnlnstyavl.supabase.co";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
-
-// Maps slug to lives granted for credit packs
 const LIVES_MAP: Record<string, number> = {
   "arcade-lives-t1": 3,
   "arcade-lives-t2": 10,
   "arcade-lives-t3": 25,
 };
 
-// Maps slug to NOS bottles granted (Alley Kingz)
 const NOS_MAP: Record<string, number> = {
   "nos-50": 50,
   "nos-300": 300,
   "nos-800": 800,
 };
 
-// Maps slug to chips granted (Blackjack)
 const CHIPS_MAP: Record<string, number> = {
   "chips-500": 500,
   "chips-3000": 3000,
   "chips-8000": 8000,
 };
-
-async function postSlack(webhookUrl: string, text: string): Promise<void> {
-  try {
-    await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-    });
-  } catch (err) {
-    console.error("Slack notification failed:", err);
-  }
-}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -235,10 +213,10 @@ Deno.serve(async (req: Request) => {
       }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("verify-arcade-purchase error:", err);
     return new Response(
-      JSON.stringify({ error: err.message ?? "Internal server error" }),
+      JSON.stringify({ error: (err as Error).message ?? "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

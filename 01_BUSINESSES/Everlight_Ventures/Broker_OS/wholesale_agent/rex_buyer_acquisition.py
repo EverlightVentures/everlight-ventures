@@ -38,8 +38,8 @@ BUYERS_DIR = AGENT_DIR / "buyer_outreach"
 BUYERS_DIR.mkdir(parents=True, exist_ok=True)
 
 RESEND_KEY = os.environ.get("RESEND_API_KEY", os.environ.get("SMTP_PASS", ""))
-FROM_EMAIL = os.environ.get("SMTP_FROM", "Rich Gee <rich@everlightventures.io>")
-REPLY_TO = "rich@everlightventures.io"
+FROM_EMAIL = os.environ.get("SMTP_FROM", "Harrison Knox <hammer@everlightventures.io>")
+REPLY_TO = "hammer@everlightventures.io"
 SLACK_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
 SLACK_CHANNEL = "C0ANLLV8JAC"
 TODAY = datetime.now(timezone.utc).strftime("%Y-%m-%d")
@@ -112,7 +112,7 @@ Reply with your buy box (property types, price range, preferred areas) and I wil
 
 Rich
 Everlight Ventures -- Acquisitions
-rich@everlightventures.io
+hammer@everlightventures.io
 everlightventures.io/wholesale""",
     },
     {
@@ -134,7 +134,7 @@ Interested? Reply with your criteria and I will get you on the list.
 
 Rich
 Everlight Ventures
-rich@everlightventures.io""",
+hammer@everlightventures.io""",
     },
     {
         "subject": "Private deal flow for {city} investors",

@@ -152,7 +152,23 @@ deploy_scripts() {
     scp -o ConnectTimeout=10 -i "$KEY" \
         /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/gdocs_bridge.py \
         /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/report_template.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/hive_logger.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/hive_tags.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/HIVE_LOGGER_API.md \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/n8n_replacements.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/resend_budget.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/branded_mailer.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/resend_guard.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/branded_slack.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/branded_calendar.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/branded_sms.py \
         "$E5_VM:/home/opc/content_tools/" 2>/dev/null
+
+    # Hive Logger standalone scripts (live at 01_Scripts/ root)
+    scp -o ConnectTimeout=10 -i "$KEY" \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/hive_3format.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/regenerate_index.py \
+        "$E5_VM:/home/opc/" 2>/dev/null
 
     # Broker enrichment modules
     ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "mkdir -p /home/opc/broker" 2>/dev/null

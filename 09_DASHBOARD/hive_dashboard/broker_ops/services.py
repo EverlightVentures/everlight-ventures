@@ -160,6 +160,23 @@ def run_matching(min_score: float = 60.0, dry_run: bool = False) -> list[dict]:
     Minimum score raised from 40 -> 60 to cut noise.
     Returns list of match summaries.
     """
+    # Hive Logger: canonical run for broker matching
+    _hive_run = None
+    try:
+        import sys as _sys
+        _ct = "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools"
+        if _ct not in _sys.path:
+            _sys.path.insert(0, _ct)
+        import hive_logger as _hl  # type: ignore
+        _hive_run = _hl.start(
+            agent="30_match_maker",
+            task="broker-run-matching",
+            inputs={"min_score": min_score, "dry_run": dry_run},
+            tags=["#broker/ops", "#hive/pipeline"],
+        )
+    except Exception:
+        _hive_run = None
+
     offers = OfferListing.objects.filter(status="active")
     leads = _contactable_leads()
     results = []
@@ -219,6 +236,16 @@ def run_matching(min_score: float = 60.0, dry_run: bool = False) -> list[dict]:
             "result_count": len(results),
         },
     )
+
+    if _hive_run is not None:
+        try:
+            _hive_run.finish(
+                status="done",
+                summary=f"Broker matching produced {len(results)} matches at min_score={min_score}.",
+            )
+        except Exception:
+            pass
+
     return results
 
 
@@ -242,10 +269,18 @@ def expire_stale_matches(hours: int = 48, dry_run: bool = False) -> int:
 
 
 def auto_approve_high_score_matches(min_score: float = 65.0, limit: int = 20,
-                                    dry_run: bool = False) -> int:
+                                    dry_run: bool = False,
+                                    auto_deal_min_score: float = 70.0) -> int:
     """
     Auto-approve pending matches with score >= min_score that have real emails.
     Removes human approval bottleneck for clear-cut high-confidence matches.
+
+    If a match also hits `auto_deal_min_score`, automatically create a Deal
+    so approved matches stop piling up untouched. The deal value is estimated
+    from the offer's price range (midpoint of price_min/price_max). Matches
+    without a usable offer price are still approved but NOT auto-converted;
+    they surface for human triage.
+
     Returns number of matches approved.
     """
     candidates = BrokerMatch.objects.filter(
@@ -262,14 +297,40 @@ def auto_approve_high_score_matches(min_score: float = 65.0, limit: int = 20,
     candidates = candidates.order_by("-match_score")[:limit]
 
     count = 0
+    deals_created = 0
     for match in candidates:
         if not dry_run:
             match.status = "approved"
             match.matched_by = "auto_approved"
             match.save(update_fields=["status", "matched_by", "updated_at"])
+
+            # Auto-convert to Deal if score crosses the higher bar AND we have
+            # a usable offer price. One conversion per match; re-runs skip
+            # via the new status=converted flag set inside create_deal_from_match.
+            if float(match.match_score or 0) >= auto_deal_min_score:
+                try:
+                    offer = match.offer
+                    p_min = float(offer.price_min or 0) if offer else 0.0
+                    p_max = float(offer.price_max or 0) if offer else 0.0
+                    midpoint = (p_min + p_max) / 2 if (p_min or p_max) else 0.0
+                    if midpoint > 0:
+                        from decimal import Decimal
+                        create_deal_from_match(
+                            match,
+                            Decimal(str(round(midpoint, 2))),
+                            notes=f"auto-created from match score {match.match_score}",
+                        )
+                        deals_created += 1
+                    else:
+                        logger.info(
+                            f"Match {match.id} score={match.match_score} approved but "
+                            "no offer price (price_min=price_max=0); deal not auto-created."
+                        )
+                except Exception as exc:
+                    logger.warning(f"auto match->deal failed for match {match.id}: {exc}")
         count += 1
 
-    logger.info(f"Auto-approved {count} high-score matches (>= {min_score})")
+    logger.info(f"Auto-approved {count} matches (>= {min_score}), auto-created {deals_created} deals (>= {auto_deal_min_score})")
     return count
 
 

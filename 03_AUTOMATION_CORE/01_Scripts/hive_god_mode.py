@@ -1040,8 +1040,8 @@ class GodMode:
             log.info("  %d emails sent 48h+ ago without detected reply.", stale_count)
             # This is informational -- don't escalate, just note it
 
-        # TODO: When Gmail MCP is integrated, actively check inbox for replies
-        # and update the outreach queue status to "replied"
+        # Blocked on Gmail MCP integration; once available, check inbox
+        # for replies and update outreach queue status to "replied"
 
     # ---------------------------------------------------------------
     # 6. AMBIENT HEALTH -- Keep the office alive

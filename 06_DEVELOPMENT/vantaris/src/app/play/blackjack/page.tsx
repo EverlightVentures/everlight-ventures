@@ -1674,21 +1674,34 @@ export default function BlackjackPage() {
         currentGems={store.player.gems}
         currentChips={store.player.chips}
         onPurchase={async (slug) => {
+          // Direct fetch with anon key -- bypasses session JWT expiry issues
+          const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkcXFtc213bWJzbmxuc3R5YXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTk5ODMsImV4cCI6MjA4ODM5NTk4M30.9BDviI2WR46sphcS3uzKapcKbslYpMO4PdSEPFrv3Ww'
           try {
-            const { supabase } = await import('@/lib/supabase')
-            const { data, error } = await supabase.functions.invoke('create-checkout', {
-              body: {
+            const res = await fetch('https://jdqqmsmwmbsnlnstyavl.supabase.co/functions/v1/create-checkout', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${ANON}`,
+                'apikey': ANON,
+              },
+              body: JSON.stringify({
                 slug,
                 success_url: window.location.origin + '/play/blackjack?checkout=success',
                 cancel_url: window.location.origin + '/play/blackjack?checkout=canceled',
                 metadata: { slug, product_type: slug.startsWith('gems') ? 'gems' : 'chips' },
-              },
+              }),
             })
-            if (error) { alert(`Payment error: ${error.message}`); return }
+            const data = await res.json().catch(() => ({}))
+            if (!res.ok) {
+              alert(`Payment error (${res.status}): ${data?.error || data?.message || 'Unknown'}`)
+              console.error('[checkout]', res.status, data)
+              return
+            }
             if (data?.url) { window.location.href = data.url }
-            else { alert('Could not create checkout. Try again.') }
+            else { alert('No checkout URL returned. Try again.') }
           } catch (err: any) {
-            alert(`Payment unavailable: ${err?.message || 'Unknown error'}`)
+            alert(`Network error: ${err?.message || 'Unknown'}. Try again.`)
+            console.error('[checkout]', err)
           }
         }}
       />

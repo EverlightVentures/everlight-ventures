@@ -37,8 +37,8 @@ DEALS_DIR.mkdir(parents=True, exist_ok=True)
 CONTRACTS_DIR.mkdir(parents=True, exist_ok=True)
 
 RESEND_KEY = os.environ.get("RESEND_API_KEY", os.environ.get("SMTP_PASS", ""))
-FROM_EMAIL = os.environ.get("SMTP_FROM", "Rich Gee <rich@everlightventures.io>")
-REPLY_TO = "rich@everlightventures.io"
+FROM_EMAIL = os.environ.get("SMTP_FROM", "Harrison Knox <hammer@everlightventures.io>")
+REPLY_TO = "hammer@everlightventures.io"
 SLACK_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
 SLACK_CHANNEL = "C0ANLLV8JAC"
 
@@ -81,35 +81,72 @@ def _load_title_companies() -> dict:
 # EMAIL / SLACK HELPERS
 # ---------------------------------------------------------------------------
 
-def send_email(to: str, subject: str, body: str) -> bool:
-    if not RESEND_KEY or not to:
+def send_email(to: str, subject: str, body: str, *, state: str = "") -> bool:
+    """Send via the branded mailer so every outbound wears the luxury template.
+
+    `body` is the message content (Harrison's voice, Piper's voice, etc.); the
+    mailer wraps it in the Everlight gold header + signature block. Line breaks
+    in `body` are converted to <br> for the HTML pass; a stripped plain-text
+    fallback is generated automatically.
+
+    Compliance gate: if caller passes `state`, check state_gate before sending.
+    """
+    if not to:
         return False
+
+    if state:
+        try:
+            import sys
+            sys.path.insert(0, str(Path(__file__).parent))
+            from compliance.state_gate import check
+            gate = check(state, "email", "outreach")
+            if not gate.ok:
+                log.warning(f"Email blocked by state gate ({state}): {gate.blocked_reason}")
+                return False
+        except ImportError:
+            pass  # compliance module optional
+
+    # Route through branded_mailer so the luxury template renders by default.
     try:
-        from rex_utils import safe_send_email
-        return safe_send_email(to, subject, body)
-    except ImportError:
-        pass
-    import requests
-    try:
-        resp = requests.post(
-            "https://api.resend.com/emails",
-            headers={
-                "Authorization": f"Bearer {RESEND_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "from": FROM_EMAIL,
-                "to": [to],
-                "subject": subject,
-                "text": body,
-                "reply_to": REPLY_TO,
-            },
-            timeout=10,
-        )
-        return resp.status_code in (200, 201)
-    except Exception as e:
-        log.error(f"Email send failed: {e}")
+        import sys
+        content_tools = Path("/home/opc/content_tools") if Path("/home/opc/content_tools").exists() \
+            else Path("/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
+        sys.path.insert(0, str(content_tools))
+        from branded_mailer import send_branded_email
+    except ImportError as e:
+        log.error(f"branded_mailer unavailable: {e}")
         return False
+
+    # Body is plain text with newlines -> HTML <br> for render_report content_html.
+    content_html = (body or "").replace("\n", "<br>\n")
+
+    # FROM_EMAIL may be "Harrison Knox <hammer@everlightventures.io>"; split name + addr.
+    from_name, from_addr = _split_from(FROM_EMAIL)
+
+    result = send_branded_email(
+        to=to,
+        subject=subject,
+        content_html=content_html,
+        title=subject,
+        from_name=from_name,
+        from_email=from_addr,
+        reply_to=REPLY_TO,
+        agent_name=from_name,
+        agent_title="Everlight Ventures Acquisitions",
+        agent_email=from_addr,
+    )
+    if not result.ok:
+        log.error(f"Email send failed: {result.error}")
+    return result.ok
+
+
+def _split_from(from_line: str) -> tuple:
+    """Parse 'Name <email@x.com>' -> ('Name', 'email@x.com'). Falls back to ('Everlight Ventures', from_line) for bare addresses."""
+    import re
+    m = re.match(r'^\s*"?([^"<]+?)"?\s*<([^>]+)>\s*$', from_line)
+    if m:
+        return m.group(1).strip(), m.group(2).strip()
+    return "Everlight Ventures", from_line.strip()
 
 
 def post_slack(text: str, title: str = "Rex Closer Update"):
@@ -397,9 +434,9 @@ def send_offer(deal: dict, offer_details: dict) -> bool:
         f"If that works, I'll send over the purchase agreement right now "
         f"for your e-signature.\n\n"
         f"Just reply YES and I'll send it over.\n\n"
-        f"Rich\n"
+        f"Harrison Knox\n"
         f"Everlight Ventures\n"
-        f"rich@everlightventures.io"
+        f"hammer@everlightventures.io"
     )
 
     if send_email(email, subject, body):
@@ -492,19 +529,100 @@ Everlight Logistics LLC
 ---
 This agreement was prepared by Everlight Ventures for review purposes.
 Both parties are advised to consult with legal counsel before signing.
-Contact: rich@everlightventures.io
+Contact: hammer@everlightventures.io
 """
     return agreement
 
 
-def get_title_company(market: str) -> dict:
-    """Get the first title company for this market."""
+_CITY_TO_STATE = {
+    "atlanta": "GA", "augusta": "GA", "savannah": "GA", "macon": "GA",
+    "dallas": "TX", "houston": "TX", "san_antonio": "TX", "fort_worth": "TX", "austin": "TX",
+    "jacksonville": "FL", "orlando": "FL", "tampa": "FL", "miami": "FL",
+    "charlotte": "NC", "raleigh": "NC",
+    "st_louis": "MO", "saint_louis": "MO", "kansas_city": "MO",
+    "phoenix": "AZ", "tucson": "AZ", "mesa": "AZ",
+    "memphis": "TN", "nashville": "TN", "knoxville": "TN",
+}
+
+
+def _companies_from_entry(entry) -> list[dict]:
+    """Normalize a title_companies.json state entry into a ranked list.
+
+    Handles two shapes:
+      (a) {"market":..., "companies":[{...},{...}]}     -- current
+      (b) [{...}, {...}]                                 -- legacy
+    """
+    if isinstance(entry, dict) and isinstance(entry.get("companies"), list):
+        cos = entry["companies"]
+    elif isinstance(entry, list):
+        cos = entry
+    else:
+        return []
+    return sorted(cos, key=lambda c: (0 if c.get("primary") else 1, c.get("rank", 999)))
+
+
+def get_title_companies_ranked(market_or_state: str) -> list[dict]:
+    """Return the full ranked list of title companies for a market/state.
+
+    Caller iterates this list -- try rank 1, then 2, 3... until one accepts.
+    Each row includes .name, .phone, .email, .website, .rank, .primary (True/False),
+    .handles_assignments, .investor_friendly, .notes.
+    """
     companies = _load_title_companies()
-    market_key = market.lower().replace(" ", "_").replace(".", "")
-    market_list = companies.get(market_key, companies.get("national_backup", []))
-    if market_list:
-        return market_list[0]
+    key = (market_or_state or "").strip()
+    # 2-letter state code? take directly
+    if len(key) == 2 and key.upper() in companies:
+        return _companies_from_entry(companies[key.upper()])
+    k_lower = key.lower().replace(" ", "_").replace(".", "")
+    # City -> state lookup
+    st = _CITY_TO_STATE.get(k_lower)
+    if st and st in companies:
+        return _companies_from_entry(companies[st])
+    # Legacy: market_key as-is (old city-level keys)
+    if k_lower in companies:
+        return _companies_from_entry(companies[k_lower])
+    # Fallback: national_backup list
+    return _companies_from_entry(companies.get("national_backup", []))
+
+
+def get_title_company(market_or_state: str) -> dict:
+    """Return the primary (rank 1) title company for a market/state.
+
+    Kept for backwards compatibility with existing callers. New code should
+    call get_title_companies_ranked() and iterate with fallback logic.
+    """
+    ranked = get_title_companies_ranked(market_or_state)
+    if ranked:
+        # Prefer primary=y, else rank 1
+        for c in ranked:
+            if str(c.get("primary", "")).lower() in ("y", "yes", "true", "1"):
+                return c
+        return ranked[0]
     return {"name": "TBD", "phone": "", "email": ""}
+
+
+def try_title_companies_with_fallback(market_or_state: str, address: str,
+                                       attempt_fn) -> tuple[bool, dict, list[dict]]:
+    """Iterate ranked title companies; call attempt_fn(company) until one accepts.
+
+    attempt_fn(company) -> True if that company took the closing, else False.
+    Returns (success, accepted_company_or_empty, tried_log[]).
+    Logs each attempt with the decline reason so the closer can re-rank later.
+    """
+    ranked = get_title_companies_ranked(market_or_state)
+    tried: list[dict] = []
+    for c in ranked:
+        log.info("title attempt: rank=%s %s for %s", c.get("rank","?"), c.get("name","?"), address)
+        ok = False
+        try:
+            ok = bool(attempt_fn(c))
+        except Exception as e:
+            tried.append({"company": c.get("name"), "ok": False, "error": str(e)[:120]})
+            continue
+        tried.append({"company": c.get("name"), "ok": ok})
+        if ok:
+            return True, c, tried
+    return False, {}, tried
 
 
 def generate_deal_sheet(deal: dict) -> str:
@@ -573,7 +691,7 @@ Title Company: {title_info}
 
 ---
 Everlight Ventures -- Acquisitions
-rich@everlightventures.io
+hammer@everlightventures.io
 everlightventures.io/wholesale
 """
     return sheet
@@ -683,7 +801,7 @@ def process_seller_acceptance(deal: dict) -> bool:
         f"just reply to this email.\n\n"
         f"Once signed, we will open escrow with the title company "
         f"and you will have your cash within 7 days.\n\n"
-        f"Rich\n"
+        f"Harrison Knox\n"
         f"Everlight Ventures\n\n"
         f"---\n\n"
         f"{agreement}"
@@ -729,7 +847,24 @@ def process_seller_acceptance(deal: dict) -> bool:
 
     log.info(f"Buyer check passed: {buyer_count_available} buyers ready for {addr}")
 
-    send_email(email, subject, body)
+    send_email(email, subject, body, state=deal.get("state", ""))
+
+    # Generate Ace's custom pitch package (email + SMS + HTML one-pager) so the buyer
+    # blast uses branded copy rather than raw deal data. Stored on the deal record.
+    try:
+        from ace_pitch_engine import pitch_deal
+        pitch = pitch_deal(deal)
+        deal["ace_pitch"] = {
+            "email_pitch": pitch.get("email_pitch", ""),
+            "sms_pitch": pitch.get("sms_pitch", ""),
+            "one_pager_html": pitch.get("one_pager_html", ""),
+            "generated_at": pitch.get("generated_at", ""),
+        }
+        log.info(f"Ace pitch generated for {addr}")
+    except ImportError:
+        log.debug("ace_pitch_engine not available -- buyer blast will use default copy")
+    except Exception as e:
+        log.warning(f"Ace pitch generation failed (non-fatal): {e}")
 
     # Update deal stage
     deal["stage"] = "under_contract"
@@ -869,7 +1004,7 @@ def _handle_qualifying_reply(deal: dict, reply_text: str) -> str:
             f"research on comparable sales in your area before I can give you "
             f"an accurate cash offer.\n\n"
             f"I will follow up within 24 hours with a firm number.\n\n"
-            f"Rich\nEverlight Ventures"
+            f"Harrison Knox\nEverlight Ventures"
         )
         send_email(email, f"Re: Cash offer for {addr}", defer_body)
         deal["stage"] = "researching"
@@ -1048,7 +1183,7 @@ def _handle_offer_reply_legacy(deal: dict, reply_text: str) -> str:
                 f"repairs, closing costs, and holding costs on my end.\n\n"
                 f"If ${our_max:,.0f} works for you, I can have the purchase "
                 f"agreement over today and close within 7 days.\n\n"
-                f"Rich\nEverlight Ventures"
+                f"Harrison Knox\nEverlight Ventures"
             )
             email = deal.get("owner_email", "")
             send_email(email, f"Re: Cash offer for {addr}", body)
@@ -1069,7 +1204,7 @@ def _handle_offer_reply_legacy(deal: dict, reply_text: str) -> str:
         f"Thanks for getting back to me. Just to confirm -- my offer for "
         f"{addr} is ${offer:,.0f}, cash, close in 7 days.\n\n"
         f"Would you like me to send over the purchase agreement?\n\n"
-        f"Rich\nEverlight Ventures"
+        f"Harrison Knox\nEverlight Ventures"
     )
     email = deal.get("owner_email", "")
     send_email(email, f"Re: Cash offer for {addr}", body)

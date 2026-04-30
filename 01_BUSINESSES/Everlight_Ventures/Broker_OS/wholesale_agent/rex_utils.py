@@ -34,8 +34,8 @@ FAILED_DIR = AGENT_DIR / "failed_emails"
 FAILED_DIR.mkdir(parents=True, exist_ok=True)
 
 RESEND_KEY = os.environ.get("RESEND_API_KEY", os.environ.get("SMTP_PASS", ""))
-FROM_EMAIL = os.environ.get("SMTP_FROM", "Rich Gee <rich@everlightventures.io>")
-REPLY_TO = "rich@everlightventures.io"
+FROM_EMAIL = os.environ.get("SMTP_FROM", "Piper Reeves <piper@everlightventures.io>")
+REPLY_TO = "piper@everlightventures.io"
 SLACK_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
 SLACK_CHANNEL = "C0ANLLV8JAC"
 ATTOM_API_KEY = os.environ.get("ATTOM_API_KEY", "")
@@ -155,11 +155,15 @@ def is_dead_end_email(email: str) -> bool:
 
 
 def safe_send_email(to: str, subject: str, body: str,
-                    max_retries: int = 3) -> bool:
+                    max_retries: int = 3,
+                    state: str = "",
+                    action: str = "outreach") -> bool:
     """
     Send email via Resend with retry and dead letter queue on failure.
     Returns True if sent, False if queued to dead letter.
     Auto-skips government, institutional, and dead-end addresses.
+    Enforces per-state compliance (state_gates.json) when `state` is provided.
+    Appends CAN-SPAM footer if body does not already have one.
     """
     if not RESEND_KEY:
         log.warning("No RESEND_API_KEY set -- queuing to dead letter")
@@ -172,6 +176,49 @@ def safe_send_email(to: str, subject: str, body: str,
     if is_dead_end_email(to):
         log.info("SKIP dead-end email: %s" % to)
         return False
+
+    try:
+        import sys as _sys, pathlib as _pl
+        _sys.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
+        from resend_guard import assert_external_recipient, OwnerEmailBlocked
+        assert_external_recipient(to)
+    except OwnerEmailBlocked as e:
+        log.warning("BLOCKED owner-bound send: %s", e)
+        return False
+    except Exception:
+        pass  # guard unavailable -> fall through to preserve existing behavior
+
+    # --- State compliance gate ----------------------------------------------
+    # If caller passed a state, run it through state_gate. Blocks + logs if not
+    # allowed. No state == legacy path (warn once per hour so we migrate over).
+    if state:
+        try:
+            import sys as _sys, pathlib as _pl
+            _sys.path.insert(0, str(_pl.Path(__file__).resolve().parent / "compliance"))
+            from state_gate import check as _state_check
+            decision = _state_check(state, channel="email", action=action)
+            if not decision.ok:
+                log.warning("BLOCKED by state_gate: %s / %s -> %s",
+                            state, action, decision.blocked_reason)
+                _queue_dead_letter(to, subject, body,
+                                   f"state_gate_blocked:{decision.blocked_reason}")
+                return False
+            if decision.warnings:
+                log.info("state_gate warnings for %s: %s", state, "; ".join(decision.warnings))
+            # Append CAN-SPAM footer if missing
+            if "unsubscribe" not in body.lower() and "opt out" not in body.lower():
+                body = body.rstrip() + (
+                    "\n\n---\nEverlight Ventures, Wholesale Division\n"
+                    "To opt out of future messages reply STOP or email opt-out@everlightventures.io.\n"
+                    "You received this message because we believe you may be the owner of a property "
+                    "we're interested in acquiring."
+                )
+        except Exception as e:
+            log.warning("state_gate unavailable, proceeding without compliance check: %s", e)
+    else:
+        log.warning("safe_send_email called without state -- compliance NOT checked. Caller should pass state=<2-letter>.")
+
+    # -----------------------------------------------------------------------
 
     import requests
 

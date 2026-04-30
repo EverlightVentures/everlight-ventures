@@ -2,38 +2,14 @@
 // Called from success page / email links instead of raw signed URLs
 // Validates token, checks expiry + download count, returns fresh 1-hour signed URL
 
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-const SUPABASE_URL = "https://jdqqmsmwmbsnlnstyavl.supabase.co";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-};
-
-const FILE_MAP: Record<string, string> = {
-  "sam-book-1": "sam-book-1/Sams_First_Superpower.zip",
-  "sam-book-2": "sam-book-2/Sams_Second_Superpower.zip",
-  "sam-book-3": "sam-book-3/Sams_Third_Superpower.zip",
-  "sam-book-4": "sam-book-4/Sams_Fourth_Superpower.zip",
-  "sam-book-5": "sam-book-5/Sams_Fifth_Superpower.zip",
-  "sam-bundle": "sam-bundle/Sam_And_Robo_Complete.zip",
-  "beyond-the-veil": "beyond-the-veil/Beyond_The_Veil.zip",
-};
-
-function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}
+import { corsHeaders, handleCors, json, createSupabaseAdmin, postSlack, EBOOK_FILE_MAP } from "../_shared/mod.ts";
 
 Deno.serve(async (req: Request) => {
-  if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
+  const corsResp = handleCors(req);
+  if (corsResp) return corsResp;
 
   try {
-    const supabase = createClient(SUPABASE_URL, Deno.env.get("SB_SERVICE_ROLE_KEY")!);
+    const supabase = createSupabaseAdmin();
 
     // Accept token from body (POST) or query param (GET link from email)
     let token: string | null = null;
@@ -85,7 +61,7 @@ Deno.serve(async (req: Request) => {
 
     // Valid token -- generate fresh short-lived signed URL (1 hour)
     const slug = tokenRow.slug;
-    const filePath = FILE_MAP[slug];
+    const filePath = EBOOK_FILE_MAP[slug];
 
     if (!filePath) {
       return json({ error: "Invalid product slug on token" }, 400);
@@ -110,16 +86,7 @@ Deno.serve(async (req: Request) => {
       .eq("token", token);
 
     // Slack notification
-    const slackUrl = Deno.env.get("SLACK_WEBHOOK_URL");
-    if (slackUrl) {
-      fetch(slackUrl, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          text: `Download #${currentCount + 1}/${maxDownloads} for "${slug}" (token: ${token.slice(0, 8)}...)`,
-        }),
-      }).catch(() => {});
-    }
+    postSlack(`Download #${currentCount + 1}/${maxDownloads} for "${slug}" (token: ${token.slice(0, 8)}...)`).catch((e) => console.error("Slack download notification failed:", e));
 
     return json({
       success: true,
@@ -128,8 +95,8 @@ Deno.serve(async (req: Request) => {
       downloads_remaining: maxDownloads - currentCount - 1,
       expires_in: "1 hour",
     });
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("download-ebook error:", err);
-    return json({ error: err.message ?? "Internal server error" }, 500);
+    return json({ error: (err as Error).message ?? "Internal server error" }, 500);
   }
 });

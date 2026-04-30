@@ -23,6 +23,13 @@ import email as email_lib
 from datetime import datetime, timezone
 from pathlib import Path
 
+
+# --- Owner directive 2026-04-23: test scripts that email owner are gated ---
+import os as _os, sys as _sys
+if _os.environ.get("HIVE_EMAIL_TEST_ENABLED") != "1":
+    print("hive_email_test gated -- set HIVE_EMAIL_TEST_ENABLED=1 to run (owner policy)", file=_sys.stderr)
+    _sys.exit(0)
+
 try:
     import yaml
 except ImportError:

@@ -20,12 +20,13 @@ from django.db.models import Avg, Count, F, Max, Q, Sum
 from django.db.models.functions import TruncDate
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
+from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.views import View
 from django.views.generic import DetailView, ListView, TemplateView
 
-from .models import Agent, AgentResponse, HiveSession, QueryLog, SystemEvent
+from .models import Agent, AgentResponse, HiveArtifact, HiveSession, QueryLog, SystemEvent
 
 # Progress tracking directory (shared with dispatcher)
 HIVE_WORKSPACE = Path(
@@ -1600,9 +1601,14 @@ class ReportsListView(LoginRequiredMixin, TemplateView):
         return ctx
 
 
-@login_required
 def report_detail(request, report_hash):
-    """Serve a premium HTML report - raw or wrapped in base layout."""
+    """Serve a premium HTML report -- raw or wrapped in base layout.
+
+    Public (no login required) so branded Slack links work for any team
+    member who taps them, including from a phone Slack client that may
+    not have a Django session. Path traversal is blocked by the
+    safe_hash regex below.
+    """
     import re as _re
     safe_hash = _re.sub(r'[^a-zA-Z0-9_.-]', '', report_hash)
     report_file = None
@@ -2220,3 +2226,142 @@ def agent_booking_submit(request, agent_slug):
         log.warning(f"Booking failed: {e}")
 
     return redirect(f'/book/{agent_slug}/?booked=1')
+
+
+# ---------------------------------------------------------------------------
+# Hive Logger API: ingest + artifact search
+# ---------------------------------------------------------------------------
+
+def _check_hive_token(request) -> bool:
+    """Validate the X-Hive-Token header against settings.HIVE_LOGGER_TOKEN.
+
+    When no token is configured in settings, the endpoint is open. This is the
+    expected state during Phase A rollout before secrets are rotated in. Once
+    `HIVE_LOGGER_TOKEN` is set in prod env, the header becomes required.
+    """
+    expected = getattr(settings, 'HIVE_LOGGER_TOKEN', '') or os.environ.get('HIVE_LOGGER_TOKEN', '')
+    if not expected:
+        return True
+    presented = request.headers.get('X-Hive-Token', '') or request.META.get('HTTP_X_HIVE_TOKEN', '')
+    return presented == expected
+
+
+@csrf_exempt
+@require_POST
+def api_hive_log_ingest(request):
+    """Accept one canonical hive_logger log line and upsert HiveSession + artifacts.
+
+    Request body (JSON): see hive_logger.py finish() for schema.
+    Response: {"ok": true, "session_id": str, "artifacts_created": int}
+
+    Never raises; invalid payloads return {"ok": false, "error": "..."} with
+    an appropriate status code so bots know to keep going.
+    """
+    if not _check_hive_token(request):
+        return JsonResponse({"ok": False, "error": "forbidden"}, status=403)
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+    except Exception as exc:
+        return JsonResponse({"ok": False, "error": f"bad json: {exc}"}, status=400)
+
+    session_id = (payload.get('session_id') or '').strip()
+    if not session_id:
+        return JsonResponse({"ok": False, "error": "session_id required"}, status=400)
+
+    def _parse_dt(v):
+        if not v:
+            return None
+        try:
+            return datetime.fromisoformat(str(v).replace('Z', '+00:00'))
+        except Exception:
+            return None
+
+    created_at = _parse_dt(payload.get('started_at')) or timezone.now()
+
+    defaults = {
+        'query': (payload.get('task') or payload.get('summary') or '')[:10000] or '(no task)',
+        'mode': payload.get('mode', 'full') if payload.get('mode') in {'full', 'lite', 'all'} else 'full',
+        'status': payload.get('status', 'done') if payload.get('status') in {'running', 'done', 'partial', 'failed'} else 'done',
+        'routed_to': payload.get('routed_to') or [],
+        'created_at': created_at,
+        'duration_seconds': payload.get('duration_seconds'),
+        'combined_summary': (payload.get('summary') or '')[:20000],
+        'agent': (payload.get('agent') or '')[:64],
+        'task': (payload.get('task') or '')[:255],
+    }
+
+    session, _ = HiveSession.objects.update_or_create(
+        session_id=session_id,
+        defaults=defaults,
+    )
+
+    artifacts_created = 0
+    for a in (payload.get('artifacts') or [])[:50]:
+        try:
+            HiveArtifact.objects.create(
+                session=session,
+                agent=session.agent or '',
+                kind=(a.get('kind') or 'file')[:32],
+                title=(a.get('title') or '')[:255],
+                url=(a.get('url') or '')[:1024],
+                path=(a.get('path') or '')[:1024],
+                tags=a.get('tags') or [],
+            )
+            artifacts_created += 1
+        except Exception as exc:
+            logger.warning(f"hive_logger: artifact create failed: {exc}")
+
+    session.artifacts_count = session.artifacts.count()
+    session.save(update_fields=['artifacts_count'])
+
+    return JsonResponse({
+        "ok": True,
+        "session_id": session_id,
+        "artifacts_created": artifacts_created,
+    })
+
+
+@require_GET
+def api_hive_artifact_search(request):
+    """Search bot-created artifacts. Query params: kind, agent, q, since_days, limit."""
+    qs = HiveArtifact.objects.all().select_related('session')
+    kind = request.GET.get('kind', '').strip()
+    agent = request.GET.get('agent', '').strip()
+    q = request.GET.get('q', '').strip()
+    since_days = request.GET.get('since_days', '').strip()
+    limit = request.GET.get('limit', '50').strip()
+
+    if kind:
+        qs = qs.filter(kind=kind)
+    if agent:
+        qs = qs.filter(agent=agent)
+    if q:
+        qs = qs.filter(Q(title__icontains=q) | Q(url__icontains=q) | Q(path__icontains=q))
+    if since_days:
+        try:
+            days = int(since_days)
+            qs = qs.filter(created_at__gte=timezone.now() - timedelta(days=days))
+        except ValueError:
+            pass
+
+    try:
+        limit_i = max(1, min(500, int(limit)))
+    except ValueError:
+        limit_i = 50
+
+    results = []
+    for a in qs[:limit_i]:
+        results.append({
+            'id': a.id,
+            'kind': a.kind,
+            'agent': a.agent,
+            'title': a.title,
+            'url': a.url,
+            'path': a.path,
+            'tags': a.tags,
+            'created_at': a.created_at.isoformat(),
+            'session_id': a.session.session_id if a.session else None,
+        })
+
+    return JsonResponse({'ok': True, 'count': len(results), 'results': results})
+

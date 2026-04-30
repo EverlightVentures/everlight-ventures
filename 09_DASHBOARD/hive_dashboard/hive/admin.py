@@ -5,7 +5,7 @@ Everlight Ventures OS
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Agent, AgentResponse, HiveSession, QueryLog, SystemEvent
+from .models import Agent, AgentResponse, HiveArtifact, HiveSession, QueryLog, SystemEvent
 
 # ---------------------------------------------------------------------------
 # Admin site branding
@@ -203,3 +203,32 @@ class SystemEventAdmin(admin.ModelAdmin):
         )
     level_badge.short_description = "Level"
     level_badge.admin_order_field = 'level'
+
+
+# ---------------------------------------------------------------------------
+# HiveArtifact (bot-generated outputs registered via hive_logger)
+# ---------------------------------------------------------------------------
+
+@admin.register(HiveArtifact)
+class HiveArtifactAdmin(admin.ModelAdmin):
+    list_display = ('kind', 'title_short', 'agent', 'link_out', 'created_at')
+    list_filter = ('kind', 'agent')
+    search_fields = ('title', 'url', 'path', 'agent')
+    date_hierarchy = 'created_at'
+    readonly_fields = ('session', 'agent', 'kind', 'title', 'url', 'path', 'tags', 'created_at')
+    list_per_page = 50
+
+    def title_short(self, obj):
+        t = obj.title or obj.url or obj.path or ''
+        if len(t) > 70:
+            return t[:70] + '...'
+        return t or '-'
+    title_short.short_description = 'Title'
+
+    def link_out(self, obj):
+        if obj.url:
+            return format_html('<a href="{}" target="_blank">open</a>', obj.url)
+        if obj.path:
+            return format_html('<span style="color:#888">{}</span>', obj.path[:80])
+        return '-'
+    link_out.short_description = 'Link'

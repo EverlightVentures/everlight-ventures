@@ -87,6 +87,10 @@ class HiveSession(models.Model):
     combined_summary = models.TextField(blank=True)
     intel_summary = models.TextField(blank=True)
     category = models.CharField(max_length=50, blank=True, db_index=True)
+    # Canonical logging (hive_logger)
+    agent = models.CharField(max_length=64, blank=True, db_index=True)
+    task = models.CharField(max_length=255, blank=True)
+    artifacts_count = models.IntegerField(default=0)
 
     objects = SessionQuerySet.as_manager()
 
@@ -200,6 +204,47 @@ class QueryLog(models.Model):
 
     def __str__(self):
         return f"[{self.source}] {self.query[:60]}"
+
+
+class HiveArtifact(models.Model):
+    """A single artifact (Google Doc, HTML report, file, Slack post) created by a bot run.
+
+    Written by the `/api/logger/ingest/` endpoint when a hive_logger.finish() call
+    lands. Team members query this table to find bot-generated outputs long after
+    the Slack message announcing them has scrolled off.
+    """
+    KIND_CHOICES = [
+        ('gdoc', 'Google Doc'),
+        ('html', 'HTML Report'),
+        ('file', 'File'),
+        ('slack_post', 'Slack Post'),
+        ('blinko_note', 'Blinko Note'),
+        ('supabase_row', 'Supabase Row'),
+    ]
+    session = models.ForeignKey(
+        HiveSession,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='artifacts',
+    )
+    agent = models.CharField(max_length=64, db_index=True)
+    kind = models.CharField(max_length=32, choices=KIND_CHOICES, db_index=True)
+    title = models.CharField(max_length=255, blank=True)
+    url = models.CharField(max_length=1024, blank=True)
+    path = models.CharField(max_length=1024, blank=True)
+    tags = models.JSONField(default=list, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['kind', '-created_at']),
+            models.Index(fields=['agent', '-created_at']),
+        ]
+
+    def __str__(self):
+        return f"[{self.kind}] {self.title or self.url or self.path}"
 
 
 class SystemEvent(models.Model):

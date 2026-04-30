@@ -15,6 +15,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from delegate_utils import parse_output, write_delegate_logs
+
 
 DEFAULT_WORKSPACE = Path("/mnt/sdcard/AA_MY_DRIVE")
 MODE_PERMISSION = {
@@ -104,47 +106,6 @@ def parse_args() -> argparse.Namespace:
         help="Prompt text (use quotes for multi-word requests).",
     )
     return parser.parse_args()
-
-
-def parse_output(output_format: str, stdout_text: str):
-    clean = stdout_text.strip()
-    if not clean:
-        return None
-
-    if output_format == "json":
-        try:
-            return json.loads(clean)
-        except json.JSONDecodeError:
-            return None
-
-    if output_format == "stream-json":
-        events = []
-        for line in stdout_text.splitlines():
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                events.append(json.loads(line))
-            except json.JSONDecodeError:
-                events.append({"type": "raw", "data": line})
-        return events
-
-    return None
-
-
-def write_logs(workspace: Path, payload: dict) -> str:
-    logs_dir = workspace / "_logs" / "claude_delegate"
-    logs_dir.mkdir(parents=True, exist_ok=True)
-
-    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    run_file = logs_dir / f"{timestamp}_{payload['mode']}.json"
-    run_file.write_text(json.dumps(payload, indent=2, ensure_ascii=True) + "\n")
-
-    history_file = logs_dir / "history.jsonl"
-    with history_file.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(payload, ensure_ascii=True) + "\n")
-
-    return str(run_file)
 
 
 def main() -> int:
@@ -239,7 +200,7 @@ def main() -> int:
     }
 
     if not args.no_log:
-        payload["log_file"] = write_logs(workspace, payload)
+        payload["log_file"] = write_delegate_logs(workspace, payload, "claude")
 
     print(json.dumps(payload, ensure_ascii=True))
     return proc.returncode

@@ -28,11 +28,71 @@ logger = logging.getLogger(__name__)
 # SCORING
 # ---------------------------------------------------------------------------
 
+# Niche-focus configuration (2026-04-25 strategic pivot).
+# Wholesalers that close 1+/week pick ONE market and ONE persona. We're
+# anchoring on Cleveland absentee-vacant. Properties matching the niche
+# get a +20 bonus so they rise to the top of the queue.
+NICHE_CITY = "atlanta"
+NICHE_STATE = "GA"
+NICHE_PERSONA_BONUS_LEAD_TYPES = {"absentee", "vacant"}
+NICHE_BONUS = 20
+# Compliance: Ohio not in state_gates.json. Pivoted to Atlanta which is
+# verified green (SMS allowed, cold call allowed, no license required,
+# pre-foreclosure outreach allowed). See compliance/state_gates.json.
+
+
+# ── Phone callback queue helper ──────────────────────────────────
+def schedule_callback(*, lead_id: str = "", buyer_id: str = "", priority: str = "normal",
+                     reason: str = "", talking_points: str = "", phone: str = "",
+                     contact_name: str = "", source: str = "manual") -> dict:
+    """Create a phone callback task. Used by the IMAP reply handler when an
+    inbound email reply suggests motivated seller / engaged buyer.
+
+    Falls back gracefully if the CallbackTask model isn't yet migrated.
+    """
+    try:
+        from .models import CallbackTask
+        task = CallbackTask.objects.create(
+            lead_id=lead_id or None,
+            buyer_id=buyer_id or None,
+            priority=priority,
+            reason=reason[:500],
+            talking_points=talking_points,
+            phone=phone[:20],
+            contact_name=contact_name[:200],
+            status="pending",
+            source=source,
+        )
+        return {"ok": True, "task_id": str(task.id)}
+    except Exception as exc:
+        # Fall back to JSONL ledger so nothing is lost pre-migration
+        from pathlib import Path
+        from datetime import datetime
+        import json
+        ledger = Path("/home/opc/_logs/callback_queue.jsonl")
+        if not ledger.parent.exists():
+            ledger = Path("/mnt/sdcard/AA_MY_DRIVE/_logs/callback_queue.jsonl")
+            ledger.parent.mkdir(parents=True, exist_ok=True)
+        with ledger.open("a", encoding="utf-8") as f:
+            f.write(json.dumps({
+                "ts": datetime.utcnow().isoformat(),
+                "lead_id": lead_id, "buyer_id": buyer_id, "priority": priority,
+                "reason": reason[:500], "talking_points": talking_points[:1000],
+                "phone": phone, "contact_name": contact_name, "source": source,
+                "fallback": str(exc)[:200],
+            }) + "\n")
+        return {"ok": False, "error": str(exc)[:200], "fallback_ledger": str(ledger)}
+
+
 def score_property(property_lead: PropertyLead) -> int:
     """
     Score a PropertyLead 0-100 based on motivation signals.
 
     Higher score = more motivated seller = better wholesale opportunity.
+
+    Niche bonus: properties in our focus market (Cleveland, OH) AND matching
+    our focus persona (absentee landlords with vacancy) get +20. This keeps
+    the top of the queue tight and aligned with the strategy.
     """
     score = 0
     lt = property_lead.lead_type
@@ -50,6 +110,18 @@ def score_property(property_lead: PropertyLead) -> int:
         score += 10
     if lt == "expired_listing":
         score += 10
+
+    # Niche bonus -- Cleveland absentee/vacant gets pushed to the top
+    is_niche_market = (
+        (property_lead.city or "").strip().lower() == NICHE_CITY
+        or (property_lead.state or "").strip().upper() == NICHE_STATE
+    )
+    is_niche_persona = (
+        lt in NICHE_PERSONA_BONUS_LEAD_TYPES
+        or property_lead.is_absentee
+    )
+    if is_niche_market and is_niche_persona:
+        score += NICHE_BONUS
 
     # Equity check
     equity_pct = float(property_lead.equity_pct or 0)
@@ -297,6 +369,23 @@ def import_csv_leads(csv_file_path: str, source: str = "propstream") -> dict:
 
     Returns: {"created": N, "skipped": N, "errors": [str]}
     """
+    # Hive Logger: canonical run for CSV lead imports
+    _hive_run = None
+    try:
+        import sys as _sys
+        _ct = "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools"
+        if _ct not in _sys.path:
+            _sys.path.insert(0, _ct)
+        import hive_logger as _hl  # type: ignore
+        _hive_run = _hl.start(
+            agent="36_rex_wholesale",
+            task="csv-lead-import",
+            inputs={"csv_file_path": csv_file_path, "source": source},
+            tags=["#hive/wholesale", "#hive/pipeline"],
+        )
+    except Exception:
+        _hive_run = None
+
     created = 0
     skipped = 0
     errors: list[str] = []
@@ -381,6 +470,17 @@ def import_csv_leads(csv_file_path: str, source: str = "propstream") -> dict:
             errors.append(f"Row {row_num}: {exc}")
 
     logger.info("CSV import complete: created=%d skipped=%d errors=%d", created, skipped, len(errors))
+
+    if _hive_run is not None:
+        try:
+            _hive_run.artifact("file", path=csv_file_path, title=f"propstream-csv ({source})")
+            _hive_run.finish(
+                status="done" if not errors else "partial",
+                summary=f"CSV import: created={created} skipped={skipped} errors={len(errors)}",
+            )
+        except Exception:
+            pass
+
     return {"created": created, "skipped": skipped, "errors": errors}
 
 

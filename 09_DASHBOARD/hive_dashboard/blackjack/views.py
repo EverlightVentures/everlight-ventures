@@ -27,7 +27,7 @@ from django.conf import settings
 try:
     import stripe
     STRIPE_AVAILABLE = True
-except Exception:
+except ImportError:
     stripe = None
     STRIPE_AVAILABLE = False
 
@@ -122,7 +122,7 @@ def _checkout_is_configured() -> bool:
     return _stripe_is_configured() or checkout_bridge.bridge_enabled()
 
 
-def _get_stripe_client():
+def _get_stripe_client() -> Any:
     if not _stripe_is_configured():
         raise RuntimeError("Stripe checkout is not configured")
     stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "").strip()
@@ -211,7 +211,7 @@ def _derive_outcome(
     return "push"
 
 
-def _check_achievements(profile, outcome, chips_delta):
+def _check_achievements(profile: PlayerProfile, outcome: str, chips_delta: int) -> list[dict[str, Any]]:
     """Return list of newly unlocked achievements (dicts with id/name/desc/reward)."""
     unlocked = list(profile.achievements or [])
     new_ach = []
@@ -245,19 +245,19 @@ def _check_achievements(profile, outcome, chips_delta):
     return new_ach
 
 
-def _get_or_create_profile(user):
+def _get_or_create_profile(user: User) -> PlayerProfile:
     profile, _ = PlayerProfile.objects.get_or_create(user=user)
     return profile
 
 
-def _calculate_presence_multiplier(profile):
+def _calculate_presence_multiplier(profile: PlayerProfile) -> float:
     outfit_score = FASHION_SCORES.get(profile.avatar_outfit, 1.0)
     aura_score = AURA_SCORES.get(profile.avatar_aura, 1.0)
     rank_bonus = RANK_CONFIG.get(profile.rank, {}).get('presence_bonus', 0.0)
     return round(outfit_score * aura_score * (1 + rank_bonus), 3)
 
 
-def _update_rank(profile):
+def _update_rank(profile: PlayerProfile) -> None:
     new_rank = 'Bronze'
     for rank_name, cfg in RANK_CONFIG.items():
         if profile.xp >= cfg['min_xp']:
@@ -406,7 +406,7 @@ def oauth_callback(request):
     return redirect('blackjack:auth')
 
 
-def _oauth_find_or_create_user(provider, uid, email, name, avatar_url):
+def _oauth_find_or_create_user(provider: str, uid: str, email: str, name: str, avatar_url: str) -> User | None:
     """Find or create a Django user from OAuth data. Returns the user."""
     if not email:
         return None
@@ -441,7 +441,7 @@ def _oauth_find_or_create_user(provider, uid, email, name, avatar_url):
     return user
 
 
-def _unique_username(base):
+def _unique_username(base: str) -> str:
     """Return a unique username derived from base."""
     username = base[:28]
     if not User.objects.filter(username=username).exists():
@@ -452,7 +452,7 @@ def _unique_username(base):
     return f'{username}{suffix}'
 
 
-def _fetch_json(url, post_data=None, bearer_token=None):
+def _fetch_json(url: str, post_data: dict[str, str] | None = None, bearer_token: str | None = None) -> dict[str, Any]:
     """Simple urllib wrapper: GET or POST, returns parsed JSON dict."""
     data = urllib.parse.urlencode(post_data).encode() if post_data else None
     req = urllib.request.Request(url, data=data)
@@ -650,7 +650,7 @@ SUITS = ["spades", "hearts", "diamonds", "clubs"]
 RANKS = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"]
 
 
-def _build_shoe(num_decks=6, seed=None):
+def _build_shoe(num_decks: int = 6, seed: str | None = None) -> tuple[list[dict[str, str]], str]:
     """Build a shuffled shoe. Returns (card_list, seed_hex)."""
     if seed is None:
         seed = secrets.token_hex(32)
@@ -660,7 +660,7 @@ def _build_shoe(num_decks=6, seed=None):
     return cards, seed
 
 
-def _pop_card(gs):
+def _pop_card(gs: GameSession) -> dict[str, str]:
     """Pop one card from the shoe stored on the GameSession."""
     shoe = gs.shoe_state
     if not shoe:
@@ -671,7 +671,7 @@ def _pop_card(gs):
     return card
 
 
-def _log_action(gs, action, card=None):
+def _log_action(gs: GameSession, action: str, card: dict[str, str] | None = None) -> None:
     """Append an entry to the session action log."""
     log = gs.action_log or []
     entry = {"action": action, "ts": timezone.now().isoformat()}
@@ -683,7 +683,7 @@ def _log_action(gs, action, card=None):
     gs.action_log = log
 
 
-def _settle_hand(gs, profile, outcome):
+def _settle_hand(gs: GameSession, profile: PlayerProfile, outcome: str) -> dict[str, Any]:
     """Settle the hand: compute payout, update profile stats, save everything."""
     bet = gs.bet_chips
     if gs.doubled:
@@ -785,7 +785,7 @@ def _settle_hand(gs, profile, outcome):
     }
 
 
-def _run_dealer_and_settle(gs, profile):
+def _run_dealer_and_settle(gs: GameSession, profile: PlayerProfile) -> dict[str, Any]:
     """Dealer draws to 17+, then settle."""
     gs.state = 'dealer_turn'
     while _hand_value(gs.dealer_hand) < 17:

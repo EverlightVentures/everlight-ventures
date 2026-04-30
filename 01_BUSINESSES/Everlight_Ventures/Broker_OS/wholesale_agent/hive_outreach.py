@@ -23,6 +23,7 @@ import os
 import random
 import textwrap
 from datetime import datetime, timedelta
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 try:
@@ -954,30 +955,103 @@ def send_touch(
         return False, "No recipient email provided"
 
     touch = generate_touch(touch_number, lead)
-    html_body = touch["body"].replace("\n", "<br>")
+    # Piper's warm voice goes in the content body; the branded mailer wraps it
+    # in the gold luxury frame so every outbound seller touch is consistent.
+    content_html = touch["body"].replace("\n", "<br>\n")
 
     try:
+        import sys
+        sys.path.insert(0, "/home/opc/content_tools" if Path("/home/opc").exists() else "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
+        from branded_mailer import send_branded_email
+    except ImportError as e:
+        return False, f"branded_mailer unavailable: {e}"
+
+    result = send_branded_email(
+        to=recipient,
+        subject=touch["subject"],
+        content_html=content_html,
+        title=touch["subject"],
+        from_name=touch["from_name"],
+        from_email=touch["from_email"],
+        reply_to=touch["from_email"],
+        agent_name=touch["from_name"],
+        agent_title="Everlight Ventures Acquisitions",
+        agent_email=touch["from_email"],
+    )
+
+    if result.ok:
+        return True, result.message_id
+    return False, result.error
+
+
+# ---------------------------------------------------------------------------
+# SMS -- gated behind A2P_APPROVED. Blocks until Twilio 10DLC is live.
+# ---------------------------------------------------------------------------
+
+def send_sms(to_phone: str, body: str, *, lane: str = "", lead_id: str = "",
+             state: str = "", is_inbound_consent: bool = False) -> Tuple[bool, str]:
+    """Send an SMS via Twilio. Returns (ok, message_id_or_error).
+
+    Triple-gated:
+      1. A2P_APPROVED env flag (Twilio 10DLC campaign live)
+      2. compliance.state_gate per-state SMS allowlist (blocks TX cold-SMS, etc.)
+      3. is_inbound_consent=True for warm leads who texted us first (bypasses cold-SMS block)
+
+    The body MUST already include STOP opt-out language; we do not inject it.
+    Justine Park reviews every template before A2P approval.
+    """
+    # Gate 1: compliance gate -- checks per-state SMS legality + required disclosures.
+    if state and not is_inbound_consent:
+        try:
+            from compliance.state_gate import check
+            gate = check(state, "sms", "outreach")
+            if not gate.ok:
+                return False, f"STATE_GATE_BLOCKED ({state}): {gate.blocked_reason}"
+        except ImportError:
+            # compliance module not available; fall through to A2P gate
+            pass
+
+    # Gate 2: A2P 10DLC approval for outbound cold SMS.
+    if os.environ.get("A2P_APPROVED", "") != "1" and not is_inbound_consent:
+        return False, "A2P_NOT_APPROVED: SMS sending disabled until Twilio 10DLC campaign approved"
+
+    # Gate 3: opt-out language required in every outbound body.
+    if "stop" not in body.lower():
+        return False, "missing_opt_out: body must include STOP opt-out language"
+
+    account_sid = os.environ.get("TWILIO_ACCOUNT_SID", "")
+    auth_token = os.environ.get("TWILIO_AUTH_TOKEN", "")
+    from_number = os.environ.get("TWILIO_FROM_NUMBER", "")
+
+    if not (account_sid and auth_token and from_number):
+        return False, "TWILIO_CREDS_MISSING"
+
+    if not to_phone or not to_phone.startswith("+"):
+        return False, f"invalid_phone:{to_phone!r} (must be E.164 format)"
+
+    if not requests:
+        return False, "requests library not installed"
+
+    url = f"https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Messages.json"
+    try:
         r = requests.post(
-            RESEND_URL,
-            headers={
-                "Authorization": f"Bearer {RESEND_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "from": f"{touch['from_name']} <{touch['from_email']}>",
-                "to": [recipient],
-                "subject": touch["subject"],
-                "html": html_body,
-                "reply_to": touch["from_email"],
-            },
+            url,
+            auth=(account_sid, auth_token),
+            data={"From": from_number, "To": to_phone, "Body": body},
             timeout=10,
         )
-        data = r.json()
-        if r.status_code in (200, 201):
-            return True, data.get("id", "sent")
-        return False, data.get("message", f"HTTP {r.status_code}")
     except Exception as e:
-        return False, str(e)
+        return False, f"http_error:{e}"
+
+    if r.status_code in (200, 201):
+        data = r.json() if r.headers.get("content-type", "").startswith("application/json") else {}
+        return True, str(data.get("sid", "sent"))
+
+    try:
+        err = r.json().get("message", f"HTTP {r.status_code}")
+    except Exception:
+        err = f"HTTP {r.status_code}"
+    return False, err
 
 
 # ---------------------------------------------------------------------------

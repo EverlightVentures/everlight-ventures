@@ -134,8 +134,13 @@ class WorkbookLogger:
     def log_lead_scouted(self, *, address: str, city: str, state: str,
                          lead_type: str = "other", source: str = "manual",
                          owner_name: str = "", estimated_arv: float = 0,
-                         motivation_score: int = 0, **extra) -> str:
-        """Log a new lead discovered by scouting. Returns lead_id."""
+                         motivation_score: int = 0, ai_score: bool = True,
+                         **extra) -> str:
+        """Log a new lead discovered by scouting. Returns lead_id.
+
+        If ai_score=True and sheets_ai_helpers is importable, auto-score the lead
+        via Filter Banks (Haiku) and stash the result in the stored record.
+        """
         wb = self._get_pipeline()
         lead_id = _uid()
         lead = {
@@ -156,6 +161,26 @@ class WorkbookLogger:
             "updated_at": _now(),
             **extra,
         }
+        # Filter Banks auto-score via sheets_ai_helpers (Folder 08 upgrade)
+        if ai_score:
+            try:
+                from sheets_ai_helpers import score_lead  # type: ignore
+                sc = score_lead({
+                    "address": address, "city": city, "state": state,
+                    "owner_tags": extra.get("owner_tags", []),
+                    "estimated_equity": extra.get("estimated_equity"),
+                    "absentee": extra.get("absentee", False),
+                    "property_condition": extra.get("property_condition", ""),
+                    "days_listed": extra.get("days_listed"),
+                    "owner_type": extra.get("owner_type", ""),
+                })
+                lead["ai_score"] = sc.get("score")
+                lead["ai_tier"] = sc.get("tier")
+                lead["ai_reasoning"] = sc.get("reasoning")
+                lead["ai_confidence"] = sc.get("confidence")
+            except Exception as _exc:  # keep logging path clean even if helper missing
+                lead["ai_score"] = None
+                lead["ai_score_error"] = str(_exc)
         if "leads" not in wb:
             wb["leads"] = []
         wb["leads"].append(lead)

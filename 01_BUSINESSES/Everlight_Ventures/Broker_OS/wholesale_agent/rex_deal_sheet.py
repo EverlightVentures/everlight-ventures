@@ -377,7 +377,7 @@ def generate_deal_sheet(deal: dict) -> dict:
   <div style="background:{BRAND_NAVY};padding:16px 24px;text-align:center;border-top:1px solid #2a2a4a;">
     <p style="margin:0;color:#888;font-size:12px;">
       Everlight Ventures | Everlight Logistics LLC<br>
-      <a href="mailto:rich@everlightventures.io" style="color:{BRAND_GOLD};">rich@everlightventures.io</a> |
+      <a href="mailto:hammer@everlightventures.io" style="color:{BRAND_GOLD};">hammer@everlightventures.io</a> |
       <a href="https://everlightventures.io" style="color:{BRAND_GOLD};">everlightventures.io</a>
     </p>
     <p style="margin:8px 0 0;color:#555;font-size:10px;">
@@ -445,7 +445,7 @@ TITLE COMPANY -- WIRE EMD HERE
 ====================================================
 
 Everlight Ventures | Everlight Logistics LLC
-rich@everlightventures.io | everlightventures.io
+hammer@everlightventures.io | everlightventures.io
 This deal sheet is confidential. Do not forward without permission.
 """
 

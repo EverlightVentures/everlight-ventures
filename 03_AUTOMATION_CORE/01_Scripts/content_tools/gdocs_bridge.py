@@ -47,9 +47,12 @@ GOOGLE_DOCS_SCOPES = [
 def _candidate_webhook_urls():
     urls = []
     preferred = os.environ.get("N8N_GDOCS_WEBHOOK", "").strip()
+    # Local (Oracle) + phone-reachable (public IP through the n8n port) + DNS name if configured
     defaults = [
         "http://127.0.0.1:5678/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdoc",
         "http://localhost:5678/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdoc",
+        "http://129.159.38.250:5678/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdoc",
+        "https://n8n.everlightventures.io/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdoc",
     ]
     for url in ([preferred] if preferred else []) + defaults:
         clean = str(url or "").strip()

@@ -45,8 +45,14 @@ GMAIL_PASS = os.environ.get("IMAP_PASS", "")
 SLACK_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
 SLACK_CHANNEL = "C0ANLLV8JAC"
 
-FROM_EMAIL = "Rich Gee <rich@everlightventures.io>"
-REPLY_TO = "rich@everlightventures.io"
+# Wholesale seller outreach is signed by Piper Reeves, not the owner. Owner
+# notifications go to Slack, not Resend (owner directive 2026-04-23).
+FROM_EMAIL = "Piper Reeves <piper@everlightventures.io>"
+REPLY_TO = "piper@everlightventures.io"
+AGENT_NAME = "Piper Reeves"
+AGENT_TITLE = "Senior Account Executive, Wholesale"
+AGENT_EMAIL = "piper@everlightventures.io"
+AGENT_PHONE = "(707) 801-0360"
 NOW = datetime.now(timezone.utc)
 TODAY = NOW.strftime("%Y-%m-%d")
 
@@ -73,8 +79,11 @@ def verify_mx(email_addr):
     return valid
 
 
-def send_email(to, subject, body):
-    """Resend first, Gmail overflow. Pre-validates MX records to avoid wasted sends."""
+def send_email(to, subject, body, state: str = "", action: str = "outreach"):
+    """Resend first, Gmail overflow. Pre-validates MX records to avoid wasted sends.
+    Enforces state_gates.json compliance when `state` is provided. Owner/internal
+    addresses are blocked upstream by resend_guard (platform policy).
+    """
     global _resend_count
     if not to:
         return False
@@ -84,12 +93,88 @@ def send_email(to, subject, body):
         log.debug(f"MX check failed for {to} -- skipping")
         return False
 
+    # Block owner/internal addresses at the send boundary (Slack-only policy)
+    try:
+        import sys as _sys
+        _sys.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
+        from resend_guard import is_owner_recipient
+        if is_owner_recipient(to):
+            log.warning("resend_guard blocked owner-bound send to %s", to)
+            return False
+    except Exception:
+        pass
+
+    # State compliance gate (sms/call/email all routed through this func)
+    if state:
+        try:
+            import sys as _sys, pathlib as _pl
+            _sys.path.insert(0, str(_pl.Path(__file__).resolve().parent / "compliance"))
+            from state_gate import check as _state_check
+            decision = _state_check(state, channel="email", action=action)
+            if not decision.ok:
+                log.warning("state_gate BLOCK %s/%s: %s", state, action, decision.blocked_reason)
+                return False
+            # Append CAN-SPAM footer if missing (required by state_gate.check for email)
+            if "unsubscribe" not in body.lower() and "opt out" not in body.lower():
+                body = body.rstrip() + (
+                    "\n\n---\nEverlight Ventures, Wholesale Division\n"
+                    "To opt out reply STOP or email opt-out@everlightventures.io.\n"
+                    "You received this because we believe you may own a property we'd like to acquire."
+                )
+        except Exception as _e:
+            log.warning("state_gate import failed, proceeding uncompliant: %s", _e)
+    else:
+        log.warning("rex_belfort.send_email called without state -- compliance NOT checked")
+
+    # Wrap plain-text body in the branded Everlight template (gold/black, Playfair+Inter).
+    # Every wholesale outreach email now looks like the luxury brand.
+    body_html = body
+    try:
+        import sys as _sys
+        _sys.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
+        from report_template import render_report
+        # Convert plain text -> HTML paragraphs. Preserve the bulleted list block.
+        lines = body.split("\n")
+        html_parts = []
+        in_list = False
+        for ln in lines:
+            s = ln.strip()
+            if s.startswith("- ") or s.startswith("* "):
+                if not in_list:
+                    html_parts.append("<ul>")
+                    in_list = True
+                html_parts.append(f"<li>{s[2:]}</li>")
+                continue
+            if in_list:
+                html_parts.append("</ul>")
+                in_list = False
+            if s == "":
+                html_parts.append("")
+            elif s == "---":
+                html_parts.append("<hr style='border:0;border-top:1px solid #222;margin:20px 0;'>")
+            else:
+                html_parts.append(f"<p>{s}</p>")
+        if in_list:
+            html_parts.append("</ul>")
+        content_html = "\n".join(p for p in html_parts if p is not None)
+        body_html = render_report(
+            title=subject,
+            content_html=content_html,
+            agent_name=AGENT_NAME,
+            agent_title=AGENT_TITLE,
+            agent_email=AGENT_EMAIL,
+            confidential=False,
+        )
+    except Exception as _e:
+        log.debug("branded wrap unavailable, falling back to plain text: %s", _e)
+
     if RESEND_KEY and _resend_count < 95:
         try:
             import requests
             r = requests.post("https://api.resend.com/emails",
                 headers={"Authorization": f"Bearer {RESEND_KEY}", "Content-Type": "application/json"},
-                json={"from": FROM_EMAIL, "to": [to], "subject": subject, "text": body, "reply_to": REPLY_TO},
+                json={"from": FROM_EMAIL, "to": [to], "subject": subject,
+                      "html": body_html, "text": body, "reply_to": REPLY_TO},
                 timeout=10)
             if r.status_code in (200, 201):
                 _resend_count += 1
@@ -134,7 +219,7 @@ BELFORT_TOUCHES = {
         "channel": "sms",
         "delay_hours": 0,
         "subject": "{address}",
-        "body": "Hey {first_name} -- saw your property at {address}. I'm a private buyer in {city}, looking to pick up a few properties this month. Any interest in a cash offer? No obligation. - Rich",
+        "body": "Hey {first_name} -- saw your property at {address}. I'm a private buyer in {city}, looking to pick up a few properties this month. Any interest in a cash offer? No obligation. -- Piper",
     },
     1: {  # Day 0, 4 hours later -- premium pitch, reads like a personal email
         "channel": "email",
@@ -159,10 +244,11 @@ I've already reviewed the property details. If you're open to hearing a number, 
 No pressure either way. Just wanted to make sure you had the option on the table.
 
 Best,
-Rich Gee
-Everlight Ventures | Private Acquisitions
+Piper Reeves
+Everlight Ventures | Wholesale
 everlightventures.io
-rich@everlightventures.io
+piper@everlightventures.io
+(707) 801-0360
 
 Not interested? Reply STOP and I will remove you immediately.""",
     },
@@ -170,7 +256,7 @@ Not interested? Reply STOP and I will remove you immediately.""",
         "channel": "sms",
         "delay_hours": 24,
         "subject": "Re: {address}",
-        "body": "Hey {first_name}, just following up -- sent you an email about {address} yesterday. We're closing on a few properties in {city} this week and yours caught my eye. Worth a quick chat? - Rich",
+        "body": "Hey {first_name}, just following up -- sent you an email about {address} yesterday. We're closing on a few properties in {city} this week and yours caught my eye. Worth a quick chat? -- Piper",
     },
     3: {  # Day 2 -- credibility + scarcity
         "channel": "email",
@@ -187,15 +273,16 @@ If you've been thinking about selling -- or even just curious what your property
 Just reply "what's the offer?" and I'll have a number for you today.
 
 Best,
-Rich Gee
-Everlight Ventures | Private Acquisitions
-rich@everlightventures.io""",
+Piper Reeves
+Everlight Ventures | Wholesale
+piper@everlightventures.io
+(707) 801-0360""",
     },
     4: {  # Day 3 -- direct, time pressure
         "channel": "sms",
         "delay_hours": 72,
         "subject": "Re: {address}",
-        "body": "{first_name} -- heads up, we're finalizing our {city} acquisitions this week. Your property at {address} is still on the list but I need to hear from you by Friday. Cash offer, your timeline. - Rich",
+        "body": "{first_name} -- heads up, we're finalizing our {city} acquisitions this week. Your property at {address} is still on the list but I need to hear from you by Friday. Cash offer, your timeline. -- Piper",
     },
     5: {  # Day 4 -- final professional email
         "channel": "email",
@@ -212,9 +299,10 @@ If selling is something you'd consider -- even down the road -- just reply and I
 Otherwise, no worries at all. I appreciate your time and wish you the best with the property.
 
 Respectfully,
-Rich Gee
-Everlight Ventures | Private Acquisitions
+Piper Reeves
+Everlight Ventures | Wholesale
 everlightventures.io
+(707) 801-0360
 
 Reply STOP to opt out.""",
     },
@@ -222,7 +310,7 @@ Reply STOP to opt out.""",
         "channel": "sms",
         "delay_hours": 120,
         "subject": "Last note -- {address}",
-        "body": "{first_name}, closing my file on {address}. If you ever reconsider, my door's always open -- rich@everlightventures.io. All the best. - Rich",
+        "body": "{first_name}, closing my file on {address}. If you ever reconsider, my door's always open -- piper@everlightventures.io. All the best. -- Piper",
     },
 }
 
@@ -397,7 +485,7 @@ def _get_personalized_content(lead, step, touch):
                 street = street.title()
             body = (
                 f"{first}, closing my file on {street}. "
-                f"If you ever reconsider -- rich@everlightventures.io. "
+                f"If you ever reconsider -- piper@everlightventures.io. "
                 f"All the best. -Rich"
             )
             return personalize(touch["subject"], lead), body[:160]
@@ -473,12 +561,56 @@ def run_belfort_sequence():
             # Get personalized content (uses enrichment data if available)
             subject, body = _get_personalized_content(lead, step, touch)
 
-            if send_email(email, subject, body):
+            lead_state = (lead.get("state") or "").upper()
+            # Pre-foreclosure leads in CA/TN get a different action rule
+            action = "preforeclosure" if (lead.get("detected_distress") in ("pre_foreclosure","preforeclosure","pf")) else "outreach"
+            if send_email(email, subject, body, state=lead_state, action=action):
                 lead["sequence_step"] = step + 1
                 lead["outreach_count"] = lead.get("outreach_count", 0) + 1
                 lead["last_outreach"] = NOW.isoformat()
                 lead["status"] = "contacted"
                 sent += 1
+
+                # Record the conversation entry + full branded HTML so the
+                # dashboard can render the EXACT email that was delivered.
+                _html_rendered = ""
+                try:
+                    import sys as _sys
+                    _sys.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
+                    from report_template import render_report
+                    _lines = body.split("\n"); _parts = []; _in_list = False
+                    for _ln in _lines:
+                        _s = _ln.strip()
+                        if _s.startswith("- ") or _s.startswith("* "):
+                            if not _in_list: _parts.append("<ul>"); _in_list = True
+                            _parts.append(f"<li>{_s[2:]}</li>"); continue
+                        if _in_list: _parts.append("</ul>"); _in_list = False
+                        if _s == "": _parts.append("")
+                        elif _s == "---": _parts.append("<hr style='border:0;border-top:1px solid #222;margin:20px 0;'>")
+                        else: _parts.append(f"<p>{_s}</p>")
+                    if _in_list: _parts.append("</ul>")
+                    _content_html = "\n".join(p for p in _parts if p is not None)
+                    _html_rendered = render_report(
+                        title=subject, content_html=_content_html,
+                        agent_name=AGENT_NAME, agent_title=AGENT_TITLE,
+                        agent_email=AGENT_EMAIL,
+                    )
+                except Exception as _he:
+                    log.debug("html capture skipped: %s", _he)
+
+                lead.setdefault("conversation", []).append({
+                    "role": "piper",
+                    "agent_name": "Piper Reeves",
+                    "agent_email": "piper@everlightventures.io",
+                    "channel": touch.get("channel", "email"),
+                    "direction": "outbound",
+                    "to": email,
+                    "subject": subject,
+                    "message": body,
+                    "message_html": _html_rendered,
+                    "step": step,
+                    "timestamp": NOW.isoformat(),
+                })
 
                 angle = lead.get("recycle_angle", "standard")
                 recycle = lead.get("recycle_count", 0)
@@ -488,6 +620,23 @@ def run_belfort_sequence():
                     log.info(f"  {label}: {lead.get('owner_name','')} ({lead.get('city','')}) [{distress}]")
                 elif step == 1:
                     log.info(f"  PERSONALIZED EMAIL: {lead.get('owner_name','')} [{distress}]")
+
+                # Per-lead Slack thread: post a touch entry so the owner sees
+                # WHO received WHAT, not an aggregate count.
+                try:
+                    from deal_slack import post_touch
+                    lid = str(lead.get("id") or lead.get("lead_id") or "")
+                    post_touch(
+                        lead=lead,
+                        agent="Piper Reeves",
+                        channel=touch.get("channel", "email"),
+                        subject=subject,
+                        body=body,
+                        to_address=email,
+                        outcome=f"sent (step {step+1}/7)",
+                    )
+                except Exception as _e:
+                    log.debug("deal_slack post failed for %s: %s", lead.get("owner_name",""), _e)
 
         time.sleep(1.5)
 
@@ -519,6 +668,45 @@ def run_belfort_sequence():
     return sent
 
 
+def _run_single_lead(lead_id: str) -> int:
+    """Event-mode: process a single lead by ID from leads_db.json.
+
+    Called by hive_dispatcher when Supabase fires a new-lead webhook. The
+    hunter pre-writes the lead into leads_db.json; the dispatcher then hands
+    off the ID here for immediate first-touch.
+    """
+    if not LEADS_DB.exists():
+        log.info("no leads_db.json yet -- hunter has not seeded; skipping event")
+        return 0
+    leads = json.loads(LEADS_DB.read_text())
+    target = next((l for l in leads if str(l.get("id") or l.get("lead_id")) == str(lead_id)), None)
+    if not target:
+        log.info("lead %s not in leads_db.json -- skipping (hunter must seed first)", lead_id)
+        return 0
+    from rex_stop_handler import is_suppressed
+    if is_suppressed(target.get("phone", ""), target.get("email", "")):
+        log.info("lead %s suppressed -- skipping", lead_id)
+        return 0
+    # Mark as event-triggered so run_belfort_sequence's timing rules don't skip it
+    target.setdefault("event_triggered", True)
+    target["touch_count"] = target.get("touch_count", 0)
+    target["last_touched_at"] = None  # force immediate first touch
+    # Persist the unlock, then re-invoke the full sequence
+    # (which will process exactly one lead since we just reset its clock)
+    with LEADS_DB.open("w") as f:
+        json.dump(leads, f, indent=2, default=str)
+    return run_belfort_sequence()
+
+
 if __name__ == "__main__":
-    log.info("=== BELFORT MODE -- 5 days, 7 touches, no mercy ===")
-    run_belfort_sequence()
+    import argparse
+    parser = argparse.ArgumentParser(description="Rex Belfort wholesale outreach sequence")
+    parser.add_argument("--lead-id", dest="lead_id",
+                        help="Event mode: process only this single lead ID")
+    args, _extra = parser.parse_known_args()
+    if args.lead_id:
+        log.info("=== EVENT MODE -- single lead %s ===", args.lead_id)
+        _run_single_lead(args.lead_id)
+    else:
+        log.info("=== BELFORT MODE -- 5 days, 7 touches, no mercy ===")
+        run_belfort_sequence()

@@ -251,9 +251,9 @@ def step5_generate_outreach(leads: list[dict], top_n: int = 10) -> list[dict]:
     log.info(f"STEP 5: Generating outreach for top {top_n} leads...")
     outreach = []
     templates = [
-        "Hi, I saw your property at {address} and wanted to reach out. I buy properties in {city} for cash, fast close. Would you consider an offer? - Rich, Everlight Ventures. Reply STOP to opt out.",
-        "Hello, I'm an investor interested in properties in {city}. I can close quickly with cash. Is your property at {address} available? - Rich, Everlight. STOP to opt out.",
-        "Hi there, I help homeowners in {city} sell quickly for cash. Saw your property at {address}. Any interest in a no-obligation offer? - Rich. Reply STOP to opt out.",
+        "Hi, I saw your property at {address} and wanted to reach out. I buy properties in {city} for cash, fast close. Would you consider an offer? -- Piper, Everlight Ventures (Piper). Reply STOP to opt out.",
+        "Hello, I'm an investor interested in properties in {city}. I can close quickly with cash. Is your property at {address} available? -- Piper, Everlight. STOP to opt out.",
+        "Hi there, I help homeowners in {city} sell quickly for cash. Saw your property at {address}. Any interest in a no-obligation offer? -- Piper. Reply STOP to opt out.",
     ]
     import random
 
@@ -326,8 +326,8 @@ def step6_match_buyers(leads: list[dict]) -> list[dict]:
 def send_buyer_email(to_email: str, subject: str, body: str) -> bool:
     """Send email via Resend, overflow to Gmail SMTP."""
     resend_key = os.environ.get("RESEND_API_KEY", os.environ.get("SMTP_PASS", ""))
-    from_email = os.environ.get("SMTP_FROM", "Rich Gee <rich@everlightventures.io>")
-    reply_to = "rich@everlightventures.io"
+    from_email = os.environ.get("SMTP_FROM", "Piper Reeves <piper@everlightventures.io>")
+    reply_to = "piper@everlightventures.io"
 
     # Try Resend
     if resend_key:
@@ -382,7 +382,7 @@ def step7_buyer_blast(hot_leads: list[dict]) -> str:
             f"  Confidence score: {lead.get('motivation_score', 0)}/100\n\n"
         )
     blast += "Reply to this email for full property details, ARV comps, and repair estimates.\n\n"
-    blast += "Rich Gee\nEverlight Ventures\nrich@everlightventures.io\n"
+    blast += "Piper Reeves\nEverlight Ventures\npiper@everlightventures.io\n"
     blast += "Reply STOP to unsubscribe."
 
     # Save blast text

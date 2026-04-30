@@ -49,7 +49,7 @@ def _send_branded_email(from_agent, to_email, to_name, subject, body_html):
     """Send Everlight branded email."""
     agents = {
         "piper": {"from": "Piper Reeves <piper@everlightventures.io>", "name": "Piper Reeves", "title": "Senior Account Executive", "email": "piper@everlightventures.io", "phone": "(707) 801-0360"},
-        "harrison": {"from": "Harrison Knox <harrison@everlightventures.io>", "name": "Harrison Knox", "title": "Deal Operations", "email": "harrison@everlightventures.io", "phone": "(888) 896-6772"},
+        "harrison": {"from": "Harrison Knox <hammer@everlightventures.io>", "name": "Harrison Knox", "title": "Deal Operations", "email": "hammer@everlightventures.io", "phone": "(888) 896-6772"},
         "justine": {"from": "Justine Park <justine@everlightventures.io>", "name": "Justine Park", "title": "Compliance Officer", "email": "justine@everlightventures.io", "phone": "(888) 896-6772"},
         "marcus": {"from": "Marcus Cole <marcus@everlightventures.io>", "name": "Marcus Cole", "title": "Chief Operator", "email": "marcus@everlightventures.io", "phone": "(888) 896-6772"},
     }
@@ -99,13 +99,49 @@ body {{ margin:0; padding:0; background:#0A0A0A; font-family: -apple-system, Bli
         sig_email=sig["email"], sig_phone=sig["phone"],
     )
 
-    if not RESEND_KEY:
+    # Owner-bound notifications go to Slack, not Resend (owner directive 2026-04-23).
+    # Resend is reserved for external candidates: sellers, buyers, title companies, clients.
+    try:
+        import sys as _sys
+        _sys.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
+        from resend_guard import is_owner_recipient
+        if is_owner_recipient(to_email):
+            _post_slack(
+                "[{agent}] {subj} -- would-have-emailed {to} (owner -> slack-only)\n{body}".format(
+                    agent=sig["name"], subj=subject, to=to_email, body=body_html[:500]
+                ),
+            )
+            return True  # treat as delivered via Slack
+    except Exception:
+        pass
+
+    # Route through branded_mailer (master Everlight template, budget gate, owner guard).
+    # The inline "html" we built is now ignored -- branded_mailer wraps body_html
+    # with the canonical Playfair/Inter gold theme via report_template.render_report().
+    try:
+        import sys as _sys
+        for _p in ("/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools",
+                   "/home/opc/content_tools"):
+            if _p not in _sys.path:
+                _sys.path.insert(0, _p)
+        from branded_mailer import send_branded_email  # type: ignore
+    except Exception:
         return False
-    resp = requests.post("https://api.resend.com/emails",
-        headers={"Authorization": "Bearer %s" % RESEND_KEY, "Content-Type": "application/json"},
-        json={"from": sig["from"], "to": [to_email], "reply_to": sig["email"], "subject": subject, "html": html},
-        timeout=15)
-    return resp.status_code in (200, 201)
+
+    result = send_branded_email(
+        to=to_email,
+        subject=subject,
+        content_html=body_html,
+        title=subject,
+        from_name=sig.get("from", sig["name"]).split("<")[0].strip(),
+        from_email=sig["email"],
+        reply_to=sig["email"],
+        agent_name=sig["name"],
+        agent_title=sig["title"],
+        agent_email=sig["email"],
+        budget_category="nurture",
+    )
+    return bool(result.ok)
 
 
 def _post_slack(msg, channel="C0ANLLV8JAC"):
@@ -116,12 +152,22 @@ def _post_slack(msg, channel="C0ANLLV8JAC"):
 
 
 def _create_gdoc(title, body_md):
+    """Publish a branded Google Doc via the Python replacement (no n8n).
+
+    Routes through gdocs_bridge.publish_report() which applies the Everlight
+    gold Playfair/Inter template and posts a branded link to Slack.
+    """
     try:
-        requests.post("%s/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdoc" % N8N_URL,
-            json={"title": title, "body": body_md, "channel": "broker-pipeline"}, timeout=15)
-        return True
+        import sys as _sys
+        for _p in ("/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools",
+                   "/home/opc/content_tools"):
+            if _p not in _sys.path:
+                _sys.path.insert(0, _p)
+        from n8n_replacements import publish_gdoc  # type: ignore
     except Exception:
         return False
+    res = publish_gdoc(title=title, body=body_md, channel="#broker-pipeline", folder_key="broker_scout")
+    return bool(res.get("ok"))
 
 
 # ====================================================================

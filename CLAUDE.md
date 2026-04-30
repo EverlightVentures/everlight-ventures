@@ -18,25 +18,64 @@ Operating model:
 4. Summarize outcome, risks, and rollback.
 
 3-Format Reporting Standard:
-- Use one publishing path only: `03_AUTOMATION_CORE/01_Scripts/content_tools/gdocs_bridge.py`.
+- Use ONE publishing entry point: `from content_tools.n8n_replacements import publish_gdoc`.
+  - Calls `gdocs_bridge.publish_report()` under the hood (Everlight gold Playfair/Inter template applied automatically).
+  - Auto-registers the resulting doc as a HiveArtifact via `hive_logger.current_run()`.
+  - Bypasses n8n entirely (`GDOCS_DISABLE_N8N=1` is exported on Oracle).
 - Every report must produce:
   1. HTML in `/home/opc/hive_reports/` served at `http://129.159.38.250:8504/reports/`
-  2. Google Doc in Drive
+  2. Google Doc in Drive (skipped automatically if OAuth token is dead -- HTML+Slack still ship)
   3. Slack post with links to the HTML and Google Doc
 - Oracle repair + handoff script: `03_AUTOMATION_CORE/01_Scripts/repair_3_format_reports.sh`
-- Oracle deploy must also ship `content_tools/report_template.py` and `xlm_bot/vendor/report_template.py`
-- If Google Docs direct publish breaks, rebuild `/home/opc/secrets/google_docs_token.json` from the n8n Google credential using the handoff script. Do not patch raw Slack wrappers again.
+- Oracle deploy ships `content_tools/{report_template,gdocs_bridge,n8n_replacements,branded_mailer,resend_budget,resend_guard,hive_logger,hive_tags}.py` (deploy_to_oracle.sh handles the rsync list).
+- **n8n is parked.** All workflows deactivated 2026-04-24 (10,117 errors / 30 days, 100% failure on the gdoc one). Do NOT POST to `:5678/webhook/...` from new code. Use `publish_gdoc()` directly.
+- If the Google OAuth refresh token expires, run `python3 /home/opc/reauth_google_docs.py` to regenerate `/home/opc/secrets/google_docs_token.json`. Browser auth, takes 2 minutes, no n8n touch needed.
 
-Hive Mind Auto-Dispatch (ALWAYS ON):
-Every query automatically routes through the 42-person Hive Mind team. You do NOT wait
+Branded Communications Doctrine (mandatory across the entire ecosystem):
+- **Email outbound:** every send goes through `content_tools.branded_mailer.send_branded_email()`. NO direct calls to `https://api.resend.com/emails`. The mailer applies the gold template, runs `resend_guard` (blocks owner/internal addresses), and gates through `resend_budget` (3000/mo cap, 100/day, 25% VIP reserve).
+- **Email categories:** pass `budget_category` -- `vip_reply` (engaged-prospect responses), `nurture` (follow-ups), `bulk` (cold blasts), `system` (admin/alerts). Default `bulk`.
+- **Slack posts (significant):** every report-style post goes through `content_tools.branded_slack.post_branded_slack()`. Block Kit format with header + EVERLIGHT VENTURES wordmark + summary + body + fields + "View full report" button + agent attribution footer. Categories: `report` (gold), `alert` (red), `deal` (green), `intel` (purple), `ops` (blue), `system` (grey).
+- **Slack posts (alerts):** use `branded_slack.post_branded_alert()` for severity-tagged system alerts.
+- **Slack posts (1-line ops pings):** raw `chat.postMessage` is acceptable for things like "deploy done" or "disk at 80%". Anything a human will read for content goes through `branded_slack`.
+- **Google Docs / HTML reports:** every doc/report goes through `content_tools.n8n_replacements.publish_gdoc()`. Auto-applies gold theme, registers HiveArtifact, posts branded Slack card with "View full report" button.
+- **Calendar invites:** description body is rendered via `content_tools.branded_calendar.render_event_description()` -- gold-banded HTML with agenda, CTA button, agent signature. Drop the output into the Google Calendar `events.insert` `description` field.
+- **SMS (future):** every SMS goes through `content_tools.branded_sms.send_branded_sms()` with `category` = `vip_reply | nurture | bulk | transactional`. Auto-applies "EV:" prefix and "STOP=optout" footer for cold/bulk per TCPA. Twilio not configured yet -- module returns ok=False until env vars are set, callers degrade to email gracefully.
+- **Single source of truth:** the Everlight palette (gold `#D4A843`, dark `#0A0A0A`, light text `#E8E8E8`) and the Playfair/Inter pairing live in `content_tools/report_template.py`. Every other module reads from there. Never hardcode brand colors elsewhere.
+
+The result: every channel a prospect or team member sees -- email, Slack, calendar, SMS, Google Doc, HTML report -- carries the same gold accents, same Playfair Display, same wordmark, same agent attribution. Brand consistency is a default, not a discipline.
+
+Hive Mind Auto-Dispatch (ALWAYS ON, MULTI-AI):
+Every query automatically routes through the 42-person Hive Mind team AND the multi-AI stack
+(Claude + Codex + Gemini + Perplexity + GPT + named Everlight agents). You do NOT wait
 for the user to say "use the Hive" -- it is ALWAYS active. For every task:
 
 1. CLASSIFY the task using roster.yaml routing_rules (trading, content, engineering, broker, wholesale, research, operations)
-2. IDENTIFY which team members are needed (min 3 agents across 2+ departments)
+2. IDENTIFY which team members are needed (min 3 named agents across 2+ departments)
 3. QUERY Blinko first (http://129.159.38.250:1111/api/v1/note/list) for prior knowledge
-4. DISPATCH using the right subagents, MCP tools, and infrastructure
-5. PUBLISH results to Google Docs via gdocs_bridge and post link to Slack
-6. LOG the session to BOTH Blinko AND Django dashboard so it appears in :8504 console
+4. DISPATCH -- for non-trivial tasks, this means LAUNCHING IN PARALLEL (single message, multiple tool-use blocks):
+   - 3+ named Everlight agents via Task tool (subagent_type from .claude/agents/)
+   - Codex (`clx_delegate.py --mode review`) for code / architecture validation
+   - Gemini (`gemx_delegate.py --mode explain`) for alternate-perspective check
+   - Perplexity (`ppx_terminal.py`) for real-time research on market-facing questions
+   - MCP tools (broker-os, supabase, blinko-memory, market-intel, Gmail, Slack) for live data
+5. CONVERGE -- wait for all to return, flag disagreements, Lucrex resolves, write one decision
+6. PUBLISH results to Google Docs via gdocs_bridge and post link to Slack
+7. LOG the session to BOTH Blinko AND Django dashboard so it appears in :8504 console
+
+The full doctrine is at `06_DEVELOPMENT/everlight_os/hive_mind/ORCHESTRATION_DOCTRINE.md`.
+Read it on the 1st of each month and on any new-AI-tool addition.
+
+Orchestration Doctrine (10 Habits -- non-negotiable for high-stakes work):
+1. Parallel sessions / parallel subagents -- never serialize independent lanes
+2. Plan first, second AI reviews, only THEN execute
+3. Live data via MCP tools -- never paste screenshots when the data is pullable
+4. Recurring work becomes a slash command in `.claude/commands/`
+5. Paste error, say "fix" -- no step-by-step debugging narration
+6. Adversarial review -- "grill me on this" and "red-team this plan" before ship
+7. Subagents for every independent sub-task
+8. MCP layer is the auth + logging boundary for every external system
+9. Explanatory mode on + context-aware status line on (understand what ships)
+10. Hive-wide fan-out on stakes > $100 decisions (7-mind triangulation)
 
 Session Logging (EVERY significant task):
 After completing a task, log it to Blinko AND the Django dashboard API so the :8504
@@ -132,6 +171,14 @@ Non-negotiables:
 - Prefer direct file edits over long narrative output.
 - Avoid destructive shell actions unless explicitly requested.
 - Cite sources when current external data is used.
+
+Comms Doctrine (Fire-Team Signal Over Noise):
+- Written-first. Every decision lands in a file or a Slack thread before it is spoken. If it is not written, it did not happen.
+- Thread-by-default in every Slack channel. Top-level posts are for dispatch orders, major decisions, and system alerts only. Chatter goes in a thread.
+- 3-format output is mandatory for significant work. Every report must produce an HTML, a Google Doc, and a Slack link to both. Use `03_AUTOMATION_CORE/01_Scripts/hive_3format.py` (wrapper) or `content_tools/gdocs_bridge.publish_report`. Raw `chat.postMessage` is for quick ops pings only.
+- Meeting-kill. If a decision can happen async in a thread or a Canvas, it does. Meetings are for live collaboration only.
+- No deletion without a memory-pipeline pass. Logs, reports, and caches that age out go through `memory_pipeline.ingest_before_delete()` first. Nothing gets reclaimed without an archive copy + Knowledge Bank row + Blinko note.
+- Channel charter discipline. Each of the 13 Slack channels has a pinned charter. If your post would violate the charter, it goes to a different channel or a thread.
 
 Mode routing:
 - Planning behavior: `.claude/modes/plan.md`

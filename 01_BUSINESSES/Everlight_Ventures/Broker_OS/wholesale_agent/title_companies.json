@@ -1,29 +1,98 @@
 {
-  "atlanta": [
-    {"name": "Katz Durell LLC", "phone": "(404) 487-0040", "email": "", "website": "katzdurell.com/investors", "contact": "Joshua Katz", "handles_assignments": true, "notes": "Routinely closes for wholesalers. Double closings and assignments."},
-    {"name": "Bagwell & Associates PC", "phone": "(678) 528-1908", "website": "bagwellassociates.com", "contact": "", "handles_assignments": true, "notes": "Specializes in wholesaling, assignments, novation, subject-to. Free initial consultation."}
-  ],
-  "dallas": [
-    {"name": "1st Option Title", "phone": "(972) 271-1700", "website": "1stoptiontitle.com", "contact": "", "handles_assignments": true, "notes": "Specializes in double closing, assignments, and owner finance for investors."},
-    {"name": "Affinity Title LLC", "phone": "(817) 381-7913", "website": "affinitytitletx.com", "contact": "Christopher Pettigrew", "handles_assignments": true, "notes": "Investor-friendly, serves DFW wholesale investors."}
-  ],
-  "cleveland": [
-    {"name": "Black Tie Title", "phone": "(216) 333-1295", "email": "sales@blacktietitle.net", "website": "blacktietitle.net", "contact": "", "handles_assignments": true, "notes": "Incredibly investor-friendly. Experienced with wholesalers."},
-    {"name": "Ohio Real Title Agency", "phone": "(866) 373-9900", "email": "info@ohiorealtitle.com", "website": "ohiorealtitle.com", "contact": "", "handles_assignments": true, "notes": "BiggerPockets recommended for wholesale closings."}
-  ],
-  "charlotte": [
-    {"name": "Harry Marsh Law", "phone": "(704) 956-7465", "website": "harrymarshlaw.com", "contact": "Harry Marsh", "handles_assignments": true, "notes": "The king of investor/creative closings in Charlotte. Attorney-close state."},
-    {"name": "Hankin & Pack PLLC", "phone": "", "website": "hankinpacklaw.com", "contact": "", "handles_assignments": true, "notes": "Investor-oriented closing firm. Confirm assignment handling."}
-  ],
-  "st_louis": [
-    {"name": "Freedom Title", "phone": "(314) 786-4000", "email": "Ryan@Freedom-Title.com", "website": "freedom-title.com", "contact": "Ryan Kerner", "handles_assignments": true, "notes": "12 locations across STL. Investor-focused leadership."},
-    {"name": "Investors Title Company", "phone": "(314) 862-0303", "website": "investors-title.com", "contact": "", "handles_assignments": true, "notes": "50+ years in STL. 20+ locations. Confirm assignment policy by phone."}
-  ],
-  "jacksonville": [
-    {"name": "Marina Title", "phone": "(855) 513-5880", "email": "Info@MarinaTitle.com", "website": "marinatitle.com", "contact": "", "handles_assignments": true, "notes": "Explicitly serves wholesalers. Assignment, double close, novation."},
-    {"name": "FL Title Closings", "phone": "1 (833) FL-TITLE", "website": "fltitleclosings.com", "contact": "", "handles_assignments": true, "notes": "Explicitly serves investors, wholesalers, iBuyers."}
-  ],
+  "_meta": {
+    "generated": "2026-04-22",
+    "source": "Apr 2026 research sweep merged with existing workspace data (phone numbers from prior sessions preserved).",
+    "rerank_protocol": "01_BUSINESSES/Everlight_Ventures/Wholesale/title_companies/RANKING_PROTOCOL.md",
+    "primary_per_state": "rank 1 until we have 3+ closed deals with data to re-rank",
+    "legacy_city_keys": "Old keys (atlanta, dallas, cleveland, charlotte, st_louis, jacksonville) have been rekeyed by state code. cleveland dropped (not in target states)."
+  },
+  "GA": {
+    "market": "Atlanta",
+    "preferred_closer_id": "georgia_title_escrow_atl",
+    "closing_type": "attorney",
+    "companies": [
+      {"id": "georgia_title_escrow_atl", "rank": 1, "primary": true, "name": "Georgia Title & Escrow Co LLC", "phone": "(678) 448-4148", "email": "", "website": "https://georgiatitle.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Advertises wholesaling + assignments + double-closings. Buckhead office."},
+      {"id": "katz_durell_atl", "rank": 2, "primary": false, "name": "Katz Durell PLLC", "phone": "(404) 487-0040", "email": "", "website": "https://katzdurell.com/investors", "contact": "Joshua Katz", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Routinely closes for wholesalers. Double closings and assignments."},
+      {"id": "bagwell_assoc_atl", "rank": 3, "primary": false, "name": "Bagwell & Associates PC", "phone": "(678) 528-1908", "email": "", "website": "https://bagwellassociates.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Specializes in wholesaling, assignments, novation, subject-to. Free initial consultation."},
+      {"id": "mhs_atl", "rank": 4, "primary": false, "name": "Morris Hardwick Schneider (MHS)", "phone": "(404) 814-9247", "email": "", "website": "https://closingsource.net", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Large GA closing firm. Druid Hills volume shop."},
+      {"id": "chalker_atl", "rank": 5, "primary": false, "name": "Chalker & Chalker", "phone": "", "email": "", "website": "https://chalkerandchalker.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Wholesaler-friendly per BP threads. Smaller shop."}
+    ]
+  },
+  "TX": {
+    "market": "Dallas",
+    "preferred_closer_id": "texas_title_dal",
+    "closing_type": "title_company",
+    "companies": [
+      {"id": "texas_title_dal", "rank": 1, "primary": true, "name": "Texas Title", "phone": "(972) 733-3800", "email": "", "website": "https://texastitle.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "19111 Dallas Pkwy Ste 120. Widely used by DFW wholesalers."},
+      {"id": "first_option_title_tx", "rank": 2, "primary": false, "name": "1st Option Title", "phone": "(972) 271-1700", "email": "", "website": "https://1stoptiontitle.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Specializes in double closing, assignments, owner finance. Texas-only."},
+      {"id": "closed_title_dal", "rank": 3, "primary": false, "name": "CLOSED Title - Dallas", "phone": "", "email": "", "website": "https://closedtitle.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Built FOR investors. Dedicated /investors page."},
+      {"id": "affinity_title_tx", "rank": 4, "primary": false, "name": "Affinity Title LLC", "phone": "(817) 381-7913", "email": "", "website": "https://affinitytitletx.com", "contact": "Christopher Pettigrew", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Investor-friendly. Serves DFW wholesale investors."},
+      {"id": "republic_title_uptown", "rank": 5, "primary": false, "name": "Republic Title of Texas - Uptown", "phone": "(214) 855-8888", "email": "", "website": "https://republictitle.com", "contact": "", "handles_assignments": false, "investor_friendly": "mixed", "deals_closed": 0, "notes": "Big DFW name but wholesale tolerance varies by escrow officer."}
+    ]
+  },
+  "FL": {
+    "market": "Jacksonville",
+    "preferred_closer_id": "marina_title_fl",
+    "closing_type": "title_company",
+    "companies": [
+      {"id": "marina_title_fl", "rank": 1, "primary": true, "name": "Marina Title - Jacksonville", "phone": "(855) 513-5880", "email": "Info@MarinaTitle.com", "website": "https://marinatitle.com/locations/jacksonville-fl", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Attorney-owned. Explicitly founded to serve real estate investors. Statewide FL coverage."},
+      {"id": "sunshine_title_jax", "rank": 2, "primary": false, "name": "Sunshine Title Corporation", "phone": "", "email": "", "website": "https://sunshinetitle.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "30+ years. Processes most Duval County orders within 2 business days."},
+      {"id": "fl_title_closings", "rank": 3, "primary": false, "name": "FL Title Closings", "phone": "1 (833) FL-TITLE", "email": "", "website": "https://fltitleclosings.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Explicitly serves investors, wholesalers, iBuyers."},
+      {"id": "cherry_title_jax", "rank": 4, "primary": false, "name": "Cherry Title LLC", "phone": "", "email": "", "website": "https://cherrytitle.us", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Downtown Jacksonville office. Serves Duval + 4 surrounding counties."},
+      {"id": "first_coast_title_jax", "rank": 5, "primary": false, "name": "First Coast Title Services", "phone": "", "email": "", "website": "https://firstcoasttitlellc.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Wide service range. Locally recommended for investor closings."}
+    ]
+  },
+  "NC": {
+    "market": "Charlotte",
+    "preferred_closer_id": null,
+    "pipeline_status": "paused",
+    "pause_reason": "HB 797 effective 2025-10-01: NC broker license required for residential wholesaling.",
+    "closing_type": "attorney",
+    "companies": [
+      {"id": "harry_marsh_clt", "rank": 1, "primary": false, "name": "Harry Marsh Law", "phone": "(704) 956-7465", "email": "", "website": "https://harrymarshlaw.com", "contact": "Harry Marsh", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "The king of investor/creative closings in Charlotte. REVISIT if we license a NC broker."},
+      {"id": "hankin_pack_clt", "rank": 2, "primary": false, "name": "Hankin & Pack PLLC", "phone": "", "email": "", "website": "https://hankinpacklaw.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Investor-oriented closing firm."},
+      {"id": "taylor_law_clt", "rank": 3, "primary": false, "name": "Taylor Law Firm", "phone": "", "email": "", "website": "https://taylorlawfirmnc.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Dedicated /real-estate-investment page."},
+      {"id": "24hour_closing_clt", "rank": 4, "primary": false, "name": "24 Hour Closing", "phone": "", "email": "", "website": "https://24hourclose.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Full-service investor closing firm. Branded around speed."},
+      {"id": "mcgrath_spielberger_clt", "rank": 5, "primary": false, "name": "McGrath & Spielberger PLLC", "phone": "", "email": "", "website": "https://mcgrathspielberger.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Multi-state footprint (NC/SC/FL)."}
+    ]
+  },
+  "MO": {
+    "market": "St. Louis",
+    "preferred_closer_id": "investors_title_stl",
+    "closing_type": "title_company",
+    "companies": [
+      {"id": "investors_title_stl", "rank": 1, "primary": true, "name": "Investors Title Company", "phone": "(314) 862-0303", "email": "", "website": "https://investors-title.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Largest independently-owned in St. Louis. 20+ locations, 50+ years."},
+      {"id": "freedom_title_stl", "rank": 2, "primary": false, "name": "Freedom Title", "phone": "(314) 786-4000", "email": "Ryan@Freedom-Title.com", "website": "https://freedom-title.com", "contact": "Ryan Kerner", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "12 locations across STL. Investor-focused leadership."},
+      {"id": "eastern_title_stl", "rank": 3, "primary": false, "name": "Eastern Title", "phone": "", "email": "", "website": "https://easterntitle.com/missouri/saint-louis", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Explicit investor page: wholesale, distressed, double-closings, novations, sub-to."},
+      {"id": "continental_title_stl", "rank": 4, "primary": false, "name": "Continental Title Company", "phone": "(314) 366-0348", "email": "", "website": "https://cticmo.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "3353 Roger Pl. Midwest multi-state operator."},
+      {"id": "integrity_title_stl", "rank": 5, "primary": false, "name": "Integrity Title Solutions", "phone": "(314) 725-1500", "email": "", "website": "https://integritytitlellc.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "11715 Administration Dr. Smaller shop. Responsive."}
+    ]
+  },
+  "AZ": {
+    "market": "Phoenix",
+    "preferred_closer_id": "university_title_phx",
+    "closing_type": "title_company",
+    "companies": [
+      {"id": "university_title_phx", "rank": 1, "primary": true, "name": "University Title Agency", "phone": "(602) 903-4914", "email": "", "website": "https://utitlearizona.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Clearest investor menu in AZ: creative financing, double-close, assignments, land contracts, sub-to, wraps."},
+      {"id": "magnus_title_phx", "rank": 2, "primary": false, "name": "Magnus Title Agency", "phone": "(602) 792-7300", "email": "", "website": "https://magnustitle.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Largest privately-held agency in Maricopa County."},
+      {"id": "equity_title_phx", "rank": 3, "primary": false, "name": "Equity Title of Arizona", "phone": "", "email": "", "website": "https://eta-az.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Multiple Maricopa branches. Used by Phoenix flippers."},
+      {"id": "standard_title_phx", "rank": 4, "primary": false, "name": "Standard Title & Escrow", "phone": "", "email": "", "website": "https://standardclosingaz.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Since 2019. Investor + builder niche across Phoenix/Peoria/Glendale."},
+      {"id": "fidelity_national_phx", "rank": 5, "primary": false, "name": "Fidelity National Title - Phoenix", "phone": "", "email": "", "website": "https://fntic.com", "contact": "", "handles_assignments": false, "investor_friendly": "branch_dependent", "deals_closed": 0, "notes": "Big AZ market share but requires wholesaler to bring own funds. Only with named officer."}
+    ]
+  },
+  "TN": {
+    "market": "Nashville",
+    "preferred_closer_id": "closed_title_nash",
+    "closing_type": "title_company",
+    "companies": [
+      {"id": "closed_title_nash", "rank": 1, "primary": true, "name": "CLOSED Title - Nashville", "phone": "(615) 574-6230", "email": "", "website": "https://closedtitle.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "2260 Murfreesboro Pike. 100% digital. Dedicated /investors page."},
+      {"id": "wagon_wheel_nash", "rank": 2, "primary": false, "name": "Wagon Wheel Title & Escrow", "phone": "(615) 650-5100", "email": "", "website": "https://wagonwheeltitle.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "204 S 11th St East Nashville (near Davidson Co Register). Franklin + Sumner offices."},
+      {"id": "stewart_title_nash", "rank": 3, "primary": false, "name": "Stewart Title - Nashville", "phone": "", "email": "", "website": "https://stewart.com/en/markets/nashville", "contact": "", "handles_assignments": false, "investor_friendly": "branch_dependent", "deals_closed": 0, "notes": "National underwriter. Use with specific officer."},
+      {"id": "jaken_nash", "rank": 4, "primary": false, "name": "Jaken Finance Group regionals", "phone": "", "email": "", "website": "https://jakenfinancegroup.com", "contact": "", "handles_assignments": true, "investor_friendly": "yes", "deals_closed": 0, "notes": "Not a title co itself. TN guide references vetted wholesaler-friendly shops."},
+      {"id": "fidelity_national_nash", "rank": 5, "primary": false, "name": "Fidelity National Title - Nashville", "phone": "", "email": "", "website": "https://fntic.com", "contact": "", "handles_assignments": false, "investor_friendly": "branch_dependent", "deals_closed": 0, "notes": "National. Use only with named officer."}
+    ]
+  },
   "national_backup": [
-    {"name": "CLOSED Title", "phone": "", "website": "closedtitle.com/investors", "contact": "", "handles_assignments": true, "notes": "Multi-state. Can close in 24 hours. Digital-first. Check coverage for all 6 markets."}
+    {"id": "closed_title_multistate", "name": "CLOSED Title (multi-state)", "phone": "", "website": "https://closedtitle.com/investors", "handles_assignments": true, "notes": "Multi-state closer. Can close in 24 hours. Digital-first. Backup for any market."}
   ]
 }

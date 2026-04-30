@@ -222,6 +222,46 @@ class Deal(models.Model):
     agreement_url     = models.URLField(blank=True, help_text="Link to signed finder agreement")
     stripe_invoice_id = models.CharField(max_length=200, blank=True)
 
+    # ── EMD tracking (audit-required for title-company files) ──
+    earnest_money_deposit = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0,
+        help_text="Buyer EMD held with title/attorney. 0 = none on file yet.")
+    emd_status = models.CharField(
+        max_length=20, blank=True,
+        choices=[("pending", "Pending receipt"), ("held", "Held by title"),
+                 ("refunded", "Refunded to buyer"), ("forfeited", "Forfeited to seller"),
+                 ("applied_to_close", "Applied to closing")],
+        help_text="Lifecycle state of the earnest money")
+    emd_received_at = models.DateTimeField(null=True, blank=True)
+    emd_held_by = models.CharField(max_length=200, blank=True,
+                                    help_text="Name of title company / attorney holding EMD")
+
+    # ── Close type (audit-required: assignment vs double-close) ──
+    close_type = models.CharField(
+        max_length=20, default="assignment",
+        choices=[("assignment", "Contract assignment"),
+                 ("double_close", "A->B then B->C double close"),
+                 ("subject_to", "Subject-to existing financing"),
+                 ("direct_purchase", "We buy and hold")],
+        help_text="How the deal will close. Drives template + funding requirements.")
+    funder_name = models.CharField(max_length=200, blank=True,
+                                    help_text="Transactional funder for double closes")
+
+    # ── Inspection / due diligence ──
+    inspection_status = models.CharField(
+        max_length=20, default="not_started",
+        choices=[("not_started", "Not started"), ("scheduled", "Scheduled"),
+                 ("complete", "Complete"), ("waived", "Waived"),
+                 ("failed", "Failed -- terminated")])
+    inspection_due_date = models.DateField(null=True, blank=True)
+    inspection_notes = models.TextField(blank=True)
+
+    # ── Title status ──
+    title_company = models.CharField(max_length=200, blank=True)
+    title_search_ordered_at = models.DateTimeField(null=True, blank=True)
+    title_clear = models.BooleanField(default=False,
+                                       help_text="Title returned clear and marketable")
+
     started_at   = models.DateTimeField(default=timezone.now)
     closed_at    = models.DateTimeField(null=True, blank=True)
     created_at   = models.DateTimeField(auto_now_add=True)
@@ -730,3 +770,379 @@ class CallLog(models.Model):
 
     def __str__(self):
         return f"{self.call_type} | {self.contact_name} | {self.outcome} | {self.started_at:%Y-%m-%d}"
+
+
+class CallbackTask(models.Model):
+    """Phone callback task auto-created from inbound email replies.
+
+    The wholesalers that close 1+/week answer replies on the PHONE within
+    24 hours, not via email. Justine's IMAP monitor flags any inbound that
+    looks motivated and creates a CallbackTask so the human (or VA) sees a
+    queue with talking points pre-loaded by Hammer Knox.
+    """
+    PRIORITY_CHOICES = [
+        ("urgent", "Urgent (call within 2h)"),
+        ("high", "High (call within 24h)"),
+        ("normal", "Normal (call within 48h)"),
+        ("low", "Low (when convenient)"),
+    ]
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("in_progress", "In progress"),
+        ("done", "Done"),
+        ("voicemail", "Voicemail left"),
+        ("no_answer", "No answer"),
+        ("invalid", "Bad number"),
+        ("snoozed", "Snoozed"),
+    ]
+
+    lead_id = models.CharField(max_length=64, blank=True, db_index=True,
+                               help_text="UUID/ID of the related PropertyLead or LeadProfile")
+    buyer_id = models.CharField(max_length=64, blank=True, db_index=True,
+                                help_text="UUID of the related InvestorBuyer")
+    contact_name = models.CharField(max_length=200, blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default="normal", db_index=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending", db_index=True)
+    reason = models.TextField(blank=True)
+    talking_points = models.TextField(blank=True)
+    disposition_notes = models.TextField(blank=True)
+    source = models.CharField(max_length=50, default="manual")
+    assigned_to = models.CharField(max_length=64, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    completed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-priority", "-created_at"]
+        indexes = [
+            models.Index(fields=["status", "priority", "-created_at"]),
+            models.Index(fields=["assigned_to", "status"]),
+        ]
+
+    def __str__(self):
+        return f"[{self.priority}] {self.contact_name or self.phone or self.lead_id or 'unknown'} -- {self.status}"
+
+
+class POFRequest(models.Model):
+    """Proof-of-Funds collection from a cash buyer. Audit-required to
+    prevent dispatching deals to buyers who cannot actually close."""
+    STATUS_CHOICES = [
+        ("invited", "Invited (link sent)"),
+        ("submitted", "POF submitted, pending review"),
+        ("approved", "Approved -- buyer can receive deals"),
+        ("rejected", "Rejected (insufficient or expired)"),
+        ("expired", "POF older than 90 days; resubmit"),
+    ]
+    buyer = models.ForeignKey("InvestorBuyer", on_delete=models.CASCADE,
+                               related_name="pof_requests")
+    token = models.CharField(max_length=64, unique=True, db_index=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="invited",
+                              db_index=True)
+    pof_amount = models.DecimalField(max_digits=12, decimal_places=2, default=0,
+                                      help_text="Amount documented on the POF letter")
+    pof_letter_url = models.CharField(max_length=1024, blank=True,
+                                       help_text="Path to uploaded POF document")
+    pof_letter_dated = models.DateField(null=True, blank=True,
+                                         help_text="Date on the POF letter (must be < 90d old at deal time)")
+    requested_at = models.DateTimeField(auto_now_add=True)
+    submitted_at = models.DateTimeField(null=True, blank=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewer_notes = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["-requested_at"]
+
+    def __str__(self):
+        return f"POF[{self.status}] {self.buyer.name} ${self.pof_amount}"
+
+
+class ConsentLedger(models.Model):
+    """Immutable Prior Express Written Consent (PEWC) record.
+
+    Required by 47 CFR 64.1200(f)(9) for any marketing autodialed,
+    prerecorded, or AI-voice call. Once a contact signs the consent form,
+    THIS row becomes the legal proof. Never edited, never deleted -- new
+    revocations create separate `revoked=True` rows that supersede.
+
+    What this row is proof of
+    -------------------------
+    1. The contact saw the disclosure (we store the exact text shown).
+    2. The contact agreed (signature_text + signature_ip + timestamp).
+    3. The contact authorized specific channels (channels JSON array).
+    4. The number being called (phone, normalized).
+    5. The seller name (Everlight Ventures, baked into disclosure_text).
+
+    On any TCPA dispute, this row + Django's `auto_now_add` audit trail is
+    what we hand to the lawyer.
+    """
+    CONTACT_TYPE_CHOICES = [
+        ("seller", "Seller"),
+        ("buyer", "Cash Buyer / Investor"),
+        ("wholesaler", "JV Wholesaler"),
+        ("title_company", "Title Company"),
+        ("other", "Other"),
+    ]
+    CHANNEL_CHOICES = [
+        ("ai_call", "AI Voice Call"),
+        ("autodialed_call", "Autodialed Call"),
+        ("prerecorded_voicemail", "Prerecorded Voicemail Drop"),
+        ("sms_marketing", "Marketing SMS"),
+        ("email_marketing", "Marketing Email"),
+    ]
+
+    # Who consented
+    contact_type = models.CharField(max_length=20, choices=CONTACT_TYPE_CHOICES, db_index=True)
+    contact_name = models.CharField(max_length=200)
+    contact_email = models.EmailField(blank=True, db_index=True)
+    contact_phone = models.CharField(max_length=20, blank=True, db_index=True,
+                                     help_text="Normalized 10-digit US number")
+
+    # What they consented to
+    channels = models.JSONField(default=list,
+                                help_text="List of authorized channel codes from CHANNEL_CHOICES")
+    disclosure_text = models.TextField(
+        help_text="Exact disclosure text shown to the contact at consent time. NEVER edit retroactively.")
+
+    # Proof of agreement
+    signature_text = models.CharField(max_length=200,
+                                       help_text="What the contact typed/checked as their signature")
+    signature_ip = models.GenericIPAddressField(null=True, blank=True)
+    signature_user_agent = models.TextField(blank=True)
+    consent_token = models.CharField(max_length=64, unique=True, db_index=True,
+                                      help_text="Random token in the consent URL")
+
+    # Lifecycle
+    revoked = models.BooleanField(default=False, db_index=True)
+    revoked_at = models.DateTimeField(null=True, blank=True)
+    revoked_reason = models.CharField(max_length=200, blank=True)
+    revoked_via = models.CharField(max_length=50, blank=True,
+                                    help_text="STOP_sms | unsubscribe_email | revoke_form | request_phone")
+
+    # ── Forensic anchors for legal defense (TCPA / FTSA / state DNC) ──
+    # Outbound = the disclosure WE sent them (proves they saw it)
+    outbound_twilio_sid = models.CharField(max_length=64, blank=True, db_index=True,
+        help_text="Twilio SID of outbound disclosure SMS (subpoena anchor)")
+    outbound_sent_at = models.DateTimeField(null=True, blank=True,
+        help_text="Server-side timestamp when disclosure was sent")
+    # Inbound = their reply that constitutes the signature (E-SIGN Act)
+    inbound_twilio_sid = models.CharField(max_length=64, blank=True, db_index=True,
+        help_text="Twilio SID of inbound consent reply (subpoena anchor)")
+    inbound_body_verbatim = models.TextField(blank=True,
+        help_text="Exact reply body from contact -- their consent signature")
+    inbound_received_at = models.DateTimeField(null=True, blank=True,
+        help_text="Twilio server-side timestamp when reply landed")
+    # Strong tie-back to the property lead so legal proof links to the deal
+    property_lead_id = models.CharField(max_length=100, blank=True, db_index=True,
+        help_text="PropertyLead.id this consent belongs to (string for UUID compat)")
+    # Raw evidence payloads (kept verbatim for forensic completeness)
+    evidence_payload_json = models.TextField(blank=True,
+        help_text="Raw Twilio webhook/API payloads for outbound + inbound (audit-only)")
+
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["contact_phone", "revoked", "-created_at"]),
+            models.Index(fields=["contact_email", "revoked", "-created_at"]),
+            models.Index(fields=["outbound_twilio_sid"]),
+            models.Index(fields=["inbound_twilio_sid"]),
+            models.Index(fields=["property_lead_id"]),
+        ]
+
+    def __str__(self):
+        status = "revoked" if self.revoked else "active"
+        return f"[{self.contact_type}] {self.contact_name} ({self.contact_phone or self.contact_email}) -- {status}"
+
+    def has_channel(self, channel: str) -> bool:
+        return not self.revoked and channel in (self.channels or [])
+
+    def is_legally_defensible(self) -> bool:
+        """True only if we have the full forensic chain for this consent.
+
+        Used by the audit + by the consent-proof-pack view. Defensibility
+        requires: outbound disclosure SID + inbound reply SID + verbatim body.
+        """
+        return bool(
+            self.outbound_twilio_sid
+            and self.inbound_twilio_sid
+            and self.inbound_body_verbatim
+            and self.channels
+            and not self.revoked
+        )
+
+
+class BankReconciliation(models.Model):
+    """Monthly bank reconciliation record. Audit-required (Section 1: Financial)."""
+    period_year = models.IntegerField(db_index=True)
+    period_month = models.IntegerField(db_index=True, help_text="1-12")
+    bank_account_label = models.CharField(max_length=100, default="primary_checking")
+    statement_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    book_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    reconciled_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    in_transit_deposits = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    outstanding_checks = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    discrepancies_count = models.IntegerField(default=0)
+    discrepancies_notes = models.TextField(blank=True)
+    statement_pdf_url = models.CharField(max_length=1024, blank=True)
+    reconciled = models.BooleanField(default=False, db_index=True)
+    reconciled_at = models.DateTimeField(null=True, blank=True)
+    reconciled_by = models.CharField(max_length=100, blank=True, help_text="Rich / CPA name")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-period_year", "-period_month"]
+        unique_together = [("period_year", "period_month", "bank_account_label")]
+
+    def __str__(self):
+        return f"BankRec {self.period_year}-{self.period_month:02d} {self.bank_account_label} {'OK' if self.reconciled else 'PENDING'}"
+
+
+class RESPAAuditLog(models.Model):
+    """Tracks any payment that could be construed as a referral or kickback
+    under RESPA Section 8. The audit module looks for unaccounted-for entries.
+    """
+    PAYMENT_TYPE_CHOICES = [
+        ("referral", "Referral fee"),
+        ("birddog", "Bird-dog finder fee"),
+        ("commission_split", "Commission split (JV)"),
+        ("vendor_kickback_check", "Vendor kickback check"),
+        ("other", "Other"),
+    ]
+    payment_type = models.CharField(max_length=30, choices=PAYMENT_TYPE_CHOICES, db_index=True)
+    payee_name = models.CharField(max_length=200)
+    payee_role = models.CharField(max_length=100, blank=True,
+                                   help_text="Title agent / lender / inspector / contractor / other")
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    deal = models.ForeignKey("Deal", on_delete=models.SET_NULL, null=True, blank=True,
+                              related_name="respa_payments")
+    written_disclosure_present = models.BooleanField(default=False,
+                                                      help_text="RESPA-compliant disclosure on file?")
+    disclosure_url = models.CharField(max_length=1024, blank=True)
+    paid_at = models.DateField()
+    reviewed_by_attorney = models.BooleanField(default=False)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-paid_at"]
+
+    def __str__(self):
+        return f"RESPA {self.payment_type} ${self.amount} -> {self.payee_name}"
+
+
+class InsurancePolicy(models.Model):
+    """E&O, GL, and other coverage tracking. Audit-required (Section 5: Risk)."""
+    POLICY_TYPE_CHOICES = [
+        ("eo", "Errors & Omissions"),
+        ("gl", "General Liability"),
+        ("cyber", "Cyber Liability"),
+        ("auto", "Commercial Auto"),
+        ("workers_comp", "Workers Comp"),
+        ("umbrella", "Umbrella"),
+    ]
+    policy_type = models.CharField(max_length=20, choices=POLICY_TYPE_CHOICES, db_index=True)
+    carrier = models.CharField(max_length=200)
+    policy_number = models.CharField(max_length=100)
+    coverage_limit = models.DecimalField(max_digits=12, decimal_places=2)
+    deductible = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    annual_premium = models.DecimalField(max_digits=10, decimal_places=2)
+    effective_date = models.DateField()
+    expiration_date = models.DateField(db_index=True)
+    certificate_url = models.CharField(max_length=1024, blank=True,
+                                        help_text="Certificate of Insurance PDF")
+    states_covered = models.JSONField(default=list, blank=True)
+    notes = models.TextField(blank=True)
+    active = models.BooleanField(default=True, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-effective_date"]
+
+    def __str__(self):
+        return f"{self.get_policy_type_display()} {self.carrier} ${self.coverage_limit} until {self.expiration_date}"
+
+
+class GBPListing(models.Model):
+    """Google Business Profile tracking. Audit-required (Section 6: Reputation)."""
+    name = models.CharField(max_length=200, default="Everlight Ventures")
+    primary_market = models.CharField(max_length=100, default="Atlanta, GA")
+    phone = models.CharField(max_length=20, default="+14048004380")
+    website = models.URLField(default="https://everlightventures.io")
+    google_place_id = models.CharField(max_length=200, blank=True)
+    verified = models.BooleanField(default=False, db_index=True)
+    verified_at = models.DateTimeField(null=True, blank=True)
+    review_count = models.IntegerField(default=0)
+    average_rating = models.DecimalField(max_digits=3, decimal_places=2, default=0)
+    last_post_at = models.DateTimeField(null=True, blank=True,
+                                         help_text="Last GBP post (for SEO refresh cadence)")
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"GBP[{self.primary_market}] {'verified' if self.verified else 'unverified'} ({self.review_count} reviews)"
+
+
+class AgentRoster(models.Model):
+    """Formal team / AI-agent roster. Audit-required (Section 7: Team)."""
+    AGENT_TYPE_CHOICES = [
+        ("human", "Human team member"),
+        ("va", "Virtual Assistant (contractor)"),
+        ("ai", "AI agent (Hive Mind)"),
+        ("vendor", "External vendor (CPA / attorney / title)"),
+    ]
+    name = models.CharField(max_length=200)
+    agent_type = models.CharField(max_length=20, choices=AGENT_TYPE_CHOICES, db_index=True)
+    role = models.CharField(max_length=200, help_text="e.g. Acquisitions, Disposition, Compliance")
+    email = models.EmailField(blank=True)
+    phone = models.CharField(max_length=20, blank=True)
+    employment_start = models.DateField(null=True, blank=True)
+    code_of_conduct_signed = models.BooleanField(default=False,
+                                                  help_text="For human/VA: signed code of conduct?")
+    code_of_conduct_signed_at = models.DateTimeField(null=True, blank=True)
+    background_check_complete = models.BooleanField(default=False)
+    mfa_enrolled = models.BooleanField(default=False,
+                                        help_text="Django MFA TOTP device enrolled (if has admin access)?")
+    is_active = models.BooleanField(default=True, db_index=True)
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-is_active", "agent_type", "name"]
+
+    def __str__(self):
+        return f"[{self.agent_type}] {self.name} ({self.role}){' INACTIVE' if not self.is_active else ''}"
+
+
+class TestimonialCollection(models.Model):
+    """Closed-deal testimonials. Audit-required (Section 6: Reputation).
+    FTC-compliant: must reflect typical experience; not cherry-picked highest-money."""
+    deal = models.ForeignKey("Deal", on_delete=models.SET_NULL, null=True, blank=True,
+                              related_name="testimonials")
+    contact_name = models.CharField(max_length=200)
+    contact_role = models.CharField(max_length=50,
+                                     choices=[("seller", "Seller"), ("buyer", "Buyer"),
+                                              ("title", "Title Co"), ("attorney", "Attorney")])
+    quote_text = models.TextField()
+    publication_permission = models.CharField(max_length=30,
+                                                choices=[("full_name", "Full name + market OK"),
+                                                         ("first_name", "First name + market OK"),
+                                                         ("anonymous", "Anonymous only"),
+                                                         ("no_publish", "Internal use only")])
+    market_city = models.CharField(max_length=100, blank=True)
+    deal_assignment_fee_range = models.CharField(max_length=50, blank=True,
+                                                   help_text="e.g. '$5K-$10K' for FTC typicality context")
+    received_at = models.DateField()
+    published_at = models.DateField(null=True, blank=True,
+                                     help_text="When published to landing page / GBP / etc.")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-received_at"]
+
+    def __str__(self):
+        return f"[{self.contact_role}] {self.contact_name} -- {self.quote_text[:60]}..."

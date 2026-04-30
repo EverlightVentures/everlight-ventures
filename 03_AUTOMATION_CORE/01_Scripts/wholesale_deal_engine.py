@@ -131,8 +131,8 @@ def post_action(title, content, agent, folder="01_Broker_OS/Outreach_Logs"):
                 folder=folder, slack_channel="#wholesale-deals", app="warroom",
                 summary=content[:150],
             )
-        except Exception:
-            pass
+        except Exception as e:
+            log(f"  WARN: post_action failed: {e}")
 
 
 # ============================================================================
@@ -408,8 +408,8 @@ def handle_title_engagement():
                 tc_path = Path("/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/title_companies.json")
             if tc_path.exists():
                 title_cos = json.loads(tc_path.read_text())
-        except Exception:
-            pass
+        except Exception as e:
+            log(f"  WARN: failed to load title companies: {e}")
 
         # Find a company that serves this state
         tc = None

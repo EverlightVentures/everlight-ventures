@@ -508,9 +508,9 @@ _PITCH_TEMPLATES = {
             "make you a cash offer and close in 7 days.\n\n"
             "No agents, no repairs, no showings. Just a check.\n\n"
             "Worth a conversation?\n\n"
-            "- Rich\n"
+            "-- Piper\n"
             "Everlight Ventures | Private Acquisitions\n"
-            "rich@everlightventures.io\n\n"
+            "piper@everlightventures.io\n\n"
             "Reply STOP to opt out."
         ),
     },
@@ -523,9 +523,9 @@ _PITCH_TEMPLATES = {
             "the back taxes at closing{violation_addon}, and you walk away with cash. "
             "No cleanup, no repairs, no stress.\n\n"
             "Would it help to hear what I can offer?\n\n"
-            "- Rich\n"
+            "-- Piper\n"
             "Everlight Ventures | Private Acquisitions\n"
-            "rich@everlightventures.io\n\n"
+            "piper@everlightventures.io\n\n"
             "Reply STOP to opt out."
         ),
     },
@@ -539,9 +539,9 @@ _PITCH_TEMPLATES = {
             "everything at closing -- the violations go away the day we close, "
             "and you walk away with cash. No cleanup, no repairs, no stress.\n\n"
             "Would it help to hear what I can offer?\n\n"
-            "- Rich\n"
+            "-- Piper\n"
             "Everlight Ventures | Private Acquisitions\n"
-            "rich@everlightventures.io\n\n"
+            "piper@everlightventures.io\n\n"
             "Reply STOP to opt out."
         ),
     },
@@ -557,9 +557,9 @@ _PITCH_TEMPLATES = {
             "paperwork and can close on your timeline.\n\n"
             "If it would help to have one less thing to worry about, I'm happy to "
             "share what I can offer. No pressure.\n\n"
-            "- Rich\n"
+            "-- Piper\n"
             "Everlight Ventures | Private Acquisitions\n"
-            "rich@everlightventures.io\n\n"
+            "piper@everlightventures.io\n\n"
             "Reply STOP to opt out."
         ),
     },
@@ -575,9 +575,9 @@ _PITCH_TEMPLATES = {
             "negotiations. {value_clause}\n\n"
             "If a clean break on the property would be useful, just reply and "
             "I'll send a number.\n\n"
-            "- Rich\n"
+            "-- Piper\n"
             "Everlight Ventures | Private Acquisitions\n"
-            "rich@everlightventures.io\n\n"
+            "piper@everlightventures.io\n\n"
             "Reply STOP to opt out."
         ),
     },
@@ -590,9 +590,9 @@ _PITCH_TEMPLATES = {
             "I'm a different kind of buyer. No contingencies, no inspections, no "
             "waiting for financing. Cash, close in 7 days, and I buy as-is.\n\n"
             "I think I can get close to where you need to be. Want to hear a number?\n\n"
-            "- Rich\n"
+            "-- Piper\n"
             "Everlight Ventures | Private Acquisitions\n"
-            "rich@everlightventures.io\n\n"
+            "piper@everlightventures.io\n\n"
             "Reply STOP to opt out."
         ),
     },
@@ -606,9 +606,9 @@ _PITCH_TEMPLATES = {
             "offers in {city} this quarter. All cash, close in 7 days, completely "
             "as-is. No repairs, no agents, no hassle.\n\n"
             "Interested in hearing a number?\n\n"
-            "- Rich\n"
+            "-- Piper\n"
             "Everlight Ventures | Private Acquisitions\n"
-            "rich@everlightventures.io\n\n"
+            "piper@everlightventures.io\n\n"
             "Reply STOP to opt out."
         ),
     },
@@ -622,9 +622,9 @@ _PITCH_TEMPLATES = {
             "you a cash offer and close in 7 days.\n\n"
             "A lot of owners in your position are surprised at what their property "
             "is worth in a private cash sale. Worth a quick conversation?\n\n"
-            "- Rich\n"
+            "-- Piper\n"
             "Everlight Ventures | Private Acquisitions\n"
-            "rich@everlightventures.io\n\n"
+            "piper@everlightventures.io\n\n"
             "Reply STOP to opt out."
         ),
     },
@@ -638,9 +638,9 @@ _PITCH_TEMPLATES = {
             "I'm a private cash buyer and I can take it off your hands fast. "
             "As-is condition, I cover closing costs, and we can close in 7 days.\n\n"
             "Would it help to hear an offer?\n\n"
-            "- Rich\n"
+            "-- Piper\n"
             "Everlight Ventures | Private Acquisitions\n"
-            "rich@everlightventures.io\n\n"
+            "piper@everlightventures.io\n\n"
             "Reply STOP to opt out."
         ),
     },
@@ -654,9 +654,9 @@ _PITCH_TEMPLATES = {
             "often in 7-10 days. You walk away with your equity instead of "
             "losing it to foreclosure, and your credit takes a much smaller hit.\n\n"
             "It costs nothing to hear a number. Want me to send one over?\n\n"
-            "- Rich\n"
+            "-- Piper\n"
             "Everlight Ventures | Private Acquisitions\n"
-            "rich@everlightventures.io\n\n"
+            "piper@everlightventures.io\n\n"
             "Reply STOP to opt out."
         ),
     },

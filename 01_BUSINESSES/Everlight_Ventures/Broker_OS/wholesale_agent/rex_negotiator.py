@@ -15,7 +15,7 @@ Deal flow:
 7. Title company closes, you get wired the assignment fee
 
 Communication channels:
-- Outbound: Resend API (email from rich@everlightventures.io)
+- Outbound: Resend API (email from piper@everlightventures.io)
 - Inbound: IMAP monitoring (reads replies)
 - Internal: Slack #wholesale-deals (deal approvals only)
 - AI brain: Claude API for negotiation strategy
@@ -40,8 +40,8 @@ DEALS_DIR.mkdir(parents=True, exist_ok=True)
 RESEND_KEY = os.environ.get("RESEND_API_KEY", os.environ.get("SMTP_PASS", ""))
 SLACK_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
 SLACK_CHANNEL = "C0ANLLV8JAC"
-FROM_EMAIL = os.environ.get("SMTP_FROM", "Rich Gee <rich@everlightventures.io>")
-REPLY_TO = "rich@everlightventures.io"
+FROM_EMAIL = os.environ.get("SMTP_FROM", "Piper Reeves <piper@everlightventures.io>")
+REPLY_TO = "piper@everlightventures.io"
 
 
 # ---------------------------------------------------------------------------
@@ -108,7 +108,7 @@ Your rules:
 - Your goal: get the property under contract at or below MAO
 
 You communicate via email. Keep messages short (3-5 sentences max), professional, and warm.
-Sign emails as "Rich, Everlight Ventures" (not Rex -- Rex is internal only).
+Sign emails as "Everlight Ventures" (not Rex -- Rex is internal only).
 
 Do not use buzzwords or filler. Be plain and direct."""
 
@@ -258,9 +258,9 @@ I buy properties for cash and can close in 7-14 days. No repairs, no commissions
 If you are open to a quick conversation, just reply to this email.
 
 Best,
-Rich
-Everlight Ventures
-rich@everlightventures.io"""
+Piper Reeves
+Everlight Ventures | Wholesale
+piper@everlightventures.io"""
 
     if send_email(deal.owner_email, subject, body):
         deal.status = "outreach_sent"
@@ -276,7 +276,25 @@ rich@everlightventures.io"""
 def handle_seller_reply(deal: DealState, seller_message: str) -> str:
     deal.conversation.append({"role": "seller", "message": seller_message, "timestamp": datetime.now(timezone.utc).isoformat()})
 
+    # Post the incoming reply to the deal thread so the owner sees it immediately.
+    try:
+        from deal_slack import post_touch, post_stage
+        lead_like = {
+            "id": getattr(deal, "id", ""),
+            "owner_name": getattr(deal, "owner_name", "") or deal.owner_email.split("@")[0],
+            "address": deal.address, "city": deal.city, "state": deal.state,
+            "email": deal.owner_email,
+            "lead_type": getattr(deal, "lead_type", "generic"),
+            "detected_distress": getattr(deal, "distress", ""),
+        }
+        post_touch(lead=lead_like, agent="Seller", channel="reply",
+                   body=seller_message, to_address=deal.owner_email,
+                   outcome="received")
+    except Exception:
+        pass
+
     msg_lower = seller_message.lower()
+    old_status = deal.status
     if any(w in msg_lower for w in ["yes", "deal", "agree", "let's do it", "sounds good"]):
         deal.seller_sentiment = "eager"
         deal.status = "verbal_agreement"
@@ -291,6 +309,11 @@ def handle_seller_reply(deal: DealState, seller_message: str) -> str:
         deal.seller_sentiment = "hostile"
         deal.status = "dead"
         deal.save()
+        try:
+            from deal_slack import post_stage
+            post_stage(lead_like, "dead", detail=f"Seller wrote: _{seller_message[:150]}_")
+        except Exception:
+            pass
         return ""
     else:
         deal.seller_sentiment = "neutral"
@@ -301,7 +324,23 @@ def handle_seller_reply(deal: DealState, seller_message: str) -> str:
     if send_email(deal.owner_email, subject, response):
         deal.conversation.append({"role": "rex", "message": response, "timestamp": datetime.now(timezone.utc).isoformat()})
         deal.last_contact = datetime.now(timezone.utc).isoformat()
+        # Thread post the auto-response so the owner sees what Piper sent back.
+        try:
+            from deal_slack import post_touch
+            post_touch(lead=lead_like, agent="Piper Reeves (auto)", channel="email",
+                       subject=subject, body=response,
+                       to_address=deal.owner_email, outcome="auto-reply sent")
+        except Exception:
+            pass
     deal.save()
+
+    # Fire stage transition if status changed
+    if old_status != deal.status:
+        try:
+            from deal_slack import post_stage
+            post_stage(lead_like, deal.status)
+        except Exception:
+            pass
     return response
 
 

@@ -20,8 +20,7 @@
  */
 
 import { useBlackjackStore, type GameMode } from './blackjack-store'
-import { toastWin, toastInfo } from '@/components/blackjack/VantarisToast'
-import { IS_PRODUCTION } from './django-sync'
+import { toastInfo } from '@/components/blackjack/VantarisToast'
 
 // ============================================================
 // GC PURCHASE PACKAGES (SC is always a bonus, never sold)
@@ -47,48 +46,63 @@ export const GC_PACKAGES: GCPackage[] = [
 ]
 
 // ============================================================
-// PURCHASE FLOW
+// PURCHASE FLOW -- direct fetch bypasses session JWT issues
 // ============================================================
+
+const SUPABASE_URL = 'https://jdqqmsmwmbsnlnstyavl.supabase.co'
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkcXFtc213bWJzbmxuc3R5YXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTk5ODMsImV4cCI6MjA4ODM5NTk4M30.9BDviI2WR46sphcS3uzKapcKbslYpMO4PdSEPFrv3Ww'
+
+const PACKAGE_SLUG_MAP: Record<string, string> = {
+  starter: 'chips-500',
+  player: 'chips-500',
+  high_roller: 'chips-3000',
+  vip: 'chips-3000',
+  whale: 'chips-8000',
+}
 
 export async function purchaseGCPackage(packageId: string): Promise<void> {
   const pkg = GC_PACKAGES.find(p => p.id === packageId)
-  if (!pkg) return
+  if (!pkg) { alert('Unknown package.'); return }
 
-  // ALWAYS go through Stripe -- no free credits, no fallbacks, no exceptions
+  const slug = PACKAGE_SLUG_MAP[packageId] || 'chips-500'
+
   try {
-    const { supabase } = await import('./supabase')
-
-    // Map package to the Stripe slug
-    const slugMap: Record<string, string> = {
-      starter: 'chips-500',
-      player: 'chips-500',
-      high_roller: 'chips-3000',
-      vip: 'chips-3000',
-      whale: 'chips-8000',
-    }
-    const slug = slugMap[packageId] || 'chips-500'
-
-    const { data, error } = await supabase.functions.invoke('create-checkout', {
-      body: {
+    // Direct fetch with anon key bypasses session JWT issues
+    // (supabase.functions.invoke uses the session token which may be expired)
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'apikey': SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({
         slug,
         success_url: window.location.origin + '/play/blackjack?checkout=success',
         cancel_url: window.location.origin + '/wallet?checkout=canceled',
         metadata: { slug, product_type: 'chips' },
-      },
+      }),
     })
 
-    if (error) {
-      alert(`Payment error: ${error.message}. Please try again.`)
+    const data = await res.json().catch(() => ({}))
+
+    if (!res.ok) {
+      const msg = data?.error || data?.message || `HTTP ${res.status}`
+      alert(`Payment error (${res.status}): ${msg}`)
+      console.error('[purchase] Non-OK response:', res.status, data)
       return
     }
 
     if (data?.url) {
       window.location.href = data.url
-    } else {
-      alert('Could not create checkout session. Please try again.')
+      return
     }
+
+    alert('Payment error: no checkout URL returned.')
+    console.error('[purchase] Unexpected response:', data)
   } catch (err: any) {
-    alert(`Payment unavailable: ${err?.message || 'Unknown error'}. Please try again.`)
+    alert(`Payment unavailable: ${err?.message || 'Network error'}. Please try again.`)
+    console.error('[purchase] Exception:', err)
   }
 }
 
@@ -151,7 +165,6 @@ export function getPlaythroughProgress(): number {
 
 // States where sweepstakes casinos are restricted or banned
 export const RESTRICTED_STATES = ['WA', 'ID', 'NV', 'MT']
-// States with additional restrictions (may require extra compliance)
 export const EXTRA_COMPLIANCE_STATES = ['NJ', 'NY']
 
 export function isStateAllowed(stateCode: string): boolean {
@@ -172,12 +185,10 @@ export function setGameMode(mode: GameMode): void {
   )
 }
 
-// Get current bet currency label
 export function getCurrencyLabel(mode: GameMode): string {
   return mode === 'sc' ? 'SC' : 'GC'
 }
 
-// Get player balance for current mode
 export function getModeBalance(mode: GameMode): number {
   const player = useBlackjackStore.getState().player
   return mode === 'sc' ? player.sweepsCoins : player.chips

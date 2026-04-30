@@ -332,46 +332,59 @@ piper@everlightventures.io"""
 
 
 def send_email(outreach: dict) -> dict:
-    """Send an email via Resend API. Only sends VERIFIED drafts."""
+    """Send an email via the branded mailer. Only sends VERIFIED drafts.
+
+    Routes through `content_tools.branded_mailer.send_branded_email()` so the
+    Everlight gold template wraps the body, the resend_guard blocks
+    owner/internal addresses, and the resend_budget gate paces the send
+    against the monthly Resend quota (with a 25% VIP reserve).
+    """
     if outreach.get("status") != "verified":
         return {"sent": False, "reason": "not_verified"}
     if not outreach.get("target_email"):
         return {"sent": False, "reason": "no_email"}
-    if not RESEND_KEY:
-        return {"sent": False, "reason": "no_resend_key"}
 
-    import urllib.request
-    payload = {
-        "from": f"{outreach.get('agent_name', 'Piper Reeves')} <piper@everlightventures.io>",
-        "to": [outreach["target_email"]],
-        "subject": outreach["subject"],
-        "text": outreach["body"],
-    }
-
-    req = urllib.request.Request(
-        "https://api.resend.com/emails",
-        data=json.dumps(payload).encode(),
-        headers={
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {RESEND_KEY}",
-        },
-    )
     try:
-        resp = urllib.request.urlopen(req, timeout=15)
-        result = json.loads(resp.read().decode())
-        msg_id = result.get("id", "")
+        import sys as _sys
+        for _p in ("/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools",
+                   "/home/opc/content_tools"):
+            if _p not in _sys.path:
+                _sys.path.insert(0, _p)
+        from branded_mailer import send_branded_email  # type: ignore
+    except Exception as exc:
+        return {"sent": False, "reason": f"branded_mailer_unavailable:{exc}"}
 
-        # Update outreach record
-        if outreach.get("id"):
-            _supabase_update("wholesale_outreach", {"id": outreach["id"]}, {
-                "status": "sent",
-                "sent_at": datetime.now(timezone.utc).isoformat(),
-                "resend_message_id": msg_id,
-            })
+    agent_name = outreach.get("agent_name", "Piper Reeves")
+    body = outreach["body"]
+    # Use simple <br> conversion -- branded_mailer wraps the inner content with the gold template
+    body_html = body.replace("\n", "<br>") if "<" not in body else body
 
-        return {"sent": True, "message_id": msg_id}
-    except Exception as e:
-        return {"sent": False, "reason": str(e)[:200]}
+    result = send_branded_email(
+        to=outreach["target_email"],
+        subject=outreach["subject"],
+        content_html=body_html,
+        title=outreach["subject"],
+        from_name=f"{agent_name} at Everlight",
+        from_email="piper@everlightventures.io",
+        reply_to="piper@everlightventures.io",
+        agent_name=agent_name,
+        agent_title="Wholesale Outreach",
+        agent_email="piper@everlightventures.io",
+        plain_text_fallback=body,
+        budget_category="bulk",
+    )
+    if not result.ok:
+        return {"sent": False, "reason": result.error[:200]}
+
+    msg_id = result.message_id
+    if outreach.get("id"):
+        _supabase_update("wholesale_outreach", {"id": outreach["id"]}, {
+            "status": "sent",
+            "sent_at": datetime.now(timezone.utc).isoformat(),
+            "resend_message_id": msg_id,
+        })
+
+    return {"sent": True, "message_id": msg_id}
 
 
 # ============================================================

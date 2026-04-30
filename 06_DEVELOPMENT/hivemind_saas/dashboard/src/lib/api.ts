@@ -1,11 +1,32 @@
 "use client";
 
-type BootstrapPayload = {
+import type { Integration, HiveSession } from "@/types";
+
+interface BootstrapPayload {
   access_token: string;
   email: string;
   password: string;
   api_base_url: string;
-};
+}
+
+interface TenantInfo {
+  id: string;
+  name: string;
+  plan: string;
+  [key: string]: unknown;
+}
+
+interface UsageInfo {
+  tokens_used: number;
+  tokens_limit: number;
+  [key: string]: unknown;
+}
+
+interface SessionListResponse {
+  results: HiveSession[];
+  count: number;
+  [key: string]: unknown;
+}
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_HIVE_API_URL || "http://127.0.0.1:8000";
 let cachedBootstrap: BootstrapPayload | null = null;
@@ -45,34 +66,39 @@ export async function hiveRequest<T>(path: string, init: RequestInit = {}): Prom
   return response.json() as Promise<T>;
 }
 
-export async function listIntegrations() {
-  return hiveRequest<any[]>("/api/integrations/");
+export async function listIntegrations(): Promise<Integration[]> {
+  return hiveRequest<Integration[]>("/api/integrations/");
 }
 
-export async function connectIntegration(payload: Record<string, unknown>) {
-  return hiveRequest<any>("/api/integrations/", {
+export async function connectIntegration(payload: Record<string, unknown>): Promise<Integration> {
+  return hiveRequest<Integration>("/api/integrations/", {
     method: "POST",
     body: JSON.stringify(payload),
   });
 }
 
-export async function startHiveSession(prompt: string, agents: string[]) {
-  return hiveRequest<any>("/api/sessions/", {
+export async function startHiveSession(prompt: string, agents: string[]): Promise<HiveSession> {
+  return hiveRequest<HiveSession>("/api/sessions/", {
     method: "POST",
     body: JSON.stringify({ prompt, agents, mode: "full" }),
   });
 }
 
-export async function getHiveSession(sessionId: string) {
-  return hiveRequest<any>(`/api/sessions/${sessionId}`);
+export async function getHiveSession(sessionId: string): Promise<HiveSession> {
+  return hiveRequest<HiveSession>(`/api/sessions/${sessionId}`);
 }
 
-export async function getDashboardSnapshot() {
+export async function getDashboardSnapshot(): Promise<{
+  tenant: TenantInfo;
+  usage: UsageInfo;
+  sessions: SessionListResponse;
+  integrations: Integration[];
+}> {
   const [tenant, usage, sessions, integrations] = await Promise.all([
-    hiveRequest<any>("/api/tenants/me"),
-    hiveRequest<any>("/api/billing/usage"),
-    hiveRequest<any>("/api/sessions?limit=6"),
-    hiveRequest<any[]>("/api/integrations/"),
+    hiveRequest<TenantInfo>("/api/tenants/me"),
+    hiveRequest<UsageInfo>("/api/billing/usage"),
+    hiveRequest<SessionListResponse>("/api/sessions?limit=6"),
+    hiveRequest<Integration[]>("/api/integrations/"),
   ]);
 
   return { tenant, usage, sessions, integrations };

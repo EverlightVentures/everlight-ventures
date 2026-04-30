@@ -417,7 +417,9 @@ def generate_wholesale_contract(deal: dict) -> str:
         ("4. ASSIGNMENT", (
             "This contract IS ASSIGNABLE. Buyer may assign this contract to a third party "
             "for an assignment fee of <b>$%s</b>. Seller acknowledges and consents "
-            "to assignment." % "{:,.0f}".format(fee)
+            "to assignment. Buyer is Richard Gee doing business as Everlight Ventures, "
+            "a California sole proprietor. (See BUSINESS_ENTITY_STATUS.md for current "
+            "entity status. Update this clause once the Everlight Ventures LLC is reinstated.)" % "{:,.0f}".format(fee)
         )),
         ("5. CLOSING", (
             "Closing shall occur on or before <b>%s</b> at %s. "
@@ -433,7 +435,15 @@ def generate_wholesale_contract(deal: dict) -> str:
             "liquidated damages. If Seller defaults, Buyer may seek specific performance "
             "or return of earnest money."
         )),
-        ("8. GOVERNING LAW", (
+        ("8. QUALITY ASSURANCE REVIEW PERIOD", (
+            "Seller shall have a <b>7-calendar-day Quality Assurance Review Period</b> "
+            "beginning on mutual execution of this agreement. During this period Seller may "
+            "rescind this agreement for any reason by written notice (email accepted) and "
+            "receive return of all deposits without penalty or obligation. This right is in "
+            "addition to any state-mandated rescission periods. Everlight Ventures commits to "
+            "the CarMax standard: a fair deal or no deal."
+        )),
+        ("9. GOVERNING LAW", (
             "This agreement is governed by the laws of the state where the property is located."
         )),
     ]

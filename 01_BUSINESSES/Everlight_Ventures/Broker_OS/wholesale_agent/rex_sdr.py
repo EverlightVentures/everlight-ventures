@@ -34,8 +34,8 @@ PIPELINE_DIR.mkdir(parents=True, exist_ok=True)
 OUTREACH_LOG.mkdir(parents=True, exist_ok=True)
 
 RESEND_KEY = os.environ.get("RESEND_API_KEY", os.environ.get("SMTP_PASS", ""))
-FROM_EMAIL = os.environ.get("SMTP_FROM", "Rich Gee <rich@everlightventures.io>")
-REPLY_TO = "rich@everlightventures.io"
+FROM_EMAIL = os.environ.get("SMTP_FROM", "Harrison Knox <hammer@everlightventures.io>")
+REPLY_TO = "hammer@everlightventures.io"
 SLACK_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
 SLACK_CHANNEL = "C0ANLLV8JAC"
 
@@ -101,42 +101,42 @@ def add_leads(new_leads: list[dict]):
 # Pain-point-specific templates per lead type
 PAIN_TEMPLATES = {
     "code_violation": {
-        "touch1": "Hi {first_name},\n\nI noticed your property at {address}, {city} has some open code issues with the city. I know those fines add up fast and dealing with inspectors is a headache.\n\nI buy properties in {city} as-is -- code violations and all. No repairs needed on your end. I can close in 7 days with cash and the fines stop the day we close.\n\nWould it help to hear what I could offer?\n\nRich\nEverlight Ventures\nrich@everlightventures.io",
+        "touch1": "Hi {first_name},\n\nI noticed your property at {address}, {city} has some open code issues with the city. I know those fines add up fast and dealing with inspectors is a headache.\n\nI buy properties in {city} as-is -- code violations and all. No repairs needed on your end. I can close in 7 days with cash and the fines stop the day we close.\n\nWould it help to hear what I could offer?\n\nRich\nEverlight Ventures\nhammer@everlightventures.io",
         "touch2": "Hi {first_name},\n\nFollowing up on {address}. Those city fines do not pause while you decide -- they keep adding up. I can make them stop this week.\n\nCash offer, close in 7 days, I handle everything. Just reply and I will send you a number.\n\nRich\nEverlight Ventures",
         "touch3": "Hi {first_name},\n\nLast check-in about {address}. If the code situation has gotten worse, my offer still stands. I take properties as-is and close fast.\n\nIf you have already resolved it, no worries at all. Just reply either way.\n\nRich\nEverlight Ventures",
     },
     "pre_foreclosure": {
-        "touch1": "Hi {first_name},\n\nI am reaching out about your property at {address}, {city}. I work with homeowners who are facing tight deadlines and need to sell quickly.\n\nI buy with cash and can close before any auction date. No inspections, no bank approval delays, no commissions. You walk away with a check and your credit intact.\n\nWould you like to hear what I can offer?\n\nRich\nEverlight Ventures\nrich@everlightventures.io",
+        "touch1": "Hi {first_name},\n\nI am reaching out about your property at {address}, {city}. I work with homeowners who are facing tight deadlines and need to sell quickly.\n\nI buy with cash and can close before any auction date. No inspections, no bank approval delays, no commissions. You walk away with a check and your credit intact.\n\nWould you like to hear what I can offer?\n\nRich\nEverlight Ventures\nhammer@everlightventures.io",
         "touch2": "Hi {first_name},\n\nFollowing up about {address}. If your timeline is getting tight, I want you to know my cash offer can close in as little as 5 business days. That is fast enough to beat most deadlines.\n\nJust reply and I will get you a number today.\n\nRich\nEverlight Ventures",
         "touch3": "Hi {first_name},\n\nI know this might be a stressful time. I am still able to help with {address} if you need a fast sale. No judgment, just a fair offer and a quick close.\n\nReply anytime. I check email daily.\n\nRich\nEverlight Ventures",
     },
     "tax_lien": {
-        "touch1": "Hi {first_name},\n\nI am reaching out about your property at {address}, {city}. I work with property owners who have outstanding tax balances and need a clean exit.\n\nI buy as-is for cash. I handle the back taxes at closing so you walk away free and clear. No repairs, no agents, no waiting.\n\nWould you be open to a conversation?\n\nRich\nEverlight Ventures\nrich@everlightventures.io",
+        "touch1": "Hi {first_name},\n\nI am reaching out about your property at {address}, {city}. I work with property owners who have outstanding tax balances and need a clean exit.\n\nI buy as-is for cash. I handle the back taxes at closing so you walk away free and clear. No repairs, no agents, no waiting.\n\nWould you be open to a conversation?\n\nRich\nEverlight Ventures\nhammer@everlightventures.io",
         "touch2": "Hi {first_name},\n\nQuick follow-up on {address}. Back taxes keep accruing and the county does not wait. I can take this off your plate this month -- cash, fast close, I cover the taxes.\n\nJust reply if you want to hear a number.\n\nRich\nEverlight Ventures",
         "touch3": "Hi {first_name},\n\nLast note about {address}. If the tax situation is weighing on you, I am still here to help. I have closed dozens of these deals and I make it simple.\n\nReply anytime.\n\nRich\nEverlight Ventures",
     },
     "probate": {
-        "touch1": "Hi {first_name},\n\nI am sorry for your loss. I am reaching out about the property at {address}, {city}. I work with families who have inherited a property and want a simple, fast sale.\n\nI buy as-is for cash -- no cleaning out, no repairs, no showings. I handle everything and close on your timeline.\n\nIf that would be helpful, I would be glad to chat.\n\nRich\nEverlight Ventures\nrich@everlightventures.io",
+        "touch1": "Hi {first_name},\n\nI am sorry for your loss. I am reaching out about the property at {address}, {city}. I work with families who have inherited a property and want a simple, fast sale.\n\nI buy as-is for cash -- no cleaning out, no repairs, no showings. I handle everything and close on your timeline.\n\nIf that would be helpful, I would be glad to chat.\n\nRich\nEverlight Ventures\nhammer@everlightventures.io",
         "touch2": "Hi {first_name},\n\nFollowing up about {address}. I know dealing with an inherited property can be overwhelming on top of everything else. I can take it off your plate quickly and simply.\n\nNo pressure. Just reply if you want to talk options.\n\nRich\nEverlight Ventures",
         "touch3": "Hi {first_name},\n\nLast note about {address}. Whenever you are ready -- whether that is now or months from now -- my offer to buy the property as-is stands. Just reply to this email.\n\nWishing you well.\n\nRich\nEverlight Ventures",
     },
     "vacant": {
-        "touch1": "Hi {first_name},\n\nI noticed your property at {address}, {city} appears to be vacant. I know an empty property still costs money every month -- insurance, taxes, maintenance, liability.\n\nI buy vacant properties for cash and close fast. No repairs, no cleanup, no agents. Just a check and one less thing to worry about.\n\nWould you like to hear an offer?\n\nRich\nEverlight Ventures\nrich@everlightventures.io",
+        "touch1": "Hi {first_name},\n\nI noticed your property at {address}, {city} appears to be vacant. I know an empty property still costs money every month -- insurance, taxes, maintenance, liability.\n\nI buy vacant properties for cash and close fast. No repairs, no cleanup, no agents. Just a check and one less thing to worry about.\n\nWould you like to hear an offer?\n\nRich\nEverlight Ventures\nhammer@everlightventures.io",
         "touch2": "Hi {first_name},\n\nFollowing up on {address}. Every month that property sits empty is another month of carrying costs with zero return. I can turn it into cash for you this month.\n\nJust reply and I will send a number.\n\nRich\nEverlight Ventures",
         "touch3": "Hi {first_name},\n\nLast check-in about {address}. If you have plans for the property, great. If not, my cash offer still stands. No rush, but the offer is here whenever you are ready.\n\nRich\nEverlight Ventures",
     },
     "absentee": {
-        "touch1": "Hi {first_name},\n\nI am reaching out about your property at {address}, {city}. Managing a property from a distance is not easy -- tenant issues, repair calls, finding contractors you trust from far away.\n\nI buy rental properties for cash, as-is. No fixing up, no vacancy risk, no more late-night calls. Just a clean sale and a check.\n\nWould that be worth a conversation?\n\nRich\nEverlight Ventures\nrich@everlightventures.io",
+        "touch1": "Hi {first_name},\n\nI am reaching out about your property at {address}, {city}. Managing a property from a distance is not easy -- tenant issues, repair calls, finding contractors you trust from far away.\n\nI buy rental properties for cash, as-is. No fixing up, no vacancy risk, no more late-night calls. Just a clean sale and a check.\n\nWould that be worth a conversation?\n\nRich\nEverlight Ventures\nhammer@everlightventures.io",
         "touch2": "Hi {first_name},\n\nFollowing up on {address}. If managing that property remotely has become more trouble than it is worth, I can take it off your hands quickly. Cash, as-is, I handle the paperwork.\n\nJust reply.\n\nRich\nEverlight Ventures",
         "touch3": "Hi {first_name},\n\nLast note about {address}. If you ever decide to sell, I am still buying in {city} and can move fast. Just reply to this email anytime.\n\nRich\nEverlight Ventures",
     },
     "divorce": {
-        "touch1": "Hi {first_name},\n\nI understand you may need to sell the property at {address}, {city} quickly. I specialize in fast, clean closings -- cash, no contingencies, close in 7-14 days.\n\nIf a quick sale would help simplify things, I would be happy to make an offer.\n\nRich\nEverlight Ventures\nrich@everlightventures.io",
+        "touch1": "Hi {first_name},\n\nI understand you may need to sell the property at {address}, {city} quickly. I specialize in fast, clean closings -- cash, no contingencies, close in 7-14 days.\n\nIf a quick sale would help simplify things, I would be happy to make an offer.\n\nRich\nEverlight Ventures\nhammer@everlightventures.io",
         "touch2": "Hi {first_name},\n\nFollowing up on {address}. I can close fast and keep things simple. Cash offer, no showings, no drawn-out process. Reply if you want a number.\n\nRich\nEverlight Ventures",
         "touch3": "Hi {first_name},\n\nLast note about {address}. My offer stands whenever you are ready. Reply anytime.\n\nRich\nEverlight Ventures",
     },
     "expired_listing": {
-        "touch1": "Hi {first_name},\n\nI saw that your property at {address}, {city} was on the market recently but did not sell. That is frustrating -- especially after months of showings and waiting.\n\nI am a different kind of buyer. I pay cash, close in 7-14 days, and buy as-is. No more showings, no more waiting, no more agent fees.\n\nWant to hear what I would offer?\n\nRich\nEverlight Ventures\nrich@everlightventures.io",
+        "touch1": "Hi {first_name},\n\nI saw that your property at {address}, {city} was on the market recently but did not sell. That is frustrating -- especially after months of showings and waiting.\n\nI am a different kind of buyer. I pay cash, close in 7-14 days, and buy as-is. No more showings, no more waiting, no more agent fees.\n\nWant to hear what I would offer?\n\nRich\nEverlight Ventures\nhammer@everlightventures.io",
         "touch2": "Hi {first_name},\n\nFollowing up on {address}. The market did not deliver at list price, but that does not mean the property is not valuable. I am a cash buyer and I see the potential.\n\nReply and I will send you a number today.\n\nRich\nEverlight Ventures",
         "touch3": "Hi {first_name},\n\nLast check-in about {address}. If you relist it, great. If you want a fast cash sale instead, my offer is here. Just reply.\n\nRich\nEverlight Ventures",
     },
@@ -144,7 +144,7 @@ PAIN_TEMPLATES = {
 
 # Default templates for lead types not in the pain library
 DEFAULT_TEMPLATES = {
-    "touch1": "Hi {first_name},\n\nI am reaching out about your property at {address}, {city}, {state}. I buy properties for cash and can close in 7-14 days -- no repairs, no commissions, no hassle.\n\nWould you be open to hearing an offer?\n\nRich\nEverlight Ventures\nrich@everlightventures.io",
+    "touch1": "Hi {first_name},\n\nI am reaching out about your property at {address}, {city}, {state}. I buy properties for cash and can close in 7-14 days -- no repairs, no commissions, no hassle.\n\nWould you be open to hearing an offer?\n\nRich\nEverlight Ventures\nhammer@everlightventures.io",
     "touch2": "Hi {first_name},\n\nFollowing up on my note about {address}. I am still interested in making a cash offer if you are open to it.\n\nNo pressure -- just reply whenever works.\n\nRich\nEverlight Ventures",
     "touch3": "Hi {first_name},\n\nLast check-in about {address}. Cash offer still stands. Reply anytime.\n\nRich\nEverlight Ventures",
 }

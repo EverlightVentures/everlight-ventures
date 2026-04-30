@@ -17,61 +17,8 @@ import { useRouter } from "next/navigation";
 import Sidebar from "@/components/layout/Sidebar";
 import { getHiveSession, startHiveSession } from "@/lib/api";
 import { cn, getAgentColor, getStatusBadgeClass, getStatusLabel, getPulseDotClass } from "@/lib/utils";
+import { MOCK_AGENTS as AGENTS } from "@/lib/mock-agents";
 import type { Agent, AgentId, HiveLogEntry } from "@/types";
-
-// ============================================================
-// Mock data
-// ============================================================
-const AGENTS: Agent[] = [
-  {
-    id: "claude",
-    name: "Claude",
-    role: "Strategic Advisor",
-    status: "active",
-    currentTask: "Analyzing Q4 revenue trends and drafting executive narrative",
-    tokensUsed: 14820,
-    tokensLimit: 100000,
-    responseTime: 1240,
-    color: "#F59E0B",
-    accentColor: "#FCD34D",
-  },
-  {
-    id: "gemini",
-    name: "Gemini",
-    role: "Research Engine",
-    status: "thinking",
-    currentTask: "Running competitive pricing analysis across 12 SaaS benchmarks",
-    tokensUsed: 8430,
-    tokensLimit: 100000,
-    responseTime: 980,
-    color: "#3B82F6",
-    accentColor: "#60A5FA",
-  },
-  {
-    id: "codex",
-    name: "Codex",
-    role: "Automation Builder",
-    status: "active",
-    currentTask: "Writing Slack digest workflow script for #sales-updates",
-    tokensUsed: 5200,
-    tokensLimit: 100000,
-    responseTime: 760,
-    color: "#10B981",
-    accentColor: "#34D399",
-  },
-  {
-    id: "perplexity",
-    name: "Perplexity",
-    role: "Live Researcher",
-    status: "idle",
-    currentTask: null,
-    tokensUsed: 2100,
-    tokensLimit: 100000,
-    responseTime: 1820,
-    color: "#7C3AED",
-    accentColor: "#A78BFA",
-  },
-];
 
 const MOCK_LOG: HiveLogEntry[] = [
   {
@@ -351,7 +298,7 @@ export default function WarRoomPage() {
             timestamp: new Date(session.started_at),
             tokens: 0,
           },
-          ...(session.results ?? []).map((result: any, index: number) => ({
+          ...(session.results ?? []).map((result: Record<string, unknown>, index: number) => ({
             id: `${session.session_id}-${result.agent}-${index}`,
             sessionId: session.session_id,
             agentId: result.agent as AgentId,

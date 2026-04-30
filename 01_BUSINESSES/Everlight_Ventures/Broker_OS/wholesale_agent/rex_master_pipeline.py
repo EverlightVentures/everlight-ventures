@@ -34,6 +34,9 @@ try:
 except ImportError:
     publish_report = None
 
+# Create log dir BEFORE attaching FileHandler (handler opens the file eagerly).
+(AGENT_DIR / "logs").mkdir(parents=True, exist_ok=True)
+
 logging.basicConfig(
     level=logging.INFO,
     format="[Rex Pipeline %(asctime)s] %(message)s",
@@ -44,9 +47,6 @@ logging.basicConfig(
     ],
 )
 log = logging.getLogger("rex_pipeline")
-
-# Ensure log dir exists
-(AGENT_DIR / "logs").mkdir(parents=True, exist_ok=True)
 
 TODAY = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
@@ -94,6 +94,119 @@ def log_blinko(summary: str, details: str = ""):
         pass
 
 
+# ===== LANE ROUTING =====
+# Each lane maps to: scout module, offer strategy, playbook path.
+# Keep this in sync with supabase migration 20260422_wholesale_lanes.sql.
+# When `active=False`, the phase_lane() dispatcher skips the lane entirely.
+ROUTE_TABLE = {
+    "L1": {
+        "name": "Code violations / tired landlords",
+        "scout_module": "rex_distress_finder",
+        "offer_strategy": "seventy_rule",
+        "playbook": "../../../01_BUSINESSES/Everlight_Ventures/Wholesale/offers/L1_code_violation.md",
+        "active": False,
+    },
+    "L2": {
+        "name": "Pre-foreclosure assignment",
+        "scout_module": "rex_zillow_keyword_scraper",
+        "offer_strategy": "balance_assignment",
+        "playbook": "../../../01_BUSINESSES/Everlight_Ventures/Wholesale/offers/L2_preforeclosure_assignment.md",
+        "active": True,
+    },
+    "L3": {
+        "name": "Probate",
+        "scout_module": "rex_probate_scout",
+        "offer_strategy": "seventy_rule",
+        "playbook": "../../../01_BUSINESSES/Everlight_Ventures/Wholesale/offers/L3_probate.md",
+        "active": False,
+    },
+    "L4": {
+        "name": "Tax delinquency",
+        "scout_module": "rex_tax_delinquency_scout",
+        "offer_strategy": "seventy_rule",
+        "playbook": "../../../01_BUSINESSES/Everlight_Ventures/Wholesale/offers/L4_tax_delinquency.md",
+        "active": False,
+    },
+    "L5": {
+        "name": "Vacant / absentee owner",
+        "scout_module": "rex_zillow_keyword_scraper",
+        "offer_strategy": "balance_assignment",
+        "playbook": "../../../01_BUSINESSES/Everlight_Ventures/Wholesale/offers/L5_vacant_absentee.md",
+        "active": False,
+    },
+    "L6": {
+        "name": "Teardown hunt",
+        "scout_module": "rex_teardown_finder",
+        "offer_strategy": "teardown_80pct",
+        "playbook": "../../../01_BUSINESSES/Everlight_Ventures/Wholesale/offers/L6_teardown_hunt.md",
+        "active": False,
+    },
+}
+
+VALID_SCOUT_MODULES = {v["scout_module"] for v in ROUTE_TABLE.values()}
+
+
+def phase_lane(lane_code: str, dry_run: bool = False):
+    """Dispatch a single lane's daily cycle.
+
+    Separate from phase_morning/followup/reengage so existing cron behavior is
+    untouched. Once a lane is proven, its call can be folded into phase_morning
+    (or kept separate if we want lane-by-lane dispatch for scaling).
+    """
+    lane = ROUTE_TABLE.get(lane_code.upper())
+    if not lane:
+        log.error(f"Unknown lane: {lane_code}. Valid: {list(ROUTE_TABLE.keys())}")
+        return
+    if not lane["active"]:
+        log.info(f"Lane {lane_code} is not active yet. Skipping.")
+        return
+
+    log.info("=" * 60)
+    log.info(f"LANE {lane_code} -- {lane['name']}")
+    log.info(f"  scout={lane['scout_module']} offer_strategy={lane['offer_strategy']}")
+    log.info("=" * 60)
+
+    scout_module = lane["scout_module"]
+    if scout_module not in VALID_SCOUT_MODULES:
+        log.error(f"Scout module {scout_module} not in allowlist. Refusing to dispatch.")
+        return
+
+    try:
+        mod = __import__(scout_module)
+    except ImportError as e:
+        log.error(f"Lane {lane_code} scout module {scout_module} not importable: {e}")
+        return
+
+    if hasattr(mod, "run_lane"):
+        try:
+            result = mod.run_lane(dry_run=dry_run)
+            log.info(f"Lane {lane_code} scout result: {result}")
+        except Exception as e:
+            log.error(f"Lane {lane_code} scout raised: {e}")
+            post_slack(f"*Rex Lane {lane_code} ERROR* -- scout {scout_module} raised: {e}")
+            return
+    else:
+        log.warning(f"Lane {lane_code} scout {scout_module} has no run_lane() -- invoking as script")
+        import subprocess
+        script_path = AGENT_DIR / f"{scout_module}.py"
+        if not script_path.exists():
+            log.error(f"Scout script not found: {script_path}")
+            return
+        try:
+            subprocess.run(
+                ["python3", str(script_path)],
+                cwd=str(AGENT_DIR),
+                timeout=600,
+                check=False,
+            )
+        except subprocess.TimeoutExpired:
+            log.error(f"Scout {scout_module} timed out after 600s")
+            return
+
+    post_slack(f"*Rex Lane {lane_code} Complete* -- {lane['name']} ({TODAY})")
+    log_blinko(f"Lane {lane_code} run {TODAY}", f"{lane['name']} -- scout {scout_module}")
+
+
 # ===== PHASE 1: MORNING -- Scout + Score + Outreach + Buyer Blast =====
 
 def phase_morning():
@@ -118,12 +231,31 @@ def phase_morning():
     except ImportError:
         # SDR might not have run_fresh_outreach as a function, run it directly
         log.info("Running SDR as standalone...")
-        os.system(f"cd {AGENT_DIR} && python3 rex_sdr.py --mode fresh 2>&1 | tail -20")
+        import subprocess
+        sdr_path = AGENT_DIR / "rex_sdr.py"
+        if sdr_path.exists():
+            try:
+                subprocess.run(["python3", str(sdr_path), "--mode", "fresh"],
+                               cwd=str(AGENT_DIR), timeout=600, check=False)
+            except subprocess.TimeoutExpired:
+                log.error("rex_sdr.py timed out after 600s")
     except Exception as e:
         log.warning(f"SDR fresh outreach error: {e}")
 
-    post_slack(f"*Rex Morning Pipeline Complete* -- {TODAY}\nScout + Score + Outreach + Buyer Blast done.")
-    log_blinko(f"Morning pipeline {TODAY}", "Scouted leads, scored, sent seller outreach, blasted buyers.")
+    # Creative finance stream: Rex Batch Offers sends subject-to / owner-finance /
+    # lease-option letters to any leads in `apify_leads.json` or `surplus_leads.json`.
+    # Gated by daily cap (50 sends/day) and per-address dedup inside rex_batch_offers.
+    try:
+        from rex_batch_offers import run_batch
+        batch_result = run_batch(dry_run=False, offer_type="subject_to")
+        log.info(f"Creative finance batch: {batch_result}")
+    except ImportError:
+        log.debug("rex_batch_offers not importable -- skipping creative finance stream")
+    except Exception as e:
+        log.warning(f"Creative finance batch error: {e}")
+
+    post_slack(f"*Rex Morning Pipeline Complete* -- {TODAY}\nScout + Score + Outreach + Buyer Blast + Creative Finance done.")
+    log_blinko(f"Morning pipeline {TODAY}", "Scouted leads, scored, sent seller outreach, blasted buyers, ran creative finance batch.")
 
 
 # ===== PHASE 2: MIDDAY -- Follow-up sequences =====
@@ -231,7 +363,13 @@ def retry_dead_letters():
 def main():
     parser = argparse.ArgumentParser(description="Rex Master Pipeline")
     parser.add_argument("--phase", default="morning", choices=["morning", "followup", "reengage", "all"])
+    parser.add_argument("--lane", default="", help="Run a single lane (L1-L6). Overrides --phase when set.")
+    parser.add_argument("--dry-run", action="store_true", help="Preview without sending or writing.")
     args = parser.parse_args()
+
+    if args.lane:
+        phase_lane(args.lane, dry_run=args.dry_run)
+        return
 
     if args.phase == "morning":
         phase_morning()

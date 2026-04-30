@@ -23,6 +23,13 @@ from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timezone
 from pathlib import Path
 
+
+# --- Owner directive 2026-04-23: test scripts that email owner are gated ---
+import os as _os, sys as _sys
+if _os.environ.get("HIVE_EMAIL_TEST_ENABLED") != "1":
+    print("hive_email_test gated -- set HIVE_EMAIL_TEST_ENABLED=1 to run (owner policy)", file=_sys.stderr)
+    _sys.exit(0)
+
 # Paths
 CONFIG_PATH = "/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/hive_mind/email_config.yaml"
 REPORT_PATH = "/mnt/sdcard/AA_MY_DRIVE/09_DASHBOARD/reports/hive_email_test_report.json"

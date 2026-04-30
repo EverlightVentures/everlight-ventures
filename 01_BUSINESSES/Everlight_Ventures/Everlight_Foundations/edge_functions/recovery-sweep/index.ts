@@ -5,41 +5,9 @@
 
 import Stripe from "https://esm.sh/stripe@14.21.0?target=deno";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { SUPABASE_URL, corsHeaders, postSlack, EBOOK_FILE_MAP } from "../_shared/mod.ts";
 
-const SUPABASE_URL = "https://jdqqmsmwmbsnlnstyavl.supabase.co";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
-
-const FILE_MAP: Record<string, string> = {
-  "sam-book-1": "sam-book-1/Sams_First_Superpower.zip",
-  "sam-book-2": "sam-book-2/Sams_Second_Superpower.zip",
-  "sam-book-3": "sam-book-3/Sams_Third_Superpower.zip",
-  "sam-book-4": "sam-book-4/Sams_Fourth_Superpower.zip",
-  "sam-book-5": "sam-book-5/Sams_Fifth_Superpower.zip",
-  "sam-bundle": "sam-bundle/Sam_And_Robo_Complete.zip",
-  "beyond-the-veil": "beyond-the-veil/Beyond_The_Veil.zip",
-};
-
-// Bonus book to include with recovery emails (free gift)
 const BONUS_SLUG = "sam-book-2";
-
-async function postSlack(text: string): Promise<void> {
-  const url = Deno.env.get("SLACK_WEBHOOK_URL");
-  if (!url) return;
-  try {
-    await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text }),
-    });
-  } catch (e) {
-    console.error("Slack failed:", e);
-  }
-}
 
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
@@ -76,7 +44,7 @@ Deno.serve(async (req: Request) => {
       const email = session.customer_details?.email;
 
       // Only process ebook purchases
-      if (!slug || productType !== "ebook" || !email || !FILE_MAP[slug]) {
+      if (!slug || productType !== "ebook" || !email || !EBOOK_FILE_MAP[slug]) {
         skipped++;
         continue;
       }
@@ -107,7 +75,7 @@ Deno.serve(async (req: Request) => {
       });
 
       // 2. Generate download link (7-day expiry for recovery)
-      const filePath = FILE_MAP[slug];
+      const filePath = EBOOK_FILE_MAP[slug];
       const { data: signedData } = await supabaseAdmin.storage
         .from("Ebooks")
         .createSignedUrl(filePath, 604800); // 7 days
@@ -118,7 +86,7 @@ Deno.serve(async (req: Request) => {
       }
 
       // 3. Generate bonus book link
-      const bonusPath = FILE_MAP[BONUS_SLUG];
+      const bonusPath = EBOOK_FILE_MAP[BONUS_SLUG];
       const { data: bonusData } = await supabaseAdmin.storage
         .from("Ebooks")
         .createSignedUrl(bonusPath, 604800);
@@ -165,11 +133,11 @@ Deno.serve(async (req: Request) => {
       JSON.stringify({ summary, recovered, alreadyFulfilled, skipped, results }),
       { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("recovery-sweep error:", err);
-    await postSlack(`Recovery sweep ERROR: ${err.message}`);
+    await postSlack(`Recovery sweep ERROR: ${(err as Error).message}`);
     return new Response(
-      JSON.stringify({ error: err.message ?? "Internal server error" }),
+      JSON.stringify({ error: (err as Error).message ?? "Internal server error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

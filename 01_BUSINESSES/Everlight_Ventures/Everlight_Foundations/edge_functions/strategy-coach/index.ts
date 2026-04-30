@@ -2,18 +2,7 @@
 // Static chart lookups for analyze-hand + get-tip (free, instant, accurate)
 // OpenAI GPT-4o-mini for freeform ask (cheap, conversational)
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
-
-function json(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
-}
+import { corsHeaders, json } from "../_shared/mod.ts";
 
 // --- EMBEDDED STRATEGY DATA (from blackjack_strategy_data.json) ---
 const STRATEGY: Record<string, DeckStrategy> = {
@@ -627,9 +616,9 @@ async function callPerplexity(
     const text = data.choices?.[0]?.message?.content ?? "";
     const citations = data.citations ?? [];
     return { content: text, citations };
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("Perplexity API fetch error:", err);
-    return { content: "", error: err.message ?? "Failed to reach Perplexity API" };
+    return { content: "", error: (err as Error).message ?? "Failed to reach Perplexity API" };
   }
 }
 
@@ -696,8 +685,8 @@ Deno.serve(async (req: Request) => {
           error: `Unknown action: ${action}. Valid actions: ask, analyze-hand, get-tip, chart-lookup`
         }, 400);
     }
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("strategy-coach error:", err);
-    return json({ error: err.message ?? "Internal server error" }, 500);
+    return json({ error: (err as Error).message ?? "Internal server error" }, 500);
   }
 });

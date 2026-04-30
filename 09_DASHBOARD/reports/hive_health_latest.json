@@ -1,75 +1,75 @@
 {
-  "generated_at": "2026-03-21T23:45:00Z",
-  "generated_at_pt": "4:45 PM PT",
+  "generated_at": "2026-04-25T07:35:21Z",
+  "generated_at_pt": "12:35 AM PT",
   "checks": [
     {
       "name": "Slack",
       "status": "fail",
-      "message": "Slack webhook returned HTTP -1: HTTP Error 400: Bad Request",
+      "message": "Slack webhook returned HTTP -1: HTTP Error 404: Not Found",
       "auto_fixed": false,
-      "checked_at": "2026-03-21T23:44:59Z"
+      "checked_at": "2026-04-25T07:35:01Z"
     },
     {
-      "name": "Resend",
+      "name": "XLM Bot",
       "status": "fail",
-      "message": "Resend API key invalid/expired",
+      "message": "Restart failed -- xlm-bot.service not active: Connection timed out during banner exchange\nConnection to 163.192.19.196 port 22 timed out",
       "auto_fixed": false,
-      "checked_at": "2026-03-21T23:44:59Z"
-    },
-    {
-      "name": "Blinko",
-      "status": "warn",
-      "message": "Blinko not running, BlinkoLite fallback failed",
-      "auto_fixed": false,
-      "checked_at": "2026-03-21T23:44:59Z"
+      "checked_at": "2026-04-25T07:35:21Z"
     },
     {
       "name": "Google Docs",
       "status": "warn",
       "message": "Google Docs webhook returned HTTP -1: HTTP Error 404: Not Found",
       "auto_fixed": false,
-      "checked_at": "2026-03-21T23:44:59Z"
+      "checked_at": "2026-04-25T07:35:01Z"
     },
     {
-      "name": "n8n Tunnel",
+      "name": "Blinko",
       "status": "ok",
-      "message": "Tunnel process alive (PID 27229)",
+      "message": "Blinko healthy",
       "auto_fixed": false,
-      "checked_at": "2026-03-21T23:44:59Z"
-    },
-    {
-      "name": "ImprovMX",
-      "status": "ok",
-      "message": "MX records point to ImprovMX",
-      "auto_fixed": false,
-      "checked_at": "2026-03-21T23:44:59Z"
-    },
-    {
-      "name": "Pipeline",
-      "status": "ok",
-      "message": "Last run 2.7h ago",
-      "auto_fixed": false,
-      "checked_at": "2026-03-21T23:44:59Z"
+      "checked_at": "2026-04-25T07:35:01Z"
     },
     {
       "name": "n8n",
       "status": "ok",
       "message": "n8n healthy (Oracle E5)",
       "auto_fixed": false,
-      "checked_at": "2026-03-21T23:44:59Z"
+      "checked_at": "2026-04-25T07:35:01Z"
     },
     {
-      "name": "XLM Bot",
+      "name": "ImprovMX",
       "status": "ok",
-      "message": "xlm-bot.service active (Oracle Micro)",
+      "message": "MX records point to ImprovMX",
       "auto_fixed": false,
-      "checked_at": "2026-03-21T23:45:00Z"
+      "checked_at": "2026-04-25T07:35:01Z"
+    },
+    {
+      "name": "Pipeline",
+      "status": "ok",
+      "message": "Last run 0.6h ago",
+      "auto_fixed": false,
+      "checked_at": "2026-04-25T07:35:01Z"
+    },
+    {
+      "name": "n8n Tunnel",
+      "status": "ok",
+      "message": "Tunnel process alive (PID 9657)",
+      "auto_fixed": false,
+      "checked_at": "2026-04-25T07:35:01Z"
+    },
+    {
+      "name": "Resend",
+      "status": "ok",
+      "message": "Resend API key valid, can send",
+      "auto_fixed": false,
+      "checked_at": "2026-04-25T07:35:01Z"
     }
   ],
   "summary": {
     "total": 9,
-    "ok": 5,
-    "warn": 2,
+    "ok": 6,
+    "warn": 1,
     "fail": 2,
     "auto_fixed": 0
   }

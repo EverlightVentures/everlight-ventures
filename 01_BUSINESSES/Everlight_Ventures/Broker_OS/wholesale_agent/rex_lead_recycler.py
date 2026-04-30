@@ -73,7 +73,7 @@ BELFORT_ANGLE_NEW_INVESTOR = {
         "body": (
             "Hey {first_name}, I recently started acquiring properties "
             "in {city}. Came across yours at {address}. Any interest in "
-            "a quick cash sale? - Rich"
+            "a quick cash sale? -- Piper"
         ),
     },
     1: {
@@ -92,9 +92,9 @@ BELFORT_ANGLE_NEW_INVESTOR = {
             "If you'd consider a no-obligation cash offer, just reply "
             "and I'll have a number for you today.\n\n"
             "Best,\n"
-            "Rich Gee\n"
+            "Piper Reeves\n"
             "Everlight Ventures | Private Acquisitions\n"
-            "rich@everlightventures.io\n\n"
+            "piper@everlightventures.io\n\n"
             "Not interested? Reply STOP and I will remove you immediately."
         ),
     },
@@ -105,7 +105,7 @@ BELFORT_ANGLE_NEW_INVESTOR = {
         "body": (
             "Hey {first_name}, following up on {address}. I'm closing "
             "on two other properties in {city} this week. Would love to "
-            "add yours. Quick chat? - Rich"
+            "add yours. Quick chat? -- Piper"
         ),
     },
     3: {
@@ -124,9 +124,9 @@ BELFORT_ANGLE_NEW_INVESTOR = {
             "Just reply \"interested\" and I'll send a written offer "
             "within the hour.\n\n"
             "Best,\n"
-            "Rich Gee\n"
+            "Piper Reeves\n"
             "Everlight Ventures | Private Acquisitions\n"
-            "rich@everlightventures.io"
+            "piper@everlightventures.io"
         ),
     },
     4: {
@@ -136,7 +136,7 @@ BELFORT_ANGLE_NEW_INVESTOR = {
         "body": (
             "{first_name} -- wrapping up my {city} acquisitions this "
             "week. Still have room for {address} if you're open to it. "
-            "Cash, your timeline. - Rich"
+            "Cash, your timeline. -- Piper"
         ),
     },
     5: {
@@ -153,7 +153,7 @@ BELFORT_ANGLE_NEW_INVESTOR = {
             "Reply anytime if you'd like to revisit this down the "
             "road.\n\n"
             "Respectfully,\n"
-            "Rich Gee\n"
+            "Piper Reeves\n"
             "Everlight Ventures\n\n"
             "Reply STOP to opt out."
         ),
@@ -164,8 +164,8 @@ BELFORT_ANGLE_NEW_INVESTOR = {
         "subject": "Last note -- {address}",
         "body": (
             "{first_name}, closing my file on {address}. If you ever "
-            "want a cash offer, I'm here -- rich@everlightventures.io. "
-            "Best of luck. - Rich"
+            "want a cash offer, I'm here -- piper@everlightventures.io. "
+            "Best of luck. -- Piper"
         ),
     },
 }
@@ -202,9 +202,9 @@ BELFORT_ANGLE_MARKET_UPDATE = {
             "Just reply and I'll have an updated offer for you "
             "within 24 hours.\n\n"
             "Best,\n"
-            "Rich Gee\n"
+            "Piper Reeves\n"
             "Everlight Ventures | Private Acquisitions\n"
-            "rich@everlightventures.io\n\n"
+            "piper@everlightventures.io\n\n"
             "Not interested? Reply STOP and I will remove you immediately."
         ),
     },
@@ -215,7 +215,7 @@ BELFORT_ANGLE_MARKET_UPDATE = {
         "body": (
             "Hey {first_name}, sent you a market update on {address} "
             "yesterday. Comparable sales in {zip_code} have moved. "
-            "Worth a quick look? - Rich"
+            "Worth a quick look? -- Piper"
         ),
     },
     3: {
@@ -232,9 +232,9 @@ BELFORT_ANGLE_MARKET_UPDATE = {
             "sale, just reply and I'll share what I found.\n\n"
             "No obligation, no pressure -- just data.\n\n"
             "Best,\n"
-            "Rich Gee\n"
+            "Piper Reeves\n"
             "Everlight Ventures | Private Acquisitions\n"
-            "rich@everlightventures.io"
+            "piper@everlightventures.io"
         ),
     },
     4: {
@@ -244,7 +244,7 @@ BELFORT_ANGLE_MARKET_UPDATE = {
         "body": (
             "{first_name} -- market window for {zip_code} is open "
             "right now. I've got updated numbers for {address} if "
-            "you want to see them. No strings. - Rich"
+            "you want to see them. No strings. -- Piper"
         ),
     },
     5: {
@@ -262,7 +262,7 @@ BELFORT_ANGLE_MARKET_UPDATE = {
             "for future updates.\n\n"
             "Otherwise, no worries at all. Wishing you well.\n\n"
             "Respectfully,\n"
-            "Rich Gee\n"
+            "Piper Reeves\n"
             "Everlight Ventures\n\n"
             "Reply STOP to opt out."
         ),
@@ -274,7 +274,7 @@ BELFORT_ANGLE_MARKET_UPDATE = {
         "body": (
             "{first_name}, wrapping up my market review for "
             "{zip_code}. Door's always open if you want an updated "
-            "offer -- rich@everlightventures.io. All the best. - Rich"
+            "offer -- piper@everlightventures.io. All the best. -- Piper"
         ),
     },
 }
