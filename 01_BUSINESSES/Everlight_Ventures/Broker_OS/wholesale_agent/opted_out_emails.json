@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "email": "dave@municipalfirm.com",
+    "name": "DAVID A STREUBEL",
+    "property_address": "4435 WESTMINSTER PL, SAINT LOUIS, MO 63108",
+    "opted_out_at": "2026-05-05T00:54:28Z",
+    "reason": "User-directed eradication; subject threatening BBB complaint after replying 'no'",
+    "source": "operator_explicit_2026-05-04",
+    "lead_id": "leg_afee1a472d"
+  }
+]

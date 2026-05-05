@@ -1,0 +1,30 @@
+{
+  "timestamp_utc": "2026-05-05T00:54:28Z",
+  "action": "DO_NOT_CONTACT_ERADICATION",
+  "subject": {
+    "owner_name": "DAVID A STREUBEL",
+    "email": "dave@municipalfirm.com",
+    "property": "4435 WESTMINSTER PL, SAINT LOUIS, MO 63108",
+    "lead_id": "leg_afee1a472d"
+  },
+  "reason": "Owner replied 'no' to outreach; system failed to register opt-out (INBOUND_WATCH_GAPS_2026-04-26 root cause); subject threatening BBB complaint",
+  "operator_directive": "User explicit instruction 2026-05-04: delete property and never contact again",
+  "files_modified": [
+    "01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/leads_db.json",
+    "01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/opted_out_emails.json",
+    "01_BUSINESSES/Everlight_Ventures/Wholesale/compliance/dnc_list.json"
+  ],
+  "records_removed": 1,
+  "backups_created": [
+    "01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/leads_db.json.bak.streubel-eradication",
+    "01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/opted_out_emails.json.bak.streubel-eradication"
+  ],
+  "errors": [],
+  "sweep_wave_1a": [
+    {
+      "file": "01_BUSINESSES/Everlight_Ventures/Wholesale/prospecting/MO_prospects.csv",
+      "type": "text",
+      "removed_count": 1
+    }
+  ]
+}

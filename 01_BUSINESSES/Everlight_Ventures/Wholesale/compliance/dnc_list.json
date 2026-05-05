@@ -1,0 +1,30 @@
+[
+  {
+    "id": "dnc_streubel_2026-05-04",
+    "added_utc": "2026-05-05T00:54:28Z",
+    "name": "DAVID A STREUBEL",
+    "email": "dave@municipalfirm.com",
+    "phone": null,
+    "property_addresses": [
+      "4435 WESTMINSTER PL, SAINT LOUIS, MO 63108"
+    ],
+    "blocked_channels": [
+      "email",
+      "sms",
+      "phone",
+      "mail",
+      "all"
+    ],
+    "reason": "Subject replied 'no' to outreach; threatening BBB complaint; user-directed permanent eradication",
+    "evidence": {
+      "outreach_count_at_eradication": 2,
+      "last_outreach": "2026-04-24T04:55:48.288094+00:00",
+      "messages_sent": [
+        "sms 2026-04-24T00:55",
+        "email 2026-04-24T04:55"
+      ],
+      "user_directive": "User: 'David Ateubel (sic, STREUBEL) and his property need to be deleted and never contacted again. He's about to file a complaint with BBB. I told u to stop the first time he replied no.'"
+    },
+    "do_not_contact": true
+  }
+]
