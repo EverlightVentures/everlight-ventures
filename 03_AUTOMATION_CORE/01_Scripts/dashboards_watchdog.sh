@@ -44,6 +44,8 @@ SERVICES=(
   "2302|/healthz|cd $ROOT/Everlight_Intel_Center && nohup python3 -m uvicorn osint_api.esign_server:app --host 127.0.0.1 --port 2302 > /tmp/svc_2302.log 2>&1 &|E-Sign + Signatures"
   "2400|/|cd $ROOT/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/prototype && nohup python3 $ROOT/03_AUTOMATION_CORE/01_Scripts/serve_helpers/everlight_themed_server.py 2400 . 'Apps -- Alley Kingz' > /tmp/svc_2400.log 2>&1 &|Apps"
   "2500|/|cd $ROOT/05_PERSONAL/02_Training/MMA_Notebook/Fight_Camp_OS && nohup python3 $ROOT/03_AUTOMATION_CORE/01_Scripts/serve_helpers/everlight_themed_server.py 2500 . 'MMA Fight Camp' > /tmp/svc_2500.log 2>&1 &|Health (MMA)"
+  "2700|/health|cd $ROOT && BLINKO_PORT=2700 nohup python3 06_DEVELOPMENT/everlight_os/blinko/blinko_lite.py > /tmp/svc_2700.log 2>&1 &|Blinko RAG"
+  "2701|/healthz|cd $ROOT && BLINKO_URL=http://127.0.0.1:2700 nohup python3 -m uvicorn 06_DEVELOPMENT.mcp_servers.http_bridge:app --host 127.0.0.1 --port 2701 > /tmp/svc_2701.log 2>&1 &|MCP HTTP Bridge"
 )
 
 # Pids of stale processes bound to a port we want

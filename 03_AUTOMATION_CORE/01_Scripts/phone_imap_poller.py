@@ -479,17 +479,54 @@ def watch_loop(interval_seconds: int = 120) -> None:
         time.sleep(interval_seconds)
 
 
+def healthcheck() -> int:
+    """Verify GMAIL_APP_PASSWORD auth works, without touching any mail.
+    Returns 0 = AUTH OK, 1 = NO PASSWORD, 2 = AUTH FAILED."""
+    if not GMAIL_PASS:
+        print("AUTH FAILED -- GMAIL_APP_PASSWORD not in env")
+        print("  Set per: 03_AUTOMATION_CORE/03_Credentials/.env")
+        print("  Or:    https://myaccount.google.com/apppasswords (16-char, no spaces)")
+        return 1
+    try:
+        m = imaplib.IMAP4_SSL(GMAIL_HOST)
+        m.login(GMAIL_USER, GMAIL_PASS)
+        rc, msg = m.select("INBOX", readonly=True)
+        m.logout()
+        if rc == "OK":
+            print(f"AUTH OK -- user={GMAIL_USER} host={GMAIL_HOST}")
+            try:
+                count = int(msg[0])
+                print(f"  INBOX message count: {count}")
+            except Exception:
+                pass
+            return 0
+        print(f"AUTH OK but INBOX SELECT failed: rc={rc}")
+        return 0
+    except imaplib.IMAP4.error as e:
+        print(f"AUTH FAILED -- {e}")
+        print("  If AUTHENTICATIONFAILED, the app password is wrong or revoked.")
+        print("  Rotate at https://myaccount.google.com/apppasswords")
+        return 2
+    except Exception as e:
+        print(f"AUTH FAILED -- {e}")
+        return 2
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--once", action="store_true", help="Poll once and exit")
     parser.add_argument("--watch", action="store_true", help="Continuous loop every 2 min")
     parser.add_argument("--dry-run", action="store_true", help="Detect but don't fire intake")
+    parser.add_argument("--healthcheck", action="store_true",
+                        help="Probe auth only; print AUTH OK or AUTH FAILED; exit. No mail touched.")
     parser.add_argument("--since-minutes", type=int, default=1440,
                         help="On --once, look back this many minutes (default 24h)")
     parser.add_argument("--interval", type=int, default=120,
                         help="Watch loop interval seconds (default 120)")
     args = parser.parse_args()
 
+    if args.healthcheck:
+        sys.exit(healthcheck())
     if args.watch:
         watch_loop(args.interval)
     elif args.once:

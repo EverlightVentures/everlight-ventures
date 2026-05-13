@@ -421,6 +421,20 @@ def c_assignment(deal_key: str) -> dict:
     from osint_api.esign_server import make_token
 
     m = load_deal_meta(deal_key)
+
+    # Memory rule: feedback_back_tax_escalation_rule.md
+    # Pause + alert if back tax exceeds 30% of our assignment fee; never send blind.
+    check = back_tax_escalation_check(m)
+    if not check["ok"]:
+        _post_back_tax_alert(deal_key, m, check)
+        log_event(deal_key=deal_key, event="escalation_to_operator",
+                  actor="Hammer Knox",
+                  counterparty=f"{m.get('buyer_name','Chris')} <{m.get('buyer_email','')}>",
+                  artifact_ref="back_tax_escalation_check",
+                  notes=check["reason"], statute_ref="INTERNAL_DOCTRINE")
+        return {"ok": False, "escalated": True, "check": check,
+                "error": "c_assignment paused for back-tax escalation; awaiting operator approval"}
+
     chris_pays = int(m.get("final_to_buyer", 13090))
     final_to_seller = int(m.get("final_to_seller", 9500))
     assignment_fee = chris_pays - final_to_seller
@@ -616,6 +630,86 @@ def should_escalate(deal_key: str, last_stage: str, reply_class: str, role: str 
     if next_step(deal_key, last_stage, reply_class, role) is None:
         return True
     return False
+
+
+# Memory rule: feedback_back_tax_escalation_rule.md
+# PSA Block 6 puts back tax on BUYER side, NOT Everlight. But >30% of fee triggers split flag.
+BACK_TAX_PCT_THRESHOLD = 0.30
+BACK_TAX_SPLIT_CAP_USD = 800  # we absorb up to $800 on a split, never more without Rich approval
+
+
+def back_tax_escalation_check(deal_meta: dict) -> dict:
+    """Decide whether back tax on a deal warrants a buyer-side split conversation.
+
+    Returns {ok: bool, reason: str, slack_alert: bool, suggested_split: int|None,
+             pct: float, back_tax: int, fee: int}.
+
+    ok=True means proceed straight to Chris assignment send.
+    ok=False means PAUSE -- Rich must respond in #war-room before c_assignment fires.
+    """
+    try:
+        back_tax = float(deal_meta.get("back_tax_estimate", 0) or 0)
+    except (TypeError, ValueError):
+        back_tax = 0.0
+    chris_pays = float(deal_meta.get("final_to_buyer", 0) or 0)
+    final_to_seller = float(deal_meta.get("final_to_seller", 0) or 0)
+    assignment_fee = chris_pays - final_to_seller
+    if assignment_fee <= 0:
+        return {
+            "ok": False,
+            "reason": "assignment fee is zero or negative (deal_meta missing final_to_buyer / final_to_seller)",
+            "slack_alert": True,
+            "suggested_split": None,
+            "pct": 0.0,
+            "back_tax": int(back_tax),
+            "fee": int(assignment_fee),
+        }
+    pct = back_tax / assignment_fee
+    if pct > BACK_TAX_PCT_THRESHOLD:
+        suggested = int(min(back_tax * 0.25, BACK_TAX_SPLIT_CAP_USD))
+        return {
+            "ok": False,
+            "reason": (
+                f"back tax ${back_tax:,.0f} is {pct*100:.0f}% of fee ${assignment_fee:,.0f} "
+                f"(threshold {BACK_TAX_PCT_THRESHOLD*100:.0f}%). Suggest split: Everlight absorbs "
+                f"${suggested:,}, Chris pays remainder. Operator must approve in war-room."
+            ),
+            "slack_alert": True,
+            "suggested_split": suggested,
+            "pct": pct,
+            "back_tax": int(back_tax),
+            "fee": int(assignment_fee),
+        }
+    return {
+        "ok": True,
+        "reason": f"back tax ${back_tax:,.0f} is {pct*100:.0f}% of fee ${assignment_fee:,.0f} -- within tolerance",
+        "slack_alert": False,
+        "suggested_split": None,
+        "pct": pct,
+        "back_tax": int(back_tax),
+        "fee": int(assignment_fee),
+    }
+
+
+def _post_back_tax_alert(deal_key: str, meta: dict, check: dict) -> None:
+    """Post a #war-room alert when back_tax_escalation_check fires."""
+    try:
+        sys.path.insert(0, str(ROOT / "03_AUTOMATION_CORE" / "01_Scripts" / "content_tools"))
+        from branded_slack import post_branded_alert  # noqa: E402
+        post_branded_alert(
+            channel="#war-room",
+            title=f"Back-tax escalation: {deal_key}",
+            detail=(
+                f"Deal: {meta.get('property_address', deal_key)}\n"
+                f"{check['reason']}\n\n"
+                f"c_assignment is PAUSED. Reply in this channel: APPROVE / SPLIT <usd> / WALK."
+            ),
+            severity="warning",
+            agent_name="Hammer Knox",
+            report_url=f"http://127.0.0.1:2200/reports/deals/{deal_key}/",
+        )
+    except Exception as e:  # branded_slack may be unavailable in test contexts
+        print(f"[back-tax alert] could not post to Slack: {e}", file=sys.stderr)
 
 
 # ---------- public API ----------

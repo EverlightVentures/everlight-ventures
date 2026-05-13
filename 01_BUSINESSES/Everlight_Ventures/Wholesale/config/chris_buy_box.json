@@ -1,0 +1,59 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "owner": "Chris @ Mid South Homebuyers",
+    "last_updated": "2026-05-13",
+    "source": "Existing CHRIS_BATCH_001_DRAFT.json filter, codified for daily_lead_pipeline.py. Rich to refine via Slack.",
+    "notes": "Placeholder zips list -- Rich confirms or replaces with Chris's actual 15. Default values keep the daily pipeline running on best-guess defaults; first-day run will flag the config status in #ft-hunters."
+  },
+  "geography": {
+    "state": "TN",
+    "county": "Shelby",
+    "metro": "Memphis",
+    "zips": [
+      "38103", "38104", "38105", "38106", "38107",
+      "38108", "38109", "38111", "38114", "38115",
+      "38116", "38117", "38122", "38127", "38128"
+    ]
+  },
+  "property": {
+    "property_class": ["RESIDENTIAL"],
+    "exclude_vacant_lot": true,
+    "min_year_built": 1900,
+    "max_year_built": 1985,
+    "min_appraisal_usd": 30000,
+    "max_appraisal_usd": 120000
+  },
+  "owner": {
+    "require_absentee": false,
+    "prefer_absentee": true,
+    "prefer_tax_delinquent": true
+  },
+  "back_tax": {
+    "min_usd": 0,
+    "max_usd": 5000,
+    "preferred_band_low": 1000,
+    "preferred_band_high": 2500
+  },
+  "exit": {
+    "buyer_name": "Chris",
+    "buyer_org": "Mid South Homebuyers",
+    "all_in_target_pct_of_appraisal": 0.55,
+    "min_margin_to_us_usd": 3000
+  },
+  "ranking": {
+    "use_rex_lead_scorer_v2": true,
+    "min_score_to_include": 30,
+    "tiers": {
+      "priority": 70,
+      "hot": 50,
+      "warm": 30
+    }
+  },
+  "daily_caps": {
+    "max_skip_traced_per_run": 100,
+    "max_intel_per_run": 50,
+    "max_pitched_per_run": 25,
+    "max_outreach_per_day": 100
+  }
+}
