@@ -1,0 +1,17 @@
+{
+  "deal_key": "test_self",
+  "property_address": "1536 S THIRD ST, MEMPHIS, TN",
+  "parcel_id": "035093 00032",
+  "seller_name": "Mikal L. Hakeem",
+  "seller_email": "mhakeem@timemphis.org",
+  "buyer_name": "Chris Ulander",
+  "buyer_email": "leads@midsouthhomebuyers.com",
+  "opening_to_seller": 6500,
+  "final_to_seller": 9500,
+  "opening_to_buyer": 14500,
+  "final_to_buyer": 13090,
+  "emd_usd": 250,
+  "gfad_usd": 1000,
+  "inspection_days": 14,
+  "test_mode": true
+}

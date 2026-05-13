@@ -1,0 +1,2414 @@
+#!/usr/bin/env python3
+"""
+intel -- Everlight Intel Center CLI
+Single entry point for the resource database. SQLite-backed.
+
+Usage:
+  intel                          # open the master HTML report (default)
+  intel dash                     # same -- explicit
+
+  # Browse / search
+  intel search <query>           # full-text search across name/domain/purpose
+  intel cat <category>           # list resources in a category (substring match)
+  intel agent <name>             # resources owned by an agent
+  intel review                   # show the review queue (unverified rows)
+  intel stats                    # category + agent breakdown
+
+  # Live data (fetchable categories only)
+  intel news                     # pull headlines from News & Journalism sources
+  intel weather                  # pull from Weather & Disaster Intel sources
+  intel space                    # pull from Space & Science sources
+  intel finance                  # pull from Trading & Finance sources
+  intel osint                    # pull from OSINT & Investigation sources
+  intel health                   # pull from Health & Environment sources
+  intel fetch <category-substr>  # pull from any fetchable category
+
+  # Per-source pull (live)
+  intel pull <domain>            # fetch ONE source -- RSS first, HTML scrape fallback. Caches results.
+  intel pull-all <category>      # batch pull every source in a category (parallel)
+  intel articles [query]         # search across cached articles (cross-source)
+  intel show <domain>            # show stored use_case + setup + cached articles for a source
+
+  # Activation (wires agents to their resources)
+  intel manifest                 # generate per-agent source manifests
+  intel wire                     # append Intel Center reference to all agent firmwares
+
+  # Maintenance
+  intel audit                    # grep workspace for usage of every resource
+  intel audit-report             # show the most recent audit results
+  intel audit-end-to-end         # full e2e: dashboard routes + OSINT API + article URLs + theme drift
+  intel audit-end-to-end --theme-only   # quick theme drift scan only
+  intel rebuild                  # re-run categorize-only (cached OCR)
+  intel rebuild-full             # re-run OCR + categorize (35 min)
+"""
+from __future__ import annotations
+
+import json
+import os
+import re
+import shutil
+import sqlite3
+import subprocess
+import sys
+import textwrap
+import time
+from datetime import datetime
+from pathlib import Path
+
+ROOT = Path("/mnt/sdcard/AA_MY_DRIVE/Everlight_Intel_Center")
+DB = ROOT / "database" / "everlight_resources.sqlite"
+HTML = ROOT / "guides" / "everlight_resources_master.html"
+WORKSPACE = Path("/mnt/sdcard/AA_MY_DRIVE")
+AUDIT_LOG = ROOT / "logs" / "audit_latest.json"
+
+# ANSI colors (gold/dark accents to mirror the brand)
+GOLD = "\033[38;5;179m"
+DIM = "\033[2m"
+BOLD = "\033[1m"
+RESET = "\033[0m"
+RED = "\033[31m"
+GREEN = "\033[32m"
+CYAN = "\033[36m"
+
+
+def header(text: str, n: int | None = None) -> None:
+    suffix = f" ({n})" if n is not None else ""
+    print(f"\n{GOLD}{BOLD}== {text}{suffix} =={RESET}")
+
+
+def fmt_row(domain: str, category: str, purpose: str, agent: str = "", status: str = "") -> str:
+    purpose = (purpose or "")[:65]
+    badge = ""
+    if status == "checked":
+        badge = f" {GREEN}[curated]{RESET}"
+    elif status == "auto":
+        badge = f" {DIM}[auto]{RESET}"
+    elif status == "unverified":
+        badge = f" {RED}[review]{RESET}"
+    return f"  {GOLD}{domain:<30}{RESET} {DIM}|{RESET} {category:<26} {DIM}|{RESET} {purpose}{badge}"
+
+
+def open_db() -> sqlite3.Connection:
+    if not DB.exists():
+        sys.exit(f"{RED}Database missing at {DB} -- run `intel rebuild-full` first.{RESET}")
+    return sqlite3.connect(DB)
+
+
+def cmd_dash(args: list[str]) -> None:
+    """Start the Intel dashboard on port 2300. Forwards args to serve.sh."""
+    serve = ROOT / "09_Dashboard" / "serve.sh"
+    if serve.exists():
+        subprocess.run(["bash", str(serve), *args])
+        return
+    # Fallback: open the static HTML report
+    if not HTML.exists():
+        sys.exit(f"{RED}HTML report missing at {HTML} -- run `intel rebuild`.{RESET}")
+    print(f"{GOLD}Intel dashboard (static fallback):{RESET} file://{HTML}")
+    for opener in ("xdg-open", "termux-open-url", "termux-open", "open"):
+        if shutil.which(opener):
+            subprocess.Popen([opener, str(HTML)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            break
+
+
+def cmd_search(args: list[str]) -> None:
+    """Full-text-ish search across domain + purpose + raw_text + tags + notes."""
+    if not args:
+        sys.exit("usage: intel search <query>")
+    q = " ".join(args).strip()
+    con = open_db()
+    needle = f"%{q}%"
+    rows = con.execute("""
+        SELECT domain, category, purpose, agent_owner, verified_status
+        FROM resources
+        WHERE domain LIKE ? OR purpose LIKE ? OR raw_text LIKE ? OR tags LIKE ? OR notes LIKE ?
+        ORDER BY (verified_status='checked') DESC, category, domain
+        LIMIT 60
+    """, (needle,) * 5).fetchall()
+    header(f"search '{q}'", len(rows))
+    if not rows:
+        print(f"  {DIM}no matches -- try a broader term or `intel cat <category>`{RESET}")
+        return
+    for d, c, p, a, s in rows:
+        print(fmt_row(d, c, p, a, s))
+
+
+def cmd_cat(args: list[str]) -> None:
+    """List resources in a category. Substring match against category name."""
+    if not args:
+        # Show category list if no arg
+        con = open_db()
+        cats = con.execute("SELECT category, COUNT(*) FROM resources GROUP BY category ORDER BY 2 DESC").fetchall()
+        header("categories", len(cats))
+        for c, n in cats:
+            print(f"  {n:>4}  {GOLD}{c}{RESET}")
+        print(f"\n{DIM}Use: intel cat <name-substring>{RESET}")
+        return
+    q = " ".join(args).lower()
+    con = open_db()
+    cats = [c for (c,) in con.execute("SELECT DISTINCT category FROM resources").fetchall()
+            if q in c.lower()]
+    if not cats:
+        sys.exit(f"{RED}No category matches '{q}'. Try: intel cat (no args) for the full list.{RESET}")
+    for cat in cats:
+        rows = con.execute("""
+            SELECT domain, category, purpose, agent_owner, verified_status
+            FROM resources WHERE category=?
+            ORDER BY (verified_status='checked') DESC, domain
+        """, (cat,)).fetchall()
+        header(cat, len(rows))
+        for d, c, p, a, s in rows:
+            print(fmt_row(d, c, p, a, s))
+
+
+def cmd_agent(args: list[str]) -> None:
+    """Resources owned by an agent (substring match)."""
+    if not args:
+        con = open_db()
+        agents = con.execute("SELECT agent_owner, COUNT(*) FROM resources GROUP BY agent_owner ORDER BY 2 DESC").fetchall()
+        header("agents", len(agents))
+        for a, n in agents:
+            print(f"  {n:>4}  {GOLD}{a}{RESET}")
+        return
+    q = " ".join(args).lower()
+    con = open_db()
+    rows = con.execute("""
+        SELECT domain, category, purpose, agent_owner, verified_status
+        FROM resources WHERE LOWER(agent_owner) LIKE ?
+        ORDER BY category, domain
+    """, (f"%{q}%",)).fetchall()
+    header(f"agent '{q}'", len(rows))
+    for d, c, p, a, s in rows:
+        print(fmt_row(d, c, p, a, s))
+
+
+def cmd_review(_: list[str]) -> None:
+    con = open_db()
+    rows = con.execute("""
+        SELECT domain, category, purpose, agent_owner, verified_status
+        FROM resources WHERE verified_status='unverified'
+        ORDER BY category, domain
+    """).fetchall()
+    header("review queue", len(rows))
+    for d, c, p, a, s in rows:
+        print(fmt_row(d, c, p, a, s))
+
+
+def cmd_stats(_: list[str]) -> None:
+    con = open_db()
+    total = con.execute("SELECT COUNT(*) FROM resources").fetchone()[0]
+    header("Intel Center stats", total)
+    print(f"\n{BOLD}By verified_status:{RESET}")
+    for s, n in con.execute("SELECT verified_status, COUNT(*) FROM resources GROUP BY 1 ORDER BY 2 DESC"):
+        print(f"  {n:>4}  {s}")
+    print(f"\n{BOLD}Top 10 categories:{RESET}")
+    for c, n in con.execute("SELECT category, COUNT(*) FROM resources GROUP BY 1 ORDER BY 2 DESC LIMIT 10"):
+        print(f"  {n:>4}  {GOLD}{c}{RESET}")
+    print(f"\n{BOLD}Top 10 agent owners:{RESET}")
+    for a, n in con.execute("SELECT agent_owner, COUNT(*) FROM resources GROUP BY 1 ORDER BY 2 DESC LIMIT 10"):
+        print(f"  {n:>4}  {a}")
+    if AUDIT_LOG.exists():
+        a = json.loads(AUDIT_LOG.read_text())
+        print(f"\n{BOLD}Latest audit:{RESET} {a['ts']}")
+        print(f"  {a['in_use']} of {a['total']} resources actively used in workspace ({a['in_use']*100//a['total']}%)")
+
+
+def cmd_audit(_: list[str]) -> None:
+    """
+    For every domain in the DB, grep the workspace to see if we're using it.
+    Excludes the Intel Center folder itself (would be 100% self-referential)
+    and the FREE RESOURCES source folder. Writes results to audit_latest.json
+    and adds in_use + usage_evidence columns to the DB.
+    """
+    print(f"{GOLD}== Intel audit -- searching the workspace for resource usage =={RESET}")
+    con = open_db()
+    domains = [d for (d,) in con.execute("SELECT DISTINCT domain FROM resources WHERE domain != ''").fetchall()]
+    print(f"  {len(domains)} unique domains to check\n")
+
+    # Add audit columns if not present
+    con.execute("CREATE TABLE IF NOT EXISTS audit (domain TEXT PRIMARY KEY, in_use INT, evidence TEXT, checked_at TEXT)")
+    con.execute("DELETE FROM audit")
+
+    # Exclude self + source dir + binary/large dirs
+    excludes = [
+        "--exclude-dir=Everlight_Intel_Center",
+        "--exclude-dir=FREE RESOURCES",
+        "--exclude-dir=.git",
+        "--exclude-dir=node_modules",
+        "--exclude-dir=__pycache__",
+        "--exclude-dir=.venv",
+        "--exclude-dir=08_BACKUPS",
+        "--exclude-dir=_logs",
+        "--exclude=*.pyc",
+        "--exclude=*.sqlite",
+        "--exclude=*.jpg",
+        "--exclude=*.png",
+        "--exclude=*.pdf",
+        "--exclude=*.zip",
+    ]
+
+    in_use_count = 0
+    evidence_lines: list[tuple[str, int, str]] = []
+    t0 = time.time()
+    # Batch domains into regex alternation (50 at a time) for one grep pass each
+    BATCH = 50
+    for i in range(0, len(domains), BATCH):
+        batch = domains[i:i + BATCH]
+        # Escape dots; grep -F isn't an option since we want word-boundary
+        alt = "|".join(re.escape(d) for d in batch)
+        pattern = rf"(^|[^a-zA-Z0-9])({alt})([^a-zA-Z0-9]|$)"
+        try:
+            r = subprocess.run(
+                ["grep", "-r", "-l", "-E", pattern, "--include=*.py", "--include=*.md",
+                 "--include=*.yaml", "--include=*.yml", "--include=*.json", "--include=*.html",
+                 "--include=*.ts", "--include=*.tsx", "--include=*.js", "--include=*.jsx",
+                 "--include=*.txt", "--include=*.sh", "--include=*.org",
+                 *excludes, str(WORKSPACE)],
+                capture_output=True, text=True, timeout=120,
+            )
+            files_with_hits = [Path(p) for p in r.stdout.strip().split("\n") if p]
+        except subprocess.TimeoutExpired:
+            files_with_hits = []
+        # For each file with hits, find which of our domains were the actual matches
+        for f in files_with_hits:
+            try:
+                content = f.read_text(errors="ignore")
+            except Exception:
+                continue
+            for d in batch:
+                # Word-boundary-ish check
+                if re.search(rf"(^|[^a-zA-Z0-9.]){re.escape(d)}([^a-zA-Z0-9]|$)", content):
+                    rel = str(f.relative_to(WORKSPACE)) if f.is_relative_to(WORKSPACE) else str(f)
+                    evidence_lines.append((d, 1, rel))
+        progress = i + BATCH
+        print(f"  {min(progress, len(domains)):>4}/{len(domains)} domains scanned "
+              f"({len(evidence_lines)} hits so far, {time.time()-t0:.0f}s)")
+
+    # Aggregate: per-domain hit count + first 3 evidence files
+    by_domain: dict[str, list[str]] = {}
+    for d, _, rel in evidence_lines:
+        by_domain.setdefault(d, []).append(rel)
+
+    now = datetime.now().isoformat()
+    for d in domains:
+        hits = sorted(set(by_domain.get(d, [])))
+        in_use = 1 if hits else 0
+        if in_use:
+            in_use_count += 1
+        evidence = "; ".join(hits[:3])
+        con.execute("INSERT INTO audit VALUES (?,?,?,?)", (d, in_use, evidence, now))
+    con.commit()
+
+    summary = {
+        "ts": now,
+        "total": len(domains),
+        "in_use": in_use_count,
+        "in_use_pct": round(in_use_count * 100 / max(len(domains), 1), 1),
+        "elapsed_sec": round(time.time() - t0, 1),
+        "top_used": sorted(
+            [(d, len(set(by_domain.get(d, [])))) for d in domains if by_domain.get(d)],
+            key=lambda x: -x[1])[:25],
+    }
+    AUDIT_LOG.parent.mkdir(parents=True, exist_ok=True)
+    AUDIT_LOG.write_text(json.dumps(summary, indent=2))
+    con.close()
+
+    print(f"\n{GOLD}== Audit complete =={RESET}")
+    print(f"  {BOLD}{summary['in_use']}/{summary['total']} ({summary['in_use_pct']}%){RESET} resources actively used in workspace")
+    print(f"  Duration: {summary['elapsed_sec']}s")
+    print(f"\n{BOLD}Top 15 resources by file references:{RESET}")
+    for d, n in summary["top_used"][:15]:
+        cat = open_db().execute("SELECT category FROM resources WHERE domain=?", (d,)).fetchone()
+        cat_str = cat[0] if cat else "?"
+        print(f"  {n:>3} files  {GOLD}{d:<28}{RESET} {DIM}{cat_str}{RESET}")
+    print(f"\n{DIM}Run `intel audit-report` to see the full breakdown by category.{RESET}")
+
+
+def cmd_audit_report(_: list[str]) -> None:
+    if not AUDIT_LOG.exists():
+        sys.exit(f"{RED}No audit yet. Run `intel audit` first.{RESET}")
+    summary = json.loads(AUDIT_LOG.read_text())
+    con = open_db()
+
+    print(f"{GOLD}{BOLD}== Workspace Usage Audit -- {summary['ts'][:19]} =={RESET}")
+    print(f"  {summary['in_use']}/{summary['total']} resources actively used ({summary['in_use_pct']}%)")
+    print(f"  Scan duration: {summary['elapsed_sec']}s\n")
+
+    # Per-category usage
+    rows = con.execute("""
+        SELECT r.category,
+               COUNT(*) AS total,
+               SUM(COALESCE(a.in_use, 0)) AS used
+        FROM resources r LEFT JOIN audit a ON r.domain = a.domain
+        GROUP BY r.category
+        ORDER BY used DESC, total DESC
+    """).fetchall()
+    header("usage by category")
+    print(f"  {BOLD}{'CATEGORY':<30} {'USED':>5} / {'TOTAL':>5}  {'PCT':>5}{RESET}")
+    for cat, total, used in rows:
+        pct = used * 100 // max(total, 1)
+        bar = "█" * (pct // 5) + DIM + "░" * (20 - pct // 5) + RESET
+        print(f"  {cat:<30} {used:>5} / {total:>5}  {pct:>4}%  {bar}")
+
+    # Per-agent: who has resources but isn't using them?
+    header("usage by agent owner")
+    rows = con.execute("""
+        SELECT r.agent_owner,
+               COUNT(*) AS total,
+               SUM(COALESCE(a.in_use, 0)) AS used
+        FROM resources r LEFT JOIN audit a ON r.domain = a.domain
+        GROUP BY r.agent_owner
+        ORDER BY total DESC
+    """).fetchall()
+    for agent, total, used in rows:
+        gap = total - used
+        flag = f" {RED}({gap} unused){RESET}" if gap > total // 2 else ""
+        print(f"  {used:>3} / {total:>3}  {GOLD}{agent}{RESET}{flag}")
+
+    # In-use resources with their evidence
+    header("currently-in-use resources")
+    rows = con.execute("""
+        SELECT r.domain, r.category, r.agent_owner, a.evidence
+        FROM resources r JOIN audit a ON r.domain = a.domain
+        WHERE a.in_use = 1
+        ORDER BY r.category, r.domain
+    """).fetchall()
+    if not rows:
+        print(f"  {DIM}none yet -- the Hive isn't using any of these resources directly{RESET}")
+    last_cat = None
+    for d, c, ag, ev in rows:
+        if c != last_cat:
+            print(f"\n  {BOLD}{c}{RESET}")
+            last_cat = c
+        print(f"    {GOLD}{d:<28}{RESET} {DIM}{ag}{RESET}")
+        for f in ev.split("; "):
+            print(f"      {DIM}-> {f}{RESET}")
+
+
+FETCHABLE_TOPICS = {
+    "news":    "News & Journalism",
+    "weather": "Weather & Disaster Intel",
+    "space":   "Space & Science",
+    "finance": "Trading & Finance",
+    "osint":   "OSINT & Investigation",
+    "health":  "Health & Environment",
+    "markets": "Economics & Markets",
+    "aviation":"Aviation & Maritime",
+}
+
+
+def _fetch_one(domain: str, timeout: int = 6) -> dict:
+    """Pull title + meta description + first H1 with curl. No third-party deps."""
+    url = f"https://{domain}"
+    try:
+        r = subprocess.run(
+            ["curl", "-sL", "--max-time", str(timeout),
+             "--max-filesize", "300000", "-A",
+             "Mozilla/5.0 (compatible; EverlightIntel/1.0)", url],
+            capture_output=True, text=True, timeout=timeout + 2,
+        )
+        html = r.stdout[:200000]
+        ok = r.returncode == 0 and len(html) > 100
+    except subprocess.TimeoutExpired:
+        return {"domain": domain, "ok": False, "error": "timeout"}
+    if not ok:
+        return {"domain": domain, "ok": False, "error": f"curl rc={r.returncode}"}
+
+    title = ""
+    desc = ""
+    h1 = ""
+    m = re.search(r"<title[^>]*>(.*?)</title>", html, re.I | re.S)
+    if m:
+        title = re.sub(r"\s+", " ", m.group(1)).strip()[:140]
+    m = re.search(r"""<meta\s+[^>]*name=['"]description['"][^>]*content=['"]([^'"]+)""", html, re.I)
+    if not m:
+        m = re.search(r"""<meta\s+[^>]*property=['"]og:description['"][^>]*content=['"]([^'"]+)""", html, re.I)
+    if m:
+        desc = re.sub(r"\s+", " ", m.group(1)).strip()[:200]
+    m = re.search(r"<h1[^>]*>(.*?)</h1>", html, re.I | re.S)
+    if m:
+        h1 = re.sub(r"<[^>]+>", "", m.group(1))
+        h1 = re.sub(r"\s+", " ", h1).strip()[:140]
+    return {"domain": domain, "ok": True, "title": title, "desc": desc, "h1": h1}
+
+
+def _fetch_category(category: str, limit: int = 12) -> None:
+    if not shutil.which("curl"):
+        sys.exit(f"{RED}curl not installed -- `apt install -y curl` first.{RESET}")
+    con = open_db()
+    rows = con.execute("""
+        SELECT domain, purpose, agent_owner FROM resources
+        WHERE category = ? AND domain != ''
+        ORDER BY (verified_status='checked') DESC, RANDOM()
+        LIMIT ?
+    """, (category, limit)).fetchall()
+    if not rows:
+        sys.exit(f"{RED}No domains found for category '{category}'.{RESET}")
+    header(f"intel fetch '{category}'", len(rows))
+    print(f"  {DIM}Pulling head + meta from {len(rows)} sources (max ~6s each)...{RESET}\n")
+
+    # Run fetches in parallel via threads
+    import concurrent.futures as cf
+    results = []
+    with cf.ThreadPoolExecutor(max_workers=6) as ex:
+        futures = {ex.submit(_fetch_one, d): (d, p, a) for d, p, a in rows}
+        for fut in cf.as_completed(futures):
+            d, p, a = futures[fut]
+            try:
+                res = fut.result()
+            except Exception as e:
+                res = {"domain": d, "ok": False, "error": str(e)}
+            results.append({"meta": (d, p, a), "fetch": res})
+
+    # Cache the run for downstream consumers (briefings, agents)
+    cache_dir = ROOT / "cache" / "fetch"
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    safe_cat = re.sub(r"[^a-z0-9]+", "_", category.lower()).strip("_")
+    cache_file = cache_dir / f"{safe_cat}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    cache_file.write_text(json.dumps(results, indent=2))
+
+    ok_count = sum(1 for r in results if r["fetch"]["ok"])
+    for r in sorted(results, key=lambda x: x["meta"][0]):
+        d, p, a = r["meta"]
+        f = r["fetch"]
+        if not f["ok"]:
+            print(f"  {RED}✗ {d:<28}{RESET} {DIM}{f.get('error','?')} -- {p[:40]}{RESET}")
+            continue
+        title = f.get("title") or f.get("h1") or "(no title)"
+        desc = f.get("desc") or p
+        print(f"  {GREEN}✓{RESET} {GOLD}{d:<28}{RESET}")
+        print(f"      {BOLD}{title[:90]}{RESET}")
+        if desc and desc != title:
+            print(f"      {DIM}{desc[:140]}{RESET}")
+        print(f"      {CYAN}{a}{RESET} {DIM}|  https://{d}{RESET}\n")
+    print(f"{DIM}Cached: {cache_file.relative_to(ROOT)}  |  ok={ok_count}/{len(results)}{RESET}")
+
+
+def cmd_fetch(args: list[str]) -> None:
+    if not args:
+        # Show available fetchable topics
+        print(f"{GOLD}Fetchable topics:{RESET}")
+        for kw, cat in FETCHABLE_TOPICS.items():
+            con = open_db()
+            n = con.execute("SELECT COUNT(*) FROM resources WHERE category=?", (cat,)).fetchone()[0]
+            print(f"  {GOLD}intel {kw:<10}{RESET} {DIM}->{RESET} {cat} ({n} sources)")
+        print(f"\n{DIM}Or: intel fetch <category-substring>{RESET}")
+        return
+    q = " ".join(args).lower()
+    # Resolve substring match against fetchable categories
+    con = open_db()
+    cats = [c for (c,) in con.execute("SELECT DISTINCT category FROM resources").fetchall()
+            if q in c.lower()]
+    if not cats:
+        sys.exit(f"{RED}No category matches '{q}'.{RESET}")
+    for cat in cats:
+        _fetch_category(cat)
+
+
+def _make_topic_cmd(category: str):
+    def fn(_: list[str]) -> None:
+        _fetch_category(category)
+    return fn
+
+
+# ============================================================================
+# LIVE PULL -- per-source RSS/HTML fetcher with cache
+# ============================================================================
+ARTICLES_DB = ROOT / "cache" / "articles.sqlite"
+ARTICLES_DIR = ROOT / "cache" / "articles"
+
+RSS_PATHS = ["/feed", "/rss", "/feed.xml", "/rss.xml", "/atom.xml", "/index.xml", "/feed/", "/rss/"]
+
+
+def _articles_db():
+    ARTICLES_DB.parent.mkdir(parents=True, exist_ok=True)
+    con = sqlite3.connect(ARTICLES_DB)
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS articles (
+            id INTEGER PRIMARY KEY,
+            domain TEXT,
+            title TEXT,
+            url TEXT,
+            published TEXT,
+            summary TEXT,
+            fetched_at TEXT,
+            UNIQUE(domain, url)
+        )
+    """)
+    con.execute("CREATE INDEX IF NOT EXISTS idx_a_domain ON articles(domain)")
+    con.execute("CREATE INDEX IF NOT EXISTS idx_a_fetched ON articles(fetched_at)")
+    return con
+
+
+def _try_curl(url: str, timeout: int = 8, log_domain: str | None = None) -> str:
+    """Curl with auto live_log instrumentation. log_domain enables success/failure tracking."""
+    domain = log_domain
+    if not domain:
+        m = re.match(r"https?://([^/]+)", url)
+        if m: domain = m.group(1)
+    status = 0
+    bytes_received = 0
+    err = None
+    text = ""
+    try:
+        r = subprocess.run(
+            ["curl", "-sL", "--max-time", str(timeout), "--max-filesize", "1500000",
+             "-A", "Mozilla/5.0 (compatible; EverlightIntel/1.0)",
+             "-w", "%{http_code}|%{size_download}", "-o", "-", url],
+            capture_output=True, text=True, timeout=timeout + 2,
+        )
+        if r.returncode == 0 and r.stdout:
+            # Last line of stdout is "code|bytes" (because -w writes after body)
+            body, _, tail = r.stdout.rpartition("\n")
+            if "|" in tail:
+                code_s, _, bytes_s = tail.partition("|")
+                try:
+                    status = int(code_s.strip())
+                    bytes_received = int(bytes_s.strip())
+                except ValueError:
+                    status = 200 if body else 0
+                text = body
+            else:
+                # No trailing -w (older curl?), assume success based on output
+                status = 200 if r.stdout else 0
+                text = r.stdout
+        else:
+            err = f"curl rc={r.returncode}"
+    except subprocess.TimeoutExpired:
+        err = "timeout"
+    # Record to live_log
+    if domain:
+        try:
+            from osint_api import live_log
+            live_log.record(domain, status_code=status, bytes_received=bytes_received,
+                           method="GET", error=err)
+        except Exception:
+            pass  # Never let logging break the fetch
+    return text
+
+
+def _parse_rss(xml_text: str) -> list[dict]:
+    """Lightweight RSS/Atom parser using stdlib. Handles namespaced docs."""
+    import xml.etree.ElementTree as ET
+    items: list[dict] = []
+    if not xml_text or len(xml_text) < 50:
+        return items
+    try:
+        xml_text = xml_text.lstrip("﻿").strip()
+        root = ET.fromstring(xml_text)
+    except ET.ParseError:
+        return items
+
+    def local(elem):
+        """Strip namespace from tag for easier matching."""
+        return elem.tag.rsplit("}", 1)[-1] if "}" in elem.tag else elem.tag
+
+    def get_text(parent, *names):
+        for n in names:
+            for child in parent.iter():
+                if local(child) == n and child.text:
+                    return child.text.strip()
+        return ""
+
+    def get_link(parent):
+        # Plain <link>URL</link> (RSS) or <link href="URL"/> (Atom)
+        for child in parent.iter():
+            if local(child) != "link":
+                continue
+            if child.text and child.text.strip().startswith("http"):
+                return child.text.strip()
+            href = child.get("href")
+            if href:
+                return href
+        return ""
+
+    # RSS items + Atom entries -- iterate everything tagged "item" or "entry"
+    for item in root.iter():
+        tag = local(item)
+        if tag not in ("item", "entry"):
+            continue
+        # Skip nested re-iter children (already in the iter pass)
+        title = get_text(item, "title")
+        link = get_link(item)
+        pub = get_text(item, "pubDate", "published", "updated", "date")
+        desc = get_text(item, "description", "summary", "content")
+        desc = re.sub(r"<[^>]+>", "", desc)[:300].strip()
+        if title:
+            items.append({"title": title[:200], "url": link, "published": pub, "summary": desc})
+        if len(items) >= 20:
+            break
+    # Dedupe by URL+title preserving order
+    seen = set(); dedup = []
+    for it in items:
+        key = (it["url"], it["title"])
+        if key in seen: continue
+        seen.add(key); dedup.append(it)
+    return dedup[:15]
+
+
+def _scrape_headlines(html: str, base_url: str) -> list[dict]:
+    """Last-resort: grab <a> tags inside <article>/<h1-3> elements as headlines."""
+    items = []
+    seen_urls = set()
+    # Pull links from headline-ish containers
+    for tag in ("article", "h1", "h2", "h3"):
+        for m in re.finditer(rf"<{tag}[^>]*>(.*?)</{tag}>", html[:300000], re.I | re.S):
+            block = m.group(1)
+            link_match = re.search(r'href="([^"#]+)"[^>]*>([^<]{8,200})</a>', block, re.I)
+            if link_match:
+                href = link_match.group(1)
+                title = re.sub(r"\s+", " ", link_match.group(2)).strip()
+                if not href.startswith("http"):
+                    if href.startswith("//"):
+                        href = "https:" + href
+                    elif href.startswith("/"):
+                        href = base_url.rstrip("/") + href
+                if href in seen_urls:
+                    continue
+                seen_urls.add(href)
+                items.append({"title": title[:200], "url": href, "published": "", "summary": ""})
+            if len(items) >= 12:
+                break
+        if len(items) >= 12:
+            break
+    return items
+
+
+RSS_OVERRIDES_PATH = ROOT / "config" / "rss_overrides.yaml"
+_rss_overrides_cache: dict | None = None
+
+
+def _rss_overrides() -> dict:
+    global _rss_overrides_cache
+    if _rss_overrides_cache is None:
+        if RSS_OVERRIDES_PATH.exists():
+            try:
+                import yaml as _yaml
+                _rss_overrides_cache = _yaml.safe_load(RSS_OVERRIDES_PATH.read_text()) or {}
+            except Exception:
+                _rss_overrides_cache = {}
+        else:
+            _rss_overrides_cache = {}
+    return _rss_overrides_cache
+
+
+def _pull_one(domain: str) -> dict:
+    base = f"https://{domain}"
+    items: list[dict] = []
+    used_path = ""
+    # 1. Curated override -- known-good RSS URL for this domain
+    overrides = _rss_overrides()
+    if domain in overrides:
+        url = overrides[domain]
+        text = _try_curl(url, timeout=8)
+        if text:
+            items = _parse_rss(text)
+            if items:
+                used_path = url
+    # 2. Auto-discover RSS at common paths
+    if not items:
+        for path in RSS_PATHS:
+            text = _try_curl(base + path, timeout=6)
+            if text and ("<rss" in text[:500].lower() or "<feed" in text[:500].lower()):
+                items = _parse_rss(text)
+                if items:
+                    used_path = path
+                    break
+    method = "rss" if items else "scrape"
+    # 3. HTML scrape fallback
+    if not items:
+        html = _try_curl(base, timeout=8)
+        if html:
+            items = _scrape_headlines(html, base)
+    return {"domain": domain, "method": method, "rss_path": used_path,
+            "items": items, "fetched_at": datetime.now().isoformat()}
+
+
+def _ensure_resource_row(domain: str, result: dict) -> bool:
+    """If we just pulled a domain that isn't in the resources DB, insert a
+    minimal row so it appears in the dashboard / detail pages. Returns True if inserted."""
+    con = open_db()
+    if con.execute("SELECT 1 FROM resources WHERE domain=?", (domain,)).fetchone():
+        con.close()
+        return False
+
+    # Guess category from override hints + curated list.
+    # Order matters -- specific names BEFORE generic suffixes like .gov.
+    CATEGORY_BY_DOMAIN_PATTERN = [
+        # (substring/suffix, category, agent, dept)
+        ("noaa", "Weather & Disaster Intel", "Helix Patel", "Disaster Response Desk"),
+        ("usgs", "Weather & Disaster Intel", "Helix Patel", "Disaster Response Desk"),
+        ("fema", "Weather & Disaster Intel", "Helix Patel", "Disaster Response Desk"),
+        ("nasa", "Space & Science", "Helix Patel", "CEO Command Center"),
+        ("biorxiv", "Space & Science", "Helix Patel", "CEO Command Center"),
+        ("nature", "Space & Science", "Helix Patel", "CEO Command Center"),
+        ("arxiv", "Space & Science", "Helix Patel", "CEO Command Center"),
+        ("sec.gov", "Legal & Compliance", "Brief Calloway", "Legal/Compliance Desk"),
+        ("fbi", "OSINT & Investigation", "Cipher Wolfe", "OSINT Desk"),
+        ("bls", "Economics & Markets", "Bull Archer", "Trading Desk"),
+        ("bea", "Economics & Markets", "Bull Archer", "Trading Desk"),
+        ("fred", "Economics & Markets", "Bull Archer", "Trading Desk"),
+        ("coindesk", "Trading & Finance", "Bull Archer", "Trading Desk"),
+        ("coingecko", "Trading & Finance", "Bull Archer", "Trading Desk"),
+        ("tradingview", "Trading & Finance", "Bull Archer", "Trading Desk"),
+        ("archive.org", "OSINT & Investigation", "Cipher Wolfe", "OSINT Desk"),
+        ("wikileaks", "OSINT & Investigation", "Cipher Wolfe", "OSINT Desk"),
+        ("reuters", "News & Journalism", "Wire Santos", "Everlight Newsroom"),
+        ("nytimes", "News & Journalism", "Wire Santos", "Everlight Newsroom"),
+        ("propublica", "News & Journalism", "Wire Santos", "Everlight Newsroom"),
+        ("npr", "News & Journalism", "Wire Santos", "Everlight Newsroom"),
+        ("bbc.com", "News & Journalism", "Wire Santos", "Everlight Newsroom"),
+        ("axios", "News & Journalism", "Wire Santos", "Everlight Newsroom"),
+        ("factcheck", "News & Journalism", "Wire Santos", "Everlight Newsroom"),
+        ("gdelt", "OSINT & Investigation", "Cipher Wolfe", "OSINT Desk"),
+        ("ap.org", "News & Journalism", "Wire Santos", "Everlight Newsroom"),
+        ("apnews", "News & Journalism", "Wire Santos", "Everlight Newsroom"),
+        # Generic suffix fallbacks LAST -- only fire if no specific match above
+        (".gov", "Legal & Compliance", "Brief Calloway", "Legal/Compliance Desk"),
+    ]
+    cat, agent, dept = "News & Journalism", "Wire Santos", "Everlight Newsroom"
+    for pat, c, a, d in CATEGORY_BY_DOMAIN_PATTERN:
+        if pat in domain.lower():
+            cat, agent, dept = c, a, d
+            break
+
+    purpose = result["items"][0]["title"][:140] if result["items"] else f"Pulled live from {domain}"
+    new_id = f"EIC-PULL-{int(time.time()) % 1_000_000:06d}"
+    today = datetime.now().strftime("%Y-%m-%d")
+    name = domain.split(".")[0].replace("-", " ").title()
+
+    # Use the category template for use_case if we can
+    use_case = (f"{agent} pulled {domain} live via `intel pull`. "
+                f"Latest items cached at cache/articles/. Refresh anytime: `intel pull {domain}`.")
+    setup_steps = (f"1. Open https://{domain}.\n"
+                   f"2. Pull latest items: `intel pull {domain}`.\n"
+                   f"3. View detail at /09_Dashboard/resource.html?d={domain}")
+
+    cols = ["id","source_type","source_file","raw_text","name","url","domain","category","subcategory",
+            "purpose","department","agent_owner","use_case","data_type","access_type","cost_level",
+            "risk_level","legal_notes","setup_steps","example_prompt","tags","priority_score",
+            "verified_status","last_checked","notes"]
+    vals = {
+        "id": new_id, "source_type": "intel-pull", "source_file": "", "raw_text": "",
+        "name": name, "url": f"https://{domain}", "domain": domain, "category": cat,
+        "subcategory": "auto-pulled", "purpose": purpose, "department": dept,
+        "agent_owner": agent, "use_case": use_case, "data_type": "rss/html",
+        "access_type": "free", "cost_level": "free", "risk_level": "low",
+        "legal_notes": "", "setup_steps": setup_steps, "example_prompt": "",
+        "tags": "auto-pulled, live", "priority_score": "3", "verified_status": "auto-pulled",
+        "last_checked": today, "notes": f"Inserted by intel pull on {today}",
+    }
+    placeholders = ",".join("?" * len(cols))
+    con.execute(f"INSERT INTO resources VALUES ({placeholders})", [vals[c] for c in cols])
+    con.commit()
+    con.close()
+    return True
+
+
+def cmd_pull(args: list[str]) -> None:
+    if not args:
+        sys.exit("usage: intel pull <domain>")
+    domain = args[0].strip().lower().rstrip("/")
+    for p in ("https://", "http://"):
+        if domain.startswith(p):
+            domain = domain[len(p):]
+    print(f"{GOLD}Pulling {domain} ...{RESET}")
+    result = _pull_one(domain)
+    inserted = _ensure_resource_row(domain, result)
+    if inserted:
+        print(f"  {DIM}+ inserted as new resource row -- it now appears in the dashboard.{RESET}")
+    # Cache: per-domain JSON + master SQLite
+    safe = re.sub(r"[^a-z0-9]+", "_", domain).strip("_")
+    ARTICLES_DIR.mkdir(parents=True, exist_ok=True)
+    (ARTICLES_DIR / f"{safe}.json").write_text(json.dumps(result, indent=2))
+    con = _articles_db()
+    now = result["fetched_at"]
+    inserted = 0
+    for it in result["items"]:
+        try:
+            con.execute(
+                "INSERT OR IGNORE INTO articles (domain, title, url, published, summary, fetched_at) VALUES (?,?,?,?,?,?)",
+                (domain, it["title"], it["url"], it["published"], it["summary"], now)
+            )
+            inserted += con.total_changes
+        except sqlite3.Error:
+            pass
+    con.commit(); con.close()
+    header(f"{domain} -- {result['method']}{(' ' + result['rss_path']) if result['rss_path'] else ''}", len(result["items"]))
+    if not result["items"]:
+        print(f"  {RED}no items found -- source may be JS-rendered or behind auth{RESET}")
+        return
+    for i, it in enumerate(result["items"][:12], 1):
+        print(f"  {GOLD}{i:>2}.{RESET} {BOLD}{it['title'][:90]}{RESET}")
+        if it["published"]:
+            print(f"      {DIM}{it['published'][:60]}{RESET}")
+        if it["summary"]:
+            print(f"      {DIM}{it['summary'][:140]}{RESET}")
+        if it["url"]:
+            print(f"      {CYAN}{it['url'][:90]}{RESET}")
+        print()
+    print(f"{DIM}cached -> cache/articles/{safe}.json + cache/articles.sqlite ({inserted} new in DB){RESET}")
+
+
+def cmd_pull_all(args: list[str]) -> None:
+    if not args:
+        sys.exit("usage: intel pull-all <category-substring>  (e.g. news, weather, space)")
+    q = " ".join(args).lower()
+    con = open_db()
+    cats = [c for (c,) in con.execute("SELECT DISTINCT category FROM resources").fetchall() if q in c.lower()]
+    if not cats:
+        sys.exit(f"{RED}No category matches '{q}'.{RESET}")
+    for cat in cats:
+        domains = [d for (d,) in con.execute(
+            "SELECT domain FROM resources WHERE category=? AND domain != ''", (cat,)
+        ).fetchall()]
+        header(f"pull-all '{cat}'", len(domains))
+        import concurrent.futures as cf
+        ok_with_items = 0; total_items = 0
+        with cf.ThreadPoolExecutor(max_workers=6) as ex:
+            futures = {ex.submit(_pull_one, d): d for d in domains}
+            artcon = _articles_db()
+            now = datetime.now().isoformat()
+            for fut in cf.as_completed(futures):
+                d = futures[fut]
+                try:
+                    res = fut.result()
+                except Exception:
+                    res = {"domain": d, "items": [], "method": "error", "rss_path": "", "fetched_at": now}
+                # Save per-domain
+                safe = re.sub(r"[^a-z0-9]+", "_", d).strip("_")
+                ARTICLES_DIR.mkdir(parents=True, exist_ok=True)
+                (ARTICLES_DIR / f"{safe}.json").write_text(json.dumps(res, indent=2))
+                # Save to master DB
+                for it in res["items"]:
+                    try:
+                        artcon.execute(
+                            "INSERT OR IGNORE INTO articles (domain, title, url, published, summary, fetched_at) VALUES (?,?,?,?,?,?)",
+                            (d, it["title"], it["url"], it["published"], it["summary"], now)
+                        )
+                    except sqlite3.Error:
+                        pass
+                if res["items"]:
+                    _ensure_resource_row(d, res)
+                    ok_with_items += 1; total_items += len(res["items"])
+                    print(f"  {GREEN}✓{RESET} {GOLD}{d:<30}{RESET} {len(res['items']):>2} items ({res['method']})")
+                else:
+                    print(f"  {RED}✗{RESET} {DIM}{d:<30} no items ({res['method']}){RESET}")
+            artcon.commit(); artcon.close()
+        print(f"\n{GOLD}Done: {ok_with_items}/{len(domains)} sources returned items, {total_items} total cached.{RESET}")
+
+
+def cmd_articles(args: list[str]) -> None:
+    """Search the cached articles index across all sources."""
+    q = " ".join(args).strip().lower()
+    if not ARTICLES_DB.exists():
+        sys.exit(f"{RED}No articles cached yet. Run `intel pull-all news` (or another category).{RESET}")
+    con = _articles_db()
+    if q:
+        rows = con.execute("""
+            SELECT domain, title, url, published, summary FROM articles
+            WHERE LOWER(title) LIKE ? OR LOWER(summary) LIKE ?
+            ORDER BY fetched_at DESC LIMIT 50
+        """, (f"%{q}%", f"%{q}%")).fetchall()
+        header(f"articles '{q}'", len(rows))
+    else:
+        rows = con.execute("""
+            SELECT domain, title, url, published, summary FROM articles
+            ORDER BY fetched_at DESC LIMIT 50
+        """).fetchall()
+        total = con.execute("SELECT COUNT(*) FROM articles").fetchone()[0]
+        header(f"latest articles (showing 50 of {total})", len(rows))
+    for d, t, u, p, s in rows:
+        print(f"  {GOLD}{d:<22}{RESET} {BOLD}{t[:80]}{RESET}")
+        if p:
+            print(f"      {DIM}{p[:50]}{RESET}")
+        if u:
+            print(f"      {CYAN}{u[:90]}{RESET}")
+        print()
+
+
+def cmd_show(args: list[str]) -> None:
+    if not args:
+        sys.exit("usage: intel show <domain>")
+    domain = args[0].strip().lower()
+    con = open_db()
+    r = con.execute("""
+        SELECT domain, name, category, agent_owner, department, purpose,
+               use_case, setup_steps, verified_status
+        FROM resources WHERE domain = ?
+    """, (domain,)).fetchone()
+    if not r:
+        sys.exit(f"{RED}No resource matching {domain}.{RESET}")
+    d, n, c, a, dept, p, uc, st, vs = r
+    print()
+    print(f"{GOLD}{BOLD}{d}{RESET}  {DIM}({c}){RESET}")
+    print(f"  {DIM}{p}{RESET}")
+    print()
+    print(f"  {BOLD}Owner:{RESET} {GOLD}{a}{RESET}  {DIM}({dept}){RESET}")
+    print(f"  {BOLD}Status:{RESET} {vs}")
+    print()
+    if uc:
+        print(f"{GOLD}Use case:{RESET}")
+        print(f"  {uc}")
+        print()
+    if st:
+        print(f"{GOLD}Setup:{RESET}")
+        for line in st.split("\n"):
+            print(f"  {line}")
+        print()
+    # Cached articles?
+    if ARTICLES_DB.exists():
+        artcon = _articles_db()
+        rows = artcon.execute("SELECT title, url, published FROM articles WHERE domain=? ORDER BY id DESC LIMIT 8", (domain,)).fetchall()
+        if rows:
+            print(f"{GOLD}Latest cached items ({len(rows)}):{RESET}")
+            for t, u, p in rows:
+                print(f"  {BOLD}{t[:90]}{RESET}")
+                if u: print(f"    {CYAN}{u[:90]}{RESET}")
+            print()
+        else:
+            print(f"  {DIM}No cached items -- run `intel pull {domain}` to fetch.{RESET}")
+
+
+def cmd_manifest(_: list[str]) -> None:
+    """Generate per-agent source manifests at .claude/agents/sources/<agent>.md"""
+    out_dir = WORKSPACE / ".claude" / "agents" / "sources"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    con = open_db()
+    agents = [a for (a,) in con.execute("SELECT DISTINCT agent_owner FROM resources WHERE agent_owner != ''").fetchall()]
+    written = 0
+    index_lines = ["# Intel Center -- Agent Source Manifests",
+                   f"Generated {datetime.now().strftime('%Y-%m-%d %H:%M PT')} from `everlight_resources.sqlite`.",
+                   "Each agent's manifest lists the free/open-source resources assigned to them.",
+                   "Re-generate after `intel rebuild`: `intel manifest`.",
+                   ""]
+    for agent in sorted(agents):
+        rows = con.execute("""
+            SELECT category, domain, purpose, verified_status, use_case, setup_steps
+            FROM resources
+            WHERE agent_owner = ?
+            ORDER BY category, domain
+        """, (agent,)).fetchall()
+        if not rows:
+            continue
+        # Group by category
+        by_cat: dict[str, list] = {}
+        for c, d, p, s, uc, st in rows:
+            by_cat.setdefault(c, []).append((d, p, s, uc, st))
+
+        # Build enriched markdown
+        lines = [f"# Intel Center sources -- {agent}", ""]
+        lines.append(f"**Total assigned:** {len(rows)} resources across {len(by_cat)} categories.")
+        lines.append("")
+        lines.append("## How to use this manifest")
+        lines.append("")
+        lines.append("When a user query lands in your domain, READ this manifest FIRST and prefer these sources over guessing. Three modes:")
+        lines.append("")
+        lines.append("1. **Search:** `intel search <query>` -- full-text across 745 resources")
+        lines.append("2. **Pull live:** `intel pull <domain>` -- fetch RSS/HTML, cache it, get latest items")
+        lines.append("3. **Investigate:** `intel investigate <target>` -- multi-source OSINT (port 2301)")
+        lines.append("")
+        lines.append("Each resource below shows its **use_case** (how YOU specifically use it) and **setup_steps** (how to actually invoke it).")
+        lines.append("")
+        for cat in sorted(by_cat):
+            items = by_cat[cat]
+            lines.append(f"## {cat}  ({len(items)})")
+            lines.append("")
+            for d, p, s, uc, st in items:
+                badge = " *(curated)*" if s == "checked" else ""
+                lines.append(f"### [{d}](https://{d}){badge}")
+                lines.append(f"_{p}_")
+                if uc:
+                    lines.append(f"")
+                    lines.append(f"**Use case:** {uc}")
+                if st:
+                    lines.append(f"")
+                    lines.append(f"**Setup:**")
+                    for line in st.split("\n"):
+                        line = line.strip()
+                        if line:
+                            lines.append(f"  {line}")
+                lines.append("")
+        # File-safe agent name
+        slug = re.sub(r"[^a-z0-9]+", "_", agent.lower()).strip("_")
+        out = out_dir / f"{slug}.md"
+        out.write_text("\n".join(lines))
+        written += 1
+        index_lines.append(f"- [{agent}](sources/{slug}.md) -- {len(rows)} resources")
+        print(f"  {GREEN}✓{RESET} wrote {GOLD}{out.relative_to(WORKSPACE)}{RESET} ({len(rows)} resources)")
+
+    # Write the index at .claude/agents/sources/INDEX.md
+    (out_dir / "INDEX.md").write_text("\n".join(index_lines))
+    print(f"\n{GOLD}Manifests written: {written}{RESET}")
+    print(f"  Index: .claude/agents/sources/INDEX.md")
+
+
+def _detect_relevant_categories(text: str, all_categories: list[str]) -> list[str]:
+    """Score categories by keyword frequency in the agent firmware text. Top 4 win."""
+    text_lc = text.lower()
+    KEYWORDS = {
+        "News & Journalism":         ["news", "journalist", "headline", "wire", "breaking", "report", "scoop"],
+        "Weather & Disaster Intel":  ["weather", "storm", "disaster", "hurricane", "fema", "emergency", "alert"],
+        "Maps & Geospatial":         ["map", "geo", "location", "gis", "satellite", "terrain"],
+        "Aviation & Maritime":       ["flight", "aviation", "ship", "marine", "logistics", "airport"],
+        "Space & Science":           ["space", "science", "research", "experiment", "physics", "biology"],
+        "Economics & Markets":       ["economy", "macro", "inflation", "fomc", "fed", "treasury"],
+        "Trading & Finance":         ["trad", "finance", "stock", "crypto", "broker", "portfolio", "earnings"],
+        "OSINT & Investigation":     ["osint", "investigat", "lookup", "research", "verify", "wholesale", "skip", "deal", "fraud", "compliance", "background", "source"],
+        "Cybersecurity":             ["security", "vuln", "exploit", "breach", "malware", "auth"],
+        "AI & Automation":           ["ai", "ml", "agent", "automat", "workflow", "prompt", "llm"],
+        "APIs & Developer Tools":    ["api", "code", "develop", "engineer", "dev", "framework", "sdk"],
+        "Content Creation":          ["content", "design", "writ", "video", "audio", "image", "copy", "social"],
+        "eCommerce & Product Research": ["product", "shop", "ecom", "amazon", "shopify", "supplier"],
+        "Real Estate & Property":    ["property", "real estate", "wholesale", "lead", "owner", "deal", "address"],
+        "Logistics & Supply Chain":  ["logistic", "supply", "freight", "shipping", "warehouse"],
+        "Legal & Compliance":        ["legal", "compliance", "law", "court", "filing", "tos", "gdpr", "hipaa", "ccpa"],
+        "Health & Environment":      ["health", "medic", "biotech", "pharma", "environment", "climate"],
+        "Education & Training":      ["learn", "tutorial", "course", "education", "train", "skill"],
+        "Self-Hosting & Privacy":    ["host", "privacy", "vpn", "encrypt", "self-host", "infra", "deploy"],
+        "Decision Intelligence":     ["decision", "strategy", "framework", "analysis", "playbook", "executive"],
+    }
+    scores = []
+    for cat in all_categories:
+        hits = sum(1 for kw in KEYWORDS.get(cat, []) if kw in text_lc)
+        if hits > 0:
+            scores.append((hits, cat))
+    scores.sort(reverse=True)
+    return [c for _, c in scores[:4]]
+
+
+def cmd_wire(_: list[str]) -> None:
+    """
+    Two-tier Intel Center wiring:
+    - Tier 1 (named owners, slug match): rich block with their resource count, manifest path,
+      and category-specific commands.
+    - Tier 2 (every other agent): generic awareness block listing the 4 most-relevant
+      categories for that agent's domain (auto-detected by keyword frequency in their firmware).
+    """
+    agents_dir = WORKSPACE / ".claude" / "agents"
+    sources_dir = agents_dir / "sources"
+    if not sources_dir.exists():
+        sys.exit(f"{RED}Run `intel manifest` first.{RESET}")
+    con = open_db()
+    owners = {}
+    for (a, n) in con.execute(
+        "SELECT agent_owner, COUNT(*) FROM resources WHERE agent_owner != '' GROUP BY agent_owner"
+    ).fetchall():
+        slug = re.sub(r"[^a-z0-9]+", "_", a.lower()).strip("_")
+        owners[a] = (slug, n)
+
+    # Per-owner top categories for the rich block
+    owner_top_cats = {}
+    for owner in owners:
+        rows = con.execute(
+            "SELECT category, COUNT(*) FROM resources WHERE agent_owner=? GROUP BY category ORDER BY 2 DESC",
+            (owner,)
+        ).fetchall()
+        owner_top_cats[owner] = rows[:5]
+
+    # All categories (for tier 2 keyword detection)
+    all_cats = sorted({c for (c,) in con.execute("SELECT DISTINCT category FROM resources").fetchall()})
+    total_resources = con.execute("SELECT COUNT(*) FROM resources").fetchone()[0]
+
+    SENTINEL_START = "<!-- INTEL_CENTER_BLOCK_START -->"
+    SENTINEL_END = "<!-- INTEL_CENTER_BLOCK_END -->"
+    tier1 = 0; tier2 = 0; skipped = 0
+
+    for agent_file in sorted(agents_dir.glob("*.md")):
+        if agent_file.name in ("README.md",):
+            skipped += 1
+            continue
+        text = agent_file.read_text(errors="ignore")
+        file_slug = agent_file.stem.lower().lstrip("0123456789_")
+
+        # Tier 1: filename slug matches an owner
+        owner_match = next(((o, s, n) for o, (s, n) in owners.items() if s == file_slug), None)
+
+        if owner_match:
+            owner, slug, n = owner_match
+            cats = owner_top_cats.get(owner, [])
+            cats_md = "\n".join(f"  - **{c}** ({cnt} resources)" for c, cnt in cats)
+            # Per-owner CLI tip
+            top_cat = cats[0][0] if cats else ""
+            suite_kw = {
+                "OSINT & Investigation": "osint_sweep",
+                "Trading & Finance": "finance_snapshot",
+                "Weather & Disaster Intel": "weather_watch",
+                "Space & Science": "space_briefing",
+                "News & Journalism": "news_brief",
+                "Health & Environment": "health_brief",
+                "Aviation & Maritime": "aviation_radar",
+                "Decision Intelligence": "decision_intel",
+                "Education & Training": "education_brief",
+                "Self-Hosting & Privacy": "privacy_self_host",
+                "Content Creation": "content_tools",
+                "Maps & Geospatial": "maps_geo",
+                "AI & Automation": "ai_automation",
+                "APIs & Developer Tools": "dev_tools",
+                "Real Estate & Property": "real_estate_watch",
+                "Legal & Compliance": "legal_lookup",
+                "eCommerce & Product Research": "ecommerce_scout",
+                "Economics & Markets": "markets_macro",
+            }.get(top_cat, "")
+            suite_line = f"- **Refresh your live data:** `intel suite {suite_kw}` -- pulls every domain in your top category" if suite_kw else ""
+            investigate_line = "- **Run an OSINT investigation:** `intel investigate <target>` -- streams findings from 10 investigators (port 2301)" if "OSINT" in top_cat or n >= 50 else ""
+
+            block = f"""
+{SENTINEL_START}
+## Intel Center Sources -- Tier 1 Owner
+
+You are the **assigned owner of {n} resources** in the Everlight Intel Center, spread across:
+
+{cats_md}
+
+### How to use them in YOUR workflow
+
+- **Your full manifest** (with use_case + setup per resource): `.claude/agents/sources/{slug}.md`
+- **Search across all {total_resources} resources:** `intel search <query>`
+- **Open one resource's detail page:** `intel show <domain>` (terminal) or http://127.0.0.1:2300/09_Dashboard/resource.html?d=<domain>
+- **Pull live RSS/HTML from one source:** `intel pull <domain>` -- caches latest items
+{suite_line}
+{investigate_line}
+- **Cross-source headlines feed:** `intel articles [query]` (or http://127.0.0.1:2300/09_Dashboard/articles.html)
+
+### Operating doctrine
+
+When a user query lands in your domain, **READ your manifest FIRST**. Prefer your assigned sources over guessing. When the question is about CURRENT state (today's news, latest filing, recent breach), pull live data; cite the source URL in your response.
+
+Auto-generated by `intel wire`. Re-run `intel manifest && intel wire` to refresh.
+{SENTINEL_END}
+""".strip()
+            tag = "T1"
+            label = f"{owner} ({n})"
+
+        else:
+            # Tier 2: every other agent gets a generic awareness block
+            relevant = _detect_relevant_categories(text, all_cats)
+            if not relevant:
+                relevant = ["Decision Intelligence", "News & Journalism", "OSINT & Investigation", "AI & Automation"]
+            cats_md = "\n".join(f"  - `intel cat \"{c}\"` -- browse this category" for c in relevant)
+            block = f"""
+{SENTINEL_START}
+## Intel Center -- Generic Access
+
+The Everlight Intel Center holds **{total_resources} free + open-source resources** across 18 categories. You don't OWN any directly, but you can pull from ALL of them whenever your task needs research, live data, or OSINT.
+
+### Most-relevant categories for your domain
+
+{cats_md}
+
+### CLI shortcuts (run in terminal, no env needed)
+
+- **Search:** `intel search <query>` -- full-text across the resource DB
+- **Browse a category:** `intel cat <name>` -- e.g. `intel cat news`
+- **Pull live data:** `intel pull <domain>` -- fetch RSS/HTML, cache it
+- **OSINT investigation:** `intel investigate <target>` -- multi-source company/person/domain lookup (port 2301)
+- **All articles cross-source:** `intel articles [query]` -- search 200+ cached headlines
+
+### Dashboards
+
+- **Intel Center main:** http://127.0.0.1:2300/09_Dashboard/index.html
+- **OSINT Desk:** http://127.0.0.1:2301/
+
+Auto-generated by `intel wire`. Re-run to refresh.
+{SENTINEL_END}
+""".strip()
+            tag = "T2"
+            label = f"generic ({', '.join(relevant[:2])}...)"
+
+        # Idempotent replace or append
+        if SENTINEL_START in text:
+            new_text = re.sub(
+                rf"{re.escape(SENTINEL_START)}.*?{re.escape(SENTINEL_END)}",
+                block, text, flags=re.S,
+            )
+        else:
+            new_text = text.rstrip() + "\n\n" + block + "\n"
+        agent_file.write_text(new_text)
+        if tag == "T1":
+            tier1 += 1
+            print(f"  {GREEN}✓ T1{RESET} {GOLD}{agent_file.name}{RESET} -> {label}")
+        else:
+            tier2 += 1
+            print(f"  {DIM}+ T2 {agent_file.name} -> {label}{RESET}")
+
+    print(f"\n{GOLD}Wired: T1={tier1} (owners) + T2={tier2} (generic) = {tier1+tier2} agents{RESET}")
+    print(f"  Skipped: {skipped}")
+    print(f"  Re-run after firmware edits: `intel manifest && intel wire`")
+
+
+def cmd_live_audit(args: list[str]) -> None:
+    """Reports domains successfully HTTP-fetched in the last N days (default 30)."""
+    window = 30
+    if args and args[0].isdigit():
+        window = int(args[0])
+    try:
+        sys.path.insert(0, str(ROOT))
+        from osint_api import live_log
+    except ImportError as e:
+        sys.exit(f"{RED}live_log import failed: {e}{RESET}")
+    s = live_log.stats(window_days=window)
+    header(f"Live audit (last {window}d)", s["live_active"])
+    print(f"\n  {GOLD}{BOLD}{s['live_active']}{RESET} domains live-active "
+          f"({s['live_active']*100//max(s['total_attempted'],1)}% of attempted)")
+    print(f"  {DIM}{s['total_attempted']} total domains have been attempted at least once{RESET}")
+    print()
+    print(f"{BOLD}HTTP status distribution:{RESET}")
+    for status, count in sorted(s["by_status"].items(), key=lambda x: -x[1]):
+        color = GREEN if status and 200 <= status < 400 else RED
+        print(f"  {color}{status or 'err':>4}{RESET}  {count}")
+    print()
+    print(f"{BOLD}Most recent successful fetches (top 20):{RESET}")
+    for r in s["recent_success"]:
+        ts = r["at"][:16] if r["at"] else "?"
+        print(f"  {GOLD}{r['domain']:<32}{RESET} {DIM}HTTP {r['status']}{RESET}  "
+              f"{r['bytes']:>7}b  {DIM}{ts}{RESET}")
+
+
+def cmd_suite(args: list[str]) -> None:
+    """Run a per-category functional suite -- pulls every domain in that category."""
+    if not args:
+        # List available suites
+        suites_dir = ROOT / "suites"
+        names = []
+        if suites_dir.exists():
+            names = [p.stem for p in sorted(suites_dir.glob("*.py")) if not p.stem.startswith("_")]
+        print(f"{GOLD}Available suites:{RESET}")
+        for n in names:
+            print(f"  intel suite {n}")
+        print(f"  intel suite all      {DIM}# run every suite (~5-10 min){RESET}")
+        return
+
+    name = args[0].strip().lower().replace("-", "_")
+    sys.path.insert(0, str(ROOT))
+    if name == "all":
+        from suites import _runner
+        _runner.run_all()
+        return
+    try:
+        mod = __import__(f"suites.{name}", fromlist=["main"])
+    except ImportError as e:
+        sys.exit(f"{RED}No suite '{name}' -- run `intel suite` for the list.{RESET}\n  {e}")
+    mod.main()
+
+
+def cmd_investigate(args: list[str]) -> None:
+    """
+    Trigger an OSINT investigation. Supports attribution + verification.
+
+    Flags (parsed inline):
+      --triggered-by=<id>      # default: cli_user
+      --lead-id=<id>           # link investigation to a Wholesale lead row
+      --verify-state=<2-char>  # enable identity verification by state
+      --verify-city=<city>
+      --verify-email=<email>
+      --verify-phone=<phone>
+      --verify-address=<addr>
+    """
+    if not args:
+        sys.exit("usage: intel investigate <target> [--triggered-by=<id>] [--verify-state=CA] [--verify-city=...]")
+
+    target_parts = []
+    triggered_by = "cli_user"
+    lead_id: int | None = None
+    verify_ctx: dict = {}
+    purpose = ""
+    for a in args:
+        if a.startswith("--triggered-by="):
+            triggered_by = a.split("=", 1)[1].strip()
+        elif a.startswith("--lead-id="):
+            try: lead_id = int(a.split("=", 1)[1])
+            except ValueError: pass
+        elif a.startswith("--verify-state="):
+            verify_ctx["state"] = a.split("=", 1)[1].strip()
+        elif a.startswith("--verify-city="):
+            verify_ctx["city"] = a.split("=", 1)[1].strip()
+        elif a.startswith("--verify-email="):
+            verify_ctx["owner_email"] = a.split("=", 1)[1].strip()
+        elif a.startswith("--verify-phone="):
+            verify_ctx["owner_phone"] = a.split("=", 1)[1].strip()
+        elif a.startswith("--verify-address="):
+            verify_ctx["address"] = a.split("=", 1)[1].strip()
+        elif a.startswith("--purpose="):
+            purpose = a.split("=", 1)[1].strip()
+        elif not a.startswith("--"):
+            target_parts.append(a)
+    target = " ".join(target_parts).strip()
+    if not target:
+        sys.exit(f"{RED}Missing target.{RESET}")
+    if verify_ctx:
+        verify_ctx["owner_name"] = target
+
+    # Business purpose is REQUIRED per Everlight compliance doctrine
+    if not purpose:
+        try:
+            print(f"{GOLD}Per Everlight compliance doctrine, every investigation must record a business purpose.{RESET}")
+            print(f"{DIM}Why are you researching this target? (e.g. 'wholesale lead recon', 'self-audit', 'due diligence on vendor X'){RESET}")
+            purpose = input(f"{GOLD}Purpose: {RESET}").strip()
+        except (EOFError, KeyboardInterrupt):
+            sys.exit(f"\n{RED}Aborted -- business_purpose required.{RESET}")
+    if not purpose:
+        sys.exit(f"{RED}Aborted -- business_purpose required (use --purpose=\"...\" or answer the prompt).{RESET}")
+
+    badge = f" [triggered_by={triggered_by}"
+    if lead_id is not None: badge += f", lead_id={lead_id}"
+    if verify_ctx: badge += f", verifying with {len(verify_ctx)-1} signal(s)"
+    badge += "]"
+    print(f"{GOLD}Investigating: {target}{RESET} {DIM}{badge}{RESET}")
+    print(f"{DIM}Purpose: {purpose}{RESET}\n")
+    try:
+        sys.path.insert(0, str(ROOT))
+        from osint_api.orchestrator import run_investigation_sync
+        from osint_api import compliance_log, legal_state
+        # Log the investigation start to compliance_log
+        state_rules = legal_state.state_rules_for(verify_ctx.get("state", ""))
+        compliance_log.log_action(
+            action="investigate", target=target, actor=triggered_by,
+            lead_id=lead_id, business_purpose=purpose,
+            state=verify_ctx.get("state", ""), state_rules=state_rules,
+            notes="cli investigate",
+        )
+        results, inv_id = run_investigation_sync(
+            target, triggered_by=triggered_by, lead_id=lead_id,
+            verify_context=verify_ctx or None, business_purpose=purpose)
+        for inv in results:
+            color = GREEN if inv.get("ok") else RED
+            mark = "✓" if inv.get("ok") else "✗"
+            print(f"\n  {color}{mark}{RESET} {GOLD}{inv['investigator']}{RESET}  "
+                  f"{DIM}({inv.get('elapsed_ms',0)}ms){RESET}")
+            for finding in inv.get("findings", [])[:5]:
+                v = finding.get("verification")
+                if v:
+                    conf = v.get("confidence", 0)
+                    conf_col = GREEN if conf >= 70 else (CYAN if conf >= 50 else RED)
+                    conf_str = f" {conf_col}[conf={conf}]{RESET}"
+                else:
+                    conf_str = ""
+                print(f"      {BOLD}{finding.get('label','')}{RESET}: {finding.get('value','')[:100]}{conf_str}")
+        if inv_id:
+            report_url = f"http://127.0.0.1:2301/report/{inv_id}"
+            print(f"\n{GOLD}{BOLD}Profile Report:{RESET}")
+            print(f"  {GOLD}{report_url}{RESET}")
+            print(f"  {DIM}Static snapshot: http://127.0.0.1:2300/cache/reports/{inv_id}.html{RESET}")
+            # Auto-open unless --no-open passed
+            if "--no-open" not in sys.argv:
+                _open_url(report_url)
+        print(f"{DIM}triggered_by={triggered_by}, purpose='{purpose[:50]}'{RESET}")
+    except Exception as e:
+        sys.exit(f"{RED}Investigation failed: {e}{RESET}")
+
+
+def _open_url(url: str) -> bool:
+    """Try every common URL opener. Returns True if one succeeded."""
+    for opener in ("termux-open-url", "xdg-open", "open"):
+        if shutil.which(opener):
+            try:
+                subprocess.Popen([opener, url],
+                                  stdout=subprocess.DEVNULL,
+                                  stderr=subprocess.DEVNULL)
+                print(f"  {DIM}opened in browser via {opener}{RESET}")
+                return True
+            except Exception:
+                continue
+    # Android `am start` fallback (Termux without termux-open-url)
+    if shutil.which("am"):
+        try:
+            subprocess.Popen(["am", "start", "-a", "android.intent.action.VIEW", "-d", url],
+                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            print(f"  {DIM}opened in browser via am start{RESET}")
+            return True
+        except Exception:
+            pass
+    print(f"  {DIM}(no URL opener found -- copy the URL above into a browser){RESET}")
+    return False
+
+
+def cmd_team_usage(args: list[str]) -> None:
+    """
+    Team usage telemetry: who triggered what, when, and where.
+    Aggregates investigations + live_pulls + lead enrichments + article freshness.
+    Emits branded HTML report at audit_reports/team_usage_<ts>.html.
+    """
+    from datetime import timedelta
+    sys.path.insert(0, str(ROOT))
+
+    INVESTIGATIONS_DB = ROOT / "cache" / "investigations.sqlite"
+    LIVE_LOG_DB = ROOT / "cache" / "live_log.sqlite"
+    ARTICLES_DB = ROOT / "cache" / "articles.sqlite"
+    LEADS_DB = WORKSPACE / "01_BUSINESSES" / "Everlight_Ventures" / "Wholesale" / "leads_db.sqlite"
+
+    report_dir = ROOT / "audit_reports"
+    report_dir.mkdir(parents=True, exist_ok=True)
+
+    now = datetime.now()
+    cutoff_7d = (now - timedelta(days=7)).isoformat()
+    cutoff_30d = (now - timedelta(days=30)).isoformat()
+    cutoff_24h = (now - timedelta(hours=24))
+
+    print(f"{GOLD}{BOLD}== Team usage telemetry =={RESET}\n")
+
+    # --- Investigations ---
+    inv_total = 0; inv_7d = 0; inv_30d = 0
+    inv_by_trigger: dict[str, int] = {}
+    inv_by_kind: dict[str, int] = {}
+    top_targets: dict[str, int] = {}
+    if INVESTIGATIONS_DB.exists():
+        c = sqlite3.connect(INVESTIGATIONS_DB)
+        try:
+            inv_total = c.execute("SELECT COUNT(*) FROM investigations").fetchone()[0]
+            inv_7d = c.execute("SELECT COUNT(*) FROM investigations WHERE started_at >= ?", (cutoff_7d,)).fetchone()[0]
+            inv_30d = c.execute("SELECT COUNT(*) FROM investigations WHERE started_at >= ?", (cutoff_30d,)).fetchone()[0]
+            for row in c.execute("SELECT COALESCE(triggered_by, '(legacy)'), COUNT(*) FROM investigations GROUP BY 1 ORDER BY 2 DESC"):
+                inv_by_trigger[row[0]] = row[1]
+            for row in c.execute("SELECT COALESCE(kind, '(unknown)'), COUNT(*) FROM investigations GROUP BY 1 ORDER BY 2 DESC"):
+                inv_by_kind[row[0]] = row[1]
+            for row in c.execute("SELECT target, COUNT(*) FROM investigations GROUP BY target ORDER BY 2 DESC LIMIT 20"):
+                top_targets[row[0]] = row[1]
+        except sqlite3.OperationalError:
+            pass
+        c.close()
+
+    # --- Live pulls (suite + ad-hoc activity) ---
+    pull_by_trigger: dict[str, int] = {}
+    pull_timeline_24h: dict[str, int] = {}  # hour bucket -> count
+    pull_total = 0
+    if LIVE_LOG_DB.exists():
+        c = sqlite3.connect(LIVE_LOG_DB)
+        pull_total = c.execute("SELECT COUNT(*) FROM live_pulls").fetchone()[0]
+        try:
+            for row in c.execute("SELECT COALESCE(last_triggered_by, '(legacy)'), COUNT(*) FROM live_pulls GROUP BY 1 ORDER BY 2 DESC LIMIT 15"):
+                pull_by_trigger[row[0]] = row[1]
+            # 24h hourly buckets
+            for row in c.execute("SELECT last_attempt FROM live_pulls WHERE last_attempt IS NOT NULL"):
+                try:
+                    ts = datetime.fromisoformat(row[0])
+                    if ts >= cutoff_24h:
+                        bucket = ts.strftime("%Y-%m-%d %H:00")
+                        pull_timeline_24h[bucket] = pull_timeline_24h.get(bucket, 0) + 1
+                except (ValueError, TypeError):
+                    pass
+        except sqlite3.OperationalError:
+            pass
+        c.close()
+
+    # --- Lead enrichments ---
+    enriched_leads = 0; total_leads = 0
+    if LEADS_DB.exists():
+        try:
+            c = sqlite3.connect(LEADS_DB)
+            total_leads = c.execute("SELECT COUNT(*) FROM leads").fetchone()[0]
+            enriched_leads = c.execute(
+                "SELECT COUNT(*) FROM leads WHERE intel_enrichment_json IS NOT NULL"
+            ).fetchone()[0]
+            c.close()
+        except sqlite3.OperationalError:
+            pass
+
+    # --- Articles freshness ---
+    article_total = 0; articles_24h = 0
+    sources_by_freshness: list[tuple[str, str, int]] = []
+    if ARTICLES_DB.exists():
+        try:
+            c = sqlite3.connect(ARTICLES_DB)
+            article_total = c.execute("SELECT COUNT(*) FROM articles").fetchone()[0]
+            cutoff_iso = cutoff_24h.isoformat()
+            articles_24h = c.execute(
+                "SELECT COUNT(*) FROM articles WHERE fetched_at >= ?", (cutoff_iso,)
+            ).fetchone()[0]
+            for row in c.execute(
+                "SELECT domain, MAX(fetched_at), COUNT(*) FROM articles GROUP BY domain ORDER BY MAX(fetched_at) DESC LIMIT 20"
+            ):
+                sources_by_freshness.append((row[0], row[1] or "", row[2]))
+            c.close()
+        except sqlite3.OperationalError:
+            pass
+
+    # --- Print summary ---
+    print(f"{BOLD}Investigations:{RESET}")
+    print(f"  total: {GOLD}{inv_total}{RESET}  |  last 7d: {inv_7d}  |  last 30d: {inv_30d}")
+    print(f"  by trigger:")
+    for k, v in list(inv_by_trigger.items())[:8]:
+        print(f"    {v:>3}  {k}")
+    print()
+    print(f"{BOLD}Live pulls (suite + ad-hoc):{RESET}")
+    print(f"  total domains tracked: {GOLD}{pull_total}{RESET}  |  events in last 24h: {sum(pull_timeline_24h.values())}")
+    print(f"  by trigger:")
+    for k, v in list(pull_by_trigger.items())[:10]:
+        print(f"    {v:>4}  {k}")
+    print()
+    print(f"{BOLD}Wholesale lead enrichments:{RESET}")
+    print(f"  enriched: {GOLD}{enriched_leads}{RESET} / {total_leads} leads in DB")
+    print()
+    print(f"{BOLD}Articles:{RESET}")
+    print(f"  cached: {GOLD}{article_total}{RESET}  |  fetched in last 24h: {articles_24h}")
+
+    # --- Write branded HTML report ---
+    summary = {
+        "ts": now.isoformat(),
+        "investigations": {
+            "total": inv_total, "last_7d": inv_7d, "last_30d": inv_30d,
+            "by_trigger": inv_by_trigger, "by_kind": inv_by_kind,
+            "top_targets": top_targets,
+        },
+        "pulls": {
+            "total": pull_total, "by_trigger": pull_by_trigger,
+            "timeline_24h": pull_timeline_24h,
+        },
+        "leads": {"enriched": enriched_leads, "total": total_leads},
+        "articles": {"total": article_total, "last_24h": articles_24h,
+                      "sources_by_freshness": sources_by_freshness},
+    }
+
+    report_path = _write_usage_report(summary, report_dir)
+    print(f"\n{GOLD}Report: {report_path.relative_to(ROOT)}{RESET}")
+    print(f"  open: http://127.0.0.1:2300/{report_path.relative_to(ROOT)}")
+
+
+def _write_usage_report(s: dict, report_dir: Path) -> Path:
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    out = report_dir / f"team_usage_{ts}.html"
+
+    inv = s["investigations"]; pulls = s["pulls"]; leads = s["leads"]; arts = s["articles"]
+
+    # Build per-trigger rows
+    trig_rows = "".join(
+        f'<tr><td class="mono">{k}</td><td class="num bold">{v}</td></tr>'
+        for k, v in inv["by_trigger"].items()
+    )
+    pull_trig_rows = "".join(
+        f'<tr><td class="mono">{k}</td><td class="num">{v}</td></tr>'
+        for k, v in pulls["by_trigger"].items()
+    )
+    top_target_rows = "".join(
+        f'<tr><td class="mono">{k}</td><td class="num">{v}</td></tr>'
+        for k, v in inv["top_targets"].items()
+    )
+    sources_rows = "".join(
+        f'<tr><td class="mono">{d}</td><td class="num">{c}</td><td class="mono dim">{ts_}</td></tr>'
+        for d, ts_, c in arts["sources_by_freshness"]
+    )
+
+    # 24h timeline (simple SVG bar chart)
+    timeline = pulls["timeline_24h"]
+    max_v = max(timeline.values()) if timeline else 1
+    bars_html = ""
+    sorted_buckets = sorted(timeline.items())
+    for bucket, count in sorted_buckets:
+        h = int((count / max_v) * 100)
+        hour = bucket[-5:]  # "HH:00"
+        bars_html += (
+            f'<div style="display:inline-block;width:30px;text-align:center;margin:0 2px;">'
+            f'<div style="height:120px;display:flex;align-items:flex-end;justify-content:center;">'
+            f'<div style="width:18px;background:linear-gradient(180deg,#c9a84c,#a0832e);height:{h}%;border-radius:3px 3px 0 0;" title="{count} pulls"></div>'
+            f'</div>'
+            f'<div style="font-size:9px;color:#999;font-family:JetBrains Mono,monospace;margin-top:4px;">{hour}</div>'
+            f'<div style="font-size:10px;color:#c9a84c;font-family:JetBrains Mono,monospace;font-weight:bold;">{count}</div>'
+            f'</div>'
+        )
+
+    html_out = f"""<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Team Usage · Intel Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{{ --gold:#c9a84c; --bg:#0a0a0f; --panel:#15140f; --line:#2a2615; --text:#e8e8e8; --dim:#999; }}
+  *{{ box-sizing:border-box; }}
+  body{{ background:var(--bg); color:var(--text); font-family:Inter,sans-serif; line-height:1.55; margin:0; }}
+  .mesh{{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; opacity:.5; }}
+  .mesh::before, .mesh::after{{ content:''; position:absolute; border-radius:50%; filter:blur(80px); opacity:.45; }}
+  .mesh::before{{ width:520px; height:520px; left:-10%; top:-15%; background:radial-gradient(closest-side,#3a2a08,transparent); }}
+  .mesh::after {{ width:480px; height:480px; right:-8%; top:35%; background:radial-gradient(closest-side,#1b1135,transparent); }}
+  header{{ border-bottom:2px solid var(--gold); padding:48px 56px 32px; position:relative; z-index:1; background:radial-gradient(ellipse at top, rgba(201,168,76,0.08), transparent 60%), var(--bg); }}
+  .wordmark{{ font-family:'Playfair Display',serif; font-weight:900; color:var(--gold); letter-spacing:.15em; font-size:.85rem; text-transform:uppercase; }}
+  h1{{ font-family:'Playfair Display',serif; font-weight:700; color:var(--gold); margin:8px 0 4px; font-size:2.4rem; text-shadow:0 0 24px rgba(201,168,76,.45); }}
+  header .sub{{ color:var(--dim); font-size:.95rem; }}
+  main{{ padding:32px 56px 80px; max-width:1200px; margin:0 auto; position:relative; z-index:1; }}
+  .kpis{{ display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:18px; margin-bottom:36px; }}
+  .kpi{{ background:linear-gradient(135deg, rgba(17,17,24,.78), rgba(17,17,24,.45)); border:1px solid rgba(255,255,255,.06); border-radius:12px; padding:20px; }}
+  .kpi-label{{ font-size:.72rem; color:var(--dim); text-transform:uppercase; letter-spacing:.1em; }}
+  .kpi-value{{ font-size:2rem; font-weight:700; color:var(--gold); font-family:'JetBrains Mono', monospace; margin-top:6px; }}
+  section{{ margin-bottom:40px; }}
+  h2{{ font-family:'Playfair Display',serif; color:var(--gold); font-size:1.5rem; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:14px; }}
+  .grid2{{ display:grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap:24px; }}
+  table{{ width:100%; border-collapse:collapse; background:var(--panel); border-radius:6px; overflow:hidden; }}
+  th, td{{ text-align:left; padding:9px 12px; border-bottom:1px solid var(--line); font-size:.9rem; }}
+  th{{ background:rgba(201,168,76,.06); color:var(--gold); font-weight:500; text-transform:uppercase; letter-spacing:.08em; font-size:.7rem; }}
+  td.num{{ font-family:'JetBrains Mono', monospace; text-align:right; }}
+  td.mono{{ font-family:'JetBrains Mono', monospace; font-size:.82rem; }}
+  td.bold{{ color:var(--gold); font-weight:700; }}
+  td.dim{{ color:var(--dim); }}
+  .timeline-bars{{ background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:24px; overflow-x:auto; white-space:nowrap; }}
+  footer{{ border-top:1px solid var(--line); padding:24px 56px; color:var(--dim); font-size:.85rem; text-align:center; position:relative; z-index:1; }}
+</style>
+</head>
+<body>
+<div class="mesh"></div>
+<header>
+  <div class="wordmark">Everlight Ventures · Intel Center</div>
+  <h1>Team Usage Telemetry</h1>
+  <div class="sub">{s['ts']}</div>
+</header>
+<main>
+
+  <section>
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-label">Investigations · all-time</div><div class="kpi-value">{inv['total']}</div></div>
+      <div class="kpi"><div class="kpi-label">Investigations · last 7d</div><div class="kpi-value">{inv['last_7d']}</div></div>
+      <div class="kpi"><div class="kpi-label">Domains tracked</div><div class="kpi-value">{pulls['total']}</div></div>
+      <div class="kpi"><div class="kpi-label">Leads enriched</div><div class="kpi-value">{leads['enriched']} <span style="font-size:.6em;color:var(--dim)">/ {leads['total']}</span></div></div>
+      <div class="kpi"><div class="kpi-label">Articles cached</div><div class="kpi-value">{arts['total']}</div></div>
+      <div class="kpi"><div class="kpi-label">Articles · last 24h</div><div class="kpi-value">{arts['last_24h']}</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>24h activity timeline (live pulls per hour)</h2>
+    <div class="timeline-bars">{bars_html or '<div style="color:var(--dim)">No activity in the last 24h. Run <code>intel suite all</code> to populate.</div>'}</div>
+  </section>
+
+  <div class="grid2">
+    <section>
+      <h2>Investigations by trigger</h2>
+      <table><thead><tr><th>Triggered by</th><th>Count</th></tr></thead>
+        <tbody>{trig_rows or '<tr><td class="dim" colspan="2">No investigations yet</td></tr>'}</tbody></table>
+    </section>
+
+    <section>
+      <h2>Live pulls by trigger</h2>
+      <table><thead><tr><th>Triggered by</th><th>Count</th></tr></thead>
+        <tbody>{pull_trig_rows or '<tr><td class="dim" colspan="2">No pulls logged</td></tr>'}</tbody></table>
+    </section>
+  </div>
+
+  <div class="grid2">
+    <section>
+      <h2>Top investigated targets</h2>
+      <table><thead><tr><th>Target</th><th>Times</th></tr></thead>
+        <tbody>{top_target_rows or '<tr><td class="dim" colspan="2">No targets yet</td></tr>'}</tbody></table>
+    </section>
+
+    <section>
+      <h2>Source freshness (last fetched)</h2>
+      <table><thead><tr><th>Source</th><th>Articles</th><th>Last fetched</th></tr></thead>
+        <tbody>{sources_rows or '<tr><td class="dim" colspan="3">No articles cached</td></tr>'}</tbody></table>
+    </section>
+  </div>
+
+</main>
+<footer>
+  Lucrex · Everlight Ventures · Team usage report · Run again with <code>intel team-usage</code>
+</footer>
+</body></html>"""
+    out.write_text(html_out)
+    return out
+
+
+def cmd_audit_e2e(args: list[str]) -> None:
+    """
+    End-to-end audit: dashboard routes, OSINT API, every cached article URL,
+    every resource domain (via live_log), theme drift check. Emits a branded
+    HTML report at audit_reports/end_to_end_<timestamp>.html.
+
+    Flags:
+      --quick       skip suite re-runs (use existing live_log)
+      --theme-only  just the theme drift check, no HTTP probes
+    """
+    quick = "--quick" in args
+    theme_only = "--theme-only" in args
+
+    sys.path.insert(0, str(ROOT))
+    from osint_api import live_log
+    import concurrent.futures as cf
+
+    started = datetime.now()
+    report_dir = ROOT / "audit_reports"
+    report_dir.mkdir(parents=True, exist_ok=True)
+
+    summary = {
+        "ts": started.isoformat(),
+        "dashboard_routes": [],
+        "osint_routes": [],
+        "article_url_check": {"total": 0, "ok": 0, "404": 0, "other": 0, "samples_404": []},
+        "live_audit": {},
+        "theme_check": {},
+        "category_breakdown": [],
+    }
+
+    print(f"{GOLD}{BOLD}== End-to-end audit started =={RESET}\n")
+
+    # ---- 1. Theme drift check (always) -----------------------------------
+    print(f"{BOLD}[1/5] Theme drift check...{RESET}")
+    theme_tokens = ["#c9a84c", "Playfair Display", "Inter", "mesh"]
+    theme_results = []
+    for html in sorted((ROOT / "09_Dashboard").glob("*.html")) + [ROOT / "osint_api" / "osint.html"]:
+        if not html.exists():
+            continue
+        text = html.read_text(errors="ignore")
+        missing = [t for t in theme_tokens if t not in text]
+        theme_results.append({
+            "file": str(html.relative_to(ROOT)),
+            "missing": missing,
+            "size_kb": round(html.stat().st_size / 1024, 1),
+            "score": 100 - (len(missing) * 25),
+        })
+        status = GREEN if not missing else (RED if len(missing) > 1 else "")
+        mark = "✓" if not missing else "!"
+        print(f"  {status}{mark} {html.relative_to(ROOT)}  "
+              f"score={100 - len(missing)*25}/100  missing={missing or 'none'}{RESET}")
+    summary["theme_check"] = {
+        "total_files": len(theme_results),
+        "perfect_files": sum(1 for r in theme_results if r["score"] == 100),
+        "results": theme_results,
+    }
+
+    if theme_only:
+        _write_audit_report(summary, report_dir)
+        return
+
+    # ---- 2. Dashboard route probes ---------------------------------------
+    print(f"\n{BOLD}[2/5] Dashboard route probes (port 2300)...{RESET}")
+    routes_dash = [
+        ("index.html", 5000),
+        ("articles.html", 5000),
+        ("audit.html", 5000),
+        ("resources.html", 5000),
+        ("categories.html", 5000),
+        ("agents.html", 5000),
+        ("feeds.html", 5000),
+        ("resource.html?d=nasa.gov", 5000),
+        ("data.js", 100000),
+        ("shared.js", 1000),
+    ]
+    for path, min_bytes in routes_dash:
+        try:
+            r = subprocess.run(
+                ["curl", "-s", "-o", "/dev/null", "-w", "%{http_code}|%{size_download}",
+                 f"http://127.0.0.1:2300/09_Dashboard/{path}"],
+                capture_output=True, text=True, timeout=8,
+            )
+            code, _, size = r.stdout.partition("|")
+            code = int(code or 0); size = int(size or 0)
+            ok = code == 200 and size >= min_bytes
+            mark = GREEN + "✓" if ok else RED + "✗"
+            print(f"  {mark}{RESET} {path:<32}  HTTP {code}  {size:>6}b  "
+                  f"{'(min ' + str(min_bytes) + ')' if not ok else ''}")
+            summary["dashboard_routes"].append({"path": path, "code": code, "bytes": size, "ok": ok})
+        except subprocess.TimeoutExpired:
+            print(f"  {RED}✗{RESET} {path:<32}  TIMEOUT")
+            summary["dashboard_routes"].append({"path": path, "code": 0, "bytes": 0, "ok": False, "err": "timeout"})
+
+    # ---- 3. OSINT API probes ---------------------------------------------
+    print(f"\n{BOLD}[3/5] OSINT API probes (port 2301)...{RESET}")
+    routes_osint = ["/healthz", "/sources", "/live-audit", "/investigations", "/"]
+    for path in routes_osint:
+        try:
+            r = subprocess.run(
+                ["curl", "-s", "-o", "/dev/null", "-w", "%{http_code}",
+                 f"http://127.0.0.1:2301{path}"],
+                capture_output=True, text=True, timeout=8,
+            )
+            code = int(r.stdout or 0)
+            ok = 200 <= code < 400
+            mark = GREEN + "✓" if ok else RED + "✗"
+            print(f"  {mark}{RESET} {path:<24}  HTTP {code}")
+            summary["osint_routes"].append({"path": path, "code": code, "ok": ok})
+        except subprocess.TimeoutExpired:
+            print(f"  {RED}✗{RESET} {path:<24}  TIMEOUT")
+
+    # ---- 4. Cached article URL check --------------------------------------
+    print(f"\n{BOLD}[4/5] Cached article URL HEAD check (parallel)...{RESET}")
+    art_db = ROOT / "cache" / "articles.sqlite"
+    article_urls = []
+    if art_db.exists():
+        ac = sqlite3.connect(art_db)
+        article_urls = [u for (u,) in ac.execute(
+            "SELECT DISTINCT url FROM articles WHERE url LIKE 'http%'"
+        ).fetchall()][:300]  # cap at 300 to keep audit under 5 min
+        ac.close()
+    print(f"  testing {len(article_urls)} URLs (cap 300)...")
+
+    def _head(url):
+        try:
+            r = subprocess.run(
+                ["curl", "-sI", "-o", "/dev/null", "-w", "%{http_code}",
+                 "--max-time", "6", "-A", "Mozilla/5.0 (compatible; EverlightIntel/1.0)",
+                 url],
+                capture_output=True, text=True, timeout=8,
+            )
+            return url, int(r.stdout or 0)
+        except Exception:
+            return url, 0
+
+    art_404s = []
+    art_ok = 0
+    art_other = 0
+    if article_urls:
+        with cf.ThreadPoolExecutor(max_workers=8) as ex:
+            done = 0
+            for url, code in ex.map(_head, article_urls):
+                done += 1
+                if 200 <= code < 400:
+                    art_ok += 1
+                elif code == 404:
+                    art_404s.append(url)
+                else:
+                    art_other += 1
+                if done % 50 == 0:
+                    print(f"    ... {done}/{len(article_urls)}  ok={art_ok}  404={len(art_404s)}")
+    summary["article_url_check"] = {
+        "total": len(article_urls),
+        "ok": art_ok,
+        "404": len(art_404s),
+        "other": art_other,
+        "samples_404": art_404s[:20],
+    }
+    print(f"  {GREEN}✓{RESET} ok={art_ok}  {RED}404={len(art_404s)}{RESET}  other={art_other}")
+
+    # ---- 5. Live audit snapshot + per-category breakdown ------------------
+    print(f"\n{BOLD}[5/5] Live audit snapshot + per-category breakdown...{RESET}")
+    s = live_log.stats(window_days=30)
+    summary["live_audit"] = s
+
+    con = open_db()
+    cat_rows = []
+    for cat, total in con.execute(
+        "SELECT category, COUNT(*) FROM resources GROUP BY category ORDER BY 2 DESC"
+    ).fetchall():
+        # how many of this category's domains are live in live_log?
+        domains = [d for (d,) in con.execute(
+            "SELECT domain FROM resources WHERE category=? AND domain != ''", (cat,)
+        ).fetchall()]
+        if not domains:
+            cat_rows.append({"category": cat, "total": total, "live": 0, "dead": 0, "untested": total})
+            continue
+        live_domains = set(live_log.live_active_domains(window_days=30))
+        live_count = sum(1 for d in domains if d in live_domains)
+        # dead = attempted but no recent success
+        attempted = set()
+        for r in live_log.all_records():
+            if r["domain"] in domains:
+                attempted.add(r["domain"])
+        dead = len(attempted) - live_count
+        untested = total - len(attempted)
+        cat_rows.append({"category": cat, "total": total, "live": live_count,
+                         "dead": dead, "untested": untested})
+    summary["category_breakdown"] = cat_rows
+    print(f"  live_active: {GOLD}{s['live_active']}{RESET} of {s['total_attempted']} attempted "
+          f"({s['live_active']*100//max(s['total_attempted'],1)}%)")
+
+    # ---- Render branded HTML report ---------------------------------------
+    report_path = _write_audit_report(summary, report_dir)
+    print(f"\n{GOLD}{BOLD}== Audit complete =={RESET}")
+    print(f"  report: {report_path.relative_to(ROOT)}")
+    print(f"  open:   file://{report_path}")
+
+
+def _write_audit_report(summary: dict, report_dir: Path) -> Path:
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    out = report_dir / f"end_to_end_{ts}.html"
+
+    # KPIs
+    live = summary.get("live_audit", {}).get("live_active", 0)
+    total_attempted = summary.get("live_audit", {}).get("total_attempted", 0)
+    live_pct = (live * 100 // max(total_attempted, 1)) if total_attempted else 0
+    art = summary.get("article_url_check", {})
+    dash_ok = sum(1 for r in summary.get("dashboard_routes", []) if r.get("ok"))
+    dash_total = len(summary.get("dashboard_routes", []))
+    osint_ok = sum(1 for r in summary.get("osint_routes", []) if r.get("ok"))
+    osint_total = len(summary.get("osint_routes", []))
+    theme_perfect = summary.get("theme_check", {}).get("perfect_files", 0)
+    theme_total = summary.get("theme_check", {}).get("total_files", 0)
+
+    # Per-category bars
+    cat_rows_html = ""
+    for c in sorted(summary.get("category_breakdown", []), key=lambda x: -x["live"]):
+        live_pct_c = (c["live"] * 100 // max(c["total"], 1)) if c["total"] else 0
+        dead_pct_c = (c["dead"] * 100 // max(c["total"], 1)) if c["total"] else 0
+        cat_rows_html += f"""
+        <tr>
+          <td>{c['category']}</td>
+          <td class="num">{c['live']}</td>
+          <td class="num">{c['dead']}</td>
+          <td class="num">{c['untested']}</td>
+          <td class="num bold">{c['total']}</td>
+          <td>
+            <div class="bar">
+              <span class="bar-live" style="width:{live_pct_c}%"></span>
+              <span class="bar-dead" style="width:{dead_pct_c}%"></span>
+            </div>
+          </td>
+        </tr>"""
+
+    dash_rows_html = "".join(
+        f'<tr><td class="mono">{r["path"]}</td><td class="num">{r["code"]}</td>'
+        f'<td class="num">{r["bytes"]:,}</td>'
+        f'<td>{"<span class=chip-green>OK</span>" if r["ok"] else "<span class=chip-red>FAIL</span>"}</td></tr>'
+        for r in summary.get("dashboard_routes", [])
+    )
+    osint_rows_html = "".join(
+        f'<tr><td class="mono">{r["path"]}</td><td class="num">{r["code"]}</td>'
+        f'<td>{"<span class=chip-green>OK</span>" if r["ok"] else "<span class=chip-red>FAIL</span>"}</td></tr>'
+        for r in summary.get("osint_routes", [])
+    )
+    theme_rows_html = "".join(
+        f'<tr><td class="mono">{r["file"]}</td><td class="num">{r["size_kb"]} KB</td>'
+        f'<td class="num">{r["score"]}/100</td>'
+        f'<td>{("<span class=chip-red>missing: " + ", ".join(r["missing"]) + "</span>") if r["missing"] else "<span class=chip-green>perfect</span>"}</td></tr>'
+        for r in summary.get("theme_check", {}).get("results", [])
+    )
+    art_404_html = "".join(f'<li class="mono">{u}</li>' for u in art.get("samples_404", []))
+
+    html_out = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>End-to-end Audit · Intel Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {{ --gold:#c9a84c; --gold-glow:#e0c66a; --bg:#0a0a0f; --panel:#15140f; --line:#2a2615; --text:#e8e8e8; --dim:#999;
+           --green:#22c55e; --red:#dc2626; --cyan:#22d3ee; }}
+  *{{ box-sizing:border-box; }}
+  body {{ background:var(--bg); color:var(--text); font-family:Inter,sans-serif; line-height:1.55; margin:0; }}
+  .mesh {{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; opacity:.5; }}
+  .mesh::before, .mesh::after {{ content:''; position:absolute; border-radius:50%; filter:blur(80px); opacity:.45; }}
+  .mesh::before {{ width:520px; height:520px; left:-10%; top:-15%; background:radial-gradient(closest-side,#3a2a08,transparent); }}
+  .mesh::after {{ width:480px; height:480px; right:-8%; top:35%; background:radial-gradient(closest-side,#1b1135,transparent); }}
+  header {{ border-bottom:2px solid var(--gold); padding:48px 56px 32px; background:radial-gradient(ellipse at top, rgba(201,168,76,0.08), transparent 60%), var(--bg); position:relative; z-index:1; }}
+  .wordmark {{ font-family:'Playfair Display',serif; font-weight:900; color:var(--gold); letter-spacing:.15em; font-size:.85rem; text-transform:uppercase; }}
+  h1 {{ font-family:'Playfair Display',serif; font-weight:700; color:var(--gold); margin:8px 0 4px; font-size:2.4rem; text-shadow:0 0 24px rgba(201,168,76,.45); }}
+  header .sub {{ color:var(--dim); font-size:.95rem; }}
+  main {{ padding:32px 56px 80px; max-width:1200px; margin:0 auto; position:relative; z-index:1; }}
+  .kpis {{ display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:18px; margin-bottom:36px; }}
+  .kpi {{ background:linear-gradient(135deg, rgba(17,17,24,.78), rgba(17,17,24,.45)); border:1px solid rgba(255,255,255,.06); border-radius:12px; padding:20px; }}
+  .kpi-label {{ font-size:.75rem; color:var(--dim); text-transform:uppercase; letter-spacing:.1em; }}
+  .kpi-value {{ font-size:2rem; font-weight:700; color:var(--gold); font-family:'JetBrains Mono', monospace; margin-top:6px; }}
+  .kpi.green .kpi-value {{ color:var(--green); }}
+  .kpi.red .kpi-value {{ color:var(--red); }}
+  section {{ margin-bottom:40px; }}
+  h2 {{ font-family:'Playfair Display',serif; color:var(--gold); font-size:1.5rem; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:14px; }}
+  table {{ width:100%; border-collapse:collapse; background:var(--panel); border-radius:6px; overflow:hidden; }}
+  th, td {{ text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); font-size:.92rem; }}
+  th {{ background:rgba(201,168,76,.06); color:var(--gold); font-weight:500; text-transform:uppercase; letter-spacing:.08em; font-size:.75rem; }}
+  tr:last-child td {{ border-bottom:none; }}
+  td.num {{ font-family:'JetBrains Mono', monospace; text-align:right; }}
+  td.mono {{ font-family:'JetBrains Mono', monospace; font-size:.85rem; }}
+  td.bold {{ color:var(--gold); font-weight:700; }}
+  .chip-green, .chip-red {{ padding:.18rem .55rem; border-radius:9999px; font-size:.7rem; font-family:'JetBrains Mono', monospace; }}
+  .chip-green {{ background:rgba(34,197,94,.10); color:#4ade80; border:1px solid rgba(34,197,94,.3); }}
+  .chip-red {{ background:rgba(220,38,38,.10); color:#f87171; border:1px solid rgba(220,38,38,.3); }}
+  .bar {{ display:flex; height:6px; background:rgba(255,255,255,.06); border-radius:3px; overflow:hidden; min-width:140px; }}
+  .bar-live {{ background:var(--green); }}
+  .bar-dead {{ background:var(--red); }}
+  ul {{ font-family:'JetBrains Mono', monospace; font-size:.8rem; color:var(--dim); }}
+  footer {{ border-top:1px solid var(--line); padding:24px 56px; color:var(--dim); font-size:.85rem; text-align:center; position:relative; z-index:1; }}
+</style>
+</head>
+<body>
+<div class="mesh"></div>
+
+<header>
+  <div class="wordmark">Everlight Ventures · Intel Center</div>
+  <h1>End-to-end Audit</h1>
+  <div class="sub">{summary['ts']}</div>
+</header>
+
+<main>
+
+  <section>
+    <div class="kpis">
+      <div class="kpi {'green' if live_pct >= 75 else 'red' if live_pct < 50 else ''}">
+        <div class="kpi-label">Live-active</div>
+        <div class="kpi-value">{live} <span style="font-size:.6em; color:var(--dim)">/ {total_attempted}</span></div>
+        <div style="font-size:.85rem; color:var(--dim); margin-top:4px">{live_pct}%</div>
+      </div>
+      <div class="kpi {'green' if dash_ok == dash_total else 'red'}">
+        <div class="kpi-label">Dashboard routes</div>
+        <div class="kpi-value">{dash_ok} / {dash_total}</div>
+      </div>
+      <div class="kpi {'green' if osint_ok == osint_total else 'red'}">
+        <div class="kpi-label">OSINT API routes</div>
+        <div class="kpi-value">{osint_ok} / {osint_total}</div>
+      </div>
+      <div class="kpi {'green' if art.get('404',0) == 0 else 'red'}">
+        <div class="kpi-label">Article 404s</div>
+        <div class="kpi-value">{art.get('404',0)}</div>
+        <div style="font-size:.85rem; color:var(--dim); margin-top:4px">of {art.get('total',0)} tested</div>
+      </div>
+      <div class="kpi {'green' if theme_perfect == theme_total else 'red'}">
+        <div class="kpi-label">Theme perfect</div>
+        <div class="kpi-value">{theme_perfect} / {theme_total}</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Activation by category</h2>
+    <table>
+      <thead><tr><th>Category</th><th class="num">Live</th><th class="num">Dead</th><th class="num">Untested</th><th class="num">Total</th><th>Bar</th></tr></thead>
+      <tbody>{cat_rows_html}</tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Dashboard route status (port 2300)</h2>
+    <table>
+      <thead><tr><th>Route</th><th class="num">HTTP</th><th class="num">Bytes</th><th>Status</th></tr></thead>
+      <tbody>{dash_rows_html}</tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>OSINT API status (port 2301)</h2>
+    <table>
+      <thead><tr><th>Route</th><th class="num">HTTP</th><th>Status</th></tr></thead>
+      <tbody>{osint_rows_html}</tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Theme drift</h2>
+    <table>
+      <thead><tr><th>File</th><th class="num">Size</th><th class="num">Score</th><th>Status</th></tr></thead>
+      <tbody>{theme_rows_html}</tbody>
+    </table>
+  </section>
+
+  {f'<section><h2>Article URLs returning 404 (sample)</h2><ul>{art_404_html}</ul></section>' if art.get("samples_404") else ""}
+
+</main>
+
+<footer>
+  Lucrex · Everlight Ventures · End-to-end audit · Run again with <code>intel audit-end-to-end</code>
+</footer>
+</body>
+</html>"""
+    out.write_text(html_out)
+    return out
+
+
+def cmd_coverage(args: list[str]) -> None:
+    """
+    Show per-state and per-category breakdown of domain coverage:
+    live / auth_gated / dead / untested.
+    """
+    sys.path.insert(0, str(ROOT))
+    from osint_api.domain_status import stats as _ds_stats, status_map as _ds_map
+    b = _ds_stats()
+    total = sum(b.values()) or 1
+    print(f"{GOLD}{BOLD}== Domain coverage =={RESET}")
+    print()
+    for k, color in [("live", GREEN), ("auth_gated", GOLD), ("rate_limited", "\033[33m"),
+                      ("dead", RED), ("untested", DIM)]:
+        n = b.get(k, 0)
+        pct_val = n * 100 // total
+        bar = "█" * (pct_val // 2) + DIM + "░" * (50 - pct_val // 2) + RESET
+        print(f"  {color}{k:<14}{RESET} {n:>4}  ({pct_val:>3}%)  {bar}")
+    print()
+    print(f"  Total tested: {GOLD}{total}{RESET}")
+
+    # Per-category breakdown
+    status_map = _ds_map()
+    con = open_db()
+    print()
+    print(f"{BOLD}By category:{RESET}")
+    rows = con.execute(
+        "SELECT category, domain FROM resources WHERE domain != ''"
+    ).fetchall()
+    by_cat: dict[str, dict] = {}
+    for cat, dom in rows:
+        s = status_map.get(dom.lower(), "untested")
+        if cat not in by_cat:
+            by_cat[cat] = {"live": 0, "auth_gated": 0, "rate_limited": 0, "dead": 0, "untested": 0}
+        by_cat[cat][s] = by_cat[cat].get(s, 0) + 1
+    for cat in sorted(by_cat, key=lambda c: -by_cat[c]["live"]):
+        s = by_cat[cat]
+        t = sum(s.values()) or 1
+        print(f"  {GOLD}{cat[:38]:<38}{RESET} live={GREEN}{s['live']:>3}{RESET}/{t:<3} "
+              f"auth={s.get('auth_gated',0):>2} dead={RED}{s.get('dead',0):>3}{RESET} "
+              f"untested={s.get('untested',0):>3}")
+
+
+def cmd_purge_target(args: list[str]) -> None:
+    """
+    Right-to-deletion (CCPA §1798.105). Removes everything we have on a target.
+
+    Deletes:
+      - cache/investigations/<id>.json files where target matches
+      - cache/reports/<id>.html files where target matches
+      - investigations.sqlite rows
+      - leads_db.sqlite intel_enrichment_json column (cleared)
+
+    Preserves (for legal hold, 7-year retention):
+      - compliance_log rows -- target/notes redacted, but the audit row stays
+
+    Adds to DNC: permanent block on contact.
+
+    Usage: intel purge-target "Linda Smith"
+    """
+    if not args:
+        sys.exit("usage: intel purge-target \"<name or address>\"")
+    target = " ".join(args).strip().strip('"').strip("'")
+    if not target:
+        sys.exit(f"{RED}Empty target.{RESET}")
+
+    print(f"{GOLD}{BOLD}== Right-to-Deletion: '{target}' =={RESET}\n")
+    print(f"{RED}This will permanently remove ALL data on this target.{RESET}")
+    try:
+        confirm = input(f"{GOLD}Type the target name to confirm: {RESET}").strip()
+    except (EOFError, KeyboardInterrupt):
+        sys.exit(f"\n{RED}Aborted.{RESET}")
+    if confirm != target:
+        sys.exit(f"{RED}Confirmation didn't match -- aborted.{RESET}")
+
+    sys.path.insert(0, str(ROOT))
+    from osint_api import compliance_log
+    deleted = {"investigations": 0, "reports": 0, "sqlite_rows": 0, "leads_rows": 0}
+
+    # 1. SQLite rows in investigations.sqlite
+    inv_db = ROOT / "cache" / "investigations.sqlite"
+    matched_ids = []
+    if inv_db.exists():
+        try:
+            con = sqlite3.connect(inv_db)
+            rows = con.execute(
+                "SELECT id, file_path FROM investigations WHERE LOWER(target)=LOWER(?)",
+                (target,)
+            ).fetchall()
+            matched_ids = [r[0] for r in rows]
+            for inv_id, file_path in rows:
+                if file_path and Path(file_path).exists():
+                    Path(file_path).unlink()
+                    deleted["investigations"] += 1
+            con.execute("DELETE FROM investigations WHERE LOWER(target)=LOWER(?)", (target,))
+            deleted["sqlite_rows"] = con.total_changes
+            con.commit(); con.close()
+        except sqlite3.Error as e:
+            print(f"{RED}sqlite error: {e}{RESET}")
+
+    # 2. Rendered report HTMLs
+    reports_dir = ROOT / "cache" / "reports"
+    if reports_dir.exists():
+        for inv_id in matched_ids:
+            html_path = reports_dir / f"{inv_id}.html"
+            if html_path.exists():
+                html_path.unlink()
+                deleted["reports"] += 1
+
+    # 3. Wholesale leads_db intel_enrichment_json column
+    leads_db = WORKSPACE / "01_BUSINESSES" / "Everlight_Ventures" / "Wholesale" / "leads_db.sqlite"
+    if leads_db.exists():
+        try:
+            con = sqlite3.connect(leads_db)
+            con.execute(
+                "UPDATE leads SET intel_enrichment_json=NULL WHERE LOWER(owner_name)=LOWER(?)",
+                (target,)
+            )
+            deleted["leads_rows"] = con.total_changes
+            con.commit(); con.close()
+        except sqlite3.OperationalError:
+            pass
+
+    # 4. Compliance log: PRESERVE rows but redact target text (7-year legal hold)
+    try:
+        log_db = ROOT / "cache" / "compliance.sqlite"
+        if log_db.exists():
+            con = sqlite3.connect(log_db)
+            con.execute(
+                "UPDATE compliance_log SET target='[REDACTED]', notes='[REDACTED]' "
+                "WHERE LOWER(target)=LOWER(?)", (target,)
+            )
+            con.commit(); con.close()
+    except sqlite3.Error:
+        pass
+
+    # 5. Log the purge as a compliance event
+    compliance_log.log_action(
+        action="purge", target=target, actor="cli_user",
+        notes=f"Right-to-deletion executed. Deleted: {json.dumps(deleted)}",
+    )
+
+    print()
+    print(f"{GREEN}✓ Purge complete:{RESET}")
+    print(f"  Investigation JSON files deleted:  {deleted['investigations']}")
+    print(f"  Rendered HTML reports deleted:     {deleted['reports']}")
+    print(f"  SQLite rows deleted:               {deleted['sqlite_rows']}")
+    print(f"  Lead enrichment cleared:           {deleted['leads_rows']}")
+    print(f"  Compliance log: target redacted (7-year legal hold preserved)")
+    print(f"\n{GOLD}Consider adding '{target}' to Wholesale/compliance/dnc_list.json to prevent re-investigation.{RESET}")
+
+
+def cmd_deal(args: list[str]) -> None:
+    """`intel deal launch|status|verify|fire <key>` -- autonomous deal arc engine.
+
+    Subcommands:
+      intel deal launch <key>           Kick off the M1 cold intro (real send to seller_email
+                                        from deal_meta.json; use test_mode for self-test)
+      intel deal status <key>           Print audit timeline + last stage
+      intel deal verify <key>           Verify hash chain integrity for this deal
+      intel deal fire <key> <step>      Fire a specific arc step (m1_intro/m3_open/m5_meet/m7_contract)
+      intel deal new <key> --test       Initialize a new deal_meta.json in test mode
+    """
+    import sys as _sys, json as _json
+    _sys.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/Everlight_Intel_Center")
+    _sys.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/audit")
+    from osint_api.arc_send import (fire_step, deal_status, ARC_FUNCTIONS,
+                                     load_deal_meta, write_deal_meta)
+    from deal_execution_log import verify_chain, deal_history
+
+    if not args:
+        print(cmd_deal.__doc__ or "")
+        return
+
+    sub = args[0]
+    if sub == "launch":
+        if len(args) < 2:
+            print("usage: intel deal launch <deal_key>"); return
+        key = args[1]
+        meta = load_deal_meta(key)
+        print(f"=== launching deal {key} ===")
+        print(f"  property:  {meta.get('property_address')}")
+        print(f"  seller:    {meta.get('seller_name')} <{meta.get('seller_email')}>")
+        print(f"  test_mode: {meta.get('test_mode', False)}")
+        print()
+        result = fire_step(key, "m1_intro")
+        print(_json.dumps(result, indent=2))
+
+    elif sub == "status":
+        if len(args) < 2:
+            print("usage: intel deal status <deal_key>"); return
+        key = args[1]
+        st = deal_status(key)
+        print(f"=== deal {key} status ===")
+        print(f"  events:     {st['event_count']}")
+        print(f"  last_stage: {st.get('last_event_stage')}")
+        print()
+        print("--- timeline ---")
+        for e in deal_history(key)[-15:]:
+            amt = f"${e['amount_usd']:,}" if e['amount_usd'] else ""
+            print(f"  [{e['id']:03d}] {e['ts'][:19]} {e['event']:18} {amt:>10} -- {(e['notes'] or '')[:80]}")
+
+    elif sub == "verify":
+        if len(args) < 2:
+            print("usage: intel deal verify <deal_key>"); return
+        key = args[1]
+        # Global chain verify (the hash chain is across all deals; tamper-detect on
+        # ANY prior row breaks the chain regardless of deal_key)
+        global_result = verify_chain()
+        events_for_deal = deal_history(key)
+        ok = "✓" if global_result.get("ok") else "✗"
+        print(f"  {ok} global chain verify: {global_result}")
+        print(f"      events for this deal: {len(events_for_deal)}")
+        if events_for_deal:
+            print(f"      first event id: {events_for_deal[0]['id']}, last: {events_for_deal[-1]['id']}")
+
+    elif sub == "fire":
+        if len(args) < 3:
+            print(f"usage: intel deal fire <deal_key> <step>")
+            print(f"  steps: {list(ARC_FUNCTIONS.keys())}"); return
+        key, step = args[1], args[2]
+        kwargs = {}
+        # Allow `intel deal fire X m5_meet 12000` to pass counter_amount
+        if len(args) >= 4 and step == "m5_meet":
+            try: kwargs["counter_amount"] = int(args[3])
+            except ValueError: pass
+        result = fire_step(key, step, **kwargs)
+        print(_json.dumps(result, indent=2))
+
+    elif sub == "new":
+        if len(args) < 2:
+            print("usage: intel deal new <deal_key> [--test]"); return
+        key = args[1]
+        test_mode = "--test" in args
+        meta = load_deal_meta(key)  # gets defaults for 1536 S Third
+        meta["deal_key"] = key
+        meta["test_mode"] = test_mode
+        if test_mode:
+            # Test-mode: redirect everything to operator inbox by setting recipient = operator
+            print(f"  test_mode=True: all sends redirect to operator inbox (1m.rich.gee@gmail.com)")
+        write_deal_meta(key, meta)
+        print(f"  ✓ wrote deal_meta.json for {key}")
+        # AUTO-RENDER the 5 contract HTMLs + index from deal_meta. Eliminates the
+        # "test_self had no contracts so /sign/<token> 404'd" bug class.
+        try:
+            from osint_api.contract_renderer import render_all_contracts
+            render_result = render_all_contracts(key, force=False)
+            if render_result.get("ok"):
+                print(f"  ✓ auto-rendered {len(render_result['written'])} contract HTMLs")
+                for fn in render_result["written"]:
+                    print(f"      ↪ {fn}")
+                if render_result["skipped"]:
+                    print(f"  (skipped {len(render_result['skipped'])} that already existed; pass --force to overwrite)")
+            else:
+                print(f"  ✗ contract render failed: {render_result.get('error')}")
+        except Exception as e:
+            print(f"  ✗ contract render exception: {e}")
+        print()
+        print(_json.dumps(meta, indent=2))
+
+    else:
+        print(f"unknown subcommand: {sub}")
+        print(cmd_deal.__doc__ or "")
+
+
+def cmd_rebuild(_: list[str]) -> None:
+    print(f"{GOLD}Re-categorizing using cached OCR...{RESET}")
+    subprocess.run([sys.executable, str(ROOT / "build_intel_db.py"), "--no-ocr"], cwd=ROOT)
+
+
+def cmd_rebuild_full(_: list[str]) -> None:
+    print(f"{GOLD}Full rebuild (OCR + categorize) -- ~35 min on first pass.{RESET}")
+    subprocess.run([sys.executable, str(ROOT / "build_intel_db.py")], cwd=ROOT)
+
+
+COMMANDS = {
+    "": cmd_dash, "dash": cmd_dash, "html": cmd_dash,
+    "search": cmd_search, "find": cmd_search, "s": cmd_search,
+    "cat": cmd_cat, "category": cmd_cat,
+    "agent": cmd_agent,
+    "review": cmd_review, "queue": cmd_review,
+    "stats": cmd_stats, "info": cmd_stats,
+    "audit": cmd_audit,
+    "audit-report": cmd_audit_report, "report": cmd_audit_report,
+    "fetch": cmd_fetch,
+    "audit-end-to-end": cmd_audit_e2e, "audit-e2e": cmd_audit_e2e, "e2e": cmd_audit_e2e,
+    "team-usage": cmd_team_usage, "usage": cmd_team_usage,
+    "purge-target": cmd_purge_target, "purge": cmd_purge_target,
+    "coverage": cmd_coverage,
+    "pull": cmd_pull,
+    "pull-all": cmd_pull_all, "pullall": cmd_pull_all,
+    "articles": cmd_articles,
+    "show": cmd_show, "info-source": cmd_show,
+    "suite": cmd_suite,
+    "investigate": cmd_investigate, "osint": cmd_investigate,
+    "live-audit": cmd_live_audit, "liveaudit": cmd_live_audit,
+    "manifest": cmd_manifest, "manifests": cmd_manifest,
+    "wire": cmd_wire,
+    "rebuild": cmd_rebuild,
+    "rebuild-full": cmd_rebuild_full,
+    "deal": cmd_deal,  # autonomous deal arc engine (launch/status/verify/fire/new)
+}
+# Topic shortcuts -- intel news / intel space / intel finance / etc.
+for _kw, _cat in FETCHABLE_TOPICS.items():
+    COMMANDS[_kw] = _make_topic_cmd(_cat)
+
+
+def main():
+    if len(sys.argv) >= 2 and sys.argv[1] in ("-h", "--help", "help"):
+        print(textwrap.dedent(__doc__))
+        return
+    cmd = sys.argv[1] if len(sys.argv) >= 2 else ""
+    fn = COMMANDS.get(cmd.lower())
+    if not fn:
+        print(f"{RED}Unknown subcommand: {cmd}{RESET}")
+        print(textwrap.dedent(__doc__))
+        sys.exit(2)
+    fn(sys.argv[2:])
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Deal: 1536 S Third Street -- Everlight Ventures</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold:#d4a843; --gold-hot:#ffcd3c; --gold-deep:#b8902f;
+    --dark:#0a0a0a; --paper:#16140e; --paper-hi:#1f1c12;
+    --border:#322a14; --border-hi:#4a3d1c;
+    --text:#f4eedb; --text-dim:#b5af9b; --muted:#7a7560;
+    --turquoise:#00e5ff; --green:#5cffb1; --rose:#ff7a8a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background:
+      radial-gradient(ellipse 800px 400px at 20% -10%, rgba(212,168,67,.18) 0%, transparent 70%),
+      linear-gradient(180deg, #050402 0%, var(--dark) 40%, #08080a 100%);
+    background-attachment: fixed;
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    line-height: 1.65;
+    padding: 1.75rem 1rem 4rem;
+    -webkit-font-smoothing: antialiased;
+  }
+  .display { font-family: 'Playfair Display', Georgia, serif; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  a { color: var(--gold); }
+  .wrap { max-width: 880px; margin: 0 auto; }
+
+  /* DOC HEADER */
+  .doc-header {
+    background: linear-gradient(135deg, rgba(212,168,67,.08) 0%, rgba(0,0,0,0) 70%);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--gold);
+    border-radius: 14px;
+    padding: 1.5rem 1.75rem 1.25rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+  }
+  .doc-header::before {
+    content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, var(--gold) 0%, transparent 50%);
+  }
+  .doc-label {
+    color: var(--gold);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    margin-bottom: .35rem;
+  }
+  h1.doc-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--gold-hot);
+    margin: 0 0 .35rem;
+    font-size: clamp(1.85rem, 4vw, 2.45rem);
+    font-weight: 900;
+    letter-spacing: -.01em;
+    line-height: 1.05;
+    text-shadow: 0 0 20px rgba(255,205,60,.20);
+  }
+  .doc-meta {
+    margin-top: .9rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .8rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+  .doc-meta strong { color: var(--gold); margin-right: .35em; font-weight: 600; }
+  .doc-id {
+    margin-top: .65rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .65rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .15em;
+  }
+
+  /* DOC BODY */
+  .doc-body {
+    background: linear-gradient(180deg, var(--paper) 0%, #100f08 100%);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 2rem 2.25rem 2.25rem;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.55);
+  }
+  .doc-body h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    color: var(--gold);
+    font-size: 1.35rem;
+    margin: 1.65rem 0 .65rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .35rem;
+    letter-spacing: .005em;
+  }
+  .doc-body h2:first-child { margin-top: 0; }
+  .doc-body h3 {
+    color: var(--gold-hot);
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 1.25rem 0 .35rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .doc-body p { margin: .5rem 0 .9rem; }
+  .doc-body ul, .doc-body ol { padding-left: 1.4rem; margin: .35rem 0 .9rem; }
+  .doc-body li { margin: .25rem 0; }
+
+  .clause {
+    background: rgba(212,168,67,.04);
+    border-left: 2px solid var(--gold-deep);
+    padding: .9rem 1.1rem;
+    margin: 1rem 0;
+    border-radius: 0 8px 8px 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .82rem;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .clause-id {
+    font-size: .65rem;
+    color: var(--gold);
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    margin-bottom: .35rem;
+    font-weight: 700;
+  }
+
+  .terms-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .85rem;
+  }
+  .terms-table td {
+    padding: .55rem .75rem;
+    border-bottom: 1px solid rgba(122,117,96,.15);
+  }
+  .terms-table td:first-child {
+    color: var(--gold);
+    font-weight: 600;
+    width: 38%;
+  }
+  .terms-table td:last-child { color: var(--text); }
+  .money { color: var(--gold-hot); font-weight: 700; }
+
+  /* SIGNATURE BLOCK */
+  .sig-block {
+    margin-top: 2rem;
+    padding: 1.5rem 1.75rem;
+    background: rgba(0,229,255,.04);
+    border: 1px dashed var(--turquoise);
+    border-radius: 10px;
+  }
+  .sig-block-title {
+    color: var(--turquoise);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .7rem;
+    letter-spacing: .25em;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    font-weight: 700;
+  }
+  .sig-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-top: 1rem;
+  }
+  .sig-line {
+    border-bottom: 2px solid var(--gold-deep);
+    height: 2.5rem;
+    margin-bottom: .35rem;
+  }
+  .sig-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .7rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+  }
+  .sig-label strong { color: var(--gold); display: block; margin-top: .15rem; }
+
+  /* BANNER (e.g. "demo / not signed") */
+  .banner {
+    background: linear-gradient(90deg, rgba(255,205,60,.14) 0%, rgba(255,205,60,.04) 100%);
+    border: 1px solid rgba(255,205,60,.4);
+    color: var(--gold-hot);
+    padding: .75rem 1.1rem;
+    border-radius: 8px;
+    margin-bottom: 1.25rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .78rem;
+    letter-spacing: .05em;
+  }
+
+  footer {
+    margin-top: 2rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .68rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap; gap: .5rem;
+  }
+  footer a { color: var(--gold); border-bottom: 1px dotted var(--gold-deep); }
+  footer .sep { color: var(--gold-deep); margin: 0 .65em; opacity: .6; }
+
+  @media (max-width: 720px) {
+    body { padding: 1rem .65rem 3rem; }
+    .doc-body { padding: 1.25rem 1rem; }
+    .sig-row { grid-template-columns: 1fr; gap: 1rem; }
+    h1.doc-title { font-size: 1.65rem; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="doc-header">
+    <div class="doc-label">Active Deal Index<span style="color: var(--gold-deep); margin: 0 .65em;">◆</span>Everlight Ventures</div>
+    <h1 class="doc-title display">Deal: 1536 S Third Street</h1>
+    <div class="doc-meta">
+      <div><strong>Property:</strong> 1536 S THIRD ST, MEMPHIS, TN, parcel 035093 00032</div>
+      <div><strong>Parties:</strong> Mikal L. Hakeem (Seller) ◆ Richard Gee dba Everlight Ventures (Buyer/Assignor)</div>
+    </div>
+    <div class="doc-id">Deal ID: 2026-05-12_mikal_hakeem_1536_s_third<span style="margin: 0 .8em;">·</span>Generated: 2026-05-12 18:41</div>
+  </header>
+
+  <main class="doc-body">
+    
+<div class="banner">Active Deal ◆ Negotiated $9,500 ◆ Pending signatures</div>
+
+<h2>Deal Snapshot</h2>
+<table class="terms-table">
+  <tr><td>Property</td><td>1536 S THIRD ST, MEMPHIS, TN</td></tr>
+  <tr><td>Parcel</td><td>035093 00032</td></tr>
+  <tr><td>Seller</td><td>Mikal L. Hakeem</td></tr>
+  <tr><td>Buyer</td><td>Richard Gee dba Everlight Ventures</td></tr>
+  <tr><td>Assignee</td><td>Mid South Homebuyers, LLC (Chris Ulander)</td></tr>
+  <tr><td>Negotiated price</td><td><span class="money">$9,500</span> to Seller</td></tr>
+  <tr><td>Assignee pays</td><td><span class="money">$13,090</span></td></tr>
+  <tr><td>Our assignment fee</td><td><span class="money">$3,590</span></td></tr>
+  <tr><td>Effective date</td><td>May 12, 2026</td></tr>
+  <tr><td>Target close</td><td>on or before May 26, 2026</td></tr>
+</table>
+
+<h2>Seller Documents (Mikal signs)</h2>
+<ol>
+  <li><a href="01_PSA.html">Purchase and Sale Agreement</a></li>
+  <li><a href="02_Schedule_A_TN_SB909.html">Schedule A ◆ TN SB 909 Wholesaler Disclosure</a></li>
+  <li><a href="03_EMD_Wire_Acknowledgment.html">Earnest Money Wire Acknowledgment</a></li>
+</ol>
+
+<h2>Buyer Documents (Chris signs)</h2>
+<ol start="4">
+  <li><a href="04_Assignment_Agreement_Chris.html">Assignment Agreement (Everlight to Mid South Homebuyers)</a></li>
+</ol>
+
+<h2>Money Flow</h2>
+<div class="clause">
+  <div class="clause-id">Closing settlement</div>
+  <strong>Step 1:</strong> Mikal signs PSA + Schedule A + EMD ack ◆ Buyer wires $250 EMD to Mid South Title within 3 business days.<br>
+  <strong>Step 2:</strong> Chris signs Assignment Agreement ◆ Wires $1000 GFAD to Mid South Title within 48 hours.<br>
+  <strong>Step 3:</strong> 14-day DD period; either side can walk on material defect.<br>
+  <strong>Step 4:</strong> At close (on or before May 26, 2026):
+  <ul>
+    <li>Chris wires balance: $12,090 (plus closing costs)</li>
+    <li>Title firm disburses: <strong>$9,500</strong> to Mikal, <span class="money"><strong>$3,590</strong></span> to Everlight, plus back tax + recording fees</li>
+    <li>Deed records to Mid South Homebuyers, LLC</li>
+  </ul>
+</div>
+
+  </main>
+
+  <footer>
+    <span>Everlight Ventures<span class="sep">◆</span>Acquisitions<span class="sep">◆</span><a href="http://127.0.0.1:2000/">return to hub</a></span>
+    <span>2026-05-12_mikal_hakeem_1536_s_third</span>
+  </footer>
+</div>
+</body>
+</html>

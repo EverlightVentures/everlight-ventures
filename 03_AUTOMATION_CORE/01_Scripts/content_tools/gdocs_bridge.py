@@ -51,7 +51,7 @@ def _candidate_webhook_urls():
     defaults = [
         "http://127.0.0.1:5678/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdoc",
         "http://localhost:5678/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdoc",
-        "http://129.159.38.250:5678/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdoc",
+        "http://163.192.19.196:5678/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdoc",
         "https://n8n.everlightventures.io/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdoc",
     ]
     for url in ([preferred] if preferred else []) + defaults:
@@ -851,7 +851,7 @@ def _save_styled_html_report(title, content_md, agent=None):
     if not saved:
         return {"ok": False, "error": "html_save_failed"}
 
-    report_base = os.environ.get("REPORT_URL_BASE", "http://129.159.38.250:8504/reports/").rstrip("/") + "/"
+    report_base = os.environ.get("REPORT_URL_BASE", "http://127.0.0.1:2200/reports/").rstrip("/") + "/"
     return {"ok": True, "html_link": f"{report_base}{filename}", "html_path": filename, "html": html}
 
 
