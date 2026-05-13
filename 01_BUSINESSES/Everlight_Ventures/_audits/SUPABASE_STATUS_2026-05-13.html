@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supabase Status Audit -- 2026-05-13 | Everlight Ventures</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0A0A0A; color: #E8E8E8; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.7; min-height: 100vh; }
+.header { background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%); border-bottom: 2px solid #D4A843; padding: 40px 0; text-align: center; }
+.header-inner { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+.logo { font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 4px; text-transform: uppercase; color: #D4A843; margin-bottom: 16px; }
+.header h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600; color: #E8E8E8; margin-bottom: 8px; }
+.header .meta { font-size: 13px; color: #999999; }
+.header .meta span { color: #D4A843; }
+.content { max-width: 800px; margin: 0 auto; padding: 40px 24px; }
+.content h2 { font-family: 'Playfair Display', serif; font-size: 22px; color: #D4A843; margin: 32px 0 16px 0; padding-bottom: 8px; border-bottom: 1px solid #1A1A1A; }
+.content h3 { font-size: 16px; font-weight: 600; color: #E8E8E8; margin: 24px 0 12px 0; }
+.content p { margin-bottom: 16px; font-size: 15px; }
+.content ul { margin: 0 0 16px 24px; }
+.content li { margin-bottom: 8px; font-size: 15px; }
+.content strong { color: #D4A843; font-weight: 600; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+th { background: #1A1A1A; color: #D4A843; text-align: left; padding: 12px 16px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+td { padding: 10px 16px; border-bottom: 1px solid #1a1a1a; }
+tr:hover td { background: #1A1A1A; }
+.footer { text-align: center; padding: 40px 24px; color: #999999; font-size: 12px; border-top: 1px solid #1a1a1a; }
+.footer .brand { color: #D4A843; font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 2px; }
+.sig { margin-top: 40px; padding-top: 20px; border-top: 1px solid #222; }
+.sig .name { color: #D4A843; font-weight: 600; font-size: 15px; }
+.sig .role, .sig .contact { color: #999; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">Everlight Ventures</div>
+    <h1>Supabase Status Audit -- 2026-05-13</h1>
+    <div class="meta">Prepared by <span>Hive Audit</span> | May 13, 2026 12:42 AM PT</div>
+  </div>
+</div>
+<div class="content">
+<h1 style='font-family:Playfair Display,serif;color:#D4A843;font-size:28px;margin:24px 0 12px;border-bottom:2px solid #2a2a2a;padding-bottom:8px;'>Supabase Status Audit -- 2026-05-13 (CORRECTED)</h1>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Project URL:</strong> <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>https://jdqqmsmwmbsnlnstyavl.supabase.co</code></p>
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Anon key + service role key:</strong> present in <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>03_AUTOMATION_CORE/03_Credentials/.env</code></p>
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Auditor:</strong> Hive (Loop 7 + correction from Rich, 2026-05-13)</p>
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Status:</strong> ALIVE AND HEAVILY USED -- 105 tables, 55 active, 182,575 rows</p>
+
+<hr style='border:none;border-top:1px solid #2a2a2a;margin:24px 0;'>
+
+<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:20px 0 10px;'>CORRECTION FROM THE INITIAL DRAFT</h2>
+
+<p style='margin:8px 0;'>The first version of this memo (saved earlier today) said Supabase was "functionally</p>
+<p style='margin:8px 0;'>empty with 2 rows in <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>leads</code>." <strong style='color:#E8E8E8;'>That was wrong.</strong> I probed with the anon key and</p>
+<p style='margin:8px 0;'>Row Level Security correctly hid 104 of 105 tables from me. Rich pushed back: "no</p>
+<p style='margin:8px 0;'>way Supabase is empty, we've been pushing to that." Re-probing with the service</p>
+<p style='margin:8px 0;'>role key revealed the real state.</p>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Lesson logged:</strong> memory rule <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>feedback_verify_source_of_truth.md</code> -- always probe</p>
+<p style='margin:8px 0;'>authoritative systems with the right auth context, and especially with RLS-protected</p>
+<p style='margin:8px 0;'>PostgREST projects, anon-key enumeration is meaningless. Re-test with service role</p>
+<p style='margin:8px 0;'>before drawing conclusions.</p>
+
+<hr style='border:none;border-top:1px solid #2a2a2a;margin:24px 0;'>
+
+<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:20px 0 10px;'>Real state</h2>
+
+<table style='width:100%;border-collapse:collapse;font-size:14px;margin:16px 0;'>
+<tr><th style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;border-bottom:2px solid #D4A843;background:#1a1a1a;color:#D4A843;'>Metric</th><th style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;border-bottom:2px solid #D4A843;background:#1a1a1a;color:#D4A843;'>Value</th></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Tables total</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>105</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Tables with > 0 rows</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>55</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Total rows across project</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>182,575</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Most active writer</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>xlm_bot_timeseries</code> (67,293 rows; last write today)</td></tr>
+</table>
+
+<h3 style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:18px;margin:16px 0 8px;border-left:3px solid #D4A843;padding-left:10px;'>Top 15 by row count</h3>
+
+<table style='width:100%;border-collapse:collapse;font-size:14px;margin:16px 0;'>
+<tr><th style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;border-bottom:2px solid #D4A843;background:#1a1a1a;color:#D4A843;'>Table</th><th style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;border-bottom:2px solid #D4A843;background:#1a1a1a;color:#D4A843;'>Rows</th><th style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;border-bottom:2px solid #D4A843;background:#1a1a1a;color:#D4A843;'>Last write</th></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>xlm_bot_timeseries</code></td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>67,293</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>2026-05-13 07:07 UTC (LIVE)</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>xlm_bot_feature_snapshots</code></td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>49,020</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>(frequent)</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>xlm_market_intel_runs</code></td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>38,637</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>(frequent)</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>xlm_bot_report_history</code></td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>23,022</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>(frequent)</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>xlm_market_intel_claims</code></td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>1,487</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>--</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>xlm_market_intel_documents</code></td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>653</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>--</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>hive_master_log</code></td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>510</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>2026-04-09</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>player_events</code></td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>413</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>--</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>flip_intel</code></td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>254</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>2026-04-24</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>wholesale_buyers</code></td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>201</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>2026-04-05</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>blackjack_hands</code></td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>163</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>--</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>xlm_bot_trade_labels</code></td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>160</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>--</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>player_sessions</code></td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>111</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>--</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>rex_pipeline</code></td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>93</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>2026-03-21</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>wholesale_sellers</code></td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>65</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>--</td></tr>
+</table>
+
+<h3 style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:18px;margin:16px 0 8px;border-left:3px solid #D4A843;padding-left:10px;'>Schema groupings</h3>
+
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'><strong style='color:#E8E8E8;'>XLM bot telemetry (8 tables, 178K rows)</strong>: live, written every few seconds</li>
+</ul>
+<p style='margin:8px 0;'>  by the bot on Oracle Micro. Source of truth for trading PnL, market intel,</p>
+<p style='margin:8px 0;'>  report history. <strong style='color:#E8E8E8;'>Do NOT migrate</strong> -- volume is too high; if Supabase free</p>
+<p style='margin:8px 0;'>  tier limits hit, this is the first thing that breaks.</p>
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'><strong style='color:#E8E8E8;'>Hive operational logs (15 tables, ~700 rows)</strong>: <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>hive_master_log</code>,</li>
+</ul>
+<p style='margin:8px 0;'>  <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>hive_agent_registry</code>, <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>hive_duty_roster</code>, <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>hive_error_ledger</code>, etc. Cold</p>
+<p style='margin:8px 0;'>  since Apr 9 -- the local Django dashboard hasn't been writing here since</p>
+<p style='margin:8px 0;'>  it went dark.</p>
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'><strong style='color:#E8E8E8;'>Wholesale operational (6 tables, ~400 rows)</strong>: <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>wholesale_buyers</code>,</li>
+</ul>
+<p style='margin:8px 0;'>  <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>wholesale_sellers</code>, <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>wholesale_outreach</code>, <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>wholesale_states</code>, etc. Cold</p>
+<p style='margin:8px 0;'>  since early Apr -- we pivoted to local SQLite for the deal audit chain.</p>
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'><strong style='color:#E8E8E8;'>Broker / consulting (5 tables, ~50 rows)</strong>: <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>broker_offers</code>, <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>broker_leads</code>,</li>
+</ul>
+<p style='margin:8px 0;'>  <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>broker_knowledge</code>, <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>customers</code>, <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>download_tokens</code>. Cold since Mar 13.</p>
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'><strong style='color:#E8E8E8;'>Gaming (10 tables, ~700 rows)</strong>: blackjack + arcade. Vantaris production.</li>
+<li style='margin:4px 0;'><strong style='color:#E8E8E8;'>Field Ops + Flip (5 tables, ~300 rows)</strong>: waitlist + flip inventory.</li>
+</ul>
+
+<hr style='border:none;border-top:1px solid #2a2a2a;margin:24px 0;'>
+
+<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:20px 0 10px;'>What this means for production</h2>
+
+<h3 style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:18px;margin:16px 0 8px;border-left:3px solid #D4A843;padding-left:10px;'>Surfaces currently relying on Supabase (KEEP)</h3>
+
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'><strong style='color:#E8E8E8;'>XLM bot reporting</strong> -- the live <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>xlm_bot_*</code> tables are the source of truth.</li>
+</ul>
+<p style='margin:8px 0;'>  Don't touch.</p>
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'><strong style='color:#E8E8E8;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>everlightventures.io</code> public site</strong> -- the <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>leads</code> contact-form catcher</li>
+</ul>
+<p style='margin:8px 0;'>  is one of the 105.</p>
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'><strong style='color:#E8E8E8;'>Vantaris / blackjack / arcade</strong> -- Vantaris frontend reads from Supabase.</li>
+</ul>
+
+<h3 style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:18px;margin:16px 0 8px;border-left:3px solid #D4A843;padding-left:10px;'>Surfaces that pivoted to local SQLite (intentional)</h3>
+
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'><strong style='color:#E8E8E8;'>Deal audit chain</strong> (<code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>deal_execution_log.py</code> -> local sqlite). The hash chain</li>
+</ul>
+<p style='margin:8px 0;'>  needs absolute write integrity that's harder to guarantee through Supabase.</p>
+<p style='margin:8px 0;'>  Keep local.</p>
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'><strong style='color:#E8E8E8;'>Hive Master Log on the phone</strong> (cold in Supabase since Apr 9) -- not a</li>
+</ul>
+<p style='margin:8px 0;'>  problem because Hive sessions land in Blinko (local + e5-mother) instead.</p>
+
+<h3 style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:18px;margin:16px 0 8px;border-left:3px solid #D4A843;padding-left:10px;'>Decision: keep both, dual-write where useful</h3>
+
+<p style='margin:8px 0;'>For new ops surfaces that need cross-device read access (Marquise's PC, the</p>
+<p style='margin:8px 0;'>public site dashboards we haven't built yet), mirror writes into both:</p>
+<p style='margin:6px 0 6px 24px;'>Local SQLite / JSON (immediate, audit-grade)</p>
+<p style='margin:6px 0 6px 24px;'>Supabase REST (cross-device, public-readable)</p>
+
+<p style='margin:8px 0;'>The dual-write pattern is already in use for some xlm_bot writes. The same</p>
+<p style='margin:8px 0;'>pattern can extend to broker / wholesale ops once we have a reason to</p>
+<p style='margin:8px 0;'>(public deal-track-record page, multi-device coordination, etc.).</p>
+
+<hr style='border:none;border-top:1px solid #2a2a2a;margin:24px 0;'>
+
+<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:20px 0 10px;'>Action items</h2>
+
+<table style='width:100%;border-collapse:collapse;font-size:14px;margin:16px 0;'>
+<tr><th style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;border-bottom:2px solid #D4A843;background:#1a1a1a;color:#D4A843;'>#</th><th style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;border-bottom:2px solid #D4A843;background:#1a1a1a;color:#D4A843;'>Action</th><th style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;border-bottom:2px solid #D4A843;background:#1a1a1a;color:#D4A843;'>Owner</th><th style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;border-bottom:2px solid #D4A843;background:#1a1a1a;color:#D4A843;'>Status</th></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>1</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Update CLAUDE.md "Supabase is source of truth for ALL production data" to nuance: source of truth for XLM bot telemetry + Vantaris + public-facing surfaces; local SQLite is source of truth for deal audit chain</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Rich + Hive</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>TODO next session</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>2</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Confirm xlm_bot writes are still flowing (last write was 7 min ago at audit time -- ALL GOOD)</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>--</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>DONE</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>3</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Reactivate hive_master_log writes from active services -- the gap since 2026-04-09 means the master log is missing the last 5 weeks of ops</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Hive sessions</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>TODO -- add a daily heartbeat row from cron</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>4</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Add <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>wholesale_outreach</code> and <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>wholesale_buyers</code> writes from <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>arc_send.py</code> outbound sends so the live deal flow lands in Supabase too (NOT replacing local audit chain, additive)</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Hive</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>DEFERRED -- after Deal 1 ships</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>5</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Apologize + correct earlier memo.</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Hive</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>DONE</td></tr>
+</table>
+
+<hr style='border:none;border-top:1px solid #2a2a2a;margin:24px 0;'>
+
+<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:20px 0 10px;'>Lesson logged</h2>
+
+<p style='margin:8px 0;'>This is exactly the failure mode memory rule <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>feedback_verify_source_of_truth.md</code></p>
+<p style='margin:8px 0;'>exists to prevent. The fix going forward:</p>
+
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'>Treat anon-key probe outputs as "what an unauthenticated visitor can see," not</li>
+</ul>
+<p style='margin:8px 0;'>  "what's in the database."</p>
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'>For Supabase / any RLS-protected PostgREST project, always re-probe with service</li>
+</ul>
+<p style='margin:8px 0;'>  role when auditing schema or row counts.</p>
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'>For ANY system-of-truth audit, probe at the highest legitimate auth context</li>
+</ul>
+<p style='margin:8px 0;'>  first.</p>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Bonus rule:</strong> before claiming a system is "empty" or "dead," ask the user</p>
+<p style='margin:8px 0;'>"does that match what you'd expect?" Rich's pushback caught this in 5 minutes</p>
+<p style='margin:8px 0;'>what could have led to a bad doctrine update.</p>
+<div class="sig">
+  <div class="name">Hive Audit</div>
+  <div class="role">Data Layer Audit</div>
+  <div class="contact">hello@everlightventures.io | everlightventures.io</div>
+</div>
+</div>
+<div class="footer">
+  <div class="brand">Everlight Ventures</div>
+  <p style="margin-top: 8px;">Generated by the Everlight Hive Mind | Sacramento, CA</p>
+  <p style="margin-top: 4px;">everlightventures.io</p>
+</div>
+</body>
+</html>

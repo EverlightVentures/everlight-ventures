@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>E5 Migration + Local Parity Plan -- 2026-05-13 | Everlight Ventures</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0A0A0A; color: #E8E8E8; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.7; min-height: 100vh; }
+.header { background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%); border-bottom: 2px solid #D4A843; padding: 40px 0; text-align: center; }
+.header-inner { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+.logo { font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 4px; text-transform: uppercase; color: #D4A843; margin-bottom: 16px; }
+.header h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600; color: #E8E8E8; margin-bottom: 8px; }
+.header .meta { font-size: 13px; color: #999999; }
+.header .meta span { color: #D4A843; }
+.content { max-width: 800px; margin: 0 auto; padding: 40px 24px; }
+.content h2 { font-family: 'Playfair Display', serif; font-size: 22px; color: #D4A843; margin: 32px 0 16px 0; padding-bottom: 8px; border-bottom: 1px solid #1A1A1A; }
+.content h3 { font-size: 16px; font-weight: 600; color: #E8E8E8; margin: 24px 0 12px 0; }
+.content p { margin-bottom: 16px; font-size: 15px; }
+.content ul { margin: 0 0 16px 24px; }
+.content li { margin-bottom: 8px; font-size: 15px; }
+.content strong { color: #D4A843; font-weight: 600; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+th { background: #1A1A1A; color: #D4A843; text-align: left; padding: 12px 16px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+td { padding: 10px 16px; border-bottom: 1px solid #1a1a1a; }
+tr:hover td { background: #1A1A1A; }
+.footer { text-align: center; padding: 40px 24px; color: #999999; font-size: 12px; border-top: 1px solid #1a1a1a; }
+.footer .brand { color: #D4A843; font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 2px; }
+.sig { margin-top: 40px; padding-top: 20px; border-top: 1px solid #222; }
+.sig .name { color: #D4A843; font-weight: 600; font-size: 15px; }
+.sig .role, .sig .contact { color: #999; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">Everlight Ventures</div>
+    <h1>E5 Migration + Local Parity Plan -- 2026-05-13</h1>
+    <div class="meta">Prepared by <span>Hive Mind</span> | May 13, 2026 12:42 AM PT</div>
+  </div>
+</div>
+<div class="content">
+<h1 style='font-family:Playfair Display,serif;color:#D4A843;font-size:28px;margin:24px 0 12px;border-bottom:2px solid #2a2a2a;padding-bottom:8px;'>E5 Instance Migration + Local Parity Plan</h1>
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Date:</strong> 2026-05-13</p>
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Operator:</strong> Rich Gee</p>
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Status:</strong> PLAN-OF-RECORD. Local self-healing watchdog SHIPPED. MCP/RAG migration QUEUED for next session.</p>
+
+<hr style='border:none;border-top:1px solid #2a2a2a;margin:24px 0;'>
+
+<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:20px 0 10px;'>Background</h2>
+
+<p style='margin:8px 0;'>The Oracle E5 instance (<code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>129.159.38.250</code>) was a paid Always-Free OCI VM that hosted:</p>
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'>Blinko RAG (port 1111) — knowledge base + memory store</li>
+<li style='margin:4px 0;'>Hive Django dashboard (port 8504) — ops console</li>
+<li style='margin:4px 0;'>Hive Voice handler (port 8200) — Twilio webhook</li>
+<li style='margin:4px 0;'>MCP fleet (ports 3101-3107) — Claude Code MCP servers</li>
+<li style='margin:4px 0;'>n8n (port 5678) — automation workflows (parked since 2026-04-24)</li>
+<li style='margin:4px 0;'>Various crons + reports server (port 8504/reports)</li>
+</ul>
+
+<p style='margin:8px 0;'>The instance got terminated when it slipped off the free tier. Per <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>memory/oracle_cloud.md</code>,</p>
+<p style='margin:8px 0;'>the canonical replacement (e5-mother on a tailnet-only Ampere VM) was provisioned in</p>
+<p style='margin:8px 0;'>docs but never fully restored.</p>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Result</strong>: phone is now the sole host for everything. This memo is the parity plan.</p>
+
+<hr style='border:none;border-top:1px solid #2a2a2a;margin:24px 0;'>
+
+<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:20px 0 10px;'>Current local parity (what's already running)</h2>
+
+<p style='margin:8px 0;'>These ports are LIVE on the phone right now, watched by <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>dashboards_watchdog.sh</code>:</p>
+
+<table style='width:100%;border-collapse:collapse;font-size:14px;margin:16px 0;'>
+<tr><th style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;border-bottom:2px solid #D4A843;background:#1a1a1a;color:#D4A843;'>Port</th><th style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;border-bottom:2px solid #D4A843;background:#1a1a1a;color:#D4A843;'>Service</th><th style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;border-bottom:2px solid #D4A843;background:#1a1a1a;color:#D4A843;'>Replaces (E5 equivalent)</th></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>2000</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Master Hub</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>new — was no E5 equivalent</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>2200</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Reports Hub</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>E5:8504/reports/</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>2300</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Intel Center static</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>new</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>2301</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Intel Center FastAPI</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>new</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>2302</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>E-Sign + Wire + Audit</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>new</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>2400</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Apps (Alley Kingz)</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>local-only, never E5</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>2500</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>MMA Fight Camp</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>local-only, never E5</td></tr>
+</table>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Self-healing</strong>: dashboards_watchdog.sh runs every 1 min via cron, kills stale processes</p>
+<p style='margin:8px 0;'>on port-in-use errors, restarts cleanly. Wired into Termux boot + Ubuntu shell login.</p>
+
+<hr style='border:none;border-top:1px solid #2a2a2a;margin:24px 0;'>
+
+<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:20px 0 10px;'>Missing local parity (queued for next session)</h2>
+
+<h3 style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:18px;margin:16px 0 8px;border-left:3px solid #D4A843;padding-left:10px;'>Priority 1 — Blinko RAG (memory store)</h3>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>E5 state</strong>: ran on <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>:1111</code>, served the Hive memory layer. Already had a fallback</p>
+<p style='margin:8px 0;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>blinko_lite.py</code> that runs on the phone (per existing crontab line:</p>
+<p style='margin:8px 0;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'><em>/5 </em> <em> </em> * curl localhost:1111/health || nohup python3 blinko_lite.py</code>).</p>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Local restoration plan</strong>:</p>
+<p style='margin:6px 0 6px 24px;'>Verify <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>blinko_lite.py</code> is healthy + responding on <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>:1111</code></p>
+<p style='margin:6px 0 6px 24px;'>If not running → integrate into <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>dashboards_watchdog.sh</code> as an 8th service</p>
+<p style='margin:6px 0 6px 24px;'>Reassign port from 1111 → <strong style='color:#E8E8E8;'>2600</strong> (per the band scheme; reserve 2600 band for memory + RAG)</p>
+<p style='margin:6px 0 6px 24px;'>Migrate any Blinko notes data from <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>_logs/blinko_lite.db</code> (already on disk)</p>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Estimated effort</strong>: 30 min (mostly verify + cron integration)</p>
+
+<h3 style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:18px;margin:16px 0 8px;border-left:3px solid #D4A843;padding-left:10px;'>Priority 2 — MCP Fleet (3101-3107)</h3>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>E5 state</strong>: 7 MCP servers (broker-os, blinko-memory, market-intel, slack, gmail, calendar, hive-orchestrator) running on Oracle E5.</p>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Local restoration plan</strong>:</p>
+<p style='margin:6px 0 6px 24px;'>Existing scripts at <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>06_DEVELOPMENT/mcp_servers/{broker_os,blinko_memory,market_intel}/server.py</code> — verify they run locally</p>
+<p style='margin:6px 0 6px 24px;'>Build <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>start_all.sh</code> (already done!) + <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>stop_all.sh</code> (already done!) at <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>06_DEVELOPMENT/mcp_servers/</code></p>
+<p style='margin:6px 0 6px 24px;'>The MCP failover doctrine at <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>03_AUTOMATION_CORE/01_Scripts/mcp_failover/mcp_elect.sh</code> already exists for this exact case</p>
+<p style='margin:6px 0 6px 24px;'>Reassign ports from 31xx → <strong style='color:#E8E8E8;'>2700 band</strong> (memory/RAG/MCP):</p>
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'>2700 Blinko RAG</li>
+<li style='margin:4px 0;'>2701 broker-os MCP</li>
+<li style='margin:4px 0;'>2702 blinko-memory MCP</li>
+<li style='margin:4px 0;'>2703 market-intel MCP</li>
+<li style='margin:4px 0;'>2704 hive-orchestrator MCP</li>
+<li style='margin:4px 0;'>2705 slack MCP (when set up)</li>
+<li style='margin:4px 0;'>2706 gmail MCP (when set up)</li>
+<li style='margin:4px 0;'>2707 calendar MCP (when set up)</li>
+</ul>
+<p style='margin:6px 0 6px 24px;'>Add to <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>dashboards_watchdog.sh</code> so they self-heal</p>
+<p style='margin:6px 0 6px 24px;'>Update <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>.mcp.json</code> to point Claude Code at local URLs</p>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Estimated effort</strong>: 2-3 hours (need to test each MCP server starts cleanly on phone)</p>
+
+<h3 style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:18px;margin:16px 0 8px;border-left:3px solid #D4A843;padding-left:10px;'>Priority 3 — Hive Django dashboard (deferred per CLAUDE.md)</h3>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>E5 state</strong>: ran on <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>:8504</code>, full Django app with 14 views (taskboard, blackjack, broker, etc.)</p>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Local restoration plan</strong>: per memory <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>aios_audit_may8_findings.md</code> and CLAUDE.md, this is</p>
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>deferred to Phase 7</strong> after Open WebUI + Supabase prove sufficient. The Django source is</p>
+<p style='margin:8px 0;'>intact at <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>09_DASHBOARD/hive_dashboard/</code> with real data in <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>db.sqlite3</code>. Don't rebuild.</p>
+
+<h3 style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:18px;margin:16px 0 8px;border-left:3px solid #D4A843;padding-left:10px;'>Priority 4 — Supabase status check</h3>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Unknown</strong>: per Rich, "I don't know what's going on with Supabase." Per CLAUDE.md, we</p>
+<p style='margin:8px 0;'>have a Supabase project at <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>https://jdqqmsmwmbsnlnstyavl.supabase.co</code> for deal pipeline.</p>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Action item</strong>: 5-min check next session — <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>curl -s https://.../rest/v1/?apikey=...</code> to</p>
+<p style='margin:8px 0;'>verify the project is alive and not paused for inactivity. If paused, restore. If alive,</p>
+<p style='margin:8px 0;'>audit which tables are still in active use (broker_ops likely; everything else may be stale).</p>
+
+<h3 style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:18px;margin:16px 0 8px;border-left:3px solid #D4A843;padding-left:10px;'>Priority 5 — Hive Voice handler</h3>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>E5 state</strong>: ran on <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>:8200</code>, Twilio inbound voice webhook for Marcus Cole.</p>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Local plan</strong>: requires public-facing URL (Twilio webhooks need an HTTPS callback). When</p>
+<p style='margin:8px 0;'>Cloudflare Tunnel is set up for esign (per <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>PUBLIC_URL_VIA_CLOUDFLARE_TUNNEL.md</code>), add a</p>
+<p style='margin:8px 0;'>second tunnel hostname <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>voice.everlightventures.io</code> → phone:2800. Defer until Twilio is</p>
+<p style='margin:8px 0;'>re-needed for live deals.</p>
+
+<hr style='border:none;border-top:1px solid #2a2a2a;margin:24px 0;'>
+
+<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:20px 0 10px;'>Migration path: when free Oracle instance comes back</h2>
+
+<p style='margin:8px 0;'>When OCI free-tier capacity opens (per <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>memory/reference_oci_capacity_plan.md</code>, the hunter</p>
+<p style='margin:8px 0;'>script polls indefinitely):</p>
+
+<h3 style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:18px;margin:16px 0 8px;border-left:3px solid #D4A843;padding-left:10px;'>Steps</h3>
+<p style='margin:6px 0 6px 24px;'>Provision new Ampere ARM 4 OCPU / 24 GB instance via OCI CLI</p>
+<p style='margin:6px 0 6px 24px;'>Run <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>03_AUTOMATION_CORE/01_Scripts/e5_mother/</code> provisioning scripts (already exist per <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>memory/reference_ev_box.md</code>)</p>
+<p style='margin:6px 0 6px 24px;'><strong style='color:#E8E8E8;'>Do NOT abandon local services.</strong> Keep phone-side services as the default; Oracle becomes the <strong style='color:#E8E8E8;'>secondary</strong> with <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>mcp_elect.sh</code> failover doctrine</p>
+<p style='margin:6px 0 6px 24px;'>Migrate the data:</p>
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>deal_execution.sqlite</code> (audit log) → rsync to Oracle</li>
+<li style='margin:4px 0;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>09_DASHBOARD/reports/deals/*</code> (signed contracts) → rsync to Oracle</li>
+<li style='margin:4px 0;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>Wholesale/owner_downloads/parsed/*.json</code> (lead data) → rsync to Oracle</li>
+<li style='margin:4px 0;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>_logs/blinko_lite.db</code> (memory) → restore to Blinko Postgres</li>
+</ul>
+<p style='margin:6px 0 6px 24px;'>Set up Cloudflare Tunnels with Oracle as primary, phone as backup</p>
+<p style='margin:6px 0 6px 24px;'>Cross-device tailnet sync: <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>claude_sync_acemagician.sh</code> already does this</p>
+
+<h3 style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:18px;margin:16px 0 8px;border-left:3px solid #D4A843;padding-left:10px;'>Tailnet topology after restoration</h3>
+<pre style='background:#0d0d0d;color:#E8E8E8;padding:16px;border-left:3px solid #D4A843;overflow-x:auto;font-family:JetBrains Mono,monospace;font-size:13px;line-height:1.5;margin:16px 0;'><code class=''>
+Phone (2100-2700 bands, primary host)
+   ├── Tailscale → AceMagician PC (mirror via claude_sync_acemagician.sh)
+   ├── Tailscale → ev-box VM (mirror via claude_sync_ev_box.sh)
+   └── Tailscale → new Oracle e5-mother (primary host post-restoration)
+
+Cloudflare Tunnel public hostnames:
+   ├── esign.everlightventures.io → phone:2302 (or Oracle:2302 when up)
+   ├── voice.everlightventures.io → Oracle:2800 (when Twilio re-needed)
+   └── reports.everlightventures.io → Oracle:2200 (cached static reports)
+</code></pre>
+
+<hr style='border:none;border-top:1px solid #2a2a2a;margin:24px 0;'>
+
+<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:20px 0 10px;'>Self-healing watchdog (SHIPPED 2026-05-13)</h2>
+
+<p style='margin:8px 0;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>03_AUTOMATION_CORE/01_Scripts/dashboards_watchdog.sh</code>:</p>
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'>Watches all 7 dashboard ports (2000/2200/2300/2301/2302/2400/2500)</li>
+<li style='margin:4px 0;'>Pattern: <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>curl health → if down: pkill stale on port + restart launcher</code></li>
+<li style='margin:4px 0;'>Idempotent (safe to run from cron, boot, or shell login)</li>
+<li style='margin:4px 0;'>Runs every 1 minute via cron</li>
+<li style='margin:4px 0;'>Runs ONCE on phone boot (start_hive.sh calls it after settling)</li>
+<li style='margin:4px 0;'>Runs ONCE on first interactive Ubuntu shell login (everlight_shell.zsh fires it)</li>
+<li style='margin:4px 0;'>Logs to <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>_logs/dashboards_watchdog.log</code></li>
+</ul>
+
+<p style='margin:8px 0;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>fastfetch banner now shows live ● / ○ pills per port</code> so Rich sees health on every shell open.</p>
+
+<hr style='border:none;border-top:1px solid #2a2a2a;margin:24px 0;'>
+
+<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:20px 0 10px;'>When to add new ports to the watchdog</h2>
+
+<p style='margin:8px 0;'>Edit <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>dashboards_watchdog.sh</code> <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>SERVICES=</code> array. Format:</p>
+<pre style='background:#0d0d0d;color:#E8E8E8;padding:16px;border-left:3px solid #D4A843;overflow-x:auto;font-family:JetBrains Mono,monospace;font-size:13px;line-height:1.5;margin:16px 0;'><code class='bash'>
+"&lt;port&gt;|&lt;healthpath&gt;|&lt;launch command&gt;|&lt;human name&gt;"
+</code></pre>
+<p style='margin:8px 0;'>The watchdog will pick up new entries on the next cron tick. No restart needed.</p>
+
+<hr style='border:none;border-top:1px solid #2a2a2a;margin:24px 0;'>
+
+<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:20px 0 10px;'>Failure modes + escalation</h2>
+
+<table style='width:100%;border-collapse:collapse;font-size:14px;margin:16px 0;'>
+<tr><th style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;border-bottom:2px solid #D4A843;background:#1a1a1a;color:#D4A843;'>Failure</th><th style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;border-bottom:2px solid #D4A843;background:#1a1a1a;color:#D4A843;'>Auto-recovery?</th><th style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;border-bottom:2px solid #D4A843;background:#1a1a1a;color:#D4A843;'>Escalation</th></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Service crashes mid-day</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>YES (cron next minute)</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>log only</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Port stuck (proc didn't release)</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>YES (pkill before restart)</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>log only</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Phone reboots</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>YES (start_hive.sh + cron resume)</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>log only</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Watchdog itself broken</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>NO</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>manual: <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>bash dashboards_watchdog.sh --status</code></td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>Phone offline (no network)</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>NA — services still local</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>NA</td></tr>
+<tr><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>sdcard unmounted</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>NO</td><td style='padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;'>requires phone restart</td></tr>
+</table>
+
+<hr style='border:none;border-top:1px solid #2a2a2a;margin:24px 0;'>
+
+<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:20px 0 10px;'>Verification commands</h2>
+
+<pre style='background:#0d0d0d;color:#E8E8E8;padding:16px;border-left:3px solid #D4A843;overflow-x:auto;font-family:JetBrains Mono,monospace;font-size:13px;line-height:1.5;margin:16px 0;'><code class='bash'>
+# Live status
+bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/dashboards_watchdog.sh --status
+
+# Force a heal cycle now
+bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/dashboards_watchdog.sh
+
+# Recent watchdog log
+tail -30 /mnt/sdcard/AA_MY_DRIVE/_logs/dashboards_watchdog.log
+
+# Cron entry verification
+crontab -l | grep dashboards_watchdog
+</code></pre>
+<div class="sig">
+  <div class="name">Hive Mind</div>
+  <div class="role">Infrastructure</div>
+  <div class="contact">hello@everlightventures.io | everlightventures.io</div>
+</div>
+</div>
+<div class="footer">
+  <div class="brand">Everlight Ventures</div>
+  <p style="margin-top: 8px;">Generated by the Everlight Hive Mind | Sacramento, CA</p>
+  <p style="margin-top: 4px;">everlightventures.io</p>
+</div>
+</body>
+</html>

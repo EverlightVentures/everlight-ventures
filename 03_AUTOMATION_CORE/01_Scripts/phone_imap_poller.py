@@ -48,6 +48,14 @@ from datetime import datetime, timedelta, timezone
 from email.header import decode_header
 from pathlib import Path
 
+# Phoenix v3: auto-load Everlight credentials from .env
+sys.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
+try:
+    from env_loader import load_env
+    load_env()
+except Exception:
+    pass
+
 
 WORKSPACE = Path("/mnt/sdcard/AA_MY_DRIVE")
 LAST_SEEN_FILE = WORKSPACE / "_logs/inbound/imap_last_seen.json"
@@ -55,7 +63,7 @@ LAST_SEEN_FILE.parent.mkdir(parents=True, exist_ok=True)
 INTAKE_SCRIPT = WORKSPACE / "03_AUTOMATION_CORE/01_Scripts/hot_lead_intake.py"
 
 GMAIL_HOST = "imap.gmail.com"
-GMAIL_USER = os.environ.get("IMAP_USER", "1m.rich.gee@gmail.com")
+GMAIL_USER = os.environ.get("IMAP_USER") or os.environ.get("GMAIL_USER") or "1m.rich.gee@gmail.com"
 GMAIL_PASS = os.environ.get("GMAIL_APP_PASSWORD") or os.environ.get("IMAP_PASS", "")
 
 # Patterns that signal SELLER engagement (wholesale lane)

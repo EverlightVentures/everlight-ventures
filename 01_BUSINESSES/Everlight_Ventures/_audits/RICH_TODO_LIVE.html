@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rich's Live To-Do List | Everlight Ventures</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0A0A0A; color: #E8E8E8; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.7; min-height: 100vh; }
+.header { background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%); border-bottom: 2px solid #D4A843; padding: 40px 0; text-align: center; }
+.header-inner { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+.logo { font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 4px; text-transform: uppercase; color: #D4A843; margin-bottom: 16px; }
+.header h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600; color: #E8E8E8; margin-bottom: 8px; }
+.header .meta { font-size: 13px; color: #999999; }
+.header .meta span { color: #D4A843; }
+.content { max-width: 800px; margin: 0 auto; padding: 40px 24px; }
+.content h2 { font-family: 'Playfair Display', serif; font-size: 22px; color: #D4A843; margin: 32px 0 16px 0; padding-bottom: 8px; border-bottom: 1px solid #1A1A1A; }
+.content h3 { font-size: 16px; font-weight: 600; color: #E8E8E8; margin: 24px 0 12px 0; }
+.content p { margin-bottom: 16px; font-size: 15px; }
+.content ul { margin: 0 0 16px 24px; }
+.content li { margin-bottom: 8px; font-size: 15px; }
+.content strong { color: #D4A843; font-weight: 600; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+th { background: #1A1A1A; color: #D4A843; text-align: left; padding: 12px 16px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+td { padding: 10px 16px; border-bottom: 1px solid #1a1a1a; }
+tr:hover td { background: #1A1A1A; }
+.footer { text-align: center; padding: 40px 24px; color: #999999; font-size: 12px; border-top: 1px solid #1a1a1a; }
+.footer .brand { color: #D4A843; font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 2px; }
+.sig { margin-top: 40px; padding-top: 20px; border-top: 1px solid #222; }
+.sig .name { color: #D4A843; font-weight: 600; font-size: 15px; }
+.sig .role, .sig .contact { color: #999; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">Everlight Ventures</div>
+    <h1>Rich's Live To-Do List</h1>
+    <div class="meta">Prepared by <span>Hive Mind</span> | May 13, 2026 12:42 AM PT</div>
+  </div>
+</div>
+<div class="content">
+<h1 style='font-family:Playfair Display,serif;color:#D4A843;font-size:28px;margin:24px 0 12px;border-bottom:2px solid #2a2a2a;padding-bottom:8px;'>Rich's Live To-Do List</h1>
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Last updated:</strong> 2026-05-13</p>
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Owner:</strong> Rich Gee</p>
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>Format:</strong> I add new items at the top of "OPEN" as we close other things. You knock them out in your own time. Anything marked DONE moves to bottom.</p>
+
+<hr style='border:none;border-top:1px solid #2a2a2a;margin:24px 0;'>
+
+<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:20px 0 10px;'>OPEN -- Manual steps that need your hands</h2>
+
+<h3 style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:18px;margin:16px 0 8px;border-left:3px solid #D4A843;padding-left:10px;'>1. Generate Gmail App Password (5 min, blocks inbound deal-arc routing)</h3>
+
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'>Go to https://myaccount.google.com/apppasswords (requires 2FA on <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>1m.rich.gee@gmail.com</code>)</li>
+<li style='margin:4px 0;'>Generate a 16-char password labeled "Everlight Hive IMAP"</li>
+<li style='margin:4px 0;'>Append to <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/03_Credentials/.env</code>:</li>
+</ul>
+<p style='margin:8px 0;'>  ```</p>
+<p style='margin:8px 0;'>  GMAIL_APP_PASSWORD=xxxxxxxxxxxxxxxx</p>
+<p style='margin:8px 0;'>  GMAIL_USER=1m.rich.gee@gmail.com</p>
+<p style='margin:8px 0;'>  ```</p>
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'>Verify: <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>python3 03_AUTOMATION_CORE/01_Scripts/phone_imap_poller.py --healthcheck</code></li>
+<li style='margin:4px 0;'>Should print <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>AUTH OK -- user=...</code></li>
+</ul>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>What this unlocks:</strong> Any seller/buyer reply to a deal email gets auto-routed</p>
+<p style='margin:8px 0;'>to the next arc step (M3/M5/M7/c_assignment) within 2 minutes. Currently the</p>
+<p style='margin:8px 0;'>deal engine is fully outbound-only -- inbound is dark until this is set.</p>
+
+<h3 style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:18px;margin:16px 0 8px;border-left:3px solid #D4A843;padding-left:10px;'>2. Cloudflare Tunnel (~30 min, blocks real seller/buyer sends)</h3>
+
+<p style='margin:8px 0;'>Full handoff doc with paste-ready commands at:</p>
+<p style='margin:8px 0;'><code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>01_BUSINESSES/Everlight_Ventures/Wholesale/SOPS/CLOUDFLARE_TUNNEL_ACTIVATION_2026-05-13.md</code></p>
+
+<p style='margin:8px 0;'>The 4 commands (recap):</p>
+<pre style='background:#0d0d0d;color:#E8E8E8;padding:16px;border-left:3px solid #D4A843;overflow-x:auto;font-family:JetBrains Mono,monospace;font-size:13px;line-height:1.5;margin:16px 0;'><code class='bash'>
+# 1. Install cloudflared
+curl -L -o /tmp/cloudflared https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-arm64
+chmod +x /tmp/cloudflared &amp;&amp; sudo mv /tmp/cloudflared /usr/local/bin/
+
+# 2. Browser auth (one-time)
+cloudflared tunnel login
+
+# 3. Create tunnel + DNS routes (config in the SOP doc)
+cloudflared tunnel create everlight-esign
+cloudflared tunnel route dns everlight-esign esign.everlightventures.io
+cloudflared tunnel route dns everlight-esign reports.everlightventures.io
+
+# 4. Run the tunnel
+nohup cloudflared tunnel run everlight-esign &gt; /tmp/cloudflared.log 2&gt;&amp;1 &amp;
+</code></pre>
+
+<p style='margin:8px 0;'>When the tunnel is up, ping me "tunnel is up" and I'll do the rest:</p>
+<ul style='margin:8px 0 16px 0;padding-left:24px;'>
+<li style='margin:4px 0;'>Add <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>EVERLIGHT_PUBLIC_HOST=esign.everlightventures.io</code> to <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>~/.zshrc</code></li>
+<li style='margin:4px 0;'>Patch <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>esign_server._public_url()</code> to use it</li>
+<li style='margin:4px 0;'>Smoke test M7 send to your inbox via the public URL</li>
+<li style='margin:4px 0;'>Add cloudflared to <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>dashboards_watchdog.sh</code> (process-name watch)</li>
+</ul>
+
+<p style='margin:8px 0;'><strong style='color:#E8E8E8;'>What this unlocks:</strong> Real M1/M7 sends to actual sellers (Mikal etc.) with</p>
+<p style='margin:8px 0;'>sign URLs they can click from their inbox. Currently sign URLs only work on</p>
+<p style='margin:8px 0;'>your phone.</p>
+
+<hr style='border:none;border-top:1px solid #2a2a2a;margin:24px 0;'>
+
+<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:20px 0 10px;'>DONE</h2>
+
+<p style='margin:8px 0;'>(I'll move closed items here with date)</p>
+
+<div class="sig">
+  <div class="name">Hive Mind</div>
+  <div class="role">Operations Center</div>
+  <div class="contact">hello@everlightventures.io | everlightventures.io</div>
+</div>
+</div>
+<div class="footer">
+  <div class="brand">Everlight Ventures</div>
+  <p style="margin-top: 8px;">Generated by the Everlight Hive Mind | Sacramento, CA</p>
+  <p style="margin-top: 4px;">everlightventures.io</p>
+</div>
+</body>
+</html>
