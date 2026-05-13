@@ -419,6 +419,7 @@ def c5_final(deal_key: str, counter_amount: int = 0) -> dict:
 def c_assignment(deal_key: str) -> dict:
     """Hammer sends Chris the assignment package + GFAD wire instructions."""
     from osint_api.esign_server import make_token
+    from osint_api.public_url import sign_url as _sign_url
 
     m = load_deal_meta(deal_key)
 
@@ -442,7 +443,7 @@ def c_assignment(deal_key: str) -> dict:
     target_close = (datetime.now() + timedelta(days=m["inspection_days"])).strftime("%B %d, %Y")
 
     token = make_token(deal_key, "04_Assignment_Agreement_Chris", m["buyer_email"], m["buyer_name"], ttl_hours=168)
-    sign_url = f"http://127.0.0.1:2302/sign/{token}"
+    sign_url = _sign_url(token)
 
     subject = f"Assignment package for {m['property_address'].split(',')[0]}, ${chris_pays:,} agreed"
     body = f"""Chris,
@@ -480,16 +481,17 @@ hammer@everlightventures.io"""
 def m7_contract(deal_key: str) -> dict:
     """Marquise sends contract package with esign URLs."""
     from osint_api.esign_server import make_token
+    from osint_api.public_url import sign_url as _sign_url, deals_root_url
 
     m = load_deal_meta(deal_key)
-    deal_url = f"http://127.0.0.1:2200/reports/deals/{deal_key}/"
+    deal_url = deals_root_url(deal_key)
 
     # Generate signing tokens for the 3 seller-side docs
     docs = ["01_PSA", "02_Schedule_A_TN_SB909", "03_EMD_Wire_Acknowledgment"]
     signing_lines = []
     for doc in docs:
         token = make_token(deal_key, doc, m["seller_email"], m["seller_name"], ttl_hours=168)
-        signing_lines.append(f"  {doc}: http://127.0.0.1:2302/sign/{token}")
+        signing_lines.append(f"  {doc}: {_sign_url(token)}")
 
     target_close = (datetime.now() + timedelta(days=m["inspection_days"])).strftime("%B %d, %Y")
 
@@ -706,7 +708,7 @@ def _post_back_tax_alert(deal_key: str, meta: dict, check: dict) -> None:
             ),
             severity="warning",
             agent_name="Hammer Knox",
-            report_url=f"http://127.0.0.1:2200/reports/deals/{deal_key}/",
+            report_url=__import__("osint_api.public_url", fromlist=["deals_root_url"]).deals_root_url(deal_key),
         )
     except Exception as e:  # branded_slack may be unavailable in test contexts
         print(f"[back-tax alert] could not post to Slack: {e}", file=sys.stderr)

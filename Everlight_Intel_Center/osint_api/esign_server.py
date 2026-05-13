@@ -440,8 +440,9 @@ def _error_view(msg: str) -> str:
 
 
 def _signed_view(sig_record: dict, deal_key: str, doc_id: str) -> str:
-    signed_copy_url = f"http://127.0.0.1:2200/reports/deals/{deal_key}/{doc_id}_signed.html"
-    template_url = f"http://127.0.0.1:2200/reports/deals/{deal_key}/{doc_id}.html"
+    from osint_api.public_url import signed_doc_url, deal_url as _deal_url
+    signed_copy_url = signed_doc_url(deal_key, doc_id)
+    template_url = _deal_url(deal_key, doc_id)
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -642,18 +643,20 @@ def _email_signed_certificate(deal_key: str, doc_id: str, sig: dict) -> None:
         return  # silently skip if branded_mailer not available
 
     # Burn the signature into a signed copy of the contract
+    from osint_api.public_url import reports_base, deal_url as _deal_url
+    rb = reports_base()
     signed_html_path = _burn_signed_copy(deal_key, doc_id, sig)
     signed_html_url = ""
     if signed_html_path:
         rel = signed_html_path.relative_to(ROOT / "09_DASHBOARD")
-        signed_html_url = f"http://127.0.0.1:2200/{rel.as_posix()}"
+        signed_html_url = f"{rb}/{rel.as_posix()}"
 
     # Generate PDF cert (saves to deal_dir/signatures/, logs to audit)
     pdf_path = _generate_and_save_pdf_cert(deal_key, doc_id, sig["signer_email"], sig)
     pdf_url = ""
     if pdf_path:
         rel = pdf_path.relative_to(ROOT / "09_DASHBOARD")
-        pdf_url = f"http://127.0.0.1:2200/{rel.as_posix()}"
+        pdf_url = f"{rb}/{rel.as_posix()}"
 
     pdf_link_html = (
         f'<li><strong>PDF signature certificate:</strong> <a href="{pdf_url}">{pdf_url}</a></li>'
@@ -682,7 +685,7 @@ def _email_signed_certificate(deal_key: str, doc_id: str, sig: dict) -> None:
   <li>Original template SHA-256: <code>{sig['document_sha256']}</code></li>
   <li>Signature SHA-256: <code>{sig['signature_sha256']}</code></li>
   {pdf_link_html}
-  <li>Original (unsigned) template: <a href="http://127.0.0.1:2200/reports/deals/{deal_key}/{doc_id}.html">view template</a></li>
+  <li>Original (unsigned) template: <a href="{_deal_url(deal_key, doc_id)}">view template</a></li>
 </ul>
 <p>This signature is binding under the federal E-Sign Act (15 USC § 7001) and the
 Tennessee Uniform Electronic Transactions Act (Tenn. Code Ann. § 47-10-101 et seq).</p>
@@ -917,7 +920,7 @@ async def submit_wire(deal_key: str, request: Request,
     <div><strong>Amount:</strong> ${amt:,}</div>
     <div><strong>Confirmation #:</strong> {confirmation_number}</div>
     <div><strong>Submitted by:</strong> {actor}</div>
-    <div><strong>File:</strong> {'<a href="http://127.0.0.1:2200/reports/deals/' + deal_key + '/wires/' + file_path.name + '">' + file_path.name + '</a>' if file_path else '(none uploaded)'}</div>
+    <div><strong>File:</strong> {('<a href="' + __import__('osint_api.public_url', fromlist=['reports_base']).reports_base() + '/reports/deals/' + deal_key + '/wires/' + file_path.name + '">' + file_path.name + '</a>') if file_path else '(none uploaded)'}</div>
     <div><strong>Audit row hash:</strong> <span class="mono" style="font-size:.65rem;color:#7a7560;">{rec['row_hash']}</span></div>
   </div>
   <div class="meta" style="margin-top:1rem;">
@@ -1018,7 +1021,7 @@ async def signatures_dashboard():
             safe = email.replace("@", "_at_")
             for f in SIG_DIR.glob(f"{sig_event['deal_key']}_*_{safe}.json"):
                 rel = f.relative_to(ROOT / "09_DASHBOARD")
-                return f"http://127.0.0.1:2200/{rel.as_posix()}"
+                return f"{__import__('osint_api.public_url', fromlist=['reports_base']).reports_base()}/{rel.as_posix()}"
             return ""
         if sig_event["event"] == "cert_generated":
             # PDF cert lives at deals/<key>/signatures/<doc>_<safe-email>.pdf
@@ -1027,7 +1030,7 @@ async def signatures_dashboard():
                 pdfs = sorted(deal_dir.glob("*.pdf"), key=lambda p: -p.stat().st_mtime)
                 if pdfs:
                     rel = pdfs[0].relative_to(ROOT / "09_DASHBOARD")
-                    return f"http://127.0.0.1:2200/{rel.as_posix()}"
+                    return f"{__import__('osint_api.public_url', fromlist=['reports_base']).reports_base()}/{rel.as_posix()}"
         return ""
 
     rows_html = ""
