@@ -7,8 +7,13 @@
 # --- PATH: ensure ~/bin is available (matches bash) ---
 export PATH="$HOME/bin:$PATH"
 
-# --- Wake lock: keep Termux alive (matches bash) ---
-termux-wake-lock 2>/dev/null
+# --- Wake lock: DISABLED in shell init 2026-05-13 ---
+# On One UI 8.5+, every termux-wake-lock call flashes the foreground notification.
+# Claude Code spawns a new zsh subshell on every Bash tool call, so calling it
+# here would flash 100+ times/minute. The wake-lock is now acquired once at boot
+# via ~/.termux/boot/start_crypto_bot.sh and held for device lifetime.
+# To manually re-acquire after a forced release: run `termux-wake-lock` from a shell.
+# termux-wake-lock 2>/dev/null
 
 # --- Django Dashboard alias ---
 alias ddr='bash /mnt/sdcard/AA_MY_DRIVE/xlm_bot/dashboard_django/ddr'
@@ -129,8 +134,10 @@ _ev_prompt_init() {
     fi
 }
 
-# EV logo with gold "E" + navy "V" + drop-shadow-feel via dim navy below.
-# Navy matches the path-zone color in the prompt -- visual continuity.
+# EV logo: gold "E" + navy "V" block-art, drop-shadow line in dim navy.
+# Rich asked for the gold+navy ASCII back -- it carries the brand
+# stronger than typographic text alone.  Auto-aligned to fastfetch's
+# left logo column when used as ~/.config/fastfetch/ev_logo.txt.
 _ev_brand_logo() {
     printf "%b\n" \
         "  ${_EV_BOLD}${_EV_GOLD}███████╗${_EV_NAVY}██╗   ██╗${_EV_RESET}" \
@@ -327,6 +334,101 @@ links() {
         "  ${_EV_DIM}--${_EV_RESET}" \
         "  ${_EV_GOLD}site${_EV_RESET}           ${_EV_TURQUOISE}https://everlightventures.io/${_EV_RESET}"
 }
+
+# emhelp: the long-form Emacs primer.  Fastfetch shows the cheat sheet,
+# but when you actually need to learn (not just remember), run `emhelp`.
+# Paged through `less -R` so colors render and you can scroll.
+emhelp() {
+    local g="${_EV_GOLD}" gb="${_EV_BOLD}${_EV_GOLD_HOT}" c="${_EV_TURQUOISE}" \
+          d="${_EV_DIM}" r="${_EV_RESET}" n="${_EV_NAVY}"
+    {
+        printf "\n  ${gb}EMACS  ::  LUCREX OS PRIMER${r}\n"
+        printf "  ${g}════════════════════════════════════════════════════${r}\n\n"
+
+        printf "  ${c}>> START HERE${r}\n"
+        printf "    ${g}emacs${r}        launch Emacs in this terminal (always -nw)\n"
+        printf "    ${g}agenda${r}       jump straight into your org-agenda\n"
+        printf "    ${g}work${r}         IDE layout (treemacs + buffer + vterm)\n"
+        printf "    ${g}inbox${r}        edit inbox.org capture buffer\n"
+        printf "    ${g}notes${r}        browse the Notes/ tree\n\n"
+
+        printf "  ${c}>> THE TWO MODES${r}\n"
+        printf "    Normal mode  (default)  -- ${g}h j k l${r} to move, every key is a command.\n"
+        printf "    Insert mode  (i / a / o) -- you can type; ${g}ESC${r} to leave.\n"
+        printf "    If a key 'does something weird' you are probably in INSERT.\n"
+        printf "    Hit ${g}ESC${r} until the bottom shows ${d}-- NORMAL --${r}.\n\n"
+
+        printf "  ${c}>> SPC IS YOUR FRIEND${r}\n"
+        printf "    Every command lives under ${gb}SPC${r} (the space bar in normal mode).\n"
+        printf "    Hold SPC for ½ second and Emacs shows the menu of next keys.\n"
+        printf "    ${g}SPC f${r}  -> file commands       ${g}SPC b${r}  -> buffer commands\n"
+        printf "    ${g}SPC w${r}  -> window commands     ${g}SPC g${r}  -> git (magit)\n"
+        printf "    ${g}SPC p${r}  -> project commands    ${g}SPC l${r}  -> Lucrex commands\n"
+        printf "    ${g}SPC s${r}  -> search commands     ${g}SPC a${r}  -> org-agenda\n\n"
+
+        printf "  ${c}>> SURVIVAL  -- read this when you're stuck${r}\n"
+        printf "    ${g}ESC${r}            leave insert mode\n"
+        printf "    ${g}C-g${r}            cancel whatever Emacs is mid-doing\n"
+        printf "    ${g}u${r}              undo (in normal mode)\n"
+        printf "    ${g}SPC f s${r}        save the current file\n"
+        printf "    ${g}SPC q q${r}        save buffers + quit Emacs\n"
+        printf "    ${g}SPC d${r}          back to the LUCREX dashboard\n"
+        printf "    ${g}SPC SPC${r}        prompt for any Emacs command (M-x)\n"
+        printf "    ${g}SPC h k${r} <key>  what does this key do?\n\n"
+
+        printf "  ${c}>> WORKSTATIONS${r}\n"
+        printf "    ${g}SPC 1${r}  Dashboard    ${g}SPC 2${r}  Code (IDE)\n"
+        printf "    ${g}SPC 3${r}  Comms        ${g}SPC 4${r}  Browser\n"
+        printf "    ${g}C-<tab>${r}  next      ${g}C-S-<tab>${r}  previous\n\n"
+
+        printf "  ${c}>> NAVIGATING YOUR DRIVE${r}\n"
+        printf "    Your workspace is auto-registered as 30 projects.\n"
+        printf "    ${g}SPC p p${r}   pick a project (Alley_Kingz, Broker_OS, etc.)\n"
+        printf "    ${g}SPC p f${r}   find a file inside the current project\n"
+        printf "    ${g}SPC f f${r}   find any file -- starts at AA_MY_DRIVE\n"
+        printf "    ${g}SPC f r${r}   recent files (last edited / opened)\n"
+        printf "    ${g}SPC f b${r}   bookmarks -- 29 jumps to your top dirs\n\n"
+
+        printf "  ${c}>> AI WORKERS  -- under SPC l a${r}\n"
+        printf "    ${g}SPC l a h${r}  Hive Mind dispatch  ${g}SPC l a l${r}  Claude CLI\n"
+        printf "    ${g}SPC l a g${r}  Gemini              ${g}SPC l a c${r}  Codex\n"
+        printf "    ${g}SPC l a p${r}  Perplexity          ${g}SPC l a a${r}  smart router\n"
+        printf "    ${g}SPC l a i${r}  OpenAI\n\n"
+
+        printf "  ${c}>> DASHBOARDS  -- under SPC l b${r}\n"
+        printf "    ${g}SPC l b d${r}  pick a dashboard (EWW or Android browser)\n"
+        printf "    ${g}SPC l b h${r}  Master Hub in EWW :2000\n"
+        printf "    ${g}SPC l b s${r}  open everlightventures.io in Android browser\n\n"
+
+        printf "  ${c}>> EVERYDAY TASKS${r}\n"
+        printf "    Open a file in workspace          ${g}SPC f f${r}\n"
+        printf "    See what changed in git           ${g}SPC g s${r}  (magit)\n"
+        printf "    Search all your code              ${g}SPC s p${r}  (ripgrep)\n"
+        printf "    Drop a TODO into inbox            ${g}SPC a c t${r}\n"
+        printf "    Open the bot dashboard            ${g}SPC l x d${r}\n"
+        printf "    Toggle the embedded terminal      ${g}SPC o t${r}\n\n"
+
+        printf "  ${c}>> TOUCHSCREEN  -- when keyboard isn't there${r}\n"
+        printf "    Single tap on a dashboard row     ${d}runs that command${r}\n"
+        printf "    Single tap on a tab name (top)    ${d}switches workstation${r}\n"
+        printf "    Two-finger drag                   ${d}scrolls the buffer${r}\n"
+        printf "    Tap a dired filename              ${d}preview in other window${r}\n"
+        printf "    Double-tap a dired filename       ${d}open in current window${r}\n"
+        printf "    Tap inside any pane               ${d}focus moves there${r}\n"
+        printf "    Lost touch response?               ${g}SPC l T${r}  to reset\n\n"
+
+        printf "  ${c}>> WHEN YOU FEEL OVERWHELMED${r}\n"
+        printf "    1. Hit ${g}ESC${r} a few times.  You are now in NORMAL mode.\n"
+        printf "    2. Hit ${g}SPC d${r}.  You are now on the dashboard.\n"
+        printf "    3. Pick any clickable row -- they all work as buttons.\n"
+        printf "    4. If you need to leave: ${g}SPC q q${r}.\n\n"
+
+        printf "  ${d}── tip: run \`emhelp | less -R\` to scroll comfortably ──${r}\n\n"
+    }
+}
+
+# Short alias
+alias eh='emhelp | less -R'
 
 palette() {
     printf "%b\n" \
