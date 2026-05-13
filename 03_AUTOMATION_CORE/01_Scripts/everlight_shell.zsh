@@ -228,7 +228,7 @@ _ev_print_banner() {
     _ev_spine
 
     # ── live service health (one curl per port, ~70ms each cached) ──────────
-    local _h_2000 _h_2200 _h_2300 _h_2301 _h_2302 _h_2400 _h_2500
+    local _h_2000 _h_2200 _h_2300 _h_2301 _h_2302 _h_2400 _h_2500 _h_2700 _h_2701
     _h_2000=$(curl -s -o /dev/null -w "%{http_code}" -m 1 http://127.0.0.1:2000/ 2>/dev/null)
     _h_2200=$(curl -s -o /dev/null -w "%{http_code}" -m 1 http://127.0.0.1:2200/ 2>/dev/null)
     _h_2300=$(curl -s -o /dev/null -w "%{http_code}" -m 1 http://127.0.0.1:2300/ 2>/dev/null)
@@ -236,11 +236,14 @@ _ev_print_banner() {
     _h_2302=$(curl -s -o /dev/null -w "%{http_code}" -m 1 http://127.0.0.1:2302/healthz 2>/dev/null)
     _h_2400=$(curl -s -o /dev/null -w "%{http_code}" -m 1 http://127.0.0.1:2400/ 2>/dev/null)
     _h_2500=$(curl -s -o /dev/null -w "%{http_code}" -m 1 http://127.0.0.1:2500/ 2>/dev/null)
+    _h_2700=$(curl -s -o /dev/null -w "%{http_code}" -m 1 http://127.0.0.1:2700/health 2>/dev/null)
+    _h_2701=$(curl -s -o /dev/null -w "%{http_code}" -m 1 http://127.0.0.1:2701/healthz 2>/dev/null)
     _pill() { case "$1" in 200|404) echo "${_EV_GREEN}●${_EV_RESET}" ;; *) echo "${_EV_RED}○${_EV_RESET}" ;; esac; }
 
     _ev_section "SERVICE HEALTH  ::  watchdog cron 1 min" "🩺"
     _ev_row "  $(_pill $_h_2000) :2000 hub  $(_pill $_h_2200) :2200 reports  $(_pill $_h_2300) :2300 intel  $(_pill $_h_2301) :2301 intel-api"
-    _ev_row "  $(_pill $_h_2302) :2302 esign  $(_pill $_h_2400) :2400 apps  $(_pill $_h_2500) :2500 health  ${_EV_SILVER_DIM}(any ○ → watchdog auto-heals next cron)${_EV_RESET}"
+    _ev_row "  $(_pill $_h_2302) :2302 esign  $(_pill $_h_2400) :2400 apps  $(_pill $_h_2500) :2500 mma   $(_pill $_h_2700) :2700 blinko  $(_pill $_h_2701) :2701 mcp-bridge"
+    _ev_row "  ${_EV_SILVER_DIM}(any ○ → watchdog auto-heals next cron)${_EV_RESET}"
     _ev_spine
 
     _ev_section "DASHBOARDS  ::  hub > band > sub-page" "📊"
@@ -267,6 +270,18 @@ _ev_print_banner() {
     _ev_row "${_EV_BOLD}${_EV_GOLD}health${_EV_RESET}   ${_EV_BOLD}2500${_EV_RESET}  ${_EV_SILVER_DIM}Personal / Health${_EV_RESET}"
     _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_BOLD}2500${_EV_RESET}    ${_EV_TURQUOISE}http://127.0.0.1:2500/${_EV_RESET}                ${_EV_SILVER_DIM}MMA Fight Camp${_EV_RESET}"
     _ev_row "  ${_EV_GOLD}└${_EV_RESET}  ${_EV_BOLD}2500.1${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2500/05_Fitness/${_EV_RESET}     ${_EV_SILVER_DIM}fitness mirror${_EV_RESET}"
+    _ev_row ""
+    _ev_row "${_EV_BOLD}${_EV_GOLD}memory${_EV_RESET}   ${_EV_BOLD}2700${_EV_RESET}  ${_EV_SILVER_DIM}Memory + MCP${_EV_RESET}"
+    _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_BOLD}2700${_EV_RESET}    ${_EV_TURQUOISE}http://127.0.0.1:2700/${_EV_RESET}                ${_EV_SILVER_DIM}Blinko RAG (614+ notes)${_EV_RESET}"
+    _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_BOLD}2701${_EV_RESET}    ${_EV_TURQUOISE}http://127.0.0.1:2701/healthz${_EV_RESET}         ${_EV_SILVER_DIM}MCP HTTP bridge${_EV_RESET}"
+    _ev_row "  ${_EV_GOLD}└${_EV_RESET}  ${_EV_BOLD}2701.1${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2701/list_tools${_EV_RESET}      ${_EV_SILVER_DIM}28 tools across 3 services${_EV_RESET}"
+    _ev_row ""
+    _ev_row "${_EV_BOLD}${_EV_GOLD}dashboards${_EV_RESET}  ${_EV_SILVER_DIM}branded HTML (Master Hub tiles)${_EV_RESET}"
+    _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2200/reports/RICH_TODO_LIVE.html${_EV_RESET}      ${_EV_SILVER_DIM}master TODO${_EV_RESET}"
+    _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2200/reports/RESOURCES_HUB.html${_EV_RESET}       ${_EV_SILVER_DIM}745 free tools, categorized${_EV_RESET}"
+    _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2200/reports/HIVE_MIND.html${_EV_RESET}           ${_EV_SILVER_DIM}94 agents, 28 tools${_EV_RESET}"
+    _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2200/reports/SERVICES_REGISTRY.html${_EV_RESET}   ${_EV_SILVER_DIM}24 external services${_EV_RESET}"
+    _ev_row "  ${_EV_GOLD}└${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2200/reports/xlm_honest_dashboard.html${_EV_RESET} ${_EV_SILVER_DIM}XLM bot truth layer${_EV_RESET}"
     _ev_row ""
     _ev_row "${_EV_SILVER_DIM}usage:  <band> [list|recent|search|api|...]   ${_EV_RESET}${_EV_GOLD}dashboards${_EV_RESET}${_EV_SILVER_DIM} = print this map${_EV_RESET}"
     _ev_spine

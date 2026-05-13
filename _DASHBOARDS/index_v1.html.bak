@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Everlight Local Hub</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --gold: #d4a843;
+    --gold-soft: #f0c460;
+    --bg: #0a0a0a;
+    --bg-card: #14140e;
+    --border: #2a2410;
+    --text: #e8e8e8;
+    --muted: #9b9788;
+  }
+  body {
+    background: radial-gradient(circle at 30% -10%, #1a1308 0%, var(--bg) 60%) fixed;
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif;
+    min-height: 100vh;
+  }
+  .display { font-family: 'Playfair Display', Georgia, serif; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  .gold { color: var(--gold); }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: all .15s ease;
+  }
+  .card:hover { border-color: var(--gold); transform: translateY(-2px); }
+  .leaf {
+    transition: all .12s ease;
+    border-left: 2px solid transparent;
+  }
+  .leaf:hover {
+    border-left-color: var(--gold);
+    background: rgba(212,168,67,.05);
+    padding-left: .75rem;
+  }
+  .pill {
+    background: rgba(212,168,67,.1);
+    border: 1px solid rgba(212,168,67,.3);
+    color: var(--gold);
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: .7rem;
+  }
+  .pill-dim { background: rgba(155,151,136,.08); border-color: rgba(155,151,136,.2); color: var(--muted); }
+  details summary { list-style: none; cursor: pointer; }
+  details summary::-webkit-details-marker { display: none; }
+  details[open] summary .chev { transform: rotate(90deg); }
+  .chev { display: inline-block; transition: transform .15s ease; color: var(--gold); }
+  a { text-decoration: none; color: inherit; }
+</style>
+</head>
+<body class="px-4 py-8 sm:px-8">
+
+<header class="max-w-5xl mx-auto mb-8">
+  <div class="flex items-baseline gap-3 mb-2">
+    <span class="gold mono text-xs uppercase tracking-widest">Everlight Ventures</span>
+    <span class="text-xs text-[color:var(--muted)] mono">127.0.0.1:2000</span>
+  </div>
+  <h1 class="display text-4xl sm:text-5xl gold leading-tight">Local Hub</h1>
+  <p class="text-[color:var(--muted)] mt-2 text-sm">
+    Every local dashboard, by band. Click any leaf to open. Decimals (e.g. <span class="mono gold">2200.1</span>) are sub-pages on the same port.
+  </p>
+</header>
+
+<main class="max-w-5xl mx-auto grid gap-4 sm:grid-cols-2">
+
+  <!-- 2100 Markets -->
+  <details class="card p-5" open>
+    <summary class="flex items-baseline gap-3 mb-2">
+      <span class="chev">▶</span>
+      <span class="display text-2xl gold">2100</span>
+      <span class="text-sm uppercase tracking-wider text-[color:var(--muted)]">Markets / Trading</span>
+      <span class="ml-auto pill mono">markets</span>
+    </summary>
+    <ul class="space-y-2 mt-3 ml-6">
+      <li class="leaf pl-2 py-1">
+        <a href="http://127.0.0.1:2100/" target="_blank" class="flex items-baseline gap-3">
+          <span class="mono gold text-sm">2100</span>
+          <span>XLM Bot Dashboard</span>
+          <span class="pill pill-dim ml-auto">mirror, TBD</span>
+        </a>
+      </li>
+    </ul>
+  </details>
+
+  <!-- 2200 Reports -->
+  <details class="card p-5" open>
+    <summary class="flex items-baseline gap-3 mb-2">
+      <span class="chev">▶</span>
+      <span class="display text-2xl gold">2200</span>
+      <span class="text-sm uppercase tracking-wider text-[color:var(--muted)]">Reports / Ops</span>
+      <span class="ml-auto pill mono">reports</span>
+    </summary>
+    <ul class="space-y-2 mt-3 ml-6">
+      <li class="leaf pl-2 py-1">
+        <a href="http://127.0.0.1:2200/" target="_blank" class="flex items-baseline gap-3">
+          <span class="mono gold text-sm">2200</span>
+          <span>Band root</span>
+        </a>
+      </li>
+      <li class="leaf pl-2 py-1">
+        <a href="http://127.0.0.1:2200/reports/" target="_blank" class="flex items-baseline gap-3">
+          <span class="mono gold text-sm">2200.1</span>
+          <span>All Reports (76+)</span>
+          <span class="pill ml-auto">live</span>
+        </a>
+      </li>
+      <li class="leaf pl-2 py-1">
+        <a href="http://127.0.0.1:2200/dashboards/" target="_blank" class="flex items-baseline gap-3">
+          <span class="mono gold text-sm">2200.2</span>
+          <span>Dashboard Index (mirror of this hub)</span>
+        </a>
+      </li>
+      <li class="leaf pl-2 py-1" style="background:rgba(212,168,67,0.08); border-radius:6px; padding:.5rem .75rem;">
+        <a href="http://127.0.0.1:2200/reports/MASTER_PIPELINE_DOCTRINE_2026-05-13.html" target="_blank" class="flex items-baseline gap-3">
+          <span class="mono gold text-sm">2200.3</span>
+          <span style="font-weight:600; color:#ffcd3c;">★ TN Pipeline Doctrine (investor-grade, A-Z)</span>
+          <span class="pill ml-auto" style="background:#5cffb1;color:#0a0a0a;">NEW</span>
+        </a>
+      </li>
+      <li class="leaf pl-2 py-1">
+        <a href="http://127.0.0.1:2302/signatures" target="_blank" class="flex items-baseline gap-3">
+          <span class="mono gold text-sm">2302.s</span>
+          <span>Signatures Audit Dashboard (live, hash-chained)</span>
+        </a>
+      </li>
+    </ul>
+  </details>
+
+  <!-- 2300 Intel -->
+  <details class="card p-5" open>
+    <summary class="flex items-baseline gap-3 mb-2">
+      <span class="chev">▶</span>
+      <span class="display text-2xl gold">2300</span>
+      <span class="text-sm uppercase tracking-wider text-[color:var(--muted)]">Intel Center</span>
+      <span class="ml-auto pill mono">intel</span>
+    </summary>
+    <ul class="space-y-2 mt-3 ml-6">
+      <li class="leaf pl-2 py-1">
+        <a href="http://127.0.0.1:2300/" target="_blank" class="flex items-baseline gap-3">
+          <span class="mono gold text-sm">2300</span>
+          <span>Static Dashboard</span>
+        </a>
+      </li>
+      <li class="leaf pl-2 py-1">
+        <a href="http://127.0.0.1:2300/clients.html" target="_blank" class="flex items-baseline gap-3">
+          <span class="mono gold text-sm">2300.1</span>
+          <span>Clients</span>
+        </a>
+      </li>
+      <li class="leaf pl-2 py-1">
+        <a href="http://127.0.0.1:2300/resources.html" target="_blank" class="flex items-baseline gap-3">
+          <span class="mono gold text-sm">2300.2</span>
+          <span>Resources Catalog</span>
+        </a>
+      </li>
+      <li class="leaf pl-2 py-1">
+        <a href="http://127.0.0.1:2301/" target="_blank" class="flex items-baseline gap-3">
+          <span class="mono gold text-sm">2301</span>
+          <span>OSINT FastAPI</span>
+        </a>
+      </li>
+      <li class="leaf pl-2 py-1">
+        <a href="http://127.0.0.1:2301/api/docs" target="_blank" class="flex items-baseline gap-3">
+          <span class="mono gold text-sm">2301.1</span>
+          <span>Swagger UI</span>
+        </a>
+      </li>
+      <li class="leaf pl-2 py-1">
+        <a href="http://127.0.0.1:2302/" target="_blank" class="flex items-baseline gap-3">
+          <span class="mono gold text-sm">2302</span>
+          <span>E-Sign Service (UETA compliant)</span>
+          <span class="pill ml-auto">live</span>
+        </a>
+      </li>
+    </ul>
+  </details>
+
+  <!-- 2400 Apps -->
+  <details class="card p-5" open>
+    <summary class="flex items-baseline gap-3 mb-2">
+      <span class="chev">▶</span>
+      <span class="display text-2xl gold">2400</span>
+      <span class="text-sm uppercase tracking-wider text-[color:var(--muted)]">Consumer / Apps</span>
+      <span class="ml-auto pill mono">apps</span>
+    </summary>
+    <ul class="space-y-2 mt-3 ml-6">
+      <li class="leaf pl-2 py-1">
+        <a href="http://127.0.0.1:2400/game_v6.html" target="_blank" class="flex items-baseline gap-3">
+          <span class="mono gold text-sm">2400</span>
+          <span>Alley Kingz prototype</span>
+        </a>
+      </li>
+    </ul>
+  </details>
+
+  <!-- 2500 Health -->
+  <details class="card p-5" open>
+    <summary class="flex items-baseline gap-3 mb-2">
+      <span class="chev">▶</span>
+      <span class="display text-2xl gold">2500</span>
+      <span class="text-sm uppercase tracking-wider text-[color:var(--muted)]">Personal / Health</span>
+      <span class="ml-auto pill mono">health</span>
+    </summary>
+    <ul class="space-y-2 mt-3 ml-6">
+      <li class="leaf pl-2 py-1">
+        <a href="http://127.0.0.1:2500/" target="_blank" class="flex items-baseline gap-3">
+          <span class="mono gold text-sm">2500</span>
+          <span>MMA Fight Camp dashboard</span>
+        </a>
+      </li>
+      <li class="leaf pl-2 py-1">
+        <a href="http://127.0.0.1:2500/05_Fitness/" target="_blank" class="flex items-baseline gap-3">
+          <span class="mono gold text-sm">2500.1</span>
+          <span>Phase 4 Fitness Mirror</span>
+        </a>
+      </li>
+    </ul>
+  </details>
+
+  <!-- Reserved -->
+  <details class="card p-5">
+    <summary class="flex items-baseline gap-3 mb-2">
+      <span class="chev">▶</span>
+      <span class="display text-2xl text-[color:var(--muted)]">2600+</span>
+      <span class="text-sm uppercase tracking-wider text-[color:var(--muted)]">Reserved</span>
+    </summary>
+    <ul class="space-y-2 mt-3 ml-6 text-sm text-[color:var(--muted)]">
+      <li class="leaf pl-2 py-1">2600 — open band, awaiting category</li>
+      <li class="leaf pl-2 py-1">2700 — Lucrex Next.js (when rehomed)</li>
+    </ul>
+  </details>
+
+</main>
+
+<footer class="max-w-5xl mx-auto mt-10 pt-6 border-t border-[color:var(--border)] text-xs text-[color:var(--muted)] mono flex justify-between">
+  <span>EVERLIGHT VENTURES · Local Hub</span>
+  <span>Updated 2026-05-12 · Source: <span class="gold">_DASHBOARDS/PORT_MAP.md</span></span>
+</footer>
+
+</body>
+</html>

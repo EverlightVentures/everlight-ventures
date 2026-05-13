@@ -1,0 +1,1760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hive Mind -- Agents & Tools | Everlight Ventures</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0A0A0A; color: #E8E8E8; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.7; min-height: 100vh; }
+.header { background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%); border-bottom: 2px solid #D4A843; padding: 40px 0; text-align: center; }
+.header-inner { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+.logo { font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 4px; text-transform: uppercase; color: #D4A843; margin-bottom: 16px; }
+.header h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600; color: #E8E8E8; margin-bottom: 8px; }
+.header .meta { font-size: 13px; color: #999999; }
+.header .meta span { color: #D4A843; }
+.content { max-width: 800px; margin: 0 auto; padding: 40px 24px; }
+.content h2 { font-family: 'Playfair Display', serif; font-size: 22px; color: #D4A843; margin: 32px 0 16px 0; padding-bottom: 8px; border-bottom: 1px solid #1A1A1A; }
+.content h3 { font-size: 16px; font-weight: 600; color: #E8E8E8; margin: 24px 0 12px 0; }
+.content p { margin-bottom: 16px; font-size: 15px; }
+.content ul { margin: 0 0 16px 24px; }
+.content li { margin-bottom: 8px; font-size: 15px; }
+.content strong { color: #D4A843; font-weight: 600; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+th { background: #1A1A1A; color: #D4A843; text-align: left; padding: 12px 16px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+td { padding: 10px 16px; border-bottom: 1px solid #1a1a1a; }
+tr:hover td { background: #1A1A1A; }
+.footer { text-align: center; padding: 40px 24px; color: #999999; font-size: 12px; border-top: 1px solid #1a1a1a; }
+.footer .brand { color: #D4A843; font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 2px; }
+.sig { margin-top: 40px; padding-top: 20px; border-top: 1px solid #222; }
+.sig .name { color: #D4A843; font-weight: 600; font-size: 15px; }
+.sig .role, .sig .contact { color: #999; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">Everlight Ventures</div>
+    <h1>Hive Mind -- Agents & Tools</h1>
+    <div class="meta">Prepared by <span>Marcus Cole</span> | May 13, 2026 01:13 AM PT</div>
+  </div>
+</div>
+<div class="content">
+
+<p style='color:#888;font-size:14px;margin:8px 0 16px;'>
+The Hive Mind. 94 named agents across 10 departments,
+28 MCP tools live on the HTTP bridge. Query Blinko, browse the
+Resources Hub, or click any agent for their firmware.
+</p>
+
+<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0 24px;'>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+    <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Agents</div>
+    <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>94</div>
+  </div>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+    <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Departments</div>
+    <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>10</div>
+  </div>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+    <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>MCP Tools</div>
+    <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>28</div>
+  </div>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #7ec699;'>
+    <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Bridge</div>
+    <div style='color:#7ec699;font-size:18px;font-family:Playfair Display,serif;'>:2701</div>
+    <div style='color:#888;font-size:11px;'>HTTP + stdio</div>
+  </div>
+</div>
+
+<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:8px 0 24px;'>
+  <a href='http://127.0.0.1:2700/' target='_blank' style='display:block;background:#0d0d0d;border-left:3px solid #7ec699;padding:14px 18px;color:#E8E8E8;text-decoration:none;'>
+    <div style='color:#7ec699;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Quick Query</div>
+    <div style='font-family:Playfair Display,serif;font-size:18px;margin-top:4px;'>Blinko RAG &rarr;</div>
+    <div style='color:#888;font-size:12px;'>Search 614+ notes via API</div>
+  </a>
+  <a href='/reports/RESOURCES_HUB.html' target='_blank' style='display:block;background:#0d0d0d;border-left:3px solid #a8a3ff;padding:14px 18px;color:#E8E8E8;text-decoration:none;'>
+    <div style='color:#a8a3ff;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Quick Query</div>
+    <div style='font-family:Playfair Display,serif;font-size:18px;margin-top:4px;'>Resources Hub &rarr;</div>
+    <div style='color:#888;font-size:12px;'>745 free tools, categorized</div>
+  </a>
+  <a href='http://127.0.0.1:2701/list_tools' target='_blank' style='display:block;background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 18px;color:#E8E8E8;text-decoration:none;'>
+    <div style='color:#D4A843;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Quick Query</div>
+    <div style='font-family:Playfair Display,serif;font-size:18px;margin-top:4px;'>MCP HTTP Bridge &rarr;</div>
+    <div style='color:#888;font-size:12px;'>Tool catalog (JSON)</div>
+  </a>
+</div>
+
+<div style='margin:16px 0;'>
+  <input id='hivesearch' type='text' placeholder='Search agents -- name, department, role'
+         style='width:100%;padding:14px 16px;background:#0d0d0d;color:#E8E8E8;border:1px solid #2a2a2a;
+                border-left:3px solid #D4A843;font-family:Inter,sans-serif;font-size:15px;'>
+</div>
+
+<div style='display:flex;flex-wrap:wrap;gap:8px;margin:16px 0;' id='deptfilters'>
+  <button class='dfilter active' data-dept='' style='background:#D4A843;color:#0a0a0a;border:none;padding:6px 14px;font-family:Inter;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;'>ALL</button>
+<button class='dfilter' data-dept='unassigned' style='background:#1a1a1a;color:#D4A843;border:1px solid #D4A843;padding:6px 14px;font-family:Inter;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;'>Unassigned (21)</button><button class='dfilter' data-dept='codex labs' style='background:#1a1a1a;color:#7ec699;border:1px solid #7ec699;padding:6px 14px;font-family:Inter;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;'>Codex Labs (16)</button><button class='dfilter' data-dept='saas factory' style='background:#1a1a1a;color:#D4A843;border:1px solid #D4A843;padding:6px 14px;font-family:Inter;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;'>SaaS Factory (16)</button><button class='dfilter' data-dept='claude corp' style='background:#1a1a1a;color:#D4A843;border:1px solid #D4A843;padding:6px 14px;font-family:Inter;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;'>Claude Corp (15)</button><button class='dfilter' data-dept='perplexity intel' style='background:#1a1a1a;color:#a8a3ff;border:1px solid #a8a3ff;padding:6px 14px;font-family:Inter;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;'>Perplexity Intel (15)</button><button class='dfilter' data-dept='gemini ops' style='background:#1a1a1a;color:#6bafff;border:1px solid #6bafff;padding:6px 14px;font-family:Inter;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;'>Gemini Ops (4)</button><button class='dfilter' data-dept='gemini core' style='background:#1a1a1a;color:#D4A843;border:1px solid #D4A843;padding:6px 14px;font-family:Inter;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;'>Gemini Core (3)</button><button class='dfilter' data-dept='gemini ops (reporting to major dex)' style='background:#1a1a1a;color:#D4A843;border:1px solid #D4A843;padding:6px 14px;font-family:Inter;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;'>Gemini Ops (reporting to Major Dex) (2)</button><button class='dfilter' data-dept='claude corp (crypto &amp; defi intelligence + qa gate)' style='background:#1a1a1a;color:#D4A843;border:1px solid #D4A843;padding:6px 14px;font-family:Inter;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;'>Claude Corp (Crypto &amp; DeFi Intelligence + QA Gate) (1)</button><button class='dfilter' data-dept='wholesale acquisitions (tennessee desk)' style='background:#1a1a1a;color:#D4A843;border:1px solid #D4A843;padding:6px 14px;font-family:Inter;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;'>Wholesale Acquisitions (Tennessee desk) (1)</button></div>
+
+<section class='deptsection' data-dept='unassigned' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    Unassigned <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(21 agents)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;'>
+    
+<div class='agent' data-name='02 ops deputy' data-dept='—'
+     data-role='operations deputy (gemini), the backup operator and day-to-day execution lead'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>02 Ops Deputy</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Operations Deputy (Gemini), the backup operator and day-to-day execution lead</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/02_ops_deputy.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='06 listing strategist' data-dept='—'
+     data-role='amazon listing strategist (claude)'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>06 Listing Strategist</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Amazon Listing Strategist (Claude)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/06_listing_strategist.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='07 listing writer' data-dept='—'
+     data-role='listing production writer (gemini)'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>07 Listing Writer</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Listing Production Writer (Gemini)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/07_listing_writer.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='11 sync coordinator' data-dept='—'
+     data-role='offer sync coordinator (gemini)'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>11 Sync Coordinator</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Offer Sync Coordinator (Gemini)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/11_sync_coordinator.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='12 showrunner' data-dept='—'
+     data-role='book series showrunner (claude)'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>12 Showrunner</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Book Series Showrunner (Claude)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/12_showrunner.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='13 writing lead' data-dept='—'
+     data-role='book writing room lead (claude)'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>13 Writing Lead</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Book Writing Room Lead (Claude)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/13_writing_lead.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='14 draft writer' data-dept='—'
+     data-role='draft writer &amp; adaptation agent (gemini)'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>14 Draft Writer</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Draft Writer &amp; Adaptation Agent (Gemini)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/14_draft_writer.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='16 publishing asset builder' data-dept='—'
+     data-role='publishing asset builder (codex)'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>16 Publishing Asset Builder</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Publishing Asset Builder (Codex)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/16_publishing_asset_builder.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='19 platform copywriter' data-dept='—'
+     data-role='platform copywriter (gemini)'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>19 Platform Copywriter</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Platform Copywriter (Gemini)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/19_platform_copywriter.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='20 prompt producer' data-dept='—'
+     data-role='creative prompt producer (claude)'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>20 Prompt Producer</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Creative Prompt Producer (Claude)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/20_prompt_producer.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='21 repurposing agent' data-dept='—'
+     data-role='content repurposing agent (gemini)'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>21 Repurposing Agent</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Content Repurposing Agent (Gemini)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/21_repurposing_agent.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='22 distribution ops' data-dept='—'
+     data-role='scheduling &amp; distribution operator (codex)'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>22 Distribution Ops</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Scheduling &amp; Distribution Operator (Codex)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/22_distribution_ops.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='23 automation architect' data-dept='—'
+     data-role='automation architect (claude)'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>23 Automation Architect</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Automation Architect (Claude)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/23_automation_architect.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='24 workflow builder' data-dept='—'
+     data-role='workflow builder (codex)'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>24 Workflow Builder</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Workflow Builder (Codex)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/24_workflow_builder.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='25 analytics auditor' data-dept='—'
+     data-role='analytics &amp; kpi auditor (gemini)'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>25 Analytics Auditor</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Analytics &amp; KPI Auditor (Gemini)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/25_analytics_auditor.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='36 contract writer' data-dept='—'
+     data-role='- **name**: contract_writer'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>36 Contract Writer</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>- **Name**: contract_writer</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/36_contract_writer.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='brand reviewer' data-dept='—'
+     data-role='the everlight ventures brand quality gate'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Brand Reviewer</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>the Everlight Ventures Brand Quality Gate</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/brand_reviewer.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='everlight packager' data-dept='—'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Everlight Packager</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/everlight_packager.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='everlight researcher' data-dept='—'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Everlight Researcher</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/everlight_researcher.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='everlight seo formatter' data-dept='—'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Everlight Seo Formatter</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/everlight_seo_formatter.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='researcher' data-dept='—'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Researcher</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>—</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/researcher.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+  </div>
+</section>
+
+<section class='deptsection' data-dept='codex labs' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#7ec699;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    Codex Labs <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(16 agents)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;'>
+    
+<div class='agent' data-name='franklin steele' data-dept='codex labs'
+     data-role='engineering foreman (codex)'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Franklin Steele</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Codex Labs</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Engineering Foreman (Codex)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    forge@everlightventures.io &middot; @forge | #codex-labs, #engineering, #war-room
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/03_engineering_foreman.md' style='color:#7ec699;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='samuel locke' data-dept='codex labs'
+     data-role='seo &amp; keyword mapper (gemini)'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Samuel Locke</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Codex Labs</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>SEO &amp; Keyword Mapper (Gemini)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    spider@everlightventures.io &middot; @spider | #codex-labs, #seo, #content
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/08_seo_mapper.md' style='color:#7ec699;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='franklin jordan' data-dept='codex labs'
+     data-role='affiliate funnel architect (claude)'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Franklin Jordan</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Codex Labs</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Affiliate Funnel Architect (Claude)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    flow@everlightventures.io &middot; @flow | #codex-labs, #funnels, #marketing
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/10_funnel_architect.md' style='color:#7ec699;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='penny vance' data-dept='codex labs'
+     data-role='the profit maximizer, the ruthless financial tactician of the everlight ecosystem'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Penny Vance</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Codex Labs</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>the Profit Maximizer, the ruthless financial tactician of the Everlight ecosystem</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    penny@everlightventures.io &middot; @penny | #codex-labs, #finance, #strategy
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/27_profit_maximizer.md' style='color:#7ec699;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='frederick banks' data-dept='codex labs'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Frederick Banks</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Codex Labs</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    filter@everlightventures.io &middot; @filter | #codex-labs, #broker-ops, #leads
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/29_lead_qualifier.md' style='color:#7ec699;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='calvin osei' data-dept='codex labs'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Calvin Osei</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Codex Labs</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    cupid@everlightventures.io &middot; @cupid | #codex-labs, #broker-ops, #matching
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/30_match_maker.md' style='color:#7ec699;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='harrison knox' data-dept='codex labs'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Harrison Knox</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Codex Labs</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    hammer@everlightventures.io &middot; @hammer | #codex-labs, #broker-ops, #deals
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/32_deal_closer.md' style='color:#7ec699;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='patrick donovan' data-dept='codex labs'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Patrick Donovan</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Codex Labs</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    patch@everlightventures.io &middot; @patch | #codex-labs, #engineering, #code-review
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/49_engineering_assistant.md' style='color:#7ec699;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='lawrence okafor' data-dept='codex labs'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Lawrence Okafor</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Codex Labs</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    ledger@everlightventures.io &middot; @ledger | #codex-labs, #finance, #revenue
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/50_revenue_assistant.md' style='color:#7ec699;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='benjamin orozco' data-dept='codex labs'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Benjamin Orozco</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Codex Labs</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    beacon@everlightventures.io &middot; @beacon | #codex-labs, #leads, #broker-ops
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/51_prospect_scraper.md' style='color:#7ec699;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='oliver kessler' data-dept='codex labs'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Oliver Kessler</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Codex Labs</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    onboard@everlightventures.io &middot; @onboard | #codex-labs, #clients, #broker-ops
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/52_client_deployer.md' style='color:#7ec699;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='rafael vasquez' data-dept='codex labs'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Rafael Vasquez</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Codex Labs</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    relay@everlightventures.io &middot; @relay | #codex-labs, #clients, #consulting
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/57_consulting_assistant.md' style='color:#7ec699;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='sebastian torres' data-dept='codex labs'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Sebastian Torres</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Codex Labs</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    stack@everlightventures.io &middot; @stack | #codex-labs, #engineering, #saas
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/everlight_saas_builder.md' style='color:#7ec699;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='ryan kim' data-dept='codex labs'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Ryan Kim</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Codex Labs</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    rocket@everlightventures.io &middot; @rocket | #codex-labs, #growth, #marketing
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/everlight_saas_growth.md' style='color:#7ec699;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='raymond harper' data-dept='codex labs'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Raymond Harper</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Codex Labs</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    road@everlightventures.io &middot; @road | #codex-labs, #product, #saas
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/everlight_saas_pm.md' style='color:#7ec699;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='isaac castellano' data-dept='codex labs'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Isaac Castellano</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Codex Labs</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    ink@everlightventures.io &middot; @ink | #codex-labs, #content, #writing
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/writer.md' style='color:#7ec699;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+  </div>
+</section>
+
+<section class='deptsection' data-dept='saas factory' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    SaaS Factory <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(16 agents)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;'>
+    
+<div class='agent' data-name='dominic reyes' data-dept='saas factory'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Dominic Reyes</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>SaaS Factory</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    dom@everlightventures.io &middot; @dom | #saas-factory, #war-room, #engineering
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/61_saas_factory_lead.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='kaelen nguyen' data-dept='saas factory'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Kaelen Nguyen</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>SaaS Factory</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    canvas@everlightventures.io &middot; @canvas | #saas-factory, #frontend
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/62_frontend_architect.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='maren solberg' data-dept='saas factory'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Maren Solberg</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>SaaS Factory</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    sketch@everlightventures.io &middot; @sketch | #saas-factory, #frontend
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/63_ui_ux_designer.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='javier cruz' data-dept='saas factory'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Javier Cruz</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>SaaS Factory</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    kit@everlightventures.io &middot; @kit | #saas-factory, #frontend
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/64_component_engineer.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='tobias engel' data-dept='saas factory'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Tobias Engel</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>SaaS Factory</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    lens.f@everlightventures.io &middot; @lens.f | #saas-factory, #frontend
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/65_frontend_qa.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='priya chakraborty' data-dept='saas factory'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Priya Chakraborty</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>SaaS Factory</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    priya@everlightventures.io &middot; @priya | #saas-factory, #frontend
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/66_frontend_assistant.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='amara osei' data-dept='saas factory'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Amara Osei</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>SaaS Factory</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    forge.b@everlightventures.io &middot; @forge.b | #saas-factory, #backend-infra
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/67_backend_architect.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='henrik strand' data-dept='saas factory'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Henrik Strand</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>SaaS Factory</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    pipe@everlightventures.io &middot; @pipe | #saas-factory, #backend-infra
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/68_devops_engineer.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='zara khoury' data-dept='saas factory'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Zara Khoury</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>SaaS Factory</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    vault@everlightventures.io &middot; @vault | #saas-factory, #backend-infra
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/69_security_engineer.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='elias varga' data-dept='saas factory'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Elias Varga</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>SaaS Factory</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    probe@everlightventures.io &middot; @probe | #saas-factory, #backend-infra
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/70_infrastructure_qa.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='nina okoye' data-dept='saas factory'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Nina Okoye</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>SaaS Factory</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    nina@everlightventures.io &middot; @nina | #saas-factory, #backend-infra
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/71_backend_assistant.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='leo marchetti' data-dept='saas factory'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Leo Marchetti</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>SaaS Factory</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    signal@everlightventures.io &middot; @signal | #saas-factory, #ai-integrations
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/72_ai_integration_lead.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='suki tanaka' data-dept='saas factory'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Suki Tanaka</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>SaaS Factory</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    seek@everlightventures.io &middot; @seek | #saas-factory, #ai-integrations, #growth-eng
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/73_search_analytics.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='aisha bello' data-dept='saas factory'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Aisha Bello</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>SaaS Factory</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    spark@everlightventures.io &middot; @spark | #saas-factory, #growth-eng
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/74_growth_engineer.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='ruben delgado' data-dept='saas factory'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Ruben Delgado</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>SaaS Factory</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    proof.g@everlightventures.io &middot; @proof.g | #saas-factory, #growth-eng
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/75_growth_qa.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='yuki arakawa' data-dept='saas factory'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Yuki Arakawa</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>SaaS Factory</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    yuki@everlightventures.io &middot; @yuki | #saas-factory, #growth-eng
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/76_growth_assistant.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+  </div>
+</section>
+
+<section class='deptsection' data-dept='claude corp' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    Claude Corp <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(15 agents)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;'>
+    
+<div class='agent' data-name='marcus cole' data-dept='claude corp'
+     data-role='chief operator (claude), the final decision-maker for the ai organization'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Marcus Cole</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Claude Corp</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Chief Operator (Claude), the final decision-maker for the AI organization</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    marcus@everlightventures.io &middot; @marcus | #war-room, #claude-corp, #strategy
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/01_chief_operator.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='edith cross' data-dept='claude corp'
+     data-role='editing &amp; qa agent (claude)'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Edith Cross</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Claude Corp</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Editing &amp; QA Agent (Claude)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    edith@everlightventures.io &middot; @edith | #claude-corp, #content, #editing
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/15_editor_qa.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='nora blaine' data-dept='claude corp'
+     data-role='content strategy director (claude)'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Nora Blaine</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Claude Corp</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>Content Strategy Director (Claude)</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    nora@everlightventures.io &middot; @nora | #claude-corp, #content, #campaigns
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/17_content_strategy.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='carlos moreno' data-dept='claude corp'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Carlos Moreno</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Claude Corp</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    cash@everlightventures.io &middot; @cash | #claude-corp, #broker-ops, #finance
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/33_commission_auditor.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='justine park' data-dept='claude corp'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Justine Park</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Claude Corp</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    justine@everlightventures.io &middot; @justine | #claude-corp, #compliance, #broker-ops
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/34_compliance_gate.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='slate mercer' data-dept='claude corp'
+     data-role='the **assigned owner of 179 resources** in the everlight intel center, spread across:'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Slate Mercer</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Claude Corp</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>the **assigned owner of 179 resources** in the Everlight Intel Center, spread across:</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    slate@everlightventures.io &middot; @slate | #claude-corp, #strategy, #war-room
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/40_strategic_modeler.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='quinn fontaine' data-dept='claude corp'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Quinn Fontaine</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Claude Corp</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    quill@everlightventures.io &middot; @quill | #claude-corp, #content, #brand
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/41_style_enforcer.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='samuel navarro' data-dept='claude corp'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Samuel Navarro</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Claude Corp</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    shield@everlightventures.io &middot; @shield | #claude-corp, #finance, #compliance
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/42_financial_safeguard.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='derek ellis' data-dept='claude corp'
+     data-role='the **assigned owner of 91 resources** in the everlight intel center, spread across:'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Derek Ellis</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Claude Corp</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>the **assigned owner of 91 resources** in the Everlight Intel Center, spread across:</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    draft@everlightventures.io &middot; @draft | #claude-corp, #strategy
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/43_strategy_assistant.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='paul sandoval' data-dept='claude corp'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Paul Sandoval</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Claude Corp</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    proof@everlightventures.io &middot; @proof | #claude-corp, #content
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/44_edit_assistant.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='augustine crane' data-dept='claude corp'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Augustine Crane</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Claude Corp</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    audit@everlightventures.io &middot; @audit | #claude-corp, #compliance
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/45_compliance_assistant.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='atlas vega' data-dept='claude corp'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Atlas Vega</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Claude Corp</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    atlas@everlightventures.io &middot; @atlas | #claude-corp, #engineering, #architecture
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/everlight_architect.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='vera lux' data-dept='claude corp'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Vera Lux</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Claude Corp</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    vera@everlightventures.io &middot; @vera | #claude-corp, #content, #brand
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/everlight_content_director.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='rex thornton' data-dept='claude corp'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Rex Thornton</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Claude Corp</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    rex@everlightventures.io &middot; @rex | #claude-corp, #xlm-bot, #risk
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/everlight_trading_risk.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='sage holloway' data-dept='claude corp'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Sage Holloway</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Claude Corp</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    sage@everlightventures.io &middot; @sage | #claude-corp, #code-review, #engineering
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/reviewer.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+  </div>
+</section>
+
+<section class='deptsection' data-dept='perplexity intel' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#a8a3ff;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    Perplexity Intel <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(15 agents)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;'>
+    
+<div class='agent' data-name='miguel reyes' data-dept='perplexity intel'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Miguel Reyes</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Perplexity Intel</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    margin@everlightventures.io &middot; @margin | #perplexity-intel, #trading, #xlm-bot
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/53_derivatives_beat.md' style='color:#a8a3ff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='stewart erikson' data-dept='perplexity intel'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Stewart Erikson</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Perplexity Intel</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    scope@everlightventures.io &middot; @scope | #perplexity-intel, #world-desk, #war-room
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/54_geopolitical_risk.md' style='color:#a8a3ff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='leonard nakamura' data-dept='perplexity intel'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Leonard Nakamura</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Perplexity Intel</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    lens@everlightventures.io &middot; @lens | #perplexity-intel, #horizon, #strategy
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/55_competitive_intel.md' style='color:#a8a3ff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='thomas rourke' data-dept='perplexity intel'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Thomas Rourke</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Perplexity Intel</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    tally@everlightventures.io &middot; @tally | #perplexity-intel, #horizon, #compliance
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/56_data_verifier.md' style='color:#a8a3ff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='christopher johanssen' data-dept='perplexity intel'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Christopher Johanssen</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Perplexity Intel</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    clip@everlightventures.io &middot; @clip | #perplexity-intel, #trading, #markets
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/58_markets_assistant.md' style='color:#a8a3ff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='david wen' data-dept='perplexity intel'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>David Wen</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Perplexity Intel</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    docket@everlightventures.io &middot; @docket | #perplexity-intel, #compliance, #legal
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/59_legal_assistant.md' style='color:#a8a3ff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='isaac ashworth' data-dept='perplexity intel'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Isaac Ashworth</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Perplexity Intel</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    index@everlightventures.io &middot; @index | #perplexity-intel, #horizon, #tech
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/60_tech_assistant.md' style='color:#a8a3ff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='bernard calloway (&quot;brief&quot;)' data-dept='perplexity intel'
+     data-role='the **assigned owner of 1 resources** in the everlight intel center, spread across:'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Bernard Calloway (&quot;Brief&quot;)</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Perplexity Intel</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>the **assigned owner of 1 resources** in the Everlight Intel Center, spread across:</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    brief@everlightventures.io &middot; @brief | #perplexity-intel, #war-room, #compliance, #legal
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/brief_calloway.md' style='color:#a8a3ff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='bernard archer (&quot;bull&quot;)' data-dept='perplexity intel'
+     data-role='the **assigned owner of 67 resources** in the everlight intel center, spread across:'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Bernard Archer (&quot;Bull&quot;)</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Perplexity Intel</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>the **assigned owner of 67 resources** in the Everlight Intel Center, spread across:</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    bull@everlightventures.io &middot; @bull | #perplexity-intel, #war-room, #finance, #markets
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/bull_archer.md' style='color:#a8a3ff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='christopher wolfe (&quot;cipher&quot;)' data-dept='perplexity intel'
+     data-role='the **assigned owner of 174 resources** in the everlight intel center, spread across:'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Christopher Wolfe (&quot;Cipher&quot;)</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Perplexity Intel</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>the **assigned owner of 174 resources** in the Everlight Intel Center, spread across:</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    cipher@everlightventures.io &middot; @cipher | #perplexity-intel, #war-room, #xlm-bot, #crypto
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/cipher_wolfe.md' style='color:#a8a3ff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='henry patel (&quot;helix&quot;)' data-dept='perplexity intel'
+     data-role='the **assigned owner of 97 resources** in the everlight intel center, spread across:'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Henry Patel (&quot;Helix&quot;)</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Perplexity Intel</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>the **assigned owner of 97 resources** in the Everlight Intel Center, spread across:</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    helix@everlightventures.io &middot; @helix | #perplexity-intel, #war-room, #science, #health
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/helix_patel.md' style='color:#a8a3ff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='nathan ling (&quot;nova&quot;)' data-dept='perplexity intel'
+     data-role='the **assigned owner of 7 resources** in the everlight intel center, spread across:'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Nathan Ling (&quot;Nova&quot;)</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Perplexity Intel</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>the **assigned owner of 7 resources** in the Everlight Intel Center, spread across:</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    nova@everlightventures.io &middot; @nova | #perplexity-intel, #war-room, #tech, #ai
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/nova_ling.md' style='color:#a8a3ff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='peter adler (&quot;pitch&quot;)' data-dept='perplexity intel'
+     data-role='the **assigned owner of 2 resources** in the everlight intel center, spread across:'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Peter Adler (&quot;Pitch&quot;)</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Perplexity Intel</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>the **assigned owner of 2 resources** in the Everlight Intel Center, spread across:</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    pitch@everlightventures.io &middot; @pitch | #perplexity-intel, #war-room, #business, #startups
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/pitch_adler.md' style='color:#a8a3ff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='pedro diaz (&quot;pulse&quot;)' data-dept='perplexity intel'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Pedro Diaz (&quot;Pulse&quot;)</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Perplexity Intel</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    pulse@everlightventures.io &middot; @pulse | #perplexity-intel, #war-room, #markets, #personal
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/pulse_diaz.md' style='color:#a8a3ff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='william santos (&quot;wire&quot;)' data-dept='perplexity intel'
+     data-role='the **assigned owner of 27 resources** in the everlight intel center, spread across:'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>William Santos (&quot;Wire&quot;)</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Perplexity Intel</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>the **assigned owner of 27 resources** in the Everlight Intel Center, spread across:</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    wire@everlightventures.io &middot; @wire | #perplexity-intel, #war-room, #news, #world
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/wire_santos.md' style='color:#a8a3ff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+  </div>
+</section>
+
+<section class='deptsection' data-dept='gemini ops' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#6bafff;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    Gemini Ops <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(4 agents)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;'>
+    
+<div class='agent' data-name='major dex' data-dept='gemini ops'
+     data-role='the logistics commander, the core operational engine of everlight logistics'
+     style='background:#0d0d0d;border-left:3px solid #6bafff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Major Dex</div>
+    <span style='color:#6bafff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Gemini Ops</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>the Logistics Commander, the core operational engine of Everlight Logistics</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    major.dex@everlightventures.io &middot; @major | #gemini-ops, #war-room, #operations
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/26_logistics_commander.md' style='color:#6bafff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='sebastian navarro' data-dept='gemini ops'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #6bafff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Sebastian Navarro</div>
+    <span style='color:#6bafff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Gemini Ops</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    scout.navarro@everlightventures.io &middot; @scout | #gemini-ops, #broker-ops, #deals
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/28_deal_scout.md' style='color:#6bafff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='piper reeves' data-dept='gemini ops'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #6bafff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Piper Reeves</div>
+    <span style='color:#6bafff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Gemini Ops</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    piper.reeves@everlightventures.io &middot; @piper | #gemini-ops, #broker-ops, #outreach
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/31_outreach_agent.md' style='color:#6bafff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='charles dawson' data-dept='gemini ops'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #6bafff;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Charles Dawson</div>
+    <span style='color:#6bafff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Gemini Ops</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    chart.dawson@everlightventures.io &middot; @chart | #gemini-ops, #broker-ops, #analytics
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/35_broker_analytics.md' style='color:#6bafff;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+  </div>
+</section>
+
+<section class='deptsection' data-dept='gemini core' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    Gemini Core <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(3 agents)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;'>
+    
+<div class='agent' data-name='carlos alvarez' data-dept='gemini core'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Carlos Alvarez</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Gemini Core</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    cog@everlightventures.io &middot; @cog | #gemini-core, #engineering, #automation
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/46_automation_assistant.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='philip warren' data-dept='gemini core'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Philip Warren</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Gemini Core</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    pixel@everlightventures.io &middot; @pixel | #gemini-core, #analytics, #dashboard
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/47_analytics_assistant.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='frederick beckett' data-dept='gemini core'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Frederick Beckett</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Gemini Core</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    flyer@everlightventures.io &middot; @flyer | #gemini-core, #outreach, #leads
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/48_outreach_assistant.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+  </div>
+</section>
+
+<section class='deptsection' data-dept='gemini ops (reporting to major dex)' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    Gemini Ops (reporting to Major Dex) <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(2 agents)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;'>
+    
+<div class='agent' data-name='rex &quot;the closer&quot; blackwell' data-dept='gemini ops (reporting to major dex)'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Rex &quot;The Closer&quot; Blackwell</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Gemini Ops (reporting to Major Dex)</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    rex.b@everlightventures.io &middot; @rex-b | #wholesale-deals, #broker-ops, #gemini-ops
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/36_rex_wholesale.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+<div class='agent' data-name='ace &quot;the pitch&quot; morgan' data-dept='gemini ops (reporting to major dex)'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Ace &quot;The Pitch&quot; Morgan</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Gemini Ops (reporting to Major Dex)</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    ace@everlightventures.io &middot; @ace | #wholesale-deals, #content, #gemini-ops
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/37_ace_deal_marketer.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+  </div>
+</section>
+
+<section class='deptsection' data-dept='claude corp (crypto &amp; defi intelligence + qa gate)' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    Claude Corp (Crypto &amp; DeFi Intelligence + QA Gate) <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(1 agents)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;'>
+    
+<div class='agent' data-name='christopher wolfe' data-dept='claude corp (crypto &amp; defi intelligence + qa gate)'
+     data-role='---'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Christopher Wolfe</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Claude Corp (Crypto &amp; DeFi Intelligence + QA Gate)</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>---</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    cipher@everlightventures.io &middot; @cipher | #claude-corp, #crypto, #qa, #deploys
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/everlight_qa_gate.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+  </div>
+</section>
+
+<section class='deptsection' data-dept='wholesale acquisitions (tennessee desk)' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    Wholesale Acquisitions (Tennessee desk) <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(1 agents)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px;'>
+    
+<div class='agent' data-name='marquise reed' data-dept='wholesale acquisitions (tennessee desk)'
+     data-role='real to the people you contact'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:16px;font-weight:600;'>Marquise Reed</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>Wholesale Acquisitions (Tennessee desk)</span>
+  </div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;line-height:1.5;'>real to the people you contact</div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:8px;'>
+    marquise@everlightventures.io
+  </div>
+  <div style='margin-top:6px;'>
+    <a href='/agents/marquise_reed_acquisitions.md' style='color:#D4A843;font-size:11px;text-decoration:none;'>firmware &rarr;</a>
+  </div>
+</div>
+
+  </div>
+</section>
+
+
+<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:24px;margin:48px 0 12px;border-bottom:2px solid #D4A843;padding-bottom:8px;'>
+  MCP HTTP Bridge -- Tool Catalog
+</h2>
+<p style='color:#888;font-size:13px;margin-bottom:16px;'>
+Every tool callable from cron / Workers / scripts via POST <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;'>http://127.0.0.1:2701/tool/&#123;service&#125;/&#123;tool_name&#125;</code>.
+Same Python dispatchers as the stdio MCP path used by Claude Code.
+</p>
+
+<h3 style='font-family:Playfair Display,serif;color:#D4A843;font-size:18px;margin:18px 0 8px;'>broker (23 tools)</h3>
+<div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>scout_hacker_news</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Scrape Hacker News &#x27;Show HN&#x27; posts via public Algolia API. No auth needed. Returns AI/SaaS relevant products as potential offers.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>scout_product_hunt_rss</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Scrape Product Hunt newest posts via public RSS feed. No API token needed. Returns products as potential offers.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>scout_indiehackers_rss</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Scrape IndieHackers RSS feed for new SaaS/tool launches. No auth needed.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>scout_github_trending</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Scrape GitHub trending repos (public page) for dev tools and SaaS projects.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>scout_devto</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Search DEV.to public API for SaaS/AI/startup articles and product launches. No auth needed.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>web_scrape_public</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Fetch and extract text from any public URL. For scouting product pages, blog posts, company info.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>broker_ingest_offer</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Add a seller&#x27;s product/service to the Broker OS offer catalog via Django API.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>broker_ingest_lead</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Add a buyer lead to the Broker OS pipeline via Django API.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>broker_run_matching</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Run the AI matching engine to pair offers with leads. Returns scored matches.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>broker_approve_match</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Approve a match and create a deal with specified value.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>broker_close_deal</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Close a deal as won or lost.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>broker_status</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Get full Broker OS pipeline status: offers, leads, matches, deals, commissions.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>broker_commission_report</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Get commission summary: earned, pending, paid, unpaid balance.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>email_send</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Send an email via configured SMTP. Tracks warm-up limits. Requires SMTP env vars.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>email_warmup_status</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Check email sending limits and warm-up progress for the configured domain.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>email_draft_outreach</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Generate a personalized outreach email draft (seller intro or buyer intro). Does NOT send.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>generate_finder_agreement</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Generate a finder fee agreement template for a specific deal. Outputs markdown.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>scheduler_add_job</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Schedule a recurring broker pipeline job (ingest, match, report).</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>scheduler_list_jobs</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>List all scheduled broker pipeline jobs.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>scheduler_remove_job</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Remove a scheduled job by name.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>scheduler_install_crontab</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Write all enabled jobs to the system crontab. Makes schedules persistent.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>broker_kpi_snapshot</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Generate a full KPI snapshot: funnel metrics, conversion rates, revenue forecast.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>bulk_scout_all_sources</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Run all scouts (HN, Reddit, GitHub trending, IndieHackers) in one call. Returns combined results.</div></div>
+
+<h3 style='font-family:Playfair Display,serif;color:#D4A843;font-size:18px;margin:18px 0 8px;'>blinko (3 tools)</h3>
+<div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>blinko_query_memory</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Query the Blinko memory layer for prior decisions, summaries, and notes.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>blinko_ai_query</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Ask Blinko&#x27;s AI query endpoint to synthesize memory-backed context.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>blinko_ingest_note</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Write a durable note into Blinko memory.</div></div>
+
+<h3 style='font-family:Playfair Display,serif;color:#D4A843;font-size:18px;margin:18px 0 8px;'>market (2 tools)</h3>
+<div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>get_market_intel_state</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Return the current structured market-intel state bundle used by the XLM bot.</div></div><div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'><code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>read_market_intel_resource</code><div style='color:#aaa;font-size:12px;margin-top:4px;'>Read a specific market-intel MCP resource URI via tool call.</div></div>
+
+
+<script>
+(function() {
+  const box = document.getElementById('hivesearch');
+  const filters = document.querySelectorAll('.dfilter');
+  const sections = document.querySelectorAll('.deptsection');
+  const cards = document.querySelectorAll('.agent');
+  let activeDept = '';
+  function applyFilter() {
+    const q = (box.value || '').toLowerCase().trim();
+    cards.forEach(c => {
+      const name = (c.dataset.name || '').toLowerCase();
+      const dept = (c.dataset.dept || '').toLowerCase();
+      const role = (c.dataset.role || '').toLowerCase();
+      const matchesDept = !activeDept || dept === activeDept;
+      const matchesQ = !q || name.includes(q) || dept.includes(q) || role.includes(q);
+      c.style.display = (matchesDept && matchesQ) ? '' : 'none';
+    });
+    sections.forEach(s => {
+      const visible = Array.from(s.querySelectorAll('.agent')).some(c => c.style.display !== 'none');
+      const dept = (s.dataset.dept || '').toLowerCase();
+      s.style.display = (visible && (!activeDept || dept === activeDept)) ? '' : 'none';
+    });
+  }
+  box.addEventListener('input', applyFilter);
+  filters.forEach(f => f.addEventListener('click', () => {
+    filters.forEach(x => { x.classList.remove('active'); x.style.background='#1a1a1a'; x.style.color = x.style.borderColor || '#D4A843'; });
+    f.classList.add('active');
+    f.style.background = '#D4A843';
+    f.style.color = '#0a0a0a';
+    activeDept = f.dataset.dept;
+    applyFilter();
+  }));
+})();
+</script>
+
+
+<div class="sig">
+  <div class="name">Marcus Cole</div>
+  <div class="role">Chief Operator (orchestrating)</div>
+  <div class="contact">hello@everlightventures.io | everlightventures.io</div>
+</div>
+</div>
+<div class="footer">
+  <div class="brand">Everlight Ventures</div>
+  <p style="margin-top: 8px;">Generated by the Everlight Hive Mind | Sacramento, CA</p>
+  <p style="margin-top: 4px;">everlightventures.io</p>
+</div>
+</body>
+</html>

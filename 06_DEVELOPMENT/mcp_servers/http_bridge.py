@@ -88,6 +88,11 @@ _load_module("broker", "broker_os.server", "_dispatch")
 _load_module("blinko", "blinko_memory.server", "call_tool")
 _load_module("market", "market_intel.server", "_tool_payload")
 
+# Intel Center -- pure Python helper, no MCP server.py needed. Auto-exposes
+# search_by_capability / search / list_categories at /tool/intel/{name}.
+sys.path.insert(0, str(ROOT / "Everlight_Intel_Center" / "lib"))
+_load_module("intel", "intel_query", "_dispatch")
+
 # ---------------------------------------------------------------------------
 # FastAPI app
 # ---------------------------------------------------------------------------
@@ -216,6 +221,16 @@ async def call_market(
 ):
     _check_token(x_everlight_token)
     return await _call("market", tool_name, args or {})
+
+
+@app.post("/intel/{tool_name}")
+async def call_intel(
+    tool_name: str,
+    args: dict | None = None,
+    x_everlight_token: str | None = Header(None, alias="X-Everlight-Token"),
+):
+    _check_token(x_everlight_token)
+    return await _call("intel", tool_name, args or {})
 
 
 @app.exception_handler(Exception)

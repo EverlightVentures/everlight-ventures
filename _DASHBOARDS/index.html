@@ -1,249 +1,148 @@
+
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Everlight Local Hub</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<title>Everlight Ultra Mind | Master Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <style>
-  :root {
-    --gold: #d4a843;
-    --gold-soft: #f0c460;
-    --bg: #0a0a0a;
-    --bg-card: #14140e;
-    --border: #2a2410;
-    --text: #e8e8e8;
-    --muted: #9b9788;
-  }
-  body {
-    background: radial-gradient(circle at 30% -10%, #1a1308 0%, var(--bg) 60%) fixed;
-    color: var(--text);
-    font-family: 'Inter', system-ui, sans-serif;
-    min-height: 100vh;
-  }
-  .display { font-family: 'Playfair Display', Georgia, serif; }
-  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
-  .gold { color: var(--gold); }
-  .card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    transition: all .15s ease;
-  }
-  .card:hover { border-color: var(--gold); transform: translateY(-2px); }
-  .leaf {
-    transition: all .12s ease;
-    border-left: 2px solid transparent;
-  }
-  .leaf:hover {
-    border-left-color: var(--gold);
-    background: rgba(212,168,67,.05);
-    padding-left: .75rem;
-  }
-  .pill {
-    background: rgba(212,168,67,.1);
-    border: 1px solid rgba(212,168,67,.3);
-    color: var(--gold);
-    padding: 2px 8px;
-    border-radius: 999px;
-    font-size: .7rem;
-  }
-  .pill-dim { background: rgba(155,151,136,.08); border-color: rgba(155,151,136,.2); color: var(--muted); }
-  details summary { list-style: none; cursor: pointer; }
-  details summary::-webkit-details-marker { display: none; }
-  details[open] summary .chev { transform: rotate(90deg); }
-  .chev { display: inline-block; transition: transform .15s ease; color: var(--gold); }
-  a { text-decoration: none; color: inherit; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: radial-gradient(circle at 30% -10%, #1a1308 0%, #0a0a0a 60%) fixed;
+  color: #E8E8E8;
+  font-family: 'Inter', -apple-system, sans-serif;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+.container { max-width: 1400px; margin: 0 auto; padding: 32px 24px; }
+.header { text-align: center; margin-bottom: 24px; border-bottom: 1px solid #2a2a2a; padding-bottom: 24px; }
+.logo { font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 6px; text-transform: uppercase; color: #D4A843; }
+.title { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 700; color: #E8E8E8; margin-top: 8px; }
+.subtitle { color: #888; font-size: 14px; margin-top: 4px; }
+a { color: #D4A843; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 18px; margin: 24px 0; }
+.footer { text-align: center; margin-top: 48px; padding-top: 24px; border-top: 1px solid #2a2a2a; color: #666; font-size: 12px; }
 </style>
 </head>
-<body class="px-4 py-8 sm:px-8">
-
-<header class="max-w-5xl mx-auto mb-8">
-  <div class="flex items-baseline gap-3 mb-2">
-    <span class="gold mono text-xs uppercase tracking-widest">Everlight Ventures</span>
-    <span class="text-xs text-[color:var(--muted)] mono">127.0.0.1:2000</span>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">Everlight Ventures</div>
+    <div class="title">Ultra Mind</div>
+    <div class="subtitle">Single home for memory, knowledge, ops, trading, comms, services &middot; May 13, 2026 01:21 AM PT</div>
   </div>
-  <h1 class="display text-4xl sm:text-5xl gold leading-tight">Local Hub</h1>
-  <p class="text-[color:var(--muted)] mt-2 text-sm">
-    Every local dashboard, by band. Click any leaf to open. Decimals (e.g. <span class="mono gold">2200.1</span>) are sub-pages on the same port.
-  </p>
-</header>
 
-<main class="max-w-5xl mx-auto grid gap-4 sm:grid-cols-2">
+  
+<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:24px 0;'>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+    <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Services</div>
+    <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>9/9 <span style='color:#888;font-size:14px;'>up</span></div>
+  </div>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+    <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Memory (Blinko)</div>
+    <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>614 <span style='color:#888;font-size:14px;'>notes</span></div>
+  </div>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+    <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Knowledge</div>
+    <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>745 <span style='color:#888;font-size:14px;'>resources</span></div>
+  </div>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #ff6b6b;'>
+    <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>XLM Bot</div>
+    <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>$2.75</div>
+    <div style='color:#ff6b6b;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>OBSERVING</div>
+  </div>
+</div>
 
-  <!-- 2100 Markets -->
-  <details class="card p-5" open>
-    <summary class="flex items-baseline gap-3 mb-2">
-      <span class="chev">▶</span>
-      <span class="display text-2xl gold">2100</span>
-      <span class="text-sm uppercase tracking-wider text-[color:var(--muted)]">Markets / Trading</span>
-      <span class="ml-auto pill mono">markets</span>
-    </summary>
-    <ul class="space-y-2 mt-3 ml-6">
-      <li class="leaf pl-2 py-1">
-        <a href="http://127.0.0.1:2100/" target="_blank" class="flex items-baseline gap-3">
-          <span class="mono gold text-sm">2100</span>
-          <span>XLM Bot Dashboard</span>
-          <span class="pill pill-dim ml-auto">mirror, TBD</span>
-        </a>
-      </li>
-    </ul>
-  </details>
+<div style='background:#0d0d0d;padding:14px 18px;border-left:3px solid #D4A843;margin:8px 0 24px;'>
+  <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;'>Service Health</div>
+  <div style='display:flex;flex-wrap:wrap;gap:8px;'><a href='http://127.0.0.1:2000/' target='_blank' style='display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#0d0d0d;border:1px solid #2a2a2a;border-left:3px solid #7ec699;color:#E8E8E8;font-family:JetBrains Mono,monospace;font-size:12px;text-decoration:none;border-radius:0 3px 3px 0;'><span style='color:#7ec699;'>●</span> :2000 Master Hub</a><a href='http://127.0.0.1:2200/' target='_blank' style='display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#0d0d0d;border:1px solid #2a2a2a;border-left:3px solid #7ec699;color:#E8E8E8;font-family:JetBrains Mono,monospace;font-size:12px;text-decoration:none;border-radius:0 3px 3px 0;'><span style='color:#7ec699;'>●</span> :2200 Reports Hub</a><a href='http://127.0.0.1:2300/' target='_blank' style='display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#0d0d0d;border:1px solid #2a2a2a;border-left:3px solid #7ec699;color:#E8E8E8;font-family:JetBrains Mono,monospace;font-size:12px;text-decoration:none;border-radius:0 3px 3px 0;'><span style='color:#7ec699;'>●</span> :2300 Intel Static</a><a href='http://127.0.0.1:2301/' target='_blank' style='display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#0d0d0d;border:1px solid #2a2a2a;border-left:3px solid #7ec699;color:#E8E8E8;font-family:JetBrains Mono,monospace;font-size:12px;text-decoration:none;border-radius:0 3px 3px 0;'><span style='color:#7ec699;'>●</span> :2301 Intel API</a><a href='http://127.0.0.1:2302/' target='_blank' style='display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#0d0d0d;border:1px solid #2a2a2a;border-left:3px solid #7ec699;color:#E8E8E8;font-family:JetBrains Mono,monospace;font-size:12px;text-decoration:none;border-radius:0 3px 3px 0;'><span style='color:#7ec699;'>●</span> :2302 E-Sign</a><a href='http://127.0.0.1:2400/' target='_blank' style='display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#0d0d0d;border:1px solid #2a2a2a;border-left:3px solid #7ec699;color:#E8E8E8;font-family:JetBrains Mono,monospace;font-size:12px;text-decoration:none;border-radius:0 3px 3px 0;'><span style='color:#7ec699;'>●</span> :2400 Apps</a><a href='http://127.0.0.1:2500/' target='_blank' style='display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#0d0d0d;border:1px solid #2a2a2a;border-left:3px solid #7ec699;color:#E8E8E8;font-family:JetBrains Mono,monospace;font-size:12px;text-decoration:none;border-radius:0 3px 3px 0;'><span style='color:#7ec699;'>●</span> :2500 MMA Fight Camp</a><a href='http://127.0.0.1:2700/' target='_blank' style='display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#0d0d0d;border:1px solid #2a2a2a;border-left:3px solid #7ec699;color:#E8E8E8;font-family:JetBrains Mono,monospace;font-size:12px;text-decoration:none;border-radius:0 3px 3px 0;'><span style='color:#7ec699;'>●</span> :2700 Blinko RAG</a><a href='http://127.0.0.1:2701/' target='_blank' style='display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:#0d0d0d;border:1px solid #2a2a2a;border-left:3px solid #7ec699;color:#E8E8E8;font-family:JetBrains Mono,monospace;font-size:12px;text-decoration:none;border-radius:0 3px 3px 0;'><span style='color:#7ec699;'>●</span> :2701 MCP HTTP Bridge</a></div>
+</div>
 
-  <!-- 2200 Reports -->
-  <details class="card p-5" open>
-    <summary class="flex items-baseline gap-3 mb-2">
-      <span class="chev">▶</span>
-      <span class="display text-2xl gold">2200</span>
-      <span class="text-sm uppercase tracking-wider text-[color:var(--muted)]">Reports / Ops</span>
-      <span class="ml-auto pill mono">reports</span>
-    </summary>
-    <ul class="space-y-2 mt-3 ml-6">
-      <li class="leaf pl-2 py-1">
-        <a href="http://127.0.0.1:2200/" target="_blank" class="flex items-baseline gap-3">
-          <span class="mono gold text-sm">2200</span>
-          <span>Band root</span>
-        </a>
-      </li>
-      <li class="leaf pl-2 py-1">
-        <a href="http://127.0.0.1:2200/reports/" target="_blank" class="flex items-baseline gap-3">
-          <span class="mono gold text-sm">2200.1</span>
-          <span>All Reports (76+)</span>
-          <span class="pill ml-auto">live</span>
-        </a>
-      </li>
-      <li class="leaf pl-2 py-1">
-        <a href="http://127.0.0.1:2200/dashboards/" target="_blank" class="flex items-baseline gap-3">
-          <span class="mono gold text-sm">2200.2</span>
-          <span>Dashboard Index (mirror of this hub)</span>
-        </a>
-      </li>
-      <li class="leaf pl-2 py-1" style="background:rgba(212,168,67,0.08); border-radius:6px; padding:.5rem .75rem;">
-        <a href="http://127.0.0.1:2200/reports/MASTER_PIPELINE_DOCTRINE_2026-05-13.html" target="_blank" class="flex items-baseline gap-3">
-          <span class="mono gold text-sm">2200.3</span>
-          <span style="font-weight:600; color:#ffcd3c;">★ TN Pipeline Doctrine (investor-grade, A-Z)</span>
-          <span class="pill ml-auto" style="background:#5cffb1;color:#0a0a0a;">NEW</span>
-        </a>
-      </li>
-      <li class="leaf pl-2 py-1">
-        <a href="http://127.0.0.1:2302/signatures" target="_blank" class="flex items-baseline gap-3">
-          <span class="mono gold text-sm">2302.s</span>
-          <span>Signatures Audit Dashboard (live, hash-chained)</span>
-        </a>
-      </li>
-    </ul>
-  </details>
 
-  <!-- 2300 Intel -->
-  <details class="card p-5" open>
-    <summary class="flex items-baseline gap-3 mb-2">
-      <span class="chev">▶</span>
-      <span class="display text-2xl gold">2300</span>
-      <span class="text-sm uppercase tracking-wider text-[color:var(--muted)]">Intel Center</span>
-      <span class="ml-auto pill mono">intel</span>
-    </summary>
-    <ul class="space-y-2 mt-3 ml-6">
-      <li class="leaf pl-2 py-1">
-        <a href="http://127.0.0.1:2300/" target="_blank" class="flex items-baseline gap-3">
-          <span class="mono gold text-sm">2300</span>
-          <span>Static Dashboard</span>
-        </a>
-      </li>
-      <li class="leaf pl-2 py-1">
-        <a href="http://127.0.0.1:2300/clients.html" target="_blank" class="flex items-baseline gap-3">
-          <span class="mono gold text-sm">2300.1</span>
-          <span>Clients</span>
-        </a>
-      </li>
-      <li class="leaf pl-2 py-1">
-        <a href="http://127.0.0.1:2300/resources.html" target="_blank" class="flex items-baseline gap-3">
-          <span class="mono gold text-sm">2300.2</span>
-          <span>Resources Catalog</span>
-        </a>
-      </li>
-      <li class="leaf pl-2 py-1">
-        <a href="http://127.0.0.1:2301/" target="_blank" class="flex items-baseline gap-3">
-          <span class="mono gold text-sm">2301</span>
-          <span>OSINT FastAPI</span>
-        </a>
-      </li>
-      <li class="leaf pl-2 py-1">
-        <a href="http://127.0.0.1:2301/api/docs" target="_blank" class="flex items-baseline gap-3">
-          <span class="mono gold text-sm">2301.1</span>
-          <span>Swagger UI</span>
-        </a>
-      </li>
-      <li class="leaf pl-2 py-1">
-        <a href="http://127.0.0.1:2302/" target="_blank" class="flex items-baseline gap-3">
-          <span class="mono gold text-sm">2302</span>
-          <span>E-Sign Service (UETA compliant)</span>
-          <span class="pill ml-auto">live</span>
-        </a>
-      </li>
-    </ul>
-  </details>
+  <div class="grid">
+    
+<div style='background:#0d0d0d;border-left:3px solid #7ec699;padding:18px 20px;border-radius:0 4px 4px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <h3 style='font-family:Playfair Display,serif;color:#7ec699;font-size:20px;margin:0;'>Memory</h3>
+    <a href='http://127.0.0.1:2700/' target='_blank' style='color:#7ec699;font-size:11px;text-decoration:none;text-transform:uppercase;letter-spacing:1px;'>search &rarr;</a>
+  </div>
+  <div style='color:#888;font-size:13px;margin-top:4px;'>Blinko RAG -- 614+ notes, searchable</div>
+  <div style='margin-top:12px;color:#aaa;font-size:14px;line-height:1.6;'><div>614 notes indexed. Query for prior decisions, audits, agent reports.</div><div style='margin-top:8px;'><a href='http://127.0.0.1:2701/list_tools/blinko' style='color:#D4A843;font-size:12px;'>API: 3 tools via MCP bridge</a></div></div>
+</div>
 
-  <!-- 2400 Apps -->
-  <details class="card p-5" open>
-    <summary class="flex items-baseline gap-3 mb-2">
-      <span class="chev">▶</span>
-      <span class="display text-2xl gold">2400</span>
-      <span class="text-sm uppercase tracking-wider text-[color:var(--muted)]">Consumer / Apps</span>
-      <span class="ml-auto pill mono">apps</span>
-    </summary>
-    <ul class="space-y-2 mt-3 ml-6">
-      <li class="leaf pl-2 py-1">
-        <a href="http://127.0.0.1:2400/game_v6.html" target="_blank" class="flex items-baseline gap-3">
-          <span class="mono gold text-sm">2400</span>
-          <span>Alley Kingz prototype</span>
-        </a>
-      </li>
-    </ul>
-  </details>
+<div style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:18px 20px;border-radius:0 4px 4px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <h3 style='font-family:Playfair Display,serif;color:#a8a3ff;font-size:20px;margin:0;'>Knowledge</h3>
+    <a href='http://127.0.0.1:2200/reports/RESOURCES_HUB.html' target='_blank' style='color:#a8a3ff;font-size:11px;text-decoration:none;text-transform:uppercase;letter-spacing:1px;'>browse &rarr;</a>
+  </div>
+  <div style='color:#888;font-size:13px;margin-top:4px;'>Resources Hub -- 745 free tools, categorized</div>
+  <div style='margin-top:12px;color:#aaa;font-size:14px;line-height:1.6;'><div>745 verified resources across 18 categories.</div><div style='margin-top:8px;color:#888;font-size:12px;'>175 transcripts &middot; Intel Center phases 1-5 shipped, 6-10 queued.</div></div>
+</div>
 
-  <!-- 2500 Health -->
-  <details class="card p-5" open>
-    <summary class="flex items-baseline gap-3 mb-2">
-      <span class="chev">▶</span>
-      <span class="display text-2xl gold">2500</span>
-      <span class="text-sm uppercase tracking-wider text-[color:var(--muted)]">Personal / Health</span>
-      <span class="ml-auto pill mono">health</span>
-    </summary>
-    <ul class="space-y-2 mt-3 ml-6">
-      <li class="leaf pl-2 py-1">
-        <a href="http://127.0.0.1:2500/" target="_blank" class="flex items-baseline gap-3">
-          <span class="mono gold text-sm">2500</span>
-          <span>MMA Fight Camp dashboard</span>
-        </a>
-      </li>
-      <li class="leaf pl-2 py-1">
-        <a href="http://127.0.0.1:2500/05_Fitness/" target="_blank" class="flex items-baseline gap-3">
-          <span class="mono gold text-sm">2500.1</span>
-          <span>Phase 4 Fitness Mirror</span>
-        </a>
-      </li>
-    </ul>
-  </details>
+<div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:18px 20px;border-radius:0 4px 4px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <h3 style='font-family:Playfair Display,serif;color:#D4A843;font-size:20px;margin:0;'>Operations</h3>
+    <a href='http://127.0.0.1:2200/reports/RICH_TODO_LIVE.html' target='_blank' style='color:#D4A843;font-size:11px;text-decoration:none;text-transform:uppercase;letter-spacing:1px;'>todo &rarr;</a>
+  </div>
+  <div style='color:#888;font-size:13px;margin-top:4px;'>TODO + Daily Leads + Deal Pipeline + Watchdog</div>
+  <div style='margin-top:12px;color:#aaa;font-size:14px;line-height:1.6;'><div>Master TODO: open tasks tracked across the workspace.</div><div style='margin-top:6px;'>Latest: <a href='http://127.0.0.1:2200/reports/daily_leads/2026-05-13.html' style='color:#D4A843;'>2026-05-13</a></div><div style='margin-top:6px;'><a href='http://127.0.0.1:2200/reports/MASTER_PIPELINE_DOCTRINE_2026-05-13.html' style='color:#D4A843;font-size:12px;'>Pipeline doctrine →</a></div></div>
+</div>
 
-  <!-- Reserved -->
-  <details class="card p-5">
-    <summary class="flex items-baseline gap-3 mb-2">
-      <span class="chev">▶</span>
-      <span class="display text-2xl text-[color:var(--muted)]">2600+</span>
-      <span class="text-sm uppercase tracking-wider text-[color:var(--muted)]">Reserved</span>
-    </summary>
-    <ul class="space-y-2 mt-3 ml-6 text-sm text-[color:var(--muted)]">
-      <li class="leaf pl-2 py-1">2600 — open band, awaiting category</li>
-      <li class="leaf pl-2 py-1">2700 — Lucrex Next.js (when rehomed)</li>
-    </ul>
-  </details>
+<div style='background:#0d0d0d;border-left:3px solid #ff6b6b;padding:18px 20px;border-radius:0 4px 4px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <h3 style='font-family:Playfair Display,serif;color:#ff6b6b;font-size:20px;margin:0;'>Trading</h3>
+    <a href='http://127.0.0.1:2200/reports/xlm_honest_dashboard.html' target='_blank' style='color:#ff6b6b;font-size:11px;text-decoration:none;text-transform:uppercase;letter-spacing:1px;'>honest &rarr;</a>
+  </div>
+  <div style='color:#888;font-size:13px;margin-top:4px;'>XLM bot -- OBSERVING -- $2.75</div>
+  <div style='margin-top:12px;color:#aaa;font-size:14px;line-height:1.6;'><div>0 trades in last 7 days. Service-active, not trading.</div><div style='margin-top:6px;color:#888;font-size:12px;'>Honest verdict per operator-truth doctrine.</div></div>
+</div>
 
-</main>
+<div style='background:#0d0d0d;border-left:3px solid #6bafff;padding:18px 20px;border-radius:0 4px 4px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <h3 style='font-family:Playfair Display,serif;color:#6bafff;font-size:20px;margin:0;'>Communications</h3>
+    <a href='https://app.slack.com/client/T0AN6PD3XMD' target='_blank' style='color:#6bafff;font-size:11px;text-decoration:none;text-transform:uppercase;letter-spacing:1px;'>slack &rarr;</a>
+  </div>
+  <div style='color:#888;font-size:13px;margin-top:4px;'>Slack -- 13 channels, branded comms layer</div>
+  <div style='margin-top:12px;color:#aaa;font-size:14px;line-height:1.6;'><div>warroom + xlmbot tokens active. ImprovMX 42 aliases @everlightventures.io.</div><div style='margin-top:6px;'><a href='http://127.0.0.1:2200/reports/SERVICES_REGISTRY.html' style='color:#D4A843;font-size:12px;'>All channels & services →</a></div></div>
+</div>
 
-<footer class="max-w-5xl mx-auto mt-10 pt-6 border-t border-[color:var(--border)] text-xs text-[color:var(--muted)] mono flex justify-between">
-  <span>EVERLIGHT VENTURES · Local Hub</span>
-  <span>Updated 2026-05-12 · Source: <span class="gold">_DASHBOARDS/PORT_MAP.md</span></span>
-</footer>
+<div style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:18px 20px;border-radius:0 4px 4px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <h3 style='font-family:Playfair Display,serif;color:#ff9f6b;font-size:20px;margin:0;'>Personal</h3>
+    <a href='http://127.0.0.1:2500/' target='_blank' style='color:#ff9f6b;font-size:11px;text-decoration:none;text-transform:uppercase;letter-spacing:1px;'>train &rarr;</a>
+  </div>
+  <div style='color:#888;font-size:13px;margin-top:4px;'>MMA Fight Camp -- training calendar, lesson capture</div>
+  <div style='margin-top:12px;color:#aaa;font-size:14px;line-height:1.6;'><div>Mon/Wed/Fri MMA + box + BJJ. Quizzes Tue/Thu. Voice-note workflow.</div></div>
+</div>
 
+<div style='background:#0d0d0d;border-left:3px solid #ffd76b;padding:18px 20px;border-radius:0 4px 4px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <h3 style='font-family:Playfair Display,serif;color:#ffd76b;font-size:20px;margin:0;'>Services &amp; Subscriptions</h3>
+    <a href='http://127.0.0.1:2200/reports/SERVICES_REGISTRY.html' target='_blank' style='color:#ffd76b;font-size:11px;text-decoration:none;text-transform:uppercase;letter-spacing:1px;'>registry &rarr;</a>
+  </div>
+  <div style='color:#888;font-size:13px;margin-top:4px;'>What you&#x27;re paying for &amp; connected to</div>
+  <div style='margin-top:12px;color:#aaa;font-size:14px;line-height:1.6;'><div>24 external services. Stripe, Twilio, 11labs, OpenAI, Resend, Supabase, Cloudflare, Coinbase, Google, ImprovMX, Tailscale, ATTOM, GitHub, Oracle, Onyx POS, MGN POS, Mid South Title.</div><div style='margin-top:6px;color:#888;font-size:12px;'>$20/mo recurring &middot; the rest on free tiers.</div></div>
+</div>
+
+<div style='background:#0d0d0d;border-left:3px solid #c39bff;padding:18px 20px;border-radius:0 4px 4px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <h3 style='font-family:Playfair Display,serif;color:#c39bff;font-size:20px;margin:0;'>Hive Mind</h3>
+    <a href='http://127.0.0.1:2200/reports/HIVE_MIND.html' target='_blank' style='color:#c39bff;font-size:11px;text-decoration:none;text-transform:uppercase;letter-spacing:1px;'>query &rarr;</a>
+  </div>
+  <div style='color:#888;font-size:13px;margin-top:4px;'>Query interface -- agents, dispatchers, recent decisions</div>
+  <div style='margin-top:12px;color:#aaa;font-size:14px;line-height:1.6;'><div>94 agents across 4 squads. Cipher, Marquise, Hammer, Bull Archer, Nova Ling, Helix Patel, etc.</div><div style='margin-top:6px;'><a href='http://127.0.0.1:2701/list_tools' style='color:#D4A843;font-size:12px;'>MCP HTTP bridge: 28 tools →</a></div></div>
+</div>
+
+  </div>
+
+  <div class="footer">
+    Generated by the Everlight Hive Mind &middot; refreshes every 5 min via watchdog cron &middot;
+    <a href='/PORT_MAP.md' style='color:#666;'>port map</a> &middot;
+    <a href='http://127.0.0.1:2200/reports/' style='color:#666;'>all reports</a>
+  </div>
+</div>
 </body>
 </html>
