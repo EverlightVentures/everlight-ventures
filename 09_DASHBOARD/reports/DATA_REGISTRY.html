@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Registry -- Internal Stores | Everlight Ventures</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0A0A0A; color: #E8E8E8; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.7; min-height: 100vh; }
+.header { background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%); border-bottom: 2px solid #D4A843; padding: 40px 0; text-align: center; }
+.header-inner { max-width: 800px; margin: 0 auto; padding: 0 24px; }
+.logo { font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 4px; text-transform: uppercase; color: #D4A843; margin-bottom: 16px; }
+.header h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600; color: #E8E8E8; margin-bottom: 8px; }
+.header .meta { font-size: 13px; color: #999999; }
+.header .meta span { color: #D4A843; }
+.content { max-width: 800px; margin: 0 auto; padding: 40px 24px; }
+.content h2 { font-family: 'Playfair Display', serif; font-size: 22px; color: #D4A843; margin: 32px 0 16px 0; padding-bottom: 8px; border-bottom: 1px solid #1A1A1A; }
+.content h3 { font-size: 16px; font-weight: 600; color: #E8E8E8; margin: 24px 0 12px 0; }
+.content p { margin-bottom: 16px; font-size: 15px; }
+.content ul { margin: 0 0 16px 24px; }
+.content li { margin-bottom: 8px; font-size: 15px; }
+.content strong { color: #D4A843; font-weight: 600; }
+table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+th { background: #1A1A1A; color: #D4A843; text-align: left; padding: 12px 16px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+td { padding: 10px 16px; border-bottom: 1px solid #1a1a1a; }
+tr:hover td { background: #1A1A1A; }
+.footer { text-align: center; padding: 40px 24px; color: #999999; font-size: 12px; border-top: 1px solid #1a1a1a; }
+.footer .brand { color: #D4A843; font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 2px; }
+.sig { margin-top: 40px; padding-top: 20px; border-top: 1px solid #222; }
+.sig .name { color: #D4A843; font-weight: 600; font-size: 15px; }
+.sig .role, .sig .contact { color: #999; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">Everlight Ventures</div>
+    <h1>Data Registry -- Internal Stores</h1>
+    <div class="meta">Prepared by <span>Hive Mind</span> | May 13, 2026 01:32 PM PT</div>
+  </div>
+</div>
+<div class="content">
+
+<p style='color:#888;font-size:14px;'>
+Every internal data store. SQLite DBs, JSONL audit logs, CSV registries,
+JSON registries. Auto-discovered via filesystem walk.
+Counterpart to the <a href='SERVICES_REGISTRY.html' style='color:#D4A843;'>Services Registry</a> (which catalogs external APIs).
+</p>
+
+<div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:16px 0 24px;'>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+    <div style='color:#888;font-size:11px;text-transform:uppercase;'>Stores</div>
+    <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>88</div>
+  </div>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+    <div style='color:#888;font-size:11px;text-transform:uppercase;'>Categories</div>
+    <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>8</div>
+  </div>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+    <div style='color:#888;font-size:11px;text-transform:uppercase;'>Total Size</div>
+    <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>1015.3 MB</div>
+  </div>
+</div>
+
+<div style='margin:12px 0;'>
+  <input id='datasearch' type='text' placeholder='Search stores -- name, path, category'
+         style='width:100%;padding:14px 16px;background:#0d0d0d;color:#E8E8E8;border:1px solid #2a2a2a;
+                border-left:3px solid #D4A843;font-family:Inter,sans-serif;font-size:15px;'>
+</div>
+
+
+<section class='datasection' data-cat='trading' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#ff9f6b;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    Trading <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(24)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:12px;'>
+    
+<div class='datacard' data-cat='trading' data-name='decisions.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>decisions.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 111.0 MB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs/decisions.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>—</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-28T19:19:06</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='dashboard_timeseries.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>dashboard_timeseries.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 15.6 MB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs/dashboard_timeseries.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>26,430 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-28T19:18:46</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='margin_policy.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>margin_policy.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 12.2 MB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs/margin_policy.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>24,738 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-27T11:00:26</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='plrl3.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>plrl3.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 11.7 MB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs/plrl3.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>32,127 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-27T11:00:26</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='atr_regime_audit.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>atr_regime_audit.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 9.8 MB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs/atr_regime_audit.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>22,884 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-28T19:18:43</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='contract_context.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>contract_context.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 8.9 MB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs/contract_context.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>22,291 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-28T19:18:44</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='bot_state.db'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>bot_state.db</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 2.7 MB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/data/bot_state.db</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>35,174 rows / 2 tables</div>
+  <div style='color:#888;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>events=35172 &middot; kv=2</div>
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-18T04:23:17</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='equity_series.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>equity_series.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 1.5 MB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs/equity_series.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>10,892 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-28T19:18:46</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='cash_movements.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>cash_movements.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 224.8 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs/cash_movements.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>603 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-27T11:00:28</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='market_news.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>market_news.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 198.3 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs/market_news.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>18 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-28T19:17:07</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='fills.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>fills.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 69.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs/fills.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>133 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-26T19:43:03</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='incidents.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>incidents.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 59.9 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs/incidents.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>203 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-27T10:54:21</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='bot_state.db'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>bot_state.db</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 20.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/data_mr/bot_state.db</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>3 rows / 2 tables</div>
+  <div style='color:#888;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>events=3 &middot; kv=0</div>
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-18T04:23:17</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='bot_state.db'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>bot_state.db</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 20.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/data_trend/bot_state.db</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>8 rows / 2 tables</div>
+  <div style='color:#888;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>events=7 &middot; kv=1</div>
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-18T04:23:17</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='changelog.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>changelog.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 12.4 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs/changelog.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>34 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-24T21:52:16</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='ai_feedback.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>ai_feedback.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 8.8 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/data/ai_feedback.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>17 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-18T04:23:17</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='decisions.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>decisions.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 4.8 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs_trend/decisions.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>8 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-18T04:23:17</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='decisions.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>decisions.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 3.6 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs_mr/decisions.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>6 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-18T04:23:17</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='dashboard_timeseries.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>dashboard_timeseries.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 1.7 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs_trend/dashboard_timeseries.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>4 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-18T04:23:17</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='dashboard_timeseries.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>dashboard_timeseries.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 1.3 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs_mr/dashboard_timeseries.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>3 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-18T04:23:17</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='margin_policy.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>margin_policy.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 460.0 B</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs_trend/margin_policy.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>1 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-18T04:23:17</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='plrl3.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>plrl3.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 283.0 B</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs_trend/plrl3.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>1 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-18T04:23:17</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='signals.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>signals.jsonl</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 205.0 B</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/logs/signals.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>1 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-23T23:56:17</div>
+</div>
+
+<div class='datacard' data-cat='trading' data-name='db.sqlite3'
+     style='background:#0d0d0d;border-left:3px solid #ff9f6b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>db.sqlite3</div>
+    <span style='color:#ff9f6b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 0.0 B</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/xlm_bot/dashboard_django/db.sqlite3</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>0 rows / 0 tables</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-18T04:23:16</div>
+</div>
+
+  </div>
+</section>
+
+<section class='datasection' data-cat='operational logs' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#888;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    Operational Logs <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(17)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:12px;'>
+    
+<div class='datacard' data-cat='operational logs' data-name='hive.db'
+     style='background:#0d0d0d;border-left:3px solid #888;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>hive.db</div>
+    <span style='color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 475.0 MB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/hive.db</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>—</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-03-06T07:09:28</div>
+</div>
+
+<div class='datacard' data-cat='operational logs' data-name='posttool.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #888;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>posttool.jsonl</div>
+    <span style='color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 315.0 MB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/claude_hooks/posttool.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>—</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-26T01:48:10</div>
+</div>
+
+<div class='datacard' data-cat='operational logs' data-name='pretool.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #888;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>pretool.jsonl</div>
+    <span style='color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 32.9 MB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/claude_hooks/pretool.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>20,567 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-26T06:23:58</div>
+</div>
+
+<div class='datacard' data-cat='operational logs' data-name='hot_inbound.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #888;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>hot_inbound.jsonl</div>
+    <span style='color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 37.1 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/inbound/hot_inbound.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>18 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-28T00:02:42</div>
+</div>
+
+<div class='datacard' data-cat='operational logs' data-name='events.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #888;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>events.jsonl</div>
+    <span style='color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 25.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/hive_runs/events.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>51 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-29T22:39:16</div>
+</div>
+
+<div class='datacard' data-cat='operational logs' data-name='skip_trace_free_results.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #888;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>skip_trace_free_results.jsonl</div>
+    <span style='color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 20.7 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/skip_trace_free_results.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>20 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-24T18:35:07</div>
+</div>
+
+<div class='datacard' data-cat='operational logs' data-name='events.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #888;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>events.jsonl</div>
+    <span style='color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 19.2 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/business_os/events.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>41 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-27T17:51:54</div>
+</div>
+
+<div class='datacard' data-cat='operational logs' data-name='resend_budget.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #888;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>resend_budget.jsonl</div>
+    <span style='color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 18.3 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/resend_budget.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>76 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-13T03:48:54</div>
+</div>
+
+<div class='datacard' data-cat='operational logs' data-name='hive_sessions.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #888;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>hive_sessions.jsonl</div>
+    <span style='color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 11.5 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/hive_sessions.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>18 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-03-19T19:01:15</div>
+</div>
+
+<div class='datacard' data-cat='operational logs' data-name='contacted_addresses.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #888;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>contacted_addresses.jsonl</div>
+    <span style='color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 10.7 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/outreach/contacted_addresses.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>41 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-27T21:15:54</div>
+</div>
+
+<div class='datacard' data-cat='operational logs' data-name='events.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #888;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>events.jsonl</div>
+    <span style='color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 5.3 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/dispatcher/events.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>11 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-24T16:19:35</div>
+</div>
+
+<div class='datacard' data-cat='operational logs' data-name='everlight_runs.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #888;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>everlight_runs.jsonl</div>
+    <span style='color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 1.7 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/everlight_os/_logs/everlight_runs.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>4 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-17T13:32:59</div>
+</div>
+
+<div class='datacard' data-cat='operational logs' data-name='errors.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #888;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>errors.jsonl</div>
+    <span style='color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 1.1 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/hive_runs/errors.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>5 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-29T22:39:37</div>
+</div>
+
+<div class='datacard' data-cat='operational logs' data-name='alerts.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #888;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>alerts.jsonl</div>
+    <span style='color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 1.1 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/business_os/alerts.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>3 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-03-15T04:50:35</div>
+</div>
+
+<div class='datacard' data-cat='operational logs' data-name='inbound_miss.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #888;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>inbound_miss.jsonl</div>
+    <span style='color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 739.0 B</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/hive_failures/inbound_miss.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>2 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-27T19:27:01</div>
+</div>
+
+<div class='datacard' data-cat='operational logs' data-name='task_queue.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #888;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>task_queue.jsonl</div>
+    <span style='color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 0.0 B</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/task_queue.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>0 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-03-06T07:09:21</div>
+</div>
+
+<div class='datacard' data-cat='operational logs' data-name='daily_briefs.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #888;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>daily_briefs.jsonl</div>
+    <span style='color:#888;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 0.0 B</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/daily_briefs.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>0 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-03-06T07:09:21</div>
+</div>
+
+  </div>
+</section>
+
+<section class='datasection' data-cat='wholesale + broker pipeline' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    Wholesale + Broker Pipeline <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(14)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:12px;'>
+    
+<div class='datacard' data-cat='wholesale + broker pipeline' data-name='leads_db.json'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>leads_db.json</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>json &middot; 4.3 MB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/leads_db.json</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>3,082 records</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-05T00:54:28</div>
+</div>
+
+<div class='datacard' data-cat='wholesale + broker pipeline' data-name='reddit_monitor.db'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>reddit_monitor.db</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 368.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/broker_ops/reddit_monitor.db</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>428 rows / 2 tables</div>
+  <div style='color:#888;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>seen_posts=396 &middot; monitor_stats=32</div>
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-25T07:30:33</div>
+</div>
+
+<div class='datacard' data-cat='wholesale + broker pipeline' data-name='2026-03-21_dead_letters.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>2026-03-21_dead_letters.jsonl</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 85.3 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/failed_emails/2026-03-21_dead_letters.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>207 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-18T04:24:38</div>
+</div>
+
+<div class='datacard' data-cat='wholesale + broker pipeline' data-name='buyers_db.json'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>buyers_db.json</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>json &middot; 56.5 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/buyers_db.json</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>84 records</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-26T01:48:25</div>
+</div>
+
+<div class='datacard' data-cat='wholesale + broker pipeline' data-name='deal_execution.sqlite'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>deal_execution.sqlite</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 32.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Wholesale/audit/deal_execution.sqlite</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>18 rows / 1 tables</div>
+  <div style='color:#888;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>deal_events=18</div>
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-13T05:11:20</div>
+</div>
+
+<div class='datacard' data-cat='wholesale + broker pipeline' data-name='warmup.db'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>warmup.db</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 12.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/broker_ops/warmup.db</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>3 rows / 1 tables</div>
+  <div style='color:#888;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>sends=3</div>
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-09T22:42:21</div>
+</div>
+
+<div class='datacard' data-cat='wholesale + broker pipeline' data-name='scheduler.db'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>scheduler.db</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 12.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/broker_ops/scheduler.db</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>3 rows / 1 tables</div>
+  <div style='color:#888;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>jobs=3</div>
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-03-12T21:03:10</div>
+</div>
+
+<div class='datacard' data-cat='wholesale + broker pipeline' data-name='zillow_keyword_log.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>zillow_keyword_log.jsonl</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 5.1 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pipeline/zillow_keyword_log.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>27 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-27T17:57:06</div>
+</div>
+
+<div class='datacard' data-cat='wholesale + broker pipeline' data-name='distress_finder_log.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>distress_finder_log.jsonl</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 3.3 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pipeline/distress_finder_log.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>18 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-27T17:59:44</div>
+</div>
+
+<div class='datacard' data-cat='wholesale + broker pipeline' data-name='buyers_db.json'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>buyers_db.json</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>json &middot; 3.2 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Wholesale/buyers/buyers_db.json</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>1 records</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-27T19:48:27</div>
+</div>
+
+<div class='datacard' data-cat='wholesale + broker pipeline' data-name='probate_scout_log.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>probate_scout_log.jsonl</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 3.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pipeline/probate_scout_log.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>18 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-26T01:48:25</div>
+</div>
+
+<div class='datacard' data-cat='wholesale + broker pipeline' data-name='teardown_finder_log.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>teardown_finder_log.jsonl</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 2.9 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pipeline/teardown_finder_log.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>15 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-26T01:48:25</div>
+</div>
+
+<div class='datacard' data-cat='wholesale + broker pipeline' data-name='tax_delinquency_log.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>tax_delinquency_log.jsonl</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 2.9 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pipeline/tax_delinquency_log.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>15 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-26T01:48:25</div>
+</div>
+
+<div class='datacard' data-cat='wholesale + broker pipeline' data-name='leads_db.sqlite'
+     style='background:#0d0d0d;border-left:3px solid #D4A843;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>leads_db.sqlite</div>
+    <span style='color:#D4A843;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 0.0 B</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Wholesale/leads_db.sqlite</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>0 rows / 0 tables</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-12T06:50:28</div>
+</div>
+
+  </div>
+</section>
+
+<section class='datasection' data-cat='memory / knowledge' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#7ec699;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    Memory / Knowledge <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(13)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:12px;'>
+    
+<div class='datacard' data-cat='memory / knowledge' data-name='blinko_lite.db'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>blinko_lite.db</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 5.1 MB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/blinko_lite.db</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>2,851 rows / 7 tables</div>
+  <div style='color:#888;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>notes=614 &middot; notes_fts=614 &middot; notes_fts_content=614 &middot; notes_fts_docsize=614 &middot; notes_fts_data=198</div>
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-24T18:31:04</div>
+</div>
+
+<div class='datacard' data-cat='memory / knowledge' data-name='everlight_resources.sqlite'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>everlight_resources.sqlite</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 752.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>Everlight_Intel_Center/database/everlight_resources.sqlite</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>1,475 rows / 2 tables</div>
+  <div style='color:#888;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>resources=745 &middot; audit=730</div>
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-12T05:40:01</div>
+</div>
+
+<div class='datacard' data-cat='memory / knowledge' data-name='live_log.sqlite'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>live_log.sqlite</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 220.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>Everlight_Intel_Center/cache/live_log.sqlite</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>799 rows / 1 tables</div>
+  <div style='color:#888;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>live_pulls=799</div>
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-13T01:00:09</div>
+</div>
+
+<div class='datacard' data-cat='memory / knowledge' data-name='articles.sqlite'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>articles.sqlite</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 148.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>Everlight_Intel_Center/cache/articles.sqlite</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>207 rows / 1 tables</div>
+  <div style='color:#888;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>articles=207</div>
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-12T05:31:36</div>
+</div>
+
+<div class='datacard' data-cat='memory / knowledge' data-name='compliance.sqlite'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>compliance.sqlite</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 108.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>Everlight_Intel_Center/cache/compliance.sqlite</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>43 rows / 1 tables</div>
+  <div style='color:#888;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>compliance_log=43</div>
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-13T07:37:08</div>
+</div>
+
+<div class='datacard' data-cat='memory / knowledge' data-name='investigations.sqlite'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>investigations.sqlite</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 40.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>Everlight_Intel_Center/cache/investigations.sqlite</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>36 rows / 1 tables</div>
+  <div style='color:#888;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>investigations=36</div>
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-13T01:00:09</div>
+</div>
+
+<div class='datacard' data-cat='memory / knowledge' data-name='build_20260511_165641.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>build_20260511_165641.jsonl</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 14.1 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>Everlight_Intel_Center/logs/build_20260511_165641.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>130 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-12T00:32:01</div>
+</div>
+
+<div class='datacard' data-cat='memory / knowledge' data-name='build_20260511_181608.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>build_20260511_181608.jsonl</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 7.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>Everlight_Intel_Center/logs/build_20260511_181608.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>66 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-12T01:16:08</div>
+</div>
+
+<div class='datacard' data-cat='memory / knowledge' data-name='build_20260511_181902.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>build_20260511_181902.jsonl</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 7.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>Everlight_Intel_Center/logs/build_20260511_181902.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>66 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-12T01:19:03</div>
+</div>
+
+<div class='datacard' data-cat='memory / knowledge' data-name='build_20260511_181945.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>build_20260511_181945.jsonl</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 7.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>Everlight_Intel_Center/logs/build_20260511_181945.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>66 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-12T01:19:47</div>
+</div>
+
+<div class='datacard' data-cat='memory / knowledge' data-name='build_20260511_215733.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>build_20260511_215733.jsonl</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 7.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>Everlight_Intel_Center/logs/build_20260511_215733.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>66 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-12T04:57:34</div>
+</div>
+
+<div class='datacard' data-cat='memory / knowledge' data-name='build_20260511_215903.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>build_20260511_215903.jsonl</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 7.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>Everlight_Intel_Center/logs/build_20260511_215903.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>66 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-12T04:59:04</div>
+</div>
+
+<div class='datacard' data-cat='memory / knowledge' data-name='build_20260511_220044.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #7ec699;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>build_20260511_220044.jsonl</div>
+    <span style='color:#7ec699;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 7.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>Everlight_Intel_Center/logs/build_20260511_220044.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>66 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-12T05:00:45</div>
+</div>
+
+  </div>
+</section>
+
+<section class='datasection' data-cat='gaming / apps' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#c39bff;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    Gaming / Apps <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(8)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:12px;'>
+    
+<div class='datacard' data-cat='gaming / apps' data-name='transactions.db'
+     style='background:#0d0d0d;border-left:3px solid #c39bff;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>transactions.db</div>
+    <span style='color:#c39bff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 313.7 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/ArenaAdvance/My project/Library/Search/transactions.db</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'><span style='color:#ff6b6b;'>err: file is not a database</span></div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-27T21:21:49</div>
+</div>
+
+<div class='datacard' data-cat='gaming / apps' data-name='transactions.db'
+     style='background:#0d0d0d;border-left:3px solid #c39bff;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>transactions.db</div>
+    <span style='color:#c39bff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 257.7 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz_Build/ArenaAdvance/Alley Kingz/Library/Search/transactions.db</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'><span style='color:#ff6b6b;'>err: file is not a database</span></div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-27T21:29:50</div>
+</div>
+
+<div class='datacard' data-cat='gaming / apps' data-name='shadercache.db'
+     style='background:#0d0d0d;border-left:3px solid #c39bff;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>ShaderCache.db</div>
+    <span style='color:#c39bff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 16.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/ArenaAdvance/My project/Library/ShaderCache.db</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>5 rows / 1 tables</div>
+  <div style='color:#888;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>shadererrors=5</div>
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-27T21:22:02</div>
+</div>
+
+<div class='datacard' data-cat='gaming / apps' data-name='shadercache.db'
+     style='background:#0d0d0d;border-left:3px solid #c39bff;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>ShaderCache.db</div>
+    <span style='color:#c39bff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 16.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz_Build/ArenaAdvance/Alley Kingz/Library/ShaderCache.db</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>5 rows / 1 tables</div>
+  <div style='color:#888;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>shadererrors=5</div>
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-27T21:29:59</div>
+</div>
+
+<div class='datacard' data-cat='gaming / apps' data-name='propertydatabase.db'
+     style='background:#0d0d0d;border-left:3px solid #c39bff;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>propertyDatabase.db</div>
+    <span style='color:#c39bff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 4.0 B</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/ArenaAdvance/My project/Library/Search/propertyDatabase.db</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'><span style='color:#ff6b6b;'>err: file is not a database</span></div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-27T21:21:49</div>
+</div>
+
+<div class='datacard' data-cat='gaming / apps' data-name='propertyaliases.db'
+     style='background:#0d0d0d;border-left:3px solid #c39bff;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>propertyAliases.db</div>
+    <span style='color:#c39bff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 4.0 B</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/ArenaAdvance/My project/Library/Search/propertyAliases.db</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'><span style='color:#ff6b6b;'>err: file is not a database</span></div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-27T21:21:49</div>
+</div>
+
+<div class='datacard' data-cat='gaming / apps' data-name='propertyaliases.db'
+     style='background:#0d0d0d;border-left:3px solid #c39bff;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>propertyAliases.db</div>
+    <span style='color:#c39bff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 4.0 B</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz_Build/ArenaAdvance/Alley Kingz/Library/Search/propertyAliases.db</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'><span style='color:#ff6b6b;'>err: file is not a database</span></div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-27T21:29:50</div>
+</div>
+
+<div class='datacard' data-cat='gaming / apps' data-name='propertydatabase.db'
+     style='background:#0d0d0d;border-left:3px solid #c39bff;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>propertyDatabase.db</div>
+    <span style='color:#c39bff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 4.0 B</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz_Build/ArenaAdvance/Alley Kingz/Library/Search/propertyDatabase.db</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'><span style='color:#ff6b6b;'>err: file is not a database</span></div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-02-27T21:29:50</div>
+</div>
+
+  </div>
+</section>
+
+<section class='datasection' data-cat='other' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#666;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    Other <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(6)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:12px;'>
+    
+<div class='datacard' data-cat='other' data-name='integration_registry.json'
+     style='background:#0d0d0d;border-left:3px solid #666;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>integration_registry.json</div>
+    <span style='color:#666;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>json &middot; 8.2 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>09_DASHBOARD/reports/integration_registry.json</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>6 top-level keys</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-30T00:40:38</div>
+</div>
+
+<div class='datacard' data-cat='other' data-name='report_registry.json'
+     style='background:#0d0d0d;border-left:3px solid #666;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>report_registry.json</div>
+    <span style='color:#666;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>json &middot; 5.0 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>09_DASHBOARD/reports/report_registry.json</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>5 top-level keys</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-30T00:40:38</div>
+</div>
+
+<div class='datacard' data-cat='other' data-name='everlight_db_payroll_with_totals.csv'
+     style='background:#0d0d0d;border-left:3px solid #666;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>Everlight_DB_Payroll_With_Totals.csv</div>
+    <span style='color:#666;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>csv &middot; 3.7 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/02_Operations/Payroll/Everlight_DB_Payroll_With_Totals.csv</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>28 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-18T04:23:11</div>
+</div>
+
+<div class='datacard' data-cat='other' data-name='channel_registry.json'
+     style='background:#0d0d0d;border-left:3px solid #666;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>channel_registry.json</div>
+    <span style='color:#666;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>json &middot; 3.0 B</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/everlight_os/slack_org/config/channel_registry.json</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>0 top-level keys</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-18T04:23:16</div>
+</div>
+
+<div class='datacard' data-cat='other' data-name='incoming.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #666;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>incoming.jsonl</div>
+    <span style='color:#666;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 0.0 B</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/everlight_swarms/logistics/queue/incoming.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>0 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-08T02:25:34</div>
+</div>
+
+<div class='datacard' data-cat='other' data-name='outgoing.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #666;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>outgoing.jsonl</div>
+    <span style='color:#666;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 0.0 B</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/everlight_swarms/logistics/queue/outgoing.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>0 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-08T02:25:34</div>
+</div>
+
+  </div>
+</section>
+
+<section class='datasection' data-cat='audit chains' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#a8a3ff;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    Audit Chains <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(4)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:12px;'>
+    
+<div class='datacard' data-cat='audit chains' data-name='services_registry.json'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>services_registry.json</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>json &middot; 11.9 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>01_BUSINESSES/Everlight_Ventures/_audits/services_registry.json</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>2 top-level keys</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-05-13T08:07:48</div>
+</div>
+
+<div class='datacard' data-cat='audit chains' data-name='veto_audit.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>veto_audit.jsonl</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 3.5 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/operator_truth/veto_audit.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>4 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-27T16:22:11</div>
+</div>
+
+<div class='datacard' data-cat='audit chains' data-name='merge_audit.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>merge_audit.jsonl</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 2.4 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/outreach/merge_audit.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>7 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-27T15:57:36</div>
+</div>
+
+<div class='datacard' data-cat='audit chains' data-name='cascade_audit.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #a8a3ff;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>cascade_audit.jsonl</div>
+    <span style='color:#a8a3ff;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 565.0 B</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>_logs/skip_trace/cascade_audit.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>1 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-27T16:30:22</div>
+</div>
+
+  </div>
+</section>
+
+<section class='datasection' data-cat='hive sessions' style='margin-top:32px;'>
+  <h2 style='font-family:Playfair Display,serif;color:#ffd76b;font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+    Hive Sessions <span style='color:#666;font-size:13px;font-family:Inter,sans-serif;'>(2)</span>
+  </h2>
+  <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:12px;'>
+    
+<div class='datacard' data-cat='hive sessions' data-name='db.sqlite3'
+     style='background:#0d0d0d;border-left:3px solid #ffd76b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>db.sqlite3</div>
+    <span style='color:#ffd76b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>sqlite &middot; 6.3 MB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>09_DASHBOARD/hive_dashboard/db.sqlite3</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>952 rows / 62 tables</div>
+  <div style='color:#888;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>hive_agentresponse=285 &middot; auth_permission=232 &middot; hive_hivesession=100 &middot; hive_querylog=95 &middot; django_content_type=58</div>
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-27T17:51:54</div>
+</div>
+
+<div class='datacard' data-cat='hive sessions' data-name='telemetry.jsonl'
+     style='background:#0d0d0d;border-left:3px solid #ffd76b;padding:12px 16px;border-radius:0 3px 3px 0;'>
+  <div style='display:flex;justify-content:space-between;align-items:baseline;'>
+    <div style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:14px;font-weight:600;'>telemetry.jsonl</div>
+    <span style='color:#ffd76b;font-size:10px;text-transform:uppercase;letter-spacing:1px;'>jsonl &middot; 257.7 KB</span>
+  </div>
+  <div style='color:#666;font-size:11px;font-family:JetBrains Mono,monospace;margin-top:4px;'>06_DEVELOPMENT/everlight_os/hive_mind/telemetry.jsonl</div>
+  <div style='color:#aaa;font-size:12px;margin-top:6px;'>753 lines</div>
+  
+  <div style='color:#666;font-size:11px;margin-top:6px;'>last write 2026-04-18T04:24:43</div>
+</div>
+
+  </div>
+</section>
+
+
+<script>
+(function() {
+  const box = document.getElementById('datasearch');
+  const cards = document.querySelectorAll('.datacard');
+  const sections = document.querySelectorAll('.datasection');
+  box.addEventListener('input', () => {
+    const q = (box.value || '').toLowerCase().trim();
+    cards.forEach(c => {
+      const t = (c.textContent || '').toLowerCase();
+      c.style.display = (!q || t.includes(q)) ? '' : 'none';
+    });
+    sections.forEach(s => {
+      s.style.display = Array.from(s.querySelectorAll('.datacard')).some(c => c.style.display !== 'none') ? '' : 'none';
+    });
+  });
+})();
+</script>
+
+<p style='color:#666;font-size:12px;margin-top:32px;'>
+Machine-readable mirror at <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;'>01_BUSINESSES/Everlight_Ventures/_audits/data_registry.json</code>.
+Re-render: <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;'>python3 03_AUTOMATION_CORE/01_Scripts/build_data_registry.py</code>.
+</p>
+
+<div class="sig">
+  <div class="name">Hive Mind</div>
+  <div class="role">Data Layer Index</div>
+  <div class="contact">hello@everlightventures.io | everlightventures.io</div>
+</div>
+</div>
+<div class="footer">
+  <div class="brand">Everlight Ventures</div>
+  <p style="margin-top: 8px;">Generated by the Everlight Hive Mind | Sacramento, CA</p>
+  <p style="margin-top: 4px;">everlightventures.io</p>
+</div>
+</body>
+</html>

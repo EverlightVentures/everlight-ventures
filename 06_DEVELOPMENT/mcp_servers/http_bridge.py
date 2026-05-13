@@ -93,6 +93,9 @@ _load_module("market", "market_intel.server", "_tool_payload")
 sys.path.insert(0, str(ROOT / "Everlight_Intel_Center" / "lib"))
 _load_module("intel", "intel_query", "_dispatch")
 
+# Hive orchestrator -- agent list/dispatch/pipeline state
+_load_module("hive", "hive_orchestrator.server", "_dispatch")
+
 # ---------------------------------------------------------------------------
 # FastAPI app
 # ---------------------------------------------------------------------------
@@ -231,6 +234,16 @@ async def call_intel(
 ):
     _check_token(x_everlight_token)
     return await _call("intel", tool_name, args or {})
+
+
+@app.post("/hive/{tool_name}")
+async def call_hive(
+    tool_name: str,
+    args: dict | None = None,
+    x_everlight_token: str | None = Header(None, alias="X-Everlight-Token"),
+):
+    _check_token(x_everlight_token)
+    return await _call("hive", tool_name, args or {})
 
 
 @app.exception_handler(Exception)
