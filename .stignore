@@ -52,6 +52,18 @@ open_webui_venv
 *.venv
 venv
 
+// ---- Unity build caches (regenerable, gigabytes, machine-specific) ----
+// Unity rebuilds Library/ on open; never worth syncing. Alley Kingz especially.
+**/Library/PackageCache
+**/Library/Bee
+**/Library/Artifacts
+**/Library/ShaderCache
+**/Library/StateCache
+**/Library/Bee/artifacts
+**/[Tt]emp
+**/[Oo]bj
+**/Logs/*.log
+
 // ---- proot / android cruft if it ever leaks in ----
 .android
 .Xauthority
