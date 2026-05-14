@@ -1,0 +1,65 @@
+// Syncthing ignore file for the Everlight workspace.
+// Phone <-> AceMagician PC bidirectional sync.
+//
+// PRINCIPLE: git handles version-controlled code/doctrine (it flows through
+// GitHub). Syncthing handles the UNTRACKED data. Anything git already syncs
+// is excluded here to avoid double-sync conflicts.
+//
+// Lines starting with // are comments. (?d) = delete if it becomes ignored.
+
+// ---- git internals: git syncs these through GitHub, never Syncthing ----
+.git
+**/.git
+.gitignore
+
+// ---- build artifacts + dependency trees (regenerable, huge, churny) ----
+node_modules
+**/node_modules
+__pycache__
+**/__pycache__
+*.pyc
+.next
+**/.next
+dist
+**/dist
+build
+**/build
+.turbo
+.parcel-cache
+*.egg-info
+
+// ---- caches + ephemeral state ----
+.cache
+**/.cache
+*.log
+*.tmp
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+.sync_conflicts
+~syncthing~*
+
+// ---- the Syncthing config dir itself (never sync your own config) ----
+_logs/syncthing_config
+
+// ---- venvs + large installed packages (machine-specific binaries) ----
+// Open WebUI etc. -- each machine installs its own; .so files are arch-specific
+open_webui_pkgs
+**/open_webui_pkgs
+open_webui_venv
+**/open_webui_venv
+*.venv
+venv
+
+// ---- proot / android cruft if it ever leaks in ----
+.android
+.Xauthority
+
+// ---- worktrees: separate git working trees, git owns these ----
+// (kept as a phone-side sibling; not part of the synced workspace)
+
+// NOTE: everything NOT matched above DOES sync. That includes:
+//   _logs/ (except syncthing_config), owner_downloads/, Blinko DB,
+//   deal_execution.sqlite, reports, parsed leads, intel DBs, etc.
+//   -- exactly the untracked data that makes the PC "as smart as the phone."
