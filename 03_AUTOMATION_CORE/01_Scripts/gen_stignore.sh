@@ -53,7 +53,18 @@ TMP="$(mktemp)"
   echo ""
   echo "// ---- git-tracked files: git owns these, Syncthing must skip them ----"
   echo "// ($(git ls-files | wc -l) entries as of generation)"
-  git -c core.quotePath=false ls-files | sed 's|^|/|'
+  # git ls-files paths can contain glob metacharacters (* ? [ ] { }) -- a literal
+  # '[' in a filename would otherwise be parsed as a glob char-class and break
+  # the WHOLE .stignore. Escape every metacharacter so each path is literal.
+  git -c core.quotePath=false ls-files -z | python3 -c '
+import sys, re
+data = sys.stdin.buffer.read().decode("utf-8", "surrogateescape")
+for path in data.split("\0"):
+    if not path:
+        continue
+    escaped = re.sub(r"([*?\[\]{}\\])", r"\\\1", path)
+    print("/" + escaped)
+'
 } > "$TMP"
 
 mv "$TMP" "$OUT"

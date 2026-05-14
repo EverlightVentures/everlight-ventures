@@ -1,4 +1,4 @@
-// Syncthing ignore file -- AUTO-GENERATED 2026-05-14 01:56:02 PDT
+// Syncthing ignore file -- AUTO-GENERATED 2026-05-14 09:43:09 PDT
 // by 03_AUTOMATION_CORE/01_Scripts/gen_stignore.sh
 //
 // ARCHITECTURE: git owns version-controlled files (synced via GitHub).
@@ -36,7 +36,7 @@ open_webui_venv
 **/[Tt]emp
 
 // ---- git-tracked files: git owns these, Syncthing must skip them ----
-// (2511 entries as of generation)
+// (2512 entries as of generation)
 /.claude/agents/01_chief_operator.md
 /.claude/agents/02_ops_deputy.md
 /.claude/agents/03_engineering_foreman.md
@@ -238,7 +238,7 @@ open_webui_venv
 /01_BUSINESSES/Everlight_Ventures/Alley_Kingz/General_Idea/clash copy ai specs and overiew
 /01_BUSINESSES/Everlight_Ventures/Alley_Kingz/General_Idea/clash copy enhancements
 /01_BUSINESSES/Everlight_Ventures/Alley_Kingz/General_Idea/clash copy ethics
-/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/General_Idea/clash copy p[ayment
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/General_Idea/clash copy p\[ayment
 /01_BUSINESSES/Everlight_Ventures/Alley_Kingz/General_Idea/clash copy steps
 /01_BUSINESSES/Everlight_Ventures/Alley_Kingz/General_Idea/clash royale copy
 /01_BUSINESSES/Everlight_Ventures/Alley_Kingz/General_Idea/clasy copy economy
@@ -946,6 +946,7 @@ open_webui_venv
 /03_AUTOMATION_CORE/01_Scripts/flip_os/run_pipeline.py
 /03_AUTOMATION_CORE/01_Scripts/funnel_nurture.py
 /03_AUTOMATION_CORE/01_Scripts/gear_engine_setup.sh
+/03_AUTOMATION_CORE/01_Scripts/gen_stignore.sh
 /03_AUTOMATION_CORE/01_Scripts/gmail_broker_setup.gs
 /03_AUTOMATION_CORE/01_Scripts/gmail_calendar_to_drive.py
 /03_AUTOMATION_CORE/01_Scripts/gmail_scripts/send_gmail.py
