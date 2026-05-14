@@ -23,7 +23,7 @@ Operating model:
   - Auto-registers the resulting doc as a HiveArtifact via `hive_logger.current_run()`.
   - Bypasses n8n entirely (`GDOCS_DISABLE_N8N=1` is exported on Oracle).
 - Every report must produce:
-  1. HTML in `/home/opc/hive_reports/` served at `http://129.159.38.250:8504/reports/`
+  1. HTML in `/home/ubuntu/hive_reports/` on e5-mother, served at `http://e5-mother/reports/` (tailnet)
   2. Google Doc in Drive (skipped automatically if OAuth token is dead -- HTML+Slack still ship)
   3. Slack post with links to the HTML and Google Doc
 - Oracle repair + handoff script: `03_AUTOMATION_CORE/01_Scripts/repair_3_format_reports.sh`
@@ -51,16 +51,20 @@ for the user to say "use the Hive" -- it is ALWAYS active. For every task:
 
 1. CLASSIFY the task using roster.yaml routing_rules (trading, content, engineering, broker, wholesale, research, operations)
 2. IDENTIFY which team members are needed (min 3 named agents across 2+ departments)
-3. QUERY Blinko first (http://129.159.38.250:1111/api/v1/note/list) for prior knowledge
+3. QUERY Blinko first (http://e5-mother:1111/api/v1/note/list, tailnet) for prior knowledge. Blinko is on e5-mother post-2026-05-11 restore; falls back to local cache if mother is unreachable.
 4. DISPATCH -- for non-trivial tasks, this means LAUNCHING IN PARALLEL (single message, multiple tool-use blocks):
    - 3+ named Everlight agents via Task tool (subagent_type from .claude/agents/)
    - Codex (`clx_delegate.py --mode review`) for code / architecture validation
    - Gemini (`gemx_delegate.py --mode explain`) for alternate-perspective check
    - Perplexity (`ppx_terminal.py`) for real-time research on market-facing questions
    - MCP tools (broker-os, supabase, blinko-memory, market-intel, Gmail, Slack) for live data
-5. CONVERGE -- wait for all to return, flag disagreements, Lucrex resolves, write one decision
-6. PUBLISH results to Google Docs via gdocs_bridge and post link to Slack
-7. LOG the session to BOTH Blinko AND Django dashboard so it appears in :8504 console
+5. CROSS-CHECK -- once parallel outputs land, dispatch a SECOND pass where each agent reviews 1-2 peer outputs. Find disagreements, flag conflicts, note missed gaps, identify where ideas combine (Agent A's idea + Agent B's idea = better than either alone). Output is a delta+merge document, not a fresh deliverable. (Doctrine added 2026-04-28 per Marquise: "my agents need to crosscheck each others work, collaborate eachother to utilize the best of their ideas." See `feedback_cross_check_and_synthesize.md` memory.)
+6. SYNTHESIZE -- ONE agent (or Marcus) takes the cross-checked outputs and produces ONE merged canonical deliverable. Resolves every named conflict (or flags for Lucrex). Combines best ideas. Cites which agent contributed which piece (provenance). Lists dropped recommendations + why.
+7. CONVERGE / DECIDE -- Lucrex resolves anything still flagged. Decision logged.
+8. PUBLISH results to Google Docs via gdocs_bridge and post link to Slack
+9. LOG the session to BOTH Blinko AND Django dashboard so it appears in :8504 console
+
+Skip cross-check + synthesize ONLY for trivial tasks (single-lane bug fix, typo, simple rename). Default to the full 9-phase pattern for audits, plans, architecture, multi-domain decisions, anything crossing 2+ specialty lanes. Token-budget: cross-check + synthesize add ~30% to dispatch cost; worth it on high-stakes work.
 
 The full doctrine is at `06_DEVELOPMENT/everlight_os/hive_mind/ORCHESTRATION_DOCTRINE.md`.
 Read it on the 1st of each month and on any new-AI-tool addition.
@@ -82,15 +86,16 @@ After completing a task, log it to Blinko AND the Django dashboard API so the :8
 console shows the same work. Use this Bash command at the end of significant tasks:
 
 ```bash
-# Log to Blinko
-curl -s -X POST http://129.159.38.250:1111/api/v1/note/upsert \
+# Log to Blinko (e5-mother, tailnet)
+curl -s -X POST http://e5-mother:1111/api/v1/note/upsert \
   -H "Content-Type: application/json" \
   -d '{"content": "# Hive Session: [TASK_SUMMARY]\n#hive/session #hive/claude-cli\n\nQuery: [USER_QUERY]\nAgents: [AGENTS_USED]\nOutcome: [RESULT]\n\n[DETAILS]", "type": 1}'
 ```
 
-This makes Claude CLI sessions visible in the Django dashboard's session history
-and searchable in Blinko. The :8504 console and Claude CLI are the SAME Hive --
-same agents, same logging, same knowledge base.
+Sessions land in Blinko regardless of Django state. Django (:8504/:8000) is
+DEFERRED per the 2026-05-11 recover-and-replace plan; revisit at Phase 7 after
+Open WebUI + Supabase have run for 2 weeks. Until then, Open WebUI on e5-mother
+is the human-facing chat surface and Supabase is the canonical write store.
 
 Autonomous Team Orchestration (HOW AGENTS COLLABORATE):
 When a query comes in, Lucrex runs this chain automatically:
@@ -141,19 +146,26 @@ Nashville accent, "y'all." When Hammer follows up, he follows up like HAMMER --
 Team roster: 06_DEVELOPMENT/everlight_os/hive_mind/roster.yaml
 Employee directory: 06_DEVELOPMENT/everlight_os/hive_mind/EMPLOYEE_DIRECTORY.md
 
-Infrastructure available 24/7:
-- Blinko RAG: http://129.159.38.250:1111 (449 notes, Oracle E5, Restart=always)
-- n8n Google Docs: http://129.159.38.250:5678/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdoc
-- Voice handler: http://129.159.38.250:8200 (Marcus phone actions)
-- Slack: Bot tokens (webhooks dead). warroom bot + xlmbot. 13 channels.
+Infrastructure (reality as of 2026-05-11, post-mother-dead audit):
+- See `06_DEVELOPMENT/everlight_os/hive_mind/SERVICE_TIERS.md` for the live truth log.
+- **Oracle Micro** (xlm-bot host, public IP 163.192.19.196, hostname `xlm-bot`): ONLY runs `xlm-bot.service` and `xlm-ws.service`. Nothing else. Doctrine previously over-claimed.
+- **e5-mother** (NEW Ampere ARM 4 OCPU / 16-18 GB, tailnet-only): hosts Blinko RAG + agentmemory MCP + Open WebUI + hive-voice. Provisioning kit at `03_AUTOMATION_CORE/01_Scripts/e5_mother/`. The dead "mother" at `129.159.38.250` is replaced by this. Reach via `ssh e5-mother` (tailnet) or `ssh e5-mother-public` (port 2222 break-glass).
+- **ev-box** (planned, Ampere ARM 2 OCPU / 8 GB, tailnet-only): ops control plane, DFIR-lite, cron migration target. Scripts at `03_AUTOMATION_CORE/01_Scripts/ev_box/`. Not yet launched.
+- **AceMagician PC** (Arch Linux, tailnet 100.93.253.49): peer cache. Bidirectional sync via `03_AUTOMATION_CORE/01_Scripts/claude_sync_acemagician.sh`. Phone-boot one-shot + PC-side hourly cron at :17.
+- **Phone** (Termux + proot Debian on sdcard): workspace SOT, control plane only, NEVER a cron host.
+- Blinko RAG: `http://e5-mother:1111` (tailnet) — populated from `_logs/blinko_lite.db` via `blinko_restore_from_lite.py` (614 notes Mar-Apr).
+- agentmemory MCP: `http://e5-mother:3108` (tailnet).
+- Open WebUI: `http://e5-mother:8080` (tailnet, multi-model parallel chat).
+- Voice handler: `http://e5-mother:8200` (tailnet, Twilio webhook). DEFERRED until secrets regen.
+- hive-django :8504/:8000: DEFERRED to Phase 7. Source intact at `09_DASHBOARD/hive_dashboard/`, current `db.sqlite3` has real broker-ops data (1893 matches, 515 leads, 436 properties). Decision after Open WebUI + Supabase prove sufficient.
+- n8n: PARKED 2026-04-24. Use `content_tools/n8n_replacements.publish_gdoc()` directly. No new POSTs to `:5678/webhook/...`.
+- Slack: bot tokens (webhooks dead). warroom bot + xlmbot. 13 channels.
     - Config: 06_DEVELOPMENT/everlight_os/hive_mind/slack_routing.yaml
     - Key channels: #war-room, #ceo-brief, #hive-alerts, #ft-hunters, #ft-consult, #ft-markets, #ft-profit-engine
     - Pipeline: #ai-consulting, #broker-pipeline, #xlm-trading, #deploy-log, #content-factory, #revenue-dashboard
-- Email: Resend API + 42 ImprovMX addresses @everlightventures.io
-- Supabase: https://jdqqmsmwmbsnlnstyavl.supabase.co
-- Oracle Bot VM: 163.192.19.196 (XLM bot)
-- Oracle E5 VM: 129.159.38.250 (n8n + voice + blinko)
-- MCP tools: broker-os, blinko-memory, market-intel, Gmail, Slack, Calendar
+- Email: Resend API + 42 ImprovMX addresses @everlightventures.io. Always through `content_tools.branded_mailer.send_branded_email()`.
+- Supabase: https://jdqqmsmwmbsnlnstyavl.supabase.co (deal pipeline source of truth).
+- MCP tools: broker-os, blinko-memory, market-intel, Gmail, Slack, Calendar. Bridge via SSH tunnel to e5-mother once provisioned.
 
 When the user says "check the pipeline" -- you ARE Marcus Cole dispatching Rex, Filter, Penny,
 Cupid, Piper, Hammer, Chart, and Cash. You don't ask permission. You do it.
@@ -223,7 +235,7 @@ A cron also checks every 10 min and auto-deploys if files changed.
 Always-Connected Architecture (CRITICAL):
 Oracle is the server. Phone is the remote control. If the phone dies, Oracle keeps running.
 
-Oracle E5 VM (129.159.38.250) -- 24/7 with Restart=always:
+Oracle E5 VM (163.192.19.196) -- 24/7 with Restart=always:
 - n8n.service (port 5678) -- automation + Google Docs
 - hive-voice.service (port 8200) -- Marcus phone handler
 - blinko.service (port 1111) -- RAG knowledge base (449+ notes)

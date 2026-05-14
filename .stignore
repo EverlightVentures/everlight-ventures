@@ -1,77 +1,2550 @@
-// Syncthing ignore file for the Everlight workspace.
-// Phone <-> AceMagician PC bidirectional sync.
+// Syncthing ignore file -- AUTO-GENERATED 2026-05-14 01:56:02 PDT
+// by 03_AUTOMATION_CORE/01_Scripts/gen_stignore.sh
 //
-// PRINCIPLE: git handles version-controlled code/doctrine (it flows through
-// GitHub). Syncthing handles the UNTRACKED data. Anything git already syncs
-// is excluded here to avoid double-sync conflicts.
+// ARCHITECTURE: git owns version-controlled files (synced via GitHub).
+// Syncthing carries ONLY untracked data (_logs, owner_downloads, Blinko
+// DB, deal audit, parsed leads, caches of real value). The two never
+// touch the same file -> no sync-conflict storms.
 //
-// Lines starting with // are comments. (?d) = delete if it becomes ignored.
+// Regenerate after large git commits:  bash 03_AUTOMATION_CORE/01_Scripts/gen_stignore.sh
 
-// ---- git internals: git syncs these through GitHub, never Syncthing ----
+// ---- hard excludes (never sync, either tool) ----
 .git
 **/.git
-.gitignore
-
-// ---- build artifacts + dependency trees (regenerable, huge, churny) ----
 node_modules
 **/node_modules
 __pycache__
 **/__pycache__
 *.pyc
-.next
-**/.next
-dist
-**/dist
-build
-**/build
-.turbo
-.parcel-cache
-*.egg-info
-
-// ---- caches + ephemeral state ----
 .cache
 **/.cache
-*.log
 *.tmp
 *.swp
-*.swo
-.DS_Store
-Thumbs.db
-.sync_conflicts
 ~syncthing~*
-
-// ---- the Syncthing config dir itself (never sync your own config) ----
+(?d).sync-conflict-*
+_sync_conflicts_quarantine_20260513
 _logs/syncthing_config
-
-// ---- venvs + large installed packages (machine-specific binaries) ----
-// Open WebUI etc. -- each machine installs its own; .so files are arch-specific
 open_webui_pkgs
 **/open_webui_pkgs
 open_webui_venv
 **/open_webui_venv
 *.venv
-venv
-
-// ---- Unity build caches (regenerable, gigabytes, machine-specific) ----
-// Unity rebuilds Library/ on open; never worth syncing. Alley Kingz especially.
 **/Library/PackageCache
 **/Library/Bee
 **/Library/Artifacts
 **/Library/ShaderCache
-**/Library/StateCache
-**/Library/Bee/artifacts
 **/[Tt]emp
-**/[Oo]bj
-**/Logs/*.log
 
-// ---- proot / android cruft if it ever leaks in ----
-.android
-.Xauthority
-
-// ---- worktrees: separate git working trees, git owns these ----
-// (kept as a phone-side sibling; not part of the synced workspace)
-
-// NOTE: everything NOT matched above DOES sync. That includes:
-//   _logs/ (except syncthing_config), owner_downloads/, Blinko DB,
-//   deal_execution.sqlite, reports, parsed leads, intel DBs, etc.
-//   -- exactly the untracked data that makes the PC "as smart as the phone."
+// ---- git-tracked files: git owns these, Syncthing must skip them ----
+// (2511 entries as of generation)
+/.claude/agents/01_chief_operator.md
+/.claude/agents/02_ops_deputy.md
+/.claude/agents/03_engineering_foreman.md
+/.claude/agents/06_listing_strategist.md
+/.claude/agents/07_listing_writer.md
+/.claude/agents/08_seo_mapper.md
+/.claude/agents/10_funnel_architect.md
+/.claude/agents/11_sync_coordinator.md
+/.claude/agents/12_showrunner.md
+/.claude/agents/13_writing_lead.md
+/.claude/agents/14_draft_writer.md
+/.claude/agents/15_editor_qa.md
+/.claude/agents/16_publishing_asset_builder.md
+/.claude/agents/17_content_strategy.md
+/.claude/agents/19_platform_copywriter.md
+/.claude/agents/20_prompt_producer.md
+/.claude/agents/21_repurposing_agent.md
+/.claude/agents/22_distribution_ops.md
+/.claude/agents/23_automation_architect.md
+/.claude/agents/24_workflow_builder.md
+/.claude/agents/25_analytics_auditor.md
+/.claude/agents/26_logistics_commander.md
+/.claude/agents/27_profit_maximizer.md
+/.claude/agents/28_deal_scout.md
+/.claude/agents/29_lead_qualifier.md
+/.claude/agents/30_match_maker.md
+/.claude/agents/31_outreach_agent.md
+/.claude/agents/32_deal_closer.md
+/.claude/agents/33_commission_auditor.md
+/.claude/agents/34_compliance_gate.md
+/.claude/agents/35_broker_analytics.md
+/.claude/agents/36_contract_writer.md
+/.claude/agents/36_rex_wholesale.md
+/.claude/agents/37_ace_deal_marketer.md
+/.claude/agents/40_strategic_modeler.md
+/.claude/agents/41_style_enforcer.md
+/.claude/agents/42_financial_safeguard.md
+/.claude/agents/43_strategy_assistant.md
+/.claude/agents/44_edit_assistant.md
+/.claude/agents/45_compliance_assistant.md
+/.claude/agents/46_automation_assistant.md
+/.claude/agents/47_analytics_assistant.md
+/.claude/agents/48_outreach_assistant.md
+/.claude/agents/49_engineering_assistant.md
+/.claude/agents/50_revenue_assistant.md
+/.claude/agents/51_prospect_scraper.md
+/.claude/agents/52_client_deployer.md
+/.claude/agents/53_derivatives_beat.md
+/.claude/agents/54_geopolitical_risk.md
+/.claude/agents/55_competitive_intel.md
+/.claude/agents/56_data_verifier.md
+/.claude/agents/57_consulting_assistant.md
+/.claude/agents/58_markets_assistant.md
+/.claude/agents/59_legal_assistant.md
+/.claude/agents/60_tech_assistant.md
+/.claude/agents/61_saas_factory_lead.md
+/.claude/agents/62_frontend_architect.md
+/.claude/agents/63_ui_ux_designer.md
+/.claude/agents/64_component_engineer.md
+/.claude/agents/65_frontend_qa.md
+/.claude/agents/66_frontend_assistant.md
+/.claude/agents/67_backend_architect.md
+/.claude/agents/68_devops_engineer.md
+/.claude/agents/69_security_engineer.md
+/.claude/agents/70_infrastructure_qa.md
+/.claude/agents/71_backend_assistant.md
+/.claude/agents/72_ai_integration_lead.md
+/.claude/agents/73_search_analytics.md
+/.claude/agents/74_growth_engineer.md
+/.claude/agents/75_growth_qa.md
+/.claude/agents/76_growth_assistant.md
+/.claude/agents/brand_reviewer.md
+/.claude/agents/bull_archer.md
+/.claude/agents/cipher_wolfe.md
+/.claude/agents/everlight_architect.md
+/.claude/agents/everlight_content_director.md
+/.claude/agents/everlight_packager.md
+/.claude/agents/everlight_qa_gate.md
+/.claude/agents/everlight_researcher.md
+/.claude/agents/everlight_saas_builder.md
+/.claude/agents/everlight_saas_growth.md
+/.claude/agents/everlight_saas_pm.md
+/.claude/agents/everlight_seo_formatter.md
+/.claude/agents/everlight_trading_risk.md
+/.claude/agents/helix_patel.md
+/.claude/agents/marquise_reed_acquisitions.md
+/.claude/agents/nova_ling.md
+/.claude/agents/researcher.md
+/.claude/agents/reviewer.md
+/.claude/agents/writer.md
+/.claude/commands/ev-execute.md
+/.claude/commands/ev-plan.md
+/.claude/commands/ev-review.md
+/.claude/feedback_autonomous_execution.md
+/.claude/feedback_no_lovable_prompts.md
+/.claude/guard/no_local_image_reads.txt
+/.claude/hooks/log_tool_use.py
+/.claude/hooks/pre_tool_guard.py
+/.claude/memory/bot_upgrade_march17.md
+/.claude/memory/broker_os_autonomy_upgrade.md
+/.claude/memory/everlightventures_io.md
+/.claude/memory/feedback_bot_oracle_only.md
+/.claude/memory/feedback_lovable_workflow.md
+/.claude/memory/feedback_screenshots_path.md
+/.claude/memory/feedback_trading_philosophy.md
+/.claude/memory/feedback_trading_strategies.md
+/.claude/memory/gear_engine_deploy.md
+/.claude/memory/onyx_pos_status.md
+/.claude/memory/oracle_cloud.md
+/.claude/memory/workspace_reorg_2026_03_06.md
+/.claude/modes/execute.md
+/.claude/modes/plan.md
+/.claude/modes/review.md
+/.claude/plans/crispy-jumping-curry.md
+/.claude/plans/glimmering-juggling-sphinx.md
+/.claude/plans/jaunty-splashing-firefly.md
+/.claude/plans/modular-yawning-sketch.md
+/.claude/plans/nested-strolling-backus.md
+/.claude/plans/polished-gliding-church.md
+/.claude/plans/prancy-baking-cocoa.md
+/.claude/plans/root_cleanup.md
+/.claude/plans/slack_war_room.md
+/.claude/plans/tender-enchanting-riddle.md
+/.claude/plans/tidy-napping-bumblebee.md
+/.claude/plans/tingly-mapping-pearl.md
+/.claude/projects/-mnt-sdcard-AA-MY-DRIVE/memory/wholesale_funding.md
+/.claude/settings.json
+/.claude/skills/delegation_json_contract/SKILL.md
+/.claude/skills/everlight_copy_guard/SKILL.md
+/.claude/skills/plan_execute_verify/SKILL.md
+/.claude/sync_config.json
+/.claudeignore
+/.codex/AGENTS.md
+/.env.example
+/.gemini/GEMINI.md
+/.github/workflows/deploy-vantaris.yml
+/.gitignore
+/.stignore
+/01_BUSINESSES/Everlight_Ventures/00_Core/Business_Plan/Everlight_Logistics_Investor_Proposal.docx
+/01_BUSINESSES/Everlight_Ventures/00_Core/Rocketbook/Jarvis Unified Ops System (All-in-One Framework).docx
+/01_BUSINESSES/Everlight_Ventures/00_Core/Rocketbook/Ventures_Breakdown.docx
+/01_BUSINESSES/Everlight_Ventures/02_Operations/Finance/Annual_Income_Projections.csv
+/01_BUSINESSES/Everlight_Ventures/02_Operations/Finance/Everlight_Ventures_Purchases_And_Tax_Strategy.xlsx
+/01_BUSINESSES/Everlight_Ventures/02_Operations/Payroll/Everlight_DB_Payroll_With_Totals.csv
+/01_BUSINESSES/Everlight_Ventures/02_Operations/Schedules/Everlight_2Week_FullSchedule_WithRoutines.ics
+/01_BUSINESSES/Everlight_Ventures/02_Operations/Schedules/Everlight_Master_Merged_Calendar.ics
+/01_BUSINESSES/Everlight_Ventures/02_Operations/Schedules/Everlight_Nomad_TwoWeek_Calendar.ics
+/01_BUSINESSES/Everlight_Ventures/02_Operations/Storage_Unit/Everlight_Workflow_&_Office.docx
+/01_BUSINESSES/Everlight_Ventures/02_Operations/Storage_Unit/Micro_Grid_Station.docx
+/01_BUSINESSES/Everlight_Ventures/02_Operations/Storage_Unit/Route_Schedule.docx
+/01_BUSINESSES/Everlight_Ventures/04_Automation/02_Automation_ Everlight Logistics Command Center.docx
+/01_BUSINESSES/Everlight_Ventures/04_Automation/Automate_GSheet.docx
+/01_BUSINESSES/Everlight_Ventures/04_Automation/GAS TO automate Alibaba and chatbots_.docx
+/01_BUSINESSES/Everlight_Ventures/04_Automation/Slack_N8N_Gpt_Output.xlsx
+/01_BUSINESSES/Everlight_Ventures/04_Automation/n8n_workflows/Slack_to_GPT_Chain_Aggregator_Workflow.json
+/01_BUSINESSES/Everlight_Ventures/04_Automation/n8n_workflows/ask_gpt_workflow.json
+/01_BUSINESSES/Everlight_Ventures/04_Automation/n8n_workflows/everlight_logistics_fullstack.json
+/01_BUSINESSES/Everlight_Ventures/04_Automation/n8n_workflows/everlight_n8n_bundle/everlight_gpt_ask.json
+/01_BUSINESSES/Everlight_Ventures/04_Automation/n8n_workflows/everlight_n8n_bundle/instructions_everlight.md
+/01_BUSINESSES/Everlight_Ventures/AI_Consulting/cv_consulting_page.md
+/01_BUSINESSES/Everlight_Ventures/AI_Consulting/mobile_bar_client/PF_Pricing_and_Menus.html
+/01_BUSINESSES/Everlight_Ventures/AI_Consulting/offer_stack.md
+/01_BUSINESSES/Everlight_Ventures/AI_Consulting/outreach/__pycache__/consulting_outreach.cpython-313.pyc
+/01_BUSINESSES/Everlight_Ventures/AI_Consulting/outreach/consulting_outreach.py
+/01_BUSINESSES/Everlight_Ventures/AI_Consulting/outreach/cv_outreach_templates.md
+/01_BUSINESSES/Everlight_Ventures/AI_Consulting/pipeline/__pycache__/lead_scorer.cpython-313.pyc
+/01_BUSINESSES/Everlight_Ventures/AI_Consulting/pipeline/__pycache__/prospect_scraper.cpython-313.pyc
+/01_BUSINESSES/Everlight_Ventures/AI_Consulting/pipeline/lead_scorer.py
+/01_BUSINESSES/Everlight_Ventures/AI_Consulting/pipeline/prospect_scraper.py
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ART_BIBLE.md
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/prototype/EXECUTION_REPORT_v05.md
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/prototype/art_prompts.md
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/prototype/build_v5.py
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/prototype/combat_upgrades.js
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/prototype/game_v4.html
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/prototype/game_v5.html
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/prototype/game_v6.html
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/prototype/game_v7.html
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/prototype/game_v8.html
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/prototype/graffiti_system.js
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/prototype/index.html
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/prototype/index_v2.html
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/App_Files/Advancecontract.cs
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/App_Files/BattleManager.cs
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/App_Files/BattleSystems.cs
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/App_Files/Battleinputhandler.cs
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/App_Files/Carddefinition.cs
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/App_Files/Economymanager.cs
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/App_Files/GameData.json
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/App_Files/Gameenums.cs
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/App_Files/Gamemanager.cs
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/App_Files/GamplayUI.cs
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/App_Files/Matchmaking.cs
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/App_Files/Playerdata.cs
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/App_Files/Readme.md
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/App_Files/UnitBehaviourc.cs
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/App_Files/contractadvisor.cs
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/General_Idea/clash copy ai specs
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/General_Idea/clash copy ai specs and overiew
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/General_Idea/clash copy enhancements
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/General_Idea/clash copy ethics
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/General_Idea/clash copy p[ayment
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/General_Idea/clash copy steps
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/General_Idea/clash royale copy
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/General_Idea/clasy copy economy
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/MONETIZATION_UX_REWRITE.md
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/PROMPT_BIBLE.md
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/VISUAL_AI_PIPELINE_SOP.md
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ak_up.md
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/blockchain/contracts/AlleyKingzCards.sol
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/blockchain/contracts/AlleyKingzDogs.sol
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/blockchain/contracts/AlleyKingzMarketplace.sol
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/blockchain/contracts/BCRDIToken.sol
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/blockchain/contracts/BcrdiGameVault.sol
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/blockchain/contracts/BcrdiStaking.sol
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/blockchain/hardhat.config.js
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/blockchain/package.json
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/blockchain/scripts/deploy.js
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/content_pack.json
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/research/GAME_VISION.md
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/research/research_packet.json
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/research/sources.md
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/spec/05_DATA_MODEL.md
+/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/spec/PRD_V2.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/BROKER_OS_OVERVIEW.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/BUYER_OUTREACH_DRAFTS.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/DEAL_PROTECTION_AND_CLOSING_SOP.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/REAL_CASH_BUYERS.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/SOP_surplus_funds_recovery.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/TITLE_COMPANY_RESEARCH.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/contract_generator.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/contracts/ASSIGNMENT_CONTRACT_BASE.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/contracts/CLOSING_CHECKLIST_BY_STATE.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/contracts/CRYPTO_PAYMENT_ADDENDUM.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/contracts/DEAL_MEMO_TEMPLATE.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/contracts/FINDER_FEE_AGREEMENT_TEMPLATE.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/contracts/STATE_ADDENDA.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/contracts/STATE_CONTRACT_MATRIX.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/contracts/audits/AUDIT_2026-03-13.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/freelance_revenue/README.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/freelance_revenue/gig_templates.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/stripe_invoicer.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/09_DASHBOARD/reports/gdocs_queue/2026-04-07_00-36-PT_Wholesale_Pipeline_Daily_Report.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/FREE_TOOLS_GUIDE.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/ace_pitch_engine.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/apify_lead_wrapper.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/bounced_emails.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/buyers_db.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/cache/market_data/cleveland_oh.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/cache/market_data/houston_tx.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/cache/sent_email_hashes.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/contracts/finder_agreement_Rich Gillies_20260409.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/contracts/finder_agreement_TechCorp Inc_20260408.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/contracts/wholesale_1234 Oak St_ Cleveland OH 44102_20260408.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/creative_finance_engine.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/daily_leads/2026-03-20_auto_import.csv
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/data/workbooks/deal_tracker.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/data/workbooks/outreach_log.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/data/workbooks/performance_metrics.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/data/workbooks/pipeline_master.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/deal_sheet_preview.html
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/deploy_wholesale.sh
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/direct_mail/2026-03-20_envelope_labels.csv
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/direct_mail/2026-03-20_letters.txt
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/direct_mail/2026-03-20_owner_search_urls.csv
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/failed_emails/2026-03-21_dead_letters.jsonl
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/free_skip_tracer.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/gdocs_bridge.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/hive_outreach.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/invoices/in_1TKCzDGd8n4Fz3nAL2ObpE3p.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/invoices/in_1TKD0xGd8n4Fz3nAkdyxXibE.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/invoices/in_1TKD1nGd8n4Fz3nA7g0FVyax.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/invoices/in_1TKDJGGd8n4Fz3nAFurlHfjR.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/land_analyzer.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/leads_db.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/lis_pendens_pipeline.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/opportunity_zones.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/opted_out_emails.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/outreach/2026-03-20_buyer_blast.txt
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/outreach/2026-03-20_outreach.csv
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pipeline/2026-03-21_leads.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pipeline/attom_bulk_leads.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pipeline/attom_fresh_20260321.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pipeline/attom_real_leads.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pipeline/distress_finder_log.jsonl
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pipeline/enriched_leads.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pipeline/probate_scout_log.jsonl
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pipeline/seed_buyers.csv
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pipeline/seed_research_2026-03-20.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pipeline/tax_delinquency_log.jsonl
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pipeline/teardown_finder_log.jsonl
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pipeline/zillow_keyword_log.jsonl
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/piper_chart_engine.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/piper_market_data.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/piper_outreach_templates.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/piper_unique_engine.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/pitches/2026-03-20_1847_Peachtree_Rd.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/real_data_seeder.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/report_template.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/reports/2026-03-20_daily.md
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_7touch_sequence.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_autonomous.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_batch_offers.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_belfort_sequence.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_buyer_acquisition.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_buyer_segmenter.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_closer.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_comp_validator.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_daily_run.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_deal_sheet.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_direct_mail.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_distress_finder.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_enrichment_engine.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_health.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_lead_recycler.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_lead_scorer.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_lead_scorer_v2.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_master_pipeline.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_multi_tier.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_negotiator.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_probate_scout.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_repair_estimator.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_sdr.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_stop_handler.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_straight_line.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_tax_delinquency_scout.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_teardown_finder.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_utils.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/rex_zillow_keyword_scraper.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/search_urls/2026-03-20_search_urls.csv
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/search_urls/2026-03-20_search_urls_all.csv
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/seed_pipeline.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/seller_landing_page.html
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/setup_stripe_intel_products.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/skip_trace_and_enrich.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/skip_traces/2026-03-20_skip_trace.csv
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/skip_traces/batch_skip_trace_upload.csv
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/skip_traces/top20_skip_trace.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/stripe_intel_prices.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/surplus_claims_tracker.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/surplus_funds_finder.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/surplus_outreach_templates.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/title_companies.json
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/workbook_logger.py
+/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/zillow_scout.py
+/01_BUSINESSES/Everlight_Ventures/Everlight_Cannabis/Blaze_And_Graze.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Crypto/(Condensed) VASP_VCE.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Crypto/00_Core/BCARDI_Project_Overview.csv
+/01_BUSINESSES/Everlight_Ventures/Everlight_Crypto/01_Media/BCARDI_OFFICIAL_COIN.png
+/01_BUSINESSES/Everlight_Ventures/Everlight_Crypto/BCARDI_Project_Overview.xlsx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Crypto/BCD/Photos/BCARDI_Coin_1.png
+/01_BUSINESSES/Everlight_Ventures/Everlight_Crypto/BCD/Photos/Official $BCARDI.png
+/01_BUSINESSES/Everlight_Ventures/Everlight_Crypto/Bacardi token INFO.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Crypto/Copy of Official $BCARDI.png
+/01_BUSINESSES/Everlight_Ventures/Everlight_Crypto/Enhanced VASP_VCE.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Crypto/GPT_BCRDI_DS_TRCK.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Crypto/Official_BCARDI.png
+/01_BUSINESSES/Everlight_Ventures/Everlight_Crypto/VASP_VCE_Condensed.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Crypto/VASP_VCE_Enhanced.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Crypto/VVS_Vault.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Crypto/Zilcade_BCARDI_Bridge.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Crypto/Zilliqa, Bitcoin, and ETF Potential.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Crypto/Zilliqa, Gaming, and Market Potential.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/BLOCKCHAIN_CASINO_STRATEGY.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/BRAND_IDENTITY.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/BRAND_UNIFICATION_STRATEGY.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/CASINO_BRAND_EVALUATION.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/CEO Dashboard (Everlight Logistics).xlsx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/CEO Dashboard Everlight Logistics.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/Everlight Token Interest _ Support Form (Responses.xlsx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/Everlight_Assistant_SOP.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/Everlight_Logistics- Flow Funds and EcoSystem_.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/Everlight_Ventures(1).docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/Everlight_Ventures.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_ARCADE_EASTER_EGG_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_ARCADE_SHOPS_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_AUTH_FIX_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_AUTH_ROUTING_FIX.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_BLACKJACK_BUSINESS_OS_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_BLACKJACK_MERGE_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_BLACKJACK_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_BLACKJACK_V2_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_BLACKJACK_V3_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_BLACKJACK_V4_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_BRAND_RESTRUCTURE.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_DASHBOARD_WATCHTOWER_REFRESH_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_ELEVENLABS_AUDIO_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_FULL_UPGRADE_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_HIVEMIND_PRIVATE_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_HIVEMIND_PRODUCT_PAGE_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_LEGAL_PAGES_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_MASTER_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_MENU_RESTRUCTURE_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_NEXT_GEN_MEGA_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_PROFILE_AND_WARROOM_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_PUBLISHING_LINKS_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_REWARDS_MISSIONS_FIX_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_REWARDS_PROGRAM_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_SELL_PAGE_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_SITE_MASTER.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_SMART_DEALER_CHAT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/LOVABLE_STRATEGY_COACH_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/PRODUCT_TO_PROFIT_PIPELINE.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/README.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/REVENUE_PLAN.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/SEEDANCE_AVATAR_PROMPTS.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/SITE_ARCHITECTURE_V2.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/SOCIAL_CASINO_COMPETITIVE_INTEL.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/SOCIAL_CASINO_GTM_STRATEGY.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/SOCIAL_CASINO_LEGAL_RESEARCH.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/STRIPE_PRODUCT_CATALOG.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/Streamline_Approach_To_EL.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/VANTARIS_BRAND.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/assets/ev-icon-gold-dark.svg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/assets/ev-icon-gold-transparent.svg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/assets/ev-logo-primary-dark.svg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/assets/everlight_app_icon_1024.png
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/blackjack_strategy_data.json
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/edge_functions/blackjack-api/index.ts
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/edge_functions/blackjack-dealer/index.ts
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/edge_functions/create-checkout/index.ts
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/edge_functions/download-ebook/index.ts
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/edge_functions/recovery-sweep/index.ts
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/edge_functions/send-purchase-email/index.ts
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/edge_functions/strategy-coach/index.ts
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/edge_functions/stripe-webhook/index.ts
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/edge_functions/verify-arcade-purchase/index.ts
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/edge_functions/verify-checkout-session/index.ts
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/edge_functions/verify-ebook-purchase/index.ts
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/edge_functions/verify-gem-purchase/index.ts
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/gear_engine/LOVABLE_GEAR_DROP_PROMPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/gear_engine/QUICK_SETUP.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/gear_engine/fallback_queue.json
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/gear_engine/gear_engine_config.yaml
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/gear_engine/published_ids.json
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/gear_engine/seed_gear_catalog.sql
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/legal/LLC_NEVADA_FORMATION_2026-05-13.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/legal/PRIVACY_POLICY.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/legal/REFUND_POLICY.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/legal/TERMS_OF_SERVICE.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/plans/avatar_agent/14_day_sprint.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/plans/avatar_agent/personas.json
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/plans/content_cohesion_audit.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/plans/directory_consolidation.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/plans/root_cleanup_final.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/plans/seo_audit_report.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/plans/series_consistency_rebuild.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/plans/workspace_cleanup_2026_03_06.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Gaming/Blackjack/BLACKJACK_PRO_ARCHITECTURE.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Gaming/Blackjack/BLACKJACK_PRO_GDD.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Gaming/Blackjack/GAME_DESIGN_DOC.txt
+/01_BUSINESSES/Everlight_Ventures/Everlight_Gaming/Blackjack/SEEDANCE_ART_BRIEF.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Gaming/Blackjack/blackjack_strategy_guide.html
+/01_BUSINESSES/Everlight_Ventures/Everlight_Gaming/Blackjack/blackjackgame.py
+/01_BUSINESSES/Everlight_Ventures/Everlight_Gaming/LEGAL_COMPLIANCE_CA.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/03_Marketing/Everlight_Kids_Prompt_Bank.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/AMAZON_BRAND_STRATEGY.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/M2_Sams_Second_Superpower.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/Sams_Second_Superpower_KDP.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/Sams_Second_Superpower_MASTER.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/Sams_Second_Superpower_MASTER_ILLUSTRATED.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/Sams_Second_Superpower_reader.html
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_10_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_10_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_11_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_11_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_1_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_1_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_2_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_2_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_3_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_3_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_4_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_4_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_5_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_5_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_6_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_6_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_7_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_7_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_8_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_8_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_9_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_9_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_cover.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_cover_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/2_cover_ebook.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book 2/images/Sams_Second_Superpower_KDP_Wrap_12.36x9.25_SAFE.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Pictures_Firepower/Carrot.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Pictures_Firepower/Emotional_intelligence.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Pictures_Firepower/Robo_meets_Sam.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Pictures_Firepower/Sam_and_Robo.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Pictures_Firepower/Sam_saves.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Pictures_Firepower/Sam_saves_cat.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Pictures_Firepower/Sams_Superpower.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Pictures_Firepower/Super_achievement.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Sam's_First_Superpower_01.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Sam's_Superpower_B1_1.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Sam's_Superpower_B1_2.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Sam's_Superpower_B1_3.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Sam's_Superpower_B1_4.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Sams_First_Superpower_KDP.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Sams_First_Superpower_MASTER.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Sams_First_Superpower_MASTER_ILLUSTRATED.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/Sams_First_Superpower_reader.html
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_10_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_10_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_11_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_11_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_12_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_12_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_1_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_1_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_2_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_2_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_3_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_3_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_4_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_4_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_5_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_5_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_6_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_6_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_7_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_7_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_8_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_8_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_9_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_9_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_cover.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_cover_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Book1/images/1_cover_ebook.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/KDP_METADATA_SERIES.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/SERIES_MONETIZATION_STRATEGY.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/SERIES_ROADMAP.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/Sam's_First_Superpower_1.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/TOC__Sam_B4.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_3/ILLUSTRATION_BRIEF.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_3/Sams_Third_Superpower.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_3/Sams_Third_Superpower_KDP.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_3/Sams_Third_Superpower_MASTER.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_3/Sams_Third_Superpower_MASTER_ILLUSTRATED.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_3/Sams_Third_Superpower_reader.html
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_3/images/3_1.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_3/images/3_2.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_3/images/3_33.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_3/images/3_4.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_3/images/3_5.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_3/images/3_7.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_3/images/3_8.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_3/images/3_cover.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_3/images/3_cover_ebook.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/ILLUSTRATION_BRIEF.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/ILLUSTRATION_BRIEF_v2.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/Sams_Fourth_Superpower_KDP.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/Sams_Fourth_Superpower_reader.html
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_10_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_10_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_11_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_11_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_12_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_12_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_1_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_1_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_2_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_2_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_3_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_3_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_4_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_4_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_5_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_5_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_6_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_6_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_7_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_7_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_8_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_8_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_9_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_9_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_cover.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_cover_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/images/4_cover_ebook.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/kdp_upload/KDP_METADATA_B4.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/kdp_upload/KDP_METADATA_B4_v2.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/manuscript/SAM_BOOK4_MASTER.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/manuscript/Sams 4th Superpower Chapter 1.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/manuscript/Sams_Fourth_Superpower_MASTER.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_4/manuscript/Sams_Fourth_Superpower_MASTER_ILLUSTRATED.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/ILLUSTRATION_BRIEF.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/Sams_Fifth_Superpower_KDP.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/Sams_Fifth_Superpower_reader.html
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/.gitkeep
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_10_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_10_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_11_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_11_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_12_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_12_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_1_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_1_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_2_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_2_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_3_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_3_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_4_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_4_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_5_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_5_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_6_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_6_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_7_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_7_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_8_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_8_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_9_bw.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_9_color.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_cover.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/images/5_cover_ebook.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/manuscript/Sams_Fifth_Superpower_MASTER.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/book_5/manuscript/Sams_Fifth_Superpower_MASTER_ILLUSTRATED.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM/build_book.py
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/EDUCATORS_GUIDE_TEMPLATE.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/LIBRARY_SCHOOL_DISTRIBUTION_CHECKLIST.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/SERIES_BIBLE_MASTER.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Adventures_Series/SERIES_MASTER/README.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/BEYOND_THE_VEIL_FINAL_MANUSCRIPT.bak.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/BEYOND_THE_VEIL_FINAL_MANUSCRIPT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/BEYOND_THE_VEIL_KDP_Interior.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/BEYOND_THE_VEIL_reader.html
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/Book_Outline_Astral_Western.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/CIPHER_FOOTERS.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/CIPHER_KEY.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/Cowboys_Vs_Indians_C1--.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/DEDICATION_PAGE.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/Editorial_Vitality_Notes.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/GOD_MODE_LAUNCH_PACK.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/KDP_Publishing_Package.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/PROOFREADING_REPORT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/Title_And_Structure_Analysis.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/build_audiobook.py
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/build_kdp_docx.py
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/build_reader.py
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/chapter_1_draft.txt
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/chapters/00_prologue.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/chapters/01_a_world_in_conflict.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/chapters/02_deeper_into_the_dream.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/chapters/03_the_town_falls_apart.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/chapters/04_rising_tensions.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/chapters/05_the_breaking_point.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/chapters/06_the_coma.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/chapters/07_preparing_for_battle.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/chapters/08_the_astral_war.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/chapters/09_resolution_and_rebirth.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/chapters/10_a_new_timeline.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/compile_manuscript.py
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/enhanced_chapter_outlines.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/BEYOND_THE_VEIL_HaileyPink_Book1/series_bible.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Beyond_The_Veil/90_Day_Production_Timeline.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Beyond_The_Veil/Revenue_Model.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/Ebook_Sells/Beyond_The_Veil/Voice_Brand_SOP.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Literature/PUBLISHING_PAGE_CONTENT.md
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/B_Everlight_logistics/Home/Documents/Ai_Team/Ai collab sheets blueprint.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/B_Everlight_logistics/Home/Documents/Ai_Team/Ash Roles and Responsibilities.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/B_Everlight_logistics/Home/Documents/Ai_Team/Bank Automation Example txt.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/B_Everlight_logistics/Home/Documents/Ai_Team/Do I need all the tools in my team or am I overle_.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/B_Everlight_logistics/Home/Documents/Ai_Team/General Description of my Ai.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/B_Everlight_logistics/Home/Documents/Ai_Team/Listing Pro roles and Responsibilities_.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/B_Everlight_logistics/Home/Documents/Ai_Team/Ops Roles and Responsibilities_.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/B_Everlight_logistics/Home/Documents/Ai_Team/Prophet Roles and Responsibilities_.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/B_Everlight_logistics/Home/Documents/Ai_Team/Scout Roles and Responsibilities.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/B_Everlight_logistics/Home/Documents/Backend_Website/kivy_app_backend_web.py
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/B_Everlight_logistics/Home/Documents/Backend_Website/streamlit_app.py
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/B_Everlight_logistics/Home/Documents/Business_Card/EL_Logo_Business_Card.jpg
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/B_Everlight_logistics/Home/Documents/Email_Automations_&_Spreadsheets/contact_sheet.py
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/B_Everlight_logistics/Home/Documents/Email_Automations_&_Spreadsheets/sample_spreadsheet.py
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/B_Everlight_logistics/Home/Documents/Employee_Training/Data_and_Privacy_Training.py
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/FinalEverlightLogisticsFinancialPlan-20231016-1610.docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/Untitled document(1).docx
+/01_BUSINESSES/Everlight_Ventures/Everlight_Logistics/Untitled document.docx
+/01_BUSINESSES/Everlight_Ventures/Field_Ops/FIELD_OPS_CONTENT_PLAN.md
+/01_BUSINESSES/Everlight_Ventures/Field_Ops/FIELD_OPS_LANDING_PAGE.md
+/01_BUSINESSES/Everlight_Ventures/Field_Ops/FIELD_OPS_OUTREACH.md
+/01_BUSINESSES/Everlight_Ventures/Field_Ops/FIELD_OPS_PH_LAUNCH.md
+/01_BUSINESSES/Everlight_Ventures/Field_Ops/FIELD_OPS_PRODUCT_SPEC.md
+/01_BUSINESSES/Everlight_Ventures/Field_Ops/fiverr_gigs.md
+/01_BUSINESSES/Everlight_Ventures/Field_Ops/scope.json
+/01_BUSINESSES/Everlight_Ventures/REVENUE_OPERATIONS_MAP.md
+/01_BUSINESSES/Everlight_Ventures/Theme/fiverr_new_1.png
+/01_BUSINESSES/Everlight_Ventures/Theme/fiverr_new_2.png
+/01_BUSINESSES/Everlight_Ventures/Theme/media-1773124610595.png
+/01_BUSINESSES/Everlight_Ventures/Wholesale/SOPS/CLOUDFLARE_TUNNEL_ACTIVATION_2026-05-13.html
+/01_BUSINESSES/Everlight_Ventures/Wholesale/SOPS/DAILY_100_LEADS_PIPELINE.md
+/01_BUSINESSES/Everlight_Ventures/Wholesale/SOPS/E5_MIGRATION_AND_LOCAL_PARITY_2026-05-13.html
+/01_BUSINESSES/Everlight_Ventures/Wholesale/SOPS/INBOX_AUTOMATION_SETUP.md
+/01_BUSINESSES/Everlight_Ventures/Wholesale/SOPS/PUBLIC_URL_VIA_CLOUDFLARE_TUNNEL.md
+/01_BUSINESSES/Everlight_Ventures/Wholesale/SOPS/SOP_CLOSING_DAY.md
+/01_BUSINESSES/Everlight_Ventures/Wholesale/SOPS/SOP_DEAL_INTAKE.md
+/01_BUSINESSES/Everlight_Ventures/Wholesale/SOPS/SOP_DISPOSITION.md
+/01_BUSINESSES/Everlight_Ventures/Wholesale/SOPS/SOP_EMD_HANDLING.md
+/01_BUSINESSES/Everlight_Ventures/Wholesale/SOPS/SOP_TITLE_SEARCH_MANUAL.md
+/01_BUSINESSES/Everlight_Ventures/Wholesale/audit/deal_execution_log.py
+/01_BUSINESSES/Everlight_Ventures/Wholesale/compliance/dnc_actions/2026-05-04_streubel_eradication.json
+/01_BUSINESSES/Everlight_Ventures/Wholesale/compliance/dnc_list.json
+/01_BUSINESSES/Everlight_Ventures/Wholesale/compliance/inbound_watch_daemon.py
+/01_BUSINESSES/Everlight_Ventures/Wholesale/config/chris_buy_box.json
+/01_BUSINESSES/Everlight_Ventures/Wholesale/prospecting/MO_prospects.csv
+/01_BUSINESSES/Everlight_Ventures/Wholesale/scripts/daily_lead_pipeline.py
+/01_BUSINESSES/Everlight_Ventures/_audits/MCP_FLEET_STATUS_2026-05-13.html
+/01_BUSINESSES/Everlight_Ventures/_audits/RICH_TODO_LIVE.html
+/01_BUSINESSES/Everlight_Ventures/_audits/SUPABASE_STATUS_2026-05-13.html
+/01_BUSINESSES/Everlight_Ventures/_audits/data_registry.json
+/01_BUSINESSES/Everlight_Ventures/_audits/services_registry.json
+/01_BUSINESSES/Everlight_Ventures/trading/xlm_derivatives/reports/2026/02/17/anomalies.json
+/01_BUSINESSES/Everlight_Ventures/trading/xlm_derivatives/reports/2026/02/17/daily_report.md
+/01_BUSINESSES/Everlight_Ventures/trading/xlm_derivatives/reports/2026/02/17/metrics.json
+/01_BUSINESSES/Everlight_Ventures/trading/xlm_derivatives/reports/2026/02/17/state.json
+/01_BUSINESSES/Everlight_Ventures/trading/xlm_derivatives/reports/2026/02/26/anomalies.json
+/01_BUSINESSES/Everlight_Ventures/trading/xlm_derivatives/reports/2026/02/26/approval_status.json
+/01_BUSINESSES/Everlight_Ventures/trading/xlm_derivatives/reports/2026/02/26/daily_report.md
+/01_BUSINESSES/Everlight_Ventures/trading/xlm_derivatives/reports/2026/02/26/recommended_changes.md
+/01_BUSINESSES/Everlight_Ventures/trading/xlm_derivatives/reports/2026/02/28/anomalies.json
+/01_BUSINESSES/Everlight_Ventures/trading/xlm_derivatives/reports/2026/02/28/daily_report.md
+/01_BUSINESSES/Everlight_Ventures/trading/xlm_derivatives/reports/2026/02/28/metrics.json
+/01_BUSINESSES/onyx_pos/ONYX_CASINO_BLUEPRINT.md
+/01_BUSINESSES/onyx_pos/ONYX_FULL_PLATFORM.md
+/01_BUSINESSES/onyx_pos/ONYX_MONOPOLY_ARCHITECTURE.md
+/01_BUSINESSES/onyx_pos/ONYX_SUPER_APP.md
+/01_BUSINESSES/onyx_pos/app/.env.example
+/01_BUSINESSES/onyx_pos/app/Dockerfile
+/01_BUSINESSES/onyx_pos/app/api/config.py
+/01_BUSINESSES/onyx_pos/app/api/db.py
+/01_BUSINESSES/onyx_pos/app/api/ecosystem.py
+/01_BUSINESSES/onyx_pos/app/api/main.py
+/01_BUSINESSES/onyx_pos/app/api/models.py
+/01_BUSINESSES/onyx_pos/app/api/platform.py
+/01_BUSINESSES/onyx_pos/app/api/receipt_scanner.py
+/01_BUSINESSES/onyx_pos/app/api/requirements.txt
+/01_BUSINESSES/onyx_pos/app/docker-compose.yml
+/01_BUSINESSES/onyx_pos/app/frontend/index.html
+/01_BUSINESSES/onyx_pos/app/frontend/package.json
+/01_BUSINESSES/onyx_pos/app/frontend/src/components/Layout.jsx
+/01_BUSINESSES/onyx_pos/app/frontend/src/index.css
+/01_BUSINESSES/onyx_pos/app/frontend/src/lib/api.js
+/01_BUSINESSES/onyx_pos/app/frontend/src/main.jsx
+/01_BUSINESSES/onyx_pos/app/frontend/src/pages/Chat.jsx
+/01_BUSINESSES/onyx_pos/app/frontend/src/pages/Dashboard.jsx
+/01_BUSINESSES/onyx_pos/app/frontend/src/pages/Employees.jsx
+/01_BUSINESSES/onyx_pos/app/frontend/src/pages/Login.jsx
+/01_BUSINESSES/onyx_pos/app/frontend/src/pages/POS.jsx
+/01_BUSINESSES/onyx_pos/app/frontend/src/pages/Products.jsx
+/01_BUSINESSES/onyx_pos/app/frontend/src/pages/Register.jsx
+/01_BUSINESSES/onyx_pos/app/frontend/src/pages/Reports.jsx
+/01_BUSINESSES/onyx_pos/app/frontend/src/pages/Settings.jsx
+/01_BUSINESSES/onyx_pos/app/frontend/vite.config.js
+/01_BUSINESSES/onyx_pos/launch/NEXT_PROJECT_PLAN.md
+/01_BUSINESSES/onyx_pos/launch/ONYX_POS_LAUNCH_PLAN.md
+/01_BUSINESSES/onyx_pos/launch/landing_page_copy.md
+/02_CONTENT_FACTORY/00_Inbox/GPT_Conversatins/Outcome of Today_s G7 Summit (June 13, 2024).docx
+/02_CONTENT_FACTORY/01_Queue/avatar_output/20260305_233147_retail POS_founder/metadata.json
+/02_CONTENT_FACTORY/01_Queue/avatar_output/20260306_002133_retail POS_founder/metadata.json
+/02_CONTENT_FACTORY/01_Queue/ig_digital_launch_kit.md
+/02_CONTENT_FACTORY/03_Assets/GPT_Instructions.docx
+/02_CONTENT_FACTORY/03_Assets/Hands_off_Helulium_Gpt.docx
+/02_CONTENT_FACTORY/03_Assets/Personal_Bio_Everlight.docx
+/02_CONTENT_FACTORY/03_Assets/Prompts/GPT_Promts_Training/AI_MASTER_5_MERGE_Writting_Assessment_Response.docx
+/02_CONTENT_FACTORY/03_Assets/Prompts/GPT_Promts_Training/Author_Prompts.docx
+/02_CONTENT_FACTORY/03_Assets/Prompts/GPT_Promts_Training/CLAUDE_AI_Writting_Assesment_Response.docx
+/02_CONTENT_FACTORY/03_Assets/Prompts/GPT_Promts_Training/COPILOT_AI_Writting_Assesment_Response.docx
+/02_CONTENT_FACTORY/03_Assets/Prompts/GPT_Promts_Training/Everlight_Logistics_GPT_Training_Doc.docx
+/02_CONTENT_FACTORY/03_Assets/Prompts/GPT_Promts_Training/GEMINI_AI_Writting_Assesment_Response.docx
+/02_CONTENT_FACTORY/03_Assets/Prompts/GPT_Promts_Training/GPT_Writting_Assestment_Response.docx
+/02_CONTENT_FACTORY/03_Assets/Prompts/GPT_Promts_Training/Gpt_Assitant_Updated.docx
+/02_CONTENT_FACTORY/03_Assets/Prompts/GPT_Promts_Training/PERPLEXITY_AI_Writing_Assesment_Response.docx
+/02_CONTENT_FACTORY/03_Assets/Prompts/GPT_Promts_Training/copy__paste_el_gpt.docx
+/02_CONTENT_FACTORY/03_Assets/Voice_Transcript_Prompts.docx
+/02_CONTENT_FACTORY/AI_Workteams/Brain storm work teams for everlight logistics..._.docx
+/02_CONTENT_FACTORY/AI_Workteams/Could u switch the human from Sarah to rich.  Als_.docx
+/02_CONTENT_FACTORY/AI_Workteams/For each bullet point present roles and responsib_.docx
+/02_CONTENT_FACTORY/AI_Workteams/For each main bulletpoint select 1 option that wi_.docx
+/02_CONTENT_FACTORY/AI_Workteams/How Will the ai ads manager I have be assisting m_.docx
+/02_CONTENT_FACTORY/AI_Workteams/I confused u.   What I mean is.  If prophet gets._.docx
+/02_CONTENT_FACTORY/AI_Workteams/I like this but instead of the ai emailing me, I._.docx
+/02_CONTENT_FACTORY/AI_Workteams/I want this team to meet and discuss via Google m_.docx
+/02_CONTENT_FACTORY/AI_Workteams/I would like to save this chat as a document in m_.docx
+/02_CONTENT_FACTORY/AI_Workteams/I_d like everything to be in more detail.   Also._.docx
+/02_CONTENT_FACTORY/AI_Workteams/I_m already making all the approvals and I_ll hav_.docx
+/02_CONTENT_FACTORY/AI_Workteams/Include the total profits made from the publishin_.docx
+/02_CONTENT_FACTORY/AI_Workteams/Include these parameters in the situation.    I h_.docx
+/02_CONTENT_FACTORY/AI_Workteams/Include thr utlization of my amazon buisness acco_.docx
+/02_CONTENT_FACTORY/AI_Workteams/Keep this and include a list of roles and respons_.docx
+/02_CONTENT_FACTORY/AI_Workteams/Keep this but include a system admin for website._.docx
+/02_CONTENT_FACTORY/AI_Workteams/Okay I appreciate the good words but is this enou_.docx
+/02_CONTENT_FACTORY/AI_Workteams/Okay now following these bulletpoints create a si_.docx
+/02_CONTENT_FACTORY/AI_Workteams/Okay so I need help organizing my google workspac_.docx
+/02_CONTENT_FACTORY/AI_Workteams/Okay so show me how I would do this using workspa_.docx
+/02_CONTENT_FACTORY/AI_Workteams/Show me where and how to sign up for these ai too_.docx
+/02_CONTENT_FACTORY/AI_Workteams/So explain how I would use helium 10 with ppc for_.docx
+/02_CONTENT_FACTORY/AI_Workteams/This is cool put how much money was made- Where a_.docx
+/02_CONTENT_FACTORY/AI_Workteams/Understanding Overhead, Profit, and Reinvestment._.docx
+/02_CONTENT_FACTORY/AI_Workteams/Using this buisness model, rather than having a t_.docx
+/02_CONTENT_FACTORY/AI_Workteams/What are good automated reordering metric-  and a_.docx
+/02_CONTENT_FACTORY/AI_Workteams/Why not-.docx
+/02_CONTENT_FACTORY/AI_Workteams/Yes exactly that_s the whole point of the shared._.docx
+/02_CONTENT_FACTORY/README.md
+/02_CONTENT_FACTORY/everlight_ventures_homepage.md
+/02_CONTENT_FACTORY/kdp_metadata/everlight_kdp_metadata.md
+/03_AUTOMATION_CORE/00_N8N/Updated_USB_FILE_DIrectory_N8N.docx
+/03_AUTOMATION_CORE/00_N8N/broker/broker_master_workflow.json
+/03_AUTOMATION_CORE/00_N8N/broker/gmail_seller_reply_watcher.json
+/03_AUTOMATION_CORE/00_N8N/workflows/gdocs_report_publisher.json
+/03_AUTOMATION_CORE/00_N8N/workflows/hive_log_to_canvas.json
+/03_AUTOMATION_CORE/01_Scripts/Python_Zero_To_Hero/My_Notes
+/03_AUTOMATION_CORE/01_Scripts/Python_Zero_To_Hero/class_project1.py
+/03_AUTOMATION_CORE/01_Scripts/Python_Zero_To_Hero/funcitons_with_parameters.txt
+/03_AUTOMATION_CORE/01_Scripts/aggregate_todos.py
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/36_contract_writer.md
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/CLAUDE_ORCHESTRATION.md
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/GEMINI_ORCHESTRATION.md
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/ai_terminal.py
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/ask_router.py
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/blinko_bridge.py
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/blinko_context.py
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/claude_safe_wrapper.sh
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/clx_delegate.py
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/clx_mode.sh
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/cx_terminal.py
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/gemx_delegate.py
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/gemx_mode.sh
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/hive_cmd.py
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/hive_doctrine_compiler.py
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/hive_parity_check.py
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/ppx_terminal.py
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/war_room_watcher.py
+/03_AUTOMATION_CORE/01_Scripts/ai_workers/war_room_watcher.sh
+/03_AUTOMATION_CORE/01_Scripts/art_generator_v2.py
+/03_AUTOMATION_CORE/01_Scripts/avatar_orchestrator.py
+/03_AUTOMATION_CORE/01_Scripts/baseline_groceries.py
+/03_AUTOMATION_CORE/01_Scripts/bin/claude
+/03_AUTOMATION_CORE/01_Scripts/blinko_log_ingest.sh
+/03_AUTOMATION_CORE/01_Scripts/blinko_optimizer.py
+/03_AUTOMATION_CORE/01_Scripts/book_distribution_pipeline/clip_slicer.sh
+/03_AUTOMATION_CORE/01_Scripts/book_distribution_pipeline/metadata_sync.py
+/03_AUTOMATION_CORE/01_Scripts/bootstrap_everlight.sh
+/03_AUTOMATION_CORE/01_Scripts/broker/__init__.py
+/03_AUTOMATION_CORE/01_Scripts/broker/attom_enrichment.py
+/03_AUTOMATION_CORE/01_Scripts/broker/contact_enrichment.py
+/03_AUTOMATION_CORE/01_Scripts/broker_daily_orchestrator.py
+/03_AUTOMATION_CORE/01_Scripts/broker_deal_packet.py
+/03_AUTOMATION_CORE/01_Scripts/broker_gmail_monitor.py
+/03_AUTOMATION_CORE/01_Scripts/broker_ingest.py
+/03_AUTOMATION_CORE/01_Scripts/broker_outreach_sdr.py
+/03_AUTOMATION_CORE/01_Scripts/broker_seed_catalog.py
+/03_AUTOMATION_CORE/01_Scripts/broker_sop.yaml
+/03_AUTOMATION_CORE/01_Scripts/broker_starter_offers.csv
+/03_AUTOMATION_CORE/01_Scripts/build_daily_brief.py
+/03_AUTOMATION_CORE/01_Scripts/build_data_registry.py
+/03_AUTOMATION_CORE/01_Scripts/build_hive_mind_dashboard.py
+/03_AUTOMATION_CORE/01_Scripts/build_master_hub.py
+/03_AUTOMATION_CORE/01_Scripts/build_resources_dashboard.py
+/03_AUTOMATION_CORE/01_Scripts/build_services_registry.py
+/03_AUTOMATION_CORE/01_Scripts/build_xlm_honest_dashboard.py
+/03_AUTOMATION_CORE/01_Scripts/ceo_daily_brief.py
+/03_AUTOMATION_CORE/01_Scripts/claude_bridge_guardian.sh
+/03_AUTOMATION_CORE/01_Scripts/claude_chat_bridge.py
+/03_AUTOMATION_CORE/01_Scripts/claude_sync_acemagician.sh
+/03_AUTOMATION_CORE/01_Scripts/cleanup_oracle_duplicates.sh
+/03_AUTOMATION_CORE/01_Scripts/cloud_monitor.sh
+/03_AUTOMATION_CORE/01_Scripts/cloudflare_tunnel_setup.sh
+/03_AUTOMATION_CORE/01_Scripts/code_server_daemon.sh
+/03_AUTOMATION_CORE/01_Scripts/collab_calendar.py
+/03_AUTOMATION_CORE/01_Scripts/compress_upload.py
+/03_AUTOMATION_CORE/01_Scripts/content_tools/HIVE_LOGGER_API.md
+/03_AUTOMATION_CORE/01_Scripts/content_tools/branded_mailer.py
+/03_AUTOMATION_CORE/01_Scripts/content_tools/branded_slack.py
+/03_AUTOMATION_CORE/01_Scripts/content_tools/env_loader.py
+/03_AUTOMATION_CORE/01_Scripts/content_tools/gdocs_bridge.py
+/03_AUTOMATION_CORE/01_Scripts/content_tools/gdrive_setup.py
+/03_AUTOMATION_CORE/01_Scripts/content_tools/hive_logger.py
+/03_AUTOMATION_CORE/01_Scripts/content_tools/log_to_canvas.py
+/03_AUTOMATION_CORE/01_Scripts/content_tools/report_template.py
+/03_AUTOMATION_CORE/01_Scripts/content_tools/resend_guard.py
+/03_AUTOMATION_CORE/01_Scripts/content_tools/slack_canvas_bridge.py
+/03_AUTOMATION_CORE/01_Scripts/critical_email_monitor.py
+/03_AUTOMATION_CORE/01_Scripts/daily_drop_orchestrator.py
+/03_AUTOMATION_CORE/01_Scripts/daily_report.py
+/03_AUTOMATION_CORE/01_Scripts/dashboards_watchdog.sh
+/03_AUTOMATION_CORE/01_Scripts/deploy_observability_topology.sh
+/03_AUTOMATION_CORE/01_Scripts/deploy_oracle_blinko.sh
+/03_AUTOMATION_CORE/01_Scripts/deploy_to_oracle.sh
+/03_AUTOMATION_CORE/01_Scripts/deploy_trading_agents.sh
+/03_AUTOMATION_CORE/01_Scripts/device_update_runner.sh
+/03_AUTOMATION_CORE/01_Scripts/disk_guardian.py
+/03_AUTOMATION_CORE/01_Scripts/download_music.sh
+/03_AUTOMATION_CORE/01_Scripts/everlight_engine.py
+/03_AUTOMATION_CORE/01_Scripts/everlight_orchestrator.sh
+/03_AUTOMATION_CORE/01_Scripts/everlight_shell.zsh
+/03_AUTOMATION_CORE/01_Scripts/fdx
+/03_AUTOMATION_CORE/01_Scripts/file_organizer/deduplicate_files.py
+/03_AUTOMATION_CORE/01_Scripts/file_organizer/manifest_generator.py
+/03_AUTOMATION_CORE/01_Scripts/file_organizer/manifest_monitor.py
+/03_AUTOMATION_CORE/01_Scripts/file_organizer/merge_duplicate_folders.py
+/03_AUTOMATION_CORE/01_Scripts/flip_os/__init__.py
+/03_AUTOMATION_CORE/01_Scripts/flip_os/daily_brief.py
+/03_AUTOMATION_CORE/01_Scripts/flip_os/demand_scorer.py
+/03_AUTOMATION_CORE/01_Scripts/flip_os/penny_scraper.py
+/03_AUTOMATION_CORE/01_Scripts/flip_os/run_pipeline.py
+/03_AUTOMATION_CORE/01_Scripts/funnel_nurture.py
+/03_AUTOMATION_CORE/01_Scripts/gear_engine_setup.sh
+/03_AUTOMATION_CORE/01_Scripts/gmail_broker_setup.gs
+/03_AUTOMATION_CORE/01_Scripts/gmail_calendar_to_drive.py
+/03_AUTOMATION_CORE/01_Scripts/gmail_scripts/send_gmail.py
+/03_AUTOMATION_CORE/01_Scripts/hive-slack-agent.service
+/03_AUTOMATION_CORE/01_Scripts/hive_deal_orchestrator.py
+/03_AUTOMATION_CORE/01_Scripts/hive_deliverables/__init__.py
+/03_AUTOMATION_CORE/01_Scripts/hive_deliverables/excel_gen.py
+/03_AUTOMATION_CORE/01_Scripts/hive_deliverables/pdf_gen.py
+/03_AUTOMATION_CORE/01_Scripts/hive_deliverables/pptx_gen.py
+/03_AUTOMATION_CORE/01_Scripts/hive_drift_to_slack.py
+/03_AUTOMATION_CORE/01_Scripts/hive_email_live_test.py
+/03_AUTOMATION_CORE/01_Scripts/hive_email_test.py
+/03_AUTOMATION_CORE/01_Scripts/hive_god_mode.py
+/03_AUTOMATION_CORE/01_Scripts/hive_health_monitor.py
+/03_AUTOMATION_CORE/01_Scripts/hive_master_analytics.py
+/03_AUTOMATION_CORE/01_Scripts/hive_master_sync.py
+/03_AUTOMATION_CORE/01_Scripts/hive_model_router.py
+/03_AUTOMATION_CORE/01_Scripts/hive_n8n_bridge.py
+/03_AUTOMATION_CORE/01_Scripts/hive_shift_system.py
+/03_AUTOMATION_CORE/01_Scripts/hive_slack_agent.py
+/03_AUTOMATION_CORE/01_Scripts/hive_smart_post.py
+/03_AUTOMATION_CORE/01_Scripts/hive_sync.sh
+/03_AUTOMATION_CORE/01_Scripts/hive_sync_v2.sh
+/03_AUTOMATION_CORE/01_Scripts/hive_sync_watcher.sh
+/03_AUTOMATION_CORE/01_Scripts/hive_voice.py
+/03_AUTOMATION_CORE/01_Scripts/hive_voice_handler.py
+/03_AUTOMATION_CORE/01_Scripts/hive_watchdog.py
+/03_AUTOMATION_CORE/01_Scripts/hive_work_engine.py
+/03_AUTOMATION_CORE/01_Scripts/hourly_status_pulse.py
+/03_AUTOMATION_CORE/01_Scripts/inbox_router.sh
+/03_AUTOMATION_CORE/01_Scripts/install_god_mode_cron.sh
+/03_AUTOMATION_CORE/01_Scripts/lead_enrichment.py
+/03_AUTOMATION_CORE/01_Scripts/live_status.sh
+/03_AUTOMATION_CORE/01_Scripts/master_notebook.py
+/03_AUTOMATION_CORE/01_Scripts/md_to_branded_html.py
+/03_AUTOMATION_CORE/01_Scripts/morning_brief.sh
+/03_AUTOMATION_CORE/01_Scripts/n8n_start.sh
+/03_AUTOMATION_CORE/01_Scripts/n8n_watchdog.sh
+/03_AUTOMATION_CORE/01_Scripts/ngrok_tunnel.sh
+/03_AUTOMATION_CORE/01_Scripts/note_a
+/03_AUTOMATION_CORE/01_Scripts/open_webui_setup.sh
+/03_AUTOMATION_CORE/01_Scripts/oracle_arm_auto_grab.sh
+/03_AUTOMATION_CORE/01_Scripts/oracle_expand_storage.sh
+/03_AUTOMATION_CORE/01_Scripts/oracle_health_sweep.sh
+/03_AUTOMATION_CORE/01_Scripts/oracle_watchdog.sh
+/03_AUTOMATION_CORE/01_Scripts/organize_files.sh
+/03_AUTOMATION_CORE/01_Scripts/phone_imap_poller.py
+/03_AUTOMATION_CORE/01_Scripts/phone_pull_321_from_drive.sh
+/03_AUTOMATION_CORE/01_Scripts/post_arm_321_recovery.sh
+/03_AUTOMATION_CORE/01_Scripts/profit_scoreboard.py
+/03_AUTOMATION_CORE/01_Scripts/publish_everlight_site_repo.sh
+/03_AUTOMATION_CORE/01_Scripts/publishing/build_audiobooks.py
+/03_AUTOMATION_CORE/01_Scripts/publishing/build_books.py
+/03_AUTOMATION_CORE/01_Scripts/publishing/build_cover_pdfs.py
+/03_AUTOMATION_CORE/01_Scripts/publishing/build_ebook_covers.py
+/03_AUTOMATION_CORE/01_Scripts/publishing/embed_images.py
+/03_AUTOMATION_CORE/01_Scripts/publishing/generate_book_images.py
+/03_AUTOMATION_CORE/01_Scripts/publishing/generate_covers.py
+/03_AUTOMATION_CORE/01_Scripts/reddit_monitor.py
+/03_AUTOMATION_CORE/01_Scripts/repair_3_format_reports.sh
+/03_AUTOMATION_CORE/01_Scripts/rotate_logs.py
+/03_AUTOMATION_CORE/01_Scripts/sdcard_sync_to_drive.sh
+/03_AUTOMATION_CORE/01_Scripts/serve_helpers/contract_template.py
+/03_AUTOMATION_CORE/01_Scripts/serve_helpers/everlight_themed_server.py
+/03_AUTOMATION_CORE/01_Scripts/serve_helpers/serve_themed.sh
+/03_AUTOMATION_CORE/01_Scripts/serve_local_reports.sh
+/03_AUTOMATION_CORE/01_Scripts/serve_master_hub.sh
+/03_AUTOMATION_CORE/01_Scripts/setup_aliases.sh
+/03_AUTOMATION_CORE/01_Scripts/setup_rclone_drive.sh
+/03_AUTOMATION_CORE/01_Scripts/setup_vault.py
+/03_AUTOMATION_CORE/01_Scripts/social_data_scrapping.py
+/03_AUTOMATION_CORE/01_Scripts/social_poster.py
+/03_AUTOMATION_CORE/01_Scripts/staging_inbox_watcher.py
+/03_AUTOMATION_CORE/01_Scripts/staging_purge.sh
+/03_AUTOMATION_CORE/01_Scripts/start_code_server.sh
+/03_AUTOMATION_CORE/01_Scripts/supabase_connection_test.py
+/03_AUTOMATION_CORE/01_Scripts/sweep_dead_oracle_urls.py
+/03_AUTOMATION_CORE/01_Scripts/sync_mcp_configs.sh
+/03_AUTOMATION_CORE/01_Scripts/syncthing_pair_patch.py
+/03_AUTOMATION_CORE/01_Scripts/task_router.py
+/03_AUTOMATION_CORE/01_Scripts/trade_analytics.py
+/03_AUTOMATION_CORE/01_Scripts/trading_watchtower_sync.py
+/03_AUTOMATION_CORE/01_Scripts/ubuntu_vnc/us-vnc.sh
+/03_AUTOMATION_CORE/01_Scripts/verify_321_redundancy.sh
+/03_AUTOMATION_CORE/01_Scripts/wholesale_deal_engine.py
+/03_AUTOMATION_CORE/01_Scripts/wholesale_hive_pipeline.py
+/03_AUTOMATION_CORE/01_Scripts/wholesale_property_scraper.py
+/03_AUTOMATION_CORE/02_Config/USB_File_Directory_N8N.docx
+/03_AUTOMATION_CORE/02_Config/funnel_emails/hivemind_day2_why.md
+/03_AUTOMATION_CORE/02_Config/funnel_emails/hivemind_day5_demo.md
+/03_AUTOMATION_CORE/02_Config/funnel_emails/hivemind_day7_engage.md
+/03_AUTOMATION_CORE/02_Config/funnel_emails/hivemind_sequence.json
+/03_AUTOMATION_CORE/02_Config/funnel_emails/hivemind_welcome.md
+/03_AUTOMATION_CORE/02_Config/funnel_emails/onyx_day2_cost.md
+/03_AUTOMATION_CORE/02_Config/funnel_emails/onyx_day5_casestudy.md
+/03_AUTOMATION_CORE/02_Config/funnel_emails/onyx_day7_checkin.md
+/03_AUTOMATION_CORE/02_Config/funnel_emails/onyx_sequence.json
+/03_AUTOMATION_CORE/02_Config/funnel_emails/onyx_welcome.md
+/03_AUTOMATION_CORE/02_Config/gear_drop.env.example
+/03_AUTOMATION_CORE/02_Config/kill_scale_rubric.yaml
+/03_AUTOMATION_CORE/02_Config/n8n_fiverr_workflow.json
+/03_AUTOMATION_CORE/02_Config/phase_gate_checklist.yaml
+/03_AUTOMATION_CORE/02_Config/slack_manifest.md
+/03_AUTOMATION_CORE/02_Config/triggers.yaml
+/03_AUTOMATION_CORE/02_Config/weekly_kpi_scorecard.md
+/03_AUTOMATION_CORE/03_Credentials/.env
+/03_AUTOMATION_CORE/03_Credentials/README.md
+/03_AUTOMATION_CORE/03_Credentials/avatar_env.example
+/03_AUTOMATION_CORE/04_Logs/Report_Logs/Police_Reports/REPORT/R.Gillies_Stolen_Backpack_Inventory.txt
+/03_AUTOMATION_CORE/04_Logs/Report_Logs/Police_Reports/REPORT/rgillies_stolen_items.txt
+/03_AUTOMATION_CORE/04_Logs/Report_Logs/suspicious_per1.txt
+/03_AUTOMATION_CORE/04_Logs/system/SESSION_2026-02-09.md
+/03_AUTOMATION_CORE/04_PendingUpdates/_done/.gitkeep
+/03_AUTOMATION_CORE/04_PendingUpdates/acemagician/install_open_webui.sh
+/03_AUTOMATION_CORE/04_PendingUpdates/ev-box/.gitkeep
+/03_AUTOMATION_CORE/04_PendingUpdates/oracle-micro/.gitkeep
+/03_AUTOMATION_CORE/04_PendingUpdates/phone/.gitkeep
+/03_AUTOMATION_CORE/05_Slack_Workflows/Slack_Workflow/N8N_Multi_AI_Agent/_ Title_ N8N Perplexity + GPT Multi-AI Slack Work.docx
+/03_AUTOMATION_CORE/06_AI_Tools/echo_mind/data/notes.json
+/03_AUTOMATION_CORE/06_AI_Tools/echo_mind/em-fg
+/03_AUTOMATION_CORE/06_AI_Tools/echo_mind/index.html
+/03_AUTOMATION_CORE/06_AI_Tools/echo_mind/server.py
+/03_AUTOMATION_CORE/README.md
+/03_AUTOMATION_CORE/SLACK_SUPPORT_BOT_ARCHITECTURE.md
+/03_AUTOMATION_CORE/STRIPE_PAYMENT_ARCHITECTURE.md
+/06_DEVELOPMENT/App_List.docx
+/06_DEVELOPMENT/Experiments/PROJECT_BMO.md
+/06_DEVELOPMENT/HTML_Files/Gmail - Python Zero to Hero Transcript.html
+/06_DEVELOPMENT/HTML_Files/baseline_expenses.html
+/06_DEVELOPMENT/HTML_Files/steam.deb
+/06_DEVELOPMENT/HTML_Files/survey_pitch.html
+/06_DEVELOPMENT/HTML_Files/whatever.html
+/06_DEVELOPMENT/Outline_&Strategy.docx
+/06_DEVELOPMENT/RG_OS/cache/zsh/zcompdump
+/06_DEVELOPMENT/RG_OS/logs/zsh_history
+/06_DEVELOPMENT/Zfold_Customizations/Nova_Launcher/2024-10-18_14-40.novabackup
+/06_DEVELOPMENT/Zfold_Customizations/tmux_config_optimized.conf
+/06_DEVELOPMENT/claude-code
+/06_DEVELOPMENT/everlight_os/__init__.py
+/06_DEVELOPMENT/everlight_os/_meta/path_map.json
+/06_DEVELOPMENT/everlight_os/_meta/path_resolver.py
+/06_DEVELOPMENT/everlight_os/blinko/.env.example
+/06_DEVELOPMENT/everlight_os/blinko/bk
+/06_DEVELOPMENT/everlight_os/blinko/blinko_lite.py
+/06_DEVELOPMENT/everlight_os/blinko/blinko_watchdog.sh
+/06_DEVELOPMENT/everlight_os/blinko/docker-compose.yml
+/06_DEVELOPMENT/everlight_os/cli.py
+/06_DEVELOPMENT/everlight_os/computer_use/Dockerfile
+/06_DEVELOPMENT/everlight_os/computer_use/agent.py
+/06_DEVELOPMENT/everlight_os/computer_use/entrypoint.sh
+/06_DEVELOPMENT/everlight_os/computer_use/podman-compose.yml
+/06_DEVELOPMENT/everlight_os/computer_use/requirements.txt
+/06_DEVELOPMENT/everlight_os/computer_use/server.py
+/06_DEVELOPMENT/everlight_os/configs/everlight.yaml
+/06_DEVELOPMENT/everlight_os/core/__init__.py
+/06_DEVELOPMENT/everlight_os/core/ai_worker.py
+/06_DEVELOPMENT/everlight_os/core/contracts.py
+/06_DEVELOPMENT/everlight_os/core/filesystem.py
+/06_DEVELOPMENT/everlight_os/core/log.py
+/06_DEVELOPMENT/everlight_os/core/orchestrator.py
+/06_DEVELOPMENT/everlight_os/core/router.py
+/06_DEVELOPMENT/everlight_os/core/slack_client.py
+/06_DEVELOPMENT/everlight_os/deploy_oracle.sh
+/06_DEVELOPMENT/everlight_os/deploy_oracle_observability.sh
+/06_DEVELOPMENT/everlight_os/google_drive_structure.md
+/06_DEVELOPMENT/everlight_os/hive_mind/EMPLOYEE_DIRECTORY.md
+/06_DEVELOPMENT/everlight_os/hive_mind/LUCREX.md
+/06_DEVELOPMENT/everlight_os/hive_mind/OPEN_SOURCE_REPO_STACK.md
+/06_DEVELOPMENT/everlight_os/hive_mind/TEAM_FIRMWARE.md
+/06_DEVELOPMENT/everlight_os/hive_mind/TEAM_PROFILES.md
+/06_DEVELOPMENT/everlight_os/hive_mind/__init__.py
+/06_DEVELOPMENT/everlight_os/hive_mind/action_engine.py
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_metrics.py
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/all_profiles.json
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/adrian-morgan.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/aria-chen.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/atlas-vega.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/augustine-crane.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/benjamin-crate.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/benjamin-orozco.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/bernard-archer.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/bernard-calloway.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/business-startups.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/calvin-osei.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/carlos-alvarez.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/carlos-moreno.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/charles-dawson.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/christopher-johanssen.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/christopher-wolfe.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/competitive-intel.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/consumer-local.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/crypto-defi.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/daniel-monroe.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/data-verification.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/david-wen.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/derek-ellis.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/derivatives-risk.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/edith-cross.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/finance-markets.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/franklin-jordan.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/franklin-steele.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/frederick-banks.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/frederick-beckett.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/gary-tanaka.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/geopolitical-risk.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/harrison-knox.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/henry-patel.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/isaac-ashworth.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/isaac-castellano.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/justine-park.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/lawrence-okafor.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/legal-desk-aide.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/legal-regulatory.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/leonard-nakamura.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/lincoln-masters.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/mack-rivera.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/major-dex.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/marcus-cole.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/marcus-webb.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/markets-desk-aide.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/miguel-reyes.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/nathan-ling.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/nora-blaine.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/oliver-kessler.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/patrick-donovan.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/paul-sandoval.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/pedro-diaz.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/penny-vance.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/peter-adler.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/philip-warren.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/piper-reeves.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/quinn-fontaine.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/quinn-sharp.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/rafael-vasquez.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/raymond-harper.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/rex-blackwell.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/rex-thornton.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/ryan-kim.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/sage-holloway.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/samuel-locke.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/samuel-navarro.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/science-health.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/sebastian-navarro.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/sebastian-torres.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/slate-mercer.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/stewart-erikson.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/tech-ai.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/tech-desk-aide.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/thomas-rourke.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/vera-lux.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/william-santos.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/avatars/world-news.svg
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/generate_profiles.py
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/adrian-morgan.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/aria-chen.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/atlas-vega.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/augustine-crane.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/benjamin-crate.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/benjamin-orozco.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/bernard-archer.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/bernard-calloway.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/business-startups.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/calvin-osei.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/carlos-alvarez.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/carlos-moreno.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/charles-dawson.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/christopher-johanssen.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/christopher-wolfe.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/competitive-intel.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/consumer-local.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/crypto-defi.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/daniel-monroe.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/data-verification.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/david-wen.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/derek-ellis.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/derivatives-risk.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/edith-cross.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/finance-markets.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/franklin-jordan.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/franklin-steele.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/frederick-banks.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/frederick-beckett.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/gary-tanaka.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/geopolitical-risk.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/harrison-knox.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/henry-patel.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/isaac-ashworth.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/isaac-castellano.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/justine-park.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/lawrence-okafor.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/legal-desk-aide.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/legal-regulatory.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/leonard-nakamura.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/lincoln-masters.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/mack-rivera.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/major-dex.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/marcus-cole.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/marcus-webb.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/markets-desk-aide.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/miguel-reyes.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/nathan-ling.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/nora-blaine.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/oliver-kessler.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/patrick-donovan.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/paul-sandoval.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/pedro-diaz.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/penny-vance.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/peter-adler.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/philip-warren.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/piper-reeves.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/quinn-fontaine.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/quinn-sharp.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/rafael-vasquez.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/raymond-harper.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/rex-blackwell.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/rex-thornton.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/ryan-kim.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/sage-holloway.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/samuel-locke.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/samuel-navarro.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/science-health.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/sebastian-navarro.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/sebastian-torres.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/slate-mercer.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/stewart-erikson.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/tech-ai.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/tech-desk-aide.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/thomas-rourke.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/vera-lux.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/william-santos.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/agent_profiles/vcards/world-news.vcf
+/06_DEVELOPMENT/everlight_os/hive_mind/config.py
+/06_DEVELOPMENT/everlight_os/hive_mind/contracts.py
+/06_DEVELOPMENT/everlight_os/hive_mind/convergence.py
+/06_DEVELOPMENT/everlight_os/hive_mind/deal_prep_engine.py
+/06_DEVELOPMENT/everlight_os/hive_mind/dispatcher.py
+/06_DEVELOPMENT/everlight_os/hive_mind/email_config.yaml
+/06_DEVELOPMENT/everlight_os/hive_mind/intel.py
+/06_DEVELOPMENT/everlight_os/hive_mind/manager_claude.py
+/06_DEVELOPMENT/everlight_os/hive_mind/manager_codex.py
+/06_DEVELOPMENT/everlight_os/hive_mind/manager_gemini.py
+/06_DEVELOPMENT/everlight_os/hive_mind/messaging.py
+/06_DEVELOPMENT/everlight_os/hive_mind/open_source_repo_stack.py
+/06_DEVELOPMENT/everlight_os/hive_mind/open_source_repo_stack.yaml
+/06_DEVELOPMENT/everlight_os/hive_mind/prompts.py
+/06_DEVELOPMENT/everlight_os/hive_mind/roster.yaml
+/06_DEVELOPMENT/everlight_os/hive_mind/router.py
+/06_DEVELOPMENT/everlight_os/hive_mind/slack_router.py
+/06_DEVELOPMENT/everlight_os/hive_mind/slack_routing.yaml
+/06_DEVELOPMENT/everlight_os/hive_mind/telemetry.jsonl
+/06_DEVELOPMENT/everlight_os/hive_mind/telemetry.py
+/06_DEVELOPMENT/everlight_os/hive_mind/voice_agents.json
+/06_DEVELOPMENT/everlight_os/hive_mind/wholesale_autonomous.py
+/06_DEVELOPMENT/everlight_os/hive_mind/wholesale_engine.py
+/06_DEVELOPMENT/everlight_os/knowledge/brand_voice.md
+/06_DEVELOPMENT/everlight_os/knowledge/disclaimers.md
+/06_DEVELOPMENT/everlight_os/knowledge/sam_and_robo_bible.md
+/06_DEVELOPMENT/everlight_os/knowledge/style_guide.md
+/06_DEVELOPMENT/everlight_os/langfuse/.env.example
+/06_DEVELOPMENT/everlight_os/langfuse/README.md
+/06_DEVELOPMENT/everlight_os/langfuse/docker-compose.yml
+/06_DEVELOPMENT/everlight_os/metabase/docker-compose.yml
+/06_DEVELOPMENT/everlight_os/modules/__init__.py
+/06_DEVELOPMENT/everlight_os/modules/books_engine/__init__.py
+/06_DEVELOPMENT/everlight_os/modules/books_engine/illustration_gen.py
+/06_DEVELOPMENT/everlight_os/modules/books_engine/kdp_packager.py
+/06_DEVELOPMENT/everlight_os/modules/books_engine/launch_planner.py
+/06_DEVELOPMENT/everlight_os/modules/books_engine/manuscript_writer.py
+/06_DEVELOPMENT/everlight_os/modules/books_engine/outliner.py
+/06_DEVELOPMENT/everlight_os/modules/books_engine/series_manager.py
+/06_DEVELOPMENT/everlight_os/modules/content_engine/__init__.py
+/06_DEVELOPMENT/everlight_os/modules/content_engine/drafter.py
+/06_DEVELOPMENT/everlight_os/modules/content_engine/monetizer.py
+/06_DEVELOPMENT/everlight_os/modules/content_engine/outliner.py
+/06_DEVELOPMENT/everlight_os/modules/content_engine/quality_gate.py
+/06_DEVELOPMENT/everlight_os/modules/content_engine/researcher.py
+/06_DEVELOPMENT/everlight_os/modules/content_engine/seo_optimizer.py
+/06_DEVELOPMENT/everlight_os/modules/saas_engine/__init__.py
+/06_DEVELOPMENT/everlight_os/modules/saas_engine/builder.py
+/06_DEVELOPMENT/everlight_os/modules/saas_engine/launcher.py
+/06_DEVELOPMENT/everlight_os/modules/saas_engine/ops_writer.py
+/06_DEVELOPMENT/everlight_os/modules/saas_engine/saas_gate.py
+/06_DEVELOPMENT/everlight_os/modules/saas_engine/scoper.py
+/06_DEVELOPMENT/everlight_os/modules/saas_engine/spec_writer.py
+/06_DEVELOPMENT/everlight_os/modules/saas_engine/stack_picker.py
+/06_DEVELOPMENT/everlight_os/modules/trading_engine/__init__.py
+/06_DEVELOPMENT/everlight_os/modules/trading_engine/analyzer.py
+/06_DEVELOPMENT/everlight_os/modules/trading_engine/anomaly_detector.py
+/06_DEVELOPMENT/everlight_os/modules/trading_engine/report_generator.py
+/06_DEVELOPMENT/everlight_os/n8n/docker-compose.queue.yml
+/06_DEVELOPMENT/everlight_os/n8n/docker-compose.yml
+/06_DEVELOPMENT/everlight_os/netdata/.env.example
+/06_DEVELOPMENT/everlight_os/netdata/README.md
+/06_DEVELOPMENT/everlight_os/netdata/docker-compose.yml
+/06_DEVELOPMENT/everlight_os/neuromorphic/__init__.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/booking_system.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/brain.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/brain_knowledge.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/brain_policy.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/call_copilot.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/computer_use_bridge.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/crew_orchestrator.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/deal_state_machine.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/langfuse_bridge.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/llm_gateway.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/ml_models.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/models/trade_predictor.joblib
+/06_DEVELOPMENT/everlight_os/neuromorphic/nlp_engine.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/pipeline_api.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/polymarket_bridge.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/requirements.txt
+/06_DEVELOPMENT/everlight_os/neuromorphic/semantic_search.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/speech_engine.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/state/ai_brain_knowledge.json
+/06_DEVELOPMENT/everlight_os/neuromorphic/state/ai_brain_memory.json
+/06_DEVELOPMENT/everlight_os/neuromorphic/state/brain_state.json
+/06_DEVELOPMENT/everlight_os/neuromorphic/state/crew_broker_pipeline_crew_memory.json
+/06_DEVELOPMENT/everlight_os/neuromorphic/train_from_django.py
+/06_DEVELOPMENT/everlight_os/neuromorphic/vector_memory.py
+/06_DEVELOPMENT/everlight_os/slack_org/.env.example
+/06_DEVELOPMENT/everlight_os/slack_org/README.md
+/06_DEVELOPMENT/everlight_os/slack_org/__init__.py
+/06_DEVELOPMENT/everlight_os/slack_org/channel_registry.py
+/06_DEVELOPMENT/everlight_os/slack_org/config.py
+/06_DEVELOPMENT/everlight_os/slack_org/config/channel_map.json
+/06_DEVELOPMENT/everlight_os/slack_org/config/channel_registry.json
+/06_DEVELOPMENT/everlight_os/slack_org/config/task_schema.json
+/06_DEVELOPMENT/everlight_os/slack_org/config/task_threads.json
+/06_DEVELOPMENT/everlight_os/slack_org/config/template_agent_log.txt
+/06_DEVELOPMENT/everlight_os/slack_org/config/template_approval_request.txt
+/06_DEVELOPMENT/everlight_os/slack_org/config/template_escalation.txt
+/06_DEVELOPMENT/everlight_os/slack_org/config/template_war_room_update.txt
+/06_DEVELOPMENT/everlight_os/slack_org/examples/example_usage.py
+/06_DEVELOPMENT/everlight_os/slack_org/logger.py
+/06_DEVELOPMENT/everlight_os/slack_org/scripts/__init__.py
+/06_DEVELOPMENT/everlight_os/slack_org/scripts/create_channels.py
+/06_DEVELOPMENT/everlight_os/slack_org/slack_api.py
+/06_DEVELOPMENT/everlight_os/slack_org/slack_logger.py
+/06_DEVELOPMENT/everlight_os/uptime_kuma/docker-compose.yml
+/06_DEVELOPMENT/everlightventures
+/06_DEVELOPMENT/everlightventures-site/index.html
+/06_DEVELOPMENT/everlightventures-site/patricia.html
+/06_DEVELOPMENT/generate_trailer_samples.py
+/06_DEVELOPMENT/godmode_desktop/INSTALL.sh
+/06_DEVELOPMENT/godmode_desktop/finish_termux.sh
+/06_DEVELOPMENT/godmode_desktop/mahesh_hybrid_setup.sh
+/06_DEVELOPMENT/godmode_desktop/setup_proot_side.sh
+/06_DEVELOPMENT/godmode_desktop/setup_termux_side.sh
+/06_DEVELOPMENT/godmode_desktop/setup_viture_gaming.sh
+/06_DEVELOPMENT/godmode_desktop/start_desktop.sh
+/06_DEVELOPMENT/godmode_desktop/stop_desktop.sh
+/06_DEVELOPMENT/hivemind_saas/ARCHITECTURE.md
+/06_DEVELOPMENT/hivemind_saas/EXECUTION_REPORT.md
+/06_DEVELOPMENT/hivemind_saas/README.md
+/06_DEVELOPMENT/hivemind_saas/backend/.env
+/06_DEVELOPMENT/hivemind_saas/backend/.env.example
+/06_DEVELOPMENT/hivemind_saas/backend/Dockerfile
+/06_DEVELOPMENT/hivemind_saas/backend/api/__init__.py
+/06_DEVELOPMENT/hivemind_saas/backend/api/deps.py
+/06_DEVELOPMENT/hivemind_saas/backend/api/routers/__init__.py
+/06_DEVELOPMENT/hivemind_saas/backend/api/routers/auth.py
+/06_DEVELOPMENT/hivemind_saas/backend/api/routers/billing.py
+/06_DEVELOPMENT/hivemind_saas/backend/api/routers/integrations.py
+/06_DEVELOPMENT/hivemind_saas/backend/api/routers/mindmap.py
+/06_DEVELOPMENT/hivemind_saas/backend/api/routers/sessions.py
+/06_DEVELOPMENT/hivemind_saas/backend/api/routers/tenants.py
+/06_DEVELOPMENT/hivemind_saas/backend/api/routers/webhooks.py
+/06_DEVELOPMENT/hivemind_saas/backend/core/__init__.py
+/06_DEVELOPMENT/hivemind_saas/backend/core/config.py
+/06_DEVELOPMENT/hivemind_saas/backend/core/database.py
+/06_DEVELOPMENT/hivemind_saas/backend/core/security.py
+/06_DEVELOPMENT/hivemind_saas/backend/main.py
+/06_DEVELOPMENT/hivemind_saas/backend/models/__init__.py
+/06_DEVELOPMENT/hivemind_saas/backend/models/tenant.py
+/06_DEVELOPMENT/hivemind_saas/backend/requirements.txt
+/06_DEVELOPMENT/hivemind_saas/backend/services/__init__.py
+/06_DEVELOPMENT/hivemind_saas/backend/services/hive_runner.py
+/06_DEVELOPMENT/hivemind_saas/backend/services/slack_audit.py
+/06_DEVELOPMENT/hivemind_saas/dashboard/.gitignore
+/06_DEVELOPMENT/hivemind_saas/dashboard/next.config.ts
+/06_DEVELOPMENT/hivemind_saas/dashboard/package.json
+/06_DEVELOPMENT/hivemind_saas/dashboard/postcss.config.mjs
+/06_DEVELOPMENT/hivemind_saas/dashboard/src/app/globals.css
+/06_DEVELOPMENT/hivemind_saas/dashboard/src/app/integrations/page.tsx
+/06_DEVELOPMENT/hivemind_saas/dashboard/src/app/layout.tsx
+/06_DEVELOPMENT/hivemind_saas/dashboard/src/app/mindmap/page.tsx
+/06_DEVELOPMENT/hivemind_saas/dashboard/src/app/page.tsx
+/06_DEVELOPMENT/hivemind_saas/dashboard/src/app/war-room/page.tsx
+/06_DEVELOPMENT/hivemind_saas/dashboard/src/components/dashboard/HiveStatusPanel.tsx
+/06_DEVELOPMENT/hivemind_saas/dashboard/src/components/dashboard/KpiCard.tsx
+/06_DEVELOPMENT/hivemind_saas/dashboard/src/components/layout/Sidebar.tsx
+/06_DEVELOPMENT/hivemind_saas/dashboard/src/components/mindmap/ConversationMindmap.tsx
+/06_DEVELOPMENT/hivemind_saas/dashboard/src/components/onboarding/IntegrationSetup.tsx
+/06_DEVELOPMENT/hivemind_saas/dashboard/src/lib/api.ts
+/06_DEVELOPMENT/hivemind_saas/dashboard/src/lib/utils.ts
+/06_DEVELOPMENT/hivemind_saas/dashboard/src/types/index.ts
+/06_DEVELOPMENT/hivemind_saas/dashboard/tailwind.config.ts
+/06_DEVELOPMENT/hivemind_saas/dashboard/tsconfig.json
+/06_DEVELOPMENT/hivemind_saas/database/rls_policies.sql
+/06_DEVELOPMENT/hivemind_saas/database/schema.sql
+/06_DEVELOPMENT/hivemind_saas/docker-compose.yml
+/06_DEVELOPMENT/hivemind_saas/install_hive.sh
+/06_DEVELOPMENT/hivemind_saas/installer/hive_wrapper.sh
+/06_DEVELOPMENT/hivemind_saas/installer/install_hivemind.sh
+/06_DEVELOPMENT/hivemind_saas/installer/query_limiter.py
+/06_DEVELOPMENT/hivemind_saas/installer/subscription_gate.py
+/06_DEVELOPMENT/hivemind_saas/launch/pricing.md
+/06_DEVELOPMENT/hivemind_saas/scope.json
+/06_DEVELOPMENT/hivemind_saas/spec/01_PRD.md
+/06_DEVELOPMENT/hivemind_saas/spec/02_USER_STORIES.md
+/06_DEVELOPMENT/hivemind_saas/spec/03_ACCEPTANCE_CRITERIA.md
+/06_DEVELOPMENT/hivemind_saas/spec/04_NONFUNCTIONAL_REQUIREMENTS.md
+/06_DEVELOPMENT/hivemind_saas/spec/05_DATA_MODEL.md
+/06_DEVELOPMENT/hivemind_saas/spec/06_API_SPEC.md
+/06_DEVELOPMENT/hivemind_saas/spec/07_UI_MAP.md
+/06_DEVELOPMENT/hivemind_saas/spec/08_RISK_REGISTER.md
+/06_DEVELOPMENT/hivemind_saas/spec/09_ROADMAP.md
+/06_DEVELOPMENT/mcp_servers/blinko_memory/server.py
+/06_DEVELOPMENT/mcp_servers/broker_os/server.py
+/06_DEVELOPMENT/mcp_servers/hive_orchestrator/server.py
+/06_DEVELOPMENT/mcp_servers/http_bridge.py
+/06_DEVELOPMENT/mcp_servers/market_intel/server.py
+/06_DEVELOPMENT/mcp_servers/n8n_mcp/server.py
+/06_DEVELOPMENT/mcp_servers/start_all.sh
+/06_DEVELOPMENT/mcp_servers/stop_all.sh
+/06_DEVELOPMENT/nextcloud/NEXTCLOUD_SYNC_GUIDE.md
+/06_DEVELOPMENT/nextcloud/RUNBOOK.md
+/06_DEVELOPMENT/nextcloud/install_nextcloud.sh
+/06_DEVELOPMENT/nextcloud/setup_ngrok.sh
+/06_DEVELOPMENT/nextcloud/start_services.sh
+/06_DEVELOPMENT/nextcloud/stop_services.sh
+/06_DEVELOPMENT/nextcloud/termux_boot_nextcloud.sh
+/06_DEVELOPMENT/polymarket_agent/Dockerfile
+/06_DEVELOPMENT/polymarket_agent/config.yaml
+/06_DEVELOPMENT/polymarket_agent/main.py
+/06_DEVELOPMENT/polymarket_agent/podman-compose.yml
+/06_DEVELOPMENT/speech_service.py
+/06_DEVELOPMENT/stark_ai/__init__.py
+/06_DEVELOPMENT/stark_ai/auth.py
+/06_DEVELOPMENT/stark_ai/call_dispatcher.py
+/06_DEVELOPMENT/stark_ai/commands.py
+/06_DEVELOPMENT/stark_ai/config.py
+/06_DEVELOPMENT/stark_ai/deal_pipeline.py
+/06_DEVELOPMENT/stark_ai/post_call_executor.py
+/06_DEVELOPMENT/stark_ai/requirements.txt
+/06_DEVELOPMENT/stark_ai/server.py
+/06_DEVELOPMENT/stark_ai/stark-ai.service
+/06_DEVELOPMENT/stark_ai/voice.py
+/06_DEVELOPMENT/vantaris/.gitignore
+/06_DEVELOPMENT/vantaris/COMPARISON_AND_GAPS.md
+/06_DEVELOPMENT/vantaris/GAME_ARCHITECTURE.md
+/06_DEVELOPMENT/vantaris/MULTIPLAYER_PLAN.md
+/06_DEVELOPMENT/vantaris/next.config.ts
+/06_DEVELOPMENT/vantaris/package.json
+/06_DEVELOPMENT/vantaris/postcss.config.mjs
+/06_DEVELOPMENT/vantaris/src/app/alley-kingz/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/arcade/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/auth/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/beyond-the-veil/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/fairness/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/find-tools/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/him-loadout/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/hivemind/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/layout.tsx
+/06_DEVELOPMENT/vantaris/src/app/list-your-tool/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/lobby/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/logistics/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/onyx/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/play/blackjack/multi/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/play/blackjack/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/play/crash/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/play/dice/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/play/mines/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/play/plinko/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/play/roulette/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/privacy/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/profile/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/publishing/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/redeem/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/rewards/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/rules/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/sam-and-robo/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/sell/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/settings/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/support/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/tables/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/terms/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/vantaris/blackjack/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/vantaris/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/wallet/page.tsx
+/06_DEVELOPMENT/vantaris/src/app/wholesale/page.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/AchievementPopup.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/AvatarBuilder.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/BettingLayout.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/BotPlayers.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/CasinoChip.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/CasinoScene3D.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/DealerAvatar.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/DealerChat.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/EmojiReactions.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/FreeChips.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/GemStore.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/Leaderboard.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/MultiplayerTable.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/Natural21.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/PlayerProfile.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/SeatRenderer.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/SocialBar.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/TurnTimer.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/VantarisBoutique.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/VantarisToast.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/WelcomeScreen.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/WinParticles.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/XPBar.tsx
+/06_DEVELOPMENT/vantaris/src/components/blackjack/index.ts
+/06_DEVELOPMENT/vantaris/src/components/layout/ClientLayout.tsx
+/06_DEVELOPMENT/vantaris/src/components/layout/PageTransition.tsx
+/06_DEVELOPMENT/vantaris/src/components/layout/SiteFooter.tsx
+/06_DEVELOPMENT/vantaris/src/components/layout/SiteNav.tsx
+/06_DEVELOPMENT/vantaris/src/components/shared/AuthProvider.tsx
+/06_DEVELOPMENT/vantaris/src/components/shared/CasinoAmbience.tsx
+/06_DEVELOPMENT/vantaris/src/components/shared/CasinoLoader.tsx
+/06_DEVELOPMENT/vantaris/src/components/shared/CustomCursor.tsx
+/06_DEVELOPMENT/vantaris/src/components/shared/EmailCapture.tsx
+/06_DEVELOPMENT/vantaris/src/components/shared/GlassCard.tsx
+/06_DEVELOPMENT/vantaris/src/components/shared/GoldHeroScene.tsx
+/06_DEVELOPMENT/vantaris/src/components/shared/GoldParticles.tsx
+/06_DEVELOPMENT/vantaris/src/components/shared/IntroLoader.tsx
+/06_DEVELOPMENT/vantaris/src/components/shared/PageHero.tsx
+/06_DEVELOPMENT/vantaris/src/components/shared/SectionDivider.tsx
+/06_DEVELOPMENT/vantaris/src/components/shared/TextReveal.tsx
+/06_DEVELOPMENT/vantaris/src/hooks/useLeadForm.ts
+/06_DEVELOPMENT/vantaris/src/lib/audio-engine.ts
+/06_DEVELOPMENT/vantaris/src/lib/blackjack-engine.ts
+/06_DEVELOPMENT/vantaris/src/lib/blackjack-store.ts
+/06_DEVELOPMENT/vantaris/src/lib/bot-personas.ts
+/06_DEVELOPMENT/vantaris/src/lib/card-skins.ts
+/06_DEVELOPMENT/vantaris/src/lib/dealer-intelligence.ts
+/06_DEVELOPMENT/vantaris/src/lib/django-sync.ts
+/06_DEVELOPMENT/vantaris/src/lib/gsap-animations.ts
+/06_DEVELOPMENT/vantaris/src/lib/jukebox-engine.ts
+/06_DEVELOPMENT/vantaris/src/lib/leads.ts
+/06_DEVELOPMENT/vantaris/src/lib/multiplayer-store.ts
+/06_DEVELOPMENT/vantaris/src/lib/multiplayer-types.ts
+/06_DEVELOPMENT/vantaris/src/lib/stripe-products.ts
+/06_DEVELOPMENT/vantaris/src/lib/supabase.ts
+/06_DEVELOPMENT/vantaris/src/lib/sweepstakes.ts
+/06_DEVELOPMENT/vantaris/src/lib/web3-wallet.ts
+/06_DEVELOPMENT/vantaris/src/styles/design-system.css
+/06_DEVELOPMENT/vantaris/supabase/functions/notify-lead/index.ts
+/06_DEVELOPMENT/vantaris/supabase_migration_leads.sql
+/06_DEVELOPMENT/vantaris/tailwind.config.ts
+/06_DEVELOPMENT/vantaris/tsconfig.json
+/06_DEVELOPMENT/vantaris/tsconfig.tsbuildinfo
+/06_DEVELOPMENT/vantaris/wrangler.toml
+/06_DEVELOPMENT/xlm-dash-react/api.py
+/06_DEVELOPMENT/xlm-dash-react/index.html
+/06_DEVELOPMENT/xlm-dash-react/package.json
+/06_DEVELOPMENT/xlm-dash-react/src/pages/Reports.jsx
+/06_DEVELOPMENT/xlm-dash-react/vite.config.js
+/06_DEVELOPMENT/xlm_bot/.dockerignore
+/06_DEVELOPMENT/xlm_bot/.env.example
+/06_DEVELOPMENT/xlm_bot/AUDIT_REPORT_20260325.md
+/06_DEVELOPMENT/xlm_bot/DEPLOYMENT.md
+/06_DEVELOPMENT/xlm_bot/Dockerfile
+/06_DEVELOPMENT/xlm_bot/HANDOFF_CLAUDE_20260325_WICK_MISS.md
+/06_DEVELOPMENT/xlm_bot/OPERATOR_DOSSIER_V5.md
+/06_DEVELOPMENT/xlm_bot/OPERATOR_PLAYBOOK.md
+/06_DEVELOPMENT/xlm_bot/ORACLE_CLOUD_DEPLOY.md
+/06_DEVELOPMENT/xlm_bot/PHONE_DEPLOY.md
+/06_DEVELOPMENT/xlm_bot/RUNBOOK.md
+/06_DEVELOPMENT/xlm_bot/TEST_PLAN.md
+/06_DEVELOPMENT/xlm_bot/_venv.sh
+/06_DEVELOPMENT/xlm_bot/ai/__init__.py
+/06_DEVELOPMENT/xlm_bot/ai/agent_comms.py
+/06_DEVELOPMENT/xlm_bot/ai/agent_debate.py
+/06_DEVELOPMENT/xlm_bot/ai/claude_advisor.py
+/06_DEVELOPMENT/xlm_bot/ai/claude_advisor.py.bak.20260324
+/06_DEVELOPMENT/xlm_bot/ai/codex_advisor.py
+/06_DEVELOPMENT/xlm_bot/ai/decision_linker.py
+/06_DEVELOPMENT/xlm_bot/ai/gemini_advisor.py
+/06_DEVELOPMENT/xlm_bot/ai/market_pulse.py
+/06_DEVELOPMENT/xlm_bot/ai/perplexity_advisor.py
+/06_DEVELOPMENT/xlm_bot/ai/prompts.py
+/06_DEVELOPMENT/xlm_bot/ai/prompts.py.bak.20260324
+/06_DEVELOPMENT/xlm_bot/alerts/__init__.py
+/06_DEVELOPMENT/xlm_bot/alerts/slack.py
+/06_DEVELOPMENT/xlm_bot/alerts/slack_canvas_bridge.py
+/06_DEVELOPMENT/xlm_bot/alerts/slack_intel.py
+/06_DEVELOPMENT/xlm_bot/alerts/slack_reports.py
+/06_DEVELOPMENT/xlm_bot/alerts/sms_alerts.py
+/06_DEVELOPMENT/xlm_bot/alerts/tiered_alerts.py
+/06_DEVELOPMENT/xlm_bot/backtest/run.py
+/06_DEVELOPMENT/xlm_bot/backtest/self_check.py
+/06_DEVELOPMENT/xlm_bot/bootstrap_google_docs_oauth.py
+/06_DEVELOPMENT/xlm_bot/circuit_breaker.sh
+/06_DEVELOPMENT/xlm_bot/circuit_breaker_v2.sh
+/06_DEVELOPMENT/xlm_bot/claude_chat_api.py
+/06_DEVELOPMENT/xlm_bot/claude_chat_api.py.bak
+/06_DEVELOPMENT/xlm_bot/cloud-setup-native.sh
+/06_DEVELOPMENT/xlm_bot/cloud-setup.sh
+/06_DEVELOPMENT/xlm_bot/config.yaml
+/06_DEVELOPMENT/xlm_bot/config.yaml.bak.20260324
+/06_DEVELOPMENT/xlm_bot/config_mr.yaml
+/06_DEVELOPMENT/xlm_bot/config_shortbias.yaml
+/06_DEVELOPMENT/xlm_bot/config_trend.yaml
+/06_DEVELOPMENT/xlm_bot/dashboard.py
+/06_DEVELOPMENT/xlm_bot/dashboard.py.bak
+/06_DEVELOPMENT/xlm_bot/dashboard_django/db.sqlite3
+/06_DEVELOPMENT/xlm_bot/dashboard_django/ddr
+/06_DEVELOPMENT/xlm_bot/dashboard_django/manage.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/requirements.txt
+/06_DEVELOPMENT/xlm_bot/dashboard_django/start.sh
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/__init__.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/apps.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/context_processors.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/middleware.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/models.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/services/__init__.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/services/analytics.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/services/blinko.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/services/events.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/services/exchange.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/services/file_reader.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/services/formatters.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/services/market.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/services/position.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/static/trading/css/theme.css
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/static/trading/js/charts.js
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/static/trading/js/common.js
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/static/trading/js/ticker.js
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/base.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/ledger/page.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/partials/blinko_notes.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/partials/bot_analytics.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/partials/events_feed.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/partials/kpi_bar.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/partials/logs_tail.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/partials/position_badge.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/partials/sidebar_status.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/partials/signals_current.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/partials/thought_feed.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/partials/trade_log.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/portfolio/page.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/signals/page.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/system/page.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/terminal/chat.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/terminal/evolution.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/terminal/intel_hub.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/terminal/overview.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templates/trading/terminal/page.html
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templatetags/__init__.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/templatetags/trading_tags.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/urls.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/views/__init__.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/views/api.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/views/ledger.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/views/portfolio.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/views/signals.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/views/system.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/trading/views/terminal.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/xlm_dashboard/__init__.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/xlm_dashboard/settings.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/xlm_dashboard/urls.py
+/06_DEVELOPMENT/xlm_bot/dashboard_django/xlm_dashboard/wsgi.py
+/06_DEVELOPMENT/xlm_bot/dashboard_react/api.py
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/App.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/PriceChart.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/StrategyIQ.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/components/AIAdvisor.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/components/GoalTracker.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/components/MarketContextBar.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/components/MindsetPanel.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/components/Sidebar.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/components/TradeReportCard.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/components/TradingCharts.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/components/stark/AgentFeed.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/components/stark/AuthGate.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/components/stark/CommandTerminal.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/components/stark/VoiceOrb.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/hooks.js
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/index.css
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/pages/BrokerOS.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/pages/BusinessOS.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/pages/Changelog.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/pages/Funnel.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/pages/HiveMind.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/pages/HiveSessions.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/pages/MarketIntel.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/pages/Reports.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/pages/Revenue.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/pages/Settings.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/pages/Stark.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/pages/Taskboard.jsx
+/06_DEVELOPMENT/xlm_bot/dashboard_react/src/pages/TradeHistory.jsx
+/06_DEVELOPMENT/xlm_bot/data/.ai_output_codex_exit_eval.txt
+/06_DEVELOPMENT/xlm_bot/data/.ai_prompt_codex_exit_eval.txt
+/06_DEVELOPMENT/xlm_bot/data/.gemini_prompt_audit_decision.txt
+/06_DEVELOPMENT/xlm_bot/data/.gemini_prompt_directive.txt
+/06_DEVELOPMENT/xlm_bot/data/.gemini_prompt_entry_eval.txt
+/06_DEVELOPMENT/xlm_bot/data/.gemini_prompt_exit_eval.txt
+/06_DEVELOPMENT/xlm_bot/data/.gemini_prompt_regime_eval.txt
+/06_DEVELOPMENT/xlm_bot/data/.guardian_restart
+/06_DEVELOPMENT/xlm_bot/data/.heartbeat
+/06_DEVELOPMENT/xlm_bot/data/agent_comms.json
+/06_DEVELOPMENT/xlm_bot/data/ai_feedback.jsonl
+/06_DEVELOPMENT/xlm_bot/data/ai_insight.json
+/06_DEVELOPMENT/xlm_bot/data/bot_state.db
+/06_DEVELOPMENT/xlm_bot/data/candles.py
+/06_DEVELOPMENT/xlm_bot/data/contract_context.json
+/06_DEVELOPMENT/xlm_bot/data/daily_brief.json
+/06_DEVELOPMENT/xlm_bot/data/market_brief.json
+/06_DEVELOPMENT/xlm_bot/data/market_intel_cache.json
+/06_DEVELOPMENT/xlm_bot/data/market_pulse.json
+/06_DEVELOPMENT/xlm_bot/data/metrics.json
+/06_DEVELOPMENT/xlm_bot/data/monthly_ohlc.json
+/06_DEVELOPMENT/xlm_bot/data/perplexity_context.json
+/06_DEVELOPMENT/xlm_bot/data/perplexity_integration_log.json
+/06_DEVELOPMENT/xlm_bot/data/state.json
+/06_DEVELOPMENT/xlm_bot/data/trading_watchtower_notify_state.json
+/06_DEVELOPMENT/xlm_bot/data/trading_watchtower_status.json
+/06_DEVELOPMENT/xlm_bot/data/weekly_ohlc.json
+/06_DEVELOPMENT/xlm_bot/data/xlm_30d_candles.csv
+/06_DEVELOPMENT/xlm_bot/data/xlm_30d_candles.json
+/06_DEVELOPMENT/xlm_bot/data_mr/XLM_15m.csv
+/06_DEVELOPMENT/xlm_bot/data_mr/bot_state.db
+/06_DEVELOPMENT/xlm_bot/data_mr/state.json
+/06_DEVELOPMENT/xlm_bot/data_trend/XLM_15m.csv
+/06_DEVELOPMENT/xlm_bot/data_trend/bot_state.db
+/06_DEVELOPMENT/xlm_bot/data_trend/state.json
+/06_DEVELOPMENT/xlm_bot/deploy-native.sh
+/06_DEVELOPMENT/xlm_bot/deploy.sh
+/06_DEVELOPMENT/xlm_bot/docker-compose.yml
+/06_DEVELOPMENT/xlm_bot/docker-entrypoint.sh
+/06_DEVELOPMENT/xlm_bot/error_detector.sh
+/06_DEVELOPMENT/xlm_bot/execution/coinbase_advanced.py
+/06_DEVELOPMENT/xlm_bot/execution/order_manager.py
+/06_DEVELOPMENT/xlm_bot/execution/smart_execution.py
+/06_DEVELOPMENT/xlm_bot/export_metrics.py
+/06_DEVELOPMENT/xlm_bot/feature_store.py
+/06_DEVELOPMENT/xlm_bot/house_money.py
+/06_DEVELOPMENT/xlm_bot/indicators/adx.py
+/06_DEVELOPMENT/xlm_bot/indicators/anchored_vwap.py
+/06_DEVELOPMENT/xlm_bot/indicators/atr.py
+/06_DEVELOPMENT/xlm_bot/indicators/bollinger.py
+/06_DEVELOPMENT/xlm_bot/indicators/candle_patterns.py
+/06_DEVELOPMENT/xlm_bot/indicators/cvd.py
+/06_DEVELOPMENT/xlm_bot/indicators/divergence.py
+/06_DEVELOPMENT/xlm_bot/indicators/ema.py
+/06_DEVELOPMENT/xlm_bot/indicators/funding.py
+/06_DEVELOPMENT/xlm_bot/indicators/macd.py
+/06_DEVELOPMENT/xlm_bot/indicators/obv.py
+/06_DEVELOPMENT/xlm_bot/indicators/oi_analysis.py
+/06_DEVELOPMENT/xlm_bot/indicators/pattern_engine.py
+/06_DEVELOPMENT/xlm_bot/indicators/rsi.py
+/06_DEVELOPMENT/xlm_bot/indicators/rsi_gap.py
+/06_DEVELOPMENT/xlm_bot/indicators/session_vwap.py
+/06_DEVELOPMENT/xlm_bot/indicators/squeeze.py
+/06_DEVELOPMENT/xlm_bot/indicators/volume_profile.py
+/06_DEVELOPMENT/xlm_bot/indicators/vwap.py
+/06_DEVELOPMENT/xlm_bot/indicators/wick_score.py
+/06_DEVELOPMENT/xlm_bot/install_oracle_watchdog.sh
+/06_DEVELOPMENT/xlm_bot/install_systemd_user.sh
+/06_DEVELOPMENT/xlm_bot/liquidation_feed_runner.py
+/06_DEVELOPMENT/xlm_bot/live_ws.py
+/06_DEVELOPMENT/xlm_bot/log_rotate.sh
+/06_DEVELOPMENT/xlm_bot/logs_mr/dashboard.log
+/06_DEVELOPMENT/xlm_bot/logs_mr/dashboard_snapshot.json
+/06_DEVELOPMENT/xlm_bot/logs_mr/dashboard_snapshot.last_good.json
+/06_DEVELOPMENT/xlm_bot/logs_mr/dashboard_timeseries.jsonl
+/06_DEVELOPMENT/xlm_bot/logs_mr/decisions.jsonl
+/06_DEVELOPMENT/xlm_bot/logs_mr/xpb_console.log
+/06_DEVELOPMENT/xlm_bot/logs_trend/dashboard.log
+/06_DEVELOPMENT/xlm_bot/logs_trend/dashboard_snapshot.json
+/06_DEVELOPMENT/xlm_bot/logs_trend/dashboard_snapshot.last_good.json
+/06_DEVELOPMENT/xlm_bot/logs_trend/dashboard_timeseries.jsonl
+/06_DEVELOPMENT/xlm_bot/logs_trend/decisions.jsonl
+/06_DEVELOPMENT/xlm_bot/logs_trend/margin_policy.jsonl
+/06_DEVELOPMENT/xlm_bot/logs_trend/plrl3.jsonl
+/06_DEVELOPMENT/xlm_bot/logs_trend/xpb_console.log
+/06_DEVELOPMENT/xlm_bot/main.py
+/06_DEVELOPMENT/xlm_bot/market/__init__.py
+/06_DEVELOPMENT/xlm_bot/market/btc_correlation.py
+/06_DEVELOPMENT/xlm_bot/market/contract_context.py
+/06_DEVELOPMENT/xlm_bot/market/correlation_drift.py
+/06_DEVELOPMENT/xlm_bot/market/futures_relativity.py
+/06_DEVELOPMENT/xlm_bot/market/intel_runner.py
+/06_DEVELOPMENT/xlm_bot/market/liquidation_clusters.py
+/06_DEVELOPMENT/xlm_bot/market/liquidation_feed.py
+/06_DEVELOPMENT/xlm_bot/market/moonshot.py
+/06_DEVELOPMENT/xlm_bot/market/news_intel.py
+/06_DEVELOPMENT/xlm_bot/market/onchain_intelligence.py
+/06_DEVELOPMENT/xlm_bot/market/order_flow_intel.py
+/06_DEVELOPMENT/xlm_bot/market/orderbook_context.py
+/06_DEVELOPMENT/xlm_bot/market/pro_indicators.py
+/06_DEVELOPMENT/xlm_bot/market/rolling_expectancy.py
+/06_DEVELOPMENT/xlm_bot/market/score_modifiers.py
+/06_DEVELOPMENT/xlm_bot/market/sentiment_gate.py
+/06_DEVELOPMENT/xlm_bot/market/sentiment_monitor.py
+/06_DEVELOPMENT/xlm_bot/market_intel_service.py
+/06_DEVELOPMENT/xlm_bot/memory_guard.sh
+/06_DEVELOPMENT/xlm_bot/notify_status.sh
+/06_DEVELOPMENT/xlm_bot/oracle_watchdog.sh
+/06_DEVELOPMENT/xlm_bot/perplexity_poller.py
+/06_DEVELOPMENT/xlm_bot/public_watchtower.py
+/06_DEVELOPMENT/xlm_bot/push_metrics_supabase.py
+/06_DEVELOPMENT/xlm_bot/push_updates.sh
+/06_DEVELOPMENT/xlm_bot/rd.sh
+/06_DEVELOPMENT/xlm_bot/rdx.sh
+/06_DEVELOPMENT/xlm_bot/recovery.py
+/06_DEVELOPMENT/xlm_bot/report_history.py
+/06_DEVELOPMENT/xlm_bot/requirements.txt
+/06_DEVELOPMENT/xlm_bot/restart_oracle.sh
+/06_DEVELOPMENT/xlm_bot/risk/__init__.py
+/06_DEVELOPMENT/xlm_bot/risk/audit_logger.py
+/06_DEVELOPMENT/xlm_bot/risk/balance_reconciler.py
+/06_DEVELOPMENT/xlm_bot/risk/dynamic_sizer.py
+/06_DEVELOPMENT/xlm_bot/risk/margin_policy.py
+/06_DEVELOPMENT/xlm_bot/risk/plrl3.py
+/06_DEVELOPMENT/xlm_bot/risk/reconcile.py
+/06_DEVELOPMENT/xlm_bot/risk/state_sync.py
+/06_DEVELOPMENT/xlm_bot/risk_gate.py
+/06_DEVELOPMENT/xlm_bot/run-bot.sh
+/06_DEVELOPMENT/xlm_bot/run-dashboard.sh
+/06_DEVELOPMENT/xlm_bot/run_live.sh
+/06_DEVELOPMENT/xlm_bot/rxd.sh
+/06_DEVELOPMENT/xlm_bot/rxl.sh
+/06_DEVELOPMENT/xlm_bot/scripts/backtest_htf_blocks.py
+/06_DEVELOPMENT/xlm_bot/scripts/backtest_htf_v2.py
+/06_DEVELOPMENT/xlm_bot/scripts/daily_excel_report.py
+/06_DEVELOPMENT/xlm_bot/scripts/daily_trade_rotation.py
+/06_DEVELOPMENT/xlm_bot/scripts/trade_analysis.py
+/06_DEVELOPMENT/xlm_bot/setup_oracle_24x7.sh
+/06_DEVELOPMENT/xlm_bot/setup_oracle_cron.sh
+/06_DEVELOPMENT/xlm_bot/slack_standup.sh
+/06_DEVELOPMENT/xlm_bot/state_store.py
+/06_DEVELOPMENT/xlm_bot/stop_watcher.py
+/06_DEVELOPMENT/xlm_bot/strategy/adaptive.py
+/06_DEVELOPMENT/xlm_bot/strategy/auction_model.py
+/06_DEVELOPMENT/xlm_bot/strategy/autonomous_ops.py
+/06_DEVELOPMENT/xlm_bot/strategy/band_navigator.py
+/06_DEVELOPMENT/xlm_bot/strategy/breakout.py
+/06_DEVELOPMENT/xlm_bot/strategy/candle_math.py
+/06_DEVELOPMENT/xlm_bot/strategy/channels.py
+/06_DEVELOPMENT/xlm_bot/strategy/compression_range.py
+/06_DEVELOPMENT/xlm_bot/strategy/confluence.py
+/06_DEVELOPMENT/xlm_bot/strategy/entries.py
+/06_DEVELOPMENT/xlm_bot/strategy/evolution.py
+/06_DEVELOPMENT/xlm_bot/strategy/execution_intel.py
+/06_DEVELOPMENT/xlm_bot/strategy/exits.py
+/06_DEVELOPMENT/xlm_bot/strategy/expansion.py
+/06_DEVELOPMENT/xlm_bot/strategy/fee_intelligence.py
+/06_DEVELOPMENT/xlm_bot/strategy/foresight.py
+/06_DEVELOPMENT/xlm_bot/strategy/funding_timer.py
+/06_DEVELOPMENT/xlm_bot/strategy/fvg.py
+/06_DEVELOPMENT/xlm_bot/strategy/goal_tracker.py
+/06_DEVELOPMENT/xlm_bot/strategy/hedge_flip.py
+/06_DEVELOPMENT/xlm_bot/strategy/hindsight.py
+/06_DEVELOPMENT/xlm_bot/strategy/indicator_cache.py
+/06_DEVELOPMENT/xlm_bot/strategy/inventory_intel.py
+/06_DEVELOPMENT/xlm_bot/strategy/lane_consensus.py
+/06_DEVELOPMENT/xlm_bot/strategy/lane_performance_tracker.py
+/06_DEVELOPMENT/xlm_bot/strategy/lane_scoring.py
+/06_DEVELOPMENT/xlm_bot/strategy/liquidity_pools.py
+/06_DEVELOPMENT/xlm_bot/strategy/macro_vision.py
+/06_DEVELOPMENT/xlm_bot/strategy/micro_sweep.py
+/06_DEVELOPMENT/xlm_bot/strategy/monthly_zones.py
+/06_DEVELOPMENT/xlm_bot/strategy/mtf_confluence.py
+/06_DEVELOPMENT/xlm_bot/strategy/mtf_levels.py
+/06_DEVELOPMENT/xlm_bot/strategy/pattern_memory.py
+/06_DEVELOPMENT/xlm_bot/strategy/pattern_tracker.py
+/06_DEVELOPMENT/xlm_bot/strategy/position_iq.py
+/06_DEVELOPMENT/xlm_bot/strategy/position_sizing.py
+/06_DEVELOPMENT/xlm_bot/strategy/profit_manager.py
+/06_DEVELOPMENT/xlm_bot/strategy/pyramiding.py
+/06_DEVELOPMENT/xlm_bot/strategy/regime.py
+/06_DEVELOPMENT/xlm_bot/strategy/regime_manager.py
+/06_DEVELOPMENT/xlm_bot/strategy/regime_state_machine.py
+/06_DEVELOPMENT/xlm_bot/strategy/reversal_engine.py
+/06_DEVELOPMENT/xlm_bot/strategy/risk.py
+/06_DEVELOPMENT/xlm_bot/strategy/risk_intel.py
+/06_DEVELOPMENT/xlm_bot/strategy/scalp_engine.py
+/06_DEVELOPMENT/xlm_bot/strategy/self_awareness.py
+/06_DEVELOPMENT/xlm_bot/strategy/shadow_system.py
+/06_DEVELOPMENT/xlm_bot/strategy/shadow_trades.py
+/06_DEVELOPMENT/xlm_bot/strategy/simple_core.py
+/06_DEVELOPMENT/xlm_bot/strategy/simple_exit.py
+/06_DEVELOPMENT/xlm_bot/strategy/smart_exit.py
+/06_DEVELOPMENT/xlm_bot/strategy/squeeze_anticipation.py
+/06_DEVELOPMENT/xlm_bot/strategy/telemetry.py
+/06_DEVELOPMENT/xlm_bot/strategy/trade_memory.py
+/06_DEVELOPMENT/xlm_bot/strategy/trading_mindset.py
+/06_DEVELOPMENT/xlm_bot/strategy/trap_detector.py
+/06_DEVELOPMENT/xlm_bot/strategy/v4_engine.py
+/06_DEVELOPMENT/xlm_bot/strategy/wick_zones.py
+/06_DEVELOPMENT/xlm_bot/strategy/wyckoff.py
+/06_DEVELOPMENT/xlm_bot/structure/fib.py
+/06_DEVELOPMENT/xlm_bot/structure/levels.py
+/06_DEVELOPMENT/xlm_bot/systemd/xlm-bot.service
+/06_DEVELOPMENT/xlm_bot/systemd/xlm-dashboard.service
+/06_DEVELOPMENT/xlm_bot/tests/__init__.py
+/06_DEVELOPMENT/xlm_bot/tests/test_htf_breakout.py
+/06_DEVELOPMENT/xlm_bot/tests/test_lane_v_strategy.py
+/06_DEVELOPMENT/xlm_bot/tests/test_market_intel_service.py
+/06_DEVELOPMENT/xlm_bot/tests/test_micro_sweep.py
+/06_DEVELOPMENT/xlm_bot/tests/test_reconcile.py
+/06_DEVELOPMENT/xlm_bot/tests/test_risk_gates.py
+/06_DEVELOPMENT/xlm_bot/tests/test_trade_eta.py
+/06_DEVELOPMENT/xlm_bot/tests/test_wick_zones.py
+/06_DEVELOPMENT/xlm_bot/timing/__init__.py
+/06_DEVELOPMENT/xlm_bot/timing/trade_eta.py
+/06_DEVELOPMENT/xlm_bot/trade_reviewer.py
+/06_DEVELOPMENT/xlm_bot/trading_watchtower_sync.py
+/06_DEVELOPMENT/xlm_bot/unified_scorer.py
+/06_DEVELOPMENT/xlm_bot/vendor/__init__.py
+/06_DEVELOPMENT/xlm_bot/vendor/ai_workers/clx_delegate.py
+/06_DEVELOPMENT/xlm_bot/vendor/ai_workers/gemx_delegate.py
+/06_DEVELOPMENT/xlm_bot/vendor/gdocs_bridge.py
+/06_DEVELOPMENT/xlm_bot/vendor/report_template.py
+/06_DEVELOPMENT/xlm_bot/vendor/utils/__init__.py
+/06_DEVELOPMENT/xlm_bot/vendor/utils/coinbase_api.py
+/06_DEVELOPMENT/xlm_bot/watchdog.sh
+/06_DEVELOPMENT/xlm_bot/xdr
+/06_DEVELOPMENT/xlm_bot/xdr-fg
+/06_DEVELOPMENT/xlm_bot/xdr-mr
+/06_DEVELOPMENT/xlm_bot/xdr-trend
+/06_DEVELOPMENT/xlm_bot/xlb.sh
+/06_DEVELOPMENT/xlm_bot/xon
+/06_DEVELOPMENT/xlm_bot/xpb
+/06_DEVELOPMENT/xlm_bot/xpb-fg
+/06_DEVELOPMENT/xlm_bot/xpb-guardian
+/06_DEVELOPMENT/xlm_bot/xpb-mr
+/06_DEVELOPMENT/xlm_bot/xpb-shortbias
+/06_DEVELOPMENT/xlm_bot/xpb-trend
+/06_DEVELOPMENT/xlm_bot/xpb.sh
+/06_DEVELOPMENT/xlm_bot/xws
+/06_DEVELOPMENT/xlm_bot/xws-fg
+/09_DASHBOARD/aa_dashboard/INSTRUCTIONS.md
+/09_DASHBOARD/aa_dashboard/README.md
+/09_DASHBOARD/aa_dashboard/app.py
+/09_DASHBOARD/aa_dashboard/master_restart.sh
+/09_DASHBOARD/aa_dashboard/proton_sync.sh
+/09_DASHBOARD/aa_dashboard/proton_sync_resync.sh
+/09_DASHBOARD/aa_dashboard/requirements.txt
+/09_DASHBOARD/aa_dashboard/run.sh
+/09_DASHBOARD/aa_dashboard/static/app.js
+/09_DASHBOARD/aa_dashboard/static/style.css
+/09_DASHBOARD/aa_dashboard/templates/index.html
+/09_DASHBOARD/hive_dashboard/SITE_ARCHITECTURE.md
+/09_DASHBOARD/hive_dashboard/blackjack/BLACKJACK_NOTES.md
+/09_DASHBOARD/hive_dashboard/blackjack/__init__.py
+/09_DASHBOARD/hive_dashboard/blackjack/apps.py
+/09_DASHBOARD/hive_dashboard/blackjack/catalog.py
+/09_DASHBOARD/hive_dashboard/blackjack/checkout_bridge.py
+/09_DASHBOARD/hive_dashboard/blackjack/management/__init__.py
+/09_DASHBOARD/hive_dashboard/blackjack/management/commands/__init__.py
+/09_DASHBOARD/hive_dashboard/blackjack/management/commands/seed_blackjack.py
+/09_DASHBOARD/hive_dashboard/blackjack/migrations/0001_initial.py
+/09_DASHBOARD/hive_dashboard/blackjack/migrations/0002_playerprofile_achievements.py
+/09_DASHBOARD/hive_dashboard/blackjack/migrations/0003_gamesession_action_log_gamesession_doubled_and_more.py
+/09_DASHBOARD/hive_dashboard/blackjack/migrations/__init__.py
+/09_DASHBOARD/hive_dashboard/blackjack/models.py
+/09_DASHBOARD/hive_dashboard/blackjack/templates/blackjack/auth.html
+/09_DASHBOARD/hive_dashboard/blackjack/templates/blackjack/game.html
+/09_DASHBOARD/hive_dashboard/blackjack/urls.py
+/09_DASHBOARD/hive_dashboard/blackjack/views.py
+/09_DASHBOARD/hive_dashboard/broker_ops/__init__.py
+/09_DASHBOARD/hive_dashboard/broker_ops/admin.py
+/09_DASHBOARD/hive_dashboard/broker_ops/apps.py
+/09_DASHBOARD/hive_dashboard/broker_ops/client_files.py
+/09_DASHBOARD/hive_dashboard/broker_ops/management/__init__.py
+/09_DASHBOARD/hive_dashboard/broker_ops/management/commands/__init__.py
+/09_DASHBOARD/hive_dashboard/broker_ops/management/commands/broker_run.py
+/09_DASHBOARD/hive_dashboard/broker_ops/migrations/0001_initial.py
+/09_DASHBOARD/hive_dashboard/broker_ops/migrations/0002_outreachsequence.py
+/09_DASHBOARD/hive_dashboard/broker_ops/migrations/0003_alter_brokermatch_created_at_and_more.py
+/09_DASHBOARD/hive_dashboard/broker_ops/migrations/0004_investorbuyer_alter_offerlisting_category_and_more.py
+/09_DASHBOARD/hive_dashboard/broker_ops/migrations/0005_alter_offerlisting_seller_email_clientfile_and_more.py
+/09_DASHBOARD/hive_dashboard/broker_ops/migrations/0006_deal_stages_events_calls.py
+/09_DASHBOARD/hive_dashboard/broker_ops/migrations/__init__.py
+/09_DASHBOARD/hive_dashboard/broker_ops/models.py
+/09_DASHBOARD/hive_dashboard/broker_ops/services.py
+/09_DASHBOARD/hive_dashboard/broker_ops/signals.py
+/09_DASHBOARD/hive_dashboard/broker_ops/slack_client_files.py
+/09_DASHBOARD/hive_dashboard/broker_ops/templates/broker_ops/client_file_detail.html
+/09_DASHBOARD/hive_dashboard/broker_ops/templates/broker_ops/client_files.html
+/09_DASHBOARD/hive_dashboard/broker_ops/templates/broker_ops/dashboard.html
+/09_DASHBOARD/hive_dashboard/broker_ops/templates/broker_ops/wholesale.html
+/09_DASHBOARD/hive_dashboard/broker_ops/urls.py
+/09_DASHBOARD/hive_dashboard/broker_ops/views.py
+/09_DASHBOARD/hive_dashboard/broker_ops/wholesale.py
+/09_DASHBOARD/hive_dashboard/business_os/__init__.py
+/09_DASHBOARD/hive_dashboard/business_os/admin.py
+/09_DASHBOARD/hive_dashboard/business_os/apps.py
+/09_DASHBOARD/hive_dashboard/business_os/management/__init__.py
+/09_DASHBOARD/hive_dashboard/business_os/management/commands/__init__.py
+/09_DASHBOARD/hive_dashboard/business_os/management/commands/refresh_business_os.py
+/09_DASHBOARD/hive_dashboard/business_os/migrations/0001_initial.py
+/09_DASHBOARD/hive_dashboard/business_os/migrations/__init__.py
+/09_DASHBOARD/hive_dashboard/business_os/models.py
+/09_DASHBOARD/hive_dashboard/business_os/services.py
+/09_DASHBOARD/hive_dashboard/business_os/templates/business_os/dashboard.html
+/09_DASHBOARD/hive_dashboard/business_os/urls.py
+/09_DASHBOARD/hive_dashboard/business_os/views.py
+/09_DASHBOARD/hive_dashboard/db.sqlite3
+/09_DASHBOARD/hive_dashboard/everlight_os/launch/hive_mind_product_page.md
+/09_DASHBOARD/hive_dashboard/everlight_site_copy.md
+/09_DASHBOARD/hive_dashboard/flip_os/__init__.py
+/09_DASHBOARD/hive_dashboard/flip_os/apps.py
+/09_DASHBOARD/hive_dashboard/flip_os/management/__init__.py
+/09_DASHBOARD/hive_dashboard/flip_os/management/commands/__init__.py
+/09_DASHBOARD/hive_dashboard/flip_os/templates/flip_os/brief.html
+/09_DASHBOARD/hive_dashboard/flip_os/templates/flip_os/dashboard.html
+/09_DASHBOARD/hive_dashboard/flip_os/templates/flip_os/intel_list.html
+/09_DASHBOARD/hive_dashboard/flip_os/templates/flip_os/inventory_add.html
+/09_DASHBOARD/hive_dashboard/flip_os/templates/flip_os/inventory_edit.html
+/09_DASHBOARD/hive_dashboard/flip_os/templates/flip_os/inventory_list.html
+/09_DASHBOARD/hive_dashboard/flip_os/urls.py
+/09_DASHBOARD/hive_dashboard/flip_os/views.py
+/09_DASHBOARD/hive_dashboard/funnel/__init__.py
+/09_DASHBOARD/hive_dashboard/funnel/admin.py
+/09_DASHBOARD/hive_dashboard/funnel/apps.py
+/09_DASHBOARD/hive_dashboard/funnel/migrations/0001_initial.py
+/09_DASHBOARD/hive_dashboard/funnel/migrations/0002_alter_lead_product.py
+/09_DASHBOARD/hive_dashboard/funnel/migrations/0003_alter_lead_product.py
+/09_DASHBOARD/hive_dashboard/funnel/migrations/__init__.py
+/09_DASHBOARD/hive_dashboard/funnel/migrations/__pycache__/0001_initial.cpython-313.pyc
+/09_DASHBOARD/hive_dashboard/funnel/migrations/__pycache__/0002_alter_lead_product.cpython-313.pyc
+/09_DASHBOARD/hive_dashboard/funnel/migrations/__pycache__/0003_alter_lead_product.cpython-313.pyc
+/09_DASHBOARD/hive_dashboard/funnel/migrations/__pycache__/__init__.cpython-313.pyc
+/09_DASHBOARD/hive_dashboard/funnel/models.py
+/09_DASHBOARD/hive_dashboard/funnel/templates/funnel/consulting_landing.html
+/09_DASHBOARD/hive_dashboard/funnel/templates/funnel/dashboard_landing.html
+/09_DASHBOARD/hive_dashboard/funnel/templates/funnel/hivemind_landing.html
+/09_DASHBOARD/hive_dashboard/funnel/templates/funnel/onyx_landing.html
+/09_DASHBOARD/hive_dashboard/funnel/templates/funnel/thank_you.html
+/09_DASHBOARD/hive_dashboard/funnel/urls.py
+/09_DASHBOARD/hive_dashboard/funnel/views.py
+/09_DASHBOARD/hive_dashboard/hive/__init__.py
+/09_DASHBOARD/hive_dashboard/hive/admin.py
+/09_DASHBOARD/hive_dashboard/hive/apps.py
+/09_DASHBOARD/hive_dashboard/hive/context_processors.py
+/09_DASHBOARD/hive_dashboard/hive/management/__init__.py
+/09_DASHBOARD/hive_dashboard/hive/management/commands/__init__.py
+/09_DASHBOARD/hive_dashboard/hive/management/commands/import_sessions.py
+/09_DASHBOARD/hive_dashboard/hive/middleware.py
+/09_DASHBOARD/hive_dashboard/hive/migrations/0001_initial.py
+/09_DASHBOARD/hive_dashboard/hive/migrations/__init__.py
+/09_DASHBOARD/hive_dashboard/hive/models.py
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/agent_detail.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/agent_performance.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/agents.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/analytics.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/base.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/blinko_search.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/booking.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/bot_intel.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/dashboard.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/events.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/infra_hub.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/launch.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/login.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/onboard.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/partials/agent_card.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/processes.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/report_detail.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/reports_list.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/session_detail.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/sessions.html
+/09_DASHBOARD/hive_dashboard/hive/templates/hive/team_directory.html
+/09_DASHBOARD/hive_dashboard/hive/templatetags/__init__.py
+/09_DASHBOARD/hive_dashboard/hive/templatetags/hive_tags.py
+/09_DASHBOARD/hive_dashboard/hive/tests.py
+/09_DASHBOARD/hive_dashboard/hive/urls.py
+/09_DASHBOARD/hive_dashboard/hive/views.py
+/09_DASHBOARD/hive_dashboard/hive_dashboard/__init__.py
+/09_DASHBOARD/hive_dashboard/hive_dashboard/asgi.py
+/09_DASHBOARD/hive_dashboard/hive_dashboard/security.py
+/09_DASHBOARD/hive_dashboard/hive_dashboard/settings.py
+/09_DASHBOARD/hive_dashboard/hive_dashboard/supabase_client.py
+/09_DASHBOARD/hive_dashboard/hive_dashboard/urls.py
+/09_DASHBOARD/hive_dashboard/hive_dashboard/wsgi.py
+/09_DASHBOARD/hive_dashboard/manage.py
+/09_DASHBOARD/hive_dashboard/payments/__init__.py
+/09_DASHBOARD/hive_dashboard/payments/admin.py
+/09_DASHBOARD/hive_dashboard/payments/apps.py
+/09_DASHBOARD/hive_dashboard/payments/management/__init__.py
+/09_DASHBOARD/hive_dashboard/payments/management/commands/__init__.py
+/09_DASHBOARD/hive_dashboard/payments/migrations/0001_initial.py
+/09_DASHBOARD/hive_dashboard/payments/migrations/0002_alter_subscription_product_consultingproject.py
+/09_DASHBOARD/hive_dashboard/payments/migrations/__init__.py
+/09_DASHBOARD/hive_dashboard/payments/migrations/__pycache__/0001_initial.cpython-313.pyc
+/09_DASHBOARD/hive_dashboard/payments/migrations/__pycache__/0002_alter_subscription_product_consultingproject.cpython-313.pyc
+/09_DASHBOARD/hive_dashboard/payments/migrations/__pycache__/__init__.cpython-313.pyc
+/09_DASHBOARD/hive_dashboard/payments/models.py
+/09_DASHBOARD/hive_dashboard/payments/templates/payments/revenue_dashboard.html
+/09_DASHBOARD/hive_dashboard/payments/urls.py
+/09_DASHBOARD/hive_dashboard/payments/views.py
+/09_DASHBOARD/hive_dashboard/rewards/__init__.py
+/09_DASHBOARD/hive_dashboard/rewards/admin.py
+/09_DASHBOARD/hive_dashboard/rewards/apps.py
+/09_DASHBOARD/hive_dashboard/rewards/migrations/0001_initial.py
+/09_DASHBOARD/hive_dashboard/rewards/migrations/0002_seed_defaults.py
+/09_DASHBOARD/hive_dashboard/rewards/migrations/__init__.py
+/09_DASHBOARD/hive_dashboard/rewards/models.py
+/09_DASHBOARD/hive_dashboard/rewards/services.py
+/09_DASHBOARD/hive_dashboard/rewards/templates/rewards/admin_dashboard.html
+/09_DASHBOARD/hive_dashboard/rewards/templates/rewards/referral_landing.html
+/09_DASHBOARD/hive_dashboard/rewards/urls.py
+/09_DASHBOARD/hive_dashboard/rewards/views.py
+/09_DASHBOARD/hive_dashboard/start.sh
+/09_DASHBOARD/hive_dashboard/staticfiles/admin/css/autocomplete.css
+/09_DASHBOARD/hive_dashboard/taskboard/.encrypt_key
+/09_DASHBOARD/hive_dashboard/taskboard/__init__.py
+/09_DASHBOARD/hive_dashboard/taskboard/admin.py
+/09_DASHBOARD/hive_dashboard/taskboard/apps.py
+/09_DASHBOARD/hive_dashboard/taskboard/management/__init__.py
+/09_DASHBOARD/hive_dashboard/taskboard/management/commands/__init__.py
+/09_DASHBOARD/hive_dashboard/taskboard/management/commands/apply_credentials.py
+/09_DASHBOARD/hive_dashboard/taskboard/management/commands/seed_ebook_store.py
+/09_DASHBOARD/hive_dashboard/taskboard/management/commands/seed_launch_checklist.py
+/09_DASHBOARD/hive_dashboard/taskboard/management/commands/seed_site_audit.py
+/09_DASHBOARD/hive_dashboard/taskboard/management/commands/seed_taskboard.py
+/09_DASHBOARD/hive_dashboard/taskboard/migrations/0001_initial.py
+/09_DASHBOARD/hive_dashboard/taskboard/migrations/0002_taskitem_workflow_fields.py
+/09_DASHBOARD/hive_dashboard/taskboard/migrations/__init__.py
+/09_DASHBOARD/hive_dashboard/taskboard/models.py
+/09_DASHBOARD/hive_dashboard/taskboard/templates/taskboard/board.html
+/09_DASHBOARD/hive_dashboard/taskboard/templates/taskboard/nerve_center.html
+/09_DASHBOARD/hive_dashboard/taskboard/templates/taskboard/secrets_hub.html
+/09_DASHBOARD/hive_dashboard/taskboard/templates/taskboard/task_form.html
+/09_DASHBOARD/hive_dashboard/taskboard/templatetags/__init__.py
+/09_DASHBOARD/hive_dashboard/taskboard/templatetags/taskboard_tags.py
+/09_DASHBOARD/hive_dashboard/taskboard/urls.py
+/09_DASHBOARD/hive_dashboard/taskboard/views.py
+/09_DASHBOARD/master_dashboard/AUTOSTART.md
+/09_DASHBOARD/master_dashboard/INSTRUCTIONS.md
+/09_DASHBOARD/master_dashboard/README.md
+/09_DASHBOARD/master_dashboard/analytics_run.sh
+/09_DASHBOARD/master_dashboard/analytics_streamlit.py
+/09_DASHBOARD/master_dashboard/app.py
+/09_DASHBOARD/master_dashboard/autostart_tmux.sh
+/09_DASHBOARD/master_dashboard/bot_run.sh
+/09_DASHBOARD/master_dashboard/master_launch.sh
+/09_DASHBOARD/master_dashboard/master_restart.sh
+/09_DASHBOARD/master_dashboard/proton_sync.sh
+/09_DASHBOARD/master_dashboard/proton_sync_resync.sh
+/09_DASHBOARD/master_dashboard/requirements-analytics.txt
+/09_DASHBOARD/master_dashboard/requirements.txt
+/09_DASHBOARD/master_dashboard/run.sh
+/09_DASHBOARD/master_dashboard/static/app.js
+/09_DASHBOARD/master_dashboard/static/manifest.json
+/09_DASHBOARD/master_dashboard/static/style.css
+/09_DASHBOARD/master_dashboard/static/sw.js
+/09_DASHBOARD/master_dashboard/templates/edit.html
+/09_DASHBOARD/master_dashboard/templates/file.html
+/09_DASHBOARD/master_dashboard/templates/index.html
+/09_DASHBOARD/reports/DATA_REGISTRY.html
+/09_DASHBOARD/reports/EVERLIGHT_BLACKJACK_OS_AUDIT_2026.md
+/09_DASHBOARD/reports/EVERLIGHT_BUSINESS_OS_AUDIT_2026.md
+/09_DASHBOARD/reports/EVERLIGHT_FINANCIAL_PLAN_2026.md
+/09_DASHBOARD/reports/EVERLIGHT_STACK_RATIONALIZATION_2026.md
+/09_DASHBOARD/reports/HIVE_MIND.html
+/09_DASHBOARD/reports/MASTER_PIPELINE_DOCTRINE_2026-05-13.html
+/09_DASHBOARD/reports/RESOURCES_HUB.html
+/09_DASHBOARD/reports/RICH_TODO_LIVE.html
+/09_DASHBOARD/reports/SERVICES_REGISTRY.html
+/09_DASHBOARD/reports/XLM_BOT_HIVE_AUDIT_2026.md
+/09_DASHBOARD/reports/XLM_BOT_INTELLIGENCE_AUDIT_2026.md
+/09_DASHBOARD/reports/XLM_MARGIN_WINDOW_PLAYBOOK_2026.md
+/09_DASHBOARD/reports/bot_forensics_20260322.md
+/09_DASHBOARD/reports/broker_pipeline_summary.csv
+/09_DASHBOARD/reports/broker_seller_outreach_report.csv
+/09_DASHBOARD/reports/ceo_brief_2026-03-21.md
+/09_DASHBOARD/reports/ceo_brief_2026-03-22.md
+/09_DASHBOARD/reports/daily_2026-02-26.md
+/09_DASHBOARD/reports/daily_2026-02-27.md
+/09_DASHBOARD/reports/daily_brief/2026-05-13.html
+/09_DASHBOARD/reports/daily_leads/2026-05-13.html
+/09_DASHBOARD/reports/deals/2026-05-12_mikal_hakeem_1536_s_third/01_PSA.html
+/09_DASHBOARD/reports/deals/2026-05-12_mikal_hakeem_1536_s_third/02_Schedule_A_TN_SB909.html
+/09_DASHBOARD/reports/deals/2026-05-12_mikal_hakeem_1536_s_third/03_EMD_Wire_Acknowledgment.html
+/09_DASHBOARD/reports/deals/2026-05-12_mikal_hakeem_1536_s_third/04_Assignment_Agreement_Chris.html
+/09_DASHBOARD/reports/deals/2026-05-12_mikal_hakeem_1536_s_third/05_Settlement_Statement_Preview.html
+/09_DASHBOARD/reports/deals/2026-05-12_mikal_hakeem_1536_s_third/index.html
+/09_DASHBOARD/reports/deals/test_self/01_PSA.html
+/09_DASHBOARD/reports/deals/test_self/01_PSA_signed.html
+/09_DASHBOARD/reports/deals/test_self/02_Schedule_A_TN_SB909.html
+/09_DASHBOARD/reports/deals/test_self/03_EMD_Wire_Acknowledgment.html
+/09_DASHBOARD/reports/deals/test_self/04_Assignment_Agreement_Chris.html
+/09_DASHBOARD/reports/deals/test_self/05_Settlement_Statement_Preview.html
+/09_DASHBOARD/reports/deals/test_self/deal_meta.json
+/09_DASHBOARD/reports/deals/test_self/index.html
+/09_DASHBOARD/reports/deals/test_self/signatures/01_PSA_mhakeem_at_timemphis_org_drawn.png
+/09_DASHBOARD/reports/deals/test_self2/01_PSA.html
+/09_DASHBOARD/reports/deals/test_self2/02_Schedule_A_TN_SB909.html
+/09_DASHBOARD/reports/deals/test_self2/03_EMD_Wire_Acknowledgment.html
+/09_DASHBOARD/reports/deals/test_self2/04_Assignment_Agreement_Chris.html
+/09_DASHBOARD/reports/deals/test_self2/05_Settlement_Statement_Preview.html
+/09_DASHBOARD/reports/deals/test_self2/deal_meta.json
+/09_DASHBOARD/reports/deals/test_self2/index.html
+/09_DASHBOARD/reports/everlight_casino_features_research_packet.json
+/09_DASHBOARD/reports/everlight_casino_features_sources.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-14_10-52-PT_00_perplexity_report.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-14_10-52-PT_01_gemini_report.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-14_10-52-PT_02_codex_report.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-14_10-52-PT_Hive_Session_e406e134.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-14_11-02-PT_05_claude_execution_report.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-14_11-02-PT_combined_summary.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-14_11-52-PT_00_perplexity_report.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-14_11-52-PT_01_gemini_report.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-14_11-52-PT_Hive_Session_c927b9f8.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-14_11-53-PT_02_codex_report.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-14_11-57-PT_05_claude_execution_report.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-14_11-57-PT_combined_summary.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-19_07-58-PT_00_perplexity_report.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-19_07-58-PT_01_codex_report.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-19_07-58-PT_02_gemini_report.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-19_07-58-PT_Hive_Session_e7987361.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-19_12-01-PT_00_perplexity_report.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-19_12-01-PT_01_codex_report.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-19_12-01-PT_02_gemini_report.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-19_12-01-PT_05_claude_execution_report.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-19_12-01-PT_Hive_Session_215ccc37.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-19_12-01-PT_combined_summary.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-21_14-23-PT_Hive_Pulse_9pm.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-21_14-56-PT_Hive_Tunnel_Test.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-21_16-00-PT_God_Mode_Activated.md
+/09_DASHBOARD/reports/gdocs_queue/2026-03-22_10-21-PT_CEO_Brief_2026-03-22.md
+/09_DASHBOARD/reports/hive_health_latest.json
+/09_DASHBOARD/reports/hive_live_test_20260321_194537.json
+/09_DASHBOARD/reports/hive_live_test_20260321_194554.json
+/09_DASHBOARD/reports/hive_live_test_latest.json
+/09_DASHBOARD/reports/hourly_pulse_2026-03-21_2123.md
+/09_DASHBOARD/reports/integration_registry.json
+/09_DASHBOARD/reports/profit_scoreboard.md
+/09_DASHBOARD/reports/report_registry.json
+/09_DASHBOARD/reports/rex_potential_deals.csv
+/09_DASHBOARD/reports/trade_analytics.md
+/09_DASHBOARD/reports/wholesale_pipeline_20260321_204125.json
+/09_DASHBOARD/reports/wholesale_pipeline_20260321_205210.json
+/09_DASHBOARD/reports/wholesale_pipeline_latest.json
+/09_DASHBOARD/reports/wholesaling_research/research_packet.json
+/09_DASHBOARD/reports/wholesaling_research/sources.md
+/09_DASHBOARD/reports/xlm_honest_dashboard.html
+/AGENTS.md
+/AI_Avatars/Ace_The_Pitch_Morgan.png
+/AI_Avatars/GENERATE_REMAINING.md
+/AI_Avatars/Hammer_Knox.png
+/AI_Avatars/Marcus_Cole.png
+/AI_Avatars/Piper_Reeves.png
+/AI_Avatars/Rex_The_Closer_Maxwell.png
+/CLAUDE.md
+/DISASTER_RECOVERY.md
+/ELEVENLABS_RUNBOOK.md
+/Everlight_Intel_Center/intel
+/Everlight_Intel_Center/lib/intel_query.py
+/Everlight_Intel_Center/osint_api/arc_send.py
+/Everlight_Intel_Center/osint_api/contract_renderer.py
+/Everlight_Intel_Center/osint_api/esign_server.py
+/Everlight_Intel_Center/osint_api/main.py
+/Everlight_Intel_Center/osint_api/marketing_pipeline.py
+/Everlight_Intel_Center/osint_api/orchestrator.py
+/Everlight_Intel_Center/osint_api/pdf_certificate.py
+/Everlight_Intel_Center/osint_api/pipeline_smoketest.py
+/Everlight_Intel_Center/osint_api/pitch_tailor.py
+/Everlight_Intel_Center/osint_api/public_url.py
+/Everlight_Intel_Center/osint_api/signature_burner.py
+/Everlight_Intel_Center/osint_api/template_lint.py
+/GEMINI.md
+/HIVE_MIND.md
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405174853_txt_443/Summary_Balázs Mészáros - Sp.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405174853_txt_443/Summary_Chengcheng Huang - S.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405174853_txt_443/Summary_Christoph Miehl - As.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405174853_txt_443/Summary_Claudia Cusseddu - S.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405174853_txt_443/Summary_Elisabetta Chicca - .txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405174853_txt_443/Summary_Jason Eshraghian - N.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405174853_txt_443/Summary_Paolo Agliati - Spik.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405174853_txt_443/Summary_Raphaël Bergoin - Em.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405174853_txt_443/Summary_SNUFA 2025 - Flash t.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405174853_txt_443/Summary_Tomoki Fukai - Spont.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405175318_txt_476/Summary_CSCE 790- Neuromorph.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405175905_txt_991/Summary_7.3 Spike Response M.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405175905_txt_991/Summary_Convolutional Neural.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405175905_txt_991/Summary_End to End Learning .txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405175905_txt_991/Summary_IEE/CSE 598- Lecture.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405175905_txt_991/Summary_Mike Davies- Realizi.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405175905_txt_991/Summary_NICE 2019 - Day 4c L.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405175905_txt_991/Summary_Spiking Neural Netwo.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Summary_0405175905_txt_991/Summary_spiking neurons on a.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405174844_txt_187/Default_medium_Balázs Mészáros - Space as Tim_0G7vHD4M3WI.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405174844_txt_187/Default_medium_Chengcheng Huang - State modul__wqjVwBTurA.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405174844_txt_187/Default_medium_Christoph Miehl - Assembly-bas_r5djP6bXxk4.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405174844_txt_187/Default_medium_Claudia Cusseddu - Synaptic Pl_hMWbKFe-cJM.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405174844_txt_187/Default_medium_Elisabetta Chicca - Event-Base_CGYT6g80Ku8.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405174844_txt_187/Default_medium_Jason Eshraghian - Neuromorphi_jlFARECk2zE.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405174844_txt_187/Default_medium_Paolo Agliati - Spiking neuron_f1RxbDeL27E.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405174844_txt_187/Default_medium_Raphaël Bergoin - Emergence an_oQiQLUyS1qM.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405174844_txt_187/Default_medium_SNUFA 2025 - Flash talks_ucL5AvmdD1E.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405174844_txt_187/Default_medium_Tomoki Fukai - Spontaneous rep_lPbxx3iIWGo.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405175312_txt_815/Default_medium_CSCE 790_ Neuromorphic Computi_FxTMH9VRsgk.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405175846_txt_353/Default_medium_7.3 Spike Response Model (SRM)_HfSZzKvDV5s.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405175846_txt_353/Default_medium_Convolutional Neural Networks _YRhxdVk_sIs.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405175846_txt_353/Default_medium_End to End Learning of Spiking_xRkonYlbzjs.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405175846_txt_353/Default_medium_IEE_CSE 598_ Lecture 7G (2020-_ICw2_49dSNw.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405175846_txt_353/Default_medium_Mike Davies_ Realizing the Pro_jhQgElvtb1s.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405175846_txt_353/Default_medium_NICE 2019 - Day 4c Loihi Overv_BO2PlEtfruo.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405175846_txt_353/Default_medium_Spiking Neural Networks for Mo_PeW-TN3P1hk.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405175846_txt_353/Default_medium_spiking neurons on a quadcopte_D3NdnImFVfE.txt
+/NOTEPAD/Trranscripts/Ai_Brain/NoteGPT_Transcript_0405180036_txt_378/Default_IEE 598_ Lecture 7F (2025-04-24)_ Spikin.txt
+/NOTEPAD/Trranscripts/Trading/fibonaci_101.md
+/NOTEPAD/Trranscripts/Trading/hedging.md
+/NOTEPAD/Trranscripts/Trading/trading_retracement_strategies.md
+/NOTEPAD/Trranscripts/Trading/utlimate_short_selling.md
+/Non_Business/Customer_Support/mint_mobile/mint_ticket.txt
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Daily_Reports/2025/11_November/Week_5_Nov_23-Nov_29/2025-11-26_Wednesday_DailySummary.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Daily_Reports/2025/11_November/Week_5_Nov_23-Nov_29/2025-11-28_Friday_DailySummary.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Daily_Reports/2025/11_November/Week_5_Nov_30-Nov_30/2025-11-30_Sunday_DailySummary.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Daily_Reports/2025/12_December/Week_1_Dec_01-Dec_06/2025-12-01_Monday_DailySummary.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Employees/Employee_Directory.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Employees/Employee_Directory_OLD.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/MGN_APP.py
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Mountain_Gardens_POS_Advance_34.py
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Notifications/Employee_Notifications.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/POS_CORE.py
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/README.txt
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Receipts/2025/11_November/Week_5_Nov_23-Nov_29/Receipt_TXN20251126101652.txt
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Receipts/2025/11_November/Week_5_Nov_23-Nov_29/Receipt_TXN20251126132413.txt
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Receipts/2025/11_November/Week_5_Nov_23-Nov_29/Receipt_TXN20251128145706.txt
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Receipts/2025/11_November/Week_5_Nov_23-Nov_29/Receipt_TXN20251128210811.txt
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Receipts/2025/11_November/Week_5_Nov_23-Nov_29/Receipt_TXN20251128211840.txt
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Receipts/2025/11_November/Week_5_Nov_23-Nov_29/receipt_2025-11-26_100359_#0001.txt
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Receipts/2025/11_November/Week_5_Nov_30-Nov_30/Receipt_TXN20251130134933.txt
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Receipts/2025/11_November/Week_5_Nov_30-Nov_30/Receipt_TXN20251130142404.txt
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Receipts/2025/12_December/Week_1_Dec_01-Dec_06/Receipt_TXN20251201100136.txt
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/START_POS.sh
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/STOP_POS.sh
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/11_November/Week_3/2025-11-15_Saturday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/11_November/Week_5_Nov_23-Nov_29/2025-11-26_Wednesday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/11_November/Week_5_Nov_23-Nov_29/2025-11-26_Wednesday_sales.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/11_November/Week_5_Nov_23-Nov_29/2025-11-28_Friday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/11_November/Week_5_Nov_23-Nov_29/2025-11-29_Saturday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/11_November/Week_5_Nov_30-Nov_30/2025-11-30_Sunday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/12_December/Week_1/2025-12-01_Monday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/12_December/Week_1/2025-12-02_Tuesday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/12_December/Week_1/2025-12-04_Thursday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/12_December/Week_1/2025-12-07_Sunday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/12_December/Week_1_Dec_01-Dec_06/2025-12-01_Monday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/12_December/Week_2/2025-12-09_Tuesday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/12_December/Week_2/2025-12-10_Wednesday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/12_December/Week_2/2025-12-11_Thursday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/12_December/Week_2/2025-12-12_Friday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/12_December/Week_2/2025-12-13_Saturday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/12_December/Week_2/2025-12-14_Sunday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/12_December/Week_3/2025-12-15_Monday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/12_December/Week_3/2025-12-16_Tuesday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Sales_Logs/2025/12_December/Week_3/2025-12-17_Wednesday_SalesLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/TEMPLATES_ALL.txt
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/11_November/Week_3/2025-11-15_Saturday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/11_November/Week_5_Nov_23-Nov_29/2025-11-26_Wednesday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/11_November/Week_5_Nov_23-Nov_29/2025-11-26_Wednesday_timeclock.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/11_November/Week_5_Nov_23-Nov_29/2025-11-28_Friday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/11_November/Week_5_Nov_23-Nov_29/2025-11-29_Saturday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/11_November/Week_5_Nov_30-Nov_30/2025-11-30_Sunday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_1/2025-12-01_Monday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_1/2025-12-02_Tuesday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_1/2025-12-04_Thursday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_1/2025-12-07_Sunday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_1_Dec_01-Dec_06/2025-12-01_Monday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_2/2025-12-08_Monday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_2/2025-12-09_Tuesday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_2/2025-12-10_Wednesday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_2/2025-12-11_Thursday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_2/2025-12-12_Friday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_2/2025-12-13_Saturday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_2/2025-12-14_Sunday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_3/2025-12-15_Monday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_3/2025-12-16_Tuesday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_3/2025-12-17_Wednesday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_3/2025-12-18_Thursday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_3/2025-12-19_Friday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/2025/12_December/Week_3/2025-12-20_Saturday_TimeClockLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/Time_Edits_Audit.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/add_punch.html
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/edit_punch.html
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Clock/manage.html
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Time_Off_Requests/2025_TimeOffRequests.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/11_November/Week_3/2025-11-15_Saturday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/11_November/Week_5_Nov_23-Nov_29/2025-11-26_Wednesday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/11_November/Week_5_Nov_23-Nov_29/2025-11-28_Friday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/11_November/Week_5_Nov_23-Nov_29/2025-11-29_Saturday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/11_November/Week_5_Nov_30-Nov_30/2025-11-30_Sunday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/12_December/Week_1/2025-12-01_Monday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/12_December/Week_1/2025-12-02_Tuesday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/12_December/Week_1/2025-12-04_Thursday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/12_December/Week_1/2025-12-07_Sunday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/12_December/Week_1_Dec_01-Dec_06/2025-12-01_Monday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/12_December/Week_2/2025-12-09_Tuesday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/12_December/Week_2/2025-12-10_Wednesday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/12_December/Week_2/2025-12-11_Thursday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/12_December/Week_2/2025-12-12_Friday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/12_December/Week_2/2025-12-13_Saturday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/12_December/Week_2/2025-12-14_Sunday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/12_December/Week_3/2025-12-15_Monday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/12_December/Week_3/2025-12-16_Tuesday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Transaction_Logs/2025/12_December/Week_3/2025-12-17_Wednesday_TransactionLog.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Tree.txt
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/Vendor_Mapping.csv
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/employees.json
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/invoice_importer.py
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/ngrok-v3-stable-linux-amd64.tgz
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/ngrok-v3-stable-linux-amd64.tgz.1
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/restart_POS.sh
+/Non_Business/Mountain Gardens Nursery POS/Mountain Gardens Nursery POS (working_beta) (copy).bak/seed_owner.py
+/Non_Business/Mountain Gardens Nursery POS/Mountain_Gardens_POS_Advanced.py
+/Non_Business/Shared/Shared_W_Ceo/BCD/Photos/BCARDI_Coin_1.png
+/Non_Business/Shared/Shared_W_Ceo/BCD/Photos/Official $BCARDI.png
+/Non_Business/Shared/Shared_W_Ceo/Rocketbook/Jarvis Unified Ops System (All-in-One Framework).docx
+/Non_Business/Shared/Shared_W_Ceo/Rocketbook/Ventures_Breakdown.docx
+/Non_Business/Shared/Shared_W_Ceo/Storage_Unit/Everlight_Workflow_&_Office.docx
+/Non_Business/Shared/Shared_W_Ceo/Storage_Unit/Micro_Grid_Station.docx
+/Non_Business/Shared/Shared_W_Ceo/Storage_Unit/Route_Schedule.docx
+/Non_Business/Shared/Shared_W_Ceo/Vim_Setup.docx
+/Non_Business/Shared/Shared_W_Ceo/WELCOME.html
+/Non_Business/Solar/Blaze_And_Graze.docx
+/Non_Business/Solar/EcoPulseP-Thread_Output.xlsx
+/Non_Business/Solar/Refined Solar Pitch 1.docx
+/Non_Business/Solar/Sfl_Profitablity.docx
+/Non_Business/Solar/Sfl_discord_cheat_sheet.docx
+/Non_Business/Solar/Solar_Stuff/360_Sales_Pitch.docx
+/Non_Business/Solar/Solar_Stuff/Solar_Client_List_100_Rows.xlsx
+/Non_Business/Solar/Solar_Stuff/Solar_Client_Prospect_List.csv
+/Non_Business/Solar/Solar_Stuff/Solar_Client_Prospect_List.xlsx
+/Non_Business/Solar/solar_presentation.txt
+/Non_Business/The_Yung_Printz/Overview of the Dogo Argentino.docx
+/Non_Business/Update_W_Braintree.docx
+/Non_Business/sales_management_zones_with_validation.xlsx
+/PC_TRANSFER_GUIDE.md
+/WORKSPACE_MANIFEST.md
+/_DASHBOARDS/PORT_MAP.md
+/_DASHBOARDS/SWEEP_LOG_2026-05-12.md
+/_DASHBOARDS/index.html
+/_DASHBOARDS/index_v1.html.bak
+/_plans/abundant-snacking-lemon.md
+/_plans/execution_loop_plan.md
+/batch_skip_trace_upload.csv
+/restart_claude.sh
+/setup_linux.sh
+/supabase/.temp/cli-latest
+/supabase/.temp/gotrue-version
+/supabase/.temp/pooler-url
+/supabase/.temp/postgres-version
+/supabase/.temp/project-ref
+/supabase/.temp/rest-version
+/supabase/.temp/storage-migration
+/supabase/.temp/storage-version
+/supabase/PASTE_THIS_IN_SUPABASE.sql
+/supabase/SCHEMA_MAP.md
+/supabase/functions/_shared/mod.ts
+/supabase/functions/blackjack-api/index.ts
+/supabase/functions/blackjack-dealer/index.ts
+/supabase/functions/booking/index.ts
+/supabase/functions/create-checkout/index.ts
+/supabase/functions/dealer-speak/index.ts
+/supabase/functions/download-ebook/index.ts
+/supabase/functions/field-ops-api/index.ts
+/supabase/functions/recovery-sweep/index.ts
+/supabase/functions/rex-dashboard/index.ts
+/supabase/functions/sell/index.ts
+/supabase/functions/send-purchase-email/index.ts
+/supabase/functions/strategy-coach/index.ts
+/supabase/functions/stripe-webhook/index.ts
+/supabase/functions/verify-arcade-purchase/index.ts
+/supabase/functions/verify-checkout-session/index.ts
+/supabase/functions/verify-ebook-purchase/index.ts
+/supabase/functions/verify-gem-purchase/index.ts
+/supabase/migrations/20260313_broker_os_setup.sql
+/supabase/migrations/20260315212500_xlm_bot_report_history.sql
+/supabase/migrations/20260315213200_xlm_bot_liquidation_feed_columns.sql
+/supabase/migrations/20260315_xlm_bot_schema.sql
+/supabase/migrations/20260316030000_market_intel_service.sql
+/supabase/migrations/20260318_gear_engine_tables.sql
+/supabase/migrations/20260319_fix_xlm_write_policies.sql
+/supabase/migrations/20260319_hive_mind_tables.sql
+/supabase/migrations/20260320_intelligence_tables.sql
+/supabase/migrations/20260323_agent_performance.sql
+/supabase/migrations/20260324_field_ops_schema.sql
+/supabase/migrations/20260330_wholesale_client_files.sql
+/supabase/migrations/20260405_customer_onboarding.sql
+/supabase/migrations/20260407_flip_os_schema.sql
+/supabase/migrations/20260407_project_status.sql
+/supabase/migrations/20260407_wholesale_metrics.sql
+/supabase/migrations/20260409_stark_ai_schema.sql
+/supabase/migrations/20260410_onyx_pos_schema.sql
+/supabase/migrations/20260412_onyx_ecosystem.sql
+/supabase/migrations/20260412_onyx_platform.sql
+/supabase/migrations/20260412_onyx_receipt_scans.sql
+/supabase/migrations/20260413_casino_empire.sql
+/supabase/migrations/20260417_multiplayer_blackjack.sql
+/supabase/sql/business_os_schema.sql
+/verify_setup.sh
