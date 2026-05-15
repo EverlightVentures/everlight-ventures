@@ -26,20 +26,7 @@ Reads leads_db.json, advances each lead through the sequence based on
 elapsed days since last_outreach, then saves back.
 """
 
-# === ERADICATION HALT (auto-inserted 2026-05-15 after Streubel 2nd-strike) ===
-import os as _os_halt
-if _os_halt.environ.get("WHOLESALE_OUTBOUND_HALT", "").strip() in {"1", "true", "TRUE", "yes"}:
-    import sys as _sys_halt
-    print("[rex_7touch_sequence.py] WHOLESALE_OUTBOUND_HALT=1 -- refusing to run", file=_sys_halt.stderr)
-    raise SystemExit("WHOLESALE_OUTBOUND_HALT active")
-import sys as _sys_eg
-_sys_eg.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
-try:
-    from eradication_gate import assert_safe as _erad_assert_safe, EradicationViolation
-except ImportError as _eg_err:
-    print(f"[rex_7touch_sequence.py] eradication_gate unavailable: {_eg_err}", file=_sys_eg.stderr)
-    raise SystemExit("eradication_gate required")
-# === END ERADICATION HALT ===
+# (eradication halt block removed after canonical-migration; safe_send_email is now the only send path and it carries the halt + gate internally)
 
 import json
 import logging
@@ -200,34 +187,33 @@ def _pain_pitch(lead_type: str, first: str, addr: str, city: str, state: str) ->
 # ---------------------------------------------------------------------------
 
 def send_email(to: str, subject: str, body: str) -> bool:
-    """Send email via Resend (or rex_utils safe wrapper)."""
-    if not RESEND_KEY or not to:
-        return False
+    """Delegates to rex_utils.safe_send_email (canonical branded_mailer pipeline).
+
+    Migrated 2026-05-15 after Streubel 2nd-strike. The old body POSTed
+    directly to api.resend.com and bypassed render_report. safe_send_email
+    routes through branded_mailer which wraps content_html in the gold
+    template, re-checks eradication_gate / resend_guard / resend_budget /
+    weekly_cadence / phrase_scrub, then sends.
+    """
     try:
         from rex_utils import safe_send_email
-        return safe_send_email(to, subject, body)
     except ImportError:
-        pass
-    import requests
-    try:
-        resp = requests.post(
-            "https://api.resend.com/emails",
-            headers={
-                "Authorization": f"Bearer {RESEND_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "from": FROM_EMAIL,
-                "to": [to],
-                "subject": subject,
-                "text": body,
-                "reply_to": REPLY_TO,
-            },
-            timeout=10,
-        )
-        return resp.status_code in (200, 201)
-    except Exception:
         return False
+    _agent_name = globals().get("AGENT_NAME", "Piper Reeves")
+    _agent_email = globals().get("AGENT_EMAIL", globals().get("FROM_EMAIL", "piper@everlightventures.io"))
+    _agent_title = globals().get("AGENT_TITLE", "Senior Account Executive, Wholesale")
+    # FROM_EMAIL may be "Name <addr@x.com>" -- extract addr if so.
+    import re as _re
+    _m = _re.search(r"<([^>]+)>", _agent_email or "")
+    if _m:
+        _agent_email = _m.group(1)
+    return safe_send_email(
+        to, subject, body,
+        state=state, action=action,
+        agent_name=_agent_name,
+        agent_email=_agent_email,
+        agent_title=_agent_title,
+    )
 
 
 def send_sms_via_gateway(to_email: str, body: str) -> bool:

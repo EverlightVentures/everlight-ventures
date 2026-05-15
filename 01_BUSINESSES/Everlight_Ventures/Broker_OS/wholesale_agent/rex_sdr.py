@@ -15,25 +15,7 @@ Rex runs 3x per day:
 Daily volume target: 100 emails = 50 fresh + 40 follow-ups + 10 re-engages
 """
 
-# === ERADICATION HALT (auto-inserted 2026-05-15 after Streubel 2nd-strike) ===
-# noqa: direct-resend
-# This file still POSTs to api.resend.com directly. The eradication_gate is now
-# called BEFORE any send via rex_utils.safe_send_email; the module refuses to
-# load under WHOLESALE_OUTBOUND_HALT=1. Full migration to branded_mailer is
-# tracked in _state/SELF_AUDIT_2026-05-15_STREUBEL_2ND_STRIKE.md.
-import os as _os_halt
-if _os_halt.environ.get("WHOLESALE_OUTBOUND_HALT", "").strip() in {"1", "true", "TRUE", "yes"}:
-    import sys as _sys_halt
-    print("[rex_sdr.py] WHOLESALE_OUTBOUND_HALT=1 -- refusing to run", file=_sys_halt.stderr)
-    raise SystemExit("WHOLESALE_OUTBOUND_HALT active")
-import sys as _sys_eg
-_sys_eg.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
-try:
-    from eradication_gate import assert_safe as _erad_assert_safe, EradicationViolation
-except ImportError as _eg_err:
-    print(f"[rex_sdr.py] eradication_gate unavailable: {_eg_err}", file=_sys_eg.stderr)
-    raise SystemExit("eradication_gate required")
-# === END ERADICATION HALT ===
+# (eradication halt block removed after canonical-migration; safe_send_email is now the only send path and it carries the halt + gate internally)
 
 import csv
 import json
@@ -218,52 +200,33 @@ def _verify_mx(email_addr: str) -> bool:
     return valid
 
 def send_email(to: str, subject: str, body: str) -> bool:
-    """Send via Resend first. If quota exceeded, overflow to Gmail SMTP. $0 = 600/day."""
-    global _resend_sent_today
-    if not to:
+    """Delegates to rex_utils.safe_send_email (canonical branded_mailer pipeline).
+
+    Migrated 2026-05-15 after Streubel 2nd-strike. The old body POSTed
+    directly to api.resend.com and bypassed render_report. safe_send_email
+    routes through branded_mailer which wraps content_html in the gold
+    template, re-checks eradication_gate / resend_guard / resend_budget /
+    weekly_cadence / phrase_scrub, then sends.
+    """
+    try:
+        from rex_utils import safe_send_email
+    except ImportError:
         return False
-
-    if not _verify_mx(to):
-        return False
-
-    # Try Resend first (100/day free tier)
-    if RESEND_KEY and _resend_sent_today < 95:
-        try:
-            import requests
-            resp = requests.post("https://api.resend.com/emails",
-                headers={"Authorization": f"Bearer {RESEND_KEY}", "Content-Type": "application/json"},
-                json={"from": FROM_EMAIL, "to": [to], "subject": subject, "text": body, "reply_to": REPLY_TO},
-                timeout=10)
-            if resp.status_code in (200, 201):
-                _resend_sent_today += 1
-                return True
-            elif resp.status_code == 429 or "rate" in resp.text.lower() or "quota" in resp.text.lower():
-                _resend_sent_today = 100  # force overflow to Gmail
-            else:
-                return False
-        except Exception:
-            pass
-
-    # Overflow: Gmail SMTP (500/day free)
-    gmail_user = os.environ.get("IMAP_USER", "")
-    gmail_pass = os.environ.get("IMAP_PASS", "")
-    if gmail_user and gmail_pass:
-        try:
-            import smtplib
-            from email.mime.text import MIMEText
-            msg = MIMEText(body)
-            msg["Subject"] = subject
-            msg["From"] = gmail_user
-            msg["To"] = to
-            msg["Reply-To"] = REPLY_TO
-            with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as server:
-                server.login(gmail_user, gmail_pass)
-                server.send_message(msg)
-            return True
-        except Exception:
-            return False
-
-    return False
+    _agent_name = globals().get("AGENT_NAME", "Piper Reeves")
+    _agent_email = globals().get("AGENT_EMAIL", globals().get("FROM_EMAIL", "piper@everlightventures.io"))
+    _agent_title = globals().get("AGENT_TITLE", "Senior Account Executive, Wholesale")
+    # FROM_EMAIL may be "Name <addr@x.com>" -- extract addr if so.
+    import re as _re
+    _m = _re.search(r"<([^>]+)>", _agent_email or "")
+    if _m:
+        _agent_email = _m.group(1)
+    return safe_send_email(
+        to, subject, body,
+        state=state, action=action,
+        agent_name=_agent_name,
+        agent_email=_agent_email,
+        agent_title=_agent_title,
+    )
 
 
 def personalize(template: str, lead: dict) -> str:

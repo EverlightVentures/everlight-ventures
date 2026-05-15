@@ -1,0 +1,37 @@
+# Oracle-side wholesale cron template (e5-mother / ev-box)
+# ---------------------------------------------------------------------
+# Install on Oracle host:
+#   1. mkdir -p ~/.config/everlight && chmod 700 ~/.config/everlight
+#   2. cp /AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/secrets.env.example \
+#         ~/.config/everlight/secrets.env
+#   3. fill in the secrets, then `chmod 600 ~/.config/everlight/secrets.env`
+#   4. append THE LINES BELOW to the host's crontab (`crontab -e`)
+#
+# Role discipline:
+#   - Phone (primary): runs the canonical cron. Does NOT set
+#     WHOLESALE_REDUNDANCY_ROLE -- defaults to primary.
+#   - Oracle (secondary): sets WHOLESALE_REDUNDANCY_ROLE=secondary in its
+#     secrets.env so hive_cron_redundancy.should_run() defers to the
+#     freshest peer heartbeat (the phone). If the phone heartbeat ages out
+#     (>65 min), Oracle takes over the next tick and Slack-alerts.
+#
+# How failover works:
+#   - Both hosts run the SAME cron schedule.
+#   - Each tick, wholesale_cron_runner.sh asks should_run(): primary runs,
+#     secondary defers if the peer heartbeat is fresh.
+#   - Heartbeat files in _state/heartbeats/ sync via git + Syncthing.
+#   - Watchdog (every 5 min on both hosts) screams Slack when EVERY host
+#     has gone silent > 30 min.
+# ---------------------------------------------------------------------
+
+# Secret-loading helper. Path must match host install location.
+# (On Oracle, /home/opc/.config/everlight/secrets.env or /home/ubuntu/...)
+
+# rex_negotiator: every 2 min
+*/2 * * * * cd /home/opc/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent && . /home/opc/.config/everlight/secrets.env && bash /home/opc/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/wholesale_cron_runner.sh rex_negotiator_2min python3 rex_negotiator.py >> /home/opc/AA_MY_DRIVE/_logs/rex_negotiator.log 2>&1
+
+# rex_belfort_sequence: hourly
+0 * * * * cd /home/opc/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent && . /home/opc/.config/everlight/secrets.env && bash /home/opc/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/wholesale_cron_runner.sh wholesale_hourly python3 rex_belfort_sequence.py >> /home/opc/AA_MY_DRIVE/_logs/rex_7touch.log 2>&1
+
+# Watchdog: every 5 min, alerts Slack when wholesale silent on every host > 30 min
+*/5 * * * * . /home/opc/.config/everlight/secrets.env && python3 /home/opc/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/hive_cron_redundancy.py watchdog wholesale_hourly >> /home/opc/AA_MY_DRIVE/_logs/cron_redundancy_watchdog.log 2>&1

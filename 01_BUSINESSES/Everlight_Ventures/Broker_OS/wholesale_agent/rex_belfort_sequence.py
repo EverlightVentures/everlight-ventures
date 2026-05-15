@@ -111,136 +111,33 @@ def verify_mx(email_addr):
 
 
 def send_email(to, subject, body, state: str = "", action: str = "outreach"):
-    """Resend first, Gmail overflow. Pre-validates MX records to avoid wasted sends.
-    Enforces state_gates.json compliance when `state` is provided. Owner/internal
-    addresses are blocked upstream by resend_guard (platform policy).
+    """Delegates to rex_utils.safe_send_email (canonical branded_mailer pipeline).
+
+    Migrated 2026-05-15 after Streubel 2nd-strike. The old body POSTed
+    directly to api.resend.com and bypassed render_report. safe_send_email
+    routes through branded_mailer which wraps content_html in the gold
+    template, re-checks eradication_gate / resend_guard / resend_budget /
+    weekly_cadence / phrase_scrub, then sends.
     """
-    global _resend_count
-    if not to:
-        return False
-
-    # ============================================================
-    # ERADICATION GATE -- FIRST. Permanent DNC subjects (Streubel et al.).
-    # Hardcoded list. JSON files cannot bypass this. Fail closed.
-    # ============================================================
     try:
-        _erad_assert_safe(email=to, address=subject, caller="rex_belfort_sequence.send_email")
-    except EradicationViolation as _eg_err:
-        log.error("ERADICATION GATE blocked send to %s: %s", to, _eg_err)
+        from rex_utils import safe_send_email
+    except ImportError:
         return False
-
-    # MX validation -- don't waste a send on a domain that can't receive email
-    if not verify_mx(to):
-        log.debug(f"MX check failed for {to} -- skipping")
-        return False
-
-    # Block owner/internal addresses at the send boundary (Slack-only policy)
-    try:
-        import sys as _sys
-        _sys.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
-        from resend_guard import is_owner_recipient
-        if is_owner_recipient(to):
-            log.warning("resend_guard blocked owner-bound send to %s", to)
-            return False
-    except Exception:
-        pass
-
-    # State compliance gate (sms/call/email all routed through this func)
-    if state:
-        try:
-            import sys as _sys, pathlib as _pl
-            _sys.path.insert(0, str(_pl.Path(__file__).resolve().parent / "compliance"))
-            from state_gate import check as _state_check
-            decision = _state_check(state, channel="email", action=action)
-            if not decision.ok:
-                log.warning("state_gate BLOCK %s/%s: %s", state, action, decision.blocked_reason)
-                return False
-            # Append CAN-SPAM footer if missing (required by state_gate.check for email)
-            if "unsubscribe" not in body.lower() and "opt out" not in body.lower():
-                body = body.rstrip() + (
-                    "\n\n---\nEverlight Ventures, Wholesale Division\n"
-                    "To opt out reply STOP or email opt-out@everlightventures.io.\n"
-                    "You received this because we believe you may own a property we'd like to acquire."
-                )
-        except Exception as _e:
-            log.warning("state_gate import failed, proceeding uncompliant: %s", _e)
-    else:
-        log.warning("rex_belfort.send_email called without state -- compliance NOT checked")
-
-    # Wrap plain-text body in the branded Everlight template (gold/black, Playfair+Inter).
-    # Every wholesale outreach email now looks like the luxury brand.
-    body_html = body
-    try:
-        import sys as _sys
-        _sys.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
-        from report_template import render_report
-        # Convert plain text -> HTML paragraphs. Preserve the bulleted list block.
-        lines = body.split("\n")
-        html_parts = []
-        in_list = False
-        for ln in lines:
-            s = ln.strip()
-            if s.startswith("- ") or s.startswith("* "):
-                if not in_list:
-                    html_parts.append("<ul>")
-                    in_list = True
-                html_parts.append(f"<li>{s[2:]}</li>")
-                continue
-            if in_list:
-                html_parts.append("</ul>")
-                in_list = False
-            if s == "":
-                html_parts.append("")
-            elif s == "---":
-                html_parts.append("<hr style='border:0;border-top:1px solid #222;margin:20px 0;'>")
-            else:
-                html_parts.append(f"<p>{s}</p>")
-        if in_list:
-            html_parts.append("</ul>")
-        content_html = "\n".join(p for p in html_parts if p is not None)
-        body_html = render_report(
-            title=subject,
-            content_html=content_html,
-            agent_name=AGENT_NAME,
-            agent_title=AGENT_TITLE,
-            agent_email=AGENT_EMAIL,
-            confidential=False,
-        )
-    except Exception as _e:
-        log.debug("branded wrap unavailable, falling back to plain text: %s", _e)
-
-    if RESEND_KEY and _resend_count < 95:
-        try:
-            import requests
-            r = requests.post("https://api.resend.com/emails",
-                headers={"Authorization": f"Bearer {RESEND_KEY}", "Content-Type": "application/json"},
-                json={"from": FROM_EMAIL, "to": [to], "subject": subject,
-                      "html": body_html, "text": body, "reply_to": REPLY_TO},
-                timeout=10)
-            if r.status_code in (200, 201):
-                _resend_count += 1
-                return True
-            elif r.status_code == 429 or "quota" in r.text.lower():
-                _resend_count = 100
-        except:
-            pass
-
-    if GMAIL_USER and GMAIL_PASS:
-        try:
-            import smtplib
-            from email.mime.text import MIMEText
-            msg = MIMEText(body)
-            msg["Subject"] = subject
-            msg["From"] = GMAIL_USER
-            msg["To"] = to
-            msg["Reply-To"] = REPLY_TO
-            with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=15) as server:
-                server.login(GMAIL_USER, GMAIL_PASS)
-                server.send_message(msg)
-            return True
-        except:
-            return False
-    return False
+    _agent_name = globals().get("AGENT_NAME", "Piper Reeves")
+    _agent_email = globals().get("AGENT_EMAIL", globals().get("FROM_EMAIL", "piper@everlightventures.io"))
+    _agent_title = globals().get("AGENT_TITLE", "Senior Account Executive, Wholesale")
+    # FROM_EMAIL may be "Name <addr@x.com>" -- extract addr if so.
+    import re as _re
+    _m = _re.search(r"<([^>]+)>", _agent_email or "")
+    if _m:
+        _agent_email = _m.group(1)
+    return safe_send_email(
+        to, subject, body,
+        state=state, action=action,
+        agent_name=_agent_name,
+        agent_email=_agent_email,
+        agent_title=_agent_title,
+    )
 
 
 # ---------------------------------------------------------------------------

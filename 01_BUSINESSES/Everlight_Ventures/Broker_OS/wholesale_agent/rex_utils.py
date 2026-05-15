@@ -11,6 +11,26 @@ Covers:
 - System health check (Resend, IMAP, ATTOM, Supabase, Slack)
 """
 
+# === ERADICATION HALT (auto-inserted 2026-05-15 after Streubel 2nd-strike) ===
+# noqa: direct-resend
+# This file still POSTs to api.resend.com directly. The eradication_gate is now
+# called BEFORE any send via rex_utils.safe_send_email; the module refuses to
+# load under WHOLESALE_OUTBOUND_HALT=1. Full migration to branded_mailer is
+# tracked in _state/SELF_AUDIT_2026-05-15_STREUBEL_2ND_STRIKE.md.
+import os as _os_halt
+if _os_halt.environ.get("WHOLESALE_OUTBOUND_HALT", "").strip() in {"1", "true", "TRUE", "yes"}:
+    import sys as _sys_halt
+    print("[rex_utils.py] WHOLESALE_OUTBOUND_HALT=1 -- refusing to run", file=_sys_halt.stderr)
+    raise SystemExit("WHOLESALE_OUTBOUND_HALT active")
+import sys as _sys_eg
+_sys_eg.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
+try:
+    from eradication_gate import assert_safe as _erad_assert_safe, EradicationViolation
+except ImportError as _eg_err:
+    print(f"[rex_utils.py] eradication_gate unavailable: {_eg_err}", file=_sys_eg.stderr)
+    raise SystemExit("eradication_gate required")
+# === END ERADICATION HALT ===
+
 import json
 import logging
 import os
@@ -157,14 +177,27 @@ def is_dead_end_email(email: str) -> bool:
 def safe_send_email(to: str, subject: str, body: str,
                     max_retries: int = 3,
                     state: str = "",
-                    action: str = "outreach") -> bool:
+                    action: str = "outreach",
+                    agent_name: str = "Piper Reeves",
+                    agent_title: str = "Senior Account Executive, Wholesale",
+                    agent_email: str = "piper@everlightventures.io",
+                    from_email: Optional[str] = None,
+                    reply_to: Optional[str] = None) -> bool:
     """
-    Send email via Resend with retry and dead letter queue on failure.
-    Returns True if sent, False if queued to dead letter.
+    Send email via the canonical branded_mailer pipeline. Returns True on
+    success, False if blocked / queued to dead letter.
+
     Auto-skips government, institutional, and dead-end addresses.
     Enforces per-state compliance (state_gates.json) when `state` is provided.
     Appends CAN-SPAM footer if body does not already have one.
+
+    persona params (agent_name/title/email + from_email) let each caller
+    preserve its identity (Piper, Marvin, Vaughn, etc.) while routing
+    through one canonical send path.
     """
+    # Allow callers to pass their persona; default to Piper.
+    persona_from = from_email or os.environ.get("SMTP_FROM_EMAIL", agent_email)
+    persona_reply = reply_to or agent_email
     if not RESEND_KEY:
         log.warning("No RESEND_API_KEY set -- queuing to dead letter")
         _queue_dead_letter(to, subject, body, "no_api_key")
@@ -244,31 +277,79 @@ def safe_send_email(to: str, subject: str, body: str,
         log.warning("safe_send_email called without state -- compliance NOT checked. Caller should pass state=<2-letter>.")
 
     # -----------------------------------------------------------------------
+    # CANONICAL SEND PATH (2026-05-15 migration): delegate to branded_mailer.
+    # The direct api.resend.com POST that used to live here was the bypass
+    # surface that let raw plain-text follow-ups slip past the gold template
+    # AND the centralized gates. Now this function is a thin pre-checking
+    # wrapper around branded_mailer.send_branded_email which:
+    #   - wraps body in render_report() (gold/Playfair luxury template)
+    #   - re-checks eradication_gate (defense in depth)
+    #   - re-checks resend_guard (owner-bound block)
+    #   - applies resend_budget (3000/mo cap, VIP reserve)
+    #   - applies weekly_cadence (per-state quiet hours / cadence)
+    #   - applies phrase_scrub (unauthorized-brokerage language)
+    # Returns True on send-success, False otherwise. Failed sends still
+    # queue to the dead-letter file for retry_dead_letters() to handle.
+    # -----------------------------------------------------------------------
+    try:
+        import sys as _sys
+        _sys.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
+        from branded_mailer import send_branded_email
+    except ImportError as _bm_imp:
+        log.error("branded_mailer unavailable -- failing closed: %s", _bm_imp)
+        _queue_dead_letter(to, subject, body, f"branded_mailer_unavailable:{_bm_imp}")
+        return False
 
-    import requests
+    # Convert plain body to paragraph-wrapped HTML. render_report adds the
+    # outer template (header/footer/styling); this only formats the inner
+    # message content.
+    lines = (body or "").split("\n")
+    html_parts: list[str] = []
+    in_list = False
+    for ln in lines:
+        s = ln.strip()
+        if s.startswith("- ") or s.startswith("* "):
+            if not in_list:
+                html_parts.append("<ul>")
+                in_list = True
+            html_parts.append(f"<li>{s[2:]}</li>")
+            continue
+        if in_list:
+            html_parts.append("</ul>")
+            in_list = False
+        if s == "":
+            html_parts.append("")
+        elif s == "---":
+            html_parts.append("<hr style='border:0;border-top:1px solid #222;margin:20px 0;'>")
+        else:
+            html_parts.append(f"<p>{s}</p>")
+    if in_list:
+        html_parts.append("</ul>")
+    content_html = "\n".join(p for p in html_parts if p is not None)
 
-    def _send():
-        resp = requests.post(
-            "https://api.resend.com/emails",
-            headers={
-                "Authorization": f"Bearer {RESEND_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "from": FROM_EMAIL,
-                "to": [to],
-                "subject": subject,
-                "text": body,
-                "reply_to": REPLY_TO,
-            },
-            timeout=15,
+    def _send_via_branded():
+        result = send_branded_email(
+            to=to,
+            subject=subject,
+            content_html=content_html,
+            from_name=agent_name,
+            from_email=persona_from,
+            reply_to=persona_reply,
+            agent_name=agent_name,
+            agent_title=agent_title,
+            agent_email=agent_email,
+            plain_text_fallback=body,
+            budget_category=("vip_reply" if action == "reply" else "bulk"),
+            recipient_state=(state or ""),
+            lead_type=action,
+            state_disclaimer=True,
         )
-        if resp.status_code not in (200, 201):
-            raise RuntimeError(f"Resend API returned {resp.status_code}: {resp.text[:200]}")
+        if not result.ok:
+            raise RuntimeError(f"branded_mailer returned not-ok: {result.error}")
         return True
 
     try:
-        return retry(_send, max_retries=max_retries, delay=5, backoff=2.0)
+        return retry(_send_via_branded, max_retries=max_retries, delay=5, backoff=2.0)
     except Exception as e:
         log.error(f"Email to {to} failed after {max_retries} retries: {e}")
         _queue_dead_letter(to, subject, body, str(e))

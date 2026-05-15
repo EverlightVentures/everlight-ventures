@@ -162,3 +162,6 @@ ProtonDrive/
 
 # Cloud-state local mirror (per feedback_cloud_state_mirrors_local_always)
 _state/cloud_mirror_secrets/
+
+# Pre-migration archives of obsolete function bodies (local reference only)
+*.pre-migration.*.txt

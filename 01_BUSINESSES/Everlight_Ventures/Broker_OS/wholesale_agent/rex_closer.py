@@ -82,62 +82,33 @@ def _load_title_companies() -> dict:
 # ---------------------------------------------------------------------------
 
 def send_email(to: str, subject: str, body: str, *, state: str = "") -> bool:
-    """Send via the branded mailer so every outbound wears the luxury template.
+    """Delegates to rex_utils.safe_send_email (canonical branded_mailer pipeline).
 
-    `body` is the message content (Harrison's voice, Piper's voice, etc.); the
-    mailer wraps it in the Everlight gold header + signature block. Line breaks
-    in `body` are converted to <br> for the HTML pass; a stripped plain-text
-    fallback is generated automatically.
-
-    Compliance gate: if caller passes `state`, check state_gate before sending.
+    Migrated 2026-05-15 after Streubel 2nd-strike. The old body POSTed
+    directly to api.resend.com and bypassed render_report. safe_send_email
+    routes through branded_mailer which wraps content_html in the gold
+    template, re-checks eradication_gate / resend_guard / resend_budget /
+    weekly_cadence / phrase_scrub, then sends.
     """
-    if not to:
-        return False
-
-    if state:
-        try:
-            import sys
-            sys.path.insert(0, str(Path(__file__).parent))
-            from compliance.state_gate import check
-            gate = check(state, "email", "outreach")
-            if not gate.ok:
-                log.warning(f"Email blocked by state gate ({state}): {gate.blocked_reason}")
-                return False
-        except ImportError:
-            pass  # compliance module optional
-
-    # Route through branded_mailer so the luxury template renders by default.
     try:
-        import sys
-        content_tools = Path("/home/opc/content_tools") if Path("/home/opc/content_tools").exists() \
-            else Path("/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
-        sys.path.insert(0, str(content_tools))
-        from branded_mailer import send_branded_email
-    except ImportError as e:
-        log.error(f"branded_mailer unavailable: {e}")
+        from rex_utils import safe_send_email
+    except ImportError:
         return False
-
-    # Body is plain text with newlines -> HTML <br> for render_report content_html.
-    content_html = (body or "").replace("\n", "<br>\n")
-
-    # FROM_EMAIL may be "Harrison Knox <hammer@everlightventures.io>"; split name + addr.
-    from_name, from_addr = _split_from(FROM_EMAIL)
-
-    result = send_branded_email(
-        to=to,
-        subject=subject,
-        content_html=content_html,
-        title=subject,
-        from_name=from_name,
-        from_email=from_addr,
-        reply_to=REPLY_TO,
-        agent_name=from_name,
-        agent_title="Everlight Ventures Acquisitions",
-        agent_email=from_addr,
+    _agent_name = globals().get("AGENT_NAME", "Piper Reeves")
+    _agent_email = globals().get("AGENT_EMAIL", globals().get("FROM_EMAIL", "piper@everlightventures.io"))
+    _agent_title = globals().get("AGENT_TITLE", "Senior Account Executive, Wholesale")
+    # FROM_EMAIL may be "Name <addr@x.com>" -- extract addr if so.
+    import re as _re
+    _m = _re.search(r"<([^>]+)>", _agent_email or "")
+    if _m:
+        _agent_email = _m.group(1)
+    return safe_send_email(
+        to, subject, body,
+        state=state, action=action,
+        agent_name=_agent_name,
+        agent_email=_agent_email,
+        agent_title=_agent_title,
     )
-    if not result.ok:
-        log.error(f"Email send failed: {result.error}")
-    return result.ok
 
 
 def _split_from(from_line: str) -> tuple:
