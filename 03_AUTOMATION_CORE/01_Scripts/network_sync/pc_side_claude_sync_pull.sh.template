@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# pc_side_claude_sync_pull.sh -- runs on AceMagician PC, NOT on phone.
+#
+# Installation (when PC comes back online):
+#   1. cp ~/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/network_sync/pc_side_claude_sync_pull.sh.template ~/bin/claude_sync_pull.sh
+#   2. chmod +x ~/bin/claude_sync_pull.sh
+#   3. crontab -e  -- append:
+#        17 * * * * /home/richgee/bin/claude_sync_pull.sh
+#   4. Verify ~/.ssh/arch_to_phone exists (private key matching phone's authorized_keys for root).
+#
+# What it does:
+#   Hourly at 17 past, SSH from PC -> phone via tailnet, run claude_sync_acemagician.sh --push
+#   on the phone side. The phone then pushes its newer files to PC.
+#
+# Why "17 past" not "on the hour": per feedback_oracle_only_crons doctrine -- jitter to avoid
+# cron stampedes and to make logs easier to attribute.
+#
+# Belt + suspenders pairing:
+#   - phone-boot one-shot (already wired in /root/.termux/boot/start_hive.sh on phone) = belt
+#   - this hourly cron on PC = suspenders
+#   - both feed the same mature claude_sync_acemagician.sh
+
+set -uo pipefail
+
+# ----- Config -----
+PHONE_USER="root"
+SSH_KEY="$HOME/.ssh/arch_to_phone"            # PC-side private key (match to phone's authorized_keys)
+WORKSPACE_PATH_ON_PHONE="/mnt/sdcard/AA_MY_DRIVE"
+SYNC_SCRIPT="$WORKSPACE_PATH_ON_PHONE/03_AUTOMATION_CORE/01_Scripts/claude_sync_acemagician.sh"
+
+LOG_DIR="$HOME/.claude/logs"
+mkdir -p "$LOG_DIR"
+LOG="$LOG_DIR/sync_pull_$(date +%Y%m%d).log"
+
+ts() { date +'%Y-%m-%dT%H:%M:%S%z'; }
+log() { printf '[%s] %s\n' "$(ts)" "$*" | tee -a "$LOG"; }
+
+# ----- 1. Find phone on tailnet -----
+# Looking for the phone hostname or its known tailnet IP. Adjust if you renamed it.
+PHONE_TS_IP="$(tailscale status 2>/dev/null \
+  | awk '/phone|termux|s23|pixel/ && /100\./ {print $1; exit}')"
+
+if [[ -z "$PHONE_TS_IP" ]]; then
+  log "phone not on tailnet (no peer matched) -- skipping this tick"
+  exit 0
+fi
+
+log "phone found at $PHONE_TS_IP, dispatching --push"
+
+# ----- 2. Pre-flight: can we SSH? -----
+if ! ssh -i "$SSH_KEY" \
+        -o ConnectTimeout=8 \
+        -o BatchMode=yes \
+        -o StrictHostKeyChecking=accept-new \
+        "$PHONE_USER@$PHONE_TS_IP" "echo UP" 2>>"$LOG" | grep -q UP; then
+  log "SSH handshake failed -- skipping (phone may be locked or proot suspended)"
+  exit 0
+fi
+
+# ----- 3. Run the push on the phone side -----
+ssh -i "$SSH_KEY" \
+    -o ConnectTimeout=10 \
+    -o StrictHostKeyChecking=accept-new \
+    "$PHONE_USER@$PHONE_TS_IP" \
+    "bash $SYNC_SCRIPT --push" 2>&1 | tee -a "$LOG"
+RC="${PIPESTATUS[0]}"
+
+if [[ "$RC" -eq 0 ]]; then
+  log "sync ok"
+else
+  log "sync exited with rc=$RC -- check $LOG"
+fi
+
+# ----- 4. Rotate logs older than 14 days -----
+find "$LOG_DIR" -name 'sync_pull_*.log' -type f -mtime +14 -delete 2>/dev/null
+
+exit "$RC"

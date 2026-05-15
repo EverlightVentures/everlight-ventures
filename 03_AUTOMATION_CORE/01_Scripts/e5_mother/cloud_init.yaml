@@ -1,0 +1,137 @@
+#cloud-config
+# e5_mother cloud-init -- paste VERBATIM into the OCI Console at launch
+# Compute -> Instances -> Create Instance -> Advanced -> Management -> Cloud-init script
+#
+# Target shape: VM.Standard.A1.Flex
+#   - 4 OCPU / 18 GB RAM (or 16 GB if 18 unavailable)
+#   - Ubuntu 22.04 ARM64 (Canonical-Ubuntu-22.04-aarch64-*)
+#   - 100 GB boot volume
+#   - Public subnet, public IP yes
+#
+# Replaces the dead "mother" at 129.159.38.250. Will host:
+#   - Blinko RAG (Docker)
+#   - n8n (Docker, but parked per doctrine -- container ready, autostart off)
+#   - hive-django (:8504 ops dashboard)
+#   - hive-voice (:8200 Marcus voice handler)
+#   - agentmemory MCP (:3108)
+#   - Open WebUI (:8080 tailnet-only)
+#   - branded comms workers (Python services)
+#
+# After cloud-init finishes (~5-7 min, slower than ev-box because Docker):
+#   ssh -p 2222 ubuntu@<public-ip>  (with /root/.ssh/github_deploy)
+#   touch /tmp/cloud-init-confirmed
+#
+# Then from the phone:
+#   bash 03_AUTOMATION_CORE/01_Scripts/e5_mother/provision.sh <public-ip>
+
+package_update: true
+package_upgrade: true
+
+packages:
+  # Shell + dev
+  - zsh
+  - tmux
+  - mosh
+  - git
+  - curl
+  - wget
+  - jq
+  - python3-pip
+  - python3-venv
+  - python3-dev
+  - build-essential
+  - rclone
+  - htop
+  - btop
+  - fastfetch
+  - ripgrep
+  - fd-find
+  - fzf
+  # Heavy service deps
+  - nginx
+  - redis-server
+  - postgresql-client
+  - ffmpeg
+  - libpq-dev
+  # Networking + diag
+  - net-tools
+  - dnsutils
+  - whois
+  - nmap
+  - traceroute
+  - tcpdump
+  - mtr
+  # Security base
+  - fail2ban
+  - ufw
+  - unattended-upgrades
+
+write_files:
+  # Locked-down SSH config -- port 2222, key-only, no root, no password
+  - path: /etc/ssh/sshd_config.d/00-mother-lockdown.conf
+    permissions: '0644'
+    content: |
+      Port 2222
+      PermitRootLogin no
+      PasswordAuthentication no
+      ChallengeResponseAuthentication no
+      KbdInteractiveAuthentication no
+      PubkeyAuthentication yes
+      X11Forwarding no
+      MaxAuthTries 3
+      LoginGraceTime 30
+      AllowUsers ubuntu
+
+  # fail2ban filter for SSH on 2222
+  - path: /etc/fail2ban/jail.d/sshd-2222.conf
+    permissions: '0644'
+    content: |
+      [sshd]
+      enabled = true
+      port    = 2222
+      maxretry = 4
+      bantime  = 1h
+      findtime = 10m
+
+  # First-boot service-marker writer
+  - path: /usr/local/bin/mother-first-boot.sh
+    permissions: '0755'
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+      # UFW: only 2222/tcp from anywhere, everything else from tailscale0 only
+      ufw --force reset
+      ufw default deny incoming
+      ufw default allow outgoing
+      ufw allow 2222/tcp comment 'ssh break-glass'
+      ufw allow in on tailscale0 comment 'tailnet trusted'
+      ufw --force enable
+      systemctl enable --now fail2ban
+      systemctl restart sshd
+      # Tailscale install (NOT auth -- provision.sh handles that)
+      curl -fsSL https://tailscale.com/install.sh | sh
+      systemctl enable --now tailscaled
+      # Docker install
+      install -m 0755 -d /etc/apt/keyrings
+      curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+      chmod a+r /etc/apt/keyrings/docker.asc
+      echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+        | tee /etc/apt/sources.list.d/docker.list > /dev/null
+      apt-get update -y
+      apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      usermod -aG docker ubuntu
+      systemctl enable --now docker
+      # Node 20 (for agentmemory + Open WebUI builds)
+      curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+      apt-get install -y nodejs
+      # Done marker
+      touch /var/lib/cloud/mother.ready
+      echo "mother first-boot complete $(date -Iseconds)" >> /var/log/mother-first-boot.log
+
+runcmd:
+  - bash /usr/local/bin/mother-first-boot.sh
+
+final_message: |
+  e5_mother cloud-init finished after $UPTIME seconds.
+  Reach it: ssh -p 2222 ubuntu@<public-ip>  (key: /root/.ssh/github_deploy)
+  Provision: bash 03_AUTOMATION_CORE/01_Scripts/e5_mother/provision.sh <public-ip>

@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "description": "Dewey-Decimal-style classification codes for Hive audit entries.",
+  "codes": {
+    "100": "Infrastructure",
+    "110": "Oracle Cloud — instances, volumes, networking, security",
+    "120": "Tailscale / VPN — tailnet membership, ACL, routing",
+    "130": "Local hardware — phone, PC, Dell",
+    "140": "Webhooks / Public endpoints — Cloudflare, ingress",
+
+    "200": "Memory / Knowledge",
+    "210": "Blinko RAG — storage, restore, queries",
+    "220": "Memory sync / reconciliation — Claude memory files, doctrine",
+    "230": "Agent memory awareness — blinko_status, observability for memory",
+
+    "300": "Services / Runtime",
+    "310": "Hive Core — action-engine, self-healer, hive-dashboard",
+    "320": "MCP Fleet — the 7 mcp-*-proxy services",
+    "330": "Wholesale Pipeline — broker-orch, cuyahoga-scrape, outreach",
+    "340": "XLM Trading — xlm-bot, dashboards, watchtower",
+    "350": "Briefs & Pulse — ceo-brief, morning-brief, hourly-pulse",
+
+    "400": "Tools / Observability",
+    "410": "Dashboards — Moltbook, hive-django, Homarr, Langfuse",
+    "420": "Logging / activity tools — activity_feed, journal aggregation",
+    "430": "Audit tools — audit_log, classification, the meta-layer",
+
+    "500": "Doctrine / Process",
+    "510": "Operator preferences — feedback rules, hard laws",
+    "520": "Sync architecture — node priorities, GitHub-bus pipeline",
+    "530": "Recovery procedures — orphan mounts, .env reconstruction",
+    "540": "Naming / org standards — this codebook itself",
+
+    "600": "External integrations",
+    "610": "Payments — Stripe",
+    "620": "Email — Resend, branded_mailer, ImprovMX",
+    "630": "Comms — Slack, Twilio",
+    "640": "Data — Supabase, GitHub, Google Drive/Maps"
+  },
+  "threads": {
+    "oracle-recover-replace": "The .250 → e5-mother migration: capacity hunt, instance launch, data restore.",
+    "memory-resilience": "Blinko restore + memory awareness + local fallback model.",
+    "dashboard-build": "Moltbook personal AI notebook construction.",
+    "sync-architecture": "Multi-node sync mesh design (phone → GitHub → Oracle → PC + Taildrive).",
+    "service-provisioning": "Bringing the 113 systemd units back up on e5-mother in batches.",
+    "doctrine-reconciliation": "Doctrine cleanup, memory merge, naming standards."
+  },
+  "sessions": {
+    "s-001-may10-network-audit": {
+      "start": "2026-05-10T00:00:00-07:00",
+      "end":   "2026-05-13T23:59:59-07:00",
+      "summary": "Initial network audit, e5_mother provisioning kit built, workspace sprawl mapped, capacity hammer set up."
+    },
+    "s-002-may14-migration": {
+      "start": "2026-05-14T00:00:00-07:00",
+      "end":   "2026-05-14T23:59:59-07:00",
+      "summary": "Card on file → PAYG upgrade → e5-mother LANDED → data restore → Tailscale joined → Blinko live."
+    },
+    "s-003-may15-tooling": {
+      "start": "2026-05-15T00:00:00-07:00",
+      "end":   "2026-05-15T23:59:59-07:00",
+      "summary": "Third orphan grab (/opt/mcp_servers), memory awareness service, activity feed, Moltbook v1, audit log."
+    }
+  }
+}

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+<meta name="color-scheme" content="dark">
+<title>Moltbook · Lucrex Notebook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/everlight.css">
+</head>
+<body>
+
+<div class="mesh-bg" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark">EV</span>
+    <span class="brand-name">Everlight Ventures</span>
+  </div>
+  <div class="topbar-right">
+    <span id="clock" class="clock">--:--:--</span>
+    <span id="memory-pill" class="pill pill-unknown">memory: …</span>
+  </div>
+</header>
+
+<main class="content">
+
+  <section class="hero">
+    <div class="hero-eyebrow">Personal AI Notebook</div>
+    <h1 class="hero-title"><span class="hero-title-mark">Moltbook</span></h1>
+    <div class="hero-subtitle">Lucrex Notebook · the family's coordination surface</div>
+    <div class="hero-meta">
+      <span id="hero-date">— · —</span>
+      <span class="dot">·</span>
+      <span id="hero-refresh">refresh: —s</span>
+    </div>
+  </section>
+
+  <section class="pane" id="family-pane">
+    <h2><span class="section-num">01</span> The Family</h2>
+    <div id="family-grid" class="family-grid">
+      <div class="card skeleton">loading…</div>
+    </div>
+  </section>
+
+  <section class="pane" id="audit-pane">
+    <h2><span class="section-num">02</span> Audit Log <span class="section-hint">click any entry for the full reasoning</span></h2>
+    <div id="audit-list" class="audit-list">
+      <div class="card skeleton">loading…</div>
+    </div>
+  </section>
+
+  <section class="pane two-col">
+    <div id="memory-pane">
+      <h2><span class="section-num">03</span> Memory State</h2>
+      <div id="memory-card" class="card glass">
+        <div class="skeleton">loading…</div>
+      </div>
+    </div>
+    <div id="notes-pane">
+      <h2><span class="section-num">04</span> Recent Notes</h2>
+      <div id="notes-list" class="notes">
+        <div class="card skeleton">loading…</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pane" id="queue-pane">
+    <h2><span class="section-num">05</span> Open Queue</h2>
+    <div class="card glass">
+      <ul class="queue">
+        <li><span class="queue-tag">phase 8</span> Moltbook dashboard — <em>shipping now</em></li>
+        <li><span class="queue-tag">phase 9</span> e5-mother sync boot hook</li>
+        <li><span class="queue-tag">phase 10</span> Batch 2/3/4 service provisioning</li>
+        <li><span class="queue-tag">phase 11</span> GitHub immortal-layer commit</li>
+        <li><span class="queue-tag op</span> Tailscale ACL paste · phone tailscaled kick</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<!-- Audit detail modal -->
+<div id="audit-modal" class="modal" hidden>
+  <div class="modal-backdrop" data-close></div>
+  <div class="modal-panel" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <button class="modal-close" data-close aria-label="Close">×</button>
+    <header class="modal-header">
+      <div class="modal-eyebrow" id="modal-eyebrow">audit entry</div>
+      <h2 id="modal-title">…</h2>
+      <div class="modal-meta" id="modal-meta"></div>
+    </header>
+    <div class="modal-summary" id="modal-summary"></div>
+    <article class="modal-body markdown" id="modal-body">
+      <div class="skeleton">loading…</div>
+    </article>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-line">
+    <span class="wordmark">Moltbook · v1</span>
+    <span class="footer-sep">·</span>
+    <span id="footer-status">connecting…</span>
+  </div>
+  <div class="footer-links">
+    <a href="/api/audit">audit.json</a>
+    <span class="footer-sep">·</span>
+    <a href="/api/memory">memory.json</a>
+    <span class="footer-sep">·</span>
+    <a href="/api/activity">activity.json</a>
+    <span class="footer-sep">·</span>
+    <a href="/api/mailbox">mailbox.json</a>
+    <span class="footer-sep">·</span>
+    <a href="/api/family">family.json</a>
+  </div>
+</footer>
+
+<script src="/static/js/app.js" defer></script>
+</body>
+</html>

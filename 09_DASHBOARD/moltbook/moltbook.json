@@ -1,0 +1,27 @@
+{
+  "title": "Moltbook",
+  "subtitle": "Lucrex Notebook",
+  "refresh_seconds": 30,
+  "devices": [
+    {
+      "name": "e5-mother",
+      "tailnet_ip": "100.125.115.95",
+      "role": "Oracle hub · always-on 24/7"
+    },
+    {
+      "name": "acemagician-pc",
+      "tailnet_ip": "100.93.253.49",
+      "role": "Powerful #2 · heavy compute"
+    },
+    {
+      "name": "richards-z-fold7",
+      "tailnet_ip": "100.112.180.29",
+      "role": "Workstation · where edits originate"
+    },
+    {
+      "name": "mgn-latitude-e7240",
+      "tailnet_ip": "100.120.23.23",
+      "role": "Spare · thin client"
+    }
+  ]
+}
