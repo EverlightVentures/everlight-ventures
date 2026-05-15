@@ -159,3 +159,6 @@ ProtonDrive/
 .codex/agents/
 .codex/skills/
 .codex/commands/
+
+# Cloud-state local mirror (per feedback_cloud_state_mirrors_local_always)
+_state/cloud_mirror_secrets/
