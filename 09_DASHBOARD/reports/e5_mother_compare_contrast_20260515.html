@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>.250 vs e5-mother -- Deep Compare & Contrast | 2026-05-15</title>
+<style>
+  :root { --gold: #D4A843; --gold-dim: #8a6f2e; --dark: #0A0A0A; --dark-2: #141414; --light: #E8E8E8; --muted: #888; --red: #c84a4a; --green: #5fad6f; --amber: #d49a43; --blue: #5f9ad4; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--dark); color: var(--light); font-family: "Inter", system-ui, sans-serif; line-height: 1.55; padding: 0 0 80px 0; }
+  header { background: linear-gradient(180deg, #1a1a1a 0%, var(--dark) 100%); border-bottom: 2px solid var(--gold); padding: 36px 48px 28px; }
+  .wordmark { color: var(--gold); font-family: "Playfair Display", Georgia, serif; font-size: 13px; letter-spacing: 0.3em; text-transform: uppercase; }
+  h1 { font-family: "Playfair Display", Georgia, serif; font-size: 36px; margin: 8px 0 6px; color: var(--light); font-weight: 600; }
+  .subtitle { color: var(--muted); font-size: 14px; }
+  main { max-width: 1300px; margin: 0 auto; padding: 36px 48px; }
+  h2 { font-family: "Playfair Display", Georgia, serif; font-size: 26px; color: var(--gold); border-bottom: 1px solid #2a2a2a; padding-bottom: 8px; margin: 40px 0 18px; font-weight: 600; }
+  h3 { color: var(--light); font-size: 17px; margin: 22px 0 8px; }
+  p, li { color: #ddd; font-size: 14.5px; }
+  ul, ol { margin-left: 22px; margin-bottom: 12px; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0 18px; font-size: 13px; }
+  th { background: #1a1a1a; color: var(--gold); padding: 9px 11px; text-align: left; border-bottom: 1px solid var(--gold-dim); font-weight: 500; font-size: 11.5px; letter-spacing: 0.05em; text-transform: uppercase; }
+  td { padding: 7px 11px; border-bottom: 1px solid #1a1a1a; color: #ccc; vertical-align: top; }
+  tr:hover td { background: #111; }
+  code, .mono { font-family: "JetBrains Mono", "Fira Code", monospace; font-size: 12px; color: var(--gold); background: #181818; padding: 1px 5px; border-radius: 3px; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10.5px; letter-spacing: 0.05em; font-weight: 500; text-transform: uppercase; white-space: nowrap; }
+  .pill-green { background: #1a2e1f; color: var(--green); border: 1px solid var(--green); }
+  .pill-red { background: #2e1a1a; color: var(--red); border: 1px solid var(--red); }
+  .pill-amber { background: #2e261a; color: var(--amber); border: 1px solid var(--amber); }
+  .pill-blue { background: #1a2030; color: var(--blue); border: 1px solid var(--blue); }
+  .pill-grey { background: #1a1a1a; color: var(--muted); border: 1px solid #333; }
+  .callout { background: #14110a; border-left: 3px solid var(--gold); padding: 14px 18px; margin: 16px 0; border-radius: 0 4px 4px 0; }
+  .callout strong { color: var(--gold); }
+  .callout-red { border-left-color: var(--red); }
+  .callout-red strong { color: var(--red); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 14px 0; }
+  .card { background: var(--dark-2); border: 1px solid #222; padding: 14px 18px; border-radius: 4px; }
+  .card h4 { color: var(--gold); font-size: 13.5px; margin-bottom: 8px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .ascii { font-family: "JetBrains Mono", monospace; background: #0e0e0e; padding: 16px; border-radius: 4px; border: 1px solid #1f1f1f; color: #b5b5b5; font-size: 11.5px; line-height: 1.45; white-space: pre; overflow-x: auto; }
+  footer { border-top: 1px solid #2a2a2a; margin-top: 60px; padding: 24px 48px; color: var(--muted); font-size: 12px; text-align: center; }
+  .footer-mark { color: var(--gold); letter-spacing: 0.3em; font-family: "Playfair Display", serif; }
+  .small { font-size: 12.5px; color: var(--muted); }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header>
+  <div class="wordmark">Everlight Ventures &nbsp;&middot;&nbsp; data lineage audit</div>
+  <h1>.250 vs e5-mother &mdash; Deep Compare & Contrast</h1>
+  <div class="subtitle">2026-05-15 &middot; Two-pass methodology &middot; Pass 1 complete (live state); Pass 2 pending (orphan binary diff)</div>
+</header>
+
+<main>
+
+<!-- ============================================== -->
+<h2>1. How to read this document</h2>
+
+<p>This is the audit-trail Rich asked for so we never repeat the missing-file incidents and never lose framework hours. Three principles drive the structure:</p>
+
+<ol>
+  <li><strong>Honest about what we don't know.</strong> The orphan boot volume (<code>xlm-bot-core-e5-2c16g</code>) can't be mounted from the CLI; needs an operator unblock in OCI Console. Pass 2 of this audit (binary diff against orphan) is documented but pending.</li>
+  <li><strong>Provenance on every claim.</strong> Each row in the comparison tables names the source (live process state, recovered tree timestamp, recovery_log entry, doctrine drift).</li>
+  <li><strong>Decisions are reversible</strong> — every "delete this" or "this is redundant" includes a manifest path so we can audit-trail the choice later.</li>
+</ol>
+
+<div class="callout">
+<strong>The four data layers and their truth status today (2026-05-15 09:55 PT):</strong>
+<table>
+  <tr><th>Layer</th><th>What</th><th>Current state</th><th>Provenance</th></tr>
+  <tr><td>Layer 1 -- Live services</td><td>What's actually running on e5-mother RIGHT NOW</td><td><span class="pill pill-green">verified</span> 8 daemons + 21 timers, smokes pass</td><td><code>systemctl list-units --type=service --state=active</code></td></tr>
+  <tr><td>Layer 2 -- e5_data recovery tree</td><td>What got extracted from .250 onto e5-mother</td><td><span class="pill pill-green">verified</span> 3.8 GB, 3,731 .py, 67 .service files</td><td><code>find /home/ubuntu/e5_data/ -type f</code></td></tr>
+  <tr><td>Layer 3 -- Workspace mirror</td><td>The phone workspace rsync'd to e5-mother</td><td><span class="pill pill-green">verified</span> 20 GB synced 2026-05-15 09:39 PT</td><td><code>/home/ubuntu/AA_MY_DRIVE</code></td></tr>
+  <tr><td>Layer 4 -- Orphan boot volume</td><td>The bit-for-bit .250 root volume (47 GB)</td><td><span class="pill pill-amber">unverified</span> AVAILABLE but un-mountable from CLI</td><td><code>oci bv boot-volume get</code> -- needs Console unblock</td></tr>
+</table>
+</div>
+
+<!-- ============================================== -->
+<h2>2. The recovery thought-process &mdash; what happened, in order</h2>
+
+<div class="ascii">
+2026-02-27  Original .250 instance provisioned          [boot vol: "Xlm-bot (Boot Volume)" 47GB created]
+            Actually: this is the Oracle Micro, NOT the mother. Mother came later.
+
+2026-03-14  ".250 mother" provisioned                   [boot vol: "xlm-bot-core-e5-2c16g (Boot Volume)" 47GB]
+            VM.Standard.E2.2 (legacy paid shape) -- the host that ran Blinko, MCPs, hive stack, n8n until 2026-04-30.
+
+2026-04-30  .250 mother TERMINATED                       [instance gone; boot vol now detached/orphaned]
+            Cause: paid E2.2 shape dropped from Always Free during account audit.
+            Audit log entry: 08_BACKUPS/recovery_log.md, "May 11 audit found only xlm-bot.service running."
+
+2026-05-04  "everlight-recovery-clean" provisioned       [E2.1.Micro + 47 GB boot vol]
+            Purpose: scratch host for the recovery hunt, probably never used in earnest.
+            Currently RUNNING (consumes an Always-Free Micro slot).
+
+2026-05-14  e5-mother provisioned (everlight-prod-a1)    [A1.Flex 4 OCPU/24 GB + 50 GB boot vol -- bootVolumeQuota-shrunk from planned 100 GB]
+            OCI bootVolumeQuota was at 141 GB (3x 47 GB existing); shrank new boot to 50 GB to fit.
+
+2026-05-14  "Third orphan pass" recovery                 [/home/ubuntu/e5_data/ written, 3.8 GB extracted]
+            Per audit_log/2026-05-14-002-e5-data-restored.md.
+            Method: mount orphan boot vol, rsync /home/opc/, /opt/mcp_servers/, /usr/local/, /root/ to e5-mother.
+
+2026-05-15  Service provisioning Batch 2/3/4             [28 of 67 recovered units installed + 14 timers + Blinko + open-webui + agentmemory]
+            Sessions audit_log/2026-05-15-001 through 006.
+            Today's work: /home/opc -> /home/ubuntu/e5_data symlink, Python deps via pip --user, broken MCPs repointed.
+
+2026-05-15  TODAY: deep compare-contrast (this doc)      [Pass 1 = layers 1-3 verified; Pass 2 = layer 4 pending operator unblock]
+</div>
+
+<!-- ============================================== -->
+<h2>3. The big comparison &mdash; service by service</h2>
+
+<p>Every systemd unit that was in the .250 recovery tree, mapped against (a) what's installed on e5-mother now, (b) running, (c) the decision rationale. Color-coded.</p>
+
+<table>
+  <tr><th>Unit</th><th>In .250 recovery?</th><th>Installed on e5?</th><th>Currently running?</th><th>Decision &amp; rationale</th></tr>
+
+  <!-- Cluster: hive core daemons -->
+  <tr><td colspan="5" style="background:#0e0e0e; color:var(--gold); font-weight:600; padding-top:10px;">CLUSTER: HIVE CORE DAEMONS</td></tr>
+  <tr><td><code>blinko</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">active</span></td><td>Serves :1111. 3,711 notes verified. CRITICAL.</td></tr>
+  <tr><td><code>hive-action-engine</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">active</span></td><td>Auto-detect+fix loop. SLACK_BOT_TOKEN moved to EnvironmentFile today.</td></tr>
+  <tr><td><code>hive-slack-agent</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">active</span></td><td>Conversational AI for @mentions. Script bug (3-arg get) patched today.</td></tr>
+  <tr><td><code>hive-reports</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">active</span></td><td>HTTP server on :8590 for HTML reports.</td></tr>
+  <tr><td><code>hive-self-healer</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-blue">timer</span></td><td>Scans systemd failures every 30 min.</td></tr>
+  <tr><td><code>hive-task-runner</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-blue">timer</span></td><td>Drains <code>_hive_tasks/</code> every 2 min via Anthropic API.</td></tr>
+  <tr><td><code>hive-health</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-blue">timer</span></td><td>Every 5 min check. Was trying to restart xlm-bot/n8n on a different host -- harmless logging.</td></tr>
+
+  <!-- Cluster: MCPs -->
+  <tr><td colspan="5" style="background:#0e0e0e; color:var(--gold); font-weight:600; padding-top:10px;">CLUSTER: MCP FLEET (THE INVENTORY OF FOUR PROBED 2026-05-15 AT 09:00)</td></tr>
+  <tr><td><code>mcp-blinko-proxy</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">active :3101</span></td><td>Repointed today from e5_recovered/ to workspace path.</td></tr>
+  <tr><td><code>mcp-market-intel-proxy</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">active :3102</span></td><td>Repointed today.</td></tr>
+  <tr><td><code>mcp-n8n-proxy</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">active :3103</span></td><td>Repointed today. n8n itself parked but the MCP shim provides the workflow surface for future use.</td></tr>
+  <tr><td><code>mcp-dispatcher-relay</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-green">active :8503</span></td><td><strong>relay.py source LOST in e5_recovered delete; RECONSTRUCTED today from session transcript + audit log.</strong> Health endpoint OK. Pass-2 should diff against orphan original.</td></tr>
+  <tr><td><code>mcp-resend-proxy</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-grey">deferred</span></td><td>Unit file has <code>re_*</code> Resend API key hardcoded (redacted). Move to <code>/etc/default/mcp-resend</code> mode 600 first.</td></tr>
+  <tr><td><code>mcp-stripe-proxy</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-grey">deferred</span></td><td>Unit file has <code>rk_live_*</code> Stripe restricted key hardcoded (redacted). Move to <code>/etc/default/mcp-stripe</code> first. Also key may be scope-restricted (got 401 on balance endpoint).</td></tr>
+  <tr><td><code>mcp-supabase-proxy</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-grey">deferred</span></td><td>Unit file has <code>sbp_*</code> Supabase service key hardcoded (redacted).</td></tr>
+  <tr><td><code>agentmemory</code></td><td><span class="pill pill-red">no (doctrine drift)</span></td><td><span class="pill pill-green">yes (NEW today)</span></td><td><span class="pill pill-green">active :3108</span></td><td>Doctrine claimed it ran on .250 but the recovery tree has no unit; installed fresh from @modelcontextprotocol/server-memory today.</td></tr>
+
+  <!-- Cluster: Wholesale pipeline -->
+  <tr><td colspan="5" style="background:#0e0e0e; color:var(--gold); font-weight:600; padding-top:10px;">CLUSTER: WHOLESALE PIPELINE (14 timers)</td></tr>
+  <tr><td><code>broker-orch-{full,scout,match,outreach}</code></td><td colspan="2"><span class="pill pill-green">all 4 yes</span></td><td><span class="pill pill-blue">timers active</span></td><td>broker_daily_orchestrator.py different invocations. Smoke ran 17 sellers found from dev.to. Reddit 403 expected.</td></tr>
+  <tr><td><code>wholesale-day</code> + <code>wholesale-outreach</code></td><td colspan="2"><span class="pill pill-green">yes</span></td><td><span class="pill pill-blue">timers active</span></td><td>Pipeline + outreach. Daily + every 4 hours.</td></tr>
+  <tr><td><code>cuyahoga-scrape</code></td><td colspan="2"><span class="pill pill-green">yes</span></td><td><span class="pill pill-blue">timer active</span></td><td>OH parcel scrape. Daily 6 AM.</td></tr>
+  <tr><td><code>buybox-reply-router</code></td><td colspan="2"><span class="pill pill-green">yes</span></td><td><span class="pill pill-blue">timer active</span></td><td>Every 30 min.</td></tr>
+  <tr><td><code>inbound-watch</code></td><td colspan="2"><span class="pill pill-green">yes</span></td><td><span class="pill pill-blue">timer active</span></td><td>IMAP poll, every 5 min.</td></tr>
+  <tr><td><code>sync-deals</code></td><td colspan="2"><span class="pill pill-green">yes</span></td><td><span class="pill pill-blue">timer active</span></td><td>Sync rex active_deals -> Django ORM. Smoke: "DB totals -- Deal: 1 DealEvent: 9".</td></tr>
+  <tr><td><code>rex-{belfort,negotiator,recycler}</code></td><td colspan="2"><span class="pill pill-green">all 3 yes</span></td><td><span class="pill pill-blue">timers active</span></td><td>Negotiation + recycler chain.</td></tr>
+  <tr><td><code>deal-closeout-tracker</code></td><td colspan="2"><span class="pill pill-green">yes</span></td><td><span class="pill pill-blue">timer active</span></td><td>Daily 10 AM.</td></tr>
+
+  <!-- Cluster: Doctrine-deferred (intentionally not installed) -->
+  <tr><td colspan="5" style="background:#0e0e0e; color:var(--gold); font-weight:600; padding-top:10px;">CLUSTER: DOCTRINE-DEFERRED (decision made; do not install)</td></tr>
+  <tr><td><code>n8n</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-grey">parked</span></td><td>10,117 errors / 30 days pre-death. Doctrine: <code>publish_gdoc()</code> direct instead.</td></tr>
+  <tr><td><code>hive-django</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-grey">Phase 7 deferred</span></td><td>Open WebUI + Supabase covers most use cases; revisit if specific dashboard view needed.</td></tr>
+  <tr><td><code>hive-voice</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-grey">deferred</span></td><td>Twilio webhook -- needs secrets regen.</td></tr>
+  <tr><td><code>nextcloud</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-grey">deferred</span></td><td>Too heavy for 50 GB boot. Replaced by sdcard sync.</td></tr>
+  <tr><td><code>langfuse</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-grey">deferred</span></td><td>LLM observability -- decide if needed before Open WebUI grows.</td></tr>
+
+  <!-- Cluster: Not e5-mother's job -->
+  <tr><td colspan="5" style="background:#0e0e0e; color:var(--gold); font-weight:600; padding-top:10px;">CLUSTER: BELONGS ON A DIFFERENT HOST (skip on e5-mother)</td></tr>
+  <tr><td><code>ollama</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-grey">skip</span></td><td>Local LLM hosting -- needs GPU; A1 ARM lacks that. Use cloud APIs instead.</td></tr>
+  <tr><td><code>cloudflared</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-grey">skip</span></td><td>Public tunnel -- not needed; tailnet-only.</td></tr>
+  <tr><td><code>xlm-bot</code>, <code>xlm-ws</code>, <code>xlm-dash-react</code>, <code>xlm-liqfeed</code>, <code>xlm-watchtower</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-blue">on Xlm-bot host</span></td><td>Already live on the dedicated Xlm-bot Micro. Recovered units are reference copies.</td></tr>
+  <tr><td><code>onyx-pos</code>, <code>onyx-pos-ui</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-amber">decision pending</span></td><td>If POS is e5-mother's job, install. If hosted elsewhere (CF Pages), skip.</td></tr>
+  <tr><td><code>polymarket</code>, <code>stark-ai</code>, <code>triple-threat</code>, <code>vantaris</code>, <code>wealth-intel</code>, <code>wholesale-pipeline</code> (legacy name)</td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-amber">decision pending</span></td><td>Inspect each unit before deciding. Some may be older versions of running services.</td></tr>
+
+  <!-- Cluster: Candidates worth installing -->
+  <tr><td colspan="5" style="background:#0e0e0e; color:var(--gold); font-weight:600; padding-top:10px;">CLUSTER: RECOMMENDED TO INSTALL (gaps in current coverage)</td></tr>
+  <tr><td><code>claude-chat-bridge</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-amber">install next</span></td><td>Powers the dashboard AI chat bubble. Listed in CLAUDE.md as expected.</td></tr>
+  <tr><td><code>gmail-organizer</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-amber">install after OAuth regen</span></td><td>Useful for inbound watch routing -- requires Google OAuth re-auth.</td></tr>
+  <tr><td><code>nightly-backup</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-amber">install after 50 GB block volume mount</span></td><td>Once <code>/data</code> is mounted, this can back up to <code>/data/nightly_backups/</code>.</td></tr>
+  <tr><td><code>computer-use</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-grey">install only if used</span></td><td>Anthropic computer use API -- check if Rich uses it.</td></tr>
+
+  <!-- Cluster: OS plumbing -->
+  <tr><td colspan="5" style="background:#0e0e0e; color:var(--gold); font-weight:600; padding-top:10px;">CLUSTER: OS PLUMBING (provided by Ubuntu, ignore from recovery)</td></tr>
+  <tr><td><code>dbus*</code>, <code>oracle-cloud-agent*</code>, <code>ocid</code>, <code>port80-forward</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-grey">already provided</span></td><td>Ubuntu 22.04 ships its own. Don't install from recovery.</td></tr>
+  <tr><td><code>uptrack-late</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-grey">obsolete</span></td><td>Was a Ksplice helper on Oracle Linux. Ubuntu doesn't need.</td></tr>
+  <tr><td><code>hive-sync</code>, <code>hive-dashboard</code>, <code>hive-directory</code></td><td><span class="pill pill-green">yes</span></td><td><span class="pill pill-red">no</span></td><td><span class="pill pill-amber">inspect first</span></td><td>Read each unit; possibly subsumed by today's installs.</td></tr>
+</table>
+
+<!-- ============================================== -->
+<h2>4. What's redundant or obsolete (mark for cleanup once verified)</h2>
+
+<table>
+  <tr><th>Path</th><th>Size</th><th>Redundant with</th><th>Action</th></tr>
+  <tr><td><code>e5_data/.local.broken</code></td><td>~unknown</td><td>Failed install attempt; superseded by <code>.local</code></td><td>Verify + delete via <code>safe_delete.sh --target e5_data/.local.broken --canonical e5_data/.local</code></td></tr>
+  <tr><td><code>e5_data/__pycache__/</code></td><td>~400 KB</td><td>Python cache; regenerable</td><td>Safe to delete; will rebuild as scripts run.</td></tr>
+  <tr><td><code>e5_data/vantaris/</code> 1.2 GB</td><td>1.2 GB</td><td>Probably frontend app, not running on e5-mother</td><td>Inspect README/package.json; if archived, move to <code>/data/archives/</code></td></tr>
+  <tr><td><code>e5_data/lucrex-os/</code> 812 MB</td><td>812 MB</td><td>Likely archived prototype</td><td>Inspect; archive candidate.</td></tr>
+  <tr><td><code>e5_data/onyx_pos_frontend/</code> 130 MB</td><td>130 MB</td><td>Frontend -- not serving from e5-mother</td><td>Archive candidate.</td></tr>
+  <tr><td><code>e5_data/xlm-dash-react/</code> 123 MB</td><td>123 MB</td><td>Dashboard frontend -- runs on Xlm-bot host</td><td>Archive candidate.</td></tr>
+  <tr><td>3 <code>*.bak.*</code> files (broker_daily_orchestrator, hive_self_healer, gmail_organizer, pdf_autofill, triple_threat_team)</td><td>~500 KB total</td><td>Pre-edit backups; current versions are in workspace</td><td>Manifest + delete after verifying current is good.</td></tr>
+  <tr><td><code>everlight-recovery-clean</code> Micro instance</td><td>1 OCPU + 47 GB</td><td>Scratch host, idle 11 days</td><td>Terminate to free Always-Free Micro slot + 47 GB quota.</td></tr>
+</table>
+
+<!-- ============================================== -->
+<h2>5. The unknown &mdash; what's on the orphan that may NOT be in e5_data</h2>
+
+<div class="callout callout-red">
+<strong>Without mounting the orphan, we cannot know with certainty.</strong> Here's the educated-guess list of categories worth verifying when Pass 2 runs:
+<ul>
+  <li><strong>System logs</strong>: <code>/var/log/journal/*</code> (journald history of the dead system -- useful for post-mortem)</li>
+  <li><strong>Cron state</strong>: <code>/var/spool/cron/crontabs/*</code> (any system or user crons that weren't migrated)</li>
+  <li><strong>PostgreSQL data</strong>: <code>/var/lib/postgresql/*</code> (if .250 ran Blinko on real Postgres rather than the SQLite fallback we recovered)</li>
+  <li><strong>Docker volumes</strong>: <code>/var/lib/docker/volumes/*</code> (any container persistence not captured by e5_data)</li>
+  <li><strong>SSL/TLS state</strong>: <code>/etc/letsencrypt/*</code>, <code>/etc/ssl/private/*</code></li>
+  <li><strong>Nextcloud / Documenso state</strong>: if those ran on .250, their app data is at <code>/var/www/*</code> or <code>/srv/*</code></li>
+  <li><strong>Browser/SSH state</strong>: <code>~/.cache/*</code>, <code>~/.config/*</code> beyond what came over in e5_data</li>
+  <li><strong>The original <code>dispatcher_relay/relay.py</code></strong>: I reconstructed it from memory; binary diff will tell us if my reconstruction is bit-accurate.</li>
+</ul>
+<strong>What to do:</strong> Pass 2 of this audit (Option A workflow) -- mount orphan, <code>rsync -an --itemize-changes</code> against <code>/home/ubuntu/e5_data/</code>, write the gap report.
+</div>
+
+<!-- ============================================== -->
+<h2>6. Memory upgrades to implement</h2>
+
+<p>Per Rich's direction: "if there's any memory upgrades or tips or enhancements ... go ahead." The memory system has 4 surfaces and 6 fallback layers but several known weaknesses. Here's the ranked enhancement plan, ordered by impact / effort.</p>
+
+<table>
+  <tr><th>#</th><th>Upgrade</th><th>Impact</th><th>Status</th></tr>
+  <tr><td>1</td><td><strong>safe_delete.sh</strong> -- verify-before-delete with manifest + diff + confirmation prompt. Wraps every destructive op &gt;100 MB.</td><td>Prevents repeats of today's e5_recovered incident. Audit trail of every delete.</td><td><span class="pill pill-green">BUILT TODAY</span> at <code>03_AUTOMATION_CORE/01_Scripts/safe_delete.sh</code></td></tr>
+  <tr><td>2</td><td><strong>memory_health_check.py</strong> -- probes all 4 memory surfaces (Blinko mother, Blinko phone, agentmemory mother, file mirrors), validates integrity, counts notes, freshness, SQLite integrity check, JSON parse, snapshot recency. Exit codes: 0/1/2 for green/degraded/critical.</td><td>Catches silent corruption / sync failures. Hooks into dashboards_watchdog for 5-min cycle.</td><td><span class="pill pill-green">BUILT TODAY</span> at <code>03_AUTOMATION_CORE/01_Scripts/memory_health_check.py</code></td></tr>
+  <tr><td>3</td><td><strong>Mother-side daily snapshots</strong> -- Blinko + agentmemory daily file dumps with 14-day rotation, mirrored to phone <code>08_BACKUPS/mother_snapshots/</code> on every sync.</td><td>14-day point-in-time rollback if a memory mutation went wrong.</td><td><span class="pill pill-green">DONE TODAY</span> -- timers <code>blinko-snapshot.timer</code> + <code>agentmemory-snapshot.timer</code></td></tr>
+  <tr><td>4</td><td><strong>Multi-source memory consolidator</strong> -- daily script that snapshots all 4 surfaces (Blinko, agentmemory, /root/.claude/memory/, audit log) into one timestamped digest, stored locally + pushed to Cloudflare R2 (free 10 GB).</td><td>Off-account-storage defense against full OCI account loss.</td><td><span class="pill pill-amber">NEXT SESSION</span> -- needs R2 bucket + key setup</td></tr>
+  <tr><td>5</td><td><strong>Append-only memory journal</strong> -- every memory mutation (Blinko insert, agentmemory edit, claude memory file change) appended to <code>_state/memory_journal.jsonl</code> with timestamp + SHA-256. Survives sync clobbering.</td><td>Bit-level recoverable history. Like a database WAL for memory.</td><td><span class="pill pill-amber">NEXT SESSION</span> -- needs hook in branded_mailer, agentmemory write path, claude memory editor</td></tr>
+  <tr><td>6</td><td><strong>Multi-master Blinko</strong> -- run a write-enabled Blinko replica on phone (port 2700 in the watchdog), agents auto-fall-back to phone for writes if mother is down.</td><td>Zero-downtime memory writes when cloud is unreachable.</td><td><span class="pill pill-grey">FUTURE</span> -- needs replication strategy decision</td></tr>
+  <tr><td>7</td><td><strong>Hash-chained audit log</strong> -- extend the existing <code>deal_execution_log.py</code> pattern to <code>audit_log/</code> entries. Each entry references prev entry's SHA-256.</td><td>Tamper-detection on the documentation trail.</td><td><span class="pill pill-grey">FUTURE</span></td></tr>
+  <tr><td>8</td><td><strong>PC mirror once online</strong> -- when AceMagician PC returns, install pc_side_claude_sync_pull.sh.template into <code>~/bin/</code> + crontab :17. Adds 4th device redundancy.</td><td>Memory survives if phone+cloud both die.</td><td><span class="pill pill-grey">WAITING PC RETURN</span> -- template ready</td></tr>
+</table>
+
+<!-- ============================================== -->
+<h2>7. The 4-layer memory defense in depth (current state)</h2>
+
+<div class="ascii">
+      ┌──────────────────────────────────────────────────────────────┐
+      │  LAYER 1: LIVE CLOUD                                          │
+      │  e5-mother:1111 (Blinko, 3,711 notes)                        │
+      │  e5-mother:3108 (agentmemory MCP, JSON graph)                │
+      │  e5-mother:8503 (dispatcher_relay)                           │
+      │  e5-mother:8080 (open-webui chat history in Docker volume)   │
+      └──────────────────────────────────────────────────────────────┘
+                              │ rsync daily on phone-boot
+                              ▼
+      ┌──────────────────────────────────────────────────────────────┐
+      │  LAYER 2: PHONE CANONICAL                                     │
+      │  _state/blinko_lite.db (3,711 notes, 8.1 MB)                 │
+      │  _state/agentmemory_graph.json (knowledge graph)             │
+      │  /root/.claude/.../memory/ (181+ md files)                   │
+      └──────────────────────────────────────────────────────────────┘
+                              │ rotated daily on e5-mother
+                              ▼
+      ┌──────────────────────────────────────────────────────────────┐
+      │  LAYER 3: ROLLING 14-DAY SNAPSHOTS                            │
+      │  08_BACKUPS/mother_snapshots/blinko_YYYYMMDD.db              │
+      │  08_BACKUPS/mother_snapshots/agentmemory_YYYYMMDD.json       │
+      │  (mother-side daily 3 AM PT, mirrored on phone sync)          │
+      └──────────────────────────────────────────────────────────────┘
+                              │ git push daily
+                              ▼
+      ┌──────────────────────────────────────────────────────────────┐
+      │  LAYER 4: GITHUB IMMORTAL                                     │
+      │  github.com/EverlightVentures/everlight-ventures              │
+      │  Branch: everlightventures.io + side branches per deploy     │
+      │  Contains: workspace + audit_log + cheat sheets              │
+      │  Does NOT contain: live API keys, .env, OAuth tokens         │
+      └──────────────────────────────────────────────────────────────┘
+
+      [FUTURE LAYER 5]: Cloudflare R2 encrypted off-site
+      [FUTURE LAYER 6]: AceMagician PC bidirectional mirror
+</div>
+
+<!-- ============================================== -->
+<h2>8. Action items &mdash; what unblocks what</h2>
+
+<ol style="line-height: 1.9;">
+  <li><strong>Decision needed:</strong> Was <code>everlight-recovery-clean</code> intentional or a leftover? <span class="pill pill-grey">5-second answer</span></li>
+  <li>If leftover: terminate it via OCI Console (frees Always-Free Micro + 47 GB). <span class="pill pill-grey">2-min Console click</span></li>
+  <li>Boot the orphan <code>xlm-bot-core-e5-2c16g</code> as a new temporary Micro (uses the freed slot). SSH in, mount the partitions, rsync the deltas against e5-mother's <code>/home/ubuntu/e5_data/</code> via tailnet. <span class="pill pill-grey">30 min</span></li>
+  <li>Pass 2 of this audit: append the orphan-diff results to this document. Identify unique files. Recover them. Delete orphan boot vol. <span class="pill pill-grey">20 min</span></li>
+  <li>Create 50 GB block volume in OCI, attach to e5-mother as paravirtualized, format XFS, mount at <code>/data</code>. <span class="pill pill-grey">15 min</span></li>
+  <li>Move <code>/home/ubuntu/AA_MY_DRIVE</code> + <code>blinko_backups</code> to <code>/data/</code>. Symlink back. e5-mother root drops to ~13 GB used, /data has 27 GB headroom. <span class="pill pill-grey">10 min</span></li>
+  <li>Install <code>memory_health_check</code> on a 5-min watchdog cycle. Add to <code>dashboards_watchdog.sh SERVICES</code>. <span class="pill pill-grey">5 min</span></li>
+  <li>Clean keys in the 3 deferred NPM MCPs. Move to <code>/etc/default/&lt;svc&gt;</code> mode 600. Install. <span class="pill pill-grey">20 min</span></li>
+  <li>Next session: Cloudflare R2 encrypted off-site backup (Layer 5). Memory journal (upgrade #5). <span class="pill pill-grey">2-3 hr</span></li>
+</ol>
+
+</main>
+
+<footer>
+  <div class="footer-mark">EVERLIGHT VENTURES</div>
+  <div style="margin-top: 6px;">Deep compare-contrast compiled 2026-05-15 09:55 PT &middot; phone-claude</div>
+  <div style="margin-top: 4px;">
+    Provenance: <code>oci bv boot-volume list</code> &middot; <code>systemctl list-units</code> &middot; <code>du -sh /home/ubuntu/e5_data/*</code> &middot;
+    <code>diff -rq</code> &middot; <code>_state/audit_log/2026-05-15-001</code> through <code>007</code>
+  </div>
+  <div class="small" style="margin-top: 8px;">Pass 1 of 2 complete. Pass 2 (orphan binary diff) pending operator OCI Console unblock.</div>
+</footer>
+
+</body>
+</html>
