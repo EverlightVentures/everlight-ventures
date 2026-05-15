@@ -1,0 +1,319 @@
+{
+  "investigation_id": "david_streubel_1778584019",
+  "target": "David Streubel",
+  "kind": "person",
+  "started_at": "2026-05-12T04:06:59.952883",
+  "finished_at": "2026-05-12T04:07:02.696914",
+  "elapsed_ms": 2742,
+  "total_findings": 12,
+  "investigators_run": 5,
+  "triggered_by": "test",
+  "lead_id": null,
+  "business_purpose": "audit DNC preflight v2",
+  "verify_context": {
+    "state": "MO",
+    "owner_name": "David Streubel"
+  },
+  "verification_summary": {
+    "total_findings": 12,
+    "verified": 0,
+    "rejected": 12,
+    "avg_confidence": 30,
+    "threshold": 50,
+    "highest_confidence_per_signal": {},
+    "lead_context_keys_provided": [
+      "state",
+      "owner_name"
+    ]
+  },
+  "dnc_blocked": true,
+  "dnc_reason": "name_match_tokens:DAVID A STREUBEL",
+  "dnc_entry_id": "dnc_streubel_2026-05-04",
+  "results": [
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Archive item",
+          "value": "Popular Science Library",
+          "url": "https://archive.org/details/bwb_O5-RLZ-382",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        }
+      ],
+      "raw": {
+        "search": {
+          "status": 200,
+          "len": 482
+        }
+      },
+      "elapsed_ms": 390,
+      "investigator": "Archive.org / Wayback",
+      "investigator_id": "archive_org"
+    },
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "\"{q}\"": {
+          "status": 202,
+          "len": 14198
+        },
+        "{q} site:linkedin.com": {
+          "status": 202,
+          "len": 14270
+        },
+        "{q} site:github.com": {
+          "status": 202,
+          "len": 14211
+        },
+        "{q} site:reddit.com": {
+          "status": 202,
+          "len": 14206
+        },
+        "{q} filetype:pdf": {
+          "status": 202,
+          "len": 14218
+        },
+        "{q} contact email": {
+          "status": 202,
+          "len": 14208
+        }
+      },
+      "elapsed_ms": 1634,
+      "investigator": "Search Dorks",
+      "investigator_id": "google_dorks"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Dehashed",
+          "value": "Search (login required)",
+          "url": "https://dehashed.com/search?query=David%20Streubel",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        },
+        {
+          "label": "Intelligence X",
+          "value": "Search",
+          "url": "https://intelx.io/?s=David%20Streubel",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        }
+      ],
+      "raw": {
+        "hibp_breaches": {
+          "status": 200,
+          "len": 2
+        }
+      },
+      "elapsed_ms": 2041,
+      "investigator": "Leak Check",
+      "investigator_id": "leak_check"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "TruePeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.truepeoplesearch.com/results?name=David%20Streubel",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "FastPeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.fastpeoplesearch.com/name/david-streubel",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ZabaSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.zabasearch.com/people/David+Streubel",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ThatsThem",
+          "value": "HTTP 200",
+          "url": "https://thatsthem.com/name/David-Streubel",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "Whitepages",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.whitepages.com/name/David-Streubel",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        }
+      ],
+      "raw": {
+        "TruePeopleSearch": {
+          "status": 403
+        },
+        "FastPeopleSearch": {
+          "status": 403
+        },
+        "ZabaSearch": {
+          "status": 403
+        },
+        "ThatsThem": {
+          "status": 200
+        },
+        "Whitepages": {
+          "status": 403
+        }
+      },
+      "elapsed_ms": 2199,
+      "investigator": "Skip-Trace",
+      "investigator_id": "skip_trace"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Sweep summary",
+          "value": "3 of 22 platforms returned a profile page for 'davidstreubel'",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Instagram",
+          "value": "found",
+          "url": "https://www.instagram.com/davidstreubel/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Reddit",
+          "value": "found",
+          "url": "https://www.reddit.com/user/davidstreubel",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Pinterest",
+          "value": "found",
+          "url": "https://www.pinterest.com/davidstreubel/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        }
+      ],
+      "raw": {
+        "Twitter/X": 403,
+        "TikTok": 403,
+        "LinkedIn": 999,
+        "Medium": 403,
+        "Instagram": 200,
+        "YouTube": 404,
+        "GitHub": 404,
+        "Reddit": 200,
+        "ProductHunt": 404,
+        "StackOverflow": 404,
+        "Pinterest": 200,
+        "Behance": 404,
+        "Patreon": 404,
+        "Gravatar": 404,
+        "Dribbble": 404,
+        "Keybase": 404,
+        "Twitch": 405,
+        "About.me": 404,
+        "Vimeo": 404,
+        "DeviantArt": 404,
+        "SoundCloud": 404,
+        "Flickr": 404
+      },
+      "elapsed_ms": 2391,
+      "investigator": "Social Recon",
+      "investigator_id": "social_recon"
+    }
+  ]
+}

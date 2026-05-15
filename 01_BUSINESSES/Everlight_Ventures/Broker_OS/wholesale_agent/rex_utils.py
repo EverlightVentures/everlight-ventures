@@ -173,6 +173,31 @@ def safe_send_email(to: str, subject: str, body: str,
     if not to:
         return False
 
+    # ERADICATION GATE -- FIRST. Permanent DNC list (Streubel et al.).
+    # Hardcoded module. If a DNC subject reaches this function, that's a
+    # supervisory failure -- the upstream filter should have removed them
+    # from the working set. We still tripwire here as last resort.
+    try:
+        import sys as _sys
+        _sys.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
+        from eradication_gate import assert_safe as _erad_assert_safe, EradicationViolation
+        from dnc_filter import alert_dnc_touch
+        _erad_assert_safe(email=to, address=subject, caller="rex_utils.safe_send_email")
+    except EradicationViolation as _eg_err:
+        log.error("ERADICATION GATE tripwire (last-resort): %s", _eg_err)
+        try:
+            alert_dnc_touch(
+                context={"to": to, "subject": subject, "stage": "safe_send_email"},
+                caller="rex_utils.safe_send_email",
+            )
+        except Exception:
+            pass
+        _queue_dead_letter(to, subject, body, f"eradication_blocked:{_eg_err}")
+        return False
+    except ImportError as _eg_imp:
+        log.error("eradication_gate unavailable -- failing closed: %s", _eg_imp)
+        return False
+
     if is_dead_end_email(to):
         log.info("SKIP dead-end email: %s" % to)
         return False
@@ -844,3 +869,38 @@ def attom_fetch(endpoint: str, params: dict, zip_code: str = "") -> Optional[dic
         log.error(f"ATTOM fetch failed: {endpoint} -- {e}")
         attom_rate_increment(1)  # still counts against quota
         return None
+
+
+def load_leads_filtered(path, *, caller: str = "unknown") -> list[dict]:
+    """
+    Canonical lead loader for ALL rex_* scripts. Reads a leads_db.json file
+    and applies the DNC filter at load time. Any DNC contact found in the
+    file fires an alert (log + Slack) and is removed from the working set
+    before downstream code sees it.
+
+    Doctrine (Rich, 2026-05-15): "never should those DNC contacts be part
+    of an autonomous process. they are do not contact and blacklisted."
+
+    Use this instead of `json.loads(LEADS_DB.read_text())`.
+    """
+    import json as _json
+    import pathlib as _pl
+    import sys as _sys
+    _sys.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
+    from dnc_filter import filter_dnc
+
+    p = _pl.Path(path)
+    if not p.exists():
+        log.info("load_leads_filtered: %s does not exist; returning []", p)
+        return []
+    raw = _json.loads(p.read_text())
+    if not isinstance(raw, list):
+        log.warning("load_leads_filtered: %s is not a list; passing through", p)
+        return raw  # pass-through, no filter possible
+    clean, removed = filter_dnc(raw, caller=f"{caller}:load_leads_filtered({p.name})")
+    if removed:
+        log.error(
+            "load_leads_filtered REMOVED %d DNC contact(s) from %s -- alerts fired",
+            len(removed), p.name,
+        )
+    return clean
