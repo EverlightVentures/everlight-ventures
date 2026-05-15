@@ -1,0 +1,171 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=048003%20%2000007",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/Memphis Property Downloads/Assessor of Property, Shelby County TN (21).mht",
+  "parsed_at": "2026-04-29T20:11:06.068124+00:00",
+  "parcel_id": "048003  00007",
+  "property_address": "1537  WILSON ST",
+  "neighborhood_number": "00714A04",
+  "tax_map_page": "156H",
+  "land_sqft": 6490,
+  "acres": "0.149",
+  "subdivision": "SMALL HOMES INCORPORATED",
+  "owner_name": "GREATER LOVE FOR LIFE MINISTRIES INC",
+  "owner_mailing_street": "P O BOX 30007",
+  "owner_mailing_city_state_zip": "ALBUQUERQUENM87190-0007",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 7000,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 7000,
+  "total_assessment_usd": 1750,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "ALBUQUERQUE",
+  "owner_mailing_state": "NM",
+  "owner_mailing_zip": "87190",
+  "property_address_full": "1537  WILSON ST, MEMPHIS, TN",
+  "absentee_owner": true,
+  "absentee_signal": "owner_mailing_zip 87190 not in Memphis (381xx)",
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "05/10/2017",
+      "price_text": "$0",
+      "deed_or_inst": "17051147",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2017
+    },
+    {
+      "date": "09/20/2016",
+      "price_text": "$17,682",
+      "deed_or_inst": "16104809",
+      "type_code": "TD",
+      "price_usd": 17682,
+      "year": 2016
+    },
+    {
+      "date": "02/15/2013",
+      "price_text": "$27,875",
+      "deed_or_inst": "13038598",
+      "type_code": "SW",
+      "price_usd": 27875,
+      "year": 2013
+    },
+    {
+      "date": "02/15/2013",
+      "price_text": "$46,000",
+      "deed_or_inst": "13044393",
+      "type_code": "SW",
+      "price_usd": 46000,
+      "year": 2013
+    },
+    {
+      "date": "04/07/2011",
+      "price_text": "$7,225",
+      "deed_or_inst": "11039510",
+      "type_code": "SW",
+      "price_usd": 7225,
+      "year": 2011
+    },
+    {
+      "date": "08/08/2007",
+      "price_text": "$60,462",
+      "deed_or_inst": "07127795",
+      "type_code": "TD",
+      "price_usd": 60462,
+      "year": 2007
+    },
+    {
+      "date": "12/08/2005",
+      "price_text": "$0",
+      "deed_or_inst": "05204532",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2005
+    },
+    {
+      "date": "09/28/2005",
+      "price_text": "$19,500",
+      "deed_or_inst": "05166929",
+      "type_code": "SW",
+      "price_usd": 19500,
+      "year": 2005
+    },
+    {
+      "date": "06/24/2005",
+      "price_text": "$32,000",
+      "deed_or_inst": "05113885",
+      "type_code": "TD",
+      "price_usd": 32000,
+      "year": 2005
+    },
+    {
+      "date": "03/10/2003",
+      "price_text": "$39,900",
+      "deed_or_inst": "03066502",
+      "type_code": "WD",
+      "price_usd": 39900,
+      "year": 2003
+    },
+    {
+      "date": "05/12/1993",
+      "price_text": "$14,000",
+      "deed_or_inst": "DN5009",
+      "type_code": "SW",
+      "price_usd": 14000,
+      "year": 1993
+    },
+    {
+      "date": "12/17/1992",
+      "price_text": "$13,954",
+      "deed_or_inst": "DF9086",
+      "type_code": "TD",
+      "price_usd": 13954,
+      "year": 1992
+    },
+    {
+      "date": "10/31/1961",
+      "price_text": "$0",
+      "deed_or_inst": "110-88",
+      "type_code": "UN",
+      "price_usd": 0,
+      "year": 1961
+    }
+  ],
+  "first_sale_year": 1961,
+  "last_sale_year": 2017,
+  "last_sale_date": "05/10/2017",
+  "last_sale_price_usd": 0,
+  "first_sale_date": "10/31/1961",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1961,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "permits": [
+    {
+      "date": "01/24/2018",
+      "amount_text": "$0",
+      "reason": "DEMO",
+      "permit_number": "BD010146",
+      "year": 2018
+    },
+    {
+      "date": "01/26/1987",
+      "amount_text": "$1,250",
+      "reason": "",
+      "permit_number": "26265",
+      "year": 1987
+    },
+    {
+      "date": "11/20/1986",
+      "amount_text": "$1,100",
+      "reason": "",
+      "permit_number": "324032",
+      "year": 1986
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  }
+}

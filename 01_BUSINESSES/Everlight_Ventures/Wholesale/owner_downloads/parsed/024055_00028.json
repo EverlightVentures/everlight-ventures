@@ -1,0 +1,82 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=024055%20%2000028",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/Assessor of Property, Shelby County TN (9).mht",
+  "parsed_at": "2026-05-15T09:28:40.540801+00:00",
+  "parcel_id": "024055 00028",
+  "property_address": "1329 MICHIGAN ST",
+  "neighborhood_number": "00713A01",
+  "tax_map_page": "157B",
+  "land_sqft": 3615,
+  "acres": "0.083",
+  "subdivision": "RIEHLMAN",
+  "owner_name": "KEMP FRANKLIN",
+  "owner_mailing_street": "5977 RANDY LN",
+  "owner_mailing_city_state_zip": "ELLENWOOD GA 30294 - 4015",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 3300,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 3300,
+  "total_assessment_usd": 825,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "ELLENWOOD",
+  "owner_mailing_state": "GA",
+  "owner_mailing_zip": "30294",
+  "owner_mailing_zip4": "4015",
+  "owner_mailing_full": "5977 RANDY LN, ELLENWOOD, GA 30294",
+  "property_address_full": "1329 MICHIGAN ST, MEMPHIS, TN",
+  "absentee_owner": true,
+  "absentee_signal": "owner_mailing_zip 30294 not in Memphis (381xx)",
+  "out_of_state_owner": true,
+  "out_of_state_signal": "mailing state GA not TN",
+  "is_llc_owner": false,
+  "is_institutional_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "07/30/2020",
+      "price_text": "$0",
+      "deed_or_inst": "20080163",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2020
+    },
+    {
+      "date": "04/25/1985",
+      "price_text": "$0",
+      "deed_or_inst": "9408-1",
+      "type_code": "CH",
+      "price_usd": 0,
+      "year": 1985
+    }
+  ],
+  "first_sale_year": 1985,
+  "last_sale_year": 2020,
+  "last_sale_date": "07/30/2020",
+  "last_sale_price_usd": 0,
+  "first_sale_date": "04/25/1985",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1985,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 6,
+  "is_long_term_owner": false,
+  "permits": [],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  },
+  "distress_signals": [
+    "out_of_state_owner_GA",
+    "absentee_owner",
+    "vacant_lot",
+    "low_appraisal_under_50k"
+  ],
+  "pitch_hooks": [
+    "out-of-state convenience (owner mailing in GA)",
+    "vacant lot -- carrying cost relief pitch",
+    "low-appraisal asset (carrying cost vs value)"
+  ],
+  "signal_count": 4,
+  "outreach_priority": "high"
+}

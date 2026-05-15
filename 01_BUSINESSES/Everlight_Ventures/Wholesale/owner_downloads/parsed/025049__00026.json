@@ -1,0 +1,99 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=025049%20%2000026",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/Memphis Property Downloads/Assessor of Property, Shelby County TN (1).mht",
+  "parsed_at": "2026-04-29T19:36:02.246567+00:00",
+  "parcel_id": "025049  00026",
+  "property_address": "1242  MARKSMAN ST",
+  "neighborhood_number": "00713B01",
+  "tax_map_page": "157C",
+  "land_sqft": 5924,
+  "acres": "0.136",
+  "subdivision": "THOMPSON",
+  "owner_name": "DAWSON KEITH A AND DEMETRA C DANIEL ANDALLENE DAWSON AND ALLEN DAWSON JR",
+  "owner_mailing_street": "1248MARKSMANST",
+  "owner_mailing_city_state_zip": "MEMPHISTN38106-3112",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 4400,
+  "building_appraisal_usd": 14800,
+  "total_appraisal_usd": 19200,
+  "total_assessment_usd": 4800,
+  "land_use": "- SINGLE FAMILY",
+  "year_built": 1909,
+  "total_rooms": 4,
+  "bedrooms": 2,
+  "bathrooms": 1,
+  "half_baths": 0,
+  "heat": "FORCED AIR",
+  "fuel": "NOT APPLICABLE",
+  "owner_mailing_city": "MEMPHIS",
+  "owner_mailing_state": "TN",
+  "owner_mailing_zip": "38106",
+  "property_address_full": "1242  MARKSMAN ST, MEMPHIS, TN",
+  "absentee_owner": false,
+  "sales_history": [
+    {
+      "date": "04/25/2017",
+      "price_text": "$0",
+      "deed_or_inst": "17042118",
+      "type_code": "A",
+      "price_usd": 0,
+      "year": 2017
+    },
+    {
+      "date": "04/25/2017",
+      "price_text": "$0",
+      "deed_or_inst": "17042119",
+      "type_code": "A",
+      "price_usd": 0,
+      "year": 2017
+    },
+    {
+      "date": "04/25/2017",
+      "price_text": "$0",
+      "deed_or_inst": "17042120",
+      "type_code": "A",
+      "price_usd": 0,
+      "year": 2017
+    },
+    {
+      "date": "04/20/1988",
+      "price_text": "$4,000",
+      "deed_or_inst": "AK3062",
+      "type_code": "WD",
+      "price_usd": 4000,
+      "year": 1988
+    },
+    {
+      "date": "05/17/1984",
+      "price_text": "$0",
+      "deed_or_inst": "V41414",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1984
+    },
+    {
+      "date": "07/18/1975",
+      "price_text": "$0",
+      "deed_or_inst": "K57048",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1975
+    }
+  ],
+  "first_sale_year": 1975,
+  "last_sale_year": 2017,
+  "last_sale_date": "04/25/2017",
+  "last_sale_price_usd": 0,
+  "first_sale_date": "07/18/1975",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1975,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "permits": [],
+  "chris_check": {
+    "vacant_lot_ok": false,
+    "build_year_ok": false,
+    "verdict": "year_built_1909_pre_1940_REJECT",
+    "year_built_source": "assessor_actual"
+  }
+}

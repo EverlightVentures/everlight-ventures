@@ -1,0 +1,20 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=016007%20%2000005",
+  "parsed_at": "2026-05-08T00:58:16+00:00",
+  "parcel_id": "016007  00005",
+  "property_address": "1253  CARR AVE",
+  "owner_name": "STEWART JENA A AND JERI R EARLS AND",
+  "land_use": "- SINGLE FAMILY",
+  "year_built": 1940,
+  "sqft": 1950,
+  "bedrooms": 3,
+  "bathrooms": 2,
+  "land_sqft": null,
+  "land_appraisal_usd": 71400,
+  "building_appraisal_usd": 168500,
+  "total_appraisal_usd": 239900,
+  "total_assessment_usd": 59975,
+  "property_class": null,
+  "subdivision": null
+}

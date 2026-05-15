@@ -1,0 +1,76 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=048018%20%2000007",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/Memphis Property Downloads/Assessor of Property, Shelby County TN (10).mht",
+  "parsed_at": "2026-04-29T20:11:04.746382+00:00",
+  "parcel_id": "048018  00007",
+  "property_address": "1363  ETHLYN AVE",
+  "neighborhood_number": "00714A04",
+  "tax_map_page": "156I",
+  "land_sqft": 6534,
+  "acres": "0.15",
+  "subdivision": "WEST DRIVE HEIGHTS BLK 2",
+  "owner_name": "BROWN YOLANDA",
+  "owner_mailing_street": "4098CINDERELLAST",
+  "owner_mailing_city_state_zip": "MEMPHISTN38109-4522",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 7100,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 7100,
+  "total_assessment_usd": 1775,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "MEMPHIS",
+  "owner_mailing_state": "TN",
+  "owner_mailing_zip": "38109",
+  "property_address_full": "1363  ETHLYN AVE, MEMPHIS, TN",
+  "absentee_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "02/02/2018",
+      "price_text": "$360",
+      "deed_or_inst": "18011633",
+      "type_code": "QC",
+      "price_usd": 360,
+      "year": 2018
+    },
+    {
+      "date": "01/24/2012",
+      "price_text": "$12,542",
+      "deed_or_inst": "9486-1",
+      "type_code": "CH",
+      "price_usd": 12542,
+      "year": 2012
+    },
+    {
+      "date": "05/27/1980",
+      "price_text": "$0",
+      "deed_or_inst": "221-438",
+      "type_code": "PC",
+      "price_usd": 0,
+      "year": 1980
+    },
+    {
+      "date": "01/31/1977",
+      "price_text": "$0",
+      "deed_or_inst": "68",
+      "type_code": "DN",
+      "price_usd": 0,
+      "year": 1977
+    }
+  ],
+  "first_sale_year": 1977,
+  "last_sale_year": 2018,
+  "last_sale_date": "02/02/2018",
+  "last_sale_price_usd": 360,
+  "first_sale_date": "01/31/1977",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1977,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "permits": [],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  }
+}

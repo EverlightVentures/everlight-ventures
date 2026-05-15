@@ -1,0 +1,80 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=026063%20%2000013",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/Memphis Property Downloads/Assessor of Property, Shelby County TN.mht",
+  "parsed_at": "2026-04-29T19:36:02.685620+00:00",
+  "parcel_id": "026063  00013",
+  "property_address": "1287  WILSON ST",
+  "neighborhood_number": "00714A06",
+  "tax_map_page": "156A",
+  "land_sqft": 3746,
+  "acres": "0.086",
+  "subdivision": "CRESENT LAND CO",
+  "owner_name": "LESUEUR FRANKLIN & PAULA",
+  "owner_mailing_street": "9411FORREST WINDDR",
+  "owner_mailing_city_state_zip": "COLLIERVILLETN38017-",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 5400,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 5400,
+  "total_assessment_usd": 1350,
+  "land_use": "- VACANT LAND",
+  "property_address_full": "1287  WILSON ST, MEMPHIS, TN",
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "03/16/2011",
+      "price_text": "$1,800",
+      "deed_or_inst": "11029050",
+      "type_code": "QC",
+      "price_usd": 1800,
+      "year": 2011
+    },
+    {
+      "date": "05/19/2009",
+      "price_text": "$1,732",
+      "deed_or_inst": "9480-1",
+      "type_code": "CH",
+      "price_usd": 1732,
+      "year": 2009
+    },
+    {
+      "date": "06/13/1972",
+      "price_text": "$9,500",
+      "deed_or_inst": "H43848",
+      "type_code": "UN",
+      "price_usd": 9500,
+      "year": 1972
+    },
+    {
+      "date": "02/04/1970",
+      "price_text": "$5,000",
+      "deed_or_inst": "F35058",
+      "type_code": "UN",
+      "price_usd": 5000,
+      "year": 1970
+    }
+  ],
+  "first_sale_year": 1970,
+  "last_sale_year": 2011,
+  "last_sale_date": "03/16/2011",
+  "last_sale_price_usd": 1800,
+  "first_sale_date": "02/04/1970",
+  "first_sale_price_usd": 5000,
+  "build_year_proxy": 1970,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "permits": [
+    {
+      "date": "09/29/1995",
+      "amount_text": "$0",
+      "reason": "",
+      "permit_number": "751677",
+      "year": 1995
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  }
+}

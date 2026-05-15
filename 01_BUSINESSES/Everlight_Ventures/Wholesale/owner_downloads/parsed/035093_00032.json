@@ -1,0 +1,177 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=035093%20%2000032",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/Assessor of Property, Shelby County TN (20).mht",
+  "parsed_at": "2026-05-15T09:28:38.405876+00:00",
+  "parcel_id": "035093 00032",
+  "property_address": "1536 S THIRD ST",
+  "neighborhood_number": "00713B05",
+  "tax_map_page": "157G",
+  "land_sqft": 3746,
+  "acres": "0.086",
+  "subdivision": "RAYBURN AVE",
+  "owner_name": "HAKEEM MIKAL L",
+  "owner_mailing_street": "8078 WATERFORD CIR",
+  "owner_mailing_city_state_zip": "MEMPHIS TN 38125 - 5120",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 3900,
+  "building_appraisal_usd": 19900,
+  "total_appraisal_usd": 23800,
+  "total_assessment_usd": 5950,
+  "land_use": "- SINGLE FAMILY",
+  "year_built": 1968,
+  "total_rooms": 4,
+  "bedrooms": 2,
+  "bathrooms": 1,
+  "half_baths": 0,
+  "heat": "CENTRAL A/C AND HEAT",
+  "fuel": "NOT APPLICABLE",
+  "owner_mailing_city": "MEMPHIS",
+  "owner_mailing_state": "TN",
+  "owner_mailing_zip": "38125",
+  "owner_mailing_zip4": "5120",
+  "owner_mailing_full": "8078 WATERFORD CIR, MEMPHIS, TN 38125",
+  "property_address_full": "1536 S THIRD ST, MEMPHIS, TN",
+  "absentee_owner": true,
+  "absentee_signal": "mailing street differs from property street (same zip)",
+  "out_of_state_owner": false,
+  "is_llc_owner": false,
+  "is_institutional_owner": false,
+  "sales_history": [
+    {
+      "date": "10/14/2019",
+      "price_text": "$0",
+      "deed_or_inst": "19109741",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2019
+    },
+    {
+      "date": "07/31/2019",
+      "price_text": "$0",
+      "deed_or_inst": "19078387",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2019
+    },
+    {
+      "date": "03/28/2017",
+      "price_text": "$1,800",
+      "deed_or_inst": "17031430",
+      "type_code": "QC",
+      "price_usd": 1800,
+      "year": 2017
+    },
+    {
+      "date": "02/26/2013",
+      "price_text": "$2,476",
+      "deed_or_inst": "9488-3",
+      "type_code": "CH",
+      "price_usd": 2476,
+      "year": 2013
+    },
+    {
+      "date": "06/23/2006",
+      "price_text": "$55,600",
+      "deed_or_inst": "06167063",
+      "type_code": "WD",
+      "price_usd": 55600,
+      "year": 2006
+    },
+    {
+      "date": "07/17/2003",
+      "price_text": "$55,000",
+      "deed_or_inst": "05015985",
+      "type_code": "CD",
+      "price_usd": 55000,
+      "year": 2003
+    },
+    {
+      "date": "07/17/2003",
+      "price_text": "$0",
+      "deed_or_inst": "03213033",
+      "type_code": "CD",
+      "price_usd": 0,
+      "year": 2003
+    },
+    {
+      "date": "01/28/2003",
+      "price_text": "$5,500",
+      "deed_or_inst": "03090519",
+      "type_code": "SW",
+      "price_usd": 5500,
+      "year": 2003
+    },
+    {
+      "date": "06/14/2002",
+      "price_text": "$11,824",
+      "deed_or_inst": "02111367",
+      "type_code": "TD",
+      "price_usd": 11824,
+      "year": 2002
+    },
+    {
+      "date": "02/05/1986",
+      "price_text": "$5,500",
+      "deed_or_inst": "X51591",
+      "type_code": "WD",
+      "price_usd": 5500,
+      "year": 1986
+    },
+    {
+      "date": "01/13/1986",
+      "price_text": "$0",
+      "deed_or_inst": "X44869",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1986
+    },
+    {
+      "date": "04/03/1984",
+      "price_text": "$10,000",
+      "deed_or_inst": "V25386",
+      "type_code": "WD",
+      "price_usd": 10000,
+      "year": 1984
+    }
+  ],
+  "first_sale_year": 1984,
+  "last_sale_year": 2019,
+  "last_sale_date": "07/31/2019",
+  "last_sale_price_usd": 0,
+  "first_sale_date": "04/03/1984",
+  "first_sale_price_usd": 10000,
+  "build_year_proxy": 1984,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 7,
+  "is_long_term_owner": true,
+  "permits": [
+    {
+      "date": "02/17/2026",
+      "amount_text": "$4,741",
+      "reason": "DEMO",
+      "permit_number": "DEM-26-000070",
+      "year": 2026
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": false,
+    "build_year_ok": true,
+    "verdict": "year_built_1968_passes",
+    "year_built_source": "assessor_actual"
+  },
+  "distress_signals": [
+    "absentee_owner",
+    "long_term_owner_7yr",
+    "low_appraisal_under_50k",
+    "active_history_12_sales"
+  ],
+  "pitch_hooks": [
+    "absentee owner in Memphis (mailing differs from property)",
+    "long-term owner (7 years on title)",
+    "low-appraisal asset (carrying cost vs value)",
+    "active sales history (12 transactions on record)"
+  ],
+  "signal_count": 4,
+  "outreach_priority": "high"
+}

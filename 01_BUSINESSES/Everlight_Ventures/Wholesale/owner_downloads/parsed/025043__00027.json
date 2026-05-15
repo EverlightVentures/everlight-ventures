@@ -1,0 +1,92 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=025043%20%2000027",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/Memphis Property Downloads/Assessor of Property, Shelby County TN (4).mht",
+  "parsed_at": "2026-04-29T20:11:06.877510+00:00",
+  "parcel_id": "025043  00027",
+  "property_address": "1174 S ORLEANS",
+  "neighborhood_number": "00713B01",
+  "tax_map_page": "138N",
+  "land_sqft": 6447,
+  "acres": "0.148",
+  "subdivision": "POND",
+  "owner_name": "GOLDEN LEVEL OPERATIONS LLC",
+  "owner_mailing_street": "6657KIRBY OAKCV",
+  "owner_mailing_city_state_zip": "MEMPHISTN38119-8325",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 4700,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 4700,
+  "total_assessment_usd": 1175,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "MEMPHIS",
+  "owner_mailing_state": "TN",
+  "owner_mailing_zip": "38119",
+  "property_address_full": "1174 S ORLEANS, MEMPHIS, TN",
+  "absentee_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "02/24/2026",
+      "price_text": "$0",
+      "deed_or_inst": "26014134",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2026
+    },
+    {
+      "date": "09/20/2023",
+      "price_text": "$0",
+      "deed_or_inst": "23079778",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2023
+    },
+    {
+      "date": "09/14/2020",
+      "price_text": "$0",
+      "deed_or_inst": "20099414",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2020
+    },
+    {
+      "date": "06/29/2009",
+      "price_text": "$10,555",
+      "deed_or_inst": "9482-3",
+      "type_code": "CH",
+      "price_usd": 10555,
+      "year": 2009
+    },
+    {
+      "date": "06/05/1969",
+      "price_text": "$8,050",
+      "deed_or_inst": "E90137",
+      "type_code": "UN",
+      "price_usd": 8050,
+      "year": 1969
+    }
+  ],
+  "first_sale_year": 1969,
+  "last_sale_year": 2026,
+  "last_sale_date": "02/24/2026",
+  "last_sale_price_usd": 0,
+  "first_sale_date": "06/05/1969",
+  "first_sale_price_usd": 8050,
+  "build_year_proxy": 1969,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "permits": [
+    {
+      "date": "12/06/2005",
+      "amount_text": "",
+      "reason": "DEM",
+      "permit_number": "B0954616",
+      "year": 2005
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  }
+}

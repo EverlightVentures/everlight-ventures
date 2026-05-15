@@ -1,0 +1,15 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=037018%20%2000027C",
+  "parsed_at": "2026-05-08T02:10:43+00:00",
+  "parcel_id": "037018  00027C",
+  "property_address": "2852  NATHAN AVE",
+  "owner_name": "JC RESTORATION CO LLC",
+  "land_use": "- DUPLEX",
+  "year_built": 1964,
+  "sqft": 1200,
+  "land_appraisal_usd": 10000,
+  "building_appraisal_usd": 76300,
+  "total_appraisal_usd": 86300,
+  "subdivision": null
+}

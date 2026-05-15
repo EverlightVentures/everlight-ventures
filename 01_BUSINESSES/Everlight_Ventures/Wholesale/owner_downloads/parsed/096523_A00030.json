@@ -1,0 +1,15 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=096523%20A00030",
+  "parsed_at": "2026-05-08T02:09:55+00:00",
+  "parcel_id": "096523 A00030",
+  "property_address": "8172  HARLEY SQ",
+  "owner_name": "GLOBAL FINANCIAL AUTO SALES LLC",
+  "land_use": "- CONDO UNIT",
+  "year_built": 1974,
+  "sqft": 808,
+  "land_appraisal_usd": 4700,
+  "building_appraisal_usd": 82200,
+  "total_appraisal_usd": 86900,
+  "subdivision": null
+}

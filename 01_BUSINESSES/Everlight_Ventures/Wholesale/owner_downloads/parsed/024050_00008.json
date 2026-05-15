@@ -1,0 +1,116 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=024050%20%2000008",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/Assessor of Property, Shelby County TN (12).mht",
+  "parsed_at": "2026-05-15T09:28:37.111950+00:00",
+  "parcel_id": "024050 00008",
+  "property_address": "1391 S MAIN ST",
+  "neighborhood_number": "00713A01",
+  "tax_map_page": "157B",
+  "land_sqft": 4182,
+  "acres": "0.096",
+  "subdivision": "FACTORY HIGHLANDS BLK 1",
+  "owner_name": "CARTWRIGHT MARCUS",
+  "owner_mailing_street": "1614 MONSARRAT ST",
+  "owner_mailing_city_state_zip": "MEMPHIS TN 38109 - 1629",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 3500,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 3500,
+  "total_assessment_usd": 875,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "MEMPHIS",
+  "owner_mailing_state": "TN",
+  "owner_mailing_zip": "38109",
+  "owner_mailing_zip4": "1629",
+  "owner_mailing_full": "1614 MONSARRAT ST, MEMPHIS, TN 38109",
+  "property_address_full": "1391 S MAIN ST, MEMPHIS, TN",
+  "absentee_owner": true,
+  "absentee_signal": "mailing street differs from property street (same zip)",
+  "out_of_state_owner": false,
+  "is_llc_owner": false,
+  "is_institutional_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "07/05/2016",
+      "price_text": "$200",
+      "deed_or_inst": "16070488",
+      "type_code": "QC",
+      "price_usd": 200,
+      "year": 2016
+    },
+    {
+      "date": "10/30/2006",
+      "price_text": "$8,630",
+      "deed_or_inst": "9476-3",
+      "type_code": "CH",
+      "price_usd": 8630,
+      "year": 2006
+    },
+    {
+      "date": "02/26/1991",
+      "price_text": "$0",
+      "deed_or_inst": "CD4206",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1991
+    },
+    {
+      "date": "03/18/1982",
+      "price_text": "$0",
+      "deed_or_inst": "229-852",
+      "type_code": "PC",
+      "price_usd": 0,
+      "year": 1982
+    },
+    {
+      "date": "07/10/1981",
+      "price_text": "$0",
+      "deed_or_inst": "455",
+      "type_code": "DN",
+      "price_usd": 0,
+      "year": 1981
+    }
+  ],
+  "first_sale_year": 1981,
+  "last_sale_year": 2016,
+  "last_sale_date": "07/05/2016",
+  "last_sale_price_usd": 200,
+  "first_sale_date": "07/10/1981",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1981,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 10,
+  "is_long_term_owner": true,
+  "permits": [
+    {
+      "date": "09/26/2000",
+      "amount_text": "",
+      "reason": "",
+      "permit_number": "B0822881",
+      "year": 2000
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  },
+  "distress_signals": [
+    "absentee_owner",
+    "long_term_owner_10yr",
+    "vacant_lot",
+    "low_appraisal_under_50k",
+    "active_history_5_sales"
+  ],
+  "pitch_hooks": [
+    "absentee owner in Memphis (mailing differs from property)",
+    "long-term owner (10 years on title)",
+    "vacant lot -- carrying cost relief pitch",
+    "low-appraisal asset (carrying cost vs value)",
+    "active sales history (5 transactions on record)"
+  ],
+  "signal_count": 5,
+  "outreach_priority": "high"
+}

@@ -1,0 +1,100 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=026056%20%2000018",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/Memphis Property Downloads/Assessor of Property, Shelby County TN (14).mht",
+  "parsed_at": "2026-04-29T20:11:05.279891+00:00",
+  "parcel_id": "026056  00018",
+  "property_address": "1411  RICHMOND AVE",
+  "neighborhood_number": "00714A06",
+  "tax_map_page": "156H",
+  "land_sqft": 2396,
+  "acres": "0.055",
+  "subdivision": "KAHN",
+  "owner_name": "BOYINGTON GEORGE",
+  "owner_mailing_street": "1408SPARKWAYE",
+  "owner_mailing_city_state_zip": "MEMPHISTN38106-3729",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 4900,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 4900,
+  "total_assessment_usd": 1225,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "MEMPHIS",
+  "owner_mailing_state": "TN",
+  "owner_mailing_zip": "38106",
+  "property_address_full": "1411  RICHMOND AVE, MEMPHIS, TN",
+  "absentee_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "05/18/2021",
+      "price_text": "$5,000",
+      "deed_or_inst": "21063517",
+      "type_code": "WD",
+      "price_usd": 5000,
+      "year": 2021
+    },
+    {
+      "date": "11/14/2014",
+      "price_text": "$800",
+      "deed_or_inst": "14117803",
+      "type_code": "QC",
+      "price_usd": 800,
+      "year": 2014
+    },
+    {
+      "date": "02/15/2011",
+      "price_text": "$3,081",
+      "deed_or_inst": "9485-3",
+      "type_code": "CH",
+      "price_usd": 3081,
+      "year": 2011
+    },
+    {
+      "date": "05/07/2004",
+      "price_text": "$0",
+      "deed_or_inst": "04075659",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2004
+    },
+    {
+      "date": "04/27/1992",
+      "price_text": "$5,000",
+      "deed_or_inst": "CV6747",
+      "type_code": "WD",
+      "price_usd": 5000,
+      "year": 1992
+    },
+    {
+      "date": "11/01/1962",
+      "price_text": "$1,250",
+      "deed_or_inst": "4871-36",
+      "type_code": "UN",
+      "price_usd": 1250,
+      "year": 1962
+    }
+  ],
+  "first_sale_year": 1962,
+  "last_sale_year": 2021,
+  "last_sale_date": "05/18/2021",
+  "last_sale_price_usd": 5000,
+  "first_sale_date": "11/01/1962",
+  "first_sale_price_usd": 1250,
+  "build_year_proxy": 1962,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "permits": [
+    {
+      "date": "08/04/2014",
+      "amount_text": "$0",
+      "reason": "DEM",
+      "permit_number": "BD005783",
+      "year": 2014
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  }
+}

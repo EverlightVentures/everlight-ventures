@@ -1,0 +1,91 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=060057%20%2000004",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/Memphis Property Downloads/Assessor of Property, Shelby County TN (18).mht",
+  "parsed_at": "2026-04-29T20:11:05.691394+00:00",
+  "parcel_id": "060057  00004",
+  "property_address": "1477  RAVEN AVE",
+  "neighborhood_number": "00714D02",
+  "tax_map_page": "165A",
+  "land_sqft": 5968,
+  "acres": "0.137",
+  "subdivision": "ELLISTON HEIGHTS",
+  "owner_name": "HARRIS LAURA L",
+  "owner_mailing_street": "1477RAVENAVE",
+  "owner_mailing_city_state_zip": "MEMPHISTN38106-7329",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 6200,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 6200,
+  "total_assessment_usd": 1550,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "MEMPHIS",
+  "owner_mailing_state": "TN",
+  "owner_mailing_zip": "38106",
+  "property_address_full": "1477  RAVEN AVE, MEMPHIS, TN",
+  "absentee_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "08/29/2001",
+      "price_text": "$0",
+      "deed_or_inst": "LG8662",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2001
+    },
+    {
+      "date": "03/28/1997",
+      "price_text": "$0",
+      "deed_or_inst": "GL9447",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1997
+    },
+    {
+      "date": "06/24/1991",
+      "price_text": "$0",
+      "deed_or_inst": "CG2926",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1991
+    },
+    {
+      "date": "03/29/1958",
+      "price_text": "$0",
+      "deed_or_inst": "385",
+      "type_code": "DN",
+      "price_usd": 0,
+      "year": 1958
+    }
+  ],
+  "first_sale_year": 1958,
+  "last_sale_year": 2001,
+  "last_sale_date": "08/29/2001",
+  "last_sale_price_usd": 0,
+  "first_sale_date": "03/29/1958",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1958,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "permits": [
+    {
+      "date": "02/13/2012",
+      "amount_text": "$0",
+      "reason": "DEM",
+      "permit_number": "BD002034",
+      "year": 2012
+    },
+    {
+      "date": "07/05/1983",
+      "amount_text": "$10,000",
+      "reason": "",
+      "permit_number": "186007",
+      "year": 1983
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  }
+}

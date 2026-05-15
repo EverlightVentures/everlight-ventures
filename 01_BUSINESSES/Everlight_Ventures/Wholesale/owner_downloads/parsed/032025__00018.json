@@ -1,0 +1,15 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=032025%20%2000018",
+  "parsed_at": "2026-05-08T01:21:20+00:00",
+  "parcel_id": "032025  00018",
+  "property_address": "1172  AGNES PL",
+  "owner_name": "TOPSTONE INV MEM 1 LLC",
+  "land_use": "- SINGLE FAMILY",
+  "year_built": 1920,
+  "sqft": 1379,
+  "land_appraisal_usd": 60000,
+  "building_appraisal_usd": 97300,
+  "total_appraisal_usd": 157300,
+  "subdivision": null
+}

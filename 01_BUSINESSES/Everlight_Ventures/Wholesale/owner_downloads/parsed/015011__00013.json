@@ -1,0 +1,20 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=015011%20%2000013",
+  "parsed_at": "2026-05-08T00:58:34+00:00",
+  "parcel_id": "015011  00013",
+  "property_address": "725  SNOWDEN CLB",
+  "owner_name": "TANGLEWOOD CHURCH OF CHRIST (TRS)",
+  "land_use": "- RELIGIOUS",
+  "year_built": 1960,
+  "sqft": null,
+  "bedrooms": null,
+  "bathrooms": null,
+  "land_sqft": null,
+  "land_appraisal_usd": 15900,
+  "building_appraisal_usd": 102500,
+  "total_appraisal_usd": 118400,
+  "total_assessment_usd": 47360,
+  "property_class": null,
+  "subdivision": null
+}

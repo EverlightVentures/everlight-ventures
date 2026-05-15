@@ -1,0 +1,20 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=029028%20%2000007",
+  "parsed_at": "2026-05-08T00:58:39+00:00",
+  "parcel_id": "029028  00007",
+  "property_address": "981  MEDA ST",
+  "owner_name": "PLATANIA MARK",
+  "land_use": "- SINGLE FAMILY",
+  "year_built": 1920,
+  "sqft": 1286,
+  "bedrooms": 1,
+  "bathrooms": 1,
+  "land_sqft": null,
+  "land_appraisal_usd": 55600,
+  "building_appraisal_usd": 113300,
+  "total_appraisal_usd": 168900,
+  "total_assessment_usd": 42225,
+  "property_class": null,
+  "subdivision": null
+}

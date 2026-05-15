@@ -1,0 +1,20 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=028006%20%2000018",
+  "parsed_at": "2026-05-08T00:58:32+00:00",
+  "parcel_id": "028006  00018",
+  "property_address": "2206  UNION AVE",
+  "owner_name": "ML REAL ESTATE LLC",
+  "land_use": "- OFFICE LOW",
+  "year_built": 1900,
+  "sqft": null,
+  "bedrooms": null,
+  "bathrooms": null,
+  "land_sqft": null,
+  "land_appraisal_usd": 219500,
+  "building_appraisal_usd": 207000,
+  "total_appraisal_usd": 426500,
+  "total_assessment_usd": 170600,
+  "property_class": null,
+  "subdivision": null
+}

@@ -1,0 +1,15 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=024010%20%2000009",
+  "parsed_at": "2026-05-08T01:20:41+00:00",
+  "parcel_id": "024010  00009",
+  "property_address": "0  PIONEER",
+  "owner_name": "PM MANAGEMENT LLC",
+  "land_use": "- VACANT LAND",
+  "year_built": null,
+  "sqft": null,
+  "land_appraisal_usd": 3200,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 3200,
+  "subdivision": null
+}

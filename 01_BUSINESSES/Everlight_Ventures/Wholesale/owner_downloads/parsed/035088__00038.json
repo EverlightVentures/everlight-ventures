@@ -1,0 +1,20 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=035088%20%2000038",
+  "parsed_at": "2026-05-08T00:58:49+00:00",
+  "parcel_id": "035088  00038",
+  "property_address": "MICHIGAN",
+  "owner_name": "DUDLEY LATORIA",
+  "land_use": "- VACANT LAND",
+  "year_built": null,
+  "sqft": null,
+  "bedrooms": null,
+  "bathrooms": null,
+  "land_sqft": null,
+  "land_appraisal_usd": 6000,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 6000,
+  "total_assessment_usd": 1500,
+  "property_class": null,
+  "subdivision": null
+}

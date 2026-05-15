@@ -1,0 +1,55 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=060170%20%2000016",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/Memphis Property Downloads/Assessor of Property, Shelby County TN (6).mht",
+  "parsed_at": "2026-04-29T20:11:07.076279+00:00",
+  "parcel_id": "060170  00016",
+  "property_address": "1261  CARLTON RD",
+  "neighborhood_number": "00714D01",
+  "tax_map_page": "165P",
+  "land_sqft": 30056,
+  "acres": "0.69",
+  "subdivision": "FERGUSON",
+  "owner_name": "THWEATT RUSSELL & SERENE S",
+  "owner_mailing_street": "3105JEFF DAVIS DREXT",
+  "owner_mailing_city_state_zip": "OXFORDMS38655-",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 14700,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 14700,
+  "total_assessment_usd": 3675,
+  "land_use": "- VACANT LAND",
+  "property_address_full": "1261  CARLTON RD, MEMPHIS, TN",
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "04/23/1951",
+      "price_text": "",
+      "deed_or_inst": "2730-243",
+      "type_code": "WD",
+      "year": 1951
+    }
+  ],
+  "first_sale_year": 1951,
+  "last_sale_year": 1951,
+  "last_sale_date": "04/23/1951",
+  "last_sale_price_usd": null,
+  "first_sale_date": "04/23/1951",
+  "first_sale_price_usd": null,
+  "build_year_proxy": 1951,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "permits": [
+    {
+      "date": "11/22/2016",
+      "amount_text": "$0",
+      "reason": "DEMO",
+      "permit_number": "BD009061",
+      "year": 2016
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  }
+}

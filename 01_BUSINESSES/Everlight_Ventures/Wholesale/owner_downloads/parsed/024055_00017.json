@@ -1,0 +1,115 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=024055%20%2000017",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/Assessor of Property, Shelby County TN (8).mht",
+  "parsed_at": "2026-05-15T09:28:40.397285+00:00",
+  "parcel_id": "024055 00017",
+  "property_address": "1303 MICHIGAN ST",
+  "neighborhood_number": "00713A01",
+  "tax_map_page": "157B",
+  "land_sqft": 3223,
+  "acres": "0.074",
+  "subdivision": "RIEHLMAN",
+  "owner_name": "STOKES IMMANUEL",
+  "owner_mailing_street": "2275 LESTER RD",
+  "owner_mailing_city_state_zip": "NESBIT MS 38651 - 8331",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 3200,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 3200,
+  "total_assessment_usd": 800,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "NESBIT",
+  "owner_mailing_state": "MS",
+  "owner_mailing_zip": "38651",
+  "owner_mailing_zip4": "8331",
+  "owner_mailing_full": "2275 LESTER RD, NESBIT, MS 38651",
+  "property_address_full": "1303 MICHIGAN ST, MEMPHIS, TN",
+  "absentee_owner": true,
+  "absentee_signal": "owner_mailing_zip 38651 not in Memphis (381xx)",
+  "out_of_state_owner": true,
+  "out_of_state_signal": "mailing state MS not TN",
+  "is_llc_owner": false,
+  "is_institutional_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "06/11/2020",
+      "price_text": "$220",
+      "deed_or_inst": "20061619",
+      "type_code": "QC",
+      "price_usd": 220,
+      "year": 2020
+    },
+    {
+      "date": "09/07/2006",
+      "price_text": "$2,961",
+      "deed_or_inst": "9476-3",
+      "type_code": "CH",
+      "price_usd": 2961,
+      "year": 2006
+    },
+    {
+      "date": "02/04/1998",
+      "price_text": "$0",
+      "deed_or_inst": "HH4786",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1998
+    },
+    {
+      "date": "12/30/1997",
+      "price_text": "$0",
+      "deed_or_inst": "HC8046",
+      "type_code": "A",
+      "price_usd": 0,
+      "year": 1997
+    },
+    {
+      "date": "12/30/1997",
+      "price_text": "",
+      "deed_or_inst": "HH4785",
+      "type_code": "A",
+      "year": 1997
+    },
+    {
+      "date": "07/16/1926",
+      "price_text": "$0",
+      "deed_or_inst": "1046-627",
+      "type_code": "WD",
+      "price_usd": 0,
+      "year": 1926
+    }
+  ],
+  "first_sale_year": 1926,
+  "last_sale_year": 2020,
+  "last_sale_date": "06/11/2020",
+  "last_sale_price_usd": 220,
+  "first_sale_date": "07/16/1926",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1926,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 6,
+  "is_long_term_owner": false,
+  "permits": [],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  },
+  "distress_signals": [
+    "out_of_state_owner_MS",
+    "absentee_owner",
+    "vacant_lot",
+    "low_appraisal_under_50k",
+    "active_history_6_sales"
+  ],
+  "pitch_hooks": [
+    "out-of-state convenience (owner mailing in MS)",
+    "vacant lot -- carrying cost relief pitch",
+    "low-appraisal asset (carrying cost vs value)",
+    "active sales history (6 transactions on record)"
+  ],
+  "signal_count": 5,
+  "outreach_priority": "high"
+}

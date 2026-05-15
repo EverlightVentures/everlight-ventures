@@ -1,0 +1,131 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=035093%20%2000003",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/Memphis Property Downloads/Assessor of Property, Shelby County TN (19).mht",
+  "parsed_at": "2026-04-29T20:11:05.782941+00:00",
+  "parcel_id": "035093  00003",
+  "property_address": "1535  RAYBURN",
+  "neighborhood_number": "00713B05",
+  "tax_map_page": "157G",
+  "land_sqft": 4661,
+  "acres": "0.107",
+  "subdivision": "RAYBURN AVE BLK O",
+  "owner_name": "HAKEEM MIKAL L",
+  "owner_mailing_street": "8078WATERFORDCIRAPT203",
+  "owner_mailing_city_state_zip": "MEMPHISTN38125-5119",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 4800,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 4800,
+  "total_assessment_usd": 1200,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "MEMPHIS",
+  "owner_mailing_state": "TN",
+  "owner_mailing_zip": "38125",
+  "property_address_full": "1535  RAYBURN, MEMPHIS, TN",
+  "absentee_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "10/14/2019",
+      "price_text": "$0",
+      "deed_or_inst": "19109742",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2019
+    },
+    {
+      "date": "07/31/2019",
+      "price_text": "$0",
+      "deed_or_inst": "19078388",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2019
+    },
+    {
+      "date": "11/13/2017",
+      "price_text": "$0",
+      "deed_or_inst": "17117127",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2017
+    },
+    {
+      "date": "09/08/2010",
+      "price_text": "$10,328",
+      "deed_or_inst": "9485-3",
+      "type_code": "CH",
+      "price_usd": 10328,
+      "year": 2010
+    },
+    {
+      "date": "03/04/1998",
+      "price_text": "$20,000",
+      "deed_or_inst": "HF7284",
+      "type_code": "WD",
+      "price_usd": 20000,
+      "year": 1998
+    },
+    {
+      "date": "02/12/1998",
+      "price_text": "$37,861",
+      "deed_or_inst": "HE4429",
+      "type_code": "WD",
+      "price_usd": 37861,
+      "year": 1998
+    },
+    {
+      "date": "06/21/1989",
+      "price_text": "$0",
+      "deed_or_inst": "BC3473",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1989
+    },
+    {
+      "date": "10/24/1980",
+      "price_text": "$8,000",
+      "deed_or_inst": "R89144",
+      "type_code": "WD",
+      "price_usd": 8000,
+      "year": 1980
+    },
+    {
+      "date": "03/29/1978",
+      "price_text": "$0",
+      "deed_or_inst": "144",
+      "type_code": "DN",
+      "price_usd": 0,
+      "year": 1978
+    }
+  ],
+  "first_sale_year": 1978,
+  "last_sale_year": 2019,
+  "last_sale_date": "07/31/2019",
+  "last_sale_price_usd": 0,
+  "first_sale_date": "03/29/1978",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1978,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "permits": [
+    {
+      "date": "03/05/1990",
+      "amount_text": "$1,000",
+      "reason": "",
+      "permit_number": "64041",
+      "year": 1990
+    },
+    {
+      "date": "07/26/1989",
+      "amount_text": "$2,000",
+      "reason": "",
+      "permit_number": "207207",
+      "year": 1989
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  }
+}

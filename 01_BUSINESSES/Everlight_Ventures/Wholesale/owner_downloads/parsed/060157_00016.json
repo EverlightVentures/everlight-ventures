@@ -1,0 +1,107 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=060157%20%2000016",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/Assessor of Property, Shelby County TN (24).mht",
+  "parsed_at": "2026-05-15T09:28:39.002288+00:00",
+  "parcel_id": "060157 00016",
+  "property_address": "1562 CLEMENTINE",
+  "neighborhood_number": "00714F06",
+  "tax_map_page": "165O",
+  "land_sqft": 6360,
+  "acres": "0.146",
+  "subdivision": "CLEMENTINE",
+  "owner_name": "LITTLE DEBORAH",
+  "owner_mailing_street": "1431 LAPALOMA CIR APT 3",
+  "owner_mailing_city_state_zip": "MEMPHIS TN 38114 -",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 7500,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 7500,
+  "total_assessment_usd": 1875,
+  "land_use": "- VACANT LAND",
+  "property_address_full": "1562 CLEMENTINE, MEMPHIS, TN",
+  "out_of_state_owner": false,
+  "is_llc_owner": false,
+  "is_institutional_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "03/19/2008",
+      "price_text": "$1,700",
+      "deed_or_inst": "08066098",
+      "type_code": "QC",
+      "price_usd": 1700,
+      "year": 2008
+    },
+    {
+      "date": "05/06/2004",
+      "price_text": "$6,863",
+      "deed_or_inst": "9468-1",
+      "type_code": "CH",
+      "price_usd": 6863,
+      "year": 2004
+    },
+    {
+      "date": "01/16/1989",
+      "price_text": "$40,900",
+      "deed_or_inst": "AW7617",
+      "type_code": "WD",
+      "price_usd": 40900,
+      "year": 1989
+    },
+    {
+      "date": "07/03/1979",
+      "price_text": "$24,000",
+      "deed_or_inst": "P52976",
+      "type_code": "WD",
+      "price_usd": 24000,
+      "year": 1979
+    },
+    {
+      "date": "08/02/1967",
+      "price_text": "$12,300",
+      "deed_or_inst": "6243-3",
+      "type_code": "UN",
+      "price_usd": 12300,
+      "year": 1967
+    }
+  ],
+  "first_sale_year": 1967,
+  "last_sale_year": 2008,
+  "last_sale_date": "03/19/2008",
+  "last_sale_price_usd": 1700,
+  "first_sale_date": "08/02/1967",
+  "first_sale_price_usd": 12300,
+  "build_year_proxy": 1967,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 18,
+  "is_long_term_owner": true,
+  "permits": [
+    {
+      "date": "10/30/2002",
+      "amount_text": "",
+      "reason": "DEM",
+      "permit_number": "B0089271",
+      "year": 2002
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  },
+  "distress_signals": [
+    "long_term_owner_18yr",
+    "vacant_lot",
+    "low_appraisal_under_50k",
+    "active_history_5_sales"
+  ],
+  "pitch_hooks": [
+    "long-term owner (18 years on title)",
+    "vacant lot -- carrying cost relief pitch",
+    "low-appraisal asset (carrying cost vs value)",
+    "active sales history (5 transactions on record)"
+  ],
+  "signal_count": 4,
+  "outreach_priority": "high"
+}

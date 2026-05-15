@@ -1,0 +1,20 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=034063%20%2000040",
+  "parsed_at": "2026-05-08T00:58:47+00:00",
+  "parcel_id": "034063  00040",
+  "property_address": "0  MARJORIE",
+  "owner_name": "MEMPHIS METRO DEVELOPMENT CORPORATION",
+  "land_use": "- VACANT LAND",
+  "year_built": null,
+  "sqft": null,
+  "bedrooms": null,
+  "bathrooms": null,
+  "land_sqft": null,
+  "land_appraisal_usd": 8000,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 8000,
+  "total_assessment_usd": 2000,
+  "property_class": null,
+  "subdivision": null
+}

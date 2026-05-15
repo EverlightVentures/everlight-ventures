@@ -1,0 +1,69 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=034033%20%2000003",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/Memphis Property Downloads/Assessor of Property, Shelby County TN (22).mht",
+  "parsed_at": "2026-04-29T20:11:06.163992+00:00",
+  "parcel_id": "034033  00003",
+  "property_address": "1539 S ORLEANS ST",
+  "neighborhood_number": "00713B04",
+  "tax_map_page": "157F",
+  "land_sqft": 3964,
+  "acres": "0.091",
+  "subdivision": "E E MEACHAMS ORLEANS STREET PLACE BLK 2",
+  "owner_name": "GREEN SAMANTHA G",
+  "owner_mailing_street": "1138NGERMANTOWNPKWYSTE101-301",
+  "owner_mailing_city_state_zip": "CORDOVATN38016-5872",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 7000,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 7000,
+  "total_assessment_usd": 1750,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "CORDOVA",
+  "owner_mailing_state": "TN",
+  "owner_mailing_zip": "38016",
+  "property_address_full": "1539 S ORLEANS ST, MEMPHIS, TN",
+  "absentee_owner": true,
+  "absentee_signal": "owner_mailing_zip 38016 not in Memphis (381xx)",
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "08/30/2002",
+      "price_text": "$17,500",
+      "deed_or_inst": "02158046",
+      "type_code": "WD",
+      "price_usd": 17500,
+      "year": 2002
+    },
+    {
+      "date": "12/27/1967",
+      "price_text": "$0",
+      "deed_or_inst": "6311-27",
+      "type_code": "UN",
+      "price_usd": 0,
+      "year": 1967
+    }
+  ],
+  "first_sale_year": 1967,
+  "last_sale_year": 2002,
+  "last_sale_date": "08/30/2002",
+  "last_sale_price_usd": 17500,
+  "first_sale_date": "12/27/1967",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1967,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "permits": [
+    {
+      "date": "10/25/2011",
+      "amount_text": "$0",
+      "reason": "DEM",
+      "permit_number": "BD001802",
+      "year": 2011
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  }
+}

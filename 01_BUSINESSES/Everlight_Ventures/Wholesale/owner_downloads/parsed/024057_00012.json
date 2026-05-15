@@ -1,0 +1,127 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=024057%20%2000012",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/117_FARROW_AVE.mht",
+  "parsed_at": "2026-05-15T09:28:36.403413+00:00",
+  "parcel_id": "024057 00012",
+  "property_address": "117 FARROW AVE",
+  "neighborhood_number": "00713A01",
+  "tax_map_page": "157B",
+  "land_sqft": 5009,
+  "acres": "0.115",
+  "subdivision": "RANDOLPH'S FLORIDA",
+  "owner_name": "HOWARD EDDIE ( ESTATE OF )",
+  "owner_mailing_street": "1919 JAMAR 230",
+  "owner_mailing_city_state_zip": "SAN ANTONIO TX 78226 - 1170",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 3800,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 3800,
+  "total_assessment_usd": 950,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "SAN ANTONIO",
+  "owner_mailing_state": "TX",
+  "owner_mailing_zip": "78226",
+  "owner_mailing_zip4": "1170",
+  "owner_mailing_full": "1919 JAMAR 230, SAN ANTONIO, TX 78226",
+  "property_address_full": "117 FARROW AVE, MEMPHIS, TN",
+  "absentee_owner": true,
+  "absentee_signal": "owner_mailing_zip 78226 not in Memphis (381xx)",
+  "out_of_state_owner": true,
+  "out_of_state_signal": "mailing state TX not TN",
+  "is_llc_owner": true,
+  "is_institutional_owner": true,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "04/10/2005",
+      "price_text": "$0",
+      "deed_or_inst": "1249",
+      "type_code": "DN",
+      "price_usd": 0,
+      "year": 2005
+    },
+    {
+      "date": "03/10/1993",
+      "price_text": "$0",
+      "deed_or_inst": "141093",
+      "type_code": "CC",
+      "price_usd": 0,
+      "year": 1993
+    },
+    {
+      "date": "12/04/1981",
+      "price_text": "$3,000",
+      "deed_or_inst": "S94102",
+      "type_code": "WD",
+      "price_usd": 3000,
+      "year": 1981
+    },
+    {
+      "date": "08/10/1981",
+      "price_text": "$7,800",
+      "deed_or_inst": "S75271",
+      "type_code": "WD",
+      "price_usd": 7800,
+      "year": 1981
+    },
+    {
+      "date": "06/10/1964",
+      "price_text": "$0",
+      "deed_or_inst": "101-484",
+      "type_code": "PC",
+      "price_usd": 0,
+      "year": 1964
+    }
+  ],
+  "first_sale_year": 1964,
+  "last_sale_year": 2005,
+  "last_sale_date": "04/10/2005",
+  "last_sale_price_usd": 0,
+  "first_sale_date": "06/10/1964",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1964,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 21,
+  "is_long_term_owner": true,
+  "permits": [
+    {
+      "date": "05/27/1980",
+      "amount_text": "$0",
+      "reason": "",
+      "permit_number": "148021",
+      "year": 1980
+    },
+    {
+      "date": "11/16/1978",
+      "amount_text": "$0",
+      "reason": "",
+      "permit_number": "576",
+      "year": 1978
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  },
+  "distress_signals": [
+    "out_of_state_owner_TX",
+    "absentee_owner",
+    "long_term_owner_21yr",
+    "institutional_owner",
+    "vacant_lot",
+    "low_appraisal_under_50k",
+    "active_history_5_sales"
+  ],
+  "pitch_hooks": [
+    "out-of-state convenience (owner mailing in TX)",
+    "long-term owner (21 years on title)",
+    "investor-to-investor framing (LLC/Trust/Corp owner)",
+    "vacant lot -- carrying cost relief pitch",
+    "low-appraisal asset (carrying cost vs value)",
+    "active sales history (5 transactions on record)"
+  ],
+  "signal_count": 7,
+  "outreach_priority": "high"
+}

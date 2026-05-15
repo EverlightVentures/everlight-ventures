@@ -1,0 +1,100 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=048018%20%2000007",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/Assessor of Property, Shelby County TN (10).mht",
+  "parsed_at": "2026-05-15T09:28:36.809795+00:00",
+  "parcel_id": "048018 00007",
+  "property_address": "1363 ETHLYN AVE",
+  "neighborhood_number": "00714A04",
+  "tax_map_page": "156I",
+  "land_sqft": 6534,
+  "acres": "0.15",
+  "subdivision": "WEST DRIVE HEIGHTS BLK 2",
+  "owner_name": "BROWN YOLANDA",
+  "owner_mailing_street": "4098 CINDERELLA ST",
+  "owner_mailing_city_state_zip": "MEMPHIS TN 38109 - 4522",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 7100,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 7100,
+  "total_assessment_usd": 1775,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "MEMPHIS",
+  "owner_mailing_state": "TN",
+  "owner_mailing_zip": "38109",
+  "owner_mailing_zip4": "4522",
+  "owner_mailing_full": "4098 CINDERELLA ST, MEMPHIS, TN 38109",
+  "property_address_full": "1363 ETHLYN AVE, MEMPHIS, TN",
+  "absentee_owner": true,
+  "absentee_signal": "mailing street differs from property street (same zip)",
+  "out_of_state_owner": false,
+  "is_llc_owner": false,
+  "is_institutional_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "02/02/2018",
+      "price_text": "$360",
+      "deed_or_inst": "18011633",
+      "type_code": "QC",
+      "price_usd": 360,
+      "year": 2018
+    },
+    {
+      "date": "01/24/2012",
+      "price_text": "$12,542",
+      "deed_or_inst": "9486-1",
+      "type_code": "CH",
+      "price_usd": 12542,
+      "year": 2012
+    },
+    {
+      "date": "05/27/1980",
+      "price_text": "$0",
+      "deed_or_inst": "221-438",
+      "type_code": "PC",
+      "price_usd": 0,
+      "year": 1980
+    },
+    {
+      "date": "01/31/1977",
+      "price_text": "$0",
+      "deed_or_inst": "68",
+      "type_code": "DN",
+      "price_usd": 0,
+      "year": 1977
+    }
+  ],
+  "first_sale_year": 1977,
+  "last_sale_year": 2018,
+  "last_sale_date": "02/02/2018",
+  "last_sale_price_usd": 360,
+  "first_sale_date": "01/31/1977",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1977,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 8,
+  "is_long_term_owner": true,
+  "permits": [],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  },
+  "distress_signals": [
+    "absentee_owner",
+    "long_term_owner_8yr",
+    "vacant_lot",
+    "low_appraisal_under_50k",
+    "active_history_4_sales"
+  ],
+  "pitch_hooks": [
+    "absentee owner in Memphis (mailing differs from property)",
+    "long-term owner (8 years on title)",
+    "vacant lot -- carrying cost relief pitch",
+    "low-appraisal asset (carrying cost vs value)",
+    "active sales history (4 transactions on record)"
+  ],
+  "signal_count": 5,
+  "outreach_priority": "high"
+}

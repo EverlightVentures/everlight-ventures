@@ -1,0 +1,134 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=024047%20%2000022",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/Assessor of Property, Shelby County TN (11).mht",
+  "parsed_at": "2026-05-15T09:28:36.960036+00:00",
+  "parcel_id": "024047 00022",
+  "property_address": "1382 FLORIDA ST",
+  "neighborhood_number": "00708D71",
+  "tax_map_page": "157A",
+  "land_sqft": 6839,
+  "acres": "0.157",
+  "subdivision": "BOYD",
+  "owner_name": "SHOWERS PETER JR AND LOLITA R SHOWERS",
+  "owner_mailing_street": "465 BONNELL AVE",
+  "owner_mailing_city_state_zip": "MEMPHIS TN 38109 - 7329",
+  "property_class": "INDUSTRIAL",
+  "land_appraisal_usd": 7900,
+  "building_appraisal_usd": 6000,
+  "total_appraisal_usd": 13900,
+  "total_assessment_usd": 5560,
+  "land_use": "- ACCESSRY IMP",
+  "owner_mailing_city": "MEMPHIS",
+  "owner_mailing_state": "TN",
+  "owner_mailing_zip": "38109",
+  "owner_mailing_zip4": "7329",
+  "owner_mailing_full": "465 BONNELL AVE, MEMPHIS, TN 38109",
+  "property_address_full": "1382 FLORIDA ST, MEMPHIS, TN",
+  "absentee_owner": true,
+  "absentee_signal": "mailing street differs from property street (same zip)",
+  "out_of_state_owner": false,
+  "is_llc_owner": false,
+  "is_institutional_owner": false,
+  "sales_history": [
+    {
+      "date": "01/28/2002",
+      "price_text": "",
+      "deed_or_inst": "02016812",
+      "type_code": "QC",
+      "year": 2002
+    },
+    {
+      "date": "12/04/2001",
+      "price_text": "$0",
+      "deed_or_inst": "02016812",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2001
+    },
+    {
+      "date": "07/09/1987",
+      "price_text": "$0",
+      "deed_or_inst": "464",
+      "type_code": "DN",
+      "price_usd": 0,
+      "year": 1987
+    },
+    {
+      "date": "12/12/1966",
+      "price_text": "$12,000",
+      "deed_or_inst": "6046-243",
+      "type_code": "UN",
+      "price_usd": 12000,
+      "year": 1966
+    },
+    {
+      "date": "07/29/1966",
+      "price_text": "$7,000",
+      "deed_or_inst": "6004-81",
+      "type_code": "UN",
+      "price_usd": 7000,
+      "year": 1966
+    }
+  ],
+  "first_sale_year": 1966,
+  "last_sale_year": 2002,
+  "last_sale_date": "01/28/2002",
+  "last_sale_price_usd": null,
+  "first_sale_date": "07/29/1966",
+  "first_sale_price_usd": 7000,
+  "build_year_proxy": 1966,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 24,
+  "is_long_term_owner": true,
+  "permits": [
+    {
+      "date": "06/04/2015",
+      "amount_text": "$0",
+      "reason": "UO",
+      "permit_number": "BC0009099",
+      "year": 2015
+    },
+    {
+      "date": "05/26/2015",
+      "amount_text": "$0",
+      "reason": "ACC",
+      "permit_number": "B1069997",
+      "year": 2015
+    },
+    {
+      "date": "11/05/2014",
+      "amount_text": "$0",
+      "reason": "DEM",
+      "permit_number": "BD006303",
+      "year": 2014
+    },
+    {
+      "date": "05/29/1998",
+      "amount_text": "$20,000",
+      "reason": "",
+      "permit_number": "B0811618",
+      "year": 1998
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": false,
+    "build_year_ok": true,
+    "verdict": "first_sale_proxy_1966_passes",
+    "year_built_source": "first_sale_proxy"
+  },
+  "distress_signals": [
+    "absentee_owner",
+    "long_term_owner_24yr",
+    "low_appraisal_under_50k",
+    "active_history_5_sales"
+  ],
+  "pitch_hooks": [
+    "absentee owner in Memphis (mailing differs from property)",
+    "long-term owner (24 years on title)",
+    "low-appraisal asset (carrying cost vs value)",
+    "active sales history (5 transactions on record)"
+  ],
+  "signal_count": 4,
+  "outreach_priority": "high"
+}

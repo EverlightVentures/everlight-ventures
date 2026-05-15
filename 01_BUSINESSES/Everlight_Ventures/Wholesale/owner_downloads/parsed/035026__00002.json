@@ -1,0 +1,15 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=035026%20%2000002",
+  "parsed_at": "2026-05-08T02:10:27+00:00",
+  "parcel_id": "035026  00002",
+  "property_address": "349  SILVERAGE AVE",
+  "owner_name": "A FRESH START TO A NEW BEGINING",
+  "land_use": "- APRT GARDEN",
+  "year_built": 1950,
+  "sqft": null,
+  "land_appraisal_usd": 118600,
+  "building_appraisal_usd": 59100,
+  "total_appraisal_usd": 177700,
+  "subdivision": null
+}

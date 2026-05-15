@@ -1,0 +1,100 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=015025%20%2000024",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/Memphis Property Downloads/Assessor of Property, Shelby County TN.mht",
+  "parsed_at": "2026-04-29T20:11:07.513854+00:00",
+  "parcel_id": "015025  00024",
+  "property_address": "942  MELROSE",
+  "neighborhood_number": "00709J01",
+  "tax_map_page": "139O",
+  "land_sqft": 4661,
+  "acres": "0.107",
+  "subdivision": "V C THOMAS",
+  "owner_name": "EVANS ARIN B",
+  "owner_mailing_street": "905SWILLETTST",
+  "owner_mailing_city_state_zip": "MEMPHISTN38114-1530",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 25000,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 25000,
+  "total_assessment_usd": 6250,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "MEMPHIS",
+  "owner_mailing_state": "TN",
+  "owner_mailing_zip": "38114",
+  "property_address_full": "942  MELROSE, MEMPHIS, TN",
+  "absentee_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "03/28/2017",
+      "price_text": "$100",
+      "deed_or_inst": "17031428",
+      "type_code": "QC",
+      "price_usd": 100,
+      "year": 2017
+    },
+    {
+      "date": "02/15/2011",
+      "price_text": "$5,010",
+      "deed_or_inst": "9485-3",
+      "type_code": "CH",
+      "price_usd": 5010,
+      "year": 2011
+    },
+    {
+      "date": "05/31/2001",
+      "price_text": "$1,700",
+      "deed_or_inst": "02004108",
+      "type_code": "QC",
+      "price_usd": 1700,
+      "year": 2001
+    },
+    {
+      "date": "01/30/1986",
+      "price_text": "$0",
+      "deed_or_inst": "9410-3",
+      "type_code": "CH",
+      "price_usd": 0,
+      "year": 1986
+    },
+    {
+      "date": "08/20/1975",
+      "price_text": "$2,500",
+      "deed_or_inst": "K61182",
+      "type_code": "QC",
+      "price_usd": 2500,
+      "year": 1975
+    },
+    {
+      "date": "10/02/1972",
+      "price_text": "$0",
+      "deed_or_inst": "H67140",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1972
+    }
+  ],
+  "first_sale_year": 1972,
+  "last_sale_year": 2017,
+  "last_sale_date": "03/28/2017",
+  "last_sale_price_usd": 100,
+  "first_sale_date": "10/02/1972",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1972,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "permits": [
+    {
+      "date": "05/04/1979",
+      "amount_text": "$0",
+      "reason": "",
+      "permit_number": "124026",
+      "year": 1979
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  }
+}

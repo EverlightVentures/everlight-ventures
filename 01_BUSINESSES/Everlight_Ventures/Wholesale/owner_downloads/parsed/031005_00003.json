@@ -1,0 +1,196 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=031005%20%2000003",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/Assessor of Property, Shelby County TN (17).mht",
+  "parsed_at": "2026-05-15T09:28:37.830747+00:00",
+  "parcel_id": "031005 00003",
+  "property_address": "1467 E MCLEMORE AVE",
+  "neighborhood_number": "00708F63",
+  "tax_map_page": "156B",
+  "land_sqft": 218236,
+  "acres": "5.01",
+  "owner_name": "FLH DEVELOPMENT LLC",
+  "owner_mailing_street": "1011 W POPLAR AVE STE 5",
+  "owner_mailing_city_state_zip": "COLLIERVILLE TN 38017 - 2577",
+  "property_class": "COMMERCIAL",
+  "land_appraisal_usd": 221600,
+  "building_appraisal_usd": 1322000,
+  "total_appraisal_usd": 1543600,
+  "total_assessment_usd": 617440,
+  "land_use": "- NURSING HOME",
+  "year_built": 1940,
+  "owner_mailing_city": "COLLIERVILLE",
+  "owner_mailing_state": "TN",
+  "owner_mailing_zip": "38017",
+  "owner_mailing_zip4": "2577",
+  "owner_mailing_full": "1011 W POPLAR AVE STE 5, COLLIERVILLE, TN 38017",
+  "property_address_full": "1467 E MCLEMORE AVE, MEMPHIS, TN",
+  "absentee_owner": true,
+  "absentee_signal": "owner_mailing_zip 38017 not in Memphis (381xx)",
+  "out_of_state_owner": false,
+  "is_llc_owner": true,
+  "is_institutional_owner": true,
+  "sales_history": [
+    {
+      "date": "07/19/2021",
+      "price_text": "$156,787",
+      "deed_or_inst": "TX-2018",
+      "type_code": "CH",
+      "price_usd": 156787,
+      "year": 2021
+    },
+    {
+      "date": "12/20/2019",
+      "price_text": "$138,364",
+      "deed_or_inst": "TX-2018",
+      "type_code": "CH",
+      "price_usd": 138364,
+      "year": 2019
+    },
+    {
+      "date": "09/02/2014",
+      "price_text": "$240,000",
+      "deed_or_inst": "14091680",
+      "type_code": "SW",
+      "price_usd": 240000,
+      "year": 2014
+    },
+    {
+      "date": "05/23/2014",
+      "price_text": "$100,000",
+      "deed_or_inst": "14054692",
+      "type_code": "QC",
+      "price_usd": 100000,
+      "year": 2014
+    },
+    {
+      "date": "05/23/2014",
+      "price_text": "$0",
+      "deed_or_inst": "14091675",
+      "type_code": "CD",
+      "price_usd": 0,
+      "year": 2014
+    },
+    {
+      "date": "10/18/2011",
+      "price_text": "$112,141",
+      "deed_or_inst": "9486-1",
+      "type_code": "CH",
+      "price_usd": 112141,
+      "year": 2011
+    },
+    {
+      "date": "08/22/2006",
+      "price_text": "$590,000",
+      "deed_or_inst": "06151819",
+      "type_code": "WD",
+      "price_usd": 590000,
+      "year": 2006
+    },
+    {
+      "date": "08/09/2006",
+      "price_text": "$385,000",
+      "deed_or_inst": "06142947",
+      "type_code": "WD",
+      "price_usd": 385000,
+      "year": 2006
+    },
+    {
+      "date": "08/09/2006",
+      "price_text": "$0",
+      "deed_or_inst": "06142948",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2006
+    },
+    {
+      "date": "10/15/2004",
+      "price_text": "$0",
+      "deed_or_inst": "04176367",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2004
+    },
+    {
+      "date": "10/15/2004",
+      "price_text": "$250,000",
+      "deed_or_inst": "04176366",
+      "type_code": "SW",
+      "price_usd": 250000,
+      "year": 2004
+    },
+    {
+      "date": "11/20/1998",
+      "price_text": "$0",
+      "deed_or_inst": "HY4436",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1998
+    }
+  ],
+  "first_sale_year": 1998,
+  "last_sale_year": 2021,
+  "last_sale_date": "07/19/2021",
+  "last_sale_price_usd": 156787,
+  "first_sale_date": "11/20/1998",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1998,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 5,
+  "is_long_term_owner": false,
+  "permits": [
+    {
+      "date": "09/12/2006",
+      "amount_text": "",
+      "reason": "UO",
+      "permit_number": "B0982813",
+      "year": 2006
+    },
+    {
+      "date": "01/11/2005",
+      "amount_text": "",
+      "reason": "UO",
+      "permit_number": "B0943358",
+      "year": 2005
+    },
+    {
+      "date": "09/24/2001",
+      "amount_text": "$45,000",
+      "reason": "",
+      "permit_number": "B0870323",
+      "year": 2001
+    },
+    {
+      "date": "05/08/1997",
+      "amount_text": "$10,000",
+      "reason": "",
+      "permit_number": "B0796635",
+      "year": 1997
+    },
+    {
+      "date": "03/21/1997",
+      "amount_text": "$5,000",
+      "reason": "",
+      "permit_number": "B0793657",
+      "year": 1997
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": false,
+    "build_year_ok": true,
+    "verdict": "year_built_1940_passes",
+    "year_built_source": "assessor_actual"
+  },
+  "distress_signals": [
+    "absentee_owner",
+    "institutional_owner",
+    "active_history_12_sales"
+  ],
+  "pitch_hooks": [
+    "absentee owner in Memphis (mailing differs from property)",
+    "investor-to-investor framing (LLC/Trust/Corp owner)",
+    "active sales history (12 transactions on record)"
+  ],
+  "signal_count": 3,
+  "outreach_priority": "high"
+}

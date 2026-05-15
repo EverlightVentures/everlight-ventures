@@ -1,0 +1,102 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=034026%20%2000014",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/Memphis Property Downloads/Assessor of Property, Shelby County TN (27).mht",
+  "parsed_at": "2026-04-29T20:11:06.669224+00:00",
+  "parcel_id": "034026  00014",
+  "property_address": "1577  MCMILLAN ST",
+  "neighborhood_number": "00713B04",
+  "tax_map_page": "157F",
+  "land_sqft": 3006,
+  "acres": "0.069",
+  "subdivision": "LAUDERDALE ST PL BLK 11",
+  "owner_name": "CARNEGIE CHURCH OF GOD IN CHRIST",
+  "owner_mailing_street": "5340SANTA MONICAST",
+  "owner_mailing_city_state_zip": "MEMPHISTN38116-",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 7000,
+  "building_appraisal_usd": 49000,
+  "total_appraisal_usd": 56000,
+  "total_assessment_usd": 14000,
+  "land_use": "- SINGLE FAMILY",
+  "year_built": 1992,
+  "total_rooms": 5,
+  "bedrooms": 2,
+  "bathrooms": 1,
+  "half_baths": 0,
+  "heat": "CENTRAL A/C AND HEAT",
+  "fuel": "NOT APPLICABLE",
+  "property_address_full": "1577  MCMILLAN ST, MEMPHIS, TN",
+  "sales_history": [
+    {
+      "date": "03/10/2009",
+      "price_text": "$8,897",
+      "deed_or_inst": "09034774",
+      "type_code": "WD",
+      "price_usd": 8897,
+      "year": 2009
+    },
+    {
+      "date": "02/19/2009",
+      "price_text": "$0",
+      "deed_or_inst": "09031413",
+      "type_code": "A",
+      "price_usd": 0,
+      "year": 2009
+    },
+    {
+      "date": "03/01/2005",
+      "price_text": "$0",
+      "deed_or_inst": "867",
+      "type_code": "DN",
+      "price_usd": 0,
+      "year": 2005
+    },
+    {
+      "date": "02/12/1998",
+      "price_text": "",
+      "deed_or_inst": "HE5929",
+      "type_code": "QC",
+      "year": 1998
+    },
+    {
+      "date": "06/06/1997",
+      "price_text": "$0",
+      "deed_or_inst": "GR7707",
+      "type_code": "A",
+      "price_usd": 0,
+      "year": 1997
+    },
+    {
+      "date": "06/27/1996",
+      "price_text": "$0",
+      "deed_or_inst": "363",
+      "type_code": "DN",
+      "price_usd": 0,
+      "year": 1996
+    }
+  ],
+  "first_sale_year": 1996,
+  "last_sale_year": 2009,
+  "last_sale_date": "02/19/2009",
+  "last_sale_price_usd": 0,
+  "first_sale_date": "06/27/1996",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1996,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "permits": [
+    {
+      "date": "01/13/1992",
+      "amount_text": "$34,000",
+      "reason": "",
+      "permit_number": "13062",
+      "year": 1992
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": false,
+    "build_year_ok": true,
+    "verdict": "year_built_1992_passes",
+    "year_built_source": "assessor_actual"
+  }
+}

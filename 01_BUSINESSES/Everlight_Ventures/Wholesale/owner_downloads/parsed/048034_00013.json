@@ -1,0 +1,117 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=048034%20%2000013",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/Assessor of Property, Shelby County TN (16).mht",
+  "parsed_at": "2026-05-15T09:28:37.681411+00:00",
+  "parcel_id": "048034 00013",
+  "property_address": "1430 SILVER",
+  "neighborhood_number": "00714A04",
+  "tax_map_page": "156G",
+  "land_sqft": 2483,
+  "acres": "0.057",
+  "subdivision": "CALDWELL & DILATUSH",
+  "owner_name": "JONES CHRISTINE AND MAGGIE SAUNDERS",
+  "owner_mailing_street": "120 MAGGIORA DR",
+  "owner_mailing_city_state_zip": "OAKLAND CA 94605 - 5336",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 5400,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 5400,
+  "total_assessment_usd": 1350,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "OAKLAND",
+  "owner_mailing_state": "CA",
+  "owner_mailing_zip": "94605",
+  "owner_mailing_zip4": "5336",
+  "owner_mailing_full": "120 MAGGIORA DR, OAKLAND, CA 94605",
+  "property_address_full": "1430 SILVER, MEMPHIS, TN",
+  "absentee_owner": true,
+  "absentee_signal": "owner_mailing_zip 94605 not in Memphis (381xx)",
+  "out_of_state_owner": true,
+  "out_of_state_signal": "mailing state CA not TN",
+  "is_llc_owner": false,
+  "is_institutional_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "02/13/1998",
+      "price_text": "$1,200",
+      "deed_or_inst": "HN2511",
+      "type_code": "QC",
+      "price_usd": 1200,
+      "year": 1998
+    },
+    {
+      "date": "09/19/1995",
+      "price_text": "",
+      "deed_or_inst": "TRD9441-1",
+      "type_code": "CH",
+      "year": 1995
+    },
+    {
+      "date": "06/20/1979",
+      "price_text": "$0",
+      "deed_or_inst": "P46505",
+      "type_code": "WD",
+      "price_usd": 0,
+      "year": 1979
+    },
+    {
+      "date": "02/08/1978",
+      "price_text": "$0",
+      "deed_or_inst": "M91613",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1978
+    },
+    {
+      "date": "12/30/1977",
+      "price_text": "$0",
+      "deed_or_inst": "M83289",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1977
+    }
+  ],
+  "first_sale_year": 1977,
+  "last_sale_year": 1998,
+  "last_sale_date": "02/13/1998",
+  "last_sale_price_usd": 1200,
+  "first_sale_date": "12/30/1977",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1977,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 28,
+  "is_long_term_owner": true,
+  "permits": [
+    {
+      "date": "01/24/1995",
+      "amount_text": "$0",
+      "reason": "",
+      "permit_number": "748829",
+      "year": 1995
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  },
+  "distress_signals": [
+    "out_of_state_owner_CA",
+    "absentee_owner",
+    "long_term_owner_28yr",
+    "vacant_lot",
+    "low_appraisal_under_50k",
+    "active_history_5_sales"
+  ],
+  "pitch_hooks": [
+    "out-of-state convenience (owner mailing in CA)",
+    "long-term owner (28 years on title)",
+    "vacant lot -- carrying cost relief pitch",
+    "low-appraisal asset (carrying cost vs value)",
+    "active sales history (5 transactions on record)"
+  ],
+  "signal_count": 6,
+  "outreach_priority": "high"
+}

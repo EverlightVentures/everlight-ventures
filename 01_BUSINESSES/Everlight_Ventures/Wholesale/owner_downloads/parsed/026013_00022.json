@@ -1,0 +1,140 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=026013%20%2000022",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/Assessor of Property, Shelby County TN (3).mht",
+  "parsed_at": "2026-05-15T09:28:39.586309+00:00",
+  "parcel_id": "026013 00022",
+  "property_address": "1112 SAXON",
+  "neighborhood_number": "00709I01",
+  "tax_map_page": "139P",
+  "land_sqft": 6142,
+  "acres": "0.141",
+  "subdivision": "GOODLOE & MARTIN BLK 1",
+  "owner_name": "SPILMANN JOSEPH R JR",
+  "owner_mailing_street": "60 O YOUNG RDG",
+  "owner_mailing_city_state_zip": "CARRIERE MS 39426 - 5512",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 8000,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 8000,
+  "total_assessment_usd": 2000,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "CARRIERE",
+  "owner_mailing_state": "MS",
+  "owner_mailing_zip": "39426",
+  "owner_mailing_zip4": "5512",
+  "owner_mailing_full": "60 O YOUNG RDG, CARRIERE, MS 39426",
+  "property_address_full": "1112 SAXON, MEMPHIS, TN",
+  "absentee_owner": true,
+  "absentee_signal": "owner_mailing_zip 39426 not in Memphis (381xx)",
+  "out_of_state_owner": true,
+  "out_of_state_signal": "mailing state MS not TN",
+  "is_llc_owner": false,
+  "is_institutional_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "09/14/2020",
+      "price_text": "$1,800",
+      "deed_or_inst": "20103279",
+      "type_code": "WD",
+      "price_usd": 1800,
+      "year": 2020
+    },
+    {
+      "date": "06/22/2020",
+      "price_text": "$500",
+      "deed_or_inst": "20070030",
+      "type_code": "WD",
+      "price_usd": 500,
+      "year": 2020
+    },
+    {
+      "date": "11/17/2017",
+      "price_text": "$801",
+      "deed_or_inst": "17124143",
+      "type_code": "QC",
+      "price_usd": 801,
+      "year": 2017
+    },
+    {
+      "date": "08/22/2017",
+      "price_text": "$200",
+      "deed_or_inst": "17086444",
+      "type_code": "QC",
+      "price_usd": 200,
+      "year": 2017
+    },
+    {
+      "date": "11/29/2006",
+      "price_text": "$8,026",
+      "deed_or_inst": "9476-3",
+      "type_code": "CH",
+      "price_usd": 8026,
+      "year": 2006
+    },
+    {
+      "date": "10/24/1986",
+      "price_text": "$0",
+      "deed_or_inst": "Y66447",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1986
+    },
+    {
+      "date": "08/16/1984",
+      "price_text": "$0",
+      "deed_or_inst": "V62678",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1984
+    },
+    {
+      "date": "07/17/1971",
+      "price_text": "$4,000",
+      "deed_or_inst": "G31325",
+      "type_code": "UN",
+      "price_usd": 4000,
+      "year": 1971
+    }
+  ],
+  "first_sale_year": 1971,
+  "last_sale_year": 2020,
+  "last_sale_date": "06/22/2020",
+  "last_sale_price_usd": 500,
+  "first_sale_date": "07/17/1971",
+  "first_sale_price_usd": 4000,
+  "build_year_proxy": 1971,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 6,
+  "is_long_term_owner": false,
+  "permits": [
+    {
+      "date": "06/01/2004",
+      "amount_text": "",
+      "reason": "DEM",
+      "permit_number": "B0904629",
+      "year": 2004
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  },
+  "distress_signals": [
+    "out_of_state_owner_MS",
+    "absentee_owner",
+    "vacant_lot",
+    "low_appraisal_under_50k",
+    "active_history_8_sales"
+  ],
+  "pitch_hooks": [
+    "out-of-state convenience (owner mailing in MS)",
+    "vacant lot -- carrying cost relief pitch",
+    "low-appraisal asset (carrying cost vs value)",
+    "active sales history (8 transactions on record)"
+  ],
+  "signal_count": 5,
+  "outreach_priority": "high"
+}

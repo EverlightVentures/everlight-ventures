@@ -1,0 +1,20 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=021115%20%2000017",
+  "parsed_at": "2026-05-08T00:58:38+00:00",
+  "parcel_id": "021115  00017",
+  "property_address": "892 N CLAYBROOK ST",
+  "owner_name": "EVANS TIMOTHY",
+  "land_use": "- SINGLE FAMILY",
+  "year_built": 1992,
+  "sqft": 900,
+  "bedrooms": 3,
+  "bathrooms": 1,
+  "land_sqft": null,
+  "land_appraisal_usd": 3300,
+  "building_appraisal_usd": 32500,
+  "total_appraisal_usd": 35800,
+  "total_assessment_usd": 8950,
+  "property_class": null,
+  "subdivision": null
+}

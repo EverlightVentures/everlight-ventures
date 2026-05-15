@@ -1,0 +1,73 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=026043%20%2000029",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/Assessor of Property, Shelby County TN (15).mht",
+  "parsed_at": "2026-05-15T09:28:37.532599+00:00",
+  "parcel_id": "026043 00029",
+  "property_address": "1420 ENGLEWOOD ST",
+  "neighborhood_number": "00714A03",
+  "tax_map_page": "156H",
+  "land_sqft": 3964,
+  "acres": "0.091",
+  "subdivision": "TRIGG AVE PL BLK 6",
+  "owner_name": "WILLIAM ERMA J",
+  "owner_mailing_street": "983 CRAFT RD",
+  "owner_mailing_city_state_zip": "MEMPHIS TN 38116 -",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 3800,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 3800,
+  "total_assessment_usd": 950,
+  "land_use": "- VACANT LAND",
+  "property_address_full": "1420 ENGLEWOOD ST, MEMPHIS, TN",
+  "out_of_state_owner": false,
+  "is_llc_owner": false,
+  "is_institutional_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "03/16/2004",
+      "price_text": "$0",
+      "deed_or_inst": "04047921",
+      "type_code": "A",
+      "price_usd": 0,
+      "year": 2004
+    },
+    {
+      "date": "03/15/1993",
+      "price_text": "$0",
+      "deed_or_inst": "DK6210",
+      "type_code": "A",
+      "price_usd": 0,
+      "year": 1993
+    }
+  ],
+  "first_sale_year": 1993,
+  "last_sale_year": 2004,
+  "last_sale_date": "03/16/2004",
+  "last_sale_price_usd": 0,
+  "first_sale_date": "03/15/1993",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1993,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 22,
+  "is_long_term_owner": true,
+  "permits": [],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  },
+  "distress_signals": [
+    "long_term_owner_22yr",
+    "vacant_lot",
+    "low_appraisal_under_50k"
+  ],
+  "pitch_hooks": [
+    "long-term owner (22 years on title)",
+    "vacant lot -- carrying cost relief pitch",
+    "low-appraisal asset (carrying cost vs value)"
+  ],
+  "signal_count": 3,
+  "outreach_priority": "high"
+}

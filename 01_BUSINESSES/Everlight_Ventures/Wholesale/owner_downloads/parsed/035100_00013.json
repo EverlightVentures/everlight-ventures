@@ -1,0 +1,82 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=035100%20%2000013",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/Assessor of Property, Shelby County TN (26).mht",
+  "parsed_at": "2026-05-15T09:28:39.299012+00:00",
+  "parcel_id": "035100 00013",
+  "property_address": "1573 PATTON ST",
+  "neighborhood_number": "00713B05",
+  "tax_map_page": "157G",
+  "land_sqft": 3223,
+  "acres": "0.074",
+  "subdivision": "RAYBURN AVE BLK L",
+  "owner_name": "HILL ARNETTE L",
+  "owner_mailing_street": "4185 NEELY RD",
+  "owner_mailing_city_state_zip": "MEMPHIS TN 38109 - 5427",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 3600,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 3600,
+  "total_assessment_usd": 900,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "MEMPHIS",
+  "owner_mailing_state": "TN",
+  "owner_mailing_zip": "38109",
+  "owner_mailing_zip4": "5427",
+  "owner_mailing_full": "4185 NEELY RD, MEMPHIS, TN 38109",
+  "property_address_full": "1573 PATTON ST, MEMPHIS, TN",
+  "absentee_owner": true,
+  "absentee_signal": "mailing street differs from property street (same zip)",
+  "out_of_state_owner": false,
+  "is_llc_owner": false,
+  "is_institutional_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "09/02/1998",
+      "price_text": "$0",
+      "deed_or_inst": "HU3972",
+      "type_code": "A",
+      "price_usd": 0,
+      "year": 1998
+    },
+    {
+      "date": "09/02/1998",
+      "price_text": "$0",
+      "deed_or_inst": "HU3973",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1998
+    }
+  ],
+  "first_sale_year": 1998,
+  "last_sale_year": 1998,
+  "last_sale_date": "09/02/1998",
+  "last_sale_price_usd": 0,
+  "first_sale_date": "09/02/1998",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1998,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 28,
+  "is_long_term_owner": true,
+  "permits": [],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  },
+  "distress_signals": [
+    "absentee_owner",
+    "long_term_owner_28yr",
+    "vacant_lot",
+    "low_appraisal_under_50k"
+  ],
+  "pitch_hooks": [
+    "absentee owner in Memphis (mailing differs from property)",
+    "long-term owner (28 years on title)",
+    "vacant lot -- carrying cost relief pitch",
+    "low-appraisal asset (carrying cost vs value)"
+  ],
+  "signal_count": 4,
+  "outreach_priority": "high"
+}

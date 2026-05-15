@@ -1,0 +1,141 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=024058%20%2000005",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/Assessor of Property, Shelby County TN (1).mht",
+  "parsed_at": "2026-05-15T09:28:36.660301+00:00",
+  "parcel_id": "024058 00005",
+  "property_address": "101 LUCY AVE",
+  "neighborhood_number": "00713A01",
+  "tax_map_page": "138O",
+  "land_sqft": 3049,
+  "acres": "0.07",
+  "subdivision": "RANDOLPH'S FLORIDA",
+  "owner_name": "HUDSON JUSTIN",
+  "owner_mailing_street": "101 LUCY AVE",
+  "owner_mailing_city_state_zip": "MEMPHIS TN 38106",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 3100,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 3100,
+  "total_assessment_usd": 775,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "MEMPHIS",
+  "owner_mailing_state": "TN",
+  "owner_mailing_zip": "38106",
+  "owner_mailing_full": "101 LUCY AVE, MEMPHIS, TN 38106",
+  "property_address_full": "101 LUCY AVE, MEMPHIS, TN",
+  "absentee_owner": false,
+  "out_of_state_owner": false,
+  "is_llc_owner": false,
+  "is_institutional_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "04/02/2021",
+      "price_text": "$0",
+      "deed_or_inst": "21038313",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2021
+    },
+    {
+      "date": "03/29/2019",
+      "price_text": "$732",
+      "deed_or_inst": "19035384",
+      "type_code": "CH",
+      "price_usd": 732,
+      "year": 2019
+    },
+    {
+      "date": "08/21/2015",
+      "price_text": "$0",
+      "deed_or_inst": "15092993",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2015
+    },
+    {
+      "date": "11/27/2007",
+      "price_text": "$2,400",
+      "deed_or_inst": "07185107",
+      "type_code": "WD",
+      "price_usd": 2400,
+      "year": 2007
+    },
+    {
+      "date": "09/12/2005",
+      "price_text": "$0",
+      "deed_or_inst": "07185106",
+      "type_code": "CH",
+      "price_usd": 0,
+      "year": 2005
+    },
+    {
+      "date": "02/24/1997",
+      "price_text": "$8,000",
+      "deed_or_inst": "GK3007",
+      "type_code": "WD",
+      "price_usd": 8000,
+      "year": 1997
+    },
+    {
+      "date": "12/15/1989",
+      "price_text": "$5,000",
+      "deed_or_inst": "BK1981",
+      "type_code": "CA",
+      "price_usd": 5000,
+      "year": 1989
+    },
+    {
+      "date": "06/13/1986",
+      "price_text": "$3,500",
+      "deed_or_inst": "Y84304",
+      "type_code": "TD",
+      "price_usd": 3500,
+      "year": 1986
+    }
+  ],
+  "first_sale_year": 1986,
+  "last_sale_year": 2021,
+  "last_sale_date": "04/02/2021",
+  "last_sale_price_usd": 0,
+  "first_sale_date": "06/13/1986",
+  "first_sale_price_usd": 3500,
+  "build_year_proxy": 1986,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 5,
+  "is_long_term_owner": false,
+  "permits": [
+    {
+      "date": "08/31/2007",
+      "amount_text": "$53,950",
+      "reason": "NCT",
+      "permit_number": "B0994424",
+      "year": 2007
+    },
+    {
+      "date": "08/11/2005",
+      "amount_text": "",
+      "reason": "DEM",
+      "permit_number": "B0949251",
+      "year": 2005
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  },
+  "distress_signals": [
+    "vacant_lot",
+    "low_appraisal_under_50k",
+    "active_history_8_sales"
+  ],
+  "pitch_hooks": [
+    "vacant lot -- carrying cost relief pitch",
+    "low-appraisal asset (carrying cost vs value)",
+    "active sales history (8 transactions on record)"
+  ],
+  "signal_count": 3,
+  "outreach_priority": "high"
+}

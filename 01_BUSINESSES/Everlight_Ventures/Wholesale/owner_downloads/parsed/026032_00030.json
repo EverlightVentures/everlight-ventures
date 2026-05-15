@@ -1,0 +1,143 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=026032%20%2000030",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/Assessor of Property, Shelby County TN (7).mht",
+  "parsed_at": "2026-05-15T09:28:40.237567+00:00",
+  "parcel_id": "026032 00030",
+  "property_address": "1298 ENGLEWOOD ST",
+  "neighborhood_number": "00714A03",
+  "tax_map_page": "156A",
+  "land_sqft": 5271,
+  "acres": "0.121",
+  "subdivision": "TRIGG AVE PL BLK 1",
+  "owner_name": "VAUGHN RAY",
+  "owner_mailing_street": "1298 ENGLEWOOD",
+  "owner_mailing_city_state_zip": "MEMPHIS TN 38106 - 4812",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 4200,
+  "building_appraisal_usd": 34200,
+  "total_appraisal_usd": 38400,
+  "total_assessment_usd": 9600,
+  "land_use": "- SINGLE FAMILY",
+  "year_built": 1912,
+  "total_rooms": 6,
+  "bedrooms": 2,
+  "bathrooms": 1,
+  "half_baths": 0,
+  "heat": "FORCED AIR",
+  "fuel": "NOT APPLICABLE",
+  "owner_mailing_city": "MEMPHIS",
+  "owner_mailing_state": "TN",
+  "owner_mailing_zip": "38106",
+  "owner_mailing_zip4": "4812",
+  "owner_mailing_full": "1298 ENGLEWOOD, MEMPHIS, TN 38106",
+  "property_address_full": "1298 ENGLEWOOD ST, MEMPHIS, TN",
+  "absentee_owner": true,
+  "absentee_signal": "mailing street differs from property street (same zip)",
+  "out_of_state_owner": false,
+  "is_llc_owner": false,
+  "is_institutional_owner": false,
+  "sales_history": [
+    {
+      "date": "12/27/2024",
+      "price_text": "$0",
+      "deed_or_inst": "25000017",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2024
+    },
+    {
+      "date": "12/27/2021",
+      "price_text": "$0",
+      "deed_or_inst": "21159309",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2021
+    },
+    {
+      "date": "12/27/2021",
+      "price_text": "$14,000",
+      "deed_or_inst": "22053668",
+      "type_code": "QC",
+      "price_usd": 14000,
+      "year": 2021
+    },
+    {
+      "date": "07/25/2002",
+      "price_text": "$0",
+      "deed_or_inst": "02129164",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2002
+    },
+    {
+      "date": "09/11/2001",
+      "price_text": "$0",
+      "deed_or_inst": "LJ3071",
+      "type_code": "A",
+      "price_usd": 0,
+      "year": 2001
+    },
+    {
+      "date": "09/10/2001",
+      "price_text": "$0",
+      "deed_or_inst": "LJ3072",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2001
+    },
+    {
+      "date": "11/19/1980",
+      "price_text": "$0",
+      "deed_or_inst": "R97002",
+      "type_code": "CC",
+      "price_usd": 0,
+      "year": 1980
+    },
+    {
+      "date": "11/19/1980",
+      "price_text": "$0",
+      "deed_or_inst": "69878",
+      "type_code": "CC",
+      "price_usd": 0,
+      "year": 1980
+    }
+  ],
+  "first_sale_year": 1980,
+  "last_sale_year": 2024,
+  "last_sale_date": "12/27/2024",
+  "last_sale_price_usd": 0,
+  "first_sale_date": "11/19/1980",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1980,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 2,
+  "is_long_term_owner": false,
+  "permits": [
+    {
+      "date": "08/20/2003",
+      "amount_text": "$7,768",
+      "reason": "EXF",
+      "permit_number": "B0912589",
+      "year": 2003
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": false,
+    "build_year_ok": false,
+    "verdict": "year_built_1912_pre_1940_REJECT",
+    "year_built_source": "assessor_actual"
+  },
+  "distress_signals": [
+    "absentee_owner",
+    "low_appraisal_under_50k",
+    "active_history_8_sales"
+  ],
+  "pitch_hooks": [
+    "absentee owner in Memphis (mailing differs from property)",
+    "low-appraisal asset (carrying cost vs value)",
+    "active sales history (8 transactions on record)"
+  ],
+  "signal_count": 3,
+  "outreach_priority": "high"
+}

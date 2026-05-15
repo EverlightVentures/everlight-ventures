@@ -1,0 +1,159 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=034042%20%2000014",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/Memphis Property Downloads/Assessor of Property, Shelby County TN (2).mht",
+  "parsed_at": "2026-04-29T19:36:02.508621+00:00",
+  "parcel_id": "034042  00014",
+  "property_address": "1596  GABAY ST",
+  "neighborhood_number": "00713B04",
+  "tax_map_page": "157K",
+  "land_sqft": 2047,
+  "acres": "0.047",
+  "subdivision": "GABAY",
+  "owner_name": "JONES TOBY T",
+  "owner_mailing_street": "3772SOCORRO",
+  "owner_mailing_city_state_zip": "MEMPHISTN38128-",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 7000,
+  "building_appraisal_usd": 15700,
+  "total_appraisal_usd": 22700,
+  "total_assessment_usd": 5675,
+  "land_use": "- SINGLE FAMILY",
+  "year_built": 1940,
+  "total_rooms": 4,
+  "bedrooms": 2,
+  "bathrooms": 1,
+  "half_baths": 0,
+  "heat": "OTHER HEAT",
+  "fuel": "NOT APPLICABLE",
+  "property_address_full": "1596  GABAY ST, MEMPHIS, TN",
+  "sales_history": [
+    {
+      "date": "01/14/2005",
+      "price_text": "$10,000",
+      "deed_or_inst": "05037088",
+      "type_code": "WD",
+      "price_usd": 10000,
+      "year": 2005
+    },
+    {
+      "date": "08/26/2004",
+      "price_text": "$0",
+      "deed_or_inst": "04150016",
+      "type_code": "CD",
+      "price_usd": 0,
+      "year": 2004
+    },
+    {
+      "date": "08/26/2004",
+      "price_text": "$0",
+      "deed_or_inst": "05120609",
+      "type_code": "CD",
+      "price_usd": 0,
+      "year": 2004
+    },
+    {
+      "date": "08/24/2004",
+      "price_text": "$10,217",
+      "deed_or_inst": "04145380",
+      "type_code": "TD",
+      "price_usd": 10217,
+      "year": 2004
+    },
+    {
+      "date": "07/12/2003",
+      "price_text": "$0",
+      "deed_or_inst": "03153657",
+      "type_code": "A",
+      "price_usd": 0,
+      "year": 2003
+    },
+    {
+      "date": "10/27/1997",
+      "price_text": "$0",
+      "deed_or_inst": "GY4229",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1997
+    },
+    {
+      "date": "07/07/1992",
+      "price_text": "$0",
+      "deed_or_inst": "CY4753",
+      "type_code": "WD",
+      "price_usd": 0,
+      "year": 1992
+    },
+    {
+      "date": "07/07/1992",
+      "price_text": "$9,500",
+      "deed_or_inst": "CY4753",
+      "type_code": "WD",
+      "price_usd": 9500,
+      "year": 1992
+    },
+    {
+      "date": "06/09/1992",
+      "price_text": "$6,000",
+      "deed_or_inst": "CX2136",
+      "type_code": "WD",
+      "price_usd": 6000,
+      "year": 1992
+    },
+    {
+      "date": "06/02/1992",
+      "price_text": "$0",
+      "deed_or_inst": "B-17703",
+      "type_code": "PC",
+      "price_usd": 0,
+      "year": 1992
+    },
+    {
+      "date": "11/26/1991",
+      "price_text": "$0",
+      "deed_or_inst": "CN5729",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1991
+    },
+    {
+      "date": "04/10/1991",
+      "price_text": "$0",
+      "deed_or_inst": "660",
+      "type_code": "DN",
+      "price_usd": 0,
+      "year": 1991
+    },
+    {
+      "date": "02/13/1981",
+      "price_text": "$8,000",
+      "deed_or_inst": "S26924",
+      "type_code": "WD",
+      "price_usd": 8000,
+      "year": 1981
+    },
+    {
+      "date": "04/02/1977",
+      "price_text": "$0",
+      "deed_or_inst": "M13420",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 1977
+    }
+  ],
+  "first_sale_year": 1977,
+  "last_sale_year": 2005,
+  "last_sale_date": "01/14/2005",
+  "last_sale_price_usd": 10000,
+  "first_sale_date": "04/02/1977",
+  "first_sale_price_usd": 0,
+  "build_year_proxy": 1977,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "permits": [],
+  "chris_check": {
+    "vacant_lot_ok": false,
+    "build_year_ok": true,
+    "verdict": "year_built_1940_passes",
+    "year_built_source": "assessor_actual"
+  }
+}

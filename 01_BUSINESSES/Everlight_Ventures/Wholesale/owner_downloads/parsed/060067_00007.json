@@ -1,0 +1,114 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=060067%20%2000007",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/Assessor of Property, Shelby County TN (13).mht",
+  "parsed_at": "2026-05-15T09:28:37.257174+00:00",
+  "parcel_id": "060067 00007",
+  "property_address": "1393 VALSE",
+  "neighborhood_number": "00714A01",
+  "tax_map_page": "156P",
+  "land_sqft": 2483,
+  "acres": "0.057",
+  "subdivision": "BUNKER HILL",
+  "owner_name": "MATTHEWS TREZDEN C",
+  "owner_mailing_street": "3050 COBB PKWY NW APT 3123",
+  "owner_mailing_city_state_zip": "KENNESAW GA 30152 - 6564",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 4900,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 4900,
+  "total_assessment_usd": 1225,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "KENNESAW",
+  "owner_mailing_state": "GA",
+  "owner_mailing_zip": "30152",
+  "owner_mailing_zip4": "6564",
+  "owner_mailing_full": "3050 COBB PKWY NW APT 3123, KENNESAW, GA 30152",
+  "property_address_full": "1393 VALSE, MEMPHIS, TN",
+  "absentee_owner": true,
+  "absentee_signal": "owner_mailing_zip 30152 not in Memphis (381xx)",
+  "out_of_state_owner": true,
+  "out_of_state_signal": "mailing state GA not TN",
+  "is_llc_owner": false,
+  "is_institutional_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "07/15/2020",
+      "price_text": "$0",
+      "deed_or_inst": "20073537",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2020
+    },
+    {
+      "date": "08/09/2018",
+      "price_text": "$100",
+      "deed_or_inst": "18081377",
+      "type_code": "QC",
+      "price_usd": 100,
+      "year": 2018
+    },
+    {
+      "date": "01/27/2010",
+      "price_text": "$8,767",
+      "deed_or_inst": "9482-3",
+      "type_code": "CH",
+      "price_usd": 8767,
+      "year": 2010
+    },
+    {
+      "date": "01/14/1946",
+      "price_text": "",
+      "deed_or_inst": "1965-558",
+      "type_code": "WD",
+      "year": 1946
+    }
+  ],
+  "first_sale_year": 1946,
+  "last_sale_year": 2020,
+  "last_sale_date": "07/15/2020",
+  "last_sale_price_usd": 0,
+  "first_sale_date": "01/14/1946",
+  "first_sale_price_usd": null,
+  "build_year_proxy": 1946,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 6,
+  "is_long_term_owner": false,
+  "permits": [
+    {
+      "date": "07/11/2001",
+      "amount_text": "",
+      "reason": "",
+      "permit_number": "B0871773",
+      "year": 2001
+    },
+    {
+      "date": "08/04/1992",
+      "amount_text": "$2,000",
+      "reason": "",
+      "permit_number": "217050",
+      "year": 1992
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  },
+  "distress_signals": [
+    "out_of_state_owner_GA",
+    "absentee_owner",
+    "vacant_lot",
+    "low_appraisal_under_50k",
+    "active_history_4_sales"
+  ],
+  "pitch_hooks": [
+    "out-of-state convenience (owner mailing in GA)",
+    "vacant lot -- carrying cost relief pitch",
+    "low-appraisal asset (carrying cost vs value)",
+    "active sales history (4 transactions on record)"
+  ],
+  "signal_count": 5,
+  "outreach_priority": "high"
+}

@@ -1,0 +1,99 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=034026%20%2000011",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/Assessor of Property, Shelby County TN (25).mht",
+  "parsed_at": "2026-05-15T09:28:39.154192+00:00",
+  "parcel_id": "034026 00011",
+  "property_address": "1563 S MCMILLAN ST",
+  "neighborhood_number": "00713B04",
+  "tax_map_page": "157F",
+  "land_sqft": 3964,
+  "acres": "0.091",
+  "subdivision": "LAUDERDALE ST PL BLK 11",
+  "owner_name": "CARNEGIE CHURCH OF GOD IN CHRIST",
+  "owner_mailing_street": "1584 CARNEGIE ST",
+  "owner_mailing_city_state_zip": "MEMPHIS TN 38106 -",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 7000,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 7000,
+  "total_assessment_usd": 1750,
+  "land_use": "- VACANT LAND",
+  "property_address_full": "1563 S MCMILLAN ST, MEMPHIS, TN",
+  "out_of_state_owner": false,
+  "is_llc_owner": false,
+  "is_institutional_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "07/14/2009",
+      "price_text": "$1,000",
+      "deed_or_inst": "09141926",
+      "type_code": "QC",
+      "price_usd": 1000,
+      "year": 2009
+    },
+    {
+      "date": "11/16/2006",
+      "price_text": "$0",
+      "deed_or_inst": "06198943",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2006
+    },
+    {
+      "date": "03/10/1969",
+      "price_text": "$0",
+      "deed_or_inst": "E75222",
+      "type_code": "UN",
+      "price_usd": 0,
+      "year": 1969
+    },
+    {
+      "date": "06/14/1965",
+      "price_text": "$1,800",
+      "deed_or_inst": "5632-283",
+      "type_code": "UN",
+      "price_usd": 1800,
+      "year": 1965
+    }
+  ],
+  "first_sale_year": 1965,
+  "last_sale_year": 2009,
+  "last_sale_date": "07/14/2009",
+  "last_sale_price_usd": 1000,
+  "first_sale_date": "06/14/1965",
+  "first_sale_price_usd": 1800,
+  "build_year_proxy": 1965,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 17,
+  "is_long_term_owner": true,
+  "permits": [
+    {
+      "date": "06/01/2004",
+      "amount_text": "",
+      "reason": "DEM",
+      "permit_number": "B0930438",
+      "year": 2004
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  },
+  "distress_signals": [
+    "long_term_owner_17yr",
+    "vacant_lot",
+    "low_appraisal_under_50k",
+    "active_history_4_sales"
+  ],
+  "pitch_hooks": [
+    "long-term owner (17 years on title)",
+    "vacant lot -- carrying cost relief pitch",
+    "low-appraisal asset (carrying cost vs value)",
+    "active sales history (4 transactions on record)"
+  ],
+  "signal_count": 4,
+  "outreach_priority": "high"
+}

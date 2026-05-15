@@ -1,0 +1,20 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=025070%20%2000021",
+  "parsed_at": "2026-05-08T00:58:36+00:00",
+  "parcel_id": "025070  00021",
+  "property_address": "830 S PARKWAY E",
+  "owner_name": "OSBORN MELVIN",
+  "land_use": "- DUPLEX",
+  "year_built": 1914,
+  "sqft": 1472,
+  "bedrooms": 4,
+  "bathrooms": 2,
+  "land_sqft": null,
+  "land_appraisal_usd": 3700,
+  "building_appraisal_usd": 41300,
+  "total_appraisal_usd": 45000,
+  "total_assessment_usd": 18000,
+  "property_class": null,
+  "subdivision": null
+}

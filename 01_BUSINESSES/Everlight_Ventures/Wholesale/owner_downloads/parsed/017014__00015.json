@@ -1,0 +1,20 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=017014%20%2000015",
+  "parsed_at": "2026-05-08T00:56:42+00:00",
+  "parcel_id": "017014  00015",
+  "property_address": "1368 MONROE, MEMPHIS, TN",
+  "owner_name": null,
+  "land_use": null,
+  "year_built": null,
+  "sqft": null,
+  "bedrooms": null,
+  "bathrooms": null,
+  "land_sqft": null,
+  "land_appraisal_usd": null,
+  "building_appraisal_usd": null,
+  "total_appraisal_usd": null,
+  "total_assessment_usd": null,
+  "property_class": null,
+  "subdivision": null
+}

@@ -1,0 +1,125 @@
+{
+  "source": "shelby_assessor_mhtml_download",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=024055%20%2000038",
+  "source_file": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/archive/Assessor of Property, Shelby County TN (2).mht",
+  "parsed_at": "2026-05-15T09:28:38.260176+00:00",
+  "parcel_id": "024055 00038",
+  "property_address": "108 E OLIVE AVE",
+  "neighborhood_number": "00713A01",
+  "tax_map_page": "157B",
+  "land_sqft": 4138,
+  "acres": "0.095",
+  "subdivision": "BAXTER",
+  "owner_name": "LEGGETT BENNIE JR",
+  "owner_mailing_street": "1521 E 23ND ST",
+  "owner_mailing_city_state_zip": "LOS ANGELES CA 90011 - 1801",
+  "property_class": "RESIDENTIAL",
+  "land_appraisal_usd": 3500,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 3500,
+  "total_assessment_usd": 875,
+  "land_use": "- VACANT LAND",
+  "owner_mailing_city": "LOS ANGELES",
+  "owner_mailing_state": "CA",
+  "owner_mailing_zip": "90011",
+  "owner_mailing_zip4": "1801",
+  "owner_mailing_full": "1521 E 23ND ST, LOS ANGELES, CA 90011",
+  "property_address_full": "108 E OLIVE AVE, MEMPHIS, TN",
+  "absentee_owner": true,
+  "absentee_signal": "owner_mailing_zip 90011 not in Memphis (381xx)",
+  "out_of_state_owner": true,
+  "out_of_state_signal": "mailing state CA not TN",
+  "is_llc_owner": false,
+  "is_institutional_owner": false,
+  "is_vacant_lot": true,
+  "sales_history": [
+    {
+      "date": "01/30/2019",
+      "price_text": "$601",
+      "deed_or_inst": "19018120",
+      "type_code": "QC",
+      "price_usd": 601,
+      "year": 2019
+    },
+    {
+      "date": "01/02/2019",
+      "price_text": "$0",
+      "deed_or_inst": "19002010",
+      "type_code": "QC",
+      "price_usd": 0,
+      "year": 2019
+    },
+    {
+      "date": "08/03/2004",
+      "price_text": "$3,769",
+      "deed_or_inst": "9468-1",
+      "type_code": "CH",
+      "price_usd": 3769,
+      "year": 2004
+    },
+    {
+      "date": "11/16/1996",
+      "price_text": "$0",
+      "deed_or_inst": "1481",
+      "type_code": "DN",
+      "price_usd": 0,
+      "year": 1996
+    },
+    {
+      "date": "01/30/1987",
+      "price_text": "$3,000",
+      "deed_or_inst": "Z31446",
+      "type_code": "WD",
+      "price_usd": 3000,
+      "year": 1987
+    }
+  ],
+  "first_sale_year": 1987,
+  "last_sale_year": 2019,
+  "last_sale_date": "01/02/2019",
+  "last_sale_price_usd": 0,
+  "first_sale_date": "01/30/1987",
+  "first_sale_price_usd": 3000,
+  "build_year_proxy": 1987,
+  "build_year_proxy_basis": "first_sale_year (upper bound)",
+  "years_owned": 7,
+  "is_long_term_owner": true,
+  "permits": [
+    {
+      "date": "06/16/1993",
+      "amount_text": "$0",
+      "reason": "",
+      "permit_number": "167159",
+      "year": 1993
+    },
+    {
+      "date": "02/13/1987",
+      "amount_text": "$600",
+      "reason": "",
+      "permit_number": "44097",
+      "year": 1987
+    }
+  ],
+  "chris_check": {
+    "vacant_lot_ok": true,
+    "build_year_ok": null,
+    "verdict": "vacant_lot_accepted"
+  },
+  "distress_signals": [
+    "out_of_state_owner_CA",
+    "absentee_owner",
+    "long_term_owner_7yr",
+    "vacant_lot",
+    "low_appraisal_under_50k",
+    "active_history_5_sales"
+  ],
+  "pitch_hooks": [
+    "out-of-state convenience (owner mailing in CA)",
+    "long-term owner (7 years on title)",
+    "vacant lot -- carrying cost relief pitch",
+    "low-appraisal asset (carrying cost vs value)",
+    "active sales history (5 transactions on record)"
+  ],
+  "signal_count": 6,
+  "outreach_priority": "high"
+}
