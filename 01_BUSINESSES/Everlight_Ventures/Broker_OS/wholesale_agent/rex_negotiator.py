@@ -45,6 +45,125 @@ REPLY_TO = "piper@everlightventures.io"
 
 
 # ---------------------------------------------------------------------------
+# PERSONAS -- per WHOLESALE_PERSONA_TEMPLATES.md (canonical roster v2)
+# Each external-facing persona has its own alias, signature, and voice prompt.
+# Stage-based selection: outreach -> Piper, engaged -> Henry, signed -> Marvin,
+# rescue -> Vaughn. Don't-say lists enforce voice integrity in Claude prompts.
+# ---------------------------------------------------------------------------
+
+PERSONAS = {
+    "piper": {
+        "name": "Piper Reeves",
+        "role": "Outreach Coordinator",
+        "from_email": "Piper Reeves <piper@everlightventures.io>",
+        "reply_to": "piper@everlightventures.io",
+        "signature": (
+            "Thanks for the time,\n\n"
+            "Piper Reeves\n"
+            "Outreach Coordinator, Everlight Ventures\n"
+            "piper@everlightventures.io"
+        ),
+        "voice": (
+            "warm, low-pressure, conversational. Uses contractions. Asks two soft "
+            "questions per email. Never quotes a price. Never mentions back-taxes "
+            "in dollars. Libra energy: diplomatic, social."
+        ),
+        "owns_stages": ["new", "outreach_sent"],
+        "handoff_to_next": (
+            "I'm passing your file to my colleague Henry Hammond, our Senior "
+            "Acquisitions Lead. He handles the numbers side. You'll hear from "
+            "him shortly."
+        ),
+    },
+    "henry": {
+        "name": "Henry Hammond",
+        "role": "Senior Acquisitions",
+        "from_email": "Henry Hammond <henry@everlightventures.io>",
+        "reply_to": "henry@everlightventures.io",
+        "signature": (
+            "Henry Hammond\n"
+            "Senior Acquisitions, Everlight Ventures\n"
+            "henry@everlightventures.io"
+        ),
+        "voice": (
+            "direct, numbers-first, professional. Short paragraphs, one number per "
+            "paragraph. Cites Memphis comparables, not assessor numbers. Always "
+            "anchors a specific price before asking the seller's number. Capricorn "
+            "energy: disciplined, ambitious."
+        ),
+        "owns_stages": ["negotiating", "verbal_agreement"],
+        "handoff_intro": (
+            "Hi {first_name}, Henry Hammond at Everlight Ventures, taking over "
+            "from Piper."
+        ),
+        "handoff_to_next": (
+            "Glad we got there. Marvin Cohen from our closing team will be in "
+            "touch shortly with the PSA and timeline. You're in good hands."
+        ),
+    },
+    "marvin": {
+        "name": "Marvin Cohen",
+        "role": "TN Closing Coordinator",
+        "from_email": "Marvin Cohen <marvin@everlightventures.io>",
+        "reply_to": "marvin@everlightventures.io",
+        "signature": (
+            "Marvin Cohen\n"
+            "Closing Coordinator, Everlight Ventures\n"
+            "marvin@everlightventures.io"
+        ),
+        "voice": (
+            "procedural, calm, anti-anxiety. Bullets and dates. Every email "
+            "confirms what's already known. Never quotes dollar figures without "
+            "'subject to title firm's final settlement statement.' Never sends "
+            "wire instructions (BEC protocol). Virgo energy: detail-oriented."
+        ),
+        "owns_stages": ["psa_sent", "psa_signed", "title_processing"],
+        "handoff_intro": (
+            "{first_name}, Marvin Cohen from our closing team. Now that you've "
+            "signed the PSA, here's what happens next."
+        ),
+        "handoff_to_next": (
+            "Mid-South Title has your file and will reach out within 24 hours "
+            "with wire instructions. As a reminder: wire instructions come from "
+            "them directly, never from me, never from a forwarded email."
+        ),
+    },
+    "vaughn": {
+        "name": "Vaughn Sterling",
+        "role": "Senior Partner",
+        "from_email": "Vaughn Sterling <vaughn@everlightventures.io>",
+        "reply_to": "vaughn@everlightventures.io",
+        "signature": (
+            "Vaughn Sterling\n"
+            "Senior Partner, Everlight Ventures\n"
+            "vaughn@everlightventures.io"
+        ),
+        "voice": (
+            "authoritative, executive, brief. 1-2 short paragraphs maximum. "
+            "Never apologizes. Never negotiates further once the firm number is "
+            "stated. Allowed ONE concession per file. Aries energy: decisive."
+        ),
+        "owns_stages": ["stuck_rescue"],  # manual escalation only
+        "handoff_intro": (
+            "{first_name} -- Vaughn Sterling, Everlight Ventures. Reviewed your "
+            "file personally."
+        ),
+        "handoff_to_next": (
+            "Henry will close out the paperwork side from here. We're set."
+        ),
+    },
+}
+
+
+def pick_persona_for_stage(deal_status: str) -> dict:
+    """Return the persona config for a given deal status. Defaults to Piper."""
+    for persona_id, cfg in PERSONAS.items():
+        if deal_status in cfg.get("owns_stages", []):
+            return cfg
+    return PERSONAS["piper"]  # safe default for unknown statuses
+
+
+# ---------------------------------------------------------------------------
 # DEAL STATE MACHINE
 # ---------------------------------------------------------------------------
 
@@ -227,19 +346,29 @@ def _template_response(deal: DealState, seller_message: str) -> str:
 # EMAIL
 # ---------------------------------------------------------------------------
 
-def send_email(to: str, subject: str, body: str) -> bool:
+def send_email(to: str, subject: str, body: str, persona: dict | None = None) -> bool:
+    """Send via Resend. If persona is provided, use that persona's alias + reply-to.
+    Falls back to module-level FROM_EMAIL/REPLY_TO (Piper) for backward compat."""
     if not RESEND_KEY:
         log.warning("No RESEND_API_KEY")
         return False
+
+    from_addr = persona["from_email"] if persona else FROM_EMAIL
+    reply_addr = persona["reply_to"] if persona else REPLY_TO
+
     try:
         from rex_utils import safe_send_email
-        return safe_send_email(to, subject, body)
+        # rex_utils signature stays backward compat; persona pass-through if supported
+        try:
+            return safe_send_email(to, subject, body, from_email=from_addr, reply_to=reply_addr)
+        except TypeError:
+            return safe_send_email(to, subject, body)
     except ImportError:
         import requests
         try:
             resp = requests.post("https://api.resend.com/emails",
                 headers={"Authorization": f"Bearer {RESEND_KEY}", "Content-Type": "application/json"},
-                json={"from": FROM_EMAIL, "to": [to], "subject": subject, "text": body, "reply_to": REPLY_TO},
+                json={"from": from_addr, "to": [to], "subject": subject, "text": body, "reply_to": reply_addr},
                 timeout=10)
             return resp.status_code in (200, 201)
         except Exception as e:
@@ -247,22 +376,52 @@ def send_email(to: str, subject: str, body: str) -> bool:
             return False
 
 
+def send_handoff(deal, from_persona: dict, to_persona: dict, seller_first_name: str) -> bool:
+    """Send the explicit named-handoff email when a stage transition fires.
+    The seller experiences a real team passing the file between named people."""
+    handoff_intro = to_persona.get("handoff_intro", "").format(first_name=seller_first_name)
+    closing_line = from_persona.get("handoff_to_next", "")
+
+    body = (
+        f"{closing_line}\n\n"
+        f"{from_persona['signature']}\n\n"
+        f"---\n\n"
+        f"{handoff_intro}\n\n"
+        f"I'll be in touch shortly with next steps.\n\n"
+        f"{to_persona['signature']}"
+    )
+
+    subject = f"Re: {deal.address}"
+    ok = send_email(deal.owner_email, subject, body, persona=to_persona)
+    if ok:
+        log.info(f"Handoff sent: {from_persona['name']} -> {to_persona['name']} for {deal.address}")
+        deal.conversation.append({
+            "role": "handoff",
+            "from": from_persona["name"],
+            "to": to_persona["name"],
+            "message": body,
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+        })
+        deal.save()
+    return ok
+
+
 def send_initial_outreach(deal: DealState) -> bool:
-    subject = f"Cash offer for {deal.address}"
-    body = f"""Hi {deal.owner_name.split()[0] if deal.owner_name else 'there'},
+    # Piper persona owns the opener -- warm, conversational, no price quoted
+    persona = PERSONAS["piper"]
+    first_name = deal.owner_name.split()[0] if deal.owner_name else "there"
+    subject = f"Regarding {deal.address} -- courtesy note before our follow up"
+    body = f"""Hi {first_name},
 
-I am reaching out about your property at {deal.address}, {deal.city}, {deal.state}.
+My name is Piper with Everlight Ventures, a Memphis real estate group that buys directly from owners. No agents, no commissions.
 
-I buy properties for cash and can close in 7-14 days. No repairs, no commissions, no hassle on your end. I am prepared to make an offer of ${deal.our_offer:,.0f}.
+Wanted to reach out about your property at {deal.address} before following up by phone, so this didn't feel like a cold call.
 
-If you are open to a quick conversation, just reply to this email.
+If you're open to a quick conversation about it, just reply with a good time. If email's easier, that's fine too. And if you're not selling, reply STOP and I won't follow up.
 
-Best,
-Piper Reeves
-Everlight Ventures | Wholesale
-piper@everlightventures.io"""
+{persona['signature']}"""
 
-    if send_email(deal.owner_email, subject, body):
+    if send_email(deal.owner_email, subject, body, persona=persona):
         deal.status = "outreach_sent"
         deal.outreach_count += 1
         deal.last_contact = datetime.now(timezone.utc).isoformat()
@@ -319,9 +478,26 @@ def handle_seller_reply(deal: DealState, seller_message: str) -> str:
         deal.seller_sentiment = "neutral"
         deal.status = "negotiating"
 
+    # Persona handoff: if we just transitioned from outreach to negotiating,
+    # fire the explicit named handoff from Piper -> Henry BEFORE the negotiation reply
+    first_name = deal.owner_name.split()[0] if deal.owner_name else "there"
+    if old_status in ("new", "outreach_sent") and deal.status == "negotiating":
+        try:
+            send_handoff(deal, PERSONAS["piper"], PERSONAS["henry"], first_name)
+        except Exception as e:
+            log.warning(f"Handoff send failed (continuing with reply anyway): {e}")
+    elif old_status in ("negotiating", "verbal_agreement") and deal.status == "psa_signed":
+        try:
+            send_handoff(deal, PERSONAS["henry"], PERSONAS["marvin"], first_name)
+        except Exception as e:
+            log.warning(f"Handoff send failed (continuing with reply anyway): {e}")
+
     response = generate_negotiation_response(deal, seller_message)
-    subject = f"Re: Cash offer for {deal.address}"
-    if send_email(deal.owner_email, subject, response):
+    # Pick persona based on current deal stage (Henry for negotiating, Marvin for post-PSA)
+    active_persona = pick_persona_for_stage(deal.status)
+    response_with_sig = f"{response}\n\n{active_persona['signature']}"
+    subject = f"Re: {deal.address}"
+    if send_email(deal.owner_email, subject, response_with_sig, persona=active_persona):
         deal.conversation.append({"role": "rex", "message": response, "timestamp": datetime.now(timezone.utc).isoformat()})
         deal.last_contact = datetime.now(timezone.utc).isoformat()
         # Thread post the auto-response so the owner sees what Piper sent back.

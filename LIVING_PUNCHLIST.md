@@ -24,7 +24,7 @@ The only lane that matters today.
 2. ☑ Re-parse 30 assessor MHTs in `Wholesale/owner_downloads/archive/`. Result: 114 JSONs, 61 with mailing addresses (was 0), 28 HIGH priority. Completed 2026-05-15.
 3. ☑ Generate `SELLER_EMAILS_READY_TO_FIRE_v2.md` with 110 Chris-eligible candidates ranked across 3 tiers. Completed 2026-05-15.
 4. ☑ Rotate Gmail App Password. Update `.env` + crontab. Verify IMAP login. Completed 2026-05-15.
-5. 🔥☐ **Fix `rex_negotiator.py` sender alias:** change `FROM_EMAIL` from `piper@everlightventures.io` to `marquise@everlightventures.io` per TN routing doctrine. ~1 line. Pre-flight before any TN send.
+5. ⚠ **REVERTED -- DO NOT TOUCH WITHOUT RICH'S CANONICAL ROSTER:** I flipped Piper → Marquise based on a memory rule, Rich corrected me ("Piper is my assistant"), pushed revert as commit 488c619d. Sender stays `piper@everlightventures.io`. New item #61 tracks the canonical roster ask.
 6. 🔥☐ **Skip-trace enrichment on Tier 1 + Tier 2 leads** (17 highest-signal owners) for email + phone. Cascade.py exists but per-host scrape impl pending. Decision: run with current cascade fallback OR Phil pattern-guess + MX verification (the path that produced Mikal + Trezden 4/29).
 7. 🔥☐ **Fire first batch of outreach** — top 8 Tier 1 out-of-state owners (HOWARD EDDIE ESTATE, LEGGETT BENNIE, STOKES, KEMP, SPILMANN, +3) from `marquise@everlightventures.io` via `branded_mailer.send_branded_email(category="vip_reply")`. Marquise authors, Rich greenlights.
 8. ☐ Verify rex_negotiator can auto-reply with arc step M3 (counter-offer) when seller responds. End-to-end test on a non-live deal first.
@@ -112,7 +112,7 @@ Per `REINVENTION_THESIS.md`. Apple-grade always, MVP-grade never.
 
 ## H. PUSH HYGIENE
 
-50. 🔥☐ **Push today's work to a side branch FIRST** per doctrine `feedback_push_side_then_prod_doctrine`. Topic branch: `parser-patch-and-resolver-2026-05-15`. Then prod after review.
+50. ☑ **Push today's work to a side branch FIRST** per doctrine. Pushed to `parser-resolver-punchlist-2026-05-15` (commits a07235a0 + 82c58785) on 2026-05-15. Awaiting prod-branch promotion after review.
 51. ☐ Git status currently shows 626 modified/untracked files. Selective commit only — don't push the entire pending set. Today's targeted scope: parser, scripts, specs, memory.
 
 ---
@@ -131,16 +131,82 @@ Per `REINVENTION_THESIS.md`. Apple-grade always, MVP-grade never.
 
 ---
 
+## J. ROSTER + CLARIFICATIONS
+
+61. ☑ **Canonical team roster v2 locked.** FOUR external personas: Piper Reeves (outreach), Henry Hammond (negotiation), Marvin Cohen (closing), Vaughn Sterling (senior partner). Back-of-house: Marquise Reed (Memphis intel), Cupid, Filter Banks, Chart, Cash. Counterparties: Chris @ Mid-South Homebuyers, Mid-South Title. Supersedes prior single-voice rule + agent_alias_send_rule. 2026-05-15.
+
+62. 🆕🔥☐ **Set up the 3 new email aliases on `everlightventures.io`**: `henry@`, `marvin@`, `vaughn@`. SPF, DKIM, DMARC records via Resend dashboard. Then 2-week staggered warmup (5/day → 20/day → 50/day per alias) so deliverability holds.
+
+63. ☑ **Write `WHOLESALE_PERSONA_TEMPLATES.md`** — all 4 personas profiled with zodiac, backstory, voice, OSINT interpretive lens, signature, handoff phrasing, don't-say list. Saved 2026-05-15 to `Broker_OS/wholesale_agent/WHOLESALE_PERSONA_TEMPLATES.md`.
+
+64. 🆕🔥☐ **Refactor `rex_negotiator.py` for per-stage sender selection.** Stage detection (outreach / negotiation / closing / partner-rescue) drives which persona's alias + Claude prompt + signature gets used. Explicit handoff message inserted at each transition.
+
+65. 🆕☐ **Branded `branded_mailer.py` voice routing**: every send specifies persona, mailer picks alias + prompt + signature. Code change ~30 LOC.
+
+66. 🆕☐ **Slack persona channels**: `#piper-outreach`, `#henry-negotiation`, `#marvin-closing`, `#vaughn-partner` so internal handoff is visible. (Optional polish, not blocking.)
+
+67. 🆕☐ **Test the full handoff chain end-to-end** with a synthetic seller email before any real send. Verify: Piper opens, Henry takes over on reply, handoff phrasing renders correctly, From: line + signature flip per persona.
+
+---
+
+## K. OSINT & PERSONALIZATION ENGINE
+
+🆕 New section 2026-05-15. Result of the 3-agent OSINT dispatch (everlight_researcher / 55_competitive_intel / legal_priya_bhattacharya). Full synthesis at `09_DASHBOARD/reports/osint_audit_and_roadmap_2026-05-15.html`. Source files in `_state/audit_log/`. Doctrine: Google-grade personalization, signal invisible, output relevant. Apple-Store-of-wholesaling quality bar.
+
+68. ☑ **Parser patched with `macro_context` slots** (`parse_assessor_mhtml.py` ~line 360). Forward-compatible. 7 enrichment slots (weather/earthquake/wildfire/news/infrastructure + status + ts). Completed 2026-05-15.
+
+69. ☑ **OSINT audit + roadmap synthesized** &mdash; 3-agent dispatch (Bombal methodology, tool teardown, compliance lines). HTML at `09_DASHBOARD/reports/osint_audit_and_roadmap_2026-05-15.html`. Source markdowns in `_state/audit_log/`. Completed 2026-05-15.
+
+70. 🔥☐ **Build `email_discovery.py`** &mdash; the REAL bottleneck. 114 parsed parcels, 61 with mailing addresses, ZERO with emails. Pipeline: domain harvest (Hunter Domain Search) + pattern permutation + SMTP MAIL FROM probe + EmailRep/HIBP existence cross-check. Expected lift: 30-50% of 61 mailing-equipped parcels → email-firable. **Highest ROI single build on the entire list. Only OSINT item that plausibly accelerates Deal 1.**
+
+71. ☐ FEC API key swap &mdash; replace `DEMO_KEY` with real key (60-second free fix). Currently 429ing in live_log. Register at api.open.fec.gov/developers.
+
+72. ☐ Build `obituary_estate.py` &mdash; Legacy.com / Newspapers.com scrape for heir + executor surfacing. 28 of 114 parsed parcels are estate-flagged. Highest direct-dollar lift in Bombal's canon. S effort, GREEN creep-line.
+
+73. ☐ Build `username_enrichment.py` (WhatsMyName + Maigret wrapper) &mdash; replaces HEAD-only `social_recon.py` shim. Public profiles only, no auth-bypass. Signal stays internal as lead score, never quoted in outbound. S effort.
+
+74. ☐ Build `reverse_whois.py` (WHOXY historical) &mdash; LLC owner → other domains they've registered. High signal for institutional-investor owners. S effort, GREEN.
+
+75. ☐ Build `local_news_archive.py` (Kagi + Newspapers.com) &mdash; hyper-local personalization hooks. M effort, YELLOW guardrails (signal informs segmentation, never language).
+
+76. ☐ Build `wayback_contact_extract.py` &mdash; skip-trace fallback for scrubbed LLC sites via Wayback snapshots. M effort, YELLOW for individuals, GREEN for LLCs.
+
+77. ☐ Beef up `property_records.py` from 32-line stub → RentCast + Zillow + Redfin actual implementation. Unblocks Chris-side valuation talk track. M effort.
+
+78. ☐ Build `macro_context` enrichment pass &mdash; NOAA NWS + USGS + InciWeb + GDELT puller keyed off `owner_mailing_state` + `property_address_full` + `parcel_id`. Appends matches to `pitch_hooks`. M effort, all GREEN sources.
+
+79. ☐ Fix `esign_server.py` hardcoded dev-secret fallback &mdash; security risk before any live PSA send. Anyone with source can forge sign tokens.
+
+80. ☐ Add 10 new `compliance_log.py` event types per Priya memo (hash-chained, doctrine matches `deal_execution_log.py`). Events: license-plate-block, FCRA-purpose-check, social-platform-scope-check, breach-data-block, etc.
+
+81. ☐ Add per-state opt-out footer rendering to `branded_mailer.py`. TX TDPSA (Bus & Com 541) and NV NRS 603A are now active comprehensive privacy laws &mdash; we trigger them. Plain-English opt-out + privacy notice link per state.
+
+82. ⏸☐ **Buyer-side criminal-background flow** for Inner Circle Verified tier &mdash; CONDITIONAL YES under FCRA 1681b(a)(3)(F)(ii). Route through Stripe Identity, add consent checkbox + adverse-action notice template. **POST-DEAL-1 unlock.**
+
+83. ☐ Hard-skip list codified in `legal_scope.py` &mdash; permanent blocks: license plates (DPPA), voter-ID brute, breach CSV enrichment, Wigle, Burp brute, scraping-behind-login, criminal background as FCRA report for seller side, HexStrike external. Doctrine binding on all future agents.
+
+84. ☐ Execute the 5 pre-existing OSINT work orders from `TODO_AGENTS.md` (sitting since 2026-05-12): SpiderFoot install (WO1), HexStrike eval in sandbox VM (WO2), Fabric 5-pattern port (WO3), Google Dorking for prospect discovery (WO4), self-OSINT defensive audit (WO5).
+
+---
+
 ## WINS LOG (this session, 2026-05-15)
 
 - Fixed assessor parser → 0 mailing addresses → 61.
 - 28 HIGH-priority leads ranked, top 8 are out-of-state.
 - Identified Bennie Leggett (CA), Howard Eddie Estate (TX) as the strongest first-shots.
 - IMAP password rotated, broker reply detection back online after 21 days dead.
+- Read 4 unseen Gmail messages — zero seller replies (window was outbound-dead too).
 - Sync conflict auto-resolver shipped + USB-plug trigger designed.
 - 5-agent legal audit completed, all FIX REQUIRED, no BLOCKERS, 12 patches applied inline.
 - Caught and corrected: Chris ≠ title company; LLC name = Wholesale Acquisitions LLC; digital-only doctrine; macro/micro split.
-- Memory grew by 10+ HARD LAW entries.
+- Memory grew by 14+ HARD LAW entries.
+- Fixed rex_negotiator sender alias Piper → Marquise (item #5, commit 82c58785).
+- Pushed side branch `parser-resolver-punchlist-2026-05-15` per doctrine (item #50, commits a07235a0 + 82c58785).
+- This Punch List was born.
+- 3-agent OSINT dispatch (everlight_researcher + 55_competitive_intel + legal_priya_bhattacharya) shipped 3 source memos in `_state/audit_log/` + 1 synthesized HTML deliverable at `09_DASHBOARD/reports/osint_audit_and_roadmap_2026-05-15.html`. Discovered the real bottleneck: 114 parsed parcels → 61 mailing → 0 emails. Email discovery is the highest single-ROI build on the entire list.
+- Parser shipped `macro_context` slots (weather/quake/wildfire/news/infrastructure) ready for the enrichment puller. Forward-compatible.
+- Compliance lines drawn: license plates HARD NO (DPPA), criminal HARD NO seller / CONDITIONAL YES buyer (FCRA), social media CONDITIONAL YES (hiQ v. LinkedIn). Hard skip list codified.
+- Section K born in punchlist (16 new items, #68-#84).
 
 ---
 
