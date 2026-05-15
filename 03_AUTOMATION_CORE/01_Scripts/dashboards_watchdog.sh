@@ -107,6 +107,29 @@ for svc in "${SERVICES[@]}"; do
   fi
 done
 
+# ------------------------------------------------------------------------------
+# Non-port actions -- run every cycle regardless of port-watchdog state.
+# Order matters here: each action is fire-and-forget but kept short.
+# Per HARD LAW feedback_oracle_only_crons + feedback_offline_first_bidirectional_sync:
+# this is NOT a cron host, but the watchdog is the legitimate phone-side
+# recurring trigger. Keep actions cheap (sub-second) so they fit the 1-min cycle.
+# ------------------------------------------------------------------------------
+
+# Action 1: drain sync_queue if non-empty (ships phone-originated writes upward)
+if [ "$STATUS_ONLY" -eq 0 ]; then
+  QUEUE_DEPTH=$(python3 $ROOT/03_AUTOMATION_CORE/01_Scripts/sync_queue.py depth 2>/dev/null || echo 0)
+  if [ "$QUEUE_DEPTH" != "0" ] && [ -n "$QUEUE_DEPTH" ]; then
+    log "  sync_queue depth=$QUEUE_DEPTH -- draining"
+    python3 $ROOT/03_AUTOMATION_CORE/01_Scripts/sync_queue.py drain >> "$LOG" 2>&1 &
+  fi
+
+  # Action 2: drain agentmemory inbox if any local inbox entries arrived from peers
+  if [ -s /tmp/agentmemory_inbox.jsonl ]; then
+    log "  agentmemory_inbox has entries -- merging"
+    python3 $ROOT/03_AUTOMATION_CORE/01_Scripts/agentmemory_inbox_merger.py drain >> "$LOG" 2>&1 &
+  fi
+fi
+
 # Print summary
 if [ "$STATUS_ONLY" -eq 1 ]; then
   echo "$TABLE"

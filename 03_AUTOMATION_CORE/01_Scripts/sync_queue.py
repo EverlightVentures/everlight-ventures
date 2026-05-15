@@ -146,57 +146,161 @@ def _is_reachable(target: str) -> bool:
         return False
 
 
+# Conflict resolution -------------------------------------------------------
+# Each ship handler returns one of: "shipped", "conflict", "failed".
+# A "conflict" means the peer already has divergent content for this logical
+# key AND the peer's version is newer than ours -- we DO NOT overwrite.
+# Conflicts are logged to _state/sync_conflicts.jsonl for operator review.
+
+CONFLICT_LOG = WORKSPACE / "_state" / "sync_conflicts.jsonl"
+CONFLICT_WINDOW_SECS = 60
+
+
+def _log_conflict(entry: dict, peer_name: str, peer_state: dict, reason: str) -> None:
+    CONFLICT_LOG.parent.mkdir(parents=True, exist_ok=True)
+    with open(CONFLICT_LOG, "a") as f:
+        f.write(json.dumps({
+            "ts": _now(),
+            "queue_entry_id": entry.get("id"),
+            "type": entry.get("type"),
+            "peer": peer_name,
+            "reason": reason,
+            "our_payload": entry.get("payload"),
+            "our_hash": entry.get("payload_hash"),
+            "our_ts": entry.get("ts"),
+            "peer_state": peer_state,
+        }) + "\n")
+
+
 # Per-type ship handlers ------------------------------------------------------
+# Each handler returns: "shipped" | "conflict" | "failed"
 
 
-def _ship_blinko_note(entry: dict, peer: dict) -> bool:
-    """Push a Blinko note to a peer's Blinko endpoint via the upsert API."""
+def _ship_blinko_note(entry: dict, peer: dict) -> str:
+    """Push a Blinko note. Probe peer first for the same external_id; if peer
+    has divergent content with newer ts, mark as conflict (do not overwrite).
+    """
     payload = entry["payload"]
-    url = f"http://{peer['tailnet']}:1111/api/v1/note/upsert"
+    external_id = payload.get("external_id", f"sync_{entry['id']}")
+    base_url = f"http://{peer['tailnet']}:1111"
+
+    # Pre-ship probe: does peer have this external_id already?
+    try:
+        probe_cmd = [
+            "curl", "-sS", "--max-time", "5",
+            f"{base_url}/api/v1/note/get?external_id={external_id}",
+        ]
+        probe = subprocess.run(probe_cmd, capture_output=True, text=True, timeout=8)
+        if probe.returncode == 0 and probe.stdout.strip():
+            # Try parse -- if it's a JSON note object, check for divergence
+            try:
+                peer_note = json.loads(probe.stdout)
+                if isinstance(peer_note, dict) and peer_note.get("content"):
+                    peer_content = peer_note.get("content", "")
+                    if peer_content != payload.get("content", ""):
+                        # Content diverged -- check timestamps
+                        peer_ts = peer_note.get("updated_at") or peer_note.get("created_at") or ""
+                        our_ts = entry.get("ts", "")
+                        if peer_ts and our_ts:
+                            try:
+                                peer_epoch = datetime.fromisoformat(peer_ts.rstrip("Z")).timestamp()
+                                our_epoch = datetime.fromisoformat(our_ts.rstrip("Z")).timestamp()
+                                if peer_epoch > our_epoch:
+                                    # Peer wrote a different version after us -> conflict
+                                    _log_conflict(entry, "blinko", {
+                                        "external_id": external_id,
+                                        "content_preview": peer_content[:200],
+                                        "peer_ts": peer_ts,
+                                    }, "peer_newer_diverged")
+                                    return "conflict"
+                            except (ValueError, TypeError):
+                                pass  # ts parse failed, fall through to ship
+            except json.JSONDecodeError:
+                pass  # probe returned non-JSON, just ship
+
+    except subprocess.TimeoutExpired:
+        pass  # probe timeout, attempt ship anyway
+
+    # Ship via upsert (idempotent on external_id)
     body = {
         "content": payload["content"],
         "type": payload.get("note_type", 1),
-        "external_id": f"sync_{entry['id']}",
+        "external_id": external_id,
     }
     cmd = [
-        "curl", "-sS", "-X", "POST", url,
+        "curl", "-sS", "-X", "POST", f"{base_url}/api/v1/note/upsert",
         "-H", "Content-Type: application/json",
         "-d", json.dumps(body),
         "--max-time", "10",
     ]
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
-        return result.returncode == 0 and "error" not in result.stdout.lower()
+        if result.returncode == 0 and "error" not in result.stdout.lower():
+            return "shipped"
+        return "failed"
     except subprocess.TimeoutExpired:
-        return False
+        return "failed"
 
 
-def _ship_agentmemory_entity(entry: dict, peer: dict) -> bool:
-    """Push an agentmemory knowledge graph entity update to peer's MCP."""
-    # The agentmemory MCP doesn't expose REST directly -- the proxy serves SSE.
-    # For now, ship by writing to the graph file via SSH (operator-trusted).
+def _ship_agentmemory_entity(entry: dict, peer: dict) -> str:
+    """Ship an agentmemory entity to peer's inbox. The peer's
+    agentmemory_inbox_merger.py does the conflict-aware merge there.
+    Conflicts surface in peer's agentmemory_conflicts.jsonl, NOT here.
+    """
     payload = entry["payload"]
-    graph_path = "/home/ubuntu/e5_data/agentmemory_graph.json" if peer["user"] == "ubuntu" else "/home/richgee/AA_MY_DRIVE/_state/agentmemory_graph.json"
+    # Encode payload as a single-line JSON, ssh-append to inbox
+    json_payload = json.dumps(payload)
+    # Use printf with %s to safely embed the JSON without shell interpretation
     cmd = [
-        "ssh", "-i", peer["ssh_key"], "-o", "StrictHostKeyChecking=accept-new",
+        "ssh", "-i", peer["ssh_key"],
+        "-o", "StrictHostKeyChecking=accept-new",
+        "-o", "ConnectTimeout=8",
         f"{peer['user']}@{peer['tailnet']}",
-        # Append-merge style: caller is responsible for the operation already
-        # being a delta. For now we just touch the file -- proper merge needs the
-        # knowledge-graph library (next iteration).
-        f"echo '{json.dumps(payload).replace(chr(39), chr(34))}' >> /tmp/agentmemory_inbox.jsonl",
+        "cat >> /tmp/agentmemory_inbox.jsonl",
     ]
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
-        return result.returncode == 0
+        result = subprocess.run(
+            cmd,
+            input=json_payload + "\n",
+            capture_output=True, text=True, timeout=15,
+        )
+        return "shipped" if result.returncode == 0 else "failed"
     except subprocess.TimeoutExpired:
-        return False
+        return "failed"
 
 
-def _ship_file_replace(entry: dict, peer: dict) -> bool:
-    """Rsync a file from local to peer's path."""
+def _ship_file_replace(entry: dict, peer: dict) -> str:
+    """Rsync a file. Probe peer mtime first; if peer's file is newer than ours,
+    flag as conflict and don't overwrite.
+    """
     payload = entry["payload"]
     src = payload["src"]
     dst = payload["dst"]
+
+    # Probe peer mtime
+    try:
+        probe_cmd = [
+            "ssh", "-i", peer["ssh_key"],
+            "-o", "StrictHostKeyChecking=accept-new", "-o", "ConnectTimeout=5",
+            f"{peer['user']}@{peer['tailnet']}",
+            f"stat -c '%Y' {dst} 2>/dev/null || echo 0",
+        ]
+        probe = subprocess.run(probe_cmd, capture_output=True, text=True, timeout=10)
+        if probe.returncode == 0:
+            peer_mtime = float(probe.stdout.strip() or "0")
+            our_mtime = Path(src).stat().st_mtime if Path(src).exists() else 0
+            if peer_mtime > 0 and peer_mtime > our_mtime + CONFLICT_WINDOW_SECS:
+                # Peer's file is meaningfully newer -- don't clobber
+                _log_conflict(entry, peer.get("user", "unknown"), {
+                    "dst": dst,
+                    "peer_mtime": peer_mtime,
+                    "our_mtime": our_mtime,
+                }, "peer_file_newer")
+                return "conflict"
+    except (subprocess.TimeoutExpired, ValueError, OSError):
+        pass
+
+    # Ship via rsync --update (which already respects mtime)
     cmd = [
         "rsync", "-az", "--update",
         "-e", f"ssh -i {peer['ssh_key']} -o StrictHostKeyChecking=accept-new",
@@ -204,9 +308,9 @@ def _ship_file_replace(entry: dict, peer: dict) -> bool:
     ]
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
-        return result.returncode == 0
+        return "shipped" if result.returncode == 0 else "failed"
     except subprocess.TimeoutExpired:
-        return False
+        return "failed"
 
 
 SHIP_HANDLERS: dict[str, Callable] = {
@@ -261,26 +365,81 @@ def drain(max_attempts: int = 5, verbose: bool = False) -> dict:
                 all_shipped = False
                 continue
 
-            ok = handler(entry, PEERS[t])
+            result = handler(entry, PEERS[t])
             entry["attempts"] = entry.get("attempts", 0) + 1
             entry["last_attempt"] = _now()
 
-            if ok:
+            # Backward compat: bool return -> map to tri-state
+            if isinstance(result, bool):
+                result = "shipped" if result else "failed"
+
+            if result == "shipped":
                 entry.setdefault("shipped_to", []).append(t)
                 if verbose:
                     print(f"  ✓ shipped {entry['id'][:8]} -> {t}")
-            else:
+            elif result == "conflict":
+                entry["status"] = "conflict"
+                entry.setdefault("conflict_with", []).append(t)
+                summary["conflicts"] += 1
+                all_shipped = False
+                if verbose:
+                    print(f"  ⚠ CONFLICT {entry['id'][:8]} -> {t} (peer has newer divergent content; logged)")
+                # Once any peer reports conflict, stop trying others until operator resolves
+                break
+            else:  # failed
                 all_shipped = False
                 if verbose:
                     print(f"  ✗ failed {entry['id'][:8]} -> {t}")
 
-        if all_shipped:
+        # Status transition: only mark shipped if every target acknowledged AND no conflict
+        if all_shipped and entry.get("status") == "pending":
             entry["status"] = "shipped"
             summary["shipped"] += 1
 
     # Write back the updated queue
     _write_queue(entries)
     return summary
+
+
+# Conflict inspection helpers ------------------------------------------------
+
+
+def list_conflicts() -> list[dict]:
+    """Return all logged conflicts for operator review."""
+    if not CONFLICT_LOG.exists():
+        return []
+    out = []
+    for line in CONFLICT_LOG.read_text().splitlines():
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            out.append(json.loads(line))
+        except json.JSONDecodeError:
+            continue
+    return out
+
+
+def resolve_conflict(entry_id: str, action: str) -> bool:
+    """Operator resolves a conflict. Action is 'force_ship' (overwrite peer)
+    or 'accept_peer' (drop our version, mark shipped).
+    """
+    entries = _read_queue()
+    for e in entries:
+        if e.get("id") == entry_id:
+            if action == "force_ship":
+                e["status"] = "pending"
+                e["attempts"] = 0
+                e.pop("conflict_with", None)
+                e["resolved"] = {"by": "operator", "ts": _now(), "action": "force_ship"}
+            elif action == "accept_peer":
+                e["status"] = "shipped"
+                e["resolved"] = {"by": "operator", "ts": _now(), "action": "accept_peer"}
+            else:
+                return False
+            _write_queue(entries)
+            return True
+    return False
 
 
 def gc(older_than_days: int = 30) -> int:
@@ -310,6 +469,13 @@ if __name__ == "__main__":
     sub.add_parser("drain", help="ship pending entries")
     sub.add_parser("depth", help="show queue depth")
     sub.add_parser("show", help="show all pending entries")
+    sub.add_parser("conflicts", help="show all logged conflicts for operator review")
+    res_p = sub.add_parser("resolve", help="resolve a conflict")
+    res_p.add_argument("--id", required=True, help="queue entry id")
+    res_p.add_argument(
+        "--action", required=True, choices=["force_ship", "accept_peer"],
+        help="force_ship overwrites peer; accept_peer drops our version",
+    )
     gc_p = sub.add_parser("gc", help="garbage-collect old shipped entries")
     gc_p.add_argument("--days", type=int, default=30)
     args = ap.parse_args()
@@ -322,6 +488,11 @@ if __name__ == "__main__":
     elif args.cmd == "show":
         pending = [e for e in _read_queue() if e.get("status") == "pending"]
         print(json.dumps(pending, indent=2))
+    elif args.cmd == "conflicts":
+        print(json.dumps(list_conflicts(), indent=2))
+    elif args.cmd == "resolve":
+        ok = resolve_conflict(args.id, args.action)
+        print(json.dumps({"ok": ok, "id": args.id, "action": args.action}))
     elif args.cmd == "gc":
         n = gc(older_than_days=args.days)
         print(f"removed {n} shipped entries older than {args.days}d")

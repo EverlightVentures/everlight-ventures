@@ -197,6 +197,88 @@ def _check_claude_memory() -> dict:
     return out
 
 
+# Queue depth thresholds -- alert when any of these are exceeded
+QUEUE_DEPTH_WARN = 20      # 20+ pending entries = cloud has been unreachable a while
+QUEUE_DEPTH_CRITICAL = 100  # 100+ = something is seriously wrong
+QUEUE_OLDEST_WARN_SECS = 3600     # 1 hour old pending entry
+QUEUE_OLDEST_CRITICAL_SECS = 86400  # 1 day old
+
+
+def _check_sync_queue() -> dict:
+    """Probe the sync_queue.jsonl: depth, oldest pending age, conflict count."""
+    out = {"surface": "sync-queue", "path": str(WORKSPACE / "_state" / "sync_queue.jsonl")}
+    queue_path = WORKSPACE / "_state" / "sync_queue.jsonl"
+    conflict_log = WORKSPACE / "_state" / "sync_conflicts.jsonl"
+
+    if not queue_path.exists():
+        # Empty queue = healthy state (no writes attempted yet)
+        out.update({"present": False, "depth": 0, "conflicts": 0, "healthy": True})
+        return out
+
+    pending = []
+    total_lines = 0
+    try:
+        for line in queue_path.read_text().splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            total_lines += 1
+            try:
+                e = json.loads(line)
+                if e.get("status") == "pending":
+                    pending.append(e)
+            except json.JSONDecodeError:
+                continue
+    except OSError as exc:
+        out.update({"healthy": False, "error": f"queue unreadable: {exc}"})
+        return out
+
+    out["depth"] = len(pending)
+    out["total_entries"] = total_lines
+
+    # Oldest pending age
+    if pending:
+        oldest_ts = None
+        for e in pending:
+            try:
+                ts = datetime.fromisoformat(e["ts"]).timestamp()
+                if oldest_ts is None or ts < oldest_ts:
+                    oldest_ts = ts
+            except (ValueError, KeyError):
+                continue
+        if oldest_ts:
+            out["oldest_age_secs"] = int(time.time() - oldest_ts)
+
+    # Conflict count
+    conflicts = 0
+    if conflict_log.exists():
+        try:
+            for line in conflict_log.read_text().splitlines():
+                if line.strip():
+                    conflicts += 1
+        except OSError:
+            pass
+    out["conflicts"] = conflicts
+
+    # Health verdict
+    depth = out["depth"]
+    age = out.get("oldest_age_secs", 0)
+    if depth >= QUEUE_DEPTH_CRITICAL or age >= QUEUE_OLDEST_CRITICAL_SECS:
+        out["healthy"] = False
+        out["severity"] = "critical"
+    elif depth >= QUEUE_DEPTH_WARN or age >= QUEUE_OLDEST_WARN_SECS:
+        out["healthy"] = False
+        out["severity"] = "warning"
+    elif conflicts > 0:
+        # Conflicts always need operator eyes, even if depth is low
+        out["healthy"] = False
+        out["severity"] = "warning"
+    else:
+        out["healthy"] = True
+
+    return out
+
+
 def run_checks(quick: bool = False) -> list[dict]:
     """Run all checks and return list of results."""
     checks = [_check_blinko_remote, _check_blinko_phone, _check_blinko_db_file]
@@ -206,6 +288,7 @@ def run_checks(quick: bool = False) -> list[dict]:
             _check_agentmemory_file,
             _check_snapshots,
             _check_claude_memory,
+            _check_sync_queue,
         ])
     return [c() for c in checks]
 
@@ -232,7 +315,7 @@ def render_human(results: list[dict]) -> str:
     for r in results:
         status = "✓ healthy" if r.get("healthy") else "✗ degraded"
         details_parts = []
-        for k in ("count", "entities", "file_count", "blinko_snapshots", "size_bytes", "age_secs", "integrity", "error"):
+        for k in ("count", "entities", "file_count", "blinko_snapshots", "depth", "conflicts", "oldest_age_secs", "size_bytes", "age_secs", "integrity", "severity", "error"):
             if k in r:
                 v = r[k]
                 if k == "size_bytes" and isinstance(v, int):
@@ -266,15 +349,27 @@ def main():
         print(render_human(results))
 
     if args.slack_alert and state != "GREEN":
+        # Build a focused alert summary -- highlight queue issues specifically
+        queue_check = next((r for r in results if r.get("surface") == "sync-queue"), None)
+        alert_body = render_human(results)
+        alert_summary = f"Memory health: {state}"
+        severity = "warning" if state == "DEGRADED" else "critical"
+
+        if queue_check and not queue_check.get("healthy"):
+            depth = queue_check.get("depth", 0)
+            age = queue_check.get("oldest_age_secs", 0)
+            conflicts = queue_check.get("conflicts", 0)
+            alert_summary = f"Sync queue {queue_check.get('severity', 'warning').upper()}: depth={depth}, oldest={age // 60}min, conflicts={conflicts}"
+            severity = queue_check.get("severity", severity)
+
         try:
-            # Use existing branded slack module if present
             sys.path.insert(0, str(WORKSPACE / "03_AUTOMATION_CORE" / "01_Scripts"))
             from content_tools.branded_slack import post_branded_alert
             post_branded_alert(
                 channel="#hive-alerts",
-                summary=f"Memory health: {state}",
-                severity="warning" if state == "DEGRADED" else "critical",
-                body=render_human(results),
+                summary=alert_summary,
+                severity=severity,
+                body=alert_body,
             )
         except Exception as e:
             print(f"  (slack alert failed: {e})", file=sys.stderr)
