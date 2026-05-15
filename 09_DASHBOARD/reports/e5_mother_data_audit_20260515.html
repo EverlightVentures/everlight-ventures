@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>e5-mother Data Audit & Allocation Plan -- 2026-05-15</title>
+<style>
+  :root {
+    --gold: #D4A843;
+    --gold-dim: #8a6f2e;
+    --dark: #0A0A0A;
+    --dark-2: #141414;
+    --light: #E8E8E8;
+    --muted: #888;
+    --red: #c84a4a;
+    --green: #5fad6f;
+    --amber: #d49a43;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--dark);
+    color: var(--light);
+    font-family: "Inter", system-ui, sans-serif;
+    line-height: 1.55;
+    padding: 0 0 80px 0;
+  }
+  header {
+    background: linear-gradient(180deg, #1a1a1a 0%, var(--dark) 100%);
+    border-bottom: 2px solid var(--gold);
+    padding: 36px 48px 28px;
+  }
+  .wordmark { color: var(--gold); font-family: "Playfair Display", Georgia, serif; font-size: 13px; letter-spacing: 0.3em; text-transform: uppercase; }
+  h1 { font-family: "Playfair Display", Georgia, serif; font-size: 38px; margin: 8px 0 6px; color: var(--light); font-weight: 600; }
+  .subtitle { color: var(--muted); font-size: 14px; }
+  main { max-width: 1240px; margin: 0 auto; padding: 36px 48px; }
+  h2 {
+    font-family: "Playfair Display", Georgia, serif;
+    font-size: 26px;
+    color: var(--gold);
+    border-bottom: 1px solid #2a2a2a;
+    padding-bottom: 8px;
+    margin: 40px 0 18px;
+    font-weight: 600;
+  }
+  h3 { color: var(--light); font-size: 17px; margin: 22px 0 8px; }
+  p, li { color: #ddd; font-size: 14.5px; }
+  ul, ol { margin-left: 22px; margin-bottom: 12px; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0 18px; font-size: 13.5px; }
+  th { background: #1a1a1a; color: var(--gold); padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--gold-dim); font-weight: 500; font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; }
+  td { padding: 9px 12px; border-bottom: 1px solid #1a1a1a; color: #ccc; }
+  tr:hover td { background: #111; }
+  code, .mono { font-family: "JetBrains Mono", "Fira Code", monospace; font-size: 12.5px; color: var(--gold); background: #181818; padding: 1px 6px; border-radius: 3px; }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 11px; letter-spacing: 0.05em; font-weight: 500; text-transform: uppercase; }
+  .pill-green { background: #1a2e1f; color: var(--green); border: 1px solid var(--green); }
+  .pill-red { background: #2e1a1a; color: var(--red); border: 1px solid var(--red); }
+  .pill-amber { background: #2e261a; color: var(--amber); border: 1px solid var(--amber); }
+  .pill-grey { background: #1a1a1a; color: var(--muted); border: 1px solid #333; }
+  .callout { background: #14110a; border-left: 3px solid var(--gold); padding: 14px 18px; margin: 16px 0; border-radius: 0 4px 4px 0; }
+  .callout strong { color: var(--gold); }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 14px 0; }
+  .card { background: var(--dark-2); border: 1px solid #222; padding: 14px 18px; border-radius: 4px; }
+  .card h4 { color: var(--gold); font-size: 14px; margin-bottom: 8px; letter-spacing: 0.05em; text-transform: uppercase; }
+  .stats { display: flex; gap: 22px; flex-wrap: wrap; margin: 16px 0; }
+  .stat { background: var(--dark-2); border: 1px solid #1f1f1f; padding: 12px 18px; border-radius: 4px; }
+  .stat .num { color: var(--gold); font-size: 28px; font-family: "Playfair Display", serif; }
+  .stat .label { color: var(--muted); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; }
+  footer { border-top: 1px solid #2a2a2a; margin-top: 60px; padding: 24px 48px; color: var(--muted); font-size: 12px; text-align: center; }
+  .footer-mark { color: var(--gold); letter-spacing: 0.3em; font-family: "Playfair Display", serif; }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<header>
+  <div class="wordmark">Everlight Ventures &nbsp;&middot;&nbsp; e5-mother data audit</div>
+  <h1>What's on .250, where it went, and how to allocate 50 GB</h1>
+  <div class="subtitle">2026-05-15 &middot; Compiled from OCI CLI + e5-mother live inspection + recovery_log.md</div>
+</header>
+
+<main>
+
+<!-- ============================================== -->
+<h2>1. The TL;DR</h2>
+
+<div class="callout">
+<strong>Reality check.</strong> The story is mostly good news, with two real-but-fixable concerns:
+<ul style="margin-top: 6px;">
+  <li><strong>Good:</strong> The .250 mother boot was extracted to <code>/home/ubuntu/e5_data/</code> on e5-mother. 3.8 GB of source code, 3,731 Python scripts, 67 systemd unit files, all secrets, the Blinko DB. <span class="pill pill-green">recovered</span></li>
+  <li><strong>Good:</strong> The workspace itself (the 20 GB at <code>/mnt/sdcard/AA_MY_DRIVE</code>) is git-tracked and was already mirrored to e5-mother. <span class="pill pill-green">recovered</span></li>
+  <li><strong>Concern #1:</strong> There's still ONE detached orphan boot volume (<code>xlm-bot-core-e5-2c16g</code> 47 GB, May not equal what's in e5_data). The OCI <code>attach</code> call returned 409 conflict, meaning it's likely in a stuck transient state. <span class="pill pill-amber">verify pending</span></li>
+  <li><strong>Concern #2:</strong> There's a <em>third running instance</em> we didn't fully account for: <code>everlight-recovery-clean</code> (E2.1.Micro, since 2026-05-04). Probably a scratch host from the recovery hunt. <span class="pill pill-amber">decision pending</span></li>
+  <li><strong>Resource math:</strong> 191 GB of 200 GB Always Free pool is used. To safely attach a new 50 GB block volume, we need to reclaim 47 GB by either deleting the orphan boot or terminating the recovery-clean instance.</li>
+</ul>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="num">3</div><div class="label">running instances</div></div>
+  <div class="stat"><div class="num">4</div><div class="label">boot volumes</div></div>
+  <div class="stat"><div class="num">1</div><div class="label">true orphan (data unverified)</div></div>
+  <div class="stat"><div class="num">191 GB</div><div class="label">of 200 GB pool used</div></div>
+  <div class="stat"><div class="num">28/67</div><div class="label">recovered units installed</div></div>
+  <div class="stat"><div class="num">3,711</div><div class="label">Blinko notes</div></div>
+</div>
+
+<!-- ============================================== -->
+<h2>2. Oracle Infrastructure -- the live truth</h2>
+
+<h3>Running instances (3)</h3>
+<table>
+  <tr><th>Instance</th><th>Shape</th><th>Created</th><th>Role</th><th>Status</th></tr>
+  <tr><td><code>Xlm-bot</code></td><td>E2.1.Micro</td><td>2026-02-27</td><td>XLM trading bot + websocket feed (PRODUCTION)</td><td><span class="pill pill-green">do not touch</span></td></tr>
+  <tr><td><code>everlight-prod-a1</code></td><td>A1.Flex 4 OCPU / 24 GB</td><td>2026-05-14</td><td>e5-mother -- Blinko, MCPs, hive stack, wholesale, open-webui</td><td><span class="pill pill-green">production</span></td></tr>
+  <tr><td><code>everlight-recovery-clean</code></td><td>E2.1.Micro</td><td>2026-05-04</td><td><strong>Unknown role</strong> -- probably a leftover from the recovery hunt</td><td><span class="pill pill-amber">decision</span></td></tr>
+</table>
+
+<h3>Boot volumes (4) -- attached state</h3>
+<table>
+  <tr><th>Boot Volume</th><th>GB</th><th>Created</th><th>Attached To</th><th>What's On It</th></tr>
+  <tr><td><code>Xlm-bot (Boot Volume)</code></td><td>47</td><td>2026-02-27</td><td>Xlm-bot (Oracle Micro)</td><td>xlm-bot.service + xlm-ws.service runtime</td></tr>
+  <tr><td><code>xlm-bot-core-e5-2c16g (Boot Volume)</code></td><td>47</td><td>2026-03-14</td><td><span class="pill pill-red">ORPHAN</span></td><td><strong>The dead .250 mother boot.</strong> Already extracted to e5_data, but unverified. 409 conflict on re-attach.</td></tr>
+  <tr><td><code>everlight-recovery-clean (Boot Volume)</code></td><td>47</td><td>2026-05-04</td><td>everlight-recovery-clean</td><td>Scratch Ubuntu Micro from recovery hunt</td></tr>
+  <tr><td><code>everlight-prod-a1 (Boot Volume)</code></td><td>50</td><td>2026-05-14</td><td>everlight-prod-a1 (e5-mother)</td><td>Current production. <strong>Used: 35 GB / 49 GB (71%)</strong></td></tr>
+</table>
+
+<div class="callout">
+<strong>Always Free quota math.</strong> 47 + 47 + 47 + 50 = <strong>191 GB used</strong> of the 200 GB free tier pool. Only 9 GB headroom, so we can't add a 50 GB block volume without first reclaiming. <br>
+<strong>2 of 2 Always-Free E2.1.Micro slots</strong> are taken (Xlm-bot + recovery-clean). 1 of 1 A1.Flex slots taken (e5-mother).
+</div>
+
+<!-- ============================================== -->
+<h2>3. What was on the .250 mother (per CLAUDE.md + audit log)</h2>
+
+<p>The .250 doctrine claimed 24/7 hosting of these services. The May 11 audit confirmed only ~3 of these were actually running pre-death. The rest were doctrine drift (planned-but-never-installed).</p>
+
+<table>
+  <tr><th>Service</th><th>Per .250 doctrine</th><th>Actually running pre-death?</th><th>Migrated to e5-mother now?</th></tr>
+  <tr><td>Blinko RAG (port 1111)</td><td>449 notes</td><td>Yes (3,711 notes verified)</td><td><span class="pill pill-green">yes, 1111 active</span></td></tr>
+  <tr><td>n8n (port 5678)</td><td>"Automation platform"</td><td>Yes (10,117 errors / 30d, parked)</td><td><span class="pill pill-grey">parked by doctrine</span></td></tr>
+  <tr><td>hive-django (port 8504)</td><td>Unified ops dashboard</td><td>Source code exists, never confirmed serving</td><td><span class="pill pill-grey">deferred Phase 7</span></td></tr>
+  <tr><td>hive-voice (port 8200)</td><td>Twilio webhook handler</td><td>Source exists, never confirmed serving</td><td><span class="pill pill-grey">deferred (secrets regen needed)</span></td></tr>
+  <tr><td>agentmemory MCP (port 3108)</td><td>"Knowledge graph"</td><td><strong>Doctrine drift</strong> -- never installed</td><td><span class="pill pill-green">NEW install just now, active</span></td></tr>
+  <tr><td>Open WebUI (port 8080)</td><td>Multi-model chat UI</td><td><strong>Doctrine drift</strong> -- never installed</td><td><span class="pill pill-green">NEW install just now, active</span></td></tr>
+  <tr><td>4 MCP servers (3101-3108)</td><td>blinko_memory, market_intel, n8n_mcp, dispatcher_relay</td><td>Likely yes (units present)</td><td><span class="pill pill-amber">3 of 4 active</span> (dispatcher_relay source lost)</td></tr>
+  <tr><td>3 MCP servers (LIVE-KEY)</td><td>mcp-resend, mcp-stripe, mcp-supabase</td><td>Unknown -- units have hardcoded keys</td><td><span class="pill pill-grey">deferred until keys moved to EnvironmentFile</span></td></tr>
+  <tr><td>Hive core (action engine, slack agent, self healer, task runner, reports)</td><td>Always running</td><td>Likely yes (units present)</td><td><span class="pill pill-green">all 5 active</span></td></tr>
+  <tr><td>Wholesale pipeline (14 timers)</td><td>Daily/hourly cadence</td><td>Likely yes</td><td><span class="pill pill-green">all 14 timers active</span></td></tr>
+  <tr><td>Other systemd units (39 recovered, not yet installed)</td><td>Various</td><td>Mixed</td><td>See section 5 for the per-unit decision</td></tr>
+</table>
+
+<!-- ============================================== -->
+<h2>4. The recovery delta -- what we have vs what's on the orphan</h2>
+
+<div class="grid-2">
+  <div class="card">
+    <h4>Recovered to e5-mother (verified)</h4>
+    <p>Total extracted from .250 to <code>/home/ubuntu/e5_data/</code>: <strong>3.8 GB</strong>.</p>
+    <p>Top space consumers:</p>
+    <ul style="font-size: 13px;">
+      <li><code>vantaris/</code> 1.2 GB (frontend app)</li>
+      <li><code>xlm-bot/</code> 910 MB</li>
+      <li><code>lucrex-os/</code> 812 MB</li>
+      <li><code>onyx_pos_frontend/</code> 130 MB</li>
+      <li><code>wholesale/</code> 126 MB</li>
+      <li><code>xlm-dash-react/</code> 123 MB</li>
+      <li><code>hive_directory/</code> 76 MB</li>
+      <li><code>documenso/</code> 66 MB</li>
+      <li><code>hive_django/</code> 20 MB</li>
+      <li>3,731 .py scripts; 67 systemd unit files; <code>blinko_lite.db</code> 8.5 MB</li>
+    </ul>
+    <p>All <code>/home/opc/</code> paths from old mother are accessible via symlink <code>/home/opc &rarr; /home/ubuntu/e5_data</code>.</p>
+  </div>
+  <div class="card">
+    <h4>Potentially still on orphan (unverified)</h4>
+    <p>The 47 GB <code>xlm-bot-core-e5-2c16g</code> boot volume <strong>could not be re-attached today</strong> (409 conflict, suggesting it's stuck in a transient state from a prior attempt). Without mounting it, we cannot verify what's there vs in e5_data.</p>
+    <p><strong>Most likely contents</strong> (based on naming + size):</p>
+    <ul style="font-size: 13px;">
+      <li>The full <code>/</code> root of .250 (mounted as <code>/dev/sda1</code> on the dead instance)</li>
+      <li>Sub-trees we extracted: <code>/home/opc/</code>, <code>/opt/mcp_servers/</code>, <code>/usr/local/</code>, <code>/root/</code>, <code>/etc/systemd/system/</code>, <code>/etc/default/</code></li>
+      <li>Anything we MIGHT have missed: <code>/var/log/</code>, <code>/var/lib/postgresql/</code> (if real Blinko Postgres ran there), <code>/var/spool/cron/</code>, browser state, journald history</li>
+    </ul>
+    <p><strong>Action to fully verify:</strong> mount via OCI Console (the CLI is blocked), <code>rsync -a --dry-run</code> to compare against <code>e5_data/</code>.</p>
+  </div>
+</div>
+
+<div class="callout" style="border-left-color: var(--red);">
+<strong>What might be lost (honest uncertainty):</strong>
+<ul style="margin-top: 6px;">
+  <li><strong>dispatcher_relay.py source</strong> -- this file was at <code>/opt/mcp_servers/dispatcher_relay/relay.py</code> on .250. I deleted <code>e5_recovered/</code> earlier in this session. The file isn't in workspace git. The orphan should still have it.</li>
+  <li><strong>The 3 MCP unit files with hardcoded keys</strong> (mcp-resend, mcp-stripe, mcp-supabase) -- the keys themselves might be in the orphan but were never extracted because we paused on the secret-leak concern. <span class="pill pill-amber">defer to keys-rotation</span></li>
+  <li><strong>Journald history</strong> -- the .250's <code>journalctl</code> archive is on the orphan only. If you ever need to investigate what crashed pre-death, you'd need to mount the orphan.</li>
+  <li><strong>Browser/SSH state</strong> -- <code>~/.cache/</code>, <code>~/.config/</code> beyond what's in <code>e5_data/.config/</code>. Probably not load-bearing but unverified.</li>
+</ul>
+</div>
+
+<!-- ============================================== -->
+<h2>5. Service allocation -- what stays on the 50 GB root vs moves to new 50 GB volume</h2>
+
+<p>e5-mother's 50 GB boot disk is currently at 35 GB / 71%. After adding a new 50 GB block volume, we should keep <strong>only what must run 24/7</strong> on the boot disk, and move bulky data + offline-able assets to the new block volume.</p>
+
+<h3>Stays on boot disk (always-on, low-latency, OS + services)</h3>
+<table>
+  <tr><th>Footprint</th><th>What</th><th>Why</th></tr>
+  <tr><td>~3 GB</td><td>Ubuntu OS + apt cache</td><td>OS</td></tr>
+  <tr><td>~3.8 GB</td><td><code>/home/ubuntu/e5_data/</code> source tree + symlink</td><td>Active Blinko DB, Python source for all 28 running services</td></tr>
+  <tr><td>~6 GB</td><td>Docker (open-webui image + volume)</td><td>Required for :8080 chat UI</td></tr>
+  <tr><td>~200 MB</td><td><code>/home/ubuntu/.local/</code> (mcp-proxy, fastapi, django, agentmemory node_modules)</td><td>Required for MCPs + agentmemory + hive core</td></tr>
+  <tr><td>~50 MB</td><td><code>/etc/systemd/system/</code> 50 unit files</td><td>Systemd</td></tr>
+  <tr><td>~50 MB</td><td><code>/etc/mcp/</code>, <code>/etc/default/</code> env files</td><td>Service secrets</td></tr>
+  <tr><td>~8.5 MB</td><td><code>blinko_lite.db</code> (3,711 notes)</td><td>Hot data, frequent reads</td></tr>
+  <tr><td>~5 GB</td><td>Reserve for growth + journald + tmp</td><td>Headroom</td></tr>
+  <tr><th>= ~21 GB</th><th>Total on boot</th><th>Leaves <strong>29 GB free</strong></th></tr>
+</table>
+
+<h3>Moves to new 50 GB block volume (mounted at <code>/data</code>)</h3>
+<table>
+  <tr><th>Footprint</th><th>What</th><th>Notes</th></tr>
+  <tr><td>~20 GB</td><td><code>/home/ubuntu/AA_MY_DRIVE/</code> workspace mirror</td><td>Currently sync'd from phone. Used by services that need workspace paths (mostly for source-of-truth lookups; runtime impact minimal).</td></tr>
+  <tr><td>~8 MB &amp; growing</td><td>Daily Blinko + agentmemory snapshots (14-day rotation)</td><td>Currently at <code>/home/ubuntu/blinko_backups/</code>; move to <code>/data/snapshots/</code></td></tr>
+  <tr><td>~1.2 GB</td><td><code>vantaris/</code></td><td>Frontend app source -- not actively serving on e5-mother. Archive candidate.</td></tr>
+  <tr><td>~812 MB</td><td><code>lucrex-os/</code></td><td>Likely archived prototype</td></tr>
+  <tr><td>~130 MB + ~123 MB</td><td><code>onyx_pos_frontend/</code> + <code>xlm-dash-react/</code></td><td>Frontends -- not serving from e5-mother</td></tr>
+  <tr><td>~28 MB</td><td><code>archives/</code></td><td>Self-evident</td></tr>
+  <tr><th>= ~23 GB initial; up to 50 GB headroom</th><th>Total on data volume</th><th>Plenty for growth</th></tr>
+</table>
+
+<h3>The 39 not-yet-installed systemd units -- classify each</h3>
+<table>
+  <tr><th>Unit</th><th>Decision</th><th>Reason</th></tr>
+  <tr><td><code>dbus*</code>, <code>oracle-cloud-agent*</code>, <code>ocid</code> (6 units)</td><td><span class="pill pill-grey">skip</span></td><td>OS plumbing already provided by Ubuntu 22.04</td></tr>
+  <tr><td><code>hive-django</code>, <code>n8n</code>, <code>hive-voice</code>, <code>nextcloud</code>, <code>langfuse</code></td><td><span class="pill pill-grey">deferred</span></td><td>Per CLAUDE.md / SERVICE_TIERS.md -- Phase 7 reconsider</td></tr>
+  <tr><td><code>mcp-resend-proxy</code>, <code>mcp-stripe-proxy</code>, <code>mcp-supabase-proxy</code></td><td><span class="pill pill-amber">install after key cleanup</span></td><td>Live keys hardcoded in unit files; move to EnvironmentFile first</td></tr>
+  <tr><td><code>ollama</code></td><td><span class="pill pill-red">skip</span></td><td>Local LLM hosting -- ARM A1 lacks GPU; not viable on this shape</td></tr>
+  <tr><td><code>onyx-pos</code>, <code>onyx-pos-ui</code></td><td><span class="pill pill-amber">decision pending</span></td><td>If POS is meant to run from e5-mother, install. If from elsewhere (CF Pages), skip.</td></tr>
+  <tr><td><code>polymarket</code>, <code>stark-ai</code>, <code>triple-threat</code></td><td><span class="pill pill-amber">decision pending</span></td><td>Identify purpose, then decide</td></tr>
+  <tr><td><code>claude-chat-bridge</code></td><td><span class="pill pill-green">install</span></td><td>Bridge to Claude Code for dashboard chat (mentioned in CLAUDE.md)</td></tr>
+  <tr><td><code>computer-use</code></td><td><span class="pill pill-amber">decision pending</span></td><td>Anthropic computer use API -- only if you actively use it</td></tr>
+  <tr><td><code>gmail-organizer</code></td><td><span class="pill pill-amber">install if OAuth tokens regen</span></td><td>Useful for inbound watch, but needs Google OAuth re-auth</td></tr>
+  <tr><td><code>cloudflared</code></td><td><span class="pill pill-grey">skip</span></td><td>Tunnel to Cloudflare -- only if e5-mother is exposed publicly. Currently tailnet-only.</td></tr>
+  <tr><td><code>hive-sync</code>, <code>hive-dashboard</code></td><td><span class="pill pill-amber">decision pending</span></td><td>Sync orchestrator + dashboard backend -- inspect unit files first</td></tr>
+  <tr><td><code>nightly-backup</code></td><td><span class="pill pill-amber">install (after data volume mounted)</span></td><td>Useful when we have the data volume to back up TO</td></tr>
+  <tr><td><code>port80-forward</code></td><td><span class="pill pill-grey">skip</span></td><td>Reverse proxy -- not needed for tailnet-only</td></tr>
+</table>
+
+<!-- ============================================== -->
+<h2>6. Action items -- ordered by safety</h2>
+
+<ol style="line-height: 2;">
+  <li><strong>Decision needed from operator:</strong> What is <code>everlight-recovery-clean</code>? If it's a leftover scratch box, terminating it frees an Always-Free Micro slot + 47 GB of quota. If it's serving something, we need to know what.</li>
+  <li>Once #1 is decided -- <strong>terminate the unused instance OR delete the unattached orphan boot volume</strong> -- whichever recovers 47 GB. The orphan delete is most defensible if we can first mount + diff it (see #3).</li>
+  <li><strong>Mount the orphan via OCI Console</strong> (CLI is blocked by 409). Diff against <code>e5_data/</code>. Recover <code>dispatcher_relay.py</code> + any unique files. Then safely delete the orphan.</li>
+  <li><strong>Provision a new 50 GB iSCSI block volume</strong>, attach to e5-mother, format XFS, mount at <code>/data</code>. Move workspace mirror + snapshots + archives there.</li>
+  <li><strong>Reclaim disk on e5-mother boot</strong> after the move: <code>e5_data/vantaris/</code>, <code>lucrex-os/</code>, <code>onyx_pos_frontend/</code>, <code>xlm-dash-react/</code> can move to <code>/data/archives/</code>. Saves ~2.3 GB on root.</li>
+  <li><strong>Rebuild <code>dispatcher_relay.py</code></strong> (3 KB Python FastAPI relay) -- either from orphan after mount, or recreate from the docstring + functionality described in the audit log.</li>
+  <li><strong>Clean keys from the 3 NPM MCP units</strong>: move <code>STRIPE_KEY</code>, <code>RESEND_KEY</code>, <code>SUPABASE_KEY</code> from <code>Environment=</code> to <code>/etc/default/&lt;service&gt;</code> (mode 600), reference via <code>EnvironmentFile=-</code>. Then enable + start them.</li>
+  <li><strong>Per-unit triage of the remaining 14 candidate units</strong> -- look at each <code>.service</code> file, decide install/skip based on whether it's truly 24/7-required.</li>
+  <li><strong>Update CLAUDE.md doctrine</strong> to reflect the actual install state. Drift caught honestly.</li>
+</ol>
+
+<!-- ============================================== -->
+<h2>7. Quick reference -- the new mental model</h2>
+
+<div class="grid-2">
+  <div class="card">
+    <h4>If e5-mother dies tomorrow, you recover from:</h4>
+    <ol style="font-size: 13.5px;">
+      <li>GitHub <code>origin/everlightventures.io</code> (workspace + scripts + audit log)</li>
+      <li>Phone <code>_state/blinko_lite.db</code> (3,711 notes)</li>
+      <li>Phone <code>_state/agentmemory_graph.json</code> (knowledge graph)</li>
+      <li>Phone <code>08_BACKUPS/mother_snapshots/</code> (14-day rolling Blinko + agentmemory dumps)</li>
+      <li><code>/etc/mcp/*.env</code> -- need to be regenerated from Resend/Stripe/Supabase dashboards (not in any backup yet)</li>
+      <li>The orphan boot volume if it still exists at recovery time</li>
+    </ol>
+  </div>
+  <div class="card">
+    <h4>If phone dies tomorrow, you recover from:</h4>
+    <ol style="font-size: 13.5px;">
+      <li>GitHub clone to PC or new device</li>
+      <li>Pull workspace from e5-mother via <code>rsync</code> (the canonical mirror)</li>
+      <li>Pull <code>blinko_lite.db</code> from e5-mother (live + 14-day snapshots)</li>
+      <li>Pull <code>agentmemory_graph.json</code> from e5-mother</li>
+      <li>AceMagician PC has its own bidirectional mirror once it's back online</li>
+    </ol>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  <div class="footer-mark">EVERLIGHT VENTURES</div>
+  <div style="margin-top: 6px;">Audit compiled by phone-claude &middot; 2026-05-15 09:50 PT</div>
+  <div style="margin-top: 4px;">Sources: <code>oci bv boot-volume list</code>, <code>systemctl</code>, <code>du -sh /home/ubuntu/e5_data/*</code>, <code>_state/audit_log/2026-05-14-005-blinko-restored.md</code></div>
+</footer>
+
+</body>
+</html>

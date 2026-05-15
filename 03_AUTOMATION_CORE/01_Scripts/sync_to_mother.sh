@@ -90,7 +90,37 @@ rsync $DRY $VERBOSE -az --update \
   | tail -3 | tee -a "$LOG"
 
 # ---------------------------------------------------------------------------
-# 5. record handshake
+# 5. PULL memory data files FROM mother (defense-in-depth, never lose memory)
+#    -- Blinko SQLite live DB
+#    -- agentmemory knowledge graph
+#    -- yesterday's snapshots (in case the live file got corrupted)
+# ---------------------------------------------------------------------------
+log "memory PULL <- $MOTHER_TAILNET (Blinko DB + agentmemory graph)"
+mkdir -p "$PHONE_WS/_state" "$PHONE_WS/08_BACKUPS/mother_snapshots"
+
+# Live files first (latest state)
+# sdcard FAT filesystem doesn't support chmod/chown -- strip perms to avoid noise
+RSYNC_SDCARD="-rtz --update --no-perms --no-owner --no-group --no-times"
+
+rsync $DRY $VERBOSE $RSYNC_SDCARD \
+  -e "ssh -i $SSH_KEY -o StrictHostKeyChecking=accept-new" \
+  "$MOTHER_USER@$MOTHER_TAILNET:/home/ubuntu/e5_data/blinko_lite.db" \
+  "$PHONE_WS/_state/blinko_lite.db" 2>&1 | tail -2 | tee -a "$LOG"
+
+rsync $DRY $VERBOSE $RSYNC_SDCARD \
+  -e "ssh -i $SSH_KEY -o StrictHostKeyChecking=accept-new" \
+  "$MOTHER_USER@$MOTHER_TAILNET:/home/ubuntu/e5_data/agentmemory_graph.json" \
+  "$PHONE_WS/_state/agentmemory_graph.json" 2>&1 | tail -2 | tee -a "$LOG"
+
+# Rolling 14-day snapshots (defense if live file is bad)
+rsync $DRY $VERBOSE $RSYNC_SDCARD --delete-excluded \
+  --include='blinko_*.db' --include='agentmemory_*.json' --exclude='*' \
+  -e "ssh -i $SSH_KEY -o StrictHostKeyChecking=accept-new" \
+  "$MOTHER_USER@$MOTHER_TAILNET:/home/ubuntu/blinko_backups/" \
+  "$PHONE_WS/08_BACKUPS/mother_snapshots/" 2>&1 | tail -3 | tee -a "$LOG"
+
+# ---------------------------------------------------------------------------
+# 6. record handshake
 # ---------------------------------------------------------------------------
 date -Iseconds > "$PHONE_WS/_state/last_mother_sync.txt"
 log "=== sync_to_mother done -- log: $LOG ==="
