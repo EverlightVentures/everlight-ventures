@@ -324,3 +324,53 @@ python3 .../activity_feed.py --source blinko    # one source only
   smoke) still pending, multi-hour. Phase 11 (GitHub commit) still pending,
   needs careful .gitignore review. Operator can resume those in a focused
   next session.
+
+## [2026-05-15 04:05 PT] Session: Sync gap closure session + new exit-export doctrine
+
+<!-- session_iso=2026-05-15T11:05:25.520824+00:00 | size=3043b -->
+
+# Sync gap closure session + new exit-export doctrine
+
+### Accomplished
+- Closed all 4 honest gaps from audit entry #008 in one pass: agentmemory peer merger, conflict resolution, queue depth alerting, watchdog drain hook
+- Built `agentmemory_inbox_merger.py` (270 lines) -- last-write-wins merge with 60s conflict window, atomic write, persistent archive
+- Extended `sync_queue.py` with tri-state ship handlers (shipped|conflict|failed), pre-ship peer probes, conflict logging, operator-resolvable CLI
+- Extended `memory_health_check.py` with sync-queue depth/age/conflict surface, WARN/CRITICAL thresholds, queue-specific Slack alert path
+- Extended `dashboards_watchdog.sh` with non-port "actions" block: drains sync_queue + agentmemory_inbox each cycle when non-empty
+- Deployed merger to e5-mother + new `agentmemory-merge.timer` (5min cycle)
+- Found + fixed archive-location bug during smoke (was /tmp/, now persistent)
+- New HARD LAW: `feedback_exit_exports_session_to_mailbox` -- this very feature
+- Built companion script `session_export_to_mailbox.py` and `/exit` slash command
+
+### Files created or modified
+- `03_AUTOMATION_CORE/01_Scripts/agentmemory_inbox_merger.py` (NEW, 318 lines)
+- `03_AUTOMATION_CORE/01_Scripts/sync_queue.py` (modified, +227 lines)
+- `03_AUTOMATION_CORE/01_Scripts/memory_health_check.py` (modified, +105 lines)
+- `03_AUTOMATION_CORE/01_Scripts/dashboards_watchdog.sh` (modified, +23 lines)
+- `03_AUTOMATION_CORE/01_Scripts/session_export_to_mailbox.py` (NEW, this script itself)
+- `.claude/commands/exit.md` (NEW slash command)
+- `_state/audit_log/2026-05-15-009-sync-gaps-closed.md` (NEW, 198 lines)
+
+### Doctrines added or changed
+- `feedback_exit_exports_session_to_mailbox` -- this session's new HARD LAW
+
+### Commits + pushes
+- `2d004c7e` on `everlightventures.io` + side branch `sync-gaps-closed-2026-05-15` -- the 4-gap closure
+- (this session export will be in the next commit)
+
+### Open items / handoffs / queued for next session
+- Verify Blinko `/api/v1/note/get?external_id=...` endpoint shape against real API (the conflict probe assumes a guess)
+- agentmemory MCP needs SIGHUP or restart to reload graph after merge (file changes don't auto-propagate to MCP)
+- No queue-depth widget in Moltbook dashboard yet -- wire next iteration
+- Slack interactive conflict-resolution UI ("force ship | accept peer" buttons) -- next iteration
+
+### Honest gaps / known limitations
+- The `/etc/hosts` entry for `e5-mother` on phone is missing -- memory_health_check shows mother as unreachable from phone, but it's actually fine via tailnet IP. Cosmetic but real.
+- agentmemory merge logic doesn't notify the MCP -- live graph updates require a process restart
+
+### Operator decisions deferred
+- Whether to install claude-chat-bridge / polymarket / nightly-backup on e5-mother (per architecture allocation from prior session)
+- Whether to clean keys + install the 3 NPM MCPs (mcp-resend / mcp-stripe / mcp-supabase)
+- Phone-side projects setup (onyx-pos / stark-ai / triple-threat / wealth-intel / vantaris)
+
+---
