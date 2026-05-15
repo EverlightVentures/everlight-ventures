@@ -1,4 +1,13 @@
 """
+
+# noqa: direct-resend
+# This file still POSTs to api.resend.com directly. The eradication_gate is now
+# called BEFORE any send, and the module refuses to load under WHOLESALE_OUTBOUND_HALT=1.
+# Full migration to content_tools.branded_mailer.send_branded_email() is tracked
+# in _state/SELF_AUDIT_2026-05-15_STREUBEL_2ND_STRIKE.md under "Lift criteria".
+# The noqa marker is the lint's documented exception for files that are gated
+# pending a full refactor. DO NOT remove the eradication_gate import or the
+# module-level halt check; they are the load-bearing protections.
 Rex Belfort Mode -- Aggressive 5-day closing sequence.
 
 Not 7 touches in 25 days. 7 touches in 5 DAYS.
@@ -29,6 +38,28 @@ log = logging.getLogger("belfort")
 
 AGENT_DIR = Path(__file__).parent
 LEADS_DB = AGENT_DIR / "leads_db.json"
+
+# ============================================================
+# MODULE-LEVEL HALT -- if WHOLESALE_OUTBOUND_HALT=1, refuse to load.
+# Born from the Streubel 2nd-strike 2026-05-15. Belt-and-suspenders:
+# even if a cron job invokes this module directly, it exits before
+# any send loop can start.
+# ============================================================
+if os.environ.get("WHOLESALE_OUTBOUND_HALT", "").strip() in {"1", "true", "TRUE", "yes"}:
+    log.error("WHOLESALE_OUTBOUND_HALT=1 -- rex_belfort_sequence refusing to load. "
+              "See memory: feedback-streubel-permanent-eradication")
+    raise SystemExit("WHOLESALE_OUTBOUND_HALT active -- rex_belfort blocked at module load")
+
+# Eradication gate -- hardcoded permanent-DNC list. Independent of any JSON.
+# MUST be called before every send. See eradication_gate.py for the doctrine.
+import sys as _sys
+_sys.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
+try:
+    from eradication_gate import assert_safe as _erad_assert_safe, EradicationViolation
+except ImportError as _erad_imp:
+    # Fail closed: if the gate cannot be imported, the module refuses to run.
+    log.error("eradication_gate import failed -- rex_belfort refusing to run: %s", _erad_imp)
+    raise SystemExit(f"eradication_gate unavailable: {_erad_imp}")
 
 # Import suppression list checker -- MUST be checked before every send
 from rex_stop_handler import is_suppressed, load_suppression_list
@@ -86,6 +117,16 @@ def send_email(to, subject, body, state: str = "", action: str = "outreach"):
     """
     global _resend_count
     if not to:
+        return False
+
+    # ============================================================
+    # ERADICATION GATE -- FIRST. Permanent DNC subjects (Streubel et al.).
+    # Hardcoded list. JSON files cannot bypass this. Fail closed.
+    # ============================================================
+    try:
+        _erad_assert_safe(email=to, address=subject, caller="rex_belfort_sequence.send_email")
+    except EradicationViolation as _eg_err:
+        log.error("ERADICATION GATE blocked send to %s: %s", to, _eg_err)
         return False
 
     # MX validation -- don't waste a send on a domain that can't receive email

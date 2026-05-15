@@ -101,6 +101,30 @@ def send_branded_email(
 
     recipients = [to] if isinstance(to, str) else list(to)
 
+    # ============================================================
+    # ERADICATION GATE -- FIRST CHECK, NO BYPASSES, NO EXCEPTIONS.
+    # Hardcoded list of permanent-DNC subjects (e.g. David A. Streubel /
+    # municipalfirm.com -- BBB complainant from 2026-04-26). This gate must
+    # fire BEFORE resend_guard / budget / cadence / phrase_scrub because it
+    # is the most absolute rule. See eradication_gate.py for the list and
+    # MEMORY.md `feedback-streubel-permanent-eradication` for the doctrine.
+    # ============================================================
+    try:
+        import sys as _sys, pathlib as _pl
+        _here = _pl.Path(__file__).parent
+        if str(_here) not in _sys.path:
+            _sys.path.insert(0, str(_here))
+        from eradication_gate import assert_safe as _erad_assert_safe, EradicationViolation
+        for _r in recipients:
+            _erad_assert_safe(email=_r, caller="branded_mailer.send_branded_email")
+    except EradicationViolation as _erad_err:
+        log.error("ERADICATION GATE blocked send: %s", _erad_err)
+        return MailResult(ok=False, error=f"eradication_blocked:{_erad_err}")
+    except ImportError as _erad_imp:
+        # If the gate module is missing, FAIL CLOSED. Do not send.
+        log.error("eradication_gate module missing -- failing closed: %s", _erad_imp)
+        return MailResult(ok=False, error="eradication_gate_module_missing_fail_closed")
+
     try:
         from resend_guard import assert_safe_recipient
     except ImportError:

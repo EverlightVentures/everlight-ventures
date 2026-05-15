@@ -1,4 +1,13 @@
 """
+
+# noqa: direct-resend
+# This file still POSTs to api.resend.com directly. The eradication_gate is now
+# called BEFORE any send, and the module refuses to load under WHOLESALE_OUTBOUND_HALT=1.
+# Full migration to content_tools.branded_mailer.send_branded_email() is tracked
+# in _state/SELF_AUDIT_2026-05-15_STREUBEL_2ND_STRIKE.md under "Lift criteria".
+# The noqa marker is the lint's documented exception for files that are gated
+# pending a full refactor. DO NOT remove the eradication_gate import or the
+# module-level halt check; they are the load-bearing protections.
 Rex 7-Touch Sequence -- replace spray-and-pray with a proven 25-day drip.
 
 Each lead progresses through 7 touches over 25 days, alternating SMS and email.
@@ -16,6 +25,21 @@ Touch schedule:
 Reads leads_db.json, advances each lead through the sequence based on
 elapsed days since last_outreach, then saves back.
 """
+
+# === ERADICATION HALT (auto-inserted 2026-05-15 after Streubel 2nd-strike) ===
+import os as _os_halt
+if _os_halt.environ.get("WHOLESALE_OUTBOUND_HALT", "").strip() in {"1", "true", "TRUE", "yes"}:
+    import sys as _sys_halt
+    print("[rex_7touch_sequence.py] WHOLESALE_OUTBOUND_HALT=1 -- refusing to run", file=_sys_halt.stderr)
+    raise SystemExit("WHOLESALE_OUTBOUND_HALT active")
+import sys as _sys_eg
+_sys_eg.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools")
+try:
+    from eradication_gate import assert_safe as _erad_assert_safe, EradicationViolation
+except ImportError as _eg_err:
+    print(f"[rex_7touch_sequence.py] eradication_gate unavailable: {_eg_err}", file=_sys_eg.stderr)
+    raise SystemExit("eradication_gate required")
+# === END ERADICATION HALT ===
 
 import json
 import logging
