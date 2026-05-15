@@ -40,8 +40,8 @@ DEALS_DIR.mkdir(parents=True, exist_ok=True)
 RESEND_KEY = os.environ.get("RESEND_API_KEY", os.environ.get("SMTP_PASS", ""))
 SLACK_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
 SLACK_CHANNEL = "C0ANLLV8JAC"
-FROM_EMAIL = os.environ.get("SMTP_FROM", "Piper Reeves <piper@everlightventures.io>")
-REPLY_TO = "piper@everlightventures.io"
+FROM_EMAIL = os.environ.get("SMTP_FROM", "Marquise Reed <marquise@everlightventures.io>")
+REPLY_TO = "marquise@everlightventures.io"
 
 
 # ---------------------------------------------------------------------------
