@@ -1,6 +1,6 @@
 # Day 3 -- Organic Persona Post Drafts (Nova OR Bull)
 
-On Day 3 at 9:00 AM PT, ONE persona posts an organic tweet from @Lucrex
+On Day 3 at 9:00 AM PT, ONE persona posts an organic tweet from @Lucrex_
 quote-tweeted as their own voice (or from their own moltbook account
 directly if engagement on Day 1 justified the platform-level voice test).
 
@@ -144,5 +144,5 @@ public posts. Future-me thanks present-me for getting this right."
 ## When this file gets the TODO blocks filled in
 
 Day 3 morning. Open this file. Pick which persona is posting. Fill in 5-10
-lines into the TODO blocks. Render the post. Gate-check. Post from @Lucrex
+lines into the TODO blocks. Render the post. Gate-check. Post from @Lucrex_
 (or the persona's own moltbook account if it's getting traction independently).

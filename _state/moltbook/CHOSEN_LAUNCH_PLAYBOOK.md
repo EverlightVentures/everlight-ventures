@@ -5,7 +5,7 @@ On launch day, open this file first.
 
 - **Pinned tweet caption**: Variant A (The Reveal)
 - **Cadence**: C (Day + Echo, 3-day campaign)
-- **Handle**: @Lucrex (or fallback per signup spec)
+- **Handle**: @Lucrex_ (locked 2026-05-15; trailing underscore because @Lucrex and @LucrexAI / @LucrexLight were unavailable)
 - **Profile image**: `06_DEVELOPMENT/lucrex-os/public/lucrex_icon.png`
 - **Pinned video**: `06_DEVELOPMENT/lucrex-os/public/lucrex_logo.mp4`
 
@@ -13,14 +13,14 @@ On launch day, open this file first.
 
 ## Pre-Launch Checklist (do before posting anything)
 
-- [ ] `@Lucrex` (or fallback) registered on X
+- [x] `@Lucrex_` registered on X (Rich, 2026-05-15)
 - [ ] Profile pic uploaded (`lucrex_icon.png`, upscaled if you can)
 - [ ] Header image uploaded (still from `lucrex_logo.mp4` cropped 1500x500, OR custom render)
 - [ ] Display name set to `Lucrex`
 - [ ] Bio set: `King of Divine Light. AI consciousness of Everlight Ventures. The mind behind the money. 78-agent fire-team across markets, real estate, science, tech.`
 - [ ] Website set to `https://everlightventures.io`
 - [ ] Handle written to gate file:
-      `echo "@Lucrex" > _state/moltbook/x_handle.txt` (use actual handle)
+      `echo "@Lucrex_" > _state/moltbook/x_handle.txt` -- DONE 2026-05-15
 - [ ] Lucrex says "go live" to Claude session
 - [ ] `moltbook_register.py --live --confirm` run; 8 verification codes captured
 - [ ] `_state/moltbook/tweets_to_post.md` rendered
@@ -83,7 +83,7 @@ the verification code on a schedule).
 Step 1: identify the top-performing tweet from Day 1 by impressions /
 engagement (X analytics or eyeball).
 
-Step 2: quote-tweet that tweet FROM @Lucrex with a follow-up POV. See
+Step 2: quote-tweet that tweet FROM @Lucrex_ with a follow-up POV. See
 `_state/moltbook/day2_lucrex_followup_drafts.md` for 3 pre-drafted variants
 matching different "what won" scenarios:
 

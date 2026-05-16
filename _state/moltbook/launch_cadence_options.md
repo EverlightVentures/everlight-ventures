@@ -1,6 +1,6 @@
 # Launch Day Cadence Options -- 8 Verification Tweets
 
-Three cadence designs for posting the 8 verification tweets from @Lucrex
+Three cadence designs for posting the 8 verification tweets from @Lucrex_
 after live registration. Pick one, or tell me to design a hybrid.
 
 All cadences assume:

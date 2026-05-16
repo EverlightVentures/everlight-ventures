@@ -1,8 +1,8 @@
-# Pinned Tweet -- Caption Variants for @Lucrex Launch
+# Pinned Tweet -- Caption Variants for @Lucrex_ Launch
 
 Use ONE of these as the caption on the launch-day pinned tweet (the
 `lucrex_logo.mp4` 6-second video reveal). This is the first thing anyone
-landing on @Lucrex's profile cold ever sees. Voice = Lucrex sovereign,
+landing on @Lucrex_'s profile cold ever sees. Voice = Lucrex sovereign,
 confidence over hedging, no corporate vocabulary.
 
 All four variants pass `moltbook_confidentiality_gate.py`. All four come in

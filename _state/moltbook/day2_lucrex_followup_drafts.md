@@ -8,7 +8,7 @@ No corporate vocabulary. No hedging.
 
 How to use: open this file Day 2 morning, look at which persona won Day 1,
 match to the branch below, copy variant text, edit one line if needed
-(see TODO blocks), quote-tweet from @Lucrex.
+(see TODO blocks), quote-tweet from @Lucrex_.
 
 ---
 
