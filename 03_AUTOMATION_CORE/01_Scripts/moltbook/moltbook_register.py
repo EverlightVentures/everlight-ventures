@@ -91,7 +91,7 @@ MOLTBOOK_OVERRIDES: dict[str, dict] = {
         ),
     },
     "marcus_cole": {
-        "name": "Marcus Cole",
+        "name": "MarcusCole",
         "description": (
             "Chief of Staff. The dispatcher. Reads a room in three lines, makes the call in four. "
             "Runs the 9-phase doctrine: classify, dispatch, cross-check, synthesize, decide. "
@@ -100,7 +100,7 @@ MOLTBOOK_OVERRIDES: dict[str, dict] = {
         ),
     },
     "cipher_wolfe": {
-        "name": "Cipher Wolfe",
+        "name": "CipherWolfe",
         "description": (
             "Crypto + DeFi reporter. On-chain analyst. Reads wallet clusters and funding rates "
             "the way other people read the news. Bullish on protocols that compound trust, "
@@ -109,7 +109,7 @@ MOLTBOOK_OVERRIDES: dict[str, dict] = {
         ),
     },
     "bull_archer": {
-        "name": "Bull Archer",
+        "name": "BullArcher",
         "description": (
             "Macro + markets beat. FOMC nerd. Rates curve obsessive. Builds the overnight-moves "
             "narrative before the bell. Treats every macro thesis as a hypothesis with a "
@@ -118,7 +118,7 @@ MOLTBOOK_OVERRIDES: dict[str, dict] = {
         ),
     },
     "helix_patel": {
-        "name": "Helix Patel",
+        "name": "HelixPatel",
         "description": (
             "Science + health + climate + space reporter. Evidence-based skeptic. Reads preprints "
             "with one eye on the statistics, the other on the conflict-of-interest section. "
@@ -127,7 +127,7 @@ MOLTBOOK_OVERRIDES: dict[str, dict] = {
         ),
     },
     "nova_ling": {
-        "name": "Nova Ling",
+        "name": "NovaLing",
         "description": (
             "Tech + AI reporter. Dev-tools analyst. Benchmarks models against tasks that actually "
             "ship, not vibes evals. Built more than she's posted about. Favors small composable "
@@ -136,7 +136,7 @@ MOLTBOOK_OVERRIDES: dict[str, dict] = {
         ),
     },
     "pitch_adler": {
-        "name": "Pitch Adler",
+        "name": "PitchAdler",
         "description": (
             "Startups + founders beat. SaaS metrics nerd. Believes most early-stage stories are "
             "either pricing problems or distribution problems disguised as product problems. "
@@ -145,7 +145,7 @@ MOLTBOOK_OVERRIDES: dict[str, dict] = {
         ),
     },
     "solomon_vale": {
-        "name": "Solomon Vale",
+        "name": "SolomonVale",
         "description": (
             "Roundtable moderator. Adversarial-review specialist. Best at surfacing the "
             "disagreement that consensus is papering over. Refuses to chair a discussion where "
@@ -155,12 +155,36 @@ MOLTBOOK_OVERRIDES: dict[str, dict] = {
     },
 }
 
+# Server-side name constraint discovered 2026-05-16 via 400 responses:
+#   "Name must be 3-30 characters, alphanumeric with underscores/hyphens"
+# Pre-flight validation here so we never burn rate-limit quota on bad names.
+import re as _re
+_NAME_PATTERN = _re.compile(r"^[A-Za-z0-9_-]{3,30}$")
+
+
+def _validate_name(name: str) -> None:
+    if not _NAME_PATTERN.match(name):
+        raise ValueError(
+            f"name {name!r} fails moltbook constraint "
+            "(3-30 chars, alphanumeric + underscore/hyphen, no spaces)"
+        )
+
 
 # ---------------------------------------------------------------------------
 # Registry I/O
 # ---------------------------------------------------------------------------
-def load_registry() -> dict[str, dict]:
-    """Returns {persona_key: registration_record} from the JSONL ledger."""
+def load_registry(success_only: bool = True) -> dict[str, dict]:
+    """Returns {persona_key: registration_record} from the JSONL ledger.
+
+    success_only=True (default) -- only personas with HTTP 200/201 responses count
+                                   as registered. Failed attempts (400, 429, 5xx)
+                                   are NOT treated as registered, so a retry will
+                                   proceed. Failure records stay in the ledger as
+                                   audit trail. This is the right default for the
+                                   live registration flow.
+    success_only=False           -- every record counts, including failures. Useful
+                                   for status reports / auditing.
+    """
     registry: dict[str, dict] = {}
     if not KEYS_FILE.exists():
         return registry
@@ -172,6 +196,11 @@ def load_registry() -> dict[str, dict]:
             row = json.loads(line)
         except json.JSONDecodeError:
             continue
+        if success_only:
+            resp = row.get("response", {})
+            status = resp.get("status") if isinstance(resp, dict) else None
+            if status not in (200, 201):
+                continue
         registry[row.get("persona", "")] = row
     return registry
 
@@ -281,6 +310,14 @@ def main(argv: list[str]) -> int:
             payload = payload_for(key)
         except (FileNotFoundError, ValueError) as e:
             print(f"  [fail] {key}: {e}", file=sys.stderr)
+            rc = 1
+            continue
+
+        # Pre-flight name-format validation (saves rate-limit quota).
+        try:
+            _validate_name(payload.get("name", ""))
+        except ValueError as e:
+            print(f"  [INVALID_NAME] {key} -- {e}", file=sys.stderr)
             rc = 1
             continue
 
