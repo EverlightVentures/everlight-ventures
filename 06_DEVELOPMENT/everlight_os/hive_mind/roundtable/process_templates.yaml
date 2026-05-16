@@ -1,0 +1,191 @@
+# Hive Roundtable -- Process Templates
+#
+# Maps process types to standing committee members + state-pair injections +
+# topic-keyword ad-hoc additions. Banking-committee model: every meeting has
+# a fixed core plus the case-specific stakeholders.
+#
+# Schema:
+#   processes:
+#     <process_key>:
+#       description:      one-line summary
+#       convener:         always solomon_vale unless an Article III escalation
+#       standing:         list of agent keys -- always at the table
+#       ad_hoc_by_state:  map of state code -> list of agent keys (only for wholesale/legal)
+#       ad_hoc_by_topic:  map of topic keyword -> list of agent keys (matched against question text)
+#       max_participants: hard cap (Solomon will drop lowest-priority if exceeded)
+#       keywords:         classifier hints (matched against question to auto-pick process)
+#       severity_escalation: optional -- list of agents added when severity == "high"
+
+processes:
+
+  # ------------------------------------------------------------------------
+  # COMPLIANCE / DNC / ERADICATION POST-MORTEM
+  # ------------------------------------------------------------------------
+  dnc_post_mortem:
+    description: Post-mortem on a contact that should have been DNC-blocked or eradication-listed
+    convener: solomon_vale
+    standing:
+      - legal_theo_briggs           # CAE -- 3rd Line of Defense
+      - legal_priya_bhattacharya    # Privacy & Data Counsel
+      - legal_lia_knight            # Ethics intake / whistleblower hotline
+    ad_hoc_by_state:
+      MO: [state_walt_henning_mo]
+      TN: [state_lo_hines_tn]
+      GA: [state_ellie_vaughn_ga]
+      OH: [state_bernie_kowalski_oh]
+      AZ: [state_lupe_salazar_az]
+      TX: [state_mags_diaz_tx]
+      FL: [state_mona_castile_fl]
+    ad_hoc_by_topic:
+      operations:  [marquise_reed_acquisitions, piper_reeves_outreach]
+      litigation:  [legal_imani_calder]
+      engineering: [everlight_architect, everlight_qa_gate]
+    severity_escalation:
+      high: [vaughn_sterling_partner, legal_imani_calder]
+    max_participants: 8
+    keywords: [dnc, eradication, post-mortem, bypass, telephone solicitor, opt-out, unsubscribe, complaint, BBB, do-not-call, suppression]
+
+  # ------------------------------------------------------------------------
+  # WHOLESALE DEAL REVIEW -- pricing / contract / title / closing
+  # ------------------------------------------------------------------------
+  wholesale_deal_review:
+    description: Live wholesale deal decision -- offer pricing, contract terms, title issues, EMD structure
+    convener: solomon_vale
+    standing:
+      - marquise_reed_acquisitions  # acquisitions lead (sourcing)
+      - henry_hammond_negotiator    # senior negotiator (price + walk-away)
+      - marvin_cohen_closer         # closing coordinator (contract + title)
+      - legal_heck_aurelio          # real estate transaction counsel
+    ad_hoc_by_state:
+      MO: [state_stella_mo, state_walt_henning_mo]
+      TN: [state_marvin_tn, state_lo_hines_tn]
+      GA: [state_atlas_ga, state_ellie_vaughn_ga]
+      OH: [state_cleo_oh, state_bernie_kowalski_oh]
+      AZ: [state_phin_az, state_lupe_salazar_az]
+      TX: [state_daria_tx, state_mags_diaz_tx]
+      FL: [state_jasper_fl, state_mona_castile_fl]
+    ad_hoc_by_topic:
+      senior_signoff: [vaughn_sterling_partner]
+      dementia:       [vaughn_sterling_partner, legal_imani_calder]
+      probate:        [vaughn_sterling_partner, legal_heck_aurelio]
+      bbb_history:    [legal_imani_calder, legal_theo_briggs]
+      outreach:       [piper_reeves_outreach]
+    severity_escalation:
+      high: [vaughn_sterling_partner]
+    max_participants: 10
+    keywords: [deal, offer, contract, PSA, EMD, assignment, title, closing, ARV, MAO, walkaway, walk-away, escrow, double-close]
+
+  # ------------------------------------------------------------------------
+  # TRADING RISK REVIEW -- XLM bot, position sizing, margin
+  # ------------------------------------------------------------------------
+  trading_risk_review:
+    description: XLM bot strategy / position-sizing / margin / risk-on or risk-off decision
+    convener: solomon_vale
+    standing:
+      - bull_archer                 # Finance & Markets, macro anchor
+      - cipher_wolfe                # Crypto & DeFi, on-chain
+      - everlight_trading_risk      # XLM-specific advisory risk
+      - pulse_diaz                  # Markets pulse / real-time tape reader
+    ad_hoc_by_topic:
+      regulation:     [brief_calloway, legal_priya_bhattacharya]
+      derivatives:    []     # 53_derivatives_beat is numbered-only, not Task-spawnable
+      macro_overlay:  [bull_archer]
+      cost_review:    [legal_theo_briggs]   # CAE on burn / cost discipline
+    severity_escalation:
+      high: [vaughn_sterling_partner, legal_theo_briggs]
+    max_participants: 7
+    keywords: [trade, position, margin, scalp, xlm, leverage, risk, exit, entry, pnl, perpetuals, futures, stop loss, drawdown, sniper]
+
+  # ------------------------------------------------------------------------
+  # ENGINEERING CHANGE REVIEW -- prod-affecting infra / code
+  # ------------------------------------------------------------------------
+  engineering_change_review:
+    description: Infrastructure or code change that touches production (XLM bot, broker pipeline, branded mailer, dashboards)
+    convener: solomon_vale
+    standing:
+      - everlight_architect         # system architect
+      - everlight_saas_builder      # build specialist
+      - everlight_qa_gate           # QA + safety gate
+    ad_hoc_by_topic:
+      security:              [legal_priya_bhattacharya]
+      database:              []
+      frontend:              [everlight_content_director]
+      compliance_affecting:  [legal_priya_bhattacharya, legal_theo_briggs]
+      branded_pipeline:      [everlight_packager, everlight_seo_formatter]
+      xlm_bot:               [everlight_trading_risk, cipher_wolfe]
+    severity_escalation:
+      high: [legal_theo_briggs, vaughn_sterling_partner]
+    max_participants: 8
+    keywords: [deploy, refactor, migration, upgrade, schema, infra, cron, systemd, oracle, e5-mother, branded_mailer, dashboard, ci/cd]
+
+  # ------------------------------------------------------------------------
+  # LEGAL ESCALATION -- BBB / AG / regulator / external complaint
+  # ------------------------------------------------------------------------
+  legal_escalation:
+    description: External legal exposure -- BBB complaint, AG inquiry, regulator letter, civil action threat
+    convener: solomon_vale
+    standing:
+      - legal_theo_briggs           # CAE + General Counsel (lead)
+      - legal_imani_calder          # Senior Litigation Counsel
+      - legal_priya_bhattacharya    # Privacy Counsel
+      - legal_lia_knight            # Ethics intake
+    ad_hoc_by_state:
+      MO: [state_walt_henning_mo]
+      TN: [state_lo_hines_tn]
+      GA: [state_ellie_vaughn_ga]
+      OH: [state_bernie_kowalski_oh]
+      AZ: [state_lupe_salazar_az]
+      TX: [state_mags_diaz_tx]
+      FL: [state_mona_castile_fl]
+    ad_hoc_by_topic:
+      corporate_filing: [legal_wen_marsh]
+      real_estate:      [legal_heck_aurelio]
+      finance:          [brief_calloway]
+      outreach_record:  [piper_reeves_outreach, marquise_reed_acquisitions]
+    severity_escalation:
+      high:     [vaughn_sterling_partner]
+      critical: [vaughn_sterling_partner]
+    max_participants: 9
+    keywords: [BBB, attorney general, AG, complaint, regulator, SEC, FTC, lawsuit, subpoena, cease and desist, civil action, TCPA, FTSA, CCPA, GDPR]
+
+# ----------------------------------------------------------------------------
+# Topic detection keywords -- mapped to ad_hoc_by_topic keys above.
+# The classifier scans the question text (case-insensitive) for these and
+# triggers the matching topic injections.
+# ----------------------------------------------------------------------------
+topic_keywords:
+  operations:           [operations, operational, pipeline, drip, sequence, enrollment, send-time, scheduler]
+  litigation:           [litigation, lawsuit, sue, suing, civil action, plaintiff, defendant]
+  engineering:          [engineering, code, refactor, bug, deploy, infra]
+  senior_signoff:       [senior, signoff, sign-off, partner approval, escalate, escalation]
+  dementia:             [dementia, alzheimer, cognitive, capacity, elder abuse]
+  probate:              [probate, executor, estate, heir, deceased, will, intestate]
+  bbb_history:          [bbb, better business bureau, complaint history]
+  outreach:             [outreach, email send, drip, follow-up, cold contact]
+  regulation:           [regulation, regulator, SEC, FTC, CFTC, compliance officer]
+  derivatives:          [options, futures, perpetuals, greeks, volatility, IV]
+  macro_overlay:        [FOMC, rates, fed, inflation, CPI, PPI, NFP]
+  cost_review:          [cost, burn, monthly burn, expense]
+  security:             [security, vulnerability, breach, leak, credential, secret]
+  database:             [database, schema, migration, postgres, supabase, sqlite]
+  frontend:             [frontend, ui, ux, dashboard, page, component]
+  compliance_affecting: [tcpa, can-spam, gdpr, ccpa, dnc, privacy, consent]
+  branded_pipeline:     [branded_mailer, branded_slack, branded pipeline, gold theme]
+  xlm_bot:              [xlm, xlm bot, sniper, scalp, perpetuals]
+  corporate_filing:     [llc, incorporation, secretary of state, reinstatement, dissolution]
+  real_estate:          [real estate, deed, PSA, title, escrow, equitable interest]
+  finance:              [finance, banking, treasury, allocation, capital]
+  outreach_record:      [outreach history, send log, sequence record]
+
+# ----------------------------------------------------------------------------
+# State detection -- regex patterns mapped to 2-letter state codes
+# Used by the classifier when state is not explicitly passed in.
+# ----------------------------------------------------------------------------
+state_patterns:
+  MO: ['missouri', 'st\.? louis', 'saint louis', 'kansas city', 'springfield mo', 'westminster pl', 'westminster place']
+  TN: ['tennessee', 'memphis', 'nashville', 'little rock']  # AR rolls into TN per roster
+  GA: ['georgia', 'atlanta', 'marietta', 'decatur', 'sandy springs']
+  OH: ['ohio', 'cleveland', 'columbus', 'cincinnati', 'akron']
+  AZ: ['arizona', 'phoenix', 'tucson', 'scottsdale', 'mesa']
+  TX: ['texas', 'dallas', 'fort worth', 'dfw', 'houston', 'austin', 'san antonio']
+  FL: ['florida', 'jacksonville', 'tampa', 'orlando', 'miami']
