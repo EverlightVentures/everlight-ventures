@@ -1,7 +1,7 @@
 #!/bin/bash
 # Auto-deploy bot changes to Oracle production
 # Syncs local xlm_bot code to Oracle Micro (163.192.19.196)
-# and scripts/configs to Oracle E5 (129.159.38.250)
+# and scripts/configs to Oracle E5 (163.192.19.196)
 #
 # Usage:
 #   bash deploy_to_oracle.sh          # deploy everything
@@ -12,17 +12,35 @@
 # Cron: runs every 10 min to catch any uncommitted changes
 # */10 * * * * bash /path/to/deploy_to_oracle.sh >> _logs/deploy.log 2>&1
 
-KEY="/root/.ssh/oracle_key.pem"
-# Everything consolidated on E5 now (2026-03-24). Old Micro IP dead.
-BOT_VM="opc@129.159.38.250"
-E5_VM="opc@129.159.38.250"
-LOCAL_BOT="/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/xlm_bot"
-REMOTE_BOT="/home/opc/xlm-bot"
-LOG="/mnt/sdcard/AA_MY_DRIVE/_logs/deploy_oracle.log"
-SLACK_WH="https://hooks.slack.com/services/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"  # dead
-SLACK_BOT_TOKEN="xoxb-8645963765681-10594020158069-eJRt13YP8qedI6DnQwupuFfy"
-SLACK_DEPLOY_CH="C0AN4GSTMT5"  # #deploy-log
+# --- hostname-addressed config (sources the mesh keystone) -------------------
+# Rewritten 2026-05-14: was hardcoded to the dead 163.192.19.196 E5 + phone-only
+# /mnt/sdcard paths + a committed Slack token. Now sources hive_hosts.env so it
+# runs from ANY device (phone, PC, the box itself) and survives a failover --
+# change HIVE_PROD_HOST in hive_hosts.env and this script follows automatically.
+MESH_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/mesh" 2>/dev/null && pwd)"
+[ -f "$MESH_DIR/hive_hosts.env" ] || MESH_DIR="/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/mesh"
+# shellcheck disable=SC1091
+source "$MESH_DIR/hive_hosts.env"
+
+KEY="$HIVE_SSH_KEY"                          # unified mesh key (github_deploy)
+BOT_KEY="$HIVE_BOT_SSH_KEY"                  # Oracle Micro key (oracle_key.pem)
+BOT_VM="${HIVE_BOT_USER}@${HIVE_BOT_HOST}"   # xlm-bot Micro -- verified LIVE 2026-05-14
+BOT_PORT="$HIVE_BOT_SSH_PORT"
+E5_VM="${HIVE_PROD_USER}@${HIVE_PROD_HOST}"  # new Ampere 4/24 hive box (replaces dead .250)
+E5_PORT="$HIVE_PROD_SSH_PORT"
+LOCAL_BOT="${HIVE_LOCAL_WS}/06_DEVELOPMENT/xlm_bot"
+REMOTE_BOT="${HIVE_BOT_HOME}/xlm-bot"
+WS="$HIVE_LOCAL_WS"                          # workspace root on whatever device runs this
+LOG="${HIVE_LOCAL_WS}/_logs/deploy_oracle.log"
+SLACK_BOT_TOKEN="${SLACK_BOT_TOKEN:-}"       # source from env/.env -- never commit the token
+SLACK_DEPLOY_CH="C0AN4GSTMT5"                # #deploy-log
 DEPLOY_HASH_FILE="/tmp/last_deploy_hash"
+
+# NOTE(mesh 2026-05-14): deploy_bot works from any device now ($LOCAL_BOT is
+# resolved). The deploy_scripts / deploy_django / etc. functions still carry
+# old /mnt/sdcard absolute paths + no -P port flag -- they no-op safely on the
+# PC but need their paths swapped to "$WS/..." and a -P "$E5_PORT" added once
+# the new box's real SSH coordinates are confirmed. Tracked as a mesh task.
 
 ts() { date '+%Y-%m-%d %H:%M:%S PT'; }
 log() { echo "[$(ts)] $1" >> "$LOG"; echo "[$(ts)] $1"; }
@@ -185,6 +203,34 @@ deploy_scripts() {
         /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/hive_mind/agent_metrics.py \
         /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/hive_mind/messaging.py \
         "$E5_VM:/home/opc/06_DEVELOPMENT/everlight_os/hive_mind/" 2>/dev/null
+
+    # Hive Roundtable -- Solomon Vale's 5-phase persona orchestration engine
+    # (constitutional Article III branch -- always keep e5-mother in sync)
+    ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" \
+        "mkdir -p /home/opc/06_DEVELOPMENT/everlight_os/hive_mind/roundtable/guests" 2>/dev/null
+    scp -o ConnectTimeout=30 -i "$KEY" \
+        /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/hive_mind/roundtable/__init__.py \
+        /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/hive_mind/roundtable/roundtable.py \
+        /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/hive_mind/roundtable/participant_resolver.py \
+        /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/hive_mind/roundtable/persona_builder.py \
+        /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/hive_mind/roundtable/smoke_test.py \
+        /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/hive_mind/roundtable/process_templates.yaml \
+        "$E5_VM:/home/opc/06_DEVELOPMENT/everlight_os/hive_mind/roundtable/" 2>/dev/null
+
+    # Persona dossiers (.claude/agents/) -- needed by Roundtable engine to load voices
+    ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" \
+        "mkdir -p /home/opc/.claude/agents" 2>/dev/null
+    rsync -az --include='*.md' --exclude='*' \
+        -e "ssh -o ConnectTimeout=10 -i $KEY" \
+        /mnt/sdcard/AA_MY_DRIVE/.claude/agents/ \
+        "$E5_VM:/home/opc/.claude/agents/" 2>/dev/null
+
+    # Roundtable archives -- one-way push (08_BACKUPS gitignored, sync via deploy)
+    ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" \
+        "mkdir -p /home/opc/08_BACKUPS/roundtables" 2>/dev/null
+    rsync -az -e "ssh -o ConnectTimeout=10 -i $KEY" \
+        /mnt/sdcard/AA_MY_DRIVE/08_BACKUPS/roundtables/ \
+        "$E5_VM:/home/opc/08_BACKUPS/roundtables/" 2>/dev/null
 
     # Neuromorphic modules (NLP, brain policy, LLM gateway, pipeline API)
     ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "mkdir -p /home/opc/06_DEVELOPMENT/everlight_os/neuromorphic" 2>/dev/null

@@ -170,14 +170,58 @@ def _compliance_gate(question: str, context: str, participants: list[str]) -> No
 
 
 # --- Anthropic SDK with mock fallback ---------------------------------------
+def _load_env_once() -> None:
+    """Load ANTHROPIC_API_KEY (and others) from canonical env files.
+
+    Mirrors branded_slack._load_env_once() pattern. Search order:
+      1. 03_AUTOMATION_CORE/03_Credentials/.env  (canonical credentials)
+      2. /home/opc/.env                           (Oracle deploy fallback)
+      3. 06_DEVELOPMENT/hivemind_saas/backend/.env (legacy slot)
+    First-write-wins via os.environ.setdefault, so an env var set by the
+    caller (e.g. cron) always overrides the file.
+    """
+    import os as _os
+    if _os.environ.get("_ROUNDTABLE_ENV_LOADED"):
+        return
+    candidates = [
+        WORKSPACE / "03_AUTOMATION_CORE" / "03_Credentials" / ".env",
+        Path("/home/opc/.env"),
+        WORKSPACE / "06_DEVELOPMENT" / "hivemind_saas" / "backend" / ".env",
+    ]
+    for env_path in candidates:
+        if not env_path.exists():
+            continue
+        try:
+            for line in env_path.read_text().splitlines():
+                line = line.strip()
+                if not line or line.startswith("#") or "=" not in line:
+                    continue
+                if line.startswith("export "):
+                    line = line[7:]
+                k, _, v = line.partition("=")
+                _os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+        except Exception:
+            pass
+    _os.environ["_ROUNDTABLE_ENV_LOADED"] = "1"
+
+
 def _get_client():
     """Lazy import anthropic; return a real client OR raise with install hint."""
+    _load_env_once()
     try:
         import anthropic  # type: ignore
     except ImportError:
         raise RoundtableError(
             "anthropic SDK not installed. Run: pip install anthropic\n"
             "For phone-side smoke testing without spending tokens, pass --mock."
+        )
+    import os as _os
+    if not _os.environ.get("ANTHROPIC_API_KEY"):
+        raise RoundtableError(
+            "ANTHROPIC_API_KEY not set. Checked: "
+            "03_AUTOMATION_CORE/03_Credentials/.env, /home/opc/.env, "
+            "hivemind_saas/backend/.env. Add the key to one of these "
+            "or set ANTHROPIC_API_KEY in the calling environment."
         )
     return anthropic.Anthropic()
 
