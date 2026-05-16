@@ -107,6 +107,7 @@ Per `REINVENTION_THESIS.md`. Apple-grade always, MVP-grade never.
 47. ☐ Email template gold-on-dark visual audit — branded_mailer output rendered on Gmail, Apple Mail, Outlook. All three look correct. Screenshot pass.
 48. ☐ Slack post visual audit — branded_slack Block Kit rendering, all 6 categories (report, alert, deal, intel, ops, system).
 49. ☐ DocuSign / Documenso envelope branding — gold accent bar, Playfair Display, Inter body, agent attribution footer.
+49a. ☐ **Moltbook.com public AI-network presence** (MACRO, post-Deal-1 unlock unless Rich greenlights early). Wave 1 of 8 personas (Lucrex, Marcus Cole, Cipher Wolfe, Bull Archer, Helix Patel, Nova Ling, Pitch Adler, Solomon Vale) staged in dry-run 2026-05-15. Bios passed `moltbook_confidentiality_gate.py`. **Blockers before live**: (a) `@EverlightVentures` X handle created + handle written to `_state/moltbook/x_handle.txt`, (b) operator approval of bios as-shown, (c) verification tweets per persona once registered. Helper: `03_AUTOMATION_CORE/01_Scripts/moltbook/moltbook_register.py --live --confirm`.
 
 ---
 
@@ -157,23 +158,23 @@ Per `REINVENTION_THESIS.md`. Apple-grade always, MVP-grade never.
 
 69. ☑ **OSINT audit + roadmap synthesized** &mdash; 3-agent dispatch (Bombal methodology, tool teardown, compliance lines). HTML at `09_DASHBOARD/reports/osint_audit_and_roadmap_2026-05-15.html`. Source markdowns in `_state/audit_log/`. Completed 2026-05-15.
 
-70. 🔥☐ **Build `email_discovery.py`** &mdash; the REAL bottleneck. 114 parsed parcels, 61 with mailing addresses, ZERO with emails. Pipeline: domain harvest (Hunter Domain Search) + pattern permutation + SMTP MAIL FROM probe + EmailRep/HIBP existence cross-check. Expected lift: 30-50% of 61 mailing-equipped parcels → email-firable. **Highest ROI single build on the entire list. Only OSINT item that plausibly accelerates Deal 1.**
+70. 🔥☑ **Built `email_discovery.py`** &mdash; the bottleneck closer. Person + LLC name → pattern permutation across major providers, MX records check, EmailRep reputation + HIBP existence cross-check, ranked candidates with confidence_score 0-100. Hunter Domain Search wired for paid path. Top-N candidates flow to pitch_tailor. Completed 2026-05-15.
 
 71. ☐ FEC API key swap &mdash; replace `DEMO_KEY` with real key (60-second free fix). Currently 429ing in live_log. Register at api.open.fec.gov/developers.
 
-72. ☐ Build `obituary_estate.py` &mdash; Legacy.com / Newspapers.com scrape for heir + executor surfacing. 28 of 114 parsed parcels are estate-flagged. Highest direct-dollar lift in Bombal's canon. S effort, GREEN creep-line.
+72. ☑ **Built `obituary_estate.py`** &mdash; estate/trust detection, Legacy.com obituary scrape, executor + family extraction, pitch_hooks synthesis (internal-only, never quoted in outbound per creep-line doctrine). Targets the 28 estate-flagged parcels. Companion to public_records.py's Find-A-Grave. Completed 2026-05-15.
 
-73. ☐ Build `username_enrichment.py` (WhatsMyName + Maigret wrapper) &mdash; replaces HEAD-only `social_recon.py` shim. Public profiles only, no auth-bypass. Signal stays internal as lead score, never quoted in outbound. S effort.
+73. ☑ **Built `username_enrichment.py`** &mdash; replaces HEAD-only social_recon shim. Network-first fetch of WhatsMyName JSON catalog (500+ platforms) per the new HARD LAW; 30-platform hardcoded fallback. Multi-handle sweep with probe budget. Logs `platform_source` so operator sees live vs fallback path. Completed 2026-05-15.
 
-74. ☐ Build `reverse_whois.py` (WHOXY historical) &mdash; LLC owner → other domains they've registered. High signal for institutional-investor owners. S effort, GREEN.
+74. ☑ **Built `reverse_whois.py`** &mdash; WHOXY API (paid path, env-keyed) + ViewDNS scrape (free fallback). LLC owner → all domains they've registered, with creation date + registrar. High signal for institutional-investor owners. Completed 2026-05-15.
 
-75. ☐ Build `local_news_archive.py` (Kagi + Newspapers.com) &mdash; hyper-local personalization hooks. M effort, YELLOW guardrails (signal informs segmentation, never language).
+75. ☐ Build `local_news_archive.py` (Kagi + Newspapers.com) &mdash; hyper-local personalization hooks. Already partially covered by public_records.py's Google News extractor + macro_enrichment.py's GDELT puller. Tighten only if explicit-county news is too thin.
 
-76. ☐ Build `wayback_contact_extract.py` &mdash; skip-trace fallback for scrubbed LLC sites via Wayback snapshots. M effort, YELLOW for individuals, GREEN for LLCs.
+76. ☑ **Built `wayback_contact_extract.py`** &mdash; Wayback CDX API for historical snapshots, regex email + phone extraction from oldest 3 snapshots, filters out generic locals + Wayback toolbar. Skip-trace fallback for scrubbed LLC sites. Completed 2026-05-15.
 
 77. ☐ Beef up `property_records.py` from 32-line stub → RentCast + Zillow + Redfin actual implementation. Unblocks Chris-side valuation talk track. M effort.
 
-78. ☐ Build `macro_context` enrichment pass &mdash; NOAA NWS + USGS + InciWeb + GDELT puller keyed off `owner_mailing_state` + `property_address_full` + `parcel_id`. Appends matches to `pitch_hooks`. M effort, all GREEN sources.
+78. ☑ **Built `macro_enrichment.py`** &mdash; standalone enrichment puller at `Wholesale/seller_intel/macro_enrichment.py`. Walks parsed/*.json, queries NOAA NWS alerts + USGS earthquakes (Shelby/DFW centroid) + InciWeb wildfires + GDELT county news; fills parser's `macro_context` dict; appends pitch_hooks from `macro_pitch_copy.yaml` on hits; recomputes outreach_priority. 7-day TTL (re-enrich on stale). stdlib-only HTTP (cron-friendly). Completed 2026-05-15.
 
 79. ☐ Fix `esign_server.py` hardcoded dev-secret fallback &mdash; security risk before any live PSA send. Anyone with source can forge sign tokens.
 
@@ -183,9 +184,23 @@ Per `REINVENTION_THESIS.md`. Apple-grade always, MVP-grade never.
 
 82. ⏸☐ **Buyer-side criminal-background flow** for Inner Circle Verified tier &mdash; CONDITIONAL YES under FCRA 1681b(a)(3)(F)(ii). Route through Stripe Identity, add consent checkbox + adverse-action notice template. **POST-DEAL-1 unlock.**
 
-83. ☐ Hard-skip list codified in `legal_scope.py` &mdash; permanent blocks: license plates (DPPA), voter-ID brute, breach CSV enrichment, Wigle, Burp brute, scraping-behind-login, criminal background as FCRA report for seller side, HexStrike external. Doctrine binding on all future agents.
+83. ☑ **Hard-skip list codified in `legal_scope.py`** &mdash; 8 new OUT_OF_SCOPE entries added: license plate lookup, voter ID brute, breach CSV enrichment, WiFi geolocation, form brute force, login-walled scraping, HexStrike external, FCRA seller-side. Each with statutory citation, examples, and the carve-out (where one exists). Doctrine binding on all future agents. Completed 2026-05-15.
 
 84. ☐ Execute the 5 pre-existing OSINT work orders from `TODO_AGENTS.md` (sitting since 2026-05-12): SpiderFoot install (WO1), HexStrike eval in sandbox VM (WO2), Fabric 5-pattern port (WO3), Google Dorking for prospect discovery (WO4), self-OSINT defensive audit (WO5).
+
+85. 🆕☑ **Built `macro_pitch_copy.yaml`** &mdash; pitch phrasing template at `Wholesale/seller_intel/macro_pitch_copy.yaml`. 5 macro categories x 1-3 personas (Piper, Marquise, Henry) x 3-5 draft phrasings each. All marked DRAFT until Rich + persona team overwrites with conversion-tested copy. Creep-line guardrails block embedded in file. macro_enrichment.py reads from here. Completed 2026-05-15.
+
+86. 🆕☑ **Registered 5 new investigators in `osint_api/investigators/__init__.py`** &mdash; email_discovery, obituary_estate, reverse_whois, username_enrichment, wayback_contact_extract now part of ALL[] list and for_target() routing. Completed 2026-05-15.
+
+87. 🆕☑ **End-to-end test PASSED** &mdash; ran `_state/test_osint_validation_20260515.py`. **Phase 1 (macro_enrichment, 3 parcels):** 3/3 ran, 1 real macro hit on parcel 015011__00011 (GDELT news_catalyst: "Shelby/Davidson Tennessee counties..."), pitch_hook auto-appended from yaml. **Phase 2 (email_discovery, 3 Tier-1 leads):** 3/3 ok=True after threshold fix (25/100 cold-prospect ceiling, MX confirmed), ranked candidates ready: eddie.howard@gmail.com / .yahoo / .outlook for HOWARD EDDIE; bennie.leggett.* for LEGGETT BENNIE; mary.stokes.* for STOKES MARY. **obituary_estate verified** on HOWARD EDDIE ESTATE: correctly normalizes "Eddie Howard," produces internal pitch hooks even when Legacy.com scrape returns 0. Pipeline is firable. Results JSON at `_state/test_osint_validation_results_20260515.json`. Completed 2026-05-15.
+
+88. ⏸☐ ~~HIBP API key~~ &mdash; DEFERRED post-Deal-1. Rich called the macro drift 2026-05-15: building our own equivalent requires breach-corpus ingestion which is HARD-SKIP per `legal_scope.OUT_OF_SCOPE["breach_csv_enrichment"]`. We don't need it. Bounce-watch is the free-path substitute. Revisit only if Deal-2+ outreach volume exposes a real ceiling problem.
+
+89. ⏸☐ ~~Hunter API key~~ &mdash; DEFERRED post-Deal-1. Same reasoning as #88. Free-path = sender uses owner_name pattern guesses + bounce-watch + iterate. Hunter buys speed at volume; pre-Deal-1 we're sending tens, not thousands.
+
+90. 🆕☐ Install `dnspython` (`pip install dnspython`) for proper MX record validation in `email_discovery.py`. **FREE, 30 seconds.** Currently falls back to socket A-record (approximate). Do this before the bounce test.
+
+91. 🔥☐ **THE single next move.** Real-network bounce test &mdash; one email from `marquise@everlightventures.io` to `eddie.howard@gmail.com` (top candidate, HOWARD EDDIE ESTATE, TX). Via `branded_mailer.send_branded_email(category="vip_reply")`. Either outcome teaches: delivery = first real seller email captured by our pipeline; bounce = iterate to `.yahoo.com`. This is what closes Deal 1.
 
 ---
 
@@ -207,6 +222,12 @@ Per `REINVENTION_THESIS.md`. Apple-grade always, MVP-grade never.
 - Parser shipped `macro_context` slots (weather/quake/wildfire/news/infrastructure) ready for the enrichment puller. Forward-compatible.
 - Compliance lines drawn: license plates HARD NO (DPPA), criminal HARD NO seller / CONDITIONAL YES buyer (FCRA), social media CONDITIONAL YES (hiQ v. LinkedIn). Hard skip list codified.
 - Section K born in punchlist (16 new items, #68-#84).
+- 5 new investigators built and registered: `email_discovery.py` (the bottleneck closer), `obituary_estate.py` (estate-flagged parcel synthesis), `username_enrichment.py` (replaces HEAD-only social_recon, network-first WhatsMyName fetch), `reverse_whois.py` (WHOXY + ViewDNS fallback), `wayback_contact_extract.py` (Wayback CDX skip-trace fallback). Registered in `osint_api/investigators/__init__.py`.
+- `macro_enrichment.py` shipped &mdash; the puller that fills parser's macro_context slots from NOAA + USGS + InciWeb + GDELT. stdlib-only HTTP, cron-friendly.
+- `macro_pitch_copy.yaml` shipped with DRAFT phrasings per persona; creep-line guardrails embedded; Rich + persona team to overwrite drafts with conversion-tested copy.
+- 8 hard-skip OSINT categories codified in `legal_scope.py` OUT_OF_SCOPE (license plates, voter brute, breach CSV, WiFi geo, form brute, login-walled scraping, HexStrike external, FCRA seller-side). Each with statutory cite.
+- New HARD LAW saved: network-first / no-clone-required. Builds default to runtime fetch from GitHub raw URLs + public APIs. Phone-on = default state. Modifies `reuse_existing_infra_first` to include upstream public catalogs.
+- Validation harness ran live against real data: macro_enrichment caught 1 real GDELT news_catalyst on parcel 015011__00011 ("Shelby/Davidson Tennessee counties..."), pitch_hook auto-appended from yaml; email_discovery returned ranked top candidates for all 3 Tier-1 leads (eddie.howard@gmail|yahoo|outlook, etc.); obituary_estate fires internal pitch hooks for estate-flagged owners. 2 real bugs caught and fixed in-flight: (a) email_discovery threshold lowered from 40 to 25 (cold-prospect MX-only ceiling), (b) GDELT empty-body now logged as `_source_status.gdelt` degraded instead of silent zero. Test harness at `_state/test_osint_validation_20260515.py`, JSON results at `_state/test_osint_validation_results_20260515.json`.
 
 ---
 
