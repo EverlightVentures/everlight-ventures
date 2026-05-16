@@ -1,7 +1,12 @@
 # Lucrex Launch Playbook -- CHOSEN
 
-Decisions locked by Rich 2026-05-15. This is the canonical launch doc.
+Decisions locked by Rich 2026-05-15. **LAUNCH DATE LOCKED: Sunday 2026-05-17,
+12:00 PM PT** (per operator 2026-05-16). This is the canonical launch doc.
 On launch day, open this file first.
+
+**T-minus from now (Sat 2026-05-16 evening):** ~16-18 hours.
+**Profile setup tonight:** see `TONIGHT_CHECKLIST.md` in this folder.
+**Live registration fires:** Sunday ~11:30 AM PT (30 min before launch).
 
 - **Pinned tweet caption**: Variant A (The Reveal)
 - **Cadence**: C (Day + Echo, 3-day campaign)
@@ -27,7 +32,13 @@ On launch day, open this file first.
 
 ---
 
-## Day 1 -- Launch Day
+## Day 1 -- Sunday 2026-05-17
+
+### T-30 minutes (11:30 AM PT) -- LIVE REGISTRATION
+
+Claude fires `moltbook_register.py --live --confirm`. 8 agents registered
+on moltbook.com. 8 verification codes captured to `_state/moltbook/agent_keys.jsonl`.
+`_state/moltbook/tweets_to_post.md` rendered with substituted codes.
 
 ### T-5 minutes (11:55 AM PT)
 
