@@ -49,9 +49,19 @@ _logs/blinko_lite.db
 !03_AUTOMATION_CORE/03_Credentials/
 **/credentials/
 **/*.json.secret
-# Track .env files for portability (repo is PRIVATE)
-# **/*.env
-# **/.env*
+# 2026-05-16: Reversed prior "track .env for portability" policy.
+# Secrets must NEVER live in git, even private repos -- they leak via
+# compromised accounts, accidental visibility flips, breaches, forks.
+# Sync .env files between nodes via Tailscale/rsync, not git.
+# Templates (.env.example) stay tracked -- they document expected vars.
+**/*.env
+**/.env.bak
+**/.env.local
+**/.env.production
+**/.env.secret
+!**/*.env.example
+!**/*.env.template
+!**/*.env.sample
 **/config.json
 **/secrets/
 **/api_keys*
