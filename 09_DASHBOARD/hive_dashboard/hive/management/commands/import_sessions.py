@@ -335,5 +335,5 @@ class Command(BaseCommand):
                     encoding='utf-8'
                 )
                 session.save(update_fields=['combined_summary'])
-            except OSError:
-                pass
+            except OSError as exc:
+                self.stdout.write(self.style.WARNING(f"Could not read combined_summary.md: {exc}"))

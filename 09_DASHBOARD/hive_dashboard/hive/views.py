@@ -240,12 +240,12 @@ class SessionListView(ListView):
             try:
                 qs = qs.filter(created_at__date__gte=datetime.strptime(date_from, '%Y-%m-%d').date())
             except ValueError:
-                pass
+                logger.debug("Invalid date_from format %r, ignoring filter", date_from)
         if date_to:
             try:
                 qs = qs.filter(created_at__date__lte=datetime.strptime(date_to, '%Y-%m-%d').date())
             except ValueError:
-                pass
+                logger.debug("Invalid date_to format %r, ignoring filter", date_to)
 
         # Sort
         sort = self.request.GET.get('sort', 'newest')

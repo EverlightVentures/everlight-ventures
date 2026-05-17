@@ -33,7 +33,7 @@ def _slack(message, channel="#05-revenue"):
     try:
         requests.post(webhook, json={"text": message, "channel": channel}, timeout=5)
     except Exception:
-        pass
+        log.warning("Slack webhook notification failed", exc_info=True)
 
 
 def _award_points(account, points, transaction_type, description, reference_id=""):

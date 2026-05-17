@@ -651,7 +651,7 @@ def _notify_slack(message):
         import requests
         requests.post(webhook, json={"text": message, "channel": "#05-revenue"}, timeout=5)
     except Exception:
-        pass
+        logger.warning("Slack webhook notification failed", exc_info=True)
 
 
 def create_stripe_invoice(deal: Deal) -> str:

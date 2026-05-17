@@ -390,7 +390,7 @@ def nerve_center(request):
                 "color": "green",
             })
     except Exception:
-        pass
+        log.debug("Could not load funnel events for nerve center", exc_info=True)
     recent_events.sort(key=lambda x: x["time"], reverse=True)
     recent_events = recent_events[:10]
 

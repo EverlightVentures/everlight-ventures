@@ -149,7 +149,7 @@ def api_close_deal(request, deal_id):
     try:
         body = json.loads(request.body)
     except json.JSONDecodeError:
-        pass
+        logger.debug("api_close_deal: non-JSON request body, using defaults")
     won  = body.get("won", True)
     deal = close_deal(deal, won=won)
     return JsonResponse({"ok": True, "stage": deal.stage, "commission_due": float(deal.commission_due)})
@@ -368,7 +368,7 @@ def api_create_checkout(request, deal_id):
     try:
         body = json.loads(request.body)
     except json.JSONDecodeError:
-        pass
+        logger.debug("api_create_checkout: non-JSON request body, using defaults")
 
     success_url = body.get("success_url", "")
     cancel_url = body.get("cancel_url", "")
@@ -429,7 +429,7 @@ def api_generate_contract(request, deal_id):
     try:
         body = json.loads(request.body)
     except json.JSONDecodeError:
-        pass
+        logger.debug("api_generate_contract: non-JSON request body, using defaults")
 
     payment_method = body.get("payment_method", "stripe")
 
