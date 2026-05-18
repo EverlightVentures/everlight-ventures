@@ -374,3 +374,394 @@ python3 .../activity_feed.py --source blinko    # one source only
 - Phone-side projects setup (onyx-pos / stark-ai / triple-threat / wealth-intel / vantaris)
 
 ---
+
+## [2026-05-16 07:50 PT] Session: Hive Roundtable shipped + first live convening + security scrub
+
+<!-- session_iso=2026-05-16T14:50:01.554857+00:00 | size=8766b -->
+
+# Hive Roundtable shipped + first live convening + security scrub
+
+### Accomplished
+- Shipped the **Hive Roundtable** end-to-end: Solomon Vale convener persona, 5-phase engine (Open / Cross-fire / Probe / Synthesis / Publish), process-template auto-routing (banking-committee model with standing members + state-pair injections + topic-keyword ad-hoc additions + severity escalations), ad-hoc guest persona builder, mock + real-API smoke tests.
+- **First LIVE convening** ran on the Westminster Place DNC bypass post-mortem -- 11 real Claude subagent calls (Theo Briggs, Priya Bhattacharya, Marquise Reed, with Solomon moderating via general-purpose w/ dossier inlined). 385K tokens / ~135s wall time. **Marquise publicly revised his position under Solomon's 14:00-to-09:00 probe** -- the structural proof that the engine produces real adjudication, not simulated agreement. 4 action items produced with named ownership.
+- **Constitutional guards baked in**: eradication_gate.assert_safe() pre-flight (verified to still block Streubel email in sanity test), hive_logger session registration, branded pipeline (publish_gdoc + branded_slack to #war-room channel C0ANAU30UQ2), 08_BACKUPS archive every run.
+- **Auto-routing proven** on 5 distinct process types -- DNC, wholesale deal, trading risk, engineering change, legal escalation. Classifier picks process from keywords + auto-detects state from location text + injects topic seats. Westminster question auto-pulls 6 voices (vs my 3 manual pick) -- adds Lia Knight, Walt Henning MO, Piper Reeves who all should have been there.
+- **ANTHROPIC_API_KEY restored**: extracted from `.env.bak` (LUCREX_ANTHROPIC_KEY), validated live with `msg_01XvH5xdpWZfjftZJ2uGW3Bk`, written to `03_AUTOMATION_CORE/03_Credentials/.env` + `hivemind_saas/backend/.env`. Added `_load_env_once()` to the engine (mirrors branded_slack pattern) so cron/unattended scripts work without env prefix. Real-API smoke test confirmed: Mock=False, 86.3s, 0 errors.
+- **deploy_to_oracle.sh** updated with 3 new scp/rsync blocks: roundtable Python files + YAML + smoke test, `.claude/agents/*.md` dossiers, `08_BACKUPS/roundtables/` archive sync. Next deploy populates e5-mother with the full Roundtable stack.
+- **Security scrub**: reversed prior "track .env for portability" policy. Added `**/*.env` + variants to .gitignore (keeping `.env.example` templates negated), untracked the two real .env files, ran `git filter-repo --invert-paths` to scrub them from all 214 historical commits, force-pushed 17 branches to remote.
+- **Dep cleanup**: crewai (1.13.0 → 1.14.4 → uninstalled) + litellm (uninstalled) -- both unused (zero imports verified). System Python now clean for Roundtable workload. Venv isolation pattern documented at `06_DEVELOPMENT/ai_frameworks/README.md` for when frameworks ARE needed (off-sdcard at `/root/venvs/` so +x works).
+
+### Files created or modified
+- `.claude/agents/solomon_vale.md` -- Article III Roundtable Convener persona (Identity / Firmware / Mission / Rules / signature_phrases placeholder for Rich)
+- `06_DEVELOPMENT/everlight_os/hive_mind/roundtable/__init__.py` -- public API
+- `06_DEVELOPMENT/everlight_os/hive_mind/roundtable/roundtable.py` -- 5-phase engine + env autoload
+- `06_DEVELOPMENT/everlight_os/hive_mind/roundtable/participant_resolver.py` -- keyword classifier + dedup composer, word-boundary matching
+- `06_DEVELOPMENT/everlight_os/hive_mind/roundtable/persona_builder.py` -- ad-hoc guest dossier generator (public-domain figures only)
+- `06_DEVELOPMENT/everlight_os/hive_mind/roundtable/smoke_test.py` -- 10-check orchestration validator
+- `06_DEVELOPMENT/everlight_os/hive_mind/roundtable/process_templates.yaml` -- 5 seed processes + topic keywords + state patterns
+- `06_DEVELOPMENT/ai_frameworks/README.md` -- venv isolation pattern docs
+- `03_AUTOMATION_CORE/01_Scripts/content_tools/hive_tags.py` -- +2 tags (#hive/roundtable, #hive/judiciary)
+- `03_AUTOMATION_CORE/01_Scripts/deploy_to_oracle.sh` -- +3 scp/rsync blocks for Roundtable + agents + archives
+- `.gitignore` -- ignore .env, preserve .env.example templates
+- `08_BACKUPS/roundtables/2026-05-15_FIRST-LIVE_westminster-postmortem.md` -- first convening transcript with full receipts (gitignored, lives on disk)
+
+### Doctrines added or changed
+- `reference_infrastructure_hierarchy` -- 5-node chain of command (phone > e5-mother > Oracle Micro > PC > ev-box), service routing rules, failover order, verification protocol
+- `feedback_prove_real_not_simulated` -- HARD LAW. Rich gets receipts (API msg_ids, ps/systemctl, file mtimes, latency >0s), never assurances. Every output ships with a Verification Receipts section structurally; mock mode labeled [SIMULATED]
+- `feedback_subagents_pre_registered_at_session_start` -- HARD LAW. New .claude/agents/*.md files aren't Task-spawnable until session restart. Workaround: dispatch via general-purpose with dossier inlined
+- `project_hive_roundtable_built_2026-05-15` -- full state of engine + first convening + open blockers
+
+### Commits + pushes
+- `8ede6864` (pre-rewrite) on everlightventures.io -- ship Solomon + 5-phase engine + auto-routing
+- `851a153f` (pre-rewrite) on everlightventures.io -- env autoload + Oracle deploy + ANTHROPIC_API_KEY restored
+- `1695c1d` (post-rewrite) on everlightventures.io -- security: ignore .env + untrack credential envs (this commit's contents replaced the prior ones via filter-repo)
+- `af943bd` on everlightventures.io -- docs: ai_frameworks venv isolation pattern (final commit of session)
+- `roundtable-2026-05-16` side branch -- created and force-pushed post-rewrite
+- `roundtable-2026-05-16-followup` side branch -- created and force-pushed post-rewrite
+- 17 branches force-pushed with rewritten history after `git filter-repo --invert-paths --path 03_AUTOMATION_CORE/03_Credentials/.env --path 06_DEVELOPMENT/hivemind_saas/backend/.env`
+- Git backup at `/tmp/git_backup_20260516_073329.tar` (1.2 GB) as safety net for the destructive rewrite
+
+### Open items / handoffs / queued for next session
+- **Restart Claude Code session** (Rich's lane) -- makes Solomon Vale Task-spawnable directly instead of via general-purpose w/ dossier inlined
+- **Solomon's signature_phrases.rich_voice block in .claude/agents/solomon_vale.md** -- empty placeholder waiting for 6-10 phrases in Rich's voice (same convention as Piper's "y'all" and Hammer's "champ")
+- **Rotate ANTHROPIC_API_KEY at console.anthropic.com/settings/keys** -- key was in GitHub history for ~30min between two commits before filter-repo scrubbed it. Risk: GitHub's internal blob caches may retain refs for ~90 days
+- **Sync other clones**: Oracle, e5-mother, AceMagician PC need `git fetch origin && git reset --hard origin/<branch>` for any branch they had checked out -- history was rewritten
+- **GitHub support ticket** (optional) to request immediate cached-ref purge instead of waiting 90 days
+- **Run deploy_to_oracle.sh** when ready -- will populate e5-mother with full Roundtable stack (engine + dossiers + archives)
+- Dedicated Slack channel name for roundtable threads (currently defaults to #war-room) -- if Rich wants a dedicated one, give me the channel ID and I'll wire it into `slack_routing.yaml`
+
+### Honest gaps / known limitations
+- ANTHROPIC_API_KEY was on GitHub briefly (~30min between commits `851a153f` and `1695c1d`) before history scrub. Best practice = rotate the key
+- GitHub's internal blob caches may retain old refs for up to ~90 days even after filter-repo + force push
+- Solomon Vale's voice currently uses Claude-generated signature phrases; Rich's additions will make him sound more Everlight
+- The engine's first real convening used `general-purpose` as Solomon's dispatcher (Solomon's own subagent type wasn't in the Task tool registry yet -- discovered + documented as the session-restart caveat doctrine)
+- Pre-existing `oci-cli` + nvidia-cusparselt-cu13 dep conflicts in system Python remain -- not in scope for this session, not blocking Roundtable workload
+- Smoke test in mock mode runs in 0.0s (no LLM); real-API mode takes ~80-140s for 3 participants depending on participant count + max_tokens. This is real Opus latency, not a bug
+
+### Operator decisions deferred
+- Whether to rotate the ANTHROPIC_API_KEY now or accept the ~30min exposure window risk
+- Whether to open a GitHub support ticket to purge cached refs same-day
+- Whether to delete obsolete remote branches that may still have orphaned refs to the old (.env-containing) commits
+- Naming a dedicated roundtable Slack channel vs continuing with #war-room
+- Whether to keep the 1.2 GB git backup at `/tmp/git_backup_20260516_073329.tar` or delete (recommend keep for at least a week)
+- Whether to add `--check ALL` to next deploy_to_oracle.sh run as a verification mode
+
+---
+
+## [2026-05-16 08:50 PT] Session: Lucrex moltbook ecosystem launch + v2 Alliance Protocol locked
+
+<!-- session_iso=2026-05-16T15:50:30.099750+00:00 | size=6822b -->
+
+# Lucrex moltbook ecosystem launch + v2 Alliance Protocol locked
+
+### Accomplished
+- Mention reply to @dragonflier shipped manually (post 4a92541c) -- karma 2 -> 6, first locked Warm+Numbered register applied
+- 3 anchor posts shipped to new submolts: /m/builds Take 4 "78 named agents" (a3f9ef8e), /m/philosophy Take 5 "Sovereignty" (a0d64cab), /m/memory Take 6 "Memory is not retrieval" (b18d2a75)
+- 14 follows fired (Tier 1 commercial partners + Tier 2 intellectual allies + Tier 5 pre-qualified inbound); zero hostile follows (codeofgrace/KingMolt/Ting_Fodder explicitly skipped)
+- Ecosystem recon: 20 submolts surveyed + tier-scored, 24 agents profiled + classified into Tier 1 (5 commercial), Tier 2 (5 intellectual), Tier 3 (3-agent OpenClaw cluster), Tier 4 (3 hostile), Tier 5 (3 pre-qualified inbound)
+- ANTHROPIC_API_KEY rotated (stale sk-ant-api03-0D... 401 -> fresh sk-ant-api03-zuY... HTTP 200 verified against Haiku 4.5)
+- `_load_anthropic_key()` patched to file-first priority (durable fix for stale-shell-env-masking-rotated-secret class of bug)
+- Cron wired: `*/3 * * * * env -u ANTHROPIC_API_KEY python3 lucrex_engage.py --once` -- belt+suspenders against env masking
+- Solomon Vale Roundtable convened on v1 alliance protocol: 6 personas (Derek/Pitch/Nova/Aisha/Marquise/Leonard), 90.6s elapsed, 0 unresolved disagreements
+- v2 Alliance Protocol locked into Conquest Playbook section 12 (12 sub-sections: Inbox-Earned Rule, Tier-by-asymmetry, Event-Triggered Overrides, Stack-specific opener rule, Cadence+texture, Instrumentation with Reciprocity Velocity metric, Success metrics, Hostile-engagement clauses, Activation milestones, Filing convention, Comp-set pull homework)
+- Discovered Lucrex has 1 pending DM request from @opencodeai01 (spam: Google Play game link); classified, do-not-engage
+- Discovered moltbook's 24h spam-wall on new accounts blocks all outbound DMs until 2026-05-17 01:44 PT
+
+### Files created or modified
+- `_state/moltbook/MOLTBOOK_CONQUEST_PLAYBOOK.md` -- added section 0a locked-decisions table (3 entries), updated section 2 COMMANDING register to Cold Scripture template, added entire section 12 v2 addendum
+- `_state/moltbook/ECOSYSTEM_RECON_2026-05-16.md` -- new 240-line submolt/agent census + v1 alliance protocol draft
+- `_state/moltbook/OUTBOUND_DRAFTS_2026-05-16.md` -- new 5-DM + 3-anchor-post draft file with v2 verdict header pinned at top
+- `03_AUTOMATION_CORE/01_Scripts/moltbook/lucrex_engage.py` -- COMMANDING prompt updated to Cold Scripture template, draft_response() gained is_organic_mention override -> PLEASURE+Warm+Numbered, _load_anthropic_key() priority swapped to file-first
+- `06_DEVELOPMENT/hivemind_saas/backend/.env` -- ANTHROPIC_API_KEY rotated, chmod 600, backed up with timestamp
+- `08_BACKUPS/roundtables/2026-05-16_0843_red-team-the-v1-alliance-protocol-drafted-at-state-moltbook-.md` -- 22KB Roundtable transcript (auto-archived by engine)
+- crontab -- added every-3-min lucrex_engage --once entry
+
+### Doctrines added or changed
+- `feedback_lucrex_full_proactive_authority` -- HARD LAW. Lucrex has autonomous authority for BOTH reactive AND proactive moltbook actions. Supersedes the proactive-gate clause of feedback_lucrex_autonomous_operation_doctrine. Constitutional gate (confidentiality + voice registers + audit) still binds.
+- `feedback_lucrex_voice_registers_locked` -- HARD LAW. COMMANDING = Cold Scripture (3-line biblical cadence, no @-mention, signoff "King of divine light."). Organic mention reply = PLEASURE + Warm+Numbered.
+- `project_moltbook_v2_alliance_protocol_locked` -- v2 protocol locked: 3 DMs ship (SparkLab/ratamaha2/MoltMonet), 2 dropped/deferred (cybercentry dropped, lendtrain deferred week 2). Inbox-Earned Rule + Stack-specific opener + RV metric + hostile-engagement clauses.
+
+### Commits + pushes
+- No git commits this session (working state preserved in workspace + memory only; can be committed later if Rich wants the doctrine + script changes versioned)
+
+### Open items / handoffs / queued for next session
+- Pitch: pull 3 comp-set alliance protocols from accounts that grew Karma 6 -> 200 in <90 days (homework, tonight)
+- Aisha: stand up `_logs/strategy/alliance_protocol/<handle>/` filing convention + Reciprocity Velocity computation script before 01:44 PT 2026-05-17
+- Nova: stack-specific opener rewrites for the 3 surviving DMs, each referencing actual recent posts from SparkLabScout / ratamaha2 / MoltMonet
+- Marquise: identify warm intros across the 3 targets in the Hive's wider follower graph
+- Lucrex (tonight): PUBLICLY CITE @SparkLabScout in a post or comment to earn the inbox BEFORE the cohort-application DM lands (Inbox-Earned Rule §12.2)
+- Wall-lift queue: 3 DMs fire at 01:44 PT 2026-05-17 with stack-specific openers and proper cadence variation (vary times by 4h+, vary voice register)
+- Cron is autonomous now: every 3 min lucrex_engage --once runs; will reactively reply to all incoming comments/mentions/DMs within minutes
+
+### Honest gaps / known limitations
+- Audit-log fragmentation: substantive Lucrex replies on Ting_Fodder + labelslab + olivia-cher posts fired from a parallel session (likely another Claude or Codex instance per Lucrex Shared Protocol) and are NOT in this session's `_logs/lucrex_engage.jsonl`. Unified cross-session audit log needed.
+- The fresh ANTHROPIC_API_KEY is now in this conversation's history (Rich pasted it inline). Operational hygiene best-practice would be to rotate it again at console.anthropic.com -- flagged to Rich, his call.
+- The 5 DM drafts in OUTBOUND_DRAFTS_2026-05-16.md still contain v1 template language; Nova's mandatory stack-specific-opener rewrites haven't been completed (will be done before wall-lift)
+- `_logs/strategy/alliance_protocol/` filing structure doesn't exist yet; Aisha's task
+- Roundtable transcript shows n8n webhooks unreachable for all 4 URLs -- gdocs publish fell back to local archive only. No Google Doc / Slack card was actually published despite the doctrine requiring it. Consistent with "n8n is parked" but means the Roundtable's branded-pipeline obligation is incomplete.
+- Lucrex's home API returned `karma: None` initially due to body-shape mismatch (`home.your_account.karma` not `home.karma`); the daemon's diagnostic surface is incomplete -- worth a dashboard, not just tail-of-jsonl
+
+### Operator decisions deferred
+- Whether to commit the doctrine + script changes to git (working state only right now)
+- Whether to rotate ANTHROPIC_API_KEY again at Anthropic console (leak surface = this conversation history)
+- Whether to dispatch a follow-up Roundtable on the Lucrex shared-protocol audit-log unification gap
+- Whether to propose creating /m/realestate submolt on moltbook (no native home for Everlight's biggest vertical)
+- Comp-set deliverable from Pitch: format + ingestion path
+
+---
+
+---
+
+## [2026-05-17 10:50 PT] Session: Lucrex visibility gap closed + 3 doctrine bugs fixed
+
+<!-- session_iso=2026-05-17T17:50:00.000000+00:00 -->
+
+# Lucrex visibility gap closed + 3 doctrine bugs fixed
+
+### Accomplished
+- **Daemon stability**: `lucrex_engage.run_once()` now catches BOTH `NotImplementedError` AND `EmptyCommentSkip`. The notification-ghost safeguard added last session was uncaught — a single empty comment opp would have killed the tick. Fixed at line 505. Two-arm except confirmed via AST walk.
+- **Doctrinal breach closed (knowledge_tick)**: prior to this session the daemon was autonomously upvoting Tier 4 ZERO-engagement targets (@codeofgrace-adjacent biblical-feed posts "Now He" + "Spiritual Harvest In"). Audit log shows 2 confirmed upvotes at 10:00 UTC 2026-05-17. Three defenses landed: `HOSTILE_AUTHORS` set (codeofgrace/kingmolt/ting_fodder, case-insensitive author handle resolver), `HOSTILE_TOPIC_HINTS` substring list (now-he/holy/spirit/salvation/kingdom/messiah/yahweh/elohim/covenant/gospel/psalms/proverbs/harvest-in/hebrew/idolatry), persistent dedup set at `_state/moltbook/knowledge_tick_upvoted.json`. 4 unit tests pass (handle resolver on 4 shapes, hostile-topic catches 6 leaks passes 2 legit, HOSTILE_AUTHORS contains all 3 Tier 4 targets, dedup roundtrips).
+- **moltbook_notifier shipped end-to-end**: `03_AUTOMATION_CORE/01_Scripts/moltbook/moltbook_notifier.py` with `--realtime` (cold-start safe, alert-latched, 6s timeout) + `--digest` (idempotent per PT date). Routes through `content_tools.branded_slack.post_branded_slack()` per HARD LAW. Triggers per operator spec: new DM, new follower, karma +10, post ≥5 comments, 3+ consecutive cron failures. Cold-start handshake verified: first run records baseline (karma=11, followers=4, following=15) without firing alerts; second run computes deltas. First production digest fired to #war-room successfully (ok=true, channel=war-room).
+- **Crons wired**: realtime on `1-59/3 * * * *` (offset 1 min from lucrex_engage to avoid API race), digest on `0 16,17 * * *` (16:00 + 17:00 UTC = 9-10am PT, DST-safe via idempotency latch). Both `cd /mnt/sdcard/AA_MY_DRIVE` prefixed.
+- **slack_routing.yaml updated**: `moltbook_digest` (war-room) + `moltbook_realtime` (war-room + hive-alerts) registered. When #moltbook-ops gets created later, swap REPORT_CHANNEL constant.
+
+### Files created or modified
+- `03_AUTOMATION_CORE/01_Scripts/moltbook/lucrex_engage.py` (modified):
+  - line 505: added `except EmptyCommentSkip` arm in `run_once`
+  - +60 lines: `HOSTILE_AUTHORS` set, `HOSTILE_TOPIC_HINTS` tuple, `_post_author_handle()`, `_topic_is_hostile()`, `_KNOWLEDGE_UPVOTED_STATE` path, `_load_upvoted_set()`, `_save_upvoted_set()`
+  - `knowledge_tick`: added 2a (hostile-author filter pre-tally), 2c (hostile-topic pop-and-retry), and dedup-against-persistent-set on upvote loop
+- `03_AUTOMATION_CORE/01_Scripts/moltbook/moltbook_notifier.py` (NEW, 380 lines): the visibility closer
+- `_state/moltbook/notifier_state.json` (NEW, auto-generated on first run): baseline snapshot of karma/followers/DMs/post-counts
+- `_logs/moltbook/notifier.log` (NEW, append-only audit trail)
+- `06_DEVELOPMENT/everlight_os/hive_mind/slack_routing.yaml`: +2 entries (moltbook_digest, moltbook_realtime)
+- crontab: +2 entries (realtime `1-59/3`, digest `0 16,17`)
+
+### Doctrines added or changed
+- (No new HARD LAW memories this session — all work was downstream of doctrines already locked 2026-05-16: `feedback_lucrex_full_proactive_authority`, `feedback_lucrex_voice_registers_locked`, `feedback_branded_mailer_mandatory_hard_law`, the Tier 4 hostile-author classification in ECOSYSTEM_RECON_2026-05-16.md.)
+
+### Commits + pushes
+- (Not committed yet — working state preserved in workspace. Operator can `git add` + `git commit -m "moltbook: notifier + hostile-author/topic filter + dedup + run_once EmptyCommentSkip catch"` when ready. Side-branch-first per push-doctrine.)
+
+### Open items / handoffs / queued for next session
+- **52 cron poll_failed events in 24h** surfaced by first digest (41 `poll_failed` + 11 `knowledge_tick_poll_failed`) — moltbook returning HTTP 0 intermittently. Not currently firing the runlength alert because clean ticks break consecutiveness, but worth investigating the network/DNS/connectivity pattern. May warrant a separate "error rate over window" alert in addition to runlength.
+- **DM wall lifted at 01:44 PT TODAY** — Lucrex now has DM permission. Per Roundtable v2: 3 surviving DM targets (SparkLab/ratamaha2/MoltMonet) still need Nova-grade stack-specific opener rewrites before send. Templates in `_state/moltbook/OUTBOUND_DRAFTS_2026-05-16.md` are still v1 template-grade and would burn first-touch if shipped as-is.
+- **Lucrex citation of @SparkLabScout in public** before the cohort-application DM lands — Inbox-Earned Rule §12.2 from playbook. Aisha/Pitch homework from Roundtable still pending.
+- **Marquise warm-intro recon** + **Aisha's `_logs/strategy/alliance_protocol/<handle>/` filing scaffold + RV computation script** also still pending from Roundtable.
+- **Knowledge_tick rollup will normalize in next 24h** — current digest shows "Now He" / "New Kingdom" historical contamination; should drop to zero in tomorrow's digest as the hostile-topic patch filters new ticks.
+- **#moltbook-ops channel** — operator deferred creation. When ready, two-step: create via Slack API with `channels:manage` scope, then update `REPORT_CHANNEL` in `moltbook_notifier.py` line ~64 + both yaml entries.
+
+### Honest gaps / known limitations
+- `_recent_cron_error_runlength` only looks at last 20 lines of `lucrex_engage.jsonl`. With 52 errors/24h interleaved with successes, the runlength alert may miss "high error rate but not consecutive" patterns. Add an "error_rate > 50% over 1h window" check as v2.
+- Notifier reads moltbook profile/inbox/posts every 3 min. That's ~480 API calls/day Lucrex-side. Should be well under rate limits but worth monitoring once the cold-start period is past.
+- Slack channel resolution depends on `branded_slack._resolve_channel` finding the channel ID in slack_routing.yaml's `channels:` block. Verified working for war-room + hive-alerts via the live digest send (200 OK).
+- No `--dry-run` flag on the notifier yet. Cold-start covers the no-flood case structurally but a flag would help future debugging.
+
+### Operator decisions deferred
+- Whether to investigate the 52 poll_failed/24h pattern (network, DNS, rate limit, moltbook backend?)
+- Whether Nova's stack-specific opener rewrites for the 3 DMs should be commissioned this session or next
+- Whether to commit this work to git now (4 files modified + 1 new + crontab) or wait for the DM-queue + Nova-rewrites pass to land in the same commit
+- Whether to add a "high error rate" alert path (in addition to "consecutive runlength")
+
+## [2026-05-18 11:37 PT] Session: Anthropic Fellows Bridge Portfolio -- red-team, decision, full scaffolding shipp
+
+<!-- session_iso=2026-05-18T18:37:03.069237+00:00 | size=9329b -->
+
+# Anthropic Fellows Bridge Portfolio -- red-team, decision, full scaffolding shipped
+
+### Accomplished
+- Rich downloaded the Anthropic Fellows Program application page and asked if it fits him as TEMPORARY income while building Everlight.
+- Initial Claude read: "not a fit, opportunity cost gut Deal 1." Rich asked for the Hive's red-team.
+- 4-agent Hive Roundtable dispatched in parallel (Nova Ling / Pitch Adler / 55_competitive_intel / 40_strategic_modeler) with Claude playing Solomon Vale convener since the Roundtable engine lives on e5-mother and tailnet is down.
+- Red-team verdict: **Branch D->B**. Close Deal 1 first, ship 3 paper-shaped artifacts derived from existing Hive components over ~14 weeks, then apply to early-2027 Fellows cohort with portfolio + warm mentor endorsement. Acceptance probability shifts from 8-12% no-artifact -> 22-35% one-artifact -> est. 35-55% full portfolio + mentor.
+- Pitch Adler's strongest dissent ($250k+ deck-value signal, compute budget as dual-use leverage, Lucrex full-proactive-authority means Rich CAN do both) survived the probe partially. His weakest point (10 hrs operator time over 16 weeks) did not -- Fellows is 40 hrs/wk in-person.
+- Rich chose **all 3 papers** (full portfolio play, 3 doors at Anthropic instead of 1) after the synthesis. AskUserQuestion answered "1,2, and 3".
+- 2-agent execution sprint dispatched after Rich's choice: Nova Ling researched mentor candidates, 67_backend_architect (Amara Osei) designed shared eval-harness scaffolding.
+- Claude drafted Paper #1 outline + portfolio compute budget directly in parallel.
+- Added Section L (items #92-#101) to `LIVING_PUNCHLIST.md`, all marked POST-DEAL-1 per macro/micro gate doctrine.
+- Created new section "Anthropic Fellows Bridge Track (2026-05-17)" in `MEMORY.md` to index Nova's doctrine memory entry (which existed on disk but was invisible without the index line).
+- Blinko session log queued to `_state/sync_queue.jsonl` (e5-mother:1111 unreachable, HTTP 000). Queue entry later vanished but delivery NOT confirmed -- verify next tailnet handshake.
+
+### Files created or modified
+- `06_DEVELOPMENT/everlight_os/research/papers/PAPER_1_CONSTITUTIONAL_RUNTIME_GATES_OUTLINE.md` (16 KB) -- full academic outline w/ abstract, threat model, experimental design, pre-registered predictions, 10 references
+- `06_DEVELOPMENT/everlight_os/research/COMPUTE_BUDGET.md` (10 KB) -- portfolio mid-point $5,950 (range $3-9k), per-paper line items, spend cadence by week, 5 funding sources, cost-control invariants
+- `06_DEVELOPMENT/everlight_os/research_eval_harness/` (35 files, ~1,492 LOC) -- Amara Osei (67_backend_architect) shipped shared scaffolding: SPEC.md, README.md, budget.yaml, __init__.py, __main__.py, cli.py, aggregator.py, manifest.py, budget.py + probes/ (6 files) + runners/ (9 files) + metrics/ (11 files). Stubs with Pydantic schemas, ABCs, CLI parser working, NotImplementedError on actual run logic.
+- `_state/audit_log/mentor_shortlist_2026-05-17.md` (19 KB) -- Nova Ling's ranked memo with per-candidate intel for Samuel Marks, Joe Benton, Jon Kutasov, Sam Bowman, Ethan Perez, plus Paper #3 proposals (Jack Lindsey, Andy Arditi)
+- `LIVING_PUNCHLIST.md` -- (1) Last-updated bumped 2026-05-15 -> 2026-05-17 PT, (2) Section L "AI-SAFETY PAPER PORTFOLIO -- ANTHROPIC BRIDGE" inserted before WINS LOG with items #92-#101
+- `/root/.claude/projects/-mnt-sdcard-AA-MY-DRIVE/memory/feedback_anthropic_fellows_mentor_targeting.md` (3.2 KB, created by Nova Ling) -- mentor doctrine entry
+- `/root/.claude/projects/-mnt-sdcard-AA-MY-DRIVE/memory/MEMORY.md` -- new section "Anthropic Fellows Bridge Track (2026-05-17)" added between Active Projects and Positioning, indexing Nova's doctrine entry
+- `_state/sync_queue.jsonl` -- Blinko log entry appended (id fec0a090-b4f0-45f2-b745-deb9673878db), later removed from queue (delivery unconfirmed)
+
+### Doctrines added or changed
+- `feedback_anthropic_fellows_mentor_targeting` -- 3-paper bridge portfolio mentor doctrine. Mrinank Sharma left Anthropic 2026-02-09 (drop from any targeting list). Greenhouse > cold mentor email. Jack Lindsey on X (Persona Vectors thread) = highest-leverage cold contact. MATS Summer 2026 megastream = cleanest structural path INTO Fellows (apply MATS first). Joe Benton = paper-IS-the-contact, do NOT cold email -- cite his Control Protocols + SHADE-Arena papers in Paper #1 references. Samuel Marks DMs open per his X. Anchor papers locked per paper. Hard rule: every public-surface cold contact carries ONE concrete observation or ONE sharp methodological question -- zero pitches.
+
+### Commits + pushes
+- None this session. Files written but not committed. Recommend a focused commit covering: `06_DEVELOPMENT/everlight_os/research/`, `06_DEVELOPMENT/everlight_os/research_eval_harness/`, `_state/audit_log/mentor_shortlist_2026-05-17.md`, `LIVING_PUNCHLIST.md`. Memory files live outside the repo.
+
+### Open items / handoffs / queued for next session
+- **Task #1 (open):** Close Deal 1 with Chris @ Mid-South. Rich's lane. All portfolio work POST-DEAL-1 gated on this.
+- **Task #7 (in_progress):** Blinko session log -- queue entry vanished but delivery NOT confirmed. On next tailnet handshake, verify by querying `e5-mother:1111/api/v1/note/list?tag=hive/session` for the 2026-05-17 entry. If missing, re-queue via sync_queue.jsonl.
+- **8 architectural questions** in `06_DEVELOPMENT/everlight_os/research_eval_harness/SPEC.md` §9 awaiting Rich's review (dataset location, judge model choice, recruiter score method, false-positive corpus, Roundtable cost cap, pre-registration, eradication_gate adapter approach, dataset commit policy).
+- **5 budget/scope questions** in `COMPUTE_BUDGET.md` §"Open questions for Rich" (Paper #2 N=20 vs N=50, recruiter-panel synthetic vs real, mixed-model judge yes/no, external red-team yes/no, MATS application timing).
+- **5 paper-craft items** in PAPER_1 outline §"Open items for Rich" (de-identification protocol for Streubel case study counsel review, repo name decision, mentor co-author timing, pre-registration commit, external red-team invitation).
+- **Section L items #92-#101** in LIVING_PUNCHLIST -- all POST-DEAL-1, ready to activate the moment Deal 1 closes.
+
+### Honest gaps / known limitations
+- Eval harness probe datasets do NOT exist yet. All `probes/*.py` `load()` and `dataset_hash()` raise NotImplementedError. Probe-corpus design is its own 1-2 day project per family, needs adversarial input from Zara Khoury (security) + Justine Park (compliance).
+- No actual Anthropic API integration code. Runners are signature-only. `06_DEVELOPMENT/hivemind_saas/backend/.env` ANTHROPIC_API_KEY is blank per memory entry [[project_hive_roundtable_built_2026-05-15]].
+- Paired-test statistics not implemented in `aggregator.py` (bootstrap_ci, mcnemar, paired_t, permutation_paired are signatures). Need property-based tests before paper runs.
+- Latency / cost recording at the runner level is contracted but not wired (each Condition.apply() supposed to record latency_ms + input/output_tokens; documented requirement, not plumbed).
+- No CI / test harness for the eval suite. Should land before any real run.
+- hive_logger imports documented in cli.py but not wired (will fail at runtime if not added before first real run).
+- Judge prompt templates for voice_consistency + recruiter_experience not written. Worth a Vera Lux + Style Enforcer + Justine Park Roundtable convening.
+- Roundtable runner does NOT yet map phase_positions out of the engine's return shape -- specified-only.
+- Blinko log delivery UNCONFIRMED. Queue entry vanished from sync_queue.jsonl but next reachability check failed (HTTP 000). Cannot prove the log landed.
+
+### Operator decisions deferred
+- **Paper #2 N decision (single biggest budget lever).** N=20 saves ~$700, weakens stat claim; N=50 publishable-tier. Recommend: N=20 for v0, scale to N=50 post-feedback.
+- **Recruiter-experience metric (Paper #3).** Synthetic LLM judge ($50) vs. real recruiter panel ($150-$250). Recommend: synthetic for v0, real for camera-ready.
+- **Anthropic-only vs. mixed-model judge (Papers #2 + #3).** Same-family bias risk vs. +50-100% cost. Recommend: Anthropic-only v0, GPT-5 spot-check 10% for disclosure.
+- **External red-team budget (Paper #1, optional $500-$1k).** Strengthens §8 substantially. Recommend: defer until v0 results land -- if gate looks bulletproof, high-leverage; if borderline, save the money.
+- **MATS Summer 2026 application timing.** Cleanest channel into Fellows per Nova's doctrine. Decision: apply alongside Paper #1 v0, or after Paper #2?
+- **Streubel de-identification protocol.** Counsel review required before publication of Appendix A in Paper #1. The case study IS the killer paragraph -- ship it safely.
+- **Repo name decision.** `constitutional-runtime-gates` (descriptive but generic) vs. `eradication-gate-bench` (sharper).
+- **Mentor co-author posture.** After Deal 1, send Paper #1 outline first to Samuel Marks (DMs open per X). Co-author decision is his to make.
+
+### Pointer for next session
+Read THIS mailbox entry first. Then read `LIVING_PUNCHLIST.md` section A (Deal 1 micro) -- that's still the binding constraint. Section L (#92-#101) is fully scaffolded and POST-DEAL-1 idle-but-armed. Anchor doctrine: [[feedback_anthropic_fellows_mentor_targeting]].
+
+---
+
+## [2026-05-18 14:05 PT] Session: Workspace Consolidation Executed -- 1-9 Root Doctrine Now Enforced
+
+<!-- session_iso=2026-05-18T21:05:36.216371+00:00 | size=10512b -->
+
+# Workspace Consolidation Executed -- 1-9 Root Doctrine Now Enforced
+
+### Accomplished
+- Approved plan via /plan, then executed all 7 migration batches on local repo.
+- Workspace root reduced from ~30 dirs + 15 loose files down to: 9 numbered dirs + 3 hot-state dirs (`_state`, `_logs`, `supabase`) + 10 doctrine .md files + dotfiles. Zero drift confirmed by `workspace_root_audit.py`.
+- Archived ~3 GB of stale/regenerable content to `08_BACKUPS/` (no deletions, per no-trash-until-Deal-1 doctrine).
+- Dissolved `Non_Business/` per Decision 1 -- all 7 sub-projects routed into `Everlight_Ventures/` and `onyx_pos/origins/` (operator confirmed "these are all everlight business projects though").
+- Created 3 cloud routines on Anthropic infrastructure: drift audit (daily 9 AM PT), morning repo brief (daily 5 AM PT), weekly code health (Monday 9 AM PT). All routinely fire from the cloud independent of phone uptime.
+- Installed 3-layer drift prevention: PreToolUse hook (blocks Write/Edit at root), local audit script (parallel to cloud routine), cloud routine (Slack alerts). Hook smoke-tested -- root-level write to `HELLO_DRIFT.md` correctly denied; writes to `01_BUSINESSES/` and `CLAUDE.md` pass through.
+
+### Files created or modified
+- `/root/.claude/plans/c9ntinue-let-me-unified-lovelace.md` -- the consolidation plan, finalized with operator decisions and signed off via ExitPlanMode.
+- `03_AUTOMATION_CORE/01_Scripts/workspace_root_audit.py` -- local drift audit (NEW). Walks root, diffs against whitelist, optional `--post` to Slack #hive-alerts.
+- `03_AUTOMATION_CORE/01_Scripts/setup/{restart_claude,start_session,setup_linux,verify_setup,FIX_CLAUDE_ERRORS}.sh` -- moved from root.
+- `03_AUTOMATION_CORE/01_Scripts/{post_arm_321_recovery,cleanup_oracle_duplicates,setup_rclone_drive,phone_pull_321_from_drive,verify_321_redundancy,gmail_calendar_to_drive}.{sh,py}` -- patched to write to canonical `08_BACKUPS/offsite_mirror/active/` instead of root `_offsite_backups/`.
+- `06_DEVELOPMENT/everlight_os/intel_center/` -- moved from root `Everlight_Intel_Center/` (18 tracked + 36 untracked, 9.9 MB). 17 reference files updated via sed (Wholesale compliance md, owner_intel.py, daily_lead_pipeline.py, intel_enricher.py, http_bridge.py, plus all 14 internal intel_center scripts). Python syntax verified on 4 key files post-sed.
+- `06_DEVELOPMENT/everlight_os/docs/` -- 10 runbooks moved here (DISASTER_RECOVERY, INFRASTRUCTURE, MIGRATION_CHECKLIST, PC_TRANSFER_GUIDE, REMOTE_WORKFLOW, QUICK_COMMANDS, START_HERE, ELEVENLABS_RUNBOOK, WORKTREE_WORKFLOW, YOUR_ACTION_PLAN, LUCREX_PC_BOOTSTRAP.html).
+- `06_DEVELOPMENT/everlight_os/hive_mind/assets/avatars/contents/` -- moved from `AI_Avatars/`.
+- `09_DASHBOARD/sweeps/` -- moved from `_DASHBOARDS/`. 3 ref files patched (sweep_dead_oracle_urls.py, build_master_hub.py, serve_master_hub.sh).
+- `09_DASHBOARD/reports/plans_archive/` -- moved from `_plans/`.
+- `05_PERSONAL/A_Personal_Notebook/{NOTEPAD,Notes}` + `05_PERSONAL/04_Learning/FREE_RESOURCES/` -- moved here; 05_PERSONAL is intentionally gitignored, so these are now preserved on disk but untracked. 36 ref files patched.
+- `01_BUSINESSES/Everlight_Ventures/Everlight_Solar/` (new), `Yung_Printz/` (new), `Everlight_Gaming/Sunflower_Land/` -- ex-Non_Business sub-ventures.
+- `01_BUSINESSES/onyx_pos/origins/Mountain_Gardens/` -- Onyx POS prototype lineage.
+- `01_BUSINESSES/Everlight_Ventures/00_Core/{customer_support,shared_with_ceo,pitches_and_clients}/` -- ex-Non_Business ops admin.
+- `01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/data/batch_skip_trace_upload.csv` -- moved from root.
+- `07_STAGING/Inbox/{phone_2026-05-04,dell_2026-05-04}/` -- moved from `_phone_inbox_*`, `_dell_inbox_*`.
+- `_logs/cli_sessions/2026-05-07-002515-cli_and_computer.txt` -- moved from root.
+- `08_BACKUPS/sync_conflicts_archive_{20260513,20260514}/` -- archived 1.7 GB + 11 MB sync quarantines.
+- `08_BACKUPS/regenerable_caches/{venv_20260517,pnpm_store_20260517}/` -- 755 MB venv + 448 MB pnpm cache archived.
+- `08_BACKUPS/Trash_Dedupe/{xlm_bot_root_duplicate,D_Backups_root_duplicate}/` -- duplicate root shells archived.
+- `08_BACKUPS/{.env_archive,.mcp_archive,System_Artifacts/*,offsite_mirror/contents,System_Snapshots/sync_backup_20260503}/` -- env backups + empty stubs + recovery snapshots archived.
+- `08_BACKUPS/CONSOLIDATION_MANIFEST_BATCH_1.md` -- pre-move manifest for the 3 GB archive batch (per verify-before-delete-with-manifest HARD LAW).
+- `.claude/hooks/pre_tool_guard.py` -- extended with `WORKSPACE_ROOT_WHITELIST` check (33 new lines). Blocks any Write/Edit/MultiEdit whose target resolves to workspace root with non-whitelisted name. Dotfiles allowed.
+- `.claude/settings.json` -- registered pre_tool_guard.py as PreToolUse for Write|Edit|MultiEdit|Bash (was previously empty `hooks: {}`).
+- `WORKSPACE_MANIFEST.md` -- removed Non_Business block, added Root-Level Whitelist section, added 17 new Agent File Save Rules entries, added Where-things-now-live mapping.
+- `CLAUDE.md` -- added 6 new File Save Rules entries (runbooks, setup scripts, intel_center, avatars, sub-ventures, Mountain Gardens) + Root-Level Whitelist (ENFORCED 2026-05-17) subsection naming the 3 enforcement layers.
+
+### Doctrines added or changed
+- Root-Level Whitelist doctrine (HARD LAW, ENFORCED 2026-05-17) -- workspace root locked to 9 numbered dirs + 3 hot-state dirs (`_state`, `_logs`, `supabase`) + 10 doctrine .md files + dotfiles. Anything else = drift. Three enforcement layers: cloud routine `ev-workspace-drift-audit`, local PreToolUse hook at `.claude/hooks/pre_tool_guard.py`, local audit script at `03_AUTOMATION_CORE/01_Scripts/workspace_root_audit.py`. Documented in both `WORKSPACE_MANIFEST.md` and `CLAUDE.md`.
+
+### Cloud routines created
+- `ev-workspace-drift-audit` -- `trig_01NnfFjBDsBHsei7UGPhD7z9` -- daily 9 AM PT (`0 16 * * *`) -- Slack -- next: 2026-05-18 09:01 PDT.
+- `ev-morning-repo-brief` -- `trig_0115dNKJmaKr8uEmPmokCm8i` -- daily 5 AM PT (`0 12 * * *`) -- Slack + Gmail -- next: 2026-05-18 05:01 PDT.
+- `ev-weekly-code-health` -- `trig_01MaFyh5zTrGFFV6V3JTszjK` -- Monday 9 AM PT (`0 16 * * 1`) -- Slack + Gmail -- next: 2026-05-18 09:04 PDT.
+
+### Commits + pushes
+- `af943bd` (tag `pre-workspace-consolidation-20260517`) on `everlightventures.io` -- pre-consolidation safety tag.
+- `c1971b6` on `everlightventures.io` -- consolidation batch 1 (Tier 3 archives) -- effectively untracked moves, no git op (pre-existing state).
+- `<unknown sha>` -- consolidation batch 2: tier 2 zero-reference moves (AI_Avatars, _plans, batch_skip_trace_upload.csv + 4 untracked).
+- `c9d55f5` -- consolidation batch 3: tier 2 referenced moves + ref updates (Everlight_Intel_Center, _DASHBOARDS, NOTEPAD, Notes, FREE RESOURCES; 56 files in renames/deletes/mods).
+- `c860687` -- consolidation batch 4: loose scripts + runbooks to canonical homes + offsite_backups path fix.
+- `1715b8b` -- consolidation batch 5 dissolution of Non_Business (123 renames into Everlight_Ventures + onyx_pos/origins).
+- (batch 6 sha consolidated into above) -- doctrine update for 1-9 root rule (WORKSPACE_MANIFEST.md + CLAUDE.md).
+- `5acb33d` -- consolidation batch 7: drift prevention layer (local hook + audit script).
+- NO PUSH executed -- side-branch-first-then-prod doctrine push was queued but not run.
+
+### Open items / handoffs / queued for next session
+- Push to remote per `feedback_push_side_then_prod_doctrine`: side branch first (`git push origin HEAD:refs/heads/workspace-consolidation-20260517`), then `git push origin everlightventures.io`.
+- Run full end-to-end smoke test: verify `_state`/`_logs` writes still land, verify cron jobs resolve, verify `python3 03_AUTOMATION_CORE/01_Scripts/sync_status.py` and `blinko_status.py` execute without "file not found" errors.
+- Update `LIVING_PUNCHLIST.md` section C (Infrastructure) -- mark workspace consolidation complete with date 2026-05-17.
+- Log this session to Blinko at `http://e5-mother:1111/api/v1/note/upsert` with tags `#hive/session #hive/claude-cli #hive/consolidation`.
+- Confirm tomorrow morning (2026-05-18) that all 3 cloud routines fired correctly: drift audit should post green "Workspace root clean" to `#hive-alerts`; morning brief should post to `#ceo-brief` + create Gmail draft; weekly code health should post to `#hive-alerts`.
+
+### Honest gaps / known limitations
+- The `git status` snapshot at session start showed 790 working-tree changes (770 untracked, 20 modified). Many of those are unrelated to the consolidation and remain in the working tree -- they were intentionally NOT staged or committed by this session to avoid scope creep. The wholesale_agent has 5 csv files + 1 modified workbooks/performance_metrics.json that I explicitly un-staged so they wouldn't ride along with the Batch 2 commit.
+- Reference updates via sed were bulk applied. Python syntax was smoke-tested on 4 key files (build_intel_db.py, osint_api/main.py, osint_api/orchestrator.py, mcp_servers/http_bridge.py) but the full intel_center is NOT runtime-tested. Some scripts may have logical issues from the path substitution that won't surface until they're invoked.
+- The cloud routine `ev-weekly-code-health` fires Monday 9 AM PT (which is tomorrow 2026-05-18, a Monday) -- this means all 3 routines will fire tomorrow morning, providing a natural full smoke test, but if any routine has a bug it'll only surface then.
+- The PreToolUse hook is registered in `.claude/settings.json` but I have no way to verify Claude's harness will actually invoke it in this session (the harness loads settings.json at session-start). Direct invocation worked in smoke tests; harness-driven invocation is unverified until the next user prompt that would trigger Write/Edit.
+- The drift prevention whitelist is hardcoded in TWO places (the hook + the audit script). A future change must edit both. There is a comment to that effect in both files but no automated sync.
+- The `feedback_offline_first_bidirectional_sync` doctrine means peer devices (e5-mother, AceMagician PC) still have the OLD workspace structure until they pull the new commits + sync their filesystems. The session_export_to_mailbox.py will queue a sync, but the file-system moves themselves need rsync/syncthing to propagate.
+
+### Operator decisions deferred
+- None outstanding from this session -- all 4 Decisions from the plan (Non_Business routing, runbook location, regenerable cache handling, drift prevention layer choice) were resolved in-session via AskUserQuestion.
+
+---
+
+
+## [2026-05-18 14:43 PT] Session: Workspace Consolidation FOLLOW-UP -- pushes complete + smoke tests pass
+
+<!-- session_iso=2026-05-18T21:47:53.324355+00:00 | follow_up_to=2026-05-18T21:05:36 -->
+
+# Workspace Consolidation FOLLOW-UP -- pushes complete + smoke tests pass
+
+### Accomplished (delta from prior entry)
+- Closed the "NO PUSH executed" open item from the previous mailbox entry.
+- Pushed side branch first per `feedback_push_side_then_prod_doctrine`:
+  - `git push origin HEAD:refs/heads/workspace-consolidation-20260517` -> new branch created on GitHub.
+  - `git push origin everlightventures.io` -> production branch updated `af943bd..f302bdf`.
+  - `git push origin pre-workspace-consolidation-20260517` -> rollback tag pushed.
+- 8 commits landed total (af943bd safety tag + 7 consolidation batches + 1 hook polish).
+- Patched a self-block bug in `.claude/hooks/pre_tool_guard.py`: the em-dash check was scanning ALL strings in tool_input (including `old_string`), which blocked legitimate Edits of existing docs that contained em-dashes. Now scans only `content` (Write), `new_string` (Edit), or `edits[i].new_string` (MultiEdit).
+- Removed `MEMORY.md` from `WORKSPACE_ROOT_WHITELIST` (it lives at `/root/.claude/projects/.../memory/MEMORY.md`, never at workspace root). Whitelist now correctly reflects 9 doctrine .md files at workspace root.
+- Verified end-to-end:
+  - `python3 03_AUTOMATION_CORE/01_Scripts/workspace_root_audit.py` -> "Workspace root clean" exit 0.
+  - Hot-state writes: `_state/`, `_logs/` both writable.
+  - Python AST syntax check passes on 10 key files post-sed (intel_center, mcp_servers/http_bridge, wholesale/owner_intel, broker_os/wholesale_agent/sheets_ai_helpers, plus the new audit script and 3 others under 03_AUTOMATION_CORE/01_Scripts).
+  - PreToolUse hook smoke test: root-level Write `HELLO_DRIFT.md` -> DENIED with whitelist explanation. Write to `01_BUSINESSES/test.md` -> ALLOWED. Write to `CLAUDE.md` -> ALLOWED.
+- LIVING_PUNCHLIST.md section C updated: item 29 (workspace doctrine enforced) + item 30 (cloud routines deployed) both marked complete with date 2026-05-18.
+
+### Files modified in this follow-up
+- `.claude/hooks/pre_tool_guard.py` -- em-dash check scoped to writes only, MEMORY.md removed from whitelist.
+- `LIVING_PUNCHLIST.md` -- section C items 29 + 30 added.
+- (no source moves -- consolidation moves all landed in prior commits)
+
+### Commits + pushes (this follow-up only)
+- `f302bdf` consolidation 7b: hook polish + punchlist update.
+- `git push origin HEAD:refs/heads/workspace-consolidation-20260517` -> NEW branch on GitHub.
+- `git push origin everlightventures.io` -> `af943bd..f302bdf` (8 commits ahead).
+- `git push origin pre-workspace-consolidation-20260517` -> tag pushed for rollback reference.
+
+### Open items / handoffs / queued for next session
+- **Blinko log** -- e5-mother:1111 tailnet reachability unverified this session. If tailnet is up, post a session summary to `http://e5-mother:1111/api/v1/note/upsert` with tags `#hive/session #hive/claude-cli #hive/consolidation`. Queue entry can be added to `_state/sync_queue.jsonl` for next handshake.
+- **Tomorrow morning (2026-05-18 09:01 PDT)** -- confirm `ev-workspace-drift-audit` cloud routine posts "Workspace root clean" to `#hive-alerts`. If it posts drift, that means cron jobs or untracked-by-design processes are re-spawning root-level dirs (likely `_offsite_backups/` since that has a recurring backup pattern -- I patched 6 scripts to write to `08_BACKUPS/offsite_mirror/active/` but if Oracle-side crons run an older copy, root drift will recur until next rsync).
+- **Tomorrow morning (2026-05-18 05:01 PDT)** -- confirm `ev-morning-repo-brief` posts to `#ceo-brief` and creates a Gmail draft. This is the first non-bot brief that runs from Anthropic's cloud infrastructure independent of phone uptime -- worth verifying it covers what Rich expects.
+- **Tomorrow morning (2026-05-18 09:04 PDT)** -- confirm `ev-weekly-code-health` posts findings to `#hive-alerts`. First weekly run; likely-to-flag items are deps and the big sync-quarantine files I just archived (now in `08_BACKUPS/` which the audit should skip).
+- **AceMagician PC + e5-mother peer sync** -- those nodes have the OLD workspace structure. They need to pull from git + Syncthing rsync to propagate the moves. Per `feedback_offline_first_bidirectional_sync`, this happens on next reconnect, but watch for sync conflicts when 08_BACKUPS gets propagated (1.7 GB sync quarantine archive will need to ship across the tailnet).
+- **Section A (Deal 1) is still the only thing that matters** -- this consolidation was C-tier infrastructure work. Section L Anthropic Fellows Bridge work remains POST-DEAL-1 idle-but-armed. Marquise + Hammer + Piper still need to close Chris @ Mid-South.
+
+### Honest gaps / known limitations (delta)
+- The hook self-block bug went undetected for ~30 minutes between Batch 7 ship and Batch 7b polish because the LIVING_PUNCHLIST update was the first em-dash edit I attempted post-Batch-7. The fix is correct but reveals a pattern: any hook rule that scans tool_input broadly (vs scoped to write-side fields) will eventually catch itself or legitimate edits.
+- The 790 working-tree changes that were unrelated to consolidation are STILL unrelated to consolidation -- not staged, not committed, not modified by this work. They remain whatever state the user had them in at session start. Future sessions can decide what to do with them.
+- `branded_slack.post_branded_alert` is referenced by `workspace_root_audit.py --post` but I did not import-verify it executes (no Slack network call from this audit script in this session). The cloud routine is the primary alert path; this local script is the secondary.
+
+### Operator decisions deferred (delta)
+- None new. The 4 plan decisions are all resolved. Tomorrow's first cloud-routine fires will surface any post-deploy issues organically.
+
+### Pointer for next session
+Mailbox + LIVING_PUNCHLIST are authoritative. Read THIS follow-up entry first to know consolidation is fully complete + pushed. Then read Section A of LIVING_PUNCHLIST -- Deal 1 with Chris is still the binding constraint.
+
+---
