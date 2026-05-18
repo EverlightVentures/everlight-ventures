@@ -1,0 +1,384 @@
+{
+  "investigation_id": "lino_gillies_1778605785",
+  "target": "Lino Gillies",
+  "kind": "person",
+  "started_at": "2026-05-12T10:09:45.976217",
+  "finished_at": "2026-05-12T10:09:48.792676",
+  "elapsed_ms": 2813,
+  "total_findings": 16,
+  "investigators_run": 5,
+  "triggered_by": "cipher_wolfe",
+  "lead_id": null,
+  "business_purpose": "test",
+  "verify_context": {
+    "state": "CA",
+    "owner_name": "Lino Gillies"
+  },
+  "verification_summary": {
+    "total_findings": 16,
+    "verified": 3,
+    "rejected": 13,
+    "avg_confidence": 33,
+    "threshold": 50,
+    "highest_confidence_per_signal": {
+      "name_exact_match": 50
+    },
+    "lead_context_keys_provided": [
+      "state",
+      "owner_name"
+    ]
+  },
+  "dnc_blocked": false,
+  "dnc_reason": "",
+  "dnc_entry_id": null,
+  "results": [
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Archive item",
+          "value": "Richard Lino Gillies",
+          "url": "https://archive.org/details/gov.uscourts.caeb.611193",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 25,
+            "boost": 30,
+            "investigator_id": "archive_org"
+          }
+        }
+      ],
+      "raw": {
+        "search": {
+          "status": 200,
+          "len": 475
+        }
+      },
+      "elapsed_ms": 647,
+      "investigator": "Archive.org / Wayback",
+      "investigator_id": "archive_org"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Dehashed",
+          "value": "Search (login required)",
+          "url": "https://dehashed.com/search?query=Lino%20Gillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        },
+        {
+          "label": "Intelligence X",
+          "value": "Search",
+          "url": "https://intelx.io/?s=Lino%20Gillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        }
+      ],
+      "raw": {
+        "hibp_breaches": {
+          "status": 200,
+          "len": 2
+        }
+      },
+      "elapsed_ms": 1751,
+      "investigator": "Leak Check",
+      "investigator_id": "leak_check"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "TruePeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.truepeoplesearch.com/results?name=Lino%20Gillies",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "FastPeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.fastpeoplesearch.com/name/lino-gillies",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ZabaSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.zabasearch.com/people/Lino+Gillies",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ThatsThem",
+          "value": "HTTP 200",
+          "url": "https://thatsthem.com/name/Lino-Gillies",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "Whitepages",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.whitepages.com/name/Lino-Gillies",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        }
+      ],
+      "raw": {
+        "TruePeopleSearch": {
+          "status": 403
+        },
+        "FastPeopleSearch": {
+          "status": 403
+        },
+        "ZabaSearch": {
+          "status": 403
+        },
+        "ThatsThem": {
+          "status": 200
+        },
+        "Whitepages": {
+          "status": 403
+        }
+      },
+      "elapsed_ms": 1980,
+      "investigator": "Skip-Trace",
+      "investigator_id": "skip_trace"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "\"\u00b7\"",
+          "value": "Lino Gillies MMA Stats, News, Biography - MMADive",
+          "url": "https://mmadive.com/fighter/lino-gillies",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\"\u00b7\"",
+          "value": "Lino Gillies | MMA Fighter Page | Tapology",
+          "url": "https://www.tapology.com/fightcenter/fighters/218621-lino-gillies",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\u00b7 site:github.com",
+          "value": "GitHub - linorobot/linorobot: Autonomous ground robots (2WD, 4WD ...",
+          "url": "https://github.com/linorobot/linorobot",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\u00b7 site:github.com",
+          "value": "unsupervised_topic_modeling/topics/en/17/100/100/topics at ... - GitHub",
+          "url": "https://github.com/annontopicmodel/unsupervised_topic_modeling/blob/master/topics/en/17/100/100/topics",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "google_dorks"
+          }
+        }
+      ],
+      "raw": {
+        "\"{q}\"": {
+          "status": 200,
+          "len": 22658
+        },
+        "{q} site:linkedin.com": {
+          "status": 202,
+          "len": 14284
+        },
+        "{q} site:github.com": {
+          "status": 200,
+          "len": 33111
+        },
+        "{q} site:reddit.com": {
+          "status": 202,
+          "len": 14226
+        },
+        "{q} filetype:pdf": {
+          "status": 202,
+          "len": 14202
+        },
+        "{q} contact email": {
+          "status": 202,
+          "len": 14210
+        }
+      },
+      "elapsed_ms": 2401,
+      "investigator": "Search Dorks",
+      "investigator_id": "google_dorks"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Sweep summary",
+          "value": "3 of 22 platforms returned a profile page for 'linogillies'",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Instagram",
+          "value": "found",
+          "url": "https://www.instagram.com/linogillies/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Reddit",
+          "value": "found",
+          "url": "https://www.reddit.com/user/linogillies",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Pinterest",
+          "value": "found",
+          "url": "https://www.pinterest.com/linogillies/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        }
+      ],
+      "raw": {
+        "Twitter/X": 403,
+        "Medium": 403,
+        "Instagram": 200,
+        "YouTube": 404,
+        "TikTok": 403,
+        "LinkedIn": 405,
+        "GitHub": 404,
+        "Reddit": 200,
+        "Dribbble": 404,
+        "StackOverflow": 404,
+        "Pinterest": 200,
+        "Behance": 404,
+        "Keybase": 404,
+        "ProductHunt": 404,
+        "Patreon": 404,
+        "Gravatar": 404,
+        "DeviantArt": 404,
+        "Twitch": 405,
+        "About.me": 404,
+        "SoundCloud": 404,
+        "Vimeo": 404,
+        "Flickr": 404
+      },
+      "elapsed_ms": 2437,
+      "investigator": "Social Recon",
+      "investigator_id": "social_recon"
+    }
+  ]
+}

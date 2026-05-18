@@ -1,0 +1,41 @@
++L}:
+ByteClave
+Tools That Expose Every Lie On The Internet
+e Hive Moderation - Detects Al-generated images at 99% accuracy
+e Forensically - Exposes every hidden edit inside any photo
+e Deepware - Scans any video for deepfake faces
+e GPTZero - Detects Al-written text in seconds
+e InVID WeVerify - Breaks viral videos into fact-checkable frames
+e Fact Check Explorer - Search every debunked claim ever verified
+e ClaimBuster - Scans speeches and text for checkable claims
+e Politwoops - Catches every tweet politicians quietly deleted
+e ScamAdviser - Checks any website for fraud and risk
+e FollowerAudit - Reveals exactly how many followers are fake
+e OSoMeNet - Maps how any narrative spreads socially
+e Coordiscope - Detects coordinated fake behavior on social media
+e lffy.news - Tracks sites spreading the most misinformation
+e Ground News - Same story shown from every political bias
+e NewsGuard - Rates every news site's credibility score
+e Full Fact - Al flags false claims in speeches live
+e Snopes - World's oldest database of debunked hoaxes
+e Who.is - Shows full ownership behind any suspicious domain
+e URLScan - Seans what any website does invisibly
+e Checkology - Teaches news literacy from real newsroom journalists
+e RevEye - One click reverse searches six image engines
+e SpyFu - Shows every ad a competitor ever ran
+e SimilarWeb - Shows real traffic data behind website claims
+e Ghostarchive - Saves any video before anyone deletes it
+e Carbon Dating Web - Dates any webpage to catch backdated content
+e Truly Media - Collaborative platform to verify social media content
+e Reverso Context - Catches mistranslations in any foreign quote
+e Fakespot - Exposes fake reviews hiding on Amazon listings
+e Wachete - Alerts you when any webpage silently changes
+e Botometer X - Scores any X account for bot probability
+e Facebook News Bridge - Flags untrustworthy posts while browsing Facebook
+e Hoaxy2 - Visualizes how claims actually spread online
+e Misinfo Dashboard - Tracks trending misinformation claims in real time
+e IsitWP - Reveals every plugin on any WordPress site
+e EUvsDisinfo - EU database exposing Kremlin disinformation campaigns
+e Storyzy - Verifies if any attributed quote is real
+e Chainabuse - Community database of reported crypto scam addresses
+e FakerFact - Classifies any text as satire or misleading

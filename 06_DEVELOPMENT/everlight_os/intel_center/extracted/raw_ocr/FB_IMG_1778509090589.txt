@@ -1,0 +1,63 @@
+ByteClave
+
+Free Tools that handle tasks you've been avoiding
+
+¢ cobalt.tools - Download video/ audio from any platform
+
+¢ rxresu.me - free/ open-source resume builder
+
+¢ zerogpt.com - Detect Al written text
+
+¢ suitecrm.com - Full CRM for managing customers(Open source)
+
+« deepl.com - Most accurate Al translator
+
+¢ wolframalpha.com - Solves any math or science problem
+
+- calmcode.io - Short, simple coding tutorials for developers.
+
+- qrbtf.com - Generates artistic/styled QR codes
+
+¢ freemusicarchive.org - Royalty free music for your video projects
+
+¢ languagetool.org - Grammar and style check in 30+ languages
+
+- limesurvey.org - free/ unlimited surveys with advanced logic
+
+- lmms.io - Make beats and full music tracks
+
+¢ tally.so - Unlimited forms and submissions builder
+
+¢ squoosh.app - Compress images to any format
+
+- blender.org -free 3D modeling, animation, rendering
+
+- zotero.org - Collect/ organise /cite research papers
+
+¢ ttsmaker.com - Unlimited text to speech
+
+e pagespeed.web.dev - Audit any website speed plus exact fix suggestions
+
+¢ jitsi.org - Host unlimited private video calls
+
+¢ omnivore.app - Save articles ,newsletters to read later
+
+¢ duplichecker.com - Plagiarism check against billions of pages
+
+« perchance.org - Generate unlimited Al images
+
+ gifcap.dev - Create animated GIFs from a screen recording.
+
+« codeberg.org - Reliable Free code hosting
+
+¢ paperless-ngx.com - Scan/OCR/search your documents(self-hosted)
+
+e playwright.dev - Automate browser tasks/scraping/ testing
+
+¢ explainpaper.com - understand any confusing paper
+
+¢ mixpost.app - Self-host social media scheduling
+
+¢ consensus.app - Search what science says on any topic
+
+¢ ocr.space - Extract text from any image or PDF..

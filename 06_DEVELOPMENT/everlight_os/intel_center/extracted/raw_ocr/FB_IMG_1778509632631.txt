@@ -1,0 +1,40 @@
+5 i
+ByteClave
+Platforms That Let You Explore Space and Astronomy Data
+e Heavens-above - Predict exact satellite passes over your house
+e Theskylive - Track every comet and planet live
+e Spaceweatherlive - Real-time solar flares and aurora alerts
+e MAST - Browse raw Hubble and JWST telescope science data
+e Eyes - Fly through the solar system in NASA's 3D explorer
+e Simbad - Look up any astronomical object ever catalogued
+e Aladin - Overlay real telescope survey data on live sky maps
+e VizieR - Query 25,000 published astronomical catalogs directly
+e Meteorshowers - Watch Earth fly through meteor streams in 3D
+e Livemeteors - Hear meteors strike the atmosphere live via radio
+- Aurorasaurus - Citizen reports of aurora sightings mapped globally
+e Globalmeteornetwork - Real-time meteor flux from stations worldwide
+e Exoplanet - NASA's complete database of every confirmed planet
+¢ Worldwidetelescope - Stitch telescope surveys into one navigable sky
+e Sungrazer - Public comet discovery using NASA's SOHO mission data
+e Asterank - Every asteroid ranked by mining economic value
+e Backyard - Hunt for Planet 9 using NASA's WISE infrared data
+e Galaxyzoo - Classify real galaxies observed by space telescopes
+e Aavso - Access the world's largest variable star brightness database
+e Heasarc - Download raw X-ray and gamma-ray space mission archives
+e Irsa - Browse NASA's infrared and SPHEREx all-sky survey data
+e Neofixer - Animate any asteroid or comet orbit interactively
+e Scix - Search all NASA science publications in one place
+e Spacetelescopelive - See exactly what Hubble and JWST observe today
+e Spaceweather - Daily sunspot photos, CME alerts and aurora forecasts
+e Sdss - Explore 500 million objects from the Sloan sky survey
+e Ligo - Open gravitational wave event data from every detection
+e Pulsar - Browse timing data from every known pulsar catalogued
+e Chandra - Publicly searchable archive of X-ray universe observations
+e Marstrek - Walk NASA's 3D interactive map of Mars surface
+« Moontrek - Explore the Moon using real orbital mission data
+e Pvol - Community database of Jupiter and Saturn storm observations
+e Minorplanet - The global authority on asteroid orbit submissions
+- Auroramax - High-resolution live aurora camera streaming from Canada
+e Isstracker - Watch the International Space Station cross your sky live
+e Radioastron - Listen to archived deep space radio telescope recordings
+e Exofop - Community-shared follow-up data on TESS exoplanet candidates

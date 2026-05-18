@@ -1,0 +1,82 @@
++L}:
+ByteClave
+
+Tools That Show Real-Time Data About the World
+
+e Safecast - Community radiation readings mapped across every country
+
+e NETC - Every US nuclear radiation sensor reading, live now
+
+e GMCmap - Geiger counter readings from every country right now
+
+e Blitzortung - Community-powered global lightning detection live
+
+e N2YO - Every satellite orbiting Earth tracked in real time
+
+e Submarine Cable Map - Every fiber optic cable on every ocean floor
+
+¢ Whale Alert - Every large crypto transaction happening right now
+
+e Kaspersky Cybermap - Every cyberattack on Earth visualized live
+
+e NETSCOUT Horizon - Live DDoS attack data across the entire internet
+
+e Global Threat Map - Open-source live cyber activity mapped worldwide
+
+e NOAA Earth Real-Time - Live satellite imagery from every GOES satellite
+
+e NASA FIRMS - Every active wildfire detected from space right now
+
+e VoleanoDiscovery - Every volcanic eruption happening anywhere right now
+
+e RSOE EDIS - Every disaster event on Earth updated in real time
+
+e Flightradar24 - Every commercial flight on Earth tracked live
+
+e VesselFinder - Every ship on every ocean tracked live right now
+
+e Openrailwaymap - Every active train route on Earth mapped live
+
+e Tor Metrics - Live anonymized internet usage from every country
+
+e Cloudflare Radar - Live internet traffic and shutdown data globally
+
+e Internet Health Report - Real-time packet loss data across every network
+
+e Downdector - Every major internet service outage happening right now
+
+e CTBTO IMS - Global network detecting secret nuclear test explosions
+
+e Nuclearplanet - Every nuclear plant on Earth mapped and monitored
+
+e Uranium Map - Every uranium deposit and mine on Earth mapped
+
+e OpenAdQ - Real-time air pollution readings from every country
+
+e PurpleAir - Hyper-local air quality from 50,000 community sensors
+
+e BreezoMeter - Block-level air quality and pollen data anywhere live
+
+e USGS Water - Stream flow and flood levels across every US river
+
+e Copernicus Emergency - Live satellite crisis mapping during every disaster
+
+e Global Forest Watch - Real-time deforestation alerts from any forest
+
+e Ocean Color Web - NASA live satellite ocean health and temperature
+
+e IMOS Ocean - Real-time Australian ocean temperature and current data
+
+e Space Weather - Live solar wind speed and geomagnetic storm strength
+
+e Oulu Neutron Monitor - Cosmic ray intensity hitting Earth right now
+
+e Spaceweather.com - Daily real-time solar activity and aurora forecasts
+
+e LightningMaps - Every lightning strike happening on Earth right now
+
+e AIS Live - Every vessel broadcasting position on Earth right now
+
+e Global Incident Map - Every security incident on Earth updated live
+
+e EarthquakeSD - Every earthquake on Earth visualized in 3D right

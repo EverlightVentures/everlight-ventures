@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0f">
+<title>Clients · Intel Center</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        ev: { bg:'#0a0a0f', surface:'#111118', s2:'#1a1a24', s3:'#222230', s4:'#2d2d3d',
+              gold:'#c9a84c', goldDim:'#a0832e', goldGlow:'#e0c66a',
+              cyan:'#22d3ee', purple:'#8b5cf6', green:'#22c55e',
+              orange:'#f97316', red:'#dc2626', text:'#e8e8e8', dim:'#999' }
+      },
+      fontFamily: {
+        display: ['"Playfair Display"','serif'],
+        sans:    ['"DM Sans"','"Inter"','sans-serif'],
+        body:    ['"Inter"','sans-serif'],
+        mono:    ['"JetBrains Mono"','monospace'],
+      },
+      boxShadow: { glow:'0 0 40px rgba(201,168,76,0.25)', glowStrong:'0 0 60px rgba(201,168,76,0.5)' },
+    }
+  }
+}
+</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="./data.js"></script>
+
+<style>
+  :root { --gold:#c9a84c; --gold-dim:#a0832e; --gold-glow:#e0c66a; --bg:#0a0a0f; }
+  *{ -webkit-tap-highlight-color:transparent; }
+  html,body{ background:var(--bg); color:#e8e8e8; font-family:"Inter",sans-serif; overflow-x:hidden; }
+  .mesh{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .mesh::before, .mesh::after, .mesh > span{
+    content:''; position:absolute; border-radius:50%; filter:blur(80px); opacity:0.45;
+    animation: drift 22s ease-in-out infinite;
+  }
+  .mesh::before{ width:520px; height:520px; left:-10%;  top:-15%; background:radial-gradient(closest-side,#3a2a08,transparent); }
+  .mesh::after { width:480px; height:480px; right:-8%;  top:35%;  background:radial-gradient(closest-side,#1b1135,transparent); animation-delay:-7s; }
+  .mesh > span { width:600px; height:600px; left:35%;   bottom:-20%; background:radial-gradient(closest-side,#0a2027,transparent); animation-delay:-14s; }
+  @keyframes drift{ 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(40px,-30px) scale(1.05)} 66%{transform:translate(-30px,40px) scale(0.95)} }
+
+  .glass{ background:linear-gradient(135deg, rgba(17,17,24,0.78), rgba(17,17,24,0.45));
+          border:1px solid rgba(255,255,255,0.06); backdrop-filter:blur(12px) saturate(140%);
+          -webkit-backdrop-filter:blur(12px) saturate(140%); }
+  .glass-gold{ background:linear-gradient(135deg, rgba(201,168,76,0.10), rgba(201,168,76,0.02));
+               border:1px solid rgba(201,168,76,0.35); }
+  .gold{ color:var(--gold); }
+  .gold-glow{ text-shadow:0 0 24px rgba(201,168,76,0.45); }
+  .lift{ transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+  .lift:hover{ transform:translateY(-2px); border-color:rgba(201,168,76,0.5); box-shadow:0 8px 32px rgba(201,168,76,0.12); }
+  .nav-link{ color:#999; transition:color .2s; padding:.5rem .9rem; border-radius:.5rem; }
+  .nav-link:hover{ color:#e0c66a; background:rgba(201,168,76,0.06); }
+  .nav-link.active{ color:#c9a84c; background:rgba(201,168,76,0.12); border:1px solid rgba(201,168,76,0.25); }
+  .bar{ height:6px; background:rgba(255,255,255,.06); border-radius:3px; overflow:hidden; position:relative; }
+  .bar > i{ display:block; height:100%; background:linear-gradient(90deg,#c9a84c,#e0c66a); border-radius:3px; }
+  .chip{ display:inline-flex; align-items:center; gap:.35rem; padding:.18rem .55rem; border-radius:9999px; font-size:.7rem;
+         font-family:"JetBrains Mono",monospace; letter-spacing:.04em; }
+  .chip-gold{ background:rgba(201,168,76,.10); color:#e0c66a; border:1px solid rgba(201,168,76,.3); }
+  .chip-green{ background:rgba(34,197,94,.10); color:#4ade80; border:1px solid rgba(34,197,94,.3); }
+  .chip-red{   background:rgba(220,38,38,.10); color:#f87171; border:1px solid rgba(220,38,38,.3); }
+  .chip-cyan{  background:rgba(34,211,238,.10); color:#67e8f9; border:1px solid rgba(34,211,238,.3); }
+  main{ animation: fadein .35s ease-out both; }
+  @keyframes fadein{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)} }
+  input.search{ background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:#e8e8e8;
+                 padding:.6rem 1rem .6rem 2.5rem; border-radius:.6rem; width:100%; outline:none;
+                 transition: border-color .2s; }
+  input.search:focus{ border-color:#c9a84c; }
+  .pill-btn{ padding:.35rem .9rem; border-radius:9999px; font-size:.78rem; cursor:pointer;
+              border:1px solid rgba(255,255,255,0.12); transition: all .2s; }
+  .pill-btn:hover{ border-color:#c9a84c; color:#e0c66a; }
+  .pill-btn.on{ background:rgba(201,168,76,0.15); border-color:#c9a84c; color:#e0c66a; }
+  table.intel{ width:100%; border-collapse:collapse; }
+  table.intel th, table.intel td{ text-align:left; padding:.6rem .8rem; border-bottom:1px solid rgba(255,255,255,0.05); font-size:.85rem; }
+  table.intel th{ background:rgba(201,168,76,0.04); color:#c9a84c; font-weight:500; text-transform:uppercase; letter-spacing:.08em; font-size:.7rem; }
+  table.intel tr:hover td{ background:rgba(201,168,76,0.03); }
+  table.intel a{ color:#e0c66a; }
+  table.intel a:hover{ text-decoration:underline; }
+</style>
+</head>
+<body class="min-h-screen relative">
+<div class="mesh"><span></span></div>
+<div id="app" class="relative z-10"></div>
+
+<script type="module">
+
+import { html, render, h, useState, useMemo, D, fmt, useLucide, Icon, Nav, Footer, relTime } from "./shared.js";
+
+function ClientsPage(){
+  useLucide();
+  const all = D.clients || [];
+  const [tab, setTab] = useState("people");      // people | addresses
+  const [q, setQ] = useState("");
+  const [filter, setFilter] = useState("all");   // all | dnc | verified
+
+  const tabbed = useMemo(() => {
+    return all.filter(c => {
+      const isAddr = c.kind === "address";
+      if (tab === "people"    && isAddr) return false;
+      if (tab === "addresses" && !isAddr) return false;
+      return true;
+    });
+  }, [all, tab]);
+
+  const filtered = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    return tabbed.filter(c => {
+      if (filter === "dnc" && !c.dnc_blocked) return false;
+      if (filter === "verified" && !(c.verified_findings > 0)) return false;
+      if (!needle) return true;
+      return ((c.target||"") + " " + (c.state||"") + " " + (c.id||"")).toLowerCase().includes(needle);
+    });
+  }, [tabbed, q, filter]);
+
+  const peopleCount = all.filter(c => c.kind !== "address").length;
+  const addrCount   = all.filter(c => c.kind === "address").length;
+
+  const Row = ({c}) => html`
+    <div class="glass rounded-xl border border-white/5 lift p-4 flex items-center gap-3 flex-wrap">
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-2 flex-wrap mb-1">
+          <span class="font-mono gold text-base">${c.target}</span>
+          ${c.state && html`<span class="chip chip-cyan">${c.state}</span>`}
+          ${c.dnc_blocked && html`<span class="chip chip-red">DNC BLOCKED</span>`}
+          <span class="chip chip-gold">${c.kind}</span>
+        </div>
+        <div class="text-[11px] text-ev-dim font-mono flex items-center gap-3 flex-wrap">
+          <span><${Icon} name="search" cls="w-3 h-3 inline -mt-0.5"/> ${c.investigation_count} investigation${c.investigation_count===1?"":"s"}</span>
+          <span>·</span>
+          <span><${Icon} name="clock" cls="w-3 h-3 inline -mt-0.5"/> last ${relTime(c.last_seen)}</span>
+          <span>·</span>
+          ${c.verified_findings > 0
+            ? html`<span class="text-ev-green">${c.verified_findings} verified</span>`
+            : html`<span class="text-ev-dim">0 verified</span>`}
+          <span class="text-ev-dim">/ ${c.raw_findings} raw</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <a href=${c.report_url} target="_blank" rel="noopener"
+           class="px-3 py-2 rounded-lg bg-ev-gold/10 hover:bg-ev-gold/20 border border-ev-gold/30 gold flex items-center gap-2 text-xs">
+          <${Icon} name="file-text" cls="w-3.5 h-3.5"/> Open Report
+        </a>
+      </div>
+    </div>`;
+
+  return html`
+    <${Nav} active="clients"/>
+    <main class="max-w-7xl mx-auto px-5 pt-8 pb-20">
+      <div class="mb-6">
+        <h1 class="font-display text-3xl gold gold-glow mb-1">Clients & Targets</h1>
+        <p class="text-sm text-ev-dim">Every target ever investigated, grouped by latest investigation. Source: <span class="font-mono">cache/investigations.sqlite</span>.</p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        ${[
+          {label:"Total targets", value: fmt(all.length), color:"gold", icon:"users"},
+          {label:"People", value: fmt(peopleCount), color:"cyan", icon:"user"},
+          {label:"Addresses", value: fmt(addrCount), color:"purple", icon:"map-pin"},
+          {label:"DNC blocked", value: fmt(all.filter(c=>c.dnc_blocked).length), color: all.filter(c=>c.dnc_blocked).length>0?"red":"green", icon:"shield-x"},
+        ].map(k => html`
+          <div class="glass rounded-xl p-5">
+            <div class=${`w-9 h-9 rounded-lg grid place-items-center bg-ev-${k.color}/10 border border-ev-${k.color}/30 mb-3`}>
+              <${Icon} name=${k.icon} cls=${`w-4 h-4 text-ev-${k.color}`}/>
+            </div>
+            <div class=${`text-2xl font-mono font-bold text-ev-${k.color}`}>${k.value}</div>
+            <div class="text-xs text-ev-dim mt-1">${k.label}</div>
+          </div>`)}
+      </div>
+
+      <div class="glass rounded-2xl p-4 mb-5 space-y-3">
+        <div class="flex flex-wrap gap-2 items-center">
+          <button class=${"pill-btn " + (tab==="people" ? "on" : "")} onClick=${() => setTab("people")}>
+            People <span class="opacity-60">(${peopleCount})</span>
+          </button>
+          <button class=${"pill-btn " + (tab==="addresses" ? "on" : "")} onClick=${() => setTab("addresses")}>
+            Addresses <span class="opacity-60">(${addrCount})</span>
+          </button>
+        </div>
+        <div class="relative">
+          <${Icon} name="search" cls="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ev-dim"/>
+          <input class="search font-mono text-sm"
+                 placeholder="Search target name, state, investigation id..."
+                 value=${q} onInput=${e => setQ(e.target.value)}/>
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+          <span class="text-[10px] uppercase tracking-widest text-ev-dim mr-2">Filter</span>
+          <button class=${"pill-btn " + (filter==="all" ? "on" : "")} onClick=${() => setFilter("all")}>All</button>
+          <button class=${"pill-btn " + (filter==="verified" ? "on" : "")} onClick=${() => setFilter("verified")}>Has verified intel</button>
+          <button class=${"pill-btn " + (filter==="dnc" ? "on" : "")} onClick=${() => setFilter("dnc")}>DNC blocked</button>
+        </div>
+      </div>
+
+      <div class="text-xs text-ev-dim mb-3 font-mono">${fmt(filtered.length)} of ${fmt(tabbed.length)} ${tab}</div>
+
+      ${filtered.length === 0
+        ? html`<div class="glass rounded-2xl p-12 text-center">
+            <${Icon} name="search-x" cls="w-10 h-10 text-ev-dim mx-auto mb-3"/>
+            <div class="text-sm text-ev-dim">
+              ${all.length === 0
+                ? html`No investigations yet. Run <code class="font-mono gold">intel investigate "Some Target"</code> to populate.`
+                : "No targets match these filters. Try clearing the search or filter."}
+            </div>
+          </div>`
+        : html`<div class="space-y-2">
+            ${filtered.map(c => html`<${Row} c=${c}/>`)}
+          </div>`}
+    </main>
+    <${Footer}/>`;
+}
+
+render(html`<${ClientsPage}/>`, document.getElementById("app"));
+
+</script>
+</body>
+</html>

@@ -1,0 +1,631 @@
+{
+  "investigation_id": "melina_tapiz_1778634000",
+  "target": "Melina Tapiz",
+  "kind": "person",
+  "started_at": "2026-05-12T18:00:00.892213",
+  "finished_at": "2026-05-12T18:00:09.372437",
+  "elapsed_ms": 8478,
+  "total_findings": 29,
+  "investigators_run": 10,
+  "triggered_by": "web_user",
+  "lead_id": null,
+  "business_purpose": "test sale",
+  "verify_context": {
+    "owner_name": "Melina Tapiz",
+    "state": "CA",
+    "city": "Fairfield",
+    "owner_email": "Tapizme@gmail.com",
+    "owner_phone": null,
+    "address": null
+  },
+  "verification_summary": {
+    "total_findings": 29,
+    "verified": 2,
+    "rejected": 27,
+    "avg_confidence": 26,
+    "threshold": 50,
+    "highest_confidence_per_signal": {
+      "name_exact_match": 50
+    },
+    "lead_context_keys_provided": [
+      "owner_name",
+      "state",
+      "city",
+      "owner_email"
+    ]
+  },
+  "dnc_blocked": false,
+  "dnc_reason": "",
+  "dnc_entry_id": null,
+  "results": [
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "OSINT & Investigation",
+          "value": "Allthatsinteresting \u2014 ddeep history true crime dark mysteries \u00b7 verified live",
+          "url": "https://allthatsinteresting.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Melina Tapiz' via OSINT & Investigation"
+          }
+        },
+        {
+          "label": "Maps & Geospatial",
+          "value": "Amazingplacesonearth \u2014 Showcases natural and cultural world wonders \u00b7 verified live",
+          "url": "https://amazingplacesonearth.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Melina Tapiz' via Maps & Geospatial"
+          }
+        },
+        {
+          "label": "Education & Training",
+          "value": "Abandonedspaces \u2014 abandoned buildings and forgotten global places \u00b7 verified live",
+          "url": "https://abandonedspaces.com",
+          "investigator_meta": {
+            "agent_owner": "Strategy Assistant",
+            "is_live": true,
+            "search_hint": "Research 'Melina Tapiz' via Education & Training"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "10015 \u2014 productivity tools collection \u00b7 verified live",
+          "url": "https://10015.io",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Research 'Melina Tapiz' via Decision Intelligence"
+          }
+        },
+        {
+          "label": "OSINT & Investigation",
+          "value": "Americanhauntingsink \u2014 Haunted American places ghost mysteries \u00b7 verified live",
+          "url": "https://americanhauntingsink.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Melina Tapiz' via OSINT & Investigation"
+          }
+        },
+        {
+          "label": "Maps & Geospatial",
+          "value": "Atlasobscura \u2014 hidden wondrous mysterious places worldwide \u00b7 verified live",
+          "url": "https://atlasobscura.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Melina Tapiz' via Maps & Geospatial"
+          }
+        },
+        {
+          "label": "Education & Training",
+          "value": "Animagraffs \u2014 Complex machines and systems explained \u00b7 verified live",
+          "url": "https://animagraffs.com",
+          "investigator_meta": {
+            "agent_owner": "Strategy Assistant",
+            "is_live": true,
+            "search_hint": "Research 'Melina Tapiz' via Education & Training"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "Amusingplanet \u2014 unusual natural and manmade global phenomena \u00b7 verified live",
+          "url": "https://amusingplanet.com",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Research 'Melina Tapiz' via Decision Intelligence"
+          }
+        },
+        {
+          "label": "OSINT & Investigation",
+          "value": "Ancient Code \u2014 ancient alien forbidden suppressed history \u00b7 verified live",
+          "url": "https://ancient-code.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Melina Tapiz' via OSINT & Investigation"
+          }
+        },
+        {
+          "label": "Maps & Geospatial",
+          "value": "Factinate \u2014 surprising facts about places worldwide \u00b7 verified live",
+          "url": "https://factinate.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Melina Tapiz' via Maps & Geospatial"
+          }
+        },
+        {
+          "label": "Education & Training",
+          "value": "Batteryuniversity \u2014 Deep dive into battery chemistry and systems \u00b7 verified live",
+          "url": "https://batteryuniversity.com",
+          "investigator_meta": {
+            "agent_owner": "Strategy Assistant",
+            "is_live": true,
+            "search_hint": "Research 'Melina Tapiz' via Education & Training"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "Astronomyonline \u2014 Best collection of astronomy education resources \u00b7 verified live",
+          "url": "https://astronomyonline.org",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Research 'Melina Tapiz' via Decision Intelligence"
+          }
+        }
+      ],
+      "raw": {
+        "total_matched": 71,
+        "categories_used": [
+          "OSINT & Investigation",
+          "Maps & Geospatial",
+          "Education & Training",
+          "Decision Intelligence"
+        ],
+        "kind": "person"
+      },
+      "elapsed_ms": 15,
+      "investigator": "Catalogued Sources",
+      "investigator_id": "resource_lookup"
+    },
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "search": {
+          "status": 200,
+          "len": 403
+        }
+      },
+      "elapsed_ms": 391,
+      "investigator": "Archive.org / Wayback",
+      "investigator_id": "archive_org"
+    },
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "fec": 0,
+        "nonprofit": 0,
+        "gofundme": 0,
+        "patents": 0
+      },
+      "elapsed_ms": 1273,
+      "investigator": "Civic + Philanthropy (deep mine)",
+      "investigator_id": "philanthropy_civic"
+    },
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "yelp": 0,
+        "goodreads": 0,
+        "letterboxd": 0,
+        "strava": 0,
+        "untappd": 0,
+        "spotify": 0,
+        "producthunt": 0
+      },
+      "elapsed_ms": 1275,
+      "investigator": "Consumer Signals (deep mine)",
+      "investigator_id": "consumer_signals"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Dehashed",
+          "value": "Search (login required)",
+          "url": "https://dehashed.com/search?query=Melina%20Tapiz",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        },
+        {
+          "label": "Intelligence X",
+          "value": "Search",
+          "url": "https://intelx.io/?s=Melina%20Tapiz",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        }
+      ],
+      "raw": {
+        "hibp_breaches": {
+          "status": 200,
+          "len": 2
+        }
+      },
+      "elapsed_ms": 3395,
+      "investigator": "Leak Check",
+      "investigator_id": "leak_check"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "TruePeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.truepeoplesearch.com/results?name=Melina%20Tapiz",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "FastPeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.fastpeoplesearch.com/name/melina-tapiz",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ZabaSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.zabasearch.com/people/Melina+Tapiz",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ThatsThem",
+          "value": "HTTP 200",
+          "url": "https://thatsthem.com/name/Melina-Tapiz",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "Whitepages",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.whitepages.com/name/Melina-Tapiz",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        }
+      ],
+      "raw": {
+        "TruePeopleSearch": {
+          "status": 403
+        },
+        "FastPeopleSearch": {
+          "status": 403
+        },
+        "ZabaSearch": {
+          "status": 403
+        },
+        "ThatsThem": {
+          "status": 200
+        },
+        "Whitepages": {
+          "status": 403
+        }
+      },
+      "elapsed_ms": 4555,
+      "investigator": "Skip-Trace",
+      "investigator_id": "skip_trace"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Sweep summary",
+          "value": "3 of 22 platforms returned a profile page for 'melinatapiz'",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Instagram",
+          "value": "found",
+          "url": "https://www.instagram.com/melinatapiz/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Reddit",
+          "value": "found",
+          "url": "https://www.reddit.com/user/melinatapiz",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Pinterest",
+          "value": "found",
+          "url": "https://www.pinterest.com/melinatapiz/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        }
+      ],
+      "raw": {
+        "Twitter/X": 403,
+        "GitHub": 404,
+        "Medium": 403,
+        "Instagram": 200,
+        "LinkedIn": 405,
+        "TikTok": 403,
+        "YouTube": 404,
+        "Reddit": 200,
+        "StackOverflow": 404,
+        "ProductHunt": 404,
+        "Patreon": 404,
+        "Pinterest": 200,
+        "Behance": 404,
+        "Keybase": 404,
+        "Gravatar": 404,
+        "About.me": 404,
+        "DeviantArt": 404,
+        "Twitch": 405,
+        "SoundCloud": 404,
+        "Vimeo": 404,
+        "Flickr": 404,
+        "Dribbble": 0
+      },
+      "elapsed_ms": 5980,
+      "investigator": "Social Recon",
+      "investigator_id": "social_recon"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Twitter/X interests",
+          "value": "#FFF, #placeholder, #react",
+          "url": "https://twitter.com/melinatapiz",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "social_bio_scraper"
+          }
+        },
+        {
+          "label": "Pinterest interests",
+          "value": "#e2e2e2, #dadada",
+          "url": "https://www.pinterest.com/melinatapiz/",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "social_bio_scraper"
+          }
+        }
+      ],
+      "raw": {
+        "Medium": {
+          "status": 403,
+          "len": 5434
+        },
+        "GitHub": {
+          "status": 404,
+          "len": 9
+        },
+        "Reddit": {
+          "status": 403,
+          "len": 189906
+        },
+        "ProductHunt": {
+          "status": 404,
+          "len": 98061
+        },
+        "About.me": {
+          "status": 404,
+          "len": 66947
+        },
+        "Keybase": {
+          "status": 404,
+          "len": 7140
+        },
+        "Pinterest": {
+          "status": 200,
+          "len": 885444
+        },
+        "Dribbble": {
+          "status": 404,
+          "len": 21143
+        },
+        "Behance": {
+          "status": 404,
+          "len": 363196
+        },
+        "Twitter/X": {
+          "status": 200,
+          "len": 268056
+        }
+      },
+      "elapsed_ms": 6021,
+      "investigator": "Deep Social Mine",
+      "investigator_id": "social_bio_scraper"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "\"\u00b7\"",
+          "value": "Melina Tapiz - Executive Director, Financial Crimes Director Wells ...",
+          "url": "https://www.linkedin.com/pub/dir/Melina/Tapiz",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\"\u00b7\"",
+          "value": "Melina Tapiz (@tapizme) \u2022 Instagram photos and videos",
+          "url": "https://www.instagram.com/tapizme/",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\u00b7 site:github.com",
+          "value": "massgravel/Microsoft-Activation-Scripts - GitHub",
+          "url": "https://github.com/massgravel/Microsoft-Activation-Scripts",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\u00b7 site:github.com",
+          "value": "SegLossOdyssey/test/LossOverview.PNG at master \u00b7 JunMa11/SegLossOdyssey ...",
+          "url": "https://github.com/JunMa11/SegLossOdyssey/blob/master/test/LossOverview.PNG",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "google_dorks"
+          }
+        }
+      ],
+      "raw": {
+        "\"{q}\"": {
+          "status": 200,
+          "len": 32271
+        },
+        "{q} site:linkedin.com": {
+          "status": 202,
+          "len": 14266
+        },
+        "{q} site:github.com": {
+          "status": 200,
+          "len": 32946
+        },
+        "{q} site:reddit.com": {
+          "status": 202,
+          "len": 14202
+        },
+        "{q} filetype:pdf": {
+          "status": 202,
+          "len": 14214
+        },
+        "{q} contact email": {
+          "status": 202,
+          "len": 14222
+        }
+      },
+      "elapsed_ms": 7715,
+      "investigator": "Search Dorks",
+      "investigator_id": "google_dorks"
+    },
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "courtlistener": 0,
+        "opencorporates": 0,
+        "findagrave": 0,
+        "news_archive": 0
+      },
+      "elapsed_ms": 8333,
+      "investigator": "Public Records (deep mine)",
+      "investigator_id": "public_records"
+    }
+  ]
+}

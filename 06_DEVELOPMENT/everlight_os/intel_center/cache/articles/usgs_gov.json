@@ -1,0 +1,14 @@
+{
+  "domain": "usgs.gov",
+  "method": "rss",
+  "rss_path": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.atom",
+  "items": [
+    {
+      "title": "M 4.7 - 3 km WSW of Brawley, CA",
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/ci41461608",
+      "published": "2026-05-11T19:15:05.877Z",
+      "summary": "PAGER - GREEN ShakeMap - V DYFI? - VITime2026-05-10 07:10:21 UTC2026-05-10 07:10:21 UTC at epicenterLocation32.971&deg;N 115.562&deg;WDepth14.53 km (9.03 mi)"
+    }
+  ],
+  "fetched_at": "2026-05-11T22:19:44.268469"
+}

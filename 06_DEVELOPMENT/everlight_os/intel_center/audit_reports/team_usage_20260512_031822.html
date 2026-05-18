@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Team Usage · Intel Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{ --gold:#c9a84c; --bg:#0a0a0f; --panel:#15140f; --line:#2a2615; --text:#e8e8e8; --dim:#999; }
+  *{ box-sizing:border-box; }
+  body{ background:var(--bg); color:var(--text); font-family:Inter,sans-serif; line-height:1.55; margin:0; }
+  .mesh{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; opacity:.5; }
+  .mesh::before, .mesh::after{ content:''; position:absolute; border-radius:50%; filter:blur(80px); opacity:.45; }
+  .mesh::before{ width:520px; height:520px; left:-10%; top:-15%; background:radial-gradient(closest-side,#3a2a08,transparent); }
+  .mesh::after { width:480px; height:480px; right:-8%; top:35%; background:radial-gradient(closest-side,#1b1135,transparent); }
+  header{ border-bottom:2px solid var(--gold); padding:48px 56px 32px; position:relative; z-index:1; background:radial-gradient(ellipse at top, rgba(201,168,76,0.08), transparent 60%), var(--bg); }
+  .wordmark{ font-family:'Playfair Display',serif; font-weight:900; color:var(--gold); letter-spacing:.15em; font-size:.85rem; text-transform:uppercase; }
+  h1{ font-family:'Playfair Display',serif; font-weight:700; color:var(--gold); margin:8px 0 4px; font-size:2.4rem; text-shadow:0 0 24px rgba(201,168,76,.45); }
+  header .sub{ color:var(--dim); font-size:.95rem; }
+  main{ padding:32px 56px 80px; max-width:1200px; margin:0 auto; position:relative; z-index:1; }
+  .kpis{ display:grid; grid-template-columns:repeat(auto-fit, minmax(170px, 1fr)); gap:18px; margin-bottom:36px; }
+  .kpi{ background:linear-gradient(135deg, rgba(17,17,24,.78), rgba(17,17,24,.45)); border:1px solid rgba(255,255,255,.06); border-radius:12px; padding:20px; }
+  .kpi-label{ font-size:.72rem; color:var(--dim); text-transform:uppercase; letter-spacing:.1em; }
+  .kpi-value{ font-size:2rem; font-weight:700; color:var(--gold); font-family:'JetBrains Mono', monospace; margin-top:6px; }
+  section{ margin-bottom:40px; }
+  h2{ font-family:'Playfair Display',serif; color:var(--gold); font-size:1.5rem; border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:14px; }
+  .grid2{ display:grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap:24px; }
+  table{ width:100%; border-collapse:collapse; background:var(--panel); border-radius:6px; overflow:hidden; }
+  th, td{ text-align:left; padding:9px 12px; border-bottom:1px solid var(--line); font-size:.9rem; }
+  th{ background:rgba(201,168,76,.06); color:var(--gold); font-weight:500; text-transform:uppercase; letter-spacing:.08em; font-size:.7rem; }
+  td.num{ font-family:'JetBrains Mono', monospace; text-align:right; }
+  td.mono{ font-family:'JetBrains Mono', monospace; font-size:.82rem; }
+  td.bold{ color:var(--gold); font-weight:700; }
+  td.dim{ color:var(--dim); }
+  .timeline-bars{ background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:24px; overflow-x:auto; white-space:nowrap; }
+  footer{ border-top:1px solid var(--line); padding:24px 56px; color:var(--dim); font-size:.85rem; text-align:center; position:relative; z-index:1; }
+</style>
+</head>
+<body>
+<div class="mesh"></div>
+<header>
+  <div class="wordmark">Everlight Ventures · Intel Center</div>
+  <h1>Team Usage Telemetry</h1>
+  <div class="sub">2026-05-12T03:18:22.491893</div>
+</header>
+<main>
+
+  <section>
+    <div class="kpis">
+      <div class="kpi"><div class="kpi-label">Investigations · all-time</div><div class="kpi-value">6</div></div>
+      <div class="kpi"><div class="kpi-label">Investigations · last 7d</div><div class="kpi-value">6</div></div>
+      <div class="kpi"><div class="kpi-label">Domains tracked</div><div class="kpi-value">786</div></div>
+      <div class="kpi"><div class="kpi-label">Leads enriched</div><div class="kpi-value">0 <span style="font-size:.6em;color:var(--dim)">/ 0</span></div></div>
+      <div class="kpi"><div class="kpi-label">Articles cached</div><div class="kpi-value">207</div></div>
+      <div class="kpi"><div class="kpi-label">Articles · last 24h</div><div class="kpi-value">207</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>24h activity timeline (live pulls per hour)</h2>
+    <div class="timeline-bars"><div style="display:inline-block;width:30px;text-align:center;margin:0 2px;"><div style="height:120px;display:flex;align-items:flex-end;justify-content:center;"><div style="width:18px;background:linear-gradient(180deg,#c9a84c,#a0832e);height:100%;border-radius:3px 3px 0 0;" title="754 pulls"></div></div><div style="font-size:9px;color:#999;font-family:JetBrains Mono,monospace;margin-top:4px;">23:00</div><div style="font-size:10px;color:#c9a84c;font-family:JetBrains Mono,monospace;font-weight:bold;">754</div></div><div style="display:inline-block;width:30px;text-align:center;margin:0 2px;"><div style="height:120px;display:flex;align-items:flex-end;justify-content:center;"><div style="width:18px;background:linear-gradient(180deg,#c9a84c,#a0832e);height:4%;border-radius:3px 3px 0 0;" title="32 pulls"></div></div><div style="font-size:9px;color:#999;font-family:JetBrains Mono,monospace;margin-top:4px;">03:00</div><div style="font-size:10px;color:#c9a84c;font-family:JetBrains Mono,monospace;font-weight:bold;">32</div></div></div>
+  </section>
+
+  <div class="grid2">
+    <section>
+      <h2>Investigations by trigger</h2>
+      <table><thead><tr><th>Triggered by</th><th>Count</th></tr></thead>
+        <tbody><tr><td class="mono">(legacy)</td><td class="num bold">5</td></tr><tr><td class="mono">cipher_wolfe</td><td class="num bold">1</td></tr></tbody></table>
+    </section>
+
+    <section>
+      <h2>Live pulls by trigger</h2>
+      <table><thead><tr><th>Triggered by</th><th>Count</th></tr></thead>
+        <tbody><tr><td class="mono">(legacy)</td><td class="num">754</td></tr><tr><td class="mono">unknown</td><td class="num">32</td></tr></tbody></table>
+    </section>
+  </div>
+
+  <div class="grid2">
+    <section>
+      <h2>Top investigated targets</h2>
+      <table><thead><tr><th>Target</th><th>Times</th></tr></thead>
+        <tbody><tr><td class="mono">Everlight Ventures</td><td class="num">2</td></tr><tr><td class="mono">Test Owner LLC</td><td class="num">2</td></tr><tr><td class="mono">Linda Smith</td><td class="num">1</td></tr><tr><td class="mono">everlightventures.io</td><td class="num">1</td></tr></tbody></table>
+    </section>
+
+    <section>
+      <h2>Source freshness (last fetched)</h2>
+      <table><thead><tr><th>Source</th><th>Articles</th><th>Last fetched</th></tr></thead>
+        <tbody><tr><td class="mono">factcheck.org</td><td class="num">10</td><td class="mono dim">2026-05-11T22:31:36.288706</td></tr><tr><td class="mono">gdeltproject.org</td><td class="num">1</td><td class="mono dim">2026-05-11T22:31:35.364379</td></tr><tr><td class="mono">fbi.gov</td><td class="num">1</td><td class="mono dim">2026-05-11T22:31:14.441495</td></tr><tr><td class="mono">bea.gov</td><td class="num">15</td><td class="mono dim">2026-05-11T22:31:12.355190</td></tr><tr><td class="mono">sec.gov</td><td class="num">15</td><td class="mono dim">2026-05-11T22:31:03.803733</td></tr><tr><td class="mono">tradingview.com</td><td class="num">15</td><td class="mono dim">2026-05-11T22:31:03.358629</td></tr><tr><td class="mono">propublica.org</td><td class="num">15</td><td class="mono dim">2026-05-11T22:31:02.494847</td></tr><tr><td class="mono">coindesk.com</td><td class="num">15</td><td class="mono dim">2026-05-11T22:20:11.141421</td></tr><tr><td class="mono">nature.com</td><td class="num">15</td><td class="mono dim">2026-05-11T22:20:05.102654</td></tr><tr><td class="mono">archive.org</td><td class="num">10</td><td class="mono dim">2026-05-11T22:20:03.448547</td></tr><tr><td class="mono">axios.com</td><td class="num">15</td><td class="mono dim">2026-05-11T22:19:51.350954</td></tr><tr><td class="mono">bbc.com</td><td class="num">15</td><td class="mono dim">2026-05-11T22:19:50.668951</td></tr><tr><td class="mono">npr.org</td><td class="num">10</td><td class="mono dim">2026-05-11T22:19:50.169105</td></tr><tr><td class="mono">nytimes.com</td><td class="num">15</td><td class="mono dim">2026-05-11T22:19:48.784400</td></tr><tr><td class="mono">usgs.gov</td><td class="num">1</td><td class="mono dim">2026-05-11T22:19:44.268469</td></tr><tr><td class="mono">noaa.gov</td><td class="num">14</td><td class="mono dim">2026-05-11T22:16:46.911225</td></tr><tr><td class="mono">nasa.gov</td><td class="num">10</td><td class="mono dim">2026-05-11T22:16:33.731340</td></tr><tr><td class="mono">coingecko.com</td><td class="num">15</td><td class="mono dim">2026-05-11T22:15:14.078949</td></tr></tbody></table>
+    </section>
+  </div>
+
+</main>
+<footer>
+  Lucrex · Everlight Ventures · Team usage report · Run again with <code>intel team-usage</code>
+</footer>
+</body></html>

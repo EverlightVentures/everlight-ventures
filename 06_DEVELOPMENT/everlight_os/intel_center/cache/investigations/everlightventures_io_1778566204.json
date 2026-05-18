@@ -1,0 +1,228 @@
+{
+  "investigation_id": "everlightventures_io_1778566204",
+  "target": "everlightventures.io",
+  "kind": "domain",
+  "started_at": "2026-05-11T23:10:04.443588",
+  "finished_at": "2026-05-11T23:10:11.065394",
+  "elapsed_ms": 6621,
+  "total_findings": 17,
+  "investigators_run": 6,
+  "results": [
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Dehashed",
+          "value": "Search (login required)",
+          "url": "https://dehashed.com/search?query=everlightventures.io"
+        },
+        {
+          "label": "Intelligence X",
+          "value": "Search",
+          "url": "https://intelx.io/?s=everlightventures.io"
+        }
+      ],
+      "raw": {
+        "hibp_breaches": {
+          "status": 200,
+          "len": 2
+        }
+      },
+      "elapsed_ms": 1119,
+      "investigator": "Leak Check",
+      "investigator_id": "leak_check"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Detail link",
+          "value": "https://who.is/whois/everlightventures.io",
+          "url": "https://who.is/whois/everlightventures.io"
+        }
+      ],
+      "raw": {
+        "rdap_verisign": {
+          "status": 404,
+          "len": 0,
+          "err": null
+        }
+      },
+      "elapsed_ms": 1512,
+      "investigator": "WHOIS Lookup",
+      "investigator_id": "whois"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "\u00b7 site:github.com",
+          "value": "EverlightVentures \u00b7 GitHub",
+          "url": "https://github.com/EverlightVentures"
+        },
+        {
+          "label": "\u00b7 site:github.com",
+          "value": "EverlightVentures / Repositories \u00b7 GitHub",
+          "url": "https://github.com/EverlightVentures?tab=repositories"
+        }
+      ],
+      "raw": {
+        "\"{q}\"": {
+          "status": 200,
+          "len": 9323
+        },
+        "{q} site:linkedin.com": {
+          "status": 202,
+          "len": 14282
+        },
+        "{q} site:github.com": {
+          "status": 200,
+          "len": 32290
+        },
+        "{q} site:reddit.com": {
+          "status": 202,
+          "len": 14230
+        },
+        "{q} filetype:pdf": {
+          "status": 202,
+          "len": 14230
+        },
+        "{q} contact email": {
+          "status": 202,
+          "len": 14226
+        }
+      },
+      "elapsed_ms": 1838,
+      "investigator": "Search Dorks",
+      "investigator_id": "google_dorks"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Subdomains (crt.sh)",
+          "value": "3 certificates",
+          "url": "https://crt.sh/?q=everlightventures.io"
+        },
+        {
+          "label": "Subdomain",
+          "value": "www.everlightventures.io"
+        },
+        {
+          "label": "Subdomain",
+          "value": "everlightventures.io"
+        },
+        {
+          "label": "Subdomain",
+          "value": "*.everlightventures.io"
+        },
+        {
+          "label": "URLscan submission",
+          "value": "https://everlightventures.io/",
+          "url": "https://urlscan.io/api/v1/result/01972816-254b-71cb-a5ad-ae550025b51a/"
+        },
+        {
+          "label": "OTX threat pulses",
+          "value": "0",
+          "url": "https://otx.alienvault.com/indicator/domain/everlightventures.io"
+        },
+        {
+          "label": "VirusTotal",
+          "value": "Open in browser",
+          "url": "https://www.virustotal.com/gui/domain/everlightventures.io"
+        },
+        {
+          "label": "SecurityTrails",
+          "value": "Open in browser",
+          "url": "https://securitytrails.com/domain/everlightventures.io"
+        }
+      ],
+      "raw": {
+        "crt_sh": {
+          "status": 200,
+          "len": 16986
+        },
+        "urlscan": {
+          "status": 200,
+          "len": 1545
+        },
+        "otx": {
+          "status": 200,
+          "len": 577
+        }
+      },
+      "elapsed_ms": 4825,
+      "investigator": "Domain Intel",
+      "investigator_id": "domain_intel"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Sweep summary",
+          "value": "3 of 22 platforms returned a profile page for 'everlightventuresio'"
+        },
+        {
+          "label": "\u2713 Instagram",
+          "value": "found",
+          "url": "https://www.instagram.com/everlightventuresio/"
+        },
+        {
+          "label": "\u2713 Reddit",
+          "value": "found",
+          "url": "https://www.reddit.com/user/everlightventuresio"
+        },
+        {
+          "label": "\u2713 Pinterest",
+          "value": "found",
+          "url": "https://www.pinterest.com/everlightventuresio/"
+        }
+      ],
+      "raw": {
+        "Twitter/X": 403,
+        "Medium": 403,
+        "YouTube": 404,
+        "LinkedIn": 405,
+        "TikTok": 403,
+        "Instagram": 200,
+        "GitHub": 404,
+        "Reddit": 200,
+        "StackOverflow": 404,
+        "Patreon": 404,
+        "Gravatar": 404,
+        "Keybase": 404,
+        "Pinterest": 200,
+        "Behance": 404,
+        "ProductHunt": 404,
+        "Twitch": 405,
+        "DeviantArt": 404,
+        "About.me": 404,
+        "Vimeo": 404,
+        "SoundCloud": 404,
+        "Flickr": 404,
+        "Dribbble": 0
+      },
+      "elapsed_ms": 5361,
+      "investigator": "Social Recon",
+      "investigator_id": "social_recon"
+    },
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "wayback_available": {
+          "status": 200,
+          "len": 65,
+          "err": null
+        },
+        "search": {
+          "status": 200,
+          "len": 290
+        }
+      },
+      "elapsed_ms": 6457,
+      "investigator": "Archive.org / Wayback",
+      "investigator_id": "archive_org"
+    }
+  ]
+}

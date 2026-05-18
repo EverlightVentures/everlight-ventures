@@ -1,0 +1,40 @@
+LI
+ByteClave
+platforms for finding hard-to- access information..
+¢ mindat.org - World's largest mineral and meteorite database..
+e refseek.com - Academic-focused search engine that filters low-quality sources
+* opencorporates.com - Data on 225 milliont+ global companies.
+¢ biodiversitylibrary.org - Millions of rare biology books digitized.
+* europeana.eu - 50 million+ digitized European cultural artifacts.
+¢ iucnredlist.org - Extinction risk data for every known species
+* openverse.org - 800 million+ openly licensed media files
+¢ etymonline.com - Full origin history of every English word
+¢ freemusicarchive.org - copyrightt-free music database curated by radio stations
+¢ openfoodfacts.org - Nutrient data on 3 million food products
+¢ elephind.com - Millions of historical newspapers searchable
+° oxrep.classics.ox.ac.uk - Ancient Roman trade and shipwreck data.
+¢ drugbank.com - Deep data on every approved drug worldwide
+¢ zenodo.org - Open research data from every scientific field
+¢ semanticscholar.org - 220 million academic papers ...free
+¢ openalex.org - Open catalog of every scholarly work published
+¢ musicbrainz.org - Open encyclopedia of all music metadata
+* openaq.org - Real-time air quality data for every city
+¢ adsb.fi - Community flight tracking data..
+¢ antcat.org - Every ant species ever discovered, catalogued
+¢ ebird.org - 1 billion bird observation records worldwide
+¢ lens.org - Free patent and scholarly literature database
+¢ paleobiodb.org - Fossil records spanning 500 million years
+¢ standardebooks.org - Professionally formatted public domain ebooks
+¢ inventaire.io - Open database of every book edition published
+¢ crossref.org - DOI metadata for every published paper
+e jstor.org - Millions of academic articles,... some fully free.
+¢ ourworldindata.org - Data visualizations on every global issue
+° opencontext.org - Free archaeological excavation data worldwide
+° pangaea.cde - Raw ocean and Earth science research data
+e sentinel-hub.com - analyze satellite imagery of Earth in near real-time..
+* repec.org - Massive database of economics papers, authors and institutions
+¢ offshoreleaks.icij.org - offshore companies and hidden financial networks data .
+¢ softwareheritage.org - Archive preserving all publicly available source code
+¢ roadsideamerica.com - Database of bizarre and obscure roadside attractions.
+¢ oldmapsonline.org - Search engine specifically for rare historical maps,
+¢ documentcloud.org - analyze leaked and investigative documents.

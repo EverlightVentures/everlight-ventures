@@ -1,0 +1,40 @@
+LJ:
+ByteClave
+Hidden scientific platforms worth discovering
+ scifinder.cas.org - Every chemical reaction ever published ..
+* comptox.epa.gov - Toxicity data for 900,000 chemicals from EPA models
+e neuroelectro.org - Electrophysiology data from every neuron type published
+° iswa.gsfc.nasa.gov - Real-time 3D model of solar wind hitting Earth
+e geneontology.org - Universal describing biological function across species
+e targetvalidation.org - Links every human gene to its disease evidence
+e cede.cam.ac.uk - World's largest organic crystal structure repository
+e sdss.org - Navigate every galaxy photo ever captured digitally
+e exoplanetarchive.ipac.caltech.edu - Every confirmed exoplanet with full data
+e ned.ipac.caltech.edu - Database of every extragalactic object
+e argo.ucsd.edu - Temperature and salinity from 4,000 autonomous ocean floats
+¢ protocols.io - Every lab procedure and scientific method
+e humanconnectome.org - Complete human brain wiring maps at neuron scale
+e neuromorpho.org - Every neuron shape ever reconstructed and archived
+e pangaea.de - Ocean and earth science datasets across centuries
+e essoar.org - Earth science preprints before peer review exists
+e cds.cern.ch - Every particle physics document CERN ever produced
+e swissmodel.expasy.org - Predict any protein 3D structure
+e phenome.jax.org - Every mouse genetic phenotype ever measured
+¢ knb.ecoinformatics.org - raw ecological field data downloadable
+e osdr.nasa.gov - Biological data from every NASA space mission
+¢ eol.org - Encyclopedia covering every species ever formally named
+* openneuro.org - Thousands of human brain scan datasets
+¢ turbulence.pha.jhu.edu - Queryable petabyte-scale fluid turbulence simulations
+e cactus.nci.nih.gov - Convert any chemical name to structure instantly
+¢ sdbs.db.aist.go.jp - Spectral database for 35,000 organic chemical compounds
+e earthdata.nasa.gov - Every satellite Earth observation NASA ever collected
+e nsidc.org - Complete record of every sea ice extent measured
+¢ volcano.si.edu - Real-time data from every active volcano globally
+ tide-forecast.com - Exact tide predictions for any coastal point worldwide
+e ncei.noaa.gov - Every weather measurement recorded on Earth since 1900
+¢ minorplanetcenter.net - Live orbital data for every asteroid ever discovered
+* swpc.noaa.gov - Real-time solar storm and geomagnetic disturbance forecasts
+e chemspider.com - Search 100 million chemical structures with properties
+¢ tephrabase.org - Every volcanic ash layer found in ice cores
+¢ icebridge.gsfc.nasa.gov - Aerial radar maps beneath both polar ice sheets
+e spectroscopyonline.com - Identify unknown materials using spectral libraries..

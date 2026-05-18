@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0f">
+<title>Resource · Intel Center</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        ev: { bg:'#0a0a0f', surface:'#111118', s2:'#1a1a24', s3:'#222230', s4:'#2d2d3d',
+              gold:'#c9a84c', goldDim:'#a0832e', goldGlow:'#e0c66a',
+              cyan:'#22d3ee', purple:'#8b5cf6', green:'#22c55e',
+              orange:'#f97316', red:'#dc2626', text:'#e8e8e8', dim:'#999' }
+      },
+      fontFamily: {
+        display: ['"Playfair Display"','serif'],
+        sans:    ['"DM Sans"','"Inter"','sans-serif'],
+        body:    ['"Inter"','sans-serif'],
+        mono:    ['"JetBrains Mono"','monospace'],
+      },
+      boxShadow: { glow:'0 0 40px rgba(201,168,76,0.25)', glowStrong:'0 0 60px rgba(201,168,76,0.5)' },
+    }
+  }
+}
+</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="./data.js"></script>
+
+<style>
+  :root { --gold:#c9a84c; --gold-dim:#a0832e; --gold-glow:#e0c66a; --bg:#0a0a0f; }
+  *{ -webkit-tap-highlight-color:transparent; }
+  html,body{ background:var(--bg); color:#e8e8e8; font-family:"Inter",sans-serif; overflow-x:hidden; }
+  .mesh{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .mesh::before, .mesh::after, .mesh > span{
+    content:''; position:absolute; border-radius:50%; filter:blur(80px); opacity:0.45;
+    animation: drift 22s ease-in-out infinite;
+  }
+  .mesh::before{ width:520px; height:520px; left:-10%;  top:-15%; background:radial-gradient(closest-side,#3a2a08,transparent); }
+  .mesh::after { width:480px; height:480px; right:-8%;  top:35%;  background:radial-gradient(closest-side,#1b1135,transparent); animation-delay:-7s; }
+  .mesh > span { width:600px; height:600px; left:35%;   bottom:-20%; background:radial-gradient(closest-side,#0a2027,transparent); animation-delay:-14s; }
+  @keyframes drift{ 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(40px,-30px) scale(1.05)} 66%{transform:translate(-30px,40px) scale(0.95)} }
+
+  .glass{ background:linear-gradient(135deg, rgba(17,17,24,0.78), rgba(17,17,24,0.45));
+          border:1px solid rgba(255,255,255,0.06); backdrop-filter:blur(12px) saturate(140%);
+          -webkit-backdrop-filter:blur(12px) saturate(140%); }
+  .glass-gold{ background:linear-gradient(135deg, rgba(201,168,76,0.10), rgba(201,168,76,0.02));
+               border:1px solid rgba(201,168,76,0.35); }
+  .gold{ color:var(--gold); }
+  .gold-glow{ text-shadow:0 0 24px rgba(201,168,76,0.45); }
+  .lift{ transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+  .lift:hover{ transform:translateY(-2px); border-color:rgba(201,168,76,0.5); box-shadow:0 8px 32px rgba(201,168,76,0.12); }
+  .nav-link{ color:#999; transition:color .2s; padding:.5rem .9rem; border-radius:.5rem; }
+  .nav-link:hover{ color:#e0c66a; background:rgba(201,168,76,0.06); }
+  .nav-link.active{ color:#c9a84c; background:rgba(201,168,76,0.12); border:1px solid rgba(201,168,76,0.25); }
+  .bar{ height:6px; background:rgba(255,255,255,.06); border-radius:3px; overflow:hidden; position:relative; }
+  .bar > i{ display:block; height:100%; background:linear-gradient(90deg,#c9a84c,#e0c66a); border-radius:3px; }
+  .chip{ display:inline-flex; align-items:center; gap:.35rem; padding:.18rem .55rem; border-radius:9999px; font-size:.7rem;
+         font-family:"JetBrains Mono",monospace; letter-spacing:.04em; }
+  .chip-gold{ background:rgba(201,168,76,.10); color:#e0c66a; border:1px solid rgba(201,168,76,.3); }
+  .chip-green{ background:rgba(34,197,94,.10); color:#4ade80; border:1px solid rgba(34,197,94,.3); }
+  .chip-red{   background:rgba(220,38,38,.10); color:#f87171; border:1px solid rgba(220,38,38,.3); }
+  .chip-cyan{  background:rgba(34,211,238,.10); color:#67e8f9; border:1px solid rgba(34,211,238,.3); }
+  main{ animation: fadein .35s ease-out both; }
+  @keyframes fadein{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)} }
+  input.search{ background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:#e8e8e8;
+                 padding:.6rem 1rem .6rem 2.5rem; border-radius:.6rem; width:100%; outline:none;
+                 transition: border-color .2s; }
+  input.search:focus{ border-color:#c9a84c; }
+  .pill-btn{ padding:.35rem .9rem; border-radius:9999px; font-size:.78rem; cursor:pointer;
+              border:1px solid rgba(255,255,255,0.12); transition: all .2s; }
+  .pill-btn:hover{ border-color:#c9a84c; color:#e0c66a; }
+  .pill-btn.on{ background:rgba(201,168,76,0.15); border-color:#c9a84c; color:#e0c66a; }
+  table.intel{ width:100%; border-collapse:collapse; }
+  table.intel th, table.intel td{ text-align:left; padding:.6rem .8rem; border-bottom:1px solid rgba(255,255,255,0.05); font-size:.85rem; }
+  table.intel th{ background:rgba(201,168,76,0.04); color:#c9a84c; font-weight:500; text-transform:uppercase; letter-spacing:.08em; font-size:.7rem; }
+  table.intel tr:hover td{ background:rgba(201,168,76,0.03); }
+  table.intel a{ color:#e0c66a; }
+  table.intel a:hover{ text-decoration:underline; }
+</style>
+</head>
+<body class="min-h-screen relative">
+<div class="mesh"><span></span></div>
+<div id="app" class="relative z-10"></div>
+
+<script type="module">
+
+import { html, render, h, useState, useMemo, D, fmt, useLucide, Icon, Nav, Footer } from "./shared.js";
+
+function ResourcePage(){
+  useLucide();
+  const params = new URLSearchParams(location.search);
+  const dParam = (params.get("d") || "").toLowerCase();
+  const idParam = params.get("id");
+  const r = D.resources.find(x => x.domain === dParam || x.id === idParam) || D.resources[0];
+
+  if (!r) return html`<${Nav}/><main class="max-w-7xl mx-auto px-5 pt-8"><div class="glass rounded-xl p-8">Resource not found.</div></main><${Footer}/>`;
+
+  const related = D.resources
+    .filter(x => x.category === r.category && x.domain !== r.domain)
+    .slice(0, 6);
+  const setupLines = (r.setup_steps || "").split("\n").filter(Boolean);
+
+  return html`
+    <${Nav} active="resources"/>
+    <main class="max-w-7xl mx-auto px-5 pt-8 pb-20">
+      <div class="text-xs text-ev-dim mb-3">
+        <a href="./resources.html" class="hover:text-ev-gold">Resources</a>
+        <span class="mx-1">/</span>
+        <a href=${"./categories.html#" + encodeURIComponent(r.category)} class="hover:text-ev-gold">${r.category}</a>
+        <span class="mx-1">/</span>
+        <span class="font-mono">${r.domain}</span>
+      </div>
+
+      <!-- Hero -->
+      <section class="glass-gold rounded-2xl p-7 mb-6 relative overflow-hidden">
+        <div class="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-ev-gold/10 blur-3xl"></div>
+        <div class="text-[11px] uppercase tracking-[.22em] text-ev-goldDim mb-2">${r.department}</div>
+        <h1 class="font-display text-4xl gold gold-glow leading-tight">${r.name}</h1>
+        <a href=${r.url} target="_blank" rel="noopener" class="font-mono text-lg gold hover:underline mt-1 inline-block">${r.domain}</a>
+        <p class="text-ev-text/80 mt-3">${r.purpose}</p>
+        <div class="flex flex-wrap gap-2 mt-4">
+          <span class="chip chip-gold">${r.category}</span>
+          ${r.in_use && html`<span class="chip chip-green">USED IN WORKSPACE</span>`}
+          ${r.verified_status === "checked" && html`<span class="chip chip-cyan">CURATED</span>`}
+          ${r.verified_status === "unverified" && html`<span class="chip chip-red">REVIEW</span>`}
+          <span class="chip chip-cyan">${r.article_count || 0} cached items</span>
+        </div>
+        <div class="mt-5 flex flex-wrap gap-3 text-sm">
+          <a href=${r.url} target="_blank" rel="noopener" class="px-4 py-2 rounded-lg bg-ev-gold/10 border border-ev-gold/40 hover:bg-ev-gold/20 transition gold flex items-center gap-2">
+            <${Icon} name="external-link" cls="w-4 h-4"/> Open ${r.domain}
+          </a>
+          <button onClick=${() => navigator.clipboard?.writeText(`intel pull ${r.domain}`)} class="px-4 py-2 rounded-lg glass border border-white/10 hover:border-ev-gold/40 transition flex items-center gap-2">
+            <${Icon} name="copy" cls="w-4 h-4"/> Copy `intel pull` command
+          </button>
+        </div>
+      </section>
+
+      <div class="grid lg:grid-cols-3 gap-6">
+        <!-- LEFT: Use case + setup -->
+        <div class="lg:col-span-2 space-y-6">
+          ${r.use_case && html`
+            <section class="glass rounded-2xl p-6">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-9 h-9 rounded-lg bg-ev-purple/10 border border-ev-purple/30 grid place-items-center">
+                  <${Icon} name="target" cls="w-4 h-4 text-ev-purple"/>
+                </div>
+                <h2 class="font-display text-2xl gold">Use case</h2>
+              </div>
+              <p class="text-ev-text/85 leading-relaxed">${r.use_case}</p>
+            </section>`}
+
+          ${setupLines.length > 0 && html`
+            <section class="glass rounded-2xl p-6">
+              <div class="flex items-center gap-3 mb-3">
+                <div class="w-9 h-9 rounded-lg bg-ev-cyan/10 border border-ev-cyan/30 grid place-items-center">
+                  <${Icon} name="list-checks" cls="w-4 h-4 text-ev-cyan"/>
+                </div>
+                <h2 class="font-display text-2xl gold">Setup</h2>
+              </div>
+              <ol class="space-y-2 list-decimal list-inside text-sm text-ev-text/80">
+                ${setupLines.map(line => html`<li>${line.replace(/^\d+\.\s*/, "")}</li>`)}
+              </ol>
+            </section>`}
+
+          <!-- Latest cached articles -->
+          <section class="glass rounded-2xl p-6">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-ev-gold/10 border border-ev-gold/30 grid place-items-center">
+                  <${Icon} name="rss" cls="w-4 h-4 gold"/>
+                </div>
+                <h2 class="font-display text-2xl gold">Latest items</h2>
+              </div>
+              <span class="font-mono text-xs gold">${r.article_count || 0}</span>
+            </div>
+            ${(r.articles || []).length === 0
+              ? html`
+                <div class="text-sm text-ev-dim">
+                  No cached items yet. Pull live with:
+                  <pre class="font-mono text-sm bg-black/40 rounded-lg p-3 mt-3 border border-white/10"><span class="gold">$</span> intel pull ${r.domain}</pre>
+                </div>`
+              : html`
+                <div class="space-y-3">
+                  ${(r.articles || []).map(a => html`
+                    <a href=${a.url} target="_blank" rel="noopener" class="block lift rounded-lg p-3 border border-white/5 hover:bg-ev-gold/5">
+                      <div class="font-medium text-sm text-ev-text">${a.title}</div>
+                      ${a.summary && html`<div class="text-xs text-ev-text/60 mt-1">${a.summary.slice(0,200)}</div>`}
+                      <div class="flex gap-3 mt-1 text-[11px] text-ev-dim">
+                        ${a.published && html`<span>${a.published}</span>`}
+                        ${a.fetched_at && html`<span>· cached ${a.fetched_at.slice(0,16)}</span>`}
+                      </div>
+                    </a>`)}
+                </div>`}
+          </section>
+        </div>
+
+        <!-- RIGHT: Owner card + related -->
+        <aside class="space-y-5">
+          <section class="glass rounded-2xl p-5">
+            <div class="text-[10px] uppercase tracking-[.2em] text-ev-dim mb-2">Owned by</div>
+            <a href=${"./agents.html#" + r.agent_owner.toLowerCase().replace(/[^a-z0-9]+/g,'_')}
+               class="flex items-center gap-3 lift rounded-lg p-2 -mx-2">
+              <div class="w-12 h-12 rounded-full bg-ev-gold/10 grid place-items-center font-bold gold border border-ev-gold/30">
+                ${r.agent_owner.split(" ").map(s=>s[0]).join("")}
+              </div>
+              <div>
+                <div class="font-medium gold">${r.agent_owner}</div>
+                <div class="text-[11px] text-ev-dim">${r.department}</div>
+              </div>
+            </a>
+            <div class="mt-3 text-[11px] text-ev-dim">
+              <div>ID: <span class="font-mono">${r.id}</span></div>
+              <div>Status: <span class="font-mono">${r.verified_status}</span></div>
+              <div>Last checked: <span class="font-mono">${r.last_checked || "n/a"}</span></div>
+            </div>
+          </section>
+
+          <section class="glass rounded-2xl p-5">
+            <div class="text-[10px] uppercase tracking-[.2em] text-ev-dim mb-3">Shell commands</div>
+            <pre class="font-mono text-xs bg-black/30 rounded p-3 border border-white/10 leading-relaxed overflow-x-auto"><span class="gold">$</span> intel show ${r.domain}
+<span class="gold">$</span> intel pull ${r.domain}
+<span class="gold">$</span> intel cat "${r.category}"</pre>
+          </section>
+
+          ${related.length > 0 && html`
+            <section class="glass rounded-2xl p-5">
+              <div class="text-[10px] uppercase tracking-[.2em] text-ev-dim mb-3">Related in ${r.category}</div>
+              <div class="space-y-1.5">
+                ${related.map(x => html`
+                  <a href=${"./resource.html?d=" + x.domain} class="block lift rounded p-2 border border-white/5 text-sm">
+                    <span class="font-mono gold">${x.domain}</span>
+                    <span class="text-xs text-ev-text/60 ml-2">${x.purpose.slice(0, 60)}</span>
+                  </a>`)}
+              </div>
+            </section>`}
+
+          ${r.in_use && r.evidence && html`
+            <section class="glass rounded-2xl p-5">
+              <div class="text-[10px] uppercase tracking-[.2em] text-ev-dim mb-2">Already used in</div>
+              <div class="space-y-1 text-[11px] font-mono text-ev-text/70">
+                ${r.evidence.split("; ").map(f => html`<div>→ ${f}</div>`)}
+              </div>
+            </section>`}
+        </aside>
+      </div>
+    </main>
+    <${Footer}/>`;
+}
+
+render(html`<${ResourcePage}/>`, document.getElementById("app"));
+
+</script>
+</body>
+</html>

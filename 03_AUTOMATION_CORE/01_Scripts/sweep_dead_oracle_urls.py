@@ -19,7 +19,7 @@ Mapping table (per the 2026-05-12 dashboard reorg):
 
 Skips: .bak.*, _logs/, cache/, .git/, node_modules/, .pyc, *.html (rendered snapshots)
 Refuses to touch .json/.yaml unless --include-config is passed.
-Writes diff log to _DASHBOARDS/SWEEP_LOG_<date>.md.
+Writes diff log to 09_DASHBOARD/sweeps/SWEEP_LOG_<date>.md.
 """
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ from datetime import datetime
 from pathlib import Path
 
 ROOT = Path("/mnt/sdcard/AA_MY_DRIVE")
-LOG_PATH = ROOT / "_DASHBOARDS" / f"SWEEP_LOG_{datetime.now().strftime('%Y-%m-%d')}.md"
+LOG_PATH = ROOT / "09_DASHBOARD/sweeps" / f"SWEEP_LOG_{datetime.now().strftime('%Y-%m-%d')}.md"
 
 # (regex, replacement, label) tuples in order of evaluation.
 # Order matters: more specific patterns first.

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-build_master_hub.py -- The Ultra Mind view. Generates _DASHBOARDS/index.html,
+build_master_hub.py -- The Ultra Mind view. Generates 09_DASHBOARD/sweeps/index.html,
 the page served at http://127.0.0.1:2000/.
 
 Replaces the static port-list with a categorized "metaverse" home screen that
@@ -41,8 +41,8 @@ sys.path.insert(0, str(ROOT / "03_AUTOMATION_CORE" / "01_Scripts" / "content_too
 from env_loader import load_env  # noqa: E402
 load_env()
 
-DASH_DIR = ROOT / "_DASHBOARDS"
-INTEL_DB = ROOT / "Everlight_Intel_Center" / "database" / "everlight_resources.sqlite"
+DASH_DIR = ROOT / "09_DASHBOARD/sweeps"
+INTEL_DB = ROOT / "06_DEVELOPMENT/everlight_os/intel_center" / "database" / "everlight_resources.sqlite"
 BLINKO_URL = "http://127.0.0.1:2700"
 REPORTS_BASE = "http://127.0.0.1:2200/reports"
 HUB_BASE = "http://127.0.0.1:2000"

@@ -1,0 +1,78 @@
+SES
+ByteClave
+
+Sites that provide Solutions to various problems..
+
+e Audiomass - Edit audio waveforms in browser,. no install
+
+e Squoosh - Shrinks image files by 90%...
+
+e Supercook - Enter fridge contents, get real dinner recipes
+
+e FutureMe - Email your future self years from now..
+
+e CyberChef - Decode, encrypt, hash anything in one browser tab.
+
+e Regex101 - Explains every regex command ..
+
+¢ Bundlephobia - Shows exact download cost of any npm package..
+
+e Explainshell - Break down any terminal command word by word.
+
+° Tally - Build free forms without code or account
+
+e Immersity - Turns any flat photo into a 3D parallax image
+
+e Gnoosic - Describe music taste, discover hidden artists
+
+e Rome 2rio - Any two places, every transport option priced
+
+e JustTheRecipe - Strips recipe blogs to ingredients and steps only
+
+e StillTasty - Lookup exactly how long any food stays safe
+
+e AccountKiller - Step-by-step guides to delete any online account
+
+e Untools - Thinking frameworks for solving complex problems
+
+e Htmirev - Free HTML templates for websites and dashboards
+
+e Keepa- Historical price graph for any product online
+
+e DocSend - See who opened your document and for how long..
+
+e TravelTime - Map everywhere reachable within a set time
+
+e Wakatime - Tracks every minute you spend coding automatically
+
+e Emojipedia - Deep history and rendering differences for every emoji
+
+e Coblis - Simulates color blindness on any uploaded image
+
+e Bionic Reading - Converts any text for faster reading speed
+
+e Screenotate - OCR screenshot tool that makes text searchable.
+
+e Mindmup - Brainstorm mind maps with zero friction
+
+e Photopills - Plan exact sun,, moon and Milky Way positions
+
+e Mathway - Solves any math problem with full shown steps
+
+e Wikenigma - Encyclopedia of things science still cannot explain
+
+° Tineye - Finds the oldest original source of any image.
+
+e Loudwire - Ranks heaviest songs by actual measured decibels.
+
+e BentoPDF - Runs 70-plus PDF operations entirely in browser
+
+e Coinmarketcap - Live crypto prices and market cap data.
+
+° Tasteatlas - Every traditional dish from every country documented
+
+e WebSDR - Listen to live radio signals from anywhere globally
+
+e Darebee - 1,000+ free science-backed workouts.
+
+e Namelix - generates short brandable business names ...

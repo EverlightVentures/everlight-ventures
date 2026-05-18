@@ -1,0 +1,1411 @@
+{
+  "investigation_id": "timothy_gillies_1778945387",
+  "target": "Timothy Gillies",
+  "kind": "person",
+  "started_at": "2026-05-16T08:29:47.885679",
+  "finished_at": "2026-05-16T08:30:46.065182",
+  "elapsed_ms": 58176,
+  "total_findings": 72,
+  "investigators_run": 14,
+  "triggered_by": "web_user",
+  "lead_id": null,
+  "business_purpose": "Test",
+  "verify_context": {
+    "owner_name": "Timothy Gillies",
+    "state": null,
+    "city": null,
+    "owner_email": null,
+    "owner_phone": null,
+    "address": null
+  },
+  "verification_summary": {
+    "total_findings": 72,
+    "verified": 8,
+    "rejected": 64,
+    "avg_confidence": 25,
+    "threshold": 50,
+    "highest_confidence_per_signal": {
+      "name_exact_match": 50
+    },
+    "lead_context_keys_provided": [
+      "owner_name"
+    ]
+  },
+  "dnc_blocked": false,
+  "dnc_reason": "",
+  "dnc_entry_id": null,
+  "results": [
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "is_estate": false,
+        "is_trust": false,
+        "obits_found": 0,
+        "normalized_decedent": "Gillies Timothy"
+      },
+      "elapsed_ms": 1,
+      "investigator": "Obituary + Estate",
+      "investigator_id": "obituary_estate",
+      "note": "Target does not appear to be estate/trust-flagged"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "OSINT & Investigation",
+          "value": "Allthatsinteresting \u2014 ddeep history true crime dark mysteries \u00b7 verified live",
+          "url": "https://allthatsinteresting.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Timothy Gillies' via OSINT & Investigation"
+          }
+        },
+        {
+          "label": "Maps & Geospatial",
+          "value": "Amazingplacesonearth \u2014 Showcases natural and cultural world wonders \u00b7 verified live",
+          "url": "https://amazingplacesonearth.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Timothy Gillies' via Maps & Geospatial"
+          }
+        },
+        {
+          "label": "Education & Training",
+          "value": "Abandonedspaces \u2014 abandoned buildings and forgotten global places \u00b7 verified live",
+          "url": "https://abandonedspaces.com",
+          "investigator_meta": {
+            "agent_owner": "Strategy Assistant",
+            "is_live": true,
+            "search_hint": "Research 'Timothy Gillies' via Education & Training"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "10015 \u2014 productivity tools collection \u00b7 verified live",
+          "url": "https://10015.io",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Research 'Timothy Gillies' via Decision Intelligence"
+          }
+        },
+        {
+          "label": "OSINT & Investigation",
+          "value": "Americanhauntingsink \u2014 Haunted American places ghost mysteries \u00b7 verified live",
+          "url": "https://americanhauntingsink.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Timothy Gillies' via OSINT & Investigation"
+          }
+        },
+        {
+          "label": "Maps & Geospatial",
+          "value": "Atlasobscura \u2014 hidden wondrous mysterious places worldwide \u00b7 verified live",
+          "url": "https://atlasobscura.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Timothy Gillies' via Maps & Geospatial"
+          }
+        },
+        {
+          "label": "Education & Training",
+          "value": "Animagraffs \u2014 Complex machines and systems explained \u00b7 verified live",
+          "url": "https://animagraffs.com",
+          "investigator_meta": {
+            "agent_owner": "Strategy Assistant",
+            "is_live": true,
+            "search_hint": "Research 'Timothy Gillies' via Education & Training"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "Amusingplanet \u2014 unusual natural and manmade global phenomena \u00b7 verified live",
+          "url": "https://amusingplanet.com",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Research 'Timothy Gillies' via Decision Intelligence"
+          }
+        },
+        {
+          "label": "OSINT & Investigation",
+          "value": "Ancient Code \u2014 ancient alien forbidden suppressed history \u00b7 verified live",
+          "url": "https://ancient-code.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Timothy Gillies' via OSINT & Investigation"
+          }
+        },
+        {
+          "label": "Maps & Geospatial",
+          "value": "Factinate \u2014 surprising facts about places worldwide \u00b7 verified live",
+          "url": "https://factinate.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Timothy Gillies' via Maps & Geospatial"
+          }
+        },
+        {
+          "label": "Education & Training",
+          "value": "Batteryuniversity \u2014 Deep dive into battery chemistry and systems \u00b7 verified live",
+          "url": "https://batteryuniversity.com",
+          "investigator_meta": {
+            "agent_owner": "Strategy Assistant",
+            "is_live": true,
+            "search_hint": "Research 'Timothy Gillies' via Education & Training"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "Astronomyonline \u2014 Best collection of astronomy education resources \u00b7 verified live",
+          "url": "https://astronomyonline.org",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Research 'Timothy Gillies' via Decision Intelligence"
+          }
+        }
+      ],
+      "raw": {
+        "total_matched": 71,
+        "categories_used": [
+          "OSINT & Investigation",
+          "Maps & Geospatial",
+          "Education & Training",
+          "Decision Intelligence"
+        ],
+        "kind": "person"
+      },
+      "elapsed_ms": 27,
+      "investigator": "Catalogued Sources",
+      "investigator_id": "resource_lookup"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Archive item",
+          "value": "Castleton Select Board - March 27, 2023",
+          "url": "https://archive.org/details/pegtvvt-Castleton_Select_Board_-_March_27_2023",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "Ultrastructural and clinical evidence of subretinal debris accumulation in type 2 macular telangiect",
+          "url": "https://archive.org/details/pubmed-PMC3512427",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "E.D. Feehan High School 01981-82 Yearbook",
+          "url": "https://archive.org/details/e.d.feehanhighschool198182yearbook",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "Radiation oncology : technology and biology",
+          "url": "https://archive.org/details/radiationoncolog0000mauc",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "E.D. Feehan High School 01980-81 Yearbook",
+          "url": "https://archive.org/details/e.d.feehanhighschool198081yearbook",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        }
+      ],
+      "raw": {
+        "search": {
+          "status": 200,
+          "len": 993
+        }
+      },
+      "elapsed_ms": 562,
+      "investigator": "Archive.org / Wayback",
+      "investigator_id": "archive_org"
+    },
+    {
+      "ok": false,
+      "findings": [
+        {
+          "label": "Reverse WHOIS search (no automated hits)",
+          "value": "open browser to check 'Timothy Gillies'",
+          "url": "https://viewdns.info/reversewhois/?q=Timothy%20Gillies",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "reverse_whois"
+          }
+        }
+      ],
+      "raw": {
+        "source": "no_results",
+        "domains_found": 0
+      },
+      "elapsed_ms": 514,
+      "investigator": "Reverse WHOIS",
+      "investigator_id": "reverse_whois"
+    },
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "yelp": 0,
+        "goodreads": 0,
+        "letterboxd": 0,
+        "strava": 0,
+        "untappd": 0,
+        "spotify": 0,
+        "producthunt": 0
+      },
+      "elapsed_ms": 1681,
+      "investigator": "Consumer Signals (deep mine)",
+      "investigator_id": "consumer_signals"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Twitter/X interests",
+          "value": "#FFF, #placeholder, #react",
+          "url": "https://twitter.com/timothygillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "social_bio_scraper"
+          }
+        },
+        {
+          "label": "Pinterest interests",
+          "value": "#e2e2e2, #dadada",
+          "url": "https://www.pinterest.com/timothygillies/",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "social_bio_scraper"
+          }
+        }
+      ],
+      "raw": {
+        "GitHub": {
+          "status": 404,
+          "len": 9
+        },
+        "Reddit": {
+          "status": 403,
+          "len": 189906
+        },
+        "ProductHunt": {
+          "status": 404,
+          "len": 70712
+        },
+        "Medium": {
+          "status": 403,
+          "len": 5400
+        },
+        "About.me": {
+          "status": 404,
+          "len": 66947
+        },
+        "Twitter/X": {
+          "status": 200,
+          "len": 266745
+        },
+        "Keybase": {
+          "status": 404,
+          "len": 7140
+        },
+        "Pinterest": {
+          "status": 200,
+          "len": 941836
+        },
+        "Behance": {
+          "status": 404,
+          "len": 360562
+        },
+        "Dribbble": {
+          "status": 404,
+          "len": 21143
+        }
+      },
+      "elapsed_ms": 2137,
+      "investigator": "Deep Social Mine",
+      "investigator_id": "social_bio_scraper"
+    },
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "fec": 0,
+        "nonprofit": 0,
+        "gofundme": 0,
+        "patents": 0
+      },
+      "elapsed_ms": 2431,
+      "investigator": "Civic + Philanthropy (deep mine)",
+      "investigator_id": "philanthropy_civic"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "\"\u00b7\"",
+          "value": "Timothy Gillies (9 matches): Phone Number, Email, Address - Spokeo",
+          "url": "https://www.spokeo.com/Timothy-Gillies",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\"\u00b7\"",
+          "value": "Timothy Gillies - Facebook",
+          "url": "https://www.facebook.com/timothy.gillies/",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\u00b7 site:github.com",
+          "value": "teste Pedro \u00b7 GitHub",
+          "url": "https://gist.github.com/pedrocapella/3c414b082aa0e182f28fb6dafa8b8855",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\u00b7 site:github.com",
+          "value": "unsupervised_topic_modeling/topics/en/17/100/50/topics at ... - GitHub",
+          "url": "https://github.com/annontopicmodel/unsupervised_topic_modeling/blob/master/topics/en/17/100/50/topics",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "google_dorks"
+          }
+        }
+      ],
+      "raw": {
+        "\"{q}\"": {
+          "status": 200,
+          "len": 30109
+        },
+        "{q} site:linkedin.com": {
+          "status": 202,
+          "len": 14209
+        },
+        "{q} site:github.com": {
+          "status": 200,
+          "len": 33490
+        },
+        "{q} site:reddit.com": {
+          "status": 202,
+          "len": 14214
+        },
+        "{q} filetype:pdf": {
+          "status": 202,
+          "len": 14220
+        },
+        "{q} contact email": {
+          "status": 202,
+          "len": 14216
+        }
+      },
+      "elapsed_ms": 2794,
+      "investigator": "Search Dorks",
+      "investigator_id": "google_dorks"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Dehashed",
+          "value": "Search (login required)",
+          "url": "https://dehashed.com/search?query=Timothy%20Gillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        },
+        {
+          "label": "Intelligence X",
+          "value": "Search",
+          "url": "https://intelx.io/?s=Timothy%20Gillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        }
+      ],
+      "raw": {
+        "hibp_breaches": {
+          "status": 200,
+          "len": 2
+        }
+      },
+      "elapsed_ms": 2832,
+      "investigator": "Leak Check",
+      "investigator_id": "leak_check"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Sweep summary",
+          "value": "3 of 22 platforms returned a profile page for 'timothygillies'",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Instagram",
+          "value": "found",
+          "url": "https://www.instagram.com/timothygillies/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Reddit",
+          "value": "found",
+          "url": "https://www.reddit.com/user/timothygillies",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Pinterest",
+          "value": "found",
+          "url": "https://www.pinterest.com/timothygillies/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        }
+      ],
+      "raw": {
+        "Twitter/X": 403,
+        "GitHub": 404,
+        "Reddit": 200,
+        "TikTok": 403,
+        "LinkedIn": 405,
+        "StackOverflow": 404,
+        "Medium": 403,
+        "Instagram": 200,
+        "YouTube": 404,
+        "Pinterest": 200,
+        "ProductHunt": 404,
+        "Gravatar": 404,
+        "Keybase": 404,
+        "DeviantArt": 404,
+        "Patreon": 404,
+        "Behance": 404,
+        "Dribbble": 404,
+        "SoundCloud": 404,
+        "About.me": 404,
+        "Twitch": 405,
+        "Vimeo": 404,
+        "Flickr": 404
+      },
+      "elapsed_ms": 3420,
+      "investigator": "Social Recon",
+      "investigator_id": "social_recon"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "News mention",
+          "value": "Timothy Edward Howard Obituary (2025) - Brigham City, UT - Gillies Funeral Chapel - Brigham City - Legacy obituary",
+          "url": "https://news.google.com/rss/articles/CBMigwFBVV95cUxQRm5FblgxR2NvQ3BMbk1vdHU5WDdCTW5GZkdlSmJOTG91NjFKTE1ndU1qTlV4Uk11dDJSdVl4clBtVVZhMFhhMWR0MFZXblYxc29yM3laTVR1U0ZqX1dkMGdYdVNqbEZGemh5TzhvUENOZ3BsWFR2cml0X0JfNmZRbkRkcw?oc=5",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "public_records"
+          }
+        },
+        {
+          "label": "News mention",
+          "value": "Police arrest three-time fast-food restaurant robbery suspect - Tehachapi News",
+          "url": "https://news.google.com/rss/articles/CBMi3wFBVV95cUxPNUJ4SjUwVVRFT2tzMEphaWljemk3cHZvUzhSSExCeWxFLWw1clZyU01YdmpmTDRTVGhwbk5mUUJoTDJIT0NWMHBFeXB1clJmc3Jwbm9vTFVXQndlbHlBZHN4djdtNUhKZ3g0UV9XVndQcmZaU21HODdjUFFCRlo0dmZFbVU5aU1SWkFONHlRM09hY3dPLXlrNGdpS0xRcW0xdzJmenBTeld1VndWMW9WN3pRM2VjaG5qcVk4ZF8tZlJwblNINVNHY25RcW04U3VHMDFoMEtRRUwzOWp5bXo00gHkAUFVX3lxTFBkNHpabll4cXQ5V0gwbXYxWWNLSHY0U2NOdEVWMFBwaDBya1l6cl9TcTJsYTJKV1EyYkRzdUFyZzVyOG1FLWdmVG9nUlRjZTU3VHdZSWswbDBjVnVhbkRJcUk1Uk1ZRS0tYmFwa25yZU1wMDZWUzkxYXdzQlNqRktJaTJhU3VmQm9SOWNSampXUmxyaW9xVlR1Q0hWUmtkc3dycjB0dDlrR2pJakhNbFB4cnR0Zmg3WnBQS01wMXVvTHl1RE9ZcXI5a3J5ZTBZeGJPZEQwQjFraWpXbTRiODJQMWxwYg?oc=5",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "public_records"
+          }
+        },
+        {
+          "label": "News mention",
+          "value": "Marilyn Norman Obituary March 24, 2021 - Lindquist Mortuary",
+          "url": "https://news.google.com/rss/articles/CBMia0FVX3lxTE1oQ3VuMjJ4Snp1dmI4QWh4OEdwQUk5RGlaQlpLU0pNZ2xkOW9iQUpPR2ZCeW1QVThwVV9zU2xxVjhqN0JyNFhtMjhMRnlMMlpqdW54TXJxSTczRXlPMzlHSV8zOGxNanBSX0E0?oc=5",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "public_records"
+          }
+        },
+        {
+          "label": "News mention",
+          "value": "Military historian to share experience working on epic war film \u20181917\u2019 - Chatham Daily News",
+          "url": "https://news.google.com/rss/articles/CBMitwFBVV95cUxOeWYwdk1IMl9VWnJ6al9BdjA2d3k5VWtLQWxHM2EtNDFDdjBMWmU1U1kxMDJyVGhJWGMzNkFXbnM1a0luajg1Q2hDdTE2dXhTREFSWXBzY3k1QnM5czM2TmFvZmdlejN2bFhuZG1YNDNqMTZVUHNXd3UxYjdDQ3lxZXNWNmNqeTFxOGhSTnoza1BTbDl0VUt0MnZnbFF0MWlmcS05LWNyaFMyN1hickxrSkpHOTV0ZTg?oc=5",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "public_records"
+          }
+        },
+        {
+          "label": "News mention",
+          "value": "Timothy G. Scheidecker Obituary April 15, 2024 - Whitney &amp; Murphy Funeral Home",
+          "url": "https://news.google.com/rss/articles/CBMie0FVX3lxTE90cU8tR05iazBSX0Z4Q01DSE5pRVpiS3JJU09JMmZVd0RsMlFuY0xnOVlvNnUxbXF3VzFHelo1VVFiM1ltblJKSHVvMTYwbkNieUl2ZnRSdGswa29uYm1ybWxSWTlSdndXYW1IamNmV3luaXZBYkZkak1Paw?oc=5",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "public_records"
+          }
+        }
+      ],
+      "raw": {
+        "courtlistener": 0,
+        "opencorporates": 0,
+        "findagrave": 0,
+        "news_archive": 5
+      },
+      "elapsed_ms": 3828,
+      "investigator": "Public Records (deep mine)",
+      "investigator_id": "public_records"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Candidate \u00b7 score 25/100",
+          "value": "gillies.timothy@gmail.com (MX\u2192gmail-smtp-in.l.google.com)",
+          "url": "",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "email_discovery"
+          }
+        },
+        {
+          "label": "Candidate \u00b7 score 25/100",
+          "value": "gillies.timothy@yahoo.com (MX\u2192mta5.am0.yahoodns.net)",
+          "url": "",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "email_discovery"
+          }
+        },
+        {
+          "label": "Candidate \u00b7 score 25/100",
+          "value": "gillies.timothy@outlook.com (MX\u2192outlook-com.olc.protection.outlook.com)",
+          "url": "",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "email_discovery"
+          }
+        }
+      ],
+      "raw": {
+        "target": "Timothy Gillies",
+        "verified": 12,
+        "candidates": 30,
+        "top_candidates": [
+          "gillies.timothy@gmail.com",
+          "gillies.timothy@yahoo.com",
+          "gillies.timothy@outlook.com",
+          "gillies.timothy@hotmail.com",
+          "gillies.timothy@aol.com"
+        ],
+        "full_results": [
+          {
+            "email": "gillies.timothy@gmail.com",
+            "score": 25,
+            "mx_ok": true,
+            "emailrep": {},
+            "hibp_exists": null,
+            "summary": "MX\u2192gmail-smtp-in.l.google.com"
+          },
+          {
+            "email": "gillies.timothy@yahoo.com",
+            "score": 25,
+            "mx_ok": true,
+            "emailrep": {},
+            "hibp_exists": null,
+            "summary": "MX\u2192mta5.am0.yahoodns.net"
+          },
+          {
+            "email": "gillies.timothy@outlook.com",
+            "score": 25,
+            "mx_ok": true,
+            "emailrep": {},
+            "hibp_exists": null,
+            "summary": "MX\u2192outlook-com.olc.protection.outlook.com"
+          },
+          {
+            "email": "gillies.timothy@hotmail.com",
+            "score": 25,
+            "mx_ok": true,
+            "emailrep": {},
+            "hibp_exists": null,
+            "summary": "MX\u2192hotmail-com.olc.protection.outlook.com"
+          },
+          {
+            "email": "gillies.timothy@aol.com",
+            "score": 25,
+            "mx_ok": true,
+            "emailrep": {},
+            "hibp_exists": null,
+            "summary": "MX\u2192mx-aol.mail.gm0.yahoodns.net"
+          },
+          {
+            "email": "gilliestimothy@gmail.com",
+            "score": 25,
+            "mx_ok": true,
+            "emailrep": {},
+            "hibp_exists": null,
+            "summary": "MX\u2192gmail-smtp-in.l.google.com"
+          },
+          {
+            "email": "gilliestimothy@yahoo.com",
+            "score": 25,
+            "mx_ok": true,
+            "emailrep": {},
+            "hibp_exists": null,
+            "summary": "MX\u2192mta5.am0.yahoodns.net"
+          },
+          {
+            "email": "gilliestimothy@outlook.com",
+            "score": 25,
+            "mx_ok": true,
+            "emailrep": {},
+            "hibp_exists": null,
+            "summary": "MX\u2192outlook-com.olc.protection.outlook.com"
+          },
+          {
+            "email": "gilliestimothy@hotmail.com",
+            "score": 25,
+            "mx_ok": true,
+            "emailrep": {},
+            "hibp_exists": null,
+            "summary": "MX\u2192hotmail-com.olc.protection.outlook.com"
+          },
+          {
+            "email": "gilliestimothy@aol.com",
+            "score": 25,
+            "mx_ok": true,
+            "emailrep": {},
+            "hibp_exists": null,
+            "summary": "MX\u2192mx-aol.mail.gm0.yahoodns.net"
+          },
+          {
+            "email": "gtimothy@gmail.com",
+            "score": 25,
+            "mx_ok": true,
+            "emailrep": {},
+            "hibp_exists": null,
+            "summary": "MX\u2192gmail-smtp-in.l.google.com"
+          },
+          {
+            "email": "gtimothy@yahoo.com",
+            "score": 25,
+            "mx_ok": true,
+            "emailrep": {},
+            "hibp_exists": null,
+            "summary": "MX\u2192mta5.am0.yahoodns.net"
+          }
+        ]
+      },
+      "elapsed_ms": 4386,
+      "investigator": "Email Discovery",
+      "investigator_id": "email_discovery",
+      "top_score": 25,
+      "high_confidence": false
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "TruePeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.truepeoplesearch.com/results?name=Timothy%20Gillies",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "FastPeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.fastpeoplesearch.com/name/timothy-gillies",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ZabaSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.zabasearch.com/people/Timothy+Gillies",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ThatsThem",
+          "value": "HTTP 200",
+          "url": "https://thatsthem.com/name/Timothy-Gillies",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "Whitepages",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.whitepages.com/name/Timothy-Gillies",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        }
+      ],
+      "raw": {
+        "TruePeopleSearch": {
+          "status": 403
+        },
+        "FastPeopleSearch": {
+          "status": 403
+        },
+        "ZabaSearch": {
+          "status": 403
+        },
+        "ThatsThem": {
+          "status": 200
+        },
+        "Whitepages": {
+          "status": 403
+        }
+      },
+      "elapsed_ms": 4545,
+      "investigator": "Skip-Trace",
+      "investigator_id": "skip_trace"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "21buttons",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://www.21buttons.com/buttoner/timothygillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "247CTF",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://247ctf.com/progress/timothygillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "247sports",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://247sports.com/User/timothygillies/",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "35photo",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://35photo.pro/@timothygillies/",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "3DNews",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://forum.3dnews.tech/member.php?username=timothygillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "Airline_Pilot_Life",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://airlinepilot.life/u/timothygillies.json",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "alik",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://www.alik.cz/u/timothygillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "anonup",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://anonup.com/@timothygillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "Appian",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://community.appian.com/members/timothygillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "Arch Linux GitLab",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://gitlab.archlinux.org/api/v4/users?username=timothygillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "ArchWiki",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://wiki.archlinux.org/api.php?action=query&format=json&list=users&ususers=timothygillies&usprop=cancreate&formatversion=2&errorformat=html&errorsuselocal=true&uselang=en",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "Arduino (Project Hub)",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://projecthub.arduino.cc/timothygillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "ArmorGames",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://armorgames.com/user/timothygillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "Arsmate",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://arsmate.com/timothygillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "bblog_ru",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://www.babyblog.ru/user/timothygillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "BDSMLR",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://timothygillies.bdsmlr.com",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "bdsmsingles",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://www.bdsmsingles.com/members/timothygillies/",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "Bentbox",
+          "value": "@timothygillies present (HTTP 200)",
+          "url": "https://bentbox.co/timothygillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "21buttons (alt)",
+          "value": "@tgillies present (HTTP 200)",
+          "url": "https://www.21buttons.com/buttoner/tgillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "247CTF (alt)",
+          "value": "@tgillies present (HTTP 200)",
+          "url": "https://247ctf.com/progress/tgillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "247sports (alt)",
+          "value": "@tgillies present (HTTP 200)",
+          "url": "https://247sports.com/User/tgillies/",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "35photo (alt)",
+          "value": "@tgillies present (HTTP 200)",
+          "url": "https://35photo.pro/@tgillies/",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "3DNews (alt)",
+          "value": "@tgillies present (HTTP 200)",
+          "url": "https://forum.3dnews.tech/member.php?username=tgillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "Airline_Pilot_Life (alt)",
+          "value": "@tgillies present (HTTP 200)",
+          "url": "https://airlinepilot.life/u/tgillies.json",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "21buttons (alt)",
+          "value": "@timothy.gillies present (HTTP 200)",
+          "url": "https://www.21buttons.com/buttoner/timothy.gillies",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "247CTF (alt)",
+          "value": "@timothy.gillies present (HTTP 200)",
+          "url": "https://247ctf.com/progress/timothy.gillies",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "247sports (alt)",
+          "value": "@timothy.gillies present (HTTP 200)",
+          "url": "https://247sports.com/User/timothy.gillies/",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "35photo (alt)",
+          "value": "@timothy.gillies present (HTTP 200)",
+          "url": "https://35photo.pro/@timothy.gillies/",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "username_enrichment"
+          }
+        },
+        {
+          "label": "3DNews (alt)",
+          "value": "@timothy.gillies present (HTTP 200)",
+          "url": "https://forum.3dnews.tech/member.php?username=timothy.gillies",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "username_enrichment"
+          }
+        }
+      ],
+      "raw": {
+        "candidates": [
+          "timothygillies",
+          "tgillies",
+          "timothy.gillies",
+          "timothy_gillies",
+          "gillies"
+        ],
+        "platform_source": "whatsmyname_live",
+        "platforms_probed": 709,
+        "hits": 29,
+        "probes_used": 70
+      },
+      "elapsed_ms": 57745,
+      "investigator": "Username Enrichment",
+      "investigator_id": "username_enrichment"
+    }
+  ]
+}

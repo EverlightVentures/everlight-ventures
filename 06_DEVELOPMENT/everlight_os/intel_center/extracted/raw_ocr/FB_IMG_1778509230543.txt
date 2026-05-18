@@ -1,0 +1,67 @@
+ByteClave
+
+Platforms to decode how different systems operate
+
+e engine-sim.parts - See engine internals move in real time
+
+¢ tanks-encyclopedia.com - breakdowns of armored vehicle systems
+
+¢ lightingdesignlab.com -understand Lighting systems designs
+
+¢ nuclear-power.com -explore Reactor systems and nuclear plant operations
+
+¢ learn.sparkfun.com - electronics parts and how they function
+
+¢ mitmproxy.org - inspect application network transactions
+
+¢ falstad.com - understand circuits and signals flow
+
+* nandgame.com - Build a computer from basic components.
+
+¢ cpu.land - Watch how a CPU runs instructions
+
+¢ bosch-mobility.com - See how modern car systems operate
+
+¢ realpars.com - lessons on industrial automation and control systems
+
+« rfglobalnet.com - Radio frequency systems and wireless signal behavior
+
+¢ howacarworks.com - Simple visuals of car parts working together
+
+¢ animagraffs.com - visuals of complex machines explained
+
+« chemicalprocessing.com - Explore chemical systems operations
+
+¢ dnsviz.net - Analyze DNS trust chains and resolution paths
+
+¢ opendss.epri.com - Explore power distribution and voltage control
+
+« skybrary.aero - how aircraft systems function
+
+¢ practicalmachinist.com - understand metalworking systems
+
+¢ chipestimate.com - Chip design systems and silicon architecture
+
+« dronezon.com - Learn drone systems flight control and sensors
+
+e marineinsight.com - Understand ship systems and operations
+
+¢ batteryuniversity.com - Deep dive into battery chemistry and systems
+
+¢ gazebosim.org - Simulates robots sensors and physics interactions
+
+¢ internetexchangemap.com - Learn how internet traffic gets routed
+
+e peeringdb.com - how networks connect and exchange data
+
+¢ roboticsbiz.com - Learn how robots work in industries
+
+* semiengineering.com - Semiconductor fabrication systems explained
+
+¢ learnabout-electronics.org - Understand electronic systems
+
+e soundonsound.com - Audio production systems explained
+
+« datacenterknowledge.com - Data center infrastructure explained
+
+* navweaps.com - Naval weapon systems and firing mechanisms detailed

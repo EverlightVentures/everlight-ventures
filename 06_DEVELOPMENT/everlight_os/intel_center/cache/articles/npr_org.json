@@ -1,0 +1,68 @@
+{
+  "domain": "npr.org",
+  "method": "rss",
+  "rss_path": "https://feeds.npr.org/1001/rss.xml",
+  "items": [
+    {
+      "title": "Trump taps former FEMA director to lead the disaster agency again",
+      "url": "https://www.npr.org/2026/05/11/nx-s1-5818675/trump-fema-disaster-emergency-hamilton-nominate",
+      "published": "Mon, 11 May 2026 20:59:14 -0400",
+      "summary": "Cameron Hamilton led FEMA briefly in 2025. He was removed by the Trump administration after telling Congress that the agency should continue to exist. Now, he's been nominated to lead it once again."
+    },
+    {
+      "title": "Nonprofit sues the federal government over plans to paint Lincoln Memorial Reflecting Pool blue",
+      "url": "https://www.npr.org/2026/05/11/g-s1-121548/a-nonprofit-has-sued-the-federal-government-over-its-plans-to-paint-the-lincoln-memorial-reflecting-pool-blue",
+      "published": "Mon, 11 May 2026 20:10:36 -0400",
+      "summary": "The Cultural Landscape Foundation, a nonprofit advocacy organization, is asking a federal judge to halt President Trump's plans to resurface the reflecting pool on the National Mall."
+    },
+    {
+      "title": "Why cruise ship passengers with possible hantavirus exposure went to Nebraska",
+      "url": "https://www.npr.org/2026/05/11/nx-s1-5818277/hantavirus-quarantine-cruise-ship",
+      "published": "Mon, 11 May 2026 18:19:18 -0400",
+      "summary": "The University of Nebraska is home to the only federally funded quarantine unit in the U.S. and a separate biocontainment unit that can treat people exposed to infectious diseases."
+    },
+    {
+      "title": "New poll finds a majority of Americans unsure if attempts on Trump's life were real",
+      "url": "https://www.npr.org/2026/05/11/nx-s1-5818557/poll-trump-assassination-attempts-conspiracy-theories",
+      "published": "Mon, 11 May 2026 17:17:55 -0400",
+      "summary": "When given the options of \"true,\" \"false\" or \"not sure,\" and asked whether each of the incidents \"was staged,\" a majority of respondents said they thought each event was either staged or were unsure."
+    },
+    {
+      "title": "Abortion pill by mail allowed for at least 3 more days, the Supreme Court says",
+      "url": "https://www.npr.org/2026/05/11/nx-s1-5818316/supreme-court-mifepristone-telemedicine-alito-delay",
+      "published": "Mon, 11 May 2026 17:14:36 -0400",
+      "summary": "Full access to the abortion pill mifepristone, including through telemedicine and the mail, will continue for at least three more days, the high court said on Monday."
+    },
+    {
+      "title": "Can Chinese AI solve inequality? + How dementia comes for your bank account",
+      "url": "https://www.npr.org/2026/05/11/g-s1-121351/can-chinese-ai-solve-inequality-how-dementia-comes-for-your-bank-account",
+      "published": "Mon, 11 May 2026 14:42:50 -0400",
+      "summary": ""
+    },
+    {
+      "title": "Trump wants to suspend the federal gas tax as prices soar amid war with Iran",
+      "url": "https://www.npr.org/2026/05/11/nx-s1-5818446/trump-gas-tax",
+      "published": "Mon, 11 May 2026 12:59:38 -0400",
+      "summary": "Suspending the federal gas tax would require an act of Congress."
+    },
+    {
+      "title": "'Atlanta Journal-Constitution' chief steps down as bold goals yield to tough realities",
+      "url": "https://www.npr.org/2026/05/11/nx-s1-5818208/ajc-andrew-morse-leaving",
+      "published": "Mon, 11 May 2026 11:14:23 -0400",
+      "summary": "The owners of the Atlanta Journal-Constitution invested $150 million to reinvent the paper. The changes have been significant. Three years in, the payoff has been modest."
+    },
+    {
+      "title": "Trump rejects Iran's ceasefire proposal response. And, Congress to tackle ICE funding",
+      "url": "https://www.npr.org/2026/05/11/g-s1-121375/up-first-newsletter-trump-iran-congress-ice-cbp-hantavirus",
+      "published": "Mon, 11 May 2026 07:31:31 -0400",
+      "summary": "Trump rejected Iran's response to a U.S. peace proposal, calling it \"totally unacceptable.\" And, Congressional Republicans are trying to push for three years of funding for immigration enforcement."
+    },
+    {
+      "title": "Oregon's most unexpected gubernatorial candidate? A pencil with a point",
+      "url": "https://www.npr.org/2026/05/11/nx-s1-5781255/oregon-reading-education-governor-pencil",
+      "published": "Mon, 11 May 2026 07:14:01 -0400",
+      "summary": "Oregon's public schools rank last in fourth-grade reading, according to an analysis of national testing. As a wake-up call for elected leaders, Pencil is running for governor as a write-in candidate."
+    }
+  ],
+  "fetched_at": "2026-05-11T22:19:50.169105"
+}

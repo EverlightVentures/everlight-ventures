@@ -39,9 +39,9 @@ log() {
 SERVICES=(
   "2000|/|cd $ROOT && nohup bash 03_AUTOMATION_CORE/01_Scripts/serve_master_hub.sh start > /tmp/svc_2000.log 2>&1|Master Hub"
   "2200|/|cd $ROOT && nohup bash 03_AUTOMATION_CORE/01_Scripts/serve_local_reports.sh start > /tmp/svc_2200.log 2>&1|Reports Hub"
-  "2300|/|cd $ROOT/Everlight_Intel_Center/09_Dashboard && nohup python3 $ROOT/03_AUTOMATION_CORE/01_Scripts/serve_helpers/everlight_themed_server.py 2300 . 'Intel Center' > /tmp/svc_2300.log 2>&1 &|Intel Static"
-  "2301|/healthz|cd $ROOT/Everlight_Intel_Center && nohup python3 -m uvicorn osint_api.main:app --host 127.0.0.1 --port 2301 > /tmp/svc_2301.log 2>&1 &|Intel FastAPI"
-  "2302|/healthz|cd $ROOT/Everlight_Intel_Center && nohup python3 -m uvicorn osint_api.esign_server:app --host 127.0.0.1 --port 2302 > /tmp/svc_2302.log 2>&1 &|E-Sign + Signatures"
+  "2300|/|cd $ROOT/06_DEVELOPMENT/everlight_os/intel_center/09_Dashboard && nohup python3 $ROOT/03_AUTOMATION_CORE/01_Scripts/serve_helpers/everlight_themed_server.py 2300 . 'Intel Center' > /tmp/svc_2300.log 2>&1 &|Intel Static"
+  "2301|/healthz|cd $ROOT/06_DEVELOPMENT/everlight_os/intel_center && nohup python3 -m uvicorn osint_api.main:app --host 127.0.0.1 --port 2301 > /tmp/svc_2301.log 2>&1 &|Intel FastAPI"
+  "2302|/healthz|cd $ROOT/06_DEVELOPMENT/everlight_os/intel_center && nohup python3 -m uvicorn osint_api.esign_server:app --host 127.0.0.1 --port 2302 > /tmp/svc_2302.log 2>&1 &|E-Sign + Signatures"
   "2400|/|cd $ROOT/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/prototype && nohup python3 $ROOT/03_AUTOMATION_CORE/01_Scripts/serve_helpers/everlight_themed_server.py 2400 . 'Apps -- Alley Kingz' > /tmp/svc_2400.log 2>&1 &|Apps"
   "2401|/api/health|cd $ROOT/09_DASHBOARD/moltbook && nohup python3 serve.py > /tmp/svc_2401.log 2>&1 &|Moltbook -- audit notebook"
   "2500|/|cd $ROOT/05_PERSONAL/02_Training/MMA_Notebook/Fight_Camp_OS && nohup python3 $ROOT/03_AUTOMATION_CORE/01_Scripts/serve_helpers/everlight_themed_server.py 2500 . 'MMA Fight Camp' > /tmp/svc_2500.log 2>&1 &|Health (MMA)"

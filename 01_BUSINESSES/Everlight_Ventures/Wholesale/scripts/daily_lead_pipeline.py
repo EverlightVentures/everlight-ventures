@@ -37,7 +37,7 @@ LOG_PATH = ROOT / "_logs" / "daily_lead_pipeline.log"
 sys.path.insert(0, str(ROOT / "01_BUSINESSES" / "Everlight_Ventures" / "Broker_OS" / "wholesale_agent"))
 sys.path.insert(0, str(ROOT / "03_AUTOMATION_CORE" / "01_Scripts"))
 sys.path.insert(0, str(ROOT / "03_AUTOMATION_CORE" / "01_Scripts" / "content_tools"))
-sys.path.insert(0, str(ROOT / "Everlight_Intel_Center"))
+sys.path.insert(0, str(ROOT / "06_DEVELOPMENT/everlight_os/intel_center"))
 
 
 def _log(msg: str) -> None:

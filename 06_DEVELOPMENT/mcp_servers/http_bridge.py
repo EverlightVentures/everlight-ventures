@@ -90,7 +90,7 @@ _load_module("market", "market_intel.server", "_tool_payload")
 
 # Intel Center -- pure Python helper, no MCP server.py needed. Auto-exposes
 # search_by_capability / search / list_categories at /tool/intel/{name}.
-sys.path.insert(0, str(ROOT / "Everlight_Intel_Center" / "lib"))
+sys.path.insert(0, str(ROOT / "06_DEVELOPMENT" / "everlight_os" / "intel_center" / "lib"))
 _load_module("intel", "intel_query", "_dispatch")
 
 # Hive orchestrator -- agent list/dispatch/pipeline state

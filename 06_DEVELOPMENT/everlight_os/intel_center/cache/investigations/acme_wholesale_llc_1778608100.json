@@ -1,0 +1,484 @@
+{
+  "investigation_id": "acme_wholesale_llc_1778608100",
+  "target": "Acme Wholesale LLC",
+  "kind": "company",
+  "started_at": "2026-05-12T10:48:20.045836",
+  "finished_at": "2026-05-12T10:48:22.979048",
+  "elapsed_ms": 2929,
+  "total_findings": 23,
+  "investigators_run": 7,
+  "triggered_by": "cli_user",
+  "lead_id": null,
+  "business_purpose": "resource_lookup smoke test",
+  "verify_context": {
+    "state": "CA",
+    "owner_name": "Acme Wholesale LLC"
+  },
+  "verification_summary": {
+    "total_findings": 23,
+    "verified": 0,
+    "rejected": 23,
+    "avg_confidence": 23,
+    "threshold": 50,
+    "highest_confidence_per_signal": {},
+    "lead_context_keys_provided": [
+      "state",
+      "owner_name"
+    ]
+  },
+  "dnc_blocked": false,
+  "dnc_reason": "",
+  "dnc_entry_id": null,
+  "results": [
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Decision Intelligence",
+          "value": "10015 \u2014 productivity tools collection (verified live)",
+          "url": "https://10015.io",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Use this source to research 'Acme Wholesale LLC' in decision intelligence"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "Amusingplanet \u2014 unusual natural and manmade global phenomena (verified live)",
+          "url": "https://amusingplanet.com",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Use this source to research 'Acme Wholesale LLC' in decision intelligence"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "Astronomyonline \u2014 Best collection of astronomy education resources (verified live)",
+          "url": "https://astronomyonline.org",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Use this source to research 'Acme Wholesale LLC' in decision intelligence"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "Atlasofwonders \u2014 Curated list of breathtaking hidden global locations (verified live)",
+          "url": "https://atlasofwonders.com",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Use this source to research 'Acme Wholesale LLC' in decision intelligence"
+          }
+        }
+      ],
+      "raw": {
+        "total_matched": 60,
+        "categories_used": [
+          "OSINT & Investigation",
+          "Trading & Finance",
+          "Legal & Compliance",
+          "News & Journalism",
+          "Decision Intelligence",
+          "Economics & Markets"
+        ],
+        "kind": "company"
+      },
+      "elapsed_ms": 13,
+      "investigator": "Catalogued Sources",
+      "investigator_id": "resource_lookup"
+    },
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "search": {
+          "status": 200,
+          "len": 476
+        }
+      },
+      "elapsed_ms": 565,
+      "investigator": "Archive.org / Wayback",
+      "investigator_id": "archive_org"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Domain",
+          "value": "ACME.COM",
+          "url": "https://acme.com",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "whois_lookup"
+          }
+        },
+        {
+          "label": "Registration",
+          "value": "1991-04-17T04:00:00Z",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "whois_lookup"
+          }
+        },
+        {
+          "label": "Expiration",
+          "value": "2027-04-18T04:00:00Z",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "whois_lookup"
+          }
+        },
+        {
+          "label": "Last Changed",
+          "value": "2026-04-17T09:07:22Z",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "whois_lookup"
+          }
+        },
+        {
+          "label": "Entity (registrar)",
+          "value": "48",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "whois_lookup"
+          }
+        },
+        {
+          "label": "Detail link",
+          "value": "https://who.is/whois/acme.com",
+          "url": "https://who.is/whois/acme.com",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "whois_lookup"
+          }
+        }
+      ],
+      "raw": {
+        "rdap_verisign": {
+          "status": 200,
+          "len": 2421,
+          "err": null
+        }
+      },
+      "elapsed_ms": 935,
+      "investigator": "WHOIS Lookup",
+      "investigator_id": "whois"
+    },
+    {
+      "ok": false,
+      "findings": [
+        {
+          "label": "HTML search",
+          "value": "Open in browser",
+          "url": "https://opencorporates.com/companies?q=Acme%20Wholesale%20LLC&utf8=%E2%9C%93",
+          "verification": {
+            "confidence": 30,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 30,
+            "boost": 0,
+            "investigator_id": "opencorporates"
+          }
+        }
+      ],
+      "raw": {
+        "api_search": {
+          "status": 401,
+          "len": 83,
+          "err": null
+        }
+      },
+      "elapsed_ms": 1090,
+      "investigator": "OpenCorporates",
+      "investigator_id": "opencorporates"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "8-K",
+          "value": "URSTADT BIDDLE PROPERTIES INC  (CIK 0001029800) -- 2020-06-08",
+          "url": "https://www.sec.gov/Archives/edgar/data//000102980020000026/",
+          "verification": {
+            "confidence": 30,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 30,
+            "boost": 0,
+            "investigator_id": "sec_edgar"
+          }
+        },
+        {
+          "label": "8-K",
+          "value": "URSTADT BIDDLE PROPERTIES INC  (CIK 0001029800) -- 2019-09-05",
+          "url": "https://www.sec.gov/Archives/edgar/data//000102980019000044/",
+          "verification": {
+            "confidence": 30,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 30,
+            "boost": 0,
+            "investigator_id": "sec_edgar"
+          }
+        },
+        {
+          "label": "8-K",
+          "value": "URSTADT BIDDLE PROPERTIES INC  (CIK 0001029800) -- 2020-01-10",
+          "url": "https://www.sec.gov/Archives/edgar/data//000102980020000009/",
+          "verification": {
+            "confidence": 30,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 30,
+            "boost": 0,
+            "investigator_id": "sec_edgar"
+          }
+        },
+        {
+          "label": "8-K",
+          "value": "URSTADT BIDDLE PROPERTIES INC  (CIK 0001029800) -- 2021-09-08",
+          "url": "https://www.sec.gov/Archives/edgar/data//000102980021000057/",
+          "verification": {
+            "confidence": 30,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 30,
+            "boost": 0,
+            "investigator_id": "sec_edgar"
+          }
+        },
+        {
+          "label": "8-K",
+          "value": "URSTADT BIDDLE PROPERTIES INC  (CIK 0001029800) -- 2020-03-09",
+          "url": "https://www.sec.gov/Archives/edgar/data//000102980020000017/",
+          "verification": {
+            "confidence": 30,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 30,
+            "boost": 0,
+            "investigator_id": "sec_edgar"
+          }
+        },
+        {
+          "label": "8-K",
+          "value": "URSTADT BIDDLE PROPERTIES INC  (CIK 0001029800) -- 2022-01-13",
+          "url": "https://www.sec.gov/Archives/edgar/data//000102980022000010/",
+          "verification": {
+            "confidence": 30,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 30,
+            "boost": 0,
+            "investigator_id": "sec_edgar"
+          }
+        }
+      ],
+      "raw": {
+        "fulltext_search": {
+          "status": 200,
+          "len": 59903,
+          "err": null
+        },
+        "tickers_catalog": {
+          "status": 200,
+          "len": 792870,
+          "err": null
+        }
+      },
+      "elapsed_ms": 1415,
+      "investigator": "SEC EDGAR",
+      "investigator_id": "sec_edgar"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Sweep summary",
+          "value": "3 of 22 platforms returned a profile page for 'acmewholesalellc'",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Instagram",
+          "value": "found",
+          "url": "https://www.instagram.com/acmewholesalellc/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Reddit",
+          "value": "found",
+          "url": "https://www.reddit.com/user/acmewholesalellc",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Pinterest",
+          "value": "found",
+          "url": "https://www.pinterest.com/acmewholesalellc/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        }
+      ],
+      "raw": {
+        "Twitter/X": 403,
+        "Medium": 403,
+        "Instagram": 200,
+        "YouTube": 404,
+        "LinkedIn": 405,
+        "TikTok": 403,
+        "GitHub": 404,
+        "Reddit": 200,
+        "StackOverflow": 404,
+        "Pinterest": 200,
+        "ProductHunt": 404,
+        "Dribbble": 404,
+        "Patreon": 404,
+        "Keybase": 404,
+        "Gravatar": 404,
+        "Twitch": 405,
+        "About.me": 404,
+        "SoundCloud": 404,
+        "DeviantArt": 404,
+        "Behance": 404,
+        "Vimeo": 404,
+        "Flickr": 404
+      },
+      "elapsed_ms": 2221,
+      "investigator": "Social Recon",
+      "investigator_id": "social_recon"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "\u00b7 site:github.com",
+          "value": "Acme Software LLC - GitHub",
+          "url": "https://github.com/AcmeSoftwareLLC",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\u00b7 site:github.com",
+          "value": "mySamm companies batch 2 (15k) \u00b7 GitHub",
+          "url": "https://gist.github.com/hosunchung316/3153eb1fc7d3da17f7bbe9aa71dbbf91",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "google_dorks"
+          }
+        }
+      ],
+      "raw": {
+        "\"{q}\"": {
+          "status": 200,
+          "len": 9317
+        },
+        "{q} site:linkedin.com": {
+          "status": 202,
+          "len": 14290
+        },
+        "{q} site:github.com": {
+          "status": 200,
+          "len": 31819
+        },
+        "{q} site:reddit.com": {
+          "status": 202,
+          "len": 14232
+        },
+        "{q} filetype:pdf": {
+          "status": 202,
+          "len": 14232
+        },
+        "{q} contact email": {
+          "status": 202,
+          "len": 14222
+        }
+      },
+      "elapsed_ms": 2660,
+      "investigator": "Search Dorks",
+      "investigator_id": "google_dorks"
+    }
+  ]
+}

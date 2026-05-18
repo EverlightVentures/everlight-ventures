@@ -1,0 +1,41 @@
+5 i
+ByteClave
+Tools to investigate anything online legally
+¢ Instaloader - Pull full metadata and posts from any public Instagram
+¢ Toutatis - Extract phone numbers and emails from any Instagram account
+e Snscrape - Scrape any public social media platform without API keys
+e Arctic Shift - Access and search the complete historical Reddit data dump
+¢ Mosint - Run automated OSINT on any email address from terminal
+e GAU - Fetch every known URL for any domain from multiple archives
+e Waybackurls - Pull every URL the Wayback Machine ever recorded for a domain
+¢ Photon - Crawl any website and extract emails, keys, and links fast
+e Crosslinked - Extract employee names from Linkedin without an account
+e URLScan - Sean any URL and see every request it makes live
+¢ Datashare - Search millions of leaked documents across 140 countries
+e Zeek - Turn any network traffic into structured logs for analysis
+e Gitleaks - Scan any Git repository for exposed secrets and API keys
+e OpenRefine - Reconcile and clean any messy investigation dataset fast
+e Cytoscape - Map any network of relationships as an interactive graph
+e Certspotter - Monitor any domain for new SSL certificates the moment issued
+e Subfinder - Discover every subdomain of any target from passive sources
+e Jimpl - Reveal hidden GPS coordinates and camera data inside any image
+e Profil3r - Find all accounts tied to any username across platforms
+e Ignorant - Check which services any phone number is registered on
+e SDR++ - Decode live radio signals from aircraft, ships, and weather sats
+e ODCrawler - Search millions of publicly exposed files in open directories
+e Tgstat - Search and analyse every public Telegram channel and post
+¢ Discord History Tracker - Archive and search any Discord server's full chat history
+e Osintgram - Run deep analysis on any public Instagram account interactively
+e Mailcat - Find every email address linked to any username online
+° Zen - Find the real email address behind any GitHub account
+¢ Pastebin Search - Find any leaked data or credentials on public paste sites
+¢ Orbit - Trace every transaction linked to any cryptocurrency wallet
+e Little Navmap - Map real flight routes and track aircraft with live data
+e QGIS - Overlay any investigation data on detailed real-world maps
+e IVRE - Build your own private device reconnaissance database from scratch
+¢ Webtech - Fingerprint every technology stack behind any website target
+e Changedetection - Get alerted the moment any target webpage is updated
+¢ Datasette - Turn any leaked database or CSV into a searchable explorer
+¢ Gephi - Visualise any complex entity relationship as an explorable network
+¢ Volatility - Extract hidden artefacts from any memory dump forensically
+e Cyberchef - Decode, decrypt, and analyse any suspicious data or file

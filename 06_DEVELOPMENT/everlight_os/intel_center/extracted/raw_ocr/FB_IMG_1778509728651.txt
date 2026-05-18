@@ -1,0 +1,42 @@
+5 i
+ByteClave
+sites that show what most people never find online
+e Nextstrain - Tracks real-time evolution of every dangerous pathogen
+e Gapminder - Destroys assumptions about the world with real data
+e Numbeo - True cost of living in every city globally
+e Retraction Watch - Exposes every fraudulent scientific paper ever published
+e Paperswithcode - Every Al breakthrough with working downloadable code attached
+e Pubpeer - Scientists publicly flag problems in any published paper
+e Erowid - 60,000 documents on every psychoactive substance ever studied
+e Psychonautwiki - Scientific encyclopedia of every altered state ever documented
+e Clinicaltrials - Every medical trial ever run on humans searchable
+e Biodiversitylibrary - Every natural history book ever printed digitized
+e Onezoom - Zoomable interactive map of all 2 million species
+e Rumsey - 150,000 rare antique maps in ultra-high resolution
+e Oldmapsonline - Searches every historical map across all major archives
+e Sefaria - Complete Jewish textual tradition spanning 3,000 years
+e Imslp - Every classical music score ever published
+e Ethnologue - Complete database of every living and dead language
+e Multitree - Every linguistic family tree ever proposed in one place
+e Gpa - Every herbarium specimen ever pressed now digitized
+e Archivegrid - Searches 5 million archival collections across institutions globally
+e Worldcat - Locates any book inside every library on earth
+e Opencontext - Archaeological excavation records from ancient world sites
+e Fossilworks - Every fossil occurrence ever recorded mapped interactively
+e Meteoritical - Every meteorite ever officially authenticated on earth documented
+e Emdat - Every natural disaster recorded on earth since 1900
+e Gdacs - Global disaster alert tracking every crisis in real time
+e Reliefweb - Live tracker of every humanitarian crisis unfolding globally
+e Desinventar - Every small-scale local disaster ever recorded anywhere globally
+e Seismicportal - European live seismic monitoring of every tremor worldwide
+e Dimensions - Free research database larger than any university library
+e Gnod - Maps every book author and artist ever made
+e Databasin - Thousands of hidden conservation datasets layered on maps
+e Habitatmap - Crowdsourced mapping of every hidden habitat on earth
+e Psmsl - Sea level measurements from every tide gauge globally
+e Icesat2 - Measures exact ice sheet thickness changes globally live
+e Earthchem - Geochemical composition of every rock sample ever analyzed
+e Soilgrids - Maps exact soil composition of any location
+e Gbif - Every species occurrence ever recorded on earth searchable
+e lucnredlist - Conservation status of every species on earth documented
+e Movebank - Real GPS movement of wild animals tracked globally

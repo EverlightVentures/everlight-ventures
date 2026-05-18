@@ -1,0 +1,41 @@
+5 i
+ByteClave
+platforms that give you unfair access to hidden knowledge
+e Paradisec - 18,500 hours of dying Pacific language recordings
+e Elararchive - Recordings of languages dying before anyone documents them
+¢ Pleiades - Every ancient Greek and Roman place ever named
+e Topostext - Ancient texts linked to their exact map locations
+e Trismegistos - Every ancient Egyptian and Roman document ever found
+e Docsouth - Primary sources on American southern history
+¢ Avalon - Yale law library of every historical legal document
+e Orbis - Models travel time across ancient Roman road networks
+e Nomisma - Every ancient coin ever catalogued linked to maps
+e Papyri - Every surviving ancient papyrus document fully digitized
+e Jstor - Millions of academic journals unavailable anywhere else
+e Zooniverse - Citizen science uncovering patterns hidden in raw data
+e Animalbase - Historic zoological texts fully digitized from 1500 onwards
+¢ Tdar - Archaeological excavation datasets from thousands of dig sites
+¢ Neotomadb - 3.8 million prehistoric ecological observations mapped globally
+e Fishbase - Complete data on every known fish species described
+e Antweb - Every ant species ever scientifically discovered documented
+e Algaebase - Complete encyclopedia of every known algae species
+¢ Diatombase - Every diatom species ever formally described globally
+e Sharkref - Complete database of every known shark species
+e Reptiledb - Complete database of every known reptile species
+¢ Zoobank - Official registry of every animal species ever named
+e Mycobank - Every fungal species ever formally registered globally
+e Wagsrpd - Every plant distribution record across all world regions
+e Phenobase - Seasonal biological event records spanning hundreds of years
+e Neurodata - Complete neural connectivity maps of animal brains
+e Openneuro - Every brain imaging dataset ever shared by researchers
+e Psychoanalysis - Entire historical archive of psychoanalytic case studies digitized
+e Nber - Every economics working paper published since 1970
+e Repec - 4 million economies research papers fully searchable
+¢ Ssrn - Social science preprints before any journal ever sees them
+e Chemspider - Complete chemical structure database of every known molecule
+e Crystallography - Every crystal structure ever determined by X-ray diffraction
+e Reaxys - Every chemical reaction ever recorded in scientific literature
+¢ Pangaea - Every ocean and earth science dataset ever published
+e Sesar - Every geological sample ever collected catalogued with GPS
+e Argo - Real-time ocean temperature and salinity data globally
+e Cchdo - Complete hydrographic data from every ocean expedition ever

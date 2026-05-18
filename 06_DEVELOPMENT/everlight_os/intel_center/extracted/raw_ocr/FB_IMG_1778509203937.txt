@@ -1,0 +1,63 @@
+ByteClave
+
+Platforms for Exploring Nature, Wildlife, and Ecosystem
+
+e obis.org - Global ocean species occurrence database
+
+¢ birdcast.org - Live bird migration radar forecasts
+
+e aquamaps.org - marine species distribution maps
+
+e amphibiaweb.org - amphibian species biology database
+
+e wildlifeinsights.org - camera trap wildlife identifier
+
+e phenocam.sr.unh.edu - Live forest vegetation seasonal cameras
+
+e motus.org - small animal tracking network
+
+e intactforests.org - Intact forest landscape loss maps
+
+e mwater.co - Freshwater quality field data portal
+
+e earthenv.org - Global habitat and topography layers
+
+e batbase.org - Bat species trait and range repository
+
+¢ calflora.org - California plant observation and mapping
+
+e coralwatch.org - coral bleaching health monitoring
+
+e antweb.org - Global ant species specimen database
+
+¢ fossilworks.org - Fossil occurrence paleobiology database
+
+¢ bioacoustica.org - wildlife sound recording archive
+
+e reptile-database.org - reptile species checklist database
+
+¢ gbif.org - Free global biodiversity occurrence data
+
+e soilgrids.org - Global soil property prediction maps
+
+e mountainresearch.at - Alpine ecosystem monitoring data
+
+e vertnet.org - Vertebrate specimen museum records database
+
+e wormbase.org - Nematode worm species biology database
+
+¢ wildbook.org - open source animal photo re-identification app
+
+e plantnet.org - global plant species identifier
+
+e spotteron.com - science environmental observation app
+
+e macroinvertebrates.org - Stream benthic invertebrate database
+
+¢ calphotos.berkeley.edu - specimen photos reference library
+
+e sharkcount.org - Diver-submitted reef shark data
+
+e mycomap.com - Fungi species sighting map
+
+e mtbs.gov - historical wildfire burn severity map

@@ -1,0 +1,67 @@
+ByteClave
+
+platforms to explore large datasets across multiple fields
+
+« exoplanetarchive.ipac.caltech.edu - Confirmed exoplanet data
+
+« datacommons.org - datasets across multiple domains collection
+
+e essopenarchive.org - Earth and space science data
+
+¢ gigadb.org - Massive biological datasets
+
+« livingreviews.org - updated/reliable expert scientific review articles
+
+¢ paleobiodb.org - Fossil occurrences across all geological time
+
+¢ brenda-enzymes.org - enzyme kinetics and ligand data
+
+* openei.org - energy ,renewable resource data
+
+- shapenet.org - 3D object models database
+
+- fishsounds.net - fish sound recordings database
+
+« vegbank.org - Vegetation plots with species composition records data
+
+« cbioportal.org - Cancer genomics ,,clinical outcome data
+
+« earthbyte.org - Plate tectonic reconstructions and geological models
+
+« bvbrc.org - Bacterial ,,viral pathogen bioinformatics resource
+
+- rruff.info - spectra database of every known mineral
+
+e databasin.org - maps ,environmental planning datasets..
+
+¢ worldwidetelescope.org - Astronomical sky survey data browser
+
+« geosamples.org - Registry of earth science samples
+
+« palaeoelectronica.org - rare palaeontological specimen data
+
+¢ giita.ucsd.edu - Microbiome and metagenomics data portal
+
+¢ hubmapconsortium.org - Human organ spatial single-cell atlas data
+
+- wals.info - Typological database of every world language
+
+« brainspan.org - atlas of human brain development.
+
+e earthchem.org - Igneous and metamorphic rock geochemistry archive
+
+« cosmicflows.iap.fr - Galaxy distance measurements and velocity data
+
+e radiocarbon.org - Radiocarbon dating curves and age data
+
+¢ icpsr.umich.edu - Social science research archive
+
+« glottolog.org - database of all lesser known languages.
+
+« ecmwf.int - Weather prediction models ,,,atmospheric datasets
+
+* genenames.org - human gene nomenclature database
+
+¢ lotus.naturalproducts.net - Natural Products storage, search ,analysis
+
+« matweb.com - Material property data for engineering

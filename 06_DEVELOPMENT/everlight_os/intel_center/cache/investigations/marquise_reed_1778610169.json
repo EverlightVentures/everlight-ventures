@@ -1,0 +1,752 @@
+{
+  "investigation_id": "marquise_reed_1778610169",
+  "target": "Marquise Reed",
+  "kind": "person",
+  "started_at": "2026-05-12T11:22:49.000734",
+  "finished_at": "2026-05-12T11:22:51.835950",
+  "elapsed_ms": 2830,
+  "total_findings": 40,
+  "investigators_run": 8,
+  "triggered_by": "cli_user",
+  "lead_id": null,
+  "business_purpose": "deep mine test -- show pitch hooks",
+  "verify_context": {
+    "state": "CA",
+    "city": "Sacramento",
+    "owner_name": "Marquise Reed"
+  },
+  "verification_summary": {
+    "total_findings": 40,
+    "verified": 1,
+    "rejected": 39,
+    "avg_confidence": 24,
+    "threshold": 50,
+    "highest_confidence_per_signal": {
+      "name_exact_match": 50
+    },
+    "lead_context_keys_provided": [
+      "state",
+      "city",
+      "owner_name"
+    ]
+  },
+  "dnc_blocked": false,
+  "dnc_reason": "",
+  "dnc_entry_id": null,
+  "results": [
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "OSINT & Investigation",
+          "value": "Allthatsinteresting \u2014 ddeep history true crime dark mysteries \u00b7 verified live",
+          "url": "https://allthatsinteresting.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Marquise Reed' via OSINT & Investigation"
+          }
+        },
+        {
+          "label": "Maps & Geospatial",
+          "value": "Amazingplacesonearth \u2014 Showcases natural and cultural world wonders \u00b7 verified live",
+          "url": "https://amazingplacesonearth.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Marquise Reed' via Maps & Geospatial"
+          }
+        },
+        {
+          "label": "Education & Training",
+          "value": "Abandonedspaces \u2014 abandoned buildings and forgotten global places \u00b7 verified live",
+          "url": "https://abandonedspaces.com",
+          "investigator_meta": {
+            "agent_owner": "Strategy Assistant",
+            "is_live": true,
+            "search_hint": "Research 'Marquise Reed' via Education & Training"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "10015 \u2014 productivity tools collection \u00b7 verified live",
+          "url": "https://10015.io",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Research 'Marquise Reed' via Decision Intelligence"
+          }
+        },
+        {
+          "label": "OSINT & Investigation",
+          "value": "Americanhauntingsink \u2014 Haunted American places ghost mysteries \u00b7 verified live",
+          "url": "https://americanhauntingsink.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Marquise Reed' via OSINT & Investigation"
+          }
+        },
+        {
+          "label": "Maps & Geospatial",
+          "value": "Atlasobscura \u2014 hidden wondrous mysterious places worldwide \u00b7 verified live",
+          "url": "https://atlasobscura.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Marquise Reed' via Maps & Geospatial"
+          }
+        },
+        {
+          "label": "Education & Training",
+          "value": "Animagraffs \u2014 Complex machines and systems explained \u00b7 verified live",
+          "url": "https://animagraffs.com",
+          "investigator_meta": {
+            "agent_owner": "Strategy Assistant",
+            "is_live": true,
+            "search_hint": "Research 'Marquise Reed' via Education & Training"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "Amusingplanet \u2014 unusual natural and manmade global phenomena \u00b7 verified live",
+          "url": "https://amusingplanet.com",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Research 'Marquise Reed' via Decision Intelligence"
+          }
+        },
+        {
+          "label": "OSINT & Investigation",
+          "value": "Ancient Code \u2014 ancient alien forbidden suppressed history \u00b7 verified live",
+          "url": "https://ancient-code.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Marquise Reed' via OSINT & Investigation"
+          }
+        },
+        {
+          "label": "Maps & Geospatial",
+          "value": "Factinate \u2014 surprising facts about places worldwide \u00b7 verified live",
+          "url": "https://factinate.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Marquise Reed' via Maps & Geospatial"
+          }
+        },
+        {
+          "label": "Education & Training",
+          "value": "Batteryuniversity \u2014 Deep dive into battery chemistry and systems \u00b7 verified live",
+          "url": "https://batteryuniversity.com",
+          "investigator_meta": {
+            "agent_owner": "Strategy Assistant",
+            "is_live": true,
+            "search_hint": "Research 'Marquise Reed' via Education & Training"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "Astronomyonline \u2014 Best collection of astronomy education resources \u00b7 verified live",
+          "url": "https://astronomyonline.org",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Research 'Marquise Reed' via Decision Intelligence"
+          }
+        }
+      ],
+      "raw": {
+        "total_matched": 71,
+        "categories_used": [
+          "OSINT & Investigation",
+          "Maps & Geospatial",
+          "Education & Training",
+          "Decision Intelligence"
+        ],
+        "kind": "person"
+      },
+      "elapsed_ms": 27,
+      "investigator": "Catalogued Sources",
+      "investigator_id": "resource_lookup"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Archive item",
+          "value": "Reminiscences, musical and other",
+          "url": "https://archive.org/details/cu31924021748219",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "Its all in the Game No.1 BBS Software and Games (DE) (1996)",
+          "url": "https://archive.org/details/Its_all_in_the_Game_No_1_BBS_Software_and_Games-1996-DE-trgf",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "Madame de Brinvilliers and her times 1630-1676",
+          "url": "https://archive.org/details/madamedebrinvill00stokiala",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "Reminiscences, musical and other",
+          "url": "https://archive.org/details/reminiscencesmus00reed_0",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "Episode 158: The Glastonbury Flashback [Ricki and the Flash; 45 Years; American Ultra]",
+          "url": "https://archive.org/details/Episode158TheGlastonburyFlashbackrickiAndTheFlash45YearsAmerican",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        }
+      ],
+      "raw": {
+        "search": {
+          "status": 200,
+          "len": 999
+        }
+      },
+      "elapsed_ms": 418,
+      "investigator": "Archive.org / Wayback",
+      "investigator_id": "archive_org"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "TruePeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.truepeoplesearch.com/results?name=Marquise%20Reed",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "FastPeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.fastpeoplesearch.com/name/marquise-reed",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ZabaSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.zabasearch.com/people/Marquise+Reed",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ThatsThem",
+          "value": "HTTP 200",
+          "url": "https://thatsthem.com/name/Marquise-Reed",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "Whitepages",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.whitepages.com/name/Marquise-Reed",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        }
+      ],
+      "raw": {
+        "TruePeopleSearch": {
+          "status": 403
+        },
+        "FastPeopleSearch": {
+          "status": 403
+        },
+        "ZabaSearch": {
+          "status": 403
+        },
+        "ThatsThem": {
+          "status": 200
+        },
+        "Whitepages": {
+          "status": 403
+        }
+      },
+      "elapsed_ms": 1850,
+      "investigator": "Skip-Trace",
+      "investigator_id": "skip_trace"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Twitter/X interests",
+          "value": "#FFF, #placeholder, #react",
+          "url": "https://twitter.com/marquisereed",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "social_bio_scraper"
+          }
+        },
+        {
+          "label": "Pinterest interests",
+          "value": "#e2e2e2, #dadada",
+          "url": "https://www.pinterest.com/marquisereed/",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "social_bio_scraper"
+          }
+        }
+      ],
+      "raw": {
+        "Medium": {
+          "status": 403,
+          "len": 5437
+        },
+        "Reddit": {
+          "status": 403,
+          "len": 189906
+        },
+        "GitHub": {
+          "status": 404,
+          "len": 9
+        },
+        "About.me": {
+          "status": 404,
+          "len": 66947
+        },
+        "ProductHunt": {
+          "status": 404,
+          "len": 83279
+        },
+        "Keybase": {
+          "status": 404,
+          "len": 7140
+        },
+        "Twitter/X": {
+          "status": 200,
+          "len": 266849
+        },
+        "Dribbble": {
+          "status": 404,
+          "len": 21143
+        },
+        "Behance": {
+          "status": 404,
+          "len": 369767
+        },
+        "Pinterest": {
+          "status": 200,
+          "len": 941589
+        }
+      },
+      "elapsed_ms": 1882,
+      "investigator": "Deep Social Mine",
+      "investigator_id": "social_bio_scraper"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Dehashed",
+          "value": "Search (login required)",
+          "url": "https://dehashed.com/search?query=Marquise%20Reed",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        },
+        {
+          "label": "Intelligence X",
+          "value": "Search",
+          "url": "https://intelx.io/?s=Marquise%20Reed",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        }
+      ],
+      "raw": {
+        "hibp_breaches": {
+          "status": 200,
+          "len": 2
+        }
+      },
+      "elapsed_ms": 1965,
+      "investigator": "Leak Check",
+      "investigator_id": "leak_check"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Sweep summary",
+          "value": "4 of 22 platforms returned a profile page for 'marquisereed'",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Instagram",
+          "value": "found",
+          "url": "https://www.instagram.com/marquisereed/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Reddit",
+          "value": "found",
+          "url": "https://www.reddit.com/user/marquisereed",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 YouTube",
+          "value": "found",
+          "url": "https://www.youtube.com/@marquisereed",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Pinterest",
+          "value": "found",
+          "url": "https://www.pinterest.com/marquisereed/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        }
+      ],
+      "raw": {
+        "Twitter/X": 403,
+        "Medium": 403,
+        "GitHub": 404,
+        "TikTok": 403,
+        "Instagram": 200,
+        "YouTube": 200,
+        "Reddit": 200,
+        "LinkedIn": 405,
+        "StackOverflow": 404,
+        "ProductHunt": 404,
+        "Patreon": 404,
+        "Dribbble": 404,
+        "Pinterest": 200,
+        "Behance": 404,
+        "Keybase": 404,
+        "Gravatar": 404,
+        "Twitch": 405,
+        "DeviantArt": 404,
+        "About.me": 404,
+        "SoundCloud": 404,
+        "Vimeo": 404,
+        "Flickr": 404
+      },
+      "elapsed_ms": 2383,
+      "investigator": "Social Recon",
+      "investigator_id": "social_recon"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "\"\u00b7\"",
+          "value": "Marquise Reed: I would like to play for Turkey",
+          "url": "https://basketballsphere.com/en/marquise-reed-turkish-national-team/",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\"\u00b7\"",
+          "value": "Clemson starting guards Mitchell, Reed withdraw from draft",
+          "url": "https://apnews.com/sc-state-wire-7419ed1aa139430b8ed3d8da0c8730f2",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\u00b7 site:github.com",
+          "value": "TinyDX---Tiny-Digital-Modes-HF-Transceiver/TinyDX TX DFM.jpg at main ...",
+          "url": "https://github.com/WB2CBA/TinyDX---Tiny-Digital-Modes-HF-Transceiver/blob/main/TinyDX TX DFM.jpg",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\u00b7 site:github.com",
+          "value": "unsupervised_topic_modeling/topics/en/11/100/50/topics at ... - GitHub",
+          "url": "https://github.com/annontopicmodel/unsupervised_topic_modeling/blob/master/topics/en/11/100/50/topics",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "google_dorks"
+          }
+        }
+      ],
+      "raw": {
+        "\"{q}\"": {
+          "status": 200,
+          "len": 18916
+        },
+        "{q} site:linkedin.com": {
+          "status": 202,
+          "len": 14273
+        },
+        "{q} site:github.com": {
+          "status": 200,
+          "len": 34805
+        },
+        "{q} site:reddit.com": {
+          "status": 202,
+          "len": 14210
+        },
+        "{q} filetype:pdf": {
+          "status": 202,
+          "len": 14204
+        },
+        "{q} contact email": {
+          "status": 202,
+          "len": 14200
+        }
+      },
+      "elapsed_ms": 2557,
+      "investigator": "Search Dorks",
+      "investigator_id": "google_dorks"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "News mention",
+          "value": "Marcquise Reed - ESPN",
+          "url": "https://news.google.com/rss/articles/CBMihgFBVV95cUxPSnNSdUdGOHUtT2R5NVJ1dXgteUwtWjBYcGNocVBuUUM5bUxfeHRNM3NoTGJidnl2YXdiYUpZSDJwMGFWckpqSUtyako2Y1V4a2J3YlJPS0tYaEkwLXc5V1BKMVJUQjFlSXI5VUtSMkRIQTEwS21KLUhuXzk5Y1V5UEtweFNYZw?oc=5",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "public_records"
+          }
+        },
+        {
+          "label": "News mention",
+          "value": "Creekside Christian Academy Football Roster (2025-26) - MaxPreps",
+          "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxQaW9JSm1IejZPYmtjTVU0ZnRzX0FBbThud2tZLUx3YkEwY2RqQnZVUkx2bk01N3RFUU5SQ01fMzg5TDZONTFoT0xTV0lPWGktS3QyVzlZNUg2UTdPZFFQZ0FzVDVVVlM4LXZmNllmR1Y4NDBHelRvdDFPbEg4UndHcTA2WVpJS1BHb2VHV2dYWnNtZXVX?oc=5",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "public_records"
+          }
+        },
+        {
+          "label": "News mention",
+          "value": "2 murder suspects sought after man's body found along Schuylkill River Trail in Montgomery County - 6abc Philadelphia",
+          "url": "https://news.google.com/rss/articles/CBMiwwFBVV95cUxQVV80WGxkWkVoT0Q0OGd5Wll3ckI0Vmh0Q05WSE1SLTRuS3g5VXFxVDBWejJ6TjJNUWtkbGYwdkxVM1BnNVlPcEliMlVMaEpFcDhFSGJDREFHNm5zNEp4NmhXbkh2SHFhd095UDltTjc5MzJ0RTBQSV96cjFhQWVLaFFFaTF1RU5vSmtzQ1c0eDhFdThKUDR2clN1NXd3MkttU3R1UnFGR1NaR09jZTBJYzRvdmRLcm9vRWYtTm9hMUxlU1nSAcgBQVVfeXFMT0VTVzltOXRUZFRUN29wMnZNMW04YU0wMWF4NnQtWkJ3Q3RUN3JHUWp1N3VzcnlPQU8xS1JRdElVaEk0TU9UZ0ZVUVN5UmcxUWlsa1VGQjllNjhiOWtBU01KNmtOUi1jTnVWdWt4eEhaUzU2RWtlRkJqWEV2T1BvM0Q4aXdHX2o1dF90Znh2V0U2WVQxYVNkWnk0OEU1Zk41UHZZanpsOU5tb1BLQ1JTZkoxOHlZakUyZmFocVlzTEdIem0tamM5Zmo?oc=5",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "public_records"
+          }
+        },
+        {
+          "label": "News mention",
+          "value": "Marcquise Reed - Tofas Bursa - Player Profile - FIBA Europe Cup 2024-25 - FIBA Basketball",
+          "url": "https://news.google.com/rss/articles/CBMioAFBVV95cUxQWE1TdHJkRmpwRXF6SldmNUE1S3NRY1UzSjZiV0RZZ2hTZHVoaW1iTU5XSXQ4QldlZnRlY0lWU3FKcjZ5TjlySEI0cDh6YUo4Q0lVczA0Nl9jMHZURnkwZTZhZlBOZVFfWW5kbVhVNG8xUXJFbnB0SWxJZnI3MWZYTnEwNVFwNmtSNlB3dzZHd0ZXY0Z5emRxRVREMEhBUHlM?oc=5",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "public_records"
+          }
+        },
+        {
+          "label": "News mention",
+          "value": "Tofas signs BSL top scorer Marcquise Reed for the next season - Eurohoops",
+          "url": "https://news.google.com/rss/articles/CBMiuwFBVV95cUxOSzFmTklIRWNza29HYzJCNjVMaDBDdzlXVjM3MnpwaTNlZjVIS2o3R1g4al9YYU5sMDVSYWw2RUtvNE5SMDJGbXRFdmR0cmtrTDZLbk9mX0NlcTdpOS1mVHZoMFBvbzFmQV9yb1BCcjhDRTdseC1BQXA1Z0EzZWJ0MmZNMDdOdDBmSmdNUXczMENtV1J6TlFPdlNtalotNWtEOG83bUFtT2o1T3JTNm1mMzgxWUQ5eEtfSWNN?oc=5",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "public_records"
+          }
+        }
+      ],
+      "raw": {
+        "courtlistener": 0,
+        "opencorporates": 0,
+        "findagrave": 0,
+        "news_archive": 5
+      },
+      "elapsed_ms": 2602,
+      "investigator": "Public Records (deep mine)",
+      "investigator_id": "public_records"
+    }
+  ]
+}

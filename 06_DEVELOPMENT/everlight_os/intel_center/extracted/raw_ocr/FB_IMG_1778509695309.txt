@@ -1,0 +1,42 @@
++L}:
+ByteClave
+PC APPS NOBODY TELLS YOU ABOUT
+e Stellarium - Renders the exact night sky from any location.
+e Celestia - Explore the universe in real-time 3D.
+¢ Gpredict - Tracks every satellite orbiting Earth right now.
+e SDRSharp - Receives hidden radio frequency transmissions nearby.
+e Gqrx - Tunes into any radio frequency your hardware receives.
+e OpenMHZ - Archives police radio scanner recordings worldwide.
+e Wireshark - Reveals every packet crossing your network live.
+e Maltego - Maps hidden connections between people and organizations.
+¢ SpiderFoot - Pulls intelligence on any target automatically.
+¢ Gephi - Visualizes hidden patterns inside massive data networks.
+e Autopsy - Digital forensics tool used by law enforcement globally.
+e Ghidra - Reverse engineers any compiled software binary completely.
+¢ Exif Tool - Extracts hidden metadata from every file type.
+e Volatility - Extracts hidden data from any memory dump.
+e Recuva - Recovers deleted files most people think gone.
+e Sysinternals Suite - Exposes every hidden Windows process silently running.
+e TCPView - Shows every active network connection in real time.
+e ProcMon - Logs every file registry and network event.
+e HWiNFO - Exposes every hardware sensor reading on machine.
+e CrystalDisk - Reads health data your hard drive secretly stores.
+¢ Datasette - Explores any dataset through instant local interface.
+e Gephi Network - Reveals hidden clusters inside any relationship dataset.
+e JOSM - Queries every object ever mapped on OpenStreetMap.
+e Zotero - Organizes access to millions of academic research papers.
+e Calibre - Manages and reads every ebook format ever created.
+e Fiddler - Intercepts every HTTP request your apps make.
+¢ Burp Suite - Reveals what websites secretly send and receive.
+e OpenContext Desktop - Archaeological excavation data from ancient world sites.
+¢ WorldWide Telescope - Imagery from every major telescope combined desktop.
+e Orbitron - Predicts passes of every satellite over your location.
+e GPredict - Tracks ISS and every orbiting satellite in real time.
+e Recon-ng - Automates open source intelligence gathering methodically.
+¢ theHarvester - Gathers emails subdomains and IPs from any target.
+e Obsidian - Connects hidden relationships across any knowledge base.
+e QGIS - Analyzes and visualizes any geographic data layer.
+e Marble - Explores detailed virtual globe with scientific data overlays.
+e OpenEV - Processes satellite and aerial imagery from any source.
+e Cutter - Decompiles and analyzes any unknown executable file.
+e Binwalk - Extracts hidden files from any firmware or binary.

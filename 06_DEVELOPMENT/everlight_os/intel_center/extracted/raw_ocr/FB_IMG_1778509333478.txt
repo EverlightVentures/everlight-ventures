@@ -1,0 +1,76 @@
+LJ:
+: ByteClave
+
+Must-know GIS & advanced mapping sites
+
+° gpsjam.org - map of every GPS jamming zone on earth
+
+¢ lightningmaps.org - Watch every lightning strike hit earth in real time
+
+e openrailwaymap.org - map of every railway track on earth
+
+e ventusky.com - animated weather map of wind rain and snow
+
+e openinframap.org - Map power line oil pipe and telecom cable worldwide
+
+e osmbuildings.org - See every building on earth rendered in 3D free
+
+« coastal.climatecentral.org - Map which coastlines vanish at any sea level
+
+* gmcmap.com - real-time radiation level map worldwide
+
+e globalfishingwatch.org - Track every fishing vessel live on world oceans
+
+e radiationnetwork.com - Live USA radiation readings from citizen Geiger counters
+
+e demo.f4map.com - interactive photorealistic 3D city map
+
+e peakfinder.org - exact mountain horizon panorama from any coordinate
+
+e kepler.gl - Visualize millions of map data points in browser
+
+* geojson.io - Draw edit and export any map shape
+
+e shadowmap.org - See exactly where shadows fall on any building any time
+
+e floodmap.net - Reveal which land floods at every elevation level
+
+e mapshaper.org - edit any shapefile or GeoJSON in browser
+
+e maps-for-free.com - shaded relief maps for any region
+
+e freegisdata.rtwilson.com - Directory of 500 free GIS datasets by category
+
+e opendroneMap.org - Build maps from drone photos completely free
+
+° overturemaps.org - Open community-built alternative to Google Maps data
+
+e coast.noaa.gov/sir - sea level rise viewer for every US coastline
+
+e freetopomaps.io - 3D printable topographic map of any place
+
+e climateviewer.org - Layer dozens of environmental data maps together
+
+e pmtiles.io - Self-host an entire world map in one single file
+
+e skyvector.com - Professional aviation and flight planning charts
+
+e livingatlas.arcgis.com - 10000 authoritative free data layers on one map
+
+e firms.modaps.eosdis.nasa.gov - Real-time NASA fire detection map
+
+e openrouteservice.org - Advanced routing analysis for walking cycling driving
+
+e traveltime.com - Map every location reachable within a set travel time
+
+e weatherspark.com - Historical climate visualized as a map for any city
+
+« sealevel.nasa.gov - interactive global sea level change tracker
+
+« luminocity3d.org - 3D global population density visualization
+
+e cadmapper.com - Export any city block as CAD or 3D model
+
+e opentopomap.org - Detailed topographic contour map of entire earth
+
+e earthquaketrack.com - map of every earthquake happening globally

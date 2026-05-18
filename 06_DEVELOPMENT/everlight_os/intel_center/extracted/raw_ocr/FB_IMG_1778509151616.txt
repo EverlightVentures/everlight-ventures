@@ -1,0 +1,32 @@
+; : = ByteClave
+MUST-KNOW LINUX COMMANDS
+e ss -tulnp - See all open ports with owners
+e coredumpctl list - See all program crashes with details
+¢ cgroup-tools blkio - Shows disk IO limits per cgroup
+e column -t -s, - Formats CSV into aligned terminal table
+¢ zramctl - Shows all compressed RAM swap devices
+¢ vidir - Renames files by editing them as text
+¢ pv file | cmd - Adds progress bar to any pipe
+¢ ip route get 8.8.8.8 - Shows which interface routes your traffic
+¢ repquota -a - Shows disk quotas for every user
+¢ getcap -r /usr/bin - Finds all binaries with special capabilities
+¢ find / -newer /tmp/ref - Finds files changed after a timestamp
+e perf stat -a sleep 5 - Captures live hardware counters system-wide
+¢ namei -! /path/to/file - Show permissions at every path level
+e nc -zv host 1-1000 - Scan ports using only netcat
+e systemd-analyze blame - See what slows your boot down
+¢ fuser -v /mount/point - Find what blocks your unmount
+e lastb - View every failed login attempt ever
+¢ watch -d -n1 'df -h' - Live disk usage with change highlights
+e diff <(Is dir1) <(Is dir2) - Diff two directories without temp files
+¢ nmap -sV --script=banner - Grabs service banners across open ports
+e udevadm monitor - Streams every hardware event live..
+¢ Idd /usr/bin/program - Lists all binary library dependencies
+e capsh --print - Shows current shell Linux capabilities
+* ionice -c 3 cp big.iso /dst - Runs process at lowest disk priority
+¢ taskset -c 0,1./program - Pins process to specific CPU cores
+e trace -e malloc ./binary - Trace library calls ...not syscalls
+* socat TCP-LISTEN:8080,fork TCP:target:80 - Creates a TCP proxy
+e openssl! s_client -connect host:443 - Inspect any TLS certificate
+¢ iptables -L -n -v --line-numbers - Full firewall rules with packet counters
+e objdump -d /usr/bin/Is | head -60 - Disassembles any binary to assembly

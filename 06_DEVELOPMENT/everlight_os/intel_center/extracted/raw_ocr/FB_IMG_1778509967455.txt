@@ -1,0 +1,42 @@
++L}:
+ByteClave
+Scientific Databases That Change How You See The World
+e GenBank - Every DNA sequence ever discovered, freely searchable
+e RCSB PDB - 3D structure of every known protein on Earth
+e GBIF - 2.5 billion wildlife sightings mapped across every country
+e OBIS - Every ocean species ever recorded, globally mapped
+e NASA ADS - Every astronomy paper ever published, freely searchable
+e Paleobiology Database - Every fossil species ever found, fully searchable
+e USGS Earthquake Hazards - Every earthquake on Earth, happening live
+e ChemSpider - Every known chemical compound, fully searchable free
+e UniProt - Complete biological function of every known protein
+e Human Connectome - Complete wiring map of the human brain free
+e Allen Brain Atlas - Gene expression mapped across the entire human brain
+e OpenNeuro - Raw brain scan data from thousands of real humans
+e PhysioNet - Real heartbeat and vital sign data from real patients
+e SEER Cancer - Every cancer diagnosis in the US since 1973
+e Global Burden of Disease - Every cause of death globally since 1990
+e PubChem - Every chemical compound and its toxic effects free
+e NIST Chemistry WebBook - Every chemical property ever experimentally measured
+e NASA Exoplanet Archive - Every confirmed planet outside our solar system
+e MAST - Raw Hubble and James Webb telescope data, free
+e Space Weather Center - Live solar storm and geomagnetic disruption data
+e NOAA Paleoclimatology - Earth's climate data going back 800,000 years
+e eBird - Half a billion bird observations mapped globally
+e iNaturalist - 200 million real wildlife observations, all geotagged
+e Movebank - GPS tracking of millions of wild animals migrating
+e ENCODE Project - Complete map of every functional element in human DNA
+e 1000 Genomes - Complete genetic sequences of 2,500 humans globally
+e GTEx Portal - How genes behave differently in every human organ
+e COSMIC Cancer - Every cancer-causing genetic mutation ever identified
+e NeuroMorpho - Every neuron shape ever reconstructed and catalogued
+e SDSS SkyServer - Browse and search the entire observable universe
+e Marine Geoscience - Every ocean floor sample ever collected, free
+e Open Targets - Every known link between genes and human diseases
+e IRIS Seismograph - Real-time seismic waveforms from every station on Earth
+e NASA Earthdata - Every earth science dataset NASA ever collected
+e Cancer Imaging Archive - Free MRI and CT scans from real cancer patients
+e MorphoBank - Every fossil specimen photo ever scientifically published
+e PANGAEA - Every ocean and earth environmental dataset ever collected
+e TRY Plant Traits - Every measured plant characteristic across Earth
+e NeuroVault - Every brain imaging study result ever published free

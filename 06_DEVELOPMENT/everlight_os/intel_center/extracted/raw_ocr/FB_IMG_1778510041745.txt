@@ -1,0 +1,84 @@
++L}:
+ByteClave
+
+Geospatial & Satellite Tools Nobody Talks About
+
+« Zoom Earth - Live near real-time satellite imagery updated hourly
+
+e Ventusky - Animated global weather data on interactive 3D map
+
+¢ Earth Nullschool - Live visualization of global wind and ocean currents
+
+e Windy - Professional weather forecasting with 50 atmospheric layers
+
+¢ LightningMaps - Tracks every lightning strike on earth live
+
+e OpeninfraMap - Shows all underground power cables and pipelines globally
+
+¢ OpenRailwayMap - Detailed global railway infrastructure mapped openly
+
+e OpenAerialMap - Free drone and aerial imagery after disasters
+
+e Mapillary - Crowdsourced street level imagery from every country
+
+e OpenTopography - Free high resolution terrain and LiDAR datasets
+
+¢ Soar Earth - Marketplace for satellite and drone map layers
+
+e Peakfinder - Identifies every mountain visible from any point
+
+« F4map - Renders any city in interactive real-time 3D
+
+e Cadmapper - Converts any city block into CAD file
+
+¢ ShadowMap - Simulates building shadows at any date and time
+
+e GeoHack - Jumps instantly between every map tool for coordinates
+
+e Pic2Map - Extracts hidden GPS coordinates from any photo
+
+e Chronolocation - Determines exact photo date from sun and shadows
+
+« Mapflow - Al detects buildings and roads from satellite imagery
+
+e EO Browser - Compares multispectral satellite data across any dates
+
+e OnGeo - Instant satellite analysis report for any land plot
+
+e UP42 - Marketplace ordering satellite imagery from 30 providers
+
+« Picterra - Trains custom Al detectors on your satellite images
+
+e Global Forest Watch - Monitors deforestation and forest loss live
+
+e Global Fishing Watch - Tracks illegal fishing vessels worldwide
+
+e ICEYE - SAR satellite imagery through clouds and darkness
+
+¢ Orbital Insight - Extracts economic signals from satellite parking data
+
+e Methane SAT - Maps global methane emission sources from orbit
+
+¢ SpacelKnow - Monitors industrial activity via satellite change detection
+
+e Descartes Labs - Al analysis of satellite time series for signals
+
+e EOSDA - Custom satellite analytics for agriculture and infrastructure
+
+e FireWatch - Monitors active wildfires globally using NASA satellite data
+
+¢ Tanager - Commercial satellite measuring exact CO2 and methane plumes
+
+e SkyTruth - Uses satellite imagery to expose environmental violations
+
+« Felt - Collaborative live map building with satellite layer stacking
+
+e Aerialod - Renders beautiful 3D terrain maps from elevation data
+
+¢ Radio Garden - Explores live radio stations across any globe location
+
+e Flightradar24 - Tracks every commercial aircraft live in real time
+
+¢ PolarView - Monitors Arctic and Antarctic sea ice extent live
+
+e Zoom Earth Historic - Compares satellite imagery of any location over decades

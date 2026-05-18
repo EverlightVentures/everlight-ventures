@@ -1,0 +1,98 @@
+{
+  "domain": "bbc.com",
+  "method": "rss",
+  "rss_path": "http://feeds.bbci.co.uk/news/world/rss.xml",
+  "items": [
+    {
+      "title": "Trump says Iran ceasefire is on 'massive life support'",
+      "url": "https://www.bbc.com/news/articles/cvgznxn18zgo?at_medium=RSS&at_campaign=rss",
+      "published": "Tue, 12 May 2026 00:59:12 GMT",
+      "summary": "The US president criticises an Iranian counteroffer to end the war, and says the month-long ceasefire is \"unbelievably weak\"."
+    },
+    {
+      "title": "How the Trump-Xi summit could set superpower relations for many years to come",
+      "url": "https://www.bbc.com/news/articles/ceqprgen1nyo?at_medium=RSS&at_campaign=rss",
+      "published": "Mon, 11 May 2026 23:20:53 GMT",
+      "summary": "Trump's whirlwind visit to China is the most significant for years - but will it bear fruit?"
+    },
+    {
+      "title": "Last passengers leave virus-hit cruise ship as three more test positive",
+      "url": "https://www.bbc.com/news/articles/cjep78l5835o?at_medium=RSS&at_campaign=rss",
+      "published": "Mon, 11 May 2026 20:49:14 GMT",
+      "summary": "An American and a French national who have returned home have tested positive for hantavirus."
+    },
+    {
+      "title": "Israel passes law to allow death penalty and public trials for those linked to 7 October",
+      "url": "https://www.bbc.com/news/articles/c202ngg45x8o?at_medium=RSS&at_campaign=rss",
+      "published": "Tue, 12 May 2026 04:11:42 GMT",
+      "summary": "Israel passes a law that permits the death penalty and public trials for those involved in the unprecedented Hamas-led attacks."
+    },
+    {
+      "title": "EU agrees sanctions on Israeli settlers over West Bank violence",
+      "url": "https://www.bbc.com/news/articles/c202wp2rl09o?at_medium=RSS&at_campaign=rss",
+      "published": "Mon, 11 May 2026 19:37:17 GMT",
+      "summary": "The EU's foreign policy chief said \"extremism and violence carry consequences\", while Israel branded the move \"arbitrary\"."
+    },
+    {
+      "title": "'Britain at the heart of Europe': How Starmer's plans are going down in the EU",
+      "url": "https://www.bbc.com/news/articles/cwy2k7re9jdo?at_medium=RSS&at_campaign=rss",
+      "published": "Mon, 11 May 2026 17:15:52 GMT",
+      "summary": "Sir Keir Starmer pledged to rebuild the UK's relationship with Europe in a defiant speech on Monday."
+    },
+    {
+      "title": "South African president says he will not step down after impeachment call",
+      "url": "https://www.bbc.com/news/articles/c9369q3g7w7o?at_medium=RSS&at_campaign=rss",
+      "published": "Mon, 11 May 2026 21:44:20 GMT",
+      "summary": "President Cyril Ramaphosa said he would not resign on Monday evening after days of speculation."
+    },
+    {
+      "title": "US in closely-guarded talks to open new bases in Greenland",
+      "url": "https://www.bbc.com/news/articles/cx21669452lo?at_medium=RSS&at_campaign=rss",
+      "published": "Mon, 11 May 2026 23:56:11 GMT",
+      "summary": "It is seeking to open three bases in the south of the Arctic territory, according to multiple officials familiar with the talks."
+    },
+    {
+      "title": "US passengers quarantining in Nebraska as officials say public hantavirus risk 'very low'",
+      "url": "https://www.bbc.com/news/articles/cwy2e9e1g0wo?at_medium=RSS&at_campaign=rss",
+      "published": "Mon, 11 May 2026 23:31:37 GMT",
+      "summary": "Two people are being monitored in Atlanta, 16 in Nebraska and another six passengers in Canada."
+    },
+    {
+      "title": "Whales could be harmed by diverted ships avoiding Middle East, scientists warn",
+      "url": "https://www.bbc.com/news/articles/cz02dkkd9j9o?at_medium=RSS&at_campaign=rss",
+      "published": "Mon, 11 May 2026 14:22:07 GMT",
+      "summary": "Ships have rerouted around the Cape of Good Hope since 2023 to avoid conflicts in the Middle East."
+    },
+    {
+      "title": "China should stop hoarding food and fertiliser, says former World Bank chief",
+      "url": "https://www.bbc.com/news/articles/cwy2rnyg50zo?at_medium=RSS&at_campaign=rss",
+      "published": "Tue, 12 May 2026 03:40:29 GMT",
+      "summary": "David Malpass also said that Beijing's claim to be a developing nation is no longer credible."
+    },
+    {
+      "title": "Portrait looted by Nazis found in home of Dutch SS leader's descendants",
+      "url": "https://www.bbc.com/news/articles/cgmpj0p9k08o?at_medium=RSS&at_campaign=rss",
+      "published": "Mon, 11 May 2026 18:27:21 GMT",
+      "summary": "The painting is believed to have been plundered by high-ranking Nazi Hermann Goering during World War Two."
+    },
+    {
+      "title": "Washington dinner shooting suspect pleads not guilty",
+      "url": "https://www.bbc.com/news/articles/c4g48ewgz8mo?at_medium=RSS&at_campaign=rss",
+      "published": "Mon, 11 May 2026 14:52:12 GMT",
+      "summary": "Cole Tomas Allen, 31, was charged with attempting to assassinate US President Donald Trump."
+    },
+    {
+      "title": "Watch: Alaska town sees its last sunset until August",
+      "url": "https://www.bbc.com/news/videos/cgjpg20xgy5o?at_medium=RSS&at_campaign=rss",
+      "published": "Mon, 11 May 2026 21:05:29 GMT",
+      "summary": "Residents of Utqiagvik, the United States' northernmost city, will experience 84 days of midnight sun and uninterrupted daylight."
+    },
+    {
+      "title": "Elon Musk and Tim Cook among CEOs expected to accompany Trump on China trip",
+      "url": "https://www.bbc.com/news/articles/c5yx757w048o?at_medium=RSS&at_campaign=rss",
+      "published": "Mon, 11 May 2026 18:26:20 GMT",
+      "summary": "A total of 17 US executives are set to join the president on his visit, where he will meet his Chinese counterpart Xi Jinping."
+    }
+  ],
+  "fetched_at": "2026-05-11T22:19:50.668951"
+}

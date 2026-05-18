@@ -1,0 +1,30 @@
+; : = ByteClave
+sites that let you interact with live global data
+¢ earth.nullschool.net - Animated global wind and ocean currents
+¢ marinetraffic.com - Track every ship on Earth right now
+¢ mempool.space - Every pending Bitcoin transaction
+¢ flightradar24.com - live flights across the globe
+¢ cybermap.kaspersky.com - global cyberattack flows on 3D globe
+¢ netc.com - Live nuclear radiation readings
+¢ iqair.com/earth - Real-time air quality across every continent
+¢ globalfishingwatch.org - Track commercial fishing vessel s
+¢ globalquake.net - seismic detection from stations worldwide
+¢ globalforestwatch.org - Live deforestation alerts from satellite data
+¢ climatetrace.org - Track greenhouse emissions by source globally
+¢ earthquaketrack.com - Every earthquake on Earth as it happens
+¢ opensky-network.org - live global air traffic data
+* geomag.bgs.ac.uk - Live readings from Earth's magnetic field
+¢ observe.earth - Live conflicts, disease outbreaks and fuel prices
+¢ worldview.earthdata.nasa.gov - NASA satellite imagery
+¢ acleddata.com - political conflict and protest event data
+« outbreaks.globalincidentmap.com - disease outbreak incidents mapped
+¢ the-world-now.com - globe showing conflicts and disasters
+e isstracker.live - Track the space station above
+¢ deaddrops.com - map of hidden USB data drop spots
+¢ co2.earth - atmospheric carbon dioxide concentration readings
+¢ oceancolor.gsfc.nasa.gov - ocean chlorophyll and temperature data
+¢ globe.adsbexchange.com - live military and civilian flights
+¢ tide-forecast.com - Real-time tidal data for every global coastline
+e stats. wikimedia.org - Live Wikipedia edits happening
+¢ swpc.noaa.gov - solar flares and geomagnetic storm alerts
+¢ internetlivestats.com - Watch internet traffic and data grow live

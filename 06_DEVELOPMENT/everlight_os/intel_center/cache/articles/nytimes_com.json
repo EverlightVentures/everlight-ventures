@@ -1,0 +1,98 @@
+{
+  "domain": "nytimes.com",
+  "method": "rss",
+  "rss_path": "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
+  "items": [
+    {
+      "title": "Xi Poised to Press Trump on Arms Sales to Taiwan",
+      "url": "https://www.nytimes.com/2026/05/12/world/asia/xi-trump-china-taiwan-arms-sales.html",
+      "published": "Tue, 12 May 2026 04:00:16 +0000",
+      "summary": "Beijing has called Taiwan the \u201ccore of China\u2019s core interests.\u201d Xi Jinping is likely to focus on getting President Trump to slow approval of more weapons for the self-governing island."
+    },
+    {
+      "title": "Chinese A.I. Firms Push Beyond Nvidia as DeepSeek Turns to Huawei",
+      "url": "https://www.nytimes.com/2026/05/12/business/china-semiconductor-ai-deepseek.html",
+      "published": "Tue, 12 May 2026 04:00:14 +0000",
+      "summary": "Before this week\u2019s U.S.-Chinese summit, Beijing reached a milestone in its quest for technological self-sufficiency."
+    },
+    {
+      "title": "China Increasingly Views Trump\u2019s America as an Empire in Decline",
+      "url": "https://www.nytimes.com/2026/05/12/business/china-trump-xi-decline.html",
+      "published": "Tue, 12 May 2026 04:00:06 +0000",
+      "summary": "For decades, many Chinese viewed the United States with a mix of admiration, envy and resentment. President Trump\u2019s volatile second term shattered that image."
+    },
+    {
+      "title": "RFK Jr. Is Driving a Vast Inquiry Into Vaccines, Despite His Public Silence",
+      "url": "https://www.nytimes.com/2026/05/11/health/kennedy-vaccine-safety.html",
+      "published": "Mon, 11 May 2026 20:02:04 +0000",
+      "summary": "Health Secretary Robert F. Kennedy Jr. has toned down his public criticism of vaccines, under orders from the White House. But inside his department, a sprawling research effort is a top priority."
+    },
+    {
+      "title": "Supreme Court Clears Path for Alabama to Use New Voting Map",
+      "url": "https://www.nytimes.com/2026/05/11/us/politics/supreme-court-alabama-map.html",
+      "published": "Tue, 12 May 2026 00:33:02 +0000",
+      "summary": "A majority of the justices sided with Alabama in a move that could speed up efforts to put in place a congressional district map that would eliminate a majority-Black district."
+    },
+    {
+      "title": "The Voting Rights Decision Might Silence Black People in Fayette County, Tennessee",
+      "url": "https://www.nytimes.com/2026/05/11/us/fayette-county-tennessee-voting-rights.html",
+      "published": "Mon, 11 May 2026 19:49:37 +0000",
+      "summary": "Black residents, who make up 25 percent of Fayette County, Tenn., won a new electoral map last year to change an all-white board of commissioners. They worry the Supreme Court\u2019s ruling could threaten that."
+    },
+    {
+      "title": "Virginia Officials Ask Supreme Court to Restore Voting Map Drawn by Democrats",
+      "url": "https://www.nytimes.com/2026/05/11/us/politics/supreme-court-virginia-redistricting.html",
+      "published": "Mon, 11 May 2026 23:59:20 +0000",
+      "summary": "State officials asked the justices to overturn a Virginia Supreme Court decision that struck down a congressional map, a major defeat for Democrats."
+    },
+    {
+      "title": "Why Republicans Are Still Drawing House Maps, While Democrats Are Stuck",
+      "url": "https://www.nytimes.com/2026/05/11/us/politics/redistricting-republicans-democrats.html",
+      "published": "Tue, 12 May 2026 01:51:32 +0000",
+      "summary": "The G.O.P. has seized an edge on redistricting thanks to two court rulings, and it has more room to maneuver for extra seats before the midterms."
+    },
+    {
+      "title": "Starmer Faces Mounting Calls From Own Party to Resign as British Prime Minister",
+      "url": "https://www.nytimes.com/2026/05/11/world/europe/starmer-speech-uk-labour.html",
+      "published": "Tue, 12 May 2026 02:26:05 +0000",
+      "summary": "Dozens of Labour Party leaders called on Prime Minister Keir Starmer to leave office, and several government aides announced their resignations."
+    },
+    {
+      "title": "Justice Dept. Subpoenas Wall Street Journal in Leak Investigation",
+      "url": "https://www.nytimes.com/2026/05/11/us/politics/subpoenas-wall-street-journal-trump.html",
+      "published": "Tue, 12 May 2026 02:16:58 +0000",
+      "summary": "Critics raised concerns over press freedom after The Journal disclosed receiving subpoenas related to an article on deliberations on the risks of military action in Iran."
+    },
+    {
+      "title": "Reflecting Pool Repairs to Cost $13.1 Million. Trump Had Promised $1.8 Million.",
+      "url": "https://www.nytimes.com/2026/05/11/us/politics/reflecting-pool-paint-contract-trump.html",
+      "published": "Mon, 11 May 2026 21:09:28 +0000",
+      "summary": "The Interior Department added $6.2 million to the no-bid contract for repairs to the Lincoln Memorial pool late last week."
+    },
+    {
+      "title": "Kari Lake, Who Led Effort to Shutter Voice of America, Is Named Ambassador to Jamaica",
+      "url": "https://www.nytimes.com/2026/05/11/us/politics/kari-lake-jamaica-ambassador.html",
+      "published": "Tue, 12 May 2026 04:05:57 +0000",
+      "summary": "Ms. Lake tried and failed to fire hundreds of Voice of America journalists and to cut funding for other federally funded news groups like Radio Free Europe/Radio Liberty."
+    },
+    {
+      "title": "Nations Brace for Long-Term Economic Woes as Trump Calls Iran Truce Plan \u2018Garbage\u2019",
+      "url": "https://www.nytimes.com/2026/05/11/world/middleeast/economic-woes-trump-iran-truce.html",
+      "published": "Mon, 11 May 2026 21:38:00 +0000",
+      "summary": "President Trump said the fragile cease-fire was on \u201clife support,\u201d and India\u2019s leader urged residents to cut back on purchases and travel."
+    },
+    {
+      "title": "Trump Proposes Suspending Federal Gas Tax Until Prices Fall",
+      "url": "https://www.nytimes.com/2026/05/11/us/politics/trump-gas-tax.html",
+      "published": "Mon, 11 May 2026 19:02:54 +0000",
+      "summary": "Congress would have to agree to any suspension, and dropping federal taxes would not make up for the steep increase in prices since the war began."
+    },
+    {
+      "title": "Is France\u2019s Centrist Leader Trying to Weatherproof It From the Far Right?",
+      "url": "https://www.nytimes.com/2026/05/12/world/europe/france-macron-weatherproof-bureaucracy.html",
+      "published": "Tue, 12 May 2026 04:01:05 +0000",
+      "summary": "President Emmanuel Macron has appointed a string of allies who will remain in critical state positions after next year\u2019s presidential election, and who could thwart a far-right successor."
+    }
+  ],
+  "fetched_at": "2026-05-11T22:19:48.784400"
+}

@@ -1,0 +1,42 @@
++L}:
+ByteClave
+Secret Alternatives Google Hopes You Never Find
+e Kagi - Ad-free search engine that never tracks you
+e Tuta - End-to-end encrypted email nobody can read
+e Filen - Zero-knowledge cloud storage fully encrypted
+e Notesnook - Private encrypted notes synced across every device
+e Grist - Spreadsheet and database hybrid in one tool
+e Ente - Self-hosted encrypted photo backup with facial recognition
+e OsmAnd - Full offline maps and navigation without internet
+e Invidious - Watch any YouTube video without being tracked
+e Plausible - Website analytics with zero cookies or tracking
+e Fontsource - Self-host any font via one install command
+e DeepL - Translate any document with near-human accuracy
+e Proton Calendar - Fully encrypted calendar nobody can access
+e Jitsi - Host any video call on your own server
+e Tally - Build any form without data ever being sold
+¢ hCaptcha - Block bots without harvesting any user data
+e Pocketbase - Complete backend in a single downloadable binary
+e F-Droid - Install open source Android apps completely free
+e GrapheneOS - Hardened Android with zero tracking built in
+e AdGuard DNS - Block every tracker before it reaches your device
+e Vaultwarden - Self-host all your passwords on your own server
+e Ente Auth - Fully encrypted two-factor authentication codes
+e Umami - Privacy-first website analytics you fully own
+e Moodle - Run a full online classroom on your server
+e Memos - Self-hosted private notes that syne everywhere free
+e Baikal - Self-host all your contacts and calendar data
+e Mattermost - Team messaging on your own server
+e Miniflux - Minimal self-hosted RSS reader for any news
+e AntennaPod - Listen to any podcast without any tracking
+e Marble - Full offline globe with Wikipedia overlays built in
+e Glimpse - See search trend data without being profiled
+e OpenAlex - Search every academic paper ever published free
+e Pitch - Build stunning presentations with a collaborative team
+e Linphone - Free encrypted voice calls over any network
+e NixOS - Fully reproducible Linux OS with zero bloat
+¢ Seafile - Self-host your entire file and document workspace
+e Hetzner - Affordable European cloud hosting with strong privacy
+e Listmonk - Self-host newsletters to millions for free
+e Forgejo - Self-host all your code repositories privately
+e Immich - Self-hosted photo library with Al organisation built in

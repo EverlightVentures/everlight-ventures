@@ -12,7 +12,7 @@ together. And what kind of search like-minded material, or same context,
 material at 1 time? And it's all cart and their own cards."
 
 Output: 09_DASHBOARD/reports/RESOURCES_HUB.html
-Source: Everlight_Intel_Center/database/everlight_resources.sqlite
+Source: 06_DEVELOPMENT/everlight_os/intel_center/database/everlight_resources.sqlite
 """
 from __future__ import annotations
 
@@ -30,7 +30,7 @@ from env_loader import load_env  # noqa: E402
 load_env()
 from report_template import render_report  # noqa: E402
 
-DB = ROOT / "Everlight_Intel_Center" / "database" / "everlight_resources.sqlite"
+DB = ROOT / "06_DEVELOPMENT/everlight_os/intel_center" / "database" / "everlight_resources.sqlite"
 OUTPUT = ROOT / "09_DASHBOARD" / "reports" / "RESOURCES_HUB.html"
 
 # Category emoji-free icons (Playfair / unicode symbols) and accent colors
@@ -208,7 +208,7 @@ tags, purposes, and use cases.
 {strip}
 {''.join(sections)}
 <p style='color:#666;font-size:12px;margin-top:32px;'>
-Source: <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;'>Everlight_Intel_Center/database/everlight_resources.sqlite</code>
+Source: <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;'>06_DEVELOPMENT/everlight_os/intel_center/database/everlight_resources.sqlite</code>
 &middot; Rendered {datetime.now().strftime('%Y-%m-%d %H:%M PT')}
 </p>
 {js}

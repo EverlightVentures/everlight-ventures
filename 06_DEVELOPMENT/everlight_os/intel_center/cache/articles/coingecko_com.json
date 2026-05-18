@@ -1,0 +1,98 @@
+{
+  "domain": "coingecko.com",
+  "method": "rss",
+  "rss_path": "/feed",
+  "items": [
+    {
+      "title": "How Apyx and Pendle Bring Dividend-Backed Yield to DeFi",
+      "url": "https://www.coingecko.com/learn/apyx-pendle-dividend-backed-yield-defi?locale=en",
+      "published": "2026-05-11T03:12:08Z",
+      "summary": "Overview of Pendle x Apyx\n\nPendle Finance and Apyx are integrating traditional preferred stock dividends with DeFi yield trading infrastructure. Apyx tokenizes dividend cash flows from Digital Ass..."
+    },
+    {
+      "title": "What Are Solana Token Accounts: Reclaiming SOL in Your Wallets",
+      "url": "https://www.coingecko.com/learn/what-are-solana-token-accounts?locale=en",
+      "published": "2026-05-08T03:00:54Z",
+      "summary": "Solana Token Accounts Overview\n\nSolana token accounts are a feature of the Solana network, unlike Ethereum where your wallet directly holds all your tokens, Solana creates a separate account for e..."
+    },
+    {
+      "title": "DeFi's Dopamine Hit Is Over. Real-World Assets Offer Something Real.",
+      "url": "https://www.coingecko.com/learn/defis-dopamine-hit-rwa-offers-something-real?locale=en",
+      "published": "2026-05-08T00:54:02Z",
+      "summary": "Tiger Research looks at DeFi&#39;s shift from artificially inflated yields to real-world assets, and why RWA may be the sustainable revenue source the market was missing.\n\n\nKey Takeaways\n\n\n\t\n\tAave V3..."
+    },
+    {
+      "title": "What Are Layer 2s (L2s)? Top L2 Networks Compared",
+      "url": "https://www.coingecko.com/learn/layer-2-l2?locale=en",
+      "published": "2026-05-06T06:37:01Z",
+      "summary": "What Is a Layer 2 (L2)?\n\nLayer 2 (L2) refers to a secondary protocol built on top of a base blockchain (Layer 1) to increase scalability and reduce transaction costs while inheriting the L1&#39;s secu..."
+    },
+    {
+      "title": "Strategy's STRC: Capture Bitcoin-Linked Yield via Saturn & Pendle",
+      "url": "https://www.coingecko.com/learn/strategy-strc-defi-strc-yield-saturn-pendle?locale=en",
+      "published": "2026-05-04T05:59:36Z",
+      "summary": "This article and the products described are available only to non-U.S. persons (as defined in Regulation S under the U.S. Securities Act of 1933, as amended) who satisfy Saturn&#39;s and Pendle&#39;s eligi..."
+    },
+    {
+      "title": "Tiger Research's 2026 Q2 Bitcoin Valuation Report: $143,000",
+      "url": "https://www.coingecko.com/learn/26q2-bitcoin-valuation-report-tiger-research?locale=en",
+      "published": "2026-05-04T01:14:59Z",
+      "summary": "This report is written by Tiger Research and presents the Q2 2026 Bitcoin outlook and establishes a 12-month price target of $143,000.\n\n\nKey Takeaways\n\n\n\t\n\tMacro remains supportive despite slower..."
+    },
+    {
+      "title": "What Are Decentralized Autonomous Organizations (DAO) and How They Work",
+      "url": "https://www.coingecko.com/learn/decentralized-autonomous-organization-dao?locale=en",
+      "published": "2026-05-01T02:56:18Z",
+      "summary": "What Is a DAO (Decentralized Autonomous Organization)?\n\nA decentralized autonomous organization (DAO) is a blockchain-based organization with no central authority. Decisions are made collectively ..."
+    },
+    {
+      "title": "How Bitget Is Bringing TradFi to 125 Million Users",
+      "url": "https://www.coingecko.com/learn/what-is-bitget-tradfi?locale=en",
+      "published": "2026-04-30T06:20:14Z",
+      "summary": "Bitget TradFi Overview\n\nBitget TradFi is a cross-market trading platform that allows users to trade traditional financial assets like forex, gold, and stock CFDs directly through the Bitget exchan..."
+    },
+    {
+      "title": "Top Crypto Cards in Switzerland (2026)",
+      "url": "https://www.coingecko.com/learn/top-crypto-cards-switzerland?locale=en",
+      "published": "2026-04-29T09:06:06Z",
+      "summary": "Top Crypto Cards in Switzerland\n\nThe top non-custodial crypto cards in Switzerland, where you retain full control of your funds until the moment of payment, are Oobit, Ether.fi Cash, and Gnosis Pa..."
+    },
+    {
+      "title": "What Is Circulating Supply and Why It Matters",
+      "url": "https://www.coingecko.com/learn/what-is-circulating-supply-crypto?locale=en",
+      "published": "2026-04-28T03:04:20Z",
+      "summary": "What Is Circulating Supply?\n\nCirculating supply refers to the amount of coins currently in circulation and tradeable to the public. It is a key component in determining market capitalization (MC =..."
+    },
+    {
+      "title": "Top 8 Hot Wallets in 2026",
+      "url": "https://www.coingecko.com/learn/top-hot-software-wallets-crypto?locale=en",
+      "published": "2026-04-27T08:17:57Z",
+      "summary": "Top Hot Wallets for Storing Cryptocurrencies\n\nLeading cryptocurrency hot wallets provide secure digital asset management and decentralized application access. The top platforms for managing digita..."
+    },
+    {
+      "title": "How to Connect CoinGecko to OpenClaw for Real-Time Crypto Market Data",
+      "url": "https://www.coingecko.com/learn/how-to-connect-coingecko-openclaw-crypto-data?locale=en",
+      "published": "2026-04-22T10:50:34Z",
+      "summary": "OpenClaw (formerly known as Clawdbot and Moltbot) has become one of the fastest-growing open-source AI agent projects, with more than 355K stars on GitHub as of April 2026. One of its most popular ..."
+    },
+    {
+      "title": "Introducing Partner Platform: A Unified Growth Hub for Crypto Projects & Partners",
+      "url": "https://www.coingecko.com/learn/introducing-partner-platform?locale=en",
+      "published": "2026-04-22T05:22:27Z",
+      "summary": "As the crypto ecosystem continues to expand across millions of tokens, chains, and use cases, the way projects manage their presence and reach users has become increasingly fragmented.\n\nTeams tod..."
+    },
+    {
+      "title": "Bitcoin Options Theta Decay: Why Your Profitable Trade Is Losing Money",
+      "url": "https://www.coingecko.com/learn/bitcoin-options-theta-decay?locale=en",
+      "published": "2026-04-21T12:00:43Z",
+      "summary": "What Is Theta?\n\nTheta (\u0398), also known as time decay, is the dollar amount an option&#39;s price tends to lose each day because time passes (all else equal).\n\n\n\tTheta accelerates near expiration: espec..."
+    },
+    {
+      "title": "Bitcoin vs. 100 Years of Fiat: Quantum Risk and the 21M Supply",
+      "url": "https://www.coingecko.com/learn/bitcoin-100-year-survival-thesis?locale=en",
+      "published": "2026-04-21T09:39:05Z",
+      "summary": "Bitcoin&#39;s 100-Year Thesis: From Experiment to Infrastructure\n\nAs of April 2026, Bitcoin has transitioned from a fringe experiment into a $98.7 billion institutional asset class and sovereign reser..."
+    }
+  ],
+  "fetched_at": "2026-05-11T22:19:48.383809"
+}

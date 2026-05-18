@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0a0a0f">
+<meta http-equiv="Cache-Control" content="no-store">
+<title>Profile Report · Lino Gillies · Intel Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold:#c9a84c; --gold-glow:#e0c66a; --bg:#0a0a0f; --panel:#15140f; --line:#2a2615;
+    --text:#e8e8e8; --dim:#999;
+    --green:#22c55e; --red:#dc2626; --cyan:#22d3ee; --purple:#8b5cf6; --orange:#f97316;
+  }
+  *{ box-sizing:border-box; }
+  body {
+    background: var(--bg); color: var(--text); font-family: Inter, sans-serif;
+    line-height: 1.55; margin: 0; min-height: 100vh; position: relative; overflow-x: hidden;
+  }
+  /* Diagonal repeating INTERNAL watermark */
+  body::before {
+    content: '';
+    position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    background-image: repeating-linear-gradient(
+      -25deg,
+      transparent 0px, transparent 200px,
+      rgba(220, 38, 38, 0.04) 200px, rgba(220, 38, 38, 0.04) 220px
+    );
+  }
+  body::after {
+    content: 'INTERNAL · EVERLIGHT VENTURES · INTERNAL · EVERLIGHT VENTURES · INTERNAL · EVERLIGHT VENTURES · INTERNAL · EVERLIGHT VENTURES';
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-25deg);
+    font-family: 'JetBrains Mono', monospace; font-size: 12rem; font-weight: 900;
+    color: rgba(220, 38, 38, 0.025); white-space: nowrap; letter-spacing: 1rem;
+    pointer-events: none; z-index: 1; user-select: none;
+  }
+  .mesh { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; opacity: .5; }
+  .mesh::before, .mesh::after { content: ''; position: absolute; border-radius: 50%; filter: blur(80px); opacity: .45; }
+  .mesh::before { width: 520px; height: 520px; left: -10%; top: -15%; background: radial-gradient(closest-side, #3a2a08, transparent); }
+  .mesh::after { width: 480px; height: 480px; right: -8%; top: 35%; background: radial-gradient(closest-side, #2a1135, transparent); }
+
+  /* Top-right viewer watermark */
+  .view-stamp {
+    position: fixed; top: 14px; right: 18px; z-index: 100;
+    background: rgba(220, 38, 38, 0.12); border: 1px solid rgba(220, 38, 38, 0.4);
+    color: #f87171; font-family: 'JetBrains Mono', monospace; font-size: .65rem;
+    padding: .35rem .75rem; border-radius: 9999px; letter-spacing: .08em;
+  }
+
+  header {
+    border-bottom: 2px solid var(--gold);
+    padding: 48px 56px 32px;
+    background: radial-gradient(ellipse at top, rgba(201,168,76,0.08), transparent 60%), var(--bg);
+    position: relative; z-index: 2;
+  }
+  .wordmark { font-family: 'Playfair Display', serif; font-weight: 900; color: var(--gold); letter-spacing: .15em; font-size: .85rem; text-transform: uppercase; }
+  h1 { font-family: 'Playfair Display', serif; font-weight: 700; color: var(--gold); margin: 8px 0 4px; font-size: 2.4rem; text-shadow: 0 0 24px rgba(201,168,76,.45); }
+  .header-meta { color: var(--dim); font-size: .9rem; margin-top: 4px; font-family: 'JetBrains Mono', monospace; }
+  .header-meta .gold { color: var(--gold); }
+  .kind-chip {
+    display: inline-block; padding: .2rem .7rem; border-radius: 9999px;
+    background: rgba(139,92,246,.1); color: #a78bfa; border: 1px solid rgba(139,92,246,.4);
+    font-family: 'JetBrains Mono', monospace; font-size: .7rem; letter-spacing: .08em; margin-left: 12px;
+  }
+
+  main { padding: 32px 56px 80px; max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; }
+
+  /* DNC banner */
+  .dnc-banner {
+    display: flex; gap: 14px; align-items: center;
+    background: rgba(220,38,38,0.15); border: 2px solid rgba(220,38,38,0.6);
+    border-radius: 12px; padding: 18px 22px; margin-bottom: 28px;
+  }
+  .dnc-icon { font-size: 2rem; }
+  .dnc-title { color: #fca5a5; font-weight: 700; font-size: 1.05rem; letter-spacing: .05em; }
+  .dnc-detail { color: #fee2e2; font-size: .85rem; margin-top: 4px; }
+
+  /* Per-state legal panel */
+  .state-legal-panel {
+    background: linear-gradient(135deg, rgba(201,168,76,0.10), rgba(201,168,76,0.02));
+    border: 1px solid rgba(201,168,76,0.35); border-radius: 14px; padding: 28px; margin-bottom: 28px;
+  }
+  .legal-panel-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+  .panel-eyebrow { font-size: .7rem; text-transform: uppercase; letter-spacing: .2em; color: var(--gold); font-weight: 600; }
+  .panel-title { font-family: 'Playfair Display', serif; color: var(--gold); margin: 6px 0; font-size: 1.6rem; }
+  .panel-sub { color: var(--dim); font-size: .9rem; font-weight: 400; }
+  .panel-stamp { font-family: 'JetBrains Mono', monospace; font-size: .65rem; color: var(--dim); letter-spacing: .08em; }
+  .legal-panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px; }
+  .block-title { font-size: .75rem; text-transform: uppercase; letter-spacing: .12em; color: var(--gold); margin-bottom: 8px; font-weight: 600; }
+  .channel-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  .channel-table th, .channel-table td { padding: 6px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: left; }
+  .channel-table th { color: var(--dim); font-weight: 500; font-size: .7rem; text-transform: uppercase; }
+  .status-chip { display: inline-block; padding: .15rem .55rem; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; font-size: .68rem; letter-spacing: .04em; border: 1px solid; }
+  .restrictions-block ul { list-style: none; padding: 0; margin: 0; }
+  .restrictions-block li { background: rgba(220,38,38,0.07); border-left: 3px solid #dc2626; padding: 8px 12px; margin-bottom: 6px; border-radius: 4px; font-size: .85rem; }
+  .citations { margin-top: 14px; font-family: 'JetBrains Mono', monospace; font-size: .75rem; color: var(--dim); }
+  .hard-block-banner { display: flex; gap: 14px; align-items: center; background: rgba(220,38,38,0.15); border: 2px solid #dc2626; border-radius: 8px; padding: 14px 18px; margin-bottom: 16px; }
+  .hard-block-icon { font-size: 1.6rem; }
+  .hard-block-title { color: #fca5a5; font-weight: 700; letter-spacing: .05em; }
+  .hard-block-detail { color: #fee2e2; font-size: .85rem; margin-top: 2px; }
+
+  /* KPIs */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px; margin-bottom: 32px; }
+  .kpi { background: linear-gradient(135deg, rgba(17,17,24,.78), rgba(17,17,24,.45)); border: 1px solid rgba(255,255,255,.06); border-radius: 10px; padding: 16px 18px; }
+  .kpi-label { font-size: .7rem; color: var(--dim); text-transform: uppercase; letter-spacing: .1em; }
+  .kpi-value { font-size: 1.7rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; margin-top: 4px; }
+
+  /* Section cards */
+  section.section {
+    background: linear-gradient(135deg, rgba(17,17,24,.78), rgba(17,17,24,.45));
+    border: 1px solid rgba(255,255,255,.06); border-left: 4px solid var(--accent);
+    border-radius: 12px; padding: 24px 28px; margin-bottom: 22px;
+  }
+  .section-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .section-icon { font-size: 1.4rem; }
+  .section-head h2 { font-family: 'Playfair Display', serif; color: var(--accent); margin: 0; font-size: 1.4rem; flex: 1; }
+  .section-count { font-family: 'JetBrains Mono', monospace; font-size: .8rem; color: var(--accent); background: rgba(255,255,255,0.04); padding: .2rem .7rem; border-radius: 9999px; }
+
+  .finding { padding: 12px 14px; border-radius: 6px; background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.04); margin-bottom: 8px; }
+  .finding-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .finding-attribution { margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: .65rem; color: var(--dim); }
+  .finding-value { font-size: .92rem; color: var(--text); margin: 4px 0 6px; word-wrap: break-word; }
+  .finding-actions { font-size: .75rem; }
+  .src-link { color: var(--cyan); text-decoration: none; font-family: 'JetBrains Mono', monospace; }
+  .src-link:hover { color: var(--gold); text-decoration: underline; }
+
+  .chip { display: inline-block; padding: .15rem .55rem; border-radius: 9999px; font-size: .68rem; font-family: 'JetBrains Mono', monospace; letter-spacing: .04em; }
+  .chip-gold { background: rgba(201,168,76,.10); color: #e0c66a; border: 1px solid rgba(201,168,76,.3); }
+  .conf-chip { padding: .15rem .55rem; border-radius: 9999px; font-family: 'JetBrains Mono', monospace; font-size: .65rem; cursor: help; }
+  .conf-high { background: rgba(34,197,94,.12); color: #4ade80; border: 1px solid rgba(34,197,94,.4); }
+  .conf-med { background: rgba(201,168,76,.12); color: #e0c66a; border: 1px solid rgba(201,168,76,.4); }
+  .conf-low { background: rgba(220,38,38,.12); color: #f87171; border: 1px solid rgba(220,38,38,.4); }
+
+  /* Sources Run */
+  .sources-run-section { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--line); }
+  .sources-run-section h3 { font-family: 'Playfair Display', serif; color: var(--gold); font-size: 1.2rem; margin-bottom: 14px; }
+  table.sources-table { width: 100%; border-collapse: collapse; background: var(--panel); border-radius: 8px; overflow: hidden; font-size: .85rem; }
+  table.sources-table th { padding: 10px 14px; background: rgba(201,168,76,.06); color: var(--gold); text-align: left; font-size: .7rem; text-transform: uppercase; letter-spacing: .08em; }
+  table.sources-table td { padding: 10px 14px; border-top: 1px solid rgba(255,255,255,0.04); }
+  table.sources-table td.num { font-family: 'JetBrains Mono', monospace; text-align: right; }
+  table.sources-table td.dim { color: var(--dim); font-size: .8rem; }
+
+  /* Legal footer */
+  .legal-footer { margin-top: 40px; padding: 28px 32px; background: rgba(15,14,15,0.5); border: 1px solid var(--line); border-radius: 10px; }
+  .legal-footer h3 { font-family: 'Playfair Display', serif; color: var(--gold); margin: 0 0 16px; font-size: 1.3rem; }
+  .legal-block { font-size: .85rem; line-height: 1.6; color: var(--text); margin-bottom: 14px; }
+  .legal-block strong { color: var(--gold); }
+  .legal-block .quote { color: var(--gold-glow); font-style: italic; }
+  .legal-block code { font-family: 'JetBrains Mono', monospace; font-size: .82rem; color: var(--cyan); }
+  .warning-block { background: rgba(220,38,38,0.06); border-left: 3px solid var(--red); padding: 12px 16px; border-radius: 4px; }
+
+  /* TLDR Summary -- the part the operator actually reads */
+  .tldr-card {
+    background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.03));
+    border: 2px solid rgba(201,168,76,0.5); border-radius: 14px;
+    padding: 28px 32px; margin-bottom: 28px;
+    box-shadow: 0 0 60px rgba(201,168,76,0.12);
+  }
+  .tldr-eyebrow { font-family: 'Playfair Display', serif; font-size: 1rem; color: var(--gold); letter-spacing: .12em; margin-bottom: 18px; }
+  .tldr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px 32px; }
+  .tldr-block { }
+  .tldr-block-trust { grid-column: span 2; padding-top: 14px; border-top: 1px solid rgba(201,168,76,0.2); }
+  .tldr-block-action { grid-column: span 2; background: rgba(0,0,0,0.25); padding: 16px 20px; border-radius: 8px; }
+  .tldr-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .2em; color: var(--gold); margin-bottom: 6px; font-weight: 600; }
+  .tldr-text { font-size: 1.05rem; line-height: 1.55; color: var(--text); }
+  .tldr-actions { list-style: none; padding: 0; margin: 0; }
+  .tldr-actions li { font-size: 1rem; line-height: 1.55; color: var(--text); padding: 4px 0; }
+  .tldr-actions li strong { color: var(--gold); }
+
+  /* Personalization + Pitch Hooks card */
+  .personalization-card {
+    background: linear-gradient(135deg, rgba(139,92,246,0.10), rgba(34,211,238,0.04));
+    border: 2px solid rgba(139,92,246,0.5);
+    border-radius: 14px; padding: 28px 32px; margin-bottom: 28px;
+    box-shadow: 0 0 60px rgba(139,92,246,0.10);
+  }
+  .personalization-eyebrow { font-family: 'Playfair Display', serif; font-size: 1rem; color: #a78bfa; letter-spacing: .12em; margin-bottom: 18px; }
+  .personalization-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 24px; padding-bottom: 24px; border-bottom: 1px solid rgba(139,92,246,0.2); }
+  .p-block { }
+  .p-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .2em; color: #a78bfa; margin-bottom: 8px; font-weight: 600; }
+  .p-text { font-size: .95rem; line-height: 1.5; color: var(--text); }
+  .p-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .p-empty { color: var(--dim); font-size: .85rem; font-style: italic; }
+  .pchip { padding: .25rem .7rem; border-radius: 9999px; font-size: .75rem;
+            font-family: 'Inter', sans-serif; letter-spacing: .02em;
+            font-weight: 500; }
+  .pchip-gold { background: rgba(201,168,76,0.12); color: #e0c66a; border: 1px solid rgba(201,168,76,0.4); }
+  .pchip-cyan { background: rgba(34,211,238,0.10); color: #67e8f9; border: 1px solid rgba(34,211,238,0.3); }
+  .pchip-red { background: rgba(220,38,38,0.10); color: #f87171; border: 1px solid rgba(220,38,38,0.3); }
+  .pchip-orange { background: rgba(249,115,22,0.10); color: #fb923c; border: 1px solid rgba(249,115,22,0.3); }
+  .pchip-dim { background: rgba(255,255,255,0.05); color: var(--dim); border: 1px solid rgba(255,255,255,0.15); }
+
+  .hooks-section { padding-top: 4px; }
+  .hook-row { display: flex; gap: 14px; margin-bottom: 12px; padding: 14px 16px;
+                background: rgba(0,0,0,0.25); border: 1px solid rgba(255,255,255,0.06);
+                border-radius: 8px; align-items: flex-start; }
+  .hook-cat-pill { flex-shrink: 0; padding: .25rem .65rem; border-radius: 9999px;
+                     font-size: .65rem; text-transform: uppercase; letter-spacing: .1em;
+                     font-weight: 600; font-family: 'JetBrains Mono', monospace; min-width: 80px; text-align: center; }
+  .hook-body { flex: 1; }
+  .hook-text { font-size: 1rem; line-height: 1.5; color: var(--text); font-weight: 500; }
+  .hook-rationale { margin-top: 6px; font-size: .78rem; line-height: 1.4; color: var(--dim); font-style: italic; }
+  .hook-rationale-label { color: #a78bfa; font-style: normal; font-weight: 600; margin-right: 4px; }
+  .personalization-footer { font-size: .78rem; line-height: 1.5; color: var(--dim);
+                              padding-top: 14px; margin-top: 18px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+  /* Profile Depth card */
+  .depth-card {
+    background: linear-gradient(135deg, rgba(34,211,238,0.10), rgba(34,211,238,0.02));
+    border: 2px solid rgba(34,211,238,0.4); border-radius: 14px;
+    padding: 24px 28px; margin-bottom: 24px;
+  }
+  .depth-eyebrow { font-family: 'Playfair Display', serif; font-size: .95rem; color: var(--cyan); letter-spacing: .12em; margin-bottom: 14px; }
+  .depth-score-row { display: flex; align-items: baseline; gap: 18px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid rgba(34,211,238,0.2); }
+  .depth-score { font-size: 2.6rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .depth-score-suffix { font-size: 1rem; color: var(--dim); margin-left: 4px; }
+  .depth-verdict { font-size: 1rem; color: var(--text); }
+  .depth-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .depth-axes { display: flex; flex-direction: column; gap: 6px; }
+  .depth-axis { display: grid; grid-template-columns: 1fr 80px 30px; gap: 10px; align-items: center; font-size: .82rem; }
+  .depth-axis-label { color: var(--text); }
+  .depth-axis-bar { height: 8px; background: rgba(255,255,255,.05); border-radius: 4px; overflow: hidden; }
+  .depth-axis-bar > span { display: block; height: 100%; border-radius: 4px; }
+  .depth-axis-score { font-family: 'JetBrains Mono', monospace; color: var(--gold); font-size: .8rem; text-align: right; }
+  .rec-row { padding: 8px 12px; background: rgba(0,0,0,0.2); border-left: 2px solid var(--cyan); border-radius: 4px; margin-bottom: 6px; font-size: .8rem; }
+  .rec-axis { color: var(--cyan); font-family: 'JetBrains Mono', monospace; font-size: .7rem; text-transform: uppercase; margin-bottom: 2px; }
+  .rec-text { color: var(--text); }
+
+  /* Pitch Package */
+  .pkg-card {
+    background: linear-gradient(135deg, rgba(201,168,76,0.10), rgba(139,92,246,0.04));
+    border: 2px solid rgba(201,168,76,0.5); border-radius: 14px;
+    padding: 28px 32px; margin-bottom: 28px;
+    box-shadow: 0 0 60px rgba(201,168,76,0.10);
+  }
+  .pkg-eyebrow { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: var(--gold); letter-spacing: .12em; margin-bottom: 18px; }
+  .pkg-stage { margin-bottom: 22px; }
+  .pkg-stage-label { font-size: .72rem; text-transform: uppercase; letter-spacing: .18em; color: #a78bfa; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px dashed rgba(139,92,246,0.25); font-weight: 600; }
+  .pkg-stage-body { }
+  .pkg-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+  .pkg-row-label { font-size: .7rem; text-transform: uppercase; letter-spacing: .12em; color: var(--dim); min-width: 110px; }
+  .angle-row { display: flex; gap: 14px; padding: 10px 14px; background: rgba(0,0,0,0.25); border-radius: 6px; margin-bottom: 8px; align-items: flex-start; }
+  .angle-text { flex: 1; font-size: .92rem; line-height: 1.5; color: var(--text); }
+  .touchpoint { background: rgba(0,0,0,0.3); border-left: 3px solid var(--gold); border-radius: 6px; padding: 16px 20px; margin-bottom: 14px; }
+  .tp-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+  .tp-step { background: rgba(201,168,76,.15); color: var(--gold); padding: .2rem .8rem; border-radius: 9999px; font-size: .7rem; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .tp-name { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--gold); }
+  .tp-when { font-family: 'JetBrains Mono', monospace; font-size: .7rem; color: var(--dim); margin-left: auto; }
+  .tp-rationale { font-size: .75rem; color: var(--dim); font-style: italic; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.05); }
+  .ch-block { margin-bottom: 12px; padding: 10px 14px; background: rgba(0,0,0,0.25); border-radius: 4px; }
+  .ch-label { font-size: .68rem; text-transform: uppercase; letter-spacing: .12em; color: var(--gold); margin-bottom: 6px; font-family: 'JetBrains Mono', monospace; }
+  .ch-label em { color: var(--text); font-style: italic; text-transform: none; letter-spacing: 0; }
+  .ch-body { font-size: .9rem; line-height: 1.55; color: var(--text); }
+  .ch-mono { font-family: 'JetBrains Mono', monospace; font-size: .82rem; }
+  .route-primary { font-size: .9rem; color: var(--text); margin-bottom: 8px; }
+  .route-step { font-size: .8rem; color: var(--dim); padding: 4px 0; font-family: 'JetBrains Mono', monospace; }
+  .pkg-footer { font-size: .78rem; line-height: 1.5; color: var(--dim); padding-top: 14px; margin-top: 14px; border-top: 1px solid rgba(255,255,255,0.05); }
+
+  /* Garbage / low-value findings collapsible */
+  details.garbage-section { margin: 32px 0; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; padding: 4px 0; }
+  details.garbage-section summary { cursor: pointer; padding: 14px 20px; font-size: .85rem; color: var(--dim); user-select: none; }
+  details.garbage-section summary:hover { color: var(--gold); }
+  details.garbage-section[open] summary { color: var(--gold); border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .garbage-summary-icon { margin-right: 8px; }
+  .garbage-body { padding: 12px 20px 20px; }
+  .garbage-row { display: grid; grid-template-columns: 110px 130px 1fr auto 90px; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px dashed rgba(255,255,255,0.04); font-size: .82rem; }
+  .garbage-row:last-child { border-bottom: none; }
+  .garbage-reason { color: var(--dim); font-family: 'JetBrains Mono', monospace; font-size: .72rem; }
+  .garbage-label { color: var(--gold); font-size: .8rem; font-weight: 500; }
+  .garbage-value { color: var(--text); opacity: .7; }
+  .garbage-investigator { color: var(--dim); font-family: 'JetBrains Mono', monospace; font-size: .68rem; text-align: right; }
+
+  .empty-state { color: var(--dim); font-style: italic; font-size: .9rem; padding: 12px 0; }
+  .empty-state-large { background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.15); padding: 36px; border-radius: 8px; text-align: center; color: var(--dim); }
+
+  footer.report-footer { border-top: 1px solid var(--line); padding: 24px 56px; color: var(--dim); font-size: .8rem; text-align: center; position: relative; z-index: 2; }
+  footer.report-footer code { font-family: 'JetBrains Mono', monospace; color: var(--gold); }
+
+  @media (max-width: 768px) {
+    header, main { padding-left: 24px; padding-right: 24px; }
+    .legal-panel-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 1.8rem; }
+  }
+</style>
+</head>
+<body>
+<div class="mesh"></div>
+<div class="view-stamp">INTERNAL · rebuild · 2026-05-12T12:03:09</div>
+
+<header>
+  <div class="wordmark">Everlight Ventures · Intel Center</div>
+  <h1>Lino Gillies <span class="kind-chip">person</span></h1>
+  <div class="header-meta">
+    investigation_id: <span class="gold">lino_gillies_1778581918</span> · started: <span class="gold">2026-05-12T03:31:58</span> ·
+    triggered by: <span class="gold">cipher_wolfe</span>
+  </div>
+</header>
+
+<main>
+  
+  
+        <section class="tldr-card">
+          <div class="tldr-eyebrow">★ At a glance</div>
+          <div class="tldr-grid">
+            <div class="tldr-block">
+              <div class="tldr-label">WHO</div>
+              <div class="tldr-text">Lino Gillies appears to be an individual.</div>
+            </div>
+            <div class="tldr-block">
+              <div class="tldr-label">WHAT WE FOUND</div>
+              <div class="tldr-text">We surfaced 1 online presence signal.</div>
+            </div>
+            <div class="tldr-block tldr-block-trust">
+              <div class="tldr-label">CAN YOU TRUST IT?</div>
+              <div class="tldr-text">1 of 12 findings passed identity verification at medium confidence. Review them; do not treat as ground truth.</div>
+            </div>
+            <div class="tldr-block tldr-block-action"><div class="tldr-label">WHAT YOU CAN DO</div><ul class="tldr-actions"><li>**No state context provided** -- re-run with `--verify-state=XX` to get per-state contact rules.</li></ul></div>
+          </div>
+        </section>
+  
+        <section class="depth-card">
+          <div class="depth-eyebrow">★ Profile Depth</div>
+          <div class="depth-score-row">
+            <div class="depth-score" style="color:#dc2626">6<span class="depth-score-suffix">/100</span></div>
+            <div class="depth-verdict">Bare profile -- run with more verification context (state/city/email/phone)</div>
+          </div>
+          <div class="depth-grid">
+            <div>
+              <div class="p-label">DIMENSIONS</div>
+              <div class="depth-axes"><div class="depth-axis">
+              <div class="depth-axis-label">Identity Match</div>
+              <div class="depth-axis-bar"><span style="width:60%; background:#c9a84c"></span></div>
+              <div class="depth-axis-score">60</div>
+            </div><div class="depth-axis">
+              <div class="depth-axis-label">Interest Diversity</div>
+              <div class="depth-axis-bar"><span style="width:0%; background:#dc2626"></span></div>
+              <div class="depth-axis-score">0</div>
+            </div><div class="depth-axis">
+              <div class="depth-axis-label">Life Event Signal</div>
+              <div class="depth-axis-bar"><span style="width:0%; background:#dc2626"></span></div>
+              <div class="depth-axis-score">0</div>
+            </div><div class="depth-axis">
+              <div class="depth-axis-label">Profession Known</div>
+              <div class="depth-axis-bar"><span style="width:0%; background:#dc2626"></span></div>
+              <div class="depth-axis-score">0</div>
+            </div><div class="depth-axis">
+              <div class="depth-axis-label">Financial Signal</div>
+              <div class="depth-axis-bar"><span style="width:0%; background:#dc2626"></span></div>
+              <div class="depth-axis-score">0</div>
+            </div><div class="depth-axis">
+              <div class="depth-axis-label">Contact Verified</div>
+              <div class="depth-axis-bar"><span style="width:0%; background:#dc2626"></span></div>
+              <div class="depth-axis-score">0</div>
+            </div><div class="depth-axis">
+              <div class="depth-axis-label">Media Presence</div>
+              <div class="depth-axis-bar"><span style="width:0%; background:#dc2626"></span></div>
+              <div class="depth-axis-score">0</div>
+            </div><div class="depth-axis">
+              <div class="depth-axis-label">Civic Engagement</div>
+              <div class="depth-axis-bar"><span style="width:0%; background:#dc2626"></span></div>
+              <div class="depth-axis-score">0</div>
+            </div><div class="depth-axis">
+              <div class="depth-axis-label">Consumer Behavior</div>
+              <div class="depth-axis-bar"><span style="width:0%; background:#dc2626"></span></div>
+              <div class="depth-axis-score">0</div>
+            </div><div class="depth-axis">
+              <div class="depth-axis-label">Location Confirmed</div>
+              <div class="depth-axis-bar"><span style="width:0%; background:#dc2626"></span></div>
+              <div class="depth-axis-score">0</div>
+            </div></div>
+            </div>
+            <div>
+              <div class="p-label">RECOMMENDED NEXT STEPS</div>
+              <div class="rec-row">
+              <div class="rec-axis">interest diversity</div>
+              <div class="rec-text">Run consumer_signals + social_bio_scraper -- need more public-source coverage</div>
+            </div><div class="rec-row">
+              <div class="rec-axis">life event signal</div>
+              <div class="rec-text">Pull from public_records (court + news + obit) for life events</div>
+            </div><div class="rec-row">
+              <div class="rec-axis">profession known</div>
+              <div class="rec-text">Try social_bio_scraper -- LinkedIn / About.me / GitHub bios usually reveal job</div>
+            </div><div class="rec-row">
+              <div class="rec-axis">financial signal</div>
+              <div class="rec-text">Run opencorporates + sec_edgar -- business filings show financial pattern</div>
+            </div><div class="rec-row">
+              <div class="rec-axis">contact verified</div>
+              <div class="rec-text">Cross-reference phone area code with state via owner_intel.AC_TO_STATE</div>
+            </div>
+            </div>
+          </div>
+        </section>
+  
+        <section class="pkg-card">
+          <div class="pkg-eyebrow">★ Pitch Package -- Multi-Touchpoint Story</div>
+
+          <div class="pkg-stage">
+            <div class="pkg-stage-label">Stage 2 · Resonance</div>
+            <div class="pkg-stage-body">
+              <div class="pkg-row"><span class="pkg-row-label">Tone</span><span class="pchip pchip-gold">warm_direct</span></div>
+              <div class="pkg-row"><span class="pkg-row-label">Values</span><span class="p-empty">none derived</span></div>
+              
+            </div>
+          </div>
+
+          <div class="pkg-stage">
+            <div class="pkg-stage-label">Stage 3 · Positioning Angles (woven implicitly into copy)</div>
+            <div class="pkg-stage-body"><div class="angle-row">
+              <span class="pchip pchip-gold">directness</span>
+              <div class="angle-text">Straight numbers. Cash. Your timeline.</div>
+            </div></div>
+          </div>
+
+          <div class="pkg-stage">
+            <div class="pkg-stage-label">Stage 4 · Narrative -- 3 Touchpoints</div>
+            <div class="pkg-stage-body">
+            <div class="touchpoint">
+              <div class="tp-head">
+                <span class="tp-step">Touch 1</span>
+                <span class="tp-name">INITIAL</span>
+                <span class="tp-when">send +0d</span>
+              </div>
+              <div class="tp-rationale">Tone: warm_direct (matched to detected communication style + life-event sensitivities). Opens with directness -- a value the recipient appears to operate by. Positioning angle invokes &#x27;directness&#x27;.</div>
+              
+                    <div class="ch-block">
+                      <div class="ch-label">EMAIL · subject: <em>Quick note about your property</em></div>
+                      <div class="ch-body">Hey Lino --<br><br>I work with property owners in your area who want a clean exit -- cash, your timeline, no listing or showings. Straight numbers. Cash. Your timeline.<br><br>Worth a quick call this week? Numbers below.<br><br>Talk soon,<br>[Agent Name]</div>
+                    </div>
+                    <div class="ch-block">
+                      <div class="ch-label">SMS</div>
+                      <div class="ch-body ch-mono">Lino, this is [Agent] from Everlight. Straight numbers. Cash. Your timeline. Worth a quick call this week? Numbers below.</div>
+                    </div>
+                    <div class="ch-block">
+                      <div class="ch-label">VOICEMAIL SCRIPT</div>
+                      <div class="ch-body ch-mono">Hey Lino -- This is [Agent Name] with Everlight Ventures. Straight numbers. Cash. Your timeline. Worth a quick call this week? Numbers below. You can reach me at [number]. Have a good day.</div>
+                    </div>
+                    <div class="ch-block">
+                      <div class="ch-label">DIRECT MAIL (long-form letter)</div>
+                      <div class="ch-body">Hey Lino --<br><br>I work with property owners in your area who want a clean exit -- cash, your timeline, no listing or showings. Straight numbers. Cash. Your timeline.<br><br>What this means for you, plain English:<br> - One conversation tells you if we're a fit (no commitment)<br> - Written cash offer within 48 hours of a property walk<br> - You pick the close date -- we work back from your timeline<br> - No agent commissions, no listing chaos, no buyer-financing risk<br><br>Worth a quick call this week? Numbers below.<br><br>Talk soon,<br>[Agent Name]<br>Everlight Ventures</div>
+                    </div>
+            </div>
+            <div class="touchpoint">
+              <div class="tp-head">
+                <span class="tp-step">Touch 2</span>
+                <span class="tp-name">FOLLOWUP</span>
+                <span class="tp-when">send +4d</span>
+              </div>
+              <div class="tp-rationale">Soft re-engage. Cadence: three_touch_over_14d. Repeats the angle in different words.</div>
+              
+                    <div class="ch-block">
+                      <div class="ch-label">EMAIL · subject: <em>Re: Quick note about your property</em></div>
+                      <div class="ch-body">Lino, quick note from one operator to another.<br><br>Lino, following up on my note from earlier this week. If timing isn't right, I respect that completely. If the property isn't something you want to move on right now, I'll respect that and step back -- just wanted to make the door open in case the timing changes.<br><br>Open to talking? 60 seconds tells you if we're a fit.<br><br>Talk soon,<br>[Agent Name]</div>
+                    </div>
+                    <div class="ch-block">
+                      <div class="ch-label">SMS</div>
+                      <div class="ch-body ch-mono">Lino, circling back. If timing isn&#x27;t right, I respect that completely. Reply yes/no/not-now?</div>
+                    </div>
+                    <div class="ch-block">
+                      <div class="ch-label">VOICEMAIL SCRIPT</div>
+                      <div class="ch-body ch-mono">Lino, quick note from one operator to another. Lino, following up on my note from earlier this week. If timing isn&#x27;t right, I respect that completely. If the property isn&#x27;t something you want to move on right now, I&#x27;ll respect that and step back -- just wanted to make the door open in case the timing changes. Talk to you soon -- [number].</div>
+                    </div>
+            </div>
+            <div class="touchpoint">
+              <div class="tp-head">
+                <span class="tp-step">Touch 3</span>
+                <span class="tp-name">NUDGE</span>
+                <span class="tp-when">send +14d</span>
+              </div>
+              <div class="tp-rationale">Respectful close. Opens the door without pressure.</div>
+              
+                    <div class="ch-block">
+                      <div class="ch-label">EMAIL · subject: <em>Final note re: Quick note about your property</em></div>
+                      <div class="ch-body">Lino, hope your week is going well.<br><br>Lino, last note from me on this. Door stays open. If now isn't the right time, I won't keep reaching out. The door stays open if anything changes -- my contact info is in the previous email.<br><br>Talk soon,<br>[Agent Name]</div>
+                    </div>
+                    <div class="ch-block">
+                      <div class="ch-label">SMS</div>
+                      <div class="ch-body ch-mono">Lino, last note. Door stays open. Door stays open.</div>
+                    </div>
+            </div></div>
+          </div>
+
+          <div class="pkg-stage">
+            <div class="pkg-stage-label">Stage 5 · Routing</div>
+            <div class="pkg-stage-body">
+              <div class="route-primary">Primary closer: <strong>31_outreach_agent</strong></div>
+              <div class="route-step">1. SEO/keyword resonance scan -&gt; 17_content_strategy.md</div><div class="route-step">2. Market intel pull -&gt; 35_broker_analytics.md (per- comp data)</div><div class="route-step">3. Marketing strategy review -&gt; 19_platform_copywriter.md (positioning sign-off)</div><div class="route-step">4. Pitch narrative draft -&gt; 31_outreach_agent.md (Piper drafts in voice)</div><div class="route-step">5. Compliance gate -&gt; 34_compliance_gate.md (state rules + DNC check)</div><div class="route-step">6. Closer dispatch -&gt; .claude/agents/31_outreach_agent.md</div>
+            </div>
+          </div>
+
+          <div class="pkg-footer">
+            Per operator doctrine: this pitch RESONATES with the value-set inferred from
+            findings -- it never CITES the source. The recipient sees recognition, not
+            surveillance. DNC + state-channel rules ALWAYS override this package.
+          </div>
+        </section>
+  
+        <section class="personalization-card">
+          <div class="personalization-eyebrow">★ Personalization & Pitch Hooks</div>
+          <div class="personalization-grid">
+            <div class="p-block">
+              <div class="p-label">INTERESTS DETECTED</div>
+              <div class="p-chips"><span class="p-empty">No interests detected (re-run with more lead context)</span></div>
+            </div>
+            <div class="p-block">
+              <div class="p-label">LIFE EVENTS</div>
+              <div class="p-chips"><span class="p-empty">None detected</span></div>
+            </div>
+            <div class="p-block">
+              <div class="p-label">PROFESSION / ROLE</div>
+              <div class="p-text"><span class="p-empty">Not detected</span></div>
+            </div>
+            <div class="p-block">
+              <div class="p-label">SIGNALS</div>
+              <div class="p-chips"><span class="pchip pchip-cyan">style: casual</span></div>
+            </div>
+          </div>
+
+          <div class="hooks-section">
+            <div class="p-label" style="margin-bottom:14px;">RECOMMENDED PITCH HOOKS</div>
+            
+            <div class="hook-row">
+              <div class="hook-cat-pill pchip-dim">generic</div>
+              <div class="hook-body">
+                <div class="hook-text">Lino, quick note about your property -- we make cash offers, close in 10-21 days, no agents, no commissions. Worth a 60-second call?</div>
+                <div class="hook-rationale">
+                  <span class="hook-rationale-label">Why this works:</span> fallback hook -- always available even when no personality signals
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="personalization-footer">
+            Every signal cites its source ("Why this works" line). Verify before sending.
+            These hooks are pattern-matched from public findings -- they're SUGGESTIONS, not psychology readings.
+            DNC + state-channel rules ALWAYS override these hooks.
+          </div>
+        </section>
+  
+
+  <div class="kpis"><div class="kpi"><div class="kpi-label">Verified</div><div class="kpi-value" style="color:#22c55e">1</div></div><div class="kpi"><div class="kpi-label">High conf (≥70)</div><div class="kpi-value" style="color:#22c55e">0</div></div><div class="kpi"><div class="kpi-label">Total raw findings</div><div class="kpi-value" style="color:#c9a84c">12</div></div><div class="kpi"><div class="kpi-label">Filtered (junk)</div><div class="kpi-value" style="color:#dc2626">11</div></div><div class="kpi"><div class="kpi-label">Sources w/ data</div><div class="kpi-value" style="color:#8b5cf6">1 / 5</div></div><div class="kpi"><div class="kpi-label">Elapsed</div><div class="kpi-value" style="color:#22d3ee">2s</div></div></div>
+
+  
+    <section class="section" style="--accent:#22d3ee">
+      <div class="section-head">
+        <span class="section-icon">🌐</span>
+        <h2>Online Presence</h2>
+        <span class="section-count">1</span>
+      </div>
+      <div class="section-body">
+        
+        <div class="finding">
+          <div class="finding-head">
+            <span class="chip chip-gold">Archive item</span>
+            <span class="conf-chip conf-med" title="name_exact_match">conf 50</span>
+            <span class="finding-attribution">Archive.org / Wayback</span>
+          </div>
+          <div class="finding-value">Richard Lino Gillies</div>
+          <div class="finding-actions">
+            <a class="src-link" href="https://archive.org/details/gov.uscourts.caeb.611193" target="_blank" rel="noopener">View source →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  
+        <details class="garbage-section">
+          <summary><span class="garbage-summary-icon">🗑</span> 11 findings auto-filtered as low-value (auth-gated, dead links, raw JSON dumps, unrelated archive items)</summary>
+          <div class="garbage-body">
+            <div class="garbage-row">
+              <span class="garbage-reason">✗ dead link</span>
+              <span class="garbage-label">TruePeopleSearch</span>
+              <span class="garbage-value">HTTP 403 (open in browser)</span>
+              <a class="src-link" href="https://www.truepeoplesearch.com/results?name=Lino%20Gillies" target="_blank" rel="noopener">open →</a>
+              <span class="garbage-investigator">Skip-Trace</span>
+            </div>
+            <div class="garbage-row">
+              <span class="garbage-reason">✗ dead link</span>
+              <span class="garbage-label">FastPeopleSearch</span>
+              <span class="garbage-value">HTTP 403 (open in browser)</span>
+              <a class="src-link" href="https://www.fastpeoplesearch.com/name/lino-gillies" target="_blank" rel="noopener">open →</a>
+              <span class="garbage-investigator">Skip-Trace</span>
+            </div>
+            <div class="garbage-row">
+              <span class="garbage-reason">✗ dead link</span>
+              <span class="garbage-label">ZabaSearch</span>
+              <span class="garbage-value">HTTP 403 (open in browser)</span>
+              <a class="src-link" href="https://www.zabasearch.com/people/Lino+Gillies" target="_blank" rel="noopener">open →</a>
+              <span class="garbage-investigator">Skip-Trace</span>
+            </div>
+            <div class="garbage-row">
+              <span class="garbage-reason">❓ unverified (conf 40)</span>
+              <span class="garbage-label">ThatsThem</span>
+              <span class="garbage-value">HTTP 200</span>
+              <a class="src-link" href="https://thatsthem.com/name/Lino-Gillies" target="_blank" rel="noopener">open →</a>
+              <span class="garbage-investigator">Skip-Trace</span>
+            </div>
+            <div class="garbage-row">
+              <span class="garbage-reason">✗ dead link</span>
+              <span class="garbage-label">Whitepages</span>
+              <span class="garbage-value">HTTP 403 (open in browser)</span>
+              <a class="src-link" href="https://www.whitepages.com/name/Lino-Gillies" target="_blank" rel="noopener">open →</a>
+              <span class="garbage-investigator">Skip-Trace</span>
+            </div>
+            <div class="garbage-row">
+              <span class="garbage-reason">🔒 needs login</span>
+              <span class="garbage-label">Dehashed</span>
+              <span class="garbage-value">Search (login required)</span>
+              <a class="src-link" href="https://dehashed.com/search?query=Lino%20Gillies" target="_blank" rel="noopener">open →</a>
+              <span class="garbage-investigator">Leak Check</span>
+            </div>
+            <div class="garbage-row">
+              <span class="garbage-reason">🔎 manual search</span>
+              <span class="garbage-label">Intelligence X</span>
+              <span class="garbage-value">Search</span>
+              <a class="src-link" href="https://intelx.io/?s=Lino%20Gillies" target="_blank" rel="noopener">open →</a>
+              <span class="garbage-investigator">Leak Check</span>
+            </div>
+            <div class="garbage-row">
+              <span class="garbage-reason">❓ unverified (conf 25)</span>
+              <span class="garbage-label">Sweep summary</span>
+              <span class="garbage-value">3 of 22 platforms returned a profile page for &#x27;linogillies&#x27;</span>
+              
+              <span class="garbage-investigator">Social Recon</span>
+            </div>
+            <div class="garbage-row">
+              <span class="garbage-reason">❓ unverified (conf 25)</span>
+              <span class="garbage-label">✓ Instagram</span>
+              <span class="garbage-value">found</span>
+              <a class="src-link" href="https://www.instagram.com/linogillies/" target="_blank" rel="noopener">open →</a>
+              <span class="garbage-investigator">Social Recon</span>
+            </div>
+            <div class="garbage-row">
+              <span class="garbage-reason">❓ unverified (conf 25)</span>
+              <span class="garbage-label">✓ Reddit</span>
+              <span class="garbage-value">found</span>
+              <a class="src-link" href="https://www.reddit.com/user/linogillies" target="_blank" rel="noopener">open →</a>
+              <span class="garbage-investigator">Social Recon</span>
+            </div>
+            <div class="garbage-row">
+              <span class="garbage-reason">❓ unverified (conf 25)</span>
+              <span class="garbage-label">✓ Pinterest</span>
+              <span class="garbage-value">found</span>
+              <a class="src-link" href="https://www.pinterest.com/linogillies/" target="_blank" rel="noopener">open →</a>
+              <span class="garbage-investigator">Social Recon</span>
+            </div></div>
+        </details>
+
+  <section class="sources-run-section">
+    <h3>Sources Run</h3>
+    <table class="sources-table">
+      <thead><tr><th>Investigator</th><th>Status</th><th class="num">Verified / Raw</th><th class="num">Elapsed</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Archive.org / Wayback</td>
+          <td><span class="status-chip" style="background:#22c55e22;color:#22c55e">OK</span></td>
+          <td class="num">1 / 1</td>
+          <td class="num">728ms</td>
+          <td class="dim"></td>
+        </tr>
+        <tr>
+          <td>Search Dorks</td>
+          <td><span class="status-chip" style="background:#dc262622;color:#dc2626">FAIL</span></td>
+          <td class="num">0 / 0</td>
+          <td class="num">1344ms</td>
+          <td class="dim"></td>
+        </tr>
+        <tr>
+          <td>Skip-Trace</td>
+          <td><span class="status-chip" style="background:#22c55e22;color:#22c55e">OK</span></td>
+          <td class="num">0 / 5</td>
+          <td class="num">1714ms</td>
+          <td class="dim"></td>
+        </tr>
+        <tr>
+          <td>Leak Check</td>
+          <td><span class="status-chip" style="background:#22c55e22;color:#22c55e">OK</span></td>
+          <td class="num">0 / 2</td>
+          <td class="num">1753ms</td>
+          <td class="dim"></td>
+        </tr>
+        <tr>
+          <td>Social Recon</td>
+          <td><span class="status-chip" style="background:#22c55e22;color:#22c55e">OK</span></td>
+          <td class="num">0 / 4</td>
+          <td class="num">2407ms</td>
+          <td class="dim"></td>
+        </tr></tbody>
+    </table>
+  </section>
+
+  
+    <section class="legal-footer">
+      <h3>Legal disclaimers</h3>
+
+      <div class="legal-block">
+        <strong>Fair Credit Reporting Act (FCRA):</strong> This report is NOT a consumer report
+        as defined at 15 U.S.C. §§ 1681a(d), 1681b. It may not be used for any "permissible
+        purpose" enumerated under § 1681b (credit, employment, insurance, housing tenancy,
+        government benefits, court-ordered child support, or other FCRA-regulated decisions).
+        The adverse-action duties of § 1681m do not attach because no consumer report is involved.
+        Findings are derived from publicly available sources and may be inaccurate, incomplete,
+        outdated, or pertain to a different individual sharing the same name (a "name collision").
+      </div>
+
+      <div class="legal-block">
+        <strong>Gramm-Leach-Bliley Act (GLBA):</strong> All financial information referenced is
+        from publicly available sources for which Everlight Ventures has a permissible business
+        purpose. No nonpublic personal information was obtained from a financial institution by
+        pretext or false statement in violation of 15 U.S.C. §§ 6801-6809 (privacy) or
+        §§ 6821-6827 (pretexting / fraudulent access).
+      </div>
+
+      <div class="legal-block">
+        <strong>California Consumer Privacy Act / CPRA:</strong> If the subject of this report
+        is a California resident, they have the right to know what personal information
+        Everlight Ventures has collected (Cal. Civ. Code § 1798.100), to request deletion
+        (§ 1798.105), and to opt out of "sale" or "sharing" (§ 1798.120). Requests:
+        <code>privacy@everlightventures.io</code>. This report is created for the "business
+        purpose" defined at § 1798.140(e); no data is sold or shared with third parties.
+      </div>
+
+      <div class="legal-block">
+        <strong>GDPR (if applicable):</strong> Where the subject is an identified or
+        identifiable EU/UK natural person, Everlight relies on Article 6(1)(f) GDPR
+        (legitimate interests) as the lawful basis for this limited business-intelligence
+        processing, subject to the subject's right to object under Article 21.
+      </div>
+
+      <div class="legal-block">
+        <strong>Opinion + qualified common-interest privilege:</strong> All synthesized
+        characterizations in this report are statements of opinion based on cited public
+        sources, made under the qualified common-interest privilege among authorized Everlight
+        Ventures personnel for a legitimate business purpose. No third-party republication is
+        authorized. Distribution outside the authorized recipient list waives the privilege.
+      </div>
+
+      <div class="legal-block">
+        <strong>Permissible business purpose</strong> stated for this investigation:
+        <em class="quote">"(not provided)"</em>
+      </div>
+
+      <div class="legal-block">
+        <strong>State-specific compliance</strong> rules consulted are shown in the panel above
+        and sourced from <code>Wholesale/compliance/state_gates.json</code>. Per-state hard
+        blocks (TX SB 140, CA Civ. Code §§ 2945/1695, NC HB 797, FL FTSA, OH ORC §1349.61,
+        IL HB 1535, MO No-Call) are enforced before any contact is recommended. Where the
+        target's state is unknown, every channel is treated as blocked until verified.
+      </div>
+
+      <div class="legal-block">
+        <strong>Source scope:</strong> public social profiles, public consumer reviews (Yelp,
+        Goodreads, Strava, Untappd, Letterboxd, etc.), civic + court records, public
+        philanthropy (FEC/990s), news + obit archives, property assessor records, and
+        professional license lookups. <em>Excluded</em>: HIPAA-protected medical records,
+        DMV data (DPPA 18 USC §2721), consumer credit (FCRA), nonpublic financial info
+        (GLBA §§6801-6809), private communications (ECPA §§2510-2522), private support-group
+        membership, and any records about minors. See <code>osint_api/legal_scope.py</code>.
+      </div>
+
+      <div class="legal-block warning-block">
+        <strong>INTERNAL USE ONLY · TRADE SECRET</strong> -- This report and its synthesis
+        constitute Everlight Ventures trade secret information under the Defend Trade Secrets
+        Act, 18 U.S.C. §§ 1836, 1839. DO NOT DISTRIBUTE outside Everlight Ventures authorized
+        personnel. The operator is responsible for verifying any finding before acting. Per
+        Operator Truth doctrine: unverified data is integrity-grade failure.
+      </div>
+    </section>
+</main>
+
+<footer class="report-footer">
+  Lucrex · Everlight Ventures · Intel Center · Report rendered 2026-05-12T12:03:09 ·
+  Re-run with <code>intel investigate "Lino Gillies"</code>
+</footer>
+</body>
+</html>

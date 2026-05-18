@@ -1,0 +1,98 @@
+{
+  "domain": "coindesk.com",
+  "method": "rss",
+  "rss_path": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+  "items": [
+    {
+      "title": "Ripple-linked XRP holds near $1.46 as breakout attempt fades despite $200 million raise",
+      "url": "https://www.coindesk.com/markets/2026/05/12/ripple-linked-xrp-holds-near-usd1-46-as-breakout-attempt-fades-despite-usd200-million-raise",
+      "published": "Tue, 12 May 2026 04:56:46 +0000",
+      "summary": "XRP briefly pushed toward $1.49 on heavy volume before stalling again near a resistance zone that has capped rallies for months."
+    },
+    {
+      "title": "Bitcoin briefly hits $82,000, SOL, DOGE higher as Michael Burry warns of stock crash",
+      "url": "https://www.coindesk.com/markets/2026/05/12/bitcoin-briefly-hits-usd82-000-sol-doge-higher-as-michael-burry-warns-of-stock-crash",
+      "published": "Tue, 12 May 2026 04:32:48 +0000",
+      "summary": "Bitcoin held above $81,000 after touching $82,026 overnight, while solana led the major altcoins on the week as The Big Short investor warned the Nasdaq 100 had reached dot-com bubble territory and oil zoomed past $105 on fresh Iran ceasefire doubts."
+    },
+    {
+      "title": "Clarity Act, in the flesh, unveiled by U.S. Senate Banking Committee before hearing",
+      "url": "https://www.coindesk.com/policy/2026/05/11/clarity-act-in-the-flesh-unveiled-by-u-s-senate-banking-committee-before-hearing",
+      "published": "Tue, 12 May 2026 04:25:26 +0000",
+      "summary": "The crypto market structure bill had already been making the industry rounds behind closed doors, but the lawmakers have released the text before their vote."
+    },
+    {
+      "title": "Bitcoin\u2019s floor looks firmer at $80,000, but traders still don\u2019t trust the breakout",
+      "url": "https://www.coindesk.com/markets/2026/05/12/bitcoin-s-floor-looks-firmer-at-usd80-000-but-traders-still-don-t-trust-the-breakout",
+      "published": "Tue, 12 May 2026 04:07:12 +0000",
+      "summary": "BTC has recovered from Friday\u2019s jobs-driven dip, but Enflux says overhead resistance remains intact while Glassnode\u2019s market structure data suggests traders are buying the rally while still positioning for downside."
+    },
+    {
+      "title": "'A big nothing burger': A Q&A with Strategy's Michael Saylor on selling bitcoin",
+      "url": "https://www.coindesk.com/markets/2026/05/11/a-big-nothing-burger-a-q-and-a-with-strategy-s-michael-saylor-on-selling-bitcoin",
+      "published": "Mon, 11 May 2026 20:21:44 +0000",
+      "summary": "Michael Saylor sat down with CoinDesk on selling bitcoin for dividends, retiring debt with STRC proceeds, and why critics who say Strategy buys the weekly top are missing the point."
+    },
+    {
+      "title": "'I don\u2019t think that\u2019s crazy': Here is why Circle is betting on new $3 billion blockchain",
+      "url": "https://www.coindesk.com/business/2026/05/11/i-don-t-think-that-s-crazy-here-is-why-circle-is-betting-on-new-usd3-billion-blockchain",
+      "published": "Mon, 11 May 2026 19:51:09 +0000",
+      "summary": "The USDC stablecoin issuer is betting Arc can become Wall Street\u2019s blockchain rail for payments and tokenized finance, though analysts still see it as speculative."
+    },
+    {
+      "title": "Kraken parent Payward seeks fresh funding at $20 billion valuation ahead of planned IPO",
+      "url": "https://www.coindesk.com/business/2026/05/08/kraken-parent-payward-seeks-fresh-funding-at-usd20-billion-valuation-ahead-of-potential-ipo",
+      "published": "Mon, 11 May 2026 18:42:27 +0000",
+      "summary": "The crypto exchange operator is pursuing a new fundraising round as it ramps up acquisitions across derivatives and stablecoins while laying the groundwork for a future public listing."
+    },
+    {
+      "title": "Anchorage is stepping back from Robinhood and Kraken-backed stablecoin group",
+      "url": "https://www.coindesk.com/business/2026/05/11/anchorage-is-stepping-back-from-robinhood-and-kraken-backed-stablecoin-group",
+      "published": "Mon, 11 May 2026 16:30:09 +0000",
+      "summary": "Anchorage Digital co-founder and CEO Nathan McCauley said there will be \u2018increased neutrality\u2019 from his firm on stablecoins."
+    },
+    {
+      "title": "Why the TradFi takeover of crypto might not be the death blow analysts expect",
+      "url": "https://www.coindesk.com/business/2026/05/11/why-the-tradfi-takeover-of-crypto-might-not-be-the-death-blow-analysts-expect",
+      "published": "Mon, 11 May 2026 16:29:48 +0000",
+      "summary": "Gate\u2019s CBO argues that Bloomberg\u2019s warning of a TradFi takeover is \"oversimplified,\" noting that global exchanges evolved past fee-only models years ago."
+    },
+    {
+      "title": "Banking groups escalate fight over stablecoin yield ahead of Senate vote",
+      "url": "https://www.coindesk.com/policy/2026/05/11/banking-groups-escalate-fight-over-stablecoin-yield-ahead-of-senate-vote",
+      "published": "Mon, 11 May 2026 14:43:29 +0000",
+      "summary": "The American Bankers Association amplified warnings the Senate\u2019s Clarity Act could push deposit flight into stablecoins unless lawmakers tighten yield limits."
+    },
+    {
+      "title": "Corpay taps BVNK to bring stablecoin wallets to corporate payments",
+      "url": "https://www.coindesk.com/business/2026/05/11/corpay-taps-bvnk-to-bring-stablecoin-wallets-to-corporate-payments",
+      "published": "Mon, 11 May 2026 14:34:29 +0000",
+      "summary": "Corpay will use stablecoin rails in its treasury operations to improve capital efficiency, reduce reliance on pre-funded accounts, and move funds across its global footprint."
+    },
+    {
+      "title": "The biggest consensus overhaul in Solana history is officially live for testing",
+      "url": "https://www.coindesk.com/tech/2026/05/11/the-biggest-consensus-overhaul-in-solana-history-is-officially-live-for-testing",
+      "published": "Mon, 11 May 2026 14:18:58 +0000",
+      "summary": "The upgrade, known as Alpenglow, is live on a community test cluster, said Solana core developer Anza."
+    },
+    {
+      "title": "Ripple raises $200 million from Neuberger Berman to expand its Ripple Prime platform",
+      "url": "https://www.coindesk.com/business/2026/05/11/ripple-raises-usd200-million-from-neuberger-berman-to-expand-its-ripple-prime-platform",
+      "published": "Mon, 11 May 2026 13:47:38 +0000",
+      "summary": "Ripple announced its agreement with the global investment firm Monday, noting that Ripple Prime\u2019s revenue has tripled in the last year, when. it acquired it for $1.25 billion."
+    },
+    {
+      "title": "CoinDesk 20 performance update: SUI surges 25% over weekend",
+      "url": "https://www.coindesk.com/coindesk-indices/2026/05/11/coindesk-20-performance-update-sui-surges-25-over-weekend",
+      "published": "Mon, 11 May 2026 13:17:36 +0000",
+      "summary": "Cronos (CRO), up 9.7% from Friday, joined Sui (SUI) as a top performer."
+    },
+    {
+      "title": "Tom Lee's Bitmine slows down ether purchases after already buying 1 million tokens this year",
+      "url": "https://www.coindesk.com/business/2026/05/11/tom-lee-s-bitmine-slows-down-ether-purchases-after-already-buying-1-million-tokens-this-year",
+      "published": "Mon, 11 May 2026 12:56:58 +0000",
+      "summary": "The firm bought roughly 26,000 ether last week, a sharp decline from the average of the previous weeks' 100,000."
+    }
+  ],
+  "fetched_at": "2026-05-11T22:20:11.141421"
+}

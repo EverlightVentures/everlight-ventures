@@ -1,0 +1,38 @@
+-C}:
+ByteClave
+Must-know Tools for Software Developers
+e Devhunt - New developer tools launched daily by developers..
+« Freefordev - Every software free tier in one list
+e Libhunt - Discover open source libraries by category
+e Saashub - Compare every SaaS alternative ever listed
+¢ Tinyhelpers - Single-purpose mini tools for specific tasks
+¢ Omatsuri - Twelve frontend utilities inside one app
+e Openalternative - Open source replacements for paid software
+e Codrops - Experimental web demos and creative code
+¢ Awwwards - The internet's most awarded website designs
+e Egghead - Short expert video lessons on modern dev
+e Scrimba - Learn coding through interactive browser environments
+e Fireship - Complex dev concepts explained ..
+¢ Tldr - Simplified human-readable versions of man pages
+e Exercism - Practice any language with real mentor feedback
+e Visualgo - Every algorithm animated visually in real time
+¢ Pythontutor - Step through code watching memory change live
+e Roadmap - Expert visual learning paths for every role
+e Explainshell - Paste any command and understand every flag
+¢ Ohshitgit - Plain English fixes for every git mistake
+e Gitexplorer - Find the exact git command you need
+¢ Devdocs - Unified offline documentation for every language
+e Cheatography - Thousands of community developer cheat sheets printable
+¢ Publicapis - Directory of every free public API available
+e Apilist - Browse APIs categorized by what they do
+e Openverse - Millions of openly licensed images and audio
+e Newsdata - Global real-time news through a single API
+e Shodan - Search engine indexing every exposed internet device
+e Uriscan - See every request any URL makes visually
+e Gtmetrix - Deep performance analysis of any website
+e Architecturenotes - Illustrated deep dives into real-world tech architecture
+« Bytebytego - Visual explanations of complex system design
+e Highscalability - How the internet's biggest systems were built
+¢ Staffeng - Real engineering career growth stories from seniors
+e Changelog - News covering everything new in open source
+¢ Tildes - Community-run technical Reddit alternative...

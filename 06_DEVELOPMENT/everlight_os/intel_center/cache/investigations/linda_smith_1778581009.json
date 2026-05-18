@@ -1,0 +1,557 @@
+{
+  "investigation_id": "linda_smith_1778581009",
+  "target": "Linda Smith",
+  "kind": "person",
+  "started_at": "2026-05-12T03:16:49.772552",
+  "finished_at": "2026-05-12T03:16:55.753757",
+  "elapsed_ms": 5977,
+  "total_findings": 29,
+  "investigators_run": 5,
+  "triggered_by": "cipher_wolfe",
+  "lead_id": null,
+  "verification_summary": {
+    "total_findings": 29,
+    "verified": 2,
+    "rejected": 27,
+    "avg_confidence": 28,
+    "threshold": 50,
+    "highest_confidence_per_signal": {
+      "name_exact_match": 50
+    },
+    "lead_context_keys_provided": [
+      "state",
+      "city",
+      "owner_name"
+    ]
+  },
+  "results": [
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Archive item",
+          "value": "JammFm 22-03-2020 Edwin van Brakel met \" EDWIN ON \" The JAMM ON Funky Sunday van Jamm Fm",
+          "url": "https://archive.org/details/8auop0mvmqk9sklgnfsdjb2zkgkm1ap8jfrroet4",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "TransTuesday LIVE Book Club: She's Not There",
+          "url": "https://archive.org/details/uhtuqmmb0xuzsuqf5sd6ywwb5w9pvypnxfg4tdsj",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "May 27, 2021 - Dr. Tehseen Ladha on COVID-19; 'If I Fit, I Sits' Cat study at Cat Fest",
+          "url": "https://archive.org/details/wpng4ihh86tmubsqi8asftktuilpfkao1soklrda",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "Perspectives on elementary education : a casebook for critically analyzing issues of diversity",
+          "url": "https://archive.org/details/perspectivesonel0000neuh",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "From torn-up boulevard to frontyard oasis in Robbinsdale",
+          "url": "https://archive.org/details/From_torn-up_boulevard_to_frontyard_oasis_in_Robbinsdale",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        }
+      ],
+      "raw": {
+        "search": {
+          "status": 200,
+          "len": 1113
+        }
+      },
+      "elapsed_ms": 429,
+      "investigator": "Archive.org / Wayback",
+      "investigator_id": "archive_org"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Dehashed",
+          "value": "Search (login required)",
+          "url": "https://dehashed.com/search?query=Linda%20Smith",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        },
+        {
+          "label": "Intelligence X",
+          "value": "Search",
+          "url": "https://intelx.io/?s=Linda%20Smith",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        }
+      ],
+      "raw": {
+        "hibp_breaches": {
+          "status": 200,
+          "len": 2
+        }
+      },
+      "elapsed_ms": 1654,
+      "investigator": "Leak Check",
+      "investigator_id": "leak_check"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "TruePeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.truepeoplesearch.com/results?name=Linda%20Smith",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "FastPeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.fastpeoplesearch.com/name/linda-smith",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ZabaSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.zabasearch.com/people/Linda+Smith",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ThatsThem",
+          "value": "HTTP 200",
+          "url": "https://thatsthem.com/name/Linda-Smith",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "Whitepages",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.whitepages.com/name/Linda-Smith",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        }
+      ],
+      "raw": {
+        "TruePeopleSearch": {
+          "status": 403
+        },
+        "FastPeopleSearch": {
+          "status": 403
+        },
+        "ZabaSearch": {
+          "status": 403
+        },
+        "ThatsThem": {
+          "status": 200
+        },
+        "Whitepages": {
+          "status": 403
+        }
+      },
+      "elapsed_ms": 2450,
+      "investigator": "Skip-Trace",
+      "investigator_id": "skip_trace"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "\"\u00b7\"",
+          "value": "Linda Smith Profiles - Facebook",
+          "url": "https://www.facebook.com/public/Linda-Smith/",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\"\u00b7\"",
+          "value": "Linda Smith (comedian) - Wikipedia",
+          "url": "https://en.wikipedia.org/wiki/Linda_Smith_(comedian)",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\u00b7 site:github.com",
+          "value": "PHS_inventory_database_Project.py - GitHub",
+          "url": "https://github.com/Stella4life/PHS-Inventory/blob/main/PHS_inventory_database_Project.py",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\u00b7 site:github.com",
+          "value": "unsupervised_topic_modeling/topics/en/17/100/50/topics at master ...",
+          "url": "https://github.com/annontopicmodel/unsupervised_topic_modeling/blob/master/topics/en/17/100/50/topics",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "google_dorks"
+          }
+        }
+      ],
+      "raw": {
+        "\"{q}\"": {
+          "status": 200,
+          "len": 33165
+        },
+        "{q} site:linkedin.com": {
+          "status": 202,
+          "len": 14270
+        },
+        "{q} site:github.com": {
+          "status": 200,
+          "len": 33069
+        },
+        "{q} site:reddit.com": {
+          "status": 202,
+          "len": 14211
+        },
+        "{q} filetype:pdf": {
+          "status": 202,
+          "len": 14193
+        },
+        "{q} contact email": {
+          "status": 202,
+          "len": 14202
+        }
+      },
+      "elapsed_ms": 2534,
+      "investigator": "Search Dorks",
+      "investigator_id": "google_dorks"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Sweep summary",
+          "value": "12 of 22 platforms returned a profile page for 'lindasmith'",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 GitHub",
+          "value": "found",
+          "url": "https://github.com/lindasmith",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Instagram",
+          "value": "found",
+          "url": "https://www.instagram.com/lindasmith/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Reddit",
+          "value": "found",
+          "url": "https://www.reddit.com/user/lindasmith",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Pinterest",
+          "value": "found",
+          "url": "https://www.pinterest.com/lindasmith/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Patreon",
+          "value": "found",
+          "url": "https://www.patreon.com/lindasmith",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Behance",
+          "value": "found",
+          "url": "https://www.behance.net/lindasmith",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Keybase",
+          "value": "found",
+          "url": "https://keybase.io/lindasmith",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 About.me",
+          "value": "found",
+          "url": "https://about.me/lindasmith",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 DeviantArt",
+          "value": "found",
+          "url": "https://www.deviantart.com/lindasmith",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 SoundCloud",
+          "value": "found",
+          "url": "https://soundcloud.com/lindasmith",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Vimeo",
+          "value": "found",
+          "url": "https://vimeo.com/lindasmith",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Flickr",
+          "value": "found",
+          "url": "https://www.flickr.com/people/lindasmith/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        }
+      ],
+      "raw": {
+        "Twitter/X": 403,
+        "LinkedIn": 405,
+        "YouTube": 404,
+        "Instagram": 200,
+        "Medium": 403,
+        "GitHub": 200,
+        "TikTok": 403,
+        "Reddit": 200,
+        "StackOverflow": 404,
+        "Pinterest": 200,
+        "ProductHunt": 404,
+        "Keybase": 200,
+        "Gravatar": 404,
+        "About.me": 200,
+        "Twitch": 405,
+        "Patreon": 200,
+        "DeviantArt": 200,
+        "Vimeo": 200,
+        "SoundCloud": 200,
+        "Flickr": 200,
+        "Behance": 200,
+        "Dribbble": 0
+      },
+      "elapsed_ms": 5678,
+      "investigator": "Social Recon",
+      "investigator_id": "social_recon"
+    }
+  ]
+}

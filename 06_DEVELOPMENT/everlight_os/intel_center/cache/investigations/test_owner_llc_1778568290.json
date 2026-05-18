@@ -1,0 +1,220 @@
+{
+  "investigation_id": "test_owner_llc_1778568290",
+  "target": "Test Owner LLC",
+  "kind": "company",
+  "started_at": "2026-05-11T23:44:50.566026",
+  "finished_at": "2026-05-11T23:44:58.730780",
+  "elapsed_ms": 8164,
+  "total_findings": 17,
+  "investigators_run": 6,
+  "results": [
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Domain",
+          "value": "TEST.COM",
+          "url": "https://test.com"
+        },
+        {
+          "label": "Registration",
+          "value": "1997-06-18T04:00:00Z"
+        },
+        {
+          "label": "Expiration",
+          "value": "2027-06-17T04:00:00Z"
+        },
+        {
+          "label": "Last Changed",
+          "value": "2025-04-18T07:33:24Z"
+        },
+        {
+          "label": "Entity (registrar)",
+          "value": "2"
+        },
+        {
+          "label": "Detail link",
+          "value": "https://who.is/whois/test.com",
+          "url": "https://who.is/whois/test.com"
+        }
+      ],
+      "raw": {
+        "rdap_verisign": {
+          "status": 200,
+          "len": 2560,
+          "err": null
+        }
+      },
+      "elapsed_ms": 894,
+      "investigator": "WHOIS Lookup",
+      "investigator_id": "whois"
+    },
+    {
+      "ok": false,
+      "findings": [
+        {
+          "label": "HTML search",
+          "value": "Open in browser",
+          "url": "https://opencorporates.com/companies?q=Test%20Owner%20LLC&utf8=%E2%9C%93"
+        }
+      ],
+      "raw": {
+        "api_search": {
+          "status": 401,
+          "len": 83,
+          "err": null
+        }
+      },
+      "elapsed_ms": 934,
+      "investigator": "OpenCorporates",
+      "investigator_id": "opencorporates"
+    },
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "\"{q}\"": {
+          "status": 202,
+          "len": 14198
+        },
+        "{q} site:linkedin.com": {
+          "status": 202,
+          "len": 14270
+        },
+        "{q} site:github.com": {
+          "status": 202,
+          "len": 14206
+        },
+        "{q} site:reddit.com": {
+          "status": 202,
+          "len": 14224
+        },
+        "{q} filetype:pdf": {
+          "status": 202,
+          "len": 14212
+        },
+        "{q} contact email": {
+          "status": 202,
+          "len": 14202
+        }
+      },
+      "elapsed_ms": 1218,
+      "investigator": "Search Dorks",
+      "investigator_id": "google_dorks"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Sweep summary",
+          "value": "3 of 22 platforms returned a profile page for 'testownerllc'"
+        },
+        {
+          "label": "\u2713 Instagram",
+          "value": "found",
+          "url": "https://www.instagram.com/testownerllc/"
+        },
+        {
+          "label": "\u2713 Reddit",
+          "value": "found",
+          "url": "https://www.reddit.com/user/testownerllc"
+        },
+        {
+          "label": "\u2713 Pinterest",
+          "value": "found",
+          "url": "https://www.pinterest.com/testownerllc/"
+        }
+      ],
+      "raw": {
+        "Twitter/X": 403,
+        "YouTube": 404,
+        "TikTok": 403,
+        "LinkedIn": 405,
+        "Medium": 403,
+        "Instagram": 200,
+        "GitHub": 404,
+        "Reddit": 200,
+        "Patreon": 404,
+        "Pinterest": 200,
+        "Gravatar": 404,
+        "ProductHunt": 404,
+        "Dribbble": 404,
+        "Keybase": 404,
+        "Behance": 404,
+        "StackOverflow": 404,
+        "DeviantArt": 404,
+        "Twitch": 405,
+        "Vimeo": 404,
+        "SoundCloud": 404,
+        "About.me": 404,
+        "Flickr": 404
+      },
+      "elapsed_ms": 2204,
+      "investigator": "Social Recon",
+      "investigator_id": "social_recon"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "10-Q",
+          "value": "Duke Energy CORP  (DUK, DUKB, DUKH, DUK-PA)  (CIK 0001326160) -- 2008-08-11",
+          "url": "https://www.sec.gov/Archives/edgar/data//000119312508172193/"
+        },
+        {
+          "label": "10-Q",
+          "value": "Duke Energy Carolinas, LLC  (CIK 0000030371) -- 2008-08-13",
+          "url": "https://www.sec.gov/Archives/edgar/data//000119312508175933/"
+        },
+        {
+          "label": "8-K",
+          "value": "NISSAN AUTO RECEIVABLES Co II LLC  (CIK 0001129068) -- 2021-06-17",
+          "url": "https://www.sec.gov/Archives/edgar/data//000119312521193365/"
+        },
+        {
+          "label": "8-K",
+          "value": "Ford Credit Auto Lease Two LLC  (CIK 0001519881) -- 2022-04-25",
+          "url": "https://www.sec.gov/Archives/edgar/data//000110465922049532/"
+        },
+        {
+          "label": "10-Q",
+          "value": "MIRANT CORP  (CIK 0001010775) -- 2009-11-06",
+          "url": "https://www.sec.gov/Archives/edgar/data//000119312509226432/"
+        },
+        {
+          "label": "8-K",
+          "value": "Nissan Auto Receivables 2018-B Owner Trust  (CIK 0001743852) -- 2018-07-18",
+          "url": "https://www.sec.gov/Archives/edgar/data//000119312518220702/"
+        }
+      ],
+      "raw": {
+        "fulltext_search": {
+          "status": 200,
+          "len": 74061,
+          "err": null
+        },
+        "tickers_catalog": {
+          "status": 200,
+          "len": 792870,
+          "err": null
+        }
+      },
+      "elapsed_ms": 3262,
+      "investigator": "SEC EDGAR",
+      "investigator_id": "sec_edgar"
+    },
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "search": {
+          "status": 0,
+          "len": 0
+        }
+      },
+      "elapsed_ms": 8129,
+      "investigator": "Archive.org / Wayback",
+      "investigator_id": "archive_org"
+    }
+  ]
+}

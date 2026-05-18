@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0f">
+<title>Categories · Intel Center</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        ev: { bg:'#0a0a0f', surface:'#111118', s2:'#1a1a24', s3:'#222230', s4:'#2d2d3d',
+              gold:'#c9a84c', goldDim:'#a0832e', goldGlow:'#e0c66a',
+              cyan:'#22d3ee', purple:'#8b5cf6', green:'#22c55e',
+              orange:'#f97316', red:'#dc2626', text:'#e8e8e8', dim:'#999' }
+      },
+      fontFamily: {
+        display: ['"Playfair Display"','serif'],
+        sans:    ['"DM Sans"','"Inter"','sans-serif'],
+        body:    ['"Inter"','sans-serif'],
+        mono:    ['"JetBrains Mono"','monospace'],
+      },
+      boxShadow: { glow:'0 0 40px rgba(201,168,76,0.25)', glowStrong:'0 0 60px rgba(201,168,76,0.5)' },
+    }
+  }
+}
+</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="./data.js"></script>
+
+<style>
+  :root { --gold:#c9a84c; --gold-dim:#a0832e; --gold-glow:#e0c66a; --bg:#0a0a0f; }
+  *{ -webkit-tap-highlight-color:transparent; }
+  html,body{ background:var(--bg); color:#e8e8e8; font-family:"Inter",sans-serif; overflow-x:hidden; }
+  .mesh{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .mesh::before, .mesh::after, .mesh > span{
+    content:''; position:absolute; border-radius:50%; filter:blur(80px); opacity:0.45;
+    animation: drift 22s ease-in-out infinite;
+  }
+  .mesh::before{ width:520px; height:520px; left:-10%;  top:-15%; background:radial-gradient(closest-side,#3a2a08,transparent); }
+  .mesh::after { width:480px; height:480px; right:-8%;  top:35%;  background:radial-gradient(closest-side,#1b1135,transparent); animation-delay:-7s; }
+  .mesh > span { width:600px; height:600px; left:35%;   bottom:-20%; background:radial-gradient(closest-side,#0a2027,transparent); animation-delay:-14s; }
+  @keyframes drift{ 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(40px,-30px) scale(1.05)} 66%{transform:translate(-30px,40px) scale(0.95)} }
+
+  .glass{ background:linear-gradient(135deg, rgba(17,17,24,0.78), rgba(17,17,24,0.45));
+          border:1px solid rgba(255,255,255,0.06); backdrop-filter:blur(12px) saturate(140%);
+          -webkit-backdrop-filter:blur(12px) saturate(140%); }
+  .glass-gold{ background:linear-gradient(135deg, rgba(201,168,76,0.10), rgba(201,168,76,0.02));
+               border:1px solid rgba(201,168,76,0.35); }
+  .gold{ color:var(--gold); }
+  .gold-glow{ text-shadow:0 0 24px rgba(201,168,76,0.45); }
+  .lift{ transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+  .lift:hover{ transform:translateY(-2px); border-color:rgba(201,168,76,0.5); box-shadow:0 8px 32px rgba(201,168,76,0.12); }
+  .nav-link{ color:#999; transition:color .2s; padding:.5rem .9rem; border-radius:.5rem; }
+  .nav-link:hover{ color:#e0c66a; background:rgba(201,168,76,0.06); }
+  .nav-link.active{ color:#c9a84c; background:rgba(201,168,76,0.12); border:1px solid rgba(201,168,76,0.25); }
+  .bar{ height:6px; background:rgba(255,255,255,.06); border-radius:3px; overflow:hidden; position:relative; }
+  .bar > i{ display:block; height:100%; background:linear-gradient(90deg,#c9a84c,#e0c66a); border-radius:3px; }
+  .chip{ display:inline-flex; align-items:center; gap:.35rem; padding:.18rem .55rem; border-radius:9999px; font-size:.7rem;
+         font-family:"JetBrains Mono",monospace; letter-spacing:.04em; }
+  .chip-gold{ background:rgba(201,168,76,.10); color:#e0c66a; border:1px solid rgba(201,168,76,.3); }
+  .chip-green{ background:rgba(34,197,94,.10); color:#4ade80; border:1px solid rgba(34,197,94,.3); }
+  .chip-red{   background:rgba(220,38,38,.10); color:#f87171; border:1px solid rgba(220,38,38,.3); }
+  .chip-cyan{  background:rgba(34,211,238,.10); color:#67e8f9; border:1px solid rgba(34,211,238,.3); }
+  main{ animation: fadein .35s ease-out both; }
+  @keyframes fadein{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)} }
+  input.search{ background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:#e8e8e8;
+                 padding:.6rem 1rem .6rem 2.5rem; border-radius:.6rem; width:100%; outline:none;
+                 transition: border-color .2s; }
+  input.search:focus{ border-color:#c9a84c; }
+  .pill-btn{ padding:.35rem .9rem; border-radius:9999px; font-size:.78rem; cursor:pointer;
+              border:1px solid rgba(255,255,255,0.12); transition: all .2s; }
+  .pill-btn:hover{ border-color:#c9a84c; color:#e0c66a; }
+  .pill-btn.on{ background:rgba(201,168,76,0.15); border-color:#c9a84c; color:#e0c66a; }
+  table.intel{ width:100%; border-collapse:collapse; }
+  table.intel th, table.intel td{ text-align:left; padding:.6rem .8rem; border-bottom:1px solid rgba(255,255,255,0.05); font-size:.85rem; }
+  table.intel th{ background:rgba(201,168,76,0.04); color:#c9a84c; font-weight:500; text-transform:uppercase; letter-spacing:.08em; font-size:.7rem; }
+  table.intel tr:hover td{ background:rgba(201,168,76,0.03); }
+  table.intel a{ color:#e0c66a; }
+  table.intel a:hover{ text-decoration:underline; }
+</style>
+</head>
+<body class="min-h-screen relative">
+<div class="mesh"><span></span></div>
+<div id="app" class="relative z-10"></div>
+
+<script type="module">
+
+import { html, render, h, useState, useMemo, D, fmt, pct, useLucide, Icon, Nav, Footer, TOPIC_ICONS } from "./shared.js";
+
+function CategoriesPage(){
+  useLucide();
+  const hash = decodeURIComponent((location.hash || "").replace(/^#/, ""));
+  const [open, setOpen] = useState(hash || (D.categories[0] && D.categories[0].name) || "");
+
+  return html`
+    <${Nav} active="categories"/>
+    <main class="max-w-7xl mx-auto px-5 pt-8 pb-20">
+      <div class="mb-6">
+        <h1 class="font-display text-3xl gold gold-glow mb-1">Categories</h1>
+        <p class="text-sm text-ev-dim">${D.meta.categories} categories across ${fmt(D.meta.total)} resources. Pick one to drill in.</p>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-4">
+        <aside class="space-y-2 lg:col-span-1">
+          ${D.categories.map(c => html`
+            <button class=${"w-full text-left lift glass rounded-xl p-3 border " + (open===c.name ? "border-ev-gold/60 bg-ev-gold/5" : "border-white/5")}
+                    onClick=${() => { setOpen(c.name); history.replaceState(null,"","#" + encodeURIComponent(c.name)); }}>
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="font-medium text-sm">${c.name}</div>
+                  <div class="text-[10px] text-ev-dim font-mono mt-0.5">${c.agent_owner}</div>
+                </div>
+                <div class="flex flex-col items-end gap-1">
+                  <span class="font-mono gold text-sm">${c.count}</span>
+                  ${c.fetchable && html`<span class="chip chip-cyan">FETCH</span>`}
+                </div>
+              </div>
+            </button>`)}
+        </aside>
+
+        <section class="lg:col-span-2 glass rounded-2xl p-6">
+          ${(() => {
+            const cat = D.categories.find(c => c.name === open) || D.categories[0];
+            if (!cat) return null;
+            const items = D.resources.filter(r => r.category === cat.name);
+            return html`
+              <div class="flex items-start justify-between mb-5">
+                <div>
+                  <div class="text-[10px] uppercase tracking-[.2em] text-ev-dim mb-1">${cat.department}</div>
+                  <h2 class="font-display text-2xl gold">${cat.name}</h2>
+                  <div class="text-xs text-ev-dim mt-1">Owner: <span class="text-ev-text/80">${cat.agent_owner}</span> · ${cat.count} resources · ${cat.used} active</div>
+                </div>
+                ${cat.fetchable && html`<span class="chip chip-cyan">live-fetchable</span>`}
+              </div>
+              <div class="space-y-2">
+                ${items.map(r => html`
+                  <a href=${"./resource.html?d=" + r.domain} class="block lift glass rounded-lg p-3 border border-white/5">
+                    <div class="flex justify-between items-start gap-3">
+                      <div class="min-w-0">
+                        <div class="font-mono gold text-sm truncate">${r.domain}</div>
+                        <div class="text-xs text-ev-text/70 mt-1">${r.purpose}</div>
+                      </div>
+                      <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                        ${r.in_use && html`<span class="chip chip-green">USED</span>`}
+                        ${(r.article_count||0) > 0 && html`<span class="chip chip-cyan">${r.article_count} items</span>`}
+                        ${r.verified_status === "checked" && html`<span class="chip chip-cyan">CURATED</span>`}
+                      </div>
+                    </div>
+                  </a>`)}
+              </div>`;
+          })()}
+        </section>
+      </div>
+    </main>
+    <${Footer}/>`;
+}
+
+render(html`<${CategoriesPage}/>`, document.getElementById("app"));
+
+</script>
+</body>
+</html>

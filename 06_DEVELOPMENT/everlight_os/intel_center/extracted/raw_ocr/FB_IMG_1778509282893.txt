@@ -1,0 +1,65 @@
+ByteClave
+
+Must-know healthcare information systems
+
+« malacards.org —- Comprehensive human disease database
+
+¢ brain-map.org — human brain atlas and data..
+
+« cronometer.com — Advanced nutrition and micronutrient tracking...
+
+« bio.tools - thousands of biomedical research tools.
+
+« visiblebody.com - 3D human anatomy explorer..
+
+« disgenet.com — Gene-disease associations from scientific evidence.
+
+- cellimagelibrary.org — Thousands of labeled cell microscopy images
+
+¢ opentargets.org — Drug target identification for diseases.
+
+« hmdb.ca - Human metabolite database and chemical profiles
+
+¢ pharmgkb.org — Pharmacogenomics and drug response insights
+
+« reactome.org — Biological pathway visualization and analysis
+
+« proteinatlas.org — Protein expression across human tissues
+
+« pubchem.ncbi.nlm.nih.gov - Chemical structures and bioactivity database
+
+« ncats.nih.gov — Rare disease and translational research hub
+
+« ebi.ac.uk - Integrated genomics and bioinformatics resources
+
+¢ drugcentral.org — Drug mechanisms and active ingredient data
+
+« repodb.net - Drug repurposing database and applications
+
+« cde.gov/wonder — US health statistics and mortality data
+
+« phenotypr.com — Disease clustering by symptom patterns
+
+« bloodexposome.org - Chemicals detected in human blood
+
+« string-db.org — Protein interaction network analysis tool
+
+« omim.org — Genetic disorders and gene relationships database
+
+« cbioportal.org - Cancer genomics and tumor data
+
+¢ nutritionix.com — food nutrition information database.
+
+« sleepfoundation.org — sleep research and education
+
+« microbiomedb.org — Microbiome datasets for health research
+
+- alzforum.org — Alzheimer’s mutations and biomarker tracking
+
+* genome.ucsc.edu —- Human genome browser and annotations
+
+« omicsdi.org — Omics datasets discovery platform
+
+* cog-genomics.org — Population genetics analysis toolkit
+
+« tcga-data.nci.nih.gov — Cancer genome profiles and datasets

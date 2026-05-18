@@ -266,7 +266,7 @@ def _try_deal_arc_route(from_email: str, from_name: str, subject: str, body: str
     Returns a string describing the action taken, or None if not a deal-arc reply.
     """
     try:
-        sys.path.insert(0, str(WORKSPACE / "Everlight_Intel_Center"))
+        sys.path.insert(0, str(WORKSPACE / "06_DEVELOPMENT/everlight_os/intel_center"))
         sys.path.insert(0, str(WORKSPACE / "01_BUSINESSES" / "Everlight_Ventures" / "Wholesale" / "audit"))
         from osint_api.arc_send import (classify_reply, fire_step, load_deal_meta,
                                           next_step, should_throttle_inbound,
@@ -373,6 +373,7 @@ def fire_hot_lead_intake(
     from_name: str,
     subject: str,
     body: str,
+    imap_uid: str = "",
 ) -> int:
     """Call hot_lead_intake.py with the parsed message. Returns rc."""
     cmd = [
@@ -382,6 +383,7 @@ def fire_hot_lead_intake(
         "--from-name", from_name,
         "--source-channel", "email",
         "--catch-path", "auto_phone_imap_poller",
+        "--imap-uid", str(imap_uid),
         "--no-slack",  # caller can re-fire with Slack later if needed
     ]
     payload = f"Subject: {subject}\n\n{body}\n"
@@ -459,7 +461,7 @@ def poll_inbox(since_minutes: int = 5, dry_run: bool = False) -> int:
                 continue
             # FALLBACK: hot-lead intake (cold-lead engagement)
             if is_engagement:
-                fire_hot_lead_intake(from_email, from_name, subject, body)
+                fire_hot_lead_intake(from_email, from_name, subject, body, imap_uid=str(uid))
                 fired += 1
 
     m.logout()

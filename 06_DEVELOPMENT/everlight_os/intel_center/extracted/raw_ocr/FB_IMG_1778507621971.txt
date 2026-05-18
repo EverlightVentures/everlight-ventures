@@ -1,0 +1,30 @@
+ByteClave
+safe automation tools worth using..
+e listmonk.app - newsletter/ mailing list automation
+¢ mautic.org - Largest Open source marketing Automation
+¢ kibitzr.github.io - automated Web scraping (self-hosted)
+¢ gotify.net - server for push notification delivery..(Self-hosted )
+¢ bazarr.media - fetch subtitles for your media Automatically
+« netbox.dev - Automates your network infrastructure
+¢ mealie.io - Auto-import /organize recipes .
+¢ olivetin.app - Run shell commands from a web interface.
+¢ canarytokens.org - Auto-alert on unauthorized file /link access
+¢ nocodb.com - Converts databases into automated spreadsheet
+¢ frigate.video - Local Al object detection for security cameras
+¢ docspell.org - automatic document organizer
+¢ rclone.org - Automate cloud storage sync
+¢ archivebox.io - Saves websites/ RSS feeds/ posts for offline access
+« restic.net - Automated encrypted backups for any OS..
+¢ stirlingpdf.com - Automate PDF processing
+¢ firefly-iii.org - free /open source finance manager
+¢ meilisearch.com - fast full-text search engine
+¢ wallos.app - powerful DeFi automation tool
+¢ beszel.dev - automated server resource monitoring
+¢ linkding.link - self-hosted bookmark manager
+¢ tubearchivist.com - self hosted YouTube media server
+¢ ocrmypdf.readthedocs.io - Adds searchable OCR layers to PDF
+¢ beets.io - automated music library organizer
+¢ budibase.com - Generates business apps
+e automatisch.io - Open source Zapier alternative
+¢ syncthing.net - synchronizes files across many devices..
+¢ autobrr.com - automated Torrent grabbing from IRC feeds

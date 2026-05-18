@@ -1,0 +1,391 @@
+{
+  "investigation_id": "marquise_reed_1778584965",
+  "target": "Marquise Reed",
+  "kind": "person",
+  "started_at": "2026-05-12T04:22:45.110998",
+  "finished_at": "2026-05-12T04:22:48.036662",
+  "elapsed_ms": 2924,
+  "total_findings": 17,
+  "investigators_run": 5,
+  "triggered_by": "cli_user",
+  "lead_id": null,
+  "business_purpose": "re-render with new TLDR + garbage filter",
+  "verify_context": {
+    "state": "CA",
+    "city": "Sacramento",
+    "owner_name": "Marquise Reed"
+  },
+  "verification_summary": {
+    "total_findings": 17,
+    "verified": 0,
+    "rejected": 17,
+    "avg_confidence": 28,
+    "threshold": 50,
+    "highest_confidence_per_signal": {},
+    "lead_context_keys_provided": [
+      "state",
+      "city",
+      "owner_name"
+    ]
+  },
+  "dnc_blocked": false,
+  "dnc_reason": "",
+  "dnc_entry_id": null,
+  "results": [
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Archive item",
+          "value": "Madame de Brinvilliers and her times 1630-1676",
+          "url": "https://archive.org/details/madamedebrinvill00stokiala",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "Reminiscences, musical and other",
+          "url": "https://archive.org/details/reminiscencesmus00reed_0",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "Reminiscences, musical and other",
+          "url": "https://archive.org/details/reminiscencesmu00reedgoog",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "Rock Pop Folk Songs et cetera. Vol. 2/3 - 2.800 Songs (pvg)",
+          "url": "https://archive.org/details/rock-pop-folk-lieder-et-cetera.-vol.-2-2.-2.800-songs-pvg",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "Episode 158: The Glastonbury Flashback [Ricki and the Flash; 45 Years; American Ultra]",
+          "url": "https://archive.org/details/Episode158TheGlastonburyFlashbackrickiAndTheFlash45YearsAmerican",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        }
+      ],
+      "raw": {
+        "search": {
+          "status": 200,
+          "len": 1005
+        }
+      },
+      "elapsed_ms": 506,
+      "investigator": "Archive.org / Wayback",
+      "investigator_id": "archive_org"
+    },
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "\"{q}\"": {
+          "status": 202,
+          "len": 14202
+        },
+        "{q} site:linkedin.com": {
+          "status": 202,
+          "len": 14267
+        },
+        "{q} site:github.com": {
+          "status": 202,
+          "len": 14216
+        },
+        "{q} site:reddit.com": {
+          "status": 202,
+          "len": 14210
+        },
+        "{q} filetype:pdf": {
+          "status": 202,
+          "len": 14198
+        },
+        "{q} contact email": {
+          "status": 202,
+          "len": 14200
+        }
+      },
+      "elapsed_ms": 1666,
+      "investigator": "Search Dorks",
+      "investigator_id": "google_dorks"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Dehashed",
+          "value": "Search (login required)",
+          "url": "https://dehashed.com/search?query=Marquise%20Reed",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        },
+        {
+          "label": "Intelligence X",
+          "value": "Search",
+          "url": "https://intelx.io/?s=Marquise%20Reed",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        }
+      ],
+      "raw": {
+        "hibp_breaches": {
+          "status": 200,
+          "len": 2
+        }
+      },
+      "elapsed_ms": 1793,
+      "investigator": "Leak Check",
+      "investigator_id": "leak_check"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "TruePeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.truepeoplesearch.com/results?name=Marquise%20Reed",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "FastPeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.fastpeoplesearch.com/name/marquise-reed",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ZabaSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.zabasearch.com/people/Marquise+Reed",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ThatsThem",
+          "value": "HTTP 200",
+          "url": "https://thatsthem.com/name/Marquise-Reed",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "Whitepages",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.whitepages.com/name/Marquise-Reed",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        }
+      ],
+      "raw": {
+        "TruePeopleSearch": {
+          "status": 403
+        },
+        "FastPeopleSearch": {
+          "status": 403
+        },
+        "ZabaSearch": {
+          "status": 403
+        },
+        "ThatsThem": {
+          "status": 200
+        },
+        "Whitepages": {
+          "status": 403
+        }
+      },
+      "elapsed_ms": 2041,
+      "investigator": "Skip-Trace",
+      "investigator_id": "skip_trace"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Sweep summary",
+          "value": "4 of 22 platforms returned a profile page for 'marquisereed'",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Instagram",
+          "value": "found",
+          "url": "https://www.instagram.com/marquisereed/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Reddit",
+          "value": "found",
+          "url": "https://www.reddit.com/user/marquisereed",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 YouTube",
+          "value": "found",
+          "url": "https://www.youtube.com/@marquisereed",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Pinterest",
+          "value": "found",
+          "url": "https://www.pinterest.com/marquisereed/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        }
+      ],
+      "raw": {
+        "Twitter/X": 403,
+        "Medium": 403,
+        "TikTok": 403,
+        "Instagram": 200,
+        "GitHub": 404,
+        "LinkedIn": 405,
+        "YouTube": 200,
+        "Reddit": 200,
+        "StackOverflow": 404,
+        "ProductHunt": 404,
+        "Pinterest": 200,
+        "Behance": 404,
+        "Keybase": 404,
+        "Dribbble": 404,
+        "Gravatar": 404,
+        "Twitch": 405,
+        "DeviantArt": 404,
+        "About.me": 404,
+        "SoundCloud": 404,
+        "Vimeo": 404,
+        "Flickr": 404,
+        "Patreon": 404
+      },
+      "elapsed_ms": 2627,
+      "investigator": "Social Recon",
+      "investigator_id": "social_recon"
+    }
+  ]
+}

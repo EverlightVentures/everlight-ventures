@@ -1,0 +1,98 @@
+{
+  "domain": "fbi.gov",
+  "method": "rss",
+  "rss_path": "/rss.xml",
+  "items": [
+    {
+      "title": "/brevardhijacking",
+      "url": "",
+      "published": "Tue, 21 Apr 2026 09:55:00 +0000",
+      "summary": ""
+    },
+    {
+      "title": "odushooting",
+      "url": "",
+      "published": "Thu, 12 Mar 2026 15:09:00 +0000",
+      "summary": ""
+    },
+    {
+      "title": "WestBloomfieldAttack",
+      "url": "",
+      "published": "Thu, 12 Mar 2026 14:44:00 +0000",
+      "summary": ""
+    },
+    {
+      "title": "austinactiveshooter",
+      "url": "",
+      "published": "Sun, 01 Mar 2026 11:05:00 +0000",
+      "summary": ""
+    },
+    {
+      "title": "maralagoclub",
+      "url": "",
+      "published": "Mon, 23 Feb 2026 16:01:00 +0000",
+      "summary": ""
+    },
+    {
+      "title": "chocfamily",
+      "url": "",
+      "published": "Wed, 18 Feb 2026 15:33:00 +0000",
+      "summary": ""
+    },
+    {
+      "title": "findguthrie",
+      "url": "",
+      "published": "Fri, 06 Feb 2026 16:25:00 +0000",
+      "summary": ""
+    },
+    {
+      "title": "balchspringsloomis",
+      "url": "",
+      "published": "Wed, 04 Feb 2026 12:34:00 +0000",
+      "summary": ""
+    },
+    {
+      "title": "eugeneor",
+      "url": "",
+      "published": "Sat, 31 Jan 2026 15:34:00 +0000",
+      "summary": ""
+    },
+    {
+      "title": "minneapolisvandalism",
+      "url": "",
+      "published": "Thu, 15 Jan 2026 15:09:00 +0000",
+      "summary": ""
+    },
+    {
+      "title": "kayentaparadecrash",
+      "url": "",
+      "published": "Tue, 13 Jan 2026 11:08:00 +0000",
+      "summary": ""
+    },
+    {
+      "title": "fortlauderdaleshooting",
+      "url": "",
+      "published": "Mon, 29 Dec 2025 16:35:00 +0000",
+      "summary": ""
+    },
+    {
+      "title": "Forsyth Park Attack",
+      "url": "",
+      "published": "Fri, 19 Dec 2025 11:18:00 +0000",
+      "summary": "The FBI is seeking doorbell or security camera footage from any residences in the highlighted area between the hours of 7:00 p.m. and 8:30 p.m. on December 10, 2025, specifically focusing on pedestrian traffic."
+    },
+    {
+      "title": "brownuniversityvideo",
+      "url": "",
+      "published": "Mon, 15 Dec 2025 10:31:00 +0000",
+      "summary": ""
+    },
+    {
+      "title": "brownuniversityshooting",
+      "url": "",
+      "published": "Sat, 13 Dec 2025 20:44:00 +0000",
+      "summary": ""
+    }
+  ],
+  "fetched_at": "2026-05-11T22:31:14.441495"
+}

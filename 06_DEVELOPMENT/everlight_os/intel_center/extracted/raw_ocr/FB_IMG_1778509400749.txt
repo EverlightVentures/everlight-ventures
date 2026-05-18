@@ -1,0 +1,37 @@
+{EE
+ByteClave
+investigative platforms to uncover truth on any subject
+¢ osint.sh - Curated investigative tools for deep online intelligence work.
+¢ usersearch.org - Find usernames across hundreds of social platforms.
+¢ sitecheck.sucuri.net - Scan websites for malware and security issues..
+« checkshorturl.com - Expand shortened URL investigation tool
+¢ pushshift.io - Access archived Reddit data for deep investigations
+« chainabuse.com - Reported crypto scam address database
+« numverify.com - Validate phone numbers and detect carrier details
+« explodingtopics.com - emerging trends before they become mainstream
+¢ archive.ph - permanent webpage snapshot archive tool
+¢ macvendors.com - Identify device manufacturers using MAC address
+« emailrep.io - Assess email reputation and risk scoring
+¢ hybrid-analysis.com - Analyze suspicious files using sandbox technology
+« deviceinfo.me - Device and browser data exposure check
+¢ c99.nl - Perform multiple network and IP intelligence lookups
+« mailtester.com - Verify email address validity without sending messages
+¢ trademap.org - Global trade flow and import/export data
+¢ breachdirectory.org - Search leaked credentials across multiple databases
+¢ builtwith.com - Identify technologies used on any website instantly
+¢ serpstat.com - Analyze search visibility and keyword intelligence
+¢ zabasearch.com - Search public records for addresses and phone numbers
+« keywordseverywhere.com - Reveal keyword data directly within search results
+« centralops.net - network diagnostic and domain tools suite
+« checkphish.ai - phishing site detection and verification tool
+¢ tubularlabs.com - Analyze video trends and audience engagement insights
+¢ chartmetric.com - Track music trends and artist performance data
+« lenso.ai - Reverse image search with advanced recognition capabilities
+« startupbuffer.com - Discover new startups before public exposure
+¢ iplocation.net - Analyze IP addresses and track geographic location data
+« fotoforensics.com - image manipulation detection tool
+¢ urlhaus.abuse.ch - Track malicious URLs and cyber threat intelligence
+¢ ipvoid.com - IP address blacklist and reputation checker
+* reverseip.domaintools.com - Discover all domains hosted on same server
+¢ osint.industries - Run deep identity checks across obscure data sources
+¢ ghostproject.fr - Access large database of leaked personal records.

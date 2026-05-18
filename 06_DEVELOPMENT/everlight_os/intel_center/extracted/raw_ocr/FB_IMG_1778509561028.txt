@@ -1,0 +1,38 @@
+-C}:
+ByteClave
+Tools That Solve Issues You've Been Ignoring
+« Pangolin - Self-hosted Cloudflare Tunnel with web dashboard
+¢ Warracker - Tracks every product warranty expiration with alerts
+« Papra - Minimal self-hosted document management for records
+« Rybbit - Cookie-free GDPR-ready analytics entirely self-hosted
+« Mazanoke - Compresses images locally inside your browser
+« Palmr - Self-hosted file sharing with expiring access links
+« PatchMon - Monitors Linux patch status across all servers..
+¢ Tinyauth - Adds a login screen to any self-hosted app.
+« LoggiFly - Sends alerts from Docker log pattern matches.
+¢ BookLore - Personal ebook library with OPDS e-reader support..
+« Zerobyte - Clean web UI for managing restic backups
+¢ Dispatcharr - Manages multiple IPTV streams with auto-failover.
+« Colanode - Self-hosted workspace combining Notion and Slack
+¢ Poznote - Notes with Mermaid and Excalidraw built in
+« Sync-in - Lightweight Nextcloud alternative for file sync
+« Upvote RSS - Generates rich RSS feeds from Reddit posts
+« Gatus - Monitors services and builds a public status page
+¢ Ryot - Tracks books movies shows and games together
+« Arcane - Manage Docker containers from a clean web Ul
+« Cinephage - Automated movie acquisition and library manager
+« Pulse - Real-time Proxmox resource monitor clean dashboard
+* BookStack - Self-hosted wiki and documentation platform
+« Postgresus - One-click web-based PostgreSQL backup tool
+« Komodo - Centralized Docker and server management platform
+« Coroot - Pinpoints app failures from observability data automatically
+¢ Miniflux - Minimalist opinionated RSS reader ..self-hosted
+« Umami - Privacy-first website analytics.
+¢ Rallly - Self-hosted date polling to schedule meetings easily
+« Gitea - Lightweight self-hosted Git with built-in Cl
+« Dashy - Highly customizable dashboard for all your services
+« Piped - Privacy-respecting YouTube frontend zero tracking
+« Reactive Resume - Privacy-first resume builder you own entirely
+¢ Gokapi - File sharing with expiring links and download limits
+« Rymdport - Cross-platform file transfer via Wormhole protocol.
+« Gotify - Self-hosted push notification server for your alerts.

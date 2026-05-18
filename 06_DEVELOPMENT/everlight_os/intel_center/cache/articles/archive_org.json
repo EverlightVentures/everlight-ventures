@@ -1,0 +1,68 @@
+{
+  "domain": "archive.org",
+  "method": "rss",
+  "rss_path": "https://blog.archive.org/feed/",
+  "items": [
+    {
+      "title": "A Thank You to Journalists Supporting the Wayback Machine",
+      "url": "https://blog.archive.org/2026/05/11/a-thank-you-to-journalists-supporting-the-wayback-machine/",
+      "published": "Mon, 11 May 2026 12:00:00 +0000",
+      "summary": "As publishers block the Internet Archive&#8217;s Wayback Machine for unfounded concerns over AI scraping, hundreds of journalists have signed a public letter supporting the Wayback Machine and the importance of [&#8230;]"
+    },
+    {
+      "title": "Celebrating Thirty Years of the Internet Archive with the \u2018Class of 1996\u2019",
+      "url": "https://blog.archive.org/2026/05/07/celebrating-thirty-years-of-the-internet-archive-with-the-class-of-1996/",
+      "published": "Thu, 07 May 2026 17:24:47 +0000",
+      "summary": "Before feeds, before algorithms, there was the Class of 1996: websites &#38; organizations founded (or expanded) in 1996, like the Internet Archive. On the occasion of the Internet Archive&#8217;s 30th [&#8230;]"
+    },
+    {
+      "title": "Internet Archive Switzerland: Expanding a Global Mission to Preserve Knowledge",
+      "url": "https://blog.archive.org/2026/05/06/internet-archive-switzerland-expanding-a-global-mission-to-preserve-knowledge/",
+      "published": "Wed, 06 May 2026 12:05:00 +0000",
+      "summary": "Thirty years ago, Brewster Kahle founded the Internet Archive with an ambitious goal: Universal Access to All Knowledge. Today, that mission continues to grow with an exciting new chapter: the [&#8230;]"
+    },
+    {
+      "title": "Wayback Machine Director: We Are \u2018Collateral Damage\u2019 in the Fight Between AI Companies and Publishers",
+      "url": "https://blog.archive.org/2026/05/06/wayback-machine-director-we-are-collateral-damage-in-the-fight-between-ai-companies-and-publishers/",
+      "published": "Wed, 06 May 2026 12:00:00 +0000",
+      "summary": "In the latest episode of the Future Knowledge podcast, &#8220;Preserving the Web in the Age of AI,&#8221; Wayback Machine director Mark Graham, tech policy expert Mike Masnick, and media lawyer [&#8230;]"
+    },
+    {
+      "title": "On World Press Freedom Day, a Call to Keep the News Preserved",
+      "url": "https://blog.archive.org/2026/05/03/on-world-press-freedom-day-a-call-to-keep-the-news-preserved/",
+      "published": "Sun, 03 May 2026 16:31:22 +0000",
+      "summary": "For nearly 30 years, the Internet Archive\u2019s Wayback Machine has worked alongside journalists, researchers, and the public to ensure that the web\u2014and the news it carries\u2014remains part of our shared [&#8230;]"
+    },
+    {
+      "title": "Public Libraries Jump On Board the Our Future Memory Movement",
+      "url": "https://blog.archive.org/2026/05/01/public-libraries-jump-on-board-the-our-future-memory-movement/",
+      "published": "Fri, 01 May 2026 00:19:06 +0000",
+      "summary": "The Our Future Memory movement was already building momentum with flagship library organizations like IFLA, ALA, and SPARC. But now, local and regional library systems from across the United States [&#8230;]"
+    },
+    {
+      "title": "Information Stewardship Forum 2026: Creating Community and Purpose Around US Government Information",
+      "url": "https://blog.archive.org/2026/04/28/information-stewardship-forum-2026-creating-community-and-purpose-around-us-government-information/",
+      "published": "Tue, 28 Apr 2026 08:00:00 +0000",
+      "summary": "As soon as people started walking in the door, I breathed a sigh of relief. After months of careful (some might say obsessive) planning, we were kicking off the inaugural [&#8230;]"
+    },
+    {
+      "title": "Introducing Vanishing Culture: A New Book on the Loss of Our Digital Memory",
+      "url": "https://blog.archive.org/2026/04/23/introducing-vanishing-culture-a-new-book-on-the-loss-of-our-digital-memory/",
+      "published": "Thu, 23 Apr 2026 12:03:00 +0000",
+      "summary": "From disappearing news articles to lost films, music, and websites, a new book from the Internet Archive reveals how our shared digital record is eroding, and what it will take [&#8230;]"
+    },
+    {
+      "title": "Gone but Not Forgotten: Recovering the Dead Web",
+      "url": "https://blog.archive.org/2026/04/23/gone-but-not-forgotten-recovering-the-dead-web/",
+      "published": "Thu, 23 Apr 2026 11:00:00 +0000",
+      "summary": "A Pew Research Center study found that 38% of webpages from a decade ago, and about 25% of pages sampled across the decade, are now inaccessible; our analysis shows that the Wayback Machine has rescued roughly 15% of those otherwise dead pages."
+    },
+    {
+      "title": "U.S. Supreme Court Records and Briefs: The Arguments That Shaped America, Now Freely Available",
+      "url": "https://blog.archive.org/2026/04/20/u-s-supreme-court-records-and-briefs-the-arguments-that-shaped-america-now-freely-available/",
+      "published": "Mon, 20 Apr 2026 15:12:22 +0000",
+      "summary": "Most people are familiar with the U.S. Supreme Court opinions as public documents. But the opinions are only part of the story. Behind every landmark ruling lies a vast archive of briefs, petitions, appendices, and supporting records; these are the the arguments, evidence, and voices that shaped eac"
+    }
+  ],
+  "fetched_at": "2026-05-11T22:20:03.448547"
+}

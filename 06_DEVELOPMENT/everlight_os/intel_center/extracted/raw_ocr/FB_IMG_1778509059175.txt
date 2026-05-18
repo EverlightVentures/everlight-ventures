@@ -1,0 +1,29 @@
+— : = = ByteClave
+Sites curating powerful Tool collections...
+¢ essentialmarketingtools.com - Collection of Digital Marketing Tools
+¢ rapidapi.com/hub - World's largest API hub (40,000+ APIs)
+e it-tools.tech - browser based developer tools
+« tooldex.org - 1000+ free tools across 36 categories
+¢ startupstash.com - tools for building startups
+* awesome-selfhosted.net - self-hostable ,open source apps directory
+¢ 10015.io - productivity tools collection
+« designsystemsrepo.com - Collection of design systems
+¢ untools.co - thinking frameworks/mental model tools for decisions
+« thetoolsverse.com/free - Al Tools Directory
+¢ omatsuri.app - frontend utility tools
+¢ dfir.training/dfir-tools - forensics/ incident response tools
+¢ producthunt.com - collection of newly launched tech tools
+¢ linuxlinks.com - free Linux tools directory
+¢ toools.design - Best Design Resources /Tools
+* privacy.sexy - scripts and tools to harden privacy on any OS
+¢ trackawesomelist.com - Track updates to every awesome list
+« codebeautify.org - Code formatting /conversion tools
+° ciwesomeopensource.com - Find/Compare Open Source Projects
+¢ transform.tools - data format transformation tools
+¢ alternativeto.net - Find alternatives to any software
+« regex101.com - Regex testing / reference tools
+* awesome-privacy.xyz - privacy-respecting tools for every task
+¢ d3fend.mitre.org - cyber defense /countermeasure tools
+¢ thriftmac.com - directory of free Mac apps
+¢ intelx.io/tools - Intelligence search tools
+« devhints.io - Developer cheatsheet ,quick-reference tools

@@ -1,0 +1,43 @@
+# Known-good RSS / Atom URLs for sources whose root domain doesn't auto-discover.
+# Format: <domain>: <full RSS URL>
+# Add new ones over time; intel pull will prefer these over auto-discovery.
+
+reuters.com: https://feeds.reuters.com/reuters/topNews
+apnews.com: https://feedx.net/rss/ap.xml
+nytimes.com: https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml
+propublica.org: https://www.propublica.org/feeds/propublica/main
+npr.org: https://feeds.npr.org/1001/rss.xml
+bbc.com: http://feeds.bbci.co.uk/news/world/rss.xml
+axios.com: https://api.axios.com/feed/
+ground.news: https://ground.news/rss
+factcheck.org: https://www.factcheck.org/feed/
+allsides.com: https://www.allsides.com/headline-roundups/feed
+gdeltproject.org: https://api.gdeltproject.org/api/v2/doc/doc?query=&format=rss
+
+# Weather / disaster
+noaa.gov: https://www.noaa.gov/news-release/feed
+nws.noaa.gov: https://alerts.weather.gov/cap/us.php?x=1
+usgs.gov: https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/significant_week.atom
+fema.gov: https://www.fema.gov/feeds/news.atom
+
+# Space / science
+nasa.gov: https://www.nasa.gov/news-release/feed/
+arxiv.org: https://export.arxiv.org/rss/cs.AI
+science.nasa.gov: https://science.nasa.gov/feed/
+biorxiv.org: https://www.biorxiv.org/syndication/biorxiv-recent.xml
+nature.com: https://www.nature.com/nature.rss
+
+# Trading / finance
+tradingview.com: https://www.tradingview.com/feed/
+coingecko.com: https://www.coingecko.com/news.xml
+coindesk.com: https://www.coindesk.com/arc/outboundfeeds/rss/
+
+# Economics
+fred.stlouisfed.org: https://fred.stlouisfed.org/releases/rss
+bls.gov: https://www.bls.gov/feed/news_release/empsit.rss
+bea.gov: https://apps.bea.gov/rss/rss.xml
+
+# OSINT-adjacent
+wikileaks.org: https://wikileaks.org/-Document-Releases-.html?lang=en
+archive.org: https://blog.archive.org/feed/
+sec.gov: https://www.sec.gov/news/pressreleases.rss

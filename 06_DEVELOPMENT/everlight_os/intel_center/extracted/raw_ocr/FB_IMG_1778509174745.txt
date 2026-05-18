@@ -1,0 +1,72 @@
+sit
+ByteClave
+
+forensics tools experts rarely mention
+
+¢ ericzimmerman.github.io -Windows forensics tools collection
+
+¢ github.com/libyal/libesedb - Extensible Storage Engine database parser
+
+« mvt.re - detect spyware traces on mobile devices
+
+¢ passware.com - encrypted disk and password forensic recovery tool
+
+¢ virustotal.com — File and URL malware analysis
+
+« usbdeview.net - analyze USB device connection history
+
+« bleachbit.org - trace cleaned files and privacy artifacts
+
+« hashdeep.sourceforge.net - Computes and audits hash sets
+
+« freehexeditorneo.com - low level binary data forensic inspection
+
+¢ timesketch.org - collaborative timeline analysis for digital investigations
+
+¢ upx.github.io - unpack compressed executables for analysis
+
+¢ dnstwist.it - detect domain impersonation for investigations
+
+¢ cutter.re - GUI reverse engineering platform based on radare
+
+« caploader.com - visualize and analyze packet capture files
+
+« base64decode.org - decode encoded forensic data quickly
+
+- diffchecker.com - compare text differences for forensic review
+
+¢ caine-live.net - linux forensic distribution for digital investigations
+
+« belkasoft.com - digital evidence acquisition and analysis platform
+
+¢ volatilityfoundation.org - analyze RAM dumps for hidden processes
+
+¢ jimpl.com - simple online EXIF metadata viewer
+
+« plaso.readthedocs.io - extract logs and generate forensic timelines
+
+¢ guymager.sourceforge.io - forensic disk imaging acquisition utility
+
+¢ niksun.com - deep network packet forensics investigation system
+
+« foremost.sourceforge.net - recover files through header and footer carving
+
+¢ exiftool.org - extract metadata from files and media
+
+« hashcat.net - password recovery through advanced hash cracking
+
+¢ ghidra-sre.org - reverse engineer compiled software binaries
+
+e radare.org - disassemble and inspect binary programs
+
+¢ maigret.dev - advanced username footprint investigation tool
+
+¢ apktool.org - decode android applications for analysis
+
+¢ libimobiledevice.org - access data from ios devices
+
+« sqlitebrowser.org - analyze sqlite databases from applications
+
+¢ osquery.io - query system state for forensic evidence
+
+¢ suricata.io - network threat detection and logging

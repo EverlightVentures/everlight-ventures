@@ -1,0 +1,32 @@
+: ByteClave
+Ultimate OSINT and Research Toolkit
+« dl.acm.org - Computing and tech research library
+¢ osintframework.com - large directory of every free OSINT tool
+e breach.house - ransomware /data leak monitor ..real-time
+¢ researchmethodology.org - understand every research approach
+« base-search.net - Massive academic documents
+¢ scispace.com - Simple explanations of research papers
+¢ start.me/p/DPYPMz - Ultimate OSINT collection bookmark library
+- refseek.com - search across billions of documents
+¢ gijn.org - World's biggest investigative journalism guide
+¢ quirks.com - market research methods explained
+¢ osintupdates.com - OSINT learning resources
+« biorxiv.org - Biology and life sciences research
+« discovery.researcher.life - research reading assistant
+¢ worldcat.org - Books available in libraries worldwide
+¢ whatsmyname.app - Username presence checker(all platforms)
+* europepmc.org - biomedical literature database
+¢ statisticshowto.com - every statistical concept explained
+¢ web-check.xyz - Deep analysis of any website
+¢ warheatmap.app - global conflict data visualization(live)
+¢ atsameip.com - deterrmine all websites sharing any IP address
+¢ conjointly.com/kb - textbook covering all social research methods
+¢ filmot.com - Find anything spoken across millions of videos
+« ieeexplore.ieee.org - Engineering ,electronics research database
+« openknowledgemaps.org - Visual maps of research topics
+¢ eric.ed.gov - Education research papers
+¢ bellingcat.gitbook.io - investigation toolkit for researchers
+¢ researchgate.net - Researcher network /paper sharing
+« theosintvault.io - Full client-side OSINT investigation vault
+¢ github.com/handsome-rich/Awesome-Auto-Research-Tools -
+collection of automated research tools

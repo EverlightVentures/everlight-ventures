@@ -1,0 +1,41 @@
++L}:
+ByteClave
+Government Databases Nobody Tells You Exist
+e SIPRI Arms - Every arms deal between nations since 1950
+e IAEA PRIS - Status of every nuclear reactor on Earth
+e FAOSTAT - Every country's food and hunger data, free
+e UNODC Data - Global drug trafficking and crime statistics
+e WHO GHO - Every health indicator for every country
+e World Bank Open Data - Development data for every nation free
+e UN Comtrade - Every import and export between every country
+e UNHCR Data - Real numbers behind every refugee crisis
+e OECD.Stat - Economic data for all 38 OECD nations
+e ILO ILOSTAT - Every country's wages and labor conditions
+e CERN Open Data - Raw particle collision data from the LHC
+e USGS EarthExplorer - 50 years of satellite images, free download
+e Copernicus Browser - Live ESA satellite imagery of anywhere
+e NASA Earthdata - Every earth science dataset NASA ever collected
+e NOAA Climate - US weather and ocean data since 1820
+e GDELT Project - Every world news event since 1979, searchable
+e OpenAG - Real-time air quality data from every city
+e Global Carbon Project - Every nation's CO2 emissions, year by year
+e IHME GHDx - Disease burden data for every country free
+e OpenSpending - Every government budget, globally searchable free
+e USASpending - Tracks every dollar the US government spends
+e UK Data Service - Britain's entire archive of social research data
+e Eurostat - Official statistics from all 27 EU states
+e AidData - Every foreign aid dollar tracked and mapped
+e ICPSR - 16,000 social science datasets from 130 countries
+e Harvard Dataverse - 130,000 research datasets, fully open access
+e Govinfo - Every US federal document published, fully searchable
+e CIA FOIA - CIA declassified intelligence files, free access
+e FB! Vault - Declassified FBI files on every major investigation
+e ACLED - Every armed conflict and protest event worldwide
+e V-Dem - Democracy scores for every country since 1789
+e Our World in Data - Every global statistic visualized and sourced
+e World Prison Brief - Every country's prison population, updated free
+e Global Slavery Index - Estimated slaves in every country today
+e ITU Datahub - Telecom and internet data for every nation
+e BIS Statistics - Central bank data from every major economy
+e INTERPOL Notices - Public wanted notices for fugitives worldwide
+e Nuclear Threat Initiative - Every country's nuclear security score ranked

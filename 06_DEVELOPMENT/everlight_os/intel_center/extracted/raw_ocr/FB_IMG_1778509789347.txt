@@ -1,0 +1,82 @@
+5 i
+ByteClave
+
+SCIENTIFIC PLATFORMS NOBODY TELLS YOU ABOUT
+
+e MGnify - Microbiome sequences from every habitat on Earth
+
+e BioGRID - Every protein interaction ever experimentally confirmed
+
+e RNAcentral - Every known RNA sequence from every organism studied
+
+e ViPR - Complete genomes of every known human virus
+
+e FungiDB - Genetic data for every known fungal species globally
+
+e Phytozome - Full genome sequences of every major plant species
+
+e VectorBase - Genomic data for every disease-carrying insect species
+
+e ChiroVex - Echolocation recordings from every known bat species
+
+e CoralNet - Coral reef health monitoring data from thousands of sites
+
+e GWOSC - Every gravitational wave detection ever recorded publicly
+
+e AFLOW - Crystal structures of over 3 million materials
+
+e ExoMol - Molecular spectral data for every exoplanet atmosphere studied
+
+e BRENDA - Enzyme properties from every organism ever studied
+
+e MetaboLights - Metabolomics datasets from thousands of global experiments
+
+e Single Cell Portal - Gene expression from millions of individual cells
+
+e NSRR - Sleep study recordings from thousands of real patients
+
+e ICSD - Crystal structures of every known inorganic material solved
+
+e AADR - Ancient DNA from every human population ever studied
+
+e Blitzortung - Every lightning strike on Earth mapped in real time
+
+e BCO-DMO - Every ocean chemistry dataset ever collected by researchers
+
+e Earth Microbiome - Microbial diversity mapped across every ecosystem
+
+e AstDyS - Orbital data and collision risk for every known asteroid
+
+e IMO - Every meteor shower observation recorded by global volunteers
+
+e ALMA Archive - Radio telescope observations of every studied cosmic object
+
+e MiMeDB - Every metabolite produced by the human microbiome catalogued
+
+e OBIS-SEAMAP - Every marine mammal sighting ever geotagged and mapped
+
+e Roadmap Epigenomics - DNA methylation maps across every human tissue
+
+e ENRAM - Bird migration patterns tracked across all European radar networks
+
+e lceCube Data - Neutrino detections from deep inside Antarctic ice
+
+e RELAG - Spectral data revealing composition of every known asteroid
+
+e Polyinfo - Physical and chemical properties of every known polymer
+
+e GVP Smithsonian - Every voleano eruption recorded since 10000 BC
+
+e Xenbase - Every genetic and genomic dataset from Xenopus frogs
+
+e WormBase - Complete biological data for every C elegans roundworm
+
+e FlyBase - Every gene and mutation ever studied in fruit flies
+
+e ZFIN - Complete zebrafish genetics and developmental biology database
+
+e TreeBASE - Every published phylogenetic tree and dataset ever submitted
+
+e ITRDB - Tree ring climate records spanning thousands of years globally
+
+e Mindat - Every known mineral species and their global occurrences mapped

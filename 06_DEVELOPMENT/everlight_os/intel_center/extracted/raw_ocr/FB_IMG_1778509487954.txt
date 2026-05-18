@@ -1,0 +1,39 @@
+LI
+ByteClave
+Sites that Can turn you into a Tech Expert faster.
+¢ javascript.info - The most complete modern JavaScript guide .
+¢ sqlbolt.com - Learn SQL with instant in-browser interactive exercises
+* regexone.com - Master regular expressions through guided practices.
+¢ visualgo.net - Algorithms and data structures animated .
+¢ refactoring.guru - Design patterns and code smells explained .
+¢ roadmap.sh - learning roadmaps for every developer role.
+¢ teachyourselfcs.com - world-class CS curriculum using free resources
+¢ nand 2tetris.org - Build a full computer from logic gates up..
+¢ missing.csail.mit.edu - MIT course on tools developers never formally learn
+¢ learnxinyminutes.com - Learn any programming language syntax .
+¢ cssgridgarden.com - Learn CSS Grid by growing a virtual garden
+¢ portswigger.net/web-security - Free web hacking labs from Burp Suite makers
+¢ overthewire.org - Linux and security wargames from beginner level .
+¢ linuxjourney.com - guided course through all Linux concepts.
+¢ codecrafters.io - Rebuild Redis ,,Git ,SQLite or complex softwares from scratch.
+¢ frontendmentor.io - -frontend challenges with professional Figma designs
+* exercism.org - Code exercises with real mentor feedback in 60 languages
+¢ cryptopals.com - Learn cryptography by breaking real ciphers .
+¢ pwn.college - ASU's free cybersecurity program with live hacking labs
+¢ web.dev/learn - Google's web development free learning paths.
+¢ fireship.io - modern tech explainers and short courses
+¢ boot.dev - Backend learned through browser-based real projects.
+¢ codingchallenges.fyi - Build real tools from scratch with weekly challenges.
+¢ projecteuler.net - programming problems for deep computational thinking..
+¢ learnpython.org - Fully interactive Python tutorials directly in browser
+¢ coddy.tech - - daily coding challenges across multiple languages,.
+¢ hyperskill.org - Project-based courses in Python, Java,, Go and more
+¢ takeuforward.org - Structured DSA sheets.. trusted .
+¢ devchallenges.io - Full-stack project challenges with real-world design briefs
+¢ sqlzoo.net - Interactive SQL exercises across multiple database systems
+¢ scrimba.com - Edit live code inside tutorial videos mid-playback
+¢ learnshell.org - Interactive Shell and Bash scripting lessons in browser
+¢ regex101.com - Build and debug regex with instant full explanations
+¢ git-scm.com/book - The complete official free Pro Git book online..
+¢ explainshell.com - Pastes any command and explains every part instantly
+¢ kaggle.com/learn - Free structured data science and machine learning courses.

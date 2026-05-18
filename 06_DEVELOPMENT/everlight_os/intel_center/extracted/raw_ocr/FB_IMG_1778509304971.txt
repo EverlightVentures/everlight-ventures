@@ -1,0 +1,32 @@
+ByteClave
+Must-know essential free PC tools
+¢ handbrake.fr - Converts any video to any other format
+« apachefriends.org - Runs Apache,, MySQL and PHP locally
+« cgsecurity.org - Recovers deleted data from any storage device
+¢ audacityteam.org - Multi-track audio recording and noise removal
+« nikse.dk - Creates and syncs subtitles for any video
+« inkscape.org - vector graphics editor for illustrations
+« bitwarden.com - Encrypted password manager
+¢ picard.musicbrainz.org - organises your entire music library
+- libreoffice.org - Complete office suite replacing Word and Excel
+« pdfgear.com - Edit, sign and convert PDFs without watermarks
+* upscayl.org - upscales low-resolution images to 4K
+« joplinapp.org - Encrypted note-taking with Markdown and sync
+¢ gnucash.org - Double-entry bookkeeping and invoicing for businesses
+« krita.org - Digital painting studio built for concept artists
+¢ projectlibre.com - Full project management with Gantt charts
+« freemind.sourceforge.net - Mind mapping tool for brainstorming ideas
+¢ veracrypt.fr - Encrypts entire drives and hidden volumes..
+« protonvpn.com - VPN with verified no-logs and no data limit
+« voidtools.com - Searches every file on your PC..
+¢ windirstat.net - Visual map showing what consumes your disk space
+¢ freefilesync.org - Backs up and synchronises folders automatically
+« revouninstaller.com - Removes apps and cleans every leftover trace
+« getsharex.com - Screen capture and recording with instant upload
+« github.com/microsoft/PowerToys - Adds missing Windows utilities
+« cpuid.com - Reads every hardware temperature and voltage live
+« ventoy.net - Multiple bootable ISOs on one USB drive
+« duplicati.com - Encrypted cloud backup to any storage destination
+- it-scm.com - Version control tracking every project change
+« sqlitebrowser.org - Browse and edit SQLite databases
+« blackmagicdesign.com - Hollywood- grade video editor

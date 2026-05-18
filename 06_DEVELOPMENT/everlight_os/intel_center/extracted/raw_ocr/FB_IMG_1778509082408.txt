@@ -1,0 +1,32 @@
+ByteClave
+Free design tools you should be using
+¢ glyphrstudio.com - Design your own font from scratch
+* watermarkremover.io - Erase watermarks from any image
+¢ gimp.org - Free / Open Source Image Editor
+« designresourc.es - directory of 1,000+ free design tools
+« libgdx.com - Cross-platform Java game development framework
+¢ clideo.com - Cut, merge ,convert video files
+¢ vectormaker.co - Convert images into vectors
+« scribus.net - Design print-ready books, magazines
+¢ humaaans.com - Build custom human character scenes
+¢ whimsical.com - Build flowcharts, wireframes ,mind maps
+* caniuse.com - Check which browsers support any design feature
+« birme.net - Resize hundreds of images at once
+* opengameart.org - Massive free game asset library
+¢ upscayl.org - Make blurry images sharp /clear
+¢ barcode.tec-it.com - Generate any barcode format
+¢ inkscape.org - Design logos and vectors
+¢ spline.design - Design interactive 3D scenes
+¢ audacity.sourceforge.net - Record/edit / master audio
+¢ piktochart.com - Turn complex information into clear infographics
+« shotsnapp.com - Create device mockup images for your app/ site
+¢ affinity.studio - Pro print and layout design
+¢ 3dicons.co - Download open source 3D icons in any style
+¢ brutalistwebsites.com - brutalist design inspiration for web designers
+e designcavalry.scenegroup.co - Design data-driven motion graphics
+¢ patternpad.com - create unlimited unique pattern designs
+¢ calligraphr.com - Turn your handwriting into a font
+¢ ezgif.com - Create/ edit/ optimize animated GIFs
+¢ ambientcg.com - Download PBR materials and textures
+¢ jitter. video - Design animations and Ul transitions
+¢ dofsimulator.net - Simulate camera depth of field before photo shoot

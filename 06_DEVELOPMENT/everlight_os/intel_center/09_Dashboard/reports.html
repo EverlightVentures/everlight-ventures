@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0f">
+<title>Reports · Intel Center</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        ev: { bg:'#0a0a0f', surface:'#111118', s2:'#1a1a24', s3:'#222230', s4:'#2d2d3d',
+              gold:'#c9a84c', goldDim:'#a0832e', goldGlow:'#e0c66a',
+              cyan:'#22d3ee', purple:'#8b5cf6', green:'#22c55e',
+              orange:'#f97316', red:'#dc2626', text:'#e8e8e8', dim:'#999' }
+      },
+      fontFamily: {
+        display: ['"Playfair Display"','serif'],
+        sans:    ['"DM Sans"','"Inter"','sans-serif'],
+        body:    ['"Inter"','sans-serif'],
+        mono:    ['"JetBrains Mono"','monospace'],
+      },
+      boxShadow: { glow:'0 0 40px rgba(201,168,76,0.25)', glowStrong:'0 0 60px rgba(201,168,76,0.5)' },
+    }
+  }
+}
+</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="./data.js"></script>
+
+<style>
+  :root { --gold:#c9a84c; --gold-dim:#a0832e; --gold-glow:#e0c66a; --bg:#0a0a0f; }
+  *{ -webkit-tap-highlight-color:transparent; }
+  html,body{ background:var(--bg); color:#e8e8e8; font-family:"Inter",sans-serif; overflow-x:hidden; }
+  .mesh{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .mesh::before, .mesh::after, .mesh > span{
+    content:''; position:absolute; border-radius:50%; filter:blur(80px); opacity:0.45;
+    animation: drift 22s ease-in-out infinite;
+  }
+  .mesh::before{ width:520px; height:520px; left:-10%;  top:-15%; background:radial-gradient(closest-side,#3a2a08,transparent); }
+  .mesh::after { width:480px; height:480px; right:-8%;  top:35%;  background:radial-gradient(closest-side,#1b1135,transparent); animation-delay:-7s; }
+  .mesh > span { width:600px; height:600px; left:35%;   bottom:-20%; background:radial-gradient(closest-side,#0a2027,transparent); animation-delay:-14s; }
+  @keyframes drift{ 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(40px,-30px) scale(1.05)} 66%{transform:translate(-30px,40px) scale(0.95)} }
+
+  .glass{ background:linear-gradient(135deg, rgba(17,17,24,0.78), rgba(17,17,24,0.45));
+          border:1px solid rgba(255,255,255,0.06); backdrop-filter:blur(12px) saturate(140%);
+          -webkit-backdrop-filter:blur(12px) saturate(140%); }
+  .glass-gold{ background:linear-gradient(135deg, rgba(201,168,76,0.10), rgba(201,168,76,0.02));
+               border:1px solid rgba(201,168,76,0.35); }
+  .gold{ color:var(--gold); }
+  .gold-glow{ text-shadow:0 0 24px rgba(201,168,76,0.45); }
+  .lift{ transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+  .lift:hover{ transform:translateY(-2px); border-color:rgba(201,168,76,0.5); box-shadow:0 8px 32px rgba(201,168,76,0.12); }
+  .nav-link{ color:#999; transition:color .2s; padding:.5rem .9rem; border-radius:.5rem; }
+  .nav-link:hover{ color:#e0c66a; background:rgba(201,168,76,0.06); }
+  .nav-link.active{ color:#c9a84c; background:rgba(201,168,76,0.12); border:1px solid rgba(201,168,76,0.25); }
+  .bar{ height:6px; background:rgba(255,255,255,.06); border-radius:3px; overflow:hidden; position:relative; }
+  .bar > i{ display:block; height:100%; background:linear-gradient(90deg,#c9a84c,#e0c66a); border-radius:3px; }
+  .chip{ display:inline-flex; align-items:center; gap:.35rem; padding:.18rem .55rem; border-radius:9999px; font-size:.7rem;
+         font-family:"JetBrains Mono",monospace; letter-spacing:.04em; }
+  .chip-gold{ background:rgba(201,168,76,.10); color:#e0c66a; border:1px solid rgba(201,168,76,.3); }
+  .chip-green{ background:rgba(34,197,94,.10); color:#4ade80; border:1px solid rgba(34,197,94,.3); }
+  .chip-red{   background:rgba(220,38,38,.10); color:#f87171; border:1px solid rgba(220,38,38,.3); }
+  .chip-cyan{  background:rgba(34,211,238,.10); color:#67e8f9; border:1px solid rgba(34,211,238,.3); }
+  main{ animation: fadein .35s ease-out both; }
+  @keyframes fadein{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)} }
+  input.search{ background: rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:#e8e8e8;
+                 padding:.6rem 1rem .6rem 2.5rem; border-radius:.6rem; width:100%; outline:none;
+                 transition: border-color .2s; }
+  input.search:focus{ border-color:#c9a84c; }
+  .pill-btn{ padding:.35rem .9rem; border-radius:9999px; font-size:.78rem; cursor:pointer;
+              border:1px solid rgba(255,255,255,0.12); transition: all .2s; }
+  .pill-btn:hover{ border-color:#c9a84c; color:#e0c66a; }
+  .pill-btn.on{ background:rgba(201,168,76,0.15); border-color:#c9a84c; color:#e0c66a; }
+  table.intel{ width:100%; border-collapse:collapse; }
+  table.intel th, table.intel td{ text-align:left; padding:.6rem .8rem; border-bottom:1px solid rgba(255,255,255,0.05); font-size:.85rem; }
+  table.intel th{ background:rgba(201,168,76,0.04); color:#c9a84c; font-weight:500; text-transform:uppercase; letter-spacing:.08em; font-size:.7rem; }
+  table.intel tr:hover td{ background:rgba(201,168,76,0.03); }
+  table.intel a{ color:#e0c66a; }
+  table.intel a:hover{ text-decoration:underline; }
+</style>
+</head>
+<body class="min-h-screen relative">
+<div class="mesh"><span></span></div>
+<div id="app" class="relative z-10"></div>
+
+<script type="module">
+
+import { html, render, h, useState, useMemo, D, fmt, useLucide, Icon, Nav, Footer, relTime } from "./shared.js";
+
+function ReportsPage(){
+  useLucide();
+  const [q, setQ] = useState("");
+  const [kindFilter, setKindFilter] = useState("ALL");
+  const [stateFilter, setStateFilter] = useState("ALL");
+  const [showDnc, setShowDnc] = useState("ALL");  // ALL | DNC | NON_DNC
+  const [showVerified, setShowVerified] = useState("ALL");  // ALL | VERIFIED | RAW
+
+  const reports = D.reports || [];
+
+  const kinds = useMemo(() => ["ALL", ...Array.from(new Set(reports.map(r => r.kind))).sort()], [reports]);
+  const states = useMemo(() => ["ALL", ...Array.from(new Set(reports.map(r => r.state).filter(Boolean))).sort()], [reports]);
+  const triggers = useMemo(() => ["ALL", ...Array.from(new Set(reports.map(r => r.triggered_by))).sort()], [reports]);
+  const [triggerFilter, setTriggerFilter] = useState("ALL");
+
+  const filtered = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    return reports.filter(r => {
+      if (kindFilter !== "ALL" && r.kind !== kindFilter) return false;
+      if (stateFilter !== "ALL" && r.state !== stateFilter) return false;
+      if (triggerFilter !== "ALL" && r.triggered_by !== triggerFilter) return false;
+      if (showDnc === "DNC" && !r.dnc_blocked) return false;
+      if (showDnc === "NON_DNC" && r.dnc_blocked) return false;
+      if (showVerified === "VERIFIED" && (r.verified_findings||0) === 0) return false;
+      if (showVerified === "RAW" && (r.verified_findings||0) > 0) return false;
+      if (!needle) return true;
+      const hay = (r.target + " " + r.business_purpose + " " + r.kind + " " +
+                    r.state + " " + r.triggered_by + " " + r.id).toLowerCase();
+      return hay.includes(needle);
+    });
+  }, [q, kindFilter, stateFilter, triggerFilter, showDnc, showVerified, reports]);
+
+  return html`
+    <${Nav} active="reports"/>
+    <main class="max-w-7xl mx-auto px-5 pt-8 pb-20">
+      <div class="mb-6">
+        <h1 class="font-display text-3xl gold gold-glow mb-1">Investigation Reports</h1>
+        <p class="text-sm text-ev-dim">${fmt(reports.length)} total investigations. Searchable by target, purpose, state, agent who ran it, or investigation ID.</p>
+      </div>
+
+      <!-- KPI strip -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        ${[
+          {label:"Total reports", value: fmt(reports.length), color:"gold", icon:"file-search"},
+          {label:"With verified intel", value: reports.filter(r => (r.verified_findings||0) > 0).length, color:"green", icon:"check-circle"},
+          {label:"DNC blocked", value: reports.filter(r => r.dnc_blocked).length, color:"red", icon:"ban"},
+          {label:"Distinct targets", value: new Set(reports.map(r => r.target.toLowerCase())).size, color:"cyan", icon:"users"},
+        ].map(k => html`
+          <div class="glass rounded-xl p-5">
+            <div class=${`w-9 h-9 rounded-lg grid place-items-center bg-ev-${k.color}/10 border border-ev-${k.color}/30 mb-3`}>
+              <${Icon} name=${k.icon} cls=${`w-4 h-4 text-ev-${k.color}`}/>
+            </div>
+            <div class=${`text-2xl font-mono font-bold text-ev-${k.color}`}>${k.value}</div>
+            <div class="text-xs text-ev-dim mt-1">${k.label}</div>
+          </div>`)}
+      </div>
+
+      <!-- Filters -->
+      <div class="glass rounded-2xl p-5 mb-6 space-y-3">
+        <div class="relative">
+          <${Icon} name="search" cls="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ev-dim"/>
+          <input class="search font-mono"
+                 placeholder="Search target, purpose, state, triggered_by, investigation_id..."
+                 value=${q} onInput=${e => setQ(e.target.value)}/>
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+          <span class="text-[10px] uppercase tracking-widest text-ev-dim mr-1">Kind</span>
+          ${kinds.slice(0, 8).map(k => html`
+            <button class=${"pill-btn " + (kindFilter===k ? "on" : "")} onClick=${() => setKindFilter(k)}>${k}</button>`)}
+        </div>
+        ${states.length > 1 && html`
+          <div class="flex flex-wrap gap-2 items-center">
+            <span class="text-[10px] uppercase tracking-widest text-ev-dim mr-1">State</span>
+            ${states.slice(0, 12).map(s => html`
+              <button class=${"pill-btn " + (stateFilter===s ? "on" : "")} onClick=${() => setStateFilter(s)}>${s}</button>`)}
+          </div>`}
+        <div class="flex flex-wrap gap-2 items-center">
+          <span class="text-[10px] uppercase tracking-widest text-ev-dim mr-1">Triggered by</span>
+          ${triggers.slice(0, 8).map(t => html`
+            <button class=${"pill-btn " + (triggerFilter===t ? "on" : "")} onClick=${() => setTriggerFilter(t)}>${t}</button>`)}
+        </div>
+        <div class="flex flex-wrap gap-2 items-center">
+          <span class="text-[10px] uppercase tracking-widest text-ev-dim mr-1">DNC</span>
+          ${["ALL","DNC","NON_DNC"].map(v => html`
+            <button class=${"pill-btn " + (showDnc===v ? "on" : "")} onClick=${() => setShowDnc(v)}>${v==="NON_DNC"?"Non-DNC":v}</button>`)}
+          <span class="text-[10px] uppercase tracking-widest text-ev-dim mr-1 ml-4">Verified</span>
+          ${["ALL","VERIFIED","RAW"].map(v => html`
+            <button class=${"pill-btn " + (showVerified===v ? "on" : "")} onClick=${() => setShowVerified(v)}>${v}</button>`)}
+        </div>
+      </div>
+
+      <div class="text-xs text-ev-dim mb-3 font-mono">${fmt(filtered.length)} of ${fmt(reports.length)} reports</div>
+
+      <!-- Report rows -->
+      <div class="glass rounded-2xl overflow-hidden">
+        <div class="overflow-x-auto" style="max-height: 70vh; overflow-y:auto">
+          <table class="intel">
+            <thead><tr>
+              <th>Target</th><th>Kind</th><th>State</th><th class="num">Verified / Raw</th>
+              <th>Triggered by</th><th>Purpose</th><th>When</th><th>Status</th><th></th>
+            </tr></thead>
+            <tbody>
+              ${filtered.slice(0, 500).map(r => html`
+                <tr>
+                  <td class="font-mono">
+                    <a href=${r.report_url} target="_blank" rel="noopener" class="gold hover:underline">${r.target}</a>
+                  </td>
+                  <td class="text-xs"><span class="chip chip-gold">${r.kind}</span></td>
+                  <td class="text-xs text-ev-dim font-mono">${r.state || "—"}</td>
+                  <td class="num font-mono">
+                    <span class=${(r.verified_findings||0)>0 ? "text-ev-green" : "text-ev-dim"}>${r.verified_findings||0}</span>
+                    <span class="text-ev-dim"> / ${r.raw_findings||0}</span>
+                  </td>
+                  <td class="text-xs text-ev-dim">${r.triggered_by}</td>
+                  <td class="text-xs text-ev-text/70" style="max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title=${r.business_purpose}>${r.business_purpose || "—"}</td>
+                  <td class="text-xs text-ev-dim font-mono">${relTime(r.started_at)}</td>
+                  <td class="text-xs">
+                    ${r.dnc_blocked
+                      ? html`<span class="chip chip-red">DNC</span>`
+                      : (r.verified_findings||0) > 0
+                        ? html`<span class="chip chip-green">VERIFIED</span>`
+                        : html`<span class="chip chip-gold">RAW</span>`}
+                  </td>
+                  <td class="text-xs">
+                    <a href=${r.report_url} target="_blank" rel="noopener" class="px-2 py-1 rounded bg-ev-gold/10 hover:bg-ev-gold/20 gold inline-flex items-center gap-1">
+                      <${Icon} name="external-link" cls="w-3 h-3"/> Open
+                    </a>
+                  </td>
+                </tr>`)}
+            </tbody>
+          </table>
+        </div>
+        ${filtered.length > 500 && html`<div class="p-3 text-center text-xs text-ev-dim border-t border-white/5">Showing first 500 -- narrow your filters</div>`}
+        ${filtered.length === 0 && html`
+          <div class="p-12 text-center text-sm text-ev-dim">
+            No reports match. ${reports.length === 0 ? html`Run <code class="font-mono gold">intel investigate "&lt;target&gt;" --purpose="..."</code> to create one.` : "Clear a filter or try a different search."}
+          </div>`}
+      </div>
+    </main>
+    <${Footer}/>`;
+}
+
+render(html`<${ReportsPage}/>`, document.getElementById("app"));
+
+</script>
+</body>
+</html>

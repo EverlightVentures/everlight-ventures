@@ -1,0 +1,41 @@
++L}:
+ByteClave
+sites that turn you into a professional investigator instantly
+e FaceCheck ID - Reverse searches any face across internet
+¢ Blackbird - Hunts accounts linked to any email address
+e FotoForensics - Detects photo manipulation through error analysis
+¢ SunCalc - Geolocates any image using shadow angles
+e Sensity - Detects Al deepfakes and synthetic media
+e Moriarty Project - Six-tool phone number investigation suite
+e Judy Records - Searches millions of US court records
+¢ Social Catfish - Verifies real identities behind any photo
+e VesselFinder - Tracks real time global ship positions
+¢ OpenSky Network - Uncensored open source aircraft tracking tool
+¢ Global Fishing Watch - Exposes illegal fishing vessels worldwide
+¢ Satellites Pro - Browses historical satellite views anywhere
+e Overpass Turbo - Extracts any object from OpenStreetMap data
+¢ Numbuster - Identifies unknown callers through crowdsourced data
+e Unfurl - Forensically deconstructs any URL completely
+¢ SpyOnWeb - Reveals websites linked through shared tracking codes
+e NerdyData - Searches source code of millions of websites
+¢ StealthMole - Crawls dark web forums for threat intelligence
+¢ DocumentCloud - Extracts hidden metadata from any document
+e Orbit - Maps crypto wallet transaction history recursively
+e Arkham Intelligence - Labels every wallet and entity on blockchain
+¢ TRM Labs - Tracks illicit cryptocurrency flows across blockchains
+¢ Spur - Reveals VPN and proxy status behind any IP
+¢ EmailRep - Shows full risk score for any email
+¢ TruffleHog - Scans Git repositories for committed secrets
+e SnOint - Modular semi-automatic OSINT investigation framework
+¢ DorkSearch - Prebuilt Google dork queries for deep investigations
+¢ Summarize Tech - Turns any YouTube video into timestamped summary
+e Intelly Weave - Al research across 30 international archives
+e Maigret - Builds dossiers from one username across 3000 sites
+e WhatsMyName - Checks any username across 600 platforms
+¢ Junkipedia - Monitors fringe social media across 15 platforms
+e Open Measures - Searches extremist content across alt platforms
+¢ Geoconfirmed - Crowdsourced geolocation verification of conflict footage
+e GeoSpy - Predicts any photo location using Al analysis
+¢ DOJ Epstein Library - Searches 3.5 million official Epstein documents
+¢ InVID WeVerify - Verifies video authenticity through keyframe analysis
+e Osint Rocks - Multi-source OSINT lookup from one search

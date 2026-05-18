@@ -1,0 +1,78 @@
+5 i
+ByteClave
+
+Tools That Turn You Into a professional Investigator
+
+e Shadowserver - Live global dashboard tracking active cyber threats
+
+e CyberGordon - Runs one indicator through 30 threat databases simultaneously
+
+e FOFA - Maps the entire internet's exposed infrastructure by fingerprint
+
+¢ Bevigil - Surfaces hidden subdomains buried inside mobile app code
+
+¢ Criminalip - Scores any IP address for full cyber threat history
+
+e Odin - Checks any host for CVEs and exposed buckets free
+
+¢ Harmari - Search engine built for short-term rental fraud investigations
+
+e Mamont - Search engine for finding large hidden file archives
+
+- Biznar - Deep business intelligence search the surface web never shows
+
+¢ Dorkgpt - Al generates advanced dork queries for any investigation target
+
+¢ Talosintelligence - Cisco's live global threat intelligence and attack map
+
+¢ BrightCloud - Checks any URL or IP against real-time reputation data
+
+e Cyberbro - Checks any suspicious observable against 30 reputation sources
+
+« Islegitsite - Scores any website's trustworthiness using public trust signals
+
+e Wpscan - Scans any WordPress site for known security vulnerabilities
+
+e Osintmap - Interactive world map of every country's public records databases
+
+« Minerva - Aggregates data on any target email from 100 websites
+
+¢ Multirbl - Checks any IP against dozens of public blacklists simultaneously
+
+e Mxtoolbox - Diagnoses any email server's full health and configuration
+
+« Peepmail - Discovers business email addresses even when not publicly listed
+
+e Reacher - Verifies any email address is real without sending anything
+
+e Sherlockeye - Finds publicly linked data to any email across the web
+
+e H&8mail - Hunts breached passwords tied to any email address locally
+
+e Gitrecon - Scans any GitHub account for exposed real names and emails
+
+e Avtonomer - Finds vehicle photos by license plate across public databases
+
+¢ Teletracker - Gathers detailed intelligence from any Telegram channel
+
+e Tosint - Extracts structured data from any Telegram bot or channel
+
+e Worldlicenseplates - Identifies any license plate's country and regional origin
+
+e Pacer - Searches every US federal court case ever filed
+
+e Osintindustries - Links any email or phone to every connected platform account
+
+e Snitches - Searches public court documents and lawsuits by name
+
+« Whoxy - Finds every domain ever registered under one email address
+
+e Amass - Maps every subdomain and hidden asset behind any domain
+
+¢ Socialsearcher - Monitors public mentions of any name across all networks
+
+¢ Blackbird - Hunts one username across 600 websites at once
+
+e Dorkgenius - Generates custom dork queries for Google, Bing and DuckDuckGo
+
+e Etherscan - Traces every transaction linked to any crypto wallet

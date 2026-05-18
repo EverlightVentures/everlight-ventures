@@ -29,7 +29,7 @@ from pathlib import Path
 
 ROOT = Path("/mnt/sdcard/AA_MY_DRIVE")
 sys.path.insert(0, str(ROOT / "03_AUTOMATION_CORE" / "01_Scripts" / "content_tools"))
-sys.path.insert(0, str(ROOT / "Everlight_Intel_Center" / "lib"))
+sys.path.insert(0, str(ROOT / "06_DEVELOPMENT/everlight_os/intel_center" / "lib"))
 
 from env_loader import load_env  # noqa: E402
 load_env()
@@ -56,7 +56,7 @@ def intel_top_per_category(limit_per_cat: int = 4) -> dict[str, list]:
         # Trick: search with a stopword the search() function rejects -> falls through to category filter only.
         # Simpler: hit SQLite directly via the same conn.
         import sqlite3
-        db = ROOT / "Everlight_Intel_Center" / "database" / "everlight_resources.sqlite"
+        db = ROOT / "06_DEVELOPMENT/everlight_os/intel_center" / "database" / "everlight_resources.sqlite"
         conn = sqlite3.connect(db)
         conn.row_factory = sqlite3.Row
         rows = conn.execute(

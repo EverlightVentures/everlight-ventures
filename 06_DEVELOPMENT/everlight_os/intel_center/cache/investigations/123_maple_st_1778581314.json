@@ -1,0 +1,254 @@
+{
+  "investigation_id": "123_maple_st_1778581314",
+  "target": "123 Maple St",
+  "kind": "company",
+  "started_at": "2026-05-12T03:21:54.103565",
+  "finished_at": "2026-05-12T03:22:00.240783",
+  "elapsed_ms": 6137,
+  "total_findings": 23,
+  "investigators_run": 6,
+  "triggered_by": "cli_user",
+  "lead_id": null,
+  "verification_summary": null,
+  "results": [
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Archive item",
+          "value": "VOA [Voice of America] Global English : June 03, 2019 07:00PM-08:00PM EDT",
+          "url": "https://archive.org/details/VOA_Global_English_20190603_230000"
+        },
+        {
+          "label": "Archive item",
+          "value": "Armstrong/Cooper Girls Lacrosse Edges Totino-Grace/St. Anthony 10-9",
+          "url": "https://archive.org/details/ccxnewsmn-Armstrong_Cooper_Girls_Lacrosse_Edges_Totino-Grace_St._Anthony_10-9"
+        },
+        {
+          "label": "Archive item",
+          "value": "The Poets And Poetry Of The West: With Biographical And Critical Notices",
+          "url": "https://archive.org/details/ThePoetsAndPoetryOfTheWest"
+        },
+        {
+          "label": "Archive item",
+          "value": "CIA Reading Room cia-rdp89g00720r000700940005-6: REQUEST OR JUDGE WILLIAM WEBSTER TO BE THE KEYNOTE ",
+          "url": "https://archive.org/details/cia-readingroom-document-cia-rdp89g00720r000700940005-6"
+        },
+        {
+          "label": "Archive item",
+          "value": "Musical Selections from Garrison Keillor's A Prairie Home Companion Vol. 2",
+          "url": "https://archive.org/details/musical-selections-from-garrison-keillors-a-prairie-home-companion-vol.-2"
+        }
+      ],
+      "raw": {
+        "search": {
+          "status": 200,
+          "len": 1284
+        }
+      },
+      "elapsed_ms": 224,
+      "investigator": "Archive.org / Wayback",
+      "investigator_id": "archive_org"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "8-K",
+          "value": "PHH Alternative Mortgage Trust, Series 2007-2  (CIK 0001393639) -- 2007-05-11",
+          "url": "https://www.sec.gov/Archives/edgar/data//000116231807000553/"
+        },
+        {
+          "label": "8-K/A",
+          "value": "VENTAS INC  (VTR)  (CIK 0000740260) -- 2001-04-24",
+          "url": "https://www.sec.gov/Archives/edgar/data//000102140801500314/"
+        },
+        {
+          "label": "8-K",
+          "value": "VENTAS INC  (VTR)  (CIK 0000740260) -- 2001-04-24",
+          "url": "https://www.sec.gov/Archives/edgar/data//000102140801500288/"
+        },
+        {
+          "label": "8-K",
+          "value": "INVESTORS REAL ESTATE TRUST  (CSR, IRET, CSR-PC)  (CIK 0000798359) -- 2015-03-12",
+          "url": "https://www.sec.gov/Archives/edgar/data//000079835915000016/"
+        },
+        {
+          "label": "8-K",
+          "value": "FIRST UNION COMMERCIAL MORTGAGE SECURITIES INC  (CIK 0000850779) -- 2001-03-20",
+          "url": "https://www.sec.gov/Archives/edgar/data//000091412101000243/"
+        },
+        {
+          "label": "10-K",
+          "value": "ALPHA PRO TECH LTD  (APT)  (CIK 0000884269) -- 2006-03-23",
+          "url": "https://www.sec.gov/Archives/edgar/data//000110465906018916/"
+        }
+      ],
+      "raw": {
+        "fulltext_search": {
+          "status": 200,
+          "len": 61150,
+          "err": null
+        },
+        "tickers_catalog": {
+          "status": 200,
+          "len": 792870,
+          "err": null
+        }
+      },
+      "elapsed_ms": 594,
+      "investigator": "SEC EDGAR",
+      "investigator_id": "sec_edgar"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Domain",
+          "value": "123.COM",
+          "url": "https://123.com"
+        },
+        {
+          "label": "Registration",
+          "value": "1995-11-13T05:00:00Z"
+        },
+        {
+          "label": "Expiration",
+          "value": "2029-11-12T05:00:00Z"
+        },
+        {
+          "label": "Last Changed",
+          "value": "2025-01-30T21:16:00Z"
+        },
+        {
+          "label": "Entity (registrar)",
+          "value": "470"
+        },
+        {
+          "label": "Detail link",
+          "value": "https://who.is/whois/123.com",
+          "url": "https://who.is/whois/123.com"
+        }
+      ],
+      "raw": {
+        "rdap_verisign": {
+          "status": 200,
+          "len": 2726,
+          "err": null
+        }
+      },
+      "elapsed_ms": 872,
+      "investigator": "WHOIS Lookup",
+      "investigator_id": "whois"
+    },
+    {
+      "ok": false,
+      "findings": [
+        {
+          "label": "HTML search",
+          "value": "Open in browser",
+          "url": "https://opencorporates.com/companies?q=123%20Maple%20St&utf8=%E2%9C%93"
+        }
+      ],
+      "raw": {
+        "api_search": {
+          "status": 401,
+          "len": 83,
+          "err": null
+        }
+      },
+      "elapsed_ms": 901,
+      "investigator": "OpenCorporates",
+      "investigator_id": "opencorporates"
+    },
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "\"{q}\"": {
+          "status": 202,
+          "len": 14199
+        },
+        "{q} site:linkedin.com": {
+          "status": 202,
+          "len": 14260
+        },
+        "{q} site:github.com": {
+          "status": 202,
+          "len": 14213
+        },
+        "{q} site:reddit.com": {
+          "status": 202,
+          "len": 14202
+        },
+        "{q} filetype:pdf": {
+          "status": 202,
+          "len": 14208
+        },
+        "{q} contact email": {
+          "status": 202,
+          "len": 14198
+        }
+      },
+      "elapsed_ms": 1171,
+      "investigator": "Search Dorks",
+      "investigator_id": "google_dorks"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Sweep summary",
+          "value": "4 of 22 platforms returned a profile page for '123maplest'"
+        },
+        {
+          "label": "\u2713 Instagram",
+          "value": "found",
+          "url": "https://www.instagram.com/123maplest/"
+        },
+        {
+          "label": "\u2713 Reddit",
+          "value": "found",
+          "url": "https://www.reddit.com/user/123maplest"
+        },
+        {
+          "label": "\u2713 Pinterest",
+          "value": "found",
+          "url": "https://www.pinterest.com/123maplest/"
+        },
+        {
+          "label": "\u2713 DeviantArt",
+          "value": "found",
+          "url": "https://www.deviantart.com/123maplest"
+        }
+      ],
+      "raw": {
+        "Twitter/X": 403,
+        "Medium": 403,
+        "GitHub": 404,
+        "LinkedIn": 999,
+        "Instagram": 200,
+        "YouTube": 404,
+        "TikTok": 403,
+        "Reddit": 200,
+        "StackOverflow": 403,
+        "ProductHunt": 404,
+        "Patreon": 404,
+        "Pinterest": 200,
+        "Behance": 404,
+        "Dribbble": 404,
+        "Keybase": 404,
+        "DeviantArt": 200,
+        "Gravatar": 404,
+        "Twitch": 405,
+        "About.me": 404,
+        "Vimeo": 404,
+        "SoundCloud": 404,
+        "Flickr": 0
+      },
+      "elapsed_ms": 6126,
+      "investigator": "Social Recon",
+      "investigator_id": "social_recon"
+    }
+  ]
+}

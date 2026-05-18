@@ -1,0 +1,659 @@
+{
+  "investigation_id": "lino_gillies_1778611830",
+  "target": "Lino Gillies",
+  "kind": "person",
+  "started_at": "2026-05-12T11:50:30.529446",
+  "finished_at": "2026-05-12T11:50:34.326593",
+  "elapsed_ms": 3794,
+  "total_findings": 31,
+  "investigators_run": 10,
+  "triggered_by": "cipher_wolfe",
+  "lead_id": null,
+  "business_purpose": "test3",
+  "verify_context": {
+    "state": "CA",
+    "owner_name": "Lino Gillies"
+  },
+  "verification_summary": {
+    "total_findings": 31,
+    "verified": 3,
+    "rejected": 28,
+    "avg_confidence": 27,
+    "threshold": 50,
+    "highest_confidence_per_signal": {
+      "name_exact_match": 65,
+      "state_match": 65
+    },
+    "lead_context_keys_provided": [
+      "state",
+      "owner_name"
+    ]
+  },
+  "dnc_blocked": false,
+  "dnc_reason": "",
+  "dnc_entry_id": null,
+  "results": [
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "OSINT & Investigation",
+          "value": "Allthatsinteresting \u2014 ddeep history true crime dark mysteries \u00b7 verified live",
+          "url": "https://allthatsinteresting.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Lino Gillies' via OSINT & Investigation"
+          }
+        },
+        {
+          "label": "Maps & Geospatial",
+          "value": "Amazingplacesonearth \u2014 Showcases natural and cultural world wonders \u00b7 verified live",
+          "url": "https://amazingplacesonearth.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Lino Gillies' via Maps & Geospatial"
+          }
+        },
+        {
+          "label": "Education & Training",
+          "value": "Abandonedspaces \u2014 abandoned buildings and forgotten global places \u00b7 verified live",
+          "url": "https://abandonedspaces.com",
+          "investigator_meta": {
+            "agent_owner": "Strategy Assistant",
+            "is_live": true,
+            "search_hint": "Research 'Lino Gillies' via Education & Training"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "10015 \u2014 productivity tools collection \u00b7 verified live",
+          "url": "https://10015.io",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Research 'Lino Gillies' via Decision Intelligence"
+          }
+        },
+        {
+          "label": "OSINT & Investigation",
+          "value": "Americanhauntingsink \u2014 Haunted American places ghost mysteries \u00b7 verified live",
+          "url": "https://americanhauntingsink.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Lino Gillies' via OSINT & Investigation"
+          }
+        },
+        {
+          "label": "Maps & Geospatial",
+          "value": "Atlasobscura \u2014 hidden wondrous mysterious places worldwide \u00b7 verified live",
+          "url": "https://atlasobscura.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Lino Gillies' via Maps & Geospatial"
+          }
+        },
+        {
+          "label": "Education & Training",
+          "value": "Animagraffs \u2014 Complex machines and systems explained \u00b7 verified live",
+          "url": "https://animagraffs.com",
+          "investigator_meta": {
+            "agent_owner": "Strategy Assistant",
+            "is_live": true,
+            "search_hint": "Research 'Lino Gillies' via Education & Training"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "Amusingplanet \u2014 unusual natural and manmade global phenomena \u00b7 verified live",
+          "url": "https://amusingplanet.com",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Research 'Lino Gillies' via Decision Intelligence"
+          }
+        },
+        {
+          "label": "OSINT & Investigation",
+          "value": "Ancient Code \u2014 ancient alien forbidden suppressed history \u00b7 verified live",
+          "url": "https://ancient-code.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Lino Gillies' via OSINT & Investigation"
+          }
+        },
+        {
+          "label": "Maps & Geospatial",
+          "value": "Factinate \u2014 surprising facts about places worldwide \u00b7 verified live",
+          "url": "https://factinate.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Lino Gillies' via Maps & Geospatial"
+          }
+        },
+        {
+          "label": "Education & Training",
+          "value": "Batteryuniversity \u2014 Deep dive into battery chemistry and systems \u00b7 verified live",
+          "url": "https://batteryuniversity.com",
+          "investigator_meta": {
+            "agent_owner": "Strategy Assistant",
+            "is_live": true,
+            "search_hint": "Research 'Lino Gillies' via Education & Training"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "Astronomyonline \u2014 Best collection of astronomy education resources \u00b7 verified live",
+          "url": "https://astronomyonline.org",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Research 'Lino Gillies' via Decision Intelligence"
+          }
+        }
+      ],
+      "raw": {
+        "total_matched": 71,
+        "categories_used": [
+          "OSINT & Investigation",
+          "Maps & Geospatial",
+          "Education & Training",
+          "Decision Intelligence"
+        ],
+        "kind": "person"
+      },
+      "elapsed_ms": 20,
+      "investigator": "Catalogued Sources",
+      "investigator_id": "resource_lookup"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Archive item",
+          "value": "Richard Lino Gillies",
+          "url": "https://archive.org/details/gov.uscourts.caeb.611193",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 25,
+            "boost": 30,
+            "investigator_id": "archive_org"
+          }
+        }
+      ],
+      "raw": {
+        "search": {
+          "status": 200,
+          "len": 475
+        }
+      },
+      "elapsed_ms": 734,
+      "investigator": "Archive.org / Wayback",
+      "investigator_id": "archive_org"
+    },
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "yelp": 0,
+        "goodreads": 0,
+        "letterboxd": 0,
+        "strava": 0,
+        "untappd": 0,
+        "spotify": 0,
+        "producthunt": 0
+      },
+      "elapsed_ms": 983,
+      "investigator": "Consumer Signals (deep mine)",
+      "investigator_id": "consumer_signals"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Dehashed",
+          "value": "Search (login required)",
+          "url": "https://dehashed.com/search?query=Lino%20Gillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        },
+        {
+          "label": "Intelligence X",
+          "value": "Search",
+          "url": "https://intelx.io/?s=Lino%20Gillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        }
+      ],
+      "raw": {
+        "hibp_breaches": {
+          "status": 200,
+          "len": 2
+        }
+      },
+      "elapsed_ms": 2159,
+      "investigator": "Leak Check",
+      "investigator_id": "leak_check"
+    },
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "fec": 0,
+        "nonprofit": 0,
+        "gofundme": 0,
+        "patents": 0
+      },
+      "elapsed_ms": 2159,
+      "investigator": "Civic + Philanthropy (deep mine)",
+      "investigator_id": "philanthropy_civic"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "TruePeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.truepeoplesearch.com/results?name=Lino%20Gillies",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "FastPeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.fastpeoplesearch.com/name/lino-gillies",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ZabaSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.zabasearch.com/people/Lino+Gillies",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ThatsThem",
+          "value": "HTTP 200",
+          "url": "https://thatsthem.com/name/Lino-Gillies",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "Whitepages",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.whitepages.com/name/Lino-Gillies",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        }
+      ],
+      "raw": {
+        "TruePeopleSearch": {
+          "status": 403
+        },
+        "FastPeopleSearch": {
+          "status": 403
+        },
+        "ZabaSearch": {
+          "status": 403
+        },
+        "ThatsThem": {
+          "status": 200
+        },
+        "Whitepages": {
+          "status": 403
+        }
+      },
+      "elapsed_ms": 2544,
+      "investigator": "Skip-Trace",
+      "investigator_id": "skip_trace"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "\"\u00b7\"",
+          "value": "Lino Gillies | MMA Fighter Page | Tapology",
+          "url": "https://www.tapology.com/fightcenter/fighters/218621-lino-gillies",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\"\u00b7\"",
+          "value": "Richard Lino Gillies - Suisun City, CA - Has Court or Arrest Records",
+          "url": "https://www.mylife.com/richard-gillies/e99720912095232",
+          "verification": {
+            "confidence": 65,
+            "matched_signals": [
+              "name_exact_match",
+              "state_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 45,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\u00b7 site:github.com",
+          "value": "GitHub - houyuanchen111/LINO_UniPS: [ICLR 2026] Official code for ...",
+          "url": "https://github.com/houyuanchen111/LINO_UniPS",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "google_dorks"
+          }
+        },
+        {
+          "label": "\u00b7 site:github.com",
+          "value": "wordlist-diff/en_CA.txt at diff \u00b7 en-wl/wordlist-diff \u00b7 GitHub",
+          "url": "https://github.com/en-wl/wordlist-diff/blob/diff/en_CA.txt",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "google_dorks"
+          }
+        }
+      ],
+      "raw": {
+        "\"{q}\"": {
+          "status": 200,
+          "len": 23349
+        },
+        "{q} site:linkedin.com": {
+          "status": 202,
+          "len": 14272
+        },
+        "{q} site:github.com": {
+          "status": 200,
+          "len": 33112
+        },
+        "{q} site:reddit.com": {
+          "status": 202,
+          "len": 14202
+        },
+        "{q} filetype:pdf": {
+          "status": 202,
+          "len": 14202
+        },
+        "{q} contact email": {
+          "status": 202,
+          "len": 14216
+        }
+      },
+      "elapsed_ms": 2597,
+      "investigator": "Search Dorks",
+      "investigator_id": "google_dorks"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Twitter/X interests",
+          "value": "#FFF, #placeholder, #react",
+          "url": "https://twitter.com/linogillies",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "social_bio_scraper"
+          }
+        },
+        {
+          "label": "Pinterest interests",
+          "value": "#e2e2e2, #dadada",
+          "url": "https://www.pinterest.com/linogillies/",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "social_bio_scraper"
+          }
+        }
+      ],
+      "raw": {
+        "Medium": {
+          "status": 403,
+          "len": 5434
+        },
+        "ProductHunt": {
+          "status": 404,
+          "len": 97872
+        },
+        "About.me": {
+          "status": 404,
+          "len": 66947
+        },
+        "GitHub": {
+          "status": 404,
+          "len": 9
+        },
+        "Reddit": {
+          "status": 403,
+          "len": 189906
+        },
+        "Keybase": {
+          "status": 404,
+          "len": 7140
+        },
+        "Dribbble": {
+          "status": 404,
+          "len": 21143
+        },
+        "Pinterest": {
+          "status": 200,
+          "len": 885383
+        },
+        "Behance": {
+          "status": 404,
+          "len": 369767
+        },
+        "Twitter/X": {
+          "status": 200,
+          "len": 266847
+        }
+      },
+      "elapsed_ms": 2918,
+      "investigator": "Deep Social Mine",
+      "investigator_id": "social_bio_scraper"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Sweep summary",
+          "value": "3 of 22 platforms returned a profile page for 'linogillies'",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Instagram",
+          "value": "found",
+          "url": "https://www.instagram.com/linogillies/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Reddit",
+          "value": "found",
+          "url": "https://www.reddit.com/user/linogillies",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Pinterest",
+          "value": "found",
+          "url": "https://www.pinterest.com/linogillies/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        }
+      ],
+      "raw": {
+        "Instagram": 200,
+        "LinkedIn": 999,
+        "YouTube": 404,
+        "GitHub": 404,
+        "Twitter/X": 403,
+        "Medium": 403,
+        "TikTok": 403,
+        "StackOverflow": 404,
+        "Reddit": 200,
+        "Patreon": 404,
+        "Dribbble": 404,
+        "ProductHunt": 404,
+        "Pinterest": 200,
+        "Gravatar": 404,
+        "Behance": 404,
+        "Keybase": 404,
+        "About.me": 404,
+        "Twitch": 405,
+        "DeviantArt": 404,
+        "SoundCloud": 404,
+        "Vimeo": 404,
+        "Flickr": 404
+      },
+      "elapsed_ms": 3009,
+      "investigator": "Social Recon",
+      "investigator_id": "social_recon"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "News mention",
+          "value": "Wilma \u201cJune\u201d Conrad Lawrence, 1929-2016 - Tehachapi News",
+          "url": "https://news.google.com/rss/articles/CBMixgFBVV95cUxNZW8zQ3ZPdmZacjh1R2JfbE00TnJBV2w4dk91SDRJSmZQQk1EZnlqVXBNUjZpcEhIMG02ZUpHOUtxWk5RN2plR2lhQVhBcnlORkFVc2pURm9od3JQYllObm1Ob0xtS2p4X1lRLVlZa3dmeTFLRS16VFRUOF9CSHJhZEtjTnMzNzlPRnh3Smczd3VvRmoyZmswMHBpOWc5UGY5NFp4Wm1aWkYzQU1CWjlNY0k0ejlhUVZYVFV0MjQxdGxBbmM2a0E?oc=5",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "public_records"
+          }
+        }
+      ],
+      "raw": {
+        "courtlistener": 0,
+        "opencorporates": 0,
+        "findagrave": 0,
+        "news_archive": 1
+      },
+      "elapsed_ms": 3430,
+      "investigator": "Public Records (deep mine)",
+      "investigator_id": "public_records"
+    }
+  ]
+}

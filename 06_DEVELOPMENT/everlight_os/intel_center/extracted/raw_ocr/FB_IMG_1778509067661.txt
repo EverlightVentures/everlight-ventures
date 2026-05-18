@@ -1,0 +1,29 @@
+— : —— ByteClave
+Tools for advanced climate data analysis
+¢ gml.noaa.gov - atmospheric CO2 readings
+¢ climatetoolbox.org - regional climate /hydrology tool collection
+¢ climatereanalyzer.org - surface temperature anomaly charts
+¢ open-meteo.com - open-source weather/climate API
+¢ firms.modaps.eosdis.nasa.gov - wildfire hotspot map
+¢ globalfloods.eu - flood forecasts and alerts
+e drought.gov - drought severity monitor map
+¢ globalforestwatch.org - satellite deforestation loss alerts
+¢ pwsweather.com - manage,archive your personal weather station
+¢ zacklabe.com - Arctic and Antarctic climate visualizations
+¢ blitzortung.org - Live lightning strike detection
+¢ tidesandcurrents.noaa.gov - tide/sea level gauges
+¢ earthdata.nasa.gov - full Earth science data and tool gateway
+¢ climatechangetracker.org - live climate indicator dashboards
+¢ aqueduct.wri.org - water stress and scarcity risk atlas
+¢ worldview.earthdata.nasa.gov - full satellite imagery
+¢ pulse.climate.copernicus.eu - climate variable pulse
+¢ its-live.jpl.nasa.gov - glacier velocity and ice flow data
+e usgs.gov/programs/VHP - volcano eruption alerts and status
+¢ spaceweather.live - solar wind speed ,geomagnetic storm index
+¢ climatetrace.org - global emissions by economic sector
+¢ ozonewatch.gsfc.nasa.gov - stratospheric ozone hole monitor
+¢ coastal.climatecentral.org - coastal flood/ sea level risk map
+¢ smap.jpl.nasa.gov - soil moisture data
+¢ ncei.noaa.gov - temperature content tracking data
+e ventusky.com - humidity ,dew point map
+¢ nhc.noaa.gov - tropical cyclone , hurricane track data

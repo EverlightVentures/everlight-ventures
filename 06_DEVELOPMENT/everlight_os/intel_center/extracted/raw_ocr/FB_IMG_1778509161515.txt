@@ -1,0 +1,40 @@
+-C}:
+: — _ — _____s-—sdws@BytteCClavvee
+GitHub repositories worth exploring....
+« /LeCoupa/awesome-cheatsheets - Every language and framework explained..
+- /tiimgreen/github-cheat-sheet - Hidden GitHub features most users never find.
+« /ossu/computer-science - complete computer science university education online
+« /jlevy/the-art-of-command-line - resources to master Terminal
+« /denysdovhan/bash-handbook - Complete handbook to learn bash from scratch
+« /Kapeli/cheatsheets - Offline documentation for every tool you use.
+« /rstacruz/cheatsheets -Cheatsheets for web development
+« /k88hudson/git-flight-rules - What to do when git goes completely wrong
+« /shlomi-noach/awesome-mysql - Complete guide to master MySQL
+- /matteocrippa/awesome-swift - iOS and macOS Swift resources
+« /florinpop17/app-ideas - Project ideas ranked by beginner to advanced difficulty
+« /donnemartin/system-design-primer - Learn to design large scalable systems
+« /MunGell/awesome-for-beginners - open source projects for beginners
+- /git-tips/tips - Most useful git tips you never knew existed
+« /alebcay/awesome-shell - Every shell tool and resource explained..
+« /shieldfy/AP!-Security-Checklist - Security checklist for every API you build
+« /vinta/awesome-python - definitive guide to Python libraries,,
+e /herrbischoff/awesome-macos-command-line - Hidden macOS terminal tricks
+« /joshbuchea/HEAD - Complete reference for HTML head elements
+« /kamranahmedse/design-patterns-for-humans - Design patterns explained
+« /braydie/HowToBeAProgrammer - guideS to growing as developer
+« /trekhleb/homemade-machine-learning - Machine learning algorithms guides
+« /gto76/python-cheatsheet - Most comprehensive Python cheatsheet in existence
+» /mtdvio/every-programmer-should-know - Technical knowledge for every developer
+« /denysdovhan/witfjs - Weird JavaScript behaviors explained
+« /ByteByteGoHa/system-design-101 - System design explained
+« /Asabeneh/30-Days-Of-Python - Learn Python step by step over 30 days
+e /therealsreehari/Learn-Data-Science-For-Free - resources to learn Data Science.
+« /vasanthk/how-web-works - How the entire web works step by step
+« /EbookFoundation/free-programming-books - free books across every language
+« /binhnguyennus/awesome-scalability - Guides on building highly scalable systems
+« /phuoc-ng/html-dom - How to handle DOM operations without any framework
+« /public-apis/public-apis - Free APIs to practice and build real projects
+« /microsoft/ML-For-Beginners - Learn machine learning
+« /getify/You-Dont-Know-JS - complete book series on JavaScript internals
+« /bregman-arie/devops-exercises - exercises covering every DevOps concept
+« /veggiemonk/awesome-docker - Everything you need to master Docker

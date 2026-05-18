@@ -1,0 +1,42 @@
++L}:
+ByteClave
+sites that expose every hidden danger lurking on the internet
+e HavelBeenPwned - Checks if your data was ever leaked
+e DeHashed - Searches billions of leaked credentials instantly
+e HudsonRock - Checks if your device appears in infostealer logs
+¢ MalwareBazaar - Analyzes real malware samples completely safely
+e URLhaus - Tracks malicious URLs distributing malware live
+¢ Phishtank - Community database of verified phishing websites
+e OpenPhish - Tracks active phishing URLs targeting users now
+¢ AbuselPDB - Community blacklist reporting malicious IP addresses
+e GreyNoise - Separates real attacks from internet background noise
+¢ Pulsedive - Community threat intelligence aggregating global feeds
+¢ VirusTotal - Scans any file or URL against 70 engines
+« Any.run - Executes suspicious files inside safe sandbox
+e Hybrid Analysis - Detonates malware samples revealing hidden behavior
+¢ Talosintelligence - Cisco real-time global IP threat reputation database
+e Shodan - Finds every dangerously exposed device on internet
+« Censys - Maps every misconfigured server exposed online globally
+¢ BinaryEdge - Scans entire internet revealing live attack surface
+e ZoomEye - Exposes hidden vulnerable systems across entire internet
+¢ FullHunt - Discovers every internet-exposed asset on any domain
+e LeakiX - Finds misconfigured servers and exposed databases live
+e GrayhatWarfare - Searches millions of exposed public cloud storage
+« ExploitDB - Database of every publicly known software exploit
+e GTFOBins - Shows how attackers abuse legitimate Linux binaries
+e LOLBAS - Reveals how Windows binaries get weaponized against you
+e Canarytekens - Plants invisible tripwires detecting unauthorized access
+¢ SpiderFoot - Automates complete digital footprint reconnaissance instantly
+e Grabify - Reveals exact device and location behind any click
+¢ IPVoid - Cross checks any IP against multiple global blacklists
+e URLVoid - Cross checks any suspicious URL against dozens of blacklists
+¢ MXToolbox - Diagnoses email servers used in phishing attacks
+¢ DNSLeakTest - Confirms whether your DNS requests expose location
+e |PLeak - Tests whether your VPN actually leaks your identity
+e Creepjs - Reveals how uniquely fingerprinted your browser is
+e WhatlsMyBrowser - Reveals everything websites silently collect about you
+e AlienVault OTX - Community sharing real-time global threat intelligence
+¢ ThreatFox - Searches and shares malware indicators of compromise
+¢ Shedan Exploits - Finds known vulnerabilities for any software version
+¢ PacketTotal - Analyzes any network capture file for threats
+e Am|Unique - Checks if your browser fingerprint is truly unique

@@ -68,8 +68,8 @@ def _candidate_source_dirs() -> list[Path]:
 
     here = Path(__file__).resolve()
     suffixes = [
-        Path("NOTEPAD/Trranscripts/Ai_Brain"),
-        Path("NOTEPAD/Transcripts/Ai_Brain"),
+        Path("05_PERSONAL/A_Personal_Notebook/NOTEPAD/Trranscripts/Ai_Brain"),
+        Path("05_PERSONAL/A_Personal_Notebook/NOTEPAD/Transcripts/Ai_Brain"),
     ]
     for parent in here.parents:
         for suffix in suffixes:

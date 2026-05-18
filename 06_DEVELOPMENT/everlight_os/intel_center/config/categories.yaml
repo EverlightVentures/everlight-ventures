@@ -1,0 +1,148 @@
+# Everlight Intel Center -- Master Categories + Routing
+# Spec: Free Resources handoff (2026-05-11)
+#
+# Categorizer matches each "hint" with WORD BOUNDARIES (\b...\b) against
+# domain + purpose + notes + raw_text. Hints are ranked by length DESC so
+# multi-word hints win over short ones. TLD overrides apply last.
+
+categories:
+
+  News & Journalism:
+    hints: [news, journalism, journalist, reuters, ap.org, bbc, cnn, gdelt, factcheck, allsides, ground.news, nytimes, propublica, npr, axios, breaking, headlines, press, reporting, wire, newsroom, live global data, global information, civilian airstrike, armed conflict, conflict event]
+    department: Everlight Newsroom
+    agent_owner: Wire Santos
+
+  Weather & Disaster Intel:
+    hints: [weather, noaa, nws, hurricane, storm, fema, earthquake, usgs, wildfire, drought, alert, flood, ventusky, windy, zoom.earth, tornado, lightning, climate, tsunami, disaster, emergency, evacuation, seismic, volcano, blizzard, climate data, climate data analysis, advanced climate]
+    department: Disaster Response Desk
+    agent_owner: Helix Patel
+
+  Maps & Geospatial:
+    hints: [map, mapping, gis, openstreetmap, satellite imagery, terrain, geo, qgis, leaflet, mapbox, sentinel-hub, atlas, cartography, geocoding, geographic, navigation, route, location, parcel map, geospatial, population, visualization, 3d global, 3d city, projection, globe, advanced mapping, gis & advanced, mapped, mapping sites, places worldwide, world wonders]
+    department: OSINT Desk
+    agent_owner: Cipher Wolfe
+
+  Aviation & Maritime:
+    hints: [flight, aero, aviation, adsb, flightaware, marine, vessel, marinetraffic, port, airport, opensky, ship, aircraft, plane, airline, runway, helicopter, drone, maritime, naval, sailing, cargo ship, freighter]
+    department: Trading Desk
+    agent_owner: Bull Archer
+
+  Space & Science:
+    hints: [space, nasa, esa, space agency, telescope, astronomy, solar activity, space-track, iss, mars, moon, asteroid, comet, exoplanet, galaxy, stargazing, observatory, planetarium, cosmos, planet, prehistoric, paleontology, fossil, geology, biology, life sciences, brain development, atlas of, scientific, science, chemistry research, chemistry, molecular, periodic table, lab analysis, research and analysis, meteorite, lunar, martian, impact database, geological, biochemistry]
+    department: CEO Command Center
+    agent_owner: Helix Patel
+
+  Economics & Markets:
+    hints: [econ, fred, bls, bea, oecd, imf, worldbank, inflation, cpi, gdp, ppi, jobs report, fomc, treasury, macroeconomic, federal reserve, unemployment, payroll, consumer spending, recession, deflation, monetary policy]
+    department: Trading Desk
+    agent_owner: Bull Archer
+
+  Trading & Finance:
+    hints: [stock, crypto, coingecko, coinmarketcap, tradingview, polygon, finnhub, ohlcv, perpetual, futures, options, ghostfolio, wealthfolio, finance, portfolio, defi, staking, yield, exchange, candlestick, ticker, brokerage, day trading, capital flows, blockchain capital, on-chain, financial tools, financial, beyond the basics, rare products, rare product, antiquarian, meteorite price, price of different]
+    department: Trading Desk
+    agent_owner: Bull Archer
+
+  OSINT & Investigation:
+    hints: [osint, whois, intelligence, reconnaissance, sherlock, lookup, public records, sec.gov, opencorporates, archive.org, leaked documents, leaked, exposed, hidden activities, wikileaks, true crime, dark mysteries, mysteries, exif, metadata viewer, identify, identification, who-is, background check, investigation, doxx, tracking, surveillance, court records, criminal records, ultimate osint, research toolkit, forensics tools, forensics, crime patterns, evidence data, hidden mysteries, investigative platforms, uncover truth, specialized search engines, hidden global information, hard to access, hard-to-access, exposing crime, hidden information]
+    department: OSINT Desk
+    agent_owner: Cipher Wolfe
+
+  Cybersecurity:
+    hints: [cybersecurity, hack, vulnerability, cve, breach, haveibeenpwned, threat intel, malware, virustotal, shodan, censys, nmap, owasp, infosec, penetration, exploit, firewall, antivirus, encryption, ransomware, phishing]
+    department: DevOps Desk
+    agent_owner: Engineering Foreman
+
+  AI & Automation:
+    hints: [ai, llm, gpt, claude, anthropic, openai, ai agent, langchain, autogpt, vector database, rag, automation, workflow automation, chatbot, prompt, machine learning, neural, deep learning, generative ai, ai-powered, ai assistant, ai detection, ai object detection]
+    department: DevOps Desk
+    agent_owner: Nova Ling
+
+  APIs & Developer Tools:
+    hints: [api, sdk, postman, swagger, graphql, rest api, openapi, mock api, webhook, dev tools, developer tool, code, ci/cd, github repo, framework, library, runtime, compiler, ide, debugger]
+    department: DevOps Desk
+    agent_owner: Engineering Foreman
+
+  Content Creation:
+    hints: [video editor, audio editor, design tool, design tools, animaker, canva, figma, font, color palette, photo editor, gimp, image editor, podcast, music, midi, vocal, mixxx, glyph, vectormaker, scribus, inkscape, spline, watermark, upscayl, illustration, animation, infographic, mockup, wireframe, mind map, presentation, slides, recording, voice over, dubbing, video creation, video files, image cleanup, remove background, generate image, ai image, dj software, beat maker, free design, design your own, layout design, print and layout, print design]
+    department: Content Engine
+    agent_owner: Listing Writer
+
+  eCommerce & Product Research:
+    hints: [shopify, amazon, ecommerce, product research, supplier, alibaba, jungle scout, helium, dropship, etsy, woocommerce, magento, marketplace, listing, fulfillment, sku, inventory tracker, price tracker, niche]
+    department: Product Desk
+    agent_owner: Pitch Adler
+
+  Real Estate & Property:
+    hints: [zillow, realtor, redfin, property, mls, attom, parcel data, real estate, mortgage, rentometer, rental, foreclosure, deed, listing, comp, fsbo, wholesale, off-market]
+    department: Wholesale Desk
+    agent_owner: Rex Blackwell
+
+  Logistics & Supply Chain:
+    hints: [logistics, shipping, fedex, ups, freight, supply chain, port traffic, container, route optimization, last mile, delivery, warehouse, fulfillment center, customs, trucking]
+    department: Logistics Desk
+    agent_owner: Logistics Commander
+
+  Legal & Compliance:
+    hints: [legal, law firm, court, sec.gov, fcc, fda, ftc, eeoc, statute, regulation, courtlistener, justia, caselaw, attorney, contract, compliance, regulatory, lawsuit, judgment, ordinance, jurisdiction, ucc, irs, citation]
+    department: Legal/Compliance Desk
+    agent_owner: Brief Calloway
+
+  Health & Environment:
+    hints: [health, healthcare, epa, who, cdc, air quality, pollution, water quality, environment, biotech, pharma, mental health, nutrition, fitness, public health, vaccine, outbreak, epidemic, pandemic, healthcare information, ecosystem, wildlife, nature platform, ocean species, biodiversity, conservation]
+    department: Disaster Response Desk
+    agent_owner: Helix Patel
+
+  Education & Training:
+    hints: [course, learn, learning, tutorial, school, university, mooc, coursera, khan, mit ocw, stanford, training, lecture, syllabus, textbook, ebook, free book, study guide, masterclass, certification, history, true history, deep history, casting lab, identification resource, museum, archaeology, archaeological, abandoned buildings, abandoned spaces, antiquarian book, rare knowledge, decode how, systems operate, engine internals, world wonders, hidden wonders, fiction books, top fiction, knowledge platform, learn faster, expert faster, tech expert]
+    department: CEO Command Center
+    agent_owner: Strategy Assistant
+
+  Self-Hosting & Privacy:
+    hints: [self-host, self host, self-hosted, vpn, encrypted, privacy, ente, netbird, tailscale, coolify, proton, wireguard, signal, matrix, openpgp, decentralized, anonymous, end-to-end, no telemetry, open source, foss, libre, mailing list, newsletter automation, marketing automation, web scraping, push notification, fetch subtitles, network infrastructure, recipes, shell commands, file access, spreadsheet, document organizer, cloud storage sync, backup, pdf processing, finance manager, full-text search, defi automation, server monitoring, bookmark manager, security cameras, watermark removal, video conferencing, password manager, knowledge base, note taking, productivity, monitoring, essential tools, essential pc tools, free pc tools, must know essential, must know free, pc tools, automation tool, automation tools, automate, safe automation, software alternative, software alternatives, alternatives to]
+    department: DevOps Desk
+    agent_owner: Engineering Foreman
+
+  Decision Intelligence:
+    hints: [decision tree, strategy, briefing, daily summary, executive dashboard, kpi, analytics dashboard, insight, looker, business intelligence, data viz, scenario plan, forecast, what-if, large datasets, explore datasets, multiple fields, dataset platform, datasets across, underrecognized, underrecognized information, information resource, tool collections, curating powerful, sites curating, rare research, hidden tools, hidden platform, hidden scientific, scientific platform, hidden tool]
+    department: CEO Command Center
+    agent_owner: Strategic Modeler
+
+# Categories where live data can be fetched (news headlines, weather data,
+# market quotes). Other categories are reference-only -- agents OPEN those
+# URLs when they need that capability, rather than us pre-fetching.
+fetchable_categories:
+  - News & Journalism
+  - Weather & Disaster Intel
+  - Space & Science
+  - Trading & Finance
+  - Economics & Markets
+  - OSINT & Investigation
+  - Health & Environment
+  - Aviation & Maritime
+
+# Domain-substring overrides applied BEFORE hint matching. If the domain
+# contains one of these tokens, force the named category regardless of OCR
+# description. Catches Aviation/Maritime that gets eaten by generic news hints.
+domain_overrides:
+  Aviation & Maritime: [flight, aviation, adsb, plane, aircraft, airport, marine, vessel, ship, fishing-vessel, helicopter, drone, runway, opensky]
+  Real Estate & Property: [zillow, realtor, redfin, attom, parcel, mls, foreclosure, rentometer]
+  Trading & Finance: [coingecko, coinmarketcap, tradingview, polygon.io, finnhub, ghostfolio, wealthfolio]
+  News & Journalism: [reuters, nytimes, propublica, axios, bbc.com, cnn.com, npr.org, ap.org]
+  Weather & Disaster Intel: [noaa, nws.noaa, ventusky, windy.com, fema, usgs.gov]
+  Space & Science: [nasa.gov, esa.int, arxiv.org, biorxiv, sciencedirect, nature.com]
+
+# TLD-based overrides applied AFTER hint matching. If domain ends with one of
+# these and category is still fallback, force the override.
+tld_overrides:
+  .gov: Legal & Compliance
+  .edu: Education & Training
+  .mil: Legal & Compliance
+  .ai: AI & Automation
+  .health: Health & Environment
+
+fallback:
+  category: Decision Intelligence
+  subcategory: Uncategorized
+  department: CEO Command Center
+  agent_owner: Strategic Modeler
+  verified_status: unverified

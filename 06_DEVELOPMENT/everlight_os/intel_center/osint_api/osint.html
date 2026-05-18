@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0f">
+<title>OSINT Desk · Intel Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {extend: {
+    colors: {ev: { bg:'#0a0a0f', surface:'#111118', s2:'#1a1a24', s3:'#222230',
+      gold:'#c9a84c', goldDim:'#a0832e', goldGlow:'#e0c66a',
+      cyan:'#22d3ee', purple:'#8b5cf6', green:'#22c55e',
+      orange:'#f97316', red:'#dc2626', text:'#e8e8e8', dim:'#999' }},
+    fontFamily: {display:['"Playfair Display"','serif'], body:['Inter','sans-serif'], mono:['"JetBrains Mono"','monospace']},
+    boxShadow: {glow:'0 0 40px rgba(201,168,76,0.25)'},
+  }}
+}
+</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<style>
+  *{ -webkit-tap-highlight-color:transparent; }
+  html,body{ background:#0a0a0f; color:#e8e8e8; font-family:Inter,sans-serif; overflow-x:hidden; }
+  .mesh{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .mesh::before, .mesh::after, .mesh > span{
+    content:''; position:absolute; border-radius:50%; filter:blur(80px); opacity:0.4;
+    animation: drift 22s ease-in-out infinite;
+  }
+  .mesh::before{ width:520px; height:520px; left:-10%; top:-15%; background:radial-gradient(closest-side,#3a2a08,transparent); }
+  .mesh::after { width:480px; height:480px; right:-8%; top:35%; background:radial-gradient(closest-side,#2a1135,transparent); animation-delay:-7s; }
+  .mesh > span { width:600px; height:600px; left:35%; bottom:-20%; background:radial-gradient(closest-side,#0a2027,transparent); animation-delay:-14s; }
+  @keyframes drift{ 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(40px,-30px) scale(1.05)} 66%{transform:translate(-30px,40px) scale(0.95)} }
+  .glass{ background:linear-gradient(135deg, rgba(17,17,24,0.78), rgba(17,17,24,0.45));
+          border:1px solid rgba(255,255,255,0.06); backdrop-filter:blur(12px) saturate(140%); }
+  .glass-gold{ background:linear-gradient(135deg, rgba(201,168,76,0.10), rgba(201,168,76,0.02));
+               border:1px solid rgba(201,168,76,0.35); }
+  .gold{ color:#c9a84c; }
+  .gold-glow{ text-shadow:0 0 24px rgba(201,168,76,0.45); }
+  .lift{ transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+  .lift:hover{ transform:translateY(-2px); border-color:rgba(201,168,76,0.5); box-shadow:0 8px 32px rgba(201,168,76,0.12); }
+  .nav-link{ color:#999; padding:.5rem .9rem; border-radius:.5rem; transition:color .2s; }
+  .nav-link:hover{ color:#e0c66a; background:rgba(201,168,76,0.06); }
+  .chip{ display:inline-flex; align-items:center; gap:.35rem; padding:.18rem .6rem; border-radius:9999px;
+         font-size:.7rem; font-family:'JetBrains Mono',monospace; letter-spacing:.04em; }
+  .chip-gold{ background:rgba(201,168,76,.10); color:#e0c66a; border:1px solid rgba(201,168,76,.3); }
+  .chip-green{ background:rgba(34,197,94,.10); color:#4ade80; border:1px solid rgba(34,197,94,.3); }
+  .chip-red{ background:rgba(220,38,38,.10); color:#f87171; border:1px solid rgba(220,38,38,.3); }
+  .chip-cyan{ background:rgba(34,211,238,.10); color:#67e8f9; border:1px solid rgba(34,211,238,.3); }
+  .chip-purple{ background:rgba(139,92,246,.10); color:#a78bfa; border:1px solid rgba(139,92,246,.3); }
+  input.search{ background:rgba(0,0,0,0.35); border:1px solid rgba(255,255,255,0.1);
+                color:#e8e8e8; padding:.85rem 1.25rem .85rem 3rem; border-radius:.75rem;
+                width:100%; outline:none; font-size:1.05rem; transition:border-color .2s; }
+  input.search:focus{ border-color:#c9a84c; box-shadow:0 0 0 3px rgba(201,168,76,0.12); }
+  .pill-btn{ padding:.4rem 1rem; border-radius:9999px; font-size:.78rem; cursor:pointer;
+             border:1px solid rgba(255,255,255,0.12); transition:all .2s; user-select:none;
+             background:rgba(0,0,0,0.2); color:#e8e8e8; }
+  .pill-btn:hover{ border-color:#c9a84c; color:#e0c66a; }
+  .pill-btn.on{ background:rgba(201,168,76,0.15); border-color:#c9a84c; color:#e0c66a; }
+  .investigator-card{ animation: cardin .35s ease-out both; }
+  @keyframes cardin { from{opacity:0; transform:translateY(8px) scale(.98)} to{opacity:1; transform:translateY(0) scale(1)} }
+  .pulse{ animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+  .accent-bar{ width:3px; flex-shrink:0; border-radius:3px; }
+  details > summary { list-style: none; cursor:pointer; }
+  details > summary::-webkit-details-marker { display:none; }
+  details > summary::after { content:'▾'; margin-left:.5rem; transition:transform .2s; display:inline-block; }
+  details[open] > summary::after { transform: rotate(180deg); }
+</style>
+</head>
+<body class="min-h-screen relative">
+<div class="mesh"><span></span></div>
+
+<div id="app" class="relative z-10"></div>
+
+<script type="module">
+import { h, render } from "https://esm.sh/preact@10.22.0";
+import { useState, useEffect, useMemo } from "https://esm.sh/preact@10.22.0/hooks";
+import htm from "https://esm.sh/htm@3.1.1";
+
+const html = htm.bind(h);
+const Icon = ({name, cls=""}) => html`<i data-lucide=${name} class=${cls}></i>`;
+const KIND_ICONS = { company:'building-2', person:'user', domain:'globe', email:'mail',
+                     address:'map-pin', phone:'phone', '*':'search' };
+const KINDS = ['company','person','domain','email','address','phone'];
+
+function Header(){
+  return html`
+    <header class="border-b border-white/5 backdrop-blur">
+      <div class="max-w-7xl mx-auto px-5 py-4 flex items-center gap-6">
+        <a href="http://localhost:2300/09_Dashboard/index.html" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-xl glass-gold grid place-items-center">
+            <${Icon} name="search-code" cls="w-5 h-5 gold"/>
+          </div>
+          <div>
+            <div class="font-display text-xl gold gold-glow leading-tight">OSINT Desk</div>
+            <div class="text-[10px] tracking-[.18em] text-ev-dim uppercase">Intel Center · Cipher Wolfe</div>
+          </div>
+        </a>
+        <nav class="ml-auto flex items-center gap-2 text-sm">
+          <a href="http://localhost:2300/09_Dashboard/index.html" class="nav-link">← Intel Dashboard</a>
+          <a href="http://localhost:2300/09_Dashboard/articles.html" class="nav-link">Articles</a>
+          <span class="chip chip-purple">port 2301</span>
+        </nav>
+      </div>
+    </header>`;
+}
+
+function App(){
+  const [target, setTarget] = useState("");
+  const [kind, setKind] = useState("");
+  const [sources, setSources] = useState([]);
+  const [allSources, setAllSources] = useState([]);
+  const [streaming, setStreaming] = useState(false);
+  const [events, setEvents] = useState([]);  // chronological event log
+  const [byInv, setByInv] = useState({});    // grouped by investigator
+  const [history, setHistory] = useState([]);
+  const [activeInvestigators, setActiveInvestigators] = useState(new Set());
+  const [verifyState, setVerifyState] = useState("");
+  const [verifyCity, setVerifyCity] = useState("");
+  const [verifyEmail, setVerifyEmail] = useState("");
+
+  useEffect(() => { if (window.lucide) window.lucide.createIcons(); });
+
+  useEffect(() => {
+    fetch('/sources').then(r => r.json()).then(setAllSources);
+    fetch('/investigations?limit=20').then(r => r.json()).then(setHistory);
+  }, []);
+
+  const [purpose, setPurpose] = useState("");
+  const [investigationId, setInvestigationId] = useState("");
+  const [dncBlocked, setDncBlocked] = useState(false);
+
+  function start(){
+    if (!target.trim() || streaming) return;
+    if (!purpose.trim()) {
+      alert("Per Everlight compliance doctrine, you must record a business purpose.\n\nWhy are you investigating this target?");
+      return;
+    }
+    setEvents([]); setByInv({}); setInvestigationId(""); setDncBlocked(false);
+    setStreaming(true);
+    setActiveInvestigators(new Set());
+    const params = new URLSearchParams({ target: target.trim(), business_purpose: purpose.trim() });
+    if (kind) params.set('kind', kind);
+    if (sources.length) params.set('sources', sources.join(','));
+    if (verifyState) params.set('verify_for_state', verifyState);
+    if (verifyCity)  params.set('verify_for_city', verifyCity);
+    if (verifyEmail) params.set('verify_for_email', verifyEmail);
+    const es = new EventSource(`/events?${params.toString()}`);
+    es.onmessage = (msg) => {
+      try {
+        const ev = JSON.parse(msg.data);
+        setEvents(prev => [...prev, ev]);
+        if (ev.type === 'start') {
+          if (ev.investigation_id) setInvestigationId(ev.investigation_id);
+          if (ev.dnc_blocked) setDncBlocked(true);
+        } else if (ev.type === 'investigator_start') {
+          setActiveInvestigators(prev => new Set(prev).add(ev.investigator_id));
+          setByInv(prev => ({...prev, [ev.investigator_id]: {start: ev, status: 'running'}}));
+        } else if (ev.type === 'result') {
+          setByInv(prev => ({...prev, [ev.investigator_id]: {...prev[ev.investigator_id], result: ev.payload, status: 'done'}}));
+        } else if (ev.type === 'investigator_done') {
+          setActiveInvestigators(prev => { const n = new Set(prev); n.delete(ev.investigator_id); return n; });
+        } else if (ev.type === 'done') {
+          setStreaming(false);
+          es.close();
+          fetch('/investigations?limit=20').then(r => r.json()).then(setHistory);
+          // Auto-open the branded report in a new tab the moment the investigation completes.
+          // If popup-blocked, the "View Full Report" button below still works as a manual fallback.
+          const invId = ev.investigation_id || (typeof investigationId === 'string' ? investigationId : '');
+          if (invId) {
+            const reportUrl = '/report/' + invId;
+            try {
+              const w = window.open(reportUrl, '_blank', 'noopener');
+              if (!w) {
+                // Popup blocked -- fall back to same-tab navigation after a short pause
+                // so the user sees the "complete" state briefly first.
+                setTimeout(() => { window.location.href = reportUrl; }, 800);
+              }
+            } catch(e) {
+              window.location.href = reportUrl;
+            }
+          }
+        }
+      } catch(e){}
+    };
+    es.onerror = () => { setStreaming(false); es.close(); };
+  }
+
+  function loadHistory(id){
+    fetch('/investigations/' + id).then(r => r.json()).then(data => {
+      setTarget(data.target);
+      setKind(data.kind);
+      setEvents([]);
+      const grouped = {};
+      for (const r of data.results || []){
+        grouped[r.investigator_id || r.investigator] = {
+          start: {name: r.investigator, investigator_id: r.investigator_id},
+          result: r,
+          status: 'done',
+        };
+      }
+      setByInv(grouped);
+    });
+  }
+
+  return html`
+    <${Header}/>
+    <main class="max-w-7xl mx-auto px-5 pt-8 pb-20">
+      <!-- Hero -->
+      <section class="glass-gold rounded-2xl p-7 mb-6 relative overflow-hidden">
+        <div class="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-ev-gold/10 blur-3xl"></div>
+        <div class="text-[11px] uppercase tracking-[.22em] text-ev-goldDim mb-2">Investigation Console</div>
+        <h1 class="font-display text-4xl gold gold-glow leading-tight">Investigate anything.</h1>
+        <p class="text-ev-text/70 mt-2 max-w-2xl">Company, person, domain, email, address, phone. ${allSources.length} parallel investigators stream results live.</p>
+
+        <div class="mt-5 relative">
+          <${Icon} name="search" cls="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-ev-dim pointer-events-none"/>
+          <input class="search font-mono"
+                 placeholder="e.g. Acme Corp / john.doe@example.com / nasa.gov / 4435 Westminster Pl"
+                 value=${target} onInput=${e => setTarget(e.target.value)}
+                 onKeyDown=${e => e.key === 'Enter' && start()}/>
+        </div>
+
+        <div class="mt-4 flex flex-wrap items-center gap-2">
+          <span class="text-[10px] uppercase tracking-widest text-ev-dim mr-2">Type</span>
+          <button class=${"pill-btn " + (kind === '' ? 'on' : '')} onClick=${() => setKind('')}>auto</button>
+          ${KINDS.map(k => html`
+            <button class=${"pill-btn flex items-center gap-1.5 " + (kind === k ? 'on' : '')} onClick=${() => setKind(k)}>
+              <${Icon} name=${KIND_ICONS[k]||'search'} cls="w-3.5 h-3.5"/>
+              ${k}
+            </button>`)}
+          <button class=${"ml-auto px-6 py-2.5 rounded-xl font-semibold transition flex items-center gap-2 " +
+                          (streaming ? 'bg-ev-purple/20 border border-ev-purple/40 text-ev-purple cursor-wait' : 'bg-ev-gold text-ev-bg hover:bg-ev-goldGlow')}
+                  onClick=${start} disabled=${streaming}>
+            ${streaming ? html`<${Icon} name="loader-2" cls="w-4 h-4 animate-spin"/> Streaming...` : html`<${Icon} name="zap" cls="w-4 h-4"/> Run investigation`}
+          </button>
+        </div>
+
+        <!-- Business purpose -- REQUIRED per Everlight compliance doctrine -->
+        <div class="mt-4 pt-4 border-t border-white/10">
+          <div class="flex items-center gap-2 mb-3">
+            <${Icon} name="file-text" cls="w-4 h-4 gold"/>
+            <span class="text-[11px] uppercase tracking-widest text-ev-dim">Business purpose <span class="text-ev-red">*required*</span></span>
+          </div>
+          <textarea class="search font-mono" rows="2" style="padding:.55rem 1rem; resize:vertical"
+                    placeholder="e.g. wholesale lead due-diligence; self-audit; vendor verification"
+                    value=${purpose} onInput=${e => setPurpose(e.target.value)}></textarea>
+          <div class="text-[10px] text-ev-dim mt-1">Logged to compliance.sqlite. Required to start an investigation.</div>
+        </div>
+
+        <!-- Verification context -- supply what you know about the target so we can verify findings belong to them -->
+        <div class="mt-4 pt-4 border-t border-white/10">
+          <div class="flex items-center gap-2 mb-3">
+            <${Icon} name="shield-check" cls="w-4 h-4 gold"/>
+            <span class="text-[11px] uppercase tracking-widest text-ev-dim">Verify findings belong to this person/entity</span>
+          </div>
+          <div class="grid grid-cols-3 gap-3">
+            <input class="search font-mono" style="padding:.55rem 1rem" placeholder="State (e.g. CA)" maxlength="2"
+                   value=${verifyState} onInput=${e => setVerifyState(e.target.value.toUpperCase())}/>
+            <input class="search font-mono" style="padding:.55rem 1rem" placeholder="City (e.g. Sacramento)"
+                   value=${verifyCity} onInput=${e => setVerifyCity(e.target.value)}/>
+            <input class="search font-mono" style="padding:.55rem 1rem" placeholder="Email (optional)"
+                   value=${verifyEmail} onInput=${e => setVerifyEmail(e.target.value)}/>
+          </div>
+          <div class="text-[10px] text-ev-dim mt-2">Empty = no verification. Each finding gets a confidence chip (green ≥70, gold 50-69, red &lt;50).</div>
+        </div>
+      </section>
+
+      <div class="grid lg:grid-cols-4 gap-6">
+        <!-- LEFT: source selector -->
+        <aside class="lg:col-span-1">
+          <div class="glass rounded-2xl p-4 mb-4">
+            <div class="text-[10px] uppercase tracking-[.2em] text-ev-dim mb-3">Investigators (${allSources.length})</div>
+            ${allSources.map(s => {
+              const on = sources.length === 0 || sources.includes(s.id);
+              return html`
+                <label class="flex items-start gap-2 p-2 rounded hover:bg-white/5 cursor-pointer">
+                  <input type="checkbox" checked=${on}
+                         onChange=${e => {
+                           if (sources.length === 0) {
+                             // First click: include all except this one OR just this one
+                             setSources(allSources.filter(x => x.id !== s.id).map(x => x.id));
+                           } else if (e.target.checked) {
+                             setSources([...sources, s.id]);
+                           } else {
+                             setSources(sources.filter(x => x !== s.id));
+                           }
+                         }}
+                         class="mt-1 accent-ev-gold flex-shrink-0"/>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm font-medium gold">${s.name}</div>
+                    <div class="text-[10px] text-ev-dim font-mono mt-0.5">${s.domains.length} domains · ${s.when.join('/')}</div>
+                  </div>
+                </label>`;
+            })}
+            <button onClick=${() => setSources([])} class="w-full mt-2 text-xs text-ev-dim hover:text-ev-gold py-1">↻ select all</button>
+          </div>
+
+          <div class="glass rounded-2xl p-4">
+            <div class="text-[10px] uppercase tracking-[.2em] text-ev-dim mb-3">Recent (${history.length})</div>
+            <div class="space-y-1.5">
+              ${history.map(h => html`
+                <button onClick=${() => loadHistory(h.id)} class="block w-full text-left lift glass rounded p-2 border border-white/5">
+                  <div class="font-mono text-xs gold truncate">${h.target}</div>
+                  <div class="text-[10px] text-ev-dim mt-1">${h.total_findings} findings · ${h.investigators_run} sources · ${h.kind || 'auto'}</div>
+                </button>`)}
+              ${history.length === 0 && html`<div class="text-xs text-ev-dim italic">No past investigations yet.</div>`}
+            </div>
+          </div>
+        </aside>
+
+        <!-- RIGHT: live stream -->
+        <section class="lg:col-span-3">
+          ${dncBlocked && html`
+            <div class="rounded-2xl p-5 mb-4 flex gap-3 items-center" style="background:rgba(220,38,38,0.15); border:2px solid rgba(220,38,38,0.6)">
+              <${Icon} name="ban" cls="w-8 h-8 text-ev-red"/>
+              <div>
+                <div class="font-bold text-ev-red text-lg">DNC BLOCKED · DO NOT CONTACT</div>
+                <div class="text-sm text-ev-text/80 mt-1">This target matches an Everlight DNC entry. Investigation continues for knowledge only. NO outreach permitted on any channel.</div>
+              </div>
+            </div>`}
+
+          ${investigationId && !streaming && Object.keys(byInv).length > 0 && html`
+            <div class="glass-gold rounded-2xl p-4 mb-4 flex items-center justify-between">
+              <div>
+                <div class="text-[10px] uppercase tracking-[.2em] text-ev-goldDim">✓ Investigation complete -- report opened in new tab</div>
+                <div class="text-sm gold mt-1">If the new tab didn't open (popup blocked), click below.</div>
+              </div>
+              <a href=${"/report/" + investigationId} target="_blank" rel="noopener"
+                 class="px-5 py-2.5 rounded-lg bg-ev-gold text-ev-bg font-semibold flex items-center gap-2 hover:bg-ev-goldGlow transition">
+                <${Icon} name="file-text" cls="w-4 h-4"/> Open Report
+              </a>
+            </div>`}
+
+          ${Object.keys(byInv).length === 0 && !streaming && html`
+            <div class="glass rounded-2xl p-12 text-center">
+              <${Icon} name="search-code" cls="w-12 h-12 gold mx-auto mb-3 opacity-60"/>
+              <div class="font-display text-xl gold mb-1">Start an investigation</div>
+              <div class="text-sm text-ev-dim">Type a target, record your business purpose, hit Run. Results stream in live with confidence chips. Full branded report opens at the end.</div>
+            </div>`}
+
+          ${Object.entries(byInv).map(([iid, data]) => {
+            const r = data.result;
+            const findings = r?.findings || [];
+            const ok = r?.ok;
+            const accent = ok ? '#c9a84c' : (data.status === 'running' ? '#22d3ee' : '#dc2626');
+            return html`
+              <details class="investigator-card glass rounded-2xl mb-3 border border-white/5 lift" open>
+                <summary class="flex items-center gap-3 p-4">
+                  <div class="accent-bar h-10" style=${"background:" + accent}></div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-3">
+                      <span class="font-display text-lg gold">${data.start?.name || iid}</span>
+                      ${data.status === 'running'
+                        ? html`<span class="chip chip-cyan pulse">streaming...</span>`
+                        : ok ? html`<span class="chip chip-green">${findings.length} findings</span>`
+                             : html`<span class="chip chip-red">no results</span>`}
+                      ${r?.elapsed_ms ? html`<span class="text-[10px] text-ev-dim font-mono ml-auto">${r.elapsed_ms}ms</span>` : ''}
+                    </div>
+                  </div>
+                </summary>
+                <div class="px-4 pb-4">
+                  ${data.status === 'running' && html`
+                    <div class="text-xs text-ev-dim italic flex items-center gap-2"><${Icon} name="loader-2" cls="w-3 h-3 animate-spin"/> querying domains…</div>`}
+                  ${findings.length === 0 && data.status === 'done' && html`
+                    <div class="text-xs text-ev-dim italic">No structured findings (auth-gated source or no results).</div>`}
+                  <div class="space-y-2 mt-1">
+                    ${findings.map(f => {
+                      const v = f.verification;
+                      let confChip = null;
+                      if (v) {
+                        const conf = v.confidence || 0;
+                        const cls = conf >= 70 ? "chip-green" : (conf >= 50 ? "chip-gold" : "chip-red");
+                        const title = (v.matched_signals||[]).join(", ") || v.reason || "no signals matched";
+                        confChip = html`<span class=${"chip " + cls + " flex-shrink-0"} title=${title}>conf ${conf}</span>`;
+                      }
+                      return html`
+                      <div class="flex items-start gap-3 p-2 rounded border border-white/5 bg-black/20">
+                        <span class="chip chip-gold flex-shrink-0">${f.label}</span>
+                        ${confChip}
+                        <div class="min-w-0 flex-1 text-sm break-words">${f.value}</div>
+                        ${f.url && html`<a href=${f.url} target="_blank" rel="noopener" class="flex-shrink-0 text-ev-cyan hover:text-ev-gold">
+                          <${Icon} name="external-link" cls="w-3.5 h-3.5"/>
+                        </a>`}
+                      </div>`;
+                    })}
+                  </div>
+                </div>
+              </details>`;
+          })}
+        </section>
+      </div>
+    </main>
+
+    <footer class="relative z-10 border-t border-white/5 py-5 text-center text-xs text-ev-dim">
+      Lucrex · Everlight Ventures · OSINT API on port 2301
+    </footer>`;
+}
+
+render(html`<${App}/>`, document.getElementById("app"));
+</script>
+</body>
+</html>

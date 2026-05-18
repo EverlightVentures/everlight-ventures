@@ -1,0 +1,40 @@
+5 i
+ByteClave
+sites that let you tour the world from anywhere...
+e Airpano - Aerial 360 views above every world wonder
+e Roundme - Crowdsourced 360 tours from photographers worldwide
+¢ Windowswap - Opens random strangers windows worldwide live
+¢ Kuula - 15 million panoramic photos from every country
+e Earthcam - Live streaming cameras from iconic locations globally
+e CamStreamer - Live public webcams streamed globally in HD
+¢ SepiaTown - Explore cities using historical photo overlays
+¢ Sketchfab - Browse 10 million interactive 3D heritage models
+e Smartify - Points phone at any artwork explaining it instantly
+e Cyark - Laser-scanned SD tours of endangered heritage sites
+¢ MapCrunch - Instantly drop anywhere using street view
+e Panoramax - Open-source street-level imagery from around world
+e NaraXR - Immersive virtual tours of cultural heritage sites
+e Virtualvacation - Drive or walk through any city virtually
+¢ Gigapixel - Zoom infinitely into famous paintings and landmarks
+¢ Marinetraffic - Tracks every ship sailing every ocean live
+e Flightradar24 - Watch every plane flying over earth now
+e Zoom Earth - Live satellite weather and map animations
+¢ Windy - Stunning 3D globe showing live global weather
+¢ Lightningmaps - Real-time global lightning strikes every single second
+e Volcanediscovery - Live tracker of every active volcano globally
+e Peakvisor - Points phone at horizon naming every mountain
+¢ Soar - Crowdsourced drone imagery from pilots worldwide
+¢ Shadowmap - Calculates exactly where sunlight falls any time
+e Satflare - Track satellites visually in real-time sky maps
+e Webcamtaxi - Directory of live webcams worldwide by location
+¢ Earthtv - Live HD webcam streams from iconic world destinations
+e Naviplaces - Walk any city street using real footage
+e Heygo - Live interactive virtual tours with real guides
+e Ocearch - Tracks named great white sharks live globally
+¢ BirdWatchingHQ - Live bird cams streaming worldwide nature
+e Matterport - Walk through SD scans of real spaces anywhere
+e Openstreetmap - Community-built map including trails ..
+e Mapcarta - Finds every hidden lake valley and glacier
+¢ Culturetrip - Hyper-local hidden gems in every city worldwide
+e Komoot - Plan outdoor adventures and explore hidden routes
+e Panoee - Free 360 virtual tours of real locations worldwide..

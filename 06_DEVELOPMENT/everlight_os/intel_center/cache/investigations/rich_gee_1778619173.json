@@ -1,0 +1,913 @@
+{
+  "investigation_id": "rich_gee_1778619173",
+  "target": "Rich Gee",
+  "kind": "person",
+  "started_at": "2026-05-12T13:52:53.092169",
+  "finished_at": "2026-05-12T13:52:57.698867",
+  "elapsed_ms": 4596,
+  "total_findings": 49,
+  "investigators_run": 10,
+  "triggered_by": "marquise_reed_acquisitions",
+  "lead_id": null,
+  "business_purpose": "Memphis tax-delinquent acquisition outreach -- 942 S MELROSE, MEMPHIS, TN -- Mid South Homebuyers buyer match",
+  "verify_context": {
+    "owner_name": "Rich Gee",
+    "owner_email": "1m.rich.gee@gmail.com",
+    "state": "TN",
+    "city": "Memphis",
+    "address": "942 S MELROSE, MEMPHIS, TN"
+  },
+  "verification_summary": {
+    "total_findings": 49,
+    "verified": 2,
+    "rejected": 47,
+    "avg_confidence": 24,
+    "threshold": 50,
+    "highest_confidence_per_signal": {
+      "name_exact_match": 50
+    },
+    "lead_context_keys_provided": [
+      "owner_name",
+      "owner_email",
+      "state",
+      "city",
+      "address"
+    ]
+  },
+  "dnc_blocked": false,
+  "dnc_reason": "",
+  "dnc_entry_id": null,
+  "results": [
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "OSINT & Investigation",
+          "value": "Allthatsinteresting \u2014 ddeep history true crime dark mysteries \u00b7 verified live",
+          "url": "https://allthatsinteresting.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Rich Gee' via OSINT & Investigation"
+          }
+        },
+        {
+          "label": "Maps & Geospatial",
+          "value": "Amazingplacesonearth \u2014 Showcases natural and cultural world wonders \u00b7 verified live",
+          "url": "https://amazingplacesonearth.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Rich Gee' via Maps & Geospatial"
+          }
+        },
+        {
+          "label": "Education & Training",
+          "value": "Abandonedspaces \u2014 abandoned buildings and forgotten global places \u00b7 verified live",
+          "url": "https://abandonedspaces.com",
+          "investigator_meta": {
+            "agent_owner": "Strategy Assistant",
+            "is_live": true,
+            "search_hint": "Research 'Rich Gee' via Education & Training"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "10015 \u2014 productivity tools collection \u00b7 verified live",
+          "url": "https://10015.io",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Research 'Rich Gee' via Decision Intelligence"
+          }
+        },
+        {
+          "label": "OSINT & Investigation",
+          "value": "Americanhauntingsink \u2014 Haunted American places ghost mysteries \u00b7 verified live",
+          "url": "https://americanhauntingsink.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Rich Gee' via OSINT & Investigation"
+          }
+        },
+        {
+          "label": "Maps & Geospatial",
+          "value": "Atlasobscura \u2014 hidden wondrous mysterious places worldwide \u00b7 verified live",
+          "url": "https://atlasobscura.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Rich Gee' via Maps & Geospatial"
+          }
+        },
+        {
+          "label": "Education & Training",
+          "value": "Animagraffs \u2014 Complex machines and systems explained \u00b7 verified live",
+          "url": "https://animagraffs.com",
+          "investigator_meta": {
+            "agent_owner": "Strategy Assistant",
+            "is_live": true,
+            "search_hint": "Research 'Rich Gee' via Education & Training"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "Amusingplanet \u2014 unusual natural and manmade global phenomena \u00b7 verified live",
+          "url": "https://amusingplanet.com",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Research 'Rich Gee' via Decision Intelligence"
+          }
+        },
+        {
+          "label": "OSINT & Investigation",
+          "value": "Ancient Code \u2014 ancient alien forbidden suppressed history \u00b7 verified live",
+          "url": "https://ancient-code.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Rich Gee' via OSINT & Investigation"
+          }
+        },
+        {
+          "label": "Maps & Geospatial",
+          "value": "Factinate \u2014 surprising facts about places worldwide \u00b7 verified live",
+          "url": "https://factinate.com",
+          "investigator_meta": {
+            "agent_owner": "Cipher Wolfe",
+            "is_live": true,
+            "search_hint": "Research 'Rich Gee' via Maps & Geospatial"
+          }
+        },
+        {
+          "label": "Education & Training",
+          "value": "Batteryuniversity \u2014 Deep dive into battery chemistry and systems \u00b7 verified live",
+          "url": "https://batteryuniversity.com",
+          "investigator_meta": {
+            "agent_owner": "Strategy Assistant",
+            "is_live": true,
+            "search_hint": "Research 'Rich Gee' via Education & Training"
+          }
+        },
+        {
+          "label": "Decision Intelligence",
+          "value": "Astronomyonline \u2014 Best collection of astronomy education resources \u00b7 verified live",
+          "url": "https://astronomyonline.org",
+          "investigator_meta": {
+            "agent_owner": "Strategic Modeler",
+            "is_live": true,
+            "search_hint": "Research 'Rich Gee' via Decision Intelligence"
+          }
+        }
+      ],
+      "raw": {
+        "total_matched": 71,
+        "categories_used": [
+          "OSINT & Investigation",
+          "Maps & Geospatial",
+          "Education & Training",
+          "Decision Intelligence"
+        ],
+        "kind": "person"
+      },
+      "elapsed_ms": 22,
+      "investigator": "Catalogued Sources",
+      "investigator_id": "resource_lookup"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Archive item",
+          "value": "Andrew Xavier - Soundz of the Streetz - Volume 22 (Aquarius 2022) (Trap, Rap and TrapSoul)",
+          "url": "https://archive.org/details/kaktcevnxy63vm0g05ouhvdqch2zpo2gp5bdqwkl",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "CIA Reading Room cia-rdp08c01297r000300280007-4: HAITIAN NEWSPAPER PUBLICITY CONCERNING THE CLAIM TO",
+          "url": "https://archive.org/details/cia-readingroom-document-cia-rdp08c01297r000300280007-4",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "Andrew Xavier - Soundz of the Streetz - Volume 24 (Libra 2022) (Rap, Trap, Trapsoul)",
+          "url": "https://archive.org/details/fdtvsxijqyzu1q8wwdexduzx30w0jw1325kl2woo",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "CIA Reading Room cia-rdp80-00926a003300010001-5: PROPAGANDA MATERIAL",
+          "url": "https://archive.org/details/cia-readingroom-document-cia-rdp80-00926a003300010001-5",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        },
+        {
+          "label": "Archive item",
+          "value": "VOA [Voice of America] Africa : December 31, 2018 01:00PM-02:00PM EST",
+          "url": "https://archive.org/details/VOA_Africa_20181231_180000",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "archive_org"
+          }
+        }
+      ],
+      "raw": {
+        "search": {
+          "status": 200,
+          "len": 1164
+        }
+      },
+      "elapsed_ms": 330,
+      "investigator": "Archive.org / Wayback",
+      "investigator_id": "archive_org"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Strava athlete",
+          "value": "Join Rich and get inspired for your next workout",
+          "url": "https://www.strava.com/athletes/richgee",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "consumer_signals"
+          }
+        },
+        {
+          "label": "Untappd beer profile",
+          "value": "Rich G Check-in Activity on Untappd with beer ratings, venues and more.",
+          "url": "https://untappd.com/user/richgee",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "consumer_signals"
+          }
+        },
+        {
+          "label": "Spotify public playlists",
+          "value": "Home on Spotify",
+          "url": "https://open.spotify.com/user/richgee",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "consumer_signals"
+          }
+        }
+      ],
+      "raw": {
+        "yelp": 0,
+        "goodreads": 0,
+        "letterboxd": 0,
+        "strava": 1,
+        "untappd": 1,
+        "spotify": 1,
+        "producthunt": 0
+      },
+      "elapsed_ms": 1175,
+      "investigator": "Consumer Signals (deep mine)",
+      "investigator_id": "consumer_signals"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "GitHub bio",
+          "value": "richgee has 2 repositories available. Follow their code on GitHub.",
+          "url": "https://github.com/richgee",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "social_bio_scraper"
+          }
+        },
+        {
+          "label": "Twitter/X interests",
+          "value": "#FFF, #placeholder, #react",
+          "url": "https://twitter.com/richgee",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "social_bio_scraper"
+          }
+        },
+        {
+          "label": "About.me bio",
+          "value": "I use about.me to show people what matters most to me.",
+          "url": "https://about.me/richgee",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "social_bio_scraper"
+          }
+        },
+        {
+          "label": "About.me interests",
+          "value": "#iefix, #fff, #fc3, #ffe7a2, #ccc, #ddd, #d92626, #f5f5f5, #edf4f9",
+          "url": "https://about.me/richgee",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "social_bio_scraper"
+          }
+        },
+        {
+          "label": "Pinterest interests",
+          "value": "#e2e2e2, #dadada",
+          "url": "https://www.pinterest.com/richgee/",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "social_bio_scraper"
+          }
+        },
+        {
+          "label": "Behance location",
+          "value": "United Kingdom, United Kingdom",
+          "url": "https://www.behance.net/richgee",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "social_bio_scraper"
+          }
+        }
+      ],
+      "raw": {
+        "Medium": {
+          "status": 403,
+          "len": 5400
+        },
+        "ProductHunt": {
+          "status": 404,
+          "len": 70742
+        },
+        "Reddit": {
+          "status": 403,
+          "len": 189906
+        },
+        "GitHub": {
+          "status": 200,
+          "len": 189800
+        },
+        "About.me": {
+          "status": 200,
+          "len": 111381
+        },
+        "Behance": {
+          "status": 200,
+          "len": 518007
+        },
+        "Keybase": {
+          "status": 404,
+          "len": 7140
+        },
+        "Twitter/X": {
+          "status": 200,
+          "len": 268107
+        },
+        "Dribbble": {
+          "status": 404,
+          "len": 21143
+        },
+        "Pinterest": {
+          "status": 200,
+          "len": 1356886
+        }
+      },
+      "elapsed_ms": 2009,
+      "investigator": "Deep Social Mine",
+      "investigator_id": "social_bio_scraper"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Dehashed",
+          "value": "Search (login required)",
+          "url": "https://dehashed.com/search?query=Rich%20Gee",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        },
+        {
+          "label": "Intelligence X",
+          "value": "Search",
+          "url": "https://intelx.io/?s=Rich%20Gee",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "leak_check"
+          }
+        }
+      ],
+      "raw": {
+        "hibp_breaches": {
+          "status": 200,
+          "len": 2
+        }
+      },
+      "elapsed_ms": 2320,
+      "investigator": "Leak Check",
+      "investigator_id": "leak_check"
+    },
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "\"{q}\"": {
+          "status": 202,
+          "len": 14192
+        },
+        "{q} site:linkedin.com": {
+          "status": 202,
+          "len": 14258
+        },
+        "{q} site:github.com": {
+          "status": 202,
+          "len": 14206
+        },
+        "{q} site:reddit.com": {
+          "status": 202,
+          "len": 14200
+        },
+        "{q} filetype:pdf": {
+          "status": 202,
+          "len": 14188
+        },
+        "{q} contact email": {
+          "status": 202,
+          "len": 14208
+        }
+      },
+      "elapsed_ms": 2444,
+      "investigator": "Search Dorks",
+      "investigator_id": "google_dorks"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "TruePeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.truepeoplesearch.com/results?name=Rich%20Gee",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "FastPeopleSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.fastpeoplesearch.com/name/rich-gee",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ZabaSearch",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.zabasearch.com/people/Rich+Gee",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "ThatsThem",
+          "value": "HTTP 200",
+          "url": "https://thatsthem.com/name/Rich-Gee",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        },
+        {
+          "label": "Whitepages",
+          "value": "HTTP 403 (open in browser)",
+          "url": "https://www.whitepages.com/name/Rich-Gee",
+          "verification": {
+            "confidence": 40,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 40,
+            "boost": 0,
+            "investigator_id": "skip_trace"
+          }
+        }
+      ],
+      "raw": {
+        "TruePeopleSearch": {
+          "status": 403
+        },
+        "FastPeopleSearch": {
+          "status": 403
+        },
+        "ZabaSearch": {
+          "status": 403
+        },
+        "ThatsThem": {
+          "status": 200
+        },
+        "Whitepages": {
+          "status": 403
+        }
+      },
+      "elapsed_ms": 2682,
+      "investigator": "Skip-Trace",
+      "investigator_id": "skip_trace"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "Sweep summary",
+          "value": "10 of 22 platforms returned a profile page for 'richgee'",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 GitHub",
+          "value": "found",
+          "url": "https://github.com/richgee",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Instagram",
+          "value": "found",
+          "url": "https://www.instagram.com/richgee/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Reddit",
+          "value": "found",
+          "url": "https://www.reddit.com/user/richgee",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 YouTube",
+          "value": "found",
+          "url": "https://www.youtube.com/@richgee",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Pinterest",
+          "value": "found",
+          "url": "https://www.pinterest.com/richgee/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Behance",
+          "value": "found",
+          "url": "https://www.behance.net/richgee",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 About.me",
+          "value": "found",
+          "url": "https://about.me/richgee",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 DeviantArt",
+          "value": "found",
+          "url": "https://www.deviantart.com/richgee",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 SoundCloud",
+          "value": "found",
+          "url": "https://soundcloud.com/richgee",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        },
+        {
+          "label": "\u2713 Flickr",
+          "value": "found",
+          "url": "https://www.flickr.com/people/richgee/",
+          "verification": {
+            "confidence": 25,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 25,
+            "boost": 0,
+            "investigator_id": "social_recon"
+          }
+        }
+      ],
+      "raw": {
+        "Twitter/X": 403,
+        "Medium": 403,
+        "GitHub": 200,
+        "Instagram": 200,
+        "TikTok": 403,
+        "LinkedIn": 405,
+        "YouTube": 200,
+        "Reddit": 200,
+        "StackOverflow": 404,
+        "Behance": 200,
+        "ProductHunt": 404,
+        "Patreon": 404,
+        "Dribbble": 404,
+        "Pinterest": 200,
+        "Gravatar": 404,
+        "Keybase": 404,
+        "Twitch": 405,
+        "About.me": 200,
+        "Vimeo": 404,
+        "DeviantArt": 200,
+        "SoundCloud": 200,
+        "Flickr": 200
+      },
+      "elapsed_ms": 2861,
+      "investigator": "Social Recon",
+      "investigator_id": "social_recon"
+    },
+    {
+      "ok": true,
+      "findings": [
+        {
+          "label": "News mention",
+          "value": "Rich Gee Stats, Age, Position, Height, Weight, Fantasy &amp; News - MLB.com",
+          "url": "https://news.google.com/rss/articles/CBMiVEFVX3lxTFAxTF9mYkVZTm4wUFNpVjgwSjJsTFluTGlxRDB1dnlySVozU3dWb1dUbS1iT05yQW9DUTdPZ1BpTU1CRktHYkRaOFlpXzZaM0gwcktKLQ?oc=5",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "public_records"
+          }
+        },
+        {
+          "label": "News mention",
+          "value": "Richard Gee Obituary (1966 - 2021) - Cedar Springs, MI - MLive.com",
+          "url": "https://news.google.com/rss/articles/CBMikAFBVV95cUxOQkFLenlhWFlpMDNwSEVSZnVMVzU0RjlKNE1XYW1MNENNdlZoaWhkaUNHYzI5dDk4RDdGLWZSZTltODNlOFpLSXV5d1FXRHYtczZxTWtxaWY5cXU0T2JfeG04UTJBZGY0SmJFbWpKNlFBdk1HaGo4WmFyM1dRRWRoMWoxaDR5SGpYMWxFR2NrX0M?oc=5",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "public_records"
+          }
+        },
+        {
+          "label": "News mention",
+          "value": "Natalie Gee, community organizer, enters race for D4 supervisor - 48 Hills",
+          "url": "https://news.google.com/rss/articles/CBMilAFBVV95cUxNYTBJbUFBQ2E5RWU4aUNrSm8xQjdET1Jla0NwRUlWMHB3V1duZXk3Zi1ZaVhFTUdCN1p6MmNpYnZLbU9nM29nMUcyMkdKdGdWdUpacGRUbHlqQ2xzTEZwZU05N0ZiZVFuSktSdjNVVHJXTlliVmNZd1N0ZGlyQm5QUXlmREgzeWhka2NOSFdHZkZNS0hY?oc=5",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "public_records"
+          }
+        },
+        {
+          "label": "News mention",
+          "value": "Richard Gee Obituary (2017) - Mount Pleasant, Sc, CA - San Francisco Chronicle - Legacy obituary",
+          "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxQU08xNmpsTWFheURIeVNueU5zcVhkWllKYWItV2doYUdFNFFGSWNUbllNb2o5M0UxNXE1UjVXbVBua2Y0N3lKNEwwQTUxNm1GckJDMkxiVUtnN2Y4VTI3TUhCYWlrNGRsaV9hWHcxUHhSYUI1MWp5R29fUVhBZDRVVjlObVhkcVhZ?oc=5",
+          "verification": {
+            "confidence": 20,
+            "matched_signals": [],
+            "rejected": true,
+            "reason": "no_signals_matched",
+            "base": 20,
+            "boost": 0,
+            "investigator_id": "public_records"
+          }
+        },
+        {
+          "label": "News mention",
+          "value": "Nhoza &amp; Rich Gee Bring Ancestral Power To The Forefront With Global Afro-Soul Hit \u201cAndiyazi\u201d - Africa.com",
+          "url": "https://news.google.com/rss/articles/CBMirAFBVV95cUxNeFFCNzJHY1dEdFlXbS1JNVRpRmF4bjVUbEFmenVmN3FkdFlZM3YwRk5TZzEtMl9ZZkFtNk5pcmlfYkVtOWNCNXh6Zk5fUVktZ1N4clFzTlRrUnpuX2ItQnRYTlFxemtMNjRpdjFNbzRGMm9vb1B3QXpoUzlQeUpXRFkxeC15TEJuSkJOcUMwNEdSS0xUNmhybUoyWE5sZnQ1VVROYjlZYUV2WVl0?oc=5",
+          "verification": {
+            "confidence": 50,
+            "matched_signals": [
+              "name_exact_match"
+            ],
+            "rejected": false,
+            "reason": "",
+            "base": 20,
+            "boost": 30,
+            "investigator_id": "public_records"
+          }
+        }
+      ],
+      "raw": {
+        "courtlistener": 0,
+        "opencorporates": 0,
+        "findagrave": 0,
+        "news_archive": 5
+      },
+      "elapsed_ms": 4233,
+      "investigator": "Public Records (deep mine)",
+      "investigator_id": "public_records"
+    },
+    {
+      "ok": false,
+      "findings": [],
+      "raw": {
+        "fec": 0,
+        "nonprofit": 0,
+        "gofundme": 0,
+        "patents": 0
+      },
+      "elapsed_ms": 4297,
+      "investigator": "Civic + Philanthropy (deep mine)",
+      "investigator_id": "philanthropy_civic"
+    }
+  ]
+}

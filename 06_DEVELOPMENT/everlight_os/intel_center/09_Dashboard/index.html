@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0f">
+<title>Intel Center · Everlight</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=DM+Sans:wght@400;500;700;800;900&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        ev: { bg:'#0a0a0f', surface:'#111118', s2:'#1a1a24', s3:'#222230', s4:'#2d2d3d',
+              gold:'#c9a84c', goldDim:'#a0832e', goldGlow:'#e0c66a',
+              cyan:'#22d3ee', purple:'#8b5cf6', green:'#22c55e',
+              orange:'#f97316', red:'#dc2626', text:'#e8e8e8', dim:'#999' }
+      },
+      fontFamily: {
+        display: ['"Playfair Display"','serif'],
+        sans:    ['"DM Sans"','"Inter"','sans-serif'],
+        body:    ['"Inter"','sans-serif'],
+        mono:    ['"JetBrains Mono"','monospace'],
+      },
+      boxShadow: { glow:'0 0 40px rgba(201,168,76,0.25)', glowStrong:'0 0 60px rgba(201,168,76,0.5)' },
+    }
+  }
+}
+</script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script src="./data.js"></script>
+
+<style>
+  :root { --gold:#c9a84c; --gold-dim:#a0832e; --gold-glow:#e0c66a; --bg:#0a0a0f; }
+  *{ -webkit-tap-highlight-color:transparent; }
+  html,body{ background:var(--bg); color:#e8e8e8; font-family:"Inter",sans-serif; overflow-x:hidden; }
+  .mesh{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .mesh::before, .mesh::after, .mesh > span{
+    content:''; position:absolute; border-radius:50%; filter:blur(80px); opacity:0.45;
+    animation: drift 22s ease-in-out infinite;
+  }
+  .mesh::before{ width:520px; height:520px; left:-10%;  top:-15%; background:radial-gradient(closest-side,#3a2a08,transparent); }
+  .mesh::after { width:480px; height:480px; right:-8%;  top:35%;  background:radial-gradient(closest-side,#1b1135,transparent); animation-delay:-7s; }
+  .mesh > span { width:600px; height:600px; left:35%;   bottom:-20%; background:radial-gradient(closest-side,#0a2027,transparent); animation-delay:-14s; }
+  @keyframes drift{ 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(40px,-30px) scale(1.05)} 66%{transform:translate(-30px,40px) scale(0.95)} }
+
+  .glass{ background:linear-gradient(135deg, rgba(17,17,24,0.78), rgba(17,17,24,0.45));
+          border:1px solid rgba(255,255,255,0.06); backdrop-filter:blur(12px) saturate(140%);
+          -webkit-backdrop-filter:blur(12px) saturate(140%); }
+  .glass-gold{ background:linear-gradient(135deg, rgba(201,168,76,0.10), rgba(201,168,76,0.02));
+               border:1px solid rgba(201,168,76,0.35); }
+  .gold{ color:var(--gold); }
+  .gold-glow{ text-shadow:0 0 24px rgba(201,168,76,0.45); }
+  .lift{ transition:transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+  .lift:hover{ transform:translateY(-2px); border-color:rgba(201,168,76,0.5); box-shadow:0 8px 32px rgba(201,168,76,0.12); }
+  .nav-link{ color:#999; transition:color .2s; padding:.5rem .9rem; border-radius:.5rem; }
+  .nav-link:hover{ color:#e0c66a; background:rgba(201,168,76,0.06); }
+  .nav-link.active{ color:#c9a84c; background:rgba(201,168,76,0.12); border:1px solid rgba(201,168,76,0.25); }
+  .bar{ height:6px; background:rgba(255,255,255,.06); border-radius:3px; overflow:hidden; position:relative; }
+  .bar > i{ display:block; height:100%; background:linear-gradient(90deg,#c9a84c,#e0c66a); border-radius:3px; }
+  .chip{ display:inline-flex; align-items:center; gap:.35rem; padding:.18rem .55rem; border-radius:9999px; font-size:.7rem;
+         font-family:"JetBrains Mono",monospace; letter-spacing:.04em; }
+  .chip-gold{ background:rgba(201,168,76,.10); color:#e0c66a; border:1px solid rgba(201,168,76,.3); }
+  .chip-green{ background:rgba(34,197,94,.10); color:#4ade80; border:1px solid rgba(34,197,94,.3); }
+  .chip-red{   background:rgba(220,38,38,.10); color:#f87171; border:1px solid rgba(220,38,38,.3); }
+  .chip-cyan{  background:rgba(34,211,238,.10); color:#67e8f9; border:1px solid rgba(34,211,238,.3); }
+  main{ animation: fadein .35s ease-out both; }
+  @keyframes fadein{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)} }
+</style>
+</head>
+
+<body class="min-h-screen relative">
+<div class="mesh"><span></span></div>
+<div id="app" class="relative z-10"></div>
+
+<script type="module">
+import { h, render } from "https://esm.sh/preact@10.22.0";
+import { useEffect } from "https://esm.sh/preact@10.22.0/hooks";
+import htm from "https://esm.sh/htm@3.1.1";
+
+const html = htm.bind(h);
+const D = window.INTEL || {meta:{}, categories:[], agents:[], resources:[], fetchable_topics:{}};
+
+const fmt = n => (n||0).toLocaleString();
+const pct = (used, total) => total ? Math.round(used*100/total) : 0;
+
+function useLucide(){ useEffect(() => { if (window.lucide) window.lucide.createIcons(); }); }
+
+const Icon = ({name, cls=""}) => html`<i data-lucide=${name} class=${cls}></i>`;
+
+const TOPIC_ICONS = {
+  news:'newspaper', weather:'cloud-rain', space:'rocket', finance:'trending-up',
+  osint:'shield-search', health:'heart-pulse', markets:'bar-chart-3', aviation:'plane'
+};
+
+function Nav({active}){
+  const links = [
+    ["Overview",   "./index.html",                "overview", false],
+    ["Articles",   "./articles.html",             "articles", false],
+    ["OSINT",      "http://localhost:2301/",      "osint",    true],
+    ["Resources",  "./resources.html",            "resources", false],
+    ["Categories", "./categories.html",           "categories", false],
+    ["Agents",     "./agents.html",               "agents", false],
+    ["Live Feeds", "./feeds.html",                "feeds", false],
+    ["Usage",      "./usage.html",                "usage", false],
+    ["Audit",      "./audit.html",                "audit", false],
+  ];
+  return html`
+    <header class="border-b border-white/5 backdrop-blur">
+      <div class="max-w-7xl mx-auto px-5 py-4 flex items-center gap-6">
+        <a href="./index.html" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-xl glass-gold grid place-items-center group-hover:shadow-glow transition">
+            <${Icon} name="brain-circuit" cls="w-5 h-5 gold"/>
+          </div>
+          <div>
+            <div class="font-display text-xl gold gold-glow leading-tight">Intel Center</div>
+            <div class="text-[10px] tracking-[.18em] text-ev-dim uppercase">Everlight Ventures</div>
+          </div>
+        </a>
+        <nav class="flex items-center gap-1 ml-auto text-sm font-medium overflow-x-auto">
+          ${links.map(([label, href, key, ext]) => html`
+            <a href=${href}
+               target=${ext ? "_blank" : null}
+               rel=${ext ? "noopener" : null}
+               class=${"nav-link " + (active===key ? "active" : "") + (ext ? " text-ev-purple" : "")}>
+              ${label}${ext ? " ↗" : ""}
+            </a>
+          `)}
+        </nav>
+      </div>
+    </header>`;
+}
+
+function Footer(){
+  return html`
+    <footer class="border-t border-white/5 py-5 text-center text-xs text-ev-dim">
+      Generated ${D.meta.generated || ''} · Lucrex · Everlight Ventures · port 2300
+    </footer>`;
+}
+
+function Hero(){
+  return html`
+    <section class="mb-10 grid lg:grid-cols-3 gap-5">
+      <div class="lg:col-span-2 glass-gold rounded-2xl p-7 relative overflow-hidden">
+        <div class="absolute -right-10 -top-10 w-48 h-48 rounded-full bg-ev-gold/10 blur-3xl"></div>
+        <div class="text-[11px] uppercase tracking-[.22em] text-ev-goldDim mb-2">Mission Control</div>
+        <h1 class="font-display text-4xl md:text-5xl gold gold-glow leading-tight">
+          ${fmt(D.meta.total)} resources.<br/>
+          <span class="text-ev-text/80">${D.meta.categories} categories. ${D.meta.agents} agents.</span>
+        </h1>
+        <p class="text-ev-text/70 mt-3 max-w-2xl">
+          Free + open-source intelligence wired to the Hive. News, weather, finance, OSINT, science,
+          space — every source assigned to an agent and queryable in one second.
+        </p>
+        <div class="mt-5 flex flex-wrap gap-3 text-sm">
+          <a href="./feeds.html" class="px-4 py-2 rounded-lg bg-ev-gold/10 border border-ev-gold/40 hover:bg-ev-gold/20 transition gold flex items-center gap-2">
+            <${Icon} name="rss" cls="w-4 h-4"/> Live feeds
+          </a>
+          <a href="./resources.html" class="px-4 py-2 rounded-lg glass border border-white/10 hover:border-ev-gold/40 transition flex items-center gap-2">
+            <${Icon} name="search" cls="w-4 h-4"/> Browse all ${fmt(D.meta.total)}
+          </a>
+          <a href="./audit.html" class="px-4 py-2 rounded-lg glass border border-white/10 hover:border-ev-gold/40 transition flex items-center gap-2">
+            <${Icon} name="file-search" cls="w-4 h-4"/> Usage audit
+          </a>
+        </div>
+      </div>
+      <div class="glass rounded-2xl p-6 lift">
+        <div class="text-[11px] uppercase tracking-[.22em] text-ev-dim mb-3">Snapshot</div>
+        <div class="space-y-3 text-sm">
+          <div class="flex justify-between"><span class="text-ev-dim">Total resources</span><span class="font-mono gold">${fmt(D.meta.total)}</span></div>
+          <div class="flex justify-between"><span class="text-ev-dim">Categories</span><span class="font-mono">${D.meta.categories}</span></div>
+          <div class="flex justify-between"><span class="text-ev-dim">Agent owners</span><span class="font-mono">${D.meta.agents}</span></div>
+          <div class="flex justify-between">
+            <span class="text-ev-dim">Cached articles</span>
+            <span class="font-mono gold">${fmt(D.meta.articles_total||0)} from ${D.meta.sources_with_articles||0} sources</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-ev-dim">Currently in use</span>
+            <span class=${"font-mono " + ((D.meta.in_use_pct||0)<10 ? "text-ev-red" : "text-ev-green")}>
+              ${fmt(D.meta.in_use)} / ${fmt(D.meta.total)} (${D.meta.in_use_pct||0}%)
+            </span>
+          </div>
+          <div class="pt-2 mt-2 border-t border-white/5 text-[10px] text-ev-dim font-mono">
+            Generated ${D.meta.generated || ''}
+          </div>
+        </div>
+      </div>
+    </section>`;
+}
+
+function KPIs(){
+  const kpis = [
+    { icon:"database",   label:"Total resources", value: fmt(D.meta.total), color:"gold" },
+    { icon:"layers",     label:"Categories",      value: D.meta.categories, color:"cyan" },
+    { icon:"users",      label:"Agent owners",    value: D.meta.agents,     color:"purple" },
+    { icon:"activity",   label:"Active in workspace", value: (D.meta.in_use_pct||0)+"%",
+      color: (D.meta.in_use_pct||0) < 10 ? "red" : "green" }
+  ];
+  return html`
+    <section class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+      ${kpis.map(k => html`
+        <div class="glass rounded-xl p-5 lift">
+          <div class="flex items-center justify-between mb-3">
+            <div class=${`w-9 h-9 rounded-lg grid place-items-center bg-ev-${k.color}/10 border border-ev-${k.color}/30`}>
+              <${Icon} name=${k.icon} cls=${`w-4 h-4 text-ev-${k.color}`}/>
+            </div>
+          </div>
+          <div class=${`text-2xl font-mono font-bold text-ev-${k.color}`}>${k.value}</div>
+          <div class="text-xs text-ev-dim mt-1">${k.label}</div>
+        </div>`)}
+    </section>`;
+}
+
+function TopCats(){
+  const top = D.categories.slice(0, 8);
+  const max = Math.max(...top.map(c => c.count), 1);
+  return html`
+    <div class="glass rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="font-display text-2xl gold">Top categories</h2>
+        <a href="./categories.html" class="text-xs uppercase tracking-widest text-ev-dim hover:text-ev-gold">See all</a>
+      </div>
+      <div class="space-y-3">
+        ${top.map(c => html`
+          <a href=${"./categories.html#" + encodeURIComponent(c.name)} class="block lift glass rounded-lg p-3 border border-white/5">
+            <div class="flex items-center justify-between mb-2">
+              <div class="font-medium text-sm">${c.name}</div>
+              <div class="flex items-center gap-2">
+                ${c.fetchable && html`<span class="chip chip-cyan">FETCH</span>`}
+                <span class="font-mono text-sm gold">${c.count}</span>
+              </div>
+            </div>
+            <div class="bar"><i style=${"width:" + (c.count*100/max) + "%"}></i></div>
+            <div class="flex justify-between mt-2 text-[11px] text-ev-dim">
+              <span>${c.agent_owner}</span>
+              <span>${c.used} active <span class="text-ev-dim/60">/ ${c.count}</span></span>
+            </div>
+          </a>`)}
+      </div>
+    </div>`;
+}
+
+function TopAgents(){
+  const max = Math.max(...D.agents.map(x => x.count), 1);
+  return html`
+    <div class="glass rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="font-display text-2xl gold">Agents on duty</h2>
+        <a href="./agents.html" class="text-xs uppercase tracking-widest text-ev-dim hover:text-ev-gold">All agents</a>
+      </div>
+      <div class="space-y-3">
+        ${D.agents.map(a => {
+          const usePct = pct(a.used, a.count);
+          return html`
+            <a href=${"./agents.html#" + a.slug} class="block lift glass rounded-lg p-3 border border-white/5">
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-3">
+                  <div class="w-8 h-8 rounded-full bg-ev-gold/10 grid place-items-center font-bold text-xs gold">
+                    ${a.name.split(" ").map(s=>s[0]).join("")}
+                  </div>
+                  <div>
+                    <div class="font-medium text-sm">${a.name}</div>
+                    <div class="text-[10px] text-ev-dim font-mono">${a.categories.length} categories</div>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="font-mono gold text-sm">${a.count}</div>
+                  <div class=${"text-[10px] font-mono " + (usePct < 5 ? "text-ev-red" : "text-ev-green")}>${usePct}% live</div>
+                </div>
+              </div>
+              <div class="bar"><i style=${"width:" + (a.count*100/max) + "%"}></i></div>
+            </a>`;
+        })}
+      </div>
+    </div>`;
+}
+
+function TopicGrid(){
+  return html`
+    <section class="mb-10">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="font-display text-2xl gold">Live feed shortcuts</h2>
+        <a href="./feeds.html" class="text-xs uppercase tracking-widest text-ev-dim hover:text-ev-gold">All feeds</a>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+        ${Object.entries(D.fetchable_topics).map(([kw, cat]) => {
+          const c = D.categories.find(x => x.name === cat);
+          const n = c ? c.count : 0;
+          return html`
+            <a href=${"./feeds.html#" + kw} class="lift glass rounded-xl p-4 border border-white/5 group">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="w-9 h-9 rounded-lg bg-ev-gold/10 border border-ev-gold/30 grid place-items-center">
+                  <${Icon} name=${TOPIC_ICONS[kw]||'rss'} cls="w-4 h-4 gold"/>
+                </div>
+                <div>
+                  <div class="font-medium text-sm capitalize">${kw}</div>
+                  <div class="text-[10px] text-ev-dim font-mono">${cat}</div>
+                </div>
+              </div>
+              <div class="flex items-center justify-between text-xs mt-3">
+                <span class="text-ev-dim">${n} sources</span>
+                <span class="gold opacity-0 group-hover:opacity-100 transition">→ pull</span>
+              </div>
+            </a>`;
+        })}
+      </div>
+    </section>`;
+}
+
+function ShellHint(){
+  return html`
+    <section class="glass rounded-2xl p-6">
+      <div class="flex items-center gap-3 mb-3">
+        <${Icon} name="terminal" cls="w-5 h-5 gold"/>
+        <h3 class="font-display text-xl gold">From the shell</h3>
+      </div>
+      <pre class="font-mono text-sm text-ev-text/80 leading-relaxed overflow-x-auto"><span class="gold">$</span> intel                      <span class="text-ev-dim"># open this dashboard (port 2300)</span>
+<span class="gold">$</span> intel news                 <span class="text-ev-dim"># pull headlines from 24 news sources</span>
+<span class="gold">$</span> intel space                <span class="text-ev-dim"># pull from 28 space + science sources</span>
+<span class="gold">$</span> intel finance              <span class="text-ev-dim"># pull from 59 trading + finance sources</span>
+<span class="gold">$</span> intel search "encrypted"   <span class="text-ev-dim"># full-text search across 730</span>
+<span class="gold">$</span> intel agent helix          <span class="text-ev-dim"># Helix Patel's 87 assigned sources</span></pre>
+    </section>`;
+}
+
+function App(){
+  useLucide();
+  return html`
+    <${Nav} active="overview"/>
+    <main class="max-w-7xl mx-auto px-5 pt-8 pb-20">
+      <${Hero}/>
+      <${KPIs}/>
+      <section class="grid lg:grid-cols-2 gap-6 mb-10">
+        <${TopCats}/>
+        <${TopAgents}/>
+      </section>
+      <${TopicGrid}/>
+      <${ShellHint}/>
+    </main>
+    <${Footer}/>`;
+}
+
+render(html`<${App}/>`, document.getElementById("app"));
+</script>
+</body>
+</html>

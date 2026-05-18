@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # serve_master_hub.sh -- the :2000 master hub.
-# Serves /mnt/sdcard/AA_MY_DRIVE/_DASHBOARDS/index.html as the entry point
+# Serves /mnt/sdcard/AA_MY_DRIVE/09_DASHBOARD/sweeps/index.html as the entry point
 # to every local dashboard.
 
 set -u
 
 PORT="${HUB_PORT:-2000}"
-ROOT="/mnt/sdcard/AA_MY_DRIVE/_DASHBOARDS"
+ROOT="/mnt/sdcard/AA_MY_DRIVE/09_DASHBOARD/sweeps"
 PIDFILE="/tmp/serve_master_hub.pid"
 LOGFILE="/tmp/serve_master_hub.log"
 BIND="${HUB_BIND:-127.0.0.1}"

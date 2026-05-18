@@ -1,0 +1,67 @@
+ByteClave
+
+Hidden Tools for chemistry research and analysis
+
+« chem.libretexts.org - Free chemistry books across every field
+
+e chemicalequationbalancer.com - Balance/understand chemical equations
+
+e organic-chemistry.org - Guide to every named organic reaction
+
+« flavornet.org - Find which molecules create which food aromas
+
+« chemistry.stackexchange.com - answers for chemistry problems
+
+« chemspider.com - Search millions of structures from sources
+
+e masterorganicchemistry.com - Master reaction mechanisms
+
+« molview.org - Draw ,visualize molecules in 3D
+
+« avogadro.cc - Advanced molecule editor for computational chemistry
+
+« openbabel.org - Convert any chemical file format to another
+
+« sdbs.db.aist.go.jp - experimental spectra for organic compounds
+
+« asdlib.org - analytical science learning resources
+
+« emolecules.com - commercial suppliers for any chemical structure
+
+« massbank.eu - largest public mass spectral database
+
+« ptable.com- deeply explore compounds from periodic table
+
+* osra.sourceforge.net - Convert chemical images
+
+e deepchem.io - Apply machine learning to chemistry problems
+
+- icsd.fiz-karlsruhe.de - explore every inorganic crystal structure
+
+« hero.epa.gov - study behind EPA chemical risk assessments
+
+¢ opsin.ch.cam.ac.uk - Convert any IUPAC name to machine-readable
+
+« phet.colorado.edu- Simulate molecular bonds and reactions
+
+¢ swisstargetprediction.ch - all biological targets for any small molecule
+
+« cheminfo.org - Build full cheminformatics workflows
+
+« cactus.nci.nih.gov - Convert structure names formats and identifiers
+
+¢ periodni.com - guide to every element with calculation tools
+
+¢ psicode.org - Perform ab initio quantum chemistry calculations
+
+e lammps.sandia.gov - Run molecular dynamics simulations
+
+« commonchemistry.cas.org - Confirm any CAS number/chemical name
+
+« rcsb.org - every known protein structure solved
+
+« ebi.ac.uk/chembl - bioactivity data for drug-like molecules
+
+e environmentalchemistry.com - environmental chemistry,element data
+
+« materialsproject.org - Compute properties of any material
