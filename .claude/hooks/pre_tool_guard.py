@@ -31,7 +31,7 @@ WORKSPACE_ROOT_WHITELIST = frozenset({
     # 10 constitutional / per-AI entry docs
     "CLAUDE.md", "CODEX.md", "GEMINI.md", "AGENTS.md",
     "HIVE_CONSTITUTION.md", "HIVE_MIND.md", "EVERLIGHT_COMMANDMENTS.md",
-    "LIVING_PUNCHLIST.md", "WORKSPACE_MANIFEST.md", "MEMORY.md",
+    "LIVING_PUNCHLIST.md", "WORKSPACE_MANIFEST.md",
 })
 
 
@@ -235,8 +235,20 @@ def main() -> int:
             except Exception:
                 pass
 
-        for text in _iter_strings(tool_input):
-            if "—" in text:
+        # Em-dash check: only scan content being written, not existing content being replaced.
+        # (Was a self-block bug -- scanning all strings in tool_input also caught old_string.)
+        em_dash_targets = []
+        if tool_name == "Write":
+            em_dash_targets.append(tool_input.get("content", ""))
+        elif tool_name == "Edit":
+            em_dash_targets.append(tool_input.get("new_string", ""))
+        elif tool_name == "MultiEdit":
+            for edit in tool_input.get("edits", []) or []:
+                if isinstance(edit, dict):
+                    em_dash_targets.append(edit.get("new_string", ""))
+        EM_DASH = chr(0x2014)
+        for text in em_dash_targets:
+            if isinstance(text, str) and EM_DASH in text:
                 return _deny(data, "Blocked em-dash character in generated content.")
 
         theme_warning = _check_theme_consistency(tool_input)

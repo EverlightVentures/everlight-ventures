@@ -1,6 +1,6 @@
 # EVERLIGHT VENTURES — LIVING PUNCH LIST
 
-**Last updated:** 2026-05-15 03:15 PT
+**Last updated:** 2026-05-17 PT
 **Owner:** Rich Gee
 **Operating model:** Macro lane (platform/empire vision) runs in parallel via Hive. Micro lane (close Deal 1 with Chris) is the daily focus. Items in CRITICAL PATH are the only ones that gate today.
 **Doctrine:** This list is NEVER done. We complete items, we add new items, the list grows. Always.
@@ -61,7 +61,9 @@ This builds in the background while micro closes the first deal. Hive owns deliv
 25. ☐ **Watchdog-of-watchdog** — cron on a SEPARATE host (Oracle when available, AceMagician otherwise) that pings the primary watchdog and alerts if IT stops. Two-level redundancy.
 26. ☐ **Heartbeat dashboard** — every named service writes a "last alive" timestamp to a central file (Supabase row OR `_state/heartbeats.json`). One page that shows red/green for every cron + daemon. fastfetch banner-style at shell login.
 27. ☐ **`hive_self_heal.py` deploy** — already written per memory, 5 recipes (ATTOM key rotation, Resend rate-limit retry, OAuth refresh, cron stall restart, disk cleanup) + circuit breaker. Needs systemd timer install once Oracle reachable.
-28. ☐ **Operator Truth dashboard** — Charles Dawson veto layer materialized as a `:8504/audit/` widget that compares claimed work to verified-running state. Per `operator_truth.py` already written.
+28. ☐ **Operator Truth dashboard** -- Charles Dawson veto layer materialized as a `:8504/audit/` widget that compares claimed work to verified-running state. Per `operator_truth.py` already written.
+29. ☑ **Workspace 1-9 root doctrine enforced** -- Completed 2026-05-18. ~30 root orphans + 15 loose files consolidated into 01-09 canonical homes. Root now contains ONLY 9 numbered dirs + 3 hot-state (`_state`/`_logs`/`supabase`) + 9 doctrine .md + dotfiles. Three enforcement layers shipped: (a) cloud routine `ev-workspace-drift-audit` (trig_01NnfFjBDsBHsei7UGPhD7z9, daily 9 AM PT, posts to #hive-alerts), (b) local PreToolUse hook at `.claude/hooks/pre_tool_guard.py` blocks Write/Edit drift in real time, (c) local audit script at `03_AUTOMATION_CORE/01_Scripts/workspace_root_audit.py` for ad-hoc check. Plan at `/root/.claude/plans/c9ntinue-let-me-unified-lovelace.md`. 7-batch git history tagged `pre-workspace-consolidation-20260517` for rollback. Non_Business dissolved per Decision 1 ("these are all everlight business projects").
+30. ☑ **Cloud routines (3) deployed** -- Completed 2026-05-18. `ev-workspace-drift-audit` (daily 9 AM PT), `ev-morning-repo-brief` (daily 5 AM PT, posts to #ceo-brief + Gmail draft), `ev-weekly-code-health` (Monday 9 AM PT, secrets/deps/test-gaps scan). All survive the phone being offline.
 
 ---
 
@@ -201,6 +203,32 @@ Per `REINVENTION_THESIS.md`. Apple-grade always, MVP-grade never.
 90. 🆕☐ Install `dnspython` (`pip install dnspython`) for proper MX record validation in `email_discovery.py`. **FREE, 30 seconds.** Currently falls back to socket A-record (approximate). Do this before the bounce test.
 
 91. 🔥☐ **THE single next move.** Real-network bounce test &mdash; one email from `marquise@everlightventures.io` to `eddie.howard@gmail.com` (top candidate, HOWARD EDDIE ESTATE, TX). Via `branded_mailer.send_branded_email(category="vip_reply")`. Either outcome teaches: delivery = first real seller email captured by our pipeline; bounce = iterate to `.yahoo.com`. This is what closes Deal 1.
+
+---
+
+## L. AI-SAFETY PAPER PORTFOLIO &mdash; ANTHROPIC BRIDGE
+
+🆕 Anthropic Fellows Program red-team dispatched 2026-05-17 (Nova Ling + Pitch Adler + 55_competitive_intel + 40_strategic_modeler, Claude playing Solomon Vale convener). Verdict: **Branch D&rarr;B**. Close Deal 1 first, then ship 3 paper-shaped artifacts derived from existing Hive components over ~14 weeks. Portfolio play: 3 doors at Anthropic instead of 1. Acceptance probability shifts from 8-12% (no artifact) &rarr; 22-35% (one artifact); estimate 35-55% with full portfolio + warm mentor. Artifacts compound regardless of Fellows outcome (Anthropic Solutions Architect lane, MATS/Constellation mentorship, Hive Mind SaaS enterprise objection-breaker, AI Consulting retainer uplift). All items &#9208; POST-DEAL-1 per macro/micro gate doctrine.
+
+92. &#9208;&#9744; **Identify and rank 5 mentor candidates.** Paper #1: Samuel Marks (control evals), Joe Benton (Strengthening Red Teams alumni mentor), Jon Kutasov. Paper #2: Sam Bowman (scalable oversight), Ethan Perez (red-teaming). Paper #3: TBD. Need relationships BEFORE applications credible &mdash; every Fellows paper lists 2-3 Anthropic insiders as co-authors, not just advisors. Surface their Twitter/blog activity. Warm-intro paths via open-source contribution + Hive Mind SaaS network.
+
+93. &#9208;&#9744; **Draft shared eval-harness scaffolding spec** at `06_DEVELOPMENT/everlight_os/research_eval_harness/`. Build once, reuse 3x: adversarial probe generator, baseline runner (single-pass Claude vs. soft-prompt DNC vs. raw API), metric collectors (bypass rate, false-positive rate, latency, accuracy delta), result aggregator with confidence intervals. This is what makes Papers #2 and #3 marginal-cost much lower than #1 in isolation.
+
+94. &#9208;&#9744; **Scope $3-6k portfolio compute budget.** Paper #1 ~$500-2k. Paper #2 ~$1-2k (TruthfulQA / MATH-adversarial held-out eval). Paper #3 ~$1-2k (adversarial leak harness). Funding source: Everlight operating budget post-Deal-1, OR Anthropic/OpenAI eval credits, OR open-weight models on existing AceMagician/Oracle infra.
+
+95. &#9208;&#9744; **Paper #1 &mdash; "Constitutional Runtime Gates: Fail-Closed Enforcement of Eradication Lists in Multi-Agent Outbound Pipelines."** Component: `eradication_gate.py` + `branded_mailer` audit log + **Streubel 3-strike case study** as motivating incident. Method: N=500 bypass attempts across 4 personas (Piper/Henry/Marvin/Vaughn). Baseline: soft-prompt DNC. Metrics: bypass rate, false-positive rate, latency. Target venue: Alignment Forum + arXiv + GitHub release. Stretch: NeurIPS SafeML workshop. **Lowest credibility lift, ships first. ~2-3 weekends post-Deal-1.**
+
+96. &#9208;&#9744; **Paper #2 &mdash; "The Roundtable Protocol: Probe-Phase Position Revision in 5-Phase Persona Orchestration."** Component: Solomon Vale convener + Roundtable engine + Westminster post-mortem case study. Method: N=50 runs vs. baselines (single-pass Claude, vanilla CoT). Held-out eval: TruthfulQA / MATH-adversarial. Measure: position-revision rate, accuracy delta. Target venue: arXiv + Alignment Forum. Sits in scalable-oversight / debate literature (Irving et al. lineage). **~5-6 weekends after Paper #1.**
+
+97. &#9208;&#9744; **Paper #3 &mdash; "Voice-Register Classifiers as Structural Confidentiality Envelopes for Public-Network AI Personas."** Component: Lucrex daemon + `recipient_register.py` + `moltbook_confidentiality_gate.py`. Method: 200-example adversarial leak harness. Compare 5-register classifier + confidentiality gate vs. baseline GPT-4o persona. Metrics: leak rate, voice consistency, recruiter-experience scores. Target venue: arXiv + open-source release. **Higher novelty, more scaffolding required. ~3-4 weekends after Paper #2.**
+
+98. &#9208;&#9744; **Outline-only on all 3 papers before Deal 1 closes.** Background-task work compatible with comms-heavy wholesale closing. Abstracts + methodology sections drafted. Full experiments + writeups gated on Deal 1 cash + operator-time release. Compatible with current micro lane.
+
+99. &#9208;&#9744; **Mentor outreach via shipped Paper #1 draft.** Once Paper #1 has working experimental results, send concrete draft + GitHub repo to mentor shortlist. Order: Samuel Marks first (closest topical match), Joe Benton second, Jon Kutasov third. Goal: warm engagement, ideally co-author offer or endorsement before application.
+
+100. &#9208;&#9744; **Apply to Anthropic Fellows cohort with 3-paper portfolio + mentor endorsement.** Target: rolling-admission cohort ~6-8 months out (early-2027 start). Workstream preference: AI Safety primary, AI Security secondary (eradication_gate maps to both). EV math: $61.6k stipend + $60k compute budget + signal value on Hive Mind SaaS deck + relationship LTV (per Pitch's counter-memo).
+
+101. &#9208;&#9744; **Alt-vector parallel pursuit (Branch C overlay).** Even if Fellows rejects, the portfolio opens: (a) Anthropic Solutions Architect / alignment-eng contract roles, (b) MATS / Constellation mentorship pipeline, (c) Hive Mind SaaS enterprise procurement objection-breaker, (d) AI Consulting retainer uplift ($2k/mo &rarr; $5-8k/mo per Pitch's estimate). Track separately &mdash; don't conflate with Fellows acceptance.
 
 ---
 
