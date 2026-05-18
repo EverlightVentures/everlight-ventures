@@ -18,6 +18,22 @@ ALLOWED_ROOTS = [WORKSPACE, Path("/tmp").resolve(), MEMORY_DIR]
 LOG_DIR = WORKSPACE / "_logs" / "claude_hooks"
 LOG_FILE = LOG_DIR / "pretool.jsonl"
 
+# Workspace-root whitelist (enforced 2026-05-17). MUST match
+# 03_AUTOMATION_CORE/01_Scripts/workspace_root_audit.py and the cloud routine
+# ev-workspace-drift-audit. Any new write at workspace root with a name NOT in
+# this set is drift and will be blocked.
+WORKSPACE_ROOT_WHITELIST = frozenset({
+    # 9 numbered project dirs
+    "01_BUSINESSES", "02_CONTENT_FACTORY", "03_AUTOMATION_CORE", "04_MEDIA_LIBRARY",
+    "05_PERSONAL", "06_DEVELOPMENT", "07_STAGING", "08_BACKUPS", "09_DASHBOARD",
+    # 3 load-bearing hot-state dirs
+    "_state", "_logs", "supabase",
+    # 10 constitutional / per-AI entry docs
+    "CLAUDE.md", "CODEX.md", "GEMINI.md", "AGENTS.md",
+    "HIVE_CONSTITUTION.md", "HIVE_MIND.md", "EVERLIGHT_COMMANDMENTS.md",
+    "LIVING_PUNCHLIST.md", "WORKSPACE_MANIFEST.md", "MEMORY.md",
+})
+
 
 def _emit_decision(decision: str, reason: str) -> None:
     payload = {
@@ -201,6 +217,23 @@ def main() -> int:
         for path_text in _extract_candidate_paths(tool_input):
             if not _is_allowed_path(path_text):
                 return _deny(data, f"Blocked write/edit outside allowed roots: {path_text}")
+            # Workspace-root drift check: block writes at workspace root with names
+            # not on the whitelist. Hidden dotfiles allowed.
+            try:
+                resolved = _resolve_path(path_text)
+                if resolved.parent == WORKSPACE:
+                    name = resolved.name
+                    if not name.startswith(".") and name not in WORKSPACE_ROOT_WHITELIST:
+                        return _deny(
+                            data,
+                            f"Blocked root-level write '{name}'. Workspace root is "
+                            f"locked to 9 numbered dirs + _state/_logs/supabase + "
+                            f"10 doctrine .md files + dotfiles. Route this content "
+                            f"to the correct 01-09 folder per WORKSPACE_MANIFEST.md "
+                            f"File Save Rules.",
+                        )
+            except Exception:
+                pass
 
         for text in _iter_strings(tool_input):
             if "—" in text:

@@ -1,3 +1,15 @@
 {
-  "hooks": {}
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 /mnt/sdcard/AA_MY_DRIVE/.claude/hooks/pre_tool_guard.py"
+          }
+        ]
+      }
+    ]
+  }
 }
