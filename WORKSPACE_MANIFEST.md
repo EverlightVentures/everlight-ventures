@@ -101,15 +101,6 @@ AA_MY_DRIVE/
 │   ├── reports/                     Trade & business reports
 │   └── streamlit_app/               Streamlit analytics dashboards
 │
-├── Non_Business/                    Non-Everlight businesses & side projects
-│   ├── Customer_Support/            Support docs
-│   ├── Mountain Gardens Nursery POS/  Mountain Gardens POS (client)
-│   ├── Shared/                      Shared resources
-│   ├── Solar/                       Solar business docs
-│   ├── Solar_Business/              Solar business plans
-│   ├── Sunflower_Land/              Sunflower Land project
-│   └── The_Yung_Printz/             Yung Printz project
-│
 └── [Agent Config Directories]
     ├── .claude/                      Claude agents, skills, modes, hooks, memory
     ├── .gemini/                      Gemini agents, skills, plans
@@ -170,6 +161,46 @@ AA_MY_DRIVE/
 | Supabase sync client | `09_DASHBOARD/hive_dashboard/hive_dashboard/supabase_client.py` |
 | MCP Servers | `06_DEVELOPMENT/mcp_servers/` |
 | Archived prototypes | `08_BACKUPS/archived_prototypes/` |
+
+## Root-Level Whitelist (ENFORCED -- 2026-05-17)
+
+Workspace root contains ONLY the following. Any other file or directory at root is
+drift and will be flagged by the daily drift audit (cloud routine `ev-workspace-drift-audit`
++ local PreToolUse hook at `.claude/hooks/root_write_guard.sh`).
+
+**Numbered project folders (9):** `01_BUSINESSES/`, `02_CONTENT_FACTORY/`,
+`03_AUTOMATION_CORE/`, `04_MEDIA_LIBRARY/`, `05_PERSONAL/`, `06_DEVELOPMENT/`,
+`07_STAGING/`, `08_BACKUPS/`, `09_DASHBOARD/`.
+
+**Load-bearing hot-state dirs (3, structurally required at root):**
+- `_state/` -- AGENT_MAILBOX, moltbook state, sync queues. ~40 prod-script refs.
+- `_logs/` -- hive logs, war room, branded mailer audit. 787+ refs, pinned in .gitignore.
+- `supabase/` -- migrations + edge functions. Pinned in CLAUDE.md doctrine.
+
+**Constitutional + per-AI entry docs (read on every session):** `CLAUDE.md`,
+`CODEX.md`, `GEMINI.md`, `AGENTS.md`, `HIVE_CONSTITUTION.md`, `HIVE_MIND.md`,
+`EVERLIGHT_COMMANDMENTS.md`, `LIVING_PUNCHLIST.md`, `WORKSPACE_MANIFEST.md`,
+`MEMORY.md`.
+
+**Hidden config (dotfiles always allowed):** `.claude/`, `.codex/`, `.gemini/`,
+`.perplexity/`, `.git/`, `.github/`, `.gitignore`, `.claudeignore`, `.mcp.json`,
+`.stignore`, `.stfolder`, `.env`, `.env.example`, `.nvim/`, `__pycache__/`.
+
+**Where things now live (replaces former root dirs):**
+- Runbooks: `06_DEVELOPMENT/everlight_os/docs/` (was scattered .md files at root)
+- Setup scripts: `03_AUTOMATION_CORE/01_Scripts/setup/` (was *.sh at root)
+- Intel pipeline: `06_DEVELOPMENT/everlight_os/intel_center/` (was `Everlight_Intel_Center/`)
+- Dashboard sweeps: `09_DASHBOARD/sweeps/` (was `_DASHBOARDS/`)
+- Personal notes: `05_PERSONAL/A_Personal_Notebook/` (was `NOTEPAD/`, `Notes/`)
+- Personal learning: `05_PERSONAL/04_Learning/FREE_RESOURCES/` (was `FREE RESOURCES/`)
+- Plans archive: `09_DASHBOARD/reports/plans_archive/` (was `_plans/`)
+- Solar venture: `01_BUSINESSES/Everlight_Ventures/Everlight_Solar/` (was `Non_Business/Solar/`)
+- Sunflower Land: `01_BUSINESSES/Everlight_Ventures/Everlight_Gaming/Sunflower_Land/`
+- Yung Printz: `01_BUSINESSES/Everlight_Ventures/Yung_Printz/`
+- Mountain Gardens (Onyx POS origin): `01_BUSINESSES/onyx_pos/origins/Mountain_Gardens/`
+- Avatars: `06_DEVELOPMENT/everlight_os/hive_mind/assets/avatars/` (was `AI_Avatars/`)
+- Stale archives: `08_BACKUPS/sync_conflicts_archive_*/`, `08_BACKUPS/regenerable_caches/`,
+  `08_BACKUPS/Trash_Dedupe/`, `08_BACKUPS/.env_archive/`, `08_BACKUPS/.mcp_archive/`
 
 ## Architecture Lanes
 
@@ -242,5 +273,23 @@ CRITICAL: Agents MUST save outputs to the correct project folder.
 | Plans & audits | `01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/plans/` |
 | Screenshots & media | `04_MEDIA_LIBRARY/Photos/` |
 | Unsorted incoming | `07_STAGING/Inbox/` |
+| Operational runbooks | `06_DEVELOPMENT/everlight_os/docs/` |
+| Setup / bootstrap shell scripts | `03_AUTOMATION_CORE/01_Scripts/setup/` |
+| Intel pipeline / OSINT | `06_DEVELOPMENT/everlight_os/intel_center/` |
+| Solar venture | `01_BUSINESSES/Everlight_Ventures/Everlight_Solar/` |
+| Yung Printz | `01_BUSINESSES/Everlight_Ventures/Yung_Printz/` |
+| Sunflower Land | `01_BUSINESSES/Everlight_Ventures/Everlight_Gaming/Sunflower_Land/` |
+| Onyx POS origin (Mountain Gardens) | `01_BUSINESSES/onyx_pos/origins/Mountain_Gardens/` |
+| Customer support tickets | `01_BUSINESSES/Everlight_Ventures/00_Core/customer_support/` |
+| Pitches & client artifacts | `01_BUSINESSES/Everlight_Ventures/00_Core/pitches_and_clients/` |
+| Personal notes & transcripts | `05_PERSONAL/A_Personal_Notebook/` |
+| Personal learning resources | `05_PERSONAL/04_Learning/` |
+| Offsite backups (live target) | `08_BACKUPS/offsite_mirror/active/` |
+| Sync conflict archives | `08_BACKUPS/sync_conflicts_archive_<date>/` |
+| Regenerable caches (.venv, .pnpm-store) | `08_BACKUPS/regenerable_caches/` |
+| Avatar / persona portraits | `06_DEVELOPMENT/everlight_os/hive_mind/assets/avatars/` |
 
 NEVER save project files at the workspace root or in random directories.
+Per the Root-Level Whitelist (enforced 2026-05-17), the workspace root is locked
+to the 9 numbered dirs + 3 hot-state dirs + 10 doctrine .md files + dotfiles only.
+Any new file or directory written at root will be flagged by the drift audit.

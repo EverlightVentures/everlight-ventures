@@ -223,7 +223,23 @@ File Save Rules (CRITICAL):
 - AI Consulting -> `01_BUSINESSES/Everlight_Ventures/AI_Consulting/`
 - IG Content Kit -> `02_CONTENT_FACTORY/01_Queue/`
 - Unsorted -> `07_STAGING/Inbox/`
+- Operational runbooks (DISASTER_RECOVERY, INFRASTRUCTURE, MIGRATION_CHECKLIST, PC_TRANSFER_GUIDE, REMOTE_WORKFLOW, QUICK_COMMANDS, START_HERE, ELEVENLABS_RUNBOOK, etc.) -> `06_DEVELOPMENT/everlight_os/docs/`
+- Setup/bootstrap shell scripts (restart_claude.sh, start_session.sh, verify_setup.sh, etc.) -> `03_AUTOMATION_CORE/01_Scripts/setup/`
+- Intel pipeline / OSINT -> `06_DEVELOPMENT/everlight_os/intel_center/`
+- Avatar / persona portraits -> `06_DEVELOPMENT/everlight_os/hive_mind/assets/avatars/`
+- Sub-ventures (Everlight_Solar, Yung_Printz, Sunflower_Land) -> `01_BUSINESSES/Everlight_Ventures/<venture>/`
+- Mountain Gardens (Onyx POS origin) -> `01_BUSINESSES/onyx_pos/origins/Mountain_Gardens/`
 - See WORKSPACE_MANIFEST.md for the full routing table.
+
+Root-Level Whitelist (ENFORCED 2026-05-17):
+Workspace root contains ONLY: 9 numbered dirs (01_BUSINESSES..09_DASHBOARD) +
+3 hot-state dirs (`_state/`, `_logs/`, `supabase/`) + 10 doctrine .md files
+(CLAUDE.md, CODEX.md, GEMINI.md, AGENTS.md, HIVE_CONSTITUTION.md, HIVE_MIND.md,
+EVERLIGHT_COMMANDMENTS.md, LIVING_PUNCHLIST.md, WORKSPACE_MANIFEST.md, MEMORY.md)
++ hidden dotfiles. Any new write at root is drift. Enforced by:
+- Cloud daily routine `ev-workspace-drift-audit` (trig_01NnfFjBDsBHsei7UGPhD7z9, 9 AM PT)
+- Local PreToolUse hook at `.claude/hooks/root_write_guard.sh`
+- Local daily audit script at `03_AUTOMATION_CORE/01_Scripts/workspace_root_audit.py`
 
 Auto-Deploy Rule (CRITICAL):
 After editing ANY file in 06_DEVELOPMENT/xlm_bot/ or 03_AUTOMATION_CORE/01_Scripts/,
