@@ -7,7 +7,7 @@
 # Copies checked:
 #   1. Oracle (orphan boot vol)        — primary
 #   2. Google Drive (rclone target)    — offsite
-#   3. Phone /mnt/sdcard/AA_MY_DRIVE/_offsite_backups/oracle_e5/latest/
+#   3. Phone /mnt/sdcard/AA_MY_DRIVE/08_BACKUPS/offsite_mirror/active/oracle_e5/latest/
 #                                      — local offline-survivable
 #
 # Output: PASS/FAIL summary + manifest diff
@@ -16,7 +16,7 @@
 set -euo pipefail
 
 LOG=/mnt/sdcard/AA_MY_DRIVE/_logs/verify_321.log
-LOCAL_BACKUP=/mnt/sdcard/AA_MY_DRIVE/_offsite_backups/oracle_e5/latest
+LOCAL_BACKUP=/mnt/sdcard/AA_MY_DRIVE/08_BACKUPS/offsite_mirror/active/oracle_e5/latest
 mkdir -p "$(dirname "$LOG")"
 log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*" | tee -a "$LOG"; }
 

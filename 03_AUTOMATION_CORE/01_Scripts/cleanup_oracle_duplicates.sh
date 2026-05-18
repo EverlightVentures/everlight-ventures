@@ -142,7 +142,7 @@ log "═════════════════════════
 log "  3-2-1 architecture now active:"
 log "    Copy 1: Oracle orphan (production access)"
 log "    Copy 2: Google Drive (encrypted offsite)"
-log "    Copy 3: Phone local /mnt/sdcard/_offsite_backups/"
+log "    Copy 3: Phone local /mnt/sdcard/08_BACKUPS/offsite_mirror/active/"
 log ""
 log "  Storage freed: ~141GB of 200GB cap"
 log "  Future ARM redeploy can clone fresh boot vols without hitting cap"

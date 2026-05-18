@@ -14,7 +14,7 @@
 #   4. Create SHA256 manifest of every file
 #   5. Notify Slack #hive-alerts AND ntfy.sh push that Drive copy is done
 #   6. Phone-side cron (separate) pulls from Drive to local
-#      /mnt/sdcard/AA_MY_DRIVE/_offsite_backups/oracle_e5/
+#      /mnt/sdcard/AA_MY_DRIVE/08_BACKUPS/offsite_mirror/active/oracle_e5/
 #   7. After phone pull confirmed, run verify_321_redundancy.sh
 #   8. ONLY after 3 verified copies exist, prompt Marquise to approve
 #      deletion of the 3 redundant Oracle copies.

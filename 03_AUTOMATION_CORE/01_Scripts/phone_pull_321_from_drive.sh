@@ -2,7 +2,7 @@
 # phone_pull_321_from_drive.sh
 # ────────────────────────────
 # Runs on phone via cron every 1 hour. Pulls latest oracle_e5_backup
-# folder from Drive into /mnt/sdcard/AA_MY_DRIVE/_offsite_backups/oracle_e5/
+# folder from Drive into /mnt/sdcard/AA_MY_DRIVE/08_BACKUPS/offsite_mirror/active/oracle_e5/
 # This is the "1" in the 3-2-1 backup rule (offsite local).
 #
 # Cron entry:
@@ -10,7 +10,7 @@
 set -euo pipefail
 
 LOG=/mnt/sdcard/AA_MY_DRIVE/_logs/phone_pull_321.log
-DEST=/mnt/sdcard/AA_MY_DRIVE/_offsite_backups/oracle_e5
+DEST=/mnt/sdcard/AA_MY_DRIVE/08_BACKUPS/offsite_mirror/active/oracle_e5
 mkdir -p "$DEST" "$(dirname "$LOG")"
 
 log() { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] $*" | tee -a "$LOG"; }

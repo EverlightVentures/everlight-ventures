@@ -43,7 +43,7 @@ from pathlib import Path
 WORKSPACE = Path("/mnt/sdcard/AA_MY_DRIVE")
 LOG_DIR = WORKSPACE / "_logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
-STAGING_DIR = WORKSPACE / "_offsite_backups" / "gmail_calendar_staging"
+STAGING_DIR = WORKSPACE / "08_BACKUPS/offsite_mirror/active" / "gmail_calendar_staging"
 STAGING_DIR.mkdir(parents=True, exist_ok=True)
 
 logging.basicConfig(
