@@ -60,6 +60,20 @@ except ImportError:
     attom_enrich_property = None
     attom_format = None
 
+# Canonical HTTP wrapper -- adds EverLight-Hive UA + retries + audit log + CF-Access headers
+# when calling *.everlightventures.io. Optional import so old hosts still run.
+for _ctp in [
+    os.path.join(os.path.dirname(__file__), "content_tools"),
+    "/home/opc/03_AUTOMATION_CORE/01_Scripts/content_tools",
+    "/home/ubuntu/03_AUTOMATION_CORE/01_Scripts/content_tools",
+]:
+    if os.path.isdir(_ctp) and _ctp not in sys.path:
+        sys.path.insert(0, _ctp)
+try:
+    from http_client import request_urllib as _http_request
+except ImportError:
+    _http_request = None
+
 # Django bootstrap (phone + Oracle)
 for _djp in [
     os.path.join(os.path.dirname(__file__), "..", "..", "09_DASHBOARD", "hive_dashboard"),
@@ -1929,29 +1943,45 @@ SLACK_CH_ALERTS = "C0ANPRCA4AD"
 
 
 def _slack_post_bot(text, channel=None):
-    """Post to Slack via Bot API (webhooks are dead since 2026-03-23)."""
+    """Post to Slack via Bot API (webhooks are dead since 2026-03-23).
+
+    Routed through http_client.request_urllib when available so the call
+    picks up the canonical EverLight-Hive UA, 3-retry backoff, and an audit
+    line in _logs/http_client.jsonl. Falls back to raw urllib when the
+    wrapper is not yet on the host (legacy hosts pre-2026-05-19).
+    """
     token = SLACK_BOT_TOKEN
     if not token:
         log.warning("  No SLACK_BOT_TOKEN set. Skipping Slack.")
         return False
     ch = channel or SLACK_CH_WAR_ROOM
     payload = json.dumps({"channel": ch, "text": text}).encode()
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {token}",
+    }
     try:
-        req = urllib.request.Request(
-            "https://slack.com/api/chat.postMessage",
-            data=payload,
-            method="POST",
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {token}",
-            }
-        )
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            result = json.loads(resp.read())
-            if not result.get("ok"):
-                log.error(f"  Slack bot post error: {result.get('error')}")
+        if _http_request is not None:
+            resp = _http_request(
+                "https://slack.com/api/chat.postMessage",
+                method="POST", headers=headers, body=payload,
+                timeout=10, caller="broker_daily_orchestrator._slack_post_bot",
+            )
+            if not resp.ok:
+                log.error(f"  Slack bot post HTTP error: status={resp.status} err={resp.error}")
                 return False
-            return True
+            result = resp.json()
+        else:
+            req = urllib.request.Request(
+                "https://slack.com/api/chat.postMessage",
+                data=payload, method="POST", headers=headers,
+            )
+            with urllib.request.urlopen(req, timeout=10) as raw_resp:
+                result = json.loads(raw_resp.read())
+        if not result.get("ok"):
+            log.error(f"  Slack bot post error: {result.get('error')}")
+            return False
+        return True
     except Exception as e:
         log.error(f"  Slack bot post failed: {e}")
         return False
