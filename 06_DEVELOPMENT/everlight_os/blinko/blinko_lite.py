@@ -342,8 +342,11 @@ def run_server() -> None:
     # Initialize database
     init_db()
 
-    server = HTTPServer(("0.0.0.0", PORT), BlinkoHandler)
-    _log(f"BlinkoLite started on port {PORT} (PID {os.getpid()})")
+    # Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+    # Default 127.0.0.1. EV_BIND=0.0.0.0 to expose on e5-mother tailnet.
+    bind_host = os.environ.get("EV_BIND") or os.environ.get("BLINKO_HOST") or "127.0.0.1"
+    server = HTTPServer((bind_host, PORT), BlinkoHandler)
+    _log(f"BlinkoLite started on {bind_host}:{PORT} (PID {os.getpid()})")
     _log(f"Database: {DB_PATH}")
     _log(f"Health: http://localhost:{PORT}/health")
 

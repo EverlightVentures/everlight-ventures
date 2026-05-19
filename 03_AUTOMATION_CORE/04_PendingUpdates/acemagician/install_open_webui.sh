@@ -41,7 +41,11 @@ fi
 say "STEP 2/4 -- pip install open-webui (~3-5 min on PC)"
 "$PY" -m pip install --user --upgrade open-webui 2>&1 | tail -5 | tee -a "$LOG"
 
-say "STEP 3/4 -- launch on $PORT (HOST=0.0.0.0 so phone can reach via tailnet)"
+# Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+# AceMagician runs on the tailnet. Default 127.0.0.1; set EV_BIND=0.0.0.0
+# only after confirming Tailscale ACLs are restricting access.
+WEBUI_BIND="${EV_BIND:-127.0.0.1}"
+say "STEP 3/4 -- launch on $PORT (HOST=$WEBUI_BIND)"
 mkdir -p "$DATA_DIR"
 pkill -f "open-webui serve" 2>/dev/null || true
 sleep 1
@@ -50,8 +54,8 @@ DATA_DIR="$DATA_DIR" \
 WEBUI_AUTH=true \
 WEBUI_NAME="Everlight Ultra Mind" \
 PORT="$PORT" \
-HOST=0.0.0.0 \
-nohup "$PY" -m open_webui serve --port "$PORT" --host 0.0.0.0 \
+HOST="$WEBUI_BIND" \
+nohup "$PY" -m open_webui serve --port "$PORT" --host "$WEBUI_BIND" \
   > /tmp/svc_open_webui.log 2>&1 &
 
 say "  spawned, waiting for first-time DB init..."
@@ -77,8 +81,8 @@ Environment=DATA_DIR=$DATA_DIR
 Environment=WEBUI_AUTH=true
 Environment=WEBUI_NAME=Everlight Ultra Mind
 Environment=PORT=$PORT
-Environment=HOST=0.0.0.0
-ExecStart=$PY -m open_webui serve --port $PORT --host 0.0.0.0
+Environment=HOST=$WEBUI_BIND
+ExecStart=$PY -m open_webui serve --port $PORT --host $WEBUI_BIND
 Restart=always
 RestartSec=10
 

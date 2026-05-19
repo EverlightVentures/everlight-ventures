@@ -335,6 +335,8 @@ def health():
 
 
 if __name__ == "__main__":
+    import os
     import uvicorn
 
-    uvicorn.run("app:app", host="0.0.0.0", port=8765, reload=True)
+    # Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+    uvicorn.run("app:app", host=os.environ.get("EV_BIND", "127.0.0.1"), port=8765, reload=True)

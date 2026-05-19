@@ -48,10 +48,12 @@ start_vnc() {
 
 start_novnc_bg() {
   mkdir -p "$LOG_DIR"
-  log "Starting noVNC on 0.0.0.0:${NOVNC_PORT} -> 127.0.0.1:${VNC_PORT}..."
+  # Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+  NOVNC_BIND="${EV_BIND:-127.0.0.1}"
+  log "Starting noVNC on ${NOVNC_BIND}:${NOVNC_PORT} -> 127.0.0.1:${VNC_PORT}..."
   nohup "$NOVNC_PROXY" \
     --vnc "127.0.0.1:${VNC_PORT}" \
-    --listen "0.0.0.0:${NOVNC_PORT}" \
+    --listen "${NOVNC_BIND}:${NOVNC_PORT}" \
     >>"$LOG_DIR/novnc.log" 2>&1 &
   sleep 1
 }
@@ -83,7 +85,9 @@ run_service() {
   kill_conflicts
   start_vnc
   log "Running noVNC foreground mode for systemd..."
-  exec "$NOVNC_PROXY" --vnc "127.0.0.1:${VNC_PORT}" --listen "0.0.0.0:${NOVNC_PORT}"
+  # Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+  NOVNC_BIND="${EV_BIND:-127.0.0.1}"
+  exec "$NOVNC_PROXY" --vnc "127.0.0.1:${VNC_PORT}" --listen "${NOVNC_BIND}:${NOVNC_PORT}"
 }
 
 stop_all() {

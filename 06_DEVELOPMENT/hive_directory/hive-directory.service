@@ -1,0 +1,27 @@
+[Unit]
+Description=Hive Mind Employee Directory (FastAPI + React on :8503)
+After=network.target
+
+[Service]
+Type=simple
+User=opc
+Group=opc
+WorkingDirectory=/home/opc/hive_directory
+Environment=HIVE_MIND_DIR=/home/opc/06_DEVELOPMENT/everlight_os/hive_mind
+Environment=HIVE_PARENT=/home/opc/06_DEVELOPMENT/everlight_os
+Environment=HIVE_PROGRESS_DIR=/home/opc/06_DEVELOPMENT/_logs/.hive_active
+Environment=PHOTOS_DIR=/home/opc/AI_Avatars
+Environment=URL_PREFIX=/hive
+Environment=PATH=/home/opc/.local/bin:/usr/local/bin:/usr/bin:/bin
+# Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+# Default 127.0.0.1. Override at service-level with Environment=EV_BIND=...
+Environment=EV_BIND=127.0.0.1
+ExecStart=/usr/bin/python3 -m uvicorn api:app --host ${EV_BIND} --port 8503 --log-level info
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=hive-directory
+
+[Install]
+WantedBy=multi-user.target

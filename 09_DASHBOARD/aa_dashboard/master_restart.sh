@@ -20,4 +20,6 @@ fi
 source "$VENV_DIR/bin/activate"
 pip install -r requirements.txt
 
-exec uvicorn app:app --host 0.0.0.0 --port "$PORT" --reload
+# Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+BIND_HOST="${EV_BIND:-127.0.0.1}"
+exec uvicorn app:app --host "$BIND_HOST" --port "$PORT" --reload

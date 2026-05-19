@@ -19,11 +19,15 @@ fi
 
 cd "$BOT_DIR"
 
+# Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+# Inside the docker container, EV_BIND=0.0.0.0 is correct because Docker is the
+# isolation boundary and the host security list controls public reach.
+DASH_BIND="${EV_BIND:-0.0.0.0}"  # bind:tailnet-only (container internal)
 # Start dashboard in background
-echo "Starting dashboard on port 8502..."
+echo "Starting dashboard on port 8502 (bind ${DASH_BIND})..."
 $VENV_PYTHON -m streamlit run dashboard.py \
     --server.port=8502 \
-    --server.address=0.0.0.0 \
+    --server.address="$DASH_BIND" \
     --server.headless=true \
     --browser.gatherUsageStats=false \
     > logs/dashboard.log 2>&1 &

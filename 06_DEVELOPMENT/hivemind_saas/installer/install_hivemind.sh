@@ -342,7 +342,9 @@ mkdir -p "$HIVEMIND_HOME/logs"
 
 echo "Starting Hive Mind Dashboard on port $PORT ..."
 cd "$HIVEMIND_WORKSPACE/dashboard"
-nohup "$VENV/python3" manage.py runserver "0.0.0.0:$PORT" > "$LOGFILE" 2>&1 &
+# Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+BIND_HOST="${EV_BIND:-127.0.0.1}"
+nohup "$VENV/python3" manage.py runserver "${BIND_HOST}:$PORT" > "$LOGFILE" 2>&1 &
 echo $! > "$PIDFILE"
 sleep 2
 

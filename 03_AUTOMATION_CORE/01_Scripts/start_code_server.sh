@@ -6,6 +6,9 @@
 
 # Configuration
 PORT=8080
+# Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+# code-server exposes the entire workspace filesystem, NEVER bind public.
+BIND_HOST="${EV_BIND:-127.0.0.1}"
 LOG_DIR="/mnt/sdcard/AA_MY_DRIVE/_logs"
 LOG_FILE="$LOG_DIR/code-server_$(date +%Y-%m-%d_%H%M).log"
 
@@ -36,7 +39,7 @@ echo "=============================================="
 
 # Start code-server with stability flags
 code-server \
-    --bind-addr 0.0.0.0:$PORT \
+    --bind-addr "${BIND_HOST}:$PORT" \
     --auth password \
     --disable-telemetry \
     --disable-update-check \

@@ -35,7 +35,7 @@ log = logging.getLogger("relay")
 
 PHONE_BASE = os.environ.get("PHONE_DISPATCHER_BASE", "http://[::1]:8600")
 RELAY_TOKEN = os.environ.get("RELAY_BEARER_TOKEN", "").strip()
-HOST = os.environ.get("RELAY_HOST", "0.0.0.0")
+HOST = os.environ.get("RELAY_HOST", "0.0.0.0")  # bind:public-by-design Supabase webhook receiver, see NETWORK_BINDING_POLICY.md
 PORT = int(os.environ.get("RELAY_PORT", "8503"))
 
 app = FastAPI(title="Hive Dispatcher Relay", version="1.0.0")

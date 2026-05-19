@@ -1402,5 +1402,9 @@ async def health():
 
 
 if __name__ == "__main__":
+    import os
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8600)
+    # Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+    # POS API: LAN-bound for register devices when deployed; EV_BIND for dev/test.
+    _bind = os.environ.get("EV_BIND", "127.0.0.1")
+    uvicorn.run(app, host=_bind, port=8600)  # bind:lan-required on customer hardware override with EV_BIND

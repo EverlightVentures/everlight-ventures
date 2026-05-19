@@ -4,6 +4,9 @@
 # ============================================================
 
 PORT=8080
+# Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+# code-server has the workspace as filesystem root, must NEVER bind public.
+BIND_HOST="${EV_BIND:-127.0.0.1}"
 LOG_DIR="/mnt/sdcard/AA_MY_DRIVE/_logs"
 PID_FILE="/tmp/code-server.pid"
 RESTART_DELAY=5
@@ -18,7 +21,7 @@ start_server() {
     mkdir -p "$LOG_DIR"
 
     code-server \
-        --bind-addr 0.0.0.0:$PORT \
+        --bind-addr "${BIND_HOST}:$PORT" \
         --auth password \
         --disable-telemetry \
         --disable-update-check \

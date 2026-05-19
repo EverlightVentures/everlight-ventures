@@ -329,7 +329,10 @@ class _ChatHandler(BaseHTTPRequestHandler):
 
 def start_chat_server(port: int = 8504, host: str | None = None) -> ThreadingHTTPServer | None:
     global _CHAT_SERVER
-    bind_host = str(host or os.environ.get("XLM_CHAT_HOST", "0.0.0.0")).strip() or "0.0.0.0"
+    # Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+    # Private by default. EV_BIND=0.0.0.0 to expose; XLM_CHAT_HOST kept as legacy override.
+    _default_bind = os.environ.get("EV_BIND") or os.environ.get("XLM_CHAT_HOST") or "127.0.0.1"
+    bind_host = str(host or _default_bind).strip() or "127.0.0.1"
     if _CHAT_SERVER is not None:
         return _CHAT_SERVER
     if _chat_server_alive(bind_host, port):

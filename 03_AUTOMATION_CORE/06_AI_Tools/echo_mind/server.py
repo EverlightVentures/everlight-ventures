@@ -282,8 +282,10 @@ class ReusableHTTPServer(HTTPServer):
 
 def main():
     os.chdir(str(ROOT))
-    server = ReusableHTTPServer(("0.0.0.0", PORT), EchoMindHandler)
-    print(f"Echo Mind serving on http://0.0.0.0:{PORT}")
+    # Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+    bind_host = os.environ.get("EV_BIND", "127.0.0.1")
+    server = ReusableHTTPServer((bind_host, PORT), EchoMindHandler)
+    print(f"Echo Mind serving on http://{bind_host}:{PORT}")
     try:
         server.serve_forever()
     except KeyboardInterrupt:

@@ -241,6 +241,20 @@ EVERLIGHT_COMMANDMENTS.md, LIVING_PUNCHLIST.md, WORKSPACE_MANIFEST.md, MEMORY.md
 - Local PreToolUse hook at `.claude/hooks/root_write_guard.sh`
 - Local daily audit script at `03_AUTOMATION_CORE/01_Scripts/workspace_root_audit.py`
 
+Network Binding Doctrine (HARD LAW, ENFORCED 2026-05-18):
+- Private by default. Public by `ev` domain. Every service binds to `127.0.0.1`
+  unless explicitly published through Cloudflare on an `*.everlightventures.io`
+  domain, or it is a managed-platform deploy (Railway, CF Pages, Vercel) where
+  the platform requires `0.0.0.0:$PORT`.
+- Use `EV_BIND=0.0.0.0` env-var to deliberately expose a service (e.g. on Oracle
+  behind a verified security list). Legacy per-script env-vars (HIVE_BIND_ALL,
+  XLM_CHAT_HOST, MOLTBOOK_BIND, IC_BIND, RELAY_HOST) still work but EV_BIND wins
+  in any conflict.
+- Tagged exceptions (`# bind:public-by-design | managed-platform | tailnet-only
+  | lan-required | legacy-archive`) bypass the audit. Anything else is drift.
+- Audit: `python3 03_AUTOMATION_CORE/01_Scripts/network_binding_audit.py`
+- Full doctrine: `06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md`
+
 Auto-Deploy Rule (CRITICAL):
 After editing ANY file in 06_DEVELOPMENT/xlm_bot/ or 03_AUTOMATION_CORE/01_Scripts/,
 ALWAYS run: bash 03_AUTOMATION_CORE/01_Scripts/deploy_to_oracle.sh

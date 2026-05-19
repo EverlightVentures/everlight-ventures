@@ -26,4 +26,6 @@ else
 fi
 touch "$VENV_DIR/.installed"
 
-exec uvicorn app:app --host 0.0.0.0 --port "$PORT"
+# Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+BIND_HOST="${EV_BIND:-127.0.0.1}"
+exec uvicorn app:app --host "$BIND_HOST" --port "$PORT"

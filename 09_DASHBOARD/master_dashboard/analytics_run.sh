@@ -10,4 +10,6 @@ source "$VENV_DIR/bin/activate"
 # Install analytics deps only when needed
 pip install -q -r requirements-analytics.txt 2>/dev/null
 
-streamlit run analytics_streamlit.py --server.port 8777 --server.address 0.0.0.0
+# Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+BIND_HOST="${EV_BIND:-127.0.0.1}"
+streamlit run analytics_streamlit.py --server.port 8777 --server.address "$BIND_HOST"

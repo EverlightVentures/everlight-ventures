@@ -310,10 +310,14 @@ source "$VENV/bin/activate"
 echo "[$(date)] Dashboard starting on port $PORT"
 
 while true; do
+    # Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+    # Oracle cloud deploy: SSH-tunnel by default. EV_BIND=0.0.0.0 to expose
+    # the dashboard via Oracle security list (only after security list verified).
+    BIND_HOST="${EV_BIND:-127.0.0.1}"
     XLM_DASH_EXCHANGE_READ=1 PYTHONFAULTHANDLER=1 \
         "$VENV/bin/streamlit" run dashboard.py \
         --server.port "$PORT" \
-        --server.address 0.0.0.0 \
+        --server.address "$BIND_HOST" \
         --server.headless true \
         --server.fileWatcherType poll
     sleep 2

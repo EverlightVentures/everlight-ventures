@@ -271,5 +271,7 @@ class Handler(BaseHTTPRequestHandler):
         pass
 
 if __name__ == "__main__":
+    # bind:public-by-design Twilio voice webhook receives unsolicited public traffic.
+    # See 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md.
     log("Hive Voice Handler v2 starting on port 8200...")
     HTTPServer(("0.0.0.0", 8200), Handler).serve_forever()

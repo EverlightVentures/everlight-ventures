@@ -162,9 +162,10 @@ except Exception:
 
 if _start_chat_server is not None:
     try:
+        # Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
         _start_chat_server(
             port=int(os.environ.get("XLM_CHAT_PORT", "8504") or 8504),
-            host=os.environ.get("XLM_CHAT_HOST", "0.0.0.0"),
+            host=os.environ.get("EV_BIND") or os.environ.get("XLM_CHAT_HOST") or "127.0.0.1",
         )
     except Exception:
         pass

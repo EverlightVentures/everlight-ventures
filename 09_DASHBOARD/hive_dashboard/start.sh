@@ -20,9 +20,10 @@ python3 manage.py collectstatic --noinput -q 2>&1
 echo "[HIVE] Importing latest sessions..."
 python3 manage.py import_sessions 2>&1
 
-BIND_HOST="127.0.0.1"
+# Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+BIND_HOST="${EV_BIND:-127.0.0.1}"
 if [ "${HIVE_BIND_ALL:-0}" = "1" ]; then
-    BIND_HOST="0.0.0.0"
+    BIND_HOST="0.0.0.0"  # bind:tailnet-only legacy HIVE_BIND_ALL flag; prefer EV_BIND=0.0.0.0
 fi
 
 echo "[HIVE] Starting dashboard on ${BIND_HOST}:8504..."

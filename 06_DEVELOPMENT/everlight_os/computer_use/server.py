@@ -90,4 +90,6 @@ async def get_screenshot():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8501)
+    import os
+    # Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+    uvicorn.run(app, host=os.environ.get("EV_BIND", "127.0.0.1"), port=8501)

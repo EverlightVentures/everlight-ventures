@@ -19,7 +19,7 @@ fi
 
 # n8n config
 export N8N_PORT=5678
-export N8N_HOST=0.0.0.0
+export N8N_HOST=0.0.0.0  # bind:legacy-archive n8n is PARKED 2026-04-24, see CLAUDE.md
 export GENERIC_TIMEZONE=America/Los_Angeles
 export N8N_USER_FOLDER="$N8N_DATA"
 export N8N_DIAGNOSTICS_ENABLED=false

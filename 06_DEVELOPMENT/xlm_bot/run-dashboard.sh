@@ -2,9 +2,12 @@
 set -euo pipefail
 BOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 VENV="$BOT_DIR/venv"
+# Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+# Private by default. Set EV_BIND=0.0.0.0 on Oracle (behind security list) to expose.
 PORT="${XLM_DASH_PORT:-8502}"
 CHAT_PORT="${XLM_CHAT_PORT:-8504}"
-CHAT_HOST="${XLM_CHAT_HOST:-0.0.0.0}"
+BIND_HOST="${EV_BIND:-${XLM_CHAT_HOST:-127.0.0.1}}"
+CHAT_HOST="$BIND_HOST"
 
 cd "$BOT_DIR"
 source "$VENV/bin/activate"
@@ -41,7 +44,7 @@ while true; do
     XLM_DASH_EXCHANGE_READ=1 PYTHONFAULTHANDLER=1 \
         "$VENV/bin/streamlit" run dashboard.py \
         --server.port "$PORT" \
-        --server.address 0.0.0.0 \
+        --server.address "$BIND_HOST" \
         --server.headless true \
         --server.fileWatcherType poll
     sleep 2

@@ -108,7 +108,10 @@ class ChatHandler(BaseHTTPRequestHandler):
 
 
 if __name__ == "__main__":
-    server = ThreadingHTTPServer(("0.0.0.0", PORT), ChatHandler)
+    import os
+    # Bind policy: 06_DEVELOPMENT/everlight_os/docs/NETWORK_BINDING_POLICY.md
+    _bind = os.environ.get("EV_BIND", "127.0.0.1")
+    server = ThreadingHTTPServer((_bind, PORT), ChatHandler)
     print(f"Claude Chat Bridge running on port {PORT}")
     print(f"Workspace: {WORKSPACE}")
     print(f"Claude CLI: {CLAUDE_BIN}")
