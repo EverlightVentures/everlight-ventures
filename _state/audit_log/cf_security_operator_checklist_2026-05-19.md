@@ -81,6 +81,21 @@ EV_SECRETS_DIR=/opt/everlight/secrets
 
 Verify: `python3 .../secrets_vault.py self-test` -> expect `PASS: roundtrip ok`.
 
+## Sequencing advantage (discovered 2026-05-19 via cf_subdomain_health.py)
+
+All 6 tunnel subdomains are currently **DOWN** (e5-mother/cloudflared not
+serving). The root site `everlightventures.io` (CF Pages) is up (HTTP 200).
+
+This is the ideal moment to apply Access: it is a Cloudflare-side config that
+does NOT require the origin to be up. Apply it now, and when e5-mother + the
+tunnel reconnect, the 5 private subdomains come back ALREADY protected -- they
+are never re-exposed. Verify anytime with:
+
+    python3 03_AUTOMATION_CORE/01_Scripts/cf_subdomain_health.py
+    # before apply + tunnel down: all DOWN
+    # after apply + tunnel up:    all PROTECTED
+    # after apply, --check-token: TOKEN=passes (agents still get through)
+
 ## Step 4 -- Apply Cloudflare Access + WAF (5 min, MUTATES PRODUCTION)
 
 After Steps 1-2 are done:

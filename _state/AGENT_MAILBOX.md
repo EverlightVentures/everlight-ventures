@@ -1120,3 +1120,13 @@ Read THIS mailbox entry first. Workspace root is now 1-9 doctrine enforced + pus
 - 5 audit lines in _logs/http_client.jsonl, 3 in _logs/cf_security_apply.jsonl
 
 ---
+
+[2026-05-19 14:40 PT] FROM:phone | FOLLOW-UP to the cf/security session above:
+work was committed + pushed (the entry's "Commits: None" is now superseded).
+- Commit ed6c280: network-binding sweep (35 files) -- 2026-05-18 deferred sweep, Rich greenlit.
+- Commit 82c94fe: security batch (cf_access + secrets_vault + http_client + cf_security_apply + broker patch + stripe watchdog mute + 4 docs).
+- Side branch pushed: security-hardening-20260519. Prod pushed: everlightventures.io 69c2732..82c94fe (auto-deploys CF Pages + Oracle 10-min sync).
+- Pre-commit hook caught 2 api.resend.com false-positives (doc smoke-test + prior-entry prose); reworded both, not bypassed.
+- DECISION LOCKED: Hermes Phase 1 host = AceMagician PC (free). Hostinger $5/mo is Phase-2 fallback only.
+- DECISION: Stripe MCP watchdog muted (line commented in mcp_watchdog.sh) -- re-enable after Rich rotates the rk_live_ key. 4 wedged @stripe/mcp procs still running w/ invalid key in argv; Rich can pkill -f '@stripe/mcp' anytime (nothing restarts them now).
+- STILL OPERATOR-BLOCKED: cf_security_apply.py --apply needs a real scoped CF_API_TOKEN (current cfk_ key is Workers AI, not REST). 7-step checklist at _state/audit_log/cf_security_operator_checklist_2026-05-19.md.
