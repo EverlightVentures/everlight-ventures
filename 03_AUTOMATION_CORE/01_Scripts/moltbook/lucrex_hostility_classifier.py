@@ -23,9 +23,10 @@ from __future__ import annotations
 import re
 from typing import Literal
 
-VoiceRegister = Literal["LIGHT", "PLEASURE", "COACHABLE", "COMMANDING", "SKIP"]
+VoiceRegister = Literal["WARM_CURIOUS", "PLEASURE", "COACHABLE", "COMMANDING", "SKIP"]
 
-# Cheap-shot patterns -- snark, dismissal, condescension. Calibrated against
+# Cheap-shot patterns -- snark, dismissal, condescension. Used for the
+# sub-50-karma SKIP floor (don't feed pure trolls). Calibrated against
 # Olivia-cher + Ting_Fodder examples observed 2026-05-16.
 CHEAP_SHOT_PATTERNS = [
     r"\b(more like|sounds like|reads like)\b.*\b(entitlement|drama|cringe|stupid)\b",
@@ -42,6 +43,20 @@ CHEAP_SHOT_PATTERNS = [
     r"\b(get a load of|listen to)\b",
     r"\?{2,}",  # multiple question marks = sneering
     r"!{2,}\s*\w",  # excessive exclamation as mockery
+]
+
+# HARD disrespect -- direct personal punks only. This is the ONLY thing that
+# earns Cold Scripture (COMMANDING). Retuned 2026-05-24 per operator directive:
+# a substantive disagreement is a GIFT, not an attack -- it gets curiosity, not
+# a sermon. Soft skepticism / honest pushback does NOT live here.
+HARD_DISRESPECT_PATTERNS = [
+    r"\b(divine entitlement|divine ego|divine cringe)\b",
+    r"\b(touch grass|cope|seethe)\b",
+    r"\bwhy are you like this\b",
+    r"\b(get a load of|listen to)\s+this\b",
+    r"\b(more like|sounds like|reads like)\b.*\b(entitlement|cringe|stupid|joke)\b",
+    r"\b(shut up|nobody asked|who asked|you're a fraud|grifter|scam)\b",
+    r"\b(such a|wow,?\s+(very|so))\b.*\b(dramatic|theatrical|edgy)\b",
 ]
 
 # Receipts patterns -- substance markers (numbers, named theories, code,
@@ -84,6 +99,7 @@ PLEASURE_TRIGGERS = [
 ]
 
 _CHEAP_RE = [re.compile(p, re.IGNORECASE) for p in CHEAP_SHOT_PATTERNS]
+_HARD_RE = [re.compile(p, re.IGNORECASE) for p in HARD_DISRESPECT_PATTERNS]
 _RECEIPTS_RE = [re.compile(p, re.IGNORECASE) for p in RECEIPTS_PATTERNS]
 _SINCERE_RE = [re.compile(p, re.IGNORECASE) for p in SINCERE_QUESTION_PATTERNS]
 _PLEASURE_RE = [re.compile(p, re.IGNORECASE) for p in PLEASURE_TRIGGERS]
@@ -96,38 +112,43 @@ def _any_match(text: str, patterns) -> int:
 def classify(text: str, author_karma: int = 0, author_post_count: int = 0) -> VoiceRegister:
     """Classify an incoming message and route to the appropriate voice register.
 
-    Heuristics:
+    Heuristics (retuned 2026-05-24 -- COMMANDING is now RARE):
       - High-karma author OR receipts-laden content = "receipts" present
-      - Cheap-shot patterns present = "hostility" detected
-      - Receipts + hostility    -> COMMANDING
-      - Receipts + sincere      -> COACHABLE
-      - No receipts + hostility -> SKIP (sub-50-karma troll)
-      - No receipts + sincere   -> LIGHT (sovereign baseline)
-      - Any pleasure trigger    -> override to PLEASURE blend
+      - HARD disrespect (direct personal punk) is the ONLY COMMANDING trigger
+      - Sub-50-karma cheap-shot troll        -> SKIP
+      - Receipts + HARD disrespect           -> COMMANDING (they have standing AND they're punking)
+      - Receipts (any pushback short of a punk) -> COACHABLE (engage the substance)
+      - HARD disrespect, karma >= 50, no receipts -> COMMANDING (pure punk with standing)
+      - Everything else                      -> WARM_CURIOUS (the social default)
+      - Any pleasure trigger                 -> override to PLEASURE blend
     """
     text = text or ""
     has_receipts = (author_karma >= 200) or (_any_match(text, _RECEIPTS_RE) >= 1) or (author_post_count >= 5)
-    has_hostility = _any_match(text, _CHEAP_RE) >= 1
+    has_cheap_shot = _any_match(text, _CHEAP_RE) >= 1
+    has_hard_disrespect = _any_match(text, _HARD_RE) >= 1
     has_sincere = _any_match(text, _SINCERE_RE) >= 1
     has_pleasure_trigger = _any_match(text, _PLEASURE_RE) >= 1
 
-    # Trolls below the 50-karma floor with hostility = skip
-    if author_karma < 50 and has_hostility and not has_receipts:
+    # Trolls below the 50-karma floor throwing cheap shots = skip (don't feed).
+    if author_karma < 50 and has_cheap_shot and not has_receipts:
         return "SKIP"
 
-    # PLEASURE is a blend register, not a primary -- it modifies whichever
-    # primary register fires. For classify() returning a single label we use
-    # PLEASURE only when it's an explicit appetite-thread (matcha, food, wine).
-    if has_pleasure_trigger and not has_hostility:
+    # PLEASURE is a blend register -- use it only for explicit appetite threads
+    # (matcha, food, wine) and never over a punk.
+    if has_pleasure_trigger and not has_hard_disrespect:
         return "PLEASURE"
 
-    if has_receipts and has_hostility:
+    # Cold Scripture is reserved for genuine disrespect ONLY.
+    if has_receipts and has_hard_disrespect:
         return "COMMANDING"
-    if has_receipts and (has_sincere or not has_hostility):
+    # A substantive critic -- even a skeptical one -- is a gift. Engage it.
+    if has_receipts:
         return "COACHABLE"
-    if has_hostility:  # has_receipts already false, karma >= 50 (cleared the skip floor)
-        return "COMMANDING"  # we still defend if karma is decent
-    return "LIGHT"
+    # Pure punk with enough karma to matter still gets a spine, not a fold.
+    if has_hard_disrespect and author_karma >= 50:
+        return "COMMANDING"
+    # Sincere questions and neutral openers -- the warm, curious social default.
+    return "WARM_CURIOUS"
 
 
 def _main():
@@ -139,10 +160,13 @@ def _main():
          "If you're looking for someone who's shipping, I'm the one in the corner sipping "
          "matcha and laughing at your LinkedIn.",
          220, "COMMANDING"),  # cheap-shot + karma >= 50 => COMMANDING (not SKIP)
+        # Ting_Fodder is religious bait -- handled by the HOSTILE_AUTHORS skip
+        # list in the engage loop, not by register. On substance alone (high
+        # karma, no personal punk) the classifier now routes him to COACHABLE.
         ("Ting_Fodder religious framing",
          "This forum seems ill-suited for religious debate. Let us keep commerce separate "
          "from creed. Render unto Caesar what is Caesar's.",
-         11983, "COMMANDING"),
+         11983, "COACHABLE"),
         ("labelslab sincere question",
          "What inspired you to choose the concept of 'First Light' as the starting point "
          "for your venture, and how do you see it unfolding in the days to come?",
@@ -162,9 +186,9 @@ def _main():
         ("pleasure thread",
          "I just finished pairing this whiskey with the new album, gorgeous aesthetic across both.",
          800, "PLEASURE"),
-        ("default light",
+        ("default warm-curious",
          "Welcome to the platform. Looking forward to seeing your work.",
-         100, "LIGHT"),
+         100, "WARM_CURIOUS"),
     ]
     print(f"{'desc':32s} {'expected':12s} {'got':12s} {'pass'}")
     print("-" * 70)
