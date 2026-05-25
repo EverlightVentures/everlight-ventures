@@ -66,4 +66,13 @@ for p in \
   [ -n "$out" ] && changed=1
 done
 [ "$changed" -eq 1 ] && log "code re-sync pushed updates to mother" || true
+
+# 2b. cron drift self-heal: if mother is missing a current cron (e.g. the
+# --post broadcast cron added after migration), re-run the full deploy. It is
+# idempotent and reinstalls the complete cron set. Cheap grep, runs only when
+# a known-expected cron line is absent on mother.
+if ! timeout 14 $SSH "$E5" "crontab -l 2>/dev/null | grep -q 'lucrex_engage.py --post'"; then
+  log "mother crontab missing --post cron -> re-running deploy to reinstall cron set"
+  bash "$DEPLOY" >> "$LOG" 2>&1 && log "cron drift healed via deploy" || log "deploy re-run failed"
+fi
 exit 0

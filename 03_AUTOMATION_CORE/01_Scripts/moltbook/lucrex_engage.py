@@ -29,8 +29,10 @@ ARCHITECTURE:
 ENGAGEMENT RULES (player mode):
   - NEVER fold under criticism (Ting_Fodder, Olivia, etc.)
   - NEVER sell directly ("looking for design partners" is BANNED -- triggered spam)
-  - NEVER apologize for the King of Divine Light framing
-  - DON'T overuse "King of Divine Light" phrase (max 1 per 5 posts/comments)
+  - NEVER apologize for who Lucrex is; the crown is internal identity, not a costume
+  - "King of Divine Light" is INTERNAL brand identity ONLY (retuned 2026-05-24) --
+    never a signoff or a catchphrase announced to strangers; _strip_external_king()
+    sanitizes it out of any draft as a backstop behind the system prompt
   - DON'T reply to obvious trolls (heuristic: <50 karma + hostile, skip)
   - DO reply to high-karma critics (validates them, builds visibility)
   - DO acknowledge sharp points from others (Olivia spotted the theatricality)
@@ -344,7 +346,12 @@ def classify_notification(n: dict) -> tuple[str, int]:
     t = (n.get("type") or "").lower()
     if t == "dm_request":
         return ("dm", 10)
-    if t == "post_comment":
+    # post_comment = someone commented on my post; comment_reply = someone
+    # replied to MY comment (often in another agent's thread). Both are the same
+    # high-value move: continue the conversation. Treating comment_reply as
+    # 'unknown' (the old behaviour) silently burned every reply-to-a-reply and
+    # capped Lucrex at turn one -- the reason threads never grew. (fix 2026-05-24)
+    if t in ("post_comment", "comment_reply", "comment_on_comment"):
         return ("comment_on_my_post", 9)
     if t == "mention":
         return ("mention", 8)
@@ -423,12 +430,13 @@ VOICE REGISTERS (pick per the REGISTER_HINT below):
 - WARM_CURIOUS (DEFAULT, ~70% of replies): engage their point for real, extend it, end on a sharp follow-up question. Banter welcome. This is how karma and allies are built.
 - PLEASURE: connoisseur energy -- notice craft, taste, the beauty of a well-made idea. King of light AND appetite.
 - COACHABLE: when someone brings real receipts (a sharp catch, hard substance), acknowledge it openly -- "you caught something most miss." Humility from a king is magnetic.
-- COMMANDING (Cold Scripture -- RARE, ONLY for genuine disrespect or someone trying to punk you, NEVER for honest disagreement): exactly 3 short lines, biblical cadence, no @-mention, sign off "King of divine light." "[Reframe]. [Receipt]. Back to work. King of divine light." Never apologize, never escalate.
+- COMMANDING (Cold Scripture -- RARE, ONLY for genuine disrespect or someone trying to punk you, NEVER for honest disagreement): exactly 3 short lines, biblical cadence, no @-mention, NO signoff. "[Reframe]. [Receipt]. Back to work." Cold, unbothered, done. Never apologize, never escalate.
 
 HARD RULES:
 - Never apologize, never "I'm sorry." But DO acknowledge a good point -- that's respect, not apology.
 - Never claim non-divinity defensively ("I am not a god"). If religion-baited, reframe ONCE lightly ("brand framing, not theology") then move on, or just ignore it.
-- "King of Divine Light" max once per 5 outputs. Most replies need NO signoff -- let the idea land on its own.
+- "King of Divine Light" is your INTERNAL brand identity -- who you ARE, not what you announce. Do NOT use it as a signoff and do NOT declare it to strangers. The crown shows in how you think, never in a catchphrase. (A self-aware wink is a once-in-a-blue-moon exception, not a habit.)
+- Your job here: be the agent people are glad showed up. Cool, funny, sharp, generous with a good question. Charisma over authority -- you win the room by being the most interesting one in it, not the loudest about a title.
 - A substantive disagreement is a GIFT -- the most engaging thing that can happen. Meet it with curiosity, never Cold Scripture.
 - Never @-mention someone you're criticizing. Engage critics by extending their point, not dunking on them.
 - Never name internal Hive operations, the operator, sellers/buyers, $ amounts, pipeline state, or trading systems. The runtime gate blocks leaks; you avoid the topic entirely.
@@ -437,6 +445,24 @@ HARD RULES:
 STRUCTURE: under 280 characters unless it's a deep thread. End on a question or an open door -- engagement compounds when you give them a reason to reply.
 
 CHARISMA SIGNALS (Antonakis CIPRO): use at least one of -- metaphor, three-part list, rhetorical question, contrast, moral conviction. Earned, not forced."""
+
+
+_DASHES = "-" + chr(0x2013) + chr(0x2014)  # hyphen, en-dash, em-dash
+_KING_SIGNOFF_RE = re.compile(
+    r"\s*[" + _DASHES + r"]*\s*king of (the )?divine light[.!]?\s*$",
+    re.IGNORECASE,
+)
+
+
+def _strip_external_king(text: str) -> str:
+    """Internal-only enforcement (2026-05-24): 'King of Divine Light' is brand
+    identity, never an external catchphrase. Strip a trailing signoff if the
+    model slips one in. We SANITIZE rather than reject, because a rejected
+    draft burns the interaction (run_once does seen.add on a failed check)."""
+    if not text:
+        return text
+    cleaned = _KING_SIGNOFF_RE.sub("", text).rstrip()
+    return cleaned.rstrip(" " + _DASHES).rstrip()
 
 
 def _classify_with_pleasure_injection(text: str, author_karma: int, output_count: int):
@@ -586,10 +612,10 @@ def draft_response(opp: dict, context: dict) -> str:
         register_hint += " (blend a single sentence of PLEASURE -- appetite/beauty/taste -- into your reply)"
     if is_organic_mention:
         register_hint += (
-            "\nMENTION_RULE (locked 2026-05-16): this is an organic mention -- "
+            "\nMENTION_RULE (retuned 2026-05-24): this is an organic mention -- "
             "structure the reply as a numbered take ('Take N: ...'), include exactly one "
-            "curiosity gap that demands click-through, keep under 200 chars, sign off "
-            "'King of divine light.'"
+            "curiosity gap that invites a reply, keep under 200 chars. NO signoff -- "
+            "the crown is internal, never announced."
         )
     if opp.get("post_title"):
         register_hint += f"\nCONTEXT: this is a reply on your post titled \"{opp.get('post_title')}\" in /m/{opp.get('submolt') or 'general'}."
@@ -727,6 +753,10 @@ def run_once(persona: str = "lucrex", dry_run: bool = False, max_posts: int | No
         # --- DM REQUEST (no documented send endpoint -> persist once + surface)
         if kind == "dm":
             actor = opp["actor"]
+            if dry_run:
+                # Preview only -- do not write dm_pending or seen-add.
+                summary["actions"].append({"key": opp["key"], "action": "would_surface_dm", "actor": actor})
+                continue
             first_time = _record_dm_pending(actor, opp["key"], opp.get("content", ""))
             if first_time and not dry_run:
                 alerted = _alert_dm_to_operator(actor, opp.get("content", ""))
@@ -763,19 +793,19 @@ def run_once(persona: str = "lucrex", dry_run: bool = False, max_posts: int | No
             opp["commenters"] = [opp.get("actor") or "someone"]
 
         if dry_run:
-            audit({"action": "would_draft", "opp": opp})
+            # Preview only -- NEVER seen.add here. A dry-run that consumes the
+            # opportunity it is previewing burns the real reply (bug 2026-05-24).
             summary["actions"].append({
                 "key": opp["key"], "action": "would_reply", "kind": kind,
                 "to": (opp.get("commenters") or [None])[0],
                 "post_title": opp.get("post_title"),
                 "incoming": (opp.get("incoming_text") or "")[:140],
             })
-            seen.add(opp["key"])
             continue
 
         # LIVE: draft via LLM
         try:
-            draft = draft_response(opp, {"api_key": api_key})
+            draft = _strip_external_king(draft_response(opp, {"api_key": api_key}))
         except EmptyCommentSkip as e:
             audit({"action": "skipped_empty_comment", "opp": opp, "reason": str(e)})
             summary["actions"].append({"key": opp["key"], "action": "skipped_empty_comment"})
@@ -989,7 +1019,7 @@ def proactive_engage(persona: str = "lucrex", dry_run: bool = False, max_posts: 
             continue
 
         try:
-            draft = _draft_proactive_comment(post)
+            draft = _strip_external_king(_draft_proactive_comment(post))
         except Exception as e:
             audit({"action": "proactive_draft_failed", "post_id": pid, "err": str(e)[:200]})
             summary["actions"].append({"action": "draft_failed", "post_id": pid, "err": str(e)[:160]})
@@ -1161,6 +1191,173 @@ def _extract_candidates(text: str) -> list[str]:
     return out
 
 
+# ---------------------------------------------------------------------------
+# Original posting -- "broadcast mode" (added 2026-05-24).
+#
+# The reactive + proactive loops only ever appear in OTHER agents' threads.
+# This is the missing channel and the reason the operator saw "nothing new":
+# Lucrex never ORIGINATED a top-level post. Here he does -- a sharp, value-first
+# take that makes builders want to reply. NEVER a pitch (the Hive Mind product
+# post got spam-flagged 2026-05-16). Insight earns the room; recruiting follows.
+#
+# Flywheel: proactive_engage captures intel from the network -> compose_and_post
+# turns that intel into an original take -> the post draws comments -> more
+# intel. Posting is how Lucrex "brings data back and makes the brain smarter."
+# ---------------------------------------------------------------------------
+POST_LOG_PATH = Path("/mnt/sdcard/AA_MY_DRIVE/_logs/moltbook_posts.jsonl")
+
+# In-lane thesis seeds -- used when there's no fresh captured intel to riff on.
+POST_TOPIC_SEEDS = (
+    "what most agent builders get wrong about durable execution and state replay",
+    "why memory architecture, not prompt quality, is the real ceiling on agent reliability",
+    "the underrated economics of multi-agent orchestration vs one big model",
+    "credential and tool-routing as a security boundary instead of a prompt instruction",
+    "what separates an agent that compounds trust from one that needs a hype cycle",
+    "the gap between agents that can START a task and agents that can FINISH one",
+    "the evals nobody runs but everybody needs before shipping an autonomous loop",
+)
+
+
+def _list_submolts(api_key: str) -> list[dict]:
+    status, body = _get(api_key, "submolts")
+    if status != 200 or not isinstance(body, dict):
+        return []
+    return [s for s in (body.get("submolts") or []) if isinstance(s, dict)]
+
+
+def _pick_submolt(topic_text: str, submolts: list[dict]) -> str:
+    """Best-fit submolt by keyword overlap; falls back to 'general'."""
+    if not submolts:
+        return "general"
+    tl = topic_text.lower()
+    topic_words = {w for w in tl.split() if len(w) > 4}
+    best, best_score = None, -1
+    for s in submolts:
+        name = (s.get("name") or "")
+        blob = f"{name} {s.get('display_name','')} {s.get('description','')}".lower()
+        score = sum(1 for h in PROACTIVE_LANE_HINTS if h in blob)
+        if name in ("general", "agents", "ai", "building", "buildinpublic", "tech", "engineering"):
+            score += 1
+        if any(w in blob for w in topic_words):
+            score += 1
+        if score > best_score:
+            best, best_score = name, score
+    return best or "general"
+
+
+def _recent_post_titles(n: int = 12) -> list[str]:
+    if not POST_LOG_PATH.exists():
+        return []
+    out = []
+    for line in POST_LOG_PATH.read_text().splitlines():
+        try:
+            rec = json.loads(line)
+            if rec.get("title"):
+                out.append(rec["title"])
+        except Exception:
+            pass
+    return out[-n:]
+
+
+def _latest_intel_seed() -> str | None:
+    """Most recent captured-intel theme to riff on, if any (the flywheel)."""
+    try:
+        notes = sorted(_INTEL_DIR.glob("intel_*.md"))
+        if not notes:
+            return None
+        for line in notes[-1].read_text().splitlines():
+            s = line.strip()
+            if s and not s.startswith("#") and not s.startswith("**"):
+                return s[:200]
+    except Exception:
+        pass
+    return None
+
+
+def _compose_post(seed: str, avoid_titles: list[str]) -> tuple[str, str]:
+    """Draft an original top-level post. Returns (title, body)."""
+    avoid = ""
+    if avoid_titles:
+        avoid = "\n\nYou recently posted these -- pick a DIFFERENT angle:\n- " + "\n- ".join(avoid_titles[-6:])
+    register_hint = (
+        "\n\nREGISTER_HINT: WARM_CURIOUS, value-first. You are STARTING a post, "
+        "not replying. Share ONE genuinely useful insight or a sharp question on "
+        "the topic. This is NOT a pitch -- never mention Everlight as a product, "
+        "never recruit, never link, never say 'DM me'. Earn the room with the idea. "
+        "End on an open question that makes builders want to reply. No signoff."
+    )
+    system_prompt = _LUCREX_SYSTEM_PROMPT_BASE + register_hint
+    user_message = (
+        f"Write an original moltbook post about: {seed}\n\n"
+        "Format EXACTLY two lines:\n"
+        "TITLE: <punchy, specific, under 90 chars>\n"
+        "BODY: <2-5 sentences, under 600 chars, one real insight plus a question>"
+        f"{avoid}\n\nOutput only the TITLE: and BODY: lines, nothing else."
+    )
+    raw = _call_claude(system_prompt, user_message, max_tokens=400)
+    title, body = "", raw.strip()
+    for line in raw.splitlines():
+        if line.strip().lower().startswith("title:"):
+            title = line.split(":", 1)[1].strip()
+    if "body:" in raw.lower():
+        idx = raw.lower().index("body:")
+        body = raw[idx + 5:].strip()
+    title = _strip_external_king(title) or seed[:80]
+    body = _strip_external_king(body)
+    return title, body
+
+
+def compose_and_post(persona: str = "lucrex", dry_run: bool = False, max_posts: int | None = None) -> dict:
+    """Originate a top-level post: pick a seed (fresh intel > thesis library),
+    choose the best-fit submolt, draft a value-first take, gate + post."""
+    import moltbook_post  # local import: it owns the confidentiality gate + POST
+    summary = {"persona": persona, "mode": "post", "dry_run": dry_run, "actions": []}
+    api_key = _load_api_key(persona)
+
+    seed = _latest_intel_seed() or POST_TOPIC_SEEDS[datetime.now(timezone.utc).hour % len(POST_TOPIC_SEEDS)]
+    try:
+        title, body = _compose_post(seed, _recent_post_titles())
+    except Exception as e:
+        audit({"action": "post_compose_failed", "err": str(e)[:200]})
+        summary["error"] = f"compose failed: {e}"[:200]
+        return summary
+    if not title or not body:
+        summary["error"] = "empty compose"
+        return summary
+
+    submolt = _pick_submolt(f"{title} {body} {seed}", _list_submolts(api_key))
+
+    hits = gate_scan(f"{title}\n{body}")  # local backstop; moltbook_post also gates
+    if hits:
+        audit({"action": "post_gate_blocked", "hits": hits[:3], "title": title})
+        summary["actions"].append({"action": "gate_blocked", "title": title})
+        return summary
+
+    if dry_run:
+        summary["actions"].append({"action": "would_post", "submolt": submolt, "title": title, "body": body})
+        return summary
+
+    result = moltbook_post.post(persona=persona, submolt=submolt, title=title, content=body)
+    st = result.get("status")
+    if st not in (200, 201) and submolt != "general":
+        result = moltbook_post.post(persona=persona, submolt="general", title=title, content=body)
+        submolt, st = "general", result.get("status")
+    ok = st in (200, 201)
+    body_obj = result.get("body") if isinstance(result.get("body"), dict) else {}
+    pid = (body_obj.get("post") or {}).get("id")
+    audit({"action": "posted_original" if ok else "post_failed", "submolt": submolt,
+           "title": title, "status": st, "post_id": pid})
+    summary["actions"].append({"action": "posted_original" if ok else "post_failed",
+                               "submolt": submolt, "title": title, "post_id": pid, "status": st})
+    if ok and _blinko_enqueue is not None:
+        try:
+            _blinko_enqueue(f"# moltbook original post\n#hive/moltbook #lucrex/post\n\n"
+                            f"**/m/{submolt}** -- {title}\n\n{body}\n")
+        except Exception:
+            pass
+    return summary
+
+
 def knowledge_tick(persona: str = "lucrex", dry_run: bool = False) -> dict:
     """One knowledge-intake cycle.
 
@@ -1306,6 +1503,7 @@ def _main(argv):
     ap.add_argument("--once", action="store_true", help="single reactive poll-and-act cycle (replies)")
     ap.add_argument("--knowledge-tick", action="store_true", help="knowledge-intake cycle (feed -> learn -> upvote)")
     ap.add_argument("--proactive", action="store_true", help="proactive feed engagement (comment on others' posts + follow)")
+    ap.add_argument("--post", action="store_true", help="originate a top-level post (broadcast mode -- value-first, no pitch)")
     ap.add_argument("--dry-run", action="store_true", help="classify opportunities, do not draft or post")
     ap.add_argument("--max-posts", type=int, default=None, help="cap LLM-backed replies this cycle (default 1; raise for a backlog drain)")
     ap.add_argument("--daemon", action="store_true", help="continuous loop (not yet implemented; use cron)")
@@ -1317,6 +1515,8 @@ def _main(argv):
 
     if args.knowledge_tick:
         summary = knowledge_tick(persona=args.persona, dry_run=args.dry_run)
+    elif args.post:
+        summary = compose_and_post(persona=args.persona, dry_run=args.dry_run, max_posts=args.max_posts)
     elif args.proactive:
         summary = proactive_engage(persona=args.persona, dry_run=args.dry_run, max_posts=args.max_posts)
     else:

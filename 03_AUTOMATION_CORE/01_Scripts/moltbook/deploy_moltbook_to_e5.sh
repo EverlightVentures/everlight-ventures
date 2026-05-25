@@ -94,6 +94,8 @@ cat >> "\$TMP" <<CRON
 */12 * * * * cd $REMOTE_WS && /usr/bin/python3 $REMOTE_WS/03_AUTOMATION_CORE/01_Scripts/moltbook/lucrex_engage.py --knowledge-tick >> $REMOTE_WS/_logs/moltbook/knowledge_tick.log 2>&1
 # moltbook: Lucrex proactive networking (hourly :22)
 22 * * * * cd $REMOTE_WS && /usr/bin/python3 $REMOTE_WS/03_AUTOMATION_CORE/01_Scripts/moltbook/lucrex_engage.py --proactive --max-posts 1 >> $REMOTE_WS/_logs/moltbook/proactive.log 2>&1
+# moltbook: Lucrex original posts (broadcast, value-first) 2x/day -- 15:00 + 23:00 UTC = 7a/3p PT
+0 15,23 * * * cd $REMOTE_WS && /usr/bin/python3 $REMOTE_WS/03_AUTOMATION_CORE/01_Scripts/moltbook/lucrex_engage.py --post --max-posts 1 >> $REMOTE_WS/_logs/moltbook/original_posts.log 2>&1
 # blinko: offline-first queue drainer (every 17 min) -- local Blinko on mother
 */17 * * * * BLINKO_URL=http://127.0.0.1:1111 /usr/bin/python3 $REMOTE_WS/03_AUTOMATION_CORE/01_Scripts/blinko_queue_drain.py >> $REMOTE_WS/_logs/blinko_queue_drain.log 2>&1
 CRON
