@@ -5,8 +5,9 @@ route(msg, classification, *, dry_run) -> dict             (side effects)
 
 Safety: auto_reply ONLY for low-risk, non-opsec, non-high-stakes categories.
 Everything else becomes a Gmail draft for one-tap human approval. Every send
-goes through branded_mailer (which runs eradication_gate internally) and the
-confidentiality scan; a confidentiality hit downgrades the send to alert-only.
+goes through branded_mailer (which runs eradication_gate internally) and a
+confidentiality scan that FAILS CLOSED -- if the gate cannot run we do NOT
+send, we downgrade to alert-only. Mirrors the eradication-gate doctrine.
 """
 from __future__ import annotations
 
@@ -15,13 +16,25 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-LOG = Path("/mnt/sdcard/AA_MY_DRIVE/_logs/inbound/sentinel.jsonl")
-_AUTO_REPLY_OK = {"sales_pitch", "vendor_pitch", "opt_out"}
+# Put the Scripts dir (and the moltbook gate dir) on sys.path ONCE at import
+# time so content_tools.* and the confidentiality gate resolve without
+# per-call path mutation.
+_SCRIPTS = Path(__file__).resolve().parents[1]  # .../01_Scripts
+for _p in (str(_SCRIPTS), str(_SCRIPTS / "moltbook")):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
-# Persona routing: which teammate owns the reply for each category.
+_LOG_DIR = Path("/mnt/sdcard/AA_MY_DRIVE/_logs/inbound")
+LOG = _LOG_DIR / "sentinel.jsonl"
+DRAFTS = _LOG_DIR / "drafts.jsonl"
+
+# Categories the classifier actually emits AND that are safe to auto-reply.
+# (opt_out auto-reply is a planned classifier addition; until the classifier
+#  emits "opt_out", an unsubscribe lands as "other" and safely drafts.)
+_AUTO_REPLY_OK = {"sales_pitch"}
+
 _PERSONA = {
     "sales_pitch": ("Vaughn Sterling", "Senior Partner", "vaughn@everlightventures.io"),
-    "opt_out":     ("Vaughn Sterling", "Senior Partner", "vaughn@everlightventures.io"),
     "partnership": ("Vaughn Sterling", "Senior Partner", "vaughn@everlightventures.io"),
     "investor":    ("Vaughn Sterling", "Senior Partner", "vaughn@everlightventures.io"),
     "press":       ("Everlight Content", "Press Desk", "press@everlightventures.io"),
@@ -41,25 +54,29 @@ def decide_action(classification: dict) -> str:
     return "draft"
 
 
-def _confidential_ok(body: str) -> bool:
-    """True if the reply body leaks no internal state. Reuses moltbook gate."""
-    try:
-        sys.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/moltbook")
-        from moltbook_confidentiality_gate import scan
-        return len(scan(body)) == 0
-    except Exception:
-        return True  # gate import failure must not silently send; see route() guard
-
-
 def _log(record: dict) -> None:
-    LOG.parent.mkdir(parents=True, exist_ok=True)
-    record["ts"] = datetime.now(timezone.utc).isoformat()
+    _LOG_DIR.mkdir(parents=True, exist_ok=True)
+    record.setdefault("ts", datetime.now(timezone.utc).isoformat())
     with LOG.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(record, default=str) + "\n")
 
 
+def _confidential_ok(body: str) -> bool:
+    """True only if the reply body provably leaks no internal state.
+
+    FAILS CLOSED: if the confidentiality gate cannot be imported or the scan
+    raises, return False so route() downgrades to alert-only instead of
+    sending. Mirrors the eradication_gate fail-closed doctrine.
+    """
+    try:
+        from moltbook_confidentiality_gate import scan
+        return len(scan(body)) == 0
+    except Exception:
+        return False
+
+
 def _safe_reply_body(persona_name: str) -> str:
-    """A content-free brush-off. Names nothing internal. Used for auto_reply only."""
+    """A content-free brush-off. Names nothing internal. auto_reply only."""
     return (
         "Hi,<br><br>Thanks for reaching out. We are heads-down right now and not "
         "evaluating new tools or partnerships. If that changes we will reach back out.<br><br>"
@@ -83,12 +100,13 @@ def route(msg: dict, classification: dict, *, dry_run: bool = True) -> dict:
         "sent": False,
         "drafted": False,
         "alerted": False,
+        "error": "",
     }
     if dry_run:
         _log(result)
         return result
 
-    # 1. Always alert (branded Slack card + push handled by orchestrator).
+    # 1. Always alert.
     result["alerted"] = _post_alert(msg, classification, action, persona_name)
 
     # 2. Reply path.
@@ -97,7 +115,13 @@ def route(msg: dict, classification: dict, *, dry_run: bool = True) -> dict:
         if not _confidential_ok(body):
             result["action"] = "blocked_confidential"
         else:
-            result["sent"] = _send_reply(msg, body, persona_name, persona_title, persona_email)
+            ok, err = _send_reply(msg, body, persona_name, persona_title, persona_email)
+            result["sent"] = ok
+            result["error"] = err
+            if err.startswith("eradication"):
+                # A blocked send is a security event, not a plain failure.
+                _log({"event": "eradication_block_on_auto_reply",
+                      "from": msg.get("from_email"), "error": err})
     else:
         result["drafted"] = _make_draft(msg, classification, persona_name, persona_email)
 
@@ -107,15 +131,19 @@ def route(msg: dict, classification: dict, *, dry_run: bool = True) -> dict:
 
 def _post_alert(msg, classification, action, persona_name) -> bool:
     try:
-        sys.path.insert(0, "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts")
         from content_tools.branded_slack import post_branded_slack
         cat = classification.get("category", "other")
         channel = "#ceo-brief" if cat in {"partnership", "investor", "press"} else "#hive-alerts"
+        assets = classification.get("referenced_assets", [])
+        if classification.get("opsec_flag"):
+            opsec = "EXPOSED: " + ", ".join(assets) if assets else "EXPOSED"
+        else:
+            opsec = "clear"
         fields = {
             "From": msg.get("from_email", ""),
             "Category": cat,
             "Action": action,
-            "Opsec": "EXPOSED: " + ", ".join(classification.get("referenced_assets", [])) if classification.get("opsec_flag") else "clear",
+            "Opsec": opsec,
             "Routed to": persona_name,
         }
         r = post_branded_slack(
@@ -129,11 +157,12 @@ def _post_alert(msg, classification, action, persona_name) -> bool:
             agent_title="Everlight Ventures",
         )
         return bool(getattr(r, "ok", False))
-    except Exception:
+    except Exception as exc:
+        _log({"event": "alert_failed", "error": str(exc), "from": msg.get("from_email")})
         return False
 
 
-def _send_reply(msg, body, name, title, from_email) -> bool:
+def _send_reply(msg, body, name, title, from_email) -> tuple[bool, str]:
     try:
         from content_tools.branded_mailer import send_branded_email
         r = send_branded_email(
@@ -147,13 +176,13 @@ def _send_reply(msg, body, name, title, from_email) -> bool:
             persona_id="inbound_sentinel",
             caller="inbound_sentinel",
         )
-        return bool(getattr(r, "ok", False))
-    except Exception:
-        return False
+        return bool(getattr(r, "ok", False)), str(getattr(r, "error", ""))
+    except Exception as exc:
+        _log({"event": "send_exception", "error": str(exc), "from": msg.get("from_email")})
+        return False, f"send_exception:{exc}"
 
 
 def _make_draft(msg, classification, name, from_email) -> bool:
-    """Persist a draft record the orchestrator turns into a Gmail draft."""
     draft = {
         "to": msg.get("from_email"),
         "subject": "Re: " + msg.get("subject", ""),
@@ -164,8 +193,7 @@ def _make_draft(msg, classification, name, from_email) -> bool:
             ", ".join(classification.get("referenced_assets", [])) or "clear"),
         "original_body": msg.get("body", "")[:1000],
     }
-    out = Path("/mnt/sdcard/AA_MY_DRIVE/_logs/inbound/drafts.jsonl")
-    out.parent.mkdir(parents=True, exist_ok=True)
-    with out.open("a", encoding="utf-8") as fh:
+    _LOG_DIR.mkdir(parents=True, exist_ok=True)
+    with DRAFTS.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(draft, default=str) + "\n")
     return True
