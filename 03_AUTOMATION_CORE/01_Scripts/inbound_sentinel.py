@@ -21,21 +21,22 @@ from inbound.sentinel_classifier import classify
 from inbound.sentinel_router import route
 
 SEEN = Path("/mnt/sdcard/AA_MY_DRIVE/_logs/inbound/sentinel_seen.json")
+_SEEN_MAX = 5000   # prune trigger
+_SEEN_KEEP = 3000  # survivors after prune (NEWEST by insertion order)
 
 
-def _seen() -> set[str]:
+def _load_seen() -> list[str]:
+    """Return the seen Message-IDs as an ordered list (oldest first)."""
     try:
-        return set(json.loads(SEEN.read_text()))
+        data = json.loads(SEEN.read_text())
+        return [str(x) for x in data] if isinstance(data, list) else []
     except Exception:
-        return set()
+        return []
 
 
-def _mark(seen: set[str], mid: str) -> None:
-    seen.add(mid)
-    if len(seen) > 5000:
-        seen = set(list(seen)[-3000:])
+def _save_seen(ids: list[str]) -> None:
     SEEN.parent.mkdir(parents=True, exist_ok=True)
-    SEEN.write_text(json.dumps(list(seen)))
+    SEEN.write_text(json.dumps(ids))
 
 
 def process_one(msg: dict, *, dry_run: bool = True) -> dict | None:
@@ -47,9 +48,11 @@ def process_one(msg: dict, *, dry_run: bool = True) -> dict | None:
 
 
 def scan_once(*, dry_run: bool = True, days: int = 1) -> dict:
-    seen = _seen()
+    seen_list = _load_seen()
+    seen = set(seen_list)
     kept = 0
     actions: dict[str, int] = {}
+    new_ids: list[str] = []
     for msg in fetch_recent(days=days):
         mid = msg.get("message_id", "")
         if mid and mid in seen:
@@ -59,14 +62,21 @@ def scan_once(*, dry_run: bool = True, days: int = 1) -> dict:
             kept += 1
             actions[result["action"]] = actions.get(result["action"], 0) + 1
         if mid:
-            _mark(seen, mid)
+            seen.add(mid)        # within-run dedup
+            new_ids.append(mid)  # ordered, newest appended last
+    if new_ids:
+        merged = seen_list + new_ids
+        if len(merged) > _SEEN_MAX:
+            merged = merged[-_SEEN_KEEP:]  # keep the NEWEST by insertion order
+        _save_seen(merged)       # one write per scan, not per message
     return {"kept": kept, "actions": actions, "dry_run": dry_run}
 
 
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--once", action="store_true")
-    ap.add_argument("--daemon", action="store_true")
+    ap.add_argument("--daemon", action="store_true",
+                    help="run forever, scan every 5 min (process-manager only; use --once for cron)")
     ap.add_argument("--live", action="store_true", help="perform sends/drafts (default is dry-run)")
     ap.add_argument("--days", type=int, default=1)
     args = ap.parse_args()
