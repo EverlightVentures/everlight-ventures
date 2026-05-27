@@ -26,3 +26,17 @@ def test_billing_alert_deferred():
     keep, reason = triage_keep(_msg("stripe_alert.eml"))
     assert keep is False
     assert reason == "critical_service_defer"
+
+def test_known_by_domain_dropped():
+    # a NEW person at a known domain (not the listed email) still drops as known;
+    # mixed-case sender also verifies domain normalization.
+    msg = {"from_email": "newperson@MidSouthHomebuyers.com",
+           "list_unsubscribe": "", "precedence": ""}
+    keep, reason = triage_keep(msg)
+    assert keep is False
+    assert reason == "known_contact"
+
+def test_no_signal_when_no_sender():
+    keep, reason = triage_keep({"from_email": "", "list_unsubscribe": "", "precedence": ""})
+    assert keep is False
+    assert reason == "no_signal"

@@ -9,12 +9,16 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from pathlib import Path
 
 _HERE = Path(__file__).resolve().parent
 _KNOWN = _HERE / "known_contacts.json"
 
 # Senders handled by critical_email_monitor (billing/legal/security). Deferred, not kept.
+# Substring-by-design: matches only domains that START with "@brand." (brand-owned,
+# e.g. notifications@stripe.com, alerts@aws.amazon.com). A stranger domain that merely
+# contains the word (e.g. @mygithub-consulting.com) does NOT match -- no "@brand." prefix.
 _CRITICAL_SENDER = re.compile(
     r"@(stripe|paypal|oracle|aws|amazonwebservices|namecheap|godaddy|cloudflare|"
     r"github|chase|bankofamerica|wellsfargo|capitalone|chime|irs|resend|sendgrid)\.",
@@ -25,7 +29,11 @@ _CRITICAL_SENDER = re.compile(
 def _load_known() -> dict:
     try:
         return json.loads(_KNOWN.read_text())
-    except Exception:
+    except Exception as exc:
+        # Fail loud: a missing/corrupt allowlist means known contacts get
+        # surfaced as strangers. Make that visible instead of silent.
+        print(f"sentinel_filter: known_contacts.json unreadable ({exc}); "
+              f"treating all senders as unknown", file=sys.stderr)
         return {"domains": [], "emails": []}
 
 
@@ -42,7 +50,7 @@ def is_known_contact(msg: dict, known: dict | None = None) -> bool:
     sender = msg.get("from_email", "")
     if sender in {e.lower() for e in known.get("emails", [])}:
         return True
-    domain = sender.split("@")[-1] if "@" in sender else ""
+    domain = (sender.split("@")[-1] if "@" in sender else "").lower()
     return domain in {d.lower() for d in known.get("domains", [])}
 
 
