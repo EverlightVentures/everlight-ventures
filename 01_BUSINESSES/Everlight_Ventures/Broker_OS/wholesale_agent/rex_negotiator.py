@@ -393,7 +393,12 @@ def _template_response(deal: DealState, seller_message: str) -> str:
 # EMAIL
 # ---------------------------------------------------------------------------
 
-def send_email(to: str, subject: str, body: str, persona: dict | None = None) -> bool:
+def send_email(to: str, subject: str, body: str, persona: dict | None = None,
+               state: str = "TN", action: str = "negotiation") -> bool:
+    # state/action were referenced below but never defined -- every call raised
+    # NameError (dormant only because there were 0 deals). Default state="TN"
+    # since negotiations only occur on TN deals under the TN-only lockdown
+    # (2026-05-27). When multi-state, thread the deal's actual state here.
     """Delegates to rex_utils.safe_send_email (canonical branded_mailer pipeline).
 
     Migrated 2026-05-15 after Streubel 2nd-strike. The old body POSTed
