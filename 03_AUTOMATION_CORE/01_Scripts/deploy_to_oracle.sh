@@ -45,6 +45,16 @@ DEPLOY_HASH_FILE="/tmp/last_deploy_hash"
 ts() { date '+%Y-%m-%d %H:%M:%S PT'; }
 log() { echo "[$(ts)] $1" >> "$LOG"; echo "[$(ts)] $1"; }
 
+# Fast reachability gate. e5-mother is tailnet-only; when the tailnet is down it
+# does not resolve, so every E5-targeted scp/ssh would burn ConnectTimeout=10
+# sequentially across dozens of calls (the "deploy hang"). Probe once, skip the
+# whole E5 block fast if it's down. Bot deploys (Oracle Micro) are unaffected.
+e5_up() {
+    getent hosts "$HIVE_PROD_HOST" >/dev/null 2>&1 || \
+      [[ "$HIVE_PROD_HOST" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]] || return 1
+    ssh -o ConnectTimeout=6 -o BatchMode=yes -i "$KEY" -p "$E5_PORT" "$E5_VM" true 2>/dev/null
+}
+
 # Check if files actually changed since last deploy
 current_hash=$(find "$LOCAL_BOT" -name "*.py" -o -name "*.yaml" | sort | xargs md5sum 2>/dev/null | md5sum | cut -d' ' -f1)
 last_hash=$(cat "$DEPLOY_HASH_FILE" 2>/dev/null || echo "none")
@@ -145,6 +155,7 @@ deploy_bot() {
 
 # Deploy scripts to Oracle E5
 deploy_scripts() {
+    if ! e5_up; then log "SKIP deploy_scripts: e5-mother ($HIVE_PROD_HOST) unreachable -- cron will retry"; return 0; fi
     log "Deploying scripts to Oracle E5..."
 
     scp -o ConnectTimeout=10 -i "$KEY" \
@@ -180,6 +191,7 @@ deploy_scripts() {
         /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/branded_slack.py \
         /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/branded_calendar.py \
         /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/branded_sms.py \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools/imap_fetch.py \
         "$E5_VM:/home/opc/content_tools/" 2>/dev/null
 
     # Hive Logger standalone scripts (live at 01_Scripts/ root)
@@ -187,6 +199,21 @@ deploy_scripts() {
         /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/hive_3format.py \
         /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/regenerate_index.py \
         "$E5_VM:/home/opc/" 2>/dev/null
+
+    # Photo guard pair (claude-safe wrapper + prep script). Cloud crons that
+    # feed photo paths to claude must invoke claude-safe instead of claude
+    # to avoid glibc malloc.c:4512 assertion crashes under image-decode load.
+    # Pillow must be installed on the cloud node (pip install --user Pillow).
+    ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "mkdir -p /home/opc/photo_guard /home/opc/.local/bin" 2>/dev/null
+    scp -o ConnectTimeout=10 -i "$KEY" \
+        /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/claude_photo_prep.py \
+        "$E5_VM:/home/opc/photo_guard/" 2>/dev/null
+    scp -o ConnectTimeout=10 -i "$KEY" \
+        /root/.local/bin/claude-safe \
+        "$E5_VM:/home/opc/.local/bin/claude-safe" 2>/dev/null
+    ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" \
+        "chmod +x /home/opc/.local/bin/claude-safe /home/opc/photo_guard/claude_photo_prep.py 2>/dev/null; \
+         sed -i 's|/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/claude_photo_prep.py|/home/opc/photo_guard/claude_photo_prep.py|g' /home/opc/.local/bin/claude-safe 2>/dev/null" 2>/dev/null
 
     # Broker enrichment modules
     ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "mkdir -p /home/opc/broker" 2>/dev/null
@@ -284,6 +311,7 @@ deploy_config() {
 
 # Install watchdog cron on Oracle (idempotent)
 install_watchdog_cron() {
+    if ! e5_up; then log "SKIP install_watchdog_cron: e5-mother ($HIVE_PROD_HOST) unreachable"; return 0; fi
     log "Installing watchdog cron on Oracle E5..."
     ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "
         (crontab -l 2>/dev/null | grep -v hive_watchdog; echo '*/2 * * * * /usr/bin/python3 /home/opc/hive_watchdog.py >> /tmp/hive_watchdog.log 2>&1') | crontab -
@@ -293,6 +321,7 @@ install_watchdog_cron() {
 
 # Install broker execution crons on Oracle (idempotent, uses markers)
 install_broker_crons() {
+    if ! e5_up; then log "SKIP install_broker_crons: e5-mother ($HIVE_PROD_HOST) unreachable"; return 0; fi
     log "Installing broker execution crons on Oracle E5..."
     ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" '
         # Remove everything between BEGIN/END BROKER markers, then re-insert
@@ -310,6 +339,7 @@ install_broker_crons() {
 
 # Deploy Computer Use container via Podman
 deploy_computer_use() {
+    if ! e5_up; then log "SKIP deploy_computer_use: e5-mother ($HIVE_PROD_HOST) unreachable"; return 0; fi
     log "Deploying Computer Use container on Oracle E5 via Podman..."
     ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "mkdir -p /home/opc/computer_use" 2>/dev/null
     scp -o ConnectTimeout=10 -i "$KEY" \
@@ -323,6 +353,7 @@ deploy_computer_use() {
 
 # Deploy Stark AI voice command center
 deploy_stark() {
+    if ! e5_up; then log "SKIP deploy_stark: e5-mother ($HIVE_PROD_HOST) unreachable -- cron will retry"; return 0; fi
     log "Deploying Stark AI to Oracle E5..."
     ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "mkdir -p /home/opc/stark-ai" 2>/dev/null
     scp -o ConnectTimeout=10 -i "$KEY" \
@@ -350,6 +381,7 @@ deploy_stark() {
 
 # Deploy Polymarket prediction agent via Podman
 deploy_polymarket() {
+    if ! e5_up; then log "SKIP deploy_polymarket: e5-mother ($HIVE_PROD_HOST) unreachable"; return 0; fi
     log "Deploying Polymarket agent on Oracle E5 via Podman..."
     ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "mkdir -p /home/opc/polymarket_agent" 2>/dev/null
     scp -o ConnectTimeout=10 -i "$KEY" \
@@ -363,6 +395,7 @@ deploy_polymarket() {
 
 # Deploy Django hive_dashboard to Oracle E5
 deploy_django() {
+    if ! e5_up; then log "SKIP deploy_django: e5-mother ($HIVE_PROD_HOST) unreachable -- cron will retry"; return 0; fi
     log "Deploying Django hive_dashboard to Oracle E5..."
     LOCAL_DJANGO="/mnt/sdcard/AA_MY_DRIVE/09_DASHBOARD/hive_dashboard"
     REMOTE_DJANGO="/home/opc/hive_django"
@@ -392,6 +425,7 @@ deploy_django() {
 
 # Install Flip OS daily pipeline cron on Oracle (idempotent, uses markers)
 install_flip_crons() {
+    if ! e5_up; then log "SKIP install_flip_crons: e5-mother ($HIVE_PROD_HOST) unreachable"; return 0; fi
     log "Installing Flip OS crons on Oracle E5..."
     ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" '
         crontab -l 2>/dev/null | sed "/^# --- BEGIN FLIP OS CRONS/,/^# --- END FLIP OS CRONS/d" | {
