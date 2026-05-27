@@ -79,9 +79,11 @@ def parse_message(raw: bytes) -> dict:
 def fetch_recent(days: int = 1, mailbox: str = "INBOX", limit: int = 100) -> list[dict]:
     """Fetch parsed messages from the last `days`. Returns [] on any failure."""
     load_env()
-    user = os.environ.get("GMAIL_IMAP_USER")
-    pw = os.environ.get("GMAIL_IMAP_PASS")
-    host = os.environ.get("GMAIL_IMAP_HOST", "imap.gmail.com")
+    # Accept either the GMAIL_IMAP_* names or the legacy IMAP_USER/IMAP_PASS
+    # names already present in 03_Credentials/.env -- whichever is set wins.
+    user = os.environ.get("GMAIL_IMAP_USER") or os.environ.get("IMAP_USER")
+    pw = os.environ.get("GMAIL_IMAP_PASS") or os.environ.get("IMAP_PASS")
+    host = os.environ.get("GMAIL_IMAP_HOST") or os.environ.get("IMAP_HOST", "imap.gmail.com")
     if not user or not pw:
         return []
     out: list[dict] = []

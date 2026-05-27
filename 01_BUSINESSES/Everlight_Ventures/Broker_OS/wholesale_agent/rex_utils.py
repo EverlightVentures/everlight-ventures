@@ -272,9 +272,22 @@ def safe_send_email(to: str, subject: str, body: str,
                     "we're interested in acquiring."
                 )
         except Exception as e:
-            log.warning("state_gate unavailable, proceeding without compliance check: %s", e)
+            # FAIL CLOSED: a state_gate error must never become a free pass to
+            # send uncompliant. Hold in dead-letter (re-sendable) instead.
+            log.error("state_gate ERROR -- failing closed, NOT sending: %s", e)
+            _queue_dead_letter(to, subject, body, f"state_gate_error:{e}")
+            return False
     else:
-        log.warning("safe_send_email called without state -- compliance NOT checked. Caller should pass state=<2-letter>.")
+        # No state resolved. FAIL CLOSED by default so a stateless lead can never
+        # bypass the TN-only lockdown (the GA/Onity rogue-send path, 2026-05-27).
+        # Override only via WHOLESALE_REQUIRE_STATE=0 (NOT recommended).
+        if os.environ.get("WHOLESALE_REQUIRE_STATE", "1") != "0":
+            log.error("safe_send_email called WITHOUT state -- failing closed (TN-only "
+                      "lockdown). Caller must pass state=<2-letter>. Held in dead-letter.")
+            _queue_dead_letter(to, subject, body, "no_state_provided_failclosed")
+            return False
+        log.warning("safe_send_email without state but WHOLESALE_REQUIRE_STATE=0 -- "
+                    "proceeding UNCHECKED (override active).")
 
     # -----------------------------------------------------------------------
     # CANONICAL SEND PATH (2026-05-15 migration): delegate to branded_mailer.
