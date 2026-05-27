@@ -26,19 +26,15 @@ Cron entry:
 from __future__ import annotations
 
 import argparse
-import email
-import imaplib
 import json
 import os
 import re
 import sys
 import time
 from datetime import datetime, timedelta, timezone
-from email.header import decode_header
 from pathlib import Path
 
-import sys as _sys
-_sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from content_tools.imap_fetch import fetch_recent
 
 WORKSPACE = Path("/mnt/sdcard/AA_MY_DRIVE")
@@ -94,24 +90,6 @@ def _log(event: str, **fields) -> None:
     row = {"ts": datetime.now(timezone.utc).isoformat(), "event": event, **fields}
     with LOG_FILE.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(row, default=str) + "\n")
-
-
-def _decode_subject(raw: str | bytes | None) -> str:
-    if raw is None:
-        return ""
-    if isinstance(raw, bytes):
-        raw = raw.decode("utf-8", errors="replace")
-    parts = decode_header(raw)
-    out = []
-    for chunk, enc in parts:
-        if isinstance(chunk, bytes):
-            try:
-                out.append(chunk.decode(enc or "utf-8", errors="replace"))
-            except LookupError:
-                out.append(chunk.decode("utf-8", errors="replace"))
-        else:
-            out.append(chunk)
-    return "".join(out)
 
 
 def _seen_set() -> set[str]:
