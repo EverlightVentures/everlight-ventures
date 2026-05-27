@@ -10,20 +10,14 @@ from __future__ import annotations
 import email
 import imaplib
 import os
+import sys
 from datetime import datetime, timedelta
 from email.header import decode_header
-from pathlib import Path
 
-ENV = Path("/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/03_Credentials/.env")
-
-
-def load_env() -> None:
-    if not ENV.exists():
-        return
-    for line in ENV.read_text().splitlines():
-        if "=" in line and not line.strip().startswith("#"):
-            k, _, v = line.partition("=")
-            os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+try:
+    from content_tools.env_loader import load_env
+except ImportError:  # when the content_tools dir itself is on sys.path
+    from env_loader import load_env
 
 
 def _decode(raw: str | bytes | None) -> str:
@@ -99,9 +93,13 @@ def fetch_recent(days: int = 1, mailbox: str = "INBOX", limit: int = 100) -> lis
         typ, data = imap.search(None, f'(SINCE "{cutoff}")')
         if typ == "OK":
             for num in data[0].split()[-limit:]:
-                typ, md = imap.fetch(num, "(RFC822)")
-                if typ == "OK" and md and md[0]:
-                    out.append(parse_message(md[0][1]))
+                try:
+                    rtyp, md = imap.fetch(num, "(RFC822)")
+                    if rtyp == "OK" and md and md[0]:
+                        out.append(parse_message(md[0][1]))
+                except Exception as exc:
+                    print(f"imap_fetch: skipped message {num!r}: {exc}", file=sys.stderr)
+                    continue
     except Exception:
         return out
     finally:

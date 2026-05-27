@@ -14,3 +14,19 @@ def test_parse_extracts_core_fields():
     assert msg["delivered_to"] == "1m.rich.gee@gmail.com"
     assert msg["list_unsubscribe"] == ""        # not a bulk email
     assert msg["precedence"] == ""
+
+
+def test_fetch_recent_returns_empty_without_creds(monkeypatch):
+    import content_tools.imap_fetch as mod
+    monkeypatch.delenv("GMAIL_IMAP_USER", raising=False)
+    monkeypatch.delenv("GMAIL_IMAP_PASS", raising=False)
+    # neutralize the .env loader so it cannot supply real creds during the test
+    monkeypatch.setattr(mod, "load_env", lambda *a, **k: 0)
+    assert mod.fetch_recent(days=1) == []
+
+
+def test_parse_message_handles_garbage_without_raising():
+    msg = parse_message(b"not a real email at all")
+    assert isinstance(msg, dict)
+    assert set(msg) == {"message_id", "from_name", "from_email", "subject", "body",
+                        "delivered_to", "list_unsubscribe", "precedence", "date"}
