@@ -37,6 +37,10 @@ from datetime import datetime, timedelta, timezone
 from email.header import decode_header
 from pathlib import Path
 
+import sys as _sys
+_sys.path.insert(0, str(Path(__file__).resolve().parent))
+from content_tools.imap_fetch import fetch_recent
+
 WORKSPACE = Path("/mnt/sdcard/AA_MY_DRIVE")
 LOG_DIR = WORKSPACE / "_logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -193,91 +197,40 @@ def alert_ntfy(severity: str, category: str, subject: str) -> bool:
 
 
 def check_inbox() -> dict:
-    """Connect to Gmail IMAP, fetch UNSEEN messages, classify, alert."""
-    if not GMAIL_USER or not GMAIL_APP_PASSWORD:
-        _log("missing_credentials", has_user=bool(GMAIL_USER), has_password=bool(GMAIL_APP_PASSWORD))
-        return {"ok": False, "reason": "missing GMAIL_USER or GMAIL_APP_PASSWORD"}
-    try:
-        imap = imaplib.IMAP4_SSL("imap.gmail.com", 993)
-        imap.login(GMAIL_USER, GMAIL_APP_PASSWORD)
-    except Exception as e:
-        _log("imap_login_failed", error=str(e))
-        return {"ok": False, "reason": f"imap_login_failed: {e}"}
+    """Scan the last 24h of mail via the shared imap_fetch helper.
 
+    Credentials come from GMAIL_IMAP_USER/GMAIL_IMAP_PASS (the working path)
+    via imap_fetch, which returns [] if creds are missing -- so a missing
+    cred now yields ok=True/matched=0 instead of the old fatal error spam.
+    """
     seen = _seen_set()
     alerts_sent = 0
     matched = 0
-
-    try:
-        imap.select("INBOX")
-        # Look at last 24 hours of mail
-        cutoff = (datetime.now() - timedelta(hours=24)).strftime("%d-%b-%Y")
-        typ, data = imap.search(None, f'(SINCE "{cutoff}")')
-        if typ != "OK":
-            return {"ok": False, "reason": "imap_search_failed"}
-
-        msg_nums = data[0].split()
-        for num in msg_nums:
-            typ, msg_data = imap.fetch(num, "(RFC822)")
-            if typ != "OK":
-                continue
-            msg = email.message_from_bytes(msg_data[0][1])
-            msg_id = msg.get("Message-ID", "").strip()
-            if not msg_id or msg_id in seen:
-                continue
-            sender = msg.get("From", "")
-            subject = _decode_subject(msg.get("Subject", ""))
-            classification = classify(sender, subject)
-            if not classification:
-                _mark_seen(seen, msg_id)
-                continue
-
-            matched += 1
-            # Get a snippet of the body
-            snippet = ""
-            if msg.is_multipart():
-                for part in msg.walk():
-                    if part.get_content_type() == "text/plain":
-                        try:
-                            snippet = part.get_payload(decode=True).decode("utf-8", errors="replace")[:1500]
-                            break
-                        except Exception:
-                            pass
-            else:
-                try:
-                    snippet = msg.get_payload(decode=True).decode("utf-8", errors="replace")[:1500]
-                except Exception:
-                    pass
-
-            slack_ok = alert_slack(
-                classification["severity"],
-                classification["category"],
-                sender,
-                subject,
-                snippet,
-            )
-            ntfy_ok = alert_ntfy(
-                classification["severity"],
-                classification["category"],
-                subject,
-            )
-            _log("alert_sent",
-                 severity=classification["severity"],
-                 category=classification["category"],
-                 sender=sender,
-                 subject=subject,
-                 slack_ok=slack_ok,
-                 ntfy_ok=ntfy_ok)
-            if slack_ok or ntfy_ok:
-                alerts_sent += 1
+    for msg in fetch_recent(days=1):
+        msg_id = msg.get("message_id", "")
+        if not msg_id or msg_id in seen:
+            continue
+        sender = msg.get("from_email", "")
+        subject = msg.get("subject", "")
+        classification = classify(sender, subject)
+        if not classification:
             _mark_seen(seen, msg_id)
-
-    finally:
-        try:
-            imap.logout()
-        except Exception:
-            pass
-
+            continue
+        matched += 1
+        snippet = (msg.get("body", "") or "")[:1500]
+        slack_ok = alert_slack(
+            classification["severity"], classification["category"],
+            sender, subject, snippet,
+        )
+        ntfy_ok = alert_ntfy(
+            classification["severity"], classification["category"], subject,
+        )
+        _log("alert_sent", severity=classification["severity"],
+             category=classification["category"], sender=sender,
+             subject=subject, slack_ok=slack_ok, ntfy_ok=ntfy_ok)
+        if slack_ok or ntfy_ok:
+            alerts_sent += 1
+        _mark_seen(seen, msg_id)
     return {"ok": True, "matched": matched, "alerts_sent": alerts_sent}
 
 
