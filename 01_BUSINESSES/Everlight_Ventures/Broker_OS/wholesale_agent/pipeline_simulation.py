@@ -185,13 +185,17 @@ def pick_lead(owner_filter: str | None = None, appraisal_override: int | None = 
 
 def compute_deal_math(lead: dict) -> dict:
     appraisal = int(lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 45000)
-    moa_anchor   = int(appraisal * 0.55)
-    moa_open     = int(appraisal * 0.65)   # Marquise anchor (65% per firmware)
-    moa_counter  = int(appraisal * 0.78)   # mid-target
-    moa_close    = int(appraisal * 0.85)   # seller close
-    seller_ask   = int(appraisal * 0.95)   # seller's counter-ask
-    buyer_ask    = moa_close + 3500        # what we ask Chris
-    buyer_close  = moa_close + 3000        # where we close with Chris
+    # CONSERVATIVE POSTURE (operator decision 2026-05-28, audit-defensible):
+    # Anchor 48% -- below industry 50-65% distressed band so we have room to walk up.
+    # Walk-up to 58% seller close -- ~10% movement, the discipline.
+    # Buyer pays seller_close + $11,500 EV fee (TN norm $10k-$15k, national avg $13k).
+    moa_anchor   = int(appraisal * 0.48)  # internal floor (rarely seen by seller)
+    moa_open     = int(appraisal * 0.48)  # Marquise anchor -- conservative open
+    moa_counter  = int(appraisal * 0.54)  # mid-target after seller pushback
+    moa_close    = int(appraisal * 0.58)  # seller close -- final
+    seller_ask   = int(appraisal * 0.70)  # seller's counter-ask (high but realistic)
+    buyer_ask    = moa_close + 13000      # we ask Chris a bit higher for negotiation room
+    buyer_close  = moa_close + 11500      # actual EV fee at TN norm
     ev_fee       = buyer_close - moa_close
 
     close_date = datetime.now() + timedelta(days=10)

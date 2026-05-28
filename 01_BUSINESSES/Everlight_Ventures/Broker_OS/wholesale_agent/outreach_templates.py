@@ -1332,9 +1332,11 @@ def render_marquise_anchor_offer(lead: dict, county_appraisal: int | None = None
     addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
     appraisal = int(county_appraisal or lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 45000)
 
-    # Offer at 65% (anchor -- room to walk up)
-    offer = int(appraisal * 0.65)
-    comp_median = int(appraisal * 0.72)
+    # Offer at 48% (conservative anchor per operator decision 2026-05-28).
+    # Industry distressed band is 50-65% of as-is value; we open at the floor to
+    # leave room to walk up to a 58% close (TN/Memphis tax-delinquent norm).
+    offer = int(appraisal * 0.48)
+    comp_median = int(appraisal * 0.55)
 
     subdivision = lead.get("subdivision") or "this Memphis corridor"
     owner_zip = lead.get("owner_mailing_zip") or lead.get("zip_code") or "38114"
@@ -1358,7 +1360,7 @@ def render_marquise_anchor_offer(lead: dict, county_appraisal: int | None = None
         f"</table>"
         f"<p>Honest with you: ${offer:,} reads short of ${appraisal:,} because the county number is "
         f"for the land if it were ready to build on -- and {html.escape(subdivision)} comps say "
-        f"flat-vacant residential is moving in the ${int(appraisal * 0.65):,} to ${int(appraisal * 0.80):,} band right now.</p>"
+        f"flat-vacant residential is moving in the ${int(appraisal * 0.48):,} to ${int(appraisal * 0.60):,} band right now.</p>"
         f"<p>Three things working in your favor with my offer:</p>"
         f"<ol>"
         f"<li>Cash -- no financing falling through 30 days in</li>"
@@ -1459,8 +1461,9 @@ def render_marquise_pivot_to_chris(lead: dict, locked_price: int) -> dict:
     """
     owner = lead.get("owner_name") or ""
     addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
-    buyer_ask = locked_price + 3500
-    buyer_close_est = locked_price + 3000
+    # Conservative posture (2026-05-28): $11,500 EV fee at TN/national norm.
+    buyer_ask = locked_price + 13000      # opening ask to Chris with negotiation room
+    buyer_close_est = locked_price + 11500 # what we expect to close at
 
     subject = f"[INTERNAL] Deal locked: {html.escape(addr)} at ${locked_price:,} -- pivot to Chris"
 
@@ -1881,7 +1884,7 @@ def render_psa_contract(lead: dict, deal_terms: dict) -> dict:
     purchase_price = int(deal_terms.get("purchase_price") or 0)
     emd_amount = int(deal_terms.get("emd_amount") or 500)
     close_date = deal_terms.get("close_date") or (datetime.now() + timedelta(days=10)).strftime("%B %d, %Y")
-    assignment_fee = int(deal_terms.get("assignment_fee") or 3000)
+    assignment_fee = int(deal_terms.get("assignment_fee") or 11500)  # TN norm $10-15k (2026-05-28)
     effective_date = deal_terms.get("effective_date") or datetime.now().strftime("%B %d, %Y")
 
     blocks = [
