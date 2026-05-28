@@ -1,6 +1,17 @@
+import os
 import pytest
 from pathlib import Path
+from unittest.mock import patch, MagicMock
 from polymarket_agent.execution.wallet import PolygonWallet
+
+
+def _stub_web3(monkeypatch):
+    """Patch Web3 so constructor succeeds without real RPC."""
+    fake_w3 = MagicMock()
+    fake_w3.is_connected.return_value = True
+    fake_w3.eth.chain_id = 137
+    fake_w3.eth.contract.return_value = MagicMock()
+    monkeypatch.setattr("polymarket_agent.execution.wallet.Web3", MagicMock(return_value=fake_w3))
 
 
 def test_missing_key_file_fails_loud(tmp_path: Path):
@@ -10,11 +21,89 @@ def test_missing_key_file_fails_loud(tmp_path: Path):
     assert "key file missing" in str(e.value).lower()
 
 
-def test_loads_address_from_valid_key(tmp_path: Path):
-    # Test vector: well-known anvil/hardhat default key 0
+def test_loads_address_from_valid_key(tmp_path: Path, monkeypatch):
+    _stub_web3(monkeypatch)
     key_path = tmp_path / "test.key"
     key_path.write_text(
         "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
     )
+    os.chmod(key_path, 0o600)
     w = PolygonWallet(private_key_path=key_path)
     assert w.address.lower() == "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+
+
+def test_sign_typed_data_returns_hex_prefixed_signature(tmp_path, monkeypatch):
+    _stub_web3(monkeypatch)
+    key_path = tmp_path / "test.key"
+    key_path.write_text(
+        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+    )
+    os.chmod(key_path, 0o600)
+    w = PolygonWallet(private_key_path=key_path)
+    typed = {
+        "types": {
+            "EIP712Domain": [
+                {"name": "name", "type": "string"},
+                {"name": "chainId", "type": "uint256"},
+            ],
+            "Mail": [{"name": "contents", "type": "string"}],
+        },
+        "primaryType": "Mail",
+        "domain": {"name": "Test", "chainId": 137},
+        "message": {"contents": "hello"},
+    }
+    sig = w.sign_clob_order(typed)
+    assert sig.startswith("0x")
+    assert len(sig) == 132  # 0x + 130 hex = 65 bytes signature
+
+
+def test_sign_clob_order_rejects_missing_keys(tmp_path, monkeypatch):
+    _stub_web3(monkeypatch)
+    key_path = tmp_path / "test.key"
+    key_path.write_text(
+        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+    )
+    os.chmod(key_path, 0o600)
+    w = PolygonWallet(private_key_path=key_path)
+    with pytest.raises(RuntimeError) as e:
+        w.sign_clob_order({"types": {}, "primaryType": "Mail"})  # missing domain + message
+    assert "missing keys" in str(e.value).lower()
+
+
+def test_sign_clob_order_rejects_wrong_chain_id(tmp_path, monkeypatch):
+    _stub_web3(monkeypatch)
+    key_path = tmp_path / "test.key"
+    key_path.write_text(
+        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+    )
+    os.chmod(key_path, 0o600)
+    w = PolygonWallet(private_key_path=key_path)
+    typed = {
+        "types": {"EIP712Domain": [{"name": "chainId", "type": "uint256"}], "M": []},
+        "primaryType": "M",
+        "domain": {"chainId": 1},
+        "message": {},
+    }
+    with pytest.raises(RuntimeError) as e:
+        w.sign_clob_order(typed)
+    assert "chainid" in str(e.value).lower()
+
+
+def test_invalid_key_text_raises_runtime(tmp_path):
+    key_path = tmp_path / "test.key"
+    key_path.write_text("not a key")
+    os.chmod(key_path, 0o600)
+    with pytest.raises(RuntimeError) as e:
+        PolygonWallet(private_key_path=key_path)
+    assert "64-hex" in str(e.value) or "private key" in str(e.value).lower()
+
+
+def test_bad_perms_raises_runtime(tmp_path):
+    key_path = tmp_path / "test.key"
+    key_path.write_text(
+        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+    )
+    os.chmod(key_path, 0o644)
+    with pytest.raises(RuntimeError) as e:
+        PolygonWallet(private_key_path=key_path)
+    assert "perms" in str(e.value).lower()
