@@ -940,3 +940,237 @@ class TestNegotiatorAndCloserWiring:
             "Marvin closing handoff must not contain 'Piper' -- cross-persona contamination. "
             f"Found in: {body[:400]}"
         )
+
+
+# ---------------------------------------------------------------------------
+# NEW: Operator blueprint compliance tests
+# ---------------------------------------------------------------------------
+
+_RITA_WITH_APPRAISAL = {
+    "owner_name": "TOWNSEND RITA M",
+    "property_address": "836 N BELLEVUE",
+    "address": "836 N BELLEVUE",
+    "city": "Memphis",
+    "state": "TN",
+    "parcel_id": "021083 00056",
+    "source": "shelby_tax_delinquent_csv_2026-04-28",
+    "county_appraisal": 58000,
+    "mailing_address": "836 N BELLEVUE MEMPHIS TN",
+}
+
+_APPRAISAL_LEAD = {
+    "owner_name": "HARRIS CLARENCE B",
+    "property_address": "422 CHELSEA AVE",
+    "address": "422 CHELSEA AVE",
+    "city": "Memphis",
+    "state": "TN",
+    "mailing_address": "422 CHELSEA AVE MEMPHIS TN",
+    "years_owned": 18,
+    "county_appraisal": 62000,
+    "source": "shelby_tax_delinquent_csv_2026-04-28",
+    "lead_type": "tax_lien",
+}
+
+_NO_APPRAISAL_LEAD = {
+    "owner_name": "WALKER DARNELL",
+    "property_address": "210 POPLAR AVE MEMPHIS TN",
+    "city": "Memphis",
+    "state": "TN",
+    "mailing_address": "9000 SUNSET BLVD LOS ANGELES CA 90028",
+    # no county_appraisal
+}
+
+
+class TestOperatorBlueprintCompliance:
+    """All personas must comply with the operator's data-first blueprint:
+    signal + data + real number + future state + direct CTA."""
+
+    # ---- Piper: dollar number when appraisal is present ----
+
+    def test_piper_first_touch_has_dollar_number_when_appraisal_present(self):
+        """When county_appraisal is set, Piper first_touch must contain a dollar number."""
+        import re
+        result = ot.render_first_touch(_RITA_WITH_APPRAISAL, persona_key="piper")
+        body = result["body_html"]
+        dollar_amounts = re.findall(r"\$\d[\d,]*", body)
+        assert dollar_amounts, (
+            f"Piper first_touch must contain a dollar number when county_appraisal is present. "
+            f"county_appraisal=58000. Got body (first 600 chars): {body[:600]}"
+        )
+
+    def test_piper_offer_range_reflects_appraisal(self):
+        """Piper's rendered offer range must be derived from county_appraisal (55-70% band)."""
+        import re
+        result = ot.render_first_touch(_RITA_WITH_APPRAISAL, persona_key="piper")
+        body = result["body_html"]
+        # appraisal=58000 -> 55%=$31,900, 70%=$40,600. Both should appear.
+        low_str = "31,900"
+        high_str = "40,600"
+        assert low_str in body or "31" in body, (
+            f"Piper offer range lower bound not found for appraisal=58000 (expect ~$31,900). "
+            f"Body: {body[:800]}"
+        )
+        assert high_str in body or "40" in body, (
+            f"Piper offer range upper bound not found for appraisal=58000 (expect ~$40,600). "
+            f"Body: {body[:800]}"
+        )
+
+    def test_piper_no_dollar_fallback_when_appraisal_missing(self):
+        """When appraisal is missing, Piper must still include a dollar fallback range."""
+        import re
+        result = ot.render_first_touch(_NO_APPRAISAL_LEAD, persona_key="piper")
+        body = result["body_html"]
+        dollar_amounts = re.findall(r"\$\d[\d,]*", body)
+        assert dollar_amounts, (
+            "Piper first_touch must still include a fallback dollar range even without appraisal. "
+            f"Body: {body[:600]}"
+        )
+
+    # ---- Piper: specific reason we reached out (signal) ----
+
+    def test_piper_tax_delinquent_signal_in_body(self):
+        """When source=shelby_tax_delinquent, Piper body must reference the tax signal."""
+        result = ot.render_first_touch(_RITA_WITH_APPRAISAL, persona_key="piper")
+        body = result["body_html"].lower()
+        assert any(phrase in body for phrase in [
+            "delinquent", "tax", "back-tax", "tax balance", "tax burden"
+        ]), (
+            "Piper must name the specific signal (tax delinquent) when source indicates it. "
+            f"Body: {body[:600]}"
+        )
+
+    def test_piper_signal_named_not_generic_desk_only(self):
+        """Piper body must go beyond 'your property came across my desk' -- must name the WHY."""
+        result = ot.render_first_touch(_RITA_WITH_APPRAISAL, persona_key="piper")
+        body = result["body_html"]
+        # Must contain both the desk reference AND the specific signal reason
+        has_desk = "came across" in body
+        has_signal = any(phrase in body.lower() for phrase in [
+            "delinquent", "tax", "quitclaim", "probate", "absentee", "out of town",
+            "estate", "long time", "no recent", "vacant"
+        ])
+        assert has_desk and has_signal, (
+            "Piper must include BOTH 'came across my desk' AND the specific outreach reason. "
+            f"has_desk={has_desk}, has_signal={has_signal}. Body: {body[:600]}"
+        )
+
+    # ---- All personas: future-state phrase ----
+
+    def test_piper_contains_future_state_phrase(self):
+        """Piper first_touch must contain a future-state outcome phrase."""
+        result = ot.render_first_touch(_RITA_WITH_APPRAISAL, persona_key="piper")
+        body = result["body_html"].lower()
+        future_phrases = [
+            "clean exit", "out from under", "fresh start", "no back-tax burden",
+            "walk away", "clean cash", "free and clear", "cash in hand",
+            "no agent fees", "7 days"
+        ]
+        found = [p for p in future_phrases if p in body]
+        assert found, (
+            f"Piper first_touch must contain a future-state phrase. "
+            f"None of {future_phrases} found. Body: {body[:600]}"
+        )
+
+    def test_henry_contains_future_state_phrase(self):
+        """Henry negotiation must contain a future-state outcome phrase."""
+        result = ot.render_first_touch(_APPRAISAL_LEAD, persona_key="henry")
+        body = result["body_html"].lower()
+        future_phrases = [
+            "clean exit", "out from under", "fresh start", "no back-tax",
+            "walk", "clean cash", "free and clear", "cash in hand", "7-day",
+            "tax burden", "liquidity", "equity to cash"
+        ]
+        found = [p for p in future_phrases if p in body]
+        assert found, (
+            f"Henry negotiation must contain a future-state phrase. "
+            f"None of {future_phrases} found. Body: {body[:600]}"
+        )
+
+    def test_vaughn_contains_future_state_phrase(self):
+        """Vaughn first_touch must contain a future-state outcome phrase."""
+        result = ot.render_first_touch(_RITA_WITH_APPRAISAL, persona_key="vaughn")
+        body = result["body_html"].lower()
+        future_phrases = [
+            "liquidity", "clean", "carrying cost", "outcome", "certainty",
+            "converts", "7-day", "cash close", "no obligation"
+        ]
+        found = [p for p in future_phrases if p in body]
+        assert found, (
+            f"Vaughn first_touch must contain a future-state outcome phrase. "
+            f"None of {future_phrases} found. Body: {body[:600]}"
+        )
+
+    def test_marvin_contains_future_state_phrase(self):
+        """Marvin closing handoff must reference the procedural future state (numbers in writing)."""
+        result = ot.render_first_touch(_APPRAISAL_LEAD, persona_key="marvin")
+        body = result["body_html"].lower()
+        future_phrases = [
+            "in writing", "closing date", "7 business days", "specific date",
+            "mid-south", "clean", "actual number"
+        ]
+        found = [p for p in future_phrases if p in body]
+        assert found, (
+            f"Marvin must contain future-state / procedural clarity phrases. "
+            f"None of {future_phrases} found. Body: {body[:600]}"
+        )
+
+    # ---- Piper: under 1200 chars on first_touch (no over-talking) ----
+
+    def test_piper_first_touch_under_1200_chars_plain_text(self):
+        """Piper first_touch body text (HTML stripped) must be under 1200 chars."""
+        import re
+        result = ot.render_first_touch(_RITA_WITH_APPRAISAL, persona_key="piper")
+        body = result["body_html"]
+        # strip HTML tags for char count
+        plain = re.sub(r"<[^>]+>", " ", body)
+        plain = re.sub(r"\s+", " ", plain).strip()
+        char_count = len(plain)
+        assert char_count <= 1200, (
+            f"Piper first_touch must be under 1200 chars plain text (no over-talking). "
+            f"Got {char_count} chars. Blueprint: 'We don't need to over-talk.' "
+            f"Text (first 800): {plain[:800]}"
+        )
+
+    # ---- Piper: CTA is direct, not a phone call pitch ----
+
+    def test_piper_cta_is_reply_based_not_call_pitch(self):
+        """Piper's CTA must be reply-based ('send you a number', 'are you down', etc.)."""
+        result = ot.render_first_touch(_RITA_WITH_APPRAISAL, persona_key="piper")
+        body = result["body_html"].lower()
+        # Must have a direct reply-based CTA
+        cta_phrases = [
+            "send you a real number", "send you the actual number",
+            "are you down", "want me to send", "just reply",
+            "let me know", "hit reply"
+        ]
+        found = [p for p in cta_phrases if p in body]
+        assert found, (
+            f"Piper CTA must be direct and reply-based (per blueprint: 'want me to send you a real number this week'). "
+            f"None of {cta_phrases} found. Body: {body[:600]}"
+        )
+
+    # ---- Henry: appraisal-based number in negotiation ----
+
+    def test_henry_negotiation_includes_computed_offer_range_from_appraisal(self):
+        """Henry's negotiation email must include computed offer range when appraisal is present."""
+        import re
+        result = ot.render_first_touch(_APPRAISAL_LEAD, persona_key="henry")
+        body = result["body_html"]
+        dollar_amounts = re.findall(r"\$[\d,]+", body)
+        assert len(dollar_amounts) >= 2, (
+            f"Henry negotiation must include at least 2 dollar figures (range) when appraisal present. "
+            f"Found: {dollar_amounts}. Body: {body[:600]}"
+        )
+
+    # ---- Vaughn: data + offer when appraisal present ----
+
+    def test_vaughn_includes_offer_range_when_appraisal_present(self):
+        """Vaughn must include computed offer range when county_appraisal is present."""
+        import re
+        result = ot.render_first_touch(_RITA_WITH_APPRAISAL, persona_key="vaughn")
+        body = result["body_html"]
+        dollar_amounts = re.findall(r"\$[\d,]+", body)
+        assert dollar_amounts, (
+            f"Vaughn must include a dollar range when county_appraisal is present. "
+            f"Body: {body[:600]}"
+        )

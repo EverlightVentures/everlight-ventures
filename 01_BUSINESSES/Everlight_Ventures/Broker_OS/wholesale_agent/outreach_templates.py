@@ -1,5 +1,13 @@
 """outreach_templates -- persona-voiced email bodies for the wholesale pipeline.
 
+Operator blueprint (verbatim):
+  "They don't wanna hear some basic jargon, they wanna see the numbers,
+  how it applies to them, and how it changes their future. We don't need
+  to over-talk. Personality + tonality YES, but use the facts, the data,
+  everything. Straight to the point. Once they agree, give them a number
+  boom. Try to get them to accept on the first. If we have to negotiate,
+  negotiate higher -- more money for us, get them out of their situation."
+
 Four external personas (Piper / Henry / Marvin / Vaughn), each with distinct
 cadence, opener, Memphis-specific signal, data_lens interpretation, and
 signature block. Same lead, four completely different characters.
@@ -16,6 +24,7 @@ Usage:
 from __future__ import annotations
 
 import html
+import re
 
 # ---------------------------------------------------------------------------
 # Persona registry -- deep character data pulled from agent dossiers
@@ -54,8 +63,8 @@ PERSONA: dict[str, dict] = {
             "I read it as an opening.",
         ],
         "closers": [
-            "Would a quick call or email work this week? No obligation, just a conversation.",
-            "If the timing is right, I'd love to hear from you -- no rush at all.",
+            "Want me to send you a real number this week?",
+            "Are you down to look at an offer?",
             "Just hit reply whenever it works for you.",
         ],
         "tells": [
@@ -242,6 +251,101 @@ TN_CONSTANTS: dict = {
     # do not reference any state other than TN in any template
 }
 
+# ---------------------------------------------------------------------------
+# Signal labels -- maps source/lead_type to the "specific reason we reached out"
+# ---------------------------------------------------------------------------
+
+_SOURCE_SIGNAL_MAP = {
+    "tax_lien":                  "your property has a delinquent tax balance",
+    "tax_delinquent":            "your property shows a delinquent tax balance on county records",
+    "shelby_tax_delinquent":     "your property shows a delinquent tax balance on Shelby County records",
+    "quitclaim":                 "your property transferred via quitclaim deed -- a family or estate transfer",
+    "probate":                   "your property is connected to an estate situation",
+    "absentee":                  "you hold this property from out of town",
+    "long_hold":                 "you have held this property for a long time with no recent permit activity",
+    "vacant":                    "the property appears to be vacant land with no recent improvements",
+    "expired_listing":           "the property was recently listed but did not sell",
+    "pre_foreclosure":           "there is a foreclosure notice on public record for this property",
+    "high_equity":               "the property shows strong equity relative to its assessed value",
+}
+
+
+def _signal_for_lead(lead: dict) -> str:
+    """Return a single plain-English sentence explaining the specific reason for outreach."""
+    source = (lead.get("source") or "").lower()
+    lead_type_raw = (lead.get("lead_type") or "").lower()
+
+    # Source-string checks (most specific)
+    for key, phrase in _SOURCE_SIGNAL_MAP.items():
+        if key in source or key in lead_type_raw:
+            return phrase
+
+    # Fallback by lead_type field
+    lt = classify_lead(lead)
+    if lt == "probate":
+        return "your property is connected to an estate situation"
+    if lt == "absentee":
+        return "you hold this property from out of town"
+    if lt == "llc":
+        return "the property is held in a business entity"
+    if lt == "joint_couple":
+        return "the property is in joint ownership"
+
+    years = int(lead.get("years_owned") or 0)
+    if years >= 10:
+        return f"you have held this property for over {years} years with no recent activity"
+
+    return "your property came across our Memphis acquisitions list this week"
+
+
+# ---------------------------------------------------------------------------
+# Offer math helpers -- operator blueprint: give them a REAL number
+# ---------------------------------------------------------------------------
+
+def _compute_offer_range(lead: dict) -> tuple[int | None, int | None]:
+    """Return (offer_low, offer_high) from county_appraisal or total_appraisal_usd.
+
+    Blueprint: 55-70% of county assessed value. If missing, return (None, None).
+    """
+    appraisal = (
+        lead.get("county_appraisal")
+        or lead.get("total_appraisal_usd")
+        or 0
+    )
+    if not appraisal:
+        return None, None
+    appraisal = int(appraisal)
+    return int(appraisal * 0.55), int(appraisal * 0.70)
+
+
+def _offer_sentence(lead: dict, persona_key: str = "piper") -> str:
+    """Return a sentence with the ACTUAL offer range (or fallback if no appraisal).
+
+    Piper: casual, 'Honest with you, I'm thinking $X-$Y.'
+    Henry: table-ready number.
+    Marvin/Vaughn: clean range in a sentence.
+    """
+    low, high = _compute_offer_range(lead)
+    if low is None:
+        return "Based on comps in this part of Memphis, we're typically in the $35-65k range -- once I see the full picture I can send a real number, no runaround."
+
+    if persona_key == "piper":
+        return (
+            f"Honest with you, based on the county assessment I'm thinking somewhere in the "
+            f"<strong>${low:,}-${high:,} range</strong> all cash. Once we confirm a few details, "
+            "I can firm that up into an actual number same day."
+        )
+    if persona_key == "henry":
+        return (
+            f"County has it at ${int(lead.get('county_appraisal') or lead.get('total_appraisal_usd', 0)):,}. "
+            f"Where I can be today: <strong>${low:,}-${high:,}</strong> all cash, 7-day close."
+        )
+    # marvin / vaughn
+    return (
+        f"Our cash range based on the county figure is ${low:,}-${high:,}, "
+        "7-day close, no agent fees on your side."
+    )
+
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -375,7 +479,7 @@ def data_lens(persona_key: str, lead: dict) -> str:
                 "is actually favorable right now -- I can show you exactly where I land "
                 "in one email, no back-and-forth required."
             )
-        appraisal = lead.get("county_appraisal") or 0
+        appraisal = lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 0
         if appraisal:
             offer_est = int(int(appraisal) * 0.68)
             return (
@@ -438,93 +542,137 @@ def data_lens(persona_key: str, lead: dict) -> str:
 
 # ---------------------------------------------------------------------------
 # PIPER templates (warm Southern professional, Memphis-aware)
+# Blueprint: specific signal + 3-5 data points + real number + future state + CTA
 # ---------------------------------------------------------------------------
 
 def _piper_first_touch(lead: dict, lead_type: str) -> dict:
     p_key = "piper"
     owner = lead.get("owner_name") or ""
     address = lead.get("property_address") or lead.get("address") or "your Memphis property"
-    # Extract street portion for casual reference (e.g. "836 N Bellevue" not full address)
     street_address = html.escape(address)
     city = lead.get("city") or TN_CONSTANTS["metro"]
     years_owned = lead.get("years_owned") or 0
+    fname = first_name(owner)
+    salutation = _lead_type_salutation(lead_type, owner)
 
-    # Build lead-type-specific warmth line (paragraph 3: something nice about the house/them)
+    # -- 1. Casual one-line intro
+    intro = "I'm Piper with Everlight -- we buy Memphis properties for cash, no agents, no hassle."
+
+    # -- 2. Specific reason we're reaching out (signal)
+    signal = _signal_for_lead(lead)
+    parcel_id = lead.get("parcel_id") or ""
+    source_raw = (lead.get("source") or "").replace("_", " ")
+
+    # build the data points block
+    appraisal = lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 0
+    subdivision = lead.get("subdivision") or ""
+    neighborhood = lead.get("neighborhood") or ""
+    last_sale_year = lead.get("last_sale_year") or ""
+    year_built = lead.get("year_built") or lead.get("build_year_proxy") or ""
+    land_use = lead.get("land_use") or ""
+    absentee = lead.get("absentee_owner") or False
+
+    data_points = []
+    if appraisal:
+        data_points.append(f"County assessed value: <strong>${int(appraisal):,}</strong>")
+    if last_sale_year:
+        data_points.append(f"Year acquired on record: <strong>{last_sale_year}</strong>")
+    if neighborhood:
+        data_points.append(f"Neighborhood: {html.escape(str(neighborhood))}")
+    elif subdivision:
+        data_points.append(f"Subdivision: {html.escape(str(subdivision))}")
+    if year_built:
+        data_points.append(f"Year built: {year_built}")
+    if absentee:
+        data_points.append("Owner mailing address is out of the area")
+    # always include the assessor source as a credibility signal
+    if source_raw:
+        data_points.append(f"We found this through: {html.escape(source_raw)}")
+
+    # pick the 3 most useful for first touch (not too many)
+    data_block_items = data_points[:4]
+
+    # -- 3. Build lead-type specific warmth line
     if lead_type == "probate":
-        nice_line = (
-            "Dealing with an estate property is a lot to manage on top of everything else -- "
-            "I just want you to know we handle this kind of thing quietly and without any drama."
+        warmth = (
+            "Dealing with an estate property is a lot -- I just want you to know "
+            "we handle this kind of thing quietly and without any drama."
         )
     elif lead_type == "joint_couple":
-        nice_line = (
-            "I always love seeing two names on a deed -- "
-            "it tells me y'all have taken care of this place together, and that means something."
+        warmth = (
+            "I always appreciate seeing two names on a deed -- "
+            "it tells me y'all have taken care of this place together."
         )
     elif lead_type == "absentee":
-        nice_line = (
+        warmth = (
             "Managing a property from out of town is no small thing -- "
-            "the fact that you've held onto it says a lot."
+            "a cash offer can simplify that in a hurry."
         )
     elif years_owned and int(years_owned) >= 10:
-        nice_line = (
+        warmth = (
             f"Honest with you, when I see someone hold a spot for {int(years_owned)} years, "
-            "it tells me they've been intentional about it -- that's not something you see every day."
+            "it tells me they've been intentional about it."
         )
     else:
-        nice_line = (
-            "Memphis has some really solid blocks, and yours caught my eye -- "
-            "good bones in this part of town."
+        warmth = (
+            "Memphis has some really solid blocks, and yours caught my eye."
         )
 
-    # Paragraph 4: a little stat about the house / block
-    stat_line = (
-        "Places like yours in this part of Memphis have been moving "
-        "in the $35-65k range depending on condition -- "
-        "cash buyers are active right now and closings have been quick."
-    )
+    # -- 4. Actual number / range
+    offer_line = _offer_sentence(lead, "piper")
 
-    # Paragraph 5: casual ask
-    if lead_type == "llc":
-        cta = (
-            "Anyway -- we're a private buyer picking up a few Memphis properties this month. "
-            "Would your firm be down to have a quick conversation about a cash offer? "
-            "No agents, no fees, no obligation -- just putting it on your radar."
-        )
+    # -- 5. Future-state outcome (one specific outcome)
+    if "tax" in signal.lower() or "delinquent" in signal.lower():
+        future = "A clean cash close means no back-tax burden carried forward -- you walk away free and clear."
     elif lead_type == "probate":
-        cta = (
-            "Anyway -- we're a private buyer picking up a few Memphis homes this month. "
-            "Are you down to talk through what a clean cash offer might look like? "
-            "No fees, no agents, no showings -- just letting you know we're interested."
-        )
+        future = "A quiet, fast close means the estate settles without a drawn-out listing process."
+    elif lead_type == "absentee":
+        future = "Close in 7 days cash, out from under the out-of-town management grind."
     else:
-        fname = first_name(owner)
-        cta = (
-            "Anyway -- we're a private buyer picking up a few homes in your area this month. "
-            f"Would you be down for a quick conversation about a cash offer, {html.escape(fname)}? "
-            "No fees, no agents, no obligation -- just letting you know we're interested."
-        )
+        future = "Cash in hand in 7 days -- clean exit, no agent fees, no inspections, no surprises."
 
-    # Paragraph 1: casual hello + intro
+    # -- 6. CTA (direct, not a phone call pitch)
     if lead_type in ("llc", "probate"):
-        salutation = _lead_type_salutation(lead_type, owner)
-        intro = "I'm Piper with Everlight -- we're a small private buying group based out of the Sacramento area."
+        cta = (
+            "Want me to send you a real number this week? "
+            "Just reply and I'll have one to you same day. No obligation."
+        )
     else:
-        salutation = _lead_type_salutation(lead_type, owner)
-        intro = "I'm Piper with Everlight -- we're a small private buying group."
+        cta = (
+            f"Are you down to look at an offer, {html.escape(fname)}? "
+            "I can send you the actual number this week -- reply and I'll make it happen."
+        )
 
-    # Paragraph 2: why I'm here
-    why_here = (
-        f"Your place on {street_address} came across my desk this morning "
-        f"while I was going through properties in {html.escape(city)}, Tennessee, "
-        "and I wanted to reach out."
+    # -- 7. No-pressure close
+    close_note = "If the timing isn't right, no worries at all -- you've got my line whenever."
+
+    # Build the signal + data paragraph
+    why_para = (
+        f"Your place on {street_address} came across my desk this morning, "
+        f"and the reason I'm reaching out specifically is that {signal}."
     )
 
-    # Paragraph 6: no-pressure close
-    close = "If the timing isn't right, no worries at all -- you've got my line whenever. -- Piper"
+    if data_block_items:
+        data_list = "".join(f"<li>{item}</li>" for item in data_block_items)
+        data_para = f"Here's what I pulled on the property:<ul>{data_list}</ul>"
+    else:
+        data_para = ""
 
     subject = f"Quick question about your Memphis property -- {street_address}"
-    paragraphs = [salutation, intro, why_here, nice_line, stat_line, cta, close]
-    body_html = _wrap(paragraphs, _sig(p_key))
+
+    body_html = (
+        f"<p>{salutation}</p>"
+        f"<p>{intro}</p>"
+        f"<p>{why_para}</p>"
+        f"{data_para}"
+        f"<p>{warmth}</p>"
+        f"<p>{offer_line}</p>"
+        f"<p>{future}</p>"
+        f"<p>{cta}</p>"
+        f"<p>{close_note}</p>"
+        + _sig(p_key)
+    )
+
     return {"subject": subject, "body_html": body_html, "persona": PERSONA[p_key]}
 
 
@@ -618,6 +766,7 @@ def _piper_first_touch_final(lead: dict) -> dict:
 
 # ---------------------------------------------------------------------------
 # HENRY templates (math-first, walks-away, negotiation phase)
+# Blueprint: comp data + real number upfront + walk-away framing
 # ---------------------------------------------------------------------------
 
 def _henry_negotiation(lead: dict) -> dict:
@@ -628,33 +777,64 @@ def _henry_negotiation(lead: dict) -> dict:
     salutation = _lead_type_salutation(lead_type, owner)
     lens = data_lens("henry", lead)
 
+    fname_str = html.escape(first_name(owner))
     opener = (
-        f"Hi {html.escape(first_name(owner))} -- Henry here, picking up from Piper. "
+        f"Hi {fname_str} -- Henry here, picking up from Piper. "
         "She mentioned you'd like to know where we land on the numbers, "
         "so let me give you an honest read."
     )
     lens_para = lens
+
+    appraisal = lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 0
+
+    # Signal + data points for Henry's math-first pitch
+    signal = _signal_for_lead(lead)
+    neighborhood = lead.get("neighborhood") or lead.get("subdivision") or "this Memphis corridor"
+    last_sale_year = lead.get("last_sale_year") or ""
+
+    if appraisal:
+        offer_low = int(int(appraisal) * 0.65)
+        offer_high = int(int(appraisal) * 0.72)
+        anchor_note = (
+            f"County assessed value: ${int(appraisal):,}. "
+            f"Cash buyer range in {html.escape(str(neighborhood))}: "
+            f"${offer_low:,}-${offer_high:,} (65-72% of assessed -- "
+            "that's the no-agent, no-repair, 7-day-close math)."
+        )
+        offer_line = f"${offer_low:,} -- ${offer_high:,} all cash, 7-day close through Mid-South Title."
+    else:
+        offer_line = "A competitive all-cash offer, 7-day close through Mid-South Title in Memphis."
+        anchor_note = "Comps in this Memphis corridor are active -- once I see the full picture I send the real number same day."
+
+    # Future-state framing (operator blueprint: how it changes their future)
+    if "tax" in signal.lower() or "delinquent" in signal.lower():
+        future_line = "Clean cash close means the tax burden stops here -- you walk with the check, not the liability."
+    elif lead_type == "probate":
+        future_line = "Estate settles fast, no drawn-out listing process, title clears at Mid-South."
+    elif last_sale_year and int(str(last_sale_year)) < 2000:
+        future_line = f"You've carried this since {last_sale_year} -- a clean exit now converts that equity to cash in 7 days."
+    else:
+        future_line = "Fresh start -- cash in hand in 7 days, no agent, no inspection, no back-and-forth."
+
     math_intro = (
         f"Based on the Memphis comps I'm looking at for {html.escape(address)}, "
         "here is where I can be today:"
     )
 
-    appraisal = lead.get("county_appraisal") or 0
-    if appraisal:
-        offer_low = int(int(appraisal) * 0.65)
-        offer_high = int(int(appraisal) * 0.72)
-        offer_line = f"${offer_low:,} -- ${offer_high:,} all cash, 7-day close through Mid-South Title."
-    else:
-        offer_line = "A competitive all-cash offer, 7-day close through Mid-South Title in Memphis."
-
     table = (
         f"<table style='border-collapse:collapse;font-family:inherit'>"
+        f"<tr><td style='padding:4px 12px 4px 0'><strong>Why we reached out</strong></td>"
+        f"<td style='padding:4px 0'>{html.escape(signal)}</td></tr>"
+        f"<tr><td style='padding:4px 12px 4px 0'><strong>The math</strong></td>"
+        f"<td style='padding:4px 0'>{anchor_note}</td></tr>"
         f"<tr><td style='padding:4px 12px 4px 0'><strong>Offer range</strong></td>"
-        f"<td style='padding:4px 0'>{offer_line}</td></tr>"
+        f"<td style='padding:4px 0'><strong>{offer_line}</strong></td></tr>"
         f"<tr><td style='padding:4px 12px 4px 0'><strong>Terms</strong></td>"
         f"<td style='padding:4px 0'>Cash, as-is, no agent fee, no repairs</td></tr>"
         f"<tr><td style='padding:4px 12px 4px 0'><strong>Close window</strong></td>"
         f"<td style='padding:4px 0'>7 days from signed contract</td></tr>"
+        f"<tr><td style='padding:4px 12px 4px 0'><strong>What this means for you</strong></td>"
+        f"<td style='padding:4px 0'>{future_line}</td></tr>"
         f"</table>"
     )
 
@@ -706,6 +886,7 @@ def _henry_followup(lead: dict, touch_index: int) -> dict:
 
 # ---------------------------------------------------------------------------
 # MARVIN templates (closing coordinator, contract/title phase)
+# Blueprint: procedure + timeline + numbers in writing
 # ---------------------------------------------------------------------------
 
 def _marvin_closing_handoff(lead: dict) -> dict:
@@ -715,19 +896,36 @@ def _marvin_closing_handoff(lead: dict) -> dict:
     lead_type = classify_lead(lead)
     salutation = _lead_type_salutation(lead_type, owner)
     lens = data_lens("marvin", lead)
+    fname_str = html.escape(first_name(owner))
+
+    appraisal = lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 0
+    offer_low, offer_high = _compute_offer_range(lead)
 
     opener = (
-        f"Hi {html.escape(first_name(owner))} -- Marvin Cohen here, "
+        f"Hi {fname_str} -- Marvin Cohen here, "
         "Closing Coordinator at Everlight Ventures. "
         "Henry just handed this over to me, which means we're moving. "
         "Two quick items to get on your calendar."
     )
     lens_para = lens
+
+    if offer_low:
+        numbers_line = (
+            f"<li><strong>Agreed range: ${offer_low:,}-${offer_high:,} all cash.</strong> "
+            "Once you confirm, I lock in the exact figure and put it in writing in the purchase agreement. "
+            "Not 'around that number' -- the actual number.</li>"
+        )
+    else:
+        numbers_line = (
+            "<li><strong>Cash offer</strong> -- Henry's number goes into the contract. "
+            "If it's not in writing, it's not in writing -- so we make sure it is.</li>"
+        )
+
     steps = (
         "<ol>"
-        "<li><strong>Purchase contract</strong> -- I'll have the agreement to you "
+        + numbers_line
+        + "<li><strong>Purchase contract</strong> -- I'll have the agreement to you "
         "within 30 minutes. TN SB 909 equitable-interest disclosure is pre-baked in. "
-        "If it's not in writing, it's not in writing -- so we make sure everything is. "
         "Sign at your convenience, no rush on time of day.</li>"
         "<li><strong>EMD (Earnest Money Deposit)</strong> -- held by "
         "Mid-South Title Company here in Memphis (not by us). "
@@ -786,6 +984,7 @@ def _marvin_followup(lead: dict, touch_index: int) -> dict:
 
 # ---------------------------------------------------------------------------
 # VAUGHN templates (senior partner, institutional gravitas, probate / high-stakes)
+# Blueprint: data + outcome + no pressure -- institution behind the offer
 # ---------------------------------------------------------------------------
 
 def _vaughn_first_touch(lead: dict) -> dict:
@@ -795,6 +994,10 @@ def _vaughn_first_touch(lead: dict) -> dict:
     address = lead.get("property_address") or lead.get("address") or "your property"
     lead_type = classify_lead(lead)
     lens = data_lens("vaughn", lead)
+
+    signal = _signal_for_lead(lead)
+    appraisal = lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 0
+    offer_low, offer_high = _compute_offer_range(lead)
 
     if lead_type == "probate":
         salutation = "Dear Sir or Madam,"
@@ -807,19 +1010,49 @@ def _vaughn_first_touch(lead: dict) -> dict:
         "in Memphis, Tennessee."
     )
     lens_para = lens
-    context = (
-        "We work with a trusted Memphis buyer who closes on a weekly schedule, "
-        "and we can put a no-obligation cash offer in writing within 24 hours "
-        "if that would be useful. I would like to be direct with you: "
-        "there is no pressure attached to this note."
+
+    why_line = (
+        f"I want to be direct with you about why I am writing: {signal}. "
+        "In my experience, that signal is worth a conversation."
     )
+
+    if offer_low:
+        numbers_line = (
+            f"Based on the county figure of ${int(appraisal):,}, our cash range is "
+            f"${offer_low:,}-${offer_high:,}, 7-day close, no agent commissions on your side. "
+            "I can put a specific number in writing within 24 hours if that would be useful."
+        )
+    else:
+        numbers_line = (
+            "We can put a no-obligation cash offer in writing within 24 hours "
+            "if that would be useful. I would like to be direct with you: "
+            "there is no pressure attached to this note."
+        )
+
+    # future-state (Vaughn version: institutional, outcome-specific)
+    if "tax" in signal.lower() or "delinquent" in signal.lower():
+        future_line = (
+            "A clean, timely close eliminates the carrying cost and the tax exposure "
+            "in a single step -- you walk away with liquidity and no obligation."
+        )
+    elif lead_type == "probate":
+        future_line = (
+            "In my experience, a well-structured cash close is often the cleanest "
+            "resolution for an estate -- it ends the holding cost and gives the family certainty."
+        )
+    else:
+        future_line = (
+            "A 7-day cash close converts the asset to liquidity without the carrying costs "
+            "of a traditional listing. That is the outcome we are built to deliver."
+        )
+
     close = (
         "There is no deadline on my end. "
         "If the timing is not right, my line is always open."
     )
 
     subject = f"Regarding your property in Memphis, Tennessee -- {html.escape(address)}"
-    paragraphs = [salutation, opener, lens_para, context, close]
+    paragraphs = [salutation, opener, lens_para, why_line, numbers_line, future_line, close]
     body_html = _wrap(paragraphs, _sig(p_key))
     return {"subject": subject, "body_html": body_html, "persona": PERSONA[p_key]}
 
@@ -860,8 +1093,12 @@ def render_first_touch(lead: dict, persona_key: str = "piper") -> dict:
     in branded_mailer. Persona-voiced, Memphis-anchored, TN-only.
     Each persona interprets the lead through their own lens.
 
+    Operator blueprint: specific signal + data points + real number +
+    future state framing + direct CTA. No over-talking.
+
     Args:
-        lead: dict with owner_name, property_address/address, city, mailing_address, etc.
+        lead: dict with owner_name, property_address/address, city,
+              mailing_address, county_appraisal, source, etc.
         persona_key: one of "piper" | "henry" | "marvin" | "vaughn"
 
     Returns:
