@@ -444,77 +444,86 @@ def _piper_first_touch(lead: dict, lead_type: str) -> dict:
     p_key = "piper"
     owner = lead.get("owner_name") or ""
     address = lead.get("property_address") or lead.get("address") or "your Memphis property"
-    salutation = _lead_type_salutation(lead_type, owner)
+    # Extract street portion for casual reference (e.g. "836 N Bellevue" not full address)
+    street_address = html.escape(address)
     city = lead.get("city") or TN_CONSTANTS["metro"]
-    lens = data_lens("piper", lead)
+    years_owned = lead.get("years_owned") or 0
 
-    if lead_type == "llc":
-        opener = (
-            "My name is Piper Reeves with Everlight Ventures. "
-            "I came across the property at "
-            f"{html.escape(address)} in {html.escape(city)}, Tennessee "
-            "while researching Memphis acquisitions, and I wanted to reach out directly."
+    # Build lead-type-specific warmth line (paragraph 3: something nice about the house/them)
+    if lead_type == "probate":
+        nice_line = (
+            "Dealing with an estate property is a lot to manage on top of everything else -- "
+            "I just want you to know we handle this kind of thing quietly and without any drama."
         )
-        hook = (
-            "We work with a local Mid-South buyer who closes cash deals every week -- "
-            "no agents, no commissions, no showings on your end. "
-            "If your firm has any interest in an off-market conversation, "
-            "I'd genuinely love five minutes of your time."
+    elif lead_type == "joint_couple":
+        nice_line = (
+            "I always love seeing two names on a deed -- "
+            "it tells me y'all have taken care of this place together, and that means something."
         )
-        middle = lens
-        cta = "Would a quick call or email work this week? No obligation, just a conversation."
-
-    elif lead_type == "probate":
-        opener = (
-            "My name is Piper Reeves with Everlight Ventures. "
-            f"I came across the property at {html.escape(address)} in {html.escape(city)} "
-            "and wanted to reach out with care."
-        )
-        hook = lens
-        middle = (
-            "There's absolutely no rush, and I'm not here to push. "
-            "If it would ever be helpful to have a no-obligation cash offer on the table "
-            "so you have one less thing to manage, we'd be glad to help. "
-            "First conversation, not a pitch."
-        )
-        cta = "Just hit reply whenever it works -- I'll be here."
-
     elif lead_type == "absentee":
-        fname = first_name(owner)
-        opener = (
-            f"My name is Piper Reeves with Everlight Ventures -- "
-            f"I noticed you own a spot at {html.escape(address)} in {html.escape(city)}, Tennessee "
-            "and wanted to reach out personally."
+        nice_line = (
+            "Managing a property from out of town is no small thing -- "
+            "the fact that you've held onto it says a lot."
         )
-        hook = lens
-        middle = (
-            "We buy Memphis properties directly -- cash, as-is, no agent fees, no showings. "
-            "If the timing is ever right for a clean exit, I'd love to hear from you, "
-            f"{html.escape(fname)}. First conversation, not a pitch."
+    elif years_owned and int(years_owned) >= 10:
+        nice_line = (
+            f"Honest with you, when I see someone hold a spot for {int(years_owned)} years, "
+            "it tells me they've been intentional about it -- that's not something you see every day."
         )
-        cta = "Would a quick email back work? No pressure at all."
+    else:
+        nice_line = (
+            "Memphis has some really solid blocks, and yours caught my eye -- "
+            "good bones in this part of town."
+        )
 
+    # Paragraph 4: a little stat about the house / block
+    stat_line = (
+        "Places like yours in this part of Memphis have been moving "
+        "in the $35-65k range depending on condition -- "
+        "cash buyers are active right now and closings have been quick."
+    )
+
+    # Paragraph 5: casual ask
+    if lead_type == "llc":
+        cta = (
+            "Anyway -- we're a private buyer picking up a few Memphis properties this month. "
+            "Would your firm be down to have a quick conversation about a cash offer? "
+            "No agents, no fees, no obligation -- just putting it on your radar."
+        )
+    elif lead_type == "probate":
+        cta = (
+            "Anyway -- we're a private buyer picking up a few Memphis homes this month. "
+            "Are you down to talk through what a clean cash offer might look like? "
+            "No fees, no agents, no showings -- just letting you know we're interested."
+        )
     else:
         fname = first_name(owner)
-        opener = (
-            f"My name is Piper Reeves with Everlight Ventures -- "
-            f"I came across {html.escape(address)} in {html.escape(city)}, Tennessee "
-            "and wanted to introduce myself."
-        )
-        hook = lens
-        middle = (
-            "We buy Memphis homes directly from owners -- no agents, no showings, "
-            "no fees on your end. Honest with you, I'm not here to push a number today. "
-            f"I'd genuinely love to hear your situation, {html.escape(fname)}. "
-            "First conversation, not a pitch."
-        )
         cta = (
-            "Would a quick call or email work for you this week? "
-            "No obligation, just a conversation."
+            "Anyway -- we're a private buyer picking up a few homes in your area this month. "
+            f"Would you be down for a quick conversation about a cash offer, {html.escape(fname)}? "
+            "No fees, no agents, no obligation -- just letting you know we're interested."
         )
 
-    subject = f"Quick question about your Memphis property -- {html.escape(address)}"
-    paragraphs = [salutation, opener, hook, middle, cta]
+    # Paragraph 1: casual hello + intro
+    if lead_type in ("llc", "probate"):
+        salutation = _lead_type_salutation(lead_type, owner)
+        intro = "I'm Piper with Everlight -- we're a small private buying group based out of the Sacramento area."
+    else:
+        salutation = _lead_type_salutation(lead_type, owner)
+        intro = "I'm Piper with Everlight -- we're a small private buying group."
+
+    # Paragraph 2: why I'm here
+    why_here = (
+        f"Your place on {street_address} came across my desk this morning "
+        f"while I was going through properties in {html.escape(city)}, Tennessee, "
+        "and I wanted to reach out."
+    )
+
+    # Paragraph 6: no-pressure close
+    close = "If the timing isn't right, no worries at all -- you've got my line whenever. -- Piper"
+
+    subject = f"Quick question about your Memphis property -- {street_address}"
+    paragraphs = [salutation, intro, why_here, nice_line, stat_line, cta, close]
     body_html = _wrap(paragraphs, _sig(p_key))
     return {"subject": subject, "body_html": body_html, "persona": PERSONA[p_key]}
 
@@ -556,63 +565,52 @@ def _piper_followup(lead: dict, touch_index: int) -> dict:
 
 
 def _piper_first_touch_followup(lead: dict) -> dict:
-    """Day-2 follow-up: social proof + soft urgency, fully Piper-voiced."""
+    """Day-2 follow-up: bump the inbox, short and casual, no pressure language."""
     p_key = "piper"
     owner = lead.get("owner_name") or ""
     address = lead.get("property_address") or lead.get("address") or "your Memphis property"
     lead_type = classify_lead(lead)
     salutation = _lead_type_salutation(lead_type, owner)
     fname = first_name(owner)
-    city = lead.get("city") or TN_CONSTANTS["metro"]
 
     opener = (
-        f"Hey {html.escape(fname)} -- Piper again. "
-        f"Just wanted to follow up on my note about {html.escape(address)} in {html.escape(city)}."
+        f"Hey {html.escape(fname)} -- just bumping my last note up the inbox "
+        "in case it got buried."
     )
-    social_proof = (
-        "We closed on a few Memphis properties this month already -- "
-        "cash closings, sellers walked away without a single showing or agent in the middle. "
-        "That's the experience I want to offer you."
+    body = (
+        "We're still picking up a few homes in Memphis this month if the timing ever lines up. "
+        "No rush on my end -- just wanted to make sure you saw it."
     )
-    soft_urgency = (
-        "Honest with you, I still have a buyer allocated for this neighborhood right now. "
-        "I don't want to lose the window for you if the timing could work. "
-        "First conversation, not a pitch -- just a quick reply is all I'm asking."
-    )
-    cta = "Would this week work for a short call or email? Totally your call."
+    cta = "Shoot me a reply whenever. -- Piper"
 
-    subject = f"Re: {html.escape(address)} -- Memphis (quick follow-up)"
-    paragraphs = [salutation, opener, social_proof, soft_urgency, cta]
+    subject = f"Re: {html.escape(address)} -- Memphis"
+    paragraphs = [salutation, opener, body, cta]
     body_html = _wrap(paragraphs, _sig(p_key))
     return {"subject": subject, "body_html": body_html, "persona": PERSONA[p_key]}
 
 
 def _piper_first_touch_final(lead: dict) -> dict:
-    """Day-4 final touch: 'closing file Friday' framing, still warm but with closure energy."""
+    """Day-4 final touch: warm closure, no false deadline, no expiration pressure."""
     p_key = "piper"
     owner = lead.get("owner_name") or ""
     address = lead.get("property_address") or lead.get("address") or "your Memphis property"
     lead_type = classify_lead(lead)
     salutation = _lead_type_salutation(lead_type, owner)
     fname = first_name(owner)
-    city = lead.get("city") or TN_CONSTANTS["metro"]
 
     opener = (
-        f"Hey {html.escape(fname)} -- this is my last note about "
-        f"{html.escape(address)} in {html.escape(city)}, I promise."
+        f"Hey {html.escape(fname)} -- one last note from me."
     )
     body = (
-        "I'm closing out my open files for this stretch of Memphis on Friday. "
-        "If there is any interest at all -- even if the timing is not quite right yet -- "
-        "just reply and I'll hold a spot for you in the next round."
+        "If the timing isn't right that's completely okay -- "
+        "no expiration on the offer. "
+        "You know where to find me if anything changes."
     )
     close_note = (
-        "Honest with you, I genuinely enjoyed learning about this property. "
-        "If now's not the time, that's okay. "
-        "You know where to find me whenever it is -- no expiration on that offer."
+        "Either way, I hope things are going well on your end. Take care. -- Piper"
     )
 
-    subject = f"Closing out -- {html.escape(address)}, Memphis"
+    subject = f"Last note -- {html.escape(address)}, Memphis"
     paragraphs = [salutation, opener, body, close_note]
     body_html = _wrap(paragraphs, _sig(p_key))
     return {"subject": subject, "body_html": body_html, "persona": PERSONA[p_key]}
@@ -909,7 +907,7 @@ def render_first_touch_followup(lead: dict, persona_key: str = "piper") -> dict:
 
 
 def render_first_touch_final(lead: dict, persona_key: str = "piper") -> dict:
-    """Day-4 final touch: 'closing file Friday' framing.
+    """Day-4 final touch: warm closure, no false deadline.
 
     Args:
         lead: lead dict

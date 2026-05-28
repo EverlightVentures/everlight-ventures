@@ -178,20 +178,108 @@ class TestFirstName:
 class TestPersonaCatchphrases:
     """Each persona's render must contain their signature phrases from the dossier."""
 
-    def test_piper_catchphrase_first_conversation(self):
-        """Piper's core catchphrase must appear in first touch."""
+    # ---- NEW: operator blueprint voice checks ----
+
+    def test_piper_no_too_formal_intro(self):
+        """Piper must NOT open with the stiff 'My name is Piper Reeves with Everlight Ventures'."""
         result = ot.render_first_touch(_RITA_LEAD, persona_key="piper")
         body = result["body_html"]
-        assert "First conversation, not a pitch" in body, (
-            "Piper first-touch must contain her catchphrase 'First conversation, not a pitch.'"
+        assert "My name is Piper Reeves with Everlight Ventures" not in body, (
+            "Piper opener is too formal -- must not use 'My name is Piper Reeves with Everlight Ventures'"
         )
 
-    def test_piper_honest_with_you(self):
-        """Piper's 'honest with you' tell must appear in her individual first touch."""
+    def test_piper_opener_starts_with_hey(self):
+        """Piper must open with 'Hey' or equivalent casual greeting."""
         result = ot.render_first_touch(_RITA_LEAD, persona_key="piper")
         body = result["body_html"]
+        assert "Hey " in body or "Hi " in body, (
+            "Piper first-touch must open with 'Hey' or warm equivalent"
+        )
+
+    def test_piper_intro_casual(self):
+        """Piper introduces herself simply: 'I'm Piper with Everlight'."""
+        result = ot.render_first_touch(_RITA_LEAD, persona_key="piper")
+        body = result["body_html"]
+        assert "I'm Piper with Everlight" in body or "Piper with Everlight" in body, (
+            "Piper must introduce herself casually: 'I'm Piper with Everlight'"
+        )
+
+    def test_piper_why_here_property_on_desk(self):
+        """Piper must say the property came across her desk."""
+        result = ot.render_first_touch(_RITA_LEAD, persona_key="piper")
+        body = result["body_html"]
+        assert "came across my desk" in body or "came across" in body, (
+            "Piper must say the property came across her desk"
+        )
+
+    def test_piper_dollar_range_stat(self):
+        """Piper must include a ballpark dollar range stat about the house/block."""
+        import re
+        result = ot.render_first_touch(_RITA_LEAD, persona_key="piper")
+        body = result["body_html"]
+        dollar_ranges = re.findall(r"\$\d+", body)
+        assert len(dollar_ranges) >= 1, (
+            f"Piper first-touch must include a dollar range stat. Got: {body[:400]}"
+        )
+
+    def test_piper_casual_ask_phrase(self):
+        """Piper must include a casual ask ('are you down', 'down for', 'let me know')."""
+        result = ot.render_first_touch(_RITA_LEAD, persona_key="piper")
+        body = result["body_html"].lower()
+        assert any(phrase in body for phrase in ["are you down", "down for", "down to", "let me know"]), (
+            "Piper must include a casual ask phrase ('are you down', 'down for', 'let me know')"
+        )
+
+    def test_piper_no_false_deadline_friday(self):
+        """Piper must NOT contain false deadline 'Friday' language."""
+        result = ot.render_first_touch(_RITA_LEAD, persona_key="piper")
+        body = result["body_html"]
+        assert "Friday" not in body, (
+            "Piper first-touch must not contain false deadline 'Friday' language"
+        )
+
+    def test_piper_no_no_obligation_cash_offer_this(self):
+        """Piper must NOT use the phrase 'no-obligation cash offer this'."""
+        result = ot.render_first_touch(_RITA_LEAD, persona_key="piper")
+        body = result["body_html"]
+        assert "no-obligation cash offer this" not in body.lower(), (
+            "Piper first-touch must not contain false urgency 'no-obligation cash offer this'"
+        )
+
+    def test_piper_no_closing_my_open_files(self):
+        """Piper must NOT use 'closing my open files' anywhere in first touch."""
+        result = ot.render_first_touch(_RITA_LEAD, persona_key="piper")
+        body = result["body_html"]
+        assert "closing my open files" not in body.lower(), (
+            "Piper first-touch must not use 'closing my open files' pressure framing"
+        )
+
+    def test_piper_no_buyer_allocated(self):
+        """Piper must NOT use 'buyer allocated' pressure language."""
+        result = ot.render_first_touch(_RITA_LEAD, persona_key="piper")
+        body = result["body_html"]
+        assert "buyer allocated" not in body.lower(), (
+            "Piper first-touch must not use 'buyer allocated' pressure language"
+        )
+
+    def test_piper_no_pressure_close(self):
+        """Piper's close must contain a no-pressure line."""
+        result = ot.render_first_touch(_RITA_LEAD, persona_key="piper")
+        body = result["body_html"]
+        assert any(phrase in body.lower() for phrase in [
+            "no worries", "timing isn't right", "timing is not right", "no rush", "whenever"
+        ]), (
+            "Piper must close with a no-pressure line"
+        )
+
+    # ---- EXISTING: Piper voice checks (updated to match new blueprint) ----
+
+    def test_piper_honest_with_you(self):
+        """Piper's 'honest with you' tell must appear in her long-hold first touch."""
+        result = ot.render_first_touch(_LONG_HOLD_LEAD, persona_key="piper")
+        body = result["body_html"]
         assert "Honest with you" in body or "honest with you" in body, (
-            "Piper should use her 'Honest with you' tell on individual leads"
+            "Piper should use her 'Honest with you' tell on long-hold leads"
         )
 
     def test_piper_two_persona_phrases(self):
@@ -199,12 +287,14 @@ class TestPersonaCatchphrases:
         result = ot.render_first_touch(_RITA_LEAD, persona_key="piper")
         body = result["body_html"]
         piper_phrases = [
-            "First conversation, not a pitch",
-            "honest with you",
-            "Honest with you",
-            "genuinely love to hear",
+            "Piper with Everlight",
+            "came across my desk",
             "Memphis",
+            "no worries",
             "no rush",
+            "down for",
+            "are you down",
+            "down to",
         ]
         found = [p for p in piper_phrases if p in body]
         assert len(found) >= 2, (
@@ -565,19 +655,52 @@ class TestFollowupAndFinalVariants:
         assert "body_html" in result
         assert "persona" in result
 
-    def test_piper_followup_contains_social_proof_angle(self):
+    def test_piper_followup_bumps_inbox(self):
+        """Day-2 followup must bump the inbox casually -- no pressure language."""
         result = ot.render_first_touch_followup(_RITA_LEAD, persona_key="piper")
         body = result["body_html"]
-        # Day-2 should contain social proof + the buyer-allocation angle
-        assert any(kw in body for kw in ["closed", "buyer", "allocated", "follow"]), (
-            f"Piper day-2 followup should contain social proof angle. Body: {body[:300]}"
+        assert any(kw in body for kw in ["bumping", "bump", "buried", "follow", "last note"]), (
+            f"Piper day-2 followup should bump the inbox casually. Body: {body[:300]}"
         )
 
-    def test_piper_final_closing_file_framing(self):
+    def test_piper_followup_no_buyer_allocated(self):
+        """Day-2 followup must NOT contain 'buyer allocated' pressure language."""
+        result = ot.render_first_touch_followup(_RITA_LEAD, persona_key="piper")
+        body = result["body_html"]
+        assert "buyer allocated" not in body.lower(), (
+            "Piper day-2 followup must not use 'buyer allocated' pressure language"
+        )
+
+    def test_piper_followup_no_friday(self):
+        """Day-2 followup must NOT contain false deadline 'Friday'."""
+        result = ot.render_first_touch_followup(_RITA_LEAD, persona_key="piper")
+        body = result["body_html"]
+        assert "Friday" not in body, (
+            "Piper day-2 followup must not contain false deadline 'Friday'"
+        )
+
+    def test_piper_final_warm_closure(self):
+        """Day-4 final must contain warm closure language, no false deadlines."""
         result = ot.render_first_touch_final(_RITA_LEAD, persona_key="piper")
         body = result["body_html"]
-        assert any(kw in body for kw in ["closing out", "closing", "Friday", "last note", "file"]), (
-            f"Piper day-4 final should contain closing-file framing. Body: {body[:300]}"
+        assert any(kw in body for kw in ["last note", "timing", "no expiration", "find me", "okay"]), (
+            f"Piper day-4 final should contain warm closure language. Body: {body[:300]}"
+        )
+
+    def test_piper_final_no_closing_my_open_files(self):
+        """Day-4 final must NOT use 'closing my open files' framing."""
+        result = ot.render_first_touch_final(_RITA_LEAD, persona_key="piper")
+        body = result["body_html"]
+        assert "closing my open files" not in body.lower(), (
+            "Piper day-4 final must not use 'closing my open files' false urgency"
+        )
+
+    def test_piper_final_no_friday(self):
+        """Day-4 final must NOT contain false deadline 'Friday'."""
+        result = ot.render_first_touch_final(_RITA_LEAD, persona_key="piper")
+        body = result["body_html"]
+        assert "Friday" not in body, (
+            "Piper day-4 final must not contain 'Friday' false deadline"
         )
 
     def test_henry_followup_returns_valid_output(self):
@@ -654,8 +777,10 @@ class TestRexBelfortTemplateWiring:
         result_day0 = ot.render_first_touch(lead, persona_key="piper")
         assert result_day0["subject"], "Day-0 email subject must be non-empty"
         assert "piper" in result_day0["body_html"].lower(), "Day-0 email must be signed by Piper"
-        assert "First conversation, not a pitch" in result_day0["body_html"], (
-            "Day-0 email must carry Piper's core catchphrase"
+        # Piper must introduce herself and reference the property coming across her desk
+        assert "Piper with Everlight" in result_day0["body_html"] or \
+               "came across" in result_day0["body_html"], (
+            "Day-0 email must carry Piper's casual intro and desk-reference"
         )
 
         # Day-2 (touch index 3) -- render_first_touch_followup
