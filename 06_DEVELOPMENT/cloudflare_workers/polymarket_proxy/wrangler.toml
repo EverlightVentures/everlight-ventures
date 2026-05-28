@@ -1,0 +1,11 @@
+name = "polymarket-proxy"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+
+[[routes]]
+pattern = "clob-proxy.everlightventures.io/*"
+zone_name = "everlightventures.io"
+
+[vars]
+UPSTREAM_GAMMA = "https://gamma-api.polymarket.com"
+UPSTREAM_CLOB = "https://clob.polymarket.com"
