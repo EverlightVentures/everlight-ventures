@@ -5,101 +5,159 @@ Pure functions, no network, fully testable.
 
 Tiers
 -----
-TIER_AUTO       (score >= 75)  : agents send automatically
-TIER_REVIEW     (55 <= score < 75) : human reviews before send
-TIER_DIRECTMAIL (score < 55)   : no email outreach; route to direct mail or deepen OSINT
+TIER_SEND = "send"  -- deliverability verified (HIBP or EmailRep deliverable).
+                       Best signal -- highest priority send.
+TIER_TRY  = "try"   -- mx_ok and no disqualifying flags (catch-all, disposable,
+                       role, duplicate). We send anyway per operator policy.
+TIER_SKIP = "skip"  -- would bounce (no MX) OR disqualifying flag. Don't send.
 
-Score formula
--------------
-The score answers: "How confident are we that THIS email reaches THIS homeowner?"
+Operator policy (2026-05-27): deliverability-verified is the new bar, not
+identity-verified. No direct-mail tier. Send to anything we can deliver.
 
-Two independent questions must both be high for the score to be high:
-  1. Is this the right person?  --> identity_score (0-100) from osint_api profile_depth
-  2. Is this email valid?       --> email_confidence (0-100) from email_discovery candidate
+email_score(candidate, identity_score) formula
+----------------------------------------------
+Answer: "How deliverable + trustworthy is this email address?"
 
-Base blend (70/30 weighted toward identity match because a perfect email for the
-wrong person is worthless):
-    base = (identity_score * 0.70) + (candidate["confidence"] or 0) * 0.30
+Base from deliverability:
+  +50 if candidate.verified is True (HIBP OR EmailRep deliverable)
+  +30 if any source contains "mx_check", "mx_ok", or "mx" (MX exists)
+  +0  otherwise
 
-Caps and penalties:
-  - If candidate is NOT verified deliverable (verified=False): cap at 60
-    Rationale: even a strong identity match is useless if the mailbox may bounce.
-  - If candidate has no confidence value (confidence is None): treat as 0 and
-    apply a -10 penalty (unknown signal is worse than a low-confidence signal).
-  - Final score is clamped to [0, 100].
+Identity bonus (raises priority, does not gate):
+  + min(20, identity_score // 5)     max +20
 
-Example:
-  identity_score=90, confidence=80, verified=True
-    -> base = (90*0.70) + (80*0.30) = 63 + 24 = 87  -> TIER_AUTO
-  identity_score=90, confidence=80, verified=False
-    -> raw = 87, cap to 60                            -> TIER_REVIEW
-  identity_score=60, confidence=50, verified=True
-    -> base = (60*0.70) + (50*0.30) = 42 + 15 = 57   -> TIER_REVIEW
-  identity_score=60, confidence=None, verified=False
-    -> base = (60*0.70) + 0 - 10 = 42 - 10 = 32, cap 60 -> TIER_DIRECTMAIL
+Email-discovery confidence roll-in:
+  + min(20, (candidate.get("confidence") or 0) // 5)   max +20
+
+Penalties (look at sources list; treat any source string containing
+"catch", "disposable", "role", "free-tier-suspicious" as a disqualifier):
+  -40 if catch-all / disposable / role detected (clamped once per candidate)
+  -25 if candidate email appears in the caller-supplied duplicate_emails set
+       (same address already enriched on a different lead)
+
+Final score clamped to [0, 100].
+
+tier_for(score, candidate) boundaries
+--------------------------------------
+  no "mx" in sources at all          -> TIER_SKIP
+  candidate.verified is True         -> TIER_SEND
+  mx_ok AND score >= 35              -> TIER_TRY
+  else                               -> TIER_SKIP
 """
 from __future__ import annotations
 
-TIER_AUTO = "auto_email"
-TIER_REVIEW = "review"
-TIER_DIRECTMAIL = "directmail"
+from typing import Optional
 
-_UNVERIFIED_CAP = 60
-_NO_CONFIDENCE_PENALTY = 10
-_BLEND_IDENTITY = 0.70
-_BLEND_EMAIL = 0.30
+TIER_SEND = "send"
+TIER_TRY = "try"
+TIER_SKIP = "skip"
+
+_MX_TOKENS = ("mx_check", "mx_ok", "mx")
+_DISQUALIFY_TOKENS = ("catch", "disposable", "role", "free-tier-suspicious")
 
 
-def email_score(candidate: dict, identity_score: int) -> int:
+def _has_mx(candidate: dict) -> bool:
+    """Return True if any source string on the candidate contains an MX token."""
+    sources = candidate.get("sources") or []
+    for src in sources:
+        src_lower = str(src).lower()
+        for tok in _MX_TOKENS:
+            if tok in src_lower:
+                return True
+    return False
+
+
+def _has_disqualifier(candidate: dict) -> bool:
+    """Return True if any source string on the candidate is a disqualifying flag."""
+    sources = candidate.get("sources") or []
+    for src in sources:
+        src_lower = str(src).lower()
+        for tok in _DISQUALIFY_TOKENS:
+            if tok in src_lower:
+                return True
+    return False
+
+
+def email_score(
+    candidate: dict,
+    identity_score: int,
+    duplicate_emails: Optional[set] = None,
+) -> int:
     """
-    Blend the identity match score with the email candidate's own confidence.
+    Score a single email candidate.
 
     Parameters
     ----------
     candidate : dict
         Shape: {"email": str, "confidence": int(0-100)|None,
-                "verified": bool, "sources": list}
-        "confidence" is the email-deliverability confidence from email_discovery.
-        "verified" signals the email was confirmed deliverable by at least one
-        signal (EmailRep deliverable=True or HIBP existence).
+                "verified": bool, "sources": list[str]}
+        "confidence" is from email_discovery (format + MX + breach corroboration).
+        "verified" is True when EmailRep reports deliverable OR HIBP has seen it.
     identity_score : int
-        0-100 score from profile_depth.score()["overall_score"] representing how
-        confident osint_api is that the results belong to the correct homeowner.
+        0-100 from osint_api profile_depth (raises priority, does not gate).
+    duplicate_emails : set[str] | None
+        Optional set of email addresses already enriched on other leads. Matching
+        candidates receive a -25 penalty.
 
     Returns
     -------
     int
-        Blended confidence score, 0-100.
+        Composite score in [0, 100].
     """
     identity_score = max(0, min(100, int(identity_score)))
-    confidence = candidate.get("confidence")
     verified = bool(candidate.get("verified", False))
+    raw_conf = candidate.get("confidence") or 0
+    disc_conf = max(0, min(100, int(raw_conf)))
 
-    if confidence is None:
-        email_conf = 0
-        penalty = _NO_CONFIDENCE_PENALTY
+    # Base from deliverability
+    if verified:
+        base = 50
+    elif _has_mx(candidate):
+        base = 30
     else:
-        email_conf = max(0, min(100, int(confidence)))
-        penalty = 0
+        base = 0
 
-    base = (identity_score * _BLEND_IDENTITY) + (email_conf * _BLEND_EMAIL) - penalty
+    # Identity bonus -- max +20
+    base += min(20, identity_score // 5)
 
-    if not verified:
-        base = min(base, _UNVERIFIED_CAP)
+    # Email-discovery confidence roll-in -- max +20
+    base += min(20, disc_conf // 5)
 
-    return max(0, min(100, round(base)))
+    # Penalties
+    if _has_disqualifier(candidate):
+        base -= 40
+
+    email_addr = str(candidate.get("email") or "").strip().lower()
+    if duplicate_emails and email_addr in {e.strip().lower() for e in duplicate_emails}:
+        base -= 25
+
+    return max(0, min(100, base))
 
 
-def tier_for(score: int) -> str:
-    """Map a blended score to a TIER_* constant."""
-    if score >= 75:
-        return TIER_AUTO
-    if score >= 55:
-        return TIER_REVIEW
-    return TIER_DIRECTMAIL
+def tier_for(score: int, candidate: dict) -> str:
+    """
+    Map a score + candidate signals to a TIER_* constant.
+
+    Rules (checked in order):
+      1. No MX in sources -> TIER_SKIP (would bounce)
+      2. candidate.verified is True -> TIER_SEND
+      3. MX ok AND score >= 35 -> TIER_TRY
+      4. else -> TIER_SKIP
+    """
+    if not _has_mx(candidate):
+        return TIER_SKIP
+    if bool(candidate.get("verified", False)):
+        return TIER_SEND
+    if score >= 35:
+        return TIER_TRY
+    return TIER_SKIP
 
 
-def categorize(candidates: list[dict], identity_score: int) -> dict:
+def categorize(
+    candidates: list[dict],
+    identity_score: int,
+    duplicate_emails: Optional[set] = None,
+) -> dict:
     """
     Score every candidate, pick the best, and return a routing decision.
 
@@ -107,62 +165,77 @@ def categorize(candidates: list[dict], identity_score: int) -> dict:
     ----------
     candidates : list[dict]
         Each item: {"email": str, "confidence": int|None,
-                    "verified": bool, "sources": list}
+                    "verified": bool, "sources": list[str]}
     identity_score : int
         Overall identity confidence from osint_api.
+    duplicate_emails : set[str] | None
+        Email addresses already enriched on other leads (passed through to
+        email_score for the -25 duplicate penalty).
 
     Returns
     -------
     dict
         {
-          "tier": str,         -- TIER_* constant for routing
+          "tier": str,          -- TIER_SEND | TIER_TRY | TIER_SKIP
           "best_email": str|None,
-          "score": int,        -- score of the best candidate
-          "reason": str,       -- plain-English explanation
-          "ranked": [          -- all candidates, sorted best-first
-              {"email": str, "score": int, "tier": str},
+          "score": int,         -- score of the best sendable candidate (or 0)
+          "reason": str,        -- plain-English explanation
+          "ranked": [           -- all candidates, sorted best-first
+              {"email": str, "score": int, "tier": str, "verified": bool},
               ...
           ]
         }
     """
     if not candidates:
         return {
-            "tier": TIER_DIRECTMAIL,
+            "tier": TIER_SKIP,
             "best_email": None,
             "score": 0,
-            "reason": "No email candidates found by OSINT -- route to direct mail.",
+            "reason": "No email candidates found by OSINT -- nothing to send.",
             "ranked": [],
         }
 
     ranked = []
     for c in candidates:
-        s = email_score(c, identity_score)
+        s = email_score(c, identity_score, duplicate_emails=duplicate_emails)
+        t = tier_for(s, c)
         ranked.append({
             "email": c.get("email", ""),
             "score": s,
-            "tier": tier_for(s),
+            "tier": t,
+            "verified": bool(c.get("verified", False)),
         })
 
-    ranked.sort(key=lambda x: x["score"], reverse=True)
-    best = ranked[0]
+    # Sort: score desc, then verified candidates win ties (True > False)
+    ranked.sort(key=lambda x: (x["score"], x["verified"]), reverse=True)
 
-    if best["score"] >= 75:
+    # Best = highest-scoring non-SKIP candidate
+    sendable = [r for r in ranked if r["tier"] != TIER_SKIP]
+    if not sendable:
+        return {
+            "tier": TIER_SKIP,
+            "best_email": None,
+            "score": 0,
+            "reason": (
+                f"All {len(candidates)} candidate(s) scored below send threshold "
+                f"(no MX or score < 35 on unverified, identity_score={identity_score})."
+            ),
+            "ranked": ranked,
+        }
+
+    best = sendable[0]
+
+    if best["tier"] == TIER_SEND:
         reason = (
             f"Top candidate {best['email']} scored {best['score']}/100 "
-            f"(identity_score={identity_score}). Verified deliverable with high "
-            "identity confidence -- cleared for automated send."
-        )
-    elif best["score"] >= 55:
-        reason = (
-            f"Top candidate {best['email']} scored {best['score']}/100 "
-            f"(identity_score={identity_score}). Moderate confidence -- "
-            "recommend human review before send."
+            f"(identity_score={identity_score}). Deliverability verified -- "
+            "cleared for send."
         )
     else:
         reason = (
-            f"Best candidate {best['email']} scored {best['score']}/100 "
-            f"(identity_score={identity_score}). Insufficient confidence for "
-            "email outreach -- route to direct mail or deepen OSINT."
+            f"Top candidate {best['email']} scored {best['score']}/100 "
+            f"(identity_score={identity_score}). MX ok, no disqualifying flags -- "
+            "sending per operator deliverability policy."
         )
 
     return {
