@@ -1282,13 +1282,14 @@ class TestMarquisePersona:
             f"Got body: {body[:400]}"
         )
 
-    def test_marquise_anchor_offer_65pct_of_appraisal(self):
-        """Marquise anchor offer is 65% of appraisal -- should be $16,250 on $25,000."""
+    def test_marquise_anchor_offer_48pct_of_appraisal(self):
+        """Marquise anchor offer is 48% of appraisal (conservative posture, 2026-05-28).
+        Should be $12,000 on $25,000."""
         result = ot.render_marquise_anchor_offer(_MARQUISE_LEAD)
         body = result["body_html"]
-        # 25000 * 0.65 = $16,250
-        assert "16,250" in body or "16250" in body, (
-            "Marquise anchor_offer on $25k appraisal should quote $16,250 (65%). "
+        # 25000 * 0.48 = $12,000
+        assert "12,000" in body or "12000" in body, (
+            "Marquise anchor_offer on $25k appraisal should quote $12,000 (48% conservative). "
             f"Got body: {body[:400]}"
         )
 
