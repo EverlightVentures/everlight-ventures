@@ -66,7 +66,11 @@ _PARSE_SCRIPT = Path(__file__).parent.parent.parent.parent.parent / \
     "03_AUTOMATION_CORE/01_Scripts/parse_assessor_mhtml.py"
 
 # Also try relative to workspace root
-_WORKSPACE = Path("/mnt/sdcard/AA_MY_DRIVE")
+# Workspace root -- the phone (canonical) when present, else the install dir
+# (e.g. on E5 the module lives at /home/ubuntu/everlight_assessor/ and writes
+# alongside itself).
+_PHONE_ROOT = Path("/mnt/sdcard/AA_MY_DRIVE")
+_WORKSPACE = _PHONE_ROOT if _PHONE_ROOT.exists() else Path(__file__).resolve().parent
 _PARSE_SCRIPT_ABS = _WORKSPACE / "03_AUTOMATION_CORE/01_Scripts/parse_assessor_mhtml.py"
 
 _extract_lead_fn = None
@@ -95,24 +99,25 @@ def _load_extract_lead():
 # ---------------------------------------------------------------------------
 ASSESSOR_URL = "https://www.assessormelvinburgess.com/propertySearch"
 
-# TODO: verify these selectors in DevTools on E5-mother against a live search.
-# The site is ArcGIS / Dojo-based; actual selector may differ from these guesses.
-# Try them in order; first one that exists wins.
+# Verified 2026-05-27 via live Playwright probe on E5-mother. The Melvin
+# Burgess assessor site (Shelby County TN) renders search hits as a single
+# DataTables-style <table> with columns: Parcel ID | Owner Name | Property
+# Location | Link. Wait on a data row to ensure results actually populated.
 RESULTS_SELECTOR_CANDIDATES = [
-    ".esriPopupWrapper",
-    "#resultsDiv",
-    "table.results-table",
-    "[data-dojo-attach-point='resultsContainer']",
-    ".dijitContentPane",
+    "table tbody tr td",   # primary: a real result cell exists
+    "table tbody tr",
+    "table",
 ]
-# Primary selector used in wait_for_selector
-RESULTS_SELECTOR = RESULTS_SELECTOR_CANDIDATES[0]  # UPDATE after E5 verification
+RESULTS_SELECTOR = RESULTS_SELECTOR_CANDIDATES[0]
 
-# Search input selector -- typical ArcGIS search widget
-SEARCH_INPUT_SELECTOR = "input.searchInput, input[placeholder*='address' i], input[placeholder*='search' i], #searchInput"
+# The page has multiple text inputs; the search box is the first input on the
+# results page. The probe found 6 inputs; index 0 worked.
+SEARCH_INPUT_SELECTOR = "input[type='search'], input[type='text']"
 
-LEADS_DB_PATH = _WORKSPACE / "01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/leads_db.json"
-LOG_DIR = _WORKSPACE / "_logs/enrichment"
+_LEADS_PHONE = _PHONE_ROOT / "01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/leads_db.json"
+_LEADS_LOCAL = Path(__file__).resolve().parent / "leads_db.json"
+LEADS_DB_PATH = _LEADS_PHONE if _LEADS_PHONE.exists() else _LEADS_LOCAL
+LOG_DIR = _WORKSPACE / "_logs" / "enrichment"
 LOG_PATH = LOG_DIR / "assessor_harvester.jsonl"
 
 PAGE_TIMEOUT_MS = 30_000   # 30 s for page load
@@ -148,13 +153,28 @@ def get_address_for_lead(lead: dict) -> Optional[str]:
     return None
 
 
-def select_candidates(leads: list[dict], state: str, limit: int, resume: bool) -> list[dict]:
-    """Return up to `limit` leads eligible for harvesting."""
+def select_candidates(leads: list[dict], state: str, limit: int, resume: bool,
+                       source_contains: str = "") -> list[dict]:
+    """Return up to `limit` leads eligible for harvesting.
+
+    source_contains: substring filter on the lead's source/origin field. Use
+    "shelby" to restrict to the tax-delinquent Shelby list (best funnel yield);
+    "" allows any source. Also auto-excludes FSBO/Craigslist-origin lead_ids
+    (lead_id starting with "fsbo_") -- those carry post titles, not addresses.
+    """
     SKIP_STAGES = {"assessor_done", "assessor_failed"}
+    needle = source_contains.lower().strip()
     candidates = []
     for lead in leads:
         if lead.get("state", "").upper() != state.upper():
             continue
+        lid = str(lead.get("lead_id", "")).lower()
+        if lid.startswith("fsbo_"):
+            continue  # Craigslist-origin: address field is a post title, not an address
+        if needle:
+            src = str(lead.get("source", "")).lower()
+            if needle not in src:
+                continue
         addr = get_address_for_lead(lead)
         if not addr:
             continue
@@ -193,16 +213,67 @@ def _try_result_selector(page) -> Optional[str]:
     return None
 
 
+_TR_RE = __import__("re").compile(r"<tr[^>]*>(.*?)</tr>", __import__("re").IGNORECASE | __import__("re").DOTALL)
+_TD_RE = __import__("re").compile(r"<t[dh][^>]*>(.*?)</t[dh]>", __import__("re").IGNORECASE | __import__("re").DOTALL)
+_TAG_RE = __import__("re").compile(r"<[^>]+>")
+
+
+def _clean(s: str) -> str:
+    """Strip HTML tags + collapse whitespace."""
+    return " ".join(_TAG_RE.sub(" ", s or "").split()).strip()
+
+
+def _norm_addr(s: str) -> str:
+    """Loose normalization: uppercase, collapse whitespace, drop punctuation."""
+    import re as _re
+    return _re.sub(r"[^A-Z0-9 ]", " ", (s or "").upper()).split() and \
+           " ".join(_re.sub(r"[^A-Z0-9 ]", " ", (s or "").upper()).split()) or ""
+
+
+def extract_from_results_table(html: str, target_address: str) -> dict:
+    """Parse the Melvin Burgess DataTables results page. Find the row whose
+    'Property Location' best matches target_address. Returns:
+      {"owner_name", "parcel_id", "property_location", "match_quality",
+       "all_candidates"}
+    match_quality is "exact" | "substring" | "first_row" | "no_results".
+    """
+    rows = []
+    for tr_html in _TR_RE.findall(html):
+        cells = [_clean(td) for td in _TD_RE.findall(tr_html)]
+        # We want rows that look like data rows: 4+ cells, first is parcel id pattern
+        if len(cells) >= 3 and cells[0] and cells[1] and cells[2] and \
+           cells[0].lower() != "parcel id":
+            rows.append({"parcel_id": cells[0], "owner_name": cells[1],
+                          "property_location": cells[2]})
+    if not rows:
+        return {"owner_name": "", "parcel_id": "", "property_location": "",
+                "match_quality": "no_results", "candidate_count": 0}
+    tgt = _norm_addr(target_address)
+    n = len(rows)
+    # exact normalized match wins
+    for r in rows:
+        if _norm_addr(r["property_location"]) == tgt:
+            return {**r, "match_quality": "exact", "candidate_count": n}
+    # substring either direction
+    for r in rows:
+        loc = _norm_addr(r["property_location"])
+        if tgt and (tgt in loc or loc in tgt):
+            return {**r, "match_quality": "substring", "candidate_count": n}
+    # fallback: first row (operator should review)
+    return {**rows[0], "match_quality": "first_row", "candidate_count": n}
+
+
 def harvest_one(page, address: str, delay_seconds: float) -> dict:
     """
     Navigate to the assessor search page, type address, submit, wait for
     results, return extracted lead dict.  Raises on hard failures.
     """
-    extract_lead = _load_extract_lead()
-    if not extract_lead:
-        raise RuntimeError("extract_lead not available (parse_assessor_mhtml import failed)")
 
-    page.goto(ASSESSOR_URL, timeout=PAGE_TIMEOUT_MS)
+    # 'load' (default) waits for ALL resources; this heavy ArcGIS site routinely
+    # blows past 30s on that. The probe proved 'domcontentloaded' renders enough
+    # of the DOM to drive the search input within seconds.
+    page.goto(ASSESSOR_URL, timeout=60_000, wait_until="domcontentloaded")
+    page.wait_for_timeout(2500)  # give widgets a moment to wire up
 
     # Wait for search input
     search_input = page.wait_for_selector(
@@ -237,9 +308,10 @@ def harvest_one(page, address: str, delay_seconds: float) -> dict:
     if delay_seconds > 0:
         time.sleep(delay_seconds)
 
-    # Extract structured record using the canonical parser
-    lead_data = extract_lead(html, source_url=ASSESSOR_URL, source_file=f"browser:{address}")
-    return lead_data
+    # Extract structured record from the live results table (verified shape:
+    # Parcel ID | Owner Name | Property Location | Link). Match best row to
+    # the target address; tolerate fuzzy results from the assessor's search.
+    return extract_from_results_table(html, address)
 
 
 # ---------------------------------------------------------------------------
@@ -248,7 +320,8 @@ def harvest_one(page, address: str, delay_seconds: float) -> dict:
 
 def run(args: argparse.Namespace) -> int:
     leads = load_leads()
-    candidates = select_candidates(leads, args.state, args.limit, args.resume)
+    candidates = select_candidates(leads, args.state, args.limit, args.resume,
+                                    source_contains=args.source_contains)
 
     if not candidates:
         print(f"[assessor_harvester] No eligible TN leads to process (limit={args.limit}, resume={args.resume}).")
@@ -354,6 +427,8 @@ def _build_parser() -> argparse.ArgumentParser:
                    help="Seconds to wait between requests (default 4)")
     p.add_argument("--dry-run", action="store_true",
                    help="Print queue without opening browser")
+    p.add_argument("--source-contains", default="shelby",
+                   help="filter leads whose 'source' contains this substring (default: 'shelby' = tax-delinquent list; pass '' to allow any)")
     p.add_argument("--resume", action="store_true",
                    help="Skip leads already marked assessor_done or assessor_failed")
     return p
