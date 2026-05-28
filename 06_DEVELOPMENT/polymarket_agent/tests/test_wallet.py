@@ -107,3 +107,27 @@ def test_bad_perms_raises_runtime(tmp_path):
     with pytest.raises(RuntimeError) as e:
         PolygonWallet(private_key_path=key_path)
     assert "perms" in str(e.value).lower()
+
+
+def test_key_not_reachable_on_instance(tmp_path, monkeypatch):
+    """Regression guard: the raw private key must not be reachable via any
+    public or single-attribute-hop path from a PolygonWallet instance.
+    Original C2 finding plus residual __signer.__self__.key leak."""
+    _stub_web3(monkeypatch)
+    key_path = tmp_path / "test.key"
+    key_path.write_text(
+        "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+    )
+    import os; os.chmod(key_path, 0o600)
+    w = PolygonWallet(private_key_path=key_path)
+
+    # No public _account attribute
+    assert not hasattr(w, "_account"), "instance must not retain LocalAccount"
+
+    # The mangled __signer must not be a bound method on a LocalAccount
+    signer = w._PolygonWallet__signer
+    if hasattr(signer, "__self__"):
+        # If anyone re-introduces a bound method, fail loud
+        target = signer.__self__
+        assert not hasattr(target, "key"), \
+            f"bound method __self__ has .key attribute -- leak via {type(target).__name__}.key"

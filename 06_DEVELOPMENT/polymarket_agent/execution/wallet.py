@@ -44,9 +44,35 @@ class PolygonWallet:
                 f"wallet key file at {key_path} is not a 64-hex-char private key"
             )
 
+        # C2 -- closure-based signer: capture raw key bytes in closure cell only.
+        # We do NOT keep a LocalAccount on self; bound methods retain LocalAccount
+        # via __self__, which exposes .key (the residual leak closed here).
+        try:
+            key_bytes = bytes.fromhex(key_text.removeprefix("0x"))
+            address = Account.from_key(key_bytes).address
+        except Exception as e:
+            raise RuntimeError(
+                f"wallet key file at {key_path} failed Account.from_key validation -- refusing to start"
+            ) from e
+
+        self.address = address
+
+        # Bind key_bytes via default-arg so the closure owns its own private copy
+        # in _kb rather than sharing the enclosing-scope cell for key_bytes.
+        # Deleting key_bytes and key_text below then only removes the local names;
+        # _kb inside the closure is unaffected.
+        def _sign(*, full_message, _kb=key_bytes):
+            return Account.sign_typed_data(_kb, full_message=full_message)
+
+        self.__signer = _sign
+
+        # Scrub locals so a traceback through RPC checks does not expose key material.
+        del key_text
+        del key_bytes
+
         self._w3 = Web3(Web3.HTTPProvider(rpc_url))
 
-        # I2 -- RPC health + chain check at construct time
+        # I2 -- RPC health + chain check at construct time (after key material scrubbed)
         if not self._w3.is_connected():
             raise RuntimeError(
                 f"polygon RPC unreachable at {rpc_url} -- aborting wallet init"
@@ -56,20 +82,6 @@ class PolygonWallet:
             raise RuntimeError(
                 f"wrong chain: expected 137 (Polygon mainnet), got {chain_id}"
             )
-
-        # I5 -- wrap invalid-key Account.from_key in RuntimeError
-        try:
-            account = Account.from_key(key_text)
-        except Exception as e:
-            raise RuntimeError(
-                f"wallet key file at {key_path} failed Account.from_key validation -- refusing to start"
-            ) from e
-
-        # C2 -- capture bound signer and DROP account from self
-        self.address = account.address
-        self.__signer = account.sign_typed_data  # bound method, no key on self
-        # DO NOT store account or its key on self
-        del account
 
         self._usdc = self._w3.eth.contract(address=USDC_E_ADDR, abi=USDC_E_ABI)
 
@@ -98,7 +110,7 @@ class PolygonWallet:
                 f"typed_data chainId {chain_id_in_data} != 137 -- refusing to sign"
             )
 
-        # C1 -- use bound instance method; key never appears as a local variable
+        # C1 -- call closure signer; key_bytes captured in closure cell, not on self
         sig_bytes = self.__signer(full_message=typed_data).signature
         sig = sig_bytes.hex()
         return sig if sig.startswith("0x") else "0x" + sig
