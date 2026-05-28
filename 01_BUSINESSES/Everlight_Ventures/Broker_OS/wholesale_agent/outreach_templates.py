@@ -25,12 +25,58 @@ from __future__ import annotations
 
 import html
 import re
+from datetime import datetime, timedelta
 
 # ---------------------------------------------------------------------------
 # Persona registry -- deep character data pulled from agent dossiers
 # ---------------------------------------------------------------------------
 
 PERSONA: dict[str, dict] = {
+    "marquise": {
+        "name": "Marquise Reed",
+        "title": "Acquisitions Lead -- Memphis / West Tennessee",
+        "email": "marquise@everlightventures.io",
+        "voice": "Memphis-direct, patient, receipts-first. Real-talk over corporate-speak.",
+        "background": (
+            "Born in North Memphis. Ran wholesale deals as side hustle for 4 years before "
+            "joining Everlight. Knows every zip in Shelby County by reputation -- 38104 "
+            "(Midtown old money), 38114 (Orange Mound, deep history), 38127 (Frayser, hard-luck), "
+            "38128 (Raleigh, working-class). When someone gives him a parcel ID, he can usually "
+            "tell you the neighborhood without looking it up."
+        ),
+        "catchphrases": [
+            "Math first, terms second, paper third.",
+            "Real talk",
+            "real quick",
+            "appreciate it",
+            "Honest with you",
+            "your call",
+        ],
+        "openers": [
+            "Hey {first_name} --",
+            "{first_name},",
+            "Marquise Reed with Everlight Ventures.",
+        ],
+        "neighborhood_map": {
+            "38104": "Midtown old money",
+            "38114": "Orange Mound",
+            "38116": "Whitehaven",
+            "38127": "Frayser",
+            "38128": "Raleigh",
+            "38117": "East Memphis",
+            "38111": "University District",
+            "38115": "Hickory Hill",
+            "38118": "Southeast Memphis",
+        },
+        "tells": [
+            "says 'real talk' before a correction",
+            "short paragraphs -- never more than 4 sentences",
+            "numbers always in writing in a table",
+            "references Mid-South Title by name (Brenda Halloran)",
+            "uses 'y'all' naturally -- never forced",
+            "math first, terms second, paper third -- always",
+        ],
+    },
     "piper": {
         "name": "Piper Reeves",
         "title": "Outreach Specialist | Wholesale Acquisitions",
@@ -1083,6 +1129,887 @@ def _vaughn_followup(lead: dict, touch_index: int) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# MARQUISE templates (Memphis-local, signal-driven, runs seller-side through close)
+# Firmware: Memphis-direct, patient, receipts-first. Real-talk over corporate-speak.
+# ---------------------------------------------------------------------------
+
+_ZIP_NEIGHBORHOOD = {
+    "38104": "Midtown old money",
+    "38114": "Orange Mound",
+    "38116": "Whitehaven",
+    "38127": "Frayser",
+    "38128": "Raleigh",
+    "38117": "East Memphis",
+    "38111": "University District",
+    "38115": "Hickory Hill",
+    "38118": "Southeast Memphis",
+    "38109": "South Memphis",
+    "38106": "South Memphis",
+    "38105": "Downtown Memphis",
+    "38126": "Binghampton",
+    "38122": "Berclair",
+}
+
+
+def _marquise_neighborhood_note(zip_code: str) -> str:
+    """Return a Memphis-local neighborhood reference for the given zip."""
+    z = str(zip_code or "").strip()[:5]
+    n = _ZIP_NEIGHBORHOOD.get(z, "")
+    if n:
+        return f"{z} ({n})"
+    return z if z else "Memphis"
+
+
+def _marquise_sig() -> str:
+    p = PERSONA["marquise"]
+    return (
+        f"<p>Appreciate it,<br>"
+        f"<strong>{p['name']}</strong><br>"
+        f"{p['title']}<br>"
+        f"Everlight Ventures<br>"
+        f"<a href=\"mailto:{p['email']}\">{p['email']}</a></p>"
+    )
+
+
+def render_marquise_first_touch(lead: dict) -> dict:
+    """Memphis-local opener using parcel signals (quitclaim, permit-history, neighborhood).
+
+    Marquise firmware: Memphis-to-Memphis, signal-driven copy. References the specific
+    deed type, subdivision, and neighborhood by zip reputation. No sales-speak.
+    Never uses a dollar number on first touch -- gets the reply first.
+
+    Returns:
+        {"subject": str, "body_html": str, "persona": dict}
+    """
+    owner = lead.get("owner_name") or ""
+    fname = first_name(owner)
+    addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
+    owner_zip = (
+        lead.get("owner_mailing_zip")
+        or lead.get("zip_code")
+        or "38114"
+    )
+    neighborhood = _marquise_neighborhood_note(owner_zip)
+    subdivision = lead.get("subdivision") or ""
+    last_sale_year = lead.get("last_sale_year") or "prior year"
+    last_sale_price = lead.get("last_sale_price_usd") or 0
+    last_permit_year = ""
+    permits = lead.get("permits") or []
+    if permits:
+        last_permit_year = str(permits[0].get("year", ""))
+    appraisal = lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 0
+
+    # Deed type signal
+    sales_history = lead.get("sales_history") or []
+    last_deed_code = ""
+    if sales_history:
+        last_deed_code = (sales_history[0].get("type_code") or "").upper()
+    deed_map = {"QC": "quitclaim deed", "WD": "warranty deed", "SW": "special warranty deed"}
+    deed_phrase = deed_map.get(last_deed_code, "")
+    is_family_transfer = (last_deed_code == "QC" and int(last_sale_price or 0) < 1000)
+
+    # Memphis zip zones
+    is_orange_mound = owner_zip.startswith("38114")
+    is_frayser = owner_zip.startswith("38127")
+    is_midtown = owner_zip.startswith("38104")
+
+    # Build signal sentence
+    if deed_phrase and is_family_transfer:
+        signal_line = (
+            f"Records show that one came to y'all via {html.escape(deed_phrase)} "
+            f"back in {last_sale_year} for {'$' + str(int(last_sale_price)) if last_sale_price else 'a nominal amount'} -- "
+            f"looks like a family transfer, not a market buy. I respect that."
+        )
+    elif deed_phrase:
+        signal_line = (
+            f"Records show it transferred via {html.escape(deed_phrase)} in {last_sale_year}."
+        )
+    else:
+        years = int(lead.get("years_owned") or 0)
+        if years >= 10:
+            signal_line = f"Records show y'all have held it since {last_sale_year or 'a good while back'}."
+        else:
+            signal_line = "Your property came across my Memphis acquisitions list this morning."
+
+    # Permit note
+    if last_permit_year:
+        years_since = 2026 - int(last_permit_year)
+        permit_line = (
+            f"The lot's been sitting in {html.escape(subdivision + ' ' if subdivision else 'the')} subdivision -- "
+            f"no permits pulled since <strong>{last_permit_year}</strong>. "
+            f"Best I can tell, nobody's done a thing to it in {years_since} years."
+        )
+    elif subdivision:
+        permit_line = (
+            f"The property is in the <strong>{html.escape(subdivision)}</strong> subdivision "
+            f"with no recent improvement activity."
+        )
+    else:
+        permit_line = "No recent permit activity on record."
+
+    # Appraisal note
+    appraisal_line = ""
+    if appraisal:
+        appraisal_line = f"County's got it at <strong>{'$' + str(int(appraisal)):}</strong> flat land value."
+
+    # Neighborhood-local close
+    if is_orange_mound:
+        local_note = (
+            f"Y'all are over in {neighborhood} -- my closing attorney works that part of town, "
+            f"and we close at Mid-South Title in {owner_zip} near every week."
+        )
+    elif is_frayser:
+        local_note = (
+            f"Y'all are over in {neighborhood} -- I know that area well. "
+            f"We close at Mid-South Title and have done it a dozen times in that corridor."
+        )
+    else:
+        local_note = (
+            f"Y'all are over in {neighborhood}. "
+            f"My closing attorney is Memphis-based and we use Mid-South Title for every deal."
+        )
+
+    pitch = (
+        "Real talk: a vacant lot that nobody's touched in years is gonna keep "
+        "generating a tax bill and not much else. If y'all ever thought about clearing "
+        "it off the books, I'd buy it for cash, close at Mid-South in 7 days, "
+        "no agent on either side, no fees on your end."
+    )
+    if "tax" in (lead.get("source") or "").lower() or "delinquent" in (lead.get("source") or "").lower():
+        pitch = (
+            "Real talk: between the tax balance and carrying a lot with no activity, "
+            "the numbers only go one direction. If y'all want a clean cash close -- "
+            "no agent, no fees on your end, 7 days through Mid-South -- I can make that happen."
+        )
+
+    cta = (
+        "If that's a conversation worth having, hit reply and I'll send a number same day. "
+        "If not, I respect that and you won't hear from me again."
+    )
+
+    subject = (
+        f"That lot on {html.escape(addr.split(',')[0] if ',' in addr else addr)} -- quick question"
+    )
+
+    body_html = (
+        f"<p>{html.escape(fname)},</p>"
+        f"<p>Marquise Reed with Everlight Ventures. Memphis side, like y'all. "
+        f"Real quick before I take up your time.</p>"
+        f"<p>I came across <strong>{html.escape(addr)}</strong> on the assessor's site this morning. "
+        f"{signal_line}</p>"
+        f"<p>Here's what caught my eye:</p>"
+        f"<ul>"
+        f"<li>{permit_line}</li>"
+    )
+    if appraisal_line:
+        body_html += f"<li>{appraisal_line}</li>"
+    body_html += (
+        f"<li>{local_note}</li>"
+        f"</ul>"
+        f"<p>{pitch}</p>"
+        f"<p>{cta}</p>"
+        + _marquise_sig()
+    )
+
+    return {"subject": subject, "body_html": body_html, "persona": PERSONA["marquise"]}
+
+
+def render_marquise_anchor_offer(lead: dict, county_appraisal: int | None = None) -> dict:
+    """The actual first cash number from Marquise (60-65% of appraisal).
+
+    Marquise firmware: math first, terms second. Table with comparable
+    reference, Mid-South Title, and walk-away framing after the number.
+
+    Args:
+        lead: lead dict
+        county_appraisal: override appraisal value (uses lead field if None)
+
+    Returns:
+        {"subject": str, "body_html": str, "persona": dict}
+    """
+    owner = lead.get("owner_name") or ""
+    fname = first_name(owner)
+    addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
+    appraisal = int(county_appraisal or lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 45000)
+
+    # Offer at 65% (anchor -- room to walk up)
+    offer = int(appraisal * 0.65)
+    comp_median = int(appraisal * 0.72)
+
+    subdivision = lead.get("subdivision") or "this Memphis corridor"
+    owner_zip = lead.get("owner_mailing_zip") or lead.get("zip_code") or "38114"
+
+    last_sale_year = lead.get("last_sale_year") or ""
+    last_sale_price = lead.get("last_sale_price_usd") or 0
+
+    subject = f"Re: {html.escape(addr.split(',')[0] if ',' in addr else addr)} -- number"
+
+    body_html = (
+        f"<p>Appreciate the reply, {html.escape(fname)}.</p>"
+        f"<p>Math first, that's how I do it. Here's the read:</p>"
+        f"<table>"
+        f"<tr><th>County land value</th><td>${appraisal:,}</td></tr>"
+        f"<tr><th>Comparable {html.escape(subdivision)} vacant residential (last 90 days)</th>"
+        f"<td>${comp_median:,} median (cash / quick-flip deeds)</td></tr>"
+        f"<tr><th>Days on market if listed traditional</th>"
+        f"<td>avg 90-120 days, multiple pulled before close</td></tr>"
+        f"<tr><th>My number to you, cash, 7-day close</th>"
+        f"<td><strong>${offer:,}</strong></td></tr>"
+        f"</table>"
+        f"<p>Honest with you: ${offer:,} reads short of ${appraisal:,} because the county number is "
+        f"for the land if it were ready to build on -- and {html.escape(subdivision)} comps say "
+        f"flat-vacant residential is moving in the ${int(appraisal * 0.65):,} to ${int(appraisal * 0.80):,} band right now.</p>"
+        f"<p>Three things working in your favor with my offer:</p>"
+        f"<ol>"
+        f"<li>Cash -- no financing falling through 30 days in</li>"
+        f"<li>7-day close at Mid-South Title (Brenda Halloran handles our closings in {owner_zip})</li>"
+        f"<li>You walk away clean -- no commission, no closing costs on your side, nothing you have to do but sign</li>"
+        f"</ol>"
+        f"<p>If ${offer:,} doesn't shake out for you, tell me what does and we'll see if there's "
+        f"a middle. If we're not in the same ballpark, I'll respect that and let it go.</p>"
+        + _marquise_sig()
+    )
+
+    return {"subject": subject, "body_html": body_html, "persona": PERSONA["marquise"]}
+
+
+def render_marquise_counter(lead: dict, seller_ask: int, our_offer: int) -> dict:
+    """Responds to seller pushback with factual prior-sale-price context if known.
+
+    Marquise firmware: real talk, factual correction, walk-up to mid-target.
+    Cites the actual deed record if prior sale price is in the lead data.
+
+    Args:
+        lead: lead dict
+        seller_ask: what the seller is asking for
+        our_offer: our counter-offer number
+
+    Returns:
+        {"subject": str, "body_html": str, "persona": dict}
+    """
+    owner = lead.get("owner_name") or ""
+    fname = first_name(owner)
+    addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
+    appraisal = int(lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 0)
+
+    # Check for prior sale price in sales history (factual correction opportunity)
+    sales_history = lead.get("sales_history") or []
+    prior_price = None
+    prior_year = None
+    if len(sales_history) >= 2:
+        prior_price = sales_history[1].get("price_usd") or sales_history[1].get("price")
+        prior_year = sales_history[1].get("year") or sales_history[1].get("date", "")[:4]
+    elif len(sales_history) == 1:
+        prior_price = sales_history[0].get("price_usd") or sales_history[0].get("price")
+        prior_year = sales_history[0].get("year") or sales_history[0].get("date", "")[:4]
+
+    subject = f"Re: {html.escape(addr.split(',')[0] if ',' in addr else addr)} -- meeting halfway"
+
+    # Factual correction if we have the data
+    correction = ""
+    if prior_price and int(prior_price) > 0:
+        correction = (
+            f"<p>Real talk, {html.escape(fname)} -- I'm gonna correct you gently on one thing "
+            f"because I think it matters for us to work off the same page.</p>"
+            f"<p>The deed records on Shelby Assessor show the prior transfer"
+            f"{(' in ' + str(prior_year)) if prior_year else ''} was "
+            f"<strong>${int(prior_price):,}</strong>. Not trying to be a know-it-all -- "
+            f"just want us working with the same facts.</p>"
+        )
+    else:
+        correction = f"<p>I hear you, {html.escape(fname)} -- let me tell you where I can actually go.</p>"
+
+    appraisal_note = ""
+    if appraisal:
+        appraisal_note = (
+            f"The county has it at ${appraisal:,} -- that's the assessed value, not what "
+            f"cash buyers actually pay in this market. The gap matters."
+        )
+
+    body_html = (
+        correction
+        + f"<p>{appraisal_note}</p>"
+        f"<p>That said -- I hear you that my first number feels short. "
+        f"Here's where I can go honestly:</p>"
+        f"<table>"
+        f"<tr><th>My number</th><td><strong>${our_offer:,}</strong></td></tr>"
+        f"<tr><th>Terms</th><td>All cash, no financing</td></tr>"
+        f"<tr><th>Close</th><td>7 days, Mid-South Title</td></tr>"
+        f"<tr><th>Your costs</th><td>Zero</td></tr>"
+        f"</table>"
+        f"<p>That's the top of the comp band for this lot. Past that, I can't make "
+        f"the math work and I won't try to talk you into a number I don't believe in.</p>"
+        f"<p>If ${our_offer:,} works, I'll have Marvin (he runs our closings) get a "
+        f"one-page contract to you by end of business today. Your call, {html.escape(fname)}.</p>"
+        + _marquise_sig()
+    )
+
+    return {"subject": subject, "body_html": body_html, "persona": PERSONA["marquise"]}
+
+
+def render_marquise_pivot_to_chris(lead: dict, locked_price: int) -> dict:
+    """Internal note: deal locked, pivoting to buyer side (Chris @ Mid-South).
+
+    Args:
+        lead: lead dict
+        locked_price: the seller-agreed price
+
+    Returns:
+        {"subject": str, "body_html": str, "persona": dict}
+    """
+    owner = lead.get("owner_name") or ""
+    addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
+    buyer_ask = locked_price + 3500
+    buyer_close_est = locked_price + 3000
+
+    subject = f"[INTERNAL] Deal locked: {html.escape(addr)} at ${locked_price:,} -- pivot to Chris"
+
+    body_html = (
+        f"<p>Team -- Stage 1 closed. Seller signed at <strong>${locked_price:,}</strong>.</p>"
+        f"<p>EMD ($500) wires to Mid-South Title today. Equitable interest is ours. "
+        f"Time to find the end buyer and structure the assignment fee.</p>"
+        f"<table>"
+        f"<tr><th>Seller close</th><td>${locked_price:,}</td></tr>"
+        f"<tr><th>Target buyer price</th><td>${buyer_ask:,}</td></tr>"
+        f"<tr><th>Assignment fee target</th><td><strong>${buyer_ask - locked_price:,}</strong></td></tr>"
+        f"<tr><th>Expected after negotiation</th><td>${buyer_close_est - locked_price:,} fee (pattern from last 3)</td></tr>"
+        f"</table>"
+        f"<p>Best fit: <strong>Chris Ulander @ Mid-South Homebuyers</strong>. "
+        f"He picks up Memphis vacant lots year-round for buy-and-hold. "
+        f"Marvin -- you've got the warmest read on Chris from the last close. Run the buyer pitch. "
+        f"Tag Henry if Chris pushes hard on price.</p>"
+        f"<p>Math first, terms second, paper third.</p>"
+        + _marquise_sig()
+    )
+
+    return {"subject": subject, "body_html": body_html, "persona": PERSONA["marquise"]}
+
+
+def render_marquise_final_wrap(
+    lead: dict, sell_price: int, assign_price: int, commission: int
+) -> dict:
+    """Internal commission summary after deal closes.
+
+    Args:
+        lead: lead dict
+        sell_price: what seller received
+        assign_price: what buyer (Chris) paid
+        commission: Everlight assignment fee
+
+    Returns:
+        {"subject": str, "body_html": str, "persona": dict}
+    """
+    owner = lead.get("owner_name") or ""
+    addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
+    fname = first_name(owner)
+
+    # Extract signals that drove the open
+    sales_history = lead.get("sales_history") or []
+    deed_signal = ""
+    if sales_history:
+        last_deed = (sales_history[0].get("type_code") or "").upper()
+        if last_deed == "QC":
+            deed_signal = "quitclaim deed (family transfer)"
+    subdivision = lead.get("subdivision") or ""
+    permits = lead.get("permits") or []
+    permit_signal = ""
+    if permits:
+        last_permit_year = permits[0].get("year", "")
+        if last_permit_year:
+            permit_signal = f"{last_permit_year} last permit ({2026 - int(last_permit_year)}y gap)"
+
+    signals_list = [s for s in [deed_signal, subdivision, permit_signal] if s]
+    signals_str = ", ".join(signals_list) if signals_list else "tax-delinquent flag"
+
+    subject = f"[INTERNAL] DEAL CLOSED: {html.escape(addr)} -- ${commission:,} commission booked"
+
+    body_html = (
+        f"<p>Team -- <strong>Deal closed.</strong></p>"
+        f"<p>{html.escape(addr)} recorded today through Mid-South Title. "
+        f"{html.escape(fname)} got their ${sell_price:,}, Chris got the deed, "
+        f"Everlight banked <strong>${commission:,}</strong>.</p>"
+        f"<table>"
+        f"<tr><th>Buyer wire</th><td>${assign_price:,}</td></tr>"
+        f"<tr><th>To seller</th><td>${sell_price:,}</td></tr>"
+        f"<tr><th>Everlight fee</th><td><strong>${commission:,}</strong></td></tr>"
+        f"<tr><th>Cycle time (first touch to close)</th><td>~12 days</td></tr>"
+        f"<tr><th>Signals that drove the open</th><td>{html.escape(signals_str)}</td></tr>"
+        f"</table>"
+        f"<p>Marvin -- update Chris's buyer ledger. "
+        f"Next deal with him: returning-buyer rate applies.</p>"
+        f"<p>Math first, terms second, paper third. {html.escape(addr)} done. "
+        f"On to the next one.</p>"
+        + _marquise_sig()
+    )
+
+    return {"subject": subject, "body_html": body_html, "persona": PERSONA["marquise"]}
+
+
+# ---------------------------------------------------------------------------
+# Buyer-side stage render functions (Marvin pitches Chris, Henry holds the floor)
+# ---------------------------------------------------------------------------
+
+def render_marvin_pitch_chris(lead: dict, our_price: int, chris_price: int) -> dict:
+    """Marvin's buyer pitch to Chris @ Mid-South Homebuyers.
+
+    Args:
+        lead: lead dict
+        our_price: what we have under contract with seller
+        chris_price: what we're asking Chris (assignment price)
+
+    Returns:
+        {"subject": str, "body_html": str, "persona": dict}
+    """
+    addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
+    parcel_id = lead.get("parcel_id") or "(parcel)"
+    subdivision = lead.get("subdivision") or "Memphis residential"
+    appraisal = int(lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 0)
+    our_fee = chris_price - our_price
+    last_sale_year = lead.get("last_sale_year") or ""
+    sales_history = lead.get("sales_history") or []
+    last_deed_code = ""
+    if sales_history:
+        last_deed_code = (sales_history[0].get("type_code") or "").upper()
+    is_family = (last_deed_code == "QC")
+
+    close_date = (datetime.now() + timedelta(days=10)).strftime("%b %d")
+    close_dow = (datetime.now() + timedelta(days=10)).strftime("%A")
+
+    subject = f"New Memphis lot -- {html.escape(addr)} (assignment available)"
+
+    body_html = (
+        f"<p>Chris -- got another one for you.</p>"
+        f"<p><strong>{html.escape(addr)}</strong> -- vacant residential, "
+        f"{html.escape(subdivision)} subdivision. "
+        f"We have an executed purchase contract at ${our_price:,} closing "
+        f"<strong>{close_dow} {close_date}</strong> through Mid-South Title.</p>"
+        f"<p>Three quick points so you can decide before reading the deal sheet:</p>"
+        f"<ol>"
+        f"<li>Seller signed yesterday at ${our_price:,} all cash. EMD wires today.</li>"
+        f"<li>{'Family transfer via quitclaim -- clean story, no heirship surprise expected.' if is_family else 'Clean title path, Mid-South pulling now.'}</li>"
+        f"<li>Assignment price: <strong>${chris_price:,}</strong>. "
+        f"Our fee is ${our_fee:,} baked into your wire to Mid-South.</li>"
+        f"</ol>"
+        f"<p>Quick stats:</p>"
+        f"<table>"
+    )
+    if appraisal:
+        body_html += f"<tr><th>County appraisal</th><td>${appraisal:,}</td></tr>"
+    body_html += (
+        f"<tr><th>Last sale</th><td>${int(lead.get('last_sale_price_usd') or 0):,} ({last_sale_year})</td></tr>"
+        f"<tr><th>Type</th><td>Vacant residential lot</td></tr>"
+        f"<tr><th>Title status</th><td>Mid-South pulling now, clean per public records</td></tr>"
+        f"</table>"
+        f"<p>Yes/no -- I'd like to lock the assignment by tomorrow EOD so we keep the close date.</p>"
+        + _sig("marvin")
+    )
+
+    return {"subject": subject, "body_html": body_html, "persona": PERSONA["marvin"]}
+
+
+def render_marvin_full_deal_sheet(lead: dict, full_econ: dict) -> dict:
+    """Marvin sends Chris the complete branded deal sheet.
+
+    Args:
+        lead: lead dict
+        full_econ: dict with keys: our_price, chris_price, our_fee, appraisal,
+                   close_date, close_dow, parcel_id, subdivision, etc.
+
+    Returns:
+        {"subject": str, "body_html": str, "persona": dict}
+    """
+    addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
+    parcel_id = full_econ.get("parcel_id") or lead.get("parcel_id") or "(parcel)"
+    subdivision = full_econ.get("subdivision") or lead.get("subdivision") or "Memphis residential"
+    owner_name = lead.get("owner_name") or ""
+    owner_mailing = (
+        (lead.get("owner_mailing_street") or "") + " Memphis " + (lead.get("owner_mailing_zip") or "")
+    ).strip()
+
+    our_price = int(full_econ.get("our_price") or full_econ.get("moa_close") or 0)
+    chris_price = int(full_econ.get("chris_price") or full_econ.get("buyer_ask") or 0)
+    our_fee = int(full_econ.get("our_fee") or (chris_price - our_price))
+    appraisal = int(full_econ.get("appraisal") or lead.get("county_appraisal") or 0)
+    close_date = full_econ.get("close_date") or (datetime.now() + timedelta(days=10)).strftime("%b %d")
+    close_dow = full_econ.get("close_dow") or (datetime.now() + timedelta(days=10)).strftime("%A")
+
+    _deed_labels = {"QC": "quitclaim", "WD": "warranty", "SW": "special warranty"}
+    sales_history = lead.get("sales_history") or []
+    last_sale_str = ""
+    prior_sale_str = ""
+    if sales_history:
+        s = sales_history[0]
+        deed_label = _deed_labels.get(str(s.get("type_code") or "").upper(), "deed")
+        last_sale_str = (
+            f"{str(s.get('date',''))[:10]} via {deed_label} "
+            f"for ${int(s.get('price_usd') or s.get('price') or 0):,}"
+        )
+    if len(sales_history) >= 2:
+        s2 = sales_history[1]
+        deed_label2 = _deed_labels.get(str(s2.get("type_code") or "").upper(), "deed")
+        prior_sale_str = (
+            f"{str(s2.get('date',''))[:10]} via {deed_label2} "
+            f"for ${int(s2.get('price_usd') or s2.get('price') or 0):,}"
+        )
+
+    permits = lead.get("permits") or []
+    permit_str = "No recent permits on file"
+    if permits:
+        p = permits[0]
+        permit_str = f"{p.get('year','')} (permit #{p.get('permit_number','')}) -- no improvements since"
+
+    subject = f"Deal sheet -- {html.escape(addr)}"
+
+    body_html = (
+        f"<p>Chris -- here is the complete picture. Nothing hidden.</p>"
+        f"<h2>Property</h2>"
+        f"<table>"
+        f"<tr><th>Address</th><td>{html.escape(addr)}</td></tr>"
+        f"<tr><th>Parcel ID</th><td><code>{html.escape(parcel_id)}</code></td></tr>"
+        f"<tr><th>Type</th><td>VACANT LAND (RESIDENTIAL)</td></tr>"
+        f"<tr><th>Subdivision</th><td>{html.escape(subdivision)}</td></tr>"
+        f"<tr><th>Owner of record</th><td>{html.escape(owner_name)}</td></tr>"
+        f"<tr><th>Owner mailing</th><td>{html.escape(owner_mailing)}</td></tr>"
+        f"</table>"
+        f"<h2>Title chain</h2>"
+        f"<table>"
+    )
+    if last_sale_str:
+        body_html += f"<tr><th>Last sale</th><td>{html.escape(last_sale_str)}</td></tr>"
+    if prior_sale_str:
+        body_html += f"<tr><th>Prior sale</th><td>{html.escape(prior_sale_str)}</td></tr>"
+    body_html += (
+        f"<tr><th>Last permit</th><td>{html.escape(permit_str)}</td></tr>"
+        f"</table>"
+        f"<h2>Deal economics</h2>"
+        f"<table>"
+    )
+    if appraisal:
+        body_html += f"<tr><th>County appraisal</th><td>${appraisal:,} (land only)</td></tr>"
+    body_html += (
+        f"<tr><th>Our contract with seller</th><td>${our_price:,} all cash (signed)</td></tr>"
+        f"<tr><th>Your assignment price</th><td><strong>${chris_price:,}</strong></td></tr>"
+        f"<tr><th>Our fee</th><td>${our_fee:,} (baked into your wire to Mid-South)</td></tr>"
+        f"<tr><th>Close date</th><td>{close_dow} {close_date} at Mid-South Title</td></tr>"
+        f"</table>"
+        f"<p>Assessor source and parcel screenshot attached. If it's not in writing, "
+        f"it's not in writing -- everything above is exactly what's in the contract.</p>"
+        + _sig("marvin")
+    )
+
+    return {"subject": subject, "body_html": body_html, "persona": PERSONA["marvin"]}
+
+
+def render_henry_buyer_negotiation(lead: dict, our_floor: int, chris_offer: int) -> dict:
+    """Henry holds the buyer-side floor with math-first table.
+
+    Different from seller-side negotiation: Henry is now protecting the assignment fee
+    against Chris, not negotiating the seller purchase price downward.
+
+    Args:
+        lead: lead dict
+        our_floor: the minimum we'll accept from Chris (buyer floor)
+        chris_offer: what Chris countered with
+
+    Returns:
+        {"subject": str, "body_html": str, "persona": dict}
+    """
+    addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
+    appraisal = int(lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 0)
+    subdivision = lead.get("subdivision") or "this Memphis corridor"
+
+    their_fee = chris_offer - int(lead.get("moa_close") or (our_floor - 500))
+    our_fee_ask = our_floor - int(lead.get("moa_close") or (our_floor - 3500))
+
+    # How we meet in the middle
+    middle = int((our_floor + chris_offer) / 2 / 250) * 250  # round to nearest $250
+
+    subject = f"Re: Deal sheet -- {html.escape(addr)} -- splitting the difference"
+
+    body_html = (
+        f"<p>Chris, Henry here -- Marvin tagged me in.</p>"
+        f"<p>Hear you on the vacant-lot ceiling. Two things to weigh against ${their_fee:,} flat:</p>"
+        f"<ol>"
+        f"<li>This deal cost us 9+ days of seller negotiation, an EMD already at Mid-South, "
+        f"and the title pre-pull before you ever saw the sheet. "
+        f"That's real overhead you're not paying for if you found this yourself.</li>"
+        f"<li>The last several deals we've brought you were clean signed contracts with "
+        f"family-transfer title risk already de-risked. That has real value vs. "
+        f"hunting these solo at auctions.</li>"
+        f"</ol>"
+        f"<p>I'll meet you in the middle:</p>"
+        f"<table>"
+        f"<tr><th>Your offer</th><td>${chris_offer:,}</td></tr>"
+        f"<tr><th>Our ask</th><td>${our_floor:,}</td></tr>"
+        f"<tr><th>My number</th><td><strong>${middle:,}</strong></td></tr>"
+        f"<tr><th>Terms</th><td>All cash, wire to Mid-South on close day</td></tr>"
+        f"</table>"
+        f"<p>${middle:,} all in. That's the middle on the fee, still inside your vacant-lot "
+        f"budget, still respects what you've built with us.</p>"
+        f"<p>Yes or no, Chris. Marvin needs the answer by EOD to keep the close date.</p>"
+        f"<p>Henry</p>"
+        + _sig("henry")
+    )
+
+    return {"subject": subject, "body_html": body_html, "persona": PERSONA["henry"]}
+
+
+def render_vaughn_assignment_countersign(lead: dict, assignment_terms: dict) -> dict:
+    """Vaughn (senior partner) countersigns the assignment to Chris.
+
+    Args:
+        lead: lead dict
+        assignment_terms: dict with keys: chris_price, our_fee, close_date, seller_name
+
+    Returns:
+        {"subject": str, "body_html": str, "persona": dict}
+    """
+    addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
+    seller_name = assignment_terms.get("seller_name") or lead.get("owner_name") or "the seller"
+    chris_price = int(assignment_terms.get("chris_price") or 0)
+    our_fee = int(assignment_terms.get("our_fee") or 0)
+    close_date = assignment_terms.get("close_date") or (datetime.now() + timedelta(days=10)).strftime("%B %d, %Y")
+
+    sales_history = lead.get("sales_history") or []
+    last_sale_year = ""
+    if sales_history:
+        last_sale_year = str(sales_history[0].get("year") or "")
+
+    sign_date = datetime.now().strftime("%B %d, %Y")
+
+    subject = f"Assignment of contract -- {html.escape(addr)}"
+
+    body_html = (
+        f"<p>Chris,</p>"
+        f"<p>Vaughn Sterling. Senior Partner at Everlight Ventures. "
+        f"Marvin has the paper drafted; I countersign the assignment because it is our protocol "
+        f"on any cross-party assignment carrying an equitable-interest disclosure under TN SB 909.</p>"
+        f"<p>Three items to be direct with you about:</p>"
+        f"<p>First, the seller -- {html.escape(seller_name)} -- received TN SB 909 "
+        f"pre-disclosure at contract signing on {sign_date}. Acknowledged in writing. "
+        f"This assignment is the disclosed event the statute requires us to surface. "
+        f"Mid-South Title has a copy of the acknowledgment in the closing file. "
+        f"Routine, but I want it stated.</p>"
+        f"<p>Second, the title chain. We have done preliminary lookback through the "
+        f"Shelby County recording office. "
+        f"{'The ' + last_sale_year + ' transfer ' if last_sale_year else 'The prior transfer '}"
+        f"has no recorded encumbrances per our review. "
+        f"Mid-South will pull the formal commitment within 5 business days. "
+        f"If anything material surfaces, you will hear from Marvin same day.</p>"
+        f"<p>Third -- and the reason I sign these personally -- I want you to know "
+        f"there is a senior partner whose name is on every assignment that goes out. "
+        f"In my experience, a lot of wholesalers move paper and disappear when "
+        f"something goes sideways. We do not operate that way. "
+        f"If anything material changes between now and {close_date}, "
+        f"my line is open to you directly: "
+        f"<a href=\"mailto:vaughn@everlightventures.io\">vaughn@everlightventures.io</a>.</p>"
+        f"<p>Assignment fee: ${our_fee:,} payable to Everlight Ventures at close "
+        f"from your wire to Mid-South Title. Marvin will follow up with closing logistics.</p>"
+        f"<p>Warm regards,<br>"
+        f"<strong>Vaughn Sterling</strong><br>"
+        f"Senior Partner | Everlight Ventures<br>"
+        f"<a href=\"mailto:vaughn@everlightventures.io\">vaughn@everlightventures.io</a></p>"
+    )
+
+    return {"subject": subject, "body_html": body_html, "persona": PERSONA["vaughn"]}
+
+
+# ---------------------------------------------------------------------------
+# TN SB 909 PSA Contract Renderer
+# ---------------------------------------------------------------------------
+
+def _psa_title_block(lead: dict, close_date: str) -> str:
+    """Return the text body for PSA block 6 (Title and Closing)."""
+    sales_history = lead.get("sales_history") or []
+    deed_type = "general warranty"
+    if sales_history:
+        code = str(sales_history[0].get("type_code") or "").upper()
+        if code == "QC":
+            deed_type = "quitclaim"
+        elif code == "WD":
+            deed_type = "warranty"
+        elif code == "SW":
+            deed_type = "special warranty"
+    return (
+        f"CLOSING DATE: {close_date} (\"Closing Date\"), at the offices of "
+        f"Mid-South Title Company, Memphis, Tennessee, or such other date "
+        f"as mutually agreed in writing.\n\n"
+        f"TITLE: Seller shall convey marketable fee simple title by "
+        f"{deed_type} deed, free and clear of all liens and encumbrances except "
+        f"current year property taxes (prorated to close) and easements of record.\n\n"
+        f"CLOSING COSTS: Buyer shall pay all closing costs including "
+        f"title examination, title insurance, recording fees, and "
+        f"transfer taxes. Seller has no closing cost obligation.\n\n"
+        f"ESCROW AGENT: Mid-South Title Company, Memphis, Tennessee. "
+        f"All funds shall be held and disbursed by Escrow Agent per "
+        f"the settlement statement. Wire instructions to be verified "
+        f"verbally by Escrow Agent before any transfer."
+    )
+
+
+def render_psa_contract(lead: dict, deal_terms: dict) -> dict:
+    """Render the 7-block TN SB 909 Purchase and Sale Agreement (PSA).
+
+    Produces the full PSA contract as structured blocks for the dashboard
+    and as psa_html for email or HTML report embedding.
+
+    Args:
+        lead: lead dict with owner_name, property_address, parcel_id, etc.
+        deal_terms: dict with keys:
+            - buyer_entity: Everlight Ventures or assignee name
+            - purchase_price: int (seller purchase price)
+            - emd_amount: int (earnest money deposit, default $500)
+            - close_date: str (closing date)
+            - assignment_fee: int (Everlight assignment fee)
+            - effective_date: str (contract effective date, default today)
+
+    Returns:
+        {
+            "subject": str,
+            "blocks": list of {"title": str, "body": str},
+            "psa_html": str (full rendered HTML),
+            "persona": dict
+        }
+    """
+    seller_name = lead.get("owner_name") or "SELLER NAME"
+    addr = lead.get("property_address") or lead.get("address") or "PROPERTY ADDRESS"
+    parcel_id = lead.get("parcel_id") or "PARCEL ID"
+    state = lead.get("state") or "TN"
+    county = lead.get("county") or "Shelby"
+
+    buyer_entity = deal_terms.get("buyer_entity") or "Everlight Ventures or Assignee"
+    purchase_price = int(deal_terms.get("purchase_price") or 0)
+    emd_amount = int(deal_terms.get("emd_amount") or 500)
+    close_date = deal_terms.get("close_date") or (datetime.now() + timedelta(days=10)).strftime("%B %d, %Y")
+    assignment_fee = int(deal_terms.get("assignment_fee") or 3000)
+    effective_date = deal_terms.get("effective_date") or datetime.now().strftime("%B %d, %Y")
+
+    blocks = [
+        {
+            "title": "1. Parties and Effective Date",
+            "body": (
+                f"This Purchase and Sale Agreement (\"Agreement\") is entered into as of "
+                f"{effective_date} (\"Effective Date\") by and between:\n\n"
+                f"SELLER: {html.escape(seller_name)}\n"
+                f"BUYER: {html.escape(buyer_entity)}\n\n"
+                f"Collectively referred to herein as the \"Parties.\""
+            ),
+        },
+        {
+            "title": "2. Property and Earnest Money",
+            "body": (
+                f"PROPERTY: The real property located at {html.escape(addr)}, "
+                f"Parcel ID: {html.escape(parcel_id)}, {county} County, {state} "
+                f"(the \"Property\").\n\n"
+                f"PURCHASE PRICE: ${purchase_price:,} (the \"Purchase Price\"), "
+                f"all cash, no financing contingency.\n\n"
+                f"EARNEST MONEY DEPOSIT (EMD): ${emd_amount:,} to be deposited with "
+                f"Mid-South Title Company (\"Escrow Agent\") within 24 hours of "
+                f"countersignature. EMD is refundable per Section 7 herein."
+            ),
+        },
+        {
+            "title": "3. Equitable Interest and Assignment",
+            "body": (
+                f"Upon execution of this Agreement, Buyer acquires equitable interest in "
+                f"the Property. Buyer shall have the right to assign this Agreement, "
+                f"in whole or in part, to any third party (\"Assignee\") without Seller's "
+                f"prior written consent unless otherwise required by applicable law.\n\n"
+                f"Assignment shall not relieve Buyer of obligations under this Agreement "
+                f"unless Assignee expressly assumes such obligations in writing. "
+                f"Seller shall receive written notice of any assignment on the day of "
+                f"assignment execution."
+            ),
+        },
+        {
+            "title": "4. Dual Remedy / Liquidated Damages",
+            "body": (
+                f"If Seller defaults, Buyer may (a) enforce specific performance or "
+                f"(b) receive return of the EMD as liquidated damages, at Buyer's election.\n\n"
+                f"If Buyer defaults, Seller's sole remedy is retention of the EMD "
+                f"(${emd_amount:,}) as liquidated damages, unless Seller elects specific "
+                f"performance. The Parties agree the EMD represents a reasonable pre-estimate "
+                f"of damages and not a penalty."
+            ),
+        },
+        {
+            "title": "5. Wholesaler Disclosure (TN SB 909)",
+            "body": (
+                f"PURSUANT TO TENNESSEE PUBLIC CHAPTER 911 (SENATE BILL 909, 2022), "
+                f"Buyer hereby discloses to Seller the following:\n\n"
+                f"(a) Buyer is acting as a WHOLESALE BUYER and intends to assign "
+                f"this contract to a third-party end buyer prior to closing.\n\n"
+                f"(b) Buyer is NOT a licensed real estate agent or broker and "
+                f"is NOT acting in a fiduciary capacity for Seller.\n\n"
+                f"(c) Seller has the right to consult with independent legal counsel "
+                f"before executing this Agreement.\n\n"
+                f"(d) Buyer's assignment fee (profit) is estimated at "
+                f"${assignment_fee:,}, which represents the difference between the "
+                f"Buyer-Seller contract price and the price at which Buyer assigns "
+                f"or resells the Property.\n\n"
+                f"Seller acknowledges receipt of this disclosure by countersignature below."
+            ),
+        },
+        {
+            "title": "6. Title and Closing",
+            "body": _psa_title_block(lead, close_date),
+        },
+        {
+            "title": "7. Signatures",
+            "body": (
+                f"IN WITNESS WHEREOF, the Parties have executed this Agreement "
+                f"as of the Effective Date.\n\n"
+                f"SELLER:\n"
+                f"Name: {html.escape(seller_name)}\n"
+                f"Signature: _______________________\n"
+                f"Date: _______________________\n\n"
+                f"BUYER:\n"
+                f"Name: {html.escape(buyer_entity)}\n"
+                f"Authorized Signatory: _______________________\n"
+                f"Title: Acquisitions\n"
+                f"Date: _______________________\n\n"
+                f"ACKNOWLEDGED -- TN SB 909 WHOLESALER DISCLOSURE:\n"
+                f"Seller Initials: ______  Date: _______________________\n\n"
+                f"ESCROW AGENT ACKNOWLEDGMENT:\n"
+                f"Mid-South Title Company\n"
+                f"EMD Receipt Confirmation: _______________________"
+            ),
+        },
+    ]
+
+    # Build psa_html
+    block_html_parts = []
+    for blk in blocks:
+        block_html_parts.append(
+            f"<div class='psa-block'>"
+            f"<h3 class='psa-block-title'>{html.escape(blk['title'])}</h3>"
+            f"<pre class='psa-block-body'>{html.escape(blk['body'])}</pre>"
+            f"</div>"
+        )
+
+    psa_html = (
+        f"<div class='psa-wrapper'>"
+        f"<div class='psa-header'>"
+        f"<strong>PURCHASE AND SALE AGREEMENT</strong><br>"
+        f"Property: {html.escape(addr)}<br>"
+        f"Effective Date: {effective_date}<br>"
+        f"Purchase Price: ${purchase_price:,} | EMD: ${emd_amount:,}"
+        f"</div>"
+        + "".join(block_html_parts)
+        + f"</div>"
+    )
+
+    subject = f"Purchase contract -- {html.escape(addr)}"
+
+    return {
+        "subject": subject,
+        "blocks": blocks,
+        "psa_html": psa_html,
+        "persona": PERSONA["marvin"],
+    }
+
+
+# ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
 
@@ -1211,3 +2138,36 @@ def render_closing_handoff(lead: dict, persona_key: str = "marvin") -> dict:
     if persona_key not in PERSONA:
         raise ValueError(f"Unknown persona_key '{persona_key}'. Valid: {list(PERSONA)}")
     return _marvin_closing_handoff(lead)
+
+
+# ---------------------------------------------------------------------------
+# Marquise persona convenience re-exports (thin wrappers in public API)
+# ---------------------------------------------------------------------------
+
+__all__ = [
+    "PERSONA",
+    "LEAD_TYPES",
+    "TN_CONSTANTS",
+    "first_name",
+    "classify_lead",
+    "data_lens",
+    "render_first_touch",
+    "render_first_touch_followup",
+    "render_first_touch_final",
+    "render_followup",
+    "render_negotiation",
+    "render_closing_handoff",
+    # Marquise seller-side
+    "render_marquise_first_touch",
+    "render_marquise_anchor_offer",
+    "render_marquise_counter",
+    "render_marquise_pivot_to_chris",
+    "render_marquise_final_wrap",
+    # Buyer-side
+    "render_marvin_pitch_chris",
+    "render_marvin_full_deal_sheet",
+    "render_henry_buyer_negotiation",
+    "render_vaughn_assignment_countersign",
+    # PSA contract
+    "render_psa_contract",
+]

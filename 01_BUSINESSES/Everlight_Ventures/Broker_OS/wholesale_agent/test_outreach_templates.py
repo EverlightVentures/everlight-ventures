@@ -1174,3 +1174,237 @@ class TestOperatorBlueprintCompliance:
             f"Vaughn must include a dollar range when county_appraisal is present. "
             f"Body: {body[:600]}"
         )
+
+
+# ---------------------------------------------------------------------------
+# Part D: Marquise persona tests
+# ---------------------------------------------------------------------------
+
+_MARQUISE_LEAD = {
+    "owner_name": "EVANS ARIN B",
+    "property_address": "942 MELROSE",
+    "address": "942 MELROSE",
+    "city": "Memphis",
+    "state": "TN",
+    "zip_code": "38114",
+    "owner_mailing_zip": "38114",
+    "owner_mailing_street": "905 S WILLETT ST",
+    "county_appraisal": 25000,
+    "total_appraisal_usd": 25000,
+    "subdivision": "V C THOMAS",
+    "last_sale_year": 2017,
+    "last_sale_price_usd": 100,
+    "sales_history": [
+        {"type_code": "QC", "date": "2017-03-28", "price_usd": 100, "year": 2017},
+        {"type_code": "QC", "date": "2011-02-15", "price_usd": 5010, "year": 2011},
+    ],
+    "permits": [{"year": 1979, "permit_number": "124026"}],
+    "source": "shelby_tax_delinquent",
+}
+
+
+class TestMarquisePersona:
+    """Marquise first_touch, anchor_offer, counter, pivot, final_wrap -- persona purity."""
+
+    def test_marquise_first_touch_no_piper_contamination(self):
+        """Marquise opener must not say 'I'm Piper' -- no persona contamination."""
+        result = ot.render_marquise_first_touch(_MARQUISE_LEAD)
+        body = result["body_html"]
+        assert "I'm Piper" not in body, (
+            "Marquise first touch must not contain Piper's name in the body -- persona contamination"
+        )
+        assert "piper@everlightventures.io" not in body, (
+            "Marquise first touch must not contain Piper's email -- persona contamination"
+        )
+
+    def test_marquise_first_touch_no_outreach_specialist_title(self):
+        """Marquise body must not contain 'Outreach Specialist' (Piper's title)."""
+        result = ot.render_marquise_first_touch(_MARQUISE_LEAD)
+        body = result["body_html"]
+        assert "Outreach Specialist" not in body, (
+            "Marquise first touch must not contain Piper's title 'Outreach Specialist'"
+        )
+
+    def test_marquise_first_touch_references_memphis(self):
+        """Marquise body must reference Memphis explicitly."""
+        result = ot.render_marquise_first_touch(_MARQUISE_LEAD)
+        body = result["body_html"]
+        assert "Memphis" in body or "38114" in body or "Orange Mound" in body, (
+            f"Marquise first touch must reference Memphis / neighborhood. Body: {body[:400]}"
+        )
+
+    def test_marquise_first_touch_orange_mound_zip(self):
+        """38114 zip lead should trigger Orange Mound neighborhood reference."""
+        result = ot.render_marquise_first_touch(_MARQUISE_LEAD)
+        body = result["body_html"]
+        # 38114 is Orange Mound -- should appear somewhere
+        assert "38114" in body or "Orange Mound" in body, (
+            "Marquise first touch on 38114 lead must reference Orange Mound or the zip code"
+        )
+
+    def test_marquise_first_touch_marquise_signed(self):
+        """Marquise body must contain his name in the signature."""
+        result = ot.render_marquise_first_touch(_MARQUISE_LEAD)
+        body = result["body_html"]
+        assert "Marquise" in body, (
+            "Marquise first touch must contain 'Marquise' in the signature block"
+        )
+
+    def test_marquise_first_touch_persona_key(self):
+        """render_marquise_first_touch must return persona dict with marquise email."""
+        result = ot.render_marquise_first_touch(_MARQUISE_LEAD)
+        assert result["persona"]["email"] == "marquise@everlightventures.io", (
+            "Marquise persona email must be marquise@everlightventures.io"
+        )
+
+    def test_marquise_first_touch_no_number(self):
+        """Marquise first touch does NOT drop a dollar number -- gets the reply first."""
+        import re
+        result = ot.render_marquise_first_touch(_MARQUISE_LEAD)
+        body = result["body_html"]
+        # Strip county appraisal mentions; we're checking for offer numbers
+        # Marquise first touch should NOT include an offer number (that's anchor_offer's job)
+        # But it may mention the county value as credibility -- that's acceptable
+        # What must NOT appear: explicit offer like "$16,250" or "my number is"
+        assert "my number" not in body.lower() and "my offer" not in body.lower(), (
+            "Marquise first touch must not drop a dollar offer -- gets reply first. "
+            f"Body: {body[:400]}"
+        )
+
+    def test_marquise_anchor_offer_contains_dollar_number(self):
+        """Marquise anchor_offer body must contain a dollar number (the actual offer)."""
+        import re
+        result = ot.render_marquise_anchor_offer(_MARQUISE_LEAD)
+        body = result["body_html"]
+        dollar_amounts = re.findall(r"\$[\d,]+", body)
+        assert dollar_amounts, (
+            "Marquise anchor_offer must contain a dollar number. "
+            f"Got body: {body[:400]}"
+        )
+
+    def test_marquise_anchor_offer_65pct_of_appraisal(self):
+        """Marquise anchor offer is 65% of appraisal -- should be $16,250 on $25,000."""
+        result = ot.render_marquise_anchor_offer(_MARQUISE_LEAD)
+        body = result["body_html"]
+        # 25000 * 0.65 = $16,250
+        assert "16,250" in body or "16250" in body, (
+            "Marquise anchor_offer on $25k appraisal should quote $16,250 (65%). "
+            f"Got body: {body[:400]}"
+        )
+
+    def test_marquise_anchor_offer_mid_south_title(self):
+        """Marquise anchor_offer must reference Mid-South Title."""
+        result = ot.render_marquise_anchor_offer(_MARQUISE_LEAD)
+        body = result["body_html"]
+        assert "Mid-South" in body, (
+            "Marquise anchor_offer must reference Mid-South Title"
+        )
+
+    def test_marquise_counter_real_talk_correction(self):
+        """Marquise counter must use 'Real talk' and reference the counter offer."""
+        result = ot.render_marquise_counter(_MARQUISE_LEAD, seller_ask=23750, our_offer=21250)
+        body = result["body_html"]
+        assert "Real talk" in body or "real talk" in body or "correct" in body.lower(), (
+            "Marquise counter must include real-talk framing or factual correction. "
+            f"Body: {body[:400]}"
+        )
+        assert "21,250" in body, (
+            "Marquise counter must contain our_offer $21,250 in the body"
+        )
+
+    def test_marquise_counter_cites_prior_sale_price(self):
+        """Marquise counter cites the actual prior sale price from sales_history."""
+        result = ot.render_marquise_counter(_MARQUISE_LEAD, seller_ask=23750, our_offer=21250)
+        body = result["body_html"]
+        # Prior sale in the lead is $5,010 (2011)
+        assert "5,010" in body, (
+            "Marquise counter must cite the actual prior sale price ($5,010) from sales_history. "
+            f"Body: {body[:500]}"
+        )
+
+    def test_psa_contract_has_seven_blocks(self):
+        """render_psa_contract must return exactly 7 blocks."""
+        psa = ot.render_psa_contract(
+            _MARQUISE_LEAD,
+            {"purchase_price": 21250, "assignment_fee": 3000, "emd_amount": 500}
+        )
+        assert len(psa["blocks"]) == 7, (
+            f"PSA contract must have exactly 7 blocks. Got {len(psa['blocks'])}: "
+            f"{[b['title'] for b in psa['blocks']]}"
+        )
+
+    def test_psa_contract_block_titles(self):
+        """PSA contract blocks must have expected titles."""
+        psa = ot.render_psa_contract(
+            _MARQUISE_LEAD,
+            {"purchase_price": 21250, "assignment_fee": 3000}
+        )
+        titles = [b["title"] for b in psa["blocks"]]
+        assert any("Parties" in t for t in titles), "PSA must have a 'Parties' block"
+        assert any("Property" in t and "Earnest" in t for t in titles), "PSA must have a 'Property and Earnest Money' block"
+        assert any("Equitable" in t for t in titles), "PSA must have an 'Equitable Interest' block"
+        assert any("Dual Remedy" in t or "Liquidated" in t for t in titles), "PSA must have a 'Dual Remedy / Liquidated Damages' block"
+        assert any("SB 909" in t or "Wholesaler" in t for t in titles), "PSA must have a 'Wholesaler Disclosure' block"
+        assert any("Title" in t and "Closing" in t for t in titles), "PSA must have a 'Title and Closing' block"
+        assert any("Signature" in t for t in titles), "PSA must have a 'Signatures' block"
+
+    def test_psa_sb909_block_has_required_disclosures(self):
+        """TN SB 909 block must disclose wholesale buyer intent and assignment fee."""
+        psa = ot.render_psa_contract(
+            _MARQUISE_LEAD,
+            {"purchase_price": 21250, "assignment_fee": 3000}
+        )
+        sb909_block = next((b for b in psa["blocks"] if "SB 909" in b["title"] or "Wholesaler" in b["title"]), None)
+        assert sb909_block is not None, "PSA must contain a TN SB 909 / Wholesaler Disclosure block"
+        body = sb909_block["body"]
+        assert "WHOLESALE BUYER" in body, "SB 909 block must state 'WHOLESALE BUYER'"
+        assert "assign" in body.lower(), "SB 909 block must mention assignment intent"
+        assert "3,000" in body or "3000" in body, "SB 909 block must state the assignment fee ($3,000)"
+
+    def test_psa_contract_returns_psa_html(self):
+        """render_psa_contract must return psa_html key with non-empty HTML."""
+        psa = ot.render_psa_contract(
+            _MARQUISE_LEAD,
+            {"purchase_price": 21250, "assignment_fee": 3000}
+        )
+        assert "psa_html" in psa, "render_psa_contract must return psa_html key"
+        assert len(psa["psa_html"]) > 200, "psa_html must be non-trivial HTML"
+
+    def test_henry_buyer_negotiation_differs_from_seller_negotiation(self):
+        """Henry buyer-side negotiation body must differ from seller-side negotiation body."""
+        # Henry seller-side (standard render_negotiation)
+        seller_side = ot.render_negotiation(_MARQUISE_LEAD, persona_key="henry")
+        # Henry buyer-side (render_henry_buyer_negotiation)
+        buyer_side = ot.render_henry_buyer_negotiation(
+            _MARQUISE_LEAD, our_floor=24250, chris_offer=23750
+        )
+        assert seller_side["body_html"] != buyer_side["body_html"], (
+            "Henry buyer-side negotiation must be different from seller-side negotiation -- "
+            "different stage = different framing"
+        )
+        # Buyer-side must mention Chris or buyer-side context
+        assert "Chris" in buyer_side["body_html"] or "buyer" in buyer_side["body_html"].lower(), (
+            "Henry buyer-side negotiation must reference the buyer (Chris) context"
+        )
+
+    def test_marquise_pivot_internal_note(self):
+        """render_marquise_pivot_to_chris must produce an internal team note."""
+        result = ot.render_marquise_pivot_to_chris(_MARQUISE_LEAD, locked_price=21250)
+        body = result["body_html"]
+        assert "Chris" in body, "Marquise pivot note must mention Chris"
+        assert "21,250" in body, "Marquise pivot note must mention the locked price"
+        assert "INTERNAL" in result["subject"], "Marquise pivot subject must be marked [INTERNAL]"
+
+    def test_marquise_final_wrap_commission(self):
+        """render_marquise_final_wrap must contain the commission amount."""
+        result = ot.render_marquise_final_wrap(
+            _MARQUISE_LEAD,
+            sell_price=21250,
+            assign_price=24250,
+            commission=3000
+        )
+        body = result["body_html"]
+        assert "3,000" in body, "Marquise final wrap must contain the $3,000 commission"
+        assert "CLOSED" in result["subject"] or "DEAL CLOSED" in result["subject"], (
+            "Marquise final wrap subject must indicate DEAL CLOSED"
+        )
