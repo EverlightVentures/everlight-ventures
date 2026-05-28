@@ -88,3 +88,55 @@ agents:
   predictor: "cipher_wolfe"     # Cipher does final prediction
   risk_manager: "everlight_trading_risk"  # Rex Thornton
   postmortem: "56_data_verifier"  # Thomas Rourke - fact checker
+
+# Proxy routing (Phase 0 outcome)
+proxy:
+  url: "https://clob-proxy.everlightventures.io"  # Or eu-frankfurt-1 fallback if A4
+  enabled: true
+
+# Kill switches
+kill_switches:
+  daily_loss_pct: 15.0          # Halt for day at -15% bankroll
+  bankroll_floor_pct_warn: 80.0  # Reduce max_bet at 80% of start
+  bankroll_floor_pct_halt: 60.0  # Halt + operator-confirm at 60%
+  drift_usd: 0.01                # Reconciliation drift -- halt
+
+# Live trading flag (two-factor opt-in)
+live_trading:
+  enabled: false                 # MUST be true AND env LIVE_TRADING=true to actually trade
+
+# Wallet
+wallet:
+  key_path: "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/03_Credentials/polymarket_wallet.key"
+  address_path: "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/03_Credentials/polymarket_wallet.addr"
+
+# Telegram signals (free Bot API)
+telegram:
+  enabled: false                 # Flip to true after @BotFather registration
+  bot_token_env: "TELEGRAM_BOT_TOKEN"
+  channels:
+    - "whalealert_official"
+    - "PolyMarketAlerts"
+
+# RSSHub (self-hosted on e5-mother)
+rsshub:
+  enabled: true
+  base_url: "http://e5-mother:1200"
+  accounts:
+    - "tier10k"
+    - "WatcherGuru"
+    - "unusual_whales"
+    - "DeItaone"
+
+# RSS news (renamed from rss to avoid collision with sources.rss nested key)
+rss_news:
+  enabled: true
+  feeds:
+    - "https://feeds.reuters.com/reuters/topNews"
+    - "https://feeds.bbci.co.uk/news/rss.xml"
+    - "https://www.coindesk.com/arc/outboundfeeds/rss/"
+
+# Orderbook sentinel
+orderbook_sentinel:
+  spike_multiplier: 3.0
+  baseline_window_min: 5
