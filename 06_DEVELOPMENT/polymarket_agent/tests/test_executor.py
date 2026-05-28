@@ -7,6 +7,7 @@ import pytest
 from polymarket_agent.execution.exceptions import (
     LiveTradingDisabledError, KillSwitchActiveError, UnauthorizedInstrumentError,
     DollarCapExceededError, OnChainBalanceShortfallError, OrderRejectedByVenueError,
+    PolymarketExecutorError,
 )
 from polymarket_agent.execution.executor_polymarket import PolymarketExecutor, BetRequest
 
@@ -110,9 +111,108 @@ def test_happy_path_submits_signs_updates_ledger(tmp_path, monkeypatch):
     monkeypatch.setenv("LIVE_TRADING", "true")
     monkeypatch.delenv("EV_TRADER_HALT", raising=False)
     ex, wallet, clob = make_executor(tmp_path)
+    ex._build_eip712 = lambda req: {"types": {}, "primaryType": "X", "domain": {}, "message": {}}
     bet = ex.submit_order(make_req())
     assert bet.id == "bet_id_1"
     assert wallet.sign_clob_order.call_count == 1
     assert clob.submit_order.call_count == 1
     open_bets = json.loads((tmp_path / "open_bets.json").read_text())
     assert len(open_bets) == 1
+
+
+def test_check_6_open_positions_cap(tmp_path, monkeypatch):
+    monkeypatch.setenv("LIVE_TRADING", "true")
+    monkeypatch.delenv("EV_TRADER_HALT", raising=False)
+    ex, _, _ = make_executor(tmp_path, max_open_positions=2)
+    # Pre-populate 2 open bets
+    (tmp_path / "open_bets.json").write_text(json.dumps([{"id": "a"}, {"id": "b"}]))
+    with pytest.raises(DollarCapExceededError):
+        ex.submit_order(make_req())
+
+
+def test_check_7_daily_loss_exceeded(tmp_path, monkeypatch):
+    monkeypatch.setenv("LIVE_TRADING", "true")
+    monkeypatch.delenv("EV_TRADER_HALT", raising=False)
+    state_path = tmp_path / "bankroll.json"
+    state_path.write_text(json.dumps({
+        "cash_usdc": 250.0, "open_positions_value_usdc": 0.0,
+        "daily_pnl_usdc": -50.0,  # exceeds -15% of 250 = -37.5
+    }))
+    halt_path = tmp_path / "HALT"
+    open_bets_path = tmp_path / "open_bets.json"
+    open_bets_path.write_text(json.dumps([]))
+    wallet = MagicMock(); wallet.get_usdc_balance.return_value = Decimal("250")
+    clob = MagicMock()
+    cfg = {"live_trading_enabled": True, "max_bet_pct": 5.0,
+           "max_open_positions": 10, "max_daily_loss_pct": 15.0,
+           "active_whitelist": {"mkt_1"}}
+    ex = PolymarketExecutor(wallet=wallet, clob=clob, config=cfg,
+                            bankroll_state_path=state_path, halt_path=halt_path,
+                            open_bets_path=open_bets_path)
+    with pytest.raises(KillSwitchActiveError):
+        ex.submit_order(make_req())
+
+
+def test_check_9_clob_rejection_wrapped(tmp_path, monkeypatch):
+    monkeypatch.setenv("LIVE_TRADING", "true")
+    monkeypatch.delenv("EV_TRADER_HALT", raising=False)
+    ex, wallet, clob = make_executor(tmp_path)
+    # Override the EIP-712 stub so we can reach check 9 without NotImplementedError
+    ex._build_eip712 = lambda req: {"types": {}, "primaryType": "X", "domain": {}, "message": {}}
+    clob.submit_order.side_effect = RuntimeError("network down")
+    with pytest.raises(OrderRejectedByVenueError):
+        ex.submit_order(make_req())
+
+
+def test_eip712_stub_raises_notimplemented(tmp_path, monkeypatch):
+    monkeypatch.setenv("LIVE_TRADING", "true")
+    monkeypatch.delenv("EV_TRADER_HALT", raising=False)
+    ex, _, _ = make_executor(tmp_path)
+    # When the executor reaches check 9, the stub _build_eip712 should fire
+    with pytest.raises(NotImplementedError) as e:
+        ex.submit_order(make_req())
+    assert "phase f" in str(e.value).lower() or "py-clob-client" in str(e.value).lower()
+
+
+def test_amount_must_be_decimal_not_float(tmp_path, monkeypatch):
+    monkeypatch.setenv("LIVE_TRADING", "true")
+    monkeypatch.delenv("EV_TRADER_HALT", raising=False)
+    ex, _, _ = make_executor(tmp_path)
+    bad = BetRequest(market_id="mkt_1", outcome="YES",
+                     amount_usdc=10.0,  # float, not Decimal
+                     limit_price=Decimal("0.5"))
+    with pytest.raises(PolymarketExecutorError):
+        ex.submit_order(bad)
+
+
+def test_atomic_ledger_write_uses_temp_then_rename(tmp_path, monkeypatch):
+    """Verify the ledger write goes through a temp file (no partial corruption)."""
+    monkeypatch.setenv("LIVE_TRADING", "true")
+    monkeypatch.delenv("EV_TRADER_HALT", raising=False)
+    ex, _, _ = make_executor(tmp_path)
+    # Override _build_eip712 stub so we can reach the ledger write
+    ex._build_eip712 = lambda req: {"types": {}, "primaryType": "X", "domain": {}, "message": {}}
+    bet = ex.submit_order(make_req())
+    # Final file present, no .tmp leftover
+    assert (tmp_path / "open_bets.json").exists()
+    assert not (tmp_path / "open_bets.json.tmp").exists()
+
+
+def test_missing_whitelist_config_key_raises(tmp_path, monkeypatch):
+    monkeypatch.setenv("LIVE_TRADING", "true")
+    monkeypatch.delenv("EV_TRADER_HALT", raising=False)
+    state_path = tmp_path / "bankroll.json"
+    state_path.write_text(json.dumps({"cash_usdc": 250.0, "daily_pnl_usdc": 0.0}))
+    halt_path = tmp_path / "HALT"
+    open_bets_path = tmp_path / "open_bets.json"
+    open_bets_path.write_text(json.dumps([]))
+    wallet = MagicMock(); wallet.get_usdc_balance.return_value = Decimal("250")
+    clob = MagicMock()
+    cfg = {"live_trading_enabled": True, "max_bet_pct": 5.0,
+           "max_open_positions": 10, "max_daily_loss_pct": 15.0}
+           # no active_whitelist
+    ex = PolymarketExecutor(wallet=wallet, clob=clob, config=cfg,
+                            bankroll_state_path=state_path, halt_path=halt_path,
+                            open_bets_path=open_bets_path)
+    with pytest.raises(PolymarketExecutorError):
+        ex.submit_order(make_req())

@@ -53,14 +53,34 @@ class PolymarketExecutor:
     def _read_open_bets(self) -> list:
         if not self.open_bets_path.exists():
             return []
-        return json.loads(self.open_bets_path.read_text())
+        try:
+            return json.loads(self.open_bets_path.read_text())
+        except json.JSONDecodeError as e:
+            raise PolymarketExecutorError(
+                f"open_bets ledger corrupted at {self.open_bets_path}",
+                context={"error": str(e)[:200]},
+            ) from e
 
     def _append_open_bet(self, bet: Bet):
         bets = self._read_open_bets()
         bets.append(asdict(bet))
-        self.open_bets_path.write_text(json.dumps(bets, indent=2))
+        tmp = self.open_bets_path.with_suffix(self.open_bets_path.suffix + ".tmp")
+        tmp.write_text(json.dumps(bets, indent=2))
+        os.replace(tmp, self.open_bets_path)
 
     def submit_order(self, req: BetRequest) -> Bet:
+        # I4: type-guard amount_usdc and limit_price
+        if not isinstance(req.amount_usdc, Decimal):
+            raise PolymarketExecutorError(
+                f"amount_usdc must be Decimal, got {type(req.amount_usdc).__name__}",
+                context={"received_type": type(req.amount_usdc).__name__},
+            )
+        if not isinstance(req.limit_price, Decimal):
+            raise PolymarketExecutorError(
+                f"limit_price must be Decimal, got {type(req.limit_price).__name__}",
+                context={"received_type": type(req.limit_price).__name__},
+            )
+
         # CHECK 1: LIVE_TRADING (config AND env)
         if not self.config.get("live_trading_enabled", False):
             raise LiveTradingDisabledError(
@@ -92,7 +112,12 @@ class PolymarketExecutor:
             )
 
         # CHECK 4: market in active whitelist
-        whitelist = self.config.get("active_whitelist", set())
+        if "active_whitelist" not in self.config:
+            raise PolymarketExecutorError(
+                "config missing required key: active_whitelist",
+                context={"config_keys": list(self.config.keys())},
+            )
+        whitelist = self.config["active_whitelist"]
         if req.market_id not in whitelist:
             raise UnauthorizedInstrumentError(
                 f"market {req.market_id} not in active whitelist",
@@ -101,7 +126,7 @@ class PolymarketExecutor:
 
         # CHECK 5: amount <= max_bet_pct * bankroll
         state = self._read_state()
-        bankroll = Decimal(str(state.get("cash_usdc", 0)))
+        bankroll = Decimal(str(state.get("cash_usdc") or 0))
         max_bet = bankroll * Decimal(str(self.config["max_bet_pct"])) / Decimal("100")
         if req.amount_usdc > max_bet:
             raise DollarCapExceededError(
@@ -119,7 +144,7 @@ class PolymarketExecutor:
             )
 
         # CHECK 7: daily_pnl > -max_daily_loss
-        daily_pnl = Decimal(str(state.get("daily_pnl_usdc", 0)))
+        daily_pnl = Decimal(str(state.get("daily_pnl_usdc") or 0))
         max_daily_loss = bankroll * Decimal(str(self.config["max_daily_loss_pct"])) / Decimal("100") * Decimal("-1")
         if daily_pnl < max_daily_loss:
             raise KillSwitchActiveError(
@@ -138,28 +163,67 @@ class PolymarketExecutor:
         # CHECK 9: sign + submit + record
         typed_data = self._build_eip712(req)
         signature = self.wallet.sign_clob_order(typed_data)
+
+        # I3: Re-check HALT just before commit -- close the window where reconciler
+        # could have detected drift and written HALT during the in-flight checks
+        if self.halt_path.exists():
+            raise KillSwitchActiveError(
+                "HALT appeared during pre-flight -- aborting",
+                context={"phase": "pre_submit_recheck", "market_id": req.market_id},
+            )
+
         try:
             order_id = self.clob.submit_order({"typed_data": typed_data, "signature": signature})
         except Exception as e:
             raise OrderRejectedByVenueError(
-                f"CLOB rejected order: {e}",
-                context={"market_id": req.market_id},
+                "CLOB rejected order",
+                context={"market_id": req.market_id, "exception_type": type(e).__name__,
+                         "error": str(e)[:200]},
             ) from e
+
+        # I5: guard empty order_id from CLOB
+        if not order_id or not isinstance(order_id, str):
+            raise OrderRejectedByVenueError(
+                "CLOB returned empty or invalid order_id",
+                context={"market_id": req.market_id, "returned": repr(order_id)},
+            )
 
         bet = Bet(
             id=order_id, market_id=req.market_id, outcome=req.outcome,
             amount_usdc=str(req.amount_usdc), limit_price=str(req.limit_price),
             timestamp=datetime.now(timezone.utc).isoformat(),
         )
-        self._append_open_bet(bet)
+        # C2: wrap ledger write -- if it fails after a live order, HALT immediately
+        try:
+            self._append_open_bet(bet)
+        except Exception as e:
+            # Order is live but ledger write failed -- HALT immediately
+            self.halt_path.write_text(json.dumps({
+                "reason": "ledger_write_failed_post_submit",
+                "order_id": order_id,
+                "market_id": req.market_id,
+                "error": str(e)[:200],
+                "ts": datetime.now(timezone.utc).isoformat(),
+            }, indent=2))
+            raise PolymarketExecutorError(
+                "ledger write failed AFTER order submitted -- HALTED",
+                context={"order_id": order_id, "market_id": req.market_id},
+            ) from e
         return bet
 
     def _build_eip712(self, req: BetRequest) -> dict:
-        """Polymarket CLOB EIP-712 typed-data structure. Simplified for now;
-        full schema lives in py-clob-client. Filled in Phase F integration."""
-        return {
-            "market_id": req.market_id,
-            "outcome": req.outcome,
-            "amount_usdc": str(req.amount_usdc),
-            "limit_price": str(req.limit_price),
-        }
+        """Polymarket CLOB EIP-712 typed-data structure.
+
+        Phase F wires py-clob-client which builds the real EIP-712 Order envelope
+        with domain 'Polymarket CTF Exchange', primaryType 'Order', chainId 137,
+        plus salt/maker/signer/taker/tokenId/makerAmount/takerAmount/expiration/
+        nonce/feeRateBps/side/signatureType fields.
+
+        The stub below is INTENTIONALLY unusable for real signing -- wallet.py
+        will reject any dict missing types/primaryType/domain/message at sign time,
+        which is the desired fail-loud behavior until py-clob-client integration.
+        """
+        raise NotImplementedError(
+            "EIP-712 builder is Phase F work -- py-clob-client integration required "
+            "before live signing. Executor scaffolding is paper-trade-ready only."
+        )
