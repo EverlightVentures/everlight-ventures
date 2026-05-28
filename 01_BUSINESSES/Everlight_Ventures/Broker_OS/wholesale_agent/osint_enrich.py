@@ -2,13 +2,17 @@
 osint_enrich.py -- run free OSINT + the confidence gate on owner-enriched leads.
 
 Pre-condition: lead has owner_name (from the assessor harvester) and state.
-Post-condition: lead has confidence_tier (auto_email|review|directmail),
-                confidence_score, candidate_email; for auto_email tier we
+Post-condition: lead has confidence_tier (send|try|skip),
+                confidence_score, candidate_email; for send/try tier we
                 also set lead.email (so rex_belfort_sequence will pick it up
                 on its next 7-touch run).
 
 Runs on the PHONE (osint_api lives at 06_DEVELOPMENT/everlight_os/intel_center).
 Free-only by design. Ledger: _logs/enrichment/osint_enrich.jsonl.
+
+Parallelism: up to 4 OSINT resolve() calls run concurrently via ThreadPoolExecutor.
+Results are collected, then merged into leads_db serially on the main thread.
+Ledger appends are fine to do per-thread (kernel guarantees atomicity for small writes).
 
 Usage:
     python3 osint_enrich.py                 # process up to 25 ready leads
@@ -20,18 +24,25 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))  # so homeowner_osint + email_confidence_gate import
 
+# Workspace-aware: phone uses /mnt/sdcard/AA_MY_DRIVE (also symlinked on E5);
+# else fall back to writing alongside the script. Same pattern as assessor_harvester.
+_PHONE_ROOT = Path("/mnt/sdcard/AA_MY_DRIVE")
+_WORKSPACE = _PHONE_ROOT if _PHONE_ROOT.exists() else HERE
 LEADS_DB = HERE / "leads_db.json"
-LEDGER = HERE.parent.parent.parent.parent / "_logs" / "enrichment" / "osint_enrich.jsonl"
+LEDGER = _WORKSPACE / "_logs" / "enrichment" / "osint_enrich.jsonl"
+
+_MAX_WORKERS = 4
 
 
 def _select_ready(leads: list[dict], state: str, limit: int) -> list[dict]:
-    """Leads with owner_name, target state, no best_email yet."""
+    """Leads with owner_name, target state, no email enrichment yet."""
     out = []
     for l in leads:
         if not isinstance(l, dict):
@@ -56,9 +67,67 @@ def _log(rec: dict) -> None:
         fh.write(json.dumps(rec, default=str) + "\n")
 
 
+def _enrich_one(lead: dict, ts: str, resolve_fn, categorize_fn) -> dict:
+    """
+    Resolve OSINT for a single lead and return an enrichment patch dict.
+    Safe to call from a worker thread -- does NOT mutate the lead in place.
+    Returns a dict with keys to merge back onto the lead (plus "lead_ref" pointer).
+    """
+    from email_confidence_gate import TIER_SEND, TIER_TRY, TIER_SKIP
+
+    name = lead.get("owner_name", "")
+    addr = lead.get("property_address") or lead.get("address", "")
+    city = lead.get("city", "")
+    state = lead.get("state", "TN")
+    mailing = lead.get("mailing_address", "")
+    lead_id = lead.get("lead_id") or lead.get("id") or ""
+
+    patch = {"_lead_ref": id(lead), "_lead_id": lead_id, "_ts": ts}
+    try:
+        osint = resolve_fn(
+            name=name, address=addr, city=city, state=state,
+            mailing_address=mailing, lead_id=str(lead_id),
+        )
+    except TypeError:
+        # Older resolve() signature without mailing_address/lead_id
+        try:
+            osint = resolve_fn(name=name, address=addr, city=city, state=state)
+        except Exception as e:
+            _log({"ts": ts, "status": "osint_error", "owner": name, "error": str(e)})
+            patch["_error"] = str(e)
+            return patch
+    except Exception as e:
+        _log({"ts": ts, "status": "osint_error", "owner": name, "error": str(e)})
+        patch["_error"] = str(e)
+        return patch
+
+    cands = osint.get("candidate_emails", []) or []
+    identity = int(osint.get("identity_score") or 0)
+    verdict = categorize_fn(cands, identity)
+    tier = verdict["tier"]
+
+    patch["confidence_score"] = verdict["score"]
+    patch["confidence_tier"] = tier
+    patch["confidence_reason"] = verdict["reason"]
+    patch["best_email_candidate"] = verdict.get("best_email") or ""
+    patch["osint_at"] = ts
+
+    if tier in {TIER_SEND, TIER_TRY} and verdict.get("best_email"):
+        patch["email"] = verdict["best_email"]
+        patch["email_source"] = "osint_enrich_" + tier
+        patch["confidence_tier_label"] = tier  # alias for rex_belfort compat
+
+    _log({
+        "ts": ts, "status": "ok", "owner": name, "address": addr,
+        "tier": tier, "score": verdict["score"],
+        "best_email": verdict.get("best_email"),
+    })
+    return patch
+
+
 def run(args: argparse.Namespace) -> int:
     from homeowner_osint import resolve
-    from email_confidence_gate import categorize
+    from email_confidence_gate import categorize, TIER_SEND, TIER_TRY, TIER_SKIP
 
     raw = json.loads(LEADS_DB.read_text())
     is_dict = isinstance(raw, dict)
@@ -68,52 +137,62 @@ def run(args: argparse.Namespace) -> int:
         print(f"[osint_enrich] No ready leads (state={args.state}, limit={args.limit})")
         return 0
 
-    print(f"[osint_enrich] {len(ready)} ready lead(s)")
+    print(f"[osint_enrich] {len(ready)} ready lead(s) -- dispatching up to {_MAX_WORKERS} workers")
     if args.dry_run:
         for l in ready[:10]:
             print(f"  WOULD: {l.get('owner_name')!r} @ {l.get('property_address') or l.get('address')!r}")
         print("[osint_enrich] DRY-RUN -- no OSINT calls, no writes.")
         return 0
 
-    tiers = {"auto_email": 0, "review": 0, "directmail": 0}
     ts = datetime.now(timezone.utc).isoformat()
-    for lead in ready:
-        name = lead.get("owner_name", "")
-        addr = lead.get("property_address") or lead.get("address", "")
-        city = lead.get("city", "")
-        state = lead.get("state", "TN")
-        print(f"[osint_enrich] resolving: {name!r} @ {addr!r}")
-        try:
-            osint = resolve(name=name, address=addr, city=city, state=state)
-        except Exception as e:
-            _log({"ts": ts, "status": "osint_error", "owner": name, "error": str(e)})
+    tiers = {TIER_SEND: 0, TIER_TRY: 0, TIER_SKIP: 0}
+
+    # Build a lookup for fast patch merging: id(lead) -> lead
+    lead_by_ref = {id(l): l for l in ready}
+
+    # Parallel OSINT resolution -- collect all patches, then merge serially
+    patches = []
+    with ThreadPoolExecutor(max_workers=_MAX_WORKERS) as pool:
+        futures = {
+            pool.submit(_enrich_one, lead, ts, resolve, categorize): lead
+            for lead in ready
+        }
+        for future in as_completed(futures):
+            try:
+                patch = future.result()
+            except Exception as e:
+                name = futures[future].get("owner_name", "?")
+                print(f"[osint_enrich] worker error for {name!r}: {e}")
+                continue
+            patches.append(patch)
+
+    # Serial merge back onto leads (main thread only)
+    for patch in patches:
+        if "_error" in patch:
             continue
-        cands = osint.get("candidate_emails", []) or []
-        identity = int(osint.get("identity_score") or 0)
-        verdict = categorize(cands, identity)
-        tier = verdict["tier"]
+        ref = patch.pop("_lead_ref", None)
+        patch.pop("_lead_id", None)
+        patch.pop("_ts", None)
+        lead = lead_by_ref.get(ref)
+        if lead is None:
+            continue
+        tier = patch.get("confidence_tier", TIER_SKIP)
         tiers[tier] = tiers.get(tier, 0) + 1
+        lead.update(patch)
 
-        lead["confidence_score"] = verdict["score"]
-        lead["confidence_tier"] = tier
-        lead["confidence_reason"] = verdict["reason"]
-        lead["best_email_candidate"] = verdict.get("best_email") or ""
-        lead["osint_at"] = ts
-        if tier == "auto_email" and verdict.get("best_email"):
-            lead["email"] = verdict["best_email"]   # rex_belfort picks this up
-            lead["email_source"] = "osint_enrich_auto"
-        _log({"ts": ts, "status": "ok", "owner": name, "address": addr,
-              "tier": tier, "score": verdict["score"],
-              "best_email": verdict.get("best_email")})
-
-    # save leads_db back
+    # Save leads_db back (main thread, after all merges)
     if is_dict:
         keyed = {str(l.get("lead_id") or l.get("id") or ""): l for l in leads}
         LEADS_DB.write_text(json.dumps(keyed, indent=2, default=str))
     else:
         LEADS_DB.write_text(json.dumps(leads, indent=2, default=str))
 
-    print(f"[osint_enrich] done. tiers={tiers}")
+    print(
+        f"[osint_enrich] done. "
+        f"send={tiers.get(TIER_SEND, 0)} "
+        f"try={tiers.get(TIER_TRY, 0)} "
+        f"skip={tiers.get(TIER_SKIP, 0)}"
+    )
     return 0
 
 
