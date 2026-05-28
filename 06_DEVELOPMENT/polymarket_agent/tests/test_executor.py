@@ -111,7 +111,7 @@ def test_happy_path_submits_signs_updates_ledger(tmp_path, monkeypatch):
     monkeypatch.setenv("LIVE_TRADING", "true")
     monkeypatch.delenv("EV_TRADER_HALT", raising=False)
     ex, wallet, clob = make_executor(tmp_path)
-    ex._build_eip712 = lambda req: {"types": {}, "primaryType": "X", "domain": {}, "message": {}}
+    ex.wallet.address = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
     bet = ex.submit_order(make_req())
     assert bet.id == "bet_id_1"
     assert wallet.sign_clob_order.call_count == 1
@@ -157,21 +157,52 @@ def test_check_9_clob_rejection_wrapped(tmp_path, monkeypatch):
     monkeypatch.setenv("LIVE_TRADING", "true")
     monkeypatch.delenv("EV_TRADER_HALT", raising=False)
     ex, wallet, clob = make_executor(tmp_path)
-    # Override the EIP-712 stub so we can reach check 9 without NotImplementedError
-    ex._build_eip712 = lambda req: {"types": {}, "primaryType": "X", "domain": {}, "message": {}}
+    ex.wallet.address = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
     clob.submit_order.side_effect = RuntimeError("network down")
     with pytest.raises(OrderRejectedByVenueError):
         ex.submit_order(make_req())
 
 
-def test_eip712_stub_raises_notimplemented(tmp_path, monkeypatch):
+def test_eip712_builder_returns_valid_typed_data(tmp_path, monkeypatch):
+    """EIP-712 builder produces a dict that satisfies wallet.sign_clob_order contract."""
     monkeypatch.setenv("LIVE_TRADING", "true")
     monkeypatch.delenv("EV_TRADER_HALT", raising=False)
     ex, _, _ = make_executor(tmp_path)
-    # When the executor reaches check 9, the stub _build_eip712 should fire
-    with pytest.raises(NotImplementedError) as e:
-        ex.submit_order(make_req())
-    assert "phase f" in str(e.value).lower() or "py-clob-client" in str(e.value).lower()
+    # wallet.address needs to exist on the mock
+    ex.wallet.address = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+    req = BetRequest(market_id="123456", outcome="YES",
+                     amount_usdc=Decimal("10"), limit_price=Decimal("0.5"))
+    typed_data = ex._build_eip712(req)
+
+    # Required keys per wallet.sign_clob_order
+    assert {"types", "primaryType", "domain", "message"} <= typed_data.keys()
+    # Domain chainId must be 137
+    assert typed_data["domain"]["chainId"] == 137
+    assert typed_data["domain"]["name"] == "Polymarket CTF Exchange"
+    # Order envelope structure
+    assert typed_data["primaryType"] == "Order"
+    msg = typed_data["message"]
+    assert msg["maker"] == "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+    assert msg["signer"] == msg["maker"]
+    assert msg["taker"] == "0x0000000000000000000000000000000000000000"
+    # makerAmount = 10 USDC * 1e6 = 10_000_000
+    assert msg["makerAmount"] == 10_000_000
+    # takerAmount = (10 / 0.5) * 1e6 = 20_000_000
+    assert msg["takerAmount"] == 20_000_000
+    assert msg["side"] == 0
+    assert msg["signatureType"] == 0
+
+
+def test_eip712_rejects_zero_limit_price(tmp_path, monkeypatch):
+    monkeypatch.setenv("LIVE_TRADING", "true")
+    monkeypatch.delenv("EV_TRADER_HALT", raising=False)
+    ex, _, _ = make_executor(tmp_path)
+    ex.wallet.address = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
+    req = BetRequest(market_id="123456", outcome="YES",
+                     amount_usdc=Decimal("10"), limit_price=Decimal("0"))
+    from polymarket_agent.execution.exceptions import PolymarketExecutorError
+    with pytest.raises(PolymarketExecutorError):
+        ex._build_eip712(req)
 
 
 def test_amount_must_be_decimal_not_float(tmp_path, monkeypatch):
@@ -190,8 +221,7 @@ def test_atomic_ledger_write_uses_temp_then_rename(tmp_path, monkeypatch):
     monkeypatch.setenv("LIVE_TRADING", "true")
     monkeypatch.delenv("EV_TRADER_HALT", raising=False)
     ex, _, _ = make_executor(tmp_path)
-    # Override _build_eip712 stub so we can reach the ledger write
-    ex._build_eip712 = lambda req: {"types": {}, "primaryType": "X", "domain": {}, "message": {}}
+    ex.wallet.address = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
     bet = ex.submit_order(make_req())
     # Final file present, no .tmp leftover
     assert (tmp_path / "open_bets.json").exists()
