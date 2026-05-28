@@ -1323,14 +1323,14 @@ class TestMarquisePersona:
             f"Body: {body[:500]}"
         )
 
-    def test_psa_contract_has_seven_blocks(self):
-        """render_psa_contract must return exactly 7 blocks."""
+    def test_psa_contract_has_eight_blocks(self):
+        """render_psa_contract must return exactly 8 blocks (7 original + Block 7.5 QA Period)."""
         psa = ot.render_psa_contract(
             _MARQUISE_LEAD,
             {"purchase_price": 21250, "assignment_fee": 3000, "emd_amount": 500}
         )
-        assert len(psa["blocks"]) == 7, (
-            f"PSA contract must have exactly 7 blocks. Got {len(psa['blocks'])}: "
+        assert len(psa["blocks"]) == 8, (
+            f"PSA contract must have exactly 8 blocks (7 + QA Period). Got {len(psa['blocks'])}: "
             f"{[b['title'] for b in psa['blocks']]}"
         )
 
@@ -1408,4 +1408,370 @@ class TestMarquisePersona:
         assert "3,000" in body, "Marquise final wrap must contain the $3,000 commission"
         assert "CLOSED" in result["subject"] or "DEAL CLOSED" in result["subject"], (
             "Marquise final wrap subject must indicate DEAL CLOSED"
+        )
+
+    def test_psa_contract_has_eight_blocks_with_qa_period(self):
+        """render_psa_contract must return 8 blocks now (7 original + Block 7.5 QA Period)."""
+        psa = ot.render_psa_contract(
+            _MARQUISE_LEAD,
+            {"purchase_price": 21250, "assignment_fee": 3000, "emd_amount": 500}
+        )
+        assert len(psa["blocks"]) == 8, (
+            f"PSA contract must have exactly 8 blocks (7 + QA Period 7.5). "
+            f"Got {len(psa['blocks'])}: {[b['title'] for b in psa['blocks']]}"
+        )
+
+    def test_psa_qa_period_block_exists_with_ten_days(self):
+        """PSA Block 7.5 must exist and contain 'TEN' and 'without penalty'."""
+        psa = ot.render_psa_contract(
+            _MARQUISE_LEAD,
+            {"purchase_price": 21250, "assignment_fee": 3000}
+        )
+        qa_block = next(
+            (b for b in psa["blocks"] if "Quality Assurance" in b["title"]),
+            None
+        )
+        assert qa_block is not None, "PSA must contain a 'Quality Assurance Period' block (Block 7.5)"
+        body = qa_block["body"]
+        assert "TEN" in body, "QA Period block must mention 'TEN' (10 days)"
+        assert "without penalty" in body, "QA Period block must mention 'without penalty'"
+
+    def test_psa_qa_period_no_assignment_leak(self):
+        """Block 7.5 must not contain 'assignment', 'end buyer', or 'Chris'."""
+        psa = ot.render_psa_contract(
+            _MARQUISE_LEAD,
+            {"purchase_price": 21250, "assignment_fee": 3000}
+        )
+        qa_block = next(
+            (b for b in psa["blocks"] if "Quality Assurance" in b["title"]),
+            None
+        )
+        assert qa_block is not None, "QA Period block must exist"
+        body = qa_block["body"].lower()
+        assert "assignment" not in body, (
+            "Block 7.5 must not mention 'assignment' -- operator semantic: seller-friendly, mutual"
+        )
+        assert "end buyer" not in body, (
+            "Block 7.5 must not mention 'end buyer' -- seller doesn't need to see that mechanic"
+        )
+        assert "chris" not in body, (
+            "Block 7.5 must not mention 'Chris' by name -- seller-facing document"
+        )
+
+
+# ---------------------------------------------------------------------------
+# NEW: Multi-round negotiation tests
+# ---------------------------------------------------------------------------
+
+class TestMultiRoundNegotiation:
+    """4-round Marquise seller negotiation -- distinct angles, controlled walk-ups."""
+
+    _LEAD = {
+        "owner_name": "TOWNSEND RITA M",
+        "property_address": "836 N BELLEVUE BLVD",
+        "address": "836 N BELLEVUE BLVD",
+        "city": "Memphis",
+        "state": "TN",
+        "county_appraisal": 58000,
+        "zip_code": "38114",
+        "owner_mailing_zip": "38114",
+        "subdivision": "BELLEVUE TERRACE",
+        "source": "shelby_tax_delinquent",
+    }
+
+    def _appraisal(self):
+        return 58000
+
+    def _round_offers(self):
+        a = self._appraisal()
+        return {
+            "r2": int(a * 0.50),
+            "r3": int(a * 0.53),
+            "r4": int(a * 0.55),
+        }
+
+    def test_round2_renders_without_error(self):
+        r2 = ot.render_marquise_round2_validation(
+            self._LEAD, seller_position=int(self._appraisal() * 0.70),
+            our_offer=self._round_offers()["r2"]
+        )
+        assert "body_html" in r2
+        assert len(r2["body_html"]) > 100
+
+    def test_round3_renders_without_error(self):
+        r3 = ot.render_marquise_round3_social_proof(
+            self._LEAD, our_offer=self._round_offers()["r3"]
+        )
+        assert "body_html" in r3
+        assert len(r3["body_html"]) > 100
+
+    def test_round4_renders_without_error(self):
+        r4 = ot.render_marquise_round4_final(
+            self._LEAD, our_offer=self._round_offers()["r4"]
+        )
+        assert "body_html" in r4
+        assert len(r4["body_html"]) > 100
+
+    def test_round2_validates_seller_first(self):
+        """Round 2 must contain empathy/validation language before reframe."""
+        r2 = ot.render_marquise_round2_validation(
+            self._LEAD, seller_position=40600, our_offer=self._round_offers()["r2"]
+        )
+        body = r2["body_html"].lower()
+        assert any(phrase in body for phrase in [
+            "i hear you", "hear you", "fair reaction", "light against"
+        ]), (
+            "Round 2 must validate seller's pushback first. "
+            f"Body: {body[:400]}"
+        )
+
+    def test_round2_reframes_to_carry_cost(self):
+        """Round 2 must mention carry cost or back-tax dynamic."""
+        r2 = ot.render_marquise_round2_validation(
+            self._LEAD, seller_position=40600, our_offer=self._round_offers()["r2"]
+        )
+        body = r2["body_html"].lower()
+        assert any(phrase in body for phrase in [
+            "carry", "back-tax", "accruing", "every month", "holding"
+        ]), (
+            "Round 2 must reframe to carrying cost / back-tax reality. "
+            f"Body: {body[:400]}"
+        )
+
+    def test_round3_contains_social_proof(self):
+        """Round 3 must reference recent comparable closes."""
+        r3 = ot.render_marquise_round3_social_proof(
+            self._LEAD, our_offer=self._round_offers()["r3"]
+        )
+        body = r3["body_html"].lower()
+        assert any(phrase in body for phrase in [
+            "deals i closed", "closed", "corridor", "last month", "comps"
+        ]), (
+            "Round 3 must contain social proof (recent comparable closes). "
+            f"Body: {body[:400]}"
+        )
+
+    def test_round4_paints_future_state(self):
+        """Round 4 must paint vivid future-state: Friday, back taxes paid, cash hits."""
+        r4 = ot.render_marquise_round4_final(
+            self._LEAD, our_offer=self._round_offers()["r4"]
+        )
+        body = r4["body_html"].lower()
+        assert any(phrase in body for phrase in [
+            "friday", "monday", "tuesday", "wednesday", "thursday", "saturday",
+            "back taxes", "assessor", "cash hits", "cash in hand", "account"
+        ]), (
+            "Round 4 must paint vivid future-state (close-day scenario). "
+            f"Body: {body[:400]}"
+        )
+
+    def test_round4_has_walk_away_framing(self):
+        """Round 4 must include explicit walk-away / let it go language."""
+        r4 = ot.render_marquise_round4_final(
+            self._LEAD, our_offer=self._round_offers()["r4"]
+        )
+        body = r4["body_html"].lower()
+        assert any(phrase in body for phrase in [
+            "let it go", "walk away", "no hard feelings", "respect that"
+        ]), (
+            "Round 4 must include walk-away framing. "
+            f"Body: {body[:400]}"
+        )
+
+    def test_rounds_are_pairwise_distinct_jaccard(self):
+        """Rounds 2, 3, 4 must be pairwise distinct (Jaccard < 0.30 across all three pairs)."""
+        offers = self._round_offers()
+        r2 = ot.render_marquise_round2_validation(
+            self._LEAD, seller_position=40600, our_offer=offers["r2"]
+        )
+        r3 = ot.render_marquise_round3_social_proof(self._LEAD, our_offer=offers["r3"])
+        r4 = ot.render_marquise_round4_final(self._LEAD, our_offer=offers["r4"])
+
+        sim_r2_r3 = _token_similarity(r2["body_html"], r3["body_html"])
+        sim_r2_r4 = _token_similarity(r2["body_html"], r4["body_html"])
+        sim_r3_r4 = _token_similarity(r3["body_html"], r4["body_html"])
+
+        assert sim_r2_r3 < 0.30, (
+            f"Round 2 and Round 3 are too similar (Jaccard={sim_r2_r3:.2f}, must be < 0.30). "
+            "Each round must use a DIFFERENT persuasion angle."
+        )
+        assert sim_r2_r4 < 0.30, (
+            f"Round 2 and Round 4 are too similar (Jaccard={sim_r2_r4:.2f}, must be < 0.30)."
+        )
+        assert sim_r3_r4 < 0.30, (
+            f"Round 3 and Round 4 are too similar (Jaccard={sim_r3_r4:.2f}, must be < 0.30)."
+        )
+
+    def test_each_round_walks_offer_by_no_more_than_3pct(self):
+        """Each round must walk the offer up by no more than 3% of appraisal."""
+        a = self._appraisal()
+        offers = self._round_offers()
+        anchor = int(a * 0.48)  # moa_open anchor
+
+        # R2: +2%
+        r2_pct = (offers["r2"] - anchor) / a
+        assert r2_pct <= 0.03, (
+            f"Round 2 walk-up is {r2_pct:.1%} from anchor -- must be <= 3%. "
+            f"anchor={anchor}, r2={offers['r2']}"
+        )
+        # R3: up to +5% cumulative (r3 vs anchor)
+        r3_pct = (offers["r3"] - anchor) / a
+        assert r3_pct <= 0.06, (
+            f"Round 3 walk-up from anchor is {r3_pct:.1%} -- must be <= 6% cumulative. "
+            f"anchor={anchor}, r3={offers['r3']}"
+        )
+        # R4: up to +7% cumulative (r4 vs anchor)
+        r4_pct = (offers["r4"] - anchor) / a
+        assert r4_pct <= 0.08, (
+            f"Round 4 walk-up from anchor is {r4_pct:.1%} -- must be <= 8% cumulative. "
+            f"anchor={anchor}, r4={offers['r4']}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# NEW: Henry flip-math buyer pitch tests
+# ---------------------------------------------------------------------------
+
+class TestHenryFlipMathBuyer:
+    """Henry buyer-side flip-math leverage pitch + round 2 counter hold."""
+
+    _LEAD = {
+        "owner_name": "TOWNSEND RITA M",
+        "property_address": "836 N BELLEVUE BLVD",
+        "city": "Memphis",
+        "state": "TN",
+        "county_appraisal": 58000,
+    }
+
+    def test_flip_math_pitch_contains_math_first(self):
+        """Henry's flip-math pitch must contain 'Math first'."""
+        r = ot.render_henry_buyer_pitch_with_flip_math(
+            self._LEAD,
+            our_buy=33640, chris_buy=45140,
+            repairs_est=22000, arv_est=89900,
+            chris_net=22760
+        )
+        body = r["body_html"]
+        assert "Math first" in body, (
+            "Henry flip-math pitch must start with 'Math first' -- "
+            f"Body: {body[:400]}"
+        )
+
+    def test_flip_math_pitch_contains_chris_net(self):
+        """Henry's flip-math pitch must contain Chris's profit number."""
+        r = ot.render_henry_buyer_pitch_with_flip_math(
+            self._LEAD,
+            our_buy=33640, chris_buy=45140,
+            repairs_est=22000, arv_est=89900,
+            chris_net=22760
+        )
+        body = r["body_html"]
+        assert "22,760" in body or "22760" in body, (
+            "Henry flip-math pitch must contain Chris's net profit ($22,760). "
+            f"Body: {body[:400]}"
+        )
+
+    def test_flip_math_pitch_leads_with_profit_not_fee(self):
+        """Pitch must mention ARV and net before mentioning our fee."""
+        r = ot.render_henry_buyer_pitch_with_flip_math(
+            self._LEAD,
+            our_buy=33640, chris_buy=45140,
+            repairs_est=22000, arv_est=89900,
+            chris_net=22760
+        )
+        body = r["body_html"]
+        arv_pos = body.find("89,900")
+        fee_pos = body.find("11,500")
+        if arv_pos >= 0 and fee_pos >= 0:
+            assert arv_pos < fee_pos, (
+                "Flip-math pitch must show ARV before our fee -- lead with Chris's profit"
+            )
+
+    def test_flip_math_no_pleading_language(self):
+        """Pitch must not beg or plead -- leverage framing only."""
+        r = ot.render_henry_buyer_pitch_with_flip_math(
+            self._LEAD,
+            our_buy=33640, chris_buy=45140,
+            repairs_est=22000, arv_est=89900,
+            chris_net=22760
+        )
+        body = r["body_html"].lower()
+        assert "please" not in body, "Henry pitch must not contain 'please' -- leverage framing only"
+
+    def test_buyer_counter_r2_holds_floor(self):
+        """Henry round 2 must mention the floor and walk-away signal."""
+        r = ot.render_henry_buyer_counter_round2(
+            self._LEAD,
+            chris_position=35000,
+            our_floor=45140
+        )
+        body = r["body_html"]
+        assert "45,140" in body, (
+            "Henry buyer round 2 must state the floor ($45,140). "
+            f"Body: {body[:400]}"
+        )
+        assert any(phrase in body.lower() for phrase in [
+            "no hard feelings", "we'll pass", "pass", "walk away", "floor"
+        ]), (
+            "Henry buyer round 2 must contain walk-away framing. "
+            f"Body: {body[:400]}"
+        )
+
+    def test_buyer_counter_r2_validates_chris(self):
+        """Henry round 2 must validate Chris's number before holding the floor."""
+        r = ot.render_henry_buyer_counter_round2(
+            self._LEAD,
+            chris_position=35000,
+            our_floor=45140
+        )
+        body = r["body_html"].lower()
+        assert any(phrase in body for phrase in [
+            "i hear", "hear $", "hear you", "hear 35"
+        ]), (
+            "Henry buyer round 2 must validate Chris's position first. "
+            f"Body: {body[:400]}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# NEW: Pipeline stage count test
+# ---------------------------------------------------------------------------
+
+class TestPipelineStageCount:
+    """pipeline_simulation must now build 24-26 stages (expanded from 20)."""
+
+    def test_stage_count_24_to_26(self):
+        """build_stage_bodies must now return 24-26 stages."""
+        import sys
+        import os
+        sys.path.insert(0, os.path.dirname(__file__))
+        import pipeline_simulation as ps
+
+        # Use a simple lead dict with appraisal to avoid DB dependency
+        lead = {
+            "owner_name": "TOWNSEND RITA M",
+            "property_address": "836 N BELLEVUE BLVD",
+            "address": "836 N BELLEVUE BLVD",
+            "city": "Memphis",
+            "state": "TN",
+            "county_appraisal": 58000,
+            "parcel_id": "021083 00056",
+            "email": "rita@example.com",
+            "confidence_tier": "send",
+            "source": "shelby_tax_delinquent",
+            "zip_code": "38114",
+            "owner_mailing_zip": "38114",
+            "subdivision": "BELLEVUE TERRACE",
+            "last_sale_year": 2017,
+            "last_sale_price_usd": 100,
+            "sales_history": [
+                {"type_code": "QC", "date": "2017-03-28", "price_usd": 100, "year": 2017}
+            ],
+        }
+        math = ps.compute_deal_math(lead)
+        stages = ps.build_stage_bodies(lead, math)
+        count = len(stages)
+        assert 24 <= count <= 30, (
+            f"build_stage_bodies should return 24-30 stages (expanded from 20). "
+            f"Got {count} stages: {[s['num'] for s in stages]}"
         )

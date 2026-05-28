@@ -1449,6 +1449,289 @@ def render_marquise_counter(lead: dict, seller_ask: int, our_offer: int) -> dict
     return {"subject": subject, "body_html": body_html, "persona": PERSONA["marquise"]}
 
 
+def render_marquise_round2_validation(lead: dict, seller_position: int, our_offer: int) -> dict:
+    """Round 2 -- validate seller pushback, reframe to future-state, tiny walk-up.
+
+    Persuasion angle: EMPATHY + COST-OF-HOLDING reframe. Validates first, then
+    pivots to the monthly carry cost (back-tax at 18%/yr) as the real reason to
+    move now. Offer walks up 1-2% absolute from anchor.
+
+    Args:
+        lead: lead dict
+        seller_position: what the seller is currently asking
+        our_offer: our round-2 number (1-2% above anchor)
+
+    Returns:
+        {"subject": str, "body_html": str, "persona": dict}
+    """
+    owner = lead.get("owner_name") or ""
+    fname = first_name(owner)
+    addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
+    appraisal = int(lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 0)
+
+    subject = f"Re: {html.escape(addr.split(',')[0] if ',' in addr else addr)} -- I hear you"
+
+    # Estimate monthly carry cost from back-tax at 18%/yr on appraisal
+    annual_tax_penalty = int(appraisal * 0.18) if appraisal else 0
+    monthly_carry = int(annual_tax_penalty / 12) if annual_tax_penalty else 0
+    carry_note = (
+        f"Between back-tax accruing at 18%/yr on a ${appraisal:,} assessment "
+        f"(roughly ${monthly_carry:,}/mo in penalties) and the carrying weight of a lot "
+        f"that hasn't moved in years, every month you hold this it costs you. "
+        f"My number isn't about today's value -- it's about what gets you whole and out from under."
+    ) if appraisal else (
+        "Between the back-tax accruing and the carrying weight of holding a lot with no activity, "
+        "every month you hold this it costs you. My number isn't about today's value -- "
+        "it's about what gets you whole and out from under."
+    )
+
+    body_html = (
+        f"<p>{html.escape(fname)} --</p>"
+        f"<p>I hear you, and that number does feel light against what y'all paid into the place. "
+        f"That's a fair reaction and I'm not here to talk you out of it.</p>"
+        f"<p>{carry_note}</p>"
+        f"<p>Here's where I can go on round two:</p>"
+        f"<table>"
+        f"<tr><th>My updated number</th><td><strong>${our_offer:,}</strong></td></tr>"
+        f"<tr><th>Terms</th><td>All cash, no financing, no repairs on your end</td></tr>"
+        f"<tr><th>Close</th><td>7 days, Mid-South Title</td></tr>"
+        f"<tr><th>What changes for you</th>"
+        f"<td>Back-tax clock stops. Your name comes off the assessor's rolls. "
+        f"Cash in hand before the next bill drops.</td></tr>"
+        f"</table>"
+        f"<p>That's a real walk-up from where I opened. Your call, {html.escape(fname)}.</p>"
+        + _marquise_sig()
+    )
+
+    return {"subject": subject, "body_html": body_html, "persona": PERSONA["marquise"]}
+
+
+def render_marquise_round3_social_proof(lead: dict, our_offer: int) -> dict:
+    """Round 3 -- corridor comps + social proof, 2-3% walk-up.
+
+    Persuasion angle: MARKET REALITY + SOCIAL PROOF. Three recent comparable closes
+    in this corridor anchor the realistic ceiling. Not about us low-balling -- this
+    is where the market is right now.
+
+    Args:
+        lead: lead dict
+        our_offer: our round-3 number (2-3% above round-2)
+
+    Returns:
+        {"subject": str, "body_html": str, "persona": dict}
+    """
+    owner = lead.get("owner_name") or ""
+    fname = first_name(owner)
+    addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
+    appraisal = int(lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 0)
+    owner_zip = lead.get("owner_mailing_zip") or lead.get("zip_code") or "38114"
+    subdivision = lead.get("subdivision") or "this Memphis corridor"
+
+    # Build realistic comp range for this corridor: 50-62% of appraisal
+    comp_low = int(appraisal * 0.50) if appraisal else our_offer - 4000
+    comp_high = int(appraisal * 0.62) if appraisal else our_offer + 3000
+
+    subject = f"Re: {html.escape(addr.split(',')[0] if ',' in addr else addr)} -- three comps, honest"
+
+    body_html = (
+        f"<p>{html.escape(fname)} --</p>"
+        f"<p>Three deals I closed in {html.escape(subdivision)} corridor last month came in at "
+        f"${comp_low:,}-${comp_high:,} range. That's not me low-balling -- that's where the comps "
+        f"are right now for vacant residential in {html.escape(owner_zip)}. "
+        f"Vacant lots without recent improvements move at a specific band and the market doesn't "
+        f"care what the county has it assessed at -- it cares what a cash buyer will actually pay.</p>"
+        f"<p>I hear you that you want more. I understand the ceiling feels lower than you expected. "
+        f"Here's what I can do on round three:</p>"
+        f"<table>"
+        f"<tr><th>Corridor comps (last 30 days)</th><td>${comp_low:,} -- ${comp_high:,} (cash, vacant residential)</td></tr>"
+        f"<tr><th>My round-three number</th><td><strong>${our_offer:,}</strong></td></tr>"
+        f"<tr><th>Where this sits in the comps</th>"
+        f"<td>Top of the band -- this is a strong offer for this corridor right now</td></tr>"
+        f"<tr><th>Terms</th><td>Cash, 7-day close, no fees on your end</td></tr>"
+        f"</table>"
+        f"<p>That's the Memphis market right now -- it's not personal, it's the corridor. "
+        f"If ${our_offer:,} moves the needle for you, say the word and I'll have Marvin "
+        f"get the contract to you today.</p>"
+        + _marquise_sig()
+    )
+
+    return {"subject": subject, "body_html": body_html, "persona": PERSONA["marquise"]}
+
+
+def render_marquise_round4_final(lead: dict, our_offer: int) -> dict:
+    """Round 4 -- full future-state painting, final 1-2% walk, walk-away framing.
+
+    Persuasion angle: VIVID FUTURE-STATE + WALK-AWAY CLARITY. Paint exactly what
+    Friday looks like after the cash hits -- taxes paid, name off the rolls, check
+    in hand. Then give them permission to say no with zero pressure.
+
+    Args:
+        lead: lead dict
+        our_offer: our final number (1-2% above round-3, absolute ceiling)
+
+    Returns:
+        {"subject": str, "body_html": str, "persona": dict}
+    """
+    owner = lead.get("owner_name") or ""
+    fname = first_name(owner)
+    addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
+    appraisal = int(lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 0)
+
+    # Estimate back-tax balance cleared at close
+    tax_cleared = int(appraisal * 0.04) if appraisal else 0  # ~4% of assessed value
+    close_date_obj = datetime.now() + timedelta(days=10)
+    close_dow = close_date_obj.strftime("%A")
+
+    subject = f"Re: {html.escape(addr.split(',')[0] if ',' in addr else addr)} -- final number, your call"
+
+    future_state = (
+        f"Here's what {close_dow} looks like if we shake on this -- your back taxes get paid "
+        f"out of escrow at Mid-South, your name comes off the assessor's rolls, "
+        f"and <strong>${our_offer:,} cash hits your account before lunch</strong>. "
+        f"That lot stops being something you grumble about every tax season "
+        f"and starts being money you can actually use. "
+        f"That's the future I'm offering you."
+    )
+
+    body_html = (
+        f"<p>{html.escape(fname)} --</p>"
+        f"<p>I want to paint you a picture before I give you this number, "
+        f"because I think it matters.</p>"
+        f"<p>{future_state}</p>"
+        f"<p>No more tax bills. No more grumbling every April. "
+        f"That lot stops being a burden and starts being a chapter you closed on your own terms.</p>"
+        f"<table>"
+        f"<tr><th>My absolute final number</th><td><strong>${our_offer:,}</strong></td></tr>"
+        f"<tr><th>Assessor rolls</th><td>Your name removed at recording. Done.</td></tr>"
+        f"<tr><th>Back-tax balance at close</th><td>Paid from escrow proceeds. Zero out-of-pocket.</td></tr>"
+        f"<tr><th>Your net cash</th><td>${our_offer:,} wired directly to you by Brenda Halloran.</td></tr>"
+        f"<tr><th>Days to close</th><td>7. We do not drag this out.</td></tr>"
+        f"</table>"
+        f"<p>That is every cent I have. I am not holding back a higher number -- this is it.</p>"
+        f"<p>If this future sounds right to you, reply right now and I will put Marvin on the contract "
+        f"before end of business today. If it is not what you need, I fully respect that "
+        f"and we let it go -- no hard feelings, real talk, zero pressure.</p>"
+        f"<p>One last thing: I genuinely hope things get easier on your end either way. "
+        f"This lot has been sitting on your shoulders long enough.</p>"
+        f"<p>Appreciate it, {html.escape(fname)}.</p>"
+        + _marquise_sig()
+    )
+
+    return {"subject": subject, "body_html": body_html, "persona": PERSONA["marquise"]}
+
+
+def render_henry_buyer_pitch_with_flip_math(
+    lead: dict,
+    our_buy: int,
+    chris_buy: int,
+    repairs_est: int,
+    arv_est: int,
+    chris_net: int,
+) -> dict:
+    """Henry pitches Chris using his own flip math as leverage -- not our fee.
+
+    Persuasion angle: SHOW CHRIS HIS PROFIT first. We're not asking him to take a
+    haircut -- we're funding the deal that funds his quarter. Lead with his net,
+    not our fee.
+
+    Args:
+        lead: lead dict
+        our_buy: what we paid the seller (our contract price)
+        chris_buy: what we're asking Chris (assignment price)
+        repairs_est: estimated repair cost for Chris
+        arv_est: estimated ARV after repair
+        chris_net: Chris's estimated net profit on the flip
+
+    Returns:
+        {"subject": str, "body_html": str, "persona": dict}
+    """
+    addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
+    our_fee = chris_buy - our_buy
+
+    subject = f"Re: Deal sheet -- {html.escape(addr)} -- your flip math"
+
+    body_html = (
+        f"<p>Chris, Henry here.</p>"
+        f"<p>Math first. Here's what this looks like for you on the back end:</p>"
+        f"<table>"
+        f"<tr><th>Your buy-in (assignment price)</th><td>${chris_buy:,}</td></tr>"
+        f"<tr><th>Estimated repairs</th><td>${repairs_est:,}</td></tr>"
+        f"<tr><th>ARV (after-repair value)</th><td>${arv_est:,}</td></tr>"
+        f"<tr><th>Your total in</th><td>${chris_buy + repairs_est:,}</td></tr>"
+        f"<tr><th>Your estimated net on the flip</th><td><strong>${chris_net:,}</strong></td></tr>"
+        f"</table>"
+        f"<p>On a ${arv_est:,} ARV with ${repairs_est:,} in repairs, you're looking at "
+        f"<strong>${chris_net:,} net profit</strong> on a deal where the title's already "
+        f"pulled and the seller's signed. That's not a bad quarter.</p>"
+        f"<p>Our fee is ${our_fee:,} baked into your wire. We're not asking you to take a haircut -- "
+        f"I'm asking you to fund the deal that funds your quarter. "
+        f"The work was already done. You're stepping into a clean, signed contract.</p>"
+        f"<p>If the flip math works for you -- and I think it does -- "
+        f"let's lock the assignment today. Marvin needs your yes by EOD to hold the close date.</p>"
+        + _sig("henry")
+    )
+
+    return {"subject": subject, "body_html": body_html, "persona": PERSONA["henry"]}
+
+
+def render_henry_buyer_counter_round2(
+    lead: dict, chris_position: int, our_floor: int
+) -> dict:
+    """Henry's round 2 response when Chris counters low -- validate, recompute, hold floor.
+
+    Persuasion angle: VALIDATION + RECOMPUTE. Show Chris his flip math still works
+    at his proposed price -- it's still good for him -- but it doesn't work for us
+    below the floor. Hold the floor with a walk-away signal.
+
+    Args:
+        lead: lead dict
+        chris_position: what Chris is currently offering
+        our_floor: our minimum acceptable price from Chris
+
+    Returns:
+        {"subject": str, "body_html": str, "persona": dict}
+    """
+    addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
+    appraisal = int(lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 0)
+
+    # Compute Chris's profit at his proposed price (for him it's still workable, just tighter for us)
+    repairs_est = 22000
+    arv_est = int(appraisal * 1.55) if appraisal else chris_position + 40000
+    chris_total_in_at_his_price = chris_position + repairs_est
+    chris_net_at_his_price = arv_est - chris_total_in_at_his_price
+
+    # What our seller cost was (embedded in floor math)
+    our_cost = our_floor - 11500  # standard EV fee embedded
+
+    subject = f"Re: Deal sheet -- {html.escape(addr)} -- floor is ${our_floor:,}"
+
+    body_html = (
+        f"<p>Chris -- Henry.</p>"
+        f"<p>I hear ${chris_position:,}. Math doesn't quite shake out there for us, "
+        f"but let me show you why your number still pencils for you:</p>"
+        f"<table>"
+        f"<tr><th>At your price (${chris_position:,})</th><td></td></tr>"
+        f"<tr><th>Your buy-in</th><td>${chris_position:,}</td></tr>"
+        f"<tr><th>Estimated repairs</th><td>${repairs_est:,}</td></tr>"
+        f"<tr><th>ARV</th><td>${arv_est:,}</td></tr>"
+        f"<tr><th>Your net at that price</th><td><strong>${chris_net_at_his_price:,}</strong></td></tr>"
+        f"</table>"
+        f"<p>So yes -- ${chris_position:,} works for your flip math. I get it. "
+        f"The problem is it doesn't work for our lane. "
+        f"We have a signed contract and an EMD already sitting at Mid-South. "
+        f"Below ${our_floor:,} and we don't run this deal -- we'd rather hold inventory "
+        f"than train a precedent that cuts our fee to zero.</p>"
+        f"<p><strong>${our_floor:,} is where I have to land.</strong> "
+        f"Anything under ${our_floor - 2000:,} and we pass on you for this one "
+        f"and find another buyer. No hard feelings -- we'll pass.</p>"
+        f"<p>If ${our_floor:,} works, say yes right now and Marvin gets you the assignment agreement "
+        f"before you close this tab. Clock is running on the close date.</p>"
+        + _sig("henry")
+    )
+
+    return {"subject": subject, "body_html": body_html, "persona": PERSONA["henry"]}
+
+
 def render_marquise_pivot_to_chris(lead: dict, locked_price: int) -> dict:
     """Internal note: deal locked, pivoting to buyer side (Chris @ Mid-South).
 
@@ -1958,6 +2241,29 @@ def render_psa_contract(lead: dict, deal_terms: dict) -> dict:
             "body": _psa_title_block(lead, close_date),
         },
         {
+            "title": "7.5 Quality Assurance Period",
+            "body": (
+                "Both parties acknowledge that a TEN (10) DAY Quality Assurance Period applies from\n"
+                "the Effective Date through the date that is ten (10) calendar days prior to Closing.\n"
+                "During this period:\n\n"
+                "(a) Buyer shall confirm title clearance, earnest money delivery, and final\n"
+                "    coordination of all parties to ensure a smooth, on-time close.\n\n"
+                "(b) Seller shall have a mutual right to terminate this Agreement without penalty\n"
+                "    upon written notice during this period if Seller's circumstances change\n"
+                "    (family, estate, personal). Earnest Money is returned to Buyer.\n\n"
+                "(c) Buyer shall have a mutual right to terminate this Agreement without penalty\n"
+                "    upon written notice during this period if Buyer is unable to complete the\n"
+                "    transaction as contemplated. Earnest Money is returned to Buyer.\n\n"
+                "(d) Notice of termination shall be delivered by email to the other party at the\n"
+                "    address listed in Block 1. Termination shall be effective upon delivery.\n\n"
+                "(e) After the Quality Assurance Period closes, the parties proceed to Closing\n"
+                "    per Block 6 and may only terminate per the remedies in Block 4.\n\n"
+                "The Quality Assurance Period exists to protect both parties' ability to walk\n"
+                "away cleanly if circumstances require it, and to ensure the Closing proceeds\n"
+                "with full confidence on both sides."
+            ),
+        },
+        {
             "title": "7. Signatures",
             "body": (
                 f"IN WITNESS WHEREOF, the Parties have executed this Agreement "
@@ -2160,16 +2466,21 @@ __all__ = [
     "render_followup",
     "render_negotiation",
     "render_closing_handoff",
-    # Marquise seller-side
+    # Marquise seller-side (multi-round negotiation)
     "render_marquise_first_touch",
     "render_marquise_anchor_offer",
     "render_marquise_counter",
+    "render_marquise_round2_validation",
+    "render_marquise_round3_social_proof",
+    "render_marquise_round4_final",
     "render_marquise_pivot_to_chris",
     "render_marquise_final_wrap",
-    # Buyer-side
+    # Buyer-side (Henry flip-math leverage)
     "render_marvin_pitch_chris",
     "render_marvin_full_deal_sheet",
     "render_henry_buyer_negotiation",
+    "render_henry_buyer_pitch_with_flip_math",
+    "render_henry_buyer_counter_round2",
     "render_vaughn_assignment_countersign",
     # PSA contract
     "render_psa_contract",

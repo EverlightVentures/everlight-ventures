@@ -71,11 +71,16 @@ from outreach_templates import (
     render_marquise_first_touch,
     render_marquise_anchor_offer,
     render_marquise_counter,
+    render_marquise_round2_validation,
+    render_marquise_round3_social_proof,
+    render_marquise_round4_final,
     render_marquise_pivot_to_chris,
     render_marquise_final_wrap,
     render_marvin_pitch_chris,
     render_marvin_full_deal_sheet,
     render_henry_buyer_negotiation,
+    render_henry_buyer_pitch_with_flip_math,
+    render_henry_buyer_counter_round2,
     render_vaughn_assignment_countersign,
     render_psa_contract,
     first_name as extract_first_name,
@@ -191,28 +196,52 @@ def compute_deal_math(lead: dict) -> dict:
     # Buyer pays seller_close + $11,500 EV fee (TN norm $10k-$15k, national avg $13k).
     moa_anchor   = int(appraisal * 0.48)  # internal floor (rarely seen by seller)
     moa_open     = int(appraisal * 0.48)  # Marquise anchor -- conservative open
-    moa_counter  = int(appraisal * 0.54)  # mid-target after seller pushback
-    moa_close    = int(appraisal * 0.58)  # seller close -- final
+    # Multi-round seller negotiation walk-ups (discipline: each round <= 3% absolute)
+    moa_round2   = int(appraisal * 0.50)  # Round 2 validation: +2% -- just enough to signal good faith
+    moa_round3   = int(appraisal * 0.53)  # Round 3 social proof: +3% -- corridor comps anchor
+    moa_round4   = int(appraisal * 0.55)  # Round 4 final: +2% -- absolute ceiling
+    moa_counter  = int(appraisal * 0.54)  # mid-target after seller pushback (legacy field)
+    moa_close    = int(appraisal * 0.58)  # seller close -- final accepted price
     seller_ask   = int(appraisal * 0.70)  # seller's counter-ask (high but realistic)
+    # Intermediate seller positions for multi-round sim
+    seller_round2_pos = int(appraisal * 0.67)  # seller still pushes after R2
+    seller_round3_pos = int(appraisal * 0.62)  # seller softens after R3
+    seller_round4_pos = moa_close              # seller accepts after R4 final
     buyer_ask    = moa_close + 13000      # we ask Chris a bit higher for negotiation room
     buyer_close  = moa_close + 11500      # actual EV fee at TN norm
     ev_fee       = buyer_close - moa_close
+    # Flip math for Henry's buyer pitch (default ARV = 1.55x appraisal, repairs = $22k)
+    repairs_est  = 22000
+    arv_est      = int(appraisal * 1.55)
+    chris_net    = arv_est - (buyer_close + repairs_est)
+    # Chris counters at $42k equivalent (low ball) for buyer-side round 2 sim
+    chris_counter_low = moa_close + 2000  # low-ball from Chris
 
     close_date = datetime.now() + timedelta(days=10)
     return {
-        "appraisal":         appraisal,
-        "moa_anchor":        moa_anchor,
-        "moa_open":          moa_open,
-        "moa_counter":       moa_counter,
-        "moa_close":         moa_close,
-        "seller_ask":        seller_ask,
-        "buyer_ask":         buyer_ask,
-        "buyer_close":       buyer_close,
-        "ev_fee":            ev_fee,
-        "close_date":        close_date.strftime("%B %d, %Y"),
-        "close_date_short":  close_date.strftime("%b %d"),
-        "close_dow":         close_date.strftime("%A"),
-        "close_iso":         (close_date + timedelta(days=10)).strftime("%Y-%m-%d"),
+        "appraisal":           appraisal,
+        "moa_anchor":          moa_anchor,
+        "moa_open":            moa_open,
+        "moa_round2":          moa_round2,
+        "moa_round3":          moa_round3,
+        "moa_round4":          moa_round4,
+        "moa_counter":         moa_counter,
+        "moa_close":           moa_close,
+        "seller_ask":          seller_ask,
+        "seller_round2_pos":   seller_round2_pos,
+        "seller_round3_pos":   seller_round3_pos,
+        "seller_round4_pos":   seller_round4_pos,
+        "buyer_ask":           buyer_ask,
+        "buyer_close":         buyer_close,
+        "ev_fee":              ev_fee,
+        "repairs_est":         repairs_est,
+        "arv_est":             arv_est,
+        "chris_net":           chris_net,
+        "chris_counter_low":   chris_counter_low,
+        "close_date":          close_date.strftime("%B %d, %Y"),
+        "close_date_short":    close_date.strftime("%b %d"),
+        "close_dow":           close_date.strftime("%A"),
+        "close_iso":           (close_date + timedelta(days=10)).strftime("%Y-%m-%d"),
     }
 
 
@@ -395,8 +424,8 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
         "is_template": True, "is_internal": False, "is_sim": False,
     })
 
-    # ---- Stage 05: Sim seller pushback (anchors high, "uncle's hopes") ----
-    sim05 = (
+    # ---- Stage 05a: Sim seller pushback (anchors high, "uncle's hopes") ----
+    sim05a = (
         f"<div class='sim-card'>"
         f"<div class='sim-label'>Simulated Incoming Reply</div>"
         f"<div class='sim-from'>From: <strong>{html_escape.escape(fname)}</strong> &lt;seller@example.com&gt;</div>"
@@ -409,46 +438,113 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
         f"</div>"
     )
     stages.append({
-        "num": "05", "key": "seller_pushback", "persona": "seller",
-        "label": "Sim Seller Pushback",
+        "num": "05a", "key": "seller_pushback_05a", "persona": "seller",
+        "label": "Sim Seller Pushback (Round 1)",
         "note": f"Seller anchors at {fmt(m['seller_ask'])} (95%), cites county appraisal + uncle's hopes.",
-        "html": sim05, "subject": f"Re: {r04['subject']}",
+        "html": sim05a, "subject": f"Re: {r04['subject']}",
         "is_template": False, "is_internal": False, "is_sim": True,
     })
 
-    # ---- Stage 06: Marquise counter (cites prior sale price factually, walks up) ----
-    r06 = render_marquise_counter(lead_w_history, seller_ask=m["seller_ask"], our_offer=m["moa_close"])
+    # ---- Stage 05b: Marquise Round 2 -- validation + future-state reframe ----
+    r05b = render_marquise_round2_validation(
+        lead_w_history, seller_position=m["seller_ask"], our_offer=m["moa_round2"]
+    )
     stages.append({
-        "num": "06", "key": "marquise_counter", "persona": "marquise",
-        "label": "Marquise Counter",
-        "note": f"Factual correction on uncle's price from deed records; walks up to {fmt(m['moa_close'])}",
-        "html": r06["body_html"], "subject": r06["subject"],
+        "num": "05b", "key": "marquise_round2", "persona": "marquise",
+        "label": "Marquise Round 2 -- Validation + Future-State Reframe",
+        "note": (f"Validates seller's pushback first, reframes to carry-cost reality, "
+                 f"walk-up to {fmt(m['moa_round2'])} (+2%)"),
+        "html": r05b["body_html"], "subject": r05b["subject"],
         "is_template": True, "is_internal": False, "is_sim": False,
     })
 
-    # ---- Stage 07: Sim seller accepts ----
-    sim07 = (
+    # ---- Stage 05c: Sim seller still pushes ----
+    sim05c = (
         f"<div class='sim-card'>"
         f"<div class='sim-label'>Simulated Incoming Reply</div>"
         f"<div class='sim-from'>From: <strong>{html_escape.escape(fname)}</strong> &lt;seller@example.com&gt;</div>"
         f"<div class='sim-body'>"
-        f"<p>Alright Marquise. {fmt(m['moa_close'])} works. Send the contract.</p>"
-        f"<p>Appreciate you being straight about the deed record. "
+        f"<p>Marquise I appreciate that but still feels short. "
+        f"My wife is saying we should hold out for at least {fmt(m['seller_round2_pos'])}. "
+        f"Is that even possible?</p>"
+        f"</div>"
+        f"</div>"
+    )
+    stages.append({
+        "num": "05c", "key": "seller_still_pushes_05c", "persona": "seller",
+        "label": "Sim Seller Still Pushes (Round 2 reply)",
+        "note": f"Seller softens slightly but wife holds at {fmt(m['seller_round2_pos'])}. Tests persistence.",
+        "html": sim05c, "subject": f"Re: {r05b['subject']}",
+        "is_template": False, "is_internal": False, "is_sim": True,
+    })
+
+    # ---- Stage 05d: Marquise Round 3 -- social proof + corridor comps ----
+    r05d = render_marquise_round3_social_proof(lead_w_history, our_offer=m["moa_round3"])
+    stages.append({
+        "num": "05d", "key": "marquise_round3", "persona": "marquise",
+        "label": "Marquise Round 3 -- Social Proof + Corridor Comps",
+        "note": (f"Three comparable closes in corridor; market reality anchor; "
+                 f"walk-up to {fmt(m['moa_round3'])} (+3%)"),
+        "html": r05d["body_html"], "subject": r05d["subject"],
+        "is_template": True, "is_internal": False, "is_sim": False,
+    })
+
+    # ---- Stage 05e: Sim seller softens but holds at one number ----
+    sim05e = (
+        f"<div class='sim-card'>"
+        f"<div class='sim-label'>Simulated Incoming Reply</div>"
+        f"<div class='sim-from'>From: <strong>{html_escape.escape(fname)}</strong> &lt;seller@example.com&gt;</div>"
+        f"<div class='sim-body'>"
+        f"<p>Ok I can see the comps. My wife and I talked it over. "
+        f"We could do {fmt(m['seller_round3_pos'])} -- that's our number. "
+        f"If you can get there we have a deal.</p>"
+        f"</div>"
+        f"</div>"
+    )
+    stages.append({
+        "num": "05e", "key": "seller_softens_05e", "persona": "seller",
+        "label": "Sim Seller Softens -- Holds at One Number",
+        "note": f"Seller responds to comps, softens to {fmt(m['seller_round3_pos'])}. One number on the table.",
+        "html": sim05e, "subject": f"Re: {r05d['subject']}",
+        "is_template": False, "is_internal": False, "is_sim": True,
+    })
+
+    # ---- Stage 05f: Marquise Round 4 -- final pitch, future-state painting, walk-away ----
+    r05f = render_marquise_round4_final(lead_w_history, our_offer=m["moa_round4"])
+    stages.append({
+        "num": "05f", "key": "marquise_round4", "persona": "marquise",
+        "label": "Marquise Round 4 -- Final Pitch, Future-State, Walk-Away",
+        "note": (f"Full future-state painting (Friday close, back taxes paid, cash hits account), "
+                 f"final number {fmt(m['moa_round4'])}, explicit walk-away framing"),
+        "html": r05f["body_html"], "subject": r05f["subject"],
+        "is_template": True, "is_internal": False, "is_sim": False,
+    })
+
+    # ---- Stage 06: Sim seller accepts (after Round 4 final) ----
+    sim06 = (
+        f"<div class='sim-card'>"
+        f"<div class='sim-label'>Simulated Incoming Reply</div>"
+        f"<div class='sim-from'>From: <strong>{html_escape.escape(fname)}</strong> &lt;seller@example.com&gt;</div>"
+        f"<div class='sim-body'>"
+        f"<p>Alright Marquise. {fmt(m['moa_round4'])} works. Send the contract.</p>"
+        f"<p>Appreciate you being straight about the deed record and the comps. "
         f"My wife is gonna be relieved we got that off our hands. When can we close?</p>"
         f"</div>"
         f"</div>"
     )
     stages.append({
-        "num": "07", "key": "seller_accept", "persona": "seller",
-        "label": "Sim Seller Accepts",
-        "note": f"Seller accepts at {fmt(m['moa_close'])}. Personal moment (wife relieved). Deal locked.",
-        "html": sim07, "subject": f"Re: {r06['subject']}",
+        "num": "06", "key": "seller_accept", "persona": "seller",
+        "label": "Sim Seller Accepts (Round 4 close)",
+        "note": f"Seller accepts at {fmt(m['moa_round4'])} after 4-round negotiation. Deal locked.",
+        "html": sim06, "subject": f"Re: {r05f['subject']}",
         "is_template": False, "is_internal": False, "is_sim": True,
     })
 
-    # ---- Stage 08: Marvin contract (numbered, TN SB 909 baked in, EMD to Mid-South Title) ----
+    # ---- Stage 07: Marvin contract (numbered, TN SB 909 baked in, EMD to Mid-South Title) ----
+    # Use moa_round4 as the final accepted seller price
+    seller_final_price = m["moa_round4"]
     psa = render_psa_contract(lead_w_history, {
-        "purchase_price": m["moa_close"],
+        "purchase_price": seller_final_price,
         "emd_amount": 500,
         "close_date": m["close_date"],
         "assignment_fee": m["ev_fee"],
@@ -457,7 +553,7 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
     })
     marvin_contract_html = (
         f"<p>{html_escape.escape(fname)} -- Marvin Cohen here, I run closings for Everlight Ventures. "
-        f"Marquise tagged me in. We're closing at {fmt(m['moa_close'])}, all cash, "
+        f"Marquise tagged me in. We're closing at {fmt(seller_final_price)}, all cash, "
         f"target close <strong>{m['close_dow']} {m['close_date']}</strong> at Mid-South Title.</p>"
         f"<p>Two things to flag before you sign, three things to expect after:</p>"
         f"<p><strong>Before you sign:</strong></p>"
@@ -475,7 +571,7 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
         f"If anything weird shows up (old lien, unreleased mortgage, heirship issue), we let you know same day.</li>"
         f"<li>Settlement statement to your email at least 48 hours before close. "
         f"You see every line item before signing day.</li>"
-        f"<li>Wire instructions for {fmt(m['moa_close'])} come from Brenda Halloran directly -- "
+        f"<li>Wire instructions for {fmt(seller_final_price)} come from Brenda Halloran directly -- "
         f"she calls you to verbally verify before you wire. Wire fraud is real and we won't let it touch this close.</li>"
         f"</ol>"
         f"<p>Contract attached (see PSA block below). Ping me at "
@@ -484,16 +580,16 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
         + psa["psa_html"]
     )
     stages.append({
-        "num": "08", "key": "marvin_contract", "persona": "marvin",
-        "label": "Marvin Contract + TN SB 909 PSA",
-        "note": "Numbered, TN SB 909 baked in, $500 EMD to Mid-South Title, wire-fraud discipline",
+        "num": "07", "key": "marvin_contract", "persona": "marvin",
+        "label": "Marvin Contract + TN SB 909 PSA (with QA Period Block 7.5)",
+        "note": "Numbered, TN SB 909 baked in, Block 7.5 QA Period, $500 EMD to Mid-South Title",
         "html": marvin_contract_html, "subject": psa["subject"],
         "is_template": True, "is_internal": False, "is_sim": False,
         "psa_blocks": psa["blocks"],
     })
 
-    # ---- Stage 09: Sim seller signs ----
-    sim09 = (
+    # ---- Stage 08: Sim seller signs ----
+    sim08 = (
         f"<div class='sim-card'>"
         f"<div class='sim-label'>Simulated Incoming Reply</div>"
         f"<div class='sim-from'>From: <strong>{html_escape.escape(fname)}</strong> &lt;seller@example.com&gt;</div>"
@@ -505,37 +601,37 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
         f"</div>"
     )
     stages.append({
-        "num": "09", "key": "seller_signs", "persona": "seller",
+        "num": "08", "key": "seller_signs", "persona": "seller",
         "label": "Sim Seller Signs Contract",
         "note": "Seller signs. Brenda already contacted them. Equitable interest is ours. Ready to assign to Chris.",
-        "html": sim09, "subject": f"Re: {psa['subject']}",
+        "html": sim08, "subject": f"Re: {psa['subject']}",
         "is_template": False, "is_internal": False, "is_sim": True,
     })
 
-    # ---- Stage 10: Marquise internal pivot to Chris ----
-    r10 = render_marquise_pivot_to_chris(lead_w_history, locked_price=m["moa_close"])
+    # ---- Stage 09: Marquise internal pivot to Chris ----
+    r09 = render_marquise_pivot_to_chris(lead_w_history, locked_price=seller_final_price)
     stages.append({
-        "num": "10", "key": "marquise_pivot", "persona": "marquise",
+        "num": "09", "key": "marquise_pivot", "persona": "marquise",
         "label": "Marquise Internal -- Deal Locked, Pivot to Chris",
         "note": "Seller signed. Equitable interest ours. Pivoting to buyer side. Chris @ Mid-South is the target.",
-        "html": r10["body_html"], "subject": r10["subject"],
+        "html": r09["body_html"], "subject": r09["subject"],
         "is_template": True, "is_internal": True, "is_sim": False,
     })
 
-    # ---- Stage 11: Marvin pitches Chris ----
-    r11 = render_marvin_pitch_chris(
-        lead_w_history, our_price=m["moa_close"], chris_price=m["buyer_ask"]
+    # ---- Stage 10: Marvin pitches Chris ----
+    r10 = render_marvin_pitch_chris(
+        lead_w_history, our_price=seller_final_price, chris_price=m["buyer_ask"]
     )
     stages.append({
-        "num": "11", "key": "marvin_pitch_chris", "persona": "marvin",
+        "num": "10", "key": "marvin_pitch_chris", "persona": "marvin",
         "label": "Marvin Pitches Chris (Mid-South Homebuyers)",
         "note": f"Buyer pitch at {fmt(m['buyer_ask'])} (fee {fmt(m['ev_fee'])}). Yes/no by EOD.",
-        "html": r11["body_html"], "subject": r11["subject"],
+        "html": r10["body_html"], "subject": r10["subject"],
         "is_template": True, "is_internal": False, "is_sim": False,
     })
 
-    # ---- Stage 12: Sim Chris asks for full sheet ----
-    sim12 = (
+    # ---- Stage 11: Sim Chris asks for full sheet ----
+    sim11 = (
         f"<div class='sim-card'>"
         f"<div class='sim-label'>Simulated Incoming Reply</div>"
         f"<div class='sim-from'>From: <strong>Chris Ulander @ Mid-South Homebuyers</strong> "
@@ -547,72 +643,113 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
         f"</div>"
     )
     stages.append({
-        "num": "12", "key": "chris_asks_sheet", "persona": "chris",
+        "num": "11", "key": "chris_asks_sheet", "persona": "chris",
         "label": "Sim Chris Asks for Full Deal Sheet",
         "note": "Chris requests full numbers + assessor source. Telegraphs his usual $2,500 fee anchor.",
-        "html": sim12, "subject": f"Re: {r11['subject']}",
+        "html": sim11, "subject": f"Re: {r10['subject']}",
         "is_template": False, "is_internal": False, "is_sim": True,
     })
 
-    # ---- Stage 13: Marvin sends full deal sheet ----
+    # ---- Stage 12: Marvin sends full deal sheet ----
     full_econ = {
         "parcel_id": parcel_id,
         "subdivision": subdivision,
-        "our_price": m["moa_close"],
-        "moa_close": m["moa_close"],
+        "our_price": seller_final_price,
+        "moa_close": seller_final_price,
         "chris_price": m["buyer_ask"],
         "buyer_ask": m["buyer_ask"],
-        "our_fee": m["buyer_ask"] - m["moa_close"],
+        "our_fee": m["buyer_ask"] - seller_final_price,
         "appraisal": appraisal,
         "close_date": m["close_date_short"],
         "close_dow": m["close_dow"],
     }
-    r13 = render_marvin_full_deal_sheet(lead_w_history, full_econ)
+    r12 = render_marvin_full_deal_sheet(lead_w_history, full_econ)
     stages.append({
-        "num": "13", "key": "marvin_deal_sheet", "persona": "marvin",
+        "num": "12", "key": "marvin_deal_sheet", "persona": "marvin",
         "label": "Marvin Sends Full Deal Sheet",
         "note": "Complete picture: property, title chain, deal economics. Nothing hidden.",
-        "html": r13["body_html"], "subject": r13["subject"],
+        "html": r12["body_html"], "subject": r12["subject"],
         "is_template": True, "is_internal": False, "is_sim": False,
     })
 
-    # ---- Stage 14: Sim Chris counters lower ----
-    sim14 = (
+    # ---- Stage 13a: Henry's flip-math pitch to Chris ----
+    r13a = render_henry_buyer_pitch_with_flip_math(
+        lead_w_history,
+        our_buy=seller_final_price,
+        chris_buy=m["buyer_ask"],
+        repairs_est=m["repairs_est"],
+        arv_est=m["arv_est"],
+        chris_net=m["chris_net"],
+    )
+    stages.append({
+        "num": "13a", "key": "henry_flip_math", "persona": "henry",
+        "label": "Henry Flip-Math Pitch to Chris",
+        "note": (f"Leads with Chris's profit math (${m['chris_net']:,} net on ${m['arv_est']:,} ARV), "
+                 f"NOT EV fee. 'Fund the deal that funds your quarter.'"),
+        "html": r13a["body_html"], "subject": r13a["subject"],
+        "is_template": True, "is_internal": False, "is_sim": False,
+    })
+
+    # ---- Stage 13b: Sim Chris counters at $42k (low-ball) ----
+    chris_low_total = m["chris_counter_low"]
+    sim13b = (
         f"<div class='sim-card'>"
         f"<div class='sim-label'>Simulated Incoming Reply</div>"
         f"<div class='sim-from'>From: <strong>Chris Ulander @ Mid-South Homebuyers</strong> "
         f"&lt;chris@midsouthhomebuyers.com&gt;</div>"
         f"<div class='sim-body'>"
-        f"<p>Marvin {fmt(m['buyer_ask'] - m['moa_close'])} is high for a vacant lot. "
-        f"I usually do $2,500 on these. I can do {fmt(m['moa_close'] + 2500)} all in. "
-        f"Take it or leave it.</p>"
+        f"<p>Marvin / Henry -- I hear you on the flip math but that fee is still too high. "
+        f"I can do {fmt(chris_low_total)} all in. "
+        f"That's my number. I've done a dozen lots in this corridor at that price.</p>"
         f"</div>"
         f"</div>"
     )
     stages.append({
-        "num": "14", "key": "chris_counters", "persona": "chris",
-        "label": "Sim Chris Counters Lower",
-        "note": f"Chris counters at $2,500 fee ({fmt(m['moa_close'] + 2500)} total). Cutting our fee from {fmt(m['ev_fee'])} to $2.5k.",
-        "html": sim14, "subject": f"Re: {r13['subject']}",
+        "num": "13b", "key": "chris_counters_low", "persona": "chris",
+        "label": "Sim Chris Counters Low",
+        "note": f"Chris counters at {fmt(chris_low_total)} -- cutting the fee to almost nothing. Round 2 starts.",
+        "html": sim13b, "subject": f"Re: {r13a['subject']}",
         "is_template": False, "is_internal": False, "is_sim": True,
     })
 
-    # ---- Stage 15: Henry holds the buyer-side floor ----
-    r15 = render_henry_buyer_negotiation(
+    # ---- Stage 13c: Henry Round 2 -- validates, holds floor ----
+    r13c = render_henry_buyer_counter_round2(
         lead_w_history,
+        chris_position=chris_low_total,
         our_floor=m["buyer_close"],
-        chris_offer=m["moa_close"] + 2500,
     )
     stages.append({
-        "num": "15", "key": "henry_buyer_nego", "persona": "henry",
-        "label": "Henry Holds Buyer-Side Floor",
-        "note": f"Math table: value of clean-title + 9-day negotiation vs. solo hunting. Meets at {fmt(m['buyer_close'])}.",
-        "html": r15["body_html"], "subject": r15["subject"],
+        "num": "13c", "key": "henry_buyer_r2", "persona": "henry",
+        "label": "Henry Buyer Round 2 -- Validate, Recompute, Hold Floor",
+        "note": (f"Shows Chris his flip math STILL works at his price, but doesn't work for EV. "
+                 f"Floor is {fmt(m['buyer_close'])}. Walk-away framing."),
+        "html": r13c["body_html"], "subject": r13c["subject"],
         "is_template": True, "is_internal": False, "is_sim": False,
     })
 
-    # ---- Stage 16: Sim Chris accepts revised number ----
-    sim16 = (
+    # ---- Stage 13d: Sim Chris re-counters at $44.5k ----
+    chris_mid_counter = int((chris_low_total + m["buyer_close"]) / 2 / 250) * 250
+    sim13d = (
+        f"<div class='sim-card'>"
+        f"<div class='sim-label'>Simulated Incoming Reply</div>"
+        f"<div class='sim-from'>From: <strong>Chris Ulander @ Mid-South Homebuyers</strong> "
+        f"&lt;chris@midsouthhomebuyers.com&gt;</div>"
+        f"<div class='sim-body'>"
+        f"<p>Fine. I can do {fmt(chris_mid_counter)}. That's splitting the difference. "
+        f"I'm not going higher than that.</p>"
+        f"</div>"
+        f"</div>"
+    )
+    stages.append({
+        "num": "13d", "key": "chris_mid_counter", "persona": "chris",
+        "label": "Sim Chris Re-Counters (Split the Difference)",
+        "note": f"Chris moves to midpoint {fmt(chris_mid_counter)}. Getting closer to our floor.",
+        "html": sim13d, "subject": f"Re: {r13c['subject']}",
+        "is_template": False, "is_internal": False, "is_sim": True,
+    })
+
+    # ---- Stage 14: Sim Chris accepts at buyer_close ----
+    sim14 = (
         f"<div class='sim-card'>"
         f"<div class='sim-label'>Simulated Incoming Reply</div>"
         f"<div class='sim-from'>From: <strong>Chris Ulander @ Mid-South Homebuyers</strong> "
@@ -624,30 +761,30 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
         f"</div>"
     )
     stages.append({
-        "num": "16", "key": "chris_accepts", "persona": "chris",
-        "label": "Sim Chris Accepts Revised Number",
+        "num": "14", "key": "chris_accepts", "persona": "chris",
+        "label": "Sim Chris Accepts at Floor",
         "note": f"Chris accepts at {fmt(m['buyer_close'])}. Buyer side locked. EV fee = {fmt(m['ev_fee'])}.",
-        "html": sim16, "subject": f"Re: {r15['subject']}",
+        "html": sim14, "subject": f"Re: {r13c['subject']}",
         "is_template": False, "is_internal": False, "is_sim": True,
     })
 
-    # ---- Stage 17: Vaughn countersigns the assignment ----
-    r17 = render_vaughn_assignment_countersign(lead_w_history, {
+    # ---- Stage 15: Vaughn countersigns the assignment ----
+    r15 = render_vaughn_assignment_countersign(lead_w_history, {
         "chris_price": m["buyer_close"],
         "our_fee": m["ev_fee"],
         "close_date": m["close_date"],
         "seller_name": owner_name,
     })
     stages.append({
-        "num": "17", "key": "vaughn_countersign", "persona": "vaughn",
+        "num": "15", "key": "vaughn_countersign", "persona": "vaughn",
         "label": "Vaughn Senior Partner -- Assignment Countersign",
         "note": "Institutional gravitas. TN SB 909 disclosed. Title chain lookback stated. Senior line open.",
-        "html": r17["body_html"], "subject": r17["subject"],
+        "html": r15["body_html"], "subject": r15["subject"],
         "is_template": True, "is_internal": False, "is_sim": False,
     })
 
-    # ---- Stage 18: Sim Chris confirms wire ----
-    sim18 = (
+    # ---- Stage 16: Sim Chris confirms wire ----
+    sim16 = (
         f"<div class='sim-card'>"
         f"<div class='sim-label'>Simulated Incoming Reply</div>"
         f"<div class='sim-from'>From: <strong>Chris Ulander @ Mid-South Homebuyers</strong> "
@@ -661,14 +798,14 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
         f"</div>"
     )
     stages.append({
-        "num": "18", "key": "chris_wire", "persona": "chris",
+        "num": "16", "key": "chris_wire", "persona": "chris",
         "label": "Sim Chris Signs + Confirms Wire",
         "note": "Chris acknowledges senior-partner touch and title-chain transparency. Wire confirmed.",
-        "html": sim18, "subject": f"Re: {r17['subject']}",
+        "html": sim16, "subject": f"Re: {r15['subject']}",
         "is_template": False, "is_internal": False, "is_sim": True,
     })
 
-    # ---- Stage 19: Marvin closing coordination ----
+    # ---- Stage 17: Marvin closing coordination ----
     closing_html = (
         f"<p>All parties + Brenda @ Mid-South,</p>"
         f"<p>Final coordination on <strong>{html_escape.escape(addr)}</strong>, "
@@ -680,7 +817,7 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
         f"<li>Chris Ulander / Mid-South Homebuyers LLC (buyer) -- wires <strong>{fmt(m['buyer_close'])}</strong> "
         f"to Mid-South Title escrow. Brenda calls Chris to verbally verify wire instructions before he wires. "
         f"No email-only.</li>"
-        f"<li>Mid-South disburses: <strong>{fmt(m['moa_close'])}</strong> to {html_escape.escape(fname)}, "
+        f"<li>Mid-South disburses: <strong>{fmt(seller_final_price)}</strong> to {html_escape.escape(fname)}, "
         f"<strong>{fmt(m['ev_fee'])}</strong> to Everlight Ventures operating account.</li>"
         f"<li>Recording with Shelby County same day. Deed conveys directly from seller to Chris's LLC; "
         f"Everlight Ventures does not appear on title.</li>"
@@ -692,25 +829,25 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
         + _closing_sig()
     )
     stages.append({
-        "num": "19", "key": "marvin_closing", "persona": "marvin",
+        "num": "17", "key": "marvin_closing", "persona": "marvin",
         "label": "Marvin Closing Coordination",
         "note": "Title path, wire verification discipline, disbursements, recording logistics.",
         "html": closing_html, "subject": f"Closing day logistics -- {addr}",
         "is_template": True, "is_internal": False, "is_sim": False,
     })
 
-    # ---- Stage 20: Marquise internal final wrap ----
-    r20 = render_marquise_final_wrap(
+    # ---- Stage 18: Marquise internal final wrap ----
+    r18 = render_marquise_final_wrap(
         lead_w_history,
-        sell_price=m["moa_close"],
+        sell_price=seller_final_price,
         assign_price=m["buyer_close"],
         commission=m["ev_fee"],
     )
     stages.append({
-        "num": "20", "key": "marquise_final", "persona": "marquise",
+        "num": "18", "key": "marquise_final", "persona": "marquise",
         "label": "Marquise Internal -- Deal Closed, Commission Booked",
         "note": f"{fmt(m['ev_fee'])} booked. Cycle time ~12 days. Lessons learned for next deal.",
-        "html": r20["body_html"], "subject": r20["subject"],
+        "html": r18["body_html"], "subject": r18["subject"],
         "is_template": True, "is_internal": True, "is_sim": False,
     })
 
@@ -762,7 +899,7 @@ def render_dashboard(
     ev_fee = m["ev_fee"]
     fee_color = "#44d44a" if ev_fee >= 2000 else "#e5a00d"
 
-    # ---- Stage cards (20 stages)
+    # ---- Stage cards (26 stages)
     stage_cards = []
     for stg in stages:
         num = stg["num"]
@@ -784,7 +921,10 @@ def render_dashboard(
         else:
             badge = '<span class="badge-raw">inline</span>'
 
-        stage_in_gate = int(num) in GATE_STAGES
+        try:
+            stage_in_gate = int(num) in GATE_STAGES
+        except ValueError:
+            stage_in_gate = False  # lettered sub-stages (05a, 05b...) are sim/template, not direct sends
         gate_badge = '<span class="badge-gate">gate-checked</span>' if stage_in_gate else ""
 
         raw_html = stg.get("html", "")
@@ -836,7 +976,7 @@ def render_dashboard(
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pipeline Simulation (20 Stages) -- {html_escape.escape(lead.get('owner_name',''))} | Everlight Ventures</title>
+<title>Pipeline Simulation (26 Stages) -- {html_escape.escape(lead.get('owner_name',''))} | Everlight Ventures</title>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&family=Fira+Code&display=swap" rel="stylesheet">
 <style>
 *{{box-sizing:border-box}}
@@ -890,7 +1030,7 @@ td{{padding:4px 0}}
 </head>
 <body>
 <div class="frame">
-<div class="banner">PIPELINE SIMULATION (20 STAGES) -- DRY RUN -- NO SENDS -- {now}</div>
+<div class="banner">PIPELINE SIMULATION (26 STAGES) -- DRY RUN -- NO SENDS -- {now}</div>
 
 <h2>Subject Lead</h2>
 <div class="lead-box">
@@ -945,10 +1085,12 @@ td{{padding:4px 0}}
 </div>
 
 <div class="note">
-<b>What just ran:</b> all 20 stages use outreach_templates render functions for persona copy.
+<b>What just ran:</b> all 26 stages use outreach_templates render functions for persona copy.
+NEW: 4-round Marquise seller negotiation (05a-05f), Henry flip-math buyer pitch (13a),
+Henry buyer round 2 (13c), PSA Block 7.5 Quality Assurance Period.
 Gates (eradication_gate, state_gate, resend_guard) are the LIVE modules.
-Internal stages (01, 10, 20) are Marquise fire-team notes -- no gate needed.
-Simulated stages (03, 05, 07, 09, 12, 14, 16, 18) model counterparty replies.
+Internal stages (01, 09, 18) are Marquise fire-team notes -- no gate needed.
+Simulated stages model counterparty replies across both seller and buyer tracks.
 The only thing NOT executed: the final Resend POST. No email left this machine.
 <b>{ready_count}</b> TN leads are in the ready pool.
 </div>
@@ -961,12 +1103,12 @@ The only thing NOT executed: the final Resend POST. No email left this machine.
 {psa_section}
 
 <div class="dry-run-footer">
-  DRY-RUN -- NO SENDS -- pipeline_simulation.py (20-stage Marquise-led Memphis pipeline)
+  DRY-RUN -- NO SENDS -- pipeline_simulation.py (26-stage: 4-round negotiation + flip-math leverage + QA Period PSA)
   <br>All copy from outreach_templates.py -- Marquise firmware applied -- TN-only doctrine enforced
 </div>
 
 <div class="meta">
-  pipeline_simulation.py -- 20-stage canonical simulation (Marquise Memphis-local closer)<br>
+  pipeline_simulation.py -- 26-stage canonical simulation (4-round negotiation + flip-math + QA Period)<br>
   Structural model: wholesale_simulation_transcript_20260515_150820.md<br>
   Visual model: deal_simulation_20260525_072835.html<br>
   Generated {now}
@@ -982,7 +1124,7 @@ The only thing NOT executed: the final Resend POST. No email left this machine.
 # ---------------------------------------------------------------------------
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description="Wholesale pipeline simulation (20 stages) -- dry run")
+    parser = argparse.ArgumentParser(description="Wholesale pipeline simulation (26 stages: 4-round negotiation + flip-math + QA Period) -- dry run")
     parser.add_argument("--lead", default="TOWNSEND RITA M", help="Owner name substring to filter leads")
     parser.add_argument("--appraisal", type=int, default=58000, help="Override county_appraisal (for demo)")
     parser.add_argument("--random", action="store_true", help="Pick a random lead instead of --lead filter")
@@ -1010,7 +1152,7 @@ def main(argv: list[str] | None = None) -> int:
         sym = "+" if g["ok"] else "x"
         print(f"  [{sym}] {g['name']}")
 
-    print("[sim] Building 20-stage bodies (outreach_templates for all persona copy)...")
+    print("[sim] Building 26-stage bodies (outreach_templates for all persona copy)...")
     try:
         stages = build_stage_bodies(lead, math)
     except Exception as e:
@@ -1024,7 +1166,7 @@ def main(argv: list[str] | None = None) -> int:
     psa_blocks = None
     for stg in stages:
         if stg.get("key") == "marvin_contract" and stg.get("psa_blocks"):
-            psa_blocks = stg["psa_blocks"]
+            psa_blocks = stg["psa_blocks"]  # PSA blocks from stage 07
             break
 
     print(f"[sim] Rendering 20-stage dashboard HTML...")
@@ -1072,7 +1214,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"  Close target:         {math['close_dow']} {math['close_date']}")
     print(f"  Cycle time:           ~12 days first-touch to close")
 
-    print(f"\n[sim] === 20-STAGE SIMULATION COMPLETE (DRY RUN) ===")
+    print(f"\n[sim] === 26-STAGE SIMULATION COMPLETE (DRY RUN) ===")
     print(f"[sim] Everlight commission if real: {fmt(math['ev_fee'])}")
     print(f"[sim] Dashboard: {DASHBOARD_OUT}")
     return 0
