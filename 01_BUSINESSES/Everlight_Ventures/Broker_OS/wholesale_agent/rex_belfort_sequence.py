@@ -70,6 +70,15 @@ from rex_lead_recycler import get_angle_touches
 # Import enrichment engine for hyper-personalized pitches
 from rex_enrichment_engine import enrich_lead, generate_personalized_pitch
 
+# Import outreach template renders -- Piper-voiced email bodies with data_lens
+import sys as _ot_sys
+_ot_sys.path.insert(0, str(Path(__file__).parent))
+from outreach_templates import (
+    render_first_touch as _render_first_touch,
+    render_first_touch_followup as _render_first_touch_followup,
+    render_first_touch_final as _render_first_touch_final,
+)
+
 RESEND_KEY = os.environ.get("RESEND_API_KEY", "")
 GMAIL_USER = os.environ.get("IMAP_USER", "")
 GMAIL_PASS = os.environ.get("IMAP_PASS", "")
@@ -159,36 +168,13 @@ BELFORT_TOUCHES = {
         "subject": "{address}",
         "body": "Hey {first_name} -- saw your property at {address}. I'm a private buyer in {city}, looking to pick up a few properties this month. Any interest in a cash offer? No obligation. -- Piper",
     },
-    1: {  # Day 0, 4 hours later -- premium pitch, reads like a personal email
+    1: {  # Day 0, 4 hours later -- Piper-voiced first touch via outreach_templates
         "channel": "email",
         "delay_hours": 4,
+        # subject + body are resolved at send time via _render_first_touch(lead, "piper")
+        # See _get_personalized_content step==1 below.
         "subject": "Your property on {address}",
-        "body": """Hey {first_name},
-
-Hope this finds you well. I came across your property at {address} and wanted to reach out personally.
-
-I'm a private real estate buyer working with a small group of investors. We're actively acquiring properties in {city} this quarter.
-
-Here's what I can offer:
-
-  - All cash, no financing contingencies
-  - Close in as little as 7 days (or on your timeline)
-  - As-is condition -- no repairs, no cleaning, no showings
-  - I cover all closing costs
-  - No commissions or fees on your end
-
-I've already reviewed the property details. If you're open to hearing a number, just reply to this email and I'll send over a written offer within the hour.
-
-No pressure either way. Just wanted to make sure you had the option on the table.
-
-Best,
-Piper Reeves
-Everlight Ventures | Wholesale
-everlightventures.io
-piper@everlightventures.io
-(707) 801-0360
-
-Not interested? Reply STOP and I will remove you immediately.""",
+        "body": "__OUTREACH_TEMPLATES_FIRST_TOUCH__",
     },
     2: {  # Day 1 -- casual follow-up
         "channel": "sms",
@@ -196,25 +182,12 @@ Not interested? Reply STOP and I will remove you immediately.""",
         "subject": "Re: {address}",
         "body": "Hey {first_name}, just following up -- sent you an email about {address} yesterday. We're closing on a few properties in {city} this week and yours caught my eye. Worth a quick chat? -- Piper",
     },
-    3: {  # Day 2 -- credibility + scarcity
+    3: {  # Day 2 -- Piper-voiced social proof + soft urgency via outreach_templates
         "channel": "email",
         "delay_hours": 48,
-        "subject": "Quick update on {city} acquisitions",
-        "body": """Hi {first_name},
-
-Wanted to give you a quick update -- we are actively acquiring properties in the {city} area. Sellers we work with typically have cash in hand within 2 weeks.
-
-Your property at {address} is still on my short list. My investment group has capital allocated for {city} acquisitions through end of month, but we're narrowing down to our final picks this week.
-
-If you've been thinking about selling -- or even just curious what your property could fetch in a private cash sale -- now's a great time to explore it.
-
-Just reply "what's the offer?" and I'll have a number for you today.
-
-Best,
-Piper Reeves
-Everlight Ventures | Wholesale
-piper@everlightventures.io
-(707) 801-0360""",
+        # subject + body resolved via _render_first_touch_followup(lead, "piper")
+        "subject": "Re: {address} -- Memphis",
+        "body": "__OUTREACH_TEMPLATES_FOLLOWUP__",
     },
     4: {  # Day 3 -- direct, time pressure
         "channel": "sms",
@@ -222,27 +195,12 @@ piper@everlightventures.io
         "subject": "Re: {address}",
         "body": "{first_name} -- heads up, we're finalizing our {city} acquisitions this week. Your property at {address} is still on the list but I need to hear from you by Friday. Cash offer, your timeline. -- Piper",
     },
-    5: {  # Day 4 -- final professional email
+    5: {  # Day 4 -- Piper-voiced "closing file Friday" final via outreach_templates
         "channel": "email",
         "delay_hours": 96,
+        # subject + body resolved via _render_first_touch_final(lead, "piper")
         "subject": "Closing out -- {address}",
-        "body": """Hi {first_name},
-
-This is my last note about {address}.
-
-We've wrapped up most of our {city} acquisitions for the quarter. I'm closing out the remaining files this week.
-
-If selling is something you'd consider -- even down the road -- just reply and I'll keep your property in our system for future offers.
-
-Otherwise, no worries at all. I appreciate your time and wish you the best with the property.
-
-Respectfully,
-Piper Reeves
-Everlight Ventures | Wholesale
-everlightventures.io
-(707) 801-0360
-
-Reply STOP to opt out.""",
+        "body": "__OUTREACH_TEMPLATES_FINAL__",
     },
     6: {  # Day 5 -- last shot, warm and personal
         "channel": "sms",
@@ -357,14 +315,44 @@ def _enrich_if_needed(lead):
 
 def _get_personalized_content(lead, step, touch):
     """
-    Get subject and body for a touch, using personalized pitch for key touches.
+    Get subject and body for a touch, using persona-voiced outreach_templates for emails.
 
     Touch 0 (SMS): Personalized SMS referencing property details
-    Touch 1 (Email): Full hyper-personalized pitch from enrichment engine
+    Touch 1 (Email day-0+4h): render_first_touch(lead, "piper") -- Piper-voiced, data_lens
     Touches 2, 4, 6 (SMS): Reference specific property details
-    Touches 3, 5 (Email): Use standard templates (urgency/closing angles)
+    Touch 3 (Email day-2): render_first_touch_followup(lead, "piper") -- social proof
+    Touch 5 (Email day-4): render_first_touch_final(lead, "piper") -- closing file Friday
     """
-    # For Touch 1 (the main email pitch), use the enrichment engine
+    # Email touches -- always use outreach_templates for persona-voiced bodies.
+    # Step 1 = Day-0+4h first touch email.
+    if step == 1 and touch.get("channel") == "email":
+        try:
+            rendered = _render_first_touch(lead, persona_key="piper")
+            return rendered["subject"], rendered["body_html"]
+        except Exception as _e:
+            log.warning("outreach_templates render_first_touch failed: %s -- falling back", _e)
+        # Fallback path: use enrichment engine if available
+        if lead.get("enriched"):
+            pitch = generate_personalized_pitch(lead)
+            return pitch["subject"], pitch["body"]
+
+    # Step 3 = Day-2 social proof email.
+    if step == 3 and touch.get("channel") == "email":
+        try:
+            rendered = _render_first_touch_followup(lead, persona_key="piper")
+            return rendered["subject"], rendered["body_html"]
+        except Exception as _e:
+            log.warning("outreach_templates render_first_touch_followup failed: %s -- falling back", _e)
+
+    # Step 5 = Day-4 final email.
+    if step == 5 and touch.get("channel") == "email":
+        try:
+            rendered = _render_first_touch_final(lead, persona_key="piper")
+            return rendered["subject"], rendered["body_html"]
+        except Exception as _e:
+            log.warning("outreach_templates render_first_touch_final failed: %s -- falling back", _e)
+
+    # For Touch 1 enrichment fallback (already handled above with try/except)
     if step == 1 and lead.get("enriched"):
         pitch = generate_personalized_pitch(lead)
         return pitch["subject"], pitch["body"]
