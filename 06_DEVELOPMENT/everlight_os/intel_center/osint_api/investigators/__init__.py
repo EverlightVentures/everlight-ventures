@@ -8,6 +8,7 @@ Each investigator module exports:
 """
 from . import (
     archive_org,
+    comment_scan,
     consumer_signals,
     domain_intel,
     email_discovery,
@@ -31,6 +32,7 @@ from . import (
 
 ALL = [
     archive_org,
+    comment_scan,
     consumer_signals,
     domain_intel,
     email_discovery,
