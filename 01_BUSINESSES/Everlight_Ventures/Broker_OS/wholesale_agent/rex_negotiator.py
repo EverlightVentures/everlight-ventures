@@ -44,6 +44,13 @@ from typing import Optional
 logging.basicConfig(level=logging.INFO, format="[Rex %(asctime)s] %(message)s", datefmt="%H:%M")
 log = logging.getLogger("rex_negotiator")
 
+try:
+    from outreach_templates import render_negotiation as _render_negotiation
+    _HAS_OUTREACH_TEMPLATES = True
+except ImportError:
+    _render_negotiation = None
+    _HAS_OUTREACH_TEMPLATES = False
+
 AGENT_DIR = Path(__file__).parent
 DEALS_DIR = AGENT_DIR / "active_deals"
 DEALS_DIR.mkdir(parents=True, exist_ok=True)
@@ -547,8 +554,33 @@ def handle_seller_reply(deal: DealState, seller_message: str) -> str:
     response = generate_negotiation_response(deal, seller_message)
     # Pick persona based on current deal stage (Henry for negotiating, Marvin for post-PSA)
     active_persona = pick_persona_for_stage(deal.status)
-    response_with_sig = f"{response}\n\n{active_persona['signature']}"
-    subject = f"Re: {deal.address}"
+
+    # Wire outreach_templates.render_negotiation for Henry (negotiating stage).
+    # Build a lead-shaped dict from the deal object so the template renderer
+    # gets the same fields it expects from the assessor pipeline.
+    if _HAS_OUTREACH_TEMPLATES and deal.status in ("negotiating", "verbal_agreement"):
+        _lead_dict = {
+            "owner_name": deal.owner_name,
+            "property_address": deal.address,
+            "address": deal.address,
+            "city": deal.city,
+            "state": deal.state,
+            "parcel_id": getattr(deal, "parcel_id", ""),
+            "county_appraisal": getattr(deal, "arv", 0) or 0,
+        }
+        try:
+            _rendered = _render_negotiation(_lead_dict, persona_key="henry")
+            subject = _rendered["subject"]
+            response_with_sig = _rendered["body_html"]
+            active_persona = _rendered["persona"]
+        except Exception as _e:
+            log.warning(f"outreach_templates.render_negotiation failed ({_e}), using fallback")
+            response_with_sig = f"{response}\n\n{active_persona['signature']}"
+            subject = f"Re: {deal.address}"
+    else:
+        response_with_sig = f"{response}\n\n{active_persona['signature']}"
+        subject = f"Re: {deal.address}"
+
     if send_email(deal.owner_email, subject, response_with_sig, persona=active_persona):
         deal.conversation.append({"role": "rex", "message": response, "timestamp": datetime.now(timezone.utc).isoformat()})
         deal.last_contact = datetime.now(timezone.utc).isoformat()

@@ -700,3 +700,118 @@ class TestRexBelfortTemplateWiring:
             assert result["subject"]
             assert result["body_html"]
             assert result["persona"]["email"] == "piper@everlightventures.io"
+
+
+# ---------------------------------------------------------------------------
+# rex_negotiator (Henry) + rex_closer (Marvin) wiring tests
+# ---------------------------------------------------------------------------
+
+class TestNegotiatorAndCloserWiring:
+    """
+    Verify render_negotiation (Henry) and render_closing_handoff (Marvin) produce
+    correct, persona-pure output on Rita Townsend's lead.
+
+    These tests mirror how rex_negotiator.py and rex_closer.py call the templates.
+    """
+
+    _RITA = {
+        "owner_name": "TOWNSEND RITA M",
+        "property_address": "836 N BELLEVUE BLVD",
+        "address": "836 N BELLEVUE BLVD",
+        "city": "Memphis",
+        "state": "TN",
+        "mailing_address": "836 N BELLEVUE BLVD MEMPHIS TN",
+        "county_appraisal": 72000,
+    }
+
+    def test_henry_negotiation_body_contains_numbers_reference(self):
+        """Henry's render_negotiation must contain a $, 'spread', or 'comps' reference."""
+        result = ot.render_negotiation(self._RITA, persona_key="henry")
+        body = result["body_html"]
+        assert any(kw in body for kw in ["$", "spread", "comps"]), (
+            "Henry negotiation body must contain a numbers reference ($, spread, or comps). "
+            f"Got (first 300 chars): {body[:300]}"
+        )
+
+    def test_henry_negotiation_body_contains_henry_signature(self):
+        """Henry's render_negotiation body must contain his name in the signature."""
+        result = ot.render_negotiation(self._RITA, persona_key="henry")
+        body = result["body_html"]
+        assert "Henry" in body, (
+            "Henry negotiation body must contain 'Henry' in the signature block. "
+            f"Got (first 300 chars): {body[:300]}"
+        )
+
+    def test_henry_negotiation_references_memphis_or_tennessee(self):
+        """TN-only constraint -- Henry's template must anchor to Memphis or Tennessee."""
+        result = ot.render_negotiation(self._RITA, persona_key="henry")
+        body = result["body_html"]
+        assert "Memphis" in body or "Tennessee" in body or "TN" in body, (
+            "Henry negotiation body must reference Memphis or Tennessee (TN-only doctrine). "
+            f"Got (first 400 chars): {body[:400]}"
+        )
+
+    def test_henry_negotiation_no_piper_signature_contamination(self):
+        """Henry's negotiation email must not have Piper's signature or email address.
+
+        Note: 'picking up from Piper' is intentional handoff language and is allowed.
+        What must NOT appear is Piper's signature block or email alias.
+        """
+        result = ot.render_negotiation(self._RITA, persona_key="henry")
+        body = result["body_html"]
+        assert "piper@everlightventures.io" not in body, (
+            "Henry negotiation body must not contain Piper's email address. "
+            f"Found in: {body[:400]}"
+        )
+        assert "Outreach Specialist" not in body, (
+            "Henry negotiation body must not contain Piper's title (cross-persona signature leak). "
+            f"Found in: {body[:400]}"
+        )
+
+    def test_marvin_closing_handoff_contains_mid_south_title(self):
+        """Marvin's render_closing_handoff must reference Mid-South Title."""
+        result = ot.render_closing_handoff(self._RITA, persona_key="marvin")
+        body = result["body_html"]
+        assert "Mid-South" in body, (
+            "Marvin closing handoff must reference Mid-South Title (his anchor partner). "
+            f"Got (first 300 chars): {body[:300]}"
+        )
+
+    def test_marvin_closing_handoff_contains_marvin_signature(self):
+        """Marvin's render_closing_handoff body must contain his name."""
+        result = ot.render_closing_handoff(self._RITA, persona_key="marvin")
+        body = result["body_html"]
+        assert "Marvin" in body, (
+            "Marvin closing handoff must contain 'Marvin' in the signature block. "
+            f"Got (first 300 chars): {body[:300]}"
+        )
+
+    def test_marvin_closing_handoff_contains_procedural_list(self):
+        """Marvin's closing handoff must have a numbered list (his dossier-mandated style)."""
+        result = ot.render_closing_handoff(self._RITA, persona_key="marvin")
+        body = result["body_html"]
+        import re
+        has_numbered_html = "<ol>" in body or "<li>" in body
+        has_numbered_text = bool(re.search(r"\b[123]\.", body))
+        assert has_numbered_html or has_numbered_text, (
+            "Marvin closing handoff must contain a numbered/procedural list. "
+            f"Got (first 500 chars): {body[:500]}"
+        )
+
+    def test_marvin_closing_handoff_references_memphis_or_tennessee(self):
+        """TN-only constraint -- Marvin's template must anchor to Memphis or Tennessee."""
+        result = ot.render_closing_handoff(self._RITA, persona_key="marvin")
+        body = result["body_html"]
+        assert "Memphis" in body or "Tennessee" in body or "TN" in body, (
+            "Marvin closing handoff must reference Memphis or Tennessee (TN-only doctrine). "
+            f"Got (first 400 chars): {body[:400]}"
+        )
+
+    def test_marvin_closing_handoff_no_piper_contamination(self):
+        """Marvin's closing handoff must not contain 'Piper' -- cross-persona check."""
+        result = ot.render_closing_handoff(self._RITA, persona_key="marvin")
+        body = result["body_html"]
+        assert "Piper" not in body, (
+            "Marvin closing handoff must not contain 'Piper' -- cross-persona contamination. "
+            f"Found in: {body[:400]}"
+        )

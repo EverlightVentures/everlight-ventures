@@ -47,6 +47,13 @@ try:
 except ImportError:
     publish_report = None
 
+try:
+    from outreach_templates import render_closing_handoff as _render_closing_handoff
+    _HAS_OUTREACH_TEMPLATES = True
+except ImportError:
+    _render_closing_handoff = None
+    _HAS_OUTREACH_TEMPLATES = False
+
 # Contract generation + Stripe invoicing
 try:
     import sys
@@ -81,7 +88,7 @@ def _load_title_companies() -> dict:
 # EMAIL / SLACK HELPERS
 # ---------------------------------------------------------------------------
 
-def send_email(to: str, subject: str, body: str, *, state: str = "") -> bool:
+def send_email(to: str, subject: str, body: str, *, state: str = "", action: str = "closing") -> bool:
     """Delegates to rex_utils.safe_send_email (canonical branded_mailer pipeline).
 
     Migrated 2026-05-15 after Streubel 2nd-strike. The old body POSTed
@@ -762,21 +769,54 @@ def process_seller_acceptance(deal: dict) -> bool:
     contract_path = CONTRACTS_DIR / f"{slug}_purchase_agreement.txt"
     contract_path.write_text(agreement)
 
-    # Email contract to seller
+    # Email contract to seller -- Marvin (closing coordinator) owns this stage.
+    # Wire outreach_templates.render_closing_handoff for the branded Marvin voice.
+    # Build a lead-shaped dict from the deal so the template renderer gets
+    # the same fields it expects from the assessor/negotiation pipeline.
     first = deal.get("owner_name", "").split()[0] if deal.get("owner_name") else "there"
-    subject = f"Purchase Agreement for {addr}"
-    body = (
-        f"Hi {first},\n\n"
-        f"Here is the purchase agreement for {addr} at ${deal.get('offer', 0):,.0f}.\n\n"
-        f"Please review and sign where indicated. If you have any questions, "
-        f"just reply to this email.\n\n"
-        f"Once signed, we will open escrow with the title company "
-        f"and you will have your cash within 7 days.\n\n"
-        f"Harrison Knox\n"
-        f"Everlight Ventures\n\n"
-        f"---\n\n"
-        f"{agreement}"
-    )
+    _closing_lead = {
+        "owner_name": deal.get("owner_name", ""),
+        "property_address": addr,
+        "address": addr,
+        "city": deal.get("city", "Memphis"),
+        "state": deal.get("state", "TN"),
+        "parcel_id": deal.get("parcel_id", ""),
+        "county_appraisal": deal.get("offer", 0),
+    }
+    if _HAS_OUTREACH_TEMPLATES:
+        try:
+            _rendered = _render_closing_handoff(_closing_lead, persona_key="marvin")
+            subject = _rendered["subject"]
+            body = _rendered["body_html"] + f"\n\n---\n\n{agreement}"
+        except Exception as _e:
+            log.warning(f"outreach_templates.render_closing_handoff failed ({_e}), using fallback")
+            subject = f"Purchase Agreement for {addr}"
+            body = (
+                f"Hi {first},\n\n"
+                f"Here is the purchase agreement for {addr} at ${deal.get('offer', 0):,.0f}.\n\n"
+                f"Please review and sign where indicated. If you have any questions, "
+                f"just reply to this email.\n\n"
+                f"Once signed, we will open escrow with the title company "
+                f"and you will have your cash within 7 days.\n\n"
+                f"Harrison Knox\n"
+                f"Everlight Ventures\n\n"
+                f"---\n\n"
+                f"{agreement}"
+            )
+    else:
+        subject = f"Purchase Agreement for {addr}"
+        body = (
+            f"Hi {first},\n\n"
+            f"Here is the purchase agreement for {addr} at ${deal.get('offer', 0):,.0f}.\n\n"
+            f"Please review and sign where indicated. If you have any questions, "
+            f"just reply to this email.\n\n"
+            f"Once signed, we will open escrow with the title company "
+            f"and you will have your cash within 7 days.\n\n"
+            f"Harrison Knox\n"
+            f"Everlight Ventures\n\n"
+            f"---\n\n"
+            f"{agreement}"
+        )
     # COUNTERMEASURE: Pre-qualify buyers BEFORE sending contract to seller
     # Never put a property under contract without a buyer already lined up
     try:
