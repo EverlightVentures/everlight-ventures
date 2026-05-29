@@ -1710,8 +1710,9 @@ class TestHenryFlipMathBuyer:
             chris_net=22760
         )
         body = r["body_html"]
-        assert "22,760" in body or "22760" in body, (
-            "Henry flip-math pitch must contain Chris's net profit ($22,760). "
+        expected_net = ot._flip_math(self._LEAD, 45140)["net"]  # single-source, computed
+        assert f"{expected_net:,}" in body or str(expected_net) in body, (
+            f"Henry flip-math pitch must contain Chris's computed net (${expected_net:,}). "
             f"Body: {body[:400]}"
         )
 
@@ -2488,8 +2489,9 @@ class TestBuyerRecipeFlipMath:
         r = self._render()
         body = r["body_html"]
         # chris_net should appear somewhere in the table as the projected net
-        assert str(self._CHRIS_NET).replace(",", "") in body.replace(",", ""), (
-            f"Flip-math pitch must contain Chris's net profit (${self._CHRIS_NET:,}). "
+        expected_net = ot._flip_math(self._LEAD, self._CHRIS_BUY)["net"]  # single-source
+        assert str(expected_net).replace(",", "") in body.replace(",", ""), (
+            f"Flip-math pitch must contain Chris's computed net (${expected_net:,}). "
             f"Body snippet: {body[:600]}"
         )
 
@@ -2727,11 +2729,12 @@ class TestBuyerRecipeCounterLow:
         """Henry's counter must be between chris_position and our_floor (narrowing the gap)."""
         r = self._render()
         body = r["body_html"]
-        # Counter is computed as avg of floor + position, rounded to $250
-        counter = int((self._OUR_FLOOR + self._CHRIS_POSITION) / 2 / 250) * 250
-        counter = max(counter, self._OUR_FLOOR - 1500)
+        # Counter concedes toward Chris but NEVER below our floor (fixed 2026-05-29).
+        midpoint = int((self._OUR_FLOOR + self._CHRIS_POSITION) / 2 / 250) * 250
+        counter = max(self._OUR_FLOOR, midpoint)
+        assert counter >= self._OUR_FLOOR, "counter must never drop below our floor"
         assert str(counter).replace(",", "") in body.replace(",", "") or f"{counter:,}" in body, (
-            f"Henry's counter (${counter:,}) must appear in the counter-low response. "
+            f"Henry's counter (${counter:,}) must appear and be >= floor. "
             f"Body snippet: {body[:600]}"
         )
 

@@ -425,6 +425,26 @@ def _compute_offer_range(lead: dict) -> tuple[int | None, int | None]:
     return int(appraisal * 0.48), int(appraisal * 0.54)
 
 
+# Buyer-side flip-math: SINGLE SOURCE so the pitch + counter never disagree on the same
+# lead (fixes the 'net higher at a higher price' contradiction, 2026-05-29). ARV from
+# assessed value, standard rehab + 10%/6mo carry; net + ROI derived, never passed in.
+_ARV_MULT = 1.55
+_REPAIRS_DEFAULT = 22000
+
+def _flip_math(lead: dict, price: int) -> dict:
+    """Chris's flip economics at a given buy-in `price`. Deterministic from the lead."""
+    appraisal = int(lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 0)
+    arv = int(appraisal * _ARV_MULT) if appraisal else int(price) + 50000
+    repairs = int(lead.get("repairs_est") or _REPAIRS_DEFAULT)
+    price = int(price)
+    carry = int((price + repairs) * 0.10)
+    all_in = price + repairs + carry
+    net = arv - all_in
+    roi = round((net / all_in) * 100, 1) if all_in else 0
+    return {"arv": arv, "repairs": repairs, "carry": carry,
+            "all_in": all_in, "net": net, "roi": roi, "price": price}
+
+
 def _offer_sentence(lead: dict, persona_key: str = "piper") -> str:
     """Return a sentence with the ACTUAL offer range (or fallback if no appraisal).
 
@@ -1978,17 +1998,17 @@ def render_henry_buyer_pitch_with_flip_math(
     addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
     our_fee = chris_buy - our_buy
 
-    # Carry cost: 10% of all-in acquisition (buy-in + repairs), 6-month hold standard.
-    # Keeps the math honest for an institutional buyer who checks our carry model.
-    carry_est = int((chris_buy + repairs_est) * 0.10)
-
-    # Chris's all-in cost = buy-in + repairs + carry
-    chris_all_in = chris_buy + repairs_est + carry_est
-
-    # ROI on all-in (not just on buy-in -- the sophisticated framing)
-    roi_pct = round((chris_net / chris_all_in) * 100, 1) if chris_all_in else 0
-
-    # Fee as % of his net (ratio test from BUYER_RECIPE: >= 2.5x)
+    # SINGLE SOURCE: derive arv/repairs/carry/net/roi from _flip_math so this pitch and
+    # render_henry_buyer_counter_round2 NEVER disagree on the same lead. Passed
+    # arv_est/repairs_est/chris_net are overridden by the deterministic model (they were
+    # the source of the 'net higher at a higher price' contradiction, 2026-05-29).
+    fm = _flip_math(lead, chris_buy)
+    arv_est = fm["arv"]
+    repairs_est = fm["repairs"]
+    carry_est = fm["carry"]
+    chris_all_in = fm["all_in"]
+    chris_net = fm["net"]
+    roi_pct = fm["roi"]
     fee_pct_of_net = round((our_fee / chris_net) * 100, 1) if chris_net else 0
 
     subject = f"Batch -- {html.escape(addr)} -- your flip math"
@@ -2062,32 +2082,24 @@ def render_henry_buyer_counter_round2(
     addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
     appraisal = int(lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 0)
 
-    # Recompute flip math at BOTH price points (the BUYER_RECIPE anchor move).
-    # Use consistent assumptions: same repairs, same ARV, carry = 10% of all-in.
-    repairs_est = 22000
-    arv_est = int(appraisal * 1.55) if appraisal else chris_position + 50000
+    # SINGLE SOURCE flip math at each price point (same _flip_math model the pitch uses --
+    # guarantees same ARV/repairs and that a LOWER price always shows a HIGHER net).
+    fm_his = _flip_math(lead, chris_position)
+    fm_floor = _flip_math(lead, our_floor)
+    arv_est = fm_floor["arv"]
+    repairs_est = fm_floor["repairs"]
+    carry_at_his = fm_his["carry"]; chris_all_in_his = fm_his["all_in"]
+    chris_net_his = fm_his["net"]; roi_his = fm_his["roi"]
+    carry_at_floor = fm_floor["carry"]; chris_all_in_floor = fm_floor["all_in"]
+    chris_net_floor = fm_floor["net"]; roi_floor = fm_floor["roi"]
 
-    # At his price
-    carry_at_his = int((chris_position + repairs_est) * 0.10)
-    chris_all_in_his = chris_position + repairs_est + carry_at_his
-    chris_net_his = arv_est - chris_all_in_his
-    roi_his = round((chris_net_his / chris_all_in_his) * 100, 1) if chris_all_in_his else 0
-
-    # At our floor
-    carry_at_floor = int((our_floor + repairs_est) * 0.10)
-    chris_all_in_floor = our_floor + repairs_est + carry_at_floor
-    chris_net_floor = arv_est - chris_all_in_floor
-    roi_floor = round((chris_net_floor / chris_all_in_floor) * 100, 1) if chris_all_in_floor else 0
-
-    # Counter: narrow the gap but hold within $500 of floor
-    counter = int((our_floor + chris_position) / 2 / 250) * 250
-    counter = max(counter, our_floor - 1500)  # never more than $1,500 below floor
-
-    # At counter
-    carry_at_counter = int((counter + repairs_est) * 0.10)
-    chris_all_in_counter = counter + repairs_est + carry_at_counter
-    chris_net_counter = arv_est - chris_all_in_counter
-    roi_counter = round((chris_net_counter / chris_all_in_counter) * 100, 1) if chris_all_in_counter else 0
+    # Counter: concede toward Chris but NEVER below our floor. The floor is the floor --
+    # countering below it (the old our_floor-1500 bug) contradicts naming it as the floor.
+    midpoint = int((our_floor + chris_position) / 2 / 250) * 250
+    counter = max(our_floor, midpoint)
+    fm_counter = _flip_math(lead, counter)
+    carry_at_counter = fm_counter["carry"]; chris_all_in_counter = fm_counter["all_in"]
+    chris_net_counter = fm_counter["net"]; roi_counter = fm_counter["roi"]
 
     subject = f"Re: {html.escape(addr)} -- ran your counter"
 
