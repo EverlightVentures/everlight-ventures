@@ -599,13 +599,13 @@ def data_lens(persona_key: str, lead: dict) -> str:
             )
         appraisal = lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 0
         if appraisal:
-            offer_est = int(int(appraisal) * 0.68)
+            # Do NOT hardcode an offer number here -- the offer table (via
+            # _compute_offer_range) is the SINGLE source so Henry never quotes
+            # two different numbers in one email (the 0.68 bug, 2026-05-28).
             return (
-                f"I pulled the Memphis comps for the {html.escape(address)} corridor "
-                f"and ran the spread. County has it at ${int(appraisal):,}. "
-                f"Where I can be today is closer to ${offer_est:,} all cash, "
-                "7-day close. That's not lowballing -- that's the math on a no-agent, "
-                "no-repair, no-financing deal. Let me give you an honest read."
+                f"I pulled the comps for the {html.escape(address)} corridor and ran the spread. "
+                f"County has it assessed at ${int(appraisal):,}; the cash number below reflects "
+                "a no-agent, no-repair, no-financing close -- not a lowball, just the math."
             )
         return (
             "I pulled the Memphis comps for this block and the spread is clear. "
