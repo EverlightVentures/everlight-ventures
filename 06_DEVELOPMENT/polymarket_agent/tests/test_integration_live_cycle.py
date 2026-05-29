@@ -9,8 +9,18 @@ from decimal import Decimal
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
+import pytest
+
 from polymarket_agent.main import run_live_cycle
 from polymarket_agent.dataflows.polymarket_clob import Market
+
+
+@pytest.fixture(autouse=True)
+def _isolated_notifier():
+    """Notify (Slack + Blinko) is tested in test_notify.py; isolate it from the
+    cycle tests so they make no real network calls."""
+    with patch("polymarket_agent.main._make_notifier", return_value=MagicMock()):
+        yield
 
 
 def _cfg(tmp_path):

@@ -114,6 +114,19 @@ def run_paper_cycle(cfg: dict):
             continue
 
 
+def _make_notifier(cfg: dict, data_dir: Path):
+    """Build the shared-services bridge from config (branded Slack + brain).
+    Disabled gracefully if no Slack channels configured."""
+    from polymarket_agent.notify import Notifier
+    slack = cfg.get("slack", {}).get("channels", {})
+    return Notifier(
+        channel_trades=slack.get("trades", ""),
+        channel_alerts=slack.get("alerts", ""),
+        brain_log_path=data_dir / "brain_log.jsonl",
+        enabled=bool(slack.get("trades") or slack.get("alerts")),
+    )
+
+
 def gather_signals(cfg: dict, filtered, data_dir: Path) -> list:
     """Invoke every ENABLED free signal source and merge into one Signal list.
     Each source is isolated in try/except -- one dead source (e.g. Sonar 401,
@@ -271,6 +284,9 @@ def run_live_cycle(cfg: dict, backend=None, wallet=None):
         bankroll_state_path=state_path, halt_path=halt_path, open_bets_path=open_bets_path,
     )
 
+    # Shared-services bridge: branded Slack + brain (degrades gracefully).
+    notifier = _make_notifier(cfg, data_dir)
+
     placed = 0
     for b in approved:
         mkt = by_id.get(b.market_id)
@@ -281,12 +297,13 @@ def run_live_cycle(cfg: dict, backend=None, wallet=None):
             log.warning("no CLOB token id for %s / %s -- skipping", b.market_id, b.outcome)
             continue
         try:
-            executor.submit_order(BetRequest(
+            bet = executor.submit_order(BetRequest(
                 market_id=token_id, outcome=b.outcome,
                 amount_usdc=b.amount_usdc, limit_price=b.limit_price,
                 predicted_prob=b.predicted_prob, edge=b.edge,
             ))
             placed += 1
+            notifier.order_placed(bet)  # branded deal card to #polymarket-trades
         except PolymarketExecutorError as e:
             log.warning("executor rejected bet: %s: %s", type(e).__name__, e)
 
@@ -298,9 +315,12 @@ def run_live_cycle(cfg: dict, backend=None, wallet=None):
     if result.halt_required:
         log.error("RECONCILE HALT -- drift %s; no further trading until cleared",
                   result.drift_usd)
+        notifier.halted("reconcile_drift", f"drift {result.drift_usd} -- trading halted")
     log.info("live cycle complete: %d order(s) placed, %d markets, halt=%s",
              placed, len(filtered), result.halt_required)
-    return {"placed": placed, "markets": len(filtered), "halt": result.halt_required}
+    summary = {"placed": placed, "markets": len(filtered), "halt": result.halt_required}
+    notifier.cycle_summary(summary)  # brain log (local-first + best-effort Blinko)
+    return summary
 
 
 def main():
