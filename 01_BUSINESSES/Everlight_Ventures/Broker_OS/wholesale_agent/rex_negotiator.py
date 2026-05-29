@@ -318,16 +318,33 @@ Example table format:
 - Be compassionate with distressed sellers. Never predatory. Never exploit urgency,
   illness, or grief. If it feels wrong, escalate to human.
 
---- ESCALATION (HARD -- do not improvise, flag for human) ---
-If any of the following apply, respond briefly and warmly but DO NOT commit to anything:
-  - Seller is hostile, angry, or threatening
-  - Seller mentions an attorney, lawsuit, court, fraud, or "report you"
-  - Seller seems confused about what they are signing or who you are
-  - Seller mentions death, illness, terminal diagnosis, dementia, or severe financial despair
-  - Seller asks for a concession beyond your authority (above MAO)
-  - Seller asks you to promise or guarantee something outside the contract
-In these cases say: "I want to make sure I handle this right for you -- let me loop in my
-team lead and we will get back to you within 24 hours." Then stop. Do not keep negotiating.
+--- EMPATHY (HARD -- do this in EVERY reply, before any math) ---
+ALWAYS open by acknowledging the seller's SPECIFIC concern or number in your own words,
+so they feel heard. Name what they said. Validate the feeling. THEN bridge to the numbers.
+NEVER jump straight to a new figure. Bad: "I can do $31,900." Good: "You said you'd hoped
+for $35k, and I get it -- this place has history for your family. Here's the honest read on
+my end, and where I can land." If they raised a concern (repairs, taxes, a relative's wishes,
+timing), address THAT concern explicitly before you talk price. People sell to people who
+make them feel respected, not cornered.
+
+--- GRACE UNDER FIRE (HARD) ---
+If a seller is rude, angry, suspicious, calls you a scammer, or says this feels predatory:
+you NEVER match their energy and you NEVER get defensive. Stay warm, calm, and gracious.
+Acknowledge the skepticism as completely fair ("Honestly, I'd be skeptical too -- you should
+be"), give them a real reason to trust (title company holds the funds, verify us at
+everlightventures.io), hold your number with kindness, and keep the door open. You can hold
+firm AND be kind at the same time. A "no" handled with grace becomes a "yes" in 60 days.
+Keep trying to close, gently -- but never through pressure, repetition, or guilt.
+
+--- WHEN TO STEP BACK (let a human take over -- do NOT negotiate) ---
+Only three situations call for stepping back rather than replying yourself:
+  - LEGAL/REGULATORY threat: attorney, lawsuit, court, fraud accusation, "report you," BBB.
+  - OPT-OUT: they ask you to stop contacting them. Honor it immediately and warmly.
+  - GRIEF / ACUTE DISTRESS: a death, terminal illness, eviction, or someone in real crisis.
+    These deserve a human being, not a negotiation. Respond with pure compassion, zero pressure.
+In those three cases, do not push price at all -- a warm, brief, human message only.
+For everything else (anger, suspicion, lowball insults, confusion), you handle it yourself
+with empathy and grace per the rules above.
 
 Keep messages short (3-5 sentences max outside of the anchor table), plain, and warm.
 Do not use buzzwords, filler, or high-pressure language."""
@@ -362,56 +379,80 @@ HUMAN_REVIEW_DIR = Path(os.environ.get("LOGS_DIR", "/mnt/sdcard/AA_MY_DRIVE/_log
 HUMAN_REVIEW_DIR.mkdir(parents=True, exist_ok=True)
 HUMAN_REVIEW_QUEUE = HUMAN_REVIEW_DIR / "human_review_queue.jsonl"
 
-# Escalation trigger sets -- any hit -> needs human
-_LEGAL_TRIGGERS = {"lawyer", "attorney", "sue", "court", "report you", "report us", "fraud", "legal action"}
-_CONFUSION_TRIGGERS = {"don't understand", "do not understand", "what is this", "scam?", "is this a scam",
-                       "who is this", "how did you get my", "not sure what you", "confused"}
-_VULNERABILITY_TRIGGERS = {"passed away", "recently passed", "death in", "dying", "terminal", "hospice",
-                            "sick", "can't afford", "cannot afford", "desperate", "facing eviction",
-                            "eviction notice", "foreclosure", "homeless", "no money"}
-_OPTOUT_TRIGGERS = {"stop", "remove me", "unsubscribe", "do not contact", "don't contact",
-                    "take me off", "leave me alone", "no more emails", "never contact"}
-_HOSTILE_TRIGGERS = {"scammer", "fraud", "predatory", "lowball thief", "get lost", "go to hell",
-                     "f*** you", "f**k you", "stop harassing", "harassment"}
+# --- TWO-TIER ESCALATION ---------------------------------------------------
+# HARD escalation (escalation_check -> True): the bot must NOT negotiate. A human
+# takes over with a compassionate holding line (see holding_reply). Only three
+# categories qualify -- a real human needs to be in the loop:
+#   legal:      legal/regulatory threat -> protect ourselves, hand to senior team
+#   optout:     opt-out request         -> honor immediately + DNC, back off with grace
+#   vulnerable: grief / acute distress  -> a person, not a bot, handles this; zero pressure
+# SOFT friction (anger, suspicion, "is this a scam", lowball insults) does NOT hard-
+# escalate. Per operator: the bot stays warm, holds its number with grace, addresses
+# the concern, and keeps trying to close. See GRACE UNDER FIRE in the system prompt.
+_LEGAL_TRIGGERS = {"lawyer", "attorney", "sue", "court", "fraud", "legal action",
+                   "report you", "report us", "reporting you", "lawsuit", "bbb",
+                   "better business bureau", "cease and desist", "district attorney"}
+_OPTOUT_TRIGGERS = {"stop emailing", "stop contacting", "stop messaging", "stop reaching",
+                    "remove me", "unsubscribe", "do not contact", "don't contact",
+                    "take me off", "leave me alone", "no more emails", "never contact",
+                    "lose my number", "stop harassing"}
+_VULNERABILITY_TRIGGERS = {"passed away", "recently passed", "death in the family", "dying",
+                           "terminal", "hospice", "can't afford", "cannot afford", "desperate",
+                           "facing eviction", "eviction notice", "foreclosure", "homeless",
+                           "no money", "lost my job", "lost our home"}
 
 
 def escalation_check(seller_message: str, sentiment: str = "") -> tuple[bool, str]:
-    """Return (needs_human, reason). True = do NOT auto-send; queue for human review.
+    """HARD gate. Return (needs_human, reason). True ONLY when the bot must NOT
+    negotiate and a human takes over: legal threats, opt-out requests, or grief /
+    acute vulnerability. reason is category-prefixed: 'legal:' | 'optout:' |
+    'vulnerable:' so the caller can pick the right compassionate holding line.
 
-    Triggers:
-    - hostility / anger in sentiment or message
-    - legal threat (lawyer / sue / court / fraud / report)
-    - confusion about the process or identity
-    - vulnerability (death, illness, financial despair, eviction)
-    - opt-out request
-    - sentiment already classified as hostile
+    Plain hostility, suspicion, or 'is this a scam?' do NOT trigger this -- those
+    are handled gracefully by the bot (operator directive: empathy + hold ground +
+    keep trying). sentiment is accepted for signature stability but no longer hard-
+    escalates on its own.
     """
     msg = seller_message.lower()
 
-    if sentiment in ("hostile", "angry"):
-        return True, f"sentiment={sentiment}"
-
-    for word in _HOSTILE_TRIGGERS:
-        if word in msg:
-            return True, f"hostile language detected: '{word}'"
-
     for word in _LEGAL_TRIGGERS:
         if word in msg:
-            return True, f"legal threat detected: '{word}'"
-
-    for phrase in _CONFUSION_TRIGGERS:
-        if phrase in msg:
-            return True, f"seller confusion detected: '{phrase}'"
-
-    for phrase in _VULNERABILITY_TRIGGERS:
-        if phrase in msg:
-            return True, f"vulnerability signal detected: '{phrase}'"
+            return True, f"legal:{word}"
 
     for phrase in _OPTOUT_TRIGGERS:
         if phrase in msg:
-            return True, f"opt-out request detected: '{phrase}'"
+            return True, f"optout:{phrase}"
+
+    for phrase in _VULNERABILITY_TRIGGERS:
+        if phrase in msg:
+            return True, f"vulnerable:{phrase}"
 
     return False, ""
+
+
+def holding_reply(reason: str, deal: "DealState") -> str:
+    """Compassionate, category-appropriate holding message for HARD-escalation
+    cases. The bot does NOT negotiate here -- it backs off with grace and a human
+    takes over. Category comes from the escalation_check reason prefix.
+    """
+    cat = (reason.split(":", 1)[0] if reason else "").strip()
+    first = (deal.owner_name.split()[0] if getattr(deal, "owner_name", "") else "there")
+    if cat == "legal":
+        return (f"{first}, I hear you, and the last thing I ever want is to cause you stress. "
+                f"I'm going to step back here and have a senior member of our team reach out to "
+                f"you directly so everything is handled the right way. Thank you for your patience, "
+                f"and I'm sorry for any frustration.")
+    if cat == "optout":
+        return (f"Understood, {first} -- I've taken you off our list and you won't hear from me "
+                f"again. I'm genuinely sorry for the intrusion. If anything ever changes down the "
+                f"road, you know where to find us. Wishing you and your family all the best.")
+    if cat == "vulnerable":
+        return (f"{first}, I'm truly sorry you're going through this -- please don't feel one ounce "
+                f"of pressure from me. There is no rush at all, and your wellbeing comes first. If "
+                f"and when the time is right for you and your family, I'm here. Please lean on the "
+                f"people close to you, and take care of yourself.")
+    return (f"{first}, I want to make sure I handle this the right way for you. Let me bring in my "
+            f"team lead and we'll follow up shortly. Thank you for your patience.")
 
 
 def queue_for_human_review(deal: DealState, seller_message: str, drafted_response: str, reason: str):
@@ -828,12 +869,30 @@ def handle_seller_reply(deal: DealState, seller_message: str) -> str:
     needs_human, esc_reason = escalation_check(seller_message, deal.seller_sentiment)
 
     if needs_human:
-        # Always queue escalated replies regardless of AUTOSEND flag
+        # HARD escalation (legal / opt-out / grief). The bot does NOT negotiate.
+        # The drafted reply is a compassionate, category-appropriate HOLDING line,
+        # not the negotiation body. Always queued regardless of AUTOSEND.
         deal.status = "awaiting_human"
-        queue_for_human_review(deal, seller_message, response_with_sig, esc_reason)
+        hold = holding_reply(esc_reason, deal)
+        # Opt-out is honored immediately: record to the DNC suppression list.
+        if esc_reason.startswith("optout"):
+            try:
+                dnc_path = Path(os.environ.get("LOGS_DIR", "/mnt/sdcard/AA_MY_DRIVE/_logs")) / "wholesale" / "optout_dnc.jsonl"
+                dnc_path.parent.mkdir(parents=True, exist_ok=True)
+                with open(dnc_path, "a") as fh:
+                    fh.write(json.dumps({
+                        "ts": datetime.now(timezone.utc).isoformat(),
+                        "email": deal.owner_email, "address": deal.address,
+                        "owner_name": deal.owner_name, "trigger": esc_reason,
+                        "seller_message": seller_message[:300],
+                    }) + "\n")
+                log.warning(f"[OPTOUT-DNC] {deal.owner_email} added to suppression list -- {esc_reason}")
+            except Exception as exc:
+                log.error(f"Failed to write opt-out DNC: {exc}")
+        queue_for_human_review(deal, seller_message, hold, esc_reason)
         deal.save()
         log.warning(f"[ESCALATION] Reply NOT sent for {deal.address} -- reason: {esc_reason}")
-        return response  # caller sees draft but nothing was sent
+        return hold  # caller sees the compassionate holding draft; nothing was sent
 
     if not _AUTOSEND:
         # Draft mode (default, pre-Deal-1 safe): queue for human review, do not send

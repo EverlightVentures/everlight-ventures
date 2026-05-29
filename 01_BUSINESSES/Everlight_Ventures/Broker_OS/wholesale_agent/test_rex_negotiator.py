@@ -142,14 +142,15 @@ class TestEscalationCheck:
 
     # -- should trigger True --
 
-    def test_hostile_sentiment_triggers(self):
-        needs_human, reason = rn.escalation_check("What is your offer?", sentiment="hostile")
-        assert needs_human is True
-        assert reason
+    def test_hostile_sentiment_does_not_hard_escalate(self):
+        # Pure hostility (no legal/optout/grief) is handled GRACEFULLY by the bot,
+        # not punted to a human. Operator directive: empathy + hold ground + keep trying.
+        needs_human, _ = rn.escalation_check("What is your offer?", sentiment="hostile")
+        assert needs_human is False
 
-    def test_angry_sentiment_triggers(self):
+    def test_angry_sentiment_does_not_hard_escalate(self):
         needs_human, _ = rn.escalation_check("Just give me a number", sentiment="angry")
-        assert needs_human is True
+        assert needs_human is False
 
     def test_legal_threat_lawyer(self):
         needs_human, reason = rn.escalation_check(
@@ -189,15 +190,17 @@ class TestEscalationCheck:
         )
         assert needs_human is True
 
-    def test_confusion_what_is_this(self):
+    def test_confusion_handled_gracefully_not_escalated(self):
         needs_human, _ = rn.escalation_check(
             "What is this? I dont understand what you want.", sentiment="neutral"
         )
-        assert needs_human is True
+        assert needs_human is False
 
-    def test_confusion_scam_question(self):
+    def test_scam_question_handled_gracefully_not_escalated(self):
+        # 'Is this a scam?' is a fair question the bot should ANSWER with grace,
+        # not a reason to go silent and escalate.
         needs_human, _ = rn.escalation_check("Is this a scam?", sentiment="neutral")
-        assert needs_human is True
+        assert needs_human is False
 
     def test_vulnerability_passed_away(self):
         needs_human, _ = rn.escalation_check(
@@ -234,11 +237,21 @@ class TestEscalationCheck:
         )
         assert needs_human is True
 
-    def test_hostile_language_scammer(self):
-        needs_human, _ = rn.escalation_check(
+    def test_scammer_plus_leave_me_alone_is_optout(self):
+        # 'leave me alone' is an opt-out -> hard escalate + honor. The 'scammer'
+        # insult on its own would not; the opt-out does.
+        needs_human, reason = rn.escalation_check(
             "You are a scammer, leave me alone.", sentiment="neutral"
         )
         assert needs_human is True
+        assert reason.startswith("optout")
+
+    def test_pure_scammer_insult_handled_gracefully(self):
+        # Insult with NO opt-out / legal / grief -> bot handles with grace, no hard stop.
+        needs_human, _ = rn.escalation_check(
+            "You wholesalers are predatory vultures.", sentiment="hostile"
+        )
+        assert needs_human is False
 
     # -- should return False (normal negotiation messages) --
 
@@ -278,6 +291,39 @@ class TestEscalationCheck:
         assert isinstance(result, tuple) and len(result) == 2
         assert isinstance(result[0], bool)
         assert isinstance(result[1], str)
+
+    def test_reason_is_category_prefixed(self):
+        _, legal = rn.escalation_check("I will call my attorney.")
+        assert legal.startswith("legal:")
+        _, opt = rn.escalation_check("Please remove me from your list.")
+        assert opt.startswith("optout:")
+        _, vuln = rn.escalation_check("My husband passed away last month.")
+        assert vuln.startswith("vulnerable:")
+
+
+class TestHoldingReply:
+    """Compassionate, category-appropriate holding lines for HARD escalation."""
+
+    def _deal(self):
+        d = rn.DealState("100 Test Ave", "Memphis", "TN")
+        d.owner_name = "Rita Johnson"
+        return d
+
+    def test_legal_holding_is_warm_and_steps_back(self):
+        msg = rn.holding_reply("legal:attorney", self._deal())
+        assert "Rita" in msg
+        # No price negotiation in a legal holding line
+        assert "$" not in msg
+
+    def test_optout_holding_honors_and_apologizes(self):
+        msg = rn.holding_reply("optout:remove me", self._deal())
+        assert "Rita" in msg
+        assert "list" in msg.lower() or "won't hear" in msg.lower()
+
+    def test_vulnerable_holding_is_compassionate_no_pressure(self):
+        msg = rn.holding_reply("vulnerable:passed away", self._deal())
+        assert "Rita" in msg
+        assert "no rush" in msg.lower() or "pressure" in msg.lower()
 
 
 # ---------------------------------------------------------------------------
