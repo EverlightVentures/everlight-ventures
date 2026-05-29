@@ -96,9 +96,43 @@ _BANNED_STATES = [
 ]
 
 
+def _strip_disclosure(html_body: str) -> str:
+    """Remove the AI disclosure footer before token comparison.
+
+    The footer is intentionally identical across all emails, so including it
+    in Jaccard similarity would artificially inflate scores and cause the
+    voice-diversity tests to fail for a non-persona reason.
+
+    Strips from the opening <p style="margin-top:24px ... (the disclosure wrapper)
+    through the closing </p> using the unique sentinel text as anchor.
+    """
+    # The footer starts with a <p style= tag and ends with </p>.
+    # The sentinel "real company -- real people, using AI" is unique inside it.
+    # Strategy: find the <p tag that contains the sentinel and strip it entirely.
+    sentinel = "real company -- real people, using AI"
+    if sentinel not in html_body:
+        return html_body
+    # Find the sentinel, then walk left to the opening <p
+    idx = html_body.find(sentinel)
+    # Walk left to find the start of the <p tag
+    p_start = html_body.rfind("<p", 0, idx)
+    if p_start < 0:
+        return html_body
+    # Walk right from sentinel to find </p>
+    close = html_body.find("</p>", idx)
+    if close < 0:
+        return html_body
+    return html_body[:p_start] + html_body[close + 4:]
+
+
 def _token_set(html_body: str) -> set[str]:
-    """Strip HTML tags, lowercase, split on whitespace/punctuation for token comparison."""
+    """Strip HTML tags, lowercase, split on whitespace/punctuation for token comparison.
+
+    Strips the shared AI disclosure footer first so it does not inflate
+    Jaccard similarity between personas.
+    """
     import re
+    html_body = _strip_disclosure(html_body)
     text = re.sub(r"<[^>]+>", " ", html_body)
     tokens = re.findall(r"[a-z]{3,}", text.lower())
     return set(tokens)
@@ -1117,17 +1151,20 @@ class TestOperatorBlueprintCompliance:
     # ---- Piper: under 1200 chars on first_touch (no over-talking) ----
 
     def test_piper_first_touch_under_1200_chars_plain_text(self):
-        """Piper first_touch body text (HTML stripped) must be under 1200 chars."""
+        """Piper first_touch body text (HTML stripped, disclosure footer excluded) must be under 1200 chars."""
         import re
         result = ot.render_first_touch(_RITA_WITH_APPRAISAL, persona_key="piper")
         body = result["body_html"]
+        # Strip the AI disclosure footer before char count -- it is shared boilerplate,
+        # not persona copy. The persona body itself must still be concise.
+        body = _strip_disclosure(body)
         # strip HTML tags for char count
         plain = re.sub(r"<[^>]+>", " ", body)
         plain = re.sub(r"\s+", " ", plain).strip()
         char_count = len(plain)
         assert char_count <= 1200, (
-            f"Piper first_touch must be under 1200 chars plain text (no over-talking). "
-            f"Got {char_count} chars. Blueprint: 'We don't need to over-talk.' "
+            f"Piper first_touch persona body (footer excluded) must be under 1200 chars plain text "
+            f"(no over-talking). Got {char_count} chars. Blueprint: 'We don't need to over-talk.' "
             f"Text (first 800): {plain[:800]}"
         )
 
@@ -1774,4 +1811,270 @@ class TestPipelineStageCount:
         assert 24 <= count <= 30, (
             f"build_stage_bodies should return 24-30 stages (expanded from 20). "
             f"Got {count} stages: {[s['num'] for s in stages]}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# NEW: AI Disclosure Footer tests
+# ---------------------------------------------------------------------------
+
+_MARQUISE_LEAD_FULL = {
+    "owner_name": "EVANS ARIN B",
+    "property_address": "942 MELROSE",
+    "address": "942 MELROSE",
+    "city": "Memphis",
+    "state": "TN",
+    "zip_code": "38114",
+    "owner_mailing_zip": "38114",
+    "owner_mailing_street": "905 S WILLETT ST",
+    "county_appraisal": 25000,
+    "total_appraisal_usd": 25000,
+    "subdivision": "V C THOMAS",
+    "last_sale_year": 2017,
+    "last_sale_price_usd": 100,
+    "sales_history": [
+        {"type_code": "QC", "date": "2017-03-28", "price_usd": 100, "year": 2017},
+        {"type_code": "QC", "date": "2011-02-15", "price_usd": 5010, "year": 2011},
+    ],
+    "permits": [{"year": 1979, "permit_number": "124026"}],
+    "source": "shelby_tax_delinquent",
+}
+
+_DISCLOSURE_MARKER = "real company -- real people, using AI"
+
+
+class TestAIDisclosureFooter:
+    """AI disclosure footer: present on every consumer-facing email,
+    absent from [INTERNAL] team notes, idempotent, text quality checks."""
+
+    # ---- Consumer-facing: piper/henry/marvin/vaughn render_first_touch ----
+
+    def test_piper_first_touch_has_disclosure(self):
+        result = ot.render_first_touch(_RITA_LEAD, persona_key="piper")
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "Piper first_touch must contain AI disclosure footer"
+        )
+
+    def test_henry_first_touch_has_disclosure(self):
+        result = ot.render_first_touch(_RITA_LEAD, persona_key="henry")
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "Henry first_touch must contain AI disclosure footer"
+        )
+
+    def test_marvin_first_touch_has_disclosure(self):
+        result = ot.render_first_touch(_RITA_LEAD, persona_key="marvin")
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "Marvin first_touch must contain AI disclosure footer"
+        )
+
+    def test_vaughn_first_touch_has_disclosure(self):
+        result = ot.render_first_touch(_RITA_LEAD, persona_key="vaughn")
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "Vaughn first_touch must contain AI disclosure footer"
+        )
+
+    # ---- Consumer-facing: followup + final variants ----
+
+    def test_piper_followup_has_disclosure(self):
+        result = ot.render_first_touch_followup(_RITA_LEAD, persona_key="piper")
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "Piper first_touch_followup must contain AI disclosure footer"
+        )
+
+    def test_piper_final_has_disclosure(self):
+        result = ot.render_first_touch_final(_RITA_LEAD, persona_key="piper")
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "Piper first_touch_final must contain AI disclosure footer"
+        )
+
+    def test_henry_followup_has_disclosure(self):
+        result = ot.render_first_touch_followup(_RITA_LEAD, persona_key="henry")
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "Henry followup must contain AI disclosure footer"
+        )
+
+    def test_marvin_followup_has_disclosure(self):
+        result = ot.render_followup(_RITA_LEAD, touch_index=1, persona_key="marvin")
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "Marvin followup must contain AI disclosure footer"
+        )
+
+    def test_vaughn_followup_has_disclosure(self):
+        result = ot.render_first_touch_followup(_RITA_LEAD, persona_key="vaughn")
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "Vaughn followup must contain AI disclosure footer"
+        )
+
+    # ---- Consumer-facing: negotiation + closing_handoff ----
+
+    def test_negotiation_has_disclosure(self):
+        result = ot.render_negotiation(_RITA_LEAD, persona_key="henry")
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "render_negotiation must contain AI disclosure footer"
+        )
+
+    def test_closing_handoff_has_disclosure(self):
+        result = ot.render_closing_handoff(_RITA_LEAD, persona_key="marvin")
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "render_closing_handoff must contain AI disclosure footer"
+        )
+
+    # ---- Consumer-facing: Marquise seller-side multi-round ----
+
+    def test_marquise_first_touch_has_disclosure(self):
+        result = ot.render_marquise_first_touch(_MARQUISE_LEAD_FULL)
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "render_marquise_first_touch must contain AI disclosure footer"
+        )
+
+    def test_marquise_anchor_offer_has_disclosure(self):
+        result = ot.render_marquise_anchor_offer(_MARQUISE_LEAD_FULL)
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "render_marquise_anchor_offer must contain AI disclosure footer"
+        )
+
+    def test_marquise_counter_has_disclosure(self):
+        result = ot.render_marquise_counter(_MARQUISE_LEAD_FULL, seller_ask=23750, our_offer=21250)
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "render_marquise_counter must contain AI disclosure footer"
+        )
+
+    def test_marquise_round2_has_disclosure(self):
+        result = ot.render_marquise_round2_validation(
+            _MARQUISE_LEAD_FULL, seller_position=20000, our_offer=13000
+        )
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "render_marquise_round2_validation must contain AI disclosure footer"
+        )
+
+    def test_marquise_round3_has_disclosure(self):
+        result = ot.render_marquise_round3_social_proof(_MARQUISE_LEAD_FULL, our_offer=14000)
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "render_marquise_round3_social_proof must contain AI disclosure footer"
+        )
+
+    def test_marquise_round4_has_disclosure(self):
+        result = ot.render_marquise_round4_final(_MARQUISE_LEAD_FULL, our_offer=14750)
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "render_marquise_round4_final must contain AI disclosure footer"
+        )
+
+    # ---- Consumer-facing: buyer-side henry/marvin/vaughn ----
+
+    def test_henry_buyer_pitch_has_disclosure(self):
+        result = ot.render_henry_buyer_pitch_with_flip_math(
+            _RITA_LEAD, our_buy=33640, chris_buy=45140,
+            repairs_est=22000, arv_est=89900, chris_net=22760
+        )
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "render_henry_buyer_pitch_with_flip_math must contain AI disclosure footer"
+        )
+
+    def test_marvin_pitch_chris_has_disclosure(self):
+        result = ot.render_marvin_pitch_chris(_MARQUISE_LEAD_FULL, our_price=21250, chris_price=24250)
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "render_marvin_pitch_chris must contain AI disclosure footer"
+        )
+
+    def test_marvin_full_deal_sheet_has_disclosure(self):
+        result = ot.render_marvin_full_deal_sheet(
+            _MARQUISE_LEAD_FULL,
+            {"our_price": 21250, "chris_price": 24250, "our_fee": 3000}
+        )
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "render_marvin_full_deal_sheet must contain AI disclosure footer"
+        )
+
+    def test_henry_buyer_negotiation_has_disclosure(self):
+        result = ot.render_henry_buyer_negotiation(_RITA_LEAD, our_floor=45140, chris_offer=35000)
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "render_henry_buyer_negotiation must contain AI disclosure footer"
+        )
+
+    def test_henry_buyer_counter_r2_has_disclosure(self):
+        result = ot.render_henry_buyer_counter_round2(_RITA_LEAD, chris_position=35000, our_floor=45140)
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "render_henry_buyer_counter_round2 must contain AI disclosure footer"
+        )
+
+    def test_vaughn_assignment_countersign_has_disclosure(self):
+        result = ot.render_vaughn_assignment_countersign(
+            _RITA_LEAD,
+            {"chris_price": 24250, "our_fee": 3000,
+             "close_date": "June 10, 2026", "seller_name": "Rita Townsend"}
+        )
+        assert _DISCLOSURE_MARKER in result["body_html"], (
+            "render_vaughn_assignment_countersign must contain AI disclosure footer"
+        )
+
+    # ---- [INTERNAL] renders must NOT have disclosure ----
+
+    def test_marquise_pivot_to_chris_no_disclosure(self):
+        """[INTERNAL] pivot note must NOT contain the consumer disclosure."""
+        result = ot.render_marquise_pivot_to_chris(_MARQUISE_LEAD_FULL, locked_price=21250)
+        assert _DISCLOSURE_MARKER not in result["body_html"], (
+            "[INTERNAL] render_marquise_pivot_to_chris must NOT contain AI disclosure footer"
+        )
+
+    def test_marquise_final_wrap_no_disclosure(self):
+        """[INTERNAL] final wrap must NOT contain the consumer disclosure."""
+        result = ot.render_marquise_final_wrap(
+            _MARQUISE_LEAD_FULL, sell_price=21250, assign_price=24250, commission=3000
+        )
+        assert _DISCLOSURE_MARKER not in result["body_html"], (
+            "[INTERNAL] render_marquise_final_wrap must NOT contain AI disclosure footer"
+        )
+
+    # ---- Idempotency ----
+
+    def test_with_disclosure_idempotent(self):
+        """Calling _with_disclosure twice must not double the footer."""
+        body = "<p>Test email body.</p>"
+        once = ot._with_disclosure(body)
+        twice = ot._with_disclosure(once)
+        count = twice.count(_DISCLOSURE_MARKER)
+        assert count == 1, (
+            f"_with_disclosure must be idempotent -- calling twice produced {count} footers"
+        )
+
+    def test_with_disclosure_idempotent_on_rendered_output(self):
+        """Idempotency holds on real rendered output (not just a stub string)."""
+        result = ot.render_first_touch(_RITA_LEAD, persona_key="piper")
+        body = result["body_html"]
+        body2 = ot._with_disclosure(body)
+        count = body2.count(_DISCLOSURE_MARKER)
+        assert count == 1, (
+            f"Applying _with_disclosure to already-disclosed piper first_touch "
+            f"produced {count} copies"
+        )
+
+    # ---- Disclosure text quality checks ----
+
+    def test_disclosure_contains_real(self):
+        """Disclosure must contain the word 'real'."""
+        assert "real" in ot.AI_DISCLOSURE_FOOTER.lower(), (
+            "AI_DISCLOSURE_FOOTER must contain 'real'"
+        )
+
+    def test_disclosure_contains_ai(self):
+        """Disclosure must mention AI."""
+        footer_lower = ot.AI_DISCLOSURE_FOOTER.lower()
+        assert "ai" in footer_lower, (
+            "AI_DISCLOSURE_FOOTER must mention 'AI'"
+        )
+
+    def test_disclosure_contains_reply_handoff(self):
+        """Disclosure must describe a human reply handoff."""
+        footer = ot.AI_DISCLOSURE_FOOTER.lower()
+        assert any(phrase in footer for phrase in [
+            "reply", "respond", "real person"
+        ]), (
+            "AI_DISCLOSURE_FOOTER must describe human reply handoff"
+        )
+
+    def test_disclosure_no_em_dash(self):
+        """Disclosure must use ASCII -- not the em-dash character U+2014."""
+        em_dash = chr(0x2014)
+        assert em_dash not in ot.AI_DISCLOSURE_FOOTER, (
+            "AI_DISCLOSURE_FOOTER must use ASCII -- not em-dash U+2014 (blocked by repo hook)"
         )
