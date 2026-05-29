@@ -29,15 +29,21 @@ def fetch_market_resolution(market_id: str) -> tuple:
     Looks up the gamma market by id; if closed, the winning outcome is the one
     whose outcomePrice rounds to 1."""
     try:
+        # gamma single-market endpoint is the PATH form /markets/{id}
+        # (the ?id= query filter returns an empty list).
         req = urllib.request.Request(
-            f"{GAMMA}/markets?id={market_id}",
+            f"{GAMMA}/markets/{market_id}",
             headers={"User-Agent": "ev-settle/1.0"})
         with urllib.request.urlopen(req, timeout=15) as r:
             data = json.loads(r.read())
-        rows = data.get("data", data) if isinstance(data, dict) else data
-        if not rows:
+        if isinstance(data, list):
+            m = data[0] if data else None
+        elif isinstance(data, dict) and "id" in data:
+            m = data
+        else:
+            m = (data.get("data") or [None])[0] if isinstance(data, dict) else None
+        if not m:
             return (False, None)
-        m = rows[0]
         if not (m.get("closed") or m.get("umaResolutionStatus") == "resolved"):
             return (False, None)
         outcomes = m.get("outcomes")

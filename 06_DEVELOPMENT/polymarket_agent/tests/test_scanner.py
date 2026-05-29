@@ -35,3 +35,19 @@ def test_filters_by_time_to_resolution():
     m_ok = make_market("ok", end_days=2)
     filtered = s.filter([m_soon, m_ok])
     assert {m.id for m in filtered} == {"ok"}
+
+
+def test_skips_subjective_resolution_markets():
+    s = Scanner(min_liquidity=5000, min_volume_24h=1000, min_hours_to_resolution=4, max_spread=0.05)
+    objective = make_market("obj")          # "Qobj?" -- objective
+    novelty = make_market("nov"); novelty.category = "Pop Culture"
+    joke = make_market("joke"); joke.question = "Will Jesus return before GTA VI?"
+    filtered = s.filter([objective, novelty, joke])
+    assert {m.id for m in filtered} == {"obj"}  # only the objective one survives
+
+
+def test_skip_subjective_can_be_disabled():
+    s = Scanner(min_liquidity=5000, min_volume_24h=1000, min_hours_to_resolution=4,
+                max_spread=0.05, skip_subjective=False)
+    novelty = make_market("nov"); novelty.category = "Pop Culture"
+    assert any(m.id == "nov" for m in s.filter([novelty]))

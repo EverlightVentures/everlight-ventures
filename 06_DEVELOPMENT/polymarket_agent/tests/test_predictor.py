@@ -85,3 +85,33 @@ def test_llm_predict_parses_real_claude_json(monkeypatch):
     assert prob == 1.0  # clamped from 1.5
     assert conf == 0.8
     assert reason == "edge"
+
+
+def test_bets_no_side_when_yes_overpriced():
+    """YES priced 0.60 but true ~0.30 -> negative YES edge but +0.10 NO edge.
+    The bot should bet NO (fade the overpriced YES/longshot)."""
+    p = Predictor(min_edge=0.05, min_confidence=0.4)
+    brief = {"question": "Will longshot X win?", "category": "Sports",
+             "signals": [Signal(source="x", text="X unlikely per report")],
+             "_market_price": 0.60, "_outcome": "Yes",
+             "_prices": {"Yes": 0.60, "No": 0.40}, "_outcomes": ["Yes", "No"]}
+    # Claude: P(Yes)=0.30 -> P(No)=0.70 vs No price 0.40 -> NO edge +0.30
+    with patch.object(p, "_llm_predict", return_value=(0.30, 0.95, "X overpriced")):
+        preds = p.predict(brief and {"m1": brief}, brain_policy={})
+    assert len(preds) == 1
+    assert preds[0].outcome == "No"           # fades the overpriced Yes
+    assert preds[0].market_price == 0.40
+    assert abs(preds[0].edge - 0.30) < 1e-6
+
+
+def test_picks_larger_edge_side():
+    p = Predictor(min_edge=0.05, min_confidence=0.4)
+    brief = {"question": "Q", "category": "Sports",
+             "signals": [Signal(source="x", text="strong yes")],
+             "_market_price": 0.50, "_outcome": "Yes",
+             "_prices": {"Yes": 0.50, "No": 0.50}, "_outcomes": ["Yes", "No"]}
+    # P(Yes)=0.70 -> Yes edge +0.20, No edge -0.20 -> bet Yes
+    with patch.object(p, "_llm_predict", return_value=(0.70, 0.95, "yes")):
+        preds = p.predict({"m1": brief}, brain_policy={})
+    assert preds[0].outcome == "Yes"
+    assert abs(preds[0].edge - 0.20) < 1e-6

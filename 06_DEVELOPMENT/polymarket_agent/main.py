@@ -62,11 +62,14 @@ def run_paper_cycle(cfg: dict):
     signals = gather_signals(cfg, filtered, data_dir)
     researcher = Researcher()
     briefs = researcher.aggregate(filtered, signals)
-    # Inject market prices for predictor
+    # Inject prices/outcomes for predictor (both sides for NO-side betting)
     for m in filtered:
         if m.id in briefs:
-            briefs[m.id]["_market_price"] = m.prices.get("YES", 0.5)
-            briefs[m.id]["_outcome"] = "YES"
+            outcome = m.outcomes[0] if m.outcomes else "YES"
+            briefs[m.id]["_market_price"] = m.prices.get(outcome, m.prices.get("YES", 0.5))
+            briefs[m.id]["_outcome"] = outcome
+            briefs[m.id]["_prices"] = dict(m.prices)
+            briefs[m.id]["_outcomes"] = list(m.outcomes)
     (data_dir / "research_briefs.json").write_text(json.dumps(
         {k: {kk: vv if kk != "signals" else [asdict(s) for s in vv]
              for kk, vv in v.items()} for k, v in briefs.items()},
@@ -115,6 +118,16 @@ def run_paper_cycle(cfg: dict):
             ))
         except ValueError:
             continue
+
+    # SETTLE: resolve any paper bets whose markets have closed -> calibration data.
+    # This is what makes the 20-trade Brier gate actually accumulate over time.
+    try:
+        from polymarket_agent.settle_paper import settle
+        s = settle(data_dir)
+        log.info("paper cycle: %d approved, settled %d resolved (%d still open)",
+                 len(approved), s["resolved"], s["still_open"])
+    except Exception as e:
+        log.warning("paper settlement failed: %s", e)
 
 
 def _make_notifier(cfg: dict, data_dir: Path):
@@ -194,6 +207,10 @@ def _build_briefs(filtered, signals):
         outcome = m.outcomes[0] if m.outcomes else "YES"
         briefs[m.id]["_market_price"] = m.prices.get(outcome, m.prices.get("YES", 0.5))
         briefs[m.id]["_outcome"] = outcome
+        # Full price/outcome map so the predictor can evaluate BOTH sides
+        # (bet NO when YES is overpriced -- fades longshots).
+        briefs[m.id]["_prices"] = dict(m.prices)
+        briefs[m.id]["_outcomes"] = list(m.outcomes)
     return briefs
 
 

@@ -110,21 +110,41 @@ class Predictor:
             # skip (do not burn an LLM call, do not bet blind).
             if not (brief.get("signals") or []):
                 continue
+            primary = brief.get("_outcome", "YES")
             market_price = brief.get("_market_price", 0.5)
-            outcome = brief.get("_outcome", "YES")
+            # Claude estimates P(primary outcome) once.
             try:
                 pred_prob, raw_conf, reasoning = self._llm_predict(brief)
             except Exception:
                 continue
-            edge = pred_prob - market_price
             adjusted_conf = self._brain_adjust(raw_conf, brain_policy)
-            if edge < self.min_edge:
-                continue
             if adjusted_conf < self.min_confidence:
                 continue
+
+            # Evaluate BOTH sides. P(primary)=pred_prob implies P(other)=1-pred_prob.
+            # Bet whichever side the market under-prices by >= min_edge. This is
+            # what lets us FADE overpriced longshots (bet the favorite/NO side).
+            prices = brief.get("_prices") or {}
+            outcomes = brief.get("_outcomes") or [primary]
+            other = next((o for o in outcomes if o != primary), None)
+            other_price = prices.get(other) if other else (1.0 - market_price)
+
+            candidates = [(primary, pred_prob, market_price)]
+            if other is not None and other_price is not None:
+                candidates.append((other, 1.0 - pred_prob, float(other_price)))
+
+            # Choose the side with the largest positive edge >= min_edge.
+            best = None
+            for side, p_true, p_mkt in candidates:
+                e = p_true - p_mkt
+                if e >= self.min_edge and (best is None or e > best[3]):
+                    best = (side, p_true, p_mkt, e)
+            if best is None:
+                continue
+            side, p_true, p_mkt, e = best
             out.append(Prediction(
-                market_id=market_id, outcome=outcome,
-                predicted_prob=pred_prob, market_price=market_price,
-                edge=edge, confidence=adjusted_conf, reasoning=reasoning,
+                market_id=market_id, outcome=side,
+                predicted_prob=p_true, market_price=p_mkt,
+                edge=e, confidence=adjusted_conf, reasoning=reasoning,
             ))
         return out
