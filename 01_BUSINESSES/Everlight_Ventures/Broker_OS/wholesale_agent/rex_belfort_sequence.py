@@ -430,10 +430,20 @@ def run_belfort_sequence():
     completed = 0
     skipped_suppressed = 0
     enriched_count = 0
-    max_per_run = 80
+    # Warming caps (deliverability, 2026-05-29): the 33% bounce on the first cold run can
+    # scorch sender reputation. Small bursts + a daily ceiling; ramp via env as we warm.
+    max_per_run = int(os.environ.get("WHOLESALE_MAX_PER_RUN", "15"))
+    daily_cap = int(os.environ.get("WHOLESALE_DAILY_COLD_CAP", "20"))
+    _cap_file = Path("/mnt/sdcard/AA_MY_DRIVE/_logs/wholesale/daily_send_count.json")
+    _today = NOW.date().isoformat()
+    try:
+        _cc = json.loads(_cap_file.read_text())
+    except Exception:
+        _cc = {}
+    sent_today = int(_cc.get(_today, 0))
 
     for lead in leads:
-        if sent >= max_per_run:
+        if sent >= max_per_run or sent_today >= daily_cap:
             break
 
         status = lead.get("status", "new")
@@ -441,7 +451,9 @@ def run_belfort_sequence():
                        "dead", "opted_out", "permanently_dead"):
             continue
 
-        email = lead.get("owner_email", "")
+        # osint_enrich writes lead["email"]; legacy paths use owner_email. Read BOTH or
+        # the cron silently skips every OSINT-enriched lead (wiring bug, 2026-05-29).
+        email = lead.get("owner_email") or lead.get("email", "")
 
         # CAN-SPAM: check suppression list BEFORE every send
         if is_suppressed(email):
@@ -496,6 +508,13 @@ def run_belfort_sequence():
                 lead["last_outreach"] = NOW.isoformat()
                 lead["status"] = "contacted"
                 sent += 1
+                sent_today += 1
+                try:
+                    _cap_file.parent.mkdir(parents=True, exist_ok=True)
+                    _cc[_today] = sent_today
+                    _cap_file.write_text(json.dumps(_cc))
+                except Exception:
+                    pass
 
                 # Record the conversation entry + full branded HTML so the
                 # dashboard can render the EXACT email that was delivered.
