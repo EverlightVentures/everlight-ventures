@@ -539,6 +539,32 @@ def _wrap(paragraphs: list[str], sig_html: str) -> str:
     return body + sig_html
 
 
+def render_freeform(persona_key: str, text: str, subject: str) -> dict:
+    """Wrap arbitrary reasoned text (e.g. an LLM negotiation reply) in the
+    branded shell + persona signature + AI disclosure.
+
+    This is the on-brand path for replies that are REASONED rather than
+    templated -- negotiation rounds 2+ where the bot responds to what the
+    seller actually said. Plain-text in, branded body_html out, so a
+    reasoned reply looks identical to a templated one in the inbox.
+
+    Args:
+        persona_key: PERSONA key (e.g. "henry").
+        text: plain text; double-newline = paragraph break, single = <br>.
+        subject: email subject line.
+    Returns: {"subject", "body_html", "persona"} -- same shape as render_*.
+    """
+    p_key = persona_key.lower().strip()
+    if p_key not in PERSONA:
+        p_key = "henry"
+    blocks = [b.strip() for b in text.split("\n\n") if b.strip()]
+    paragraphs = [html.escape(b).replace("\n", "<br>") for b in blocks]
+    if not paragraphs:
+        paragraphs = [html.escape(text.strip())]
+    body_html = _wrap(paragraphs, _sig(p_key))
+    return {"subject": subject, "body_html": _with_disclosure(body_html), "persona": PERSONA[p_key]}
+
+
 def _lead_type_salutation(lead_type: str, owner_name: str) -> str:
     """Return the correct opener salutation for a given lead type."""
     if lead_type == "llc":

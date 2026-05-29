@@ -361,3 +361,83 @@ class TestModuleIntegrity:
             str(em_dash_count) + " em-dash character(s) found in rex_negotiator.py. "
             "Replace all with --."
         )
+
+
+# ---------------------------------------------------------------------------
+# SHARED DECIDER -- compose_negotiation_reply (sim == live guarantee)
+# ---------------------------------------------------------------------------
+
+class TestComposeNegotiationReply:
+    """The ONE function live + sim both call, so they cannot diverge."""
+
+    def _deal(self):
+        d = rn.DealState("100 Test Ave", "Memphis", "TN")
+        d.owner_name = "Jane Doe"
+        d.owner_email = "jane@example.com"
+        d.arv = 100000
+        d.our_offer = 48000
+        d.our_mao = 54000
+        d.repair_estimate = 22000
+        d.status = "negotiating"
+        return d
+
+    def test_reply_shape(self):
+        reply = rn.compose_negotiation_reply(self._deal(), "tell me more", is_first_touch=True)
+        for k in ("subject", "body_html", "persona", "engine", "is_first_touch", "reasoned_text"):
+            assert k in reply, "missing key: " + k
+
+    def test_first_touch_uses_anchor_template(self):
+        reply = rn.compose_negotiation_reply(self._deal(), "tell me more", is_first_touch=True)
+        assert reply["engine"] == "template:first-touch-anchor"
+        assert reply["is_first_touch"] is True
+        assert len(reply["body_html"]) > 100  # branded anchor table
+
+    def test_rounds_2plus_reasoned(self, monkeypatch):
+        d = self._deal()
+
+        def fake_gen(deal, msg, force_template=False):
+            rn.LAST_RESPONSE_ENGINE = "llm:claude-sonnet-4-6"
+            return "I hear you. The math works at 54k, not 60k."
+
+        monkeypatch.setattr(rn, "generate_negotiation_response", fake_gen)
+        reply = rn.compose_negotiation_reply(d, "I want 60k", is_first_touch=False)
+        assert reply["engine"] == "llm:claude-sonnet-4-6"
+        assert reply["reasoned_text"].startswith("I hear you")
+        assert "54k" in reply["body_html"]
+        assert reply["is_first_touch"] is False
+
+    def test_rounds_2plus_reasoned_text_is_branded(self, monkeypatch):
+        d = self._deal()
+
+        def fake_gen(deal, msg, force_template=False):
+            rn.LAST_RESPONSE_ENGINE = "template:keyword-fallback"
+            return "Here is where I can be today."
+
+        monkeypatch.setattr(rn, "generate_negotiation_response", fake_gen)
+        reply = rn.compose_negotiation_reply(d, "too low", is_first_touch=False)
+        # branded shell carries Henry's signature so reasoned == templated in inbox
+        assert "Henry Hammond" in reply["body_html"]
+        assert reply["engine"] == "template:keyword-fallback"
+
+
+class TestRenderFreeform:
+    """Branded wrap for reasoned (non-templated) replies."""
+
+    def test_branded_wrap_paragraphs(self):
+        import outreach_templates as ot
+        out = ot.render_freeform("henry", "First para.\n\nSecond para.", "Re: 100 Test Ave")
+        assert out["subject"] == "Re: 100 Test Ave"
+        assert "<p>First para.</p>" in out["body_html"]
+        assert "<p>Second para.</p>" in out["body_html"]
+        assert "Henry Hammond" in out["body_html"]
+
+    def test_escapes_html(self):
+        import outreach_templates as ot
+        out = ot.render_freeform("henry", "5 < 6 & 7 > 2", "subj")
+        assert "&lt;" in out["body_html"]
+        assert "&amp;" in out["body_html"]
+
+    def test_unknown_persona_falls_back_to_henry(self):
+        import outreach_templates as ot
+        out = ot.render_freeform("nobody", "hi", "subj")
+        assert out["persona"]["name"] == "Henry Hammond"

@@ -352,6 +352,12 @@ OBJECTION_PLAYBOOK = {
 # never auto-send unless operator has deliberately flipped the flag.
 _AUTOSEND = os.environ.get("WHOLESALE_NEGOTIATE_AUTOSEND", "0").strip() == "1"
 
+# Tracks which engine produced the most recent generate_negotiation_response()
+# output: "llm:claude-sonnet-4-6" | "llm:claude-cli-sonnet" |
+# "template:keyword-fallback". Read by compose_negotiation_reply() so both the
+# live pipeline and the simulation can LABEL each reply with its true source.
+LAST_RESPONSE_ENGINE = "unknown"
+
 HUMAN_REVIEW_DIR = Path(os.environ.get("LOGS_DIR", "/mnt/sdcard/AA_MY_DRIVE/_logs")) / "negotiation"
 HUMAN_REVIEW_DIR.mkdir(parents=True, exist_ok=True)
 HUMAN_REVIEW_QUEUE = HUMAN_REVIEW_DIR / "human_review_queue.jsonl"
@@ -454,7 +460,18 @@ def queue_for_human_review(deal: DealState, seller_message: str, drafted_respons
             log.warning(f"Slack escalation alert failed (non-fatal): {exc}")
 
 
-def generate_negotiation_response(deal: DealState, seller_message: str) -> str:
+def generate_negotiation_response(deal: DealState, seller_message: str,
+                                  force_template: bool = False) -> str:
+    """Reason about our reply to the seller. Tries Claude API -> claude CLI ->
+    keyword template. force_template=True skips both LLM paths (deterministic,
+    free, fast) -- used by the simulation for cost-free dashboard iteration.
+    Sets module global LAST_RESPONSE_ENGINE to the path actually taken.
+    """
+    global LAST_RESPONSE_ENGINE
+    if force_template:
+        LAST_RESPONSE_ENGINE = "template:keyword-fallback"
+        return _template_response(deal, seller_message)
+
     context = f"""Deal context:
 - Property: {deal.address}, {deal.city}, {deal.state}
 - Asking price: ${deal.asking_price:,.0f}
@@ -496,6 +513,7 @@ Conversation history:
                 timeout=30,
             )
             if resp.status_code == 200:
+                LAST_RESPONSE_ENGINE = "llm:claude-sonnet-4-6"
                 return resp.json()["content"][0]["text"]
 
         import shutil
@@ -510,11 +528,13 @@ Conversation history:
                 capture_output=True, text=True, timeout=60, env=env,
             )
             if result.returncode == 0 and result.stdout.strip():
+                LAST_RESPONSE_ENGINE = "llm:claude-cli-sonnet"
                 return result.stdout.strip()
 
     except Exception as e:
         log.warning(f"AI response failed: {e}, using template")
 
+    LAST_RESPONSE_ENGINE = "template:keyword-fallback"
     return _template_response(deal, seller_message)
 
 
@@ -552,6 +572,86 @@ def _template_response(deal: DealState, seller_message: str) -> str:
         return f"Wonderful -- I am excited to move forward. I will have our purchase agreement sent over today for your review. We use a licensed title company to handle the closing, so everything is protected. I will be in touch shortly with next steps."
 
     return f"Thank you for getting back to me about {deal.address}. I am prepared to make a cash offer of ${deal.our_offer:,.0f} and can close in as little as 7 days. No repairs needed on your end, no realtor commissions. Would that work for you?"
+
+
+# ---------------------------------------------------------------------------
+# SHARED NEGOTIATION DECIDER -- single source of truth for live AND sim
+# ---------------------------------------------------------------------------
+
+def compose_negotiation_reply(deal: DealState, seller_message: str,
+                              is_first_touch: bool = False,
+                              force_template: bool = False) -> dict:
+    """Decide our side's negotiation reply. The ONE function the live pipeline
+    AND the simulation both call, so the two can never diverge.
+
+    Strategy (see THE_RECIPE.md):
+      - FIRST negotiation touch -> deterministic anchor-replacement table
+        (render_negotiation/henry). Money math stays exact -- no LLM arithmetic
+        drift on the net-vs-traditional numbers.
+      - ROUNDS 2+ -> LLM-reasoned reply (generate_negotiation_response), wrapped
+        in the branded shell. This is where the bot truly reasons about what the
+        seller actually said; falls back to keyword template if no API key.
+
+    Escalation + the AUTOSEND draft-gate are enforced by the CALLER
+    (handle_seller_reply / the sim), not here -- this function only decides the
+    content + records which engine produced it.
+
+    Returns dict: {"subject", "body_html", "persona", "engine", "is_first_touch",
+                   "reasoned_text"}.
+    """
+    if is_first_touch and _HAS_OUTREACH_TEMPLATES:
+        lead_dict = {
+            "owner_name": deal.owner_name,
+            "property_address": deal.address,
+            "address": deal.address,
+            "city": deal.city,
+            "state": deal.state,
+            "parcel_id": getattr(deal, "parcel_id", ""),
+            "county_appraisal": getattr(deal, "arv", 0) or 0,
+        }
+        try:
+            rendered = _render_negotiation(lead_dict, persona_key="henry")
+            return {
+                "subject": rendered["subject"],
+                "body_html": rendered["body_html"],
+                "persona": rendered["persona"],
+                "engine": "template:first-touch-anchor",
+                "is_first_touch": True,
+                "reasoned_text": "",
+            }
+        except Exception as exc:
+            log.warning(f"render_negotiation failed on first touch ({exc}); reasoning instead")
+
+    # Rounds 2+ (or first touch with no templates): reason about the reply.
+    reasoned_text = generate_negotiation_response(deal, seller_message,
+                                                  force_template=force_template)
+    engine = LAST_RESPONSE_ENGINE
+    persona = pick_persona_for_stage(deal.status)
+
+    if _HAS_OUTREACH_TEMPLATES:
+        try:
+            from outreach_templates import render_freeform
+            rendered = render_freeform("henry", reasoned_text, subject=f"Re: {deal.address}")
+            return {
+                "subject": rendered["subject"],
+                "body_html": rendered["body_html"],
+                "persona": rendered["persona"],
+                "engine": engine,
+                "is_first_touch": bool(is_first_touch),
+                "reasoned_text": reasoned_text,
+            }
+        except Exception as exc:
+            log.warning(f"render_freeform failed ({exc}); using plain signature wrap")
+
+    body_html = f"{reasoned_text}\n\n{persona.get('signature', '')}"
+    return {
+        "subject": f"Re: {deal.address}",
+        "body_html": body_html,
+        "persona": persona,
+        "engine": engine,
+        "is_first_touch": bool(is_first_touch),
+        "reasoned_text": reasoned_text,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -709,35 +809,18 @@ def handle_seller_reply(deal: DealState, seller_message: str) -> str:
         except Exception as e:
             log.warning(f"Handoff send failed (continuing with reply anyway): {e}")
 
-    response = generate_negotiation_response(deal, seller_message)
-    # Pick persona based on current deal stage (Henry for negotiating, Marvin for post-PSA)
-    active_persona = pick_persona_for_stage(deal.status)
-
-    # Wire outreach_templates.render_negotiation for Henry (negotiating stage).
-    # Build a lead-shaped dict from the deal object so the template renderer
-    # gets the same fields it expects from the assessor pipeline.
-    if _HAS_OUTREACH_TEMPLATES and deal.status in ("negotiating", "verbal_agreement"):
-        _lead_dict = {
-            "owner_name": deal.owner_name,
-            "property_address": deal.address,
-            "address": deal.address,
-            "city": deal.city,
-            "state": deal.state,
-            "parcel_id": getattr(deal, "parcel_id", ""),
-            "county_appraisal": getattr(deal, "arv", 0) or 0,
-        }
-        try:
-            _rendered = _render_negotiation(_lead_dict, persona_key="henry")
-            subject = _rendered["subject"]
-            response_with_sig = _rendered["body_html"]
-            active_persona = _rendered["persona"]
-        except Exception as _e:
-            log.warning(f"outreach_templates.render_negotiation failed ({_e}), using fallback")
-            response_with_sig = f"{response}\n\n{active_persona['signature']}"
-            subject = f"Re: {deal.address}"
-    else:
-        response_with_sig = f"{response}\n\n{active_persona['signature']}"
-        subject = f"Re: {deal.address}"
+    # SHARED DECIDER -- identical logic the simulation uses (sim == live).
+    # First negotiation touch -> deterministic anchor table; rounds 2+ -> reasoned.
+    is_first_touch = old_status in ("new", "outreach_sent") and deal.status == "negotiating"
+    reply = compose_negotiation_reply(deal, seller_message, is_first_touch=is_first_touch)
+    subject = reply["subject"]
+    response_with_sig = reply["body_html"]
+    active_persona = reply["persona"]
+    reply_engine = reply["engine"]
+    response = reply["reasoned_text"] or (
+        "[Henry first-touch anchor-replacement offer sent]" if is_first_touch else ""
+    )
+    log.info(f"[NEGOTIATE] {deal.address} reply engine={reply_engine} first_touch={is_first_touch}")
 
     # --- HUMAN-DRAFT GATE (HARD) ---
     # Check escalation BEFORE any send. Default is draft-everything (AUTOSEND=0).
