@@ -171,3 +171,12 @@ growth_ladder:
     - {min_bankroll: 30000, max_bet_usd: 5000}   # >= $30k: $5,000
   compound_until_usd: 30000     # below this: 100% compounds, no withdrawal
   payout_per_day_usd: 100       # at/above $30k: pay this daily, compound the rest
+
+# Smart-money copy-trade (most-cited real edge from research transcripts).
+# Follow VETTED profitable wallets (not raw top-N -- most top wallets are bots).
+# Add proxy-wallet addresses to `wallets` to activate. Free, on-chain, one signal
+# among many (feeds research + 360 synthesis; never auto-fires a trade alone).
+smart_money:
+  enabled: true
+  wallets: []          # operator/we populate with vetted profitable wallets
+  min_size_usd: 100    # ignore dust positions

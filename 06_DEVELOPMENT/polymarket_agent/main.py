@@ -191,6 +191,18 @@ def gather_signals(cfg: dict, filtered, data_dir: Path) -> list:
     except Exception as e:
         log.warning("Telegram source failed: %s", e)
 
+    # Smart-money copy-trade -- follow vetted profitable wallets (the most-cited
+    # real retail edge from the research transcripts). Free, on-chain.
+    try:
+        sm = cfg.get("smart_money", {})
+        if sm.get("enabled") and sm.get("wallets"):
+            from polymarket_agent.dataflows.smart_money import SmartMoney
+            signals += SmartMoney(wallets=sm["wallets"],
+                                  min_size_usd=float(sm.get("min_size_usd", 100))) \
+                .get_smart_money_signals(last_minutes=120)
+    except Exception as e:
+        log.warning("Smart-money source failed: %s", e)
+
     log.info("gathered %d signals across enabled sources", len(signals))
     return signals
 
