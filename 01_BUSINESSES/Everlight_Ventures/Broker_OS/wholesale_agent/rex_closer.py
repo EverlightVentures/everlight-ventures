@@ -676,7 +676,47 @@ everlightventures.io/wholesale
 
 
 def blast_deal_to_buyers(deal: dict) -> int:
-    """Email the deal sheet to all buyers in buyers_db.json + Supabase."""
+    """Email the deal sheet to all buyers in buyers_db.json + Supabase.
+
+    SB 909 GATE (TN): Assignment is blocked until the 3-business-day seller
+    notice clock has elapsed.  This function is the primary assignment dispatch
+    point (blasting to end buyers = executing the assignment).  Fails CLOSED.
+    See sb909_notice.assignment_gate for enforcement logic.
+    """
+    # ---------------------------------------------------------------------------
+    # SB 909 ASSIGNMENT GATE -- fail closed (TN SB 909, Public Chapter 911, 2022)
+    # ---------------------------------------------------------------------------
+    deal_id = deal.get("deal_id") or deal.get("address_slug") or ""
+    state = deal.get("state", "").upper()
+    if state == "TN" or not state:
+        # Apply gate to TN deals and to any deal where state is unknown (conservative).
+        try:
+            from sb909_notice import assignment_gate as _sb909_gate
+            _gate_ok, _gate_reason = _sb909_gate(deal_id)
+            if not _gate_ok:
+                log.error(
+                    "SB909 ASSIGNMENT BLOCKED for deal %s: %s -- "
+                    "send sb909_notice first and wait 3 business days.",
+                    deal_id, _gate_reason,
+                )
+                post_slack(
+                    f"*SB909 ASSIGNMENT BLOCKED*\n"
+                    f"Deal: {deal_id}\n"
+                    f"Reason: {_gate_reason}\n"
+                    f"Action required: send SB 909 notice to seller and wait 3 business days "
+                    f"before blasting to buyers."
+                )
+                return 0  # blocked -- zero buyers notified
+        except ImportError:
+            # Fail CLOSED: if sb909_notice module is missing, block assignment.
+            log.error(
+                "SB909 ASSIGNMENT BLOCKED for deal %s: sb909_notice module not found. "
+                "Cannot verify 3-day notice compliance. Assignment halted.",
+                deal_id,
+            )
+            return 0
+    # ---------------------------------------------------------------------------
+
     deal_sheet = generate_deal_sheet(deal)
     addr = deal.get("address", "")
     city = deal.get("city", "")
@@ -1287,12 +1327,46 @@ def close_deal(deal: dict, buyer: dict) -> dict:
     """
     Close a wholesale deal: generate finder agreement PDF, send Stripe invoice.
 
+    SB 909 GATE (TN): Assignment is also blocked here as a second enforcement
+    layer.  blast_deal_to_buyers is the primary gate; close_deal is the
+    secondary gate covering any direct-close path that bypasses the buyer blast.
+
     Args:
         deal: deal dict with address, offer, assignment_fee, etc.
         buyer: dict with name, email, company
 
     Returns: dict with contract_path, invoice_result
     """
+    # ---------------------------------------------------------------------------
+    # SB 909 ASSIGNMENT GATE -- second enforcement layer
+    # ---------------------------------------------------------------------------
+    _deal_id = deal.get("deal_id") or deal.get("address_slug") or ""
+    _state = deal.get("state", "").upper()
+    if _state == "TN" or not _state:
+        try:
+            from sb909_notice import assignment_gate as _sb909_gate
+            _gate_ok, _gate_reason = _sb909_gate(_deal_id)
+            if not _gate_ok:
+                log.error(
+                    "SB909 ASSIGNMENT BLOCKED (close_deal) for deal %s: %s",
+                    _deal_id, _gate_reason,
+                )
+                post_slack(
+                    f"*SB909 CLOSE BLOCKED*\n"
+                    f"Deal: {_deal_id}\n"
+                    f"Reason: {_gate_reason}\n"
+                    f"Send SB 909 notice to seller + wait 3 business days before closing."
+                )
+                return {"blocked": True, "reason": _gate_reason, "contract_path": None, "invoice": None}
+        except ImportError:
+            log.error(
+                "SB909 BLOCKED (close_deal) for deal %s: sb909_notice module missing. "
+                "Failing closed -- assignment halted.",
+                _deal_id,
+            )
+            return {"blocked": True, "reason": "sb909_module_missing", "contract_path": None, "invoice": None}
+    # ---------------------------------------------------------------------------
+
     addr = deal.get("address", "")
     slug = deal.get("address_slug", make_slug(addr))
     assignment_fee = deal.get("assignment_fee", deal.get("offer", 0) * 0.10)
