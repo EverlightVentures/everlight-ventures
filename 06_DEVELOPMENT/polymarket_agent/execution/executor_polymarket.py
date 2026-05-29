@@ -160,10 +160,6 @@ class PolymarketExecutor:
                 context={"on_chain": str(on_chain), "amount": str(req.amount_usdc)},
             )
 
-        # CHECK 9: sign + submit + record
-        typed_data = self._build_eip712(req)
-        signature = self.wallet.sign_clob_order(typed_data)
-
         # I3: Re-check HALT just before commit -- close the window where reconciler
         # could have detected drift and written HALT during the in-flight checks
         if self.halt_path.exists():
@@ -172,8 +168,17 @@ class PolymarketExecutor:
                 context={"phase": "pre_submit_recheck", "market_id": req.market_id},
             )
 
+        # CHECK 9: place real order via LiveClobBackend.
+        # The backend (py-clob-client) owns EIP-712 construction + signing +
+        # neg-risk/tick-size handling + L2 auth. We pass shares = USDC / price.
+        shares = req.amount_usdc / req.limit_price
         try:
-            order_id = self.clob.submit_order({"typed_data": typed_data, "signature": signature})
+            order_resp = self.clob.place_order(
+                token_id=req.market_id,
+                price=float(req.limit_price),
+                size=float(shares),
+                side="BUY",
+            )
         except Exception as e:
             raise OrderRejectedByVenueError(
                 "CLOB rejected order",
@@ -181,11 +186,15 @@ class PolymarketExecutor:
                          "error": str(e)[:200]},
             ) from e
 
-        # I5: guard empty order_id from CLOB
+        # I5: extract + guard order id (matches LiveClobBackend.extract_order_id)
+        order_id = None
+        if isinstance(order_resp, dict):
+            order_id = (order_resp.get("orderID") or order_resp.get("orderId")
+                        or order_resp.get("id"))
         if not order_id or not isinstance(order_id, str):
             raise OrderRejectedByVenueError(
                 "CLOB returned empty or invalid order_id",
-                context={"market_id": req.market_id, "returned": repr(order_id)},
+                context={"market_id": req.market_id, "returned": repr(order_resp)[:200]},
             )
 
         bet = Bet(
@@ -210,91 +219,3 @@ class PolymarketExecutor:
                 context={"order_id": order_id, "market_id": req.market_id},
             ) from e
         return bet
-
-    def _build_eip712(self, req: BetRequest) -> dict:
-        """Polymarket CLOB EIP-712 typed-data for an Order envelope.
-
-        Constructs the full eth_account-compatible typed_data dict so wallet.sign_clob_order
-        can produce a signature accepted by the CLOB. The wallet enforces:
-        - keys present: types, primaryType, domain, message
-        - domain.chainId == 137
-
-        Order math:
-          For a BUY of `amount_usdc` shares-of-outcome at `limit_price`:
-            makerAmount = amount_usdc * 1e6 (USDC.e is 6 decimals)
-            takerAmount = (amount_usdc / limit_price) * 1e6
-          Side: 0 = BUY (we always take YES/NO long; spec says outcome resolution to YES)
-        """
-        from decimal import Decimal as _Dec
-        import time as _time
-        import secrets as _secrets
-
-        # Wallet must already be loaded; pull its address for maker/signer
-        maker = getattr(self.wallet, "address", "0x0000000000000000000000000000000000000000")
-
-        # Convert amounts to integer USDC.e units (6 decimals)
-        usdc_decimals = _Dec(10) ** 6
-        maker_amount = int(req.amount_usdc * usdc_decimals)
-        if req.limit_price <= 0:
-            raise PolymarketExecutorError(
-                "limit_price must be > 0 for EIP-712 construction",
-                context={"limit_price": str(req.limit_price)},
-            )
-        # taker_amount represents the outcome-share quantity at limit_price
-        # For a YES bet at $0.50, $10 USDC buys 20 YES shares
-        taker_amount = int((req.amount_usdc / req.limit_price) * usdc_decimals)
-
-        # tokenId comes from req.market_id mapped to the outcome token id. In this scaffold
-        # the market_id IS the token_id string (the CLOB encodes outcome tokens directly).
-        try:
-            token_id = int(req.market_id)
-        except (ValueError, TypeError):
-            # Some markets use non-integer ids; py-clob-client handles via gamma->token resolution.
-            # For now, hash the string to a deterministic uint256 for testability.
-            token_id = int.from_bytes(req.market_id.encode()[:32].ljust(32, b"\0"), "big")
-
-        return {
-            "types": {
-                "EIP712Domain": [
-                    {"name": "name", "type": "string"},
-                    {"name": "version", "type": "string"},
-                    {"name": "chainId", "type": "uint256"},
-                    {"name": "verifyingContract", "type": "address"},
-                ],
-                "Order": [
-                    {"name": "salt", "type": "uint256"},
-                    {"name": "maker", "type": "address"},
-                    {"name": "signer", "type": "address"},
-                    {"name": "taker", "type": "address"},
-                    {"name": "tokenId", "type": "uint256"},
-                    {"name": "makerAmount", "type": "uint256"},
-                    {"name": "takerAmount", "type": "uint256"},
-                    {"name": "expiration", "type": "uint256"},
-                    {"name": "nonce", "type": "uint256"},
-                    {"name": "feeRateBps", "type": "uint256"},
-                    {"name": "side", "type": "uint8"},
-                    {"name": "signatureType", "type": "uint8"},
-                ],
-            },
-            "primaryType": "Order",
-            "domain": {
-                "name": "Polymarket CTF Exchange",
-                "version": "1",
-                "chainId": 137,
-                "verifyingContract": "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E",
-            },
-            "message": {
-                "salt": _secrets.randbits(256),
-                "maker": maker,
-                "signer": maker,
-                "taker": "0x0000000000000000000000000000000000000000",
-                "tokenId": token_id,
-                "makerAmount": maker_amount,
-                "takerAmount": taker_amount,
-                "expiration": int(_time.time()) + 60 * 60,  # 1-hour expiry
-                "nonce": int(_time.time() * 1000),
-                "feeRateBps": 0,
-                "side": 0,  # 0 = BUY
-                "signatureType": 0,  # 0 = EOA
-            },
-        }

@@ -28,7 +28,8 @@ def make_executor(tmp_path, **overrides):
     wallet.sign_clob_order.return_value = "0xfake"
 
     clob = MagicMock()
-    clob.submit_order.return_value = "bet_id_1"
+    # Real path: executor check 9 calls clob.place_order(...) -> dict with order id
+    clob.place_order.return_value = {"orderID": "bet_id_1"}
 
     cfg = {
         "live_trading_enabled": True,
@@ -107,15 +108,19 @@ def test_check_8_on_chain_balance_short(tmp_path, monkeypatch):
         ex.submit_order(make_req())
 
 
-def test_happy_path_submits_signs_updates_ledger(tmp_path, monkeypatch):
+def test_happy_path_places_order_updates_ledger(tmp_path, monkeypatch):
     monkeypatch.setenv("LIVE_TRADING", "true")
     monkeypatch.delenv("EV_TRADER_HALT", raising=False)
     ex, wallet, clob = make_executor(tmp_path)
-    ex.wallet.address = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
     bet = ex.submit_order(make_req())
     assert bet.id == "bet_id_1"
-    assert wallet.sign_clob_order.call_count == 1
-    assert clob.submit_order.call_count == 1
+    # Real path: check 9 calls the LiveClobBackend.place_order
+    assert clob.place_order.call_count == 1
+    _, kwargs = clob.place_order.call_args
+    assert kwargs["token_id"] == "mkt_1"
+    assert kwargs["side"] == "BUY"
+    # shares = amount / price = 10 / 0.5 = 20
+    assert kwargs["size"] == 20.0
     open_bets = json.loads((tmp_path / "open_bets.json").read_text())
     assert len(open_bets) == 1
 
@@ -157,52 +162,18 @@ def test_check_9_clob_rejection_wrapped(tmp_path, monkeypatch):
     monkeypatch.setenv("LIVE_TRADING", "true")
     monkeypatch.delenv("EV_TRADER_HALT", raising=False)
     ex, wallet, clob = make_executor(tmp_path)
-    ex.wallet.address = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-    clob.submit_order.side_effect = RuntimeError("network down")
+    clob.place_order.side_effect = RuntimeError("network down")
     with pytest.raises(OrderRejectedByVenueError):
         ex.submit_order(make_req())
 
 
-def test_eip712_builder_returns_valid_typed_data(tmp_path, monkeypatch):
-    """EIP-712 builder produces a dict that satisfies wallet.sign_clob_order contract."""
+def test_check_9_empty_order_id_rejected(tmp_path, monkeypatch):
     monkeypatch.setenv("LIVE_TRADING", "true")
     monkeypatch.delenv("EV_TRADER_HALT", raising=False)
-    ex, _, _ = make_executor(tmp_path)
-    # wallet.address needs to exist on the mock
-    ex.wallet.address = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-    req = BetRequest(market_id="123456", outcome="YES",
-                     amount_usdc=Decimal("10"), limit_price=Decimal("0.5"))
-    typed_data = ex._build_eip712(req)
-
-    # Required keys per wallet.sign_clob_order
-    assert {"types", "primaryType", "domain", "message"} <= typed_data.keys()
-    # Domain chainId must be 137
-    assert typed_data["domain"]["chainId"] == 137
-    assert typed_data["domain"]["name"] == "Polymarket CTF Exchange"
-    # Order envelope structure
-    assert typed_data["primaryType"] == "Order"
-    msg = typed_data["message"]
-    assert msg["maker"] == "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-    assert msg["signer"] == msg["maker"]
-    assert msg["taker"] == "0x0000000000000000000000000000000000000000"
-    # makerAmount = 10 USDC * 1e6 = 10_000_000
-    assert msg["makerAmount"] == 10_000_000
-    # takerAmount = (10 / 0.5) * 1e6 = 20_000_000
-    assert msg["takerAmount"] == 20_000_000
-    assert msg["side"] == 0
-    assert msg["signatureType"] == 0
-
-
-def test_eip712_rejects_zero_limit_price(tmp_path, monkeypatch):
-    monkeypatch.setenv("LIVE_TRADING", "true")
-    monkeypatch.delenv("EV_TRADER_HALT", raising=False)
-    ex, _, _ = make_executor(tmp_path)
-    ex.wallet.address = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266"
-    req = BetRequest(market_id="123456", outcome="YES",
-                     amount_usdc=Decimal("10"), limit_price=Decimal("0"))
-    from polymarket_agent.execution.exceptions import PolymarketExecutorError
-    with pytest.raises(PolymarketExecutorError):
-        ex._build_eip712(req)
+    ex, wallet, clob = make_executor(tmp_path)
+    clob.place_order.return_value = {"success": True}  # no orderID
+    with pytest.raises(OrderRejectedByVenueError):
+        ex.submit_order(make_req())
 
 
 def test_amount_must_be_decimal_not_float(tmp_path, monkeypatch):
