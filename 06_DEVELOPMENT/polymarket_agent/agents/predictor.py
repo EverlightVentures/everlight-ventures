@@ -34,11 +34,16 @@ def _signal_text(s) -> tuple:
 
 class Predictor:
     def __init__(self, min_edge: float = 0.05, min_confidence: float = 0.6,
-                 model: str = "claude-sonnet-4-6", api_key: str = None):
+                 model: str = "claude-sonnet-4-6", api_key: str = None,
+                 max_llm_calls: int = 15):
         self.min_edge = min_edge
         self.min_confidence = min_confidence
         self.model = model
         self._api_key = api_key  # None -> lazy-load from env/.env
+        # Cost control: never spend more than N Claude calls per cycle. Prioritize
+        # markets whose signals are HIGH credibility (smart-money 0.9, rsshub 0.85)
+        # over generic RSS (0.7) -- so we don't burn API on loose keyword matches.
+        self.max_llm_calls = max_llm_calls
 
     def _brain_adjust(self, raw_confidence: float, brain_policy: dict) -> float:
         bp = {**_DEFAULT_BRAIN, **brain_policy}
@@ -94,9 +99,23 @@ class Predictor:
         except Exception as e:
             return (market_price, 0.0, f"llm_error:{type(e).__name__}")
 
+    def _best_cred(self, brief) -> float:
+        sigs = brief.get("signals") or []
+        best = 0.0
+        for s in sigs:
+            c = s.get("credibility", 0) if isinstance(s, dict) else getattr(s, "credibility", 0)
+            best = max(best, float(c or 0))
+        return best
+
     def predict(self, briefs: dict, brain_policy: dict) -> list:
         out = []
-        for market_id, brief in briefs.items():
+        # Cost control: rank briefs by best signal credibility, only LLM-evaluate
+        # the top N (high-cred signals first), skip the rest this cycle.
+        ranked = sorted(
+            [(mid, b) for mid, b in briefs.items() if (b.get("signals") or [])],
+            key=lambda kv: self._best_cred(kv[1]), reverse=True,
+        )[: self.max_llm_calls]
+        for market_id, brief in ranked:
             # Cost + edge discipline: no matched signals -> no information edge ->
             # skip (do not burn an LLM call, do not bet blind).
             if not (brief.get("signals") or []):

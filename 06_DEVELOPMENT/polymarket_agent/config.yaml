@@ -178,7 +178,12 @@ growth_ladder:
 # among many (feeds research + 360 synthesis; never auto-fires a trade alone).
 smart_money:
   enabled: true
-  wallets: []          # operator/we populate with vetted profitable wallets
+  wallets:
+    - "0x42c99f38d2b951b0dc8e8bd5371fa80c9dd19623"   # TRCM (starter -- vet over time)
+    - "0xeebde7a0e019a63e6b476eb425505b7b3e6eba30"   # Bonereaper
+    - "0x6485f47d0344c03eb4340f985159f6eb2dcba265"   # flatbarrel
+    - "0x0a26054fe174697bf6be759c4b600fdb830d1851"   # BrevanHoward
+    - "0xa1d57d329227c75b12b09f927fb3d6d6ef8f1343"   # 1kto1m
   min_size_usd: 100    # ignore dust positions
 
 # Convexity lane -- catch the big asymmetric/moonshot trades (operator directive).
@@ -196,7 +201,7 @@ convexity:
 # Phase 1: 24-48h PAPER on short-horizon markets (fast resolutions -> quick Brier).
 # Phase 2: week-1 small REAL 'test the waters' trades = live calibration.
 calibration:
-  prefer_short_horizon: true
+  prefer_short_horizon: false   # full candidate set; calibration speed comes from fast-resolving bets within it
   max_hours_to_resolution: 72   # target markets resolving within 3 days
   paper_hours: 48               # fast paper phase length
   test_live_max_bet_usd: 2.0    # week-1 tiny real stakes
