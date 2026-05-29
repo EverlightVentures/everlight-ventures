@@ -51,9 +51,13 @@ def read_key_file(key_path) -> str:
     if not p.exists():
         raise KeyFileError(f"wallet key file missing at {p}")
     mode = p.stat().st_mode & 0o777
-    if mode not in (0o600, 0o400):
+    # The security-meaningful invariant is NO world (other) access. Group access
+    # (0o660/0o640) is tolerated because Android sdcard/exFAT mounts cannot
+    # represent perms finer than 0o660; on real ext4 (e5, proot root fs) prefer
+    # 0o600. World read/write/exec bits are never acceptable for a key file.
+    if mode & 0o007:
         raise KeyFileError(
-            f"wallet key file perms {oct(mode)} at {p} -- expected 0o600 or 0o400"
+            f"wallet key file perms {oct(mode)} at {p} are world-accessible -- forbidden"
         )
     text = p.read_text(encoding="utf-8-sig").strip()
     if not _HEX_KEY.fullmatch(text):

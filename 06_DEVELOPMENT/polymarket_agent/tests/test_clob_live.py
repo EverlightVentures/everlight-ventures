@@ -22,13 +22,22 @@ def test_read_key_file_missing_raises(tmp_path):
     assert "missing" in str(e.value).lower()
 
 
-def test_read_key_file_bad_perms_raises(tmp_path):
+def test_read_key_file_world_readable_raises(tmp_path):
     p = tmp_path / "k.key"
     p.write_text("0x" + "a" * 64)
-    os.chmod(p, 0o644)
+    os.chmod(p, 0o644)  # world-readable -> forbidden
     with pytest.raises(KeyFileError) as e:
         read_key_file(p)
-    assert "perms" in str(e.value).lower()
+    assert "world" in str(e.value).lower() or "perms" in str(e.value).lower()
+
+
+def test_read_key_file_group_only_ok(tmp_path):
+    """0o660 (no world bits) is tolerated -- sdcard/exFAT floor."""
+    p = tmp_path / "k.key"
+    p.write_text("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
+    os.chmod(p, 0o660)
+    key = read_key_file(p)
+    assert key.startswith("0x")
 
 
 def test_read_key_file_bad_hex_raises(tmp_path):

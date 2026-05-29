@@ -175,3 +175,4 @@ _state/cloud_mirror_secrets/
 
 # Pre-migration archives of obsolete function bodies (local reference only)
 *.pre-migration.*.txt
+03_AUTOMATION_CORE/03_Credentials/polymarket_wallet.*

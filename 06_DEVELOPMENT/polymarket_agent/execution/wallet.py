@@ -30,11 +30,13 @@ class PolygonWallet:
                 f"wallet key file missing at {key_path} -- aborting wallet load"
             )
 
-        # I1 -- file permission check
+        # I1 -- file permission check. Security-meaningful invariant: NO world
+        # (other) access. Group access (0o660) is tolerated because Android
+        # sdcard/exFAT cannot represent finer perms; on real ext4 prefer 0o600.
         mode = key_path.stat().st_mode & 0o777
-        if mode not in (0o600, 0o400):
+        if mode & 0o007:
             raise RuntimeError(
-                f"wallet key file perms {oct(mode)} at {key_path} -- expected 0o600 or 0o400"
+                f"wallet key file perms {oct(mode)} at {key_path} are world-accessible -- forbidden"
             )
 
         # I3 -- BOM-safe read + hex validation
