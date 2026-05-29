@@ -444,7 +444,10 @@ def run_candle_cycle(cfg: dict):
     placed = 0
     for asset in cc.get("assets", ["BTC"]):
         d = candle_decision(asset, min_edge=min_edge,
-                            enter_after_min=float(cc.get("enter_after_min", 3.0)))
+                            enter_after_min=float(cc.get("enter_after_min", 3.0)),
+                            stake=stake, fee_rate=float(cc.get("fee_rate", 0.02)),
+                            gas_usd=float(cc.get("gas_usd", 0.01)),
+                            min_net_ev_pct=float(cc.get("min_net_ev_pct", 0.05)))
         if not d or "skip" in d:
             continue
         if any(o["asset"] == asset and o["window_ts"] == _cw(d) for o in openb):

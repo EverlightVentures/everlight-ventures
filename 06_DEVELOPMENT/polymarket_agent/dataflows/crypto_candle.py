@@ -124,7 +124,9 @@ def window_outcome(asset: str, window_ts: int) -> str | None:
 
 
 def candle_decision(asset: str = "BTC", min_edge: float = 0.05,
-                    enter_after_min: float = 3.0, now_ts: float = None) -> dict | None:
+                    enter_after_min: float = 3.0, now_ts: float = None,
+                    stake: float = 2.0, fee_rate: float = 0.02, gas_usd: float = 0.01,
+                    min_net_ev_pct: float = 0.05) -> dict | None:
     """Combine the live market + momentum into a trade decision, or None.
 
     Strategy (transcript-derived): only act LATE in the window (>= enter_after_min,
@@ -145,9 +147,17 @@ def candle_decision(asset: str = "BTC", min_edge: float = 0.05,
     edge = pred - price
     if edge < min_edge:
         return {"skip": f"edge {edge:.3f} < {min_edge}", "market": mkt, "momentum": mo}
+    # COST GATE (operator law): the bet must clear fees + gas AND grow the book.
+    # On a ~50c candle the crypto fee peaks, so a thin edge nets NEGATIVE -- skip.
+    from polymarket_agent.costs import net_ev
+    ev = net_ev(stake, price, pred, fee_rate=fee_rate, gas_usd=gas_usd)
+    if ev["net_ev_pct"] < min_net_ev_pct:
+        return {"skip": f"net EV {ev['net_ev_pct']*100:.1f}% < {min_net_ev_pct*100:.0f}% "
+                        f"after costs (${ev['cost']})", "market": mkt, "momentum": mo, "ev": ev}
     return {
         "asset": asset.upper(), "market_id": mkt["token_ids"][direction],
         "outcome": direction, "market_price": price, "predicted_prob": pred,
         "edge": round(edge, 4), "strength": mo["strength"],
+        "net_ev_pct": ev["net_ev_pct"], "cost": ev["cost"],
         "slug": mkt["slug"], "question": mkt["question"],
     }

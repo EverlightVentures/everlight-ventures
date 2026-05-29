@@ -216,3 +216,6 @@ crypto_candle:
   stake_usd: 2.0          # bounded test-the-waters stake per candle
   min_edge: 0.05          # momentum prob must beat market by >=5%
   enter_after_min: 3.0    # only act in the last ~2 min of the 5-min window
+  fee_rate: 0.02          # Polymarket crypto taker fee (peaks at 50c)
+  gas_usd: 0.01           # Polymarket trades are mostly gasless (relayer)
+  min_net_ev_pct: 0.05    # COST GATE: net EV after fees+gas must be >=5% of stake
