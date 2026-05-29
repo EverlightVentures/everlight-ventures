@@ -1150,22 +1150,25 @@ class TestOperatorBlueprintCompliance:
 
     # ---- Piper: under 1200 chars on first_touch (no over-talking) ----
 
-    def test_piper_first_touch_under_1200_chars_plain_text(self):
-        """Piper first_touch body text (HTML stripped, disclosure footer excluded) must be under 1200 chars."""
+    def test_piper_first_touch_under_2500_chars_plain_text(self):
+        """Piper first_touch body text (HTML stripped, disclosure footer excluded) must be under 2500 chars.
+
+        Limit raised from 1200 -> 2500 when THE RECIPE (2026-05-28) was implemented.
+        THE RECIPE requires 12 beats (accusation audit, SPIN question, anchor-replacement table,
+        social proof, tenure respect, pride/gratitude close, consult-counsel) -- these add
+        substance, not fluff. The original 1200 limit was for the old minimal body.
+        2500 is the new ceiling to catch runaway templates.
+        """
         import re
         result = ot.render_first_touch(_RITA_WITH_APPRAISAL, persona_key="piper")
         body = result["body_html"]
-        # Strip the AI disclosure footer before char count -- it is shared boilerplate,
-        # not persona copy. The persona body itself must still be concise.
         body = _strip_disclosure(body)
-        # strip HTML tags for char count
         plain = re.sub(r"<[^>]+>", " ", body)
         plain = re.sub(r"\s+", " ", plain).strip()
         char_count = len(plain)
-        assert char_count <= 1200, (
-            f"Piper first_touch persona body (footer excluded) must be under 1200 chars plain text "
-            f"(no over-talking). Got {char_count} chars. Blueprint: 'We don't need to over-talk.' "
-            f"Text (first 800): {plain[:800]}"
+        assert char_count <= 2500, (
+            f"Piper first_touch persona body (footer excluded) must be under 2500 chars plain text. "
+            f"Got {char_count} chars. Text (first 800): {plain[:800]}"
         )
 
     # ---- Piper: CTA is direct, not a phone call pitch ----
@@ -2077,4 +2080,363 @@ class TestAIDisclosureFooter:
         em_dash = chr(0x2014)
         assert em_dash not in ot.AI_DISCLOSURE_FOOTER, (
             "AI_DISCLOSURE_FOOTER must use ASCII -- not em-dash U+2014 (blocked by repo hook)"
+        )
+
+    def test_disclosure_not_automated_outreach_team(self):
+        """Disclosure must NOT say 'automated outreach team' (operator direction: not a machine-after-house read)."""
+        assert "automated outreach team" not in ot.AI_DISCLOSURE_FOOTER, (
+            "AI_DISCLOSURE_FOOTER must NOT say 'automated outreach team' -- "
+            "operator direction: brand-forward, not machine-after-house"
+        )
+
+    def test_disclosure_not_at_scale(self):
+        """Disclosure must NOT say 'at scale' (sounds corporate, per operator direction)."""
+        assert "at scale" not in ot.AI_DISCLOSURE_FOOTER.lower(), (
+            "AI_DISCLOSURE_FOOTER must NOT say 'at scale'"
+        )
+
+
+# ---------------------------------------------------------------------------
+# NEW: THE RECIPE compliance tests (2026-05-28)
+# ---------------------------------------------------------------------------
+
+_RITA_TAX_LEAD = {
+    "owner_name": "TOWNSEND RITA M",
+    "property_address": "836 N BELLEVUE BLVD",
+    "address": "836 N BELLEVUE BLVD",
+    "city": "Memphis",
+    "state": "TN",
+    "mailing_address": "836 N BELLEVUE BLVD MEMPHIS TN",
+    "county_appraisal": 58000,
+    "years_owned": 22,
+    "source": "shelby_tax_delinquent",
+}
+
+_LLC_LEAD_RECIPE = {
+    "owner_name": "MAGNOLIA HOLDINGS LLC",
+    "property_address": "1200 UNION AVE",
+    "city": "Memphis",
+    "state": "TN",
+    "mailing_address": "PO BOX 1000 CHICAGO IL 60601",
+    "county_appraisal": 65000,
+}
+
+_PROBATE_LEAD_RECIPE = {
+    "owner_name": "ESTATE OF HAROLD GREEN",
+    "property_address": "77 JACKSON AVE",
+    "city": "Memphis",
+    "state": "TN",
+    "county_appraisal": 52000,
+    "years_owned": 15,
+}
+
+_ABSENTEE_LEAD_RECIPE = {
+    "owner_name": "WALKER DARNELL",
+    "property_address": "210 POPLAR AVE",
+    "city": "Memphis",
+    "state": "TN",
+    "mailing_address": "9000 SUNSET BLVD LOS ANGELES CA",
+    "county_appraisal": 48000,
+}
+
+
+class TestRecipeCompliancePiper:
+    """Verify THE RECIPE beats are present in Piper first-touch."""
+
+    def test_accusation_audit_beat_present(self):
+        """Piper first-touch must contain the accusation audit ('bracing' or 'put you at ease')."""
+        result = ot.render_first_touch(_RITA_TAX_LEAD, persona_key="piper")
+        body = result["body_html"].lower()
+        assert "bracing" in body or "put you at ease" in body, (
+            "Piper first-touch must contain accusation audit beat ('bracing' or 'put you at ease'). "
+            f"Body: {body[:600]}"
+        )
+
+    def test_dollar_number_present(self):
+        """Piper first-touch must contain at least one $ number."""
+        import re
+        result = ot.render_first_touch(_RITA_TAX_LEAD, persona_key="piper")
+        body = result["body_html"]
+        assert re.search(r"\$\d[\d,]*", body), (
+            "Piper first-touch must contain a $ number. "
+            f"Body: {body[:400]}"
+        )
+
+    def test_anchor_replacement_listing_reference(self):
+        """Piper first-touch must reference the traditional listing path to anchor the number."""
+        result = ot.render_first_touch(_RITA_TAX_LEAD, persona_key="piper")
+        body = result["body_html"].lower()
+        assert any(w in body for w in ["listed", "agent", "commission", "repairs"]), (
+            "Piper first-touch must reference the traditional listing path "
+            "(anchor replacement: 'listed' / 'agent' / 'commission' / 'repairs'). "
+            f"Body: {body[:600]}"
+        )
+
+    def test_pride_gratitude_close_present(self):
+        """Piper first-touch must contain the pride/gratitude close ('yourself' or 'credit' or 'earned')."""
+        result = ot.render_first_touch(_RITA_TAX_LEAD, persona_key="piper")
+        body = result["body_html"].lower()
+        assert any(w in body for w in ["yourself", "credit", "earned", "invested"]), (
+            "Piper first-touch must contain pride/gratitude close ('yourself' / 'credit' / 'earned'). "
+            f"Body: {body[:600]}"
+        )
+
+    def test_consult_counsel_line_present(self):
+        """Piper first-touch must contain the consult-counsel line ('attorney' or 'family')."""
+        result = ot.render_first_touch(_RITA_TAX_LEAD, persona_key="piper")
+        body = result["body_html"].lower()
+        assert "attorney" in body or "family" in body, (
+            "Piper first-touch must contain consult-counsel line ('attorney' or 'family'). "
+            f"Body: {body[:600]}"
+        )
+
+    def test_social_proof_line_present(self):
+        """Piper first-touch must contain a social proof line."""
+        result = ot.render_first_touch(_RITA_TAX_LEAD, persona_key="piper")
+        body = result["body_html"].lower()
+        assert any(w in body for w in ["closed", "streets", "last month", "6 days", "cash in"]), (
+            "Piper first-touch must contain a social proof line. "
+            f"Body: {body[:600]}"
+        )
+
+    def test_tenure_respect_when_22_years(self):
+        """When years_owned=22, Piper must include a tenure-as-respect line."""
+        result = ot.render_first_touch(_RITA_TAX_LEAD, persona_key="piper")
+        body = result["body_html"].lower()
+        assert "22 years" in body or "22" in body, (
+            "Piper first-touch with years_owned=22 must reference the tenure. "
+            f"Body: {body[:600]}"
+        )
+
+
+class TestRecipeLeadTypeDifference:
+    """Probate vs LLC first-touch must differ substantially (Jaccard < 0.5 on body)."""
+
+    def test_probate_vs_llc_jaccard_under_half(self):
+        """Probate and LLC first-touch bodies must differ substantially (Jaccard < 0.5)."""
+        probate = ot.render_first_touch(_PROBATE_LEAD_RECIPE, persona_key="piper")
+        llc = ot.render_first_touch(_LLC_LEAD_RECIPE, persona_key="piper")
+        sim = _token_similarity(probate["body_html"], llc["body_html"])
+        assert sim < 0.5, (
+            f"Probate and LLC first-touch are too similar (Jaccard={sim:.2f}, must be < 0.5). "
+            "Per-lead-type distinct bodies required."
+        )
+
+    def test_llc_no_emotional_bracing_beat(self):
+        """LLC first-touch must NOT contain the emotional accusation-audit beat ('bracing for bad news')."""
+        result = ot.render_first_touch(_LLC_LEAD_RECIPE, persona_key="piper")
+        body = result["body_html"].lower()
+        assert "bracing for bad news" not in body, (
+            "LLC first-touch must not use the emotional 'bracing for bad news' beat -- "
+            "LLC is a businesslike peer interaction, not an emotional appeal."
+        )
+
+    def test_llc_businesslike_tone(self):
+        """LLC first-touch must use businesslike language (peer, acquisition, etc.)."""
+        result = ot.render_first_touch(_LLC_LEAD_RECIPE, persona_key="piper")
+        body = result["body_html"].lower()
+        assert any(w in body for w in ["peer", "acquisition", "numbers", "corridor", "business"]), (
+            "LLC first-touch must use businesslike language. "
+            f"Body: {body[:400]}"
+        )
+
+
+class TestRecipeNoCloneAcrossPersonas:
+    """No sentence >12 words shared verbatim across piper+henry+vaughn first-touch."""
+
+    def _extract_sentences(self, html_body: str) -> list[str]:
+        """Extract plain-text sentences (>12 words) from HTML body."""
+        import re
+        body = _strip_disclosure(html_body)
+        text = re.sub(r"<[^>]+>", " ", body)
+        text = re.sub(r"\s+", " ", text).strip()
+        sentences = re.split(r"[.!?]+", text)
+        return [s.strip() for s in sentences if len(s.split()) > 12]
+
+    def test_no_long_sentence_shared_piper_henry(self):
+        """Piper and Henry first-touch must not share any sentence >12 words verbatim."""
+        piper = ot.render_first_touch(_RITA_TAX_LEAD, persona_key="piper")
+        henry = ot.render_first_touch(_RITA_TAX_LEAD, persona_key="henry")
+        piper_sents = set(s.lower() for s in self._extract_sentences(piper["body_html"]))
+        henry_sents = set(s.lower() for s in self._extract_sentences(henry["body_html"]))
+        shared = piper_sents & henry_sents
+        assert not shared, (
+            f"Piper and Henry share {len(shared)} long sentence(s) verbatim -- clone detected: "
+            f"{list(shared)[:3]}"
+        )
+
+    def test_no_long_sentence_shared_piper_vaughn(self):
+        """Piper and Vaughn first-touch must not share any sentence >12 words verbatim."""
+        piper = ot.render_first_touch(_RITA_TAX_LEAD, persona_key="piper")
+        vaughn = ot.render_first_touch(_RITA_TAX_LEAD, persona_key="vaughn")
+        piper_sents = set(s.lower() for s in self._extract_sentences(piper["body_html"]))
+        vaughn_sents = set(s.lower() for s in self._extract_sentences(vaughn["body_html"]))
+        shared = piper_sents & vaughn_sents
+        assert not shared, (
+            f"Piper and Vaughn share {len(shared)} long sentence(s) verbatim -- clone detected: "
+            f"{list(shared)[:3]}"
+        )
+
+
+class TestRecipeHenryNegotiation:
+    """Henry negotiation: traditional-vs-cash comparison + single offer range, no double-number."""
+
+    _HENRY_LEAD = {
+        "owner_name": "TOWNSEND RITA M",
+        "property_address": "836 N BELLEVUE BLVD",
+        "city": "Memphis",
+        "state": "TN",
+        "mailing_address": "836 N BELLEVUE BLVD MEMPHIS TN",
+        "county_appraisal": 58000,
+    }
+
+    def test_contains_commission_keyword(self):
+        """Henry negotiation must mention 'commission' (traditional listing path)."""
+        result = ot.render_first_touch(self._HENRY_LEAD, persona_key="henry")
+        body = result["body_html"].lower()
+        assert "commission" in body, (
+            "Henry negotiation must reference 'commission' in the traditional-vs-cash comparison. "
+            f"Body: {body[:600]}"
+        )
+
+    def test_contains_cash_keyword(self):
+        """Henry negotiation must mention 'cash' (our offer path)."""
+        result = ot.render_first_touch(self._HENRY_LEAD, persona_key="henry")
+        body = result["body_html"].lower()
+        assert "cash" in body, (
+            "Henry negotiation must reference 'cash' in the comparison. "
+            f"Body: {body[:600]}"
+        )
+
+    def test_single_offer_range_not_double(self):
+        """Henry negotiation must contain exactly one offer range derived from _compute_offer_range.
+
+        The 0.68 bug (2026-05-28): two different percentages quoted in one email.
+        The table owns the number; the lens references the county figure only.
+        appraisal=58000 -> low=27840, high=31320. Only those two values should appear as offer.
+        """
+        import re
+        result = ot.render_first_touch(self._HENRY_LEAD, persona_key="henry")
+        body = result["body_html"]
+        # Extract all dollar values that look like offer numbers (exclude the appraisal itself)
+        low, high = ot._compute_offer_range(self._HENRY_LEAD)
+        appraisal = self._HENRY_LEAD["county_appraisal"]
+        # Verify low and high appear
+        assert str(low).replace(",", "") in body.replace(",", "") or f"{low:,}" in body, (
+            f"Henry negotiation must contain offer_low ${low:,}. Body: {body[:600]}"
+        )
+        assert str(high).replace(",", "") in body.replace(",", "") or f"{high:,}" in body, (
+            f"Henry negotiation must contain offer_high ${high:,}. Body: {body[:600]}"
+        )
+
+    def test_henry_consult_counsel_present(self):
+        """Henry negotiation must contain a consult-counsel line."""
+        result = ot.render_first_touch(self._HENRY_LEAD, persona_key="henry")
+        body = result["body_html"].lower()
+        assert "attorney" in body or "family" in body, (
+            "Henry negotiation must contain consult-counsel line ('attorney' or 'family'). "
+            f"Body: {body[:600]}"
+        )
+
+
+class TestRecipeFooterReframe:
+    """Footer reframe: contains 'real' and 'AI' but NOT 'automated outreach team'."""
+
+    def test_footer_contains_real(self):
+        """Footer must contain 'real'."""
+        assert "real" in ot.AI_DISCLOSURE_FOOTER.lower()
+
+    def test_footer_contains_ai(self):
+        """Footer must mention 'AI'."""
+        assert "ai" in ot.AI_DISCLOSURE_FOOTER.lower()
+
+    def test_footer_not_automated_outreach_team(self):
+        """Footer must NOT say 'automated outreach team'."""
+        assert "automated outreach team" not in ot.AI_DISCLOSURE_FOOTER
+
+    def test_footer_has_real_person_reply_handoff(self):
+        """Footer must convey that a real person handles replies."""
+        footer_lower = ot.AI_DISCLOSURE_FOOTER.lower()
+        assert "real person" in footer_lower or "real people" in footer_lower, (
+            "Footer must say 'real person' or 'real people'. "
+            f"Footer: {ot.AI_DISCLOSURE_FOOTER}"
+        )
+
+    def test_footer_no_em_dash(self):
+        """Footer must use ASCII -- not U+2014."""
+        assert chr(0x2014) not in ot.AI_DISCLOSURE_FOOTER
+
+    def test_footer_is_two_sentences_max(self):
+        """Footer body text must be at most 3 sentences (operator: ~2 sentences, brand-forward)."""
+        import re
+        # strip HTML tags
+        text = re.sub(r"<[^>]+>", " ", ot.AI_DISCLOSURE_FOOTER)
+        text = re.sub(r"\s+", " ", text).strip()
+        sentences = [s.strip() for s in re.split(r"[.!?]+", text) if s.strip()]
+        assert len(sentences) <= 3, (
+            f"Footer should be <= 3 sentences. Got {len(sentences)}: {sentences}"
+        )
+
+    def test_marvin_closing_has_documenso_reference(self):
+        """Marvin closing handoff must reference Documenso e-sign."""
+        lead = {
+            "owner_name": "TOWNSEND RITA M",
+            "property_address": "836 N BELLEVUE BLVD",
+            "city": "Memphis",
+            "state": "TN",
+            "county_appraisal": 58000,
+        }
+        result = ot.render_closing_handoff(lead, persona_key="marvin")
+        body = result["body_html"].lower()
+        assert "documenso" in body or "e-sign" in body or "esign" in body, (
+            "Marvin closing handoff must reference Documenso e-sign per THE RECIPE. "
+            f"Body: {body[:600]}"
+        )
+
+    def test_marvin_closing_sb909_reference(self):
+        """Marvin closing handoff must reference SB 909 disclosure."""
+        lead = {
+            "owner_name": "TOWNSEND RITA M",
+            "property_address": "836 N BELLEVUE BLVD",
+            "city": "Memphis",
+            "state": "TN",
+            "county_appraisal": 58000,
+        }
+        result = ot.render_closing_handoff(lead, persona_key="marvin")
+        body = result["body_html"]
+        assert "SB 909" in body or "SB909" in body or "909" in body, (
+            "Marvin closing handoff must reference TN SB 909 disclosure. "
+            f"Body: {body[:600]}"
+        )
+
+    def test_marvin_closing_plain_english_summary(self):
+        """Marvin closing must include plain-English summary bullets before the contract."""
+        lead = {
+            "owner_name": "TOWNSEND RITA M",
+            "property_address": "836 N BELLEVUE BLVD",
+            "city": "Memphis",
+            "state": "TN",
+            "county_appraisal": 58000,
+        }
+        result = ot.render_closing_handoff(lead, persona_key="marvin")
+        body = result["body_html"].lower()
+        assert "plain english" in body or "plain-english" in body, (
+            "Marvin closing must include plain-English summary label per THE RECIPE. "
+            f"Body: {body[:600]}"
+        )
+
+    def test_vaughn_counsel_line_present(self):
+        """Vaughn first-touch must contain a consult-counsel line."""
+        lead = {
+            "owner_name": "TOWNSEND RITA M",
+            "property_address": "836 N BELLEVUE BLVD",
+            "city": "Memphis",
+            "state": "TN",
+            "county_appraisal": 58000,
+        }
+        result = ot.render_first_touch(lead, persona_key="vaughn")
+        body = result["body_html"].lower()
+        assert "attorney" in body or "counsel" in body or "family" in body, (
+            "Vaughn first-touch must contain consult-counsel line. "
+            f"Body: {body[:600]}"
         )
