@@ -53,7 +53,9 @@ def run_paper_cycle(cfg: dict):
     proxy_url = proxy_cfg.get("url") if proxy_cfg.get("enabled") else None
     clob = PolymarketCLOB(proxy_url=proxy_url)
     markets = clob.scan_markets(limit=cfg["polymarket"]["max_markets_scan"])
-    scanner = Scanner()
+    _cal = cfg.get("calibration", {})
+    _maxh = _cal.get("max_hours_to_resolution") if _cal.get("prefer_short_horizon") else None
+    scanner = Scanner(max_hours_to_resolution=_maxh)
     filtered = scanner.filter(markets)
     (data_dir / "active_markets.json").write_text(
         json.dumps([asdict(m) for m in filtered], indent=2)
@@ -88,11 +90,19 @@ def run_paper_cycle(cfg: dict):
     ))
 
     # RISK
+    cv = cfg.get("convexity", {})
     rm = RiskManager(
         max_bet_pct=Decimal(str(cfg["risk"]["max_bet_pct"])),
         max_daily_loss_pct=Decimal(str(cfg["risk"]["max_daily_loss_pct"])),
         max_open_positions=cfg["risk"]["max_open_positions"],
         min_edge=Decimal(str(cfg["risk"]["min_edge"])),
+        min_confidence=float(cfg["risk"].get("min_confidence", 0.65)),
+        # Convexity lane active in calibration too, so paper data reflects it.
+        convex_max_price=Decimal(str(cv.get("max_price", 0.20))),
+        convex_min_edge=Decimal(str(cv.get("min_edge", 0.03))),
+        convex_min_confidence=float(cv.get("min_confidence", 0.45)),
+        convex_budget_pct=Decimal(str(cv.get("budget_pct", 15.0))),
+        convex_stake_pct=Decimal(str(cv.get("stake_pct", 1.0))),
     )
     approved = rm.evaluate(
         predictions,
@@ -275,7 +285,9 @@ def run_live_cycle(cfg: dict, backend=None, wallet=None):
     # SCAN (direct -- the live API is reachable without the proxy)
     clob = PolymarketCLOB()
     markets = clob.scan_markets(limit=cfg["polymarket"]["max_markets_scan"])
-    scanner = Scanner()
+    _cal = cfg.get("calibration", {})
+    _maxh = _cal.get("max_hours_to_resolution") if _cal.get("prefer_short_horizon") else None
+    scanner = Scanner(max_hours_to_resolution=_maxh)
     filtered = scanner.filter(markets)
     by_id = {m.id: m for m in filtered}
     (data_dir / "active_markets.json").write_text(
@@ -295,6 +307,7 @@ def run_live_cycle(cfg: dict, backend=None, wallet=None):
     state_now = json.loads(state_path.read_text())
     bankroll_now = Decimal(str(state_now.get("cash_usdc") or 0))
     tier_cap = growth.max_bet_for(bankroll_now, cfg)
+    cv = cfg.get("convexity", {})
     rm = RiskManager(
         max_bet_pct=Decimal(str(cfg["risk"]["max_bet_pct"])),
         max_daily_loss_pct=Decimal(str(cfg["risk"]["max_daily_loss_pct"])),
@@ -304,6 +317,12 @@ def run_live_cycle(cfg: dict, backend=None, wallet=None):
         # the brain-bridge halves raw confidence when no brain policy is set.
         min_confidence=float(cfg["risk"].get("min_confidence", 0.65)),
         max_bet_abs=tier_cap,  # operator compound-growth ladder ceiling
+        # Convexity lane: catch the big asymmetric/moonshot trades (bounded).
+        convex_max_price=Decimal(str(cv.get("max_price", 0.20))),
+        convex_min_edge=Decimal(str(cv.get("min_edge", 0.03))),
+        convex_min_confidence=float(cv.get("min_confidence", 0.45)),
+        convex_budget_pct=Decimal(str(cv.get("budget_pct", 15.0))),
+        convex_stake_pct=Decimal(str(cv.get("stake_pct", 1.0))),
     )
     approved = rm.evaluate(predictions, state_path=state_path, open_bets_path=open_bets_path)
 

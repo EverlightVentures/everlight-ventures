@@ -15,10 +15,14 @@ SUBJECTIVE_CATEGORIES = {
 class Scanner:
     def __init__(self, min_liquidity: float = 5000, min_volume_24h: float = 1000,
                  min_hours_to_resolution: float = 4, max_spread: float = 0.05,
-                 skip_subjective: bool = True):
+                 skip_subjective: bool = True, max_hours_to_resolution: float = None):
         self.min_liquidity = min_liquidity
         self.min_volume_24h = min_volume_24h
         self.min_hours_to_resolution = min_hours_to_resolution
+        # Upper bound on time-to-resolution: during fast calibration we PREFER
+        # soon-resolving markets so trades settle in 24-48h (quick Brier data).
+        # None = no upper bound (normal operation, 10-14 day horizon is fine).
+        self.max_hours_to_resolution = max_hours_to_resolution
         self.max_spread = max_spread
         self.skip_subjective = skip_subjective
 
@@ -49,5 +53,8 @@ class Scanner:
                 continue
             if end_dt < cutoff:
                 continue
+            if self.max_hours_to_resolution is not None:
+                if end_dt > now + timedelta(hours=self.max_hours_to_resolution):
+                    continue  # too far out for fast calibration
             out.append(m)
         return out

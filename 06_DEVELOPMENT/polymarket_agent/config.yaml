@@ -180,3 +180,24 @@ smart_money:
   enabled: true
   wallets: []          # operator/we populate with vetted profitable wallets
   min_size_usd: 100    # ignore dust positions
+
+# Convexity lane -- catch the big asymmetric/moonshot trades (operator directive).
+# A cheap outcome (<= max_price, pays >= 1/price) with a positive model edge gets
+# a small lottery-ticket stake on RELAXED gates, bounded by budget_pct so misses
+# can't drain the bankroll. The XLM-9c-move type asymmetric win lives here.
+convexity:
+  max_price: 0.20          # <= 0.20 -> >= 5x payout multiple
+  min_edge: 0.03           # relaxed edge bar for moonshots
+  min_confidence: 0.45     # relaxed confidence bar
+  budget_pct: 15.0         # max % of bankroll on convex bets at once
+  stake_pct: 1.0           # stake per convex bet (% of bankroll)
+
+# Compressed calibration (operator: don't wait 10 days).
+# Phase 1: 24-48h PAPER on short-horizon markets (fast resolutions -> quick Brier).
+# Phase 2: week-1 small REAL 'test the waters' trades = live calibration.
+calibration:
+  prefer_short_horizon: true
+  max_hours_to_resolution: 72   # target markets resolving within 3 days
+  paper_hours: 48               # fast paper phase length
+  test_live_max_bet_usd: 2.0    # week-1 tiny real stakes
+  test_live_days: 7
