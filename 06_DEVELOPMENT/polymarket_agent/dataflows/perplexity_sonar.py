@@ -28,14 +28,15 @@ _JSON_ARRAY = re.compile(r"\[.*\]", re.DOTALL)
 
 def _load_key() -> str | None:
     import os
-    k = os.getenv("PERPLEXITY_API_KEY") or os.getenv("PPLX_API_KEY")
-    if k:
-        return k.strip().strip('"').strip("'")
+    # Operator-edited .env is authoritative; prefer it over ambient env.
     if ENV_PATH.exists():
         for line in ENV_PATH.read_text().splitlines():
             if line.startswith("PERPLEXITY_API_KEY="):
-                return line.split("=", 1)[1].strip().strip('"').strip("'")
-    return None
+                v = line.split("=", 1)[1].strip().strip('"').strip("'")
+                if v:
+                    return v
+    k = os.getenv("PERPLEXITY_API_KEY") or os.getenv("PPLX_API_KEY")
+    return k.strip().strip('"').strip("'") if k else None
 
 
 class Sonar:

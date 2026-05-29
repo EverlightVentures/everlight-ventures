@@ -21,14 +21,17 @@ _JSON_OBJ = re.compile(r"\{.*\}", re.DOTALL)
 
 
 def _load_anthropic_key() -> str | None:
-    k = os.getenv("ANTHROPIC_API_KEY")
-    if k:
-        return k.strip()
+    # The operator-edited .env is the authoritative secret store for this bot.
+    # Prefer it over any ambient process env var (which can be a different/stale
+    # key inherited from the surrounding shell, e.g. a host tool's own key).
     if _ENV_PATH.exists():
         for line in _ENV_PATH.read_text().splitlines():
             if line.startswith("ANTHROPIC_API_KEY="):
-                return line.split("=", 1)[1].strip().strip('"').strip("'")
-    return None
+                v = line.split("=", 1)[1].strip().strip('"').strip("'")
+                if v:
+                    return v
+    k = os.getenv("ANTHROPIC_API_KEY")
+    return k.strip() if k else None
 
 
 def _signal_text(s) -> tuple:
