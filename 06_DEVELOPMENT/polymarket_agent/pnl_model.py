@@ -21,29 +21,32 @@ class Assumptions:
     avg_stake_pct: float = 0.04      # quarter-Kelly at ~8% edge, price ~0.5 -> ~4%
     max_bet_pct: float = 0.05        # hard cap (executor check 5)
     bets_per_day: int = 3            # qualifying bets after edge>=5% + confidence gates
-    spread_cost: float = 0.015       # ~1.5% effective spread/slippage drag per bet
+    spread_cost: float = 0.04        # 3-10% round-trip on thin markets; ~4% typical
+    fee_drag: float = 0.02           # 2026 taker fee (peaks at 50c, less at extremes)
     daily_loss_breaker: float = 0.15  # halt the day at -15% (executor check 7)
     days: int = 30
 
 
 SCENARIOS = {
     # win_rate = fraction of the bot's SELECTED bets that resolve in its favor.
-    # 0.50 = no edge (coin flip). Below 0.50 the bot bleeds; that is the real risk.
-    "conservative": 0.51,
-    "base":         0.54,
-    "optimistic":   0.57,
+    # Calibrated to the RESEARCH: ~84% of traders lose; honest retail edge is thin.
+    # The longshot-fade gives a HIGH raw win rate but small net edge per trade.
+    # 0.50 = no edge. Below it the bot bleeds -- the calibration gate catches that.
+    "conservative": 0.52,
+    "base":         0.55,
+    "optimistic":   0.58,
 }
 
 
-def per_bet_return(win_rate: float, spread: float) -> float:
-    """Expected return per $1 staked on a ~even-money (price ~0.5) outcome.
-    Win pays roughly +1x stake, loss -1x stake, minus spread/slippage.
-    EV = (2*wr - 1) - spread."""
-    return (2.0 * win_rate - 1.0) - spread
+def per_bet_return(win_rate: float, spread: float, fee: float = 0.02) -> float:
+    """Expected return per $1 staked on a ~even-money outcome, NET of the 2026
+    Polymarket taker fee + spread/slippage. EV = (2*wr - 1) - spread - fee."""
+    return (2.0 * win_rate - 1.0) - spread - fee
 
 
 def project(a: Assumptions, win_rate: float):
-    daily_ret = a.bets_per_day * a.avg_stake_pct * per_bet_return(win_rate, a.spread_cost)
+    daily_ret = a.bets_per_day * a.avg_stake_pct * per_bet_return(
+        win_rate, a.spread_cost, a.fee_drag)
     # Floor the daily loss at the circuit breaker.
     daily_ret = max(daily_ret, -a.daily_loss_breaker)
     bal = a.bankroll
@@ -91,10 +94,12 @@ def main():
     print("    Edge selection (only bet when predicted prob beats market by >=5%) is")
     print("    what pushes win rate above 50%. That edge is UNPROVEN until the 20-")
     print("    resolved-trade paper calibration gate clears (Brier<0.25, win>52%).")
-    print("  - Base case (~54%) compounds to roughly +25-30%/mo. Optimistic is higher,")
-    print("    conservative is near break-even. NONE of this is guaranteed -- if real")
-    print("    win rate is <50%, the bot LOSES and the calibration gate should catch")
-    print("    it before real money is risked.")
+    print("  - With real 2026 fees + spread, ~52% win rate LOSES money, ~55% makes")
+    print("    ~+15%/mo, ~58% makes ~+40%/mo. The break-even is ~53-54% -- you need")
+    print("    GENUINE edge, not a coin flip. Research: ~84% of traders lose; honest")
+    print("    target is mid-single-digit monthly ROI. The 20-trade calibration gate")
+    print("    (Brier<0.25, win>52%) must clear before real money -- it catches a")
+    print("    losing edge before it costs us.")
     print("  - Downside is hard-capped: worst real day is -15% ($37.50), then the bot")
     print("    halts to the next day. A full wipe requires many breaker days in a row,")
     print("    which the bankroll-floor halt (-40% -> operator) stops first.")
