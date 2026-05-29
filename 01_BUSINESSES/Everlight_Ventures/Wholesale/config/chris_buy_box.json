@@ -1,28 +1,53 @@
 {
   "_meta": {
-    "version": "1.0",
-    "owner": "Chris @ Mid South Homebuyers",
-    "last_updated": "2026-05-13",
-    "source": "Existing CHRIS_BATCH_001_DRAFT.json filter, codified for daily_lead_pipeline.py. Rich to refine via Slack.",
-    "notes": "Placeholder zips list -- Rich confirms or replaces with Chris's actual 15. Default values keep the daily pipeline running on best-guess defaults; first-day run will flag the config status in #ft-hunters."
+    "version": "2.0",
+    "owner": "Chris Ulander -- Acquisitions Manager, Mid South Homebuyers, LLC",
+    "last_updated": "2026-05-29",
+    "source": "VERBATIM from Chris's email 2026-04-27 (_logs/inbound/imap_uid_20577_chris_ulander.txt). Replaces the 1.0 PLACEHOLDER whose zips/year/price/vacant-lot values were guesses and materially wrong (excluded vacant lots Chris actively buys, wrong year band, 3 wrong zips, missing 38134/38141/38118).",
+    "schema_note": "Flat top-level keys kept for daily_lead_pipeline.py compatibility. Memphis is the active filter; little_rock_ar is build-out-only metadata.",
+    "buyer_contact": {
+      "name": "Chris Ulander",
+      "title": "Acquisitions Manager",
+      "send_leads_to": "leads@midsouthhomebuyers.com",
+      "direct": "chris@midsouthhomebuyers.com",
+      "cell": "901.692.8049",
+      "company": "Mid South Homebuyers, LLC (also MS Newcon, LLC)",
+      "address": "46 Flicker St, Memphis, TN 38104"
+    },
+    "lead_requirements_from_chris": [
+      "Include occupancy or keybox info with every lead when available.",
+      "Direct-to-seller ONLY, unless we have a JV agreement with the original agent/wholesaler.",
+      "He gives feedback on every lead, even passes -- so we learn what fits.",
+      "No volume cap once deals fit: 'there is no limit to the amount of deals we'll take from you.'"
+    ]
   },
   "geography": {
     "state": "TN",
     "county": "Shelby",
     "metro": "Memphis",
+    "zip_basis": "street-by-street -- zip is necessary, not sufficient; Chris evaluates each",
     "zips": [
-      "38103", "38104", "38105", "38106", "38107",
-      "38108", "38109", "38111", "38114", "38115",
-      "38116", "38117", "38122", "38127", "38128"
+      "38127", "38128", "38134", "38117", "38111",
+      "38141", "38115", "38118", "38116", "38109",
+      "38104", "38122", "38107", "38114", "38106"
     ]
   },
   "property": {
-    "property_class": ["RESIDENTIAL"],
-    "exclude_vacant_lot": true,
-    "min_year_built": 1900,
-    "max_year_built": 1985,
-    "min_appraisal_usd": 30000,
-    "max_appraisal_usd": 120000
+    "property_class": ["RESIDENTIAL", "VACANT_LOT"],
+    "types": "2-4 bedroom SFR + vacant lots all over the city",
+    "bedrooms_min": 2,
+    "bedrooms_max": 4,
+    "exclude_vacant_lot": false,
+    "min_year_built": 1940,
+    "max_year_built": 2026,
+    "year_note": "Chris: 'cutoff for age is 1940' -- nothing built before 1940; newer is fine.",
+    "construction_pref": "brick preferred; buys some frame depending on condition",
+    "condition": "occupied OR vacant, distressed OK",
+    "min_appraisal_usd": 10000,
+    "max_appraisal_usd": 160000,
+    "typical_low_usd": 30000,
+    "typical_high_usd": 60000,
+    "price_note": "10-110k typical by area, up to 150-160k in some cases; vast majority 30-60k"
   },
   "owner": {
     "require_absentee": false,
@@ -36,10 +61,11 @@
     "preferred_band_high": 2500
   },
   "exit": {
-    "buyer_name": "Chris",
+    "buyer_name": "Chris Ulander",
     "buyer_org": "Mid South Homebuyers",
     "all_in_target_pct_of_appraisal": 0.55,
-    "min_margin_to_us_usd": 3000
+    "min_margin_to_us_usd": 4000,
+    "min_margin_note": "Floor assignment fee = max($4,000, 10% of price) per operator 2026-05-29; target ~$11,500."
   },
   "ranking": {
     "use_rex_lead_scorer_v2": true,
@@ -55,5 +81,17 @@
     "max_intel_per_run": 50,
     "max_pitched_per_run": 25,
     "max_outreach_per_day": 100
+  },
+  "little_rock_ar": {
+    "active": false,
+    "_gate": "BUILD-OUT ONLY -- TN-only autonomous-outreach doctrine. Do NOT send AR leads until TN closes Deal 1 + operator greenlights AR.",
+    "zips": ["72202", "72204", "72205", "72206", "72209", "72076", "72120", "72015", "72019"],
+    "exclude_cities_for_houses": ["North Little Rock", "Benton"],
+    "exclude_reason": "NLR/Benton require inspections + permits -- Chris loses money. Vacant lots there OK if NOT on septic.",
+    "bedrooms_min": 2,
+    "bathrooms_min": 1,
+    "prefer_convertible_to_3_1": true,
+    "exclude_flood_zones": true,
+    "min_sqft": 700
   }
 }
