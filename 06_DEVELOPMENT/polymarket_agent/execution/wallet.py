@@ -15,7 +15,8 @@ except ImportError as e:
         "Add to polymarket_agent/Dockerfile."
     ) from e
 
-POLYGON_RPC = "https://polygon-rpc.com"
+# polygon-rpc.com now returns 401 (auth-required). Use a no-key public endpoint.
+POLYGON_RPC = "https://polygon-bor-rpc.publicnode.com"
 USDC_E_ADDR = "0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174"  # USDC.e on Polygon
 USDC_E_ABI = '[{"constant":true,"inputs":[{"name":"_owner","type":"address"}],' \
              '"name":"balanceOf","outputs":[{"name":"balance","type":"uint256"}],' \

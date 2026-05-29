@@ -256,6 +256,11 @@ def run_live_cycle(cfg: dict, backend=None, wallet=None):
         min_confidence=cfg["risk"]["min_confidence"],
     )
     predictions = predictor.predict(briefs, brain_policy={})
+    # Growth-ladder absolute bet ceiling for the current bankroll band.
+    from polymarket_agent import growth
+    state_now = json.loads(state_path.read_text())
+    bankroll_now = Decimal(str(state_now.get("cash_usdc") or 0))
+    tier_cap = growth.max_bet_for(bankroll_now, cfg)
     rm = RiskManager(
         max_bet_pct=Decimal(str(cfg["risk"]["max_bet_pct"])),
         max_daily_loss_pct=Decimal(str(cfg["risk"]["max_daily_loss_pct"])),
@@ -264,6 +269,7 @@ def run_live_cycle(cfg: dict, backend=None, wallet=None):
         # Thread min_confidence so the risk gate matches the predictor gate;
         # the brain-bridge halves raw confidence when no brain policy is set.
         min_confidence=float(cfg["risk"].get("min_confidence", 0.65)),
+        max_bet_abs=tier_cap,  # operator compound-growth ladder ceiling
     )
     approved = rm.evaluate(predictions, state_path=state_path, open_bets_path=open_bets_path)
 

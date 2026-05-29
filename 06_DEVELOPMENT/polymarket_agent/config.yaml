@@ -152,3 +152,22 @@ sonar:
 intelligence:
   osint: true                    # osint_api entity enrichment on named markets
   cross_check: true              # Codex + Gemini red-team high-stakes bets pre-place
+
+# Treasury: where profit gets paid OUT to (YOUR personal wallet). Withdrawals
+# are LOCKED to this address -- the bot can never send your money anywhere else.
+treasury:
+  address: "0xREPLACE_WITH_YOUR_PERSONAL_POLYGON_WALLET"   # set this to get paid
+  working_capital: 250        # bot keeps this; sweep sends everything above it
+  auto_sweep: false           # true + cron = passive daily profit-taking
+
+# Compound-growth ladder (operator 2026-05-29): scale max bet with bankroll,
+# compound 100% until $30k, then passively pay $100/day + compound the rest.
+# Final bet size = MIN(quarter-Kelly, max_bet_pct, the tier ceiling below).
+growth_ladder:
+  tiers:
+    - {min_bankroll: 0,     max_bet_usd: 1000}   # < $10k: ceiling $1,000
+    - {min_bankroll: 10000, max_bet_usd: 2000}   # $10k-20k: $2,000
+    - {min_bankroll: 20000, max_bet_usd: 4000}   # $20k-30k: $4,000
+    - {min_bankroll: 30000, max_bet_usd: 5000}   # >= $30k: $5,000
+  compound_until_usd: 30000     # below this: 100% compounds, no withdrawal
+  payout_per_day_usd: 100       # at/above $30k: pay this daily, compound the rest
