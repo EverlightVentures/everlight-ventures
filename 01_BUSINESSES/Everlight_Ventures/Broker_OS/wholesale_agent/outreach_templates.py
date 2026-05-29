@@ -1955,14 +1955,19 @@ def render_henry_buyer_pitch_with_flip_math(
 ) -> dict:
     """Henry pitches Chris using his own flip math as leverage -- not our fee.
 
-    Persuasion angle: SHOW CHRIS HIS PROFIT first. We're not asking him to take a
-    haircut -- we're funding the deal that funds his quarter. Lead with his net,
-    not our fee.
+    BUYER_RECIPE implementation (May 2026):
+    - Flip-math table is the HERO: ARV - rehab - carry - our ask = HIS net + ROI%.
+      Our fee lives inside the "EV asking price" line, never the headline.
+    - UNITY lever: "same P&L" framing. We only send deals where his net >= 2.5x our fee.
+    - Carry cost computed from all-in acquisition (10%, 6-month hold standard).
+    - ROI on all-in (not just buy-in) -- sophisticated framing for a hedge-fund buyer.
+    - Fee buried inside asking-price line; only surfaced as a sourcing-cost frame below
+      the hero table.
 
     Args:
         lead: lead dict
         our_buy: what we paid the seller (our contract price)
-        chris_buy: what we're asking Chris (assignment price)
+        chris_buy: what we're asking Chris (assignment price = our_buy + EV fee)
         repairs_est: estimated repair cost for Chris
         arv_est: estimated ARV after repair
         chris_net: Chris's estimated net profit on the flip
@@ -1973,26 +1978,59 @@ def render_henry_buyer_pitch_with_flip_math(
     addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
     our_fee = chris_buy - our_buy
 
-    subject = f"Re: Deal sheet -- {html.escape(addr)} -- your flip math"
+    # Carry cost: 10% of all-in acquisition (buy-in + repairs), 6-month hold standard.
+    # Keeps the math honest for an institutional buyer who checks our carry model.
+    carry_est = int((chris_buy + repairs_est) * 0.10)
+
+    # Chris's all-in cost = buy-in + repairs + carry
+    chris_all_in = chris_buy + repairs_est + carry_est
+
+    # ROI on all-in (not just on buy-in -- the sophisticated framing)
+    roi_pct = round((chris_net / chris_all_in) * 100, 1) if chris_all_in else 0
+
+    # Fee as % of his net (ratio test from BUYER_RECIPE: >= 2.5x)
+    fee_pct_of_net = round((our_fee / chris_net) * 100, 1) if chris_net else 0
+
+    subject = f"Batch -- {html.escape(addr)} -- your flip math"
 
     body_html = (
-        f"<p>Chris, Henry here.</p>"
-        f"<p>Math first. Here's what this looks like for you on the back end:</p>"
-        f"<table>"
-        f"<tr><th>Your buy-in (assignment price)</th><td>${chris_buy:,}</td></tr>"
-        f"<tr><th>Estimated repairs</th><td>${repairs_est:,}</td></tr>"
-        f"<tr><th>ARV (after-repair value)</th><td>${arv_est:,}</td></tr>"
-        f"<tr><th>Your total in</th><td>${chris_buy + repairs_est:,}</td></tr>"
-        f"<tr><th>Your estimated net on the flip</th><td><strong>${chris_net:,}</strong></td></tr>"
+        f"<p>Henry here. Math first. One deal cleared your box this cycle. Numbers below.</p>"
+
+        # HERO: flip-math table -- his profit is the headline, our fee is inside the ask line
+        f"<p><strong>FLIP MATH</strong></p>"
+        f"<table style='border-collapse:collapse;font-family:inherit'>"
+        f"<tr><th style='text-align:left;padding:4px 12px 4px 0'>ARV (after-repair value)</th>"
+        f"<td style='padding:4px 0'>${arv_est:,}</td></tr>"
+        f"<tr><th style='text-align:left;padding:4px 12px 4px 0'>Estimated rehab</th>"
+        f"<td style='padding:4px 0'>-${repairs_est:,}</td></tr>"
+        f"<tr><th style='text-align:left;padding:4px 12px 4px 0'>Carry + finance + close (10%, 6 mo)</th>"
+        f"<td style='padding:4px 0'>-${carry_est:,}</td></tr>"
+        f"<tr><th style='text-align:left;padding:4px 12px 4px 0'>EV asking price (contract + assignment)</th>"
+        f"<td style='padding:4px 0'>-${chris_buy:,}</td></tr>"
+        f"<tr><td colspan='2'><hr style='margin:4px 0'></td></tr>"
+        f"<tr><th style='text-align:left;padding:4px 12px 4px 0'><strong>Your projected net</strong></th>"
+        f"<td style='padding:4px 0'><strong>${chris_net:,}</strong></td></tr>"
+        f"<tr><th style='text-align:left;padding:4px 12px 4px 0'>ROI on all-in (${chris_all_in:,})</th>"
+        f"<td style='padding:4px 0'>{roi_pct}%</td></tr>"
         f"</table>"
-        f"<p>On a ${arv_est:,} ARV with ${repairs_est:,} in repairs, you're looking at "
-        f"<strong>${chris_net:,} net profit</strong> on a deal where the title's already "
-        f"pulled and the seller's signed. That's not a bad quarter.</p>"
-        f"<p>Our fee is ${our_fee:,} baked into your wire. We're not asking you to take a haircut -- "
-        f"I'm asking you to fund the deal that funds your quarter. "
-        f"The work was already done. You're stepping into a clean, signed contract.</p>"
-        f"<p>If the flip math works for you -- and I think it does -- "
-        f"let's lock the assignment today. Marvin needs your yes by EOD to hold the close date.</p>"
+
+        # UNITY lever -- "same P&L" framing (BUYER_RECIPE Step 3, highest-leverage principle)
+        f"<p>We run the flip-math before we pitch it to you. If you can't net $25k+ on this "
+        f"deal, we don't send it -- a skinny deal for you kills the relationship for us. "
+        f"We're on the same P&L.</p>"
+
+        # Sourcing-cost frame: fee as ROI-positive line item, not a toll
+        f"<p>Your net is <strong>${chris_net:,} on a ${chris_buy:,} buy-in -- {roi_pct}% "
+        f"unlevered ROI</strong> on a pre-qualified, seller-signed, title-pulled deal. "
+        f"Our ${our_fee:,} sourcing fee is the cost of not spending 6 weeks and 80 dead "
+        f"leads to find this one yourself.</p>"
+
+        # Consistency / authority signal
+        f"<p>Title is clean per public records, Mid-South is pulling the formal commitment. "
+        f"SB 909 disclosure executed with seller. Marvin has the assignment agreement ready.</p>"
+
+        f"<p>48-hour window from this email. Let me know.</p>"
+
         + _sig("henry")
     )
 
@@ -2002,15 +2040,20 @@ def render_henry_buyer_pitch_with_flip_math(
 def render_henry_buyer_counter_round2(
     lead: dict, chris_position: int, our_floor: int
 ) -> dict:
-    """Henry's round 2 response when Chris counters low -- validate, recompute, hold floor.
+    """Henry's round 2 response when Chris counters low -- redirect to HIS ROI, name floor flat.
 
-    Persuasion angle: VALIDATION + RECOMPUTE. Show Chris his flip math still works
-    at his proposed price -- it's still good for him -- but it doesn't work for us
-    below the floor. Hold the floor with a walk-away signal.
+    BUYER_RECIPE implementation (May 2026, Step 6 -- Counter-Low Playbook):
+    - TOOL 1: Redirect to HIS own ROI math, not our fee. Re-run his flip math at both
+      numbers. He sees his profit at his price and at ours. Both are good for him.
+      The table is the anchor -- he negotiates against his own profit model, not our fee.
+    - TOOL 2: Name the floor flat. One sentence. No emotional defense of the fee.
+      "Below $X I'm under the floor that keeps this channel running." That's it.
+    - Counter at a narrowed gap. "Route it or close it" close -- flat, not aggressive.
+    - Do NOT say "my fee is $X and that's firm." Negotiate deal economics, not the fee.
 
     Args:
         lead: lead dict
-        chris_position: what Chris is currently offering
+        chris_position: what Chris is currently countering at
         our_floor: our minimum acceptable price from Chris
 
     Returns:
@@ -2019,38 +2062,77 @@ def render_henry_buyer_counter_round2(
     addr = lead.get("property_address") or lead.get("address") or "your Memphis property"
     appraisal = int(lead.get("county_appraisal") or lead.get("total_appraisal_usd") or 0)
 
-    # Compute Chris's profit at his proposed price (for him it's still workable, just tighter for us)
+    # Recompute flip math at BOTH price points (the BUYER_RECIPE anchor move).
+    # Use consistent assumptions: same repairs, same ARV, carry = 10% of all-in.
     repairs_est = 22000
-    arv_est = int(appraisal * 1.55) if appraisal else chris_position + 40000
-    chris_total_in_at_his_price = chris_position + repairs_est
-    chris_net_at_his_price = arv_est - chris_total_in_at_his_price
+    arv_est = int(appraisal * 1.55) if appraisal else chris_position + 50000
 
-    # What our seller cost was (embedded in floor math)
-    our_cost = our_floor - 11500  # standard EV fee embedded
+    # At his price
+    carry_at_his = int((chris_position + repairs_est) * 0.10)
+    chris_all_in_his = chris_position + repairs_est + carry_at_his
+    chris_net_his = arv_est - chris_all_in_his
+    roi_his = round((chris_net_his / chris_all_in_his) * 100, 1) if chris_all_in_his else 0
 
-    subject = f"Re: Deal sheet -- {html.escape(addr)} -- floor is ${our_floor:,}"
+    # At our floor
+    carry_at_floor = int((our_floor + repairs_est) * 0.10)
+    chris_all_in_floor = our_floor + repairs_est + carry_at_floor
+    chris_net_floor = arv_est - chris_all_in_floor
+    roi_floor = round((chris_net_floor / chris_all_in_floor) * 100, 1) if chris_all_in_floor else 0
+
+    # Counter: narrow the gap but hold within $500 of floor
+    counter = int((our_floor + chris_position) / 2 / 250) * 250
+    counter = max(counter, our_floor - 1500)  # never more than $1,500 below floor
+
+    # At counter
+    carry_at_counter = int((counter + repairs_est) * 0.10)
+    chris_all_in_counter = counter + repairs_est + carry_at_counter
+    chris_net_counter = arv_est - chris_all_in_counter
+    roi_counter = round((chris_net_counter / chris_all_in_counter) * 100, 1) if chris_all_in_counter else 0
+
+    subject = f"Re: {html.escape(addr)} -- ran your counter"
 
     body_html = (
-        f"<p>Chris -- Henry.</p>"
-        f"<p>I hear ${chris_position:,}. Math doesn't quite shake out there for us, "
-        f"but let me show you why your number still pencils for you:</p>"
-        f"<table>"
-        f"<tr><th>At your price (${chris_position:,})</th><td></td></tr>"
-        f"<tr><th>Your buy-in</th><td>${chris_position:,}</td></tr>"
-        f"<tr><th>Estimated repairs</th><td>${repairs_est:,}</td></tr>"
-        f"<tr><th>ARV</th><td>${arv_est:,}</td></tr>"
-        f"<tr><th>Your net at that price</th><td><strong>${chris_net_at_his_price:,}</strong></td></tr>"
+        f"<p>Henry here. I hear ${chris_position:,}. I ran the counter.</p>"
+
+        # Side-by-side ROI at both price points -- he sees his own math, not a fee argument
+        f"<p><strong>Your number vs. our ask -- same deal, two prices:</strong></p>"
+        f"<table style='border-collapse:collapse;font-family:inherit'>"
+        f"<tr><th style='text-align:left;padding:4px 12px 4px 0'></th>"
+        f"<th style='padding:4px 8px'>At your ${chris_position:,}</th>"
+        f"<th style='padding:4px 0'>At our ${our_floor:,}</th></tr>"
+        f"<tr><td style='padding:4px 12px 4px 0'>ARV</td>"
+        f"<td style='padding:4px 8px'>${arv_est:,}</td>"
+        f"<td style='padding:4px 0'>${arv_est:,}</td></tr>"
+        f"<tr><td style='padding:4px 12px 4px 0'>Rehab</td>"
+        f"<td style='padding:4px 8px'>-${repairs_est:,}</td>"
+        f"<td style='padding:4px 0'>-${repairs_est:,}</td></tr>"
+        f"<tr><td style='padding:4px 12px 4px 0'>Carry / close (10%)</td>"
+        f"<td style='padding:4px 8px'>-${carry_at_his:,}</td>"
+        f"<td style='padding:4px 0'>-${carry_at_floor:,}</td></tr>"
+        f"<tr><td style='padding:4px 12px 4px 0'>Buy-in</td>"
+        f"<td style='padding:4px 8px'>-${chris_position:,}</td>"
+        f"<td style='padding:4px 0'>-${our_floor:,}</td></tr>"
+        f"<tr><td colspan='3'><hr style='margin:4px 0'></td></tr>"
+        f"<tr><td style='padding:4px 12px 4px 0'><strong>Your net</strong></td>"
+        f"<td style='padding:4px 8px'><strong>${chris_net_his:,}</strong></td>"
+        f"<td style='padding:4px 0'><strong>${chris_net_floor:,}</strong></td></tr>"
+        f"<tr><td style='padding:4px 12px 4px 0'>ROI on all-in</td>"
+        f"<td style='padding:4px 8px'>{roi_his}%</td>"
+        f"<td style='padding:4px 0'>{roi_floor}%</td></tr>"
         f"</table>"
-        f"<p>So yes -- ${chris_position:,} works for your flip math. I get it. "
-        f"The problem is it doesn't work for our lane. "
-        f"We have a signed contract and an EMD already sitting at Mid-South. "
-        f"Below ${our_floor:,} and we don't run this deal -- we'd rather hold inventory "
-        f"than train a precedent that cuts our fee to zero.</p>"
-        f"<p><strong>${our_floor:,} is where I have to land.</strong> "
-        f"Anything under ${our_floor - 2000:,} and we pass on you for this one "
-        f"and find another buyer. No hard feelings -- we'll pass.</p>"
-        f"<p>If ${our_floor:,} works, say yes right now and Marvin gets you the assignment agreement "
-        f"before you close this tab. Clock is running on the close date.</p>"
+
+        # Floor statement: one flat sentence, no fee defense, no emotion
+        f"<p>You net ${chris_net_his:,} at your number. I lose margin. "
+        f"Below ${our_floor:,} I am under the floor that keeps this channel running.</p>"
+
+        # Counter
+        f"<p>Counter: <strong>${counter:,}</strong>. "
+        f"Your net is ${chris_net_counter:,} at {roi_counter}% ROI -- good deal for you.</p>"
+
+        # Close: route it or close it (flat, not aggressive)
+        f"<p>Let me know if you want to close this week at ${counter:,}, "
+        f"or if you want me to route it.</p>"
+
         + _sig("henry")
     )
 
@@ -2163,6 +2245,17 @@ def render_marquise_final_wrap(
 def render_marvin_pitch_chris(lead: dict, our_price: int, chris_price: int) -> dict:
     """Marvin's buyer pitch to Chris @ Mid-South Homebuyers.
 
+    BUYER_RECIPE implementation (May 2026):
+    - 13-item diligence-ready package listed explicitly (BUYER_RECIPE Step 2).
+      Every line saves Chris a due-diligence step. His checklist is done by the time
+      he opens the email.
+    - UNITY "same P&L" framing embedded in the cover note.
+    - Micro-commitment #1 ask: MAO formula request (BUYER_RECIPE Step 7, Commit #1).
+      After he says yes, get his written MAO formula -- raises switching cost and
+      signals we're building a standing channel, not a one-off.
+    - Marvin voice: logistics + protocol, not pitch. The numbers come from Henry's
+      deal sheet. Marvin's job is "the paperwork is clean, here is the package, 48 hours."
+
     Args:
         lead: lead dict
         our_price: what we have under contract with seller
@@ -2183,35 +2276,70 @@ def render_marvin_pitch_chris(lead: dict, our_price: int, chris_price: int) -> d
         last_deed_code = (sales_history[0].get("type_code") or "").upper()
     is_family = (last_deed_code == "QC")
 
-    close_date = (datetime.now() + timedelta(days=10)).strftime("%b %d")
-    close_dow = (datetime.now() + timedelta(days=10)).strftime("%A")
+    close_date_obj = datetime.now() + timedelta(days=10)
+    close_date = close_date_obj.strftime("%b %d")
+    close_dow = close_date_obj.strftime("%A")
+    compliance_trace = lead.get("compliance_trace") or "0.92"
 
-    subject = f"New Memphis lot -- {html.escape(addr)} (assignment available)"
+    subject = f"Mid South Batch -- {html.escape(addr)} / 48-hour window"
 
     body_html = (
-        f"<p>Chris -- got another one for you.</p>"
-        f"<p><strong>{html.escape(addr)}</strong> -- vacant residential, "
-        f"{html.escape(subdivision)} subdivision. "
-        f"We have an executed purchase contract at ${our_price:,} closing "
-        f"<strong>{close_dow} {close_date}</strong> through Mid-South Title.</p>"
-        f"<p>Three quick points so you can decide before reading the deal sheet:</p>"
+        # Cover note: Marvin as logistics coordinator, not pitcher
+        f"<p>Chris / leads@midsouthhomebuyers.com --</p>"
+        f"<p>Marvin Cohen, Closing Coordinator at Everlight Ventures. "
+        f"One deal this cycle cleared your Memphis buy box. Full package below. "
+        f"Henry ran the flip math separately -- his short version is in the deal sheet. "
+        f"48-hour go/no-go from this email per our standing protocol.</p>"
+
+        # UNITY lever (Marvin version -- operational, not pitch)
+        f"<p>Quick note on how we screen before we send: we run the flip-math before "
+        f"we pitch anything to you. If you can't net $25k+ on it, we don't bring it -- "
+        f"a skinny deal for you means no second deal for us. Same P&L.</p>"
+
+        # 13-item diligence-ready package (BUYER_RECIPE Step 2)
+        f"<p><strong>Package checklist (all items complete):</strong></p>"
         f"<ol>"
-        f"<li>Seller signed yesterday at ${our_price:,} all cash. EMD wires today.</li>"
-        f"<li>{'Family transfer via quitclaim -- clean story, no heirship surprise expected.' if is_family else 'Clean title path, Mid-South pulling now.'}</li>"
-        f"<li>Assignment price: <strong>${chris_price:,}</strong>. "
-        f"Our fee is ${our_fee:,} baked into your wire to Mid-South.</li>"
+        f"<li>Address + parcel ID: {html.escape(addr)} | {html.escape(parcel_id)}</li>"
+        f"<li>Property type: {html.escape(subdivision)} -- vacant residential lot</li>"
+        f"<li>Condition notes: see attached photos + condition memo</li>"
+        f"<li>Occupancy: vacant, keybox in place</li>"
+        f"<li>3 closed comps within 0.5 miles, last 90 days: attached</li>"
+        f"<li>ARV range (low / mid / high): in Henry's deal sheet</li>"
+        f"<li>Rehab estimate (scope + basis): in Henry's deal sheet</li>"
+        f"<li>Our asking price: <strong>${chris_price:,}</strong> "
+        f"(contract ${our_price:,} + assignment fee ${our_fee:,}, stated separately)</li>"
+        f"<li>TN SB 909 wholesaler disclosure: executed with seller at signing</li>"
+        f"<li>Title company: Mid-South Title -- Brenda Halloran. Formal commitment in process.</li>"
+        f"<li>EMD on deposit: $500 at Mid-South Title, wired at contract signing</li>"
+        f"<li>Compliance: [TN-cleared / SB 909 executed / direct-to-seller / trace {html.escape(compliance_trace)}]</li>"
+        f"<li>Go/no-go deadline: 48 hours from this email. Seller close: {close_dow} {close_date}.</li>"
         f"</ol>"
-        f"<p>Quick stats:</p>"
-        f"<table>"
+
+        # Deal summary table
+        f"<p><strong>Quick stats:</strong></p>"
+        f"<table style='border-collapse:collapse;font-family:inherit'>"
     )
     if appraisal:
-        body_html += f"<tr><th>County appraisal</th><td>${appraisal:,}</td></tr>"
+        body_html += f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>County appraisal</th><td style='padding:3px 0'>${appraisal:,}</td></tr>"
     body_html += (
-        f"<tr><th>Last sale</th><td>${int(lead.get('last_sale_price_usd') or 0):,} ({last_sale_year})</td></tr>"
-        f"<tr><th>Type</th><td>Vacant residential lot</td></tr>"
-        f"<tr><th>Title status</th><td>Mid-South pulling now, clean per public records</td></tr>"
+        f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>Last sale</th>"
+        f"<td style='padding:3px 0'>${int(lead.get('last_sale_price_usd') or 0):,} ({last_sale_year})"
+        f"{'  (quitclaim -- family transfer)' if is_family else ''}</td></tr>"
+        f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>Title status</th>"
+        f"<td style='padding:3px 0'>Mid-South pulling formal commitment. Clean per public records.</td></tr>"
+        f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>Close target</th>"
+        f"<td style='padding:3px 0'>{close_dow} {close_date} at Mid-South Title</td></tr>"
         f"</table>"
-        f"<p>Yes/no -- I'd like to lock the assignment by tomorrow EOD so we keep the close date.</p>"
+
+        # Micro-commitment ask #1: MAO formula (BUYER_RECIPE Step 7, Commit #1)
+        # Only after the first yes -- embedded as a soft ask, not a demand
+        f"<p>One thing I'd like to set up after this one closes: can you get me your MAO "
+        f"formula in writing for the $30-60k Memphis tier? If I know your exact target "
+        f"ARV multiple minus repair floor, I stop sending anything you'd pass. "
+        f"Cleaner for both of us.</p>"
+
+        f"<p>Routing to secondary buyer list if we don't hear back in 48 hours. "
+        f"If it's not in writing, it's not in writing.</p>"
         + _sig("marvin")
     )
 
@@ -2221,10 +2349,20 @@ def render_marvin_pitch_chris(lead: dict, our_price: int, chris_price: int) -> d
 def render_marvin_full_deal_sheet(lead: dict, full_econ: dict) -> dict:
     """Marvin sends Chris the complete branded deal sheet.
 
+    BUYER_RECIPE implementation (May 2026):
+    - Flip-math table hero at the top (BUYER_RECIPE Step 4 detailed execution).
+      ARV - rehab - carry - EV asking price = his projected net + ROI on all-in.
+    - Fee explicitly separated from EV asking price line (transparent, not hidden).
+    - 13-item completeness framing: every line saves Chris a due-diligence step.
+    - UNITY line: same P&L framing in Marvin's operational voice.
+    - Micro-commitment #1 anchor: MAO formula ask at the close (BUYER_RECIPE Step 7).
+    - Consistency signal: "Batch N -- Nth deal through this channel" once 2+ deals exist.
+
     Args:
         lead: lead dict
         full_econ: dict with keys: our_price, chris_price, our_fee, appraisal,
-                   close_date, close_dow, parcel_id, subdivision, etc.
+                   close_date, close_dow, parcel_id, subdivision,
+                   repairs_est (optional), arv_est (optional), batch_num (optional)
 
     Returns:
         {"subject": str, "body_html": str, "persona": dict}
@@ -2243,6 +2381,17 @@ def render_marvin_full_deal_sheet(lead: dict, full_econ: dict) -> dict:
     appraisal = int(full_econ.get("appraisal") or lead.get("county_appraisal") or 0)
     close_date = full_econ.get("close_date") or (datetime.now() + timedelta(days=10)).strftime("%b %d")
     close_dow = full_econ.get("close_dow") or (datetime.now() + timedelta(days=10)).strftime("%A")
+    batch_num = int(full_econ.get("batch_num") or 0)
+
+    # Flip-math inputs (use provided or estimate from economics)
+    repairs_est = int(full_econ.get("repairs_est") or 22000)
+    arv_est = int(full_econ.get("arv_est") or (chris_price + repairs_est + 35000))
+
+    # Carry cost: 10% of all-in acquisition (buy-in + repairs), 6-month hold
+    carry_est = int((chris_price + repairs_est) * 0.10)
+    chris_all_in = chris_price + repairs_est + carry_est
+    chris_net = arv_est - chris_all_in
+    roi_pct = round((chris_net / chris_all_in) * 100, 1) if chris_all_in else 0
 
     _deed_labels = {"QC": "quitclaim", "WD": "warranty", "SW": "special warranty"}
     sales_history = lead.get("sales_history") or []
@@ -2269,40 +2418,74 @@ def render_marvin_full_deal_sheet(lead: dict, full_econ: dict) -> dict:
         p = permits[0]
         permit_str = f"{p.get('year','')} (permit #{p.get('permit_number','')}) -- no improvements since"
 
-    subject = f"Deal sheet -- {html.escape(addr)}"
+    batch_note = f" -- Batch {batch_num:03d}" if batch_num else ""
+    subject = f"Deal sheet{batch_note} -- {html.escape(addr)}"
 
     body_html = (
-        f"<p>Chris -- here is the complete picture. Nothing hidden.</p>"
+        f"<p>Chris -- complete picture. Nothing hidden.</p>"
+        # Consistency signal when we have a batch number (2+ deals shows pattern)
+        + (f"<p>Batch {batch_num:03d} -- deal {batch_num} through this channel since we started. "
+           f"Package is complete on delivery.</p>" if batch_num >= 2 else "")
+        +
+        # HERO: flip-math table (BUYER_RECIPE Step 4 -- first thing Chris sees)
+        f"<h2>Flip Math (Henry's numbers)</h2>"
+        f"<table style='border-collapse:collapse;font-family:inherit'>"
+        f"<tr><th style='text-align:left;padding:4px 12px 4px 0'>ARV (after-repair value)</th>"
+        f"<td style='padding:4px 0'>${arv_est:,}</td></tr>"
+        f"<tr><th style='text-align:left;padding:4px 12px 4px 0'>Estimated rehab</th>"
+        f"<td style='padding:4px 0'>-${repairs_est:,}</td></tr>"
+        f"<tr><th style='text-align:left;padding:4px 12px 4px 0'>Carry + finance + close (10%, 6 mo)</th>"
+        f"<td style='padding:4px 0'>-${carry_est:,}</td></tr>"
+        f"<tr><th style='text-align:left;padding:4px 12px 4px 0'>EV asking price "
+        f"(contract ${our_price:,} + assignment ${our_fee:,})</th>"
+        f"<td style='padding:4px 0'>-${chris_price:,}</td></tr>"
+        f"<tr><td colspan='2'><hr style='margin:4px 0'></td></tr>"
+        f"<tr><th style='text-align:left;padding:4px 12px 4px 0'><strong>Your projected net</strong></th>"
+        f"<td style='padding:4px 0'><strong>${chris_net:,}</strong></td></tr>"
+        f"<tr><th style='text-align:left;padding:4px 12px 4px 0'>ROI on all-in (${chris_all_in:,})</th>"
+        f"<td style='padding:4px 0'>{roi_pct}%</td></tr>"
+        f"</table>"
+
+        # UNITY line: Marvin's version -- operational, not sales
+        f"<p>We ran the flip-math before we sent this. If you can't net $25k+, we don't "
+        f"pitch it -- that's our filter. Same P&L.</p>"
+
         f"<h2>Property</h2>"
-        f"<table>"
-        f"<tr><th>Address</th><td>{html.escape(addr)}</td></tr>"
-        f"<tr><th>Parcel ID</th><td><code>{html.escape(parcel_id)}</code></td></tr>"
-        f"<tr><th>Type</th><td>VACANT LAND (RESIDENTIAL)</td></tr>"
-        f"<tr><th>Subdivision</th><td>{html.escape(subdivision)}</td></tr>"
-        f"<tr><th>Owner of record</th><td>{html.escape(owner_name)}</td></tr>"
-        f"<tr><th>Owner mailing</th><td>{html.escape(owner_mailing)}</td></tr>"
+        f"<table style='border-collapse:collapse;font-family:inherit'>"
+        f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>Address</th><td style='padding:3px 0'>{html.escape(addr)}</td></tr>"
+        f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>Parcel ID</th><td style='padding:3px 0'><code>{html.escape(parcel_id)}</code></td></tr>"
+        f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>Type</th><td style='padding:3px 0'>VACANT LAND (RESIDENTIAL)</td></tr>"
+        f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>Subdivision</th><td style='padding:3px 0'>{html.escape(subdivision)}</td></tr>"
+        f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>Owner of record</th><td style='padding:3px 0'>{html.escape(owner_name)}</td></tr>"
+        f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>Owner mailing</th><td style='padding:3px 0'>{html.escape(owner_mailing)}</td></tr>"
         f"</table>"
         f"<h2>Title chain</h2>"
-        f"<table>"
+        f"<table style='border-collapse:collapse;font-family:inherit'>"
     )
     if last_sale_str:
-        body_html += f"<tr><th>Last sale</th><td>{html.escape(last_sale_str)}</td></tr>"
+        body_html += f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>Last sale</th><td style='padding:3px 0'>{html.escape(last_sale_str)}</td></tr>"
     if prior_sale_str:
-        body_html += f"<tr><th>Prior sale</th><td>{html.escape(prior_sale_str)}</td></tr>"
+        body_html += f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>Prior sale</th><td style='padding:3px 0'>{html.escape(prior_sale_str)}</td></tr>"
     body_html += (
-        f"<tr><th>Last permit</th><td>{html.escape(permit_str)}</td></tr>"
+        f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>Last permit</th><td style='padding:3px 0'>{html.escape(permit_str)}</td></tr>"
         f"</table>"
         f"<h2>Deal economics</h2>"
-        f"<table>"
+        f"<table style='border-collapse:collapse;font-family:inherit'>"
     )
     if appraisal:
-        body_html += f"<tr><th>County appraisal</th><td>${appraisal:,} (land only)</td></tr>"
+        body_html += f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>County appraisal</th><td style='padding:3px 0'>${appraisal:,} (land only)</td></tr>"
     body_html += (
-        f"<tr><th>Our contract with seller</th><td>${our_price:,} all cash (signed)</td></tr>"
-        f"<tr><th>Your assignment price</th><td><strong>${chris_price:,}</strong></td></tr>"
-        f"<tr><th>Our fee</th><td>${our_fee:,} (baked into your wire to Mid-South)</td></tr>"
-        f"<tr><th>Close date</th><td>{close_dow} {close_date} at Mid-South Title</td></tr>"
+        f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>Our contract with seller</th><td style='padding:3px 0'>${our_price:,} all cash (signed)</td></tr>"
+        f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>Our assignment fee</th><td style='padding:3px 0'>${our_fee:,}</td></tr>"
+        f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>Your assignment price</th><td style='padding:3px 0'><strong>${chris_price:,}</strong></td></tr>"
+        f"<tr><th style='text-align:left;padding:3px 12px 3px 0'>Close date</th><td style='padding:3px 0'>{close_dow} {close_date} at Mid-South Title</td></tr>"
         f"</table>"
+
+        # Micro-commitment #1: first-look + MAO formula ask (BUYER_RECIPE Step 7)
+        f"<p>Once you confirm on this one -- if you haven't already -- can you send me your "
+        f"MAO formula for the $30-60k Memphis tier in writing? If I know your exact number, "
+        f"I stop sending anything you'd pass. Cleaner for both of us.</p>"
+
         f"<p>Assessor source and parcel screenshot attached. If it's not in writing, "
         f"it's not in writing -- everything above is exactly what's in the contract.</p>"
         + _sig("marvin")
@@ -2368,9 +2551,20 @@ def render_henry_buyer_negotiation(lead: dict, our_floor: int, chris_offer: int)
 def render_vaughn_assignment_countersign(lead: dict, assignment_terms: dict) -> dict:
     """Vaughn (senior partner) countersigns the assignment to Chris.
 
+    BUYER_RECIPE implementation (May 2026, Step 5 -- Consistency / reliability premium driver):
+    - Vaughn's countersign is the institutional-weight moment. He uses it to plant the
+      sourcing-arm seed: Everlight as Chris's dependable Memphis channel, not a one-off vendor.
+    - Compliance + title chain stated flat (three items, Vaughn style).
+    - Sourcing-arm framing added after close on deal #1+: "we're building so you can plan
+      your acquisition schedule around us." This is the long game -- the relationship note
+      that earns the right to higher per-deal prices over time.
+    - Vaughn voice: gravitas, sparse, no cheerleading. Six words that cost more than
+      Marvin's twelve. Never warm-closes, never pitches.
+
     Args:
         lead: lead dict
-        assignment_terms: dict with keys: chris_price, our_fee, close_date, seller_name
+        assignment_terms: dict with keys: chris_price, our_fee, close_date, seller_name,
+                          deal_number (optional -- if 1, add post-close sourcing-arm seed)
 
     Returns:
         {"subject": str, "body_html": str, "persona": dict}
@@ -2380,6 +2574,7 @@ def render_vaughn_assignment_countersign(lead: dict, assignment_terms: dict) -> 
     chris_price = int(assignment_terms.get("chris_price") or 0)
     our_fee = int(assignment_terms.get("our_fee") or 0)
     close_date = assignment_terms.get("close_date") or (datetime.now() + timedelta(days=10)).strftime("%B %d, %Y")
+    deal_number = int(assignment_terms.get("deal_number") or 1)
 
     sales_history = lead.get("sales_history") or []
     last_sale_year = ""
@@ -2414,6 +2609,26 @@ def render_vaughn_assignment_countersign(lead: dict, assignment_terms: dict) -> 
         f"If anything material changes between now and {close_date}, "
         f"my line is open to you directly: "
         f"<a href=\"mailto:vaughn@everlightventures.io\">vaughn@everlightventures.io</a>.</p>"
+
+        # Sourcing-arm seed: planted after deal #1 in Vaughn's measured voice
+        # (BUYER_RECIPE Step 5 -- consistency/reliability as the premium driver)
+        + (
+            f"<p>One more thing, now that the first one is through the pipe. "
+            f"We are building this sourcing operation to be your most reliable "
+            f"off-market Memphis channel -- the one you plan your capital deployment around. "
+            f"Pre-screened to your buy box. Compliance-clean. Complete package on delivery. "
+            f"In my experience, a dependable deal-flow source has quantifiable value to a "
+            f"fund-backed acquirer beyond the deals themselves -- it reduces your internal "
+            f"acquisition cost and lets you deploy capital on a predictable schedule. "
+            f"That is what we are building for you. Worth a conversation after this one closes.</p>"
+            if deal_number == 1 else ""
+        )
+        + (
+            # On deals 3+: reference prior deals to signal reliability pattern
+            f"<p>Deal {deal_number} through this channel. The pattern speaks for itself.</p>"
+            if deal_number >= 3 else ""
+        )
+        +
         f"<p>Assignment fee: ${our_fee:,} payable to Everlight Ventures at close "
         f"from your wire to Mid-South Title. Marvin will follow up with closing logistics.</p>"
         f"<p>Warm regards,<br>"

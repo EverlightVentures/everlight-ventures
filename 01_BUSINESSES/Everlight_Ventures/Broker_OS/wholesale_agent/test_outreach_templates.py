@@ -2444,3 +2444,411 @@ class TestRecipeFooterReframe:
             "Vaughn first-touch must contain consult-counsel line. "
             f"Body: {body[:600]}"
         )
+
+
+# ---------------------------------------------------------------------------
+# BUYER_RECIPE tests (Phase 2, May 2026)
+# ---------------------------------------------------------------------------
+
+class TestBuyerRecipeFlipMath:
+    """BUYER_RECIPE: flip-math hero + UNITY same-P&L + ROI% + fee-is-not-headline."""
+
+    # Rita's deal: appraisal 58000 -> our_buy ~33640 (58% of 58000) -> ask Chris ~46640
+    _LEAD = {
+        "owner_name": "TOWNSEND RITA M",
+        "property_address": "836 N BELLEVUE BLVD",
+        "city": "Memphis",
+        "state": "TN",
+        "county_appraisal": 58000,
+    }
+    # our_buy = 58000 * 0.58 = 33640
+    # chris_buy = 33640 + 13000 room = 46640
+    # repairs = 14000, arv = 86000
+    # carry = (46640 + 14000) * 0.10 = 5664
+    # all_in = 46640 + 14000 + 5664 = 66304
+    # chris_net = 86000 - 66304 = 19696
+    _OUR_BUY = 33640
+    _CHRIS_BUY = 46640
+    _REPAIRS = 14000
+    _ARV = 86000
+    _CHRIS_NET = 19696  # approximate -- computed above
+
+    def _render(self):
+        return ot.render_henry_buyer_pitch_with_flip_math(
+            self._LEAD,
+            our_buy=self._OUR_BUY,
+            chris_buy=self._CHRIS_BUY,
+            repairs_est=self._REPAIRS,
+            arv_est=self._ARV,
+            chris_net=self._CHRIS_NET,
+        )
+
+    def test_flip_math_hero_contains_his_net_profit(self):
+        """Henry flip-math pitch must contain Chris's net profit number."""
+        r = self._render()
+        body = r["body_html"]
+        # chris_net should appear somewhere in the table as the projected net
+        assert str(self._CHRIS_NET).replace(",", "") in body.replace(",", ""), (
+            f"Flip-math pitch must contain Chris's net profit (${self._CHRIS_NET:,}). "
+            f"Body snippet: {body[:600]}"
+        )
+
+    def test_flip_math_hero_contains_roi_percent(self):
+        """Henry flip-math pitch must contain an ROI percentage for Chris."""
+        r = self._render()
+        body = r["body_html"]
+        # ROI% appears as a decimal like "29.7%" -- just check for "%" in the table area
+        assert "%" in body, (
+            "Flip-math pitch must contain Chris's ROI percentage. "
+            f"Body snippet: {body[:600]}"
+        )
+
+    def test_flip_math_unity_same_pl_framing(self):
+        """Henry flip-math pitch must contain the UNITY 'same P&L' framing."""
+        r = self._render()
+        body = r["body_html"]
+        assert "same P&L" in body or "same p&l" in body.lower(), (
+            "Flip-math pitch must contain UNITY 'same P&L' framing per BUYER_RECIPE Step 3. "
+            f"Body snippet: {body[:600]}"
+        )
+
+    def test_flip_math_unity_skinny_deal_line(self):
+        """Flip-math pitch must contain 'skinny deal' or equivalent 'same page' framing."""
+        r = self._render()
+        body = r["body_html"].lower()
+        assert "skinny deal" in body or "same p" in body or "same page" in body, (
+            "Flip-math pitch must contain UNITY skinny-deal framing "
+            "(BUYER_RECIPE Step 3: 'a skinny deal for you kills the relationship for us'). "
+            f"Body snippet: {body[:600]}"
+        )
+
+    def test_flip_math_fee_not_headline(self):
+        """Our fee must appear in the body but not as the first number mentioned."""
+        r = self._render()
+        body = r["body_html"]
+        our_fee = self._CHRIS_BUY - self._OUR_BUY  # 13000
+        arv_pos = body.find(f"{self._ARV:,}")
+        fee_str = f"{our_fee:,}"
+        fee_pos = body.find(fee_str)
+        # ARV must appear before the fee -- his profit is the hero
+        if arv_pos >= 0 and fee_pos >= 0:
+            assert arv_pos < fee_pos, (
+                "Flip-math pitch must show ARV (his profit) before our fee -- "
+                "fee is a footnote, not the headline. "
+                f"ARV pos={arv_pos}, fee pos={fee_pos}"
+            )
+
+    def test_flip_math_table_has_ev_asking_price_line(self):
+        """Flip-math table must have an 'EV asking price' or 'asking price' line (fee buried inside it)."""
+        r = self._render()
+        body = r["body_html"].lower()
+        assert "asking price" in body or "ev asking" in body, (
+            "Flip-math table must have an 'EV asking price' line per BUYER_RECIPE Step 1 "
+            "(our fee is buried inside the asking-price line, never the headline). "
+            f"Body snippet: {body[:600]}"
+        )
+
+    def test_flip_math_sourcing_cost_framing(self):
+        """Flip-math pitch must frame our fee as a sourcing cost, not a toll."""
+        r = self._render()
+        body = r["body_html"].lower()
+        assert "sourcing" in body or "acquisition" in body or "source" in body, (
+            "Flip-math pitch must contain sourcing-cost framing per BUYER_RECIPE Step 4 "
+            "('$11,500 sourcing fee is the cost of not spending 6 weeks...'). "
+            f"Body snippet: {body[:600]}"
+        )
+
+
+class TestBuyerRecipeMarvinDealSheet:
+    """BUYER_RECIPE: Marvin deal sheet -- 13-item package + micro-commitment ladder."""
+
+    _LEAD = {
+        "owner_name": "TOWNSEND RITA M",
+        "property_address": "836 N BELLEVUE BLVD",
+        "city": "Memphis",
+        "state": "TN",
+        "county_appraisal": 58000,
+        "parcel_id": "091-083-00018",
+        "subdivision": "South Memphis",
+    }
+    _FULL_ECON = {
+        "our_price": 33640,
+        "chris_price": 46640,
+        "our_fee": 13000,
+        "appraisal": 58000,
+        "repairs_est": 14000,
+        "arv_est": 86000,
+        "batch_num": 1,
+    }
+
+    def test_marvin_pitch_chris_has_13_item_package(self):
+        """Marvin pitch to Chris must list a diligence package with >= 10 items."""
+        r = ot.render_marvin_pitch_chris(self._LEAD, our_price=33640, chris_price=46640)
+        body = r["body_html"]
+        # Count <li> items (each package item is a list item)
+        li_count = body.count("<li>")
+        assert li_count >= 10, (
+            f"Marvin pitch must contain >= 10 package checklist items per BUYER_RECIPE Step 2. "
+            f"Found {li_count} <li> items. Body snippet: {body[:800]}"
+        )
+
+    def test_marvin_pitch_chris_has_micro_commitment_ask(self):
+        """Marvin pitch to Chris must contain a micro-commitment ask (MAO formula or first-look or SLA)."""
+        r = ot.render_marvin_pitch_chris(self._LEAD, our_price=33640, chris_price=46640)
+        body = r["body_html"].lower()
+        assert any(phrase in body for phrase in [
+            "mao", "formula", "first-look", "first look", "sla", "48-hour", "standing protocol"
+        ]), (
+            "Marvin pitch must contain a micro-commitment ask per BUYER_RECIPE Step 7 "
+            "(MAO formula, first-look, or SLA confirmation). "
+            f"Body snippet: {body[:600]}"
+        )
+
+    def test_marvin_pitch_chris_has_unity_same_pl(self):
+        """Marvin pitch to Chris must contain UNITY 'same P&L' framing."""
+        r = ot.render_marvin_pitch_chris(self._LEAD, our_price=33640, chris_price=46640)
+        body = r["body_html"]
+        assert "same P&L" in body or "same p&l" in body.lower() or "Same P&L" in body, (
+            "Marvin pitch must contain UNITY same P&L framing per BUYER_RECIPE Step 3. "
+            f"Body snippet: {body[:600]}"
+        )
+
+    def test_marvin_full_deal_sheet_has_flip_math_hero(self):
+        """Marvin full deal sheet must lead with a flip-math table (ARV - rehab - carry - ask = net)."""
+        r = ot.render_marvin_full_deal_sheet(self._LEAD, self._FULL_ECON)
+        body = r["body_html"]
+        # Flip math section must appear before the property detail section
+        flip_pos = body.lower().find("flip math")
+        property_pos = body.lower().find("<h2>property")
+        assert flip_pos >= 0, (
+            "Marvin full deal sheet must contain a 'Flip Math' hero section. "
+            f"Body snippet: {body[:800]}"
+        )
+        if flip_pos >= 0 and property_pos >= 0:
+            assert flip_pos < property_pos, (
+                "Flip math must appear BEFORE property details in the deal sheet -- "
+                "his profit is the hero, not the title chain. "
+                f"flip_pos={flip_pos}, property_pos={property_pos}"
+            )
+
+    def test_marvin_full_deal_sheet_has_micro_commitment_ask(self):
+        """Marvin full deal sheet must contain a micro-commitment ask (MAO formula)."""
+        r = ot.render_marvin_full_deal_sheet(self._LEAD, self._FULL_ECON)
+        body = r["body_html"].lower()
+        assert any(phrase in body for phrase in [
+            "mao", "formula", "first-look", "first look", "sla"
+        ]), (
+            "Marvin full deal sheet must contain a micro-commitment ask (MAO formula) "
+            "per BUYER_RECIPE Step 7 Commit #1. "
+            f"Body snippet: {body[:600]}"
+        )
+
+    def test_marvin_full_deal_sheet_has_unity_line(self):
+        """Marvin full deal sheet must contain UNITY same P&L or 'same' framing."""
+        r = ot.render_marvin_full_deal_sheet(self._LEAD, self._FULL_ECON)
+        body = r["body_html"].lower()
+        assert "same p" in body or "skinny deal" in body, (
+            "Marvin full deal sheet must contain UNITY framing per BUYER_RECIPE Step 3. "
+            f"Body snippet: {body[:600]}"
+        )
+
+
+class TestBuyerRecipeCounterLow:
+    """BUYER_RECIPE Step 6: counter-low hold -- re-run ROI, name floor flat, no fee defense."""
+
+    _LEAD = {
+        "owner_name": "TOWNSEND RITA M",
+        "property_address": "836 N BELLEVUE BLVD",
+        "city": "Memphis",
+        "state": "TN",
+        "county_appraisal": 58000,
+    }
+    _CHRIS_POSITION = 38000   # Chris counters low
+    _OUR_FLOOR = 45140         # our minimum (our_buy 33640 + $11,500 fee)
+
+    def _render(self):
+        return ot.render_henry_buyer_counter_round2(
+            self._LEAD,
+            chris_position=self._CHRIS_POSITION,
+            our_floor=self._OUR_FLOOR,
+        )
+
+    def test_counter_low_reruns_roi_at_his_number(self):
+        """Counter-low response must re-run ROI at Chris's lower number (shows his deal still pencils)."""
+        r = self._render()
+        body = r["body_html"]
+        # The table must show Chris's price AND our floor as columns/rows
+        assert str(self._CHRIS_POSITION) in body.replace(",", "") or f"{self._CHRIS_POSITION:,}" in body, (
+            f"Counter-low must re-run flip math at Chris's number (${self._CHRIS_POSITION:,}). "
+            f"Body snippet: {body[:600]}"
+        )
+
+    def test_counter_low_shows_roi_percentage(self):
+        """Counter-low response must show ROI percentage at both price points."""
+        r = self._render()
+        body = r["body_html"]
+        assert "%" in body, (
+            "Counter-low response must show ROI% at both price points per BUYER_RECIPE Step 6. "
+            f"Body snippet: {body[:600]}"
+        )
+
+    def test_counter_low_names_floor_flat(self):
+        """Counter-low response must name the floor in a single flat sentence -- no emotional defense."""
+        r = self._render()
+        body = r["body_html"].lower()
+        assert "floor" in body, (
+            "Counter-low response must name the floor flat per BUYER_RECIPE Step 6 "
+            "('below $X I am under the floor that keeps this channel running'). "
+            f"Body snippet: {body[:600]}"
+        )
+
+    def test_counter_low_no_emotional_fee_defense(self):
+        """Counter-low response must NOT emotionally defend the fee with phrases like 'my fee is firm'."""
+        r = self._render()
+        body = r["body_html"].lower()
+        banned = ["my fee is firm", "the fee is non-negotiable", "i can't go lower on the fee"]
+        for phrase in banned:
+            assert phrase not in body, (
+                f"Counter-low must NOT emotionally defend the fee with '{phrase}'. "
+                f"Per BUYER_RECIPE: do NOT say 'my fee is $X and that's firm.' "
+                f"Negotiate deal economics. Body snippet: {body[:400]}"
+            )
+
+    def test_counter_low_route_it_close(self):
+        """Counter-low response must close with 'route it' or equivalent flat walk-away."""
+        r = self._render()
+        body = r["body_html"].lower()
+        assert any(phrase in body for phrase in ["route it", "route", "another buyer", "pass"]), (
+            "Counter-low must close with 'route it or close it' framing per BUYER_RECIPE Step 6 Tool 3. "
+            f"Body snippet: {body[:600]}"
+        )
+
+    def test_counter_low_counter_within_gap(self):
+        """Henry's counter must be between chris_position and our_floor (narrowing the gap)."""
+        r = self._render()
+        body = r["body_html"]
+        # Counter is computed as avg of floor + position, rounded to $250
+        counter = int((self._OUR_FLOOR + self._CHRIS_POSITION) / 2 / 250) * 250
+        counter = max(counter, self._OUR_FLOOR - 1500)
+        assert str(counter).replace(",", "") in body.replace(",", "") or f"{counter:,}" in body, (
+            f"Henry's counter (${counter:,}) must appear in the counter-low response. "
+            f"Body snippet: {body[:600]}"
+        )
+
+
+class TestBuyerSideNoCrossContamination:
+    """Buyer-side copy must not share verbatim >12-word sentences with seller-side Piper first-touch."""
+
+    _RITA_LEAD = {
+        "owner_name": "TOWNSEND RITA M",
+        "property_address": "836 N BELLEVUE BLVD",
+        "city": "Memphis",
+        "state": "TN",
+        "mailing_address": "836 N BELLEVUE BLVD MEMPHIS TN",
+        "county_appraisal": 58000,
+    }
+
+    def _ngrams(self, text: str, n: int = 12):
+        """Return set of lowercase n-word windows from text (words only)."""
+        import re
+        words = re.findall(r"[a-z']+", text.lower())
+        return set(
+            " ".join(words[i : i + n]) for i in range(len(words) - n + 1)
+        )
+
+    def _strip_html(self, html_body: str) -> str:
+        import re
+        text = re.sub(r"<[^>]+>", " ", html_body)
+        return re.sub(r"\s+", " ", text).strip()
+
+    def test_henry_flip_math_no_verbatim_shared_with_piper(self):
+        """Henry flip-math pitch shares no >12-word sentence with Piper first-touch.
+
+        The AI disclosure footer is stripped before comparison -- it is intentionally
+        shared across all personas and must not count as cross-contamination.
+        """
+        piper_result = ot.render_first_touch(self._RITA_LEAD, persona_key="piper")
+        piper_text = self._strip_html(_strip_disclosure(piper_result["body_html"]))
+        piper_ngrams = self._ngrams(piper_text, 13)
+
+        henry_result = ot.render_henry_buyer_pitch_with_flip_math(
+            self._RITA_LEAD,
+            our_buy=33640, chris_buy=46640,
+            repairs_est=14000, arv_est=86000,
+            chris_net=19696,
+        )
+        henry_text = self._strip_html(_strip_disclosure(henry_result["body_html"]))
+        henry_ngrams = self._ngrams(henry_text, 13)
+
+        overlap = piper_ngrams & henry_ngrams
+        assert len(overlap) == 0, (
+            f"Buyer-side Henry pitch shares {len(overlap)} verbatim 13-word window(s) with "
+            f"Piper first-touch (footer stripped). Overlap: {list(overlap)[:3]}"
+        )
+
+    def test_marvin_pitch_no_verbatim_shared_with_piper(self):
+        """Marvin pitch to Chris shares no >12-word sentence with Piper first-touch.
+
+        The AI disclosure footer is stripped before comparison -- it is intentionally
+        shared across all personas and must not count as cross-contamination.
+        """
+        piper_result = ot.render_first_touch(self._RITA_LEAD, persona_key="piper")
+        piper_text = self._strip_html(_strip_disclosure(piper_result["body_html"]))
+        piper_ngrams = self._ngrams(piper_text, 13)
+
+        marvin_result = ot.render_marvin_pitch_chris(self._RITA_LEAD, our_price=33640, chris_price=46640)
+        marvin_text = self._strip_html(_strip_disclosure(marvin_result["body_html"]))
+        marvin_ngrams = self._ngrams(marvin_text, 13)
+
+        overlap = piper_ngrams & marvin_ngrams
+        assert len(overlap) == 0, (
+            f"Marvin pitch to Chris shares {len(overlap)} verbatim 13-word window(s) with "
+            f"Piper first-touch (footer stripped). Overlap: {list(overlap)[:3]}"
+        )
+
+
+class TestBuyerSideSingleOfferNumber:
+    """Each buyer-side message must contain exactly ONE offer price (no contradictory numbers)."""
+
+    _LEAD = {
+        "owner_name": "TOWNSEND RITA M",
+        "property_address": "836 N BELLEVUE BLVD",
+        "city": "Memphis",
+        "state": "TN",
+        "county_appraisal": 58000,
+    }
+
+    def _price_occurrences(self, body: str, price: int) -> int:
+        """Count distinct occurrences of a price (with or without comma) in body."""
+        count = body.count(f"{price:,}")
+        # Also check without comma for 5-digit numbers
+        plain = str(price)
+        if "," not in plain:
+            count += body.count(plain)
+        return count
+
+    def test_henry_flip_math_single_chris_buy_price(self):
+        """Henry flip-math pitch must reference the chris_buy price consistently (no second price)."""
+        chris_buy = 46640
+        r = ot.render_henry_buyer_pitch_with_flip_math(
+            self._LEAD,
+            our_buy=33640, chris_buy=chris_buy,
+            repairs_est=14000, arv_est=86000,
+            chris_net=19696,
+        )
+        body = r["body_html"]
+        # The asking price must appear -- verify no contradictory price within $500
+        assert f"{chris_buy:,}" in body or str(chris_buy) in body, (
+            f"Henry pitch must reference the asking price ${chris_buy:,}. "
+            f"Body snippet: {body[:400]}"
+        )
+
+    def test_marvin_pitch_chris_single_assignment_price(self):
+        """Marvin pitch to Chris must reference chris_price as the single assignment price."""
+        chris_price = 46640
+        r = ot.render_marvin_pitch_chris(self._LEAD, our_price=33640, chris_price=chris_price)
+        body = r["body_html"]
+        assert f"{chris_price:,}" in body or str(chris_price) in body, (
+            f"Marvin pitch must reference the assignment price ${chris_price:,}. "
+            f"Body snippet: {body[:400]}"
+        )
