@@ -23,8 +23,13 @@ def _isolated_cycle():
     markets with zero signals, so a Fed signal lets the 'Will Fed cut?' market
     reach the LLM step, which the tests mock via Predictor._llm_predict)."""
     sig = [Signal(source="test", text="Fed rate cut expected this meeting")]
+    # Cross-check shells out to codex/gemini CLIs -- isolate it (no veto) so the
+    # cycle tests stay offline. The veto logic itself is tested in test_intelligence.
+    intel = MagicMock()
+    intel.cross_check.return_value = {"reviewed": False, "vetoed": False}
     with patch("polymarket_agent.main._make_notifier", return_value=MagicMock()), \
-         patch("polymarket_agent.main.gather_signals", return_value=sig):
+         patch("polymarket_agent.main.gather_signals", return_value=sig), \
+         patch("polymarket_agent.intelligence.SharedIntelligence", return_value=intel):
         yield
 
 

@@ -147,3 +147,8 @@ orderbook_sentinel:
 sonar:
   enabled: true                  # needs a valid PERPLEXITY_API_KEY (regen if 401)
   cache_ttl_sec: 600
+
+# Shared intelligence layer (the "O cent" layer): OSINT + Codex/Gemini cross-check
+intelligence:
+  osint: true                    # osint_api entity enrichment on named markets
+  cross_check: true              # Codex + Gemini red-team high-stakes bets pre-place

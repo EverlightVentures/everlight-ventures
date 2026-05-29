@@ -289,6 +289,12 @@ def run_live_cycle(cfg: dict, backend=None, wallet=None):
 
     # Shared-services bridge: branded Slack + brain (degrades gracefully).
     notifier = _make_notifier(cfg, data_dir)
+    # Shared intelligence: Codex/Gemini cross-check + OSINT + brain (the O-cent layer).
+    from polymarket_agent.intelligence import SharedIntelligence
+    intel = SharedIntelligence(
+        enabled_osint=cfg.get("intelligence", {}).get("osint", True),
+        enabled_crosscheck=cfg.get("intelligence", {}).get("cross_check", True),
+    )
 
     placed = 0
     for b in approved:
@@ -298,6 +304,18 @@ def run_live_cycle(cfg: dict, backend=None, wallet=None):
         token_id = mkt.token_id_for(b.outcome)
         if not token_id:
             log.warning("no CLOB token id for %s / %s -- skipping", b.market_id, b.outcome)
+            continue
+        # 9-phase doctrine: red-team high-stakes bets with Codex + Gemini before
+        # risking money. A reviewer that ANSWERS and disagrees vetoes the bet;
+        # unavailable reviewers degrade open (the 9 executor checks still gate).
+        verdict = intel.cross_check(
+            question=mkt.question, outcome=b.outcome,
+            predicted_prob=b.predicted_prob, market_price=float(b.limit_price),
+            reasoning=getattr(b, "reasoning", ""),
+        )
+        if verdict.get("vetoed"):
+            log.warning("cross-check VETO on %s/%s -- skipping (%s)",
+                        mkt.id, b.outcome, verdict)
             continue
         try:
             bet = executor.submit_order(BetRequest(
