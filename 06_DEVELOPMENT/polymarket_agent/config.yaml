@@ -206,3 +206,13 @@ calibration:
   paper_hours: 48               # fast paper phase length
   test_live_max_bet_usd: 2.0    # week-1 tiny real stakes
   test_live_days: 7
+
+# Crypto 5-min candle lane (operator: target the active markets where the action
+# + smart money are). Momentum-scalp, near-50/50, highest fees -> BOUNDED $2 stakes.
+# Run every ~1 min (windows are 5 min, enter late). Settles by price feed.
+crypto_candle:
+  enabled: true
+  assets: ["BTC", "ETH", "SOL"]
+  stake_usd: 2.0          # bounded test-the-waters stake per candle
+  min_edge: 0.05          # momentum prob must beat market by >=5%
+  enter_after_min: 3.0    # only act in the last ~2 min of the 5-min window

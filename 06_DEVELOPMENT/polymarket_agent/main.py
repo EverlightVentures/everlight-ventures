@@ -403,6 +403,76 @@ def run_live_cycle(cfg: dict, backend=None, wallet=None):
     return summary
 
 
+def run_candle_cycle(cfg: dict):
+    """High-activity 5-min crypto candle lane (paper). Run every ~1 min so we can
+    enter LATE in each window. For each configured asset: decide via momentum,
+    place a small bounded paper bet on strong late moves, and settle finished
+    windows deterministically from the price feed. NO REAL MONEY (paper)."""
+    from polymarket_agent.dataflows.crypto_candle import candle_decision, window_outcome
+    import uuid
+    cc = cfg.get("crypto_candle", {})
+    data_dir = Path(cfg.get("data_dir", "data"))
+    data_dir.mkdir(parents=True, exist_ok=True)
+    _ensure_state(data_dir, cfg["bankroll"]["initial"])
+    open_path = data_dir / "candle_open_bets.json"
+    closed_path = data_dir / "candle_closed_bets.json"
+    ledger = data_dir / "calibration_ledger.jsonl"
+    openb = json.loads(open_path.read_text()) if open_path.exists() else []
+    closed = json.loads(closed_path.read_text()) if closed_path.exists() else []
+    stake = float(cc.get("stake_usd", 2.0))
+    min_edge = float(cc.get("min_edge", 0.05))
+
+    # 1) SETTLE finished windows by price (deterministic, no oracle wait)
+    still_open = []
+    for b in openb:
+        out = window_outcome(b["asset"], b["window_ts"])
+        if out is None:
+            still_open.append(b); continue
+        won = out == b["outcome"]
+        price = Decimal(str(b["price"]))
+        amt = Decimal(str(b["amount_usdc"]))
+        pnl = (amt / price - amt) if won else -amt
+        b.update({"status": "won" if won else "lost", "pnl_usdc": str(pnl), "outcome_resolved": out})
+        closed.append(b)
+        with open(ledger, "a") as f:
+            f.write(json.dumps({"ts": time.time(), "lane": "candle", "asset": b["asset"],
+                                "predicted_prob": b["predicted_prob"], "bet_outcome": b["outcome"],
+                                "outcome_resolved": out, "won": won, "pnl_usdc": str(pnl)}) + "\n")
+    openb = still_open
+
+    # 2) DECIDE + place new bets (one open bet per asset per window)
+    placed = 0
+    for asset in cc.get("assets", ["BTC"]):
+        d = candle_decision(asset, min_edge=min_edge,
+                            enter_after_min=float(cc.get("enter_after_min", 3.0)))
+        if not d or "skip" in d:
+            continue
+        if any(o["asset"] == asset and o["window_ts"] == _cw(d) for o in openb):
+            continue  # already have a bet this window
+        openb.append({
+            "id": f"candle_{uuid.uuid4().hex[:10]}", "asset": asset,
+            "window_ts": _cw(d), "outcome": d["outcome"], "amount_usdc": str(stake),
+            "price": str(d["market_price"]), "predicted_prob": d["predicted_prob"],
+            "edge": d["edge"], "ts": time.time(),
+        })
+        placed += 1
+        log.info("candle: BET %s %s @ %.3f (pred %.2f edge %+.3f) -- %s",
+                 asset, d["outcome"], d["market_price"], d["predicted_prob"], d["edge"], d["question"][:40])
+
+    open_path.write_text(json.dumps(openb, indent=2))
+    closed_path.write_text(json.dumps(closed, indent=2))
+    log.info("candle cycle: %d placed, %d open, %d closed total", placed, len(openb), len(closed))
+    return {"placed": placed, "open": len(openb), "closed": len(closed)}
+
+
+def _cw(decision):
+    """Window ts from a candle decision's slug (…-5m-{ts})."""
+    try:
+        return int(decision["slug"].rsplit("-", 1)[1])
+    except Exception:
+        return 0
+
+
 def main():
     cfg_path = Path(__file__).parent / "config.yaml"
     cfg = yaml.safe_load(cfg_path.read_text())
@@ -411,6 +481,8 @@ def main():
     mode = sys.argv[1] if len(sys.argv) > 1 else "paper"
     if mode == "live":
         run_live_cycle(cfg)
+    elif mode == "candle":
+        run_candle_cycle(cfg)
     else:
         run_paper_cycle(cfg)
 
