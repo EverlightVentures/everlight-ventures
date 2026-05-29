@@ -462,8 +462,24 @@ def buyer_floor_fee(contract_price: int) -> int:
 # one move (operator directive 2026-05-29: "don't go straight to the floor... he
 # counters 50, I counter 90; he counters 60, I counter 80"). The floor is the hard
 # never-cross, not the opening retreat.
-_BUYER_CONCESSION_SCHEDULE = {1: 0.92, 2: 0.80, 3: 0.70, 4: 0.62}
-_BUYER_FALLBACK_PCT = 0.58  # round 5+ -- close to, but still above, the floor
+_BUYER_CONCESSION_SCHEDULE = {1: 0.91, 2: 0.79, 3: 0.69, 4: 0.61}
+_BUYER_FALLBACK_PCT = 0.57  # round 5+ -- close to, but still above, the floor
+
+
+def _concession_pct(round_num: int, salt: int) -> float:
+    """Concession as a fraction of [floor, ask], with a deterministic per-deal
+    jitter so the ladder is NOT a detectable constant step (operator 2026-05-29:
+    'disguise it... mix it up... so it doesn't look like a solid 1% every time').
+    Same deal always negotiates the same way (reproducible); different deals get
+    different-looking ladders. Jitter is small enough that counters still descend.
+    """
+    base = _BUYER_CONCESSION_SCHEDULE.get(
+        round_num, _BUYER_FALLBACK_PCT if (round_num or 0) >= 5 else 0.91
+    )
+    # nudge in roughly [-0.018, +0.018], varies by round AND by deal salt.
+    # coefficient on salt must be coprime to 7 (salt*7 % 7 == 0 would cancel it).
+    nudge = ((((salt * 3) + (round_num * 5)) % 7) - 3) * 0.006
+    return max(0.50, base + nudge)
 
 
 def buyer_negotiation(seller_price: int, chris_offer: int, round_num: int = 1,
@@ -496,11 +512,13 @@ def buyer_negotiation(seller_price: int, chris_offer: int, round_num: int = 1,
         ask_price = floor_price  # never ask below the floor
     rng = ask_price - floor_price
 
-    pct = _BUYER_CONCESSION_SCHEDULE.get(
-        round_num, _BUYER_FALLBACK_PCT if (round_num or 0) >= 5 else 0.92
-    )
+    # Per-deal salt -> deterministic but deal-specific concession ladder (disguise).
+    salt = (seller_price // 10) % 10
+    pct = _concession_pct(round_num, salt)
     stepped = floor_price + int(round(rng * pct))
-    stepped = (stepped // 250) * 250  # round to nearest $250
+    # De-roundify: round to nearest $25 then shift by a deal-specific offset so the
+    # number reads like a negotiated figure ($45,725), not a generated one ($45,750).
+    stepped = int(round(stepped / 25.0) * 25) - (salt % 4) * 25
     if stepped < floor_price:
         stepped = floor_price
 

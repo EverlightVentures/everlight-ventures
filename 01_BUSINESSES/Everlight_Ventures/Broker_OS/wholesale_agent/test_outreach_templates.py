@@ -2889,15 +2889,26 @@ class TestBuyerFloorAndConcession:
             "round 1 must hold high, not cave toward the floor"
         )
 
-    def test_concession_shrinks_each_round(self):
-        # Same lowball, increasing round -> our counter should step DOWN gradually.
+    def test_concession_descends_and_is_disguised(self):
+        # Same lowball, increasing round -> counter descends, but the steps are
+        # UNEVEN (operator: 'disguise it... so it doesn't look like a solid step').
         kw = dict(seller_price=33640, chris_offer=35640, ask_price=46640)
-        r1 = ot.buyer_negotiation(round_num=1, **kw)["counter_price"]
-        r2 = ot.buyer_negotiation(round_num=2, **kw)["counter_price"]
-        r3 = ot.buyer_negotiation(round_num=3, **kw)["counter_price"]
-        assert r1 > r2 > r3, f"counters must descend gradually: {r1} > {r2} > {r3}"
-        # and the steps SHRINK (give-backs get smaller as we near the floor)
-        assert (r1 - r2) >= (r2 - r3), "give-backs should shrink each round"
+        cs = [ot.buyer_negotiation(round_num=r, **kw)["counter_price"] for r in (1, 2, 3, 4)]
+        assert cs[0] > cs[1] > cs[2] > cs[3], f"counters must descend: {cs}"
+        steps = [cs[i] - cs[i + 1] for i in range(3)]
+        assert len(set(steps)) > 1, f"steps must vary (disguised), not constant: {steps}"
+        assert any(c % 1000 != 0 for c in cs), f"counters should look negotiated, not round: {cs}"
+
+    def test_ladders_differ_across_deals(self):
+        # Two different deals get different concession SHAPES (per-deal salt),
+        # so the pattern isn't reusable against us.
+        a = tuple(ot.buyer_negotiation(seller_price=33640, chris_offer=35640,
+                                       round_num=r, ask_price=46640)["pct_of_range"]
+                  for r in (1, 2, 3))
+        b = tuple(ot.buyer_negotiation(seller_price=41230, chris_offer=43000,
+                                       round_num=r, ask_price=54230)["pct_of_range"]
+                  for r in (1, 2, 3))
+        assert a != b, f"different deals should get different shapes: {a} vs {b}"
 
     def test_accepts_when_chris_meets_our_step(self):
         # Chris offers above our stepped position -> accept at his number.
