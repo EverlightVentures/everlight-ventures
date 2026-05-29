@@ -445,6 +445,83 @@ def _flip_math(lead: dict, price: int) -> dict:
             "all_in": all_in, "net": net, "roi": roi, "price": price}
 
 
+def buyer_floor_fee(contract_price: int) -> int:
+    """Minimum assignment fee Everlight will accept on a deal: the GREATER of
+    $4,000 and 10% of the contract price.
+
+    Operator rule (2026-05-29): "minimum we wanna make selling a contract is 4000...
+    I want 10% regardless. So if it's 40K I want 4K." Target stays high (~$11.5k);
+    this is only the last line we never cross.
+    """
+    return max(4000, int(round(int(contract_price) * 0.10)))
+
+
+# Top-weighted, SHRINKING concession schedule as a fraction of the [floor, ask]
+# range. Round 1 we barely move off the ask; each round we give a little more, but
+# the give-backs shrink so we converge slowly and never collapse to the floor in
+# one move (operator directive 2026-05-29: "don't go straight to the floor... he
+# counters 50, I counter 90; he counters 60, I counter 80"). The floor is the hard
+# never-cross, not the opening retreat.
+_BUYER_CONCESSION_SCHEDULE = {1: 0.92, 2: 0.80, 3: 0.70, 4: 0.62}
+_BUYER_FALLBACK_PCT = 0.58  # round 5+ -- close to, but still above, the floor
+
+
+def buyer_negotiation(seller_price: int, chris_offer: int, round_num: int = 1,
+                      target_fee: int = 11500, ask_price: int | None = None) -> dict:
+    """Single source of truth for the BUYER-side (Chris) concession.
+
+    We open HIGH (ask) and concede in shrinking, top-weighted steps toward the
+    floor, staying well above Chris -- never dropping to the floor in one move.
+
+    Args:
+        seller_price: what we have the property under contract for (our cost).
+        chris_offer:  Chris's current offer/counter (total price to us).
+        round_num:    1-based negotiation round (1 = first counter).
+        target_fee:   our high target assignment fee (default $11,500).
+        ask_price:    explicit opening ask; defaults to seller_price + target_fee.
+
+    Returns dict:
+        ask_price, floor_fee, floor_price, counter_price, counter_fee,
+        accept (bool -- Chris meets/exceeds our stepped position and clears floor),
+        pct_of_range.
+    """
+    seller_price = int(seller_price)
+    chris_offer = int(chris_offer)
+    floor_fee = buyer_floor_fee(seller_price)
+    floor_price = seller_price + floor_fee
+    if ask_price is None:
+        ask_price = seller_price + max(int(target_fee), floor_fee)
+    ask_price = int(ask_price)
+    if ask_price < floor_price:
+        ask_price = floor_price  # never ask below the floor
+    rng = ask_price - floor_price
+
+    pct = _BUYER_CONCESSION_SCHEDULE.get(
+        round_num, _BUYER_FALLBACK_PCT if (round_num or 0) >= 5 else 0.92
+    )
+    stepped = floor_price + int(round(rng * pct))
+    stepped = (stepped // 250) * 250  # round to nearest $250
+    if stepped < floor_price:
+        stepped = floor_price
+
+    # Accept only if Chris already meets/exceeds our stepped position (he is at or
+    # above where we'd counter) AND clears the floor. Late rounds (4+) also accept
+    # any clean offer at/above the floor rather than lose a profitable deal.
+    accept = (chris_offer >= stepped and chris_offer >= floor_price) or \
+             ((round_num or 0) >= 4 and chris_offer >= floor_price)
+    counter_price = chris_offer if accept else stepped
+    counter_price = max(counter_price, floor_price)
+    return {
+        "ask_price": ask_price,
+        "floor_fee": floor_fee,
+        "floor_price": floor_price,
+        "counter_price": counter_price,
+        "counter_fee": counter_price - seller_price,
+        "accept": bool(accept),
+        "pct_of_range": pct,
+    }
+
+
 def _offer_sentence(lead: dict, persona_key: str = "piper") -> str:
     """Return a sentence with the ACTUAL offer range (or fallback if no appraisal).
 
@@ -2084,7 +2161,8 @@ def render_henry_buyer_pitch_with_flip_math(
 
 
 def render_henry_buyer_counter_round2(
-    lead: dict, chris_position: int, our_floor: int
+    lead: dict, chris_position: int, our_floor: int,
+    ask_price: int | None = None, round_num: int = 2
 ) -> dict:
     """Henry's round 2 response when Chris counters low -- redirect to HIS ROI, name floor flat.
 
@@ -2119,10 +2197,14 @@ def render_henry_buyer_counter_round2(
     carry_at_floor = fm_floor["carry"]; chris_all_in_floor = fm_floor["all_in"]
     chris_net_floor = fm_floor["net"]; roi_floor = fm_floor["roi"]
 
-    # Counter: concede toward Chris but NEVER below our floor. The floor is the floor --
-    # countering below it (the old our_floor-1500 bug) contradicts naming it as the floor.
-    midpoint = int((our_floor + chris_position) / 2 / 250) * 250
-    counter = max(our_floor, midpoint)
+    # Counter: gradual, top-weighted concession (operator 2026-05-29) -- we open high
+    # and ease down in SHRINKING steps, never collapsing to the floor in one move.
+    # our_floor is the hard never-cross. The round number shrinks the give-back.
+    seller_price = int(lead.get("moa_close") or lead.get("seller_close")
+                       or (our_floor - buyer_floor_fee(our_floor)))
+    _ask = int(ask_price or lead.get("buyer_ask") or (our_floor + 7500))
+    _neg = buyer_negotiation(seller_price, chris_position, round_num=round_num, ask_price=_ask)
+    counter = max(our_floor, _neg["counter_price"])
     fm_counter = _flip_math(lead, counter)
     carry_at_counter = fm_counter["carry"]; chris_all_in_counter = fm_counter["all_in"]
     chris_net_counter = fm_counter["net"]; roi_counter = fm_counter["roi"]
@@ -2532,7 +2614,8 @@ def render_marvin_full_deal_sheet(lead: dict, full_econ: dict) -> dict:
     return {"subject": subject, "body_html": _with_disclosure(body_html), "persona": PERSONA["marvin"]}
 
 
-def render_henry_buyer_negotiation(lead: dict, our_floor: int, chris_offer: int) -> dict:
+def render_henry_buyer_negotiation(lead: dict, our_floor: int, chris_offer: int,
+                                   round_num: int = 1) -> dict:
     """Henry holds the buyer-side floor with math-first table.
 
     Different from seller-side negotiation: Henry is now protecting the assignment fee
@@ -2553,10 +2636,14 @@ def render_henry_buyer_negotiation(lead: dict, our_floor: int, chris_offer: int)
     their_fee = chris_offer - int(lead.get("moa_close") or (our_floor - 500))
     our_fee_ask = our_floor - int(lead.get("moa_close") or (our_floor - 3500))
 
-    # How we meet in the middle
-    middle = int((our_floor + chris_offer) / 2 / 250) * 250  # round to nearest $250
+    # Gradual, top-weighted concession (operator 2026-05-29) -- hold high, ease down
+    # in shrinking steps, never split-the-difference to a cave. our_floor here is the
+    # opening ask; the true never-cross floor is computed inside buyer_negotiation.
+    _seller_price = int(lead.get("moa_close") or lead.get("seller_close") or (our_floor - 11500))
+    _neg = buyer_negotiation(_seller_price, chris_offer, round_num=round_num, ask_price=our_floor)
+    middle = _neg["counter_price"]
 
-    subject = f"Re: Deal sheet -- {html.escape(addr)} -- splitting the difference"
+    subject = f"Re: Deal sheet -- {html.escape(addr)} -- where I can land"
 
     body_html = (
         f"<p>Chris, Henry here -- Marvin tagged me in.</p>"
@@ -2569,15 +2656,16 @@ def render_henry_buyer_negotiation(lead: dict, our_floor: int, chris_offer: int)
         f"family-transfer title risk already de-risked. That has real value vs. "
         f"hunting these solo at auctions.</li>"
         f"</ol>"
-        f"<p>I'll meet you in the middle:</p>"
+        f"<p>I won't jump straight to my bottom -- I respect the relationship too much for that. "
+        f"Here's where I can land today:</p>"
         f"<table>"
         f"<tr><th>Your offer</th><td>${chris_offer:,}</td></tr>"
         f"<tr><th>Our ask</th><td>${our_floor:,}</td></tr>"
         f"<tr><th>My number</th><td><strong>${middle:,}</strong></td></tr>"
         f"<tr><th>Terms</th><td>All cash, wire to Mid-South on close day</td></tr>"
         f"</table>"
-        f"<p>${middle:,} all in. That's the middle on the fee, still inside your vacant-lot "
-        f"budget, still respects what you've built with us.</p>"
+        f"<p>${middle:,} all in -- still inside your vacant-lot budget, and it keeps both "
+        f"sides whole. I'd rather we land here than grind each other down.</p>"
         f"<p>Yes or no, Chris. Marvin needs the answer by EOD to keep the close date.</p>"
         f"<p>Henry</p>"
         + _sig("henry")

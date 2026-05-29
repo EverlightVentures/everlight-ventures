@@ -208,8 +208,12 @@ def compute_deal_math(lead: dict) -> dict:
     seller_round3_pos = int(appraisal * 0.62)  # seller softens after R3
     seller_round4_pos = moa_close              # seller accepts after R4 final
     buyer_ask    = moa_close + 13000      # we ask Chris a bit higher for negotiation room
-    buyer_close  = moa_close + 11500      # actual EV fee at TN norm
+    buyer_close  = moa_close + 11500      # actual EV fee at TN norm (TARGET, not floor)
     ev_fee       = buyer_close - moa_close
+    # TRUE floor (operator 2026-05-29): assignment fee never below max($4k, 10% of price).
+    # We concede gradually toward this across rounds -- never collapse to it in one move.
+    buyer_floor_fee_v = max(4000, int(round(moa_close * 0.10)))
+    buyer_floor_price = moa_close + buyer_floor_fee_v
     # Flip math for Henry's buyer pitch (default ARV = 1.55x appraisal, repairs = $22k)
     repairs_est  = 22000
     arv_est      = int(appraisal * 1.55)
@@ -233,6 +237,8 @@ def compute_deal_math(lead: dict) -> dict:
         "seller_round4_pos":   seller_round4_pos,
         "buyer_ask":           buyer_ask,
         "buyer_close":         buyer_close,
+        "buyer_floor_fee":     buyer_floor_fee_v,
+        "buyer_floor_price":   buyer_floor_price,
         "ev_fee":              ev_fee,
         "repairs_est":         repairs_est,
         "arv_est":             arv_est,
@@ -803,17 +809,24 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
         "is_template": False, "is_internal": False, "is_sim": True,
     })
 
-    # ---- Stage 13c: Henry Round 2 -- validates, holds floor ----
+    # ---- Stage 13c: Henry Round 2 -- gradual concession, hold high ----
+    from outreach_templates import buyer_negotiation as _buyer_neg
+    _b13c = _buyer_neg(m["moa_close"], chris_low_total, round_num=2,
+                       ask_price=m["buyer_ask"])
     r13c = render_henry_buyer_counter_round2(
         lead_w_history,
         chris_position=chris_low_total,
-        our_floor=m["buyer_close"],
+        our_floor=m["buyer_floor_price"],   # TRUE floor (max $4k / 10%), not the target
+        ask_price=m["buyer_ask"],
+        round_num=2,
     )
     stages.append({
         "num": "13c", "key": "henry_buyer_r2", "persona": "henry",
-        "label": "Henry Buyer Round 2 -- Validate, Recompute, Hold Floor",
-        "note": (f"Shows Chris his flip math STILL works at his price, but doesn't work for EV. "
-                 f"Floor is {fmt(m['buyer_close'])}. Walk-away framing."),
+        "label": "Henry Buyer Round 2 -- Hold High, Concede in Small Steps",
+        "note": (f"Chris lowballed {fmt(chris_low_total)}; we DON'T cave to the floor "
+                 f"({fmt(m['buyer_floor_price'])} = max $4k/10%). Round-2 counter "
+                 f"{fmt(_b13c['counter_price'])} (fee {fmt(_b13c['counter_fee'])}) -- "
+                 f"~{int(_b13c['pct_of_range']*100)}% of the ask-to-floor range, conceding slowly."),
         "html": r13c["body_html"], "subject": r13c["subject"],
         "is_template": True, "is_internal": False, "is_sim": False,
     })
@@ -853,8 +866,9 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
     )
     stages.append({
         "num": "14", "key": "chris_accepts", "persona": "chris",
-        "label": "Sim Chris Accepts at Floor",
-        "note": f"Chris accepts at {fmt(m['buyer_close'])}. Buyer side locked. EV fee = {fmt(m['ev_fee'])}.",
+        "label": "Sim Chris Accepts Near Our Target",
+        "note": (f"Chris comes up to {fmt(m['buyer_close'])} (our $11.5k target, well above the "
+                 f"{fmt(m['buyer_floor_price'])} floor). Buyer side locked. EV fee = {fmt(m['ev_fee'])}."),
         "html": sim14, "subject": f"Re: {r13c['subject']}",
         "is_template": False, "is_internal": False, "is_sim": True,
     })

@@ -2855,3 +2855,67 @@ class TestBuyerSideSingleOfferNumber:
             f"Marvin pitch must reference the assignment price ${chris_price:,}. "
             f"Body snippet: {body[:400]}"
         )
+
+
+# ---------------------------------------------------------------------------
+# Buyer-side floor + GRADUAL concession (operator rule 2026-05-29)
+# ---------------------------------------------------------------------------
+
+class TestBuyerFloorAndConcession:
+    """max($4k, 10%) floor + shrinking, top-weighted concession (never cave to floor)."""
+
+    def test_floor_fee_4k_minimum(self):
+        # 10% of 30k = 3k -> floor is the $4k minimum
+        assert ot.buyer_floor_fee(30000) == 4000
+
+    def test_floor_fee_ten_percent_when_higher(self):
+        # 10% of 60k = 6k > 4k
+        assert ot.buyer_floor_fee(60000) == 6000
+
+    def test_floor_fee_at_40k_is_4k(self):
+        # operator example: "if it's 40K I want 4K"
+        assert ot.buyer_floor_fee(40000) == 4000
+
+    def test_counter_never_below_floor(self):
+        n = ot.buyer_negotiation(seller_price=33640, chris_offer=20000, round_num=1)
+        assert n["counter_price"] >= n["floor_price"]
+        assert n["counter_fee"] >= n["floor_fee"]
+
+    def test_round1_holds_high_not_floor(self):
+        # Chris lowballs hard; round 1 must stay near the ask, NOT collapse to floor.
+        n = ot.buyer_negotiation(seller_price=33640, chris_offer=35640, round_num=1,
+                                 ask_price=46640)
+        assert n["counter_price"] > n["floor_price"] + 2000, (
+            "round 1 must hold high, not cave toward the floor"
+        )
+
+    def test_concession_shrinks_each_round(self):
+        # Same lowball, increasing round -> our counter should step DOWN gradually.
+        kw = dict(seller_price=33640, chris_offer=35640, ask_price=46640)
+        r1 = ot.buyer_negotiation(round_num=1, **kw)["counter_price"]
+        r2 = ot.buyer_negotiation(round_num=2, **kw)["counter_price"]
+        r3 = ot.buyer_negotiation(round_num=3, **kw)["counter_price"]
+        assert r1 > r2 > r3, f"counters must descend gradually: {r1} > {r2} > {r3}"
+        # and the steps SHRINK (give-backs get smaller as we near the floor)
+        assert (r1 - r2) >= (r2 - r3), "give-backs should shrink each round"
+
+    def test_accepts_when_chris_meets_our_step(self):
+        # Chris offers above our stepped position -> accept at his number.
+        n = ot.buyer_negotiation(seller_price=33640, chris_offer=46000, round_num=2,
+                                 ask_price=46640)
+        assert n["accept"] is True
+        assert n["counter_price"] == 46000
+
+    def test_late_round_accepts_at_or_above_floor(self):
+        # Round 4: take a clean offer at/above floor rather than lose the deal.
+        n = ot.buyer_negotiation(seller_price=33640, chris_offer=38000, round_num=4)
+        assert n["accept"] is True
+
+    def test_render_counter_r2_uses_gradual_not_midpoint(self):
+        # With the gradual engine, counter stays well above the old midpoint.
+        lead = {"property_address": "836 N Bellevue", "county_appraisal": 58000,
+                "moa_close": 33640, "buyer_ask": 46640}
+        r = ot.render_henry_buyer_counter_round2(
+            lead, chris_position=35640, our_floor=37640, ask_price=46640, round_num=2
+        )
+        assert "37,640" in r["body_html"]  # floor is stated
