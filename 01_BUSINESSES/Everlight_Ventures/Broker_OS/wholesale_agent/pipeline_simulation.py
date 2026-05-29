@@ -368,8 +368,8 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
         f"<p>My approach: Memphis-to-Memphis opener, cite the parcel signals, no dollar number on touch 1. "
         f"Anchor at {fmt(m['moa_open'])} when they reply, walk up to {fmt(m['moa_close'])} if needed. "
         f"Hand to Marvin for paper once we have yes.</p>"
-        f"<p>Math: appraisal {fmt(appraisal)} -- open {fmt(m['moa_open'])} (65%) -- "
-        f"close {fmt(m['moa_close'])} (85%) -- buyer ask {fmt(m['buyer_ask'])} -- "
+        f"<p>Math: appraisal {fmt(appraisal)} -- open {fmt(m['moa_open'])} ({round(m['moa_open']/max(appraisal,1)*100)}%) -- "
+        f"close {fmt(m['moa_close'])} ({round(m['moa_close']/max(appraisal,1)*100)}%) -- buyer ask {fmt(m['buyer_ask'])} -- "
         f"buyer close {fmt(m['buyer_close'])} -- EV fee <strong>{fmt(m['ev_fee'])}</strong></p>"
         f"<p>Pulling the trigger on Marquise first-touch now.</p>"
     )
@@ -419,7 +419,7 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
     stages.append({
         "num": "04", "key": "marquise_anchor", "persona": "marquise",
         "label": "Marquise Anchor Offer",
-        "note": f"First cash number: {fmt(m['moa_open'])} (65% of appraisal) with citable comps + Mid-South Title",
+        "note": f"First cash number: {fmt(m['moa_open'])} ({round(m['moa_open']/max(appraisal,1)*100)}% of appraisal) with citable comps + Mid-South Title",
         "html": r04["body_html"], "subject": r04["subject"],
         "is_template": True, "is_internal": False, "is_sim": False,
     })
@@ -1207,8 +1207,8 @@ def main(argv: list[str] | None = None) -> int:
 
     print(f"\n[Economics Summary]")
     print(f"  County appraisal:     {fmt(math['appraisal'])}")
-    print(f"  Marquise opens at:    {fmt(math['moa_open'])} (65%)")
-    print(f"  Seller closes at:     {fmt(math['moa_close'])} (85%)")
+    print(f"  Opens at (anchor):    {fmt(math['moa_open'])} ({round(math['moa_open']/max(math['appraisal'],1)*100)}%)")
+    print(f"  Seller closes at:     {fmt(math['moa_close'])} ({round(math['moa_close']/max(math['appraisal'],1)*100)}%)")
     print(f"  Buyer (Chris) pays:   {fmt(math['buyer_close'])}")
     print(f"  EV assignment fee:    {fmt(math['ev_fee'])}")
     print(f"  Close target:         {math['close_dow']} {math['close_date']}")
