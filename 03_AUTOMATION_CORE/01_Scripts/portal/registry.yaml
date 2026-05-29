@@ -1,0 +1,158 @@
+# Everlight Ventures -- Organizational Portal Registry
+# Source of truth for the numbered portal at 127.0.0.1:8800
+# Format:
+#   number: NN (two-digit, zero-padded)
+#   name: display name
+#   description: one-liner
+#   subcategories: list of subcat slugs
+#   source_files: optional map of subcat -> list of {filename, source_path} for files
+#     the server should resolve from outside portal_root (e.g. on /sdcard where
+#     FAT32/exFAT blocks symlinks). Server reads source_path at request time.
+#   external_links: optional list of {label, url} for live apps on other ports
+
+categories:
+
+  - number: "01"
+    name: "Wholesale / Broker"
+    description: "Send-approval dashboard, pipeline simulations, leads database, REX pipeline"
+    subcategories:
+      - dashboards
+      - simulations
+      - leads
+    source_files:
+      dashboards:
+        - filename: SEND_APPROVAL_DASHBOARD.html
+          source_path: /mnt/sdcard/AA_MY_DRIVE/_logs/inbound/SEND_APPROVAL_DASHBOARD.html
+        - filename: pipeline_simulation_dashboard.html
+          source_path: /mnt/sdcard/AA_MY_DRIVE/_logs/inbound/pipeline_simulation_dashboard.html
+      leads:
+        - filename: leads_db.json
+          source_path: /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/leads_db.json
+
+  - number: "02"
+    name: "Trading"
+    description: "XLM bot (PARKED), Polymarket paper cycle, P&L reports"
+    subcategories:
+      - dashboards
+      - reports
+    external_links:
+      - label: "XLM Dashboard (Oracle :8502) -- PARKED"
+        url: "http://163.192.19.196:8502"
+
+  - number: "03"
+    name: "Reports / Analytics"
+    description: "Hive daily brief, funnel analytics, performance metrics"
+    subcategories:
+      - daily
+      - funnel
+    source_files:
+      daily:
+        - filename: performance_metrics.json
+          source_path: /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/data/workbooks/performance_metrics.json
+
+  - number: "04"
+    name: "Content Factory"
+    description: "Outreach copy queue, published content, branded email drafts"
+    subcategories:
+      - queue
+      - published
+
+  - number: "05"
+    name: "Brain / Knowledge"
+    description: "Blinko RAG, agentmemory graph, doctrine memory"
+    subcategories:
+      - rag
+      - memory
+    external_links:
+      - label: "Blinko RAG (e5-mother :1111)"
+        url: "http://e5-mother:1111"
+      - label: "agentmemory MCP (e5-mother :3108)"
+        url: "http://e5-mother:3108"
+
+  - number: "06"
+    name: "Infra / Ops"
+    description: "Health checks, watchdog logs, deploy receipts, network audit"
+    subcategories:
+      - status
+      - logs
+
+  - number: "07"
+    name: "Inbound / Comms"
+    description: "Sentinel inbound queue, email previews, Slack routing"
+    subcategories:
+      - dashboards
+      - queues
+    source_files:
+      dashboards:
+        - filename: rita_piper_full.html
+          source_path: /mnt/sdcard/AA_MY_DRIVE/_logs/inbound/rita_piper_full.html
+        - filename: vaughn_preview.html
+          source_path: /mnt/sdcard/AA_MY_DRIVE/_logs/inbound/vaughn_preview.html
+
+  - number: "08"
+    name: "Contracts / E-sign"
+    description: "PSA templates, signed agreements, Documenso pipeline"
+    subcategories:
+      - psa
+      - signed
+    external_links:
+      - label: "Documenso (sign.everlightventures.io)"
+        url: "https://sign.everlightventures.io"
+      - label: "Documenso direct (e5-mother :3050)"
+        url: "http://e5-mother:3050"
+
+  - number: "09"
+    name: "Hive / Agents"
+    description: "Agent roster, Roundtable sessions, fire team doctrine, LUCREX identity"
+    subcategories:
+      - roster
+      - sessions
+
+  - number: "10"
+    name: "Onyx POS / SaaS"
+    description: "Onyx POS dashboard, Mountain Gardens origin, SaaS metrics"
+    subcategories:
+      - dashboards
+    external_links:
+      - label: "Django Hive Dashboard (:8504)"
+        url: "http://127.0.0.1:8504"
+
+  - number: "11"
+    name: "AI Consulting"
+    description: "Charlie fire team pipeline, client builds, retainer tracker"
+    subcategories:
+      - pipeline
+      - clients
+
+  - number: "12"
+    name: "Polymarket"
+    description: "Paper-cycle P&L, Brier scoring, postmortem reports"
+    subcategories:
+      - cycles
+      - postmortems
+
+  - number: "13"
+    name: "Open WebUI / Chat"
+    description: "Multi-model parallel chat surface on e5-mother"
+    subcategories:
+      - sessions
+    external_links:
+      - label: "Open WebUI (e5-mother :8080)"
+        url: "http://e5-mother:8080"
+
+  - number: "14"
+    name: "Automation Core"
+    description: "Cron schedules, deploy scripts, watchdog status, repair playbooks"
+    subcategories:
+      - crons
+      - deploys
+
+  - number: "15"
+    name: "Everlight Site"
+    description: "everlightventures.io public site (React/Vite/Shadcn on Cloudflare Pages)"
+    subcategories:
+      - pages
+      - seo
+    external_links:
+      - label: "everlightventures.io (live)"
+        url: "https://everlightventures.io"
