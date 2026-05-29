@@ -13,13 +13,18 @@ import pytest
 
 from polymarket_agent.main import run_live_cycle
 from polymarket_agent.dataflows.polymarket_clob import Market
+from polymarket_agent.dataflows.interface import Signal
 
 
 @pytest.fixture(autouse=True)
-def _isolated_notifier():
-    """Notify (Slack + Blinko) is tested in test_notify.py; isolate it from the
-    cycle tests so they make no real network calls."""
-    with patch("polymarket_agent.main._make_notifier", return_value=MagicMock()):
+def _isolated_cycle():
+    """Isolate the cycle from network: mock the notifier (Slack/Blinko tested in
+    test_notify.py) and inject one matching signal (the predictor now skips
+    markets with zero signals, so a Fed signal lets the 'Will Fed cut?' market
+    reach the LLM step, which the tests mock via Predictor._llm_predict)."""
+    sig = [Signal(source="test", text="Fed rate cut expected this meeting")]
+    with patch("polymarket_agent.main._make_notifier", return_value=MagicMock()), \
+         patch("polymarket_agent.main.gather_signals", return_value=sig):
         yield
 
 

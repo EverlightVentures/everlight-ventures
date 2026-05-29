@@ -46,8 +46,11 @@ def run_paper_cycle(cfg: dict):
     data_dir.mkdir(parents=True, exist_ok=True)
     _ensure_state(data_dir, cfg["bankroll"]["initial"])
 
-    # SCAN
-    clob = PolymarketCLOB(cfg["proxy"]["url"])
+    # SCAN -- direct unless the CF proxy is explicitly enabled (direct works
+    # from the US Oracle region; proxy is the documented geo-block fallback).
+    proxy_cfg = cfg.get("proxy", {})
+    proxy_url = proxy_cfg.get("url") if proxy_cfg.get("enabled") else None
+    clob = PolymarketCLOB(proxy_url=proxy_url)
     markets = clob.scan_markets(limit=cfg["polymarket"]["max_markets_scan"])
     scanner = Scanner()
     filtered = scanner.filter(markets)

@@ -59,11 +59,13 @@ risk:
   max_daily_bets: 10
   max_daily_loss_pct: 15.0   # Stop trading at -15% daily
   min_edge: 0.05             # Need 5% edge over market
+  max_open_positions: 10     # alias of max_daily_bets for executor check 6
+  min_confidence: 0.40       # brain-bridge halves raw conf; Phase I tunes this up
   cooldown_after_loss: 300   # 5 min cooldown after loss
 
 # Bankroll
 bankroll:
-  initial: 100.0  # Start with $100 USDC
+  initial: 250.0  # Operator-funded bankroll
   currency: "USDC"
   target_daily_return: 0.02  # 2% daily target
 
@@ -91,8 +93,8 @@ agents:
 
 # Proxy routing (Phase 0 outcome)
 proxy:
-  url: "https://clob-proxy.everlightventures.io"  # Or eu-frankfurt-1 fallback if A4
-  enabled: true
+  url: "https://clob-proxy.everlightventures.io"  # CF Worker fallback (not deployed; direct works)
+  enabled: false
 
 # Kill switches
 kill_switches:
