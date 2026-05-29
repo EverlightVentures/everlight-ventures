@@ -1,0 +1,10 @@
+[Unit]
+Description=Weekly Polymarket postmortem (Sundays 6 PM PT)
+
+[Timer]
+OnCalendar=Sun *-*-* 18:00:00 America/Los_Angeles
+Persistent=true
+Unit=polymarket-postmortem.service
+
+[Install]
+WantedBy=timers.target

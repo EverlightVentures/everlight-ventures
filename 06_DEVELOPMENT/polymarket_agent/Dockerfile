@@ -1,14 +1,25 @@
-# Polymarket Prediction Agent - Everlight Ventures
-# 5-Agent Pipeline on Oracle E5 ARM64
+# Polymarket Live Trader -- Everlight Ventures
+# Real py-clob-client execution. Runs on e5-mother (Ampere ARM64).
 FROM python:3.11-slim
 
 WORKDIR /app
 
-RUN pip install --no-cache-dir pyyaml feedparser "web3>=6.0,<7.0" "eth-account>=0.10,<0.14"
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY config.yaml .
-COPY main.py .
+# Install deps from the canonical manifest (web3 / eth-account / py-clob-client / feedparser / pyyaml)
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-RUN mkdir -p logs data
+# Copy the whole package so absolute imports (from polymarket_agent...) resolve.
+# WORKDIR /app is on sys.path; package lives at /app/polymarket_agent (.dockerignore
+# trims .venv/data/logs/tests/__pycache__).
+COPY . /app/polymarket_agent/
 
-CMD ["python3", "main.py"]
+RUN mkdir -p /app/polymarket_agent/logs /app/polymarket_agent/data
+
+# Default: PAPER cycle loop. Live trading requires LIVE_TRADING=true env AND
+# config live_trading.enabled=true (two-factor). Switch command to the live
+# entrypoint only after paper calibration passes + wallet funded.
+CMD ["python3", "-m", "polymarket_agent.main"]

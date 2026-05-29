@@ -379,18 +379,42 @@ deploy_stark() {
     log "Stark AI deployed to E5"
 }
 
-# Deploy Polymarket prediction agent via Podman
+# Deploy Polymarket Live Trader (full package) via Podman + systemd
 deploy_polymarket() {
     if ! e5_up; then log "SKIP deploy_polymarket: e5-mother ($HIVE_PROD_HOST) unreachable"; return 0; fi
-    log "Deploying Polymarket agent on Oracle E5 via Podman..."
-    ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "mkdir -p /home/opc/polymarket_agent" 2>/dev/null
-    scp -o ConnectTimeout=10 -i "$KEY" \
-        /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/polymarket_agent/{podman-compose.yml,Dockerfile,main.py,config.yaml} \
+    log "Deploying Polymarket Live Trader on Oracle E5 via Podman..."
+    ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "mkdir -p /home/opc/polymarket_agent /home/opc/secrets" 2>/dev/null
+
+    # Rsync the WHOLE package (execution/ dataflows/ agents/ + requirements + compose
+    # + Dockerfile + systemd). Exclude local-only state + venv + tests.
+    rsync -az --delete -e "ssh -o ConnectTimeout=10 -i $KEY" \
+        --exclude '.venv' --exclude '__pycache__' --exclude 'data' \
+        --exclude 'logs' --exclude '*.pyc' \
+        /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/polymarket_agent/ \
         "$E5_VM:/home/opc/polymarket_agent/" 2>/dev/null
+
+    # Wallet key -> host secrets dir (chmod 600 on ext4). The key is gitignored
+    # and NEVER baked into the image; the compose mounts it read-only into /secrets.
+    if [ -f /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/03_Credentials/polymarket_wallet.key ]; then
+        scp -o ConnectTimeout=10 -i "$KEY" \
+            /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/03_Credentials/polymarket_wallet.{key,addr} \
+            "$E5_VM:/home/opc/secrets/" 2>/dev/null
+        ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" \
+            "chmod 600 /home/opc/secrets/polymarket_wallet.key /home/opc/secrets/polymarket_wallet.addr" 2>/dev/null
+    fi
+
+    # Build + bring up (agent + rsshub sidecar), install systemd units + weekly timer.
     ssh -o ConnectTimeout=10 -i "$KEY" "$E5_VM" "
-        cd /home/opc/polymarket_agent && podman-compose up -d --build
+        cd /home/opc/polymarket_agent &&
+        podman-compose up -d --build &&
+        sudo cp systemd/polymarket-agent.service /etc/systemd/system/ 2>/dev/null;
+        sudo cp systemd/polymarket-postmortem.service /etc/systemd/system/ 2>/dev/null;
+        sudo cp systemd/polymarket-postmortem.timer /etc/systemd/system/ 2>/dev/null;
+        sudo systemctl daemon-reload 2>/dev/null;
+        sudo systemctl enable --now polymarket-postmortem.timer 2>/dev/null;
+        echo deployed
     " 2>/dev/null
-    log "Polymarket agent deployed"
+    log "Polymarket Live Trader deployed (paper mode; LIVE_TRADING=false until funded + calibrated)"
 }
 
 # Deploy Django hive_dashboard to Oracle E5

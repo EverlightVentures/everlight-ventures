@@ -1,0 +1,10 @@
+[Unit]
+Description=Polymarket weekly postmortem (Brier + win-rate + P&L -> branded report)
+
+[Service]
+Type=oneshot
+User=opc
+WorkingDirectory=/home/opc/polymarket_agent
+ExecStart=/usr/bin/podman exec everlight-polymarket python3 -m polymarket_agent.agents.postmortem
+StandardOutput=append:/var/log/polymarket-postmortem.log
+StandardError=append:/var/log/polymarket-postmortem.log

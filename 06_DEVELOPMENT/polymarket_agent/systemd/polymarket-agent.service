@@ -1,0 +1,19 @@
+[Unit]
+Description=Everlight Polymarket Live Trader
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=opc
+WorkingDirectory=/home/opc/polymarket_agent
+# podman-compose brings up the agent + rsshub sidecar (Restart handled here).
+ExecStart=/usr/bin/podman-compose up
+ExecStop=/usr/bin/podman-compose down
+Restart=always
+RestartSec=10
+StandardOutput=append:/var/log/polymarket-agent.log
+StandardError=append:/var/log/polymarket-agent.log
+
+[Install]
+WantedBy=multi-user.target

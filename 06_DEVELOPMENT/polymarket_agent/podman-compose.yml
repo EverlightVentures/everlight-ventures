@@ -1,8 +1,12 @@
 version: '3.8'
 
-# Polymarket Prediction Agent - Everlight Ventures
-# 5-Agent Pipeline: Scanner -> Researcher -> Predictor -> Risk -> Postmortem
-# Runs alongside XLM bot on Oracle E5.
+# Polymarket Live Trader -- Everlight Ventures
+# 5-agent pipeline: Scanner -> Researcher -> Predictor -> Risk -> Postmortem
+# + LiveClobBackend (real py-clob-client execution). Runs on e5-mother.
+#
+# SAFETY: LIVE_TRADING defaults false. Real trading requires BOTH
+#   LIVE_TRADING=true (here) AND config live_trading.enabled=true (config.yaml).
+# EV_TRADER_HALT=true is the manual kill switch (no new orders next cycle).
 
 services:
   polymarket-agent:
@@ -13,17 +17,43 @@ services:
     environment:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN}
-      - TWITTER_BEARER_TOKEN=${TWITTER_BEARER_TOKEN:-}
+      - PERPLEXITY_API_KEY=${PERPLEXITY_API_KEY:-}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN:-}
+      - LIVE_TRADING=${LIVE_TRADING:-false}
+      - EV_TRADER_HALT=${EV_TRADER_HALT:-false}
     volumes:
-      - polymarket_data:/app/data
-      - polymarket_logs:/app/logs
+      - polymarket_data:/app/polymarket_agent/data
+      - polymarket_logs:/app/polymarket_agent/logs
+      # Wallet key mounted read-only from the host secrets dir (chmod 600 on ext4).
+      # Never bake the key into the image. Path matches config.yaml wallet.key_path
+      # once deployed (deploy maps host /home/opc/secrets -> container path).
+      - /home/opc/secrets/polymarket_wallet.key:/secrets/polymarket_wallet.key:ro
+      - /home/opc/secrets/polymarket_wallet.addr:/secrets/polymarket_wallet.addr:ro
     mem_limit: 512m
     restart: unless-stopped
     networks:
       - everlight
-    # Run full cycle every 5 min via entrypoint loop
+    # Paper cycle loop every 5 min. Switch to the live entrypoint only after
+    # paper calibration passes + wallet funded (see verify_live.py + Phase I).
     command: >
-      sh -c "while true; do python3 main.py full; sleep 300; done"
+      sh -c "while true; do python3 -m polymarket_agent.main; sleep 300; done"
+
+  # Self-hosted RSSHub -- free Twitter/X -> RSS conversion for the rsshub_client
+  # dataflow. Bound localhost-only on the host; the agent reaches it over the
+  # everlight network. No API key, $0.
+  rsshub:
+    image: diygod/rsshub:latest
+    container_name: everlight-rsshub
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1200:1200"
+    environment:
+      - NODE_ENV=production
+      - CACHE_EXPIRE=300
+      - CACHE_CONTENT_EXPIRE=600
+    mem_limit: 512m
+    networks:
+      - everlight
 
 volumes:
   polymarket_data:
