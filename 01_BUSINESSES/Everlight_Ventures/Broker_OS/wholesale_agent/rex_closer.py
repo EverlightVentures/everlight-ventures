@@ -460,7 +460,7 @@ def generate_purchase_agreement(deal: dict) -> str:
 Date: {today_str}
 
 SELLER: {owner}
-BUYER: Everlight Logistics LLC (and/or assigns)
+BUYER: Richard Gee, an individual, d/b/a Everlight Ventures (and/or assigns)
 
 PROPERTY ADDRESS: {addr}, {city}, {state}
 
@@ -502,7 +502,7 @@ SELLER SIGNATURE: _________________________ Date: _________
 {owner}
 
 BUYER SIGNATURE: _________________________ Date: _________
-Everlight Logistics LLC
+Richard Gee, an individual, d/b/a Everlight Ventures
 
 ---
 This agreement was prepared by Everlight Ventures for review purposes.
