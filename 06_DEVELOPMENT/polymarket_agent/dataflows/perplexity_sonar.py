@@ -27,16 +27,9 @@ _JSON_ARRAY = re.compile(r"\[.*\]", re.DOTALL)
 
 
 def _load_key() -> str | None:
-    import os
-    # Operator-edited .env is authoritative; prefer it over ambient env.
-    if ENV_PATH.exists():
-        for line in ENV_PATH.read_text().splitlines():
-            if line.startswith("PERPLEXITY_API_KEY="):
-                v = line.split("=", 1)[1].strip().strip('"').strip("'")
-                if v:
-                    return v
-    k = os.getenv("PERPLEXITY_API_KEY") or os.getenv("PPLX_API_KEY")
-    return k.strip().strip('"').strip("'") if k else None
+    # Cross-host resolution (phone .env -> e5 .env -> env var); .env authoritative.
+    from polymarket_agent.paths import read_env_key
+    return read_env_key("PERPLEXITY_API_KEY") or read_env_key("PPLX_API_KEY")
 
 
 class Sonar:

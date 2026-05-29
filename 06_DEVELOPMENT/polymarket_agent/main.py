@@ -2,6 +2,7 @@
 """Polymarket Agent orchestrator. Thin cycle: scan -> research -> predict -> risk -> execute."""
 import json
 import logging
+import os
 import sys
 import time
 from dataclasses import asdict
@@ -258,14 +259,18 @@ def run_live_cycle(cfg: dict, backend=None, wallet=None):
         open_bets_path.write_text(json.dumps([]))
 
     # Real backend + wallet (key from the secure file) unless injected.
+    # Resolve the key path cross-host (phone -> e5 -> oracle) with a config override.
+    from polymarket_agent.paths import wallet_key_path
+    cfg_key = cfg.get("wallet", {}).get("key_path")
+    key_path = cfg_key if (cfg_key and os.path.isfile(cfg_key)) else wallet_key_path()
     if backend is None:
-        key = read_key_file(cfg["wallet"]["key_path"])
+        key = read_key_file(key_path)
         backend = LiveClobBackend(
             private_key=key, host="https://clob.polymarket.com",
             chain_id=137, auto_auth=True,
         )
     if wallet is None:
-        wallet = PolygonWallet(private_key_path=cfg["wallet"]["key_path"])
+        wallet = PolygonWallet(private_key_path=key_path)
 
     # SCAN (direct -- the live API is reachable without the proxy)
     clob = PolymarketCLOB()

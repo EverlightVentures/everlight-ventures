@@ -14,6 +14,27 @@ LOG="/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/polymarket_agent/logs/calibrate.log"
 LOCK="/tmp/polymarket_calibrate.lock"
 mkdir -p "$(dirname "$LOG")"
 
+# ACTIVE-PASSIVE FAILOVER: e5-mother is the primary mother hub. The phone runs
+# this ONLY when e5 is unreachable. If e5 answers, it owns the cycle -> skip
+# (prevents double-running / paper-state divergence across hosts).
+# Generous timeout: e5 tailnet SSH handshake can take >8s under load. Only treat
+# e5 as DOWN after a real failure -- a false-failover would fork the ledger.
+# Retry twice before declaring e5 down.
+e5_up() {
+  for _ in 1 2; do
+    if timeout 25 ssh -o ConnectTimeout=18 -o StrictHostKeyChecking=no \
+         -i /root/.ssh/github_deploy e5-mother "echo up" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 3
+  done
+  return 1
+}
+if e5_up; then
+  echo "$(date -u +%FT%TZ) skip: e5 (primary) is up, it owns the cycle" >> "$LOG"; exit 0
+fi
+echo "$(date -u +%FT%TZ) e5 DOWN (2 tries) -> phone failover taking the cycle" >> "$LOG"
+
 # single-instance lock (skip if a run is in flight)
 if [ -e "$LOCK" ] && kill -0 "$(cat "$LOCK" 2>/dev/null)" 2>/dev/null; then
   echo "$(date -u +%FT%TZ) skip: already running" >> "$LOG"; exit 0

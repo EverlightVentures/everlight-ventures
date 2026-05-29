@@ -16,22 +16,13 @@ from polymarket_agent.agents.risk_manager import Prediction
 
 _DEFAULT_BRAIN = {"decisive_score": 0.5, "logical_score": 0.5,
                   "self_healing_score": 0.5, "plasticity_score": 0.5}
-_ENV_PATH = Path("/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/03_Credentials/.env")
 _JSON_OBJ = re.compile(r"\{.*\}", re.DOTALL)
 
 
 def _load_anthropic_key() -> str | None:
-    # The operator-edited .env is the authoritative secret store for this bot.
-    # Prefer it over any ambient process env var (which can be a different/stale
-    # key inherited from the surrounding shell, e.g. a host tool's own key).
-    if _ENV_PATH.exists():
-        for line in _ENV_PATH.read_text().splitlines():
-            if line.startswith("ANTHROPIC_API_KEY="):
-                v = line.split("=", 1)[1].strip().strip('"').strip("'")
-                if v:
-                    return v
-    k = os.getenv("ANTHROPIC_API_KEY")
-    return k.strip() if k else None
+    # Cross-host resolution (phone .env -> e5 .env -> env var); .env authoritative.
+    from polymarket_agent.paths import read_env_key
+    return read_env_key("ANTHROPIC_API_KEY")
 
 
 def _signal_text(s) -> tuple:
