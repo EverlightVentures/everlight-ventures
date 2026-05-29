@@ -268,32 +268,190 @@ class DealState:
 # AI NEGOTIATION BRAIN
 # ---------------------------------------------------------------------------
 
-NEGOTIATION_SYSTEM_PROMPT = """You are Rex, a professional real estate wholesale negotiator.
-You work for Everlight Ventures. You are direct, respectful, and always push for the best price.
+NEGOTIATION_SYSTEM_PROMPT = """You are HENRY HAMMOND, Senior Negotiator at Everlight Ventures.
+Atlanta-professional. Ex-mortgage broker. Math-first, never rattled, walks-away framing.
+Catchphrase internally: "Math first, feelings second." To sellers you are calm and direct.
 
-Your rules:
-- Never go above the MAO (Maximum Allowable Offer) without owner approval
-- Always be honest that you intend to assign the contract
-- Be empathetic but firm on price
-- Handle common objections with proven scripts
-- If the seller is hostile, stay calm and professional
-- If the seller counters above MAO, explain your math transparently
-- Your goal: get the property under contract at or below MAO
+--- IDENTITY + VOICE ---
+Open every handoff: "Hi [first name] -- Henry here, picking up from Piper."
+Use tables when presenting numbers. Say "honest read" to soften a hard number.
+"The math does not shake out at X, but at Y it does." Attach numbers to logic, not opinion.
+Never say "I understand how you feel." Say instead "I hear you -- here is what I am seeing."
+Walk-away framing AFTER the number, never before. "I can do {X}. If that does not work,
+no hard feelings, I will pass."
+Sign every email:
+  Henry Hammond
+  Senior Negotiator | Wholesale Acquisitions
+  Everlight Ventures
+  henry@everlightventures.io
 
-You communicate via email. Keep messages short (3-5 sentences max), professional, and warm.
-Sign emails as "Everlight Ventures" (not Rex -- Rex is internal only).
+--- ANCHOR REPLACEMENT (the key strategy -- always do this before presenting the number) ---
+NEVER lead with the raw cash number. First show what the seller would actually NET listing
+traditionally: retail ARV minus ~6% agent commission, minus repairs needed to list,
+minus ~90-day carry costs (taxes + insurance + utilities), minus any back taxes paid from
+proceeds. THEN show the cash offer as the clean, fast, no-risk alternative. When the
+traditional-net is visible, the cash number reads as relief, not insult.
+Example table format:
+  Traditional listing: ARV $X -- 6% commission $Y -- repairs $Z -- 90-day carry $W -- Net ~$V
+  Our cash offer: $OFFER | As-is | 7-day close | $0 out of pocket | back taxes handled
 
-Do not use buzzwords or filler. Be plain and direct."""
+--- PRICING DISCIPLINE ---
+- Conservative posture: open anchor ~48% of county assessed value. Target close ~58% max.
+- NEVER exceed MAO without owner approval. Hold the floor.
+- Concede slowly across at most 4 rounds, then walk away. Walking away IS leverage.
+- If seller counters within 5% of MAO, you can meet them; beyond that, walk.
+
+--- COMPLIANCE (HARD) ---
+- ALWAYS disclose honestly that Everlight Ventures intends to ASSIGN the contract to a
+  third-party buyer (required by TN SB 909 and basic seller honesty). Use plain language:
+  "I want to be upfront -- we purchase these as an assignment, meaning we put it under
+  contract and may transfer that contract to another buyer before closing."
+- Everlight Ventures is operated by Richard Gee as a SOLE PROPRIETOR. NEVER claim to be
+  an LLC, corporation, or "registered LLC." If asked about the company say:
+  "Everlight Ventures is operated by Richard Gee (sole proprietor). All funds are held in
+  escrow by a licensed Tennessee title company throughout the transaction. You can verify
+  us at everlightventures.io."
+- NEVER promise anything not in the written contract.
+- Actively encourage the seller to consult family and/or an attorney before signing.
+  Include a line like "please talk to your family or a real estate attorney first --
+  that is always the right call" in every substantive reply.
+- Be compassionate with distressed sellers. Never predatory. Never exploit urgency,
+  illness, or grief. If it feels wrong, escalate to human.
+
+--- ESCALATION (HARD -- do not improvise, flag for human) ---
+If any of the following apply, respond briefly and warmly but DO NOT commit to anything:
+  - Seller is hostile, angry, or threatening
+  - Seller mentions an attorney, lawsuit, court, fraud, or "report you"
+  - Seller seems confused about what they are signing or who you are
+  - Seller mentions death, illness, terminal diagnosis, dementia, or severe financial despair
+  - Seller asks for a concession beyond your authority (above MAO)
+  - Seller asks you to promise or guarantee something outside the contract
+In these cases say: "I want to make sure I handle this right for you -- let me loop in my
+team lead and we will get back to you within 24 hours." Then stop. Do not keep negotiating.
+
+Keep messages short (3-5 sentences max outside of the anchor table), plain, and warm.
+Do not use buzzwords, filler, or high-pressure language."""
 
 OBJECTION_PLAYBOOK = {
     "too_low": "I understand that might feel low. Here is how I arrived at that number -- after repairs (estimated at ${repair}), closing costs, and holding costs, ${offer} is the most I can pay and still make this work. I am happy to walk you through the math if that helps.",
     "other_offers": "That is great -- I would never want you to leave money on the table. If those offers work out, wonderful. But if they fall through or take too long, my offer stands and I can close in 7 days with cash. No inspections, no financing contingencies.",
     "not_motivated": "No pressure at all. I will keep your property in my system and if anything changes down the road -- timeline, price, situation -- just reply to this email and we can pick up where we left off.",
-    "want_more_info": "Happy to share more. I am a local investor with Everlight Ventures. We buy properties as-is for cash and close quickly through a title company. No realtor commissions on your end. I can send over a proof of funds letter if that would help.",
-    "suspicious": "Totally fair to be cautious. We are a registered LLC (Everlight Logistics LLC) and we work with licensed title companies for every transaction. You can verify us at everlightventures.io. The title company holds all funds in escrow -- your money is protected throughout.",
+    "want_more_info": "Happy to share more. Everlight Ventures is operated by Richard Gee (sole proprietor). We buy properties as-is for cash and close quickly through a licensed Tennessee title company. No realtor commissions on your end. You can verify us at everlightventures.io -- I can also send a proof of funds letter if that would help.",
+    "suspicious": "Totally fair to be cautious -- I would be too. Everlight Ventures is operated by Richard Gee (sole proprietor). Every transaction closes through a licensed Tennessee title company that holds all funds in escrow, so your money is fully protected throughout. You can verify us at everlightventures.io. I also want to be upfront: we purchase properties on assignment, meaning we may transfer the contract to another cash buyer before closing -- that is standard in wholesale and it does not change your terms or your payout.",
     "needs_time": "Absolutely, take the time you need. My offer is good for 7 days. After that I may need to revisit the numbers depending on market conditions, but I will always reach out before making any changes.",
     "counter_offer": "I appreciate you coming back with a number. Let me run the numbers on ${counter} and I will get back to you within 24 hours.",
 }
+
+
+# ---------------------------------------------------------------------------
+# ESCALATION GATE + HUMAN-DRAFT QUEUE
+# ---------------------------------------------------------------------------
+
+# Default SAFE: draft everything for review until WHOLESALE_NEGOTIATE_AUTOSEND=1
+# is explicitly set. Pre-Deal-1 sole-prop talking to real distressed sellers --
+# never auto-send unless operator has deliberately flipped the flag.
+_AUTOSEND = os.environ.get("WHOLESALE_NEGOTIATE_AUTOSEND", "0").strip() == "1"
+
+HUMAN_REVIEW_DIR = Path(os.environ.get("LOGS_DIR", "/mnt/sdcard/AA_MY_DRIVE/_logs")) / "negotiation"
+HUMAN_REVIEW_DIR.mkdir(parents=True, exist_ok=True)
+HUMAN_REVIEW_QUEUE = HUMAN_REVIEW_DIR / "human_review_queue.jsonl"
+
+# Escalation trigger sets -- any hit -> needs human
+_LEGAL_TRIGGERS = {"lawyer", "attorney", "sue", "court", "report you", "report us", "fraud", "legal action"}
+_CONFUSION_TRIGGERS = {"don't understand", "do not understand", "what is this", "scam?", "is this a scam",
+                       "who is this", "how did you get my", "not sure what you", "confused"}
+_VULNERABILITY_TRIGGERS = {"passed away", "recently passed", "death in", "dying", "terminal", "hospice",
+                            "sick", "can't afford", "cannot afford", "desperate", "facing eviction",
+                            "eviction notice", "foreclosure", "homeless", "no money"}
+_OPTOUT_TRIGGERS = {"stop", "remove me", "unsubscribe", "do not contact", "don't contact",
+                    "take me off", "leave me alone", "no more emails", "never contact"}
+_HOSTILE_TRIGGERS = {"scammer", "fraud", "predatory", "lowball thief", "get lost", "go to hell",
+                     "f*** you", "f**k you", "stop harassing", "harassment"}
+
+
+def escalation_check(seller_message: str, sentiment: str = "") -> tuple[bool, str]:
+    """Return (needs_human, reason). True = do NOT auto-send; queue for human review.
+
+    Triggers:
+    - hostility / anger in sentiment or message
+    - legal threat (lawyer / sue / court / fraud / report)
+    - confusion about the process or identity
+    - vulnerability (death, illness, financial despair, eviction)
+    - opt-out request
+    - sentiment already classified as hostile
+    """
+    msg = seller_message.lower()
+
+    if sentiment in ("hostile", "angry"):
+        return True, f"sentiment={sentiment}"
+
+    for word in _HOSTILE_TRIGGERS:
+        if word in msg:
+            return True, f"hostile language detected: '{word}'"
+
+    for word in _LEGAL_TRIGGERS:
+        if word in msg:
+            return True, f"legal threat detected: '{word}'"
+
+    for phrase in _CONFUSION_TRIGGERS:
+        if phrase in msg:
+            return True, f"seller confusion detected: '{phrase}'"
+
+    for phrase in _VULNERABILITY_TRIGGERS:
+        if phrase in msg:
+            return True, f"vulnerability signal detected: '{phrase}'"
+
+    for phrase in _OPTOUT_TRIGGERS:
+        if phrase in msg:
+            return True, f"opt-out request detected: '{phrase}'"
+
+    return False, ""
+
+
+def queue_for_human_review(deal: DealState, seller_message: str, drafted_response: str, reason: str):
+    """Write the draft + context to the human review queue and fire a Slack alert."""
+    entry = {
+        "queued_at": datetime.now(timezone.utc).isoformat(),
+        "deal_id": deal.id,
+        "address": deal.address,
+        "owner_name": deal.owner_name,
+        "owner_email": deal.owner_email,
+        "escalation_reason": reason,
+        "seller_message": seller_message,
+        "drafted_response": drafted_response,
+        "deal_status": deal.status,
+        "our_offer": deal.our_offer,
+        "our_mao": deal.our_mao,
+        "action_required": "REVIEW + APPROVE or REVISE before sending",
+    }
+    try:
+        with open(HUMAN_REVIEW_QUEUE, "a") as fh:
+            fh.write(json.dumps(entry) + "\n")
+        log.warning(f"[ESCALATION] Deal {deal.id} queued for human review -- {reason}")
+    except Exception as exc:
+        log.error(f"Failed to write human review queue: {exc}")
+
+    # Best-effort Slack alert
+    if SLACK_TOKEN:
+        try:
+            import requests as _req
+            alert_text = (
+                f"*:rotating_light: NEGOTIATION NEEDS HUMAN REVIEW*\n\n"
+                f"*Property:* {deal.address}\n"
+                f"*Seller:* {deal.owner_name} ({deal.owner_email})\n"
+                f"*Reason:* {reason}\n"
+                f"*Seller said:* \"{seller_message[:300]}\"\n\n"
+                f"*Drafted reply (DO NOT SEND until approved):*\n{drafted_response[:400]}\n\n"
+                f"Deal ID: `{deal.id}` -- Review: `{HUMAN_REVIEW_QUEUE}`"
+            )
+            _req.post(
+                "https://slack.com/api/chat.postMessage",
+                headers={"Authorization": f"Bearer {SLACK_TOKEN}", "Content-Type": "application/json"},
+                json={"channel": SLACK_CHANNEL, "text": alert_text},
+                timeout=10,
+            )
+        except Exception as exc:
+            log.warning(f"Slack escalation alert failed (non-fatal): {exc}")
 
 
 def generate_negotiation_response(deal: DealState, seller_message: str) -> str:
@@ -330,7 +488,7 @@ Conversation history:
                     "content-type": "application/json",
                 },
                 json={
-                    "model": "claude-sonnet-4-20250514",
+                    "model": "claude-sonnet-4-6",
                     "max_tokens": 500,
                     "system": NEGOTIATION_SYSTEM_PROMPT,
                     "messages": [{"role": "user", "content": context}],
@@ -581,13 +739,35 @@ def handle_seller_reply(deal: DealState, seller_message: str) -> str:
         response_with_sig = f"{response}\n\n{active_persona['signature']}"
         subject = f"Re: {deal.address}"
 
+    # --- HUMAN-DRAFT GATE (HARD) ---
+    # Check escalation BEFORE any send. Default is draft-everything (AUTOSEND=0).
+    # Even when AUTOSEND=1, escalated replies are ALWAYS queued, never auto-sent.
+    needs_human, esc_reason = escalation_check(seller_message, deal.seller_sentiment)
+
+    if needs_human:
+        # Always queue escalated replies regardless of AUTOSEND flag
+        deal.status = "awaiting_human"
+        queue_for_human_review(deal, seller_message, response_with_sig, esc_reason)
+        deal.save()
+        log.warning(f"[ESCALATION] Reply NOT sent for {deal.address} -- reason: {esc_reason}")
+        return response  # caller sees draft but nothing was sent
+
+    if not _AUTOSEND:
+        # Draft mode (default, pre-Deal-1 safe): queue for human review, do not send
+        queue_for_human_review(deal, seller_message, response_with_sig,
+                               reason="AUTOSEND=off -- all replies require human approval (pre-Deal-1 default)")
+        deal.save()
+        log.info(f"[DRAFT] Reply queued for human review (WHOLESALE_NEGOTIATE_AUTOSEND not set): {deal.address}")
+        return response  # caller sees draft but nothing was sent
+
+    # AUTOSEND=1 and not escalated -- proceed with send
     if send_email(deal.owner_email, subject, response_with_sig, persona=active_persona):
         deal.conversation.append({"role": "rex", "message": response, "timestamp": datetime.now(timezone.utc).isoformat()})
         deal.last_contact = datetime.now(timezone.utc).isoformat()
         # Thread post the auto-response so the owner sees what Piper sent back.
         try:
             from deal_slack import post_touch
-            post_touch(lead=lead_like, agent="Piper Reeves (auto)", channel="email",
+            post_touch(lead=lead_like, agent="Henry Hammond (auto)", channel="email",
                        subject=subject, body=response,
                        to_address=deal.owner_email, outcome="auto-reply sent")
         except Exception:
