@@ -45,6 +45,27 @@ def net_ev(stake: float, price: float, pred_prob: float,
             "cost": round(cost, 4), "net_ev_pct": round(net / stake, 4) if stake else 0.0}
 
 
+def meets_profit_target(stake: float, price: float, gas_usd: float = 0.01,
+                        profit_mult: float = 2.0, gas_mult: float = 2.0) -> bool:
+    """Operator reward rule: a WINNING trade must profit at least
+    profit_mult x stake + gas_mult x gas. For $2 + ~$0 gas that needs the outcome
+    priced <= ~0.33 (fat payout) -- it pushes toward value/underdog bets and away
+    from 50c coin-flip scalps. win_profit = stake*(1-p)/p."""
+    if price <= 0 or price >= 1:
+        return False
+    win_profit = stake * (1.0 - price) / price
+    required = profit_mult * stake + gas_mult * gas_usd
+    return win_profit >= required
+
+
+def max_entry_price(stake: float, gas_usd: float = 0.01,
+                    profit_mult: float = 2.0, gas_mult: float = 2.0) -> float:
+    """The highest price at which a win still hits the 2x-stake + 2x-gas target."""
+    required = profit_mult * stake + gas_mult * gas_usd
+    # stake*(1-p)/p >= required  ->  p <= stake/(stake+required)
+    return stake / (stake + required)
+
+
 def clears_costs(stake: float, price: float, pred_prob: float,
                  fee_rate: float = 0.02, gas_usd: float = 0.01,
                  min_net_ev_pct: float = 0.05) -> bool:

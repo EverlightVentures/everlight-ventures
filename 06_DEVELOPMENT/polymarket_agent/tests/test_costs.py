@@ -29,3 +29,13 @@ def test_fee_peaks_near_50c():
     f_mid = trade_fee(100, 0.50, 0.02)
     f_edge = trade_fee(100, 0.05, 0.02)
     assert f_mid > f_edge
+
+
+def test_profit_target_rejects_50c_coinflip():
+    from polymarket_agent.costs import meets_profit_target, max_entry_price
+    # 50c: $2 win returns only $2 profit (1x), not 2x -> fails the 2x-stake target
+    assert not meets_profit_target(stake=2.0, price=0.50)
+    # 30c: $2 -> 6.67 shares -> $6.67 -> $4.67 profit (>2x) -> passes
+    assert meets_profit_target(stake=2.0, price=0.30)
+    # the ceiling price for 2x-stake+2x-gas is ~0.33
+    assert 0.32 <= max_entry_price(stake=2.0, gas_usd=0.01) <= 0.34

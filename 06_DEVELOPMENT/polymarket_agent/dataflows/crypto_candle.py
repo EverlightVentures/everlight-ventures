@@ -148,12 +148,16 @@ def candle_decision(asset: str = "BTC", min_edge: float = 0.05,
     if edge < min_edge:
         return {"skip": f"edge {edge:.3f} < {min_edge}", "market": mkt, "momentum": mo}
     # COST GATE (operator law): the bet must clear fees + gas AND grow the book.
-    # On a ~50c candle the crypto fee peaks, so a thin edge nets NEGATIVE -- skip.
-    from polymarket_agent.costs import net_ev
+    from polymarket_agent.costs import net_ev, meets_profit_target
     ev = net_ev(stake, price, pred, fee_rate=fee_rate, gas_usd=gas_usd)
     if ev["net_ev_pct"] < min_net_ev_pct:
         return {"skip": f"net EV {ev['net_ev_pct']*100:.1f}% < {min_net_ev_pct*100:.0f}% "
                         f"after costs (${ev['cost']})", "market": mkt, "momentum": mo, "ev": ev}
+    # REWARD TARGET (operator): a win must profit >= 2x stake + 2x gas. On a ~50c
+    # candle a win only returns ~1x, so this correctly skips coin-flip scalps.
+    if not meets_profit_target(stake, price, gas_usd=gas_usd):
+        return {"skip": f"win payout < 2x stake + 2x gas (price {price} too high)",
+                "market": mkt, "momentum": mo}
     return {
         "asset": asset.upper(), "market_id": mkt["token_ids"][direction],
         "outcome": direction, "market_price": price, "predicted_prob": pred,
