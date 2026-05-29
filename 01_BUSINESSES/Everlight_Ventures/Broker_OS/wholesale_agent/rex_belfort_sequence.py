@@ -420,6 +420,62 @@ def _get_personalized_content(lead, step, touch):
     return personalize(touch["subject"], lead), personalize(touch["body"], lead)
 
 
+# TN-ONLY autonomous outreach (HARD LAW) + kill scraped B2B/marketing junk that
+# leaked into leads_db. Groupon / Udemy / Namecheap / "Inmotion Official Store" etc.
+# are NOT distressed homeowners -- emailing them scorches sender reputation and
+# breaks the TN-only doctrine. Eradication (Streubel) is enforced downstream by
+# branded_mailer; we also short-circuit it here for a clean, explicit skip log.
+_ROLE_LOCALPARTS = {"info", "sales", "support", "noreply", "no-reply", "admin",
+                    "hello", "contact", "help", "team", "billing", "service",
+                    "marketing", "press", "newsletter", "notifications", "rminfo",
+                    "care", "office", "donotreply"}
+_JUNK_NAME_KEYWORDS = ("store", "official", "shop", " inc", "inc.", " llc", "llc,",
+                       " ltd", "company", "co.", "services", "solutions", "group",
+                       "systems", "mastercard", "alert", "grassroots", "reservation",
+                       "organization", "udemy", "groupon", "namecheap", "improvmx")
+_JUNK_DOMAINS = {"groupon.com", "r.groupon.com", "udemy.com", "students.udemy.com",
+                 "namecheap.com", "improvmx.com", "nramedia.org", "atlasfin.com",
+                 "mail.atlasfin.com", "groundfloor.us", "stockstotrade.com",
+                 "email1.stockstotrade.com", "lossfreerx.com", "mail-app.lossfreerx.com",
+                 # placeholder/dev domains that leaked from scrapers (NOT real sellers)
+                 "faisalman.com", "example.com", "test.com", "email.com", "domain.com"}
+
+
+def _is_eligible_lead(lead: dict, email: str) -> tuple[bool, str]:
+    """(ok, reason). TN-only + real-individual-seller gate for autonomous outreach.
+
+    This does NOT delete or mutate the lead -- non-TN/junk leads stay in the db for
+    build-out, they are simply never auto-emailed until the doctrine opens them.
+    """
+    # Defense-in-depth: eradicated contacts (Streubel) never even get considered.
+    try:
+        from eradication_gate import find_hit as _erad_find
+        if _erad_find(email=email or "",
+                      name=lead.get("owner_name", "") or "",
+                      address=lead.get("address") or lead.get("property_address", "") or "",
+                      lead_id=lead.get("id") or lead.get("lead_id", "") or ""):
+            return False, "eradicated"
+    except Exception:
+        pass  # downstream branded_mailer still enforces; never fail-open on import error here
+
+    state = (lead.get("state") or lead.get("property_state") or "").upper().strip()
+    if state != "TN":
+        return False, f"non-TN:{state or '?'}"
+
+    em = (email or "").lower().strip()
+    if "@" not in em:
+        return False, "no-email"
+    local, _, domain = em.partition("@")
+    if domain in _JUNK_DOMAINS:
+        return False, f"junk-domain:{domain}"
+    if local in _ROLE_LOCALPARTS:
+        return False, f"role-email:{local}"
+    name = (lead.get("owner_name") or "").lower()
+    if any(k in name for k in _JUNK_NAME_KEYWORDS):
+        return False, "business-name"
+    return True, ""
+
+
 def run_belfort_sequence():
     leads = json.loads(LEADS_DB.read_text()) if LEADS_DB.exists() else []
 
@@ -429,6 +485,7 @@ def run_belfort_sequence():
     sent = 0
     completed = 0
     skipped_suppressed = 0
+    skipped_ineligible = 0
     enriched_count = 0
     # Warming caps (deliverability, 2026-05-29): the 33% bounce on the first cold run can
     # scorch sender reputation. Small bursts + a daily ceiling; ramp via env as we warm.
@@ -460,6 +517,15 @@ def run_belfort_sequence():
             if status != "opted_out":
                 lead["status"] = "opted_out"
             skipped_suppressed += 1
+            continue
+
+        # TN-only + anti-junk eligibility (eradication double-checked here too).
+        # Non-TN / scraped-B2B leads stay in the db for build-out but are never
+        # auto-emailed. This is what stops "Inmotion Official Store" getting a pitch.
+        _eligible, _why = _is_eligible_lead(lead, email)
+        if not _eligible:
+            skipped_ineligible += 1
+            log.debug("skip ineligible (%s): %s", _why, email or lead.get("owner_name", "?"))
             continue
 
         # Select the right touch sequence for this lead's angle
@@ -587,6 +653,8 @@ def run_belfort_sequence():
 
     if skipped_suppressed:
         log.info(f"Skipped {skipped_suppressed} suppressed/opted-out leads")
+    if skipped_ineligible:
+        log.info(f"Skipped {skipped_ineligible} ineligible leads (non-TN / scraped-junk / eradicated)")
 
     # Save -- enrichment data persists so we don't re-fetch
     with open(LEADS_DB, "w") as f:

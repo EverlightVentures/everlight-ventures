@@ -49,6 +49,7 @@ This builds in the background while micro closes the first deal. Hive owns deliv
 20. ⏸☐ Form **Everlight Ventures Wholesale Acquisitions, LLC** (NV parent + TN sub + state subs). $300 NV + $50/yr agent. Funded by Deal 1. POST-DEAL-1 UNLOCK.
 21. ⏸☐ Mid-South Title Coordination Letter signature. Heck Aurelio drafts, Marvin drives signature. RESPA Section 8 paper trail. POST-DEAL-1 UNLOCK.
 22. ⏸☐ Theo Briggs TREC public-platform memo. Required before Verified + IC tier go public. Browser tier ships behind signup-wall in the meantime. POST-DEAL-1 UNLOCK.
+23. 🆕☐ **Package / bulk dispo to Chris** (operator idea 2026-05-29). After Deal 1, present Chris a *tray of 5 ready-to-go contracts at once* -- he buys all 5 (one big payday) or cherry-picks, and we route the rest to the open platform. Pairs with the bidding-war tiers (13-18): the platform is the leverage that stops Chris bullying us to the floor on a 1-at-a-time basis; competition does. SIDE-NOTE follow-up; do NOT build until Deal 1 closes + TN proven. Principle: more buyers = bidding war = dynamic fee (see `POST_DEAL_1_UNLOCK_CASCADE.md` line 69, InvestorLift in `REAL_CASH_BUYERS.md`).
 
 ---
 
