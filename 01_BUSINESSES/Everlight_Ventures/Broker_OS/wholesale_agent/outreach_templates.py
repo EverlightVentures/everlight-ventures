@@ -939,7 +939,11 @@ def _piper_first_touch(lead: dict, lead_type: str) -> dict:
     beats += [social_proof]
     if tenure_note:
         beats.append(tenure_note)
-    beats += [pride_close, cta, counsel_line]
+    # Single close: pride_close already carries the ask ("just say the word /
+    # offers ready if you're willing to hear them"); the separate cta was a
+    # redundant second ask (operator flagged the double-CTA). End on the warm
+    # sign-off. `cta` retained for the followup/final touches, not the first.
+    beats += [pride_close, counsel_line]
 
     # anchor_table is already wrapped in <p> tags; others get wrapped
     parts = []

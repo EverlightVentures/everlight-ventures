@@ -260,8 +260,11 @@ class TestPersonaCatchphrases:
         """Piper must include a casual ask ('are you down', 'down for', 'let me know')."""
         result = ot.render_first_touch(_RITA_LEAD, persona_key="piper")
         body = result["body_html"].lower()
-        assert any(phrase in body for phrase in ["are you down", "down for", "down to", "let me know"]), (
-            "Piper must include a casual ask phrase ('are you down', 'down for', 'let me know')"
+        assert any(phrase in body for phrase in ["are you down", "down for", "down to", "let me know",
+                                                  "say the word", "willing to hear", "open to hearing",
+                                                  "just reply", "i'm here"]), (
+            "Piper must include a casual ask phrase (recipe close: 'just say the word', "
+            "'willing to hear them', etc.)"
         )
 
     def test_piper_no_false_deadline_friday(self):
@@ -1181,7 +1184,8 @@ class TestOperatorBlueprintCompliance:
         cta_phrases = [
             "send you a real number", "send you the actual number",
             "are you down", "want me to send", "just reply",
-            "let me know", "hit reply"
+            "let me know", "hit reply",
+            "say the word", "willing to hear", "open to hearing",
         ]
         found = [p for p in cta_phrases if p in body]
         assert found, (
