@@ -34,6 +34,7 @@ class PaperBet:
     timestamp: str
     status: str = "open"
     pnl_usdc: str = "0.0"
+    predicted_prob: float = 0.0   # needed at settlement for the Brier score
 
 
 class PaperExecutor:
@@ -59,6 +60,7 @@ class PaperExecutor:
             amount_usdc=str(req.amount_usdc),
             limit_price=str(req.limit_price),
             timestamp=datetime.now(timezone.utc).isoformat(),
+            predicted_prob=float(req.predicted_prob),
         )
         bets = json.loads(self.bets_path.read_text()) if self.bets_path.exists() else []
         bets.append(asdict(bet))
