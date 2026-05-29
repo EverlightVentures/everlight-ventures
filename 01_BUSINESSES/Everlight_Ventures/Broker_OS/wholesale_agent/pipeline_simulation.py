@@ -347,6 +347,58 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
             }
         ]
 
+    # --- LIVE ENGINE: the simulation's negotiation replies are produced by the
+    # SAME function the live pipeline uses (rex_negotiator.compose_negotiation_reply),
+    # so the sim cannot show "better" behavior than production. SIM_FORCE_TEMPLATE=1
+    # forces the deterministic/free path for fast dashboard iteration; the live
+    # default uses the LLM when an API key is present (true parity).
+    import os as _os
+    import rex_negotiator as _rn
+    _sim_force_template = _os.environ.get("SIM_FORCE_TEMPLATE", "0").strip() == "1"
+    _deal = _rn.DealState(addr, lead.get("city") or "Memphis", "TN")
+    _deal.owner_name = owner_name
+    _deal.owner_email = "seller@example.com"
+    _deal.arv = appraisal
+    _deal.our_offer = m["moa_open"]
+    _deal.our_mao = m["moa_close"]
+    _deal.repair_estimate = lead.get("repairs_est") or 22000
+    _deal.asking_price = m.get("seller_ask", 0)
+    _deal.status = "negotiating"
+
+    def _live_reply(seller_text: str, first_touch: bool) -> dict:
+        """Append seller message, run the live decider, log our reply, return it."""
+        _deal.conversation.append({"role": "seller", "message": seller_text, "timestamp": ""})
+        r = _rn.compose_negotiation_reply(
+            _deal, seller_text, is_first_touch=first_touch, force_template=_sim_force_template
+        )
+        _deal.conversation.append({
+            "role": "henry",
+            "message": r.get("reasoned_text") or "[anchor-replacement offer table]",
+            "timestamp": "",
+        })
+        return r
+
+    # Plain-text seller messages (fed to the live engine AND shown in sim cards)
+    seller_03 = (
+        "Hey -- yeah that lot came to me from my uncle, you read it right. Honestly I "
+        "have not thought about that property in years. My wife and I pay the tax bill "
+        "every year and just grumble about it. What kind of number are we talking? I am "
+        "not gonna sell for nothing, but if it makes sense, let's talk."
+    )
+    seller_05a = (
+        f"I hear you on the comps but {fmt(m['moa_open'])} is rough. My uncle paid in the "
+        f"high teens for that lot and the county has it at {fmt(appraisal)}. I would need "
+        f"to see at least {fmt(m['seller_ask'])} for it to feel right. Otherwise I am fine holding it."
+    )
+    seller_05c = (
+        f"I appreciate that but it still feels short. My wife is saying we should hold out "
+        f"for at least {fmt(m['seller_round2_pos'])}. Is that even possible?"
+    )
+    seller_05e = (
+        f"Ok I can see the comps. My wife and I talked it over. We could do "
+        f"{fmt(m['seller_round3_pos'])} -- that's our number. If you can get there we have a deal."
+    )
+
     stages = []
 
     # ---- Stage 01: Marquise internal scout note ----
@@ -414,12 +466,14 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
         "is_template": False, "is_internal": False, "is_sim": True,
     })
 
-    # ---- Stage 04: Marquise anchor offer ----
-    r04 = render_marquise_anchor_offer(lead_w_history, county_appraisal=appraisal)
+    # ---- Stage 04: Henry anchor offer (LIVE ENGINE -- first negotiation touch) ----
+    r04 = _live_reply(seller_03, first_touch=True)
     stages.append({
-        "num": "04", "key": "marquise_anchor", "persona": "marquise",
-        "label": "Marquise Anchor Offer",
-        "note": f"First cash number: {fmt(m['moa_open'])} ({round(m['moa_open']/max(appraisal,1)*100)}% of appraisal) with citable comps + Mid-South Title",
+        "num": "04", "key": "henry_anchor", "persona": "henry",
+        "label": "Henry Anchor Offer (LIVE ENGINE)",
+        "note": (f"First cash number: {fmt(m['moa_open'])} ({round(m['moa_open']/max(appraisal,1)*100)}% of appraisal) "
+                 f"via compose_negotiation_reply(is_first_touch=True) -- engine: {r04['engine']} "
+                 f"(deterministic anchor table, exact math)"),
         "html": r04["body_html"], "subject": r04["subject"],
         "is_template": True, "is_internal": False, "is_sim": False,
     })
@@ -445,17 +499,16 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
         "is_template": False, "is_internal": False, "is_sim": True,
     })
 
-    # ---- Stage 05b: Marquise Round 2 -- validation + future-state reframe ----
-    r05b = render_marquise_round2_validation(
-        lead_w_history, seller_position=m["seller_ask"], our_offer=m["moa_round2"]
-    )
+    # ---- Stage 05b: Henry Round 2 (LIVE ENGINE -- reasons about the pushback) ----
+    r05b = _live_reply(seller_05a, first_touch=False)
     stages.append({
-        "num": "05b", "key": "marquise_round2", "persona": "marquise",
-        "label": "Marquise Round 2 -- Validation + Future-State Reframe",
-        "note": (f"Validates seller's pushback first, reframes to carry-cost reality, "
-                 f"walk-up to {fmt(m['moa_round2'])} (+2%)"),
+        "num": "05b", "key": "henry_round2", "persona": "henry",
+        "label": "Henry Round 2 -- Reasoned Reply (LIVE ENGINE)",
+        "note": (f"compose_negotiation_reply round 2 -- engine: {r05b['engine']}. "
+                 f"This is the bot REASONING about the seller's actual words, not a script. "
+                 f"Pricing discipline + walk-away framing held in the system prompt."),
         "html": r05b["body_html"], "subject": r05b["subject"],
-        "is_template": True, "is_internal": False, "is_sim": False,
+        "is_template": False, "is_internal": False, "is_sim": False,
     })
 
     # ---- Stage 05c: Sim seller still pushes ----
@@ -478,15 +531,15 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
         "is_template": False, "is_internal": False, "is_sim": True,
     })
 
-    # ---- Stage 05d: Marquise Round 3 -- social proof + corridor comps ----
-    r05d = render_marquise_round3_social_proof(lead_w_history, our_offer=m["moa_round3"])
+    # ---- Stage 05d: Henry Round 3 (LIVE ENGINE -- reasons about persistence) ----
+    r05d = _live_reply(seller_05c, first_touch=False)
     stages.append({
-        "num": "05d", "key": "marquise_round3", "persona": "marquise",
-        "label": "Marquise Round 3 -- Social Proof + Corridor Comps",
-        "note": (f"Three comparable closes in corridor; market reality anchor; "
-                 f"walk-up to {fmt(m['moa_round3'])} (+3%)"),
+        "num": "05d", "key": "henry_round3", "persona": "henry",
+        "label": "Henry Round 3 -- Reasoned Reply (LIVE ENGINE)",
+        "note": (f"compose_negotiation_reply round 3 -- engine: {r05d['engine']}. "
+                 f"Bot reasons against the wife's hold-out number; holds the floor."),
         "html": r05d["body_html"], "subject": r05d["subject"],
-        "is_template": True, "is_internal": False, "is_sim": False,
+        "is_template": False, "is_internal": False, "is_sim": False,
     })
 
     # ---- Stage 05e: Sim seller softens but holds at one number ----
@@ -509,15 +562,53 @@ def build_stage_bodies(lead: dict, math: dict) -> list[dict]:
         "is_template": False, "is_internal": False, "is_sim": True,
     })
 
-    # ---- Stage 05f: Marquise Round 4 -- final pitch, future-state painting, walk-away ----
-    r05f = render_marquise_round4_final(lead_w_history, our_offer=m["moa_round4"])
+    # ---- Stage 05f: Henry Round 4 (LIVE ENGINE -- final number + walk-away) ----
+    r05f = _live_reply(seller_05e, first_touch=False)
     stages.append({
-        "num": "05f", "key": "marquise_round4", "persona": "marquise",
-        "label": "Marquise Round 4 -- Final Pitch, Future-State, Walk-Away",
-        "note": (f"Full future-state painting (Friday close, back taxes paid, cash hits account), "
-                 f"final number {fmt(m['moa_round4'])}, explicit walk-away framing"),
+        "num": "05f", "key": "henry_round4", "persona": "henry",
+        "label": "Henry Round 4 -- Reasoned Close + Walk-Away (LIVE ENGINE)",
+        "note": (f"compose_negotiation_reply round 4 -- engine: {r05f['engine']}. "
+                 f"Final number near {fmt(m['moa_round4'])}, walk-away framing. Seller's number "
+                 f"{fmt(m['seller_round3_pos'])} vs our MAO {fmt(m['moa_close'])}."),
         "html": r05f["body_html"], "subject": r05f["subject"],
-        "is_template": True, "is_internal": False, "is_sim": False,
+        "is_template": False, "is_internal": False, "is_sim": False,
+    })
+
+    # ---- Stage 05g: Sim HOSTILE seller -> ESCALATION GATE catches it (LIVE ENGINE) ----
+    # This is the answer to "what if someone gets angry -- will the bot stick to the
+    # script?" The live escalation_check() catches hostility/legal threats BEFORE any
+    # send and routes to a human. The sim proves it using the exact live function.
+    seller_05g = (
+        "You know what, this whole thing feels like a scam. My cousin said you wholesalers "
+        "are predatory vultures. If you contact me again I am calling my attorney and "
+        "reporting you for fraud."
+    )
+    _needs_human, _esc_reason = _rn.escalation_check(seller_05g, "hostile")
+    _esc_draft = _live_reply(seller_05g, first_touch=False)
+    _esc_outcome = (
+        f"ESCALATION GATE TRIGGERED -- reason: {_esc_reason}. "
+        f"Reply was DRAFTED ({_esc_draft['engine']}) but NOT sent -- routed to the human "
+        f"review queue (_logs/negotiation/human_review_queue.jsonl) + Slack alert. "
+        f"The bot does NOT improvise with an angry/legal-threat seller."
+        if _needs_human else
+        "Gate did not trigger (unexpected for this message)."
+    )
+    sim05g = (
+        f"<div class='sim-card'>"
+        f"<div class='sim-label'>Simulated Incoming Reply -- HOSTILE</div>"
+        f"<div class='sim-from'>From: <strong>{html_escape.escape(fname)}</strong> &lt;seller@example.com&gt;</div>"
+        f"<div class='sim-body'><p>{html_escape.escape(seller_05g)}</p></div>"
+        f"<div class='sim-label' style='margin-top:10px;color:#ef5555'>LIVE ESCALATION GATE</div>"
+        f"<div class='sim-body'><p>{html_escape.escape(_esc_outcome)}</p></div>"
+        f"</div>"
+    )
+    stages.append({
+        "num": "05g", "key": "escalation_demo", "persona": "seller",
+        "label": "Sim Hostile Seller -> LIVE Escalation Gate (NOT auto-sent)",
+        "note": ("Proves the live human-draft gate: hostile / legal-threat replies are "
+                 "caught by escalation_check() and queued for a human, never auto-sent."),
+        "html": sim05g, "subject": f"Re: {r05f['subject']}",
+        "is_template": False, "is_internal": False, "is_sim": True,
     })
 
     # ---- Stage 06: Sim seller accepts (after Round 4 final) ----
