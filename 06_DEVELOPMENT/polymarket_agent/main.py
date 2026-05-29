@@ -114,12 +114,152 @@ def run_paper_cycle(cfg: dict):
             continue
 
 
+def _build_briefs(filtered, signals):
+    """Aggregate signals per market and attach the bettable outcome + its price.
+    Uses each market's real first outcome label (live gamma is 'Yes'/'No',
+    not 'YES'); falls back to YES for fixtures."""
+    researcher = Researcher()
+    briefs = researcher.aggregate(filtered, signals)
+    for m in filtered:
+        if m.id not in briefs:
+            continue
+        outcome = m.outcomes[0] if m.outcomes else "YES"
+        briefs[m.id]["_market_price"] = m.prices.get(outcome, m.prices.get("YES", 0.5))
+        briefs[m.id]["_outcome"] = outcome
+    return briefs
+
+
+def run_live_cycle(cfg: dict, backend=None, wallet=None):
+    """One REAL cycle: scan -> research -> predict -> risk -> place real orders
+    via LiveClobBackend -> reconcile against on-chain truth.
+
+    Requires a funded wallet AND config live_trading.enabled=true AND env
+    LIVE_TRADING=true (the executor enforces the two-factor gate). The whitelist
+    is rebuilt from this cycle's open markets (closes the stale-whitelist gap),
+    and outcomes are mapped to CLOB token ids before any order is placed.
+
+    backend/wallet are injectable for testing; built from the key file otherwise.
+    """
+    from polymarket_agent.execution.clob_live import LiveClobBackend, read_key_file
+    from polymarket_agent.execution.wallet import PolygonWallet
+    from polymarket_agent.execution.executor_polymarket import (
+        PolymarketExecutor, BetRequest,
+    )
+    from polymarket_agent.execution.reconcile import Reconciler
+    from polymarket_agent.execution.exceptions import PolymarketExecutorError
+
+    data_dir = Path(cfg.get("data_dir", "data"))
+    data_dir.mkdir(parents=True, exist_ok=True)
+    state_path = data_dir / "bankroll.json"
+    open_bets_path = data_dir / "open_bets.json"
+    halt_path = Path(cfg.get("halt_path", str(data_dir / "HALT")))
+    if not state_path.exists():
+        state_path.write_text(json.dumps({
+            "cash_usdc": 0.0, "open_positions_value_usdc": 0.0, "daily_pnl_usdc": 0.0,
+        }))
+    if not open_bets_path.exists():
+        open_bets_path.write_text(json.dumps([]))
+
+    # Real backend + wallet (key from the secure file) unless injected.
+    if backend is None:
+        key = read_key_file(cfg["wallet"]["key_path"])
+        backend = LiveClobBackend(
+            private_key=key, host="https://clob.polymarket.com",
+            chain_id=137, auto_auth=True,
+        )
+    if wallet is None:
+        wallet = PolygonWallet(private_key_path=cfg["wallet"]["key_path"])
+
+    # SCAN (direct -- the live API is reachable without the proxy)
+    clob = PolymarketCLOB()
+    markets = clob.scan_markets(limit=cfg["polymarket"]["max_markets_scan"])
+    scanner = Scanner()
+    filtered = scanner.filter(markets)
+    by_id = {m.id: m for m in filtered}
+    (data_dir / "active_markets.json").write_text(
+        json.dumps([asdict(m) for m in filtered], indent=2)
+    )
+
+    # RESEARCH -> PREDICT -> RISK
+    briefs = _build_briefs(filtered, signals=[])
+    predictor = Predictor(
+        min_edge=cfg["risk"]["min_edge"],
+        min_confidence=cfg["risk"]["min_confidence"],
+    )
+    predictions = predictor.predict(briefs, brain_policy={})
+    rm = RiskManager(
+        max_bet_pct=Decimal(str(cfg["risk"]["max_bet_pct"])),
+        max_daily_loss_pct=Decimal(str(cfg["risk"]["max_daily_loss_pct"])),
+        max_open_positions=cfg["risk"]["max_open_positions"],
+        min_edge=Decimal(str(cfg["risk"]["min_edge"])),
+        # Thread min_confidence so the risk gate matches the predictor gate;
+        # the brain-bridge halves raw confidence when no brain policy is set.
+        min_confidence=float(cfg["risk"].get("min_confidence", 0.65)),
+    )
+    approved = rm.evaluate(predictions, state_path=state_path, open_bets_path=open_bets_path)
+
+    # Whitelist = token ids of THIS cycle's open markets (fresh -> no stale markets).
+    whitelist = set()
+    for m in filtered:
+        for o in m.outcomes:
+            t = m.token_id_for(o)
+            if t:
+                whitelist.add(t)
+
+    executor = PolymarketExecutor(
+        wallet=wallet, clob=backend,
+        config={
+            "live_trading_enabled": cfg.get("live_trading", {}).get("enabled", False),
+            "max_bet_pct": cfg["risk"]["max_bet_pct"],
+            "max_open_positions": cfg["risk"]["max_open_positions"],
+            "max_daily_loss_pct": cfg["risk"]["max_daily_loss_pct"],
+            "active_whitelist": whitelist,
+        },
+        bankroll_state_path=state_path, halt_path=halt_path, open_bets_path=open_bets_path,
+    )
+
+    placed = 0
+    for b in approved:
+        mkt = by_id.get(b.market_id)
+        if mkt is None:
+            continue
+        token_id = mkt.token_id_for(b.outcome)
+        if not token_id:
+            log.warning("no CLOB token id for %s / %s -- skipping", b.market_id, b.outcome)
+            continue
+        try:
+            executor.submit_order(BetRequest(
+                market_id=token_id, outcome=b.outcome,
+                amount_usdc=b.amount_usdc, limit_price=b.limit_price,
+                predicted_prob=b.predicted_prob, edge=b.edge,
+            ))
+            placed += 1
+        except PolymarketExecutorError as e:
+            log.warning("executor rejected bet: %s: %s", type(e).__name__, e)
+
+    # RECONCILE against on-chain truth -- drift halts (the XLM-disaster preventer).
+    reconciler = Reconciler(
+        wallet, backend, bankroll_state_path=state_path, halt_path=halt_path,
+    )
+    result = reconciler.reconcile_now()
+    if result.halt_required:
+        log.error("RECONCILE HALT -- drift %s; no further trading until cleared",
+                  result.drift_usd)
+    log.info("live cycle complete: %d order(s) placed, %d markets, halt=%s",
+             placed, len(filtered), result.halt_required)
+    return {"placed": placed, "markets": len(filtered), "halt": result.halt_required}
+
+
 def main():
     cfg_path = Path(__file__).parent / "config.yaml"
     cfg = yaml.safe_load(cfg_path.read_text())
     cfg.setdefault("data_dir", str(Path(__file__).parent / "data"))
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(message)s")
-    run_paper_cycle(cfg)
+    mode = sys.argv[1] if len(sys.argv) > 1 else "paper"
+    if mode == "live":
+        run_live_cycle(cfg)
+    else:
+        run_paper_cycle(cfg)
 
 
 if __name__ == "__main__":
