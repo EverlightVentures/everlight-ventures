@@ -24,6 +24,11 @@ def _cfg(tmp_path):
                  "max_open_positions": 10, "min_edge": 0.05, "min_confidence": 0.4},
         "bankroll": {"initial": 250.0},
         "live_trading": {"enabled": True},
+        # Disable network signal sources in unit tests (no live HTTP)
+        "sonar": {"enabled": False},
+        "rss_news": {"enabled": False},
+        "rsshub": {"enabled": False},
+        "telegram": {"enabled": False},
         "wallet": {"key_path": "/unused/in/test"},
         "data_dir": str(tmp_path),
         "halt_path": str(tmp_path / "HALT"),

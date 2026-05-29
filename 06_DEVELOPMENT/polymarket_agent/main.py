@@ -55,8 +55,8 @@ def run_paper_cycle(cfg: dict):
         json.dumps([asdict(m) for m in filtered], indent=2)
     )
 
-    # RESEARCH (signals = empty for unit test; integration test will populate)
-    signals = []
+    # RESEARCH -- gather real signals from every enabled free source
+    signals = gather_signals(cfg, filtered, data_dir)
     researcher = Researcher()
     briefs = researcher.aggregate(filtered, signals)
     # Inject market prices for predictor
@@ -112,6 +112,58 @@ def run_paper_cycle(cfg: dict):
             ))
         except ValueError:
             continue
+
+
+def gather_signals(cfg: dict, filtered, data_dir: Path) -> list:
+    """Invoke every ENABLED free signal source and merge into one Signal list.
+    Each source is isolated in try/except -- one dead source (e.g. Sonar 401,
+    Nitter down) must never kill the trade cycle. This is the step that makes
+    the dataflows actually part of the pipeline (not just built + tested)."""
+    signals = []
+
+    # RSS news (Reuters/BBC/CoinDesk) -- free, always on
+    try:
+        rss_cfg = cfg.get("rss_news", {})
+        if rss_cfg.get("enabled", True) and rss_cfg.get("feeds"):
+            signals += RSSNews(feeds=rss_cfg["feeds"]).get_recent_items(last_minutes=30)
+    except Exception as e:
+        log.warning("RSS source failed: %s", e)
+
+    # Perplexity Sonar -- real-time, source-cited (the Twitter-API replacement).
+    # Query the distinct categories present in this cycle's markets (capped).
+    try:
+        if cfg.get("sonar", {}).get("enabled", True):
+            cats = []
+            for m in filtered:
+                c = (m.category or "").strip()
+                if c and c not in cats:
+                    cats.append(c)
+            sonar = Sonar()
+            for c in cats[:3]:  # cap API calls per cycle
+                signals += sonar.get_news_velocity(category=c, last_minutes=15)
+    except Exception as e:
+        log.warning("Sonar source failed: %s", e)
+
+    # Self-hosted RSSHub Twitter mirror -- free, only if reachable
+    try:
+        rh = cfg.get("rsshub", {})
+        if rh.get("enabled") and rh.get("accounts"):
+            signals += RSSHubClient(base_url=rh.get("base_url", "http://e5-mother:1200")) \
+                .get_recent_tweets(usernames=rh["accounts"], last_minutes=15)
+    except Exception as e:
+        log.warning("RSSHub source failed: %s", e)
+
+    # Telegram mirror channels -- only if a bot token is configured + ledger exists
+    try:
+        tg = cfg.get("telegram", {})
+        if tg.get("enabled"):
+            signals += TelegramBridge(ledger_path=data_dir / "telegram_signals.jsonl") \
+                .get_recent_signals(last_minutes=15)
+    except Exception as e:
+        log.warning("Telegram source failed: %s", e)
+
+    log.info("gathered %d signals across enabled sources", len(signals))
+    return signals
 
 
 def _build_briefs(filtered, signals):
@@ -180,8 +232,9 @@ def run_live_cycle(cfg: dict, backend=None, wallet=None):
         json.dumps([asdict(m) for m in filtered], indent=2)
     )
 
-    # RESEARCH -> PREDICT -> RISK
-    briefs = _build_briefs(filtered, signals=[])
+    # RESEARCH -> PREDICT -> RISK (real signals from every enabled free source)
+    signals = gather_signals(cfg, filtered, data_dir)
+    briefs = _build_briefs(filtered, signals=signals)
     predictor = Predictor(
         min_edge=cfg["risk"]["min_edge"],
         min_confidence=cfg["risk"]["min_confidence"],

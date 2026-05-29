@@ -140,3 +140,8 @@ rss_news:
 orderbook_sentinel:
   spike_multiplier: 3.0
   baseline_window_min: 5
+
+# Perplexity Sonar (real-time news velocity -- the free Twitter-API replacement)
+sonar:
+  enabled: true                  # needs a valid PERPLEXITY_API_KEY (regen if 401)
+  cache_ttl_sec: 600

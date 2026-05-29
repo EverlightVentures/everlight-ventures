@@ -13,6 +13,11 @@ def test_paper_cycle_writes_all_ledgers(tmp_path: Path):
                  "max_open_positions": 10, "min_edge": 0.05, "min_confidence": 0.5},
         "bankroll": {"initial": 250.0},
         "live_trading": {"enabled": False},
+        # Disable network signal sources in unit tests (no live HTTP)
+        "sonar": {"enabled": False},
+        "rss_news": {"enabled": False},
+        "rsshub": {"enabled": False},
+        "telegram": {"enabled": False},
         "data_dir": str(tmp_path),
     }
 
