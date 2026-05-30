@@ -38,6 +38,7 @@ import urllib.request
 
 V1_URL = "https://api.dehashed.com/search"
 V2_URL = "https://api.dehashed.com/v2/search"
+V2_INFO_URL = "https://api.dehashed.com/v2/info/user"
 _EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$")
 # emails we never treat as a real contact even if a breach row carries them
 _JUNK_DOMAINS = {"example.com", "test.com", "faisalman.com", "email.com"}
@@ -115,6 +116,27 @@ def _extract_emails(payload: dict, query_name: str = "") -> list[dict]:
     return list(out.values())
 
 
+def account_info() -> dict:
+    """Validate the key + read credit balances WITHOUT spending a search credit
+    (GET /v2/info/user). Returns {configured, ok, info, error}. Never raises."""
+    out = {"configured": is_configured(), "ok": False, "info": {}, "error": ""}
+    if not out["configured"]:
+        out["error"] = "DEHASHED_API_KEY not set"
+        return out
+    api_key = os.environ["DEHASHED_API_KEY"].strip()
+    try:
+        out["info"] = _http_json(
+            V2_INFO_URL,
+            headers={"Dehashed-Api-Key": api_key, "Accept": "application/json"},
+        )
+        out["ok"] = True
+    except urllib.error.HTTPError as e:
+        out["error"] = f"http_{e.code}"
+    except Exception as e:
+        out["error"] = f"{type(e).__name__}:{str(e)[:80]}"
+    return out
+
+
 def search(name="", phone="", address="", city="", state="", size=20) -> dict:
     """Return {configured, query, emails:[...], total, balance, error}.
     emails are REAL (breach-sourced), each tagged source='dehashed'. Never raises.
@@ -173,13 +195,19 @@ def main() -> int:
     ap.add_argument("--address", default="")
     ap.add_argument("--city", default="")
     ap.add_argument("--state", default="")
+    ap.add_argument("--check", action="store_true", help="validate key + show credits (0 credits)")
     ap.add_argument("--probe", action="store_true", help="run one live query (uses 1 credit)")
     args = ap.parse_args()
 
     if not is_configured():
-        print("DeHashed NOT configured. Set DEHASHED_API_KEY (+ DEHASHED_EMAIL for v1) "
-              "in /root/.config/everlight/secrets.env, then re-run with --probe.")
+        print("DeHashed NOT configured. Set DEHASHED_API_KEY in "
+              "/root/.config/everlight/secrets.env, then re-run with --check.")
         return 1
+
+    if args.check:
+        r = account_info()
+        print(json.dumps(r, indent=2))
+        return 0 if r["ok"] else 2
     if not args.probe:
         print("Configured. Add --probe to run a live query (consumes 1 credit).")
         return 0
