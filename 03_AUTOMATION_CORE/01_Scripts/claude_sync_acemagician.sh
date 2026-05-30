@@ -86,6 +86,15 @@ SYNC_EXTRAS=(
   "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/everlight_shell.zsh|~/everlight_shell.zsh"
   "/root/.config/fastfetch/config.jsonc|~/.config/fastfetch/config.jsonc"
   "/root/.config/starship.toml|~/.config/starship.toml"
+  # Agent mailbox -- the family coordination board. Lives in _state/, outside
+  # .claude/, so it rode neither SYNC_DIRS nor git reliably (phone copy was
+  # routinely dirty/uncommitted). Carry it here too so it travels over the
+  # tailnet branch-agnostically. Append-only file: --update is newer-wins, so
+  # the loser of a same-window double-append is preserved as a ~ backup on the
+  # receiver (recoverable, matches the file's "conflicts -> keep both" rule).
+  # Phone is SOT + dominant writer, so clobber is rare. Future hardening: a
+  # union-merge step instead of newer-wins. Added 2026-05-29.
+  "/mnt/sdcard/AA_MY_DRIVE/_state/AGENT_MAILBOX.md|~/AA_MY_DRIVE/_state/AGENT_MAILBOX.md"
 )
 
 RSYNC_EXCLUDES=(
