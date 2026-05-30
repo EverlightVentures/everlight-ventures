@@ -210,6 +210,41 @@ def _extract_identity_score(result_payloads: list[dict]) -> tuple[int, str]:
             return 0, "osint_unavailable"
 
 
+def _dehashed_candidates(name: str, address: str = "", city: str = "",
+                         state: str = "", phone: str = "") -> list[dict]:
+    """Real breach-sourced emails from the operator's DeHashed key, mapped to the
+    candidate contract. Empty list if DeHashed is not configured -- never raises,
+    never fabricates. These are REAL addresses (not permutations) so they carry
+    higher base confidence than guesses."""
+    try:
+        import dehashed_client
+        if not dehashed_client.is_configured():
+            return []
+        r = dehashed_client.search(name=name, phone=phone, address=address,
+                                   city=city, state=state)
+        out = []
+        for e in r.get("emails", []):
+            srcs = ["dehashed"] + ([e["database"]] if e.get("database") else [])
+            # Real address, breach-confirmed it existed; deliverability still
+            # unverified (could be stale) -> high confidence, verified=False.
+            out.append({"email": e["email"], "confidence": 70,
+                        "verified": False, "sources": srcs})
+        return out
+    except Exception:
+        return []
+
+
+def _merge_candidates(primary: list[dict], secondary: list[dict]) -> list[dict]:
+    """DeHashed (real) first, then osint_api (permutation/social), deduped by email."""
+    seen, out = set(), []
+    for c in list(primary) + list(secondary):
+        em = (c.get("email") or "").lower()
+        if em and em not in seen:
+            seen.add(em)
+            out.append(c)
+    return out
+
+
 def resolve(
     name: str,
     address: str = "",
@@ -256,10 +291,18 @@ def resolve(
         empty["verdict"] = "no_name_provided"
         return empty
 
+    # PRIMARY email source: DeHashed (real, breach-sourced) when a PI key is set.
+    # Queried independently so real emails survive even if osint_api is down.
+    dehashed_cands = _dehashed_candidates(name, address=address, city=city, state=state)
+
+    def _dehashed_only(reason: str) -> dict:
+        return {"candidate_emails": dehashed_cands, "identity_score": 0,
+                "verdict": f"dehashed_only ({reason})", "raw_investigation_id": ""}
+
     try:
         from osint_api.orchestrator import run_investigation_sync  # type: ignore
     except Exception:
-        return dict(_EMPTY_RESULT)
+        return _dehashed_only("osint_api unavailable") if dehashed_cands else dict(_EMPTY_RESULT)
 
     verify_context: dict = {}
     if address:
@@ -286,16 +329,21 @@ def resolve(
             prior_addresses=prior_addresses,
         )
     except Exception:
-        return dict(_EMPTY_RESULT)
+        return _dehashed_only("investigation error") if dehashed_cands else dict(_EMPTY_RESULT)
 
     if not result_payloads:
-        return dict(_EMPTY_RESULT)
+        return _dehashed_only("no osint payloads") if dehashed_cands else dict(_EMPTY_RESULT)
 
     candidate_emails = _extract_emails(result_payloads)
     identity_score, verdict = _extract_identity_score(result_payloads)
 
+    # DeHashed real emails rank FIRST, then osint_api permutation/social candidates.
+    merged = _merge_candidates(dehashed_cands, candidate_emails)
+    if dehashed_cands:
+        verdict = f"{verdict} + dehashed({len(dehashed_cands)})"
+
     return {
-        "candidate_emails": candidate_emails,
+        "candidate_emails": merged,
         "identity_score": identity_score,
         "verdict": verdict,
         "raw_investigation_id": investigation_id or "",
