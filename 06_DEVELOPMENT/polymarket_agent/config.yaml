@@ -219,3 +219,9 @@ crypto_candle:
   fee_rate: 0.02          # Polymarket crypto taker fee (peaks at 50c)
   gas_usd: 0.01           # Polymarket trades are mostly gasless (relayer)
   min_net_ev_pct: 0.05    # COST GATE: net EV after fees+gas must be >=5% of stake
+
+# Non-US egress proxy for LIVE order placement (Polymarket geo-blocks US order
+# POSTs). Point at your EU VPS tinyproxy (CONNECT tunnel -- TLS stays end-to-end,
+# the proxy never sees creds). Empty = direct (paper/reads only; live orders 403).
+egress:
+  proxy_url: ""        # e.g. http://<your-eu-vps-ip>:8888  (set after VPS up)

@@ -141,6 +141,18 @@ def run_paper_cycle(cfg: dict):
         log.warning("paper settlement failed: %s", e)
 
 
+def _apply_egress(cfg: dict):
+    """Route HTTPS (incl. ClobClient order POSTs) through the non-US egress proxy
+    when configured -- this is what clears Polymarket's US order geoblock. The
+    proxy is a CONNECT tunnel, so TLS stays end-to-end (creds never exposed)."""
+    proxy = (cfg.get("egress", {}) or {}).get("proxy_url", "")
+    if proxy:
+        os.environ["HTTPS_PROXY"] = proxy
+        os.environ["https_proxy"] = proxy
+        log.info("egress: routing live HTTPS through %s (non-US exit)", proxy)
+    return bool(proxy)
+
+
 def _make_notifier(cfg: dict, data_dir: Path):
     """Build the shared-services bridge from config (branded Slack + brain).
     Disabled gracefully if no Slack channels configured."""
@@ -256,6 +268,7 @@ def run_live_cycle(cfg: dict, backend=None, wallet=None):
     from polymarket_agent.execution.reconcile import Reconciler
     from polymarket_agent.execution.exceptions import PolymarketExecutorError
 
+    _apply_egress(cfg)  # route order POSTs through the non-US proxy (clears 403)
     data_dir = Path(cfg.get("data_dir", "data"))
     data_dir.mkdir(parents=True, exist_ok=True)
     state_path = data_dir / "bankroll.json"
