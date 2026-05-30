@@ -7,17 +7,18 @@ sys.path.insert(0, str(Path(__file__).parent))
 import dehashed_client as dc
 
 
+# Real DeHashed v2 shape: every field is an ARRAY.
 _SAMPLE_PAYLOAD = {
     "balance": 999,
     "total": 2,
     "entries": [
-        {"email": "rita.townsend@realmail.com", "name": "Rita Townsend",
-         "phone": "9015551212", "address": "123 Real St, Memphis TN",
-         "database_name": "SomeBreach2019"},
-        {"email": "RITA.T@work.org", "name": "Rita M Townsend", "phone": ""},
-        {"email": "junk@faisalman.com", "name": "Rita Townsend"},   # junk -> dropped
-        {"email": "not-an-email", "name": "x"},                      # invalid -> dropped
-        {"username": "ritarocks", "name": "Rita"},                  # no email -> skipped
+        {"id": "1", "email": ["rita.townsend@realmail.com"], "name": ["Rita Townsend"],
+         "phone": ["+19015551212"], "address": ["123 Real St, Memphis TN"],
+         "database_name": ["SomeBreach2019"]},
+        {"id": "2", "email": ["RITA.T@work.org"], "name": ["Rita M Townsend"]},
+        {"id": "3", "email": ["junk@faisalman.com"], "name": ["Rita Townsend"]},  # junk -> dropped
+        {"id": "4", "email": ["not-an-email"], "name": ["x"]},                    # invalid -> dropped
+        {"id": "5", "username": ["ritarocks"], "name": ["Rita"]},                 # no email -> skipped
     ],
 }
 
@@ -76,9 +77,17 @@ class TestExtract:
     def test_carries_corroborating_fields(self):
         emails = dc._extract_emails(_SAMPLE_PAYLOAD)
         rec = next(e for e in emails if e["email"] == "rita.townsend@realmail.com")
-        assert rec["phone"] == "9015551212"
+        assert "9015551212" in rec["phone"]          # array -> first scalar (+1 prefix ok)
         assert "Memphis" in rec["address"]
         assert rec["database"] == "SomeBreach2019"
+
+    def test_handles_multi_email_entry_and_string_tolerance(self):
+        payload = {"entries": [
+            {"email": ["a@one.com", "b@two.com"], "name": ["X"]},   # array, multiple
+            {"email": "c@three.com", "name": "Y"},                   # plain string tolerated
+        ]}
+        addrs = {e["email"] for e in dc._extract_emails(payload)}
+        assert addrs == {"a@one.com", "b@two.com", "c@three.com"}
 
 
 class TestSearchMocked:

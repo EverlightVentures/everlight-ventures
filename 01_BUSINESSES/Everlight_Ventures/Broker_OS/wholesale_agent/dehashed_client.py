@@ -74,27 +74,44 @@ def _http_json(url: str, *, headers: dict, data: bytes | None = None) -> dict:
         return json.loads(r.read().decode("utf-8", "ignore"))
 
 
+def _first(v) -> str:
+    """DeHashed v2 returns every field as an ARRAY (e.g. "name": ["Jane"]).
+    Return the first scalar, tolerating a plain string too."""
+    if isinstance(v, (list, tuple)):
+        return str(v[0]) if v else ""
+    return str(v) if v else ""
+
+
 def _extract_emails(payload: dict, query_name: str = "") -> list[dict]:
     """Pull distinct real emails from DeHashed entries, with the row's corroborating
-    fields so identity_verifier can score them against the known owner."""
+    fields so identity_verifier can score them against the known owner.
+
+    v2 entries carry array fields: "email": ["a@b.com", ...], "name": [...], etc.
+    """
     out: dict[str, dict] = {}
     for e in (payload.get("entries") or payload.get("results") or []):
         if not isinstance(e, dict):
             continue
-        email = (e.get("email") or "").strip().lower()
-        if not email or not _EMAIL_RE.match(email):
+        emails = e.get("email")
+        if isinstance(emails, str):
+            emails = [emails]
+        if not isinstance(emails, (list, tuple)):
             continue
-        if email.split("@")[-1] in _JUNK_DOMAINS:
-            continue
-        if email not in out:
-            out[email] = {
-                "email": email,
-                "source": "dehashed",
-                "name": e.get("name") or "",
-                "phone": e.get("phone") or "",
-                "address": e.get("address") or "",
-                "database": e.get("database_name") or e.get("obtained_from") or "",
-            }
+        for raw in emails:
+            email = (str(raw) if raw else "").strip().lower()
+            if not email or not _EMAIL_RE.match(email):
+                continue
+            if email.split("@")[-1] in _JUNK_DOMAINS:
+                continue
+            if email not in out:
+                out[email] = {
+                    "email": email,
+                    "source": "dehashed",
+                    "name": _first(e.get("name")),
+                    "phone": _first(e.get("phone")),
+                    "address": _first(e.get("address")),
+                    "database": _first(e.get("database_name")) or _first(e.get("obtained_from")),
+                }
     return list(out.values())
 
 
@@ -115,12 +132,17 @@ def search(name="", phone="", address="", city="", state="", size=20) -> dict:
         return result
 
     api_key = os.environ["DEHASHED_API_KEY"].strip()
-    version = os.environ.get("DEHASHED_API_VERSION", "v1").strip().lower()
+    # v2 is the current API (POST + Dehashed-Api-Key header, just the key). v1 (basic
+    # auth, needs DEHASHED_EMAIL) kept as a fallback only.
+    version = os.environ.get("DEHASHED_API_VERSION", "v2").strip().lower()
     try:
         if version == "v2":
+            # Current API (confirmed from DeHashed v2 docs 2026-05-29): POST /v2/search,
+            # Dehashed-Api-Key header, JSON body, 1 credit per search regardless of size.
             headers = {"Dehashed-Api-Key": api_key, "Content-Type": "application/json",
                        "Accept": "application/json"}
-            body = json.dumps({"query": q, "size": size}).encode()
+            body = json.dumps({"query": q, "page": 1, "size": size,
+                               "de_dupe": True}).encode()
             payload = _http_json(V2_URL, headers=headers, data=body)
         else:
             email = os.environ.get("DEHASHED_EMAIL", "").strip()
