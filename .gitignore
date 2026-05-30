@@ -176,3 +176,44 @@ _state/cloud_mirror_secrets/
 # Pre-migration archives of obsolete function bodies (local reference only)
 *.pre-migration.*.txt
 03_AUTOMATION_CORE/03_Credentials/polymarket_wallet.*
+
+# ============================================================
+# 2026-05-29 AUTO-SYNC SAFETY HARDENING
+# Close secret + noise gaps before the AceMagician catch-up / auto-sync.
+# (An automatic commit must never leak a credential or churn runtime state.)
+# ============================================================
+
+# ---- SECRET GAPS (the existing patterns were almost-right) ----
+# Suffixed env backups: .env.bak.preplymkt, .env.bak.20260503-2131, .env.bak.1778944697
+**/*.env.bak*
+**/.env.bak*
+# rclone crypt recovery key + any recovery/key text dropped in Credentials
+03_AUTOMATION_CORE/03_Credentials/RCLONE_CRYPT_RECOVERY.txt
+03_AUTOMATION_CORE/03_Credentials/*RECOVERY*
+03_AUTOMATION_CORE/03_Credentials/*.key
+03_AUTOMATION_CORE/03_Credentials/*.pem
+# The cloud-state mirror itself (doctrine: holds secrets, chmod 600). The old
+# rule only matched _state/cloud_mirror_secrets/ -- the real dir has no suffix.
+_state/cloud_mirror/
+
+# ---- RUNTIME STATE / DBs (churns every cycle, not source) ----
+_state/blinko_lite.db
+_state/blinko_lite.db-shm
+_state/blinko_lite.db-wal
+_state/agentmemory_graph.json
+*.sqlite
+**/*.db-wal
+**/*.db-shm
+*.pid
+*.status
+.claude/scheduled_tasks.lock
+_state/*.tmp_*
+.claude/.sync_conflicts/
+
+# ---- GENERATED REPORTS / CACHES (regenerated, not source) ----
+09_DASHBOARD/reports/*.html
+09_DASHBOARD/reports/daily_leads/*.html
+06_DEVELOPMENT/everlight_os/intel_center/cache/
+
+# DeHashed-enriched PII output (regenerable, breach-sourced -- keep out of git)
+01_BUSINESSES/Everlight_Ventures/Wholesale/config/_generated/

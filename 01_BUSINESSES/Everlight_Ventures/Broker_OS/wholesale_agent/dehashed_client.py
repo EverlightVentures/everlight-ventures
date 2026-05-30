@@ -48,23 +48,31 @@ def is_configured() -> bool:
     return bool(os.environ.get("DEHASHED_API_KEY", "").strip())
 
 
+def _street_of(address: str) -> str:
+    """Street portion of an address (number + street), dropping city/state/zip.
+    '1596  GABAY ST, MEMPHIS, TN 38106' -> '1596 GABAY ST'. This is the unique
+    selector DeHashed matches on."""
+    street = re.split(r"[,]", address or "")[0]
+    return re.sub(r"\s+", " ", street).strip()
+
+
 def _build_query(name="", phone="", address="", city="", state="") -> str:
-    """DeHashed query syntax: field:value, quoted for spaces, space-joined (AND)."""
-    parts = []
-    if name:
-        parts.append(f'name:"{name.strip()}"')
+    """ONE field per query (DeHashed v2 rejects multi-field AND). Selector priority,
+    strongest first:
+      address (a property street is ~unique) > phone (unique) > name (common = noisy).
+    Proven 2026-05-29: address:"1596 gabay" returns the exact owner + relatives with
+    real emails; name:"Toby Jones" returns 1,209 wrong people worldwide.
+    """
+    street = _street_of(address)
+    if street:
+        return f'address:"{street}"'
     if phone:
         digits = re.sub(r"\D", "", phone)
         if digits:
-            parts.append(f"phone:{digits}")
-    if address:
-        parts.append(f'address:"{address.strip()}"')
-    # city/state narrow a name search; DeHashed has no city field, fold into address text
-    elif city or state:
-        loc = " ".join(x for x in (city, state) if x).strip()
-        if loc:
-            parts.append(f'address:"{loc}"')
-    return " ".join(parts)
+            return f"phone:{digits}"
+    if name:
+        return f'name:"{name.strip()}"'
+    return ""
 
 
 def _http_json(url: str, *, headers: dict, data: bytes | None = None) -> dict:

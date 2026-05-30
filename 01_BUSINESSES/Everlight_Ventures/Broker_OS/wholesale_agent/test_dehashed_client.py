@@ -47,14 +47,21 @@ class TestConfig:
 
 
 class TestQueryBuild:
-    def test_name_and_location(self):
-        q = dc._build_query(name="Jane Doe", city="Memphis", state="TN")
-        assert 'name:"Jane Doe"' in q
-        assert "Memphis" in q and "TN" in q
+    def test_address_is_preferred_selector(self):
+        # address beats name (name is too common to disambiguate)
+        q = dc._build_query(name="Toby Jones", address="1596 GABAY ST, MEMPHIS, TN 38106")
+        assert q == 'address:"1596 GABAY ST"'
 
-    def test_phone_digits_only(self):
-        q = dc._build_query(phone="(901) 555-1212")
-        assert "phone:9015551212" in q
+    def test_street_strips_city_state_zip(self):
+        assert dc._street_of("1596  GABAY ST, MEMPHIS, TN 38106") == "1596 GABAY ST"
+
+    def test_name_only_when_no_address(self):
+        q = dc._build_query(name="Jane Doe", city="Memphis", state="TN")
+        assert q == 'name:"Jane Doe"'
+
+    def test_phone_beats_name(self):
+        q = dc._build_query(name="Jane Doe", phone="(901) 555-1212")
+        assert q == "phone:9015551212"
 
     def test_address(self):
         q = dc._build_query(address="123 Real St")
