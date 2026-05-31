@@ -795,7 +795,7 @@ Deno.serve(async (req: Request) => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text: `JACKPOT WON! ${display_name} hit suited 7-7-7 + dealer 7 for ${winAmount} chips!` }),
-        }).catch(() => {});
+        }).catch((e: unknown) => { console.warn("Jackpot Slack notification failed:", e); });
       }
 
       return json({ success: true, amount: winAmount, new_balance: newBalance });

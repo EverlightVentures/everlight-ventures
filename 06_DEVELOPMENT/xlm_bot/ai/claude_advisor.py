@@ -277,7 +277,7 @@ try:
             cache = {{}}
             if cache_path.exists():
                 try: cache = json.loads(cache_path.read_text())
-                except: pass
+                except Exception as e: _log(f"cache read failed, starting fresh: {{e}}")
             cache[trigger] = {{
                 "result": parsed,
                 "timestamp": datetime.now(timezone.utc).isoformat(),

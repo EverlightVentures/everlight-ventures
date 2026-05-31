@@ -168,7 +168,7 @@ try:
             cache = {{}}
             if cache_path.exists():
                 try: cache = json.loads(cache_path.read_text())
-                except: pass
+                except Exception as e: _log(f"cache read failed, starting fresh: {{e}}")
             
             # Use 'gemini_' prefix for triggers in the shared cache file
             key = f"gemini_{{trigger}}" if not trigger.startswith("gemini_") else trigger

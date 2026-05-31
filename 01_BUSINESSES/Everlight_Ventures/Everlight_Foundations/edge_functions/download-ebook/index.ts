@@ -118,7 +118,7 @@ Deno.serve(async (req: Request) => {
         body: JSON.stringify({
           text: `Download #${currentCount + 1}/${maxDownloads} for "${slug}" (token: ${token.slice(0, 8)}...)`,
         }),
-      }).catch(() => {});
+      }).catch((e: unknown) => { console.warn("download-ebook: Slack notification failed:", e); });
     }
 
     return json({

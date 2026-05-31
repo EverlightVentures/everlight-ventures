@@ -1,5 +1,3 @@
-import hashlib
-import hmac
 import json
 import logging
 import os
@@ -10,7 +8,7 @@ from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
-from django.db.models import Sum, Count, Q
+from django.db.models import Sum, Count
 
 from .models import Customer, Subscription, Payment, RevenueSnapshot
 
@@ -27,8 +25,8 @@ def _notify_slack(message, channel="#05-revenue"):
     try:
         import requests
         requests.post(webhook, json={"text": message, "channel": channel}, timeout=5)
-    except Exception:
-        pass
+    except Exception as e:
+        log.warning("Slack notification failed: %s", e)
 
 
 def _send_receipt_email(customer, payment):

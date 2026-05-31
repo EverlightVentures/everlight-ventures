@@ -148,12 +148,12 @@ export default function PlayerProfile({
       cached.display_name = newName;
       cached.name = newName;
       localStorage.setItem("blackjack_player", JSON.stringify(cached));
-    } catch {}
+    } catch (e) { console.warn("PlayerProfile: failed to sync blackjack_player cache", e); }
     try {
       const profile = JSON.parse(localStorage.getItem("ev_bj_player_profile") || "{}");
       profile.name = newName;
       localStorage.setItem("ev_bj_player_profile", JSON.stringify(profile));
-    } catch {}
+    } catch (e) { console.warn("PlayerProfile: failed to sync ev_bj_player_profile cache", e); }
     setEditingName(false);
   };
 
@@ -229,7 +229,7 @@ export default function PlayerProfile({
                         const cached = JSON.parse(localStorage.getItem("blackjack_player") || "{}");
                         cached.avatar_url = dataUrl;
                         localStorage.setItem("blackjack_player", JSON.stringify(cached));
-                      } catch {}
+                      } catch (e) { console.warn("PlayerProfile: failed to sync avatar_url to blackjack_player cache", e); }
                     }
                   };
                   reader.readAsDataURL(file);
@@ -243,7 +243,7 @@ export default function PlayerProfile({
                     const cached = JSON.parse(localStorage.getItem("blackjack_player") || "{}");
                     delete cached.avatar_url;
                     localStorage.setItem("blackjack_player", JSON.stringify(cached));
-                  } catch {}
+                  } catch (e) { console.warn("PlayerProfile: failed to clear avatar_url from blackjack_player cache", e); }
                 }}
                   className="text-[9px] font-bold tracking-wider px-2 py-1 rounded hover:bg-white/5 transition-all"
                   style={{ color: "#888", border: "1px solid #33340" }}
