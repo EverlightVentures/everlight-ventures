@@ -1,0 +1,22 @@
+# Screenshot topic taxonomy. Edit freely: add/rename/remove categories.
+# Each category: keywords (matched against OCR text, case-insensitive).
+AI:
+  keywords: [chatgpt, claude, gpt, "prompt", llm, anthropic, openai, gemini, copilot, "model"]
+Linux:
+  keywords: [sudo, "apt ", bash, "$ ", "# ", systemctl, chmod, "/etc/", kernel, ubuntu, debian, arch]
+Tech_Dev:
+  keywords: [python, javascript, github, "def ", "function", "import ", traceback, "npm ", docker, api, json]
+Finance_Trading:
+  keywords: [usdc, xlm, "p&l", pnl, ticker, candle, leverage, coinbase, polymarket, balance, "$"]
+RealEstate_Wholesale:
+  keywords: [zillow, mls, "sq ft", arv, "rehab", foreclosure, listing, realtor, escrow, "for sale"]
+Reference_HowTo:
+  keywords: [howto, "how to", tutorial, "step ", guide, documentation, "stack overflow"]
+Receipts_Docs:
+  keywords: [receipt, invoice, total, subtotal, "order #", confirmation, statement]
+Social:
+  keywords: [instagram, "retweet", "liked by", "followers", tiktok, facebook, dm]
+Memes:
+  keywords: [lol, meme, "when you", "pov:"]
+Personal:
+  keywords: []
