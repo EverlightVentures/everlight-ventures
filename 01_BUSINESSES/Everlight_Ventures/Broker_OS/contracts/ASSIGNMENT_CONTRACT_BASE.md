@@ -26,7 +26,7 @@
 ### PARTIES
 
 **ASSIGNOR** (Contract Holder):
-Everlight Ventures, LLC (d/b/a Everlight Logistics LLC)
+Richard Gee, an individual, doing business as Everlight Ventures (a California sole proprietor; not a licensed brokerage)
 [ASSIGNOR_ADDRESS]
 Phone: [ASSIGNOR_PHONE]
 Email: [ASSIGNOR_EMAIL]
@@ -190,7 +190,7 @@ This Agreement may be executed in counterparts and by electronic signature. The 
 
 ### SIGNATURES
 
-**ASSIGNOR -- Everlight Ventures, LLC**
+**ASSIGNOR -- Richard Gee, an individual, doing business as Everlight Ventures**
 
 Signature: ___________________________________
 

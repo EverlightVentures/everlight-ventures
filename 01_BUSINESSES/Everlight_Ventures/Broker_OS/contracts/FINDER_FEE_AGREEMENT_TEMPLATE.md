@@ -11,7 +11,7 @@
 ## PARTIES
 
 **FINDER:**
-Everlight Logistics LLC, doing business as Everlight Ventures
+Richard Gee, an individual, doing business as Everlight Ventures
 {{EVERLIGHT_ADDRESS}}
 Email: {{EVERLIGHT_EMAIL}}
 (hereinafter referred to as "Finder")
@@ -304,7 +304,7 @@ IN WITNESS WHEREOF, the parties have executed this Finder Fee Agreement as of th
 
 ---
 
-**FINDER -- Everlight Logistics LLC (d/b/a Everlight Ventures)**
+**FINDER -- Richard Gee, an individual, doing business as Everlight Ventures**
 
 Name: ___________________________________________
 

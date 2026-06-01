@@ -462,7 +462,7 @@ Pursuant to Arizona S.B. 1499, the Assignor hereby discloses:
 
 (b) **Assignor is NOT the owner of the Property.**
 
-(c) Assignor's name: Everlight Ventures, LLC (d/b/a Everlight Logistics LLC).
+(c) Assignor's name: Richard Gee, an individual, doing business as Everlight Ventures.
 
 (d) Assignor's phone number: [ASSIGNOR_PHONE].
 

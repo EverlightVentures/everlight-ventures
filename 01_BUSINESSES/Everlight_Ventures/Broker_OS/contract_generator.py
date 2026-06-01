@@ -36,10 +36,16 @@ GOLD = HexColor("#D4A017")
 DARK = HexColor("#1a1a2e")
 GRAY = HexColor("#555555")
 
-# Company info
+# Company info -- the canonical contracting party comes from entity_identity.py
+# (single source of truth, mirrors BUSINESS_ENTITY_STATUS.md). Do NOT hardcode an
+# entity name here; flip entity_identity.ENTITY_STATUS to switch posture.
+import os as _os, sys as _sys
+_sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__)))
+import entity_identity as _entity
+
 COMPANY = {
-    "name": "Everlight Logistics LLC",
-    "dba": "Everlight Ventures",
+    "legal_name": _entity.ENTITY_LEGAL_NAME,
+    "dba": _entity.TRADE_NAME,
     "address": "",
     "email": "deals@everlightventures.io",
     "state": "California",
@@ -161,7 +167,7 @@ def generate_finder_agreement(deal: dict) -> str:
     parties_data = [
         ["FINDER", "CLIENT"],
         [
-            "%s\nd/b/a %s\n%s" % (COMPANY["name"], COMPANY["dba"], COMPANY["email"]),
+            "%s\n%s" % (COMPANY["legal_name"], COMPANY["email"]),
             "%s\n%s\n%s" % (client, contact, email),
         ],
     ]
@@ -277,7 +283,7 @@ def generate_finder_agreement(deal: dict) -> str:
 
     sig_data = [
         ["FINDER", "", "CLIENT", ""],
-        [COMPANY["name"], "", client, ""],
+        [COMPANY["legal_name"], "", client, ""],
         ["Signature: ____________________", "Date: ________", "Signature: ____________________", "Date: ________"],
         ["Print Name: __________________", "", "Print Name: __________________", ""],
         ["Title: _______________________", "", "Title: _______________________", ""],
@@ -417,9 +423,9 @@ def generate_wholesale_contract(deal: dict) -> str:
         ("4. ASSIGNMENT", (
             "This contract IS ASSIGNABLE. Buyer may assign this contract to a third party "
             "for an assignment fee of <b>$%s</b>. Seller acknowledges and consents "
-            "to assignment. Buyer is Richard Gee doing business as Everlight Ventures, "
-            "a California sole proprietor. (See BUSINESS_ENTITY_STATUS.md for current "
-            "entity status. Update this clause once the Everlight Ventures LLC is reinstated.)" % "{:,.0f}".format(fee)
+            "to assignment. Buyer is %s, a California sole proprietor. (Canonical "
+            "party: see entity_identity.py / BUSINESS_ENTITY_STATUS.md; the buyer "
+            "entity flips automatically when the LLC is reinstated.)" % ("{:,.0f}".format(fee), _entity.ENTITY_LEGAL_NAME)
         )),
         ("5. CLOSING", (
             "Closing shall occur on or before <b>%s</b> at %s. "

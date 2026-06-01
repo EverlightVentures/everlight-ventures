@@ -35,7 +35,7 @@ Everlight Ventures operates a real estate wholesale business:
 3. **We assign that contract to a cash buyer** for an assignment fee (typically $5,000--$25,000).
 4. **We never own the property.** We sell the contract, not the house.
 
-The legal entity is **Everlight Logistics LLC**, doing business as **Everlight Ventures**, a California LLC.
+The legal posture is a **sole proprietorship**: **Richard Gee**, an individual, doing business as **Everlight Ventures** (a California sole proprietor). The Everlight Ventures LLC is in reinstatement-pending status and is NOT the contracting entity until reinstated -- every contract is signed by Richard Gee personally until then. Canonical source: `entity_identity.py` / `BUSINESS_ENTITY_STATUS.md`.
 
 **Critical distinction:** We are NOT acting as real estate agents or brokers. We are principals -- we are the buyer in the original PSA, and we assign our contractual rights to a third party. This is a legal and important distinction under California law.
 

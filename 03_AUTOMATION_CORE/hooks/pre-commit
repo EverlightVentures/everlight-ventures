@@ -1,0 +1,89 @@
+#!/bin/bash
+# Everlight pre-commit hook.
+# Blocks new direct calls to api.resend.com outside the sanctioned wrapper,
+# so every outbound email is forced through render_report()'s luxury template.
+#
+# Install:  bash 03_AUTOMATION_CORE/hooks/install-hooks.sh
+# Bypass (emergency only):  git commit --no-verify
+
+set -e
+
+# Staged text-file diffs only; -U0 = no surrounding context, only added lines.
+STAGED_DIFF=$(git diff --cached --unified=0 --diff-filter=ACMRT)
+
+if [ -z "$STAGED_DIFF" ]; then
+    exit 0
+fi
+
+# Path allowlist: the branded mailer itself, Supabase edge functions (Deno runtime),
+# documentation (can reference URLs), and the hook file itself.
+ALLOWLIST_REGEX='content_tools/branded_mailer[.]py|supabase/functions/|MCP_RUNBOOK[.]md|CHANGELOG[.]md|/hooks/pre-commit|hive_email_live_test[.]py'
+
+# Patterns that indicate a direct Resend API call -- what we want to block.
+BAD_PATTERNS='api[.]resend[.]com/(v[0-9]+/)?emails|https://api[.]resend[.]com'
+
+# Walk the staged diff, track which file each added line belongs to.
+violations=$(echo "$STAGED_DIFF" | awk -v allow="$ALLOWLIST_REGEX" -v bad="$BAD_PATTERNS" '
+    /^diff --git/ {
+        match($0, / b\/([^ ]+)$/, m)
+        file = m[1]
+        in_allowed = (file ~ allow) ? 1 : 0
+    }
+    /^\+[^+]/ {
+        if (!in_allowed && $0 ~ bad) {
+            print file ":" $0
+        }
+    }
+')
+
+if [ -n "$violations" ]; then
+    cat >&2 <<EOF
+==============================================================================
+  EVERLIGHT PRE-COMMIT HOOK -- Direct Resend API call blocked
+==============================================================================
+
+You are trying to commit a direct call to api.resend.com outside the sanctioned
+branded_mailer wrapper. That bypasses the luxury HTML template and results in
+plain-text emails landing in seller / buyer inboxes.
+
+Offending additions:
+------------------------------------------------------------------------------
+$violations
+------------------------------------------------------------------------------
+
+Remediation:
+  - Import the wrapper:
+      from branded_mailer import send_branded_email
+  - Replace the requests.post() / urllib call with:
+      result = send_branded_email(
+          to=..., subject=..., content_html=...,
+          from_name=..., from_email=..., agent_name=..., agent_title=...,
+      )
+      if not result.ok: log.error(result.error)
+  - See also: 06_DEVELOPMENT/everlight_os/hive_mind/MCP_RUNBOOK.md
+             01_BUSINESSES/Everlight_Ventures/Wholesale/compliance/BRAND_POSITIONING.md
+
+Emergency bypass (discouraged; CI/review will still flag):
+  git commit --no-verify
+
+==============================================================================
+EOF
+    exit 1
+fi
+
+# --- Entity guard --------------------------------------------------------------
+# No contract template, the contract generator, or the sender-identity config may
+# name a contracting party other than the current canonical entity declared in
+# entity_identity.py. Added after the 2026-06-01 stress test (Kill List #1, FATAL).
+ENTITY_GUARD="01_BUSINESSES/Everlight_Ventures/Broker_OS/entity_guard.py"
+if [ -f "$ENTITY_GUARD" ] && command -v python3 >/dev/null 2>&1; then
+    if ! guard_out=$(python3 "$ENTITY_GUARD" 2>&1); then
+        echo "$guard_out" >&2
+        echo "" >&2
+        echo "EVERLIGHT PRE-COMMIT -- entity guard failed; a contract names a non-canonical party." >&2
+        echo "Fix the party, or flip entity_identity.ENTITY_STATUS. Emergency bypass: git commit --no-verify" >&2
+        exit 1
+    fi
+fi
+
+exit 0

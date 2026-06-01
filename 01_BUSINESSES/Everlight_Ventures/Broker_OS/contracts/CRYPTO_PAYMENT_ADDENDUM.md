@@ -8,7 +8,7 @@
 
 ---
 
-This Cryptocurrency Payment Addendum ("Addendum") supplements and is incorporated into the Finder Fee Agreement ("Agreement") identified above by and between Everlight Logistics LLC, d/b/a Everlight Ventures ("Finder"), and {{SELLER_LEGAL_NAME}} ("Seller"). Capitalized terms not defined herein have the meanings given in the Agreement.
+This Cryptocurrency Payment Addendum ("Addendum") supplements and is incorporated into the Finder Fee Agreement ("Agreement") identified above by and between Richard Gee, an individual, doing business as Everlight Ventures ("Finder"), and {{SELLER_LEGAL_NAME}} ("Seller"). Capitalized terms not defined herein have the meanings given in the Agreement.
 
 ---
 
@@ -102,7 +102,7 @@ All other terms and conditions of the Agreement remain in full force and effect.
 
 ## SIGNATURES
 
-**FINDER -- Everlight Logistics LLC (d/b/a Everlight Ventures)**
+**FINDER -- Richard Gee, an individual, doing business as Everlight Ventures**
 
 Name: ___________________________________________
 

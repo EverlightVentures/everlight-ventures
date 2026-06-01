@@ -1,0 +1,11 @@
+{
+  "_meta": "CAN-SPAM sender identity. A DELIVERABLE physical postal address (with a street/PO-box number) is REQUIRED before any commercial email send. tn_deal_tracker.compliant_sender() PAUSES sends until one is set. Operates out of California; LLC update pending.",
+  "from_name": "Piper Reeves",
+  "from_email": "piper@everlightventures.io",
+  "reply_to": "piper@everlightventures.io",
+  "business_name": "Richard Gee d/b/a Everlight Ventures",
+  "operating_state": "California",
+  "physical_address": "PENDING_CA_DELIVERABLE_ADDRESS",
+  "address_note": "Frugal compliant options (pick one, ~free-to-cheap): (1) USPS PO Box (~$5-15/mo), (2) the LLC's registered-agent address once the LLC is updated, (3) a commercial mail-receiving-agency private mailbox. NO relocation details go in outbound copy -- internal only.",
+  "unsubscribe": "Reply STOP to opt out."
+}
