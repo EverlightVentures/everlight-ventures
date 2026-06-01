@@ -3,7 +3,7 @@
 **Date:** 2026-05-31
 **Owner:** Rich (operator)
 **Status:** Vision locked. Phase 1 spec in progress.
-**Runs on:** Rich's **AceMagician mini PC running Linux** (the box that runs Jellyfin and that he carries with him; tailnet 100.93.253.49). OS confirmed 2026-05-31.
+**Runs on:** Rich's **AceMagician mini PC running Garuda Linux** (Arch-based, zen kernel - a gaming-focused distro). Runs Jellyfin, carried with him; tailnet 100.93.253.49, user `richgee`. OS confirmed 2026-05-31.
 **Lives in (brain / source of truth):** `06_DEVELOPMENT/hive_tv/` in the workspace. Code is authored here and copied / deployed to the media machine. The workspace is the brain; the media machine is the appliance.
 
 ---
@@ -92,18 +92,27 @@ same "click and it opens" pattern). Honest flags, because hardware and anti-chea
 - **Steam + Proton (Windows games on Linux): GREEN for most single-player / indie / older titles.**
   Proton is Valve's Wine layer (what the Steam Deck runs); a large share of Windows games "just
   work." Add **Lutris** / **Heroic** for Epic / GOG / Battle.net, and **ProtonUp-Qt** for GE-Proton.
-- **Modern competitive AAA with kernel anti-cheat (Call of Duty / Warzone, Valorant, comp Fortnite):
-  RED on Linux.** Warzone's RICOCHET kernel anti-cheat does not run on Linux and Activision bans
-  Proton for it. This is a hard wall, not a settings fix. Live check: areweanticheatyet.com.
-- **GPU reality:** most AceMagician minis are integrated-graphics class (Intel N100 / N95 or small
-  Ryzen). Even setting anti-cheat aside, modern AAA needs a discrete GPU and will not run playably.
-  This box shines at **media + emulation + indie / older games**, not current AAA. Confirm exact specs.
-- **Cloud gaming (the way to actually play Warzone on this box): GREEN.** GeForce NOW and Xbox
-  Cloud Gaming run the game on *their* GPU and stream it to a browser tab. No local GPU needed, no
-  anti-cheat wall (it runs on their Windows servers), and it drops into the **exact same launcher +
-  auto-login pattern** as the streaming tiles. CoD / Warzone is on GeForce NOW. **GeForce NOW has a
-  free tier** (session-length limited); paid tiers give longer / RTX sessions. Xbox Cloud needs Game
-  Pass Ultimate (paid). This turns the AAA "RED" wall into a real path that fits Phase 1's plumbing.
+- **Call of Duty / modern AAA - the real no-cloud paths (Rich does NOT want cloud; aligning to that):**
+  Verified current state (multi-source, incl. Activision's Dec 2025 RICOCHET post + ProtonDB +
+  GamingOnLinux anti-cheat list): modern **Warzone still will not launch under Linux / Proton.**
+  RICOCHET is a ring-0 Windows kernel driver that cannot load in Wine / Proton's user space, and
+  bypass attempts risk a ban. That is Activision's driver, not a config we can out-tweak. But there
+  ARE native, no-cloud ways to play CoD on this exact box:
+  - **Dual-boot Windows (primary native path).** A Windows partition on the AceMagician runs Warzone
+    natively with anti-cheat satisfied. Garuda for media + everything else; reboot to Windows for the
+    anti-cheat games. The launcher gets a "Boot to Game Mode" tile. Cleanest native answer; the only
+    open question is whether the GPU can drive it (need the model).
+  - **Older CoD titles run on Garuda now** via Proton: CoD2, CoD4: Modern Warfare, Black Ops III,
+    CoD4x, etc. If the goal is CoD *on Linux itself*, these are the ones that work today.
+  - Cloud (GeForce NOW free tier) would run Warzone in a browser tab, but Rich does not want a cloud
+    account - noted and parked, not the plan.
+  - If Rich has a specific newer method / link he read, drop it and I will pressure-test it against
+    his exact model rather than assume - EAC / BattlEye games got Proton support, but RICOCHET (CoD)
+    has not as of the latest Dec 2025 update.
+- **GPU is the deciding factor - need the exact AceMagician model.** Garuda (a gaming distro) on
+  this box suggests it was set up for gaming, which often means a capable AMD APU (e.g. Ryzen 7840HS
+  / Radeon 780M class can run Warzone at 1080p-low on Windows). An N100-class chip could not. The
+  model decides whether dual-boot Warzone is smooth, playable, or not worth it.
 - **Console games (PS4 CoD) on PC with keyboard + mouse:**
   - PS4 *emulation*: experimental, not viable for CoD. RED.
   - PS *Remote Play* from a real PS4 / PS5: `chiaki-ng` streams it to the PC with keyboard+mouse. YELLOW (needs the console).
@@ -111,17 +120,19 @@ same "click and it opens" pattern). Honest flags, because hardware and anti-chea
 - **Redragon 15-button mouse on Linux:** Redragon's official software is Windows-only, but
   **`input-remapper`** (open-source, Linux) remaps the extra buttons regardless of vendor. YELLOW
   (no vendor app, yes open-source remap).
-- **XR display glasses (Viture / XReal / RayNeo / Rokid class):**
-  - Big-screen display: works on Linux **only if the AceMagician's USB-C port supports
-    DisplayPort-alt-mode video out.** Many mini-PC USB-C ports are data-only. **Confirm the port
-    before buying** - this is make-or-break.
-  - Head-tracking / 3DoF spatial features: vendor apps are mostly Windows / Mac / Android; Linux
-    support is community-driven (e.g. XReal Linux driver projects). YELLOW.
-  - This is a hardware purchase. Free-first does not apply to hardware; the spend decision is Rich's
-    and should follow the USB-C video-out check first.
+- **Viture XR glasses (Rich's: Viture Pro XR and / or Viture Luma Pro) - GREEN on Linux, verified:**
+  - Both models are **officially supported by XRLinuxDriver** (wheaney/XRLinuxDriver, with Viture
+    collaboration). Plug-and-play over USB-C; head-tracking works on Linux. (Correction to an earlier
+    too-pessimistic note: Viture's Linux support is solid and official, not hit-or-miss.)
+  - Virtual big-screen / 3DoF desktop: add **Breezy Desktop** (companion to XRLinuxDriver) or the
+    Steam Deck plugin. Real Linux setup, not a hack.
+  - One remaining dependency: the AceMagician's USB-C port must output video (DisplayPort-alt mode).
+    Cheap test: plug any USB-C -> HDMI adapter into that port; if a monitor lights up, the glasses
+    get a picture. The software side (driver + virtual screen) is already solved for Viture on Linux.
 
 Tooling (all free / open-source): Steam + Proton, Lutris, Heroic, ProtonUp-Qt / GE-Proton,
-RetroArch / EmuDeck, chiaki-ng, input-remapper, MangoHud (perf overlay).
+RetroArch / EmuDeck, chiaki-ng, input-remapper, MangoHud (perf overlay), XRLinuxDriver + Breezy
+Desktop (Viture glasses). Garuda already ships much of the gaming base (Steam, Proton, gamemode).
 
 ---
 
