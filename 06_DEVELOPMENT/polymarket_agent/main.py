@@ -429,13 +429,22 @@ def run_candle_cycle(cfg: dict):
     _ensure_state(data_dir, cfg["bankroll"]["initial"])
     open_path = data_dir / "candle_open_bets.json"
     closed_path = data_dir / "candle_closed_bets.json"
+    shadow_path = data_dir / "candle_shadow_open.json"
     ledger = data_dir / "calibration_ledger.jsonl"
     openb = json.loads(open_path.read_text()) if open_path.exists() else []
     closed = json.loads(closed_path.read_text()) if closed_path.exists() else []
+    shadow_open = json.loads(shadow_path.read_text()) if shadow_path.exists() else []
     stake = float(cc.get("stake_usd", 2.0))
     min_edge = float(cc.get("min_edge", 0.05))
 
-    # 1) SETTLE finished windows by price (deterministic, no oracle wait)
+    def _calib(lane, rec, outcome, won, pnl):
+        with open(ledger, "a") as f:
+            f.write(json.dumps({"ts": time.time(), "lane": lane, "asset": rec["asset"],
+                                "predicted_prob": rec["predicted_prob"], "bet_outcome": rec["outcome"],
+                                "market_price": rec.get("price"), "outcome_resolved": outcome,
+                                "won": won, "pnl_usdc": str(pnl)}) + "\n")
+
+    # 1) SETTLE finished REAL bets by price (deterministic, no oracle wait)
     still_open = []
     for b in openb:
         out = window_outcome(b["asset"], b["window_ts"])
@@ -447,38 +456,67 @@ def run_candle_cycle(cfg: dict):
         pnl = (amt / price - amt) if won else -amt
         b.update({"status": "won" if won else "lost", "pnl_usdc": str(pnl), "outcome_resolved": out})
         closed.append(b)
-        with open(ledger, "a") as f:
-            f.write(json.dumps({"ts": time.time(), "lane": "candle", "asset": b["asset"],
-                                "predicted_prob": b["predicted_prob"], "bet_outcome": b["outcome"],
-                                "outcome_resolved": out, "won": won, "pnl_usdc": str(pnl)}) + "\n")
+        _calib("candle", b, out, won, pnl)
     openb = still_open
 
-    # 2) DECIDE + place new bets (one open bet per asset per window)
-    placed = 0
+    # 1b) SETTLE finished SHADOW predictions (no money -- pure accuracy signal).
+    # These are the coin-flip candles the cost gate correctly refuses to bet, but
+    # whose prediction-vs-outcome still tells us if momentum has any real edge.
+    still_shadow = []
+    settled_shadow = 0
+    for s in shadow_open:
+        out = window_outcome(s["asset"], s["window_ts"])
+        if out is None:
+            still_shadow.append(s); continue
+        _calib("candle_shadow", s, out, out == s["outcome"], "0")
+        settled_shadow += 1
+    shadow_open = still_shadow
+
+    # 2) DECIDE: record ONE prediction per asset per window. Bet when every cost
+    #    gate clears; otherwise log a SHADOW prediction so calibration accrues.
+    placed = shadowed = 0
     for asset in cc.get("assets", ["BTC"]):
         d = candle_decision(asset, min_edge=min_edge,
                             enter_after_min=float(cc.get("enter_after_min", 3.0)),
                             stake=stake, fee_rate=float(cc.get("fee_rate", 0.02)),
                             gas_usd=float(cc.get("gas_usd", 0.01)),
                             min_net_ev_pct=float(cc.get("min_net_ev_pct", 0.05)))
-        if not d or "skip" in d:
-            continue
-        if any(o["asset"] == asset and o["window_ts"] == _cw(d) for o in openb):
-            continue  # already have a bet this window
-        openb.append({
-            "id": f"candle_{uuid.uuid4().hex[:10]}", "asset": asset,
-            "window_ts": _cw(d), "outcome": d["outcome"], "amount_usdc": str(stake),
-            "price": str(d["market_price"]), "predicted_prob": d["predicted_prob"],
-            "edge": d["edge"], "ts": time.time(),
-        })
-        placed += 1
-        log.info("candle: BET %s %s @ %.3f (pred %.2f edge %+.3f) -- %s",
-                 asset, d["outcome"], d["market_price"], d["predicted_prob"], d["edge"], d["question"][:40])
+        if not d or not d.get("outcome") or d.get("window_ts") is None:
+            continue  # no directional claim this tick
+        wts = int(d["window_ts"])
+        if any(o["asset"] == asset and o["window_ts"] == wts for o in openb) \
+           or any(s["asset"] == asset and s["window_ts"] == wts for s in shadow_open):
+            continue  # already predicted this window
+        if d.get("bet"):
+            openb.append({
+                "id": f"candle_{uuid.uuid4().hex[:10]}", "asset": asset,
+                "window_ts": wts, "outcome": d["outcome"], "amount_usdc": str(stake),
+                "price": str(d["market_price"]), "predicted_prob": d["predicted_prob"],
+                "edge": d["edge"], "ts": time.time(),
+            })
+            placed += 1
+            log.info("candle: BET %s %s @ %.3f (pred %.2f edge %+.3f) -- %s",
+                     asset, d["outcome"], d["market_price"], d["predicted_prob"], d["edge"],
+                     d.get("question", "")[:40])
+        else:
+            shadow_open.append({
+                "id": f"shadow_{uuid.uuid4().hex[:10]}", "asset": asset,
+                "window_ts": wts, "outcome": d["outcome"],
+                "price": str(d["market_price"]), "predicted_prob": d["predicted_prob"],
+                "edge": d["edge"], "skip_reason": d.get("skip_reason"), "ts": time.time(),
+            })
+            shadowed += 1
+            log.info("candle: SHADOW %s %s pred %.2f vs price %.3f (%s)",
+                     asset, d["outcome"], d["predicted_prob"], d["market_price"], d.get("skip_reason"))
 
     open_path.write_text(json.dumps(openb, indent=2))
     closed_path.write_text(json.dumps(closed, indent=2))
-    log.info("candle cycle: %d placed, %d open, %d closed total", placed, len(openb), len(closed))
-    return {"placed": placed, "open": len(openb), "closed": len(closed)}
+    shadow_path.write_text(json.dumps(shadow_open, indent=2))
+    log.info("candle cycle: %d bet, %d shadow, %d open, %d closed, %d shadow-open",
+             placed, shadowed, len(openb), len(closed), len(shadow_open))
+    return {"placed": placed, "shadow": shadowed, "open": len(openb),
+            "closed": len(closed), "shadow_open": len(shadow_open),
+            "settled_shadow": settled_shadow}
 
 
 def _cw(decision):

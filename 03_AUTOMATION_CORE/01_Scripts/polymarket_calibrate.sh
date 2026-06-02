@@ -14,26 +14,15 @@ LOG="/mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/polymarket_agent/logs/calibrate.log"
 LOCK="/tmp/polymarket_calibrate.lock"
 mkdir -p "$(dirname "$LOG")"
 
-# ACTIVE-PASSIVE FAILOVER: e5-mother is the primary mother hub. The phone runs
-# this ONLY when e5 is unreachable. If e5 answers, it owns the cycle -> skip
-# (prevents double-running / paper-state divergence across hosts).
-# Generous timeout: e5 tailnet SSH handshake can take >8s under load. Only treat
-# e5 as DOWN after a real failure -- a false-failover would fork the ledger.
-# Retry twice before declaring e5 down.
-e5_up() {
-  for _ in 1 2; do
-    if timeout 25 ssh -o ConnectTimeout=18 -o StrictHostKeyChecking=no \
-         -i /root/.ssh/github_deploy e5-mother "echo up" >/dev/null 2>&1; then
-      return 0
-    fi
-    sleep 3
-  done
-  return 1
-}
-if e5_up; then
-  echo "$(date -u +%FT%TZ) skip: e5 (primary) is up, it owns the cycle" >> "$LOG"; exit 0
-fi
-echo "$(date -u +%FT%TZ) e5 DOWN (2 tries) -> phone failover taking the cycle" >> "$LOG"
+# HOST OWNERSHIP (fixed 2026-06-02 after a 4-day split-brain gap):
+# The OLD logic SSH-pinged e5 and SKIPPED if e5 merely *answered* -- assuming e5
+# ran the cycle. But e5 never had this cron installed, so every "e5 is up" skip
+# meant NOBODY ran it -> 4 days, 0 paper trades. (And from the phone proot the
+# SSH check itself hangs ~50s on a tailnet timeout.) So: the phone OWNS the value
+# lane directly, lock-protected against self-overlap. Coordinated phone<->e5
+# failover is reinstated ONLY once e5 runs this cron AND writes a freshness
+# heartbeat we can verify (a reachable SSH echo != "the cycle actually ran").
+# TODO(e5): re-enable defer when an e5 calibrate_heartbeat file is fresh (<35m).
 
 # single-instance lock (skip if a run is in flight)
 if [ -e "$LOCK" ] && kill -0 "$(cat "$LOCK" 2>/dev/null)" 2>/dev/null; then

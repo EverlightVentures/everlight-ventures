@@ -23,10 +23,21 @@ ASSET_SLUGS = {"BTC": "btc", "ETH": "eth", "SOL": "sol", "XRP": "xrp"}
 ASSET_PRODUCTS = {"BTC": "BTC-USD", "ETH": "ETH-USD", "SOL": "SOL-USD", "XRP": "XRP-USD"}
 
 
-def _get(url):
-    req = urllib.request.Request(url, headers={"User-Agent": "ev-candle/1.0"})
-    with urllib.request.urlopen(req, timeout=12) as r:
-        return json.loads(r.read())
+def _get(url, attempts=3):
+    """GET JSON with retries. The phone proot's TLS stack intermittently times
+    out the SSL handshake to Coinbase (_ssl.c:1016) -- a SINGLE failure used to
+    kill the whole cycle's price read -> 0 trades, 0 calibration. Retry with
+    backoff so a transient handshake hiccup no longer blinds the lane."""
+    last = None
+    for i in range(attempts):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": "ev-candle/1.0"})
+            with urllib.request.urlopen(req, timeout=15) as r:
+                return json.loads(r.read())
+        except Exception as e:  # transient SSL/timeout/HTTP -- retry
+            last = e
+            time.sleep(0.6 * (i + 1))
+    raise last
 
 
 def current_window_ts(now_ts: float = None) -> int:
@@ -127,41 +138,50 @@ def candle_decision(asset: str = "BTC", min_edge: float = 0.05,
                     enter_after_min: float = 3.0, now_ts: float = None,
                     stake: float = 2.0, fee_rate: float = 0.02, gas_usd: float = 0.01,
                     min_net_ev_pct: float = 0.05) -> dict | None:
-    """Combine the live market + momentum into a trade decision, or None.
+    """Combine the live market + momentum into a decision dict, or None.
 
-    Strategy (transcript-derived): only act LATE in the window (>= enter_after_min,
-    i.e. last ~2 min of the 5-min candle) once direction has formed, SKIP dojis,
-    and only bet when our momentum-implied probability beats the market price by
-    >= min_edge. predicted_prob = 0.5 + 0.4*strength (capped)."""
+    Return contract (decoupled calibration vs betting):
+      - None          -> no directional claim yet (no market / doji / too early).
+                         Nothing to measure; the next cron tick re-checks.
+      - dict w/ bet=True  -> a directional prediction that ALSO clears every cost
+                         gate -> place a real (paper) bet.
+      - dict w/ bet=False -> a directional prediction that we will NOT bet (edge
+                         too thin, or correctly rejected by the cost/profit gate),
+                         but which we STILL record as a SHADOW prediction so the
+                         calibration ledger measures whether momentum has real edge.
+    Either dict carries the same prediction fields, so the cycle logs accuracy
+    regardless of whether a bet was placed. predicted_prob = 0.5 + 0.4*strength."""
     mkt = find_candle_market(asset, now_ts=now_ts)
     if not mkt:
         return None
     mo = momentum(asset, window_ts=mkt["window_ts"], now_ts=now_ts)
     if mo["direction"] is None or mo["is_doji"]:
-        return {"skip": "doji/indecisive", "market": mkt, "momentum": mo}
+        return None                       # no directional claim -> nothing to calibrate
     if mo["minutes_in"] < enter_after_min:
-        return {"skip": "too early in window", "market": mkt, "momentum": mo}
+        return None                       # too early; re-checked on a later tick
     direction = mo["direction"]
     price = mkt["prices"].get(direction, 0.5)
     pred = min(0.95, 0.5 + 0.4 * mo["strength"])
     edge = pred - price
-    if edge < min_edge:
-        return {"skip": f"edge {edge:.3f} < {min_edge}", "market": mkt, "momentum": mo}
-    # COST GATE (operator law): the bet must clear fees + gas AND grow the book.
-    from polymarket_agent.costs import net_ev, meets_profit_target
-    ev = net_ev(stake, price, pred, fee_rate=fee_rate, gas_usd=gas_usd)
-    if ev["net_ev_pct"] < min_net_ev_pct:
-        return {"skip": f"net EV {ev['net_ev_pct']*100:.1f}% < {min_net_ev_pct*100:.0f}% "
-                        f"after costs (${ev['cost']})", "market": mkt, "momentum": mo, "ev": ev}
-    # REWARD TARGET (operator): a win must profit >= 2x stake + 2x gas. On a ~50c
-    # candle a win only returns ~1x, so this correctly skips coin-flip scalps.
-    if not meets_profit_target(stake, price, gas_usd=gas_usd):
-        return {"skip": f"win payout < 2x stake + 2x gas (price {price} too high)",
-                "market": mkt, "momentum": mo}
-    return {
+    base = {
         "asset": asset.upper(), "market_id": mkt["token_ids"][direction],
         "outcome": direction, "market_price": price, "predicted_prob": pred,
         "edge": round(edge, 4), "strength": mo["strength"],
-        "net_ev_pct": ev["net_ev_pct"], "cost": ev["cost"],
-        "slug": mkt["slug"], "question": mkt["question"],
+        "slug": mkt["slug"], "window_ts": mkt["window_ts"],
+        "question": mkt.get("question", ""),
     }
+    from polymarket_agent.costs import net_ev, meets_profit_target
+    if edge < min_edge:
+        return {**base, "bet": False, "skip_reason": f"edge {edge:.3f} < {min_edge}"}
+    # COST GATE (operator law): the bet must clear fees + gas AND grow the book.
+    ev = net_ev(stake, price, pred, fee_rate=fee_rate, gas_usd=gas_usd)
+    if ev["net_ev_pct"] < min_net_ev_pct:
+        return {**base, "bet": False, "ev": ev,
+                "skip_reason": f"net EV {ev['net_ev_pct']*100:.1f}% < {min_net_ev_pct*100:.0f}% after costs"}
+    # REWARD TARGET (operator): a win must profit >= 2x stake + 2x gas. On a ~50c
+    # candle a win only returns ~1x, so this correctly skips coin-flip scalps
+    # (they become shadow predictions -- measured, not bet).
+    if not meets_profit_target(stake, price, gas_usd=gas_usd):
+        return {**base, "bet": False, "skip_reason": "win payout < 2x stake + 2x gas (price too high)"}
+    return {**base, "bet": True, "skip_reason": None,
+            "net_ev_pct": ev["net_ev_pct"], "cost": ev["cost"]}
