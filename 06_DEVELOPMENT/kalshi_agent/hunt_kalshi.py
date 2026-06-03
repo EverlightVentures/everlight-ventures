@@ -144,6 +144,13 @@ def main():
     print("=" * 60); print("  KALSHI EDGE HUNTER", "[LIVE]" if args.live else "[DRY-RUN]"); print("=" * 60)
     cands = scan(min_edge=args.min_edge, stake=args.max_stake)
     print(f"  tradeable edges found: {len(cands)}")
+    try:                                                # log every would-be bet for the scorecard
+        from kalshi_agent import scorecard
+        for c in cands:
+            p_side = c["model"] if c["side"] == "yes" else 1 - c["model"]
+            scorecard.record("crypto", c["ticker"], c["side"], p_side, c["limit_c"] / 100)
+    except Exception:
+        pass
     for c in cands[:8]:
         print(f"  {c['side'].upper():3} {c['ticker'][:24]:24} edge={c['edge']:+.3f} "
               f"model={c['model']:.2f} mkt={c['mid']:.2f} @ {c['limit_c']}c x{c['count']} "

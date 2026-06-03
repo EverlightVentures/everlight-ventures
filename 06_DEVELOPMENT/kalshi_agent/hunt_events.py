@@ -105,6 +105,14 @@ def main():
     print("=" * 60); print("  KALSHI EVENT HUNTER", "[LIVE]" if args.live else "[DRY-RUN]"); print("=" * 60)
     cands = scan(min_edge=args.min_edge, min_conf=args.min_conf, stake=args.max_stake, model=args.model)
     print(f"  researched-edge candidates: {len(cands)}")
+    try:                                                # log every would-be bet for the scorecard
+        from kalshi_agent import scorecard
+        for c in cands:
+            p_side = c["model_prob"] if c["side"] == "yes" else 1 - c["model_prob"]
+            scorecard.record("event", c["ticker"], c["side"], p_side, c["limit_c"] / 100,
+                             c.get("conf"), c.get("reason", ""))
+    except Exception:
+        pass
     for c in cands[:8]:
         print(f"  {c['side'].upper():3} {c['ticker'][:26]:26} edge={c['edge']:+.3f} "
               f"prob={c['model_prob']:.2f} mkt={c['mid']:.2f} conf={c['conf']:.2f} "
