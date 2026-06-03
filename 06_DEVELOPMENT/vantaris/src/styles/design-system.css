@@ -32,6 +32,17 @@
   --vanta-elevated: #151520;     /* Highest surface. Dropdowns. Tooltips. */
   --vanta-glass: rgba(15, 15, 24, 0.72);  /* Glass morphism panels */
 
+  /* === BLACKJACK WINDOW / SCENE (tune the framed video pane here) === */
+  --wall-color: #050507;          /* solid room wall behind the window */
+  --window-top: 6%;               /* window position + size (behind the dealer) */
+  --window-left: 12%;
+  --window-width: 76%;
+  --window-height: 40%;
+  --window-frame-color: #1a1410;  /* molding / frame */
+  --window-frame-width: 8px;
+  --window-video-opacity: 0.9;
+  --table-opacity: 0.9;           /* felt solidity (3D material hook, see CasinoScene3D) */
+
   /* Borders (barely visible, just structure) */
   --vanta-border: rgba(255, 255, 255, 0.06);
   --vanta-border-hover: rgba(255, 255, 255, 0.12);

@@ -1051,18 +1051,66 @@ export default function BlackjackPage() {
   const canDouble = store.availableActions.includes('double')
   const canSurrender = store.availableActions.includes('surrender')
 
+  // Per-level background scene -- the room through the window changes as the
+  // player ranks up. Tune the rank -> video map; unknown ranks use the default.
+  // Available clips: casino-entry, casino-lobby, vip-penthouse, crystal-loop.
+  const SCENE_BY_RANK: Record<string, string> = {
+    Bronze: '/videos/casino-entry.mp4',
+    Silver: '/videos/casino-entry.mp4',
+    Gold: '/videos/casino-lobby.mp4',
+    Platinum: '/videos/casino-lobby.mp4',
+    Diamond: '/videos/vip-penthouse.mp4',
+    Legend: '/videos/vip-penthouse.mp4',
+    Ember: '/videos/vip-penthouse.mp4',
+    Shadow: '/videos/crystal-loop.mp4',
+    Eclipse: '/videos/crystal-loop.mp4',
+    Supernova: '/videos/crystal-loop.mp4',
+    'Vanta Black': '/videos/crystal-loop.mp4',
+  }
+  const bgScene = SCENE_BY_RANK[store.player.rank] || '/videos/vip-penthouse.mp4'
+
   return (
     <div className="min-h-screen h-screen flex flex-col overflow-hidden relative" style={{ background: 'var(--vanta-void)' }}>
 
-      {/* Environment video -- FULL visibility, the room you're playing in */}
-      <video autoPlay muted loop playsInline
-        className="fixed top-0 left-0 w-screen h-screen object-cover"
-        style={{ opacity: 0.7, zIndex: 0, pointerEvents: 'none' }}>
-        <source src="/videos/vip-penthouse.mp4" type="video/mp4" />
-      </video>
-      {/* Subtle vignette only at edges, center stays visible */}
-      <div className="fixed top-0 left-0 w-screen h-screen"
-        style={{ background: 'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 40%, rgba(5,5,7,0.6) 100%)', zIndex: 0, pointerEvents: 'none' }} />
+      {/* z0 -- ROOM WALL: solid backdrop the window is cut into. Stops the video
+          from bleeding through the felt (the table now sits over the wall, not the clip). */}
+      <div className="fixed inset-0 pointer-events-none"
+        style={{ background: 'var(--wall-color, #050507)', zIndex: 0, pointerEvents: 'none' }} />
+
+      {/* z0 -- WINDOW: the environment video, framed like a pane. Plays ONCE (no loop)
+          and freezes on its final skyline frame. Geometry tunable via :root CSS vars.
+          Kept at zIndex 0 + before the table in DOM so the table still paints over it. */}
+      <div className="fixed overflow-hidden pointer-events-none"
+        style={{
+          top: 'var(--window-top, 6%)',
+          left: 'var(--window-left, 12%)',
+          width: 'var(--window-width, 76%)',
+          height: 'var(--window-height, 40%)',
+          zIndex: 0,
+          borderRadius: '10px',
+          border: 'var(--window-frame-width, 8px) solid var(--window-frame-color, #1a1410)',
+          boxShadow: 'inset 0 0 60px rgba(0,0,0,0.75), 0 12px 44px rgba(0,0,0,0.6)',
+          pointerEvents: 'none',
+        }}>
+        <video key={bgScene} autoPlay muted playsInline
+          className="w-full h-full object-cover"
+          style={{ opacity: 'var(--window-video-opacity, 0.9)' }}
+          onEnded={(e) => {
+            // Pin to the last (skyline) frame; do not blank or restart.
+            const v = e.currentTarget
+            v.pause()
+            try { if (v.duration) v.currentTime = Math.max(0, v.duration - 0.05) } catch {}
+          }}>
+          <source src={bgScene} type="video/mp4" />
+        </video>
+        {/* glass reflection sweep so it reads as a pane, not a cropped clip */}
+        <div className="absolute inset-0 pointer-events-none"
+          style={{ background: 'linear-gradient(125deg, rgba(255,255,255,0.10) 0%, transparent 35%, transparent 75%, rgba(255,255,255,0.05) 100%)' }} />
+      </div>
+
+      {/* Soft vignette seats the window into the room (kept at z0, behind the table) */}
+      <div className="fixed inset-0 pointer-events-none"
+        style={{ background: 'radial-gradient(ellipse 85% 75% at 50% 38%, transparent 45%, rgba(5,5,7,0.55) 100%)', zIndex: 0, pointerEvents: 'none' }} />
 
       {/* Toast notification system */}
       <ToastContainer />

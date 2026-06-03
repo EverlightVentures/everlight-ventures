@@ -102,19 +102,58 @@ export async function verifyCheckout(sessionId: string) {
 // PLAYER DATA
 // ============================================================
 
-export async function getPlayerProfile(userId: string) {
-  const { data, error } = await supabase
-    .from('casino_players')
-    .select('*')
-    .eq('user_id', userId)
-    .single()
-
-  if (error && error.code === 'PGRST116') {
-    // Profile doesn't exist, create one
-    return createPlayerProfile(userId)
+// Map a real player_accounts row to a back-compat shape so components that
+// read profile.gold_coins / profile.id keep working while the source of
+// truth is the live player_accounts table.
+function withChipAliases(row: any) {
+  if (!row) return row
+  return {
+    ...row,
+    id: row.player_id ?? row.id,
+    gold_coins: row.chip_balance ?? row.free_chips ?? 0,
+    sweeps_coins: row.gem_balance ?? 0,
+    rank: row.equipped_title ?? rankFromLevel(row.level ?? 1),
   }
-  if (error) throw error
-  return data
+}
+
+function rankFromLevel(level: number): string {
+  if (level >= 50) return 'Sovereign'
+  if (level >= 30) return 'Ascendant'
+  if (level >= 15) return 'Gilded'
+  if (level >= 5) return 'Ember'
+  return 'Spark'
+}
+
+// Translate legacy update keys to real player_accounts columns.
+function mapPlayerUpdates(updates: Record<string, any>): Record<string, any> {
+  const out: Record<string, any> = { ...updates }
+  if ('gold_coins' in out) { out.chip_balance = out.gold_coins; delete out.gold_coins }
+  if ('sweeps_coins' in out) { out.gem_balance = out.sweeps_coins; delete out.sweeps_coins }
+  if ('rank' in out) delete out.rank
+  out.updated_at = new Date().toISOString()
+  return out
+}
+
+export async function getPlayerProfile(_userId: string) {
+  // Players bridge to auth by EMAIL (player_id is the account's own uuid,
+  // gen_random_uuid default). The browser can SELECT-own but cannot INSERT
+  // player_accounts (RLS = service_role only), so account creation happens
+  // server-side; here we just read. Returns null if no account yet.
+  const user = await getUser()
+  const email = user?.email ?? null
+  if (!email) return null
+  const { data, error } = await supabase
+    .from('player_accounts')
+    .select('*')
+    .eq('email', email)
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+  if (error) {
+    console.warn('[supabase] getPlayerProfile failed:', error.message)
+    return null
+  }
+  return data ? withChipAliases(data) : null
 }
 
 export async function createPlayerProfile(userId: string) {
@@ -122,36 +161,38 @@ export async function createPlayerProfile(userId: string) {
   const displayName = user?.user_metadata?.display_name || 'Player'
 
   const { data, error } = await supabase
-    .from('casino_players')
+    .from('player_accounts')
     .insert({
-      user_id: userId,
+      player_id: userId,
+      email: user?.email ?? null,
       display_name: displayName,
-      gold_coins: 1000,
-      sweeps_coins: 0,
+      chip_balance: 1000,
+      free_chips: 0,
+      gem_balance: 0,
+      level: 1,
       xp: 0,
-      rank: 'Ember',
     })
     .select()
     .single()
 
   if (error) throw error
-  return data
+  return withChipAliases(data)
 }
 
 export async function updatePlayerProfile(playerId: string, updates: Record<string, any>) {
   const { data, error } = await supabase
-    .from('casino_players')
-    .update(updates)
-    .eq('id', playerId)
+    .from('player_accounts')
+    .update(mapPlayerUpdates(updates))
+    .eq('player_id', playerId)
     .select()
     .single()
 
   if (error) throw error
-  return data
+  return withChipAliases(data)
 }
 
 // ============================================================
-// GAME HISTORY
+// GAME HISTORY  (canonical event log = player_events)
 // ============================================================
 
 export async function saveGameRound(round: {
@@ -166,8 +207,22 @@ export async function saveGameRound(round: {
   xp_earned: number
 }) {
   const { data, error } = await supabase
-    .from('casino_game_rounds')
-    .insert(round)
+    .from('player_events')
+    .insert({
+      player_id: round.player_id,
+      event_type: 'game_round',
+      page: `/play/${round.game}`,
+      event_data: {
+        game: round.game,
+        currency: round.currency,
+        bet_amount: round.bet_amount,
+        win_amount: round.win_amount,
+        net: round.net,
+        multiplier: round.multiplier,
+        xp_earned: round.xp_earned,
+        ...round.game_data,
+      },
+    })
     .select()
     .single()
 
@@ -175,12 +230,21 @@ export async function saveGameRound(round: {
   return data
 }
 
+// Record an arcade high score (dice, mines, plinko, roulette, crash).
+export async function submitArcadeScore(game: string, playerName: string, score: number) {
+  const { error } = await supabase
+    .from('arcade_scores')
+    .insert({ game, player_name: playerName, score: Math.floor(score) })
+  if (error) console.warn('[supabase] submitArcadeScore failed:', error)
+}
+
 export async function getGameHistory(playerId: string, limit: number = 50) {
   const { data, error } = await supabase
-    .from('casino_game_rounds')
+    .from('player_events')
     .select('*')
     .eq('player_id', playerId)
-    .order('played_at', { ascending: false })
+    .eq('event_type', 'game_round')
+    .order('created_at', { ascending: false })
     .limit(limit)
 
   if (error) throw error
@@ -188,24 +252,35 @@ export async function getGameHistory(playerId: string, limit: number = 50) {
 }
 
 // ============================================================
-// LEADERBOARD
+// LEADERBOARD  (blackjack rollup table + arcade high scores)
 // ============================================================
 
-export async function getLeaderboard(game: string = 'blackjack', period: string = 'weekly') {
-  const since = period === 'daily'
-    ? new Date(Date.now() - 86400000).toISOString()
-    : period === 'weekly'
-      ? new Date(Date.now() - 604800000).toISOString()
-      : new Date(Date.now() - 31536000000).toISOString()
+export async function getLeaderboard(game: string = 'blackjack', _period: string = 'all_time') {
+  if (game === 'blackjack') {
+    const { data, error } = await supabase
+      .from('blackjack_leaderboard')
+      .select('display_name, total_winnings, hands_played, hands_won, biggest_win, jackpots_won')
+      .order('total_winnings', { ascending: false })
+      .limit(50)
+    if (error) throw error
+    return (data || []).map((r, i) => ({
+      rank: i + 1,
+      display_name: r.display_name,
+      score: r.total_winnings,
+      hands_played: r.hands_played,
+      hands_won: r.hands_won,
+      biggest_win: r.biggest_win,
+    }))
+  }
 
   const { data, error } = await supabase
-    .from('casino_game_rounds')
-    .select('player_id, casino_players(display_name, rank)')
+    .from('arcade_scores')
+    .select('player_name, score')
     .eq('game', game)
-    .gte('played_at', since)
-
+    .order('score', { ascending: false })
+    .limit(50)
   if (error) throw error
-  return data || []
+  return (data || []).map((r, i) => ({ rank: i + 1, display_name: r.player_name, score: r.score }))
 }
 
 // ============================================================
