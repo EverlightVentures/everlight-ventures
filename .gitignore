@@ -196,6 +196,17 @@ _state/cloud_mirror_secrets/
 # rule only matched _state/cloud_mirror_secrets/ -- the real dir has no suffix.
 _state/cloud_mirror/
 
+# ---- CRYPTO WALLET SECRETS (added 2026-06-02) ----
+# chmod does NOT stick on the sdcard FUSE mount (600 -> 660), so file perms are
+# not real protection. These MUST stay untracked and move into Proton Pass.
+03_AUTOMATION_CORE/03_Credentials/proton_pass_import.*
+03_AUTOMATION_CORE/03_Credentials/SEED_VAULT*
+**/atomic_sp.py
+**/phantom_sp.py
+**/bcardi_coin_sp.py
+**/Zilpay_Bacardi_Wallet_SP.py
+**/seed_phrase_phantom.py
+
 # ---- RUNTIME STATE / DBs (churns every cycle, not source) ----
 _state/blinko_lite.db
 _state/blinko_lite.db-shm

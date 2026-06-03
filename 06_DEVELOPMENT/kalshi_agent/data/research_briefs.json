@@ -1,0 +1,3881 @@
+{
+  "540881": {
+    "question": "GTA VI released before June 2026?",
+    "signals": [
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0015,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0015,
+      "No": 0.9985
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "553824": {
+    "question": "Will the Carolina Hurricanes win the 2026 NHL Stanley Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.565,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.565,
+      "No": 0.435
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "553829": {
+    "question": "Will the Vegas Golden Knights win the 2026 NHL Stanley Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.4255,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.4255,
+      "No": 0.5745
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "553849": {
+    "question": "Will the Montreal Canadiens win the 2026 NHL Stanley Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0155,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0155,
+      "No": 0.9845
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "553856": {
+    "question": "Will the Oklahoma City Thunder win the 2026 NBA Finals?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.425,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.425,
+      "No": 0.575
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "553858": {
+    "question": "Will the New York Knicks win the 2026 NBA Finals?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.3135,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.3135,
+      "No": 0.6865
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "553866": {
+    "question": "Will the San Antonio Spurs win the 2026 NBA Finals?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.2705,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.2705,
+      "No": 0.7295
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558934": {
+    "question": "Will Spain win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.1695,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.1695,
+      "No": 0.8305
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558935": {
+    "question": "Will England win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.1115,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.1115,
+      "No": 0.8885
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558936": {
+    "question": "Will France win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.1665,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.1665,
+      "No": 0.8335
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558937": {
+    "question": "Will Brazil win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0935,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0935,
+      "No": 0.9065
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558938": {
+    "question": "Will Argentina win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0855,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0855,
+      "No": 0.9145
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558939": {
+    "question": "Will Germany win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0515,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0515,
+      "No": 0.9485
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558940": {
+    "question": "Will Portugal win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.1025,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.1025,
+      "No": 0.8975
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558941": {
+    "question": "Will Netherlands win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0375,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0375,
+      "No": 0.9625
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558943": {
+    "question": "Will USA win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0115,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0115,
+      "No": 0.9885
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558944": {
+    "question": "Will Uruguay win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0105,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0105,
+      "No": 0.9895
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558945": {
+    "question": "Will Mexico win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0105,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0105,
+      "No": 0.9895
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558946": {
+    "question": "Will Belgium win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0175,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0175,
+      "No": 0.9825
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558947": {
+    "question": "Will Colombia win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0175,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0175,
+      "No": 0.9825
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558949": {
+    "question": "Will Japan win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0185,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0185,
+      "No": 0.9815
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558951": {
+    "question": "Will Norway win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0285,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0285,
+      "No": 0.9715
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558952": {
+    "question": "Will Canada win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0035,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0035,
+      "No": 0.9965
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558954": {
+    "question": "Will Tunisia win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0015,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0015,
+      "No": 0.9985
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558955": {
+    "question": "Will Ecuador win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0085,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0085,
+      "No": 0.9915
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558956": {
+    "question": "Will Paraguay win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0025,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0025,
+      "No": 0.9975
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558957": {
+    "question": "Will New Zealand win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0005,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0005,
+      "No": 0.9995
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558958": {
+    "question": "Will Australia win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0015,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0015,
+      "No": 0.9985
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558959": {
+    "question": "Will Iran win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Trump holding meeting to make 'final determination' on Iran deal -- The US president says he is meeting his advisers, after officials confirmed the US and Iran had agreed a framework of a deal.",
+        "url": "https://www.bbc.com/news/articles/c0r2d40r91qo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T18:54:51+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0015,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0015,
+      "No": 0.9985
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558960": {
+    "question": "Will Uzbekistan win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0005,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0005,
+      "No": 0.9995
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558961": {
+    "question": "Will South Korea win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0025,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0025,
+      "No": 0.9975
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558962": {
+    "question": "Will Jordan win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0005,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0005,
+      "No": 0.9995
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558963": {
+    "question": "Will Morocco win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0145,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0145,
+      "No": 0.9855
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558964": {
+    "question": "Will South Africa win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0005,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0005,
+      "No": 0.9995
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558965": {
+    "question": "Will Senegal win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0065,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0065,
+      "No": 0.9935
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558966": {
+    "question": "Will Ivory Coast win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0025,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0025,
+      "No": 0.9975
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558967": {
+    "question": "Will Ghana win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0025,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0025,
+      "No": 0.9975
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558968": {
+    "question": "Will Egypt win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0025,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0025,
+      "No": 0.9975
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558969": {
+    "question": "Will Algeria win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0015,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0015,
+      "No": 0.9985
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558970": {
+    "question": "Will Cape Verde win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0005,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0005,
+      "No": 0.9995
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558971": {
+    "question": "Will Qatar win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0005,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0005,
+      "No": 0.9995
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558972": {
+    "question": "Will Saudi Arabia win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0005,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0005,
+      "No": 0.9995
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558973": {
+    "question": "Will Scotland win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0025,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0025,
+      "No": 0.9975
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558974": {
+    "question": "Will Switzerland win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0115,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0115,
+      "No": 0.9885
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558975": {
+    "question": "Will Austria win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0055,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0055,
+      "No": 0.9945
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558976": {
+    "question": "Will Croatia win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0085,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0085,
+      "No": 0.9915
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558977": {
+    "question": "Will Haiti win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0005,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0005,
+      "No": 0.9995
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558978": {
+    "question": "Will Cura\u00e7ao win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0005,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0005,
+      "No": 0.9995
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558979": {
+    "question": "Will Panama win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0005,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0005,
+      "No": 0.9995
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558980": {
+    "question": "Will Sweden win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0055,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0055,
+      "No": 0.9945
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558981": {
+    "question": "Will Congo DR win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0015,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0015,
+      "No": 0.9985
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558982": {
+    "question": "Will Iraq win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0005,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0005,
+      "No": 0.9995
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558983": {
+    "question": "Will Bosnia-Herzegovina win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0025,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0025,
+      "No": 0.9975
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558984": {
+    "question": "Will Czechia win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0025,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0025,
+      "No": 0.9975
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "558985": {
+    "question": "Will Turkiye win the 2026 FIFA World Cup?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0075,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0075,
+      "No": 0.9925
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559651": {
+    "question": "Xi Jinping out before 2027?",
+    "signals": [],
+    "category": "",
+    "_market_price": 0.0725,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0725,
+      "No": 0.9275
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559652": {
+    "question": "Will Gavin Newsom win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.2395,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.2395,
+      "No": 0.7605
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559653": {
+    "question": "Will Alexandria Ocasio-Cortez win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0935,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0935,
+      "No": 0.9065
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559654": {
+    "question": "Will Pete Buttigieg win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0445,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0445,
+      "No": 0.9555
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559655": {
+    "question": "Will Josh Shapiro win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0535,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0535,
+      "No": 0.9465
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559658": {
+    "question": "Will Kamala Harris win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0805,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0805,
+      "No": 0.9195
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559659": {
+    "question": "Will Gretchen Whitmer win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0105,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0105,
+      "No": 0.9895
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559660": {
+    "question": "Will Andy Beshear win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0295,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0295,
+      "No": 0.9705
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559661": {
+    "question": "Will Jon Ossoff win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0545,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0545,
+      "No": 0.9455
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559662": {
+    "question": "Will Mark Cuban win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0095,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0095,
+      "No": 0.9905
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559663": {
+    "question": "Will J.B. Pritzker win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0165,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0165,
+      "No": 0.9835
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559664": {
+    "question": "Will Raphael Warnock win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0075,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0075,
+      "No": 0.9925
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559665": {
+    "question": "Will Cory Booker win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0095,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0095,
+      "No": 0.9905
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559666": {
+    "question": "Will Tim Walz win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0065,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0065,
+      "No": 0.9935
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559667": {
+    "question": "Will Michelle Obama win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0135,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0135,
+      "No": 0.9865
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559668": {
+    "question": "Will Mark Kelly win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0195,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0195,
+      "No": 0.9805
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559669": {
+    "question": "Will Rahm Emanuel win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0225,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0225,
+      "No": 0.9775
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559670": {
+    "question": "Will Gina Raimondo win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0075,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0075,
+      "No": 0.9925
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559671": {
+    "question": "Will Zohran Mamdani win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0075,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0075,
+      "No": 0.9925
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559672": {
+    "question": "Will Roy Cooper win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0095,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0095,
+      "No": 0.9905
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559673": {
+    "question": "Will John Fetterman win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0085,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0085,
+      "No": 0.9915
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559674": {
+    "question": "Will Jared Polis win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0075,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0075,
+      "No": 0.9925
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559675": {
+    "question": "Will Jon Stewart win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0165,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0165,
+      "No": 0.9835
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559676": {
+    "question": "Will Barack Obama win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0065,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0065,
+      "No": 0.9935
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559677": {
+    "question": "Will Hillary Clinton win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0075,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0075,
+      "No": 0.9925
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559678": {
+    "question": "Will Liz Cheney win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0075,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0075,
+      "No": 0.9925
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559679": {
+    "question": "Will Bernie Sanders win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0075,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0075,
+      "No": 0.9925
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559680": {
+    "question": "Will Phil Murphy win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0065,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0065,
+      "No": 0.9935
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559681": {
+    "question": "Will LeBron James win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0075,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0075,
+      "No": 0.9925
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  },
+  "559682": {
+    "question": "Will Hunter Biden win the 2028 Democratic presidential nomination?",
+    "signals": [
+      {
+        "source": "rss",
+        "text": "Fonseca stuns Djokovic in third-round epic -- Novak Djokovic's wait for a record 25th Grand Slam singles title goes on after teenager Joao Fonseca produces a stunning fightback to win a five-set epic in the French Open third round.",
+        "url": "https://www.bbc.com/sport/tennis/articles/c1521xnnxewo?at_medium=RSS&at_campaign=rss",
+        "author": "",
+        "timestamp": "2026-05-29T19:08:19+00:00",
+        "credibility": 0.7,
+        "sentiment": 0.0,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought Yes on: Will Bosnia and Herzegovina win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-bih-mac-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T19:07:14+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      },
+      {
+        "source": "smart_money",
+        "text": "Smart-money BrevanHoward bought No on: Will South Africa win on 2026-05-29?",
+        "url": "https://polymarket.com/event/fif-rsa-nca-2026-05-29",
+        "author": "BrevanHoward",
+        "timestamp": "2026-05-29T17:26:17+00:00",
+        "credibility": 0.9,
+        "sentiment": 0.6,
+        "market_ids": []
+      }
+    ],
+    "category": "",
+    "_market_price": 0.0065,
+    "_outcome": "Yes",
+    "_prices": {
+      "Yes": 0.0065,
+      "No": 0.9935
+    },
+    "_outcomes": [
+      "Yes",
+      "No"
+    ]
+  }
+}
