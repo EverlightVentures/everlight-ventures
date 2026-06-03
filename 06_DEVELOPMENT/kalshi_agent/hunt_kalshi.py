@@ -22,12 +22,31 @@ from datetime import datetime, timezone
 from kalshi_agent.crypto_edge import spot_and_vol, prob_above, prob_between
 
 K = "https://api.elections.kalshi.com/trade-api/v2"
-ALLOWED_SERIES = ["KXBTC", "KXETH"]   # crypto only -- the categories CA/NV allow
+# The ACTIVE crypto action is the 15-MINUTE markets (KXBTC15M/KXETH15M) -- that's
+# where real trades happen (proven 2026-06-02: KXBTC15M had 30 trades vs empty
+# hourly books). Hourly/daily kept as a fallback. Sports/Elections/Entertainment
+# are blocked for this CA account, so crypto is the lane.
+ALLOWED_SERIES = ["KXBTC15M", "KXETH15M", "KXBTCD", "KXETHD", "KXBTC", "KXETH"]
+SERIES_UNDERLYING = {"KXBTC15M": "BTC", "KXBTCD": "BTC", "KXBTC": "BTC",
+                     "KXETH15M": "ETH", "KXETHD": "ETH", "KXETH": "ETH"}
 
 
 def _get(path, params=None):
     u = K + path + ("?" + urllib.parse.urlencode({k: v for k, v in (params or {}).items() if v is not None}) if params else "")
     return json.loads(urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "ev-hunt/1.0"}), timeout=15).read())
+
+
+def _markets_by_series(series, max_pages=4):
+    """All open markets in a series (paginated). The list endpoint carries
+    close_time + strike fields we need; orderbook is fetched per-candidate."""
+    out, cur = [], None
+    for _ in range(max_pages):
+        d = _get("/markets", {"series_ticker": series, "status": "open", "limit": 1000, "cursor": cur})
+        out += d.get("markets", [])
+        cur = d.get("cursor")
+        if not cur:
+            break
+    return out
 
 
 def maker_fee(price, count):
@@ -60,49 +79,60 @@ def model_prob(m, spot, sig):
     return None, mins
 
 
-def scan(min_edge=0.07, stake=5.0):
-    """Return ranked trade candidates across allowed crypto markets."""
-    spots = {"KXBTC": spot_and_vol("BTC"), "KXETH": spot_and_vol("ETH")}
-    out = []
+def scan(min_edge=0.07, stake=5.0, max_close_min=90, near_pct=0.025):
+    """Ranked trade candidates: IMMINENT, NEAR-THE-MONEY crypto markets with a live
+    book. Targets where real trades happen (15-min markets), not dead far-OTM buckets."""
+    vol = {"BTC": spot_and_vol("BTC"), "ETH": spot_and_vol("ETH")}
+    out, seen = [], set()
     for series in ALLOWED_SERIES:
-        spot, sig = spots[series]
+        u = SERIES_UNDERLYING.get(series, "BTC")
+        spot, sig = vol[u]
         try:
-            ev = _get("/events", {"series_ticker": series, "status": "open",
-                                  "limit": 6, "with_nested_markets": "true"})
+            markets = _markets_by_series(series)
         except Exception:
             continue
-        for e in ev.get("events", []):
-            for m in (e.get("markets") or []):
-                t = m.get("ticker")
-                try:
-                    ob = _get(f"/markets/{t}/orderbook").get("orderbook", {})
-                except Exception:
-                    continue
-                yes, no = ob.get("yes") or [], ob.get("no") or []
-                ybid = max([p for p, s in yes], default=None)
-                nobid = max([p for p, s in no], default=None)
-                yask = (100 - nobid) if nobid is not None else None
-                if ybid is None or yask is None:
-                    continue
-                mid = (ybid + yask) / 200.0
-                mp, mins = model_prob(m, spot, sig)
-                if mp is None:
-                    continue
-                e_yes = mp - mid                       # >0 YES cheap, <0 NO cheap
-                side = "yes" if e_yes > 0 else "no"
-                # maker limit: join the cheap side's bid + 1c (still a maker)
-                px_c = (ybid + 1) if side == "yes" else (nobid + 1)
-                px = px_c / 100.0
-                win_prob = mp if side == "yes" else (1 - mp)
-                count = max(1, int(stake / max(px, 0.01)))
-                fee = maker_fee(px, count)
-                # net EV: win -> (1-px)*count ; lose -> -px*count ; minus fee
-                ev_usd = win_prob * (1 - px) * count - (1 - win_prob) * px * count - fee
-                if abs(e_yes) >= min_edge and ev_usd > 0:
-                    out.append({"ticker": t, "title": (m.get("title") or "")[:34],
-                                "side": side, "edge": round(e_yes, 3), "model": round(mp, 3),
-                                "mid": round(mid, 3), "limit_c": px_c, "count": count,
-                                "fee": fee, "net_ev": round(ev_usd, 3), "mins": round(mins, 1)})
+        # rank by closeness-to-money among imminent markets, check the nearest 12
+        scored = []
+        for m in markets:
+            mins = _close_minutes(m)
+            fl = m.get("floor_strike") or m.get("cap_strike")
+            if mins is None or not (0.5 < mins < max_close_min) or not fl:
+                continue
+            if abs(fl - spot) / spot <= near_pct:
+                scored.append((abs(fl - spot), mins, m))
+        scored.sort(key=lambda x: x[0])
+        for _d, mins, m in scored[:12]:
+            t = m.get("ticker")
+            if t in seen:
+                continue
+            seen.add(t)
+            try:
+                ob = _get(f"/markets/{t}/orderbook").get("orderbook", {})
+            except Exception:
+                continue
+            yes, no = ob.get("yes") or [], ob.get("no") or []
+            ybid = max([p for p, s in yes], default=None)
+            nobid = max([p for p, s in no], default=None)
+            yask = (100 - nobid) if nobid is not None else None
+            if ybid is None or yask is None:
+                continue                                   # no two-sided book -> skip
+            mid = (ybid + yask) / 200.0
+            mp, _m = model_prob(m, spot, sig)
+            if mp is None:
+                continue
+            e_yes = mp - mid                               # >0 YES cheap, <0 NO cheap
+            side = "yes" if e_yes > 0 else "no"
+            px_c = (ybid + 1) if side == "yes" else (nobid + 1)
+            px = px_c / 100.0
+            win_prob = mp if side == "yes" else (1 - mp)
+            count = max(1, int(stake / max(px, 0.01)))
+            fee = maker_fee(px, count)
+            ev_usd = win_prob * (1 - px) * count - (1 - win_prob) * px * count - fee
+            if abs(e_yes) >= min_edge and ev_usd > 0:
+                out.append({"ticker": t, "title": (m.get("title") or "")[:34],
+                            "side": side, "edge": round(e_yes, 3), "model": round(mp, 3),
+                            "mid": round(mid, 3), "limit_c": px_c, "count": count,
+                            "fee": fee, "net_ev": round(ev_usd, 3), "mins": round(mins, 1)})
     out.sort(key=lambda c: -c["net_ev"])
     return out
 
