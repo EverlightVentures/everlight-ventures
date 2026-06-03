@@ -20,6 +20,7 @@ import urllib.parse
 from datetime import datetime, timezone
 
 from kalshi_agent.crypto_edge import spot_and_vol, prob_above, prob_between
+from kalshi_agent.dataflows.kalshi_api import best_bbo
 
 K = "https://api.elections.kalshi.com/trade-api/v2"
 # The ACTIVE crypto action is the 15-MINUTE markets (KXBTC15M/KXETH15M) -- that's
@@ -107,13 +108,9 @@ def scan(min_edge=0.07, stake=5.0, max_close_min=90, near_pct=0.025):
                 continue
             seen.add(t)
             try:
-                ob = _get(f"/markets/{t}/orderbook").get("orderbook", {})
+                ybid, yask, nobid, _yc, _nc = best_bbo(t)
             except Exception:
                 continue
-            yes, no = ob.get("yes") or [], ob.get("no") or []
-            ybid = max([p for p, s in yes], default=None)
-            nobid = max([p for p, s in no], default=None)
-            yask = (100 - nobid) if nobid is not None else None
             if ybid is None or yask is None:
                 continue                                   # no two-sided book -> skip
             mid = (ybid + yask) / 200.0

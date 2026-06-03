@@ -15,6 +15,7 @@ from pathlib import Path
 
 from kalshi_agent.research_edge import estimate
 from kalshi_agent.hunt_kalshi import _get, maker_fee
+from kalshi_agent.dataflows.kalshi_api import best_bbo
 
 CACHE = Path(__file__).parent / "data" / "research_cache.json"
 CRYPTO_PREFIX = ("KXBTC", "KXETH", "KXSOL", "KXXRP")   # crypto is the other hunter's job
@@ -46,13 +47,11 @@ def scan(min_edge=0.07, min_conf=0.6, stake=5.0, max_research=6, ttl=1800, model
     out, researched = [], 0
     for tk in _active_event_markets():
         try:
-            ob = _get(f"/markets/{tk}/orderbook").get("orderbook", {})
+            ybid, yask, nobid, _yc, _nc = best_bbo(tk)
         except Exception:
             continue
-        yes, no = ob.get("yes") or [], ob.get("no") or []
-        if not (yes and no):
+        if ybid is None or yask is None:
             continue                                   # need a two-sided book to trade
-        ybid = max(p for p, s in yes); nobid = max(p for p, s in no); yask = 100 - nobid
         mid = (ybid + yask) / 200.0
         c = cache.get(tk)
         if c and (now_ish - c["ts"]) < ttl:

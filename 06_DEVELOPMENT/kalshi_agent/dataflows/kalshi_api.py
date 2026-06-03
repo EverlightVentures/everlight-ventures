@@ -80,8 +80,26 @@ def get_market(ticker: str) -> KalshiMarket | None:
 
 
 def get_orderbook(ticker: str) -> dict:
-    """Raw orderbook: {'yes': [[price_cents, size], ...], 'no': [...]}."""
-    return _get(f"/markets/{ticker}/orderbook").get("orderbook", {})
+    """Raw orderbook. Kalshi returns it under 'orderbook_fp' with 'yes_dollars' /
+    'no_dollars' = lists of [price_dollar_string, size]. (NOT 'orderbook'/'yes'/'no'
+    -- that older shape is empty; this was the bug that made every book look dead.)"""
+    r = _get(f"/markets/{ticker}/orderbook")
+    return r.get("orderbook_fp") or r.get("orderbook") or {}
+
+
+def best_bbo(ticker: str):
+    """Best bid/ask in CENTS from the live book, plus depth.
+    Returns (yes_bid_c, yes_ask_c, no_bid_c, yes_contracts, no_contracts).
+    A NO bid at price N == a YES ask at (100 - N), so yes_ask = 100 - best_no_bid."""
+    ob = get_orderbook(ticker)
+    yes = ob.get("yes_dollars") or []
+    no = ob.get("no_dollars") or []
+    yb = max((round(float(p) * 100) for p, s in yes), default=None)
+    nb = max((round(float(p) * 100) for p, s in no), default=None)
+    ya = (100 - nb) if nb is not None else None
+    yc = sum(float(s) for _, s in yes)
+    nc = sum(float(s) for _, s in no)
+    return yb, ya, nb, yc, nc
 
 
 def find_crypto_markets(asset="BTC", status="open", limit=50) -> list:
