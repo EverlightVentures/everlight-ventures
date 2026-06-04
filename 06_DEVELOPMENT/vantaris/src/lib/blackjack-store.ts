@@ -337,8 +337,8 @@ export const useBlackjackStore = create<BlackjackStore>()(
   showLeaderboard: false,
   showAvatarBuilder: false,
   showDealerSelect: false,
-  musicEnabled: false,
-  voiceEnabled: false,
+  musicEnabled: true,
+  voiceEnabled: true,
   autoRebet: false,
   gameMode: 'gc' as GameMode,
 
@@ -1141,8 +1141,8 @@ export const useBlackjackStore = create<BlackjackStore>()(
         return {
           ...current,
           player: mergedPlayer,
-          musicEnabled: persisted.musicEnabled ?? false,
-          voiceEnabled: persisted.voiceEnabled ?? false,
+          musicEnabled: persisted.musicEnabled ?? true,
+          voiceEnabled: persisted.voiceEnabled ?? true,
           autoRebet: persisted.autoRebet ?? false,
           gameMode: (persisted as any).gameMode ?? 'gc',
           selectedChip: persisted.selectedChip ?? 100,

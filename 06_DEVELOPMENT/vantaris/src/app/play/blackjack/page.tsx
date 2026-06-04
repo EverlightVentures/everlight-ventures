@@ -878,11 +878,15 @@ export default function BlackjackPage() {
     }
   }, [])
 
-  // Music effect (Tone.js procedural jazz)
+  // Music effect (Tone.js procedural jazz). Tone.start() only resumes audio inside
+  // a user gesture, so try immediately AND again on the first interaction so the
+  // music reliably kicks in under the browser autoplay policy.
   useEffect(() => {
-    if (store.musicEnabled) startAmbientMusic()
-    else stopAmbientMusic()
-    return () => { stopAmbientMusic() }
+    if (!store.musicEnabled) { stopAmbientMusic(); return }
+    startAmbientMusic()
+    const unlock = () => { startAmbientMusic(); window.removeEventListener('pointerdown', unlock) }
+    window.addEventListener('pointerdown', unlock)
+    return () => { window.removeEventListener('pointerdown', unlock); stopAmbientMusic() }
   }, [store.musicEnabled])
 
   // Dealer idle chatter (45-90s interval during betting)

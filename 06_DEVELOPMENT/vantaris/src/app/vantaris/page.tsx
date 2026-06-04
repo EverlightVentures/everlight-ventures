@@ -446,8 +446,8 @@ export default function LobbyPage() {
 
   return (
     <div className="min-h-screen relative" style={{ background: 'var(--vanta-void)' }}>
-      {/* Casino entry loading screen */}
-      {!casinoReady && <CasinoLoader onComplete={onLoaderComplete} />}
+      {/* Walk-in animation moved to game-select (src/app/play/layout.tsx) -- the
+          casino home no longer shows a loading screen on open. */}
 
       {/* Casino ambience video */}
       <video autoPlay muted loop playsInline className="fixed inset-0 w-full h-full object-cover pointer-events-none" style={{ opacity: 0.1, zIndex: 0 }}>

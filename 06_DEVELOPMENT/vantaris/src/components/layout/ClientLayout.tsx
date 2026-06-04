@@ -1,21 +1,17 @@
 'use client'
 
-import { useState, useCallback } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { SiteNav } from './SiteNav'
 import { SiteFooter } from './SiteFooter'
 import { PageTransition } from './PageTransition'
 import { CustomCursor } from '../shared/CustomCursor'
-import { IntroLoader } from '../shared/IntroLoader'
 import { AuthProvider } from '../shared/AuthProvider'
 
 export function ClientLayout({ children }: { children: React.ReactNode }) {
-  const [loaded, setLoaded] = useState(false)
-  const onComplete = useCallback(() => setLoaded(true), [])
-
+  // Site no longer shows a global intro loader on open. The "walking into
+  // Vantaris" animation now plays only on game-select (src/app/play/layout.tsx).
   return (
     <AuthProvider>
-      {!loaded && <IntroLoader onComplete={onComplete} />}
       <CustomCursor />
       <SiteNav />
       <AnimatePresence mode="wait">
