@@ -20,7 +20,30 @@ import {
   evaluatePerfectPairs, evaluate21Plus3, evaluateLuckyLadies,
   evaluateBadBuster, evaluateProgressive,
   generateLightning, calculateXP, createTableConfig,
+  // THE B-CARDD BET -- core is already built + unit-tested in the engine.
+  // We REUSE these; do not reimplement. Spec:
+  // 01_BUSINESSES/Everlight_Ventures/Everlight_Gaming/Blackjack/BCARDD_BET_SPEC.md
+  shouldDealBCard, makeBCard, bcardPayout,
 } from './blackjack-engine'
+
+// ============================================================
+// THE B-CARDD BET -- Phase 1 (for-fun chips, VIP/Spanish 21 table only)
+// ============================================================
+//
+// BETA_MODE: when true, shouldDealBCard() forces the B-Card every 50 cards BUT
+// ONLY for the owner account (1m.rich.gee@gmail.com) -- other testers/players see
+// the real 1-in-1,854,799 odds. The owner-email gate lives inside shouldDealBCard()
+// in the engine, so flipping this flag is safe.
+//
+// HOW TO FLIP FOR BETA TESTING:
+//   1. Set BCARD_BETA_MODE = true below (this line).
+//   2. Sign in as 1m.rich.gee@gmail.com (Supabase Google auth).
+//   3. Enter the VIP Lounge table from /vantaris/blackjack, then play.
+//   4. Every 50th card dealt to your hand becomes the B-Card -> the choice UI fires.
+//
+// PRODUCTION = leave this false. With it false, the every-50 path is never taken
+// (double-gated) and the only trigger is the genuine 1/1,854,799 RNG roll per card.
+const BCARD_BETA_MODE = true   // BETA: owner-gated (only 1m.rich.gee@gmail.com gets every-50). Flip to false for full production.
 
 // ============================================================
 // STORE TYPES
@@ -70,6 +93,15 @@ interface PlayerState {
   scPlaythroughRequired: number  // total SC that must be wagered before redemption
   scPlaythroughWagered: number   // SC wagered so far
   kycVerified: boolean           // KYC verification status
+
+  // ---- QTD average bet (B-CARDD BET payout basis) ----
+  // Phase 1: a simple per-player chip-bet average over the current quarter, computed
+  // client-side. The spec marks Gold/Sweeps-split + SERVER-AUTHORITATIVE avg as a
+  // Phase 2 requirement (immutable hand log on the edge fn). See the TODO in
+  // recordBetForQtd() below. For now we sum chip wagers + count hands this quarter.
+  qtdBetSum: number              // sum of chip bets logged this quarter
+  qtdBetCount: number            // number of chip bets logged this quarter
+  qtdQuarterKey: string          // e.g. "2026-Q2"; when it changes we reset the average
 }
 
 // Game mode: GC (social, no cash value) or SC (sweepstakes, redeemable)
@@ -149,6 +181,17 @@ interface BlackjackStore {
   autoRebet: boolean
   gameMode: GameMode  // 'gc' for social play, 'sc' for sweepstakes
 
+  // ---- THE B-CARDD BET (Phase 1, VIP/Spanish 21 table, for-fun chips) ----
+  playerEmail: string | null   // authenticated email, fed to shouldDealBCard's beta gate
+  cardsDealt: number           // running count of cards dealt this session (per-card B-Card odds)
+  bcardActive: boolean         // the player drew the B-Card this round + is choosing/has chosen
+  bcardChoice: 'take' | 'ride' | null  // which option they picked
+  bcardAvgBet: number          // QTD-average bet used as the payout basis for the current event
+  bcardPayoutAmount: number    // chips credited (or to be credited) for the current event
+  goldenHandPending: boolean   // they chose RIDE -> the NEXT hand is the Golden Hand
+  goldenHandActive: boolean    // the current round IS the Golden Hand (beat dealer for 200x)
+  goldenHandAvgBet: number     // avg-bet basis frozen at RIDE time, used for the 200x payout
+
   // Timers
   resultTimer: number | null
 
@@ -170,6 +213,10 @@ interface BlackjackStore {
   setDealerLine: (line: string) => void
   toggleSideBet: (bet: 'perfectPairs' | 'twentyOnePlus3' | 'luckyLadies' | 'progressive', amount: number) => void
   setTableVariant: (variant: string) => void
+  // THE B-CARDD BET
+  setPlayerEmail: (email: string | null) => void
+  bcardTake: () => void   // TAKE IT: auto-win current hand at 100x avg bet (chips)
+  bcardRide: () => void   // RIDE IT: B-Card plays as 8, next hand = Golden Hand (200x if you beat dealer)
 }
 
 // ============================================================
@@ -258,6 +305,96 @@ const FRESH_PLAYER: PlayerState = {
   scPlaythroughRequired: 0,
   scPlaythroughWagered: 0,
   kycVerified: false,
+  // QTD average bet (B-CARDD BET basis)
+  qtdBetSum: 0,
+  qtdBetCount: 0,
+  qtdQuarterKey: '',
+}
+
+// ============================================================
+// QTD AVERAGE BET HELPERS (B-CARDD BET payout basis)
+// ============================================================
+
+/** Calendar-quarter key, e.g. "2026-Q2". Resets the average each quarter (spec: PLAYER RATING). */
+function currentQuarterKey(d: Date = new Date()): string {
+  return `${d.getFullYear()}-Q${Math.floor(d.getMonth() / 3) + 1}`
+}
+
+/**
+ * Fold one chip bet into the player's QTD average-bet tally. Resets the tally when
+ * the calendar quarter rolls over. Returns the updated QTD fields to merge into player.
+ *
+ * Phase 1 = chip bets only (for-fun). TODO(Phase 2): move this to a server-authoritative
+ * immutable hand log on the edge fn (blackjack-api) and track Gold + Sweeps averages
+ * separately per the spec's "tracked PER CURRENCY" requirement -- the client value here
+ * is spoofable and must NOT gate any real-money (SC) payout.
+ */
+function recordBetForQtd(p: PlayerState, bet: number): Pick<PlayerState, 'qtdBetSum' | 'qtdBetCount' | 'qtdQuarterKey'> {
+  const qk = currentQuarterKey()
+  const rolledOver = p.qtdQuarterKey !== qk
+  const sum = (rolledOver ? 0 : p.qtdBetSum) + Math.max(0, bet || 0)
+  const count = (rolledOver ? 0 : p.qtdBetCount) + 1
+  return { qtdBetSum: sum, qtdBetCount: count, qtdQuarterKey: qk }
+}
+
+/**
+ * The QTD average bet used as the B-CARDD BET multiplier basis.
+ * Spec PLAYER RATING + new-player fallback: under 20 logged hands this quarter, the
+ * basis = the larger of (their average so far) or the table minimum bet, so a hand-1
+ * B-Card cannot produce a junk average.
+ */
+function qtdAvgBet(p: PlayerState, tableMinBet: number): number {
+  const MIN_HANDS = 20  // tunable threshold (spec)
+  const avgSoFar = p.qtdBetCount > 0 ? p.qtdBetSum / p.qtdBetCount : 0
+  if (p.qtdBetCount < MIN_HANDS) {
+    return Math.max(avgSoFar, tableMinBet)
+  }
+  return avgSoFar
+}
+
+// ============================================================
+// B-CARD DRAW INTERCEPT (VIP / Spanish 21 table only)
+// ============================================================
+//
+// There is no single "draw a card" function in the engine -- the store pulls cards
+// directly (shoe.pop() / shoe[0]). This helper is the ONE interception point: every
+// card drawn TO THE PLAYER on the VIP table runs through here. It keeps the running
+// cardsDealt counter, asks the engine's shouldDealBCard() per card, and swaps in
+// makeBCard() (which scores as 8 via cardValue(), so Spanish 21 eval is unaffected)
+// when the trigger fires. All other tables/draws bypass this and deal normally.
+
+interface DrawResult { card: Card; shoe: Card[]; cardsDealt: number; bcard: boolean }
+
+/**
+ * Draw the next card for a PLAYER hand on the VIP table, with B-Card interception.
+ * @param fromTop  true = shoe[0] (hit/double/split use the top); false = shoe.pop() (initial deal)
+ * Non-VIP tables must NOT call this; they keep dealing normally so nothing else changes.
+ */
+function drawPlayerCard(
+  shoe: Card[],
+  cardsDealt: number,
+  isVipTable: boolean,
+  playerEmail: string | null,
+  fromTop: boolean,
+): DrawResult {
+  const nextCount = cardsDealt + 1
+  // Only the VIP (Spanish 21) table runs the B-CARDD BET. Other tables: never inject.
+  if (isVipTable && shouldDealBCard({ betaMode: BCARD_BETA_MODE, playerEmail: playerEmail ?? undefined, cardsDealt: nextCount })) {
+    // Inject the B-Card instead of the next shoe card; the shoe is NOT consumed so
+    // the card count of the shoe is preserved (the B-Card is an overlay, not a 53rd
+    // physical card being removed from the 48-card Spanish deck).
+    return { card: makeBCard(), shoe, cardsDealt: nextCount, bcard: true }
+  }
+  const card = fromTop
+    ? { ...shoe[0], faceDown: false }
+    : { ...shoe[shoe.length - 1], faceDown: false }
+  const newShoe = fromTop ? shoe.slice(1) : shoe.slice(0, -1)
+  return { card, shoe: newShoe, cardsDealt: nextCount, bcard: false }
+}
+
+/** True when the player is sitting at the existing VIP (Spanish 21) lobby table. */
+function isVip(config: TableConfig): boolean {
+  return config.tableType === 'vip'
 }
 
 export const useBlackjackStore = create<BlackjackStore>()(
@@ -337,10 +474,21 @@ export const useBlackjackStore = create<BlackjackStore>()(
   showLeaderboard: false,
   showAvatarBuilder: false,
   showDealerSelect: false,
-  musicEnabled: false,
-  voiceEnabled: false,
+  musicEnabled: true,
+  voiceEnabled: true,
   autoRebet: false,
   gameMode: 'gc' as GameMode,
+
+  // THE B-CARDD BET (Phase 1)
+  playerEmail: null,
+  cardsDealt: 0,
+  bcardActive: false,
+  bcardChoice: null,
+  bcardAvgBet: 0,
+  bcardPayoutAmount: 0,
+  goldenHandPending: false,
+  goldenHandActive: false,
+  goldenHandAvgBet: 0,
 
   resultTimer: null,
 
@@ -393,6 +541,15 @@ export const useBlackjackStore = create<BlackjackStore>()(
     let shoe = state.shoe
     if (needsReshuffle(shoe)) shoe = createShoe(state.config.deckCount)
 
+    // ---- THE B-CARDD BET: VIP/Spanish 21 table only ----
+    // Intercept PLAYER card draws (single-seat play, the normal case) so the running
+    // cardsDealt counter + per-card 1/1,854,799 odds (or beta every-50 for the owner)
+    // can swap in the B-Card. Dealer cards + multi-seat deal normally (see TODO below).
+    const vip = isVip(state.config)
+    const singleSeat = activeSeats.length === 1
+    let cardsDealt = state.cardsDealt
+    let drewBCard = false
+
     // Deal to each active seat + dealer
     const seats = [...state.seats]
     const dealerCards: Card[] = [shoe.pop()!, shoe.pop()!]
@@ -400,7 +557,19 @@ export const useBlackjackStore = create<BlackjackStore>()(
     const dealerEvalEarly = evaluateHand(dealerCards)
 
     for (const si of activeSeats) {
-      const pCards: Card[] = [shoe.pop()!, shoe.pop()!]
+      let pCards: Card[]
+      // B-Card interception only on VIP single-seat play. TODO(Phase 2): extend the
+      // intercept to multi-seat + dealer draws once the deal moves server-side.
+      if (vip && singleSeat) {
+        const d1 = drawPlayerCard(shoe, cardsDealt, true, state.playerEmail, false)
+        shoe = d1.shoe; cardsDealt = d1.cardsDealt; if (d1.bcard) drewBCard = true
+        const d2 = drawPlayerCard(shoe, cardsDealt, true, state.playerEmail, false)
+        shoe = d2.shoe; cardsDealt = d2.cardsDealt; if (d2.bcard) drewBCard = true
+        pCards = [d1.card, d2.card]
+      } else {
+        pCards = [shoe.pop()!, shoe.pop()!]
+        if (vip) cardsDealt += 2  // still count cards on VIP multi-seat for odds continuity
+      }
       const ev = evaluateHand(pCards)
       seats[si] = {
         ...seats[si],
@@ -468,6 +637,17 @@ export const useBlackjackStore = create<BlackjackStore>()(
       ? state.player.scPlaythroughWagered + totalBet + sideBetTotal
       : state.player.scPlaythroughWagered
 
+    // QTD average-bet log (B-CARDD BET basis). Record the per-seat chip bet for each
+    // active seat this round, rolling over the quarter as needed. Phase 1: chip bets.
+    let qtd: Pick<PlayerState, 'qtdBetSum' | 'qtdBetCount' | 'qtdQuarterKey'> = {
+      qtdBetSum: state.player.qtdBetSum,
+      qtdBetCount: state.player.qtdBetCount,
+      qtdQuarterKey: state.player.qtdQuarterKey,
+    }
+    for (let i = 0; i < activeSeats.length; i++) {
+      qtd = recordBetForQtd({ ...state.player, ...qtd }, state.betAmount)
+    }
+
     set({
       phase: 'dealing',
       shoe,
@@ -477,6 +657,7 @@ export const useBlackjackStore = create<BlackjackStore>()(
       splitHand: null,
       currentSeatIndex: firstSeat,
       currentHandIndex: 0,
+      cardsDealt,
       outcome: null,
       winAmount: 0,
       xpEarned: 0,
@@ -484,7 +665,7 @@ export const useBlackjackStore = create<BlackjackStore>()(
       sideBets: seats[firstSeat].sideBets,
       lightning,
       dealQueue: [],
-      player: { ...state.player, chips: newChips, sweepsCoins: newSC, scPlaythroughWagered: newSCWagered },
+      player: { ...state.player, chips: newChips, sweepsCoins: newSC, scPlaythroughWagered: newSCWagered, ...qtd },
     })
 
     // After deal animation (~1200ms), start seat-by-seat play
@@ -492,6 +673,26 @@ export const useBlackjackStore = create<BlackjackStore>()(
       const s = get()
       const firstActive = s.activeSeatIndices[0]
       const firstSeatHand = s.seats[firstActive].hand
+
+      // ---- THE B-CARDD BET: B-Card landed in the opening deal ----
+      // Pause the hand and present TAKE IT (100x) vs RIDE IT (200x golden hand).
+      // Freeze the QTD-average-bet basis now so the displayed/credited payout is stable.
+      if (drewBCard) {
+        const basis = qtdAvgBet(s.player, s.config.minBet)
+        set({
+          phase: 'bcard_choice',
+          currentSeatIndex: firstActive,
+          mainHand: firstSeatHand,
+          splitHand: null,
+          availableActions: [],
+          bcardActive: true,
+          bcardChoice: null,
+          bcardAvgBet: basis,
+          bcardPayoutAmount: 0,
+          dealQueue: [],
+        })
+        return
+      }
 
       // Check for natural blackjack on first seat
       if (firstSeatHand.isBlackjack && s.activeSeatIndices.length === 1) {
@@ -504,18 +705,25 @@ export const useBlackjackStore = create<BlackjackStore>()(
         )
         const xp = calculateXP(settled.outcome!)
         const sbPayout = Object.values(s.seats[firstActive].sideBets).reduce((sum, sb) => sum + (sb.active ? sb.payout : 0), 0)
+        // Golden Hand bonus if this opening-BJ round was the armed Golden Hand. A
+        // natural blackjack beats the dealer (unless dealer also has BJ = push).
+        const bjBeatDealer = settled.outcome === 'blackjack'
+        const bjGoldenBonus = s.goldenHandActive ? bcardPayout(s.goldenHandAvgBet, 'ride', bjBeatDealer) : 0
+        const bjTotal = settled.payout + sbPayout + bjGoldenBonus
         set({
           phase: 'settled',
           mainHand: settled,
           dealerHand: { ...s.dealerHand, cards: s.dealerHand.cards.map(c => ({ ...c, faceDown: false })) },
           outcome: settled.outcome,
-          winAmount: settled.payout + sbPayout,
+          winAmount: bjTotal,
           xpEarned: xp,
-          seatResults: [{ seatIndex: firstActive, outcome: settled.outcome!, payout: settled.payout + sbPayout }],
+          seatResults: [{ seatIndex: firstActive, outcome: settled.outcome!, payout: bjTotal }],
+          goldenHandActive: false,
+          bcardPayoutAmount: bjGoldenBonus,
           player: {
             ...s.player,
-            chips: s.gameMode === 'sc' ? s.player.chips : s.player.chips + settled.payout + sbPayout,
-            sweepsCoins: s.gameMode === 'sc' ? s.player.sweepsCoins + settled.payout + sbPayout : s.player.sweepsCoins,
+            chips: s.gameMode === 'sc' ? s.player.chips : s.player.chips + bjTotal,
+            sweepsCoins: s.gameMode === 'sc' ? s.player.sweepsCoins + bjTotal : s.player.sweepsCoins,
             xp: s.player.xp + xp,
             handsPlayed: s.player.handsPlayed + 1,
             handsWon: s.player.handsWon + 1,
@@ -550,7 +758,25 @@ export const useBlackjackStore = create<BlackjackStore>()(
     const isMainHand = state.currentHandIndex === 0
     const currentHand = isMainHand ? state.mainHand : state.splitHand!
 
-    const result = hit(currentHand, state.shoe)
+    // ---- THE B-CARDD BET: intercept the hit draw on VIP single-seat play ----
+    // We keep the tested engine hit() untouched -- if the B-Card should fire, we
+    // prepend it to the shoe so hit() draws it as shoe[0] (it scores as 8). After the
+    // hit, we detect the B-Card on the new card and pause into the choice UI.
+    const vip = isVip(state.config)
+    const singleSeat = state.activeSeatIndices.length === 1
+    let workingShoe = state.shoe
+    let newCardsDealt = state.cardsDealt
+    let injectedBCard = false
+    if (vip && singleSeat && !state.splitHand) {
+      const d = drawPlayerCard(state.shoe, state.cardsDealt, true, state.playerEmail, true)
+      newCardsDealt = d.cardsDealt
+      if (d.bcard) {
+        workingShoe = [d.card, ...state.shoe]  // hit() will draw the B-Card first; shoe not consumed
+        injectedBCard = true
+      }
+    }
+
+    const result = hit(currentHand, workingShoe)
 
     // Sync to seats array so card display updates
     const seats = [...state.seats]
@@ -565,12 +791,30 @@ export const useBlackjackStore = create<BlackjackStore>()(
     const update: Partial<BlackjackStore> = {
       shoe: result.shoe,
       seats: seats as any,
+      cardsDealt: newCardsDealt,
     }
 
     if (isMainHand) {
       update.mainHand = result.hand
     } else {
       update.splitHand = result.hand
+    }
+
+    // ---- THE B-CARDD BET: the hit drew the B-Card -> pause for the choice ----
+    // The B-Card is now in the hand (as an 8). Even if that 8 happens to bust the
+    // hand, the player still gets the optional jackpot choice before settling.
+    if (injectedBCard) {
+      const basis = qtdAvgBet(state.player, state.config.minBet)
+      set({
+        ...(update as any),
+        phase: 'bcard_choice',
+        availableActions: [],
+        bcardActive: true,
+        bcardChoice: null,
+        bcardAvgBet: basis,
+        bcardPayoutAmount: 0,
+      })
+      return
     }
 
     if (result.autoBust) {
@@ -812,28 +1056,42 @@ export const useBlackjackStore = create<BlackjackStore>()(
           || results.find(r => r.outcome === 'push')?.outcome
           || results[0]?.outcome || 'loss'
 
+        // ---- THE B-CARDD BET: Golden Hand resolution (RIDE IT, 200x) ----
+        // If this round was armed as the Golden Hand, the player collects 200x their
+        // (frozen) avg bet ONLY if they beat the dealer (win/blackjack/charlie). Push,
+        // loss, or bust = 0 (the gambled-away guaranteed 100x is gone). Chips only.
+        let goldenBonus = 0
+        if (s2.goldenHandActive) {
+          const beatDealer = handsWon > 0  // any active seat that won = beat the dealer
+          goldenBonus = bcardPayout(s2.goldenHandAvgBet, 'ride', beatDealer)  // 200x, capped 888
+        }
+        const grandPayout = totalPayout + goldenBonus
+
         set({
           phase: 'settled',
           seats: allSeats,
           mainHand: allSeats[s2.activeSeatIndices[0]].hand,
           splitHand: allSeats[s2.activeSeatIndices[0]].splitHand,
           outcome: primaryOutcome,
-          winAmount: totalPayout,
+          winAmount: grandPayout,
           xpEarned: totalXp,
           seatResults: results,
           dealerDrawQueue: [],
+          // Golden Hand consumed this round; surface the bonus for the UI.
+          goldenHandActive: false,
+          bcardPayoutAmount: goldenBonus,
           player: {
             ...s2.player,
-            // Add winnings to correct currency based on game mode
-            chips: s2.gameMode === 'sc' ? s2.player.chips : s2.player.chips + totalPayout,
-            sweepsCoins: s2.gameMode === 'sc' ? s2.player.sweepsCoins + totalPayout : s2.player.sweepsCoins,
+            // Add winnings to correct currency based on game mode (+ any golden bonus)
+            chips: s2.gameMode === 'sc' ? s2.player.chips : s2.player.chips + grandPayout,
+            sweepsCoins: s2.gameMode === 'sc' ? s2.player.sweepsCoins + grandPayout : s2.player.sweepsCoins,
             xp: s2.player.xp + totalXp,
             handsPlayed: s2.player.handsPlayed + s2.activeSeatIndices.length,
             handsWon: s2.player.handsWon + handsWon,
             blackjacks: s2.player.blackjacks + bjCount,
             currentStreak: handsWon > 0 ? s2.player.currentStreak + 1 : 0,
             bestStreak: handsWon > 0 ? Math.max(s2.player.bestStreak, s2.player.currentStreak + 1) : s2.player.bestStreak,
-            biggestWin: Math.max(s2.player.biggestWin, totalPayout),
+            biggestWin: Math.max(s2.player.biggestWin, grandPayout),
           },
         })
       }, totalDrawTime)
@@ -1022,6 +1280,11 @@ export const useBlackjackStore = create<BlackjackStore>()(
       ...createEmptySeat(s.index, s.active),
     }))
 
+    // ---- THE B-CARDD BET: promote a pending Golden Hand into the upcoming round ----
+    // If the player chose RIDE IT last round, THIS new round is the Golden Hand:
+    // play it normally at the current bet; beat the dealer for the 200x payout.
+    const goldenHandActive = state.goldenHandPending
+
     set({
       phase: 'betting',
       shoe,
@@ -1041,6 +1304,13 @@ export const useBlackjackStore = create<BlackjackStore>()(
       xpEarned: 0,
       seatResults: [],
       betAmount: state.autoRebet ? state.betAmount : state.selectedChip,
+      // B-Card per-round flags reset; Golden Hand status carried forward once.
+      bcardActive: false,
+      bcardChoice: null,
+      bcardAvgBet: 0,
+      bcardPayoutAmount: 0,
+      goldenHandPending: false,
+      goldenHandActive,
     })
   },
 
@@ -1104,6 +1374,86 @@ export const useBlackjackStore = create<BlackjackStore>()(
       lightning: { ...EMPTY_LIGHTNING },
     })
   },
+
+  // ============================================================
+  // THE B-CARDD BET ACTIONS
+  // ============================================================
+
+  setPlayerEmail: (email) => set({ playerEmail: email }),
+
+  // TAKE IT: guaranteed auto-WIN of the current hand at 100x the QTD average bet.
+  // Resolve immediately, credit bcardPayout(avgBet, 'take') in CHIPS (capped at 888).
+  bcardTake: () => {
+    const state = get()
+    if (state.phase !== 'bcard_choice') return
+    const jackpot = bcardPayout(state.bcardAvgBet, 'take')  // 100x, capped at 888
+    // "House-staked, player risks nothing": return their staked bet (deducted at deal)
+    // on top of the jackpot, since the hand auto-wins.
+    const payout = jackpot + state.mainHand.bet
+    const reveal = { ...state.dealerHand, cards: state.dealerHand.cards.map(c => ({ ...c, faceDown: false })) }
+    const wonHand: HandState = { ...state.mainHand, outcome: 'win', payout }
+    const seats = [...state.seats]
+    seats[state.currentSeatIndex] = { ...seats[state.currentSeatIndex], hand: wonHand, outcome: 'win', payout }
+
+    set({
+      phase: 'settled',
+      mainHand: wonHand,
+      dealerHand: reveal,
+      seats,
+      outcome: 'win',
+      winAmount: payout,
+      xpEarned: calculateXP('win'),
+      seatResults: [{ seatIndex: state.currentSeatIndex, outcome: 'win', payout }],
+      bcardActive: true,
+      bcardChoice: 'take',
+      bcardPayoutAmount: jackpot,
+      // Phase 1 = chips only. TODO(Phase 2): pay SC in sweeps mode + log via edge fn
+      // bcard-resolve (server-authoritative avg bet + 888 cap on the redeemable side).
+      player: {
+        ...state.player,
+        chips: state.gameMode === 'sc' ? state.player.chips : state.player.chips + payout,
+        sweepsCoins: state.gameMode === 'sc' ? state.player.sweepsCoins + payout : state.player.sweepsCoins,
+        xp: state.player.xp + calculateXP('win'),
+        handsPlayed: state.player.handsPlayed + 1,
+        handsWon: state.player.handsWon + 1,
+        currentStreak: state.player.currentStreak + 1,
+        bestStreak: Math.max(state.player.bestStreak, state.player.currentStreak + 1),
+        biggestWin: Math.max(state.player.biggestWin, payout),
+      },
+    })
+  },
+
+  // RIDE IT: the B-Card stays as the 8 in the current hand; the player keeps playing
+  // at their current bet. The NEXT hand becomes the Golden Hand (200x if they beat the
+  // dealer). Freeze the avg-bet basis NOW so the 200x is computed off this quarter.
+  bcardRide: () => {
+    const state = get()
+    if (state.phase !== 'bcard_choice') return
+    // Arm the Golden Hand for the NEXT round and freeze the avg-bet basis now.
+    const dealerUpcard = state.dealerHand.cards[0]
+    const handEval = evaluateHand(state.mainHand.cards)
+    set({
+      bcardActive: true,
+      bcardChoice: 'ride',
+      goldenHandPending: true,
+      goldenHandAvgBet: state.bcardAvgBet,
+    })
+    // Resume normal play of the current hand (the B-Card already sits in it as an 8).
+    if (handEval.isBust || handEval.isCharlie) {
+      // The B-Card 8 ended the hand -> settle this round, Golden Hand still armed.
+      const busted = handEval.isBust
+      const seats = [...state.seats]
+      seats[state.currentSeatIndex] = {
+        ...seats[state.currentSeatIndex],
+        hand: { ...state.mainHand, outcome: busted ? 'bust' : 'charlie', payout: busted ? 0 : state.mainHand.bet * 2 },
+      }
+      set({ seats, mainHand: seats[state.currentSeatIndex].hand, phase: 'player_turn' })
+      setTimeout(() => get().playerStand(), 100)
+      return
+    }
+    const actions = getAvailableActions(state.mainHand, state.config, state.player.chips, dealerUpcard, !!state.splitHand)
+    set({ phase: 'player_turn', availableActions: actions })
+  },
 }),
     {
       name: 'vantaris-player',
@@ -1141,8 +1491,8 @@ export const useBlackjackStore = create<BlackjackStore>()(
         return {
           ...current,
           player: mergedPlayer,
-          musicEnabled: persisted.musicEnabled ?? false,
-          voiceEnabled: persisted.voiceEnabled ?? false,
+          musicEnabled: persisted.musicEnabled ?? true,
+          voiceEnabled: persisted.voiceEnabled ?? true,
           autoRebet: persisted.autoRebet ?? false,
           gameMode: (persisted as any).gameMode ?? 'gc',
           selectedChip: persisted.selectedChip ?? 100,

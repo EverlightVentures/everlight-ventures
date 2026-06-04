@@ -8,9 +8,11 @@ import {
   WinParticles, XPBar, AchievementPopup, VantarisBoutique,
   GemStore, FreeChips, AvatarBuilder, DEFAULT_AVATAR,
   PlayerProfilePanel, Leaderboard, CasinoScene3D,
-  BotPlayers, ToastContainer, DealerAvatar,
+  BotPlayers, ToastContainer, DealerAvatar, DealerStage,
   WelcomeScreen, isNewPlayer, EmojiReactions, DealerChat, BettingLayout, SocialBar,
+  BCardOverlay, GoldenHandBanner,
 } from '@/components/blackjack'
+import { supabase } from '@/lib/supabase'
 import type { Achievement, AvatarConfig, SeatPosition } from '@/components/blackjack'
 import type { Card as CardData } from '@/lib/blackjack-engine'
 import { Natural21Overlay } from '@/components/blackjack/Natural21'
@@ -254,7 +256,7 @@ async function speakLine(text: string, voiceId: string) {
     const audio = new Audio(URL.createObjectURL(SPEECH_CACHE.get(cacheKey)!))
     audio.volume = 0.7
     audio.onended = () => useBlackjackStore.setState({ speaking: false })
-    await audio.play()
+    await audio.play().catch(() => useBlackjackStore.setState({ speaking: false }))
     return
   }
 
@@ -271,7 +273,7 @@ async function speakLine(text: string, voiceId: string) {
       const audio = new Audio(URL.createObjectURL(blob))
       audio.volume = 0.7
       audio.onended = () => useBlackjackStore.setState({ speaking: false })
-      await audio.play()
+      await audio.play().catch(() => useBlackjackStore.setState({ speaking: false }))
       return
     }
   } catch {
@@ -282,16 +284,23 @@ async function speakLine(text: string, voiceId: string) {
     window.speechSynthesis.cancel() // cancel any pending speech
     const utter = new SpeechSynthesisUtterance(text)
     utter.rate = 0.88
-    utter.pitch = 0.85
     utter.volume = 0.85
     utter.onend = () => useBlackjackStore.setState({ speaking: false })
     utter.onerror = () => useBlackjackStore.setState({ speaking: false })
-    // Try to find a good voice
+    // Match the dealer's gender. Aria/Kanisha are female; Marcus/Bacardi are male.
+    // Browser default voices skew female, which made the male dealers (esp. Bacardi
+    // = Sean) sound wrong whenever the ElevenLabs voice was momentarily unavailable.
+    const FEMALE_VOICE_IDS = new Set(['EXAVITQu4vr4xnSDxMaL', 'XrExE9yKIg1WjnnlVkGX'])
+    const wantMale = !FEMALE_VOICE_IDS.has(voiceId)
     const voices = window.speechSynthesis.getVoices()
-    const preferred = voices.find(v => v.name.includes('Google') && v.lang.startsWith('en'))
-      || voices.find(v => v.lang.startsWith('en-US'))
-      || voices.find(v => v.lang.startsWith('en'))
+    const en = voices.filter(v => v.lang.toLowerCase().startsWith('en'))
+    const femaleRe = /samantha|victoria|karen|moira|tessa|fiona|zira|susan|catherine|serena|allison|nicky|female|google us english$/i
+    const maleRe = /daniel|alex|david|fred|aaron|arthur|oliver|rishi|gordon|male|google uk english male/i
+    const preferred = wantMale
+      ? (en.find(v => maleRe.test(v.name)) || en.find(v => !femaleRe.test(v.name)) || en[0])
+      : (en.find(v => femaleRe.test(v.name)) || en.find(v => v.name.includes('Google')) || en[0])
     if (preferred) utter.voice = preferred
+    utter.pitch = wantMale ? 0.8 : 0.95
     window.speechSynthesis.speak(utter)
   } else {
     setTimeout(() => useBlackjackStore.setState({ speaking: false }), 2000)
@@ -485,7 +494,7 @@ function Hand({ cards, label, active, showValue, skinId }: {
 // ============================================================
 
 function DealerPanel() {
-  const { activeDealer, dealerLine, speaking, showDealerSelect, togglePanel, setDealer } = useBlackjackStore()
+  const { activeDealer, dealerLine, showDealerSelect, togglePanel, setDealer } = useBlackjackStore()
 
   // Use the store's DEFAULT_DEALERS as single source of truth for voice IDs
   const dealers = [
@@ -504,7 +513,7 @@ function DealerPanel() {
         initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
       >
         <div className="flex-shrink-0">
-          <DealerAvatar dealerId={activeDealer.id} color={activeDealer.color} speaking={speaking} size={48} />
+          <DealerStage size={72} />
         </div>
         <div className="min-w-0">
           <p className="text-xs font-semibold" style={{ color: activeDealer.color, fontFamily: "'Cinzel', serif" }}>
@@ -550,8 +559,11 @@ function DealerPanel() {
 // ============================================================
 
 function OutcomeOverlay() {
-  const { outcome, winAmount, player, lightning } = useBlackjackStore()
+  const { outcome, winAmount, player, lightning, bcardChoice, bcardPayoutAmount, goldenHandActive } = useBlackjackStore()
   if (!outcome) return null
+
+  // THE B-CARDD BET: a TAKE IT win, or a Golden Hand that paid the 200x bonus.
+  const bcardHit = (bcardChoice === 'take' || goldenHandActive) && bcardPayoutAmount > 0
 
   const config: Record<string, { text: string; color: string; glow: string }> = {
     blackjack: { text: 'BLACKJACK', color: 'var(--gold)', glow: 'rgba(201,168,76,0.3)' },
@@ -576,6 +588,15 @@ function OutcomeOverlay() {
       style={{ background: `radial-gradient(circle, ${c.glow}, transparent 70%)` }}
     >
       <div className="text-center">
+        {bcardHit && (
+          <motion.p
+            initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
+            className="text-sm font-black mb-2 tracking-widest"
+            style={{ color: 'var(--gold)', fontFamily: "'Cinzel', serif" }}
+          >
+            {bcardChoice === 'take' ? 'THE B-CARDD BET' : 'GOLDEN HAND'}
+          </motion.p>
+        )}
         {lightning.active && lightning.multipliedTotal && isWin && (
           <motion.p
             initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
@@ -831,6 +852,18 @@ export default function BlackjackPage() {
   // SSR guard -- nothing renders until client-side mount
   useEffect(() => { setMounted(true) }, [])
 
+  // THE B-CARDD BET: feed the authenticated email into the store so shouldDealBCard()'s
+  // beta gate (owner-only every-50-cards) can resolve. Falls back to null (real odds).
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      useBlackjackStore.getState().setPlayerEmail(session?.user?.email ?? null)
+    }).catch(() => {})
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      useBlackjackStore.getState().setPlayerEmail(session?.user?.email ?? null)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
   // Check localStorage on mount only (avoids SSR hydration mismatch)
   useEffect(() => {
     if (isNewPlayer()) setShowWelcome(true)
@@ -871,11 +904,15 @@ export default function BlackjackPage() {
     }
   }, [])
 
-  // Music effect (Tone.js procedural jazz)
+  // Music effect (Tone.js procedural jazz). Tone.start() only resumes audio inside
+  // a user gesture, so try immediately AND again on the first interaction so the
+  // music reliably kicks in under the browser autoplay policy.
   useEffect(() => {
-    if (store.musicEnabled) startAmbientMusic()
-    else stopAmbientMusic()
-    return () => { stopAmbientMusic() }
+    if (!store.musicEnabled) { stopAmbientMusic(); return }
+    startAmbientMusic()
+    const unlock = () => { startAmbientMusic(); window.removeEventListener('pointerdown', unlock) }
+    window.addEventListener('pointerdown', unlock)
+    return () => { window.removeEventListener('pointerdown', unlock); stopAmbientMusic() }
   }, [store.musicEnabled])
 
   // Dealer idle chatter (45-90s interval during betting)
@@ -956,14 +993,20 @@ export default function BlackjackPage() {
     // Narrate per-seat results
     narrateResults()
 
-    // Sync hand result to Django backend (no-op in dev)
+    // Sync hand result to Django backend (no-op in dev). Log the B-CARDD BET payout
+    // through the existing event path as a side-bet-style entry so it is auditable.
+    // TODO(Phase 2): route B-Card resolution through the edge fn `bcard-resolve` action
+    // (server-authoritative avg bet + payout + immutable ledger) per the spec SECURITY
+    // section -- the client value here must NOT gate any real-money (SC) payout.
     syncHandResult({
       outcome: store.outcome || 'loss',
       player_total: store.mainHand.value,
       dealer_total: store.dealerHand.value,
       bet: store.mainHand.bet,
       payout: store.winAmount,
-      side_bets: {},
+      side_bets: store.bcardPayoutAmount > 0
+        ? { bcardd_bet: store.bcardPayoutAmount }
+        : {},
     })
 
     const moodLine = postHandSettle()
@@ -1055,17 +1098,9 @@ export default function BlackjackPage() {
   // player ranks up. Tune the rank -> video map; unknown ranks use the default.
   // Available clips: casino-entry, casino-lobby, vip-penthouse, crystal-loop.
   const SCENE_BY_RANK: Record<string, string> = {
-    Bronze: '/videos/casino-entry.mp4',
-    Silver: '/videos/casino-entry.mp4',
-    Gold: '/videos/casino-lobby.mp4',
-    Platinum: '/videos/casino-lobby.mp4',
-    Diamond: '/videos/vip-penthouse.mp4',
-    Legend: '/videos/vip-penthouse.mp4',
-    Ember: '/videos/vip-penthouse.mp4',
-    Shadow: '/videos/crystal-loop.mp4',
-    Eclipse: '/videos/crystal-loop.mp4',
-    Supernova: '/videos/crystal-loop.mp4',
-    'Vanta Black': '/videos/crystal-loop.mp4',
+    // vip-penthouse.mp4 (the made-for-blackjack background) is the default for
+    // EVERY rank. Add rank -> clip entries here as per-level scenes get made,
+    // e.g. 'Supernova': '/videos/crystal-loop.mp4'.
   }
   const bgScene = SCENE_BY_RANK[store.player.rank] || '/videos/vip-penthouse.mp4'
 
@@ -1095,11 +1130,11 @@ export default function BlackjackPage() {
         <video key={bgScene} autoPlay muted playsInline
           className="w-full h-full object-cover"
           style={{ opacity: 'var(--window-video-opacity, 0.9)' }}
-          onEnded={(e) => {
-            // Pin to the last (skyline) frame; do not blank or restart.
+          onTimeUpdate={(e) => {
+            // Play in, then freeze on the CLEAREST frame (~2.15s) instead of the end.
             const v = e.currentTarget
-            v.pause()
-            try { if (v.duration) v.currentTime = Math.max(0, v.duration - 0.05) } catch {}
+            const FREEZE_AT = 2.15
+            if (v.currentTime >= FREEZE_AT) { v.pause(); v.currentTime = FREEZE_AT }
           }}>
           <source src={bgScene} type="video/mp4" />
         </video>
@@ -1117,6 +1152,9 @@ export default function BlackjackPage() {
 
       {/* Natural 21 video celebration */}
       <Natural21Overlay show={showNatural21} onDone={() => setShowNatural21(false)} />
+
+      {/* THE B-CARDD BET -- optional jackpot choice (renders only on phase bcard_choice) */}
+      <BCardOverlay />
 
       {/* === TOP BAR === */}
       <div className="flex items-center justify-between px-2 md:px-6 py-2 md:py-2.5 border-b relative z-20"
@@ -1140,6 +1178,7 @@ export default function BlackjackPage() {
                   className="absolute top-full left-0 mt-2 z-50 glass-elevated rounded-xl p-2 w-[180px] space-y-0.5">
                   {[
                     { label: 'Lobby', href: '/lobby', icon: '\u2605' },
+                    { label: 'Play with Friends', href: '/tables', icon: '\u2663' },
                     { label: 'Wallet', href: '/wallet', icon: '\u2668' },
                     { label: 'Rewards', href: '/rewards', icon: '\u2B50' },
                     { label: 'Profile', href: '/profile', icon: '\u263A' },
@@ -1336,6 +1375,9 @@ export default function BlackjackPage() {
 
         {/* Dealer panel -- centered on table */}
         <DealerPanel />
+
+        {/* THE B-CARDD BET -- Golden Hand banner (the hand after a RIDE IT) */}
+        <GoldenHandBanner />
 
         {/* Presence indicator (top left) */}
         {/* Presence indicator -- hidden on very small mobile */}

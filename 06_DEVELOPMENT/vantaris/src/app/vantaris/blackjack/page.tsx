@@ -95,6 +95,9 @@ export default function BlackjackTablesPage() {
           ...useBlackjackStore.getState().config,
           minBet: table.minBet,
           maxBet: table.maxBet,
+          // Carry the lobby table identity into the play screen. THE B-CARDD BET only
+          // fires when tableType === 'vip' (the existing VIP Lounge / Spanish 21 table).
+          tableType: table.id,
         },
       })
       if (table.feltColor) {
