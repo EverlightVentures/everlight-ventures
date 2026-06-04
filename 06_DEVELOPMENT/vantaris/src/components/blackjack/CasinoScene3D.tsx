@@ -580,7 +580,9 @@ export function CasinoScene3D({ onSeatPositions, feltColor = '#0d5c2e' }: { onSe
           fov: 50,
           near: 0.1,
           far: 200,
-          position: [0, 5.5, 7.5],
+          // Seated-player POV: lower the camera so you look ACROSS the felt and out
+          // the window, instead of down at the table. Tune y (height) / z (distance).
+          position: [0, 3.6, 8.2],
         }}
         style={{ background: 'transparent' }}
       >

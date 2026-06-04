@@ -136,24 +136,16 @@ export function SocialBar({ seatPositions }: { seatPositions: SeatPosition[] }) 
           {/* Quick emoji button */}
           <motion.button
             onClick={() => { setShowEmojis(!showEmojis); setShowGifts(false) }}
-            className="w-9 h-9 rounded-full flex items-center justify-center"
-            style={{
-              background: showEmojis ? 'rgba(201,168,76,0.2)' : 'rgba(0,0,0,0.6)',
-              border: `1px solid ${showEmojis ? 'rgba(201,168,76,0.4)' : 'rgba(255,255,255,0.1)'}`,
-            }}
+            className={`social-btn${showEmojis ? ' active' : ''}`}
             whileTap={{ scale: 0.85 }}
           >
-            <span className="text-base">{'\uD83D\uDE00'}</span>
+            <span className="text-lg">{'\uD83D\uDE00'}</span>
           </motion.button>
 
           {/* Gift button */}
           <motion.button
             onClick={() => { setShowGifts(!showGifts); setShowEmojis(false) }}
-            className="w-9 h-9 rounded-full flex items-center justify-center"
-            style={{
-              background: showGifts ? 'rgba(201,168,76,0.2)' : 'rgba(0,0,0,0.6)',
-              border: `1px solid ${showGifts ? 'rgba(201,168,76,0.4)' : 'rgba(255,255,255,0.1)'}`,
-            }}
+            className={`social-btn${showGifts ? ' active' : ''}`}
             whileTap={{ scale: 0.85 }}
           >
             <span className="text-base">{'\uD83C\uDF81'}</span>
@@ -166,8 +158,7 @@ export function SocialBar({ seatPositions }: { seatPositions: SeatPosition[] }) 
               const chatBtn = document.querySelector('[data-chat-toggle]') as HTMLButtonElement
               chatBtn?.click()
             }}
-            className="w-9 h-9 rounded-full flex items-center justify-center"
-            style={{ background: 'rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.1)' }}
+            className="social-btn"
             whileTap={{ scale: 0.85 }}
           >
             <span className="text-base">{'\uD83D\uDCAC'}</span>
@@ -181,13 +172,12 @@ export function SocialBar({ seatPositions }: { seatPositions: SeatPosition[] }) 
               initial={{ opacity: 0, y: 8, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.9 }}
-              className="flex gap-1 mt-2 px-2 py-1.5 rounded-xl"
-              style={{ background: 'rgba(0,0,0,0.85)', border: '1px solid rgba(255,255,255,0.1)' }}
+              className="social-panel flex gap-1 mt-2 px-2 py-1.5"
             >
               {QUICK_EMOJIS.map(e => (
                 <motion.button key={e.label}
                   onClick={() => sendEmoji(e.emoji)}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-lg hover:bg-white/10"
+                  className="emote-btn w-9 h-9 flex items-center justify-center text-xl"
                   whileTap={{ scale: 0.8 }}
                 >
                   {e.emoji}
@@ -204,8 +194,7 @@ export function SocialBar({ seatPositions }: { seatPositions: SeatPosition[] }) 
               initial={{ opacity: 0, y: 8, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 8, scale: 0.9 }}
-              className="mt-2 p-2 rounded-xl w-[220px]"
-              style={{ background: 'rgba(0,0,0,0.9)', border: '1px solid rgba(201,168,76,0.2)' }}
+              className="social-panel mt-2 p-2.5 w-[234px]"
             >
               {targetSeat === null ? (
                 <>
@@ -239,17 +228,17 @@ export function SocialBar({ seatPositions }: { seatPositions: SeatPosition[] }) 
                     {GIFTS.map(g => (
                       <motion.button key={g.id}
                         onClick={() => sendGift(g, targetSeat)}
-                        className="flex flex-col items-center p-1.5 rounded-lg"
+                        className={`gift-tile flex flex-col items-center gap-0.5 p-1.5${g.troll ? ' troll' : ''}`}
                         style={{
                           background: g.troll ? 'rgba(255,45,85,0.08)' : 'rgba(201,168,76,0.08)',
-                          border: `1px solid ${g.troll ? 'rgba(255,45,85,0.15)' : 'rgba(201,168,76,0.15)'}`,
+                          border: `1px solid ${g.troll ? 'rgba(255,45,85,0.18)' : 'rgba(201,168,76,0.18)'}`,
                           opacity: player.chips >= g.cost ? 1 : 0.3,
                         }}
                         whileTap={{ scale: 0.85 }}
                         disabled={player.chips < g.cost}
                       >
-                        <span className="text-lg">{g.emoji}</span>
-                        <span className="text-[6px]" style={{ color: 'var(--text-tertiary)' }}>{g.cost}</span>
+                        <span className="text-xl">{g.emoji}</span>
+                        <span className="gift-cost text-[7px]">{g.cost}</span>
                       </motion.button>
                     ))}
                   </div>

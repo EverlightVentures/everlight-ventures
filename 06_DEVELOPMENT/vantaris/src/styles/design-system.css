@@ -35,8 +35,8 @@
   /* === BLACKJACK WINDOW / SCENE (tune the framed video pane here) === */
   --wall-color: #050507;          /* solid room wall behind the window */
   --window-top: 6%;               /* window position + size (behind the dealer) */
-  --window-left: 12%;
-  --window-width: 76%;
+  --window-left: 7%;              /* widened: kept centered (7% + 86% + 7%) */
+  --window-width: 86%;
   --window-height: 40%;
   --window-frame-color: #1a1410;  /* molding / frame */
   --window-frame-width: 8px;
@@ -463,3 +463,100 @@ body {
   pointer-events: none;
   z-index: var(--z-max);
 }
+
+/* ============================================================
+   PREMIUM BETTING CHIPS (chip-restyle brief) -- chips only.
+   Everything scales from --cs (chip diameter) set on each chip.
+   ============================================================ */
+.chip{
+  --body:#cf4747; --body-d:#7e1e1e; --spot:#f7eaea;
+  position:relative; width:var(--cs,64px); height:var(--cs,64px); border-radius:50%;
+  cursor:pointer; flex:none; border:0; padding:0;
+  background:
+    radial-gradient(circle at 38% 26%, rgba(255,255,255,.5), rgba(255,255,255,0) 40%),
+    radial-gradient(circle at 50% 118%, rgba(0,0,0,.45), transparent 52%),
+    radial-gradient(circle at 50% 46%, var(--body) 0%, var(--body-d) 84%);
+  animation:chipBeat 6s ease-in-out infinite;
+  transition:transform .25s cubic-bezier(.34,1.56,.64,1);
+  will-change:box-shadow,filter,transform;
+}
+.chip::before{content:"";position:absolute;inset:0;border-radius:50%;
+  background:repeating-conic-gradient(from 9deg,var(--spot) 0 12deg,transparent 12deg 36deg);
+  -webkit-mask:radial-gradient(circle,transparent 0 62%,#000 63% 86%,transparent 87%);
+          mask:radial-gradient(circle,transparent 0 62%,#000 63% 86%,transparent 87%);opacity:.95;}
+.chip .face{position:absolute;inset:20%;border-radius:50%;display:grid;place-items:center;
+  text-align:center;line-height:.9;border:calc(var(--cs,64px)*.026) solid rgba(255,255,255,.45);
+  background:radial-gradient(circle at 50% 34%,rgba(255,255,255,.2),rgba(0,0,0,.18));
+  box-shadow:inset 0 calc(var(--cs,64px)*.025) calc(var(--cs,64px)*.06) rgba(0,0,0,.35),
+             inset 0 calc(var(--cs,64px)*-.02) calc(var(--cs,64px)*.05) rgba(255,255,255,.25);}
+.chip .v{font-weight:600;color:#fff;font-size:calc(var(--cs,64px)*.31);
+  text-shadow:0 calc(var(--cs,64px)*.012) calc(var(--cs,64px)*.03) rgba(0,0,0,.65);}
+.chip .u{font-weight:400;font-size:calc(var(--cs,64px)*.13);letter-spacing:.18em;color:rgba(255,255,255,.72);}
+.chip:hover{transform:translateY(calc(var(--cs,64px)*-.12)) scale(1.05);}
+.chip.sel{transform:translateY(calc(var(--cs,64px)*-.18)) scale(1.08);animation:chipBeatSel 5s ease-in-out infinite;}
+
+.c10 {--body:#cf4747;--body-d:#7e1e1e;--spot:#f7eaea;}
+.c25 {--body:#33a972;--body-d:#175538;--spot:#ebf7f0;}
+.c100{--body:#4185db;--body-d:#1c4882;--spot:#eaf1fb;}
+.c500{--body:#a274d8;--body-d:#553285;--spot:#f2ebfb;}
+.c1k {--body:#d4ab52;--body-d:#735417;--spot:#1c1408;}
+.c1k .v,.c1k .u{color:#1c1408;text-shadow:0 calc(var(--cs,64px)*.012) calc(var(--cs,64px)*.012) rgba(255,255,255,.35);}
+.c1k .face{border-color:rgba(28,20,8,.5);}
+.c5k {--body:#1a1a1a;--body-d:#000;--spot:#c9a84c;}
+.c5k .v,.c5k .u{color:#c9a84c;}
+.c5k .face{border-color:rgba(201,168,76,.45);}
+
+@keyframes chipBeat{
+  0%,100%{box-shadow:
+    0 calc(var(--cs,64px)*.13) calc(var(--cs,64px)*.22) rgba(0,0,0,.55),
+    0 0 0 calc(var(--cs,64px)*.022) rgba(255,205,130,.4),
+    0 0 calc(var(--cs,64px)*.16) calc(var(--cs,64px)*.02) rgba(255,191,105,.26);
+    filter:brightness(.98) saturate(.97);}
+  50%{box-shadow:
+    0 calc(var(--cs,64px)*.13) calc(var(--cs,64px)*.22) rgba(0,0,0,.55),
+    0 0 0 calc(var(--cs,64px)*.028) rgba(255,212,145,.7),
+    0 0 calc(var(--cs,64px)*.46) calc(var(--cs,64px)*.1) rgba(255,191,105,.58);
+    filter:brightness(1.06) saturate(1.08);}
+}
+@keyframes chipBeatSel{
+  0%,100%{box-shadow:
+    0 calc(var(--cs,64px)*.18) calc(var(--cs,64px)*.3) rgba(0,0,0,.6),
+    0 0 0 calc(var(--cs,64px)*.03) rgba(255,210,140,.6),
+    0 0 calc(var(--cs,64px)*.24) calc(var(--cs,64px)*.04) rgba(255,191,105,.45);
+    filter:brightness(1) saturate(1.04);}
+  50%{box-shadow:
+    0 calc(var(--cs,64px)*.18) calc(var(--cs,64px)*.3) rgba(0,0,0,.6),
+    0 0 0 calc(var(--cs,64px)*.036) rgba(255,224,160,.9),
+    0 0 calc(var(--cs,64px)*.62) calc(var(--cs,64px)*.15) rgba(255,191,105,.85),
+    0 0 calc(var(--cs,64px)*.28) calc(var(--cs,64px)*.06) rgba(255,150,60,.4);
+    filter:brightness(1.1) saturate(1.16);}
+}
+@media (prefers-reduced-motion:reduce){.chip{animation:none;}}
+
+/* ============================================================
+   SOCIAL BAR (emote / gift / troll / chat) -- premium glass to
+   match the chips + window. Styling only; handlers untouched.
+   ============================================================ */
+.social-btn{
+  width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(160deg, rgba(42,34,18,.85), rgba(10,10,16,.92));
+  border:1px solid rgba(201,168,76,.35);
+  box-shadow:0 4px 14px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.08), 0 0 14px rgba(201,168,76,.12);
+  backdrop-filter:blur(6px);transition:transform .2s, box-shadow .3s, border-color .3s;
+}
+.social-btn:hover{transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.55), 0 0 20px rgba(201,168,76,.32);}
+.social-btn.active{border-color:rgba(201,168,76,.75);
+  box-shadow:0 0 22px rgba(201,168,76,.4), inset 0 0 12px rgba(201,168,76,.15);}
+.social-panel{
+  background:linear-gradient(160deg, rgba(22,19,30,.94), rgba(8,8,14,.96));
+  border:1px solid rgba(201,168,76,.3);border-radius:14px;
+  box-shadow:0 12px 32px rgba(0,0,0,.62), 0 0 24px rgba(201,168,76,.1), inset 0 1px 0 rgba(255,255,255,.05);
+  backdrop-filter:blur(10px);
+}
+.emote-btn{border-radius:11px;transition:transform .15s, background .2s;}
+.emote-btn:hover{transform:translateY(-2px) scale(1.14);background:rgba(201,168,76,.16);}
+.gift-tile{border-radius:11px;transition:transform .15s, box-shadow .25s, border-color .25s;}
+.gift-tile:hover{transform:translateY(-2px);box-shadow:0 0 16px rgba(201,168,76,.35);border-color:rgba(201,168,76,.45)!important;}
+.gift-tile.troll:hover{box-shadow:0 0 16px rgba(255,45,85,.4);border-color:rgba(255,45,85,.45)!important;}
+.gift-cost{display:inline-flex;align-items:center;gap:2px;padding:1px 5px;border-radius:999px;
+  background:rgba(201,168,76,.16);border:1px solid rgba(201,168,76,.3);color:#e8c55a;font-weight:600;}

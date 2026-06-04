@@ -157,11 +157,11 @@ function ActionButtons() {
 // MAIN COMPONENT
 // ============================================================
 
-export default function MultiplayerTable({ tableId }: { tableId: string }) {
+export default function MultiplayerTable({ tableId, inviteCode }: { tableId: string; inviteCode?: string }) {
   const {
     connect, disconnect, connected, table, seats, mySeatIndex,
     mySeatIndices, myUserId, turnTimeLeft, error, chatMessages,
-    joinSeat, placeBetOnSeat, createInvite, getFriends, sendChat,
+    joinSeat, placeBetOnSeat, createInvite, getFriends, sendChat, joinByInvite,
   } = useMultiplayerStore()
 
   const [dealerSpeech, setDealerSpeech] = useState('')
@@ -169,12 +169,21 @@ export default function MultiplayerTable({ tableId }: { tableId: string }) {
   const [friends, setFriends] = useState<any[]>([])
   const speechTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastPhase = useRef<string>('')
+  const invitedRef = useRef(false)
 
   // Connect on mount
   useEffect(() => {
     connect(tableId)
     return () => disconnect()
   }, [tableId])
+
+  // Arrived via an invite link: auto-claim the reserved seat once connected.
+  useEffect(() => {
+    if (connected && inviteCode && mySeatIndex === null && !invitedRef.current) {
+      invitedRef.current = true
+      joinByInvite(inviteCode)
+    }
+  }, [connected, inviteCode, mySeatIndex, joinByInvite])
 
   // Dealer speech queue -- no overlapping
   const dealerSay = (line: string) => {

@@ -8,7 +8,7 @@ import {
   WinParticles, XPBar, AchievementPopup, VantarisBoutique,
   GemStore, FreeChips, AvatarBuilder, DEFAULT_AVATAR,
   PlayerProfilePanel, Leaderboard, CasinoScene3D,
-  BotPlayers, ToastContainer, DealerAvatar,
+  BotPlayers, ToastContainer, DealerAvatar, DealerStage,
   WelcomeScreen, isNewPlayer, EmojiReactions, DealerChat, BettingLayout, SocialBar,
 } from '@/components/blackjack'
 import type { Achievement, AvatarConfig, SeatPosition } from '@/components/blackjack'
@@ -485,7 +485,7 @@ function Hand({ cards, label, active, showValue, skinId }: {
 // ============================================================
 
 function DealerPanel() {
-  const { activeDealer, dealerLine, speaking, showDealerSelect, togglePanel, setDealer } = useBlackjackStore()
+  const { activeDealer, dealerLine, showDealerSelect, togglePanel, setDealer } = useBlackjackStore()
 
   // Use the store's DEFAULT_DEALERS as single source of truth for voice IDs
   const dealers = [
@@ -504,7 +504,7 @@ function DealerPanel() {
         initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
       >
         <div className="flex-shrink-0">
-          <DealerAvatar dealerId={activeDealer.id} color={activeDealer.color} speaking={speaking} size={48} />
+          <DealerStage size={72} />
         </div>
         <div className="min-w-0">
           <p className="text-xs font-semibold" style={{ color: activeDealer.color, fontFamily: "'Cinzel', serif" }}>
@@ -1055,17 +1055,9 @@ export default function BlackjackPage() {
   // player ranks up. Tune the rank -> video map; unknown ranks use the default.
   // Available clips: casino-entry, casino-lobby, vip-penthouse, crystal-loop.
   const SCENE_BY_RANK: Record<string, string> = {
-    Bronze: '/videos/casino-entry.mp4',
-    Silver: '/videos/casino-entry.mp4',
-    Gold: '/videos/casino-lobby.mp4',
-    Platinum: '/videos/casino-lobby.mp4',
-    Diamond: '/videos/vip-penthouse.mp4',
-    Legend: '/videos/vip-penthouse.mp4',
-    Ember: '/videos/vip-penthouse.mp4',
-    Shadow: '/videos/crystal-loop.mp4',
-    Eclipse: '/videos/crystal-loop.mp4',
-    Supernova: '/videos/crystal-loop.mp4',
-    'Vanta Black': '/videos/crystal-loop.mp4',
+    // vip-penthouse.mp4 (the made-for-blackjack background) is the default for
+    // EVERY rank. Add rank -> clip entries here as per-level scenes get made,
+    // e.g. 'Supernova': '/videos/crystal-loop.mp4'.
   }
   const bgScene = SCENE_BY_RANK[store.player.rank] || '/videos/vip-penthouse.mp4'
 
@@ -1095,11 +1087,11 @@ export default function BlackjackPage() {
         <video key={bgScene} autoPlay muted playsInline
           className="w-full h-full object-cover"
           style={{ opacity: 'var(--window-video-opacity, 0.9)' }}
-          onEnded={(e) => {
-            // Pin to the last (skyline) frame; do not blank or restart.
+          onTimeUpdate={(e) => {
+            // Play in, then freeze on the CLEAREST frame (~2.15s) instead of the end.
             const v = e.currentTarget
-            v.pause()
-            try { if (v.duration) v.currentTime = Math.max(0, v.duration - 0.05) } catch {}
+            const FREEZE_AT = 2.15
+            if (v.currentTime >= FREEZE_AT) { v.pause(); v.currentTime = FREEZE_AT }
           }}>
           <source src={bgScene} type="video/mp4" />
         </video>
@@ -1140,6 +1132,7 @@ export default function BlackjackPage() {
                   className="absolute top-full left-0 mt-2 z-50 glass-elevated rounded-xl p-2 w-[180px] space-y-0.5">
                   {[
                     { label: 'Lobby', href: '/lobby', icon: '\u2605' },
+                    { label: 'Play with Friends', href: '/tables', icon: '\u2663' },
                     { label: 'Wallet', href: '/wallet', icon: '\u2668' },
                     { label: 'Rewards', href: '/rewards', icon: '\u2B50' },
                     { label: 'Profile', href: '/profile', icon: '\u263A' },

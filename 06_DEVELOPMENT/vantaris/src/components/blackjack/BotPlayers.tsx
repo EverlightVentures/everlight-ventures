@@ -246,41 +246,51 @@ function PlayerSeatLabel({ position }: { position: SeatPosition }) {
   const playerName = typeof window !== 'undefined'
     ? localStorage.getItem('vantaris_player_name') || 'Player'
     : 'Player'
+  const avatarUrl = typeof window !== 'undefined'
+    ? localStorage.getItem('vantaris_avatar_url') || ''
+    : ''
   const initial = playerName.charAt(0).toUpperCase()
 
   return (
     <div
-      className="absolute pointer-events-none text-center"
+      className="absolute flex items-center gap-2 pointer-events-none"
       style={{
-        left: `${position.x}px`,
-        top: `${position.y}px`,
-        transform: 'translate(-50%, -50%)',
+        // Pinned to the lower-left of the table, clear of the centered chip pile.
+        left: 12,
+        bottom: 12,
         fontFamily: "'Cinzel', serif",
-        transition: 'left 0.1s linear, top 0.1s linear',
+        zIndex: 16,
       }}
     >
-      {/* Player avatar circle */}
-      <div className="mx-auto mb-1 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
+      {/* Player avatar -- Google profile pic when signed in, else gold initial */}
+      <div className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center text-sm font-bold flex-shrink-0"
         style={{
-          background: 'linear-gradient(135deg, #c9a84c, #e8c55a)',
+          background: avatarUrl ? '#000' : 'linear-gradient(135deg, #c9a84c, #e8c55a)',
           color: '#000',
-          boxShadow: '0 0 12px rgba(201,168,76,0.4), 0 2px 8px rgba(0,0,0,0.5)',
-          border: '2px solid rgba(201,168,76,0.6)',
+          boxShadow: '0 0 12px rgba(201,168,76,0.45), 0 2px 8px rgba(0,0,0,0.6)',
+          border: '2px solid rgba(201,168,76,0.7)',
         }}>
-        {initial}
+        {avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={avatarUrl} alt={playerName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+        ) : (
+          initial
+        )}
       </div>
-      <div className="text-[0.55rem] font-semibold" style={{
-        color: '#c9a84c',
-        textShadow: '0 1px 3px rgba(0,0,0,0.9)',
-      }}>
-        {playerName}
-      </div>
-      <div className="text-[0.45rem] tracking-wider" style={{
-        color: 'rgba(201,168,76,0.4)',
-        letterSpacing: '1px',
-        textShadow: '0 1px 3px rgba(0,0,0,0.9)',
-      }}>
-        {SEAT_LABELS[2]}
+      <div className="text-left leading-tight">
+        <div className="text-[0.6rem] font-semibold" style={{
+          color: '#c9a84c',
+          textShadow: '0 1px 3px rgba(0,0,0,0.9)',
+        }}>
+          {playerName}
+        </div>
+        <div className="text-[0.45rem] tracking-wider" style={{
+          color: 'rgba(201,168,76,0.45)',
+          letterSpacing: '1px',
+          textShadow: '0 1px 3px rgba(0,0,0,0.9)',
+        }}>
+          YOUR SEAT
+        </div>
       </div>
     </div>
   )

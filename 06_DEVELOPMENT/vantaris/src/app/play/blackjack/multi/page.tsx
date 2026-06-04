@@ -22,6 +22,7 @@ const MultiplayerTable = dynamic(
 function MultiplayerContent() {
   const searchParams = useSearchParams()
   const tableId = searchParams.get('table')
+  const inviteCode = searchParams.get('invite')
 
   if (!tableId) {
     return (
@@ -45,7 +46,7 @@ function MultiplayerContent() {
     )
   }
 
-  return <MultiplayerTable tableId={tableId} />
+  return <MultiplayerTable tableId={tableId} inviteCode={inviteCode || undefined} />
 }
 
 export default function MultiplayerPage() {

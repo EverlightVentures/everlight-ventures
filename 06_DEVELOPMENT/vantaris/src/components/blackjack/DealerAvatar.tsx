@@ -199,7 +199,13 @@ export function DealerAvatar({ dealerId, color, speaking, size = 48 }: {
   size?: number
 }) {
   const AvatarSVG = AVATAR_MAP[dealerId] || AriaSVG
-  const isVideo = dealerId === 'bacardi'
+  // Live-action dealer videos (add more to /public/dealers as they're made).
+  const DEALER_VIDEOS: Record<string, string> = {
+    bacardi: '/dealers/bacardi_live.mp4',
+    aria: '/dealers/aria_live.mp4',
+  }
+  const videoSrc = DEALER_VIDEOS[dealerId]
+  const isVideo = !!videoSrc
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -216,7 +222,7 @@ export function DealerAvatar({ dealerId, color, speaking, size = 48 }: {
       <div className="w-full h-full rounded-full overflow-hidden">
         {isVideo ? (
           <video
-            src="/dealers/bacardi_live.mp4"
+            src={videoSrc}
             autoPlay
             loop
             muted

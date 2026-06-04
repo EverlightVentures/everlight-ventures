@@ -15,9 +15,6 @@
 import {
   supabase,
   getPlayerProfile,
-  updatePlayerProfile,
-  saveGameRound,
-  submitArcadeScore,
 } from './supabase'
 
 // ============================================================
@@ -224,32 +221,32 @@ export async function persistRound(opts: {
 }): Promise<void> {
   const { state, game, bet, win, multiplier, gameData, newBalance } = opts
 
-  if (!state.authed || !state.playerId) {
+  if (!state.authed) {
     saveGuestChips(newBalance)
     return
   }
 
+  // Signed-in: persist server-side via the game-event edge function (the browser
+  // is RLS-blocked from the game tables). It logs the round to player_events,
+  // records the arcade high score, and updates chip_balance. Best-effort; a
+  // failure never blocks play (local fallback keeps the balance correct).
   try {
-    await updatePlayerProfile(state.playerId, {
-      gold_coins: Math.max(0, Math.floor(newBalance)),
+    await supabase.functions.invoke('game-event', {
+      body: {
+        type: 'game_round',
+        game,
+        bet,
+        win,
+        net: win - bet,
+        multiplier,
+        gameData,
+        playerId: state.playerId,
+        displayName: state.displayName ?? 'Player',
+        newBalance: Math.max(0, Math.floor(newBalance)),
+      },
     })
-    await saveGameRound({
-      player_id: state.playerId,
-      game,
-      currency: 'GC',
-      bet_amount: bet,
-      win_amount: win,
-      net: win - bet,
-      multiplier,
-      game_data: gameData,
-      xp_earned: Math.max(1, Math.floor(bet / 100)),
-    })
-    // Best single net win feeds the arcade high-score board.
-    if (win - bet > 0) {
-      await submitArcadeScore(game, state.displayName ?? 'Player', win - bet)
-    }
   } catch (e) {
-    // A persistence hiccup must never break play; local balance is still correct.
-    console.warn('[casino-engine] persistRound failed (non-fatal):', e)
+    console.warn('[casino-engine] persistRound (edge) failed (non-fatal):', e)
+    saveGuestChips(newBalance)
   }
 }

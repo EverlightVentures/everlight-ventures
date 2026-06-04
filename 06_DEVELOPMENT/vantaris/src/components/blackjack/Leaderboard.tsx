@@ -1,7 +1,8 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { getLeaderboard } from '@/lib/supabase'
 
 /**
  * Hall of Legends -- Leaderboard
@@ -64,6 +65,15 @@ const TIER_COLORS: Record<string, string> = {
   Platinum: '#e5e4e2', Diamond: '#b9f2ff', Legend: '#ff6b35',
 }
 
+function tierFromWinnings(w: number): string {
+  if (w >= 500000) return 'Legend'
+  if (w >= 100000) return 'Diamond'
+  if (w >= 50000) return 'Platinum'
+  if (w >= 10000) return 'Gold'
+  if (w >= 1000) return 'Silver'
+  return 'Bronze'
+}
+
 export function Leaderboard({
   isOpen,
   onClose,
@@ -73,8 +83,28 @@ export function Leaderboard({
   onClose: () => void
   playerStats?: { name: string; tier: string; chipsWon: number; hands: number; winRate: number }
 }) {
-  const [period, setPeriod] = useState<'daily' | 'weekly' | 'alltime'>('weekly')
-  const leaders = PERIOD_DATA[period] || WEEKLY
+  const [period, setPeriod] = useState<'daily' | 'weekly' | 'alltime'>('alltime')
+  const [liveAllTime, setLiveAllTime] = useState<Leader[] | null>(null)
+
+  // Live all-time board from blackjack_leaderboard (public-read rollup table).
+  useEffect(() => {
+    if (!isOpen) return
+    getLeaderboard('blackjack', 'all_time')
+      .then((rows: any[]) => {
+        const mapped: Leader[] = (rows || []).map((r, i) => ({
+          rank: i + 1,
+          name: r.display_name || 'Player',
+          tier: tierFromWinnings(r.score || 0),
+          chipsWon: r.score || 0,
+          hands: r.hands_played || 0,
+          winRate: r.hands_played ? Math.round((r.hands_won / r.hands_played) * 1000) / 10 : 0,
+        }))
+        if (mapped.length) setLiveAllTime(mapped)
+      })
+      .catch(() => {})
+  }, [isOpen])
+
+  const leaders = (period === 'alltime' && liveAllTime) ? liveAllTime : (PERIOD_DATA[period] || WEEKLY)
 
   return (
     <AnimatePresence>
@@ -96,7 +126,7 @@ export function Leaderboard({
                 <h2 className="font-display text-xl font-bold" style={{ color: 'var(--gold)' }}>
                   Hall of Legends
                 </h2>
-                <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Top players by chips won (live rankings coming soon)</p>
+                <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>Top players by chips won{liveAllTime ? ' · live' : ''}</p>
               </div>
               <button onClick={onClose} className="text-lg" style={{ color: 'var(--text-tertiary)' }}>&times;</button>
             </div>
