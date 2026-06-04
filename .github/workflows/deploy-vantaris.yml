@@ -6,7 +6,7 @@ name: Deploy Vantaris to Cloudflare Pages
 # removal. This runs inside GitHub Actions -- no external app dependency.
 on:
   push:
-    branches: [main]
+    branches: [main, everlightventures.io, bj-finish]
     paths:
       - '06_DEVELOPMENT/vantaris/**'
       - '.github/workflows/deploy-vantaris.yml'
