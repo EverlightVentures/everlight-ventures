@@ -33,6 +33,7 @@ export interface Card {
   skinId?: string      // visual skin override
   rarity?: CardRarity  // visual rarity tier
   xp?: number          // card XP (for leveling system)
+  isBCard?: boolean    // $BCARDD signature card -- triggers the B-CARDD BET (plays as an 8)
 }
 
 export type CardRarity = 'common' | 'uncommon' | 'rare' | 'mythic' | 'legendary'
@@ -45,6 +46,7 @@ export type GamePhase =
   | 'split_turn'    // playing split hand
   | 'dealer_turn'   // dealer revealing + drawing
   | 'settled'       // round complete, showing result
+  | 'bcard_choice'  // B-CARDD BET: player drew the B-Card, choosing TAKE IT vs RIDE IT
 
 export type Outcome =
   | 'blackjack'     // natural 21
@@ -115,6 +117,11 @@ export interface TableConfig {
   lightningEnabled: boolean
   sideBetsEnabled: boolean
   variant: 'classic' | 'lightning' | 'speed' | 'switch' | 'highroller'
+  // Lobby table identity ('vip' | 'classic' | 'lightning' | 'midnight' | 'high_roller').
+  // Carried from /vantaris/blackjack so the play screen knows which lobby table the
+  // player entered. The B-CARDD BET only fires when tableType === 'vip'. Optional so
+  // it never breaks tables launched without it (defaults to non-VIP behaviour).
+  tableType?: string
 }
 
 // ============================================================
@@ -183,6 +190,66 @@ export function cardValue(card: Card): number {
   if (['J', 'Q', 'K'].includes(card.rank)) return 10
   if (card.rank === 'A') return 11
   return parseInt(card.rank)
+}
+
+// ============================================================
+// THE B-CARD  --  $BCARDD BET trigger
+// Spec: 01_BUSINESSES/Everlight_Ventures/Everlight_Gaming/Blackjack/BCARDD_BET_SPEC.md
+// $BCARDD's signature card. Plays mechanically as an 8 (B = 8) so cardValue()
+// already scores it. The isBCard flag fires the optional jackpot + special art.
+// Odds: 1 in 1,854,799 per card dealt ("$BCARDD" in digits: $1 B8 C5 A4 R7 D9 D9).
+// PHASE 1 = for-fun chips (no cash-out = no legal gate). Phase 2 moves this
+// server-side for real-money anti-cheat (see spec).
+// ============================================================
+
+export const BCARD_ODDS = 1854799        // 1-in-N cards = "$BCARDD" spelled in digits
+export const BCARD_VALUE = 8             // plays as an 8 (B = 8)
+export const BCARD_PAYOUT_CAP = 888      // hard cap on any single payout (lucky-8)
+export const BCARD_TAKE_MULT = 100       // "Take it": guaranteed auto-win at 100x avg bet
+export const BCARD_RIDE_MULT = 200       // "Ride it": 200x, but only if you then beat the dealer
+const BETA_BCARD_EVERY = 50              // beta: force the B-Card every 50 cards
+const BCARD_OWNER_EMAIL = '1m.rich.gee@gmail.com'
+
+export interface BCardContext {
+  betaMode?: boolean      // OFF in production (double-gated with owner email below)
+  playerEmail?: string
+  cardsDealt: number      // running count of cards dealt this shoe/session
+}
+
+/**
+ * Decide if the NEXT dealt card should be the B-Card.
+ * Beta = every 50 cards, OWNER ACCOUNT ONLY (so other testers see real odds).
+ * Production (betaMode falsy) = the real 1-in-1,854,799 rarity. Double-gated so
+ * a stray betaMode=true can never trigger for non-owner accounts.
+ */
+export function shouldDealBCard(ctx: BCardContext): boolean {
+  if (ctx.betaMode && ctx.playerEmail === BCARD_OWNER_EMAIL) {
+    return ctx.cardsDealt > 0 && ctx.cardsDealt % BETA_BCARD_EVERY === 0
+  }
+  return Math.floor(Math.random() * BCARD_ODDS) === 0
+}
+
+/** The B-Card itself. Mechanically an 8; isBCard flags the jackpot + art. */
+export function makeBCard(): Card {
+  return { rank: '8', suit: 'spades', faceDown: false, isBCard: true, rarity: 'mythic' }
+}
+
+export function isBCard(card: Card): boolean {
+  return card.isBCard === true
+}
+
+/**
+ * Resolve the B-CARDD BET payout, in the currency of play.
+ *  - choice 'take' -> guaranteed 100x the player's avg bet.
+ *  - choice 'ride' -> 200x, but ONLY if the player then beat the dealer.
+ * avgBet = the player's QTD average bet for THIS currency (Gold avg for a Gold
+ * hand, Sweeps avg for a Sweeps hand). Hard-capped at 888. Returns amount to credit.
+ */
+export function bcardPayout(avgBet: number, choice: 'take' | 'ride', beatDealer?: boolean): number {
+  const safeAvg = Math.max(0, avgBet || 0)
+  if (choice === 'take') return Math.min(BCARD_PAYOUT_CAP, BCARD_TAKE_MULT * safeAvg)
+  if (choice === 'ride' && beatDealer) return Math.min(BCARD_PAYOUT_CAP, BCARD_RIDE_MULT * safeAvg)
+  return 0  // rode and did NOT beat the dealer = jackpot gone
 }
 
 export function evaluateHand(cards: Card[]): {

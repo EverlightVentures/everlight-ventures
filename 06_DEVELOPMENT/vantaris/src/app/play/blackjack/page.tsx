@@ -10,7 +10,9 @@ import {
   PlayerProfilePanel, Leaderboard, CasinoScene3D,
   BotPlayers, ToastContainer, DealerAvatar, DealerStage,
   WelcomeScreen, isNewPlayer, EmojiReactions, DealerChat, BettingLayout, SocialBar,
+  BCardOverlay, GoldenHandBanner,
 } from '@/components/blackjack'
+import { supabase } from '@/lib/supabase'
 import type { Achievement, AvatarConfig, SeatPosition } from '@/components/blackjack'
 import type { Card as CardData } from '@/lib/blackjack-engine'
 import { Natural21Overlay } from '@/components/blackjack/Natural21'
@@ -557,8 +559,11 @@ function DealerPanel() {
 // ============================================================
 
 function OutcomeOverlay() {
-  const { outcome, winAmount, player, lightning } = useBlackjackStore()
+  const { outcome, winAmount, player, lightning, bcardChoice, bcardPayoutAmount, goldenHandActive } = useBlackjackStore()
   if (!outcome) return null
+
+  // THE B-CARDD BET: a TAKE IT win, or a Golden Hand that paid the 200x bonus.
+  const bcardHit = (bcardChoice === 'take' || goldenHandActive) && bcardPayoutAmount > 0
 
   const config: Record<string, { text: string; color: string; glow: string }> = {
     blackjack: { text: 'BLACKJACK', color: 'var(--gold)', glow: 'rgba(201,168,76,0.3)' },
@@ -583,6 +588,15 @@ function OutcomeOverlay() {
       style={{ background: `radial-gradient(circle, ${c.glow}, transparent 70%)` }}
     >
       <div className="text-center">
+        {bcardHit && (
+          <motion.p
+            initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
+            className="text-sm font-black mb-2 tracking-widest"
+            style={{ color: 'var(--gold)', fontFamily: "'Cinzel', serif" }}
+          >
+            {bcardChoice === 'take' ? 'THE B-CARDD BET' : 'GOLDEN HAND'}
+          </motion.p>
+        )}
         {lightning.active && lightning.multipliedTotal && isWin && (
           <motion.p
             initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
@@ -838,6 +852,18 @@ export default function BlackjackPage() {
   // SSR guard -- nothing renders until client-side mount
   useEffect(() => { setMounted(true) }, [])
 
+  // THE B-CARDD BET: feed the authenticated email into the store so shouldDealBCard()'s
+  // beta gate (owner-only every-50-cards) can resolve. Falls back to null (real odds).
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      useBlackjackStore.getState().setPlayerEmail(session?.user?.email ?? null)
+    }).catch(() => {})
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      useBlackjackStore.getState().setPlayerEmail(session?.user?.email ?? null)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
   // Check localStorage on mount only (avoids SSR hydration mismatch)
   useEffect(() => {
     if (isNewPlayer()) setShowWelcome(true)
@@ -967,14 +993,20 @@ export default function BlackjackPage() {
     // Narrate per-seat results
     narrateResults()
 
-    // Sync hand result to Django backend (no-op in dev)
+    // Sync hand result to Django backend (no-op in dev). Log the B-CARDD BET payout
+    // through the existing event path as a side-bet-style entry so it is auditable.
+    // TODO(Phase 2): route B-Card resolution through the edge fn `bcard-resolve` action
+    // (server-authoritative avg bet + payout + immutable ledger) per the spec SECURITY
+    // section -- the client value here must NOT gate any real-money (SC) payout.
     syncHandResult({
       outcome: store.outcome || 'loss',
       player_total: store.mainHand.value,
       dealer_total: store.dealerHand.value,
       bet: store.mainHand.bet,
       payout: store.winAmount,
-      side_bets: {},
+      side_bets: store.bcardPayoutAmount > 0
+        ? { bcardd_bet: store.bcardPayoutAmount }
+        : {},
     })
 
     const moodLine = postHandSettle()
@@ -1120,6 +1152,9 @@ export default function BlackjackPage() {
 
       {/* Natural 21 video celebration */}
       <Natural21Overlay show={showNatural21} onDone={() => setShowNatural21(false)} />
+
+      {/* THE B-CARDD BET -- optional jackpot choice (renders only on phase bcard_choice) */}
+      <BCardOverlay />
 
       {/* === TOP BAR === */}
       <div className="flex items-center justify-between px-2 md:px-6 py-2 md:py-2.5 border-b relative z-20"
@@ -1340,6 +1375,9 @@ export default function BlackjackPage() {
 
         {/* Dealer panel -- centered on table */}
         <DealerPanel />
+
+        {/* THE B-CARDD BET -- Golden Hand banner (the hand after a RIDE IT) */}
+        <GoldenHandBanner />
 
         {/* Presence indicator (top left) */}
         {/* Presence indicator -- hidden on very small mobile */}
