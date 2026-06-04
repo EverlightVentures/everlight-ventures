@@ -124,6 +124,8 @@ export function BettingLayout({ seatPositions }: { seatPositions: SeatPosition[]
         const type = target.getAttribute('data-drop-zone') || ''
         const seatIdx = parseInt(target.getAttribute('data-seat') || '2')
         if (source && source.zone === type) return // back on its own spot -- no change
+        // A MOVE must never light up a NEW seat (that would force an extra hand) -- snap back.
+        if (source && type === ZONE_MAIN && !useBlackjackStore.getState().activeSeatIndices.includes(seatIdx)) return
         if (source) removeFromSpot(source.zone, value) // pull off source first
         addToSpot(type, seatIdx, value)
       }

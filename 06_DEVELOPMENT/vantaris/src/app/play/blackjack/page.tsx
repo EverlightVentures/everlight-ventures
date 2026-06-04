@@ -254,7 +254,7 @@ async function speakLine(text: string, voiceId: string) {
     const audio = new Audio(URL.createObjectURL(SPEECH_CACHE.get(cacheKey)!))
     audio.volume = 0.7
     audio.onended = () => useBlackjackStore.setState({ speaking: false })
-    await audio.play()
+    await audio.play().catch(() => useBlackjackStore.setState({ speaking: false }))
     return
   }
 
@@ -271,7 +271,7 @@ async function speakLine(text: string, voiceId: string) {
       const audio = new Audio(URL.createObjectURL(blob))
       audio.volume = 0.7
       audio.onended = () => useBlackjackStore.setState({ speaking: false })
-      await audio.play()
+      await audio.play().catch(() => useBlackjackStore.setState({ speaking: false }))
       return
     }
   } catch {
@@ -282,16 +282,23 @@ async function speakLine(text: string, voiceId: string) {
     window.speechSynthesis.cancel() // cancel any pending speech
     const utter = new SpeechSynthesisUtterance(text)
     utter.rate = 0.88
-    utter.pitch = 0.85
     utter.volume = 0.85
     utter.onend = () => useBlackjackStore.setState({ speaking: false })
     utter.onerror = () => useBlackjackStore.setState({ speaking: false })
-    // Try to find a good voice
+    // Match the dealer's gender. Aria/Kanisha are female; Marcus/Bacardi are male.
+    // Browser default voices skew female, which made the male dealers (esp. Bacardi
+    // = Sean) sound wrong whenever the ElevenLabs voice was momentarily unavailable.
+    const FEMALE_VOICE_IDS = new Set(['EXAVITQu4vr4xnSDxMaL', 'XrExE9yKIg1WjnnlVkGX'])
+    const wantMale = !FEMALE_VOICE_IDS.has(voiceId)
     const voices = window.speechSynthesis.getVoices()
-    const preferred = voices.find(v => v.name.includes('Google') && v.lang.startsWith('en'))
-      || voices.find(v => v.lang.startsWith('en-US'))
-      || voices.find(v => v.lang.startsWith('en'))
+    const en = voices.filter(v => v.lang.toLowerCase().startsWith('en'))
+    const femaleRe = /samantha|victoria|karen|moira|tessa|fiona|zira|susan|catherine|serena|allison|nicky|female|google us english$/i
+    const maleRe = /daniel|alex|david|fred|aaron|arthur|oliver|rishi|gordon|male|google uk english male/i
+    const preferred = wantMale
+      ? (en.find(v => maleRe.test(v.name)) || en.find(v => !femaleRe.test(v.name)) || en[0])
+      : (en.find(v => femaleRe.test(v.name)) || en.find(v => v.name.includes('Google')) || en[0])
     if (preferred) utter.voice = preferred
+    utter.pitch = wantMale ? 0.8 : 0.95
     window.speechSynthesis.speak(utter)
   } else {
     setTimeout(() => useBlackjackStore.setState({ speaking: false }), 2000)
