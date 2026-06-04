@@ -19,7 +19,8 @@ import { DealerAvatar } from './DealerAvatar'
  */
 
 const DEALER_VIDEOS: Record<string, string> = {
-  bacardi: '/dealers/bacardi_live.mp4',
+  // official_bdl.mp4 = the new official B-CARDD dealer footage (replaces bacardi_live).
+  bacardi: '/dealers/official_bdl.mp4',
   aria: '/dealers/aria_live.mp4',
 }
 const DEAL_MOTION_MS = 1800

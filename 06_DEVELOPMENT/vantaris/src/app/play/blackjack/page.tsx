@@ -505,26 +505,33 @@ function DealerPanel() {
   ]
 
   return (
-    <div className="absolute left-1/2 -translate-x-1/2 top-[55px] md:top-[65px] z-20">
+    <div className="absolute left-1/2 -translate-x-1/2 top-[88px] md:top-[104px] z-20 flex flex-col items-center">
+      {/* The dealer SITS AT THE HEAD OF THE TABLE: a large seated figure, centered,
+          with the name + spoken line stacked beneath -- not a tiny chip in the corner.
+          Sits below the jackpot/streak band and above the dealer's felt cards. */}
       <motion.div
-        className="glass p-2 md:p-3 rounded-xl flex items-center gap-2 md:gap-3 max-w-[240px] md:max-w-[300px] cursor-pointer"
+        className="flex flex-col items-center cursor-pointer"
         onClick={() => togglePanel('dealerSelect')}
-        key={dealerLine}
         initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
       >
-        <div className="flex-shrink-0">
-          <DealerStage size={72} />
-        </div>
-        <div className="min-w-0">
-          <p className="text-xs font-semibold" style={{ color: activeDealer.color, fontFamily: "'Cinzel', serif" }}>
+        <DealerStage size={128} />
+        <div className="text-center mt-1.5">
+          <p className="text-xs md:text-sm font-semibold" style={{ color: activeDealer.color, fontFamily: "'Cinzel', serif" }}>
             {activeDealer.name}
           </p>
           <p className="text-[9px]" style={{ color: 'var(--text-tertiary)' }}>{activeDealer.title}</p>
-          <p className="text-[10px] italic mt-1 line-clamp-2" style={{ color: 'var(--text-secondary)' }}>
-            &ldquo;{dealerLine}&rdquo;
-          </p>
         </div>
       </motion.div>
+      {/* Spoken line as a compact caption -- centered, clamped so it never sprawls
+          across the side seats. */}
+      <motion.p
+        key={dealerLine}
+        initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
+        className="text-[10px] italic mt-1 text-center line-clamp-2 max-w-[200px] md:max-w-[260px] px-3 py-1 rounded-lg"
+        style={{ color: 'var(--text-secondary)', background: 'rgba(0,0,0,0.45)' }}
+      >
+        &ldquo;{dealerLine}&rdquo;
+      </motion.p>
 
       <AnimatePresence>
         {showDealerSelect && (
@@ -1454,10 +1461,14 @@ export default function BlackjackPage() {
 
         {/* Card areas (absolute positioned over 3D scene) */}
         <div className="absolute inset-0 z-10 pointer-events-none">
-          {/* Dealer hand at 25% from top */}
-          <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '22%' }}>
-            <Hand cards={store.dealerHand.cards} label="DEALER" active={store.phase === 'dealer_turn'}
-              showValue={store.phase === 'dealer_turn' || store.phase === 'settled'} skinId={skinId} />
+          {/* Dealer hand: dealt ONTO THE FELT in front of the seated dealer (lower +
+              scaled up from the old floating-in-the-window position). Grows downward
+              from a fixed top edge so it never creeps back up into the dealer figure. */}
+          <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '36%' }}>
+            <div style={{ transform: 'scale(1.12)', transformOrigin: 'top center' }}>
+              <Hand cards={store.dealerHand.cards} label="DEALER" active={store.phase === 'dealer_turn'}
+                showValue={store.phase === 'dealer_turn' || store.phase === 'settled'} skinId={skinId} />
+            </div>
           </div>
 
           {/* All active seats' cards positioned around the table */}
@@ -1551,6 +1562,8 @@ export default function BlackjackPage() {
             <div className="flex gap-1.5 md:gap-2 items-center justify-center flex-wrap">
               <button onClick={() => {
                 store.setBet(0)
+                // Drop any extra hands back to a single seat (no carry-over lock)
+                store.resetToHomeSeat()
                 // Also clear all side bets
                 if (store.sideBets.perfectPairs.active) store.toggleSideBet('perfectPairs', 0)
                 if (store.sideBets.luckyLadies.active) store.toggleSideBet('luckyLadies', 0)

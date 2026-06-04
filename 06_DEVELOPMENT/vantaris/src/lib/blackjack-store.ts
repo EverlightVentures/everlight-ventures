@@ -199,6 +199,7 @@ interface BlackjackStore {
   setBet: (amount: number) => void
   selectChip: (value: number) => void
   toggleSeat: (seatIndex: number) => void   // activate/deactivate a seat
+  resetToHomeSeat: () => void                // drop all extra seats, keep only the home seat
   deal: () => void
   playerHit: () => void
   playerDoubleHit: () => void  // Double Down Madness: double bet then hit (can repeat)
@@ -257,8 +258,22 @@ function createEmptySeat(index: number, active = false): SeatState {
 
 function createInitialSeats(): SeatState[] {
   // 5 seats. Player starts at seat 2 (center).
-  return [0, 1, 2, 3, 4].map(i => createEmptySeat(i, i === 2))
+  return [0, 1, 2, 3, 4].map(i => createEmptySeat(i, i === HOME_SEAT))
 }
+
+// The human's permanent home seat (bottom-center). Bots never sit here. Every new
+// round resets the player to exactly this ONE seat, so playing extra hands never
+// carries over -- you can drop back to a single hand freely, every round.
+const HOME_SEAT = 2
+
+// Canonical deal / turn order: first base (the dealer's LEFT = the table's far-RIGHT
+// seat) acts first, then clockwise, dealer last -- standard US casino. We keep
+// activeSeatIndices stored in THIS order so dealing, the turn loop, settlement and the
+// card render all agree (one source of truth, no scattered per-seat logic). The human's
+// center seat is dealt 3rd either way, so this only sets the bot-seat sequence.
+// To put first base on the LEFT instead, change this to [0, 1, 2, 3, 4].
+const SEAT_DEAL_ORDER = [4, 3, 2, 1, 0]
+const orderActive = (active: number[]): number[] => SEAT_DEAL_ORDER.filter(i => active.includes(i))
 
 const EMPTY_SIDE_BETS: SideBetState = {
   perfectPairs: { active: false, bet: 0, result: null, payout: 0 },
@@ -521,9 +536,18 @@ export const useBlackjackStore = create<BlackjackStore>()(
     }
 
     seats[seatIndex] = { ...seat, active: !seat.active }
-    const active = seats.filter(s => s.active).map(s => s.index)
+    const active = orderActive(seats.filter(s => s.active).map(s => s.index))
     if (active.length === 0) return // must have at least one seat
     set({ seats, activeSeatIndices: active, bots })
+  },
+
+  // Drop every seat except the home seat. Powers the CLEAR control so the player can
+  // go from N hands back to a single hand mid-round, without having to deal first.
+  resetToHomeSeat: () => {
+    const state = get()
+    if (state.phase !== 'betting') return
+    const seats = state.seats.map(s => ({ ...s, active: s.index === HOME_SEAT, bet: 0 }))
+    set({ seats, activeSeatIndices: [HOME_SEAT], currentSeatIndex: HOME_SEAT })
   },
 
   deal: () => {
@@ -1275,10 +1299,10 @@ export const useBlackjackStore = create<BlackjackStore>()(
     let shoe = state.shoe
     if (needsReshuffle(shoe)) shoe = createShoe(state.config.deckCount)
 
-    // Reset all seats but keep which ones are active
-    const seats = state.seats.map(s => ({
-      ...createEmptySeat(s.index, s.active),
-    }))
+    // Reset to the SINGLE home seat every round. Extra hands (multi-seat) are opt-in
+    // PER ROUND and must never carry over -- otherwise playing 2 hands once would lock
+    // you into 2 forever with no way back to 1. The player re-adds extra seats freely.
+    const seats = state.seats.map(s => createEmptySeat(s.index, s.index === HOME_SEAT))
 
     // ---- THE B-CARDD BET: promote a pending Golden Hand into the upcoming round ----
     // If the player chose RIDE IT last round, THIS new round is the Golden Hand:
@@ -1293,7 +1317,8 @@ export const useBlackjackStore = create<BlackjackStore>()(
       splitHand: null,
       dealerHand: { ...EMPTY_HAND },
       currentHandIndex: 0,
-      currentSeatIndex: state.activeSeatIndices[0] || 2,
+      currentSeatIndex: HOME_SEAT,
+      activeSeatIndices: [HOME_SEAT],
       availableActions: [],
       sideBets: { ...EMPTY_SIDE_BETS },
       lightning: { ...EMPTY_LIGHTNING },
