@@ -6,25 +6,6 @@ export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
-export function formatNumber(value: number, decimals = 0): string {
-  if (value >= 1_000_000) {
-    return `${(value / 1_000_000).toFixed(decimals || 1)}M`;
-  }
-  if (value >= 1_000) {
-    return `${(value / 1_000).toFixed(decimals || 1)}k`;
-  }
-  return value.toLocaleString("en-US", { maximumFractionDigits: decimals });
-}
-
-export function formatCurrency(value: number, currency = "USD"): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
-}
-
 export function formatRelativeTime(date: Date): string {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
@@ -61,16 +42,6 @@ export function getAgentColor(agentId: AgentId): string {
   return colors[agentId] ?? "#A0A0B8";
 }
 
-export function getAgentGradient(agentId: AgentId): string {
-  const gradients: Record<AgentId, string> = {
-    claude: "from-amber-500/20 to-amber-900/5",
-    gemini: "from-blue-500/20 to-blue-900/5",
-    codex: "from-emerald-500/20 to-emerald-900/5",
-    perplexity: "from-violet-500/20 to-violet-900/5",
-  };
-  return gradients[agentId] ?? "from-zinc-500/20 to-zinc-900/5";
-}
-
 export function getStatusBadgeClass(status: AgentStatus): string {
   const classes: Record<AgentStatus, string> = {
     active: "badge-active",
@@ -104,11 +75,3 @@ export function getPulseDotClass(status: AgentStatus): string {
   return classes[status] ?? "pulse-dot pulse-dot-gray";
 }
 
-export function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text;
-  return `${text.slice(0, maxLength)}...`;
-}
-
-export function generateId(): string {
-  return Math.random().toString(36).slice(2, 11);
-}

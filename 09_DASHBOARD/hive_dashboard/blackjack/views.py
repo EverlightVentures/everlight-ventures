@@ -9,7 +9,6 @@ import logging
 import secrets
 import urllib.parse
 import urllib.request
-from datetime import date
 from typing import Any
 
 from django.shortcuts import render, redirect
