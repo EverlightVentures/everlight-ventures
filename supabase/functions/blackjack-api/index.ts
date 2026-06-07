@@ -457,6 +457,12 @@ Deno.serve(async (req: Request) => {
     // --- RECORD HAND (called after each hand for history) ---
     if (action === "record-hand") {
       const { player_id, table_id, session_id, bet_amount, side_bets, result, payout, player_cards, dealer_cards, player_total, dealer_total, action_taken } = body;
+      // jackpot  = this hand was a B-CARDD BET hit (increments jackpots_won).
+      // stats_only = single-player local-wallet mode: feed lifetime stats + the
+      //   public leaderboard but DO NOT touch server chip_balance (the client owns
+      //   its own balance; mutating it here would drift the two -- the XLM-bot trap).
+      const jackpot = body.jackpot === true;
+      const stats_only = body.stats_only === true;
       if (!player_id) return json({ error: "Missing player_id" }, 400);
 
       // Validate bet_amount (prevent negative/absurd values)
@@ -492,8 +498,9 @@ Deno.serve(async (req: Request) => {
         const betAmt = validatedBet;
         const payoutAmt = validatedPayout;
 
-        // Validate bet doesn't exceed balance
-        if (betAmt > (p.chip_balance ?? 0) + payoutAmt) {
+        // Validate bet doesn't exceed balance (server-authoritative wallet only;
+        // stats_only single-player owns its balance client-side, so skip this).
+        if (!stats_only && betAmt > (p.chip_balance ?? 0) + payoutAmt) {
           return json({ error: "Bet exceeds available balance" }, 400);
         }
         const isWin = result === "win" || result === "blackjack";
@@ -511,8 +518,9 @@ Deno.serve(async (req: Request) => {
         const stats: Record<string, unknown> = {
           total_hands: (p.total_hands ?? 0) + 1,
           total_wagered: (p.total_wagered ?? 0) + betAmt,
-          chip_balance: newBalance,
         };
+        // Only the server-authoritative wallet mode mutates chip_balance.
+        if (!stats_only) stats.chip_balance = newBalance;
         if (isWin) stats.total_wins = (p.total_wins ?? 0) + 1;
         if (isLoss) stats.total_losses = (p.total_losses ?? 0) + 1;
         if (isPush) stats.total_pushes = (p.total_pushes ?? 0) + 1;
@@ -529,24 +537,26 @@ Deno.serve(async (req: Request) => {
 
         await supabase.from("player_accounts").update(stats).eq("player_id", player_id);
 
-        // Sync game_currencies balance (with error recovery)
-        const { error: gcErr } = await supabase.from("game_currencies")
-          .update({ balance: newBalance, updated_at: new Date().toISOString() })
-          .eq("player_id", player_id)
-          .eq("game_id", "blackjack");
-        if (gcErr) {
-          console.error("game_currencies sync failed:", gcErr.message);
-          // Retry once
-          await supabase.from("game_currencies")
-            .upsert({ player_id, game_id: "blackjack", currency_name: "chips", balance: newBalance, updated_at: new Date().toISOString() })
+        // Sync game_currencies balance (server-authoritative wallet only).
+        if (!stats_only) {
+          const { error: gcErr } = await supabase.from("game_currencies")
+            .update({ balance: newBalance, updated_at: new Date().toISOString() })
             .eq("player_id", player_id)
             .eq("game_id", "blackjack");
+          if (gcErr) {
+            console.error("game_currencies sync failed:", gcErr.message);
+            // Retry once
+            await supabase.from("game_currencies")
+              .upsert({ player_id, game_id: "blackjack", currency_name: "chips", balance: newBalance, updated_at: new Date().toISOString() })
+              .eq("player_id", player_id)
+              .eq("game_id", "blackjack");
+          }
         }
 
-        // Update leaderboard
+        // Update leaderboard (the public Hall of Legends rollup)
         const { data: lb } = await supabase
           .from("blackjack_leaderboard")
-          .select("hands_played, hands_won, total_winnings, biggest_win")
+          .select("hands_played, hands_won, total_winnings, biggest_win, jackpots_won")
           .eq("player_id", player_id)
           .maybeSingle();
 
@@ -560,6 +570,7 @@ Deno.serve(async (req: Request) => {
             lbUpdate.total_winnings = (lb.total_winnings ?? 0) + payoutAmt;
             if (payoutAmt > (lb.biggest_win ?? 0)) lbUpdate.biggest_win = payoutAmt;
           }
+          if (jackpot) lbUpdate.jackpots_won = (lb.jackpots_won ?? 0) + 1;  // B-CARDD BET hit
           await supabase.from("blackjack_leaderboard").update(lbUpdate).eq("player_id", player_id);
         } else {
           // Create leaderboard row if missing
@@ -571,6 +582,7 @@ Deno.serve(async (req: Request) => {
             hands_won: isWin ? 1 : 0,
             total_winnings: isWin ? payoutAmt : 0,
             biggest_win: isWin ? payoutAmt : 0,
+            jackpots_won: jackpot ? 1 : 0,
           });
         }
 

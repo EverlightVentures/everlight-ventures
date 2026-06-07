@@ -12,7 +12,7 @@ import {
   WelcomeScreen, isNewPlayer, EmojiReactions, DealerChat, BettingLayout, SocialBar,
   BCardOverlay, GoldenHandBanner,
 } from '@/components/blackjack'
-import { supabase } from '@/lib/supabase'
+import { supabase, recordLeaderboardHand } from '@/lib/supabase'
 import type { Achievement, AvatarConfig, SeatPosition } from '@/components/blackjack'
 import type { Card as CardData } from '@/lib/blackjack-engine'
 import { Natural21Overlay } from '@/components/blackjack/Natural21'
@@ -1014,6 +1014,16 @@ export default function BlackjackPage() {
       side_bets: store.bcardPayoutAmount > 0
         ? { bcardd_bet: store.bcardPayoutAmount }
         : {},
+    })
+
+    // Feed the public Hall of Legends (server-authoritative, stats-only -- never
+    // touches the local wallet). Fail-safe: signed-out players + errors no-op.
+    // jackpot=true marks a B-CARDD BET hit so jackpots_won increments.
+    recordLeaderboardHand({
+      outcome: store.outcome || 'loss',
+      bet: store.mainHand.bet,
+      payout: store.winAmount,
+      jackpot: store.bcardPayoutAmount > 0,
     })
 
     const moodLine = postHandSettle()

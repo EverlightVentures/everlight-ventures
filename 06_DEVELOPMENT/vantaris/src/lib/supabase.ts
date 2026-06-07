@@ -230,6 +230,65 @@ export async function saveGameRound(round: {
   return data
 }
 
+// ============================================================
+// LEADERBOARD FEED  (server-authoritative, balance-decoupled)
+// ============================================================
+// Single-player blackjack runs on a LOCAL (client-persisted) wallet, so we must
+// never let the server mutate chip_balance for it -- that would drift the two
+// balances apart. This feeds ONLY the competitive stats (hands / winnings /
+// jackpots) into the public Hall of Legends via the blackjack-api edge function
+// in stats_only mode. It is fully fail-safe: a signed-out player or any error is
+// swallowed and never affects gameplay. Writes are server-authoritative (the
+// edge function holds the service-role key) so the board can't be spoofed.
+
+let _cachedPlayerId: string | null | undefined  // undefined = not resolved yet; null = no account
+
+// Map the store's outcome vocabulary to the edge function's `result` values.
+function outcomeToResult(outcome: string): string {
+  switch (outcome) {
+    case 'blackjack': return 'blackjack'
+    case 'win':
+    case 'charlie': return 'win'
+    case 'bust': return 'bust'
+    case 'push': return 'push'
+    default: return 'loss'  // loss | surrender
+  }
+}
+
+export async function recordLeaderboardHand(hand: {
+  outcome: string
+  bet: number
+  payout: number
+  jackpot?: boolean
+}): Promise<void> {
+  try {
+    // Resolve + cache the signed-in player's account id (by email). Guests no-op.
+    if (_cachedPlayerId === undefined) {
+      const profile = await getPlayerProfile('').catch(() => null)
+      _cachedPlayerId = (profile as any)?.player_id ?? null
+    }
+    if (!_cachedPlayerId) return  // not signed in / no account -> not on the board
+
+    await supabase.functions.invoke('blackjack-api', {
+      body: {
+        action: 'record-hand',
+        player_id: _cachedPlayerId,
+        result: outcomeToResult(hand.outcome),
+        bet_amount: Math.max(0, Math.round(hand.bet || 0)),
+        payout: Math.max(0, Math.round(hand.payout || 0)),
+        jackpot: hand.jackpot === true,
+        stats_only: true,   // <-- leaderboard + lifetime stats, NEVER the wallet
+      },
+    })
+  } catch (err) {
+    // Leaderboard is best-effort; never let it touch the live game.
+    console.warn('[supabase] recordLeaderboardHand skipped:', err)
+  }
+}
+
+// Reset the cached player id (call on sign-out / account switch).
+export function resetLeaderboardPlayerCache() { _cachedPlayerId = undefined }
+
 // Record an arcade high score (dice, mines, plinko, roulette, crash).
 export async function submitArcadeScore(game: string, playerName: string, score: number) {
   const { error } = await supabase
