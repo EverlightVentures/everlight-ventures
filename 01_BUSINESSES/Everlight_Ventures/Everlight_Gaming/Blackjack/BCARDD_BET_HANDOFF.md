@@ -3,6 +3,8 @@
 
 > **2026-06-07 UPDATE (main blackjack chat):** The cosmetic dealer-video gap in Open TODO #3 is **CLOSED** and three table fixes shipped to **production** (`everlightventures.io`, not just the preview). See the "2026-06-07 table polish" section below before reading the rest.
 
+> **2026-06-08 UPDATE -- BACKEND DEPLOYED, FEATURES IN OWNER-GATED TEST.** Rich supplied a valid Supabase token (account "EverlightVentures's Project"). Ran `deploy_blackjack_backend.sh`: both migrations applied + `blackjack-api` edge deployed (dealer-ai, buy-coaching-pass, jackpots_won, stats_only). Smoke-tested `dealer-ai` live -> real AI reply, 0 Gold for the owner (dev-free). Frontend activated: `LEADERBOARD_SP_FEED=true` (global), Pro Coaching live but `COACHING_PUBLIC=false` (owner `1m.rich.gee@gmail.com` only). B-Card still beta (every 12 cards, owner-only). NEXT: Rich tests -> approve -> flip `COACHING_PUBLIC=true` + `BCARD_BETA_MODE=false` for public launch.
+
 ## TL;DR
 We designed + built **Phase 1** of "the B-CARDD BET": $BCARDD's signature card as a 1-in-a-million jackpot
 on the EXISTING VIP (Spanish 21) blackjack table. It is BUILT, VERIFIED (no-throw + logic tests), and
