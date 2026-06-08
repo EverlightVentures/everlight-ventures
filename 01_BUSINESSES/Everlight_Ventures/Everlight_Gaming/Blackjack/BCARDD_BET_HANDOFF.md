@@ -74,6 +74,61 @@ Three fixes from a live-table screenshot review, all verified on the live edge (
    force-added past gitignore at `public/dealers/official_bdl.mp4` (2,768,590 bytes). **This closes the
    Open TODO #3 dealer-video-404 gap below.** Live: `https://everlightventures.io/dealers/official_bdl.mp4` -> 200.
 
+## 2026-06-07 SESSION 2 -- cinematic + leaderboard reality + the one blocker
+Rich asked to do, in order: (1) B-Card reveal cinematic, (2) leaderboard/high scores,
+(3) Phase-2 cash-out prep, (4) hold for his visual polish call.
+
+**(1) B-CARD REVEAL CINEMATIC -- DONE + LIVE on prod.** Commit `1982df8`. Rewrote
+`BCardOverlay.tsx`: the 1-in-a-million hit now plays a real 3D card flip (rotateY,
+crowned-B face that plays as an 8) + gold ray burst + flash + `playBlackjack()`
+sting, then "THE B-CARDD BET" slams in and the TAKE/RIDE panel rises. Pure local
+presentation (no new store phase). ALSO fixed a live bug: the overlay still pointed
+at the dead `bacardi_live.mp4` (404) -> now `official_bdl.mp4`. Built green on e5,
+deployed (run 27107844007, success).
+
+**(2) LEADERBOARD -- IT WAS ALREADY LIVE WITH REAL DATA.** Key finding: the
+`blackjack_leaderboard` table EXISTS in prod, is populated with real players
+(XX_ACE_OF_DIAMONDS_X 8.88M/318 hands, OpusV2, Melina Tapiz, AuditBot, SmokeTest),
+has the full column set incl `jackpots_won`, and is anon-readable (RLS already
+public-read). So `getLeaderboard()` already returns real data -- the "fake DarkStar
+fallback" only shows when the live query is empty, which it isn't. The component +
+read path were never broken.
+  - The ONE real gap: `jackpots_won` is 0 for everyone because NOTHING ever
+    increments it. Built the fix (commit `fed2704`): edge `record-hand` now takes a
+    `jackpot` flag (+`jackpots_won`++) and a `stats_only` mode that feeds stats/board
+    WITHOUT mutating chip_balance (so single-player's local wallet can't drift the
+    server balance -- the XLM-bot reconciliation trap). Added a fail-safe frontend
+    `recordLeaderboardHand()` + a single-player feed.
+  - The migration `supabase/migrations/20260607_blackjack_leaderboard.sql` is now a
+    REPRODUCIBILITY artifact only (idempotent; the prod table already matches). Do
+    NOT need to apply it -- the table exists.
+  - SP feed is GATED OFF (`LEADERBOARD_SP_FEED=false`, commit `851f769`) until the
+    edge is redeployed, else the OLD edge (no stats_only) would drift signed-in
+    players' balances.
+
+**THE ONE BLOCKER (token):** activating jackpots_won + the SP feed needs the updated
+`blackjack-api` edge function DEPLOYED. Every Supabase access token in the workspace
+(.env, e5 .env, creds, proton_pass_import.json) returns 401 even via the official
+`supabase` CLI -- they're for a different account/org than project
+`jdqqmsmwmbsnlnstyavl` (NOT expired -- wrong account). The valid Management token is
+in Rich's Proton Pass vault. Deploy command (Rich, ~30s):
+  `SUPABASE_ACCESS_TOKEN=<valid> supabase functions deploy blackjack-api --project-ref jdqqmsmwmbsnlnstyavl --no-verify-jwt`
+Then flip `LEADERBOARD_SP_FEED=true` in `play/blackjack/page.tsx` + redeploy frontend.
+
+**(3) PHASE-2 CASH-OUT PREP -- groundwork already largely EXISTS; the rest is
+LEGAL-GATED (do not blind-build).** Inventory:
+  - `redeem_requests` table (migration `20260602000100`): SC redemption + KYC store,
+    status enum pending/review/approved/paid/rejected, RLS insert-own/select-own. GAP:
+    the `/redeem` page collects KYC then THROWS IT AWAY on an alert() -> needs wiring
+    to this table. (Safe to wire; no legal gate to STORE a request.)
+  - `game_currencies` (casino_empire + blackjack-api): per-currency balances via
+    `currency_name` -- the dual-currency (Gold/Sweeps) substrate already exists.
+  - Stripe purchase + webhook + verify-* functions exist (Gold sales = revenue).
+  - STILL OPEN (server-auth slice 1 = the record-hand stats_only above): `bcard-resolve`
+    server-authoritative B-Card RNG+payout (TODO #1), AMOE free-entry, formal SC
+    currency + redemption + KYC/AML + sweeps-friendly processor. These are gated on
+    LLC + attorney per the Legal section -- scope, don't ship.
+
 ## DEPLOY status
 - Built on **e5-mother** (phone proot SIGSEGVs on npm build). The `bj-finish` branch now auto-deploys to
   **PRODUCTION** via GitHub Action `.github/workflows/deploy-vantaris.yml` (triggers on push to
