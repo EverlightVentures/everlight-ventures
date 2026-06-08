@@ -68,6 +68,72 @@ function isDevEmail(email?: string | null): boolean {
   return !!email && DEV_EMAILS.has(email.toLowerCase());
 }
 
+// ============================================================================
+// PRO COACHING -- the premium, conversational AI dealer (server-authoritative).
+// ----------------------------------------------------------------------------
+// Compliance: this is paid for in GOLD COINS (chip_balance) only -- the for-fun,
+// purchasable currency. Sweeps Coins (SC) are NEVER charged for a feature; SC
+// stays free + redemption-only so the sweepstakes safe harbor holds. The basic
+// static strategy hints (the `dealer-chat` action) remain FREE for everyone, so
+// no player is ever required to pay for help -- the paid tier is the conversational
+// "ask anything" tutor, a convenience layer over public strategy.
+//
+// Self-funding: each AI reply costs Gold = max(floor, 3x the request's real token
+// cost). Metering + the Perplexity call + the Gold deduction ALL happen here on the
+// server, so the consumer cannot force a free reply or fake a deduction.
+// ============================================================================
+const GC_PER_USD = 1000;                 // Gold pricing: ~$4.99 = 5,000 GC -> ~1,000 GC/$1
+const PPLX_REQUEST_USD = 0.005;          // Perplexity sonar per-request fee (conservative)
+const PPLX_TOKEN_USD = 0.000001;         // ~$1 / 1M tokens (conservative blended in+out)
+const COST_MULTIPLIER = 3;               // charge 3x the real cost (Rich's margin rule)
+const PER_MSG_FLOOR_GC = 15;             // minimum Gold per AI reply (keeps it a real premium perk)
+const COACHING_PASS_GC = 250;            // flat Gold for a day pass (unlimited AI coaching)
+const COACHING_PASS_HOURS = 24;
+
+const COACH_SYSTEM_PROMPT =
+  "You are the player's personal blackjack dealer and high-end strategy coach at a " +
+  "luxury private table. Be concise (2-4 sentences), precise, and encouraging, using " +
+  "casino terminology naturally. When asked about a hand, state the mathematically " +
+  "optimal basic-strategy play and briefly explain why. You are a premium private tutor, " +
+  "not a textbook. Never discuss real-money value, payouts, odds of the jackpot, or how " +
+  "to beat the house bankroll -- coach correct play only.";
+
+/** The real Gold cost of an AI reply, given the request's measured token usage. */
+function coachingGoldCost(totalTokens: number): number {
+  const costUsd = PPLX_REQUEST_USD + totalTokens * PPLX_TOKEN_USD;
+  return Math.max(PER_MSG_FLOOR_GC, Math.ceil(COST_MULTIPLIER * costUsd * GC_PER_USD));
+}
+
+/** Call Perplexity sonar; returns the coach reply + token usage for metering. */
+async function callCoachLLM(userMessage: string): Promise<{ content: string; totalTokens: number; error?: string }> {
+  const apiKey = Deno.env.get("PERPLEXITY_API_KEY");
+  if (!apiKey) return { content: "", totalTokens: 0, error: "coach_unavailable" };
+  try {
+    const r = await fetch("https://api.perplexity.ai/chat/completions", {
+      method: "POST",
+      headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "sonar",
+        max_tokens: 300,
+        temperature: 0.3,
+        messages: [
+          { role: "system", content: COACH_SYSTEM_PROMPT },
+          { role: "user", content: userMessage.slice(0, 600) },
+        ],
+      }),
+    });
+    if (!r.ok) { console.error("coach LLM", r.status, await r.text()); return { content: "", totalTokens: 0, error: "coach_error" }; }
+    const data = await r.json();
+    return {
+      content: data.choices?.[0]?.message?.content ?? "",
+      totalTokens: data.usage?.total_tokens ?? 0,
+    };
+  } catch (err) {
+    console.error("coach LLM fetch error:", err);
+    return { content: "", totalTokens: 0, error: "coach_error" };
+  }
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
@@ -2571,6 +2637,108 @@ Deno.serve(async (req: Request) => {
       }
 
       return json({ success: true, reply, has_game_context: !!hasCards });
+    }
+
+    // --- PRO COACHING: premium conversational AI dealer (Gold-metered) ---
+    // Free static hints live in `dealer-chat` above. THIS is the paid LLM tutor.
+    // Charges Gold = max(floor, 3x token cost) UNLESS an active Coaching Pass covers
+    // it. Server-authoritative: balance check + deduction + LLM all happen here.
+    if (action === "dealer-ai") {
+      const { player_id, message, game_state } = body;
+      if (!player_id) return json({ error: "sign_in_required" }, 401);
+      if (!message || typeof message !== "string" || !message.trim()) return json({ error: "Missing message" }, 400);
+
+      const { data: pc } = await supabase
+        .from("player_accounts")
+        .select("chip_balance, coaching_pass_until, email")
+        .eq("player_id", player_id)
+        .maybeSingle();
+      if (!pc) return json({ error: "Player not found" }, 404);
+
+      const nowMs = Date.now();
+      const passActive = pc.coaching_pass_until ? new Date(pc.coaching_pass_until as string).getTime() > nowMs : false;
+      const devFree = isDevEmail(pc.email);  // owner/dev coaches free
+      const goldBalance = Number(pc.chip_balance ?? 0);
+
+      // If paying per-message, make sure they can cover at least the floor up front.
+      if (!passActive && !devFree && goldBalance < PER_MSG_FLOOR_GC) {
+        return json({ error: "insufficient_gold", needed_gold: PER_MSG_FLOOR_GC, gold_balance: goldBalance, pass_price_gc: COACHING_PASS_GC }, 402);
+      }
+
+      // Build a compact, context-aware prompt from the live hand (optional).
+      const gsx = (game_state ?? {}) as Record<string, unknown>;
+      let prompt = message.trim();
+      if (gsx.player_total) prompt = `[My hand: ${gsx.player_total} vs dealer ${gsx.dealer_upcard ?? "?"}${gsx.phase ? `, phase ${gsx.phase}` : ""}]\n${prompt}`;
+
+      const ai = await callCoachLLM(prompt);
+      if (ai.error || !ai.content) {
+        // Never charge for a failed reply.
+        return json({ error: ai.error || "coach_error", charged_gold: 0 }, 502);
+      }
+
+      // Meter + deduct Gold (skip when a pass is active or dev).
+      let chargedGold = 0;
+      let newBalance = goldBalance;
+      if (!passActive && !devFree) {
+        chargedGold = Math.min(goldBalance, coachingGoldCost(ai.totalTokens));
+        newBalance = Math.max(0, goldBalance - chargedGold);
+        await supabase.from("player_accounts").update({ chip_balance: newBalance }).eq("player_id", player_id);
+        await supabase.from("game_currencies")
+          .update({ balance: newBalance, updated_at: new Date().toISOString() })
+          .eq("player_id", player_id).eq("game_id", "blackjack").eq("currency_name", "chips");
+        await supabase.from("player_events").insert({
+          player_id, event_type: "coaching_spend", page: "/play/blackjack",
+          event_data: { gold: chargedGold, tokens: ai.totalTokens, new_balance: newBalance },
+        });
+      }
+
+      return json({
+        success: true,
+        reply: ai.content,
+        charged_gold: chargedGold,
+        gold_balance: newBalance,
+        pass_active: passActive || devFree,
+        tokens: ai.totalTokens,
+      });
+    }
+
+    // --- BUY COACHING PASS: flat Gold -> unlimited AI coaching for a window ---
+    if (action === "buy-coaching-pass") {
+      const { player_id } = body;
+      if (!player_id) return json({ error: "sign_in_required" }, 401);
+
+      const { data: pp } = await supabase
+        .from("player_accounts")
+        .select("chip_balance, coaching_pass_until, email")
+        .eq("player_id", player_id)
+        .maybeSingle();
+      if (!pp) return json({ error: "Player not found" }, 404);
+
+      if (isDevEmail(pp.email)) {
+        return json({ success: true, pass_active: true, gold_balance: Number(pp.chip_balance ?? 0), coaching_pass_until: new Date(Date.now() + COACHING_PASS_HOURS * 3600_000).toISOString() });
+      }
+
+      const bal = Number(pp.chip_balance ?? 0);
+      if (bal < COACHING_PASS_GC) {
+        return json({ error: "insufficient_gold", needed_gold: COACHING_PASS_GC, gold_balance: bal }, 402);
+      }
+
+      // Extend from the later of now / current pass expiry (stacking-friendly).
+      const curEnd = pp.coaching_pass_until ? new Date(pp.coaching_pass_until as string).getTime() : 0;
+      const base = Math.max(Date.now(), curEnd);
+      const until = new Date(base + COACHING_PASS_HOURS * 3600_000).toISOString();
+      const newBal = bal - COACHING_PASS_GC;
+
+      await supabase.from("player_accounts").update({ chip_balance: newBal, coaching_pass_until: until }).eq("player_id", player_id);
+      await supabase.from("game_currencies")
+        .update({ balance: newBal, updated_at: new Date().toISOString() })
+        .eq("player_id", player_id).eq("game_id", "blackjack").eq("currency_name", "chips");
+      await supabase.from("player_events").insert({
+        player_id, event_type: "coaching_pass_purchase", page: "/play/blackjack",
+        event_data: { gold: COACHING_PASS_GC, hours: COACHING_PASS_HOURS, until },
+      });
+
+      return json({ success: true, pass_active: true, coaching_pass_until: until, gold_balance: newBal });
     }
 
     return json({ error: `Unknown action: ${action}` }, 400);
