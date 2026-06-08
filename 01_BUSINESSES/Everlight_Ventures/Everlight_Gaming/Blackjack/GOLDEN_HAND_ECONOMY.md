@@ -47,11 +47,12 @@ is ~100xB. **No change to gold package prices** -- the existing house edge funds
 - **Net:** the compounding is a branding/excitement upside, not a reserve threat. The 1,776
   hard ceiling is the single number to size the reserve against.
 
-## Build checklist (next)
-1. Auto-arm: newRound when goldenHandActive -> place bet = qtdAvgBet on home seat + marker.
-2. Golden bonus rides per-hand, scales with double, stacks across splits, capped 888/hand
-   (x2 doubled) + 1,776 total event ceiling.
-3. Pay reliably on EVERY winning settle path (single / double / split / double-after-split).
-4. Celebration fires whenever golden payout > 0 (fix: current check reads goldenHandActive
-   AFTER it's cleared -> gate on bcardPayoutAmount > 0 instead).
-5. Landscape: fullscreen + emoji -> fixed top-right cluster (safe-area), clear of the bets.
+## Build checklist -- BUILT 2026-06-08 (commit 6b9244b)
+1. [x] Auto-arm: newRound when goldenHandActive -> betAmount = qtdAvgBet; GOLDEN HAND banner.
+2. [x] Golden bonus rides per-hand (`goldenHandHandBonus`), scales w/ double, stacks across
+       splits, capped 888/hand (x2 doubled) + `GOLDEN_EVENT_CAP` 1,776 total ceiling.
+3. [x] Pays on EVERY winning settle path (main loop iterates home-seat hand+splitHand;
+       opening-BJ path; doubled-bust clears goldenHandActive so it can't leak forward).
+4. [x] Celebration: gated on `bcardPayoutAmount > 0` (was reading goldenHandActive after clear).
+5. [x] Landscape: social/emoji + fullscreen -> fixed top-right cluster (safe-area inset).
+Owner-gated test (B-Card beta = owner-only). Verify, then flip BCARD_BETA_MODE=false to launch.
