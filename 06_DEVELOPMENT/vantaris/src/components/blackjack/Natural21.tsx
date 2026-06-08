@@ -10,23 +10,27 @@ import { useEffect, useState, useRef } from 'react'
 export function Natural21Overlay({ show, onDone }: { show: boolean; onDone: () => void }) {
   const [visible, setVisible] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
+  // Keep the latest onDone without making it an effect dependency.
+  const onDoneRef = useRef(onDone)
+  onDoneRef.current = onDone
 
   useEffect(() => {
-    if (show) {
-      setVisible(true)
-      // Play video from start
-      if (videoRef.current) {
-        videoRef.current.currentTime = 0
-        videoRef.current.play().catch(() => {})
-      }
-      // Auto-dismiss after 3s
-      const t = setTimeout(() => {
-        setVisible(false)
-        onDone()
-      }, 3000)
-      return () => clearTimeout(t)
+    if (!show) return
+    setVisible(true)
+    // Play video from start
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0
+      videoRef.current.play().catch(() => {})
     }
-  }, [show, onDone])
+    // Auto-dismiss after 3s. Depend ONLY on `show`: the parent passes a fresh inline
+    // onDone every render, so including it here re-ran this effect constantly and reset
+    // the timer forever -> the overlay never dismissed ("frozen on the page").
+    const t = setTimeout(() => {
+      setVisible(false)
+      onDoneRef.current()
+    }, 3000)
+    return () => clearTimeout(t)
+  }, [show])
 
   return (
     <AnimatePresence>

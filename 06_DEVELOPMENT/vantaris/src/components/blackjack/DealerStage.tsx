@@ -6,7 +6,7 @@ import { DealerAvatar } from './DealerAvatar'
 
 /**
  * DealerStage -- the seated dealer, bigger than the old icon, that DEALS IN SYNC
- * with the game. The dealer's live-action video (bacardi_live / aria_live) plays
+ * with the game. The dealer's live-action video (bcardd_live / aria_live) plays
  * its dealing motion on EACH card dealt (initial deal, hit, double, split, and
  * the dealer's own draws), then pauses on a frame (idle) when no one is acting.
  *
@@ -19,8 +19,8 @@ import { DealerAvatar } from './DealerAvatar'
  */
 
 const DEALER_VIDEOS: Record<string, string> = {
-  // official_bdl.mp4 = the new official B-CARDD dealer footage (replaces bacardi_live).
-  bacardi: '/dealers/official_bdl.mp4',
+  // official_bdl.mp4 = the new official B-CARDD dealer footage (replaces bcardd_live).
+  bcardd: '/dealers/official_bdl.mp4',
   aria: '/dealers/aria_live.mp4',
 }
 const DEAL_MOTION_MS = 1800
