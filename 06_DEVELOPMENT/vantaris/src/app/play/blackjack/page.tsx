@@ -222,6 +222,11 @@ const DEALER_LINES: Record<string, Record<string, string[]>> = {
 
 const SUPABASE_URL = 'https://jdqqmsmwmbsnlnstyavl.supabase.co'
 
+// Single-player -> Hall of Legends feed. OFF until the blackjack-api edge fn is
+// redeployed with the stats_only branch (else it would drift a signed-in player's
+// server chip_balance from a single-player hand). Flip to true post-deploy.
+const LEADERBOARD_SP_FEED = false
+
 // Speech cache: pre-warm common phrases for zero-latency dealer voice
 const SPEECH_CACHE = new Map<string, Blob>()
 const PREWARM_PHRASES = [
@@ -1019,12 +1024,22 @@ export default function BlackjackPage() {
     // Feed the public Hall of Legends (server-authoritative, stats-only -- never
     // touches the local wallet). Fail-safe: signed-out players + errors no-op.
     // jackpot=true marks a B-CARDD BET hit so jackpots_won increments.
-    recordLeaderboardHand({
-      outcome: store.outcome || 'loss',
-      bet: store.mainHand.bet,
-      payout: store.winAmount,
-      jackpot: store.bcardPayoutAmount > 0,
-    })
+    //
+    // GATED OFF until the blackjack-api edge fn is redeployed with the stats_only
+    // branch. The CURRENTLY deployed edge ignores stats_only and would mutate a
+    // signed-in player's server chip_balance from a single-player hand (that same
+    // balance backs multiplayer) -> balance drift. Flip to true the moment the
+    // edge ships (commit on supabase/functions/blackjack-api adds stats_only +
+    // jackpots_won). Deploy: `supabase functions deploy blackjack-api
+    // --project-ref jdqqmsmwmbsnlnstyavl --no-verify-jwt`.
+    if (LEADERBOARD_SP_FEED) {
+      recordLeaderboardHand({
+        outcome: store.outcome || 'loss',
+        bet: store.mainHand.bet,
+        payout: store.winAmount,
+        jackpot: store.bcardPayoutAmount > 0,
+      })
+    }
 
     const moodLine = postHandSettle()
     if (moodLine) {
