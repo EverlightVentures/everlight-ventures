@@ -207,7 +207,7 @@ export const BCARD_VALUE = 8             // plays as an 8 (B = 8)
 export const BCARD_PAYOUT_CAP = 888      // hard cap on any single payout (lucky-8)
 export const BCARD_TAKE_MULT = 100       // "Take it": guaranteed auto-win at 100x avg bet
 export const BCARD_RIDE_MULT = 200       // "Ride it": 200x, but only if you then beat the dealer
-const BETA_BCARD_EVERY = 50              // beta: force the B-Card every 50 cards
+const BETA_BCARD_EVERY = 12              // beta: force the B-Card every 12 cards (~3 hands) -- OWNER-ONLY fast testing; prod uses real BCARD_ODDS
 const BCARD_OWNER_EMAIL = '1m.rich.gee@gmail.com'
 
 export interface BCardContext {
