@@ -23,7 +23,7 @@ import {
   // THE B-CARDD BET -- core is already built + unit-tested in the engine.
   // We REUSE these; do not reimplement. Spec:
   // 01_BUSINESSES/Everlight_Ventures/Everlight_Gaming/Blackjack/BCARDD_BET_SPEC.md
-  shouldDealBCard, makeBCard, bcardPayout,
+  shouldDealBCard, makeBCard, bcardPayout, goldenHandHandBonus, GOLDEN_EVENT_CAP,
 } from './blackjack-engine'
 
 // ============================================================
@@ -297,7 +297,7 @@ const DEFAULT_DEALERS: DealerPersona[] = [
   { id: 'aria', name: 'Aria Sinclair', title: 'House Dealer', vip: false, voiceId: 'EXAVITQu4vr4xnSDxMaL', color: '#c9a84c' },
   { id: 'marcus', name: 'Marcus Vega', title: 'High Roller', vip: false, voiceId: 'onwK4e9ZLuTAKqWW03F9', color: '#ff6b35' },
   { id: 'kanisha', name: 'Kanisha Thompson', title: 'VIP Lounge', vip: true, voiceId: 'XrExE9yKIg1WjnnlVkGX', color: '#e91e63' },
-  { id: 'bacardi', name: 'Bacardi Ice', title: 'VIP Elite', vip: true, voiceId: 'DwwuoY7Uz8AP8zrY5TAo', color: '#00bcd4' },
+  { id: 'bcardd', name: '$BCARDD Ice', title: 'VIP Elite', vip: true, voiceId: 'DwwuoY7Uz8AP8zrY5TAo', color: '#00bcd4' },
 ]
 
 // ============================================================
@@ -732,7 +732,8 @@ export const useBlackjackStore = create<BlackjackStore>()(
         // Golden Hand bonus if this opening-BJ round was the armed Golden Hand. A
         // natural blackjack beats the dealer (unless dealer also has BJ = push).
         const bjBeatDealer = settled.outcome === 'blackjack'
-        const bjGoldenBonus = s.goldenHandActive ? bcardPayout(s.goldenHandAvgBet, 'ride', bjBeatDealer) : 0
+        // Natural BJ can't be doubled -> single-hand golden bonus (capped 888).
+        const bjGoldenBonus = (s.goldenHandActive && bjBeatDealer) ? goldenHandHandBonus(s.goldenHandAvgBet, false) : 0
         const bjTotal = settled.payout + sbPayout + bjGoldenBonus
         set({
           phase: 'settled',
@@ -1080,14 +1081,22 @@ export const useBlackjackStore = create<BlackjackStore>()(
           || results.find(r => r.outcome === 'push')?.outcome
           || results[0]?.outcome || 'loss'
 
-        // ---- THE B-CARDD BET: Golden Hand resolution (RIDE IT, 200x) ----
-        // If this round was armed as the Golden Hand, the player collects 200x their
-        // (frozen) avg bet ONLY if they beat the dealer (win/blackjack/charlie). Push,
-        // loss, or bust = 0 (the gambled-away guaranteed 100x is gone). Chips only.
+        // ---- THE B-CARDD BET: Golden Hand resolution (RIDE IT) ----
+        // The Golden Hand is the human's HOME seat this round. Each winning hand pays
+        // 200x the frozen avg bet, x2 if that hand was doubled, stacked across split
+        // hands, then the whole event is hard-capped at GOLDEN_EVENT_CAP (1,776) so the
+        // reserve stays bounded. Lose/push/bust a hand = 0 for it. See GOLDEN_HAND_ECONOMY.md.
         let goldenBonus = 0
         if (s2.goldenHandActive) {
-          const beatDealer = handsWon > 0  // any active seat that won = beat the dealer
-          goldenBonus = bcardPayout(s2.goldenHandAvgBet, 'ride', beatDealer)  // 200x, capped 888
+          const gh = allSeats[HOME_SEAT]
+          if (gh) {
+            const ghHands = [gh.hand, gh.splitHand].filter(Boolean) as HandState[]
+            for (const h of ghHands) {
+              const won = h.outcome === 'win' || h.outcome === 'blackjack' || h.outcome === 'charlie'
+              if (won) goldenBonus += goldenHandHandBonus(s2.goldenHandAvgBet, h.doubled)
+            }
+            goldenBonus = Math.min(GOLDEN_EVENT_CAP, goldenBonus)
+          }
         }
         const grandPayout = totalPayout + goldenBonus
 
@@ -1154,7 +1163,8 @@ export const useBlackjackStore = create<BlackjackStore>()(
         if (s.splitHand && isMainHand) {
           set({ currentHandIndex: 1, phase: 'split_turn', mainHand: { ...hand, outcome: 'bust', payout: 0 } })
         } else {
-          set({ phase: 'settled', outcome: 'bust', winAmount: hand.bet, mainHand: isMainHand ? { ...hand, outcome: 'bust', payout: 0 } : s.mainHand })
+          // Doubled hand busted -> if this was the Golden Hand, the jackpot is gone; clear the flag so it can't leak to the next round.
+          set({ phase: 'settled', outcome: 'bust', winAmount: hand.bet, mainHand: isMainHand ? { ...hand, outcome: 'bust', payout: 0 } : s.mainHand, goldenHandActive: false, bcardPayoutAmount: 0 })
         }
       } else {
         get().playerStand()
@@ -1305,9 +1315,16 @@ export const useBlackjackStore = create<BlackjackStore>()(
     const seats = state.seats.map(s => createEmptySeat(s.index, s.index === HOME_SEAT))
 
     // ---- THE B-CARDD BET: promote a pending Golden Hand into the upcoming round ----
-    // If the player chose RIDE IT last round, THIS new round is the Golden Hand:
-    // play it normally at the current bet; beat the dealer for the 200x payout.
+    // If the player chose RIDE IT last round, THIS new round is the Golden Hand.
     const goldenHandActive = state.goldenHandPending
+
+    // Auto-arm: stake a bet = the player's AVG bet so they never have to re-bet
+    // (Rich: "place the total of my average bet"). The "GOLDEN HAND 200x" marker rides
+    // on it; double/split scale it; payout resolves on win. Clamped to balance + table min.
+    const goldenBal = state.gameMode === 'sc' ? state.player.sweepsCoins : state.player.chips
+    const goldenAutoBet = goldenHandActive
+      ? Math.min(goldenBal, Math.max(state.config.minBet, Math.round(qtdAvgBet(state.player, state.config.minBet))))
+      : 0
 
     set({
       phase: 'betting',
@@ -1328,7 +1345,7 @@ export const useBlackjackStore = create<BlackjackStore>()(
       winAmount: 0,
       xpEarned: 0,
       seatResults: [],
-      betAmount: state.autoRebet ? state.betAmount : state.selectedChip,
+      betAmount: goldenHandActive ? goldenAutoBet : (state.autoRebet ? state.betAmount : state.selectedChip),
       // B-Card per-round flags reset; Golden Hand status carried forward once.
       bcardActive: false,
       bcardChoice: null,

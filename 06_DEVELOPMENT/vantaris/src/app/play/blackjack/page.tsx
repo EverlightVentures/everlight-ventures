@@ -571,11 +571,13 @@ function DealerPanel() {
 // ============================================================
 
 function OutcomeOverlay() {
-  const { outcome, winAmount, player, lightning, bcardChoice, bcardPayoutAmount, goldenHandActive } = useBlackjackStore()
+  const { outcome, winAmount, player, lightning, bcardChoice, bcardPayoutAmount } = useBlackjackStore()
   if (!outcome) return null
 
-  // THE B-CARDD BET: a TAKE IT win, or a Golden Hand that paid the 200x bonus.
-  const bcardHit = (bcardChoice === 'take' || goldenHandActive) && bcardPayoutAmount > 0
+  // THE B-CARDD BET: any B-Card payout (a TAKE win OR a Golden Hand that paid) fires the
+  // celebration. Gate on the payout amount itself -- goldenHandActive is already cleared
+  // by settle time, which is exactly why the old check never lit up for the Golden Hand.
+  const bcardHit = bcardPayoutAmount > 0
 
   const config: Record<string, { text: string; color: string; glow: string }> = {
     blackjack: { text: 'BLACKJACK', color: 'var(--gold)', glow: 'rgba(201,168,76,0.3)' },
@@ -1350,17 +1352,8 @@ export default function BlackjackPage() {
             {store.voiceEnabled ? '\uD83D\uDD0A' : '\uD83D\uDD07'}
           </button>
 
-          {/* Fullscreen */}
-          <button onClick={() => {
-            if (!document.fullscreenElement) {
-              document.documentElement.requestFullscreen?.()
-            } else {
-              document.exitFullscreen?.()
-            }
-          }}
-            className="text-sm px-1.5 py-1 rounded" style={{ color: 'var(--text-tertiary)' }}>
-            {'\u26F6'}
-          </button>
+          {/* Fullscreen moved to the fixed top-right cluster (SocialBar) so it's
+              reachable in landscape. */}
         </div>
       </div>
 

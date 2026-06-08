@@ -125,12 +125,12 @@ export function SocialBar({ seatPositions }: { seatPositions: SeatPosition[] }) 
         </AnimatePresence>
       </div>
 
-      {/* Social action bar near player seat */}
-      <div className="absolute" style={{
-        left: `${playerPos.x}px`,
-        top: `${playerPos.y + 90}px`,
-        transform: 'translate(-50%, 0)',
-        zIndex: 20,
+      {/* Social action bar -- fixed TOP-RIGHT cluster so it's always reachable and
+          never hidden under the bets (esp. in landscape). Was pinned to the seat. */}
+      <div className="fixed" style={{
+        top: 'calc(env(safe-area-inset-top, 0px) + 10px)',
+        right: 'calc(env(safe-area-inset-right, 0px) + 10px)',
+        zIndex: 40,
       }}>
         <div className="flex gap-1.5 items-center">
           {/* Quick emoji button */}
@@ -162,6 +162,19 @@ export function SocialBar({ seatPositions }: { seatPositions: SeatPosition[] }) 
             whileTap={{ scale: 0.85 }}
           >
             <span className="text-base">{'\uD83D\uDCAC'}</span>
+          </motion.button>
+
+          {/* Fullscreen -- in the cluster so it's reachable in landscape */}
+          <motion.button
+            onClick={() => {
+              if (!document.fullscreenElement) document.documentElement.requestFullscreen?.()
+              else document.exitFullscreen?.()
+            }}
+            className="social-btn"
+            whileTap={{ scale: 0.85 }}
+            title="Fullscreen"
+          >
+            <span className="text-base">{'\u26F6'}</span>
           </motion.button>
         </div>
 

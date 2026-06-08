@@ -252,6 +252,20 @@ export function bcardPayout(avgBet: number, choice: 'take' | 'ride', beatDealer?
   return 0  // rode and did NOT beat the dealer = jackpot gone
 }
 
+// ---- Golden Hand (RIDE IT) scaling -- see GOLDEN_HAND_ECONOMY.md ----
+// The 200x rides like a real bet: it DOUBLES when the hand is doubled, and each
+// SPLIT hand carries its own. Per-hand cap = 888 (x2 = 1,776 when doubled). The whole
+// event is then hard-capped at GOLDEN_EVENT_CAP so the rare 4-way-split-and-double
+// monster can never exceed it -- keeps the reserve bounded (~10x house-edge cushion).
+export const GOLDEN_EVENT_CAP = 1776   // two lucky-8s: hard ceiling on a whole Golden Hand
+
+/** One winning Golden Hand's bonus: 200x avg bet, x2 if doubled, capped 888 (x2 doubled). */
+export function goldenHandHandBonus(avgBet: number, doubled: boolean): number {
+  const safeAvg = Math.max(0, avgBet || 0)
+  const mult = doubled ? 2 : 1
+  return Math.min(BCARD_PAYOUT_CAP * mult, BCARD_RIDE_MULT * safeAvg * mult)
+}
+
 export function evaluateHand(cards: Card[]): {
   value: number; softValue: number; isSoft: boolean;
   isBust: boolean; isBlackjack: boolean; isCharlie: boolean
