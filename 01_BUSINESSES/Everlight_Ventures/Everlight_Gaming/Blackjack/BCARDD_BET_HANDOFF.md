@@ -70,7 +70,7 @@ Three fixes from a live-table screenshot review, all verified on the live edge (
    carryover, no lock. Files: `src/lib/blackjack-store.ts` (`newRound`, `toggleSeat`, `resetToHomeSeat`),
    `src/app/play/blackjack/page.tsx` (CLEAR wiring).
 4. **Dealer video = `official_bdl.mp4`** (the new official B-CARDD dealer footage). Wired in
-   `src/components/blackjack/DealerStage.tsx` (`DEALER_VIDEOS.bacardi -> '/dealers/official_bdl.mp4'`), asset
+   `src/components/blackjack/DealerStage.tsx` (`DEALER_VIDEOS.bcardd -> '/dealers/official_bdl.mp4'`), asset
    force-added past gitignore at `public/dealers/official_bdl.mp4` (2,768,590 bytes). **This closes the
    Open TODO #3 dealer-video-404 gap below.** Live: `https://everlightventures.io/dealers/official_bdl.mp4` -> 200.
 
@@ -83,7 +83,7 @@ Rich asked to do, in order: (1) B-Card reveal cinematic, (2) leaderboard/high sc
 crowned-B face that plays as an 8) + gold ray burst + flash + `playBlackjack()`
 sting, then "THE B-CARDD BET" slams in and the TAKE/RIDE panel rises. Pure local
 presentation (no new store phase). ALSO fixed a live bug: the overlay still pointed
-at the dead `bacardi_live.mp4` (404) -> now `official_bdl.mp4`. Built green on e5,
+at the dead `bcardd_live.mp4` (404) -> now `official_bdl.mp4`. Built green on e5,
 deployed (run 27107844007, success).
 
 **(2) LEADERBOARD -- IT WAS ALREADY LIVE WITH REAL DATA.** Key finding: the
@@ -129,6 +129,32 @@ LEGAL-GATED (do not blind-build).** Inventory:
     currency + redemption + KYC/AML + sweeps-friendly processor. These are gated on
     LLC + attorney per the Legal section -- scope, don't ship.
 
+## 2026-06-08 -- PRO COACHING (premium AI dealer, Gold-funded) -- commit `26a662a`
+Rich wants the AI dealer that teaches blackjack to be a PREMIUM, self-funding feature
+(its cost covers the AI subscription at a 3x markup). Built it COMPLIANT:
+  - **Two tiers.** FREE = the existing instant static strategy hints (`dealer-chat`
+    action, $0, no tokens) -- stays free for everyone so no player is EVER required to
+    pay for help (compliance anchor). PREMIUM = a conversational AI tutor (Perplexity
+    `sonar`) that answers anything + explains why.
+  - **Paid in GOLD COINS, never SC.** Rich said "SC" but that would break the
+    sweepstakes safe harbor (SC must stay free + redeemable-only). Switched to Gold
+    (chip_balance) -- the purchasable for-fun currency -- per the compliance fork.
+    Decision confirmed with Rich (GC, recommended).
+  - **Pricing (Rich chose BOTH):** pay-per-message = Gold `max(15, ceil(3x token cost))`
+    (~17 GC/msg at sonar rates), AND a Coaching Pass = 250 Gold for 24h unlimited.
+    Config constants top of `blackjack-api` (GC_PER_USD, COST_MULTIPLIER=3, etc.).
+  - **Server-authoritative + unspoofable:** balance check + Gold deduction + the LLM
+    call ALL happen in the edge fn (`dealer-ai` + `buy-coaching-pass` actions). The
+    browser can't force a free reply or fake a deduction. Dev/owner email coaches free.
+  - **Files:** `supabase/functions/blackjack-api/index.ts` (2 new actions + helpers),
+    `supabase/migrations/20260607_coaching_pass.sql` (coaching_pass_until column),
+    `src/components/blackjack/DealerChat.tsx` (PRO toggle + pass UI + Gold cost,
+    gated behind `PRO_COACHING_ENABLED=false`). Frontend builds + deploys but the
+    premium UI is HIDDEN until the edge is deployed (free chat unchanged, zero regression).
+  - **Activation (same one blocker -- the Supabase token):** deploy `blackjack-api`,
+    apply the coaching_pass migration, set `PRO_COACHING_ENABLED=true`, ensure
+    `PERPLEXITY_API_KEY` is set on the function. Then it's live.
+
 ## DEPLOY status
 - Built on **e5-mother** (phone proot SIGSEGVs on npm build). The `bj-finish` branch now auto-deploys to
   **PRODUCTION** via GitHub Action `.github/workflows/deploy-vantaris.yml` (triggers on push to
@@ -146,7 +172,7 @@ LEGAL-GATED (do not blind-build).** Inventory:
    `blackjack-api` edge function (a `bcard-resolve` action). Today it is client-side (fine for for-fun, spoofable).
 2. **Gold/Sweeps real cash-out:** add the dual-currency ledger, the AMOE free-entry, redemption + KYC. (The
    frontend already has a `gameMode:'sc'` + `sweepsCoins` notion to build on.)
-3. **Dealer video asset -- DONE (2026-06-07).** ~~`bacardi_live.mp4` 404s on the preview~~ -> replaced by
+3. **Dealer video asset -- DONE (2026-06-07).** ~~`bcardd_live.mp4` 404s on the preview~~ -> replaced by
    `official_bdl.mp4`, committed to `public/dealers/`, live (200) on prod. STILL OPEN: give the B-Card a
    dedicated REVEAL animation using the buff $BCARDD dealer (the video plays dealing-motion in sync now, but
    the 1-in-a-million B-Card hit has no special cinematic yet).
