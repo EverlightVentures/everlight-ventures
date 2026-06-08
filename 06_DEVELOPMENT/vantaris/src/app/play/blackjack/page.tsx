@@ -120,7 +120,7 @@ const DEALER_LINES: Record<string, Record<string, string[]>> = {
     charlie: ["SIX CARDS and still in! The lounge is losing it!"],
     idle: ["The VIP lounge is waiting!", "Take your time, superstar."],
   },
-  bacardi: {
+  bcardd: {
     deal: [
       "Cards are cold. Like me.", "The ice table is open. Play or leave.", "Fresh deck. Fresh victims.",
       "Let us see who freezes first.", "The frost deals. You receive.", "Your cards. Handle them wisely.",
@@ -160,7 +160,7 @@ const DEALER_LINES: Record<string, Record<string, string[]>> = {
     blackjack: [
       "Natural 21 at the ice table. Legends will speak of this.",
       "Blackjack. The frost has never seen that play.", "Twenty one. Pure. Cold. Perfect.",
-      "Flawless. Even Bacardi Ice is speechless.",
+      "Flawless. Even $BCARDD Ice is speechless.",
       "Natural blackjack. In twenty years, that moment never gets old.",
       "Twenty-one on the first two cards. The ice table has a new chapter in its history.",
       "Blackjack. If I could feel warmth, I would feel it now.",
@@ -222,10 +222,10 @@ const DEALER_LINES: Record<string, Record<string, string[]>> = {
 
 const SUPABASE_URL = 'https://jdqqmsmwmbsnlnstyavl.supabase.co'
 
-// Single-player -> Hall of Legends feed. OFF until the blackjack-api edge fn is
-// redeployed with the stats_only branch (else it would drift a signed-in player's
-// server chip_balance from a single-player hand). Flip to true post-deploy.
-const LEADERBOARD_SP_FEED = false
+// Single-player -> Hall of Legends feed. ON: the blackjack-api edge fn now honors
+// stats_only (deployed 2026-06-08), so signed-in single-player hands feed the board
+// + jackpots_won WITHOUT touching the wallet (no balance drift).
+const LEADERBOARD_SP_FEED = true
 
 // Speech cache: pre-warm common phrases for zero-latency dealer voice
 const SPEECH_CACHE = new Map<string, Blob>()
@@ -292,8 +292,8 @@ async function speakLine(text: string, voiceId: string) {
     utter.volume = 0.85
     utter.onend = () => useBlackjackStore.setState({ speaking: false })
     utter.onerror = () => useBlackjackStore.setState({ speaking: false })
-    // Match the dealer's gender. Aria/Kanisha are female; Marcus/Bacardi are male.
-    // Browser default voices skew female, which made the male dealers (esp. Bacardi
+    // Match the dealer's gender. Aria/Kanisha are female; Marcus/$BCARDD are male.
+    // Browser default voices skew female, which made the male dealers (esp. $BCARDD
     // = Sean) sound wrong whenever the ElevenLabs voice was momentarily unavailable.
     const FEMALE_VOICE_IDS = new Set(['EXAVITQu4vr4xnSDxMaL', 'XrExE9yKIg1WjnnlVkGX'])
     const wantMale = !FEMALE_VOICE_IDS.has(voiceId)
@@ -319,7 +319,7 @@ const VOICE_IDS: Record<string, string> = {
   aria: 'EXAVITQu4vr4xnSDxMaL',
   marcus: 'onwK4e9ZLuTAKqWW03F9',
   kanisha: 'XrExE9yKIg1WjnnlVkGX',
-  bacardi: 'DwwuoY7Uz8AP8zrY5TAo',
+  bcardd: 'DwwuoY7Uz8AP8zrY5TAo',
 }
 
 function useDealerSpeak() {
@@ -506,7 +506,7 @@ function DealerPanel() {
     { id: 'aria', name: 'Aria Sinclair', title: 'House Dealer', vip: false, voiceId: 'EXAVITQu4vr4xnSDxMaL', color: '#c9a84c' },
     { id: 'marcus', name: 'Marcus Vega', title: 'High Roller', vip: false, voiceId: 'onwK4e9ZLuTAKqWW03F9', color: '#ff6b35' },
     { id: 'kanisha', name: 'Kanisha Thompson', title: 'VIP Lounge', vip: false, voiceId: 'XrExE9yKIg1WjnnlVkGX', color: '#e91e63' },
-    { id: 'bacardi', name: 'Bacardi Ice', title: 'VIP Elite', vip: false, voiceId: 'DwwuoY7Uz8AP8zrY5TAo', color: '#00bcd4' },
+    { id: 'bcardd', name: '$BCARDD Ice', title: 'VIP Elite', vip: false, voiceId: 'DwwuoY7Uz8AP8zrY5TAo', color: '#00bcd4' },
   ]
 
   return (

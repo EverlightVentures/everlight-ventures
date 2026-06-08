@@ -27,7 +27,9 @@ const API_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsIn
 // Premium AI coaching. OFF until the blackjack-api dealer-ai/buy-coaching-pass
 // actions are deployed (+ the coaching_pass_until column migration applied).
 // Flip to true post-deploy; the free static hints work regardless.
-const PRO_COACHING_ENABLED = false
+const PRO_COACHING_ENABLED = true
+const COACHING_PUBLIC = false                  // false = owner-only test phase; flip true to launch publicly
+const OWNER_EMAIL = '1m.rich.gee@gmail.com'    // who can see Pro Coaching while COACHING_PUBLIC is false
 const COACHING_PASS_GC = 250  // display only; server is source of truth
 
 // Premium AI ask: server meters Gold + runs the LLM. Returns reply + what it cost.
@@ -143,12 +145,15 @@ export function DealerChat() {
   const mainHand = useBlackjackStore(s => s.mainHand)
   const dealerHand = useBlackjackStore(s => s.dealerHand)
   const activeDealer = useBlackjackStore(s => s.activeDealer)
+  const playerEmail = useBlackjackStore(s => s.playerEmail)
+  // Pro Coaching shows for the owner during the test phase, everyone once COACHING_PUBLIC=true.
+  const coachingVisible = PRO_COACHING_ENABLED && (COACHING_PUBLIC || playerEmail === OWNER_EMAIL)
 
   // Resolve the signed-in player's id once (premium AI needs a real account).
   useEffect(() => {
-    if (!PRO_COACHING_ENABLED || !isOpen || playerId) return
+    if (!coachingVisible || !isOpen || playerId) return
     getPlayerProfile('').then((p: any) => p?.player_id && setPlayerId(p.player_id)).catch(() => {})
-  }, [isOpen, playerId])
+  }, [isOpen, playerId, coachingVisible])
 
   // System line helper for the chat (coach/info notices).
   const sysMsg = (text: string) =>
@@ -233,7 +238,7 @@ export function DealerChat() {
     }
 
     // PRO COACHING -- server-metered AI tutor (Gold-funded). Free static path below.
-    if (PRO_COACHING_ENABLED && proMode) {
+    if (coachingVisible && proMode) {
       if (!playerId) { setTyping(false); sysMsg('Sign in to unlock Pro Coaching -- your live AI strategy tutor.'); return }
       const r = await getPremiumResponse(playerId, text, gs)
       setTyping(false)
@@ -322,7 +327,7 @@ export function DealerChat() {
             <div className="px-3 py-2 flex items-center gap-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
               <span className="text-xs">{'\uD83C\uDCCF'}</span>
               <span className="text-xs font-semibold" style={{ color: '#c9a84c', fontFamily: "'Cinzel', serif" }}>TABLE CHAT</span>
-              {PRO_COACHING_ENABLED && (
+              {coachingVisible && (
                 <button
                   onClick={() => setProMode(v => !v)}
                   className="ml-auto text-[9px] px-2 py-0.5 rounded-full font-bold"
@@ -336,11 +341,11 @@ export function DealerChat() {
                   {passActive ? '✦ PRO · PASS' : proMode ? '✦ PRO ON' : '✦ PRO'}
                 </button>
               )}
-              <span className={`text-[9px] ${PRO_COACHING_ENABLED ? '' : 'ml-auto'}`} style={{ color: 'rgba(255,255,255,0.4)' }}>{activeDealer.name}</span>
+              <span className={`text-[9px] ${coachingVisible ? '' : 'ml-auto'}`} style={{ color: 'rgba(255,255,255,0.4)' }}>{activeDealer.name}</span>
             </div>
 
             {/* Pro Coaching hint bar (premium mode, no active pass) */}
-            {PRO_COACHING_ENABLED && proMode && !passActive && (
+            {coachingVisible && proMode && !passActive && (
               <div className="px-3 py-1.5 flex items-center gap-2 text-[9px]"
                 style={{ background: 'rgba(201,168,76,0.06)', borderBottom: '1px solid rgba(201,168,76,0.15)', color: 'rgba(255,255,255,0.55)' }}>
                 <span>Live AI coaching &middot; Gold per question</span>
@@ -391,7 +396,7 @@ export function DealerChat() {
                 type="text" value={input}
                 onChange={e => setInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleSend()}
-                placeholder={PRO_COACHING_ENABLED && proMode ? 'Ask your AI coach...' : 'Ask the dealer...'}
+                placeholder={coachingVisible && proMode ? 'Ask your AI coach...' : 'Ask the dealer...'}
                 className="flex-1 bg-transparent text-xs outline-none px-2 py-1.5 rounded-lg"
                 style={{ border: '1px solid rgba(255,255,255,0.1)', color: '#fff' }}
               />
