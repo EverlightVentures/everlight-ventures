@@ -15,6 +15,7 @@ import {
 import { supabase, recordLeaderboardHand } from '@/lib/supabase'
 import type { Achievement, AvatarConfig, SeatPosition } from '@/components/blackjack'
 import type { Card as CardData } from '@/lib/blackjack-engine'
+import { isBCardBetaOwner, bcardBetaCountdown } from '@/lib/blackjack-engine'
 import { Natural21Overlay } from '@/components/blackjack/Natural21'
 
 // Audio engine (Tone.js procedural sounds)
@@ -226,6 +227,10 @@ const SUPABASE_URL = 'https://jdqqmsmwmbsnlnstyavl.supabase.co'
 // stats_only (deployed 2026-06-08), so signed-in single-player hands feed the board
 // + jackpots_won WITHOUT touching the wallet (no balance drift).
 const LEADERBOARD_SP_FEED = true
+
+// Temporary beta readout on the VIP table so we can SEE why the B-Card isn't firing
+// (not on VIP / not signed in as owner / just short of the card count). Remove at launch.
+const BCARD_BETA_DEBUG = true
 
 // Speech cache: pre-warm common phrases for zero-latency dealer voice
 const SPEECH_CACHE = new Map<string, Blob>()
@@ -569,6 +574,25 @@ function DealerPanel() {
 // ============================================================
 // OUTCOME OVERLAY
 // ============================================================
+
+// Temporary on-table beta readout: shows exactly why the owner B-Card will/won't fire.
+function BetaBadge() {
+  const config = useBlackjackStore(s => s.config)
+  const playerEmail = useBlackjackStore(s => s.playerEmail)
+  const cardsDealt = useBlackjackStore(s => s.cardsDealt)
+  if (!BCARD_BETA_DEBUG || config.tableType !== 'vip') return null
+  const owner = isBCardBetaOwner(playerEmail)
+  const countdown = bcardBetaCountdown(playerEmail, cardsDealt)
+  return (
+    <div className="fixed left-2 z-[60] px-2 py-1.5 rounded-lg text-[9px] font-mono leading-relaxed pointer-events-none"
+      style={{ top: 'calc(env(safe-area-inset-top, 0px) + 10px)', background: 'rgba(0,0,0,0.78)', border: '1px solid rgba(201,168,76,0.35)', color: '#c9a84c' }}>
+      <div className="font-bold tracking-wider">B-CARDD BETA</div>
+      <div>table: {config.tableType === 'vip' ? 'VIP ok' : 'not VIP'}</div>
+      <div>you: {owner ? 'OWNER ok' : (playerEmail ? `${playerEmail} (not owner)` : 'GUEST - sign in!')}</div>
+      <div>cards: {cardsDealt}{countdown != null ? ` - B-Card in ${countdown}` : ' (owner only)'}</div>
+    </div>
+  )
+}
 
 function OutcomeOverlay() {
   const { outcome, winAmount, player, lightning, bcardChoice, bcardPayoutAmount } = useBlackjackStore()
@@ -1400,6 +1424,7 @@ export default function BlackjackPage() {
 
         {/* Dealer panel -- centered on table */}
         <DealerPanel />
+        <BetaBadge />
 
         {/* THE B-CARDD BET -- Golden Hand banner (the hand after a RIDE IT) */}
         <GoldenHandBanner />

@@ -207,8 +207,19 @@ export const BCARD_VALUE = 8             // plays as an 8 (B = 8)
 export const BCARD_PAYOUT_CAP = 888      // hard cap on any single payout (lucky-8)
 export const BCARD_TAKE_MULT = 100       // "Take it": guaranteed auto-win at 100x avg bet
 export const BCARD_RIDE_MULT = 200       // "Ride it": 200x, but only if you then beat the dealer
-const BETA_BCARD_EVERY = 12              // beta: force the B-Card every 12 cards (~3 hands) -- OWNER-ONLY fast testing; prod uses real BCARD_ODDS
+const BETA_BCARD_EVERY = 6               // beta: force the B-Card every 6 cards (~2 hands) -- OWNER-ONLY fast testing; prod uses real BCARD_ODDS
 const BCARD_OWNER_EMAIL = '1m.rich.gee@gmail.com'
+
+/** True when this player is the beta owner (case/space-insensitive). Exported for the on-screen beta readout. */
+export function isBCardBetaOwner(email?: string | null): boolean {
+  return (email || '').trim().toLowerCase() === BCARD_OWNER_EMAIL
+}
+/** Cards remaining until the next beta B-Card (owner only); null if not the owner. */
+export function bcardBetaCountdown(email: string | null, cardsDealt: number): number | null {
+  if (!isBCardBetaOwner(email)) return null
+  const rem = BETA_BCARD_EVERY - (cardsDealt % BETA_BCARD_EVERY)
+  return rem === 0 ? BETA_BCARD_EVERY : rem
+}
 
 export interface BCardContext {
   betaMode?: boolean      // OFF in production (double-gated with owner email below)
@@ -223,7 +234,7 @@ export interface BCardContext {
  * a stray betaMode=true can never trigger for non-owner accounts.
  */
 export function shouldDealBCard(ctx: BCardContext): boolean {
-  if (ctx.betaMode && ctx.playerEmail === BCARD_OWNER_EMAIL) {
+  if (ctx.betaMode && isBCardBetaOwner(ctx.playerEmail)) {
     return ctx.cardsDealt > 0 && ctx.cardsDealt % BETA_BCARD_EVERY === 0
   }
   return Math.floor(Math.random() * BCARD_ODDS) === 0
