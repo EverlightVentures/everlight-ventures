@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useRef, useEffect, useState } from 'react'
 import { useBlackjackStore } from '@/lib/blackjack-store'
 import { playBlackjack } from '@/lib/audio-engine'
-import { BCARD_TAKE_MULT, BCARD_RIDE_MULT, BCARD_PAYOUT_CAP, bcardPayout } from '@/lib/blackjack-engine'
+import { BCARD_TAKE_MULT, BCARD_RIDE_MULT, bcardPayout } from '@/lib/blackjack-engine'
 
 /**
  * THE B-CARDD BET -- the 1-in-a-million jackpot moment.
@@ -259,8 +259,10 @@ export function BCardOverlay() {
                   </motion.button>
                 </div>
 
+                {/* No cap shown on TAKE (it's an exact, guaranteed amount). The RIDE
+                    side already says "up to ...". Per Rich: don't flash 888 at a TAKE. */}
                 <p className="text-[9px] mt-4 text-center" style={{ color: 'rgba(255,255,255,0.3)' }}>
-                  Max payout {BCARD_PAYOUT_CAP} GC. For-fun chips only.
+                  For-fun chips only.
                 </p>
               </motion.div>
             )}

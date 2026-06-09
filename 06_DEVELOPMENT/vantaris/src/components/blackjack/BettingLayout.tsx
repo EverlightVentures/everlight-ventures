@@ -272,7 +272,10 @@ export function BettingLayout({ seatPositions }: { seatPositions: SeatPosition[]
                       {sideBets.progressive.active ? (
                         <ChipStack chips={[]} size={22} total={sideBets.progressive.bet} max={5} showTotal={false} />
                       ) : (
-                        <span className="text-[5px] font-bold" style={{ color: 'rgba(201,168,76,0.5)' }}>777</span>
+                        <span className="leading-none text-center" style={{ color: 'rgba(201,168,76,0.6)', fontFamily: "'Cinzel', serif" }}>
+                          <span className="block text-[5px]">{'♛'}</span>
+                          <span className="block text-[9px] font-black -mt-0.5">B</span>
+                        </span>
                       )}
                     </motion.button>
                   </div>
