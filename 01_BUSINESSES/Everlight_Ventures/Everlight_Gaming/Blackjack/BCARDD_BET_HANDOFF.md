@@ -42,6 +42,13 @@ DEPLOYED to a PREVIEW. Production `main` is untouched. Real-money cash-out is Ph
 - **Phase 2 = real cash-out:** needs LLC (not sole prop), sweeps-friendly payment processor (Stripe bans it),
   KYC/AML, NPN disclosures, + a gaming/sweepstakes attorney sign-off. Rich is using the in-house legal team
   now and deferring an external attorney until revenue justifies it (sound -- Phase 1 needs no attorney).
+- **Payment rails (decided 2026-06-08, "whatever vibes with our stuff"):**
+  - GOLD purchases (revenue) = **keep Stripe** (already wired into vantaris checkout; for-fun coins, no
+    cash-out = Stripe-safe). Stripe only bans the *redemption* (cash for prize coins), not the Gold sale.
+  - SC cash-out (Phase 2) = **Aeropay** (the US sweeps-casino payout rail -- ACH/bank, low fees, US-first
+    for the CA operator, pre-vetted for the sweeps vertical). Others use Worldpay/Nuvei/Skrill/Trustly.
+  - Bonus rail (later, gated on its own legal check) = **optional USDC-on-Solana cash-out** from the wallets
+    Everlight already runs -- closes the $BCARDD loop (the coin IS the dealer) + reuses existing crypto infra.
 
 ## What was BUILT (Phase 1, for-fun chips) -- code is LIVE on the preview
 Files (in `06_DEVELOPMENT/vantaris/`):
