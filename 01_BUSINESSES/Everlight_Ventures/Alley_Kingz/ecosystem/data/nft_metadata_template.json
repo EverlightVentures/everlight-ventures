@@ -1,0 +1,43 @@
+{
+  "name": "BCARDI Dog Card #0001",
+  "symbol": "BCARDI",
+  "description": "BCARDI retro-cyberpunk dog card NFT used in PvP battles. Cosmetic plus gameplay stats are defined by on-chain rules. Card #0001 $BCARDD is the $BCARDD coin mascot, the blackjack dealer, and the Mythic Vanguard of the Boneguard Crew.",
+  "image": "ipfs://<image_cid>",
+  "animation_url": "ipfs://<animation_cid>",
+  "external_url": "https://everlightventures.io/cards/0001",
+  "chain": "solana",
+  "standard": "metaplex-core",
+  "properties": {
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "category": "video",
+    "onchain_stats": ["hp", "damage", "ability"],
+    "files": [
+      {"uri": "ipfs://<image_cid>", "type": "image/png"},
+      {"uri": "ipfs://<animation_cid>", "type": "video/mp4"}
+    ]
+  },
+  "attributes": [
+    {"trait_type": "Card Number", "value": "0001"},
+    {"trait_type": "Class", "value": "Boneguard Crew"},
+    {"trait_type": "Faction Id", "value": "boneguard_crew"},
+    {"trait_type": "Breed", "value": "Dogo Argentino"},
+    {"trait_type": "Name", "value": "$BCARDD"},
+    {"trait_type": "Rarity", "value": "Mythic"},
+    {"trait_type": "Role", "value": "Vanguard"},
+    {"trait_type": "Cost", "value": 10},
+    {"trait_type": "Tag", "value": "Pack"},
+    {"trait_type": "Tag", "value": "Guard"},
+    {"trait_type": "HP", "value": 2600},
+    {"trait_type": "Damage", "value": 160},
+    {"trait_type": "Attack Speed", "value": 0.7},
+    {"trait_type": "Move Speed", "value": 0.6},
+    {"trait_type": "Range", "value": 1},
+    {"trait_type": "Ability", "value": "Crownbreaker"},
+    {"trait_type": "Queen Target", "value": true},
+    {"trait_type": "Rig", "value": "The Crown Rig"},
+    {"trait_type": "Rig Class", "value": "bruiser"},
+    {"trait_type": "Weapon Mod", "value": "ram_plow"}
+  ]
+}

@@ -1,0 +1,8 @@
+/
+  Cache-Control: no-store, must-revalidate
+/index.html
+  Cache-Control: no-store, must-revalidate
+/canon.js
+  Cache-Control: no-cache
+/engine.js
+  Cache-Control: no-cache

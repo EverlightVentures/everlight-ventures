@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<!--
+  ALLEY KINGZ SHOP -- standalone storefront page.
+  Author: Amara Osei (Iron Stack). Self-contained surface; does NOT import
+  engine.js or index.html. Open directly:  shop.html?player_id=<id>
+  To go live, set the Supabase anon key below (or via window.AK_SUPABASE_ANON_KEY).
+  With no key it renders embedded DEMO data, clearly labelled.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <title>Alley Kingz // Chop Shop</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="shop.css">
+  <style>
+    html,body{margin:0;height:100%;background:#050507}
+    /* Lightweight launcher shown only when the overlay is closed (standalone use). */
+    #aks-launch{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+      flex-direction:column;gap:18px;background:radial-gradient(900px 500px at 50% 0%,rgba(212,175,55,.10),transparent),#050507;
+      color:#E8E8E8;font-family:'Inter',sans-serif;text-align:center;padding:24px}
+    #aks-launch h1{font-family:'Playfair Display',serif;color:#D4AF37;font-size:30px;margin:0}
+    #aks-launch p{color:#8a8f9c;max-width:440px;line-height:1.6;font-size:13px}
+    #aks-launch button{background:#D4AF37;color:#0a0a0a;border:none;padding:14px 28px;border-radius:10px;
+      font-weight:800;font-size:15px;cursor:pointer}
+  </style>
+</head>
+<!-- data-akshop-standalone="1" tells shop.js to auto-open on load. -->
+<body data-akshop-standalone="1">
+  <div id="aks-launch">
+    <h1>ALLEY KINGZ // CHOP SHOP</h1>
+    <p>Back-alley black market for the dog crews. Pull the Lucky Draw for Mythic rigs,
+       buy the exact card you want with Scrap, level your crew 1 to 10, stock the garage.
+       Real card art, real grit.</p>
+    <button onclick="window.AKShop.open({})">Enter the Chop Shop</button>
+  </div>
+
+  <!--
+    GO-LIVE CONFIG (operator/lead): set the Supabase anon key to connect to the
+    alley-kingz-shop edge function. Leave commented for DEMO (offline) review.
+    The anon key is a PUBLIC client key (RLS + service-role writes protect data).
+  -->
+  <!-- <script>window.AK_SUPABASE_ANON_KEY = "<supabase_anon_key>";</script> -->
+
+  <!-- card catalog (window.AK_CARDS, 106 cards) -> drives real-art Card Shop + Draw -->
+  <script src="cards_catalog.js"></script>
+  <script src="shop.js"></script>
+</body>
+</html>

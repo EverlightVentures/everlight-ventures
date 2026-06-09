@@ -1,0 +1,853 @@
+{
+  "rotation_rules": {
+    "mode": "sequence",
+    "cooldown_group": "per_ability",
+    "rotation_reset": "on_deploy",
+    "ability_level_scaling": {
+      "Common": 0.03,
+      "Rare": 0.03,
+      "Epic": 0.05,
+      "Legendary": 0.07,
+      "Mythic": 0.07
+    }
+  },
+  "cards": {
+    "$BCARDD": {
+      "rotation": [
+        {
+          "name": "Crownshield",
+          "type": "shield",
+          "duration": 4.0,
+          "value_pct_hp": 0.18,
+          "cooldown": 18
+        },
+        {
+          "name": "Regal Roar",
+          "type": "buff",
+          "radius": 2.5,
+          "duration": 3.0,
+          "value_pct_dmg": 0.12,
+          "cooldown": 14
+        }
+      ]
+    },
+    "Stonejaw": {
+      "rotation": [
+        {
+          "name": "Armor Pulse",
+          "type": "aura",
+          "radius": 2.0,
+          "duration": 4.0,
+          "value_pct_dr": 0.15,
+          "cooldown": 16
+        },
+        {
+          "name": "Ground Lock",
+          "type": "slow",
+          "radius": 1.5,
+          "duration": 2.5,
+          "value_pct_slow": 0.25,
+          "cooldown": 14
+        }
+      ]
+    },
+    "Balboa": {
+      "rotation": [
+        {
+          "name": "Haymaker",
+          "type": "stun",
+          "duration": 1.0,
+          "cooldown": 12
+        },
+        {
+          "name": "Combo Step",
+          "type": "dash",
+          "distance": 2.0,
+          "cooldown": 10
+        }
+      ]
+    },
+    "Iron Rottweiler": {
+      "rotation": [
+        {
+          "name": "Overclock Rage",
+          "type": "buff",
+          "duration": 5.0,
+          "value_pct_dmg": 0.20,
+          "cooldown": 14
+        },
+        {
+          "name": "Iron Guard",
+          "type": "shield",
+          "duration": 3.0,
+          "value_pct_hp": 0.10,
+          "cooldown": 16
+        }
+      ]
+    },
+    "Granite Saint": {
+      "rotation": [
+        {
+          "name": "Bodywall",
+          "type": "taunt",
+          "duration": 2.5,
+          "cooldown": 14
+        },
+        {
+          "name": "Stone Pulse",
+          "type": "dr",
+          "duration": 3.0,
+          "value_pct_dr": 0.12,
+          "cooldown": 16
+        }
+      ]
+    },
+    "Grit Bulldog": {
+      "rotation": [
+        {
+          "name": "Brawler",
+          "type": "lifesteal",
+          "duration": 4.0,
+          "value_pct_ls": 0.12,
+          "cooldown": 10
+        },
+        {
+          "name": "Jaw Lock",
+          "type": "slow",
+          "duration": 2.0,
+          "value_pct_slow": 0.20,
+          "cooldown": 9
+        }
+      ]
+    },
+    "Alloy Akita": {
+      "rotation": [
+        {
+          "name": "Shock Push",
+          "type": "knockback",
+          "distance": 1.5,
+          "cooldown": 12
+        },
+        {
+          "name": "Arc Guard",
+          "type": "shield",
+          "duration": 3.0,
+          "value_pct_hp": 0.10,
+          "cooldown": 12
+        }
+      ]
+    },
+    "Tank Pug": {
+      "rotation": [
+        {
+          "name": "Shield Bark",
+          "type": "shield",
+          "duration": 3.0,
+          "value_pct_hp": 0.10,
+          "cooldown": 10
+        },
+        {
+          "name": "Guard Yip",
+          "type": "taunt",
+          "duration": 1.5,
+          "cooldown": 10
+        }
+      ]
+    },
+    "Copper Chow": {
+      "rotation": [
+        {
+          "name": "Bitechain",
+          "type": "ramp",
+          "stacks": 3,
+          "value_pct_dmg": 0.05,
+          "cooldown": 10
+        },
+        {
+          "name": "Fury Snap",
+          "type": "crit",
+          "value_pct_crit": 0.15,
+          "duration": 3.0,
+          "cooldown": 10
+        }
+      ]
+    },
+    "Warden Newfie": {
+      "rotation": [
+        {
+          "name": "Fortify",
+          "type": "buff",
+          "radius": 2.5,
+          "duration": 4.0,
+          "value_pct_hp": 0.10,
+          "cooldown": 16
+        },
+        {
+          "name": "Anchor",
+          "type": "slow",
+          "radius": 2.0,
+          "duration": 2.5,
+          "value_pct_slow": 0.25,
+          "cooldown": 16
+        }
+      ]
+    },
+    "Rust Cane Corso": {
+      "rotation": [
+        {
+          "name": "Grav Pull",
+          "type": "taunt",
+          "duration": 2.0,
+          "cooldown": 14
+        },
+        {
+          "name": "Punish",
+          "type": "buff",
+          "duration": 3.0,
+          "value_pct_dmg": 0.10,
+          "cooldown": 12
+        }
+      ]
+    },
+    "Brick Bullmastiff": {
+      "rotation": [
+        {
+          "name": "Stonehide",
+          "type": "dr",
+          "duration": 3.0,
+          "value_pct_dr": 0.12,
+          "cooldown": 12
+        },
+        {
+          "name": "Bash",
+          "type": "stun",
+          "duration": 0.8,
+          "cooldown": 12
+        }
+      ]
+    },
+    "Jagged": {
+      "rotation": [
+        {
+          "name": "Shadow Fang",
+          "type": "teleport",
+          "distance": 6.0,
+          "cooldown": 18
+        },
+        {
+          "name": "Razor Flurry",
+          "type": "crit",
+          "duration": 3.0,
+          "value_pct_crit": 0.20,
+          "cooldown": 14
+        }
+      ]
+    },
+    "Pixel Greyhound": {
+      "rotation": [
+        {
+          "name": "Dash Loop",
+          "type": "dash",
+          "distance": 2.5,
+          "cooldown": 8
+        },
+        {
+          "name": "Afterimage",
+          "type": "evasion",
+          "duration": 2.0,
+          "value_pct_evade": 0.20,
+          "cooldown": 10
+        }
+      ]
+    },
+    "Circuit Shiba": {
+      "rotation": [
+        {
+          "name": "Blink Bite",
+          "type": "teleport",
+          "distance": 2.0,
+          "cooldown": 10
+        },
+        {
+          "name": "Tailspin",
+          "type": "aoe",
+          "radius": 1.5,
+          "value_pct_dmg": 0.10,
+          "cooldown": 10
+        }
+      ]
+    },
+    "Neon Whippet": {
+      "rotation": [
+        {
+          "name": "Slipstream",
+          "type": "buff",
+          "duration": 3.0,
+          "value_pct_ms": 0.15,
+          "cooldown": 8
+        },
+        {
+          "name": "Feint",
+          "type": "evasion",
+          "duration": 2.0,
+          "value_pct_evade": 0.15,
+          "cooldown": 8
+        }
+      ]
+    },
+    "Turbo Jack": {
+      "rotation": [
+        {
+          "name": "Burst Bite",
+          "type": "crit",
+          "value_pct_crit": 0.20,
+          "duration": 2.0,
+          "cooldown": 9
+        },
+        {
+          "name": "Scramble",
+          "type": "dash",
+          "distance": 2.0,
+          "cooldown": 9
+        }
+      ]
+    },
+    "Razor Vizsla": {
+      "rotation": [
+        {
+          "name": "Pierce Rush",
+          "type": "line",
+          "range": 3.0,
+          "cooldown": 12
+        },
+        {
+          "name": "Bleed",
+          "type": "dot",
+          "duration": 3.0,
+          "value_pct_dmg": 0.10,
+          "cooldown": 12
+        }
+      ]
+    },
+    "Flash Saluki": {
+      "rotation": [
+        {
+          "name": "Sidecut",
+          "type": "lane_swap",
+          "cooldown": 10
+        },
+        {
+          "name": "Slash Line",
+          "type": "line",
+          "range": 2.5,
+          "cooldown": 10
+        }
+      ]
+    },
+    "Bolt Corgi": {
+      "rotation": [
+        {
+          "name": "Spark Pups",
+          "type": "spawn",
+          "count": 3,
+          "cooldown": 12
+        },
+        {
+          "name": "Charge Bark",
+          "type": "buff",
+          "radius": 2.0,
+          "duration": 3.0,
+          "value_pct_dmg": 0.10,
+          "cooldown": 12
+        }
+      ]
+    },
+    "Glitch Basenji": {
+      "rotation": [
+        {
+          "name": "Signal Scramble",
+          "type": "silence",
+          "duration": 1.2,
+          "cooldown": 10
+        },
+        {
+          "name": "Static Leak",
+          "type": "slow",
+          "duration": 2.0,
+          "value_pct_slow": 0.20,
+          "cooldown": 10
+        }
+      ]
+    },
+    "Aero Malinois": {
+      "rotation": [
+        {
+          "name": "Twin Strike",
+          "type": "double_hit",
+          "cooldown": 12
+        },
+        {
+          "name": "Aero Flip",
+          "type": "evasion",
+          "duration": 2.0,
+          "value_pct_evade": 0.15,
+          "cooldown": 12
+        }
+      ]
+    },
+    "Drift Sheltie": {
+      "rotation": [
+        {
+          "name": "Tag Boost",
+          "type": "buff",
+          "radius": 2.5,
+          "duration": 3.0,
+          "value_pct_ms": 0.15,
+          "cooldown": 10
+        },
+        {
+          "name": "Swerve",
+          "type": "dash",
+          "distance": 2.0,
+          "cooldown": 10
+        }
+      ]
+    },
+    "Byte Beagle": {
+      "rotation": [
+        {
+          "name": "Tracer Round",
+          "type": "pierce",
+          "cooldown": 10
+        },
+        {
+          "name": "Focus Beam",
+          "type": "buff",
+          "duration": 3.0,
+          "value_pct_dmg": 0.10,
+          "cooldown": 10
+        }
+      ]
+    },
+    "Rosco": {
+      "rotation": [
+        {
+          "name": "Leashbreak",
+          "type": "disable_tower",
+          "duration": 1.5,
+          "cooldown": 18
+        },
+        {
+          "name": "Chain Hack",
+          "type": "silence",
+          "duration": 1.0,
+          "cooldown": 14
+        }
+      ]
+    },
+    "Synth Collie": {
+      "rotation": [
+        {
+          "name": "Hack Jam",
+          "type": "disable_tower",
+          "duration": 1.2,
+          "cooldown": 12
+        },
+        {
+          "name": "Signal Freeze",
+          "type": "slow",
+          "duration": 2.5,
+          "value_pct_slow": 0.25,
+          "cooldown": 12
+        }
+      ]
+    },
+    "Holo Husky": {
+      "rotation": [
+        {
+          "name": "Heal Beacon",
+          "type": "heal",
+          "radius": 2.0,
+          "pulses": 3,
+          "value_pct_hp": 0.05,
+          "cooldown": 12
+        },
+        {
+          "name": "Shield Pulse",
+          "type": "shield",
+          "radius": 2.0,
+          "duration": 3.0,
+          "value_pct_hp": 0.10,
+          "cooldown": 12
+        }
+      ]
+    },
+    "Chill Samoyed": {
+      "rotation": [
+        {
+          "name": "Frost Bark",
+          "type": "slow",
+          "radius": 2.0,
+          "duration": 2.5,
+          "value_pct_slow": 0.30,
+          "cooldown": 10
+        },
+        {
+          "name": "Ice Ring",
+          "type": "slow",
+          "radius": 1.5,
+          "duration": 2.0,
+          "value_pct_slow": 0.20,
+          "cooldown": 10
+        }
+      ]
+    },
+    "Prism Poodle": {
+      "rotation": [
+        {
+          "name": "Shatter",
+          "type": "shield_break",
+          "cooldown": 10
+        },
+        {
+          "name": "Prism Wall",
+          "type": "shield",
+          "duration": 3.0,
+          "value_pct_hp": 0.08,
+          "cooldown": 12
+        }
+      ]
+    },
+    "Echo Dalmatian": {
+      "rotation": [
+        {
+          "name": "Echo Howl",
+          "type": "slow",
+          "radius": 2.0,
+          "duration": 2.0,
+          "value_pct_slow": 0.25,
+          "cooldown": 9
+        },
+        {
+          "name": "Pulse Clap",
+          "type": "stun",
+          "duration": 0.8,
+          "cooldown": 12
+        }
+      ]
+    },
+    "Static Sheba Inu": {
+      "rotation": [
+        {
+          "name": "Ping",
+          "type": "silence",
+          "duration": 1.0,
+          "cooldown": 8
+        },
+        {
+          "name": "Fuzz",
+          "type": "evasion",
+          "duration": 2.0,
+          "value_pct_evade": 0.12,
+          "cooldown": 10
+        }
+      ]
+    },
+    "Vibe Shih Tzu": {
+      "rotation": [
+        {
+          "name": "Soothe",
+          "type": "heal",
+          "duration": 3.0,
+          "value_pct_hp": 0.08,
+          "cooldown": 8
+        },
+        {
+          "name": "Harmony",
+          "type": "buff",
+          "radius": 2.0,
+          "duration": 3.0,
+          "value_pct_dr": 0.08,
+          "cooldown": 10
+        }
+      ]
+    },
+    "Noir Setter": {
+      "rotation": [
+        {
+          "name": "Blackout",
+          "type": "blind",
+          "duration": 2.0,
+          "cooldown": 12
+        },
+        {
+          "name": "Nightfall",
+          "type": "slow",
+          "duration": 2.0,
+          "value_pct_slow": 0.20,
+          "cooldown": 12
+        }
+      ]
+    },
+    "Signal Pointer": {
+      "rotation": [
+        {
+          "name": "Tag Shot",
+          "type": "reveal",
+          "duration": 3.0,
+          "cooldown": 10
+        },
+        {
+          "name": "Track",
+          "type": "buff",
+          "duration": 3.0,
+          "value_pct_dmg": 0.08,
+          "cooldown": 10
+        }
+      ]
+    },
+    "Ghost Spaniel": {
+      "rotation": [
+        {
+          "name": "Phase",
+          "type": "invuln",
+          "duration": 1.2,
+          "cooldown": 10
+        },
+        {
+          "name": "Whisper",
+          "type": "slow",
+          "duration": 2.0,
+          "value_pct_slow": 0.20,
+          "cooldown": 10
+        }
+      ]
+    },
+    "Pulse Border Collie": {
+      "rotation": [
+        {
+          "name": "Barrier Ring",
+          "type": "shield",
+          "radius": 2.5,
+          "duration": 3.0,
+          "value_pct_hp": 0.12,
+          "cooldown": 12
+        },
+        {
+          "name": "Pulse Heal",
+          "type": "heal",
+          "radius": 2.0,
+          "pulses": 2,
+          "value_pct_hp": 0.04,
+          "cooldown": 12
+        }
+      ]
+    },
+    "Crown Foxhound": {
+      "rotation": [
+        {
+          "name": "Royal Hunt",
+          "type": "queen_target",
+          "cooldown": 18
+        },
+        {
+          "name": "Breaker",
+          "type": "turret_break",
+          "duration": 3.0,
+          "value_pct_dmg": 0.15,
+          "cooldown": 14
+        }
+      ]
+    },
+    "Laser Beagle": {
+      "rotation": [
+        {
+          "name": "Overheat",
+          "type": "ramp",
+          "duration": 4.0,
+          "value_pct_dmg": 0.15,
+          "cooldown": 12
+        },
+        {
+          "name": "Beam Lock",
+          "type": "slow",
+          "duration": 2.0,
+          "value_pct_slow": 0.20,
+          "cooldown": 12
+        }
+      ]
+    },
+    "Neon Dachshund": {
+      "rotation": [
+        {
+          "name": "Tunnel Drones",
+          "type": "spawn",
+          "count": 2,
+          "cooldown": 10
+        },
+        {
+          "name": "Burrow",
+          "type": "evasion",
+          "duration": 2.0,
+          "value_pct_evade": 0.15,
+          "cooldown": 10
+        }
+      ]
+    },
+    "Volt Corgi": {
+      "rotation": [
+        {
+          "name": "Spark Pups",
+          "type": "spawn",
+          "count": 3,
+          "cooldown": 12
+        },
+        {
+          "name": "Charge Bark",
+          "type": "buff",
+          "radius": 2.0,
+          "duration": 3.0,
+          "value_pct_dmg": 0.10,
+          "cooldown": 12
+        }
+      ]
+    },
+    "Grid Schnauzer": {
+      "rotation": [
+        {
+          "name": "Grid Lock",
+          "type": "slow",
+          "radius": 2.0,
+          "duration": 2.5,
+          "value_pct_slow": 0.25,
+          "cooldown": 12
+        },
+        {
+          "name": "Clamp",
+          "type": "root",
+          "duration": 1.0,
+          "cooldown": 14
+        }
+      ]
+    },
+    "Flux Pomeranian": {
+      "rotation": [
+        {
+          "name": "Battery",
+          "type": "buff",
+          "radius": 2.0,
+          "duration": 4.0,
+          "value_pct_as": 0.12,
+          "cooldown": 8
+        },
+        {
+          "name": "Surge",
+          "type": "buff",
+          "duration": 3.0,
+          "value_pct_dmg": 0.08,
+          "cooldown": 10
+        }
+      ]
+    },
+    "Rail Terrier": {
+      "rotation": [
+        {
+          "name": "Rail Shot",
+          "type": "turret_break",
+          "duration": 3.0,
+          "value_pct_dmg": 0.15,
+          "cooldown": 9
+        },
+        {
+          "name": "Chain Round",
+          "type": "pierce",
+          "cooldown": 9
+        }
+      ]
+    },
+    "Circuit Retriever": {
+      "rotation": [
+        {
+          "name": "Drone Swarm",
+          "type": "spawn",
+          "count": 5,
+          "cooldown": 12
+        },
+        {
+          "name": "Repair",
+          "type": "heal",
+          "duration": 3.0,
+          "value_pct_hp": 0.08,
+          "cooldown": 12
+        }
+      ]
+    },
+    "Chrome Airedale": {
+      "rotation": [
+        {
+          "name": "Arc Shot",
+          "type": "chain",
+          "targets": 3,
+          "cooldown": 10
+        },
+        {
+          "name": "Static Flash",
+          "type": "blind",
+          "duration": 1.5,
+          "cooldown": 12
+        }
+      ]
+    },
+    "Beacon Basset": {
+      "rotation": [
+        {
+          "name": "Beacon",
+          "type": "reveal",
+          "duration": 3.0,
+          "cooldown": 10
+        },
+        {
+          "name": "Safe Zone",
+          "type": "shield",
+          "radius": 2.0,
+          "duration": 3.0,
+          "value_pct_hp": 0.08,
+          "cooldown": 10
+        }
+      ]
+    },
+    "Pixel Pug": {
+      "rotation": [
+        {
+          "name": "Mini Pup",
+          "type": "spawn",
+          "count": 1,
+          "cooldown": 8
+        },
+        {
+          "name": "Ping Guard",
+          "type": "taunt",
+          "duration": 1.2,
+          "cooldown": 8
+        }
+      ]
+    },
+    "Nova Shepherd": {
+      "rotation": [
+        {
+          "name": "Overclock",
+          "type": "burst",
+          "duration": 3.0,
+          "value_pct_dmg": 0.20,
+          "cooldown": 14
+        },
+        {
+          "name": "Sentinel",
+          "type": "root",
+          "duration": 1.0,
+          "cooldown": 14
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,382 @@
+/* ==========================================================================
+   ALLEY KINGZ // CHOP SHOP -- GRITTY TV-MA RE-SKIN
+   Author: Kaelen Nguyen (Pixel Forge). Street / "Fast Boyz" / Twisted-Metal
+   chop-shop aesthetic. Gold #D4AF37 on vanta-black, chrome + rust + graffiti,
+   sharp clip-path panels, bold condensed type (Anton / Oswald), neon-on-grime.
+   ORIGINAL UI -- Scrap Tokens, Chop Shop, Crew Chest, Garage. NOT Clash frames.
+   Adult, edgy, premium-street. No cute / rounded / pastel / kiddish anywhere.
+   ========================================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --gold:#D4AF37; --gold-hi:#f3d77a; --gold-lo:#9c7d28;
+  --vanta:#070708; --ink:#0b0c0f; --panel:#111218; --panel-2:#171922;
+  --steel:#262a33; --steel-hi:#3a404c; --line:#22252e;
+  --text:#ECEDEF; --muted:#838a98; --dim:#525866;
+  --rust:#c0612e; --oxblood:#6e1818;
+  --cyan:#2ee6ff; --magenta:#ff2d7e; --teal:#1fd6c4; --hazard:#ff8a1f; --green:#5fff8f;
+  --ok:#3ad07a; --bad:#ff4d5e; --warn:#ffb13d;
+  --r-Common:#8a909e; --r-Rare:#6fb6ff; --r-Epic:#b06bff; --r-Legendary:#ffb13d; --r-Mythic:#ff4d6d;
+}
+*{box-sizing:border-box}
+.akshop, .akshop *{font-family:'Inter',system-ui,sans-serif}
+
+/* ---- shell ---------------------------------------------------------------- */
+.akshop{
+  position:fixed; inset:0; z-index:99999; display:flex; flex-direction:column;
+  color:var(--text); overflow:hidden;
+  background:
+    radial-gradient(1100px 540px at 18% -8%, rgba(192,97,46,.16), transparent 60%),
+    radial-gradient(1000px 600px at 92% 0%, rgba(46,230,255,.06), transparent 55%),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.014) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg,#0c0d12 0%, var(--vanta) 70%);
+}
+.akshop[hidden]{display:none}
+/* film-grain / grime overlay (inline SVG turbulence, no external dep) */
+.akshop::before{
+  content:""; position:absolute; inset:0; pointer-events:none; z-index:0; opacity:.06;
+  mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.akshop > *{position:relative; z-index:1}
+
+/* ---- top bar -------------------------------------------------------------- */
+.aks-top{display:flex; align-items:center; gap:16px; padding:14px 22px;
+  border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg, rgba(20,21,27,.92), rgba(10,11,14,.92));
+  box-shadow:0 1px 0 rgba(255,255,255,.04) inset, 0 10px 30px rgba(0,0,0,.5);
+  backdrop-filter:blur(7px)}
+.aks-mark{display:flex; flex-direction:column; gap:2px; line-height:1}
+.aks-brand{font-family:'Anton',sans-serif; font-size:30px; letter-spacing:1.5px;
+  text-transform:uppercase; transform:skewX(-7deg); color:var(--text);
+  text-shadow:2px 2px 0 #000, 4px 4px 0 rgba(0,0,0,.4)}
+.aks-brand b{color:var(--gold);
+  text-shadow:0 0 14px rgba(212,175,55,.55), 2px 2px 0 #000}
+.aks-tag{font-family:'Oswald',sans-serif; font-size:10px; color:var(--rust);
+  letter-spacing:3.5px; text-transform:uppercase; transform:skewX(-7deg)}
+.aks-spacer{flex:1}
+
+/* wallet chips (chrome-stamped) */
+.aks-wallet{display:flex; gap:9px}
+.aks-coin{display:flex; align-items:center; gap:7px; padding:7px 13px;
+  border:1px solid var(--steel); border-left:3px solid var(--steel-hi);
+  background:linear-gradient(180deg,#1b1d25,#0e0f14);
+  font-family:'Oswald',sans-serif; font-weight:700; font-variant-numeric:tabular-nums; font-size:14px;
+  clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px); letter-spacing:.5px}
+.aks-coin .dot{width:11px;height:11px;border-radius:2px; transform:rotate(45deg)}
+.aks-coin.gems{border-left-color:var(--cyan)} .aks-coin.gems .dot{background:var(--cyan); box-shadow:0 0 9px var(--cyan)}
+.aks-coin.coins{border-left-color:var(--gold)} .aks-coin.coins .dot{background:var(--gold); box-shadow:0 0 9px var(--gold)}
+.aks-coin.scrap{border-left-color:var(--rust)} .aks-coin.scrap .dot{background:var(--rust)}
+.aks-close{background:linear-gradient(180deg,#1b1d25,#0e0f14); border:1px solid var(--steel);
+  color:var(--muted); width:38px; height:38px; cursor:pointer; font-size:20px; line-height:1;
+  clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px)}
+.aks-close:hover{border-color:var(--gold); color:var(--gold)}
+
+/* ---- TEST MODE / legal banner -------------------------------------------- */
+.aks-banner{display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap;
+  padding:7px 16px; font-size:11.5px; letter-spacing:.4px; color:var(--gold-hi);
+  background:repeating-linear-gradient(-45deg, rgba(212,175,55,.10) 0 14px, rgba(212,175,55,.03) 14px 28px);
+  border-bottom:1px solid var(--line)}
+.aks-banner .pill{padding:2px 9px; border:1px solid var(--gold); color:var(--gold);
+  font-family:'Oswald',sans-serif; font-weight:700; text-transform:uppercase; font-size:10px; letter-spacing:1px;
+  clip-path:polygon(5px 0,100% 0,100% 100%,0 100%,0 5px)}
+.aks-banner .pill.bad{border-color:var(--bad); color:var(--bad)}
+.aks-banner .muted{color:var(--muted)}
+
+/* ---- tabs (stamped street labels) ---------------------------------------- */
+.aks-tabs{display:flex; gap:6px; padding:12px 16px 0; overflow-x:auto; scrollbar-width:none}
+.aks-tabs::-webkit-scrollbar{display:none}
+.aks-tab{padding:11px 18px 12px; border:1px solid transparent; cursor:pointer; white-space:nowrap;
+  color:var(--muted); font-family:'Oswald',sans-serif; font-weight:600; font-size:13.5px;
+  letter-spacing:1.5px; text-transform:uppercase;
+  clip-path:polygon(10px 0,100% 0,100% 100%,0 100%,0 0); transition:.12s}
+.aks-tab:hover{color:var(--text)}
+.aks-tab[aria-selected="true"]{color:var(--gold);
+  background:linear-gradient(180deg,var(--panel-2),rgba(17,18,24,0));
+  border-color:var(--line); border-bottom-color:transparent;
+  box-shadow:0 -2px 0 var(--gold) inset}
+.aks-tab .lock{font-size:11px; color:var(--bad); margin-left:5px}
+
+/* ---- body ----------------------------------------------------------------- */
+.aks-body{flex:1; overflow-y:auto; padding:20px 18px 56px; border-top:1px solid var(--line)}
+.aks-grid{display:grid; gap:16px; grid-template-columns:repeat(auto-fill,minmax(176px,1fr));
+  max-width:1160px; margin:0 auto}
+.aks-sec{max-width:1160px; margin:0 auto 6px; display:flex; align-items:baseline; gap:12px; flex-wrap:wrap}
+.aks-sec-title{font-family:'Anton',sans-serif; font-size:21px; color:var(--gold-hi);
+  letter-spacing:1px; text-transform:uppercase; transform:skewX(-5deg);
+  text-shadow:2px 2px 0 #000}
+.aks-sec-sub{max-width:1160px; margin:0 auto 16px; color:var(--muted); font-size:12px; line-height:1.55}
+.aks-sec-sub b{color:var(--gold-lo)}
+
+/* ---- filter chips (Card Shop) -------------------------------------------- */
+.aks-filters{max-width:1160px; margin:2px auto 16px; display:flex; gap:7px; flex-wrap:wrap; align-items:center}
+.aks-flabel{font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:1.5px; text-transform:uppercase;
+  color:var(--dim); margin-right:2px}
+.aks-chip{font-family:'Oswald',sans-serif; font-size:11.5px; font-weight:600; letter-spacing:.6px;
+  padding:5px 11px; border:1px solid var(--steel); color:var(--muted); cursor:pointer; background:var(--panel);
+  text-transform:uppercase; clip-path:polygon(6px 0,100% 0,100% 100%,0 100%,0 6px); transition:.12s}
+.aks-chip:hover{color:var(--text); border-color:var(--steel-hi)}
+.aks-chip[aria-pressed="true"]{color:#0a0a0a; background:var(--gold); border-color:var(--gold); font-weight:700}
+.aks-count{font-family:'Oswald',sans-serif; font-size:11px; color:var(--dim); margin-left:auto; letter-spacing:1px}
+
+/* ---- the card (gritty chop-shop frame) ----------------------------------- */
+.aks-card{position:relative; display:flex; flex-direction:column;
+  background:linear-gradient(165deg,var(--panel-2),var(--ink));
+  border:1px solid var(--steel);
+  clip-path:polygon(0 0, calc(100% - 16px) 0, 100% 16px, 100% 100%, 16px 100%, 0 calc(100% - 16px));
+  transition:transform .14s, box-shadow .14s, border-color .14s; overflow:hidden}
+.aks-card:hover{transform:translateY(-3px); border-color:var(--gold)}
+/* rarity left-edge spine */
+.aks-card::before{content:""; position:absolute; left:0; top:0; bottom:0; width:3px; z-index:3; background:var(--rar)}
+.aks-card.r-Common{--rar:var(--r-Common)} .aks-card.r-Rare{--rar:var(--r-Rare)}
+.aks-card.r-Epic{--rar:var(--r-Epic)} .aks-card.r-Legendary{--rar:var(--r-Legendary)}
+.aks-card.r-Mythic{--rar:var(--r-Mythic)}
+.aks-card:hover{box-shadow:0 10px 30px rgba(0,0,0,.55), 0 0 22px -6px var(--rar)}
+
+/* art window (real game card art, 3:4) */
+.aks-art{position:relative; aspect-ratio:3/4; overflow:hidden;
+  background:radial-gradient(circle at 50% 35%, #1a1d26, #08090c);
+  border-bottom:1px solid var(--steel)}
+.aks-art img{width:100%; height:100%; object-fit:cover; display:block;
+  transition:transform .25s, filter .25s; filter:saturate(1.05) contrast(1.05)}
+.aks-card:hover .aks-art img{transform:scale(1.05)}
+.aks-art .scrim{position:absolute; inset:0; pointer-events:none;
+  background:linear-gradient(180deg, transparent 55%, rgba(7,7,8,.78) 100%)}
+/* rarity ribbon (angular, top-right) */
+.aks-rib{position:absolute; top:9px; right:0; z-index:4; font-family:'Oswald',sans-serif; font-weight:700;
+  font-size:9.5px; letter-spacing:1.2px; text-transform:uppercase; padding:3px 10px 3px 13px; color:#0a0a0a;
+  background:var(--rar); clip-path:polygon(10px 0,100% 0,100% 100%,0 100%)}
+.aks-card.r-Common .aks-rib, .aks-card.r-Rare .aks-rib{color:#06070a}
+.aks-card.r-Mythic .aks-rib, .aks-card.r-Epic .aks-rib{color:#fff}
+/* faction glyph (top-left) */
+.aks-fac{position:absolute; top:8px; left:8px; z-index:4; width:26px; height:26px; display:flex;
+  align-items:center; justify-content:center; font-size:14px; color:var(--text);
+  background:rgba(7,7,8,.66); border:1px solid var(--fac,var(--steel));
+  clip-path:polygon(5px 0,100% 0,100% 100%,0 100%,0 5px); box-shadow:0 0 10px -3px var(--fac)}
+/* variant stamp (HEAVY / STREET) bottom-left of art */
+.aks-vstamp{position:absolute; left:9px; bottom:9px; z-index:4; font-family:'Oswald',sans-serif;
+  font-weight:700; font-size:9px; letter-spacing:2px; text-transform:uppercase; padding:2px 8px;
+  color:var(--text); border:1px solid currentColor; transform:skewX(-8deg)}
+.aks-vstamp.heavy{color:#ffb877} .aks-vstamp.street{color:#7fe9ff}
+/* fallback art (no painted variant yet) */
+.aks-art .fb{position:absolute; inset:0; display:none; flex-direction:column; align-items:center;
+  justify-content:center; gap:7px; text-align:center; padding:10px}
+.aks-art .fb .g{font-size:40px; filter:grayscale(.2) drop-shadow(0 0 12px var(--rar))}
+.aks-art .fb .b{font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:.5px; color:var(--muted); text-transform:uppercase}
+.aks-art .fb .t{font-family:'Oswald',sans-serif; font-size:8.5px; letter-spacing:1.5px; color:var(--dim);
+  border:1px dashed var(--steel-hi); padding:2px 7px; text-transform:uppercase}
+/* swap to the rarity-framed fallback when the painted art is missing */
+.aks-art.fb-on img{display:none}
+.aks-art.fb-on .fb{display:flex}
+/* faction accent colors (drive the .aks-fac badge glyph + glow) */
+.fac-bone{--fac:var(--rust)} .fac-zoom{--fac:var(--cyan)}
+.fac-leash{--fac:var(--teal)} .fac-k9{--fac:var(--hazard)}
+.aks-fac{font-family:'Anton',sans-serif; color:var(--fac,var(--text))}
+
+/* card meta block */
+.aks-meta{display:flex; flex-direction:column; gap:6px; padding:11px 12px 12px}
+.aks-name{font-family:'Oswald',sans-serif; font-weight:700; font-size:15px; letter-spacing:.4px;
+  text-transform:uppercase; line-height:1.05; color:var(--text)}
+.aks-sub{font-family:'Oswald',sans-serif; font-size:9.5px; letter-spacing:1.2px; text-transform:uppercase; color:var(--dim)}
+.aks-desc{font-size:10.5px; color:var(--muted); line-height:1.45; min-height:30px}
+.aks-row{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:auto}
+.aks-price{display:flex; align-items:center; gap:6px; font-family:'Oswald',sans-serif; font-weight:700;
+  font-size:15px; letter-spacing:.5px; font-variant-numeric:tabular-nums}
+.aks-price .dot{width:11px; height:11px; transform:rotate(45deg); background:var(--rust)}
+.aks-price.cyan .dot{background:var(--cyan)} .aks-price.gold .dot{background:var(--gold)}
+.aks-price small{font-family:'Oswald'; font-size:9px; letter-spacing:1px; color:var(--dim); text-transform:uppercase}
+.aks-price.usd{color:var(--gold); font-size:18px}
+
+/* ---- buttons (angular street) -------------------------------------------- */
+.aks-btn{border:none; cursor:pointer; padding:9px 15px; font-family:'Oswald',sans-serif; font-weight:700;
+  font-size:12px; letter-spacing:1px; text-transform:uppercase; color:#0a0a0a;
+  background:linear-gradient(180deg,var(--gold-hi),var(--gold));
+  clip-path:polygon(7px 0,100% 0,100% 100%,0 100%,0 7px); transition:.12s; white-space:nowrap}
+.aks-btn:hover{filter:brightness(1.08); box-shadow:0 0 16px -4px var(--gold)}
+.aks-btn:active{transform:translateY(1px)}
+.aks-btn.ghost{background:transparent; color:var(--gold); border:1px solid var(--gold)}
+.aks-btn.ghost:hover{background:rgba(212,175,55,.1)}
+.aks-btn.wide{width:100%; padding:11px; font-size:13px}
+.aks-btn:disabled{opacity:.32; cursor:not-allowed; filter:grayscale(.4); box-shadow:none}
+.aks-btn.locked{background:repeating-linear-gradient(-45deg,#1a1b20 0 9px,#101115 9px 18px);
+  color:var(--bad); border:1px solid var(--bad)}
+
+/* ---- gem packs (premium tier tiles) -------------------------------------- */
+.aks-gem{position:relative; align-items:stretch}
+.aks-gem .aks-art{aspect-ratio:16/10; background:
+  radial-gradient(circle at 50% 30%, rgba(46,230,255,.22), transparent 60%),
+  linear-gradient(160deg,#10202a,#08090c); display:flex; align-items:center; justify-content:center}
+.aks-gem .aks-art .gemglyph{font-size:46px; filter:drop-shadow(0 0 16px var(--cyan))}
+.aks-gem.best{border-color:var(--gold)}
+.aks-best{position:absolute; top:0; left:0; z-index:5; font-family:'Oswald'; font-weight:700; font-size:9px;
+  letter-spacing:1.5px; text-transform:uppercase; color:#0a0a0a; background:var(--gold); padding:3px 11px 3px 8px;
+  clip-path:polygon(0 0,100% 0,calc(100% - 9px) 100%,0 100%)}
+.aks-bonus{font-family:'Oswald'; font-size:10px; font-weight:700; letter-spacing:.8px; color:var(--green); text-transform:uppercase}
+
+/* ---- chests --------------------------------------------------------------- */
+.aks-chest .aks-art{aspect-ratio:4/3; display:flex; align-items:center; justify-content:center;
+  background:radial-gradient(circle at 50% 40%, #221a12, #08090c)}
+.aks-chest .aks-art .crate{font-size:48px; filter:drop-shadow(0 6px 10px rgba(0,0,0,.6))}
+/* "soon" crate -- muted steel, NOT a scary red lock */
+.aks-chest.gated{border-color:var(--steel-hi)}
+.aks-chest.gated .aks-art{background:repeating-linear-gradient(-45deg, rgba(255,255,255,.03) 0 14px, #0c0d11 14px 28px)}
+.aks-chest.gated .aks-art .crate{filter:grayscale(.8) opacity(.7)}
+.aks-soon{font-family:'Oswald'; font-size:9px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+  color:var(--dim); border:1px solid var(--steel-hi); padding:2px 8px;
+  clip-path:polygon(5px 0,100% 0,100% 100%,0 100%,0 5px)}
+.aks-owned{font-family:'Oswald'; font-size:11px; letter-spacing:.6px; text-transform:uppercase; color:var(--muted)}
+/* daily-deal "TODAY" stamp on a card */
+.aks-today{position:absolute; top:9px; left:8px; z-index:5; font-family:'Oswald'; font-weight:700; font-size:9px;
+  letter-spacing:1.2px; text-transform:uppercase; color:#0a0a0a; background:var(--gold); padding:3px 9px;
+  clip-path:polygon(0 0,100% 0,calc(100% - 8px) 100%,0 100%)}
+
+/* ---- upgrade tiles -------------------------------------------------------- */
+.aks-up .lvtrack{display:flex; gap:3px; margin:2px 0}
+.aks-up .lvtrack i{flex:1; height:6px; background:#000; border:1px solid var(--line)}
+.aks-up .lvtrack i.on{background:linear-gradient(180deg,var(--gold-hi),var(--gold-lo)); border-color:var(--gold-lo)}
+.aks-up .copies{height:7px; background:#000; border:1px solid var(--line); overflow:hidden; margin-top:3px}
+.aks-up .copies b{display:block; height:100%; background:linear-gradient(90deg,var(--rar,var(--gold)),var(--gold-hi))}
+.aks-up .need{font-family:'Oswald'; font-size:10px; letter-spacing:.5px; color:var(--muted); text-transform:uppercase}
+.aks-up .need .ok{color:var(--ok)} .aks-up .need .no{color:var(--bad)}
+.aks-topoff{font-family:'Oswald'; font-size:9.5px; letter-spacing:.6px; color:var(--dim); text-transform:uppercase;
+  display:flex; align-items:center; gap:5px; margin-top:4px}
+.aks-topoff .g{color:var(--cyan)}
+
+/* ---- daily lot ------------------------------------------------------------ */
+.aks-daily-hero{max-width:1160px; margin:0 auto 18px; display:flex; gap:16px; align-items:center; flex-wrap:wrap;
+  padding:16px 18px; border:1px solid var(--steel); border-left:4px solid var(--gold);
+  background:linear-gradient(120deg,rgba(212,175,55,.08),var(--panel-2));
+  clip-path:polygon(0 0,100% 0,100% 100%,18px 100%,0 calc(100% - 18px))}
+.aks-daily-hero .gift{font-size:42px; filter:drop-shadow(0 0 14px var(--gold))}
+.aks-daily-hero .copy{flex:1; min-width:200px}
+.aks-daily-hero h4{font-family:'Anton'; margin:0 0 4px; font-size:18px; letter-spacing:1px; color:var(--gold-hi); text-transform:uppercase}
+.aks-daily-hero p{margin:0; color:var(--muted); font-size:12px; line-height:1.5; max-width:520px}
+.aks-reset{font-family:'Oswald'; font-size:11px; letter-spacing:1.5px; color:var(--rust); text-transform:uppercase; margin-left:auto}
+
+/* ==========================================================================
+   LUCKY DRAW -- the headline loot-box ADVERTISEMENT (unlocked, hype, no warning)
+   ========================================================================== */
+.aks-draw{max-width:1000px; margin:0 auto}
+/* featured-Mythic hero banner */
+.aks-banner-hero{position:relative; display:flex; gap:24px; align-items:stretch; flex-wrap:wrap;
+  padding:22px; margin-bottom:18px; overflow:hidden;
+  border:1px solid var(--gold-lo); border-top:3px solid var(--gold);
+  clip-path:polygon(0 0,calc(100% - 24px) 0,100% 24px,100% 100%,24px 100%,0 calc(100% - 24px));
+  background:
+    radial-gradient(700px 360px at 80% -20%, rgba(212,175,55,.20), transparent 60%),
+    radial-gradient(500px 300px at 8% 120%, rgba(255,77,109,.14), transparent 55%),
+    linear-gradient(160deg,#15140e,#08090c)}
+.aks-banner-hero::after{content:""; position:absolute; inset:0; pointer-events:none;
+  background:repeating-linear-gradient(-45deg, rgba(212,175,55,.05) 0 22px, transparent 22px 44px)}
+.aks-pull-art{position:relative; z-index:1; width:188px; flex:0 0 188px; aspect-ratio:3/4;
+  border:2px solid var(--r-Mythic); overflow:hidden;
+  clip-path:polygon(0 0,calc(100% - 14px) 0,100% 14px,100% 100%,14px 100%,0 calc(100% - 14px));
+  box-shadow:0 0 34px -6px var(--r-Mythic), inset 0 0 40px rgba(0,0,0,.5)}
+.aks-pull-art img{width:100%; height:100%; object-fit:cover; filter:saturate(1.1) contrast(1.08)}
+.aks-pull-art .glow{position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(circle at 50% 30%, rgba(255,77,109,.28), transparent 62%); mix-blend-mode:screen}
+.aks-pull-art .tag{position:absolute; top:0; left:0; z-index:2; font-family:'Oswald'; font-weight:700;
+  font-size:9px; letter-spacing:2px; text-transform:uppercase; color:#0a0a0a; background:var(--r-Mythic);
+  padding:3px 12px 3px 9px; clip-path:polygon(0 0,100% 0,calc(100% - 9px) 100%,0 100%)}
+.aks-hero-copy{position:relative; z-index:1; flex:1; min-width:240px; display:flex; flex-direction:column; gap:9px}
+.aks-hero-kicker{font-family:'Oswald'; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--r-Mythic)}
+.aks-hero-title{font-family:'Anton'; font-size:36px; line-height:.98; letter-spacing:1px; text-transform:uppercase;
+  transform:skewX(-6deg); color:var(--text); text-shadow:2px 2px 0 #000, 0 0 26px rgba(212,175,55,.4)}
+.aks-hero-title b{color:var(--gold); text-shadow:0 0 18px rgba(212,175,55,.7), 2px 2px 0 #000}
+.aks-hero-sub{color:var(--muted); font-size:12.5px; line-height:1.55; max-width:430px}
+.aks-hero-sub b{color:var(--gold-hi)}
+/* pull buttons */
+.aks-pull-cta{display:flex; gap:11px; margin-top:6px; flex-wrap:wrap}
+.aks-pull-btn{position:relative; cursor:pointer; border:none; padding:13px 22px; min-width:150px;
+  font-family:'Anton',sans-serif; font-size:17px; letter-spacing:1.5px; text-transform:uppercase; color:#0a0a0a;
+  background:linear-gradient(180deg,var(--gold-hi),var(--gold)); transform:skewX(-7deg);
+  box-shadow:0 6px 0 var(--gold-lo), 0 12px 26px -6px rgba(212,175,55,.6); transition:.1s}
+.aks-pull-btn > span{display:block; transform:skewX(7deg)}
+.aks-pull-btn .cost{font-family:'Oswald'; font-size:11px; font-weight:600; letter-spacing:1px; color:#3a2f08; margin-top:1px}
+.aks-pull-btn:hover{filter:brightness(1.06)}
+.aks-pull-btn:active{transform:skewX(-7deg) translateY(4px); box-shadow:0 2px 0 var(--gold-lo)}
+.aks-pull-btn.ten{background:linear-gradient(180deg,#fff0c2,#e9c24b)}
+.aks-pull-btn.ten::before{content:"BEST"; position:absolute; top:-9px; right:-6px; transform:skewX(7deg);
+  font-family:'Oswald'; font-weight:700; font-size:9px; letter-spacing:1px; color:#0a0a0a; background:var(--green);
+  padding:2px 7px; clip-path:polygon(4px 0,100% 0,100% 100%,0 100%)}
+.aks-pull-btn:disabled{filter:grayscale(.5); opacity:.5; cursor:not-allowed; box-shadow:0 3px 0 var(--gold-lo)}
+/* pity meter (flex, not a warning) */
+.aks-pity{margin:2px auto 16px; max-width:1000px; display:flex; flex-direction:column; gap:9px}
+.aks-pity .row{display:flex; align-items:center; gap:12px}
+.aks-pity .lab{font-family:'Oswald'; font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:var(--muted); min-width:210px}
+.aks-pity .lab b{color:var(--r-Mythic)} .aks-pity .lab.leg b{color:var(--r-Legendary)}
+.aks-pity .bar{flex:1; height:11px; background:#000; border:1px solid var(--line); overflow:hidden;
+  clip-path:polygon(4px 0,100% 0,100% 100%,0 100%,0 4px)}
+.aks-pity .bar i{display:block; height:100%; background:linear-gradient(90deg,var(--oxblood),var(--r-Mythic),var(--gold-hi))}
+.aks-pity .bar.leg i{background:linear-gradient(90deg,#6a5418,var(--r-Legendary),#ffe6a8)}
+.aks-pity .ct{font-family:'Oswald'; font-weight:700; font-size:12px; color:var(--text); min-width:54px; text-align:right; font-variant-numeric:tabular-nums}
+/* DROP RATES table (clean app-store flex -- bright, full opacity, NOT sealed) */
+.aks-rates{max-width:1000px; margin:0 auto 14px; border:1px solid var(--steel);
+  background:linear-gradient(180deg,var(--panel-2),var(--ink));
+  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px))}
+.aks-rates .rh{display:flex; justify-content:space-between; align-items:center; padding:9px 14px;
+  border-bottom:1px solid var(--line); background:#0c0d11}
+.aks-rates .rh .t{font-family:'Oswald'; font-weight:700; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--gold-hi)}
+.aks-rates .rh .n{font-family:'Oswald'; font-size:10px; letter-spacing:1px; text-transform:uppercase; color:var(--dim)}
+.aks-rates .rrow{display:flex; align-items:center; gap:12px; padding:8px 14px; border-bottom:1px solid var(--line)}
+.aks-rates .rrow:last-child{border-bottom:none}
+.aks-rates .rrow .dot{width:9px; height:9px; transform:rotate(45deg); background:var(--rr,var(--muted))}
+.aks-rates .rrow .k{font-family:'Oswald'; font-weight:600; font-size:12.5px; letter-spacing:.6px; text-transform:uppercase; color:var(--text); min-width:96px}
+.aks-rates .rrow .track{flex:1; height:8px; background:#000; border:1px solid var(--line); overflow:hidden}
+.aks-rates .rrow .track b{display:block; height:100%; background:var(--rr,var(--muted))}
+.aks-rates .rrow .v{font-family:'Oswald'; font-weight:700; font-size:13px; color:var(--text); min-width:48px; text-align:right; font-variant-numeric:tabular-nums}
+.aks-rates .rr-Common{--rr:var(--r-Common)} .aks-rates .rr-Rare{--rr:var(--r-Rare)}
+.aks-rates .rr-Epic{--rr:var(--r-Epic)} .aks-rates .rr-Legendary{--rr:var(--r-Legendary)}
+.aks-rates .rr-Mythic{--rr:var(--r-Mythic)}
+.aks-rates .rfoot{padding:8px 14px; font-size:10.5px; color:var(--dim); line-height:1.5; border-top:1px solid var(--line)}
+
+/* ---- draw reveal overlay -------------------------------------------------- */
+.aks-reveal{position:fixed; inset:0; z-index:100002; display:flex; align-items:center; justify-content:center;
+  flex-direction:column; gap:18px; padding:24px;
+  background:radial-gradient(800px 500px at 50% 40%, rgba(212,175,55,.10), transparent), rgba(4,4,6,.93);
+  opacity:0; pointer-events:none; transition:opacity .2s}
+.aks-reveal.show{opacity:1; pointer-events:auto}
+.aks-reveal .rv-title{font-family:'Anton'; font-size:24px; letter-spacing:2px; text-transform:uppercase; color:var(--gold-hi);
+  transform:skewX(-6deg); text-shadow:2px 2px 0 #000}
+.aks-reveal .rv-grid{display:flex; gap:14px; flex-wrap:wrap; justify-content:center; max-width:760px}
+.aks-reveal .rv-card{width:138px; aspect-ratio:3/4; position:relative; overflow:hidden; border:2px solid var(--rar,var(--steel));
+  clip-path:polygon(0 0,calc(100% - 12px) 0,100% 12px,100% 100%,12px 100%,0 calc(100% - 12px));
+  box-shadow:0 0 24px -6px var(--rar); animation:rvpop .35s ease both}
+.aks-reveal .rv-card.r-Common{--rar:var(--r-Common)} .aks-reveal .rv-card.r-Rare{--rar:var(--r-Rare)}
+.aks-reveal .rv-card.r-Epic{--rar:var(--r-Epic)} .aks-reveal .rv-card.r-Legendary{--rar:var(--r-Legendary)}
+.aks-reveal .rv-card.r-Mythic{--rar:var(--r-Mythic)}
+@keyframes rvpop{from{transform:translateY(14px) scale(.86); opacity:0} to{transform:none; opacity:1}}
+.aks-reveal .rv-card img{width:100%; height:100%; object-fit:cover}
+.aks-reveal .rv-card .cap{position:absolute; left:0; right:0; bottom:0; padding:5px 7px;
+  background:linear-gradient(0deg,rgba(7,7,8,.92),transparent); display:flex; flex-direction:column; gap:1px}
+.aks-reveal .rv-card .cap .nm{font-family:'Oswald'; font-weight:700; font-size:10px; text-transform:uppercase; color:var(--text); line-height:1.05}
+.aks-reveal .rv-card .cap .rr{font-family:'Oswald'; font-size:8px; letter-spacing:1px; text-transform:uppercase; color:var(--rar)}
+.aks-reveal .rv-card .fb{position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-family:'Anton'; font-size:30px; color:var(--rar); background:radial-gradient(circle,#1a1d26,#08090c)}
+.aks-reveal .rv-foot{width:100%; max-width:260px; display:flex}
+
+/* ---- empty / note --------------------------------------------------------- */
+.aks-empty{grid-column:1/-1; text-align:center; color:var(--muted); font-size:13px; padding:30px;
+  border:1px dashed var(--steel)}
+
+/* ---- footer --------------------------------------------------------------- */
+.aks-foot{padding:15px 22px; border-top:1px solid var(--line); font-size:11px; color:var(--muted);
+  text-align:center; line-height:1.65; background:rgba(7,7,8,.6)}
+.aks-foot b{color:var(--gold-lo)}
+
+/* ---- toast ---------------------------------------------------------------- */
+.aks-toast{position:fixed; bottom:26px; left:50%; transform:translateX(-50%); padding:12px 22px;
+  background:var(--panel-2); border:1px solid var(--gold); border-left:4px solid var(--gold); color:var(--text);
+  font-family:'Oswald'; font-size:13px; letter-spacing:.5px; z-index:100001; opacity:0; transition:.2s;
+  pointer-events:none; max-width:90vw; clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px)}
+.aks-toast.show{opacity:1}
+.aks-toast.bad{border-color:var(--bad); border-left-color:var(--bad)}
+.aks-toast.ok{border-color:var(--ok); border-left-color:var(--ok)}
+
+@media (max-width:560px){
+  .aks-grid{grid-template-columns:repeat(auto-fill,minmax(144px,1fr)); gap:12px}
+  .aks-brand{font-size:23px}
+  .aks-wallet{flex-wrap:wrap; gap:6px}
+  .aks-top{padding:12px 14px; gap:10px}
+  .aks-coin{font-size:12px; padding:6px 10px}
+}

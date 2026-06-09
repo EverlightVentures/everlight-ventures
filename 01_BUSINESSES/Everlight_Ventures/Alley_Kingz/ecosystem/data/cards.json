@@ -1,0 +1,5793 @@
+{
+  "meta": {
+    "title": "Alley Kingz -- Canonical Card Roster",
+    "chain": "solana",
+    "ticker": "$BCARDD",
+    "standard": "metaplex-core",
+    "cardCount": 106,
+    "factions": [
+      "Boneguard Crew",
+      "Zoomie Syndicate",
+      "Leashbreak Tactix",
+      "K9 Circuitry"
+    ],
+    "mythics": [
+      "$BCARDD",
+      "Jagged",
+      "Rosco",
+      "Crown Foxhound"
+    ],
+    "legendary": [
+      "Stonejaw"
+    ],
+    "source": "01_OnyxPOS/prototype_dec2025/game_design/cards.json (48 dogs, byte-identical Unity copy retired)",
+    "canon_authority": "Alley_Kingz/ecosystem/ROSTER_CANON.md",
+    "note": "Dogs are the IP. Vehicles (rigs) are the toys. Existing card stats preserved verbatim; rig + nft + ids added by the canon-merge, no restats.",
+    "date": "2026-06-03",
+    "combat": "domain/targets/splash added 2026-06-04 (Combat Spec); 5 spells added.",
+    "rarity_counts": {
+      "Mythic": 4,
+      "Legendary": 10,
+      "Epic": 29,
+      "Rare": 29,
+      "Common": 34
+    },
+    "faction_counts": {
+      "Boneguard Crew": 26,
+      "Zoomie Syndicate": 26,
+      "Leashbreak Tactix": 28,
+      "K9 Circuitry": 26
+    },
+    "variant_expansion": "48 originals (0001-0048) untouched + 58 Heavy/Street variants (0049-0106) via deterministic stat-tilt. 106 character cards + 5 spells. See ALLEY_KINGZ_CARD_EXPANSION.md."
+  },
+  "cards": [
+    {
+      "class": "Boneguard Crew",
+      "name": "$BCARDD",
+      "breed": "Dogo Argentino",
+      "cost": 10,
+      "role": "Vanguard",
+      "rarity": "Mythic",
+      "tags": [
+        "Pack",
+        "Guard"
+      ],
+      "hp": 2850,
+      "damage": 180,
+      "attack_speed": 0.7,
+      "move_speed": 0.55,
+      "range": 1,
+      "ability": {
+        "name": "Crownbreaker",
+        "description": "Shields self for 18% HP; can strike the Queen",
+        "cooldown": 18
+      },
+      "queen_target": true,
+      "abilityType": "shield",
+      "cardNumber": "0001",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": true,
+      "rig": {
+        "name": "The Crown Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "flavor": "matte-black armored war-truck, gold trim, ram plow. The coin/dealer dog.",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": true,
+      "splashRadius": 1.4
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Stonejaw",
+      "breed": "Mastiff",
+      "cost": 7,
+      "role": "Vanguard",
+      "rarity": "Legendary",
+      "tags": [
+        "Pack"
+      ],
+      "hp": 2850,
+      "damage": 145,
+      "attack_speed": 0.7,
+      "move_speed": 0.55,
+      "range": 1,
+      "ability": {
+        "name": "Armor Pulse",
+        "description": "Aura cuts nearby ally damage taken by 15%",
+        "cooldown": 16
+      },
+      "queen_target": false,
+      "abilityType": "dr",
+      "cardNumber": "0002",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Mastiff Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Balboa",
+      "breed": "Boxer",
+      "cost": 6,
+      "role": "Striker",
+      "rarity": "Epic",
+      "tags": [
+        "Pack"
+      ],
+      "hp": 1500,
+      "damage": 175,
+      "attack_speed": 1.05,
+      "move_speed": 0.85,
+      "range": 1,
+      "ability": {
+        "name": "Haymaker",
+        "description": "First hit stuns the target for 1s",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "stun",
+      "cardNumber": "0003",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Boxer Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Iron Rottweiler",
+      "breed": "Rottweiler",
+      "cost": 9,
+      "role": "Vanguard",
+      "rarity": "Epic",
+      "tags": [
+        "Pack"
+      ],
+      "hp": 2850,
+      "damage": 155,
+      "attack_speed": 0.7,
+      "move_speed": 0.55,
+      "range": 1,
+      "ability": {
+        "name": "Overclock Rage",
+        "description": "Below 40% HP its bite damage spikes",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "crit",
+      "cardNumber": "0004",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Rottweiler Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Granite Saint",
+      "breed": "St. Bernard",
+      "cost": 8,
+      "role": "Vanguard",
+      "rarity": "Rare",
+      "tags": [
+        "Guard"
+      ],
+      "hp": 2650,
+      "damage": 135,
+      "attack_speed": 0.7,
+      "move_speed": 0.55,
+      "range": 1,
+      "ability": {
+        "name": "Bodywall",
+        "description": "Bodywall aura soaks nearby damage for the pack",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "dr",
+      "cardNumber": "0005",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "St. Bernard Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Grit Bulldog",
+      "breed": "Bulldog",
+      "cost": 5,
+      "role": "Striker",
+      "rarity": "Rare",
+      "tags": [
+        "Pack"
+      ],
+      "hp": 1300,
+      "damage": 150,
+      "attack_speed": 1.05,
+      "move_speed": 0.85,
+      "range": 1,
+      "ability": {
+        "name": "Brawler",
+        "description": "Powers up its own bite the longer it brawls",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "buff",
+      "cardNumber": "0006",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Bulldog Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Alloy Akita",
+      "breed": "Akita",
+      "cost": 6,
+      "role": "Lancer",
+      "rarity": "Rare",
+      "tags": [
+        "Guard"
+      ],
+      "hp": 1100,
+      "damage": 180,
+      "attack_speed": 0.95,
+      "move_speed": 0.85,
+      "range": 2,
+      "ability": {
+        "name": "Shock Push",
+        "description": "Knockback cone shoves a melee line back",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "knockback",
+      "cardNumber": "0007",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Akita Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Tank Pug",
+      "breed": "Pug",
+      "cost": 3,
+      "role": "Support",
+      "rarity": "Common",
+      "tags": [
+        "Guard"
+      ],
+      "hp": 750,
+      "damage": 45,
+      "attack_speed": 0.9,
+      "move_speed": 0.85,
+      "range": 3,
+      "ability": {
+        "name": "Shield Bark",
+        "description": "Drops a small temporary shield on one ally",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "shield",
+      "cardNumber": "0010",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Pug Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "air",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Copper Chow",
+      "breed": "Chow",
+      "cost": 4,
+      "role": "Striker",
+      "rarity": "Common",
+      "tags": [
+        "Pack"
+      ],
+      "hp": 1100,
+      "damage": 125,
+      "attack_speed": 1.05,
+      "move_speed": 0.85,
+      "range": 1,
+      "ability": {
+        "name": "Bitechain",
+        "description": "Each consecutive hit ramps its damage",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "ramp",
+      "cardNumber": "0011",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Chow Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Warden Newfie",
+      "breed": "Newfoundland",
+      "cost": 7,
+      "role": "Support",
+      "rarity": "Rare",
+      "tags": [
+        "Guard"
+      ],
+      "hp": 1100,
+      "damage": 70,
+      "attack_speed": 0.9,
+      "move_speed": 0.85,
+      "range": 2,
+      "ability": {
+        "name": "Fortify",
+        "description": "Raises max HP of allies in an aura",
+        "cooldown": 16
+      },
+      "queen_target": false,
+      "abilityType": "buff",
+      "cardNumber": "0008",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Newfoundland Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Rust Cane Corso",
+      "breed": "Cane Corso",
+      "cost": 8,
+      "role": "Vanguard",
+      "rarity": "Rare",
+      "tags": [
+        "Pack"
+      ],
+      "hp": 2650,
+      "damage": 135,
+      "attack_speed": 0.7,
+      "move_speed": 0.55,
+      "range": 1,
+      "ability": {
+        "name": "Grav Pull",
+        "description": "Pulses a shove that scatters the nearest foes",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "knockback",
+      "cardNumber": "0009",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Cane Corso Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Brick Bullmastiff",
+      "breed": "Bullmastiff",
+      "cost": 6,
+      "role": "Vanguard",
+      "rarity": "Common",
+      "tags": [
+        "Pack"
+      ],
+      "hp": 2250,
+      "damage": 110,
+      "attack_speed": 0.7,
+      "move_speed": 0.55,
+      "range": 1,
+      "ability": {
+        "name": "Stonehide",
+        "description": "Short window of heavy damage resistance",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "dr",
+      "cardNumber": "0012",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Bullmastiff Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Jagged",
+      "breed": "Doberman",
+      "cost": 11,
+      "role": "Assassin",
+      "rarity": "Mythic",
+      "tags": [
+        "Dash",
+        "Crit"
+      ],
+      "hp": 1900,
+      "damage": 230,
+      "attack_speed": 1.1,
+      "move_speed": 1.1,
+      "range": 1,
+      "ability": {
+        "name": "Shadow Fang",
+        "description": "Teleports onto the Queen for a kill window",
+        "cooldown": 18
+      },
+      "queen_target": true,
+      "abilityType": "teleport",
+      "cardNumber": "0013",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": true,
+      "rig": {
+        "name": "Shadowblade",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "flavor": "low-slung nitro muscle car, blade fenders",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Pixel Greyhound",
+      "breed": "Greyhound",
+      "cost": 3,
+      "role": "Skirmisher",
+      "rarity": "Rare",
+      "tags": [
+        "Dash"
+      ],
+      "hp": 700,
+      "damage": 95,
+      "attack_speed": 1.3,
+      "move_speed": 1.4,
+      "range": 1,
+      "ability": {
+        "name": "Dash Loop",
+        "description": "Refreshes its dash on a kill",
+        "cooldown": 8
+      },
+      "queen_target": false,
+      "abilityType": "dash",
+      "cardNumber": "0016",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Greyhound Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "air",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Circuit Shiba",
+      "breed": "Shiba Inu",
+      "cost": 4,
+      "role": "Striker",
+      "rarity": "Rare",
+      "tags": [
+        "Dash"
+      ],
+      "hp": 1200,
+      "damage": 135,
+      "attack_speed": 1.05,
+      "move_speed": 1.1,
+      "range": 1,
+      "ability": {
+        "name": "Blink Bite",
+        "description": "Blinks a short hop on its first attack",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "dash",
+      "cardNumber": "0017",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Shiba Inu Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Neon Whippet",
+      "breed": "Whippet",
+      "cost": 2,
+      "role": "Skirmisher",
+      "rarity": "Common",
+      "tags": [
+        "Dash"
+      ],
+      "hp": 600,
+      "damage": 75,
+      "attack_speed": 1.3,
+      "move_speed": 1.4,
+      "range": 1,
+      "ability": {
+        "name": "Slipstream",
+        "description": "Ignores slows and gains brief evasion",
+        "cooldown": 8
+      },
+      "queen_target": false,
+      "abilityType": "evasion",
+      "cardNumber": "0021",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Whippet Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "air",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Turbo Jack",
+      "breed": "Jack Russell",
+      "cost": 3,
+      "role": "Striker",
+      "rarity": "Common",
+      "tags": [
+        "Crit"
+      ],
+      "hp": 1050,
+      "damage": 110,
+      "attack_speed": 1.05,
+      "move_speed": 1.1,
+      "range": 1,
+      "ability": {
+        "name": "Burst Bite",
+        "description": "Crits on the first strike after deploy",
+        "cooldown": 9
+      },
+      "queen_target": false,
+      "abilityType": "crit",
+      "cardNumber": "0022",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Jack Russell Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Razor Vizsla",
+      "breed": "Vizsla",
+      "cost": 5,
+      "role": "Lancer",
+      "rarity": "Epic",
+      "tags": [
+        "Crit"
+      ],
+      "hp": 1150,
+      "damage": 180,
+      "attack_speed": 0.95,
+      "move_speed": 0.85,
+      "range": 2,
+      "ability": {
+        "name": "Pierce Rush",
+        "description": "Lunges a line that pierces every foe hit",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "pierce",
+      "cardNumber": "0014",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Vizsla Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Flash Saluki",
+      "breed": "Saluki",
+      "cost": 4,
+      "role": "Skirmisher",
+      "rarity": "Rare",
+      "tags": [
+        "Dash"
+      ],
+      "hp": 750,
+      "damage": 110,
+      "attack_speed": 1.3,
+      "move_speed": 1.4,
+      "range": 1,
+      "ability": {
+        "name": "Sidecut",
+        "description": "Dashes lane to lane to flank the backline",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "dash",
+      "cardNumber": "0018",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Saluki Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "air",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Bolt Corgi",
+      "breed": "Corgi",
+      "cost": 4,
+      "role": "Spawner",
+      "rarity": "Rare",
+      "tags": [
+        "Pack"
+      ],
+      "hp": 750,
+      "damage": 55,
+      "attack_speed": 0.9,
+      "move_speed": 0.85,
+      "range": 2,
+      "ability": {
+        "name": "Spark Pups",
+        "description": "Spawns three fast mini zoomers",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "spawn",
+      "cardNumber": "0019",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Corgi Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "air",
+      "targets": "both",
+      "splash": true,
+      "splashRadius": 1.8
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Glitch Basenji",
+      "breed": "Basenji",
+      "cost": 3,
+      "role": "Hacker",
+      "rarity": "Rare",
+      "tags": [
+        "Hack"
+      ],
+      "hp": 700,
+      "damage": 70,
+      "attack_speed": 1.0,
+      "move_speed": 0.85,
+      "range": 3,
+      "ability": {
+        "name": "Signal Scramble",
+        "description": "Silences a target ability briefly",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "silence",
+      "cardNumber": "0020",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Basenji Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Aero Malinois",
+      "breed": "Malinois",
+      "cost": 6,
+      "role": "Striker",
+      "rarity": "Epic",
+      "tags": [
+        "Dash"
+      ],
+      "hp": 1500,
+      "damage": 175,
+      "attack_speed": 1.05,
+      "move_speed": 1.1,
+      "range": 1,
+      "ability": {
+        "name": "Twin Strike",
+        "description": "Strikes twice in one attack swing",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "double_hit",
+      "cardNumber": "0015",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Malinois Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Drift Sheltie",
+      "breed": "Sheltie",
+      "cost": 2,
+      "role": "Support",
+      "rarity": "Common",
+      "tags": [
+        "Dash"
+      ],
+      "hp": 700,
+      "damage": 40,
+      "attack_speed": 0.9,
+      "move_speed": 1.1,
+      "range": 3,
+      "ability": {
+        "name": "Tag Boost",
+        "description": "Boosts the move speed of nearby allies",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "buff",
+      "cardNumber": "0023",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Sheltie Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "air",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Byte Beagle",
+      "breed": "Beagle",
+      "cost": 3,
+      "role": "Blaster",
+      "rarity": "Common",
+      "tags": [
+        "Backline"
+      ],
+      "hp": 550,
+      "damage": 80,
+      "attack_speed": 1.1,
+      "move_speed": 0.85,
+      "range": 4,
+      "ability": {
+        "name": "Tracer Round",
+        "description": "Long shots that pierce shields; can hit Queen",
+        "cooldown": 10
+      },
+      "queen_target": true,
+      "abilityType": "pierce",
+      "cardNumber": "0024",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Beagle Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Rosco",
+      "breed": "Australian Cattle Dog",
+      "cost": 10,
+      "role": "Controller",
+      "rarity": "Mythic",
+      "tags": [
+        "Hack",
+        "Pack"
+      ],
+      "hp": 1600,
+      "damage": 170,
+      "attack_speed": 0.95,
+      "move_speed": 0.85,
+      "range": 3,
+      "ability": {
+        "name": "Leashbreak",
+        "description": "Disables a tower fire; can strike the Queen",
+        "cooldown": 18
+      },
+      "queen_target": true,
+      "abilityType": "disable_tower",
+      "cardNumber": "0025",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": true,
+      "rig": {
+        "name": "The Jammer",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "flavor": "antenna-bristled tech van, EMP dish",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Synth Collie",
+      "breed": "Border Collie",
+      "cost": 5,
+      "role": "Hacker",
+      "rarity": "Epic",
+      "tags": [
+        "Hack"
+      ],
+      "hp": 900,
+      "damage": 90,
+      "attack_speed": 1.0,
+      "move_speed": 0.85,
+      "range": 3,
+      "ability": {
+        "name": "Hack Jam",
+        "description": "Jams a tower so it cannot fire",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "disable_tower",
+      "cardNumber": "0026",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Border Collie Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Holo Husky",
+      "breed": "Husky",
+      "cost": 5,
+      "role": "Support",
+      "rarity": "Rare",
+      "tags": [
+        "Shield"
+      ],
+      "hp": 950,
+      "damage": 60,
+      "attack_speed": 0.9,
+      "move_speed": 0.85,
+      "range": 3,
+      "ability": {
+        "name": "Heal Beacon",
+        "description": "Pulsing area heal for the pack",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "heal",
+      "cardNumber": "0029",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Husky Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Chill Samoyed",
+      "breed": "Samoyed",
+      "cost": 4,
+      "role": "Support",
+      "rarity": "Rare",
+      "tags": [
+        "Slow"
+      ],
+      "hp": 900,
+      "damage": 55,
+      "attack_speed": 0.9,
+      "move_speed": 0.85,
+      "range": 3,
+      "ability": {
+        "name": "Frost Bark",
+        "description": "Wide frost cone slows everything caught",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "slow",
+      "cardNumber": "0030",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Samoyed Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Prism Poodle",
+      "breed": "Poodle",
+      "cost": 4,
+      "role": "Controller",
+      "rarity": "Rare",
+      "tags": [
+        "Shield Break"
+      ],
+      "hp": 850,
+      "damage": 85,
+      "attack_speed": 0.95,
+      "move_speed": 0.85,
+      "range": 3,
+      "ability": {
+        "name": "Shatter",
+        "description": "Strips enemy shields, then wards an ally",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "shield",
+      "cardNumber": "0031",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Poodle Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Echo Dalmatian",
+      "breed": "Dalmatian",
+      "cost": 3,
+      "role": "Controller",
+      "rarity": "Common",
+      "tags": [
+        "Slow"
+      ],
+      "hp": 750,
+      "damage": 70,
+      "attack_speed": 0.95,
+      "move_speed": 0.85,
+      "range": 3,
+      "ability": {
+        "name": "Echo Howl",
+        "description": "Rolling area slow down the lane",
+        "cooldown": 9
+      },
+      "queen_target": false,
+      "abilityType": "slow",
+      "cardNumber": "0034",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Dalmatian Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Static Sheba Inu",
+      "breed": "Shiba Inu",
+      "cost": 2,
+      "role": "Hacker",
+      "rarity": "Common",
+      "tags": [
+        "Hack"
+      ],
+      "hp": 600,
+      "damage": 55,
+      "attack_speed": 1.0,
+      "move_speed": 0.85,
+      "range": 3,
+      "ability": {
+        "name": "Ping",
+        "description": "Quick silence on the first target",
+        "cooldown": 8
+      },
+      "queen_target": false,
+      "abilityType": "silence",
+      "cardNumber": "0035",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Shiba Inu Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Vibe Shih Tzu",
+      "breed": "Shih Tzu",
+      "cost": 2,
+      "role": "Support",
+      "rarity": "Common",
+      "tags": [
+        "Shield"
+      ],
+      "hp": 700,
+      "damage": 40,
+      "attack_speed": 0.9,
+      "move_speed": 0.85,
+      "range": 3,
+      "ability": {
+        "name": "Soothe",
+        "description": "Small steady heal to a wounded ally",
+        "cooldown": 8
+      },
+      "queen_target": false,
+      "abilityType": "heal",
+      "cardNumber": "0036",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Shih Tzu Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Noir Setter",
+      "breed": "Setter",
+      "cost": 6,
+      "role": "Controller",
+      "rarity": "Epic",
+      "tags": [
+        "Hack"
+      ],
+      "hp": 1100,
+      "damage": 110,
+      "attack_speed": 0.95,
+      "move_speed": 0.85,
+      "range": 3,
+      "ability": {
+        "name": "Blackout",
+        "description": "Blinds ranged foes so their shots miss",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "blind",
+      "cardNumber": "0027",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Setter Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Signal Pointer",
+      "breed": "Pointer",
+      "cost": 4,
+      "role": "Lancer",
+      "rarity": "Rare",
+      "tags": [
+        "Hack"
+      ],
+      "hp": 1000,
+      "damage": 150,
+      "attack_speed": 0.95,
+      "move_speed": 0.85,
+      "range": 3,
+      "ability": {
+        "name": "Tag Shot",
+        "description": "Tags a target, revealing stealth and weakening it",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "reveal",
+      "cardNumber": "0032",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Pointer Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Ghost Spaniel",
+      "breed": "Spaniel",
+      "cost": 3,
+      "role": "Skirmisher",
+      "rarity": "Rare",
+      "tags": [
+        "Backline"
+      ],
+      "hp": 700,
+      "damage": 95,
+      "attack_speed": 1.3,
+      "move_speed": 1.1,
+      "range": 2,
+      "ability": {
+        "name": "Phase",
+        "description": "Phases out for a brief untargetable window",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "invuln",
+      "cardNumber": "0033",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Spaniel Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "air",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Pulse Border Collie",
+      "breed": "Border Collie",
+      "cost": 5,
+      "role": "Support",
+      "rarity": "Epic",
+      "tags": [
+        "Shield"
+      ],
+      "hp": 1050,
+      "damage": 65,
+      "attack_speed": 0.9,
+      "move_speed": 0.85,
+      "range": 3,
+      "ability": {
+        "name": "Barrier Ring",
+        "description": "Drops an area shield over the front line",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "shield",
+      "cardNumber": "0028",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Border Collie Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Crown Foxhound",
+      "breed": "Foxhound",
+      "cost": 11,
+      "role": "Assassin",
+      "rarity": "Mythic",
+      "tags": [
+        "Turret Break"
+      ],
+      "hp": 1900,
+      "damage": 230,
+      "attack_speed": 1.1,
+      "move_speed": 1.1,
+      "range": 1,
+      "ability": {
+        "name": "Royal Hunt",
+        "description": "Shreds structures; can strike the Queen",
+        "cooldown": 18
+      },
+      "queen_target": true,
+      "abilityType": "turret_break",
+      "cardNumber": "0037",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": true,
+      "rig": {
+        "name": "Railhound",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "flavor": "turret-platform rig, rail-cannon mount",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": true,
+      "splashRadius": 1.3
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Laser Beagle",
+      "breed": "Beagle",
+      "cost": 4,
+      "role": "Structure",
+      "rarity": "Rare",
+      "tags": [
+        "Turret"
+      ],
+      "hp": 1050,
+      "damage": 85,
+      "attack_speed": 1.0,
+      "move_speed": 0.0,
+      "range": 5,
+      "ability": {
+        "name": "Overheat",
+        "description": "Static turret that ramps fire the longer it shoots",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "ramp",
+      "cardNumber": "0040",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Beagle Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Neon Dachshund",
+      "breed": "Dachshund",
+      "cost": 3,
+      "role": "Spawner",
+      "rarity": "Common",
+      "tags": [
+        "Drone"
+      ],
+      "hp": 650,
+      "damage": 45,
+      "attack_speed": 0.9,
+      "move_speed": 0.85,
+      "range": 2,
+      "ability": {
+        "name": "Tunnel Drones",
+        "description": "Tunnels up two attack drones",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "spawn",
+      "cardNumber": "0045",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Dachshund Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "air",
+      "targets": "both",
+      "splash": true,
+      "splashRadius": 1.8
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Volt Corgi",
+      "breed": "Corgi",
+      "cost": 4,
+      "role": "Spawner",
+      "rarity": "Rare",
+      "tags": [
+        "Drone"
+      ],
+      "hp": 750,
+      "damage": 55,
+      "attack_speed": 0.9,
+      "move_speed": 0.85,
+      "range": 2,
+      "ability": {
+        "name": "Spark Pups",
+        "description": "Spawns three spark drones",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "spawn",
+      "cardNumber": "0041",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Corgi Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": true,
+      "splashRadius": 1.8
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Grid Schnauzer",
+      "breed": "Schnauzer",
+      "cost": 5,
+      "role": "Structure",
+      "rarity": "Rare",
+      "tags": [
+        "Turret"
+      ],
+      "hp": 1150,
+      "damage": 95,
+      "attack_speed": 1.0,
+      "move_speed": 0.0,
+      "range": 4,
+      "ability": {
+        "name": "Grid Lock",
+        "description": "Turret field that slows attackers in range",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "slow",
+      "cardNumber": "0042",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Schnauzer Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Flux Pomeranian",
+      "breed": "Pomeranian",
+      "cost": 2,
+      "role": "Support",
+      "rarity": "Common",
+      "tags": [
+        "Drone"
+      ],
+      "hp": 700,
+      "damage": 40,
+      "attack_speed": 0.9,
+      "move_speed": 0.85,
+      "range": 3,
+      "ability": {
+        "name": "Battery",
+        "description": "Boosts the fire rate of nearby turrets",
+        "cooldown": 8
+      },
+      "queen_target": false,
+      "abilityType": "buff",
+      "cardNumber": "0046",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Pomeranian Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Rail Terrier",
+      "breed": "Terrier",
+      "cost": 3,
+      "role": "Blaster",
+      "rarity": "Common",
+      "tags": [
+        "Turret Break"
+      ],
+      "hp": 550,
+      "damage": 80,
+      "attack_speed": 1.1,
+      "move_speed": 0.85,
+      "range": 4,
+      "ability": {
+        "name": "Rail Shot",
+        "description": "Long rail shots deal bonus vs structures",
+        "cooldown": 9
+      },
+      "queen_target": false,
+      "abilityType": "turret_break",
+      "cardNumber": "0047",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Terrier Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Circuit Retriever",
+      "breed": "Retriever",
+      "cost": 6,
+      "role": "Support",
+      "rarity": "Epic",
+      "tags": [
+        "Drone"
+      ],
+      "hp": 1100,
+      "damage": 70,
+      "attack_speed": 0.9,
+      "move_speed": 0.85,
+      "range": 3,
+      "ability": {
+        "name": "Drone Swarm",
+        "description": "Releases five swarm drones",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "spawn",
+      "cardNumber": "0038",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Retriever Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": true,
+      "splashRadius": 1.8
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Chrome Airedale",
+      "breed": "Airedale",
+      "cost": 5,
+      "role": "Lancer",
+      "rarity": "Rare",
+      "tags": [
+        "Turret"
+      ],
+      "hp": 1050,
+      "damage": 165,
+      "attack_speed": 0.95,
+      "move_speed": 0.85,
+      "range": 3,
+      "ability": {
+        "name": "Arc Shot",
+        "description": "Arc that chains to three targets",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "chain",
+      "cardNumber": "0043",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Airedale Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": true,
+      "splashRadius": 1.8
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Beacon Basset",
+      "breed": "Basset",
+      "cost": 4,
+      "role": "Support",
+      "rarity": "Rare",
+      "tags": [
+        "Shield"
+      ],
+      "hp": 900,
+      "damage": 55,
+      "attack_speed": 0.9,
+      "move_speed": 0.85,
+      "range": 3,
+      "ability": {
+        "name": "Beacon",
+        "description": "Reveals stealth and marks foes for the pack",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "reveal",
+      "cardNumber": "0044",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Basset Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Pixel Pug",
+      "breed": "Pug",
+      "cost": 2,
+      "role": "Spawner",
+      "rarity": "Common",
+      "tags": [
+        "Drone"
+      ],
+      "hp": 550,
+      "damage": 40,
+      "attack_speed": 0.9,
+      "move_speed": 0.85,
+      "range": 2,
+      "ability": {
+        "name": "Mini Pup",
+        "description": "Deploys a single guard drone",
+        "cooldown": 8
+      },
+      "queen_target": false,
+      "abilityType": "spawn",
+      "cardNumber": "0048",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Pug Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "air",
+      "targets": "both",
+      "splash": true,
+      "splashRadius": 1.8
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Nova Shepherd",
+      "breed": "German Shepherd",
+      "cost": 7,
+      "role": "Structure",
+      "rarity": "Epic",
+      "tags": [
+        "Turret"
+      ],
+      "hp": 1450,
+      "damage": 125,
+      "attack_speed": 1.0,
+      "move_speed": 0.0,
+      "range": 4,
+      "ability": {
+        "name": "Overclock",
+        "description": "Heavy static turret with a burst fire window",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "ramp",
+      "cardNumber": "0039",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "German Shepherd Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": true,
+      "splashRadius": 1.5
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Cinderblock",
+      "breed": "Boxer",
+      "cost": 7,
+      "role": "Striker",
+      "rarity": "Legendary",
+      "tags": [
+        "Pack",
+        "Heavy"
+      ],
+      "hp": 1920,
+      "damage": 149,
+      "attack_speed": 0.95,
+      "move_speed": 0.75,
+      "range": 1,
+      "ability": {
+        "name": "Haymaker",
+        "description": "First hit stuns the target for 1s",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "stun",
+      "cardNumber": "0049",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Cinderblock Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Armored bruiser rig -- ram plow, plate armor, slow and unstoppable"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Balboa",
+      "parent": "0003",
+      "desc": "Cinderblock -- the bunkered [HEAVY] build of Balboa's line (Striker, Boneguard). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: first hit stuns the target for 1s."
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Knuckles",
+      "breed": "Boxer",
+      "cost": 5,
+      "role": "Striker",
+      "rarity": "Rare",
+      "tags": [
+        "Pack",
+        "Street"
+      ],
+      "hp": 1080,
+      "damage": 219,
+      "attack_speed": 1.18,
+      "move_speed": 0.94,
+      "range": 1,
+      "ability": {
+        "name": "Haymaker",
+        "description": "First hit stuns the target for 1s",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "stun",
+      "cardNumber": "0050",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Knuckles Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Armored bruiser rig -- ram plow, plate armor, slow and unstoppable"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Balboa",
+      "parent": "0003",
+      "desc": "Knuckles -- the stripped [STREET] build of Balboa's line (Striker, Boneguard). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: first hit stuns the target for 1s."
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Tombstone",
+      "breed": "Rottweiler",
+      "cost": 10,
+      "role": "Vanguard",
+      "rarity": "Legendary",
+      "tags": [
+        "Pack",
+        "Heavy"
+      ],
+      "hp": 3648,
+      "damage": 132,
+      "attack_speed": 0.63,
+      "move_speed": 0.48,
+      "range": 1,
+      "ability": {
+        "name": "Overclock Rage",
+        "description": "Below 40% HP its bite damage spikes",
+        "cooldown": 16
+      },
+      "queen_target": false,
+      "abilityType": "crit",
+      "cardNumber": "0051",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Tombstone Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Armored bruiser rig -- ram plow, plate armor, slow and unstoppable"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Iron Rottweiler",
+      "parent": "0004",
+      "desc": "Tombstone -- the bunkered [HEAVY] build of Iron Rottweiler's line (Vanguard, Boneguard). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: below 40% HP its bite damage spikes."
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Razorgums",
+      "breed": "Rottweiler",
+      "cost": 8,
+      "role": "Vanguard",
+      "rarity": "Rare",
+      "tags": [
+        "Pack",
+        "Street"
+      ],
+      "hp": 2052,
+      "damage": 194,
+      "attack_speed": 0.78,
+      "move_speed": 0.61,
+      "range": 1,
+      "ability": {
+        "name": "Overclock Rage",
+        "description": "Below 40% HP its bite damage spikes",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "crit",
+      "cardNumber": "0052",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Razorgums Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Armored bruiser rig -- ram plow, plate armor, slow and unstoppable"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Iron Rottweiler",
+      "parent": "0004",
+      "desc": "Razorgums -- the stripped [STREET] build of Iron Rottweiler's line (Vanguard, Boneguard). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: below 40% HP its bite damage spikes."
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Anvil",
+      "breed": "St. Bernard",
+      "cost": 9,
+      "role": "Vanguard",
+      "rarity": "Epic",
+      "tags": [
+        "Guard",
+        "Heavy"
+      ],
+      "hp": 3392,
+      "damage": 115,
+      "attack_speed": 0.63,
+      "move_speed": 0.48,
+      "range": 1,
+      "ability": {
+        "name": "Bodywall",
+        "description": "Bodywall aura soaks nearby damage for the pack",
+        "cooldown": 16
+      },
+      "queen_target": false,
+      "abilityType": "dr",
+      "cardNumber": "0053",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Anvil Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Armored bruiser rig -- ram plow, plate armor, slow and unstoppable"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Granite Saint",
+      "parent": "0005",
+      "desc": "Anvil -- the bunkered [HEAVY] build of Granite Saint's line (Vanguard, Boneguard). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: bodywall aura soaks nearby damage for the pack."
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Hatchet",
+      "breed": "St. Bernard",
+      "cost": 7,
+      "role": "Vanguard",
+      "rarity": "Common",
+      "tags": [
+        "Guard",
+        "Street"
+      ],
+      "hp": 1908,
+      "damage": 169,
+      "attack_speed": 0.78,
+      "move_speed": 0.61,
+      "range": 1,
+      "ability": {
+        "name": "Bodywall",
+        "description": "Bodywall aura soaks nearby damage for the pack",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "dr",
+      "cardNumber": "0054",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Hatchet Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Armored bruiser rig -- ram plow, plate armor, slow and unstoppable"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Granite Saint",
+      "parent": "0005",
+      "desc": "Hatchet -- the stripped [STREET] build of Granite Saint's line (Vanguard, Boneguard). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: bodywall aura soaks nearby damage for the pack."
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Bonecrusher",
+      "breed": "Bulldog",
+      "cost": 6,
+      "role": "Striker",
+      "rarity": "Epic",
+      "tags": [
+        "Pack",
+        "Heavy"
+      ],
+      "hp": 1664,
+      "damage": 128,
+      "attack_speed": 0.95,
+      "move_speed": 0.75,
+      "range": 1,
+      "ability": {
+        "name": "Brawler",
+        "description": "Powers up its own bite the longer it brawls",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "buff",
+      "cardNumber": "0055",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Bonecrusher Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Armored bruiser rig -- ram plow, plate armor, slow and unstoppable"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Grit Bulldog",
+      "parent": "0006",
+      "desc": "Bonecrusher -- the bunkered [HEAVY] build of Grit Bulldog's line (Striker, Boneguard). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: powers up its own bite the longer it brawls."
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Switch",
+      "breed": "Bulldog",
+      "cost": 4,
+      "role": "Striker",
+      "rarity": "Common",
+      "tags": [
+        "Pack",
+        "Street"
+      ],
+      "hp": 936,
+      "damage": 188,
+      "attack_speed": 1.18,
+      "move_speed": 0.94,
+      "range": 1,
+      "ability": {
+        "name": "Brawler",
+        "description": "Powers up its own bite the longer it brawls",
+        "cooldown": 8
+      },
+      "queen_target": false,
+      "abilityType": "buff",
+      "cardNumber": "0056",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Switch Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Armored bruiser rig -- ram plow, plate armor, slow and unstoppable"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Grit Bulldog",
+      "parent": "0006",
+      "desc": "Switch -- the stripped [STREET] build of Grit Bulldog's line (Striker, Boneguard). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: powers up its own bite the longer it brawls."
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Warhorse",
+      "breed": "Akita",
+      "cost": 7,
+      "role": "Lancer",
+      "rarity": "Epic",
+      "tags": [
+        "Guard",
+        "Heavy"
+      ],
+      "hp": 1408,
+      "damage": 153,
+      "attack_speed": 0.85,
+      "move_speed": 0.75,
+      "range": 2,
+      "ability": {
+        "name": "Shock Push",
+        "description": "Knockback cone shoves a melee line back",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "knockback",
+      "cardNumber": "0057",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Warhorse Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Armored bruiser rig -- ram plow, plate armor, slow and unstoppable"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Alloy Akita",
+      "parent": "0007",
+      "desc": "Warhorse -- the bunkered [HEAVY] build of Alloy Akita's line (Lancer, Boneguard). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: knockback cone shoves a melee line back."
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Lugnut",
+      "breed": "Akita",
+      "cost": 5,
+      "role": "Lancer",
+      "rarity": "Common",
+      "tags": [
+        "Guard",
+        "Street"
+      ],
+      "hp": 792,
+      "damage": 225,
+      "attack_speed": 1.06,
+      "move_speed": 0.94,
+      "range": 2,
+      "ability": {
+        "name": "Shock Push",
+        "description": "Knockback cone shoves a melee line back",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "knockback",
+      "cardNumber": "0058",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Lugnut Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Armored bruiser rig -- ram plow, plate armor, slow and unstoppable"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Alloy Akita",
+      "parent": "0007",
+      "desc": "Lugnut -- the stripped [STREET] build of Alloy Akita's line (Lancer, Boneguard). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: knockback cone shoves a melee line back."
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Ironhide",
+      "breed": "Newfoundland",
+      "cost": 8,
+      "role": "Support",
+      "rarity": "Epic",
+      "tags": [
+        "Guard",
+        "Heavy"
+      ],
+      "hp": 1408,
+      "damage": 60,
+      "attack_speed": 0.81,
+      "move_speed": 0.75,
+      "range": 2,
+      "ability": {
+        "name": "Fortify",
+        "description": "Raises max HP of allies in an aura",
+        "cooldown": 18
+      },
+      "queen_target": false,
+      "abilityType": "buff",
+      "cardNumber": "0059",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Ironhide Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Armored bruiser rig -- ram plow, plate armor, slow and unstoppable"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Warden Newfie",
+      "parent": "0008",
+      "desc": "Ironhide -- the bunkered [HEAVY] build of Warden Newfie's line (Support, Boneguard). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: raises max HP of allies in an aura."
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Snaggle",
+      "breed": "Newfoundland",
+      "cost": 6,
+      "role": "Support",
+      "rarity": "Common",
+      "tags": [
+        "Guard",
+        "Street"
+      ],
+      "hp": 792,
+      "damage": 88,
+      "attack_speed": 1.01,
+      "move_speed": 0.94,
+      "range": 2,
+      "ability": {
+        "name": "Fortify",
+        "description": "Raises max HP of allies in an aura",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "buff",
+      "cardNumber": "0060",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Snaggle Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Armored bruiser rig -- ram plow, plate armor, slow and unstoppable"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Warden Newfie",
+      "parent": "0008",
+      "desc": "Snaggle -- the stripped [STREET] build of Warden Newfie's line (Support, Boneguard). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: raises max HP of allies in an aura."
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Slab",
+      "breed": "Cane Corso",
+      "cost": 9,
+      "role": "Vanguard",
+      "rarity": "Epic",
+      "tags": [
+        "Pack",
+        "Heavy"
+      ],
+      "hp": 3392,
+      "damage": 115,
+      "attack_speed": 0.63,
+      "move_speed": 0.48,
+      "range": 1,
+      "ability": {
+        "name": "Grav Pull",
+        "description": "Pulses a shove that scatters the nearest foes",
+        "cooldown": 16
+      },
+      "queen_target": false,
+      "abilityType": "knockback",
+      "cardNumber": "0061",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Slab Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Armored bruiser rig -- ram plow, plate armor, slow and unstoppable"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Rust Cane Corso",
+      "parent": "0009",
+      "desc": "Slab -- the bunkered [HEAVY] build of Rust Cane Corso's line (Vanguard, Boneguard). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: pulses a shove that scatters the nearest foes."
+    },
+    {
+      "class": "Boneguard Crew",
+      "name": "Brassknuck",
+      "breed": "Cane Corso",
+      "cost": 7,
+      "role": "Vanguard",
+      "rarity": "Common",
+      "tags": [
+        "Pack",
+        "Street"
+      ],
+      "hp": 1908,
+      "damage": 169,
+      "attack_speed": 0.78,
+      "move_speed": 0.61,
+      "range": 1,
+      "ability": {
+        "name": "Grav Pull",
+        "description": "Pulses a shove that scatters the nearest foes",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "knockback",
+      "cardNumber": "0062",
+      "factionId": "boneguard_crew",
+      "bodyArchetype": "bruiser",
+      "isMythic": false,
+      "rig": {
+        "name": "Brassknuck Rig",
+        "rigClass": "bruiser",
+        "weaponMod": "ram_plow",
+        "sourceCar": "Muscle Car",
+        "rigLanguage": "Armored bruiser rig -- ram plow, plate armor, slow and unstoppable",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Armored bruiser rig -- ram plow, plate armor, slow and unstoppable"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Rust Cane Corso",
+      "parent": "0009",
+      "desc": "Brassknuck -- the stripped [STREET] build of Rust Cane Corso's line (Vanguard, Boneguard). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: pulses a shove that scatters the nearest foes."
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Roadblock",
+      "breed": "Greyhound",
+      "cost": 4,
+      "role": "Skirmisher",
+      "rarity": "Epic",
+      "tags": [
+        "Dash",
+        "Heavy"
+      ],
+      "hp": 896,
+      "damage": 81,
+      "attack_speed": 1.17,
+      "move_speed": 1.23,
+      "range": 1,
+      "ability": {
+        "name": "Dash Loop",
+        "description": "Refreshes its dash on a kill",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "dash",
+      "cardNumber": "0063",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Roadblock Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Sport speed rig -- nitro, drag body, glass-cannon velocity"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "air",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Pixel Greyhound",
+      "parent": "0016",
+      "desc": "Roadblock -- the bunkered [HEAVY] build of Pixel Greyhound's line (Skirmisher, Zoomie). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: refreshes its dash on a kill."
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Nitro",
+      "breed": "Greyhound",
+      "cost": 2,
+      "role": "Skirmisher",
+      "rarity": "Common",
+      "tags": [
+        "Dash",
+        "Street"
+      ],
+      "hp": 504,
+      "damage": 119,
+      "attack_speed": 1.46,
+      "move_speed": 1.54,
+      "range": 1,
+      "ability": {
+        "name": "Dash Loop",
+        "description": "Refreshes its dash on a kill",
+        "cooldown": 6
+      },
+      "queen_target": false,
+      "abilityType": "dash",
+      "cardNumber": "0064",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Nitro Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Sport speed rig -- nitro, drag body, glass-cannon velocity"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "air",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Pixel Greyhound",
+      "parent": "0016",
+      "desc": "Nitro -- the stripped [STREET] build of Pixel Greyhound's line (Skirmisher, Zoomie). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: refreshes its dash on a kill."
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Bullbar",
+      "breed": "Shiba Inu",
+      "cost": 5,
+      "role": "Striker",
+      "rarity": "Epic",
+      "tags": [
+        "Dash",
+        "Heavy"
+      ],
+      "hp": 1536,
+      "damage": 115,
+      "attack_speed": 0.95,
+      "move_speed": 0.97,
+      "range": 1,
+      "ability": {
+        "name": "Blink Bite",
+        "description": "Blinks a short hop on its first attack",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "dash",
+      "cardNumber": "0065",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Bullbar Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Sport speed rig -- nitro, drag body, glass-cannon velocity"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Circuit Shiba",
+      "parent": "0017",
+      "desc": "Bullbar -- the bunkered [HEAVY] build of Circuit Shiba's line (Striker, Zoomie). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: blinks a short hop on its first attack."
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Switchblade",
+      "breed": "Shiba Inu",
+      "cost": 3,
+      "role": "Striker",
+      "rarity": "Common",
+      "tags": [
+        "Dash",
+        "Street"
+      ],
+      "hp": 864,
+      "damage": 169,
+      "attack_speed": 1.18,
+      "move_speed": 1.21,
+      "range": 1,
+      "ability": {
+        "name": "Blink Bite",
+        "description": "Blinks a short hop on its first attack",
+        "cooldown": 8
+      },
+      "queen_target": false,
+      "abilityType": "dash",
+      "cardNumber": "0066",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Switchblade Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Sport speed rig -- nitro, drag body, glass-cannon velocity"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Circuit Shiba",
+      "parent": "0017",
+      "desc": "Switchblade -- the stripped [STREET] build of Circuit Shiba's line (Striker, Zoomie). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: blinks a short hop on its first attack."
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Rollcage",
+      "breed": "Vizsla",
+      "cost": 6,
+      "role": "Lancer",
+      "rarity": "Legendary",
+      "tags": [
+        "Crit",
+        "Heavy"
+      ],
+      "hp": 1472,
+      "damage": 153,
+      "attack_speed": 0.85,
+      "move_speed": 0.75,
+      "range": 2,
+      "ability": {
+        "name": "Pierce Rush",
+        "description": "Lunges a line that pierces every foe hit",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "pierce",
+      "cardNumber": "0067",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Rollcage Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Sport speed rig -- nitro, drag body, glass-cannon velocity"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Razor Vizsla",
+      "parent": "0014",
+      "desc": "Rollcage -- the bunkered [HEAVY] build of Razor Vizsla's line (Lancer, Zoomie). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: lunges a line that pierces every foe hit."
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Ricochet",
+      "breed": "Vizsla",
+      "cost": 4,
+      "role": "Lancer",
+      "rarity": "Rare",
+      "tags": [
+        "Crit",
+        "Street"
+      ],
+      "hp": 828,
+      "damage": 225,
+      "attack_speed": 1.06,
+      "move_speed": 0.94,
+      "range": 2,
+      "ability": {
+        "name": "Pierce Rush",
+        "description": "Lunges a line that pierces every foe hit",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "pierce",
+      "cardNumber": "0068",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Ricochet Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Sport speed rig -- nitro, drag body, glass-cannon velocity"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Razor Vizsla",
+      "parent": "0014",
+      "desc": "Ricochet -- the stripped [STREET] build of Razor Vizsla's line (Lancer, Zoomie). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: lunges a line that pierces every foe hit."
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Crashcage",
+      "breed": "Saluki",
+      "cost": 5,
+      "role": "Skirmisher",
+      "rarity": "Epic",
+      "tags": [
+        "Dash",
+        "Heavy"
+      ],
+      "hp": 960,
+      "damage": 94,
+      "attack_speed": 1.17,
+      "move_speed": 1.23,
+      "range": 1,
+      "ability": {
+        "name": "Sidecut",
+        "description": "Dashes lane to lane to flank the backline",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "dash",
+      "cardNumber": "0069",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Crashcage Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Sport speed rig -- nitro, drag body, glass-cannon velocity"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "air",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Flash Saluki",
+      "parent": "0018",
+      "desc": "Crashcage -- the bunkered [HEAVY] build of Flash Saluki's line (Skirmisher, Zoomie). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: dashes lane to lane to flank the backline."
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Hotwire",
+      "breed": "Saluki",
+      "cost": 3,
+      "role": "Skirmisher",
+      "rarity": "Common",
+      "tags": [
+        "Dash",
+        "Street"
+      ],
+      "hp": 540,
+      "damage": 138,
+      "attack_speed": 1.46,
+      "move_speed": 1.54,
+      "range": 1,
+      "ability": {
+        "name": "Sidecut",
+        "description": "Dashes lane to lane to flank the backline",
+        "cooldown": 8
+      },
+      "queen_target": false,
+      "abilityType": "dash",
+      "cardNumber": "0070",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Hotwire Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Sport speed rig -- nitro, drag body, glass-cannon velocity"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "air",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Flash Saluki",
+      "parent": "0018",
+      "desc": "Hotwire -- the stripped [STREET] build of Flash Saluki's line (Skirmisher, Zoomie). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: dashes lane to lane to flank the backline."
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Bumper",
+      "breed": "Corgi",
+      "cost": 5,
+      "role": "Spawner",
+      "rarity": "Epic",
+      "tags": [
+        "Pack",
+        "Heavy"
+      ],
+      "hp": 960,
+      "damage": 47,
+      "attack_speed": 0.81,
+      "move_speed": 0.75,
+      "range": 2,
+      "ability": {
+        "name": "Spark Pups",
+        "description": "Spawns three fast mini zoomers",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "spawn",
+      "cardNumber": "0071",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Bumper Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Sport speed rig -- nitro, drag body, glass-cannon velocity"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "air",
+      "targets": "both",
+      "splash": true,
+      "splashRadius": 1.8,
+      "variant": "HEAVY",
+      "family": "Bolt Corgi",
+      "parent": "0019",
+      "desc": "Bumper -- the bunkered [HEAVY] build of Bolt Corgi's line (Spawner, Zoomie). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: spawns three fast mini zoomers."
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Backfire",
+      "breed": "Corgi",
+      "cost": 3,
+      "role": "Spawner",
+      "rarity": "Common",
+      "tags": [
+        "Pack",
+        "Street"
+      ],
+      "hp": 540,
+      "damage": 69,
+      "attack_speed": 1.01,
+      "move_speed": 0.94,
+      "range": 2,
+      "ability": {
+        "name": "Spark Pups",
+        "description": "Spawns three fast mini zoomers",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "spawn",
+      "cardNumber": "0072",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Backfire Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Sport speed rig -- nitro, drag body, glass-cannon velocity"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "air",
+      "targets": "both",
+      "splash": true,
+      "splashRadius": 1.8,
+      "variant": "STREET",
+      "family": "Bolt Corgi",
+      "parent": "0019",
+      "desc": "Backfire -- the stripped [STREET] build of Bolt Corgi's line (Spawner, Zoomie). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: spawns three fast mini zoomers."
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Gridiron",
+      "breed": "Basenji",
+      "cost": 4,
+      "role": "Hacker",
+      "rarity": "Epic",
+      "tags": [
+        "Hack",
+        "Heavy"
+      ],
+      "hp": 896,
+      "damage": 60,
+      "attack_speed": 0.9,
+      "move_speed": 0.75,
+      "range": 3,
+      "ability": {
+        "name": "Signal Scramble",
+        "description": "Silences a target ability briefly",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "silence",
+      "cardNumber": "0073",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Gridiron Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Sport speed rig -- nitro, drag body, glass-cannon velocity"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Glitch Basenji",
+      "parent": "0020",
+      "desc": "Gridiron -- the bunkered [HEAVY] build of Glitch Basenji's line (Hacker, Zoomie). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: silences a target ability briefly."
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Skidmark",
+      "breed": "Basenji",
+      "cost": 2,
+      "role": "Hacker",
+      "rarity": "Common",
+      "tags": [
+        "Hack",
+        "Street"
+      ],
+      "hp": 504,
+      "damage": 88,
+      "attack_speed": 1.12,
+      "move_speed": 0.94,
+      "range": 3,
+      "ability": {
+        "name": "Signal Scramble",
+        "description": "Silences a target ability briefly",
+        "cooldown": 8
+      },
+      "queen_target": false,
+      "abilityType": "silence",
+      "cardNumber": "0074",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Skidmark Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Sport speed rig -- nitro, drag body, glass-cannon velocity"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Glitch Basenji",
+      "parent": "0020",
+      "desc": "Skidmark -- the stripped [STREET] build of Glitch Basenji's line (Hacker, Zoomie). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: silences a target ability briefly."
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Deadweight",
+      "breed": "Malinois",
+      "cost": 7,
+      "role": "Striker",
+      "rarity": "Legendary",
+      "tags": [
+        "Dash",
+        "Heavy"
+      ],
+      "hp": 1920,
+      "damage": 149,
+      "attack_speed": 0.95,
+      "move_speed": 0.97,
+      "range": 1,
+      "ability": {
+        "name": "Twin Strike",
+        "description": "Strikes twice in one attack swing",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "double_hit",
+      "cardNumber": "0075",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Deadweight Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Sport speed rig -- nitro, drag body, glass-cannon velocity"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Aero Malinois",
+      "parent": "0015",
+      "desc": "Deadweight -- the bunkered [HEAVY] build of Aero Malinois's line (Striker, Zoomie). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: strikes twice in one attack swing."
+    },
+    {
+      "class": "Zoomie Syndicate",
+      "name": "Flatline",
+      "breed": "Malinois",
+      "cost": 5,
+      "role": "Striker",
+      "rarity": "Rare",
+      "tags": [
+        "Dash",
+        "Street"
+      ],
+      "hp": 1080,
+      "damage": 219,
+      "attack_speed": 1.18,
+      "move_speed": 1.21,
+      "range": 1,
+      "ability": {
+        "name": "Twin Strike",
+        "description": "Strikes twice in one attack swing",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "double_hit",
+      "cardNumber": "0076",
+      "factionId": "zoomie_syndicate",
+      "bodyArchetype": "sprinter",
+      "isMythic": false,
+      "rig": {
+        "name": "Flatline Rig",
+        "rigClass": "sprinter",
+        "weaponMod": "ram_plow",
+        "sourceCar": "GTR",
+        "rigLanguage": "Sport speed rig -- nitro, drag body, glass-cannon velocity",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Sport speed rig -- nitro, drag body, glass-cannon velocity"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "ground",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Aero Malinois",
+      "parent": "0015",
+      "desc": "Flatline -- the stripped [STREET] build of Aero Malinois's line (Striker, Zoomie). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: strikes twice in one attack swing."
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Firewall",
+      "breed": "Border Collie",
+      "cost": 6,
+      "role": "Hacker",
+      "rarity": "Legendary",
+      "tags": [
+        "Hack",
+        "Heavy"
+      ],
+      "hp": 1152,
+      "damage": 76,
+      "attack_speed": 0.9,
+      "move_speed": 0.75,
+      "range": 3,
+      "ability": {
+        "name": "Hack Jam",
+        "description": "Jams a tower so it cannot fire",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "disable_tower",
+      "cardNumber": "0077",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Firewall Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Tech-ops rig -- jammer van, EMP array, signal-warfare"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Synth Collie",
+      "parent": "0026",
+      "desc": "Firewall -- the bunkered [HEAVY] build of Synth Collie's line (Hacker, Leashbreak). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: jams a tower so it cannot fire."
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Glitchfork",
+      "breed": "Border Collie",
+      "cost": 4,
+      "role": "Hacker",
+      "rarity": "Rare",
+      "tags": [
+        "Hack",
+        "Street"
+      ],
+      "hp": 648,
+      "damage": 112,
+      "attack_speed": 1.12,
+      "move_speed": 0.94,
+      "range": 3,
+      "ability": {
+        "name": "Hack Jam",
+        "description": "Jams a tower so it cannot fire",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "disable_tower",
+      "cardNumber": "0078",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Glitchfork Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Tech-ops rig -- jammer van, EMP array, signal-warfare"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Synth Collie",
+      "parent": "0026",
+      "desc": "Glitchfork -- the stripped [STREET] build of Synth Collie's line (Hacker, Leashbreak). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: jams a tower so it cannot fire."
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Deadbolt",
+      "breed": "Husky",
+      "cost": 6,
+      "role": "Support",
+      "rarity": "Epic",
+      "tags": [
+        "Shield",
+        "Heavy"
+      ],
+      "hp": 1216,
+      "damage": 51,
+      "attack_speed": 0.81,
+      "move_speed": 0.75,
+      "range": 3,
+      "ability": {
+        "name": "Heal Beacon",
+        "description": "Pulsing area heal for the pack",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "heal",
+      "cardNumber": "0079",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Deadbolt Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Tech-ops rig -- jammer van, EMP array, signal-warfare"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Holo Husky",
+      "parent": "0029",
+      "desc": "Deadbolt -- the bunkered [HEAVY] build of Holo Husky's line (Support, Leashbreak). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: pulsing area heal for the pack."
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Static",
+      "breed": "Husky",
+      "cost": 4,
+      "role": "Support",
+      "rarity": "Common",
+      "tags": [
+        "Shield",
+        "Street"
+      ],
+      "hp": 684,
+      "damage": 75,
+      "attack_speed": 1.01,
+      "move_speed": 0.94,
+      "range": 3,
+      "ability": {
+        "name": "Heal Beacon",
+        "description": "Pulsing area heal for the pack",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "heal",
+      "cardNumber": "0080",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Static Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Tech-ops rig -- jammer van, EMP array, signal-warfare"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Holo Husky",
+      "parent": "0029",
+      "desc": "Static -- the stripped [STREET] build of Holo Husky's line (Support, Leashbreak). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: pulsing area heal for the pack."
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Bunkerlink",
+      "breed": "Samoyed",
+      "cost": 5,
+      "role": "Support",
+      "rarity": "Epic",
+      "tags": [
+        "Slow",
+        "Heavy"
+      ],
+      "hp": 1152,
+      "damage": 47,
+      "attack_speed": 0.81,
+      "move_speed": 0.75,
+      "range": 3,
+      "ability": {
+        "name": "Frost Bark",
+        "description": "Wide frost cone slows everything caught",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "slow",
+      "cardNumber": "0081",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Bunkerlink Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Tech-ops rig -- jammer van, EMP array, signal-warfare"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Chill Samoyed",
+      "parent": "0030",
+      "desc": "Bunkerlink -- the bunkered [HEAVY] build of Chill Samoyed's line (Support, Leashbreak). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: wide frost cone slows everything caught."
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Shortcircuit",
+      "breed": "Samoyed",
+      "cost": 3,
+      "role": "Support",
+      "rarity": "Common",
+      "tags": [
+        "Slow",
+        "Street"
+      ],
+      "hp": 648,
+      "damage": 69,
+      "attack_speed": 1.01,
+      "move_speed": 0.94,
+      "range": 3,
+      "ability": {
+        "name": "Frost Bark",
+        "description": "Wide frost cone slows everything caught",
+        "cooldown": 8
+      },
+      "queen_target": false,
+      "abilityType": "slow",
+      "cardNumber": "0082",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Shortcircuit Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Tech-ops rig -- jammer van, EMP array, signal-warfare"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Chill Samoyed",
+      "parent": "0030",
+      "desc": "Shortcircuit -- the stripped [STREET] build of Chill Samoyed's line (Support, Leashbreak). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: wide frost cone slows everything caught."
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Faraday",
+      "breed": "Poodle",
+      "cost": 5,
+      "role": "Controller",
+      "rarity": "Epic",
+      "tags": [
+        "Shield Break",
+        "Heavy"
+      ],
+      "hp": 1088,
+      "damage": 72,
+      "attack_speed": 0.85,
+      "move_speed": 0.75,
+      "range": 3,
+      "ability": {
+        "name": "Shatter",
+        "description": "Strips enemy shields, then wards an ally",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "shield",
+      "cardNumber": "0083",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Faraday Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Tech-ops rig -- jammer van, EMP array, signal-warfare"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Prism Poodle",
+      "parent": "0031",
+      "desc": "Faraday -- the bunkered [HEAVY] build of Prism Poodle's line (Controller, Leashbreak). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: strips enemy shields, then wards an ally."
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Hexer",
+      "breed": "Poodle",
+      "cost": 3,
+      "role": "Controller",
+      "rarity": "Common",
+      "tags": [
+        "Shield Break",
+        "Street"
+      ],
+      "hp": 612,
+      "damage": 106,
+      "attack_speed": 1.06,
+      "move_speed": 0.94,
+      "range": 3,
+      "ability": {
+        "name": "Shatter",
+        "description": "Strips enemy shields, then wards an ally",
+        "cooldown": 8
+      },
+      "queen_target": false,
+      "abilityType": "shield",
+      "cardNumber": "0084",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Hexer Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Tech-ops rig -- jammer van, EMP array, signal-warfare"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Prism Poodle",
+      "parent": "0031",
+      "desc": "Hexer -- the stripped [STREET] build of Prism Poodle's line (Controller, Leashbreak). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: strips enemy shields, then wards an ally."
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Sandbag",
+      "breed": "Setter",
+      "cost": 7,
+      "role": "Controller",
+      "rarity": "Legendary",
+      "tags": [
+        "Hack",
+        "Heavy"
+      ],
+      "hp": 1408,
+      "damage": 94,
+      "attack_speed": 0.85,
+      "move_speed": 0.75,
+      "range": 3,
+      "ability": {
+        "name": "Blackout",
+        "description": "Blinds ranged foes so their shots miss",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "blind",
+      "cardNumber": "0085",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Sandbag Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Tech-ops rig -- jammer van, EMP array, signal-warfare"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Noir Setter",
+      "parent": "0027",
+      "desc": "Sandbag -- the bunkered [HEAVY] build of Noir Setter's line (Controller, Leashbreak). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: blinds ranged foes so their shots miss."
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Whitenoise",
+      "breed": "Setter",
+      "cost": 5,
+      "role": "Controller",
+      "rarity": "Rare",
+      "tags": [
+        "Hack",
+        "Street"
+      ],
+      "hp": 792,
+      "damage": 138,
+      "attack_speed": 1.06,
+      "move_speed": 0.94,
+      "range": 3,
+      "ability": {
+        "name": "Blackout",
+        "description": "Blinds ranged foes so their shots miss",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "blind",
+      "cardNumber": "0086",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Whitenoise Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Tech-ops rig -- jammer van, EMP array, signal-warfare"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Noir Setter",
+      "parent": "0027",
+      "desc": "Whitenoise -- the stripped [STREET] build of Noir Setter's line (Controller, Leashbreak). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: blinds ranged foes so their shots miss."
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Blacksite",
+      "breed": "Pointer",
+      "cost": 5,
+      "role": "Lancer",
+      "rarity": "Epic",
+      "tags": [
+        "Hack",
+        "Heavy"
+      ],
+      "hp": 1280,
+      "damage": 128,
+      "attack_speed": 0.85,
+      "move_speed": 0.75,
+      "range": 3,
+      "ability": {
+        "name": "Tag Shot",
+        "description": "Tags a target, revealing stealth and weakening it",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "reveal",
+      "cardNumber": "0087",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Blacksite Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Tech-ops rig -- jammer van, EMP array, signal-warfare"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Signal Pointer",
+      "parent": "0032",
+      "desc": "Blacksite -- the bunkered [HEAVY] build of Signal Pointer's line (Lancer, Leashbreak). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: tags a target, revealing stealth and weakening it."
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Carrier",
+      "breed": "Pointer",
+      "cost": 3,
+      "role": "Lancer",
+      "rarity": "Common",
+      "tags": [
+        "Hack",
+        "Street"
+      ],
+      "hp": 720,
+      "damage": 188,
+      "attack_speed": 1.06,
+      "move_speed": 0.94,
+      "range": 3,
+      "ability": {
+        "name": "Tag Shot",
+        "description": "Tags a target, revealing stealth and weakening it",
+        "cooldown": 8
+      },
+      "queen_target": false,
+      "abilityType": "reveal",
+      "cardNumber": "0088",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Carrier Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Tech-ops rig -- jammer van, EMP array, signal-warfare"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Signal Pointer",
+      "parent": "0032",
+      "desc": "Carrier -- the stripped [STREET] build of Signal Pointer's line (Lancer, Leashbreak). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: tags a target, revealing stealth and weakening it."
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Hardline",
+      "breed": "Spaniel",
+      "cost": 4,
+      "role": "Skirmisher",
+      "rarity": "Epic",
+      "tags": [
+        "Backline",
+        "Heavy"
+      ],
+      "hp": 896,
+      "damage": 81,
+      "attack_speed": 1.17,
+      "move_speed": 0.97,
+      "range": 2,
+      "ability": {
+        "name": "Phase",
+        "description": "Phases out for a brief untargetable window",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "invuln",
+      "cardNumber": "0089",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Hardline Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Tech-ops rig -- jammer van, EMP array, signal-warfare"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "air",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Ghost Spaniel",
+      "parent": "0033",
+      "desc": "Hardline -- the bunkered [HEAVY] build of Ghost Spaniel's line (Skirmisher, Leashbreak). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: phases out for a brief untargetable window."
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Spike",
+      "breed": "Spaniel",
+      "cost": 2,
+      "role": "Skirmisher",
+      "rarity": "Common",
+      "tags": [
+        "Backline",
+        "Street"
+      ],
+      "hp": 504,
+      "damage": 119,
+      "attack_speed": 1.46,
+      "move_speed": 1.21,
+      "range": 2,
+      "ability": {
+        "name": "Phase",
+        "description": "Phases out for a brief untargetable window",
+        "cooldown": 8
+      },
+      "queen_target": false,
+      "abilityType": "invuln",
+      "cardNumber": "0090",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Spike Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Tech-ops rig -- jammer van, EMP array, signal-warfare"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "air",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Ghost Spaniel",
+      "parent": "0033",
+      "desc": "Spike -- the stripped [STREET] build of Ghost Spaniel's line (Skirmisher, Leashbreak). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: phases out for a brief untargetable window."
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Bulwark",
+      "breed": "Border Collie",
+      "cost": 6,
+      "role": "Support",
+      "rarity": "Legendary",
+      "tags": [
+        "Shield",
+        "Heavy"
+      ],
+      "hp": 1344,
+      "damage": 55,
+      "attack_speed": 0.81,
+      "move_speed": 0.75,
+      "range": 3,
+      "ability": {
+        "name": "Barrier Ring",
+        "description": "Drops an area shield over the front line",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "shield",
+      "cardNumber": "0091",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Bulwark Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Tech-ops rig -- jammer van, EMP array, signal-warfare"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Pulse Border Collie",
+      "parent": "0028",
+      "desc": "Bulwark -- the bunkered [HEAVY] build of Pulse Border Collie's line (Support, Leashbreak). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: drops an area shield over the front line."
+    },
+    {
+      "class": "Leashbreak Tactix",
+      "name": "Brownout",
+      "breed": "Border Collie",
+      "cost": 4,
+      "role": "Support",
+      "rarity": "Rare",
+      "tags": [
+        "Shield",
+        "Street"
+      ],
+      "hp": 756,
+      "damage": 81,
+      "attack_speed": 1.01,
+      "move_speed": 0.94,
+      "range": 3,
+      "ability": {
+        "name": "Barrier Ring",
+        "description": "Drops an area shield over the front line",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "shield",
+      "cardNumber": "0092",
+      "factionId": "leashbreak_tactix",
+      "bodyArchetype": "tech_ops",
+      "isMythic": false,
+      "rig": {
+        "name": "Brownout Rig",
+        "rigClass": "tech_ops",
+        "weaponMod": "emp_array",
+        "sourceCar": "Van",
+        "rigLanguage": "Tech-ops rig -- jammer van, EMP array, signal-warfare",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Tech-ops rig -- jammer van, EMP array, signal-warfare"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Pulse Border Collie",
+      "parent": "0028",
+      "desc": "Brownout -- the stripped [STREET] build of Pulse Border Collie's line (Support, Leashbreak). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: drops an area shield over the front line."
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Bunker",
+      "breed": "Beagle",
+      "cost": 5,
+      "role": "Structure",
+      "rarity": "Epic",
+      "tags": [
+        "Turret",
+        "Heavy"
+      ],
+      "hp": 1344,
+      "damage": 72,
+      "attack_speed": 0.9,
+      "move_speed": 0.0,
+      "range": 5,
+      "ability": {
+        "name": "Overheat",
+        "description": "Static turret that ramps fire the longer it shoots",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "ramp",
+      "cardNumber": "0093",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Bunker Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Turret-utility rig -- mounted gun, drone bay, rail platform"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Laser Beagle",
+      "parent": "0040",
+      "desc": "Bunker -- the bunkered [HEAVY] build of Laser Beagle's line (Structure, K9). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: static turret that ramps fire the longer it shoots."
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Buckshot",
+      "breed": "Beagle",
+      "cost": 3,
+      "role": "Structure",
+      "rarity": "Common",
+      "tags": [
+        "Turret",
+        "Street"
+      ],
+      "hp": 756,
+      "damage": 106,
+      "attack_speed": 1.12,
+      "move_speed": 0.0,
+      "range": 5,
+      "ability": {
+        "name": "Overheat",
+        "description": "Static turret that ramps fire the longer it shoots",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "ramp",
+      "cardNumber": "0094",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Buckshot Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Turret-utility rig -- mounted gun, drone bay, rail platform"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Laser Beagle",
+      "parent": "0040",
+      "desc": "Buckshot -- the stripped [STREET] build of Laser Beagle's line (Structure, K9). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: static turret that ramps fire the longer it shoots."
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Howitzer",
+      "breed": "Corgi",
+      "cost": 5,
+      "role": "Spawner",
+      "rarity": "Epic",
+      "tags": [
+        "Drone",
+        "Heavy"
+      ],
+      "hp": 960,
+      "damage": 47,
+      "attack_speed": 0.81,
+      "move_speed": 0.75,
+      "range": 2,
+      "ability": {
+        "name": "Spark Pups",
+        "description": "Spawns three spark drones",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "spawn",
+      "cardNumber": "0095",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Howitzer Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Turret-utility rig -- mounted gun, drone bay, rail platform"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": true,
+      "splashRadius": 1.8,
+      "variant": "HEAVY",
+      "family": "Volt Corgi",
+      "parent": "0041",
+      "desc": "Howitzer -- the bunkered [HEAVY] build of Volt Corgi's line (Spawner, K9). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: spawns three spark drones."
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Tripwire",
+      "breed": "Corgi",
+      "cost": 3,
+      "role": "Spawner",
+      "rarity": "Common",
+      "tags": [
+        "Drone",
+        "Street"
+      ],
+      "hp": 540,
+      "damage": 69,
+      "attack_speed": 1.01,
+      "move_speed": 0.94,
+      "range": 2,
+      "ability": {
+        "name": "Spark Pups",
+        "description": "Spawns three spark drones",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "spawn",
+      "cardNumber": "0096",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Tripwire Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Turret-utility rig -- mounted gun, drone bay, rail platform"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": true,
+      "splashRadius": 1.8,
+      "variant": "STREET",
+      "family": "Volt Corgi",
+      "parent": "0041",
+      "desc": "Tripwire -- the stripped [STREET] build of Volt Corgi's line (Spawner, K9). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: spawns three spark drones."
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Flakwall",
+      "breed": "Schnauzer",
+      "cost": 6,
+      "role": "Structure",
+      "rarity": "Epic",
+      "tags": [
+        "Turret",
+        "Heavy"
+      ],
+      "hp": 1472,
+      "damage": 81,
+      "attack_speed": 0.9,
+      "move_speed": 0.0,
+      "range": 4,
+      "ability": {
+        "name": "Grid Lock",
+        "description": "Turret field that slows attackers in range",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "slow",
+      "cardNumber": "0097",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Flakwall Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Turret-utility rig -- mounted gun, drone bay, rail platform"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Grid Schnauzer",
+      "parent": "0042",
+      "desc": "Flakwall -- the bunkered [HEAVY] build of Grid Schnauzer's line (Structure, K9). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: turret field that slows attackers in range."
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Deadeye",
+      "breed": "Schnauzer",
+      "cost": 4,
+      "role": "Structure",
+      "rarity": "Common",
+      "tags": [
+        "Turret",
+        "Street"
+      ],
+      "hp": 828,
+      "damage": 119,
+      "attack_speed": 1.12,
+      "move_speed": 0.0,
+      "range": 4,
+      "ability": {
+        "name": "Grid Lock",
+        "description": "Turret field that slows attackers in range",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "slow",
+      "cardNumber": "0098",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Deadeye Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Turret-utility rig -- mounted gun, drone bay, rail platform"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Grid Schnauzer",
+      "parent": "0042",
+      "desc": "Deadeye -- the stripped [STREET] build of Grid Schnauzer's line (Structure, K9). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: turret field that slows attackers in range."
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Casemate",
+      "breed": "Retriever",
+      "cost": 7,
+      "role": "Support",
+      "rarity": "Legendary",
+      "tags": [
+        "Drone",
+        "Heavy"
+      ],
+      "hp": 1408,
+      "damage": 60,
+      "attack_speed": 0.81,
+      "move_speed": 0.75,
+      "range": 3,
+      "ability": {
+        "name": "Drone Swarm",
+        "description": "Releases five swarm drones",
+        "cooldown": 14
+      },
+      "queen_target": false,
+      "abilityType": "spawn",
+      "cardNumber": "0099",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Casemate Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Turret-utility rig -- mounted gun, drone bay, rail platform"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": true,
+      "splashRadius": 1.8,
+      "variant": "HEAVY",
+      "family": "Circuit Retriever",
+      "parent": "0038",
+      "desc": "Casemate -- the bunkered [HEAVY] build of Circuit Retriever's line (Support, K9). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: releases five swarm drones."
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Shrapnel",
+      "breed": "Retriever",
+      "cost": 5,
+      "role": "Support",
+      "rarity": "Rare",
+      "tags": [
+        "Drone",
+        "Street"
+      ],
+      "hp": 792,
+      "damage": 88,
+      "attack_speed": 1.01,
+      "move_speed": 0.94,
+      "range": 3,
+      "ability": {
+        "name": "Drone Swarm",
+        "description": "Releases five swarm drones",
+        "cooldown": 10
+      },
+      "queen_target": false,
+      "abilityType": "spawn",
+      "cardNumber": "0100",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Shrapnel Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Turret-utility rig -- mounted gun, drone bay, rail platform"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": true,
+      "splashRadius": 1.8,
+      "variant": "STREET",
+      "family": "Circuit Retriever",
+      "parent": "0038",
+      "desc": "Shrapnel -- the stripped [STREET] build of Circuit Retriever's line (Support, K9). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: releases five swarm drones."
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Pillbox",
+      "breed": "Airedale",
+      "cost": 6,
+      "role": "Lancer",
+      "rarity": "Epic",
+      "tags": [
+        "Turret",
+        "Heavy"
+      ],
+      "hp": 1344,
+      "damage": 140,
+      "attack_speed": 0.85,
+      "move_speed": 0.75,
+      "range": 3,
+      "ability": {
+        "name": "Arc Shot",
+        "description": "Arc that chains to three targets",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "chain",
+      "cardNumber": "0101",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Pillbox Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Turret-utility rig -- mounted gun, drone bay, rail platform"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": true,
+      "splashRadius": 1.8,
+      "variant": "HEAVY",
+      "family": "Chrome Airedale",
+      "parent": "0043",
+      "desc": "Pillbox -- the bunkered [HEAVY] build of Chrome Airedale's line (Lancer, K9). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: arc that chains to three targets."
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Hairtrigger",
+      "breed": "Airedale",
+      "cost": 4,
+      "role": "Lancer",
+      "rarity": "Common",
+      "tags": [
+        "Turret",
+        "Street"
+      ],
+      "hp": 756,
+      "damage": 206,
+      "attack_speed": 1.06,
+      "move_speed": 0.94,
+      "range": 3,
+      "ability": {
+        "name": "Arc Shot",
+        "description": "Arc that chains to three targets",
+        "cooldown": 8
+      },
+      "queen_target": false,
+      "abilityType": "chain",
+      "cardNumber": "0102",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Hairtrigger Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Turret-utility rig -- mounted gun, drone bay, rail platform"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": true,
+      "splashRadius": 1.8,
+      "variant": "STREET",
+      "family": "Chrome Airedale",
+      "parent": "0043",
+      "desc": "Hairtrigger -- the stripped [STREET] build of Chrome Airedale's line (Lancer, K9). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: arc that chains to three targets."
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Stronghold",
+      "breed": "Basset",
+      "cost": 5,
+      "role": "Support",
+      "rarity": "Epic",
+      "tags": [
+        "Shield",
+        "Heavy"
+      ],
+      "hp": 1152,
+      "damage": 47,
+      "attack_speed": 0.81,
+      "move_speed": 0.75,
+      "range": 3,
+      "ability": {
+        "name": "Beacon",
+        "description": "Reveals stealth and marks foes for the pack",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "reveal",
+      "cardNumber": "0103",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Stronghold Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Turret-utility rig -- mounted gun, drone bay, rail platform"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "HEAVY",
+      "family": "Beacon Basset",
+      "parent": "0044",
+      "desc": "Stronghold -- the bunkered [HEAVY] build of Beacon Basset's line (Support, K9). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: reveals stealth and marks foes for the pack."
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Snubnose",
+      "breed": "Basset",
+      "cost": 3,
+      "role": "Support",
+      "rarity": "Common",
+      "tags": [
+        "Shield",
+        "Street"
+      ],
+      "hp": 648,
+      "damage": 69,
+      "attack_speed": 1.01,
+      "move_speed": 0.94,
+      "range": 3,
+      "ability": {
+        "name": "Beacon",
+        "description": "Reveals stealth and marks foes for the pack",
+        "cooldown": 8
+      },
+      "queen_target": false,
+      "abilityType": "reveal",
+      "cardNumber": "0104",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Snubnose Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Turret-utility rig -- mounted gun, drone bay, rail platform"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": false,
+      "splashRadius": 0,
+      "variant": "STREET",
+      "family": "Beacon Basset",
+      "parent": "0044",
+      "desc": "Snubnose -- the stripped [STREET] build of Beacon Basset's line (Support, K9). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: reveals stealth and marks foes for the pack."
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Emplacement",
+      "breed": "German Shepherd",
+      "cost": 8,
+      "role": "Structure",
+      "rarity": "Legendary",
+      "tags": [
+        "Turret",
+        "Heavy"
+      ],
+      "hp": 1856,
+      "damage": 106,
+      "attack_speed": 0.9,
+      "move_speed": 0.0,
+      "range": 4,
+      "ability": {
+        "name": "Overclock",
+        "description": "Heavy static turret with a burst fire window",
+        "cooldown": 16
+      },
+      "queen_target": false,
+      "abilityType": "ramp",
+      "cardNumber": "0105",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Emplacement Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "bunkered Turret-utility rig -- mounted gun, drone bay, rail platform"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": true,
+      "splashRadius": 1.5,
+      "variant": "HEAVY",
+      "family": "Nova Shepherd",
+      "parent": "0039",
+      "desc": "Emplacement -- the bunkered [HEAVY] build of Nova Shepherd's line (Structure, K9). Up-armored: +28% HP and heavier plating soak hits, trading bite and speed for a slower, near-unkillable frame. Same job: heavy static turret with a burst fire window."
+    },
+    {
+      "class": "K9 Circuitry",
+      "name": "Salvo",
+      "breed": "German Shepherd",
+      "cost": 6,
+      "role": "Structure",
+      "rarity": "Rare",
+      "tags": [
+        "Turret",
+        "Street"
+      ],
+      "hp": 1044,
+      "damage": 156,
+      "attack_speed": 1.12,
+      "move_speed": 0.0,
+      "range": 4,
+      "ability": {
+        "name": "Overclock",
+        "description": "Heavy static turret with a burst fire window",
+        "cooldown": 12
+      },
+      "queen_target": false,
+      "abilityType": "ramp",
+      "cardNumber": "0106",
+      "factionId": "k9_circuitry",
+      "bodyArchetype": "turret_util",
+      "isMythic": false,
+      "rig": {
+        "name": "Salvo Rig",
+        "rigClass": "turret_util",
+        "weaponMod": "incendiary",
+        "sourceCar": "Monster Truck",
+        "rigLanguage": "Turret-utility rig -- mounted gun, drone bay, rail platform",
+        "skinnable": true,
+        "choppable": true,
+        "flavor": "stripped chop-shop Turret-utility rig -- mounted gun, drone bay, rail platform"
+      },
+      "nft": {
+        "chain": "solana",
+        "standard": "metaplex-core",
+        "animation_url": "",
+        "onchain_stats": [
+          "hp",
+          "damage",
+          "ability"
+        ]
+      },
+      "domain": "ground",
+      "targets": "both",
+      "splash": true,
+      "splashRadius": 1.5,
+      "variant": "STREET",
+      "family": "Nova Shepherd",
+      "parent": "0039",
+      "desc": "Salvo -- the stripped [STREET] build of Nova Shepherd's line (Structure, K9). Glass-cannon: +25% damage and quicker, panels torn off for the kill, but folds to one clean shot. Same job: heavy static turret with a burst fire window."
+    }
+  ],
+  "spells": [
+    {
+      "name": "Boneshatter Freeze",
+      "short": "FREEZE",
+      "type": "spell",
+      "factionId": "boneguard_crew",
+      "class": "Boneguard Crew",
+      "rarity": "Epic",
+      "cost": 5,
+      "cooldown": 14,
+      "effect": "freeze",
+      "radius": 3.0,
+      "duration": 3.0,
+      "damage": 0,
+      "spellNumber": "S001",
+      "glyph": "\u2744",
+      "fx": "freeze",
+      "description": "Enemies in the area STOP (no move, no attack) for ~3s. Towers freeze too."
+    },
+    {
+      "name": "Tar Pour",
+      "short": "TAR SLOW",
+      "type": "spell",
+      "factionId": "leashbreak_tactix",
+      "class": "Leashbreak Tactix",
+      "rarity": "Rare",
+      "cost": 4,
+      "cooldown": 12,
+      "effect": "slow",
+      "radius": 3.2,
+      "duration": 4.0,
+      "damage": 0,
+      "slowPct": 0.35,
+      "spellNumber": "S002",
+      "glyph": "\u25c9",
+      "fx": "slow",
+      "description": "Tar slick: -35% move + -35% attack speed to enemies in the area for ~4s."
+    },
+    {
+      "name": "Snare Trap",
+      "short": "SNARE",
+      "type": "spell",
+      "factionId": "k9_circuitry",
+      "class": "K9 Circuitry",
+      "rarity": "Rare",
+      "cost": 3,
+      "cooldown": 13,
+      "effect": "trap",
+      "radius": 1.8,
+      "duration": 1.6,
+      "damage": 90,
+      "spellNumber": "S003",
+      "glyph": "\u2622",
+      "fx": "trap",
+      "description": "Plants a hidden trap. Arms, then roots + small damage when an enemy crosses it. Zone control."
+    },
+    {
+      "name": "Jolt",
+      "short": "JOLT",
+      "type": "spell",
+      "factionId": "zoomie_syndicate",
+      "class": "Zoomie Syndicate",
+      "rarity": "Common",
+      "cost": 3,
+      "cooldown": 9,
+      "effect": "zap",
+      "radius": 2.4,
+      "duration": 0.5,
+      "damage": 130,
+      "spellNumber": "S004",
+      "glyph": "\u26a1",
+      "fx": "zap",
+      "description": "Instant AOE damage + 0.5s stun. Kills swarms, resets attacks."
+    },
+    {
+      "name": "Strike",
+      "short": "STRIKE",
+      "type": "spell",
+      "factionId": "neutral",
+      "class": "Neutral",
+      "rarity": "Epic",
+      "cost": 4,
+      "cooldown": 11,
+      "effect": "strike",
+      "radius": 2.6,
+      "duration": 0,
+      "damage": 320,
+      "spellNumber": "S005",
+      "glyph": "\u2739",
+      "fx": "strike",
+      "description": "The fireball: medium AOE burst damage at a point."
+    }
+  ]
+}

@@ -1,0 +1,2638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>ALLEY KINGZ -- $BCARDD Arcade</title>
+<meta name="description" content="Alley Kingz -- cyberpunk dog crews, Twisted-Metal rigs, Clash-Royale lanes. Playable prototype.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --vanta:#050507; --midnight:#0D0D1A; --gold:#D4AF37; --gold-lo:#c9a84c;
+    --gold-hi:#f3d77a; --ivory:#E8E8E8; --steel:#4A4A55; --blue:#4488FF; --red:#FF4444;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; }
+  body{
+    background:
+      radial-gradient(1200px 700px at 50% -10%, #14131f 0%, var(--vanta) 55%),
+      var(--vanta);
+    color:var(--ivory); font-family:'Inter',system-ui,sans-serif;
+    overflow:hidden; user-select:none; -webkit-user-select:none;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #app{
+    position:relative; width:100%; height:100%; max-width:520px; max-height:100vh;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+  }
+
+  /* ---------- shared overlay screens ---------- */
+  .screen{
+    position:absolute; inset:0; z-index:30;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:24px;
+    background:
+      radial-gradient(900px 600px at 50% 0%, rgba(212,175,55,0.07), transparent 60%),
+      rgba(5,5,7,0.96);
+  }
+  .screen.hidden{ display:none; }
+  .title{
+    font-family:'Cinzel',serif; font-weight:900; letter-spacing:0.06em;
+    font-size:clamp(40px,12vw,72px); line-height:0.95;
+    background:linear-gradient(180deg,var(--gold-hi) 0%,var(--gold) 45%,var(--gold-lo) 100%);
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 2px 18px rgba(212,175,55,0.35));
+    margin-bottom:6px;
+  }
+  .subtitle{
+    font-family:'Playfair Display',serif; font-style:italic; font-weight:700;
+    color:var(--gold-lo); font-size:clamp(13px,3.6vw,17px);
+    max-width:380px; line-height:1.4; margin-bottom:8px;
+  }
+  .crest{
+    width:74px; height:74px; margin-bottom:14px; border-radius:50%;
+    border:2px solid var(--gold); display:flex; align-items:center; justify-content:center;
+    font-family:'Cinzel',serif; font-weight:900; font-size:34px; color:var(--gold-hi);
+    background:radial-gradient(circle at 50% 35%, rgba(212,175,55,0.18), rgba(5,5,7,0.9));
+    box-shadow:0 0 28px rgba(212,175,55,0.25), inset 0 0 18px rgba(212,175,55,0.12);
+  }
+  .btn{
+    margin-top:22px; cursor:pointer; border:none; outline:none;
+    font-family:'Cinzel',serif; font-weight:700; letter-spacing:0.14em;
+    font-size:clamp(16px,4.4vw,20px); text-transform:uppercase;
+    color:#0a0a0a; padding:15px 46px; border-radius:999px;
+    background:linear-gradient(180deg,var(--gold-hi),var(--gold) 60%,var(--gold-lo));
+    box-shadow:0 8px 26px rgba(212,175,55,0.35), inset 0 1px 0 rgba(255,255,255,0.5);
+    transition:transform 120ms ease, box-shadow 120ms ease;
+  }
+  .btn:active{ transform:translateY(2px) scale(0.98); box-shadow:0 4px 14px rgba(212,175,55,0.3); }
+  .fineprint{
+    margin-top:20px; font-size:11px; letter-spacing:0.04em;
+    color:var(--steel); font-weight:500;
+  }
+  .wordmark{
+    position:absolute; bottom:16px; left:0; right:0; text-align:center;
+    font-family:'Cinzel',serif; letter-spacing:0.34em; font-size:10px;
+    color:rgba(212,175,55,0.55); text-transform:uppercase;
+  }
+  .result-line{
+    font-family:'Cinzel',serif; font-weight:900; font-size:clamp(34px,10vw,58px);
+    letter-spacing:0.05em; margin-bottom:4px;
+  }
+  .result-win{ color:var(--gold-hi); filter:drop-shadow(0 0 18px rgba(212,175,55,0.5)); }
+  .result-lose{ color:var(--red); filter:drop-shadow(0 0 16px rgba(255,68,68,0.4)); }
+  .result-draw{ color:var(--ivory); }
+  .result-sub{ color:var(--gold-lo); font-family:'Playfair Display',serif; font-style:italic; margin-bottom:6px; }
+
+  /* ---------- in-match HUD ---------- */
+  #stage{ position:relative; width:100%; height:100%; display:flex; flex-direction:column; }
+  #stage.hidden{ display:none; }
+
+  #topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:8px 12px; gap:10px; font-family:'Cinzel',serif; flex:0 0 auto;
+  }
+  .crowns{ display:flex; align-items:center; gap:6px; font-weight:700; font-size:15px; }
+  .crowns .me{ color:var(--blue); } .crowns .foe{ color:var(--red); }
+  #timer{
+    font-family:'Inter',monospace; font-weight:700; font-size:18px;
+    color:var(--gold-hi); letter-spacing:0.05em;
+    padding:3px 12px; border:1px solid rgba(212,175,55,0.4); border-radius:8px;
+    background:rgba(212,175,55,0.06);
+  }
+  #timerwrap{ display:flex; flex-direction:column; align-items:center; gap:3px; }
+  #speedbadge{
+    font-family:'Inter',monospace; font-weight:700; font-size:10px; letter-spacing:0.08em;
+    color:var(--gold-hi); opacity:0.9; padding:1px 7px; border-radius:6px;
+    background:rgba(212,175,55,0.10); border:1px solid rgba(212,175,55,0.25); white-space:nowrap;
+  }
+  #speedbadge.sudden{ color:#fff; background:rgba(214,40,40,0.92); border-color:#ff5a5a; animation:sdpulse 0.6s infinite alternate; }
+  @keyframes sdpulse{ from{box-shadow:0 0 0 rgba(255,40,40,0);} to{box-shadow:0 0 14px rgba(255,60,60,0.95);} }
+  #phasealert{
+    position:absolute; left:50%; top:40%; transform:translate(-50%,-50%) scale(1);
+    display:none; flex-direction:column; align-items:center; text-align:center;
+    pointer-events:none; z-index:30; will-change:opacity,transform;
+  }
+  #phasealert .pa-name{
+    font-family:'Cinzel',serif; font-weight:900; font-size:32px; letter-spacing:0.02em;
+    color:var(--gold-hi); text-shadow:0 2px 18px rgba(0,0,0,0.92), 0 0 26px rgba(212,175,55,0.55);
+  }
+  #phasealert .pa-flavor{
+    font-family:'Inter',sans-serif; font-weight:700; font-size:13px; margin-top:4px;
+    color:#ffe9a8; text-shadow:0 1px 8px rgba(0,0,0,0.9); letter-spacing:0.04em;
+  }
+  #phasealert.sudden .pa-name{ color:#ff5a5a; text-shadow:0 2px 18px rgba(0,0,0,0.95),0 0 30px rgba(255,40,40,0.7); }
+
+  /* ---------- CONVOY BAR: mini-map road strip + storm chip + codex button ---------- */
+  #convoybar{
+    display:flex; align-items:center; gap:8px; padding:0 12px 6px; flex:0 0 auto;
+  }
+  #minimap{ display:flex; align-items:center; gap:0; flex:1; }
+  #minimap .road{ position:relative; display:flex; align-items:center; width:100%; height:22px; }
+  #minimap .node{
+    position:relative; z-index:2; flex:0 0 auto; width:20px; height:20px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Cinzel',serif; font-weight:900; font-size:10px; color:var(--steel);
+    background:#0c0c14; border:1.5px solid var(--steel);
+  }
+  #minimap .node.done{ color:#0a0a0a; background:linear-gradient(180deg,var(--gold-hi),var(--gold-lo)); border-color:var(--gold-hi); }
+  #minimap .node.cur{ color:var(--gold-hi); border-color:var(--gold-hi); box-shadow:0 0 10px rgba(212,175,55,0.6); }
+  #minimap .node .star{ position:absolute; top:-9px; font-size:9px; color:var(--gold-hi); filter:drop-shadow(0 1px 2px #000); }
+  #minimap .seg{ flex:1; height:3px; background:linear-gradient(90deg,var(--steel),#0c0c14); z-index:1; }
+  #minimap .seg.done{ background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi)); }
+  #minimap .convoy{ position:absolute; z-index:3; font-size:13px; transition:left 400ms ease; transform:translateX(-50%); top:-2px; }
+  #stormchip{
+    flex:0 0 auto; font-family:'Inter',sans-serif; font-weight:700; font-size:9px; letter-spacing:0.06em;
+    text-transform:uppercase; color:var(--gold-hi); padding:3px 8px; border-radius:7px;
+    background:rgba(212,175,55,0.10); border:1px solid rgba(212,175,55,0.3); white-space:nowrap; max-width:46vw; overflow:hidden; text-overflow:ellipsis;
+  }
+  #stormchip.calm{ color:var(--steel); border-color:var(--steel); }
+  #stormchip.telegraph{ animation:chippulse 0.7s infinite alternate; }
+  #stormchip.hazard{ color:#9fe8ff; border-color:#4aa6c8; background:rgba(60,120,160,0.12); }
+  #stormchip.objective{ color:var(--gold-hi); border-color:var(--gold-hi); }
+  @keyframes chippulse{ from{opacity:0.65;} to{opacity:1; box-shadow:0 0 10px rgba(212,175,55,0.5);} }
+  #codexbtn{
+    flex:0 0 auto; cursor:pointer; width:24px; height:24px; border-radius:50%;
+    border:1px solid rgba(212,175,55,0.4); background:rgba(212,175,55,0.08); color:var(--gold-hi);
+    font-family:'Cinzel',serif; font-weight:900; font-size:13px; line-height:1; padding:0;
+  }
+  #codexbtn:active{ transform:scale(0.94); }
+
+  #boardwrap{ position:relative; flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; }
+
+  /* ---------- DISTRICT GATE health bar (top of board) ---------- */
+  #gatebar{
+    position:absolute; left:50%; top:6px; transform:translateX(-50%); z-index:18;
+    width:min(78%,360px); pointer-events:none; text-align:center;
+  }
+  #gatebar.hidden{ display:none; }
+  #gatebar .gb-label{
+    font-family:'Cinzel',serif; font-weight:700; font-size:10px; letter-spacing:0.12em;
+    color:#ffd9d9; text-transform:uppercase; text-shadow:0 1px 4px #000; margin-bottom:2px;
+  }
+  #gatebar .gb-track{ position:relative; height:9px; border-radius:6px; background:rgba(10,6,10,0.8); border:1px solid rgba(255,90,90,0.5); overflow:hidden; }
+  #gatebar .gb-fill{ position:absolute; left:0; top:0; bottom:0; width:100%;
+    background:linear-gradient(90deg,#ff5a5a,#ff9a3a); transition:width 120ms linear; }
+  #gatebar .gb-shield{ position:absolute; right:4px; top:-1px; font-size:9px; color:var(--gold-hi); }
+
+  /* ---------- STORM telegraph banner (board center, below the district banner) ---------- */
+  #stormbanner{
+    position:absolute; left:50%; top:62%; transform:translate(-50%,-50%) scale(1);
+    display:none; flex-direction:column; align-items:center; text-align:center;
+    pointer-events:none; z-index:29; will-change:opacity,transform;
+  }
+  #stormbanner .sb-name{
+    font-family:'Cinzel',serif; font-weight:900; font-size:24px; letter-spacing:0.03em;
+    text-shadow:0 2px 16px rgba(0,0,0,0.92);
+  }
+  #stormbanner .sb-flavor{
+    font-family:'Inter',sans-serif; font-weight:700; font-size:11px; margin-top:3px;
+    color:#ffe9a8; text-shadow:0 1px 8px rgba(0,0,0,0.9); letter-spacing:0.04em;
+  }
+
+  /* ---------- STORM CODEX screen (studyable, frozen catalog) ---------- */
+  #codexscreen{ overflow-y:auto; justify-content:flex-start; padding-top:30px; }
+  #codexscreen .cx-title{ font-family:'Cinzel',serif; font-weight:900; font-size:26px; color:var(--gold-hi); letter-spacing:0.04em; margin-bottom:2px; }
+  #codexscreen .cx-sub{ font-family:'Playfair Display',serif; font-style:italic; font-size:12px; color:var(--gold-lo); margin-bottom:14px; max-width:380px; }
+  #codexscreen .cx-list{ width:100%; max-width:440px; display:flex; flex-direction:column; gap:7px; }
+  #codexscreen .cx-row{ text-align:left; padding:8px 11px; border-radius:9px; background:rgba(20,19,31,0.7); border-left:3px solid var(--gold); }
+  #codexscreen .cx-row.hazard{ border-left-color:#4aa6c8; }
+  #codexscreen .cx-row.objective{ border-left-color:var(--gold-hi); }
+  #codexscreen .cx-row .cx-nm{ font-family:'Cinzel',serif; font-weight:700; font-size:12px; color:var(--ivory); }
+  #codexscreen .cx-row .cx-tag{ font-size:8px; font-weight:700; letter-spacing:0.1em; text-transform:uppercase; color:var(--gold-lo); }
+  #codexscreen .cx-row .cx-desc{ font-size:10px; line-height:1.35; color:#c8c8d0; margin-top:2px; }
+  #codexscreen .cx-doctrine{ margin-top:14px; max-width:440px; font-size:9px; color:var(--steel); line-height:1.4; }
+  #board{
+    display:block; touch-action:none;
+    border:1px solid rgba(212,175,55,0.18); border-radius:10px;
+    box-shadow:0 0 40px rgba(0,0,0,0.6), inset 0 0 60px rgba(0,0,0,0.5);
+    background:var(--vanta);
+    max-width:100%; max-height:100%;
+  }
+  #countdown{
+    position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+    font-family:'Cinzel',serif; font-weight:900; font-size:clamp(60px,22vw,140px);
+    color:var(--gold-hi); pointer-events:none;
+    text-shadow:0 0 40px rgba(212,175,55,0.5); z-index:10;
+  }
+
+  /* ---------- bottom: energy + hand ---------- */
+  #dock{ flex:0 0 auto; padding:6px 10px 12px; }
+  #energywrap{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+  #energylabel{ font-family:'Cinzel',serif; font-size:11px; color:var(--gold-lo); letter-spacing:0.1em; width:54px; }
+  #energybar{
+    position:relative; flex:1; height:14px; border-radius:8px;
+    background:#0c0c14; border:1px solid rgba(212,175,55,0.25); overflow:hidden;
+  }
+  #energyfill{
+    position:absolute; left:0; top:0; bottom:0; width:60%;
+    background:linear-gradient(90deg,#7a3cff,#b14bff 60%,var(--gold-hi));
+    transition:width 90ms linear;
+  }
+  #energypips{ position:absolute; inset:0; display:flex; }
+  #energypips span{ flex:1; border-right:1px solid rgba(5,5,7,0.7); }
+  #energypips span:last-child{ border-right:none; }
+  #energynum{ font-family:'Inter',monospace; font-weight:700; font-size:14px; color:var(--gold-hi); width:42px; text-align:right; }
+
+  #hand{ display:flex; gap:6px; justify-content:center; }
+  .card{
+    position:relative; cursor:pointer; flex:1; max-width:96px; aspect-ratio:3/4;
+    border-radius:9px; border:1.5px solid var(--steel); overflow:hidden;
+    background:linear-gradient(170deg,#15151f,#0a0a10);
+    transition:transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
+    -webkit-touch-callout:none; -webkit-user-select:none; user-select:none; touch-action:none;
+  }
+  .card.selected{ transform:translateY(-10px) scale(1.04); box-shadow:0 10px 24px rgba(212,175,55,0.45); }
+  .card.cantafford{ opacity:0.45; }
+  /* full-art portrait fills the card; the glyph sits behind as fallback if the art 404s */
+  .card .art{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:linear-gradient(170deg,#15151f,#0a0a10); }
+  .card .art .glyph{ font-family:'Cinzel',serif; font-weight:900; font-size:30px; color:var(--gold-lo); opacity:0.85; }
+  .card .art img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top; }
+  .card .scrim{ position:absolute; left:0; right:0; bottom:0; height:56%; z-index:2;
+    background:linear-gradient(180deg, transparent, rgba(6,6,12,0.92) 62%); }
+  .card .cost{
+    position:absolute; top:-1px; left:-1px; min-width:22px; height:22px; z-index:3;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Inter',monospace; font-weight:700; font-size:13px; color:#0a0a0a;
+    background:linear-gradient(180deg,#b14bff,#7a3cff); border-radius:9px 0 9px 0; padding:0 4px;
+    box-shadow:0 1px 3px rgba(0,0,0,0.5);
+  }
+  .card .crown{ position:absolute; top:2px; right:4px; font-size:12px; z-index:3; filter:drop-shadow(0 1px 2px #000); }
+  .card .nm{
+    position:absolute; left:0; right:0; bottom:12px; z-index:3; padding:0 3px;
+    font-family:'Cinzel',serif; font-weight:700; font-size:10px; line-height:1.05;
+    text-align:center; color:var(--ivory); text-shadow:0 1px 3px #000;
+  }
+  .card .role{
+    position:absolute; left:0; right:0; bottom:5px; z-index:3;
+    font-family:'Inter',sans-serif; font-weight:700; font-size:7px;
+    letter-spacing:0.08em; text-transform:uppercase; text-align:center; color:var(--gold-lo);
+  }
+  .card .facbar{ position:absolute; left:0; right:0; bottom:0; height:3px; z-index:3; border-radius:0 0 7px 7px; }
+  /* ---- SPELL cards: visually distinct from troops (Combat Spec section 6) ---- */
+  .card.spell{ border-style:dashed; border-color:var(--gold-hi); }
+  .card.spell .art{ background:radial-gradient(circle at 50% 38%, rgba(212,175,55,0.22), #0a0a12 70%); }
+  .card.spell .art .glyph{ font-size:40px; color:var(--gold-hi); opacity:0.95; filter:drop-shadow(0 0 8px rgba(212,175,55,0.6)); }
+  .card.spell .cost{ background:linear-gradient(180deg,#f3d77a,#D4AF37); }
+  .card .spelltag{
+    position:absolute; top:2px; right:3px; z-index:3;
+    font-family:'Cinzel',serif; font-weight:700; font-size:6px; letter-spacing:0.1em;
+    color:#0a0a0a; background:var(--gold-hi); border-radius:3px; padding:1px 3px;
+    text-transform:uppercase;
+  }
+  .card.spell.oncd{ opacity:0.5; }
+  .card.spell .cdmask{
+    position:absolute; inset:0; z-index:4; display:flex; align-items:center; justify-content:center;
+    font-family:'Inter',monospace; font-weight:700; font-size:18px; color:#fff;
+    background:rgba(5,5,10,0.62); text-shadow:0 1px 4px #000; pointer-events:none;
+  }
+  /* ---- ground / air / splash category badge on every card ---- */
+  .card .catbadge{
+    position:absolute; bottom:18px; right:2px; z-index:3; display:flex; gap:1px;
+  }
+  .card .catbadge .cb{
+    font-size:8px; line-height:1; padding:1px 2px; border-radius:3px;
+    background:rgba(5,5,10,0.72); border:1px solid rgba(212,175,55,0.35);
+    color:var(--gold-hi); font-family:'Inter',sans-serif; font-weight:700;
+  }
+  .card .catbadge .cb.air{ color:#9fe8ff; border-color:#4aa6c8; }
+  .card .catbadge .cb.splash{ color:#ff9a5a; border-color:#c8744a; }
+
+  /* ---------- card info popover (what does this card do) ---------- */
+  #dock{ position:relative; }
+  /* Compact, pinned to the TOP (over the enemy half, away from your deploy zone),
+     and ALWAYS pointer-events:none so taps pass straight through to the board. */
+  #cardinfo{
+    position:fixed; top:46px; left:50%; transform:translate(-50%,-6px);
+    width:max-content; max-width:min(92vw,380px);
+    z-index:40; padding:6px 11px; border-radius:10px;
+    background:linear-gradient(170deg,rgba(20,19,31,0.94),rgba(8,8,16,0.94));
+    border:1px solid rgba(212,175,55,0.4);
+    box-shadow:0 6px 18px rgba(0,0,0,0.5);
+    opacity:0; pointer-events:none;
+    transition:opacity 130ms ease, transform 130ms ease;
+  }
+  #cardinfo.show{ opacity:1; transform:translate(-50%,0); }
+  #cardinfo .ci-top{ display:flex; align-items:baseline; gap:7px; }
+  #cardinfo .ci-name{ font-family:'Cinzel',serif; font-weight:900; font-size:13px; color:var(--gold-hi); line-height:1; }
+  #cardinfo .ci-cost{
+    margin-left:auto; font-family:'Inter',monospace; font-weight:700; font-size:11px;
+    color:#0a0a0a; background:linear-gradient(180deg,#b14bff,#7a3cff);
+    border-radius:5px; padding:1px 6px;
+  }
+  #cardinfo .ci-meta{
+    margin-top:2px; font-family:'Inter',sans-serif; font-weight:600; font-size:8px;
+    letter-spacing:0.07em; text-transform:uppercase; color:var(--gold-lo);
+  }
+  #cardinfo .ci-stats{ display:flex; gap:9px; margin-top:5px; }
+  #cardinfo .ci-stat{ text-align:center; }
+  #cardinfo .ci-stat b{ display:block; font-family:'Inter',monospace; font-weight:700; font-size:12px; color:var(--ivory); }
+  #cardinfo .ci-stat span{ font-size:7px; letter-spacing:0.08em; color:var(--steel); text-transform:uppercase; }
+  #cardinfo .ci-rig{ margin-top:4px; font-family:'Playfair Display',serif; font-style:italic; font-size:9px; color:var(--gold-lo); }
+  #cardinfo .ci-ability{ margin-top:3px; font-size:9px; line-height:1.3; color:var(--ivory); }
+  #cardinfo .ci-ability b{ color:var(--gold-hi); font-weight:700; }
+  #hint{
+    text-align:center; font-size:10px; color:var(--steel); margin-top:6px; height:12px;
+    letter-spacing:0.03em;
+  }
+
+  /* ============================================================
+     RESPONSIVE -- PORTRAIT-ONLY (any phone, any browser, Clash-style).
+     The board scales to fit any device via resize(); there is NO
+     landscape split-screen and NO @media reflow (operator reverted
+     the v17 landscape-grid reflow 2026-06-07). canvasToArena() reads
+     the LIVE bounding rect, so deploy taps stay aligned on any size.
+     #stage.hidden still wins on specificity, so the start/result
+     screens hide the stage fine.
+     ============================================================ */
+
+  /* ============================================================
+     DECK LAB -- collection grid + 11-card editor + templates.
+     Portrait-only (no @media). Reuses the gold/vanta palette + Cinzel/Inter.
+     ============================================================ */
+  .btn-sub{
+    margin-top:12px; padding:11px 34px; font-size:clamp(13px,3.6vw,16px);
+    color:var(--gold-hi); background:linear-gradient(180deg,rgba(212,175,55,0.16),rgba(212,175,55,0.06));
+    border:1px solid rgba(212,175,55,0.5);
+    box-shadow:0 4px 14px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
+  }
+  #deckscreen{ justify-content:flex-start; padding:0; overflow:hidden; }
+  #db-root{ width:100%; height:100%; max-width:520px; display:flex; flex-direction:column; }
+  .db-head{
+    flex:0 0 auto; display:flex; align-items:center; gap:10px; padding:14px 16px 8px;
+  }
+  .db-head .db-title{ font-family:'Cinzel',serif; font-weight:900; font-size:22px; color:var(--gold-hi); letter-spacing:0.05em; }
+  .db-head .db-sub{ font-family:'Playfair Display',serif; font-style:italic; font-size:11px; color:var(--gold-lo); }
+  .db-head .db-x{ margin-left:auto; cursor:pointer; width:30px; height:30px; border-radius:50%;
+    border:1px solid rgba(212,175,55,0.4); background:rgba(212,175,55,0.08); color:var(--gold-hi);
+    font-family:'Cinzel',serif; font-weight:900; font-size:16px; line-height:1; }
+  .db-tabs{ flex:0 0 auto; display:flex; gap:6px; padding:0 16px 8px; }
+  .db-tab{ flex:1; cursor:pointer; text-align:center; padding:8px 4px; border-radius:9px;
+    font-family:'Cinzel',serif; font-weight:700; font-size:11px; letter-spacing:0.06em; text-transform:uppercase;
+    color:var(--gold-lo); background:rgba(20,19,31,0.7); border:1px solid rgba(212,175,55,0.18); }
+  .db-tab.active{ color:#0a0a0a; background:linear-gradient(180deg,var(--gold-hi),var(--gold-lo)); border-color:var(--gold-hi); }
+  .db-body{ flex:1 1 auto; min-height:0; overflow-y:auto; padding:4px 14px 16px; -webkit-overflow-scrolling:touch; }
+
+  /* ---- shared card tile ---- */
+  .db-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(82px,1fr)); gap:8px; }
+  .db-tile{
+    position:relative; aspect-ratio:3/4; border-radius:9px; overflow:hidden; cursor:pointer;
+    border:2px solid var(--steel); background:linear-gradient(170deg,#15151f,#0a0a10);
+    transition:transform 90ms ease, box-shadow 90ms ease;
+  }
+  .db-tile:active{ transform:scale(0.96); }
+  .db-tile .t-art{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+  .db-tile .t-art img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top; }
+  .db-tile .t-glyph{ font-family:'Cinzel',serif; font-weight:900; font-size:26px; color:var(--gold-lo); opacity:0.55; }
+  .db-tile .t-scrim{ position:absolute; left:0; right:0; bottom:0; height:54%;
+    background:linear-gradient(180deg,transparent,rgba(6,6,12,0.94) 64%); z-index:2; }
+  .db-tile .t-cost{ position:absolute; top:-1px; left:-1px; min-width:20px; height:20px; z-index:3;
+    display:flex; align-items:center; justify-content:center; font-family:'Inter',monospace; font-weight:700;
+    font-size:11px; color:#0a0a0a; background:linear-gradient(180deg,#b14bff,#7a3cff); border-radius:8px 0 8px 0; padding:0 4px; }
+  .db-tile.spell .t-cost{ background:linear-gradient(180deg,#f3d77a,#D4AF37); }
+  .db-tile .t-nm{ position:absolute; left:0; right:0; bottom:11px; z-index:3; padding:0 3px; text-align:center;
+    font-family:'Cinzel',serif; font-weight:700; font-size:9px; line-height:1.05; color:var(--ivory); text-shadow:0 1px 3px #000; }
+  .db-tile .t-role{ position:absolute; left:0; right:0; bottom:3px; z-index:3; text-align:center;
+    font-family:'Inter',sans-serif; font-weight:700; font-size:6.5px; letter-spacing:0.08em; text-transform:uppercase; color:var(--gold-lo); }
+  .db-tile .t-vbadge{ position:absolute; top:2px; right:3px; z-index:3; font-family:'Inter',sans-serif; font-weight:700;
+    font-size:7px; letter-spacing:0.05em; padding:1px 3px; border-radius:4px; background:rgba(5,5,10,0.7);
+    border:1px solid rgba(212,175,55,0.35); color:var(--gold-hi); }
+  .db-tile .t-vbadge.H{ color:#9fe8ff; border-color:#4aa6c8; }
+  .db-tile .t-vbadge.S{ color:#ff9a5a; border-color:#c8744a; }
+  .db-tile .t-crown{ position:absolute; top:1px; right:3px; z-index:3; font-size:11px; filter:drop-shadow(0 1px 2px #000); }
+  .db-tile.locked{ filter:grayscale(0.85) brightness(0.5); }
+  .db-tile.locked .t-lock{ position:absolute; inset:0; z-index:4; display:flex; align-items:center; justify-content:center;
+    font-size:22px; color:rgba(232,232,232,0.8); }
+  .db-tile.dim{ opacity:0.34; }
+  .db-tile.indeck{ box-shadow:0 0 0 2px var(--gold-hi), 0 6px 16px rgba(212,175,55,0.4); }
+
+  /* ---- filter chips ---- */
+  .db-filters{ display:flex; flex-wrap:wrap; gap:5px; margin-bottom:9px; }
+  .db-chip{ cursor:pointer; font-family:'Inter',sans-serif; font-weight:700; font-size:9px; letter-spacing:0.04em;
+    text-transform:uppercase; padding:4px 9px; border-radius:999px; color:var(--gold-lo);
+    background:rgba(20,19,31,0.7); border:1px solid rgba(212,175,55,0.2); }
+  .db-chip.on{ color:#0a0a0a; background:linear-gradient(180deg,var(--gold-hi),var(--gold-lo)); border-color:var(--gold-hi); }
+  .db-secthead{ font-family:'Cinzel',serif; font-weight:700; font-size:11px; letter-spacing:0.08em; text-transform:uppercase;
+    color:var(--gold-lo); margin:12px 0 6px; }
+
+  /* ---- deck slot cards ---- */
+  .db-slots{ display:flex; flex-direction:column; gap:9px; }
+  .db-slot{ position:relative; border-radius:12px; padding:11px 13px; background:rgba(20,19,31,0.72);
+    border:1px solid rgba(212,175,55,0.22); }
+  .db-slot.active{ border-color:var(--gold-hi); box-shadow:0 0 14px rgba(212,175,55,0.28); }
+  .db-slot.lockedslot{ opacity:0.5; }
+  .db-slot .s-top{ display:flex; align-items:center; gap:8px; }
+  .db-slot .s-name{ font-family:'Cinzel',serif; font-weight:700; font-size:14px; color:var(--ivory); }
+  .db-slot .s-fac{ font-family:'Inter',sans-serif; font-weight:700; font-size:8px; letter-spacing:0.06em;
+    text-transform:uppercase; padding:2px 7px; border-radius:999px; color:#0a0a0a; }
+  .db-slot .s-active{ margin-left:auto; font-family:'Cinzel',serif; font-weight:700; font-size:9px; letter-spacing:0.1em;
+    color:var(--gold-hi); }
+  .db-slot .s-meta{ margin-top:5px; display:flex; gap:14px; font-family:'Inter',monospace; font-size:10px; color:#c8c8d0; }
+  .db-slot .s-meta b{ color:var(--gold-hi); }
+  .db-slot .s-btns{ margin-top:9px; display:flex; gap:7px; }
+  .db-mini{ cursor:pointer; font-family:'Cinzel',serif; font-weight:700; font-size:10px; letter-spacing:0.05em;
+    text-transform:uppercase; padding:7px 14px; border-radius:8px; color:var(--gold-hi);
+    background:rgba(212,175,55,0.1); border:1px solid rgba(212,175,55,0.4); }
+  .db-mini.primary{ color:#0a0a0a; background:linear-gradient(180deg,var(--gold-hi),var(--gold-lo)); border-color:var(--gold-hi); }
+  .db-mini.wide{ width:100%; text-align:center; margin-top:8px; padding:11px; font-size:12px; }
+  .db-mini:active{ transform:translateY(1px); }
+
+  /* ---- editor: 11-card strip + linters ---- */
+  .db-deckstrip{ display:grid; grid-template-columns:repeat(6,1fr); gap:5px; margin-bottom:8px; }
+  .db-deckstrip .ds-slot{ position:relative; aspect-ratio:3/4; border-radius:7px; border:1.5px dashed rgba(212,175,55,0.3);
+    background:rgba(10,10,18,0.6); display:flex; align-items:center; justify-content:center; overflow:hidden; cursor:pointer; }
+  .db-deckstrip .ds-slot.filled{ border-style:solid; }
+  .db-deckstrip .ds-slot img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top; }
+  .db-deckstrip .ds-slot .ds-glyph{ font-family:'Cinzel',serif; font-weight:900; font-size:18px; color:var(--gold-lo); opacity:0.5; z-index:1; }
+  .db-deckstrip .ds-slot .ds-cost{ position:absolute; top:0; left:0; z-index:3; font-family:'Inter',monospace; font-weight:700;
+    font-size:9px; color:#0a0a0a; background:var(--gold-hi); padding:0 3px; border-radius:6px 0 5px 0; }
+  .db-deckstrip .ds-slot .ds-x{ position:absolute; inset:0; z-index:4; display:flex; align-items:center; justify-content:center;
+    font-size:14px; color:#fff; opacity:0; transition:opacity 90ms; }
+  .db-deckstrip .ds-slot.filled:active .ds-x{ opacity:1; background:rgba(214,40,40,0.55); }
+  .db-deckstrip .ds-slot.empty .ds-num{ font-family:'Inter',monospace; font-size:11px; color:var(--steel); }
+
+  .db-linters{ display:flex; flex-direction:column; gap:5px; padding:9px 11px; border-radius:10px;
+    background:rgba(20,19,31,0.7); border:1px solid rgba(212,175,55,0.2); margin-bottom:9px; }
+  .db-lint-row{ display:flex; align-items:center; gap:8px; font-family:'Inter',sans-serif; font-size:10px; color:#c8c8d0; }
+  .db-lint-row .ll{ font-weight:700; color:var(--gold-lo); width:78px; letter-spacing:0.04em; text-transform:uppercase; }
+  .db-lint-row .lv{ font-family:'Inter',monospace; font-weight:700; color:var(--ivory); }
+  .db-lint-row .ok{ color:#5fd38a; } .db-lint-row .warn{ color:#ffb454; }
+  .db-costbar{ flex:1; height:7px; border-radius:5px; background:#0c0c14; border:1px solid rgba(212,175,55,0.2); overflow:hidden; position:relative; }
+  .db-costbar i{ position:absolute; left:0; top:0; bottom:0; background:linear-gradient(90deg,#7a3cff,#b14bff 60%,var(--gold-hi)); }
+  .db-crewbadge{ display:inline-block; font-family:'Cinzel',serif; font-weight:700; font-size:9px; letter-spacing:0.06em;
+    color:#0a0a0a; padding:2px 8px; border-radius:999px; }
+
+  .db-editbtns{ display:flex; gap:8px; margin:4px 0 12px; }
+  .db-namein{ width:100%; margin-bottom:9px; padding:9px 11px; border-radius:9px; background:rgba(10,10,18,0.8);
+    border:1px solid rgba(212,175,55,0.35); color:var(--ivory); font-family:'Cinzel',serif; font-weight:700; font-size:13px; }
+
+  /* ---- templates ---- */
+  .db-tpl{ border-radius:12px; padding:12px 14px; margin-bottom:9px; background:rgba(20,19,31,0.72);
+    border:1px solid rgba(212,175,55,0.22); }
+  .db-tpl.wild{ border-color:rgba(123,92,255,0.5); }
+  .db-tpl .tp-top{ display:flex; align-items:baseline; gap:8px; }
+  .db-tpl .tp-name{ font-family:'Cinzel',serif; font-weight:900; font-size:15px; color:var(--gold-hi); }
+  .db-tpl .tp-arch{ font-family:'Inter',sans-serif; font-weight:700; font-size:8px; letter-spacing:0.07em;
+    text-transform:uppercase; color:var(--gold-lo); }
+  .db-tpl .tp-avg{ margin-left:auto; font-family:'Inter',monospace; font-weight:700; font-size:11px; color:var(--ivory); }
+  .db-tpl .tp-win{ margin-top:5px; font-family:'Playfair Display',serif; font-style:italic; font-size:11px; line-height:1.35; color:#c8c8d0; }
+  .db-tpl .tp-own{ margin-top:6px; font-family:'Inter',sans-serif; font-weight:600; font-size:9px; letter-spacing:0.04em; color:var(--gold-lo); }
+  .db-tpl .tp-own.short{ color:#ffb454; }
+
+  /* ---- card detail popover ---- */
+  #db-detail{ position:fixed; inset:0; z-index:60; display:flex; align-items:center; justify-content:center; padding:24px;
+    background:rgba(5,5,7,0.82); }
+  #db-detail.hidden{ display:none; }
+  #db-detail .dd-card{ width:min(92vw,360px); border-radius:14px; padding:16px 18px; background:linear-gradient(170deg,#16151f,#0a0a12);
+    border:2px solid var(--gold); box-shadow:0 16px 50px rgba(0,0,0,0.7); }
+  #db-detail .dd-top{ display:flex; align-items:baseline; gap:8px; }
+  #db-detail .dd-nm{ font-family:'Cinzel',serif; font-weight:900; font-size:18px; color:var(--gold-hi); }
+  #db-detail .dd-cost{ margin-left:auto; font-family:'Inter',monospace; font-weight:700; font-size:13px; color:#0a0a0a;
+    background:linear-gradient(180deg,#b14bff,#7a3cff); border-radius:6px; padding:2px 8px; }
+  #db-detail .dd-meta{ margin-top:3px; font-family:'Inter',sans-serif; font-weight:600; font-size:9px; letter-spacing:0.06em;
+    text-transform:uppercase; color:var(--gold-lo); }
+  #db-detail .dd-stats{ display:flex; flex-wrap:wrap; gap:12px; margin-top:10px; }
+  #db-detail .dd-stat{ text-align:center; } #db-detail .dd-stat b{ display:block; font-family:'Inter',monospace; font-weight:700; font-size:14px; color:var(--ivory); }
+  #db-detail .dd-stat span{ font-size:7px; letter-spacing:0.08em; color:var(--steel); text-transform:uppercase; }
+  #db-detail .dd-ability{ margin-top:10px; font-size:11px; line-height:1.4; color:var(--ivory); }
+  #db-detail .dd-ability b{ color:var(--gold-hi); }
+  #db-detail .dd-desc{ margin-top:8px; font-family:'Playfair Display',serif; font-style:italic; font-size:11px; line-height:1.4; color:#c8c8d0; }
+  #db-detail .dd-decks{ margin-top:8px; font-size:9px; letter-spacing:0.03em; color:var(--gold-lo); }
+  #db-detail .dd-close{ margin-top:14px; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ START SCREEN ============ -->
+  <section id="startscreen" class="screen">
+    <div class="crest"><img src="assets/ui/logo.png" alt="Alley Kingz" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.parentNode.textContent='AK'"></div>
+    <h1 class="title">ALLEY KINGZ</h1>
+    <p class="subtitle">cyberpunk dog crews, Twisted-Metal rigs, Clash-Royale lanes</p>
+    <button id="playbtn" class="btn">Play</button>
+    <button id="deckbtn" class="btn btn-sub">Deck Lab</button>
+    <button id="shopbtn" class="btn btn-sub" onclick="location.href='shop/shop.html'">Shop</button>
+    <p class="fineprint">Early prototype. Not financial advice. Shop items are in-game only, no cash value.</p>
+    <div class="wordmark">Everlight Ventures &bull; $BCARDD</div>
+  </section>
+
+  <!-- ============ MATCH STAGE ============ -->
+  <main id="stage" class="hidden">
+    <div id="topbar">
+      <div class="crowns"><span class="foe" id="foecrowns">0</span><span>FOE</span></div>
+      <div id="timerwrap"><div id="timer">3:00</div><div id="speedbadge">0.75x</div></div>
+      <div class="crowns"><span>YOU</span><span class="me" id="mecrowns">0</span></div>
+    </div>
+
+    <div id="convoybar">
+      <div id="minimap"></div>
+      <div id="stormchip" class="calm">STORM: CALM</div>
+      <button id="codexbtn" title="Storm Codex">?</button>
+    </div>
+
+    <div id="boardwrap">
+      <canvas id="board" width="540" height="900"></canvas>
+      <div id="gatebar" class="hidden"></div>
+      <div id="countdown"></div>
+      <div id="phasealert"></div>
+      <div id="stormbanner"></div>
+    </div>
+
+    <div id="dock">
+      <div id="energywrap">
+        <span id="energylabel">ENERGY</span>
+        <div id="energybar">
+          <div id="energyfill"></div>
+          <div id="energypips"></div>
+        </div>
+        <span id="energynum">6</span>
+      </div>
+      <div id="cardinfo"></div>
+      <div id="hand"></div>
+      <div id="hint">Drag a card onto your half to deploy, or tap a card then tap your half. Hold a card to peek its stats.</div>
+    </div>
+  </main>
+
+  <!-- ============ RESULT SCREEN ============ -->
+  <section id="resultscreen" class="screen hidden">
+    <div id="resultline" class="result-line">VICTORY</div>
+    <p id="resultsub" class="result-sub">The pack bows to the King.</p>
+    <div class="crowns" style="font-size:20px;margin-top:6px;">
+      <span class="me" id="r_me">0</span><span style="color:var(--steel)">crowns</span><span class="foe" id="r_foe">0</span>
+    </div>
+    <button id="againbtn" class="btn">Play Again</button>
+    <p class="fineprint">Early prototype. Not financial advice.</p>
+    <div class="wordmark">Everlight Ventures &bull; $BCARDD</div>
+  </section>
+
+  <!-- ============ STORM CODEX (studyable frozen catalog) ============ -->
+  <section id="codexscreen" class="screen hidden">
+    <div class="cx-title">STORM CODEX</div>
+    <div class="cx-sub">The alley turns on you -- but never by surprise. Every event is fixed-stat, symmetric, and telegraphed. Plan around it.</div>
+    <div class="cx-list" id="codexlist"></div>
+    <div class="cx-doctrine">Fairness Doctrine: both sides eat the identical event at the identical second. Hazards hit cells, not units -- good spacing dodges them. Buffs stack-cap at +100% move / +80% damage. A fully-ignored hazard threatens a small slice of a tower; chaos punishes mistakes, it never decides the game.</div>
+    <button id="codexclose" class="btn">Back</button>
+    <div class="wordmark">Everlight Ventures &bull; $BCARDD</div>
+  </section>
+
+  <!-- ============ DECK LAB (collection + 11-card builder + templates) ============ -->
+  <section id="deckscreen" class="screen hidden">
+    <div id="db-root"></div>
+  </section>
+  <!-- card detail popover (rendered on demand) -->
+  <div id="db-detail" class="hidden"></div>
+
+</div>
+
+<!-- order matters: canon globals first, then the engine that consumes them -->
+<script src="canon.js?v=22"></script>
+<script src="engine.js?v=22"></script>
+<script>
+(function(){
+  'use strict';
+  const AK = window.AK;
+  if(!AK){ alert('Engine failed to load (engine.js).'); return; }
+
+  // ---- DOM hooks ----
+  const startScreen  = document.getElementById('startscreen');
+  const resultScreen = document.getElementById('resultscreen');
+  const stage        = document.getElementById('stage');
+  const playBtn      = document.getElementById('playbtn');
+  const againBtn     = document.getElementById('againbtn');
+  const canvas       = document.getElementById('board');
+  const ctx          = canvas.getContext('2d');
+  const cdEl         = document.getElementById('countdown');
+  const timerEl      = document.getElementById('timer');
+  const speedBadgeEl = document.getElementById('speedbadge');
+  const phaseAlertEl = document.getElementById('phasealert');
+  const meCrownsEl   = document.getElementById('mecrowns');
+  const foeCrownsEl  = document.getElementById('foecrowns');
+  const energyFill   = document.getElementById('energyfill');
+  const energyNum    = document.getElementById('energynum');
+  const energyPips   = document.getElementById('energypips');
+  const handEl       = document.getElementById('hand');
+  const hintEl       = document.getElementById('hint');
+  const cardInfoEl   = document.getElementById('cardinfo');
+  // convoy + storm HUD
+  const stormBannerEl= document.getElementById('stormbanner');
+  const stormChipEl  = document.getElementById('stormchip');
+  const minimapEl    = document.getElementById('minimap');
+  const gatebarEl    = document.getElementById('gatebar');
+  const codexScreen  = document.getElementById('codexscreen');
+  const codexListEl  = document.getElementById('codexlist');
+  const codexBtn     = document.getElementById('codexbtn');
+  const codexClose   = document.getElementById('codexclose');
+
+  // energy pips (one per max energy point)
+  for(let i=0;i<AK.ENERGY_MAX;i++){ const s=document.createElement('span'); energyPips.appendChild(s); }
+
+  // ==========================================================
+  // ICON PRELOADER -- progressive art: load assets/units/<num>_<slug>.png
+  // per card. Drawn by drawUnit() when complete; otherwise the existing
+  // procedural shape is drawn. Guarded so it is a no-op under a DOM stub
+  // (node harness has no global Image / network).
+  // ==========================================================
+  const UNIT_ICONS = {};   // cardNumber -> Image
+  // ---- THE 4 CONVOY SECTIONS bound to the EXISTING "4 of everything" assets (G3.0).
+  // index 0..3 = Lot / Neon / Industrial / Docks. The engine owns SECTIONS (pace,
+  // difficulty, garrison, affix, gate label); the renderer owns the art mapping. ----
+  const SECTION_ARENA = ['the_lot','arena_a_neon_night','arena_b_golden_industrial','arena_c_rain_docks'];
+  const SECTION_BG    = [null,null,null,null];      // backdrop Image per section
+  const SECTION_SKINS = [{},{},{},{}];              // [sec] -> {princess:Image, king:Image}
+  let   ARENA_BG = null;                            // legacy alias (unused once sections load)
+
+  // ---- DRAG-TO-DEPLOY state (Clash-style) ----
+  // active: a hand card is being dragged. handIdx: which slot. gx/gy: current
+  // arena point under the finger. valid: over the player half AND affordable.
+  // Starts inert so drawDragGhost() is a guaranteed no-op under the DOM stub.
+  const drag = { active:false, handIdx:-1, gx:0, gy:0, valid:false, pointerId:null };
+  // Active arena drives BOTH the board background and the tower skins so they
+  // always stay in sync. Switch arenas by changing this one const.
+  const ACTIVE_ARENA = 'the_lot';   // boot into the starting NOS arena (The Lot), easiest
+  // AI difficulty per arena/NOS-trophy tier (0 easy -> 9 hardest). The full 10-arena
+  // NOS ladder (The Lot ... Empire State) will key this; the current betas map low.
+  const ARENA_DIFFICULTY = { the_lot:0, arena_a_neon_night:3, arena_b_golden_industrial:5, arena_c_rain_docks:7 };
+  const TOWER_SKINS = {};  // 'princess'|'king' -> Image (for ACTIVE_ARENA)
+  const HAS_IMAGE = (typeof Image !== 'undefined');
+  function iconSlug(name){
+    // MUST match generate_icons.py slugify(): lowercase, non-alnum -> '_', trimmed
+    return String(name||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'');
+  }
+  // Art source per card: the 48 canon originals (cardNumber 0001-0048) live at
+  // assets/units/<num>_<slug>.png; the 58 Heavy/Street variants (0049-0106) are
+  // painted by the art cron into assets/cards/<slug>.png (a clean rarity-framed
+  // placeholder shows until painted). Spells are glyph-only (no PNG).
+  function artSrc(card){
+    if(!card || card.type==='spell') return '';
+    const slug = iconSlug(card.name);
+    const num = parseInt(card.cardNumber,10) || 0;
+    return num >= 49 ? ('assets/cards/' + slug + '.png')
+                     : ('assets/units/' + card.cardNumber + '_' + slug + '.png');
+  }
+  function preloadIcons(){
+    if(!HAS_IMAGE) return;                       // node harness: skip cleanly
+    const cards = (typeof CANON_CARDS !== 'undefined' && CANON_CARDS) ||
+                  (AK.cardList) || [];
+    cards.forEach(c=>{
+      if(!c || !c.cardNumber) return;
+      const img = new Image();
+      img.src = artSrc(c);                          // units/ for originals, cards/ for variants
+      img.onerror = ()=>{ img._failed = true; };  // stays !complete-as-art, shape fallback
+      UNIT_ICONS[c.cardNumber] = img;
+    });
+    preloadSections();   // backdrops + tower skins for ALL 4 districts (G3.0 preload)
+  }
+  // Preload every district's backdrop + tower skins up front so a section advance
+  // crossfades instantly (no mid-match load hitch). Each is checked via .complete.
+  function preloadSections(){
+    if(!HAS_IMAGE) return;
+    SECTION_ARENA.forEach((name,sec)=>{
+      const bg = new Image();
+      bg.src = 'assets/arena/' + name + '.png';
+      bg.onerror = ()=>{ bg._failed = true; };
+      SECTION_BG[sec] = bg;
+      ['princess','king'].forEach(tt=>{
+        const timg = new Image();
+        timg.src = 'assets/arena/towers/' + name + '_' + tt + '.png';
+        timg.onerror = ()=>{ timg._failed = true; };
+        SECTION_SKINS[sec][tt] = timg;
+      });
+    });
+    ARENA_BG = SECTION_BG[0];
+  }
+  function curSection(){ return (AK.game && AK.game.section!=null) ? AK.game.section : 0; }
+  function unitIconReady(num){
+    const img = UNIT_ICONS[num];
+    return !!(img && img.complete && !img._failed && img.naturalWidth > 0);
+  }
+  function bgReady(sec){ const b=SECTION_BG[sec]; return !!(b && b.complete && !b._failed && b.naturalWidth>0); }
+  function towerSkinReady(sec,type){ const img=SECTION_SKINS[sec] && SECTION_SKINS[sec][type];
+    return !!(img && img.complete && !img._failed && img.naturalWidth>0); }
+  preloadIcons();
+
+  // ---- arena -> canvas transform (engine arena units -> pixels) ----
+  // THE CAMERA SEAM (G2.0): every draw routes through toX/toY, so inserting the
+  // engine-owned camera{offX,offY,zoom} here makes the whole frame pan/zoom with
+  // ZERO call-site changes. Camera defaults to IDENTITY (offX=offY=0, zoom=1) so
+  // play is pixel-identical until a section pan animates camera.offY. The pan is
+  // engine-driven (AK.update -> updatePan) on real dt; the renderer just reads it.
+  const ARENA_W = AK.ARENA_W, ARENA_H = AK.ARENA_H;
+  const IDENTITY_CAM = { offX:0, offY:0, zoom:1 };
+  function cam(){ return (AK.game && AK.game.camera) || IDENTITY_CAM; }
+  function scaleX(){ return canvas.width / ARENA_W; }
+  function scaleY(){ return canvas.height / ARENA_H; }
+  function toX(gx){ const c=cam(); return (gx - c.offX) * scaleX() * c.zoom; }
+  function toY(gy){ const c=cam(); return (gy - c.offY) * scaleY() * c.zoom; }
+
+  // ---- responsive canvas sizing (keep arena aspect, fit boardwrap) ----
+  function resize(){
+    const wrap = document.getElementById('boardwrap');
+    const availW = wrap.clientWidth - 4;
+    const availH = wrap.clientHeight - 4;
+    const aspect = ARENA_W / ARENA_H;
+    let w = availW, h = w / aspect;
+    if(h > availH){ h = availH; w = h * aspect; }
+    canvas.style.width  = Math.floor(w) + 'px';
+    canvas.style.height = Math.floor(h) + 'px';
+    // rebuild the cached static-bg if the backing pixel size changed (it is fixed
+    // at 540x900 today, so this builds once).
+    if(canvas.width!==_staticBgW || canvas.height!==_staticBgH) buildStaticBg();
+  }
+  window.addEventListener('resize', resize);
+  // Re-fit on orientation flip. Layout is portrait-only (no media query); resize()
+  // just recomputes the canvas DISPLAY size to the boardwrap box. toX/toY read
+  // canvas.width (the fixed backing) so the arena->pixel scale is always live, and
+  // canvasToArena() reads the fresh getBoundingClientRect(), so deploy taps stay
+  // aligned after the flip. The deferred second call covers browsers (iOS Safari)
+  // that report stale metrics on the orientationchange tick.
+  window.addEventListener('orientationchange', function(){ resize(); setTimeout(resize, 250); });
+  if(window.visualViewport && window.visualViewport.addEventListener){
+    window.visualViewport.addEventListener('resize', resize);  // mobile URL-bar show/hide
+  }
+
+  // ==========================================================
+  // RENDER
+  // ==========================================================
+  const PAL = AK.PAL, RIVER_Y = AK.RIVER_Y, RIVER_H = AK.RIVER_H;
+  const BRIDGE_LX = AK.BRIDGE_LX, BRIDGE_RX = AK.BRIDGE_RX, BRIDGE_W = AK.BRIDGE_W;
+
+  // ---- PERF PASS (G2.1): cached static-background canvas + offscreen culling +
+  // adaptive shadowBlur. LOW_FX is flipped by the FPS sampler in loop(); the hot
+  // draw paths read sb() so heavy glows drop on weak phones. ----
+  let LOW_FX = false;
+  const CULL = 90;                                   // px margin for offscreen culling
+  function sb(v){ return LOW_FX ? 0 : v; }           // shadowBlur gate
+  function onScreen(px,py){ return px>-CULL && px<canvas.width+CULL && py>-CULL && py<canvas.height+CULL; }
+  let _staticBg=null, _staticBgW=0, _staticBgH=0;
+  // Bake lanes + river(gradient) + bridges into an offscreen canvas ONCE (rebuild
+  // only on canvas-pixel resize). Built in identity arena coords; blitted at the
+  // camera offset each frame -- removes the per-frame gradient allocation hog.
+  function buildStaticBg(){
+    if(typeof document==='undefined' || !document.createElement) return;
+    const c = document.createElement('canvas');
+    c.width = canvas.width; c.height = canvas.height;
+    const bxx = c.getContext && c.getContext('2d'); if(!bxx) return;
+    const sx = canvas.width/ARENA_W, sy = canvas.height/ARENA_H;
+    bxx.strokeStyle='rgba(212,175,55,0.07)'; bxx.lineWidth=1;
+    [BRIDGE_LX,BRIDGE_RX].forEach(lx=>{ bxx.beginPath(); bxx.moveTo(lx*sx,0); bxx.lineTo(lx*sx,c.height); bxx.stroke(); });
+    const ry=(RIVER_Y-RIVER_H/2)*sy, rh=RIVER_H*sy;
+    const grad = bxx.createLinearGradient ? bxx.createLinearGradient(0,ry,0,ry+rh) : null;
+    if(grad){ grad.addColorStop(0,'rgba(40,40,80,0.5)'); grad.addColorStop(0.5,'rgba(80,80,150,0.65)'); grad.addColorStop(1,'rgba(40,40,80,0.5)'); bxx.fillStyle=grad; }
+    else bxx.fillStyle='rgba(60,60,120,0.55)';
+    bxx.fillRect(0,ry,c.width,rh);
+    bxx.fillStyle='#26222e';
+    [BRIDGE_LX,BRIDGE_RX].forEach(lx=>{ bxx.fillRect((lx-BRIDGE_W/2)*sx,ry,BRIDGE_W*sx,rh); });
+    _staticBg=c; _staticBgW=canvas.width; _staticBgH=canvas.height;
+  }
+  // Draw the section backdrop, crossfading the OLD district into the NEW one while
+  // the camera pans (G3.1). _bgPrevSection is set on section change in syncHUD.
+  let _bgPrevSection = null;
+  function drawBackdrops(){
+    const g = AK.game; const sec = g?g.section:0;
+    const x0=toX(0), y0=toY(0), w=ARENA_W*scaleX()*cam().zoom, h=ARENA_H*scaleY()*cam().zoom;
+    const panning = g && g.pan && g.pan.active && _bgPrevSection!=null && _bgPrevSection!==sec;
+    if(panning){
+      const t = g.pan.t;
+      if(bgReady(_bgPrevSection)){ ctx.save(); ctx.globalAlpha=(1-t)*0.92; ctx.drawImage(SECTION_BG[_bgPrevSection],x0,y0,w,h); ctx.restore(); }
+      if(bgReady(sec)){ ctx.save(); ctx.globalAlpha=t*0.92; ctx.drawImage(SECTION_BG[sec],x0,y0,w,h); ctx.restore(); }
+    } else if(bgReady(sec)){
+      ctx.save(); ctx.globalAlpha=0.92; ctx.drawImage(SECTION_BG[sec],x0,y0,w,h); ctx.restore();
+    }
+  }
+  // GOLDEN HOUR objective zone -- "$BCARDD's Blessing" (G1.4). A pulsing gold disc
+  // at the contested center while the objective is active.
+  function drawGoldenHour(){
+    const g=AK.game; const z=g&&g.goldenHour; if(!z||!z.active) return;
+    const sx=scaleX(); const px=toX(z.x), py=toY(z.y), rad=z.r*sx*cam().zoom;
+    const pulse=0.5+0.5*Math.sin((z.timer||0)*3);
+    ctx.save();
+    ctx.globalAlpha=0.10+0.07*pulse; ctx.fillStyle=PAL.gold;
+    ctx.beginPath(); ctx.arc(px,py,rad,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=0.85; ctx.strokeStyle=PAL.gold; ctx.lineWidth=Math.max(2,0.08*sx);
+    ctx.shadowColor=PAL.gold; ctx.shadowBlur=sb(14);
+    ctx.beginPath(); ctx.arc(px,py,rad*(0.92+0.05*pulse),0,Math.PI*2); ctx.stroke();
+    ctx.shadowBlur=0; ctx.globalAlpha=0.9;
+    ctx.fillStyle='#ffe9a8'; ctx.font='700 '+(0.7*sx)+'px Cinzel,serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText('GOLDEN HOUR', px, py - rad - 0.4*sx);
+    ctx.restore();
+  }
+  // Telegraphed hazard strike reticles (G1.3): a pulsing target ring at each cell
+  // that is placed-but-not-yet-fired (>= 1.4s warning). Spacing dodges them.
+  function drawStormReticles(){
+    const s=AK.getStorm(); if(!s||s.phase!=='active'||!s.strikes||!s.strikes.length) return;
+    const sx=scaleX();
+    s.strikes.forEach(st=>{
+      if(st.band || st.fired || !st.placed) return;
+      const px=toX(st.x), py=toY(st.y); if(!onScreen(px,py)) return;
+      const rad=(st.r||1.6)*sx*cam().zoom;
+      const col = st.strafe ? '#ff9a5a' : '#9fe8ff';
+      const remain = Math.max(0, st.at - s.clock);
+      const pulse = 0.5+0.5*Math.sin(s.clock*9);
+      ctx.save();
+      ctx.globalAlpha=0.14+0.10*pulse; ctx.fillStyle=col;
+      ctx.beginPath(); ctx.arc(px,py,rad,0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha=0.85; ctx.strokeStyle=col; ctx.lineWidth=Math.max(1.5,0.07*sx);
+      if(ctx.setLineDash) ctx.setLineDash([Math.max(4,0.35*sx),Math.max(3,0.28*sx)]);
+      ctx.beginPath(); ctx.arc(px,py,rad,0,Math.PI*2); ctx.stroke();
+      if(ctx.setLineDash) ctx.setLineDash([]);
+      // shrinking inner ring as impact approaches
+      ctx.globalAlpha=0.9; ctx.lineWidth=Math.max(1,0.05*sx);
+      ctx.beginPath(); ctx.arc(px,py,rad*Math.max(0.1,Math.min(1,remain/STRIKE_RETICLE)),0,Math.PI*2); ctx.stroke();
+      ctx.restore();
+    });
+  }
+  const STRIKE_RETICLE = 1.6;   // mirrors engine STRIKE_RETICLE for the inner-ring timing
+
+  function draw(){
+    const sx = scaleX(), sy = scaleY();
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // ---- SCREEN SHAKE: offset the whole frame by a clamped random vector ----
+    const g = AK.game;
+    let shaken = false;
+    if(g && g.shake>0){
+      const mag = Math.min(g.shake, 14);            // clamp to ~14px
+      const dx = (Math.random()*2-1)*mag;
+      const dy = (Math.random()*2-1)*mag;
+      ctx.save(); ctx.translate(dx,dy); shaken = true;
+    }
+
+    // ---- VOID base (full-screen, never pans) ----
+    ctx.fillStyle = '#050507'; ctx.fillRect(0,0,canvas.width,canvas.height);
+    // ---- board halves (pan with the camera via toX/toY) ----
+    const bx0 = toX(0), bw = ARENA_W*sx*cam().zoom;
+    ctx.fillStyle = '#080810'; ctx.fillRect(bx0, toY(0),       bw, toY(RIVER_Y)-toY(0));
+    ctx.fillStyle = '#0a0a14'; ctx.fillRect(bx0, toY(RIVER_Y), bw, toY(ARENA_H)-toY(RIVER_Y));
+    // ---- district backdrop(s): crossfades during a section pan (G3.1) ----
+    drawBackdrops();
+    // ---- cached static geometry (lanes / river / bridges) blitted at camera offset ----
+    if(_staticBg){ ctx.drawImage(_staticBg, toX(0), toY(0), _staticBg.width*cam().zoom, _staticBg.height*cam().zoom); }
+
+    if(g){
+      drawGoldenHour();                     // objective zone under the units (G1.4)
+      drawStormReticles();                  // telegraphed hazard cells (G1.3)
+      [...g.player.towers, ...g.opponent.towers].forEach(drawTower);
+      drawTraps();                          // armed SNARE markers under the units
+      AK.projectiles.forEach(drawProjectile);
+      g.units.forEach(drawUnit);
+      AK.particles.forEach(drawParticle);
+      AK.effects.forEach(drawEffect);
+    }
+
+    // Clash-style deploy ghost rides on top of the frame (inside the shake so it
+    // sits in board space). No-ops cleanly when no drag is active -- safe under
+    // the node DOM stub, which never sets drag.active.
+    drawDragGhost();
+
+    if(shaken) ctx.restore();
+
+    // ---- MAP TRANSITION flash (screen-space, drawn after the un-shake): a quick
+    // gold wash that masks the troop-reposition snap as the new district slides in. ----
+    drawTransitionFlash();
+    // ---- OVERWORLD JOURNEY interstitial: the curvy path + checkmarks "round complete"
+    // beat that plays over the whole transition window, on top of the flash. ----
+    drawConvoyJourney();
+  }
+
+  // MAP TRANSITION flash (operator spec): a brief gold -> vanta radial wash at the
+  // very start of the transition beat that hides the troop-reposition snap, then
+  // clears so the player SEES the new district slide in + "LEVEL PASSED" + the
+  // troops regrouping at the back. No-ops cleanly under the node DOM stub.
+  function drawTransitionFlash(){
+    const g = AK.game; const tr = g && g.transition;
+    if(!tr || !tr.active) return;
+    const a = 0.30 * Math.max(0, 1 - tr.t/0.7);   // ~0.7s flash at the start, then gone
+    if(a <= 0.01) return;
+    ctx.save();
+    ctx.globalAlpha = a;
+    const grad = ctx.createRadialGradient
+      ? ctx.createRadialGradient(canvas.width/2, canvas.height/2, canvas.height*0.08,
+                                 canvas.width/2, canvas.height/2, canvas.height*0.72)
+      : null;
+    if(grad){ grad.addColorStop(0,'rgba(212,175,55,0.55)'); grad.addColorStop(1,'rgba(5,5,7,0.96)'); ctx.fillStyle=grad; }
+    else { ctx.fillStyle='rgba(5,5,7,0.6)'; }
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.restore();
+  }
+
+  // ==========================================================
+  // OVERWORLD JOURNEY (operator spec 2026-06-08): between districts the camera
+  // does NOT just snap vertically. We play a Spyro/Mario-overworld beat: a winding
+  // path (left AND right, not just up/down), the cleared district gets a CHECKMARK,
+  // a $BCARDD marker walks the curve to the next district, "DISTRICT CLEARED ->
+  // GOOD JOB -> ENTERING X", then it fades and the map re-engages. SLOW + earned.
+  // Drawn screen-space on top of the board. No-ops cleanly under the node DOM stub.
+  // ----------------------------------------------------------
+  // The 4 districts as nodes on a winding climb. x/y are fractions of the canvas;
+  // the zig-zag (left, right, left, right) is what makes the road wind sideways.
+  var JOURNEY_NODES = [ {x:0.26,y:0.85}, {x:0.72,y:0.63}, {x:0.28,y:0.41}, {x:0.70,y:0.18} ];
+  function _ease(t){ return 1 - Math.pow(1-t, 3); }                 // ease-out cubic
+  function _bezier(a,b,c,t){ const u=1-t; return u*u*a + 2*u*t*c + t*t*b; } // quadratic
+  function drawConvoyJourney(){
+    const g = AK.game; const tr = g && g.transition;
+    if(!tr || !tr.active) return;
+    const SEC = (AK.SECTIONS||[]);
+    const to = (tr.to!=null ? tr.to : g.section);
+    const from = (tr.from!=null ? tr.from : to-1);
+    if(to<=0 || !SEC.length) return;
+    const p = Math.min(1, tr.t/(tr.dur||1));               // 0..1 over the whole window
+    // overlay opacity: fade in after the gold flash, hold, fade out as the map re-engages
+    let ov = 1;
+    if(p < 0.12) ov = p/0.12;
+    else if(p > 0.88) ov = Math.max(0, (1-p)/0.12);
+    if(ov <= 0.01) return;
+    const W = canvas.width, H = canvas.height;
+    const NODES = JOURNEY_NODES.map(n => ({ x:n.x*W, y:n.y*H }));
+    ctx.save();
+    ctx.globalAlpha = ov;
+    // 1. vanta scrim so the road reads as its own "map screen"
+    ctx.fillStyle = 'rgba(5,5,7,0.93)'; ctx.fillRect(0,0,W,H);
+    // faint gold vignette frame
+    ctx.strokeStyle = 'rgba(212,175,55,0.18)'; ctx.lineWidth = 2;
+    ctx.strokeRect(10,10,W-20,H-20);
+
+    // 2. the winding road through all 4 nodes (quadratic segments, alternating bow)
+    const seg = (i)=>{ // control point for node[i] -> node[i+1], bowed perpendicular
+      const a=NODES[i], b=NODES[i+1]; const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+      const dx=b.x-a.x, dy=b.y-a.y, len=Math.hypot(dx,dy)||1;
+      const bow = (i%2===0? 1 : -1) * len*0.28;            // alternate left/right curl
+      return { cx: mx + (-dy/len)*bow, cy: my + (dx/len)*bow, a:a, b:b };
+    };
+    // road bed
+    ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.strokeStyle='rgba(40,38,46,0.95)'; ctx.lineWidth=14;
+    ctx.beginPath(); ctx.moveTo(NODES[0].x,NODES[0].y);
+    for(let i=0;i<NODES.length-1;i++){ const s=seg(i); ctx.quadraticCurveTo(s.cx,s.cy,s.b.x,s.b.y); }
+    ctx.stroke();
+    // dashed gold center line
+    if(ctx.setLineDash) ctx.setLineDash([10,12]);
+    ctx.strokeStyle='rgba(212,175,55,0.55)'; ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.moveTo(NODES[0].x,NODES[0].y);
+    for(let i=0;i<NODES.length-1;i++){ const s=seg(i); ctx.quadraticCurveTo(s.cx,s.cy,s.b.x,s.b.y); }
+    ctx.stroke();
+    if(ctx.setLineDash) ctx.setLineDash([]);
+
+    // 3. the nodes (medallions) + checkmarks + labels
+    for(let i=0;i<NODES.length;i++){
+      const n=NODES[i]; const cleared = i < to; const dest = i===to;
+      const justCleared = i===from;
+      // destination pulses brighter as the marker arrives
+      const arrive = Math.min(1, Math.max(0,(p-0.30)/0.46));
+      const pulse = dest ? (0.5 + 0.5*Math.sin(tr.t*5)) * arrive : 0;
+      const R = dest ? 26 + 4*pulse : 22;
+      // medallion
+      ctx.beginPath(); ctx.arc(n.x,n.y,R,0,Math.PI*2);
+      ctx.fillStyle = cleared ? 'rgba(212,175,55,0.18)' : (dest? 'rgba(212,175,55,'+(0.10+0.25*pulse).toFixed(3)+')' : 'rgba(28,28,34,0.9)');
+      ctx.fill();
+      ctx.lineWidth = dest? 3 : 2;
+      ctx.strokeStyle = (cleared||dest) ? 'rgba(212,175,55,0.95)' : 'rgba(120,120,130,0.6)';
+      ctx.stroke();
+      // node number
+      ctx.fillStyle = (cleared||dest)? '#F2E2A8' : '#8a8a92';
+      ctx.font = '700 15px Cinzel, serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(String(i+1), n.x, n.y+0.5);
+      // CHECKMARK on cleared nodes -- the just-cleared one pops in this beat
+      if(cleared){
+        const stamp = justCleared ? Math.min(1, Math.max(0,(p-0.10)/0.18)) : 1;
+        if(stamp>0.01){
+          const s = 10*(0.6+0.4*_ease(stamp));
+          ctx.save(); ctx.globalAlpha = ov*Math.min(1,stamp*1.4);
+          ctx.translate(n.x+R*0.7, n.y-R*0.7);
+          ctx.strokeStyle='#37E07B'; ctx.lineWidth=3.5; ctx.lineCap='round';
+          ctx.beginPath(); ctx.moveTo(-s*0.5,0); ctx.lineTo(-s*0.1,s*0.45); ctx.lineTo(s*0.6,-s*0.5); ctx.stroke();
+          ctx.restore();
+        }
+      }
+      // district label under the node
+      const nm = (SEC[i] && SEC[i].district) ? SEC[i].district.toUpperCase() : ('DISTRICT '+(i+1));
+      ctx.globalAlpha = ov * ((cleared||dest)?1:0.55);
+      ctx.fillStyle = (cleared||dest)? 'rgba(212,175,55,0.9)' : 'rgba(150,150,158,0.8)';
+      ctx.font = '600 10px Inter, sans-serif';
+      ctx.fillText(nm, n.x, n.y+R+12);
+      ctx.globalAlpha = ov;
+    }
+
+    // 4. the $BCARDD marker walking the from->to segment along the curve
+    const travel = _ease(Math.min(1, Math.max(0,(p-0.30)/0.46)));
+    if(to-1>=0 && to-1 < NODES.length-1){
+      const s = seg(to-1);
+      const mx = _bezier(s.a.x, s.b.x, s.cx, travel);
+      const my = _bezier(s.a.y, s.b.y, s.cy, travel);
+      const bounce = Math.abs(Math.sin(tr.t*9))*6;          // little hop as it walks
+      // fading footstep trail behind it
+      for(let k=1;k<=4;k++){ const tt=Math.max(0,travel-k*0.06); if(tt<=0) break;
+        const fx=_bezier(s.a.x,s.b.x,s.cx,tt), fy=_bezier(s.a.y,s.b.y,s.cy,tt);
+        ctx.globalAlpha = ov*0.25*(1-k/5); ctx.fillStyle='#D4AF37';
+        ctx.beginPath(); ctx.arc(fx,fy,3,0,Math.PI*2); ctx.fill();
+      }
+      ctx.globalAlpha = ov;
+      // glow + gold token + paw print (the dog on the move)
+      ctx.shadowColor='#D4AF37'; ctx.shadowBlur=16;
+      ctx.fillStyle='#D4AF37'; ctx.beginPath(); ctx.arc(mx,my-bounce,13,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur=0;
+      ctx.fillStyle='#0A0A0A';
+      ctx.beginPath(); ctx.arc(mx,my-bounce+1.5,4.2,0,Math.PI*2); ctx.fill();   // paw pad
+      for(let a=0;a<3;a++){ const ang=-Math.PI/2 + (a-1)*0.7;
+        ctx.beginPath(); ctx.arc(mx+Math.cos(ang)*5.5, my-bounce-3+Math.sin(ang)*3.5, 1.8,0,Math.PI*2); ctx.fill(); }
+    }
+
+    // 5. the headline beat -- "DISTRICT CLEARED / GOOD JOB" then "ENTERING X"
+    ctx.textAlign='center';
+    if(p < 0.40){
+      const pop = _ease(Math.min(1, p/0.14));
+      ctx.globalAlpha = ov * Math.min(1, (0.40-p)/0.10);
+      ctx.fillStyle='#37E07B'; ctx.font = (700*1)+' '+(30*(0.7+0.3*pop)).toFixed(0)+'px Cinzel, serif';
+      ctx.fillText('DISTRICT CLEARED', W/2, H*0.075);
+      ctx.fillStyle='rgba(212,175,55,0.92)'; ctx.font='italic 600 15px Playfair Display, serif';
+      ctx.fillText('good job -- on to the next', W/2, H*0.075+26);
+    }
+    if(p > 0.62){
+      const ap = Math.min(1,(p-0.62)/0.12);
+      ctx.globalAlpha = ov*ap;
+      const dn = (SEC[to] && SEC[to].district) ? SEC[to].district.toUpperCase() : ('DISTRICT '+(to+1));
+      ctx.fillStyle='rgba(212,175,55,0.95)'; ctx.font='600 13px Inter, sans-serif';
+      ctx.fillText('ENTERING', W/2, H*0.075);
+      ctx.fillStyle='#F2E2A8'; ctx.font='700 30px Cinzel, serif';
+      ctx.fillText(dn, W/2, H*0.075+30);
+    }
+    ctx.restore();
+  }
+
+  // ==========================================================
+  // DRAG-TO-DEPLOY GHOST
+  // ==========================================================
+  // Drawn at the end of draw(). When drag.active is false this returns
+  // immediately, so the headless harness (which calls draw() with no pointer
+  // events) never touches Image/canvas paths it cannot satisfy.
+  function drawDragGhost(){
+    if(!drag.active) return;
+    const g = AK.game; if(!g) return;
+    const sx = scaleX();
+    const px = toX(drag.gx), py = toY(drag.gy);
+    const card = g.player.hand[drag.handIdx];
+
+    // ---- SPELL: "cast at point" RETICLE showing the AOE radius (not a troop) ----
+    if(card && card.type==='spell'){
+      drawSpellReticle(card, px, py, sx);
+      return;
+    }
+
+    const r = 0.62 * sx;                 // ~one deployed-token footprint (matches drawUnit baseR)
+    // valid => gold/green wash; invalid => red, dimmer
+    const tint = drag.valid ? PAL.gold : PAL.red;
+    ctx.save();
+
+    // target ring under the token (Clash-style drop indicator)
+    ctx.globalAlpha = drag.valid ? 0.9 : 0.5;
+    ctx.strokeStyle = tint; ctx.lineWidth = Math.max(2, 0.12*sx);
+    ctx.beginPath(); ctx.arc(px,py,r*1.6,0,Math.PI*2); ctx.stroke();
+    ctx.globalAlpha = drag.valid ? 0.18 : 0.10;
+    ctx.fillStyle = tint;
+    ctx.beginPath(); ctx.arc(px,py,r*1.6,0,Math.PI*2); ctx.fill();
+
+    // translucent unit token: real icon if loaded, else a faction-color circle
+    ctx.globalAlpha = drag.valid ? 0.85 : 0.45;
+    if(card && unitIconReady(card.cardNumber)){
+      const img = UNIT_ICONS[card.cardNumber];
+      const d = r*2.2;
+      ctx.save();
+      ctx.beginPath(); ctx.arc(px,py,d/2,0,Math.PI*2); ctx.clip();
+      ctx.drawImage(img, px-d/2, py-d/2, d, d);
+      ctx.restore();
+    } else {
+      const faccol = (card && card.palette && card.palette.base) || (card && card.color) || PAL.steel;
+      ctx.shadowColor = faccol; ctx.shadowBlur = drag.valid ? 14 : 4;
+      ctx.fillStyle = faccol;
+      ctx.beginPath(); ctx.arc(px,py,r,0,Math.PI*2); ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+    // gold/red edge so the validity reads at a glance
+    ctx.globalAlpha = 1;
+    ctx.strokeStyle = tint; ctx.lineWidth = Math.max(1.5, 0.09*sx);
+    ctx.beginPath(); ctx.arc(px,py,r*1.05,0,Math.PI*2); ctx.stroke();
+
+    ctx.restore();
+  }
+
+  // Spell cast reticle: a dashed AOE circle at the cast radius + crosshair + glyph.
+  // Tinted by the spell's effect so the player reads what they are about to drop.
+  const SPELL_RETICLE_COL = { freeze:'#9fe8ff', slow:'#caa46a', trap:'#00E0C0', zap:'#9fe8ff', strike:'#ff7b2c' };
+  function drawSpellReticle(card, px, py, sx){
+    const rad = (card.radius || 2.4) * sx;          // AOE radius in pixels
+    const col = drag.valid ? (SPELL_RETICLE_COL[card.effect] || PAL.gold) : PAL.red;
+    ctx.save();
+    // filled wash
+    ctx.globalAlpha = drag.valid ? 0.16 : 0.08;
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.arc(px,py,rad,0,Math.PI*2); ctx.fill();
+    // dashed AOE ring
+    ctx.globalAlpha = drag.valid ? 0.95 : 0.55;
+    ctx.strokeStyle = col; ctx.lineWidth = Math.max(2,0.10*sx);
+    if(ctx.setLineDash) ctx.setLineDash([Math.max(4,0.4*sx), Math.max(3,0.3*sx)]);
+    ctx.beginPath(); ctx.arc(px,py,rad,0,Math.PI*2); ctx.stroke();
+    if(ctx.setLineDash) ctx.setLineDash([]);
+    // crosshair
+    ctx.globalAlpha = drag.valid ? 0.9 : 0.5;
+    ctx.lineWidth = Math.max(1.5,0.06*sx); ctx.strokeStyle = col;
+    const ch = rad*0.4;
+    ctx.beginPath();
+    ctx.moveTo(px-ch,py); ctx.lineTo(px+ch,py);
+    ctx.moveTo(px,py-ch); ctx.lineTo(px,py+ch);
+    ctx.stroke();
+    // center glyph
+    ctx.globalAlpha = 1;
+    ctx.shadowColor = col; ctx.shadowBlur = 10;
+    ctx.fillStyle = col; ctx.font = '700 '+(1.0*sx)+'px Cinzel,serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(card.glyph||'✦', px, py);
+    ctx.restore();
+  }
+
+  function drawTower(t){
+    const sx=scaleX(), sy=scaleY(); const px=toX(t.x), py=toY(t.y);
+    if(!onScreen(px,py)) return;                          // cull off-board towers during a pan
+    const isGate = !!t.isGate;
+    const sz = ((t.type==='king'?2.0:1.5) * (isGate?1.18:1)) * sx;   // original tower sizing (operator reverted v17 bump); Gate boss still reads bigger
+    const owner = t.owner===0?PAL.blue:PAL.red;
+    const sec = curSection();
+    if(t.destroyed){
+      ctx.globalAlpha=0.3; ctx.fillStyle='#222'; ctx.fillRect(px-sz/2,py-sz/2,sz,sz); ctx.globalAlpha=1; return;
+    }
+    if(towerSkinReady(sec,t.type)){
+      // SKIN: fill the tower's square face with the district decal (clipped to the
+      // square). Owner frame + hp + numeral drawn on top below so sides still read.
+      ctx.save();
+      ctx.beginPath(); ctx.rect(px-sz/2,py-sz/2,sz,sz); ctx.clip();
+      ctx.shadowColor=owner; ctx.shadowBlur = sb(t.active?14:4);
+      ctx.drawImage(SECTION_SKINS[sec][t.type], px-sz/2,py-sz/2,sz,sz);
+      if(t.hitFlash>0){ ctx.globalAlpha=0.6; ctx.fillStyle='#fff'; ctx.fillRect(px-sz/2,py-sz/2,sz,sz); ctx.globalAlpha=1; }
+      ctx.restore();
+    } else {
+      // FALLBACK: original procedural tower body (no skin loaded)
+      ctx.save();
+      ctx.shadowColor=owner; ctx.shadowBlur = sb(t.active?14:4);
+      ctx.fillStyle = t.hitFlash>0?'#fff':(t.active?'#1a1a26':'#101018');
+      ctx.fillRect(px-sz/2,py-sz/2,sz,sz);
+      ctx.restore();
+    }
+    // DISTRICT GATE emphasis: a pulsing red-gold mini-boss frame around the enemy king
+    if(isGate){
+      const pulse=0.5+0.5*Math.sin((AK.game&&AK.game.time||0)*4);
+      ctx.save(); ctx.globalAlpha=0.6+0.3*pulse; ctx.strokeStyle='#ff7a3a'; ctx.lineWidth=Math.max(2,0.10*sx);
+      ctx.shadowColor='#ff7a3a'; ctx.shadowBlur=sb(12);
+      ctx.strokeRect(px-sz/2-2,py-sz/2-2,sz+4,sz+4); ctx.restore();
+      if(t.gateShield>0){ ctx.save(); ctx.globalAlpha=0.5; ctx.strokeStyle=PAL.gold; ctx.lineWidth=Math.max(1.5,0.07*sx);
+        ctx.beginPath(); ctx.arc(px,py,sz*0.72,0,Math.PI*2); ctx.stroke(); ctx.restore(); }
+    }
+    ctx.strokeStyle=owner; ctx.lineWidth = t.type==='king'?2.5:1.5; ctx.strokeRect(px-sz/2,py-sz/2,sz,sz);
+    // 'K' marker only on the procedural fallback; the king skin's alpha-den art reads on its own
+    if(t.type==='king' && !towerSkinReady(sec,t.type)){ ctx.fillStyle=PAL.gold; ctx.font='700 '+(0.8*sx)+'px Cinzel,serif'; ctx.textAlign='center'; ctx.fillText('K',px,py+0.3*sx); }
+    // hp bar
+    const w=sz, h=4, hp=Math.max(0,t.hp/t.maxHp);
+    ctx.fillStyle='#000'; ctx.fillRect(px-w/2,py-sz/2-7,w,h);
+    ctx.fillStyle=owner; ctx.fillRect(px-w/2,py-sz/2-7,w*hp,h);
+    // numeric HP, centered above the bar, white fill + dark outline so it reads anywhere
+    drawHpNumeral(Math.round(t.hp), px, py-sz/2-9, Math.max(9, sx*0.7));
+  }
+
+  // shared HP-numeral helper: rounded int, white fill, thin dark stroke, centered on (px,py)
+  function drawHpNumeral(val, px, py, fontPx){
+    const txt=String(val);
+    ctx.save();
+    ctx.font='700 '+fontPx+'px Inter,monospace';
+    ctx.textAlign='center'; ctx.textBaseline='bottom';
+    ctx.lineWidth=Math.max(2, fontPx*0.22); ctx.lineJoin='round';
+    ctx.strokeStyle='rgba(0,0,0,0.85)'; ctx.strokeText(txt,px,py);
+    ctx.fillStyle='#fff'; ctx.fillText(txt,px,py);
+    ctx.restore();
+  }
+
+  // small deterministic jitter from silhouetteSeed so clones differ a touch
+  function seedJit(seed, salt, span){
+    const v = ((seed * 2654435761) ^ (salt * 40503)) >>> 0;
+    return ((v % 1000) / 1000 - 0.5) * 2 * span; // -span..span
+  }
+
+  // draw the bodyShape silhouette in LOCAL space: +y = forward (unit faces +y
+  // after the rotate below). r is the base radius in px. jit nudges size.
+  function bodyPath(shape, r, jit){
+    const w = r*(1+jit*0.12);   // half-width scale
+    switch(shape){
+      case 'tank': // wide low slab
+        roundRect(-w*1.05,-r*0.75, w*2.1, r*1.5, r*0.22); break;
+      case 'brawler': // blocky square-ish
+        roundRect(-w*0.85,-r*0.85, w*1.7, r*1.7, r*0.18); break;
+      case 'lance': // long pointed wedge, nose forward
+        ctx.beginPath();
+        ctx.moveTo(0, r*1.35); ctx.lineTo(w*0.55, r*0.2);
+        ctx.lineTo(w*0.45,-r*1.0); ctx.lineTo(-w*0.45,-r*1.0);
+        ctx.lineTo(-w*0.55, r*0.2); ctx.closePath(); break;
+      case 'blade': // sleek arrow
+        ctx.beginPath();
+        ctx.moveTo(0, r*1.3); ctx.lineTo(w*0.7,-r*0.4);
+        ctx.lineTo(0,-r*1.1); ctx.lineTo(-w*0.7,-r*0.4); ctx.closePath(); break;
+      case 'scout': // small fast diamond
+        ctx.beginPath();
+        ctx.moveTo(0, r*0.9); ctx.lineTo(w*0.6,0);
+        ctx.lineTo(0,-r*0.9); ctx.lineTo(-w*0.6,0); ctx.closePath(); break;
+      case 'carrier': // boxy with a bay notch at the rear
+        ctx.beginPath();
+        ctx.moveTo(-w,-r*0.95); ctx.lineTo(w,-r*0.95); ctx.lineTo(w,r*0.95);
+        ctx.lineTo(w*0.32,r*0.95); ctx.lineTo(w*0.32,r*0.45);
+        ctx.lineTo(-w*0.32,r*0.45); ctx.lineTo(-w*0.32,r*0.95);
+        ctx.lineTo(-w,r*0.95); ctx.closePath(); break;
+      case 'dish': // rounded body (antenna drawn separately as a mount)
+        ctx.beginPath(); ctx.ellipse(0,0,w*0.78,r*0.95,0,0,Math.PI*2); break;
+      case 'turret': // octagon base (barrel drawn as a mount)
+        ctx.beginPath();
+        for(let k=0;k<8;k++){ const a=Math.PI/8 + k*Math.PI/4;
+          const x=Math.cos(a)*w*0.92, y=Math.sin(a)*r*0.92;
+          k? ctx.lineTo(x,y): ctx.moveTo(x,y); }
+        ctx.closePath(); break;
+      case 'fixed': // bunker: wide trapezoid
+        ctx.beginPath();
+        ctx.moveTo(-w*1.1, r*0.85); ctx.lineTo(w*1.1, r*0.85);
+        ctx.lineTo(w*0.75,-r*0.85); ctx.lineTo(-w*0.75,-r*0.85); ctx.closePath(); break;
+      case 'rounded': default: // hex/blob
+        ctx.beginPath();
+        for(let k=0;k<6;k++){ const a=Math.PI/6 + k*Math.PI/3;
+          const x=Math.cos(a)*w*0.85, y=Math.sin(a)*r*0.9;
+          k? ctx.lineTo(x,y): ctx.moveTo(x,y); }
+        ctx.closePath(); break;
+    }
+  }
+
+  // weapon mount drawn at the nose (local +y forward), reads the weaponType
+  function weaponMount(wt, r, accent){
+    ctx.fillStyle = accent; ctx.strokeStyle = accent; ctx.lineCap='round';
+    switch(wt){
+      case 'bullet': // single short barrel
+        ctx.lineWidth = r*0.28; ctx.beginPath();
+        ctx.moveTo(0,r*0.5); ctx.lineTo(0,r*1.25); ctx.stroke(); break;
+      case 'cannon': // fat stubby barrel
+        ctx.lineWidth = r*0.5; ctx.beginPath();
+        ctx.moveTo(0,r*0.4); ctx.lineTo(0,r*1.15); ctx.stroke(); break;
+      case 'lance': // long thin spike
+        ctx.lineWidth = r*0.16; ctx.beginPath();
+        ctx.moveTo(0,r*0.3); ctx.lineTo(0,r*1.7); ctx.stroke(); break;
+      case 'beam': // little dish/antenna
+        ctx.lineWidth = r*0.14; ctx.beginPath();
+        ctx.arc(0,r*1.0, r*0.4, Math.PI*1.15, Math.PI*1.85); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0,r*0.5); ctx.lineTo(0,r*1.0); ctx.stroke(); break;
+      case 'spread': // three short tubes (fan)
+        ctx.lineWidth = r*0.16;
+        [-0.4,0,0.4].forEach(ang=>{ ctx.save(); ctx.rotate(ang); ctx.beginPath();
+          ctx.moveTo(0,r*0.55); ctx.lineTo(0,r*1.2); ctx.stroke(); ctx.restore(); }); break;
+      case 'melee': default: // blade fin
+        ctx.lineWidth = r*0.2; ctx.beginPath();
+        ctx.moveTo(-r*0.22,r*0.6); ctx.lineTo(0,r*1.35); ctx.lineTo(r*0.22,r*0.6); ctx.stroke(); break;
+    }
+  }
+
+  function drawUnit(u){
+    const sx=scaleX();
+    const c=u.card;
+    const gpx=toX(u.x), gpy=toY(u.y);     // GROUND position (where the shadow sits)
+    if(!onScreen(gpx,gpy)) return;        // offscreen culling (free win during a pan)
+    // ---- FLYER ALTITUDE: air units float above their ground point with a cast
+    // shadow below, so you can SEE they fly (Combat Spec section 6). A gentle bob
+    // keeps them feeling airborne. Ground units render at their position unchanged.
+    const isAir = (c.domain==='air');
+    let alt = 0;
+    if(isAir && u.alive){
+      alt = (1.05 + 0.12*Math.sin((u.bob||0)*1.3)) * sx;  // ~1 tile up, bobbing
+      // ground shadow ellipse under the flyer
+      ctx.save();
+      ctx.globalAlpha = 0.32;
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.ellipse(gpx, gpy, 0.42*sx, 0.18*sx, 0, 0, Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+    const px=gpx, py=gpy - alt;           // body drawn at the lifted point
+    const owner = u.owner===0?PAL.blue:PAL.red;
+    const pal = c.palette || {base:c.color, dark:'#222', light:'#aaa'};
+    const seed = c.silhouetteSeed||0;
+    const jit = seedJit(seed,1,1);                              // -1..1
+    const baseR = 0.55*(1 + seedJit(seed,2,0.12));             // original troop size (operator reverted the v17 +20% sizing 2026-06-07)
+    // squash/stretch: deploy pop + a quick punch when it just attacked
+    const dscale = (u.deployScale!=null? u.deployScale : 1);
+    const punch  = u.muzzle>0 ? 1 + (u.muzzle/0.15)*0.22 : 1;   // up to +22% on fire
+    const r = baseR * (u.alive?dscale:1) * punch * sx;
+
+    // ---- CHARGE TRAIL: fast movers leave a fading streak behind (-angle) ----
+    if(u.alive && u.state==='move'){
+      const fast = (c.weaponType==='bullet'||c.weaponType==='lance'||c.bodyShape==='scout'||c.bodyShape==='blade');
+      if(fast){
+        ctx.save();
+        const tlen = (c.bodyShape==='scout'?1.0:0.7);
+        for(let s=1;s<=3;s++){
+          const bx = px - Math.cos(u.angle)*tlen*s*0.4*sx;
+          const by = py - Math.sin(u.angle)*tlen*s*0.4*sx;
+          ctx.globalAlpha = 0.16/s;
+          ctx.fillStyle = c.accent;
+          ctx.beginPath(); ctx.arc(bx,by,r*(0.9-s*0.18),0,Math.PI*2); ctx.fill();
+        }
+        ctx.restore();
+      }
+    }
+
+    ctx.save();
+    ctx.globalAlpha = u.alive?1:Math.max(0,1-(u.deathTimer/0.45));
+    ctx.translate(px,py);
+    // engine faces +x along u.angle; our shapes face +y, so rotate -90deg extra
+    ctx.rotate(u.angle - Math.PI/2);
+
+    // ---- RARITY FRAME / AURA ----
+    const rar = c.rarity;
+    if(c.isMythic){
+      // pulsing gold crown aura
+      const pulse = 0.5 + 0.5*Math.sin(performance.now()/180 + seed);
+      ctx.save();
+      ctx.globalAlpha = 0.22 + 0.22*pulse;
+      ctx.shadowColor = PAL.gold; ctx.shadowBlur = sb(18+8*pulse);
+      ctx.fillStyle = PAL.gold;
+      ctx.beginPath(); ctx.arc(0,0,r*1.55,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+
+    // ---- ART or SHAPE: draw the unit icon image if it has loaded, else the
+    // procedural placeholder shape. Image art is upright (counter-rotate the
+    // movement spin) and clipped to a circular token; rarity frame, hp bar and
+    // hp numeral still render on top below. Fallback never breaks if missing.
+    if(unitIconReady(c.cardNumber)){
+      const img = UNIT_ICONS[c.cardNumber];
+      const d = r*2.4;                                  // token diameter ~ shape footprint
+      ctx.save();
+      ctx.rotate(-(u.angle - Math.PI/2));               // orient art UP, not along travel
+      if(u.hitFlash>0){ ctx.shadowColor='#fff'; ctx.shadowBlur=14; }
+      // circular clip keeps it a clean board token
+      ctx.beginPath(); ctx.arc(0,0,d/2,0,Math.PI*2); ctx.clip();
+      ctx.drawImage(img, -d/2, -d/2, d, d);
+      ctx.restore();
+    } else {
+    // ---- CHASSIS: fill palette.base, edge with accent ----
+    ctx.shadowColor = pal.base; ctx.shadowBlur = sb(u.muzzle>0?14:7);
+    ctx.fillStyle = u.hitFlash>0 ? '#fff' : pal.base;
+    bodyPath(c.bodyShape, r, jit); ctx.fill();
+    ctx.shadowBlur = 0;
+    // dark inner shade for depth
+    ctx.globalAlpha *= 0.9;
+    ctx.fillStyle = pal.dark; bodyPath(c.bodyShape, r*0.55, jit); ctx.fill();
+    ctx.globalAlpha = u.alive?1:Math.max(0,1-(u.deathTimer/0.45));
+
+    // accent edge + seed-jittered accent stripe
+    ctx.lineWidth = Math.max(1.2, r*0.12); ctx.strokeStyle = c.accent;
+    bodyPath(c.bodyShape, r, jit); ctx.stroke();
+    ctx.lineWidth = Math.max(0.8, r*0.08); ctx.strokeStyle = pal.light;
+    ctx.globalAlpha *= 0.7;
+    ctx.beginPath();
+    ctx.moveTo(-r*0.5, r*0.15 + seed%3*r*0.1); ctx.lineTo(r*0.5, r*0.15 + seed%3*r*0.1);
+    ctx.stroke();
+    ctx.globalAlpha = u.alive?1:Math.max(0,1-(u.deathTimer/0.45));
+
+    // ---- WEAPON MOUNT (oriented forward, reads weaponType) ----
+    weaponMount(c.weaponType, r, c.accent);
+    }
+
+    // rarity edge color ring (non-mythic)
+    if(!c.isMythic){
+      const rc = AK.RARITY_COL[rar] || PAL.steel;
+      if(rar==='Legendary'||rar==='Epic'||rar==='Rare'){
+        ctx.lineWidth = Math.max(1, r*0.07); ctx.strokeStyle = rc; ctx.globalAlpha = 0.85;
+        bodyPath(c.bodyShape, r*1.18, jit); ctx.stroke(); ctx.globalAlpha = 1;
+      }
+    }
+    ctx.restore();
+
+    // ---- glyph (upright, not rotated) ----
+    ctx.fillStyle='#0a0a0a'; ctx.font='700 '+(0.62*sx)+'px Cinzel,serif';
+    ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(c.glyph||'M',px,py);
+
+    // ownership ring
+    ctx.strokeStyle=owner; ctx.lineWidth=1.5;
+    ctx.beginPath(); ctx.arc(px,py,r*1.32,0,Math.PI*2); ctx.stroke();
+    // shield aura
+    if(u.shieldHp>0){ ctx.strokeStyle=PAL.gold; ctx.globalAlpha=0.6;
+      ctx.beginPath(); ctx.arc(px,py,r*1.55,0,Math.PI*2); ctx.stroke(); ctx.globalAlpha=1; }
+    // hp bar
+    if(u.alive){
+      const w=r*2.5, h=3, hp=Math.max(0,u.hp/u.maxHp);
+      ctx.fillStyle='#000'; ctx.fillRect(px-w/2,py-r*1.75,w,h);
+      ctx.fillStyle=owner; ctx.fillRect(px-w/2,py-r*1.75,w*hp,h);
+      // numeric HP just above the bar; size tracks tile scale, clamped so it stays legible
+      drawHpNumeral(Math.round(u.hp), px, py-r*1.75-2, Math.max(8, Math.min(sx*0.6, r*0.9)));
+    }
+  }
+
+  function drawProjectile(p){
+    const sx=scaleX();
+    const px=toX(p.x), py=toY(p.y) - p.z*sx*0.5;
+    if(!onScreen(px,py)) return;                    // offscreen culling
+    const col=p.color, sz=(p.size||0.16)*sx;
+    const ang=Math.atan2(p.vy||0,p.vx||0);
+    ctx.save();
+    switch(p.shape){
+      case 'shell': { // big slow glowing orb + smoke trail
+        if(p.trail!==false){
+          ctx.globalAlpha=0.18; ctx.fillStyle='#888';
+          for(let s=1;s<=3;s++){
+            const bx=px-(p.vx||0)*0.012*s, by=py-(p.vy||0)*0.012*s;
+            ctx.beginPath(); ctx.arc(bx,by,sz*(1-s*0.22),0,Math.PI*2); ctx.fill();
+          }
+          ctx.globalAlpha=1;
+        }
+        ctx.shadowColor=col; ctx.shadowBlur=16; ctx.fillStyle=col;
+        ctx.beginPath(); ctx.arc(px,py,sz,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#fff'; ctx.globalAlpha=0.7;
+        ctx.beginPath(); ctx.arc(px-sz*0.3,py-sz*0.3,sz*0.35,0,Math.PI*2); ctx.fill();
+        break;
+      }
+      case 'lance': { // long thin bright streak
+        ctx.translate(px,py); ctx.rotate(ang);
+        ctx.shadowColor=col; ctx.shadowBlur=10;
+        ctx.strokeStyle=col; ctx.lineWidth=Math.max(1.5,sz*0.7); ctx.lineCap='round';
+        ctx.beginPath(); ctx.moveTo(-sz*5,0); ctx.lineTo(sz*5,0); ctx.stroke();
+        ctx.strokeStyle='#fff'; ctx.lineWidth=Math.max(0.8,sz*0.3);
+        ctx.beginPath(); ctx.moveTo(-sz*3,0); ctx.lineTo(sz*5,0); ctx.stroke();
+        break;
+      }
+      case 'beam': { // thin bright line source->target, fades fast
+        const a=Math.max(0,1-p.t/p.tof);
+        ctx.globalAlpha=Math.min(1,a*1.6);
+        ctx.shadowColor=col; ctx.shadowBlur=12;
+        ctx.strokeStyle=col; ctx.lineWidth=Math.max(1.5,sz*1.2); ctx.lineCap='round';
+        ctx.beginPath(); ctx.moveTo(toX(p.sx),toY(p.sy)); ctx.lineTo(toX(p.tx),toY(p.ty)); ctx.stroke();
+        ctx.strokeStyle='#fff'; ctx.lineWidth=Math.max(0.6,sz*0.5);
+        ctx.beginPath(); ctx.moveTo(toX(p.sx),toY(p.sy)); ctx.lineTo(toX(p.tx),toY(p.ty)); ctx.stroke();
+        break;
+      }
+      case 'pellet': { // small fan dot
+        ctx.shadowColor=col; ctx.shadowBlur=6; ctx.fillStyle=col;
+        ctx.beginPath(); ctx.arc(px,py,sz*0.8,0,Math.PI*2); ctx.fill();
+        break;
+      }
+      case 'dot': default: { // small fast glow + motion streak
+        if(p.trail){
+          ctx.globalAlpha=0.35; ctx.strokeStyle=col; ctx.lineWidth=sz*0.9; ctx.lineCap='round';
+          ctx.beginPath();
+          ctx.moveTo(px-(p.vx||0)*0.018, py-(p.vy||0)*0.018);
+          ctx.lineTo(px,py); ctx.stroke(); ctx.globalAlpha=1;
+        }
+        ctx.shadowColor=col; ctx.shadowBlur=9; ctx.fillStyle=col;
+        ctx.beginPath(); ctx.arc(px,py,sz,0,Math.PI*2); ctx.fill();
+        break;
+      }
+    }
+    ctx.restore();
+  }
+  function drawParticle(p){
+    const sx=scaleX(); const px=toX(p.x), py=toY(p.y);
+    if(!onScreen(px,py)) return;                    // offscreen culling
+    const a=Math.max(0,1-p.t/p.dur);
+    ctx.save();
+    ctx.globalAlpha=a; ctx.fillStyle=p.color;
+    ctx.shadowColor=p.color; ctx.shadowBlur=sb(6);
+    const s=p.sz*sx*1.4;   // a touch bigger/brighter
+    ctx.fillRect(px-s/2,py-s/2,s,s);
+    ctx.restore();
+  }
+  function drawEffect(e){
+    const sx=scaleX(); const a=Math.max(0,1-e.t/e.dur); const px=toX(e.x), py=toY(e.y);
+    ctx.save();
+    ctx.globalAlpha=a;
+    if(e.type==='ring'){
+      ctx.strokeStyle=e.color; ctx.lineWidth=2; ctx.beginPath();
+      ctx.arc(px,py,(0.4+e.t*3)*sx,0,Math.PI*2); ctx.stroke();
+    } else if(e.type==='muzzle'){
+      // quick bright flash burst
+      const sz=(e.size||0.3)*sx;
+      ctx.globalAlpha=a*0.95;
+      ctx.shadowColor=e.color; ctx.shadowBlur=16; ctx.fillStyle=e.color;
+      ctx.beginPath(); ctx.arc(px,py,sz*(1.2-a*0.5),0,Math.PI*2); ctx.fill();
+      // spark spikes
+      ctx.strokeStyle='#fff'; ctx.lineWidth=Math.max(1,sz*0.18); ctx.globalAlpha=a;
+      for(let k=0;k<5;k++){ const ang=k*Math.PI*2/5;
+        ctx.beginPath(); ctx.moveTo(px,py);
+        ctx.lineTo(px+Math.cos(ang)*sz*1.6, py+Math.sin(ang)*sz*1.6); ctx.stroke(); }
+    } else if(e.type==='slash'){
+      // bright arc swipe at angle (melee)
+      const rad=0.9*sx;
+      ctx.shadowColor=e.color; ctx.shadowBlur=12;
+      ctx.strokeStyle=e.color; ctx.lineWidth=Math.max(2,0.16*sx); ctx.lineCap='round';
+      ctx.beginPath();
+      ctx.arc(px,py,rad,(e.angle||0)-0.9,(e.angle||0)+0.9); ctx.stroke();
+      ctx.strokeStyle='#fff'; ctx.lineWidth=Math.max(1,0.07*sx); ctx.globalAlpha=a*0.9;
+      ctx.beginPath(); ctx.arc(px,py,rad,(e.angle||0)-0.7,(e.angle||0)+0.7); ctx.stroke();
+    } else if(e.type==='aoering'){
+      // splash impact ring (expands + fades)
+      const rad=(e.radius||1.8)*sx;
+      ctx.strokeStyle=e.color; ctx.lineWidth=Math.max(1.5,0.08*sx);
+      ctx.beginPath(); ctx.arc(px,py,rad*(0.5+0.5*e.t/e.dur),0,Math.PI*2); ctx.stroke();
+    } else if(e.type==='spell_freeze'){
+      // FREEZE: icy filled disc that lingers (tints the frozen zone) + frost ring + crystals
+      const rad=(e.radius||3)*sx;
+      ctx.globalAlpha=a*0.22; ctx.fillStyle='#aef0ff';
+      ctx.beginPath(); ctx.arc(px,py,rad,0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha=Math.min(1,a*1.3); ctx.strokeStyle='#dffaff'; ctx.lineWidth=Math.max(1.5,0.07*sx);
+      ctx.beginPath(); ctx.arc(px,py,rad,0,Math.PI*2); ctx.stroke();
+      ctx.shadowColor='#bff'; ctx.shadowBlur=10; ctx.strokeStyle='#eafdff'; ctx.lineWidth=Math.max(1,0.04*sx);
+      for(let k=0;k<8;k++){ const ang=k*Math.PI/4, rr=rad*(0.35+0.5*((e.t*3+k)%1));
+        const cx=px+Math.cos(ang)*rr, cy=py+Math.sin(ang)*rr;
+        ctx.beginPath(); ctx.moveTo(cx-0.12*sx,cy); ctx.lineTo(cx+0.12*sx,cy);
+        ctx.moveTo(cx,cy-0.12*sx); ctx.lineTo(cx,cy+0.12*sx); ctx.stroke(); }
+    } else if(e.type==='spell_slow'){
+      // TAR SLOW: dark sticky splat + radiating web threads
+      const rad=(e.radius||3.2)*sx;
+      ctx.globalAlpha=a*0.28; ctx.fillStyle='#241808';
+      ctx.beginPath(); ctx.arc(px,py,rad,0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha=a*0.8; ctx.strokeStyle='#caa46a'; ctx.lineWidth=Math.max(1,0.04*sx);
+      for(let k=0;k<10;k++){ const ang=k*Math.PI/5;
+        ctx.beginPath(); ctx.moveTo(px,py);
+        ctx.lineTo(px+Math.cos(ang)*rad, py+Math.sin(ang)*rad); ctx.stroke(); }
+      // concentric web arcs
+      for(let r=1;r<=3;r++){ ctx.beginPath(); ctx.arc(px,py,rad*r/3,0,Math.PI*2); ctx.stroke(); }
+    } else if(e.type==='spell_trap_set'){
+      // SNARE TRAP just placed: a quick teal marker pulse (then it goes hidden)
+      const rad=(e.radius||1.8)*sx;
+      ctx.globalAlpha=a*0.9; ctx.strokeStyle='#00E0C0'; ctx.lineWidth=Math.max(1.5,0.06*sx);
+      if(ctx.setLineDash) ctx.setLineDash([0.3*sx,0.25*sx]);
+      ctx.beginPath(); ctx.arc(px,py,rad*(0.6+0.4*e.t/e.dur),0,Math.PI*2); ctx.stroke();
+      if(ctx.setLineDash) ctx.setLineDash([]);
+    } else if(e.type==='spell_trap_fire'){
+      // SNARE triggered: snapping teal jaws + flash
+      const rad=(e.radius||1.8)*sx;
+      ctx.shadowColor='#00E0C0'; ctx.shadowBlur=14;
+      ctx.globalAlpha=a*0.9; ctx.strokeStyle='#7fffe6'; ctx.lineWidth=Math.max(2,0.1*sx);
+      ctx.beginPath(); ctx.arc(px,py,rad*(1-0.4*e.t/e.dur),0,Math.PI*2); ctx.stroke();
+      // chain-link spikes inward
+      ctx.lineWidth=Math.max(1,0.05*sx);
+      for(let k=0;k<6;k++){ const ang=k*Math.PI/3;
+        ctx.beginPath();
+        ctx.moveTo(px+Math.cos(ang)*rad, py+Math.sin(ang)*rad);
+        ctx.lineTo(px+Math.cos(ang)*rad*0.5, py+Math.sin(ang)*rad*0.5); ctx.stroke(); }
+    } else if(e.type==='spell_zap'){
+      // JOLT: electric flash + jagged lightning forks
+      const rad=(e.radius||2.4)*sx;
+      ctx.globalAlpha=a; ctx.shadowColor='#bff'; ctx.shadowBlur=18;
+      ctx.fillStyle='#dffaff';
+      ctx.beginPath(); ctx.arc(px,py,rad*0.3*(1.5-a),0,Math.PI*2); ctx.fill();
+      ctx.strokeStyle='#9fe8ff'; ctx.lineWidth=Math.max(1.5,0.06*sx);
+      for(let k=0;k<6;k++){ const ang=k*Math.PI/3 + e.t*4;
+        ctx.beginPath(); ctx.moveTo(px,py);
+        const mx=px+Math.cos(ang)*rad*0.6+(Math.random()-0.5)*0.3*sx;
+        const my=py+Math.sin(ang)*rad*0.6+(Math.random()-0.5)*0.3*sx;
+        ctx.lineTo(mx,my);
+        ctx.lineTo(px+Math.cos(ang)*rad, py+Math.sin(ang)*rad); ctx.stroke(); }
+    } else if(e.type==='spell_strike'){
+      // STRIKE: fireball burst -- bright core + expanding shockwave + embers
+      const rad=(e.radius||2.6)*sx;
+      ctx.globalAlpha=a; ctx.shadowColor='#ff7b2c'; ctx.shadowBlur=22;
+      ctx.fillStyle='#ffd07a';
+      ctx.beginPath(); ctx.arc(px,py,rad*0.45*(1.4-a*0.6),0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha=a*0.7; ctx.fillStyle='#ff7b2c';
+      ctx.beginPath(); ctx.arc(px,py,rad*0.7*(1.6-a),0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha=a; ctx.strokeStyle='#ffae5a'; ctx.lineWidth=Math.max(2,0.09*sx);
+      ctx.beginPath(); ctx.arc(px,py,rad*(0.6+0.5*e.t/e.dur),0,Math.PI*2); ctx.stroke();
+    } else if(e.type==='hazard_strike'){
+      // STORM HAZARD impact -- bright flash + expanding shockwave (lightning/scrap/drone)
+      const rad=(e.radius||1.6)*sx; const col=e.color||'#9fe8ff';
+      ctx.globalAlpha=a; ctx.shadowColor=col; ctx.shadowBlur=sb(20);
+      ctx.fillStyle='#ffffff';
+      ctx.beginPath(); ctx.arc(px,py,rad*0.4*(1.5-a),0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha=a*0.75; ctx.fillStyle=col;
+      ctx.beginPath(); ctx.arc(px,py,rad*0.7*(1.4-a*0.5),0,Math.PI*2); ctx.fill();
+      ctx.globalAlpha=a; ctx.strokeStyle=col; ctx.lineWidth=Math.max(2,0.09*sx);
+      ctx.beginPath(); ctx.arc(px,py,rad*(0.5+0.6*e.t/e.dur),0,Math.PI*2); ctx.stroke();
+    } else if(e.type==='flood_band'){
+      // FLOOD SURGE: a translucent blue band sweeping across the river line
+      const bh=(e.radius||4)*sx;
+      ctx.globalAlpha=a*0.5; ctx.fillStyle='#3aa6ff';
+      ctx.fillRect(toX(0), py-bh/2, ARENA_W*sx*cam().zoom, bh);
+      ctx.globalAlpha=a*0.9; ctx.strokeStyle='#bfe3ff'; ctx.lineWidth=Math.max(1.5,0.05*sx);
+      ctx.beginPath(); ctx.moveTo(toX(0),py-bh/2); ctx.lineTo(toX(ARENA_W),py-bh/2);
+      ctx.moveTo(toX(0),py+bh/2); ctx.lineTo(toX(ARENA_W),py+bh/2); ctx.stroke();
+    } else if(e.type==='golden_open'){
+      // GOLDEN HOUR opening burst -- a gold shockwave ring
+      const rad=(e.radius||3)*sx;
+      ctx.globalAlpha=a; ctx.shadowColor=PAL.gold; ctx.shadowBlur=sb(18);
+      ctx.strokeStyle=PAL.gold; ctx.lineWidth=Math.max(2,0.1*sx);
+      ctx.beginPath(); ctx.arc(px,py,rad*(0.4+0.8*e.t/e.dur),0,Math.PI*2); ctx.stroke();
+    } else {
+      ctx.fillStyle=e.color;
+      const fs = (e.type==='crown'?1.0:e.type==='ability'?0.7:0.6)*sx;
+      ctx.font='700 '+fs+'px Cinzel,serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(e.text,px,py);
+    }
+    ctx.restore();
+  }
+  // armed (untriggered) SNARE TRAP markers -- a faint pulsing teal node on the
+  // field so the player can vaguely sense their own placed traps (subtle; the
+  // enemy AI does not see them). Drawn in draw() each frame from game.traps.
+  function drawTraps(){
+    const g=AK.game; if(!g||!g.traps||!g.traps.length) return;
+    const sx=scaleX();
+    g.traps.forEach(tr=>{
+      if(tr.triggered) return;                  // triggered traps show via spell_trap_fire FX
+      const px=toX(tr.x), py=toY(tr.y);
+      const pulse=0.5+0.5*Math.sin((g.time||0)*4);
+      ctx.save();
+      ctx.globalAlpha = (tr.armT>0?0.5:0.28) * (0.6+0.4*pulse);  // brighter while arming
+      ctx.strokeStyle='#00E0C0'; ctx.lineWidth=Math.max(1,0.04*sx);
+      if(ctx.setLineDash) ctx.setLineDash([0.25*sx,0.22*sx]);
+      ctx.beginPath(); ctx.arc(px,py,(tr.radius||1.8)*sx*0.85,0,Math.PI*2); ctx.stroke();
+      if(ctx.setLineDash) ctx.setLineDash([]);
+      // tiny center node
+      ctx.globalAlpha=(tr.armT>0?0.7:0.4)*(0.6+0.4*pulse);
+      ctx.fillStyle='#00E0C0';
+      ctx.beginPath(); ctx.arc(px,py,0.12*sx,0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    });
+  }
+  function roundRect(x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+
+  // ==========================================================
+  // CONVOY + STORM HUD (mini-map, storm chip, storm banner, gate bar)
+  // ==========================================================
+  let _lastRenderSection = -1, _lastMiniSig = '';
+  // Detect a section change -> set the crossfade-from section + kick BGM crossfade.
+  function onSectionChanged(sec){
+    if(_lastRenderSection>=0) _bgPrevSection = _lastRenderSection;
+    crossfadeBgm(sec);
+    _lastRenderSection = sec;
+  }
+  function syncConvoyHUD(g){
+    if(g.section !== _lastRenderSection) onSectionChanged(g.section);
+
+    // ---- STORM CHIP: current Storm Clock state, color-coded ----
+    if(stormChipEl){
+      const s = g.storm;
+      let txt='STORM: CALM', cls='calm';
+      if(s && s.eventKey && (s.phase==='telegraph'||s.phase==='active')){
+        const ev = AK.STORM_CATALOG[s.eventKey] || {};
+        cls = ev.type==='hazard'?'hazard' : ev.type==='objective'?'objective' : 'buff';
+        if(s.phase==='telegraph'){ const inS=Math.max(0,Math.ceil(8 - s.timer)); txt='INCOMING '+ev.name+' '+inS+'s'; cls+=' telegraph'; }
+        else { txt=ev.name+' ACTIVE'; }
+      }
+      if(stormChipEl._txt!==txt){ stormChipEl.textContent=txt; stormChipEl._txt=txt; }
+      if(stormChipEl._cls2!==cls){ stormChipEl.className=cls; stormChipEl._cls2=cls; }
+    }
+
+    // ---- STORM BANNER (board): the big telegraph/active warning ----
+    if(stormBannerEl){
+      const sa = g.stormAlert;
+      if(sa){
+        if(stormBannerEl._name!==sa.name){
+          stormBannerEl._name=sa.name;
+          stormBannerEl.innerHTML='<div class="sb-name" style="color:'+(sa.color||PAL.gold)+'">'+sa.name+'</div><div class="sb-flavor">'+(sa.flavor||'')+'</div>';
+        }
+        const age=sa.dur-sa.ttl, scaleIn= age<0.2?(0.6+0.4*(age/0.2)):1;
+        const fade=Math.min(1, sa.ttl/(sa.dur*0.4));
+        stormBannerEl.style.opacity=Math.max(0,Math.min(1,fade)).toFixed(3);
+        stormBannerEl.style.transform='translate(-50%,-50%) scale('+scaleIn.toFixed(3)+')';
+        stormBannerEl.style.display='flex';
+      } else { stormBannerEl.style.display='none'; stormBannerEl._name=null; }
+    }
+
+    // ---- MINI-MAP road strip: A-B-C-D nodes + convoy icon + star per cleared gate ----
+    if(minimapEl){
+      const sig = g.section+'|'+g.gatesCleared+'|'+g.stars;
+      if(sig!==_lastMiniSig){ _lastMiniSig=sig; buildMiniMap(g); }
+    }
+
+    // ---- DISTRICT GATE health bar + label ----
+    if(gatebarEl){
+      const gate = g.opponent.towers.find(t=>t.isGate && !t.destroyed);
+      if(gate && g.phase==='live'){
+        const hp=Math.max(0,gate.hp/gate.maxHp);
+        const label=(gate.gateLabel||'DISTRICT GATE');
+        const shield = gate.gateShield>0 ? '<span class="gb-shield">SHLD</span>' : '';
+        const html='<div class="gb-label">GATE -- '+label+'</div><div class="gb-track"><div class="gb-fill" style="width:'+(hp*100).toFixed(1)+'%"></div>'+shield+'</div>';
+        if(gatebarEl._html2!==label+'|'+(hp*100|0)+'|'+(gate.gateShield>0)){
+          gatebarEl.innerHTML=html; gatebarEl._html2=label+'|'+(hp*100|0)+'|'+(gate.gateShield>0);
+        }
+        gatebarEl.classList.remove('hidden');
+      } else { gatebarEl.classList.add('hidden'); }
+    }
+  }
+  function buildMiniMap(g){
+    let html='<div class="road">';
+    const conv = ['A','B','C','D'];
+    for(let i=0;i<4;i++){
+      const done = i < g.section || (i===g.section && false);
+      const cleared = i < g.gatesCleared;
+      let cls='node'; if(i===g.section) cls+=' cur'; else if(i<g.section) cls+=' done';
+      const star = cleared ? '<span class="star">★</span>' : '';
+      html+='<div class="'+cls+'">'+star+conv[i]+'</div>';
+      if(i<3){ html+='<div class="seg'+(i<g.section?' done':'')+'"></div>'; }
+    }
+    // convoy truck icon positioned over the current node (4 nodes across the strip)
+    const pct = (g.section/3)*100;
+    html+='<div class="convoy" style="left:'+pct+'%">🚚</div>';
+    html+='</div>';
+    minimapEl.innerHTML=html;
+  }
+
+  // ==========================================================
+  // HUD SYNC
+  // ==========================================================
+  let lastHandSig = '';
+  function syncHUD(){
+    const g = AK.game; if(!g) return;
+    // timer
+    const tt = Math.max(0,Math.ceil(g.time));
+    timerEl.textContent = Math.floor(tt/60)+':'+String(tt%60).padStart(2,'0');
+    // pace badge: current sim speed, or SUDDEN DEATH in the final minute
+    if(speedBadgeEl){
+      const sp = g.gameSpeed || 0.75;
+      if(g.suddenDeath){ speedBadgeEl.textContent='SUDDEN DEATH'; speedBadgeEl.classList.add('sudden'); }
+      else { speedBadgeEl.textContent = (sp===2?'2x':sp+'x'); speedBadgeEl.classList.remove('sudden'); }
+    }
+    // dog-pun phase banner: pop-in + fade-out, driven by phaseAlert.ttl
+    if(phaseAlertEl){
+      const a = g.phaseAlert;
+      if(a){
+        if(phaseAlertEl._name !== a.name){
+          phaseAlertEl._name = a.name;
+          phaseAlertEl.innerHTML = '<div class="pa-name">'+a.name+'</div><div class="pa-flavor">'+a.flavor+'</div>';
+        }
+        phaseAlertEl.classList.toggle('sudden', !!g.suddenDeath);
+        const age = a.dur - a.ttl;
+        const scaleIn = age<0.22 ? (0.55+0.45*(age/0.22)) : 1;
+        const fadeOut = Math.min(1, a.ttl/(a.dur*0.45));
+        phaseAlertEl.style.opacity = Math.max(0,Math.min(1,fadeOut)).toFixed(3);
+        phaseAlertEl.style.transform = 'translate(-50%,-50%) scale('+scaleIn.toFixed(3)+')';
+        phaseAlertEl.style.display = 'flex';
+      } else { phaseAlertEl.style.display='none'; phaseAlertEl._name=null; }
+    }
+    // PRE-TRANSITION TELEGRAPH: 10s "NEW PHASE INCOMING" -> 5..1 countdown into the stage change
+    if(phaseAlertEl && !g.phaseAlert && g.phaseIncoming){
+      const pi = g.phaseIncoming;
+      const key = 'inc'+pi.count;
+      if(phaseAlertEl._name !== key){
+        phaseAlertEl._name = key;
+        phaseAlertEl.innerHTML = pi.count > 0
+          ? '<div class="pa-name">'+pi.count+'</div><div class="pa-flavor">NEW PHASE INCOMING</div>'
+          : '<div class="pa-flavor" style="font-size:22px;letter-spacing:0.08em">NEW PHASE INCOMING</div>';
+      }
+      phaseAlertEl.classList.remove('sudden');
+      phaseAlertEl.style.opacity = '1';
+      phaseAlertEl.style.transform = 'translate(-50%,-50%) scale(1)';
+      phaseAlertEl.style.display = 'flex';
+    }
+    // convoy run + storm clock HUD (mini-map, storm chip/banner, gate bar)
+    syncConvoyHUD(g);
+    meCrownsEl.textContent = g.player.crowns;
+    foeCrownsEl.textContent = g.opponent.crowns;
+    // energy
+    const e = g.player.energy;
+    energyFill.style.width = (e/AK.ENERGY_MAX*100)+'%';
+    energyNum.textContent = Math.floor(e);
+    // countdown overlay
+    if(g.phase==='countdown'){ cdEl.style.display='flex'; cdEl.textContent = Math.ceil(g.cd); }
+    else cdEl.style.display='none';
+    // hand (rebuild only when contents change)
+    // Rebuild ONLY when the hand CONTENTS change -- never on drag/select state.
+    // Rebuilding the cards mid-gesture destroyed+recreated the elements and
+    // dropped the touch (the old "cannot deploy after viewing a card" bug). The
+    // lift is applied as a class each frame below, so no rebuild is needed.
+    const sig = g.player.hand.map(c=>c?c.name:'_').join('|');
+    if(sig!==lastHandSig){ buildHand(g); lastHandSig=sig; }
+    // affordability + lift refresh every frame. The lifted card is the one being
+    // dragged (drag.handIdx). drawDragGhost() handles the board-side preview.
+    // Lift the card that is either being DRAGGED (drag.handIdx) or has been
+    // TAP-SELECTED (g.selected). Both gestures share the same 'selected' look so
+    // the player always sees which card is armed regardless of how they armed it.
+    [...handEl.children].forEach((el,i)=>{
+      const card=g.player.hand[i];
+      el.classList.toggle('cantafford', !(card && g.player.energy>=card.cost));
+      el.classList.toggle('selected', (drag.active && drag.handIdx===i) || (g.selected===i));
+      // SPELL cooldown overlay: dim + a seconds-remaining mask while recharging.
+      // Guarded with typeof checks so it is a clean no-op under the node DOM stub
+      // (which has no querySelector/createElement/remove on its fake elements).
+      if(card && card.type==='spell' && typeof el.querySelector === 'function'){
+        const cd = (g.player.spellCD && g.player.spellCD[card.spellId]) || 0;
+        const onCd = cd > 0.05;
+        el.classList.toggle('oncd', onCd);
+        let mask = el.querySelector('.cdmask');
+        if(onCd){
+          if(!mask){ mask=document.createElement('div'); mask.className='cdmask'; el.appendChild(mask); }
+          mask.textContent = Math.ceil(cd)+'s';
+        } else if(mask && mask.remove){ mask.remove(); }
+      } else if(card && card.type==='spell'){
+        // stub path: still reflect the on-cooldown dim via the class toggle only
+        const cd = (g.player.spellCD && g.player.spellCD[card.spellId]) || 0;
+        el.classList.toggle('oncd', cd > 0.05);
+      }
+    });
+    // NOTE: the popover is driven by long-press peek (hand) + tap-a-troop (board).
+    // Deploy happens two ways: drag-release on the board, OR tap-select a card then
+    // tap your half (handleCanvasTap). g.selected tracks the tap-place selection.
+  }
+
+  // ground/air/splash badge markup for a card (Combat Spec section 6)
+  function catBadge(card){
+    if(card.type==='spell') return '';            // spells show their own SPELL tag
+    let html='<div class="catbadge">';
+    if(card.domain==='air') html+='<span class="cb air" title="Flyer">AIR</span>';
+    else html+='<span class="cb" title="Ground">GND</span>';
+    if(card.splash) html+='<span class="cb splash" title="Splash AOE">AOE</span>';
+    html+='</div>';
+    return html;
+  }
+  function buildHand(g){
+    handEl.innerHTML='';
+    g.player.hand.forEach((card,i)=>{
+      const el=document.createElement('div'); el.className='card'; el.dataset.idx=i;
+      if(!card){ handEl.appendChild(el); return; }
+      const isSpell = card.type==='spell';
+      if(isSpell) el.classList.add('spell');
+      const rcol = AK.RARITY_COL[card.rarity] || PAL.steel;
+      const faccol = (card.palette && card.palette.base) || card.color || PAL.steel;
+      el.style.borderColor = isSpell ? '#f3d77a' : rcol;
+      if(isSpell){
+        // SPELL card: glyph-only art (no PNG), SPELL tag, cast-at-point hint.
+        el.innerHTML =
+          '<div class="art"><span class="glyph">'+(card.glyph||'✦')+'</span></div>'+
+          '<div class="scrim"></div>'+
+          '<div class="cost">'+card.cost+'</div>'+
+          '<div class="spelltag">Spell</div>'+
+          '<div class="nm">'+(card.shortName||card.name)+'</div>'+
+          '<div class="role">CAST AOE</div>'+
+          '<div class="facbar" style="background:'+faccol+'"></div>';
+      } else {
+        const port = artSrc(card);
+        el.innerHTML =
+          '<div class="art"><span class="glyph">'+(card.glyph||'?')+'</span>'+
+            '<img src="'+port+'" alt="" onerror="this.remove()"></div>'+
+          '<div class="scrim"></div>'+
+          '<div class="cost">'+card.cost+'</div>'+
+          (card.isMythic?'<div class="crown">'+'♛'+'</div>':'')+
+          catBadge(card)+
+          '<div class="nm">'+card.name+'</div>'+
+          '<div class="role">'+(card.role||'')+'</div>'+
+          '<div class="facbar" style="background:'+faccol+'"></div>';
+      }
+      attachCardInput(el, i);
+      handEl.appendChild(el);
+    });
+  }
+
+  // ---- HAND INPUT: DRAG = deploy | TAP = select | LONG-PRESS = peek ----
+  // Three gestures off ONE press, disambiguated in pointerup by time + travel:
+  //   DRAG (finger moved > TAP_PX): Clash-style ghost rides the finger on the
+  //     board; release over your own half (and affordable) deploys at that tile.
+  //   TAP (quick, small, long-press did NOT fire): toggle-SELECT this card. A
+  //     second tap on the same card deselects; tapping another moves selection.
+  //     Selecting arms the tap-to-place path -- then tap your half to deploy.
+  //   LONG-PRESS (held ~PEEK_MS without moving): peek the stat popover; release
+  //     hides it and does NOT select (peek consumed the gesture).
+  // setPointerCapture keeps pointermove/up firing on the CARD element even while
+  // the finger is out over the canvas -- that is what lets the ghost follow.
+  const TAP_MS  = 250;       // <= this long AND
+  const TAP_PX  = 8;         // <= this much movement  => candidate for a TAP
+  const PEEK_MS = 400;       // held this long without moving => LONG-PRESS peek
+  function attachCardInput(el, i){
+    let startX=0, startY=0, startT=0, downId=null, moved=false;
+    let peekTimer=null, peekFired=false;
+
+    const clearPeekTimer = ()=>{ if(peekTimer){ clearTimeout(peekTimer); peekTimer=null; } };
+
+    const setDragValid = ()=>{
+      const g = AK.game; if(!g){ drag.valid=false; return; }
+      const card = g.player.hand[drag.handIdx];
+      const afford = !!AK.canDeploy(g.player, drag.handIdx);   // spells also gate on cooldown here
+      if(card && card.type==='spell'){
+        drag.valid = afford;                                   // SPELL: cast ANYWHERE on the board
+      } else {
+        const onPlayerHalf = drag.gy > RIVER_Y;                // troop: player owns the bottom half
+        drag.valid = onPlayerHalf && afford;
+      }
+    };
+
+    const onDown = (ev)=>{
+      if(ev.button!==undefined && ev.button!==0) return;      // primary button / touch only
+      const g = AK.game; if(!g || g.phase!=='live') return;
+      if(ev.preventDefault) ev.preventDefault();
+      startX = ev.clientX||0; startY = ev.clientY||0; startT = nowMs();
+      downId = (ev.pointerId!==undefined ? ev.pointerId : 0);
+      moved = false; peekFired = false;
+      // arm the drag immediately; the ghost only shows once the finger moves onto
+      // the board, but selection lift reads right away.
+      drag.active = true; drag.handIdx = i; drag.pointerId = downId; drag.valid = false;
+      const a = canvasToArena(startX, startY);
+      drag.gx = a.gx; drag.gy = a.gy;
+      el.classList.add('selected');
+      // keep move/up on THIS element while the finger roams over the canvas
+      if(el.setPointerCapture && ev.pointerId!==undefined){
+        try{ el.setPointerCapture(ev.pointerId); }catch(_){}
+      }
+      // LONG-PRESS timer: held in place => peek this card's stats.
+      clearPeekTimer();
+      peekTimer = setTimeout(()=>{
+        if(!drag.active || drag.handIdx!==i || moved) return;  // a drag/tap stole it
+        peekFired = true;
+        const c = AK.game && AK.game.player.hand[i];
+        if(c) peekCardInfo(c);
+      }, PEEK_MS);
+      const card = g.player.hand[i];
+      if(card) hintEl.textContent = 'Drag onto your half to deploy, tap to select, hold to peek.';
+    };
+
+    const onMove = (ev)=>{
+      if(!drag.active || drag.handIdx!==i) return;
+      const cx = ev.clientX||0, cy = ev.clientY||0;
+      if(Math.hypot(cx-startX, cy-startY) > TAP_PX){
+        // it became a real DRAG: cancel the pending long-press peek and (if the
+        // peek had already fired) dismiss it so the ghost owns the gesture.
+        if(!moved){ clearPeekTimer(); if(peekFired){ closeCardInfo(); peekFired=false; } }
+        moved = true;
+      }
+      const a = canvasToArena(cx, cy);
+      drag.gx = a.gx; drag.gy = a.gy;
+      setDragValid();
+    };
+
+    const onUp = (ev)=>{
+      if(!drag.active || drag.handIdx!==i){ return; }
+      clearPeekTimer();
+      const cx = ev.clientX||0, cy = ev.clientY||0;
+      const dt = nowMs() - startT;
+      const dist = Math.hypot(cx-startX, cy-startY);
+      const a = canvasToArena(cx, cy);
+      drag.gx = a.gx; drag.gy = a.gy;
+      setDragValid();
+      if(el.releasePointerCapture && downId!==null && ev.pointerId!==undefined){
+        try{ el.releasePointerCapture(ev.pointerId); }catch(_){}
+      }
+      const wasTap = (!moved && dist<=TAP_PX && dt<=TAP_MS && !peekFired);
+      const g = AK.game;
+      if(moved && drag.valid && g){
+        // DRAG RELEASE over a legal spot => deploy at that exact tile, clear any
+        // tap-selection (drag wins, nothing left armed).
+        playDeployVoice(g.player.hand[drag.handIdx]);
+        AK.deploy(g.player, drag.handIdx, drag.gx, drag.gy);
+        closeCardInfo(); resetHint();
+        clearDrag(el);
+      } else if(peekFired){
+        // LONG-PRESS peek already showing => release just hides it, no select.
+        closeCardInfo(); resetHint();
+        clearDrag(el);
+      } else if(wasTap && g){
+        // QUICK TAP => toggle SELECT this card for tap-to-place. Re-tapping the
+        // selected card deselects; tapping a new one moves the selection.
+        const already = (g.selected===i);
+        clearDrag(el);                          // tears down the transient drag state
+        if(already){ g.selected=-1; resetHint(); }
+        else {
+          g.selected=i;
+          const card = g.player.hand[i];
+          hintEl.textContent = card ? ('Selected '+card.name+' -- tap your half to deploy.')
+                                    : 'Tap your half to deploy.';
+        }
+        closeCardInfo();
+      } else {
+        // released off-zone / unaffordable / ambiguous => cancel silently,
+        // preserving any existing tap-selection.
+        resetHint();
+        clearDrag(el, true);
+      }
+    };
+
+    const onCancel = (ev)=>{
+      if(!drag.active || drag.handIdx!==i) return;
+      clearPeekTimer();
+      if(el.releasePointerCapture && ev && ev.pointerId!==undefined){
+        try{ el.releasePointerCapture(ev.pointerId); }catch(_){}
+      }
+      clearDrag(el, true); resetHint();         // keep tap-selection on a cancel
+    };
+
+    el.addEventListener('contextmenu', (e)=> e.preventDefault());
+    if(window.PointerEvent){
+      el.addEventListener('pointerdown', onDown);
+      el.addEventListener('pointermove', onMove);
+      el.addEventListener('pointerup', onUp);
+      el.addEventListener('pointercancel', onCancel);
+    } else {
+      // legacy fallback: mouse + touch (no pointer capture available)
+      el.addEventListener('mousedown', onDown);
+      el.addEventListener('mousemove', onMove);
+      el.addEventListener('mouseup', onUp);
+      el.addEventListener('mouseleave', onCancel);
+      el.addEventListener('touchstart', (e)=>{ const t=e.touches[0]||{}; onDown(Object.assign({preventDefault:()=>e.preventDefault(),button:0},t)); }, {passive:false});
+      el.addEventListener('touchmove',  (e)=>{ const t=e.touches[0]||{}; e.preventDefault(); onMove(t); }, {passive:false});
+      el.addEventListener('touchend',   (e)=>{ const t=(e.changedTouches&&e.changedTouches[0])||{}; e.preventDefault(); onUp(t); }, {passive:false});
+      el.addEventListener('touchcancel', onCancel);
+    }
+  }
+
+  function nowMs(){ return (typeof performance!=='undefined' && performance.now) ? performance.now() : Date.now(); }
+  // Tear down the transient DRAG state. By default it also clears the tap-place
+  // selection (a completed/abandoned drag should not leave a stale selection),
+  // but keepSelection=true preserves g.selected so a pure tap-select or a cancel
+  // does not wipe the card the player just armed for tap-to-place.
+  function clearDrag(el, keepSelection){
+    drag.active=false; drag.handIdx=-1; drag.valid=false; drag.pointerId=null;
+    if(el) el.classList.remove('selected');     // syncHUD re-applies the lift for g.selected
+    const g=AK.game; if(g && !keepSelection) g.selected=-1;
+  }
+  function resetHint(){ hintEl.textContent = 'Drag a card onto your half to deploy, or tap a card then tap your half. Hold a card to peek its stats.'; }
+
+  // CARD INFO POPOVER: name, role + rarity, cost, HP/DMG/RANGE, rig, abilityDesc.
+  // SPELL cards show effect stats (radius/duration/damage/cooldown) instead.
+  function renderCardInfo(card){
+    if(card.type==='spell'){
+      const dmg = card.damage>0 ? '<div class="ci-stat"><b>'+card.damage+'</b><span>DMG</span></div>' : '';
+      const dur = card.duration>0 ? '<div class="ci-stat"><b>'+card.duration+'s</b><span>DUR</span></div>' : '';
+      cardInfoEl.innerHTML =
+        '<div class="ci-top">'+
+          '<span class="ci-name">'+(card.glyph||'')+' '+card.name+'</span>'+
+          '<span class="ci-cost">'+card.cost+' EN</span>'+
+        '</div>'+
+        '<div class="ci-meta">SPELL &bull; cast at point &bull; '+card.rarity+'</div>'+
+        '<div class="ci-stats">'+
+          '<div class="ci-stat"><b>'+card.radius+'</b><span>RADIUS</span></div>'+
+          dmg + dur +
+          '<div class="ci-stat"><b>'+card.cooldown+'s</b><span>COOLDOWN</span></div>'+
+        '</div>'+
+        '<div class="ci-ability"><b>'+(card.shortName||card.name)+':</b> '+(card.abilityDesc||'')+'</div>';
+      cardInfoEl.classList.add('show'); cardInfoEl._for = card.name;
+      return;
+    }
+    const rig = (card.rig && card.rig.name) ? card.rig.name : '';
+    const dom = card.domain==='air' ? 'AIR' : 'GROUND';
+    const tgt = card.targets==='both' ? 'hits air+ground' : card.targets==='air' ? 'air only' : 'ground only';
+    const sp = card.splash ? ' &bull; SPLASH' : '';
+    cardInfoEl.innerHTML =
+      '<div class="ci-top">'+
+        '<span class="ci-name">'+card.name+'</span>'+
+        '<span class="ci-cost">'+card.cost+' EN</span>'+
+      '</div>'+
+      '<div class="ci-meta">'+(card.role||'')+' &bull; '+card.rarity+' &bull; '+dom+' &bull; '+tgt+sp+'</div>'+
+      '<div class="ci-stats">'+
+        '<div class="ci-stat"><b>'+(card.maxHp||card.hp)+'</b><span>HP</span></div>'+
+        '<div class="ci-stat"><b>'+card.dmg+'</b><span>DMG</span></div>'+
+        '<div class="ci-stat"><b>'+card.range+'</b><span>RANGE</span></div>'+
+        '<div class="ci-stat"><b>'+(card.speedTier||'-')+'</b><span>SPEED</span></div>'+
+      '</div>'+
+      (rig?'<div class="ci-rig">Rig: '+rig+'</div>':'')+
+      '<div class="ci-ability"><b>'+card.abilityName+':</b> '+(card.abilityDesc||'No special ability.')+'</div>';
+    cardInfoEl.classList.add('show'); cardInfoEl._for = card.name;
+  }
+  function closeCardInfo(){ clearTimeout(infoTimer); cardInfoEl.classList.remove('show'); cardInfoEl.innerHTML=''; cardInfoEl._for = null; }
+
+  // auto-dismiss timer shared by the hand-card peek and the deployed-troop tap
+  let infoTimer=null;
+  // LONG-PRESS peek on a HAND card: show the card popover, auto-dismiss ~2.5s
+  // (release also hides it via closeCardInfo). Tap is now select, not peek.
+  function peekCardInfo(card){
+    clearTimeout(infoTimer);
+    renderCardInfo(card);
+    infoTimer=setTimeout(closeCardInfo, 2500);
+  }
+  // tapping a DEPLOYED troop on the board: same popover, lingers a touch longer
+  function showUnitInfo(card){
+    clearTimeout(infoTimer);
+    renderCardInfo(card);                       // reuse the same compact top-pinned popover
+    infoTimer=setTimeout(closeCardInfo, 4000);  // never linger forever
+  }
+
+  // ==========================================================
+  // INPUT -- tap canvas to deploy the selected card
+  // ==========================================================
+  function canvasToArena(clientX, clientY){
+    const rect = canvas.getBoundingClientRect();
+    const nx = (clientX - rect.left) / rect.width;
+    const ny = (clientY - rect.top) / rect.height;
+    // rebased through the camera so deploys still land where the finger points,
+    // even mid-pan. (G2.0: exact inverse of toX/toY -> identity when camera is identity.)
+    const c = cam();
+    return { gx: nx*ARENA_W/c.zoom + c.offX, gy: ny*ARENA_H/c.zoom + c.offY };
+  }
+  // nearest deployed unit (any owner) within ~1.2 tiles of the tapped arena point
+  function unitAt(gx, gy){
+    const g=AK.game; if(!g) return null;
+    let best=null, bestD=1.2; // tiles
+    g.units.forEach(u=>{
+      if(!u.alive) return;
+      const d=Math.hypot(u.x-gx, u.y-gy);
+      if(d<bestD){ bestD=d; best=u; }
+    });
+    return best;
+  }
+  // Canvas tap serves two modes:
+  //   1. A hand card is TAP-SELECTED (g.selected>=0): tapping YOUR half (gy>RIVER_Y)
+  //      on an affordable card => deploy there (classic tap-to-place), then clear
+  //      the selection. This is the alternative to drag-release deploy.
+  //   2. Nothing selected: tapping a deployed troop shows its stats; an empty tap
+  //      dismisses the popover.
+  // A mid-flight deploy drag owns the gesture and is ignored here.
+  function handleCanvasTap(clientX, clientY){
+    const g=AK.game; if(!g || g.phase!=='live') return;
+    if(drag.active) return;                       // a deploy drag owns this gesture
+    const {gx,gy} = canvasToArena(clientX, clientY);
+    // TAP-TO-PLACE: a selected card + affordable => deploy/cast.
+    //  - troop: only on the player's half (gy>RIVER_Y).
+    //  - SPELL: anywhere on the board (cast freeze/strike on the enemy push).
+    if(g.selected>=0 && AK.canDeploy(g.player, g.selected)){
+      const sel = g.player.hand[g.selected];
+      const isSpell = sel && sel.type==='spell';
+      if(isSpell || gy>RIVER_Y){
+        playDeployVoice(sel);
+        AK.deploy(g.player, g.selected, gx, gy);
+        g.selected=-1; closeCardInfo(); resetHint();
+        return;
+      }
+    }
+    const u = unitAt(gx, gy);
+    if(u){ showUnitInfo(u.card); return; }        // tap a troop => its stats
+    closeCardInfo();                              // empty tap => dismiss any popover
+  }
+  canvas.addEventListener('click', e=> handleCanvasTap(e.clientX, e.clientY));
+  canvas.addEventListener('touchstart', e=>{
+    if(e.touches.length){ e.preventDefault(); const t=e.touches[0]; handleCanvasTap(t.clientX,t.clientY); }
+  }, {passive:false});
+  canvas.addEventListener('contextmenu', e=> e.preventDefault());
+
+  // ==========================================================
+  // GAME LOOP
+  // ==========================================================
+  let raf=null, last=0, running=false;
+  let _fpsAcc=0, _fpsN=0;          // adaptive-FX FPS sampler (G2.1)
+  function loop(ts){
+    if(!running) return;
+    const dt = Math.min(0.05, (ts-last)/1000 || 0); last=ts;
+    // sample FPS over ~1s windows; drop heavy shadowBlur if the phone is struggling
+    _fpsAcc += dt; _fpsN++;
+    if(_fpsAcc >= 1){ const fps=_fpsN/_fpsAcc; LOW_FX = (fps < 45); _fpsAcc=0; _fpsN=0; }
+    AK.update(dt);
+    draw();
+    syncHUD();
+    const g=AK.game;
+    if(g && g.phase==='ended'){ running=false; showResult(g); return; }
+    raf=requestAnimationFrame(loop);
+  }
+
+  // ==========================================================
+  // SCREEN FLOW
+  // ==========================================================
+  // ---- background music: two-deck crossfader for the per-district loops (G3.1) ----
+  let _bgm=null;
+  function startBgm(){
+    try{
+      if(typeof Audio==='undefined') return;        // node harness: no audio
+      if(!_bgm){ _bgm=new Audio(); _bgm.loop=true; _bgm.volume=0.30; }
+      _bgm.src='assets/music/'+SECTION_ARENA[0]+'.mp3';
+      _bgm.play().catch(function(){});
+      _deckA=_bgm; _deckCur='A';                     // section-0 loop owns deck A
+    }catch(e){}
+  }
+  let _deckA=null,_deckB=null,_deckCur='A',_xfTimer=null;
+  // Crossfade to a new district's loop over ~1s. Guarded for the node harness
+  // (Audio undefined) so the renderer's audio path is a clean no-op headless.
+  function crossfadeBgm(section){
+    try{
+      if(typeof Audio==='undefined') return;
+      const src='assets/music/'+SECTION_ARENA[section]+'.mp3';
+      const incoming = _deckCur==='A' ? 'B' : 'A';
+      let deck = incoming==='A'?_deckA:_deckB;
+      if(!deck){ deck=new Audio(); deck.loop=true; if(incoming==='A')_deckA=deck; else _deckB=deck; }
+      deck.src=src; deck.volume=0; deck.play().catch(function(){});
+      const outgoing = _deckCur==='A'?_deckA:_deckB;
+      if(_xfTimer && typeof clearInterval!=='undefined') clearInterval(_xfTimer);
+      let v=0;
+      _xfTimer=setInterval(function(){
+        v+=0.06; deck.volume=Math.min(0.30, v*0.30);
+        if(outgoing) outgoing.volume=Math.max(0, 0.30 - v*0.30);
+        if(v>=1){ if(typeof clearInterval!=='undefined') clearInterval(_xfTimer); if(outgoing){ try{ outgoing.pause(); }catch(_){} } }
+      }, 60);
+      _deckCur=incoming;
+    }catch(e){}
+  }
+  const VO_POOL=['youre_going_down','run_with_the_pack','light_em_up','alley_kingz_ride','send_it','crownbreaker','packs_got_teeth','eat_asphalt','we_own_these_streets','bring_the_noise'];
+  let _voCD=0;
+  // ---- SINGLE GLOBAL VOICE CHANNEL ----
+  // Only ONE spoken line is ever audible. Before playing ANY new voice we pause +
+  // rewind the previous one, so the Mythic kingly line and the deploy war-cries
+  // can never garble each other on rapid multi-deploys. BGM (startBgm /
+  // crossfadeBgm) lives on its OWN channel and combat SFX (engine sfx()) on
+  // theirs -- music + one voice is fine, two VOICES is not.
+  let _currentVoice=null;
+  function playVoice(src, vol){
+    try{
+      if(typeof Audio==='undefined') return;            // node harness: no audio
+      if(_currentVoice){ try{ _currentVoice.pause(); _currentVoice.currentTime=0; }catch(_){} }
+      const a=new Audio(src); a.volume=(vol==null?0.9:vol);
+      _currentVoice=a;
+      a.play().catch(function(){});
+    }catch(e){}
+  }
+  function playDeployVoice(card){
+    try{
+      const now=(typeof performance!=='undefined'?performance.now():0);
+      // Mythic ($BCARDD) gets its kingly line every deploy; it interrupts any
+      // in-flight war-cry through the single channel so only the king is heard.
+      if(card && card.isMythic){ playVoice('assets/vo/bcardd_kingly.mp3',0.95); _voCD=now+2500; return; }
+      if(now<_voCD) return;                       // 2.5s cooldown so lines do not stack
+      if(Math.random()<0.25){
+        const s=VO_POOL[Math.floor(Math.random()*VO_POOL.length)];
+        playVoice('assets/vo/'+s+'.mp3',0.9);
+        _voCD=now+2500;
+      }
+    }catch(e){}
+  }
+  function startMatch(){
+    AK.resumeAudio();              // unlock WebAudio on user gesture
+    startBgm();                    // arena background music loop
+    // Use the player's ACTIVE deck-lab deck (11 cards) if one is set+complete;
+    // otherwise fall back to the engine's 8-card starter. localStorage-guarded so
+    // the headless harness (no localStorage) always uses the starter cleanly.
+    AK.newMatch(activeDeckNames() || AK.STARTER_DECK_NAMES);  // boot a fresh match (convoy mode: section 0)
+    // convoy drives difficulty per section; this just seeds section-0 (the_lot=0)
+    if(AK.setDifficulty) AK.setDifficulty(ARENA_DIFFICULTY[ACTIVE_ARENA] || 0);
+    lastHandSig=''; _lastRenderSection=-1; _bgPrevSection=null; _lastMiniSig='';
+    startScreen.classList.add('hidden');
+    resultScreen.classList.add('hidden');
+    stage.classList.remove('hidden');
+    resize();
+    running=true; last=performance.now();
+    raf=requestAnimationFrame(loop);
+  }
+  function showResult(g){
+    if(raf) cancelAnimationFrame(raf);
+    const line=document.getElementById('resultline');
+    const sub=document.getElementById('resultsub');
+    document.getElementById('r_me').textContent=g.player.crowns;
+    document.getElementById('r_foe').textContent=g.opponent.crowns;
+    if(g.cleanSweep){ line.textContent='CLEAN SWEEP'; line.className='result-line result-win'; sub.textContent='All four Gates broken. The empire is yours. ('+(g.stars||0)+' stars)'; }
+    else if(g.result==='win'){ line.textContent='VICTORY'; line.className='result-line result-win'; sub.textContent='The convoy rolled through. ('+(g.stars||0)+' Gate stars)'; }
+    else if(g.result==='lose'){ line.textContent='DEFEAT'; line.className='result-line result-lose'; sub.textContent='The crown slips. Run it back.'; }
+    else { line.textContent='DRAW'; line.className='result-line result-draw'; sub.textContent='No king crowned. Run it back.'; }
+    stage.classList.add('hidden');
+    resultScreen.classList.remove('hidden');
+  }
+
+  playBtn.addEventListener('click', startMatch);
+  againBtn.addEventListener('click', startMatch);
+
+  // ---- STORM CODEX: the studyable, frozen-stat catalog (G1.2 -- Fairness rule:
+  // "known menu", surfaced so chaos is planned-around, never lost-to") ----
+  function buildCodex(){
+    if(!codexListEl || !AK.STORM_CATALOG) return;
+    const order=['zoomies','overclock','smog','glass_bones','storm_surge','lightning','flood','drone','scrap_rain','golden_hour'];
+    let html='';
+    order.forEach(k=>{
+      const ev=AK.STORM_CATALOG[k]; if(!ev) return;
+      const tag = ev.type==='hazard'?'HAZARD' : ev.type==='objective'?'OBJECTIVE' : 'FIELD BUFF';
+      html+='<div class="cx-row '+ev.type+'">'+
+        '<div class="cx-nm" style="color:'+(ev.color||'#E8E8E8')+'">'+ev.name+
+        ' <span class="cx-tag">'+tag+'</span></div>'+
+        '<div class="cx-desc">'+(ev.codex||'')+'</div></div>';
+    });
+    codexListEl.innerHTML=html;
+  }
+  function openCodex(){ buildCodex(); if(codexScreen) codexScreen.classList.remove('hidden'); }
+  function closeCodex(){ if(codexScreen) codexScreen.classList.add('hidden'); }
+  if(codexBtn) codexBtn.addEventListener('click', openCodex);
+  if(codexClose) codexClose.addEventListener('click', closeCodex);
+
+  // kill the native mobile long-press "download / save page" menu across the play surface
+  stage.addEventListener('contextmenu', e=> e.preventDefault());
+
+  // ==========================================================
+  // DECK LAB -- collection grid + 11-card builder + 10 templates
+  // ----------------------------------------------------------
+  // A self-contained screen reachable from the start menu. Reads the canon
+  // (window.CANON_CARDS + window.CANON_SPELLS) for the 111-card collection and
+  // window.CANON_DECKS for the 10 premade templates. Player profile (owned cards,
+  // 8 deck slots, active slot, level) lives in localStorage and is the source of
+  // the deck startMatch() fields. ALL localStorage access is guarded so the
+  // headless node harness (no localStorage) cleanly falls back to the starter
+  // deck and never throws. No querySelectorAll at boot; clicks are delegated.
+  // ==========================================================
+  const SLOT_UNLOCK = [1,3,6,9,12,15,18,21];   // player level that unlocks each of the 8 slots
+  const STARTER_DECK = ['$BCARDD','Stonejaw','Grit Bulldog','Brick Bullmastiff','Alloy Akita',
+                        'Copper Chow','Tank Pug','Chill Samoyed','Rail Terrier','Laser Beagle','Jolt'];
+  const STARTER_OWNED = STARTER_DECK.concat(['Granite Saint','Pixel Greyhound','Neon Whippet','Turbo Jack','Strike']);
+  const FAC_SHORT = { boneguard_crew:'Bone', zoomie_syndicate:'Zoomie', leashbreak_tactix:'Leash', k9_circuitry:'K9' };
+  const CREW_BONUS = { boneguard_crew:'+4% tank HP', zoomie_syndicate:'+4% move', leashbreak_tactix:'+1s debuff', k9_circuitry:'+4% turret HP' };
+
+  function lsGet(k){ try{ return (typeof localStorage!=='undefined' && localStorage) ? localStorage.getItem(k) : null; }catch(_){ return null; } }
+  function lsSet(k,v){ try{ if(typeof localStorage!=='undefined' && localStorage) localStorage.setItem(k,v); }catch(_){} }
+
+  let DBPROFILE = null, DBCAT = [], DBBYNAME = {};
+  const DB = { view:'slots', editSlot:-1, edit:null, filters:{faction:'all',rarity:'all',owned:'all',variant:'all'} };
+
+  function defaultProfile(){
+    return { level:1, owned:STARTER_OWNED.slice(),
+      decks:[ {name:'Slow Roll', cards:STARTER_DECK.slice()}, null,null,null,null,null,null,null ],
+      active:0 };
+  }
+  function loadProfile(){
+    let p=null; try{ const raw=lsGet('ak_profile'); if(raw) p=JSON.parse(raw); }catch(_){}
+    if(!p || !Array.isArray(p.decks)) p=defaultProfile();
+    p.level = p.level||1; p.owned = Array.isArray(p.owned)?p.owned:STARTER_OWNED.slice();
+    while(p.decks.length<8) p.decks.push(null);
+    if(typeof p.active!=='number') p.active=0;
+    return p;
+  }
+  function saveProfile(){
+    if(!DBPROFILE) return;
+    lsSet('ak_profile', JSON.stringify(DBPROFILE));
+    // flat mirror so activeDeckNames()/startMatch() read it without touching the UI
+    lsSet('ak_decks', JSON.stringify(DBPROFILE.decks.map(x=> x?({name:x.name,cards:x.cards}):null)));
+    lsSet('ak_active', String(DBPROFILE.active));
+  }
+  // The deck startMatch() actually fields. localStorage-only on purpose: the
+  // harness (no localStorage) returns null -> engine STARTER_DECK_NAMES.
+  function activeDeckNames(){
+    try{
+      const raw=lsGet('ak_decks'); if(!raw) return null;
+      const decks=JSON.parse(raw); const ai=parseInt(lsGet('ak_active')||'0',10)||0;
+      const d=decks && decks[ai];
+      if(d && Array.isArray(d.cards) && d.cards.length===11) return d.cards.slice();
+    }catch(_){}
+    return null;
+  }
+
+  function buildCatalog(){
+    const out=[];
+    (window.CANON_CARDS||[]).forEach(c=>{
+      out.push({ name:c.name, num:c.cardNumber, faction:c.class, factionId:c.factionId,
+        rarity:c.rarity, role:c.role, cost:c.cost, hp:c.hp, dmg:c.damage, atkspd:c.attack_speed,
+        range:c.range, targets:c.targets||(c.range>=2?'both':'ground'), domain:c.domain||'ground',
+        splash:!!c.splash, queen:!!c.queen_target, isMythic:!!c.isMythic, isSpell:false,
+        variant:c.variant||'ORIGINAL', family:c.family||null, breed:c.breed||'',
+        ability:c.ability||{name:'',description:''}, desc:c.desc||'', glyph:'' });
+    });
+    (window.CANON_SPELLS||[]).forEach(s=>{
+      out.push({ name:s.name, num:s.spellNumber, faction:s.class, factionId:s.factionId,
+        rarity:s.rarity, role:'Spell', cost:s.cost, hp:0, dmg:s.damage||0, atkspd:0,
+        range:s.radius||2.4, targets:'both', domain:'spell', splash:true, queen:false,
+        isMythic:false, isSpell:true, variant:'ORIGINAL', family:null, breed:'',
+        ability:{name:s.short||s.name, description:s.description||''}, desc:s.description||'', glyph:s.glyph||'✦' });
+    });
+    return out;
+  }
+
+  function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m])); }
+  function isOwned(n){ return !!DBPROFILE && DBPROFILE.owned.indexOf(n)>=0; }
+  function factionShort(f){ return FAC_SHORT[f]||f; }
+  function dbRootEl(){ return document.getElementById('db-root'); }
+  function tileArt(c){ return c.isSpell ? '' : artSrc({cardNumber:c.num, name:c.name, type:'troop'}); }
+
+  // deck linter math: avg cost, archetype, anti-air answers, win-cons, crew bonus
+  function deckStats(cards){
+    let sum=0, aa=0, win=0; const fc={};
+    cards.forEach(n=>{ const c=DBBYNAME[n]; if(!c) return; sum+=c.cost;
+      if(c.targets==='both' || c.targets==='air' || (c.isSpell && c.name!=='Snare Trap')) aa++;
+      if(c.queen || c.role==='Structure' || c.role==='Assassin') win++;
+      if(!c.isSpell) fc[c.factionId]=(fc[c.factionId]||0)+1;
+    });
+    const n=cards.length||1, avg=sum/n;
+    const archetype = avg<=3.8?'CYCLE':(avg<=5.2?'MIDRANGE':'HEAVY');
+    let crewFaction=null; Object.keys(fc).forEach(f=>{ if(fc[f]>=6) crewFaction=f; });
+    return { avg:avg, archetype:archetype, aa:aa, win:win, fc:fc, crewFaction:crewFaction };
+  }
+
+  function dbHead(activeTab){
+    const tabs=[['slots','Decks'],['collection','Collection'],['templates','Templates']];
+    const t=tabs.map(a=>'<div class="db-tab '+(activeTab===a[0]?'active':'')+'" data-act="tab" data-tab="'+a[0]+'">'+a[1]+'</div>').join('');
+    return '<div class="db-head"><div><div class="db-title">DECK LAB</div><div class="db-sub">build your 11-card pack</div></div>'+
+      '<div class="db-x" data-act="close">&times;</div></div><div class="db-tabs">'+t+'</div>';
+  }
+
+  function tile(c, opts){
+    opts=opts||{};
+    const owned=isOwned(c.name);
+    const rcol=(AK.RARITY_COL[c.rarity])||PAL.steel;
+    const art=tileArt(c);
+    const cls=['db-tile']; if(c.isSpell) cls.push('spell');
+    if(opts.lockUnowned && !owned) cls.push('locked');
+    if(opts.indeck) cls.push('indeck');
+    if(opts.dim) cls.push('dim');
+    const glyph = c.isSpell ? (c.glyph||'✦') : (c.name.charAt(0)||'?');
+    const vb = c.isMythic ? '<div class="t-crown">♛</div>'
+      : (c.variant==='HEAVY' ? '<div class="t-vbadge H">HVY</div>'
+      : (c.variant==='STREET' ? '<div class="t-vbadge S">STR</div>' : ''));
+    const img = art ? '<img src="'+art+'" alt="" onerror="this.remove()">' : '';
+    const lock = (opts.lockUnowned && !owned) ? '<div class="t-lock">&#128274;</div>' : '';
+    return '<div class="'+cls.join(' ')+'" style="border-color:'+rcol+'" data-act="'+(opts.act||'detail')+'" data-name="'+esc(c.name)+'">'+
+      '<div class="t-art">'+img+'<span class="t-glyph">'+esc(glyph)+'</span></div>'+
+      '<div class="t-scrim"></div><div class="t-cost">'+c.cost+'</div>'+vb+
+      '<div class="t-nm">'+esc(c.name)+'</div><div class="t-role">'+esc(c.role||'')+'</div>'+lock+'</div>';
+  }
+
+  function filterChips(arr){
+    return arr.map(a=>'<div class="db-chip '+(DB.filters[a[0]]===a[2]?'on':'')+'" data-act="filter" data-key="'+a[0]+'" data-val="'+a[2]+'">'+a[1]+'</div>').join('');
+  }
+
+  function slotsBody(){
+    let h='<div class="db-slots">';
+    DBPROFILE.decks.forEach((d,i)=>{
+      const unlocked = DBPROFILE.level >= SLOT_UNLOCK[i];
+      if(!unlocked){
+        h+='<div class="db-slot lockedslot"><div class="s-top"><div class="s-name">Slot '+(i+1)+'</div>'+
+          '<div class="s-active">UNLOCK Lv '+SLOT_UNLOCK[i]+'</div></div></div>'; return;
+      }
+      if(!d){
+        h+='<div class="db-slot"><div class="s-top"><div class="s-name">Slot '+(i+1)+'</div></div>'+
+          '<div class="s-meta">empty</div><div class="s-btns"><div class="db-mini primary" data-act="edit" data-slot="'+i+'">Build</div></div></div>'; return;
+      }
+      const st=deckStats(d.cards); const fac=st.crewFaction;
+      const faccol = fac ? (AK.FACTION_COL[fac]||'#888') : '#555';
+      h+='<div class="db-slot '+(DBPROFILE.active===i?'active':'')+'">'+
+        '<div class="s-top"><div class="s-name">'+esc(d.name||('Deck '+(i+1)))+'</div>'+
+        (fac?'<div class="s-fac" style="background:'+faccol+'">'+factionShort(fac)+' 6+</div>':'')+
+        (DBPROFILE.active===i?'<div class="s-active">ACTIVE</div>':'')+'</div>'+
+        '<div class="s-meta"><span>cards <b>'+d.cards.length+'/11</b></span><span>avg <b>'+st.avg.toFixed(1)+'</b></span><span>'+st.archetype+'</span></div>'+
+        '<div class="s-btns"><div class="db-mini" data-act="edit" data-slot="'+i+'">Edit</div>'+
+        '<div class="db-mini '+(DBPROFILE.active===i?'':'primary')+'" data-act="setactive" data-slot="'+i+'">'+(DBPROFILE.active===i?'In use':'Use')+'</div></div></div>';
+    });
+    h+='</div><div class="db-mini wide primary" data-act="battle">Battle with active deck</div>';
+    return h;
+  }
+
+  function collectionBody(){
+    const facs=[['faction','All','all'],['faction','Bone','boneguard_crew'],['faction','Zoomie','zoomie_syndicate'],['faction','Leash','leashbreak_tactix'],['faction','K9','k9_circuitry']];
+    const rars=[['rarity','All','all'],['rarity','M','Mythic'],['rarity','L','Legendary'],['rarity','E','Epic'],['rarity','R','Rare'],['rarity','C','Common']];
+    const vars=[['variant','O/H/S','all'],['variant','Orig','ORIGINAL'],['variant','Heavy','HEAVY'],['variant','Street','STREET']];
+    const owns=[['owned','All','all'],['owned','Owned','owned'],['owned','Locked','unowned']];
+    let h='<div class="db-filters">'+filterChips(facs)+'</div><div class="db-filters">'+filterChips(rars)+'</div>'+
+      '<div class="db-filters">'+filterChips(vars)+filterChips(owns)+'</div>';
+    const f=DB.filters;
+    const list=DBCAT.filter(c=>{
+      if(f.faction!=='all' && c.factionId!==f.faction) return false;
+      if(f.rarity!=='all' && c.rarity!==f.rarity) return false;
+      if(f.variant!=='all' && (c.variant||'ORIGINAL')!==f.variant) return false;
+      const owned=isOwned(c.name);
+      if(f.owned==='owned' && !owned) return false;
+      if(f.owned==='unowned' && owned) return false;
+      return true;
+    });
+    h+='<div class="db-secthead">'+list.length+' cards ('+DBPROFILE.owned.length+' owned of '+DBCAT.length+')</div><div class="db-grid">';
+    h+=list.map(c=>tile(c,{lockUnowned:true})).join('');
+    h+='</div>';
+    return h;
+  }
+
+  function editorBody(){
+    const e=DB.edit; const cards=e.cards; const st=deckStats(cards);
+    let strip='<div class="db-deckstrip">';
+    for(let i=0;i<11;i++){
+      const n=cards[i];
+      if(n){ const c=DBBYNAME[n]; const art=tileArt(c);
+        strip+='<div class="ds-slot filled" data-act="removecard" data-idx="'+i+'">'+
+          (art?'<img src="'+art+'" onerror="this.remove()">':'')+
+          '<span class="ds-glyph">'+(c.isSpell?(c.glyph||'✦'):esc(c.name.charAt(0)))+'</span>'+
+          '<span class="ds-cost">'+c.cost+'</span><span class="ds-x">&times;</span></div>';
+      } else { strip+='<div class="ds-slot empty"><span class="ds-num">'+(i+1)+'</span></div>'; }
+    }
+    strip+='</div>';
+    const aaCls=st.aa>0?'ok':'warn', winCls=st.win>0?'ok':'warn';
+    const costPct=Math.min(100,(st.avg/8)*100);
+    let crew=''; if(st.crewFaction){ const col=AK.FACTION_COL[st.crewFaction]||'#888';
+      crew='<div class="db-lint-row"><span class="ll">Crew bonus</span><span class="db-crewbadge" style="background:'+col+'">'+factionShort(st.crewFaction)+' '+CREW_BONUS[st.crewFaction]+'</span></div>'; }
+    const lint='<div class="db-linters">'+
+      '<div class="db-lint-row"><span class="ll">Cards</span><span class="lv '+(cards.length===11?'ok':'warn')+'">'+cards.length+'/11</span></div>'+
+      '<div class="db-lint-row"><span class="ll">Avg cost</span><div class="db-costbar"><i style="width:'+costPct+'%"></i></div><span class="lv">'+st.avg.toFixed(1)+' '+st.archetype+'</span></div>'+
+      '<div class="db-lint-row"><span class="ll">Anti-air</span><span class="lv '+aaCls+'">'+(st.aa>0?(st.aa+' answers'):'NONE: air runs you over')+'</span></div>'+
+      '<div class="db-lint-row"><span class="ll">Win-con</span><span class="lv '+winCls+'">'+(st.win>0?(st.win+' threats'):'NONE: nothing closes')+'</span></div>'+crew+'</div>';
+    const namein='<input class="db-namein" id="db-name" value="'+esc(e.name||'')+'" maxlength="22" placeholder="Deck name">';
+    const saveBtn = cards.length===11 ? '<div class="db-mini primary" data-act="savedeck">Save</div>'
+                                      : '<div class="db-mini" style="opacity:0.4">Save (need 11)</div>';
+    const btns='<div class="db-editbtns">'+saveBtn+
+      '<div class="db-mini" data-act="canceledit">Cancel</div>'+
+      '<div class="db-mini" data-act="exportcode">Export</div>'+
+      '<div class="db-mini" data-act="importcode">Import</div></div>';
+    const facs=[['faction','All','all'],['faction','Bone','boneguard_crew'],['faction','Zoomie','zoomie_syndicate'],['faction','Leash','leashbreak_tactix'],['faction','K9','k9_circuitry']];
+    let tray='<div class="db-secthead">Your collection (tap to add)</div><div class="db-filters">'+filterChips(facs)+'</div><div class="db-grid">';
+    DBCAT.filter(c=>isOwned(c.name)).filter(c=> DB.filters.faction==='all'||c.factionId===DB.filters.faction).forEach(c=>{
+      const inDeck=cards.indexOf(c.name)>=0;
+      tray+=tile(c,{act:'addcard', indeck:inDeck, dim:inDeck});
+    });
+    tray+='</div>';
+    return '<div class="db-secthead">'+esc(e.name||'New deck')+' -- editing Slot '+(DB.editSlot+1)+'</div>'+strip+lint+namein+btns+tray;
+  }
+
+  function templatesBody(){
+    const decks=window.CANON_DECKS||[];
+    let h='<div class="db-secthead">10 designed decks. Copy loads one into your active slot.</div>';
+    decks.forEach((d,i)=>{
+      const ownedN=d.cards.filter(n=>isOwned(n)).length; const miss=11-ownedN;
+      h+='<div class="db-tpl '+(d.wildcard?'wild':'')+'">'+
+        '<div class="tp-top"><div class="tp-name">'+esc(d.name)+'</div>'+
+        '<div class="tp-arch">'+esc(d.archetype||'')+(d.wildcard?' (wildcard)':'')+'</div>'+
+        '<div class="tp-avg">avg '+(d.avgCost||0).toFixed(1)+'</div></div>'+
+        '<div class="tp-win">'+esc(d.winCon||'')+'</div>'+
+        '<div class="tp-own '+(miss>0?'short':'')+'">'+(miss>0?('You own '+ownedN+'/11 -- '+miss+' to unlock via Play / Shop'):'You own all 11')+'</div>'+
+        '<div class="db-mini wide primary" data-act="copytpl" data-tpl="'+i+'">Copy to my slot</div></div>';
+    });
+    return h;
+  }
+
+  function renderRoot(){
+    const root=dbRootEl(); if(!root) return;
+    let body;
+    if(DB.view==='editor'){ body=dbHead('slots')+'<div class="db-body">'+editorBody()+'</div>'; }
+    else if(DB.view==='collection'){ body=dbHead('collection')+'<div class="db-body">'+collectionBody()+'</div>'; }
+    else if(DB.view==='templates'){ body=dbHead('templates')+'<div class="db-body">'+templatesBody()+'</div>'; }
+    else { body=dbHead('slots')+'<div class="db-body">'+slotsBody()+'</div>'; }
+    root.innerHTML=body;
+  }
+
+  function openDetail(name){
+    const c=DBBYNAME[name]; const d=document.getElementById('db-detail'); if(!c||!d) return;
+    const rcol=(AK.RARITY_COL[c.rarity])||PAL.steel;
+    const usedIn=(window.CANON_DECKS||[]).filter(dk=>dk.cards.indexOf(name)>=0).map(dk=>dk.name);
+    const tags=[]; if(c.domain==='air') tags.push('AIR'); tags.push(c.targets==='both'?'anti-air':(c.isSpell?'AOE':'ground-only'));
+    if(c.splash) tags.push('splash'); if(c.queen) tags.push('hits Queen');
+    d.innerHTML='<div class="dd-card" style="border-color:'+rcol+'">'+
+      '<div class="dd-top"><div class="dd-nm">'+esc(c.name)+'</div><div class="dd-cost">'+c.cost+'</div></div>'+
+      '<div class="dd-meta">'+esc(c.rarity)+' &middot; '+esc(c.faction)+' &middot; '+esc(c.role)+
+        (c.variant&&c.variant!=='ORIGINAL'?(' &middot; '+esc(c.variant)):'')+(c.breed?(' &middot; '+esc(c.breed)):'')+'</div>'+
+      '<div class="dd-stats">'+
+        (c.isSpell?'':'<div class="dd-stat"><b>'+c.hp+'</b><span>HP</span></div>')+
+        '<div class="dd-stat"><b>'+c.dmg+'</b><span>DMG</span></div>'+
+        (c.isSpell?'':'<div class="dd-stat"><b>'+c.atkspd+'</b><span>ATK/S</span></div>')+
+        '<div class="dd-stat"><b>'+c.range+'</b><span>'+(c.isSpell?'RADIUS':'RANGE')+'</span></div>'+
+        '<div class="dd-stat"><b>'+(tags.length?'&#9670;':'-')+'</b><span>'+esc(tags.join(' / '))+'</span></div></div>'+
+      '<div class="dd-ability"><b>'+esc(c.ability.name||'')+':</b> '+esc(c.ability.description||'')+'</div>'+
+      (c.desc?'<div class="dd-desc">'+esc(c.desc)+'</div>':'')+
+      (usedIn.length?'<div class="dd-decks">Featured in: '+esc(usedIn.join(', '))+'</div>':'')+
+      '<div class="db-mini wide dd-close" data-act="closedetail">Close</div></div>';
+    d.classList.remove('hidden');
+  }
+  function closeDetail(){ const d=document.getElementById('db-detail'); if(d) d.classList.add('hidden'); }
+
+  function syncName(){ const ni=document.getElementById('db-name'); if(ni && DB.edit) DB.edit.name=ni.value; }
+  function startEdit(i){ const d=DBPROFILE.decks[i]; DB.editSlot=i;
+    DB.edit={ name:(d&&d.name)||('Deck '+(i+1)), cards:(d&&d.cards?d.cards.slice():[]) }; DB.view='editor'; renderRoot(); }
+  function addCard(name){ const e=DB.edit; if(!e||e.cards.length>=11||e.cards.indexOf(name)>=0||!isOwned(name)) return; e.cards.push(name); renderRoot(); }
+  function removeCard(idx){ if(!DB.edit) return; DB.edit.cards.splice(idx,1); renderRoot(); }
+  function saveDeck(){ const e=DB.edit; if(!e||e.cards.length!==11) return;
+    DBPROFILE.decks[DB.editSlot]={ name:e.name||('Deck '+(DB.editSlot+1)), cards:e.cards.slice() };
+    if(typeof DBPROFILE.active!=='number') DBPROFILE.active=DB.editSlot; saveProfile(); DB.view='slots'; DB.edit=null; renderRoot(); }
+  function copyTemplate(i){ const d=(window.CANON_DECKS||[])[i]; if(!d) return;
+    let target=DBPROFILE.active; if(DBPROFILE.level < SLOT_UNLOCK[target]) target=0;
+    DBPROFILE.decks[target]={ name:d.name, cards:d.cards.slice() }; DBPROFILE.active=target; saveProfile(); DB.view='slots'; renderRoot(); }
+  function battleNow(){ const d=DBPROFILE.decks[DBPROFILE.active];
+    if(!d||!d.cards||d.cards.length!==11){ DB.view='slots'; renderRoot(); return; }
+    saveProfile(); closeDeckLab(); startMatch(); }
+  function deckCode(cards){ try{ const codes=cards.map(n=>{ const c=DBBYNAME[n]; return c?c.num:''; }).filter(Boolean); return 'AK1-'+btoa(codes.join('.')); }catch(_){ return ''; } }
+  function parseCode(code){ try{ const nums=atob(String(code).replace(/^AK1-/,'')).split('.'); const m={}; DBCAT.forEach(c=>m[c.num]=c.name); return nums.map(n=>m[n]).filter(Boolean); }catch(_){ return null; } }
+  function importCode(){ try{ const code=window.prompt('Paste a deck code:'); if(!code||!DB.edit) return; const names=parseCode(code.trim()); if(names&&names.length){ DB.edit.cards=names.slice(0,11); renderRoot(); } }catch(_){} }
+
+  function openDeckLab(){ DB.view='slots'; DB.edit=null; const ds=document.getElementById('deckscreen');
+    startScreen.classList.add('hidden'); resultScreen.classList.add('hidden'); if(ds) ds.classList.remove('hidden'); renderRoot(); }
+  function closeDeckLab(){ closeDetail(); const ds=document.getElementById('deckscreen'); if(ds) ds.classList.add('hidden'); startScreen.classList.remove('hidden'); }
+
+  function dbClick(e){
+    const node = e.target && e.target.closest ? e.target.closest('[data-act]') : null; if(!node) return;
+    const act=node.getAttribute('data-act');
+    if(act!=='exportcode' && act!=='importcode') syncName();   // keep typed name across re-render
+    if(act==='close') closeDeckLab();
+    else if(act==='tab'){ DB.view=node.getAttribute('data-tab'); DB.edit=(DB.view==='editor'?DB.edit:DB.edit); renderRoot(); }
+    else if(act==='filter'){ DB.filters[node.getAttribute('data-key')]=node.getAttribute('data-val'); renderRoot(); }
+    else if(act==='detail') openDetail(node.getAttribute('data-name'));
+    else if(act==='closedetail') closeDetail();
+    else if(act==='edit') startEdit(parseInt(node.getAttribute('data-slot'),10));
+    else if(act==='setactive'){ DBPROFILE.active=parseInt(node.getAttribute('data-slot'),10); saveProfile(); renderRoot(); }
+    else if(act==='battle') battleNow();
+    else if(act==='addcard') addCard(node.getAttribute('data-name'));
+    else if(act==='removecard') removeCard(parseInt(node.getAttribute('data-idx'),10));
+    else if(act==='savedeck') saveDeck();
+    else if(act==='canceledit'){ DB.view='slots'; DB.edit=null; renderRoot(); }
+    else if(act==='copytpl') copyTemplate(parseInt(node.getAttribute('data-tpl'),10));
+    else if(act==='exportcode'){ try{ window.prompt('Deck code (copy to share):', deckCode(DB.edit?DB.edit.cards:[])); }catch(_){} }
+    else if(act==='importcode') importCode();
+  }
+
+  // ---- deck-lab boot: load profile, build catalog, wire buttons (all guarded) ----
+  DBPROFILE = loadProfile();
+  saveProfile();                 // mirror the active deck for startMatch (no-op w/o localStorage)
+  DBCAT = buildCatalog();
+  DBBYNAME = {}; DBCAT.forEach(c=>{ DBBYNAME[c.name]=c; });
+  const deckBtn = document.getElementById('deckbtn');
+  if(deckBtn) deckBtn.addEventListener('click', openDeckLab);
+  const dbRoot = document.getElementById('db-root');
+  if(dbRoot) dbRoot.addEventListener('click', dbClick);
+  const dbDetail = document.getElementById('db-detail');
+  if(dbDetail) dbDetail.addEventListener('click', function(ev){ if(ev.target===dbDetail) closeDetail(); else dbClick(ev); });
+
+  // ---- boot: build the card index after the DOM + scripts are ready ----
+  const info = AK.init();
+  console.log('[ALLEY KINGZ] engine ready -- '+info.count+' cards loaded.');
+})();
+</script>
+</body>
+</html>

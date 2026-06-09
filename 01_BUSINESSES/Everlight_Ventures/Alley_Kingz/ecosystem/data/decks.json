@@ -1,0 +1,214 @@
+{
+  "decks": [
+    {
+      "name": "CROWN MARCH",
+      "class": "Boneguard Crew",
+      "archetype": "Beatdown",
+      "avgCost": 6.2,
+      "wildcard": false,
+      "winCon": "One unstoppable splash-tank push behind $BCARDD they cannot answer in time.",
+      "cards": [
+        "$BCARDD",
+        "Iron Rottweiler",
+        "Stonejaw",
+        "Warden Newfie",
+        "Balboa",
+        "Alloy Akita",
+        "Brick Bullmastiff",
+        "Grit Bulldog",
+        "Boneshatter Freeze",
+        "Copper Chow",
+        "Tank Pug"
+      ]
+    },
+    {
+      "name": "HYPER LOOP",
+      "class": "Zoomie Syndicate",
+      "archetype": "Cycle",
+      "avgCost": 3.3,
+      "wildcard": false,
+      "winCon": "Death by a thousand cuts: cheapest deck, fastest hand, never stop chipping.",
+      "cards": [
+        "Neon Whippet",
+        "Drift Sheltie",
+        "Pixel Greyhound",
+        "Turbo Jack",
+        "Byte Beagle",
+        "Glitch Basenji",
+        "Jolt",
+        "Circuit Shiba",
+        "Flash Saluki",
+        "Bolt Corgi",
+        "Razor Vizsla"
+      ]
+    },
+    {
+      "name": "SIGNAL LOCKDOWN",
+      "class": "Leashbreak Tactix",
+      "archetype": "Control",
+      "avgCost": 4.5,
+      "wildcard": false,
+      "winCon": "Out-resource and outlast: slow, silence and disable every push, win the chip war with Rosco.",
+      "cards": [
+        "Rosco",
+        "Noir Setter",
+        "Synth Collie",
+        "Pulse Border Collie",
+        "Chill Samoyed",
+        "Prism Poodle",
+        "Signal Pointer",
+        "Tar Pour",
+        "Echo Dalmatian",
+        "Static Sheba Inu",
+        "Vibe Shih Tzu"
+      ]
+    },
+    {
+      "name": "TURRET TRAP",
+      "class": "K9 Circuitry",
+      "archetype": "Siege",
+      "avgCost": 4.5,
+      "wildcard": false,
+      "winCon": "Park static turrets and protect the engine while it chips from range.",
+      "cards": [
+        "Crown Foxhound",
+        "Nova Shepherd",
+        "Grid Schnauzer",
+        "Chrome Airedale",
+        "Laser Beagle",
+        "Beacon Basset",
+        "Volt Corgi",
+        "Rail Terrier",
+        "Snare Trap",
+        "Flux Pomeranian",
+        "Pixel Pug"
+      ]
+    },
+    {
+      "name": "SKY PACK",
+      "class": "Zoomie Syndicate",
+      "archetype": "Air",
+      "avgCost": 3.2,
+      "wildcard": false,
+      "winCon": "Flood with AIR a ground-only army physically cannot hit; punish light anti-air.",
+      "cards": [
+        "Bolt Corgi",
+        "Flash Saluki",
+        "Neon Dachshund",
+        "Pixel Greyhound",
+        "Ghost Spaniel",
+        "Tank Pug",
+        "Jolt",
+        "Pixel Pug",
+        "Neon Whippet",
+        "Drift Sheltie",
+        "Aero Malinois"
+      ]
+    },
+    {
+      "name": "IRON WALL",
+      "class": "Boneguard Crew",
+      "archetype": "Heavy-Tank",
+      "avgCost": 6.6,
+      "wildcard": false,
+      "winCon": "Build an immortal tank ball (double Vanguard + heal + shield) that does not die on the walk.",
+      "cards": [
+        "$BCARDD",
+        "Iron Rottweiler",
+        "Granite Saint",
+        "Rust Cane Corso",
+        "Stonejaw",
+        "Warden Newfie",
+        "Alloy Akita",
+        "Holo Husky",
+        "Pulse Border Collie",
+        "Boneshatter Freeze",
+        "Tank Pug"
+      ]
+    },
+    {
+      "name": "DRONE FLOOD",
+      "class": "K9 Circuitry",
+      "archetype": "Swarm-Bait",
+      "avgCost": 3.7,
+      "wildcard": false,
+      "winCon": "Bait the one splash or spell, then overwhelm with constant spawned drones.",
+      "cards": [
+        "Circuit Retriever",
+        "Grid Schnauzer",
+        "Chrome Airedale",
+        "Bolt Corgi",
+        "Volt Corgi",
+        "Beacon Basset",
+        "Neon Dachshund",
+        "Rail Terrier",
+        "Snare Trap",
+        "Flux Pomeranian",
+        "Pixel Pug"
+      ]
+    },
+    {
+      "name": "HEX STORM",
+      "class": "Leashbreak Tactix",
+      "archetype": "Spell-heavy",
+      "avgCost": 3.3,
+      "wildcard": false,
+      "winCon": "Run all 5 spells; bait support out, melt every push, finish with Strike + Jolt while Byte Beagle chips.",
+      "cards": [
+        "Boneshatter Freeze",
+        "Strike",
+        "Tar Pour",
+        "Jolt",
+        "Snare Trap",
+        "Signal Pointer",
+        "Byte Beagle",
+        "Echo Dalmatian",
+        "Glitch Basenji",
+        "Static Sheba Inu",
+        "Vibe Shih Tzu"
+      ]
+    },
+    {
+      "name": "DECAPITATION",
+      "class": "K9 Circuitry",
+      "archetype": "Triple-Assassin Queen Dive",
+      "avgCost": 5.0,
+      "wildcard": true,
+      "winCon": "Ignore the lane war; run every Queen-target threat and assassinate the Queen before they build a defense.",
+      "cards": [
+        "Crown Foxhound",
+        "Jagged",
+        "Rosco",
+        "Circuit Shiba",
+        "Byte Beagle",
+        "Ghost Spaniel",
+        "Jolt",
+        "Snare Trap",
+        "Tank Pug",
+        "Static Sheba Inu",
+        "Drift Sheltie"
+      ]
+    },
+    {
+      "name": "FOUR CROWNS",
+      "class": "Boneguard Crew",
+      "archetype": "Rainbow Midrange Toolbox",
+      "avgCost": 4.6,
+      "wildcard": true,
+      "winCon": "No single plan: one signature tool from all 4 factions; out-value every matchup by always having the answer.",
+      "cards": [
+        "Balboa",
+        "Aero Malinois",
+        "Noir Setter",
+        "Chrome Airedale",
+        "Razor Vizsla",
+        "Grit Bulldog",
+        "Prism Poodle",
+        "Beacon Basset",
+        "Strike",
+        "Turbo Jack",
+        "Glitch Basenji"
+      ]
+    }
+  ]
+}
