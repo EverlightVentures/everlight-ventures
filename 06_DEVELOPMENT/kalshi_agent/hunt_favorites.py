@@ -32,9 +32,12 @@ def _active_markets(limit=400):
     return out
 
 
-def scan(stake=3.0):
+def scan(stake=3.0, max_markets=None):
     out = []
-    for tk in _active_markets():
+    tickers = _active_markets()
+    if max_markets:
+        tickers = tickers[:max_markets]
+    for tk in tickers:
         try:
             yb, ya, nb, yc, nc = best_bbo(tk)
         except Exception:

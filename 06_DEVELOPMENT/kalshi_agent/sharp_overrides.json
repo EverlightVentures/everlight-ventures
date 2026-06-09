@@ -1,0 +1,4 @@
+{
+  "_note": "ticker -> {fair_prob (YES, de-vigged from a sharp book), source, expires_ts}. The engine BUYS YES when Kalshi's ask is below fair_prob net of the maker fee, AND only if the number is fresh (auto_edge skips if it diverges >override_stale_divergence_cents from the live market mid). Refresh these as the series moves -- a stale number is auto-rejected, not traded.",
+  "KXNBA-26-NYK": {"fair_prob": 0.80, "source": "FanDuel -490/+380 series, de-vig after Knicks go 2-0 (2026-06-06). Market efficient at ~80c -> no edge.", "expires_ts": 1782345600}
+}
