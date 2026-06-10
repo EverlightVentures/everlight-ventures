@@ -40,6 +40,10 @@ BANNED = [
     "guaranteed", "guarantee", "returns", "profit", "roi", "get rich",
     "will moon", "1000x guaranteed", "financial freedom", "passive income",
     "can't lose", "cannot lose", "risk free", "risk-free",
+    # trademark distance (renamed 2026-06-03) + gambling decouple (2026-06-08 memo):
+    # the coin is $BCARDD, never "Bacardi"; no casino/gambling framing, ever.
+    "bacardi", "blackjack", "casino", "jackpot", "gamble", "gambling",
+    "betting", "wager", "sweepstakes",
 ]
 MAX_LEN = 280
 

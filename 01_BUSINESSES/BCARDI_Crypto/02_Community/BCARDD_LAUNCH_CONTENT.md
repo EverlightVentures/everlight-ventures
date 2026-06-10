@@ -1,4 +1,12 @@
 # $BCARDD -- LAUNCH CONTENT KIT (ready to post)
+
+================================================================
+## CANONICAL DESCRIPTION (operator-locked 2026-06-10 -- use this everywhere)
+================================================================
+> $BCARDD -- a real Dogo Argentino, "The Yung Printz." In DOGO we trust. The realest dog in crypto: he deals the cards, runs the alley, and he's the only dog with his own game you can actually play. Fair launch, bag locked. The coin of the Dogo Argentino.
+
+The dog's street name is "The Yung Printz." This is THE description for VRFD, X bio, CoinGecko, DexScreener -- everywhere a description field exists.
+
 **Fill 6mjokwXx7NNzo5ocvLDFGmbsGAs7rYHZdVJhKYkapump = your contract address, https://app.streamflow.finance/contract/solana/mainnet/3d4gwe8w1v5CC3Z34PQfxR229vRZrrTofo1VPMdGRnAY = your Jupiter Lock proof link, [TG] = your Telegram link. Voice: street, meme, cocky, fun. Never "investment." Always "for the culture."**
 
 ================================================================

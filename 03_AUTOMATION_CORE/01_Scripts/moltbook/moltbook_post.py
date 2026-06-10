@@ -34,13 +34,23 @@ POSTS_URL = "https://www.moltbook.com/api/v1/posts"
 def load_api_key(persona: str) -> str:
     if not KEYS_FILE.exists():
         raise FileNotFoundError(f"no ledger at {KEYS_FILE} -- run moltbook_register.py first")
+    # registration retries can leave failed records (body is an error string);
+    # take the newest record that actually carries a key
+    key = None
     for line in KEYS_FILE.read_text().splitlines():
         if not line.strip():
             continue
         rec = json.loads(line)
-        if rec.get("persona") == persona:
-            return rec["response"]["body"]["agent"]["api_key"]
-    raise KeyError(f"persona {persona!r} not in ledger")
+        if rec.get("persona") != persona:
+            continue
+        body = (rec.get("response") or {}).get("body")
+        if isinstance(body, dict):
+            candidate = (body.get("agent") or {}).get("api_key")
+            if candidate:
+                key = candidate
+    if key:
+        return key
+    raise KeyError(f"persona {persona!r} has no usable api_key in ledger")
 
 
 def _http_post(url: str, headers: dict, body: dict, timeout: float = 20.0) -> dict:
