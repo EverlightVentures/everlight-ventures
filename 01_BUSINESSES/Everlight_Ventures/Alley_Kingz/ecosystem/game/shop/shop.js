@@ -504,12 +504,13 @@
     if (!cfg.online) {
       var d = state.draw || demoDraw();
       var results = localRoll(d, n);
+      syncDrawResults(results);          // demo pulls still land in the deck-lab profile
       showReveal(results);
-      toast("Demo pull -- connect a backend for real grants.", "ok");
+      toast("Demo pull -- cards saved to your crew.", "ok");
       return;
     }
     api("open-draw", { pulls: n }).then(function (r) {
-      if (r.ok) { showReveal(r.results || []); load(); }
+      if (r.ok) { syncDrawResults(r.results || []); showReveal(r.results || []); load(); }
       else { toast(humanErr(r), "bad"); }
     }).catch(function () { toast("Draw unavailable.", "bad"); });
   }
@@ -693,11 +694,54 @@
     ]);
   }
 
+  // ---- deck-lab profile sync shim ------------------------------------------
+  // The deck lab (index.html) reads localStorage ak_profile.owned by card NAME,
+  // while the server keys inventory by player_id. Every grant that resolves in
+  // this surface -- demo pulls included -- is ALSO merged into ak_profile so the
+  // deck lab sees it immediately. Names merge unique (shop dupes feed the Garage,
+  // not the +coins rule -- that one is match-drops only). If no profile exists
+  // yet we write a deckless stub; index.html loadProfile() merges it over the
+  // starter set on next game boot. Spec: ecosystem/PROGRESSION_DESIGN.md
+  function profileSync(names, coins) {
+    try {
+      if (typeof localStorage === "undefined" || !localStorage) return;
+      var p = null;
+      try { p = JSON.parse(localStorage.getItem("ak_profile") || "null"); } catch (e) { p = null; }
+      if (!p || typeof p !== "object") p = { level: 1, xp: 0, coins: 0, trophies: 0, owned: [] };
+      if (!Array.isArray(p.owned)) p.owned = [];
+      (names || []).forEach(function (n) { if (n && p.owned.indexOf(n) < 0) p.owned.push(n); });
+      if (coins) p.coins = (p.coins || 0) + coins;
+      localStorage.setItem("ak_profile", JSON.stringify(p));
+    } catch (e) {}
+  }
+  function syncDrawResults(results) {
+    profileSync((results || []).map(function (r) {
+      var c = cardById(r.card_id);
+      return (c && c.name) || r.name || null;
+    }), 0);
+  }
+  function syncBoughtCard(cardId) {
+    var c = cardById(cardId);
+    if (c && c.name) profileSync([c.name], 0);
+  }
+
   // ---- intent dispatch (server decides) -----------------------------------
   function doAction(action, extra, okMsg) {
-    if (!cfg.online) { toast("Demo mode -- connect a backend to spend.", "bad"); return; }
+    if (!cfg.online) {
+      if (action === "buy-card" && extra && extra.card_id) {
+        // demo purchases still land in the deck-lab profile
+        syncBoughtCard(extra.card_id);
+        toast(okMsg + " (demo -- saved to your crew).", "ok");
+        return;
+      }
+      toast("Demo mode -- connect a backend to spend.", "bad"); return;
+    }
     api(action, extra).then(function (r) {
-      if (r.ok) { toast(okMsg, "ok"); load(); }
+      if (r.ok) {
+        if (action === "buy-card" && extra && extra.card_id) syncBoughtCard(extra.card_id);
+        if (action === "open-chest" && r.grants) profileSync(r.grants.cards || [], r.grants.coins || 0);
+        toast(okMsg, "ok"); load();
+      }
       else if (r.gated) { toast(r.message || "Coming soon.", "bad"); }
       else { toast(humanErr(r), "bad"); }
     }).catch(function () { toast("Network error.", "bad"); });

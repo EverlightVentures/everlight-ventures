@@ -42,13 +42,21 @@ const PRICE_MAP: Record<string, string> = {
   "hivemind-spark": "price_1TCoRYGd8n4Fz3nA57DzNT7u",
   "hivemind-hive": "price_1TCoRZGd8n4Fz3nA4cGEuOH7",
   "hivemind-enterprise": "price_1TCoRZGd8n4Fz3nAtm7T01d7",
+  // Alley Kingz gem packs (env-sourced -- seeded by ak_stripe_seed_products.py).
+  // Unset env vars resolve to "" (falsy), so the !PRICE_MAP[slug] check below
+  // returns the existing invalid-slug error until the operator sets the secrets.
+  "ak-gems-rookie": Deno.env.get("AK_PRICE_AK_GEMS_ROOKIE") ?? "",
+  "ak-gems-player": Deno.env.get("AK_PRICE_AK_GEMS_PLAYER") ?? "",
+  "ak-gems-baller": Deno.env.get("AK_PRICE_AK_GEMS_BALLER") ?? "",
+  "ak-gems-highroller": Deno.env.get("AK_PRICE_AK_GEMS_HIGHROLLER") ?? "",
+  "ak-gems-kingpin": Deno.env.get("AK_PRICE_AK_GEMS_KINGPIN") ?? "",
   // Intelligence products (optional data tier -- not core business)
 };
 
 function deriveProductType(slug: string): string {
   if (slug.startsWith("sam-") || slug === "beyond-the-veil") return "ebook";
   if (slug.startsWith("arcade-") || slug === "ak-season-pass") return "arcade";
-  if (slug.startsWith("gems-")) return "gems";
+  if (slug.startsWith("gems-") || slug.startsWith("ak-gems-")) return "gems";
   if (slug.startsWith("nos-")) return "nos";
   if (slug.startsWith("chips-")) return "chips";
   if (slug.endsWith("-game-pass") || slug === "master-pass") return "game-pass";

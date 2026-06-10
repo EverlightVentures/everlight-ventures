@@ -94,6 +94,29 @@
   .result-lose{ color:var(--red); filter:drop-shadow(0 0 16px rgba(255,68,68,0.4)); }
   .result-draw{ color:var(--ivory); }
   .result-sub{ color:var(--gold-lo); font-family:'Playfair Display',serif; font-style:italic; margin-bottom:6px; }
+  /* post-match rewards panel: gold on vanta, same chrome as the lobby cards */
+  #rewardpanel{
+    width:100%; max-width:340px; margin-top:14px; padding:12px 14px; border-radius:12px;
+    border:1px solid rgba(212,175,55,0.35);
+    background:linear-gradient(170deg,rgba(20,19,31,0.92),rgba(8,8,14,0.92));
+    box-shadow:0 8px 24px rgba(0,0,0,0.5);
+  }
+  #rewardpanel.hidden{ display:none; }
+  .rw-head{ font-family:'Cinzel',serif; font-weight:900; font-size:11px; letter-spacing:0.16em;
+    text-transform:uppercase; color:var(--gold-hi); margin-bottom:8px; }
+  .rw-rows{ display:flex; justify-content:center; gap:22px; margin-bottom:8px; }
+  .rw-stat{ font-family:'Inter',monospace; font-weight:700; font-size:15px; color:var(--ivory); }
+  .rw-stat small{ display:block; font-family:'Inter',sans-serif; font-weight:600; font-size:8px;
+    letter-spacing:0.14em; color:var(--gold-lo); text-transform:uppercase; }
+  .rw-cards{ display:flex; flex-wrap:wrap; justify-content:center; gap:6px; }
+  .rw-drop{ font-family:'Inter',sans-serif; font-weight:600; font-size:10px; color:var(--ivory);
+    padding:3px 9px; border-radius:999px; border:1px solid var(--steel); background:rgba(20,19,31,0.8); }
+  .rw-drop.r-Rare{ border-color:#4aa6c8; color:#9fe8ff; }
+  .rw-drop.r-Epic{ border-color:#b14bff; color:#d9a8ff; }
+  .rw-drop.r-Mythic{ border-color:var(--gold-hi); color:var(--gold-hi); }
+  .rw-drop.dupe{ opacity:0.72; }
+  .rw-level{ margin-top:9px; font-family:'Cinzel',serif; font-weight:900; font-size:13px;
+    letter-spacing:0.1em; color:var(--gold-hi); filter:drop-shadow(0 0 10px rgba(212,175,55,0.5)); }
 
   /* ---------- in-match HUD ---------- */
   #stage{ position:relative; width:100%; height:100%; display:flex; flex-direction:column; }
@@ -168,6 +191,22 @@
     font-family:'Cinzel',serif; font-weight:900; font-size:13px; line-height:1; padding:0;
   }
   #codexbtn:active{ transform:scale(0.94); }
+  #pausebtn{
+    flex:0 0 auto; cursor:pointer; width:26px; height:24px; border-radius:7px;
+    border:1px solid rgba(212,175,55,0.4); background:rgba(212,175,55,0.08); color:var(--gold-hi);
+    font-family:'Cinzel',serif; font-weight:900; font-size:11px; line-height:1; padding:0;
+  }
+  #pausebtn:active{ transform:scale(0.94); }
+  #pauseoverlay{
+    position:absolute; inset:0; z-index:60; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:16px; cursor:pointer;
+    background:rgba(6,6,12,0.84);
+  }
+  #pauseoverlay.hidden{ display:none; }
+  #pauseoverlay .po-line{
+    font-family:'Cinzel',serif; font-weight:900; font-size:22px; color:var(--gold-hi);
+    letter-spacing:0.04em; text-shadow:0 2px 16px rgba(0,0,0,0.92);
+  }
 
   #boardwrap{ position:relative; flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center;
     /* full-bleed: any letterbox margin is lit ATMOSPHERE, never dead black (operator 2026-06-08) */
@@ -760,6 +799,7 @@
       <div class="crowns"><span class="foe" id="foecrowns">0</span><span>FOE</span></div>
       <div id="timerwrap"><div id="timer">3:00</div><div id="speedbadge">0.75x</div></div>
       <div class="crowns"><span>YOU</span><span class="me" id="mecrowns">0</span></div>
+      <button id="pausebtn" title="Pause">II</button>
     </div>
 
     <div id="convoybar">
@@ -789,6 +829,11 @@
       <div id="hand"></div>
       <div id="hint">Drag a card onto your half to deploy, or tap a card then tap your half. Hold a card to peek its stats.</div>
     </div>
+
+    <div id="pauseoverlay" class="hidden">
+      <div class="po-line">PAUSED -- tap to resume</div>
+      <button id="forfeitbtn" class="btn">FORFEIT</button>
+    </div>
   </main>
 
   <!-- ============ RESULT SCREEN ============ -->
@@ -798,7 +843,9 @@
     <div class="crowns" style="font-size:20px;margin-top:6px;">
       <span class="me" id="r_me">0</span><span style="color:var(--steel)">crowns</span><span class="foe" id="r_foe">0</span>
     </div>
+    <div id="rewardpanel" class="hidden"></div>
     <button id="againbtn" class="btn">Play Again</button>
+    <button id="homebtn" class="btn" style="margin-top:10px;padding:10px 32px;font-size:13px;background:none;border:1px solid rgba(212,175,55,0.45);color:var(--gold-hi);box-shadow:none;">Lobby</button>
     <p class="fineprint">Early prototype. Not financial advice.</p>
     <div class="wordmark">Everlight Ventures &bull; $BCARDD</div>
   </section>
@@ -823,8 +870,8 @@
 </div>
 
 <!-- order matters: canon globals first, then the engine that consumes them -->
-<script src="canon.js?v=27"></script>
-<script src="engine.js?v=27"></script>
+<script src="canon.js?v=28"></script>
+<script src="engine.js?v=28"></script>
 <script>
 (function(){
   'use strict';
@@ -961,6 +1008,26 @@
   function scaleY(){ return canvas.height / ARENA_H; }
   function toX(gx){ const c=cam(); return (gx - c.offX) * scaleX() * c.zoom; }
   function toY(gy){ const c=cam(); return (gy - c.offY) * scaleY() * c.zoom; }
+
+  // ---- ARENA CAMERA TILT (Phase 2, path B1): one GPU-composited CSS transform on
+  // the canvas bitmap -- zero per-frame cost, toX/toY and every draw call untouched.
+  // HUD/topbar/dock/gatebar are DOM siblings of the canvas, so they stay flat.
+  // perspective() rides INSIDE the element transform so the eye sits at the
+  // transform-origin (bottom-center pivot); that makes the tap un-projection in
+  // canvasToArena() an exact closed form. Kill-switch: TILT_ENABLED=false (or
+  // TILT_DEG=0) = no transform + the original rect-ratio tap math, pixel-identical
+  // to pre-tilt rendering. The %-based origin survives resize/orientation as-is.
+  const TILT_ENABLED = true;
+  const TILT_DEG = 18, PERSP_PX = 1100;       // tune 12-22deg / 900-1400px
+  const TILT_ON = !!(TILT_ENABLED && TILT_DEG > 0);
+  const TILT_SIN = Math.sin(TILT_DEG*Math.PI/180), TILT_COS = Math.cos(TILT_DEG*Math.PI/180);
+  try{
+    if(TILT_ON && canvas && canvas.style){
+      canvas.style.transformOrigin = '50% 100%';  // pivot at the near/bottom edge
+      canvas.style.transform = 'perspective('+PERSP_PX+'px) rotateX('+TILT_DEG+'deg)';
+      canvas.style.willChange = 'transform';
+    }
+  }catch(_e){}
 
   // ---- responsive canvas sizing (keep arena aspect, fit boardwrap) ----
   function resize(){
@@ -1662,10 +1729,12 @@
     }
     ctx.restore();
 
-    // ---- glyph (upright, not rotated) ----
-    ctx.fillStyle='#0a0a0a'; ctx.font='700 '+(0.62*sx)+'px Cinzel,serif';
-    ctx.textAlign='center'; ctx.textBaseline='middle';
-    ctx.fillText(c.glyph||'M',px,py);
+    // ---- glyph (upright, not rotated) -- procedural fallback ONLY; PNG art reads on its own ----
+    if(!unitIconReady(c.cardNumber)){
+      ctx.fillStyle='#0a0a0a'; ctx.font='700 '+(0.62*sx)+'px Cinzel,serif';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(c.glyph||'M',px,py);
+    }
 
     // ownership ring
     ctx.strokeStyle=owner; ctx.lineWidth=1.5;
@@ -2368,9 +2437,36 @@
   // INPUT -- tap canvas to deploy the selected card
   // ==========================================================
   function canvasToArena(clientX, clientY){
-    const rect = canvas.getBoundingClientRect();
-    const nx = (clientX - rect.left) / rect.width;
-    const ny = (clientY - rect.top) / rect.height;
+    let nx, ny;
+    if(TILT_ON){
+      // TILT un-projection (Phase 2 B1): the tap lands on the TILTED plane, and
+      // getBoundingClientRect() on the transformed canvas returns the POST-transform
+      // box (short + receded at the top), so a raw ratio drifts the higher you tap.
+      // Instead: rebuild the UNtransformed layout box from the flat boardwrap rect +
+      // the canvas layout offsets, take the tap relative to the bottom-center pivot,
+      // and invert the projection. Forward map of a flat-plane point v (local y, 0 at
+      // the pivot, negative upward): w = 1 - v*sin/P; screen V = v*cos/w, U = u/w.
+      // Closed-form inverse below; identity at the bottom edge (V=0 -> v=0, w=1).
+      let W=0, H=0, left=0, top=0;
+      try{
+        const wrap = canvas.offsetParent || canvas.parentNode;
+        const wr = wrap.getBoundingClientRect();
+        W = canvas.offsetWidth; H = canvas.offsetHeight;
+        left = wr.left + canvas.offsetLeft; top = wr.top + canvas.offsetTop;
+      }catch(_e){}
+      if(W>0 && H>0){
+        const U = (clientX - left) - W/2;
+        const V = (clientY - top) - H;
+        const den = TILT_COS + V*TILT_SIN/PERSP_PX;
+        const v = den > 0.05 ? V/den : V;     // degenerate-ray guard (never hit on-canvas)
+        const w = 1 - v*TILT_SIN/PERSP_PX;
+        nx = (U*w + W/2)/W;  ny = (v + H)/H;
+      } else { nx = 0.5; ny = 1; }            // layout not ready -> harmless near-edge point
+    } else {
+      const rect = canvas.getBoundingClientRect();
+      nx = (clientX - rect.left) / rect.width;
+      ny = (clientY - rect.top) / rect.height;
+    }
     // rebased through the camera so deploys still land where the finger points,
     // even mid-pan. (G2.0: exact inverse of toX/toY -> identity when camera is identity.)
     const c = cam();
@@ -2424,7 +2520,7 @@
   // ==========================================================
   // GAME LOOP
   // ==========================================================
-  let raf=null, last=0, running=false;
+  let raf=null, last=0, running=false, paused=false;   // paused: codex open or pause button
   let _fpsAcc=0, _fpsN=0;          // adaptive-FX FPS sampler (G2.1)
   function loop(ts){
     if(!running) return;
@@ -2432,7 +2528,7 @@
     // sample FPS over ~1s windows; drop heavy shadowBlur if the phone is struggling
     _fpsAcc += dt; _fpsN++;
     if(_fpsAcc >= 1){ const fps=_fpsN/_fpsAcc; LOW_FX = (fps < 30); _fpsAcc=0; _fpsN=0; }   // only TRULY struggling devices drop the glamor (was 45 -- too aggressive, flattened the look)
-    AK.update(dt);
+    if(!paused) AK.update(dt);
     draw();
     syncHUD();
     const g=AK.game;
@@ -2522,6 +2618,7 @@
     resultScreen.classList.add('hidden');
     stage.classList.remove('hidden');
     resize();
+    setPaused(false);                  // fresh match never starts paused
     running=true; last=performance.now();
     raf=requestAnimationFrame(loop);
   }
@@ -2535,12 +2632,44 @@
     else if(g.result==='win'){ line.textContent='VICTORY'; line.className='result-line result-win'; sub.textContent='The convoy rolled through. ('+(g.stars||0)+' Gate stars)'; }
     else if(g.result==='lose'){ line.textContent='DEFEAT'; line.className='result-line result-lose'; sub.textContent='The crown slips. Run it back.'; }
     else { line.textContent='DRAW'; line.className='result-line result-draw'; sub.textContent='No king crowned. Run it back.'; }
+    renderRewards(grantMatchRewards(g));   // street cred: XP + coins + card drops -> ak_profile
     stage.classList.add('hidden');
     resultScreen.classList.remove('hidden');
+  }
+  // compact rewards readout on the result screen (XP / coins / drops / level-up).
+  // Safe DOM construction (textContent only), guarded so it can never block flow.
+  function renderRewards(rw){
+    try{
+      const panel=document.getElementById('rewardpanel');
+      if(!panel) return;
+      if(!rw){ panel.classList.add('hidden'); return; }
+      while(panel.firstChild) panel.removeChild(panel.firstChild);
+      function el(tag,cls,txt){ const n=document.createElement(tag); if(cls) n.className=cls; if(txt!=null) n.textContent=txt; return n; }
+      panel.appendChild(el('div','rw-head','Street Cred'));
+      const rows=el('div','rw-rows');
+      const sx=el('div','rw-stat','+'+rw.xp); sx.appendChild(el('small',null,'XP')); rows.appendChild(sx);
+      const sc=el('div','rw-stat','+'+rw.coins); sc.appendChild(el('small',null,'Coins')); rows.appendChild(sc);
+      panel.appendChild(rows);
+      const cards=el('div','rw-cards');
+      rw.drops.forEach(d=>{
+        cards.appendChild(el('span','rw-drop r-'+d.rarity+(d.dupe?' dupe':''),
+          d.name+(d.dupe?' (dupe +'+DUPE_COINS+'c)':'')));
+      });
+      panel.appendChild(cards);
+      if(rw.levelUp) panel.appendChild(el('div','rw-level',
+        'LEVEL UP -- Lv '+rw.level+(SLOT_UNLOCK.indexOf(rw.level)>=0?' -- NEW DECK SLOT':'')));
+      panel.classList.remove('hidden');
+    }catch(_){}
   }
 
   playBtn.addEventListener('click', startMatch);
   againBtn.addEventListener('click', startMatch);
+  const homeBtn=document.getElementById('homebtn');
+  if(homeBtn) homeBtn.addEventListener('click', ()=>{
+    resultScreen.classList.add('hidden');
+    startScreen.classList.remove('hidden');
+    try{ refreshLobbyChip(); }catch(_){}
+  });
 
   // ---- STORM CODEX: the studyable, frozen-stat catalog (G1.2 -- Fairness rule:
   // "known menu", surfaced so chaos is planned-around, never lost-to") ----
@@ -2558,10 +2687,26 @@
     });
     codexListEl.innerHTML=html;
   }
-  function openCodex(){ buildCodex(); if(codexScreen) codexScreen.classList.remove('hidden'); }
-  function closeCodex(){ if(codexScreen) codexScreen.classList.add('hidden'); }
+  function openCodex(){ buildCodex(); if(codexScreen) codexScreen.classList.remove('hidden'); const g=AK.game; if(running && g && g.phase!=='ended') paused=true; }
+  function closeCodex(){ if(codexScreen) codexScreen.classList.add('hidden'); paused=false; }
   if(codexBtn) codexBtn.addEventListener('click', openCodex);
   if(codexClose) codexClose.addEventListener('click', closeCodex);
+
+  // ---- PAUSE + FORFEIT: the loop skips AK.update while paused ----
+  const pauseBtn=document.getElementById('pausebtn');
+  const pauseOverlay=document.getElementById('pauseoverlay');
+  const forfeitBtn=document.getElementById('forfeitbtn');
+  function setPaused(on){
+    paused=!!on;
+    if(pauseOverlay && pauseOverlay.classList) pauseOverlay.classList.toggle('hidden', !paused);
+  }
+  if(pauseBtn) pauseBtn.addEventListener('click', ()=>{ const g=AK.game; if(!g || g.phase==='ended') return; setPaused(!paused); });
+  if(pauseOverlay) pauseOverlay.addEventListener('click', ()=> setPaused(false));
+  if(forfeitBtn) forfeitBtn.addEventListener('click', (e)=>{
+    if(e && e.stopPropagation) e.stopPropagation();
+    const g=AK.game; setPaused(false);
+    if(g && g.phase!=='ended'){ g.phase='ended'; g.result='lose'; }  // loop's ended check routes to showResult
+  });
 
   // kill the native mobile long-press "download / save page" menu across the play surface
   stage.addEventListener('contextmenu', e=> e.preventDefault());
@@ -2591,14 +2736,23 @@
   const DB = { view:'slots', editSlot:-1, edit:null, filters:{faction:'all',rarity:'all',owned:'all',variant:'all'} };
 
   function defaultProfile(){
-    return { level:1, owned:STARTER_OWNED.slice(),
+    return { level:1, xp:0, coins:0, trophies:0, owned:STARTER_OWNED.slice(),
       decks:[ {name:'Slow Roll', cards:STARTER_DECK.slice()}, null,null,null,null,null,null,null ],
       active:0 };
   }
   function loadProfile(){
     let p=null; try{ const raw=lsGet('ak_profile'); if(raw) p=JSON.parse(raw); }catch(_){}
-    if(!p || !Array.isArray(p.decks)) p=defaultProfile();
-    p.level = p.level||1; p.owned = Array.isArray(p.owned)?p.owned:STARTER_OWNED.slice();
+    if(!p || typeof p!=='object') p=defaultProfile();
+    else if(!Array.isArray(p.decks)){
+      // shop-first profile: the shop sync shim may write owned/coins before the
+      // game ever ran -- merge it over the starter set instead of dropping it
+      const d=defaultProfile();
+      (Array.isArray(p.owned)?p.owned:[]).forEach(n=>{ if(d.owned.indexOf(n)<0) d.owned.push(n); });
+      d.coins=p.coins||0; d.xp=p.xp||0; d.level=p.level||1; d.trophies=p.trophies||0;
+      p=d;
+    }
+    p.level = p.level||1; p.xp = p.xp||0; p.coins = p.coins||0; p.trophies = p.trophies||0;
+    p.owned = Array.isArray(p.owned)?p.owned:STARTER_OWNED.slice();
     while(p.decks.length<8) p.decks.push(null);
     if(typeof p.active!=='number') p.active=0;
     return p;
@@ -2888,6 +3042,52 @@
   if(dbDetail) dbDetail.addEventListener('click', function(ev){ if(ev.target===dbDetail) closeDetail(); else dbClick(ev); });
 
   // ==========================================================
+  // PROGRESSION -- post-match XP / coins / card drops -> ak_profile.
+  // WIN 40xp+60c+2 drops; LOSS or DRAW 15xp+20c+1 drop; +10xp per Gate
+  // cleared. Drops weighted Common 70 / Rare 22 / Epic 7 / Mythic 1
+  // (Legendary stays shop+draw only); duplicate drop converts to +5 coins.
+  // Level N -> N+1 costs 80 + 40*(N-1) xp, capped at 21 so SLOT_UNLOCK
+  // (Lv 1..21) is fully reachable. Full spec: ecosystem/PROGRESSION_DESIGN.md
+  // ==========================================================
+  const XP_WIN=40, XP_LOSS=15, XP_SECTION=10, COIN_WIN=60, COIN_LOSS=20;
+  const DROP_W=[['Common',70],['Rare',22],['Epic',7],['Mythic',1]];
+  const DUPE_COINS=5, LEVEL_CAP=21;
+  let refreshLobbyChip=function(){};      // rebound to renderChip by the lobby hub below
+  function xpToNext(lv){ return 80 + 40*(lv-1); }
+  function rollDrop(){
+    let t=0; DROP_W.forEach(w=>{ t+=w[1]; });
+    let x=Math.random()*t, rar='Common';
+    for(let i=0;i<DROP_W.length;i++){ x-=DROP_W[i][1]; if(x<0){ rar=DROP_W[i][0]; break; } }
+    const pool=DBCAT.filter(c=> c.rarity===rar);
+    return pool.length ? pool[Math.floor(Math.random()*pool.length)] : null;
+  }
+  function grantMatchRewards(g){
+    try{
+      if(!g || g._rewarded) return null;          // one grant per match, forfeit included
+      g._rewarded=true;
+      if(!DBPROFILE) DBPROFILE=loadProfile();
+      const won = !!g.cleanSweep || g.result==='win';
+      let xp = (won?XP_WIN:XP_LOSS) + XP_SECTION*(g.gatesCleared||0);
+      let coins = won?COIN_WIN:COIN_LOSS;
+      const drops=[];
+      for(let i=0;i<(won?2:1);i++){
+        const c=rollDrop(); if(!c) continue;
+        if(isOwned(c.name)){ coins+=DUPE_COINS; drops.push({name:c.name, rarity:c.rarity, dupe:true}); }
+        else { DBPROFILE.owned.push(c.name); drops.push({name:c.name, rarity:c.rarity, dupe:false}); }
+      }
+      DBPROFILE.xp=(DBPROFILE.xp||0)+xp;
+      DBPROFILE.coins=(DBPROFILE.coins||0)+coins;
+      let lvUp=false;
+      while(DBPROFILE.level<LEVEL_CAP && DBPROFILE.xp>=xpToNext(DBPROFILE.level)){
+        DBPROFILE.xp-=xpToNext(DBPROFILE.level); DBPROFILE.level++; lvUp=true;
+      }
+      saveProfile();
+      try{ refreshLobbyChip(); }catch(_){}
+      return { xp:xp, coins:coins, drops:drops, levelUp:lvUp, level:DBPROFILE.level };
+    }catch(_){ return null; }
+  }
+
+  // ==========================================================
   // LOBBY HUB -- player chip, daily streak, news ticker.
   // The start screen as a real front door. Every DOM/localStorage/
   // prompt/setTimeout touch is guarded so the headless node harness
@@ -2918,6 +3118,7 @@
       if(trEl) trEl.textContent = String(tro);
     }
     renderChip();
+    refreshLobbyChip = renderChip;       // post-match rewards re-render the chip live
     if(chipEl) chipEl.addEventListener('click', function(){
       try{
         if(typeof window.prompt !== 'function') return;

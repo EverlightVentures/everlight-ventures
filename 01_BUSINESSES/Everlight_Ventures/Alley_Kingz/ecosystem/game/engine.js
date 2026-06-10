@@ -702,6 +702,7 @@ function resetEnemyGarrison(section){
   game.units.forEach(u=>{ if(u.owner===0){ u.target=null; u.acquireTarget=null; } });
   game.units = game.units.filter(u=> u.owner!==1);
   projectiles = projectiles.filter(p=> p.owner===0);   // drop enemy shots at the old crew
+  game.traps = [];   // armed traps from the old district are stale debris -- clear them
   // fresh garrison deck for this district faction
   const deckDef = (global.CANON_DECKS||[]).find(d=>d.class===sec.garrison);
   const names = (deckDef && deckDef.cards) || STARTER_DECK_NAMES;
@@ -796,6 +797,8 @@ function updatePan(dt){
 // ==========================================================================
 function updateStorm(dt){
   const s = game.storm; if(!s) return;
+  // FAIRNESS: hold strike countdowns + firing while a map transition freezes combat
+  if(s.phase==='active' && game.transition && game.transition.active) return;
   if(s.phase==='idle'){
     // Section 0 is the teaching district -- no autonomous storm. From section 1 on,
     // the clock rolls. (Section-entry affixes still fire via triggerStormEvent.)
@@ -1581,6 +1584,9 @@ function castSpell(card, owner, x, y){
     }
     case 'trap': {
       // SNARE TRAP: plant a hidden, armed trap. Triggers on enemy cross -> root + dmg.
+      // cap armed traps per side at 6 -- planting over cap retires the oldest
+      const armed = game.traps.filter(t2=> t2.owner===owner && !t2.triggered);
+      if(armed.length >= 6) game.traps.splice(game.traps.indexOf(armed[0]),1);
       game.traps.push({ owner:owner, x:x, y:y, radius:r, dmg:dmg, duration:dur,
                         armT:0.5, triggered:false, life:0 });
       effects.push({type:'spell_trap_set',x,y,color:'#00E0C0',radius:r,dur:0.6,t:0});
@@ -1782,8 +1788,12 @@ function updateAI(dt){
   if(pick.c.type==='spell'){
     if(canDeploy(ai,pick.i) && threats.length){
       const t=threats[0]; deploy(ai,pick.i,t.x,t.y);
+      return;
     }
-    return; // skip if on cooldown or no good target this beat
+    // spell on cooldown / no target -- fall through to the best playable TROOP
+    const troops = playable.filter(p=>p.c.type!=='spell');
+    if(!troops.length) return;
+    pick = troops.sort((a,b)=>(b.c.dmg||b.c.damage||0)-(a.c.dmg||a.c.damage||0))[0];
   }
   deploy(ai,pick.i,gx,gy);
 }
@@ -1863,9 +1873,10 @@ function endMatch(){
   if(game.player.crowns>game.opponent.crowns) game.result='win';
   else if(game.opponent.crowns>game.player.crowns) game.result='lose';
   else {
-    // tiebreak on remaining tower HP
-    const ph=game.player.towers.reduce((s,t)=>s+(t.destroyed?0:t.hp),0);
-    const oh=game.opponent.towers.reduce((s,t)=>s+(t.destroyed?0:t.hp),0);
+    // tiebreak on PERCENT HP of the CURRENT section's towers (enemy towers rebuild
+    // fresh each district -- raw HP would hand the AI every clock-out)
+    const pct = ts=>{ let hp=0,mx=0; ts.forEach(t=>{ mx+=t.maxHp; if(!t.destroyed) hp+=t.hp; }); return mx? hp/mx : 0; };
+    const ph=pct(game.player.towers), oh=pct(game.opponent.towers);
     game.result = ph>oh?'win':oh>ph?'lose':'draw';
   }
   sfx(game.result==='win'?'win':'lose');
