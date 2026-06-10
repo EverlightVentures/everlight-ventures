@@ -124,22 +124,28 @@
 
   #topbar{
     display:flex; align-items:center; justify-content:space-between;
-    padding:8px 12px; gap:10px; font-family:'Cinzel',serif; flex:0 0 auto;
+    padding:2px 10px; gap:8px; font-family:'Cinzel',serif; flex:0 0 auto;
   }
-  .crowns{ display:flex; align-items:center; gap:6px; font-weight:700; font-size:15px; }
+  .crowns{ display:flex; align-items:center; gap:5px; font-weight:700; font-size:13px; }
   .crowns .me{ color:var(--blue); } .crowns .foe{ color:var(--red); }
+  /* Clash-standard clock: big bold Cinzel gold on a dark pill -- unmissable */
   #timer{
-    font-family:'Inter',monospace; font-weight:700; font-size:18px;
+    font-family:'Cinzel',serif; font-weight:900; font-size:22px; line-height:1;
     color:var(--gold-hi); letter-spacing:0.05em;
-    padding:3px 12px; border:1px solid rgba(212,175,55,0.4); border-radius:8px;
-    background:rgba(212,175,55,0.06);
+    padding:1px 10px; border:1px solid rgba(212,175,55,0.5); border-radius:9px;
+    background:rgba(8,8,14,0.85);
+    text-shadow:0 0 12px rgba(212,175,55,0.35);
   }
-  #timerwrap{ display:flex; flex-direction:column; align-items:center; gap:3px; }
+  #timerwrap{ display:flex; flex-direction:column; align-items:center; gap:2px; }
   #speedbadge{
-    font-family:'Inter',monospace; font-weight:700; font-size:10px; letter-spacing:0.08em;
+    font-family:'Inter',monospace; font-weight:700; font-size:11px; letter-spacing:0.08em;
     color:var(--gold-hi); opacity:0.9; padding:1px 7px; border-radius:6px;
     background:rgba(212,175,55,0.10); border:1px solid rgba(212,175,55,0.25); white-space:nowrap;
   }
+  /* pace phases color-shift the badge: 0.75x grey, 1.5x gold, 2x orange, 4x red */
+  #speedbadge.p075{ color:var(--steel); border-color:var(--steel); background:rgba(120,120,130,0.08); }
+  #speedbadge.p2{ color:#ff9a3a; border-color:#ff9a3a; background:rgba(255,154,58,0.10); }
+  #speedbadge.p4{ color:#ff5a5a; border-color:#ff5a5a; background:rgba(255,90,90,0.12); }
   #speedbadge.sudden{ color:#fff; background:rgba(214,40,40,0.92); border-color:#ff5a5a; animation:sdpulse 0.6s infinite alternate; }
   @keyframes sdpulse{ from{box-shadow:0 0 0 rgba(255,40,40,0);} to{box-shadow:0 0 14px rgba(255,60,60,0.95);} }
   #phasealert{
@@ -159,18 +165,19 @@
 
   /* ---------- CONVOY BAR: mini-map road strip + storm chip + codex button ---------- */
   #convoybar{
-    display:flex; align-items:center; gap:8px; padding:0 12px 6px; flex:0 0 auto;
+    display:flex; align-items:center; gap:8px; padding:0 10px 2px; flex:0 0 auto;
   }
   #minimap{ display:flex; align-items:center; gap:0; flex:1; }
-  #minimap .road{ position:relative; display:flex; align-items:center; width:100%; height:22px; }
+  #minimap .road{ position:relative; display:flex; align-items:center; width:100%; height:20px; }
   #minimap .node{
-    position:relative; z-index:2; flex:0 0 auto; width:20px; height:20px; border-radius:50%;
+    position:relative; z-index:2; flex:0 0 auto; width:18px; height:18px; border-radius:50%;
     display:flex; align-items:center; justify-content:center;
-    font-family:'Cinzel',serif; font-weight:900; font-size:10px; color:var(--steel);
+    font-family:'Cinzel',serif; font-weight:900; font-size:9px; color:var(--steel);
     background:#0c0c14; border:1.5px solid var(--steel);
   }
   #minimap .node.done{ color:#0a0a0a; background:linear-gradient(180deg,var(--gold-hi),var(--gold-lo)); border-color:var(--gold-hi); }
-  #minimap .node.cur{ color:var(--gold-hi); border-color:var(--gold-hi); box-shadow:0 0 10px rgba(212,175,55,0.6); }
+  #minimap .node.cur{ color:var(--gold-hi); border-color:var(--gold-hi); animation:nodepulse 1.1s infinite alternate; }
+  @keyframes nodepulse{ from{ box-shadow:0 0 4px rgba(212,175,55,0.35); } to{ box-shadow:0 0 12px rgba(212,175,55,0.9); } }
   #minimap .node .star{ position:absolute; top:-9px; font-size:9px; color:var(--gold-hi); filter:drop-shadow(0 1px 2px #000); }
   #minimap .seg{ flex:1; height:3px; background:linear-gradient(90deg,var(--steel),#0c0c14); z-index:1; }
   #minimap .seg.done{ background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi)); }
@@ -186,9 +193,9 @@
   #stormchip.objective{ color:var(--gold-hi); border-color:var(--gold-hi); }
   @keyframes chippulse{ from{opacity:0.65;} to{opacity:1; box-shadow:0 0 10px rgba(212,175,55,0.5);} }
   #codexbtn{
-    flex:0 0 auto; cursor:pointer; width:24px; height:24px; border-radius:50%;
+    flex:0 0 auto; cursor:pointer; width:20px; height:20px; border-radius:50%;
     border:1px solid rgba(212,175,55,0.4); background:rgba(212,175,55,0.08); color:var(--gold-hi);
-    font-family:'Cinzel',serif; font-weight:900; font-size:13px; line-height:1; padding:0;
+    font-family:'Cinzel',serif; font-weight:900; font-size:12px; line-height:1; padding:0;
   }
   #codexbtn:active{ transform:scale(0.94); }
   #pausebtn{
@@ -209,6 +216,7 @@
   }
 
   #boardwrap{ position:relative; flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center;
+    overflow:hidden; /* the TILT_BOOSTed flat canvas box may run taller than the slot; clip it so it never bleeds over the bars */
     /* full-bleed: any letterbox margin is lit ATMOSPHERE, never dead black (operator 2026-06-08) */
     background:
       radial-gradient(130% 90% at 50% 38%, rgba(212,175,55,0.09), rgba(212,175,55,0) 58%),
@@ -263,7 +271,7 @@
     border:none; border-radius:0;
     box-shadow:0 0 34px rgba(212,175,55,0.12);
     background:var(--vanta);
-    max-width:100%; max-height:100%;
+    max-width:100%; flex:0 0 auto; /* no max-height: resize() may TILT_BOOST past 100%; boardwrap clips */
   }
   #countdown{
     position:absolute; inset:0; display:none; align-items:center; justify-content:center;
@@ -273,11 +281,11 @@
   }
 
   /* ---------- bottom: energy + hand ---------- */
-  #dock{ flex:0 0 auto; padding:6px 10px 12px; }
-  #energywrap{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
-  #energylabel{ font-family:'Cinzel',serif; font-size:11px; color:var(--gold-lo); letter-spacing:0.1em; width:54px; }
+  #dock{ flex:0 0 auto; padding:4px 8px 6px; }
+  #energywrap{ display:flex; align-items:center; gap:6px; margin-bottom:5px; }
+  #energylabel{ font-family:'Cinzel',serif; font-size:9px; color:var(--gold-lo); letter-spacing:0.1em; width:46px; }
   #energybar{
-    position:relative; flex:1; height:14px; border-radius:8px;
+    position:relative; flex:1; height:11px; border-radius:7px;
     background:#0c0c14; border:1px solid rgba(212,175,55,0.25); overflow:hidden;
   }
   #energyfill{
@@ -288,11 +296,11 @@
   #energypips{ position:absolute; inset:0; display:flex; }
   #energypips span{ flex:1; border-right:1px solid rgba(5,5,7,0.7); }
   #energypips span:last-child{ border-right:none; }
-  #energynum{ font-family:'Inter',monospace; font-weight:700; font-size:14px; color:var(--gold-hi); width:42px; text-align:right; }
+  #energynum{ font-family:'Inter',monospace; font-weight:700; font-size:12px; color:var(--gold-hi); width:36px; text-align:right; }
 
-  #hand{ display:flex; gap:6px; justify-content:center; }
+  #hand{ display:flex; gap:5px; justify-content:center; }
   .card{
-    position:relative; cursor:pointer; flex:1; max-width:96px; aspect-ratio:3/4;
+    position:relative; cursor:pointer; flex:1; max-width:72px; aspect-ratio:3/4;
     border-radius:9px; border:1.5px solid var(--steel); overflow:hidden;
     background:linear-gradient(170deg,#15151f,#0a0a10);
     transition:transform 120ms ease, box-shadow 120ms ease, border-color 120ms ease;
@@ -302,33 +310,33 @@
   .card.cantafford{ opacity:0.45; }
   /* full-art portrait fills the card; the glyph sits behind as fallback if the art 404s */
   .card .art{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:linear-gradient(170deg,#15151f,#0a0a10); }
-  .card .art .glyph{ font-family:'Cinzel',serif; font-weight:900; font-size:30px; color:var(--gold-lo); opacity:0.85; }
+  .card .art .glyph{ font-family:'Cinzel',serif; font-weight:900; font-size:23px; color:var(--gold-lo); opacity:0.85; }
   .card .art img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center top; }
   .card .scrim{ position:absolute; left:0; right:0; bottom:0; height:56%; z-index:2;
     background:linear-gradient(180deg, transparent, rgba(6,6,12,0.92) 62%); }
   .card .cost{
-    position:absolute; top:-1px; left:-1px; min-width:22px; height:22px; z-index:3;
+    position:absolute; top:-1px; left:-1px; min-width:17px; height:17px; z-index:3;
     display:flex; align-items:center; justify-content:center;
-    font-family:'Inter',monospace; font-weight:700; font-size:13px; color:#0a0a0a;
-    background:linear-gradient(180deg,#b14bff,#7a3cff); border-radius:9px 0 9px 0; padding:0 4px;
+    font-family:'Inter',monospace; font-weight:700; font-size:11px; color:#0a0a0a;
+    background:linear-gradient(180deg,#b14bff,#7a3cff); border-radius:9px 0 9px 0; padding:0 3px;
     box-shadow:0 1px 3px rgba(0,0,0,0.5);
   }
-  .card .crown{ position:absolute; top:2px; right:4px; font-size:12px; z-index:3; filter:drop-shadow(0 1px 2px #000); }
+  .card .crown{ position:absolute; top:2px; right:3px; font-size:10px; z-index:3; filter:drop-shadow(0 1px 2px #000); }
   .card .nm{
-    position:absolute; left:0; right:0; bottom:12px; z-index:3; padding:0 3px;
-    font-family:'Cinzel',serif; font-weight:700; font-size:10px; line-height:1.05;
+    position:absolute; left:0; right:0; bottom:10px; z-index:3; padding:0 2px;
+    font-family:'Cinzel',serif; font-weight:700; font-size:8px; line-height:1.05;
     text-align:center; color:var(--ivory); text-shadow:0 1px 3px #000;
   }
   .card .role{
-    position:absolute; left:0; right:0; bottom:5px; z-index:3;
-    font-family:'Inter',sans-serif; font-weight:700; font-size:7px;
+    position:absolute; left:0; right:0; bottom:4px; z-index:3;
+    font-family:'Inter',sans-serif; font-weight:700; font-size:6px;
     letter-spacing:0.08em; text-transform:uppercase; text-align:center; color:var(--gold-lo);
   }
   .card .facbar{ position:absolute; left:0; right:0; bottom:0; height:3px; z-index:3; border-radius:0 0 7px 7px; }
   /* ---- SPELL cards: visually distinct from troops (Combat Spec section 6) ---- */
   .card.spell{ border-style:dashed; border-color:var(--gold-hi); }
   .card.spell .art{ background:radial-gradient(circle at 50% 38%, rgba(212,175,55,0.22), #0a0a12 70%); }
-  .card.spell .art .glyph{ font-size:40px; color:var(--gold-hi); opacity:0.95; filter:drop-shadow(0 0 8px rgba(212,175,55,0.6)); }
+  .card.spell .art .glyph{ font-size:30px; color:var(--gold-hi); opacity:0.95; filter:drop-shadow(0 0 8px rgba(212,175,55,0.6)); }
   .card.spell .cost{ background:linear-gradient(180deg,#f3d77a,#D4AF37); }
   .card .spelltag{
     position:absolute; top:2px; right:3px; z-index:3;
@@ -339,15 +347,15 @@
   .card.spell.oncd{ opacity:0.5; }
   .card.spell .cdmask{
     position:absolute; inset:0; z-index:4; display:flex; align-items:center; justify-content:center;
-    font-family:'Inter',monospace; font-weight:700; font-size:18px; color:#fff;
+    font-family:'Inter',monospace; font-weight:700; font-size:15px; color:#fff;
     background:rgba(5,5,10,0.62); text-shadow:0 1px 4px #000; pointer-events:none;
   }
   /* ---- ground / air / splash category badge on every card ---- */
   .card .catbadge{
-    position:absolute; bottom:18px; right:2px; z-index:3; display:flex; gap:1px;
+    position:absolute; bottom:15px; right:2px; z-index:3; display:flex; gap:1px;
   }
   .card .catbadge .cb{
-    font-size:8px; line-height:1; padding:1px 2px; border-radius:3px;
+    font-size:7px; line-height:1; padding:1px 2px; border-radius:3px;
     background:rgba(5,5,10,0.72); border:1px solid rgba(212,175,55,0.35);
     color:var(--gold-hi); font-family:'Inter',sans-serif; font-weight:700;
   }
@@ -356,10 +364,10 @@
 
   /* ---------- card info popover (what does this card do) ---------- */
   #dock{ position:relative; }
-  /* Compact, pinned to the TOP (over the enemy half, away from your deploy zone),
-     and ALWAYS pointer-events:none so taps pass straight through to the board. */
+  /* Compact, floats just ABOVE the dock (zero flow space -- it never pushes the
+     board), and ALWAYS pointer-events:none so taps pass straight through. */
   #cardinfo{
-    position:fixed; top:46px; left:50%; transform:translate(-50%,-6px);
+    position:absolute; bottom:calc(100% + 4px); left:50%; transform:translate(-50%,6px);
     width:max-content; max-width:min(92vw,380px);
     z-index:40; padding:6px 11px; border-radius:10px;
     background:linear-gradient(170deg,rgba(20,19,31,0.94),rgba(8,8,16,0.94));
@@ -388,9 +396,10 @@
   #cardinfo .ci-ability{ margin-top:3px; font-size:9px; line-height:1.3; color:var(--ivory); }
   #cardinfo .ci-ability b{ color:var(--gold-hi); font-weight:700; }
   #hint{
-    text-align:center; font-size:10px; color:var(--steel); margin-top:6px; height:12px;
+    text-align:center; font-size:9px; color:var(--steel); margin-top:4px; height:11px;
     letter-spacing:0.03em;
   }
+  #hint.hidden{ display:none; } /* veterans (3rd match on) get the pixels back */
 
   /* ============================================================
      RESPONSIVE -- PORTRAIT-ONLY (any phone, any browser, Clash-style).
@@ -870,8 +879,8 @@
 </div>
 
 <!-- order matters: canon globals first, then the engine that consumes them -->
-<script src="canon.js?v=28"></script>
-<script src="engine.js?v=28"></script>
+<script src="canon.js?v=29"></script>
+<script src="engine.js?v=29"></script>
 <script>
 (function(){
   'use strict';
@@ -1037,6 +1046,12 @@
     const aspect = ARENA_W / ARENA_H;
     let w = availW, h = w / aspect;
     if(h > availH){ h = availH; w = h * aspect; }
+    // TILT BOOST: rotateX projects the board ~cos(TILT_DEG) shorter, so a height-fit
+    // canvas only LOOKS ~95% tall. Grow the element height by 1/cos so the tilted
+    // board visually fills the slot; capped so the flat box never exceeds availH*1.12.
+    // boardwrap overflow:hidden clips the spill; canvasToArena() reads live
+    // offsetWidth/offsetHeight so tap mapping stays exact at any element size.
+    if(TILT_ON){ h = Math.min(h / TILT_COS, availH * 1.12); }
     canvas.style.width  = Math.floor(w) + 'px';
     canvas.style.height = Math.floor(h) + 'px';
     // rebuild the cached static-bg if the backing pixel size changed (it is fixed
@@ -1383,7 +1398,7 @@
       return;
     }
 
-    const r = 0.62 * sx;                 // ~one deployed-token footprint (matches drawUnit baseR)
+    const r = 0.76 * sx;                 // ~one deployed-token footprint (matches drawUnit baseR 0.78)
     // valid => gold/green wash; invalid => red, dimmer
     const tint = drag.valid ? PAL.gold : PAL.red;
     ctx.save();
@@ -1621,7 +1636,7 @@
     const pal = c.palette || {base:c.color, dark:'#222', light:'#aaa'};
     const seed = c.silhouetteSeed||0;
     const jit = seedJit(seed,1,1);                              // -1..1
-    const baseR = 0.64*(1 + seedJit(seed,2,0.12));             // bigger + easier to see (operator 2026-06-08: "make characters a little bigger")
+    const baseR = 0.78*(1 + seedJit(seed,2,0.12));             // bigger field units (operator 2026-06-09: "cards on field are too small"; was 0.64)
     // squash/stretch: deploy pop + a quick punch when it just attacked
     const dscale = (u.deployScale!=null? u.deployScale : 1);
     const punch  = u.muzzle>0 ? 1 + (u.muzzle/0.15)*0.22 : 1;   // up to +22% on fire
@@ -2077,11 +2092,15 @@
     // timer
     const tt = Math.max(0,Math.ceil(g.time));
     timerEl.textContent = Math.floor(tt/60)+':'+String(tt%60).padStart(2,'0');
-    // pace badge: current sim speed, or SUDDEN DEATH in the final minute
+    // pace badge: current sim speed, or SUDDEN DEATH in the final minute.
+    // Color shifts with the pace phase: 0.75x grey, 1.5x gold, 2x orange, 4x red.
     if(speedBadgeEl){
       const sp = g.gameSpeed || 0.75;
-      if(g.suddenDeath){ speedBadgeEl.textContent='SUDDEN DEATH'; speedBadgeEl.classList.add('sudden'); }
-      else { speedBadgeEl.textContent = (sp===2?'2x':sp+'x'); speedBadgeEl.classList.remove('sudden'); }
+      if(g.suddenDeath){ speedBadgeEl.textContent='SUDDEN DEATH'; speedBadgeEl.className='sudden'; }
+      else {
+        speedBadgeEl.textContent = (sp===2?'2x':sp+'x');
+        speedBadgeEl.className = sp>=4?'p4' : sp>=2?'p2' : sp>=1.5?'' : 'p075';
+      }
     }
     // dog-pun phase banner: pop-in + fade-out, driven by phaseAlert.ttl
     if(phaseAlertEl){
@@ -2429,7 +2448,7 @@
   // tapping a DEPLOYED troop on the board: same popover, lingers a touch longer
   function showUnitInfo(card){
     clearTimeout(infoTimer);
-    renderCardInfo(card);                       // reuse the same compact top-pinned popover
+    renderCardInfo(card);                       // reuse the same compact above-dock popover
     infoTimer=setTimeout(closeCardInfo, 4000);  // never linger forever
   }
 
@@ -2614,6 +2633,16 @@
     // convoy drives difficulty per section; this just seeds section-0 (the_lot=0)
     if(AK.setDifficulty) AK.setDifficulty(ARENA_DIFFICULTY[ACTIVE_ARENA] || 0);
     lastHandSig=''; _lastRenderSection=-1; _bgPrevSection=null; _lastMiniSig='';
+    // ONBOARDING HINT: veterans know the controls -- show it for the first 2
+    // matches only, then hide it (display:none = zero layout, board gets the px).
+    // lsGet/lsSet are the guarded helpers, so the headless harness just shows it.
+    try{
+      if(hintEl){
+        const seen = parseInt(lsGet('ak_hint_seen')||'0',10)||0;
+        if(seen>=2){ hintEl.classList.add('hidden'); }
+        else { hintEl.classList.remove('hidden'); lsSet('ak_hint_seen', String(seen+1)); }
+      }
+    }catch(_e){}
     startScreen.classList.add('hidden');
     resultScreen.classList.add('hidden');
     stage.classList.remove('hidden');

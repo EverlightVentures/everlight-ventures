@@ -51,14 +51,26 @@ DESCRIPTION_TMPL = (
 
 
 def fail_closed_key_check(key: str) -> None:
-    """Refuse anything that is not an explicit Stripe TEST secret key."""
+    """Refuse anything that is not an explicit Stripe TEST secret key,
+    unless the operator-greenlight env gate is set.
+
+    AK_STRIPE_ALLOW_LIVE=1 lifts the live refusal. Set ONLY on explicit
+    operator decision (Rich greenlit live 2026-06-09: "greenlight stripe,
+    this site is live" + "u have all the keys u need" -- only live keys
+    exist in the credential store). Default stays fail-closed.
+    """
+    allow_live = os.environ.get("AK_STRIPE_ALLOW_LIVE", "") == "1"
     if not key:
         print("REFUSED: STRIPE_SECRET_KEY is not set. Export a TEST key (sk_test_...) and re-run.")
         sys.exit(2)
     if key.startswith("sk_live") or key.startswith("rk_live"):
+        if allow_live:
+            print("LIVE MODE: operator greenlight gate (AK_STRIPE_ALLOW_LIVE=1) is set.")
+            print("Creating products in Stripe LIVE mode.")
+            return
         print("REFUSED: STRIPE_SECRET_KEY is a LIVE key. This seeder is TEST MODE ONLY.")
-        print("Live Stripe wiring stays gated until operator + legal greenlight")
-        print("(AK_SHOP_TEST_MODE flip with a reviewed key). No API call was made.")
+        print("Live wiring needs the operator greenlight gate: AK_STRIPE_ALLOW_LIVE=1.")
+        print("No API call was made.")
         sys.exit(2)
     if not (key.startswith("sk_test_") or key.startswith("rk_test_")):
         print("REFUSED: STRIPE_SECRET_KEY does not look like a Stripe TEST secret key")
