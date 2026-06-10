@@ -1,0 +1,38 @@
+{
+  "ts_utc": "2026-04-27T19:27:00.576151+00:00",
+  "catch_path": "manual",
+  "source_channel": "email",
+  "from_name": "Chris Smith",
+  "from_email": "chris.smith@example.com",
+  "phone": "(901) 555-0173",
+  "address": "",
+  "city": "Memphis",
+  "state": "TN",
+  "motivation": "probate",
+  "urgency": "unspecified",
+  "condition": "needs_repair",
+  "sentiment": "positive",
+  "compliance_flags": [
+    "TN_warm_inbound_no_cold_block",
+    "TN_HB_2537_wholesaler_disclosure_required",
+    "TN_Code_62-13-104_surety_bond_check_before_close",
+    "probate_check_for_retained_counsel_before_negotiating"
+  ],
+  "operator_action_queue": [
+    "Reply within 30 min with 1 qualifying question + thank-you. Do not pitch number yet.",
+    "State-specific compliance pre-check via state_gates.json[TN].",
+    "Tag @hammer in #broker-pipeline + @justine for state-gate review."
+  ],
+  "raw_body_excerpt": "\nHi Rich,\n\nThanks for reaching out. Yeah I might be interested -- the property is in\nMemphis on South Parkway. My dad passed away last year and we're still\nsorting probate. Place needs work, hasn't been lived in for about 8 months.\nI'm not in a huge rush but I'd love to hear what you can offer.\n\nYou can reach me at chris.smith@example.com or 901-555-0173.\n\nChris\n",
+  "raw_body_length": 365,
+  "real_reply": true,
+  "matched_outbound": {
+    "persona_id": "henry_hammond",
+    "source": "send_authority_gate",
+    "original_subject": "",
+    "original_ts": "2026-05-18T01:43:09.006019+00:00",
+    "match_type": "domain_fallback",
+    "matched_against": "seller@example.com"
+  },
+  "matcher_ts_utc": "2026-05-18T01:49:32.173651+00:00"
+}

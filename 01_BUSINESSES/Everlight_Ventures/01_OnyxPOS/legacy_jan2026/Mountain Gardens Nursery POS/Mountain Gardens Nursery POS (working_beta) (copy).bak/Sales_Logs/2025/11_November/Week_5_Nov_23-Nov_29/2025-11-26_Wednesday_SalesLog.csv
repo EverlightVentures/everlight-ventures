@@ -1,0 +1,7 @@
+Date,Time,Transaction_ID,Employee_ID,Employee_Name,Category,Subcategory,Item_Name,Quantity,Size,Item_Description,Unit_Price,Subtotal,Tax_Rate,Tax_Amount,Line_Total,Payment_Method,Amount_Received,Change_Due,Notes
+2025-11-26,10:17:59,TXN20251126101652,1001,richard,Product,Pet Food & Supplies,fish food,1,s,tetrat fish food,3.00,3.00,0.0825,0.25,3.25,,,,
+2025-11-26,10:17:59,TXN20251126101652,1001,richard,,,=== INVOICE TOTAL ===,1,,,,3.00,0.0825,0.25,3.25,Cash,5.00,1.75,change declined
+,,,,,,,,,,,,,,,,,,,
+2025-11-26,13:26:43,TXN20251126132413,1001,richard,Product,Soil & Amendments,osbc,2,l,3.5 cu,19.99,39.98,0.0825,3.30,43.28,,,,
+2025-11-26,13:26:43,TXN20251126132413,1001,richard,,,=== INVOICE TOTAL ===,1,,,,39.98,0.0825,3.30,43.28,Cash,60.00,16.72,that was cool customer
+,,,,,,,,,,,,,,,,,,,

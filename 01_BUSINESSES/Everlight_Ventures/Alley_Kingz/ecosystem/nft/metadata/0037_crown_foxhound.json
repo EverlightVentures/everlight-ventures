@@ -1,0 +1,144 @@
+{
+  "name": "Alley Kingz #0037 Crown Foxhound",
+  "symbol": "BCARDI",
+  "description": "Crown Foxhound is a Mythic Assassin of the K9 Circuitry. The Foxhound pilots the Railhound -- turret-utility rig -- mounted gun, drone bay, rail platform. Signature move: \"Royal Hunt\". A playable Alley Kingz battle card on Solana -- the NFT is the card, with gameplay stats written on-chain. Cosmetic art plus gameplay stats; in-game items are for entertainment and utility, not investments. No promised returns.",
+  "image": "ipfs://<IMAGE_CID_DIR>/0037_crown_foxhound.png",
+  "animation_url": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_CrownFoxhound_RoyalHunt_Seedance_V1.mp4",
+  "external_url": "https://everlightventures.io/cards/0037",
+  "attributes": [
+    {
+      "trait_type": "Card Number",
+      "value": "0037"
+    },
+    {
+      "trait_type": "Faction",
+      "value": "K9 Circuitry"
+    },
+    {
+      "trait_type": "Faction Id",
+      "value": "k9_circuitry"
+    },
+    {
+      "trait_type": "Breed",
+      "value": "Foxhound"
+    },
+    {
+      "trait_type": "Name",
+      "value": "Crown Foxhound"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Mythic"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Assassin"
+    },
+    {
+      "trait_type": "Cost",
+      "value": 11
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Turret Break"
+    },
+    {
+      "trait_type": "HP",
+      "value": 1600
+    },
+    {
+      "trait_type": "Damage",
+      "value": 200
+    },
+    {
+      "trait_type": "Attack Speed",
+      "value": 1.0
+    },
+    {
+      "trait_type": "Move Speed",
+      "value": 1.0
+    },
+    {
+      "trait_type": "Range",
+      "value": 1
+    },
+    {
+      "trait_type": "Ability",
+      "value": "Royal Hunt"
+    },
+    {
+      "trait_type": "Ability Cooldown",
+      "value": 18
+    },
+    {
+      "trait_type": "Queen Target",
+      "value": true
+    },
+    {
+      "trait_type": "Rig",
+      "value": "Railhound"
+    },
+    {
+      "trait_type": "Rig Class",
+      "value": "turret_util"
+    },
+    {
+      "trait_type": "Weapon Mod",
+      "value": "incendiary"
+    }
+  ],
+  "properties": {
+    "category": "video",
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "files": [
+      {
+        "uri": "ipfs://<IMAGE_CID_DIR>/0037_crown_foxhound.png",
+        "type": "image/png"
+      },
+      {
+        "uri": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_CrownFoxhound_RoyalHunt_Seedance_V1.mp4",
+        "type": "video/mp4"
+      }
+    ]
+  },
+  "onchain_attributes": [
+    {
+      "key": "hp",
+      "value": "1600"
+    },
+    {
+      "key": "damage",
+      "value": "200"
+    },
+    {
+      "key": "attack_speed",
+      "value": "1.0"
+    },
+    {
+      "key": "move_speed",
+      "value": "1.0"
+    },
+    {
+      "key": "range",
+      "value": "1"
+    },
+    {
+      "key": "cost",
+      "value": "11"
+    },
+    {
+      "key": "rarity",
+      "value": "Mythic"
+    },
+    {
+      "key": "ability_id",
+      "value": "royal_hunt"
+    },
+    {
+      "key": "queen_target",
+      "value": "1"
+    }
+  ]
+}

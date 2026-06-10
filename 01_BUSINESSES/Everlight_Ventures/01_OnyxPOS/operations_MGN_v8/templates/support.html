@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block page_title %}Support Assistant{% endblock %}
+{% block header_emoji %}🛠️{% endblock %}
+{% block header_title %}Support Assistant{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom:16px;">
+  <div class="card-header">
+    <div class="card-title">Quick diagnostics</div>
+  </div>
+  <div class="card-body">
+    <p class="card-subtitle" style="margin-bottom: 16px;">Self-check your setup in seconds.</p>
+    <button class="btn btn-primary" id="runChecks">Run checks</button>
+    <div id="checkResults" style="margin-top:16px;"></div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px;">
+  <div class="card-header">
+    <div class="card-title">Report an issue</div>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="{{ url_for('support_report') }}">
+      <div class="form-group">
+        <label class="form-label">Subject</label>
+        <input class="form-input" name="subject" placeholder="Short summary" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Details</label>
+        <textarea class="form-input" name="details" rows="4" placeholder="What happened?"></textarea>
+      </div>
+      <button class="btn btn-primary" type="submit">Submit</button>
+    </form>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px;">
+  <div class="card-header">
+    <div class="card-title">Recent tickets</div>
+  </div>
+  <div class="card-body">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Created</th>
+          <th>Subject</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in tickets %}
+        <tr>
+          <td>{{ t.Created_At }}</td>
+          <td>{{ t.Subject }}</td>
+          <td>{{ t.Status }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="3">No tickets yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">Common fixes</div>
+  </div>
+  <div class="card-body">
+    <ul style="line-height:1.8;">
+      <li>Inventory CSV import not working? Upgrade to Pro and re-open the import page.</li>
+      <li>Receipts not emailing? Set SMTP env vars and retry.</li>
+      <li>Stripe checkout errors? Verify Stripe keys and price IDs.</li>
+    </ul>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  const btn = document.getElementById('runChecks');
+  const out = document.getElementById('checkResults');
+  btn.addEventListener('click', async () => {
+    out.textContent = 'Running checks...';
+    try {
+      const res = await fetch('/support/diagnostics');
+      const data = await res.json();
+      const checks = data.checks || {};
+      const rows = Object.entries(checks).map(([k, v]) => {
+        const status = (v === true || v) ? '✅' : '❌';
+        return `<div>${status} <strong>${k}</strong>: ${v}</div>`;
+      }).join('');
+      out.innerHTML = rows || 'No diagnostics available.';
+    } catch (e) {
+      out.textContent = 'Diagnostics failed.';
+    }
+  });
+</script>
+{% endblock %}

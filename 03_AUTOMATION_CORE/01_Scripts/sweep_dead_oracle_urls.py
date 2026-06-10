@@ -6,13 +6,13 @@ Usage:
     python3 sweep_dead_oracle_urls.py --dry-run     # default; print proposed changes only
     python3 sweep_dead_oracle_urls.py --apply       # actually write changes
 
-Mapping table (per the 2026-05-12 dashboard reorg):
+Mapping table (per the 2026-05-12 dashboard reorg; lucrex+blinko rehomed 2026-05-24):
   http://163.192.19.196:8504              -> http://127.0.0.1:2200
   http://163.192.19.196:8000              -> http://127.0.0.1:2201
   http://129.159.38.250:8504              -> http://127.0.0.1:2200
   http://129.159.38.250:8502              -> http://127.0.0.1:2100
-  http://129.159.38.250:8080/lucrex/      -> KEEP + flag (Next.js, future band 2700)
-  http://129.159.38.250:1111              -> KEEP + flag (Blinko, planned for e5-mother)
+  http://129.159.38.250:8080/lucrex/      -> http://127.0.0.1:2702   (rehomed: lucrex-os Next.js, 2700 band port 2702)
+  http://129.159.38.250:1111              -> http://e5-mother:1111   (rehomed: Blinko RAG now on e5-mother, tailnet)
   http://129.159.38.250:5678              -> KEEP + flag (n8n parked permanently)
   http://163.192.19.196:8676              -> http://127.0.0.1:2300
   http://163.192.19.196:8677              -> http://127.0.0.1:2301
@@ -41,13 +41,15 @@ MAPPINGS = [
     (r"http://163\.192\.19\.196:8677",  "http://127.0.0.1:2301", "163.196:8677->2301"),
     (r"http://129\.159\.38\.250:8504",  "http://127.0.0.1:2200", "129.250:8504->2200"),
     (r"http://129\.159\.38\.250:8502",  "http://127.0.0.1:2100", "129.250:8502->2100"),
+    # Rehomed 2026-05-24 (graduated from FLAG_ONLY -> live target):
+    #   lucrex pattern MUST precede the bare :8080 (none here) and is path-specific.
+    (r"http://129\.159\.38\.250:8080/lucrex/?", "http://127.0.0.1:2702/", "129.250:8080/lucrex->2702"),
+    (r"http://129\.159\.38\.250:1111",  "http://e5-mother:1111", "129.250:1111->e5-mother"),
 ]
 
-# Patterns that get FLAGGED (not remapped) because no local equivalent yet
+# Patterns that get FLAGGED (not remapped) because no live target / intentionally parked.
 FLAG_ONLY = [
-    (r"http://129\.159\.38\.250:8080/lucrex", "lucrex (Next.js, awaits 2700-band rehome)"),
-    (r"http://129\.159\.38\.250:1111",         "blinko RAG (planned for e5-mother)"),
-    (r"http://129\.159\.38\.250:5678",         "n8n (parked permanently 2026-04-24)"),
+    (r"http://129\.159\.38\.250:5678",         "n8n (parked permanently 2026-04-24, refs deletable)"),
 ]
 
 SKIP_DIRS = {"__pycache__", "node_modules", ".git", "_logs", "cache",

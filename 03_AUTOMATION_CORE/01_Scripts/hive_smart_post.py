@@ -56,7 +56,7 @@ CHANNELS = {
     "broker-pipeline": "C0AMVEWLT9D",
 }
 
-BLINKO_URL = "http://129.159.38.250:1111"
+BLINKO_URL = "http://e5-mother:1111"
 PT = timezone(timedelta(hours=-7))  # PDT
 
 # HTML reports served from Oracle

@@ -1,0 +1,144 @@
+{
+  "name": "Alley Kingz #0006 Grit Bulldog",
+  "symbol": "BCARDI",
+  "description": "Grit Bulldog, a Rare Striker in the Boneguard Crew. The Bulldog pilots the Bulldog Rig -- armored bruiser rig -- ram plow, plate armor, slow and unstoppable. Signature move: \"Brawler\". A playable Alley Kingz battle card on Solana -- the NFT is the card, with gameplay stats written on-chain. Cosmetic art plus gameplay stats; in-game items are for entertainment and utility, not investments. No promised returns.",
+  "image": "ipfs://<IMAGE_CID_DIR>/0006_grit_bulldog.png",
+  "animation_url": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_GritBulldog_Bulldog_Seedance_V1.mp4",
+  "external_url": "https://everlightventures.io/cards/0006",
+  "attributes": [
+    {
+      "trait_type": "Card Number",
+      "value": "0006"
+    },
+    {
+      "trait_type": "Faction",
+      "value": "Boneguard Crew"
+    },
+    {
+      "trait_type": "Faction Id",
+      "value": "boneguard_crew"
+    },
+    {
+      "trait_type": "Breed",
+      "value": "Bulldog"
+    },
+    {
+      "trait_type": "Name",
+      "value": "Grit Bulldog"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Striker"
+    },
+    {
+      "trait_type": "Cost",
+      "value": 5
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Pack"
+    },
+    {
+      "trait_type": "HP",
+      "value": 1200
+    },
+    {
+      "trait_type": "Damage",
+      "value": 120
+    },
+    {
+      "trait_type": "Attack Speed",
+      "value": 1.1
+    },
+    {
+      "trait_type": "Move Speed",
+      "value": 0.8
+    },
+    {
+      "trait_type": "Range",
+      "value": 1
+    },
+    {
+      "trait_type": "Ability",
+      "value": "Brawler"
+    },
+    {
+      "trait_type": "Ability Cooldown",
+      "value": 10
+    },
+    {
+      "trait_type": "Queen Target",
+      "value": false
+    },
+    {
+      "trait_type": "Rig",
+      "value": "Bulldog Rig"
+    },
+    {
+      "trait_type": "Rig Class",
+      "value": "bruiser"
+    },
+    {
+      "trait_type": "Weapon Mod",
+      "value": "ram_plow"
+    }
+  ],
+  "properties": {
+    "category": "video",
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "files": [
+      {
+        "uri": "ipfs://<IMAGE_CID_DIR>/0006_grit_bulldog.png",
+        "type": "image/png"
+      },
+      {
+        "uri": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_GritBulldog_Bulldog_Seedance_V1.mp4",
+        "type": "video/mp4"
+      }
+    ]
+  },
+  "onchain_attributes": [
+    {
+      "key": "hp",
+      "value": "1200"
+    },
+    {
+      "key": "damage",
+      "value": "120"
+    },
+    {
+      "key": "attack_speed",
+      "value": "1.1"
+    },
+    {
+      "key": "move_speed",
+      "value": "0.8"
+    },
+    {
+      "key": "range",
+      "value": "1"
+    },
+    {
+      "key": "cost",
+      "value": "5"
+    },
+    {
+      "key": "rarity",
+      "value": "Rare"
+    },
+    {
+      "key": "ability_id",
+      "value": "brawler"
+    },
+    {
+      "key": "queen_target",
+      "value": "0"
+    }
+  ]
+}

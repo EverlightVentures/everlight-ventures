@@ -1,0 +1,11 @@
+rank,company,markets,fit_class,priority,buy_box_size,public_contact_url,notes
+1,New Western,DFW;Houston;FW;Austin;SA,statewide_volume,P1,massive,https://www.newwestern.com/contact,Acquired Big State Houston Oct 2025; 8200 deals/yr; best buyer-side absorber
+2,REI Nation,DFW(Grapevine HQ);Memphis,turnkey_rental,P1,~8K SFR AUM,https://www.reination.com/contact,$1.45B AUM; native DFW office; direct B2B viable
+3,HomeVestors (We Buy Ugly Houses),DFW franchisees;Houston franchisees,franchise_distributed,P2,1100+ franchises,https://www.homevestors.com/franchisee-list-dfw,Pays 50-70% FMV; corporate cold-blast bounces — must scrape franchisee list per-market
+4,Texas Turnkey Properties,DFW,turnkey_rental,P1,medium,https://www.texasturnkey.com/contact,Top TX turnkey per Norada 2026 ranking
+5,CashFlow Texas,DFW;Houston;SA;Austin (Texaplex),turnkey_portfolio,P2,medium,https://www.cashflowtexas.com/contact,Portfolio builder; cleaner inventory only — not for hairy assignments
+6,Maverick Investor Group,TX statewide,passive_turnkey,P3,medium,https://www.maverickinvestorgroup.com/contact,Out-of-state investor channel; needs rehabbed product (lower fit for raw distressed)
+7,Southern Hills Home Buyers,DFW;Houston,family_cash_buyer,P2,small,https://www.southernhillshomebuyers.com/contact,5.0 Google; family-owned; faster decisions
+8,Greater Houston Houses,Houston,local_cash_buyer,P2,small,https://www.greaterhoustonhouses.com/contact,24hr cash offers; 5.0 Google
+9,American Home Buyer,Houston,local_cash_buyer,P3,small,https://www.americanhomebuyer.com/contact,Active cash buyer; lower volume signal
+10,MCB Capital / SFR Growth & Income Fund I,DFW,institutional_fund,P3,institutional,https://www.mcbcap.com/contact,Private fund 2020-formed; DFW SFR-focused; longer cycle but bigger checks

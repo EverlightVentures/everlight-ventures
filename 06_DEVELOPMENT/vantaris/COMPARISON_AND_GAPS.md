@@ -54,7 +54,7 @@ existing Everlight backend infrastructure.
 - Need to: wire create-checkout edge function to gem store UI
 
 ### Blinko RAG (already running)
-- 458 notes at http://129.159.38.250:1111
+- 458 notes at http://e5-mother:1111
 - Need to: use for AI dealer knowledge, player support
 
 ### Deploy

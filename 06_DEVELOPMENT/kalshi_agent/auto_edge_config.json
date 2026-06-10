@@ -2,18 +2,22 @@
   "_doc": "Autonomous edge engine config. live=false => dry-run only (logs candidates, places NOTHING). Flip live=true to let it bet within the caps. Lane modes: 'bet' = real maker orders, 'log' = record to scorecard only (measure, no money), 'alert' = notify only. ENVELOPE: Aggressive, set by Rich 2026-06-04.",
   "live": true,
   "min_net_edge_pct": 0.025,
-  "sanity_max_raw_edge": 0.25,
+  "min_abs_edge_prob": 0.03,
+  "sanity_max_raw_edge": 0.40,
   "override_stale_divergence_cents": 8,
+  "fresh_window_sec": 7200,
   "min_depth_dollars": 2000,
   "max_spread_cents": 6,
-  "per_bet_max_usd": 10.0,
-  "daily_max_usd": 40.0,
-  "total_exposure_max_usd": 60.0,
+  "per_bet_max_usd": 8.0,
+  "daily_max_usd": 24.0,
+  "total_exposure_max_usd": 48.0,
+  "max_new_bets_per_run": 2,
   "min_balance_floor_usd": 20.0,
   "favorite_longshot_max_picks": 3,
+  "favorite_longshot_max_buy_c": 92,
   "lanes": {
     "sharp_sports": "bet",
-    "favorite_longshot": "log",
-    "arbitrage": "alert"
+    "favorite_longshot": "bet",
+    "arbitrage": "off"
   }
 }

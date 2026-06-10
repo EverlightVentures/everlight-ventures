@@ -72,8 +72,10 @@ stop_blinko() {
         fi
         rm -f "$PID_FILE"
     fi
-    # Kill any orphaned processes on port 1111
-    pkill -f "blinko_lite.py" 2>/dev/null
+    # Kill any orphaned server processes. Use an anchored pattern ('...py$') so
+    # this only matches `python3 .../blinko_lite.py` and never an unrelated
+    # command line that merely contains the string (the 2026-06-03 footgun).
+    pkill -f 'blinko_lite\.py$' 2>/dev/null
 }
 
 cleanup() {

@@ -18,3 +18,93 @@
 {"timestamp": "2026-04-24T22:01:33.924787+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 1, "price_reduced_found": 0, "imported_new": 1}
 {"timestamp": "2026-04-24T22:01:59.089444+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
 {"timestamp": "2026-04-24T22:02:33.307714+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 1, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-16T22:00:46.486707+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 1, "price_reduced_found": 0, "imported_new": 1}
+{"timestamp": "2026-05-16T22:02:30.240874+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 1, "fsbo_found": 1, "price_reduced_found": 0, "imported_new": 2}
+{"timestamp": "2026-05-16T22:03:34.024850+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 1, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-16T22:04:38.955615+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-16T22:07:03.299789+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 1, "price_reduced_found": 5, "imported_new": 5}
+{"timestamp": "2026-05-18T22:01:05.357725+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 1, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-18T22:01:56.876503+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 1, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-18T22:02:25.634039+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-18T22:02:49.915687+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-18T22:03:19.229892+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 1, "price_reduced_found": 0, "imported_new": 1}
+{"timestamp": "2026-05-19T22:00:37.105314+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 1, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-19T22:01:16.163759+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 4, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 2}
+{"timestamp": "2026-05-19T22:01:42.110426+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 1, "price_reduced_found": 0, "imported_new": 1}
+{"timestamp": "2026-05-19T22:02:02.964665+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-19T22:02:29.104017+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 1, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-21T22:00:38.245120+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 3, "price_reduced_found": 0, "imported_new": 1}
+{"timestamp": "2026-05-21T22:01:03.191313+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 0, "fsbo_found": 1, "price_reduced_found": 0, "imported_new": 1}
+{"timestamp": "2026-05-21T22:01:33.422420+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 1, "fsbo_found": 1, "price_reduced_found": 0, "imported_new": 2}
+{"timestamp": "2026-05-21T22:01:54.130511+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-21T22:02:18.609629+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 1, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-22T22:00:16.701634+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-22T22:00:30.752029+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-22T22:00:44.967121+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-22T22:00:59.027576+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-22T22:01:13.043802+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-24T22:00:18.913218+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-24T22:00:32.959199+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-24T22:00:46.826174+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-24T22:01:04.269475+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-24T22:01:18.149354+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-26T20:34:14.707793+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-26T20:34:28.524165+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-26T20:34:42.241795+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-26T20:34:56.022475+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-26T20:35:09.741296+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-26T22:00:30.052819+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-26T22:00:44.136733+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-26T22:01:18.017575+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-26T22:01:43.697499+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-26T22:02:13.922022+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-27T22:00:18.622948+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-27T22:00:32.562694+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-27T22:00:46.511233+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-27T22:01:00.919353+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-27T22:01:14.941480+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-28T22:00:32.220889+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-28T22:00:57.593203+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-28T22:01:19.343695+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-28T22:01:34.128559+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-28T22:01:48.492287+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-29T22:00:21.883022+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-29T22:00:41.878491+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-29T22:01:01.315994+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-29T22:01:20.571423+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-29T22:01:41.339614+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-30T22:01:18.242461+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-30T22:01:52.317580+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-30T22:02:13.721149+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-30T22:02:47.822407+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-05-30T22:03:08.509364+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-01T22:02:07.462343+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-01T22:02:58.744585+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 0, "fsbo_found": 1, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-01T22:04:04.398464+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-01T22:04:26.632675+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-01T22:04:51.726501+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-02T22:00:21.123920+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-02T22:00:40.464431+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-02T22:01:01.124311+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-02T22:01:22.904405+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-02T22:01:43.784473+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-03T22:00:22.298042+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-03T22:00:41.223932+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-03T22:01:00.687367+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-03T22:01:19.881261+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-03T22:01:39.540044+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-06T22:00:30.985424+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-06T22:00:56.795854+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-06T22:01:22.615656+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-06T22:01:42.606517+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-06T22:02:04.175693+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-07T22:00:20.214942+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-07T22:00:39.641429+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-07T22:00:58.775048+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-07T22:01:25.901730+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-07T22:01:53.889768+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-08T22:02:09.064814+00:00", "scout_type": "zillow_keyword", "market": "Atlanta, GA", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-08T22:03:46.457857+00:00", "scout_type": "zillow_keyword", "market": "Dallas, TX", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-08T22:04:58.691857+00:00", "scout_type": "zillow_keyword", "market": "Cleveland, OH", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-08T22:06:12.447322+00:00", "scout_type": "zillow_keyword", "market": "St. Louis, MO", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}
+{"timestamp": "2026-06-08T22:08:12.100749+00:00", "scout_type": "zillow_keyword", "market": "Jacksonville, FL", "distressed_found": 0, "fsbo_found": 0, "price_reduced_found": 0, "imported_new": 0}

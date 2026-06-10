@@ -1,0 +1,19 @@
+{
+  "id": "f2eadb0ac042",
+  "to": "mj@jwbcompanies.com",
+  "to_name": "MJ",
+  "intent": "buyer_criteria",
+  "persona": "henry_hammond",
+  "subject": "Re: RE: Off-Market Jacksonville Properties -- Cash Buyer Inventory",
+  "body": "Hi MJ -- Henry here, picking up from Piper.\n\nThanks for sharing your buying criteria. Homes and infill lots is a solid thesis for the Memphis market right now. The median sitting at 195k with 32 days on market means there's real velocity in the pipeline, which works in a buyer's favor when you know what you want.\n\nHere's what I'd like to understand better so we can move this forward the right way. When you say homes, are we talking single family residential only, or are you open to small multis if the numbers make sense. And on the infill lots side, are you looking for shovel ready or do you have the relationships in place for development?\n\nThe reason I ask is it shapes how we source for you. We see deals across both buckets regularly, but the holding cost math changes depending on your timeline. In Memphis right now, you're looking at roughly 343 a month in carrying costs, so if you're looking at a longer development play versus a quick flip, that factors into what we'd bring you.\n\nGive me those details and I'll make sure we're surfacing the right opportunities.\n\nHenry Hammond\nAcquisitions, Everlight Ventures\n\nReply STOP to opt out of future emails.",
+  "engine": "llm",
+  "trigger_snippet": "Thanks for reaching out, happy to jump on a call. Here is our buying criteria, we want homes and infill lots",
+  "status": "staged_until_unblocked",
+  "gate": {
+    "armed": false,
+    "halt": false,
+    "address_ok": false,
+    "reason": "no CAN-SPAM address"
+  },
+  "generated_at": "2026-05-25T05:56:59.113957+00:00"
+}

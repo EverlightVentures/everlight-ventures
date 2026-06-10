@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block page_title %}Dashboard{% endblock %} — {{ tenant_name or 'POS Suite' }}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Mono&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            /* Dark Forest Green Theme */
+            --bg-dark: #0f1f17;
+            --bg-card: #132419;
+            --bg-card-hover: #1e3a2a;
+            --bg-input: #1a2f23;
+            --border-subtle: rgba(167, 243, 208, 0.1);
+            --border-medium: rgba(167, 243, 208, 0.2);
+            --border-strong: rgba(167, 243, 208, 0.35);
+
+            --text-primary: #e8f5ee;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+
+            --green-400: #34d399;
+            --green-500: #10b981;
+            --green-600: #059669;
+            --green-700: #047857;
+
+            --rose-500: #f43f5e;
+            --rose-600: #e11d48;
+            --amber-500: #f59e0b;
+            --amber-600: #d97706;
+            --sky-500: #0ea5e9;
+            --sky-600: #0284c7;
+
+            --sidebar-w: 280px;
+            --header-h: 70px;
+            --radius: 16px;
+            --radius-sm: 10px;
+
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.4);
+            --shadow-lg: 0 12px 32px rgba(0,0,0,0.5);
+            --shadow-glow-green: 0 8px 32px -8px rgba(16,185,129,0.5);
+        }
+
+        html { font-size: 14px; }
+        body {
+            font-family: 'DM Sans', -apple-system, sans-serif;
+            background: radial-gradient(1200px 600px at 10% -10%, rgba(16,185,129,0.18), transparent 60%),
+                        radial-gradient(900px 500px at 90% -20%, rgba(56,189,248,0.12), transparent 55%),
+                        linear-gradient(145deg, #0f1f17 0%, #0a1810 50%, #0f1f17 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .app { display: flex; min-height: 100vh; }
+
+        /* === SIDEBAR === */
+        .sidebar {
+            width: var(--sidebar-w);
+            background: linear-gradient(180deg, #0c1a12 0%, #081210 100%);
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            box-shadow: 4px 0 32px rgba(0,0,0,0.4);
+            border-right: 1px solid var(--border-subtle);
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 300px;
+            background: radial-gradient(ellipse at top left, rgba(16,185,129,0.12) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .sidebar-brand {
+            position: relative;
+            padding: 28px 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .brand-logo {
+            width: 52px; height: 52px;
+            background: linear-gradient(135deg, var(--green-400) 0%, var(--green-600) 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            box-shadow: var(--shadow-glow-green), inset 0 2px 0 rgba(255,255,255,0.2);
+        }
+
+        .brand-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+        .brand-tag {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Nav */
+        .sidebar-nav {
+            flex: 1;
+            padding: 24px 14px;
+            overflow-y: auto;
+        }
+
+        .nav-section { margin-bottom: 32px; }
+        .nav-label {
+            padding: 0 14px 12px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 13px 16px;
+            margin-bottom: 4px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .nav-item:hover {
+            color: var(--text-primary);
+            background: rgba(16,185,129,0.1);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            color: var(--text-primary);
+            background: linear-gradient(90deg, rgba(16,185,129,0.2), transparent);
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 50%;
+            transform: translateY(-50%);
+            width: 4px; height: 28px;
+            background: linear-gradient(180deg, var(--green-400), var(--green-600));
+            border-radius: 0 6px 6px 0;
+            box-shadow: 0 0 16px var(--green-500);
+        }
+
+        .nav-emoji { font-size: 20px; width: 28px; text-align: center; }
+        .nav-text { flex: 1; color: inherit; }
+        .nav-badge {
+            background: linear-gradient(135deg, var(--green-500), var(--green-600));
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-glow-green);
+        }
+
+        /* User */
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border-subtle);
+            background: rgba(0,0,0,0.3);
+        }
+
+        .user-card {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px;
+            border-radius: var(--radius-sm);
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .user-card:hover { background: rgba(16,185,129,0.1); }
+
+        .user-avatar {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--green-400), var(--sky-500));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 16px;
+            box-shadow: 0 4px 16px rgba(16,185,129,0.3);
+        }
+
+        .user-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+        .user-role {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 2px;
+        }
+        .user-dot {
+            width: 8px; height: 8px;
+            background: var(--green-500);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--green-500);
+        }
+
+        .logout-btn {
+            margin-left: auto;
+            width: 36px; height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .logout-btn:hover { color: var(--rose-500); background: rgba(244,63,94,0.15); }
+
+        /* === MAIN === */
+        .main {
+            flex: 1;
+            margin-left: var(--sidebar-w);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            height: var(--header-h);
+            background: rgba(15, 31, 23, 0.95);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 0 36px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+
+        .header-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: -0.5px;
+        }
+        .header-emoji { font-size: 28px; }
+        .header-actions { display: flex; gap: 12px; }
+
+        .content { flex: 1; padding: 36px; }
+
+        /* === BUTTONS === */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 22px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            border-radius: var(--radius-sm);
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+        .btn [data-lucide] { width: 18px; height: 18px; }
+
+        .btn-primary {
+            background: linear-gradient(180deg, var(--green-500), var(--green-600));
+            color: white;
+            box-shadow: var(--shadow-sm), 0 4px 16px rgba(16,185,129,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md), 0 8px 24px rgba(16,185,129,0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-medium);
+            box-shadow: var(--shadow-sm);
+        }
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-danger {
+            background: linear-gradient(180deg, var(--rose-500), var(--rose-600));
+            color: white;
+            box-shadow: var(--shadow-sm), 0 4px 16px rgba(244,63,94,0.3);
+        }
+
+        .btn-ghost { background: transparent; color: var(--text-secondary); }
+        .btn-ghost:hover { background: var(--bg-card); color: var(--text-primary); }
+
+        .btn-lg { padding: 16px 32px; font-size: 16px; border-radius: var(--radius); }
+        .btn-sm { padding: 8px 16px; font-size: 13px; }
+
+        /* === CARDS === */
+        .card {
+            background: linear-gradient(160deg, rgba(19, 36, 25, 0.95), rgba(12, 22, 16, 0.9));
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            transition: all 0.25s ease;
+        }
+        .card:hover { box-shadow: var(--shadow-lg); border-color: var(--border-strong); }
+
+        .card-header {
+            padding: 20px 28px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+        }
+
+        .card-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .card-emoji { font-size: 22px; }
+        .card-body { padding: 28px; }
+        .card-body { padding: 28px; } /* Alias for card-body */
+        .card-subtitle {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            font-weight: 400;
+        }
+
+        /* === FORMS === */
+        .form-group { margin-bottom: 24px; }
+        .form-label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 14px 18px;
+            font-size: 14px;
+            font-family: inherit;
+            border: 1px solid var(--border-medium);
+            border-radius: var(--radius-sm);
+            background: var(--bg-input);
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--green-500);
+            box-shadow: 0 0 0 4px rgba(16,185,129,0.2);
+        }
+        .form-input::placeholder { color: var(--text-muted); }
+
+        /* === TABLES === */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .table thead th {
+            text-align: left;
+            font-weight: 700;
+            color: var(--text-secondary);
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border-subtle);
+            background: rgba(255,255,255,0.02);
+        }
+        .table tbody td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255,255,255,0.04);
+            color: var(--text-primary);
+        }
+        .table tbody tr:hover {
+            background: rgba(16,185,129,0.08);
+        }
+
+        /* === TABLES === */
+        table { width: 100%; border-collapse: collapse; }
+        th {
+            text-align: left;
+            padding: 16px 24px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        td {
+            padding: 18px 24px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        tr:hover td { background: rgba(16,185,129,0.08); }
+
+        /* === BADGES === */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 20px;
+            background: var(--bg-card);
+            color: var(--text-secondary);
+        }
+        .badge-success { background: rgba(16,185,129,0.2); color: var(--green-400); }
+        .badge-warning { background: rgba(245,158,11,0.2); color: #fbbf24; }
+        .badge-danger { background: rgba(244,63,94,0.2); color: #fb7185; }
+        .badge-info { background: rgba(14,165,233,0.2); color: #38bdf8; }
+
+        /* === ALERTS === */
+        .alert {
+            padding: 18px 24px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border: 1px solid;
+        }
+        .alert [data-lucide] { width: 22px; height: 22px; flex-shrink: 0; }
+        .alert-success { background: rgba(16,185,129,0.15); color: var(--green-400); border-color: rgba(16,185,129,0.3); }
+        .alert-error { background: rgba(244,63,94,0.15); color: #fb7185; border-color: rgba(244,63,94,0.3); }
+        .alert-warning { background: rgba(245,158,11,0.15); color: #fbbf24; border-color: rgba(245,158,11,0.3); }
+
+        /* === STATS === */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; margin-bottom: 36px; }
+        .stat-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            padding: 28px;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.25s;
+        }
+        .stat-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-lg); }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--green-400), var(--green-600));
+        }
+        .stat-card.blue::before { background: linear-gradient(90deg, var(--sky-500), var(--sky-600)); }
+        .stat-card.amber::before { background: linear-gradient(90deg, var(--amber-500), var(--amber-600)); }
+        .stat-card.rose::before { background: linear-gradient(90deg, var(--rose-500), var(--rose-600)); }
+
+        .stat-icon {
+            width: 54px; height: 54px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        .stat-icon.green { background: rgba(16,185,129,0.2); box-shadow: var(--shadow-glow-green); }
+        .stat-icon.blue { background: rgba(14,165,233,0.2); }
+        .stat-icon.amber { background: rgba(245,158,11,0.2); }
+        .stat-icon.rose { background: rgba(244,63,94,0.2); }
+
+        .stat-label { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
+        .stat-value { font-size: 36px; font-weight: 800; color: var(--text-primary); letter-spacing: -1px; }
+
+        /* === ACTIONS GRID === */
+        .actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 16px; }
+        .action-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius);
+            text-decoration: none;
+            color: var(--text-secondary);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.25s;
+        }
+        .action-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--border-medium);
+            background: var(--bg-card-hover);
+        }
+        .action-icon {
+            width: 64px; height: 64px;
+            background: rgba(16,185,129,0.15);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 32px;
+            transition: all 0.25s;
+        }
+        .action-card:hover .action-icon { background: rgba(16,185,129,0.25); transform: scale(1.08); }
+        .action-card span { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+
+        /* === EMPTY STATE === */
+        .empty-state { text-align: center; padding: 64px 24px; }
+        .empty-icon {
+            width: 80px; height: 80px;
+            background: var(--bg-card);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 28px;
+            font-size: 40px;
+        }
+        .empty-state h3 { font-size: 20px; font-weight: 700; color: var(--text-primary); margin-bottom: 10px; }
+        .empty-state p { color: var(--text-muted); margin-bottom: 28px; }
+
+        /* === UTILITIES === */
+        .text-muted { color: var(--text-muted); }
+        .text-success { color: var(--green-400); }
+        .text-danger { color: #fb7185; }
+        .text-mono { font-family: 'Space Mono', monospace; font-size: 13px; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        .mt-4 { margin-top: 16px; }
+        .mt-6 { margin-top: 24px; }
+        .mb-4 { margin-bottom: 16px; }
+        .mb-6 { margin-bottom: 24px; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .gap-2 { gap: 8px; }
+        .gap-4 { gap: 16px; }
+        .grid { display: grid; gap: 24px; }
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+
+        /* === RESPONSIVE - LABELS ALWAYS VISIBLE === */
+        @media (max-width: 1024px) {
+            .sidebar { width: 240px; }
+            .main { margin-left: 240px; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .main { margin-left: 0; }
+            .content { padding: 20px; }
+            .stats-grid, .grid-2 { grid-template-columns: 1fr; }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="app">
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-logo">✨</div>
+                <div class="brand-info">
+                    <div class="brand-name">{{ tenant_name or "Your Business" }}</div>
+                    <div class="brand-tag">Operations Suite</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <!-- Core Operations -->
+                <div class="nav-section">
+                    <div class="nav-label">⚡ Core Operations</div>
+                    <a href="{{ url_for('dashboard') }}" class="nav-item {% if 'dashboard' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">🏠</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('sales') }}" class="nav-item {% if 'sales' in (request.endpoint or '') and 'receipt' not in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">🛒</span>
+                        <span class="nav-text">Sales Terminal</span>
+                    </a>
+                    <a href="{{ url_for('till') }}" class="nav-item {% if 'till' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">💵</span>
+                        <span class="nav-text">Cash Till</span>
+                    </a>
+                </div>
+
+                <!-- My Work -->
+                <div class="nav-section">
+                    <div class="nav-label">🌱 My Work</div>
+                    <a href="{{ url_for('timeclock') }}" class="nav-item {% if 'timeclock' in (request.endpoint or '') or ('time' in (request.endpoint or '') and 'timeoff' not in (request.endpoint or '')) %}active{% endif %}">
+                        <span class="nav-emoji">⏰</span>
+                        <span class="nav-text">Time Clock</span>
+                    </a>
+                    <a href="{{ url_for('my_tasks') }}" class="nav-item {% if request.endpoint == 'my_tasks' %}active{% endif %}">
+                        <span class="nav-emoji">✅</span>
+                        <span class="nav-text">My Tasks</span>
+                        {% if unread_task_count and unread_task_count > 0 %}
+                        <span class="nav-badge">{{ unread_task_count }}</span>
+                        {% endif %}
+                    </a>
+                    <a href="{{ url_for('timeoff') }}" class="nav-item {% if 'timeoff' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">🏖️</span>
+                        <span class="nav-text">Time Off</span>
+                        {% if unread_timeoff_count and unread_timeoff_count > 0 %}
+                        <span class="nav-badge">{{ unread_timeoff_count }}</span>
+                        {% endif %}
+                    </a>
+                </div>
+
+                <!-- Management (Managers+) -->
+                {% if session.role in ['Manager', 'Owner', 'Admin'] %}
+                <div class="nav-section">
+                    <div class="nav-label">👔 Management</div>
+                    <a href="{{ url_for('inventory') }}" class="nav-item {% if 'inventory' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">📦</span>
+                        <span class="nav-text">Inventory</span>
+                    </a>
+                    <a href="{{ url_for('employees') }}" class="nav-item {% if 'employee' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">👥</span>
+                        <span class="nav-text">Employees</span>
+                    </a>
+                    <a href="{{ url_for('tasks_owner_dashboard') }}" class="nav-item {% if 'tasks_owner' in (request.endpoint or '') or 'tasks' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">📋</span>
+                        <span class="nav-text">Task Manager</span>
+                    </a>
+                    <a href="{{ url_for('payroll_dashboard') }}" class="nav-item {% if 'payroll' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">💰</span>
+                        <span class="nav-text">Payroll</span>
+                    </a>
+                    <a href="{{ url_for('reports') }}" class="nav-item {% if 'report' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">📊</span>
+                        <span class="nav-text">Reports</span>
+                    </a>
+                </div>
+                {% endif %}
+
+                <!-- Tools & Settings -->
+                <div class="nav-section">
+                    <div class="nav-label">🛠️ Tools & Settings</div>
+                    <a href="{{ url_for('ai_assistant') }}" class="nav-item {% if 'ai' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">🪴</span>
+                        <span class="nav-text">Plant Doctor AI</span>
+                    </a>
+                    <a href="{{ url_for('settings') }}" class="nav-item {% if request.endpoint == 'settings' or 'settings' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">⚙️</span>
+                        <span class="nav-text">Settings</span>
+                    </a>
+                    <a href="{{ url_for('billing') }}" class="nav-item {% if request.endpoint == 'billing' %}active{% endif %}">
+                        <span class="nav-emoji">💳</span>
+                        <span class="nav-text">Billing</span>
+                    </a>
+                    <a href="{{ url_for('support_home') }}" class="nav-item {% if request.endpoint == 'support_home' %}active{% endif %}">
+                        <span class="nav-emoji">🛠️</span>
+                        <span class="nav-text">Support</span>
+                    </a>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="{{ url_for('logout') }}" class="user-card">
+                    <div class="user-avatar">{{ (session.employee_name or 'U')[0] }}</div>
+                    <div class="user-info">
+                        <div class="user-name">{{ session.employee_name or 'User' }}</div>
+                        <div class="user-role">
+                            <span class="user-dot"></span>
+                            {{ session.role or 'Employee' }}
+                        </div>
+                    </div>
+                    <div class="logout-btn">
+                        <i data-lucide="log-out" style="width:18px;height:18px;"></i>
+                    </div>
+                </a>
+            </div>
+        </aside>
+
+        <main class="main">
+            <header class="header">
+                <h1 class="header-title">
+                    <span class="header-emoji">{% block header_emoji %}🌿{% endblock %}</span>
+                    {% block header_title %}Dashboard{% endblock %}
+                </h1>
+                <div class="header-actions">{% block header_actions %}{% endblock %}</div>
+            </header>
+
+            <div class="content">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}{% for cat, msg in messages %}
+                <div class="alert alert-{{ 'success' if cat == 'success' else 'error' if cat == 'error' else 'warning' }}">
+                    <i data-lucide="{% if cat == 'success' %}check-circle{% elif cat == 'error' %}x-circle{% else %}alert-triangle{% endif %}"></i>
+                    <span>{{ msg }}</span>
+                </div>
+                {% endfor %}{% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </div>
+        </main>
+    </div>
+
+    <script>lucide.createIcons();</script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

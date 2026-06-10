@@ -1,0 +1,277 @@
+mgn@mgn-Latitude-E7240:~/Projects/Mountain Gardens Nursery POS$ tree
+.
+├── Audit
+│   └── Employee_Audit.csv
+├── Audit_Logs
+├── backups
+│   ├── base.html1.bak
+│   ├── doctor_20251214_122049
+│   │   ├── base.html.bak.20251214_122049
+│   │   └── restart_POS.sh.bak.20251214_122049
+│   ├── MGN_APP(bak).py
+│   ├── MGN_APP(broken).py
+│   ├── MGN_APP.py.bak
+│   ├── MGN_APP.py.bak.20251213_180159
+│   ├── MGN_APP (unstable).py
+│   ├── POS_CORE(Previous).py
+│   ├── POS_CORE.py.bak
+│   └── POS_CORE (unstable).py
+├── COPY_PASTE_till_routes.py
+├── Daily_Reports
+│   └── 2025
+│       ├── 11_November
+│       │   ├── Week_5_Nov_23-Nov_29
+│       │   │   ├── 2025-11-26_Wednesday_DailySummary.csv
+│       │   │   └── 2025-11-28_Friday_DailySummary.csv
+│       │   └── Week_5_Nov_30-Nov_30
+│       │       └── 2025-11-30_Sunday_DailySummary.csv
+│       └── 12_December
+│           └── Week_1_Dec_01-Dec_06
+│               └── 2025-12-01_Monday_DailySummary.csv
+├── Employees
+│   ├── Employee_Directory.csv
+│   └── Employee_Directory_OLD.csv
+├── employees.json
+├── Inventory
+│   ├── Invoice_Lines.csv
+│   ├── Invoices_Log.csv
+│   ├── Items.csv
+│   ├── Ledger.csv
+│   ├── Lots.csv
+│   └── Vendor_Mapping.csv
+├── invoice_importer.py
+├── MGN_APP.py
+├── Mountain_Gardens_POS_Advance_34.py
+├── ngrok-v3-stable-linux-amd64.tgz
+├── ngrok-v3-stable-linux-amd64.tgz.1
+├── Notifications
+│   └── Employee_Notifications.csv
+├── Payroll
+│   ├── 2025_Payroll_Runs.csv
+│   ├── Deductions.csv
+│   ├── Employee_Pay_Config.csv
+│   └── Pay_Periods.csv
+├── pos_core
+│   ├── __init__.py
+│   └── __pycache__
+│       └── __init__.cpython-313.pyc
+├── POS_CORE.py
+├── Pricing
+│   └── Pricing_Rules.csv
+├── __pycache__
+│   ├── invoice_importer.cpython-313.pyc
+│   ├── MGN_APP.cpython-313.pyc
+│   └── POS_CORE.cpython-313.pyc
+├── README.txt
+├── Receipts
+│   └── 2025
+│       ├── 11_November
+│       │   ├── Week_5_Nov_23-Nov_29
+│       │   │   ├── receipt_2025-11-26_100359_#0001.txt
+│       │   │   ├── Receipt_TXN20251126101652.txt
+│       │   │   ├── Receipt_TXN20251126132413.txt
+│       │   │   ├── Receipt_TXN20251128145706.txt
+│       │   │   ├── Receipt_TXN20251128210811.txt
+│       │   │   └── Receipt_TXN20251128211840.txt
+│       │   └── Week_5_Nov_30-Nov_30
+│       │       ├── Receipt_TXN20251130134933.txt
+│       │       └── Receipt_TXN20251130142404.txt
+│       └── 12_December
+│           └── Week_1_Dec_01-Dec_06
+│               └── Receipt_TXN20251201100136.txt
+├── requirements.txt
+├── restart_POS.sh
+├── Sales_Logs
+│   └── 2025
+│       ├── 11_November
+│       │   ├── Week_3
+│       │   │   └── 2025-11-15_Saturday_SalesLog.csv
+│       │   ├── Week_5_Nov_23-Nov_29
+│       │   │   ├── 2025-11-26_Wednesday_sales.csv
+│       │   │   ├── 2025-11-26_Wednesday_SalesLog.csv
+│       │   │   ├── 2025-11-28_Friday_SalesLog.csv
+│       │   │   └── 2025-11-29_Saturday_SalesLog.csv
+│       │   └── Week_5_Nov_30-Nov_30
+│       │       └── 2025-11-30_Sunday_SalesLog.csv
+│       └── 12_December
+│           ├── Week_1
+│           │   ├── 2025-12-01_Monday_SalesLog.csv
+│           │   ├── 2025-12-02_Tuesday_SalesLog.csv
+│           │   ├── 2025-12-04_Thursday_SalesLog.csv
+│           │   └── 2025-12-07_Sunday_SalesLog.csv
+│           ├── Week_1_Dec_01-Dec_06
+│           │   └── 2025-12-01_Monday_SalesLog.csv
+│           ├── Week_2
+│           │   ├── 2025-12-09_Tuesday_SalesLog.csv
+│           │   ├── 2025-12-10_Wednesday_SalesLog.csv
+│           │   ├── 2025-12-11_Thursday_SalesLog.csv
+│           │   ├── 2025-12-12_Friday_SalesLog.csv
+│           │   ├── 2025-12-13_Saturday_SalesLog.csv
+│           │   └── 2025-12-14_Sunday_SalesLog.csv
+│           └── Week_3
+│               ├── 2025-12-15_Monday_SalesLog.csv
+│               ├── 2025-12-16_Tuesday_SalesLog.csv
+│               ├── 2025-12-17_Wednesday_SalesLog.csv
+│               ├── 2025-12-18_Thursday_SalesLog.csv
+│               ├── 2025-12-19_Friday_SalesLog.csv
+│               ├── 2025-12-20_Saturday_SalesLog.csv
+│               └── 2025-12-21_Sunday_SalesLog.csv
+├── seed_owner.py
+├── START_POS.sh
+├── STOP_POS.sh
+├── Tasks
+│   ├── metrics_dashboard.html
+│   ├── Task_Assignments.csv
+│   ├── Task_Events.csv
+│   └── Tasks_Master.csv
+├── templates
+│   ├── ai
+│   │   └── chat.html
+│   ├── base.html
+│   ├── Dashboard
+│   │   └── analytics.html
+│   ├── dashboard_api_routes.py
+│   ├── dashboard.html
+│   ├── dashboard.html.bak
+│   ├── employees
+│   │   ├── add.html
+│   │   ├── detail.html
+│   │   ├── edit.html
+│   │   └── list.html
+│   ├── errors
+│   │   ├── 404.html
+│   │   └── 500.html
+│   ├── inventory
+│   │   ├── add.html
+│   │   ├── edit.html
+│   │   ├── invoice_importer.html
+│   │   ├── invoice_importer.html.bak
+│   │   ├── invoice_import.html
+│   │   ├── list.html
+│   │   ├── lots.html
+│   │   ├── low_stock.html
+│   │   └── receive.html
+│   ├── login.html
+│   ├── owner_dashboard.html
+│   ├── payroll
+│   │   ├── create_period.html
+│   │   ├── dashboard.html
+│   │   ├── history.html
+│   │   ├── my_history.html
+│   │   ├── pay_config_&_history.html.bak
+│   │   ├── pay_config.html
+│   │   ├── payroll_dashboard.html
+│   │   ├── run_payroll (copy).html.bak
+│   │   └── run_payroll.html
+│   ├── reports
+│   │   ├── daily.html
+│   │   └── index.html
+│   ├── sales
+│   │   ├── log.html
+│   │   ├── log.html.bak
+│   │   ├── receipt.html
+│   │   ├── terminal1.html.bak
+│   │   ├── terminal.html
+│   │   ├── terminal.html.bak
+│   │   └── terminal.nodropdown.html.bak
+│   ├── sidebar_till_addition.txt
+│   ├── tasks
+│   │   ├── detail.html
+│   │   ├── my_tasks.html
+│   │   ├── owner_dashboard.html
+│   │   └── owner_dashboard.html.bak
+│   ├── till
+│   │   └── till.html
+│   ├── time
+│   │   ├── clock.html
+│   │   ├── log.html
+│   │   └── timeoff.html
+│   └── timeclock
+├── TEMPLATES_ALL.txt
+├── till
+│   ├── ledger.csv
+│   ├── till_2025-12-19.csv
+│   ├── till.html
+│   ├── till_ledger.csv
+│   └── till_state.csv
+├── Time_Clock
+│   ├── 2025
+│   │   ├── 11_November
+│   │   │   ├── Week_3
+│   │   │   │   └── 2025-11-15_Saturday_TimeClockLog.csv
+│   │   │   ├── Week_5_Nov_23-Nov_29
+│   │   │   │   ├── 2025-11-26_Wednesday_timeclock.csv
+│   │   │   │   ├── 2025-11-26_Wednesday_TimeClockLog.csv
+│   │   │   │   ├── 2025-11-28_Friday_TimeClockLog.csv
+│   │   │   │   └── 2025-11-29_Saturday_TimeClockLog.csv
+│   │   │   └── Week_5_Nov_30-Nov_30
+│   │   │       └── 2025-11-30_Sunday_TimeClockLog.csv
+│   │   └── 12_December
+│   │       ├── Week_1
+│   │       │   ├── 2025-12-01_Monday_TimeClockLog.csv
+│   │       │   ├── 2025-12-02_Tuesday_TimeClockLog.csv
+│   │       │   ├── 2025-12-04_Thursday_TimeClockLog.csv
+│   │       │   └── 2025-12-07_Sunday_TimeClockLog.csv
+│   │       ├── Week_1_Dec_01-Dec_06
+│   │       │   └── 2025-12-01_Monday_TimeClockLog.csv
+│   │       ├── Week_2
+│   │       │   ├── 2025-12-08_Monday_TimeClockLog.csv
+│   │       │   ├── 2025-12-09_Tuesday_TimeClockLog.csv
+│   │       │   ├── 2025-12-10_Wednesday_TimeClockLog.csv
+│   │       │   ├── 2025-12-11_Thursday_TimeClockLog.csv
+│   │       │   ├── 2025-12-12_Friday_TimeClockLog.csv
+│   │       │   ├── 2025-12-13_Saturday_TimeClockLog.csv
+│   │       │   └── 2025-12-14_Sunday_TimeClockLog.csv
+│   │       └── Week_3
+│   │           ├── 2025-12-15_Monday_TimeClockLog.csv
+│   │           ├── 2025-12-16_Tuesday_TimeClockLog.csv
+│   │           ├── 2025-12-17_Wednesday_TimeClockLog.csv
+│   │           ├── 2025-12-18_Thursday_TimeClockLog.csv
+│   │           ├── 2025-12-19_Friday_TimeClockLog.csv
+│   │           ├── 2025-12-20_Saturday_TimeClockLog.csv
+│   │           └── 2025-12-21_Sunday_TimeClockLog.csv
+│   ├── add_punch.html
+│   ├── edit_punch.html
+│   ├── manage.html
+│   └── Time_Edits_Audit.csv
+├── Time_Off_Requests
+│   └── 2025_TimeOffRequests.csv
+├── Transaction_Logs
+│   └── 2025
+│       ├── 11_November
+│       │   ├── Week_3
+│       │   │   └── 2025-11-15_Saturday_TransactionLog.csv
+│       │   ├── Week_5_Nov_23-Nov_29
+│       │   │   ├── 2025-11-26_Wednesday_TransactionLog.csv
+│       │   │   ├── 2025-11-28_Friday_TransactionLog.csv
+│       │   │   └── 2025-11-29_Saturday_TransactionLog.csv
+│       │   └── Week_5_Nov_30-Nov_30
+│       │       └── 2025-11-30_Sunday_TransactionLog.csv
+│       └── 12_December
+│           ├── Week_1
+│           │   ├── 2025-12-01_Monday_TransactionLog.csv
+│           │   ├── 2025-12-02_Tuesday_TransactionLog.csv
+│           │   ├── 2025-12-04_Thursday_TransactionLog.csv
+│           │   └── 2025-12-07_Sunday_TransactionLog.csv
+│           ├── Week_1_Dec_01-Dec_06
+│           │   └── 2025-12-01_Monday_TransactionLog.csv
+│           ├── Week_2
+│           │   ├── 2025-12-09_Tuesday_TransactionLog.csv
+│           │   ├── 2025-12-10_Wednesday_TransactionLog.csv
+│           │   ├── 2025-12-11_Thursday_TransactionLog.csv
+│           │   ├── 2025-12-12_Friday_TransactionLog.csv
+│           │   ├── 2025-12-13_Saturday_TransactionLog.csv
+│           │   └── 2025-12-14_Sunday_TransactionLog.csv
+│           └── Week_3
+│               ├── 2025-12-15_Monday_TransactionLog.csv
+│               ├── 2025-12-16_Tuesday_TransactionLog.csv
+│               ├── 2025-12-17_Wednesday_TransactionLog.csv
+│               ├── 2025-12-18_Thursday_TransactionLog.csv
+│               ├── 2025-12-19_Friday_TransactionLog.csv
+│               ├── 2025-12-20_Saturday_TransactionLog.csv
+│               └── 2025-12-21_Sunday_TransactionLog.csv
+├── Tree.txt
+├── Untitled Folder
+└── Vendor_Mapping.csv
+
+

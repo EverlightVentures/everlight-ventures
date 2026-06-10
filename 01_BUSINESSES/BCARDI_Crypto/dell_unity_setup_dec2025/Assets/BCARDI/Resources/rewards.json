@@ -1,0 +1,14 @@
+{
+  "tiers": [
+    {"tier": 1, "gifts": ["100 BCARDI", "Common Pack"]},
+    {"tier": 2, "gifts": ["150 BCARDI", "Common Pack"]},
+    {"tier": 3, "gifts": ["200 BCARDI", "Rare Pack"]},
+    {"tier": 4, "gifts": ["250 BCARDI", "Rare Pack"]},
+    {"tier": 5, "gifts": ["300 BCARDI", "Epic Pack"]},
+    {"tier": 6, "gifts": ["400 BCARDI", "Epic Pack"]},
+    {"tier": 7, "gifts": ["500 BCARDI", "Legendary Pack"]},
+    {"tier": 8, "gifts": ["650 BCARDI", "Legendary Pack"]},
+    {"tier": 9, "gifts": ["800 BCARDI", "Mythic Shard"]},
+    {"tier": 10, "gifts": ["1000 BCARDI", "Mythic Pack"]}
+  ]
+}

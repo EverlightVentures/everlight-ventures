@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block page_title %}Timeclock Manage{% endblock %}
+{% block header_emoji %}⏱️{% endblock %}
+{% block header_title %}Timeclock Management{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom:16px;">
+  <div class="card-header">
+    <div class="card-title">Manage punches</div>
+  </div>
+  <div class="card-body">
+    <p class="card-subtitle" style="margin-bottom: 16px;">{{ selected_date }}</p>
+    <a class="btn btn-primary" href="{{ url_for('timeclock_add_punch') }}">Add punch</a>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">Punches</div>
+  </div>
+  <div class="card-body">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Employee</th>
+          <th>Date</th>
+          <th>Time</th>
+          <th>Type</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in punches %}
+        <tr>
+          <td>{{ p.Employee_Name or p.employee_name }}</td>
+          <td>{{ p.Date or p.date }}</td>
+          <td>{{ p.Time or p.time }}</td>
+          <td>{{ p.Punch_Type or p.punch_type }}</td>
+          <td><a class="btn btn-secondary btn-sm" href="{{ url_for('timeclock_edit_punch', punch_id=p.Punch_ID) }}">Edit</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5">No punches found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

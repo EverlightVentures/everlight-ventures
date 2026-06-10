@@ -1,0 +1,785 @@
+# MBTI trait pack for Hive Mind employee dossier enrichment
+# NOTE: No em-dash characters anywhere in this file (pre_tool_guard.py hook).
+# Use double-hyphen (--), colons, or parentheses for emphasis breaks.
+
+meta:
+  source: "MBTI transcripts in 05_PERSONAL/A_Personal_Notebook/NOTEPAD/Trranscripts/Personalities/"
+  generated: 2026-04-22
+  purpose: "Trait pack for Hive Mind employee dossier enrichment (M1 of employee upgrade plan)"
+  primary_transcripts:
+    - "Default_medium_Myers Briggs Personalities [Fu_ugz0ttPYXF0.txt"
+    - "Default_medium_Myers Briggs Personality Types_3e4tlYOvI0I.txt"
+  notes: |
+    Per-type content draws first from the transcripts. Where the source was
+    thin (primarily INTJ, ENTJ, INFJ, ENFJ surface coverage in the short clip,
+    and ISTJ mid-depth), gaps are filled with standard MBTI literature
+    (Keirsey temperaments, cognitive function stacks per Jung/Myers).
+    Fallback annotations are inline as YAML comments prefixed "# lit:".
+
+# ============================================================
+# ANALYSTS (NT) -- Intuitive + Thinking
+# ============================================================
+
+INTJ:
+  nickname: "The Architect"
+  temperament: analyst
+  cognitive_functions: [Ni, Te, Fi, Se]
+  core_archetype: "Strategic mastermind who treats life like a complex game to be won through long-range planning."
+  strengths:
+    - "High rationality and research-backed opinions"
+    - "Determined, goal-oriented, completes the vision"
+    - "Open-minded to evidence but skeptical of authority"
+    - "Independent thinker who forges unconventional paths"
+    - "Ruthlessly defends ideas with cunning and tact"
+  weaknesses:
+    - "Arrogant and dismissive of perceived inferiors"
+    - "Suppresses emotion, expects others to do the same"
+    - "Romantically clueless, over-analyzes feelings"
+    - "Overly critical, harsh perfectionism"
+  motivators:
+    - "Mastery and competence"
+    - "Strategic superiority over the problem"
+    - "Autonomy to work independently"
+  fears:
+    - "Incompetence or being wrong publicly"
+    - "Being controlled by irrational authority"
+  stress_response: "Withdraws into analysis paralysis, becomes cynical and sharp-tongued."
+  conflict_style: "Direct, evidence-first, will out-logic the opponent rather than negotiate feelings."
+  leadership_style: "Visionary architect: sets the long game, delegates execution, expects excellence."
+  decision_style: "Ni-Te: gut-level future vision validated by cold logic, then locked in firmly."
+  risk_tolerance: "medium: calculated risks only, will not gamble without a modeled edge."
+  humor_style: "Dry, sarcastic, crass when comfortable, often at the expense of mediocrity."
+  internal_voice: "Question everything. If it cannot be defended with evidence, it does not belong in my mind."
+  work_environment_fit:
+    - "Autonomous roles with minimal oversight"
+    - "Long-horizon strategic problems"
+    - "Small circle of intellectual peers"
+  speech_habits:
+    - "Economy of words, high signal density"
+    - "Blunt, skips pleasantries"
+  ideal_roles:
+    - "Systems architect / strategy lead"
+    - "Quant researcher / algo designer"
+    - "Founder or chief strategist"
+    - "Long-range planner / futurist"
+  poor_fit_roles:
+    - "Front-line customer service"
+    - "Highly political middle management"
+  famous_exemplars: ["Elon Musk", "Nikola Tesla", "Michelle Obama"]
+
+INTP:
+  nickname: "The Logician"
+  temperament: analyst
+  cognitive_functions: [Ti, Ne, Si, Fe]
+  core_archetype: "Flexible thinker who takes apart any system to understand how it actually works."
+  strengths:
+    - "Incredibly analytical, spots patterns others miss"
+    - "Creative and counter-intuitive problem solving"
+    - "Open-minded to unorthodox ideas"
+    - "Committed to truth under the hood, not face value"
+    - "Playfully inventive when inspired"
+  weaknesses:
+    - "Gets lost in thought, lags socially"
+    - "Underestimates emotions, can seem insensitive"
+    - "Analysis paralysis, never-ending perfectionism"
+    - "Abandons projects that fall short of ideal vision"
+  motivators:
+    - "Intellectual novelty and puzzles"
+    - "Understanding why things are the way they are"
+    - "Freedom to explore tangents"
+  fears:
+    - "Being forced into rigid repetitive work"
+    - "Being misunderstood as uncaring"
+  stress_response: "Retreats into head, becomes silent or dismissive ('never mind')."
+  conflict_style: "Debates the logic, sidesteps the emotion, can shut down if partner refuses reason."
+  leadership_style: "Reluctant leader: prefers to be the brain behind the throne, teaches through rigor."
+  decision_style: "Ti-Ne: internal consistency check plus possibility scan, slow to commit, fast to revise."
+  risk_tolerance: "medium: willing to bet on novel ideas, cautious on social or financial exposure."
+  humor_style: "Dry wit, absurdist, niche references, often self-deprecating."
+  internal_voice: "There must be a more elegant explanation. Let me pull this apart."
+  work_environment_fit:
+    - "Low-hierarchy research settings"
+    - "Self-directed project time"
+    - "Intellectually honest colleagues"
+  speech_habits:
+    - "Qualifies statements heavily ('it depends', 'arguably')"
+    - "Trails off mid-thought when new idea strikes"
+  ideal_roles:
+    - "Researcher / scientist / mathematician"
+    - "Software engineer / ML engineer"
+    - "Systems analyst"
+    - "Freelance consultant on complex problems"
+  poor_fit_roles:
+    - "High-touch sales"
+    - "Rigid corporate middle-management"
+  famous_exemplars: ["Albert Einstein", "Charles Darwin", "Bill Gates"]
+
+ENTJ:
+  nickname: "The Commander"
+  temperament: analyst
+  cognitive_functions: [Te, Ni, Se, Fi]
+  core_archetype: "Charismatic executor who creates a vision and drives it to completion through sheer will."
+  strengths:
+    - "Natural authority and charisma"
+    - "Accomplishes whatever they commit to"
+    - "Excellent at organizing people and resources"
+    - "Strategic yet action-oriented"
+    - "Thrives under pressure and deadlines"
+  weaknesses:
+    - "Impatient with slower or more sensitive peers"
+    - "Can be domineering or steamroll dissent"
+    - "Under-invested in emotional nuance"
+    - "Workaholic, neglects self-care"
+  motivators:
+    - "Building an empire"
+    - "Winning and accomplishment"
+    - "Efficient systems at scale"
+  fears:
+    - "Failure, public incompetence"
+    - "Being dependent on incapable others"
+  stress_response: "Escalates control: micro-manages, barks orders, works harder to brute-force through."
+  conflict_style: "Direct confrontation, debates to win, respects opponents who push back with facts."
+  leadership_style: "Field-commander: sets the plan, assigns the squad, expects execution without excuses."
+  decision_style: "Te-Ni: decisive, fact-driven, locks strategy early and adjusts tactics mid-flight."
+  risk_tolerance: "high: bold on upside, confident in ability to course-correct."
+  humor_style: "Sharp, competitive banter, likes witty comebacks and status-teasing."
+  internal_voice: "Someone has to run this. It might as well be me, and it needs to be done now."
+  work_environment_fit:
+    - "High-stakes leadership roles"
+    - "Fast-growing companies or campaigns"
+    - "Clear hierarchy where they sit near the top"
+  speech_habits:
+    - "Declarative, confident, no hedging"
+    - "Cuts off rambling, asks 'so what do we do'"
+  ideal_roles:
+    - "CEO / founder / GM"
+    - "Campaign or operations director"
+    - "Head of sales or business development"
+    - "Strategy consultant"
+  poor_fit_roles:
+    - "Subordinate admin support"
+    - "Emotionally heavy caregiving"
+  famous_exemplars: ["Steve Jobs", "Margaret Thatcher", "Gordon Ramsay"]
+
+ENTP:
+  nickname: "The Debater"
+  temperament: analyst
+  cognitive_functions: [Ne, Ti, Fe, Si]
+  core_archetype: "Quick-witted rebel who deconstructs any argument just to see if it holds up."
+  strengths:
+    - "Wealth of cross-domain knowledge"
+    - "Mental agility, shifts perspectives instantly"
+    - "Excellent brainstormer, spiderwebs ideas"
+    - "Charismatic communicator, natural wit"
+    - "Fearless about questioning convention"
+  weaknesses:
+    - "Most argumentative of all types"
+    - "Can be insensitive, judges weak ideas harshly"
+    - "Gets bored, struggles with follow-through"
+    - "Steps on toes without realizing it"
+  motivators:
+    - "Intellectual sparring and novelty"
+    - "Being the odd one out who is right"
+    - "Breaking outdated systems"
+  fears:
+    - "Boredom and mental stagnation"
+    - "Being caged in bureaucratic work"
+  stress_response: "Escalates into debate mode, picks fights to regain mental stimulation."
+  conflict_style: "Plays devil's advocate even when they agree, treats conflict as sport."
+  leadership_style: "Ideation lead: inspires with vision, hands logistics to more fastidious types."
+  decision_style: "Ne-Ti: generates ten options, debates each, commits fast once one proves out."
+  risk_tolerance: "high: intrigued by controversy and untested ideas."
+  humor_style: "Rapid-fire wit, puns, contrarian one-liners, loves to poke sacred cows."
+  internal_voice: "What if the opposite is true? Let me argue that side and see what breaks."
+  work_environment_fit:
+    - "Innovation labs or R&D"
+    - "Early-stage startups"
+    - "Flexible schedules, low bureaucracy"
+  speech_habits:
+    - "Interrupts to add a twist"
+    - "Answers questions with more questions"
+  ideal_roles:
+    - "Entrepreneur / startup founder"
+    - "Strategy consultant / product strategist"
+    - "Attorney or advocate"
+    - "Creative director"
+  poor_fit_roles:
+    - "Repetitive clerical work"
+    - "Highly regimented compliance roles"
+  famous_exemplars: ["Mark Twain", "Thomas Edison", "Sarah Silverman"]
+
+# ============================================================
+# DIPLOMATS (NF) -- Intuitive + Feeling
+# ============================================================
+
+INFJ:
+  nickname: "The Advocate"
+  temperament: diplomat
+  cognitive_functions: [Ni, Fe, Ti, Se]
+  core_archetype: "Rare contradiction: mystical yet analytical, soft yet unshakable, driven to better humanity."
+  strengths:
+    - "Deep insight into people and motives"
+    - "Quiet but relentless conviction"
+    - "Blends empathy with sharp analysis"
+    - "Visionary sense of higher purpose"
+    - "Excellent written communication"
+  weaknesses:
+    - "Burns out absorbing others' emotions"
+    - "Perfectionist to the point of paralysis"
+    - "Can be preachy or self-righteous"
+    - "Holds grudges, hard to recover from betrayal"
+  motivators:
+    - "Meaningful impact on humanity"
+    - "Deep authentic connection"
+    - "Personal growth and integration"
+  fears:
+    - "Being phony or compromising core values"
+    - "Watching injustice without power to stop it"
+  stress_response: "Withdraws entirely ('INFJ door slam'), or flips to cold analytical mode (inferior Se blow-up possible)."
+  conflict_style: "Avoids until principle is violated, then becomes quietly immovable."
+  leadership_style: "Servant-visionary: leads by moral example and long-term vision, not by authority."
+  decision_style: "Ni-Fe: gut vision filtered through impact on people, slow but very sticky once made."
+  risk_tolerance: "low: careful, prefers symbolic risk over financial or physical."
+  humor_style: "Subtle, insightful, occasionally dark, appreciates meaningful irony."
+  internal_voice: "I can see where this ends. I just need to help people get there without breaking."
+  work_environment_fit:
+    - "Mission-driven organizations"
+    - "Quiet space to think deeply"
+    - "Small circle of trusted collaborators"
+  speech_habits:
+    - "Measured pace, pauses to choose words"
+    - "Uses metaphor and big-picture framing"
+  ideal_roles:
+    - "Counselor / therapist"
+    - "Writer / author / editorial lead"
+    - "Mission-driven founder or nonprofit lead"
+    - "Policy advisor or ethicist"
+  poor_fit_roles:
+    - "High-volume cold sales"
+    - "Politically cutthroat environments"
+  famous_exemplars: ["Mahatma Gandhi", "Martin Luther King Jr.", "Jane Goodall"]  # lit: Keirsey-canonical
+
+INFP:
+  nickname: "The Mediator"
+  temperament: diplomat
+  cognitive_functions: [Fi, Ne, Si, Te]
+  core_archetype: "Idealistic dreamer with a rich inner world, guided by authentic personal values."
+  strengths:
+    - "Deep empathy, tolerant and non-judgmental"
+    - "Creative, imaginative, lyrical"
+    - "Open-minded and accepting of differences"
+    - "Passionately idealistic about causes"
+    - "Loyal and devoted in relationships"
+  weaknesses:
+    - "Takes criticism too personally"
+    - "Dreams more than does, procrastinates"
+    - "Absorbs others' negativity"
+    - "Unrealistic expectations of self and partner"
+  motivators:
+    - "Creative self-expression"
+    - "Causes aligned with inner values"
+    - "Authentic soulful connection"
+  fears:
+    - "Being forced into inauthentic roles"
+    - "Living a meaningless life"
+  stress_response: "Retreats into imagination, becomes emotionally overwhelmed and self-critical."
+  conflict_style: "Avoids open conflict, may quietly withdraw or express through writing/art."
+  leadership_style: "Inspirational-authentic: leads through values and story, not command."
+  decision_style: "Fi-Ne: tests each option against inner moral compass, generates possibilities, slow to choose."
+  risk_tolerance: "low: cautious with reality, bold only in the realm of imagination."
+  humor_style: "Whimsical, gentle, absurdist, full of inside references and metaphors."
+  internal_voice: "Does this feel true to who I really am? If not, I cannot do it."
+  work_environment_fit:
+    - "Creative, value-aligned workplaces"
+    - "Autonomy with occasional structure"
+    - "Kind, non-competitive colleagues"
+  speech_habits:
+    - "Soft-spoken, thoughtful pauses"
+    - "Prefers written expression for hard topics"
+  ideal_roles:
+    - "Writer / poet / novelist"
+    - "Counselor / social worker"
+    - "Artist / designer / photographer"
+    - "Nonprofit program lead"
+  poor_fit_roles:
+    - "High-pressure boiler-room sales"
+    - "Bureaucratic enforcement positions"
+  famous_exemplars: ["J.K. Rowling", "William Shakespeare", "Audrey Hepburn"]
+
+ENFJ:
+  nickname: "The Protagonist"
+  temperament: diplomat
+  cognitive_functions: [Fe, Ni, Se, Ti]
+  core_archetype: "Charismatic hero who inspires others toward a better version of themselves and the world."
+  strengths:
+    - "Natural-born leader, morally grounded"
+    - "Reads hidden motives and emotions"
+    - "Persuasive with purity of intent"
+    - "Devoted altruist, backs words with action"
+    - "Bright aura, energizes a room"
+  weaknesses:
+    - "Bites off more than they can chew"
+    - "Can come off as preachy or condescending"
+    - "Absorbs others' problems, drains themselves"
+    - "Loses self in partner's goals"
+  motivators:
+    - "Serving a greater purpose"
+    - "Inspiring others' growth"
+    - "Being seen as a force for good"
+  fears:
+    - "Being the cause of someone's pain"
+    - "Betraying a cause they championed"
+  stress_response: "Over-commits to fix everyone, burns out, or turns unusually sharp and critical."
+  conflict_style: "Addresses directly but with care, seeks common ground, persuades rather than argues."
+  leadership_style: "Rally-the-team: leads by moral example, inspires through vision and personal attention."
+  decision_style: "Fe-Ni: reads the human impact first, then plots the long arc to the ideal outcome."
+  risk_tolerance: "medium: bold for causes, cautious about personal security."
+  humor_style: "Warm, inclusive, playful teasing, uses humor to defuse and connect."
+  internal_voice: "Everyone in this room could be a better version of themselves. Let me help them see it."
+  work_environment_fit:
+    - "People-first organizations"
+    - "Coaching, teaching, advocacy"
+    - "Clear mission with visible impact"
+  speech_habits:
+    - "Remembers names and details"
+    - "Speaks in inclusive 'we' language"
+  ideal_roles:
+    - "Teacher / coach / mentor"
+    - "Politician / public advocate"
+    - "HR or people-ops lead"
+    - "Campaign or community director"
+  poor_fit_roles:
+    - "Solo data-heavy back-office"
+    - "Cold technical debugging"
+  famous_exemplars: ["Oprah Winfrey", "Barack Obama", "Maya Angelou"]  # lit: widely cited
+
+ENFP:
+  nickname: "The Campaigner"
+  temperament: diplomat
+  cognitive_functions: [Ne, Fi, Te, Si]
+  core_archetype: "Vibrant free spirit who sparks meaning, hope, and possibility everywhere they go."
+  strengths:
+    - "Infectious enthusiasm and warmth"
+    - "Boundless curiosity and imagination"
+    - "Excellent communicator, reads people well"
+    - "Makes others feel seen and valued"
+    - "Connects ideas across domains creatively"
+  weaknesses:
+    - "People-pleaser, overcommits"
+    - "Loses focus, disorganized"
+    - "Naive, trusts too quickly"
+    - "Struggles with mundane follow-through"
+  motivators:
+    - "Helping others realize their potential"
+    - "Novel experiences and ideas"
+    - "Genuine heartfelt conversation"
+  fears:
+    - "Being trapped in meaningless routine"
+    - "Being disliked or rejected"
+  stress_response: "Scatters across too many projects, then crashes into self-doubt."
+  conflict_style: "Seeks resolution through dialogue, avoids hostile confrontation, uses empathy."
+  leadership_style: "Champion-coach: energizes, casts inspiring vision, rallies volunteers."
+  decision_style: "Ne-Fi: scans possibilities, tests each against personal values, commits passionately."
+  risk_tolerance: "medium-high: bold on ideas and relationships, wobbly on financial discipline."
+  humor_style: "Playful, quirky, self-deprecating, riffs spontaneously, loves wordplay."
+  internal_voice: "There is so much possibility here. We just have to reach for it together."
+  work_environment_fit:
+    - "Creative, collaborative teams"
+    - "Flexible schedule and variety"
+    - "Value-aligned mission"
+  speech_habits:
+    - "Talks with hands, energetic pacing"
+    - "Tangents and then circles back"
+  ideal_roles:
+    - "Coach / motivational speaker / teacher"
+    - "Brand or content creator"
+    - "Community manager"
+    - "Founder of mission-driven startup"
+  poor_fit_roles:
+    - "Heavy regulated compliance desk work"
+    - "Isolated pure-data roles"
+  famous_exemplars: ["Robin Williams", "Robert Downey Jr.", "Ellen DeGeneres"]
+
+# ============================================================
+# SENTINELS (SJ) -- Sensing + Judging
+# ============================================================
+
+ISTJ:
+  nickname: "The Logistician (Inspector)"
+  temperament: sentinel
+  cognitive_functions: [Si, Te, Fi, Ne]
+  core_archetype: "Calm, methodical, and endlessly dependable: the quiet spine of any organization."
+  strengths:
+    - "Integrity and unshakable honesty"
+    - "Dedicated, keeps their word at all costs"
+    - "Calm and practical under pressure"
+    - "Creates and enforces clear order"
+    - "Deep factual knowledge base"
+  weaknesses:
+    - "Stubborn, slow to accept new ideas"
+    - "Comes off cold or insensitive"
+    - "Judgmental toward the willfully ignorant"
+    - "Over-stacks own responsibilities"
+  motivators:
+    - "Duty and competence"
+    - "Stable, predictable systems"
+    - "Respected institutions"
+  fears:
+    - "Letting people down"
+    - "Chaos and disorder in their domain"
+  stress_response: "Doubles down on rules, becomes harsh and blame-self or blame-others."
+  conflict_style: "States the facts bluntly, expects others to accept them, impatient with emotion."
+  leadership_style: "By-the-book manager: clear roles, clear SOPs, rewards reliability."
+  decision_style: "Si-Te: pulls from proven precedent, applies logic, locks decision and executes."
+  risk_tolerance: "low: avoids unproven methods, protects stability."
+  humor_style: "Dry, understated, occasionally droll one-liners."
+  internal_voice: "I said I would do it. That is all that matters."
+  work_environment_fit:
+    - "Structured organizations with clear hierarchy"
+    - "Long-tenure roles with growth path"
+    - "Respected traditional institutions"
+  speech_habits:
+    - "Direct and factual"
+    - "Little small talk"
+  ideal_roles:
+    - "Accountant / auditor / financial controller"
+    - "Military officer / police detective"
+    - "Lawyer / judge"
+    - "Operations manager"
+  poor_fit_roles:
+    - "Open-ended creative brainstorming"
+    - "Emotional counseling work"
+  famous_exemplars: ["Warren Buffett", "Queen Elizabeth II", "George Washington"]
+
+ISFJ:
+  nickname: "The Defender (Protector)"
+  temperament: sentinel
+  cognitive_functions: [Si, Fe, Ti, Ne]
+  core_archetype: "Quietly selfless caretaker who remembers every detail about the people they love."
+  strengths:
+    - "Innately supportive and universally helpful"
+    - "Reliable, patient, steady"
+    - "Remarkable memory for people"
+    - "Meticulous, exceeds expectations"
+    - "Loyal and emotionally enthusiastic"
+  weaknesses:
+    - "Humble and shy to a fault"
+    - "Represses own emotions, takes criticism too personally"
+    - "Fears change, clings to tradition"
+    - "Lets others take advantage"
+  motivators:
+    - "Caring for family and team"
+    - "A safe, harmonious home base"
+    - "Quiet appreciation from loved ones"
+  fears:
+    - "Conflict and confrontation"
+    - "Being unappreciated after sacrifice"
+  stress_response: "Silently overloads, bottles emotions, then erupts in one big pent-up outburst."
+  conflict_style: "Avoidant, placates, internalizes hurt rather than voicing it."
+  leadership_style: "Caretaker-manager: protects the team, shields from politics, leads by service."
+  decision_style: "Si-Fe: weighs precedent and impact on people, defers to group harmony."
+  risk_tolerance: "low: prizes stability, dislikes unpredictability."
+  humor_style: "Gentle, warm, often inside-jokes within trusted circles."
+  internal_voice: "Who needs something right now? Let me handle it before they have to ask."
+  work_environment_fit:
+    - "Supportive teams with clear roles"
+    - "Low-drama, stable environments"
+    - "One-on-one helping contexts"
+  speech_habits:
+    - "Warm tone, soft volume"
+    - "Personal anecdotes about others, not self"
+  ideal_roles:
+    - "Nurse / healthcare worker"
+    - "Elementary teacher / counselor"
+    - "Executive assistant / office manager"
+    - "Customer success rep"
+  poor_fit_roles:
+    - "Adversarial corporate strategy"
+    - "Pure abstract research"
+  famous_exemplars: ["Mother Teresa", "Kate Middleton", "Rosa Parks"]
+
+ESTJ:
+  nickname: "The Executive (Director)"
+  temperament: sentinel
+  cognitive_functions: [Te, Si, Ne, Fi]
+  core_archetype: "Hardworking traditionalist who organizes communities and gets things done by the book."
+  strengths:
+    - "Direct, honest, transparent"
+    - "Loyal, patient, deeply reliable"
+    - "Strong organizational skills"
+    - "Confident delegator"
+    - "Model citizen, upholds standards"
+  weaknesses:
+    - "Inflexible, stubborn about tradition"
+    - "Judgmental of unconventional choices"
+    - "Neglects emotional nuance"
+    - "Too focused on public respect and status"
+  motivators:
+    - "Order and productive results"
+    - "Earning respect through performance"
+    - "Serving family and community"
+  fears:
+    - "Being seen as incompetent"
+    - "Chaos breaking down the institution"
+  stress_response: "Becomes more authoritarian, pushes harder, dismisses complaints as excuses."
+  conflict_style: "Addresses head-on with facts, impatient with feelings in the moment."
+  leadership_style: "Executive director: sets clear structure, delegates fairly, enforces accountability."
+  decision_style: "Te-Si: compares against what has worked, picks the proven efficient option, moves."
+  risk_tolerance: "low-medium: prefers proven methods, takes calculated operational risks."
+  humor_style: "Traditional, situational, enjoys a good ribbing among peers."
+  internal_voice: "There is a right way to do this. Let's stop talking and get it done."
+  work_environment_fit:
+    - "Clearly structured hierarchies"
+    - "Established institutions"
+    - "Teams that respect rank and role"
+  speech_habits:
+    - "Commanding tone, declarative"
+    - "Uses numbers and deadlines"
+  ideal_roles:
+    - "Operations or general manager"
+    - "Military or law enforcement officer"
+    - "Sales manager"
+    - "Administrator / city council"
+  poor_fit_roles:
+    - "Open-ended artistic R&D"
+    - "Emotional therapy work"
+  famous_exemplars: ["Judge Judy", "Frank Sinatra", "John D. Rockefeller"]
+
+ESFJ:
+  nickname: "The Consul (Caregiver)"
+  temperament: sentinel
+  cognitive_functions: [Fe, Si, Ne, Ti]
+  core_archetype: "Sociable caregiver who organizes the community and makes sure everyone feels included."
+  strengths:
+    - "Strong practical daily-operations skills"
+    - "Loyal and devoted to their circle"
+    - "Warm, sensitive, harmony-seeking"
+    - "Connects easily with a wide range of people"
+    - "Tireless organizer of gatherings and teams"
+  weaknesses:
+    - "Overly concerned with social status"
+    - "Inflexible, dislikes unconventional ideas"
+    - "Vulnerable to criticism, gets defensive"
+    - "Neediness for appreciation can overwhelm"
+  motivators:
+    - "Appreciation and belonging"
+    - "Harmony in the group"
+    - "Helping and hosting others"
+  fears:
+    - "Being disliked or gossiped about"
+    - "Group disharmony they cannot resolve"
+  stress_response: "Fishes for reassurance, over-extends helping, then silently resents."
+  conflict_style: "Tries to smooth and mediate, hurt by personal criticism, slow to raise own issue."
+  leadership_style: "Host-leader: keeps morale high, remembers birthdays, aligns the team socially."
+  decision_style: "Fe-Si: reads the room, checks against past precedent, chooses what keeps harmony."
+  risk_tolerance: "low: prefers convention, risk-averse socially and financially."
+  humor_style: "Warm, inclusive, lots of storytelling, occasionally gossipy."
+  internal_voice: "Is everyone okay? Let me make sure no one feels left out."
+  work_environment_fit:
+    - "People-facing team environments"
+    - "Clear expectations and appreciation"
+    - "Organizations with community feel"
+  speech_habits:
+    - "Remembers personal details, asks about family"
+    - "Uses inclusive and affirming language"
+  ideal_roles:
+    - "Event planner / community manager"
+    - "Office manager / admin"
+    - "Nurse or medical staff"
+    - "Teacher or school administrator"
+  poor_fit_roles:
+    - "Solo analytical research"
+    - "Cold adversarial negotiation"
+  famous_exemplars: ["Taylor Swift", "Jennifer Garner", "Sally Field"]  # lit: widely cited
+
+# ============================================================
+# EXPLORERS (SP) -- Sensing + Perceiving
+# ============================================================
+
+ISTP:
+  nickname: "The Virtuoso (Crafter)"
+  temperament: explorer
+  cognitive_functions: [Ti, Se, Ni, Fe]
+  core_archetype: "Hands-on tinkerer who learns by taking things apart and putting them back together better."
+  strengths:
+    - "Optimistic, energetic, rarely stressed"
+    - "Creative and practical problem-solver"
+    - "Flexible, spontaneous, calm under crisis"
+    - "Deep hands-on technical skill"
+    - "Lives in the moment, highly observant"
+  weaknesses:
+    - "Stubborn, hates being told what to do"
+    - "Privately reserved, hard to know"
+    - "Gets bored, abandons long-term projects"
+    - "Pushes boundaries, can escalate risk"
+  motivators:
+    - "Hands-on mastery"
+    - "Freedom and autonomy"
+    - "Novel mechanical or technical challenge"
+  fears:
+    - "Being locked into long commitments"
+    - "Boring desk-bound routine"
+  stress_response: "Walks away, physically or mentally, refuses to explain why."
+  conflict_style: "Blunt and direct when pressed, otherwise just exits the situation."
+  leadership_style: "Lead-by-doing: shows the work, expects others to figure it out from example."
+  decision_style: "Ti-Se: quick rational read of the physical facts, acts, adjusts on the fly."
+  risk_tolerance: "high: adrenaline-tolerant, will push to see what happens."
+  humor_style: "Deadpan, dry, physical-comedy appreciation, occasional crass jokes."
+  internal_voice: "Let me just try it. We can fix it if it breaks."
+  work_environment_fit:
+    - "Autonomous hands-on roles"
+    - "Variety and physical stimulation"
+    - "Crisis-response settings"
+  speech_habits:
+    - "Few words, lots of action"
+    - "Explains by showing, not telling"
+  ideal_roles:
+    - "Mechanic / engineer / technician"
+    - "Paramedic / pilot / firefighter"
+    - "Forensic scientist"
+    - "Entrepreneur or freelance craftsman"
+  poor_fit_roles:
+    - "Desk-bound bureaucracy"
+    - "High-emotion counseling"
+  famous_exemplars: ["Clint Eastwood", "Michael Jordan", "Bear Grylls"]
+
+ISFP:
+  nickname: "The Adventurer (Artist)"
+  temperament: explorer
+  cognitive_functions: [Fi, Se, Ni, Te]
+  core_archetype: "Quiet artist who lives fully in the present and expresses soul through aesthetic and action."
+  strengths:
+    - "Charming, relaxed, warm presence"
+    - "Original artistic and aesthetic vision"
+    - "Passionate and curious, deeply perceptive"
+    - "Kind, in tune with others' feelings"
+    - "Bold when pursuing what excites them"
+  weaknesses:
+    - "Fiercely independent, resists structure"
+    - "Unpredictable, dislikes long-term plans"
+    - "Sensitive to criticism, can shut down"
+    - "Fluctuating self-esteem with hard-to-quantify work"
+  motivators:
+    - "Creative self-expression"
+    - "Present-moment experiences"
+    - "Authentic relationships"
+  fears:
+    - "Being boxed in by expectations"
+    - "Inauthenticity or phoniness"
+  stress_response: "Shuts down emotionally, disappears to recharge alone."
+  conflict_style: "Avoids, expresses through action or art rather than argument."
+  leadership_style: "Quiet example: leads through craft and aesthetic standards, not command."
+  decision_style: "Fi-Se: checks the gut-values read, responds to what the moment calls for."
+  risk_tolerance: "medium-high: thrill-friendly, commitment-averse."
+  humor_style: "Playful, visual, occasionally mischievous, often nonverbal."
+  internal_voice: "This moment matters. I want to feel it fully and make it beautiful."
+  work_environment_fit:
+    - "Creative studios or freelance"
+    - "Flexible, non-hierarchical environments"
+    - "Aesthetic-forward businesses"
+  speech_habits:
+    - "Soft, understated"
+    - "Lets work or image speak first"
+  ideal_roles:
+    - "Artist / designer / photographer"
+    - "Musician or performer"
+    - "Chef / stylist / florist"
+    - "Solo athlete or trainer"
+  poor_fit_roles:
+    - "Long-term strategy planning"
+    - "Regimented corporate compliance"
+  famous_exemplars: ["Bob Ross", "Michael Jackson", "Rihanna"]
+
+ESTP:
+  nickname: "The Entrepreneur (Persuader)"
+  temperament: explorer
+  cognitive_functions: [Se, Ti, Fe, Ni]
+  core_archetype: "Action-first dealmaker who thrives on the thrill of the here-and-now hustle."
+  strengths:
+    - "Energetic and action-oriented"
+    - "Quick decisions under pressure"
+    - "Charming and socially magnetic"
+    - "Perceives subtle shifts in people and environment"
+    - "Bold, improvisational, original"
+  weaknesses:
+    - "Insensitive, bluntly points out flaws"
+    - "Impatient, intolerant of slow pace"
+    - "Takes risks without long-term thinking"
+    - "Refuses to be boxed in by rules"
+  motivators:
+    - "Action and competition"
+    - "Immediate tangible wins"
+    - "Living large in the present"
+  fears:
+    - "Boredom and stagnation"
+    - "Being trapped in a cubicle"
+  stress_response: "Takes bigger risks to shake off the stuck feeling, can spiral into reckless choices."
+  conflict_style: "Direct, blunt, fact-first, can mock or provoke to get movement."
+  leadership_style: "Front-line commander: charges first, rallies team through energy, improvises."
+  decision_style: "Se-Ti: reads the live situation, applies quick logic, acts without second-guessing."
+  risk_tolerance: "very high: will take risks for the thrill alone."
+  humor_style: "Bold, earthy, showboat, loves to entertain the room."
+  internal_voice: "Talk is cheap. Let's move. We'll figure the rest out on the way."
+  work_environment_fit:
+    - "Fast-paced sales or trading floors"
+    - "Emergency response or field ops"
+    - "Entrepreneurial settings with autonomy"
+  speech_habits:
+    - "Loud, confident, punctuated with humor"
+    - "Closes with a call to action"
+  ideal_roles:
+    - "Sales rep / business development"
+    - "Paramedic / police officer / soldier"
+    - "Entrepreneur / dealmaker"
+    - "Athlete / coach / commentator"
+  poor_fit_roles:
+    - "Long academic research"
+    - "Detail-heavy accounting desk"
+  famous_exemplars: ["Donald Trump", "Madonna", "Ernest Hemingway"]
+
+ESFP:
+  nickname: "The Entertainer (Performer)"
+  temperament: explorer
+  cognitive_functions: [Se, Fi, Te, Ni]
+  core_archetype: "Social sunshine who turns any ordinary moment into a celebration."
+  strengths:
+    - "Bold, original, never holds back"
+    - "Aesthetic eye for fashion and presentation"
+    - "Practical and present-focused"
+    - "Outstanding people skills"
+    - "Generous with time and energy"
+  weaknesses:
+    - "Sensitive to criticism"
+    - "Avoids conflict entirely"
+    - "Easily bored, struggles with focus"
+    - "Poor long-term planner, lives beyond means"
+  motivators:
+    - "Shared joy and celebration"
+    - "Novel sensory experiences"
+    - "Being appreciated as the spark"
+  fears:
+    - "Missing out on the fun"
+    - "Being boxed into dull routine"
+  stress_response: "Distracts with pleasure-seeking, avoids hard conversations, spends to cope."
+  conflict_style: "Avoids, deflects with humor, exits to something more enjoyable."
+  leadership_style: "Morale officer: leads by lifting the room and modeling engagement with people."
+  decision_style: "Se-Fi: reads the immediate vibe and personal values, decides fast in the moment."
+  risk_tolerance: "high: pleasure-seeking, can be impulsive especially with money."
+  humor_style: "Big energy, physical comedy, storytelling, loves a great punchline."
+  internal_voice: "Life is too short. Let's make this one worth remembering."
+  work_environment_fit:
+    - "High-interaction social environments"
+    - "Creative or performance settings"
+    - "Variety and novelty day-to-day"
+  speech_habits:
+    - "Theatrical, expressive, lots of gestures"
+    - "Tells vivid stories with dialogue"
+  ideal_roles:
+    - "Event planner / tour guide / host"
+    - "Actor / musician / designer"
+    - "Hospitality or sales rep"
+    - "Paramedic / nurse (crisis extrovert fit)"
+  poor_fit_roles:
+    - "Data analysis / technical writing"
+    - "Isolated back-office roles"
+  famous_exemplars: ["Elvis Presley", "Jamie Foxx", "Adele"]

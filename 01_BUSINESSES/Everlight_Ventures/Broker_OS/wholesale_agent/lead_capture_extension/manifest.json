@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Everlight Lead Capture",
+  "version": "1.0.0",
+  "description": "One-click capture of distressed / wholesale property listings into the Everlight pipeline.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": [
+    "https://*.zillow.com/*",
+    "https://*.redfin.com/*",
+    "https://*.realtor.com/*",
+    "https://*.trulia.com/*",
+    "https://*.homes.com/*",
+    "https://jdqqmsmwmbsnlnstyavl.supabase.co/*"
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Capture this listing"
+  }
+}

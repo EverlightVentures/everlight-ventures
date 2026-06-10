@@ -1,0 +1,25 @@
+========================================================
+  E5-MOTHER LANDED + PROVISIONED  --  2026-05-14 13:06:47 PDT
+========================================================
+
+  PUBLIC IP : 192.18.137.52
+  OCID      : ocid1.instance.oc1.us-sanjose-1.anzwuljrwtpnzgacjfubz64nyrbdymap3ujkq4jymnwbhuojooy2jdd6qzmq
+
+  CONNECT (SSH):
+    ssh -i /root/.ssh/github_deploy -p 2222 ubuntu@192.18.137.52
+
+  JOIN TAILSCALE (run this once you're SSH'd in):
+    sudo tailscale up --ssh --hostname=e5-mother
+    # then it's reachable as 'e5-mother' on your tailnet
+
+  E5 PRODUCTION DATA:
+    restored to  /home/ubuntu/e5_data/   on the new box
+    systemd units in /home/ubuntu/e5_data/_systemd_units/
+    (rsync'd directly off the orphan boot volume xlm-bot-core-e5-2c16g)
+
+  NEXT (provisioning the hive stack):
+    the recovered .env + service units are in /home/ubuntu/e5_data/
+    run the e5_mother/provision.sh flow or restore services manually
+
+  cloud-init: INCOMPLETE -- check manually
+========================================================

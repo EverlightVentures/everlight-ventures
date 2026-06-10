@@ -228,3 +228,11 @@ _state/*.tmp_*
 
 # DeHashed-enriched PII output (regenerable, breach-sourced -- keep out of git)
 01_BUSINESSES/Everlight_Ventures/Wholesale/config/_generated/
+
+# MMA medical/sanctioning paperwork -- PII, never commit, never serve
+05_PERSONAL/02_Training/MMA_Notebook/MMA_Paperwork/
+
+# Big binaries (GH001 100MB limit) -- installers + voice models stay on disk only
+*.AppImage
+FirefoxSetup.exe
+06_DEVELOPMENT/everlight_os/voice/models/*.bin

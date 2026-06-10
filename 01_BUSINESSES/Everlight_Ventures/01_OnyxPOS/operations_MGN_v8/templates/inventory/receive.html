@@ -1,0 +1,584 @@
+{% extends "base.html" %}
+
+{% block page_title %}Receive Stock{% endblock %}
+{% block header_emoji %}📥{% endblock %}
+{% block header_title %}Receive Stock{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('csv_bulk_import') }}" class="btn btn-primary">
+  <i data-lucide="upload"></i> CSV Import
+</a>
+<a href="{{ url_for('inventory') }}" class="btn btn-secondary">
+  <i data-lucide="arrow-left"></i> Inventory
+</a>
+{% endblock %}
+<style>
+  .rx-grid{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:18px;
+  }
+  @media (max-width: 1100px){
+    .rx-grid{ grid-template-columns: 1fr; }
+  }
+  .card{
+    background: linear-gradient(145deg, rgba(30,58,42,0.9), rgba(22,43,31,0.9));
+    border: 1px solid rgba(167, 243, 208, 0.12);
+    border-radius: 18px;
+    padding: 18px;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.25);
+  }
+  .card h3{
+    margin:0 0 12px 0;
+    font-size: 16px;
+    font-weight: 900;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color: #e8f5ee;
+  }
+  .hint{
+    color: rgba(232,245,238,0.65);
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+  .form-row{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:12px;
+    margin-bottom: 12px;
+  }
+  @media (max-width: 700px){
+    .form-row{ grid-template-columns: 1fr; }
+  }
+
+  label{
+    display:block;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    color: rgba(232,245,238,0.70);
+    margin-bottom: 6px;
+  }
+  .input, select, textarea{
+    width:100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 2px solid rgba(167,243,208,0.16);
+    background: rgba(0,0,0,0.22);
+    color: #e8f5ee;
+    outline: none;
+    font-family: inherit;
+  }
+  .input:focus, select:focus, textarea:focus{
+    border-color:#10b981;
+    box-shadow: 0 0 0 4px rgba(16,185,129,0.18);
+  }
+  .input.scan-active{
+    border-color:#f59e0b;
+    box-shadow: 0 0 0 4px rgba(245,158,11,0.18);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  .toggle{
+    display:flex;
+    gap:10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .toggle .btn{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .footer-actions{
+    display:flex;
+    gap:10px;
+    justify-content:flex-end;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .mini-table{
+    width:100%;
+    border-collapse: collapse;
+    overflow:hidden;
+    border-radius: 14px;
+    border: 1px solid rgba(167,243,208,0.12);
+  }
+  .mini-table th, .mini-table td{
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(167,243,208,0.08);
+    font-size: 13px;
+  }
+  .mini-table th{
+    text-align:left;
+    color: rgba(232,245,238,0.70);
+    background: rgba(255,255,255,0.03);
+    font-weight: 900;
+  }
+  .mini-table tr:last-child td{ border-bottom:none; }
+  .muted{ opacity:.75; }
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    border: 1px solid rgba(167,243,208,0.14);
+    background: rgba(0,0,0,0.18);
+  }
+  .scan-info{
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(16,185,129,0.1);
+    border: 1px solid rgba(16,185,129,0.3);
+    font-size: 13px;
+    margin-bottom: 14px;
+  }
+</style>
+
+{% block content %}
+
+<div class="rx-grid">
+
+  <!-- LEFT: Receive Existing -->
+  <div class="card" id="existingCard">
+    <h3>🧾 Receive Existing Inventory</h3>
+    <div class="hint">
+      <strong>Scan or select</strong> an item already in <span class="pill">Items.csv</span>,
+      enter quantity, and submit.
+    </div>
+
+    <!-- Barcode Scanner Input -->
+    <div class="scan-info">
+      <strong>🔍 Quick Scan:</strong> Focus the field below and scan any barcode, QR code, or type SKU.
+    </div>
+
+    <form method="POST" action="{{ url_for('receive_stock') }}">
+      <input type="hidden" name="mode" value="existing">
+
+      <!-- SCAN INPUT FIELD -->
+      <div class="form-row">
+        <div style="grid-column: 1 / -1;">
+          <label for="scan_input">Scan Barcode / QR / Type SKU</label>
+          <input
+            class="input"
+            id="scan_input"
+            type="text"
+            placeholder="Scan or type code here..."
+            autocomplete="off"
+          >
+          <small class="hint" id="scan_status"></small>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label for="existing_sku">Item (SKU • Name • Price • On Hand)</label>
+          <select id="existing_sku" name="sku" required>
+            <option value="" selected disabled>— Select an item —</option>
+            {% for it in items %}
+              {% set sku = it.get('SKU') or it.get('sku') %}
+              {% set name = it.get('Item_Name') or it.get('name') or it.get('Title') or 'Item' %}
+              {% set price = it.get('Default_Price') or it.get('Unit_Price') or it.get('Price') or it.get('price') or '' %}
+              {% set onhand = it.get('Qty_On_Hand') or it.get('On_Hand') or it.get('qty_on_hand') or it.get('on_hand') or '' %}
+              <option
+                value="{{ sku }}"
+                data-name="{{ name }}"
+                data-price="{{ price }}"
+                data-onhand="{{ onhand }}"
+                data-category="{{ it.get('Category') or it.get('category') or '' }}"
+              >
+                {{ sku }} • {{ name }} • ${{ price }} • OnHand: {{ onhand }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div>
+          <label for="existing_date">Receive Date</label>
+          <input class="input" id="existing_date" name="date" type="date" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label for="existing_qty">Quantity Received</label>
+          <input class="input" id="existing_qty" name="qty" type="number" min="1" step="1" required placeholder="e.g. 12">
+        </div>
+        <div>
+          <label for="existing_cost">Unit Cost</label>
+          <input class="input" id="existing_cost" name="unit_cost" type="number" min="0" step="0.01" placeholder="e.g. 3.50" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label for="vendor">Vendor/Supplier</label>
+          <input class="input" id="vendor" name="vendor" placeholder="e.g. Monrovia">
+        </div>
+        <div>
+          <label for="vendor_barcode">Vendor Barcode (optional)</label>
+          <input class="input" id="vendor_barcode" name="vendor_barcode" placeholder="Scan vendor label">
+          <small class="hint">Maps vendor barcode → your SKU for future scans</small>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label>Selected Summary</label>
+          <table class="mini-table">
+            <tr><th>SKU</th><td id="sumSku" class="muted">—</td></tr>
+            <tr><th>Name</th><td id="sumName" class="muted">—</td></tr>
+            <tr><th>Category</th><td id="sumCat" class="muted">—</td></tr>
+            <tr><th>Price</th><td id="sumPrice" class="muted">—</td></tr>
+            <tr><th>On Hand</th><td id="sumOnHand" class="muted">—</td></tr>
+          </table>
+        </div>
+
+        <div>
+          <label for="existing_note">Note / Invoice #</label>
+          <textarea id="existing_note" name="note" rows="6" placeholder="Invoice #, notes…"></textarea>
+        </div>
+      </div>
+
+      <div class="footer-actions">
+        <button type="submit" class="btn btn-primary">
+          <i data-lucide="check"></i> Receive Stock
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- RIGHT: Receive New -->
+  <div class="card" id="newCard">
+    <h3>🆕 Receive New Inventory (Create Item)</h3>
+    <div class="hint">
+      Not in the system yet? Fill details below. We'll generate a new SKU, create the item,
+      and auto-generate an internal QR code.
+    </div>
+
+    <form method="POST" action="{{ url_for('receive_stock') }}">
+      <input type="hidden" name="mode" value="new">
+
+      <div class="form-row">
+        <div>
+          <label for="new_sku">SKU (auto-generated)</label>
+          <input class="input" id="new_sku" name="sku" required>
+        </div>
+        <div>
+          <label for="new_date">Receive Date</label>
+          <input class="input" id="new_date" name="date" type="date" required>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label for="new_name">Item Name</label>
+          <input class="input" id="new_name" name="item_name" required placeholder="e.g. 1 Gallon Lavender">
+        </div>
+        <div>
+          <label for="new_category">Category</label>
+          <input class="input" id="new_category" name="category" required placeholder="e.g. Plants">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label for="new_price">Default Price</label>
+          <input class="input" id="new_price" name="price" type="number" min="0" step="0.01" required placeholder="e.g. 12.99">
+        </div>
+        <div>
+          <label for="new_qty">Quantity Received</label>
+          <input class="input" id="new_qty" name="qty" type="number" min="1" step="1" required placeholder="e.g. 24">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label for="new_cost">Unit Cost</label>
+          <input class="input" id="new_cost" name="unit_cost" type="number" min="0" step="0.01" placeholder="e.g. 5.25" required>
+        </div>
+        <div>
+          <label for="new_taxable">Taxable?</label>
+          <select id="new_taxable" name="taxable" required>
+            <option value="1" selected>Yes (taxable)</option>
+            <option value="0">No (non-taxable)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label for="new_vendor">Vendor</label>
+          <input class="input" id="new_vendor" name="vendor" placeholder="e.g. Greenhouse Co.">
+        </div>
+        <div>
+          <label for="new_barcode">Vendor Barcode (optional)</label>
+          <input class="input" id="new_barcode" name="barcode" placeholder="Scan vendor label">
+          <small class="hint">Will be mapped to your new SKU</small>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div>
+          <label for="new_note">Note / Invoice #</label>
+          <textarea id="new_note" name="note" rows="4" placeholder="Invoice #, notes…"></textarea>
+        </div>
+        <div>
+          <label class="muted">Internal QR Code</label>
+          <div class="hint" style="margin:0;">
+            ✅ Auto-generated for this item<br>
+            Format: <span class="pill">MGN:SKU:{{ '{sku}' }}</span><br>
+            Stable forever • Printable labels
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-actions">
+        <button type="button" class="btn btn-secondary" onclick="regenSku()">
+          <i data-lucide="refresh-cw"></i> New SKU
+        </button>
+
+        <button type="submit" class="btn btn-primary">
+          <i data-lucide="plus"></i> Create + Receive
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  lucide.createIcons();
+
+  // Default dates to today
+  const today = new Date().toISOString().slice(0,10);
+  const d1 = document.getElementById("existing_date");
+  const d2 = document.getElementById("new_date");
+  if (d1 && !d1.value) d1.value = today;
+  if (d2 && !d2.value) d2.value = today;
+
+  // Existing item summary panel
+  const sel = document.getElementById("existing_sku");
+  function updateSummary(){
+    const opt = sel?.options?.[sel.selectedIndex];
+    if(!opt) return;
+
+    document.getElementById("sumSku").textContent = opt.value || "—";
+    document.getElementById("sumName").textContent = opt.dataset.name || "—";
+    document.getElementById("sumCat").textContent = opt.dataset.category || "—";
+    document.getElementById("sumPrice").textContent = opt.dataset.price ? `$${Number(opt.dataset.price).toFixed(2)}` : "—";
+    document.getElementById("sumOnHand").textContent = opt.dataset.onhand || "—";
+  }
+  if (sel) {
+    sel.addEventListener("change", updateSummary);
+  }
+
+  // SKU generator for new items
+  function rand6(){
+    return Math.floor(Math.random()*900000 + 100000);
+  }
+  window.regenSku = function regenSku(){
+    const cat = (document.getElementById("new_category")?.value || "GEN")
+      .trim().toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,3) || "GEN";
+    document.getElementById("new_sku").value = `MGN-${cat}-${rand6()}`;
+    lucide.createIcons();
+  };
+
+  // Generate initial SKU
+  if (document.getElementById("new_sku") && !document.getElementById("new_sku").value){
+    regenSku();
+  }
+
+  //
+
+
+  # ADD THIS ROUTE TO MGN_APP.py
+# Place it near your other receive_stock routes
+
+@app.route('/inventory/bulk-csv-import', methods=['POST'])
+@login_required
+def bulk_csv_import():
+    """Bulk CSV import from receive page"""
+
+    if 'csv_file' not in request.files:
+        return jsonify({'success': False, 'error': 'No file uploaded'}), 400
+
+    file = request.files['csv_file']
+
+    if file.filename == '':
+        return jsonify({'success': False, 'error': 'No file selected'}), 400
+
+    if not file.filename.endswith('.csv'):
+        return jsonify({'success': False, 'error': 'File must be a CSV'}), 400
+
+    try:
+        import csv
+        from io import StringIO
+
+        # Read CSV
+        content = file.read().decode('utf-8')
+        csv_reader = csv.DictReader(StringIO(content))
+
+        # Get existing Items.csv
+        items_path = get_items_path()
+        with open(items_path, 'r', encoding='utf-8') as f:
+            existing_reader = csv.DictReader(f)
+            existing_headers = existing_reader.fieldnames
+            existing_items = list(existing_reader)
+
+        # Get existing SKUs
+        existing_skus = {item.get('SKU', '') for item in existing_items if item.get('SKU')}
+
+        # Validate headers
+        csv_headers = csv_reader.fieldnames
+        if set(csv_headers) != set(existing_headers):
+            return jsonify({
+                'success': False,
+                'error': 'CSV headers do not match Items.csv structure'
+            }), 400
+
+        # Process items
+        new_items = []
+        duplicate_skus = []
+
+        for row in csv_reader:
+            sku = row.get('SKU', '').strip()
+
+            if not sku:
+                continue
+
+            if sku in existing_skus:
+                duplicate_skus.append(sku)
+                continue
+
+            new_items.append(row)
+            existing_skus.add(sku)
+
+        if not new_items:
+            return jsonify({
+                'success': False,
+                'error': 'No new items to import (all SKUs already exist)'
+            }), 400
+
+        # Append to Items.csv
+        with open(items_path, 'a', newline='', encoding='utf-8') as f:
+            writer = csv.DictWriter(f, fieldnames=existing_headers)
+            writer.writerows(new_items)
+
+        return jsonify({
+            'success': True,
+            'imported': len(new_items),
+            'duplicates': len(duplicate_skus),
+            'message': f'Successfully imported {len(new_items)} items'
+        })
+
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'error': f'Import error: {str(e)}'
+        }), 500
+
+  ========================================================================
+  // BARCODE SCANNING FUNCTIONALITY
+  // ========================================================================
+  const scanInput = document.getElementById('scan_input');
+  const scanStatus = document.getElementById('scan_status');
+  const skuSelect = document.getElementById('existing_sku');
+
+  let scanTimeout;
+
+  if (scanInput) {
+    // Auto-focus on page load
+    setTimeout(() => scanInput.focus(), 500);
+
+    // Handle scan input
+    scanInput.addEventListener('input', function(e) {
+      clearTimeout(scanTimeout);
+
+      // Add visual feedback
+      scanInput.classList.add('scan-active');
+      scanStatus.textContent = '🔍 Scanning...';
+
+      // Debounce - wait for scanner to finish
+      scanTimeout = setTimeout(async () => {
+        const code = scanInput.value.trim();
+
+        if (!code) {
+          scanInput.classList.remove('scan-active');
+          scanStatus.textContent = '';
+          return;
+        }
+
+        try {
+          // Call API to resolve code to SKU
+          const response = await fetch('/api/scan/lookup', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ code: code })
+          });
+
+          const data = await response.json();
+
+          if (data.success) {
+            // Found! Select the SKU in dropdown
+            const sku = data.sku;
+
+            // Find and select option
+            for (let i = 0; i < skuSelect.options.length; i++) {
+              if (skuSelect.options[i].value === sku) {
+                skuSelect.selectedIndex = i;
+                updateSummary();
+                break;
+              }
+            }
+
+            scanStatus.textContent = `✅ Found: ${data.item.name}`;
+            scanStatus.style.color = '#10b981';
+
+            // Clear scan input after delay
+            setTimeout(() => {
+              scanInput.value = '';
+              scanInput.classList.remove('scan-active');
+
+              // Focus quantity field
+              document.getElementById('existing_qty').focus();
+            }, 1000);
+          } else {
+            scanStatus.textContent = `❌ Not found: ${code}`;
+            scanStatus.style.color = '#ef4444';
+            scanInput.classList.remove('scan-active');
+          }
+        } catch (error) {
+          console.error('Scan lookup error:', error);
+          scanStatus.textContent = '❌ Error looking up code';
+          scanStatus.style.color = '#ef4444';
+          scanInput.classList.remove('scan-active');
+        }
+      }, 300); // 300ms delay after last input
+    });
+
+    // Clear status when user clears input
+    scanInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        scanInput.value = '';
+        scanStatus.textContent = '';
+        scanInput.classList.remove('scan-active');
+      }
+    });
+  }
+</script>
+{% endblock %}

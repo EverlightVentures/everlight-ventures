@@ -1,0 +1,144 @@
+{
+  "name": "Alley Kingz #0027 Noir Setter",
+  "symbol": "BCARDI",
+  "description": "Noir Setter, a Epic Controller in the Leashbreak Tactix. The Setter pilots the Setter Rig -- tech-ops rig -- jammer van, emp array, signal-warfare. Signature move: \"Blackout\". A playable Alley Kingz battle card on Solana -- the NFT is the card, with gameplay stats written on-chain. Cosmetic art plus gameplay stats; in-game items are for entertainment and utility, not investments. No promised returns.",
+  "image": "ipfs://<IMAGE_CID_DIR>/0027_noir_setter.png",
+  "animation_url": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_NoirSetter_Setter_Seedance_V1.mp4",
+  "external_url": "https://everlightventures.io/cards/0027",
+  "attributes": [
+    {
+      "trait_type": "Card Number",
+      "value": "0027"
+    },
+    {
+      "trait_type": "Faction",
+      "value": "Leashbreak Tactix"
+    },
+    {
+      "trait_type": "Faction Id",
+      "value": "leashbreak_tactix"
+    },
+    {
+      "trait_type": "Breed",
+      "value": "Setter"
+    },
+    {
+      "trait_type": "Name",
+      "value": "Noir Setter"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Controller"
+    },
+    {
+      "trait_type": "Cost",
+      "value": 6
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Hack"
+    },
+    {
+      "trait_type": "HP",
+      "value": 1100
+    },
+    {
+      "trait_type": "Damage",
+      "value": 110
+    },
+    {
+      "trait_type": "Attack Speed",
+      "value": 0.9
+    },
+    {
+      "trait_type": "Move Speed",
+      "value": 0.8
+    },
+    {
+      "trait_type": "Range",
+      "value": 3
+    },
+    {
+      "trait_type": "Ability",
+      "value": "Blackout"
+    },
+    {
+      "trait_type": "Ability Cooldown",
+      "value": 12
+    },
+    {
+      "trait_type": "Queen Target",
+      "value": false
+    },
+    {
+      "trait_type": "Rig",
+      "value": "Setter Rig"
+    },
+    {
+      "trait_type": "Rig Class",
+      "value": "tech_ops"
+    },
+    {
+      "trait_type": "Weapon Mod",
+      "value": "emp_array"
+    }
+  ],
+  "properties": {
+    "category": "video",
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "files": [
+      {
+        "uri": "ipfs://<IMAGE_CID_DIR>/0027_noir_setter.png",
+        "type": "image/png"
+      },
+      {
+        "uri": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_NoirSetter_Setter_Seedance_V1.mp4",
+        "type": "video/mp4"
+      }
+    ]
+  },
+  "onchain_attributes": [
+    {
+      "key": "hp",
+      "value": "1100"
+    },
+    {
+      "key": "damage",
+      "value": "110"
+    },
+    {
+      "key": "attack_speed",
+      "value": "0.9"
+    },
+    {
+      "key": "move_speed",
+      "value": "0.8"
+    },
+    {
+      "key": "range",
+      "value": "3"
+    },
+    {
+      "key": "cost",
+      "value": "6"
+    },
+    {
+      "key": "rarity",
+      "value": "Epic"
+    },
+    {
+      "key": "ability_id",
+      "value": "blackout"
+    },
+    {
+      "key": "queen_target",
+      "value": "0"
+    }
+  ]
+}

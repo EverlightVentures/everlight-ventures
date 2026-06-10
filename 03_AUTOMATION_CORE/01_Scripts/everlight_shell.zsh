@@ -31,7 +31,7 @@ typeset -gr _EV_DIM=$'\033[2m'
 typeset -gr _EV_ITALIC=$'\033[3m'
 
 # Foreground colors (truecolor, not 256)
-typeset -gr _EV_GOLD=$'\033[38;2;212;168;67m'         # #D4A843 brand gold
+typeset -gr _EV_GOLD=$'\033[38;2;212;168;67m'         # #D4AF37 brand gold
 typeset -gr _EV_GOLD_HOT=$'\033[38;2;255;205;60m'     # #FFCD3C bright gold
 typeset -gr _EV_NAVY=$'\033[38;2;26;45;92m'           # #1A2D5C path-zone navy
 typeset -gr _EV_NAVY_DEEP=$'\033[38;2;15;27;61m'      # #0F1B3D deep navy
@@ -146,7 +146,7 @@ _ev_brand_logo() {
         "  ${_EV_BOLD}${_EV_GOLD}██╔══╝  ${_EV_NAVY}╚██╗ ██╔╝${_EV_RESET}" \
         "  ${_EV_BOLD}${_EV_GOLD}███████╗${_EV_NAVY} ╚████╔╝${_EV_RESET}" \
         "  ${_EV_BOLD}${_EV_GOLD}╚══════╝${_EV_NAVY}  ╚═══╝${_EV_RESET}" \
-        "  ${_EV_NAVY_DEEP}░░░░░░░░░░░░░░░░░░░${_EV_RESET}"
+        "  ${_EV_SILVER_DIM}E V E R L I G H T   V E N T U R E S${_EV_RESET}"
 }
 
 # Section header: emoji + bold gold text + navy underline (gradient feel).
@@ -202,10 +202,6 @@ _ev_banner_image() {
 
 _ev_print_banner() {
     _ev_service_status
-    # Chafa "wallpaper" image first (acts as the title splash). Drop any
-    # image at /root/.config/lucrex/banner.{png,jpg,jpeg,webp} to swap.
-    _ev_banner_image
-    echo ""
     _ev_brand_logo
     echo ""
 
@@ -222,6 +218,20 @@ _ev_print_banner() {
     _ev_row "${_EV_TURQUOISE}command center${_EV_RESET} ${_EV_SILVER_DIM}·${_EV_RESET} ${_EV_SILVER_DIM}cyberluxe terminal${_EV_RESET} ${_EV_SILVER_DIM}·${_EV_RESET} ${_EV_GREEN}● live deploy${_EV_RESET}"
     _ev_spine
 
+    # SYSTEM -- live each open (merged from fastfetch; the rice stats).
+    local _os _kr _up _ram _swp _dsk
+    _os="$(. /etc/os-release 2>/dev/null; echo "${PRETTY_NAME:-Linux}")"
+    _kr="$(uname -r 2>/dev/null)"
+    _up="$(uptime -p 2>/dev/null | sed 's/^up //')"
+    _ram="$(free -h 2>/dev/null | awk '/^Mem:/{print $3"/"$2}')"
+    _swp="$(free -h 2>/dev/null | awk '/^Swap:/{print $3"/"$2}')"
+    _dsk="$(df -h / 2>/dev/null | awk 'NR==2{print $5}')"
+    _ev_section "SYSTEM" "🖥"
+    _ev_row "${_EV_GOLD}${_os}${_EV_RESET} ${_EV_SILVER_DIM}·${_EV_RESET} ${_EV_SILVER}Linux ${_kr}${_EV_RESET} ${_EV_SILVER_DIM}·${_EV_RESET} ${_EV_SILVER}$(uname -m 2>/dev/null) $(nproc 2>/dev/null)-core${_EV_RESET}"
+    _ev_row "${_EV_BOLD}${_EV_GOLD}RAM${_EV_RESET} ${_ram}  ${_EV_BOLD}${_EV_GOLD}swap${_EV_RESET} ${_swp}  ${_EV_BOLD}${_EV_GOLD}disk${_EV_RESET} ${_dsk}  ${_EV_BOLD}${_EV_GOLD}up${_EV_RESET} ${_up}"
+    _ev_row "${_EV_SILVER_DIM}Termux+proot · zsh+starship · tmux · emacs/nvim · nnn · fastfetch${_EV_RESET}"
+    _ev_spine
+
     _ev_section "AI WORKERS" "🤖"
     _ev_row "${_EV_BOLD}${_EV_GOLD}ai${_EV_RESET} ${_EV_SILVER_DIM}GPT${_EV_RESET}    ${_EV_BOLD}${_EV_GOLD}cx${_EV_RESET} ${_EV_SILVER_DIM}Codex${_EV_RESET}    ${_EV_BOLD}${_EV_GOLD}ppx${_EV_RESET} ${_EV_SILVER_DIM}Perplexity${_EV_RESET}    ${_EV_BOLD}${_EV_GOLD}ask${_EV_RESET} ${_EV_SILVER_DIM}Auto-route${_EV_RESET}"
     _ev_row "${_EV_BOLD}${_EV_GOLD}gm${_EV_RESET} ${_EV_SILVER_DIM}Gemini${_EV_RESET}  ${_EV_BOLD}${_EV_GOLD}cl${_EV_RESET} ${_EV_SILVER_DIM}Claude${_EV_RESET}   ${_EV_BOLD}${_EV_GOLD}hive${_EV_RESET} ${_EV_SILVER_DIM}Hive Mind${_EV_RESET}"
@@ -235,7 +245,7 @@ _ev_print_banner() {
     _ev_spine
 
     # ── live service health (one curl per port, ~70ms each cached) ──────────
-    local _h_2000 _h_2200 _h_2300 _h_2301 _h_2302 _h_2400 _h_2500 _h_2700 _h_2701
+    local _h_2000 _h_2200 _h_2300 _h_2301 _h_2302 _h_2400 _h_2500 _h_2700 _h_2701 _h_2702
     _h_2000=$(curl -s -o /dev/null -w "%{http_code}" -m 1 http://127.0.0.1:2000/ 2>/dev/null)
     _h_2200=$(curl -s -o /dev/null -w "%{http_code}" -m 1 http://127.0.0.1:2200/ 2>/dev/null)
     _h_2300=$(curl -s -o /dev/null -w "%{http_code}" -m 1 http://127.0.0.1:2300/ 2>/dev/null)
@@ -245,11 +255,13 @@ _ev_print_banner() {
     _h_2500=$(curl -s -o /dev/null -w "%{http_code}" -m 1 http://127.0.0.1:2500/ 2>/dev/null)
     _h_2700=$(curl -s -o /dev/null -w "%{http_code}" -m 1 http://127.0.0.1:2700/health 2>/dev/null)
     _h_2701=$(curl -s -o /dev/null -w "%{http_code}" -m 1 http://127.0.0.1:2701/healthz 2>/dev/null)
+    _h_2702=$(curl -s -o /dev/null -w "%{http_code}" -m 1 http://127.0.0.1:2702/ 2>/dev/null)
     _pill() { case "$1" in 200|404) echo "${_EV_GREEN}●${_EV_RESET}" ;; *) echo "${_EV_RED}○${_EV_RESET}" ;; esac; }
 
     _ev_section "SERVICE HEALTH  ::  watchdog cron 1 min" "🩺"
     _ev_row "  $(_pill $_h_2000) :2000 hub  $(_pill $_h_2200) :2200 reports  $(_pill $_h_2300) :2300 intel  $(_pill $_h_2301) :2301 intel-api"
-    _ev_row "  $(_pill $_h_2302) :2302 esign  $(_pill $_h_2400) :2400 apps  $(_pill $_h_2500) :2500 mma   $(_pill $_h_2700) :2700 blinko  $(_pill $_h_2701) :2701 mcp-bridge"
+    _ev_row "  $(_pill $_h_2302) :2302 esign  $(_pill $_h_2400) :2400 apps  $(_pill $_h_2500) :2500 mma"
+    _ev_row "  $(_pill $_h_2700) :2700 blinko  $(_pill $_h_2701) :2701 mcp-bridge  $(_pill $_h_2702) :2702 lucrex"
     _ev_row "  ${_EV_SILVER_DIM}(any ○ → watchdog auto-heals next cron)${_EV_RESET}"
     _ev_spine
 
@@ -278,10 +290,11 @@ _ev_print_banner() {
     _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_BOLD}2500${_EV_RESET}    ${_EV_TURQUOISE}http://127.0.0.1:2500/${_EV_RESET}                ${_EV_SILVER_DIM}MMA Fight Camp${_EV_RESET}"
     _ev_row "  ${_EV_GOLD}└${_EV_RESET}  ${_EV_BOLD}2500.1${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2500/05_Fitness/${_EV_RESET}     ${_EV_SILVER_DIM}fitness mirror${_EV_RESET}"
     _ev_row ""
-    _ev_row "${_EV_BOLD}${_EV_GOLD}memory${_EV_RESET}   ${_EV_BOLD}2700${_EV_RESET}  ${_EV_SILVER_DIM}Memory + MCP${_EV_RESET}"
-    _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_BOLD}2700${_EV_RESET}    ${_EV_TURQUOISE}http://127.0.0.1:2700/${_EV_RESET}                ${_EV_SILVER_DIM}Blinko RAG (614+ notes)${_EV_RESET}"
+    _ev_row "${_EV_BOLD}${_EV_GOLD}memory${_EV_RESET}   ${_EV_BOLD}2700${_EV_RESET}  ${_EV_SILVER_DIM}Memory cluster + Lucrex${_EV_RESET}"
+    _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_BOLD}2700${_EV_RESET}    ${_EV_TURQUOISE}http://127.0.0.1:2700/${_EV_RESET}                ${_EV_SILVER_DIM}Blinko RAG lite (canonical e5-mother:1111)${_EV_RESET}"
     _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_BOLD}2701${_EV_RESET}    ${_EV_TURQUOISE}http://127.0.0.1:2701/healthz${_EV_RESET}         ${_EV_SILVER_DIM}MCP HTTP bridge${_EV_RESET}"
-    _ev_row "  ${_EV_GOLD}└${_EV_RESET}  ${_EV_BOLD}2701.1${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2701/list_tools${_EV_RESET}      ${_EV_SILVER_DIM}28 tools across 3 services${_EV_RESET}"
+    _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_BOLD}2701.1${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2701/list_tools${_EV_RESET}      ${_EV_SILVER_DIM}28 tools across 3 services${_EV_RESET}"
+    _ev_row "  ${_EV_GOLD}└${_EV_RESET}  ${_EV_BOLD}2702${_EV_RESET}    ${_EV_TURQUOISE}http://127.0.0.1:2702/${_EV_RESET}                ${_EV_SILVER_DIM}Lucrex Command Center${_EV_RESET}"
     _ev_row ""
     _ev_row "${_EV_BOLD}${_EV_GOLD}dashboards${_EV_RESET}  ${_EV_SILVER_DIM}branded HTML (Master Hub tiles)${_EV_RESET}"
     _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2200/reports/RICH_TODO_LIVE.html${_EV_RESET}      ${_EV_SILVER_DIM}master TODO${_EV_RESET}"
@@ -306,10 +319,10 @@ _ev_print_banner() {
     _ev_row "${_EV_BOLD}${_EV_GOLD}palette${_EV_RESET} ${_EV_SILVER_DIM}color test${_EV_RESET}"
     _ev_spine
 
-    _ev_section "EXTERNAL  ::  not yet rehomed" "🔗"
+    _ev_section "EXTERNAL" "🔗"
     _ev_row "${_EV_BOLD}${_EV_GOLD}site${_EV_RESET}    ${_EV_TURQUOISE}https://everlightventures.io/${_EV_RESET}                       ${_EV_SILVER_DIM}public site${_EV_RESET}"
-    _ev_row "${_EV_BOLD}${_EV_GOLD}lucrex${_EV_RESET}  ${_EV_DIM}http://129.159.38.250:8080/lucrex/${_EV_RESET}                  ${_EV_SILVER_DIM}DEAD, awaits 2700 rehome${_EV_RESET}"
-    _ev_row "${_EV_BOLD}${_EV_GOLD}blinko${_EV_RESET}  ${_EV_DIM}http://129.159.38.250:1111/${_EV_RESET}                         ${_EV_SILVER_DIM}DEAD, planned for e5-mother${_EV_RESET}"
+    _ev_row "${_EV_BOLD}${_EV_GOLD}lucrex${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2702/${_EV_RESET}                              ${_EV_SILVER_DIM}Command Center (rehomed, 2700 band :2702)${_EV_RESET}"
+    _ev_row "${_EV_BOLD}${_EV_GOLD}blinko${_EV_RESET}  ${_EV_TURQUOISE}http://e5-mother:1111/${_EV_RESET}                              ${_EV_SILVER_DIM}RAG on e5-mother (tailnet, rehomed)${_EV_RESET}"
     _ev_spine
 
     _ev_section "NEW THIS ROUND" "✨"
@@ -331,6 +344,8 @@ links() {
         "  ${_EV_GOLD}intel${_EV_RESET}   2300   ${_EV_TURQUOISE}http://127.0.0.1:2300/${_EV_RESET}    ${_EV_DIM}(api 2301)${_EV_RESET}" \
         "  ${_EV_GOLD}apps${_EV_RESET}    2400   ${_EV_TURQUOISE}http://127.0.0.1:2400/game_v6.html${_EV_RESET}" \
         "  ${_EV_GOLD}health${_EV_RESET}  2500   ${_EV_TURQUOISE}http://127.0.0.1:2500/${_EV_RESET}" \
+        "  ${_EV_GOLD}memory${_EV_RESET}  2700   ${_EV_TURQUOISE}http://127.0.0.1:2700/${_EV_RESET}    ${_EV_DIM}(blinko lite, canonical e5-mother:1111)${_EV_RESET}" \
+        "  ${_EV_GOLD}lucrex${_EV_RESET}  2702   ${_EV_TURQUOISE}http://127.0.0.1:2702/${_EV_RESET}" \
         "  ${_EV_DIM}--${_EV_RESET}" \
         "  ${_EV_GOLD}site${_EV_RESET}           ${_EV_TURQUOISE}https://everlightventures.io/${_EV_RESET}"
 }

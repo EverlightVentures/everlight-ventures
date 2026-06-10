@@ -1,0 +1,78 @@
+{
+  "_doc": "Three Lines of Defense classification. 1L = operators (deal-doers), 2L = compliance (independent of operators), 3L = audit (independent of both). Read by two_line_dispatch.py. Anything not listed falls back to 1L. Updates require Justine + Marcus + Theo signoff per HIVE_GOVERNANCE_V2.md Section 1.2.",
+  "_updated": "2026-05-05",
+  "_version": 1,
+  "_source_doctrine": "06_DEVELOPMENT/everlight_os/hive_mind/HIVE_GOVERNANCE_V2.md",
+  "tiers": {
+    "1L": {
+      "description": "Business unit operators. Run the deals. Same Claude session as Rich's primary work. No separate API key required.",
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "log_destination": "_audit/1L/{agent_id}/{date}/{timestamp}_{action}.json",
+      "agent_ids": [
+        "state_marvin_tn",
+        "state_daria_tx",
+        "state_atlas_ga",
+        "state_jasper_fl",
+        "state_stella_mo",
+        "state_cleo_oh",
+        "state_phin_az",
+        "31_outreach_agent",
+        "32_deal_closer",
+        "33_commission_auditor",
+        "35_broker_analytics",
+        "36_contract_writer",
+        "36_rex_wholesale",
+        "37_ace_deal_marketer",
+        "scout_navarro",
+        "filter_banks",
+        "cupid_osei",
+        "hammer_knox",
+        "cash_dawson",
+        "chart_dawson",
+        "piper_reeves",
+        "rex_blackwell",
+        "rex_thornton",
+        "marcus_cole"
+      ]
+    },
+    "2L": {
+      "description": "Compliance + risk, independent of business. Audit every PSA, halt deals on missing disclosures. Runs on a separate Claude API key so 1L cannot re-prompt mid-decision. Decisions land in the audit log BEFORE any user-visible action.",
+      "api_key_env": "ANTHROPIC_API_KEY_COMPLIANCE",
+      "log_destination": "_audit/2L/{agent_id}/{date}/{timestamp}_{action}.json",
+      "agent_ids": [
+        "state_lo_hines_tn",
+        "state_mags_diaz_tx",
+        "state_ellie_vaughn_ga",
+        "state_mona_castile_fl",
+        "state_walt_henning_mo",
+        "state_bernie_kowalski_oh",
+        "state_lupe_salazar_az",
+        "34_compliance_gate",
+        "45_compliance_assistant",
+        "justine_park",
+        "bull_archer",
+        "bull_archer_cro",
+        "dnc_registrar",
+        "recipient_class"
+      ]
+    },
+    "3L": {
+      "description": "Internal audit + external reviewer. Tests whether 2L worked. Reports to the Advisory Board, NOT to Rich operationally. Quarterly external CPA reviews.",
+      "api_key_env": "ANTHROPIC_API_KEY_AUDIT",
+      "log_destination": "_audit/3L/{agent_id}/{date}/{timestamp}_{action}.json",
+      "agent_ids": [
+        "theo_briggs",
+        "theo_briggs_audit",
+        "external_cpa_quarterly",
+        "25_analytics_auditor",
+        "33_commission_auditor"
+      ]
+    }
+  },
+  "fallback_tier": "1L",
+  "_notes": [
+    "33_commission_auditor appears in both 1L and 3L on purpose -- the operator-facing wrapper is 1L, the audit-facing review function is 3L. Resolution: 3L wins (the agent's privileged read of all commissions overrides its 1L deal-prep duty).",
+    "Until ANTHROPIC_API_KEY_COMPLIANCE and ANTHROPIC_API_KEY_AUDIT are provisioned, 2L and 3L fall back to ANTHROPIC_API_KEY with a warning logged on every dispatch.",
+    "agent_ids match the `name:` frontmatter in .claude/agents/*.md OR the canonical short name used in code (e.g. 'dnc_registrar' is the audit_log actor for register_optout calls)."
+  ]
+}

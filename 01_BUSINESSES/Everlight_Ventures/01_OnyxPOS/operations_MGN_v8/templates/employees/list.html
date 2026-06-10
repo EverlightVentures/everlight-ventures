@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block header_title %}Employees{% endblock %}
+{% block header_actions %}<a href="{{ url_for('add_employee') }}" class="btn btn-primary">Add Employee</a>{% endblock %}
+{% block content %}
+<div class="card">
+    <table>
+        <thead><tr><th>ID</th><th>Name</th><th>Role</th><th>Status</th><th>Hire Date</th><th></th></tr></thead>
+        <tbody>
+        {% for emp in employees %}
+        <tr>
+            <td class="text-muted">{{ emp.Employee_ID }}</td>
+            <td style="font-weight:500;">{{ emp.Employee_Name }}</td>
+            <td>{{ emp.Role }}</td>
+            <td><span class="badge {% if emp.Status == 'Active' %}badge-success{% else %}badge-danger{% endif %}">{{ emp.Status }}</span></td>
+            <td class="text-muted">{{ emp.Hire_Date }}</td>
+            <td><a href="{{ url_for('employee_detail', emp_id=emp.Employee_ID) }}" class="btn btn-sm btn-secondary">View</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

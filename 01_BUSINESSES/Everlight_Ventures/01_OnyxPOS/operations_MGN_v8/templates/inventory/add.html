@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block page_title %}Add Inventory Item{% endblock %}
+{% block header_emoji %}➕{% endblock %}
+{% block header_title %}Add Inventory Item{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('inventory') }}" class="btn btn-secondary">
+  <i data-lucide="package" style="width:18px;height:18px;"></i>
+  Back to Inventory
+</a>
+{% endblock %}
+{% block extra_css %}
+<style>
+  .inv-helper {
+    background: linear-gradient(160deg, rgba(15, 23, 42, 0.55), rgba(2, 6, 23, 0.55));
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 16px;
+  }
+  .inv-helper .card-header { border-bottom: 1px solid rgba(148, 163, 184, 0.15); }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="grid grid-2 gap-4" style="grid-template-columns: 2fr 1fr;">
+  <!-- LEFT: Form -->
+  <div class="card inv-helper">
+    <div class="card-header">
+      <h2 class="card-title">
+        <span class="card-emoji">📦</span>
+        Create a new item
+      </h2>
+      <span class="badge badge-info">Manual Add</span>
+    </div>
+
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('add_item') }}">
+        <div class="grid gap-4" style="grid-template-columns: 1fr 1fr;">
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label">Item name</label>
+            <input class="form-input" type="text" name="name" placeholder="e.g., Monstera Deliciosa 6&quot;" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-select" name="category" id="categorySelect" required>
+              <option value="" selected disabled>Select category…</option>
+              {% if categories is mapping %}
+                {% for code, label in categories.items() %}
+                  <option value="{{ label }}">{{ label }}</option>
+                {% endfor %}
+              {% else %}
+                {% for c in categories %}
+                  <option value="{{ c }}">{{ c }}</option>
+                {% endfor %}
+              {% endif %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Subcategory</label>
+            <select class="form-select" name="subcategory" id="subcategorySelect">
+              <option value="">— Optional —</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Retail price (Default_Price)</label>
+            <input class="form-input" type="number" name="price" step="0.01" min="0" placeholder="0.00" value="0">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Reorder point</label>
+            <input class="form-input" type="number" name="reorder_point" min="0" step="1" value="5">
+          </div>
+        </div>
+
+        <div class="mt-6" style="display:flex; gap:12px; align-items:center;">
+          <button type="submit" class="btn btn-primary">
+            <i data-lucide="plus-circle" style="width:18px;height:18px;"></i>
+            Create Item
+          </button>
+
+          <a class="btn btn-secondary" href="{{ url_for('inventory') }}">
+            <i data-lucide="x" style="width:18px;height:18px;"></i>
+            Cancel
+          </a>
+
+          <span class="text-muted text-sm" style="margin-left:auto;">
+            SKU is auto-generated from name + category + subcategory.
+          </span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- RIGHT: Notes -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">
+        <span class="card-emoji">🧠</span>
+        How it works
+      </h2>
+    </div>
+    <div class="card-body">
+      <div class="text-muted" style="line-height:1.65;">
+        <p style="margin-bottom:10px;">
+          This screen creates a row in <span class="text-mono">Inventory/Items.csv</span>.
+        </p>
+        <p style="margin-bottom:10px;">
+          For bulk receiving (invoice → lots → costs), use the <span class="text-mono">Invoice Importer</span>.
+        </p>
+        <div class="alert alert-warning" style="margin-top:14px;">
+          <i data-lucide="alert-triangle"></i>
+          <span>
+            Price here is <span class="text-mono">Default_Price</span> (your terminal sells at this).
+            Wholesale + retail markup belong in the invoice import flow.
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Dicts like {"a":"Animal","p":"Product","l":"Plant"} are passed in from POS_CORE via MGN_APP.
+  // Subcategories are also dicts like {"t":"Tree","s":"Shrub",...}.
+  const SUBS = {
+    "Animal": {{ animal_subs|tojson }},
+    "Product": {{ product_subs|tojson }},
+    "Plant": {{ plant_subs|tojson }}
+  };
+
+  const categoryEl = document.getElementById("categorySelect");
+  const subEl = document.getElementById("subcategorySelect");
+
+  function setSubcategories(catLabel) {
+    const raw = SUBS[catLabel] || [];
+    const labels = Array.isArray(raw) ? raw : Object.values(raw);
+
+    subEl.innerHTML = "";
+    const opt0 = document.createElement("option");
+    opt0.value = "";
+    opt0.textContent = "— Optional —";
+    subEl.appendChild(opt0);
+
+    for (const s of labels) {
+      const o = document.createElement("option");
+      o.value = s;
+      o.textContent = s;
+      subEl.appendChild(o);
+    }
+  }
+
+  categoryEl?.addEventListener("change", (e) => setSubcategories(e.target.value));
+</script>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block page_title %}Onboarding{% endblock %}
+{% block header_emoji %}✅{% endblock %}
+{% block header_title %}Onboarding Checklist{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">Get set up fast</div>
+  </div>
+  <div class="card-body">
+    <p class="card-subtitle" style="margin-bottom: 16px;">Complete these steps to be production-ready.</p>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td>{{ item.Title }}</td>
+          <td>{{ item.Status }}</td>
+          <td>
+            {% if item.Status != "done" %}
+            <form method="POST" action="{{ url_for('onboarding_complete') }}">
+              <input type="hidden" name="item_id" value="{{ item.Item_ID }}">
+              <button class="btn btn-secondary btn-sm" type="submit">Mark done</button>
+            </form>
+            {% else %}
+            ✅
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

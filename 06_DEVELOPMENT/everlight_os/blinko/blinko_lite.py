@@ -34,7 +34,10 @@ from typing import Any
 PORT = int(os.environ.get("BLINKO_PORT", "1111"))
 DB_PATH = Path(os.environ.get(
     "BLINKO_DB",
-    "/mnt/sdcard/AA_MY_DRIVE/_logs/blinko_lite.db"
+    # Canonical phone brain unified to _state on 2026-06-03 (was _logs). The
+    # old _logs DB held 1378 notes never merged up; both phone DBs + e5 are now
+    # the single deduped MASTER. See blinko_merge.py / blinko_audit_history.
+    "/mnt/sdcard/AA_MY_DRIVE/_state/blinko_lite.db"
 ))
 LOG_PATH = Path(os.environ.get(
     "BLINKO_LOG",
@@ -47,7 +50,12 @@ PID_FILE = Path("/tmp/blinko_lite.pid")
 def _log(msg: str) -> None:
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
     line = f"[{ts}] {msg}"
-    print(line, flush=True)
+    # Print to stdout ONLY when interactive. Under cron (no TTY) stdout is
+    # redirected back into LOG_PATH (`>> blinko_lite.log`), so an unconditional
+    # print() duplicates every line in the log. isatty() keeps console output
+    # for humans while making the file write the single source of truth.
+    if sys.stdout.isatty():
+        print(line, flush=True)
     try:
         LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
         with LOG_PATH.open("a", encoding="utf-8") as f:
@@ -96,14 +104,18 @@ def init_db() -> None:
             VALUES (new.rowid, new.content, new.tags);
         END;
 
+        -- notes_fts is a regular (self-contained) FTS5 table, so rows are
+        -- removed with a plain DELETE. The FTS5 'delete' command is ONLY valid
+        -- for external-content tables (declared content='notes'); using it on a
+        -- regular table raised "SQL logic error" and aborted every DELETE and
+        -- ON CONFLICT...DO UPDATE upsert. Latent because callers normally insert
+        -- fresh UUIDs. (fixed 2026-06-03 -- see blinko_queue_audit.py history)
         CREATE TRIGGER IF NOT EXISTS notes_ad AFTER DELETE ON notes BEGIN
-            INSERT INTO notes_fts(notes_fts, rowid, content, tags)
-            VALUES ('delete', old.rowid, old.content, old.tags);
+            DELETE FROM notes_fts WHERE rowid = old.rowid;
         END;
 
         CREATE TRIGGER IF NOT EXISTS notes_au AFTER UPDATE ON notes BEGIN
-            INSERT INTO notes_fts(notes_fts, rowid, content, tags)
-            VALUES ('delete', old.rowid, old.content, old.tags);
+            DELETE FROM notes_fts WHERE rowid = old.rowid;
             INSERT INTO notes_fts(rowid, content, tags)
             VALUES (new.rowid, new.content, new.tags);
         END;
@@ -243,12 +255,19 @@ class BlinkoHandler(BaseHTTPRequestHandler):
 
     def _send_json(self, data: dict, status: int = 200) -> None:
         body = json.dumps(data).encode("utf-8")
-        self.send_response(status)
-        self.send_header("Content-Type", "application/json")
-        self.send_header("Content-Length", str(len(body)))
-        self.send_header("Access-Control-Allow-Origin", "*")
-        self.end_headers()
-        self.wfile.write(body)
+        try:
+            self.send_response(status)
+            self.send_header("Content-Type", "application/json")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(body)
+        except (BrokenPipeError, ConnectionResetError):
+            # Client (typically the */5 health poller) hung up before we
+            # finished writing. Benign -- swallow it so the base handler does
+            # not dump a full traceback into blinko_lite.log on every early
+            # disconnect. Nothing to recover; the response is simply abandoned.
+            pass
 
     def _read_json(self) -> dict:
         length = int(self.headers.get("Content-Length", 0))

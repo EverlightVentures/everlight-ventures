@@ -168,6 +168,12 @@ def gate(cfg, count, our_cents, fair, depth, spread_cents):
     raw_edge = fair - price
     if abs(raw_edge) > cfg["sanity_max_raw_edge"]:
         return False, "edge %.0f%% > sanity cap (likely a bug/stale)" % (raw_edge * 100)
+    # ABSOLUTE-edge floor (2026-06-09): a 1-2 point gap vs a single book is de-vig
+    # NOISE, not an edge -- only act when the probability gap is real. (Stopped the
+    # engine churning the daily cap on marginal MLB moneylines.)
+    if raw_edge < cfg.get("min_abs_edge_prob", 0.0):
+        return False, "abs gap %.1fpts < %.1fpt floor (noise, not a real edge)" % (
+            raw_edge * 100, cfg.get("min_abs_edge_prob", 0.0) * 100)
     if depth < cfg["min_depth_dollars"]:
         return False, "depth $%d < min" % int(depth)
     if spread_cents is not None and spread_cents > cfg["max_spread_cents"]:
@@ -195,23 +201,34 @@ def lane_sharp_sports(cfg):
             continue
         fair = sf["fair_prob"]
         spread = ya - yb
-        # STALENESS GUARD ("get with the times", 2026-06-06): a hand/cached sharp
-        # number goes stale the instant the game state moves. If our sharp fair is
-        # far from where the liquid market actually sits, the OVERRIDE is stale --
-        # never bet on it. (Caught a Game-1 55% number trying to trade a 2-0, 80%
-        # market.) Refresh the line instead.
         mid = (yb + ya) / 2.0
         div = abs(fair * 100 - mid)
-        if div > cfg.get("override_stale_divergence_cents", 8):
-            print("  STALE %-30s sharp %.0f%% vs market mid %.0fc (gap %.0fc) -- skip, refresh the line" % (
+        # FRESHNESS-AWARE GUARD (2026-06-09, Rich: "the more inaccurate, the more
+        # margin... don't let the misprice fool you -- it could be opportunity").
+        # A big gap means one of two things: (a) the sharp number is STALE -> skip;
+        # or (b) the number is FRESH (daily_research just pulled the book) and Kalshi
+        # is LAGGING -> that's the opportunity, and the bigger the gap the fatter the
+        # margin. Tell them apart by the override's freshness, not by gap size alone.
+        fresh_ts = sf.get("fresh_ts")
+        is_fresh = bool(fresh_ts) and (time.time() - fresh_ts) < cfg.get("fresh_window_sec", 7200)
+        stale_gap = cfg.get("override_stale_divergence_cents", 8)
+        if div > stale_gap and not is_fresh:
+            print("  STALE %-30s sharp %.0f%% vs mid %.0fc (gap %.0fc, line not fresh) -- skip" % (
                 tk[:30], fair * 100, mid, div))
             continue
-        # MAKER bid at the highest price that still clears our net-edge floor,
-        # always below the ask (rests as a maker; fills on a dip/seller).
-        our_cents = best_maker_cents(cfg, fair, ya)
+        # Grab a FAT FRESH mispricing by TAKING the offer (lock the margin before it
+        # corrects); rest a maker for ordinary thin edges.
+        net_at_ask = kalshi_net(10, ya / 100.0, fair)["net_pct"]
+        if is_fresh and div > stale_gap and net_at_ask >= 2 * cfg["min_net_edge_pct"]:
+            our_cents, post_only = ya, False
+            print("  OPPORTUNITY %-30s FRESH %.0f%% vs Kalshi %.0fc (gap %.0fc, +%.1f%% net at ask) -- TAKING IT" % (
+                tk[:30], fair * 100, mid, div, net_at_ask * 100))
+        else:
+            our_cents, post_only = best_maker_cents(cfg, fair, ya), True
         cands.append({"lane": "sharp_sports", "ticker": tk, "side": "yes",
                       "our_cents": our_cents, "fair": fair, "ask": ya, "bid": yb,
-                      "depth": yc or 0, "spread": spread, "source": sf["source"]})
+                      "depth": yc or 0, "spread": spread, "source": sf["source"],
+                      "post_only": post_only})
     return cands
 
 
@@ -221,10 +238,12 @@ def lane_favorite_longshot(cfg):
     except Exception:
         return []
     out = []
-    for c in scan(stake=cfg["per_bet_max_usd"], max_markets=80)[: cfg.get("favorite_longshot_max_picks", 3)]:
+    cap = cfg.get("favorite_longshot_max_buy_c", 92)   # avoid 95c+ dust (one upset wipes ~19 wins)
+    picks = [c for c in scan(stake=cfg["per_bet_max_usd"], max_markets=80) if c["buy_c"] <= cap]
+    for c in picks[: cfg.get("favorite_longshot_max_picks", 3)]:
         out.append({"lane": "favorite_longshot", "ticker": c["ticker"], "side": c["side"],
                     "our_cents": c["buy_c"], "fair": c["our_prob"], "ask": c["buy_c"],
-                    "bid": None, "depth": c.get("depth", 0), "spread": None,
+                    "bid": None, "depth": c.get("depth", 0), "spread": None, "post_only": True,
                     "source": "favorite-longshot +%.0f%% hypothesis" % ((c["our_prob"] - c["implied"]) * 100)})
     return out
 
@@ -345,6 +364,9 @@ def run(live=False):
 
     placed = 0
     for c in candidates:
+        if live and placed >= cfg.get("max_new_bets_per_run", 2):
+            print("  (per-run bet cap %d reached -- holding the rest for the next cycle)" % cfg.get("max_new_bets_per_run", 2))
+            break
         mode = modes.get(c["lane"], "off")
         tk = c["ticker"]
         if tk in held or tk in recent_placed:
@@ -375,7 +397,7 @@ def run(live=False):
         k = from_creds()
         try:
             o = k.place_order(tk, side=c["side"], action="buy", count=count,
-                              price_cents=c["our_cents"], post_only=True)
+                              price_cents=c["our_cents"], post_only=c.get("post_only", True))
             cost = count * c["our_cents"] / 100.0
             spent_today += cost
             total_exposure += cost

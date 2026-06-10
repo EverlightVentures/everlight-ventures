@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tonight We Celebrate You 🥂</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,600&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #e8d08a;
+    --gold-dark: #8a6f2e;
+    --rose: #c4677a;
+    --rose-light: #f0b8c2;
+    --cream: #fdf6ec;
+    --dark: #1a1208;
+    --warm-brown: #3d2b1f;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background-color: var(--dark);
+    color: var(--cream);
+    font-family: 'Cormorant Garamond', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ─── Background ─── */
+  .bg-layer {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(201,168,76,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 90%, rgba(196,103,122,0.10) 0%, transparent 60%),
+      radial-gradient(ellipse 100% 100% at 50% 50%, #1a1208 0%, #0d0906 100%);
+  }
+
+  /* ─── Confetti Canvas ─── */
+  #confetti { position: fixed; inset: 0; z-index: 1; pointer-events: none; }
+
+  /* ─── Main Wrapper ─── */
+  .wrapper {
+    position: relative; z-index: 2;
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 60px 32px 100px;
+  }
+
+  /* ─── Ornament ─── */
+  .ornament {
+    text-align: center;
+    font-size: 32px;
+    letter-spacing: 12px;
+    color: var(--gold);
+    opacity: 0;
+    animation: fadeUp 1s ease 0.2s forwards;
+    margin-bottom: 10px;
+  }
+
+  /* ─── Crown Badge ─── */
+  .crown-badge {
+    text-align: center;
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeUp 1s ease 0.4s forwards;
+  }
+  .crown-badge span {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold), var(--gold-light), var(--gold));
+    color: var(--dark);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 11px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    padding: 7px 22px;
+    border-radius: 100px;
+  }
+
+  /* ─── Hero Title ─── */
+  .hero-title {
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 1.1s ease 0.6s forwards;
+    margin-bottom: 8px;
+  }
+  .hero-title h1 {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(36px, 8vw, 62px);
+    font-weight: 400;
+    line-height: 1.15;
+    background: linear-gradient(to bottom right, var(--gold-light), var(--gold), var(--gold-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+  }
+
+  .hero-sub {
+    text-align: center;
+    font-size: 18px;
+    font-style: italic;
+    color: var(--rose-light);
+    opacity: 0;
+    animation: fadeUp 1s ease 0.8s forwards;
+    margin-bottom: 50px;
+    letter-spacing: 1px;
+  }
+
+  /* ─── Divider ─── */
+  .divider {
+    display: flex; align-items: center; gap: 16px;
+    margin: 36px 0;
+    opacity: 0;
+    animation: fadeIn 1s ease 1s forwards;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+  }
+  .divider-icon { color: var(--gold); font-size: 18px; }
+
+  /* ─── Love Letter Card ─── */
+  .love-card {
+    background: linear-gradient(145deg, rgba(255,248,232,0.06), rgba(255,248,232,0.03));
+    border: 1px solid rgba(201,168,76,0.25);
+    border-radius: 4px;
+    padding: 48px 44px;
+    position: relative;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.1s forwards;
+    overflow: hidden;
+  }
+  .love-card::before {
+    content: '"';
+    position: absolute;
+    top: -20px; left: 24px;
+    font-family: 'Playfair Display', serif;
+    font-size: 160px;
+    color: var(--gold);
+    opacity: 0.08;
+    line-height: 1;
+    pointer-events: none;
+  }
+  .love-card p {
+    font-size: 18px;
+    line-height: 2;
+    color: rgba(253,246,236,0.88);
+    position: relative;
+    z-index: 1;
+  }
+  .love-card p + p { margin-top: 20px; }
+  .love-card strong { color: var(--gold-light); font-weight: 400; font-style: italic; }
+
+  /* ─── Event Card ─── */
+  .event-card {
+    margin: 48px 0;
+    border: 1px solid rgba(201,168,76,0.3);
+    border-top: 3px solid var(--gold);
+    padding: 40px 44px;
+    background: linear-gradient(160deg, rgba(201,168,76,0.07), rgba(196,103,122,0.05));
+    border-radius: 2px;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.3s forwards;
+  }
+  .event-card .event-header {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 11px;
+    letter-spacing: 5px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .event-row {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    align-items: start;
+    gap: 8px 14px;
+    margin-bottom: 16px;
+  }
+  .event-icon { font-size: 18px; padding-top: 2px; }
+  .event-label {
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    font-family: 'Cormorant Garamond', serif;
+    margin-bottom: 3px;
+  }
+  .event-value {
+    font-size: 20px;
+    color: var(--cream);
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  /* ─── Timing Block ─── */
+  .timing-block {
+    margin: 0 0 48px;
+    background: rgba(196,103,122,0.08);
+    border: 1px solid rgba(196,103,122,0.25);
+    border-radius: 4px;
+    padding: 28px 32px;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.45s forwards;
+  }
+  .timing-block .timing-header {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--rose-light);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .timing-row {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 12px;
+    font-size: 17px;
+    color: rgba(253,246,236,0.82);
+  }
+  .timing-time {
+    font-family: 'Playfair Display', serif;
+    color: var(--rose-light);
+    min-width: 80px;
+    font-size: 18px;
+  }
+  .timing-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--rose);
+    flex-shrink: 0;
+    margin-bottom: 2px;
+  }
+
+  /* ─── Vibes ─── */
+  .vibes-section {
+    opacity: 0;
+    animation: fadeUp 1s ease 1.6s forwards;
+    margin-bottom: 48px;
+  }
+  .vibes-title {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 10px;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 22px;
+  }
+  .vibes-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  @media (max-width: 500px) { .vibes-grid { grid-template-columns: 1fr; } }
+  .vibe-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 4px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .vibe-emoji { font-size: 20px; flex-shrink: 0; }
+  .vibe-text { font-size: 15px; color: rgba(253,246,236,0.78); line-height: 1.5; }
+
+  /* ─── CTA Button ─── */
+  .cta-wrap {
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.75s forwards;
+    margin-bottom: 60px;
+  }
+  .cta-btn {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold), var(--gold-light));
+    color: var(--dark);
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 18px 42px;
+    border-radius: 2px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 6px 30px rgba(201,168,76,0.3);
+  }
+  .cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(201,168,76,0.45);
+  }
+
+  /* ─── Closing Quote ─── */
+  .closing {
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp 1s ease 1.9s forwards;
+  }
+  .closing blockquote {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: clamp(18px, 4vw, 24px);
+    line-height: 1.7;
+    color: rgba(253,246,236,0.75);
+    max-width: 500px;
+    margin: 0 auto 28px;
+    position: relative;
+  }
+  .closing-sig {
+    font-size: 20px;
+    color: var(--rose-light);
+    letter-spacing: 2px;
+  }
+
+  /* ─── Footer ─── */
+  .footer {
+    margin-top: 80px;
+    text-align: center;
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: rgba(201,168,76,0.3);
+    font-family: 'Cinzel Decorative', serif;
+    opacity: 0;
+    animation: fadeIn 1s ease 2.2s forwards;
+  }
+
+  /* ─── Animations ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* ─── Sparkles ─── */
+  .sparkle {
+    position: fixed;
+    pointer-events: none;
+    font-size: 16px;
+    animation: floatSpark linear infinite;
+    z-index: 1;
+  }
+  @keyframes floatSpark {
+    0%   { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.7; }
+    90%  { opacity: 0.4; }
+    100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-layer"></div>
+<canvas id="confetti"></canvas>
+
+<div class="wrapper">
+
+  <div class="ornament">✦ ✦ ✦</div>
+
+  <div class="crown-badge">
+    <span>A Celebration in Your Honor</span>
+  </div>
+
+  <div class="hero-title">
+    <h1>She Walked In<br>& Owned the Room</h1>
+  </div>
+
+  <p class="hero-sub">For Melina — on the night of her triumph 💛</p>
+
+  <!-- LOVE LETTER -->
+  <div class="love-card">
+    <p>My love,</p>
+    <p>
+      I could not be more proud of you. Walking into that boardroom today, holding your ground, speaking your truth — that took 
+      <strong>confidence, preparation, and the kind of grace that only you carry.</strong> 
+      You've been working toward this moment, and watching you step into your power is something I will never, ever take for granted.
+    </p>
+    <p>
+      You did something hard today. And you did it <strong>beautifully.</strong>
+    </p>
+    <p>
+      So tonight isn't just happy hour — <strong>it's your hour.</strong> 
+      I want to sit across from you, raise a glass, look into those eyes of yours, and just soak in how absolutely incredible you are. 
+      You deserve every bit of tonight, mi amor. 🥂
+    </p>
+    <p style="text-align:right; margin-top: 28px; color: var(--rose-light); font-style: italic;">
+      — Your biggest fan 😘
+    </p>
+  </div>
+
+  <div class="divider"><span class="divider-icon">✦</span></div>
+
+  <!-- EVENT DETAILS -->
+  <div class="event-card">
+    <div class="event-header">✨ Tonight's Plans</div>
+
+    <div class="event-row">
+      <div class="event-icon">🌮</div>
+      <div>
+        <div class="event-label">The Spot</div>
+        <div class="event-value">Que Onda Taco Bar</div>
+      </div>
+    </div>
+
+    <div class="event-row">
+      <div class="event-icon">📍</div>
+      <div>
+        <div class="event-label">Address</div>
+        <div class="event-value">112 Nut Tree Pkwy, Vacaville, CA 95687</div>
+      </div>
+    </div>
+
+    <div class="event-row">
+      <div class="event-icon">⏰</div>
+      <div>
+        <div class="event-label">Meet Me At</div>
+        <div class="event-value">4:30 PM — I'll be waiting 💛</div>
+      </div>
+    </div>
+
+    <div class="event-row">
+      <div class="event-icon">📞</div>
+      <div>
+        <div class="event-label">Restaurant Line</div>
+        <div class="event-value">(707) 203-2420</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIMING -->
+  <div class="timing-block">
+    <div class="timing-header">🗓️ Your Departure Timeline</div>
+
+    <div class="timing-row">
+      <span class="timing-time">4:00 PM</span>
+      <span class="timing-dot"></span>
+      <span>Board meeting wraps — you're done, baby! Take a breath & bask.</span>
+    </div>
+    <div class="timing-row">
+      <span class="timing-time">4:05 PM</span>
+      <span class="timing-dot"></span>
+      <span>Head to your car — freshen up if you like, you're already gorgeous.</span>
+    </div>
+    <div class="timing-row">
+      <span class="timing-time">4:10 PM</span>
+      <span class="timing-dot"></span>
+      <span>Depart from home → I-80 West toward Vacaville (≈ 18 min).</span>
+    </div>
+    <div class="timing-row">
+      <span class="timing-time">4:28 PM</span>
+      <span class="timing-dot"></span>
+      <span>Arrive at Que Onda — parking is easy right off Nut Tree Pkwy.</span>
+    </div>
+    <div class="timing-row" style="color: var(--gold-light);">
+      <span class="timing-time">4:30 PM</span>
+      <span class="timing-dot" style="background: var(--gold);"></span>
+      <span><strong style="color: var(--gold-light);">Walk in & find me. The margarita is already on the table. 🥂</strong></span>
+    </div>
+  </div>
+
+  <!-- DIRECTIONS BUTTON -->
+  <div class="cta-wrap">
+    <a href="https://www.google.com/maps/dir/5283+Carlson,+Fairfield,+CA/112+Nut+Tree+Pkwy,+Vacaville,+CA+95687" 
+       target="_blank" class="cta-btn">
+      📍 Open My Directions
+    </a>
+  </div>
+
+  <div class="divider"><span class="divider-icon">✦</span></div>
+
+  <!-- VIBES SECTION -->
+  <div class="vibes-section">
+    <div class="vibes-title">🌟 What to Expect Tonight</div>
+    <div class="vibes-grid">
+      <div class="vibe-item">
+        <span class="vibe-emoji">🍹</span>
+        <span class="vibe-text">Full bar — margaritas, wine & beer. Your celebration drink is waiting.</span>
+      </div>
+      <div class="vibe-item">
+        <span class="vibe-emoji">🔥</span>
+        <span class="vibe-text">Fresh tacos, burritos & daily specials made with serious love. ⭐ 4.5 stars.</span>
+      </div>
+      <div class="vibe-item">
+        <span class="vibe-emoji">👗</span>
+        <span class="vibe-text">Come exactly as you are — straight from your meeting, boss energy and all.</span>
+      </div>
+      <div class="vibe-item">
+        <span class="vibe-emoji">🌡️</span>
+        <span class="vibe-text">Vacaville runs warmer than Fairfield — a light layer is all you need.</span>
+      </div>
+      <div class="vibe-item">
+        <span class="vibe-emoji">💳</span>
+        <span class="vibe-text">Cards accepted — no ATM run needed. Tonight's on us.</span>
+      </div>
+      <div class="vibe-item">
+        <span class="vibe-emoji">📱</span>
+        <span class="vibe-text">Text me when you leave so I can time it perfectly & greet you at the door.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"><span class="divider-icon">✦</span></div>
+
+  <!-- CLOSING -->
+  <div class="closing">
+    <blockquote>
+      "Tonight isn't just happy hour — it's your hour. I can't wait to sit across from you, raise a glass, and just soak in how incredible you are."
+    </blockquote>
+    <div class="closing-sig">Con todo mi amor 💛</div>
+  </div>
+
+  <div class="footer">Que Onda Taco Bar · Vacaville, CA · Tonight at 4:30 PM</div>
+</div>
+
+<script>
+// ─── Confetti ───
+const canvas = document.getElementById('confetti');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+
+const COLORS = ['#c9a84c','#e8d08a','#c4677a','#f0b8c2','#fdf6ec','#8a6f2e'];
+const pieces = [];
+
+class Confetti {
+  constructor() { this.reset(); }
+  reset() {
+    this.x = Math.random() * canvas.width;
+    this.y = Math.random() * -canvas.height;
+    this.w = Math.random() * 8 + 4;
+    this.h = Math.random() * 4 + 2;
+    this.color = COLORS[Math.floor(Math.random() * COLORS.length)];
+    this.speed = Math.random() * 1.2 + 0.5;
+    this.angle = Math.random() * Math.PI * 2;
+    this.spin = (Math.random() - 0.5) * 0.08;
+    this.drift = (Math.random() - 0.5) * 0.5;
+    this.opacity = Math.random() * 0.6 + 0.2;
+  }
+  update() {
+    this.y += this.speed;
+    this.x += this.drift;
+    this.angle += this.spin;
+    if (this.y > canvas.height + 20) this.reset();
+  }
+  draw() {
+    ctx.save();
+    ctx.globalAlpha = this.opacity;
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+    ctx.fillStyle = this.color;
+    ctx.fillRect(-this.w/2, -this.h/2, this.w, this.h);
+    ctx.restore();
+  }
+}
+
+for (let i = 0; i < 80; i++) {
+  const p = new Confetti();
+  p.y = Math.random() * canvas.height; // spread out at start
+  pieces.push(p);
+}
+
+(function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  pieces.forEach(p => { p.update(); p.draw(); });
+  requestAnimationFrame(animate);
+})();
+
+// ─── Floating Sparkles ───
+const sparkleEmojis = ['✨','💛','🥂','✦','💕','🌟'];
+for (let i = 0; i < 10; i++) {
+  const el = document.createElement('div');
+  el.className = 'sparkle';
+  el.textContent = sparkleEmojis[Math.floor(Math.random() * sparkleEmojis.length)];
+  el.style.left = Math.random() * 100 + 'vw';
+  el.style.animationDuration = (Math.random() * 12 + 10) + 's';
+  el.style.animationDelay = (Math.random() * -15) + 's';
+  el.style.fontSize = (Math.random() * 12 + 10) + 'px';
+  document.body.appendChild(el);
+}
+</script>
+</body>
+</html>

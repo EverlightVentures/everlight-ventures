@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Business — MGN POS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f4f4f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .container { width: 100%; max-width: 420px; }
+        .header { text-align: center; margin-bottom: 24px; }
+        .logo { width: 56px; height: 56px; background: #18181b; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 12px; }
+        .header h1 { font-size: 22px; font-weight: 700; color: #18181b; margin-bottom: 4px; }
+        .header p { color: #71717a; }
+        .card { background: white; border: 1px solid #e4e4e7; border-radius: 16px; padding: 24px; }
+        .form-group { margin-bottom: 16px; }
+        .form-label { display: block; font-size: 13px; font-weight: 500; color: #3f3f46; margin-bottom: 6px; }
+        .form-input { width: 100%; padding: 12px 14px; font-size: 15px; border: 1px solid #d4d4d8; border-radius: 10px; background: #fafafa; font-family: inherit; }
+        .form-input:focus { outline: none; border-color: #18181b; background: white; }
+        .btn { width: 100%; padding: 12px 14px; border-radius: 10px; border: none; font-size: 14px; font-weight: 600; background: #18181b; color: white; cursor: pointer; }
+        .btn:hover { opacity: 0.95; }
+        .error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; }
+        .footer { text-align: center; margin-top: 16px; color: #a1a1aa; font-size: 13px; }
+        .footer a { color: #71717a; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🌿</div>
+            <h1>Create your business</h1>
+            <p>Start with Pro and upgrade billing later</p>
+        </div>
+        <div class="card">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}{% for cat, msg in messages %}<div class="error">{{ msg }}</div>{% endfor %}{% endif %}
+            {% endwith %}
+            <form method="POST">
+                <div class="form-group">
+                    <label class="form-label">Business name</label>
+                    <input class="form-input" name="business_name" placeholder="Example: Sunrise Coffee" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Owner name</label>
+                    <input class="form-input" name="owner_name" placeholder="Full name" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Owner PIN (4 digits)</label>
+                    <input class="form-input" name="owner_pin" maxlength="4" placeholder="1234" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Owner email (optional)</label>
+                    <input class="form-input" name="owner_email" placeholder="owner@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Referral code (optional)</label>
+                    <input class="form-input" name="referral_code" placeholder="REF-XXXXXXX">
+                </div>
+                <button class="btn" type="submit">Create business</button>
+            </form>
+        </div>
+        <div class="footer"><a href="{{ url_for('login') }}">Back to sign in</a></div>
+    </div>
+</body>
+</html>

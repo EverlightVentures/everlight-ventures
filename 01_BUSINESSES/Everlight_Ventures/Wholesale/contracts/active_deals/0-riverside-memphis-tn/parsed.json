@@ -1,0 +1,15 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=035026%20%2000016",
+  "parsed_at": "2026-05-08T01:20:53+00:00",
+  "parcel_id": "035026  00016",
+  "property_address": "0  RIVERSIDE BLVD",
+  "owner_name": "WHITES COTTAGE LLC",
+  "land_use": "- VACANT LAND",
+  "year_built": null,
+  "sqft": null,
+  "land_appraisal_usd": 3800,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 3800,
+  "subdivision": null
+}

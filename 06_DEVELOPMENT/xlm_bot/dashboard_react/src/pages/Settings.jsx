@@ -39,7 +39,7 @@ const API_KEYS = [
 const QUICK_LINKS = [
   { label: "Django Admin", url: "http://129.159.38.250:8504/admin/", icon: "D" },
   { label: "n8n Workflows", url: "http://129.159.38.250:5678", icon: "N" },
-  { label: "Blinko RAG", url: "http://129.159.38.250:1111", icon: "B" },
+  { label: "Blinko RAG", url: "http://e5-mother:1111", icon: "B" },
   { label: "Supabase", url: "https://supabase.com/dashboard/project/jdqqmsmwmbsnlnstyavl", icon: "S" },
   { label: "Cloudflare Pages", url: "https://dash.cloudflare.com", icon: "C" },
   { label: "GitHub Repo", url: "https://github.com/EverlightVentures", icon: "G" },

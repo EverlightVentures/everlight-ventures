@@ -1,0 +1,12 @@
+{
+  "_doc": "Domain tokens that hard-block on cold outbound. Maintained by Justine Park + state compliance officers. Last updated: 2026-05-05. Audit trail: every block writes to phrase_scrub_blocks.jsonl with reason.",
+  "_updated": "2026-05-05",
+  "hard_block_government": ["*.gov", ".mil", ".fed.us"],
+  "hard_block_government_state_local": [".state.", "-mo.gov", "-tx.gov", "-ca.gov", "stlouis-mo.gov", "dallas.gov", "atlanta.gov", "phoenix.gov", "cleveland.gov"],
+  "hard_block_attorney_tokens_in_domain": ["law", "legal", "attorney", "counsel", "llp", "pllc", "esq", "municipal", "lawfirm", "lawoffice", "associates"],
+  "hard_block_known_firm_tokens": ["vogel", "rost", "cunningham", "bakerlaw", "sidley", "cooley", "kirkland", "wachtell", "lathamwatkins"],
+  "hard_block_role_addresses": ["info@", "contact@", "admin@", "support@", "billing@", "noreply@", "donotreply@", "press@", "media@", "legal@", "compliance@", "security@", "dpo@", "privacy@", "abuse@", "postmaster@", "webmaster@"],
+  "soft_block_business_signals_in_local": ["llc", "inc", "corp", "company", "firm", "group", "holdings", "partners", "associates"],
+  "consumer_email_providers_allow": ["gmail.com", "yahoo.com", "hotmail.com", "aol.com", "outlook.com", "icloud.com", "proton.me", "protonmail.com", "live.com", "msn.com", "comcast.net", "att.net", "verizon.net", "sbcglobal.net", "bellsouth.net", "cox.net", "charter.net"],
+  "internal_block": ["everlightventures.io", "everlightventures.com", "lucrex.io"]
+}

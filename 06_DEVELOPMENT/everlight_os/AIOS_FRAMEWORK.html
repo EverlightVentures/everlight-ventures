@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Everlight AIOS Framework -- Distilled from Claude OS Transcripts</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root{
+    --gold:#D4A843; --dark:#0A0A0A; --light:#E8E8E8;
+    --dim:#9A9A9A; --line:#1d1d1d; --accent:#F0CB6E;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--dark);color:var(--light);
+       font-family:'Inter',system-ui,-apple-system,sans-serif;
+       line-height:1.65;font-size:16px}
+  h1,h2,h3{font-family:'Playfair Display',Georgia,serif;color:var(--gold);
+           font-weight:600;line-height:1.2}
+  h1{font-size:2.6rem;margin:0 0 .3rem}
+  h2{font-size:1.7rem;margin:2.4rem 0 .6rem;border-bottom:1px solid var(--line);padding-bottom:.3rem}
+  h3{font-size:1.15rem;margin:1.6rem 0 .4rem;color:var(--accent)}
+  .wrap{max-width:880px;margin:0 auto;padding:3rem 1.6rem 6rem}
+  .wordmark{letter-spacing:.35em;font-size:.78rem;color:var(--gold);
+            text-transform:uppercase;margin-bottom:.4rem}
+  .lede{color:var(--dim);font-size:1.05rem;margin:.4rem 0 2rem}
+  .meta{font-size:.82rem;color:var(--dim);border-left:2px solid var(--gold);
+        padding:.5rem .9rem;margin:0 0 2rem;background:#101010}
+  code,pre{font-family:'JetBrains Mono','SF Mono',ui-monospace,monospace;
+           font-size:.92em;color:#f0e0a8}
+  pre{background:#101010;border:1px solid var(--line);padding:1rem;
+      border-radius:6px;overflow-x:auto;font-size:.86rem}
+  ul{padding-left:1.2rem}
+  li{margin:.3rem 0}
+  .pill{display:inline-block;background:#1a1a1a;border:1px solid var(--gold);
+        color:var(--gold);padding:.15rem .55rem;border-radius:99px;
+        font-size:.74rem;letter-spacing:.05em;text-transform:uppercase;
+        margin-right:.4rem}
+  .card{background:#101010;border:1px solid var(--line);border-left:3px solid var(--gold);
+        padding:1rem 1.2rem;margin:1rem 0;border-radius:4px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+        gap:.9rem;margin:1rem 0}
+  .grid .card{margin:0}
+  .strong{color:var(--accent);font-weight:600}
+  .footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line);
+          color:var(--dim);font-size:.82rem}
+  table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.5rem .7rem;border-bottom:1px solid var(--line)}
+  th{color:var(--gold);font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:.78rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="wordmark">Everlight Ventures</div>
+  <h1>The Everlight AIOS Framework</h1>
+  <div class="lede">
+    Distilled doctrine from two Claude OS transcripts, mapped to the systems
+    Lucrex already runs. Source of truth for how the Hive thinks about itself.
+  </div>
+
+  <div class="meta">
+    <span class="pill">Source 1</span> <em>Build &amp; Sell Claude</em> (Nate, ~2h35) -- Three M's, Four C's, Skills, Routines.<br>
+    <span class="pill">Source 2</span> <em>Stop Using Claude Code</em> (Agentic OS) -- Observability, Memory, Architecture (3 layers).<br>
+    <span class="pill">Extracted</span> 2026-05-04 ; <span class="pill">Distilled</span> 2026-05-08
+  </div>
+
+  <h2>1. Why this matters</h2>
+  <p>
+    Both transcripts converge on the same premise: <span class="strong">most operators use
+    Claude randomly and get random results.</span> The difference between random Claude
+    and a system is structure -- skills, observability, memory, architecture, cadence.
+    Everlight already has 90% of these layers (Hive Mind, branded comms, Blinko RAG,
+    Django dashboard, agents). What was missing is the explicit <span class="strong">framework
+    name</span> for it. This doc is that name.
+  </p>
+
+  <h2>2. Three M's of AI (Mindset / Method / Machine)</h2>
+
+  <h3>Mindset -- three habits</h3>
+  <ul>
+    <li><span class="strong">Default Shift.</span> First reflex on any task: "can AI do this or assist this." Already enforced for Lucrex via auto-dispatch + Hive doctrine.</li>
+    <li><span class="strong">Function Breakdown.</span> Decompose every task into smaller automatable functions. Maps to fire-team dispatch (TL + 2 specialists + verifier + assistant).</li>
+    <li><span class="strong">Curiosity Rule.</span> Always ask "why" of any AI output. Maps to the cross-check / synthesize phases of the 9-phase orchestration doctrine.</li>
+  </ul>
+
+  <h3>Method -- the Four C's</h3>
+  <table>
+    <tr><th>C</th><th>Meaning</th><th>Where it already lives at Everlight</th></tr>
+    <tr><td>Context</td><td>What the AI knows about you and the work</td><td>CLAUDE.md (root + project), MEMORY.md, agent firmware files</td></tr>
+    <tr><td>Connections</td><td>What live systems it can touch</td><td>MCP fleet (broker-os, Blinko, Gmail, Slack, Calendar), Supabase, Oracle services</td></tr>
+    <tr><td>Capabilities</td><td>What named skills it can run</td><td>.claude/skills/ + .claude/commands/ + 94 named agents under .claude/agents/</td></tr>
+    <tr><td>Cadence</td><td>How often it acts on its own</td><td>Oracle crons (CEO brief 7AM, hourly pulse), session save hook, deploy_to_oracle every 10min</td></tr>
+  </table>
+
+  <h3>Machine -- where it actually runs</h3>
+  <p>
+    Phone (control plane) + Oracle E5 (24/7 server, 12 services, Restart=always)
+    + Oracle Micro (XLM bot) + AceMagician PC (heavy compute, multi-screen IDE) +
+    Cloudflare (public site, always on). Tailscale is the mesh. This doc lives on
+    all four nodes after sync.
+  </p>
+
+  <h2>3. Three Layers (Observability / Memory / Architecture)</h2>
+
+  <div class="grid">
+    <div class="card">
+      <h3 style="margin-top:0">Observability</h3>
+      <p>"Visual dashboard that lets you interact with the OS outside the terminal."</p>
+      <p><span class="strong">At Everlight:</span> Lucrex OS at <code>:8080/lucrex</code>,
+      Django <code>:8504</code> ops console (Reports, Bot Intel, Sessions, Funnel,
+      Broker, Payments, Wholesale), XLM dashboard <code>:8502</code>.</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Memory</h3>
+      <p>"Track past tasks and research. Raw / wiki / output sub-folders." (Karpathy RAG)</p>
+      <p><span class="strong">At Everlight:</span> Blinko RAG (449+ notes, port 1111),
+      Django HiveArtifact table, hive_logger.py canonical chokepoint, the
+      Knowledge Bank archive layer + memory_pipeline.ingest_before_delete().</p>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Architecture</h3>
+      <p>"Domains -> tasks -> skills -> automations." Each automation either local or remote.</p>
+      <p><span class="strong">At Everlight:</span> 12 fire teams across 4 squads, 13 Slack channels by charter, branded comms layer (5 channels), 4 wholesale workbooks, Broker OS pipeline, AI Consulting funnel.</p>
+    </div>
+  </div>
+
+  <h2>4. Skills vs Routines vs Agents (terminology mapping)</h2>
+  <table>
+    <tr><th>Nate's term</th><th>What it is</th><th>Everlight equivalent</th></tr>
+    <tr><td>Skill</td><td>Reusable instructions for a repeatable task</td><td><code>.claude/skills/</code> (delegation_json_contract, plan_execute_verify, everlight_copy_guard) + <code>.claude/commands/</code> (ev-plan, ev-execute, ev-review)</td></tr>
+    <tr><td>Local routine</td><td>Auto-runs on this machine on a schedule</td><td>Termux crons on phone (19), Oracle systemd timers, deploy_to_oracle 10-min loop</td></tr>
+    <tr><td>Cloud routine</td><td>Runs on a hosted scheduler without my machine</td><td>Oracle E5 crons (CEO brief 7AM, hourly pulse, log rotation), Cloudflare auto-deploy on push</td></tr>
+    <tr><td>(implicit) Agent</td><td>Named persona that owns a domain</td><td>94 agents under <code>.claude/agents/</code> with firmware (Marcus, Penny, Rex, Cipher, Forge, etc.)</td></tr>
+  </table>
+
+  <h2>5. The Iteration Habit (Audit -> Refine -> Re-deploy)</h2>
+  <p>
+    Both speakers stress the same thing: an AIOS that doesn't iterate decays.
+    Everlight already enforces this via the <span class="strong">Operator Truth Doctrine</span>
+    -- failures lead the report, no green-pixel theater, every status claim
+    re-pulled fresh -- and the <span class="strong">self-healing rule</span> -- if an audit
+    names N broken systems, the same turn launches N fix dispatches.
+    That's the AIOS audit loop, applied with teeth.
+  </p>
+
+  <h2>6. What this document changes</h2>
+  <p>The framework was already running; this doc gives it a vocabulary so:</p>
+  <ul>
+    <li>New agent firmware files can reference <code>Four C's</code> as a shorthand.</li>
+    <li>The Lucrex OS dashboard can map metrics onto the three layers (Observability / Memory / Architecture) instead of ad-hoc widgets.</li>
+    <li>When Marquise reviews a new tool/SaaS, the question becomes: <em>which C does this strengthen, and which layer does it sit in?</em> Tools that don't map are noise.</li>
+  </ul>
+
+  <h2>7. Read it once a quarter</h2>
+  <p>Mark on Lucrex's calendar: re-read this on the 1st of Feb / May / Aug / Nov. Drift catches itself when the doc and the system disagree.</p>
+
+  <div class="footer">
+    Authored by Lucrex (King of Divine Light). Sources: NOTEPAD/Trranscripts/Claude Code Desktop/Claude os/.
+    Synced to AceMagician PC via Tailscale. Lives at
+    <code>06_DEVELOPMENT/everlight_os/AIOS_FRAMEWORK.html</code>.
+  </div>
+
+</div>
+</body>
+</html>

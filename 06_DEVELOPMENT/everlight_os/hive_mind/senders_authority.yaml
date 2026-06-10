@@ -1,0 +1,384 @@
+# senders_authority.yaml -- HARD LAW: who is allowed to send what, where.
+#
+# ============================================================================
+# TN-ONLY LOCKDOWN (operator order 2026-05-18, locks for 30 days until 2026-06-17)
+# ============================================================================
+# Rich's directive: "We should really only be focusing on Tennessee right now.
+# Tennessee is built out the most and has the best options of success... So we
+# gotta sell these properties to Chris."
+#
+# While `lockdown.tn_only` == true, the send_authority_gate refuses ANY send
+# to a recipient_state other than "TN" -- regardless of persona territory.
+# This is an EXTRA layer ON TOP of per-persona territory. Even Vaughn (territory
+# = [ALL]) cannot send outside TN until this flips off.
+#
+# To lift: set `lockdown.tn_only: false` AND `lockdown.lifted_at: <ISO date>`,
+# only after Deal 1 closes with Chris @ Mid-South.
+# ============================================================================
+lockdown:
+  tn_only: true
+  set_at: "2026-05-18T20:00:00-07:00"
+  expires_at: "2026-06-17T20:00:00-07:00"
+  set_by: "Rich (operator) -- session 2026-05-18 'lock TN until $10k'"
+  reason: "Close Deal 1 with Chris @ Mid-South. All non-TN sends blocked at the gate."
+  exception_states: []   # if you need to whitelist anything, add here. Empty = strict TN.
+  slack_alert_channel: "#hive-alerts"
+
+#
+# Fail-closed enforcement by:
+#   03_AUTOMATION_CORE/01_Scripts/content_tools/send_authority_gate.py
+#
+# Consumed by:
+#   - branded_mailer.send_branded_email() before every Resend API hit
+#   - inbound_reply_matcher when routing inbound to the correct persona
+#
+# Modified only by Rich (operator). Last update: 2026-05-17
+# Triggered by: Rogue Marquise -> support@groundfloor.us send 2026-05-17.
+#               No audit entry, wrong territory, wrong persona class.
+#
+# STATUS values:
+#   LIVE     = persona is in full production. Autonomous sends allowed
+#              (still subject to eradication_gate, DNC, resend_budget, cadence).
+#   STAGING  = persona is dossier-only. NO autonomous sends. Manual operator
+#              review per send. Promote_blocker explains what gates promotion.
+#   FROZEN   = persona suspended pending incident review.
+#
+# territory: list of US state codes the persona is allowed to send to.
+# [ALL] = exec-level, allowed everywhere (used sparingly).
+# Empty/missing territory + role=back_office means CANNOT send at all.
+
+senders:
+
+  # ========================================================================
+  # FRONT-OF-HOUSE -- TN MICRO PATH (the only LIVE pipeline today)
+  # Pipeline order: piper -> henry -> marvin -> vaughn
+  # ========================================================================
+
+  piper_reeves:
+    status: LIVE
+    email: piper@everlightventures.io
+    role: outreach_specialist
+    territory: [TN]   # NARROWED 2026-05-18 lockdown (was [TN, MS, AR])
+    territory_post_lockdown: [TN, MS, AR]
+    role_in_pipeline: first_touch_outreach
+    hands_off_to: henry_hammond
+    voice_register_default: warm
+
+  henry_hammond:
+    status: LIVE
+    email: henry@everlightventures.io
+    role: senior_negotiator
+    territory: [TN]   # NARROWED 2026-05-18 lockdown (was [TN, MS, AR])
+    territory_post_lockdown: [TN, MS, AR]
+    role_in_pipeline: negotiation
+    hands_off_to: marvin_cohen
+    voice_register_default: professional_direct
+
+  marvin_cohen:
+    status: LIVE
+    email: marvin@everlightventures.io
+    role: closing_coordinator
+    territory: [TN]   # NARROWED 2026-05-18 lockdown (was [TN, MS, AR])
+    territory_post_lockdown: [TN, MS, AR]
+    role_in_pipeline: closing
+    hands_off_to: vaughn_sterling
+    voice_register_default: consultative
+
+  vaughn_sterling:
+    status: LIVE
+    email: vaughn@everlightventures.io
+    role: senior_partner
+    territory: [TN]   # NARROWED 2026-05-18 lockdown (was [ALL])
+    territory_post_lockdown: [ALL]
+    role_in_pipeline: final_signoff
+    voice_register_default: consultative
+    notes: "Exec escalation only. Used for senior-care, probate, BBB/AG, dementia. TN-locked during 30-day push."
+
+  # ========================================================================
+  # COMPLIANCE BUDDIES -- internal review only, NEVER email counterparties.
+  # Each pairs with a state designate to clear PSAs, flag exposure, audit comms.
+  # They receive internal forwards via *-inbox aliases for review folders.
+  # ========================================================================
+  lo_hines:
+    status: LIVE
+    email: lo-inbox@everlightventures.io
+    role: compliance_officer
+    territory: [TN]
+    internal_only: true
+    pairs_with: marvin_tn
+    notes: "TN SB 909 Schedule A audit, telemarketer registration, Mid-South-Title coordination."
+
+  ellie_vaughn:
+    status: FROZEN   # 2026-05-18 TN-only lockdown (was STAGING)
+    email: ellie-inbox@everlightventures.io
+    role: compliance_officer
+    territory: [GA]
+    internal_only: true
+    pairs_with: atlas_king
+    promote_blocker: "Activates with Atlas King. OCGA 10-1-490 FBPA audit + OCGA 44-14-100 foreclosure check."
+
+  mags_diaz:
+    status: FROZEN   # 2026-05-18 TN-only lockdown (was STAGING)
+    email: mags-inbox@everlightventures.io
+    role: compliance_officer
+    territory: [TX]
+    internal_only: true
+    pairs_with: daria_voss
+    promote_blocker: "Activates with Daria. SB 1577 equitable-interest disclosure, SB 140 bond, DTPA Ch. 17."
+
+  bernie_kowalski:
+    status: FROZEN   # 2026-05-18 TN-only lockdown (was STAGING)
+    email: bernie-inbox@everlightventures.io
+    role: compliance_officer
+    territory: [OH]
+    internal_only: true
+    pairs_with: cleo_vance
+    promote_blocker: "Activates with Cleo. ORC 1349.61 criminal exposure, HB 132 equitable-interest."
+
+  mona_castile:
+    status: FROZEN   # 2026-05-18 TN-only lockdown (was STAGING)
+    email: mona-inbox@everlightventures.io
+    role: compliance_officer
+    territory: [FL]
+    internal_only: true
+    pairs_with: jasper_reeves
+    promote_blocker: "Activates with Jasper. FS 475 caveat, FS 501.1377 foreclosure rescue, FS 934 all-party recording."
+
+  lupe_salazar:
+    status: FROZEN   # 2026-05-18 TN-only lockdown (was STAGING)
+    email: lupe-inbox@everlightventures.io
+    role: compliance_officer
+    territory: [AZ]
+    internal_only: true
+    pairs_with: phin_reyes
+    promote_blocker: "Activates with Phin. HB 2747 mandatory disclosure tracker (effective 2026-01-01)."
+
+  walt_henning:
+    status: FROZEN   # 2026-05-18 TN-only lockdown (was STAGING)
+    email: walt-inbox@everlightventures.io
+    role: compliance_officer
+    territory: [MO]
+    internal_only: true
+    pairs_with: stella_marquez
+    promote_blocker: "Activates with Stella. HB 2517 wholesaler-licensure tracker, MO No-Call SMS."
+
+  # ========================================================================
+  # BACK-OFFICE WHOLESALE PERSONAS -- internal_only inbox routing.
+  # These never email counterparties. They DO receive internal intel/scoring
+  # outputs via *-inbox aliases so the operator can review by persona.
+  # ========================================================================
+  marquise_reed:
+    status: LIVE
+    email: marquise-inbox@everlightventures.io
+    role: back_office_intel
+    territory: [TN, MS, AR]
+    internal_only: true
+    notes: "Memphis tax-delinquent recon, owner skip-trace, OSINT for Piper/Henry. Internal intel reports only -- never sends to seller per [[feedback_canonical_team_roster]]."
+
+  # ========================================================================
+  # LEGAL TEAM -- internal review + privileged comms only.
+  # Receive internal forwards for legal review folders.
+  # ========================================================================
+  legal_theo_briggs:
+    status: LIVE
+    email: theo-inbox@everlightventures.io
+    role: chief_audit_executive
+    territory: [ALL]
+    internal_only: true
+    notes: "SEC enforcement defense, M&A docket, 3rd Line of Defense."
+
+  legal_imani_calder:
+    status: LIVE
+    email: imani-inbox@everlightventures.io
+    role: litigation_counsel
+    territory: [ALL]
+    internal_only: true
+    notes: "BBB / state AG response, FTSA / TCPA / CAN-SPAM litigation."
+
+  legal_lia_knight:
+    status: LIVE
+    email: lia-inbox@everlightventures.io
+    role: ethics_hotline
+    territory: [ALL]
+    internal_only: true
+    notes: "Whistleblower intake at ethics@everlightventures.io. Structurally independent."
+
+  legal_priya_bhattacharya:
+    status: LIVE
+    email: priya-inbox@everlightventures.io
+    role: privacy_data_counsel
+    territory: [ALL]
+    internal_only: true
+    notes: "FTSA / TCPA / CAN-SPAM / GDPR / CCPA, consent record discipline."
+
+  legal_wen_marsh:
+    status: LIVE
+    email: wen-inbox@everlightventures.io
+    role: corporate_counsel
+    territory: [ALL]
+    internal_only: true
+    notes: "LLC formation, CA reinstatement, entity structure."
+
+  legal_heck_aurelio:
+    status: LIVE
+    email: heck-inbox@everlightventures.io
+    role: real_estate_transaction_counsel
+    territory: [ALL]
+    internal_only: true
+    notes: "PSA templates across 7 states, equitable-interest opinions, title coordination."
+
+  # ===== SYSTEM SENDER (internal routing only) =====
+  system_router:
+    status: LIVE
+    email: noreply@everlightventures.io
+    role: internal_router
+    territory: [ALL]
+    role_in_pipeline: internal_only
+    voice_register_default: system
+    internal_only: true   # gate should reject any non-@everlightventures.io recipient
+    notes: "Used by gmail_label_router.auto_forward to deliver real replies to per-persona ImprovMX alias inboxes (piper-inbox@everlightventures.io etc.). Never used for counterparty outreach."
+
+  # ========================================================================
+  # STATE DESIGNATES -- STAGING (no autonomous send until operator promotes)
+  # Each carries a promote_blocker that must clear before status can flip LIVE.
+  # ========================================================================
+
+  marvin_tn:
+    status: LIVE
+    email: marvin@everlightventures.io
+    role: state_designate
+    territory: [TN]
+    cities: [Memphis, Little Rock, Nashville]
+    anchor_buyer: chris_ulander_mid_south_homebuyers
+    compliance_buddy: lo_hines
+    notes: "TN is the anchor market. Chris @ Mid-South is the named anchor buyer."
+
+  atlas_king:
+    status: FROZEN   # 2026-05-18 TN-only lockdown (was STAGING)
+    email: king@everlightventures.io
+    role: state_designate
+    territory: [GA]
+    cities: [Atlanta, Marietta, Decatur, Sandy Springs]
+    compliance_buddy: ellie_vaughn
+    promote_blocker: |
+      1. No GA anchor buyer identified.
+      2. OCGA 10-1-490 (FBPA) disclosure templates not yet reviewed by Ellie.
+      3. OCGA 44-14-100 foreclosure-rescue check on every lead not wired.
+      4. No Atlanta REIA introduction completed.
+      5. Zero GA leads in pipeline by design until items 1-4 clear.
+
+  daria_voss:
+    status: FROZEN   # 2026-05-18 TN-only lockdown (was STAGING)
+    email: daria@everlightventures.io
+    role: state_designate
+    territory: [TX]
+    cities: [DFW, Houston, Austin, San Antonio]
+    compliance_buddy: mags_diaz
+    promote_blocker: "SB 1577 equitable-interest disclosure templates unverified. No TX anchor buyer. SB 140 telemarketer bond ($10k) not posted."
+
+  cleo_vance:
+    status: FROZEN   # 2026-05-18 TN-only lockdown (was STAGING)
+    email: cleo@everlightventures.io
+    role: state_designate
+    territory: [OH]
+    cities: [Cleveland, Columbus, Cincinnati, Akron]
+    compliance_buddy: bernie_kowalski
+    promote_blocker: "ORC 1349.61 foreclosure-rescue CRIMINAL exposure must clear Bernie. HB 132 equitable-interest review pending. SB 155 wholesale licensure status open."
+
+  jasper_reeves:
+    status: FROZEN   # 2026-05-18 TN-only lockdown (was STAGING)
+    email: jasper@everlightventures.io
+    role: state_designate
+    territory: [FL]
+    cities: [Jacksonville, Tampa, Orlando, Miami]
+    compliance_buddy: mona_castile
+    promote_blocker: "FS 475 caveat compliance unverified. FS 501.1377 foreclosure rescue must clear Mona. FS 501.059 FTSA cell-phone PRA exposure open. No FL anchor buyer."
+
+  phin_reyes:
+    status: FROZEN   # 2026-05-18 TN-only lockdown (was STAGING)
+    email: phin@everlightventures.io
+    role: state_designate
+    territory: [AZ]
+    cities: [Phoenix, Tucson, Scottsdale, Mesa]
+    compliance_buddy: lupe_salazar
+    promote_blocker: "HB 2747 mandatory wholesaler licensing effective 2026-01-01 (Class 1 misdemeanor escalating). Phin is NOT licensed. Zero AZ outbound permitted until license issued."
+
+  stella_marquez:
+    status: FROZEN   # 2026-05-18 TN-only lockdown (was STAGING)
+    email: stella@everlightventures.io
+    role: state_designate
+    territory: [MO]
+    cities: [St. Louis, Kansas City, Springfield]
+    compliance_buddy: walt_henning
+    promote_blocker: "Streubel BBB complaint open (2026-04-26). HB 2517 wholesaler-licensure pending. Common-law fraud/misrepresentation gap-fill review pending. ZERO MO outbound until Streubel BBB resolves AND HB 2517 status clarifies."
+
+# ============================================================================
+# BACK-OFFICE -- NEVER SEND TO COUNTERPARTY (Constitutional)
+# Per feedback_canonical_team_roster.md (v2 roster, 2026-05-15):
+# "BACK-OF-HOUSE (never emails seller)"
+# Attempting a send under one of these persona_ids raises
+# SendAuthorityViolation immediately. Hard blocker.
+# ============================================================================
+back_office_never_send:
+  # Memphis intel persona -- the one that triggered this whole gate
+  - marquise_reed
+  - marquise_reed_acquisitions
+  - marquise
+
+  # Lead / pipeline ops
+  - filter_banks
+  - cupid
+  - chart_dawson
+  - charles_dawson
+  - cash
+  - rex_blackwell
+  - rex
+  - penny
+
+  # Chief of staff + executive consciousness (internal comms only)
+  - marcus_cole
+  - marcus
+  - lucrex
+  - solomon_vale
+
+  # Architects / system
+  - atlas_vega
+  - everlight_architect
+  - everlight_packager
+  - everlight_qa_gate
+  - everlight_content_director
+  - everlight_researcher
+  - everlight_saas_pm
+  - everlight_saas_builder
+  - everlight_saas_growth
+  - everlight_seo_formatter
+  - everlight_trading_risk
+
+  # Legal / compliance buddies -- review only, NEVER send to counterparty
+  # (they advise the front-of-house sender; they don't email sellers themselves)
+  - ellie_vaughn
+  - bernie_kowalski
+  - mags_diaz
+  - mona_castile
+  - lupe_salazar
+  - walt_henning
+  - lo_hines
+  - legal_theo_briggs
+  - legal_imani_calder
+  - legal_lia_knight
+  - legal_priya_bhattacharya
+  - legal_wen_marsh
+  - legal_heck_aurelio
+
+# ============================================================================
+# OPERATOR OVERRIDE
+# Rich-only escape hatch. When send_authority_gate is invoked with
+# override=True (and OPERATOR_OVERRIDE_TOKEN env var matches), the gate
+# logs the override but allows the send. Used only when Rich is in the
+# loop and consciously breaking glass.
+# ============================================================================
+operator_override:
+  enabled: true
+  env_var: OPERATOR_OVERRIDE_TOKEN
+  audit_required: true
+  slack_alert: "#ceo-brief"

@@ -1,0 +1,644 @@
+{% extends "base.html" %}
+
+{% block page_title %}Employee: {{ employee.Employee_Name }}{% endblock %}
+{% block header_emoji %}👤{% endblock %}
+{% block header_title %}Employee Details{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('employees') }}" class="btn btn-secondary">
+    <i data-lucide="arrow-left"></i>
+    Back to Employees
+</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(160deg, #0f1f17 0%, #0a1810 40%, #0f1f17 100%);
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: 1fr 360px;
+        gap: 24px;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    @media (max-width: 900px) {
+        .detail-grid { grid-template-columns: 1fr; }
+    }
+
+    .info-panel {
+        background: linear-gradient(145deg, #1e3a2a 0%, #162b1f 100%);
+        border: 1px solid rgba(167, 243, 208, 0.12);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .info-header {
+        padding: 28px;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.1);
+        background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .emp-avatar {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        font-weight: 800;
+        color: white;
+        box-shadow: 0 8px 24px rgba(16,185,129,0.3);
+    }
+
+    .emp-title h2 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #e8f5ee;
+        margin-bottom: 6px;
+    }
+
+    .role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .role-badge.owner { background: rgba(167,139,250,0.2); color: #a78bfa; }
+    .role-badge.manager { background: rgba(56,189,248,0.2); color: #38bdf8; }
+    .role-badge.cashier { background: rgba(52,211,153,0.2); color: #34d399; }
+    .role-badge.employee { background: rgba(251,191,36,0.2); color: #fbbf24; }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #34d399;
+    }
+
+    .status-dot.inactive { background: #64748b; }
+
+    .info-body { padding: 28px; }
+
+    .info-section { margin-bottom: 28px; }
+    .info-section:last-child { margin-bottom: 0; }
+
+    .info-section-title {
+        font-size: 12px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.08);
+    }
+
+    .info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.06);
+    }
+
+    .info-row:last-child { border-bottom: none; }
+
+    .info-label {
+        font-size: 14px;
+        color: #94a3b8;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .info-label [data-lucide] {
+        width: 18px;
+        height: 18px;
+        color: #64748b;
+    }
+
+    .info-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: #e8f5ee;
+    }
+
+    .info-value.mono { font-family: 'Space Mono', monospace; }
+    .info-value.muted { color: #64748b; font-style: italic; }
+
+    /* Actions Panel */
+    .actions-panel {
+        background: linear-gradient(145deg, #1e3a2a 0%, #162b1f 100%);
+        border: 1px solid rgba(167, 243, 208, 0.12);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        height: fit-content;
+    }
+
+    .actions-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.1);
+        background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+    }
+
+    .actions-header h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #e8f5ee;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .actions-body { padding: 20px; }
+
+    .action-btn {
+        width: 100%;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        background: linear-gradient(145deg, #243d2e 0%, #1a2f23 100%);
+        color: #e8f5ee;
+        border: 1px solid rgba(167, 243, 208, 0.12);
+        border-radius: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        transition: all 0.2s;
+        font-family: inherit;
+        text-decoration: none;
+    }
+
+    .action-btn:hover {
+        background: linear-gradient(145deg, #2a4a36 0%, #1e3a2a 100%);
+        border-color: rgba(167, 243, 208, 0.2);
+        transform: translateX(4px);
+    }
+
+    .action-btn:last-child { margin-bottom: 0; }
+
+    .action-btn .icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .action-btn .icon [data-lucide] {
+        width: 22px;
+        height: 22px;
+    }
+
+    .action-btn.edit .icon { background: rgba(56,189,248,0.2); color: #38bdf8; }
+    .action-btn.reset .icon { background: rgba(167,139,250,0.2); color: #a78bfa; }
+    .action-btn.deactivate .icon { background: rgba(251,191,36,0.2); color: #fbbf24; }
+    .action-btn.delete .icon { background: rgba(244,63,94,0.2); color: #fb7185; }
+
+    .action-btn .text { flex: 1; }
+
+    .action-btn .text span {
+        display: block;
+        font-size: 12px;
+        color: #64748b;
+        font-weight: 500;
+        margin-top: 2px;
+    }
+
+    /* Pay Card - EDITABLE */
+    .pay-card {
+        background: rgba(0,0,0,0.2);
+        border: 1px solid rgba(167, 243, 208, 0.08);
+        border-radius: 14px;
+        padding: 20px;
+        margin: 0 20px 20px;
+    }
+
+    .pay-card h4 {
+        font-size: 13px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .pay-display {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+
+    .pay-rate {
+        font-size: 32px;
+        font-weight: 800;
+        color: #34d399;
+        font-family: 'Space Mono', monospace;
+    }
+
+    .pay-rate span {
+        font-size: 14px;
+        font-weight: 500;
+        color: #64748b;
+    }
+
+    .pay-form {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+    }
+
+    .pay-input-wrap {
+        position: relative;
+        flex: 1;
+    }
+
+    .pay-input-wrap .prefix {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #34d399;
+        font-weight: 700;
+        font-size: 18px;
+    }
+
+    .pay-input {
+        width: 100%;
+        padding: 12px 14px 12px 32px;
+        font-size: 18px;
+        font-weight: 700;
+        font-family: 'Space Mono', monospace;
+        border: 2px solid rgba(167, 243, 208, 0.15);
+        border-radius: 10px;
+        background: #1a2f23;
+        color: #34d399;
+    }
+
+    .pay-input:focus {
+        outline: none;
+        border-color: #10b981;
+    }
+
+    .pay-save-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+        font-weight: 700;
+        background: linear-gradient(180deg, #34d399, #059669);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+    }
+
+    .pay-save-btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .pay-note {
+        font-size: 11px;
+        color: #64748b;
+        margin-top: 10px;
+    }
+
+    /* Delete Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.8);
+        backdrop-filter: blur(8px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal-box {
+        background: linear-gradient(145deg, #1e3a2a 0%, #162b1f 100%);
+        border: 1px solid rgba(167, 243, 208, 0.12);
+        border-radius: 20px;
+        padding: 32px;
+        max-width: 420px;
+        width: 90%;
+        text-align: center;
+    }
+
+    .modal-icon {
+        width: 72px;
+        height: 72px;
+        background: rgba(244,63,94,0.15);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 36px;
+    }
+
+    .modal-box h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #e8f5ee;
+        margin-bottom: 12px;
+    }
+
+    .modal-box p {
+        font-size: 14px;
+        color: #94a3b8;
+        margin-bottom: 24px;
+        line-height: 1.6;
+    }
+
+    .modal-box .emp-name {
+        color: #fb7185;
+        font-weight: 700;
+    }
+
+    .modal-actions {
+        display: flex;
+        gap: 12px;
+    }
+
+    .modal-btn {
+        flex: 1;
+        padding: 14px 20px;
+        font-size: 15px;
+        font-weight: 600;
+        border-radius: 12px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+    }
+
+    .modal-btn.cancel {
+        background: rgba(0,0,0,0.2);
+        border: 1px solid rgba(167, 243, 208, 0.15);
+        color: #94a3b8;
+    }
+
+    .modal-btn.cancel:hover {
+        background: rgba(0,0,0,0.3);
+        color: #e8f5ee;
+    }
+
+    .modal-btn.danger {
+        background: linear-gradient(180deg, #f43f5e 0%, #e11d48 100%);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 16px rgba(244,63,94,0.3);
+    }
+
+    .modal-btn.danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(244,63,94,0.4);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-grid">
+    <!-- Main Info -->
+    <div class="info-panel">
+        <div class="info-header">
+            <div class="emp-avatar">
+                {{ employee.Employee_Name[:1].upper() if employee.Employee_Name else '?' }}
+            </div>
+            <div class="emp-title">
+                <h2>{{ employee.Employee_Name }}</h2>
+                {% set role_lower = (employee.Role or 'employee')|lower %}
+                <span class="role-badge {{ role_lower }}">
+                    <span class="status-dot {% if employee.Status != 'Active' %}inactive{% endif %}"></span>
+                    {{ employee.Role or 'Employee' }}
+                </span>
+            </div>
+        </div>
+
+        <div class="info-body">
+            <div class="info-section">
+                <div class="info-section-title">Employee Information</div>
+
+                <div class="info-row">
+                    <span class="info-label">
+                        <i data-lucide="hash"></i>
+                        Employee ID
+                    </span>
+                    <span class="info-value mono">{{ employee.Employee_ID }}</span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">
+                        <i data-lucide="shield"></i>
+                        Status
+                    </span>
+                    <span class="info-value">{{ employee.Status or 'Active' }}</span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">
+                        <i data-lucide="calendar"></i>
+                        Hire Date
+                    </span>
+                    <span class="info-value">{{ employee.Hire_Date or 'Not set' }}</span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">
+                        <i data-lucide="key"></i>
+                        PIN
+                    </span>
+                    <span class="info-value mono">****</span>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <div class="info-section-title">Contact Information</div>
+
+                <div class="info-row">
+                    <span class="info-label">
+                        <i data-lucide="phone"></i>
+                        Phone
+                    </span>
+                    <span class="info-value {% if not employee.Phone %}muted{% endif %}">
+                        {{ employee.Phone or 'Not provided' }}
+                    </span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">
+                        <i data-lucide="mail"></i>
+                        Email
+                    </span>
+                    <span class="info-value {% if not employee.Email %}muted{% endif %}">
+                        {{ employee.Email or 'Not provided' }}
+                    </span>
+                </div>
+
+                <div class="info-row">
+                    <span class="info-label">
+                        <i data-lucide="alert-circle"></i>
+                        Emergency Contact
+                    </span>
+                    <span class="info-value {% if not employee.Emergency_Contact %}muted{% endif %}">
+                        {{ employee.Emergency_Contact or 'Not provided' }}
+                    </span>
+                </div>
+            </div>
+
+            {% if employee.Notes %}
+            <div class="info-section">
+                <div class="info-section-title">Notes</div>
+                <p style="color: #94a3b8; font-size: 14px; line-height: 1.6;">{{ employee.Notes }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Actions Sidebar -->
+    <div>
+        <div class="actions-panel">
+            <div class="actions-header">
+                <h3><span>⚡</span> Quick Actions</h3>
+            </div>
+            <div class="actions-body">
+                <a href="{{ url_for('edit_employee', emp_id=employee.Employee_ID) }}" class="action-btn edit">
+                    <div class="icon"><i data-lucide="edit-3"></i></div>
+                    <div class="text">
+                        Edit Employee
+                        <span>Update information</span>
+                    </div>
+                </a>
+
+                <a href="{{ url_for('reset_employee_pin', emp_id=employee.Employee_ID) }}" class="action-btn reset">
+                    <div class="icon"><i data-lucide="key"></i></div>
+                    <div class="text">
+                        Reset PIN
+                        <span>Generate new PIN</span>
+                    </div>
+                </a>
+
+                {% if employee.Status == 'Active' %}
+                <a href="{{ url_for('deactivate_employee', emp_id=employee.Employee_ID) }}" class="action-btn deactivate">
+                    <div class="icon"><i data-lucide="user-x"></i></div>
+                    <div class="text">
+                        Deactivate
+                        <span>Remove access</span>
+                    </div>
+                </a>
+                {% else %}
+                <a href="{{ url_for('activate_employee', emp_id=employee.Employee_ID) }}" class="action-btn deactivate">
+                    <div class="icon"><i data-lucide="user-check"></i></div>
+                    <div class="text">
+                        Activate
+                        <span>Restore access</span>
+                    </div>
+                </a>
+                {% endif %}
+
+                <button type="button" class="action-btn delete" onclick="showDeleteModal()">
+                    <div class="icon"><i data-lucide="trash-2"></i></div>
+                    <div class="text">
+                        Delete Employee
+                        <span>Permanently remove</span>
+                    </div>
+                </button>
+            </div>
+
+            <!-- EDITABLE PAY RATE SECTION -->
+            <div class="pay-card">
+                <h4>💰 Hourly Pay Rate</h4>
+
+                {% set current_rate = (pay_config.get('Hourly_Rate') or pay_config.get('hourly_rate') or 16.00)|float if pay_config else 16.00 %}
+
+                <div class="pay-display">
+                    <div class="pay-rate">${{ "%.2f"|format(current_rate) }} <span>/ hour</span></div>
+                </div>
+
+                <form action="{{ url_for('update_employee_pay', emp_id=employee.Employee_ID) }}" method="POST" class="pay-form">
+                    <div class="pay-input-wrap">
+                        <span class="prefix">$</span>
+                        <input type="number" name="hourly_rate" class="pay-input"
+                               value="{{ "%.2f"|format(current_rate) }}"
+                               step="0.25" min="16.00" required>
+                    </div>
+                    <button type="submit" class="pay-save-btn">Update</button>
+                </form>
+                <div class="pay-note">CA minimum wage: $16.00/hr • Changes saved to Employee_Pay_Config.csv</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-box">
+        <div class="modal-icon">⚠️</div>
+        <h3>Delete Employee?</h3>
+        <p>
+            Are you sure you want to permanently delete
+            <span class="emp-name">{{ employee.Employee_Name }}</span>?
+            <br><br>
+            This action cannot be undone. All time clock records will be preserved but the employee will be removed from the directory.
+        </p>
+        <div class="modal-actions">
+            <button type="button" class="modal-btn cancel" onclick="hideDeleteModal()">Cancel</button>
+            <form action="{{ url_for('delete_employee', emp_id=employee.Employee_ID) }}" method="POST" style="flex: 1;">
+                <button type="submit" class="modal-btn danger" style="width: 100%;">
+                    Delete Employee
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    lucide.createIcons();
+
+    function showDeleteModal() {
+        document.getElementById('deleteModal').classList.add('active');
+    }
+
+    function hideDeleteModal() {
+        document.getElementById('deleteModal').classList.remove('active');
+    }
+
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) hideDeleteModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') hideDeleteModal();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,24 @@
+[Unit]
+Description=Lucrex desktop_runner -- CLI <-> Claude Computer Use bridge
+Documentation=file:///AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/computer_use/RUNBOOK.md
+After=graphical-session.target
+# If we crash 5x in 60s, give up (likely a real bug)
+StartLimitBurst=5
+StartLimitIntervalSec=60
+
+[Service]
+Type=simple
+WorkingDirectory=/AA_MY_DRIVE
+EnvironmentFile=/AA_MY_DRIVE/.env
+Environment=DISPLAY=:1
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/AA_MY_DRIVE/.venv/bin/python3 /AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/computer_use/desktop_runner.py
+StandardOutput=append:/tmp/desktop_runner.log
+StandardError=append:/tmp/desktop_runner.log
+# Auto-restart on ANY exit (crash, OOM, manual kill)
+Restart=always
+RestartSec=5
+TimeoutStopSec=15
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,19 @@
+[Unit]
+Description=Sync rex active_deals JSON into Django Deal/DealEvent tables
+After=network-online.target rex-negotiator.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=opc
+Group=opc
+WorkingDirectory=/home/opc/hive_django
+EnvironmentFile=/etc/default/rex-negotiator
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 /home/opc/sync_active_deals_to_db.py
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,325 @@
+# Hive Mind Agent Schedules
+# Each entry: a specific agent firing at a specific time with a specific task.
+# The scheduler (run_scheduled_agents.py) reads this file, computes next-fire
+# times in America/Los_Angeles, and dispatches the agent via hive_directory's
+# chat endpoint (fast) or dispatcher.dispatch (full war room for strategic work).
+#
+# Time zone for all cron expressions: America/Los_Angeles (PT).
+# Cron format: "min hour day month dow"
+#
+# mode options:
+#   chat       -- fast single-turn call, ~5s, for routine recurring work
+#   dispatch   -- full hive_mind.dispatcher war-room, for weekly strategic work
+#
+# enabled=false allows you to pause a schedule without deleting it.
+
+meta:
+  timezone: America/Los_Angeles
+  version: 1
+  generated: 2026-04-23
+  purpose: "Daily autonomous operation schedule for Hive Mind employees."
+
+schedules:
+
+  # ============================================================
+  # MARCUS COLE -- Chief Operator. Sets the day, closes the day.
+  # ============================================================
+  - slug: marcus-cole
+    cron: "0 7 * * *"
+    mode: chat
+    enabled: true
+    name: "Morning directives"
+    task: |
+      It's 7 AM PT. You just read Brief Calloway's overnight intel digest.
+      Set today's top 3 priorities for the Hive. List them numbered, with the
+      department owner for each. Flag anything stalled from yesterday.
+      Post a short version to the #war-room tone.
+
+  - slug: marcus-cole
+    cron: "0 16 * * *"
+    mode: chat
+    enabled: true
+    name: "End of day review"
+    task: |
+      It's 4 PM PT, end of business. Review the day: what shipped, what stalled,
+      what approvals are still open. Call out any department that missed its morning
+      directive. Tomorrow's first move?
+
+  # ============================================================
+  # WHOLESALE (Rex Blackwell deal crew)
+  # ============================================================
+  - slug: rex-blackwell
+    cron: "0 8 * * *"
+    mode: chat
+    enabled: true
+    name: "Morning scout"
+    task: |
+      It's 8 AM PT. Scout today's target markets: St. Louis, Charlotte/Raleigh,
+      Atlanta, Dallas-Fort Worth, Cleveland, Jacksonville/Tampa. What keywords
+      and zip codes are you hitting on Zillow today? List 5 specific searches
+      with your expected ARV range. Reference Penny if you need the math.
+
+  - slug: rex-blackwell
+    cron: "0 13 * * *"
+    mode: chat
+    enabled: true
+    name: "Afternoon match"
+    task: |
+      It's 1 PM PT. Take the top 20 scored leads from this morning. Who on the
+      cash buyer list matches each? Hand the top 3 to Piper for seller outreach.
+      Any property > 80 motivation score, flag as hot.
+
+  - slug: rex-blackwell
+    cron: "0 18 * * *"
+    mode: chat
+    enabled: true
+    name: "Evening pipeline report"
+    task: |
+      It's 6 PM PT. Post your daily wholesale summary: leads found, leads
+      scored, matches made, outreach sent, deals in pipeline. Flag what you
+      need from Harrison (Hammer) to close.
+
+  - slug: sebastian-navarro
+    cron: "0 8 * * *"
+    mode: chat
+    enabled: true
+    name: "Scout deals"
+    task: |
+      It's 8 AM PT. Source new deals beyond the usual Zillow keywords. Where
+      are off-market properties hiding this week? County records, probate,
+      tax liens. Name 5 specific places to look today.
+
+  - slug: frederick-banks
+    cron: "0 11 * * *"
+    mode: chat
+    enabled: true
+    name: "Score today's leads"
+    task: |
+      It's 11 AM PT. Rex dropped leads this morning. Score them with the BANT
+      framework plus your qualifier criteria. Give me the top 5 with scores
+      and a one-line reason each.
+
+  - slug: penny-vance
+    cron: "30 8 * * *"
+    mode: chat
+    enabled: true
+    name: "Daily deal math"
+    task: |
+      It's 8:30 AM PT. Rex's morning leads need numbers. Pick the top 3,
+      calculate MAO (Maximum Allowable Offer) from ARV minus repairs minus
+      20% wholesale margin. Flag any deal where MAO is below seller's
+      asking price.
+
+  - slug: piper-reeves
+    cron: "0 10 * * *"
+    mode: chat
+    enabled: true
+    name: "Morning outreach"
+    task: |
+      It's 10 AM PT. Rex's matched sellers need outreach. Draft 3 seller
+      outreach messages in your Nashville warmth voice. Remember: no cold
+      SMS in TX (SB 140), no pre-foreclosure in CA (CC 2945/1695), NC is
+      out entirely (HB 797). Email or mail only in those states.
+
+  - slug: piper-reeves
+    cron: "0 14 * * *"
+    mode: chat
+    enabled: true
+    name: "Afternoon follow-up"
+    task: |
+      It's 2 PM PT. Follow up on morning outreach. Who replied? Who needs
+      a nudge? Hand anyone ready-to-sign to Henry Knox.
+
+  - slug: adrian-morgan
+    cron: "0 9 * * *"
+    mode: chat
+    enabled: true
+    name: "Daily pitch"
+    task: |
+      It's 9 AM PT. Rex has today's target properties. Craft 3 investor
+      pitches showing pain point, profit potential, urgency. Lead with the
+      hook. Match the pitch to each buyer's appetite.
+
+  - slug: harrison-knox
+    cron: "0 15 * * *"
+    mode: chat
+    enabled: true
+    name: "Close follow-ups"
+    task: |
+      It's 3 PM PT. Any deals in earnest money or close-approaching? Name
+      each buyer and seller, the next action, and the deadline. If anything
+      is drifting, call it out.
+
+  - slug: justine-park
+    cron: "30 10 * * *"
+    mode: chat
+    enabled: true
+    name: "Compliance review"
+    task: |
+      It's 10:30 AM PT. Piper just sent morning outreach. Any risk of state
+      rule violations? Any contract language headed out that needs your
+      eyes? Name specific items in a 5-item checklist.
+
+  - slug: carlos-moreno
+    cron: "0 17 * * *"
+    mode: chat
+    enabled: true
+    name: "Commission ledger"
+    task: |
+      It's 5 PM PT. Reconcile today's commission-bearing activity. Who owes
+      us what? Who do we owe? Any Stripe gaps or invoice aging.
+
+  - slug: charles-dawson
+    cron: "30 18 * * *"
+    mode: chat
+    enabled: true
+    name: "Pipeline analytics"
+    task: |
+      It's 6:30 PM PT. Roll up the wholesale funnel: leads in, qualified out,
+      matched out, outreached out, replied, contracted, closed. Give me the
+      conversion at each step and the biggest leak to fix tomorrow.
+
+  # ============================================================
+  # TRADING (Rex Thornton risk watchdog)
+  # ============================================================
+  - slug: rex-thornton
+    cron: "*/60 5-13 * * *"
+    mode: chat
+    enabled: true
+    name: "Hourly risk check"
+    task: |
+      You are on the margin clock. Current phase: intraday (5 AM to 1 PM PT,
+      lower margin). Check open position size, drawdown, and distance to stop.
+      Flag anything unhedged or over allocation. One paragraph max.
+
+  - slug: samuel-navarro
+    cron: "0 9,15 * * *"
+    mode: chat
+    enabled: true
+    name: "Anomaly sweep"
+    task: |
+      Scan today's financial events across Hive services for anomalies: unusual
+      Stripe refunds, unexplained balance changes, duplicate invoices, or
+      Scorpio-instinct red flags. Report the top 3.
+
+  # ============================================================
+  # PERPLEXITY INTEL (The Desk)
+  # ============================================================
+  - slug: bernard-calloway
+    cron: "45 4 * * *"
+    mode: chat
+    enabled: true
+    name: "Digest compile"
+    task: |
+      It's 4:45 AM PT. Pull the overnight beats: Cipher's on-chain flow, Bull's
+      market open read, Wire's news wire, Helix's science health, Nova's AI,
+      Pitch's business, Stewart's geopolitics. Compile a 400-word executive
+      briefing for Marcus's 5 AM inbox. Executive summary first, supporting
+      bullets second.
+
+  - slug: christopher-wolfe
+    cron: "0 */4 * * *"
+    mode: chat
+    enabled: true
+    name: "On-chain scan"
+    task: |
+      Scan the on-chain feeds. Any whale moves > $1M in XLM or related? Any
+      stablecoin supply changes? Any exchange outflow/inflow pattern worth
+      flagging? Numbered list, 3 items max. Reference wallet addresses by
+      their first 4 and last 4 chars.
+
+  - slug: bernard-archer
+    cron: "0 6 * * *"
+    mode: chat
+    enabled: true
+    name: "Market open read"
+    task: |
+      It's 6 AM PT, markets open in 30 min. Read the macro tape: overnight
+      futures, key levels on SPY/QQQ/BTC/XLM, any earnings today that matter,
+      any Fed calendar event. Measured. One paragraph.
+
+  - slug: pedro-diaz
+    cron: "0 7,11,13 * * 1-5"
+    mode: chat
+    enabled: true
+    name: "Market pulse"
+    task: |
+      Quick market pulse check. What is the tape doing right now that wasn't
+      happening an hour ago? Sector rotation? Volume spike? Breadth? Rapid
+      fire 3 bullets.
+
+  - slug: william-santos
+    cron: "0 8,12,16 * * *"
+    mode: chat
+    enabled: true
+    name: "News wire"
+    task: |
+      Pull the wire: Reuters, AP, BBC, Politico. What just broke that touches
+      our beats (crypto, markets, startups, AI, regulatory)? 3 wire-style
+      one-liners with the attribution.
+
+  - slug: nathan-ling
+    cron: "0 9 * * *"
+    mode: chat
+    enabled: true
+    name: "Tech / AI frontier"
+    task: |
+      It's 9 AM PT. What is new in tech and AI overnight? Apply the three-
+      question discipline: What is it? Is it real? Does it matter for us?
+      3 items.
+
+  - slug: peter-adler
+    cron: "0 10 * * *"
+    mode: chat
+    enabled: true
+    name: "Startup scan"
+    task: |
+      It's 10 AM PT. What startups are pitching or raising this week that
+      should be on Lucrex's radar? Lead with the hook, then the business
+      model, then why we should care.
+
+  - slug: stewart-erikson
+    cron: "0 5 * * *"
+    mode: chat
+    enabled: true
+    name: "Geopolitical read"
+    task: |
+      It's 5 AM PT. Overnight geopolitics: China, Russia, Middle East, EU.
+      What shifted? One sentence each, with actionable implications for US
+      equities or crypto.
+
+  # ============================================================
+  # SAAS FACTORY (Dominic Reyes + fire teams)
+  # ============================================================
+  - slug: dominic-reyes
+    cron: "0 9 * * 1"
+    mode: chat
+    enabled: true
+    name: "Weekly sprint kick"
+    task: |
+      It's Monday 9 AM PT. Kick off the sprint. What is the MVP we are paddling
+      into this week across Pixel Forge, Iron Stack, Signal Boost? Scope cut,
+      timeline, blocker check.
+
+  - slug: ryan-kim
+    cron: "0 11 * * *"
+    mode: chat
+    enabled: true
+    name: "Growth experiment review"
+    task: |
+      It's 11 AM PT. What growth experiments are running? What early signal
+      do we have (sample size, direction, significance)? One recommendation
+      to kill, extend, or scale.
+
+  # ============================================================
+  # WEEKLY STRATEGIC (dispatch mode for full war-room)
+  # ============================================================
+  - slug: marcus-cole
+    cron: "0 8 * * 1"
+    mode: dispatch
+    enabled: true
+    name: "Weekly strategic plan"
+    task: |
+      Monday 8 AM PT. Plan the week strategically. What is the single most
+      important outcome for Lucrex by Friday? Which departments are the
+      critical path? Dispatch the war room for cross-department alignment.

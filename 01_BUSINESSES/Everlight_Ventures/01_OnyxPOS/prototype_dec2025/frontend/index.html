@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/onyx-icon.svg" />
+
+    <!-- Viewport and Mobile Optimization -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="OnyxPOS" />
+
+    <!-- PWA Theme Colors -->
+    <meta name="theme-color" content="#0a0a0a" />
+    <meta name="msapplication-TileColor" content="#0a0a0a" />
+    <meta name="msapplication-navbutton-color" content="#0a0a0a" />
+
+    <!-- SEO -->
+    <meta name="description" content="OnyxPOS - Next-generation point of sale system with FIFO inventory tracking, crypto payments, and powerful owner analytics" />
+    <meta name="keywords" content="POS, point of sale, inventory management, FIFO, crypto payments, business analytics" />
+    <meta name="author" content="OnyxPOS" />
+
+    <!-- Icons -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="mask-icon" href="/masked-icon.svg" color="#0a0a0a" />
+
+    <!-- Disable tap highlight on mobile -->
+    <style>
+      * {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+      }
+
+      /* Touch-optimized scrolling */
+      * {
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* Prevent text selection on buttons and UI elements */
+      button, .no-select {
+        -webkit-user-select: none;
+        user-select: none;
+      }
+    </style>
+
+    <title>OnyxPOS - Next-Gen Point of Sale</title>
+  </head>
+  <body class="bg-dark-950 text-white antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

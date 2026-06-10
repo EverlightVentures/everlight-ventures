@@ -1,0 +1,22 @@
+{
+  "name": "@everlight/db",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "scripts": {
+    "generate": "prisma generate",
+    "push": "prisma db push",
+    "migrate": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "studio": "prisma studio",
+    "seed": "tsx seed.ts"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.1"
+  },
+  "devDependencies": {
+    "prisma": "^6.19.1",
+    "tsx": "^4.19.2"
+  }
+}

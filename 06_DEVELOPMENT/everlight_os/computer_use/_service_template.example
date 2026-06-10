@@ -1,0 +1,29 @@
+# Canonical lucrex-*.service template (v1, 2026-05-07)
+# Use this for all new long-running user services. Differences allowed:
+#   - Description, Documentation (specific URL)
+#   - ExecStart (the actual binary)
+#   - StandardOutput/Error (per-service log file under /AA_MY_DRIVE/_logs/)
+#   - Environment=DISPLAY=:1 ONLY if the service drives xdotool/spectacle
+#   - EnvironmentFile (skip if no API access needed)
+[Unit]
+Description=<service description>
+Documentation=file:///AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/computer_use/RUNBOOK.md
+After=graphical-session.target
+StartLimitBurst=5
+StartLimitIntervalSec=60
+
+[Service]
+Type=simple
+WorkingDirectory=/AA_MY_DRIVE
+EnvironmentFile=/AA_MY_DRIVE/.env
+Environment=PYTHONUNBUFFERED=1
+# Add Environment=DISPLAY=:1 if the service drives xdotool/spectacle
+ExecStart=/AA_MY_DRIVE/.venv/bin/python3 <path/to/script.py>
+StandardOutput=append:/AA_MY_DRIVE/_logs/<service>.log
+StandardError=append:/AA_MY_DRIVE/_logs/<service>.log
+Restart=always
+RestartSec=5
+TimeoutStopSec=15
+
+[Install]
+WantedBy=default.target

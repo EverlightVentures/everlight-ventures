@@ -1,0 +1,106 @@
+scilla_version 0
+
+(*
+  BCARDI Game Registry (Stub)
+  - Stores card and ability hashes for off-chain validation.
+  - Not a full token or NFT contract.
+  - Intended to anchor game data integrity for ZRC-2/ZRC-6 usage.
+*)
+
+import ListUtils
+
+(***************************************************)
+(*               Associated library                *)
+(***************************************************)
+
+library BCARDIRegistry
+
+let zero = Uint256 0
+
+(***************************************************)
+(*             The contract definition             *)
+(***************************************************)
+
+contract BCARDIRegistry
+(
+  owner: ByStr20,
+  cards_hash: ByStr32,
+  abilities_hash: ByStr32,
+  metadata_base_uri: String
+)
+
+field admins : Map ByStr20 Bool = Emp ByStr20 Bool
+field card_version : Uint32 = Uint32 1
+field ability_version : Uint32 = Uint32 1
+
+procedure OnlyOwner()
+  is_owner = builtin eq owner _sender;
+  match is_owner with
+  | True =>
+  | False =>
+    e = {_eventname : "NotOwner"};
+    event e;
+    throw
+  end
+end
+
+procedure OnlyAdminOrOwner()
+  is_owner = builtin eq owner _sender;
+  is_admin_opt = builtin get admins _sender;
+  is_admin = match is_admin_opt with
+    | Some True => True
+    | _ => False
+  end;
+  can = orb is_owner is_admin;
+  match can with
+  | True =>
+  | False =>
+    e = {_eventname : "NotAuthorized"};
+    event e;
+    throw
+  end
+end
+
+transition AddAdmin(admin: ByStr20)
+  OnlyOwner();
+  admins[admin] := True;
+  e = {_eventname : "AdminAdded"; admin: admin};
+  event e
+end
+
+transition RemoveAdmin(admin: ByStr20)
+  OnlyOwner();
+  admins[admin] := False;
+  e = {_eventname : "AdminRemoved"; admin: admin};
+  event e
+end
+
+transition UpdateCardsHash(new_hash: ByStr32, new_version: Uint32)
+  OnlyAdminOrOwner();
+  cards_hash := new_hash;
+  card_version := new_version;
+  e = {_eventname : "CardsHashUpdated"; hash: new_hash; version: new_version};
+  event e
+end
+
+transition UpdateAbilitiesHash(new_hash: ByStr32, new_version: Uint32)
+  OnlyAdminOrOwner();
+  abilities_hash := new_hash;
+  ability_version := new_version;
+  e = {_eventname : "AbilitiesHashUpdated"; hash: new_hash; version: new_version};
+  event e
+end
+
+transition UpdateMetadataBaseURI(new_uri: String)
+  OnlyAdminOrOwner();
+  metadata_base_uri := new_uri;
+  e = {_eventname : "MetadataBaseURIUpdated"; uri: new_uri};
+  event e
+end
+
+transition TransferOwnership(new_owner: ByStr20)
+  OnlyOwner();
+  owner := new_owner;
+  e = {_eventname : "OwnershipTransferred"; new_owner: new_owner};
+  event e
+end

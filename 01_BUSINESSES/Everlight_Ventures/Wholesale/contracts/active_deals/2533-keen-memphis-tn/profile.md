@@ -1,0 +1,45 @@
+# Wholesale Property Profile
+
+**Address:** 2533  KEEN RD
+**Parcel ID:** `060155  00013`
+**Status:** :white_check_mark: QUALIFIED for Chris
+
+## Public Record (Shelby County Assessor)
+
+| Field | Value |
+|---|---|
+| Owner | BATCHLOR LARRY |
+| Land use | - SINGLE FAMILY |
+| Year built | 1963 |
+| Square feet | 1831 |
+| Subdivision | _(not extracted)_ |
+| Land appraisal | $7,500 |
+| Building appraisal | $75,200 |
+| **Total appraisal** | **$82,700** |
+| Source URL | <https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=060155%20%2000013> |
+
+## Buybox Check (Chris Ulander / Mid South Homebuyers)
+
+Required: year_built >= 1940 | ARV $50k-$200k | SFR or duplex (no vacant /
+religious / commercial)
+
+**Decision:** PASS
+
+Failure reasons (if any):
+(none)
+
+## Offer Math (starting point only -- comps required before live)
+
+- ARV proxy (Shelby total appraisal): $82,700
+- Estimated repairs (stub default): $25,000
+- Assignment fee (Lucrex): $5,000
+- **MAO offer to seller:** **$27,500**
+- Formula: `ARV * 0.70 - repairs - assignment_fee = MAO`
+
+## Assessor Page Screenshot
+
+![Shelby Assessor screenshot](assessor_screenshot.png)
+
+## Generated
+
+2026-05-14T07:32:37-0700

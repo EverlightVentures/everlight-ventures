@@ -1,0 +1,7 @@
+Item_ID,Title,Status,Completed_At
+brand,Add business branding,open,
+tax,Set tax rate and receipt footer,open,
+inventory,Import or add your inventory,open,
+staff,Create employee logins,open,
+test_sale,Run a test sale,open,
+billing,Pick a plan in Billing,open,

@@ -1,0 +1,489 @@
+{
+  "generated_at": "2026-05-08T00:56:00+00:00",
+  "buyer": "Mid South Homebuyers / Chris Ulander",
+  "source_batch": "CHRIS_BATCH_001_DRAFT.json",
+  "rows_processed": "30..55",
+  "buybox": {
+    "year_built_min": 1940,
+    "ARV_max_usd": 200000,
+    "ARV_min_usd": 50000,
+    "memphis_zips_acceptable": true
+  },
+  "counts": {
+    "passed": 3,
+    "failed_buybox": 13,
+    "skipped_no_parcel": 5
+  },
+  "passed": [
+    {
+      "row": 31,
+      "parcel_id": "015011  00011",
+      "address": "1283  LAMAR AVE",
+      "owner_name": "SIMS LARRY D AND KIM G SIMS",
+      "year_built": 1943,
+      "sqft": 1612,
+      "land_use": "- DUPLEX",
+      "total_appraisal_usd": 164200,
+      "parsed_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/015011__00011.json",
+      "raw_html_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/raw_html/015011__00011.html.gz"
+    },
+    {
+      "row": 32,
+      "parcel_id": "017014  00015",
+      "address": "1368 MONROE, MEMPHIS, TN",
+      "owner_name": null,
+      "year_built": null,
+      "sqft": null,
+      "land_use": null,
+      "total_appraisal_usd": null,
+      "parsed_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/017014__00015.json",
+      "raw_html_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/raw_html/017014__00015.html.gz"
+    },
+    {
+      "row": 34,
+      "parcel_id": "015011  00013",
+      "address": "725  SNOWDEN CLB",
+      "owner_name": "TANGLEWOOD CHURCH OF CHRIST (TRS)",
+      "year_built": 1960,
+      "sqft": null,
+      "land_use": "- RELIGIOUS",
+      "total_appraisal_usd": 118400,
+      "parsed_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/015011__00013.json",
+      "raw_html_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/raw_html/015011__00013.html.gz"
+    }
+  ],
+  "failed_buybox": [
+    {
+      "row": 30,
+      "parcel_id": "016007  00005",
+      "address": "1253  CARR AVE",
+      "owner_name": "STEWART JENA A AND JERI R EARLS AND",
+      "year_built": 1940,
+      "sqft": 1950,
+      "land_use": "- SINGLE FAMILY",
+      "total_appraisal_usd": 239900,
+      "parsed_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/016007__00005.json",
+      "raw_html_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/raw_html/016007__00005.html.gz",
+      "fails": [
+        "appraisal 239900 > 200000"
+      ]
+    },
+    {
+      "row": 33,
+      "parcel_id": "028006  00018",
+      "address": "2206  UNION AVE",
+      "owner_name": "ML REAL ESTATE LLC",
+      "year_built": 1900,
+      "sqft": null,
+      "land_use": "- OFFICE LOW",
+      "total_appraisal_usd": 426500,
+      "parsed_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/028006__00018.json",
+      "raw_html_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/raw_html/028006__00018.html.gz",
+      "fails": [
+        "year_built 1900 < 1940",
+        "appraisal 426500 > 200000"
+      ]
+    },
+    {
+      "row": 35,
+      "parcel_id": "025070  00021",
+      "address": "830 S PARKWAY E",
+      "owner_name": "OSBORN MELVIN",
+      "year_built": 1914,
+      "sqft": 1472,
+      "land_use": "- DUPLEX",
+      "total_appraisal_usd": 45000,
+      "parsed_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/025070__00021.json",
+      "raw_html_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/raw_html/025070__00021.html.gz",
+      "fails": [
+        "year_built 1914 < 1940",
+        "appraisal 45000 < 50000"
+      ]
+    },
+    {
+      "row": 36,
+      "parcel_id": "021115  00017",
+      "address": "892 N CLAYBROOK ST",
+      "owner_name": "EVANS TIMOTHY",
+      "year_built": 1992,
+      "sqft": 900,
+      "land_use": "- SINGLE FAMILY",
+      "total_appraisal_usd": 35800,
+      "parsed_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/021115__00017.json",
+      "raw_html_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/raw_html/021115__00017.html.gz",
+      "fails": [
+        "appraisal 35800 < 50000"
+      ]
+    },
+    {
+      "row": 37,
+      "parcel_id": "029028  00007",
+      "address": "981  MEDA ST",
+      "owner_name": "PLATANIA MARK",
+      "year_built": 1920,
+      "sqft": 1286,
+      "land_use": "- SINGLE FAMILY",
+      "total_appraisal_usd": 168900,
+      "parsed_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/029028__00007.json",
+      "raw_html_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/raw_html/029028__00007.html.gz",
+      "fails": [
+        "year_built 1920 < 1940"
+      ]
+    },
+    {
+      "row": 38,
+      "parcel_id": "060170  00013",
+      "address": "0  CARLTON RD",
+      "owner_name": "DIBRELL KATHY",
+      "year_built": null,
+      "sqft": null,
+      "land_use": "- VACANT LAND",
+      "total_appraisal_usd": 7300,
+      "parsed_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/060170__00013.json",
+      "raw_html_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/raw_html/060170__00013.html.gz",
+      "fails": [
+        "appraisal 7300 < 50000",
+        "land_use is vacant ('- VACANT LAND')"
+      ]
+    },
+    {
+      "row": 39,
+      "parcel_id": "034075  00007",
+      "address": "0  DORIS",
+      "owner_name": "WRIGHT WESLEY",
+      "year_built": null,
+      "sqft": null,
+      "land_use": "- VACANT LAND",
+      "total_appraisal_usd": 8000,
+      "parsed_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/034075__00007.json",
+      "raw_html_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/raw_html/034075__00007.html.gz",
+      "fails": [
+        "appraisal 8000 < 50000",
+        "land_use is vacant ('- VACANT LAND')"
+      ]
+    },
+    {
+      "row": 40,
+      "parcel_id": "034034  00023",
+      "address": "0  ELY",
+      "owner_name": "MK SHERARD LLC",
+      "year_built": null,
+      "sqft": null,
+      "land_use": "- VACANT LAND",
+      "total_appraisal_usd": 7000,
+      "parsed_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/034034__00023.json",
+      "raw_html_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/raw_html/034034__00023.html.gz",
+      "fails": [
+        "appraisal 7000 < 50000",
+        "land_use is vacant ('- VACANT LAND')"
+      ]
+    },
+    {
+      "row": 41,
+      "parcel_id": "034042  00008",
+      "address": "0  GABAY",
+      "owner_name": "MK SHERARD LLC",
+      "year_built": null,
+      "sqft": null,
+      "land_use": "- VACANT LAND",
+      "total_appraisal_usd": 7000,
+      "parsed_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/034042__00008.json",
+      "raw_html_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/raw_html/034042__00008.html.gz",
+      "fails": [
+        "appraisal 7000 < 50000",
+        "land_use is vacant ('- VACANT LAND')"
+      ]
+    },
+    {
+      "row": 42,
+      "parcel_id": "034063  00040",
+      "address": "0  MARJORIE",
+      "owner_name": "MEMPHIS METRO DEVELOPMENT CORPORATION",
+      "year_built": null,
+      "sqft": null,
+      "land_use": "- VACANT LAND",
+      "total_appraisal_usd": 8000,
+      "parsed_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/034063__00040.json",
+      "raw_html_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/raw_html/034063__00040.html.gz",
+      "fails": [
+        "appraisal 8000 < 50000",
+        "land_use is vacant ('- VACANT LAND')"
+      ]
+    },
+    {
+      "row": 43,
+      "parcel_id": "035088  00038",
+      "address": "MICHIGAN",
+      "owner_name": "DUDLEY LATORIA",
+      "year_built": null,
+      "sqft": null,
+      "land_use": "- VACANT LAND",
+      "total_appraisal_usd": 6000,
+      "parsed_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/035088__00038.json",
+      "raw_html_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/raw_html/035088__00038.html.gz",
+      "fails": [
+        "appraisal 6000 < 50000",
+        "land_use is vacant ('- VACANT LAND')"
+      ]
+    },
+    {
+      "row": 44,
+      "parcel_id": "034077  00011",
+      "address": "0  MISSISSIPPI",
+      "owner_name": "HAGGINS KENNETH",
+      "year_built": null,
+      "sqft": null,
+      "land_use": "- VACANT LAND",
+      "total_appraisal_usd": 8000,
+      "parsed_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/034077__00011.json",
+      "raw_html_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/raw_html/034077__00011.html.gz",
+      "fails": [
+        "appraisal 8000 < 50000",
+        "land_use is vacant ('- VACANT LAND')"
+      ]
+    },
+    {
+      "row": 45,
+      "parcel_id": "026005  00001",
+      "address": "0  RYDER",
+      "owner_name": "BUSEY NADIA",
+      "year_built": null,
+      "sqft": null,
+      "land_use": "- VACANT LAND",
+      "total_appraisal_usd": 8000,
+      "parsed_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/026005__00001.json",
+      "raw_html_path": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/raw_html/026005__00001.html.gz",
+      "fails": [
+        "appraisal 8000 < 50000",
+        "land_use is vacant ('- VACANT LAND')"
+      ]
+    }
+  ],
+  "skipped_no_parcel": [
+    {
+      "row": 46,
+      "address": "1855 York Ave",
+      "lead": {
+        "id": "fsbo_zillow_2033c0d5c1",
+        "address": "1855 York Ave",
+        "city": "Memphis",
+        "state": "TN",
+        "lead_type": "fsbo_zillow",
+        "detected_distress": "fsbo",
+        "source": "zillow_fsbo:memphis-tn",
+        "status": "new",
+        "created_at": "2026-04-24T15:42:09.836567+00:00",
+        "motivation_score": 0,
+        "motivation_tier": "COLD",
+        "score_breakdown": {
+          "lead_type": 5,
+          "email": 0,
+          "state": 0,
+          "price": 0,
+          "dom": 0,
+          "owner": 0
+        },
+        "score": 5,
+        "queue": "needs_enrichment",
+        "buyer_matches": [
+          {
+            "buyer_id": "buyer_msh_chris_ulander",
+            "buyer_company": "Mid South Homebuyers, LLC",
+            "buyer_email": "leads@midsouthhomebuyers.com",
+            "market": "memphis",
+            "score": 0,
+            "matched": [],
+            "blocked": [
+              "no_zip_to_match"
+            ]
+          }
+        ],
+        "zip_code": "38104",
+        "lat": "35.1249374",
+        "lon": "-90.0006662",
+        "neighborhood": "Cooper-Young",
+        "zip_enriched_at": "2026-04-29T01:55:25.327648+00:00"
+      }
+    },
+    {
+      "row": 47,
+      "address": "1257 E Alcy Rd",
+      "lead": {
+        "id": "fsbo_zillow_badde051a7",
+        "address": "1257 E Alcy Rd",
+        "city": "Memphis",
+        "state": "TN",
+        "lead_type": "fsbo_zillow",
+        "detected_distress": "fsbo",
+        "source": "zillow_fsbo:memphis-tn",
+        "status": "new",
+        "created_at": "2026-04-24T15:42:09.836602+00:00",
+        "motivation_score": 0,
+        "motivation_tier": "COLD",
+        "score_breakdown": {
+          "lead_type": 5,
+          "email": 0,
+          "state": 0,
+          "price": 0,
+          "dom": 0,
+          "owner": 0
+        },
+        "score": 5,
+        "queue": "needs_enrichment",
+        "buyer_matches": [
+          {
+            "buyer_id": "buyer_msh_chris_ulander",
+            "buyer_company": "Mid South Homebuyers, LLC",
+            "buyer_email": "leads@midsouthhomebuyers.com",
+            "market": "memphis",
+            "score": 0,
+            "matched": [],
+            "blocked": [
+              "no_zip_to_match"
+            ]
+          }
+        ],
+        "zip_code": "38106",
+        "lat": "35.0780463",
+        "lon": "-90.0210074",
+        "neighborhood": null,
+        "zip_enriched_at": "2026-04-29T01:55:30.641479+00:00"
+      }
+    },
+    {
+      "row": 48,
+      "address": "1415 Aste St",
+      "lead": {
+        "id": "fsbo_zillow_2c18d65b7e",
+        "address": "1415 Aste St",
+        "city": "Memphis",
+        "state": "TN",
+        "lead_type": "fsbo_zillow",
+        "detected_distress": "fsbo",
+        "source": "zillow_fsbo:memphis-tn",
+        "status": "new",
+        "created_at": "2026-04-24T15:42:09.836512+00:00",
+        "motivation_score": 0,
+        "motivation_tier": "COLD",
+        "score_breakdown": {
+          "lead_type": 5,
+          "email": 0,
+          "state": 0,
+          "price": 0,
+          "dom": 0,
+          "owner": 0
+        },
+        "score": 5,
+        "queue": "needs_enrichment",
+        "buyer_matches": [
+          {
+            "buyer_id": "buyer_msh_chris_ulander",
+            "buyer_company": "Mid South Homebuyers, LLC",
+            "buyer_email": "leads@midsouthhomebuyers.com",
+            "market": "memphis",
+            "score": 0,
+            "matched": [],
+            "blocked": [
+              "no_zip_to_match"
+            ]
+          }
+        ],
+        "zip_code": "38106",
+        "lat": "35.1086468",
+        "lon": "-90.0484644",
+        "neighborhood": null,
+        "zip_enriched_at": "2026-04-29T01:55:14.795078+00:00"
+      }
+    },
+    {
+      "row": 49,
+      "address": "2514 Rozelle St",
+      "lead": {
+        "id": "fsbo_zillow_1e58f25661",
+        "address": "2514 Rozelle St",
+        "city": "Memphis",
+        "state": "TN",
+        "lead_type": "fsbo_zillow",
+        "detected_distress": "fsbo",
+        "source": "zillow_fsbo:memphis-tn",
+        "status": "new",
+        "created_at": "2026-04-24T15:42:09.836590+00:00",
+        "motivation_score": 0,
+        "motivation_tier": "COLD",
+        "score_breakdown": {
+          "lead_type": 5,
+          "email": 0,
+          "state": 0,
+          "price": 0,
+          "dom": 0,
+          "owner": 0
+        },
+        "score": 5,
+        "queue": "needs_enrichment",
+        "buyer_matches": [
+          {
+            "buyer_id": "buyer_msh_chris_ulander",
+            "buyer_company": "Mid South Homebuyers, LLC",
+            "buyer_email": "leads@midsouthhomebuyers.com",
+            "market": "memphis",
+            "score": 0,
+            "matched": [],
+            "blocked": [
+              "no_zip_to_match"
+            ]
+          }
+        ],
+        "zip_code": "38114",
+        "lat": "35.0765693",
+        "lon": "-90.0077044",
+        "neighborhood": null,
+        "zip_enriched_at": "2026-04-29T01:55:29.173127+00:00"
+      }
+    },
+    {
+      "row": 50,
+      "address": "6355 Midsummer Way",
+      "lead": {
+        "id": "fsbo_zillow_397631aae3",
+        "address": "6355 Midsummer Way",
+        "city": "Memphis",
+        "state": "TN",
+        "lead_type": "fsbo_zillow",
+        "detected_distress": "fsbo",
+        "source": "zillow_fsbo:memphis-tn",
+        "status": "new",
+        "created_at": "2026-04-24T15:42:09.836543+00:00",
+        "motivation_score": 0,
+        "motivation_tier": "COLD",
+        "score_breakdown": {
+          "lead_type": 5,
+          "email": 0,
+          "state": 0,
+          "price": 0,
+          "dom": 0,
+          "owner": 0
+        },
+        "score": 5,
+        "queue": "needs_enrichment",
+        "buyer_matches": [
+          {
+            "buyer_id": "buyer_msh_chris_ulander",
+            "buyer_company": "Mid South Homebuyers, LLC",
+            "buyer_email": "leads@midsouthhomebuyers.com",
+            "market": "memphis",
+            "score": 0,
+            "matched": [],
+            "blocked": [
+              "no_zip_to_match"
+            ]
+          }
+        ],
+        "zip_code": "38115",
+        "lat": "35.0409934",
+        "lon": "-89.8513306",
+        "neighborhood": "Hickory Hill",
+        "zip_enriched_at": "2026-04-29T01:55:18.953264+00:00"
+      }
+    }
+  ]
+}

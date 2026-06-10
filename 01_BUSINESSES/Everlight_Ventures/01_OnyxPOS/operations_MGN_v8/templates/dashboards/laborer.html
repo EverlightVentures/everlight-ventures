@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+
+{% block page_title %}My Dashboard{% endblock %}
+{% block header_emoji %}🌱{% endblock %}
+{% block header_title %}My Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dash-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 24px;
+        margin-bottom: 36px;
+    }
+    .dash-stat {
+        background: linear-gradient(145deg, rgba(19, 36, 25, 0.95), rgba(12, 22, 16, 0.9));
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius);
+        padding: 28px;
+        position: relative;
+        overflow: hidden;
+    }
+    .dash-stat::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 4px;
+    }
+    .dash-stat.green::before { background: linear-gradient(90deg, var(--green-400), var(--green-600)); }
+    .dash-stat.blue::before { background: linear-gradient(90deg, var(--sky-500), var(--sky-600)); }
+    .dash-stat.amber::before { background: linear-gradient(90deg, var(--amber-500), var(--amber-600)); }
+    .stat-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .stat-value {
+        font-size: 36px;
+        font-weight: 800;
+        color: var(--text-primary);
+        letter-spacing: -1px;
+    }
+    .stat-sub {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash-stats">
+    <div class="dash-stat green">
+        <div class="stat-label">Hours Today</div>
+        <div class="stat-value">{{ "%.1f"|format(hours_today) }}</div>
+        <div class="stat-sub">
+            {% if clock_status.is_clocked_in %}
+            <span style="color: var(--green-400);">●</span> Clocked In
+            {% else %}
+            <span style="color: var(--text-muted);">○</span> Not Clocked In
+            {% endif %}
+        </div>
+    </div>
+    <div class="dash-stat blue">
+        <div class="stat-label">My Tasks</div>
+        <div class="stat-value">{{ pending_tasks_count }}</div>
+        <div class="stat-sub">Pending</div>
+    </div>
+    <div class="dash-stat amber">
+        <div class="stat-label">Time Off</div>
+        <div class="stat-value">{{ pending_timeoff_count }}</div>
+        <div class="stat-sub">Pending requests</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <span class="card-emoji">✅</span>
+                My Tasks
+            </div>
+        </div>
+        <div class="card-body">
+            {% if my_tasks %}
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                {% for task in my_tasks[:5] %}
+                <div style="padding: 12px; background: var(--bg-card); border-radius: var(--radius-sm); border: 1px solid var(--border-subtle);">
+                    <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">{{ task.Title or task.Task_Title or 'Task' }}</div>
+                    <div style="font-size: 12px; color: var(--text-muted);">
+                        Status: <span class="badge badge-{{ 'success' if task.Status == 'COMPLETE' else 'warning' }}">{{ task.Status or 'PENDING' }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">✅</div>
+                <p>No tasks assigned</p>
+            </div>
+            {% endif %}
+            <div style="margin-top: 16px;">
+                <a href="{{ url_for('my_tasks') }}" class="btn btn-secondary" style="width: 100%;">
+                    <i data-lucide="list"></i> View All Tasks
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <span class="card-emoji">⚡</span>
+                Quick Actions
+            </div>
+        </div>
+        <div class="card-body">
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <a href="{{ url_for('timeclock') }}" class="btn btn-primary" style="width: 100%;">
+                    <i data-lucide="clock"></i> Time Clock
+                </a>
+                <a href="{{ url_for('my_tasks') }}" class="btn btn-secondary" style="width: 100%;">
+                    <i data-lucide="check-square"></i> My Tasks
+                </a>
+                <a href="{{ url_for('timeoff') }}" class="btn btn-secondary" style="width: 100%;">
+                    <i data-lucide="calendar"></i> Time Off
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>lucide.createIcons();</script>
+{% endblock %}
+
+
+
+
+
+
+

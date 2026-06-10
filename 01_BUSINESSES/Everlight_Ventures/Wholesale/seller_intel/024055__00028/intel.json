@@ -1,0 +1,106 @@
+{
+  "lead": {
+    "parcel_id": "024055  00028",
+    "property_address": "1329  MICHIGAN ST",
+    "owner_name": "KEMP FRANKLIN",
+    "owner_mailing_street": "5977RANDYLN",
+    "owner_mailing_city": "ELLENWOOD",
+    "owner_mailing_state": "GA",
+    "owner_mailing_zip": "30294",
+    "is_vacant_lot": true,
+    "total_appraisal_usd": 3300,
+    "sales_history": [
+      {
+        "date": "07/30/2020",
+        "price_text": "$0",
+        "deed_or_inst": "20080163",
+        "type_code": "QC",
+        "price_usd": 0,
+        "year": 2020
+      },
+      {
+        "date": "04/25/1985",
+        "price_text": "$0",
+        "deed_or_inst": "9408-1",
+        "type_code": "CH",
+        "price_usd": 0,
+        "year": 1985
+      }
+    ],
+    "tax_sale_marker": "TS2202"
+  },
+  "signals": {
+    "is_estate": false,
+    "estate_decedent_name": null,
+    "is_absentee_outofstate": true,
+    "is_absentee_instate": false,
+    "owner_mailing_apartment": false,
+    "is_llc_owner": false,
+    "is_religious_org_owner": false,
+    "is_long_term_owner": false,
+    "ownership_years": 6,
+    "is_high_value": false,
+    "is_vacant_lot": true,
+    "tax_delinquent_years": "4+",
+    "multiple_sales_in_history": false
+  },
+  "browser_queue": [
+    {
+      "label": "Shelby Register of Deeds -- all deeds in 'KEMP FRANKLIN' name",
+      "url": "https://search.register.shelby.tn.us/search/",
+      "instructions": "Name search 'KEMP FRANKLIN'. Save MHTML of result list. Tells us if owner has OTHER properties in Shelby County (= portfolio = sophisticated investor).",
+      "priority": "HIGH"
+    },
+    {
+      "label": "Obit search -- Google site:legacy.com 'KEMP FRANKLIN' Memphis",
+      "url": "https://www.google.com/search?q=site%3Alegacy.com+%22KEMP+FRANKLIN%22+Memphis+OR+Tennessee",
+      "instructions": "Click any hit, MHTML the obit. Tells us: death date, age, surviving family names + cities (= heir candidates).",
+      "priority": "LOW"
+    },
+    {
+      "label": "Facebook public search -- KEMP FRANKLIN in ELLENWOOD",
+      "url": "https://www.facebook.com/public/KEMP+FRANKLIN",
+      "instructions": "If profile public, tells us age range, employer, family, recent posts. Don't friend; just look. MHTML the search result page.",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "LinkedIn search -- KEMP FRANKLIN ELLENWOOD",
+      "url": "https://www.linkedin.com/search/results/people/?keywords=KEMP+FRANKLIN+ELLENWOOD",
+      "instructions": "Profession, employer, tenure. Helps frame the pitch (busy professional = lead with time-saving; recent retiree = lead with simplicity).",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "County assessor for ELLENWOOD GA -- check if owner has property there too",
+      "url": "https://www.google.com/search?q=%22KEMP+FRANKLIN%22+ELLENWOOD+GA+property+assessor+OR+deed",
+      "instructions": "If owner has primary residence in mailing city, that's another contact path + tells us their financial position.",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "TN Public Notice + Court Records -- civil/foreclosure history",
+      "url": "https://www.tncourts.gov/courts/public-notices",
+      "instructions": "Search 'KEMP FRANKLIN'. Civil suits, eviction filings, foreclosure starts = financial pressure signals.",
+      "priority": "MEDIUM"
+    }
+  ],
+  "pitch_hooks": [
+    {
+      "name": "outofstate_convenience",
+      "angle": "Distance is the pain; we handle 100% remotely",
+      "lead_line": "Managing a Memphis property from Ellenwood GA is its own kind of work \u2014 tax notices, code letters, occasional weed-cutting bills. We handle the full close-out by mail and wire. You don't fly in.",
+      "use_when": "Out-of-state, non-estate, no portfolio signals."
+    },
+    {
+      "name": "back_tax_relief",
+      "angle": "We pay the back tax \u2014 you walk clean",
+      "lead_line": "We see the property's been on the back-tax list for a few years. We pay every dollar of back tax + penalty at closing \u2014 out of OUR side, not yours. You walk away clean.",
+      "use_when": "TS2202 lead. Strong on absentee owners with no plan to develop."
+    },
+    {
+      "name": "vacant_lot_quick_cash",
+      "angle": "Lots are inert assets; we move fast",
+      "lead_line": "Vacant lots aren't easy to sell \u2014 agents don't want them, builders take months. We'll wire cash for 1329  MICHIGAN ST in 14 days. No fix-up. No inspection. As-is.",
+      "use_when": "Vacant lot, any owner type."
+    }
+  ],
+  "generated_at": "2026-04-29T21:40:31.336625+00:00"
+}

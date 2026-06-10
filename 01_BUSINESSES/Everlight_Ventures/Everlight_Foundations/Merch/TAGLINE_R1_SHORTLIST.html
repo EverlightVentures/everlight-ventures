@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Everlight Merch :: Tagline R1 Shortlist</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800&family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --gold:#D4A843; --gold-soft:#B5902E; --dark:#0A0A0A; --dark2:#141414; --dark3:#1C1C1C;
+    --line:#2A2A2A; --text:#E8E8E8; --mute:#9A9A9A; --green:#7FB069; --amber:#E0A458; --red:#C45557;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--dark);color:var(--text);font-family:'Inter',-apple-system,sans-serif;line-height:1.6;font-weight:300;padding:40px 24px;}
+  .wrap{max-width:1080px;margin:0 auto}
+  .header{border-bottom:1px solid var(--gold);padding-bottom:24px;margin-bottom:40px}
+  .wordmark{font-family:'Playfair Display',serif;font-size:14px;letter-spacing:6px;color:var(--gold);text-transform:uppercase;font-weight:600}
+  h1{font-family:'Playfair Display',serif;font-size:44px;font-weight:800;color:var(--text);margin-top:8px;line-height:1.1;letter-spacing:-0.5px}
+  .subtitle{color:var(--mute);font-size:15px;margin-top:10px;font-style:italic}
+  .meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mute);margin-top:14px;letter-spacing:1px}
+  h2{font-family:'Playfair Display',serif;font-size:26px;color:var(--gold);margin:48px 0 16px;font-weight:600;border-left:3px solid var(--gold);padding-left:16px}
+  h3{font-family:'Inter',sans-serif;font-size:14px;color:var(--gold-soft);margin:24px 0 10px;font-weight:600;letter-spacing:2px;text-transform:uppercase}
+  p{margin-bottom:14px;color:var(--text);font-size:15px}
+  .lead{font-size:17px;color:var(--text);font-weight:300}
+  .pill{display:inline-block;padding:3px 10px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;font-weight:600;text-transform:uppercase;margin-right:6px}
+  .pill.green{background:#1F2D1A;color:var(--green);border:1px solid var(--green)}
+  .pill.amber{background:#2C2418;color:var(--amber);border:1px solid var(--amber)}
+  .pill.red{background:#2A1717;color:var(--red);border:1px solid var(--red)}
+  .pill.gold{background:#2A2310;color:var(--gold);border:1px solid var(--gold)}
+  .candidate{background:var(--dark2);border:1px solid var(--line);border-left:4px solid var(--gold);padding:20px 24px;margin-bottom:18px;border-radius:2px}
+  .candidate.tier-s{border-left-color:var(--gold)}
+  .candidate.tier-a{border-left-color:var(--gold-soft)}
+  .candidate.killed{border-left-color:var(--red);opacity:0.55}
+  .line{font-family:'Playfair Display',serif;font-size:30px;font-weight:800;color:var(--text);letter-spacing:-0.3px;margin-bottom:6px}
+  .line.killed{text-decoration:line-through;color:var(--mute)}
+  .source{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mute);margin-bottom:10px;letter-spacing:1px}
+  .why{color:var(--text);font-size:14px;margin-bottom:10px}
+  .scores{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:11px}
+  .score-cell{background:var(--dark3);padding:5px 10px;border-radius:2px;color:var(--mute)}
+  .score-cell strong{color:var(--gold)}
+  .verdict{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line);font-size:13px;color:var(--text);font-style:italic}
+  .verdict strong{color:var(--gold);font-style:normal;font-weight:600;letter-spacing:1px}
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
+  th{background:var(--dark2);color:var(--gold);text-align:left;padding:10px 14px;font-weight:600;font-family:'Inter',sans-serif;letter-spacing:1px;text-transform:uppercase;font-size:11px;border-bottom:1px solid var(--gold)}
+  td{padding:10px 14px;border-bottom:1px solid var(--line);color:var(--text)}
+  td.mono{font-family:'JetBrains Mono',monospace;font-size:12px}
+  .callout{background:linear-gradient(135deg,#1A1610 0%,#0E0C08 100%);border:1px solid var(--gold);border-radius:3px;padding:24px 28px;margin:30px 0}
+  .callout h3{color:var(--gold);margin-top:0}
+  ul.tight{list-style:none;padding-left:0}
+  ul.tight li{padding:6px 0 6px 20px;position:relative;color:var(--text);font-size:14px}
+  ul.tight li::before{content:'>';position:absolute;left:0;color:var(--gold);font-family:'JetBrains Mono',monospace;font-weight:600}
+  .question-block{background:var(--dark2);border:1px solid var(--gold);padding:24px 28px;margin:40px 0;border-radius:3px}
+  .question-block h3{color:var(--gold);margin-top:0;font-size:16px;letter-spacing:1.5px}
+  .footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mute);letter-spacing:1px;text-align:center}
+  .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  @media(max-width:720px){.grid-2{grid-template-columns:1fr}h1{font-size:34px}.line{font-size:24px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <div class="wordmark">EVERLIGHT &nbsp;&middot;&nbsp; VENTURES</div>
+  <h1>Merch Tagline R&D :: Round 1 Shortlist</h1>
+  <div class="subtitle">Founder fight-sponsor merch. Hat, hoodie, shorts. Hard, athletic, divine-light coded. The mind behind the money walks into a cage.</div>
+  <div class="meta">SESSION 2026-05-08 &nbsp;|&nbsp; 5 AGENTS DISPATCHED &nbsp;|&nbsp; 20 CANDIDATES SCREENED &nbsp;|&nbsp; SHORTLIST OF 7</div>
+</div>
+
+<h2>The Brief in One Paragraph</h2>
+<p class="lead">Marquise sponsors himself. The line goes on the hat that walks to the cage and the hoodie that walks into a title-company closing. References he likes (will not steal): <em>Winners Win</em>, Goggins's <em>Stay Hard</em>. Constraints from the Style Enforcer: 8/10 aggression ceiling, no influencer stems, no rhyme, no acronyms, no shine/glow/vibe. Constraints from the GTM lead: must pass the loss test, the originality test, the earned-mythology test. Constraints from the Researcher: avoid trademarked phrases, lean into the unowned <strong>divine-light</strong> wedge.</p>
+
+<h2>Wedge Map :: Why "Light" Is a Moat</h2>
+<div class="callout">
+  <h3>The Four Claimed Lanes (do not enter)</h3>
+  <ul class="tight">
+    <li><strong>Goggins / raw pain</strong> :: "Stay Hard" :: suffering as identity, untouchable</li>
+    <li><strong>Tate / luxury aggression</strong> :: "Top G," matrix, Bugatti :: cringe-coded post-2024</li>
+    <li><strong>Affirm-bro grindset</strong> :: "Trust the process," "Rise and grind" :: saturated, dead</li>
+    <li><strong>Eco / wellness</strong> :: "Mindful warrior," "balance" :: wrong audience</li>
+  </ul>
+  <h3 style="margin-top:18px">The Open Lane :: DIVINE / SOVEREIGN / MYTHIC</h3>
+  <p style="font-size:14px;color:var(--text);margin-bottom:0">No fight brand owns "light." Marquise's pre-built <strong>Lucrex / King of Divine Light</strong> mythology is the moat. Goggins cannot pivot to light. Tate cannot pivot to light. The lane defends itself.</p>
+</div>
+
+<h2>S-Tier Finalists (recommend Marquise pick from these)</h2>
+
+<div class="candidate tier-s">
+  <div class="line">Light the Dark</div>
+  <div class="source">SOURCE :: Brand Director &nbsp;|&nbsp; #1 of 8 &nbsp;|&nbsp; <span class="pill amber">TM RISK :: LOW-MED</span> <span class="pill gold">CORE PICK</span></div>
+  <div class="why">Verb-as-weapon. The room got darker, then it got brighter, and you did that. Three syllables, cornerman shouts it. Direct line to Everlight's dawn-cuts-the-dark mythology. Founder slogan and company thesis in one. Same line closes a wholesale email and prints on a hat.</div>
+  <div class="scores">
+    <span class="score-cell"><strong>CORNER</strong> PASS</span>
+    <span class="score-cell"><strong>BOARDROOM</strong> PASS</span>
+    <span class="score-cell"><strong>TWEET</strong> PASS</span>
+    <span class="score-cell"><strong>LOSS-TEST</strong> PASS</span>
+    <span class="score-cell"><strong>WEDGE</strong> PASS</span>
+    <span class="score-cell"><strong>ORIGINAL</strong> 9/10</span>
+    <span class="score-cell"><strong>RUBRIC</strong> 11/12</span>
+  </div>
+  <div class="verdict"><strong>VERDICT ::</strong> Top of the pile. Generic enough to need TESS clearance, mythological enough to be defensibly Everlight when paired with the wordmark.</div>
+</div>
+
+<div class="candidate tier-s">
+  <div class="line">Dawn Breaks Harder</div>
+  <div class="source">SOURCE :: Brand Director &nbsp;|&nbsp; #3 of 8 &nbsp;|&nbsp; <span class="pill green">TM RISK :: LOW</span> <span class="pill gold">CLEAN-FILE PICK</span></div>
+  <div class="why">Patient violence. The night was long, the morning isn't gentle, and that's the point. Three syllables, three beats, hits like a combo. Cornerman counts it: "DAWN. BREAKS. HARDER." Goggins-adjacent <em>without</em> stealing -- Stay Hard is endurance, this is arrival. Researcher's TESS scan: zero federal hits.</div>
+  <div class="scores">
+    <span class="score-cell"><strong>CORNER</strong> PASS</span>
+    <span class="score-cell"><strong>BOARDROOM</strong> PASS</span>
+    <span class="score-cell"><strong>TWEET</strong> PASS</span>
+    <span class="score-cell"><strong>LOSS-TEST</strong> PASS</span>
+    <span class="score-cell"><strong>WEDGE</strong> PASS</span>
+    <span class="score-cell"><strong>ORIGINAL</strong> 10/10</span>
+    <span class="score-cell"><strong>RUBRIC</strong> 12/12</span>
+  </div>
+  <div class="verdict"><strong>VERDICT ::</strong> Cleanest TM file in the pool. Most defensible. Highest originality. If you want to file fast and not worry, this is it.</div>
+</div>
+
+<div class="candidate tier-s">
+  <div class="line">Built From Black</div>
+  <div class="source">SOURCE :: Brand Director &nbsp;|&nbsp; #5 of 8 &nbsp;|&nbsp; <span class="pill green">TM RISK :: LOW</span> <span class="pill gold">AUTOBIO PICK</span></div>
+  <div class="why">Three hard B's, boxer's rhythm. The black is the foundation, not the obstacle. Direct hit on gold-on-dark palette. Real-life truth: Marquise is broke, building from nothing -- the slogan owns it instead of hiding it. Reads on shorts AND a wholesale postcard.</div>
+  <div class="scores">
+    <span class="score-cell"><strong>CORNER</strong> PASS</span>
+    <span class="score-cell"><strong>BOARDROOM</strong> PASS</span>
+    <span class="score-cell"><strong>TWEET</strong> PASS</span>
+    <span class="score-cell"><strong>LOSS-TEST</strong> PASS</span>
+    <span class="score-cell"><strong>WEDGE</strong> PASS</span>
+    <span class="score-cell"><strong>ORIGINAL</strong> 9/10</span>
+    <span class="score-cell"><strong>RUBRIC</strong> 11/12</span>
+  </div>
+  <div class="verdict"><strong>VERDICT ::</strong> The autobiographical pick. Lands hardest if Deal 1 is the inflection point. Note: "Built [X]" pattern is in the same family as your current "Build Different" -- some lineage continuity, some risk of cannibalization.</div>
+</div>
+
+<div class="candidate tier-s">
+  <div class="line">Heir to the Light</div>
+  <div class="source">SOURCE :: Copywriter &nbsp;|&nbsp; #10 of 12 &nbsp;|&nbsp; <span class="pill green">TM RISK :: LOW</span> <span class="pill gold">REGAL PICK</span></div>
+  <div class="why">Divine-right framing without arrogance. "Heir" implies bloodline + responsibility, not a coronation claim. Regal weight that survives Quinn's "no identity-claim" rule because the work is implied (an heir still has to take the throne). Plays clean against the Lucrex mythology.</div>
+  <div class="scores">
+    <span class="score-cell"><strong>CORNER</strong> PASS</span>
+    <span class="score-cell"><strong>BOARDROOM</strong> PASS</span>
+    <span class="score-cell"><strong>TWEET</strong> PASS</span>
+    <span class="score-cell"><strong>LOSS-TEST</strong> PASS</span>
+    <span class="score-cell"><strong>WEDGE</strong> PASS</span>
+    <span class="score-cell"><strong>ORIGINAL</strong> 9/10</span>
+    <span class="score-cell"><strong>RUBRIC</strong> 11/12</span>
+  </div>
+  <div class="verdict"><strong>VERDICT ::</strong> Premium register, Playfair-friendly. Reads like a luxury house motto. If the merch tier has a "ceremonial" piece (white gold thread on black wool), this goes there.</div>
+</div>
+
+<div class="candidate tier-s">
+  <div class="line">Outlast the Night</div>
+  <div class="source">SOURCE :: Copywriter &nbsp;|&nbsp; #9 of 12 &nbsp;|&nbsp; <span class="pill green">TM RISK :: LOW</span> <span class="pill gold">ENDURANCE PICK</span></div>
+  <div class="why">Endurance over violence. Dawn implied, never stated. Boardroom-safe but cornerman-credible -- the night is metaphor for any long fight, in or out of the cage. Three steady beats. The line a man whispers to himself at 4am training.</div>
+  <div class="scores">
+    <span class="score-cell"><strong>CORNER</strong> PASS</span>
+    <span class="score-cell"><strong>BOARDROOM</strong> PASS</span>
+    <span class="score-cell"><strong>TWEET</strong> PASS</span>
+    <span class="score-cell"><strong>LOSS-TEST</strong> PASS</span>
+    <span class="score-cell"><strong>WEDGE</strong> PASS</span>
+    <span class="score-cell"><strong>ORIGINAL</strong> 9/10</span>
+    <span class="score-cell"><strong>RUBRIC</strong> 11/12</span>
+  </div>
+  <div class="verdict"><strong>VERDICT ::</strong> The most boardroom-safe option in the pool. If you want a line your title-company contact will compliment without raising an eyebrow.</div>
+</div>
+
+<div class="candidate tier-s">
+  <div class="line">Gold Comes for the Patient</div>
+  <div class="source">SOURCE :: Copywriter &nbsp;|&nbsp; #12 of 12 &nbsp;|&nbsp; <span class="pill green">TM RISK :: LOW</span> <span class="pill gold">FOUNDER-TRUTH PICK</span></div>
+  <div class="why">Reframes the broke years as preparation, not failure. Hat-friendly cadence. Most autobiographical line in the pool given where you are right now (pre-Deal 1, $360 in Claude credits, hustling). The slogan that ages with you instead of against you.</div>
+  <div class="scores">
+    <span class="score-cell"><strong>CORNER</strong> PASS</span>
+    <span class="score-cell"><strong>BOARDROOM</strong> PASS</span>
+    <span class="score-cell"><strong>TWEET</strong> PASS</span>
+    <span class="score-cell"><strong>LOSS-TEST</strong> PASS</span>
+    <span class="score-cell"><strong>WEDGE</strong> PASS</span>
+    <span class="score-cell"><strong>ORIGINAL</strong> 10/10</span>
+    <span class="score-cell"><strong>RUBRIC</strong> 11/12</span>
+  </div>
+  <div class="verdict"><strong>VERDICT ::</strong> Slightly long for hat-front (5 words) but unbeatable as a back-of-shirt mantra paired with a 2-word hat line. The line that reads true after a loss AND after Deal 1 closes.</div>
+</div>
+
+<div class="candidate tier-s">
+  <div class="line">Light Owns the Dark</div>
+  <div class="source">SOURCE :: Copywriter &nbsp;|&nbsp; #2 of 12 &nbsp;|&nbsp; <span class="pill amber">TM RISK :: LOW-MED</span> <span class="pill gold">VERB-OF-OWNERSHIP</span></div>
+  <div class="why">Ownership beats illumination. Makes the brand a verb. Variant of "Light the Dark" that swaps action for sovereignty -- the light isn't trying, the light has already won. Memetic potential: people will quote it.</div>
+  <div class="scores">
+    <span class="score-cell"><strong>CORNER</strong> PASS</span>
+    <span class="score-cell"><strong>BOARDROOM</strong> PASS</span>
+    <span class="score-cell"><strong>TWEET</strong> PASS</span>
+    <span class="score-cell"><strong>LOSS-TEST</strong> PASS</span>
+    <span class="score-cell"><strong>WEDGE</strong> PASS</span>
+    <span class="score-cell"><strong>ORIGINAL</strong> 9/10</span>
+    <span class="score-cell"><strong>RUBRIC</strong> 11/12</span>
+  </div>
+  <div class="verdict"><strong>VERDICT ::</strong> Sister-line to Light the Dark. If you go this way the hat could just say <em>OWNS THE DARK</em> with the Everlight wordmark above it.</div>
+</div>
+
+<h2>A-Tier Holds (good lines, demoted on a tiebreak)</h2>
+<table>
+  <thead>
+    <tr><th>Line</th><th>Why It Lands</th><th>Why Demoted</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Sovereign Light</strong></td><td>Two-word premium feel, Playfair-perfect</td><td>"Sovereign State" + "Sovereign Athletic" both registered Class 25 (TM medium risk). Tate-coronation register risk per GTM lead.</td></tr>
+    <tr><td><strong>Light Wins Late</strong></td><td>Patient inevitability, late-rounds promise</td><td>"Late" reads slightly defeatist out of context</td></tr>
+    <tr><td><strong>Steel Knows Steel</strong></td><td>Recognition line, fighter-ready</td><td>Pure fight register, weak on Everlight light-mythology tie</td></tr>
+    <tr><td><strong>Cut From Dark</strong></td><td>Two-stress rhythm, blade-metaphor without weapon</td><td>"Cut" leans violent enough to brush Quinn's no-weapons rule</td></tr>
+    <tr><td><strong>Forge or Fold</strong></td><td>Binary verb, blue-collar steel</td><td>Slightly generic; could belong to any brand with a hammer logo</td></tr>
+    <tr><td><strong>Throne Earned, Never Given</strong></td><td>Earn-it ethos, regal cadence</td><td>4 words, brushes Tate-coronation rule despite the qualifier</td></tr>
+    <tr><td><strong>Built Where Nobody Watched</strong></td><td>Proof-of-work, broke-era flex</td><td>5 words, too long for hat-front. <em>Excellent back-of-shirt mantra.</em></td></tr>
+    <tr><td><strong>King the Dark</strong></td><td>King-as-verb, Lucrex-coded loud</td><td>Brushes GTM lead's "no King-as-noun-as-identity" rule even though it verbs it</td></tr>
+    <tr><td><strong>Dawn Pays in Gold</strong></td><td>Reward language, sunrise-as-currency</td><td>"Pays" reads slightly transactional</td></tr>
+    <tr><td><strong>Born Gold</strong></td><td>Two-word birthright stance</td><td>Cecil Frena (musician) uses it as stage name. Confusion risk in retail search.</td></tr>
+    <tr><td><strong>Crown It Cold</strong></td><td>Slang weight, kingdom mythology</td><td>"Cold" trends slang-of-2024; ages faster than the rest</td></tr>
+  </tbody>
+</table>
+
+<h2>Cuts (auto-rejected by the rubric)</h2>
+<table>
+  <thead><tr><th>Line</th><th>Reason</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Rise Black Gold</strong></td><td>"Rise" is on the radioactive verb list (grind/hustle/rise = Affirm-bro fingerprint)</td></tr>
+    <tr><td><strong>Kingdom or Nothing</strong></td><td>"or nothing" closer is a banned grammatical pattern (Quinn's rule #2)</td></tr>
+  </tbody>
+</table>
+
+<h2>The Hat-and-Hoodie Stack (recommended pairing)</h2>
+<div class="callout">
+  <p style="font-size:15px"><strong style="color:var(--gold)">If you want it simple:</strong> pick ONE line from the S-tier and run it across the whole kit. Most defensible: <em>Dawn Breaks Harder</em> (cleanest TM file) or <em>Light the Dark</em> (most iconic).</p>
+  <p style="font-size:15px;margin-top:14px"><strong style="color:var(--gold)">If you want layered:</strong></p>
+  <ul class="tight">
+    <li><strong>HAT FRONT</strong> :: 2-3 word line. <em>Light the Dark</em> or <em>Heir to the Light</em>.</li>
+    <li><strong>HOODIE BACK</strong> :: 4-6 word mantra. <em>Built Where Nobody Watched</em> or <em>Gold Comes for the Patient</em>.</li>
+    <li><strong>FIGHT SHORTS / WAISTBAND</strong> :: single word. <em>LUCREX</em> in Playfair gold. Coined word, zero TM conflict, owns the lane.</li>
+    <li><strong>WORDMARK PAIRING</strong> :: <em>EVERLIGHT &middot; VENTURES</em> in small caps under whichever line goes on the chest.</li>
+  </ul>
+</div>
+
+<div class="question-block">
+  <h3>YOUR TURN :: 3 SIGNALS WE NEED FROM YOU</h3>
+  <p>This is round one. The Hive went wide on purpose. To sharpen for round two we need three reads from you, no more.</p>
+  <ol style="margin:14px 0 14px 22px;font-size:15px;color:var(--text)">
+    <li style="margin-bottom:10px"><strong style="color:var(--gold)">Pick 1-3 favorites from the S-tier.</strong> Not the "right" answer, just the ones that make you feel something when you read them out loud. Gut-only.</li>
+    <li style="margin-bottom:10px"><strong style="color:var(--gold)">Veto anything you hate.</strong> If a line gives you secondhand cringe, kill it. Faster to subtract than re-pitch.</li>
+    <li style="margin-bottom:10px"><strong style="color:var(--gold)">Tell us the register.</strong> One word answer: <em>MYTHIC</em> (Heir to the Light, Sovereign Light), <em>OPERATOR</em> (Light the Dark, Built From Black), or <em>ENDURANCE</em> (Outlast the Night, Gold Comes for the Patient). Pick the room you want to live in.</li>
+  </ol>
+  <p style="font-size:14px;color:var(--mute);font-style:italic">Round two will sharpen the survivors, run formal TESS clearance on the top two, mock them up gold-on-dark, and pair them with hat / hoodie / shorts / waistband placements. We'll keep going until you walk into the cage with the right thing on your chest.</p>
+</div>
+
+<div class="footer">
+  EVERLIGHT VENTURES &nbsp;&middot;&nbsp; HIVE MIND R1 BRAINSTORM &nbsp;&middot;&nbsp; 5 AGENTS, 20 CANDIDATES, 7 FINALISTS &nbsp;&middot;&nbsp; 2026-05-08<br>
+  <span style="color:var(--gold)">THE MIND BEHIND THE MONEY</span>
+</div>
+
+</div>
+</body>
+</html>

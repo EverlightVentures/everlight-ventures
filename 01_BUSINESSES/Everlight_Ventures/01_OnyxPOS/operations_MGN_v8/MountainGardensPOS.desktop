@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Mountain Gardens POS
+Comment=Launch the Mountain Gardens POS Web App
+Path=/home/mgn/Projects/Mountain Gardens Nursery POS
+Exec=bash -lc 'cd "/home/mgn/Projects/Mountain Gardens Nursery POS" && ./START_POS.sh start && xdg-open http://127.0.0.1:5000'
+Terminal=false
+Icon=utilities-terminal
+Categories=Office;

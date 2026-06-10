@@ -26,7 +26,7 @@ contract AlleyKingzCards is ERC1155, Ownable, ERC1155Supply {
 
     // Card metadata
     struct CardMeta {
-        string cardName;      // e.g. "Bacardi - Dogo Argentino"
+        string cardName;      // e.g. "$BCARDD - Dogo Argentino"
         uint8 rarity;         // 0=Common, 1=Rare, 2=Epic, 3=Legendary, 4=Mythic
         uint8 cardType;       // 0=Troop, 1=Spell, 2=Building, 3=Vehicle, 4=Champion
         uint8 elixirCost;     // 1-10

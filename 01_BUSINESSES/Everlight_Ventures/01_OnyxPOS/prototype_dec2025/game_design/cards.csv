@@ -1,0 +1,49 @@
+class,name,breed,cost,role,rarity,tags,hp,damage,attack_speed,move_speed,range,ability_name,ability_desc,ability_cd,queen_target
+Boneguard Crew,Bacardi,Dogo Argentino,10,Vanguard,Mythic,"Pack;Guard",2600,160,0.7,0.6,1,Crownbreaker,"Shield self; can target Queen",18,yes
+Boneguard Crew,Stonejaw,Mastiff,7,Vanguard,Legendary,"Pack",2100,120,0.8,0.6,1,Armor Pulse,"Damage reduction aura",16,no
+Boneguard Crew,Balboa,Boxer,6,Striker,Epic,"Pack",1500,150,1.0,0.9,1,Haymaker,"Stun on first hit",12,no
+Boneguard Crew,Iron Rottweiler,Rottweiler,9,Vanguard,Epic,"Pack",2400,140,0.7,0.5,1,Overclock Rage,"Bonus damage below 40% HP",14,no
+Boneguard Crew,Granite Saint,St. Bernard,8,Vanguard,Rare,"Guard",2200,110,0.6,0.5,1,Bodywall,"Intercepts nearby damage",14,no
+Boneguard Crew,Grit Bulldog,Bulldog,5,Striker,Rare,"Pack",1200,120,1.1,0.8,1,Brawler,"Lifesteal on hit",10,no
+Boneguard Crew,Alloy Akita,Akita,6,Lancer,Rare,"Guard",1400,130,0.9,0.7,2,Shock Push,"Knockback cone",12,no
+Boneguard Crew,Tank Pug,Pug,3,Support,Common,"Guard",800,60,0.9,0.7,1,Shield Bark,"Small ally shield",10,no
+Boneguard Crew,Copper Chow,Chow,4,Striker,Common,"Pack",950,110,1.0,0.8,1,Bitechain,"Ramping damage per hit",10,no
+Boneguard Crew,Warden Newfie,Newfoundland,7,Support,Rare,"Guard",1600,70,0.7,0.6,2,Fortify,"Increase ally HP",16,no
+Boneguard Crew,Rust Cane Corso,Cane Corso,8,Vanguard,Rare,"Pack",2000,120,0.7,0.6,1,Grav Pull,"Taunt nearby foes",14,no
+Boneguard Crew,Brick Bullmastiff,Bullmastiff,6,Vanguard,Common,"Pack",1700,100,0.7,0.6,1,Stonehide,"Short damage resist",12,no
+Zoomie Syndicate,Jagged,Doberman,11,Assassin,Mythic,"Dash;Crit",1400,210,1.1,1.2,1,Shadow Fang,"Teleport to Queen",18,yes
+Zoomie Syndicate,Pixel Greyhound,Greyhound,3,Skirmisher,Rare,"Dash",700,90,1.4,1.4,1,Dash Loop,"Resets dash on KO",8,no
+Zoomie Syndicate,Circuit Shiba,Shiba Inu,4,Striker,Rare,"Dash",900,110,1.2,1.1,1,Blink Bite,"Short teleport on first attack",10,no
+Zoomie Syndicate,Neon Whippet,Whippet,2,Skirmisher,Common,"Dash",500,70,1.5,1.5,1,Slipstream,"Ignores slows",8,no
+Zoomie Syndicate,Turbo Jack,Jack Russell,3,Striker,Common,"Crit",650,100,1.3,1.3,1,Burst Bite,"Crit on first hit",9,no
+Zoomie Syndicate,Razor Vizsla,Vizsla,5,Lancer,Epic,"Crit",1000,150,1.0,1.0,2,Pierce Rush,"Line damage",12,no
+Zoomie Syndicate,Flash Saluki,Saluki,4,Skirmisher,Rare,"Dash",800,95,1.2,1.3,1,Sidecut,"Lane swap",10,no
+Zoomie Syndicate,Bolt Corgi,Corgi,4,Spawner,Rare,"Pack",800,60,0.9,0.9,2,Spark Pups,"Spawns 3 minis",12,no
+Zoomie Syndicate,Glitch Basenji,Basenji,3,Hacker,Rare,"Hack",700,80,1.0,1.0,2,Signal Scramble,"Short silence",10,no
+Zoomie Syndicate,Aero Malinois,Malinois,6,Striker,Epic,"Dash",1200,160,1.0,1.1,1,Twin Strike,"Double hit",12,no
+Zoomie Syndicate,Drift Sheltie,Sheltie,2,Support,Common,"Dash",600,50,1.0,1.3,2,Tag Boost,"Speed buff",10,no
+Zoomie Syndicate,Byte Beagle,Beagle,3,Blaster,Common,"Backline",550,80,1.1,0.9,4,Tracer Round,"Ignores shields",10,yes
+Leashbreak Tactix,Rosco,Australian Cattle Dog,10,Controller,Mythic,"Hack;Pack",1800,140,0.9,0.9,2,Leashbreak,"Disable tower; can target Queen",18,yes
+Leashbreak Tactix,Synth Collie,Border Collie,5,Hacker,Epic,"Hack",950,90,1.0,0.9,3,Hack Jam,"Disable tower fire",12,no
+Leashbreak Tactix,Holo Husky,Husky,5,Support,Rare,"Shield",1000,60,0.8,0.8,3,Heal Beacon,"AoE heal",12,no
+Leashbreak Tactix,Chill Samoyed,Samoyed,4,Support,Rare,"Slow",900,70,0.9,0.8,3,Frost Bark,"AoE slow",10,no
+Leashbreak Tactix,Prism Poodle,Poodle,4,Controller,Rare,"Shield Break",850,85,1.0,0.9,3,Shatter,"Remove shields",10,no
+Leashbreak Tactix,Echo Dalmatian,Dalmatian,3,Controller,Common,"Slow",700,60,1.1,0.9,3,Echo Howl,"Area slow",9,no
+Leashbreak Tactix,Static Sheba Inu,Shiba Inu,2,Hacker,Common,"Hack",600,55,1.1,1.0,3,Ping,"Short silence",8,no
+Leashbreak Tactix,Vibe Shih Tzu,Shih Tzu,2,Support,Common,"Shield",650,50,1.0,0.9,2,Soothe,"Small heal",8,no
+Leashbreak Tactix,Noir Setter,Setter,6,Controller,Epic,"Hack",1100,110,0.9,0.8,3,Blackout,"Blinds ranged",12,no
+Leashbreak Tactix,Signal Pointer,Pointer,4,Lancer,Rare,"Hack",900,100,1.0,0.9,3,Tag Shot,"Reveals stealth",10,no
+Leashbreak Tactix,Ghost Spaniel,Spaniel,3,Skirmisher,Rare,"Backline",750,85,1.1,1.1,2,Phase,"Brief invuln",10,no
+Leashbreak Tactix,Pulse Border Collie,Border Collie,5,Support,Epic,"Shield",1000,70,0.9,0.8,3,Barrier Ring,"AoE shield",12,no
+K9 Circuitry,Crown Foxhound,Foxhound,11,Assassin,Mythic,"Turret Break",1600,200,1.0,1.0,1,Royal Hunt,"Can target Queen",18,yes
+K9 Circuitry,Laser Beagle,Beagle,4,Structure,Rare,"Turret",1000,90,1.1,0.0,5,Overheat,"Ramps damage",12,no
+K9 Circuitry,Neon Dachshund,Dachshund,3,Spawner,Common,"Drone",800,60,0.9,0.9,2,Tunnel Drones,"Spawns drones",10,no
+K9 Circuitry,Volt Corgi,Corgi,4,Spawner,Rare,"Drone",850,60,0.9,0.9,2,Spark Pups,"Spawns 3 minis",12,no
+K9 Circuitry,Grid Schnauzer,Schnauzer,5,Structure,Rare,"Turret",1200,80,1.0,0.0,4,Grid Lock,"Slows enemies",12,no
+K9 Circuitry,Flux Pomeranian,Pomeranian,2,Support,Common,"Drone",600,50,1.0,1.0,2,Battery,"Boosts turret fire",8,no
+K9 Circuitry,Rail Terrier,Terrier,3,Blaster,Common,"Turret Break",650,90,1.0,0.9,4,Rail Shot,"Bonus vs structures",9,no
+K9 Circuitry,Circuit Retriever,Retriever,6,Support,Epic,"Drone",1100,70,0.9,0.8,3,Drone Swarm,"Spawns 5 minis",12,no
+K9 Circuitry,Chrome Airedale,Airedale,5,Lancer,Rare,"Turret",1000,110,0.9,0.9,3,Arc Shot,"Chain damage",10,no
+K9 Circuitry,Beacon Basset,Basset,4,Support,Rare,"Shield",900,60,0.9,0.8,3,Beacon,"Reveals stealth",10,no
+K9 Circuitry,Pixel Pug,Pug,2,Spawner,Common,"Drone",550,40,1.0,1.0,2,Mini Pup,"Single drone",8,no
+K9 Circuitry,Nova Shepherd,German Shepherd,7,Structure,Epic,"Turret",1400,120,0.9,0.0,4,Overclock,"Turret burst",14,no

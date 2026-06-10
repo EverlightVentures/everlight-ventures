@@ -9,7 +9,7 @@
       "blinko",
       "gdocs:00_Command_Center"
     ],
-    "last_synced": "2026-04-25T07:30:28.391414+00:00"
+    "last_synced": "2026-06-09T14:41:15.610947+00:00"
   },
   "platforms": {
     "phone": {
@@ -39,7 +39,7 @@
     },
     "blinko": {
       "role": "RAG knowledge base",
-      "url": "http://129.159.38.250:1111"
+      "url": "http://e5-mother:1111"
     }
   },
   "output_channels": {

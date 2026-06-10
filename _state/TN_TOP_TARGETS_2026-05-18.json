@@ -1,0 +1,340 @@
+[
+  {
+    "parcel_id": "048003 00007",
+    "address": "1537 WILSON ST, MEMPHIS, TN",
+    "owner": "GREATER LOVE FOR LIFE MINISTRIES INC",
+    "mailing_state": "NM",
+    "appraisal_usd": 7000,
+    "score": 63,
+    "signals": [
+      "has_mailing_addr",
+      "out_of_state:NM",
+      "long_hold_9y",
+      "family_transfer_QC",
+      "vacant_lot",
+      "institutional_owner"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/048003_00007.json"
+  },
+  {
+    "parcel_id": "048003  00007",
+    "address": "1537  WILSON ST, MEMPHIS, TN",
+    "owner": "GREATER LOVE FOR LIFE MINISTRIES INC",
+    "mailing_state": "NM",
+    "appraisal_usd": 7000,
+    "score": 63,
+    "signals": [
+      "has_mailing_addr",
+      "out_of_state:NM",
+      "long_hold_9y",
+      "family_transfer_QC",
+      "vacant_lot",
+      "institutional_owner"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/048003__00007.json"
+  },
+  {
+    "parcel_id": "024055 00038",
+    "address": "108 E OLIVE AVE, MEMPHIS, TN",
+    "owner": "LEGGETT BENNIE JR",
+    "mailing_state": "CA",
+    "appraisal_usd": 3500,
+    "score": 60,
+    "signals": [
+      "has_mailing_addr",
+      "out_of_state:CA",
+      "family_transfer_QC",
+      "vacant_lot",
+      "no_permit_33y"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/024055_00038.json"
+  },
+  {
+    "parcel_id": "024055  00038",
+    "address": "108 E OLIVE AVE, MEMPHIS, TN",
+    "owner": "LEGGETT BENNIE JR",
+    "mailing_state": "CA",
+    "appraisal_usd": 3500,
+    "score": 60,
+    "signals": [
+      "has_mailing_addr",
+      "out_of_state:CA",
+      "family_transfer_QC",
+      "vacant_lot",
+      "no_permit_33y"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/024055__00038.json"
+  },
+  {
+    "parcel_id": "060067 00007",
+    "address": "1393 VALSE, MEMPHIS, TN",
+    "owner": "MATTHEWS TREZDEN C",
+    "mailing_state": "GA",
+    "appraisal_usd": 4900,
+    "score": 60,
+    "signals": [
+      "has_mailing_addr",
+      "out_of_state:GA",
+      "family_transfer_QC",
+      "vacant_lot",
+      "no_permit_25y"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/060067_00007.json"
+  },
+  {
+    "parcel_id": "060067  00007",
+    "address": "1393  VALSE, MEMPHIS, TN",
+    "owner": "MATTHEWS TREZDEN C",
+    "mailing_state": "GA",
+    "appraisal_usd": 4900,
+    "score": 60,
+    "signals": [
+      "has_mailing_addr",
+      "out_of_state:GA",
+      "family_transfer_QC",
+      "vacant_lot",
+      "no_permit_25y"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/060067__00007.json"
+  },
+  {
+    "parcel_id": "015025 00024",
+    "address": "942 MELROSE, MEMPHIS, TN",
+    "owner": "EVANS ARIN B",
+    "mailing_state": "TN",
+    "appraisal_usd": 25000,
+    "score": 55,
+    "signals": [
+      "has_mailing_addr",
+      "long_hold_9y",
+      "family_transfer_QC",
+      "vacant_lot",
+      "no_permit_47y"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/015025_00024.json"
+  },
+  {
+    "parcel_id": "015025  00024",
+    "address": "942  MELROSE, MEMPHIS, TN",
+    "owner": "EVANS ARIN B",
+    "mailing_state": "TN",
+    "appraisal_usd": 25000,
+    "score": 55,
+    "signals": [
+      "has_mailing_addr",
+      "long_hold_9y",
+      "family_transfer_QC",
+      "vacant_lot",
+      "no_permit_47y"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/015025__00024.json"
+  },
+  {
+    "parcel_id": "024050 00008",
+    "address": "1391 S MAIN ST, MEMPHIS, TN",
+    "owner": "CARTWRIGHT MARCUS",
+    "mailing_state": "TN",
+    "appraisal_usd": 3500,
+    "score": 55,
+    "signals": [
+      "has_mailing_addr",
+      "long_hold_10y",
+      "family_transfer_QC",
+      "vacant_lot",
+      "no_permit_26y"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/024050_00008.json"
+  },
+  {
+    "parcel_id": "024050  00008",
+    "address": "1391 S MAIN ST, MEMPHIS, TN",
+    "owner": "CARTWRIGHT MARCUS",
+    "mailing_state": "TN",
+    "appraisal_usd": 3500,
+    "score": 55,
+    "signals": [
+      "has_mailing_addr",
+      "long_hold_10y",
+      "family_transfer_QC",
+      "vacant_lot",
+      "no_permit_26y"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/024050__00008.json"
+  },
+  {
+    "parcel_id": "024057 00012",
+    "address": "117 FARROW AVE, MEMPHIS, TN",
+    "owner": "HOWARD EDDIE ( ESTATE OF )",
+    "mailing_state": "TX",
+    "appraisal_usd": 3800,
+    "score": 55,
+    "signals": [
+      "has_mailing_addr",
+      "out_of_state:TX",
+      "long_hold_21y",
+      "vacant_lot",
+      "no_permit_46y"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/024057_00012.json"
+  },
+  {
+    "parcel_id": "024057  00012",
+    "address": "117  FARROW AVE, MEMPHIS, TN",
+    "owner": "HOWARD EDDIE ( ESTATE OF )",
+    "mailing_state": "TX",
+    "appraisal_usd": 3800,
+    "score": 55,
+    "signals": [
+      "has_mailing_addr",
+      "out_of_state:TX",
+      "long_hold_21y",
+      "vacant_lot",
+      "no_permit_46y"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/024057__00012.json"
+  },
+  {
+    "parcel_id": "048034 00013",
+    "address": "1430 SILVER, MEMPHIS, TN",
+    "owner": "JONES CHRISTINE AND MAGGIE SAUNDERS",
+    "mailing_state": "CA",
+    "appraisal_usd": 5400,
+    "score": 55,
+    "signals": [
+      "has_mailing_addr",
+      "out_of_state:CA",
+      "long_hold_28y",
+      "vacant_lot",
+      "no_permit_31y"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/048034_00013.json"
+  },
+  {
+    "parcel_id": "048034  00013",
+    "address": "1430  SILVER, MEMPHIS, TN",
+    "owner": "JONES CHRISTINE AND MAGGIE SAUNDERS",
+    "mailing_state": "CA",
+    "appraisal_usd": 5400,
+    "score": 55,
+    "signals": [
+      "has_mailing_addr",
+      "out_of_state:CA",
+      "long_hold_28y",
+      "vacant_lot",
+      "no_permit_31y"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/048034__00013.json"
+  },
+  {
+    "parcel_id": "025043 00027",
+    "address": "1174 S ORLEANS, MEMPHIS, TN",
+    "owner": "GOLDEN LEVEL OPERATIONS LLC",
+    "mailing_state": "TN",
+    "appraisal_usd": 4700,
+    "score": 50,
+    "signals": [
+      "has_mailing_addr",
+      "family_transfer_QC",
+      "vacant_lot",
+      "no_permit_21y",
+      "institutional_owner"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/025043_00027.json"
+  },
+  {
+    "parcel_id": "025043  00027",
+    "address": "1174 S ORLEANS, MEMPHIS, TN",
+    "owner": "GOLDEN LEVEL OPERATIONS LLC",
+    "mailing_state": "TN",
+    "appraisal_usd": 4700,
+    "score": 50,
+    "signals": [
+      "has_mailing_addr",
+      "family_transfer_QC",
+      "vacant_lot",
+      "no_permit_21y",
+      "institutional_owner"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/025043__00027.json"
+  },
+  {
+    "parcel_id": "024055 00017",
+    "address": "1303 MICHIGAN ST, MEMPHIS, TN",
+    "owner": "STOKES IMMANUEL",
+    "mailing_state": "MS",
+    "appraisal_usd": 3200,
+    "score": 48,
+    "signals": [
+      "has_mailing_addr",
+      "out_of_state:MS",
+      "family_transfer_QC",
+      "vacant_lot"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/024055_00017.json"
+  },
+  {
+    "parcel_id": "024055 00028",
+    "address": "1329 MICHIGAN ST, MEMPHIS, TN",
+    "owner": "KEMP FRANKLIN",
+    "mailing_state": "GA",
+    "appraisal_usd": 3300,
+    "score": 48,
+    "signals": [
+      "has_mailing_addr",
+      "out_of_state:GA",
+      "family_transfer_QC",
+      "vacant_lot"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/024055_00028.json"
+  },
+  {
+    "parcel_id": "024055  00017",
+    "address": "1303  MICHIGAN ST, MEMPHIS, TN",
+    "owner": "STOKES IMMANUEL",
+    "mailing_state": "MS",
+    "appraisal_usd": 3200,
+    "score": 48,
+    "signals": [
+      "has_mailing_addr",
+      "out_of_state:MS",
+      "family_transfer_QC",
+      "vacant_lot"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/024055__00017.json"
+  },
+  {
+    "parcel_id": "024055  00028",
+    "address": "1329  MICHIGAN ST, MEMPHIS, TN",
+    "owner": "KEMP FRANKLIN",
+    "mailing_state": "GA",
+    "appraisal_usd": 3300,
+    "score": 48,
+    "signals": [
+      "has_mailing_addr",
+      "out_of_state:GA",
+      "family_transfer_QC",
+      "vacant_lot"
+    ],
+    "has_email": false,
+    "path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/owner_downloads/parsed/024055__00028.json"
+  }
+]

@@ -26,7 +26,7 @@ def wrap(title: str, body_html: str, deal_meta: dict, doc_label: str = "Contract
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {{
-    --gold:#d4a843; --gold-hot:#ffcd3c; --gold-deep:#b8902f;
+    --gold:#D4AF37; --gold-hot:#ffcd3c; --gold-deep:#b8902f;
     --dark:#0a0a0a; --paper:#16140e; --paper-hi:#1f1c12;
     --border:#322a14; --border-hi:#4a3d1c;
     --text:#f4eedb; --text-dim:#b5af9b; --muted:#7a7560;

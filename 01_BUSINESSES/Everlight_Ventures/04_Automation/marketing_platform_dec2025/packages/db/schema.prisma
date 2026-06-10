@@ -1,0 +1,448 @@
+// Prisma schema for Everlight Ventures
+// Multi-tenant SaaS platform with projects, contacts, and newsletters
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// AUTHENTICATION & USERS
+// ============================================================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  passwordHash  String?   // Null for magic link-only users
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  memberships   ProjectMember[]
+  magicLinks    MagicLink[]
+  activities    Activity[]
+
+  @@index([email])
+}
+
+model MagicLink {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  email     String
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [email], references: [email], onDelete: Cascade)
+
+  @@index([token])
+  @@index([email])
+}
+
+// ============================================================================
+// MULTI-TENANT PROJECTS
+// ============================================================================
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  members            ProjectMember[]
+  contacts           Contact[]
+  campaigns          Campaign[]
+  activities         Activity[]
+  unsubscribes       Unsubscribe[]
+  socialAccounts     SocialMediaAccount[]
+  socialPosts        SocialMediaPost[]
+  socialAssets       SocialMediaAsset[]
+
+  @@index([slug])
+}
+
+enum MemberRole {
+  OWNER
+  EDITOR
+  VIEWER
+}
+
+model ProjectMember {
+  id        String     @id @default(cuid())
+  role      MemberRole @default(VIEWER)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@index([userId])
+  @@index([projectId])
+}
+
+// ============================================================================
+// CONTACTS
+// ============================================================================
+
+model Contact {
+  id          String   @id @default(cuid())
+  email       String
+  firstName   String?
+  lastName    String?
+  phone       String?
+  company     String?
+  tags        String[] @default([])
+  customData  Json?    // Flexible field for additional data from CSV imports
+  subscribed  Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Relations
+  campaignRecipients CampaignRecipient[]
+  unsubscribes       Unsubscribe[]
+
+  @@unique([projectId, email])
+  @@index([projectId])
+  @@index([email])
+  @@index([subscribed])
+}
+
+// ============================================================================
+// NEWSLETTER CAMPAIGNS
+// ============================================================================
+
+enum CampaignStatus {
+  DRAFT
+  SCHEDULED
+  SENDING
+  SENT
+  FAILED
+}
+
+model Campaign {
+  id          String         @id @default(cuid())
+  name        String
+  subject     String
+  htmlContent String         @db.Text
+  textContent String?        @db.Text
+  status      CampaignStatus @default(DRAFT)
+  scheduledAt DateTime?
+  sentAt      DateTime?
+
+  // UTM Tracking Parameters
+  utmSource   String?
+  utmMedium   String?
+  utmCampaign String?
+  utmContent  String?
+
+  // Calculated Analytics (updated by background job or on-demand)
+  openRate    Float?
+  clickRate   Float?
+
+  // Social Media Cross-Posting
+  enableSocialPosting Boolean  @default(false)
+  socialCaption       String?  @db.Text
+  socialHashtags      String[] @default([])
+
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  projectId   String
+  project     Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Relations
+  recipients   CampaignRecipient[]
+  unsubscribes Unsubscribe[]
+  socialPosts  SocialMediaPost[]
+
+  @@index([projectId])
+  @@index([status])
+}
+
+enum RecipientStatus {
+  PENDING
+  SENT
+  DELIVERED
+  FAILED
+  BOUNCED
+}
+
+model CampaignRecipient {
+  id          String          @id @default(cuid())
+  status      RecipientStatus @default(PENDING)
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  failedAt    DateTime?
+  errorMsg    String?
+
+  // Email Engagement Tracking
+  openCount     Int       @default(0)
+  clickCount    Int       @default(0)
+  lastOpenedAt  DateTime?
+  lastClickedAt DateTime?
+
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  contactId  String
+  contact    Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  // Relations
+  opens  EmailOpen[]
+  clicks EmailClick[]
+
+  @@unique([campaignId, contactId])
+  @@index([campaignId])
+  @@index([contactId])
+  @@index([status])
+}
+
+// ============================================================================
+// ACTIVITY LOG
+// ============================================================================
+
+enum ActivityType {
+  PROJECT_CREATED
+  MEMBER_ADDED
+  MEMBER_REMOVED
+  CONTACT_IMPORTED
+  CONTACT_CREATED
+  CAMPAIGN_CREATED
+  CAMPAIGN_SENT
+  EMAIL_OPENED
+  EMAIL_CLICKED
+  SUBSCRIBER_UNSUBSCRIBED
+  SOCIAL_ACCOUNT_CONNECTED
+  SOCIAL_ACCOUNT_DISCONNECTED
+  SOCIAL_POST_PUBLISHED
+  SOCIAL_POST_FAILED
+}
+
+model Activity {
+  id        String       @id @default(cuid())
+  type      ActivityType
+  metadata  Json?        // Additional context about the activity
+  createdAt DateTime     @default(now())
+
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ============================================================================
+// EMAIL TRACKING & ANALYTICS
+// ============================================================================
+
+model EmailOpen {
+  id        String   @id @default(cuid())
+  openedAt  DateTime @default(now())
+  ipAddress String?
+  userAgent String?  @db.Text
+
+  recipientId String
+  recipient   CampaignRecipient @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId])
+  @@index([openedAt])
+}
+
+model EmailClick {
+  id        String   @id @default(cuid())
+  url       String   @db.Text
+  clickedAt DateTime @default(now())
+  ipAddress String?
+  userAgent String?  @db.Text
+
+  recipientId String
+  recipient   CampaignRecipient @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId])
+  @@index([clickedAt])
+}
+
+model Unsubscribe {
+  id             String   @id @default(cuid())
+  reason         String?  @db.Text
+  unsubscribedAt DateTime @default(now())
+
+  contactId  String
+  contact    Contact  @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  campaignId String?
+  campaign   Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  projectId  String
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([contactId])
+  @@index([projectId])
+  @@index([unsubscribedAt])
+}
+
+// ============================================================================
+// SOCIAL MEDIA INTEGRATION
+// ============================================================================
+
+enum SocialMediaPlatform {
+  INSTAGRAM
+  FACEBOOK
+  TIKTOK
+}
+
+enum SocialMediaAccountStatus {
+  CONNECTED
+  DISCONNECTED
+  TOKEN_EXPIRED
+  ERROR
+}
+
+model SocialMediaAccount {
+  id              String                   @id @default(cuid())
+  platform        SocialMediaPlatform
+  platformUserId  String                   // Platform-specific user/page ID
+  platformUsername String?
+  displayName     String?
+  profileImageUrl String?
+
+  // Encrypted OAuth tokens
+  accessToken     String                   @db.Text
+  refreshToken    String?                  @db.Text
+  tokenExpiresAt  DateTime?
+
+  status          SocialMediaAccountStatus @default(CONNECTED)
+  lastSyncedAt    DateTime?
+  errorMessage    String?                  @db.Text
+
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  projectId       String
+  project         Project                  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  // Relations
+  posts           SocialMediaPost[]
+
+  @@unique([projectId, platform, platformUserId])
+  @@index([projectId])
+  @@index([platform])
+  @@index([status])
+}
+
+enum SocialMediaPostStatus {
+  DRAFT
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  DELETED
+}
+
+model SocialMediaPost {
+  id              String                 @id @default(cuid())
+  platform        SocialMediaPlatform
+  platformPostId  String?                // ID from the social platform
+
+  caption         String?                @db.Text
+  hashtags        String[]               @default([])
+
+  status          SocialMediaPostStatus  @default(DRAFT)
+  publishedAt     DateTime?
+  scheduledAt     DateTime?
+
+  // Engagement metrics (updated via cron)
+  likeCount       Int                    @default(0)
+  commentCount    Int                    @default(0)
+  shareCount      Int                    @default(0)
+  reachCount      Int                    @default(0)
+  impressionCount Int                    @default(0)
+  lastSyncedAt    DateTime?
+
+  errorMessage    String?                @db.Text
+
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+
+  projectId       String
+  project         Project                @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  accountId       String
+  account         SocialMediaAccount     @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  campaignId      String?
+  campaign        Campaign?              @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+
+  // Relations
+  assets          SocialMediaAsset[]
+
+  @@index([projectId])
+  @@index([accountId])
+  @@index([campaignId])
+  @@index([platform])
+  @@index([status])
+  @@index([publishedAt])
+}
+
+enum SocialMediaAssetType {
+  IMAGE
+  VIDEO
+  STORY
+  REEL
+}
+
+model SocialMediaAsset {
+  id          String                @id @default(cuid())
+  type        SocialMediaAssetType
+
+  // File information
+  fileName    String
+  fileSize    Int                   // Bytes
+  mimeType    String
+  url         String                @db.Text    // Public URL (S3/R2 or local)
+  thumbnailUrl String?              @db.Text
+
+  // Media metadata
+  width       Int?
+  height      Int?
+  duration    Int?                  // Seconds (for videos)
+
+  // Processing status
+  isProcessed Boolean               @default(false)
+  processedUrl String?              @db.Text    // Optimized version URL
+
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  projectId   String
+  project     Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  postId      String?
+  post        SocialMediaPost?      @relation(fields: [postId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([postId])
+  @@index([type])
+}

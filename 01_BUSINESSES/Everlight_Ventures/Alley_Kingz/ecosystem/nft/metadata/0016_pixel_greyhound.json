@@ -1,0 +1,144 @@
+{
+  "name": "Alley Kingz #0016 Pixel Greyhound",
+  "symbol": "BCARDI",
+  "description": "Pixel Greyhound, a Rare Skirmisher in the Zoomie Syndicate. The Greyhound pilots the Greyhound Rig -- sport speed rig -- nitro, drag body, glass-cannon velocity. Signature move: \"Dash Loop\". A playable Alley Kingz battle card on Solana -- the NFT is the card, with gameplay stats written on-chain. Cosmetic art plus gameplay stats; in-game items are for entertainment and utility, not investments. No promised returns.",
+  "image": "ipfs://<IMAGE_CID_DIR>/0016_pixel_greyhound.png",
+  "animation_url": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_PixelGreyhound_Greyhound_Seedance_V1.mp4",
+  "external_url": "https://everlightventures.io/cards/0016",
+  "attributes": [
+    {
+      "trait_type": "Card Number",
+      "value": "0016"
+    },
+    {
+      "trait_type": "Faction",
+      "value": "Zoomie Syndicate"
+    },
+    {
+      "trait_type": "Faction Id",
+      "value": "zoomie_syndicate"
+    },
+    {
+      "trait_type": "Breed",
+      "value": "Greyhound"
+    },
+    {
+      "trait_type": "Name",
+      "value": "Pixel Greyhound"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Skirmisher"
+    },
+    {
+      "trait_type": "Cost",
+      "value": 3
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Dash"
+    },
+    {
+      "trait_type": "HP",
+      "value": 700
+    },
+    {
+      "trait_type": "Damage",
+      "value": 90
+    },
+    {
+      "trait_type": "Attack Speed",
+      "value": 1.4
+    },
+    {
+      "trait_type": "Move Speed",
+      "value": 1.4
+    },
+    {
+      "trait_type": "Range",
+      "value": 1
+    },
+    {
+      "trait_type": "Ability",
+      "value": "Dash Loop"
+    },
+    {
+      "trait_type": "Ability Cooldown",
+      "value": 8
+    },
+    {
+      "trait_type": "Queen Target",
+      "value": false
+    },
+    {
+      "trait_type": "Rig",
+      "value": "Greyhound Rig"
+    },
+    {
+      "trait_type": "Rig Class",
+      "value": "sprinter"
+    },
+    {
+      "trait_type": "Weapon Mod",
+      "value": "ram_plow"
+    }
+  ],
+  "properties": {
+    "category": "video",
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "files": [
+      {
+        "uri": "ipfs://<IMAGE_CID_DIR>/0016_pixel_greyhound.png",
+        "type": "image/png"
+      },
+      {
+        "uri": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_PixelGreyhound_Greyhound_Seedance_V1.mp4",
+        "type": "video/mp4"
+      }
+    ]
+  },
+  "onchain_attributes": [
+    {
+      "key": "hp",
+      "value": "700"
+    },
+    {
+      "key": "damage",
+      "value": "90"
+    },
+    {
+      "key": "attack_speed",
+      "value": "1.4"
+    },
+    {
+      "key": "move_speed",
+      "value": "1.4"
+    },
+    {
+      "key": "range",
+      "value": "1"
+    },
+    {
+      "key": "cost",
+      "value": "3"
+    },
+    {
+      "key": "rarity",
+      "value": "Rare"
+    },
+    {
+      "key": "ability_id",
+      "value": "dash_loop"
+    },
+    {
+      "key": "queen_target",
+      "value": "0"
+    }
+  ]
+}

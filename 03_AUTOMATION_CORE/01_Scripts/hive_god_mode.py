@@ -124,7 +124,7 @@ def _get_secret(key: str, default: str = "") -> str:
 
 SLACK_BOT_TOKEN = _get_secret("SLACK_BOT_TOKEN")
 RESEND_API_KEY = _get_secret("RESEND_API_KEY")
-BLINKO_URL = _get_secret("BLINKO_URL", "http://129.159.38.250:1111")
+BLINKO_URL = _get_secret("BLINKO_URL", "http://e5-mother:1111")
 BOSS_SLACK_ID = "U08JZUBNJ3T"
 
 # ---------------------------------------------------------------------------
@@ -351,27 +351,39 @@ def send_email_via_resend(
     html_body: str,
     from_name: str = "Piper Reeves",
     from_email: str = "piper@everlightventures.io",
+    persona_id: str = "piper_reeves",
+    recipient_state: str = "",
 ) -> bool:
-    """Send an email via Resend API (stdlib urllib)."""
-    if not RESEND_API_KEY:
-        log.warning("Email skip: no RESEND_API_KEY")
-        return False
+    """Send an email -- now routed through branded_mailer.
+
+    Refactored 2026-05-17: previously POSTed direct to api.resend.com which
+    bypassed eradication_gate + send_authority_gate + DNC + budget.
+    All sends now flow through the canonical pipeline.
+    """
+    import sys as _sys
+    _ct = "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools"
+    if _ct not in _sys.path:
+        _sys.path.insert(0, _ct)
     try:
-        resp = _http_post_json(
-            "https://api.resend.com/emails",
-            payload={
-                "from": f"{from_name} <{from_email}>",
-                "to": [to],
-                "subject": subject,
-                "html": html_body,
-            },
-            headers={"Authorization": f"Bearer {RESEND_API_KEY}"},
-        )
-        # Resend returns id on success
-        return bool(resp.get("id")) or resp.get("ok", False)
-    except Exception as e:
-        log.error("Email send failed: %s", e)
+        from branded_mailer import send_branded_email
+    except ImportError as e:
+        log.error("branded_mailer unavailable, send aborted: %s", e)
         return False
+    res = send_branded_email(
+        to=to,
+        subject=subject,
+        content_html=html_body,
+        from_name=from_name,
+        from_email=from_email,
+        agent_name=from_name,
+        persona_id=persona_id,
+        recipient_state=recipient_state,
+        budget_category="system",
+        caller="hive_god_mode.send_email_via_resend",
+    )
+    if not res.ok:
+        log.warning("Email blocked or failed: %s", res.error)
+    return bool(res.ok)
 
 
 def log_to_blinko(summary: str, details: str):

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block header_title %}Reports{% endblock %}
+{% block extra_css %}
+<style>
+  .report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+  }
+  .report-card {
+    text-decoration: none;
+    color: inherit;
+    background: linear-gradient(160deg, rgba(15, 23, 42, 0.55), rgba(2, 6, 23, 0.55));
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 18px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    transition: transform 0.2s ease, border 0.2s ease;
+  }
+  .report-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(56, 189, 248, 0.45);
+  }
+  .report-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(16,185,129,0.15);
+  }
+  .report-title { font-size: 16px; font-weight: 700; color: #e2e8f0; }
+  .report-sub { font-size: 13px; color: #94a3b8; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="report-grid">
+  <a href="{{ url_for('daily_report') }}" class="report-card">
+    <div class="report-icon">📈</div>
+    <div class="report-title">Daily Report</div>
+    <div class="report-sub">Sales, costs, profit</div>
+  </a>
+  <a href="{{ url_for('low_stock_report') }}" class="report-card">
+    <div class="report-icon">⚠️</div>
+    <div class="report-title">Low Stock</div>
+    <div class="report-sub">Items to reorder</div>
+  </a>
+  <a href="{{ url_for('sales_log') }}" class="report-card">
+    <div class="report-icon">🧾</div>
+    <div class="report-title">Sales Log</div>
+    <div class="report-sub">Transaction history</div>
+  </a>
+</div>
+{% endblock %}

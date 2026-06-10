@@ -1,0 +1,5 @@
+# This directory is a Syncthing folder marker.
+# Do not delete.
+
+folderID: everlight-workspace
+created: 2026-05-13T22:24:24-07:00

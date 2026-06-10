@@ -1,8 +1,15 @@
 # Workspace Manifest & Semantic Map
-*Last Synced: 2026-03-19*
+*Last Synced: 2026-05-22*
 
 This document is the absolute source of truth for the directory structure.
 ALL AI agents MUST use this map to locate data before executing file operations.
+
+> **Per-folder self-documentation (added 2026-05-22):** every living folder now carries a
+> `README.md` outline (purpose + contents + connections), scaffolded by
+> `03_AUTOMATION_CORE/01_Scripts/folder_readme_scaffold.py` (idempotent -- safe to re-run as
+> the tree grows). The big-picture explainers: gameplan spine =
+> `01_BUSINESSES/Everlight_Ventures/Wealth_OS/00_MASTER_GAMEPLAN.md`; how the infra/Hive/devices
+> serve it = `06_DEVELOPMENT/everlight_os/docs/HOW_THE_MACHINE_WORKS.md`.
 
 ## Directory Tree
 

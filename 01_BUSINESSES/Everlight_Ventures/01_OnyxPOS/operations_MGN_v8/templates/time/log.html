@@ -1,0 +1,162 @@
+
+{% extends "base.html" %}
+
+{% block page_title %}Time Log{% endblock %}
+{% block header_emoji %}⏱️{% endblock %}
+{% block header_title %}Time Log{% endblock %}
+
+{% block extra_css %}
+<style>
+  .log-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px;}
+  .log-tile{background:linear-gradient(145deg,#1b3326 0%,#13261c 100%);border:1px solid rgba(167,243,208,.12);border-radius:16px;padding:16px;box-shadow:0 4px 18px rgba(0,0,0,.25);}
+  .log-tile-label{font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:#64748b;font-weight:700;}
+  .log-tile-value{margin-top:8px;font-size:20px;font-weight:800;color:#e8f5ee;font-family:'Space Mono',monospace;}
+  .log-tile-value.in{color:#34d399;}
+  .log-tile-value.out{color:#fb7185;}
+  .log-tile-value.break{color:#fbbf24;}
+  .log-table thead th{position:sticky;top:0;background:rgba(0,0,0,.35);}
+  .log-table tbody tr:hover td{background:rgba(16,185,129,.08);}
+</style>
+{% endblock %}
+
+{% block content %}
+{% set rows = (time_log or punches or entries or records or []) %}
+{% set stats = namespace(ins=0, outs=0, breaks=0, hours=0.0) %}
+{% for r in rows %}
+  {% set typ = (r.Type or r.type or r.Event or r.event or r.Action or r.action or 'PUNCH')|upper %}
+  {% if typ in ['IN','CLOCK_IN','CLOCKIN','START'] %}{% set stats.ins = stats.ins + 1 %}{% endif %}
+  {% if typ in ['OUT','CLOCK_OUT','CLOCKOUT','END'] %}{% set stats.outs = stats.outs + 1 %}{% endif %}
+  {% if typ in ['BREAK_START','BREAK','LUNCH','BREAK_END'] %}{% set stats.breaks = stats.breaks + 1 %}{% endif %}
+  {% set hrs = (r.Hours or r.hours or r.Duration_Hours or r.duration_hours) %}
+  {% if hrs %}{% set stats.hours = stats.hours + (hrs|float) %}{% endif %}
+{% endfor %}
+
+<div class="log-summary">
+  <div class="log-tile">
+    <div class="log-tile-label">Entries</div>
+    <div class="log-tile-value">{{ rows|length }}</div>
+  </div>
+  <div class="log-tile">
+    <div class="log-tile-label">Clock Ins</div>
+    <div class="log-tile-value in">{{ stats.ins }}</div>
+  </div>
+  <div class="log-tile">
+    <div class="log-tile-label">Clock Outs</div>
+    <div class="log-tile-value out">{{ stats.outs }}</div>
+  </div>
+  <div class="log-tile">
+    <div class="log-tile-label">Break Events</div>
+    <div class="log-tile-value break">{{ stats.breaks }}</div>
+  </div>
+  <div class="log-tile">
+    <div class="log-tile-label">Total Hours</div>
+    <div class="log-tile-value">{{ "%.2f"|format(stats.hours) }}</div>
+  </div>
+</div>
+
+<section class="card">
+  <div class="card-header">
+    <div class="card-title">
+      <span class="card-emoji">🕒</span>
+      Punches / Time Entries
+    </div>
+    <div class="text-muted" style="font-size:13px;">
+      {% set rows = (time_log or punches or entries or records or []) %}
+      {{ rows|length }} entr{{ 'y' if rows|length == 1 else 'ies' }}
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="toolbar" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <form method="GET" action="" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <input class="input" type="text" name="q" value="{{ request.args.get('q','') }}" placeholder="Search employee, date, note…">
+        <input class="input" type="date" name="date" value="{{ request.args.get('date','') }}">
+        <button class="btn" type="submit">Filter</button>
+        <a class="btn btn-ghost" href="{{ request.path }}">Reset</a>
+      </form>
+
+      {% if session.get('role','').lower() in ['manager','owner','admin'] %}
+        <div style="margin-left:auto;display:flex;gap:10px;align-items:center;">
+          {% if url_for is defined %}
+            {% if session.get('role','').lower() in ['manager','owner','admin'] %}
+  <a class="btn btn-primary" href="{{ url_for('timeclock_manage') }}">Manage</a>
+{% endif %}
+
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card-body" style="padding:0;">
+    {% set rows = (time_log or punches or entries or records or []) %}
+    {% if rows|length == 0 %}
+      <div class="empty-state">
+        <div class="empty-icon">🌿</div>
+        <h3>No time entries found</h3>
+        <p>Clock in/out to create entries. Managers can edit punches if needed.</p>
+      </div>
+    {% else %}
+      <table class="table log-table">
+        <thead>
+          <tr>
+            <th style="width:120px;">Date</th>
+            <th>Employee</th>
+            <th style="width:130px;">Type</th>
+            <th style="width:170px;">Time</th>
+            <th style="width:140px;">Hours</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+            {% set typ = (r.Type or r.type or r.Event or r.event or r.Action or r.action or 'PUNCH')|upper %}
+            <tr>
+              <td class="text-mono">
+                {{ r.Date or r.date or r.Day or r.day or (r.Timestamp or r.timestamp or '')[:10] or '—' }}
+              </td>
+
+              <td>
+                <div style="font-weight:800;">
+                  {{ r.Employee_Name or r.employee_name or r.Name or r.name or 'Employee' }}
+                </div>
+                <div class="text-muted" style="font-size:12px;">
+                  ID {{ r.Employee_ID or r.employee_id or r.Emp_ID or r.emp_id or '—' }}
+                </div>
+              </td>
+
+              <td>
+                {% if typ in ['IN','CLOCK_IN','CLOCKIN','START'] %}
+                  <span class="badge badge-success">🟢 Clock In</span>
+                {% elif typ in ['OUT','CLOCK_OUT','CLOCKOUT','END'] %}
+                  <span class="badge badge-rose">🔴 Clock Out</span>
+                {% elif typ in ['BREAK_START','BREAK'] %}
+                  <span class="badge badge-warning">☕ Break</span>
+                {% elif typ in ['BREAK_END'] %}
+                  <span class="badge">✅ Break End</span>
+                {% else %}
+                  <span class="badge">🕒 {{ typ|lower|replace('_',' ')|title }}</span>
+                {% endif %}
+              </td>
+
+              <td class="text-mono">
+                {{ r.Time or r.time or (r.Timestamp or r.timestamp or '')[11:19] or (r.Timestamp or r.timestamp or '') or '—' }}
+              </td>
+
+              <td class="text-mono">
+                {% set hrs = (r.Hours or r.hours or r.Duration_Hours or r.duration_hours) %}
+                {% if hrs is not none %}{{ hrs }}{% else %}—{% endif %}
+              </td>
+
+              <td class="text-muted">
+                {{ r.Notes or r.notes or r.Reason or r.reason or '' }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,19 @@
+[Unit]
+Description=Triple Threat Team -- Scout + Diagnostic + Coordinator (autonomous fix-finder)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=opc
+Group=opc
+WorkingDirectory=/home/opc
+EnvironmentFile=/etc/default/rex-negotiator
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 /home/opc/triple_threat_team.py
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

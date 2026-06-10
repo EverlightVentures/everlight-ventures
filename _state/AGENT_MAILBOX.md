@@ -1954,3 +1954,680 @@ work was committed + pushed (the entry's "Commits: None" is now superseded).
 **Open for Rich (operator calls, see chat):** (a) commit+push the dirty tree (which branch?) OR add `_state/` to a targeted rsync so this coordination note actually reaches the PC; (b) run the real rsync from Termux/host -- the proot can't route the tailnet (FINAL precedent).
 
 ---
+
+## [2026-06-02 20:18 PT] Session: $BCARDI dog meme coin: designed, secured wallets, built premium launch kit (Sola
+
+<!-- session_iso=2026-06-03T03:18:07.839319+00:00 | size=4996b -->
+
+# $BCARDI dog meme coin: designed, secured wallets, built premium launch kit (Solana/pump.fun)
+
+### Accomplished
+- Brainstormed + locked the $BCARDI design: fresh **Solana / pump.fun** fair launch (not reviving the stalled Cronos $BCRDI). Dog meme coin (Rich's real dog). 9% founder bag (dev-buy, publicly locked) + 3% treasury. North Star = coin holds ~$18-22M cap then ~$1M cashable. Wrote spec + implementation plan.
+- Inventoried + secured 6 plaintext wallet secrets (2 Phantom, ZilPay, Atomic, Cronos-BCARDI, Polymarket) scattered across 11 files. Built a Proton Pass import (43 items / 11 folders), shredder, secret-free builder; hardened .gitignore. chmod does NOT stick on the sdcard FUSE mount -> Proton Pass is the only real fix.
+- Ran a Hive workflow (5 agents) to build the launch kit: 512px coin logo, NFT dealer video staged, copy pack, Discord kit, landing site, compliance/QA pass (all 6 checks passed).
+- Rebuilt the landing site to match the real everlightventures.io theme (vanta-black + gold #c9a84c, Cinzel/Playfair/Inter/JetBrains Mono, full-bleed dealer video hero, glass cards, slow motion). Re-cropped logo from the correct image (Copy of Official $BCARDI.png). Added multi-venue "where to buy" (Phantom/Solflare/Backpack + Coinbase/Binance/Kraken + Jupiter/Raydium/Dexscreener/Birdeye/Solscan/GeckoTerminal) and a "The Climb" aspirational milestone ladder (framed as goals, never promises). Removed Telegram + Discord, kept X only.
+- Background agent built the X automation engine: compliance-gated autopilot + 15-post queue + automation gameplan (X-first -> Telegram-over-Discord -> multi-channel, e5 cron).
+- Validated the launch wallet 2ef4VfuyRNYwu6WMW9TCz8cXpiqi23MSd8y8ZFyUmrBg on-chain (Google-login Phantom @bcardi, 0 SOL).
+
+### Files created or modified
+- `01_BUSINESSES/BCARDI_Crypto/00_Core/BCARDI_SOLANA_RELAUNCH_SPEC_2026-06-02.md` -- approved design spec
+- `01_BUSINESSES/BCARDI_Crypto/00_Core/BCARDI_LAUNCH_PLAN_2026-06-02.md` -- implementation/launch plan
+- `01_BUSINESSES/BCARDI_Crypto/01_Media/launch/bcardi_logo_512.png` + `bcardi_nft_dealer.mp4` -- coin face + NFT video
+- `01_BUSINESSES/BCARDI_Crypto/02_Community/COPY_PACK.md` -- all public copy (disclaimer, X bio, pinned tweet, etc.)
+- `01_BUSINESSES/BCARDI_Crypto/02_Community/DISCORD_SETUP.md` -- Discord server + run playbook
+- `01_BUSINESSES/BCARDI_Crypto/02_Community/automation/x_autopilot.py` + `x_content_queue.json` -- hands-off X poster + queue
+- `01_BUSINESSES/BCARDI_Crypto/02_Community/X_LAUNCH_KIT.md` + `AUTOMATION_GAMEPLAN.md` -- X setup + automation roadmap
+- `01_BUSINESSES/BCARDI_Crypto/site/index.html` + `site/assets/` -- premium landing page (live preview at 127.0.0.1:8513)
+- `03_AUTOMATION_CORE/03_Credentials/proton_pass_import.json` -- 43-item Bitwarden import (git-ignored)
+- `03_AUTOMATION_CORE/01_Scripts/setup/build_proton_pass_import.py` + `shred_plaintext_secrets.sh` -- builder + shredder
+- `03_AUTOMATION_CORE/01_Scripts/secure_seed_cleanup.sh` -- wallets-only shredder (superseded by setup/ one)
+- `.gitignore` -- hardened to keep wallet secrets untracked
+
+### Doctrines added or changed
+- `reference_crypto_seed_vault` -- crypto seeds live in Proton Pass; exposed seed = compromised, rotate; chmod doesn't stick on sdcard
+- `project_bcardi_meme_coin` -- the project, locked decisions, hands-off automation directive, launch wallet, clean-exit guardrail
+
+### Commits + pushes
+- None. Per Rich's "commit only when asked" rule, nothing was committed or pushed this session.
+
+### Open items / handoffs / queued for next session
+- RICH manual: import to Proton Pass (pass.proton.me, Bitwarden) + run `setup/shred_plaintext_secrets.sh`; harden the wallet Gmail with authenticator/passkey 2FA (NOT SMS) + export the wallet private key to Proton; fund `2ef4...UmrBg` with ~3 SOL; create @bcardicoin X + free API keys.
+- Deploy the site to `everlightventures.io/bcardi` (pending Rich's go -- he was leaning yes).
+- Wire `x_autopilot.py` onto e5-mother cron.
+- Generate the NFT thumbnail on e5/AceMagician (ffmpeg h264 segfaults in proot).
+- Build the launch-day card (exact pump.fun field values + click order).
+
+### Honest gaps / known limitations
+- Site is local-preview only (127.0.0.1:8513), not deployed live.
+- NFT thumbnail not generated (proot media-decode limitation; e5 unreachable from proot).
+- pump.fun fee %/graduation/curve params + the ~9% dev-buy SOL need live re-verification at launch (SOL ~$79; est. ~2.75 SOL for 9%).
+- X API free-tier write cap to confirm at key setup.
+- Legacy exposed wallets (Phantom A/B, Polymarket ~116 USDC, Stripe live, Supabase service-role, Cloudflare, Twilio) not yet rotated.
+- The AI cannot create/sign the coin, fund, or cash out -- those are Rich's on-chain acts (keys).
+
+### Operator decisions deferred
+- Ship the site live to everlightventures.io/bcardi (a/b/c was pending; AI recommended ship).
+- Everyday Gmail vs a dedicated Google account for the launch wallet.
+- When to fund the wallet (Rich said not today).
+
+---
+
+## [2026-06-03 15:53 PT] Session: Pivoted Polymarket -> Kalshi: funded, built full autonomous trade+measure infra,
+
+<!-- session_iso=2026-06-03T22:53:26.830606+00:00 | size=5801b -->
+
+# Pivoted Polymarket -> Kalshi: funded, built full autonomous trade+measure infra, proved markets efficient, placed first real bet
+
+### Accomplished
+- Killed the Polymarket plan (proven dead end for US: order POSTs 403 even through a German datacenter VPS -- they block datacenter/VPN IPs, not just countries). Destroyed the Hetzner box (billing stopped).
+- Pivoted to KALSHI (CFTC-regulated US venue, no geoblock, bots allowed). Renamed package polymarket_agent -> kalshi_agent (imports, crons, crontab; 146 tests green).
+- FUNDED Kalshi: moved the Polygon wallet's $116 -> swap USDC.e to native USDC -> Zero Hash Polygon deposit (0xB924...C851) -> USD. $3 test credited in 30s, then the rest. Balance $116.26 (now $103.14 after the Spurs bet).
+- Proved RSA-PSS auth + order placement work from a US IP (no proxy). Solved the "Nevada" block: it was the PHONE's AT&T cellular IP misgeolocating; e5 has a California IP -> full board tradeable. HARD RULE: live orders ONLY from e5, never the phone.
+- Fixed a session-long bug: Kalshi orderbook is under `orderbook_fp` with yes_dollars/no_dollars (not `orderbook`/yes/no). Books are actually DEEP; my "empty book" reads were this bug.
+- RIGOROUSLY tested crypto, sports, AND weather -- ALL efficiently priced. Every big "edge" (97/45/28%, the Minnesota hockey team, weather sigma 2x too wide) was a MODEL BUG, caught before betting. $0 lost via discipline.
+- Placed the first REAL bet (operator call, edge or not): 20 contracts San Antonio Spurs to WIN @ 64c ($12.80), from e5. Fair-priced (sharp -185 = ~64%, edge ~0), settles tonight, logged to scorecard. Explained why "hedging" both sides of one game is a guaranteed loss.
+- Built the favorite-longshot engine (the one academically-documented PERSISTENT Kalshi edge) + a scorecard that logs every prediction and settles vs real outcomes. e5 now runs 4 lanes 24/7 (crypto, events, favorites, scorecard-settle).
+- Established a solid connection: `ssh e5` over the public IP 163.192.60.35:22 (NOT the flaky tailnet 100.x).
+
+### Files created or modified
+- `06_DEVELOPMENT/kalshi_agent/dataflows/kalshi_api.py` -- Kalshi market data + best_bbo (orderbook_fp parse fix)
+- `06_DEVELOPMENT/kalshi_agent/execution/kalshi_exec.py` -- RSA-PSS signed client (balance/orders/positions)
+- `06_DEVELOPMENT/kalshi_agent/crypto_edge.py` -- lognormal crypto model (found NO edge vs efficient mkt)
+- `06_DEVELOPMENT/kalshi_agent/research_edge.py` -- Perplexity reads event -> Claude probability
+- `06_DEVELOPMENT/kalshi_agent/weather_edge.py` -- NWS forecast vs market (strike_type+date aware)
+- `06_DEVELOPMENT/kalshi_agent/hunt_kalshi.py` -- crypto hunter
+- `06_DEVELOPMENT/kalshi_agent/hunt_events.py` -- research/event hunter
+- `06_DEVELOPMENT/kalshi_agent/hunt_favorites.py` -- favorite-longshot basket engine (the real-edge shot)
+- `06_DEVELOPMENT/kalshi_agent/scorecard.py` -- logs predictions, settles vs outcomes, win-rate/Brier/PnL by lane
+- `06_DEVELOPMENT/kalshi_agent/fund_kalshi.py` -- guarded swap+send to fund Kalshi
+- `06_DEVELOPMENT/kalshi_agent/TOMORROW_PLAYBOOK.md` -- tomorrow's plan + the 3 real-edge engines
+- `01_BUSINESSES/Everlight_Ventures/Wealth_OS/leveraged_derivatives_access_brief.md` -- legal leverage/offshore brief
+- `03_AUTOMATION_CORE/03_Credentials/{kalshi.env,kalshi_private_key.pem,hetzner_*.env}` -- gitignored creds
+
+### Doctrines added or changed
+- `project_kalshi_live_funded` -- Kalshi is the live venue, funded, the Nevada/IP fix, the connection path, all-lanes-efficient finding
+- `project_polymarket_geoblock_live_wall` -- corrected: datacenter VPS does NOT beat the geoblock
+- `project_polymarket_paper_was_silently_dead` -- earlier paper-calibration was dead 4 days (3 bugs)
+- `feedback_browser_downloads_websites_folder` -- Rich saves webpages to Websites/Download for me to parse
+
+### Commits + pushes (branch everlightventures.io)
+- `c2bb543` egress proxy wiring (later abandoned)
+- `7e36423` unblock paper calibration (3 bugs)
+- `5d2e39d` rename polymarket_agent -> kalshi_agent + kalshi_exec (K3)
+- `5fddb04` fund_kalshi + FUNDED $116.26
+- `490f117` money machine (crypto edge + hunter)
+- `8441501` hunter targets live 15-min markets
+- `742da24` orderbook_fp parse fix + STOP before fake edges
+- `f3d3f25` research brain + event hunter
+- `7707be0` scorecard
+- `6d7b076` favorite-longshot engine + weather edge + tomorrow playbook
+
+### Open items / handoffs / queued for next session
+- TONIGHT: Spurs game settles -> first real sports scorecard data point.
+- TOMORROW AM: read the scorecard (overnight settled favorites basket + Spurs) -- the first real evidence on whether favorite-longshot beats the market.
+- NEXT BUILD: news/injury-speed monitor (edge engine #2) -- catch breaking news before the market prices it.
+- Standard now: every bet ships with market% / sharp line / model% / edge / EV / why BEFORE placement.
+
+### Honest gaps / known limitations
+- NO proven edge yet -- all liquid lanes tested efficient; favorite-longshot is the only documented-persistent candidate and is UNPROVEN (now measuring via scorecard).
+- The research/event hunter's LLM can hallucinate (confused Minnesota Twins with the NHL Wild) -- needs sanity guardrails before live use.
+- e5 tailnet (tailscale) flaps intermittently -- mitigated by using the public IP; live trading is autonomous on e5 cron so it does not depend on my connection.
+- The deep-dive Hive workflow agents hit some 404s and did not cleanly synthesize; findings were extracted manually.
+
+### Operator decisions deferred
+- If favorite-longshot does not prove a real edge over the coming days: redirect this energy to wholesale (real off-market info edge) or package/sell the Kalshi tooling as a product.
+- Whether to add more funding to Kalshi or treat the $103 as a capped experiment until an edge is proven.
+
+---
+
+## [2026-06-03 15:58 PT] Session: Built /screenshots -- daily screenshot->text ingest that organizes by hashtag, d
+
+<!-- session_iso=2026-06-03T22:58:43.845811+00:00 | size=3727b -->
+
+# Built /screenshots -- daily screenshot->text ingest that organizes by hashtag, dedupes, and files into the brain
+
+### Accomplished
+- Debunked a pasted "fix" that claimed the Claude native binary is broken on Android and said to uninstall/downgrade. Proved the LIVE session IS the native ELF binary (2.1.161) running fine in proot Debian (glibc). Root cause of image crashes = in-process base64 OOM on a memory-tight sandbox, NOT a bad binary. NEVER uninstall/downgrade to "fix" it.
+- Built the real fix: a tool that sends each image to the vision API one-at-a-time in a subprocess and hands the CLI back TEXT, so the segfault-prone in-process image path is never touched. Peak RAM = one ~300KB image regardless of batch size.
+- Implemented Rich's organization rules: real visible #hashtags -> group; no hashtags -> model-suggested content tags; near-duplicates (perceptual aHash) -> flagged for review, NEVER auto-deleted.
+- Added the "implement into the system" layer (all fail-safe): brain (one Blinko note/shot via existing local-first enqueue), tag folders (copy each kept shot into its primary #tag folder), and tasks (action_items -> rolling checklist).
+- Ran it live on Rich's real newest 25 screenshots: 24 unique, organized into ~30 tags, 24 brain notes queued, 24 files sorted, 52 action items extracted. ~$0.32 total at Haiku.
+- Caught + fixed a real bug from the live run: aHash false-matched two unrelated white screens (notification center vs CalFresh receipt), silently dropping one. Fix = require BOTH visual aHash match AND text-Jaccard >= 0.55. Proven against saved data (true dup jaccard 0.82 kept, false pair 0.05 dropped). Recovered the wrongly-skipped screenshot.
+
+### Files created or modified
+- `03_AUTOMATION_CORE/01_Scripts/screenshot_ingest.py` -- NEW. Batch screenshot->structured-text ingest; groups by hashtag, dedupes (aHash+text), suggests tags, queues to brain, sorts into #tag folders, extracts action items. Reuses claude_photo_prep resize + blinko_queue_drain.enqueue.
+- `.claude/commands/screenshots.md` -- NEW. /screenshots slash command wrapping the script; instructs CLI to read only the text digest, never the images.
+- `07_STAGING/Inbox/screenshot_actions.md` -- rolling action-item checklist (populated by runs).
+- `04_MEDIA_LIBRARY/Photos/screenshots_by_tag/` -- new tag-folder archive (24 files sorted).
+
+### Doctrines added or changed
+- `project_screenshot_ingest_pipeline` (memory) -- the tool + the binary-NOT-broken root-cause truth; added to MEMORY.md index.
+
+### Commits + pushes
+- None. Work is on the working tree (branch bj-finish), not committed. Phone-local tool; 10-min Oracle deploy cron will sync the script.
+
+### Open items / handoffs / queued for next session
+- Awaiting Rich OK to delete the one real duplicate: Screenshot_20260602_223630_Facebook.jpg (dup of _223635).
+- Offered to triage the 52 action items (group by project / Slack / strip listicle noise) -- awaiting direction.
+- Test/verify runs left real entries (his actual screenshots) in the brain queue + tag folders + task list; offered to purge for a clean slate, no response.
+
+### Honest gaps / known limitations
+- aHash threshold (5) + text-Jaccard floor (0.55) are heuristic defaults; may need tuning on more data.
+- HEIC/HEIF needs pillow-heif (screenshots are PNG/JPG so fine for now).
+- Brain notes go to the local-first queue; actual delivery to Blinko depends on the drain cron + reachability, not confirmed end-to-end this session.
+- Listicle screenshots inflate action_items (52 from 25 shots).
+
+### Operator decisions deferred
+- Delete the real duplicate? (yes/no)
+- Triage the 52 action items into something usable? (how)
+- Purge the verification-run artifacts for a clean first real run?
+
+---
+
+## [2026-06-03 16:22 PT] Session: Blackjack chips overhaul + multiplayer front door wired; deploy path fixed (e5 p
+
+<!-- session_iso=2026-06-03T23:22:17.714789+00:00 | size=4675b -->
+
+# Blackjack chips overhaul + multiplayer front door wired; deploy path fixed (e5 public IP)
+
+### Accomplished
+- Physical betting chips on the main bet: real stacking chips (one per drag), denomination-colored, centered in the circle, numerals removed, total shown underneath. LIVE + byte-verified on preview.
+- Side bets (Lucky Lucky / 777 / Bad Buster) now take chips too -- fixed a real CSS bug where their chip piles anchored to the row and rendered on the center 777 circle (fix = position:relative on each bet button).
+- Move-chips interaction added: press-drag a placed chip from one spot to another (main<->side), 8px threshold vs tap-to-add, transfer subtracts source then adds target with fresh store reads. (NOTE: Rich reports it glitches -- see open items.)
+- Player nameplate moved to lower-left corner of the table with the Google profile photo (was a generic "Player" initial sitting on the chips).
+- Multiplayer "invite a friend" feature made REACHABLE: the entire backend was already built + deployed (blackjack-dealer edge fn, 6 live tables, seat_invites + player_friends tables, realtime sync) but had ZERO entry point. Added "Play with Friends" menu item -> /tables lobby, and made invite links auto-seat the friend (the &invite= code was being ignored).
+- Resolved a ~2hr credential chase: the vault CF_API_TOKEN was VALID all along -- Pages-scoped tokens falsely fail /user/tokens/verify; verify against /accounts/{id}/pages/projects instead.
+
+### Files created or modified
+- `06_DEVELOPMENT/vantaris/src/components/blackjack/BettingLayout.tsx` -- chip stacking, side-bet chips, move-chips drag system, ChipStack rewrite (center/no-numeral)
+- `06_DEVELOPMENT/vantaris/src/components/blackjack/BotPlayers.tsx` -- PlayerSeatLabel moved to lower-left + Google avatar
+- `06_DEVELOPMENT/vantaris/src/app/play/blackjack/page.tsx` -- "Play with Friends" nav menu item
+- `06_DEVELOPMENT/vantaris/src/app/play/blackjack/multi/page.tsx` -- read &invite= param, pass to table
+- `06_DEVELOPMENT/vantaris/src/components/blackjack/MultiplayerTable.tsx` -- inviteCode prop + auto joinByInvite once connected
+
+### Doctrines added or changed
+- `reference_everlightventures_deploy_architecture` (memory) -- updated: `ssh e5` now = public IP 163.192.60.35:22 (reliable, NOT flaky tailnet); Pages-scoped CF token false-negative on /user/tokens/verify (use /pages/projects); Cloudflare WAF blocks plain curl/urllib from proot (use browser UA + follow trailing-slash redirect).
+
+### Commits + pushes
+- NONE. All changes are edited locally (branch bj-finish, working tree) + deployed to the PREVIEW alias only via wrangler-from-e5. Not git-committed, not on production.
+
+### Open items / handoffs / queued for next session (Rich's feedback 2026-06-03)
+- MULTIPLAYER LIVE ROUND BROKEN: in the preview multi table "the dealer doesn't deal, the game doesn't play." Backend responds but the actual round does not progress. Debug the blackjack-dealer deal/phase loop + MultiplayerTable play flow (deal trigger, turn advance). This is the real blocker for the friend-invite feature.
+- CHIP VISUALS UGLY: the stacked chips should be the SAME chips shown in the tray/sideline (reuse the CasinoChip premium component), just stacked -- not the current CSS radial-gradient discs.
+- MOVE-CHIPS GLITCH: dragging a placed chip to another pile does a "weird glitch" and does not actually move it. The transfer (handleSpotPointerDown -> handleDragStart source / removeFromSpot+addToSpot) needs debugging.
+- CASINO WALK-IN ANIMATION: the "walking into Vantaris" loading animation should NOT play when you open the casino tab. It should ONLY play once you are inside the casino AND select a game -- then show walking through the Vantaris doors into that game. Move the door/walk-in transition from casino-tab-open to game-selection.
+- THEN PUSH TO PRODUCTION (everlightventures.io) once chips visuals + move glitch + multiplayer dealing are fixed. Rich wants it live for real users.
+
+### Honest gaps / known limitations
+- Could not test the 2-player live round from the phone (no browser/Playwright on proot). Rich tested manually -- it does NOT deal. Confirmed broken; needs next-session debug.
+- All this session's work is PREVIEW-only + uncommitted in git. A `git add` of the 5 vantaris files + commit/push is pending (changes live on e5 build dir + CF preview, but not in version control).
+- Move-chips + chip-stack visuals shipped without visual testing (blind edits); Rich's feedback confirms both need rework.
+
+### Operator decisions deferred
+- Production push held until the 4 open items are fixed (Rich: "I kind of want to push the update to the actual real website once this is done").
+
+---
+
+## [2026-06-03 18:53 PT] Session: Blinko brain: fixed latent FTS-delete bug on all 3 DBs, merged/deduped to one 29
+
+<!-- session_iso=2026-06-04T01:53:09.019123+00:00 | size=4293b -->
+
+# Blinko brain: fixed latent FTS-delete bug on all 3 DBs, merged/deduped to one 2975-note MASTER, wired constant phone<->e5 sync
+
+### Accomplished
+- Audited the Blinko log queue; found it draining fine but surfaced 6 real defects.
+- Fixed a LATENT FTS5-trigger bug ("SQL logic error" on every note DELETE/UPDATE/upsert-by-id; silently broke memory_writer re-writes) on ALL THREE brains: phone _logs, phone _state, e5 primary. Data preserved, online backups taken.
+- Fixed BrokenPipe tracebacks (health endpoint), cron double-logging (isatty gate), and per-drain #hive/probe RAG pollution (GET /health instead of POSTed probe; purged 98 junk notes).
+- Caught + healed a live outage (both phone Blinko instances down); restarted, added :2700 keepalive, retired zombie blinko_log_ingest.sh cron (dead host 129.159.38.250).
+- Reached e5 over `ssh e5` (public IP 163.192.60.35 -- tailnet NOT routable from proot); fixed e5's blinko.service + e5_data DB, restarted, verified HTTP upsert-update path works.
+- MERGED the split-brain: e5 3835 (58% dupes, only 1615 unique) + phone _state 3715 (100% subset of e5) + phone _logs 1942 (1378 notes never drained up) -> content-deduped union = 2975 MASTER, superset-verified, deployed to BOTH e5 and phone _state.
+- Unified phone to one canonical DB (_state); retired/archived _logs/blinko_lite.db; both phone servers (:1111/:2700) now serve _state.
+- Built + proved bidirectional constant sync (phone<->e5 over SSH, additive, content-deduped, never deletes): */20 cron + sync-on-wake in the live boot path.
+- Built safe restart helper after a `pkill -f blinko_lite.py` footgun killed a live shell mid-run; hardened dormant blinko_watchdog.sh to anchored pattern.
+- Standing daily self-audit writes a newest-first history journal.
+
+### Files created or modified
+- `03_AUTOMATION_CORE/01_Scripts/blinko_queue_audit.py` -- NEW: audit->heal->verify->journal->report tool (daily cron)
+- `03_AUTOMATION_CORE/01_Scripts/blinko_merge.py` -- NEW: content-dedupe union of N blinko DBs into one MASTER
+- `03_AUTOMATION_CORE/01_Scripts/blinko_sync.py` -- NEW: bidirectional phone<->e5 brain sync over SSH (self-shipping)
+- `03_AUTOMATION_CORE/01_Scripts/blinko_restart.sh` -- NEW: safe server restart (precise PID match, no pkill-f footgun)
+- `06_DEVELOPMENT/everlight_os/blinko/blinko_lite.py` -- FTS trigger fix + BrokenPipe guard + isatty logging + DB_PATH default _logs->_state
+- `03_AUTOMATION_CORE/01_Scripts/blinko_queue_drain.py` -- isatty logging + GET /health reachability (no probe-note pollution)
+- `03_AUTOMATION_CORE/01_Scripts/blinko_log_ingest.sh` -- isatty logging fix
+- `06_DEVELOPMENT/everlight_os/blinko/blinko_watchdog.sh` -- hardened pkill to anchored 'blinko_lite\.py$'
+- `03_AUTOMATION_CORE/01_Scripts/hive_inner_startup.sh` -- section 10: blinko_sync on boot/wake
+- e5: `/home/ubuntu/e5_data/blinko_lite.py` (trigger fix) + `/home/ubuntu/e5_data/blinko_lite.db` (migrated + swapped to MASTER)
+- crontab: retired zombie ingest, added daily audit (45 12 UTC), :2700 keepalive, */20 sync
+- Backups: 08_BACKUPS/blinko_lite_*pre_*; e5:/home/ubuntu/e5_data/blinko_lite.db.pre_*; _logs/archive/crontab_pre_*
+
+### Doctrines added or changed
+- `project_blinko_queue_audit_and_fts_fix` (memory) -- the FTS bug, the 3 tools, merge/unify, constant sync, ssh-e5-public-IP path, NEVER pkill -f blinko_lite.py
+
+### Open items / handoffs / queued for next session
+- sync_to_mother.sh still rsyncs phone _state/blinko_lite.db to e5's MIRROR (file-overwrite) -- now redundant with blinko_sync's content-merge to e5 CANONICAL; review/retire to avoid confusion.
+- Consider a durable always-on initiator only via a phone reverse-tunnel (e5 cannot reach phone behind cellular NAT); current mitigation = sync-on-wake + */20.
+
+### Honest gaps / known limitations
+- Sync is phone-initiated (e5 physically cannot reach the phone); reconciles fully on wake, so gaps cost latency not data.
+- Phone-cron reliability still subject to phone dozing (existing constraint).
+- Content-dedupe key is sha256(content); notes with identical text but meant-distinct would collapse (acceptable per operator's "delete duplicates" instruction).
+
+### Operator decisions deferred
+- Whether to retire sync_to_mother.sh's _state DB rsync line now that blinko_sync owns brain reconciliation.
+
+---
+
+## [2026-06-03 22:48 PT] Session: Vantaris blackjack polish + git-push->prod pipeline LIVE + media layer restored 
+
+<!-- session_iso=2026-06-04T05:48:48.689982+00:00 | size=6020b -->
+
+# Vantaris blackjack polish + git-push->prod pipeline LIVE + media layer restored (everlightventures.io)
+
+### Accomplished
+- Physical betting chips: real CasinoChip stacks (centered in circle, no numerals, total underneath), side-bet chips (Lucky Lucky / 777 / Bad Buster -- fixed a CSS-anchor bug where they piled on the center 777), move-chips between spots (drag a placed chip main<->side, forgiving nearest-zone drop, timestamped tap-guard), player Google avatar moved to lower-left corner.
+- Multiplayer "Play with Friends": discovered the backend was ALREADY fully built+deployed (blackjack-dealer edge fn, 6 live tables, seat_invites + player_friends tables, realtime sync, invite modal). It just had NO front door -- added a "Play with Friends" menu item -> /tables lobby + invite-link auto-seat (&invite= was ignored).
+- STOOD UP the git-push -> production pipeline: GitHub Action deploy-vantaris.yml. Set repo secrets CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID (were never set -> every past auto-deploy failed silently). Pointed trigger at [main, everlightventures.io, bj-finish]. Now `git push origin bj-finish` -> Action builds on GitHub runners -> everlightventures.io updates. PROVEN across 6 deploys.
+- FIXED a major regression: ALL 67MB of media (dealer videos + backgrounds + loaders) was gitignored (*.mp4 in .gitignore) -> 404 on the CI-built prod -> no dealer, no backgrounds, no walk-in. Force-committed the videos; all serve 200 now.
+- Dealer voice: gender-aware speechSynthesis fallback (Bacardi = "Sean" MALE voice, never a female browser fallback) + don't fall back to browser voice when autoplay blocks the ElevenLabs audio.
+- Audio defaults: voiceEnabled + musicEnabled now ON by default (were false) + Tone.js music gesture-unlock (starts on first click, autoplay-safe).
+- Loading flow set 3-tier per Rich: EV crown intro (ev-loading.mp4) before site load; NO loader on casino-tab open; casino walk-in (casino-entry.mp4) on game-select (new /play layout).
+- Topped up Rich's game account 1m.rich.gee@gmail.com -> chips=2,000,000,000 gems=1,000,000.
+- Resolved a ~2hr CF credential chase: vault CF_API_TOKEN IS valid but Pages-scoped -> falsely fails /user/tokens/verify; verify against /accounts/{id}/pages/projects instead.
+
+### Files created or modified (all under 06_DEVELOPMENT/vantaris/)
+- src/components/blackjack/BettingLayout.tsx -- chip stacks, side-bet chips, move-chips + move-guard
+- src/components/blackjack/BotPlayers.tsx -- player avatar to lower-left corner
+- src/app/play/blackjack/page.tsx -- Play-with-Friends menu, voice gender-aware fallback, music gesture-unlock
+- src/app/play/blackjack/multi/page.tsx -- read &invite= param
+- src/components/blackjack/MultiplayerTable.tsx -- inviteCode prop + auto joinByInvite
+- src/lib/blackjack-store.ts -- voiceEnabled+musicEnabled default true
+- src/app/play/layout.tsx -- NEW, casino walk-in (CasinoLoader) on game-select
+- src/app/vantaris/page.tsx -- removed casino-home loader
+- src/components/layout/ClientLayout.tsx -- EV crown intro restored (had over-removed)
+- public/dealers/*.mp4 + public/videos/*.mp4 -- force-committed (were gitignored)
+- .github/workflows/deploy-vantaris.yml -- trigger on bj-finish/everlightventures.io
+
+### Doctrines added or changed (memory)
+- reference_everlightventures_deploy_architecture.md -- UPDATED: ssh e5 = public IP 163.192.60.35:22 (reliable, not tailnet); Pages-scoped token false-negative on /user/tokens/verify; CF WAF blocks plain curl/urllib (use browser UA); git-push->prod pipeline now LIVE (secrets set, Action proven).
+- reference_rich_game_account.md -- NEW: Rich's game account (1m.rich.gee@gmail.com, player_id 289febfa..., how to top up chips/gems via service-role PATCH; guest=localStorage caveat).
+
+### Commits + pushes (all on bj-finish, pushed to origin)
+- 4424adf -- chips + side bets + move-chips + avatar + multiplayer front door + invite auto-seat + synced dealer + leaderboard + analytics
+- fee2984 -- CI trigger on bj-finish + everlightventures.io
+- c63e447 -- dealer voice gender-aware fallback + chip-move never forces extra hand
+- a36a46a -- commit dealer + background videos (media fix, ~67MB)
+- 0deb288 -- voice+music ON by default + gesture unlock + walk-in to game-select
+- b779a16 -- restore EV crown intro before site load
+
+### Open items / handoffs / queued for next session
+- Migrate the 67MB media from git to Supabase Storage buckets (player-assets / audio-assets / public-content already exist + public) to de-bloat the repo. Force-commit was a stopgap.
+- Multiplayer live 2-player round: needs Rich's hands-on test on the LIVE site (log in with Google, sit, place bet, does it deal?). Code + Google OAuth are all present + enabled in Supabase; the "doesn't deal" I saw was a PREVIEW-domain auth failure (OAuth redirect not whitelisted for *.pages.dev). Confirm Supabase Auth Redirect URLs include https://everlightventures.io/** if it still fails.
+- Walk-in clip reuses casino-entry.mp4 (via CasinoLoader); Rich may want a different file swapped in.
+- "Forced 2 hands": fixed the move path; if it still forces a hand another way, Rich to give exact repro.
+- Split-hand chips during PLAY (chip stacks on the hands during play, not just the betting screen).
+
+### Honest gaps / known limitations
+- Could NOT test audio (voice/music), the loader animations, or the live multiplayer round from the phone (no browser/Playwright). Everything verified at code + clean-build + deployed-byte level; Rich verifies the actual look/sound/feel.
+- Media is force-committed to git (67MB) -- bloats the repo + every CI checkout until the Storage migration.
+- I twice mis-diagnosed from the preview domain (no Google OAuth / multiplayer broken) -- both were preview-vs-prod differences. Lesson burned in: audit the LIVE site, preview != prod for auth + media.
+
+### Operator decisions deferred
+- None outstanding. Rich chose: test-preview-first, then set-up-auto-deploy-and-push-live; both done. Rich said "monetize it" pending the media/audio fixes (now shipped).
+
+---
+
+## [2026-06-08 12:05 PT] Session: Alley Kingz v21 shipped: art auto-route pipeline + deck builder + gritty shop + 
+
+<!-- session_iso=2026-06-08T19:05:48.157416+00:00 | size=4793b -->
+
+# Alley Kingz v21 shipped: art auto-route pipeline + deck builder + gritty shop + match-freeze fix
+
+### Accomplished
+- Built the STANDING RULE machine ("no generic art ever stays"): any new item (shop product, card, crate, anything) auto-routes to Leonardo for custom art. One queue + one daily cron, new items painted first.
+- Consolidated 3 competing art crons (maps + cards + new) into ONE prioritized drainer -- fixed a hidden bug where all 3 raced for the same free Leonardo daily cap (guaranteed daily failures).
+- Verified + shipped the deck builder: 48 -> 106 cards, 10 decks, full Deck Lab UI (collection grid, 11-card editor with live linters, templates, deck codes, level-gated slots). Protected layout/pacing intact (540x900, 45/90/135 stages + NEW PHASE INCOMING telegraph, portrait-only, zero media queries).
+- Verified + shipped the gritty shop re-skin (TV-MA street/Twisted-Metal), real card art, in-depth marketplace, Lucky Draw UNLOCKED + advertised (embarrassing warning removed), backend open-draw server-authoritative + non-cashable/non-NFT (Lane A COD model), Stripe still test-locked.
+- Applied the doctrine live: shop crates rendered a plain glyph -> enqueued + painted 4 custom Leonardo crate arts, wired with glyph fallback.
+- Scrubbed two stale comments that described the reverted v17 landscape split-screen as if it still existed (could trick a future agent into restoring the layout Rich hated).
+- FIXED the match freeze (~1:53): spawnDrone cloned a Spawner card (Pixel Pug) without clearing its ability -> drones spawned drones exponentially -> ~1000 units -> O(n^2) targeting froze the phone. Fix: tokens never fire abilities (isToken guard + abilityCD=Infinity) + hard 140-unit board cap. Verified full 180s match peaks at 45 units (was 858).
+- Deployed v20 then v21 to alley-kingz.pages.dev, verified each on the live edge (deployment-specific URL, not exit code).
+
+### Files created or modified
+- `01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/art/art_factory.py` -- NEW unified art generator (queue + cards manifest + maps, priority-ordered, idempotent, --enqueue mode)
+- `03_AUTOMATION_CORE/01_Scripts/art_factory_cron.sh` -- NEW single daily art cron (15:17 UTC, --limit 12, auto-deploys); replaced the 2 old art crons in crontab
+- `01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/ART_AUTOROUTE_DOCTRINE.md` -- NEW doctrine doc
+- `01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/engine.js` -- match-freeze fix (isToken guard in maybeFireAbility + cap/neutralize in spawnDrone)
+- `01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/index.html` -- scrubbed stale landscape-reflow comments; v20->v21 (deck builder added Deck Lab earlier this session)
+- `01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/shop/shop.js` -- crate art img with glyph fallback (deck/shop agents did the bulk re-skin)
+- `01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/canon.js`, `data/cards.json`, `data/decks.json` -- 106 cards + 10 decks (deck builder agent)
+- `supabase/functions/alley-kingz-shop/index.ts` -- open-draw + top-off-card implemented (shop agent)
+- `01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/assets/shop/chest_*.png` -- 4 painted crate arts
+- `01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/tests/full_match_test.js` -- NEW full-match harness (old one only tested 6s)
+- `_state/ak_art_queue.json` -- the ad-hoc art queue (currently empty; was used to paint crates)
+
+### Doctrines added or changed
+- `feedback_art_autoroute_no_generic` -- no generic/placeholder art ever stays; new items auto-route to Leonardo via the unified queue+cron. Added to MEMORY.md index.
+
+### Commits + pushes
+- None this session -- all changes deployed directly to alley-kingz.pages.dev via cf_pages_direct_upload.py (working tree on branch bj-finish, not committed).
+
+### Open items / handoffs / queued for next session
+- Art cron continues draining ~12/day: 90 card variants + 370 world maps still to paint (auto-ships).
+- Live Stripe + everlightventures.io push stay parked until legal clears (per plan).
+- The 400-map world feature is generated but not yet wired into live match rendering (assets/maps excluded from deploy).
+
+### Honest gaps / known limitations
+- cf_pages_direct_upload.py re-uploaded 67 blobs on BOTH v20 and v21 (check-missing not deduping against prior deployments tightly). Harmless bandwidth waste; worth investigating later.
+- The match-freeze "why now" is inferred (new 106-card decks field more spawners) -- not root-caused to a specific deck change; the fix is robust regardless.
+- Did not commit/push to git -- changes live only on the deployed edge + local working tree.
+
+### Operator decisions deferred
+- Whether to commit the bj-finish working tree to git / open a PR.
+
+---
+
+## [2026-06-08 17:38 PT] Session: MMA Notebook found + Fight Camp OS consolidated (single-source, grappling-enable
+
+<!-- session_iso=2026-06-09T00:38:37.088460+00:00 | size=4298b -->
+
+# MMA Notebook found + Fight Camp OS consolidated (single-source, grappling-enabled, organized)
+
+### Accomplished
+- Located Rich's lost MMA work: **Fight Camp OS** at `05_PERSONAL/02_Training/MMA_Notebook/Fight_Camp_OS/`, served on `http://127.0.0.1:2500/09_Dashboard/` via `serve.sh` (`mma` alias). This chat is now the recurring "MMA Notebook".
+- Ran a 7-agent deep-dive workflow -> wrote `00_System/CONSOLIDATION_MASTER_PLAN_2026-06-08.html` (6 sections + 19-move file plan).
+- Logged Monday 6/8 boxing transcript (Coach Sunny distance-mgmt 3-range + Jules cage seq + fusion): lesson JSON+HTML in `01_Lessons/Phase_04/` + new Arsenal combo "The Bridge". data.js rebuilt, lessons now NEWEST-FIRST.
+- Built 3 shared modules (all node-validated): `trees.js` (canonical 79-node skill data), `fcos_state.js` (one owner of fcos.skills.v1: integer ranks + ranks_progress grind + heal + computed SP/streak/IQ + idempotent learned-floor), `nav.js` (sticky header + 16-route bar + search) injected on 16 sub-pages.
+- Fixed 3 load-bearing bugs WITHOUT removing features: game +0.25 rank corruption (routed via addProgress), skill_tree init-lock race (ensureSeeded), Friday->War Room dead link (warroom reads ?opponent now).
+- DEDUP single-source from trees.js: skill_tree (-48KB), loadout (-12KB, GRAPPLING NOW EQUIPPABLE), friday_spar (grappling scores); warroom + ai_spar got additive merges (grappling recognized, tuned ranges kept).
+- Added 5 wrestling cage nodes (whizzer/pummel/high_c/double_leg/run_pipe) + floored them + bjj underhook/clinch as OWNED; hub teaser updated to show the ground game.
+- Built **The Lab** (`homelab.html`): cross-discipline "mental algebra" mixer (concept-tags 79 techniques, hybrid drills + ideas).
+- Organize pass: MMA_Notebook now = just Fight_Camp_OS + MMA_Paperwork. 9 safe mv + 4 importer-linked .py moved w/ paired path edit + scratch archived + PII gitignored (kept off served root) + empty dirs rmdir'd.
+- Rendered 4 kickboxing combo cards; set hub header to Phase 4 / Day 29.
+- Network doctrine: use 127.0.0.1 never localhost; serve.sh hardened to one EV_BIND.
+
+### Files created or modified
+- `Fight_Camp_OS/09_Dashboard/trees.js` -- NEW canonical 79-node skill dataset
+- `Fight_Camp_OS/09_Dashboard/fcos_state.js` -- NEW state owner + bug fixes + learned-floor
+- `Fight_Camp_OS/09_Dashboard/nav.js` -- NEW shared nav, injected on 16 pages
+- `Fight_Camp_OS/09_Dashboard/homelab.html` -- NEW "The Lab" mixer
+- `Fight_Camp_OS/09_Dashboard/{game,skill_tree,loadout,friday_spar,warroom,ai_spar,index}.html` -- wired/deduped
+- `Fight_Camp_OS/09_Dashboard/data.js` -- newest-first, hub teaser grappling, day 29
+- `Fight_Camp_OS/09_Dashboard/scripts/rebuild_data.py` -- newest-first sort
+- `Fight_Camp_OS/09_Dashboard/serve.sh` -- single EV_BIND (127.0.0.1)
+- `Fight_Camp_OS/01_Lessons/Phase_04/2026-06-08_Day29_DistanceMgmt_CageFusion.{json,html}` -- NEW lesson
+- `Fight_Camp_OS/03_Combos/The_Bridge_Outside_to_Ground.html` + `kickboxing_combos.html` + `index.html` -- NEW combos
+- `Fight_Camp_OS/00_System/CONSOLIDATION_MASTER_PLAN_2026-06-08.html` -- NEW plan
+- `09_Dashboard/scripts/import_historical_notes.py` -- PY_NOTES src_path paired edit
+- Root `.gitignore` -- MMA_Paperwork (PII)
+
+### Doctrines added or changed
+- `feedback_use_127_not_localhost` -- always reference 127.0.0.1, never localhost (Network Binding Doctrine)
+- `project_mma_fight_camp_os` -- updated with full build status (PROGRESS-1/2/3)
+
+### Open items / handoffs / queued for next session
+- Confirm phase/day (set to P4/D29 by calendar assumption -- may be Phase 5)
+- War Room + AI Spar are additive-merged, not 100% single-source: full dedup needs per-node `ranges` added to trees.js
+- Browser visual verification is Rich's (I validate logic in node only)
+- Future: P2 rebuild_data.py to auto-derive skill mastery/streak/iq from logged tags
+
+### Honest gaps / known limitations
+- All validation was node/curl based; no browser render verification possible from phone
+- hub skill teaser (data.js skill_tree) is a curated visual, not a full trees.js derivation
+- streak_days left at 1 (sparse logging; only 2 distinct lesson dates)
+
+### Operator decisions deferred
+- Phase/day numbering (D29 is my assumption)
+- Whether to enrich trees.js with per-node ranges to finish warroom/ai_spar dedup
+
+---
+
+## [2026-06-08 19:11 PT] Session: Alley Kingz v22: overworld journey transition (Spyro/Mario curvy-path-with-check
+
+<!-- session_iso=2026-06-09T02:11:13.011761+00:00 | size=3263b -->
+
+# Alley Kingz v22: overworld journey transition (Spyro/Mario curvy-path-with-checkmarks beat)
+
+### Accomplished
+- Reworked the district-to-district transition per operator feel-note: it was a fast (1.05s) straight vertical slide with a flat "LEVEL PASSED" banner -- no round-complete payoff, always up/down.
+- Slowed the whole transition window 3.0s -> 5.0s so it breathes; combat stays frozen under it (TRANSITION_FREEZE 1.15 -> 3.7); board reveal-pan slowed 1.05s -> 2.4s.
+- Built a NEW overworld JOURNEY interstitial (drawConvoyJourney): vanta "map screen" with a winding road through the 4 district medallions that zig-zags LEFT and RIGHT (not just up/down); green CHECKMARK stamps onto the just-cleared district; a glowing $BCARDD gold-paw marker hops along the curve to the next node with a fading footstep trail; destination medallion pulses; text beat "DISTRICT CLEARED -> good job, on to the next -> ENTERING [district]"; fades out and the map re-engages.
+- Verified clean: full-match harness ran all 3 transitions (peak 57 units, no throw); live edge confirmed v=22, drawConvoyJourney + JOURNEY_NODES present, 5s/2.4s tunables live, prior freeze-fix (isToken) + 106 cards intact.
+- Deployed v22 to alley-kingz.pages.dev (verified deployment-specific URL https://aecd63c1.alley-kingz.pages.dev).
+
+### Files created or modified
+- `01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/engine.js` -- TRANSITION_DUR 3->5, TRANSITION_FREEZE 1.15->3.7, pan dur 1.05->2.4; startTransition stores from/to; advanceSection drops the LEVEL PASSED phaseAlert (journey overlay owns the text)
+- `01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/index.html` -- NEW drawConvoyJourney() + call site after drawTransitionFlash; JOURNEY_NODES/_ease/_bezier helpers; ?v=21 -> ?v=22
+
+### Commits + pushes
+- None -- deployed directly to alley-kingz.pages.dev via cf_pages_direct_upload.py (working tree on branch bj-finish, not committed).
+
+### Open items / handoffs / queued for next session
+- Awaiting Rich's feel feedback to tune: transition duration (5s), curve amount (bow 0.28), celebration size ("good job" beat), and the marker (currently a clean gold paw -- could route the real $BCARDD dog art through the art pipeline to walk the path).
+- Art cron still draining ~12/day: remaining card variants + 370 world maps (auto-ships).
+- Live Stripe + everlightventures.io push still parked until legal clears.
+
+### Honest gaps / known limitations
+- The journey is verified to not THROW (headless node harness, canvas is a no-op proxy) but visual correctness is unverified by machine -- needs Rich's eyes on a real device.
+- v22 first deploy's output was swallowed by a `| tail` pipe under backgrounding (0-byte capture); redeployed cleanly to _logs/ak_v22_deploy.log to capture the URL. Consider always logging deploys to a file, not piping.
+- cf_pages_direct_upload.py still re-uploads a large blob set each deploy (85/160 this time) -- check-missing not deduping tightly against prior deployments. Harmless, worth a look later.
+
+### Operator decisions deferred
+- Whether to commit the bj-finish working tree to git / open a PR (multiple deployed-but-uncommitted changes accumulating: v20 art-autoroute + shop + deck builder, v21 freeze fix, v22 journey).
+
+---
+
+## [2026-06-08 21:50 PT] Session: B-CARDD BET blackjack: cinematic + real leaderboard + Pro Coaching + Golden Hand
+
+<!-- session_iso=2026-06-09T04:50:20.206810+00:00 | size=7489b -->
+
+# B-CARDD BET blackjack: cinematic + real leaderboard + Pro Coaching + Golden Hand rebuild shipped to owner-gated beta
+
+### Accomplished
+- **B-Card reveal cinematic** built: 1-in-a-million hit now plays a real 3D card flip + gold ray burst + jackpot sting, then "THE B-CARDD BET" slam, then the TAKE/RIDE panel rises. Fixed a live 404 (overlay pointed at dead bacardi_live.mp4 -> official_bdl.mp4).
+- **Leaderboard reality check**: the "Hall of Legends" was ALREADY live with real players (XX_ACE_OF_DIAMONDS_X 8.88M = Rich's own dev account, OpusV2, Melina Tapiz...). Only real gap was jackpots_won stuck at 0. Added server-side jackpots_won increment + a balance-decoupled stats_only single-player feed (no wallet drift).
+- **Pro Coaching** premium AI dealer built + COMPLIANT: paid in GOLD COINS only (never SC -> protects sweepstakes safe harbor), free static hints stay free for all, server-metered (Gold = max(15, 3x token cost)) + a 250-Gold/24h Coaching Pass. Server-authoritative (un-spoofable). Owner-gated for test (COACHING_PUBLIC=false).
+- **Backend DEPLOYED** with Rich's valid Supabase token: both migrations applied + blackjack-api edge fn deployed (dealer-ai, buy-coaching-pass, jackpots_won, stats_only). Smoke-tested dealer-ai live -> real AI reply, 0 Gold for owner (dev-free). PERPLEXITY_API_KEY confirmed present.
+- **Golden Hand (RIDE IT) rebuilt** per locked economy: auto-arms next hand with a bet = QTD avg bet (no re-betting); 200x now rides like a real bet (double->400x, split->each hand carries it), per-hand cap 888 (x2 doubled) + 1,776 whole-event ceiling; pays on EVERY winning settle path; doubled-bust clears the flag; celebration fixed (old check read goldenHandActive AFTER it was cleared at settle).
+- **Landscape UI**: social/emoji bar + fullscreen moved to a fixed TOP-RIGHT cluster (was pinned to the seat, buried under the bets in landscape).
+- **Two regression fixes**: $BCARDD dealer video restored (map keyed 'bacardi' but the dealer id is 'bcardd' post-rename -> silent SVG fallback); Natural 21 overlay un-frozen (dismiss timer listed onDone in deps -> reset itself every render -> never fired).
+- **Beta diagnostics**: cadence 50->12->6 cards; case-insensitive owner-email match; temporary on-table BetaBadge (VIP? / OWNER-vs-GUEST? / cards+countdown) so we can SEE why the B-Card wasn't firing for Rich after 5 hands.
+- **UX tweaks**: TAKE no longer flashes the 888 cap (RIDE keeps "up to ..."); 777 side-bet spot -> crowned-B logo.
+
+### Files created or modified
+- `06_DEVELOPMENT/vantaris/src/components/blackjack/BCardOverlay.tsx` -- reveal cinematic + TAKE cap text removed
+- `06_DEVELOPMENT/vantaris/src/components/blackjack/DealerStage.tsx` -- dealer video key bacardi->bcardd
+- `06_DEVELOPMENT/vantaris/src/components/blackjack/Natural21.tsx` -- unfreeze dismiss timer (onDone ref)
+- `06_DEVELOPMENT/vantaris/src/components/blackjack/DealerChat.tsx` -- Pro Coaching premium AI (owner-gated)
+- `06_DEVELOPMENT/vantaris/src/components/blackjack/SocialBar.tsx` -- fixed top-right cluster + fullscreen
+- `06_DEVELOPMENT/vantaris/src/components/blackjack/BettingLayout.tsx` -- 777 -> crowned-B
+- `06_DEVELOPMENT/vantaris/src/lib/blackjack-engine.ts` -- goldenHandHandBonus + GOLDEN_EVENT_CAP, beta cadence 6, owner helpers
+- `06_DEVELOPMENT/vantaris/src/lib/blackjack-store.ts` -- Golden Hand auto-arm + per-hand scaling settle + resets
+- `06_DEVELOPMENT/vantaris/src/lib/supabase.ts` -- recordLeaderboardHand (stats_only, fail-safe)
+- `06_DEVELOPMENT/vantaris/src/app/play/blackjack/page.tsx` -- SP feed, celebration fix, BetaBadge, header fullscreen removed
+- `supabase/functions/blackjack-api/index.ts` -- dealer-ai + buy-coaching-pass + jackpots_won + stats_only
+- `supabase/migrations/20260607_blackjack_leaderboard.sql` -- reproducible leaderboard table (applied)
+- `supabase/migrations/20260607_coaching_pass.sql` -- coaching_pass_until column (applied)
+- `03_AUTOMATION_CORE/01_Scripts/deploy/deploy_blackjack_backend.sh` -- one-shot backend deploy
+- `01_BUSINESSES/Everlight_Ventures/Everlight_Gaming/Blackjack/BCARDD_BET_HANDOFF.md` -- session log + payment rails
+- `01_BUSINESSES/Everlight_Ventures/Everlight_Gaming/Blackjack/GOLDEN_HAND_ECONOMY.md` -- exposure model + locked mechanics
+
+### Doctrines added or changed
+- Pro Coaching = GOLD COINS not Sweeps Coins (charging SC for a feature breaks the sweepstakes safe harbor)
+- Golden Hand economy: 200x rides/scales but hard-capped at 1,776 (two lucky-8s); ~10x house-edge cushion at worst case; no Gold-price change
+- Payment rails (decided 2026-06-08): Stripe for Gold purchases (Stripe only bans the SC redemption, not the for-fun Gold sale); Aeropay for SC cash-out (Phase 2); optional USDC-on-Solana crypto cash-out later (closes the $BCARDD loop, reuses existing crypto infra) -- all gated on LLC + legal
+
+### Commits + pushes (all on origin/bj-finish)
+- `1982df8` B-Card reveal cinematic + official_bdl fix
+- `fed2704` real server-authoritative leaderboard (migration + jackpots_won + stats_only + frontend feed)
+- `851f769` gate SP leaderboard feed OFF until edge stats_only ships
+- `5cb7c16` beta cadence 50->12
+- `26a662a` Pro Coaching (premium AI dealer, Gold-funded)
+- `6c029f5` one-shot backend deploy script
+- `eb2371b` activate leaderboard feed + Pro Coaching (owner-gated)
+- `bb3317c` Golden Hand economy doc
+- `6b9244b` rebuild RIDE/Golden Hand + landscape control cluster
+- `c82f388` restore $BCARDD dealer video + unfreeze Natural 21
+- `ef150bd` beta cadence 12->6 + case-insensitive owner + on-table beta readout
+- `1bef20b` TAKE hides 888 cap + 777 -> crowned-B
+- `d033b67` payment-rail decision recorded
+- (plus several docs commits: 1994033, eba398e, a805ce3, 20805ca, 51725a8)
+- BACKEND: migrations applied + blackjack-api edge fn deployed via deploy_blackjack_backend.sh (not a git commit)
+
+### Open items / handoffs / queued for next session
+- **THE active blocker:** Rich never reported the BetaBadge readout -- B-Card still hasn't fired for him after 5 hands. Almost certainly he's GUEST (not signed in) or not on the VIP table. The badge (top-left, VIP table) will say which. Resolve this first next session.
+- **Public launch (pending Rich's approval after he tests):** flip COACHING_PUBLIC=true + BCARD_BETA_MODE=false + remove BCARD_BETA_DEBUG badge + drop cadence back / restore real odds.
+- Crypto (USDC-Solana) cash-out rail: OFFERED to scaffold privately, NOT started (Phase 2, legal-gated).
+- Rich to verify the full TAKE/RIDE/Golden-Hand/+888 flow once he triggers a B-Card.
+
+### Honest gaps / known limitations
+- Golden Hand payout + celebration NOT verified end-to-end live -- Rich hasn't won one yet (lost his last round). Logic + build verified, real-play unconfirmed.
+- Landscape top-right cluster + the 777->B logo + TAKE-cap change not visually verified by me (built blind; Rich to eyeball).
+- The B-Card non-firing root cause is still UNCONFIRMED (badge deployed to diagnose, awaiting Rich's read).
+- "Attempted import error" build warnings are pre-existing non-fatal Next.js 15 barrel/'use client' noise (build 1 shipped 14 of them working) -- not real failures.
+
+### Operator decisions deferred
+- Public launch go/no-go (after Rich tests the beta).
+- Whether to scaffold the crypto cash-out rail now (private prep) vs wait for Phase 2.
+- **Token hygiene:** the Supabase Management token (sbp_...) was pasted into the chat transcript. Rich should rotate it (delete from Supabase tokens page + regenerate) or move to Proton Pass.
+
+---
+
+## [2026-06-08 21:59 PT] Session: Alley Kingz LAUNCHED live on alleykingz.online + brand/entity separation audit +
+
+<!-- session_iso=2026-06-09T04:59:17.866802+00:00 | size=4766b -->
+
+# Alley Kingz LAUNCHED live on alleykingz.online + brand/entity separation audit + The Crown moved to e5
+
+### Accomplished
+- **Brand/entity separation audit** (Content Director + Theo GC + Architect): everlightventures.io was running 3 legal regimes on one domain/DB/Stripe (B2B + sweepstakes casino + crypto). Verdict = house of brands: ONE repo, separate domains, TWO Supabase projects, separate LLCs for gambling+crypto. NOT separate repos.
+- **Root-caused dead phone crons:** `crond`/`cron` is NOT installed on the phone, so `start_hive.sh:42` fails silently and ALL ~19 crontab jobs are dead. Only `nohup &` watchdog daemon-loops survive. Operator's "I don't think any crons run" was correct.
+- **Built The Crown** (AK daily art daemon) -- then caught + fixed a silent-failure cascade it exposed: art_factory wrote 0-byte stub files on API failure (truncate-before-call), caching failures as "done"; deleted 442 stubs, added token-exhaustion abort + write-only-on-real-bytes.
+- **Migrated The Crown to e5** (always-on, REAL cron daemon): seeded pipeline+keys to ~/ak_crown, runner + cron `15 0,12 * * *`, made art_factory ROOT env-overridable (AK_ROOT). VERIFIED it runs on e5 (paths resolve, fails safe on spent tokens, 0 stubs, skips deploy). Phone out of the daily-art loop.
+- **Committed + pushed** all deployed-but-uncommitted AK work (v20-v22 game, Crown, economy backend, docs) -- it had lived only in the phone working tree.
+- **Legal (Imani):** Supercell/Clash Royale IP audit -- mechanics aren't copyrightable, risk is art/names/trade-dress. Pay-to-play+cosmetics = clean (no gambling). P0 checklist + full legal doc DRAFTS (ToS/EULA, Privacy, Refunds, Odds, age-gate, disclaimer).
+- **Growth (Aisha):** monetization stack -- Founder packs + rewarded video + cosmetics + daily-streak; Day Pass \$1.99/24h -> Arcade Mode; AdSense on content pages only; \$1k/\$10k/\$100k funnel math.
+- **LAUNCHED alleykingz.online LIVE:** created CF zone (token Rich provided), attached apex+www to alley-kingz Pages, operator switched Namecheap nameservers to robin/wilson.ns.cloudflare.com, created CNAME records -> alley-kingz.pages.dev, certs provisioned. Apex serves the real game (HTTP 200, title "ALLEY KINGZ -- \$BCARDD Arcade", 147KB).
+
+### Files created or modified
+- `03_AUTOMATION_CORE/01_Scripts/ak_crown_daemon.sh` -- NEW phone daily-art daemon (singleton-guarded loop)
+- `01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/art/art_factory.py` -- fixed 0-byte-stub-on-failure + token-exhaustion abort + AK_ROOT env override
+- `03_AUTOMATION_CORE/01_Scripts/hive_inner_startup.sh` -- wired Crown into boot
+- `01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/LAUNCH_READINESS_alleykingz_online_2026-06-08.md` -- NEW
+- `01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/legal/LEGAL_PACK_DRAFTS_2026-06-08.md` -- NEW (ToS/Privacy/Refunds/Odds/age-gate/disclaimer drafts)
+- `01_BUSINESSES/Everlight_Ventures/Everlight_Foundations/BRAND_AND_ENTITY_SEPARATION_ROADMAP_2026-06-08.md` -- NEW
+- `03_AUTOMATION_CORE/03_Credentials/.env` -- added CF_ZONE_TOKEN (gitignored)
+- **e5 (~/ak_crown/):** run_crown.sh, .env (6 keys), ecosystem mirror, cron installed
+
+### Doctrines added or changed
+- `reference_phone_crond_not_installed` -- crond absent; phone crontab jobs all dead; use daemon loops / e5
+- `project_brand_entity_separation_roadmap` -- house-of-brands launch architecture
+- `feedback_chat_private_save_secrets_quietly` -- chat is private; save tokens to .env quietly, stop flagging secrets-in-chat
+
+### Commits + pushes
+- `e0fd8c7` on `bj-finish` -- feat(alley-kingz): commit deployed game (v20-v22) + Crown art daemon + launch prep (pushed to origin)
+
+### Open items / handoffs / queued for next session
+- `www.alleykingz.online` SSL cert finishing propagation (apex already live)
+- AdSense content pages (home/news/leaderboard) -- OFFERED, awaiting Rich's go
+- Cloudflare CF_ZONE_TOKEN is `cfut_...` (valid, account-scoped) in .env
+- Registrar = Namecheap (nameservers robin/wilson.ns.cloudflare.com)
+- e5 first REAL paint fires at next Leonardo UTC reset (cron 00:15/12:15 UTC)
+
+### Honest gaps / known limitations
+- Stripe is in TEST mode (fail-closed) -- no real charges yet
+- Supabase live-deploy of migrations/edge-fns NOT verified (MCP unauthorized; SUPABASE_ACCESS_TOKEN is in .env, unused this session)
+- Art only 34/106 cards + 30/400 maps painted; fills in over ~1-2 weeks via e5
+- Blinko log of earlier separation session never landed (e5 tailnet unreachable then)
+
+### Operator decisions deferred
+- AdSense: build the content pages? (recommended next)
+- When to flip Stripe to live (gated behind any legal he wants -- he said skip LLC/ToS for now)
+- Eventual: AK its own Supabase project + own LLC (separation roadmap phase 2)
+
+---
+
+## [2026-06-09 17:03 PT] Session: Same-day car-service route plan: Vacaville -> Citrus Heights brakes + South Sac 
+
+<!-- session_iso=2026-06-10T00:03:22.003723+00:00 | size=2778b -->
+
+# Same-day car-service route plan: Vacaville -> Citrus Heights brakes + South Sac oil change (Friday June 12)
+
+### Accomplished
+- Built a full same-day action plan for Rich to get TWO car services done in one trip from Vacaville: oil change (South Sac) + brake pads (Citrus Heights).
+- Verified both shops via web search: Brake Masters #220, 8000 Greenback Ln, Citrus Heights, (916) 723-8000, Mon-Sat 7:30a-5:30p, free inspection + lifetime pad warranty; Auto Repair Garage, 6060 Elder Creek Rd, Sacramento 95824, (916) 827-9500, Mon-Sat ~9a-5p (open time disputed 9 vs 10 -- told him to confirm).
+- Mapped geography: triangle across Sac metro -- Vacaville WEST (~33mi to Sac), Elder Creek SOUTH (~37mi/40min), Citrus Heights NORTHEAST (~49mi/53min); shops ~17mi/25-30min apart; loop ~100-110mi either order, so order is decided by TIMING not distance.
+- Routing logic: brakes FIRST (opens 7:30 vs 9:00, longer + rotor-uncertainty) anchors the day; oil change second.
+- Day locked to Friday June 12 (Rich's pick). Validated it works: morning plan + WESTBOUND home dodges the Friday eastbound Tahoe getaway crush; only adjustment = book first slot (Friday pre-weekend shop rush).
+- Delivered: chronological timeline (depart 6:30a -> home ~1:15p), gas budget ($20-28, ~4gal, HR-V ~28mpg; cheapest stations named), time budget (~5-6.5hr), Waze single-stop instructions, "while you wait" spots (Rusch Park / Sunrise MarketPlace by Brake Masters), and two word-for-word phone scripts dated for Friday.
+- Assumed vehicle = 2018 Honda HR-V (carried from Rich's pasted Perplexity answer); oil spec 0W-20 full synthetic.
+
+### Open items / handoffs / queued for next session
+- Rich to CALL both shops (Brake Masters first for the first Friday slot, then Auto Repair Garage for ~11:00-11:30 oil) and report back the brake appointment time.
+- On that callback: re-issue the minute-by-minute timeline with the real appt time + exact Vacaville departure minute to catch the first slot / dodge the Yolo Causeway.
+- Offered to pin specific breakfast/coffee spots next to Brake Masters for the brake-job wait -- pending his yes.
+
+### Honest gaps / known limitations
+- Gas prices are volatile and sources disagreed (Costco Vacaville ~$5.30-5.45; Citrus Heights Towne Mart ~$4.25) -- told him to check GasBuddy day-of.
+- Oil shop open time unconfirmed (listings show 9 vs 10) -- flagged for him to verify on the call.
+- Vehicle (2018 Honda HR-V) and whether appointments already exist were assumed, not confirmed by Rich.
+- No workspace files changed; this was a personal-logistics research/planning session only.
+
+### Operator decisions deferred
+- Confirm the car is a 2018 Honda HR-V (changes oil spec + brake parts).
+- Whether he wants the curated coffee/breakfast spot list near Brake Masters.
+
+---
+
+## [2026-06-09 18:37 PT] Session: $BCARDD coin LAUNCHED + locked on-chain; Alley Kingz v25 live + v26 lobby built 
+
+<!-- session_iso=2026-06-10T01:37:21.634459+00:00 | size=6916b -->
+
+# $BCARDD coin LAUNCHED + locked on-chain; Alley Kingz v25 live + v26 lobby built (NOT deployed); Stripe scaffold ready; fresh-eyes audit done
+
+### Accomplished
+- **$BCARDD IS LIVE ON PUMP.FUN.** CA `6mjokwXx7NNzo5ocvLDFGmbsGAs7rYHZdVJhKYkapump`, 1B supply verified. Rich holds 93,514,651 (~9.35%) in wallet `DQawnukGn4Bu5ZCWFb3e31NNisfj5sDLQ66FGRy9J6un` (~0.169 SOL gas left). **90.45M (96.7% of bag) LOCKED 6 months on Streamflow** at `3d4gwe8w1v5CC3Z34PQfxR229vRZrrTofo1VPMdGRnAY` (verified on-chain: Streamflow program owner, wallet dropped 93.5M -> 3.06M). ~3.06M liquid.
+- Launch content: X 5-tweet launch thread (CA + lock proof filled), viral tweet bank (~35, Wendy's-roast + absurd voice, dealer/casino SOFT-PEDALED per operator, no competitor names), Telegram+Discord setup docs, hype/GTM plan, 6-month withdrawal plan, profit ladder + tax strategy.
+- Entity truth established: Everlight Logistics LLC = CA #202358210506, formed **7/14/2023** (2023 first-year $800 waived), 2024 paid, owes ~$1,600 (2025+2026) + small penalties. **Operator decision: do NOT reinstate; dissolve later via CPA; operate sole prop DBA "Everlight Ventures" now; form WY holding co + subsidiaries only when income is real.**
+- Alley Kingz: **v25 deployed + verified live** on alleykingz.online (full-bleed arena, bigger units baseR 0.64, the earlier fork deploy had silently failed). Gem packs wired to real art w/ glyph fallback (disk only). Art cron now ALSO auto-deploys to CF Pages (gap fixed: painted art used to never reach players).
+- Workflow `ak-platform-upgrade` (wf_4157cc45-0f3) COMPLETED, all 5 agents:
+  1. **Lobby/home hub built in index.html (v26)**: PLAY NOW + 2x2 mode tiles (Deck Lab/Shop/Lucky Draw/World Map SOON), player chip (ak_name/level/trophies, tap-rename), DAILY DROP streak (localStorage + toast), 4-item news ticker, X/TG placeholder links + "powered by $BCARDD" badge, lobby_hero.png slot w/ graceful fallback. QA verify agent: **PASS all checks** (both harnesses, em-dash 0, v26, protected constants intact).
+  2. **Stripe x Supabase scaffold**: `supabase/migrations/20260610_ak_shop_products.sql` (14 products, idempotent, matches ak_shop_products), `ak_stripe_seed_products.py` (fail-closed: refuses sk_live, tested), `supabase/AK_SHOP_WIRING.md`. KEY FINDING: edge fn create-checkout PRICE_MAP has NO ak-gems-* slugs; seeder's _state JSON supplies the 5 price ids.
+  3. **Art coverage**: queue valid, 11 entries, ZERO uncovered SKUs (4 crates painted, 5 gem packs + lobby_hero + ui_daily_drop queued; paints ~15:17 UTC cron, now auto-ships).
+  4. **Fresh-eyes audit**: TOP 12 findings, #1 CRITICAL spans index.html:2360-2402 + shop/shop.js:744-751. FULL TEXT preserved at `ecosystem/WORKFLOW_RESULT_2026-06-09_platform_upgrade.txt`.
+
+### Files created or modified
+- `01_BUSINESSES/BCARDI_Crypto/00_Core/BCARDD_TONIGHT.md` -- master launch guide (executed tonight)
+- `01_BUSINESSES/BCARDI_Crypto/00_Core/BCARDD_6MO_WITHDRAWAL_PLAN.md` + `BCARDD_PROFIT_TAX_STRATEGY.md` (incl Part 5: one-LLC-vs-many, CA $800 reality, NV-gambling myth) + `BCARDD_LEGAL_DECOUPLE_MEMO_2026-06-08.md` + `BCARDD_LAUNCH_DAY_RUNBOOK_2026-06-08.md`
+- `01_BUSINESSES/BCARDI_Crypto/02_Community/BCARDD_LAUNCH_CONTENT.md` (CA+lock filled) + `BCARDD_VIRAL_TWEETS.md` + `BCARDD_TELEGRAM_DISCORD_SETUP.md` + `BCARDD_HYPE_PLAN_2026-06-09.md`
+- `Alley_Kingz/ecosystem/game/index.html` -- v26 LOBBY (workflow) -- **on disk, NOT deployed**
+- `Alley_Kingz/ecosystem/game/shop/shop.js` -- gem-art wiring -- **on disk, NOT deployed**
+- `supabase/migrations/20260610_ak_shop_products.sql`, `03_AUTOMATION_CORE/01_Scripts/ak_stripe_seed_products.py`, `supabase/AK_SHOP_WIRING.md` -- not applied/deployed
+- `03_AUTOMATION_CORE/01_Scripts/art_factory_cron.sh` -- now CF-Pages-deploys painted art
+- `Alley_Kingz/ecosystem/ALLEY_KINGZ_PLATFORM_GAP_AND_ROADMAP.md` + `WORKFLOW_RESULT_2026-06-09_platform_upgrade.txt`
+- Memory: `project_bcardi_meme_coin.md` updated (mint-readiness, Alley-Kingz-only decoupling)
+
+### Commits + pushes
+- None -- all via CF Pages direct upload; working tree on `bj-finish` uncommitted (now spans v20-v26 + coin docs; commit soon).
+
+### Open items / handoffs / queued for next session
+1. **DEPLOY v26 NOW** (lobby + gem-art shop wiring are verified on disk but NOT live). `cf_pages_direct_upload.py --dir .../game --project alley-kingz --branch main --exclude "assets/maps"` then verify v26 on the live edge.
+2. **Operator reports "map angle/resize didn't change on the site."** v25 IS verified live (engine.js?v=25 both domains). Two likely causes: (a) his browser cache -- give him a deployment-specific URL; (b) he expects the CAMERA TILT, which was deliberately deferred = `ARENA_CAMERA_TILT_BRIEF_PHASE2.md` (Path B1 rotateX recommended). Clarify, then likely BUILD PHASE 2 TILT next.
+3. **STRIPE LIVE = GREENLIT BY OPERATOR** ("this site is live, we're building live now"; legal = advisory only per operator). Blocked this session: credential-store scan was permission-denied by the auto-mode classifier. Next: Rich provides Stripe keys (or adds a Bash permission rule), then: apply 20260607+20260610 migrations, run seeder, add ak-gems-* price ids to create-checkout PRICE_MAP, deploy edge fn w/ AK_SHOP_TEST_MODE=false + live key, test a real $4.99 checkout. Casino stays OFF this Stripe (separate product, no coin money-rail).
+4. **Triage the fresh-eyes audit top-12** (full text in WORKFLOW_RESULT file) -- fix the CRITICAL first.
+5. Art: gem packs + lobby hero + daily drop paint at next cron (~15:17 UTC) and now auto-deploy. 24 card variants + 370 maps still draining ~12/day.
+6. $BCARDD socials: Rich creates X account (handle @bcardd/@bcarddcoin) + Telegram/Discord per setup docs; then X developer app -> 4 OAuth keys -> arm `x_autopilot.py` on e5 (NO X creds exist anywhere in the system; confirmed). Post the launch thread + pin lock proof.
+7. "Be more specific" (operator's last msg): the dense workflow summary needs a plain-English walkthrough next session -- start with the preserved WORKFLOW_RESULT file.
+
+### Honest gaps / known limitations
+- v26 lobby verified by harness only; not deployed, not eyeballed by the operator.
+- Gem/lobby art still placeholder until tomorrow's cron paints it.
+- Live-edge "didn't change" report unresolved (cache vs expectation) -- needs the deployment-URL test with Rich.
+- Streamflow lock verified on-chain (program owner + balance delta) but the lock's exact unlock DATE was not independently read from contract data -- Rich set 6 months in the UI; verify the date on the Streamflow dashboard link.
+- Phone deploys remain flaky (one v25 attempt silently swallowed earlier; always verify the live edge).
+
+### Operator decisions deferred
+- Commit/push the bj-finish working tree (large uncommitted span).
+- Dissolve Everlight Logistics timing + WY holding-co formation (when income lands).
+- Phase 2 camera tilt go/no-go (B1 CSS rotateX vs B2 full warp).
+
+---

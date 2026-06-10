@@ -1,0 +1,25 @@
+{
+  "doc_type": "Purchase and Sale Agreement (TN)",
+  "buyer": "Everlight Ventures, LLC (with right to assign)",
+  "seller": "CARNEGIE CHURCH OF GOD IN CHRIST",
+  "property_address": "1577  MCMILLAN ST",
+  "parcel_id": "034026  00014",
+  "purchase_price_usd": -1800,
+  "earnest_money_usd": 100,
+  "emd_holder": "Mid-South Title Company",
+  "closing_date_target": "2026-05-28",
+  "inspection_period_days": 7,
+  "financing_contingency": "NONE -- cash purchase",
+  "title_contingency": "Buyer's option, marketable title required",
+  "occupancy_at_closing": "Vacant unless seller and buyer agree otherwise in writing",
+  "assignment_clause": "Buyer may assign this contract to any third party without seller's consent, provided assignee assumes all buyer obligations.",
+  "tn_sb909_disclosure": {
+    "doc_type": "TN SB 909 Wholesale Disclosure",
+    "statute": "T.C.A. Title 66, Chapter 35 (effective 2024-07-01)",
+    "disclosure_text": "Pursuant to Tennessee Senate Bill 909 (2024), Buyer (Everlight Ventures, LLC) discloses to Seller that Buyer may assign this contract to a third-party purchaser for an assignment fee. Buyer is not a licensed Tennessee real estate broker and is not representing Seller in this transaction. Seller has the right to consult independent legal counsel before signing.",
+    "assignment_fee_disclosed_usd": 5000,
+    "rescission_period_days": 5
+  },
+  "agent": "Hammer + Marquise",
+  "narration": "PSA prefilled. Cash $$-1800, EMD $100, 21-day close, 7-day inspection. TN SB 909 disclosure attached -- assignment fee disclosed at $5000. Mid-South Title holds EMD. Once seller signs, EMD wires same day."
+}

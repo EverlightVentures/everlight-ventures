@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+# audit_log_cron.sh -- hourly push of the cryptographically chained audit
+# envelopes to a private GitHub repo (everlight-audit-log).
+#
+# HIVE_GOVERNANCE_V2.md Section 2.1 + Section 4 doctrine.
+# Cron line: 5 * * * * /AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/audit_log_cron.sh \
+#                       >> /AA_MY_DRIVE/_logs/audit_log_cron.log 2>&1
+#
+# Idempotent: cron firing twice in the same minute is a no-op (lockfile guard).
+# On push failure: 3 retries with exponential backoff (5s, 25s, 125s), then
+# Slack alert to #compliance via the branded_slack module.
+
+set -uo pipefail
+
+# ── Configuration (override via env if needed) ─────────────────────
+AUDIT_SRC="${AUDIT_LOG_ROOT:-/AA_MY_DRIVE/_audit}"
+AUDIT_REPO_DIR="${AUDIT_REPO_DIR:-/tmp/everlight-audit-log}"
+AUDIT_REPO_URL="${AUDIT_REPO_URL:-git@github.com:EverlightVentures/everlight-audit-log.git}"
+LOCKFILE="${AUDIT_CRON_LOCKFILE:-/tmp/audit_log_cron.lock}"
+LOG_DIR="/AA_MY_DRIVE/_logs"
+COMPRESS_AGE_SECONDS="${AUDIT_COMPRESS_AGE:-3600}"  # 1 hour
+TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+mkdir -p "$LOG_DIR"
+
+# ── Lockfile guard (idempotency) ───────────────────────────────────
+# Use noclobber to avoid a TOCTOU race between two cron firings.
+if ! ( set -o noclobber; echo "$$" > "$LOCKFILE" ) 2>/dev/null; then
+    pid_in_lock="$(cat "$LOCKFILE" 2>/dev/null || echo unknown)"
+    if [[ -n "$pid_in_lock" && "$pid_in_lock" != "unknown" ]] && kill -0 "$pid_in_lock" 2>/dev/null; then
+        echo "[$TS] another audit_log_cron pid=$pid_in_lock is running -- exiting" >&2
+        exit 0
+    fi
+    # Stale lock -- claim it
+    echo "$$" > "$LOCKFILE"
+fi
+trap 'rm -f "$LOCKFILE"' EXIT
+
+# ── Sanity ─────────────────────────────────────────────────────────
+if [[ ! -d "$AUDIT_SRC" ]]; then
+    echo "[$TS] audit src $AUDIT_SRC missing -- nothing to push (likely no envelopes yet)" >&2
+    exit 0
+fi
+
+# ── Compression: gzip envelopes older than 1h, except today's dirs ─
+# Find .json files older than COMPRESS_AGE_SECONDS in date dirs older than today.
+TODAY="$(date -u +%Y-%m-%d)"
+if command -v find >/dev/null 2>&1; then
+    # Find top-level date dirs not equal to today, gzip their .json files
+    while IFS= read -r -d '' f; do
+        # Skip already-compressed files
+        [[ "$f" == *.gz ]] && continue
+        if gzip -q "$f" 2>/dev/null; then
+            : # ok
+        fi
+    done < <(find "$AUDIT_SRC" -type f -name '*.json' \
+        -not -path "*/_index/*" \
+        -not -path "*/$TODAY/*" \
+        -mmin +60 -print0 2>/dev/null)
+fi
+
+# ── Repo bootstrap ─────────────────────────────────────────────────
+if [[ ! -d "$AUDIT_REPO_DIR/.git" ]]; then
+    echo "[$TS] audit repo not found at $AUDIT_REPO_DIR -- cloning"
+    if ! git clone --depth 1 "$AUDIT_REPO_URL" "$AUDIT_REPO_DIR" 2>&1; then
+        echo "[$TS] ERROR: initial clone failed -- check $AUDIT_REPO_URL access" >&2
+        exit 1
+    fi
+fi
+
+# ── Rsync (idempotent) ─────────────────────────────────────────────
+if ! command -v rsync >/dev/null 2>&1; then
+    # Fallback: cp -ru. Slower but always available.
+    cp -ru "$AUDIT_SRC/." "$AUDIT_REPO_DIR/" 2>/dev/null || {
+        echo "[$TS] ERROR: cp -ru fallback failed" >&2
+        exit 1
+    }
+else
+    rsync -a --delete-after \
+        --exclude='_index/' \
+        --exclude='.write_probe' \
+        "$AUDIT_SRC/" "$AUDIT_REPO_DIR/" || {
+        echo "[$TS] ERROR: rsync failed" >&2
+        exit 1
+    }
+fi
+
+# ── Commit + push (retry up to 3x with backoff) ────────────────────
+cd "$AUDIT_REPO_DIR" || exit 1
+
+git add . 2>/dev/null || true
+
+# Skip empty commits (cron can fire on a quiet hour)
+if git diff --cached --quiet 2>/dev/null; then
+    echo "[$TS] no new envelopes since last push -- exiting clean"
+    exit 0
+fi
+
+COMMIT_MSG="audit:hourly:$TS"
+if ! git commit -m "$COMMIT_MSG" 2>&1; then
+    echo "[$TS] WARNING: commit failed (possibly empty after add)" >&2
+    exit 0
+fi
+
+push_ok=0
+delays=(5 25 125)
+for attempt in 1 2 3; do
+    if git push origin main 2>&1; then
+        push_ok=1
+        echo "[$TS] push OK on attempt $attempt"
+        break
+    fi
+    delay="${delays[$((attempt-1))]}"
+    echo "[$TS] push failed on attempt $attempt -- sleeping ${delay}s before retry" >&2
+    sleep "$delay"
+done
+
+if [[ "$push_ok" -ne 1 ]]; then
+    # Slack via the branded_slack module (defensive: best-effort)
+    SLACK_PY="$(cat <<'PYEOF'
+import sys
+for p in (
+    "/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools",
+    "/mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/content_tools",
+    "/home/opc/content_tools",
+):
+    if p not in sys.path:
+        sys.path.insert(0, p)
+try:
+    from branded_slack import post_branded_alert
+    post_branded_alert(
+        channel="#compliance",
+        title="AUDIT LOG PUSH FAILED",
+        summary=("Audit-log push to GitHub failed after 3 retries. "
+                 "The cryptographically chained audit trail is local-only "
+                 "until this resolves. Manual investigation required."),
+        severity="high",
+        agent_name="Audit Log Cron",
+        agent_title="Hourly Push",
+    )
+except Exception as e:
+    print(f"slack alert also failed: {e}", file=sys.stderr)
+    sys.exit(1)
+PYEOF
+)"
+    python3 -c "$SLACK_PY" || echo "[$TS] ERROR: slack notification also failed" >&2
+    exit 1
+fi
+
+echo "[$TS] audit_log_cron complete"
+exit 0

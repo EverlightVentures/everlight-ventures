@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Patricia Flores | Quote Calculator</title></head>
+<body style="margin:0;padding:0;background:#0d0d1a;font-family:'Segoe UI',Helvetica,Arial,sans-serif;color:#f0f0f0;line-height:1.6;">
+<div style="max-width:640px;margin:0 auto;background:#0d0d1a;" id="app"></div>
+<script>
+const R={classic:75,signature:95,experience:125};
+const SF={classic:95,signature:120,experience:155};
+const N={classic:'The Classic',signature:'The Signature',experience:'The Experience'};
+let pkg='classic',bts=1;
+
+function h(tag,s,inner){return'<'+tag+' style="'+s+'">'+inner+'</'+tag+'>';}
+
+function render(){
+document.getElementById('app').innerHTML=`
+${h('div','background:linear-gradient(135deg,#1a1a2e,#16213e);padding:32px 24px;text-align:center;border-bottom:3px solid #c9a84c;',
+  h('p','margin:0;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:#c9a84c;','Everlight Ventures')+
+  h('p','margin:12px 0 4px;font-size:28px;font-weight:700;color:#fff;','Patricia Flores')+
+  h('p','margin:0 0 4px;font-size:15px;color:#ccc;font-style:italic;','Quote Calculator &amp; Invoice Generator')+
+  h('p','margin:0 0 8px;font-size:12px;color:#888;','Premium Mobile Bartending')+
+  h('p','margin:0;','<a href="tel:5307616711" style="color:#c9a84c;font-size:16px;font-weight:600;text-decoration:none;letter-spacing:1px;">530-761-6711</a>')
+)}
+
+<div style="display:flex;border-bottom:1px solid #2a2a4a;background:#111125;">
+  <button onclick="showTab('calc')" id="tb1" style="flex:1;background:none;border:none;border-bottom:2px solid #c9a84c;color:#c9a84c;font-family:'Segoe UI',sans-serif;font-size:13px;font-weight:600;padding:14px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;">Quote</button>
+  <button onclick="showTab('inv')" id="tb2" style="flex:1;background:none;border:none;border-bottom:2px solid transparent;color:#888;font-family:'Segoe UI',sans-serif;font-size:13px;font-weight:600;padding:14px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;">Invoice</button>
+</div>
+
+<div id="calc-tab" style="padding:24px;">
+<div style="background:#1a1a2e;border-left:3px solid #c9a84c;border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:24px;">
+  <p style="margin:0;font-size:13px;color:#aaa;">Fill in the details. Tap Send Quote to generate a beautiful link your client can view and pay from.</p>
+</div>
+
+<p style="font-size:12px;font-weight:600;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;">Client Name</p>
+<input id="qn" type="text" placeholder="e.g. Sarah Johnson" oninput="calc()" style="width:100%;padding:12px 16px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#f0f0f0;font-size:15px;font-family:'Segoe UI',sans-serif;margin-bottom:16px;outline:none;">
+
+<p style="font-size:12px;font-weight:600;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;">Event Date</p>
+<input id="qd" type="date" oninput="calc()" style="width:100%;padding:12px 16px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#f0f0f0;font-size:15px;font-family:'Segoe UI',sans-serif;margin-bottom:16px;outline:none;color-scheme:dark;">
+
+<p style="font-size:12px;font-weight:600;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;">Event Type</p>
+<select id="qt" onchange="calc()" style="width:100%;padding:12px 16px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#f0f0f0;font-size:15px;font-family:'Segoe UI',sans-serif;margin-bottom:16px;outline:none;">
+  <option>Private Party</option><option>Birthday</option><option>Corporate Event</option><option>Wedding</option><option>Holiday Party</option><option>Engagement Party</option><option>Other</option>
+</select>
+
+<p style="font-size:12px;font-weight:600;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;">Package</p>
+<div style="display:flex;gap:8px;margin-bottom:16px;">
+  <button onclick="pkg='classic';render()" id="p1" style="flex:1;padding:14px 8px;background:#1a1a2e;border:2px solid #c9a84c;border-radius:8px;color:#c9a84c;font-family:'Segoe UI',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-align:center;">Classic<br><span style="font-size:18px;">$75</span><span style="font-size:11px;font-weight:400;">/hr</span></button>
+  <button onclick="pkg='signature';render()" id="p2" style="flex:1;padding:14px 8px;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:8px;color:#ccc;font-family:'Segoe UI',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-align:center;">Signature<br><span style="font-size:18px;">$95</span><span style="font-size:11px;font-weight:400;">/hr</span></button>
+  <button onclick="pkg='experience';render()" id="p3" style="flex:1;padding:14px 8px;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:8px;color:#ccc;font-family:'Segoe UI',sans-serif;font-size:13px;font-weight:700;cursor:pointer;text-align:center;">Experience<br><span style="font-size:18px;">$125</span><span style="font-size:11px;font-weight:400;">/hr</span></button>
+</div>
+
+<p style="font-size:12px;font-weight:600;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;">Guest Count</p>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+  <button onclick="adj('qg',-10)" style="width:40px;height:40px;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:6px;color:#c9a84c;font-size:20px;font-weight:700;cursor:pointer;">-</button>
+  <input id="qg" type="number" value="50" min="10" max="500" oninput="calc()" style="flex:1;padding:12px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#f0f0f0;font-size:20px;font-weight:700;font-family:'Segoe UI',sans-serif;text-align:center;outline:none;">
+  <button onclick="adj('qg',10)" style="width:40px;height:40px;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:6px;color:#c9a84c;font-size:20px;font-weight:700;cursor:pointer;">+</button>
+</div>
+
+<p style="font-size:12px;font-weight:600;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;">Hours</p>
+<div style="display:flex;align-items:center;gap:12px;margin-bottom:16px;">
+  <button onclick="adj('qh',-1)" style="width:40px;height:40px;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:6px;color:#c9a84c;font-size:20px;font-weight:700;cursor:pointer;">-</button>
+  <input id="qh" type="number" value="4" min="4" max="12" oninput="calc()" style="flex:1;padding:12px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#f0f0f0;font-size:20px;font-weight:700;font-family:'Segoe UI',sans-serif;text-align:center;outline:none;">
+  <button onclick="adj('qh',1)" style="width:40px;height:40px;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:6px;color:#c9a84c;font-size:20px;font-weight:700;cursor:pointer;">+</button>
+</div>
+
+<p style="font-size:12px;font-weight:600;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;">Bartenders</p>
+<div style="display:flex;gap:8px;margin-bottom:16px;">
+  <button onclick="bts=1;render()" id="b1" style="flex:1;padding:12px;background:#1a1a2e;border:2px solid #c9a84c;border-radius:6px;color:#c9a84c;font-size:16px;font-weight:700;cursor:pointer;font-family:'Segoe UI',sans-serif;">1</button>
+  <button onclick="bts=2;render()" id="b2" style="flex:1;padding:12px;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:6px;color:#ccc;font-size:16px;font-weight:700;cursor:pointer;font-family:'Segoe UI',sans-serif;">2</button>
+  <button onclick="bts=3;render()" id="b3" style="flex:1;padding:12px;background:#1a1a2e;border:1px solid #2a2a4a;border-radius:6px;color:#ccc;font-size:16px;font-weight:700;cursor:pointer;font-family:'Segoe UI',sans-serif;">3</button>
+</div>
+
+<p style="font-size:12px;font-weight:600;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;">Location</p>
+<select id="ql" onchange="calc()" style="width:100%;padding:12px 16px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#f0f0f0;font-size:15px;font-family:'Segoe UI',sans-serif;margin-bottom:16px;outline:none;">
+  <option value="local">Yolo County (No travel fee)</option>
+  <option value="sc">Vacaville / Dixon (No travel fee)</option>
+  <option value="sm">Fairfield (~$10)</option>
+  <option value="sf2">Vallejo / Benicia (~$30)</option>
+  <option value="sf">San Francisco (~$78 + premium rates)</option>
+  <option value="wa">Vancouver, WA (quote travel separately)</option>
+</select>
+
+<p style="font-size:12px;font-weight:600;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;margin:0 0 8px;">Enhancements</p>
+<div style="margin-bottom:20px;">
+  <label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1a1a2e;cursor:pointer;"><input type="checkbox" id="e1" onchange="calc()" style="width:18px;height:18px;accent-color:#c9a84c;"><span style="font-size:14px;color:#ccc;flex:1;">Bar back</span><span style="font-size:13px;color:#c9a84c;font-weight:600;">$35/hr</span></label>
+  <label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1a1a2e;cursor:pointer;"><input type="checkbox" id="e2" onchange="calc()" style="width:18px;height:18px;accent-color:#c9a84c;"><span style="font-size:14px;color:#ccc;flex:1;">Glassware rental</span><span style="font-size:13px;color:#c9a84c;font-weight:600;">$2.50/guest</span></label>
+  <label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1a1a2e;cursor:pointer;"><input type="checkbox" id="e3" onchange="calc()" style="width:18px;height:18px;accent-color:#c9a84c;"><span style="font-size:14px;color:#ccc;flex:1;">Specialty ice</span><span style="font-size:13px;color:#c9a84c;font-weight:600;">$60</span></label>
+  <label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1a1a2e;cursor:pointer;"><input type="checkbox" id="e4" onchange="calc()" style="width:18px;height:18px;accent-color:#c9a84c;"><span style="font-size:14px;color:#ccc;flex:1;">Menu signage</span><span style="font-size:13px;color:#c9a84c;font-weight:600;">$45</span></label>
+  <label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1a1a2e;cursor:pointer;"><input type="checkbox" id="e5" onchange="calc()" style="width:18px;height:18px;accent-color:#c9a84c;"><span style="font-size:14px;color:#ccc;flex:1;">Mocktail station</span><span style="font-size:13px;color:#c9a84c;font-weight:600;">$175</span></label>
+  <label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1a1a2e;cursor:pointer;"><input type="checkbox" id="e6" onchange="calc()" style="width:18px;height:18px;accent-color:#c9a84c;"><span style="font-size:14px;color:#ccc;flex:1;">Shot wall</span><span style="font-size:13px;color:#c9a84c;font-weight:600;">$150</span></label>
+  <label style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1a1a2e;cursor:pointer;"><input type="checkbox" id="e7" onchange="calc()" style="width:18px;height:18px;accent-color:#c9a84c;"><span style="font-size:14px;color:#ccc;flex:1;">Champagne tower</span><span style="font-size:13px;color:#c9a84c;font-weight:600;">$225</span></label>
+  <label style="display:flex;align-items:center;gap:10px;padding:8px 0;cursor:pointer;"><input type="checkbox" id="e8" onchange="calc()" style="width:18px;height:18px;accent-color:#c9a84c;"><span style="font-size:14px;color:#ccc;flex:1;">Venue coordination</span><span style="font-size:13px;color:#c9a84c;font-weight:600;">$65</span></label>
+</div>
+
+<div id="qr" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:2px solid #c9a84c;border-radius:10px;padding:24px;margin-bottom:16px;"></div>
+<div id="liq" style="background:#1a1a2e;border:1px solid #2a2a4a;border-radius:8px;padding:20px;margin-bottom:16px;"></div>
+
+<button onclick="sendQuote()" style="width:100%;padding:16px;background:#c9a84c;color:#0d0d1a;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:1px;font-family:'Segoe UI',sans-serif;margin-bottom:8px;">Send Quote to Client</button>
+<div id="quote-link" style="display:none;background:#111125;border:1px solid #c9a84c;border-radius:8px;padding:16px;margin-bottom:8px;text-align:center;">
+  <p style="margin:0 0 8px;font-size:12px;color:#c9a84c;font-weight:600;">QUOTE LINK READY</p>
+  <input id="ql-url" readonly style="width:100%;padding:10px;background:#0d0d1a;border:1px solid #2a2a4a;border-radius:6px;color:#c9a84c;font-size:12px;font-family:monospace;text-align:center;margin-bottom:8px;" onclick="this.select()">
+  <button onclick="copyLink()" style="width:100%;padding:12px;background:#c9a84c;color:#0d0d1a;border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;">Copy Link &amp; Text to Client</button>
+  <p id="copy-msg" style="margin:4px 0 0;font-size:11px;color:#4ade80;display:none;">Copied!</p>
+</div>
+</div>
+
+<div id="inv-tab" style="padding:24px;display:none;">
+<div style="background:#1a1a2e;border-left:3px solid #c9a84c;border-radius:0 8px 8px 0;padding:16px 20px;margin-bottom:24px;">
+  <p style="margin:0;font-size:13px;color:#aaa;">Fill in after the event. Tap Send Invoice to generate a link with Pay Now buttons.</p>
+</div>
+
+<p style="font-size:12px;font-weight:600;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;">Invoice #</p>
+<input id="in" type="text" placeholder="PF-001" oninput="genI()" style="width:100%;padding:12px 16px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#f0f0f0;font-size:15px;font-family:'Segoe UI',sans-serif;margin-bottom:16px;outline:none;">
+
+<p style="font-size:12px;font-weight:600;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;">Client Name</p>
+<input id="ic" type="text" placeholder="Sarah Johnson" oninput="genI()" style="width:100%;padding:12px 16px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#f0f0f0;font-size:15px;font-family:'Segoe UI',sans-serif;margin-bottom:16px;outline:none;">
+
+<p style="font-size:12px;font-weight:600;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;">Event Date</p>
+<input id="id" type="date" oninput="genI()" style="width:100%;padding:12px 16px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#f0f0f0;font-size:15px;font-family:'Segoe UI',sans-serif;margin-bottom:16px;outline:none;color-scheme:dark;">
+
+<p style="font-size:12px;font-weight:600;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;">Event Type</p>
+<input id="it" type="text" placeholder="Wedding Reception" oninput="genI()" style="width:100%;padding:12px 16px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#f0f0f0;font-size:15px;font-family:'Segoe UI',sans-serif;margin-bottom:16px;outline:none;">
+
+<p style="font-size:12px;font-weight:600;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;margin:0 0 8px;">Line Items</p>
+<div id="ilines" style="margin-bottom:16px;">
+  <div style="display:flex;gap:8px;margin-bottom:8px;"><input type="text" placeholder="Bartending (4 hrs)" class="ild" oninput="genI()" style="flex:2;padding:10px 12px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#f0f0f0;font-size:14px;font-family:'Segoe UI',sans-serif;outline:none;"><input type="number" placeholder="300" class="ila" oninput="genI()" style="flex:1;padding:10px 12px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#c9a84c;font-size:14px;font-weight:600;font-family:'Segoe UI',sans-serif;outline:none;text-align:right;"></div>
+  <div style="display:flex;gap:8px;margin-bottom:8px;"><input type="text" placeholder="Glassware" class="ild" oninput="genI()" style="flex:2;padding:10px 12px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#f0f0f0;font-size:14px;font-family:'Segoe UI',sans-serif;outline:none;"><input type="number" placeholder="0" class="ila" oninput="genI()" style="flex:1;padding:10px 12px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#c9a84c;font-size:14px;font-weight:600;font-family:'Segoe UI',sans-serif;outline:none;text-align:right;"></div>
+  <div style="display:flex;gap:8px;margin-bottom:8px;"><input type="text" placeholder="Travel" class="ild" oninput="genI()" style="flex:2;padding:10px 12px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#f0f0f0;font-size:14px;font-family:'Segoe UI',sans-serif;outline:none;"><input type="number" placeholder="0" class="ila" oninput="genI()" style="flex:1;padding:10px 12px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#c9a84c;font-size:14px;font-weight:600;font-family:'Segoe UI',sans-serif;outline:none;text-align:right;"></div>
+  <div style="display:flex;gap:8px;"><input type="text" placeholder="Other" class="ild" oninput="genI()" style="flex:2;padding:10px 12px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#f0f0f0;font-size:14px;font-family:'Segoe UI',sans-serif;outline:none;"><input type="number" placeholder="0" class="ila" oninput="genI()" style="flex:1;padding:10px 12px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#c9a84c;font-size:14px;font-weight:600;font-family:'Segoe UI',sans-serif;outline:none;text-align:right;"></div>
+</div>
+
+<p style="font-size:12px;font-weight:600;color:#c9a84c;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;">Deposit Already Paid</p>
+<input id="ip" type="number" value="0" oninput="genI()" style="width:100%;padding:12px 16px;background:#111125;border:1px solid #2a2a4a;border-radius:6px;color:#f0f0f0;font-size:15px;font-family:'Segoe UI',sans-serif;margin-bottom:16px;outline:none;">
+
+<div id="iv" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border:2px solid #c9a84c;border-radius:10px;padding:24px;margin-bottom:16px;"></div>
+
+<div style="background:#1a1a2e;border:1px solid #2a2a4a;border-radius:8px;padding:16px 20px;margin-bottom:16px;">
+  <p style="margin:0 0 8px;font-size:13px;font-weight:600;color:#c9a84c;">Payment Methods</p>
+  <p style="margin:0;font-size:13px;color:#ccc;">Zelle: 530-761-6711 &bull; Venmo &bull; Cash &bull; Square &bull; Check</p>
+</div>
+
+<button onclick="sendInvoice()" style="width:100%;padding:16px;background:#c9a84c;color:#0d0d1a;border:none;border-radius:8px;font-size:16px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:1px;font-family:'Segoe UI',sans-serif;margin-bottom:8px;">Send Invoice to Client</button>
+<div id="inv-link" style="display:none;background:#111125;border:1px solid #c9a84c;border-radius:8px;padding:16px;margin-bottom:8px;text-align:center;">
+  <p style="margin:0 0 8px;font-size:12px;color:#c9a84c;font-weight:600;">INVOICE LINK READY</p>
+  <input id="il-url" readonly style="width:100%;padding:10px;background:#0d0d1a;border:1px solid #2a2a4a;border-radius:6px;color:#c9a84c;font-size:12px;font-family:monospace;text-align:center;margin-bottom:8px;" onclick="this.select()">
+  <button onclick="copyInvLink()" style="width:100%;padding:12px;background:#c9a84c;color:#0d0d1a;border:none;border-radius:6px;font-size:14px;font-weight:700;cursor:pointer;">Copy Link &amp; Text to Client</button>
+  <p id="copy-inv-msg" style="margin:4px 0 0;font-size:11px;color:#4ade80;display:none;">Copied!</p>
+</div>
+</div>
+
+<div style="background:#1a1a2e;padding:20px 24px;text-align:center;border-top:2px solid #c9a84c;">
+  <p style="margin:0 0 4px;font-size:18px;font-weight:700;color:#fff;">Patricia Flores</p>
+  <p style="margin:0 0 8px;font-size:13px;color:#aaa;">Premium Mobile Bartending</p>
+  <p style="margin:0 0 8px;"><a href="tel:5307616711" style="color:#c9a84c;font-weight:600;text-decoration:none;">530-761-6711</a></p>
+  <p style="margin:0;font-size:11px;color:#555;">Woodland &bull; Solano County &bull; San Francisco &bull; Vancouver WA</p>
+  <p style="margin:12px 0 0;font-size:10px;color:#444;">Built by Everlight Ventures</p>
+</div>
+`;
+// Re-select pkg/bt buttons
+document.getElementById('p1').style.borderColor=pkg==='classic'?'#c9a84c':'#2a2a4a';document.getElementById('p1').style.borderWidth=pkg==='classic'?'2px':'1px';document.getElementById('p1').style.color=pkg==='classic'?'#c9a84c':'#ccc';
+document.getElementById('p2').style.borderColor=pkg==='signature'?'#c9a84c':'#2a2a4a';document.getElementById('p2').style.borderWidth=pkg==='signature'?'2px':'1px';document.getElementById('p2').style.color=pkg==='signature'?'#c9a84c':'#ccc';
+document.getElementById('p3').style.borderColor=pkg==='experience'?'#c9a84c':'#2a2a4a';document.getElementById('p3').style.borderWidth=pkg==='experience'?'2px':'1px';document.getElementById('p3').style.color=pkg==='experience'?'#c9a84c':'#ccc';
+document.getElementById('b1').style.borderColor=bts===1?'#c9a84c':'#2a2a4a';document.getElementById('b1').style.borderWidth=bts===1?'2px':'1px';document.getElementById('b1').style.color=bts===1?'#c9a84c':'#ccc';
+document.getElementById('b2').style.borderColor=bts===2?'#c9a84c':'#2a2a4a';document.getElementById('b2').style.borderWidth=bts===2?'2px':'1px';document.getElementById('b2').style.color=bts===2?'#c9a84c':'#ccc';
+document.getElementById('b3').style.borderColor=bts===3?'#c9a84c':'#2a2a4a';document.getElementById('b3').style.borderWidth=bts===3?'2px':'1px';document.getElementById('b3').style.color=bts===3?'#c9a84c':'#ccc';
+calc();genI();
+}
+
+function adj(id,d){const e=document.getElementById(id);let v=parseInt(e.value)+d;if(id==='qh')v=Math.max(4,Math.min(12,v));if(id==='qg')v=Math.max(10,Math.min(500,v));e.value=v;calc();}
+
+function showTab(t){
+  document.getElementById('calc-tab').style.display=t==='calc'?'block':'none';
+  document.getElementById('inv-tab').style.display=t==='inv'?'block':'none';
+  document.getElementById('tb1').style.borderBottomColor=t==='calc'?'#c9a84c':'transparent';document.getElementById('tb1').style.color=t==='calc'?'#c9a84c':'#888';
+  document.getElementById('tb2').style.borderBottomColor=t==='inv'?'#c9a84c':'transparent';document.getElementById('tb2').style.color=t==='inv'?'#c9a84c':'#888';
+}
+
+function calc(){
+  const g=parseInt(document.getElementById('qg').value)||50;
+  const hr=parseInt(document.getElementById('qh').value)||4;
+  const loc=document.getElementById('ql').value;
+  const nm=document.getElementById('qn').value||'Client';
+  const dt=document.getElementById('qd').value;
+  const tp=document.getElementById('qt').value;
+  const isSF=loc==='sf';
+  const rate=isSF?SF[pkg]:R[pkg];
+  const base=rate*hr*bts;
+  let tv=0,tvL='';
+  if(loc==='sm'){tv=10;tvL='Fairfield travel';}
+  else if(loc==='sf2'){tv=30;tvL='Vallejo/Benicia travel';}
+  else if(loc==='sf'){tv=78;tvL='SF travel + toll';}
+  let eT=0,eL=[];
+  if(document.getElementById('e1').checked){const c=35*hr;eT+=c;eL.push(['Bar back ('+hr+' hrs)',c]);}
+  if(document.getElementById('e2').checked){const c=Math.round(g*2.5);eT+=c;eL.push(['Glassware ('+g+' guests)',c]);}
+  if(document.getElementById('e3').checked){eT+=60;eL.push(['Specialty ice',60]);}
+  if(document.getElementById('e4').checked){eT+=45;eL.push(['Menu signage',45]);}
+  if(document.getElementById('e5').checked){eT+=175;eL.push(['Mocktail station',175]);}
+  if(document.getElementById('e6').checked){eT+=150;eL.push(['Shot wall',150]);}
+  if(document.getElementById('e7').checked){eT+=225;eL.push(['Champagne tower',225]);}
+  if(document.getElementById('e8').checked){eT+=65;eL.push(['Venue coordination',65]);}
+  const tot=base+tv+eT;const dep=Math.round(tot*.5);
+
+  let o='<p style="margin:0 0 4px;font-size:11px;color:#c9a84c;text-transform:uppercase;letter-spacing:2px;font-weight:700;">Estimate for</p>';
+  o+='<p style="margin:0 0 2px;font-size:18px;font-weight:700;color:#fff;">'+nm+'</p>';
+  if(dt)o+='<p style="margin:0 0 2px;font-size:13px;color:#aaa;">'+new Date(dt+'T12:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'})+'</p>';
+  o+='<p style="margin:0 0 16px;font-size:13px;color:#888;">'+tp+' &bull; '+g+' guests</p>';
+  o+='<table style="width:100%;border-collapse:collapse;">';
+  o+='<tr><td style="padding:6px 0;color:#ccc;font-size:14px;">'+N[pkg]+(isSF?' (SF)':'')+' &mdash; $'+rate+'/hr x '+hr+'hrs'+(bts>1?' x '+bts:'')+'</td><td style="padding:6px 0;color:#c9a84c;font-weight:700;text-align:right;font-size:14px;">$'+base.toLocaleString()+'</td></tr>';
+  if(tv>0)o+='<tr><td style="padding:6px 0;color:#ccc;font-size:14px;">'+tvL+'</td><td style="padding:6px 0;color:#c9a84c;font-weight:600;text-align:right;">$'+tv+'</td></tr>';
+  if(loc==='wa')o+='<tr><td style="padding:6px 0;color:#888;font-size:12px;font-style:italic;" colspan="2">WA travel quoted separately</td></tr>';
+  eL.forEach(function(x){o+='<tr><td style="padding:6px 0;color:#ccc;font-size:14px;">'+x[0]+'</td><td style="padding:6px 0;color:#c9a84c;font-weight:600;text-align:right;">$'+x[1].toLocaleString()+'</td></tr>';});
+  o+='<tr><td colspan="2" style="padding:8px 0 0;border-top:2px solid #c9a84c;"></td></tr>';
+  o+='<tr><td style="padding:4px 0;color:#fff;font-size:18px;font-weight:700;">TOTAL</td><td style="padding:4px 0;color:#c9a84c;font-weight:700;text-align:right;font-size:24px;">$'+tot.toLocaleString()+'</td></tr>';
+  o+='<tr><td style="padding:4px 0;color:#aaa;font-size:13px;">50% deposit to book</td><td style="padding:4px 0;color:#fff;font-weight:600;text-align:right;">$'+dep.toLocaleString()+'</td></tr>';
+  o+='<tr><td style="padding:4px 0;color:#aaa;font-size:13px;">Balance due 7 days before</td><td style="padding:4px 0;color:#fff;font-weight:600;text-align:right;">$'+(tot-dep).toLocaleString()+'</td></tr>';
+  o+='</table>';
+  document.getElementById('qr').innerHTML=o;
+
+  const td2=Math.round(g*hr*1.5),bt2=Math.round(td2/16),lo=bt2*20,hi=bt2*35;
+  let lq='<p style="margin:0 0 8px;font-size:11px;color:#c9a84c;text-transform:uppercase;letter-spacing:2px;font-weight:700;">Client Alcohol Budget</p>';
+  lq+='<p style="margin:0;font-size:13px;color:#aaa;">'+g+' guests, '+hr+' hours, moderate drinking:</p>';
+  lq+='<table style="width:100%;margin-top:8px;border-collapse:collapse;">';
+  lq+='<tr><td style="padding:4px 0;color:#ccc;font-size:13px;">Est. drinks</td><td style="padding:4px 0;color:#fff;font-weight:600;text-align:right;">~'+td2+'</td></tr>';
+  lq+='<tr><td style="padding:4px 0;color:#ccc;font-size:13px;">Est. bottles</td><td style="padding:4px 0;color:#fff;font-weight:600;text-align:right;">~'+bt2+'</td></tr>';
+  lq+='<tr style="border-top:1px solid #2a2a4a;"><td style="padding:6px 0;color:#ccc;font-size:14px;font-weight:600;">Their alcohol budget</td><td style="padding:6px 0;color:#c9a84c;font-weight:700;text-align:right;font-size:18px;">$'+lo+' - $'+hi+'</td></tr>';
+  lq+='</table>';
+  lq+='<p style="margin:8px 0 0;font-size:11px;color:#666;font-style:italic;">Separate from your service fee. Shopping list sent after booking.</p>';
+  document.getElementById('liq').innerHTML=lq;
+}
+
+function genI(){
+  const num=document.getElementById('in').value||'PF-001';
+  const nm=document.getElementById('ic').value||'Client';
+  const dt=document.getElementById('id').value;
+  const tp=document.getElementById('it').value||'Event';
+  const dep=parseFloat(document.getElementById('ip').value)||0;
+  const ds=document.querySelectorAll('.ild'),as=document.querySelectorAll('.ila');
+  let lines=[],tot=0;
+  for(let i=0;i<ds.length;i++){const d=ds[i].value,a=parseFloat(as[i].value)||0;if(d&&a>0){lines.push([d,a]);tot+=a;}}
+  const due=tot-dep;
+
+  let o='<p style="margin:0 0 4px;font-size:11px;color:#c9a84c;text-transform:uppercase;letter-spacing:2px;font-weight:700;">Invoice</p>';
+  o+='<div style="display:flex;justify-content:space-between;margin-bottom:16px;">';
+  o+='<div><p style="margin:0;font-size:16px;font-weight:700;color:#fff;">Patricia Flores</p><p style="margin:0;font-size:12px;color:#888;">530-761-6711</p></div>';
+  o+='<div style="text-align:right;"><p style="margin:0;font-size:14px;font-weight:600;color:#c9a84c;">#'+num+'</p>';
+  if(dt)o+='<p style="margin:0;font-size:12px;color:#aaa;">'+new Date(dt+'T12:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'})+'</p>';
+  o+='</div></div>';
+  o+='<div style="background:#111125;border-radius:6px;padding:10px 14px;margin-bottom:12px;"><p style="margin:0;font-size:11px;color:#888;">Bill To:</p><p style="margin:2px 0 0;font-size:15px;font-weight:600;color:#fff;">'+nm+'</p><p style="margin:0;font-size:13px;color:#aaa;">'+tp+'</p></div>';
+  o+='<table style="width:100%;border-collapse:collapse;">';
+  o+='<tr><td style="padding:6px 0;color:#c9a84c;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #2a2a4a;">Item</td><td style="padding:6px 0;color:#c9a84c;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #2a2a4a;text-align:right;">Amount</td></tr>';
+  lines.forEach(function(x){o+='<tr><td style="padding:6px 0;color:#ccc;font-size:14px;border-bottom:1px solid #1a1a2e;">'+x[0]+'</td><td style="padding:6px 0;color:#fff;font-weight:600;font-size:14px;text-align:right;border-bottom:1px solid #1a1a2e;">$'+x[1].toLocaleString()+'</td></tr>';});
+  if(!lines.length)o+='<tr><td style="padding:6px 0;color:#666;font-size:13px;font-style:italic;" colspan="2">Add items above</td></tr>';
+  o+='<tr><td colspan="2" style="border-top:2px solid #c9a84c;padding:6px 0;"></td></tr>';
+  o+='<tr><td style="padding:4px 0;color:#ccc;">Subtotal</td><td style="padding:4px 0;color:#fff;font-weight:600;text-align:right;">$'+tot.toLocaleString()+'</td></tr>';
+  if(dep>0)o+='<tr><td style="padding:4px 0;color:#4ade80;">Deposit paid</td><td style="padding:4px 0;color:#4ade80;font-weight:600;text-align:right;">-$'+dep.toLocaleString()+'</td></tr>';
+  o+='<tr><td style="padding:6px 0;color:#fff;font-size:18px;font-weight:700;">Balance Due</td><td style="padding:6px 0;color:#c9a84c;font-weight:700;text-align:right;font-size:24px;">$'+Math.max(0,due).toLocaleString()+'</td></tr>';
+  o+='</table>';
+  document.getElementById('iv').innerHTML=o;
+}
+
+const BASE='https://jdqqmsmwmbsnlnstyavl.supabase.co/functions/v1/pf-quote';
+
+function sendQuote(){
+  const nm=document.getElementById('qn').value||'Client';
+  const dt=document.getElementById('qd').value;
+  const tp=document.getElementById('qt').value;
+  const g=document.getElementById('qg').value;
+  const hr=document.getElementById('qh').value;
+  const loc=document.getElementById('ql').value;
+  const enhs=[];
+  if(document.getElementById('e1').checked)enhs.push('bb');
+  if(document.getElementById('e2').checked)enhs.push('gl');
+  if(document.getElementById('e3').checked)enhs.push('ice');
+  if(document.getElementById('e4').checked)enhs.push('sign');
+  if(document.getElementById('e5').checked)enhs.push('mock');
+  if(document.getElementById('e6').checked)enhs.push('shots');
+  if(document.getElementById('e7').checked)enhs.push('champ');
+  if(document.getElementById('e8').checked)enhs.push('coord');
+  const p=new URLSearchParams({name:nm,pkg:pkg,guests:g,hours:hr,bts:String(bts),loc:loc,type:tp,mode:'quote'});
+  if(dt)p.set('date',dt);
+  if(enhs.length)p.set('enh',enhs.join(','));
+  const url=BASE+'?'+p.toString();
+  document.getElementById('ql-url').value=url;
+  document.getElementById('quote-link').style.display='block';
+}
+
+function copyLink(){
+  const url=document.getElementById('ql-url').value;
+  navigator.clipboard.writeText(url).then(()=>{
+    document.getElementById('copy-msg').style.display='block';
+    setTimeout(()=>document.getElementById('copy-msg').style.display='none',2000);
+  }).catch(()=>{document.getElementById('ql-url').select();document.execCommand('copy');document.getElementById('copy-msg').style.display='block';});
+  if(navigator.share){navigator.share({title:'Quote from Patricia Flores',text:'Here is your bartending quote:',url:url}).catch(()=>{});}
+}
+
+function sendInvoice(){
+  const nm=document.getElementById('ic').value||'Client';
+  const dt=document.getElementById('id').value;
+  const tp=document.getElementById('it').value||'Event';
+  const num=document.getElementById('in').value||'PF-001';
+  const dep=document.getElementById('ip').value||'0';
+  const ds=document.querySelectorAll('.ild'),as2=document.querySelectorAll('.ila');
+  let tot=0;for(let i=0;i<as2.length;i++)tot+=parseFloat(as2[i].value)||0;
+  const hr=Math.ceil(tot/75)||4;
+  const p=new URLSearchParams({name:nm,pkg:'classic',guests:'1',hours:String(hr),bts:'1',loc:'local',type:tp,mode:'invoice',inv:num,deposit:dep});
+  if(dt)p.set('date',dt);
+  const url=BASE+'?'+p.toString();
+  document.getElementById('il-url').value=url;
+  document.getElementById('inv-link').style.display='block';
+}
+
+function copyInvLink(){
+  const url=document.getElementById('il-url').value;
+  navigator.clipboard.writeText(url).then(()=>{
+    document.getElementById('copy-inv-msg').style.display='block';
+    setTimeout(()=>document.getElementById('copy-inv-msg').style.display='none',2000);
+  }).catch(()=>{document.getElementById('il-url').select();document.execCommand('copy');document.getElementById('copy-inv-msg').style.display='block';});
+  if(navigator.share){navigator.share({title:'Invoice from Patricia Flores',text:'Here is your invoice:',url:url}).catch(()=>{});}
+}
+
+render();
+</script>
+</body></html>

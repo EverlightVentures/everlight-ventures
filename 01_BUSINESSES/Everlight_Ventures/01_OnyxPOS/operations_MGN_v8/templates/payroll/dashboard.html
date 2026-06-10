@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block header_title %}Payroll{% endblock %}
+{% block content %}
+<div class="stats-grid">
+    <div class="stat-card"><div class="stat-label">Active Employees</div><div class="stat-value">{{ active_count or 0 }}</div></div>
+    <div class="stat-card"><div class="stat-label">Current Period</div><div class="stat-value">{{ current_period.Period_ID if current_period else '-' }}</div></div>
+</div>
+<div class="grid grid-2 gap-4">
+    <div class="card">
+        <div class="card-header"><h2 class="card-title">Quick Actions</h2></div>
+        <div class="card-body">
+            <a href="{{ url_for('create_pay_period_view') }}" class="btn btn-primary mb-4" style="width:100%;">Create Pay Period</a>
+            <a href="{{ url_for('run_payroll_view') }}" class="btn btn-secondary" style="width:100%;">Run Payroll</a>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header"><h2 class="card-title">Recent Periods</h2></div>
+        {% if periods %}<table><thead><tr><th>Period</th><th>Dates</th><th>Status</th></tr></thead><tbody>{% for p in periods[:5] %}<tr><td>{{ p.Period_ID }}</td><td class="text-muted">{{ p.Start_Date }} - {{ p.End_Date }}</td><td><span class="badge">{{ p.Status }}</span></td></tr>{% endfor %}</tbody></table>{% else %}<div class="card-body text-muted">No pay periods yet</div>{% endif %}
+    </div>
+</div>
+{% endblock %}

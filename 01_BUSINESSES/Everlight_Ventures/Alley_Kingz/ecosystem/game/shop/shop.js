@@ -332,8 +332,15 @@
         h("button", { class: "aks-btn", text: "Buy", onclick: function () { buyGems(p.sku); } }),
       ]),
     ];
+    // Real gem-pack art (auto-routed to Leonardo via the art-factory queue); the
+    // diamond glyph is the fallback shown until the cron paints assets/shop/<sku>.png.
+    var gbox = h("div", { class: "aks-art" });
+    var gimg = h("img", { alt: p.title, loading: "lazy" });
+    gimg.onerror = function () { gimg.remove(); gbox.appendChild(h("div", { class: "gemglyph", text: "◆" })); };
+    gimg.src = ASSET_BASE + "shop/" + p.sku + ".png";
+    gbox.appendChild(gimg);
     return h("div", { class: "aks-card aks-gem" + (best ? " best" : "") }, [
-      h("div", { class: "aks-art" }, [h("div", { class: "gemglyph", text: "◆" })]),
+      gbox,
       h("div", { class: "aks-meta" }, meta),
     ]);
   }

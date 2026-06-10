@@ -20,7 +20,7 @@ Environment=HIVE_CLAUDE_MODEL=claude-sonnet-4-6
 Environment=HIVE_POLL_INTERVAL=5
 Environment=HIVE_ROSTER_PATH=/home/opc/roster.yaml
 Environment=HIVE_AGENT_DIR=/home/opc/agents/
-Environment=BLINKO_URL=http://129.159.38.250:1111
+Environment=BLINKO_URL=http://e5-mother:1111
 Environment=BOT_STATE_DIR=/home/opc/xlm_bot/data/
 Environment=HIVE_CHANNELS=war-room,ft-hunters,ft-consult,ft-markets,ft-profit-engine,ai-consulting,xlm-trading
 

@@ -66,7 +66,12 @@ def _log(msg: str) -> None:
     LOG.parent.mkdir(parents=True, exist_ok=True)
     with LOG.open("a") as fh:
         fh.write(line + "\n")
-    print(line)
+    # Console echo only when interactive. The */17 cron redirects stdout back
+    # into LOG (`>> blinko_queue_drain.log`); an unconditional print() would
+    # write every line twice. The final JSON summary in _main() stays printed
+    # (it is the intended cron-captured run report and is not also file-logged).
+    if sys.stdout.isatty():
+        print(line)
 
 
 def enqueue(text: str) -> Path:
@@ -93,8 +98,28 @@ def _post_note_to(url: str, content: str) -> bool:
         return False
 
 
+def _health_ok(url: str) -> bool:
+    """Reachability check via GET /health -- does NOT write a note."""
+    try:
+        req = urllib.request.Request(f"{url}/health", method="GET")
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+            return r.status == 200
+    except Exception:
+        return False
+
+
 def _reachable_blinko() -> str | None:
-    """First candidate URL that accepts a note POST. None if all are down."""
+    """First candidate URL that is reachable. None if all are down.
+
+    Prefer GET /health (no side effect). The old implementation proved
+    reachability by POSTing a throwaway '#hive/probe' note to /upsert on EVERY
+    drain -- ~85 junk notes/day on the */17 cron, polluting RAG search. We only
+    fall back to the POST probe if a target does not serve /health, so any
+    Blinko variant still works while blinko_lite stops littering the brain.
+    """
+    for url in _candidate_urls():
+        if _health_ok(url):
+            return url
     probe = f"# blinko reachability probe {datetime.now(timezone.utc).isoformat()}\n#hive/probe"
     for url in _candidate_urls():
         if _post_note_to(url, probe):

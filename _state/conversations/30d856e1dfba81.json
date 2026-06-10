@@ -1,0 +1,29 @@
+{
+  "contact": {
+    "email": "seller1@example.com",
+    "name": "",
+    "role": "",
+    "phase": "",
+    "channel": "sms",
+    "phone": "9015551234",
+    "channel_consented": true
+  },
+  "messages": [],
+  "state": {
+    "facts": [],
+    "their_open_qs": [],
+    "our_open_qs": [],
+    "commitments": {
+      "ours": [],
+      "theirs": []
+    },
+    "objections": [],
+    "personas_seen": []
+  },
+  "rapport": {
+    "sentiment": "neutral",
+    "notes": []
+  },
+  "next_action": "",
+  "updated_at": "2026-05-25T07:33:09.325212+00:00"
+}

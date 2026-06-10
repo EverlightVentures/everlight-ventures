@@ -1,0 +1,125 @@
+{
+  "lead": {
+    "parcel_id": "034026  00014",
+    "property_address": "1577  MCMILLAN ST",
+    "owner_name": "CARNEGIE CHURCH OF GOD IN CHRIST",
+    "owner_mailing_street": "5340SANTA MONICAST",
+    "owner_mailing_city": null,
+    "owner_mailing_state": null,
+    "owner_mailing_zip": null,
+    "is_vacant_lot": null,
+    "total_appraisal_usd": 56000,
+    "sales_history": [
+      {
+        "date": "03/10/2009",
+        "price_text": "$8,897",
+        "deed_or_inst": "09034774",
+        "type_code": "WD",
+        "price_usd": 8897,
+        "year": 2009
+      },
+      {
+        "date": "02/19/2009",
+        "price_text": "$0",
+        "deed_or_inst": "09031413",
+        "type_code": "A",
+        "price_usd": 0,
+        "year": 2009
+      },
+      {
+        "date": "03/01/2005",
+        "price_text": "$0",
+        "deed_or_inst": "867",
+        "type_code": "DN",
+        "price_usd": 0,
+        "year": 2005
+      },
+      {
+        "date": "02/12/1998",
+        "price_text": "",
+        "deed_or_inst": "HE5929",
+        "type_code": "QC",
+        "year": 1998
+      },
+      {
+        "date": "06/06/1997",
+        "price_text": "$0",
+        "deed_or_inst": "GR7707",
+        "type_code": "A",
+        "price_usd": 0,
+        "year": 1997
+      },
+      {
+        "date": "06/27/1996",
+        "price_text": "$0",
+        "deed_or_inst": "363",
+        "type_code": "DN",
+        "price_usd": 0,
+        "year": 1996
+      }
+    ],
+    "tax_sale_marker": "TS2202"
+  },
+  "signals": {
+    "is_estate": false,
+    "estate_decedent_name": null,
+    "is_absentee_outofstate": false,
+    "is_absentee_instate": false,
+    "owner_mailing_apartment": false,
+    "is_llc_owner": false,
+    "is_religious_org_owner": true,
+    "is_long_term_owner": false,
+    "ownership_years": 17,
+    "is_high_value": false,
+    "is_vacant_lot": false,
+    "tax_delinquent_years": "4+",
+    "multiple_sales_in_history": true
+  },
+  "browser_queue": [
+    {
+      "label": "Shelby Register of Deeds -- all deeds in 'CARNEGIE CHURCH OF GOD IN CHRIST' name",
+      "url": "https://search.register.shelby.tn.us/search/",
+      "instructions": "Name search 'CARNEGIE CHURCH OF GOD IN CHRIST'. Save MHTML of result list. Tells us if owner has OTHER properties in Shelby County (= portfolio = sophisticated investor).",
+      "priority": "HIGH"
+    },
+    {
+      "label": "Obit search -- Google site:legacy.com 'CARNEGIE CHURCH OF GOD IN CHRIST' Memphis",
+      "url": "https://www.google.com/search?q=site%3Alegacy.com+%22CARNEGIE+CHURCH+OF+GOD+IN+CHRIST%22+Memphis+OR+Tennessee",
+      "instructions": "Click any hit, MHTML the obit. Tells us: death date, age, surviving family names + cities (= heir candidates).",
+      "priority": "LOW"
+    },
+    {
+      "label": "Facebook public search -- CARNEGIE CHURCH OF GOD IN CHRIST in Memphis",
+      "url": "https://www.facebook.com/public/CARNEGIE+CHURCH+OF+GOD+IN+CHRIST",
+      "instructions": "If profile public, tells us age range, employer, family, recent posts. Don't friend; just look. MHTML the search result page.",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "LinkedIn search -- CARNEGIE CHURCH OF GOD IN CHRIST ",
+      "url": "https://www.linkedin.com/search/results/people/?keywords=CARNEGIE+CHURCH+OF+GOD+IN+CHRIST+",
+      "instructions": "Profession, employer, tenure. Helps frame the pitch (busy professional = lead with time-saving; recent retiree = lead with simplicity).",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "TN Public Notice + Court Records -- civil/foreclosure history",
+      "url": "https://www.tncourts.gov/courts/public-notices",
+      "instructions": "Search 'CARNEGIE CHURCH OF GOD IN CHRIST'. Civil suits, eviction filings, foreclosure starts = financial pressure signals.",
+      "priority": "MEDIUM"
+    }
+  ],
+  "pitch_hooks": [
+    {
+      "name": "ministry_clean_close",
+      "angle": "Ministries hold real estate that's not central to the mission",
+      "lead_line": "Ministries sometimes end up holding lots that aren't central to the mission. We can close clean and quick, freeing the funds for ministry work. Cash, no commission, 14-day close.",
+      "use_when": "Church / ministry / nonprofit owner."
+    },
+    {
+      "name": "back_tax_relief",
+      "angle": "We pay the back tax \u2014 you walk clean",
+      "lead_line": "We see the property's been on the back-tax list for a few years. We pay every dollar of back tax + penalty at closing \u2014 out of OUR side, not yours. You walk away clean.",
+      "use_when": "TS2202 lead. Strong on absentee owners with no plan to develop."
+    }
+  ],
+  "generated_at": "2026-04-29T21:40:39.450407+00:00"
+}

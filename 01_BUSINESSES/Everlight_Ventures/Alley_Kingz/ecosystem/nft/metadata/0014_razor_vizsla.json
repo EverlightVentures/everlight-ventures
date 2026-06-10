@@ -1,0 +1,144 @@
+{
+  "name": "Alley Kingz #0014 Razor Vizsla",
+  "symbol": "BCARDI",
+  "description": "Razor Vizsla, a Epic Lancer in the Zoomie Syndicate. The Vizsla pilots the Vizsla Rig -- sport speed rig -- nitro, drag body, glass-cannon velocity. Signature move: \"Pierce Rush\". A playable Alley Kingz battle card on Solana -- the NFT is the card, with gameplay stats written on-chain. Cosmetic art plus gameplay stats; in-game items are for entertainment and utility, not investments. No promised returns.",
+  "image": "ipfs://<IMAGE_CID_DIR>/0014_razor_vizsla.png",
+  "animation_url": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_RazorVizsla_Vizsla_Seedance_V1.mp4",
+  "external_url": "https://everlightventures.io/cards/0014",
+  "attributes": [
+    {
+      "trait_type": "Card Number",
+      "value": "0014"
+    },
+    {
+      "trait_type": "Faction",
+      "value": "Zoomie Syndicate"
+    },
+    {
+      "trait_type": "Faction Id",
+      "value": "zoomie_syndicate"
+    },
+    {
+      "trait_type": "Breed",
+      "value": "Vizsla"
+    },
+    {
+      "trait_type": "Name",
+      "value": "Razor Vizsla"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Lancer"
+    },
+    {
+      "trait_type": "Cost",
+      "value": 5
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Crit"
+    },
+    {
+      "trait_type": "HP",
+      "value": 1000
+    },
+    {
+      "trait_type": "Damage",
+      "value": 150
+    },
+    {
+      "trait_type": "Attack Speed",
+      "value": 1.0
+    },
+    {
+      "trait_type": "Move Speed",
+      "value": 1.0
+    },
+    {
+      "trait_type": "Range",
+      "value": 2
+    },
+    {
+      "trait_type": "Ability",
+      "value": "Pierce Rush"
+    },
+    {
+      "trait_type": "Ability Cooldown",
+      "value": 12
+    },
+    {
+      "trait_type": "Queen Target",
+      "value": false
+    },
+    {
+      "trait_type": "Rig",
+      "value": "Vizsla Rig"
+    },
+    {
+      "trait_type": "Rig Class",
+      "value": "sprinter"
+    },
+    {
+      "trait_type": "Weapon Mod",
+      "value": "ram_plow"
+    }
+  ],
+  "properties": {
+    "category": "video",
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "files": [
+      {
+        "uri": "ipfs://<IMAGE_CID_DIR>/0014_razor_vizsla.png",
+        "type": "image/png"
+      },
+      {
+        "uri": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_RazorVizsla_Vizsla_Seedance_V1.mp4",
+        "type": "video/mp4"
+      }
+    ]
+  },
+  "onchain_attributes": [
+    {
+      "key": "hp",
+      "value": "1000"
+    },
+    {
+      "key": "damage",
+      "value": "150"
+    },
+    {
+      "key": "attack_speed",
+      "value": "1.0"
+    },
+    {
+      "key": "move_speed",
+      "value": "1.0"
+    },
+    {
+      "key": "range",
+      "value": "2"
+    },
+    {
+      "key": "cost",
+      "value": "5"
+    },
+    {
+      "key": "rarity",
+      "value": "Epic"
+    },
+    {
+      "key": "ability_id",
+      "value": "pierce_rush"
+    },
+    {
+      "key": "queen_target",
+      "value": "0"
+    }
+  ]
+}

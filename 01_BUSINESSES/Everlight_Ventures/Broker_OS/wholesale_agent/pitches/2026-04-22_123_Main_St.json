@@ -1,0 +1,37 @@
+{
+  "address": "123 Main St",
+  "email_pitch": "Foreclosure auction is approaching. The seller loses everything if they don't act.\n\nA lis pendens has been filed. The clock is ticking toward auction. The seller's credit, equity, and home are all at risk.\n\nThe numbers on 123 Main St, Atlanta GA:\n- Acquisition: $155,000\n- Estimated repairs: $22,000\n- After-repair value: $245,000\n- Projected profit (flip): $41,050 (23.2% ROI)\n- Or rent at $2,200/mo (8.9% cap rate)\n\nOnce the auction date passes, this deal disappears. The seller is motivated to close before the bank takes it.\n\nCash only. 7-14 day close. Assignment structure -- clean title through a licensed title company.\n\nReply 'SEND DETAILS' for the full property package.\nFirst qualified buyer locks it.\n\nEverlight Ventures -- Acquisitions\nsupport@everlightventures.io",
+  "sms_pitch": "Off-market deal: 123 Main St, Atlanta. $155,000 cash, $41,050 profit potential. Reply for details. - Everlight Ventures",
+  "one_pager_html": "<!DOCTYPE html>\n<html>\n<head><meta charset=\"utf-8\"><title>Deal: 123 Main St</title></head>\n<body style=\"background:#0a0a0f;color:#fff;font-family:'Inter',sans-serif;margin:0;padding:40px;\">\n<div style=\"max-width:600px;margin:0 auto;\">\n\n    <div style=\"text-align:center;margin-bottom:32px;\">\n        <h1 style=\"font-family:'Cinzel',serif;color:#c9a84c;font-size:20px;letter-spacing:3px;margin:0;\">\n            EVERLIGHT VENTURES</h1>\n        <p style=\"color:#666;font-size:11px;letter-spacing:2px;margin:4px 0 0;\">\n            ACQUISITIONS -- PRIVATE DEAL ALERT</p>\n    </div>\n\n    <div style=\"background:#111;border:1px solid #c9a84c55;border-radius:12px;padding:24px;margin-bottom:24px;\">\n        <h2 style=\"color:#fff;margin:0 0 4px;font-size:18px;\">123 Main St</h2>\n        <p style=\"color:#999;margin:0 0 16px;font-size:14px;\">Atlanta, GA | 3bd/2ba | 1,400 sqft | Built 1965</p>\n\n        <div style=\"background:#c9a84c22;border-radius:8px;padding:16px;margin-bottom:16px;\">\n            <p style=\"color:#c9a84c;font-weight:bold;margin:0 0 4px;font-size:12px;text-transform:uppercase;\">\n                Why This Deal Exists</p>\n            <p style=\"color:#ddd;margin:0;font-size:14px;\">Foreclosure auction is approaching. The seller loses everything if they don't act.</p>\n        </div>\n\n        <div style=\"display:flex;gap:16px;margin-bottom:16px;\">\n            <div style=\"flex:1;background:#1a1a2e;border-radius:8px;padding:16px;text-align:center;\">\n                <p style=\"color:#999;font-size:11px;margin:0;\">PRICE</p>\n                <p style=\"color:#c9a84c;font-size:24px;font-weight:bold;margin:4px 0;\">$155,000</p>\n            </div>\n            <div style=\"flex:1;background:#1a1a2e;border-radius:8px;padding:16px;text-align:center;\">\n                <p style=\"color:#999;font-size:11px;margin:0;\">ARV</p>\n                <p style=\"color:#fff;font-size:24px;font-weight:bold;margin:4px 0;\">$245,000</p>\n            </div>\n            <div style=\"flex:1;background:#1a1a2e;border-radius:8px;padding:16px;text-align:center;\">\n                <p style=\"color:#999;font-size:11px;margin:0;\">SPREAD</p>\n                <p style=\"color:#4ade80;font-size:24px;font-weight:bold;margin:4px 0;\">$90,000</p>\n            </div>\n        </div>\n\n        \n        <div style=\"background:#1a1a2e;border:1px solid #c9a84c33;border-radius:8px;padding:20px;margin:16px 0;\">\n            <h3 style=\"color:#c9a84c;margin:0 0 12px;\">Flip Scenario</h3>\n            <table style=\"width:100%;color:#ccc;font-size:14px;\">\n                <tr><td>Acquisition</td><td style=\"text-align:right\">$155,000</td></tr>\n                <tr><td>Repairs</td><td style=\"text-align:right\">$22,000</td></tr>\n                <tr><td>Total invested</td><td style=\"text-align:right\">$177,000</td></tr>\n                <tr><td>Sell at (ARV)</td><td style=\"text-align:right\">$245,000</td></tr>\n                <tr><td>Less closing (8%)</td><td style=\"text-align:right\">-$19,600</td></tr>\n                <tr style=\"color:#c9a84c;font-weight:bold;font-size:16px;\">\n                    <td>Net profit</td><td style=\"text-align:right\">$41,050</td></tr>\n                <tr><td>ROI</td><td style=\"text-align:right\">23.2%</td></tr>\n            </table>\n        </div>\n        \n        <div style=\"background:#1a1a2e;border:1px solid #c9a84c33;border-radius:8px;padding:20px;margin:16px 0;\">\n            <h3 style=\"color:#c9a84c;margin:0 0 12px;\">Rental Scenario</h3>\n            <table style=\"width:100%;color:#ccc;font-size:14px;\">\n                <tr><td>Monthly rent</td><td style=\"text-align:right\">$2,200</td></tr>\n                <tr><td>Annual gross</td><td style=\"text-align:right\">$26,400</td></tr>\n                <tr><td>Annual expenses (40%)</td><td style=\"text-align:right\">-$10,560</td></tr>\n                <tr style=\"color:#c9a84c;font-weight:bold;\">\n                    <td>NOI</td><td style=\"text-align:right\">$15,840</td></tr>\n                <tr><td>Cap rate</td><td style=\"text-align:right\">8.9%</td></tr>\n            </table>\n        </div>\n    </div>\n\n    <div style=\"text-align:center;padding:24px;background:#c9a84c;border-radius:8px;\">\n        <p style=\"color:#000;font-weight:bold;font-size:16px;margin:0 0 4px;\">\n            Cash only. 7-14 day close. First buyer locks it.</p>\n        <p style=\"color:#000;font-size:14px;margin:0;\">\n            Reply to this email or contact support@everlightventures.io</p>\n    </div>\n\n    <p style=\"text-align:center;color:#444;font-size:11px;margin-top:24px;\">\n        Everlight Ventures -- Acquisitions | everlightventures.io/wholesale<br>\n        This is a private deal alert for qualified buyers only.</p>\n</div>\n</body>\n</html>",
+  "pain_point": {
+    "hook": "Foreclosure auction is approaching. The seller loses everything if they don't act.",
+    "detail": "A lis pendens has been filed. The clock is ticking toward auction. The seller's credit, equity, and home are all at risk.",
+    "urgency": "Once the auction date passes, this deal disappears. The seller is motivated to close before the bank takes it."
+  },
+  "flip_numbers": {
+    "strategy": "Fix and Flip",
+    "purchase": 155000,
+    "repairs": 22000,
+    "arv": 245000,
+    "closing_costs": 19600,
+    "holding_costs": 7350,
+    "total_invested": 177000,
+    "profit": 41050,
+    "roi_pct": 23.2,
+    "timeline": "6-9 months"
+  },
+  "rental_numbers": {
+    "strategy": "Buy and Hold Rental",
+    "purchase": 155000,
+    "repairs": 22000,
+    "monthly_rent": 2200.0,
+    "annual_rent": 26400,
+    "annual_expenses": 10560,
+    "noi": 15840,
+    "cap_rate": 8.9,
+    "cash_on_cash": 8.9,
+    "timeline": "Year 1 cash flow"
+  },
+  "buyer_price": 155000,
+  "generated_at": "2026-04-22"
+}

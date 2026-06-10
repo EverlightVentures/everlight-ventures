@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block page_title %}Add Punch{% endblock %}
+{% block header_emoji %}➕{% endblock %}
+{% block header_title %}Add Punch{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">New punch</div>
+  </div>
+  <div class="card-body">
+    <form method="POST">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Employee</label>
+          <select class="form-input" name="employee_id" required>
+            {% for e in employees %}
+            <option value="{{ e.Employee_ID }}">{{ e.Employee_Name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Employee name</label>
+          <input class="form-input" name="employee_name" placeholder="Name (optional)">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Date</label>
+          <input class="form-input" type="date" name="punch_date" value="{{ today }}">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Time</label>
+          <input class="form-input" type="time" name="punch_time" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <select class="form-input" name="punch_type">
+          {% for t in punch_types %}
+          <option value="{{ t }}">{{ t }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Reason</label>
+        <input class="form-input" name="reason" placeholder="Reason for manual punch">
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Add punch</button>
+        <a class="btn btn-secondary" href="{{ url_for('timeclock_manage') }}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,374 @@
+{% extends "base.html" %}
+
+{% block page_title %}Create Pay Period{% endblock %}
+{% block header_emoji %}🗓️{% endblock %}
+{% block header_title %}Create Pay Period{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('payroll_dashboard') }}" class="btn btn-secondary">
+    <i data-lucide="arrow-left"></i>
+    Back to Payroll
+</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(160deg, #0f1f17 0%, #0a1810 40%, #0f1f17 100%);
+    }
+
+    .page-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 24px;
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+
+    @media (max-width: 900px) {
+        .page-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .form-panel {
+        background: linear-gradient(145deg, #1e3a2a 0%, #162b1f 100%);
+        border: 1px solid rgba(167, 243, 208, 0.12);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    }
+
+    .form-header {
+        padding: 24px 28px;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.1);
+        background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+    }
+
+    .form-header h2 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #e8f5ee;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .form-body {
+        padding: 28px;
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    @media (max-width: 500px) {
+        .form-row { grid-template-columns: 1fr; }
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #94a3b8;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-label .required {
+        color: #fb7185;
+    }
+
+    .form-input, .form-select, .form-textarea {
+        width: 100%;
+        padding: 14px 18px;
+        font-size: 16px;
+        font-family: inherit;
+        border: 2px solid rgba(167, 243, 208, 0.15);
+        border-radius: 12px;
+        background: #1a2f23;
+        color: #e8f5ee;
+        transition: all 0.2s;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16,185,129,0.15);
+    }
+
+    .form-hint {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 6px;
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .form-actions {
+        padding: 24px 28px;
+        border-top: 1px solid rgba(167, 243, 208, 0.1);
+        background: rgba(0,0,0,0.1);
+        display: flex;
+        gap: 12px;
+    }
+
+    .btn-submit {
+        padding: 14px 32px;
+        font-size: 15px;
+        font-weight: 700;
+        background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-family: inherit;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 16px rgba(16,185,129,0.3);
+        transition: all 0.2s;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16,185,129,0.4);
+    }
+
+    .btn-cancel {
+        padding: 14px 24px;
+        font-size: 15px;
+        font-weight: 600;
+        background: rgba(0,0,0,0.2);
+        color: #94a3b8;
+        border: 1px solid rgba(167, 243, 208, 0.15);
+        border-radius: 12px;
+        cursor: pointer;
+        font-family: inherit;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(0,0,0,0.3);
+        color: #e8f5ee;
+    }
+
+    /* Info Panel */
+    .info-panel {
+        background: linear-gradient(145deg, #1e3a2a 0%, #162b1f 100%);
+        border: 1px solid rgba(167, 243, 208, 0.12);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        height: fit-content;
+    }
+
+    .info-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.1);
+        background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+    }
+
+    .info-header h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #e8f5ee;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .info-body {
+        padding: 20px 24px;
+    }
+
+    .info-body ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .info-body li {
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.06);
+        font-size: 14px;
+        color: #94a3b8;
+        line-height: 1.5;
+    }
+
+    .info-body li:last-child {
+        border-bottom: none;
+    }
+
+    .info-body strong {
+        color: #e8f5ee;
+    }
+
+    /* Recent Periods */
+    .recent-panel {
+        background: linear-gradient(145deg, #1e3a2a 0%, #162b1f 100%);
+        border: 1px solid rgba(167, 243, 208, 0.12);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        margin-top: 20px;
+    }
+
+    .period-item {
+        padding: 16px 24px;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.08);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .period-item:last-child {
+        border-bottom: none;
+    }
+
+    .period-info strong {
+        display: block;
+        font-size: 14px;
+        color: #e8f5ee;
+        margin-bottom: 4px;
+    }
+
+    .period-info span {
+        font-size: 12px;
+        color: #64748b;
+    }
+
+    .period-status {
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .period-status.approved { background: rgba(16,185,129,0.2); color: #34d399; }
+    .period-status.processed { background: rgba(56,189,248,0.2); color: #38bdf8; }
+    .period-status.draft { background: rgba(251,191,36,0.2); color: #fbbf24; }
+
+    .alert-error {
+        padding: 16px 20px;
+        border-radius: 12px;
+        background: rgba(244, 63, 94, 0.15);
+        border: 1px solid rgba(244, 63, 94, 0.3);
+        color: #fb7185;
+        margin-bottom: 20px;
+        font-size: 14px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-grid">
+    <!-- Form Panel -->
+    <div class="form-panel">
+        <div class="form-header">
+            <h2>📝 Period Details</h2>
+        </div>
+
+        <form method="POST" action="{{ url_for('create_pay_period_view') }}">
+            <div class="form-body">
+                {% if error %}
+                <div class="alert-error">
+                    <strong>Error:</strong> {{ error }}
+                </div>
+                {% endif %}
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Period Start <span class="required">*</span></label>
+                        <input type="date" name="period_start" class="form-input" value="{{ default_start or '' }}" required>
+                        <div class="form-hint">First day of pay period</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Period End <span class="required">*</span></label>
+                        <input type="date" name="period_end" class="form-input" value="{{ default_end or '' }}" required>
+                        <div class="form-hint">Last day of pay period</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Pay Date</label>
+                        <input type="date" name="pay_date" class="form-input" value="{{ default_pay_date or '' }}">
+                        <div class="form-hint">When employees get paid</div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Label</label>
+                        <input type="text" name="label" class="form-input" placeholder="e.g., Week 51" value="{{ default_label or '' }}">
+                        <div class="form-hint">Optional friendly name</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Notes</label>
+                    <textarea name="notes" class="form-textarea" placeholder="Any notes for this period...">{{ default_notes or '' }}</textarea>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn-submit">
+                    <i data-lucide="check"></i>
+                    Create Period
+                </button>
+                <a href="{{ url_for('payroll_dashboard') }}" class="btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Info Sidebar -->
+    <div>
+        <div class="info-panel">
+            <div class="info-header">
+                <h3>💡 How It Works</h3>
+            </div>
+            <div class="info-body">
+                <ul>
+                    <li><strong>Start/End</strong> define the time range for payroll calculations.</li>
+                    <li><strong>Pay Date</strong> is when employees receive payment.</li>
+                    <li>All time clock entries within the period will be included.</li>
+                    <li>After creating, you can review and process payroll.</li>
+                </ul>
+            </div>
+        </div>
+
+        {% if recent_periods %}
+        <div class="recent-panel">
+            <div class="info-header">
+                <h3>📋 Recent Periods</h3>
+            </div>
+            {% for p in recent_periods %}
+            <div class="period-item">
+                <div class="period-info">
+                    <strong>{{ p.Start_Date }} → {{ p.End_Date }}</strong>
+                    <span>Pay date: {{ p.Pay_Date or '—' }}</span>
+                </div>
+                <span class="period-status {{ (p.Status or 'draft')|lower }}">{{ p.Status or 'Draft' }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

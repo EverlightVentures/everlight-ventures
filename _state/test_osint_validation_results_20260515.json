@@ -1,0 +1,80 @@
+{
+  "test_run": "osint_validation_20260515",
+  "timestamp": "2026-05-15T04:20:07-0700",
+  "phase1_macro_enrichment": [
+    {
+      "path": "015011__00011.json",
+      "ok": true,
+      "changes": [
+        "news_catalyst: Shelby County , Davidson County among other Tennessee counti..."
+      ],
+      "new_hooks": 1,
+      "macro_hits": 1,
+      "wall_time_s": 18.3
+    },
+    {
+      "path": "015011__00013.json",
+      "ok": true,
+      "changes": [],
+      "new_hooks": 0,
+      "macro_hits": 0,
+      "wall_time_s": 16.7
+    },
+    {
+      "path": "015025_00024.json",
+      "ok": true,
+      "changes": [],
+      "new_hooks": 0,
+      "macro_hits": 0,
+      "wall_time_s": 18.9
+    }
+  ],
+  "phase2_email_discovery": [
+    {
+      "lead": "HOWARD EDDIE",
+      "ok": true,
+      "top_score": 25,
+      "candidates_generated": 30,
+      "candidates_verified": 12,
+      "top_candidates": [
+        "eddie.howard@gmail.com",
+        "eddie.howard@yahoo.com",
+        "eddie.howard@outlook.com"
+      ],
+      "wall_time_s": 2.2
+    },
+    {
+      "lead": "LEGGETT BENNIE",
+      "ok": true,
+      "top_score": 25,
+      "candidates_generated": 30,
+      "candidates_verified": 12,
+      "top_candidates": [
+        "bennie.leggett@gmail.com",
+        "bennie.leggett@yahoo.com",
+        "bennie.leggett@outlook.com"
+      ],
+      "wall_time_s": 1.9
+    },
+    {
+      "lead": "STOKES MARY",
+      "ok": true,
+      "top_score": 25,
+      "candidates_generated": 30,
+      "candidates_verified": 12,
+      "top_candidates": [
+        "mary.stokes@gmail.com",
+        "mary.stokes@yahoo.com",
+        "mary.stokes@outlook.com"
+      ],
+      "wall_time_s": 1.8
+    }
+  ],
+  "totals": {
+    "phase1_ok": 3,
+    "phase1_with_changes": 1,
+    "phase1_macro_hits": 1,
+    "phase2_ok": 3,
+    "phase2_high_score": 0
+  }
+}

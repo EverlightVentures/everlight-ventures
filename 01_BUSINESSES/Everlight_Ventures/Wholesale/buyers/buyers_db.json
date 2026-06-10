@@ -1,0 +1,111 @@
+[
+  {
+    "id": "buyer_msh_chris_ulander",
+    "company": "Mid South Homebuyers, LLC",
+    "company_alt": "MS Newcon, LLC",
+    "contact_name": "Chris Ulander",
+    "contact_role": "Acquisitions Manager",
+    "email": "chris@midsouthhomebuyers.com",
+    "deal_inbox": "leads@midsouthhomebuyers.com",
+    "phone": "901.692.8049",
+    "address": "46 Flicker St, Memphis TN 38104",
+    "website": "www.midsouthhomebuyers.com",
+    "status": "active_buyer",
+    "first_contact": "2026-04-24T22:00:00Z",
+    "first_response": "2026-04-27T14:01:24-05:00",
+    "response_latency_hours": 64,
+    "source": "everlight_b2b_cold_outreach",
+    "buy_box": {
+      "memphis": {
+        "property_types": [
+          "SFR"
+        ],
+        "bedrooms_min": 2,
+        "bedrooms_max": 4,
+        "price_min_usd": 10000,
+        "price_max_usd": 110000,
+        "price_max_stretch_usd": 160000,
+        "price_typical_low_usd": 30000,
+        "price_typical_high_usd": 60000,
+        "build_year_min": 1940,
+        "construction_pref": "brick",
+        "construction_acceptable": [
+          "brick",
+          "frame_condition_dependent"
+        ],
+        "condition_acceptable": [
+          "distressed",
+          "needs_repair",
+          "livable"
+        ],
+        "occupancy_acceptable": [
+          "occupied",
+          "vacant"
+        ],
+        "vacant_lots_accepted": true,
+        "vacant_lots_zone": "citywide",
+        "zip_codes": [
+          "38127",
+          "38128",
+          "38134",
+          "38117",
+          "38111",
+          "38141",
+          "38115",
+          "38118",
+          "38116",
+          "38109",
+          "38104",
+          "38122",
+          "38107",
+          "38114",
+          "38106"
+        ],
+        "street_by_street_caveat": true
+      },
+      "little_rock": {
+        "property_types": [
+          "SFR"
+        ],
+        "bedrooms_min": 2,
+        "bathrooms_min": 1,
+        "bedrooms_pref_for_conversion": "3/1",
+        "sqft_min": 700,
+        "flood_zone_blocked": true,
+        "submarkets_blocked": [
+          "North Little Rock",
+          "Benton"
+        ],
+        "blocked_reason": "inspection_permit_losses",
+        "vacant_lots_accepted": true,
+        "vacant_lots_zone_blocked": [
+          "North Little Rock",
+          "Benton"
+        ],
+        "vacant_lots_septic_blocked": true,
+        "zip_codes": [
+          "72202",
+          "72204",
+          "72205",
+          "72206",
+          "72209",
+          "72076",
+          "72120",
+          "72015",
+          "72019"
+        ]
+      }
+    },
+    "lead_requirements": {
+      "direct_to_seller_or_disclosed_jv": true,
+      "include_occupancy_status": true,
+      "include_keybox_info_when_available": true,
+      "feedback_promised": "respond_with_feedback_on_every_lead_even_if_pass"
+    },
+    "volume_cap": "NONE",
+    "no_volume_cap_quote": "there is no limit to the amount of deals we'll take from you",
+    "competitive_posture": "non-step-on-toes; respect existing JV chains",
+    "notes": "First Memphis buyer relationship. JV-friendly. Will give feedback on every submission so we can refine our scout criteria.",
+    "raw_email_archived_at": "/mnt/sdcard/AA_MY_DRIVE/_logs/inbound/imap_uid_20577_chris_ulander.txt"
+  }
+]

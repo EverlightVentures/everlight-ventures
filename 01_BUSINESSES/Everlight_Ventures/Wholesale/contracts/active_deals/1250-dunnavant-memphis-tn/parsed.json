@@ -1,0 +1,15 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=026056%20%2000056",
+  "parsed_at": "2026-05-08T01:19:24+00:00",
+  "parcel_id": "026056  00056",
+  "property_address": "1250  DUNNAVANT ST",
+  "owner_name": "WLLIAMS MARCO",
+  "land_use": "- SINGLE FAMILY",
+  "year_built": 1951,
+  "sqft": 1680,
+  "land_appraisal_usd": 9300,
+  "building_appraisal_usd": 30700,
+  "total_appraisal_usd": 40000,
+  "subdivision": null
+}

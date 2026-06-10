@@ -1,0 +1,12 @@
+[Unit]
+Description=Sync active_deals -> DB every 5 minutes
+Requires=sync-deals.service
+
+[Timer]
+OnBootSec=4min
+OnUnitActiveSec=5min
+AccuracySec=20s
+Persistent=true
+
+[Install]
+WantedBy=timers.target

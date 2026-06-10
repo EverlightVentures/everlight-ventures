@@ -1,0 +1,148 @@
+{
+  "name": "Alley Kingz #0001 $BCARDD",
+  "symbol": "BCARDI",
+  "description": "$BCARDD is a Mythic Vanguard of the Boneguard Crew. The Dogo Argentino pilots the The Crown Rig -- armored bruiser rig -- ram plow, plate armor, slow and unstoppable. Signature move: \"Crownbreaker\". Card #0001. The $BCARDD coin mascot, the blackjack dealer, and the Mythic Vanguard who anchors the whole pack. One dog, one currency, one aesthetic, one arcade. Cosmetic art plus gameplay stats; in-game items are for entertainment and utility, not investments. No promised returns.",
+  "image": "ipfs://<IMAGE_CID_DIR>/0001_bcardd.png",
+  "animation_url": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_$BCARDD_Crownbreaker_Seedance_V1.mp4",
+  "external_url": "https://everlightventures.io/bcardi",
+  "attributes": [
+    {
+      "trait_type": "Card Number",
+      "value": "0001"
+    },
+    {
+      "trait_type": "Faction",
+      "value": "Boneguard Crew"
+    },
+    {
+      "trait_type": "Faction Id",
+      "value": "boneguard_crew"
+    },
+    {
+      "trait_type": "Breed",
+      "value": "Dogo Argentino"
+    },
+    {
+      "trait_type": "Name",
+      "value": "$BCARDD"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Mythic"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Vanguard"
+    },
+    {
+      "trait_type": "Cost",
+      "value": 10
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Pack"
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Guard"
+    },
+    {
+      "trait_type": "HP",
+      "value": 2600
+    },
+    {
+      "trait_type": "Damage",
+      "value": 160
+    },
+    {
+      "trait_type": "Attack Speed",
+      "value": 0.7
+    },
+    {
+      "trait_type": "Move Speed",
+      "value": 0.6
+    },
+    {
+      "trait_type": "Range",
+      "value": 1
+    },
+    {
+      "trait_type": "Ability",
+      "value": "Crownbreaker"
+    },
+    {
+      "trait_type": "Ability Cooldown",
+      "value": 18
+    },
+    {
+      "trait_type": "Queen Target",
+      "value": true
+    },
+    {
+      "trait_type": "Rig",
+      "value": "The Crown Rig"
+    },
+    {
+      "trait_type": "Rig Class",
+      "value": "bruiser"
+    },
+    {
+      "trait_type": "Weapon Mod",
+      "value": "ram_plow"
+    }
+  ],
+  "properties": {
+    "category": "video",
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "files": [
+      {
+        "uri": "ipfs://<IMAGE_CID_DIR>/0001_bcardd.png",
+        "type": "image/png"
+      },
+      {
+        "uri": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_$BCARDD_Crownbreaker_Seedance_V1.mp4",
+        "type": "video/mp4"
+      }
+    ]
+  },
+  "onchain_attributes": [
+    {
+      "key": "hp",
+      "value": "2600"
+    },
+    {
+      "key": "damage",
+      "value": "160"
+    },
+    {
+      "key": "attack_speed",
+      "value": "0.7"
+    },
+    {
+      "key": "move_speed",
+      "value": "0.6"
+    },
+    {
+      "key": "range",
+      "value": "1"
+    },
+    {
+      "key": "cost",
+      "value": "10"
+    },
+    {
+      "key": "rarity",
+      "value": "Mythic"
+    },
+    {
+      "key": "ability_id",
+      "value": "crownbreaker"
+    },
+    {
+      "key": "queen_target",
+      "value": "1"
+    }
+  ]
+}

@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block page_title %}Time Clock{% endblock %}
+{% block header_emoji %}⏱️{% endblock %}
+{% block header_title %}Time Clock{% endblock %}
+{% block header_actions %}<a href="{{ url_for('timeclock_log') }}" class="btn btn-secondary">View Log</a>{% endblock %}
+{% block extra_css %}
+<style>
+    .clock-layout { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; align-items: start; }
+    @media (max-width: 980px) { .clock-layout { grid-template-columns: 1fr; } }
+
+    .clock-hero {
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(145deg, #1b3326 0%, #13261c 100%);
+        border: 1px solid rgba(167, 243, 208, 0.12);
+    }
+    .clock-hero::after {
+        content: "";
+        position: absolute;
+        top: -40px;
+        right: -60px;
+        width: 180px;
+        height: 180px;
+        background: radial-gradient(circle, rgba(56,189,248,0.28), transparent 70%);
+        opacity: 0.8;
+        pointer-events: none;
+    }
+    .clock-hero .card-body { padding: 36px; text-align: center; }
+    .clock-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 16px;
+        border-radius: 999px;
+        font-weight: 700;
+        font-size: 12px;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        border: 1px solid rgba(167, 243, 208, 0.2);
+        background: rgba(0,0,0,0.25);
+        margin-bottom: 18px;
+    }
+    .clock-status.working { color: #34d399; }
+    .clock-status.break { color: #fbbf24; }
+    .clock-status.off { color: #94a3b8; }
+    .clock-hero-value {
+        font-size: 52px;
+        font-weight: 800;
+        letter-spacing: -1px;
+        margin-bottom: 6px;
+        font-family: 'Space Mono', monospace;
+    }
+    .clock-hero-note { color: #94a3b8; font-size: 14px; }
+
+    .clock-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 16px;
+        margin-top: 18px;
+    }
+    .clock-stat {
+        background: rgba(0,0,0,0.2);
+        border: 1px solid rgba(167, 243, 208, 0.08);
+        border-radius: 14px;
+        padding: 16px;
+    }
+    .clock-stat-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        color: #64748b;
+        font-weight: 700;
+    }
+    .clock-stat-value {
+        margin-top: 8px;
+        font-size: 20px;
+        font-weight: 800;
+        color: #e8f5ee;
+        font-family: 'Space Mono', monospace;
+    }
+
+    .clock-actions {
+        background: linear-gradient(145deg, #1e3a2a 0%, #162b1f 100%);
+        border: 1px solid rgba(167, 243, 208, 0.12);
+    }
+    .clock-actions .card-header { padding: 20px 24px; }
+    .clock-actions .card-body { padding: 22px 24px; }
+    .clock-action-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+    .clock-action-note {
+        margin-top: 16px;
+        padding: 14px;
+        border-radius: 12px;
+        background: rgba(0,0,0,0.22);
+        border: 1px solid rgba(167, 243, 208, 0.08);
+        color: #94a3b8;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+    .clock-tip {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        margin-top: 8px;
+    }
+    .clock-tip span { font-size: 16px; }
+</style>
+{% endblock %}
+{% block content %}
+<div class="clock-layout">
+    <div>
+        <div class="card clock-hero mb-6">
+            <div class="card-body">
+                {% if status.status == 'WORKING' %}
+                <div class="clock-status working">🟢 Clocked In</div>
+                <div class="clock-hero-value">{{ "%.1f"|format(status.hours_today or 0) }}h</div>
+                <div class="clock-hero-note">hours today</div>
+                {% elif status.status == 'ON_BREAK' %}
+                <div class="clock-status break">☕ On Break</div>
+                <div class="clock-hero-value">Break Time</div>
+                <div class="clock-hero-note">Recharge and return ready</div>
+                {% else %}
+                <div class="clock-status off">⏸ Off Clock</div>
+                <div class="clock-hero-value">Ready?</div>
+                <div class="clock-hero-note">Clock in to start your shift</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="clock-stats">
+            <div class="clock-stat">
+                <div class="clock-stat-label">Hours Today</div>
+                <div class="clock-stat-value">{{ "%.2f"|format(status.hours_today or 0) }}</div>
+            </div>
+            <div class="clock-stat">
+                <div class="clock-stat-label">Overtime</div>
+                <div class="clock-stat-value">{{ "%.2f"|format(status.overtime or 0) }}</div>
+            </div>
+            <div class="clock-stat">
+                <div class="clock-stat-label">Last Punch</div>
+                <div class="clock-stat-value">{{ status.last_punch or "—" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card clock-actions">
+        <div class="card-header"><h2 class="card-title">Actions</h2></div>
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('punch_clock') }}">
+                {% if status.status == 'NOT_CLOCKED_IN' or status.status == 'CLOCKED_OUT' %}
+                <input type="hidden" name="action" value="clock_in">
+                <button type="submit" class="btn btn-success btn-lg" style="width:100%;padding:18px;">Clock In</button>
+                {% elif status.status == 'WORKING' %}
+                <div class="clock-action-grid mb-4">
+                    <button type="submit" name="action" value="break" class="btn btn-secondary btn-lg">Break</button>
+                    <button type="submit" name="action" value="lunch" class="btn btn-secondary btn-lg">Lunch</button>
+                </div>
+                <button type="submit" name="action" value="clock_out" class="btn btn-danger btn-lg" style="width:100%;">Clock Out</button>
+                {% elif status.status == 'ON_BREAK' %}
+                <input type="hidden" name="action" value="end_break">
+                <button type="submit" class="btn btn-primary btn-lg" style="width:100%;padding:18px;">End Break</button>
+                {% endif %}
+            </form>
+
+            <div class="clock-action-note">
+                <div class="clock-tip"><span>⏱️</span><div>Use Break for short pauses and Lunch for longer resets.</div></div>
+                <div class="clock-tip"><span>✅</span><div>Clock out only after final cleanup and cash-out duties are done.</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

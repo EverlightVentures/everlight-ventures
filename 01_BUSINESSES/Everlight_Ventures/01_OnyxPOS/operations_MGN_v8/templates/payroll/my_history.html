@@ -1,0 +1,106 @@
+
+{% extends "base.html" %}
+
+{% block page_title %}My Pay History{% endblock %}
+{% block header_emoji %}💸{% endblock %}
+{% block header_title %}My Pay History{% endblock %}
+
+{% block content %}
+
+<section class="card">
+  <div class="card-header">
+    <div class="card-title">
+      <span class="card-emoji">🧾</span>
+      Pay History
+    </div>
+    <div class="text-muted" style="font-size:13px;">
+      {% set rows = (pay_history or payroll_history or runs or []) %}
+      {{ rows|length }} record{{ '' if rows|length == 1 else 's' }}
+    </div>
+  </div>
+
+  <div class="card-body" style="padding:0;">
+    {% set rows = (pay_history or payroll_history or runs or []) %}
+    {% if rows|length == 0 %}
+      <div class="empty-state">
+        <div class="empty-icon">🌿</div>
+        <h3>No pay history yet</h3>
+        <p>If you were just added, run payroll for a period and your history will show here.</p>
+      </div>
+    {% else %}
+      <table>
+        <thead>
+          <tr>
+            <th style="width: 150px;">Pay Period</th>
+            <th style="width: 120px;">Hours</th>
+            <th style="width: 140px;">Rate</th>
+            <th style="width: 160px;">Gross Pay</th>
+            <th>Status</th>
+            <th style="width: 180px;">Created</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rows %}
+            {% set status = (r.Status or r.status or 'UNKNOWN')|upper %}
+            <tr>
+              <td class="text-mono">
+                {{ r.Period_Start or r.period_start or r.Start or r.start or '—' }}
+                →
+                {{ r.Period_End or r.period_end or r.End or r.end or '—' }}
+              </td>
+
+              <td class="text-mono">
+                {{ r.Hours or r.hours or r.Total_Hours or r.total_hours or '—' }}
+              </td>
+
+              <td class="text-mono">
+                {% set rate = (r.Hourly_Rate or r.hourly_rate or r.Rate or r.rate) %}
+                {% if rate is not none %}
+                  ${{ rate }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+
+              <td class="text-mono" style="font-weight:800;">
+                {% set gross = (r.Gross_Pay or r.gross_pay or r.Gross or r.gross) %}
+                {% if gross is not none %}
+                  ${{ gross }}
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+
+              <td>
+                {% if status in ['PAID','APPROVED','FINALIZED'] %}
+                  <span class="badge badge-success">✅ {{ status|lower|replace('_',' ')|title }}</span>
+                {% elif status in ['PENDING','DRAFT','OPEN'] %}
+                  <span class="badge badge-warning">⏳ {{ status|lower|replace('_',' ')|title }}</span>
+                {% else %}
+                  <span class="badge">{{ status|lower|replace('_',' ')|title }}</span>
+                {% endif %}
+              </td>
+
+              <td class="text-muted">
+                {{ r.Created_At or r.created_at or r.Timestamp or r.timestamp or '—' }}
+              </td>
+            </tr>
+
+            {% if r.Notes or r.notes %}
+              <tr>
+                <td colspan="6" class="text-muted" style="padding-top:0;">
+                  <div style="padding:10px 14px;border-top:1px dashed var(--gray-200);">
+                    <b>Notes:</b> {{ r.Notes or r.notes }}
+                  </div>
+                </td>
+              </tr>
+            {% endif %}
+
+          {% endfor %}
+        </tbody>
+      </table>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

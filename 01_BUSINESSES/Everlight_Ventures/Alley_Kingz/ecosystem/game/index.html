@@ -7,7 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>ALLEY KINGZ -- $BCARDD Arcade</title>
-<meta name="description" content="Alley Kingz -- cyberpunk dog crews, Twisted-Metal rigs, Clash-Royale lanes. Playable prototype.">
+<meta name="description" content="Run the pack. Rule the streets. Alley Kingz is a gritty cyberpunk dog-crew battler. Are you the top dog?">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -51,8 +51,14 @@
   }
   .subtitle{
     font-family:'Playfair Display',serif; font-style:italic; font-weight:700;
-    color:var(--gold-lo); font-size:clamp(13px,3.6vw,17px);
-    max-width:380px; line-height:1.4; margin-bottom:8px;
+    color:var(--gold-lo); font-size:clamp(15px,4.2vw,20px);
+    max-width:380px; line-height:1.35; margin-bottom:4px;
+  }
+  /* the dare under the swagger line -- spaced uppercase, gold-hi */
+  .challenge{
+    font-family:'Cinzel',serif; font-weight:900; text-transform:uppercase;
+    letter-spacing:0.16em; color:var(--gold-hi); font-size:clamp(11px,3vw,13px);
+    opacity:0.95; margin-bottom:8px; filter:drop-shadow(0 1px 8px rgba(212,175,55,0.3));
   }
   .crest{
     width:74px; height:74px; margin-bottom:14px; border-radius:50%;
@@ -163,7 +169,11 @@
   }
   #codexbtn:active{ transform:scale(0.94); }
 
-  #boardwrap{ position:relative; flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; }
+  #boardwrap{ position:relative; flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center;
+    /* full-bleed: any letterbox margin is lit ATMOSPHERE, never dead black (operator 2026-06-08) */
+    background:
+      radial-gradient(130% 90% at 50% 38%, rgba(212,175,55,0.09), rgba(212,175,55,0) 58%),
+      radial-gradient(120% 120% at 50% 50%, #16151f 0%, var(--vanta) 72%); }
 
   /* ---------- DISTRICT GATE health bar (top of board) ---------- */
   #gatebar{
@@ -209,8 +219,10 @@
   #codexscreen .cx-doctrine{ margin-top:14px; max-width:440px; font-size:9px; color:var(--steel); line-height:1.4; }
   #board{
     display:block; touch-action:none;
-    border:1px solid rgba(212,175,55,0.18); border-radius:10px;
-    box-shadow:0 0 40px rgba(0,0,0,0.6), inset 0 0 60px rgba(0,0,0,0.5);
+    /* full-bleed flat: no card frame, no dark vignette (it shrank + dimmed the field).
+       Subtle gold ambient only, so the arena reads big + lit edge-to-edge. */
+    border:none; border-radius:0;
+    box-shadow:0 0 34px rgba(212,175,55,0.12);
     background:var(--vanta);
     max-width:100%; max-height:100%;
   }
@@ -361,6 +373,176 @@
     border:1px solid rgba(212,175,55,0.5);
     box-shadow:0 4px 14px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.08);
   }
+
+  /* ============================================================
+     LOBBY HOME HUB -- the start screen as a real front door.
+     Portrait-only (no @media). Gold on vanta, gritty street.
+     ============================================================ */
+  #startscreen{
+    justify-content:flex-start; padding:12px 16px 26px;
+    overflow-y:auto; -webkit-overflow-scrolling:touch;
+  }
+  .lobby-top{
+    width:100%; max-width:440px; flex:0 0 auto;
+    display:flex; align-items:stretch; gap:8px; margin-bottom:10px;
+  }
+  #playerchip{
+    flex:1 1 auto; display:flex; align-items:center; gap:9px; cursor:pointer; text-align:left;
+    padding:7px 10px; border-radius:12px;
+    background:linear-gradient(170deg,rgba(20,19,31,0.88),rgba(8,8,14,0.88));
+    border:1px solid rgba(212,175,55,0.32);
+    box-shadow:0 4px 14px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  #playerchip:active{ transform:scale(0.985); }
+  #playerchip .pc-ava{
+    flex:0 0 auto; width:34px; height:34px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Cinzel',serif; font-weight:900; font-size:14px; color:var(--gold-hi);
+    background:radial-gradient(circle at 50% 35%, rgba(212,175,55,0.25), rgba(5,5,7,0.92));
+    border:1.5px solid var(--gold);
+    box-shadow:0 0 10px rgba(212,175,55,0.25);
+  }
+  #playerchip .pc-name{
+    font-family:'Cinzel',serif; font-weight:900; font-size:13px;
+    letter-spacing:0.07em; color:var(--ivory); line-height:1.1; text-transform:uppercase;
+  }
+  #playerchip .pc-pen{
+    font-family:'Inter',sans-serif; font-weight:700; font-size:7px; letter-spacing:0.12em;
+    text-transform:uppercase; color:var(--gold-lo); margin-left:5px; vertical-align:2px;
+    border:1px solid rgba(212,175,55,0.35); border-radius:4px; padding:1px 4px;
+  }
+  #playerchip .pc-stats{
+    display:flex; gap:9px; margin-top:3px;
+    font-family:'Inter',monospace; font-weight:700; font-size:9px;
+    color:var(--gold-lo); letter-spacing:0.06em;
+  }
+  #playerchip .pc-stats b{ color:var(--gold-hi); }
+  #dailychip{
+    flex:0 0 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    padding:6px 11px; border-radius:12px;
+    background:linear-gradient(170deg,rgba(20,19,31,0.88),rgba(8,8,14,0.88));
+    border:1px solid rgba(212,175,55,0.32);
+    box-shadow:0 4px 14px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  #dailychip .dc-label{
+    font-family:'Cinzel',serif; font-weight:700; font-size:8px; letter-spacing:0.14em;
+    color:var(--gold-lo); text-transform:uppercase;
+  }
+  #dailychip .dc-streak{ font-family:'Inter',monospace; font-weight:700; font-size:11px; color:var(--gold-hi); }
+  #dailychip .dc-claim{
+    cursor:pointer; border:none; outline:none;
+    font-family:'Cinzel',serif; font-weight:700; font-size:8px; letter-spacing:0.1em;
+    text-transform:uppercase; color:#0a0a0a; padding:3px 11px; border-radius:999px;
+    background:linear-gradient(180deg,var(--gold-hi),var(--gold-lo));
+    animation:dcglow 1.4s infinite alternate;
+  }
+  #dailychip .dc-claim:active{ transform:translateY(1px); }
+  @keyframes dcglow{
+    from{ box-shadow:0 2px 8px rgba(212,175,55,0.3); }
+    to{ box-shadow:0 2px 15px rgba(212,175,55,0.7); }
+  }
+  .lobby-hero{
+    position:relative; width:100%; max-width:440px; flex:0 0 auto; overflow:hidden;
+    display:flex; flex-direction:column; align-items:center;
+    padding:20px 12px 14px; border-radius:16px;
+    background:
+      radial-gradient(120% 100% at 50% 0%, rgba(212,175,55,0.10), transparent 60%),
+      linear-gradient(180deg,#13121d,#07070c);
+    border:1px solid rgba(212,175,55,0.22);
+    box-shadow:0 10px 30px rgba(0,0,0,0.5);
+  }
+  #lobbyhero{
+    position:absolute; inset:0; width:100%; height:100%; z-index:0;
+    object-fit:cover; object-position:center top; opacity:0.6;
+  }
+  .lobby-hero::after{
+    content:''; position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:linear-gradient(180deg, rgba(5,5,7,0.12), rgba(5,5,7,0.5) 55%, rgba(5,5,7,0.88));
+  }
+  .lobby-hero > *:not(#lobbyhero){ position:relative; z-index:2; }
+  .lobby-hero .crest{ width:58px; height:58px; margin-bottom:10px; font-size:26px; }
+  .lobby-hero .title{ font-size:clamp(34px,10vw,58px); }
+  .lobby-hero .challenge{ margin-bottom:2px; }
+  .btn.play-now{
+    width:100%; max-width:440px; margin-top:13px; padding:16px 0; flex:0 0 auto;
+    font-size:clamp(18px,5vw,22px); letter-spacing:0.18em;
+  }
+  .mode-grid{
+    width:100%; max-width:440px; flex:0 0 auto;
+    display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;
+  }
+  .mode-tile{
+    cursor:pointer; position:relative; outline:none;
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
+    padding:13px 6px; border-radius:12px; border:1px solid rgba(212,175,55,0.4);
+    background:
+      linear-gradient(170deg,rgba(212,175,55,0.13),rgba(212,175,55,0.03)),
+      linear-gradient(170deg,#15141f,#0a0a10);
+    font-family:'Cinzel',serif; font-weight:700; font-size:13px; letter-spacing:0.09em;
+    text-transform:uppercase; color:var(--gold-hi);
+    box-shadow:0 5px 16px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+    transition:transform 110ms ease, box-shadow 110ms ease;
+  }
+  .mode-tile:active{ transform:translateY(2px) scale(0.98); box-shadow:0 2px 8px rgba(0,0,0,0.4); }
+  .mode-tile .mt-ico{ font-size:18px; line-height:1; filter:drop-shadow(0 1px 4px rgba(0,0,0,0.6)); }
+  .mode-tile .mt-sub{
+    font-family:'Inter',sans-serif; font-weight:600; font-size:8px;
+    letter-spacing:0.08em; color:var(--gold-lo); text-transform:none;
+  }
+  .mode-tile.disabled{
+    cursor:default; filter:grayscale(0.7) brightness(0.6);
+    border-color:var(--steel); color:#8a8a96;
+  }
+  .mode-tile.disabled .mt-sub{ color:var(--steel); }
+  .mode-tile .mt-soon{
+    position:absolute; top:6px; right:7px;
+    font-family:'Inter',sans-serif; font-weight:700; font-size:7px; letter-spacing:0.12em;
+    color:#0a0a0a; background:linear-gradient(180deg,var(--gold-hi),var(--gold-lo));
+    border-radius:4px; padding:1px 5px;
+  }
+  #newsticker{
+    width:100%; max-width:440px; margin-top:10px; flex:0 0 auto;
+    display:flex; align-items:center; gap:8px; overflow:hidden;
+    padding:7px 11px; border-radius:9px;
+    background:rgba(20,19,31,0.7); border:1px solid rgba(212,175,55,0.2);
+  }
+  #newsticker .nt-tag{
+    flex:0 0 auto; font-family:'Cinzel',serif; font-weight:900; font-size:8px; letter-spacing:0.14em;
+    color:#0a0a0a; background:linear-gradient(180deg,var(--gold-hi),var(--gold-lo));
+    border-radius:4px; padding:2px 6px;
+  }
+  #news-item{
+    flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-align:left;
+    font-family:'Inter',sans-serif; font-weight:600; font-size:10px;
+    letter-spacing:0.04em; color:var(--ivory);
+  }
+  .lobby-footer{
+    width:100%; max-width:440px; margin-top:12px; flex:0 0 auto;
+    display:flex; align-items:center; justify-content:center; gap:9px;
+  }
+  .lobby-footer a{
+    text-decoration:none; font-family:'Inter',sans-serif; font-weight:700; font-size:9px;
+    letter-spacing:0.12em; text-transform:uppercase; color:var(--gold-lo);
+    padding:5px 13px; border-radius:999px;
+    border:1px solid rgba(212,175,55,0.3); background:rgba(212,175,55,0.06);
+  }
+  .lobby-footer .bcardd-badge{
+    font-family:'Playfair Display',serif; font-style:italic; font-weight:700; font-size:10px;
+    color:var(--gold-hi); padding:5px 13px; border-radius:999px;
+    border:1px solid rgba(212,175,55,0.45);
+    background:radial-gradient(circle at 50% 0%, rgba(212,175,55,0.18), rgba(212,175,55,0.04));
+  }
+  #startscreen .fineprint{ margin-top:12px; flex:0 0 auto; }
+  #startscreen .wordmark{ position:static; margin-top:8px; flex:0 0 auto; }
+  #lobbytoast{
+    position:fixed; left:50%; bottom:78px; transform:translate(-50%,12px); z-index:80;
+    font-family:'Inter',sans-serif; font-weight:600; font-size:11px; color:var(--ivory);
+    background:linear-gradient(170deg,rgba(20,19,31,0.97),rgba(8,8,14,0.97));
+    border:1px solid rgba(212,175,55,0.5); border-radius:10px; padding:9px 16px;
+    box-shadow:0 8px 24px rgba(0,0,0,0.6); opacity:0; pointer-events:none;
+    transition:opacity 180ms ease, transform 180ms ease;
+  }
+  #lobbytoast.show{ opacity:1; transform:translate(-50%,0); }
   #deckscreen{ justify-content:flex-start; padding:0; overflow:hidden; }
   #db-root{ width:100%; height:100%; max-width:520px; display:flex; flex-direction:column; }
   .db-head{
@@ -509,16 +691,67 @@
 <body>
 <div id="app">
 
-  <!-- ============ START SCREEN ============ -->
+  <!-- ============ START SCREEN / LOBBY HUB (the front door) ============ -->
   <section id="startscreen" class="screen">
-    <div class="crest"><img src="assets/ui/logo.png" alt="Alley Kingz" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.parentNode.textContent='AK'"></div>
-    <h1 class="title">ALLEY KINGZ</h1>
-    <p class="subtitle">cyberpunk dog crews, Twisted-Metal rigs, Clash-Royale lanes</p>
-    <button id="playbtn" class="btn">Play</button>
-    <button id="deckbtn" class="btn btn-sub">Deck Lab</button>
-    <button id="shopbtn" class="btn btn-sub" onclick="location.href='shop/shop.html'">Shop</button>
+
+    <!-- identity row: player chip (tap to rename) + daily streak -->
+    <div class="lobby-top">
+      <div id="playerchip" role="button" title="Tap to set your street name">
+        <div class="pc-ava">AK</div>
+        <div class="pc-info">
+          <div class="pc-name"><span id="pc-name">STRAY</span><span class="pc-pen">edit</span></div>
+          <div class="pc-stats"><span>LVL <b id="pc-level">1</b></span><span>&#9813; <b id="pc-trophies">0</b></span></div>
+        </div>
+      </div>
+      <div id="dailychip">
+        <span class="dc-label">Daily Drop</span>
+        <span class="dc-streak" id="dc-streak">DAY 1</span>
+        <button id="dc-claim" class="dc-claim" type="button">Claim</button>
+      </div>
+    </div>
+
+    <!-- hero: street art behind the crest; gracefully falls back to the gradient look -->
+    <div class="lobby-hero">
+      <img id="lobbyhero" src="assets/ui/lobby_hero.png" alt="" onerror="this.style.display='none'">
+      <div class="crest"><img src="assets/ui/logo.png" alt="Alley Kingz" style="width:100%;height:100%;border-radius:50%;object-fit:cover" onerror="this.parentNode.textContent='AK'"></div>
+      <h1 class="title">ALLEY KINGZ</h1>
+      <p class="subtitle">Run the pack. Rule the streets.</p>
+      <p class="challenge">Are you the top dog?</p>
+    </div>
+
+    <!-- primary action -->
+    <button id="playbtn" class="btn play-now">Play Now</button>
+
+    <!-- mode tiles: the lobby nav -->
+    <div class="mode-grid">
+      <button id="deckbtn" class="mode-tile" type="button">
+        <span class="mt-ico">&#9876;</span>Deck Lab<span class="mt-sub">Build your 11</span>
+      </button>
+      <button id="shopbtn" class="mode-tile" type="button" onclick="location.href='shop/shop.html'">
+        <span class="mt-ico">&#128176;</span>Shop<span class="mt-sub">Crates + cosmetics</span>
+      </button>
+      <button id="drawbtn" class="mode-tile" type="button" onclick="location.href='shop/shop.html#draw'">
+        <span class="mt-ico">&#127922;</span>Lucky Draw<span class="mt-sub">Spin the alley</span>
+      </button>
+      <button id="mapbtn" class="mode-tile disabled" type="button" disabled>
+        <span class="mt-soon">SOON</span>
+        <span class="mt-ico">&#128506;</span>World Map<span class="mt-sub">10 cities incoming</span>
+      </button>
+    </div>
+
+    <!-- street wire: auto-cycling news strip -->
+    <div id="newsticker"><span class="nt-tag">WIRE</span><span id="news-item"></span></div>
+
+    <!-- socials + culture badge -->
+    <div class="lobby-footer">
+      <a id="x-link" href="#" aria-label="X">X</a>
+      <a id="tg-link" href="#" aria-label="Telegram">Telegram</a>
+      <span class="bcardd-badge">powered by $BCARDD</span>
+    </div>
+
     <p class="fineprint">Early prototype. Not financial advice. Shop items are in-game only, no cash value.</p>
     <div class="wordmark">Everlight Ventures &bull; $BCARDD</div>
+    <div id="lobbytoast"></div>
   </section>
 
   <!-- ============ MATCH STAGE ============ -->
@@ -590,8 +823,8 @@
 </div>
 
 <!-- order matters: canon globals first, then the engine that consumes them -->
-<script src="canon.js?v=22"></script>
-<script src="engine.js?v=22"></script>
+<script src="canon.js?v=27"></script>
+<script src="engine.js?v=27"></script>
 <script>
 (function(){
   'use strict';
@@ -732,8 +965,8 @@
   // ---- responsive canvas sizing (keep arena aspect, fit boardwrap) ----
   function resize(){
     const wrap = document.getElementById('boardwrap');
-    const availW = wrap.clientWidth - 4;
-    const availH = wrap.clientHeight - 4;
+    const availW = wrap.clientWidth;        // use the FULL boardwrap -- bleed to the edges (was -4)
+    const availH = wrap.clientHeight;
     const aspect = ARENA_W / ARENA_H;
     let w = availW, h = w / aspect;
     if(h > availH){ h = availH; w = h * aspect; }
@@ -766,7 +999,7 @@
   // draw paths read sb() so heavy glows drop on weak phones. ----
   let LOW_FX = false;
   const CULL = 90;                                   // px margin for offscreen culling
-  function sb(v){ return LOW_FX ? 0 : v; }           // shadowBlur gate
+  function sb(v){ return LOW_FX ? Math.min(v,5) : v; }   // shadowBlur gate -- weak phones keep a SOFT glow (not flat), strong phones full
   function onScreen(px,py){ return px>-CULL && px<canvas.width+CULL && py>-CULL && py<canvas.height+CULL; }
   let _staticBg=null, _staticBgW=0, _staticBgH=0;
   // Bake lanes + river(gradient) + bridges into an offscreen canvas ONCE (rebuild
@@ -1321,11 +1554,13 @@
     const pal = c.palette || {base:c.color, dark:'#222', light:'#aaa'};
     const seed = c.silhouetteSeed||0;
     const jit = seedJit(seed,1,1);                              // -1..1
-    const baseR = 0.55*(1 + seedJit(seed,2,0.12));             // original troop size (operator reverted the v17 +20% sizing 2026-06-07)
+    const baseR = 0.64*(1 + seedJit(seed,2,0.12));             // bigger + easier to see (operator 2026-06-08: "make characters a little bigger")
     // squash/stretch: deploy pop + a quick punch when it just attacked
     const dscale = (u.deployScale!=null? u.deployScale : 1);
     const punch  = u.muzzle>0 ? 1 + (u.muzzle/0.15)*0.22 : 1;   // up to +22% on fire
-    const r = baseR * (u.alive?dscale:1) * punch * sx;
+    // idle "breathing" -- every unit subtly pulses so it reads ALIVE, not a static token
+    const breathe = u.alive ? (1 + 0.035*Math.sin(performance.now()/360 + seed*1.7)) : 1;
+    const r = baseR * (u.alive?dscale:1) * punch * breathe * sx;
 
     // ---- CHARGE TRAIL: fast movers leave a fading streak behind (-angle) ----
     if(u.alive && u.state==='move'){
@@ -1350,16 +1585,31 @@
     // engine faces +x along u.angle; our shapes face +y, so rotate -90deg extra
     ctx.rotate(u.angle - Math.PI/2);
 
-    // ---- RARITY FRAME / AURA ----
+    // ---- RARITY / FACTION AURA: EVERY unit gets a LIVING glow (operator 2026-06-08
+    // "each card should look alive and different" + "special effects around the
+    // pictures"). Color = faction (amber/pink/violet/teal) so factions read distinct;
+    // intensity = rarity; it breathes. Mythic keeps its stronger gold crown on top.
     const rar = c.rarity;
+    const facCol = (pal && pal.base) || c.color || c.accent || PAL.steel;
+    const RAR_AURA = { Common:0.12, Rare:0.18, Epic:0.24, Legendary:0.32, Mythic:0.36 };
+    if(u.alive){
+      const apulse = 0.5 + 0.5*Math.sin(performance.now()/300 + seed*2.1);
+      const amp = (RAR_AURA[rar] || 0.14);
+      ctx.save();
+      ctx.globalAlpha = amp*(0.65 + 0.35*apulse);
+      ctx.shadowColor = facCol; ctx.shadowBlur = sb(9 + amp*42);
+      ctx.fillStyle = facCol;
+      ctx.beginPath(); ctx.arc(0,0,r*(1.40+0.06*apulse),0,Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
     if(c.isMythic){
-      // pulsing gold crown aura
+      // pulsing gold crown aura ON TOP of the faction glow
       const pulse = 0.5 + 0.5*Math.sin(performance.now()/180 + seed);
       ctx.save();
       ctx.globalAlpha = 0.22 + 0.22*pulse;
       ctx.shadowColor = PAL.gold; ctx.shadowBlur = sb(18+8*pulse);
       ctx.fillStyle = PAL.gold;
-      ctx.beginPath(); ctx.arc(0,0,r*1.55,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(0,0,r*1.62,0,Math.PI*2); ctx.fill();
       ctx.restore();
     }
 
@@ -1513,16 +1763,24 @@
       ctx.strokeStyle=e.color; ctx.lineWidth=2; ctx.beginPath();
       ctx.arc(px,py,(0.4+e.t*3)*sx,0,Math.PI*2); ctx.stroke();
     } else if(e.type==='muzzle'){
-      // quick bright flash burst
+      // weapon fire: expanding shockwave ring + white-hot core + radiating sparks
       const sz=(e.size||0.3)*sx;
-      ctx.globalAlpha=a*0.95;
-      ctx.shadowColor=e.color; ctx.shadowBlur=16; ctx.fillStyle=e.color;
-      ctx.beginPath(); ctx.arc(px,py,sz*(1.2-a*0.5),0,Math.PI*2); ctx.fill();
-      // spark spikes
-      ctx.strokeStyle='#fff'; ctx.lineWidth=Math.max(1,sz*0.18); ctx.globalAlpha=a;
-      for(let k=0;k<5;k++){ const ang=k*Math.PI*2/5;
+      // shockwave ring blasts outward as it fades
+      ctx.globalAlpha=a*0.7; ctx.strokeStyle=e.color; ctx.lineWidth=Math.max(1.5,sz*0.5);
+      ctx.shadowColor=e.color; ctx.shadowBlur=sb(14);
+      ctx.beginPath(); ctx.arc(px,py,sz*(1.0+(1-a)*2.2),0,Math.PI*2); ctx.stroke();
+      // colored flash bloom
+      ctx.globalAlpha=a*0.95; ctx.shadowBlur=sb(18); ctx.fillStyle=e.color;
+      ctx.beginPath(); ctx.arc(px,py,sz*(1.3-a*0.5),0,Math.PI*2); ctx.fill();
+      // white-hot core
+      ctx.shadowBlur=0; ctx.globalAlpha=a; ctx.fillStyle='#fff';
+      ctx.beginPath(); ctx.arc(px,py,sz*(0.55-a*0.2),0,Math.PI*2); ctx.fill();
+      // radiating spark spikes (7, jittered length)
+      ctx.strokeStyle='#fff'; ctx.lineWidth=Math.max(1,sz*0.16); ctx.globalAlpha=a;
+      for(let k=0;k<7;k++){ const ang=k*Math.PI*2/7 + (e.angle||0);
+        const ln=sz*(1.5+(k%2)*0.7);
         ctx.beginPath(); ctx.moveTo(px,py);
-        ctx.lineTo(px+Math.cos(ang)*sz*1.6, py+Math.sin(ang)*sz*1.6); ctx.stroke(); }
+        ctx.lineTo(px+Math.cos(ang)*ln, py+Math.sin(ang)*ln); ctx.stroke(); }
     } else if(e.type==='slash'){
       // bright arc swipe at angle (melee)
       const rad=0.9*sx;
@@ -2173,7 +2431,7 @@
     const dt = Math.min(0.05, (ts-last)/1000 || 0); last=ts;
     // sample FPS over ~1s windows; drop heavy shadowBlur if the phone is struggling
     _fpsAcc += dt; _fpsN++;
-    if(_fpsAcc >= 1){ const fps=_fpsN/_fpsAcc; LOW_FX = (fps < 45); _fpsAcc=0; _fpsN=0; }
+    if(_fpsAcc >= 1){ const fps=_fpsN/_fpsAcc; LOW_FX = (fps < 30); _fpsAcc=0; _fpsN=0; }   // only TRULY struggling devices drop the glamor (was 45 -- too aggressive, flattened the look)
     AK.update(dt);
     draw();
     syncHUD();
@@ -2628,6 +2886,104 @@
   if(dbRoot) dbRoot.addEventListener('click', dbClick);
   const dbDetail = document.getElementById('db-detail');
   if(dbDetail) dbDetail.addEventListener('click', function(ev){ if(ev.target===dbDetail) closeDetail(); else dbClick(ev); });
+
+  // ==========================================================
+  // LOBBY HUB -- player chip, daily streak, news ticker.
+  // The start screen as a real front door. Every DOM/localStorage/
+  // prompt/setTimeout touch is guarded so the headless node harness
+  // (no localStorage, no prompt, no-op setTimeout) never throws.
+  // ==========================================================
+  try{
+    // ---- toast (small, fixed, self-hiding) ----
+    const toastEl = document.getElementById('lobbytoast');
+    function lobbyToast(msg){
+      if(!toastEl) return;
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      try{ setTimeout(function(){ toastEl.classList.remove('show'); }, 2400); }catch(_){}
+    }
+
+    // ---- player chip: street name (tap to rename) + level + trophies ----
+    const chipEl  = document.getElementById('playerchip');
+    const nameEl  = document.getElementById('pc-name');
+    const lvlEl   = document.getElementById('pc-level');
+    const trEl    = document.getElementById('pc-trophies');
+    function renderChip(){
+      const nm = (lsGet('ak_name') || 'STRAY');
+      if(nameEl) nameEl.textContent = nm;
+      if(lvlEl)  lvlEl.textContent = String((DBPROFILE && DBPROFILE.level) || 1);
+      // trophies: read existing progress if any store has it, else 0 (ladder wires up later)
+      let tro = parseInt(lsGet('ak_trophies') || '', 10);
+      if(!isFinite(tro)) tro = (DBPROFILE && DBPROFILE.trophies) || 0;
+      if(trEl) trEl.textContent = String(tro);
+    }
+    renderChip();
+    if(chipEl) chipEl.addEventListener('click', function(){
+      try{
+        if(typeof window.prompt !== 'function') return;
+        const cur = lsGet('ak_name') || 'STRAY';
+        const v = window.prompt('Claim your street name (max 14):', cur);
+        if(v == null) return;
+        const nm = String(v).replace(/[<>&"']/g,'').trim().toUpperCase().slice(0,14);
+        if(!nm) return;
+        lsSet('ak_name', nm);
+        renderChip();
+        lobbyToast('The streets know you as ' + nm + '.');
+      }catch(_){}
+    });
+
+    // ---- daily drop: consecutive-day visit streak (UI + streak now, economy later) ----
+    const dcStreakEl = document.getElementById('dc-streak');
+    const dcClaimEl  = document.getElementById('dc-claim');
+    function dayStamp(){
+      const d = new Date();
+      return d.getFullYear() + '-' +
+        String(d.getMonth()+1).padStart(2,'0') + '-' +
+        String(d.getDate()).padStart(2,'0');
+    }
+    function dayGap(a,b){
+      try{ return Math.round((new Date(b+'T00:00:00') - new Date(a+'T00:00:00')) / 86400000); }
+      catch(_){ return 99; }
+    }
+    const today = dayStamp();
+    const lastDay = lsGet('ak_streak_day') || '';
+    let streak = parseInt(lsGet('ak_streak') || '0', 10) || 0;
+    let claimable = (lastDay !== today);
+    if(claimable && lastDay && dayGap(lastDay, today) > 1){
+      streak = 0;                          // missed a day: the alley forgets fast
+      lsSet('ak_streak', '0');
+    }
+    function renderStreak(){
+      if(dcStreakEl) dcStreakEl.textContent = 'DAY ' + (claimable ? (streak+1) : streak);
+      if(dcClaimEl)  dcClaimEl.style.display = claimable ? '' : 'none';
+    }
+    renderStreak();
+    if(dcClaimEl) dcClaimEl.addEventListener('click', function(){
+      if(!claimable) return;
+      streak += 1; claimable = false;
+      lsSet('ak_streak', String(streak));
+      lsSet('ak_streak_day', today);
+      renderStreak();
+      lobbyToast('Day ' + streak + ' claimed. Rewards wire up soon.');
+    });
+
+    // ---- street wire: auto-cycling news strip (4s) ----
+    const NEWS = [
+      'NEW: 106-card expansion + Deck Lab',
+      'Lucky Draw is OPEN. Spin the alley.',
+      'World Map: 10 cities incoming',
+      '$BCARDD: the dog runs the table'
+    ];
+    const newsEl = document.getElementById('news-item');
+    let newsIdx = 0;
+    function showNews(){ if(newsEl) newsEl.textContent = NEWS[newsIdx % NEWS.length]; }
+    function cycleNews(){
+      newsIdx++; showNews();
+      try{ setTimeout(cycleNews, 4000); }catch(_){}
+    }
+    showNews();
+    try{ setTimeout(cycleNews, 4000); }catch(_){}
+  }catch(_){ /* lobby chrome must never block the game boot */ }
 
   // ---- boot: build the card index after the DOM + scripts are ready ----
   const info = AK.init();

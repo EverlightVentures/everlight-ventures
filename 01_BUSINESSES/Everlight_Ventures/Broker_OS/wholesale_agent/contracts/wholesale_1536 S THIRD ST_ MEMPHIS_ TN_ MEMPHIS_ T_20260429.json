@@ -1,0 +1,15 @@
+{
+  "type": "wholesale_purchase_agreement",
+  "property": "1536 S THIRD ST, MEMPHIS, TN, MEMPHIS, TN",
+  "state_detected": "TN",
+  "seller": "HAKEEM MIKAL L",
+  "buyer": "Richard Gee, an individual doing business as Everlight Ventures",
+  "purchase_price": 9520,
+  "assignment_fee": 1428,
+  "generated_at": "2026-04-29T15:19:41.395244-07:00",
+  "pdf_path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/contracts/wholesale_1536 S THIRD ST_ MEMPHIS_ TN_ MEMPHIS_ T_20260429.pdf",
+  "tn_sb909_schedule_a_bundled": true,
+  "state_disclosures_required": [
+    "TN_SB909"
+  ]
+}

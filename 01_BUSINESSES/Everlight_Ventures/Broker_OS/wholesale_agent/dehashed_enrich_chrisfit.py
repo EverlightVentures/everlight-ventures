@@ -73,6 +73,17 @@ def main() -> int:
 
     ready, queried, hits, total_emails, errors, owner_matched = [], 0, 0, 0, 0, 0
     last_balance = None
+
+    def _flush():
+        # Checkpoint after every owner so SPENT CREDITS are never lost to a crash.
+        OUT.parent.mkdir(parents=True, exist_ok=True)
+        OUT.write_text(json.dumps({
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "queried": queried, "owners_with_real_email": hits,
+            "owner_name_matched": owner_matched, "total_real_emails": total_emails,
+            "errors": errors, "credits_balance_after": last_balance,
+            "deal1_ready": ready,
+        }, indent=2, default=str))
     for i, lead in enumerate(batch, 1):
         name = lead.get("owner_name", "")
         addr = lead.get("property_address") or lead.get("address", "")
@@ -107,18 +118,12 @@ def main() -> int:
                 "same_address_emails": [e["email"] for e in other_emails],
             })
         tag = "OWNER" if owner_emails else ("HIT*" if emails else ("ERR" if r.get("error") else "---"))
-        print(f"  [{i}/{len(batch)}] {tag:5s} {name[:28]:28s} {best or (r.get('error') or '')}")
+        print(f"  [{i}/{len(batch)}] {tag:5s} {name[:28]:28s} {best or (r.get('error') or '')}", flush=True)
+        if i % 10 == 0:
+            _flush()  # checkpoint -- spent credits are saved even if we crash next
         time.sleep(0.4)  # be gentle on the API
 
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    OUT.write_text(json.dumps({
-        "generated_at": datetime.now(timezone.utc).isoformat(),
-        "queried": queried, "owners_with_real_email": hits,
-        "owner_name_matched": owner_matched,
-        "total_real_emails": total_emails, "errors": errors,
-        "credits_balance_after": last_balance,
-        "deal1_ready": ready,
-    }, indent=2, default=str))
+    _flush()  # final checkpoint
 
     rate = (hits / queried * 100) if queried else 0
     orate = (owner_matched / queried * 100) if queried else 0

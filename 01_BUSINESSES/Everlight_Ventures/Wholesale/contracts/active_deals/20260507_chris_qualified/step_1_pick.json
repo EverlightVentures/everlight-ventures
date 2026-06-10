@@ -1,0 +1,24 @@
+{
+  "agent": "Filter Banks",
+  "narration": "Numbers don't lie. Out of 1 qualified, 1577  MCMILLAN ST scores highest -- ARV $56000, distress signals: none, absentee: None. Pick this one.",
+  "pick": {
+    "address": "1577  MCMILLAN ST",
+    "parcel_id": "034026  00014",
+    "owner": "CARNEGIE CHURCH OF GOD IN CHRIST",
+    "year_built": null,
+    "arv": 56000,
+    "is_absentee": null,
+    "distress": []
+  },
+  "ranked_pool": [
+    {
+      "address": "1577  MCMILLAN ST",
+      "parcel_id": "034026  00014",
+      "owner": "CARNEGIE CHURCH OF GOD IN CHRIST",
+      "year_built": null,
+      "arv": 56000,
+      "is_absentee": null,
+      "distress": []
+    }
+  ]
+}

@@ -10,7 +10,7 @@ import { motion } from 'framer-motion'
  * - Aria Sinclair: Elegant, gold accents, warm tones
  * - Marcus Vega: Sharp, intense, dark tones
  * - Kanisha Thompson: Vibrant, purple/gold, confident
- * - Bacardi Ice: Cold, cyan/dark, crystalline
+ * - $BCARDD Ice: Cold, cyan/dark, crystalline
  *
  * Includes animated speaking indicator (pulsing green dot).
  */
@@ -134,11 +134,11 @@ function KanishaSVG() {
   )
 }
 
-function BacardiSVG() {
+function $BCARDDSVG() {
   return (
     <svg viewBox="0 0 64 64" className="w-full h-full">
       <defs>
-        <radialGradient id="bacardi-bg" cx="50%" cy="40%" r="60%">
+        <radialGradient id="bcardd-bg" cx="50%" cy="40%" r="60%">
           <stop offset="0%" stopColor="#001520" />
           <stop offset="100%" stopColor="#000a10" />
         </radialGradient>
@@ -148,7 +148,7 @@ function BacardiSVG() {
           <stop offset="100%" stopColor="#00bcd4" stopOpacity="0.3" />
         </linearGradient>
       </defs>
-      <circle cx="32" cy="32" r="31" fill="url(#bacardi-bg)" />
+      <circle cx="32" cy="32" r="31" fill="url(#bcardd-bg)" />
       {/* Ice crystal overlay */}
       <circle cx="32" cy="32" r="31" fill="url(#ice-sheen)" />
       {/* Hair -- slicked back, dark */}
@@ -189,7 +189,7 @@ const AVATAR_MAP: Record<string, () => React.ReactElement> = {
   aria: AriaSVG,
   marcus: MarcusSVG,
   kanisha: KanishaSVG,
-  bacardi: BacardiSVG,
+  bcardd: $BCARDDSVG,
 }
 
 export function DealerAvatar({ dealerId, color, speaking, size = 48 }: {
@@ -201,7 +201,7 @@ export function DealerAvatar({ dealerId, color, speaking, size = 48 }: {
   const AvatarSVG = AVATAR_MAP[dealerId] || AriaSVG
   // Live-action dealer videos (add more to /public/dealers as they're made).
   const DEALER_VIDEOS: Record<string, string> = {
-    bacardi: '/dealers/bacardi_live.mp4',
+    bcardd: '/dealers/bcardd_live.mp4',
     aria: '/dealers/aria_live.mp4',
   }
   const videoSrc = DEALER_VIDEOS[dealerId]
@@ -218,7 +218,7 @@ export function DealerAvatar({ dealerId, color, speaking, size = 48 }: {
         }}
       />
 
-      {/* Avatar -- video for Bacardi, SVG for others */}
+      {/* Avatar -- video for $BCARDD, SVG for others */}
       <div className="w-full h-full rounded-full overflow-hidden">
         {isVideo ? (
           <video

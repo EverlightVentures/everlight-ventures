@@ -1,0 +1,99 @@
+# macro_pitch_copy.yaml
+#
+# When macro_context_enrichment.py finds a catalyst (weather event, earthquake,
+# wildfire, local news, infrastructure change) for a given parcel, it appends
+# a phrasing from this file to that parcel's pitch_hooks. The phrasings then
+# flow into pitch_tailor.py and become part of the outbound email body.
+#
+# DOCTRINE:
+#   - "Google version" frame: signal informs SEGMENTATION, never the LANGUAGE.
+#     We say "we work with owners in storm-affected counties" not "we saw your
+#     county got hit by Hurricane Helene on October 4th."
+#   - Plain English. No corporate-speak, no AI tells (em-dashes, hyphens
+#     in connectives, "moreover," "leverage," "robust," etc.).
+#   - One paragraph maximum per signal. The macro context is FLAVOR for an
+#     email whose primary value prop is "we'll buy your property fast."
+#   - Persona-specific: each persona signs in their voice (Piper warm,
+#     Marquise direct, Henry numbers-first, Marvin closer).
+#
+# TODO -- Rich + persona team: read every "DRAFT (replace me)" entry below
+# and overwrite with copy that converts. The generic versions below are
+# placeholders so the enrichment pipeline doesn't crash. They will leak AI
+# tells until you replace them.
+#
+# Format:
+#   {category}:
+#     {persona}:
+#       - phrasing_a
+#       - phrasing_b
+#
+# Last updated: 2026-05-15 (auto-generated scaffold)
+# ---------------------------------------------------------------------------
+
+weather_event:
+  # Severe weather (storm, hurricane, flood, tornado) in property's county
+  # within last 90 days. Signal sourced from NOAA NWS alerts archive.
+  piper:
+    - DRAFT (replace me) -- With everything that's hit Shelby County this season, holding from out of state has gotten harder for a lot of folks. If carrying costs are weighing on you, I can have a fair offer in your hands fast.
+    - DRAFT (replace me) -- The recent storm cycle has been rough on owners who can't get there in person. We work with that kind of distance-management situation a lot. Worth a quick conversation?
+    - DRAFT (replace me) -- I work with a number of owners in storm-affected counties who decided this season was the right time to hand off. No pressure, just letting you know we're an option.
+  marquise:
+    - DRAFT (replace me) -- Saw your county had a rough stretch with the weather. If you're tired of fielding repair calls from out of state, I'd like to put a number on the table.
+    - DRAFT (replace me) -- Out-of-state owners and bad weather are a tough combination. We close fast, cash, no inspections that fall through. Want me to send what we'd pay?
+    - DRAFT (replace me) -- Quick note: we're actively buying in storm-affected zips this quarter. If the property is on your mind for any reason, give me 10 minutes.
+  henry:
+    - DRAFT (replace me) -- Sees a lot of out-of-county owners deciding this is the year to consolidate after a tough storm season. Numbers I can do this week, if you want to hear them.
+    - DRAFT (replace me) -- Storm seasons accelerate decisions. We can close in 14 days, all cash, no contingencies. Worth a number?
+
+earthquake:
+  # USGS M3+ within 50km of property in last 90 days. Rare for our markets
+  # but high-signal when it fires.
+  piper:
+    - DRAFT (replace me) -- I know it's been an unusual season for seismic activity in your area. If that's prompting any thinking about the property, I'd like to be in the running.
+  marquise:
+    - DRAFT (replace me) -- Sees ground movement makes long-distance ownership feel different. If you've been considering options, we're cash buyers who close fast.
+
+wildfire:
+  # InciWeb active fire within 50km of property. Most relevant for our AZ,
+  # CA-adjacent, and TX markets.
+  piper:
+    - DRAFT (replace me) -- The fire activity in your region has been on a lot of owners' minds. If managing the property from out of state has become more than you signed up for, we'd like a chance at it.
+  marquise:
+    - DRAFT (replace me) -- Wildfires near absentee-held property change the calculation. Fast-close, cash, no contingencies if that's the situation.
+
+news_catalyst:
+  # GDELT local news cluster: factory closure, layoffs, major employer move,
+  # zoning approval, rezoning, school district change. County-level signal.
+  piper:
+    - DRAFT (replace me) -- I've been watching the news coming out of your county and it sounds like a lot of folks are reassessing what to hold and what to release. If your property is on that list, we'd like a conversation.
+    - DRAFT (replace me) -- Big shifts in the local economy can be a fine time to hand off long-held real estate. We buy fast, cash, no broker. Worth a number?
+  marquise:
+    - DRAFT (replace me) -- Local news has been moving fast in your county. If you've been thinking about getting out before things shift more, we can have a cash number in front of you tomorrow.
+
+infrastructure_event:
+  # New highway, airport expansion, major commercial development, eminent
+  # domain notice, rezoning. FHWA + city planning + state DOT.
+  piper:
+    - DRAFT (replace me) -- I noticed your block has some development activity in motion. If you'd rather not navigate the next few years of construction around your property, we'd like a shot at buying it before things get loud.
+    - DRAFT (replace me) -- Infrastructure changes near a property usually mean either upside or hassle. If you're leaning hassle, I can have a cash offer to you fast.
+  marquise:
+    - DRAFT (replace me) -- Saw the development planned near your parcel. Plenty of owners decide this is the moment to step out. We're cash, fast close, no broker fees on your side. Want a number?
+  henry:
+    - DRAFT (replace me) -- Infrastructure changes adjacent to your parcel tend to mean either appreciation or three years of construction noise. If you'd rather take a clean cash exit, we can have terms ready this week.
+
+# ---------------------------------------------------------------------------
+# CREEP-LINE GUARDRAILS (do not delete -- these are doctrine examples)
+# ---------------------------------------------------------------------------
+# The following are LEGAL but CREEPY phrasings that must NEVER ship.
+# Reference only -- to remind future authors what we are NOT trying to write.
+_creep_examples_do_not_use:
+  - "Saw your county got hit by Hurricane Helene on October 4th at 3:47 AM."
+  - "Your block had a 4.2 earthquake at 32.998N, 116.998W last Tuesday."
+  - "Your obituary post said the family is splitting the estate three ways."
+  - "Noticed your son posted from the property on Instagram in March."
+  - "Your LinkedIn says you're retiring next quarter."
+  - "Saw your divorce filing on PACER -- we can move quickly."
+  - "Found you in a 2019 Equifax breach -- here's our offer."
+# All of the above involve REVEALING THE TRAIL. The phrasings above the
+# guardrail use the same underlying signal but never expose where it came
+# from. That's the Google version: invisible signal, relevant output.

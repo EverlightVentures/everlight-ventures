@@ -1,0 +1,427 @@
+{
+  "generated_at": "2026-05-08T01:21:21+00:00",
+  "total_processed": 25,
+  "qualified_count": 0,
+  "qualified": [],
+  "all_results": [
+    {
+      "address": "942 S MELROSE",
+      "parcel_id": "015025  00024",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/942-s-melrose-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 25000 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 25000,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/942-s-melrose-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/942-s-melrose-memphis-tn/profile.md"
+    },
+    {
+      "address": "101 LUCY",
+      "parcel_id": "024058  00005",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/101-lucy-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 3100 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 3100,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/101-lucy-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/101-lucy-memphis-tn/profile.md"
+    },
+    {
+      "address": "108 E OLIVE",
+      "parcel_id": "024055  00038",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/108-e-olive-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 3500 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 3500,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/108-e-olive-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/108-e-olive-memphis-tn/profile.md"
+    },
+    {
+      "address": "1112 SAXON",
+      "parcel_id": "026013  00022",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1112-saxon-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 8000 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 8000,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1112-saxon-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1112-saxon-memphis-tn/profile.md"
+    },
+    {
+      "address": "1174 S ORLEANS",
+      "parcel_id": "025043  00027",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1174-s-orleans-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 4700 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 4700,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1174-s-orleans-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1174-s-orleans-memphis-tn/profile.md"
+    },
+    {
+      "address": "1250 DUNNAVANT",
+      "parcel_id": "026056  00056",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1250-dunnavant-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "appraisal 40000 < 50000"
+      ],
+      "year_built": 1951,
+      "appraisal": 40000,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1250-dunnavant-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1250-dunnavant-memphis-tn/profile.md"
+    },
+    {
+      "address": "1252 MARKSMAN",
+      "parcel_id": "025049  00024",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1252-marksman-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 4700 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 4700,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1252-marksman-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1252-marksman-memphis-tn/profile.md"
+    },
+    {
+      "address": "1261 CARLTON",
+      "parcel_id": "060170  00016",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1261-carlton-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 14700 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 14700,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1261-carlton-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1261-carlton-memphis-tn/profile.md"
+    },
+    {
+      "address": "1298 ENGLEWOOD",
+      "parcel_id": "026032  00030",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1298-englewood-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built 1912 < 1940",
+        "appraisal 38400 < 50000"
+      ],
+      "year_built": 1912,
+      "appraisal": 38400,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1298-englewood-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1298-englewood-memphis-tn/profile.md"
+    },
+    {
+      "address": "1303 MICHIGAN",
+      "parcel_id": "024055  00017",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1303-michigan-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 3200 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 3200,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1303-michigan-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1303-michigan-memphis-tn/profile.md"
+    },
+    {
+      "address": "1329 MICHIGAN",
+      "parcel_id": "024055  00028",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1329-michigan-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 3300 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 3300,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1329-michigan-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1329-michigan-memphis-tn/profile.md"
+    },
+    {
+      "address": "1363 ETHLYN",
+      "parcel_id": "048018  00007",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1363-ethlyn-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 7100 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 7100,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1363-ethlyn-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1363-ethlyn-memphis-tn/profile.md"
+    },
+    {
+      "address": "0 DOROTHY",
+      "parcel_id": "032028  00006",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-dorothy-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 30000 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 30000,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-dorothy-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-dorothy-memphis-tn/profile.md"
+    },
+    {
+      "address": "0 EFFIE",
+      "parcel_id": "060051  00043",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-effie-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 7700 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 7700,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-effie-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-effie-memphis-tn/profile.md"
+    },
+    {
+      "address": "0 ETHLYN",
+      "parcel_id": "048030  00002C",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-ethlyn-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 4000 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 4000,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-ethlyn-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-ethlyn-memphis-tn/profile.md"
+    },
+    {
+      "address": "0 FRANK",
+      "parcel_id": "C0233   00363",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-frank-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 3208800 > 200000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 3208800,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-frank-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-frank-memphis-tn/profile.md"
+    },
+    {
+      "address": "0 KERR",
+      "parcel_id": "026040  00021",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-kerr-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 7800 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 7800,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-kerr-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-kerr-memphis-tn/profile.md"
+    },
+    {
+      "address": "0 PATTON",
+      "parcel_id": "035097  00011",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-patton-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 3000 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 3000,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-patton-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-patton-memphis-tn/profile.md"
+    },
+    {
+      "address": "0 PIONEER",
+      "parcel_id": "024010  00009",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-pioneer-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 3200 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 3200,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-pioneer-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-pioneer-memphis-tn/profile.md"
+    },
+    {
+      "address": "0 RAYBURN",
+      "parcel_id": "035093  00011",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-rayburn-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 3600 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 3600,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-rayburn-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-rayburn-memphis-tn/profile.md"
+    },
+    {
+      "address": "0 RIVERSIDE",
+      "parcel_id": "035026  00016",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-riverside-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 3800 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 3800,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-riverside-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-riverside-memphis-tn/profile.md"
+    },
+    {
+      "address": "0 ROZELLE",
+      "parcel_id": "060086  00038",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-rozelle-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 9600 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 9600,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-rozelle-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-rozelle-memphis-tn/profile.md"
+    },
+    {
+      "address": "0 W UTAH",
+      "parcel_id": "024057  00023",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-w-utah-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built unknown",
+        "appraisal 3300 < 50000",
+        "land_use '- VACANT LAND'"
+      ],
+      "year_built": null,
+      "appraisal": 3300,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-w-utah-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/0-w-utah-memphis-tn/profile.md"
+    },
+    {
+      "address": "1100 S COOPER",
+      "parcel_id": "029037  00001",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1100-s-cooper-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built 1900 < 1940"
+      ],
+      "year_built": 1900,
+      "appraisal": 117000,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1100-s-cooper-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1100-s-cooper-memphis-tn/profile.md"
+    },
+    {
+      "address": "1172 AGNES",
+      "parcel_id": "032025  00018",
+      "deal_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1172-agnes-memphis-tn",
+      "qualified": false,
+      "fails": [
+        "year_built 1920 < 1940"
+      ],
+      "year_built": 1920,
+      "appraisal": 157300,
+      "screenshot": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1172-agnes-memphis-tn/assessor_screenshot.png",
+      "psa_pdf": null,
+      "offer_letter": null,
+      "profile_md": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/1172-agnes-memphis-tn/profile.md"
+    }
+  ],
+  "deal_dirs_root": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals"
+}

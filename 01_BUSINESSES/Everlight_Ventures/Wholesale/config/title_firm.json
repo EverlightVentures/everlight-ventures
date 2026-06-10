@@ -1,0 +1,19 @@
+{
+  "buyer_legal_name": "Richard Gee",
+  "buyer_dba": "Everlight Ventures",
+  "buyer_filing_state": "California (DBA on file)",
+  "buyer_address": "Memphis, Tennessee (operating)",
+  "title_firm_name": "Mid South Title, LLC",
+  "title_firm_address": "[Mid South Title street address -- pull from intake call follow-up]",
+  "title_firm_metro": "Memphis",
+  "title_firm_state": "Tennessee",
+  "title_firm_iolta_bank": "[Mid South Title escrow bank -- populated at PSA generation]",
+  "title_firm_aba_routing": "[ABA routing -- populated at PSA generation]",
+  "title_firm_account_no": "[escrow account number -- populated at PSA generation]",
+  "back_tax_estimate_usd": 1800,
+  "title_insurance_estimate_usd": 185,
+  "recording_estimate_usd": 42,
+  "title_closing_fee_estimate_usd": 450,
+  "buyer_assignee_name": "Mid South Homebuyers, LLC",
+  "buyer_assignee_signer": "Chris Ulander"
+}

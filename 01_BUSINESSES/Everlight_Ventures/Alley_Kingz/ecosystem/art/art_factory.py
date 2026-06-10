@@ -20,7 +20,7 @@ import os, sys, json, time, argparse, urllib.request, urllib.error
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ECO  = os.path.normpath(os.path.join(HERE, ".."))
-ROOT = "/mnt/sdcard/AA_MY_DRIVE"
+ROOT = os.environ.get("AK_ROOT", "/mnt/sdcard/AA_MY_DRIVE")  # override on e5 / any host
 QUEUE = os.path.join(ROOT, "_state", "ak_art_queue.json")
 CARD_MANIFEST = os.path.join(ECO, "data", "card_art_manifest.json")
 LEO = "https://cloud.leonardo.ai/api/rest/v1"; LEO_MODEL = "de7d3faf-762f-48e0-b3b7-9d0ac3a3fcf3"

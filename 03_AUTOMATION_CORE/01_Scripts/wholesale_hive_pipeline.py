@@ -433,6 +433,10 @@ Stage breakdown:"""
                     success=r["failed"] == 0,
                     count=r["succeeded"],
                 )
+            # Un-orphan the scoreboard: rebuild the funnel from the real leads_db
+            # every run so performance_metrics can never drift back to all-zeros.
+            if hasattr(_wb, "sync_from_leads_db"):
+                _wb.sync_from_leads_db()
             _wb.snapshot_daily()
             _wb.flush()
 

@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block page_title %}Run Payroll{% endblock %}
+{% block header_emoji %}▶️{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('payroll_dashboard') }}" class="btn btn-secondary">
+    <i data-lucide="arrow-left"></i>
+    Back
+</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(160deg, #0f1f17 0%, #0a1810 40%, #0f1f17 100%);
+    }
+
+    .confirm-panel {
+        background: linear-gradient(160deg, rgba(15, 23, 42, 0.55), rgba(2, 6, 23, 0.55));
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 600px;
+        margin: 40px auto;
+        text-align: center;
+        box-shadow: 0 14px 40px rgba(2, 6, 23, 0.35);
+    }
+
+    .confirm-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.1));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+        font-size: 40px;
+    }
+
+    .confirm-panel h2 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #e8f5ee;
+        margin-bottom: 12px;
+    }
+
+    .confirm-panel p {
+        font-size: 15px;
+        color: #94a3b8;
+        margin-bottom: 24px;
+        line-height: 1.6;
+    }
+
+    .period-info {
+        background: rgba(0,0,0,0.2);
+        border: 1px solid rgba(167, 243, 208, 0.1);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 28px;
+        text-align: left;
+    }
+
+    .period-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.06);
+    }
+
+    .period-row:last-child {
+        border-bottom: none;
+    }
+
+    .period-row .label {
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .period-row .value {
+        color: #e8f5ee;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .confirm-actions {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+    }
+
+    .btn-run {
+        padding: 16px 40px;
+        font-size: 16px;
+        font-weight: 700;
+        background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 20px rgba(16,185,129,0.3);
+        transition: all 0.2s;
+        font-family: inherit;
+    }
+
+    .btn-run:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 24px rgba(16,185,129,0.4);
+    }
+
+    .btn-cancel {
+        padding: 16px 32px;
+        font-size: 16px;
+        font-weight: 600;
+        background: rgba(0,0,0,0.2);
+        color: #94a3b8;
+        border: 1px solid rgba(167, 243, 208, 0.15);
+        border-radius: 12px;
+        cursor: pointer;
+        text-decoration: none;
+        font-family: inherit;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+        color: #e8f5ee;
+    }
+
+    .warning-box {
+        background: rgba(251,191,36,0.1);
+        border: 1px solid rgba(251,191,36,0.2);
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-bottom: 24px;
+        text-align: left;
+        font-size: 13px;
+        color: #fbbf24;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirm-panel">
+    <div class="confirm-icon">💰</div>
+    <h2>Process Payroll</h2>
+    <p>You are about to process payroll for the following period. This will calculate pay for all active employees and record the payroll run.</p>
+
+    <div class="period-info">
+        <div class="period-row">
+            <span class="label">Period ID</span>
+            <span class="value">{{ period.Period_ID }}</span>
+        </div>
+        <div class="period-row">
+            <span class="label">Date Range</span>
+            <span class="value">{{ period.Start_Date }} → {{ period.End_Date }}</span>
+        </div>
+        <div class="period-row">
+            <span class="label">Pay Date</span>
+            <span class="value">{{ period.Pay_Date or 'Not set' }}</span>
+        </div>
+        <div class="period-row">
+            <span class="label">Status</span>
+            <span class="value">{{ period.Status or 'Draft' }}</span>
+        </div>
+    </div>
+
+    <div class="warning-box">
+        ⚠️ This action will mark the period as PROCESSED. Make sure all time punches are correct before proceeding.
+    </div>
+
+    <form method="POST" action="{{ url_for('run_payroll') }}">
+        <div class="confirm-actions">
+            <a href="{{ url_for('payroll_dashboard') }}" class="btn-cancel">Cancel</a>
+            <button type="submit" class="btn-run">
+                <i data-lucide="play"></i>
+                Run Payroll
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>lucide.createIcons();</script>
+{% endblock %}

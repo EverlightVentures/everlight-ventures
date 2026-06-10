@@ -1,0 +1,15 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=029037%20%2000001",
+  "parsed_at": "2026-05-08T01:21:13+00:00",
+  "parcel_id": "029037  00001",
+  "property_address": "1100 S COOPER ST",
+  "owner_name": "BANNON WAYNE W",
+  "land_use": "- DUPLEX",
+  "year_built": 1900,
+  "sqft": 1782,
+  "land_appraisal_usd": 30300,
+  "building_appraisal_usd": 86700,
+  "total_appraisal_usd": 117000,
+  "subdivision": null
+}

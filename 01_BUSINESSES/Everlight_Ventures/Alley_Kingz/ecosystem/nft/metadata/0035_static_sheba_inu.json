@@ -1,0 +1,144 @@
+{
+  "name": "Alley Kingz #0035 Static Sheba Inu",
+  "symbol": "BCARDI",
+  "description": "Static Sheba Inu, a Common Hacker in the Leashbreak Tactix. The Shiba Inu pilots the Shiba Inu Rig -- tech-ops rig -- jammer van, emp array, signal-warfare. Signature move: \"Ping\". A playable Alley Kingz battle card on Solana -- the NFT is the card, with gameplay stats written on-chain. Cosmetic art plus gameplay stats; in-game items are for entertainment and utility, not investments. No promised returns.",
+  "image": "ipfs://<IMAGE_CID_DIR>/0035_static_sheba_inu.png",
+  "animation_url": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_StaticShebaInu_Shiba_Seedance_V1.mp4",
+  "external_url": "https://everlightventures.io/cards/0035",
+  "attributes": [
+    {
+      "trait_type": "Card Number",
+      "value": "0035"
+    },
+    {
+      "trait_type": "Faction",
+      "value": "Leashbreak Tactix"
+    },
+    {
+      "trait_type": "Faction Id",
+      "value": "leashbreak_tactix"
+    },
+    {
+      "trait_type": "Breed",
+      "value": "Shiba Inu"
+    },
+    {
+      "trait_type": "Name",
+      "value": "Static Sheba Inu"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Hacker"
+    },
+    {
+      "trait_type": "Cost",
+      "value": 2
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Hack"
+    },
+    {
+      "trait_type": "HP",
+      "value": 600
+    },
+    {
+      "trait_type": "Damage",
+      "value": 55
+    },
+    {
+      "trait_type": "Attack Speed",
+      "value": 1.1
+    },
+    {
+      "trait_type": "Move Speed",
+      "value": 1.0
+    },
+    {
+      "trait_type": "Range",
+      "value": 3
+    },
+    {
+      "trait_type": "Ability",
+      "value": "Ping"
+    },
+    {
+      "trait_type": "Ability Cooldown",
+      "value": 8
+    },
+    {
+      "trait_type": "Queen Target",
+      "value": false
+    },
+    {
+      "trait_type": "Rig",
+      "value": "Shiba Inu Rig"
+    },
+    {
+      "trait_type": "Rig Class",
+      "value": "tech_ops"
+    },
+    {
+      "trait_type": "Weapon Mod",
+      "value": "emp_array"
+    }
+  ],
+  "properties": {
+    "category": "video",
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "files": [
+      {
+        "uri": "ipfs://<IMAGE_CID_DIR>/0035_static_sheba_inu.png",
+        "type": "image/png"
+      },
+      {
+        "uri": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_StaticShebaInu_Shiba_Seedance_V1.mp4",
+        "type": "video/mp4"
+      }
+    ]
+  },
+  "onchain_attributes": [
+    {
+      "key": "hp",
+      "value": "600"
+    },
+    {
+      "key": "damage",
+      "value": "55"
+    },
+    {
+      "key": "attack_speed",
+      "value": "1.1"
+    },
+    {
+      "key": "move_speed",
+      "value": "1.0"
+    },
+    {
+      "key": "range",
+      "value": "3"
+    },
+    {
+      "key": "cost",
+      "value": "2"
+    },
+    {
+      "key": "rarity",
+      "value": "Common"
+    },
+    {
+      "key": "ability_id",
+      "value": "ping"
+    },
+    {
+      "key": "queen_target",
+      "value": "0"
+    }
+  ]
+}

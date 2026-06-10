@@ -1,0 +1,144 @@
+{
+  "name": "Alley Kingz #0042 Grid Schnauzer",
+  "symbol": "BCARDI",
+  "description": "Grid Schnauzer, a Rare Structure in the K9 Circuitry. The Schnauzer pilots the Schnauzer Rig -- turret-utility rig -- mounted gun, drone bay, rail platform. Signature move: \"Grid Lock\". A playable Alley Kingz battle card on Solana -- the NFT is the card, with gameplay stats written on-chain. Cosmetic art plus gameplay stats; in-game items are for entertainment and utility, not investments. No promised returns.",
+  "image": "ipfs://<IMAGE_CID_DIR>/0042_grid_schnauzer.png",
+  "animation_url": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_GridSchnauzer_Schnauzer_Seedance_V1.mp4",
+  "external_url": "https://everlightventures.io/cards/0042",
+  "attributes": [
+    {
+      "trait_type": "Card Number",
+      "value": "0042"
+    },
+    {
+      "trait_type": "Faction",
+      "value": "K9 Circuitry"
+    },
+    {
+      "trait_type": "Faction Id",
+      "value": "k9_circuitry"
+    },
+    {
+      "trait_type": "Breed",
+      "value": "Schnauzer"
+    },
+    {
+      "trait_type": "Name",
+      "value": "Grid Schnauzer"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Structure"
+    },
+    {
+      "trait_type": "Cost",
+      "value": 5
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Turret"
+    },
+    {
+      "trait_type": "HP",
+      "value": 1200
+    },
+    {
+      "trait_type": "Damage",
+      "value": 80
+    },
+    {
+      "trait_type": "Attack Speed",
+      "value": 1.0
+    },
+    {
+      "trait_type": "Move Speed",
+      "value": 0.0
+    },
+    {
+      "trait_type": "Range",
+      "value": 4
+    },
+    {
+      "trait_type": "Ability",
+      "value": "Grid Lock"
+    },
+    {
+      "trait_type": "Ability Cooldown",
+      "value": 12
+    },
+    {
+      "trait_type": "Queen Target",
+      "value": false
+    },
+    {
+      "trait_type": "Rig",
+      "value": "Schnauzer Rig"
+    },
+    {
+      "trait_type": "Rig Class",
+      "value": "turret_util"
+    },
+    {
+      "trait_type": "Weapon Mod",
+      "value": "incendiary"
+    }
+  ],
+  "properties": {
+    "category": "video",
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "files": [
+      {
+        "uri": "ipfs://<IMAGE_CID_DIR>/0042_grid_schnauzer.png",
+        "type": "image/png"
+      },
+      {
+        "uri": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_GridSchnauzer_Schnauzer_Seedance_V1.mp4",
+        "type": "video/mp4"
+      }
+    ]
+  },
+  "onchain_attributes": [
+    {
+      "key": "hp",
+      "value": "1200"
+    },
+    {
+      "key": "damage",
+      "value": "80"
+    },
+    {
+      "key": "attack_speed",
+      "value": "1.0"
+    },
+    {
+      "key": "move_speed",
+      "value": "0.0"
+    },
+    {
+      "key": "range",
+      "value": "4"
+    },
+    {
+      "key": "cost",
+      "value": "5"
+    },
+    {
+      "key": "rarity",
+      "value": "Rare"
+    },
+    {
+      "key": "ability_id",
+      "value": "grid_lock"
+    },
+    {
+      "key": "queen_target",
+      "value": "0"
+    }
+  ]
+}

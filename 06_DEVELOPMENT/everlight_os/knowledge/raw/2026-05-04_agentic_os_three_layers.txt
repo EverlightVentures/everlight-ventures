@@ -1,0 +1,44 @@
+- [00:00:00] **Summary**: The video discusses the concept of an **Agentic OS** for optimizing workflows using cloud code. It contrasts the random use of cloud code by most users with a structured approach that involves creating a system to track, optimize, and automate tasks. The process is broken down into three key steps: establishing an observability layer, setting up a memory layer, and developing architecture for skills and automations.
+
+### Overview of Agentic OS
+- **Cloud Code Usage**: Most users employ cloud code inefficiently, leading to unpredictable results.
+- **Agentic OS**: A structured system designed to optimize workflows, transforming daily tasks into skills, skills into automations, and automations into a cohesive architecture.
+
+### Steps to Create Agentic OS
+- **Step 1: Observability Layer**
+  - This involves a visual dashboard that allows interaction with the OS outside the terminal.
+  
+- **Step 2: Memory Layer**
+  - Utilizes **Obsidian**, a tool for organizing information effectively. This layer allows users to track past tasks and research.
+  - Implements the **Carpathy RAG system**, which organizes data into different subfolders: raw, wiki, and output.
+  
+- **Step 3: Architecture Development**
+  - Breaking down daily activities into specific domains (e.g., memory, productivity, research) and tasks.
+  - Each task can be developed into skills and further into automations, which can either be local or remote.
+
+### Detailed Breakdown
+- **Domains and Tasks**: 
+  - Workflows are categorized into domains, with each domain containing specific tasks. For instance, the **research domain** might include tasks like YouTube searches, competitor analysis, etc.
+  
+- **Skills and Automations**: 
+  - Tasks are converted into skills, which can then be automated where beneficial (e.g., a morning trend scan).
+  - The process involves interaction with cloud code to determine the best type of automation.
+
+- **Community and Resources**: 
+  - The speaker promotes their **Cloud Code Masterclass** for in-depth learning on how to implement these systems.
+
+### Observability and Customization
+- **Dashboard Functions**: 
+  - The dashboard displays buttons for skills and automations, making it user-friendly for team members or clients who may not be familiar with the terminal.
+  - The observability component tracks usage and performance, allowing users to see their activity and optimize accordingly.
+  
+- **Customization**: 
+  - Users can tailor their dashboard and memory structure to suit their specific needs and workflows.
+
+### Conclusion
+- The creation of a **Cloud Code powered Agentic OS** consists of:
+  - **Architecture**: Structuring tasks into domains and skills.
+  - **Memory Management**: Using Obsidian to track and organize information efficiently.
+  - **Observability**: Building a customizable dashboard for better interaction and tracking.
+
+- **Final Remarks**: The speaker encourages viewers to share their thoughts and check out additional resources for further learning about the system.

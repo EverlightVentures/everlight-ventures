@@ -1,0 +1,134 @@
+
+{% extends "base.html" %}
+
+{% block page_title %}Payroll History{% endblock %}
+{% block header_emoji %}📋{% endblock %}
+{% block header_title %}Payroll History{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('payroll_dashboard') }}" class="btn btn-secondary">
+    <i data-lucide="arrow-left"></i>
+    Back
+</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(160deg, #0f1f17 0%, #0a1810 40%, #0f1f17 100%);
+    }
+
+    .history-panel {
+        background: linear-gradient(160deg, rgba(15, 23, 42, 0.55), rgba(2, 6, 23, 0.55));
+        border: 1px solid rgba(148, 163, 184, 0.2);
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 28px rgba(2, 6, 23, 0.35);
+    }
+
+    .period-header {
+        padding: 20px 24px;
+        background: rgba(0,0,0,0.2);
+        border-bottom: 1px solid rgba(167, 243, 208, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .period-header h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #e8f5ee;
+    }
+
+    .period-total {
+        font-size: 18px;
+        font-weight: 700;
+        color: #34d399;
+        font-family: 'Space Mono', monospace;
+    }
+
+    .money {
+        font-family: 'Space Mono', monospace;
+        font-weight: 600;
+    }
+
+    .money.green { color: #34d399; }
+    .money.red { color: #fb7185; }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #64748b;
+    }
+
+    .empty-state-icon {
+        font-size: 56px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if runs_by_period %}
+    {% for period_id, runs in runs_by_period.items() %}
+    <div class="history-panel">
+        <div class="period-header">
+            <h3>📅 Period: {{ period_id }}</h3>
+            <span class="period-total">
+                ${{ "%.2f"|format(runs|sum(attribute='Net_Pay')|float) }} Net
+            </span>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Employee</th>
+                    <th>Regular</th>
+                    <th>OT</th>
+                    <th>Gross</th>
+                    <th>Taxes</th>
+                    <th>Net Pay</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for run in runs %}
+                <tr>
+                    <td><strong>{{ run.Employee_Name }}</strong></td>
+                    <td>{{ run.Regular_Hours }}h</td>
+                    <td>{{ run.Overtime_Hours }}h</td>
+                    <td class="money">
+                        ${{ "%.2f"|format(run.Gross_Pay|float) }}
+                    </td>
+                    <td class="money red">
+                        -${{ "%.2f"|format(
+                            (run.Federal_Tax|float)
+                            + (run.State_Tax|float)
+                            + (run.Social_Security|float)
+                            + (run.Medicare|float)
+                        ) }}
+                    </td>
+                    <td class="money green">
+                        ${{ "%.2f"|format(run.Net_Pay|float) }}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endfor %}
+{% else %}
+<div class="history-panel">
+    <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <h4>No Payroll History</h4>
+        <p>Run payroll to see history here.</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>lucide.createIcons();</script>
+{% endblock %}

@@ -26,7 +26,7 @@ import json
 import os
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -66,7 +66,7 @@ def _load_env():
     _supabase_key = env.get("SUPABASE_SERVICE_ROLE_KEY", env.get("SUPABASE_ANON_KEY", os.environ.get("SUPABASE_KEY", "")))
     _slack_token = env.get("SLACK_BOT_TOKEN", os.environ.get("SLACK_BOT_TOKEN", ""))
     _slack_channel = env.get("SLACK_WHOLESALE_CH", os.environ.get("SLACK_WHOLESALE_CH", "C0ANLLV8JAC"))
-    _blinko_url = env.get("BLINKO_URL", os.environ.get("BLINKO_URL", "http://129.159.38.250:1111"))
+    _blinko_url = env.get("BLINKO_URL", os.environ.get("BLINKO_URL", "http://e5-mother:1111"))
     _env_loaded = True
 
 
@@ -429,6 +429,64 @@ class WorkbookLogger:
             bucket = m.setdefault("funnel_metrics", {}).setdefault(period, {})
             bucket[stage] = bucket.get(stage, 0) + 1
         self._metrics_dirty = True
+
+    def sync_from_leads_db(self, leads_path: Path | None = None) -> dict:
+        """Derive the funnel scoreboard from the canonical leads_db.json.
+
+        The scoreboard was orphaned: nothing called the funnel loggers, so 3,163
+        real leads rendered as all-zeros. This rebuilds funnel_metrics directly
+        from lead state on every run -- the scoreboard can no longer lie.
+        Returns the all_time funnel dict it wrote.
+        """
+        path = leads_path or (Path(__file__).parent / "leads_db.json")
+        try:
+            leads = json.loads(path.read_text())
+        except Exception:
+            return {}
+        if not isinstance(leads, list):
+            return {}
+
+        DEAD = {"dead", "dnc", "opted_out", "bounced", "eradicated", "lost"}
+        RESPONDED = {"responded", "replied", "negotiating", "under_contract", "closed", "paid", "won"}
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=30)).isoformat()
+
+        def tally(rows: list) -> dict:
+            f = {k: 0 for k in ("scouted", "scored", "qualified", "matched",
+                                "outreach_sent", "responses", "negotiating",
+                                "under_contract", "closed", "paid", "dead")}
+            for r in rows:
+                st = str(r.get("status", "")).lower()
+                f["scouted"] += 1
+                if r.get("score") or r.get("motivation_score"):
+                    f["scored"] += 1
+                if str(r.get("motivation_tier", "")).upper() in ("HIGH", "WARM") or r.get("close_tier") not in (None, "", "?"):
+                    f["qualified"] += 1
+                if r.get("buyer_matches"):
+                    f["matched"] += 1
+                if r.get("outreach_count", 0) and int(r.get("outreach_count", 0)) > 0:
+                    f["outreach_sent"] += 1
+                if st in RESPONDED:
+                    f["responses"] += 1
+                if st == "negotiating":
+                    f["negotiating"] += 1
+                if st == "under_contract":
+                    f["under_contract"] += 1
+                if st in ("closed", "won"):
+                    f["closed"] += 1
+                if st == "paid":
+                    f["paid"] += 1
+                if st in DEAD:
+                    f["dead"] += 1
+            return f
+
+        m = self._get_metrics()
+        fm = m.setdefault("funnel_metrics", {})
+        fm["all_time"] = tally(leads)
+        fm["30d"] = tally([r for r in leads if str(r.get("created_at", "")) >= cutoff])
+        m.setdefault("meta", {})["last_synced_from_leads_db"] = _now()
+        m.setdefault("current_period", {})["total_leads_in_db"] = len(leads)
+        self._metrics_dirty = True
+        return fm["all_time"]
 
     def log_agent_task(self, agent: str, task: str, success: bool = True,
                        count: int = 0, **extra):

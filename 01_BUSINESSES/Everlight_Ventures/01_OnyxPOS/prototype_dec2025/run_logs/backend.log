@@ -1,0 +1,257 @@
+✅ Database initialized successfully!
+
+============================================================
+  OnyxPOS API Server
+  Next-Generation Point of Sale
+  http://localhost:5000
+============================================================
+
+ * Serving Flask app 'app'
+ * Debug mode: on
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.183:5000
+[33mPress CTRL+C to quit[0m
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 930-823-655
+127.0.0.1 - - [29/Dec/2025 13:24:32] "GET /api/v1/analytics/top-selling?limit=5&days=30 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:24:32] "GET /api/v1/analytics/sales-trend?days=7 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:24:32] "GET /api/v1/analytics/dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:24:32] "GET /api/v1/analytics/sales-trend?days=7 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:24:32] "GET /api/v1/analytics/top-selling?limit=5&days=30 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:24:32] "GET /api/v1/analytics/dashboard HTTP/1.1" 200 -
+ * Detected change in '/home/mgn/Projects/OnyxPOS/backend/api/billing_gmv.py', reloading
+✅ Database initialized successfully!
+
+============================================================
+  OnyxPOS API Server
+  Next-Generation Point of Sale
+  http://localhost:5000
+============================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 930-823-655
+127.0.0.1 - - [29/Dec/2025 13:24:47] "[35m[1mGET /api/v1/connect/platform-revenue?days=30 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [29/Dec/2025 13:24:47] "[35m[1mGET /api/v1/connect/platform-revenue?days=30 HTTP/1.1[0m" 500 -
+ * Detected change in '/home/mgn/Projects/OnyxPOS/backend/api/auth.py', reloading
+✅ Database initialized successfully!
+
+============================================================
+  OnyxPOS API Server
+  Next-Generation Point of Sale
+  http://localhost:5000
+============================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 930-823-655
+127.0.0.1 - - [29/Dec/2025 13:25:02] "[35m[1mGET /api/v1/billing/subscription-status HTTP/1.1[0m" 500 -
+127.0.0.1 - - [29/Dec/2025 13:25:02] "[35m[1mGET /api/v1/billing/subscription-status HTTP/1.1[0m" 500 -
+127.0.0.1 - - [29/Dec/2025 13:25:12] "[35m[1mGET /api/v1/payroll?start_date=2025-12-01&end_date=2025-12-31 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [29/Dec/2025 13:25:12] "[35m[1mGET /api/v1/payroll?start_date=2025-12-01&end_date=2025-12-31 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [29/Dec/2025 13:25:19] "GET /api/v1/employees HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:19] "GET /api/v1/schedule?week_start=2025-12-28 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:19] "GET /api/v1/employees HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:19] "GET /api/v1/schedule?week_start=2025-12-28 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:25] "GET /api/v1/schedule?week_start=2026-01-04 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:25] "GET /api/v1/employees HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:25] "GET /api/v1/schedule?week_start=2026-01-11 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:25] "GET /api/v1/employees HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:26] "GET /api/v1/schedule?week_start=2026-01-18 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:26] "GET /api/v1/employees HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:28] "GET /api/v1/employees HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:28] "GET /api/v1/employees HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:38] "GET /api/v1/timeclock/current HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:38] "GET /api/v1/timeclock/recent HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:38] "GET /api/v1/timeclock/current HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:38] "GET /api/v1/timeclock/recent HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:41] "[35m[1mPOST /api/v1/timeclock/clock-in HTTP/1.1[0m" 201 -
+127.0.0.1 - - [29/Dec/2025 13:25:41] "GET /api/v1/timeclock/recent HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:47] "GET /api/v1/inventory HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:47] "GET /api/v1/inventory HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:25:54] "[31m[1mPOST /api/v1/inventory/import/preview HTTP/1.1[0m" 403 -
+127.0.0.1 - - [29/Dec/2025 13:26:02] "[31m[1mPOST /api/v1/inventory/import/preview HTTP/1.1[0m" 403 -
+127.0.0.1 - - [29/Dec/2025 13:26:15] "GET /api/v1/analytics/dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:26:15] "GET /api/v1/analytics/top-selling?limit=5&days=30 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:26:15] "GET /api/v1/analytics/sales-trend?days=7 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:26:15] "GET /api/v1/analytics/top-selling?limit=5&days=30 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:26:15] "GET /api/v1/analytics/sales-trend?days=7 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:26:15] "GET /api/v1/analytics/dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:26:21] "GET /api/v1/inventory HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:26:21] "GET /api/v1/inventory HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:31:38] "[35m[1mGET /api/v1/billing/subscription-status HTTP/1.1[0m" 500 -
+127.0.0.1 - - [29/Dec/2025 13:31:39] "[35m[1mGET /api/v1/billing/subscription-status HTTP/1.1[0m" 500 -
+127.0.0.1 - - [29/Dec/2025 13:31:50] "[31m[1mPOST /api/v1/billing/create-checkout-session HTTP/1.1[0m" 403 -
+127.0.0.1 - - [29/Dec/2025 13:31:52] "[31m[1mPOST /api/v1/billing/create-checkout-session HTTP/1.1[0m" 403 -
+127.0.0.1 - - [29/Dec/2025 13:32:10] "GET /api/v1/analytics/sales-trend?days=7 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:32:10] "GET /api/v1/analytics/top-selling?limit=5&days=30 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:32:10] "GET /api/v1/analytics/dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:32:10] "GET /api/v1/analytics/top-selling?limit=5&days=30 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:32:10] "GET /api/v1/analytics/sales-trend?days=7 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:32:10] "GET /api/v1/analytics/dashboard HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 13:32:18] "[33mGET /api/v1/connect/connect-status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [29/Dec/2025 13:32:18] "[33mGET /api/v1/connect/connect-status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [29/Dec/2025 13:32:45] "[35m[1mGET /api/v1/billing/subscription-status HTTP/1.1[0m" 500 -
+127.0.0.1 - - [29/Dec/2025 13:32:45] "[35m[1mGET /api/v1/billing/subscription-status HTTP/1.1[0m" 500 -
+127.0.0.1 - - [29/Dec/2025 14:20:51] "[31m[1mGET /api/v1/billing/subscription-status HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 14:20:51] "[31m[1mGET /api/v1/billing/subscription-status HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 14:20:51] "POST /api/v1/auth/refresh HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 14:20:51] "[31m[1mGET /api/v1/billing/subscription-status HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 14:20:51] "POST /api/v1/auth/refresh HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 14:59:57] "[31m[1mGET /api/v1/billing/subscription-status HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 16:43:55] "[31m[1mGET /api/v1/billing/subscription-status HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 16:43:55] "[31m[1mGET /api/v1/billing/subscription-status HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 16:43:55] "POST /api/v1/auth/refresh HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 16:43:55] "POST /api/v1/auth/refresh HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 16:43:55] "[31m[1mGET /api/v1/billing/subscription-status HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 16:43:55] "[31m[1mGET /api/v1/billing/subscription-status HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "[31m[1mGET /api/v1/analytics/dashboard HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "[31m[1mGET /api/v1/analytics/sales-trend?days=7 HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "[31m[1mGET /api/v1/analytics/top-selling?limit=5&days=30 HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "[31m[1mGET /api/v1/analytics/dashboard HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "[31m[1mGET /api/v1/analytics/sales-trend?days=7 HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "[31m[1mGET /api/v1/analytics/top-selling?limit=5&days=30 HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "POST /api/v1/auth/refresh HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "POST /api/v1/auth/refresh HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "POST /api/v1/auth/refresh HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "[31m[1mGET /api/v1/analytics/dashboard HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "[31m[1mGET /api/v1/analytics/sales-trend?days=7 HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "[31m[1mGET /api/v1/analytics/top-selling?limit=5&days=30 HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "POST /api/v1/auth/refresh HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "POST /api/v1/auth/refresh HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "POST /api/v1/auth/refresh HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "[31m[1mGET /api/v1/analytics/dashboard HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "[31m[1mGET /api/v1/analytics/sales-trend?days=7 HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 18:02:46] "[31m[1mGET /api/v1/analytics/top-selling?limit=5&days=30 HTTP/1.1[0m" 401 -
+127.0.0.1 - - [29/Dec/2025 18:03:04] "GET /api/v1/crypto/supported-currencies HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:03:04] "GET /api/v1/inventory HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:03:04] "GET /api/v1/crypto/supported-currencies HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:03:04] "GET /api/v1/inventory HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:03:04] "GET /api/v1/crypto/exchange-rates HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:03:04] "GET /api/v1/crypto/exchange-rates HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:03:16] "GET /api/v1/inventory HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:03:16] "GET /api/v1/inventory HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:03:31] "GET /api/v1/timeclock/current HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:03:31] "GET /api/v1/timeclock/recent HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:03:31] "GET /api/v1/timeclock/current HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:03:31] "GET /api/v1/timeclock/recent HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:03:50] "GET /api/v1/employees HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:03:50] "GET /api/v1/employees HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:03:52] "GET /api/v1/employees HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:03:52] "GET /api/v1/schedule?week_start=2025-12-28 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:03:52] "GET /api/v1/employees HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:03:52] "GET /api/v1/schedule?week_start=2025-12-28 HTTP/1.1" 200 -
+127.0.0.1 - - [29/Dec/2025 18:04:02] "[35m[1mGET /api/v1/payroll?start_date=2025-12-01&end_date=2025-12-31 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [29/Dec/2025 18:04:02] "[35m[1mGET /api/v1/payroll?start_date=2025-12-01&end_date=2025-12-31 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [29/Dec/2025 18:04:43] "[33mGET /api/v1/connect/connect-status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [29/Dec/2025 18:04:43] "[33mGET /api/v1/connect/connect-status HTTP/1.1[0m" 404 -
+127.0.0.1 - - [29/Dec/2025 18:06:56] "[35m[1mGET /api/v1/billing/subscription-status HTTP/1.1[0m" 500 -
+127.0.0.1 - - [29/Dec/2025 18:06:57] "[35m[1mGET /api/v1/billing/subscription-status HTTP/1.1[0m" 500 -
+127.0.0.1 - - [29/Dec/2025 18:07:11] "[35m[1mGET /api/v1/connect/platform-revenue?days=30 HTTP/1.1[0m" 500 -
+127.0.0.1 - - [29/Dec/2025 18:07:11] "[35m[1mGET /api/v1/connect/platform-revenue?days=30 HTTP/1.1[0m" 500 -
+ * Detected change in '/home/mgn/Projects/OnyxPOS/backend/models.py', reloading
+✅ Database initialized successfully!
+
+============================================================
+  OnyxPOS API Server
+  Next-Generation Point of Sale
+  http://localhost:5000
+============================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 930-823-655
+ * Detected change in '/home/mgn/Projects/OnyxPOS/backend/models.py', reloading
+✅ Database initialized successfully!
+
+============================================================
+  OnyxPOS API Server
+  Next-Generation Point of Sale
+  http://localhost:5000
+============================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 930-823-655
+ * Detected change in '/home/mgn/Projects/OnyxPOS/backend/models.py', reloading
+✅ Database initialized successfully!
+
+============================================================
+  OnyxPOS API Server
+  Next-Generation Point of Sale
+  http://localhost:5000
+============================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 930-823-655
+ * Detected change in '/home/mgn/Projects/OnyxPOS/backend/api/auth.py', reloading
+✅ Database initialized successfully!
+
+============================================================
+  OnyxPOS API Server
+  Next-Generation Point of Sale
+  http://localhost:5000
+============================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 930-823-655
+ * Detected change in '/home/mgn/Projects/OnyxPOS/backend/api/inventory.py', reloading
+✅ Database initialized successfully!
+
+============================================================
+  OnyxPOS API Server
+  Next-Generation Point of Sale
+  http://localhost:5000
+============================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 930-823-655
+ * Detected change in '/home/mgn/Projects/OnyxPOS/backend/api/inventory.py', reloading
+✅ Database initialized successfully!
+
+============================================================
+  OnyxPOS API Server
+  Next-Generation Point of Sale
+  http://localhost:5000
+============================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 930-823-655
+ * Detected change in '/home/mgn/Projects/OnyxPOS/backend/models.py', reloading
+✅ Database initialized successfully!
+
+============================================================
+  OnyxPOS API Server
+  Next-Generation Point of Sale
+  http://localhost:5000
+============================================================
+
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 930-823-655
+ * Detected change in '/home/mgn/Projects/OnyxPOS/backend/app.py', reloading
+✅ Database initialized successfully!
+
+============================================================
+  OnyxPOS API Server
+  Next-Generation Point of Sale
+  http://localhost:5000
+============================================================
+
+ * Restarting with stat
+✅ Database initialized successfully!
+Traceback (most recent call last):
+  File "/home/mgn/Projects/OnyxPOS/backend/app.py", line 137, in <module>
+    app = create_app()
+  File "/home/mgn/Projects/OnyxPOS/backend/app.py", line 112, in create_app
+    from api.tasks import tasks_bp
+  File "/home/mgn/Projects/OnyxPOS/backend/api/tasks.py", line 13, in <module>
+    from middleware.subscription_guard import require_role
+ImportError: cannot import name 'require_role' from 'middleware.subscription_guard' (/home/mgn/Projects/OnyxPOS/backend/middleware/subscription_guard.py)

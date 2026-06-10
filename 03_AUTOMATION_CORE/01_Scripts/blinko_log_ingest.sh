@@ -14,7 +14,10 @@ LOG="/mnt/sdcard/AA_MY_DRIVE/_logs/blinko_log_ingest.log"
 mkdir -p "$LOCAL_QUEUE" "$(dirname "$LOG")"
 
 ts() { date '+%Y-%m-%d %H:%M:%S PT'; }
-log() { echo "[$(ts)] $1" >> "$LOG"; echo "[$(ts)] $1"; }
+# Write to the logfile always; echo to stdout ONLY when interactive ([ -t 1 ]).
+# The cron redirects stdout `>> $LOG`, so an unconditional second echo would
+# duplicate every line in blinko_log_ingest.log.
+log() { local m="[$(ts)] $1"; echo "$m" >> "$LOG"; [ -t 1 ] && echo "$m"; }
 
 # Step 1: Pull queue from Oracle
 log "Pulling Blinko queue from Oracle..."

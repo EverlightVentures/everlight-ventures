@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block page_title %}Low Stock{% endblock %}
+{% block header_emoji %}📉{% endblock %}
+{% block header_title %}Low Stock Report{% endblock %}
+
+{% block header_actions %}
+  <a class="btn btn-secondary btn-sm" href="{{ url_for('dashboard') }}">
+    <i data-lucide="arrow-left"></i> Back
+  </a>
+  <button class="btn btn-ghost btn-sm" type="button" onclick="window.print()">
+    <i data-lucide="printer"></i> Print
+  </button>
+  <a class="btn btn-primary btn-sm" href="/inventory/low_stock.csv">
+    <i data-lucide="download"></i> Export CSV
+  </a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .subhead {
+    display:flex; flex-wrap:wrap; gap:10px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    font-size: 13px;
+  }
+  .toolbar-grid {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 16px;
+  }
+  @media (max-width: 768px) {
+    .toolbar-grid { grid-template-columns: 1fr; }
+  }
+  .hint {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-top: 10px;
+  }
+  th { user-select: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+  {% set items = low_stock_items if low_stock_items is not none else (items if items is not none else []) %}
+  {% set total = items|length %}
+  {% set out_count = (items|selectattr('qty', 'equalto', 0)|list)|length %}
+  {% set low_count = total - out_count %}
+
+  <div class="mb-6">
+    <div class="subhead">
+      {% if store_name %}<span><span class="font-semibold">{{ store_name }}</span></span>{% endif %}
+      {% if as_of %}<span>As of: <span class="text-mono">{{ as_of }}</span></span>{% endif %}
+      {% if threshold is not none %}<span>Threshold: <span class="text-mono">{{ threshold }}</span></span>{% endif %}
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon green">📦</div>
+      <div class="stat-label">Total flagged</div>
+      <div class="stat-value">{{ total }}</div>
+    </div>
+    <div class="stat-card rose">
+      <div class="stat-icon rose">⛔</div>
+      <div class="stat-label">Out of stock</div>
+      <div class="stat-value">{{ out_count }}</div>
+    </div>
+    <div class="stat-card amber">
+      <div class="stat-icon amber">⚠️</div>
+      <div class="stat-label">Low stock</div>
+      <div class="stat-value">{{ low_count }}</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card mb-6">
+    <div class="card-header">
+      <div class="card-title">
+        <span class="card-emoji">🔎</span> Filter
+      </div>
+      <span class="badge badge-info">
+        <i data-lucide="mouse-pointer-click" style="width:14px;height:14px;"></i>
+        Click headers to sort
+      </span>
+    </div>
+    <div class="card-body">
+      <div class="toolbar-grid">
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" for="searchBox">Search</label>
+          <input id="searchBox" class="form-input" type="search"
+                 placeholder="Search name / SKU / category..." />
+        </div>
+
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" for="statusFilter">Status</label>
+          <select id="statusFilter" class="form-select">
+            <option value="">All statuses</option>
+            <option value="OUT">Out of Stock</option>
+            <option value="LOW">Low</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="hint">
+        If you want “reorder level” to come from your CSV column names exactly, we’ll align that in the data-pull step.
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <span class="card-emoji">📋</span> Items
+      </div>
+      <span class="badge">
+        <i data-lucide="list" style="width:14px;height:14px;"></i>
+        <span id="visibleCount">{{ total }}</span> shown
+      </span>
+    </div>
+
+    <div class="card-body" style="padding:0;">
+      <table id="lowStockTable">
+        <thead>
+          <tr>
+            <th data-key="sku">SKU</th>
+            <th data-key="name">Item</th>
+            <th data-key="category">Category</th>
+            <th data-key="qty">Qty</th>
+            <th data-key="reorder_level">Reorder Level</th>
+            <th data-key="status">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if items and items|length > 0 %}
+            {% for it in items %}
+              {% set sku = it.sku if it.sku is not none else (it.get('sku') if it is mapping else '') %}
+              {% set name = it.name if it.name is not none else (it.get('name') if it is mapping else 'Unnamed') %}
+              {% set category = it.category if it.category is not none else (it.get('category') if it is mapping else '') %}
+              {% set qty = it.qty if it.qty is not none else (it.get('qty') if it is mapping else 0) %}
+              {% set reorder = it.reorder_level if it.reorder_level is not none else (it.get('reorder_level') if it is mapping else (threshold if threshold is not none else '')) %}
+              {% set status = 'OUT' if qty|int <= 0 else 'LOW' %}
+
+              <tr data-status="{{ status }}">
+                <td class="text-mono">{{ sku }}</td>
+                <td class="font-semibold" style="color: var(--text-primary);">{{ name }}</td>
+                <td>{{ category }}</td>
+                <td class="text-mono">{{ qty }}</td>
+                <td class="text-mono">{{ reorder }}</td>
+                <td>
+                  {% if status == 'OUT' %}
+                    <span class="badge badge-danger">
+                      <i data-lucide="x-circle" style="width:14px;height:14px;"></i> Out
+                    </span>
+                  {% else %}
+                    <span class="badge badge-warning">
+                      <i data-lucide="alert-triangle" style="width:14px;height:14px;"></i> Low
+                    </span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan="6">
+                <div class="empty-state">
+                  <div class="empty-icon">🌿</div>
+                  <h3>No low-stock items</h3>
+                  <p>Everything looks stocked… for now. 👀</p>
+                  <a class="btn btn-secondary" href="{{ url_for('inventory') }}">
+                    <i data-lucide="package"></i> Go to Inventory
+                  </a>
+                </div>
+              </td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // keep lucide icons fresh after table rendering
+  if (window.lucide) lucide.createIcons();
+
+  const searchBox = document.getElementById("searchBox");
+  const statusFilter = document.getElementById("statusFilter");
+  const table = document.getElementById("lowStockTable");
+  const tbody = table.querySelector("tbody");
+  const visibleCount = document.getElementById("visibleCount");
+
+  function applyFilters() {
+    const q = (searchBox.value || "").toLowerCase().trim();
+    const st = statusFilter.value;
+
+    let shown = 0;
+
+    [...tbody.querySelectorAll("tr")].forEach(tr => {
+      // skip empty-state row
+      if (tr.children.length < 6) return;
+
+      const rowText = tr.innerText.toLowerCase();
+      const rowStatus = tr.getAttribute("data-status") || "";
+      const matchQ = !q || rowText.includes(q);
+      const matchSt = !st || rowStatus === st;
+
+      const ok = matchQ && matchSt;
+      tr.style.display = ok ? "" : "none";
+      if (ok) shown++;
+    });
+
+    if (visibleCount) visibleCount.textContent = shown;
+    if (window.lucide) lucide.createIcons();
+  }
+
+  searchBox?.addEventListener("input", applyFilters);
+  statusFilter?.addEventListener("change", applyFilters);
+
+  // sorting
+  let sortState = { key: null, asc: true };
+
+  function getCellValue(tr, idx) {
+    return (tr.children[idx]?.innerText || "").trim();
+  }
+
+  function sortTableBy(colIndex, type, key) {
+    const rows = [...tbody.querySelectorAll("tr")].filter(tr => tr.children.length >= 6);
+
+    rows.sort((a, b) => {
+      let va = getCellValue(a, colIndex);
+      let vb = getCellValue(b, colIndex);
+
+      if (type === "number") {
+        va = parseFloat(va.replace(/[^0-9.-]/g, "")) || 0;
+        vb = parseFloat(vb.replace(/[^0-9.-]/g, "")) || 0;
+      } else {
+        va = va.toLowerCase();
+        vb = vb.toLowerCase();
+      }
+
+      if (va < vb) return sortState.asc ? -1 : 1;
+      if (va > vb) return sortState.asc ? 1 : -1;
+      return 0;
+    });
+
+    rows.forEach(r => tbody.appendChild(r));
+    applyFilters();
+  }
+
+  table.querySelectorAll("thead th").forEach((th, idx) => {
+    th.addEventListener("click", () => {
+      const key = th.getAttribute("data-key") || String(idx);
+      sortState.asc = (sortState.key === key) ? !sortState.asc : true;
+      sortState.key = key;
+
+      const numericKeys = new Set(["qty", "reorder_level"]);
+      const type = numericKeys.has(th.getAttribute("data-key")) ? "number" : "text";
+      sortTableBy(idx, type, key);
+    });
+  });
+
+  // initial count
+  applyFilters();
+</script>
+{% endblock %}

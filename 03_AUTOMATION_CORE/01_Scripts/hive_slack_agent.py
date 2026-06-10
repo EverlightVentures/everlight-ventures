@@ -66,7 +66,7 @@ AGENT_DIR = os.environ.get(
     "HIVE_AGENT_DIR",
     "/mnt/sdcard/AA_MY_DRIVE/.claude/agents/",
 )
-BLINKO_URL = os.environ.get("BLINKO_URL", "http://129.159.38.250:1111")
+BLINKO_URL = os.environ.get("BLINKO_URL", "http://e5-mother:1111")
 BOT_STATE_DIR = os.environ.get(
     "BOT_STATE_DIR",
     "/mnt/sdcard/AA_MY_DRIVE/xlm_bot/data/",

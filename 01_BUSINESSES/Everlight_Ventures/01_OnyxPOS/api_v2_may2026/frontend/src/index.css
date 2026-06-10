@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+:root {
+  --onyx-black: #0a0a0a;
+  --onyx-dark: #1a1a1a;
+  --onyx-gray: #2a2a2a;
+  --onyx-light: #3a3a3a;
+  --onyx-gold: #d4a843;
+  --onyx-gold-light: #e8c96a;
+  --onyx-white: #f5f5f5;
+  --onyx-green: #22c55e;
+  --onyx-red: #ef4444;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--onyx-black);
+  color: var(--onyx-white);
+  margin: 0;
+}

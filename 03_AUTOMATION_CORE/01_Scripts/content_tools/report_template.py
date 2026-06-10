@@ -24,27 +24,27 @@ EVERLIGHT_CSS = """
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap');
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #0A0A0A; color: #E8E8E8; font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; line-height: 1.7; min-height: 100vh; }
-.header { background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%); border-bottom: 2px solid #D4A843; padding: 40px 0; text-align: center; }
+.header { background: linear-gradient(135deg, #0A0A0A 0%, #1A1A1A 100%); border-bottom: 2px solid #D4AF37; padding: 40px 0; text-align: center; }
 .header-inner { max-width: 800px; margin: 0 auto; padding: 0 24px; }
-.logo { font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 4px; text-transform: uppercase; color: #D4A843; margin-bottom: 16px; }
+.logo { font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 4px; text-transform: uppercase; color: #D4AF37; margin-bottom: 16px; }
 .header h1 { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 600; color: #E8E8E8; margin-bottom: 8px; }
 .header .meta { font-size: 13px; color: #999999; }
-.header .meta span { color: #D4A843; }
+.header .meta span { color: #D4AF37; }
 .content { max-width: 800px; margin: 0 auto; padding: 40px 24px; }
-.content h2 { font-family: 'Playfair Display', serif; font-size: 22px; color: #D4A843; margin: 32px 0 16px 0; padding-bottom: 8px; border-bottom: 1px solid #1A1A1A; }
+.content h2 { font-family: 'Playfair Display', serif; font-size: 22px; color: #D4AF37; margin: 32px 0 16px 0; padding-bottom: 8px; border-bottom: 1px solid #1A1A1A; }
 .content h3 { font-size: 16px; font-weight: 600; color: #E8E8E8; margin: 24px 0 12px 0; }
 .content p { margin-bottom: 16px; font-size: 15px; }
 .content ul { margin: 0 0 16px 24px; }
 .content li { margin-bottom: 8px; font-size: 15px; }
-.content strong { color: #D4A843; font-weight: 600; }
+.content strong { color: #D4AF37; font-weight: 600; }
 table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
-th { background: #1A1A1A; color: #D4A843; text-align: left; padding: 12px 16px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+th { background: #1A1A1A; color: #D4AF37; text-align: left; padding: 12px 16px; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
 td { padding: 10px 16px; border-bottom: 1px solid #1a1a1a; }
 tr:hover td { background: #1A1A1A; }
 .footer { text-align: center; padding: 40px 24px; color: #999999; font-size: 12px; border-top: 1px solid #1a1a1a; }
-.footer .brand { color: #D4A843; font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 2px; }
+.footer .brand { color: #D4AF37; font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 2px; }
 .sig { margin-top: 40px; padding-top: 20px; border-top: 1px solid #222; }
-.sig .name { color: #D4A843; font-weight: 600; font-size: 15px; }
+.sig .name { color: #D4AF37; font-weight: 600; font-size: 15px; }
 .sig .role, .sig .contact { color: #999; font-size: 13px; }
 """
 

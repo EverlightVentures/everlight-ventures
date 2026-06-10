@@ -1,0 +1,101 @@
+# IT Repair Playbooks -- per-service auto-repair recipes.
+#
+# Per HARD LAW feedback_fail_loud_with_it_auto_repair: every watchdog failure
+# fires a Slack alert AND queues a repair entry. it_triage.py reads the queue
+# and runs the playbook for the named service. Closed loop: detect -> alert
+# -> repair -> verify -> resolve OR escalate to operator.
+#
+# Each playbook has:
+#   steps         -- ordered list of bash commands (run sequentially)
+#   verify        -- bash command that exits 0 if repair succeeded
+#   escalate_on   -- conditions that bypass auto-repair (e.g., expired secret)
+#   max_attempts  -- after this many failures in 15 min, escalate to operator
+#
+# IMPORTANT: auto-repair never touches secrets (per doctrine). If a playbook
+# detects a secret issue, it escalates immediately to operator.
+
+defaults:
+  max_attempts: 2
+  retry_interval_sec: 90
+  escalate_on:
+    - secret_missing
+    - secret_invalid
+    - secret_expired
+
+playbooks:
+
+  # ============================================================
+  # Local-only MCPs (no external secret needed)
+  # ============================================================
+
+  blinko-memory:
+    description: "Blinko RAG memory MCP (depends on Blinko :2700 being up)."
+    steps:
+      - "pkill -f 'mcp-proxy.*--port 3101' 2>/dev/null || true"
+      - "pkill -f 'mcp_servers/blinko_memory/server.py' 2>/dev/null || true"
+      - "sleep 1"
+      - "# Verify Blinko :2700 (the dependency) is up first; if not, fire dashboards_watchdog"
+      - "curl -s -o /dev/null -m 2 http://127.0.0.1:2700/health || bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/dashboards_watchdog.sh --quiet"
+      - "nohup bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/start_mcp.sh blinko-memory > /tmp/mcp_blinko-memory.log 2>&1 &"
+      - "sleep 3"
+    verify: "curl -s -o /dev/null -w '%{http_code}' -m 3 http://127.0.0.1:3101/mcp | grep -E '^(200|404|405|406)$'"
+
+  market-intel:
+    description: "Market intel MCP (XLM bot data signals)."
+    steps:
+      - "pkill -f 'mcp-proxy.*--port 3102' 2>/dev/null || true"
+      - "pkill -f 'mcp_servers/market_intel/server.py' 2>/dev/null || true"
+      - "sleep 1"
+      - "nohup bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/start_mcp.sh market-intel > /tmp/mcp_market-intel.log 2>&1 &"
+      - "sleep 3"
+    verify: "curl -s -o /dev/null -w '%{http_code}' -m 3 http://127.0.0.1:3102/mcp | grep -E '^(200|404|405|406)$'"
+
+  broker-os:
+    description: "Broker OS MCP (workspace + Django :8504 tools)."
+    steps:
+      - "pkill -f 'mcp-proxy.*--port 3104' 2>/dev/null || true"
+      - "pkill -f 'mcp_servers/broker_os/server.py' 2>/dev/null || true"
+      - "sleep 1"
+      - "nohup bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/start_mcp.sh broker-os > /tmp/mcp_broker-os.log 2>&1 &"
+      - "sleep 3"
+    verify: "curl -s -o /dev/null -w '%{http_code}' -m 3 http://127.0.0.1:3104/mcp | grep -E '^(200|404|405|406)$'"
+
+  # ============================================================
+  # External-secret MCPs (must NOT auto-rotate keys; escalate on secret fail)
+  # ============================================================
+
+  supabase:
+    description: "Supabase MCP (service_role audits). Requires SUPABASE_ACCESS_TOKEN."
+    requires_secrets: [SUPABASE_ACCESS_TOKEN]
+    steps:
+      - "test -n \"$SUPABASE_ACCESS_TOKEN\" || { echo 'escalate:secret_missing'; exit 7; }"
+      - "pkill -f 'mcp-proxy.*--port 3105' 2>/dev/null || true"
+      - "pkill -f 'mcp-server-supabase' 2>/dev/null || true"
+      - "sleep 1"
+      - "nohup bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/start_mcp.sh supabase > /tmp/mcp_supabase.log 2>&1 &"
+      - "sleep 4"
+    verify: "curl -s -o /dev/null -w '%{http_code}' -m 3 http://127.0.0.1:3105/mcp | grep -E '^(200|401|403|404|405|406)$'"
+
+  stripe:
+    description: "Stripe MCP (live API key). Requires STRIPE_SECRET_KEY."
+    requires_secrets: [STRIPE_SECRET_KEY]
+    steps:
+      - "test -n \"$STRIPE_SECRET_KEY\" || { echo 'escalate:secret_missing'; exit 7; }"
+      - "pkill -f 'mcp-proxy.*--port 3106' 2>/dev/null || true"
+      - "pkill -f '@stripe/mcp' 2>/dev/null || true"
+      - "sleep 1"
+      - "nohup bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/start_mcp.sh stripe > /tmp/mcp_stripe.log 2>&1 &"
+      - "sleep 4"
+    verify: "curl -s -o /dev/null -w '%{http_code}' -m 3 http://127.0.0.1:3106/mcp | grep -E '^(200|401|403|404|405|406)$'"
+
+  resend:
+    description: "Resend email MCP. Requires RESEND_API_KEY."
+    requires_secrets: [RESEND_API_KEY]
+    steps:
+      - "test -n \"$RESEND_API_KEY\" || { echo 'escalate:secret_missing'; exit 7; }"
+      - "pkill -f 'mcp-proxy.*--port 3107' 2>/dev/null || true"
+      - "pkill -f 'resend-mcp' 2>/dev/null || true"
+      - "sleep 1"
+      - "nohup bash /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/start_mcp.sh resend > /tmp/mcp_resend.log 2>&1 &"
+      - "sleep 4"
+    verify: "curl -s -o /dev/null -w '%{http_code}' -m 3 http://127.0.0.1:3107/mcp | grep -E '^(200|401|403|404|405|406)$'"

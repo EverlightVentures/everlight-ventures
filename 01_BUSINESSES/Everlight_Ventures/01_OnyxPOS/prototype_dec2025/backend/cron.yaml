@@ -1,0 +1,24 @@
+# Railway Cron Jobs Configuration
+# https://docs.railway.app/reference/cron-jobs
+
+jobs:
+  # Monthly GMV Billing - Runs on 1st of month at 00:00 UTC
+  - name: monthly-billing
+    schedule: "0 0 1 * *"
+    command: "python -m jobs.monthly_billing"
+    env:
+      PYTHONPATH: /app
+
+  # Daily Dunning Check - Runs at 06:00 UTC daily
+  - name: dunning-check
+    schedule: "0 6 * * *"
+    command: "python -m jobs.dunning_check"
+    env:
+      PYTHONPATH: /app
+
+  # Daily Trial Reminders - Runs at 12:00 UTC daily
+  - name: trial-reminders
+    schedule: "0 12 * * *"
+    command: "python -m jobs.trial_reminders"
+    env:
+      PYTHONPATH: /app

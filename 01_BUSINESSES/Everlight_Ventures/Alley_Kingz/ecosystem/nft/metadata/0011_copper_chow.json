@@ -1,0 +1,144 @@
+{
+  "name": "Alley Kingz #0011 Copper Chow",
+  "symbol": "BCARDI",
+  "description": "Copper Chow, a Common Striker in the Boneguard Crew. The Chow pilots the Chow Rig -- armored bruiser rig -- ram plow, plate armor, slow and unstoppable. Signature move: \"Bitechain\". A playable Alley Kingz battle card on Solana -- the NFT is the card, with gameplay stats written on-chain. Cosmetic art plus gameplay stats; in-game items are for entertainment and utility, not investments. No promised returns.",
+  "image": "ipfs://<IMAGE_CID_DIR>/0011_copper_chow.png",
+  "animation_url": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_CopperChow_Chow_Seedance_V1.mp4",
+  "external_url": "https://everlightventures.io/cards/0011",
+  "attributes": [
+    {
+      "trait_type": "Card Number",
+      "value": "0011"
+    },
+    {
+      "trait_type": "Faction",
+      "value": "Boneguard Crew"
+    },
+    {
+      "trait_type": "Faction Id",
+      "value": "boneguard_crew"
+    },
+    {
+      "trait_type": "Breed",
+      "value": "Chow"
+    },
+    {
+      "trait_type": "Name",
+      "value": "Copper Chow"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Striker"
+    },
+    {
+      "trait_type": "Cost",
+      "value": 4
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Pack"
+    },
+    {
+      "trait_type": "HP",
+      "value": 950
+    },
+    {
+      "trait_type": "Damage",
+      "value": 110
+    },
+    {
+      "trait_type": "Attack Speed",
+      "value": 1.0
+    },
+    {
+      "trait_type": "Move Speed",
+      "value": 0.8
+    },
+    {
+      "trait_type": "Range",
+      "value": 1
+    },
+    {
+      "trait_type": "Ability",
+      "value": "Bitechain"
+    },
+    {
+      "trait_type": "Ability Cooldown",
+      "value": 10
+    },
+    {
+      "trait_type": "Queen Target",
+      "value": false
+    },
+    {
+      "trait_type": "Rig",
+      "value": "Chow Rig"
+    },
+    {
+      "trait_type": "Rig Class",
+      "value": "bruiser"
+    },
+    {
+      "trait_type": "Weapon Mod",
+      "value": "ram_plow"
+    }
+  ],
+  "properties": {
+    "category": "video",
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "files": [
+      {
+        "uri": "ipfs://<IMAGE_CID_DIR>/0011_copper_chow.png",
+        "type": "image/png"
+      },
+      {
+        "uri": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_CopperChow_Chow_Seedance_V1.mp4",
+        "type": "video/mp4"
+      }
+    ]
+  },
+  "onchain_attributes": [
+    {
+      "key": "hp",
+      "value": "950"
+    },
+    {
+      "key": "damage",
+      "value": "110"
+    },
+    {
+      "key": "attack_speed",
+      "value": "1.0"
+    },
+    {
+      "key": "move_speed",
+      "value": "0.8"
+    },
+    {
+      "key": "range",
+      "value": "1"
+    },
+    {
+      "key": "cost",
+      "value": "4"
+    },
+    {
+      "key": "rarity",
+      "value": "Common"
+    },
+    {
+      "key": "ability_id",
+      "value": "bitechain"
+    },
+    {
+      "key": "queen_target",
+      "value": "0"
+    }
+  ]
+}

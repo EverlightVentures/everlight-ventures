@@ -1,0 +1,249 @@
+{
+  "name": "Everlight AI Receptionist - Client Template",
+  "_meta": {
+    "version": "1.0.0",
+    "owner": "Forge",
+    "date": "2026-04-21",
+    "usage": "Import into n8n. Replace {{CLIENT_SLUG}}, {{GOOGLE_CAL_ID}}, {{SLACK_WEBHOOK}} placeholders during onboarding. Each client gets a copy.",
+    "vapi_tool_names": ["search_cancel_booking", "cancel_booking", "get_availability", "book_time", "faq_fallback", "transfer"]
+  },
+  "nodes": [
+    {
+      "id": "webhook_search_cancel",
+      "type": "n8n-nodes-base.webhook",
+      "name": "Webhook - search_cancel_booking",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "receptionist/{{CLIENT_SLUG}}/search_cancel_booking",
+        "responseMode": "responseNode"
+      },
+      "position": [100, 100]
+    },
+    {
+      "id": "google_cal_search",
+      "type": "n8n-nodes-base.googleCalendar",
+      "name": "Calendar - search next 60d by caller name",
+      "parameters": {
+        "operation": "getAll",
+        "calendar": "{{GOOGLE_CAL_ID}}",
+        "timeMin": "={{$now.toISO()}}",
+        "timeMax": "={{$now.plus({days: 60}).toISO()}}",
+        "query": "={{$json.body.caller_name}}"
+      },
+      "position": [320, 100]
+    },
+    {
+      "id": "switch_match_count",
+      "type": "n8n-nodes-base.switch",
+      "name": "Switch - exact/multi/none",
+      "parameters": {
+        "mode": "expression",
+        "output": "={{$json.items && $json.items.length === 1 ? 'exact' : ($json.items && $json.items.length > 1 ? 'multi' : 'none')}}"
+      },
+      "position": [560, 100]
+    },
+    {
+      "id": "response_exact",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "name": "Respond - exact match found",
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {found: true, event_id: $json.items[0].id, start_time: $json.items[0].start.dateTime, service: $json.items[0].summary} }}"
+      },
+      "position": [800, 20]
+    },
+    {
+      "id": "response_needs_transfer",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "name": "Respond - needs transfer",
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {found: false, requires_transfer: true, reason: $json.items.length > 1 ? 'multiple_matches' : 'no_matches'} }}"
+      },
+      "position": [800, 180]
+    },
+    {
+      "id": "webhook_cancel",
+      "type": "n8n-nodes-base.webhook",
+      "name": "Webhook - cancel_booking",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "receptionist/{{CLIENT_SLUG}}/cancel_booking",
+        "responseMode": "responseNode"
+      },
+      "position": [100, 300]
+    },
+    {
+      "id": "cancel_delete",
+      "type": "n8n-nodes-base.googleCalendar",
+      "name": "Calendar - delete event by id",
+      "parameters": {
+        "operation": "delete",
+        "calendar": "{{GOOGLE_CAL_ID}}",
+        "eventId": "={{$json.body.event_id}}"
+      },
+      "position": [320, 300]
+    },
+    {
+      "id": "slack_notify_cancel",
+      "type": "n8n-nodes-base.slack",
+      "name": "Slack - notify client",
+      "parameters": {
+        "webhookUri": "{{SLACK_WEBHOOK}}",
+        "text": "Appointment cancelled via AI receptionist for {{$json.body.caller_name}}."
+      },
+      "position": [560, 300]
+    },
+    {
+      "id": "response_cancelled",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "name": "Respond - cancelled ok",
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {ok: true, message: 'Cancellation confirmed'} }}"
+      },
+      "position": [800, 300]
+    },
+    {
+      "id": "webhook_avail",
+      "type": "n8n-nodes-base.webhook",
+      "name": "Webhook - get_availability",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "receptionist/{{CLIENT_SLUG}}/get_availability",
+        "responseMode": "responseNode"
+      },
+      "position": [100, 500]
+    },
+    {
+      "id": "parse_time_pref",
+      "type": "n8n-nodes-base.code",
+      "name": "Parse - specific vs range",
+      "parameters": {
+        "jsCode": "const pref = $input.first().json.body.time_preference || '';\nconst specific = /\\b(at|@)\\s*\\d{1,2}(:\\d{2})?\\s*(am|pm)?\\b/i.test(pref);\nreturn [{json: {specific, raw_pref: pref}}];"
+      },
+      "position": [320, 500]
+    },
+    {
+      "id": "calendar_busy_window",
+      "type": "n8n-nodes-base.googleCalendar",
+      "name": "Calendar - busy lookup",
+      "parameters": {
+        "operation": "getAll",
+        "calendar": "{{GOOGLE_CAL_ID}}",
+        "timeMin": "={{$now.toISO()}}",
+        "timeMax": "={{$now.plus({days: 14}).toISO()}}"
+      },
+      "position": [560, 500]
+    },
+    {
+      "id": "compose_slots",
+      "type": "n8n-nodes-base.code",
+      "name": "Compose - 3 available slots",
+      "parameters": {
+        "jsCode": "// business hours: Mon-Fri 9-17 local, default 1h slots\nconst busy = ($input.all().find(i => i.json.items) || {json:{items:[]}}).json.items;\nconst now = new Date();\nconst slots = [];\nfor (let d = 0; d < 14 && slots.length < 3; d++) {\n  const day = new Date(now.getTime() + d*86400000);\n  if ([0, 6].includes(day.getDay())) continue;\n  for (let h = 9; h < 17 && slots.length < 3; h++) {\n    const slotStart = new Date(day);\n    slotStart.setHours(h, 0, 0, 0);\n    if (slotStart < now) continue;\n    const slotEnd = new Date(slotStart.getTime() + 3600000);\n    const conflict = busy.some(e => {\n      const es = new Date(e.start.dateTime || e.start.date);\n      const ee = new Date(e.end.dateTime || e.end.date);\n      return es < slotEnd && ee > slotStart;\n    });\n    if (!conflict) slots.push(slotStart.toISOString());\n  }\n}\nreturn [{json: {slots}}];"
+      },
+      "position": [800, 500]
+    },
+    {
+      "id": "response_avail",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "name": "Respond - 3 slots",
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {slots: $json.slots} }}"
+      },
+      "position": [1040, 500]
+    },
+    {
+      "id": "webhook_book",
+      "type": "n8n-nodes-base.webhook",
+      "name": "Webhook - book_time",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "receptionist/{{CLIENT_SLUG}}/book_time",
+        "responseMode": "responseNode"
+      },
+      "position": [100, 700]
+    },
+    {
+      "id": "create_event",
+      "type": "n8n-nodes-base.googleCalendar",
+      "name": "Calendar - create event",
+      "parameters": {
+        "operation": "create",
+        "calendar": "{{GOOGLE_CAL_ID}}",
+        "start": "={{$json.body.slot_start}}",
+        "end": "={{new Date(new Date($json.body.slot_start).getTime()+3600000).toISOString()}}",
+        "summary": "={{$json.body.caller_name}} - {{$json.body.service}}",
+        "description": "=Phone: {{$json.body.caller_phone}}\\nBooked via AI receptionist."
+      },
+      "position": [320, 700]
+    },
+    {
+      "id": "log_supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "name": "Supabase - log call",
+      "parameters": {
+        "url": "https://jdqqmsmwmbsnlnstyavl.supabase.co/rest/v1/receptionist_call_log",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "apikey", "value": "={{$env.SUPABASE_ANON_KEY}}"},
+            {"name": "Authorization", "value": "=Bearer {{$env.SUPABASE_ANON_KEY}}"},
+            {"name": "Content-Type", "value": "application/json"}
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {"name": "client_slug", "value": "{{CLIENT_SLUG}}"},
+            {"name": "caller_name", "value": "={{$json.body.caller_name}}"},
+            {"name": "caller_phone", "value": "={{$json.body.caller_phone}}"},
+            {"name": "service", "value": "={{$json.body.service}}"},
+            {"name": "slot_start", "value": "={{$json.body.slot_start}}"},
+            {"name": "action", "value": "booked"}
+          ]
+        }
+      },
+      "position": [560, 700]
+    },
+    {
+      "id": "slack_notify_book",
+      "type": "n8n-nodes-base.slack",
+      "name": "Slack - new booking",
+      "parameters": {
+        "webhookUri": "{{SLACK_WEBHOOK}}",
+        "text": "New booking via AI receptionist: {{$json.body.caller_name}} for {{$json.body.service}} at {{$json.body.slot_start}}"
+      },
+      "position": [800, 700]
+    },
+    {
+      "id": "response_booked",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "name": "Respond - booked ok",
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ {ok: true, event_id: $json.id, confirmation: 'Your appointment is confirmed.'} }}"
+      },
+      "position": [1040, 700]
+    }
+  ],
+  "connections": {
+    "Webhook - search_cancel_booking": {"main": [[{"node": "Calendar - search next 60d by caller name", "type": "main", "index": 0}]]},
+    "Calendar - search next 60d by caller name": {"main": [[{"node": "Switch - exact/multi/none", "type": "main", "index": 0}]]},
+    "Switch - exact/multi/none": {"main": [[{"node": "Respond - exact match found"}], [{"node": "Respond - needs transfer"}], [{"node": "Respond - needs transfer"}]]},
+    "Webhook - cancel_booking": {"main": [[{"node": "Calendar - delete event by id", "type": "main", "index": 0}]]},
+    "Calendar - delete event by id": {"main": [[{"node": "Slack - notify client", "type": "main", "index": 0}]]},
+    "Slack - notify client": {"main": [[{"node": "Respond - cancelled ok", "type": "main", "index": 0}]]},
+    "Webhook - get_availability": {"main": [[{"node": "Parse - specific vs range", "type": "main", "index": 0}]]},
+    "Parse - specific vs range": {"main": [[{"node": "Calendar - busy lookup", "type": "main", "index": 0}]]},
+    "Calendar - busy lookup": {"main": [[{"node": "Compose - 3 available slots", "type": "main", "index": 0}]]},
+    "Compose - 3 available slots": {"main": [[{"node": "Respond - 3 slots", "type": "main", "index": 0}]]},
+    "Webhook - book_time": {"main": [[{"node": "Calendar - create event", "type": "main", "index": 0}]]},
+    "Calendar - create event": {"main": [[{"node": "Supabase - log call", "type": "main", "index": 0}]]},
+    "Supabase - log call": {"main": [[{"node": "Slack - new booking", "type": "main", "index": 0}]]},
+    "Slack - new booking": {"main": [[{"node": "Respond - booked ok", "type": "main", "index": 0}]]}
+  }
+}

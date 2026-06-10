@@ -1,0 +1,5 @@
+Employee_ID,Employee_Name,Role,PIN,Status,Hire_Date,Phone,Email,Emergency_Contact,Last_Updated,Notes
+1001,Rich,Owner,8008,Active,12-01-25,707-386-9709,1m.rich.gee@gmail.com,,12/20/25 22:52,
+1002,Melina Tapiz,Cashier,303,Inactive,12-01-25,5555555555,tapizme@gmail.com,,2025-12-21 13:20:16,
+1003,Ruby,Cashier,1234,Active,12-02-25,,,,12/2/25 16:06,
+1004,Rick,Owner,216,Active,12-20-25,,,,12/20/25 9:54,

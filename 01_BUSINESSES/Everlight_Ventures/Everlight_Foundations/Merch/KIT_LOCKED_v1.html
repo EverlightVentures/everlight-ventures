@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Everlight Merch Kit :: Locked v1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;800;900&family=Inter:wght@300;400;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --gold:#D4A843; --gold-soft:#B5902E; --gold-deep:#8B6F1F;
+    --dark:#0A0A0A; --dark2:#141414; --dark3:#1C1C1C;
+    --line:#2A2A2A; --text:#E8E8E8; --mute:#9A9A9A;
+    --green:#7FB069; --amber:#E0A458; --red:#C45557;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--dark);color:var(--text);font-family:'Inter',sans-serif;line-height:1.65;font-weight:300;padding:40px 24px;}
+  .wrap{max-width:1080px;margin:0 auto}
+  .header{border-bottom:2px solid var(--gold);padding-bottom:32px;margin-bottom:48px;text-align:center}
+  .wordmark{font-family:'Playfair Display',serif;font-size:13px;letter-spacing:8px;color:var(--gold);text-transform:uppercase;font-weight:600;margin-bottom:18px}
+  h1{font-family:'Playfair Display',serif;font-size:52px;font-weight:900;color:var(--text);line-height:1.05;letter-spacing:-1px;margin-bottom:14px}
+  .subtitle{color:var(--mute);font-size:15px;font-style:italic;letter-spacing:0.5px}
+  .meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mute);margin-top:18px;letter-spacing:1.5px}
+  h2{font-family:'Playfair Display',serif;font-size:28px;color:var(--gold);margin:56px 0 18px;font-weight:600;border-left:3px solid var(--gold);padding-left:18px}
+  h3{font-family:'Inter',sans-serif;font-size:13px;color:var(--gold-soft);margin:24px 0 12px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase}
+  p{margin-bottom:16px;color:var(--text);font-size:15px}
+  .creed{background:linear-gradient(135deg,#1A1610 0%,#0A0805 100%);border:1px solid var(--gold);padding:60px 40px;margin:40px 0;text-align:center;border-radius:3px}
+  .creed-line-1{font-family:'Playfair Display',serif;font-weight:900;font-size:64px;color:var(--gold);letter-spacing:4px;line-height:1.1;margin-bottom:14px}
+  .creed-line-2{font-family:'Playfair Display',serif;font-weight:900;font-size:64px;color:var(--text);letter-spacing:3px;line-height:1.1}
+  .creed-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mute);margin-top:28px;letter-spacing:2px}
+  .pieces{display:grid;grid-template-columns:repeat(2,1fr);gap:22px;margin:30px 0}
+  .piece{background:var(--dark2);border:1px solid var(--line);border-left:4px solid var(--gold);padding:28px 26px;border-radius:2px;display:flex;flex-direction:column;justify-content:space-between;min-height:280px}
+  .piece-label{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:2px;margin-bottom:6px}
+  .piece-mockup{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 0;text-align:center}
+  .mock-text{font-family:'Playfair Display',serif;color:var(--gold);font-weight:900;letter-spacing:3px}
+  .mock-hat{font-size:36px}
+  .mock-hood{font-size:26px;line-height:1.3}
+  .mock-shorts{font-size:42px;letter-spacing:8px}
+  .mock-mark{font-size:14px;letter-spacing:6px;color:var(--gold)}
+  .piece-spec{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mute);line-height:1.7;letter-spacing:0.5px;margin-top:12px;padding-top:14px;border-top:1px dashed var(--line)}
+  .piece-spec strong{color:var(--gold);font-weight:600}
+  .pill{display:inline-block;padding:4px 11px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:1px;font-weight:600;text-transform:uppercase;margin-right:6px}
+  .pill.green{background:#1F2D1A;color:var(--green);border:1px solid var(--green)}
+  .pill.amber{background:#2C2418;color:var(--amber);border:1px solid var(--amber)}
+  .pill.gold{background:#2A2310;color:var(--gold);border:1px solid var(--gold)}
+  .insight{background:linear-gradient(135deg,#1A1610 0%,#0E0C08 100%);border:1px solid var(--gold-deep);padding:26px 32px;margin:30px 0;border-radius:3px;border-left:3px solid var(--gold)}
+  .insight h3{margin-top:0;color:var(--gold)}
+  .insight p{font-size:14px;margin-bottom:0}
+  table{width:100%;border-collapse:collapse;margin:18px 0;font-size:13px}
+  th{background:var(--dark2);color:var(--gold);text-align:left;padding:11px 14px;font-weight:600;font-family:'Inter',sans-serif;letter-spacing:1px;text-transform:uppercase;font-size:11px;border-bottom:1px solid var(--gold)}
+  td{padding:11px 14px;border-bottom:1px solid var(--line);color:var(--text)}
+  td.mono{font-family:'JetBrains Mono',monospace;font-size:12px}
+  ul.tight{list-style:none;padding-left:0}
+  ul.tight li{padding:6px 0 6px 22px;position:relative;color:var(--text);font-size:14px}
+  ul.tight li::before{content:'>';position:absolute;left:0;color:var(--gold);font-family:'JetBrains Mono',monospace;font-weight:700}
+  ol.steps{margin:16px 0 16px 22px}
+  ol.steps li{margin-bottom:10px;color:var(--text);font-size:14px}
+  ol.steps li strong{color:var(--gold)}
+  .footer{margin-top:80px;padding-top:28px;border-top:1px solid var(--line);font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--mute);letter-spacing:1.5px;text-align:center}
+  .footer .gold-line{color:var(--gold);margin-top:6px}
+  @media(max-width:720px){
+    .pieces{grid-template-columns:1fr}
+    h1{font-size:36px}
+    .creed-line-1,.creed-line-2{font-size:36px;letter-spacing:2px}
+    .mock-hat{font-size:24px}.mock-hood{font-size:18px}.mock-shorts{font-size:28px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <div class="wordmark">EVERLIGHT &nbsp;&middot;&nbsp; VENTURES</div>
+  <h1>The Kit :: Locked v1</h1>
+  <div class="subtitle">Founder fight-sponsor merch. Three rounds of brainstorm. The creed survived.</div>
+  <div class="meta">SESSION 2026-05-08 &nbsp;|&nbsp; R1 + R1.5 + R2 &nbsp;|&nbsp; AUTHORED BY MARQUISE &nbsp;|&nbsp; TM CLEARANCE QUEUED</div>
+</div>
+
+<h2>The Creed</h2>
+
+<div class="creed">
+  <div class="creed-line-1">HIT GOLD.</div>
+  <div class="creed-line-2">CARRY THAT LIGHT.</div>
+  <div class="creed-meta">SERMON REGISTER &nbsp;|&nbsp; CORNERMAN CADENCE &nbsp;|&nbsp; 5 WORDS, 2 STEPS</div>
+</div>
+
+<div class="insight">
+  <h3>Why This Beats Goggins, Tate, and Grindset</h3>
+  <p>Most fight-merch slogans only do <em>step one</em> :: get yours, get rich, win, take it. Goggins ends at the suffering. Tate ends at the spoils. <strong style="color:var(--gold)">This creed staples step two onto step one.</strong> HIT GOLD is the win. CARRY THAT LIGHT is what you do with the win :: sovereignty, responsibility, the king's job. The whole Lucrex thesis compressed into 5 words. That is the moat. No fight brand is teaching responsibility-after-victory.</p>
+</div>
+
+<h2>The Pieces</h2>
+
+<div class="pieces">
+
+  <div class="piece">
+    <div>
+      <div class="piece-label">HAT FRONT &nbsp;::&nbsp; THE BARK</div>
+      <div class="piece-mockup">
+        <div class="mock-text mock-hat">HIT GOLD</div>
+      </div>
+    </div>
+    <div class="piece-spec">
+      <strong>STITCH</strong> :: gold thread on dark wool / cotton<br>
+      <strong>FONT</strong> :: Playfair Display 900 / centered front panel<br>
+      <strong>BACK STRAP</strong> :: small EVERLIGHT VENTURES wordmark<br>
+      <strong>USE</strong> :: gym, walk-in, daily wear<br>
+      <span class="pill gold">2 SYL BARK</span> <span class="pill amber">TM PENDING</span>
+    </div>
+  </div>
+
+  <div class="piece">
+    <div>
+      <div class="piece-label">HOODIE BACK &nbsp;::&nbsp; THE SERMON</div>
+      <div class="piece-mockup">
+        <div class="mock-text mock-hood">CARRY<br>THAT LIGHT</div>
+      </div>
+    </div>
+    <div class="piece-spec">
+      <strong>STITCH</strong> :: gold thread on black hoodie back panel<br>
+      <strong>FONT</strong> :: Playfair Display 900 / 2-line stack<br>
+      <strong>SLEEVE</strong> :: small Lucrex wordmark on right cuff<br>
+      <strong>USE</strong> :: training, post-fight, between rounds<br>
+      <span class="pill gold">SERMON ANCHOR</span> <span class="pill amber">TM PENDING</span>
+    </div>
+  </div>
+
+  <div class="piece">
+    <div>
+      <div class="piece-label">SHORTS / WAISTBAND &nbsp;::&nbsp; THE PROPER NOUN</div>
+      <div class="piece-mockup">
+        <div class="mock-text mock-shorts">LUCREX</div>
+      </div>
+    </div>
+    <div class="piece-spec">
+      <strong>PRINT</strong> :: gold ink, embossed waistband / leg<br>
+      <strong>FONT</strong> :: Playfair Display 800<br>
+      <strong>USE</strong> :: fight kit, training shorts, walkout<br>
+      <strong>NOTE</strong> :: coined word, expected zero TM conflict<br>
+      <span class="pill green">TM CLEAN (EXPECTED)</span> <span class="pill gold">SINGLE WORD</span>
+    </div>
+  </div>
+
+  <div class="piece">
+    <div>
+      <div class="piece-label">WORDMARK &nbsp;::&nbsp; THE ANCHOR</div>
+      <div class="piece-mockup">
+        <div class="mock-text mock-mark">EVERLIGHT &middot; VENTURES</div>
+      </div>
+    </div>
+    <div class="piece-spec">
+      <strong>PLACEMENT</strong> :: every piece gets it (small, never the lead)<br>
+      <strong>FONT</strong> :: Inter 600 small caps / OR Playfair small caps<br>
+      <strong>SIZE</strong> :: subordinate to the creed line on each piece<br>
+      <strong>RULE</strong> :: never larger than the slogan it accompanies<br>
+      <span class="pill gold">PARENT BRAND</span>
+    </div>
+  </div>
+
+</div>
+
+<h2>The Kit Architecture</h2>
+
+<table>
+  <thead>
+    <tr><th>Piece</th><th>Line</th><th>Register</th><th>Wears Where</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Hat</strong></td><td class="mono">HIT GOLD</td><td>Bark</td><td>Daily, gym, walk-in</td></tr>
+    <tr><td><strong>Hoodie back</strong></td><td class="mono">CARRY THAT LIGHT</td><td>Sermon</td><td>Training, post-fight, hood-up</td></tr>
+    <tr><td><strong>Shorts / belt</strong></td><td class="mono">LUCREX</td><td>Proper noun</td><td>Fight kit, walkout</td></tr>
+    <tr><td><strong>Wordmark</strong></td><td class="mono">EVERLIGHT VENTURES</td><td>Anchor</td><td>Every piece, subordinate to the creed line</td></tr>
+  </tbody>
+</table>
+
+<h2>Why The Stack Works</h2>
+
+<ul class="tight">
+  <li><strong>Three registers across three pieces.</strong> The hat barks. The hoodie preaches. The shorts name the kingdom. Each piece does its own job. No piece repeats another.</li>
+  <li><strong>Through-line is brand DNA.</strong> Light, gold, dawn, sovereignty -- all four pieces sit inside the Everlight mythology. Nothing borrowed.</li>
+  <li><strong>Two-step doctrine, not one-step slogan.</strong> HIT GOLD = the win. CARRY THAT LIGHT = the responsibility. Most fight brands miss the second beat. We claim it.</li>
+  <li><strong>Stencils clean.</strong> Pure verb-noun on the hat is stencil-ready. Sermon line on the hoodie has natural line-break (CARRY / THAT LIGHT). LUCREX is one word. None of these need designer rescue.</li>
+  <li><strong>Boardroom-survivable.</strong> No f-bombs. No weapons. No Tate-coronation language. The CEO at Saturday Equinox keeps wearing it. Title-company contact compliments the hat.</li>
+  <li><strong>Survives a loss.</strong> Camera cuts to the hat after a KO. HIT GOLD still reads as the work, not the win. CARRY THAT LIGHT still reads as the responsibility, not the trophy.</li>
+</ul>
+
+<h2>Status :: Trademark Clearance (Returned 2026-05-08)</h2>
+
+<p style="font-size:14px">Preliminary USPTO mirror scan complete. Live TESS UI is JS-rendered and was not retrievable directly -- attorney must re-run in the live UI before any production order.</p>
+
+<table>
+  <thead>
+    <tr><th>Mark</th><th>Class</th><th>Verdict</th><th>File Order</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="mono">LUCREX</td><td>9 + 25 + 35 + 41</td><td><span class="pill green">GREEN :: coined, zero exact matches, multi-class strategic mark</span></td><td>1st</td></tr>
+    <tr><td class="mono">HIT GOLD</td><td>25</td><td><span class="pill green">GREEN :: clean, only soft "strike gold" idiom undertow</span></td><td>2nd</td></tr>
+    <tr><td class="mono">CARRY THAT LIGHT</td><td>25</td><td><span class="pill amber">YELLOW :: gospel hymn "Carry The Light" (Twila Paris) + 501c3 carrythelight.com + Carry The Light Ministries -- 2(d) refusal risk if "CARRY THE LIGHT" Class 25 reg exists</span></td><td>3rd, after attorney knockout</td></tr>
+    <tr><td class="mono">HIT GOLD. CARRY THAT LIGHT.</td><td>25</td><td><span class="pill amber">YELLOW :: inherits CARRY-stem risk + ornamental-refusal risk under TMEP 1202.03 if filed only with hoodie-back graphic</span></td><td>4th, HOLD</td></tr>
+  </tbody>
+</table>
+
+<h3>Filing Budget (Pre-Deal-1 Reality)</h3>
+<p style="font-size:14px">TEAS Standard :: USD 350 per class. Phase 1 (LUCREX 25+35 + HIT GOLD 25+35) :: <strong style="color:var(--gold)">USD 1,400 minimum</strong>. TEAS Plus drops to USD 250 per class but locks pre-approved goods/services language (workable for apparel).</p>
+<p style="font-size:14px"><strong style="color:var(--gold)">Doctrinal hold:</strong> per Operator Truth Doctrine + the broke-pre-Deal-1 sole-prop posture, all premium spend defers until first commission lands. Wear the unregistered creed in the meantime -- registration is what lets you sue, not what lets you print.</p>
+
+<h3>The CARRY THAT LIGHT Decision</h3>
+<p style="font-size:14px">Three options, in order of recommendation:</p>
+<ol class="steps">
+  <li><strong>Wear unregistered, decide later.</strong> No filing pre-Deal-1. The hoodie ships, the creed lives, the legal exposure is "zero, until you want to enforce." Most likely correct play.</li>
+  <li><strong>Pivot to "CARRY THE EVERLIGHT."</strong> Puts the brand inside the line, eliminates the gospel-hymn collision, deepens the brand tie. Trades cornerman-warmth for brand-anchor. Also legally cleanest of the variants.</li>
+  <li><strong>Backup variants ready:</strong> CARRY GOLD, CARRY THE FIRE. Both keep the verb-that-noun cadence Marquise wrote himself, dodge the gospel collision, retain Everlight DNA.</li>
+</ol>
+
+<p style="font-size:13px;color:var(--mute);font-style:italic">Full clearance brief: <span class="mono" style="color:var(--gold)">/tmp/tagline_kit_tm_clearance.md</span>. Attorney TESS knockout required before any filing.</p>
+
+<h2>Next Moves</h2>
+
+<ol class="steps">
+  <li><strong>TESS clearance returns.</strong> Researcher delivers Class 25 + 35 brief on all four marks. Any RED flags trigger a single-element rework, not a full kit rebuild.</li>
+  <li><strong>Quinn signs off.</strong> Style enforcer final pass on the locked creed before any vendor sees it.</li>
+  <li><strong>Sample vendor outreach.</strong> One hat sample + one hoodie sample. Local screen-printer or Printful for low-MOQ test. Not a bulk order.</li>
+  <li><strong>Wear-test in private.</strong> Marquise wears the prototype to one training session and one closing meeting. If both feel right, we scale.</li>
+  <li><strong>Filing strategy.</strong> File LUCREX first (lowest TM risk, highest brand-asset value). HIT GOLD and CARRY THAT LIGHT after clearance brief is in hand.</li>
+  <li><strong>Hold the line on register.</strong> Future merch additions stay inside this kit's architecture. No drift back to luxury-house. No drift back to grindset.</li>
+</ol>
+
+<h2>What Got Killed Along The Way</h2>
+
+<table>
+  <thead>
+    <tr><th>Line</th><th>Round</th><th>Why Killed</th></tr>
+  </thead>
+  <tbody>
+    <tr><td class="mono">Heir to the Light</td><td>R1</td><td>"Doesnt sound hard enough or workout enough" -- Marquise</td></tr>
+    <tr><td class="mono">Dawn Breaks Harder</td><td>R1</td><td>Mythic register too soft for fight floor</td></tr>
+    <tr><td class="mono">Light the Dark</td><td>R1</td><td>Too literary, lacked imperative bite</td></tr>
+    <tr><td class="mono">Sovereign Light</td><td>R1</td><td>Class 25 conflicts (Sovereign State + Sovereign Athletic)</td></tr>
+    <tr><td class="mono">Born Gold</td><td>R1</td><td>Cecil Frena (musician) collision in retail search</td></tr>
+    <tr><td class="mono">Rise Black Gold</td><td>R1</td><td>"Rise" hits Affirm-bro radioactive list</td></tr>
+    <tr><td class="mono">Kingdom or Nothing</td><td>R1</td><td>"or nothing" closer is a banned grammatical pattern</td></tr>
+  </tbody>
+</table>
+
+<div class="insight">
+  <h3>The Through-Line</h3>
+  <p>This kit is not what we'd ship in a Mythic-register agency pitch. It's not what we'd ship in a Goggins clone. It's what came out of <strong style="color:var(--gold)">three rounds of refusing what didn't sound like Marquise</strong>. R1 was elegant and wrong. R1.5 was harder but still not yours. R2 you wrote it yourself. <em>Carry that light.</em> The wearer is you. The light is the one in you. The hat barks the work, the hoodie preaches the meaning. That's the kit.</p>
+</div>
+
+<div class="footer">
+  EVERLIGHT VENTURES &nbsp;&middot;&nbsp; THE LOCKED KIT v1 &nbsp;&middot;&nbsp; HIVE MIND R1 + R1.5 + R2 &nbsp;&middot;&nbsp; 2026-05-08<br>
+  <span class="gold-line">HIT GOLD. CARRY THAT LIGHT.</span>
+</div>
+
+</div>
+</body>
+</html>

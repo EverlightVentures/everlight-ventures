@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block page_title %}Cashier Dashboard{% endblock %}
+{% block header_emoji %}🛒{% endblock %}
+{% block header_title %}Cashier Dashboard{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('sales') }}" class="btn btn-primary">
+    <i data-lucide="plus"></i> New Sale
+</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dash-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 24px;
+        margin-bottom: 36px;
+    }
+    .dash-stat {
+        background: linear-gradient(145deg, rgba(19, 36, 25, 0.95), rgba(12, 22, 16, 0.9));
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius);
+        padding: 28px;
+        position: relative;
+        overflow: hidden;
+    }
+    .dash-stat::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 4px;
+    }
+    .dash-stat.green::before { background: linear-gradient(90deg, var(--green-400), var(--green-600)); }
+    .dash-stat.blue::before { background: linear-gradient(90deg, var(--sky-500), var(--sky-600)); }
+    .stat-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text-muted);
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .stat-value {
+        font-size: 36px;
+        font-weight: 800;
+        color: var(--text-primary);
+        letter-spacing: -1px;
+    }
+    .stat-sub {
+        font-size: 13px;
+        color: var(--text-muted);
+        margin-top: 8px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dash-stats">
+    <div class="dash-stat green">
+        <div class="stat-label">Store Total</div>
+        <div class="stat-value">${{ "%.2f"|format(total_revenue) }}</div>
+        <div class="stat-sub">{{ transaction_count }} transactions</div>
+    </div>
+    <div class="dash-stat blue">
+        <div class="stat-label">My Sales</div>
+        <div class="stat-value">${{ "%.2f"|format(my_revenue) }}</div>
+        <div class="stat-sub">{{ my_transactions }} transactions</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <span class="card-emoji">⚡</span>
+                Quick Actions
+            </div>
+        </div>
+        <div class="card-body">
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <a href="{{ url_for('sales') }}" class="btn btn-primary" style="width: 100%;">
+                    <i data-lucide="shopping-cart"></i> New Sale
+                </a>
+                <a href="{{ url_for('sales_log') }}" class="btn btn-secondary" style="width: 100%;">
+                    <i data-lucide="list"></i> Sales Log
+                </a>
+                <a href="{{ url_for('till') }}" class="btn btn-secondary" style="width: 100%;">
+                    <i data-lucide="dollar-sign"></i> Cash Till
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <span class="card-emoji">⏰</span>
+                Time Clock
+            </div>
+        </div>
+        <div class="card-body">
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+                <div>
+                    <div class="text-muted" style="font-size: 12px; margin-bottom: 4px;">Status</div>
+                    <div style="font-size: 18px; font-weight: 600; color: var(--text-primary);">
+                        {% if clock_status.is_clocked_in %}
+                        <span style="color: var(--green-400);">●</span> Clocked In
+                        {% else %}
+                        <span style="color: var(--text-muted);">○</span> Not Clocked In
+                        {% endif %}
+                    </div>
+                    {% if clock_status.hours_today %}
+                    <div class="text-muted" style="font-size: 12px; margin-top: 4px;">{{ "%.1f"|format(clock_status.hours_today) }} hours today</div>
+                    {% endif %}
+                </div>
+                <a href="{{ url_for('timeclock') }}" class="btn btn-secondary" style="width: 100%;">
+                    <i data-lucide="clock"></i> Manage Time
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>lucide.createIcons();</script>
+{% endblock %}
+
+
+
+
+
+
+

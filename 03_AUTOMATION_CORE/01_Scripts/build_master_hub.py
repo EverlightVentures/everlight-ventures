@@ -43,7 +43,7 @@ load_env()
 
 DASH_DIR = ROOT / "09_DASHBOARD/sweeps"
 INTEL_DB = ROOT / "06_DEVELOPMENT/everlight_os/intel_center" / "database" / "everlight_resources.sqlite"
-BLINKO_URL = "http://127.0.0.1:2700"
+BLINKO_URL = "http://127.0.0.1:2700"  # local blinko_lite fallback (offline-first); canonical full RAG is e5-mother:1111 (tailnet)
 REPORTS_BASE = "http://127.0.0.1:2200/reports"
 HUB_BASE = "http://127.0.0.1:2000"
 
@@ -62,8 +62,9 @@ def service_pills() -> list[tuple[str, str, int, str]]:
         (2302, "E-Sign", "/healthz"),
         (2400, "Apps", "/"),
         (2500, "MMA Fight Camp", "/"),
-        (2700, "Blinko RAG", "/health"),
+        (2700, "Blinko RAG (local lite)", "/health"),
         (2701, "MCP HTTP Bridge", "/healthz"),
+        (2702, "Lucrex Command Center", "/"),
     ]
     out = []
     for port, name, path in services:
@@ -139,7 +140,7 @@ def render_pill(port: int, name: str, code: int, url: str) -> str:
             f"<span style='color:{color};'>{dot}</span> :{port} {esc(name)}</a>")
 
 
-def tile(title: str, subtitle: str, link: str, body_html: str, color: str = "#D4A843",
+def tile(title: str, subtitle: str, link: str, body_html: str, color: str = "#D4AF37",
          link_label: str = "open") -> str:
     return f"""
 <div style='background:#0d0d0d;border-left:3px solid {color};padding:18px 20px;border-radius:0 4px 4px 0;'>
@@ -171,15 +172,15 @@ def main() -> int:
 
     kpi_strip = f"""
 <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:24px 0;'>
-  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Services</div>
     <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>{up}/{total} <span style='color:#888;font-size:14px;'>up</span></div>
   </div>
-  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Memory (Blinko)</div>
     <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>{bc:,} <span style='color:#888;font-size:14px;'>notes</span></div>
   </div>
-  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Knowledge</div>
     <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>{rc} <span style='color:#888;font-size:14px;'>resources</span></div>
   </div>
@@ -190,21 +191,21 @@ def main() -> int:
   </div>
 </div>
 
-<div style='background:#0d0d0d;padding:14px 18px;border-left:3px solid #D4A843;margin:8px 0 24px;'>
+<div style='background:#0d0d0d;padding:14px 18px;border-left:3px solid #D4AF37;margin:8px 0 24px;'>
   <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;'>Service Health</div>
   <div style='display:flex;flex-wrap:wrap;gap:8px;'>{pills_html}</div>
 </div>
 """
 
     # The 7 main category tiles
-    leads_body = (f"Latest: <a href='{leads['url']}' style='color:#D4A843;'>{esc(leads['date'])}</a>"
+    leads_body = (f"Latest: <a href='{leads['url']}' style='color:#D4AF37;'>{esc(leads['date'])}</a>"
                   if leads else "No leads run today yet (cron 3 AM PT)")
 
     tiles = [
         tile("Memory", "Blinko RAG -- 614+ notes, searchable",
              "http://127.0.0.1:2700/",
              f"<div>{bc:,} notes indexed. Query for prior decisions, audits, agent reports.</div>"
-             f"<div style='margin-top:8px;'><a href='http://127.0.0.1:2701/list_tools/blinko' style='color:#D4A843;font-size:12px;'>API: 3 tools via MCP bridge</a></div>",
+             f"<div style='margin-top:8px;'><a href='http://127.0.0.1:2701/list_tools/blinko' style='color:#D4AF37;font-size:12px;'>API: 3 tools via MCP bridge</a></div>",
              color="#7ec699", link_label="search"),
         tile("Knowledge", "Resources Hub -- 745 free tools, categorized",
              f"{REPORTS_BASE}/RESOURCES_HUB.html",
@@ -215,8 +216,8 @@ def main() -> int:
              f"{REPORTS_BASE}/RICH_TODO_LIVE.html",
              f"<div>Master TODO: open tasks tracked across the workspace.</div>"
              f"<div style='margin-top:6px;'>{leads_body}</div>"
-             f"<div style='margin-top:6px;'><a href='{REPORTS_BASE}/MASTER_PIPELINE_DOCTRINE_2026-05-13.html' style='color:#D4A843;font-size:12px;'>Pipeline doctrine →</a></div>",
-             color="#D4A843", link_label="todo"),
+             f"<div style='margin-top:6px;'><a href='{REPORTS_BASE}/MASTER_PIPELINE_DOCTRINE_2026-05-13.html' style='color:#D4AF37;font-size:12px;'>Pipeline doctrine →</a></div>",
+             color="#D4AF37", link_label="todo"),
         tile("Trading", f"XLM bot -- {xlm.get('mode','?')} -- {eq_str}",
              f"{REPORTS_BASE}/xlm_honest_dashboard.html",
              f"<div>0 trades in last 7 days. Service-active, not trading.</div>"
@@ -225,7 +226,7 @@ def main() -> int:
         tile("Communications", "Slack -- 13 channels, branded comms layer",
              f"https://app.slack.com/client/T0AN6PD3XMD",
              f"<div>warroom + xlmbot tokens active. ImprovMX 42 aliases @everlightventures.io.</div>"
-             f"<div style='margin-top:6px;'><a href='{REPORTS_BASE}/SERVICES_REGISTRY.html' style='color:#D4A843;font-size:12px;'>All channels & services →</a></div>",
+             f"<div style='margin-top:6px;'><a href='{REPORTS_BASE}/SERVICES_REGISTRY.html' style='color:#D4AF37;font-size:12px;'>All channels & services →</a></div>",
              color="#6bafff", link_label="slack"),
         tile("Personal", "MMA Fight Camp -- training calendar, lesson capture",
              "http://127.0.0.1:2500/",
@@ -239,8 +240,13 @@ def main() -> int:
         tile("Hive Mind", "Query interface -- agents, dispatchers, recent decisions",
              f"{REPORTS_BASE}/HIVE_MIND.html",
              "<div>94 agents across 4 squads. Cipher, Marquise, Hammer, Bull Archer, Nova Ling, Helix Patel, etc.</div>"
-             f"<div style='margin-top:6px;'><a href='http://127.0.0.1:2701/list_tools' style='color:#D4A843;font-size:12px;'>MCP HTTP bridge: 28 tools →</a></div>",
+             f"<div style='margin-top:6px;'><a href='http://127.0.0.1:2701/list_tools' style='color:#D4AF37;font-size:12px;'>MCP HTTP bridge: 28 tools →</a></div>",
              color="#c39bff", link_label="query"),
+        tile("Lucrex Command Center", "Next.js command center -- rehomed to the 2700 band (port 2702)",
+             "http://127.0.0.1:2702/",
+             "<div>Lucrex OS front-end on 127.0.0.1:2702 (private by default). Built on e5-mother, served via next start.</div>"
+             "<div style='margin-top:6px;color:#888;font-size:12px;'>Serve: <code>bash 03_AUTOMATION_CORE/01_Scripts/serve_lucrex.sh start</code></div>",
+             color="#D4AF37", link_label="open"),
     ]
 
     # Build the HTML directly (no report_template wrap; this IS the home page)
@@ -265,10 +271,10 @@ body {{
 }}
 .container {{ max-width: 1400px; margin: 0 auto; padding: 32px 24px; }}
 .header {{ text-align: center; margin-bottom: 24px; border-bottom: 1px solid #2a2a2a; padding-bottom: 24px; }}
-.logo {{ font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 6px; text-transform: uppercase; color: #D4A843; }}
+.logo {{ font-family: 'Playfair Display', serif; font-size: 14px; letter-spacing: 6px; text-transform: uppercase; color: #D4AF37; }}
 .title {{ font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 700; color: #E8E8E8; margin-top: 8px; }}
 .subtitle {{ color: #888; font-size: 14px; margin-top: 4px; }}
-a {{ color: #D4A843; }}
+a {{ color: #D4AF37; }}
 .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 18px; margin: 24px 0; }}
 .footer {{ text-align: center; margin-top: 48px; padding-top: 24px; border-top: 1px solid #2a2a2a; color: #666; font-size: 12px; }}
 </style>

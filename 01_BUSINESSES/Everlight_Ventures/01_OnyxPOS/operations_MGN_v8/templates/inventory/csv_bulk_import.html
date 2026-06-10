@@ -1,0 +1,709 @@
+{% extends "base.html" %}
+
+{% block page_title %}Intelligent CSV Import{% endblock %}
+{% block header_emoji %}🧠{% endblock %}
+{% block header_title %}Intelligent CSV Import{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('inventory') }}" class="btn btn-secondary">
+  <i data-lucide="package"></i> Inventory
+</a>
+<a href="{{ url_for('receive_stock') }}" class="btn btn-secondary">
+  <i data-lucide="arrow-left"></i> Back
+</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .import-grid{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  @media (max-width: 1100px){
+    .import-grid{ grid-template-columns: 1fr; }
+  }
+
+  .card{
+    background: linear-gradient(145deg, rgba(30,58,42,0.9), rgba(22,43,31,0.9));
+    border: 1px solid rgba(167, 243, 208, 0.12);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.25);
+  }
+
+  .card h3{
+    margin: 0 0 16px 0;
+    font-size: 16px;
+    font-weight: 900;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #e8f5ee;
+  }
+
+  .upload-zone{
+    border: 3px dashed rgba(16,185,129,0.35);
+    border-radius: 16px;
+    padding: 50px 30px;
+    text-align: center;
+    background: rgba(16,185,129,0.05);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .upload-zone:hover{
+    border-color: #10b981;
+    background: rgba(16,185,129,0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16,185,129,0.2);
+  }
+
+  .upload-zone.dragover{
+    border-color: #10b981;
+    border-style: solid;
+    background: rgba(16,185,129,0.15);
+    transform: scale(1.01);
+  }
+
+  .upload-icon{
+    font-size: 56px;
+    margin-bottom: 16px;
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float{
+    0%, 100%{ transform: translateY(0); }
+    50%{ transform: translateY(-8px); }
+  }
+
+  .upload-title{
+    font-size: 18px;
+    font-weight: 900;
+    color: #e8f5ee;
+    margin-bottom: 8px;
+  }
+
+  .upload-hint{
+    font-size: 13px;
+    color: rgba(232,245,238,0.65);
+    margin-bottom: 16px;
+  }
+
+  .upload-badge{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: rgba(16,185,129,0.15);
+    border: 1px solid rgba(16,185,129,0.3);
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #10b981;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 4px;
+  }
+
+  .info-list{
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .info-list li{
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(167,243,208,0.08);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: rgba(232,245,238,0.85);
+    line-height: 1.5;
+  }
+
+  .info-list li:last-child{
+    border-bottom: none;
+  }
+
+  .info-list li strong{
+    color: #10b981;
+    font-weight: 900;
+  }
+
+  .icon-check{
+    color: #10b981;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .feature-grid{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .feature-item{
+    padding: 14px;
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .feature-icon{
+    font-size: 24px;
+  }
+
+  .feature-text{
+    font-size: 12px;
+    font-weight: 800;
+    color: rgba(232,245,238,0.9);
+    line-height: 1.4;
+  }
+
+  .result{
+    display: none;
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 14px;
+    animation: slideIn 0.3s ease;
+  }
+
+  .result.show{
+    display: block;
+  }
+
+  @keyframes slideIn{
+    from{
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to{
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .result.success{
+    background: rgba(16,185,129,0.12);
+    border: 2px solid rgba(16,185,129,0.3);
+  }
+
+  .result.error{
+    background: rgba(239,68,68,0.12);
+    border: 2px solid rgba(239,68,68,0.3);
+  }
+
+  .result-header{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .result-icon{
+    font-size: 32px;
+  }
+
+  .result-title{
+    font-size: 18px;
+    font-weight: 900;
+    color: #e8f5ee;
+  }
+
+  .stats-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .stat-card{
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(167,243,208,0.12);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+  }
+
+  .stat-value{
+    font-size: 32px;
+    font-weight: 900;
+    color: #10b981;
+    margin-bottom: 4px;
+    line-height: 1;
+  }
+
+  .stat-label{
+    font-size: 9px;
+    font-weight: 800;
+    color: rgba(232,245,238,0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .result-message{
+    font-size: 14px;
+    color: rgba(232,245,238,0.75);
+    margin-top: 12px;
+  }
+
+  .btn-view{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 12px 20px;
+    background: #10b981;
+    color: #0a0f0c;
+    border-radius: 12px;
+    font-weight: 900;
+    font-size: 14px;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-view:hover{
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+  }
+
+  .loading-overlay{
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(4px);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .loading-overlay.show{
+    display: flex;
+  }
+
+  .loading-content{
+    text-align: center;
+  }
+
+  .spinner{
+    width: 64px;
+    height: 64px;
+    border: 6px solid rgba(16,185,129,0.2);
+    border-top-color: #10b981;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+  }
+
+  @keyframes spin{
+    to{ transform: rotate(360deg); }
+  }
+
+  .loading-title{
+    font-size: 20px;
+    font-weight: 900;
+    color: #e8f5ee;
+    margin-bottom: 8px;
+  }
+
+  .loading-text{
+    font-size: 14px;
+    color: rgba(232,245,238,0.65);
+  }
+
+  .vendor-badge{
+    display: inline-block;
+    padding: 4px 8px;
+    background: rgba(16,185,129,0.15);
+    border: 1px solid rgba(16,185,129,0.25);
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #10b981;
+    margin: 2px;
+  }
+
+  .pro-tip{
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.25);
+    border-radius: 12px;
+    padding: 14px;
+    margin-top: 16px;
+    font-size: 13px;
+    color: rgba(232,245,238,0.85);
+  }
+
+  .pro-tip strong{
+    color: #3b82f6;
+    font-weight: 900;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+  <div class="import-grid">
+
+    <!-- Left Column: Upload Zone -->
+    <div>
+      <div class="card">
+        <h3>
+          <i data-lucide="upload-cloud"></i>
+          Upload Invoice File
+        </h3>
+
+        <div class="upload-zone" id="uploadZone">
+          <div class="upload-icon">🧠</div>
+          <div class="upload-title">Drop Invoice File Here</div>
+          <div class="upload-hint">Intelligently detects vendor format</div>
+          <div>
+            <span class="upload-badge">CSV</span>
+            <span class="upload-badge">XLSX</span>
+            <span class="upload-badge">XLS</span>
+          </div>
+          <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display: none;">
+        </div>
+
+        <div id="resultBox" class="result"></div>
+      </div>
+
+      <!-- Smart Features -->
+      <div class="card" style="margin-top: 18px;">
+        <h3>
+          <i data-lucide="cpu"></i>
+          Intelligent Features
+        </h3>
+        <div class="feature-grid">
+          <div class="feature-item">
+            <div class="feature-icon">🎯</div>
+            <div class="feature-text">Auto field mapping</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">📱</div>
+            <div class="feature-text">QR code generation</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🔗</div>
+            <div class="feature-text">Barcode linking</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🏷️</div>
+            <div class="feature-text">Auto SKU creation</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">📊</div>
+            <div class="feature-text">Multi-format support</div>
+          </div>
+          <div class="feature-item">
+            <div class="feature-icon">🛡️</div>
+            <div class="feature-text">Duplicate protection</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Information -->
+    <div>
+      <div class="card">
+        <h3>
+          <i data-lucide="brain"></i>
+          How Intelligent Import Works
+        </h3>
+        <ul class="info-list">
+          <li>
+            <i data-lucide="scan" class="icon-check" style="width: 18px; height: 18px;"></i>
+            <span><strong>Auto-Detects Vendor Format:</strong> Recognizes column names from any vendor (Home Depot, Lowe's, Monrovia, etc.)</span>
+          </li>
+          <li>
+            <i data-lucide="link" class="icon-check" style="width: 18px; height: 18px;"></i>
+            <span><strong>Links Supplier Barcodes:</strong> Associates vendor UPC/barcodes with your SKUs for scanning</span>
+          </li>
+          <li>
+            <i data-lucide="qr-code" class="icon-check" style="width: 18px; height: 18px;"></i>
+            <span><strong>Generates QR Codes:</strong> Creates unique QR codes containing full item data</span>
+          </li>
+          <li>
+            <i data-lucide="repeat" class="icon-check" style="width: 18px; height: 18px;"></i>
+            <span><strong>Triple Scan Support:</strong> Find items by scanning YOUR SKU, SUPPLIER barcode, or YOUR QR code</span>
+          </li>
+          <li>
+            <i data-lucide="tag" class="icon-check" style="width: 18px; height: 18px;"></i>
+            <span><strong>Smart SKU Generation:</strong> Auto-creates organized SKUs based on category (PLT-*, ANM-*, etc.)</span>
+          </li>
+          <li>
+            <i data-lucide="shield-check" class="icon-check" style="width: 18px; height: 18px;"></i>
+            <span><strong>Safe & Smart:</strong> Never overwrites data, skips duplicates, preserves your inventory</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="card" style="margin-top: 18px;">
+        <h3>
+          <i data-lucide="building"></i>
+          Supported Vendors
+        </h3>
+        <p style="color: rgba(232,245,238,0.7); font-size: 13px; margin-bottom: 12px;">
+          System auto-detects and imports from:
+        </p>
+        <div>
+          <span class="vendor-badge">Home Depot</span>
+          <span class="vendor-badge">Lowe's</span>
+          <span class="vendor-badge">Monrovia</span>
+          <span class="vendor-badge">Bailey Nurseries</span>
+          <span class="vendor-badge">Costa Farms</span>
+          <span class="vendor-badge">Any CSV/Excel</span>
+        </div>
+
+        <div class="pro-tip">
+          <strong>💡 Pro Tip:</strong> System recognizes 50+ field name variations. If your vendor uses "Product Description", "Item", "UPC", "SKU", etc., it will find them automatically!
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 18px;">
+        <h3>
+          <i data-lucide="scan-line"></i>
+          Barcode & QR Workflow
+        </h3>
+        <ul class="info-list">
+          <li>
+            <span style="color: #3b82f6; font-weight: 900;">1.</span>
+            <span>Import vendor invoice → System links supplier barcode to your SKU</span>
+          </li>
+          <li>
+            <span style="color: #3b82f6; font-weight: 900;">2.</span>
+            <span>System generates QR code containing item data</span>
+          </li>
+          <li>
+            <span style="color: #3b82f6; font-weight: 900;">3.</span>
+            <span>Print QR labels for your items (saved in static/qrcodes/)</span>
+          </li>
+          <li>
+            <span style="color: #3b82f6; font-weight: 900;">4.</span>
+            <span>Scan ANY code (supplier barcode, your SKU, or QR) → Find item instantly!</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<!-- Loading Overlay -->
+<div id="loadingOverlay" class="loading-overlay">
+  <div class="loading-content">
+    <div class="spinner"></div>
+    <div class="loading-title">Processing Invoice...</div>
+    <div class="loading-text">Auto-detecting vendor format & generating QR codes</div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+lucide.createIcons();
+
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+const resultBox = document.getElementById('resultBox');
+const loadingOverlay = document.getElementById('loadingOverlay');
+
+// Click to upload
+uploadZone.addEventListener('click', () => fileInput.click());
+
+// Prevent default drag behaviors
+['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+  uploadZone.addEventListener(eventName, (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  });
+});
+
+// Visual feedback on drag
+['dragenter', 'dragover'].forEach(eventName => {
+  uploadZone.addEventListener(eventName, () => {
+    uploadZone.classList.add('dragover');
+  });
+});
+
+['dragleave', 'drop'].forEach(eventName => {
+  uploadZone.addEventListener(eventName, () => {
+    uploadZone.classList.remove('dragover');
+  });
+});
+
+// Handle drop
+uploadZone.addEventListener('drop', (e) => {
+  const files = e.dataTransfer.files;
+  if (files.length > 0) {
+    handleFile(files[0]);
+  }
+});
+
+// Handle file input
+fileInput.addEventListener('change', (e) => {
+  if (e.target.files.length > 0) {
+    handleFile(e.target.files[0]);
+  }
+});
+
+async function handleFile(file) {
+  const filename = file.name.toLowerCase();
+
+  // Validate file type
+  if (!filename.endsWith('.csv') && !filename.endsWith('.xlsx') && !filename.endsWith('.xls')) {
+    showResult('error', {
+      title: 'Invalid File Type',
+      message: 'Please upload CSV, XLSX, or XLS file'
+    });
+    return;
+  }
+
+  // Validate file size (20MB max for Excel)
+  if (file.size > 20 * 1024 * 1024) {
+    showResult('error', {
+      title: 'File Too Large',
+      message: 'Maximum file size is 20MB'
+    });
+    return;
+  }
+
+  // Show loading
+  loadingOverlay.classList.add('show');
+  resultBox.classList.remove('show');
+
+  // Upload file
+  const formData = new FormData();
+  formData.append('csv_file', file);
+
+  try {
+    const response = await fetch('/inventory/csv-import', {
+      method: 'POST',
+      body: formData
+    });
+
+    const data = await response.json();
+
+    loadingOverlay.classList.remove('show');
+
+    if (data.success) {
+      showResult('success', data);
+
+      // Auto-redirect after 4 seconds
+      setTimeout(() => {
+        window.location.href = '/inventory';
+      }, 4000);
+    } else {
+      showResult('error', {
+        title: 'Import Failed',
+        message: data.error || 'An unknown error occurred'
+      });
+    }
+
+  } catch (error) {
+    loadingOverlay.classList.remove('show');
+    showResult('error', {
+      title: 'Network Error',
+      message: 'Failed to connect to server: ' + error.message
+    });
+  }
+
+  fileInput.value = '';
+}
+
+function showResult(type, data) {
+  resultBox.className = `result ${type} show`;
+
+  if (type === 'success') {
+    let html = `
+      <div class="result-header">
+        <div class="result-icon">✅</div>
+        <div class="result-title">Intelligent Import Complete!</div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">${data.imported}</div>
+          <div class="stat-label">New Items</div>
+        </div>
+    `;
+
+    if (data.updated > 0) {
+      html += `
+        <div class="stat-card">
+          <div class="stat-value" style="color: #3b82f6;">${data.updated}</div>
+          <div class="stat-label">Updated</div>
+        </div>
+      `;
+    }
+
+    if (data.qr_codes_generated > 0) {
+      html += `
+        <div class="stat-card">
+          <div class="stat-value" style="color: #8b5cf6;">${data.qr_codes_generated}</div>
+          <div class="stat-label">QR Codes</div>
+        </div>
+      `;
+    }
+
+    if (data.barcodes_linked > 0) {
+      html += `
+        <div class="stat-card">
+          <div class="stat-value" style="color: #f59e0b;">${data.barcodes_linked}</div>
+          <div class="stat-label">Barcodes Linked</div>
+        </div>
+      `;
+    }
+
+    if (data.duplicates > 0) {
+      html += `
+        <div class="stat-card">
+          <div class="stat-value" style="color: #6b7280;">${data.duplicates}</div>
+          <div class="stat-label">Duplicates Skipped</div>
+        </div>
+      `;
+    }
+
+    html += `
+      </div>
+      <div class="result-message">
+        🎉 Invoice processed! QR codes generated, barcodes linked, items ready. Redirecting...
+      </div>
+      <a href="/inventory" class="btn-view">
+        <i data-lucide="package"></i>
+        View Inventory Now
+      </a>
+    `;
+
+    resultBox.innerHTML = html;
+    lucide.createIcons();
+
+  } else {
+    resultBox.innerHTML = `
+      <div class="result-header">
+        <div class="result-icon">❌</div>
+        <div class="result-title">${data.title}</div>
+      </div>
+      <div class="result-message">${data.message}</div>
+    `;
+  }
+}
+</script>
+{% endblock %}

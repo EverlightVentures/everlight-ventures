@@ -1,0 +1,3 @@
+Date,Time,Employee_ID,Employee_Name,Punch_Type,Break_Number,Hours_Worked_Today,Overtime_Hours,Notes,Timestamp
+2025-11-30,14:22:07,1001,richard,CLOCK_IN,,0.00,0.00,Shift started,2025-11-30 14:22:07
+2025-11-30,14:25:33,1001,richard,CLOCK_OUT,,0.06,0.00,Shift ended,2025-11-30 14:25:33

@@ -1,0 +1,15 @@
+{
+  "type": "wholesale_purchase_agreement",
+  "property": "117 Farrow Ave, Memphis, TN",
+  "state_detected": "TN",
+  "seller": "Howard Eddie Estate",
+  "buyer": "Richard Gee dba Everlight Ventures",
+  "purchase_price": 1800,
+  "assignment_fee": 700,
+  "generated_at": "2026-04-29T14:05:51.308917-07:00",
+  "pdf_path": "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/contracts/wholesale_117 Farrow Ave_ Memphis_ TN_20260429.pdf",
+  "tn_sb909_schedule_a_bundled": true,
+  "state_disclosures_required": [
+    "TN_SB909"
+  ]
+}

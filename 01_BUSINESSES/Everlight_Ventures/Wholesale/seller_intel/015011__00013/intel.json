@@ -1,0 +1,71 @@
+{
+  "lead": {
+    "parcel_id": "015011  00013",
+    "property_address": null,
+    "owner_name": "",
+    "owner_mailing_street": null,
+    "owner_mailing_city": null,
+    "owner_mailing_state": null,
+    "owner_mailing_zip": null,
+    "is_vacant_lot": null,
+    "total_appraisal_usd": null,
+    "sales_history": null,
+    "tax_sale_marker": "TS2301"
+  },
+  "signals": {
+    "is_estate": false,
+    "estate_decedent_name": null,
+    "is_absentee_outofstate": false,
+    "is_absentee_instate": false,
+    "owner_mailing_apartment": false,
+    "is_llc_owner": false,
+    "is_religious_org_owner": false,
+    "is_long_term_owner": false,
+    "ownership_years": null,
+    "is_high_value": false,
+    "is_vacant_lot": false,
+    "tax_delinquent_years": "3+",
+    "multiple_sales_in_history": false
+  },
+  "browser_queue": [
+    {
+      "label": "Shelby Register of Deeds -- all deeds in '' name",
+      "url": "https://search.register.shelby.tn.us/search/",
+      "instructions": "Name search ''. Save MHTML of result list. Tells us if owner has OTHER properties in Shelby County (= portfolio = sophisticated investor).",
+      "priority": "HIGH"
+    },
+    {
+      "label": "Obit search -- Google site:legacy.com '' Memphis",
+      "url": "https://www.google.com/search?q=site%3Alegacy.com+%22%22+Memphis+OR+Tennessee",
+      "instructions": "Click any hit, MHTML the obit. Tells us: death date, age, surviving family names + cities (= heir candidates).",
+      "priority": "LOW"
+    },
+    {
+      "label": "Facebook public search --  in Memphis",
+      "url": "https://www.facebook.com/public/",
+      "instructions": "If profile public, tells us age range, employer, family, recent posts. Don't friend; just look. MHTML the search result page.",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "LinkedIn search --  ",
+      "url": "https://www.linkedin.com/search/results/people/?keywords=+",
+      "instructions": "Profession, employer, tenure. Helps frame the pitch (busy professional = lead with time-saving; recent retiree = lead with simplicity).",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "TN Public Notice + Court Records -- civil/foreclosure history",
+      "url": "https://www.tncourts.gov/courts/public-notices",
+      "instructions": "Search ''. Civil suits, eviction filings, foreclosure starts = financial pressure signals.",
+      "priority": "MEDIUM"
+    }
+  ],
+  "pitch_hooks": [
+    {
+      "name": "generic_cash_close",
+      "angle": "Standard cash close",
+      "lead_line": "Cash, no agent, 14-day close. We pay back tax. You walk with clean money.",
+      "use_when": "Fallback if no other signals."
+    }
+  ],
+  "generated_at": "2026-05-26T21:14:40.099966+00:00"
+}

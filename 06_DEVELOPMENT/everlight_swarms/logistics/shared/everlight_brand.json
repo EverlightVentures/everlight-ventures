@@ -1,0 +1,18 @@
+{
+  "name": "Everlight Ventures",
+  "wordmark": "EVERLIGHT VENTURES",
+  "palette": {
+    "gold": "#D4A843",
+    "dark": "#0A0A0A",
+    "light_text": "#E8E8E8"
+  },
+  "fonts": {
+    "heading": "Playfair Display",
+    "body": "Inter",
+    "code": "JetBrains Mono"
+  },
+  "tagline_internal": "The Mind Behind the Money",
+  "source_of_truth": "content_tools/report_template.py",
+  "version": "0.1",
+  "updated": "2026-05-07"
+}

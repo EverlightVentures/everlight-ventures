@@ -1,0 +1,160 @@
+{
+  "lead": {
+    "parcel_id": "024057  00012",
+    "property_address": "117  FARROW AVE",
+    "owner_name": "HOWARD EDDIE ( ESTATE OF )",
+    "owner_mailing_street": "1919JAMAR230",
+    "owner_mailing_city": "SAN ANTONIO",
+    "owner_mailing_state": "TX",
+    "owner_mailing_zip": "78226",
+    "is_vacant_lot": true,
+    "total_appraisal_usd": 3800,
+    "sales_history": [
+      {
+        "date": "04/10/2005",
+        "price_text": "$0",
+        "deed_or_inst": "1249",
+        "type_code": "DN",
+        "price_usd": 0,
+        "year": 2005
+      },
+      {
+        "date": "03/10/1993",
+        "price_text": "$0",
+        "deed_or_inst": "141093",
+        "type_code": "CC",
+        "price_usd": 0,
+        "year": 1993
+      },
+      {
+        "date": "12/04/1981",
+        "price_text": "$3,000",
+        "deed_or_inst": "S94102",
+        "type_code": "WD",
+        "price_usd": 3000,
+        "year": 1981
+      },
+      {
+        "date": "08/10/1981",
+        "price_text": "$7,800",
+        "deed_or_inst": "S75271",
+        "type_code": "WD",
+        "price_usd": 7800,
+        "year": 1981
+      },
+      {
+        "date": "06/10/1964",
+        "price_text": "$0",
+        "deed_or_inst": "101-484",
+        "type_code": "PC",
+        "price_usd": 0,
+        "year": 1964
+      }
+    ],
+    "tax_sale_marker": "TS2202"
+  },
+  "signals": {
+    "is_estate": true,
+    "estate_decedent_name": "HOWARD EDDIE",
+    "is_absentee_outofstate": true,
+    "is_absentee_instate": false,
+    "owner_mailing_apartment": false,
+    "is_llc_owner": false,
+    "is_religious_org_owner": false,
+    "is_long_term_owner": true,
+    "ownership_years": 21,
+    "is_high_value": false,
+    "is_vacant_lot": true,
+    "tax_delinquent_years": "4+",
+    "multiple_sales_in_history": true
+  },
+  "browser_queue": [
+    {
+      "label": "Shelby County Probate Court -- search for decedent 'HOWARD EDDIE'",
+      "url": "https://probatedata.shelbycountytn.gov/ProbateCourt/",
+      "instructions": "Search by name. Try 'EDDIE HOWARD' AND 'HOWARD EDDIE'. Save the case-list result as MHTML. We want: case number, executor name, executor address, opening date, status (open/closed).",
+      "priority": "CRITICAL"
+    },
+    {
+      "label": "Shelby Register of Deeds -- all deeds in 'HOWARD EDDIE' name",
+      "url": "https://search.register.shelby.tn.us/search/",
+      "instructions": "Name search 'HOWARD EDDIE'. Save MHTML of result list. Tells us if owner has OTHER properties in Shelby County (= portfolio = sophisticated investor).",
+      "priority": "HIGH"
+    },
+    {
+      "label": "Find-a-Grave -- HOWARD EDDIE death record",
+      "url": "https://www.findagrave.com/memorial/search?firstname=EDDIE&lastname=HOWARD&location=Tennessee",
+      "instructions": "Free, returns death year + cemetery + sometimes spouse/relatives. MHTML the result page.",
+      "priority": "HIGH"
+    },
+    {
+      "label": "Obit search -- Google site:legacy.com 'HOWARD EDDIE' Memphis",
+      "url": "https://www.google.com/search?q=site%3Alegacy.com+%22HOWARD+EDDIE%22+Memphis+OR+Tennessee",
+      "instructions": "Click any hit, MHTML the obit. Tells us: death date, age, surviving family names + cities (= heir candidates).",
+      "priority": "HIGH"
+    },
+    {
+      "label": "Facebook public search -- HOWARD EDDIE in SAN ANTONIO",
+      "url": "https://www.facebook.com/public/HOWARD+EDDIE",
+      "instructions": "If profile public, tells us age range, employer, family, recent posts. Don't friend; just look. MHTML the search result page.",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "LinkedIn search -- HOWARD EDDIE SAN ANTONIO",
+      "url": "https://www.linkedin.com/search/results/people/?keywords=HOWARD+EDDIE+SAN+ANTONIO",
+      "instructions": "Profession, employer, tenure. Helps frame the pitch (busy professional = lead with time-saving; recent retiree = lead with simplicity).",
+      "priority": "LOW"
+    },
+    {
+      "label": "County assessor for SAN ANTONIO TX -- check if owner has property there too",
+      "url": "https://www.google.com/search?q=%22HOWARD+EDDIE%22+SAN+ANTONIO+TX+property+assessor+OR+deed",
+      "instructions": "If owner has primary residence in mailing city, that's another contact path + tells us their financial position.",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "TN Public Notice + Court Records -- civil/foreclosure history",
+      "url": "https://www.tncourts.gov/courts/public-notices",
+      "instructions": "Search 'HOWARD EDDIE'. Civil suits, eviction filings, foreclosure starts = financial pressure signals.",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "Newspaper archive: Daily Memphian search -- 'HOWARD EDDIE'",
+      "url": "https://www.google.com/search?q=site%3Adailymemphian.com+%22HOWARD+EDDIE%22",
+      "instructions": "Sometimes Daily Memphian publishes paid notices / community news. Death notices contain heir names + cities.",
+      "priority": "LOW"
+    }
+  ],
+  "pitch_hooks": [
+    {
+      "name": "estate_burden_relief",
+      "angle": "Empathy for the estate process + we close direct with executor",
+      "lead_line": "I understand the family may still be settling the estate, and out-of-state real estate paperwork can drag on. We close direct with the executor in 14 days \u2014 no agent, no inspection, no out-of-pocket cost to the estate.",
+      "use_when": "Always lead with this if estate is open in probate."
+    },
+    {
+      "name": "outofstate_convenience",
+      "angle": "Distance is the pain; we handle 100% remotely",
+      "lead_line": "Managing a Memphis property from San Antonio TX is its own kind of work \u2014 tax notices, code letters, occasional weed-cutting bills. We handle the full close-out by mail and wire. You don't fly in.",
+      "use_when": "Out-of-state, non-estate, no portfolio signals."
+    },
+    {
+      "name": "long_ownership_dignified_close",
+      "angle": "Honor the time; clean exit",
+      "lead_line": "You've held this property for 21 years \u2014 that's a long time. Memphis values have shifted and so has the cost of carrying property. We can offer a clean, no-surprise close.",
+      "use_when": "Owner held property >=20 years, no estate."
+    },
+    {
+      "name": "back_tax_relief",
+      "angle": "We pay the back tax \u2014 you walk clean",
+      "lead_line": "We see the property's been on the back-tax list for a few years. We pay every dollar of back tax + penalty at closing \u2014 out of OUR side, not yours. You walk away clean.",
+      "use_when": "TS2202 lead. Strong on absentee owners with no plan to develop."
+    },
+    {
+      "name": "vacant_lot_quick_cash",
+      "angle": "Lots are inert assets; we move fast",
+      "lead_line": "Vacant lots aren't easy to sell \u2014 agents don't want them, builders take months. We'll wire cash for 117  FARROW AVE in 14 days. No fix-up. No inspection. As-is.",
+      "use_when": "Vacant lot, any owner type."
+    }
+  ],
+  "generated_at": "2026-04-29T21:40:21.769321+00:00"
+}

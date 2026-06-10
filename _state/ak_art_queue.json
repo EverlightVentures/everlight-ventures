@@ -1,0 +1,90 @@
+[
+  {
+    "id": "shop_chest_scrap_crate",
+    "prompt": "A battered rusted scrap supply crate, dented riveted steel, busted padlock and chain-link, spilling loose coins and common scrap parts, low-tier starter loot. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/shop/chest_scrap_crate.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "shop_chest_crew",
+    "prompt": "A reinforced chrome crew footlocker spray-tagged with a crowned-B dog sigil, gold trim, lid cracked open spilling rare scrap parts and gold tokens, mid-tier crew reward. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/shop/chest_crew.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "shop_chest_chop_shop",
+    "prompt": "A graffiti-covered chop-shop loot crate under flickering neon, ripped open mid-haul, sparks and salvaged car parts flying out, odds-based haul energy. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/shop/chest_chop_shop.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "shop_chest_kingpin",
+    "prompt": "An opulent gold-plated kingpin reward vault, regal crowned-B dog emblem, overflowing with premium loot and gilded tokens, vegas-opulent top-tier flex. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/shop/chest_kingpin.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "shop_ak-gems-rookie",
+    "prompt": "a modest glowing pile of cyan crypto gems spilling onto wet neon asphalt, soft glow, humble starter stash. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/shop/ak-gems-rookie.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "shop_ak-gems-player",
+    "prompt": "a heaping pile of glowing cyan and gold gems, brighter neon sparkle, spilling coins, mid-tier haul. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/shop/ak-gems-player.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "shop_ak-gems-baller",
+    "prompt": "a chrome street duffel bag bursting open overflowing with glowing gems and gold bars, flashy and rich, baller energy. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/shop/ak-gems-baller.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "shop_ak-gems-highroller",
+    "prompt": "an opened chrome crate erupting with brilliant glowing gems, beams of light and sparks flying out, premium best-value haul, dazzling. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/shop/ak-gems-highroller.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "shop_ak-gems-kingpin",
+    "prompt": "a massive gold-plated kingpin vault overflowing with enormous radiant gems and treasure, beams of golden light, the ultimate opulent flex, dazzling and luxurious. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/shop/ak-gems-kingpin.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "lobby_hero",
+    "prompt": "a cinematic wide hero shot of a muscular white Dogo Argentino street king on a neon alley throne of wrecked cars, crown of gold light, rain and neon grime, epic game key-art composition, space at the top for a title logo. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/ui/lobby_hero.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "ui_daily_drop",
+    "prompt": "a small glowing gold supply drop crate with a paw-print stamp, neon rim light, game UI icon, centered, dark background. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/ui/daily_drop.png",
+    "w": 768,
+    "h": 768
+  }
+]

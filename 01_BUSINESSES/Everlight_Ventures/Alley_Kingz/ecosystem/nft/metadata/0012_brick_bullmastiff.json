@@ -1,0 +1,144 @@
+{
+  "name": "Alley Kingz #0012 Brick Bullmastiff",
+  "symbol": "BCARDI",
+  "description": "Brick Bullmastiff, a Common Vanguard in the Boneguard Crew. The Bullmastiff pilots the Bullmastiff Rig -- armored bruiser rig -- ram plow, plate armor, slow and unstoppable. Signature move: \"Stonehide\". A playable Alley Kingz battle card on Solana -- the NFT is the card, with gameplay stats written on-chain. Cosmetic art plus gameplay stats; in-game items are for entertainment and utility, not investments. No promised returns.",
+  "image": "ipfs://<IMAGE_CID_DIR>/0012_brick_bullmastiff.png",
+  "animation_url": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_BrickBullmastiff_Bullmastiff_Seedance_V1.mp4",
+  "external_url": "https://everlightventures.io/cards/0012",
+  "attributes": [
+    {
+      "trait_type": "Card Number",
+      "value": "0012"
+    },
+    {
+      "trait_type": "Faction",
+      "value": "Boneguard Crew"
+    },
+    {
+      "trait_type": "Faction Id",
+      "value": "boneguard_crew"
+    },
+    {
+      "trait_type": "Breed",
+      "value": "Bullmastiff"
+    },
+    {
+      "trait_type": "Name",
+      "value": "Brick Bullmastiff"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Vanguard"
+    },
+    {
+      "trait_type": "Cost",
+      "value": 6
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Pack"
+    },
+    {
+      "trait_type": "HP",
+      "value": 1700
+    },
+    {
+      "trait_type": "Damage",
+      "value": 100
+    },
+    {
+      "trait_type": "Attack Speed",
+      "value": 0.7
+    },
+    {
+      "trait_type": "Move Speed",
+      "value": 0.6
+    },
+    {
+      "trait_type": "Range",
+      "value": 1
+    },
+    {
+      "trait_type": "Ability",
+      "value": "Stonehide"
+    },
+    {
+      "trait_type": "Ability Cooldown",
+      "value": 12
+    },
+    {
+      "trait_type": "Queen Target",
+      "value": false
+    },
+    {
+      "trait_type": "Rig",
+      "value": "Bullmastiff Rig"
+    },
+    {
+      "trait_type": "Rig Class",
+      "value": "bruiser"
+    },
+    {
+      "trait_type": "Weapon Mod",
+      "value": "ram_plow"
+    }
+  ],
+  "properties": {
+    "category": "video",
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "files": [
+      {
+        "uri": "ipfs://<IMAGE_CID_DIR>/0012_brick_bullmastiff.png",
+        "type": "image/png"
+      },
+      {
+        "uri": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_BrickBullmastiff_Bullmastiff_Seedance_V1.mp4",
+        "type": "video/mp4"
+      }
+    ]
+  },
+  "onchain_attributes": [
+    {
+      "key": "hp",
+      "value": "1700"
+    },
+    {
+      "key": "damage",
+      "value": "100"
+    },
+    {
+      "key": "attack_speed",
+      "value": "0.7"
+    },
+    {
+      "key": "move_speed",
+      "value": "0.6"
+    },
+    {
+      "key": "range",
+      "value": "1"
+    },
+    {
+      "key": "cost",
+      "value": "6"
+    },
+    {
+      "key": "rarity",
+      "value": "Common"
+    },
+    {
+      "key": "ability_id",
+      "value": "stonehide"
+    },
+    {
+      "key": "queen_target",
+      "value": "0"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=026013%20%2000022",
+  "parsed_at": "2026-05-08T01:19:12+00:00",
+  "parcel_id": "026013  00022",
+  "property_address": "1112  SAXON",
+  "owner_name": "SPILMANN JOSEPH R JR",
+  "land_use": "- VACANT LAND",
+  "year_built": null,
+  "sqft": null,
+  "land_appraisal_usd": 8000,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 8000,
+  "subdivision": null
+}

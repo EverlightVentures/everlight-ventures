@@ -1,0 +1,148 @@
+{
+  "name": "Alley Kingz #0025 Rosco",
+  "symbol": "BCARDI",
+  "description": "Rosco is a Mythic Controller of the Leashbreak Tactix. The Australian Cattle Dog pilots the The Jammer -- tech-ops rig -- jammer van, emp array, signal-warfare. Signature move: \"Leashbreak\". A playable Alley Kingz battle card on Solana -- the NFT is the card, with gameplay stats written on-chain. Cosmetic art plus gameplay stats; in-game items are for entertainment and utility, not investments. No promised returns.",
+  "image": "ipfs://<IMAGE_CID_DIR>/0025_rosco.png",
+  "animation_url": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_Rosco_Leashbreaker_Seedance_V1.mp4",
+  "external_url": "https://everlightventures.io/cards/0025",
+  "attributes": [
+    {
+      "trait_type": "Card Number",
+      "value": "0025"
+    },
+    {
+      "trait_type": "Faction",
+      "value": "Leashbreak Tactix"
+    },
+    {
+      "trait_type": "Faction Id",
+      "value": "leashbreak_tactix"
+    },
+    {
+      "trait_type": "Breed",
+      "value": "Australian Cattle Dog"
+    },
+    {
+      "trait_type": "Name",
+      "value": "Rosco"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Mythic"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Controller"
+    },
+    {
+      "trait_type": "Cost",
+      "value": 10
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Hack"
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Pack"
+    },
+    {
+      "trait_type": "HP",
+      "value": 1800
+    },
+    {
+      "trait_type": "Damage",
+      "value": 140
+    },
+    {
+      "trait_type": "Attack Speed",
+      "value": 0.9
+    },
+    {
+      "trait_type": "Move Speed",
+      "value": 0.9
+    },
+    {
+      "trait_type": "Range",
+      "value": 2
+    },
+    {
+      "trait_type": "Ability",
+      "value": "Leashbreak"
+    },
+    {
+      "trait_type": "Ability Cooldown",
+      "value": 18
+    },
+    {
+      "trait_type": "Queen Target",
+      "value": true
+    },
+    {
+      "trait_type": "Rig",
+      "value": "The Jammer"
+    },
+    {
+      "trait_type": "Rig Class",
+      "value": "tech_ops"
+    },
+    {
+      "trait_type": "Weapon Mod",
+      "value": "emp_array"
+    }
+  ],
+  "properties": {
+    "category": "video",
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "files": [
+      {
+        "uri": "ipfs://<IMAGE_CID_DIR>/0025_rosco.png",
+        "type": "image/png"
+      },
+      {
+        "uri": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_Rosco_Leashbreaker_Seedance_V1.mp4",
+        "type": "video/mp4"
+      }
+    ]
+  },
+  "onchain_attributes": [
+    {
+      "key": "hp",
+      "value": "1800"
+    },
+    {
+      "key": "damage",
+      "value": "140"
+    },
+    {
+      "key": "attack_speed",
+      "value": "0.9"
+    },
+    {
+      "key": "move_speed",
+      "value": "0.9"
+    },
+    {
+      "key": "range",
+      "value": "2"
+    },
+    {
+      "key": "cost",
+      "value": "10"
+    },
+    {
+      "key": "rarity",
+      "value": "Mythic"
+    },
+    {
+      "key": "ability_id",
+      "value": "leashbreak"
+    },
+    {
+      "key": "queen_target",
+      "value": "1"
+    }
+  ]
+}

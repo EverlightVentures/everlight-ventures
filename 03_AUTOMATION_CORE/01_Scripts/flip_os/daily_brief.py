@@ -26,7 +26,7 @@ SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://jdqqmsmwmbsnlnstyavl.supa
 SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY", "")
 SLACK_TOKEN = os.environ.get("SLACK_WARROOM_TOKEN", "")
 SLACK_CHANNEL = "C08NMHAF0LE"  # #war-room
-BLINKO_URL = os.environ.get("BLINKO_URL", "http://129.159.38.250:1111")
+BLINKO_URL = os.environ.get("BLINKO_URL", "http://e5-mother:1111")
 STORAGE_RENT = 60.00
 N8N_GDOC_URL = "http://129.159.38.250:5678/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdoc"
 

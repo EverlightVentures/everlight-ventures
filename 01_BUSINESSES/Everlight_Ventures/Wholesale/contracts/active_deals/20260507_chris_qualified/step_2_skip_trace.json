@@ -1,0 +1,23 @@
+{
+  "agent": "Rex Blackwell",
+  "owner": "CARNEGIE CHURCH OF GOD IN CHRIST",
+  "is_entity": true,
+  "mailing": {
+    "street": "5340SANTA MONICAST",
+    "city": null,
+    "state": null,
+    "zip": null
+  },
+  "phone_candidates": [],
+  "email_candidates": [],
+  "skip_trace_method": "deferred -- managed_agent dispatch needed",
+  "narration": "Entity owner: 'CARNEGIE CHURCH OF GOD IN CHRIST'. TPS/FastPeopleSearch don't work on entities -- those are person searches. For a church, I'd run a TN Secretary of State business filing lookup + scrape the church's website (likely public). Mailing on file: 5340SANTA MONICAST. City/state/zip MISSING -- need to pull that from the assessor page directly. Recommendation: dispatch a managed_agent envelope to research the church online.",
+  "data_gaps": [
+    "mailing_city missing",
+    "mailing_state missing",
+    "mailing_zip missing",
+    "year_built missing",
+    "sqft missing",
+    "beds missing"
+  ]
+}

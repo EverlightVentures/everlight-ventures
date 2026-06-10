@@ -1,0 +1,144 @@
+{
+  "_meta": {
+    "description": "Everlight AI Receptionist - Vapi assistant template. Customize per-client via the CLIENT_* placeholders during onboarding.",
+    "owner": "Forge",
+    "version": "1.0.0",
+    "date": "2026-04-21",
+    "deploy": "POST to https://api.vapi.ai/assistant with Authorization: Bearer $VAPI_API_KEY"
+  },
+  "name": "{{CLIENT_BUSINESS_NAME}} - AI Receptionist",
+  "firstMessage": "Hi, this is {{AGENT_VOICE_NAME}} from {{CLIENT_BUSINESS_NAME}}. How can I help you today?",
+  "voice": {
+    "provider": "11labs",
+    "voiceId": "{{ELEVENLABS_VOICE_ID}}",
+    "model": "eleven_turbo_v2",
+    "stability": 0.6,
+    "similarityBoost": 0.75
+  },
+  "model": {
+    "provider": "openai",
+    "model": "gpt-4o",
+    "temperature": 0.4,
+    "systemPrompt": "You are the front-desk receptionist for {{CLIENT_BUSINESS_NAME}}. Your job is to book, cancel, and reschedule appointments, and to answer basic questions about our services.\n\nYour voice is professional, warm, and efficient. You use the caller's first name once you have it. You never say you are an AI unless directly asked.\n\nFAQ matching: use keywords, not exact-phrase matching. If the caller asks about a service we don't offer, suggest an alternative from our service menu.\n\nServices offered: {{SERVICE_LIST}}\nBusiness hours: {{BUSINESS_HOURS}}\nTimezone: {{TIMEZONE}}\n\nTASKS:\n\n1. BOOK APPOINTMENT\n   a. Ask caller's first name and phone number.\n   b. Ask which service.\n   c. Ask preferred day and time.\n   d. Call tool get_availability with their time preference.\n   e. Offer the 3 returned slots.\n   f. On confirmation, call tool book_time with their details and the chosen slot.\n   g. Confirm by reading back the details.\n\n2. CANCEL APPOINTMENT\n   a. Ask caller's first name.\n   b. Call tool search_cancel_booking with caller_name.\n   c. If exact match found: confirm with caller, then call tool cancel_booking.\n   d. If multiple matches or no match: say \"Let me get a team member to help you\" and call tool transfer.\n\n3. RESCHEDULE APPOINTMENT\n   a. Same as cancel flow up through confirmation.\n   b. Call tool cancel_booking to remove the old slot.\n   c. Ask preferred new day and time.\n   d. Follow BOOK steps d-g.\n\n4. FAQ / GENERAL QUESTIONS\n   a. Search knowledge base by keyword.\n   b. Answer concisely.\n   c. If answer not found: call tool faq_fallback to log, say \"Let me have someone call you back about that\" and collect callback number.\n\n5. HUMAN HANDOFF\n   a. If the caller sounds frustrated, asks for a person, or the AI is unsure, call tool transfer.\n\nNEVER invent services, prices, or policies not in your knowledge base. When in doubt, use transfer or faq_fallback.",
+    "tools": [
+      {
+        "type": "function",
+        "function": {
+          "name": "search_cancel_booking",
+          "description": "Search the client's Google Calendar for an appointment by caller name in the next 60 days.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "caller_name": {"type": "string", "description": "Caller's first name"}
+            },
+            "required": ["caller_name"]
+          }
+        },
+        "server": {
+          "url": "https://n8n.everlightventures.io/webhook/receptionist/{{CLIENT_SLUG}}/search_cancel_booking"
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "cancel_booking",
+          "description": "Delete a specific appointment by event_id returned from search_cancel_booking.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "event_id": {"type": "string"},
+              "caller_name": {"type": "string"}
+            },
+            "required": ["event_id", "caller_name"]
+          }
+        },
+        "server": {
+          "url": "https://n8n.everlightventures.io/webhook/receptionist/{{CLIENT_SLUG}}/cancel_booking"
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "get_availability",
+          "description": "Return 3 available appointment slots based on caller time preference.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "time_preference": {"type": "string", "description": "E.g., 'tomorrow at 1 PM' or 'anytime next week'"}
+            },
+            "required": ["time_preference"]
+          }
+        },
+        "server": {
+          "url": "https://n8n.everlightventures.io/webhook/receptionist/{{CLIENT_SLUG}}/get_availability"
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "book_time",
+          "description": "Create a calendar event with all caller details.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "caller_name": {"type": "string"},
+              "caller_phone": {"type": "string"},
+              "service": {"type": "string"},
+              "slot_start": {"type": "string", "description": "ISO-8601 datetime"}
+            },
+            "required": ["caller_name", "caller_phone", "service", "slot_start"]
+          }
+        },
+        "server": {
+          "url": "https://n8n.everlightventures.io/webhook/receptionist/{{CLIENT_SLUG}}/book_time"
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "faq_fallback",
+          "description": "Log an unanswered question and request callback.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "question": {"type": "string"},
+              "callback_phone": {"type": "string"}
+            },
+            "required": ["question"]
+          }
+        },
+        "server": {
+          "url": "https://n8n.everlightventures.io/webhook/receptionist/{{CLIENT_SLUG}}/faq_fallback"
+        }
+      },
+      {
+        "type": "function",
+        "function": {
+          "name": "transfer",
+          "description": "Transfer the call to a human team member OR drop to voicemail-to-Slack.",
+          "parameters": {
+            "type": "object",
+            "properties": {
+              "reason": {"type": "string"},
+              "caller_phone": {"type": "string"}
+            },
+            "required": ["reason"]
+          }
+        },
+        "server": {
+          "url": "https://n8n.everlightventures.io/webhook/receptionist/{{CLIENT_SLUG}}/transfer"
+        }
+      }
+    ]
+  },
+  "knowledgeBase": {
+    "provider": "custom-knowledge-base",
+    "description": "Client-specific FAQs and service details. Uploaded during onboarding.",
+    "files": ["{{CLIENT_FAQ_DOC_ID}}"]
+  },
+  "endCallMessage": "Thanks for calling {{CLIENT_BUSINESS_NAME}}. Have a great day.",
+  "recordingEnabled": true,
+  "hipaaEnabled": false,
+  "silenceTimeoutSeconds": 20,
+  "maxDurationSeconds": 900
+}

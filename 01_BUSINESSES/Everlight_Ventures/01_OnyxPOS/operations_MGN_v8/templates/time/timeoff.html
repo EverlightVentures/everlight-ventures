@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block page_title %}Time Off{% endblock %}
+{% block header_emoji %}🌴{% endblock %}
+{% block header_title %}Time Off{% endblock %}
+
+{% block header_actions %}
+<a class="btn btn-secondary" href="{{ url_for("dashboard") }}">← Dashboard</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.to-hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px;}
+.to-hero-card{background:linear-gradient(145deg,#1b3326 0%,#13261c 100%);border:1px solid rgba(167,243,208,.12);border-radius:16px;padding:16px;box-shadow:0 4px 18px rgba(0,0,0,.25);}
+.to-hero-label{font-size:11px;letter-spacing:.6px;text-transform:uppercase;color:#64748b;font-weight:700;}
+.to-hero-value{margin-top:8px;font-size:22px;font-weight:800;color:#e8f5ee;font-family:'Space Mono',monospace;}
+.to-hero-value.pending{color:#fbbf24;}
+.to-hero-value.approved{color:#34d399;}
+.to-hero-value.denied{color:#fb7185;}
+.to-mgr{display:grid;grid-template-columns:2fr 1fr;gap:16px;align-items:start;}
+@media (max-width: 1100px){.to-mgr{grid-template-columns:1fr;}}
+.mini-grid{display:grid;grid-template-columns:1fr;gap:12px;}
+.mini-card{padding:14px;border:1px solid rgba(255,255,255,.10);border-radius:16px;background:rgba(0,0,0,.12);}
+.pill{display:inline-block;padding:4px 10px;border-radius:999px;font-size:.85rem;border:1px solid rgba(255,255,255,.12);opacity:.95}
+.pill-pending{background:rgba(255,193,7,.14);}
+.pill-approved{background:rgba(40,167,69,.14);}
+.pill-denied{background:rgba(220,53,69,.14);}
+details.req{border:1px solid rgba(255,255,255,.10);border-radius:14px;padding:10px 12px;background:rgba(0,0,0,.08);}
+details.req summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:12px;align-items:center;}
+details.req summary::-webkit-details-marker{display:none;}
+.muted{opacity:.8}
+</style>
+{% endblock %}
+
+{% block content %}
+{% set stats = namespace(pending=0, approved=0, denied=0) %}
+{% for r in my_requests %}
+  {% set st = r.get("Status","") %}
+  {% if st == "Pending" %}{% set stats.pending = stats.pending + 1 %}{% endif %}
+  {% if st == "Approved" %}{% set stats.approved = stats.approved + 1 %}{% endif %}
+  {% if st == "Denied" %}{% set stats.denied = stats.denied + 1 %}{% endif %}
+{% endfor %}
+
+<div class="to-hero">
+  <div class="to-hero-card">
+    <div class="to-hero-label">Total Requests</div>
+    <div class="to-hero-value">{{ my_requests|length }}</div>
+  </div>
+  <div class="to-hero-card">
+    <div class="to-hero-label">Pending</div>
+    <div class="to-hero-value pending">{{ stats.pending }}</div>
+  </div>
+  <div class="to-hero-card">
+    <div class="to-hero-label">Approved</div>
+    <div class="to-hero-value approved">{{ stats.approved }}</div>
+  </div>
+  <div class="to-hero-card">
+    <div class="to-hero-label">Denied</div>
+    <div class="to-hero-value denied">{{ stats.denied }}</div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">📝 Request Time Off</h2>
+    <div class="muted">⏳ Earliest start date: <b>{{ earliest_date }}</b> (2 weeks out)</div>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="{{ url_for("request_timeoff") }}">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <label>Start Date</label>
+          <input class="form-input" type="date" name="start_date" required min="{{ earliest_date }}">
+        </div>
+        <div>
+          <label>End Date</label>
+          <input class="form-input" type="date" name="end_date" required min="{{ earliest_date }}">
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <label>Reason (optional)</label>
+        <textarea class="form-input" name="reason" rows="3" placeholder="Vacation, appointment, family, etc."></textarea>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:10px;">
+        <button class="btn btn-primary" type="submit">🎉 Submit Request</button>
+        <a class="btn btn-secondary" href="{{ url_for("timeoff") }}">Refresh</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <h2 class="card-title">📌 My Requests</h2>
+    <div class="muted">{{ my_requests|length }} total</div>
+  </div>
+  <div class="card-body" style="overflow:auto;">
+    {% if my_requests %}
+    <table class="table">
+      <thead><tr><th>ID</th><th>Dates</th><th>Days</th><th>Status</th><th>Manager</th></tr></thead>
+      <tbody>
+      {% for r in my_requests %}
+        {% set st = r.get("Status","") %}
+        <tr>
+          <td style="font-family:monospace;">{{ r.get("Request_ID","") }}</td>
+          <td>{{ r.get("Start_Date","") }} → {{ r.get("End_Date","") }}</td>
+          <td>{{ r.get("Days_Requested","") }}</td>
+          <td>
+            {% if st == "Pending" %}<span class="pill pill-pending">⏳ Pending</span>{% endif %}
+            {% if st == "Approved" %}<span class="pill pill-approved">✅ Approved</span>{% endif %}
+            {% if st == "Denied" %}<span class="pill pill-denied">❌ Denied</span>{% endif %}
+          </td>
+          <td>
+            <div><b>{{ r.get("Manager_Name","") }}</b></div>
+            <div class="muted">{{ r.get("Approval_Date","") }}</div>
+            {% if r.get("Manager_Notes","") %}<div class="muted">📝 {{ r.get("Manager_Notes","") }}</div>{% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <div class="muted">No requests yet. Submit one above and it will show here ✅</div>
+    {% endif %}
+  </div>
+</div>
+
+{% if session.get("role") in ("Manager","Owner","Admin") %}
+<div class="to-mgr">
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">📣 Pending Requests (Expand for details)</h2>
+      <div class="muted">{{ pending_requests|length }} pending</div>
+    </div>
+    <div class="card-body">
+      {% if pending_requests %}
+        {% for r in pending_requests %}
+          <details class="req" style="margin-bottom:10px;">
+            <summary>
+              <div><b>{{ r.get("Employee_Name","") }}</b> <span class="muted">({{ r.get("Employee_ID","") }})</span></div>
+              <div>{{ r.get("Start_Date","") }} → {{ r.get("End_Date","") }} • {{ r.get("Days_Requested","") }} days</div>
+              <div class="pill pill-pending">⏳ Pending</div>
+            </summary>
+            <div style="margin-top:10px;">
+              <div class="muted">🆔 {{ r.get("Request_ID","") }} • Requested: {{ r.get("Request_Date","") }}</div>
+              {% if r.get("Reason","") %}<div style="margin-top:6px;">📝 <b>Reason:</b> {{ r.get("Reason","") }}</div>{% endif %}
+              <div style="margin-top:8px;" class="muted">Use the cards on the right to approve/deny.</div>
+            </div>
+          </details>
+        {% endfor %}
+      {% else %}
+        <div class="muted">No pending requests 🎉</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">✅ Approve / ❌ Deny</h2>
+      <div class="muted">1 card per request</div>
+    </div>
+    <div class="card-body">
+      <div class="mini-grid">
+      {% for r in pending_requests %}
+        <div class="mini-card">
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:center;">
+            <div><b>{{ r.get("Employee_Name","") }}</b></div>
+            <div class="pill pill-pending">⏳ Pending</div>
+          </div>
+          <div class="muted" style="margin-top:6px;">{{ r.get("Start_Date","") }} → {{ r.get("End_Date","") }} • {{ r.get("Days_Requested","") }} days</div>
+          <div class="muted" style="margin-top:4px;font-family:monospace;">ID: {{ r.get("Request_ID","") }}</div>
+          <form method="POST" action="{{ url_for("timeoff_decision") }}" style="margin-top:10px;">
+            <input type="hidden" name="req_id" value="{{ r.get("Request_ID","") }}">
+            <label>Manager Notes (optional)</label>
+            <textarea class="form-input" name="manager_notes" rows="2" placeholder="Leave blank to use the default emoji message ✨"></textarea>
+            <div style="margin-top:10px;display:flex;gap:8px;">
+              <button class="btn btn-primary" name="decision" value="approve" type="submit">🎉 Approve</button>
+              <button class="btn btn-danger" name="decision" value="deny" type="submit">🙏 Deny</button>
+            </div>
+          </form>
+        </div>
+      {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

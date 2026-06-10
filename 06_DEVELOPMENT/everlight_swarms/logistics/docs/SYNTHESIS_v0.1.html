@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Logistics Swarm POC -- Synthesis v0.1</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+  :root { --gold:#D4A843; --dark:#0A0A0A; --light:#E8E8E8; --rule:rgba(212,168,67,0.25); }
+  * { box-sizing: border-box; }
+  body { background:var(--dark); color:var(--light); font-family:'Inter',sans-serif; margin:0; padding:48px 24px; line-height:1.55; }
+  .wrap { max-width:920px; margin:0 auto; }
+  .wordmark { color:var(--gold); font-family:'Playfair Display',serif; font-size:13px; letter-spacing:6px; text-transform:uppercase; margin-bottom:8px; }
+  h1 { font-family:'Playfair Display',serif; font-weight:700; font-size:42px; line-height:1.15; margin:0 0 8px; color:var(--light); }
+  h1 .accent { color:var(--gold); }
+  .meta { color:#999; font-size:13px; margin-bottom:32px; }
+  h2 { font-family:'Playfair Display',serif; color:var(--gold); font-size:24px; margin:36px 0 12px; padding-bottom:6px; border-bottom:1px solid var(--rule); }
+  h3 { font-family:'Inter',sans-serif; color:var(--light); font-size:16px; margin:18px 0 8px; text-transform:uppercase; letter-spacing:1px; }
+  p, li { font-size:15px; }
+  ul { padding-left:22px; }
+  code, pre { font-family:'JetBrains Mono',monospace; font-size:13px; color:var(--gold); background:#111; padding:2px 6px; border-radius:3px; }
+  pre { padding:14px 16px; overflow-x:auto; border-left:3px solid var(--gold); }
+  table { width:100%; border-collapse:collapse; margin:12px 0; font-size:14px; }
+  th { text-align:left; padding:8px 10px; background:#1a1a1a; color:var(--gold); border-bottom:1px solid var(--rule); }
+  td { padding:8px 10px; border-bottom:1px solid #1c1c1c; vertical-align:top; }
+  .pill { display:inline-block; font-size:11px; letter-spacing:1px; padding:2px 8px; border-radius:10px; text-transform:uppercase; }
+  .pill.ok { background:#143b18; color:#7adb89; }
+  .pill.block { background:#3b1414; color:#db7a7a; }
+  .pill.pending { background:#3b3014; color:#dbc77a; }
+  .footer { margin-top:48px; padding-top:18px; border-top:1px solid var(--rule); color:#777; font-size:12px; }
+  .quote { border-left:3px solid var(--gold); padding:8px 16px; margin:16px 0; color:#bbb; font-style:italic; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="wordmark">Everlight Ventures &middot; Codex Labs</div>
+  <h1>Logistics Swarm <span class="accent">v0.1</span></h1>
+  <div class="meta">Synthesis of Forge + Penny + Marcus &middot; 2026-05-07 &middot; Pacific Time</div>
+
+  <h2>What we just decided</h2>
+  <p>Fork <strong>VRSEN/OpenSwarm</strong> (MIT, v1.0.0, 2026-04-22) into a Logistics-specialized swarm. One prompt produces a full client package: pitch deck, MSA, SOW, pricing chart, onboarding packet. The Hive decides whether to pursue a deal. The Swarm produces the artifact only after the Hive approves.</p>
+
+  <div class="quote">"Hive decides. Swarm produces. Two layers, one chokepoint." -- Marcus Cole</div>
+
+  <h2>Status snapshot</h2>
+  <table>
+    <tr><th>Lane</th><th>State</th><th>Notes</th></tr>
+    <tr><td>Repo verified (MIT v1.0.0)</td><td><span class="pill ok">Done</span></td><td>github.com/VRSEN/OpenSwarm, Node 20+, Python 3.10+</td></tr>
+    <tr><td>Local scaffold</td><td><span class="pill ok">Done</span></td><td><code>06_DEVELOPMENT/everlight_swarms/logistics/</code></td></tr>
+    <tr><td>Penny pricing_agent</td><td><span class="pill ok">Done</span></td><td><code>agents/pricing/instructions.md</code> shipped</td></tr>
+    <tr><td>Brand + deal counter</td><td><span class="pill ok">Done</span></td><td><code>shared/everlight_brand.json</code>, <code>shared/deals_closed.json</code></td></tr>
+    <tr><td>Forge fork+deploy plan</td><td><span class="pill ok">Filed</span></td><td><code>docs/01_FORGE_FORK_DEPLOY_PLAN.md</code></td></tr>
+    <tr><td>Marcus orchestration policy</td><td><span class="pill ok">Filed</span></td><td><code>docs/03_MARCUS_ORCHESTRATION_POLICY.md</code></td></tr>
+    <tr><td>Oracle deploy</td><td><span class="pill block">Blocked</span></td><td>SSH + HTTPS + HTTP all unreachable from phone</td></tr>
+    <tr><td>Sandbox model verified</td><td><span class="pill pending">Pending</span></td><td>Need to confirm not paid e2b.dev</td></tr>
+    <tr><td>Composio decision</td><td><span class="pill ok">Confirmed free</span></td><td>20k calls/month free tier covers POC</td></tr>
+    <tr><td>swarm_budget.py module</td><td><span class="pill pending">Pending</span></td><td>Build after Oracle restored</td></tr>
+  </table>
+
+  <h2>Layer architecture</h2>
+  <pre>USER QUERY / SCHEDULED TRIGGER
+       |
+       v
+  HIVE MIND (63 agents)
+   classify -> dispatch -> cross-check -> synthesize -> decide
+       |
+       | (handoff JSON, only if Lead Qualifier >= 70 + Penny pricing OK)
+       v
+  queue/incoming.jsonl
+       |
+       v
+  LOGISTICS SWARM (8 specialists)
+   orchestrator -> intake -> research -> pricing -> docs + slides -> onboarding
+       |
+       v
+  HIVE LOGGER + branded comms (HTML + GDoc + Slack)
+       |
+       v
+  outgoing.jsonl + /home/opc/hive_reports/swarm_logistics/<trace_id>/</pre>
+
+  <h2>Hard rails</h2>
+  <ul>
+    <li><strong>Budget:</strong> $50/mo cap, $5/day soft, $10/day kill. One Slack alert at trip, no retry storm.</li>
+    <li><strong>Branding:</strong> all artifacts through <code>content_tools.report_template</code>, <code>publish_gdoc</code>, <code>branded_slack</code>. No raw <code>api.resend.com</code>, no raw <code>chat.postMessage</code>.</li>
+    <li><strong>Pricing floor:</strong> 60% gross margin minimum. Below = walk_away, no exceptions.</li>
+    <li><strong>Cross-check:</strong> Deals 1-3 reviewed by Forge + Justine + Cash. Deal 4+ Justine spot-check.</li>
+    <li><strong>No deadlines in client copy</strong> (per memory rule). Soft language only.</li>
+    <li><strong>Kill-switch:</strong> <code>systemctl stop everlight-swarm-logistics</code>.</li>
+  </ul>
+
+  <h2>Risks Marcus surfaced</h2>
+  <table>
+    <tr><th>Risk</th><th>Mitigation</th></tr>
+    <tr><td>Composio blast radius -- one leaked key writes to every connected SaaS</td><td>Composio scope ledger + quarterly key rotation BEFORE first paying client</td></tr>
+    <tr><td>Attribution-laundering -- a hallucinated freight rate signed "Penny Vance" looks like human error to legal</td><td>"Swarm-assisted" badge on every artifact + human sign-off log entry. Justine reviews before Deal 1.</td></tr>
+    <tr><td>Sandbox = paid e2b.dev (Forge's flag)</td><td>Forge verifies upstream <code>package.json</code>; if paid, swap Data Analyst for local Docker sandbox</td></tr>
+    <tr><td>Token burn (15+ min runs)</td><td><code>swarm_budget.py</code> hard cap + daily kill-switch</td></tr>
+    <tr><td>Oracle network blocker (right now)</td><td>Build everything that can ship phone-side; deploy when Oracle is reachable</td></tr>
+  </table>
+
+  <h2>Next moves (pending Marquise + network restoration)</h2>
+  <ol>
+    <li>Restore Oracle E5 reachability (SSH from phone, then verify <code>:8504</code> + <code>:1111</code>).</li>
+    <li>Forge runs the pre-flight checklist on Oracle (<code>node --version</code>, <code>python3 --version</code>, port scan).</li>
+    <li>Forge verifies upstream sandbox is local-Docker, not paid e2b.</li>
+    <li>Clone <code>git clone https://github.com/VRSEN/OpenSwarm /home/opc/everlight_swarms/upstream</code>.</li>
+    <li>Rsync our scaffold over the upstream agents/ dir.</li>
+    <li>Build <code>content_tools/swarm_budget.py</code>.</li>
+    <li>Drop one mock RFP through the swarm. Compare deck vs. Marquise's last hand-built proposal.</li>
+    <li>If quality holds, fan the same fork pattern to AI Consulting + Broker OS + Wholesale.</li>
+  </ol>
+
+  <h2>Why this matters for Everlight Logistics</h2>
+  <p>Logistics is currently three docx files in a folder. It is the highest-margin, lowest-volume vertical in the empire -- exactly the shape that benefits from a deliverable swarm. The first paying Logistics contract becomes the regression test for every other vertical's swarm fork.</p>
+
+  <div class="footer">
+    Filed by Marcus Cole on behalf of the Hive. Approved 2026-05-07 PT. Pilot 30 days. Review 2026-06-07.<br>
+    Drafted via Logistics Swarm v0.1 dispatch &middot; cross-checked by Forge / Penny / Marcus.
+  </div>
+</div>
+</body>
+</html>

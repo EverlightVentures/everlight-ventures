@@ -1,0 +1,2 @@
+Tenant_ID,Tier,Status,Stripe_Customer_ID,Stripe_Subscription_ID,Current_Period_End,Trial_End
+default,pro,trial,,,,2026-01-09

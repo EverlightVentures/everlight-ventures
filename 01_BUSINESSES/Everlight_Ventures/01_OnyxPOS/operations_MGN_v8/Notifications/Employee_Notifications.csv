@@ -1,0 +1,5 @@
+Notification_ID,Employee_ID,Employee_Name,Date_Created,Message,Type,Read,Read_Date
+NTF20251225145422e564,1003,Ruby,2025-12-25 14:54:22,🧩 New task assigned: water plants (Due 2025-12-25),TASK,N,
+NTF20251225145530d087,1001,Rich,2025-12-25 14:55:30,📣 Task update: Ruby set 'water plants' → IN_PROGRESS — okay thanks boss an plants needing special water,TASK,N,
+NTF2025122514553220f0,1001,Rich,2025-12-25 14:55:32,📣 Task update: Ruby set 'water plants' → IN_PROGRESS — okay thanks boss an plants needing special water,TASK,N,
+NTF202512251455361d0a,1001,Rich,2025-12-25 14:55:36,📣 Task update: Ruby set 'water plants' → IN_PROGRESS — okay thanks boss an plants needing special water,TASK,N,

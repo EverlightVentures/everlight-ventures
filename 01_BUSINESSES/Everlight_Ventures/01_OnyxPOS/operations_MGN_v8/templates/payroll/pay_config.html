@@ -1,0 +1,160 @@
+
+{% extends "base.html" %}
+
+{% block page_title %}Pay Rates{% endblock %}
+{% block header_emoji %}💳{% endblock %}
+{% block header_title %}Employee Pay Rates{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('payroll_dashboard') }}" class="btn btn-secondary">
+    <i data-lucide="arrow-left"></i>
+    Back to Payroll
+</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(160deg, #0f1f17 0%, #0a1810 40%, #0f1f17 100%);
+    }
+
+    .config-panel {
+        background: linear-gradient(145deg, #1e3a2a 0%, #162b1f 100%);
+        border: 1px solid rgba(167, 243, 208, 0.12);
+        border-radius: 16px;
+        overflow: hidden;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .config-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.1);
+        background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+    }
+
+    .config-header h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #e8f5ee;
+    }
+
+    .emp-row {
+        display: flex;
+        align-items: center;
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.06);
+        gap: 20px;
+    }
+
+    .emp-row:last-child {
+        border-bottom: none;
+    }
+
+    .emp-info {
+        flex: 1;
+    }
+
+    .emp-name {
+        font-size: 15px;
+        font-weight: 600;
+        color: #e8f5ee;
+        margin-bottom: 4px;
+    }
+
+    .emp-role {
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .rate-form {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .rate-input-wrap {
+        position: relative;
+    }
+
+    .rate-input-wrap .prefix {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #64748b;
+        font-weight: 600;
+    }
+
+    .rate-input {
+        width: 100px;
+        padding: 10px 12px 10px 28px;
+        font-size: 15px;
+        font-weight: 600;
+        font-family: 'Space Mono', monospace;
+        border: 2px solid rgba(167, 243, 208, 0.15);
+        border-radius: 10px;
+        background: #1a2f23;
+        color: #34d399;
+    }
+
+    .rate-input:focus {
+        outline: none;
+        border-color: #10b981;
+    }
+
+    .rate-suffix {
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .save-btn {
+        padding: 10px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        background: linear-gradient(180deg, #34d399, #059669);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+    }
+
+    .save-btn:hover {
+        transform: translateY(-1px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="config-panel">
+    <div class="config-header">
+        <h3>👥 Active Employees</h3>
+    </div>
+
+    {% for emp in employees %}
+    <form action="{{ url_for('update_pay_config') }}" method="POST" class="emp-row">
+        <input type="hidden" name="emp_id" value="{{ emp.emp_id }}">
+        <div class="emp-info">
+            <div class="emp-name">{{ emp.name }}</div>
+            <div class="emp-role">{{ emp.role }} • ID: {{ emp.emp_id }}</div>
+        </div>
+        <div class="rate-form">
+            <div class="rate-input-wrap">
+                <span class="prefix">$</span>
+                <input type="number" name="hourly_rate" class="rate-input"
+                       value="{{ '%.2f'|format(emp.hourly_rate) }}" step="0.01" min="0">
+            </div>
+            <span class="rate-suffix">/hr</span>
+            <input type="hidden" name="pay_type" value="HOURLY">
+            <button type="submit" class="save-btn">Save</button>
+        </div>
+    </form>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>lucide.createIcons();</script>
+{% endblock %}

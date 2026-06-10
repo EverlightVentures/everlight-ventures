@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://everlightventures.io/schemas/employee_v2.json",
+  "title": "Hive Mind Employee v2",
+  "description": "Enriched employee record for Everlight Ventures AI Hive Mind. Additive over v1 all_profiles.json. Generated 2026-04-22 as part of M1 Employee Upgrade.",
+  "type": "object",
+  "required": ["slug", "name", "identity", "assets"],
+  "properties": {
+    "slug": {"type": "string", "description": "Stable kebab-case slug, matches filename in dossiers/ and avatars/"},
+    "name": {"type": "string"},
+    "title": {"type": "string"},
+    "email": {"type": "string"},
+    "phone": {"type": "string"},
+    "voice_id": {"type": "string"},
+    "has_voice": {"type": "boolean"},
+    "bio": {"type": "string", "description": "Short 1 to 2 sentence tagline. Long-form lives in dossier markdown."},
+    "personality": {"type": "array", "items": {"type": "string"}},
+    "skills": {"type": "array", "items": {"type": "string"}},
+    "headshot_prompt": {"type": "string"},
+    "headshot_url": {"type": "string"},
+    "booking_url": {"type": "string"},
+    "vcard_url": {"type": "string"},
+    "profile_url": {"type": "string"},
+    "linkedin_url": {"type": "string"},
+    "role_id": {"type": "string"},
+    "department": {"type": "string"},
+    "esign_url": {"type": "string"},
+    "avatar_svg": {"type": "string"},
+
+    "identity": {
+      "type": "object",
+      "required": ["full_name", "title", "department"],
+      "properties": {
+        "full_name": {"type": "string"},
+        "nickname": {"type": "string"},
+        "employee_id": {"type": "string", "description": "Department prefix + number (e.g. CC-001, GO-004)"},
+        "title": {"type": "string"},
+        "department": {"type": "string"},
+        "squad": {"type": "string"},
+        "fire_team": {"type": "string"},
+        "reports_to": {"type": "string", "description": "Slug of manager"},
+        "email": {"type": "string"},
+        "slack": {"type": "string"},
+        "status": {"type": "string", "enum": ["active", "on_leave", "retired", "collective_beat"]}
+      }
+    },
+
+    "background": {
+      "type": "object",
+      "properties": {
+        "birthplace": {"type": "string"},
+        "hometown": {"type": "string"},
+        "region": {"type": "string"},
+        "family": {"type": "string"},
+        "education": {"type": "string"},
+        "childhood": {"type": "string"},
+        "early_career": {"type": "string"},
+        "places_lived": {"type": "array", "items": {"type": "string"}},
+        "prior_jobs": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+
+    "mentality": {
+      "type": "object",
+      "required": ["zodiac", "mbti"],
+      "properties": {
+        "zodiac": {"type": "string", "enum": ["aries", "taurus", "gemini", "cancer", "leo", "virgo", "libra", "scorpio", "sagittarius", "capricorn", "aquarius", "pisces"]},
+        "mbti": {"type": "string", "enum": ["INTJ", "INTP", "ENTJ", "ENTP", "INFJ", "INFP", "ENFJ", "ENFP", "ISTJ", "ISFJ", "ESTJ", "ESFJ", "ISTP", "ISFP", "ESTP", "ESFP"]},
+        "values": {"type": "array", "items": {"type": "string"}},
+        "beliefs": {"type": "array", "items": {"type": "string"}},
+        "motivators": {"type": "array", "items": {"type": "string"}},
+        "fears": {"type": "array", "items": {"type": "string"}},
+        "stress_response": {"type": "string"},
+        "conflict_style": {"type": "string"},
+        "leadership_style": {"type": "string"},
+        "decision_style": {"type": "string"},
+        "default_under_pressure": {"type": "string"},
+        "risk_tolerance": {"type": "string"},
+        "humor_style": {"type": "string"},
+        "internal_voice": {"type": "string"}
+      }
+    },
+
+    "preferences": {
+      "type": "object",
+      "properties": {
+        "hobbies": {"type": "array", "items": {"type": "string"}},
+        "interests": {"type": "array", "items": {"type": "string"}},
+        "likes": {"type": "array", "items": {"type": "string"}},
+        "dislikes": {"type": "array", "items": {"type": "string"}},
+        "routines": {"type": "array", "items": {"type": "string"}},
+        "quirks": {"type": "array", "items": {"type": "string"}},
+        "habits": {"type": "array", "items": {"type": "string"}},
+        "media_taste": {"type": "array", "items": {"type": "string"}},
+        "work_env": {"type": "string"},
+        "tools": {"type": "array", "items": {"type": "string"}},
+        "collab_style": {"type": "string"}
+      }
+    },
+
+    "work_identity": {
+      "type": "object",
+      "properties": {
+        "responsibilities": {"type": "array", "items": {"type": "string"}},
+        "strengths": {"type": "array", "items": {"type": "string"}},
+        "weaknesses": {"type": "array", "items": {"type": "string"}},
+        "special_skills": {"type": "array", "items": {"type": "string"}},
+        "experience_level": {"type": "string"},
+        "pro_background": {"type": "string"},
+        "problem_approach": {"type": "string"},
+        "task_affinity": {"type": "array", "items": {"type": "string"}},
+        "task_frustration": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+
+    "relationships": {
+      "type": "object",
+      "properties": {
+        "works_closest_with": {"type": "array", "items": {"type": "string"}, "description": "Slugs"},
+        "reports_to": {"type": "string"},
+        "mentors": {"type": "array", "items": {"type": "string"}},
+        "rivals": {"type": "array", "items": {"type": "string"}},
+        "perceived_as": {"type": "string"},
+        "team_chemistry_notes": {"type": "string"}
+      }
+    },
+
+    "memory": {
+      "type": "object",
+      "properties": {
+        "signature_stories": {"type": "array", "items": {"type": "string"}},
+        "catchphrase": {"type": "string"},
+        "conversation_hooks": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+
+    "assets": {
+      "type": "object",
+      "properties": {
+        "headshot_photo": {"type": "string", "description": "Path to real photo, e.g. /AI_Avatars/Marcus_Cole.png. Null if not yet generated."},
+        "avatar_svg": {"type": "string"},
+        "vcard": {"type": "string"},
+        "voice_id": {"type": "string"},
+        "booking_url": {"type": "string"},
+        "profile_url": {"type": "string"}
+      }
+    },
+
+    "meta": {
+      "type": "object",
+      "properties": {
+        "source_refs": {"type": "array", "items": {"type": "string"}},
+        "tags": {"type": "array", "items": {"type": "string"}},
+        "last_updated": {"type": "string"},
+        "schema_version": {"type": "string", "const": "v2"}
+      }
+    }
+  }
+}

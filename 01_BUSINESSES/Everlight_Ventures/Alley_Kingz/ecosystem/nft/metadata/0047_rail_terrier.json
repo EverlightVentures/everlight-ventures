@@ -1,0 +1,144 @@
+{
+  "name": "Alley Kingz #0047 Rail Terrier",
+  "symbol": "BCARDI",
+  "description": "Rail Terrier, a Common Blaster in the K9 Circuitry. The Terrier pilots the Terrier Rig -- turret-utility rig -- mounted gun, drone bay, rail platform. Signature move: \"Rail Shot\". A playable Alley Kingz battle card on Solana -- the NFT is the card, with gameplay stats written on-chain. Cosmetic art plus gameplay stats; in-game items are for entertainment and utility, not investments. No promised returns.",
+  "image": "ipfs://<IMAGE_CID_DIR>/0047_rail_terrier.png",
+  "animation_url": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_RailTerrier_Terrier_Seedance_V1.mp4",
+  "external_url": "https://everlightventures.io/cards/0047",
+  "attributes": [
+    {
+      "trait_type": "Card Number",
+      "value": "0047"
+    },
+    {
+      "trait_type": "Faction",
+      "value": "K9 Circuitry"
+    },
+    {
+      "trait_type": "Faction Id",
+      "value": "k9_circuitry"
+    },
+    {
+      "trait_type": "Breed",
+      "value": "Terrier"
+    },
+    {
+      "trait_type": "Name",
+      "value": "Rail Terrier"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Common"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Blaster"
+    },
+    {
+      "trait_type": "Cost",
+      "value": 3
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Turret Break"
+    },
+    {
+      "trait_type": "HP",
+      "value": 650
+    },
+    {
+      "trait_type": "Damage",
+      "value": 90
+    },
+    {
+      "trait_type": "Attack Speed",
+      "value": 1.0
+    },
+    {
+      "trait_type": "Move Speed",
+      "value": 0.9
+    },
+    {
+      "trait_type": "Range",
+      "value": 4
+    },
+    {
+      "trait_type": "Ability",
+      "value": "Rail Shot"
+    },
+    {
+      "trait_type": "Ability Cooldown",
+      "value": 9
+    },
+    {
+      "trait_type": "Queen Target",
+      "value": false
+    },
+    {
+      "trait_type": "Rig",
+      "value": "Terrier Rig"
+    },
+    {
+      "trait_type": "Rig Class",
+      "value": "turret_util"
+    },
+    {
+      "trait_type": "Weapon Mod",
+      "value": "incendiary"
+    }
+  ],
+  "properties": {
+    "category": "video",
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "files": [
+      {
+        "uri": "ipfs://<IMAGE_CID_DIR>/0047_rail_terrier.png",
+        "type": "image/png"
+      },
+      {
+        "uri": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_RailTerrier_Terrier_Seedance_V1.mp4",
+        "type": "video/mp4"
+      }
+    ]
+  },
+  "onchain_attributes": [
+    {
+      "key": "hp",
+      "value": "650"
+    },
+    {
+      "key": "damage",
+      "value": "90"
+    },
+    {
+      "key": "attack_speed",
+      "value": "1.0"
+    },
+    {
+      "key": "move_speed",
+      "value": "0.9"
+    },
+    {
+      "key": "range",
+      "value": "4"
+    },
+    {
+      "key": "cost",
+      "value": "3"
+    },
+    {
+      "key": "rarity",
+      "value": "Common"
+    },
+    {
+      "key": "ability_id",
+      "value": "rail_shot"
+    },
+    {
+      "key": "queen_target",
+      "value": "0"
+    }
+  ]
+}

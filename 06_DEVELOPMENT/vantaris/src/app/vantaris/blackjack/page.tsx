@@ -74,7 +74,7 @@ const DEALERS = [
   { id: 'aria', name: 'Aria Sinclair', title: 'House Dealer', voiceId: 'EXAVITQu4vr4xnSDxMaL', color: '#c9a84c', desc: 'Warm. Professional. The default.' },
   { id: 'marcus', name: 'Marcus Vega', title: 'High Roller', voiceId: 'onwK4e9ZLuTAKqWW03F9', color: '#ff6b35', desc: 'Smooth talker. Loves the action.' },
   { id: 'kanisha', name: 'Kanisha Thompson', title: 'VIP Lounge', voiceId: 'XrExE9yKIg1WjnnlVkGX', color: '#e91e63', desc: 'Sharp. No nonsense. Respects the game.' },
-  { id: 'bacardi', name: 'Bacardi Ice', title: 'VIP Elite', voiceId: 'DwwuoY7Uz8AP8zrY5TAo', color: '#00bcd4', desc: 'Cold. Calculated. The final boss.' },
+  { id: 'bcardd', name: '$BCARDD Ice', title: 'VIP Elite', voiceId: 'DwwuoY7Uz8AP8zrY5TAo', color: '#00bcd4', desc: 'Cold. Calculated. The final boss.' },
 ]
 
 export default function BlackjackTablesPage() {
@@ -217,7 +217,7 @@ export default function BlackjackTablesPage() {
                     {/* Dealer avatar placeholder */}
                     <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center text-2xl"
                       style={{ background: `${d.color}15`, border: `1px solid ${d.color}30` }}>
-                      {d.id === 'bacardi' ? '\u2744' : d.id === 'aria' ? '\u2666' : d.id === 'marcus' ? '\u2660' : '\u2665'}
+                      {d.id === 'bcardd' ? '\u2744' : d.id === 'aria' ? '\u2666' : d.id === 'marcus' ? '\u2660' : '\u2665'}
                     </div>
 
                     <h4 className="text-sm font-bold mb-1" style={{ color: selectedDealer === d.id ? d.color : '#eee' }}>{d.name}</h4>

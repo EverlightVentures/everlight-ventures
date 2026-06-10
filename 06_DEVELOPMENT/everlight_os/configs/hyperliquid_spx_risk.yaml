@@ -1,0 +1,136 @@
+# Hyperliquid SPX Perp Risk Gate
+# Operator: Rich Gee (1m.rich.gee@gmail.com)
+# Last operator decision: 2026-05-19 -- venue=HL, leverage=venue_max, signals=Fed+SEC+geopolitical, autonomy=full_auto
+#
+# READ THIS BEFORE EDITING:
+# The operator has accepted venue ToS risk (US-restricted), Trade[XYZ] counterparty risk,
+# and 50x effective leverage. This config encodes that call BUT enforces structural floors
+# that exist regardless -- below the floors, the math says the account is dead before it
+# starts. Floors are NOT operator-adjustable in code; they require a separate amendment
+# file at configs/hyperliquid_spx_floor_override.yaml signed with EV_OPERATOR_KEY.
+
+venue:
+  exchange: hyperliquid
+  product: SPX                       # HIP-3 builder market deployed by Trade[XYZ]
+  product_type: hip3_perp
+  counterparty: trade_xyz            # explicitly NOT native Hyperliquid
+  api_base: https://api.hyperliquid.xyz
+  ws_base: wss://api.hyperliquid.xyz/ws
+  chain_id: "0x66eee"                # Hyperliquid EVM
+  sdk: hyperliquid-python-sdk
+
+leverage:
+  venue_max: 50                      # what HIP-3 permits on majors (SPX likely tiers lower)
+  effective_cap: 50                  # OPERATOR DECISION 2026-05-19: match venue max
+  monster_threshold: 50              # no further upside above the cap
+  # WARNING -- arithmetic check at 50x:
+  #   1% adverse move = -50% equity
+  #   2% adverse move = -100% equity (liquidation + may owe insurance fund)
+  #   SPX 5-sigma intraday = ~6% (account-death several times over)
+  # The structural floors below partially mitigate by capping notional, not leverage.
+
+position_sizing:
+  max_concurrent_positions: 1        # XLM all-in/all-out doctrine
+  max_notional_pct_of_equity: 1000   # 10x notional ceiling regardless of leverage cap
+  # This is the load-bearing floor: even at 50x leverage, the bot will not place
+  # a position whose notional > 10x equity. At $250 equity that's a $2.5k position.
+  # Means effective in-play leverage is 10x even when "leverage=50x" in the SDK call.
+  max_risk_per_trade_pct: 1.5        # 1.5% of equity at stop
+  min_account_equity_usd: 100        # below this, paper-mode only
+
+kill_switches:
+  daily_loss_pct: 4.0                # halt 24h, no override
+  weekly_loss_pct: 8.0                # halt 7d, operator review
+  consecutive_losses: 3              # cool-down 4h
+  account_drawdown_from_peak_pct: 12 # full stop, Rich-only resume
+  liquidation_distance_pct: 0.3      # flatten if price is within 0.3% of calculated liq
+
+signal_confluence:
+  # Hybrid fusion: confluence-gate -> regime-weights -> Kelly sizing
+  # See signals/fusion.py for implementation
+  sources:
+    - polymarket_event_odds          # Fed + SEC + geopolitical categories only
+    - market_intel_macro             # mcp__market-intel__get_market_intel_state
+    - spx_microstructure             # orderbook depth, realized vol, funding
+    - options_iv_skew                # for regime classification
+  min_required_for_entry: 3          # 3-of-4 confluence required
+  monster_threshold: 4               # 4-of-4 unlocks max sizing within notional cap
+  staleness_max_seconds: 90          # source dead at 90s
+  source_quiet_timeout_min: 5        # all quiet 5min = flatten + halt
+
+polymarket_categories:
+  # OPERATOR DECISION 2026-05-19
+  enabled:
+    - fed_rate_path                  # Bull Archer's #1 -- highest historical lead
+    - sec_regulatory_binary          # ETF approvals, antitrust
+    - geopolitical_tail              # operator override; Bull Archer's pushback noted
+  disabled:
+    - us_elections                   # not selected this round
+    - meme_long_tail
+  min_odds_shift_to_signal: 0.15     # 15-point odds move = signal-worthy
+  signal_decay_hours: 24             # post-shift edge gone after 24h
+
+regime_classifier:
+  # Used by signals/fusion.py to select weight set
+  inputs: [vix_spot, vix_term_structure, hyg_ief_spread]
+  regimes:
+    calm:                            # VIX < 14, normal term structure
+      polymarket_weight: 0.40
+      market_intel_weight: 0.20
+      microstructure_weight: 0.20
+      iv_skew_weight: 0.20
+    normal:                          # VIX 14-22, normal/slight contango
+      polymarket_weight: 0.25
+      market_intel_weight: 0.30
+      microstructure_weight: 0.25
+      iv_skew_weight: 0.20
+    stressed:                        # VIX > 22 or term inverted
+      polymarket_weight: 0.10        # PM becomes noise in stress
+      market_intel_weight: 0.20
+      microstructure_weight: 0.30
+      iv_skew_weight: 0.40           # skew dominates in vol regimes
+
+session_rules:
+  us_cash_close_et: "16:00"
+  flatten_before_close_min: 15       # exit by 15:45 ET unless monster + continuation
+  overnight_hold:
+    default: false                   # auto-flatten at 15:45 ET
+    monster_exception: false         # OPERATOR DECISION: no overnight even on monster
+    weekend_hold: forbidden          # no Fri-close holds, ever
+
+funding_gate:
+  max_hostile_funding_bps_per_8h: 5
+  pre_event_funding_freeze_min: 30
+  funding_flip_alert_bps: 10
+
+autonomy:
+  # OPERATOR DECISION 2026-05-19: full auto entry + exit, kill-switch override
+  entry: auto
+  exit: auto
+  kill_switch_override: false        # bot cannot override its own kill-switches
+  operator_approval_required:
+    config_change_any: true          # this file is read-only to bots at runtime
+    new_signal_source_added: true
+    floor_override: true             # any change to position_sizing.max_notional_pct_of_equity
+
+verification_doctrine:
+  # Samantha-Law Amendment XI compliance
+  heartbeat_max_age_sec: 60
+  heartbeat_file: _state/hyperliquid_bot/heartbeat.json
+  if_heartbeat_stale: flatten_all_and_alert
+  audit_log: _logs/hyperliquid_bot/decisions.jsonl
+  signal_freshness_required: true
+  it_repair_target_tag: hyperliquid_bot       # picked up by it_triage.py
+  receipts_required_on_status_report: true
+
+burn_in:
+  # Gate before LIVE_MODE=true can be flipped
+  min_paper_trades: 200
+  paper_trades_dir: _logs/hyperliquid_bot/paper/
+  required_kill_switch_trips_to_verify: 4   # force-trip each switch in paper before live
+  operator_signoff_required: true
+
+mode:
+  # Set by env var EV_HL_MODE = paper | live
+  default: paper
+  live_requires_burn_in_complete: true

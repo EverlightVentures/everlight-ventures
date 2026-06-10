@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% block page_title %}Task Performance Metrics{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>📊 Task Performance Metrics</h1>
+    <div class="header-actions">
+        <a href="{{ url_for('tasks_owner_dashboard') }}" class="btn btn-secondary">
+            <i data-lucide="list"></i> Task Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Date Range Filter -->
+<div class="card" style="margin-bottom: 24px;">
+    <form method="GET" style="padding: 16px; display: flex; gap: 16px; align-items: end; flex-wrap: wrap;">
+        <div class="form-group" style="margin: 0;">
+            <label class="form-label">Start Date</label>
+            <input type="date" name="start_date" class="form-input" value="{{ start_date }}">
+        </div>
+        <div class="form-group" style="margin: 0;">
+            <label class="form-label">End Date</label>
+            <input type="date" name="end_date" class="form-input" value="{{ end_date }}">
+        </div>
+        <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+</div>
+
+<!-- Summary Stats -->
+<div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 24px;">
+    <div class="stat-card">
+        <div class="stat-label">Total Assigned</div>
+        <div class="stat-value">{{ report.summary.total_assigned }}</div>
+    </div>
+    <div class="stat-card" style="background: var(--success-bg);">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value" style="color: var(--success);">{{ report.summary.total_completed }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Skipped</div>
+        <div class="stat-value">{{ report.summary.total_skipped }}</div>
+    </div>
+    <div class="stat-card" style="{% if report.summary.total_overdue > 0 %}background: var(--danger-bg);{% endif %}">
+        <div class="stat-label">Overdue</div>
+        <div class="stat-value" style="{% if report.summary.total_overdue > 0 %}color: var(--danger);{% endif %}">
+            {{ report.summary.total_overdue }}
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Avg Completion Rate</div>
+        <div class="stat-value">{{ report.summary.avg_completion_rate }}%</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-label">Avg On-Time Rate</div>
+        <div class="stat-value">{{ report.summary.avg_on_time_rate }}%</div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+    <!-- Top Performers -->
+    {% if report.top_performers %}
+    <div class="card">
+        <div class="card-header" style="background: var(--success-bg);">
+            <h3>🏆 Top Performers</h3>
+        </div>
+        <div style="padding: 0;">
+            {% for emp in report.top_performers %}
+            <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>{{ emp.employee_name }}</strong>
+                    <div class="text-muted">{{ emp.tasks_completed }}/{{ emp.tasks_assigned }} completed</div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 24px; font-weight: bold; color: var(--success);">{{ emp.completion_rate }}%</div>
+                    <div class="text-muted">On-time: {{ emp.on_time_rate }}%</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Needs Improvement -->
+    {% if report.needs_improvement %}
+    <div class="card">
+        <div class="card-header" style="background: var(--warning-bg);">
+            <h3>⚠️ Needs Attention</h3>
+        </div>
+        <div style="padding: 0;">
+            {% for emp in report.needs_improvement %}
+            <div style="padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>{{ emp.employee_name }}</strong>
+                    <div class="text-muted">
+                        {{ emp.tasks_completed }}/{{ emp.tasks_assigned }} completed
+                        {% if emp.tasks_overdue > 0 %}
+                        <span class="badge badge-danger">{{ emp.tasks_overdue }} overdue</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-size: 24px; font-weight: bold; color: var(--warning);">{{ emp.completion_rate }}%</div>
+                    <a href="{{ url_for('task_metrics_employee', employee_id=emp.employee_id) }}" class="btn btn-sm btn-secondary">
+                        View Details
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- All Employees Table -->
+<div class="card" style="margin-top: 24px;">
+    <div class="card-header">
+        <h3>👥 All Employees</h3>
+    </div>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th style="text-align: center;">Assigned</th>
+                <th style="text-align: center;">Completed</th>
+                <th style="text-align: center;">Skipped</th>
+                <th style="text-align: center;">Overdue</th>
+                <th style="text-align: center;">Completion %</th>
+                <th style="text-align: center;">On-Time %</th>
+                <th style="text-align: center;">Avg Time</th>
+                <th style="text-align: center;">Quality</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for emp in report.employees|sort(attribute='completion_rate', reverse=True) %}
+            <tr>
+                <td><strong>{{ emp.employee_name }}</strong></td>
+                <td style="text-align: center;">{{ emp.tasks_assigned }}</td>
+                <td style="text-align: center;">{{ emp.tasks_completed }}</td>
+                <td style="text-align: center;">{{ emp.tasks_skipped }}</td>
+                <td style="text-align: center;">
+                    {% if emp.tasks_overdue > 0 %}
+                    <span class="badge badge-danger">{{ emp.tasks_overdue }}</span>
+                    {% else %}
+                    0
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">
+                    <span class="badge badge-{{ 'success' if emp.completion_rate >= 90 else 'warning' if emp.completion_rate >= 70 else 'danger' }}">
+                        {{ emp.completion_rate }}%
+                    </span>
+                </td>
+                <td style="text-align: center;">{{ emp.on_time_rate }}%</td>
+                <td style="text-align: center;">{{ emp.avg_completion_minutes|round(0)|int }} min</td>
+                <td style="text-align: center;">
+                    {% if emp.avg_quality_score > 0 %}
+                    {{ emp.avg_quality_score }}/5
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{{ url_for('task_metrics_employee', employee_id=emp.employee_id) }}" class="btn btn-sm btn-secondary">
+                        Details
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="10" class="text-center text-muted">No task data for this period</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

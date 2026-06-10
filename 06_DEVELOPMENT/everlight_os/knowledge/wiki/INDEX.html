@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Everlight Knowledge Wiki -- Index</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root{--gold:#D4A843;--dark:#0A0A0A;--light:#E8E8E8;--dim:#9A9A9A;--line:#1d1d1d;--accent:#F0CB6E}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--dark);color:var(--light);
+       font-family:'Inter',system-ui,sans-serif;line-height:1.6}
+  h1,h2{font-family:'Playfair Display',Georgia,serif;color:var(--gold);font-weight:600}
+  h1{font-size:2.4rem;margin:0 0 .3rem}
+  h2{font-size:1.4rem;margin:2rem 0 .5rem;border-bottom:1px solid var(--line);padding-bottom:.3rem}
+  .wrap{max-width:980px;margin:0 auto;padding:2.5rem 1.5rem 6rem}
+  .wordmark{letter-spacing:.35em;font-size:.78rem;color:var(--gold);text-transform:uppercase;margin-bottom:.4rem}
+  .lede{color:var(--dim);font-size:1rem;margin:.4rem 0 2rem}
+  table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.92rem}
+  th,td{text-align:left;padding:.55rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--gold);font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:.74rem}
+  code{font-family:'JetBrains Mono','SF Mono',ui-monospace,monospace;font-size:.86em;color:#f0e0a8}
+  .pill{display:inline-block;background:#1a1a1a;border:1px solid var(--gold);color:var(--gold);
+        padding:.1rem .55rem;border-radius:99px;font-size:.7rem;text-transform:uppercase;letter-spacing:.05em}
+  .footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line);color:var(--dim);font-size:.82rem}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="wordmark">Everlight Ventures</div>
+  <h1>Knowledge Wiki -- Index</h1>
+  <div class="lede">
+    Sources digested into actionable Hive artifacts. Maintained per
+    <code>karpathy_rag_intake</code> skill discipline.
+  </div>
+
+  <h2>Digested sources -> Artifacts produced</h2>
+
+  <table>
+    <thead>
+      <tr><th>Date</th><th>Source (raw/)</th><th>Wiki page</th><th>Artifacts shipped (output/)</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>2026-05-04</td>
+        <td><code>raw/2026-05-04_aios_build_and_sell_claude.txt</code></td>
+        <td><code>wiki/2026-05-08_aios_framework.html</code></td>
+        <td>
+          <span class="pill">skill</span> aios_audit<br>
+          <span class="pill">skill</span> default_shift_check<br>
+          <span class="pill">skill</span> karpathy_rag_intake<br>
+          <span class="pill">doc</span> AIOS_FRAMEWORK.html
+        </td>
+      </tr>
+      <tr>
+        <td>2026-05-04</td>
+        <td><code>raw/2026-05-04_agentic_os_three_layers.txt</code></td>
+        <td>(merged into <code>wiki/2026-05-08_aios_framework.html</code>)</td>
+        <td>
+          <span class="pill">skill</span> observability_first<br>
+          <span class="pill">skill</span> karpathy_rag_intake<br>
+          <span class="pill">structure</span> knowledge/raw,wiki,output dirs
+        </td>
+      </tr>
+      <tr>
+        <td>2026-04-21</td>
+        <td><code>NOTEPAD/Trranscripts/Claude Code Desktop/Default_medium_12 Logging BEST*</code></td>
+        <td>(direct -&gt; skill)</td>
+        <td>
+          <span class="pill">skill</span> logging_standard<br>
+          <span class="pill">skill</span> canonical_log_line
+        </td>
+      </tr>
+      <tr>
+        <td>2026-04-21</td>
+        <td><code>NOTEPAD/Trranscripts/Claude Code Desktop/Default_medium_Microservices Logging*</code></td>
+        <td>(merged with above)</td>
+        <td><span class="pill">skill</span> logging_standard</td>
+      </tr>
+      <tr>
+        <td>2026-04-21</td>
+        <td><code>NOTEPAD/Trranscripts/Claude Code Desktop/Default_medium_How to Document*</code></td>
+        <td>(direct -&gt; skill)</td>
+        <td><span class="pill">skill</span> docstring_discipline</td>
+      </tr>
+      <tr>
+        <td>2026-04-21</td>
+        <td><code>NOTEPAD/Trranscripts/Claude Code Desktop/Default_medium_Writing technical documentatio*</code></td>
+        <td>(merged with above)</td>
+        <td><span class="pill">skill</span> docstring_discipline</td>
+      </tr>
+      <tr>
+        <td>2026-04-21</td>
+        <td><code>NOTEPAD/Trranscripts/Open swarm/*</code></td>
+        <td>(direct -&gt; skill)</td>
+        <td><span class="pill">skill</span> swarm_coordination</td>
+      </tr>
+      <tr>
+        <td>2026-04-21</td>
+        <td><code>NOTEPAD/Trranscripts/01_Claude_and_Codex/claude_code_plus_openrouter_free.txt</code></td>
+        <td>(direct -&gt; skill)</td>
+        <td><span class="pill">skill</span> openrouter_fallback</td>
+      </tr>
+      <tr>
+        <td>2026-04-21</td>
+        <td><code>NOTEPAD/Trranscripts/01_Claude_and_Codex/openai_codex_complete_guide.md</code></td>
+        <td>(direct -&gt; skill)</td>
+        <td><span class="pill">skill</span> codex_skills_mirror</td>
+      </tr>
+      <tr>
+        <td>2026-04-21</td>
+        <td><code>NOTEPAD/Trranscripts/01_Claude_and_Codex/one_month_of_claude_in_finance.txt</code></td>
+        <td>(direct -&gt; skill)</td>
+        <td><span class="pill">skill</span> claude_finance_prompts</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Pending digest (raw not yet promoted)</h2>
+  <p>Anything in <code>NOTEPAD/Trranscripts/</code> outside the rows above remains
+  raw / undigested. Promote on demand per <code>karpathy_rag_intake</code> rules
+  (action-based, not time-based). 39 video summaries in 10 themed folders await.
+  See <code>NOTEPAD/Trranscripts/MASTER_PRIORITIZATION.md</code> for tier-ranked
+  work orders against those.</p>
+
+  <h2>Open audit</h2>
+  <p>Wiki pages with no output artifacts in 90 days get archived to
+  <code>wiki/_archive/</code>. Run the audit quarterly via the
+  <code>aios_audit</code> skill (Capabilities check).</p>
+
+  <div class="footer">
+    Generated 2026-05-08. Curator: Marcus Cole on behalf of Lucrex.
+    Knowledge layer lives at <code>06_DEVELOPMENT/everlight_os/knowledge/</code>.
+  </div>
+</div>
+</body>
+</html>

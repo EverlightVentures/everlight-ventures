@@ -1,0 +1,1109 @@
+[
+  {
+    "class": "Boneguard Crew",
+    "name": "Bacardi",
+    "breed": "Dogo Argentino",
+    "cost": 10,
+    "role": "Vanguard",
+    "rarity": "Mythic",
+    "tags": [
+      "Pack",
+      "Guard"
+    ],
+    "hp": 2850,
+    "damage": 180,
+    "attack_speed": 0.7,
+    "move_speed": 0.55,
+    "range": 1,
+    "ability": {
+      "name": "Crownbreaker",
+      "description": "Shields self for 18% HP; can strike the Queen",
+      "cooldown": 18
+    },
+    "queen_target": true,
+    "abilityType": "shield"
+  },
+  {
+    "class": "Boneguard Crew",
+    "name": "Stonejaw",
+    "breed": "Mastiff",
+    "cost": 7,
+    "role": "Vanguard",
+    "rarity": "Legendary",
+    "tags": [
+      "Pack"
+    ],
+    "hp": 2850,
+    "damage": 145,
+    "attack_speed": 0.7,
+    "move_speed": 0.55,
+    "range": 1,
+    "ability": {
+      "name": "Armor Pulse",
+      "description": "Aura cuts nearby ally damage taken by 15%",
+      "cooldown": 16
+    },
+    "queen_target": false,
+    "abilityType": "dr"
+  },
+  {
+    "class": "Boneguard Crew",
+    "name": "Balboa",
+    "breed": "Boxer",
+    "cost": 6,
+    "role": "Striker",
+    "rarity": "Epic",
+    "tags": [
+      "Pack"
+    ],
+    "hp": 1500,
+    "damage": 175,
+    "attack_speed": 1.05,
+    "move_speed": 0.85,
+    "range": 1,
+    "ability": {
+      "name": "Haymaker",
+      "description": "First hit stuns the target for 1s",
+      "cooldown": 12
+    },
+    "queen_target": false,
+    "abilityType": "stun"
+  },
+  {
+    "class": "Boneguard Crew",
+    "name": "Iron Rottweiler",
+    "breed": "Rottweiler",
+    "cost": 9,
+    "role": "Vanguard",
+    "rarity": "Epic",
+    "tags": [
+      "Pack"
+    ],
+    "hp": 2850,
+    "damage": 155,
+    "attack_speed": 0.7,
+    "move_speed": 0.55,
+    "range": 1,
+    "ability": {
+      "name": "Overclock Rage",
+      "description": "Below 40% HP its bite damage spikes",
+      "cooldown": 14
+    },
+    "queen_target": false,
+    "abilityType": "crit"
+  },
+  {
+    "class": "Boneguard Crew",
+    "name": "Granite Saint",
+    "breed": "St. Bernard",
+    "cost": 8,
+    "role": "Vanguard",
+    "rarity": "Rare",
+    "tags": [
+      "Guard"
+    ],
+    "hp": 2650,
+    "damage": 135,
+    "attack_speed": 0.7,
+    "move_speed": 0.55,
+    "range": 1,
+    "ability": {
+      "name": "Bodywall",
+      "description": "Bodywall aura soaks nearby damage for the pack",
+      "cooldown": 14
+    },
+    "queen_target": false,
+    "abilityType": "dr"
+  },
+  {
+    "class": "Boneguard Crew",
+    "name": "Grit Bulldog",
+    "breed": "Bulldog",
+    "cost": 5,
+    "role": "Striker",
+    "rarity": "Rare",
+    "tags": [
+      "Pack"
+    ],
+    "hp": 1300,
+    "damage": 150,
+    "attack_speed": 1.05,
+    "move_speed": 0.85,
+    "range": 1,
+    "ability": {
+      "name": "Brawler",
+      "description": "Powers up its own bite the longer it brawls",
+      "cooldown": 10
+    },
+    "queen_target": false,
+    "abilityType": "buff"
+  },
+  {
+    "class": "Boneguard Crew",
+    "name": "Alloy Akita",
+    "breed": "Akita",
+    "cost": 6,
+    "role": "Lancer",
+    "rarity": "Rare",
+    "tags": [
+      "Guard"
+    ],
+    "hp": 1100,
+    "damage": 180,
+    "attack_speed": 0.95,
+    "move_speed": 0.85,
+    "range": 2,
+    "ability": {
+      "name": "Shock Push",
+      "description": "Knockback cone shoves a melee line back",
+      "cooldown": 12
+    },
+    "queen_target": false,
+    "abilityType": "knockback"
+  },
+  {
+    "class": "Boneguard Crew",
+    "name": "Tank Pug",
+    "breed": "Pug",
+    "cost": 3,
+    "role": "Support",
+    "rarity": "Common",
+    "tags": [
+      "Guard"
+    ],
+    "hp": 750,
+    "damage": 45,
+    "attack_speed": 0.9,
+    "move_speed": 0.85,
+    "range": 3,
+    "ability": {
+      "name": "Shield Bark",
+      "description": "Drops a small temporary shield on one ally",
+      "cooldown": 10
+    },
+    "queen_target": false,
+    "abilityType": "shield"
+  },
+  {
+    "class": "Boneguard Crew",
+    "name": "Copper Chow",
+    "breed": "Chow",
+    "cost": 4,
+    "role": "Striker",
+    "rarity": "Common",
+    "tags": [
+      "Pack"
+    ],
+    "hp": 1100,
+    "damage": 125,
+    "attack_speed": 1.05,
+    "move_speed": 0.85,
+    "range": 1,
+    "ability": {
+      "name": "Bitechain",
+      "description": "Each consecutive hit ramps its damage",
+      "cooldown": 10
+    },
+    "queen_target": false,
+    "abilityType": "ramp"
+  },
+  {
+    "class": "Boneguard Crew",
+    "name": "Warden Newfie",
+    "breed": "Newfoundland",
+    "cost": 7,
+    "role": "Support",
+    "rarity": "Rare",
+    "tags": [
+      "Guard"
+    ],
+    "hp": 1100,
+    "damage": 70,
+    "attack_speed": 0.9,
+    "move_speed": 0.85,
+    "range": 2,
+    "ability": {
+      "name": "Fortify",
+      "description": "Raises max HP of allies in an aura",
+      "cooldown": 16
+    },
+    "queen_target": false,
+    "abilityType": "buff"
+  },
+  {
+    "class": "Boneguard Crew",
+    "name": "Rust Cane Corso",
+    "breed": "Cane Corso",
+    "cost": 8,
+    "role": "Vanguard",
+    "rarity": "Rare",
+    "tags": [
+      "Pack"
+    ],
+    "hp": 2650,
+    "damage": 135,
+    "attack_speed": 0.7,
+    "move_speed": 0.55,
+    "range": 1,
+    "ability": {
+      "name": "Grav Pull",
+      "description": "Pulses a shove that scatters the nearest foes",
+      "cooldown": 14
+    },
+    "queen_target": false,
+    "abilityType": "knockback"
+  },
+  {
+    "class": "Boneguard Crew",
+    "name": "Brick Bullmastiff",
+    "breed": "Bullmastiff",
+    "cost": 6,
+    "role": "Vanguard",
+    "rarity": "Common",
+    "tags": [
+      "Pack"
+    ],
+    "hp": 2250,
+    "damage": 110,
+    "attack_speed": 0.7,
+    "move_speed": 0.55,
+    "range": 1,
+    "ability": {
+      "name": "Stonehide",
+      "description": "Short window of heavy damage resistance",
+      "cooldown": 12
+    },
+    "queen_target": false,
+    "abilityType": "dr"
+  },
+  {
+    "class": "Zoomie Syndicate",
+    "name": "Jagged",
+    "breed": "Doberman",
+    "cost": 11,
+    "role": "Assassin",
+    "rarity": "Mythic",
+    "tags": [
+      "Dash",
+      "Crit"
+    ],
+    "hp": 1900,
+    "damage": 230,
+    "attack_speed": 1.1,
+    "move_speed": 1.1,
+    "range": 1,
+    "ability": {
+      "name": "Shadow Fang",
+      "description": "Teleports onto the Queen for a kill window",
+      "cooldown": 18
+    },
+    "queen_target": true,
+    "abilityType": "teleport"
+  },
+  {
+    "class": "Zoomie Syndicate",
+    "name": "Pixel Greyhound",
+    "breed": "Greyhound",
+    "cost": 3,
+    "role": "Skirmisher",
+    "rarity": "Rare",
+    "tags": [
+      "Dash"
+    ],
+    "hp": 700,
+    "damage": 95,
+    "attack_speed": 1.3,
+    "move_speed": 1.4,
+    "range": 1,
+    "ability": {
+      "name": "Dash Loop",
+      "description": "Refreshes its dash on a kill",
+      "cooldown": 8
+    },
+    "queen_target": false,
+    "abilityType": "dash"
+  },
+  {
+    "class": "Zoomie Syndicate",
+    "name": "Circuit Shiba",
+    "breed": "Shiba Inu",
+    "cost": 4,
+    "role": "Striker",
+    "rarity": "Rare",
+    "tags": [
+      "Dash"
+    ],
+    "hp": 1200,
+    "damage": 135,
+    "attack_speed": 1.05,
+    "move_speed": 1.1,
+    "range": 1,
+    "ability": {
+      "name": "Blink Bite",
+      "description": "Blinks a short hop on its first attack",
+      "cooldown": 10
+    },
+    "queen_target": false,
+    "abilityType": "dash"
+  },
+  {
+    "class": "Zoomie Syndicate",
+    "name": "Neon Whippet",
+    "breed": "Whippet",
+    "cost": 2,
+    "role": "Skirmisher",
+    "rarity": "Common",
+    "tags": [
+      "Dash"
+    ],
+    "hp": 600,
+    "damage": 75,
+    "attack_speed": 1.3,
+    "move_speed": 1.4,
+    "range": 1,
+    "ability": {
+      "name": "Slipstream",
+      "description": "Ignores slows and gains brief evasion",
+      "cooldown": 8
+    },
+    "queen_target": false,
+    "abilityType": "evasion"
+  },
+  {
+    "class": "Zoomie Syndicate",
+    "name": "Turbo Jack",
+    "breed": "Jack Russell",
+    "cost": 3,
+    "role": "Striker",
+    "rarity": "Common",
+    "tags": [
+      "Crit"
+    ],
+    "hp": 1050,
+    "damage": 110,
+    "attack_speed": 1.05,
+    "move_speed": 1.1,
+    "range": 1,
+    "ability": {
+      "name": "Burst Bite",
+      "description": "Crits on the first strike after deploy",
+      "cooldown": 9
+    },
+    "queen_target": false,
+    "abilityType": "crit"
+  },
+  {
+    "class": "Zoomie Syndicate",
+    "name": "Razor Vizsla",
+    "breed": "Vizsla",
+    "cost": 5,
+    "role": "Lancer",
+    "rarity": "Epic",
+    "tags": [
+      "Crit"
+    ],
+    "hp": 1150,
+    "damage": 180,
+    "attack_speed": 0.95,
+    "move_speed": 0.85,
+    "range": 2,
+    "ability": {
+      "name": "Pierce Rush",
+      "description": "Lunges a line that pierces every foe hit",
+      "cooldown": 12
+    },
+    "queen_target": false,
+    "abilityType": "pierce"
+  },
+  {
+    "class": "Zoomie Syndicate",
+    "name": "Flash Saluki",
+    "breed": "Saluki",
+    "cost": 4,
+    "role": "Skirmisher",
+    "rarity": "Rare",
+    "tags": [
+      "Dash"
+    ],
+    "hp": 750,
+    "damage": 110,
+    "attack_speed": 1.3,
+    "move_speed": 1.4,
+    "range": 1,
+    "ability": {
+      "name": "Sidecut",
+      "description": "Dashes lane to lane to flank the backline",
+      "cooldown": 10
+    },
+    "queen_target": false,
+    "abilityType": "dash"
+  },
+  {
+    "class": "Zoomie Syndicate",
+    "name": "Bolt Corgi",
+    "breed": "Corgi",
+    "cost": 4,
+    "role": "Spawner",
+    "rarity": "Rare",
+    "tags": [
+      "Pack"
+    ],
+    "hp": 750,
+    "damage": 55,
+    "attack_speed": 0.9,
+    "move_speed": 0.85,
+    "range": 2,
+    "ability": {
+      "name": "Spark Pups",
+      "description": "Spawns three fast mini zoomers",
+      "cooldown": 12
+    },
+    "queen_target": false,
+    "abilityType": "spawn"
+  },
+  {
+    "class": "Zoomie Syndicate",
+    "name": "Glitch Basenji",
+    "breed": "Basenji",
+    "cost": 3,
+    "role": "Hacker",
+    "rarity": "Rare",
+    "tags": [
+      "Hack"
+    ],
+    "hp": 700,
+    "damage": 70,
+    "attack_speed": 1.0,
+    "move_speed": 0.85,
+    "range": 3,
+    "ability": {
+      "name": "Signal Scramble",
+      "description": "Silences a target ability briefly",
+      "cooldown": 10
+    },
+    "queen_target": false,
+    "abilityType": "silence"
+  },
+  {
+    "class": "Zoomie Syndicate",
+    "name": "Aero Malinois",
+    "breed": "Malinois",
+    "cost": 6,
+    "role": "Striker",
+    "rarity": "Epic",
+    "tags": [
+      "Dash"
+    ],
+    "hp": 1500,
+    "damage": 175,
+    "attack_speed": 1.05,
+    "move_speed": 1.1,
+    "range": 1,
+    "ability": {
+      "name": "Twin Strike",
+      "description": "Strikes twice in one attack swing",
+      "cooldown": 12
+    },
+    "queen_target": false,
+    "abilityType": "double_hit"
+  },
+  {
+    "class": "Zoomie Syndicate",
+    "name": "Drift Sheltie",
+    "breed": "Sheltie",
+    "cost": 2,
+    "role": "Support",
+    "rarity": "Common",
+    "tags": [
+      "Dash"
+    ],
+    "hp": 700,
+    "damage": 40,
+    "attack_speed": 0.9,
+    "move_speed": 1.1,
+    "range": 3,
+    "ability": {
+      "name": "Tag Boost",
+      "description": "Boosts the move speed of nearby allies",
+      "cooldown": 10
+    },
+    "queen_target": false,
+    "abilityType": "buff"
+  },
+  {
+    "class": "Zoomie Syndicate",
+    "name": "Byte Beagle",
+    "breed": "Beagle",
+    "cost": 3,
+    "role": "Blaster",
+    "rarity": "Common",
+    "tags": [
+      "Backline"
+    ],
+    "hp": 550,
+    "damage": 80,
+    "attack_speed": 1.1,
+    "move_speed": 0.85,
+    "range": 4,
+    "ability": {
+      "name": "Tracer Round",
+      "description": "Long shots that pierce shields; can hit Queen",
+      "cooldown": 10
+    },
+    "queen_target": true,
+    "abilityType": "pierce"
+  },
+  {
+    "class": "Leashbreak Tactix",
+    "name": "Rosco",
+    "breed": "Australian Cattle Dog",
+    "cost": 10,
+    "role": "Controller",
+    "rarity": "Mythic",
+    "tags": [
+      "Hack",
+      "Pack"
+    ],
+    "hp": 1600,
+    "damage": 170,
+    "attack_speed": 0.95,
+    "move_speed": 0.85,
+    "range": 3,
+    "ability": {
+      "name": "Leashbreak",
+      "description": "Disables a tower fire; can strike the Queen",
+      "cooldown": 18
+    },
+    "queen_target": true,
+    "abilityType": "disable_tower"
+  },
+  {
+    "class": "Leashbreak Tactix",
+    "name": "Synth Collie",
+    "breed": "Border Collie",
+    "cost": 5,
+    "role": "Hacker",
+    "rarity": "Epic",
+    "tags": [
+      "Hack"
+    ],
+    "hp": 900,
+    "damage": 90,
+    "attack_speed": 1.0,
+    "move_speed": 0.85,
+    "range": 3,
+    "ability": {
+      "name": "Hack Jam",
+      "description": "Jams a tower so it cannot fire",
+      "cooldown": 12
+    },
+    "queen_target": false,
+    "abilityType": "disable_tower"
+  },
+  {
+    "class": "Leashbreak Tactix",
+    "name": "Holo Husky",
+    "breed": "Husky",
+    "cost": 5,
+    "role": "Support",
+    "rarity": "Rare",
+    "tags": [
+      "Shield"
+    ],
+    "hp": 950,
+    "damage": 60,
+    "attack_speed": 0.9,
+    "move_speed": 0.85,
+    "range": 3,
+    "ability": {
+      "name": "Heal Beacon",
+      "description": "Pulsing area heal for the pack",
+      "cooldown": 12
+    },
+    "queen_target": false,
+    "abilityType": "heal"
+  },
+  {
+    "class": "Leashbreak Tactix",
+    "name": "Chill Samoyed",
+    "breed": "Samoyed",
+    "cost": 4,
+    "role": "Support",
+    "rarity": "Rare",
+    "tags": [
+      "Slow"
+    ],
+    "hp": 900,
+    "damage": 55,
+    "attack_speed": 0.9,
+    "move_speed": 0.85,
+    "range": 3,
+    "ability": {
+      "name": "Frost Bark",
+      "description": "Wide frost cone slows everything caught",
+      "cooldown": 10
+    },
+    "queen_target": false,
+    "abilityType": "slow"
+  },
+  {
+    "class": "Leashbreak Tactix",
+    "name": "Prism Poodle",
+    "breed": "Poodle",
+    "cost": 4,
+    "role": "Controller",
+    "rarity": "Rare",
+    "tags": [
+      "Shield Break"
+    ],
+    "hp": 850,
+    "damage": 85,
+    "attack_speed": 0.95,
+    "move_speed": 0.85,
+    "range": 3,
+    "ability": {
+      "name": "Shatter",
+      "description": "Strips enemy shields, then wards an ally",
+      "cooldown": 10
+    },
+    "queen_target": false,
+    "abilityType": "shield"
+  },
+  {
+    "class": "Leashbreak Tactix",
+    "name": "Echo Dalmatian",
+    "breed": "Dalmatian",
+    "cost": 3,
+    "role": "Controller",
+    "rarity": "Common",
+    "tags": [
+      "Slow"
+    ],
+    "hp": 750,
+    "damage": 70,
+    "attack_speed": 0.95,
+    "move_speed": 0.85,
+    "range": 3,
+    "ability": {
+      "name": "Echo Howl",
+      "description": "Rolling area slow down the lane",
+      "cooldown": 9
+    },
+    "queen_target": false,
+    "abilityType": "slow"
+  },
+  {
+    "class": "Leashbreak Tactix",
+    "name": "Static Sheba Inu",
+    "breed": "Shiba Inu",
+    "cost": 2,
+    "role": "Hacker",
+    "rarity": "Common",
+    "tags": [
+      "Hack"
+    ],
+    "hp": 600,
+    "damage": 55,
+    "attack_speed": 1.0,
+    "move_speed": 0.85,
+    "range": 3,
+    "ability": {
+      "name": "Ping",
+      "description": "Quick silence on the first target",
+      "cooldown": 8
+    },
+    "queen_target": false,
+    "abilityType": "silence"
+  },
+  {
+    "class": "Leashbreak Tactix",
+    "name": "Vibe Shih Tzu",
+    "breed": "Shih Tzu",
+    "cost": 2,
+    "role": "Support",
+    "rarity": "Common",
+    "tags": [
+      "Shield"
+    ],
+    "hp": 700,
+    "damage": 40,
+    "attack_speed": 0.9,
+    "move_speed": 0.85,
+    "range": 3,
+    "ability": {
+      "name": "Soothe",
+      "description": "Small steady heal to a wounded ally",
+      "cooldown": 8
+    },
+    "queen_target": false,
+    "abilityType": "heal"
+  },
+  {
+    "class": "Leashbreak Tactix",
+    "name": "Noir Setter",
+    "breed": "Setter",
+    "cost": 6,
+    "role": "Controller",
+    "rarity": "Epic",
+    "tags": [
+      "Hack"
+    ],
+    "hp": 1100,
+    "damage": 110,
+    "attack_speed": 0.95,
+    "move_speed": 0.85,
+    "range": 3,
+    "ability": {
+      "name": "Blackout",
+      "description": "Blinds ranged foes so their shots miss",
+      "cooldown": 12
+    },
+    "queen_target": false,
+    "abilityType": "blind"
+  },
+  {
+    "class": "Leashbreak Tactix",
+    "name": "Signal Pointer",
+    "breed": "Pointer",
+    "cost": 4,
+    "role": "Lancer",
+    "rarity": "Rare",
+    "tags": [
+      "Hack"
+    ],
+    "hp": 1000,
+    "damage": 150,
+    "attack_speed": 0.95,
+    "move_speed": 0.85,
+    "range": 3,
+    "ability": {
+      "name": "Tag Shot",
+      "description": "Tags a target, revealing stealth and weakening it",
+      "cooldown": 10
+    },
+    "queen_target": false,
+    "abilityType": "reveal"
+  },
+  {
+    "class": "Leashbreak Tactix",
+    "name": "Ghost Spaniel",
+    "breed": "Spaniel",
+    "cost": 3,
+    "role": "Skirmisher",
+    "rarity": "Rare",
+    "tags": [
+      "Backline"
+    ],
+    "hp": 700,
+    "damage": 95,
+    "attack_speed": 1.3,
+    "move_speed": 1.1,
+    "range": 2,
+    "ability": {
+      "name": "Phase",
+      "description": "Phases out for a brief untargetable window",
+      "cooldown": 10
+    },
+    "queen_target": false,
+    "abilityType": "invuln"
+  },
+  {
+    "class": "Leashbreak Tactix",
+    "name": "Pulse Border Collie",
+    "breed": "Border Collie",
+    "cost": 5,
+    "role": "Support",
+    "rarity": "Epic",
+    "tags": [
+      "Shield"
+    ],
+    "hp": 1050,
+    "damage": 65,
+    "attack_speed": 0.9,
+    "move_speed": 0.85,
+    "range": 3,
+    "ability": {
+      "name": "Barrier Ring",
+      "description": "Drops an area shield over the front line",
+      "cooldown": 12
+    },
+    "queen_target": false,
+    "abilityType": "shield"
+  },
+  {
+    "class": "K9 Circuitry",
+    "name": "Crown Foxhound",
+    "breed": "Foxhound",
+    "cost": 11,
+    "role": "Assassin",
+    "rarity": "Mythic",
+    "tags": [
+      "Turret Break"
+    ],
+    "hp": 1900,
+    "damage": 230,
+    "attack_speed": 1.1,
+    "move_speed": 1.1,
+    "range": 1,
+    "ability": {
+      "name": "Royal Hunt",
+      "description": "Shreds structures; can strike the Queen",
+      "cooldown": 18
+    },
+    "queen_target": true,
+    "abilityType": "turret_break"
+  },
+  {
+    "class": "K9 Circuitry",
+    "name": "Laser Beagle",
+    "breed": "Beagle",
+    "cost": 4,
+    "role": "Structure",
+    "rarity": "Rare",
+    "tags": [
+      "Turret"
+    ],
+    "hp": 1050,
+    "damage": 85,
+    "attack_speed": 1.0,
+    "move_speed": 0.0,
+    "range": 5,
+    "ability": {
+      "name": "Overheat",
+      "description": "Static turret that ramps fire the longer it shoots",
+      "cooldown": 12
+    },
+    "queen_target": false,
+    "abilityType": "ramp"
+  },
+  {
+    "class": "K9 Circuitry",
+    "name": "Neon Dachshund",
+    "breed": "Dachshund",
+    "cost": 3,
+    "role": "Spawner",
+    "rarity": "Common",
+    "tags": [
+      "Drone"
+    ],
+    "hp": 650,
+    "damage": 45,
+    "attack_speed": 0.9,
+    "move_speed": 0.85,
+    "range": 2,
+    "ability": {
+      "name": "Tunnel Drones",
+      "description": "Tunnels up two attack drones",
+      "cooldown": 10
+    },
+    "queen_target": false,
+    "abilityType": "spawn"
+  },
+  {
+    "class": "K9 Circuitry",
+    "name": "Volt Corgi",
+    "breed": "Corgi",
+    "cost": 4,
+    "role": "Spawner",
+    "rarity": "Rare",
+    "tags": [
+      "Drone"
+    ],
+    "hp": 750,
+    "damage": 55,
+    "attack_speed": 0.9,
+    "move_speed": 0.85,
+    "range": 2,
+    "ability": {
+      "name": "Spark Pups",
+      "description": "Spawns three spark drones",
+      "cooldown": 12
+    },
+    "queen_target": false,
+    "abilityType": "spawn"
+  },
+  {
+    "class": "K9 Circuitry",
+    "name": "Grid Schnauzer",
+    "breed": "Schnauzer",
+    "cost": 5,
+    "role": "Structure",
+    "rarity": "Rare",
+    "tags": [
+      "Turret"
+    ],
+    "hp": 1150,
+    "damage": 95,
+    "attack_speed": 1.0,
+    "move_speed": 0.0,
+    "range": 4,
+    "ability": {
+      "name": "Grid Lock",
+      "description": "Turret field that slows attackers in range",
+      "cooldown": 12
+    },
+    "queen_target": false,
+    "abilityType": "slow"
+  },
+  {
+    "class": "K9 Circuitry",
+    "name": "Flux Pomeranian",
+    "breed": "Pomeranian",
+    "cost": 2,
+    "role": "Support",
+    "rarity": "Common",
+    "tags": [
+      "Drone"
+    ],
+    "hp": 700,
+    "damage": 40,
+    "attack_speed": 0.9,
+    "move_speed": 0.85,
+    "range": 3,
+    "ability": {
+      "name": "Battery",
+      "description": "Boosts the fire rate of nearby turrets",
+      "cooldown": 8
+    },
+    "queen_target": false,
+    "abilityType": "buff"
+  },
+  {
+    "class": "K9 Circuitry",
+    "name": "Rail Terrier",
+    "breed": "Terrier",
+    "cost": 3,
+    "role": "Blaster",
+    "rarity": "Common",
+    "tags": [
+      "Turret Break"
+    ],
+    "hp": 550,
+    "damage": 80,
+    "attack_speed": 1.1,
+    "move_speed": 0.85,
+    "range": 4,
+    "ability": {
+      "name": "Rail Shot",
+      "description": "Long rail shots deal bonus vs structures",
+      "cooldown": 9
+    },
+    "queen_target": false,
+    "abilityType": "turret_break"
+  },
+  {
+    "class": "K9 Circuitry",
+    "name": "Circuit Retriever",
+    "breed": "Retriever",
+    "cost": 6,
+    "role": "Support",
+    "rarity": "Epic",
+    "tags": [
+      "Drone"
+    ],
+    "hp": 1100,
+    "damage": 70,
+    "attack_speed": 0.9,
+    "move_speed": 0.85,
+    "range": 3,
+    "ability": {
+      "name": "Drone Swarm",
+      "description": "Releases five swarm drones",
+      "cooldown": 12
+    },
+    "queen_target": false,
+    "abilityType": "spawn"
+  },
+  {
+    "class": "K9 Circuitry",
+    "name": "Chrome Airedale",
+    "breed": "Airedale",
+    "cost": 5,
+    "role": "Lancer",
+    "rarity": "Rare",
+    "tags": [
+      "Turret"
+    ],
+    "hp": 1050,
+    "damage": 165,
+    "attack_speed": 0.95,
+    "move_speed": 0.85,
+    "range": 3,
+    "ability": {
+      "name": "Arc Shot",
+      "description": "Arc that chains to three targets",
+      "cooldown": 10
+    },
+    "queen_target": false,
+    "abilityType": "chain"
+  },
+  {
+    "class": "K9 Circuitry",
+    "name": "Beacon Basset",
+    "breed": "Basset",
+    "cost": 4,
+    "role": "Support",
+    "rarity": "Rare",
+    "tags": [
+      "Shield"
+    ],
+    "hp": 900,
+    "damage": 55,
+    "attack_speed": 0.9,
+    "move_speed": 0.85,
+    "range": 3,
+    "ability": {
+      "name": "Beacon",
+      "description": "Reveals stealth and marks foes for the pack",
+      "cooldown": 10
+    },
+    "queen_target": false,
+    "abilityType": "reveal"
+  },
+  {
+    "class": "K9 Circuitry",
+    "name": "Pixel Pug",
+    "breed": "Pug",
+    "cost": 2,
+    "role": "Spawner",
+    "rarity": "Common",
+    "tags": [
+      "Drone"
+    ],
+    "hp": 550,
+    "damage": 40,
+    "attack_speed": 0.9,
+    "move_speed": 0.85,
+    "range": 2,
+    "ability": {
+      "name": "Mini Pup",
+      "description": "Deploys a single guard drone",
+      "cooldown": 8
+    },
+    "queen_target": false,
+    "abilityType": "spawn"
+  },
+  {
+    "class": "K9 Circuitry",
+    "name": "Nova Shepherd",
+    "breed": "German Shepherd",
+    "cost": 7,
+    "role": "Structure",
+    "rarity": "Epic",
+    "tags": [
+      "Turret"
+    ],
+    "hp": 1450,
+    "damage": 125,
+    "attack_speed": 1.0,
+    "move_speed": 0.0,
+    "range": 4,
+    "ability": {
+      "name": "Overclock",
+      "description": "Heavy static turret with a burst fire window",
+      "cooldown": 14
+    },
+    "queen_target": false,
+    "abilityType": "ramp"
+  }
+]

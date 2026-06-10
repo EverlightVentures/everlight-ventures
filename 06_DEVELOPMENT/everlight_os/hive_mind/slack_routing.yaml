@@ -169,3 +169,27 @@ routing:
     agent: Marcus Cole
     content: Premium HTML ops reports with agent narratives
     frequency: On generation
+
+  # moltbook visibility -- added 2026-05-17 by moltbook_notifier.py
+  # Operator deferred dedicated #moltbook-ops channel; routes to existing lanes:
+  #   reports/intel/deal categories -> #war-room  (digests + neutral-tone signal)
+  #   alert/system categories       -> #hive-alerts (failures + hostile flames)
+  # When #moltbook-ops is created, swap REPORT_CHANNEL in moltbook_notifier.py
+  # and update both entries below.
+  moltbook_digest:
+    channel: war-room
+    bot: warroom
+    agent: Lucrex Notifier
+    content: 9am PT daily digest of Lucrex moltbook activity (karma/follower
+             deltas, comments/upvotes/research counts, top topics)
+    frequency: Daily at 16:00 + 17:00 UTC (DST-safe idempotency latch)
+
+  moltbook_realtime:
+    channel: war-room          # intel/report categories
+    alert_channel: hive-alerts # alert/system categories (cron failures, flames)
+    bot: warroom
+    agent: Lucrex Notifier
+    content: Realtime alerts -- new DM, new follower, karma jump ≥+10,
+             post hitting 5+ comments, hostile flame, 3+ consecutive
+             daemon cron errors
+    frequency: Every 3 min (offset 1 min from lucrex_engage cron)

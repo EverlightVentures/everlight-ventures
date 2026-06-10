@@ -80,7 +80,7 @@ WORKSPACE_CANDIDATES = [
 SLACK_API = "https://slack.com/api/chat.postMessage"
 
 # Brand color (Everlight gold) -- used for attachment color stripe
-BRAND_GOLD = "#D4A843"
+BRAND_GOLD = "#D4AF37"
 
 # Category accent colors
 CATEGORY_COLORS = {
@@ -219,7 +219,7 @@ def _build_archive_html(
             rendered.append("</ul>")
         return "\n".join(rendered)
 
-    summary_html = f'<p style="font-weight:600;color:#D4A843;font-size:17px;">{summary}</p>' if summary else ""
+    summary_html = f'<p style="font-weight:600;color:#D4AF37;font-size:17px;">{summary}</p>' if summary else ""
     body_html = md_to_html(body or "")
 
     # Optional fields table
@@ -265,15 +265,15 @@ def _build_archive_html(
         '<style>'
         'body{background:#0A0A0A;color:#E8E8E8;font-family:Inter,system-ui,sans-serif;line-height:1.7;}'
         '.wrap{max-width:800px;margin:40px auto;padding:0 24px;}'
-        '.h{background:linear-gradient(135deg,#0A0A0A,#1A1A1A);border-bottom:2px solid #D4A843;padding:28px;text-align:center;}'
-        '.h .logo{font-family:Playfair Display,serif;color:#D4A843;letter-spacing:4px;font-size:13px;text-transform:uppercase;}'
+        '.h{background:linear-gradient(135deg,#0A0A0A,#1A1A1A);border-bottom:2px solid #D4AF37;padding:28px;text-align:center;}'
+        '.h .logo{font-family:Playfair Display,serif;color:#D4AF37;letter-spacing:4px;font-size:13px;text-transform:uppercase;}'
         '.h h1{font-family:Playfair Display,serif;color:#E8E8E8;font-size:26px;margin:8px 0 0;}'
         '.body{padding:32px 0;}'
-        '.body h2,.body h3{font-family:Playfair Display,serif;color:#D4A843;}'
+        '.body h2,.body h3{font-family:Playfair Display,serif;color:#D4AF37;}'
         'table{width:100%;border-collapse:collapse;margin:14px 0;}'
-        'th{background:#1A1A1A;color:#D4A843;text-align:left;padding:10px;}'
+        'th{background:#1A1A1A;color:#D4AF37;text-align:left;padding:10px;}'
         'td{padding:10px;border-bottom:1px solid #1a1a1a;}'
-        'code{background:#1a1a1a;padding:2px 6px;border-radius:3px;color:#D4A843;}'
+        'code{background:#1a1a1a;padding:2px 6px;border-radius:3px;color:#D4AF37;}'
         '.ftr{text-align:center;color:#999;font-size:12px;letter-spacing:2px;border-top:1px solid #1a1a1a;padding:24px;}'
         '</style></head><body>'
         '<div class="wrap">'

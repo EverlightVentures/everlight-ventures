@@ -1,0 +1,5 @@
+Date,Time,Transaction_ID,Employee_ID,Employee_Name,Category,Subcategory,Product_Name,Item_Name,SKU,Quantity,Size,Item_Description,Unit_Price,Unit_Cost,COGS_Line,Gross_Margin,Qty_Remaining_Before,Qty_Remaining_After,Subtotal,Tax_Rate,Tax_Amount,Line_Total,Payment_Method,Amount_Received,Change_Due,Notes
+2025-12-28,14:08:42,TRX20251228140842f2a3,1001,Rich,Plant,Plant,"pland, herb","pland, herb",PLA-CB7C6B18,1,1 gal,"pland, herb",7.99,0.00,0.00,7.99,0,0,42.98,0.0825,0.66,7.99,CARD,0.00,0.00,
+2025-12-28,14:08:42,TRX20251228140842f2a3,1001,Rich,Supply,Supply,Plalosein,Plalosein,SUP-DF071183,1,,Plalosein,34.99,0.00,0.00,34.99,0,0,42.98,0.0825,2.89,34.99,CARD,0.00,0.00,
+2025-12-28,14:13:32,TRX202512281413329610,1001,Rich,Plant,Plant,"plact, rose","plact, rose",PLA-F810C1D9,1,2 gal,"plact, rose",34.99,0.00,0.00,34.99,0,0,34.99,0.0825,2.89,34.99,CARD,0.00,0.00,
+2025-12-28,14:14:03,TRX20251228141403955f,1001,Rich,Supply,Supply,Plalosein,Plalosein,SUP-DF071183,1,,Plalosein,34.99,0.00,0.00,34.99,0,0,34.99,0.0825,2.89,34.99,CASH,40.00,2.12,

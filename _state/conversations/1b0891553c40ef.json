@@ -1,0 +1,30 @@
+{
+  "contact": {
+    "email": "wa2@example.com",
+    "name": "",
+    "role": "",
+    "phase": "",
+    "channel": "whatsapp",
+    "phone": "9015551111",
+    "channel_consented": true,
+    "last_inbound_ts": "2026-05-23T08:10:34.783878+00:00"
+  },
+  "messages": [],
+  "state": {
+    "facts": [],
+    "their_open_qs": [],
+    "our_open_qs": [],
+    "commitments": {
+      "ours": [],
+      "theirs": []
+    },
+    "objections": [],
+    "personas_seen": []
+  },
+  "rapport": {
+    "sentiment": "neutral",
+    "notes": []
+  },
+  "next_action": "",
+  "updated_at": "2026-05-25T08:10:34.784335+00:00"
+}

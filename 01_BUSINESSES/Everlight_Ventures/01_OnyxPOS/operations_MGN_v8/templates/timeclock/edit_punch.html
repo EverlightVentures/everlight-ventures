@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block page_title %}Edit Punch{% endblock %}
+{% block header_emoji %}✏️{% endblock %}
+{% block header_title %}Edit Punch{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">Punch {{ punch.Punch_ID }}</div>
+  </div>
+  <div class="card-body">
+    <p class="card-subtitle" style="margin-bottom: 16px;">{{ punch.Employee_Name }} • {{ punch.Date }}</p>
+    <form method="POST">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Time</label>
+          <input class="form-input" name="punch_time" value="{{ punch.Time }}" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <select class="form-input" name="punch_type">
+            {% for t in punch_types %}
+            <option value="{{ t }}" {% if t == punch.Punch_Type %}selected{% endif %}>{{ t }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Reason</label>
+        <input class="form-input" name="reason" placeholder="Reason for edit">
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" name="action" value="update" type="submit">Update</button>
+        <button class="btn btn-secondary" name="action" value="delete" type="submit">Delete</button>
+        <a class="btn btn-secondary" href="{{ url_for('timeclock_manage') }}">Back</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

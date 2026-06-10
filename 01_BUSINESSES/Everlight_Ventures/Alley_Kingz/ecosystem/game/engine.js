@@ -1502,7 +1502,8 @@ function maybeFireAbility(u){
       // simple drone: a weak fast melee ally
       spawnDrone(u); announce('#00E0C0'); break;
     case 'knockback':
-      game.units.forEach(o=>{ if(o.owner===enemyOwner&&o.alive&&u.dist(o.x,o.y)<=1.8){ const dir=u.owner===0?-1:1; o.y-=dir*1.2; } });
+      // shove the struck unit back toward its OWN side (sign was inverted -- it used to pull attackers in)
+      game.units.forEach(o=>{ if(o.owner===enemyOwner&&o.alive&&u.dist(o.x,o.y)<=1.8){ const dir=(o.owner===0)?1:-1; o.y=clamp(o.y+dir*1.2,1,ARENA_H-1); } });
       announce('#C9772E'); break;
     case 'evasion': u.evadeT=2; announce('#9aa'); break;
     case 'invuln': u.invulnT=1.0; announce('#9aa'); break;
@@ -1511,7 +1512,11 @@ function maybeFireAbility(u){
       game.units.forEach(o=>{ if(o.owner===enemyOwner&&o.alive&&u.dist(o.x,o.y)<=2.0){ o.takeDamage(Math.floor(u.dmg*0.5),u.x,u.y); } });
       announce('#FF8800'); break;
     case 'double':
-      if(u.target && targetValid(u.target)){ u.target.takeDamage?u.target.takeDamage(Math.floor(u.dmg*0.5)):0; } announce('#FF2E88'); break;
+      if(u.target && targetValid(u.target)){
+        if(u.target.takeDamage) u.target.takeDamage(Math.floor(u.dmg*0.5));
+        // crown-count a tower killed by Twin Strike (was a silent match-stall: king died, match never ended)
+        if(u.target instanceof Tower) checkTowerDeath(u.target,u.owner);
+      } announce('#FF2E88'); break;
     default: fired=false;
   }
   if(fired){

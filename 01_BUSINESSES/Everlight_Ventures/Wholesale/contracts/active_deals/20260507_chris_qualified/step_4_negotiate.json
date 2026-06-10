@@ -1,0 +1,16 @@
+{
+  "agent": "Hammer Ortiz",
+  "math": {
+    "ARV_usd": 56000,
+    "sqft_assumed": 1200,
+    "repair_per_sqft_usd": 30,
+    "repair_estimate_usd": 36000,
+    "chris_MAO_70pct_ARV_minus_repair_usd": 3200,
+    "target_assignment_fee_usd": 5000,
+    "seller_cash_offer_usd": -1800,
+    "spread_viable": false
+  },
+  "negotiation_floor": -1530,
+  "negotiation_ceiling": 700,
+  "narration": "Champ, ARV $56,000, repair est $36,000. Chris's max is $3,200. Target margin $5k. Seller offer: $-1,800. MARGIN TOO TIGHT -- need better data (real sqft + condition) OR pass on this property."
+}

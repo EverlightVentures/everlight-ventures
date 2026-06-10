@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block page_title %}Billing{% endblock %}
+{% block header_emoji %}💳{% endblock %}
+{% block header_title %}Billing{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom:16px;">
+  <div class="card-header">
+    <div class="card-title">Current plan</div>
+  </div>
+  <div class="card-body">
+    <p style="color: var(--text-secondary); margin-bottom: 12px;">
+      <strong style="color: var(--text-primary);">{{ subscription.Tier|default("pro")|capitalize }}</strong> — {{ subscription.Status|default("trial")|capitalize }}
+    </p>
+    <p style="color: var(--text-secondary);">Manage your plan and keep your business running smoothly.</p>
+    {% if billing_mode == "mock" %}
+    <div class="badge badge-warning" style="margin-top:10px;">Mock billing enabled</div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:16px;">
+  <div class="card-header">
+    <div class="card-title">Usage & limits</div>
+  </div>
+  <div class="card-body">
+    <div class="grid grid-3 gap-4">
+      <div>
+        <div class="text-muted">Users</div>
+        <div class="text-lg">
+          {{ usage.users }}
+          {% if usage.limits.max_users %}/ {{ usage.limits.max_users }}{% else %}/ Unlimited{% endif %}
+        </div>
+      </div>
+      <div>
+        <div class="text-muted">SKUs</div>
+        <div class="text-lg">
+          {{ usage.skus }}
+          {% if usage.limits.max_skus %}/ {{ usage.limits.max_skus }}{% else %}/ Unlimited{% endif %}
+        </div>
+      </div>
+      <div>
+        <div class="text-muted">Transactions (this month)</div>
+        <div class="text-lg">
+          {{ usage.txns_month }}
+          {% if usage.limits.max_txn_month %}/ {{ usage.limits.max_txn_month }}{% else %}/ Unlimited{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid grid-3 gap-4">
+  {% for plan in tiers %}
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">{{ plan.label }}</div>
+    </div>
+    <div class="card-body">
+      <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 18px; font-weight: 600;">
+        ${{ plan.price }}/mo
+      </p>
+      <a class="btn btn-primary" href="{{ url_for('billing_checkout', tier=plan.id) }}">Choose {{ plan.label }}</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

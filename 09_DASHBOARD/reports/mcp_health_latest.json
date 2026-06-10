@@ -1,0 +1,66 @@
+{
+  "generated_at": "2026-04-22T18:27:21.838552+00:00",
+  "summary": {
+    "ok": 4,
+    "warn": 1,
+    "fail": 2
+  },
+  "checks": [
+    {
+      "name": "blinko-memory",
+      "status": "fail",
+      "latency_ms": 163.02177001489326,
+      "detail": "unreachable: <urlopen error [Errno 113] No route to host>",
+      "remediation": "SSH oracle-e5; sudo systemctl restart blinko; journalctl -u blinko -n 50",
+      "checked_at": "2026-04-22T18:27:21.838552+00:00"
+    },
+    {
+      "name": "supabase",
+      "status": "ok",
+      "latency_ms": 1055.402134952601,
+      "detail": "management API ok",
+      "remediation": "",
+      "checked_at": "2026-04-22T18:27:21.838552+00:00"
+    },
+    {
+      "name": "broker-os",
+      "status": "fail",
+      "latency_ms": 0.7689589983783662,
+      "detail": "Django unreachable on port 8504",
+      "remediation": "SSH oracle-e5; sudo systemctl restart hive-django; journalctl -u hive-django -n 50",
+      "checked_at": "2026-04-22T18:27:21.838552+00:00"
+    },
+    {
+      "name": "market-intel",
+      "status": "warn",
+      "latency_ms": 0.0,
+      "detail": "no state.json at /mnt/sdcard/AA_MY_DRIVE/06_DEVELOPMENT/xlm_bot/state.json",
+      "remediation": "Start XLM bot on Oracle: systemctl start xlm-bot",
+      "checked_at": "2026-04-22T18:27:21.838552+00:00"
+    },
+    {
+      "name": "n8n",
+      "status": "ok",
+      "latency_ms": 192.99838499864563,
+      "detail": "",
+      "remediation": "",
+      "checked_at": "2026-04-22T18:27:21.838552+00:00"
+    },
+    {
+      "name": "resend",
+      "status": "ok",
+      "latency_ms": 381.59979099873453,
+      "detail": "",
+      "remediation": "",
+      "checked_at": "2026-04-22T18:27:21.838552+00:00"
+    },
+    {
+      "name": "stripe",
+      "status": "ok",
+      "latency_ms": 389.7644269745797,
+      "detail": "",
+      "remediation": "",
+      "checked_at": "2026-04-22T18:27:21.838552+00:00"
+    }
+  ]
+}

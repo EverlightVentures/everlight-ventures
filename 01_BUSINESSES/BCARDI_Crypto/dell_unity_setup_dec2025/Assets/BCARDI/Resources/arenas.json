@@ -1,0 +1,15 @@
+{
+  "trophy_name": "Dog Skulls",
+  "arenas": [
+    {"name": "Neon Alley", "min_trophies": 0, "max_trophies": 99, "gift_tier": 1},
+    {"name": "Grid Plaza", "min_trophies": 100, "max_trophies": 199, "gift_tier": 2},
+    {"name": "Synth Yard", "min_trophies": 200, "max_trophies": 299, "gift_tier": 3},
+    {"name": "Chrome Strip", "min_trophies": 300, "max_trophies": 399, "gift_tier": 4},
+    {"name": "Pulse Dock", "min_trophies": 400, "max_trophies": 499, "gift_tier": 5},
+    {"name": "Static Fields", "min_trophies": 500, "max_trophies": 699, "gift_tier": 6},
+    {"name": "Overclock Pier", "min_trophies": 700, "max_trophies": 899, "gift_tier": 7},
+    {"name": "Holo District", "min_trophies": 900, "max_trophies": 1099, "gift_tier": 8},
+    {"name": "Quantum Kennel", "min_trophies": 1100, "max_trophies": 1299, "gift_tier": 9},
+    {"name": "Crown Circuit", "min_trophies": 1300, "max_trophies": 9999, "gift_tier": 10}
+  ]
+}

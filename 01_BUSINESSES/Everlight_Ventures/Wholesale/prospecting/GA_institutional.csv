@@ -1,0 +1,14 @@
+lead_id,address,city,state,zip,owner_name,email,phone,estimated_arv,beds,baths,sqft,year_built,lead_type,distress,status,touches,first_contacted,last_contacted,last_message,reply_received,offer_amount,outcome,source,created_at
+,"1679 ALTADENA PL SW, ATLANTA, GA 30311",Atlanta,GA,,TRIDENT REALTY INVESTMENTS REO LLC,,,257700,,,,,pre_foreclosure,,dead,,,,,,,,oz_distress_hunt,2026-03-21
+,"2166 BELVEDERE AVE SW, ATLANTA, GA 30311",Atlanta,GA,,TRIDENT REALTY INVESTMENTS REO LLC,,,646500,,,,,pre_foreclosure,,dead,,,,,,,,oz_distress_hunt,2026-03-21
+,"3024 GRAND AVE SW, ATLANTA, GA 30315",Atlanta,GA,,MFA 2022 NQM1 TRUST,,,274600,,,,,pre_foreclosure,,dead,,,,,,,,oz_distress_hunt,2026-03-21
+,"2080 RECTOR DR SW, ATLANTA, GA 30311",Atlanta,GA,,ATLANTA NEIGHBORHOOD DEVELOPMENT PA,,,318500,,,,,expired_listing,,dead,,,,,,,,oz_distress_hunt,2026-03-21
+,"2000 MARVIN LN SW, ATLANTA, GA 30311",Atlanta,GA,,STAR 2021 SFR2 BORROWER LP,,,136700,,,,,pre_foreclosure,,dead,,,,,,,,oz_distress_hunt,2026-03-21
+,"3024 GRAND AVE SW, ATLANTA, GA 30315",ATLANTA,GA,,"MACKENZIE CRABTREE REAL ESTATE, LLC",,,0,0,0,0,0,pre_foreclosure,pre_foreclosure,contacted,,,,,,,,distress_finder,2026-03-21
+,"4916 CAMPBELLTON RD SW, ATLANTA, GA 30331",ATLANTA,GA,,PHILANA REALTY SERVICES LLC,,,0,0,0,0,0,pre_foreclosure,pre_foreclosure,new,,,,,,,,distress_finder,2026-03-21
+,"855 PEACHTREE ST NE #2408, ATLANTA, GA 30308",ATLANTA,GA,,"Christopher Scott Realty Group, LLC",,,0,0,0,0,0,pre_foreclosure,pre_foreclosure,new,,,,,,,,distress_finder,2026-03-21
+,1181 GARIBALDI ST,ATLANTA,GA,,Property Owner,,,25000,0,0,0,0,distressed,,new,,,,,,,,zillow_keyword_scraper,2026-03-21
+lead_ad8eec735f,"1443 BEECHER ST SW, ATLANTA, GA 30310",ATLANTA,GA,30310,TRACY L PRINCE,,,450800,3,0,0,0,high_equity,high_equity,new,0,,,,False,,,attom_cache,2026-04-24T05:09:24.295478+00:00
+lead_7378764aa9,"197 CHAPPELL RD NW, ATLANTA, GA 30314",ATLANTA,GA,30314,STAR INVESTMENT PARTNERS LP,,(404) 656-3916,159900,2,0,0,0,high_equity,high_equity,new,0,,,,False,,,attom_cache,2026-04-24T05:09:24.295803+00:00
+lead_7c13ea5b1a,"2865 SPRINGDALE RD SW, ATLANTA, GA 30315",ATLANTA,GA,30315,HERITAGE GREEN APARTMENTS LTD PARTN,,(404) 768-1158,140500,3,0,0,0,high_equity,high_equity,new,0,,,,False,,,attom_cache,2026-04-24T05:09:24.295897+00:00
+lead_594655747d,"6059 LAMP POST PL, ATLANTA, GA 30349",ATLANTA,GA,30349,MORTGAGE ELECTRONIC REGISTRATION,,(888) 679-6377,464300,4,0,0,0,high_equity,high_equity,new,0,,,,False,,,attom_cache,2026-04-24T05:09:24.296250+00:00

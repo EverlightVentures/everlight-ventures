@@ -1,0 +1,15 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=060170%20%2000016",
+  "parsed_at": "2026-05-08T01:19:36+00:00",
+  "parcel_id": "060170  00016",
+  "property_address": "1261  CARLTON RD",
+  "owner_name": "THWEATT RUSSELL &amp; SERENE S",
+  "land_use": "- VACANT LAND",
+  "year_built": null,
+  "sqft": null,
+  "land_appraisal_usd": 14700,
+  "building_appraisal_usd": 0,
+  "total_appraisal_usd": 14700,
+  "subdivision": null
+}

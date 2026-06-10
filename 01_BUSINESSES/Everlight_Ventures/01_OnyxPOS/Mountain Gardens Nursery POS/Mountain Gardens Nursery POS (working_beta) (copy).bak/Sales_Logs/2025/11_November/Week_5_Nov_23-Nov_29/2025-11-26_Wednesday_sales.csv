@@ -1,0 +1,4 @@
+Date,Time,Category,Subcategory,Item Name,Quantity,Size,Item Description,Unit Price,Subtotal (before tax),Tax Rate,Tax Amount,Line Total (with tax),Payment Method,Amount Received,Change Due,Cashier Initials,Comment
+2025-11-26,10:03:59,Animal,Other Animal,mouse,3,s,small pinkie,3.00,9.00,0.0825,0.74,9.74,,,,,
+2025-11-26,10:03:59,,,,,,INVOICE TOTAL - #0001,,,,,9.74,cash,20.00,10.26,RYG8,good job
+,,,,,,,,,,,,,,,,,

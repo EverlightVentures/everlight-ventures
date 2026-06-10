@@ -1,0 +1,72 @@
+{
+  "run_id": "20260602_000301",
+  "timestamp": "2026-06-02T07:03:10.279735+00:00",
+  "mode": "live",
+  "pipeline_elapsed_sec": 8.9,
+  "stages_run": 2,
+  "total_scripts": 4,
+  "total_passed": 4,
+  "total_failed": 0,
+  "stages": [
+    {
+      "stage_id": "followup",
+      "stage_name": "Stage 6: Follow-Up & Nurture",
+      "team_member": "Piper Reeves (Outreach) + Harrison Knox (Deal Closer)",
+      "elapsed_sec": 6.1,
+      "scripts_run": 3,
+      "succeeded": 3,
+      "failed": 0,
+      "skipped": [],
+      "results": [
+        {
+          "status": "success",
+          "returncode": 0,
+          "stdout_lines": 0,
+          "stderr_preview": "[Rex SDR 00:03] Rex SDR starting -- mode: --mode\n[Rex SDR 00:03] Rex SDR complete -- 0 emails sent today\n",
+          "output_preview": "",
+          "script": "rex_sdr.py",
+          "elapsed_sec": 0.8
+        },
+        {
+          "status": "success",
+          "returncode": 0,
+          "stdout_lines": 0,
+          "stderr_preview": "[Rex SDR 00:03] Rex SDR starting -- mode: --mode\n[Rex SDR 00:03] Rex SDR complete -- 0 emails sent today\n",
+          "output_preview": "",
+          "script": "rex_sdr.py",
+          "elapsed_sec": 1.7
+        },
+        {
+          "status": "success",
+          "returncode": 0,
+          "stdout_lines": 0,
+          "stderr_preview": "[Rex Closer 00:03] Processed 0 interested leads\n",
+          "output_preview": "",
+          "script": "rex_closer.py",
+          "elapsed_sec": 3.5
+        }
+      ]
+    },
+    {
+      "stage_id": "report",
+      "stage_name": "Stage 7: Pipeline Report",
+      "team_member": "Charles Dawson (Analytics) + Carlos Moreno (Commission Auditor)",
+      "elapsed_sec": 2.8,
+      "scripts_run": 1,
+      "succeeded": 1,
+      "failed": 0,
+      "skipped": [],
+      "results": [
+        {
+          "status": "success",
+          "returncode": 0,
+          "stdout_lines": 0,
+          "stderr_preview": "[Rex Health 00:03] Running Rex daily health check...\n[Rex Health 00:03] Rex Health Check -- June 02, 2026\n\nEmails sent: 0 seller / 0 buyer\nReplies: 0\nPipeline: 3314 new, 78 contacted (3469 total, 118 with email)\nBuyers: 84 total, 0 qualified, 0 responded\nATTOM: 0/250 calls (0.0%)\nErrors: Dead letters: 8 failed emails\nCron jobs today: none detected\n\nStatus: OK (SDR did not run, 1 error(s))\n[Rex Health 00:03] n8n webhook unreachable: http://127.0.0.1:5678/webhook/SU0qTaKHBX1r3oLX/r/hive-log-to-gdo",
+          "output_preview": "",
+          "script": "rex_health.py",
+          "elapsed_sec": 2.8
+        }
+      ]
+    }
+  ]
+}

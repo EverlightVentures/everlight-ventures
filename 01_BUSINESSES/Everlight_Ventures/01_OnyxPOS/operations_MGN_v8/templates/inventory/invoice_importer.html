@@ -1,0 +1,222 @@
+
+{% extends "base.html" %}
+
+{% block page_title %}Invoice Importer{% endblock %}
+{% block header_emoji %}🧾{% endblock %}
+{% block header_title %}Invoice Importer{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for("inventory") }}" class="btn btn-secondary">
+  <i data-lucide="package" style="width:18px;height:18px;"></i>
+  Back to Inventory
+</a>
+{% endblock %}
+
+{% block content %}
+
+<div class="grid grid-2 gap-4" style="grid-template-columns: 2fr 1fr;">
+  <!-- LEFT: Import Form -->
+  <div class="card animate-in">
+    <div class="card-header">
+      <h2 class="card-title">Import a supplier invoice</h2>
+      <span class="badge badge-info">CSV</span>
+    </div>
+
+    <div class="card-body">
+      <form method="POST" enctype="multipart/form-data" action="{{ action_url|default("#") }}">
+        <div class="grid gap-4" style="grid-template-columns: 1fr 1fr;">
+          <div class="form-group">
+            <label class="form-label">Vendor / Supplier</label>
+            <input class="form-input" type="text" name="vendor" placeholder="e.g., Monrovia" value="{{ vendor|default('') }}" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Invoice #</label>
+            <input class="form-input" type="text" name="invoice_no" placeholder="e.g., INV-10482" value="{{ invoice_no|default('') }}" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Received date</label>
+            <input class="form-input" type="date" name="received_date" value="{{ received_date|default('') }}">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Delimiter</label>
+            <select class="form-select" name="delimiter">
+              <option value="," {% if (delimiter|default(",")) == "," %}selected{% endif %}>Comma (,)</option>
+              <option value=";" {% if (delimiter|default(",")) == ";" %}selected{% endif %}>Semicolon (;)</option>
+              <option value="\t" {% if (delimiter|default(",")) == "\t" %}selected{% endif %}>Tab</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Retail markup</label>
+            <input class="form-input" type="number" step="0.01" min="0" name="retail_markup"
+                   value="{{ retail_markup|default('2.25') }}" placeholder="2.25">
+            <div class="text-muted text-sm" style="margin-top:6px;">
+              Retail price = Wholesale × markup (Default: 2.25)
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Invoice total (optional)</label>
+            <input class="form-input" type="number" step="0.01" min="0" name="invoice_total"
+                   value="{{ invoice_total|default('') }}" placeholder="Leave blank to auto-calc">
+          </div>
+</div>
+
+        <div class="form-group mt-4">
+          <label class="form-label">Invoice CSV file</label>
+          <input class="form-input" type="file" name="invoice_csv" ...>
+          <div class="text-muted text-sm" style="margin-top:8px;">
+            Tip: Export from your supplier system as CSV. Keep headers if possible.
+          </div>
+        </div>
+
+        <div class="grid gap-4 mt-4" style="grid-template-columns: 1fr 1fr;">
+          <label class="btn btn-ghost" style="justify-content:flex-start; border: 1px solid var(--gray-200);">
+            <input type="checkbox" name="update_costs" value="1" {% if update_costs %}checked{% endif %} style="margin-right:10px;">
+            Update item costs (wholesale) from invoice
+          </label>
+
+          <label class="btn btn-ghost" style="justify-content:flex-start; border: 1px solid var(--gray-200);">
+            <input type="checkbox" name="create_lots" value="1" {% if create_lots|default(true) %}checked{% endif %} style="margin-right:10px;">
+            Create lots + receive into inventory
+          </label>
+        </div>
+
+        <div class="mt-4" style="display:flex; gap:12px; align-items:center;">
+          <button type="submit" class="btn btn-primary">
+            <i data-lucide="upload-cloud" style="width:18px;height:18px;"></i>
+            Import Invoice
+          </button>
+
+          <button type="reset" class="btn btn-secondary">
+            <i data-lucide="rotate-ccw" style="width:18px;height:18px;"></i>
+            Reset
+          </button>
+
+          <span class="text-muted text-sm" style="margin-left:auto;">
+            Safe mode: preview-only supported if you wire it in.
+          </span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- RIGHT: Expectations / Format Help -->
+  <div class="card animate-in" style="animation-delay: .08s;">
+    <div class="card-header">
+      <h2 class="card-title">CSV format notes</h2>
+    </div>
+    <div class="card-body">
+      <div class="text-muted" style="line-height: 1.6;">
+        <p style="margin-bottom:10px;">
+          Your importer will be happiest if each row represents an item line.
+        </p>
+
+        <div style="padding:12px; border-radius: var(--radius-sm); background: var(--gray-50); border: 1px solid var(--gray-200);">
+          <div style="font-weight: 600; margin-bottom: 8px;">Common columns</div>
+          <ul style="margin-left:18px;">
+            <li><b>SKU</b> or <b>Item_ID</b></li>
+            <li><b>Description</b> / <b>Name</b></li>
+            <li><b>Qty</b> / <b>Quantity</b></li>
+            <li><b>Unit_Cost</b> / <b>Cost</b></li>
+          </ul>
+        </div>
+
+        <div style="margin-top:14px;">
+          <div style="font-weight: 600; margin-bottom: 6px;">Pro tip</div>
+          <div class="text-muted text-sm">
+            If your supplier uses weird header names, normalize them in the Python importer
+            (map “Item No.” → SKU, etc.).
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if result %}
+<!-- RESULTS -->
+<div class="card mt-6 animate-in">
+  <div class="card-header">
+    <h2 class="card-title">Import results</h2>
+    {% if result.ok %}
+      <span class="badge badge-success">Success</span>
+    {% else %}
+      <span class="badge badge-danger">Needs attention</span>
+    {% endif %}
+  </div>
+
+  <div class="card-body">
+    <div class="grid gap-4" style="grid-template-columns: repeat(4, 1fr);">
+      <div>
+        <div class="text-muted text-sm">Lines processed</div>
+        <div style="font-size:22px; font-weight:700;">{{ result.lines|default(0) }}</div>
+      </div>
+      <div>
+        <div class="text-muted text-sm">Lots created</div>
+        <div style="font-size:22px; font-weight:700;">{{ result.lots_created|default(0) }}</div>
+      </div>
+      <div>
+        <div class="text-muted text-sm">Items updated</div>
+        <div style="font-size:22px; font-weight:700;">{{ result.items_updated|default(0) }}</div>
+      </div>
+      <div>
+        <div class="text-muted text-sm">Errors</div>
+        <div style="font-size:22px; font-weight:700; color: {% if result.errors|default([]) %}#dc2626{% else %}inherit{% endif %};">
+          {{ (result.errors|default([]))|length }}
+        </div>
+      </div>
+    </div>
+
+    {% if result.errors %}
+      <div class="mt-4" style="padding:12px; border-radius: var(--radius-sm); background: #fef2f2; border: 1px solid #fecaca;">
+        <div style="font-weight: 700; color:#b91c1c; margin-bottom:8px;">Errors</div>
+        <ul style="margin-left:18px; color:#7f1d1d;">
+          {% for e in result.errors[:20] %}
+            <li>{{ e }}</li>
+          {% endfor %}
+        </ul>
+        {% if (result.errors|length) > 20 %}
+          <div class="text-muted text-sm" style="margin-top:8px;">Showing first 20…</div>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
+{% if preview_rows %}
+<!-- PREVIEW TABLE -->
+<div class="card mt-6 animate-in">
+  <div class="card-header">
+    <h2 class="card-title">Preview (first {{ preview_rows|length }})</h2>
+    <span class="badge">Read-only</span>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          {% for h in preview_headers %}
+            <th>{{ h }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in preview_rows %}
+          <tr>
+            {% for h in preview_headers %}
+              <td>{{ row[h]|default('') }}</td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

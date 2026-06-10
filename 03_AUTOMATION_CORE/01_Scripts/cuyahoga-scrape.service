@@ -1,0 +1,24 @@
+[Unit]
+Description=Cuyahoga County (Cleveland) free distressed-property scraper
+After=network-online.target hive-django.service
+Wants=network-online.target
+Documentation=file:///home/opc/scripts/cuyahoga_free_scraper.py
+
+[Service]
+Type=oneshot
+User=opc
+Group=opc
+WorkingDirectory=/home/opc/scripts
+Environment=DJANGO_SETTINGS_MODULE=hive_dashboard.settings
+Environment=PYTHONPATH=/home/opc/hive_django
+# Skip-trace is disabled here because Oracle's datacenter IP is challenged
+# by Radaris/etc. Run skip-trace from a residential IP using:
+#   python3 cuyahoga_free_scraper.py --skip-trace-csv <path>
+ExecStart=/usr/bin/python3 /home/opc/scripts/cuyahoga_free_scraper.py --limit 100 --no-skip-trace
+StandardOutput=append:/home/opc/_logs/cuyahoga_scrape.log
+StandardError=append:/home/opc/_logs/cuyahoga_scrape.log
+TimeoutStartSec=3600
+Nice=10
+
+[Install]
+WantedBy=multi-user.target

@@ -266,7 +266,7 @@ def log_cost(provider: str, model: str, input_tokens: int, output_tokens: int):
 # Blinko shared memory
 # ---------------------------------------------------------------------------
 
-BLINKO_URL = "http://129.159.38.250:1111"
+BLINKO_URL = "http://e5-mother:1111"
 
 
 def get_blinko_context(query: str, max_notes: int = 3) -> str:

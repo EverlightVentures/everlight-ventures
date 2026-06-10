@@ -1,0 +1,5 @@
+Date,Time,Transaction_ID,Employee_ID,Employee_Name,Category,Subcategory,Product_Name,Item_Name,SKU,Quantity,Size,Item_Description,Unit_Price,Unit_Cost,COGS_Line,Subtotal,Tax_Rate,Tax_Amount,Line_Total,Payment_Method,Amount_Received,Change_Due,Notes
+2025-12-02,16:41:16,TXN20251202164116,1001,Rich,Animal,Pinkie,,Mouse,ANM-PIN-4020-1201,1,,,7.98,3.99,3.99,7.98,0.0825,0.66,8.64,,,,
+2025-12-02,16:41:16,TXN20251202164116,1001,Rich,,,=== TOTAL ===,,,1,,,7.98,,,,0.0825,0.66,8.64,Cash,10.00,1.36,
+2025-12-02,16:52:39,TXN20251202165239,1001,Rich,Animal,Mouse,,Pinkie,ANM-MOU-9CCC-1201,1,,,7.98,3.99,3.99,7.98,0.0825,0.66,8.64,,,,
+2025-12-02,16:52:39,TXN20251202165239,1001,Rich,,,=== TOTAL ===,,,1,,,7.98,,,,0.0825,0.66,8.64,Cash,10.00,1.36,

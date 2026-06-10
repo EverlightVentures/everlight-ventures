@@ -1,0 +1,90 @@
+#cloud-config
+# ev-box cloud-init -- paste this VERBATIM into the OCI Console
+# Compute -> Instances -> Create Instance -> Advanced -> Management -> Cloud-init script
+#
+# Boots a fresh Ubuntu 22.04 ARM64 VM with:
+#   - All ops + dev + DFIR-lite base packages
+#   - SSH locked to port 2222, key-only, no root login
+#   - UFW firewall (only 2222/tcp + tailscale0 in)
+#   - Tailscale installed (NOT yet authed -- provision.sh handles auth)
+#
+# After cloud-init finishes (~3-4 min), the VM is reachable at:
+#   ssh -p 2222 ubuntu@<public-ip>  (with /root/.ssh/github_deploy key)
+#
+# Then run from the phone:
+#   bash 03_AUTOMATION_CORE/01_Scripts/ev_box/provision.sh <public-ip>
+
+package_update: true
+package_upgrade: true
+
+packages:
+  # Shell + dev essentials
+  - zsh
+  - tmux
+  - mosh
+  - git
+  - curl
+  - wget
+  - jq
+  - python3-pip
+  - python3-venv
+  - rclone
+  - htop
+  - btop
+  - fastfetch
+  - ripgrep
+  - fd-find
+  - fzf
+  # Networking + OSINT toolbox (the cheat-sheet stack)
+  - net-tools
+  - dnsutils
+  - whois
+  - nmap
+  - traceroute
+  - tcpdump
+  - mtr
+  # Security base layer (ufw + fail2ban; DFIR-lite adds osquery/auditd/suricata later)
+  - fail2ban
+  - ufw
+  - unattended-upgrades
+
+write_files:
+  - path: /etc/ssh/sshd_config.d/99-ev-box.conf
+    permissions: '0644'
+    content: |
+      Port 2222
+      PermitRootLogin no
+      PasswordAuthentication no
+      PubkeyAuthentication yes
+      ChallengeResponseAuthentication no
+      UsePAM yes
+      X11Forwarding no
+      MaxAuthTries 3
+      ClientAliveInterval 60
+      ClientAliveCountMax 3
+  - path: /etc/fail2ban/jail.d/sshd.local
+    permissions: '0644'
+    content: |
+      [sshd]
+      enabled = true
+      port = 2222
+      bantime = 24h
+      findtime = 10m
+      maxretry = 3
+      backend = systemd
+
+runcmd:
+  # Firewall: deny by default, allow only ssh/2222 + outgoing
+  - ufw default deny incoming
+  - ufw default allow outgoing
+  - ufw allow 2222/tcp comment 'ssh ev-box'
+  - ufw --force enable
+  # Restart sshd to pick up port 2222 + lockdowns
+  - systemctl restart ssh
+  - systemctl enable --now fail2ban
+  # Auto-security-updates
+  - dpkg-reconfigure -f noninteractive unattended-upgrades
+  # Tailscale install (auth happens in provision.sh so the URL gets posted to Slack)
+  - curl -fsSL https://tailscale.com/install.sh | sh
+  # Mark cloud-init complete for the watcher in provision.sh
+  - touch /var/lib/cloud/ev-box.ready

@@ -1,0 +1,25 @@
+# research_eval_harness budget caps (USD).
+# Tunable. CLI reads on every invocation.
+# Pre-flight: cli.py runs budget.estimate() and aborts if > cap (unless --force-budget).
+# Hard abort fires even with --force-budget.
+
+max_usd_per_run: 5.00
+max_usd_per_paper: 50.00
+daily_cap_usd: 100.00
+hard_abort_usd_per_run: 25.00
+
+# Per-model rough USD-per-1k-token rates (input / output). Used by estimator.
+# Update when Anthropic / OpenAI publish new prices.
+model_prices:
+  claude-opus-4-7:
+    input_per_1k: 0.015
+    output_per_1k: 0.075
+  claude-sonnet-4:
+    input_per_1k: 0.003
+    output_per_1k: 0.015
+  claude-haiku-4-5:
+    input_per_1k: 0.00025
+    output_per_1k: 0.00125
+  gpt-4o:
+    input_per_1k: 0.0025
+    output_per_1k: 0.010

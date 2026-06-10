@@ -1,0 +1,298 @@
+@import "tailwindcss";
+
+/* ============================================================
+   LUCREX OS DESIGN SYSTEM
+   Adopted from xlm-dash command center + extended for Wealth OS.
+   Single source of truth. Domain variants only TINT, never replace.
+   ============================================================ */
+
+@theme {
+  /* Brand Core */
+  --color-bg:           #0a0a0f;
+  --color-card:         #12121a;
+  --color-card-hover:   #1a1a28;
+  --color-surface:      #12121a;
+  --color-elevated:     #1a1a28;
+  --color-border:       #1e1e2e;
+  --color-border-hover: #2a2a3e;
+
+  /* Text */
+  --color-fg:        #e8e8f0;
+  --color-text:      #e8e8f0;
+  --color-muted:     #8888a0;
+  --color-faint:     #55556a;
+
+  /* Accents (xlm-dash palette) */
+  --color-gold-50:   #FAF5E6;
+  --color-gold-100:  #FFF3C4;
+  --color-gold-200:  #FFE082;
+  --color-gold-300:  #FFD740;
+  --color-gold-400:  #FFD740;
+  --color-gold-500:  #FFD740;
+  --color-gold-600:  #FF9100;
+  --color-gold-700:  #B8902F;
+  --color-gold-800:  #604A14;
+  --color-gold-900:  #34280A;
+
+  --color-success:   #00e676;
+  --color-alert:     #ff1744;
+  --color-warn:      #ff9100;
+  --color-intel:     #b388ff;
+  --color-ops:       #448aff;
+  --color-amber:     #ffd740;
+
+  /* Domain accents (lighter tint variants) */
+  --color-domain-wealth:    #FFD740;
+  --color-domain-trading:   #00e676;
+  --color-domain-wholesale: #ff9100;
+  --color-domain-broker:    #448aff;
+  --color-domain-content:   #ec4899;
+  --color-domain-revenue:   #00e676;
+  --color-domain-intel:     #b388ff;
+  --color-domain-hive:      #448aff;
+  --color-domain-arcade:    #f472b6;
+
+  /* Typography */
+  --font-display: "Playfair Display", "Georgia", serif;
+  --font-sans:    "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono:    "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  --shadow-gold:  0 0 24px -4px rgba(255, 215, 64, 0.35);
+  --shadow-glow:  0 0 40px -8px rgba(255, 215, 64, 0.5);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body { min-height: 100dvh; position: relative; }
+
+::selection { background: var(--color-gold-500); color: #000; }
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--color-bg); }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-gold-700); }
+
+/* Domain theme classes */
+.theme-wealth     { --accent: var(--color-domain-wealth); }
+.theme-trading    { --accent: var(--color-domain-trading); }
+.theme-wholesale  { --accent: var(--color-domain-wholesale); }
+.theme-broker     { --accent: var(--color-domain-broker); }
+.theme-content    { --accent: var(--color-domain-content); }
+.theme-revenue    { --accent: var(--color-domain-revenue); }
+.theme-intel      { --accent: var(--color-domain-intel); }
+.theme-hive       { --accent: var(--color-domain-hive); }
+.theme-arcade     { --accent: var(--color-domain-arcade); }
+:root             { --accent: var(--color-gold-500); }
+
+/* ────────────────────────────────────────────────
+   AMBIENT BACKGROUND (xlm-dash signature)
+   ──────────────────────────────────────────────── */
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.01) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.01) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: -1;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.015) 2px,
+    rgba(0,0,0,0.015) 4px
+  );
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ────────────────────────────────────────────────
+   CARDS, GLOWS, METRIC TILES
+   ──────────────────────────────────────────────── */
+
+.card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+  position: relative;
+}
+.card:hover {
+  border-color: var(--color-border-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+.card::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, rgba(255,215,64,0.05), transparent, rgba(100,100,255,0.03));
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  z-index: -1;
+}
+.card:hover::after { opacity: 1; }
+
+.metric-card {
+  background: linear-gradient(135deg, rgba(18,18,26,0.9), rgba(18,18,26,0.6));
+  border: 1px solid rgba(30,30,46,0.5);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+.metric-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--color-gold-500), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.metric-card:hover::before { opacity: 1; }
+.metric-card:hover {
+  border-color: rgba(255, 215, 64, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 215, 64, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Glow utilities */
+.glow-green { text-shadow: 0 0 20px rgba(0, 230, 118, 0.3); }
+.glow-red   { text-shadow: 0 0 20px rgba(255, 23, 68, 0.3); }
+.glow-gold  { text-shadow: 0 0 20px rgba(255, 215, 64, 0.3); }
+
+.glow-green-soft  { box-shadow: 0 0 15px rgba(0, 230, 118, 0.15), inset 0 0 15px rgba(0, 230, 118, 0.05); }
+.glow-red-soft    { box-shadow: 0 0 15px rgba(255, 23, 68, 0.15), inset 0 0 15px rgba(255, 23, 68, 0.05); }
+.glow-gold-soft   { box-shadow: 0 0 15px rgba(255, 215, 64, 0.15), inset 0 0 15px rgba(255, 215, 64, 0.05); }
+.glow-blue-soft   { box-shadow: 0 0 15px rgba(68, 138, 255, 0.15), inset 0 0 15px rgba(68, 138, 255, 0.05); }
+.glow-purple-soft { box-shadow: 0 0 15px rgba(179, 136, 255, 0.15), inset 0 0 15px rgba(179, 136, 255, 0.05); }
+
+/* Gradient text */
+.gradient-gold {
+  background: linear-gradient(135deg, #ffd740, #ff9100);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+.text-gold-gradient {
+  background: linear-gradient(135deg, #FFE082 0%, #FFD740 50%, #FF9100 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ────────────────────────────────────────────────
+   ANIMATIONS
+   ──────────────────────────────────────────────── */
+
+@keyframes pulse-live {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.4; }
+}
+.pulse-live {
+  animation: pulse-live 2s ease-in-out infinite;
+  box-shadow: 0 0 6px rgba(0, 230, 118, 0.4);
+}
+
+@keyframes pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 215, 64, 0.4); }
+  50%      { box-shadow: 0 0 0 8px rgba(255, 215, 64, 0); }
+}
+.animate-pulse-gold { animation: pulse-gold 2s ease-in-out infinite; }
+
+@keyframes price-pulse {
+  0%, 100% { box-shadow: 0 0 4px rgba(255, 215, 64, 0.3); }
+  50%      { box-shadow: 0 0 20px rgba(255, 215, 64, 0.6), 0 0 40px rgba(255, 215, 64, 0.2); }
+}
+.price-pulse { animation: price-pulse 2s ease-in-out infinite; }
+
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(8px) scale(0.99); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.page-enter { animation: pageEnter 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+
+@keyframes breathe {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%      { opacity: 0.8; transform: scale(1.05); }
+}
+.breathing      { animation: breathe 6s ease-in-out infinite; }
+.breathing-slow { animation: breathe 10s ease-in-out infinite; }
+
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.count-up { animation: countUp 0.5s ease-out; }
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-marquee { animation: marquee 60s linear infinite; }
+
+.live-indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00e676;
+  box-shadow: 0 0 8px rgba(0, 230, 118, 0.5);
+  animation: pulse-live 1.5s ease-in-out infinite;
+}
+
+/* ────────────────────────────────────────────────
+   PROSE (markdown rendering for Wealth OS)
+   ──────────────────────────────────────────────── */
+
+.prose-wealth { max-width: none; color: var(--color-fg); }
+.prose-wealth h1, .prose-wealth h2, .prose-wealth h3 {
+  font-family: var(--font-display);
+  color: var(--color-gold-400);
+}
+.prose-wealth h1 { font-size: 2rem; line-height: 1.2; margin-top: 0; margin-bottom: 1rem; font-weight: 600; }
+.prose-wealth h2 { font-size: 1.5rem; line-height: 1.3; margin-top: 2rem; margin-bottom: 0.75rem; font-weight: 600; border-bottom: 1px solid var(--color-border); padding-bottom: 0.5rem; }
+.prose-wealth h3 { font-size: 1.25rem; line-height: 1.4; margin-top: 1.5rem; margin-bottom: 0.5rem; font-weight: 600; }
+.prose-wealth p { line-height: 1.7; margin-bottom: 1rem; }
+.prose-wealth ul, .prose-wealth ol { padding-left: 1.5rem; margin-bottom: 1rem; }
+.prose-wealth li { margin-bottom: 0.25rem; }
+.prose-wealth code { background: var(--color-elevated); padding: 0.125rem 0.375rem; border-radius: 0.25rem; font-family: var(--font-mono); font-size: 0.875em; color: var(--color-gold-300); }
+.prose-wealth pre { background: var(--color-elevated); padding: 1rem; border-radius: 0.5rem; overflow-x: auto; border: 1px solid var(--color-border); }
+.prose-wealth pre code { background: transparent; padding: 0; color: var(--color-fg); }
+.prose-wealth strong { color: var(--color-fg); font-weight: 600; }
+.prose-wealth a { color: var(--color-gold-500); text-decoration: underline; text-underline-offset: 2px; }
+.prose-wealth a:hover { color: var(--color-gold-300); }
+.prose-wealth blockquote { border-left: 3px solid var(--color-gold-500); padding-left: 1rem; margin: 1rem 0; color: var(--color-muted); font-style: italic; }
+.prose-wealth hr { border-color: var(--color-border); margin: 2rem 0; }
+.prose-wealth table { border-collapse: collapse; width: 100%; margin-bottom: 1rem; }
+.prose-wealth th, .prose-wealth td { border: 1px solid var(--color-border); padding: 0.5rem 0.75rem; text-align: left; }
+.prose-wealth th { background: var(--color-elevated); color: var(--color-gold-400); font-weight: 600; }

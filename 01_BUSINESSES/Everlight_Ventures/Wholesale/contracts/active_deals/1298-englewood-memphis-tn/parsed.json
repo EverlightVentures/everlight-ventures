@@ -1,0 +1,15 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=026032%20%2000030",
+  "parsed_at": "2026-05-08T01:19:41+00:00",
+  "parcel_id": "026032  00030",
+  "property_address": "1298  ENGLEWOOD ST",
+  "owner_name": "VAUGHN RAY",
+  "land_use": "- SINGLE FAMILY",
+  "year_built": 1912,
+  "sqft": 1176,
+  "land_appraisal_usd": 4200,
+  "building_appraisal_usd": 34200,
+  "total_appraisal_usd": 38400,
+  "subdivision": null
+}

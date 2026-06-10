@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — Mountain Gardens</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f4f4f5; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .container { width: 100%; max-width: 380px; }
+        .header { text-align: center; margin-bottom: 32px; }
+        .logo { width: 56px; height: 56px; background: #18181b; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 28px; margin: 0 auto 16px; }
+        .header h1 { font-size: 24px; font-weight: 700; color: #18181b; margin-bottom: 4px; }
+        .header p { color: #71717a; }
+        .card { background: white; border: 1px solid #e4e4e7; border-radius: 16px; padding: 28px; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 13px; font-weight: 500; color: #3f3f46; margin-bottom: 8px; }
+        .form-select { width: 100%; padding: 12px 16px; font-size: 15px; border: 1px solid #d4d4d8; border-radius: 10px; background: #fafafa; font-family: inherit; }
+        .form-select:focus { outline: none; border-color: #18181b; background: white; }
+        .pin-display { display: flex; justify-content: center; gap: 12px; margin-bottom: 20px; }
+        .pin-dot { width: 14px; height: 14px; border-radius: 50%; background: #e4e4e7; }
+        .pin-dot.filled { background: #18181b; }
+        .pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .pin-key { aspect-ratio: 1.5; font-size: 22px; font-weight: 600; border: 1px solid #e4e4e7; border-radius: 10px; background: #fafafa; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: inherit; }
+        .pin-key:hover { background: #f4f4f5; }
+        .pin-key:active { background: #e4e4e7; transform: scale(0.98); }
+        .pin-key.clear { background: #fef2f2; border-color: #fecaca; color: #dc2626; font-size: 13px; font-weight: 500; }
+        .pin-key.submit { background: #18181b; color: white; font-size: 13px; font-weight: 500; }
+        .pin-key.zero { grid-column: 2; }
+        #pinInput { position: absolute; opacity: 0; pointer-events: none; }
+        .error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 12px 16px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; }
+        .footer { text-align: center; margin-top: 20px; color: #a1a1aa; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🌿</div>
+            <h1>Mountain Gardens</h1>
+            <p>Sign in to continue</p>
+        </div>
+        <div class="card">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}{% for cat, msg in messages %}<div class="error">{{ msg }}</div>{% endfor %}{% endif %}
+            {% endwith %}
+            <form method="POST" id="loginForm">
+                <div class="form-group">
+                    <label class="form-label">Business</label>
+                    <select name="tenant_id" id="tenantSelect" class="form-select" required onchange="onTenantChange()">
+                        <option value="">Select your business</option>
+                        {% for t in tenants %}
+                        <option value="{{ t.Tenant_ID }}" {% if t.Tenant_ID == selected_tenant %}selected{% endif %}>
+                            {{ t.Name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Employee</label>
+                    <select name="employee_id" id="employeeSelect" class="form-select" required>
+                        <option value="">Select your name</option>
+                        {% for emp in employees %}<option value="{{ emp.Employee_ID }}">{{ emp.Employee_Name }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">PIN</label>
+                    <div class="pin-display">
+                        <div class="pin-dot" id="dot1"></div>
+                        <div class="pin-dot" id="dot2"></div>
+                        <div class="pin-dot" id="dot3"></div>
+                        <div class="pin-dot" id="dot4"></div>
+                    </div>
+                    <input type="password" name="pin" id="pinInput" maxlength="4" required>
+                    <div class="pin-keypad">
+                        <button type="button" class="pin-key" onclick="addDigit('1')">1</button>
+                        <button type="button" class="pin-key" onclick="addDigit('2')">2</button>
+                        <button type="button" class="pin-key" onclick="addDigit('3')">3</button>
+                        <button type="button" class="pin-key" onclick="addDigit('4')">4</button>
+                        <button type="button" class="pin-key" onclick="addDigit('5')">5</button>
+                        <button type="button" class="pin-key" onclick="addDigit('6')">6</button>
+                        <button type="button" class="pin-key" onclick="addDigit('7')">7</button>
+                        <button type="button" class="pin-key" onclick="addDigit('8')">8</button>
+                        <button type="button" class="pin-key" onclick="addDigit('9')">9</button>
+                        <button type="button" class="pin-key clear" onclick="clearPin()">Clear</button>
+                        <button type="button" class="pin-key zero" onclick="addDigit('0')">0</button>
+                        <button type="submit" class="pin-key submit">Sign In</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="footer">Mountain Gardens Nursery & Pet</div>
+        <div class="footer" style="margin-top:6px;">
+            <a href="{{ url_for('signup') }}" style="color:#71717a;text-decoration:none;">Create a business</a>
+        </div>
+    </div>
+    <script>
+        let pin = '';
+        function updateDots() {
+            for (let i = 1; i <= 4; i++) document.getElementById('dot' + i).classList.toggle('filled', i <= pin.length);
+            document.getElementById('pinInput').value = pin;
+        }
+        function addDigit(d) {
+            if (pin.length < 4) { pin += d; updateDots(); }
+            if (
+                pin.length === 4 &&
+                document.getElementById('employeeSelect').value &&
+                document.getElementById('tenantSelect').value
+            ) {
+                setTimeout(() => document.getElementById('loginForm').submit(), 200);
+            }
+        }
+        function clearPin() { pin = ''; updateDots(); }
+        function onTenantChange() {
+            const tenantId = document.getElementById('tenantSelect').value;
+            const url = new URL(window.location.href);
+            if (tenantId) {
+                url.searchParams.set('tenant_id', tenantId);
+            } else {
+                url.searchParams.delete('tenant_id');
+            }
+            window.location.href = url.toString();
+        }
+        document.addEventListener('keydown', e => {
+            if (e.key >= '0' && e.key <= '9') addDigit(e.key);
+            else if (e.key === 'Backspace') { pin = pin.slice(0, -1); updateDots(); }
+        });
+    </script>
+</body>
+</html>

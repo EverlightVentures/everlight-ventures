@@ -1,0 +1,18 @@
+[Unit]
+Description=Gmail Organizer -- continuous inbox classification daemon
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=opc
+Group=opc
+WorkingDirectory=/home/opc
+EnvironmentFile=/etc/default/rex-negotiator
+ExecStart=/usr/bin/python3 /home/opc/gmail_organizer.py --days 1
+StandardOutput=journal
+StandardError=journal
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

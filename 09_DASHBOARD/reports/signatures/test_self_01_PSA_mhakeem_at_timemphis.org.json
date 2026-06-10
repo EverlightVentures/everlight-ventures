@@ -1,0 +1,14 @@
+{
+  "deal_key": "test_self",
+  "doc_id": "01_PSA",
+  "signer_name": "Mikal L. Hakeem",
+  "signer_email": "mhakeem@timemphis.org",
+  "intent_affirmed": true,
+  "signed_at": "2026-05-13T05:11:19.499057Z",
+  "ip": "127.0.0.1",
+  "user_agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36",
+  "document_sha256": "f5a33f980035536dffee5f15744ed14573a75eb257478fdba631895d449bce56",
+  "signature_image_path": "/mnt/sdcard/AA_MY_DRIVE/09_DASHBOARD/reports/deals/test_self/signatures/01_PSA_mhakeem_at_timemphis_org_drawn.png",
+  "signature_image_sha256": "d68a7456f0fcdd0c77defa0790eea01c4f790129e45f400e7c29931d9a36e580",
+  "signature_sha256": "57e778878e15aed36ef6ca1503000f601620575d6d1a3bfa468a14c0e1507638"
+}

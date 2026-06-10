@@ -1,0 +1,549 @@
+#!/usr/bin/env python3
+"""
+pdf_autofill.py -- generate a filled assignment contract for a Deal.
+
+Inputs:
+  - Deal UUID (from Django)  OR an ad-hoc dict via --json
+  - Optional override of buyer/escrow info
+
+Outputs:
+  /home/opc/wholesale_agent/contracts_out/<deal_id>/
+    - assignment.md     (filled markdown, easy to read)
+    - assignment.html   (filled HTML, what gets sent to HelloSign)
+    - assignment.pdf    (filled PDF, for manual sign or attachment)
+
+Placeholder convention: the template uses [SQUARE_BRACKET] tokens. We map
+each token to a value pulled from the Deal/PropertyLead/InvestorBuyer chain
+or from a constants block. Unknown tokens get flagged so we never ship a
+contract with a bracket still in it.
+
+State-aware: the [STATE_EMD_RULES] block fills with state-specific text
+(CA / OH / GA / TX) so the contract is jurisdictionally correct.
+
+Usage:
+  python3 pdf_autofill.py --deal-id <uuid>
+  python3 pdf_autofill.py --json '{"address":"123 Main St", ...}'  # ad-hoc
+  python3 pdf_autofill.py --dry-run --deal-id <uuid>               # log unmapped tokens
+
+Once DOCUMENSO_API_KEY is in env (token from https://sign.everlightventures.io/settings/tokens),
+this script ALSO posts the signature request to self-hosted Documenso and
+updates Deal.agreement_url. Until the key is set, it stops at the file-write
+step. Documenso replaces the original HelloSign integration: same legal
+posture (ESIGN + UETA compliant, court-admissible audit trail), zero monthly
+cost, data stays on Oracle.
+"""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import json
+import logging
+import os
+import re
+import sys
+import urllib.request
+from datetime import datetime, timezone
+from decimal import Decimal
+from pathlib import Path
+
+logging.basicConfig(level=logging.INFO, format="[%(asctime)s] %(message)s",
+                    datefmt="%H:%M:%S")
+log = logging.getLogger("pdf_autofill")
+
+# Bootstrap Django.
+DJANGO_ROOT = "/home/opc/hive_django"
+if not Path(DJANGO_ROOT).exists():
+    DJANGO_ROOT = "/mnt/sdcard/AA_MY_DRIVE/09_DASHBOARD/hive_dashboard"
+sys.path.insert(0, DJANGO_ROOT)
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "hive_dashboard.settings")
+
+import django  # noqa: E402
+
+django.setup()
+
+from broker_ops.models import Deal, DealEvent, PropertyLead, InvestorBuyer  # noqa: E402
+
+TEMPLATE_PATHS = [
+    Path("/home/opc/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/contracts/ASSIGNMENT_CONTRACT_BASE.md"),
+    Path("/home/opc/Broker_OS/contracts/ASSIGNMENT_CONTRACT_BASE.md"),
+    Path("/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/contracts/ASSIGNMENT_CONTRACT_BASE.md"),
+]
+OUT_DIR_BASE = Path("/home/opc/wholesale_agent/contracts_out")
+if not OUT_DIR_BASE.exists():
+    OUT_DIR_BASE = Path("/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/contracts_out")
+
+# Compliance appendix discovery roots. The first existing path wins per state.
+COMPLIANCE_DIRS = [
+    Path("/home/opc/Wholesale/compliance"),
+    Path("/home/opc/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/compliance"),
+    Path("/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/compliance"),
+]
+
+# Per-state appendix file mapping. ANY state-with-active-distress-deal MUST have
+# a row here or contract generation is blocked. CA = CC 1695 (misdemeanor + $25k
+# + treble damages if missing). OH = ORC 1349.61 + 4735.02 unauthorized practice.
+STATE_APPENDIX_FILES = {
+    "CA": "CA_1695_APPENDIX.md",
+    "OH": "OH_DISCLOSURE_APPENDIX.md",
+}
+
+APPENDIX_SEPARATOR = (
+    "\n\n---\n\n"
+    "## STATE-SPECIFIC DISCLOSURE APPENDIX\n\n"
+)
+
+
+def _load_state_appendix(state: str) -> str | None:
+    """Return the markdown content of the state-specific disclosure appendix.
+
+    Maps a 2-letter state code (e.g. "CA", "OH") to the appropriate appendix
+    file under one of the COMPLIANCE_DIRS. Returns None if there is no
+    appendix mapping for the state. Returns None and logs a warning if the
+    mapping exists but the file is missing on disk; callers MUST treat that
+    as a hard block (no contract should ship without disclosures the law
+    requires for a homeowner in distress in that state).
+    """
+    if not state:
+        return None
+    code = state.strip().upper()
+    fname = STATE_APPENDIX_FILES.get(code)
+    if not fname:
+        return None
+    for base in COMPLIANCE_DIRS:
+        candidate = base / fname
+        if candidate.exists():
+            try:
+                return candidate.read_text(encoding="utf-8")
+            except Exception as exc:
+                log.warning(f"failed to read appendix {candidate}: {exc}")
+                return None
+    log.warning(f"appendix file {fname} mapped for {code} but not found in any COMPLIANCE_DIRS")
+    return None
+
+
+def _state_requires_appendix(state: str) -> bool:
+    """True if the lead's state has a known disclosure regime we enforce."""
+    if not state:
+        return False
+    return state.strip().upper() in STATE_APPENDIX_FILES
+
+# Constants (Everlight Ventures party block). When the LLC is formed, replace
+# these with the LLC's record.
+ASSIGNOR_BLOCK = {
+    "ASSIGNOR_ADDRESS": "Everlight Ventures DBA, mailing on file",
+    "ASSIGNOR_PHONE": "(707) 801-0360",
+    "ASSIGNOR_EMAIL": "piper@everlightventures.io",
+}
+
+# State-specific EMD rules text (Justine-approved).
+STATE_EMD_RULES = {
+    "CA": "Per California Civil Code 1057, EMD shall be held by a licensed CA escrow company. Buyer and Seller shall execute mutual release before EMD is disbursed. CA RE Form RPA, paragraph 21A applies. The EMD is fully refundable to Buyer until the inspection contingency is removed in writing.",
+    "OH": "Per ORC 4735, EMD shall be deposited with a licensed Ohio title agency or attorney trust account within 3 business days of execution. Per ORC 5302.30, the Residential Property Disclosure Form shall be delivered to Assignee before EMD is non-refundable.",
+    "GA": "EMD shall be held by a licensed GA closing attorney pursuant to OCGA 44-14-13. Default of EMD shall not exceed actual damages plus reasonable attorney fees, OCGA 13-1-7.",
+    "TX": "EMD shall be held by a TX title company licensed under Texas Insurance Code Chapter 2651. Earnest money is fully refundable until expiration of the option period (TREC paragraph 23).",
+    "FL": "EMD shall be held in trust by a FL Bar member or licensed FL escrow agent pursuant to Florida Statutes 61J2-14.014.",
+    "NC": "WHOLESALE TRANSACTIONS BLOCKED IN NC PER HB 797. DO NOT EXECUTE.",
+    "AZ": "EMD shall be held by a licensed AZ escrow agent under ARS 6-841.",
+    "TN": "EMD shall be held by a TN-licensed title company or attorney trust account.",
+    "MO": "EMD shall be held by a Missouri-licensed title company or attorney escrow account under RSMo 333.030.",
+}
+STATE_EMD_DEFAULT = "EMD shall be held by a state-licensed title or escrow company in accordance with applicable state law. Counsel review required for any state without a Justine-approved EMD clause."
+
+
+def load_template() -> str:
+    for p in TEMPLATE_PATHS:
+        if p.exists():
+            return p.read_text(encoding="utf-8")
+    raise FileNotFoundError("ASSIGNMENT_CONTRACT_BASE.md not found")
+
+
+def deal_to_context(deal: Deal) -> dict[str, str]:
+    """Build the substitution dict from a Deal + its related rows."""
+    ctx = dict(ASSIGNOR_BLOCK)
+
+    lead = getattr(deal, "lead", None)
+    addr = ""
+    seller_name = ""
+    seller_email = ""
+    seller_phone = ""
+    seller_address = ""
+    state = ""
+    county = ""
+    if lead:
+        addr = getattr(lead, "address", "") or ""
+        seller_name = getattr(lead, "name", "") or ""
+        seller_email = getattr(lead, "email", "") or ""
+        seller_phone = getattr(lead, "phone", "") or ""
+        seller_address = addr
+        state = (getattr(lead, "state", "") or "").upper()
+        county = getattr(lead, "county", "") or ""
+
+    ctx.update({
+        "DATE": datetime.now(timezone.utc).strftime("%B %d, %Y"),
+        "PROPERTY_ADDRESS": addr or "[ADDRESS PENDING]",
+        "STATE": state or "[STATE PENDING]",
+        "COUNTY": county or "[COUNTY PENDING -- pull from county assessor]",
+        "LEGAL_DESCRIPTION": "See attached Exhibit A; legal description as recorded in the official records of the county clerk.",
+        "SELLER_NAME": seller_name or "[SELLER NAME PENDING]",
+        "SELLER_ADDRESS": seller_address or "[SELLER ADDRESS PENDING]",
+        # Assignee (buyer) defaults to TBD until Rex matches a buyer
+        "ASSIGNEE_NAME": "[ASSIGNEE NAME -- to be filled at buyer match]",
+        "ASSIGNEE_ADDRESS": "[ASSIGNEE ADDRESS -- to be filled at buyer match]",
+        "ASSIGNEE_PHONE": "[ASSIGNEE PHONE]",
+        "ASSIGNEE_EMAIL": "[ASSIGNEE EMAIL]",
+        "ORIGINAL_CONTRACT_DATE": datetime.now(timezone.utc).strftime("%B %d, %Y"),
+        "ASSIGNMENT_FEE": _fmt_money(getattr(deal, "deal_value", None)),
+        "DEPOSIT_AMOUNT": _fmt_money(_pct(getattr(deal, "deal_value", None), 0.10)),
+        "BALANCE_AMOUNT": _fmt_money(_pct(getattr(deal, "deal_value", None), 0.90)),
+        "EMD_AMOUNT": _fmt_money(getattr(deal, "earnest_money_deposit", None) or _pct(getattr(deal, "deal_value", None), 0.05)),
+        "ESCROW_HOLDER": getattr(deal, "title_company", "") or "[TITLE COMPANY -- pull from /Wholesale/title_companies/SHORTLIST.md]",
+        "STATE_EMD_RULES": STATE_EMD_RULES.get(state, STATE_EMD_DEFAULT),
+    })
+    return ctx
+
+
+def _pct(value, pct: float) -> Decimal | None:
+    if value in (None, ""):
+        return None
+    try:
+        return (Decimal(str(value)) * Decimal(str(pct))).quantize(Decimal("0.01"))
+    except Exception:
+        return None
+
+
+def _fmt_money(v) -> str:
+    if v in (None, "", 0, Decimal("0"), "0", "0.00"):
+        return "[AMOUNT PENDING]"
+    try:
+        return f"{Decimal(str(v)):,.2f}"
+    except Exception:
+        return str(v)
+
+
+def render(template: str, ctx: dict[str, str], dry_run: bool = False) -> tuple[str, list[str]]:
+    """Substitute [TOKEN] placeholders. Returns (filled_text, unmapped_tokens)."""
+    filled = template
+    for key, val in ctx.items():
+        filled = filled.replace(f"[{key}]", str(val))
+    unmapped = sorted(set(re.findall(r"\[([A-Z_][A-Z0-9_]*)\]", filled)))
+    if dry_run and unmapped:
+        log.info(f"unmapped tokens: {unmapped}")
+    return filled, unmapped
+
+
+def md_to_html(md: str) -> str:
+    """Render markdown to a styled HTML page."""
+    try:
+        import markdown as md_lib
+        body = md_lib.markdown(md, extensions=["extra"])
+    except ImportError:
+        # Bare-minimum fallback: pre-formatted text in a code block.
+        body = "<pre>" + md.replace("<", "&lt;").replace(">", "&gt;") + "</pre>"
+    return _HTML_SHELL.replace("{{BODY}}", body)
+
+
+def md_to_pdf(md: str, out_path: Path) -> bool:
+    """Render markdown to PDF via fpdf2. Returns True on success."""
+    try:
+        from fpdf import FPDF
+    except ImportError:
+        log.warning("fpdf2 not installed, skipping PDF output")
+        return False
+
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.set_font("Helvetica", size=10)
+    for line in md.split("\n"):
+        # Skip table separator lines
+        if re.match(r"^[-=_]{3,}$", line.strip()):
+            pdf.ln(2)
+            continue
+        # Light header detection
+        if line.startswith("# "):
+            pdf.set_font("Helvetica", "B", 14)
+            pdf.cell(0, 8, line[2:], new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font("Helvetica", size=10)
+        elif line.startswith("## "):
+            pdf.set_font("Helvetica", "B", 12)
+            pdf.cell(0, 7, line[3:], new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font("Helvetica", size=10)
+        elif line.startswith("### "):
+            pdf.set_font("Helvetica", "B", 11)
+            pdf.cell(0, 6, line[4:], new_x="LMARGIN", new_y="NEXT")
+            pdf.set_font("Helvetica", size=10)
+        else:
+            try:
+                pdf.multi_cell(0, 5, line.encode("latin-1", "replace").decode("latin-1"))
+            except Exception:
+                pdf.multi_cell(0, 5, "")
+    pdf.output(str(out_path))
+    return True
+
+
+def maybe_send_to_documenso(deal: Deal | None, pdf_path: Path) -> str | None:
+    """Submit the filled PDF to self-hosted Documenso for e-sign.
+
+    Documenso runs on Oracle at https://sign.everlightventures.io. Open-source,
+    ESIGN/UETA compliant, recognized by title companies. Replaces HelloSign.
+
+    Auth: DOCUMENSO_API_URL (default https://sign.everlightventures.io/api/v1)
+          DOCUMENSO_API_KEY (Bearer token from /settings/tokens). Until the
+          token is set, this gracefully no-ops.
+
+    Flow:
+      1. POST /documents to create the document shell
+      2. PUT the PDF bytes to the returned uploadUrl
+      3. POST /documents/{id}/send-for-signing to email the signer
+      4. Update Deal.agreement_url with the public signing URL
+    """
+    api_url = os.environ.get(
+        "DOCUMENSO_API_URL",
+        "https://sign.everlightventures.io/api/v1",
+    ).rstrip("/")
+    api_key = os.environ.get("DOCUMENSO_API_KEY", "")
+    if not api_key:
+        log.info("DOCUMENSO_API_KEY not set; skipping e-sign send (PDF still saved locally)")
+        return None
+    if not pdf_path.exists():
+        log.warning("PDF missing, cannot send to Documenso")
+        return None
+    if deal is None or getattr(deal, "lead", None) is None:
+        log.warning("deal/lead missing, cannot determine signer; skipping")
+        return None
+
+    lead = deal.lead
+    seller_email = (getattr(lead, "owner_email", "") or "").strip()
+    seller_name = (getattr(lead, "owner_name", "") or "").strip() or "Seller"
+    if not seller_email:
+        log.warning(f"lead {lead.id} has no owner_email; cannot send for signature")
+        return None
+
+    title = f"Assignment Agreement -- {getattr(lead, 'address', deal.id)}"
+
+    try:
+        # Step 1: create document with one recipient (the seller)
+        create_payload = {
+            "title": title,
+            "recipients": [
+                {"email": seller_email, "name": seller_name, "role": "SIGNER"},
+            ],
+            "meta": {
+                "subject": f"Sign your assignment agreement for {getattr(lead, 'address', '')}",
+                "message": (
+                    "Per our conversation, please review and sign the assignment "
+                    "agreement. The contract is contingent on inspection and your "
+                    "EMD is held by an escrow company until close. Reach out with "
+                    "any questions."
+                ),
+            },
+        }
+        req = urllib.request.Request(
+            f"{api_url}/documents",
+            data=json.dumps(create_payload).encode("utf-8"),
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            doc = json.loads(resp.read().decode("utf-8"))
+        doc_id = doc.get("id") or (doc.get("document") or {}).get("id")
+        upload_url = doc.get("uploadUrl") or doc.get("upload_url")
+        if not doc_id or not upload_url:
+            log.warning(f"Documenso create did not return id+uploadUrl: {doc}")
+            return None
+
+        # Step 2: PUT the PDF bytes to the upload URL (S3-style presigned)
+        with pdf_path.open("rb") as f:
+            put_req = urllib.request.Request(
+                upload_url,
+                data=f.read(),
+                headers={"Content-Type": "application/pdf"},
+                method="PUT",
+            )
+            urllib.request.urlopen(put_req, timeout=60).read()
+
+        # Step 3: send for signature
+        send_req = urllib.request.Request(
+            f"{api_url}/documents/{doc_id}/send-for-signing",
+            data=b"{}",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json",
+            },
+            method="POST",
+        )
+        urllib.request.urlopen(send_req, timeout=30).read()
+
+        signing_url = f"https://sign.everlightventures.io/sign/{doc_id}"
+        log.info(f"Documenso document {doc_id} sent to {seller_email}")
+
+        # Update Deal.agreement_url so the dashboard reflects it
+        try:
+            if hasattr(deal, "agreement_url"):
+                deal.agreement_url = signing_url
+                deal.save(update_fields=["agreement_url"])
+        except Exception as exc:
+            log.warning(f"could not save agreement_url: {exc}")
+
+        return signing_url
+
+    except urllib.error.HTTPError as exc:
+        body = ""
+        try:
+            body = exc.read().decode("utf-8", "replace")[:300]
+        except Exception:
+            pass
+        log.warning(f"Documenso HTTP {exc.code}: {body}")
+        return None
+    except Exception as exc:
+        log.warning(f"Documenso send error: {exc}")
+        return None
+
+
+_HTML_SHELL = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Assignment of Real Estate Purchase Agreement</title>
+<style>
+  body { font-family: Georgia, serif; max-width: 760px; margin: 40px auto; padding: 0 24px; color: #111; line-height: 1.55; }
+  h1 { font-family: 'Playfair Display', Georgia, serif; color: #0A0A0A; border-bottom: 2px solid #D4AF37; padding-bottom: 8px; }
+  h2, h3 { font-family: 'Playfair Display', Georgia, serif; color: #0A0A0A; }
+  blockquote { border-left: 4px solid #D4AF37; background: #fffbe9; padding: 12px 18px; margin: 16px 0; }
+  hr { border: 0; border-top: 1px solid #d0d0d0; margin: 28px 0; }
+  strong { color: #0A0A0A; }
+  pre { background: #f6f6f6; padding: 12px; overflow-x: auto; }
+</style>
+</head>
+<body>
+{{BODY}}
+</body>
+</html>
+"""
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--deal-id", help="UUID of a Deal in the broker_ops DB")
+    ap.add_argument("--json", help="Ad-hoc inline JSON dict for a deal (override / no DB)")
+    ap.add_argument("--dry-run", action="store_true", help="Render but log unmapped tokens; do not write PDF")
+    ap.add_argument("--out-dir", help="Override output directory")
+    args = ap.parse_args()
+
+    template = load_template()
+
+    is_real_deal = False
+    if args.deal_id:
+        try:
+            deal = Deal.objects.select_related("lead").get(id=args.deal_id)
+        except Deal.DoesNotExist:
+            log.error(f"no Deal found with id {args.deal_id}")
+            return 2
+        ctx = deal_to_context(deal)
+        deal_token = str(deal.id)
+        # A --deal-id run without --dry-run means a real contract for a real
+        # homeowner. That is the path that ships to a buyer and creates legal
+        # exposure if disclosures are missing.
+        is_real_deal = not args.dry_run
+    elif args.json:
+        try:
+            data = json.loads(args.json)
+        except json.JSONDecodeError as exc:
+            log.error(f"bad json: {exc}")
+            return 2
+        # Build a minimal stub for the context.
+        ctx = {**ASSIGNOR_BLOCK, **{k: str(v) for k, v in data.items() if v is not None}}
+        for k in ("PROPERTY_ADDRESS", "SELLER_NAME", "STATE"):
+            ctx.setdefault(k, "[PENDING]")
+        deal_token = data.get("id") or "adhoc_" + datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    else:
+        log.error("provide --deal-id or --json")
+        return 2
+
+    # Compliance gate: load state-specific disclosure appendix BEFORE we render.
+    # State codes are uppercased in deal_to_context; --json may pass mixed case.
+    state_code = (ctx.get("STATE", "") or "").strip().upper()
+    appendix_md = _load_state_appendix(state_code)
+
+    if appendix_md is None and is_real_deal:
+        # No appendix for this state. For a real deal that means we have no
+        # vetted disclosure block to attach. CA (CC 1695) and OH (ORC 1349.61)
+        # carry direct statutory penalties; other distress-state regimes likely
+        # do too. Block the build, escalate Justine, do NOT ship.
+        log.warning(
+            f"no compliance appendix for state {state_code!r}; "
+            f"contract generation blocked, escalating Justine."
+        )
+        try:
+            DealEvent.objects.create(
+                deal_id=args.deal_id,
+                event_type="legal_flagged",
+                title=f"Compliance block: missing {state_code} disclosure appendix",
+                detail=(
+                    f"pdf_autofill.py refused to generate the assignment contract "
+                    f"because no state-specific disclosure appendix is registered "
+                    f"for state {state_code!r}. CA (CC 1695) and OH (ORC 1349.61) "
+                    f"have direct statutory penalties for missing disclosures; "
+                    f"any other distress-state regime likely does too. Escalating "
+                    f"to Justine Park to draft and approve the appendix before "
+                    f"this deal moves to signing."
+                ),
+                agent_name="Justine Park",
+                metadata={
+                    "reason": "missing_state_appendix",
+                    "state": state_code,
+                    "script": "pdf_autofill.py",
+                    "escalate_to": "Justine Park (Compliance Gate)",
+                },
+            )
+        except Exception as exc:
+            log.warning(f"could not log DealEvent for compliance block: {exc}")
+        return 3
+
+    filled_md, unmapped = render(template, ctx, dry_run=args.dry_run)
+
+    # If we have an appendix, append it AFTER the placeholder pass so any
+    # tokens inside the appendix render as literal markdown (the appendix is
+    # static legal text, not a template).
+    if appendix_md:
+        filled_md = filled_md.rstrip() + APPENDIX_SEPARATOR + appendix_md.lstrip()
+        log.info(f"attached {state_code} compliance appendix ({len(appendix_md)} bytes)")
+
+    out_root = Path(args.out_dir) if args.out_dir else (OUT_DIR_BASE / deal_token)
+    out_root.mkdir(parents=True, exist_ok=True)
+
+    md_path = out_root / "assignment.md"
+    html_path = out_root / "assignment.html"
+    pdf_path = out_root / "assignment.pdf"
+
+    md_path.write_text(filled_md, encoding="utf-8")
+    log.info(f"wrote {md_path}")
+
+    html_path.write_text(md_to_html(filled_md), encoding="utf-8")
+    log.info(f"wrote {html_path}")
+
+    if not args.dry_run:
+        if md_to_pdf(filled_md, pdf_path):
+            log.info(f"wrote {pdf_path}")
+
+    if unmapped:
+        log.warning(f"{len(unmapped)} unmapped placeholders remain: {unmapped[:8]}{'...' if len(unmapped) > 8 else ''}")
+    else:
+        log.info("all placeholders mapped")
+
+    sig_url = maybe_send_to_documenso(
+        Deal.objects.get(id=args.deal_id) if args.deal_id else None,
+        pdf_path,
+    )
+    if sig_url:
+        log.info(f"Documenso signing URL: {sig_url}")
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

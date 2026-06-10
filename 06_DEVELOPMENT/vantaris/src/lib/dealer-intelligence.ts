@@ -48,7 +48,7 @@ const MOOD_LINES: Record<string, Record<DealerMood, string[]>> = {
     annoyed: ['It happens to the best, sugar. Keep your head up!', 'The comeback is always more fun than the lead!', 'Shake it off! The next hand is yours!'],
     excited: ['I am SCREAMING! This is LEGENDARY!', 'The VIP lounge has NEVER seen anything like this!', 'History! You are making HISTORY right now!'],
   },
-  bacardi: {
+  bcardd: {
     neutral: [
       'The ice waits.', 'Play or leave.', 'Another hand. Another test.',
       'The table does not judge. I do.', 'Sit down. Or walk away. No in between.',
@@ -77,7 +77,7 @@ const MOOD_LINES: Record<string, Record<DealerMood, string[]>> = {
     excited: [
       'I have never said this before. You have impressed the Ice.',
       'The temperature is rising. That should not be possible here.',
-      'Even Bacardi Ice must acknowledge greatness.',
+      'Even $BCARDD Ice must acknowledge greatness.',
       'In twenty years at this table, I can count on one hand the players who played like that.',
       'The frost is cracking. You are doing that. Nobody does that.',
       'Stand up. Look around. This is your moment. Own it.',
@@ -94,21 +94,21 @@ const DEALER_DRAW_LINES: Record<string, string[]> = {
   aria: ['Drawing...', 'Another card for the house.', 'The dealer must hit.'],
   marcus: ['The Shark draws.', 'Let us see what is under here.', 'House takes a card.'],
   kanisha: ['Dealer draws! Drama!', 'Ooh what is coming next?!', 'The suspense!'],
-  bacardi: ['The ice draws.', 'Another card. Cold as always.', 'The house takes what it needs.', 'Drawing. Do not blink.', 'One more from the frost.', 'The deck answers to me.', 'Watch carefully.', 'The ice takes.'],
+  bcardd: ['The ice draws.', 'Another card. Cold as always.', 'The house takes what it needs.', 'Drawing. Do not blink.', 'One more from the frost.', 'The deck answers to me.', 'Watch carefully.', 'The ice takes.'],
 }
 
 const DEALER_BUST_LINES: Record<string, string[]> = {
   aria: ['The house falls. Well played.', 'Dealer busts. The table wins.', 'Over 21 for the house. Fortune smiled on you.'],
   marcus: ['The Shark busted. Do not get used to it.', 'House goes over. Enjoy your chips.', 'That will not happen again.'],
   kanisha: ['DEALER BUSTED! The VIP lounge goes WILD!', 'The house is DOWN! Your chips, superstar!', 'OH NO the house busted! Tonight is YOUR night!'],
-  bacardi: ['The ice cracked. Rare.', 'Dealer busts. It will not happen twice.', 'A flaw in the frost. Take your winnings.', 'Even glaciers break. Once.', 'The house fell. Savor it. It will not happen again.', 'A crack in the ice. Enjoy it while it lasts.', 'Bust. I will remember this hand. And so will you.'],
+  bcardd: ['The ice cracked. Rare.', 'Dealer busts. It will not happen twice.', 'A flaw in the frost. Take your winnings.', 'Even glaciers break. Once.', 'The house fell. Savor it. It will not happen again.', 'A crack in the ice. Enjoy it while it lasts.', 'Bust. I will remember this hand. And so will you.'],
 }
 
 const LOW_CHIPS_LINES: Record<string, string[]> = {
   aria: ['Your stack is getting thin. Perhaps a more conservative approach?', 'Running low. The free chips are always there if you need them.'],
   marcus: ['You are almost tapped. Time to grind or go home.', 'Low stack. Either go big or claim those free chips.'],
   kanisha: ['Ooh, running a little low there! Hit that free chips button, superstar!', 'The lounge has free chips waiting for you, no shame in that!'],
-  bacardi: ['Your stack is melting. Like ice in the sun.', 'Almost gone. The ice table does not give refunds.', 'Running dry. The frost has no sympathy.', 'Your chips are disappearing. The table is hungry.', 'Low funds. The ice smells blood.', 'The cold takes everything eventually.'],
+  bcardd: ['Your stack is melting. Like ice in the sun.', 'Almost gone. The ice table does not give refunds.', 'Running dry. The frost has no sympathy.', 'Your chips are disappearing. The table is hungry.', 'Low funds. The ice smells blood.', 'The cold takes everything eventually.'],
 }
 
 const MILESTONE_LINES: Record<string, Record<number, string>> = {
@@ -130,7 +130,7 @@ const MILESTONE_LINES: Record<string, Record<number, string>> = {
     50: 'FIFTY hands! You are VIP royalty now!',
     100: 'ONE HUNDRED HANDS! Somebody get this legend a plaque!',
   },
-  bacardi: {
+  bcardd: {
     10: 'Ten hands on the ice. Most do not last five.',
     25: 'Twenty-five. You are harder than I thought.',
     50: 'Fifty hands. The ice table has claimed you.',
@@ -164,7 +164,7 @@ const IDLE_LINES: Record<string, string[]> = {
     'The lounge is quiet. Let us change that!',
     'Ready when you are, VIP!',
   ],
-  bacardi: [
+  bcardd: [
     'The ice waits for no one.',
     'Still here? Then play.',
     'Silence at the ice table. That is either wisdom or fear.',
@@ -607,7 +607,7 @@ const NARRATION_LINES: Record<string, Record<string, string[]>> = {
     result_push: ['Push at seat {seat}! Drama!', 'Tied at seat {seat}!'],
     result_bust: ['Seat {seat} busted earlier!', 'Already over at seat {seat}!'],
   },
-  bacardi: {
+  bcardd: {
     fresh_shoe: ['Fresh shoe. The ice is ready.', 'New deck. Play or leave.', 'Eight decks. Freshly cut. The frost begins.', 'Shuffled. The ice table resets for no one.'],
     cards_out: ['Cards.', 'Here.', 'Dealt.', 'The frost delivers.', 'Your fate, face up.'],
     seat_action: ['Seat {seat}.', 'Seat {seat}. Decide.', 'Your move, seat {seat}.', 'Seat {seat}. The ice is watching.', 'Seat {seat}. Do not waste my time.'],

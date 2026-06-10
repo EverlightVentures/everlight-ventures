@@ -18,7 +18,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  *   - Victory celebration animation
  *   - Profile badge/frame
  *
- * Featured breed: Dogo Argentino "Bacardi" (the OG mascot, Mythic tier)
+ * Featured breed: Dogo Argentino "$BCARDD" (the OG mascot, Mythic tier)
  */
 contract AlleyKingzDogs is ERC721, ERC721Enumerable, Ownable {
     uint256 private _nextTokenId = 1;

@@ -1660,7 +1660,7 @@ class BlinkoSearchView(LoginRequiredMixin, TemplateView):
         error = None
 
         if query:
-            blinko_url = getattr(settings, 'BLINKO_API_URL', 'http://129.159.38.250:1111')
+            blinko_url = getattr(settings, 'BLINKO_API_URL', 'http://e5-mother:1111')
             api_url = f'{blinko_url}/api/v1/note/list'
             payload = json.dumps({
                 'searchText': query,
@@ -1937,7 +1937,7 @@ def onboard_submit(request):
         )
         payload = json.dumps({"content": note, "type": 1}).encode()
         req = urllib.request.Request(
-            "http://129.159.38.250:1111/api/v1/note/upsert",
+            "http://e5-mother:1111/api/v1/note/upsert",
             data=payload, method="POST",
             headers={"Content-Type": "application/json"},
         )
@@ -1998,7 +1998,7 @@ DASHBOARD_LINKS = [
     {"name": "Lucrex Trading", "url": "http://129.159.38.250:8502", "icon": "fa-chart-candlestick", "color": "#c9a84c"},
     {"name": "Hive Ops", "url": "http://129.159.38.250:8504", "icon": "fa-gauge-high", "color": "#8b5cf6"},
     {"name": "n8n Workflows", "url": "http://129.159.38.250:5678", "icon": "fa-gears", "color": "#22c55e"},
-    {"name": "Blinko RAG", "url": "http://129.159.38.250:1111", "icon": "fa-brain", "color": "#22d3ee"},
+    {"name": "Blinko RAG", "url": "http://e5-mother:1111", "icon": "fa-brain", "color": "#22d3ee"},
     {"name": "Voice Handler", "url": "http://129.159.38.250:8200", "icon": "fa-microphone", "color": "#f59e0b"},
 ]
 

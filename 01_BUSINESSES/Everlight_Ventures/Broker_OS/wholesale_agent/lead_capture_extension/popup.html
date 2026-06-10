@@ -1,0 +1,38 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<style>
+  :root { --gold:#c9a84c; --bg:#0a0a10; --panel:#14141e; --line:rgba(255,255,255,.08); --text:#e8e8e8; --dim:#8b8b9e; }
+  * { box-sizing:border-box; font-family:'Inter',system-ui,sans-serif; }
+  body { width:340px; margin:0; background:var(--bg); color:var(--text); padding:14px; }
+  .hdr { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+  .hdr b { font-size:14px; letter-spacing:.04em; }
+  .hdr .ev { color:var(--gold); font-weight:800; }
+  .row { display:flex; justify-content:space-between; gap:8px; padding:5px 0; border-bottom:1px solid var(--line); font-size:12px; }
+  .row span:first-child { color:var(--dim); }
+  .row span:last-child { text-align:right; max-width:200px; word-break:break-word; }
+  #score { margin:10px 0; padding:8px 10px; border-radius:8px; font-size:12px; text-align:center; }
+  .btns { display:flex; gap:6px; margin-top:10px; }
+  button { flex:1; padding:8px; border:1px solid var(--line); border-radius:8px; background:var(--panel); color:var(--text); font-size:12px; cursor:pointer; }
+  button.primary { background:linear-gradient(135deg,#c9a84c,#e8c55a); color:#0a0a10; font-weight:700; border:none; }
+  button:active { transform:scale(.97); }
+  #flag { font-size:11px; padding:4px 8px; border-radius:6px; margin-top:6px; text-align:center; }
+  #status { font-size:11px; color:var(--dim); margin-top:8px; min-height:14px; text-align:center; }
+  .muted { color:var(--dim); font-size:11px; }
+</style>
+</head>
+<body>
+  <div class="hdr"><span class="ev">EV</span><b>Lead Capture</b></div>
+  <div id="fields"><p class="muted">Reading this page&hellip;</p></div>
+  <div id="score" style="display:none"></div>
+  <div id="flag" style="display:none"></div>
+  <div class="btns">
+    <button id="copy">Copy</button>
+    <button id="download">Save JSON</button>
+    <button id="send" class="primary">Send to pipeline</button>
+  </div>
+  <div id="status"></div>
+  <script src="popup.js"></script>
+</body>
+</html>

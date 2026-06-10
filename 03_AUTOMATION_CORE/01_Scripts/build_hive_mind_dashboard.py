@@ -40,7 +40,7 @@ OUTPUT = ROOT / "09_DASHBOARD" / "reports" / "HIVE_MIND.html"
 
 # Department -> color
 DEPT_COLORS = {
-    "Claude Corp": "#D4A843",
+    "Claude Corp": "#D4AF37",
     "Gemini Ops": "#6bafff",
     "Codex Labs": "#7ec699",
     "Perplexity Intel": "#a8a3ff",
@@ -52,7 +52,7 @@ DEPT_COLORS = {
     "Disaster Response Desk": "#ff6b6b",
     "Everlight Newsroom": "#c39bff",
     "Product Desk": "#a8a3ff",
-    "Wholesale Desk": "#D4A843",
+    "Wholesale Desk": "#D4AF37",
     "Legal/Compliance Desk": "#ff6b6b",
 }
 
@@ -110,7 +110,7 @@ def list_mcp_tools() -> list[dict]:
 def agent_card(info: dict) -> str:
     name = info.get("name") or info.get("name_raw", "?").replace("_", " ").title()
     dept = info.get("department", "—")
-    color = DEPT_COLORS.get(dept, "#D4A843")
+    color = DEPT_COLORS.get(dept, "#D4AF37")
     role = info.get("role", info.get("snippet", ""))[:140]
     slack = info.get("slack", "")
     email = info.get("email", "")
@@ -159,15 +159,15 @@ def main() -> int:
 
     strip = f"""
 <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0 24px;'>
-  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Agents</div>
     <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>{total_agents}</div>
   </div>
-  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Departments</div>
     <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>{total_depts}</div>
   </div>
-  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>MCP Tools</div>
     <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>{total_tools}</div>
   </div>
@@ -189,8 +189,8 @@ def main() -> int:
     <div style='font-family:Playfair Display,serif;font-size:18px;margin-top:4px;'>Resources Hub &rarr;</div>
     <div style='color:#888;font-size:12px;'>745 free tools, categorized</div>
   </a>
-  <a href='http://127.0.0.1:2701/list_tools' target='_blank' style='display:block;background:#0d0d0d;border-left:3px solid #D4A843;padding:14px 18px;color:#E8E8E8;text-decoration:none;'>
-    <div style='color:#D4A843;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Quick Query</div>
+  <a href='http://127.0.0.1:2701/list_tools' target='_blank' style='display:block;background:#0d0d0d;border-left:3px solid #D4AF37;padding:14px 18px;color:#E8E8E8;text-decoration:none;'>
+    <div style='color:#D4AF37;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Quick Query</div>
     <div style='font-family:Playfair Display,serif;font-size:18px;margin-top:4px;'>MCP HTTP Bridge &rarr;</div>
     <div style='color:#888;font-size:12px;'>Tool catalog (JSON)</div>
   </a>
@@ -199,14 +199,14 @@ def main() -> int:
 <div style='margin:16px 0;'>
   <input id='hivesearch' type='text' placeholder='Search agents -- name, department, role'
          style='width:100%;padding:14px 16px;background:#0d0d0d;color:#E8E8E8;border:1px solid #2a2a2a;
-                border-left:3px solid #D4A843;font-family:Inter,sans-serif;font-size:15px;'>
+                border-left:3px solid #D4AF37;font-family:Inter,sans-serif;font-size:15px;'>
 </div>
 
 <div style='display:flex;flex-wrap:wrap;gap:8px;margin:16px 0;' id='deptfilters'>
-  <button class='dfilter active' data-dept='' style='background:#D4A843;color:#0a0a0a;border:none;padding:6px 14px;font-family:Inter;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;'>ALL</button>
+  <button class='dfilter active' data-dept='' style='background:#D4AF37;color:#0a0a0a;border:none;padding:6px 14px;font-family:Inter;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;'>ALL</button>
 """
     for dept in depts_sorted:
-        c = DEPT_COLORS.get(dept, "#D4A843")
+        c = DEPT_COLORS.get(dept, "#D4AF37")
         strip += (f"<button class='dfilter' data-dept='{esc(dept).lower()}' "
                   f"style='background:#1a1a1a;color:{c};border:1px solid {c};"
                   f"padding:6px 14px;font-family:Inter;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;'>"
@@ -216,7 +216,7 @@ def main() -> int:
     # Sections per dept
     sections = []
     for dept in depts_sorted:
-        c = DEPT_COLORS.get(dept, "#D4A843")
+        c = DEPT_COLORS.get(dept, "#D4AF37")
         sections.append(f"""
 <section class='deptsection' data-dept='{esc(dept).lower()}' style='margin-top:32px;'>
   <h2 style='font-family:Playfair Display,serif;color:{c};font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
@@ -232,14 +232,14 @@ def main() -> int:
     tools_html = ""
     for service, ts in by_service.items():
         tools_list = "".join(
-            f"<div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'>"
-            f"<code style='color:#D4A843;font-size:13px;font-family:JetBrains Mono,monospace;'>{esc(t['name'])}</code>"
+            f"<div style='background:#0d0d0d;border-left:3px solid #D4AF37;padding:10px 14px;margin:6px 0;'>"
+            f"<code style='color:#D4AF37;font-size:13px;font-family:JetBrains Mono,monospace;'>{esc(t['name'])}</code>"
             f"<div style='color:#aaa;font-size:12px;margin-top:4px;'>{esc(t.get('description','')[:200])}</div>"
             f"</div>"
             for t in ts
         )
         tools_html += f"""
-<h3 style='font-family:Playfair Display,serif;color:#D4A843;font-size:18px;margin:18px 0 8px;'>{esc(service)} ({len(ts)} tools)</h3>
+<h3 style='font-family:Playfair Display,serif;color:#D4AF37;font-size:18px;margin:18px 0 8px;'>{esc(service)} ({len(ts)} tools)</h3>
 {tools_list}
 """
 
@@ -269,9 +269,9 @@ def main() -> int:
   }
   box.addEventListener('input', applyFilter);
   filters.forEach(f => f.addEventListener('click', () => {
-    filters.forEach(x => { x.classList.remove('active'); x.style.background='#1a1a1a'; x.style.color = x.style.borderColor || '#D4A843'; });
+    filters.forEach(x => { x.classList.remove('active'); x.style.background='#1a1a1a'; x.style.color = x.style.borderColor || '#D4AF37'; });
     f.classList.add('active');
-    f.style.background = '#D4A843';
+    f.style.background = '#D4AF37';
     f.style.color = '#0a0a0a';
     activeDept = f.dataset.dept;
     applyFilter();
@@ -289,11 +289,11 @@ Resources Hub, or click any agent for their firmware.
 {strip}
 {''.join(sections)}
 
-<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:24px;margin:48px 0 12px;border-bottom:2px solid #D4A843;padding-bottom:8px;'>
+<h2 style='font-family:Playfair Display,serif;color:#D4AF37;font-size:24px;margin:48px 0 12px;border-bottom:2px solid #D4AF37;padding-bottom:8px;'>
   MCP HTTP Bridge -- Tool Catalog
 </h2>
 <p style='color:#888;font-size:13px;margin-bottom:16px;'>
-Every tool callable from cron / Workers / scripts via POST <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;'>http://127.0.0.1:2701/tool/&#123;service&#125;/&#123;tool_name&#125;</code>.
+Every tool callable from cron / Workers / scripts via POST <code style='background:#1a1a1a;color:#D4AF37;padding:2px 6px;'>http://127.0.0.1:2701/tool/&#123;service&#125;/&#123;tool_name&#125;</code>.
 Same Python dispatchers as the stdio MCP path used by Claude Code.
 </p>
 {tools_html}

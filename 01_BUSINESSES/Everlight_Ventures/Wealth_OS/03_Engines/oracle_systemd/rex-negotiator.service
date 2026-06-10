@@ -1,0 +1,20 @@
+[Unit]
+Description=Rex Negotiator IMAP reply watcher and auto-negotiation engine
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=opc
+Group=opc
+WorkingDirectory=/home/opc/wholesale_agent
+EnvironmentFile=/home/opc/.env
+Environment="IMAP_USER=1m.rich.gee@gmail.com"
+Environment="PYTHONUNBUFFERED=1"
+ExecStart=/usr/bin/python3 /home/opc/wholesale_agent/rex_negotiator.py
+StandardOutput=append:/home/opc/_logs/rex_negotiator.log
+StandardError=append:/home/opc/_logs/rex_negotiator.log
+TimeoutStartSec=120
+
+[Install]
+WantedBy=multi-user.target

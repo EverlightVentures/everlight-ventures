@@ -1,0 +1,388 @@
+
+{% extends "base.html" %}
+
+{% block page_title %}Lots: {{ item.get('Item_Name', 'Unknown') }}{% endblock %}
+{% block header_emoji %}📦{% endblock %}
+{% block header_title %}Inventory Lots{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('inventory') }}" class="btn btn-secondary">
+    <i data-lucide="arrow-left"></i>
+    Back to Inventory
+</a>
+{% if item and item.get('SKU') %}
+<a href="{{ url_for('edit_inventory', sku=item.get('SKU')) }}" class="btn btn-secondary">
+    <i data-lucide="edit"></i>
+    Edit Item
+</a>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(160deg, #0f1f17 0%, #0a1810 40%, #0f1f17 100%);
+    }
+
+    .page-grid {
+        display: grid;
+        gap: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* Item Header */
+    .item-header {
+        background: linear-gradient(145deg, #1e3a2a 0%, #162b1f 100%);
+        border: 1px solid rgba(167, 243, 208, 0.12);
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .item-icon {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        flex-shrink: 0;
+    }
+
+    .item-meta h2 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #e8f5ee;
+        margin-bottom: 8px;
+    }
+
+    .item-stats {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+    }
+
+    .item-stat {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .item-stat .label {
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .item-stat .value {
+        font-size: 14px;
+        font-weight: 700;
+        color: #34d399;
+        font-family: 'Space Mono', monospace;
+    }
+
+    /* Panel */
+    .panel {
+        background: linear-gradient(145deg, #1e3a2a 0%, #162b1f 100%);
+        border: 1px solid rgba(167, 243, 208, 0.12);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .panel-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.1);
+        background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .panel-header h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #e8f5ee;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .panel-body {
+        padding: 20px 24px;
+    }
+
+    .lot-count {
+        background: rgba(16,185,129,0.15);
+        color: #34d399;
+        padding: 4px 12px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    /* Lots Table */
+    .lots-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .lots-table th {
+        text-align: left;
+        padding: 14px 16px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.1);
+    }
+
+    .lots-table td {
+        padding: 16px;
+        font-size: 14px;
+        color: #e8f5ee;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.06);
+    }
+
+    .lots-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .lots-table tr:hover {
+        background: rgba(16,185,129,0.05);
+    }
+
+    .lot-id {
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        color: #94a3b8;
+    }
+
+    .lot-qty {
+        font-family: 'Space Mono', monospace;
+        font-weight: 700;
+        color: #34d399;
+    }
+
+    .lot-qty.low {
+        color: #fbbf24;
+    }
+
+    .lot-qty.out {
+        color: #fb7185;
+    }
+
+    .lot-cost {
+        font-family: 'Space Mono', monospace;
+        color: #e8f5ee;
+    }
+
+    .lot-date {
+        color: #94a3b8;
+        font-size: 13px;
+    }
+
+    .lot-supplier {
+        color: #94a3b8;
+    }
+
+    .lot-notes {
+        color: #64748b;
+        font-size: 13px;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .btn-edit {
+        padding: 6px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        background: rgba(56,189,248,0.15);
+        color: #38bdf8;
+        border: 1px solid rgba(56,189,248,0.3);
+        border-radius: 6px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .btn-edit:hover {
+        background: rgba(56,189,248,0.25);
+    }
+
+    /* Summary Cards */
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    @media (max-width: 900px) {
+        .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 500px) {
+        .summary-grid { grid-template-columns: 1fr; }
+    }
+
+    .summary-card {
+        background: rgba(0,0,0,0.2);
+        border: 1px solid rgba(167, 243, 208, 0.08);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+    }
+
+    .summary-card .value {
+        font-size: 24px;
+        font-weight: 800;
+        color: #34d399;
+        font-family: 'Space Mono', monospace;
+    }
+
+    .summary-card .label {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 4px;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #64748b;
+    }
+
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+
+    .table-wrap {
+        overflow-x: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-grid">
+    <!-- Item Header -->
+    <div class="item-header">
+        <div class="item-icon">📦</div>
+        <div class="item-meta">
+            <h2>{{ item.get('Item_Name', 'Unknown Item') }}</h2>
+            <div class="item-stats">
+                <div class="item-stat">
+                    <span class="label">SKU:</span>
+                    <span class="value">{{ item.get('SKU', '—') }}</span>
+                </div>
+                <div class="item-stat">
+                    <span class="label">Category:</span>
+                    <span class="value" style="color: #94a3b8;">{{ item.get('Category', '—') }}</span>
+                </div>
+                <div class="item-stat">
+                    <span class="label">Total On Hand:</span>
+                    <span class="value">{{ stock }}</span>
+                </div>
+                <div class="item-stat">
+                    <span class="label">Avg Cost:</span>
+                    <span class="value">${{ "%.2f"|format(avg_cost or 0) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    {% if lots %}
+    <div class="summary-grid">
+        <div class="summary-card">
+            <div class="value">{{ lots|length }}</div>
+            <div class="label">Total Lots</div>
+        </div>
+        <div class="summary-card">
+            <div class="value">{{ stock }}</div>
+            <div class="label">Units On Hand</div>
+        </div>
+        <div class="summary-card">
+            <div class="value">${{ "%.2f"|format(avg_cost or 0) }}</div>
+            <div class="label">Avg Unit Cost</div>
+        </div>
+        <div class="summary-card">
+            {% set total_value = (stock|float) * (avg_cost|float) %}
+            <div class="value">${{ "%.2f"|format(total_value) }}</div>
+            <div class="label">Total Value</div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Lots Table -->
+    <div class="panel">
+        <div class="panel-header">
+            <h3>📋 Lot Details</h3>
+            {% if lots %}
+            <span class="lot-count">{{ lots|length }} lot{{ 's' if lots|length != 1 else '' }}</span>
+            {% endif %}
+        </div>
+        <div class="panel-body" style="padding: 0;">
+            {% if lots and lots|length %}
+            <div class="table-wrap">
+                <table class="lots-table">
+                    <thead>
+                        <tr>
+                            <th>Lot ID</th>
+                            <th>Received</th>
+                            <th>Supplier</th>
+                            <th>Invoice</th>
+                            <th>Unit Cost</th>
+                            <th>Qty Remaining</th>
+                            <th>Expiry</th>
+                            <th>Notes</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lot in lots %}
+                        {% set qty = (lot.get('Qty_Remaining', 0)|float)|int %}
+                        <tr>
+                            <td class="lot-id">{{ lot.get('Lot_ID', '—') }}</td>
+                            <td class="lot-date">{{ lot.get('Received_Date', '—') }}</td>
+                            <td class="lot-supplier">{{ lot.get('Supplier', '—') }}</td>
+                            <td>{{ lot.get('Invoice_Ref', '—') }}</td>
+                            <td class="lot-cost">${{ "%.2f"|format(lot.get('Unit_Cost', 0)|float) }}</td>
+                            <td class="lot-qty {% if qty == 0 %}out{% elif qty < 5 %}low{% endif %}">
+                                {{ qty }}
+                            </td>
+                            <td class="lot-date">{{ lot.get('Expiry_Date', '—') or '—' }}</td>
+                            <td class="lot-notes" title="{{ lot.get('Notes', '') }}">{{ lot.get('Notes', '—') or '—' }}</td>
+                            <td>
+                                <a href="{{ url_for('edit_inventory', sku=item.get('SKU')) }}" class="btn-edit">Edit</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <h4>No Lots Found</h4>
+                <p>This item has no inventory lots recorded.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

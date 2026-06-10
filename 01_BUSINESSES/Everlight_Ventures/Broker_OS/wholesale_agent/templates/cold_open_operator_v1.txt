@@ -1,0 +1,63 @@
+## Operator-register cold-open -- Piper Reeves
+## Use when classifier returns `operator` (multi-deed investor / fellow operator seller).
+## Token replacement: {first_name}, {property_address_short}, {locale_paper_descriptor}
+## locale_paper_descriptor examples:
+##   Shelby County (Memphis)    "Memphis paper"
+##   Fulton County (Atlanta)    "Fulton County paper"
+##   Harris County (Houston)    "Harris County paper"
+##   Cuyahoga (Cleveland)       "Cleveland paper"
+##   default                    "transactional paper"
+
+Subject: {property_address_short}
+
+{first_name},
+
+Piper Reeves with Everlight Ventures. Pulled the deed history on {property_address_short}. You've done plenty of {locale_paper_descriptor} over the years, so I'll skip the explanation.
+
+We buy {locale_city_or_region} properties direct, cash, no agents.
+
+For {property_address_short}:
+* Cash close on your timeline.
+* Property purchased as is.
+* Back tax handled at the title firm, not your check.
+* All paperwork by email and electronic signature.
+
+Worth ten minutes this week?
+
+If not, just reply STOP and I'm gone.
+
+Piper Reeves
+Outreach Coordinator, Everlight Ventures
+piper@everlightventures.io
+
+## End template.
+##
+## Brand-rule audit on this template (verified by Style Enforcer 2026-05-15):
+##   - Zero em-dashes
+##   - Zero non-whitelist hyphens
+##   - Zero entries from universal phrase blacklist
+##   - Zero statutory initialisms (RESPA / SB 909 / FCRA / TCPA)
+##   - One verified signal in first 2 lines (deed history reference)
+##   - One ask, one line (CTA)
+##   - STOP language present
+##   - Sender = Piper (per canonical_team_roster_v2)
+##
+## Renderer must:
+##   1. Resolve {locale_paper_descriptor} from county lookup based on property zip
+##   2. Resolve {locale_city_or_region} ditto
+##   3. Truncate property_address to street + suffix only (no city/state/zip in subject)
+##   4. Pass through content_tools.branded_mailer.send_branded_email with:
+##        from_name="Piper Reeves"
+##        from_email="piper@everlightventures.io"
+##        agent_name="Piper Reeves"
+##        agent_title="Outreach Coordinator"
+##        recipient_register="operator"
+##        cold_open_check=True
+##        stage="cold_open"
+##        budget_category="bulk"
+##
+## Sibling templates to build (TBD):
+##   cold_open_warm_v1.txt          -- distressed homeowner Piper register
+##   cold_open_peer_v1.txt          -- Henry to cash buyer (Chris @ Mid-South etc.)
+##   cold_open_consultative_v1.txt  -- AI Consulting prospect
+##   cold_open_professional_v1.txt  -- vendor / title firm / regulator

@@ -6,6 +6,7 @@ Blocks unsafe shell patterns, writes outside allowed roots, and em-dash content.
 
 import json
 import re
+import subprocess
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -17,6 +18,14 @@ MEMORY_DIR = Path("/root/.claude/projects/-mnt-sdcard-AA-MY-DRIVE/memory").resol
 ALLOWED_ROOTS = [WORKSPACE, Path("/tmp").resolve(), MEMORY_DIR]
 LOG_DIR = WORKSPACE / "_logs" / "claude_hooks"
 LOG_FILE = LOG_DIR / "pretool.jsonl"
+
+# Photo guard. Reads of raw photos outside /tmp/claude_photos/ have crashed
+# claude with glibc malloc assertions under swap pressure. We intercept here.
+PHOTO_EXTS = frozenset({".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif", ".bmp", ".tiff", ".tif"})
+PHOTO_SAFE_DIR = Path("/tmp/claude_photos").resolve()
+PHOTO_PASSTHROUGH_BYTES = 256 * 1024          # under this: allow as-is
+PHOTO_AUTORESIZE_MAX_BYTES = 8 * 1024 * 1024  # over this: hard block
+PHOTO_PREP_SCRIPT = WORKSPACE / "03_AUTOMATION_CORE" / "01_Scripts" / "claude_photo_prep.py"
 
 # Workspace-root whitelist (enforced 2026-05-17). MUST match
 # 03_AUTOMATION_CORE/01_Scripts/workspace_root_audit.py and the cloud routine
@@ -187,10 +196,91 @@ def _allow(data: dict[str, Any]) -> int:
     return 0
 
 
+def _photo_gate(path_text: str) -> tuple[str, str | None]:
+    """Return (reason_or_empty, severity). severity is None|'autoprep'|'block'.
+
+    None     -> not a photo / small enough / already in safe dir; let it pass.
+    'autoprep' -> ran prep, tell claude to Read the new path instead.
+    'block'  -> too big to safely auto-resize; refuse and instruct manual /photo --full.
+    """
+    try:
+        p = Path(path_text)
+        if not p.is_absolute():
+            p = (WORKSPACE / p).resolve()
+        else:
+            p = p.resolve()
+    except Exception:
+        return "", None
+    if p.suffix.lower() not in PHOTO_EXTS:
+        return "", None
+    if not p.is_file():
+        return "", None
+    if str(p).startswith(str(PHOTO_SAFE_DIR) + "/") or p == PHOTO_SAFE_DIR:
+        return "", None
+    try:
+        size = p.stat().st_size
+    except OSError:
+        return "", None
+    if size <= PHOTO_PASSTHROUGH_BYTES:
+        return "", None
+    if size > PHOTO_AUTORESIZE_MAX_BYTES:
+        return (
+            f"Blocked Read on {p} ({size/1_048_576:.1f} MB). Over 8 MB hard limit -- "
+            "loading this into the model context has crashed claude with glibc malloc "
+            "assertions under swap pressure. Run /photo --full <path> explicitly if you "
+            "need pixel-perfect, otherwise shrink first with "
+            f"python3 {PHOTO_PREP_SCRIPT} '{p}' and Read the PATH: line from its stdout.",
+            "block",
+        )
+    # Auto-prep range (256 KB - 8 MB). Run prep now so claude can just Read the small version.
+    try:
+        prep = subprocess.run(
+            ["python3", str(PHOTO_PREP_SCRIPT), str(p)],
+            capture_output=True, text=True, timeout=30,
+        )
+    except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+        return (
+            f"Blocked Read on {p} ({size/1_048_576:.1f} MB). Could not auto-prep ({e}). "
+            f"Run python3 {PHOTO_PREP_SCRIPT} '{p}' manually and Read its PATH: output.",
+            "block",
+        )
+    if prep.returncode != 0:
+        return (
+            f"Blocked Read on {p} ({size/1_048_576:.1f} MB). Photo prep failed: "
+            f"{prep.stderr.strip()[:300]}",
+            "block",
+        )
+    new_path = None
+    for line in prep.stdout.splitlines():
+        if line.startswith("PATH: "):
+            new_path = line[6:].strip()
+            break
+    if not new_path:
+        return (
+            f"Blocked Read on {p}. Prep produced no PATH: line.",
+            "block",
+        )
+    new_size = Path(new_path).stat().st_size if Path(new_path).exists() else 0
+    return (
+        f"Blocked direct Read on {p} ({size/1_048_576:.1f} MB) to avoid glibc heap-assertion "
+        f"crashes on this PRoot/swap-pressured host. I already prepared a safe resized copy at "
+        f"{new_path} ({new_size/1024:.0f} KB). Read that path instead. If you genuinely need "
+        f"full resolution, run /photo --full '{p}' and Read its PATH: output.",
+        "autoprep",
+    )
+
+
 def main() -> int:
     data = _get_input()
     tool_name = (data.get("tool_name") or data.get("toolName") or "").strip()
     tool_input = data.get("tool_input") or data.get("toolInput") or {}
+
+    if tool_name == "Read":
+        path_text = str(tool_input.get("file_path") or tool_input.get("path") or "")
+        if path_text:
+            reason, severity = _photo_gate(path_text)
+            if severity is not None:
+                return _deny(data, reason)
 
     if tool_name == "Bash":
         command = str(tool_input.get("command") or "")

@@ -143,7 +143,7 @@ def hive_doctrine_summary() -> str:
 - Slack -> `content_tools.branded_slack.post_branded_slack()` for anything human-readable.
 - Reports -> `content_tools.n8n_replacements.publish_gdoc()` (HTML + Google Doc + Slack card).
 - Calendar -> `content_tools.branded_calendar.render_event_description()`.
-- Brand palette source of truth: `content_tools/report_template.py` (gold #D4A843, dark #0A0A0A).
+- Brand palette source of truth: `content_tools/report_template.py` (gold #D4AF37, dark #0A0A0A).
 
 ## Hard Laws
 - No em-dash or single-hyphen in outbound copy. Use comma, colon, parentheses.

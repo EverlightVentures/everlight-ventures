@@ -1,0 +1,83 @@
+name: Build TUI Binaries
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            platform: darwin
+            arch: arm64
+          - os: macos-13
+            platform: darwin
+            arch: x64
+          - os: ubuntu-latest
+            platform: linux
+            arch: x64
+          - os: windows-latest
+            platform: windows
+            arch: x64
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ArtemShatokhin/agentswarm-cli
+          ref: aaaa4557178e54ad88ec839345d411cf7cace76e
+          path: agentswarm-cli
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          # Bun 1.3.12 produces a darwin-arm64 binary that exits 137 during smoke test.
+          bun-version: "1.3.11"
+
+      - name: Install dependencies
+        working-directory: agentswarm-cli
+        run: bun install
+
+      - name: Build binary
+        working-directory: agentswarm-cli/packages/opencode
+        run: bun run script/build.ts --single --skip-install
+
+      - name: Rename binary (Unix)
+        if: matrix.platform != 'windows'
+        run: |
+          mv agentswarm-cli/packages/opencode/dist/agentswarm-cli-${{ matrix.platform }}-${{ matrix.arch }}/bin/agentswarm \
+             agentswarm-${{ matrix.platform }}-${{ matrix.arch }}
+
+      - name: Rename binary (Windows)
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          Move-Item agentswarm-cli/packages/opencode/dist/agentswarm-cli-${{ matrix.platform }}-${{ matrix.arch }}/bin/agentswarm.exe `
+            agentswarm-${{ matrix.platform }}-${{ matrix.arch }}.exe
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: agentswarm-${{ matrix.platform }}-${{ matrix.arch }}
+          path: agentswarm-${{ matrix.platform }}-${{ matrix.arch }}${{ matrix.platform == 'windows' && '.exe' || '' }}
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lucrex Command Center :: 2700</title>
+<style>
+  :root { --gold:#D4AF37; --dark:#0A0A0A; --light:#E8E8E8; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--dark); color:var(--light);
+         font-family:Inter,system-ui,-apple-system,sans-serif;
+         min-height:100vh; display:flex; align-items:center; justify-content:center; padding:24px; }
+  .card { max-width:680px; width:100%; border:1px solid rgba(212,168,67,.35);
+          border-radius:14px; padding:40px; background:linear-gradient(180deg,#111 0%,#0A0A0A 100%); }
+  .wordmark { font-family:"Playfair Display",Georgia,serif; color:var(--gold);
+              font-size:13px; letter-spacing:3px; text-transform:uppercase; opacity:.8; }
+  h1 { font-family:"Playfair Display",Georgia,serif; font-size:34px; margin:10px 0 4px; color:#fff; }
+  .sub { color:var(--gold); font-size:14px; margin-bottom:24px; }
+  .status { display:inline-block; padding:4px 12px; border-radius:999px;
+            background:rgba(212,168,67,.12); border:1px solid rgba(212,168,67,.4);
+            color:var(--gold); font-size:12px; letter-spacing:1px; }
+  ul { margin:22px 0 0; padding-left:18px; line-height:1.9; color:#cfcfcf; font-size:14px; }
+  code { background:#1c1c1c; padding:2px 7px; border-radius:5px; color:var(--gold); font-size:13px; }
+  .foot { margin-top:26px; padding-top:16px; border-top:1px solid #222; color:#777; font-size:12px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="wordmark">Everlight Ventures</div>
+    <h1>Lucrex Command Center</h1>
+    <div class="sub">127.0.0.1:2702 -- rehomed off the dead Oracle mother</div>
+    <span class="status">STATUS: awaiting build artifacts</span>
+    <ul>
+      <li>This slot is <strong>live and reserved</strong>. The full Next.js app is not yet serving.</li>
+      <li>The phone cannot build it: package-manager installs segfault under proot. node itself runs fine.</li>
+      <li>Build path: <code>bash serve_lucrex.sh build-remote</code> (builds on e5-mother, pulls artifacts back).</li>
+      <li>Then it serves here for real via <code>next start -p 2702</code> (pure node, no install on phone).</li>
+    </ul>
+    <div class="foot">Served by serve_lucrex.sh placeholder mode. Private by default (127.0.0.1).</div>
+  </div>
+</body>
+</html>

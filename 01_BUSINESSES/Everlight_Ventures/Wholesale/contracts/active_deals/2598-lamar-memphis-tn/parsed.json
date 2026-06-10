@@ -1,0 +1,15 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=047071%20%2000021",
+  "parsed_at": "2026-05-08T02:10:20+00:00",
+  "parcel_id": "047071  00021",
+  "property_address": "2598  LAMAR AVE",
+  "owner_name": "CRAINE JERRY",
+  "land_use": "- STORE-RETAIL",
+  "year_built": 1976,
+  "sqft": null,
+  "land_appraisal_usd": 63500,
+  "building_appraisal_usd": 900,
+  "total_appraisal_usd": 64400,
+  "subdivision": null
+}

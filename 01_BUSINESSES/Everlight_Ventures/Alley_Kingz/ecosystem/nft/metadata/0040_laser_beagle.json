@@ -1,0 +1,144 @@
+{
+  "name": "Alley Kingz #0040 Laser Beagle",
+  "symbol": "BCARDI",
+  "description": "Laser Beagle, a Rare Structure in the K9 Circuitry. The Beagle pilots the Beagle Rig -- turret-utility rig -- mounted gun, drone bay, rail platform. Signature move: \"Overheat\". A playable Alley Kingz battle card on Solana -- the NFT is the card, with gameplay stats written on-chain. Cosmetic art plus gameplay stats; in-game items are for entertainment and utility, not investments. No promised returns.",
+  "image": "ipfs://<IMAGE_CID_DIR>/0040_laser_beagle.png",
+  "animation_url": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_LaserBeagle_Beagle_Seedance_V1.mp4",
+  "external_url": "https://everlightventures.io/cards/0040",
+  "attributes": [
+    {
+      "trait_type": "Card Number",
+      "value": "0040"
+    },
+    {
+      "trait_type": "Faction",
+      "value": "K9 Circuitry"
+    },
+    {
+      "trait_type": "Faction Id",
+      "value": "k9_circuitry"
+    },
+    {
+      "trait_type": "Breed",
+      "value": "Beagle"
+    },
+    {
+      "trait_type": "Name",
+      "value": "Laser Beagle"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Structure"
+    },
+    {
+      "trait_type": "Cost",
+      "value": 4
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Turret"
+    },
+    {
+      "trait_type": "HP",
+      "value": 1000
+    },
+    {
+      "trait_type": "Damage",
+      "value": 90
+    },
+    {
+      "trait_type": "Attack Speed",
+      "value": 1.1
+    },
+    {
+      "trait_type": "Move Speed",
+      "value": 0.0
+    },
+    {
+      "trait_type": "Range",
+      "value": 5
+    },
+    {
+      "trait_type": "Ability",
+      "value": "Overheat"
+    },
+    {
+      "trait_type": "Ability Cooldown",
+      "value": 12
+    },
+    {
+      "trait_type": "Queen Target",
+      "value": false
+    },
+    {
+      "trait_type": "Rig",
+      "value": "Beagle Rig"
+    },
+    {
+      "trait_type": "Rig Class",
+      "value": "turret_util"
+    },
+    {
+      "trait_type": "Weapon Mod",
+      "value": "incendiary"
+    }
+  ],
+  "properties": {
+    "category": "video",
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "files": [
+      {
+        "uri": "ipfs://<IMAGE_CID_DIR>/0040_laser_beagle.png",
+        "type": "image/png"
+      },
+      {
+        "uri": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_LaserBeagle_Beagle_Seedance_V1.mp4",
+        "type": "video/mp4"
+      }
+    ]
+  },
+  "onchain_attributes": [
+    {
+      "key": "hp",
+      "value": "1000"
+    },
+    {
+      "key": "damage",
+      "value": "90"
+    },
+    {
+      "key": "attack_speed",
+      "value": "1.1"
+    },
+    {
+      "key": "move_speed",
+      "value": "0.0"
+    },
+    {
+      "key": "range",
+      "value": "5"
+    },
+    {
+      "key": "cost",
+      "value": "4"
+    },
+    {
+      "key": "rarity",
+      "value": "Rare"
+    },
+    {
+      "key": "ability_id",
+      "value": "overheat"
+    },
+    {
+      "key": "queen_target",
+      "value": "0"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block page_title %}Growth{% endblock %}
+{% block header_emoji %}🚀{% endblock %}
+{% block header_title %}Growth & Referrals{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom:16px;">
+  <div class="card-header">
+    <div class="card-title">Referral code</div>
+  </div>
+  <div class="card-body">
+    <p class="card-subtitle" style="margin-bottom: 16px;">Share this with other businesses.</p>
+    <div class="text-lg"><strong>{{ settings.Referral_Code }}</strong></div>
+    <p>Invites sent: {{ settings.Referrals_Count or 0 }}</p>
+    <p>Credits earned: {{ settings.Reward_Credits or 0 }}</p>
+    <p>Invite businesses and earn future perks.</p>
+    {% if reward_rules %}
+    <ul>
+      {% for rule in reward_rules %}
+      <li>{{ rule }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">Review prompt</div>
+  </div>
+  <div class="card-body">
+    <p class="card-subtitle" style="margin-bottom: 16px;">Help your app rank higher in the store.</p>
+    {% if review_url %}
+    <a class="btn btn-primary" href="{{ review_url }}" target="_blank">Open review page</a>
+    {% else %}
+    <p>Set `APP_REVIEW_URL` to enable in-app review prompts.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

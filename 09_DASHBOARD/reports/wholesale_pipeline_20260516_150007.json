@@ -1,0 +1,166 @@
+{
+  "run_id": "20260516_150007",
+  "timestamp": "2026-05-16T22:57:14.003377+00:00",
+  "mode": "live",
+  "pipeline_elapsed_sec": 3426.7,
+  "stages_run": 4,
+  "total_scripts": 12,
+  "total_passed": 9,
+  "total_failed": 3,
+  "stages": [
+    {
+      "stage_id": "scout",
+      "stage_name": "Stage 1: Property Scouting",
+      "team_member": "Rex Blackwell (Gemini/Scout)",
+      "elapsed_sec": 3212.0,
+      "scripts_run": 6,
+      "succeeded": 3,
+      "failed": 3,
+      "skipped": [
+        "rex_autonomous.py",
+        "rex_distress_finder.py",
+        "rex_teardown_finder.py"
+      ],
+      "results": [
+        {
+          "status": "success",
+          "returncode": 0,
+          "stdout_lines": 0,
+          "stderr_preview": "[Rex ZillowScraper 15:00] ============================================================\n[Rex ZillowScraper 15:00] Rex Zillow Keyword Scraper -- starting daily run\n[Rex ZillowScraper 15:00] Date: 2026-05-16\n[Rex ZillowScraper 15:00] Target markets: 5\n[Rex ZillowScraper 15:00] Distress keywords: 11\n[Rex ZillowScraper 15:00] Investor keywords: 8\n[Rex ZillowScraper 15:00] ============================================================\n[Rex ZillowScraper 15:00] Scouting Atlanta, GA...\n[Rex ZillowScraper ",
+          "output_preview": "",
+          "script": "rex_zillow_keyword_scraper.py",
+          "elapsed_sec": 427.2
+        },
+        {
+          "status": "timeout",
+          "error": "Script timed out after 600s",
+          "retried": true,
+          "script": "rex_autonomous.py",
+          "elapsed_sec": 600.1
+        },
+        {
+          "status": "timeout",
+          "error": "Script timed out after 300s",
+          "retried": true,
+          "script": "rex_distress_finder.py",
+          "elapsed_sec": 300.1
+        },
+        {
+          "status": "success",
+          "returncode": 0,
+          "stdout_lines": 0,
+          "stderr_preview": "[Rex TaxScout 15:38] ============================================================\n[Rex TaxScout 15:38] Rex Tax Delinquency Scout -- starting daily run\n[Rex TaxScout 15:38] Date: 2026-05-16\n[Rex TaxScout 15:38] Target counties: 5\n[Rex TaxScout 15:38] ============================================================\n[Rex TaxScout 15:38] Scouting Fulton County, GA...\n[Rex TaxScout 15:38]   Searching tax delinquency data for Fulton County, GA...\n[Rex TaxScout 15:38]   Found 0 potential tax delinquent pro",
+          "output_preview": "",
+          "script": "rex_tax_delinquency_scout.py",
+          "elapsed_sec": 81.7
+        },
+        {
+          "status": "success",
+          "returncode": 0,
+          "stdout_lines": 0,
+          "stderr_preview": "[Rex Probate 15:39] ============================================================\n[Rex Probate 15:39] Rex Probate Scout -- starting daily run\n[Rex Probate 15:39] Date: 2026-05-16\n[Rex Probate 15:39] Target counties: 6\n[Rex Probate 15:39] ============================================================\n[Rex Probate 15:39] Scouting Fulton County, GA...\n[Rex Probate 15:39]   ATTOM ownertype query returned 401: {\"Response\":{\"status\":{\"version\": \"1.0.0\",\"code\": \"401\",\"msg\": \"Unauthorized\",\"total\": \"0\",\"pa",
+          "output_preview": "",
+          "script": "rex_probate_scout.py",
+          "elapsed_sec": 236.4
+        },
+        {
+          "status": "timeout",
+          "error": "Script timed out after 300s",
+          "retried": true,
+          "script": "rex_teardown_finder.py",
+          "elapsed_sec": 300.0
+        }
+      ]
+    },
+    {
+      "stage_id": "qualify",
+      "stage_name": "Stage 2: Lead Qualification",
+      "team_member": "Frederick Banks (Lead Qualifier) + Penny Vance (Profit Maximizer)",
+      "elapsed_sec": 214.4,
+      "scripts_run": 4,
+      "succeeded": 4,
+      "failed": 0,
+      "skipped": [],
+      "results": [
+        {
+          "status": "success",
+          "returncode": 0,
+          "stdout_lines": 14,
+          "stderr_preview": "[Rex Scorer V2 15:53] Scored 3101 leads: 0 PRIORITY | 0 HOT | 20 WARM | 3081 COLD\n[Rex Scorer V2 15:53] Top lead: 1679 ALTADENA PL SW, ATLANTA, GA 30311 -- score 45 (WARM)\n[Rex Scorer V2 15:53]   Breakdown: distress=20 deal=10 contact=0\n",
+          "output_preview": "{\n  \"total\": 3101,\n  \"priority\": 0,\n  \"hot\": 0,\n  \"warm\": 20,\n  \"cold\": 3081\n}\n\nTop 5 priority leads:\n  1. [35 WARM] 1522 HOGAN ST, SAINT LOUIS, MO 63106 | DONNA T BROOKS\n  2. [35 WARM] 4118 LORETTO RD, JACKSONVILLE, FL 32223 | ST AUGUSTINE DIOCESE OF\n  3. [35 WARM] 637 MCGRUDER ST NE, ATLANTA, GA 30312 | DAN AVENICK\n  4. [35 WARM] 3024 GRAND AVE SW, ATLANTA, GA 30315 | MACKENZIE CRABTREE REAL ESTATE, LLC\n  5. [35 WARM] 001-08-084 | MELLINGER, GAIL\n",
+          "script": "rex_lead_scorer_v2.py",
+          "elapsed_sec": 0.4
+        },
+        {
+          "status": "success",
+          "returncode": 0,
+          "stdout_lines": 19,
+          "stderr_preview": "[Rex Enrichment 15:53] Enriching lead: 123 MAIN ST, ATLANTA, GA 30301\n[Rex Enrichment 15:54]   ATTOM enrichment for 123 MAIN ST, ATLANTA, GA 30301: 0 fields\n[Rex Enrichment 15:56] Perplexity request failed: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))\n[Rex Enrichment 15:57]   Perplexity enrichment for 123 MAIN ST, ATLANTA, GA 30301: 1 distress signals found\n[Rex Enrichment 15:57]   Enrichment complete: distress=probate, equity=unknown, signals=['pr",
+          "output_preview": "e buyer and I work with families in this exact situation. I buy as-is -- no repairs, no cleanout, no agent fees. I handle the paperwork and can close on your timeline.\n\nIf it would help to have one less thing to worry about, I'm happy to share what I can offer. No pressure.\n\n-- Piper\nEverlight Ventures | Private Acquisitions\npiper@everlightventures.io\n\nReply STOP to opt out.\n\nSMS: Hey John -- saw 123 Main St. I work with families in this situation. Cash offer, 7 days, as-is. Worth a chat? -Rich\n",
+          "script": "rex_enrichment_engine.py",
+          "elapsed_sec": 212.8
+        },
+        {
+          "status": "success",
+          "returncode": 0,
+          "stdout_lines": 1,
+          "stderr_preview": "",
+          "output_preview": "Usage: python rex_comp_validator.py ADDRESS CITY STATE ATTOM_ARV [beds] [baths] [sqft]\n",
+          "script": "rex_comp_validator.py",
+          "elapsed_sec": 0.6
+        },
+        {
+          "status": "success",
+          "returncode": 0,
+          "stdout_lines": 1,
+          "stderr_preview": "",
+          "output_preview": "Usage: python rex_repair_estimator.py ADDRESS CITY STATE SQFT YEAR_BUILT [CONDITION]\n",
+          "script": "rex_repair_estimator.py",
+          "elapsed_sec": 0.6
+        }
+      ]
+    },
+    {
+      "stage_id": "match",
+      "stage_name": "Stage 3: Buyer Matching",
+      "team_member": "Calvin Osei (Match Maker)",
+      "elapsed_sec": 0.2,
+      "scripts_run": 1,
+      "succeeded": 1,
+      "failed": 0,
+      "skipped": [],
+      "results": [
+        {
+          "status": "success",
+          "returncode": 0,
+          "stdout_lines": 26,
+          "stderr_preview": "[Segmenter 15:57] Saved 84 buyers to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/buyers_db.json\n[Segmenter 15:57] Segmented 84 buyers\n",
+          "output_preview": "Equity Investments           score=90  market=Atlanta\n  We Buy Ugly Houses                   score=90  market=Atlanta\n\nGeneral tier (74 buyers -- send after 2h):\n  Real Ventures LLC                    score=90  market=Atlanta\n  Maximum Cash Home Buyers             score=90  market=Atlanta\n  New Horizon Home Buyers              score=90  market=Atlanta\n  Cash Out House                       score=90  market=Atlanta\n  Clever Offers                        score=90  market=Atlanta\n  ... and 69 more\n",
+          "script": "rex_buyer_segmenter.py",
+          "elapsed_sec": 0.2
+        }
+      ]
+    },
+    {
+      "stage_id": "pitch",
+      "stage_name": "Stage 4: Deal Marketing",
+      "team_member": "Adrian Morgan (Deal Marketer)",
+      "elapsed_sec": 0.1,
+      "scripts_run": 1,
+      "succeeded": 1,
+      "failed": 0,
+      "skipped": [],
+      "results": [
+        {
+          "status": "success",
+          "returncode": 0,
+          "stdout_lines": 72,
+          "stderr_preview": "",
+          "output_preview": "5-0199\n\n====================================================\n  FIRST BUYER TO WIRE $5,000 EMD GETS THIS DEAL\n  Reply INTERESTED to lock this deal now.\n====================================================\n\nEverlight Ventures | Everlight Logistics LLC\nhammer@everlightventures.io | everlightventures.io\nThis deal sheet is confidential. Do not forward without permission.\n\n\nHTML preview saved to /mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Broker_OS/wholesale_agent/deal_sheet_preview.html\n",
+          "script": "rex_deal_sheet.py",
+          "elapsed_sec": 0.1
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,63 @@
+# ============================================
+# SIDEBAR UPDATE - Add Cash Till Link
+# ============================================
+# 
+# In your base.html file, find the sidebar navigation section 
+# and add this nav item. 
+# 
+# Recommended location: After "Sales Terminal" or in the "My Work" section
+# ============================================
+
+# OPTION 1: Add after Sales Terminal (for all users)
+# Find this section in base.html:
+
+                <div class="nav-section">
+                    <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                        <span class="nav-emoji">🏠</span>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('sales') }}" class="nav-item {% if 'sales' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">🛒</span>
+                        <span class="nav-text">Sales Terminal</span>
+                    </a>
+                    
+                    <!-- ADD THIS LINE BELOW SALES TERMINAL -->
+                    <a href="{{ url_for('till') }}" class="nav-item {% if 'till' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">💵</span>
+                        <span class="nav-text">Cash Till</span>
+                    </a>
+                </div>
+
+
+# ============================================
+# OPTION 2: Add to Management section (owners/managers only)
+# ============================================
+
+                {% if session.role in ['Manager', 'Owner', 'Admin'] %}
+                <div class="nav-section">
+                    <div class="nav-label">👔 Management</div>
+                    
+                    <!-- ADD TILL HERE FOR MANAGERS ONLY -->
+                    <a href="{{ url_for('till') }}" class="nav-item {% if 'till' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">💵</span>
+                        <span class="nav-text">Cash Till</span>
+                    </a>
+                    
+                    <a href="{{ url_for('inventory') }}" class="nav-item {% if 'inventory' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">📦</span>
+                        <span class="nav-text">Inventory</span>
+                    </a>
+                    ...
+                </div>
+                {% endif %}
+
+
+# ============================================
+# The exact line to copy/paste:
+# ============================================
+
+<a href="{{ url_for('till') }}" class="nav-item {% if 'till' in (request.endpoint or '') %}active{% endif %}">
+    <span class="nav-emoji">💵</span>
+    <span class="nav-text">Cash Till</span>
+</a>
+

@@ -1,0 +1,4 @@
+date,time,status,employee,employee_id,amount
+2025-12-21,13:51:38,OPEN,Rich,1001,200.0
+2025-12-25,14:48:09,OPEN,Rich,1001,200.0
+2025-12-28,14:10:08,OPEN,Rich,1001,200.0

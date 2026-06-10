@@ -1,0 +1,288 @@
+
+{% extends "base.html" %}
+
+{% block page_title %}Add Employee{% endblock %}
+{% block header_emoji %}👤{% endblock %}
+{% block header_title %}Add Employee{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('employees') }}" class="btn btn-secondary">
+    <i data-lucide="arrow-left"></i>
+    Back to Employees
+</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(160deg, #0f1f17 0%, #0a1810 40%, #0f1f17 100%);
+    }
+
+    .form-panel {
+        background: linear-gradient(145deg, #1e3a2a 0%, #162b1f 100%);
+        border: 1px solid rgba(167, 243, 208, 0.12);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .form-header {
+        padding: 24px 28px;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.1);
+        background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+    }
+
+    .form-header h2 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #e8f5ee;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .form-header h2 span { font-size: 24px; }
+
+    .form-body {
+        padding: 28px;
+    }
+
+    .form-group {
+        margin-bottom: 24px;
+    }
+
+    .form-group:last-of-type {
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        color: #94a3b8;
+        margin-bottom: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .form-label .required {
+        color: #fb7185;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 14px 18px;
+        font-size: 16px;
+        font-family: inherit;
+        border: 2px solid rgba(167, 243, 208, 0.15);
+        border-radius: 12px;
+        background: #1a2f23;
+        color: #e8f5ee;
+        transition: all 0.2s;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16,185,129,0.15);
+    }
+
+    .form-input::placeholder {
+        color: #64748b;
+    }
+
+    .form-select {
+        width: 100%;
+        padding: 14px 18px;
+        font-size: 16px;
+        font-family: inherit;
+        border: 2px solid rgba(167, 243, 208, 0.15);
+        border-radius: 12px;
+        background: #1a2f23;
+        color: #e8f5ee;
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        background-size: 20px;
+        padding-right: 48px;
+    }
+
+    .form-select:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 4px rgba(16,185,129,0.15);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    @media (max-width: 500px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .form-hint {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 6px;
+    }
+
+    .form-actions {
+        padding: 24px 28px;
+        border-top: 1px solid rgba(167, 243, 208, 0.1);
+        background: rgba(0,0,0,0.1);
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+    }
+
+    .btn-cancel {
+        padding: 14px 24px;
+        font-size: 15px;
+        font-weight: 600;
+        background: rgba(0,0,0,0.2);
+        color: #94a3b8;
+        border: 1px solid rgba(167, 243, 208, 0.15);
+        border-radius: 12px;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(0,0,0,0.3);
+        color: #e8f5ee;
+    }
+
+    .btn-submit {
+        padding: 14px 32px;
+        font-size: 15px;
+        font-weight: 700;
+        background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        font-family: inherit;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        box-shadow: 0 4px 16px rgba(16,185,129,0.3);
+        transition: all 0.2s;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16,185,129,0.4);
+    }
+
+    .btn-submit [data-lucide] {
+        width: 20px;
+        height: 20px;
+    }
+
+    .alert {
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        font-size: 14px;
+    }
+
+    .alert-error {
+        background: rgba(244, 63, 94, 0.15);
+        border: 1px solid rgba(244, 63, 94, 0.3);
+        color: #fb7185;
+    }
+
+    .alert-success {
+        background: rgba(16, 185, 129, 0.15);
+        border: 1px solid rgba(16, 185, 129, 0.3);
+        color: #34d399;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-panel">
+    <div class="form-header">
+        <h2><span>👤</span> New Employee Details</h2>
+    </div>
+
+    <form method="POST" action="{{ url_for('add_employee') }}">
+        <div class="form-body">
+            {% if error %}
+            <div class="alert alert-error">{{ error }}</div>
+            {% endif %}
+
+            {% if success %}
+            <div class="alert alert-success">{{ success }}</div>
+            {% endif %}
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">First Name <span class="required">*</span></label>
+                    <input type="text" name="first_name" class="form-input" placeholder="John" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Last Name <span class="required">*</span></label>
+                    <input type="text" name="last_name" class="form-input" placeholder="Smith" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <input type="email" name="email" class="form-input" placeholder="john.smith@example.com">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="tel" name="phone" class="form-input" placeholder="(555) 123-4567">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Role <span class="required">*</span></label>
+                    <select name="role" class="form-select" required>
+                        <option value="">Select a role...</option>
+                        {% for role in roles %}
+                        <option value="{{ role }}">{{ role }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Hourly Rate ($)</label>
+                    <input type="number" name="hourly_rate" class="form-input" placeholder="15.00" step="0.01" min="0">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">PIN <span class="required">*</span></label>
+                <input type="password" name="pin" class="form-input" placeholder="4-digit PIN" maxlength="4" pattern="\d{4}" required>
+                <div class="form-hint">4-digit number for clock-in and login</div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{{ url_for('employees') }}" class="btn-cancel">Cancel</a>
+            <button type="submit" class="btn-submit">
+                <i data-lucide="user-plus"></i>
+                Add Employee
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

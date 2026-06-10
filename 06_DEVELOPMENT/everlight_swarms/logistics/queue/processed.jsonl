@@ -1,0 +1,2 @@
+{"trace_id": "poc-001", "status": "done", "halt_reason": "", "ts": "2026-05-08T02:51:27.221303+00:00"}
+{"trace_id": "poc-real-1778209901", "status": "halted", "halt_reason": "intake: anthropic api error: Error code: 400 - {'type': 'error', 'error': {'type': 'invalid_request_error', 'message': 'Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits.'}, 'request_id': 'req_011CapNQH5fnMwxm4mpTVjWJ'}", "ts": "2026-05-08T03:11:41.777523+00:00"}

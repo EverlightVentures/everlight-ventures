@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+  api:
+    build: .
+    ports:
+      - "8600:8600"
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  frontend:
+    image: node:22-slim
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3000:3000"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    restart: unless-stopped

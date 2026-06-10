@@ -41,7 +41,7 @@ const DEALER_COLORS: Record<string, string> = {
   aria: '#c9a84c',
   marcus: '#ff6b35',
   kanisha: '#e91e63',
-  bacardi: '#00bcd4',
+  bcardd: '#00bcd4',
 }
 
 const VARIANT_LABELS: Record<string, string> = {

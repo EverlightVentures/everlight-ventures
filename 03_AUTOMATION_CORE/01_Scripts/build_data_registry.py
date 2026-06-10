@@ -171,7 +171,7 @@ def categorize(rel: str) -> str:
 
 CAT_COLORS = {
     "Memory / Knowledge": "#7ec699",
-    "Wholesale + Broker Pipeline": "#D4A843",
+    "Wholesale + Broker Pipeline": "#D4AF37",
     "Trading": "#ff9f6b",
     "Audit Chains": "#a8a3ff",
     "Operational Logs": "#888",
@@ -220,7 +220,7 @@ def collect() -> list[dict]:
 
 
 def render_card(r: dict) -> str:
-    color = CAT_COLORS.get(r["category"], "#D4A843")
+    color = CAT_COLORS.get(r["category"], "#D4AF37")
     meta = r["meta"]
     size = meta.get("size_human", "?")
     mtime = meta.get("mtime", "?")[:19]
@@ -272,15 +272,15 @@ def main() -> int:
 
     strip = f"""
 <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:16px 0 24px;'>
-  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;'>Stores</div>
     <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>{total}</div>
   </div>
-  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;'>Categories</div>
     <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>{len(by_cat)}</div>
   </div>
-  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;'>Total Size</div>
     <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>{fmt_size(total_size)}</div>
   </div>
@@ -289,13 +289,13 @@ def main() -> int:
 <div style='margin:12px 0;'>
   <input id='datasearch' type='text' placeholder='Search stores -- name, path, category'
          style='width:100%;padding:14px 16px;background:#0d0d0d;color:#E8E8E8;border:1px solid #2a2a2a;
-                border-left:3px solid #D4A843;font-family:Inter,sans-serif;font-size:15px;'>
+                border-left:3px solid #D4AF37;font-family:Inter,sans-serif;font-size:15px;'>
 </div>
 """
 
     sections = []
     for cat in cats_sorted:
-        c = CAT_COLORS.get(cat, "#D4A843")
+        c = CAT_COLORS.get(cat, "#D4AF37")
         sections.append(f"""
 <section class='datasection' data-cat='{cat.lower()}' style='margin-top:32px;'>
   <h2 style='font-family:Playfair Display,serif;color:{c};font-size:22px;margin:0 0 10px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
@@ -331,14 +331,14 @@ def main() -> int:
 <p style='color:#888;font-size:14px;'>
 Every internal data store. SQLite DBs, JSONL audit logs, CSV registries,
 JSON registries. Auto-discovered via filesystem walk.
-Counterpart to the <a href='SERVICES_REGISTRY.html' style='color:#D4A843;'>Services Registry</a> (which catalogs external APIs).
+Counterpart to the <a href='SERVICES_REGISTRY.html' style='color:#D4AF37;'>Services Registry</a> (which catalogs external APIs).
 </p>
 {strip}
 {''.join(sections)}
 {js}
 <p style='color:#666;font-size:12px;margin-top:32px;'>
-Machine-readable mirror at <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;'>01_BUSINESSES/Everlight_Ventures/_audits/data_registry.json</code>.
-Re-render: <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;'>python3 03_AUTOMATION_CORE/01_Scripts/build_data_registry.py</code>.
+Machine-readable mirror at <code style='background:#1a1a1a;color:#D4AF37;padding:2px 6px;'>01_BUSINESSES/Everlight_Ventures/_audits/data_registry.json</code>.
+Re-render: <code style='background:#1a1a1a;color:#D4AF37;padding:2px 6px;'>python3 03_AUTOMATION_CORE/01_Scripts/build_data_registry.py</code>.
 </p>
 """
     html = render_report(

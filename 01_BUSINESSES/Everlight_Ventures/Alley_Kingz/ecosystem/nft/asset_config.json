@@ -1,0 +1,34 @@
+{
+  "_comment": "Swappable asset-URI config for gen_metadata.py. After upload_assets.md is run on e5-mother and you have the CID base (IPFS) or Arweave/Irys gateway, paste it here and re-run gen_metadata.py. The <...> placeholders are intentional until art lands (GATED-ON-ART).",
+  "ticker": "$BCARDD",
+  "symbol": "BCARDI",
+  "collection_name": "Alley Kingz",
+
+  "storage_provider": "ipfs",
+  "image_cid_base": "ipfs://<IMAGE_CID_DIR>",
+  "animation_cid_base": "ipfs://<ANIMATION_CID_DIR>",
+  "gateway_https": "https://<GATEWAY>/ipfs/<CID>",
+
+  "_image_naming": "image files expected as <cardNumber>_<slug>.png under the image CID dir",
+  "image_filename_pattern": "{cardNumber}_{slug}.png",
+
+  "_animation_naming": "Seedance battle clips per SEEDANCE_BATTLE_KIT.md section 6 naming; date prefix is the generation date, swap when the real clip lands",
+  "animation_date_prefix": "2026-06-02",
+  "animation_filename_pattern": "{animation_date_prefix}_AKBattle_{anim_token}_Seedance_V1.mp4",
+
+  "external_url_base": "https://everlightventures.io/cards",
+  "external_url_brand": "https://everlightventures.io/bcardi",
+
+  "_onchain_attribute_keys": "Per CHAIN_DECISION_MEMO section 4b: these stat keys are mirrored into the Metaplex Core Attribute Plugin on-chain (strings, parsed to int in-game). Everything else stays off-chain in this JSON.",
+  "onchain_attribute_keys": [
+    "hp",
+    "damage",
+    "attack_speed",
+    "move_speed",
+    "range",
+    "cost",
+    "rarity",
+    "ability_id",
+    "queen_target"
+  ]
+}

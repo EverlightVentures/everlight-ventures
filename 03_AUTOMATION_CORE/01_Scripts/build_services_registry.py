@@ -26,7 +26,7 @@ OUTPUT = ROOT / "09_DASHBOARD" / "reports" / "SERVICES_REGISTRY.html"
 
 TIER_COLORS = {
     "active": "#7ec699",
-    "planned": "#D4A843",
+    "planned": "#D4AF37",
     "dormant": "#888",
     "paused": "#ff6b6b",
 }
@@ -34,7 +34,7 @@ TIER_COLORS = {
 
 def render_card(svc: dict) -> str:
     tier = svc.get("tier", "unknown")
-    color = TIER_COLORS.get(tier, "#D4A843")
+    color = TIER_COLORS.get(tier, "#D4AF37")
     cost = svc.get("monthly_cost_usd")
     cost_label = f"${cost}/mo" if cost else "free" if cost == 0 else "tbd"
     used_by = svc.get("used_by", []) or []
@@ -45,7 +45,7 @@ def render_card(svc: dict) -> str:
     else:
         keys_html = str(keys)
     dash_url = svc.get("dashboard_url")
-    dash_link = (f"<a href='{dash_url}' target='_blank' style='color:#D4A843;text-decoration:none;'>"
+    dash_link = (f"<a href='{dash_url}' target='_blank' style='color:#D4AF37;text-decoration:none;'>"
                  f"&rarr; dashboard</a>") if dash_url else ""
     notes = svc.get("notes", "")
     return f"""
@@ -58,7 +58,7 @@ def render_card(svc: dict) -> str:
     {keys_html}
   </div>
   <div style='color:#aaa;font-size:13px;line-height:1.5;margin-top:10px;'>
-    <strong style='color:#D4A843;'>Used by:</strong><br>
+    <strong style='color:#D4AF37;'>Used by:</strong><br>
     {used_html or '  (not yet wired in)'}
   </div>
   {f'<div style="color:#999;font-size:12px;margin-top:8px;font-style:italic;">{notes}</div>' if notes else ''}
@@ -99,7 +99,7 @@ def main() -> int:
 
     body = f"""
 <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:20px 0;'>
-  <div style='background:#1a1a1a;padding:16px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:16px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;'>Services</div>
     <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>{total}</div>
   </div>
@@ -107,7 +107,7 @@ def main() -> int:
     <div style='color:#888;font-size:11px;text-transform:uppercase;'>Active</div>
     <div style='color:#7ec699;font-size:28px;font-family:Playfair Display,serif;'>{active}</div>
   </div>
-  <div style='background:#1a1a1a;padding:16px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:16px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;'>Free Tier</div>
     <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>{free}</div>
   </div>
@@ -125,7 +125,7 @@ Master Hub. Updated: {reg.get('_meta',{}).get('last_updated','--')}.
     for cat in cats_in_order:
         items = by_category[cat]
         body += f"""
-<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:32px 0 12px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
+<h2 style='font-family:Playfair Display,serif;color:#D4AF37;font-size:22px;margin:32px 0 12px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
   {cat.title()} <span style='color:#666;font-size:14px;font-family:Inter,sans-serif;'>({len(items)})</span>
 </h2>
 <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:16px;'>

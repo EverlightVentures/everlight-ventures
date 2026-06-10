@@ -1,0 +1,40 @@
+{
+  "name": "everlight-ventures",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "npm@10.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "overrides": {
+    "@prisma/client": "6.19.1",
+    "prisma": "6.19.1"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "db:generate": "cd packages/db && npm run generate",
+    "db:push": "cd packages/db && npm run push",
+    "db:migrate": "cd packages/db && npm run migrate",
+    "db:studio": "cd packages/db && npm run studio",
+    "clean": "turbo run clean && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.958.0",
+    "cheerio": "^1.1.2",
+    "fluent-ffmpeg": "^2.1.3",
+    "lucide-react": "^0.562.0",
+    "react-dropzone": "^14.3.8",
+    "sharp": "^0.34.5"
+  }
+}

@@ -35,7 +35,7 @@ OUTPUT = ROOT / "09_DASHBOARD" / "reports" / "RESOURCES_HUB.html"
 
 # Category emoji-free icons (Playfair / unicode symbols) and accent colors
 CATEGORY_META = {
-    "Decision Intelligence":   {"color": "#D4A843", "icon": "◆"},
+    "Decision Intelligence":   {"color": "#D4AF37", "icon": "◆"},
     "OSINT & Investigation":   {"color": "#7ec699", "icon": "▲"},
     "Education & Training":    {"color": "#a8a3ff", "icon": "✦"},
     "Trading & Finance":       {"color": "#ff9f6b", "icon": "▼"},
@@ -46,7 +46,7 @@ CATEGORY_META = {
     "News & Journalism":       {"color": "#ff6b9f", "icon": "❘"},
     "Weather & Disaster Intel":{"color": "#ffb46b", "icon": "✱"},
     "Maps & Geospatial":       {"color": "#6bffd9", "icon": "✜"},
-    "AI & Automation":         {"color": "#D4A843", "icon": "◉"},
+    "AI & Automation":         {"color": "#D4AF37", "icon": "◉"},
     "Aviation & Maritime":     {"color": "#6b9fff", "icon": "✈"},
     "APIs & Developer Tools":  {"color": "#6bafff", "icon": "</>"},
     "eCommerce & Product Research": {"color": "#ffd76b", "icon": "$"},
@@ -62,7 +62,7 @@ def esc(s: str | None) -> str:
 
 def card(row: dict) -> str:
     cat = row.get("category") or "Uncategorized"
-    meta = CATEGORY_META.get(cat, {"color": "#D4A843", "icon": "●"})
+    meta = CATEGORY_META.get(cat, {"color": "#D4AF37", "icon": "●"})
     color = meta["color"]
     name = esc(row.get("name", "")[:60])
     purpose = esc((row.get("purpose") or "")[:140])
@@ -109,19 +109,19 @@ def main() -> int:
     # Top strip: counts + search
     strip = f"""
 <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:16px 0 24px;'>
-  <div style='background:#1a1a1a;padding:14px 16px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:14px 16px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Resources</div>
     <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>{total}</div>
   </div>
-  <div style='background:#1a1a1a;padding:14px 16px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:14px 16px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Categories</div>
     <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>{len(by_category)}</div>
   </div>
-  <div style='background:#1a1a1a;padding:14px 16px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:14px 16px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Departments</div>
     <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>{departments}</div>
   </div>
-  <div style='background:#1a1a1a;padding:14px 16px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:14px 16px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;letter-spacing:1px;'>Agent Owners</div>
     <div style='color:#E8E8E8;font-size:28px;font-family:Playfair Display,serif;'>{agents}</div>
   </div>
@@ -130,14 +130,14 @@ def main() -> int:
 <div style='margin:16px 0;'>
   <input id='searchbox' type='text' placeholder='Search resources -- name, tag, purpose, agent'
          style='width:100%;padding:14px 16px;background:#0d0d0d;color:#E8E8E8;border:1px solid #2a2a2a;
-                border-left:3px solid #D4A843;font-family:Inter,sans-serif;font-size:15px;'>
+                border-left:3px solid #D4AF37;font-family:Inter,sans-serif;font-size:15px;'>
 </div>
 
 <div style='display:flex;flex-wrap:wrap;gap:8px;margin:16px 0;' id='catfilters'>
-  <button class='catfilter active' data-cat='' style='background:#D4A843;color:#0a0a0a;border:none;padding:6px 14px;font-family:Inter;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;'>ALL</button>
+  <button class='catfilter active' data-cat='' style='background:#D4AF37;color:#0a0a0a;border:none;padding:6px 14px;font-family:Inter;font-size:12px;cursor:pointer;text-transform:uppercase;letter-spacing:1px;'>ALL</button>
 """
     for cat in cats_sorted:
-        meta = CATEGORY_META.get(cat, {"color": "#D4A843", "icon": "●"})
+        meta = CATEGORY_META.get(cat, {"color": "#D4AF37", "icon": "●"})
         cc = meta["color"]
         strip += (f"<button class='catfilter' data-cat='{esc(cat).lower()}' "
                   f"style='background:#1a1a1a;color:{cc};border:1px solid {cc};"
@@ -147,7 +147,7 @@ def main() -> int:
 
     sections = []
     for cat in cats_sorted:
-        meta = CATEGORY_META.get(cat, {"color": "#D4A843", "icon": "●"})
+        meta = CATEGORY_META.get(cat, {"color": "#D4AF37", "icon": "●"})
         sections.append(f"""
 <section class='catsection' data-cat='{esc(cat).lower()}' style='margin-top:36px;'>
   <h2 style='font-family:Playfair Display,serif;color:{meta["color"]};font-size:22px;margin:0 0 12px;border-bottom:1px solid #2a2a2a;padding-bottom:6px;'>
@@ -188,9 +188,9 @@ def main() -> int:
   }
   box.addEventListener('input', applyFilter);
   filters.forEach(f => f.addEventListener('click', () => {
-    filters.forEach(x => { x.classList.remove('active'); x.style.background='#1a1a1a'; x.style.color = x.style.borderColor || '#D4A843'; });
+    filters.forEach(x => { x.classList.remove('active'); x.style.background='#1a1a1a'; x.style.color = x.style.borderColor || '#D4AF37'; });
     f.classList.add('active');
-    f.style.background = '#D4A843';
+    f.style.background = '#D4AF37';
     f.style.color = '#0a0a0a';
     activeCat = f.dataset.cat;
     applyFilter();
@@ -208,7 +208,7 @@ tags, purposes, and use cases.
 {strip}
 {''.join(sections)}
 <p style='color:#666;font-size:12px;margin-top:32px;'>
-Source: <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;'>06_DEVELOPMENT/everlight_os/intel_center/database/everlight_resources.sqlite</code>
+Source: <code style='background:#1a1a1a;color:#D4AF37;padding:2px 6px;'>06_DEVELOPMENT/everlight_os/intel_center/database/everlight_resources.sqlite</code>
 &middot; Rendered {datetime.now().strftime('%Y-%m-%d %H:%M PT')}
 </p>
 {js}

@@ -1,0 +1,50 @@
+{
+  "compiled_at": "2026-05-07T07:06:50.951032+00:00",
+  "buy_box": {
+    "markets": [
+      "Memphis",
+      "Shelby County"
+    ],
+    "states": [
+      "TN"
+    ],
+    "year_built_min": 1940,
+    "property_types": [
+      "sfr"
+    ],
+    "rehab_tolerance": "moderate",
+    "ARV_max_usd": 200000,
+    "ARV_min_usd": 50000,
+    "occupancy_preference": [
+      "vacant",
+      "tenant_in_place"
+    ],
+    "deal_structure": "PSA_with_assignment",
+    "do_not_send": [
+      "raw_address_lists",
+      "agent-listed_homes_without_JV",
+      "homes_with_active_litigation"
+    ]
+  },
+  "qualified_count": 1,
+  "addresses": [
+    {
+      "address": "1577  MCMILLAN ST",
+      "parcel_id": "034026  00014",
+      "owner": "CARNEGIE CHURCH OF GOD IN CHRIST",
+      "year_built": null,
+      "arv": 56000,
+      "is_absentee": null,
+      "distress": []
+    }
+  ],
+  "next_actions": [
+    "Filter Banks: pick top 5 by ARV/distress score",
+    "Rex Blackwell: skip-trace owners (cascade.py)",
+    "Piper Reeves: cold-mail outreach via Lob (TN cold-call BLOCKED, SMS BLOCKED, MAIL OK)",
+    "Hammer Ortiz: negotiate cash offer 70% ARV - repair",
+    "Hammer + Marquise: sign PSA + collect EMD + TN SB 909 disclosure",
+    "Penny Vance: build deal package (PSA + photos + ARV + repair + assignment fee)",
+    "Hammer: send single deal to leads@midsouthhomebuyers.com"
+  ]
+}

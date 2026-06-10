@@ -495,3 +495,33 @@ telemetry:
 
 war_room_dir: "_logs/ai_war_room"
 session_log: "_logs/hive_sessions.jsonl"
+
+# ============================================================================
+# TOOLING LAYER (added 2026-05-24 -- "24 Things to Install in Claude" merge)
+# What new Claude capability each team now owns. Manifest:
+# 05_PERSONAL/04_Learning/FREE_RESOURCES/claude_tooling_buildout_2026-05-24.md
+# ============================================================================
+tooling_layer:
+  plugins_installed:        # user scope, all projects inherit, load on restart
+    superpowers: {owner_squad: claude_corp, use: "brainstorm + subagent-driven dev methodology"}
+    skill-creator: {owner_squad: claude_corp, use: "Hive authors its own skills"}
+    claude-md-management: {owner_squad: claude_corp, use: "CLAUDE.md hygiene"}
+    code-simplifier: {owner_squad: codex_labs, use: "code clarity pass"}
+    playground: {owner_squad: content, use: "HTML explainers"}
+  skills_added:             # .claude/skills/, branded wrappers over existing agents
+    everlight_seo: {owner: everlight_seo_formatter, buddy: everlight_content_director, tier: micro}
+    everlight_humanizer: {owner: 41_style_enforcer, buddy: everlight_content_director, tier: support}
+    everlight_hyperframes: {owner: everlight_content_director, buddy: 63_ui_ux_designer, tier: macro}
+  mcp_queued_e5mother:      # HTTP-tunnel pattern, kit: 03_AUTOMATION_CORE/01_Scripts/e5_mother/mcp_install_kit.sh
+    playwright: {port: 3110, owner: hermes_browser_outreach, tier: micro, blocker: "chromium install"}
+    firecrawl: {port: 3111, owner: intel_center, tier: micro, blocker: "FIRECRAWL_API_KEY"}
+    serena: {port: 3112, owner_squad: codex_labs, tier: macro, blocker: "uv install"}
+    semgrep: {port: 3113, owner: 69_security_engineer, tier: macro, blocker: "uv install"}
+    context7: {hosted: true, owner_squad: codex_labs, tier: macro, blocker: "CONTEXT7_API_KEY + egress decision"}
+    posthog: {hosted: true, owner: 73_search_analytics, tier: macro, blocker: "POSTHOG_PERSONAL_API_KEY"}
+    notion: {hosted: true, owner_squad: claude_corp, tier: macro, blocker: "only if Notion used"}
+  skipped:
+    gstack: "redundant -- 122 agents already"
+    ai_second_brain: "have Blinko RAG + agentmemory + karpathy_rag_intake"
+    granola_raycast_appfigures: "Mac/iOS-only, paid, irrelevant to Linux+Oracle"
+    codex_plugin: "covered by codex_skills_mirror + clx_delegate.py"

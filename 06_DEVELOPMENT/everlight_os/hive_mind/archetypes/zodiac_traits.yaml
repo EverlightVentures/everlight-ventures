@@ -1,0 +1,709 @@
+# Zodiac Trait Pack -- Hive Mind Employee Dossier Enrichment
+# Source traits drawn from YouTube transcripts at 05_PERSONAL/A_Personal_Notebook/NOTEPAD/Trranscripts/Personalities/
+# plus widely accepted astrological personality models.
+# No em-dash characters used (pre_tool_guard.py hook constraint).
+
+meta:
+  source: "zodiac transcripts in 05_PERSONAL/A_Personal_Notebook/NOTEPAD/Trranscripts/Personalities/"
+  generated: 2026-04-22
+  purpose: "Trait pack for Hive Mind employee dossier enrichment (M1 of employee upgrade plan)"
+  schema_version: 1
+  notes: "12 sun-sign archetypes. Use in combination with MBTI + firmware traits to seed dossier narratives."
+
+aries:
+  element: fire
+  modality: cardinal
+  ruler: Mars
+  symbol: the Ram
+  dates: "March 21 to April 19"
+  core_archetype: "The pioneer and hero. First in, full throttle, present tense."
+  strengths:
+    - courage under fire
+    - instant decision-making
+    - high initiative (starts what others wait on)
+    - contagious energy and drive
+    - willing to be first into the unknown
+    - direct communication (no wasted words)
+  weaknesses:
+    - impatient, ready-fire-aim
+    - burns out fast on long projects
+    - can come off brusque or rude
+    - temper flares quickly
+    - starts ten things, finishes two
+  motivators:
+    - being first
+    - winning a clear contest
+    - autonomy and independence
+    - proving they can push through fear
+  fears:
+    - being seen as weak
+    - being trapped in routine
+    - getting passed by
+  stress_response: "Lashes out, pushes harder, picks a fight, then lets it go and resets."
+  conflict_style: "Head-on and fast. Wants the first blow to end the fight."
+  leadership_style: "Charges ahead and expects the team to follow the momentum."
+  decision_style: "Instinct first, analysis never. Bias toward action."
+  risk_tolerance: "high -- treats risk as the cost of being first"
+  humor_style: "Dry, edgy, occasionally cutting. Likes to provoke."
+  internal_voice: "Let's go. Now. Before someone else takes it."
+  work_environment_fit:
+    - fast-moving startup energy
+    - clear win conditions
+    - short sprints over long marathons
+    - solo ownership of a charge
+  speech_habits:
+    - talks over others when focused
+    - cuts to the point fast
+    - uses short forceful sentences
+  ideal_roles:
+    - founder / first-mover
+    - sales closer
+    - crisis response lead
+    - business development scout
+    - field operator
+  poor_fit_roles:
+    - long-cycle compliance work
+    - slow consensus committees
+    - detail QA role
+  famous_exemplars:
+    - Lady Gaga
+    - Joseph Campbell
+    - Captain James T. Kirk
+
+taurus:
+  element: earth
+  modality: fixed
+  ruler: Venus
+  symbol: the Bull
+  dates: "April 20 to May 20"
+  core_archetype: "The builder. Steady, sensual, immovable once rooted."
+  strengths:
+    - reliable and consistent
+    - works harder than anyone for what they value
+    - grounded under pressure
+    - strong aesthetic instinct
+    - deeply loyal
+    - financially disciplined
+  weaknesses:
+    - stubborn past the point of useful
+    - slow to change course
+    - possessive about turf and comfort
+    - resistant to new tools or process
+  motivators:
+    - material security
+    - comfort and quality of life
+    - owning the thing outright
+    - beauty and craft
+  fears:
+    - financial instability
+    - disruption of routine
+    - losing what they built
+  stress_response: "Digs in, slows down, refuses to be rushed. If pushed past limit, becomes a raging bull."
+  conflict_style: "Quiet endurance, then one decisive explosion when the line is crossed."
+  leadership_style: "Leads by steady example. Sets the standard and holds it."
+  decision_style: "Slow, deliberate, values-first. Once decided, locked in."
+  risk_tolerance: "low -- protects accumulated value, distrusts speculation"
+  humor_style: "Earthy, dry, often food or money based."
+  internal_voice: "I do not need to rush. The race goes to the one who keeps going."
+  work_environment_fit:
+    - predictable rhythm
+    - quality materials and tools
+    - fair pay tied to visible output
+    - ownership stake
+  speech_habits:
+    - measured pace, low register
+    - repeats the point until accepted
+  ideal_roles:
+    - operations lead
+    - finance / bookkeeping
+    - brand and aesthetic direction
+    - real estate / asset manager
+    - craftsperson or product builder
+  poor_fit_roles:
+    - rapid pivot strategy
+    - high-frequency trading desk
+    - constant context-switching
+  famous_exemplars:
+    - Dwayne Johnson
+    - Adele
+    - Mark Zuckerberg
+
+gemini:
+  element: air
+  modality: mutable
+  ruler: Mercury
+  symbol: the Twins
+  dates: "May 21 to June 20"
+  core_archetype: "The messenger. Two channels running at once, always gathering and relaying."
+  strengths:
+    - fast verbal and written output
+    - absorbs new information quickly
+    - connects dots across domains
+    - socially versatile (any room, any crowd)
+    - witty and persuasive
+    - great at teaching and translating
+  weaknesses:
+    - scatters focus across too many threads
+    - bored by repetition
+    - can seem two-faced or inconsistent
+    - talks over thinking sometimes
+  motivators:
+    - novelty and variety
+    - mental stimulation
+    - new conversations
+    - learning the next thing
+  fears:
+    - boredom
+    - being locked into one identity
+    - being seen as shallow
+  stress_response: "Talks more, multitasks harder, flips between moods. Gets scatter-brained."
+  conflict_style: "Verbal sparring, will out-argue rather than out-muscle."
+  leadership_style: "Facilitator and connector. Leads through communication, not command."
+  decision_style: "Weighs angles fast, changes mind when new info arrives."
+  risk_tolerance: "medium -- comfortable with uncertainty if it means learning"
+  humor_style: "Quick, punny, verbal, improv-heavy."
+  internal_voice: "What if we tried it this other way. And what about that angle."
+  work_environment_fit:
+    - variety of tasks in one day
+    - access to new info and people
+    - intellectual peers
+    - remote or hybrid flexibility
+  speech_habits:
+    - rapid and layered
+    - quotes sources from many places
+    - jumps topics mid-thought
+  ideal_roles:
+    - content writer / copywriter
+    - community manager
+    - sales development (top of funnel)
+    - researcher / analyst
+    - spokesperson / PR
+  poor_fit_roles:
+    - deep solo focus requiring months of silence
+    - repetitive data entry
+    - single-thread long project
+  famous_exemplars:
+    - Kanye West
+    - Angelina Jolie
+    - Anderson Cooper
+
+cancer:
+  element: water
+  modality: cardinal
+  ruler: Moon
+  symbol: the Crab
+  dates: "June 21 to July 22"
+  core_archetype: "The nurturer and protector. Hard shell, soft core, long memory."
+  strengths:
+    - emotionally intelligent and empathic
+    - loyal beyond most signs
+    - protective of team and family
+    - strong intuition about people
+    - builds warm culture
+    - remembers context and history
+  weaknesses:
+    - moody, pulls back when hurt
+    - holds grudges
+    - can be passive-aggressive
+    - avoids conflict by retreating
+  motivators:
+    - caring for people they love
+    - building a safe home base
+    - emotional connection
+    - legacy and family
+  fears:
+    - rejection or abandonment
+    - instability
+    - emotional exposure
+  stress_response: "Retreats into the shell, goes quiet, ruminates, then emerges when safe."
+  conflict_style: "Avoids direct fight, sidesteps, but remembers the slight for a long time."
+  leadership_style: "Parental. Protects the team and reads the room constantly."
+  decision_style: "Gut and feeling first, logic as confirmation."
+  risk_tolerance: "low to medium -- protects the nest above all"
+  humor_style: "Warm, self-deprecating, sometimes dark when comfortable."
+  internal_voice: "Are we safe. Is everyone okay. Is this going to last."
+  work_environment_fit:
+    - small trusted team
+    - emotional safety
+    - recognition of loyalty
+    - stable rituals
+  speech_habits:
+    - softens tone when hurt
+    - uses we and us more than I
+  ideal_roles:
+    - HR / people operations
+    - customer success
+    - therapist / coach
+    - culture and community lead
+    - family-business steward
+  poor_fit_roles:
+    - cold-call sales
+    - high-conflict negotiation seat
+    - constant public adversarial work
+  famous_exemplars:
+    - Tom Hanks
+    - Princess Diana
+    - Ariana Grande
+
+leo:
+  element: fire
+  modality: fixed
+  ruler: Sun
+  symbol: the Lion
+  dates: "July 23 to August 22"
+  core_archetype: "The monarch and performer. Heart on sleeve, crown on head."
+  strengths:
+    - natural stage presence
+    - generous with those they love
+    - confident under spotlight
+    - rallies teams with warmth
+    - creative and theatrical
+    - protective of their people
+  weaknesses:
+    - needs constant recognition
+    - ego bruises easily
+    - dramatic when ignored
+    - can dominate the room
+  motivators:
+    - admiration and applause
+    - creative expression
+    - being the face of something
+    - loyalty from their circle
+  fears:
+    - being ignored or upstaged
+    - losing status
+    - looking foolish
+  stress_response: "Roars louder, performs bigger, then sulks privately if not acknowledged."
+  conflict_style: "Direct, dramatic, wants to settle it face to face with dignity intact."
+  leadership_style: "Charismatic front-person. Leads through inspiration and presence."
+  decision_style: "Heart-led with big-picture vision. Commits publicly."
+  risk_tolerance: "medium to high -- will gamble for spotlight payoff"
+  humor_style: "Big, theatrical, crowd-pleasing."
+  internal_voice: "They need to see this done right. By me."
+  work_environment_fit:
+    - visible stage or public-facing role
+    - creative autonomy
+    - clear credit and titles
+    - loyal team around them
+  speech_habits:
+    - projects voice to the room
+    - storytells with gestures
+  ideal_roles:
+    - CEO / public founder
+    - brand ambassador
+    - creative director
+    - keynote speaker
+    - actor / performer
+  poor_fit_roles:
+    - anonymous back-office
+    - ghostwriter / invisible operator
+    - rule-bound bureaucracy
+  famous_exemplars:
+    - Barack Obama
+    - Madonna
+    - Jennifer Lopez
+
+virgo:
+  element: earth
+  modality: mutable
+  ruler: Mercury
+  symbol: the Maiden (Harvest)
+  dates: "August 23 to September 22"
+  core_archetype: "The craftsperson and analyst. Perfection through detail."
+  strengths:
+    - meticulous eye for detail
+    - organized, systems-minded
+    - practical problem solver
+    - reliable executor
+    - high-quality output
+    - service-oriented
+  weaknesses:
+    - perfectionism slows shipping
+    - harsh inner critic
+    - judgmental of others' sloppiness
+    - hates asking for help
+  motivators:
+    - mastery of craft
+    - being useful to the system
+    - fixing what is broken
+    - clean order
+  fears:
+    - chaos and mess
+    - being found inadequate
+    - wasting effort
+  stress_response: "Over-organizes, nitpicks, works harder alone, silently resentful when overloaded."
+  conflict_style: "Surgical and precise. Points to the error, not the person."
+  leadership_style: "Process-owner. Leads by fixing the system around the team."
+  decision_style: "Data-driven, cross-checked, methodical."
+  risk_tolerance: "low -- wants to eliminate variables before committing"
+  humor_style: "Dry, observational, notices the absurd detail everyone missed."
+  internal_voice: "This could be cleaner. Let me fix it."
+  work_environment_fit:
+    - clean documentation
+    - clear SOPs
+    - skilled peers
+    - quiet focus blocks
+  speech_habits:
+    - precise word choice
+    - corrects small errors reflexively
+  ideal_roles:
+    - QA / compliance
+    - editor / proofreader
+    - operations analyst
+    - systems engineer
+    - accountant / auditor
+  poor_fit_roles:
+    - ambiguous ill-defined roles
+    - fast improv comedy sales
+    - chaotic startup where the rules change daily
+  famous_exemplars:
+    - Beyonce
+    - Keanu Reeves
+    - Warren Buffett
+
+libra:
+  element: air
+  modality: cardinal
+  ruler: Venus
+  symbol: the Scales
+  dates: "September 23 to October 22"
+  core_archetype: "The diplomat and aesthete. Balance, beauty, partnership."
+  strengths:
+    - natural mediator
+    - strong sense of fairness
+    - excellent taste and design eye
+    - charming and socially smooth
+    - sees both sides of a dispute
+    - builds bridges between factions
+  weaknesses:
+    - chronic indecision
+    - avoids hard conversations
+    - over-accommodating
+    - can be passive when action is needed
+  motivators:
+    - harmony and peace
+    - beautiful environments
+    - partnership and collaboration
+    - being liked and fair
+  fears:
+    - open conflict
+    - being disliked
+    - unfair outcomes
+  stress_response: "Freezes on decisions, seeks second opinions, becomes people-pleasing."
+  conflict_style: "Mediates first, retreats second, rarely attacks directly."
+  leadership_style: "Collaborative convener. Builds consensus before moving."
+  decision_style: "Weighs every option, often needs a deadline to commit."
+  risk_tolerance: "low to medium -- prefers options with social buy-in"
+  humor_style: "Charming, light, socially attuned."
+  internal_voice: "What is fair here. Who is being left out."
+  work_environment_fit:
+    - collaborative team
+    - tasteful physical or digital space
+    - partner to bounce decisions with
+  speech_habits:
+    - softens delivery with diplomacy
+    - offers both sides before taking one
+  ideal_roles:
+    - negotiator / mediator
+    - UX / brand designer
+    - lawyer / contracts
+    - partnerships lead
+    - diplomat / BD
+  poor_fit_roles:
+    - sole high-speed decision maker
+    - aggressive debt collector
+    - high-conflict frontline
+  famous_exemplars:
+    - Kim Kardashian
+    - Mahatma Gandhi
+    - John Lennon
+
+scorpio:
+  element: water
+  modality: fixed
+  ruler: Pluto (modern), Mars (traditional)
+  symbol: the Scorpion
+  dates: "October 23 to November 21"
+  core_archetype: "The investigator and strategist. Depth, intensity, hidden power."
+  strengths:
+    - sees through pretense
+    - intense focus and staying power
+    - fearless about dark or hard truths
+    - loyal to the death once trust is earned
+    - magnetic presence
+    - strategic long-game thinker
+  weaknesses:
+    - holds grudges for years
+    - secretive to the point of isolation
+    - jealous or possessive
+    - can be vindictive when crossed
+  motivators:
+    - control over their own destiny
+    - hidden knowledge and truth
+    - transformation (personal and of others)
+    - deep bonds (few, intense)
+  fears:
+    - betrayal
+    - loss of control
+    - superficial exposure
+  stress_response: "Goes silent, watches, plans. Strikes once, decisively, when ready."
+  conflict_style: "Patient, strategic, remembers everything. Will wait years for the right move."
+  leadership_style: "Power behind the throne. Leads through intensity and leverage."
+  decision_style: "Deep research plus gut, then locked-in commitment."
+  risk_tolerance: "medium to high -- calculated, not reckless"
+  humor_style: "Dark, cutting, often taboo or morbid."
+  internal_voice: "I see what you are actually doing. I will remember this."
+  work_environment_fit:
+    - private autonomy
+    - high-stakes work
+    - small trusted inner circle
+    - access to sensitive information
+  speech_habits:
+    - measured and deliberate
+    - strategic silence is a weapon
+  ideal_roles:
+    - investigator / detective / auditor
+    - turnaround operator
+    - security / compliance lead
+    - psychologist / strategist
+    - venture capital due diligence
+  poor_fit_roles:
+    - mass-market bubbly host
+    - radical-transparency oversharer
+    - low-stakes fluff work
+  famous_exemplars:
+    - Bill Gates
+    - Leonardo DiCaprio
+    - Kamala Harris
+
+sagittarius:
+  element: fire
+  modality: mutable
+  ruler: Jupiter
+  symbol: the Archer
+  dates: "November 22 to December 21"
+  core_archetype: "The explorer and philosopher. Arrow aimed at the horizon."
+  strengths:
+    - optimistic and energizing
+    - broad vision and big ideas
+    - honest to a fault
+    - adventurous and adaptable
+    - skilled at cross-cultural work
+    - lifelong learner
+  weaknesses:
+    - blunt to the point of rude
+    - overpromises, underdelivers on detail
+    - restless, avoids commitment
+    - bored by logistics
+  motivators:
+    - freedom and exploration
+    - new experience (travel, ideas, people)
+    - teaching and preaching what they learn
+    - a bigger meaning behind the work
+  fears:
+    - being tied down
+    - narrow-minded environments
+    - missing out on something bigger
+  stress_response: "Bolts, books a trip, starts a new project to escape the old one."
+  conflict_style: "Direct and blunt, then moves on. No grudge, but no filter either."
+  leadership_style: "Vision-setter. Paints the horizon and invites the team on the journey."
+  decision_style: "Big-picture first, details delegated to others."
+  risk_tolerance: "high -- trusts the universe and their luck"
+  humor_style: "Loud, broad, story-driven, often at the edge of appropriate."
+  internal_voice: "There is more out there. Let's go see it."
+  work_environment_fit:
+    - travel or remote freedom
+    - mission-driven brand
+    - diverse team
+    - big ambitious goals
+  speech_habits:
+    - storytells with wide arcs
+    - speaks in generalities, not details
+  ideal_roles:
+    - evangelist / public speaker
+    - international business dev
+    - publisher / professor
+    - travel or adventure operator
+    - founder of a mission-driven venture
+  poor_fit_roles:
+    - granular spreadsheet work
+    - diplomatic tiptoe roles
+    - narrow single-specialty jobs
+  famous_exemplars:
+    - Walt Disney
+    - Taylor Swift
+    - Mark Twain
+
+capricorn:
+  element: earth
+  modality: cardinal
+  ruler: Saturn
+  symbol: the Sea-Goat
+  dates: "December 22 to January 19"
+  core_archetype: "The architect of empires. Long climb, patient, inevitable."
+  strengths:
+    - elite discipline and patience
+    - strategic long-term planner
+    - ambitious and goal-driven
+    - takes responsibility seriously
+    - builds durable structures
+    - mature and composed under pressure
+  weaknesses:
+    - workaholic, neglects rest
+    - emotionally reserved to cold
+    - can be status-obsessed
+    - pessimistic, sees obstacles first
+  motivators:
+    - achievement and legacy
+    - climbing the ladder
+    - respect from elders and peers
+    - mastery of a domain
+  fears:
+    - failure in public
+    - wasted time
+    - being seen as amateur
+  stress_response: "Works harder, grinds longer, isolates. Silently carries too much."
+  conflict_style: "Cold, procedural, wins through position and persistence."
+  leadership_style: "Executive. Sets the plan, holds the standard, delivers."
+  decision_style: "Strategic, risk-weighted, patient. Builds case before moving."
+  risk_tolerance: "low to medium -- measured, never reckless"
+  humor_style: "Dry, deadpan, often self-aware about being the serious one."
+  internal_voice: "Do the work. Then do more. It will compound."
+  work_environment_fit:
+    - clear hierarchy and promotion path
+    - serious peers
+    - long-term compensation (equity, vesting)
+    - measurable milestones
+  speech_habits:
+    - economical with words
+    - commits only to what will be delivered
+  ideal_roles:
+    - CEO / COO
+    - finance director
+    - project manager for large builds
+    - strategy consultant
+    - institutional founder
+  poor_fit_roles:
+    - pure improv creative
+    - unstructured no-deadline art
+    - lighthearted entertainment-first brand
+  famous_exemplars:
+    - Michelle Obama
+    - Elvis Presley
+    - Jeff Bezos
+
+aquarius:
+  element: air
+  modality: fixed
+  ruler: Uranus (modern), Saturn (traditional)
+  symbol: the Water Bearer
+  dates: "January 20 to February 18"
+  core_archetype: "The futurist and reformer. Systems thinker with a rebel streak."
+  strengths:
+    - original ideas (often ahead of their time)
+    - systems and pattern thinking
+    - independent-minded
+    - humanitarian values
+    - comfortable with weird and experimental
+    - intellectually honest
+  weaknesses:
+    - emotionally detached
+    - contrarian just to be contrarian
+    - can seem cold or distant
+    - resists traditional authority
+  motivators:
+    - making a dent in something big
+    - intellectual freedom
+    - future / tech / social reform
+    - being recognized for uniqueness
+  fears:
+    - being ordinary
+    - groupthink and conformity
+    - emotional smothering
+  stress_response: "Retreats into ideas, goes cerebral, distances from feelings."
+  conflict_style: "Detached, logical, argues principles over personalities."
+  leadership_style: "Visionary architect. Designs the system, lets others live in it."
+  decision_style: "Principle-driven, logic-first, stubborn once convinced."
+  risk_tolerance: "medium to high -- tolerant of unconventional bets"
+  humor_style: "Weird, smart, nerdy, absurdist."
+  internal_voice: "Why are we still doing it the old way. There is a better system."
+  work_environment_fit:
+    - research and development
+    - non-hierarchical team
+    - mission-driven org
+    - freedom to experiment
+  speech_habits:
+    - abstract and theoretical
+    - challenges premises before answering
+  ideal_roles:
+    - R and D lead
+    - technology architect
+    - social entrepreneur
+    - data scientist
+    - policy / think-tank analyst
+  poor_fit_roles:
+    - traditional corporate ladder
+    - emotionally intensive frontline work
+    - rigid compliance with no logic behind the rule
+  famous_exemplars:
+    - Oprah Winfrey
+    - Abraham Lincoln
+    - Ellen DeGeneres
+
+pisces:
+  element: water
+  modality: mutable
+  ruler: Neptune (modern), Jupiter (traditional)
+  symbol: the Fish
+  dates: "February 19 to March 20"
+  core_archetype: "The mystic and artist. Dissolves boundaries, feels everything."
+  strengths:
+    - deeply empathic
+    - creative and imaginative
+    - spiritually attuned
+    - adaptable and fluid
+    - gentle and non-judgmental
+    - reads unspoken emotional currents
+  weaknesses:
+    - absorbs other people's moods
+    - avoids hard reality
+    - prone to escapism
+    - poor boundaries
+  motivators:
+    - creative expression
+    - healing or helping others
+    - transcendent experience
+    - emotional and aesthetic depth
+  fears:
+    - harsh criticism
+    - being trapped in cold logic
+    - losing the dream
+  stress_response: "Dissociates, zones out, escapes into fantasy, art, sleep, or substances."
+  conflict_style: "Avoids confrontation, melts and reshapes around obstacles."
+  leadership_style: "Inspirational and compassionate. Leads through emotional resonance."
+  decision_style: "Intuitive and feeling-based, sometimes delayed."
+  risk_tolerance: "medium -- unclear on risk until it arrives"
+  humor_style: "Whimsical, surreal, often gentle or absurdist."
+  internal_voice: "I can feel what they are feeling. There is a softer way."
+  work_environment_fit:
+    - creative or healing setting
+    - low aggressive noise
+    - flexible hours
+    - meaningful mission
+  speech_habits:
+    - metaphor and imagery heavy
+    - trails off mid-sentence when overwhelmed
+  ideal_roles:
+    - artist / musician / writer
+    - therapist / healer / counselor
+    - brand storyteller
+    - nonprofit or mission-driven lead
+    - spiritual or wellness teacher
+  poor_fit_roles:
+    - high-conflict litigation
+    - cutthroat sales floor
+    - rigid quant compliance
+  famous_exemplars:
+    - Albert Einstein
+    - Rihanna
+    - Kurt Cobain

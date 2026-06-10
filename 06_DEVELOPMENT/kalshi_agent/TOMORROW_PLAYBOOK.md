@@ -11,6 +11,19 @@
 2. **News/injury speed (BUILD NEXT)** -- Perplexity/OSINT monitors the day's slate for breaking news (scratches, lineups, weather alerts, announcements) the market hasn't priced yet, and acts in the seconds-to-minutes window before it corrects. A genuine information/speed edge.
 3. **Player-prop research edges** -- where our research read on a specific player (minutes restriction, matchup, rest) beats the market. Props are less efficient than moneylines. (Today's Wemby/Brunson instinct lives here, not in the moneyline.)
 
+## PRE-BET BRIEF (mandatory, PROACTIVE -- comes BEFORE any price/bet talk)
+Operator law (2026-06-04, Rich): be a trading desk, not a reactive researcher. For EVERY game/event
+we might touch, surface a one-screen "form card" UP FRONT, before mentioning a price -- do NOT wait to
+be asked, and do NOT assume he wants to bet. The form card always covers:
+1. **Streaks / recent form** -- win streaks, how each side reached this point (e.g. Knicks 12-0 sweep vs
+   Spurs 7-game Game-7 war). The headline momentum line that reframes the price.
+2. **Rest & schedule spots** -- days off, back-to-backs, travel, Game-7 fatigue. (The most model-able edge:
+   a team off a 7-game series on 2 days rest blowing a 4th-Q lead is a LEGS story, and it changes game to game.)
+3. **Key injuries / availability** -- and what a late scratch would do to the line (news-speed edge).
+4. **Season head-to-head** -- this year's series record + any blowouts / streak-snappers.
+5. **The de-vigged sharp line** -- Vegas no-vig fair %, vs the Kalshi ask. Edge = sharp% - what-we-pay.
+The READ leads; the BET (if any) comes second and only on a real edge. Operator calls the trigger.
+
 ## Tomorrow's routine (automated on e5, no babysitting)
 - **Morning:** scorecard auto-report -- overnight settled predictions, win-rate/Brier/paper-PnL by lane. THIS is the evidence on whether any lane has real edge.
 - **Slate pull:** the day's games/events/weather + new markets (new-market mispricing window).

@@ -1,0 +1,2 @@
+Date,Time,Transaction_ID,Employee_ID,Employee_Name,Category,Subcategory,Product_Name,Item_Name,SKU,Quantity,Size,Item_Description,Unit_Price,Unit_Cost,COGS_Line,Gross_Margin,Qty_Remaining_Before,Qty_Remaining_After,Subtotal,Tax_Rate,Tax_Amount,Line_Total,Payment_Method,Amount_Received,Change_Due,Notes
+2025-12-26,20:33:21,TRX20251226203321266a,1001,Rich,Plant,Plant,"plact, rose","plact, rose",PLA-F810C1D9,1,2 gal,"plact, rose",34.99,0.00,0.00,34.99,0,0,34.99,0.0825,2.89,34.99,CARD,0.00,0.00,

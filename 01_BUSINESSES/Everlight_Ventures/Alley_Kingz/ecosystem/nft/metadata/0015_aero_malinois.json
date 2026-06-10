@@ -1,0 +1,144 @@
+{
+  "name": "Alley Kingz #0015 Aero Malinois",
+  "symbol": "BCARDI",
+  "description": "Aero Malinois, a Epic Striker in the Zoomie Syndicate. The Malinois pilots the Malinois Rig -- sport speed rig -- nitro, drag body, glass-cannon velocity. Signature move: \"Twin Strike\". A playable Alley Kingz battle card on Solana -- the NFT is the card, with gameplay stats written on-chain. Cosmetic art plus gameplay stats; in-game items are for entertainment and utility, not investments. No promised returns.",
+  "image": "ipfs://<IMAGE_CID_DIR>/0015_aero_malinois.png",
+  "animation_url": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_AeroMalinois_Malinois_Seedance_V1.mp4",
+  "external_url": "https://everlightventures.io/cards/0015",
+  "attributes": [
+    {
+      "trait_type": "Card Number",
+      "value": "0015"
+    },
+    {
+      "trait_type": "Faction",
+      "value": "Zoomie Syndicate"
+    },
+    {
+      "trait_type": "Faction Id",
+      "value": "zoomie_syndicate"
+    },
+    {
+      "trait_type": "Breed",
+      "value": "Malinois"
+    },
+    {
+      "trait_type": "Name",
+      "value": "Aero Malinois"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Striker"
+    },
+    {
+      "trait_type": "Cost",
+      "value": 6
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Dash"
+    },
+    {
+      "trait_type": "HP",
+      "value": 1200
+    },
+    {
+      "trait_type": "Damage",
+      "value": 160
+    },
+    {
+      "trait_type": "Attack Speed",
+      "value": 1.0
+    },
+    {
+      "trait_type": "Move Speed",
+      "value": 1.1
+    },
+    {
+      "trait_type": "Range",
+      "value": 1
+    },
+    {
+      "trait_type": "Ability",
+      "value": "Twin Strike"
+    },
+    {
+      "trait_type": "Ability Cooldown",
+      "value": 12
+    },
+    {
+      "trait_type": "Queen Target",
+      "value": false
+    },
+    {
+      "trait_type": "Rig",
+      "value": "Malinois Rig"
+    },
+    {
+      "trait_type": "Rig Class",
+      "value": "sprinter"
+    },
+    {
+      "trait_type": "Weapon Mod",
+      "value": "ram_plow"
+    }
+  ],
+  "properties": {
+    "category": "video",
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "files": [
+      {
+        "uri": "ipfs://<IMAGE_CID_DIR>/0015_aero_malinois.png",
+        "type": "image/png"
+      },
+      {
+        "uri": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_AeroMalinois_Malinois_Seedance_V1.mp4",
+        "type": "video/mp4"
+      }
+    ]
+  },
+  "onchain_attributes": [
+    {
+      "key": "hp",
+      "value": "1200"
+    },
+    {
+      "key": "damage",
+      "value": "160"
+    },
+    {
+      "key": "attack_speed",
+      "value": "1.0"
+    },
+    {
+      "key": "move_speed",
+      "value": "1.1"
+    },
+    {
+      "key": "range",
+      "value": "1"
+    },
+    {
+      "key": "cost",
+      "value": "6"
+    },
+    {
+      "key": "rarity",
+      "value": "Epic"
+    },
+    {
+      "key": "ability_id",
+      "value": "twin_strike"
+    },
+    {
+      "key": "queen_target",
+      "value": "0"
+    }
+  ]
+}

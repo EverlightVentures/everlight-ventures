@@ -106,7 +106,7 @@ function AnalyticsTab() {
         <div className="text-sm font-medium mb-3">System Analytics</div>
         <div className="space-y-2">
           {[
-            { name: "Blinko RAG", url: "http://129.159.38.250:1111", status: "Healthy", notes: "458+ notes" },
+            { name: "Blinko RAG", url: "http://e5-mother:1111", status: "Healthy", notes: "458+ notes" },
             { name: "n8n Workflows", url: "http://129.159.38.250:5678", status: "Active", notes: "400+ integrations" },
             { name: "Langfuse Traces", url: "http://129.159.38.250:3100", status: "Tracking", notes: "AI observability" },
             { name: "Metabase BI", url: "http://129.159.38.250:3200", status: "Ready", notes: "Custom dashboards" },

@@ -41,7 +41,7 @@ import json
 import logging
 import os
 import sys
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -70,6 +70,150 @@ ERADICATED: list[dict] = [
         "memory_ref": "feedback-streubel-permanent-eradication",
     },
 ]
+
+
+# ---------------------------------------------------------------------------
+# DYNAMIC OPT-OUT STORE -- the universal "anyone who says stop" list.
+# Streubel taught us the pattern; this generalizes it. The hardcoded ERADICATED
+# list above is the SUPREME, git-tracked tier (manual sign-off). This JSON store
+# is the GROWING tier: every opt-out reply / complaint lands here automatically
+# via rex_stop_handler -> add_opt_out(). find_hit() checks BOTH lists.
+#
+# Defense in depth: even if this file is lost/corrupt, branded_mailer also checks
+# the suppression list + opted_out_emails.json. APPEND-ONLY JSONL (litigation-safe:
+# cannot be truncated by a bad write; a corrupt line is skipped, never the whole list).
+# Scope tiers + free-mail-domain guard per the legal team's spec (Priya/Imani/Lo).
+# ---------------------------------------------------------------------------
+OPT_OUT_STORE = Path(
+    os.environ.get(
+        "ERADICATION_OPT_OUT_STORE",
+        str(Path(__file__).parent / "dnc_suppression.jsonl"),
+    )
+)
+
+# Never DOMAIN-block these -- blocking gmail.com would suppress the planet. Email-exact
+# only for free-mail. (Over-blocking guard, legal spec section 2.)
+FREE_MAIL_DOMAINS = {
+    "gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "icloud.com", "aol.com",
+    "proton.me", "protonmail.com", "live.com", "msn.com", "ymail.com", "gmx.com",
+    "mail.com", "me.com", "comcast.net", "att.net", "sbcglobal.net", "bellsouth.net",
+}
+
+
+def _load_opt_outs() -> list[dict]:
+    """Load dynamic opt-out records from the append-only JSONL. [] if absent; a bad
+    line is skipped (append-only resilience), full corruption is audited."""
+    out: list[dict] = []
+    try:
+        if OPT_OUT_STORE.exists():
+            for line in OPT_OUT_STORE.read_text().splitlines():
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    out.append(json.loads(line))
+                except Exception:
+                    continue  # skip one bad line, keep the rest
+    except Exception as e:
+        _audit("opt_out_store_unreadable", {"error": str(e), "path": str(OPT_OUT_STORE)})
+    return out
+
+
+def list_opt_outs() -> list[dict]:
+    """Public: every dynamic opt-out record (for the daily report's DNC ledger)."""
+    return _load_opt_outs()
+
+
+def _biz_days_from(dt: datetime, n: int) -> datetime:
+    d, added = dt, 0
+    while added < n:
+        d = d + timedelta(days=1)
+        if d.weekday() < 5:  # Mon-Fri
+            added += 1
+    return d
+
+
+def add_opt_out(
+    email: Optional[str] = None,
+    name: Optional[str] = None,
+    address: Optional[str] = None,
+    lead_id: Optional[str] = None,
+    domains: Optional[list] = None,
+    scope: str = "email_only",
+    source_channel: str = "email_reply",
+    trigger_verbatim: str = "",
+    trigger_pattern: str = "",
+    message_id: str = "",
+    requested_at_utc: Optional[str] = None,
+    lead_ids: Optional[list] = None,
+) -> bool:
+    """The Streubel treatment for ANYONE who opts out. Append-only, idempotent on email.
+    Returns True if newly added.
+
+    scope:
+      "email_only" (default) -> block this email (free-mail domains: email-exact only)
+      "entity"               -> also block the business domain + name (non-free domain)
+      "eradicated"           -> also block address + lead_ids (complaints / legal threats);
+                                promote to the hardcoded ERADICATED tier separately.
+    Stores a court-defensible record: when they asked, when we honored, the 10-business-day
+    legal ceiling, source channel, verbatim trigger, and the reply's Message-ID.
+    """
+    clean_email = (email or "").strip().lower()
+    if not clean_email and not (name or address or lead_id):
+        return False
+    for r in _load_opt_outs():  # idempotent on email
+        if clean_email and clean_email in [e.lower() for e in r.get("emails", [])]:
+            return False
+
+    now = datetime.now(timezone.utc)
+    req = requested_at_utc or now.isoformat()
+    try:
+        req_dt = datetime.fromisoformat(req.replace("Z", "+00:00"))
+    except Exception:
+        req_dt = now
+
+    # Domain blocking: only for entity/eradicated, and NEVER a free-mail domain.
+    block_domains = list(domains or [])
+    if scope in ("entity", "eradicated") and "@" in clean_email:
+        dom = clean_email.split("@", 1)[1]
+        if dom and dom not in FREE_MAIL_DOMAINS and dom not in block_domains:
+            block_domains.append(dom)
+    broad = scope in ("entity", "eradicated")
+    full = scope == "eradicated"
+
+    rec = {
+        "subject_name": name or clean_email or "unknown",
+        "emails": [clean_email] if clean_email else [],
+        "domains": block_domains,
+        "addresses": [address.strip().lower()] if (address and full) else [],
+        "lead_ids": list(lead_ids or ([lead_id] if lead_id else [])),
+        "name_substrings": [name.strip().lower()] if (name and broad) else [],
+        "scope": scope,
+        "reason": f"Opted out via {source_channel}. Permanent DNC.",
+        "requested_at_utc": req,
+        "recorded_at_utc": now.isoformat(),
+        "honored_at_utc": now.isoformat(),
+        "honor_deadline_utc": _biz_days_from(req_dt, 10).isoformat(),
+        "source_channel": source_channel,
+        "trigger_verbatim": (trigger_verbatim or "")[:300],
+        "trigger_pattern_matched": trigger_pattern,
+        "message_id": message_id,
+        "confirmation_sent": False,
+        "operator_visible": True,
+        "promoted_to_eradicated": False,
+        "since": now.date().isoformat(),
+        "memory_ref": "feedback-scoped-eradication-not-global-halt",
+        "recorded_by": "eradication_gate.add_opt_out",
+    }
+    try:
+        OPT_OUT_STORE.parent.mkdir(parents=True, exist_ok=True)
+        with OPT_OUT_STORE.open("a") as fh:   # append-only
+            fh.write(json.dumps(rec) + "\n")
+        _audit("opt_out_added", {"email": clean_email, "scope": scope, "source": source_channel})
+        return True
+    except Exception as e:
+        _audit("opt_out_write_failed", {"error": str(e), "email": clean_email})
+        return False
 
 
 class EradicationViolation(Exception):
@@ -138,8 +282,9 @@ def find_hit(
     """
     Return the eradication record if any field matches; else None.
     Match is OR across fields (any single hit kills the send).
+    Checks BOTH the hardcoded ERADICATED tier AND the growing dynamic opt-out store.
     """
-    for record in ERADICATED:
+    for record in ERADICATED + _load_opt_outs():
         if email and _match(email, record.get("emails", []), mode="exact"):
             return record
         if email and _match(email, record.get("domains", []), mode="domain"):

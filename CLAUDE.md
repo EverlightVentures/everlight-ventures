@@ -40,7 +40,7 @@ Branded Communications Doctrine (mandatory across the entire ecosystem):
 - **Google Docs / HTML reports:** every doc/report goes through `content_tools.n8n_replacements.publish_gdoc()`. Auto-applies gold theme, registers HiveArtifact, posts branded Slack card with "View full report" button.
 - **Calendar invites:** description body is rendered via `content_tools.branded_calendar.render_event_description()` -- gold-banded HTML with agenda, CTA button, agent signature. Drop the output into the Google Calendar `events.insert` `description` field.
 - **SMS (future):** every SMS goes through `content_tools.branded_sms.send_branded_sms()` with `category` = `vip_reply | nurture | bulk | transactional`. Auto-applies "EV:" prefix and "STOP=optout" footer for cold/bulk per TCPA. Twilio not configured yet -- module returns ok=False until env vars are set, callers degrade to email gracefully.
-- **Single source of truth:** the Everlight palette (gold `#D4A843`, dark `#0A0A0A`, light text `#E8E8E8`) and the Playfair/Inter pairing live in `content_tools/report_template.py`. Every other module reads from there. Never hardcode brand colors elsewhere.
+- **Single source of truth:** the Everlight palette (gold `#D4AF37`, dark `#0A0A0A`, light text `#E8E8E8`) and the Playfair/Inter pairing live in `content_tools/report_template.py`. Every other module reads from there. Never hardcode brand colors elsewhere.
 
 The result: every channel a prospect or team member sees -- email, Slack, calendar, SMS, Google Doc, HTML report -- carries the same gold accents, same Playfair Display, same wordmark, same agent attribution. Brand consistency is a default, not a discipline.
 
@@ -288,7 +288,7 @@ Data Flow Rules (CRITICAL):
 - Supabase is the source of truth for ALL production data.
 - Django :8504 = unified ops dashboard. Views: Reports, Blinko RAG, Bot Intel, Agent Performance, Sessions, Analytics, Launch Console, Business OS, Broker OS, Taskboard, Payments, Blackjack, Rewards, Funnel (including /funnel/consulting/)
 - Django on Oracle: /home/opc/hive_django/ (deployed, live)
-- everlightventures.io = React/Vite/Shadcn public site on Cloudflare Pages (NOT Lovable). Code at 06_DEVELOPMENT/everlightventures/. Reads from Supabase only.
+- everlightventures.io = Next.js public site on Cloudflare Pages (NOT Lovable, NOT Vite). Code at 06_DEVELOPMENT/vantaris/ (branch everlightventures.io, auto-deploys on git push). Three.js/framer-motion/gsap front, Supabase back, Stripe checkout live. Verified 2026-06-02: HTTP 200, Cloudflare, _next markers, title "Everlight Ventures | Innovation Meets Opportunity". WARNING: 06_DEVELOPMENT/everlightventures/ is a STALE March Lovable clone, do not edit it. Lead capture via vantaris/supabase/functions/notify-lead/.
 - No local-only state for production features. If it matters, it goes to Supabase.
 - Django apps use `hive_dashboard/supabase_client.py` for all Supabase calls.
 - NEVER hardcode Supabase URLs -- use the shared client module.

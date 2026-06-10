@@ -145,14 +145,39 @@ def is_opt_out_message(text: str) -> bool:
 # OPT-OUT PROCESSING
 # ---------------------------------------------------------------------------
 
-def process_opt_out(email: str, send_confirmation: bool = True) -> bool:
-    """
-    Full opt-out flow:
-    1. Add email to permanent suppression list
-    2. Mark the lead as opted_out in leads_db.json
-    3. Send confirmation email
+# Hostile-trigger patterns -> promote the opt-out to the "eradicated" scope (full block,
+# no confirmation reply). The Streubel lesson: a complaint/threat is not a routine opt-out.
+HOSTILE_PATTERNS = [re.compile(p, re.I) for p in [
+    r"\bbbb\b", r"better business bureau", r"attorney general", r"\bag\b",
+    r"\blawyer\b", r"\battorney\b", r"\bsue\b", r"\blawsuit\b", r"cease and desist",
+    r"\bharass", r"\bspam\b.*\breport", r"\bfuck\b|\bwtf\b", r"report you",
+]]
 
-    Returns True if the email was newly suppressed, False if already suppressed.
+
+def classify_opt_out_scope(text: str, email: str = "") -> str:
+    """email_only (routine) | entity (business wants all contact stopped) | eradicated
+    (complaint / legal threat). Mirrors the legal team's scope spec."""
+    t = text or ""
+    if any(p.search(t) for p in HOSTILE_PATTERNS):
+        return "eradicated"
+    if re.search(r"\b(my (company|firm|business)|anyone here|everyone here|all of us)\b", t, re.I):
+        return "entity"
+    return "email_only"
+
+
+def process_opt_out(email: str, send_confirmation: bool = True,
+                    trigger_text: str = "", message_id: str = "",
+                    requested_at_utc: str = "", name: str = "",
+                    address: str = "", lead_id: str = "") -> bool:
+    """
+    Universal opt-out flow -- the Streubel treatment for ANYONE who says stop:
+    1. Add to permanent suppression list (fast is_suppressed cache)
+    2. Add to the eradication gate's dynamic store (gate-level block on every send path)
+    3. Mark the lead as opted_out in leads_db.json
+    4. Send a transactional confirmation -- UNLESS the opt-out is hostile (eradicated scope),
+       where silence is the honor (never email a complainant).
+
+    Returns True if newly suppressed, False if already suppressed.
     """
     if not email:
         log.warning("process_opt_out called with empty email")
@@ -160,22 +185,36 @@ def process_opt_out(email: str, send_confirmation: bool = True) -> bool:
 
     clean = email.lower().strip()
 
-    # Check if already suppressed
     if is_suppressed(clean):
         log.info(f"{clean} already suppressed -- no action needed")
         return False
 
-    # 1. Add to suppression list
+    scope = classify_opt_out_scope(trigger_text, clean)
+
+    # 1. Fast suppression cache
     _add_to_suppression(clean)
 
-    # 2. Mark lead as opted_out in leads_db.json
+    # 2. Gate-level block (the universal Streubel treatment) -- defensible record
+    try:
+        from eradication_gate import add_opt_out  # type: ignore
+        add_opt_out(
+            email=clean, name=name or None, address=address or None,
+            lead_id=lead_id or None, scope=scope, source_channel="email_reply",
+            trigger_verbatim=trigger_text, message_id=message_id,
+            requested_at_utc=requested_at_utc or None,
+            lead_ids=[lead_id] if lead_id else None,
+        )
+    except Exception as e:
+        log.error(f"eradication_gate.add_opt_out failed for {clean}: {e}")
+
+    # 3. Mark lead opted_out
     _mark_lead_opted_out(clean)
 
-    # 3. Send confirmation
-    if send_confirmation:
+    # 4. Confirmation -- NEVER to a hostile/eradicated opt-out (silence is the honor)
+    if send_confirmation and scope != "eradicated":
         _send_opt_out_confirmation(clean)
 
-    log.info(f"Opt-out processed for {clean}")
+    log.info(f"Opt-out processed for {clean} (scope={scope})")
     return True
 
 

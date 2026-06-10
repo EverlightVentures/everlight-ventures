@@ -1,0 +1,32 @@
+{
+  "name": "Alley Kingz",
+  "symbol": "BCARDI",
+  "description": "Alley Kingz is the 48-card Solana battle collection behind $BCARDD. Cyberpunk dog crews pilot Twisted-Metal street war-rigs down Clash-Royale lanes -- one dog, one currency, one aesthetic, one arcade. Each card is a playable Metaplex Core asset: the NFT IS the card, with gameplay stats (HP, damage, ability) written on-chain via the Core Attribute Plugin and read by the Everlight Arcade game and the marketplace alike. $BCARDD (card #0001) is the $BCARDD coin mascot and the blackjack dealer -- the through-line that ties the coin, the cards, and the arcade to the same dog and the same vanta-black-and-gold color story. In-game items and tokens are for entertainment and utility, not investments. No promised returns. $BCARDD is a community meme coin inspired by $BCARDD the dog; not affiliated with $BCARDD Limited.",
+  "image": "ipfs://<COLLECTION_IMAGE_CID>",
+  "external_url": "https://everlightventures.io/bcardi",
+  "properties": {
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "standard_note": "Metaplex Core Collection (single on-chain account per asset). Confirmed live 2026-06-03: mpl-core 1.10.0, umi 1.5.1.",
+    "ticker": "$BCARDD",
+    "category": "image",
+    "files": [
+      {"uri": "ipfs://<COLLECTION_IMAGE_CID>", "type": "image/png"}
+    ]
+  },
+  "attributes": [
+    {"trait_type": "Collection", "value": "Alley Kingz"},
+    {"trait_type": "Ticker", "value": "$BCARDD"},
+    {"trait_type": "Card Count", "value": 48},
+    {"trait_type": "Factions", "value": 4},
+    {"trait_type": "Mythics", "value": 4},
+    {"trait_type": "Legendary", "value": 1},
+    {"trait_type": "Chain", "value": "Solana"},
+    {"trait_type": "Standard", "value": "Metaplex Core"}
+  ],
+  "_operator_notes": {
+    "royalty_plugin": "Set the Core Royalties plugin on the collection at create time. Per ECOSYSTEM_ARCHITECTURE section 4.4: 2.5% royalty (250 bps) to treasury + 2.5% marketplace fee burned. Royalty basisPoints = 250, creator = treasury wallet.",
+    "update_authority": "Per CHAIN_DECISION_MEMO open item 2: update authority should be a treasury multisig/PDA the game controls, NOT a single hot key, so stat balance-patches are possible but no one key can rewrite every card. Operator decides who holds it before mint.",
+    "image_gated_on_art": "Collection image is a placeholder CID until the collection key-art lands. Swap <COLLECTION_IMAGE_CID> after upload (see upload_assets.md)."
+  }
+}

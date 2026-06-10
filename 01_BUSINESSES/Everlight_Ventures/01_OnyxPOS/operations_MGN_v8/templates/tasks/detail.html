@@ -1,0 +1,57 @@
+
+{% extends "base.html" %}
+
+{% block page_title %}Task Detail{% endblock %}
+{% block header_emoji %}🧾{% endblock %}
+{% block header_title %}Task Detail{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('my_tasks') }}" class="btn btn-secondary">
+  <i data-lucide="arrow-left" style="width:18px;height:18px;"></i>
+  Back
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="grid gap-4" style="grid-template-columns: 2fr 1fr;">
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title"><span class="card-emoji">📌</span> {{ tmpl.Title if tmpl else "Task" }}</h2>
+      <span class="badge badge-info">{{ assignment.Status }}</span>
+    </div>
+    <div class="card-body">
+      <div class="text-muted" style="line-height:1.7;">
+        <div><b>Due:</b> {{ assignment.Due_Date }}</div>
+        <div><b>Assigned:</b> {{ assignment.Assigned_Date }}</div>
+        <div><b>Employee:</b> {{ assignment.Employee_ID }}</div>
+        <div><b>Assigned By:</b> {{ assignment.Assigned_By }}</div>
+        <hr style="opacity:.2; margin:14px 0;">
+        <div><b>Description:</b> {{ tmpl.Description if tmpl else "" }}</div>
+        <hr style="opacity:.2; margin:14px 0;">
+        <div><b>Employee Notes:</b></div>
+        <pre style="white-space:pre-wrap;">{{ assignment.Notes_From_Employee }}</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title"><span class="card-emoji">🕒</span> Timeline</h2>
+      <span class="badge badge-warning">{{ events|length }}</span>
+    </div>
+    <div class="card-body">
+      {% if events|length == 0 %}
+        <div class="text-muted">No events logged yet.</div>
+      {% else %}
+        {% for e in events %}
+          <div class="alert alert-info" style="margin-bottom:10px;">
+            <div style="font-weight:800;">{{ e.Timestamp }}</div>
+            <div><b>{{ e.Event_Type }}</b></div>
+            <div class="text-muted text-sm">{{ e.Event_Data }}</div>
+          </div>
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

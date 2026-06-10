@@ -1,0 +1,144 @@
+{
+  "name": "Alley Kingz #0019 Bolt Corgi",
+  "symbol": "BCARDI",
+  "description": "Bolt Corgi, a Rare Spawner in the Zoomie Syndicate. The Corgi pilots the Corgi Rig -- sport speed rig -- nitro, drag body, glass-cannon velocity. Signature move: \"Spark Pups\". A playable Alley Kingz battle card on Solana -- the NFT is the card, with gameplay stats written on-chain. Cosmetic art plus gameplay stats; in-game items are for entertainment and utility, not investments. No promised returns.",
+  "image": "ipfs://<IMAGE_CID_DIR>/0019_bolt_corgi.png",
+  "animation_url": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_BoltCorgi_Corgi_Seedance_V1.mp4",
+  "external_url": "https://everlightventures.io/cards/0019",
+  "attributes": [
+    {
+      "trait_type": "Card Number",
+      "value": "0019"
+    },
+    {
+      "trait_type": "Faction",
+      "value": "Zoomie Syndicate"
+    },
+    {
+      "trait_type": "Faction Id",
+      "value": "zoomie_syndicate"
+    },
+    {
+      "trait_type": "Breed",
+      "value": "Corgi"
+    },
+    {
+      "trait_type": "Name",
+      "value": "Bolt Corgi"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Spawner"
+    },
+    {
+      "trait_type": "Cost",
+      "value": 4
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Pack"
+    },
+    {
+      "trait_type": "HP",
+      "value": 800
+    },
+    {
+      "trait_type": "Damage",
+      "value": 60
+    },
+    {
+      "trait_type": "Attack Speed",
+      "value": 0.9
+    },
+    {
+      "trait_type": "Move Speed",
+      "value": 0.9
+    },
+    {
+      "trait_type": "Range",
+      "value": 2
+    },
+    {
+      "trait_type": "Ability",
+      "value": "Spark Pups"
+    },
+    {
+      "trait_type": "Ability Cooldown",
+      "value": 12
+    },
+    {
+      "trait_type": "Queen Target",
+      "value": false
+    },
+    {
+      "trait_type": "Rig",
+      "value": "Corgi Rig"
+    },
+    {
+      "trait_type": "Rig Class",
+      "value": "sprinter"
+    },
+    {
+      "trait_type": "Weapon Mod",
+      "value": "ram_plow"
+    }
+  ],
+  "properties": {
+    "category": "video",
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "files": [
+      {
+        "uri": "ipfs://<IMAGE_CID_DIR>/0019_bolt_corgi.png",
+        "type": "image/png"
+      },
+      {
+        "uri": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_BoltCorgi_Corgi_Seedance_V1.mp4",
+        "type": "video/mp4"
+      }
+    ]
+  },
+  "onchain_attributes": [
+    {
+      "key": "hp",
+      "value": "800"
+    },
+    {
+      "key": "damage",
+      "value": "60"
+    },
+    {
+      "key": "attack_speed",
+      "value": "0.9"
+    },
+    {
+      "key": "move_speed",
+      "value": "0.9"
+    },
+    {
+      "key": "range",
+      "value": "2"
+    },
+    {
+      "key": "cost",
+      "value": "4"
+    },
+    {
+      "key": "rarity",
+      "value": "Rare"
+    },
+    {
+      "key": "ability_id",
+      "value": "spark_pups"
+    },
+    {
+      "key": "queen_target",
+      "value": "0"
+    }
+  ]
+}

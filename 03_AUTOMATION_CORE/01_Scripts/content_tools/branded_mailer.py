@@ -72,6 +72,9 @@ def send_branded_email(
     recipient_state: str = "",
     lead_type: str = "",
     state_disclaimer: bool = True,
+    persona_id: str = "",
+    authority_override: bool = False,
+    caller: str = "branded_mailer",
 ) -> MailResult:
     """Send an email wrapped in the Everlight luxury template.
 
@@ -124,6 +127,45 @@ def send_branded_email(
         # If the gate module is missing, FAIL CLOSED. Do not send.
         log.error("eradication_gate module missing -- failing closed: %s", _erad_imp)
         return MailResult(ok=False, error="eradication_gate_module_missing_fail_closed")
+
+    # ============================================================
+    # SEND AUTHORITY GATE -- Layer 3a. NO BYPASSES.
+    # Born 2026-05-17 after the rogue Marquise -> support@groundfloor.us send.
+    # Enforces: persona must be LIVE, in territory, not back-office.
+    # See send_authority_gate.py + senders_authority.yaml for policy.
+    # ============================================================
+    try:
+        from send_authority_gate import (
+            assert_authorized as _auth_assert,
+            derive_persona_id as _auth_derive,
+            SendAuthorityViolation,
+        )
+        _persona = persona_id or _auth_derive(from_email, agent_name)
+        if not _persona:
+            log.error(
+                "send_authority_gate: cannot derive persona_id from "
+                "from_email=%r agent_name=%r -- fail closed",
+                from_email, agent_name,
+            )
+            return MailResult(
+                ok=False,
+                error="authority_blocked:unknown_persona (pass persona_id explicitly)",
+            )
+        for _r in recipients:
+            _auth_assert(
+                persona_id=_persona,
+                recipient_email=_r,
+                recipient_state=recipient_state,
+                caller=caller,
+                override=authority_override,
+            )
+    except SendAuthorityViolation as _auth_err:
+        log.error("SEND AUTHORITY GATE blocked send: %s", _auth_err)
+        return MailResult(ok=False, error=f"authority_blocked:{_auth_err}")
+    except ImportError as _auth_imp:
+        # Fail closed -- never send without authority check.
+        log.error("send_authority_gate module missing -- failing closed: %s", _auth_imp)
+        return MailResult(ok=False, error="authority_gate_module_missing_fail_closed")
 
     try:
         from resend_guard import assert_safe_recipient

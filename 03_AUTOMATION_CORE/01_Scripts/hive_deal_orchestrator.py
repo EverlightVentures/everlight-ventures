@@ -83,7 +83,7 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://jdqqmsmwmbsnlnstyavl.supabase.co")
 SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY", "")
-BLINKO_URL = os.environ.get("BLINKO_URL", "http://129.159.38.250:1111")
+BLINKO_URL = os.environ.get("BLINKO_URL", "http://e5-mother:1111")
 
 # ---------------------------------------------------------------------------
 # Slack channel map

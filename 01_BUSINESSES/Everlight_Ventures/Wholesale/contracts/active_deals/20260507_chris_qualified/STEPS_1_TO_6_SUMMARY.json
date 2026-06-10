@@ -1,0 +1,21 @@
+{
+  "ran_at": "2026-05-07T18:22:41.487603+00:00",
+  "dossier_dir": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/20260507_chris_qualified",
+  "property": "1577  MCMILLAN ST",
+  "viable": false,
+  "data_gaps": [
+    "mailing_city missing",
+    "mailing_state missing",
+    "mailing_zip missing",
+    "year_built missing",
+    "sqft missing",
+    "beds missing"
+  ],
+  "halt_blocking_send": false,
+  "package_html": "/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Wholesale/contracts/active_deals/20260507_chris_qualified/step_6_chris_package/package.html",
+  "next_steps": [
+    "Fix data gaps (year_built, sqft, beds, baths, mailing city/state/zip)",
+    "Justine + Marcus signoff to lift WHOLESALE_OUTBOUND_HALT",
+    "Then: actually send Step 3 outreach via branded_mailer + Lob"
+  ]
+}

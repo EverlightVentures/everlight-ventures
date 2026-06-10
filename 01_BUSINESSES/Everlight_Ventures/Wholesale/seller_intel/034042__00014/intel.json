@@ -1,0 +1,190 @@
+{
+  "lead": {
+    "parcel_id": "034042  00014",
+    "property_address": "1596  GABAY ST",
+    "owner_name": "JONES TOBY T",
+    "owner_mailing_street": "3772SOCORRO",
+    "owner_mailing_city": null,
+    "owner_mailing_state": null,
+    "owner_mailing_zip": null,
+    "is_vacant_lot": null,
+    "total_appraisal_usd": 22700,
+    "sales_history": [
+      {
+        "date": "01/14/2005",
+        "price_text": "$10,000",
+        "deed_or_inst": "05037088",
+        "type_code": "WD",
+        "price_usd": 10000,
+        "year": 2005
+      },
+      {
+        "date": "08/26/2004",
+        "price_text": "$0",
+        "deed_or_inst": "04150016",
+        "type_code": "CD",
+        "price_usd": 0,
+        "year": 2004
+      },
+      {
+        "date": "08/26/2004",
+        "price_text": "$0",
+        "deed_or_inst": "05120609",
+        "type_code": "CD",
+        "price_usd": 0,
+        "year": 2004
+      },
+      {
+        "date": "08/24/2004",
+        "price_text": "$10,217",
+        "deed_or_inst": "04145380",
+        "type_code": "TD",
+        "price_usd": 10217,
+        "year": 2004
+      },
+      {
+        "date": "07/12/2003",
+        "price_text": "$0",
+        "deed_or_inst": "03153657",
+        "type_code": "A",
+        "price_usd": 0,
+        "year": 2003
+      },
+      {
+        "date": "10/27/1997",
+        "price_text": "$0",
+        "deed_or_inst": "GY4229",
+        "type_code": "QC",
+        "price_usd": 0,
+        "year": 1997
+      },
+      {
+        "date": "07/07/1992",
+        "price_text": "$0",
+        "deed_or_inst": "CY4753",
+        "type_code": "WD",
+        "price_usd": 0,
+        "year": 1992
+      },
+      {
+        "date": "07/07/1992",
+        "price_text": "$9,500",
+        "deed_or_inst": "CY4753",
+        "type_code": "WD",
+        "price_usd": 9500,
+        "year": 1992
+      },
+      {
+        "date": "06/09/1992",
+        "price_text": "$6,000",
+        "deed_or_inst": "CX2136",
+        "type_code": "WD",
+        "price_usd": 6000,
+        "year": 1992
+      },
+      {
+        "date": "06/02/1992",
+        "price_text": "$0",
+        "deed_or_inst": "B-17703",
+        "type_code": "PC",
+        "price_usd": 0,
+        "year": 1992
+      },
+      {
+        "date": "11/26/1991",
+        "price_text": "$0",
+        "deed_or_inst": "CN5729",
+        "type_code": "QC",
+        "price_usd": 0,
+        "year": 1991
+      },
+      {
+        "date": "04/10/1991",
+        "price_text": "$0",
+        "deed_or_inst": "660",
+        "type_code": "DN",
+        "price_usd": 0,
+        "year": 1991
+      },
+      {
+        "date": "02/13/1981",
+        "price_text": "$8,000",
+        "deed_or_inst": "S26924",
+        "type_code": "WD",
+        "price_usd": 8000,
+        "year": 1981
+      },
+      {
+        "date": "04/02/1977",
+        "price_text": "$0",
+        "deed_or_inst": "M13420",
+        "type_code": "QC",
+        "price_usd": 0,
+        "year": 1977
+      }
+    ],
+    "tax_sale_marker": "TS2202"
+  },
+  "signals": {
+    "is_estate": false,
+    "estate_decedent_name": null,
+    "is_absentee_outofstate": false,
+    "is_absentee_instate": false,
+    "owner_mailing_apartment": false,
+    "is_llc_owner": false,
+    "is_religious_org_owner": false,
+    "is_long_term_owner": true,
+    "ownership_years": 21,
+    "is_high_value": false,
+    "is_vacant_lot": false,
+    "tax_delinquent_years": "4+",
+    "multiple_sales_in_history": true
+  },
+  "browser_queue": [
+    {
+      "label": "Shelby Register of Deeds -- all deeds in 'JONES TOBY T' name",
+      "url": "https://search.register.shelby.tn.us/search/",
+      "instructions": "Name search 'JONES TOBY T'. Save MHTML of result list. Tells us if owner has OTHER properties in Shelby County (= portfolio = sophisticated investor).",
+      "priority": "HIGH"
+    },
+    {
+      "label": "Obit search -- Google site:legacy.com 'JONES TOBY T' Memphis",
+      "url": "https://www.google.com/search?q=site%3Alegacy.com+%22JONES+TOBY+T%22+Memphis+OR+Tennessee",
+      "instructions": "Click any hit, MHTML the obit. Tells us: death date, age, surviving family names + cities (= heir candidates).",
+      "priority": "LOW"
+    },
+    {
+      "label": "Facebook public search -- JONES TOBY T in Memphis",
+      "url": "https://www.facebook.com/public/JONES+TOBY+T",
+      "instructions": "If profile public, tells us age range, employer, family, recent posts. Don't friend; just look. MHTML the search result page.",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "LinkedIn search -- JONES TOBY T ",
+      "url": "https://www.linkedin.com/search/results/people/?keywords=JONES+TOBY+T+",
+      "instructions": "Profession, employer, tenure. Helps frame the pitch (busy professional = lead with time-saving; recent retiree = lead with simplicity).",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "TN Public Notice + Court Records -- civil/foreclosure history",
+      "url": "https://www.tncourts.gov/courts/public-notices",
+      "instructions": "Search 'JONES TOBY T'. Civil suits, eviction filings, foreclosure starts = financial pressure signals.",
+      "priority": "MEDIUM"
+    }
+  ],
+  "pitch_hooks": [
+    {
+      "name": "long_ownership_dignified_close",
+      "angle": "Honor the time; clean exit",
+      "lead_line": "You've held this property for 21 years \u2014 that's a long time. Memphis values have shifted and so has the cost of carrying property. We can offer a clean, no-surprise close.",
+      "use_when": "Owner held property >=20 years, no estate."
+    },
+    {
+      "name": "back_tax_relief",
+      "angle": "We pay the back tax \u2014 you walk clean",
+      "lead_line": "We see the property's been on the back-tax list for a few years. We pay every dollar of back tax + penalty at closing \u2014 out of OUR side, not yours. You walk away clean.",
+      "use_when": "TS2202 lead. Strong on absentee owners with no plan to develop."
+    }
+  ],
+  "generated_at": "2026-04-29T21:40:36.023398+00:00"
+}

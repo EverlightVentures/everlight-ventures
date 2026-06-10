@@ -1,0 +1,125 @@
+{
+  "lead": {
+    "parcel_id": "024055  00017",
+    "property_address": "1303  MICHIGAN ST",
+    "owner_name": "STOKES IMMANUEL",
+    "owner_mailing_street": "2275LESTERRD",
+    "owner_mailing_city": "NESBIT",
+    "owner_mailing_state": "MS",
+    "owner_mailing_zip": "38651",
+    "is_vacant_lot": true,
+    "total_appraisal_usd": 3200,
+    "sales_history": [
+      {
+        "date": "06/11/2020",
+        "price_text": "$220",
+        "deed_or_inst": "20061619",
+        "type_code": "QC",
+        "price_usd": 220,
+        "year": 2020
+      },
+      {
+        "date": "09/07/2006",
+        "price_text": "$2,961",
+        "deed_or_inst": "9476-3",
+        "type_code": "CH",
+        "price_usd": 2961,
+        "year": 2006
+      },
+      {
+        "date": "02/04/1998",
+        "price_text": "$0",
+        "deed_or_inst": "HH4786",
+        "type_code": "QC",
+        "price_usd": 0,
+        "year": 1998
+      },
+      {
+        "date": "12/30/1997",
+        "price_text": "$0",
+        "deed_or_inst": "HC8046",
+        "type_code": "A",
+        "price_usd": 0,
+        "year": 1997
+      },
+      {
+        "date": "12/30/1997",
+        "price_text": "",
+        "deed_or_inst": "HH4785",
+        "type_code": "A",
+        "year": 1997
+      },
+      {
+        "date": "07/16/1926",
+        "price_text": "$0",
+        "deed_or_inst": "1046-627",
+        "type_code": "WD",
+        "price_usd": 0,
+        "year": 1926
+      }
+    ],
+    "tax_sale_marker": "TS2202"
+  },
+  "signals": {
+    "is_estate": false,
+    "estate_decedent_name": null,
+    "is_absentee_outofstate": false,
+    "is_absentee_instate": true,
+    "owner_mailing_apartment": false,
+    "is_llc_owner": false,
+    "is_religious_org_owner": false,
+    "is_long_term_owner": false,
+    "ownership_years": 6,
+    "is_high_value": false,
+    "is_vacant_lot": true,
+    "tax_delinquent_years": "4+",
+    "multiple_sales_in_history": true
+  },
+  "browser_queue": [
+    {
+      "label": "Shelby Register of Deeds -- all deeds in 'STOKES IMMANUEL' name",
+      "url": "https://search.register.shelby.tn.us/search/",
+      "instructions": "Name search 'STOKES IMMANUEL'. Save MHTML of result list. Tells us if owner has OTHER properties in Shelby County (= portfolio = sophisticated investor).",
+      "priority": "HIGH"
+    },
+    {
+      "label": "Obit search -- Google site:legacy.com 'STOKES IMMANUEL' Memphis",
+      "url": "https://www.google.com/search?q=site%3Alegacy.com+%22STOKES+IMMANUEL%22+Memphis+OR+Tennessee",
+      "instructions": "Click any hit, MHTML the obit. Tells us: death date, age, surviving family names + cities (= heir candidates).",
+      "priority": "LOW"
+    },
+    {
+      "label": "Facebook public search -- STOKES IMMANUEL in NESBIT",
+      "url": "https://www.facebook.com/public/STOKES+IMMANUEL",
+      "instructions": "If profile public, tells us age range, employer, family, recent posts. Don't friend; just look. MHTML the search result page.",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "LinkedIn search -- STOKES IMMANUEL NESBIT",
+      "url": "https://www.linkedin.com/search/results/people/?keywords=STOKES+IMMANUEL+NESBIT",
+      "instructions": "Profession, employer, tenure. Helps frame the pitch (busy professional = lead with time-saving; recent retiree = lead with simplicity).",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "TN Public Notice + Court Records -- civil/foreclosure history",
+      "url": "https://www.tncourts.gov/courts/public-notices",
+      "instructions": "Search 'STOKES IMMANUEL'. Civil suits, eviction filings, foreclosure starts = financial pressure signals.",
+      "priority": "MEDIUM"
+    }
+  ],
+  "pitch_hooks": [
+    {
+      "name": "back_tax_relief",
+      "angle": "We pay the back tax \u2014 you walk clean",
+      "lead_line": "We see the property's been on the back-tax list for a few years. We pay every dollar of back tax + penalty at closing \u2014 out of OUR side, not yours. You walk away clean.",
+      "use_when": "TS2202 lead. Strong on absentee owners with no plan to develop."
+    },
+    {
+      "name": "vacant_lot_quick_cash",
+      "angle": "Lots are inert assets; we move fast",
+      "lead_line": "Vacant lots aren't easy to sell \u2014 agents don't want them, builders take months. We'll wire cash for 1303  MICHIGAN ST in 14 days. No fix-up. No inspection. As-is.",
+      "use_when": "Vacant lot, any owner type."
+    }
+  ],
+  "generated_at": "2026-04-29T21:40:33.600425+00:00"
+}

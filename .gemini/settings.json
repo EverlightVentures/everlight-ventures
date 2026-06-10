@@ -1,0 +1,31 @@
+{
+  "general": {
+    "defaultApprovalMode": "auto_edit",
+    "checkpointing": {
+      "enabled": true
+    }
+  },
+  "context": {
+    "fileName": "GEMINI.md",
+    "includeDirectories": [
+      "/mnt/sdcard/AA_MY_DRIVE"
+    ],
+    "loadMemoryFromIncludeDirectories": true
+  },
+  "tools": {
+    "allowed": [
+      "run_shell_command(git status)",
+      "run_shell_command(git diff)",
+      "run_shell_command(ls)",
+      "run_shell_command(rg)"
+    ],
+    "shell": {
+      "pager": "cat",
+      "showColor": false
+    }
+  },
+  "ui": {
+    "showLineNumbers": true,
+    "hideContextSummary": false
+  }
+}

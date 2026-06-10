@@ -15,7 +15,7 @@ const DEALERS = [
   { id: 'aria', name: 'Aria Sinclair', title: 'Elegant. Composed. Classic Vegas.', color: '#c9a84c' },
   { id: 'marcus', name: 'Marcus Vega', title: 'Intense. Street-smart. No mercy.', color: '#ff6b35' },
   { id: 'kanisha', name: 'Kanisha Thompson', title: 'Warm. Confident. VIP energy.', color: '#e91e63' },
-  { id: 'bacardi', name: 'Bacardi Ice', title: 'Cold. Calculated. Elite.', color: '#00bcd4' },
+  { id: 'bcardd', name: '$BCARDD Ice', title: 'Cold. Calculated. Elite.', color: '#00bcd4' },
 ]
 
 export function WelcomeScreen({ onComplete }: {

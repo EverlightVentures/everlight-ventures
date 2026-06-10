@@ -1,0 +1,60 @@
+{
+  "decks": [
+    {
+      "name": "Slow Roll",
+      "class": "Boneguard Crew",
+      "cards": [
+        "Bacardi",
+        "Stonejaw",
+        "Balboa",
+        "Iron Rottweiler",
+        "Alloy Akita",
+        "Tank Pug",
+        "Holo Husky",
+        "Laser Beagle"
+      ]
+    },
+    {
+      "name": "Split Rush",
+      "class": "Zoomie Syndicate",
+      "cards": [
+        "Jagged",
+        "Circuit Shiba",
+        "Pixel Greyhound",
+        "Neon Whippet",
+        "Aero Malinois",
+        "Drift Sheltie",
+        "Byte Beagle",
+        "Glitch Basenji"
+      ]
+    },
+    {
+      "name": "Control Grid",
+      "class": "Leashbreak Tactix",
+      "cards": [
+        "Rosco",
+        "Synth Collie",
+        "Holo Husky",
+        "Prism Poodle",
+        "Chill Samoyed",
+        "Echo Dalmatian",
+        "Noir Setter",
+        "Signal Pointer"
+      ]
+    },
+    {
+      "name": "Turret Trap",
+      "class": "K9 Circuitry",
+      "cards": [
+        "Crown Foxhound",
+        "Laser Beagle",
+        "Grid Schnauzer",
+        "Volt Corgi",
+        "Flux Pomeranian",
+        "Rail Terrier",
+        "Circuit Retriever",
+        "Nova Shepherd"
+      ]
+    }
+  ]
+}

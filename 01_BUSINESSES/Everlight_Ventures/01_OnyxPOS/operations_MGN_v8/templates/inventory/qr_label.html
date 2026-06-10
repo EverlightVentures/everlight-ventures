@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}QR Label - {{ sku }}{% endblock %}
+
+{% block extra_css %}
+<style>
+  @media print {
+    body { margin: 0; padding: 0; }
+    .no-print { display: none !important; }
+    .label-container { page-break-after: always; }
+  }
+
+  .label-container {
+    width: 4in;
+    height: 2in;
+    border: 2px dashed #ccc;
+    padding: 0.25in;
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+    gap: 0.2in;
+    background: white;
+    color: black;
+  }
+
+  .qr-section {
+    flex-shrink: 0;
+  }
+
+  .qr-section img {
+    width: 1.5in;
+    height: 1.5in;
+    display: block;
+  }
+
+  .info-section {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .sku-text {
+    font-size: 18pt;
+    font-weight: bold;
+    font-family: 'Courier New', monospace;
+    margin-bottom: 8px;
+  }
+
+  .item-name {
+    font-size: 12pt;
+    margin-bottom: 4px;
+  }
+
+  .item-price {
+    font-size: 14pt;
+    font-weight: bold;
+    color: #059669;
+  }
+
+  .print-controls {
+    text-align: center;
+    margin: 20px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="no-print print-controls">
+  <h2>QR Code Label for {{ sku }}</h2>
+  <p>{{ item.get('Item_Name', 'Unknown Item') }}</p>
+  <button onclick="window.print()" class="btn btn-primary">
+    <i data-lucide="printer"></i> Print Label
+  </button>
+  <a href="{{ url_for('edit_inventory', sku=sku) }}" class="btn btn-secondary">
+    <i data-lucide="arrow-left"></i> Back to Item
+  </a>
+</div>
+
+<div class="label-container">
+  <div class="qr-section">
+    <img src="/qr/{{ sku }}.png" alt="QR Code for {{ sku }}">
+  </div>
+  <div class="info-section">
+    <div class="sku-text">{{ sku }}</div>
+    <div class="item-name">{{ item.get('Item_Name', 'Unknown') }}</div>
+    <div class="item-price">${{ item.get('Default_Price', '0.00') }}</div>
+  </div>
+</div>
+
+<div class="no-print" style="text-align: center; margin: 20px; color: #666;">
+  <p>QR Code Format: <code>MGN:SKU:{{ sku }}</code></p>
+  <p>Label Size: 4" × 2" (standard label size)</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  lucide.createIcons();
+</script>
+{% endblock %}

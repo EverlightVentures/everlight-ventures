@@ -12,7 +12,7 @@ from mcp.server import Server
 from mcp.types import TextContent, Tool
 
 WORKSPACE = Path(os.environ.get("WORKSPACE", "/mnt/sdcard/AA_MY_DRIVE"))
-BLINKO_URL = os.environ.get("BLINKO_URL", "http://129.159.38.250:1111").rstrip("/")
+BLINKO_URL = os.environ.get("BLINKO_URL", "http://e5-mother:1111").rstrip("/")
 BLINKO_TOKEN = os.environ.get("BLINKO_TOKEN", "").strip()
 
 server = Server("blinko-memory")

@@ -1,0 +1,19 @@
+[Unit]
+Description=Wealth OS Quarterly Intel Engine -- monthly tax/law sweep
+Documentation=https://github.com/everlightventures (wealth_os)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=opc
+Group=opc
+WorkingDirectory=/home/opc
+EnvironmentFile=/home/opc/.env
+ExecStart=/usr/bin/python3 /home/opc/wealth_intel_runner.py
+StandardOutput=append:/home/opc/_logs/wealth_intel.log
+StandardError=append:/home/opc/_logs/wealth_intel.log
+TimeoutStartSec=900
+
+[Install]
+WantedBy=multi-user.target

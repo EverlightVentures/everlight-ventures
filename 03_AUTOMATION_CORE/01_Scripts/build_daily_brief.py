@@ -37,7 +37,7 @@ from report_template import render_report  # noqa: E402
 
 # Rich's focus areas (per CarMax thesis + current ops emphasis)
 FOCUS_CATEGORIES = [
-    ("Decision Intelligence", "#D4A843"),
+    ("Decision Intelligence", "#D4AF37"),
     ("OSINT & Investigation", "#7ec699"),
     ("Trading & Finance", "#ff9f6b"),
     ("Real Estate & Property", "#a8a3ff"),
@@ -131,7 +131,7 @@ def render_html(date_str: str, intel: dict, xlm: dict, notes: list, pipelines: d
 
     strip = f"""
 <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:20px 0;'>
-  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;'>Date</div>
     <div style='color:#E8E8E8;font-size:22px;font-family:Playfair Display,serif;'>{date_str}</div>
   </div>
@@ -140,12 +140,12 @@ def render_html(date_str: str, intel: dict, xlm: dict, notes: list, pipelines: d
     <div style='color:#E8E8E8;font-size:22px;font-family:Playfair Display,serif;'>${eq:,.2f}</div>
     <div style='color:{mode_color};font-size:11px;'>{mode} &middot; {trades} trades today</div>
   </div>
-  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;'>Pipelines</div>
     <div style='color:#E8E8E8;font-size:22px;font-family:Playfair Display,serif;'>{len(pipelines.get("pipelines", []))}</div>
     <div style='color:#888;font-size:11px;'>active deal keys</div>
   </div>
-  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4A843;'>
+  <div style='background:#1a1a1a;padding:14px 18px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:11px;text-transform:uppercase;'>Memory Hits</div>
     <div style='color:#E8E8E8;font-size:22px;font-family:Playfair Display,serif;'>{len(notes)}</div>
     <div style='color:#888;font-size:11px;'>recent Blinko notes</div>
@@ -181,28 +181,28 @@ def render_html(date_str: str, intel: dict, xlm: dict, notes: list, pipelines: d
     # Memory section
     mem_html = ""
     if notes:
-        mem_html = "<h3 style='font-family:Playfair Display,serif;color:#D4A843;font-size:18px;margin:24px 0 8px;'>From Memory (Blinko, recent)</h3>"
+        mem_html = "<h3 style='font-family:Playfair Display,serif;color:#D4AF37;font-size:18px;margin:24px 0 8px;'>From Memory (Blinko, recent)</h3>"
         for n in notes[:5]:
             content = (n.get("content") or "")[:200]
-            mem_html += f"<div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;font-size:12px;color:#aaa;'>{content}…</div>"
+            mem_html += f"<div style='background:#0d0d0d;border-left:3px solid #D4AF37;padding:10px 14px;margin:6px 0;font-size:12px;color:#aaa;'>{content}…</div>"
 
     # Pipeline section
     pipe_html = ""
     if pipelines.get("pipelines"):
-        pipe_html = "<h3 style='font-family:Playfair Display,serif;color:#D4A843;font-size:18px;margin:24px 0 8px;'>Active Deal Pipelines</h3>"
+        pipe_html = "<h3 style='font-family:Playfair Display,serif;color:#D4AF37;font-size:18px;margin:24px 0 8px;'>Active Deal Pipelines</h3>"
         for p in pipelines["pipelines"][:5]:
-            pipe_html += (f"<div style='background:#0d0d0d;border-left:3px solid #D4A843;padding:10px 14px;margin:6px 0;'>"
-                          f"<code style='color:#D4A843;'>{p.get('deal_key','?')}</code> "
+            pipe_html += (f"<div style='background:#0d0d0d;border-left:3px solid #D4AF37;padding:10px 14px;margin:6px 0;'>"
+                          f"<code style='color:#D4AF37;'>{p.get('deal_key','?')}</code> "
                           f"&middot; {p.get('c',0)} events &middot; last {p.get('last_ts','?')[:19]}</div>")
 
     body = f"""
 <p style='color:#888;font-size:14px;'>
 6 AM PT briefing across Rich's focus areas. Surface free Intel Center resources
 first, then Blinko memory, then live ops state. Per HARD LAW
-<code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;'>tool-search-first</code>.
+<code style='background:#1a1a1a;color:#D4AF37;padding:2px 6px;'>tool-search-first</code>.
 </p>
 {strip}
-<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:24px;margin-top:32px;border-bottom:2px solid #D4A843;padding-bottom:6px;'>
+<h2 style='font-family:Playfair Display,serif;color:#D4AF37;font-size:24px;margin-top:32px;border-bottom:2px solid #D4AF37;padding-bottom:6px;'>
   Intelligence Surfaces
 </h2>
 {''.join(sections)}

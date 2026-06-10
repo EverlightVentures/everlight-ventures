@@ -1,0 +1,8 @@
+{
+  "ts_utc": "2026-05-15T21:14:14.244676+00:00",
+  "host": "localhost",
+  "role": "primary",
+  "job": "test_job",
+  "status": "ok",
+  "extra": {}
+}

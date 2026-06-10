@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: dark;
+}
+
+html, body, #root {
+  background: #0a0a0f;
+  min-height: 100vh;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #e8e8f0;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* Card style used by Reports.jsx idiom */
+.card {
+  background: #12121a;
+  border: 1px solid #1e1e2e;
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.card-hover {
+  transition: all 160ms ease;
+}
+
+.card-hover:hover {
+  border-color: rgba(201, 168, 76, 0.35);
+  background: #161622;
+  transform: translateY(-1px);
+}
+
+/* Department stripe accents */
+.stripe {
+  height: 3px;
+  width: 100%;
+  border-radius: 3px;
+  display: block;
+}
+
+/* Hide scrollbar on filter rows */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
+/* Simple markdown-ish rendering */
+.prose-dark h1 {
+  color: #c9a84c;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 24px 0 12px;
+  border-bottom: 1px solid #1e1e2e;
+  padding-bottom: 8px;
+}
+.prose-dark h2 {
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 600;
+  margin: 20px 0 8px;
+}
+.prose-dark h3 {
+  color: #cccccc;
+  font-size: 15px;
+  font-weight: 600;
+  margin: 16px 0 6px;
+}
+.prose-dark p {
+  color: #ccc;
+  line-height: 1.75;
+  margin: 0 0 12px;
+}
+.prose-dark strong {
+  color: #fff;
+}
+.prose-dark ul {
+  list-style: disc inside;
+  color: #ccc;
+  margin: 0 0 12px;
+  padding-left: 12px;
+}
+.prose-dark li {
+  padding: 3px 0;
+}
+.prose-dark hr {
+  border: none;
+  border-top: 1px solid #1e1e2e;
+  margin: 16px 0;
+}
+.prose-dark code {
+  background: #1e1e2e;
+  color: #c9a84c;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9em;
+}

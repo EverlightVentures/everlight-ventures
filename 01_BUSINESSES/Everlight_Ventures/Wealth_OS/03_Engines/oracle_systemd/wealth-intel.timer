@@ -1,0 +1,13 @@
+[Unit]
+Description=Wealth OS Quarterly Intel monthly trigger (1st @ 7:17 AM PT / 14:17 UTC)
+Requires=wealth-intel.service
+
+[Timer]
+# UTC. 7:17 AM PT = 14:17 UTC standard / 15:17 UTC during PDT.
+# We pick 14:17 to fire reliably even with DST drift; the runner handles its own time logging.
+OnCalendar=*-*-01 14:17:00
+Persistent=true
+RandomizedDelaySec=180
+
+[Install]
+WantedBy=timers.target

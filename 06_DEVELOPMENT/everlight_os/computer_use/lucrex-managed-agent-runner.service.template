@@ -1,0 +1,21 @@
+[Unit]
+Description=Lucrex managed_agent_runner -- Anthropic Managed Agents (cloud)
+Documentation=file:///AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/computer_use/RUNBOOK.md
+After=graphical-session.target
+StartLimitBurst=5
+StartLimitIntervalSec=60
+
+[Service]
+Type=simple
+WorkingDirectory=/AA_MY_DRIVE
+EnvironmentFile=/AA_MY_DRIVE/.env
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/AA_MY_DRIVE/.venv/bin/python3 /AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/computer_use/managed_agent_runner.py
+StandardOutput=append:/AA_MY_DRIVE/_logs/managed_agent_runner.log
+StandardError=append:/AA_MY_DRIVE/_logs/managed_agent_runner.log
+Restart=always
+RestartSec=5
+TimeoutStopSec=15
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,178 @@
+
+{% extends "base.html" %}
+
+{% block page_title %}Analytics{% endblock %}
+{% block header_emoji %}📊{% endblock %}
+{% block header_title %}Investor Dashboard{% endblock %}
+
+{% block header_actions %}
+<a class="btn btn-secondary" href="{{ url_for('owner_dashboard') }}">
+  ← Back
+</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .kpi-grid{display:grid;gap:16px;grid-template-columns:repeat(4,1fr)}
+  .chart-grid{display:grid;gap:16px;grid-template-columns:repeat(2,1fr)}
+  .kpi{padding:16px}
+  .kpi .label{opacity:.75;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+  .kpi .value{font-size:26px;font-weight:900;margin-top:6px}
+  .muted{opacity:.75}
+  .table{width:100%;border-collapse:collapse}
+  .table th,.table td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);text-align:left}
+  .table th{opacity:.8;font-size:12px;text-transform:uppercase;letter-spacing:.3px}
+  @media (max-width:1100px){
+    .kpi-grid{grid-template-columns:repeat(2,1fr)}
+    .chart-grid{grid-template-columns:1fr}
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">📌 Highlights</div>
+    <div class="badge">Live from CSV logs</div>
+  </div>
+  <div class="card-body">
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <label class="muted" style="font-weight:800;">Window:</label>
+      <select id="days" class="input" style="max-width:180px;">
+        <option value="30" selected>Last 30 days</option>
+        <option value="60">Last 60 days</option>
+        <option value="90">Last 90 days</option>
+        <option value="365">Last 12 months</option>
+      </select>
+      <button class="btn btn-primary" id="reload">Reload</button>
+      <span class="muted" id="asof"></span>
+    </div>
+  </div>
+</div>
+
+<div class="kpi-grid" style="margin-top:16px">
+  <div class="card kpi"><div class="label">Today Transactions</div><div class="value" id="k_tx">—</div></div>
+  <div class="card kpi"><div class="label">Today Sales Total</div><div class="value" id="k_sales">—</div></div>
+  <div class="card kpi"><div class="label">Today COGS</div><div class="value" id="k_cogs">—</div></div>
+  <div class="card kpi"><div class="label">Today Gross</div><div class="value" id="k_gross">—</div></div>
+</div>
+
+<div class="chart-grid" style="margin-top:16px">
+  <div class="card">
+    <div class="card-header"><div class="card-title">📈 Sales Trend</div></div>
+    <div class="card-body"><canvas id="salesChart" height="140"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">✅ Gross vs Transactions</div></div>
+    <div class="card-body"><canvas id="grossChart" height="140"></canvas></div>
+  </div>
+</div>
+
+<div class="chart-grid" style="margin-top:16px">
+  <div class="card">
+    <div class="card-header"><div class="card-title">🔮 Projection (7-day avg)</div></div>
+    <div class="card-body"><canvas id="projChart" height="140"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">🏷️ Top Categories</div></div>
+    <div class="card-body">
+      <table class="table" id="catTable">
+        <thead><tr><th>Category</th><th>Revenue</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top:16px">
+  <div class="card-header"><div class="card-title">⭐ Top Items</div></div>
+  <div class="card-body">
+    <table class="table" id="itemTable">
+      <thead><tr><th>Item</th><th>Revenue</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+let salesChart, grossChart, projChart;
+
+function money(x){ return "$" + (Number(x||0).toFixed(2)); }
+
+async function loadDash(){
+  const days = document.getElementById("days").value;
+  const res = await fetch(`/api/analytics/dashboard?days=${days}`);
+  const data = await res.json();
+
+  document.getElementById("asof").textContent = `As of ${data.snapshot.date}`;
+
+  document.getElementById("k_tx").textContent = data.snapshot.tx_count;
+  document.getElementById("k_sales").textContent = money(data.snapshot.sales_total);
+  document.getElementById("k_cogs").textContent = money(data.snapshot.cogs_total);
+  document.getElementById("k_gross").textContent = money(data.snapshot.gross);
+
+  // Charts
+  const labels = data.series.labels;
+  const sales = data.series.sales_total;
+  const gross = data.series.gross;
+  const tx = data.series.tx_count;
+
+  if(salesChart) salesChart.destroy();
+  salesChart = new Chart(document.getElementById("salesChart"), {
+    type: "line",
+    data: { labels, datasets: [{ label:"Sales", data:sales }] },
+    options: { responsive:true, plugins:{ legend:{ display:true } } }
+  });
+
+  if(grossChart) grossChart.destroy();
+  grossChart = new Chart(document.getElementById("grossChart"), {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        { label:"Gross", data:gross },
+        { label:"TX Count", data:tx, yAxisID:"y2" }
+      ]
+    },
+    options: {
+      responsive:true,
+      scales:{
+        y:{ beginAtZero:true },
+        y2:{ beginAtZero:true, position:"right", grid:{ drawOnChartArea:false } }
+      }
+    }
+  });
+
+  if(projChart) projChart.destroy();
+  projChart = new Chart(document.getElementById("projChart"), {
+    type: "line",
+    data: { labels: data.projection.labels, datasets: [{ label:"Projected Sales", data:data.projection.sales_total }] },
+    options: { responsive:true }
+  });
+
+  // Tables
+  const catBody = document.querySelector("#catTable tbody");
+  catBody.innerHTML = "";
+  data.top.categories.forEach(([k,v])=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${k}</td><td>${money(v)}</td>`;
+    catBody.appendChild(tr);
+  });
+
+  const itemBody = document.querySelector("#itemTable tbody");
+  itemBody.innerHTML = "";
+  data.top.items.forEach(([k,v])=>{
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${k}</td><td>${money(v)}</td>`;
+    itemBody.appendChild(tr);
+  });
+}
+
+document.getElementById("reload").addEventListener("click", loadDash);
+document.getElementById("days").addEventListener("change", loadDash);
+loadDash();
+</script>
+{% endblock %}

@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memphis 100 -- Everlight Hunt</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold: #D4A843;
+  --gold-bright: #E8C566;
+  --gold-soft: #8a6f2e;
+  --bg: #0A0A0A;
+  --bg-card: #161616;
+  --bg-card-hover: #1f1f1f;
+  --bg-done: #0d2010;
+  --text: #E8E8E8;
+  --text-dim: #888;
+  --green: #4ade80;
+  --red: #ef4444;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Inter', -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 120px;
+}
+header {
+  position: sticky; top: 0; z-index: 100;
+  background: linear-gradient(180deg, #000 0%, rgba(10,10,10,0.97) 100%);
+  border-bottom: 2px solid var(--gold-soft);
+  padding: 16px 20px 12px;
+  backdrop-filter: blur(10px);
+}
+.brand {
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: 22px;
+  letter-spacing: 0.5px;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+.subtitle {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+}
+.stats-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.count-pill {
+  background: var(--bg-card);
+  border: 1px solid var(--gold-soft);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-weight: 700;
+  font-size: 14px;
+}
+.count-pill .num { color: var(--gold); font-size: 18px; }
+.streak {
+  font-size: 13px;
+  color: var(--gold-bright);
+  font-weight: 600;
+}
+.streak.hot { animation: pulse 1s infinite; }
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+.progress-bar {
+  height: 6px;
+  background: #222;
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold-soft), var(--gold), var(--gold-bright));
+  width: 0%;
+  transition: width 0.4s ease;
+  box-shadow: 0 0 12px var(--gold);
+}
+.section-nav {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+.section-nav button {
+  background: var(--bg-card);
+  border: 1px solid #333;
+  color: var(--text-dim);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.section-nav button:hover, .section-nav button:active {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+main { padding: 20px 16px; max-width: 600px; margin: 0 auto; }
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 24px 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #2a2a2a;
+}
+.section-header h2 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 20px;
+  color: var(--gold);
+}
+.section-progress { font-size: 13px; color: var(--text-dim); font-weight: 600; }
+.card {
+  background: var(--bg-card);
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 10px;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--gold-soft);
+  opacity: 0.4;
+  transition: all 0.25s;
+}
+.card:hover { background: var(--bg-card-hover); border-color: #3a3a3a; }
+.card:hover::before { opacity: 1; background: var(--gold); }
+.card.done {
+  background: var(--bg-done);
+  border-color: #1f3a23;
+  opacity: 0.55;
+}
+.card.done::before { background: var(--green); opacity: 1; }
+.card.done .addr { text-decoration: line-through; color: #6a6a6a; }
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.num-badge {
+  background: var(--bg);
+  border: 1px solid var(--gold-soft);
+  color: var(--gold);
+  font-weight: 800;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  min-width: 38px;
+  text-align: center;
+  flex-shrink: 0;
+}
+.addr {
+  flex: 1;
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: -0.3px;
+  line-height: 1.1;
+  color: var(--text);
+  word-wrap: break-word;
+}
+.meta-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.tag {
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 4px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  background: #1f1f1f;
+  border: 1px solid #333;
+  color: var(--text-dim);
+}
+.tag.zip { color: var(--gold); border-color: var(--gold-soft); }
+.parcel-line {
+  font-family: ui-monospace, 'SF Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  letter-spacing: 0.3px;
+}
+.btn-row { display: flex; gap: 8px; }
+.btn {
+  flex: 1;
+  padding: 11px 12px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  text-align: center;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn-open {
+  background: linear-gradient(135deg, var(--gold-soft) 0%, var(--gold) 100%);
+  color: #000;
+}
+.btn-open:active { transform: scale(0.97); }
+.btn-done {
+  background: var(--bg);
+  color: var(--text-dim);
+  border: 1px solid #333;
+}
+.btn-done:active { transform: scale(0.97); }
+.btn-done.is-done {
+  background: var(--green);
+  color: #000;
+  border-color: var(--green);
+}
+.celebrate {
+  position: fixed;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  font-family: 'Playfair Display', serif;
+  font-weight: 900;
+  font-size: 64px;
+  color: var(--gold);
+  text-shadow: 0 0 24px var(--gold);
+  opacity: 0;
+  z-index: 1000;
+}
+.celebrate.show {
+  animation: celebrate 1.2s ease;
+}
+@keyframes celebrate {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  30% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+  60% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -65%) scale(1); }
+}
+.fab {
+  position: fixed;
+  bottom: 20px; right: 20px;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold-soft), var(--gold-bright));
+  color: #000;
+  border: none;
+  font-size: 22px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(212, 168, 67, 0.4);
+  z-index: 50;
+  transition: transform 0.2s;
+}
+.fab:active { transform: scale(0.92); }
+.banner {
+  background: var(--bg-card);
+  border: 1px solid var(--gold-soft);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  margin-bottom: 16px;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+.banner b { color: var(--gold); }
+@media (min-width: 700px) {
+  main { max-width: 760px; }
+  .grid-mode main { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">EVERLIGHT VENTURES</div>
+  <div class="subtitle">Memphis 100 — Chris Acquisition Hunt</div>
+  <div class="stats-row">
+    <div class="count-pill"><span class="num" id="done-count">0</span> / 100</div>
+    <div class="streak" id="streak"></div>
+    <div style="margin-left: auto; font-size: 12px; color: var(--text-dim);" id="time-stat">--</div>
+  </div>
+  <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+  <div class="section-nav">
+    <button onclick="jumpTo('sec1')">§1 · 1-25</button>
+    <button onclick="jumpTo('sec2')">§2 · 26-50</button>
+    <button onclick="jumpTo('sec3')">§3 · 51-75</button>
+    <button onclick="jumpTo('sec4')">§4 · 76-100</button>
+    <button onclick="resetAll()" style="border-color: var(--red); color: var(--red);">↻ Reset</button>
+  </div>
+</header>
+<main>
+  <div class="banner">
+    <b>How this works:</b> tap <b>Open</b> on a card → assessor page loads in a new tab → wait 2 sec for page to fully render → Chrome menu → <b>Save Page As</b> → Webpage Single File (.mht) → save into <b>Memphis Property Downloads/</b> folder. Come back here, tap <b>✓ Done</b>. Your progress saves automatically.
+  </div>
+  <div id="cards-container"></div>
+</main>
+<div class="celebrate" id="celebrate">★</div>
+<button class="fab" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+<script>
+const PROPS = [{"n": 1, "addr": "101 LUCY", "zip": "38106", "parcel": "024058  00005", "parcel_url": "024058%20%2000005"}, {"n": 2, "addr": "108 E OLIVE", "zip": "38106", "parcel": "024055  00038", "parcel_url": "024055%20%2000038"}, {"n": 3, "addr": "1112 SAXON", "zip": "38106", "parcel": "026013  00022", "parcel_url": "026013%20%2000022"}, {"n": 4, "addr": "1174 S ORLEANS", "zip": "38106", "parcel": "025043  00027", "parcel_url": "025043%20%2000027"}, {"n": 5, "addr": "1250 DUNNAVANT", "zip": "38106", "parcel": "026056  00056", "parcel_url": "026056%20%2000056"}, {"n": 6, "addr": "1252 MARKSMAN", "zip": "38106", "parcel": "025049  00024", "parcel_url": "025049%20%2000024"}, {"n": 7, "addr": "1261 CARLTON", "zip": "38106", "parcel": "060170  00016", "parcel_url": "060170%20%2000016"}, {"n": 8, "addr": "1298 ENGLEWOOD", "zip": "38106", "parcel": "026032  00030", "parcel_url": "026032%20%2000030"}, {"n": 9, "addr": "1303 MICHIGAN", "zip": "38106", "parcel": "024055  00017", "parcel_url": "024055%20%2000017"}, {"n": 10, "addr": "1329 MICHIGAN", "zip": "38106", "parcel": "024055  00028", "parcel_url": "024055%20%2000028"}, {"n": 11, "addr": "1363 ETHLYN", "zip": "38106", "parcel": "048018  00007", "parcel_url": "048018%20%2000007"}, {"n": 12, "addr": "1382 FLORIDA", "zip": "38106", "parcel": "024047  00022", "parcel_url": "024047%20%2000022"}, {"n": 13, "addr": "1391 S MAIN", "zip": "38106", "parcel": "024050  00008", "parcel_url": "024050%20%2000008"}, {"n": 14, "addr": "1393 VALSE", "zip": "38106", "parcel": "060067  00007", "parcel_url": "060067%20%2000007"}, {"n": 15, "addr": "1402 TEXAS", "zip": "38106", "parcel": "024050  00028", "parcel_url": "024050%20%2000028"}, {"n": 16, "addr": "1411 RICHMOND", "zip": "38106", "parcel": "026056  00018", "parcel_url": "026056%20%2000018"}, {"n": 17, "addr": "1420 ENGLEWOOD", "zip": "38106", "parcel": "026043  00029", "parcel_url": "026043%20%2000029"}, {"n": 18, "addr": "1430 SILVER", "zip": "38106", "parcel": "048034  00013", "parcel_url": "048034%20%2000013"}, {"n": 19, "addr": "1467 E MCLEMORE", "zip": "38106", "parcel": "031005  00003", "parcel_url": "031005%20%2000003"}, {"n": 20, "addr": "1477 RAVEN", "zip": "38106", "parcel": "060057  00004", "parcel_url": "060057%20%2000004"}, {"n": 21, "addr": "1535 RAYBURN", "zip": "38106", "parcel": "035093  00003", "parcel_url": "035093%20%2000003"}, {"n": 22, "addr": "1536 S THIRD", "zip": "38106", "parcel": "035093  00032", "parcel_url": "035093%20%2000032"}, {"n": 23, "addr": "1537 WILSON", "zip": "38106", "parcel": "048003  00007", "parcel_url": "048003%20%2000007"}, {"n": 24, "addr": "1539 S ORLEANS", "zip": "38106", "parcel": "034033  00003", "parcel_url": "034033%20%2000003"}, {"n": 25, "addr": "1549 S MCMILLAN", "zip": "38106", "parcel": "034026  00007", "parcel_url": "034026%20%2000007"}, {"n": 26, "addr": "1562 CLEMENTINE", "zip": "38106", "parcel": "060157  00016", "parcel_url": "060157%20%2000016"}, {"n": 27, "addr": "1563 S MCMILLAN", "zip": "38106", "parcel": "034026  00011", "parcel_url": "034026%20%2000011"}, {"n": 28, "addr": "1573 PATTON", "zip": "38106", "parcel": "035100  00013", "parcel_url": "035100%20%2000013"}, {"n": 29, "addr": "1577 MCMILLAN", "zip": "38106", "parcel": "034026  00014", "parcel_url": "034026%20%2000014"}, {"n": 30, "addr": "1598 S CARNEGIE", "zip": "38106", "parcel": "034026  00022", "parcel_url": "034026%20%2000022"}, {"n": 31, "addr": "162 CANNON", "zip": "38106", "parcel": "C0244A A00012", "parcel_url": "C0244A%20A00012"}, {"n": 32, "addr": "1632 CLANCY", "zip": "38106", "parcel": "034074  00025", "parcel_url": "034074%20%2000025"}, {"n": 33, "addr": "1686 NETHERWOOD", "zip": "38106", "parcel": "031025  00011", "parcel_url": "031025%20%2000011"}, {"n": 34, "addr": "1754 PRESTON", "zip": "38106", "parcel": "049024  00053", "parcel_url": "049024%20%2000053"}, {"n": 35, "addr": "1777 WESTMORE", "zip": "38106", "parcel": "060079  00038", "parcel_url": "060079%20%2000038"}, {"n": 36, "addr": "1820 ROZELLE", "zip": "38106", "parcel": "060086  00034", "parcel_url": "060086%20%2000034"}, {"n": 37, "addr": "2463 W BALL", "zip": "38106", "parcel": "060010  00077", "parcel_url": "060010%20%2000077"}, {"n": 38, "addr": "2547 DON KRAG", "zip": "38106", "parcel": "060166  00047M", "parcel_url": "060166%20%2000047M"}, {"n": 39, "addr": "2608 DONALD", "zip": "38106", "parcel": "060154  00019", "parcel_url": "060154%20%2000019"}, {"n": 40, "addr": "270 E CAMBRIDGE", "zip": "38106", "parcel": "013023  00012", "parcel_url": "013023%20%2000012"}, {"n": 41, "addr": "30 E UTAH", "zip": "38106", "parcel": "024038  00022", "parcel_url": "024038%20%2000022"}, {"n": 42, "addr": "309 LUCY", "zip": "38106", "parcel": "013053  00002", "parcel_url": "013053%20%2000002"}, {"n": 43, "addr": "348 E CAMBRIDGE", "zip": "38106", "parcel": "013053  00029", "parcel_url": "013053%20%2000029"}, {"n": 44, "addr": "361 E SIMPSON", "zip": "38106", "parcel": "013052  00012", "parcel_url": "013052%20%2000012"}, {"n": 45, "addr": "38 W MITCHELL", "zip": "38106", "parcel": "075061  00012", "parcel_url": "075061%20%2000012"}, {"n": 46, "addr": "418 E LUCY", "zip": "38106", "parcel": "013052  00042", "parcel_url": "013052%20%2000042"}, {"n": 47, "addr": "493 E OLIVE", "zip": "38106", "parcel": "025056  00007", "parcel_url": "025056%20%2000007"}, {"n": 48, "addr": "498 E WALKER", "zip": "38106", "parcel": "025019  00013", "parcel_url": "025019%20%2000013"}, {"n": 49, "addr": "523 E GAGE", "zip": "38106", "parcel": "049010  00010", "parcel_url": "049010%20%2000010"}, {"n": 50, "addr": "530 CAMBRIDGE", "zip": "38106", "parcel": "025051  00020", "parcel_url": "025051%20%2000020"}, {"n": 51, "addr": "97 SIMPSON", "zip": "38106", "parcel": "024059  00003", "parcel_url": "024059%20%2000003"}, {"n": 52, "addr": "1200 GRAND", "zip": "38114", "parcel": "061007  00001", "parcel_url": "061007%20%2000001"}, {"n": 53, "addr": "1257 AIRWAYS", "zip": "38114", "parcel": "029050  00005", "parcel_url": "029050%20%2000005"}, {"n": 54, "addr": "1778 WILDROSE", "zip": "38114", "parcel": "059031  00068", "parcel_url": "059031%20%2000068"}, {"n": 55, "addr": "1949 BOYLE", "zip": "38114", "parcel": "060104  00003", "parcel_url": "060104%20%2000003"}, {"n": 56, "addr": "1986 BOYLE", "zip": "38114", "parcel": "060103  00026", "parcel_url": "060103%20%2000026"}, {"n": 57, "addr": "2179 FRISCO", "zip": "38114", "parcel": "060109  00001C", "parcel_url": "060109%20%2000001C"}, {"n": 58, "addr": "2183 FRISCO", "zip": "38114", "parcel": "060109  00003C", "parcel_url": "060109%20%2000003C"}, {"n": 59, "addr": "2242 MALONE", "zip": "38114", "parcel": "047020  00075", "parcel_url": "047020%20%2000075"}, {"n": 60, "addr": "2358 ENTERPRISE", "zip": "38114", "parcel": "061004  00068", "parcel_url": "061004%20%2000068"}, {"n": 61, "addr": "2467 DWIGHT", "zip": "38114", "parcel": "060119  00004", "parcel_url": "060119%20%2000004"}, {"n": 62, "addr": "2657 DUNN", "zip": "38114", "parcel": "047033  00012", "parcel_url": "047033%20%2000012"}, {"n": 63, "addr": "2731 KETCHUM", "zip": "38114", "parcel": "060137  00174", "parcel_url": "060137%20%2000174"}, {"n": 64, "addr": "2884 FLORA", "zip": "38114", "parcel": "059021  00015", "parcel_url": "059021%20%2000015"}, {"n": 65, "addr": "338 W PERSON", "zip": "38114", "parcel": "035015  00014", "parcel_url": "035015%20%2000014"}, {"n": 66, "addr": "959 KEATING", "zip": "38114", "parcel": "061009  00008", "parcel_url": "061009%20%2000008"}, {"n": 67, "addr": "2868 PARK", "zip": "38127", "parcel": "045027  00019", "parcel_url": "045027%20%2000019"}, {"n": 68, "addr": "3272 DAWN", "zip": "38127", "parcel": "069004  00114", "parcel_url": "069004%20%2000114"}, {"n": 69, "addr": "3781 SAINT ELMO", "zip": "38127", "parcel": "090058  00006", "parcel_url": "090058%20%2000006"}, {"n": 70, "addr": "4489 SUNNY VIEW", "zip": "38127", "parcel": "071058  00006", "parcel_url": "071058%20%2000006"}, {"n": 71, "addr": "4492 RACHAEL", "zip": "38127", "parcel": "071058  00019", "parcel_url": "071058%20%2000019"}, {"n": 72, "addr": "5177 SCHOOL", "zip": "38127", "parcel": "M0115   00330", "parcel_url": "M0115%20%20%2000330"}, {"n": 73, "addr": "917 N SECOND", "zip": "38127", "parcel": "022002  00006", "parcel_url": "022002%20%2000006"}, {"n": 74, "addr": "1093 WALK", "zip": "38109", "parcel": "026075  00014", "parcel_url": "026075%20%2000014"}, {"n": 75, "addr": "1131 MARGARET", "zip": "38109", "parcel": "082044  00048", "parcel_url": "082044%20%2000048"}, {"n": 76, "addr": "121 W MALLORY", "zip": "38109", "parcel": "050023  00005", "parcel_url": "050023%20%2000005"}, {"n": 77, "addr": "1226 MARGARET", "zip": "38109", "parcel": "082044  00067", "parcel_url": "082044%20%2000067"}, {"n": 78, "addr": "1269 DES ARC", "zip": "38109", "parcel": "082056  00005", "parcel_url": "082056%20%2000005"}, {"n": 79, "addr": "1529 E MALLORY", "zip": "38109", "parcel": "060046  00003", "parcel_url": "060046%20%2000003"}, {"n": 80, "addr": "1970 KANSAS", "zip": "38109", "parcel": "050051  00011", "parcel_url": "050051%20%2000011"}, {"n": 81, "addr": "1986 RIVERSIDE", "zip": "38109", "parcel": "050016  00030", "parcel_url": "050016%20%2000030"}, {"n": 82, "addr": "2117 FLORIDA", "zip": "38109", "parcel": "050037  00010", "parcel_url": "050037%20%2000010"}, {"n": 83, "addr": "213 HOLLAND", "zip": "38109", "parcel": "050048  00002", "parcel_url": "050048%20%2000002"}, {"n": 84, "addr": "229 W FRANK", "zip": "38109", "parcel": "050010  00013", "parcel_url": "050010%20%2000013"}, {"n": 85, "addr": "26 E BODLEY", "zip": "38109", "parcel": "050078  00024", "parcel_url": "050078%20%2000024"}, {"n": 86, "addr": "283 MODDER", "zip": "38109", "parcel": "035037  00002", "parcel_url": "035037%20%2000002"}, {"n": 87, "addr": "286 E WALDORF", "zip": "38109", "parcel": "035097  00004", "parcel_url": "035097%20%2000004"}, {"n": 88, "addr": "29 E RAINES", "zip": "38109", "parcel": "076035  00031", "parcel_url": "076035%20%2000031"}, {"n": 89, "addr": "294 W FAY", "zip": "38109", "parcel": "035013  00022", "parcel_url": "035013%20%2000022"}, {"n": 90, "addr": "4232 TOMAHAWK", "zip": "38109", "parcel": "075130  00019", "parcel_url": "075130%20%2000019"}, {"n": 91, "addr": "506 TONTO", "zip": "38109", "parcel": "075148  00016", "parcel_url": "075148%20%2000016"}, {"n": 92, "addr": "5308 NORMA", "zip": "38109", "parcel": "082049  00024", "parcel_url": "082049%20%2000024"}, {"n": 93, "addr": "5362 AIRVIEW", "zip": "38109", "parcel": "082050  00057", "parcel_url": "082050%20%2000057"}, {"n": 94, "addr": "836 E BODLEY", "zip": "38109", "parcel": "049069  00012", "parcel_url": "049069%20%2000012"}, {"n": 95, "addr": "1307 AUSTIN", "zip": "38108", "parcel": "041043  00020", "parcel_url": "041043%20%2000020"}, {"n": 96, "addr": "1432 SUNSET", "zip": "38108", "parcel": "043010  00028", "parcel_url": "043010%20%2000028"}, {"n": 97, "addr": "1433 STONEWALL", "zip": "38108", "parcel": "040061  00019", "parcel_url": "040061%20%2000019"}, {"n": 98, "addr": "1443 STONEWALL", "zip": "38108", "parcel": "040061  00017", "parcel_url": "040061%20%2000017"}, {"n": 99, "addr": "1447 STONEWALL", "zip": "38108", "parcel": "040061  00016", "parcel_url": "040061%20%2000016"}, {"n": 100, "addr": "1479 POPE", "zip": "38108", "parcel": "043012  00009", "parcel_url": "043012%20%2000009"}];
+const STORAGE_KEY = 'mem100_done_v1';
+const TIME_KEY = 'mem100_times_v1';
+let doneSet = new Set(JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+let times = JSON.parse(localStorage.getItem(TIME_KEY) || '[]');
+let lastDoneTs = null;
+
+function render() {
+  const container = document.getElementById('cards-container');
+  container.innerHTML = '';
+  const sections = [
+    {id:'sec1', label:'Section 1 · 38106 (hottest zip)', range:[1,25]},
+    {id:'sec2', label:'Section 2 · 38106 continued', range:[26,50]},
+    {id:'sec3', label:'Section 3 · 38114 + 38127 + 38109', range:[51,75]},
+    {id:'sec4', label:'Section 4 · 38109 + 38108', range:[76,100]},
+  ];
+  sections.forEach(sec => {
+    const secProps = PROPS.filter(p => p.n >= sec.range[0] && p.n <= sec.range[1]);
+    const secDone = secProps.filter(p => doneSet.has(p.parcel)).length;
+    const secEl = document.createElement('div');
+    secEl.id = sec.id;
+    secEl.innerHTML = `<div class="section-header"><h2>${sec.label}</h2><span class="section-progress">${secDone}/${secProps.length}</span></div>`;
+    secProps.forEach(p => {
+      const isDone = doneSet.has(p.parcel);
+      const card = document.createElement('div');
+      card.className = 'card' + (isDone ? ' done' : '');
+      card.innerHTML = `
+        <div class="card-top">
+          <div class="num-badge">#${p.n}</div>
+          <div class="addr">${p.addr}</div>
+        </div>
+        <div class="meta-row">
+          <span class="tag zip">${p.zip}</span>
+          <span class="tag">TS2202</span>
+          <span class="tag">SFR</span>
+        </div>
+        <div class="parcel-line">parcel · ${p.parcel}</div>
+        <div class="btn-row">
+          <a class="btn btn-open" href="https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=${p.parcel_url}" target="_blank">↗ Open</a>
+          <button class="btn btn-done ${isDone ? 'is-done' : ''}" onclick="toggleDone('${p.parcel}', this)">${isDone ? '✓ Done' : '○ Mark Done'}</button>
+        </div>
+      `;
+      secEl.appendChild(card);
+    });
+    container.appendChild(secEl);
+  });
+  updateStats();
+}
+function toggleDone(parcel, btn) {
+  const card = btn.closest('.card');
+  if (doneSet.has(parcel)) {
+    doneSet.delete(parcel);
+    card.classList.remove('done');
+    btn.classList.remove('is-done');
+    btn.innerHTML = '○ Mark Done';
+  } else {
+    doneSet.add(parcel);
+    card.classList.add('done');
+    btn.classList.add('is-done');
+    btn.innerHTML = '✓ Done';
+    times.push(Date.now());
+    if (times.length > 10) times = times.slice(-10);
+    localStorage.setItem(TIME_KEY, JSON.stringify(times));
+    celebrate(doneSet.size);
+  }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify([...doneSet]));
+  updateStats();
+  // re-render section progress
+  render();
+}
+function celebrate(n) {
+  const el = document.getElementById('celebrate');
+  let msg = '★';
+  if (n === 25) msg = 'Q1 done!';
+  else if (n === 50) msg = 'Halfway!';
+  else if (n === 75) msg = 'Almost!';
+  else if (n === 100) msg = '★ DONE ★';
+  else if (n % 10 === 0) msg = `${n}!`;
+  else msg = '★';
+  el.innerHTML = msg;
+  el.classList.remove('show');
+  void el.offsetWidth;
+  el.classList.add('show');
+}
+function updateStats() {
+  const n = doneSet.size;
+  document.getElementById('done-count').textContent = n;
+  document.getElementById('progress-fill').style.width = n + '%';
+  // Streak (last N within 5 min of each other)
+  let streak = 0;
+  const now = Date.now();
+  for (let i = times.length - 1; i >= 0; i--) {
+    if ((times[i+1] || now) - times[i] < 5*60*1000 || i === times.length-1) {
+      streak++;
+    } else break;
+  }
+  const streakEl = document.getElementById('streak');
+  if (streak >= 3) {
+    streakEl.textContent = `🔥 ${streak} streak`;
+    streakEl.className = 'streak hot';
+  } else { streakEl.textContent = ''; streakEl.className = 'streak'; }
+  // Time stat
+  if (times.length >= 2) {
+    const diffs = [];
+    for (let i = 1; i < times.length; i++) diffs.push(times[i] - times[i-1]);
+    const avgMs = diffs.reduce((a,b)=>a+b, 0) / diffs.length;
+    const avgSec = Math.round(avgMs / 1000);
+    const remaining = 100 - n;
+    const etaMin = Math.round(remaining * avgSec / 60);
+    document.getElementById('time-stat').textContent = `~${avgSec}s/each · ${etaMin}m left`;
+  }
+}
+function jumpTo(id) { document.getElementById(id).scrollIntoView({behavior:'smooth', block:'start'}); }
+function resetAll() {
+  if (!confirm('Reset all progress?')) return;
+  doneSet.clear(); times = [];
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(TIME_KEY);
+  render();
+}
+render();
+</script>
+</body>
+</html>

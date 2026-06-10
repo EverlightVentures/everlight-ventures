@@ -46,7 +46,7 @@ def md_to_html(md: str) -> str:
                 tag = "th" if i == 0 else "td"
                 style = "padding:8px;border-bottom:1px solid #2a2a2a;text-align:left;"
                 if i == 0:
-                    style += "border-bottom:2px solid #D4A843;background:#1a1a1a;color:#D4A843;"
+                    style += "border-bottom:2px solid #D4AF37;background:#1a1a1a;color:#D4AF37;"
                 cell_html = "".join(f"<{tag} style='{style}'>{inline_md(c)}</{tag}>" for c in cells)
                 out.append(f"<tr>{cell_html}</tr>")
             out.append("</table>")
@@ -56,7 +56,7 @@ def md_to_html(md: str) -> str:
     def inline_md(text: str) -> str:
         # Code spans first (so other replacements don't break them)
         text = re.sub(r"`([^`]+)`",
-                      r"<code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>\1</code>",
+                      r"<code style='background:#1a1a1a;color:#D4AF37;padding:2px 6px;border-radius:3px;font-family:JetBrains Mono,monospace;font-size:13px;'>\1</code>",
                       text)
         # Bold
         text = re.sub(r"\*\*([^*]+)\*\*", r"<strong style='color:#E8E8E8;'>\1</strong>", text)
@@ -64,7 +64,7 @@ def md_to_html(md: str) -> str:
         text = re.sub(r"(?<!\*)\*([^*]+)\*(?!\*)", r"<em>\1</em>", text)
         # Links
         text = re.sub(r"\[([^\]]+)\]\(([^)]+)\)",
-                      r"<a href='\2' style='color:#D4A843;text-decoration:underline;'>\1</a>",
+                      r"<a href='\2' style='color:#D4AF37;text-decoration:underline;'>\1</a>",
                       text)
         return text
 
@@ -77,7 +77,7 @@ def md_to_html(md: str) -> str:
             flush_table()
             if not in_code:
                 lang = line[3:].strip()
-                out.append(f"<pre style='background:#0d0d0d;color:#E8E8E8;padding:16px;border-left:3px solid #D4A843;overflow-x:auto;font-family:JetBrains Mono,monospace;font-size:13px;line-height:1.5;margin:16px 0;'><code class='{lang}'>")
+                out.append(f"<pre style='background:#0d0d0d;color:#E8E8E8;padding:16px;border-left:3px solid #D4AF37;overflow-x:auto;font-family:JetBrains Mono,monospace;font-size:13px;line-height:1.5;margin:16px 0;'><code class='{lang}'>")
                 in_code = True
             else:
                 out.append("</code></pre>")
@@ -93,17 +93,17 @@ def md_to_html(md: str) -> str:
         if line.startswith("# "):
             flush_list()
             flush_table()
-            out.append(f"<h1 style='font-family:Playfair Display,serif;color:#D4A843;font-size:28px;margin:24px 0 12px;border-bottom:2px solid #2a2a2a;padding-bottom:8px;'>{inline_md(line[2:])}</h1>")
+            out.append(f"<h1 style='font-family:Playfair Display,serif;color:#D4AF37;font-size:28px;margin:24px 0 12px;border-bottom:2px solid #2a2a2a;padding-bottom:8px;'>{inline_md(line[2:])}</h1>")
             continue
         if line.startswith("## "):
             flush_list()
             flush_table()
-            out.append(f"<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin:20px 0 10px;'>{inline_md(line[3:])}</h2>")
+            out.append(f"<h2 style='font-family:Playfair Display,serif;color:#D4AF37;font-size:22px;margin:20px 0 10px;'>{inline_md(line[3:])}</h2>")
             continue
         if line.startswith("### "):
             flush_list()
             flush_table()
-            out.append(f"<h3 style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:18px;margin:16px 0 8px;border-left:3px solid #D4A843;padding-left:10px;'>{inline_md(line[4:])}</h3>")
+            out.append(f"<h3 style='font-family:Playfair Display,serif;color:#E8E8E8;font-size:18px;margin:16px 0 8px;border-left:3px solid #D4AF37;padding-left:10px;'>{inline_md(line[4:])}</h3>")
             continue
         if line.startswith("#### "):
             flush_list()

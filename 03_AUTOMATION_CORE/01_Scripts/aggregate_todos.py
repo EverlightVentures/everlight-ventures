@@ -157,7 +157,7 @@ def render_html(items: list[dict]) -> str:
         src = it.get("source", "")
         src_html = (f"<span style='color:#666;font-size:12px;font-family:JetBrains Mono,monospace;'>"
                     f" -- {src}</span>") if src else ""
-        return (f"<li style='margin:6px 0;padding:8px 12px;background:#0d0d0d;border-left:3px solid #D4A843;{style}'>"
+        return (f"<li style='margin:6px 0;padding:8px 12px;background:#0d0d0d;border-left:3px solid #D4AF37;{style}'>"
                 f"{text}{src_html}</li>")
 
     # Hand-add the two manual-Rich blockers we already know about, so they're at top
@@ -199,23 +199,23 @@ def render_html(items: list[dict]) -> str:
     body = f"""
 <p style='color:#888;font-size:14px;'>
 Live aggregator -- pulls TODO / DEFERRED / BLOCKED items across the workspace.
-Re-render any time with <code style='background:#1a1a1a;color:#D4A843;padding:2px 6px;'>python3 03_AUTOMATION_CORE/01_Scripts/aggregate_todos.py</code>
+Re-render any time with <code style='background:#1a1a1a;color:#D4AF37;padding:2px 6px;'>python3 03_AUTOMATION_CORE/01_Scripts/aggregate_todos.py</code>
 or via the Master Hub button. Last refreshed: {datetime.now().strftime('%Y-%m-%d %H:%M')}.
 </p>
 
-<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin-top:32px;'>
+<h2 style='font-family:Playfair Display,serif;color:#D4AF37;font-size:22px;margin-top:32px;'>
   Open -- needs Rich ({len(pinned_rich) + len(rich_items)})
 </h2>
 <p style='color:#888;font-size:13px;'>Manual steps that can't be automated: browser auth, credential generation, account decisions.</p>
 {rich_html}
 
-<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin-top:32px;'>
+<h2 style='font-family:Playfair Display,serif;color:#D4AF37;font-size:22px;margin-top:32px;'>
   Open -- system will execute ({len(pinned_sys) + len(sys_items)})
 </h2>
 <p style='color:#888;font-size:13px;'>Queued for the next auto-mode session. No Rich action needed.</p>
 {sys_html}
 
-<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin-top:32px;'>
+<h2 style='font-family:Playfair Display,serif;color:#D4AF37;font-size:22px;margin-top:32px;'>
   Done -- recent ({len(completed_today) + min(30, len(done_items))})
 </h2>
 <p style='color:#888;font-size:13px;'>Recently shipped. Strikethrough for the satisfaction.</p>

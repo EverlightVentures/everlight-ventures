@@ -1,0 +1,100 @@
+{
+  "lead": {
+    "parcel_id": "034033  00003",
+    "property_address": "1539 S ORLEANS ST",
+    "owner_name": "GREEN SAMANTHA G",
+    "owner_mailing_street": "1138NGERMANTOWNPKWYSTE101-301",
+    "owner_mailing_city": "CORDOVA",
+    "owner_mailing_state": "TN",
+    "owner_mailing_zip": "38016",
+    "is_vacant_lot": true,
+    "total_appraisal_usd": 7000,
+    "sales_history": [
+      {
+        "date": "08/30/2002",
+        "price_text": "$17,500",
+        "deed_or_inst": "02158046",
+        "type_code": "WD",
+        "price_usd": 17500,
+        "year": 2002
+      },
+      {
+        "date": "12/27/1967",
+        "price_text": "$0",
+        "deed_or_inst": "6311-27",
+        "type_code": "UN",
+        "price_usd": 0,
+        "year": 1967
+      }
+    ],
+    "tax_sale_marker": "TS2202"
+  },
+  "signals": {
+    "is_estate": false,
+    "estate_decedent_name": null,
+    "is_absentee_outofstate": false,
+    "is_absentee_instate": true,
+    "owner_mailing_apartment": false,
+    "is_llc_owner": false,
+    "is_religious_org_owner": false,
+    "is_long_term_owner": true,
+    "ownership_years": 24,
+    "is_high_value": false,
+    "is_vacant_lot": true,
+    "tax_delinquent_years": "4+",
+    "multiple_sales_in_history": false
+  },
+  "browser_queue": [
+    {
+      "label": "Shelby Register of Deeds -- all deeds in 'GREEN SAMANTHA G' name",
+      "url": "https://search.register.shelby.tn.us/search/",
+      "instructions": "Name search 'GREEN SAMANTHA G'. Save MHTML of result list. Tells us if owner has OTHER properties in Shelby County (= portfolio = sophisticated investor).",
+      "priority": "HIGH"
+    },
+    {
+      "label": "Obit search -- Google site:legacy.com 'GREEN SAMANTHA G' Memphis",
+      "url": "https://www.google.com/search?q=site%3Alegacy.com+%22GREEN+SAMANTHA+G%22+Memphis+OR+Tennessee",
+      "instructions": "Click any hit, MHTML the obit. Tells us: death date, age, surviving family names + cities (= heir candidates).",
+      "priority": "LOW"
+    },
+    {
+      "label": "Facebook public search -- GREEN SAMANTHA G in CORDOVA",
+      "url": "https://www.facebook.com/public/GREEN+SAMANTHA+G",
+      "instructions": "If profile public, tells us age range, employer, family, recent posts. Don't friend; just look. MHTML the search result page.",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "LinkedIn search -- GREEN SAMANTHA G CORDOVA",
+      "url": "https://www.linkedin.com/search/results/people/?keywords=GREEN+SAMANTHA+G+CORDOVA",
+      "instructions": "Profession, employer, tenure. Helps frame the pitch (busy professional = lead with time-saving; recent retiree = lead with simplicity).",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "TN Public Notice + Court Records -- civil/foreclosure history",
+      "url": "https://www.tncourts.gov/courts/public-notices",
+      "instructions": "Search 'GREEN SAMANTHA G'. Civil suits, eviction filings, foreclosure starts = financial pressure signals.",
+      "priority": "MEDIUM"
+    }
+  ],
+  "pitch_hooks": [
+    {
+      "name": "long_ownership_dignified_close",
+      "angle": "Honor the time; clean exit",
+      "lead_line": "You've held this property for 24 years \u2014 that's a long time. Memphis values have shifted and so has the cost of carrying property. We can offer a clean, no-surprise close.",
+      "use_when": "Owner held property >=20 years, no estate."
+    },
+    {
+      "name": "back_tax_relief",
+      "angle": "We pay the back tax \u2014 you walk clean",
+      "lead_line": "We see the property's been on the back-tax list for a few years. We pay every dollar of back tax + penalty at closing \u2014 out of OUR side, not yours. You walk away clean.",
+      "use_when": "TS2202 lead. Strong on absentee owners with no plan to develop."
+    },
+    {
+      "name": "vacant_lot_quick_cash",
+      "angle": "Lots are inert assets; we move fast",
+      "lead_line": "Vacant lots aren't easy to sell \u2014 agents don't want them, builders take months. We'll wire cash for 1539 S ORLEANS ST in 14 days. No fix-up. No inspection. As-is.",
+      "use_when": "Vacant lot, any owner type."
+    }
+  ],
+  "generated_at": "2026-04-29T21:40:34.764690+00:00"
+}

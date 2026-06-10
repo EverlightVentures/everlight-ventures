@@ -1,0 +1,2 @@
+Transaction_ID,Date,Time,Employee_ID,Employee_Name,Item_Count,Subtotal,Tax,Grand_Total,Payment_Method,Amount_Received,Change_Due,Receipt_Number,Notes
+TRX20251222102208e6ea,2025-12-22,10:22:08,1001,Rich,5,29.95,2.47,32.42,CASH,40.00,7.58,TRX20251222102208e6ea,

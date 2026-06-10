@@ -1,0 +1,48 @@
+{
+  "generated_at": "2026-05-18T21:58:55.499068+00:00",
+  "drafts": [
+    {
+      "parcel_id": "048003 00007",
+      "address": "1537 WILSON ST, MEMPHIS, TN",
+      "owner": "Love Greater",
+      "mailing_state": "NM",
+      "draft_path": "/mnt/sdcard/AA_MY_DRIVE/_state/piper_drafts/048003_00007__1537_WILSON_ST.html",
+      "blocked": "no_owner_email_yet"
+    },
+    {
+      "parcel_id": "048003  00007",
+      "address": "1537  WILSON ST, MEMPHIS, TN",
+      "owner": "Love Greater",
+      "mailing_state": "NM",
+      "draft_path": "/mnt/sdcard/AA_MY_DRIVE/_state/piper_drafts/048003__00007__1537__WILSON_ST.html",
+      "blocked": "no_owner_email_yet"
+    },
+    {
+      "parcel_id": "024055 00038",
+      "address": "108 E OLIVE AVE, MEMPHIS, TN",
+      "owner": "Bennie Leggett",
+      "mailing_state": "CA",
+      "draft_path": "/mnt/sdcard/AA_MY_DRIVE/_state/piper_drafts/024055_00038__108_E_OLIVE_AVE.html",
+      "blocked": "no_owner_email_yet"
+    },
+    {
+      "parcel_id": "024055  00038",
+      "address": "108 E OLIVE AVE, MEMPHIS, TN",
+      "owner": "Bennie Leggett",
+      "mailing_state": "CA",
+      "draft_path": "/mnt/sdcard/AA_MY_DRIVE/_state/piper_drafts/024055__00038__108_E_OLIVE_AVE.html",
+      "blocked": "no_owner_email_yet"
+    },
+    {
+      "parcel_id": "060067 00007",
+      "address": "1393 VALSE, MEMPHIS, TN",
+      "owner": "Trezden Matthews",
+      "mailing_state": "GA",
+      "draft_path": "/mnt/sdcard/AA_MY_DRIVE/_state/piper_drafts/060067_00007__1393_VALSE.html",
+      "blocked": "no_owner_email_yet"
+    }
+  ],
+  "skip_trace_required": true,
+  "skip_trace_tool": "Wholesale/skip_trace/intel_enricher.py",
+  "next_action": "Run intel_enricher on each parcel owner to resolve owner_email; then drafts become sendable through branded_mailer."
+}

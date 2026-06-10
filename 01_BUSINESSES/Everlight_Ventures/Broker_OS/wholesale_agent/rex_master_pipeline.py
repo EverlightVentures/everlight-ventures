@@ -53,7 +53,16 @@ TODAY = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 SLACK_TOKEN = os.environ.get("SLACK_BOT_TOKEN", "")
 SLACK_CHANNEL = "C0ANLLV8JAC"
 
-BLINKO_URL = "http://129.159.38.250:1111/api/v1/note/upsert"
+# Brain feed is LOCAL-FIRST so it is intact even when e5-mother (the remote vector
+# layer) is down. Order: local blinko-lite -> local tunnel -> e5-mother tailnet.
+# On total failure we enqueue to the offline drain queue -- a note NEVER vanishes.
+# Doctrine: brain-intact-always + [[feedback_offline_first_bidirectional_sync]].
+BLINKO_CANDIDATES = [
+    "http://127.0.0.1:2700/api/v1/note/upsert",   # local blinko-lite (canonical offline brain)
+    "http://127.0.0.1:1111/api/v1/note/upsert",   # local keepalive instance / tunnel
+    "http://e5-mother:1111/api/v1/note/upsert",    # remote RAG (when tailnet is up)
+]
+_BLINKO_QUEUE = Path("/mnt/sdcard/AA_MY_DRIVE/_logs/blinko_log_queue")
 
 
 def post_slack(text: str, title: str = "Rex Master Pipeline"):
@@ -84,12 +93,26 @@ def post_slack(text: str, title: str = "Rex Master Pipeline"):
 
 
 def log_blinko(summary: str, details: str = ""):
+    """Write a session note to the brain, local-first. Falls back to the offline
+    queue so the write survives even if every Blinko endpoint is down."""
+    import urllib.request
+    content = f"# Hive Session: {summary}\n#hive/wholesale #hive/pipeline\n\n{details}"
+    body = json.dumps({"content": content, "type": 1}).encode()
+    for url in BLINKO_CANDIDATES:
+        try:
+            req = urllib.request.Request(
+                url, data=body,
+                headers={"Content-Type": "application/json"}, method="POST")
+            with urllib.request.urlopen(req, timeout=4) as resp:
+                if resp.status < 300:
+                    return  # landed in the brain
+        except Exception:
+            continue
+    # Every endpoint failed -- preserve the note in the offline queue (drained later).
     try:
-        import requests
-        content = f"# Hive Session: {summary}\n#hive/wholesale #hive/pipeline\n\n{details}"
-        requests.post(BLINKO_URL,
-            headers={"Content-Type": "application/json"},
-            json={"content": content, "type": 1}, timeout=10)
+        _BLINKO_QUEUE.mkdir(parents=True, exist_ok=True)
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%f")
+        (_BLINKO_QUEUE / f"wholesale_{stamp}.md").write_text(content)
     except Exception:
         pass
 

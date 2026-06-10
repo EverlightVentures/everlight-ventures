@@ -1,0 +1,144 @@
+{
+  "name": "Alley Kingz #0004 Iron Rottweiler",
+  "symbol": "BCARDI",
+  "description": "Iron Rottweiler, a Epic Vanguard in the Boneguard Crew. The Rottweiler pilots the Rottweiler Rig -- armored bruiser rig -- ram plow, plate armor, slow and unstoppable. Signature move: \"Overclock Rage\". A playable Alley Kingz battle card on Solana -- the NFT is the card, with gameplay stats written on-chain. Cosmetic art plus gameplay stats; in-game items are for entertainment and utility, not investments. No promised returns.",
+  "image": "ipfs://<IMAGE_CID_DIR>/0004_iron_rottweiler.png",
+  "animation_url": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_IronRottweiler_Rottweiler_Seedance_V1.mp4",
+  "external_url": "https://everlightventures.io/cards/0004",
+  "attributes": [
+    {
+      "trait_type": "Card Number",
+      "value": "0004"
+    },
+    {
+      "trait_type": "Faction",
+      "value": "Boneguard Crew"
+    },
+    {
+      "trait_type": "Faction Id",
+      "value": "boneguard_crew"
+    },
+    {
+      "trait_type": "Breed",
+      "value": "Rottweiler"
+    },
+    {
+      "trait_type": "Name",
+      "value": "Iron Rottweiler"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Epic"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Vanguard"
+    },
+    {
+      "trait_type": "Cost",
+      "value": 9
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Pack"
+    },
+    {
+      "trait_type": "HP",
+      "value": 2400
+    },
+    {
+      "trait_type": "Damage",
+      "value": 140
+    },
+    {
+      "trait_type": "Attack Speed",
+      "value": 0.7
+    },
+    {
+      "trait_type": "Move Speed",
+      "value": 0.5
+    },
+    {
+      "trait_type": "Range",
+      "value": 1
+    },
+    {
+      "trait_type": "Ability",
+      "value": "Overclock Rage"
+    },
+    {
+      "trait_type": "Ability Cooldown",
+      "value": 14
+    },
+    {
+      "trait_type": "Queen Target",
+      "value": false
+    },
+    {
+      "trait_type": "Rig",
+      "value": "Rottweiler Rig"
+    },
+    {
+      "trait_type": "Rig Class",
+      "value": "bruiser"
+    },
+    {
+      "trait_type": "Weapon Mod",
+      "value": "ram_plow"
+    }
+  ],
+  "properties": {
+    "category": "video",
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "files": [
+      {
+        "uri": "ipfs://<IMAGE_CID_DIR>/0004_iron_rottweiler.png",
+        "type": "image/png"
+      },
+      {
+        "uri": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_IronRottweiler_Rottweiler_Seedance_V1.mp4",
+        "type": "video/mp4"
+      }
+    ]
+  },
+  "onchain_attributes": [
+    {
+      "key": "hp",
+      "value": "2400"
+    },
+    {
+      "key": "damage",
+      "value": "140"
+    },
+    {
+      "key": "attack_speed",
+      "value": "0.7"
+    },
+    {
+      "key": "move_speed",
+      "value": "0.5"
+    },
+    {
+      "key": "range",
+      "value": "1"
+    },
+    {
+      "key": "cost",
+      "value": "9"
+    },
+    {
+      "key": "rarity",
+      "value": "Epic"
+    },
+    {
+      "key": "ability_id",
+      "value": "overclock_rage"
+    },
+    {
+      "key": "queen_target",
+      "value": "0"
+    }
+  ]
+}

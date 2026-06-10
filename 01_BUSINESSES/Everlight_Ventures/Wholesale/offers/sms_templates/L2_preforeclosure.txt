@@ -1,0 +1,1 @@
+Hi {first_name}, I'm Piper with Everlight Ventures. I saw your property at {address} is heading to auction. We pay cash and can close before the auction date, saving your credit. Any interest in an offer? Reply STOP to opt out.

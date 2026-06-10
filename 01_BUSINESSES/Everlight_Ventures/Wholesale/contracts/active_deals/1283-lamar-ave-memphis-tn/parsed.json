@@ -1,0 +1,15 @@
+{
+  "source": "shelby_assessor_curl",
+  "source_url": "https://www.assessormelvinburgess.com/propertyDetails?IR=true&parcelid=015011%20%2000011",
+  "parsed_at": "2026-05-08T01:22:23+00:00",
+  "parcel_id": "015011  00011",
+  "property_address": "1283  LAMAR AVE",
+  "owner_name": "SIMS LARRY D AND KIM G SIMS",
+  "land_use": "- DUPLEX",
+  "year_built": 1943,
+  "sqft": 1612,
+  "land_appraisal_usd": 60000,
+  "building_appraisal_usd": 104200,
+  "total_appraisal_usd": 164200,
+  "subdivision": null
+}

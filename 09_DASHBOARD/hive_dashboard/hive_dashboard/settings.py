@@ -36,7 +36,7 @@ REPORTS_DIR = os.environ.get(
 )
 BLINKO_API_URL = os.environ.get(
     'BLINKO_API_URL',
-    'http://129.159.38.250:1111',
+    'http://e5-mother:1111',
 )
 
 INSTALLED_APPS = [

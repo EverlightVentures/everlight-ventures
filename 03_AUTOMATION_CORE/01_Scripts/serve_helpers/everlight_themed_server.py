@@ -29,7 +29,7 @@ from pathlib import Path
 
 # Brand palette (matches content_tools/report_template.py + master hub at :2000)
 PALETTE = {
-    "gold":       "#d4a843",
+    "gold":       "#D4AF37",
     "gold_hot":   "#ffcd3c",
     "dark":       "#0a0a0a",
     "card":       "#14140e",

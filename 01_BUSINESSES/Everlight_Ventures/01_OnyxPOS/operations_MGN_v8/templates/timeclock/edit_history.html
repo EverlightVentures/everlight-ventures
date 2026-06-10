@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block page_title %}Edit History{% endblock %}
+{% block header_emoji %}🧾{% endblock %}
+{% block header_title %}Timeclock Edit History{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom:16px;">
+  <div class="card-header">
+    <div class="card-title">Filters</div>
+  </div>
+  <div class="card-body">
+    <form method="GET">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">Employee</label>
+          <select class="form-input" name="employee_id">
+            <option value="">All employees</option>
+            {% for e in employees %}
+            <option value="{{ e.Employee_ID }}">{{ e.Employee_Name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Days</label>
+          <input class="form-input" name="days" type="number" value="{{ selected_days }}">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Apply</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <div class="card-title">Edit log</div>
+  </div>
+  <div class="card-body">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Employee</th>
+          <th>Action</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for h in history %}
+        <tr>
+          <td>{{ h.Timestamp or h.Date }}</td>
+          <td>{{ h.Employee_Name or h.Employee_ID }}</td>
+          <td>{{ h.Action or "" }}</td>
+          <td>{{ h.Notes or "" }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4">No edit history found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

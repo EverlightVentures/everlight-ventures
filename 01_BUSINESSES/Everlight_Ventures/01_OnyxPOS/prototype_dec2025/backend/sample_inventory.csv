@@ -1,0 +1,11 @@
+sku,name,category,sell_price,cost_price,stock_on_hand,reorder_point,barcode
+COFFEE-001,Espresso Beans,Coffee,15.99,8.50,150,20,1234567890001
+COFFEE-002,House Blend,Coffee,12.99,6.75,200,30,1234567890002
+COFFEE-003,Decaf Blend,Coffee,13.99,7.25,100,15,1234567890003
+BAKERY-001,Croissant,Bakery,3.50,1.25,50,10,1234567890004
+BAKERY-002,Blueberry Muffin,Bakery,4.25,1.75,40,8,1234567890005
+BAKERY-003,Chocolate Chip Cookie,Bakery,2.75,0.95,80,15,1234567890006
+DRINK-001,Orange Juice,Beverages,4.99,2.25,60,12,1234567890007
+DRINK-002,Bottled Water,Beverages,1.99,0.75,150,25,1234567890008
+MERCH-001,Coffee Mug,Merchandise,12.99,5.50,30,5,1234567890009
+MERCH-002,Travel Tumbler,Merchandise,19.99,9.25,20,5,1234567890010

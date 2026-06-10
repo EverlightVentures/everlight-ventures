@@ -1,0 +1,4 @@
+Employee_ID,Pay_Type,Hourly_Rate,Salary_Amount,Pay_Frequency,Federal_Filing_Status,State_Filing_Status,Federal_Allowances,State_Allowances,Additional_Withholding,Direct_Deposit,Bank_Account,Bank_Routing,Effective_Date,Last_Updated,Notes
+1001,SALARY,25,70000,MONTHLY,SINGLE,SINGLE,1,1,0,N,,,2025-12-13,2025-12-13 14:33:35,
+1002,SALARY,25,70000,MONTHLY,SINGLE,SINGLE,1,1,0,N,,,2025-12-13,2025-12-13 14:37:12,
+1004,HOURLY,50.0,0,BIWEEKLY,SINGLE,SINGLE,1,1,0,N,,,2025-12-21,2025-12-21 01:05:04,

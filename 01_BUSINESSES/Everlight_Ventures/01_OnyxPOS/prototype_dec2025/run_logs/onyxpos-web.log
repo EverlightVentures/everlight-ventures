@@ -1,0 +1,12 @@
+
+> onyxpos-web@0.0.0 dev
+> vite
+
+
+  VITE v7.3.0  ready in 575 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+6:48:06 PM [vite] (client) hmr update /src/components/PricingCalculator.jsx, /src/index.css
+9:00:23 AM [vite] .env changed, restarting server...
+9:00:23 AM [vite] server restarted.

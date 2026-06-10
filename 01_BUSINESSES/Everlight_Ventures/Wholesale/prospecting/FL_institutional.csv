@@ -1,0 +1,5 @@
+lead_id,address,city,state,zip,owner_name,email,phone,estimated_arv,beds,baths,sqft,year_built,lead_type,distress,status,touches,first_contacted,last_contacted,last_message,reply_received,offer_amount,outcome,source,created_at
+,"4118 LORETTO RD, JACKSONVILLE, FL 32223",JACKSONVILLE,FL,,ST AUGUSTINE DIOCESE OF,,,1485429,,,,,high_equity,,contacted,,,,,,,,attom_scale,2026-03-21
+lead_9a9fa391cc,"1022 OAKLEY ST, JACKSONVILLE, FL 32202",JACKSONVILLE,FL,32202,TRACE REDEVELOPMENT LC,,,102568,3,0,0,0,high_equity,high_equity,new,0,,,,False,,,attom_cache,2026-04-24T05:09:24.321143+00:00
+lead_d206251b14,"1021 E 13TH ST, JACKSONVILLE, FL 32206",JACKSONVILLE,FL,32206,FAB RENAB PROPERTY,,,125489,4,0,0,0,high_equity,high_equity,new,0,,,,False,,,attom_cache,2026-04-24T05:09:24.321228+00:00
+lead_b8b7a61b93,"6334 HARLOW BLVD, JACKSONVILLE, FL 32210",JACKSONVILLE,FL,32210,FKH SFR PROPCO G LP,,,215940,3,0,0,0,high_equity,high_equity,new,0,,,,False,,,attom_cache,2026-04-24T05:09:24.321392+00:00

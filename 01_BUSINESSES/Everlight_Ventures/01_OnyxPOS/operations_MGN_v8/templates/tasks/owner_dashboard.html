@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block page_title %}Task Manager{% endblock %}
+{% block header_emoji %}🧩{% endblock %}
+{% block header_title %}Task Manager{% endblock %}
+
+{% block content %}
+<style>
+  .task-board-card {
+    background: linear-gradient(160deg, rgba(15, 23, 42, 0.6), rgba(2, 6, 23, 0.5));
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 16px;
+  }
+  .task-note {
+    background: rgba(2, 6, 23, 0.5);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+</style>
+<div class="grid gap-4" style="grid-template-columns: 1fr 1fr;">
+  <!-- Assign premade -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title"><span class="card-emoji">📌</span> Assign premade task</h2>
+      <span class="badge badge-info">Templates</span>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('tasks_assign') }}">
+        <div class="grid gap-3" style="grid-template-columns: 1fr 1fr;">
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label">Task template</label>
+            <select class="form-select" name="task_id" required>
+              <option value="" selected disabled>Select a task…</option>
+              {% for t in templates %}
+                <option value="{{ t.Task_ID }}">{{ t.Title }} ({{ t.Category }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Due date</label>
+            <input class="form-input" type="date" name="due_date" value="{{ today.isoformat() }}">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Employees</label>
+            <select class="form-select" name="employee_ids" multiple required>
+              {% for e in employees %}
+                <option value="{{ e.Employee_ID }}">{{ e.Employee_Name }} ({{ e.Role }})</option>
+              {% endfor %}
+            </select>
+            <div class="text-muted text-sm">Hold Ctrl/⌘ to select multiple.</div>
+          </div>
+
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label">Notes (optional)</label>
+            <textarea class="form-input" name="notes" rows="2" placeholder="Any notes for the employee…"></textarea>
+          </div>
+        </div>
+
+        <div class="mt-4" style="display:flex; gap:12px;">
+          <button class="btn btn-primary" type="submit">
+            <i data-lucide="send" style="width:18px;height:18px;"></i>
+            Assign Task
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Quick custom create + assign -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title"><span class="card-emoji">⚡</span> Custom task (auto-saves)</h2>
+      <span class="badge badge-warning">Autonomous</span>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('tasks_quick_assign') }}">
+        <div class="grid gap-3" style="grid-template-columns: 1fr 1fr;">
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label">Title</label>
+            <input class="form-input" name="title" required placeholder="e.g., Water succulents by front gate">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <input class="form-input" name="category" value="General">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Priority</label>
+            <select class="form-select" name="priority">
+              <option value="LOW">LOW</option>
+              <option value="MEDIUM" selected>MEDIUM</option>
+              <option value="HIGH">HIGH</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Est minutes</label>
+            <input class="form-input" type="number" min="1" step="1" name="est_minutes" value="15">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Due date</label>
+            <input class="form-input" type="date" name="due_date" value="{{ today.isoformat() }}">
+          </div>
+
+          <div class="form-group" style="grid-column: 1 / -1;">
+            <label class="form-label">Description (optional)</label>
+            <textarea class="form-input" name="description" rows="2" placeholder="Details…"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Employees</label>
+            <select class="form-select" name="employee_ids" multiple required>
+              {% for e in employees %}
+                <option value="{{ e.Employee_ID }}">{{ e.Employee_Name }} ({{ e.Role }})</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Notes (optional)</label>
+            <textarea class="form-input" name="notes" rows="2" placeholder="Notes for employee…"></textarea>
+          </div>
+        </div>
+
+        <div class="mt-4" style="display:flex; gap:12px;">
+          <button class="btn btn-primary" type="submit">
+            <i data-lucide="sparkles" style="width:18px;height:18px;"></i>
+            Create + Assign
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Board -->
+<div class="card mt-4">
+  <div class="card-header">
+    <h2 class="card-title"><span class="card-emoji">📋</span> Today’s task board</h2>
+    <span class="badge badge-success">{{ today.strftime("%Y-%m-%d") }}</span>
+  </div>
+  <div class="card-body">
+    <div class="grid gap-3" style="grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));">
+      {% for eid, box in by_emp.items() %}
+        <div class="card task-board-card">
+          <div class="card-header">
+            <h3 class="card-title" style="font-size: 15px;">
+              <span class="card-emoji">👤</span>
+              {{ box.emp.Employee_Name }}
+            </h3>
+            <span class="badge badge-info">{{ box.emp.Role }}</span>
+          </div>
+          <div class="card-body">
+            {% if box.tasks|length == 0 %}
+              <div class="text-muted">No tasks due today.</div>
+            {% else %}
+              {% for t in box.tasks %}
+                <div class="task-note">
+                  <div style="display:flex; justify-content:space-between; gap:10px;">
+                    <div>
+                      <div style="font-weight:700;">{{ t.task_title }}</div>
+                      <div class="text-muted text-sm">{{ t.task_description }}</div>
+                      <div class="text-muted text-sm">Status: <b>{{ t.Status }}</b></div>
+                    </div>
+                    <a class="btn btn-secondary" href="{{ url_for('task_detail', assignment_id=t.Assignment_ID) }}">View</a>
+                  </div>
+                </div>
+              {% endfor %}
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<!-- Owner notifications -->
+<div class="card mt-4">
+  <div class="card-header">
+    <h2 class="card-title"><span class="card-emoji">🔔</span> Task notifications</h2>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <span class="badge badge-info">Last 30</span>
+      <button class="btn btn-secondary btn-sm" type="button" onclick="clearTaskNotifications()">Clear</button>
+    </div>
+  </div>
+  <div class="card-body">
+    {% if owner_notifications|length == 0 %}
+      <div class="text-muted">No task notifications yet.</div>
+    {% else %}
+      {% for n in owner_notifications %}
+        <div class="task-note">
+          <div style="display:flex; justify-content:space-between; gap:10px;">
+            <div>
+              <div style="font-weight:700;">{{ n.Date_Created }}</div>
+              <div>{{ n.Message }}</div>
+            </div>
+            {% if n.Read != "Y" %}
+              <span class="badge badge-warning">UNREAD</span>
+            {% else %}
+              <span class="badge badge-success">READ</span>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function clearTaskNotifications() {
+  const res = await fetch("{{ url_for('mark_notifications_read') }}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      "X-Requested-With": "XMLHttpRequest"
+    },
+    body: new URLSearchParams({ type: "TASK" })
+  });
+  await res.json();
+  location.reload();
+}
+</script>
+{% endblock %}

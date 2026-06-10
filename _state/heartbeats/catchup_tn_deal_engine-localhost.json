@@ -1,0 +1,8 @@
+{
+  "ts_utc": "2026-05-26T21:16:00.822600+00:00",
+  "host": "localhost",
+  "role": "primary",
+  "job": "catchup_tn_deal_engine",
+  "status": "ok",
+  "extra": {}
+}

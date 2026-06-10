@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AIOS Audit -- 2026-05-08 -- Everlight Hive</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root{--gold:#D4A843;--dark:#0A0A0A;--light:#E8E8E8;--dim:#9A9A9A;--line:#1d1d1d;
+        --green:#2bb673;--amber:#e0a939;--red:#d14545}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--dark);color:var(--light);
+       font-family:'Inter',system-ui,sans-serif;line-height:1.6}
+  h1,h2{font-family:'Playfair Display',Georgia,serif;color:var(--gold);font-weight:600}
+  h1{font-size:2.4rem;margin:0 0 .3rem}
+  h2{font-size:1.5rem;margin:2rem 0 .6rem;border-bottom:1px solid var(--line);padding-bottom:.3rem}
+  .wrap{max-width:920px;margin:0 auto;padding:2.5rem 1.5rem 6rem}
+  .wordmark{letter-spacing:.35em;font-size:.78rem;color:var(--gold);text-transform:uppercase;margin-bottom:.4rem}
+  .lede{color:var(--dim);font-size:1rem;margin:.4rem 0 2rem}
+  .meta{font-size:.84rem;color:var(--dim);border-left:2px solid var(--gold);padding:.5rem .9rem;
+        margin:0 0 2rem;background:#101010}
+  table{width:100%;border-collapse:collapse;margin:1rem 0;font-size:.94rem}
+  th,td{text-align:left;padding:.55rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--gold);font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:.74rem}
+  code{font-family:'JetBrains Mono','SF Mono',ui-monospace,monospace;font-size:.86em;color:#f0e0a8}
+  .pill{display:inline-block;padding:.15rem .55rem;border-radius:99px;font-size:.7rem;
+        text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+  .green{background:rgba(43,182,115,.15);color:var(--green);border:1px solid var(--green)}
+  .amber{background:rgba(224,169,57,.15);color:var(--amber);border:1px solid var(--amber)}
+  .red{background:rgba(209,69,69,.18);color:var(--red);border:1px solid var(--red)}
+  .card{background:#101010;border:1px solid var(--line);border-left:3px solid var(--gold);
+        padding:1rem 1.2rem;margin:1rem 0;border-radius:4px}
+  .footer{margin-top:3rem;padding-top:1rem;border-top:1px solid var(--line);color:var(--dim);font-size:.82rem}
+  ul{padding-left:1.2rem}
+  li{margin:.3rem 0}
+  .kicker{color:var(--accent,#F0CB6E);font-weight:600;letter-spacing:.04em;text-transform:uppercase;font-size:.74rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="wordmark">Everlight Ventures -- Lucrex</div>
+  <h1>AIOS Audit</h1>
+  <div class="lede">Four C's check against live systems. Failures lead, greens follow. Operator Truth Doctrine.</div>
+
+  <div class="meta">
+    <span class="pill amber">Run</span> 2026-05-08 11:56 PT<br>
+    <span class="pill amber">Auditor</span> Marcus Cole on behalf of Lucrex<br>
+    <span class="pill amber">Method</span> Live SSH to Oracle E5 + filesystem checks on phone + AceMagician PC<br>
+    <span class="pill amber">Skill</span> <code>aios_audit</code> (built earlier this round)
+  </div>
+
+  <h2>TL;DR</h2>
+  <div class="card">
+    <span class="kicker">Headline</span>
+    <p>The XLM trading layer is healthy and self-healing. <strong>Most of the rest of the Hive's claimed always-on infrastructure does not exist on Oracle right now.</strong> Doctrine in <code>CLAUDE.md</code> describes services (hive-django :8504, blinko :1111, hive-voice :8200, n8n :5678, MCP fleet 3101-3107) as 24/7 with Restart=always; reality is that those systemd units do not exist on Oracle and nothing is bound to those ports.</p>
+    <p>This is the same class of failure the <em>Operator Truth Doctrine</em> memory entry was created to prevent (claiming working systems that are broken). The audit catches it because the audit pulls <strong>live</strong> data instead of trusting CLAUDE.md.</p>
+  </div>
+
+  <h2>Failures (lead with these)</h2>
+  <table>
+    <thead><tr><th>Layer</th><th>What doctrine claims</th><th>Reality (live)</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Connections</td>
+        <td><code>hive-django.service</code> on :8504</td>
+        <td>Unit not found on Oracle. Nothing listening on 8504.</td>
+        <td><span class="pill red">RED</span></td>
+      </tr>
+      <tr>
+        <td>Connections</td>
+        <td><code>blinko.service</code> on :1111 (449+ notes RAG)</td>
+        <td>Unit not found. Port 1111 cold. <code>curl :1111</code> returns 000.</td>
+        <td><span class="pill red">RED</span></td>
+      </tr>
+      <tr>
+        <td>Connections</td>
+        <td><code>hive-voice.service</code> on :8200 (Marcus phone handler)</td>
+        <td>Unit not found. Port cold.</td>
+        <td><span class="pill red">RED</span></td>
+      </tr>
+      <tr>
+        <td>Connections</td>
+        <td>MCP fleet 3101 / 3102 / 3103 / 3105 / 3106 / 3107</td>
+        <td>All 6 ports return 000 from Oracle localhost.</td>
+        <td><span class="pill red">RED</span></td>
+      </tr>
+      <tr>
+        <td>Connections</td>
+        <td>n8n on :5678 (parked but installed)</td>
+        <td><code>/home/opc/everlight/n8n/</code> dir exists; service not running. n8n is parked per doctrine, expected.</td>
+        <td><span class="pill amber">AMBER</span></td>
+      </tr>
+      <tr>
+        <td>Cadence</td>
+        <td>CEO brief 7 AM PT cron</td>
+        <td>Not in Oracle crontab. <code>/home/opc/_logs/</code> + <code>/home/opc/hive_reports/</code> empty / missing.</td>
+        <td><span class="pill red">RED</span></td>
+      </tr>
+      <tr>
+        <td>Cadence</td>
+        <td>Hourly pulse cron</td>
+        <td>Not in Oracle crontab.</td>
+        <td><span class="pill red">RED</span></td>
+      </tr>
+      <tr>
+        <td>Cadence</td>
+        <td><code>deploy_to_oracle</code> 10-min loop</td>
+        <td>Not in Oracle crontab. Deploys depend on phone-side push.</td>
+        <td><span class="pill red">RED</span></td>
+      </tr>
+      <tr>
+        <td>Capabilities</td>
+        <td>OpenRouter fallback for non-critical Hive calls</td>
+        <td>Skill defined this round (<code>openrouter_fallback</code>). <code>OPENROUTER_API_KEY</code> NOT in <code>/home/opc/.env</code> nor <code>03_Credentials/.env</code>.</td>
+        <td><span class="pill amber">AMBER</span></td>
+      </tr>
+      <tr>
+        <td>Context</td>
+        <td>CLAUDE.md "Oracle E5 (129.159.38.250)"</td>
+        <td>129.159.38.250 returns Permission denied. Live Oracle is 163.192.19.196 (uptime 2d 23h).</td>
+        <td><span class="pill amber">AMBER</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Greens (follow)</h2>
+  <table>
+    <thead><tr><th>Layer</th><th>Item</th><th>Verified at</th></tr></thead>
+    <tbody>
+      <tr><td>Capabilities</td><td>94 agent firmware files on phone + PC</td><td>2026-05-08 04:47 UTC</td></tr>
+      <tr><td>Capabilities</td><td>14 skills (.claude/skills/) on phone + PC, 11 new this round</td><td>now</td></tr>
+      <tr><td>Capabilities</td><td>3 commands, 4 hooks, 3 modes loaded</td><td>now</td></tr>
+      <tr><td>Connections</td><td>Tailscale mesh phone <-> AceMagician PC <-> Oracle</td><td>now</td></tr>
+      <tr><td>Connections</td><td>SSH oracle-e5 (163.192.19.196)</td><td>now (uptime 2d 23h)</td></tr>
+      <tr><td>Cadence</td><td>xlm-bot.service ACTIVE (live trading)</td><td>now</td></tr>
+      <tr><td>Cadence</td><td>xlm-ws.service ACTIVE (price feed)</td><td>now</td></tr>
+      <tr><td>Cadence</td><td>7 xlm-bot crons firing (watchtower, watchdog, memory_guard, circuit_breaker, error_detector, slack_standup, house_money)</td><td>verified in <code>crontab -l</code></td></tr>
+      <tr><td>Cadence</td><td>Phone Termux boot script: claude_sync --full one-shot wired this round</td><td>now</td></tr>
+      <tr><td>Cadence</td><td>AceMagician hourly cron at :17: claude_sync_pull wired this round</td><td>now</td></tr>
+      <tr><td>Context</td><td>CLAUDE.md (root + project) present, MEMORY.md indexed at 30 lines</td><td>now</td></tr>
+      <tr><td>Capabilities</td><td>Knowledge layer: <code>06_DEVELOPMENT/everlight_os/knowledge/{raw,wiki,output}/</code> + INDEX.html</td><td>now</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Status by C</h2>
+  <table>
+    <thead><tr><th>C</th><th>Status</th><th>One-line</th></tr></thead>
+    <tbody>
+      <tr><td>Context</td><td><span class="pill amber">AMBER</span></td><td>Doctrine present, but stale Oracle IP + service claims that no longer match reality</td></tr>
+      <tr><td>Connections</td><td><span class="pill red">RED</span></td><td>Tailscale + xlm-bot live; Hive dashboard / Blinko / Voice / MCP fleet all offline</td></tr>
+      <tr><td>Capabilities</td><td><span class="pill green">GREEN</span></td><td>94 agents, 14 skills (11 new), commands/hooks/modes/patterns all healthy</td></tr>
+      <tr><td>Cadence</td><td><span class="pill amber">AMBER</span></td><td>Trading-side cadence excellent; Hive-side (CEO brief, hourly pulse, deploy loop) absent</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Fix dispatches (per self-healing rule -- launched in same session)</h2>
+  <ul>
+    <li><strong>Restart attempted</strong> for hive-django / blinko / hive-voice / xlm-dash-react -- all returned "Unit not found" (services need redeployment, not restart).</li>
+    <li><strong>Doctrine drift flagged</strong>: CLAUDE.md "Oracle E5 (129.159.38.250)" is stale. Real IP is 163.192.19.196. Update pending in next session.</li>
+    <li><strong>OpenRouter env gap flagged</strong>: skill defined, key not present anywhere. Action: add <code>OPENROUTER_API_KEY=&lt;key&gt;</code> to phone <code>03_Credentials/.env</code> + Oracle <code>/home/opc/.env</code>. Then route 1 call site (suggest <code>blinko_optimizer.py</code>) as A/B test.</li>
+  </ul>
+
+  <h2>Next-session work orders (NOT this round)</h2>
+  <ol>
+    <li><strong>Re-deploy Hive infrastructure on Oracle</strong>: hive-django (Django app, port 8504), blinko (Restart=always docker or systemd unit), hive-voice (Flask handler, 8200), MCP fleet (3101-3107 streamable-http). This is multi-hour deployment work; hand to Forge with a real plan.</li>
+    <li><strong>Recreate hive-side cron schedule</strong>: CEO brief 7 AM PT, hourly pulse, deploy_to_oracle 10-min watcher. After services come back, the crons need to point at them.</li>
+    <li><strong>Update CLAUDE.md</strong> to reflect current Oracle reality: only xlm-bot + xlm-ws are running. Strike "always-connected architecture" claims for the dashboard/Blinko/voice layer until they actually run.</li>
+    <li><strong>Hermes VPS</strong>: Hostinger KVM 2, $7.99/mo, per <code>hermes_browser_outreach</code> skill written this round. Tier 1 revenue path from <code>MASTER_PRIORITIZATION.md</code>.</li>
+  </ol>
+
+  <div class="footer">
+    Generated by <code>aios_audit</code> skill, 2026-05-08. Source data from live SSH to Oracle and filesystem checks. Synced to AceMagician PC at <code>~/AA_MY_DRIVE/06_DEVELOPMENT/everlight_os/audits/</code>.
+  </div>
+</div>
+</body>
+</html>

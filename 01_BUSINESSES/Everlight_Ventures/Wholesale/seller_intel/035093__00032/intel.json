@@ -1,0 +1,168 @@
+{
+  "lead": {
+    "parcel_id": "035093  00032",
+    "property_address": "1536 S THIRD ST",
+    "owner_name": "HAKEEM MIKAL L",
+    "owner_mailing_street": "8078WATERFORDCIR",
+    "owner_mailing_city": "MEMPHIS",
+    "owner_mailing_state": "TN",
+    "owner_mailing_zip": "38125",
+    "is_vacant_lot": null,
+    "total_appraisal_usd": 23800,
+    "sales_history": [
+      {
+        "date": "10/14/2019",
+        "price_text": "$0",
+        "deed_or_inst": "19109741",
+        "type_code": "QC",
+        "price_usd": 0,
+        "year": 2019
+      },
+      {
+        "date": "07/31/2019",
+        "price_text": "$0",
+        "deed_or_inst": "19078387",
+        "type_code": "QC",
+        "price_usd": 0,
+        "year": 2019
+      },
+      {
+        "date": "03/28/2017",
+        "price_text": "$1,800",
+        "deed_or_inst": "17031430",
+        "type_code": "QC",
+        "price_usd": 1800,
+        "year": 2017
+      },
+      {
+        "date": "02/26/2013",
+        "price_text": "$2,476",
+        "deed_or_inst": "9488-3",
+        "type_code": "CH",
+        "price_usd": 2476,
+        "year": 2013
+      },
+      {
+        "date": "06/23/2006",
+        "price_text": "$55,600",
+        "deed_or_inst": "06167063",
+        "type_code": "WD",
+        "price_usd": 55600,
+        "year": 2006
+      },
+      {
+        "date": "07/17/2003",
+        "price_text": "$55,000",
+        "deed_or_inst": "05015985",
+        "type_code": "CD",
+        "price_usd": 55000,
+        "year": 2003
+      },
+      {
+        "date": "07/17/2003",
+        "price_text": "$0",
+        "deed_or_inst": "03213033",
+        "type_code": "CD",
+        "price_usd": 0,
+        "year": 2003
+      },
+      {
+        "date": "01/28/2003",
+        "price_text": "$5,500",
+        "deed_or_inst": "03090519",
+        "type_code": "SW",
+        "price_usd": 5500,
+        "year": 2003
+      },
+      {
+        "date": "06/14/2002",
+        "price_text": "$11,824",
+        "deed_or_inst": "02111367",
+        "type_code": "TD",
+        "price_usd": 11824,
+        "year": 2002
+      },
+      {
+        "date": "02/05/1986",
+        "price_text": "$5,500",
+        "deed_or_inst": "X51591",
+        "type_code": "WD",
+        "price_usd": 5500,
+        "year": 1986
+      },
+      {
+        "date": "01/13/1986",
+        "price_text": "$0",
+        "deed_or_inst": "X44869",
+        "type_code": "QC",
+        "price_usd": 0,
+        "year": 1986
+      },
+      {
+        "date": "04/03/1984",
+        "price_text": "$10,000",
+        "deed_or_inst": "V25386",
+        "type_code": "WD",
+        "price_usd": 10000,
+        "year": 1984
+      }
+    ],
+    "tax_sale_marker": "TS2202"
+  },
+  "signals": {
+    "is_estate": false,
+    "estate_decedent_name": null,
+    "is_absentee_outofstate": false,
+    "is_absentee_instate": false,
+    "owner_mailing_apartment": false,
+    "is_llc_owner": false,
+    "is_religious_org_owner": false,
+    "is_long_term_owner": false,
+    "ownership_years": 7,
+    "is_high_value": false,
+    "is_vacant_lot": false,
+    "tax_delinquent_years": "4+",
+    "multiple_sales_in_history": true
+  },
+  "browser_queue": [
+    {
+      "label": "Shelby Register of Deeds -- all deeds in 'HAKEEM MIKAL L' name",
+      "url": "https://search.register.shelby.tn.us/search/",
+      "instructions": "Name search 'HAKEEM MIKAL L'. Save MHTML of result list. Tells us if owner has OTHER properties in Shelby County (= portfolio = sophisticated investor).",
+      "priority": "HIGH"
+    },
+    {
+      "label": "Obit search -- Google site:legacy.com 'HAKEEM MIKAL L' Memphis",
+      "url": "https://www.google.com/search?q=site%3Alegacy.com+%22HAKEEM+MIKAL+L%22+Memphis+OR+Tennessee",
+      "instructions": "Click any hit, MHTML the obit. Tells us: death date, age, surviving family names + cities (= heir candidates).",
+      "priority": "LOW"
+    },
+    {
+      "label": "Facebook public search -- HAKEEM MIKAL L in MEMPHIS",
+      "url": "https://www.facebook.com/public/HAKEEM+MIKAL+L",
+      "instructions": "If profile public, tells us age range, employer, family, recent posts. Don't friend; just look. MHTML the search result page.",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "LinkedIn search -- HAKEEM MIKAL L MEMPHIS",
+      "url": "https://www.linkedin.com/search/results/people/?keywords=HAKEEM+MIKAL+L+MEMPHIS",
+      "instructions": "Profession, employer, tenure. Helps frame the pitch (busy professional = lead with time-saving; recent retiree = lead with simplicity).",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "TN Public Notice + Court Records -- civil/foreclosure history",
+      "url": "https://www.tncourts.gov/courts/public-notices",
+      "instructions": "Search 'HAKEEM MIKAL L'. Civil suits, eviction filings, foreclosure starts = financial pressure signals.",
+      "priority": "MEDIUM"
+    }
+  ],
+  "pitch_hooks": [
+    {
+      "name": "back_tax_relief",
+      "angle": "We pay the back tax \u2014 you walk clean",
+      "lead_line": "We see the property's been on the back-tax list for a few years. We pay every dollar of back tax + penalty at closing \u2014 out of OUR side, not yours. You walk away clean.",
+      "use_when": "TS2202 lead. Strong on absentee owners with no plan to develop."
+    }
+  ],
+  "generated_at": "2026-04-29T21:40:37.057215+00:00"
+}

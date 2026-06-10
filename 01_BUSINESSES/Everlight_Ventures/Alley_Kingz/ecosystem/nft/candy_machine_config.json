@@ -1,0 +1,100 @@
+{
+  "_about": "Core Candy Machine config skeleton for the 48 Alley Kingz playable stat-cards. Deployed on e5-mother via Sugar / mpl-core-candy-machine (NOT the phone). Operator fills every <PLACEHOLDER> and signs with the Phantom wallet (@bcardi, 2ef4VfuyRNYwu6WMW9TCz8cXpiqi23MSd8y8ZFyUmrBg). Confirmed live 2026-06-03: mpl-core-candy-machine with TokenPayment guard. See RUNBOOK.md.",
+  "_doctrine": "FREE-FIRST: only on-chain cost is mint rent (~0.0029-0.0037 SOL/card, ~34 USD for all 48). No SaaS, no audit bill (Metaplex programs are audited). GATED-ON-FUNDING: wallet must hold SOL for rent before deploy. GATED-ON-ART: do not deploy until the 48 animation_url clips + images are uploaded and CIDs are swapped into asset_config.json + the per-card metadata.",
+
+  "tokenStandard": "core",
+  "collection": {
+    "_note": "Address of the Core Collection created in RUNBOOK step 3. Fill after collection create.",
+    "address": "<CORE_COLLECTION_ADDRESS>",
+    "updateAuthority": "<TREASURY_MULTISIG_OR_PDA>"
+  },
+
+  "itemsAvailable": 48,
+  "_itemsNote": "48 = the v1.0 Genesis card SET (one Candy Machine item config per distinct card). Per-card EDITION supply (how many copies of each card can mint) is enforced by the Genesis ladder below, NOT by itemsAvailable. See _editionsDecision.",
+
+  "symbol": "BCARDI",
+  "sellerFeeBasisPoints": 250,
+  "_sellerFeeNote": "2.5% royalty (250 bps) to treasury, matches AlleyKingzMarketplace.sol ROYALTY_BPS and ECOSYSTEM_ARCHITECTURE 4.4.",
+
+  "isMutable": true,
+  "_isMutableNote": "Mutable so the treasury update-authority can patch on-chain Attribute-Plugin stats in a balance update. Players cannot edit their own card (authority-gated, not owner-gated).",
+
+  "creators": [
+    {"address": "<TREASURY_WALLET>", "percentageShare": 100}
+  ],
+
+  "configLineSettings": {
+    "_note": "Names/URIs come from the per-card metadata in ./metadata/. prefixName mirrors the collection display name; prefixUri is the metadata CID base after upload.",
+    "prefixName": "Alley Kingz #",
+    "nameLength": 24,
+    "prefixUri": "ipfs://<METADATA_CID_DIR>/",
+    "uriLength": 64,
+    "isSequential": false
+  },
+
+  "guards": {
+    "_guardNote": "Composable Candy Guard set. $BCARDD is the mint currency (tokenPayment). Coin-holder allowlist + start date + bot tax are the launch guards. Fill amounts/addresses before deploy.",
+
+    "tokenPayment": {
+      "_desc": "Mint price paid in $BCARDD SPL token. amount is in base units of the $BCARDD mint (respect its decimals). destinationAta = treasury token account.",
+      "mint": "<BCARDI_SPL_MINT_ADDRESS>",
+      "amount": "<PRICE_IN_BCARDI_BASE_UNITS>",
+      "destinationAta": "<TREASURY_BCARDI_ATA>"
+    },
+
+    "solPayment": {
+      "_desc": "OPTIONAL alternate door: allow SOL-priced mint alongside $BCARDD (two-door funnel per ECOSYSTEM_ARCHITECTURE 2.3). Remove this block to make the drop $BCARDD-only. Leave null to disable.",
+      "lamports": null,
+      "destination": "<TREASURY_WALLET>"
+    },
+
+    "startDate": {
+      "date": "<ISO8601_MINT_START e.g. 2026-07-01T17:00:00Z>"
+    },
+
+    "botTax": {
+      "_desc": "Bot protection: penalize invalid mint attempts.",
+      "lamports": 10000000,
+      "lastInstruction": true
+    },
+
+    "mintLimit": {
+      "_desc": "Per-wallet cap to keep the drop fair.",
+      "id": 1,
+      "limit": "<MAX_MINTS_PER_WALLET>"
+    },
+
+    "allowList": {
+      "_desc": "Coin-holder whitelist (the $BCARDD-holder early-access tier from the cross-perk matrix). merkleRoot of eligible wallets, built on e5-mother.",
+      "merkleRoot": "<ALLOWLIST_MERKLE_ROOT>"
+    }
+  },
+
+  "groups": {
+    "_desc": "OPTIONAL phased groups (whitelist window then public). Default single-phase: leave empty and rely on the top-level guards. Fill if you want a WL price/time distinct from public.",
+    "wl": {
+      "startDate": {"date": "<ISO8601_WL_START>"},
+      "allowList": {"merkleRoot": "<ALLOWLIST_MERKLE_ROOT>"},
+      "tokenPayment": {"mint": "<BCARDI_SPL_MINT_ADDRESS>", "amount": "<WL_PRICE_BASE_UNITS>", "destinationAta": "<TREASURY_BCARDI_ATA>"}
+    },
+    "public": {
+      "startDate": {"date": "<ISO8601_PUBLIC_START>"},
+      "tokenPayment": {"mint": "<BCARDI_SPL_MINT_ADDRESS>", "amount": "<PUBLIC_PRICE_BASE_UNITS>", "destinationAta": "<TREASURY_BCARDI_ATA>"}
+    }
+  },
+
+  "_editionsDecision": {
+    "status": "RESOLVED by ECOSYSTEM_ARCHITECTURE.md section 3.3 (Genesis scarcity ladder). NOT 1-of-1 across the board.",
+    "model": "Master collection of 48 UNIQUE card characters; each character mints as a capped Genesis edition. Per-character edition cap drives the floor + Seedance video priority.",
+    "genesisEditionCaps": {
+      "Mythic": 100,
+      "Legendary": 500,
+      "Epic": 2000,
+      "Rare": 10000,
+      "Common": "uncapped (route Commons to Bubblegum V2 compressed NFTs, cents to mint -- FREE-FIRST)"
+    },
+    "rarityCounts": {"Mythic": 4, "Legendary": 1, "Epic": 9, "Rare": 20, "Common": 14},
+    "implementationNote": "Core Candy Machine enforces caps via per-config-line supply / separate machines per rarity tier, OR mint Mythic/Legendary/Epic/Rare as Core assets here and split Commons to a Bubblegum V2 cNFT machine in the same Core collection. Operator confirms the exact ladder ahead of deploy (CHAIN_DECISION_MEMO open item 3 -- e.g. $BCARDD #0001 may be 1-of-1 or a tiny cap).",
+    "operatorFlag": "CONFIRM the exact per-card edition ladder (especially whether $BCARDD #0001 is 1-of-1) before the Candy Machine deploy. Default = the ladder above."
+  }
+}

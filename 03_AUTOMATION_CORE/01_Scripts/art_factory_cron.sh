@@ -18,3 +18,9 @@ MAPS=$(find ../game/assets/maps -name '*.png' 2>/dev/null | wc -l)
 echo "  progress: cards ${CARDS}/106  maps ${MAPS}/400" >> "$LOG"
 # auto-deploy freshly painted art to prod (idempotent; safe no-op if nothing changed)
 bash "$ROOT/03_AUTOMATION_CORE/01_Scripts/deploy_to_oracle.sh" >> "$LOG" 2>&1 || true
+# ALSO ship painted art to the LIVE game (alleykingz.online via CF Pages direct upload).
+# Without this the art lands on disk but never reaches players (gap found 2026-06-09).
+export CLOUDFLARE_ACCOUNT_ID=d06376317522c7451e390a9af44aebba
+python3 "$ROOT/03_AUTOMATION_CORE/01_Scripts/deploy/cf_pages_direct_upload.py" \
+  --dir "$ROOT/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game" \
+  --project alley-kingz --branch main --exclude "assets/maps" >> "$LOG" 2>&1 || true

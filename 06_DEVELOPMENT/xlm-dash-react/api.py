@@ -561,7 +561,7 @@ def get_settings():
 
     return {
         "integrations": {
-            "blinko": {"status": "connected" if blinko_up else "offline", "url": "http://129.159.38.250:1111", "notes": blinko_notes, "editable": True},
+            "blinko": {"status": "connected" if blinko_up else "offline", "url": "http://e5-mother:1111", "notes": blinko_notes, "editable": True},
             "django": {"status": "connected" if django_up else "offline", "url": "http://129.159.38.250:8504", "editable": True},
             "n8n": {"status": "connected" if n8n_up else "offline", "url": "http://129.159.38.250:5678", "editable": True},
             "slack": {"status": "connected", "channels": 13, "via": "Bot tokens", "editable": True},

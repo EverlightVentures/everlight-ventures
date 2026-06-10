@@ -46,7 +46,7 @@ if CREDS.exists():
 SUPABASE_URL = _env.get("SUPABASE_URL", "")
 SUPABASE_KEY = _env.get("SUPABASE_SERVICE_ROLE_KEY", "")
 SLACK_TOKEN = _env.get("SLACK_WARROOM_TOKEN", _env.get("SLACK_BOT_TOKEN", ""))
-BLINKO_URL = _env.get("BLINKO_URL", "http://129.159.38.250:1111")
+BLINKO_URL = _env.get("BLINKO_URL", "http://e5-mother:1111")
 
 
 def _ts():

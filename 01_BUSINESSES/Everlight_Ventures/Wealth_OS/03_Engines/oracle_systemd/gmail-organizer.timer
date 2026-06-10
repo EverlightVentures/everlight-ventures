@@ -1,0 +1,12 @@
+[Unit]
+Description=Gmail Organizer fires every 10 minutes
+Requires=gmail-organizer.service
+
+[Timer]
+OnBootSec=3min
+OnUnitActiveSec=10min
+AccuracySec=30s
+Persistent=true
+
+[Install]
+WantedBy=timers.target

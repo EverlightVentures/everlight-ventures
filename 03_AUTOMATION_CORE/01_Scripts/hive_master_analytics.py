@@ -35,7 +35,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 log = logging.getLogger("master-analytics")
 logging.basicConfig(level=logging.INFO, format="[Analytics %(asctime)s] %(message)s")
 
-BLINKO_URL = os.environ.get("BLINKO_URL", "http://129.159.38.250:1111")
+BLINKO_URL = os.environ.get("BLINKO_URL", "http://e5-mother:1111")
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://jdqqmsmwmbsnlnstyavl.supabase.co")
 SUPABASE_KEY = os.environ.get("SUPABASE_ANON_KEY", "")
 

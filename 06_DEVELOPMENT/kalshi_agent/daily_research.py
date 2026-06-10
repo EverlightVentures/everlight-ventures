@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
 """daily_research.py -- the AUTONOMOUS multi-sport daily edge-finder.
 
-Runs on a cron at optimal times. For every game on the day's slate (NBA, MLB, NHL...)
-it derives a SHARP win-probability from the live book line (ESPN's free API, no key,
-no signup), maps the game to its Kalshi ticker, and writes a FRESH sharp number into
-sharp_overrides.json. The auto_edge engine (15-min cron) then places maker bids on any
-market where Kalshi diverges enough to clear the net-edge floor -- zero human in loop.
+Cron'd at 30-min intervals. For every game on the day's slate it derives a SHARP
+win-probability from the live book line (ESPN's free API, no key) and writes a FRESH
+sharp number into sharp_overrides.json. auto_edge (15-min cron) then places bets on
+any market where Kalshi lags the book enough to clear the net-edge floor -- and, per
+Rich (2026-06-09), a FRESH big gap is treated as opportunity (more gap = more margin),
+not dismissed as a bug.
 
-ESPN's `details` field is sport-dependent and we read both shapes:
-  * basketball -> point spread ("NY -1.5"). NBA final margin ~Normal(spread, 12),
-    so P(fav) = Phi(spread/12).
-  * baseball/hockey -> favorite moneyline ("SEA -122"). raw = implied(ML); we de-vig
-    with an assumed 2-way hold: fair_fav = raw / 1.045.
+Handles three market shapes off ESPN's `details`/`drawOdds`:
+  * spread2  (NBA): "NY -1.5" -> P(fav)=Phi(spread/12).
+  * ml2 (MLB/NHL/tennis): "SEA -122" -> de-vig one line by the assumed 2-way hold.
+  * soccer3  (World Cup): home ML ("MEX -235") + draw ML -> de-vig the full W/D/L,
+    writing fair for the team tickets AND the Kalshi `-TIE` outcome.
 
-Matching is by Kalshi market DISCOVERY (pull the open series, match on date token +
-both team abbrevs + the team suffix) so we never have to guess the time component some
-tickers carry. Unmatched games are safely skipped, never mis-bet.
+Matching is by Kalshi market DISCOVERY: pull the open series, match on date token +
+both competitor codes present in the ticker + the outcome suffix. Unmatched games are
+safely skipped, never mis-bet. Tennis Kalshi codes == player surname[:3].
 
-  python3 -m kalshi_agent.daily_research            # research all sports + write overrides
-  python3 -m kalshi_agent.daily_research --quiet     # no Slack ping
+  python3 -m kalshi_agent.daily_research [--quiet]
 """
 import json
 import math
@@ -36,23 +36,20 @@ OVERRIDES = HERE / "sharp_overrides.json"
 RESEARCH_LOG = HERE / "data" / "daily_research.jsonl"
 UA = {"User-Agent": "everlight-ventures-research/1.0"}
 _MON = ["", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
-HOLD = 1.045   # assumed 2-way book overround, for single-line moneyline de-vig
+HOLD2 = 1.045   # assumed 2-way book overround
+HOLD3 = 1.07    # assumed 3-way (W/D/L) overround
 
-# ESPN abbreviation -> Kalshi abbreviation. Identity is the fallback (most match);
-# only the known mismatches need an entry. Unmatched teams just get skipped safely.
-ABBR_FIX = {
-    # NBA
-    "GS": "GSW", "NO": "NOP", "NY": "NYK", "SA": "SAS", "UTAH": "UTA", "WSH_NBA": "WAS",
-    # MLB
-    "CHW": "CWS", "AZ": "ARI",
-    # NHL (ESPN short -> Kalshi standard)
-    "TB": "TBL", "LA": "LAK", "NJ": "NJD", "SJ": "SJS",
-}
+# ESPN abbreviation -> Kalshi abbreviation; identity is the fallback.
+ABBR_FIX = {"GS": "GSW", "NO": "NOP", "NY": "NYK", "SA": "SAS", "UTAH": "UTA",
+            "CHW": "CWS", "AZ": "ARI", "TB": "TBL", "LA": "LAK", "NJ": "NJD", "SJ": "SJS"}
 
 SPORTS = {
-    "nba": {"espn": "basketball/nba", "series": "KXNBAGAME", "method": "spread", "sigma": 12.0},
-    "mlb": {"espn": "baseball/mlb", "series": "KXMLBGAME", "method": "moneyline"},
-    "nhl": {"espn": "hockey/nhl", "series": "KXNHLGAME", "method": "moneyline"},
+    "nba": {"espn": "basketball/nba", "series": "KXNBAGAME", "kind": "spread2", "sigma": 12.0},
+    "mlb": {"espn": "baseball/mlb", "series": "KXMLBGAME", "kind": "ml2"},
+    "nhl": {"espn": "hockey/nhl", "series": "KXNHLGAME", "kind": "ml2"},
+    "wc":  {"espn": "soccer/fifa.world", "series": "KXWCGAME", "kind": "soccer3"},
+    "atp": {"espn": "tennis/atp", "series": "KXATPMATCH", "kind": "tennis2"},
+    "wta": {"espn": "tennis/wta", "series": "KXWTAMATCH", "kind": "tennis2"},
 }
 
 
@@ -70,39 +67,82 @@ def american_to_prob(odds):
 
 
 def _ymd_to_kalshi(ymd):
-    """ESPN query date 'YYYYMMDD' (US game day) -> Kalshi token '26JUN10'."""
     return "%s%s%s" % (ymd[2:4], _MON[int(ymd[4:6])], ymd[6:8])
 
 
-def _kalshi_abbr(espn_abbr):
-    return ABBR_FIX.get(espn_abbr, espn_abbr)
+def fix(a):
+    return ABBR_FIX.get(a, a) if a else a
 
 
-def _parse_details(s):
-    """'NY -1.5' -> ('NY','spread',1.5); 'SEA -122' -> ('SEA','ml',-122);
-    'EVEN'/'PK' -> (None,'spread',0.0); junk -> (None,None,None)."""
+def _surname_code(athlete):
+    """Kalshi tennis code == first 3 letters of the surname (Safiullin -> SAF)."""
+    a = athlete or {}
+    ln = a.get("lastName") or (a.get("displayName") or "").split(" ")[-1]
+    ln = re.sub(r"[^A-Za-z]", "", ln or "")
+    return ln[:3].upper() if len(ln) >= 3 else None
+
+
+def _parse_line(s):
+    """'NY -1.5' -> ('NY', -1.5); 'SEA -122' -> ('SEA', -122). Returns (team, num)."""
     if not s:
-        return None, None, None
+        return None, None
     s = s.strip().upper()
     if s in ("EVEN", "PK", "PICK"):
-        return None, "spread", 0.0
+        return None, 0.0
     m = re.match(r"^([A-Z]{2,4})\s*([+-]?\d+(?:\.\d+)?)$", s)
-    if not m:
-        return None, None, None
-    team, num = m.group(1), float(m.group(2))
-    kind = "ml" if abs(num) >= 100 else "spread"
-    return team, kind, num
+    return (m.group(1), float(m.group(2))) if m else (None, None)
 
 
-def _fair_favorite(method, kind, num, sigma):
-    """Favorite's de-vigged win prob from the parsed book line."""
-    if kind == "spread":
-        return _norm_cdf(abs(num) / (sigma or 12.0))
-    # moneyline: favorite is the negative line; de-vig by the assumed hold
-    return min(0.97, max(0.50, american_to_prob(num) / HOLD))
+def _game_outcomes(cfg, comp, home, away):
+    """Return (code_a, code_b, [(code, prob), ...]) for a game, or None."""
+    odds = comp.get("odds") or []
+    if not odds:
+        return None
+    o = odds[0]
+    kind = cfg["kind"]
+    if kind == "tennis2":
+        ca = _surname_code((away.get("athlete") if away else None))
+        cb = _surname_code((home.get("athlete") if home else None))
+        team, num = _parse_line(o.get("details"))
+        if not ca or not cb or num is None or num == 0.0:
+            return None
+        raw = american_to_prob(num)            # the listed player's implied
+        p_listed = min(0.97, max(0.03, raw / HOLD2))
+        # the listed player is whichever code the ML team matches; default to home
+        listed = cb if (team and team[:3] == cb) else (ca if (team and team[:3] == ca) else cb)
+        other = ca if listed == cb else cb
+        return ca, cb, [(listed, p_listed), (other, 1 - p_listed)]
+
+    ha = fix((home.get("team") or {}).get("abbreviation")) if home else None
+    aa = fix((away.get("team") or {}).get("abbreviation")) if away else None
+    if not ha or not aa:
+        return None
+
+    if kind == "soccer3":
+        home_team, home_num = _parse_line(o.get("details"))      # details = HOME ml
+        draw = (o.get("drawOdds") or {}).get("moneyLine")
+        if home_num is None or draw is None:
+            return None
+        rh = american_to_prob(home_num)
+        rd = american_to_prob(draw)
+        ra = max(0.02, HOLD3 - rh - rd)
+        t = rh + rd + ra
+        return aa, ha, [(ha, rh / t), (aa, ra / t), ("TIE", rd / t)]
+
+    # spread2 / ml2
+    team, num = _parse_line(o.get("details"))
+    if num is None:
+        return None
+    if kind == "spread2":
+        fav_p = _norm_cdf(abs(num) / (cfg.get("sigma") or 12.0))
+    else:  # ml2 -- de-vig the single listed line
+        fav_p = min(0.97, max(0.03, american_to_prob(num) / HOLD2))
+    fav = fix(team)
+    home_p = fav_p if fav == ha else (1 - fav_p if fav == aa else 0.5)
+    return aa, ha, [(ha, home_p), (aa, 1 - home_p)]
 
 
-def espn_slate(cfg, days=2):
+def espn_slate(cfg, days=3):
     out = []
     base = datetime.now(timezone.utc)
     for d in range(days):
@@ -115,33 +155,29 @@ def espn_slate(cfg, days=2):
         for e in data.get("events", []):
             comp = (e.get("competitions") or [{}])[0]
             cs = comp.get("competitors", [])
-            home = next((c for c in cs if c.get("homeAway") == "home"), None)
-            away = next((c for c in cs if c.get("homeAway") == "away"), None)
-            odds = comp.get("odds") or []
-            if not home or not away or not odds:
+            home = next((c for c in cs if c.get("homeAway") == "home"), cs[0] if cs else None)
+            away = next((c for c in cs if c.get("homeAway") == "away"), cs[1] if len(cs) > 1 else None)
+            if not home or not away:
                 continue
-            ha = _kalshi_abbr((home.get("team") or {}).get("abbreviation") or "")
-            aa = _kalshi_abbr((away.get("team") or {}).get("abbreviation") or "")
-            fav_espn, kind, num = _parse_details(odds[0].get("details"))
-            if kind is None:
+            res = _game_outcomes(cfg, comp, home, away)
+            if not res:
                 continue
-            fav_p = _fair_favorite(cfg["method"], kind, num, cfg.get("sigma"))
-            fav_k = _kalshi_abbr(fav_espn) if fav_espn else None
-            home_p = fav_p if fav_k == ha else (1 - fav_p if fav_k == aa else 0.5)
-            out.append({"date": ktoken, "home": ha, "away": aa, "name": e.get("name"),
-                        "fair_home": round(home_p, 4), "fair_away": round(1 - home_p, 4),
-                        "book": (odds[0].get("provider") or {}).get("name", "book")})
+            ca, cb, outcomes = res
+            book = ((comp.get("odds") or [{}])[0].get("provider") or {}).get("name", "book")
+            out.append({"date": ktoken, "code_a": ca, "code_b": cb,
+                        "outcomes": [{"code": c, "prob": round(p, 4)} for c, p in outcomes],
+                        "name": e.get("name"), "book": book})
     return out
 
 
-def _find_ticker(markets, date_tok, away_k, home_k, team_k):
+def _find_ticker(markets, date_tok, code_a, code_b, outcome):
     for m in markets:
         t = m.get("ticker", "")
         parts = t.split("-")
         if len(parts) < 3:
             continue
         mid, suf = parts[1], parts[-1]
-        if mid.startswith(date_tok) and away_k in mid and home_k in mid and suf == team_k:
+        if mid.startswith(date_tok) and code_a in mid and code_b in mid and suf == outcome:
             return t
     return None
 
@@ -164,21 +200,21 @@ def research(write=True):
             kmkts = []
         for g in slate:
             ngames += 1
-            for team, p in ((g["home"], g["fair_home"]), (g["away"], g["fair_away"])):
-                tk = _find_ticker(kmkts, g["date"], g["away"], g["home"], team)
+            for oc in g["outcomes"]:
+                tk = _find_ticker(kmkts, g["date"], g["code_a"], g["code_b"], oc["code"])
                 if not tk:
                     continue
                 try:
                     yb, ya, nb, yc, nc = best_bbo(tk)
                 except Exception:
                     yb = ya = None
-                row = {"sport": sport, "ticker": tk, "team": team, "fair_prob": round(p, 4),
+                row = {"sport": sport, "ticker": tk, "outcome": oc["code"], "fair_prob": oc["prob"],
                        "kalshi_ask": ya, "game": g["name"], "book": g["book"]}
                 if ya is not None:
-                    row["edge_buy"] = round(p - ya / 100.0, 4)
+                    row["edge_buy"] = round(oc["prob"] - ya / 100.0, 4)
                 rows.append(row)
                 if write and ya is not None:
-                    existing[tk] = {"fair_prob": round(p, 4),
+                    existing[tk] = {"fair_prob": oc["prob"],
                                     "source": "%s %s->prob (daily_research)" % (g["book"], sport),
                                     "expires_ts": int(time.time()) + 18 * 3600,
                                     "fresh_ts": int(time.time())}
@@ -194,21 +230,22 @@ def main():
     import sys
     quiet = "--quiet" in sys.argv
     r = research(write=True)
-    print("=" * 64)
+    print("=" * 66)
     print("  DAILY RESEARCH", time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()), "-- games:", r["games"])
-    print("=" * 64)
+    print("=" * 66)
     edges = []
     for row in sorted(r["rows"], key=lambda x: -(x.get("edge_buy") or -9)):
         eb = row.get("edge_buy")
-        mark = ""
-        if eb is not None and eb >= 0.025:
-            mark = "  <== EDGE +%.1f%%" % (eb * 100)
+        if eb is None:
+            continue
+        mark = "  <== EDGE +%.1f%%" % (eb * 100) if eb >= 0.025 else ""
+        if mark:
             edges.append(row)
-        if eb is not None and (eb >= 0.0 or mark):
-            print("  %-4s %-30s fair %.0f%% ask %sc edge %+.1f%%%s" % (
-                row["sport"].upper(), row["ticker"][:30], row["fair_prob"] * 100,
-                row.get("kalshi_ask"), (eb or 0) * 100, mark))
-    msg = "Daily research: %d games across %d sports, %d edge(s)%s. auto_edge places any that clear the floor." % (
+        if eb >= 0.0 or mark:
+            print("  %-4s %-32s fair %.0f%% ask %sc edge %+.1f%%%s" % (
+                row["sport"].upper(), row["ticker"][:32], row["fair_prob"] * 100,
+                row.get("kalshi_ask"), eb * 100, mark))
+    msg = "Daily research: %d games / %d sports, %d edge(s)%s. auto_edge takes any that clear the floor." % (
         r["games"], len(SPORTS), len(edges),
         (" -> " + ", ".join(e["ticker"] for e in edges)) if edges else " (efficient slate, sitting out)")
     print("\n  " + msg)

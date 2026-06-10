@@ -1,0 +1,13 @@
+[Unit]
+Description=Run Cuyahoga County free scraper daily at 06:00 PT (overnight foreclosure filings have stabilized by then)
+Requires=cuyahoga-scrape.service
+
+[Timer]
+# Cuyahoga County is in America/New_York. 06:00 America/Los_Angeles = 09:00 America/New_York
+OnCalendar=*-*-* 09:00:00 America/New_York
+Persistent=true
+RandomizedDelaySec=900
+Unit=cuyahoga-scrape.service
+
+[Install]
+WantedBy=timers.target

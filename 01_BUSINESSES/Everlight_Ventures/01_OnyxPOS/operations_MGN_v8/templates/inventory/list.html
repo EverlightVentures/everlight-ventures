@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block header_title %}Inventory{% endblock %}
+{% block header_actions %}
+<a href="{{ url_for('add_item') }}" class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Add Item</a>
+<a href="{{ url_for('receive_stock') }}" class="btn btn-secondary">Receive Stock</a>
+{% endblock %}
+{% block extra_css %}
+<style>
+  .inv-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .inv-chip {
+    background: linear-gradient(160deg, rgba(15, 23, 42, 0.5), rgba(2, 6, 23, 0.5));
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    border-radius: 14px;
+    padding: 16px;
+  }
+  .inv-chip h3 { font-size: 13px; color: #94a3b8; font-weight: 600; }
+  .inv-chip .value { font-size: 22px; font-weight: 800; color: #e2e8f0; }
+  .inventory-table-wrap { overflow-x: auto; }
+</style>
+{% endblock %}
+{% block content %}
+{% set out_of_stock = items|selectattr('stock_on_hand', 'equalto', 0)|list|length %}
+{% set low_stock = items|selectattr('stock_on_hand', 'le', 5)|list|length %}
+<div class="inv-summary">
+  <div class="inv-chip">
+    <h3>Total items</h3>
+    <div class="value">{{ items|length }}</div>
+  </div>
+  <div class="inv-chip">
+    <h3>Low stock</h3>
+    <div class="value">{{ low_stock }}</div>
+  </div>
+  <div class="inv-chip">
+    <h3>Out of stock</h3>
+    <div class="value">{{ out_of_stock }}</div>
+  </div>
+</div>
+<div class="card">
+    <div class="card-header">
+        <h2 class="card-title">All Items ({{ items|length }})</h2>
+        <input type="text" class="form-input" placeholder="Search items, SKU, category…" style="width:260px;" id="searchBox" onkeyup="filterTable()">
+    </div>
+    <div class="inventory-table-wrap">
+    <table id="itemsTable" class="table">
+        <thead><tr><th>SKU</th><th>Name</th><th>Category</th><th style="text-align:right;">Price</th><th style="text-align:right;">Stock</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+        {% for item in items %}
+        <tr>
+            <td class="text-muted" style="font-family:monospace;">{{ item.get("SKU", "") }}</td>
+            <td style="font-weight:500;">{{ item.get("Item_Name", "") }}</td>
+            <td>{{ item.get("Category", "") }}</td>
+            <td style="text-align:right;">${{ "%.2f"|format((item.get("Default_Price", 0) or 0)|float) }}</td>
+
+            <td style="text-align:right;">{% set stock = item.stock_on_hand|default(0)|int %}{% if stock <= 0 %}<span class="badge badge-danger">{{ stock }}</span>{% elif stock <= (item.Reorder_Point|default(5)|int) %}<span class="badge badge-warning">{{ stock }}</span>{% else %}{{ stock }}{% endif %}</td>
+            <td><span class="badge {% if item.get("Status") == 'Active' %}badge-success{% else %}badge-danger{% endif %}">{{ item.get("Status", "Active") }}</span></td>
+            <td><a href="{{ url_for('edit_inventory', sku=item.get("SKU", "")) }}" class="btn btn-sm btn-secondary">Edit</a></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+<script>
+function filterTable(){const q=document.getElementById('searchBox').value.toLowerCase();document.querySelectorAll('#itemsTable tbody tr').forEach(r=>{r.style.display=r.textContent.toLowerCase().includes(q)?'':'none';});}
+</script>
+{% endblock %}

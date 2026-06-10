@@ -1146,7 +1146,7 @@ def get_settings():
 
     return {
         "integrations": {
-            "blinko": {"status": "connected" if blinko_up else "offline", "url": "http://129.159.38.250:1111", "notes": blinko_notes, "editable": True},
+            "blinko": {"status": "connected" if blinko_up else "offline", "url": "http://e5-mother:1111", "notes": blinko_notes, "editable": True},
             "django": {"status": "connected" if django_up else "offline", "url": "http://129.159.38.250:8504", "editable": True},
             "n8n": {"status": "connected" if n8n_up else "offline", "url": "http://129.159.38.250:5678", "editable": True},
             "slack": {"status": "connected", "channels": 13, "via": "Bot tokens", "editable": True},
@@ -2435,7 +2435,7 @@ def onboard_submit(data: dict):
     try:
         note = f"# New Customer: {company}\n#hive/onboard #hive/customer\n\nContact: {contact} ({email})\nAgents: {', '.join(agents)}"
         payload = json.dumps({"content": note, "type": 1}).encode()
-        req = ur.Request("http://129.159.38.250:1111/api/v1/note/upsert", data=payload, method="POST", headers={"Content-Type": "application/json"})
+        req = ur.Request("http://e5-mother:1111/api/v1/note/upsert", data=payload, method="POST", headers={"Content-Type": "application/json"})
         ur.urlopen(req, timeout=10)
     except Exception:
         pass

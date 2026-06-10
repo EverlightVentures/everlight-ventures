@@ -1,0 +1,19 @@
+{
+  "id": "78073f05e762",
+  "to": "chris@midsouthhomebuyers.com",
+  "to_name": "Chris Ulander",
+  "intent": "buyer_criteria",
+  "persona": "henry_hammond",
+  "subject": "Re: Re: Private deal flow for Memphis investors",
+  "body": "Hi Chris   Henry here, picking up from Piper.\n\nThanks for sending over your buying criteria. I've reviewed it and I want to make sure we're aligned before we move forward.\n\nHere's what I'm seeing on the Memphis market right now. Median price sitting at 195k, inventory moving in about 32 days, and we're tracking a 4.5 percent year over year price appreciation. Monthly holding costs run 343 dollars. That's the backdrop we're working in.\n\nWhat I need from you is clarity on a few specifics so the math works for both of us. When you say you're looking at certain property types or price ranges, how tight are those windows. Are we talking hard stops or do they flex based on cash flow upside. And on timeline   are you looking to close in 30 days, 60 days, or do you have flexibility there.\n\nI ask because my job is to match you with deals that actually pencil out on your end, not just get you properties. I've seen too many deals fall apart because the numbers didn't hold up under real pressure, and I don't want that to be us.\n\nLet me know those two things and we'll run some scenarios together.\n\nHenry Hammond\nAcquisitions, Everlight Ventures\n\nReply STOP to opt out of future messages.",
+  "engine": "llm",
+  "trigger_snippet": "Nice to e-meet you. Send all leads to leads@midsouthhomebuyers.com. Here is our buying criteria",
+  "status": "staged_until_unblocked",
+  "gate": {
+    "armed": false,
+    "halt": false,
+    "address_ok": false,
+    "reason": "no CAN-SPAM address"
+  },
+  "generated_at": "2026-05-25T05:56:54.870593+00:00"
+}

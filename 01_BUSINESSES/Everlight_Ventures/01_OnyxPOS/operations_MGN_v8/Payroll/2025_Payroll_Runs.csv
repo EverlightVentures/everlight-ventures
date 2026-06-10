@@ -1,0 +1,1 @@
+Payroll_ID,Period_ID,Employee_ID,Employee_Name,Regular_Hours,Overtime_Hours,Holiday_Hours,PTO_Hours,Sick_Hours,Gross_Pay,Federal_Tax,State_Tax,Social_Security,Medicare,Other_Deductions,Net_Pay,Pay_Method,Check_Number,Status,Created_At,Approved_By,Approved_At,Notes

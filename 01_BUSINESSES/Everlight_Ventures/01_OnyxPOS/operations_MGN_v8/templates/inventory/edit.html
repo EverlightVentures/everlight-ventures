@@ -1,0 +1,518 @@
+{% extends "base.html" %}
+
+{% block page_title %}Edit Item{% endblock %}
+{% block header_emoji %}📦{% endblock %}
+{% block header_title %}Edit Inventory Item{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('inventory') }}" class="btn btn-secondary">
+    <i data-lucide="arrow-left"></i>
+    Back to Inventory
+</a>
+{% if item and item.get('SKU') %}
+<a href="{{ url_for('view_lots', sku=item.get('SKU')) }}" class="btn btn-secondary">
+    <i data-lucide="layers"></i>
+    View Lots
+</a>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: linear-gradient(160deg, #0f1f17 0%, #0a1810 40%, #0f1f17 100%);
+    }
+
+    .page-grid {
+        display: grid;
+        gap: 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* Item Info Header */
+    .item-header {
+        background: linear-gradient(145deg, #1e3a2a 0%, #162b1f 100%);
+        border: 1px solid rgba(167, 243, 208, 0.12);
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    .item-icon {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 28px;
+        flex-shrink: 0;
+    }
+
+    .item-meta h2 {
+        font-size: 20px;
+        font-weight: 700;
+        color: #e8f5ee;
+        margin-bottom: 8px;
+    }
+
+    .item-stats {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+    }
+
+    .item-stat {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .item-stat .label {
+        font-size: 13px;
+        color: #64748b;
+    }
+
+    .item-stat .value {
+        font-size: 14px;
+        font-weight: 700;
+        color: #34d399;
+        font-family: 'Space Mono', monospace;
+    }
+
+    /* Form Panel */
+    .form-panel {
+        background: linear-gradient(145deg, #1e3a2a 0%, #162b1f 100%);
+        border: 1px solid rgba(167, 243, 208, 0.12);
+        border-radius: 16px;
+        overflow: hidden;
+    }
+
+    .panel-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.1);
+        background: linear-gradient(180deg, rgba(255,255,255,0.03), transparent);
+    }
+
+    .panel-header h3 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #e8f5ee;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .panel-body {
+        padding: 24px;
+    }
+
+    /* Form Grid */
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+    }
+
+    @media (max-width: 900px) {
+        .form-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 600px) {
+        .form-grid { grid-template-columns: 1fr; }
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-group.span-2 {
+        grid-column: span 2;
+    }
+
+    .form-group.span-3 {
+        grid-column: span 3;
+    }
+
+    @media (max-width: 900px) {
+        .form-group.span-3 { grid-column: span 2; }
+    }
+
+    @media (max-width: 600px) {
+        .form-group.span-2, .form-group.span-3 { grid-column: span 1; }
+    }
+
+    .form-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .form-input, .form-select, .form-textarea {
+        padding: 12px 16px;
+        font-size: 15px;
+        font-family: inherit;
+        border: 2px solid rgba(167, 243, 208, 0.12);
+        border-radius: 10px;
+        background: #1a2f23;
+        color: #e8f5ee;
+        transition: all 0.2s;
+    }
+
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+        outline: none;
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16,185,129,0.15);
+    }
+
+    .form-input::placeholder {
+        color: #4a5e52;
+    }
+
+    .form-textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    .form-select {
+        cursor: pointer;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 40px;
+    }
+
+    /* Form Actions */
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+        padding-top: 24px;
+        border-top: 1px solid rgba(167, 243, 208, 0.1);
+    }
+
+    .btn-save {
+        padding: 14px 28px;
+        font-size: 15px;
+        font-weight: 700;
+        background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-family: inherit;
+        box-shadow: 0 4px 16px rgba(16,185,129,0.3);
+        transition: all 0.2s;
+    }
+
+    .btn-save:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16,185,129,0.4);
+    }
+
+    .btn-cancel {
+        padding: 14px 24px;
+        font-size: 15px;
+        font-weight: 600;
+        background: rgba(0,0,0,0.2);
+        color: #94a3b8;
+        border: 1px solid rgba(167, 243, 208, 0.12);
+        border-radius: 10px;
+        cursor: pointer;
+        text-decoration: none;
+        font-family: inherit;
+        transition: all 0.2s;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(0,0,0,0.3);
+        color: #e8f5ee;
+    }
+
+    /* Lots Table */
+    .lots-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .lots-table th {
+        text-align: left;
+        padding: 12px 14px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.1);
+        white-space: nowrap;
+    }
+
+    .lots-table td {
+        padding: 12px 14px;
+        font-size: 14px;
+        color: #e8f5ee;
+        border-bottom: 1px solid rgba(167, 243, 208, 0.06);
+        vertical-align: middle;
+    }
+
+    .lots-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .lot-id {
+        font-family: 'Space Mono', monospace;
+        font-size: 12px;
+        color: #94a3b8;
+    }
+
+    .lot-input {
+        padding: 8px 10px;
+        font-size: 13px;
+        font-family: inherit;
+        border: 1px solid rgba(167, 243, 208, 0.1);
+        border-radius: 6px;
+        background: #1a2f23;
+        color: #e8f5ee;
+        width: 100%;
+        min-width: 80px;
+    }
+
+    .lot-input:focus {
+        outline: none;
+        border-color: #10b981;
+    }
+
+    .btn-update {
+        padding: 8px 14px;
+        font-size: 12px;
+        font-weight: 600;
+        background: rgba(16,185,129,0.15);
+        color: #34d399;
+        border: 1px solid rgba(16,185,129,0.3);
+        border-radius: 6px;
+        cursor: pointer;
+        font-family: inherit;
+        white-space: nowrap;
+        transition: all 0.2s;
+    }
+
+    .btn-update:hover {
+        background: rgba(16,185,129,0.25);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #64748b;
+    }
+
+    .empty-state-icon {
+        font-size: 40px;
+        margin-bottom: 12px;
+        opacity: 0.5;
+    }
+
+    /* Responsive table */
+    .table-wrap {
+        overflow-x: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-grid">
+    <!-- Item Header -->
+    <div class="item-header">
+        <div class="item-icon">📦</div>
+        <div class="item-meta">
+            <h2>{{ item.get('Item_Name', 'Unknown Item') }}</h2>
+            <div class="item-stats">
+                <div class="item-stat">
+                    <span class="label">SKU:</span>
+                    <span class="value">{{ item.get('SKU', '—') }}</span>
+                </div>
+                <div class="item-stat">
+                    <span class="label">On Hand:</span>
+                    <span class="value">{{ stock }}</span>
+                </div>
+                <div class="item-stat">
+                    <span class="label">Avg Cost:</span>
+                    <span class="value">${{ "%.2f"|format(avg_cost or 0) }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Item Master Form -->
+    <div class="form-panel">
+        <div class="panel-header">
+            <h3>📝 Item Details</h3>
+        </div>
+        <div class="panel-body">
+            <form method="post">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label">SKU</label>
+                        <input type="text" class="form-input" name="SKU" value="{{ item.get('SKU', '') }}">
+                    </div>
+
+                    <div class="form-group span-2">
+                        <label class="form-label">Item Name</label>
+                        <input type="text" class="form-input" name="Item_Name" value="{{ item.get('Item_Name', '') }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Category</label>
+                        <input type="text" class="form-input" name="Category" value="{{ item.get('Category', '') }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Subcategory</label>
+                        <input type="text" class="form-input" name="Subcategory" value="{{ item.get('Subcategory', '') }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Product Name</label>
+                        <input type="text" class="form-input" name="Product_Name" value="{{ item.get('Product_Name', '') }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Default Unit</label>
+                        <input type="text" class="form-input" name="Default_Unit" value="{{ item.get('Default_Unit', '') }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Default Price</label>
+                        <input type="text" class="form-input" name="Default_Price" value="{{ item.get('Default_Price', '') }}" placeholder="0.00">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Wholesale Cost</label>
+                        <input type="text" class="form-input" name="Wholesale_Cost" value="{{ item.get('Wholesale_Cost', '') }}" placeholder="0.00">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Retail Price</label>
+                        <input type="text" class="form-input" name="Retail_Price" value="{{ item.get('Retail_Price', '') }}" placeholder="0.00">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Taxable</label>
+                        <select class="form-select" name="Taxable">
+                            {% set t = (item.get('Taxable', 'Y') or 'Y') %}
+                            <option value="Y" {% if t == 'Y' %}selected{% endif %}>Yes</option>
+                            <option value="N" {% if t == 'N' %}selected{% endif %}>No</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Reorder Point</label>
+                        <input type="text" class="form-input" name="Reorder_Point" value="{{ item.get('Reorder_Point', '') }}" placeholder="0">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="Status">
+                            {% set s = (item.get('Status', 'Active') or 'Active') %}
+                            <option value="Active" {% if s == 'Active' %}selected{% endif %}>Active</option>
+                            <option value="Inactive" {% if s == 'Inactive' %}selected{% endif %}>Inactive</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Size</label>
+                        <input type="text" class="form-input" name="Size" value="{{ item.get('Size', '') }}">
+                    </div>
+
+                    <div class="form-group span-2">
+                        <label class="form-label">Description</label>
+                        <input type="text" class="form-input" name="Item_Description" value="{{ item.get('Item_Description', '') }}">
+                    </div>
+
+                    <div class="form-group span-3">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-textarea" name="Notes" rows="3">{{ item.get('Notes', '') }}</textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-save">
+                        <i data-lucide="save"></i>
+                        Save Item
+                    </button>
+                    <a href="{{ url_for('inventory') }}" class="btn-cancel">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Lots Section -->
+    <div class="form-panel">
+        <div class="panel-header">
+            <h3>📦 Inventory Lots</h3>
+        </div>
+        <div class="panel-body">
+            {% if lots and lots|length %}
+            <div class="table-wrap">
+                <table class="lots-table">
+                    <thead>
+                        <tr>
+                            <th>Lot ID</th>
+                            <th>Received</th>
+                            <th>Supplier</th>
+                            <th>Invoice</th>
+                            <th>Unit Cost</th>
+                            <th>Qty</th>
+                            <th>Expiry</th>
+                            <th>Notes</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for lot in lots %}
+                        <tr>
+                            <form method="post" action="{{ url_for('edit_lot', lot_id=lot.get('Lot_ID')) }}">
+                                <input type="hidden" name="sku" value="{{ item.get('SKU', '') }}">
+                                <td class="lot-id">{{ lot.get('Lot_ID') }}</td>
+                                <td><input type="date" class="lot-input" name="Received_Date" value="{{ lot.get('Received_Date', '') }}"></td>
+                                <td><input type="text" class="lot-input" name="Supplier" value="{{ lot.get('Supplier', '') }}"></td>
+                                <td><input type="text" class="lot-input" name="Invoice_Ref" value="{{ lot.get('Invoice_Ref', '') }}"></td>
+                                <td><input type="text" class="lot-input" name="Unit_Cost" value="{{ lot.get('Unit_Cost', '') }}" style="width:70px;"></td>
+                                <td><input type="text" class="lot-input" name="Qty_Remaining" value="{{ lot.get('Qty_Remaining', '') }}" style="width:60px;"></td>
+                                <td><input type="date" class="lot-input" name="Expiry_Date" value="{{ lot.get('Expiry_Date', '') }}"></td>
+                                <td><input type="text" class="lot-input" name="Notes" value="{{ lot.get('Notes', '') }}"></td>
+                                <td><button type="submit" class="btn-update">Update</button></td>
+                            </form>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <p>No lots found for this SKU.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    lucide.createIcons();
+</script>
+{% endblock %}

@@ -145,7 +145,7 @@ def main() -> int:
     # Render
     body = f"""
 <div style='display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:20px 0;'>
-  <div style='background:#0d0d0d;padding:20px;border-left:3px solid #D4A843;'>
+  <div style='background:#0d0d0d;padding:20px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;'>Equity</div>
     <div style='color:#E8E8E8;font-size:36px;font-family:Playfair Display,serif;margin-top:4px;'>${equity:,.2f}</div>
     <div style='color:#888;font-size:12px;margin-top:4px;'>{'+' if equity_change_7d >= 0 else ''}${equity_change_7d:,.2f} in 7d</div>
@@ -157,35 +157,35 @@ def main() -> int:
     <div style='color:#888;font-size:12px;margin-top:4px;'>{trades_7d} trades in last 7 days</div>
   </div>
 
-  <div style='background:#0d0d0d;padding:20px;border-left:3px solid #D4A843;'>
+  <div style='background:#0d0d0d;padding:20px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;'>Last Trade</div>
     <div style='color:#E8E8E8;font-size:24px;font-family:Playfair Display,serif;margin-top:4px;'>{days_since_trade_text}</div>
   </div>
 
-  <div style='background:#0d0d0d;padding:20px;border-left:3px solid #D4A843;'>
+  <div style='background:#0d0d0d;padding:20px;border-left:3px solid #D4AF37;'>
     <div style='color:#888;font-size:12px;text-transform:uppercase;letter-spacing:1px;'>Today PnL</div>
     <div style='color:#E8E8E8;font-size:24px;font-family:Playfair Display,serif;margin-top:4px;'>${pnl_today:,.2f}</div>
     <div style='color:#888;font-size:12px;margin-top:4px;'>win rate: {win_rate:.0f}%</div>
   </div>
 </div>
 
-<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin-top:32px;'>Honest Verdict</h2>
+<h2 style='font-family:Playfair Display,serif;color:#D4AF37;font-size:22px;margin-top:32px;'>Honest Verdict</h2>
 <div style='background:#1a1a1a;padding:20px;border-left:3px solid {mode_color};margin:12px 0;'>
   <p style='color:#E8E8E8;line-height:1.7;'>{verdict}</p>
 </div>
 
-<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin-top:32px;'>Latest Bot Report (what it's thinking)</h2>
-<pre style='background:#0d0d0d;color:#E8E8E8;padding:16px;border-left:3px solid #D4A843;overflow-x:auto;font-family:JetBrains Mono,monospace;font-size:13px;line-height:1.5;'>{last_report_summary or '(no recent report)'}</pre>
+<h2 style='font-family:Playfair Display,serif;color:#D4AF37;font-size:22px;margin-top:32px;'>Latest Bot Report (what it's thinking)</h2>
+<pre style='background:#0d0d0d;color:#E8E8E8;padding:16px;border-left:3px solid #D4AF37;overflow-x:auto;font-family:JetBrains Mono,monospace;font-size:13px;line-height:1.5;'>{last_report_summary or '(no recent report)'}</pre>
 
-<h2 style='font-family:Playfair Display,serif;color:#D4A843;font-size:22px;margin-top:32px;'>Last 5 Heartbeats</h2>
+<h2 style='font-family:Playfair Display,serif;color:#D4AF37;font-size:22px;margin-top:32px;'>Last 5 Heartbeats</h2>
 <table style='width:100%;border-collapse:collapse;font-size:14px;'>
   <thead>
-    <tr style='background:#1a1a1a;color:#D4A843;'>
-      <th style='padding:8px;text-align:left;border-bottom:2px solid #D4A843;'>Timestamp</th>
-      <th style='padding:8px;text-align:right;border-bottom:2px solid #D4A843;'>Equity</th>
-      <th style='padding:8px;text-align:right;border-bottom:2px solid #D4A843;'>Trades</th>
-      <th style='padding:8px;text-align:right;border-bottom:2px solid #D4A843;'>PnL</th>
-      <th style='padding:8px;text-align:right;border-bottom:2px solid #D4A843;'>Win%</th>
+    <tr style='background:#1a1a1a;color:#D4AF37;'>
+      <th style='padding:8px;text-align:left;border-bottom:2px solid #D4AF37;'>Timestamp</th>
+      <th style='padding:8px;text-align:right;border-bottom:2px solid #D4AF37;'>Equity</th>
+      <th style='padding:8px;text-align:right;border-bottom:2px solid #D4AF37;'>Trades</th>
+      <th style='padding:8px;text-align:right;border-bottom:2px solid #D4AF37;'>PnL</th>
+      <th style='padding:8px;text-align:right;border-bottom:2px solid #D4AF37;'>Win%</th>
     </tr>
   </thead>
   <tbody>

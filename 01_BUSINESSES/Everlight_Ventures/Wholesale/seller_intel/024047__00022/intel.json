@@ -1,0 +1,117 @@
+{
+  "lead": {
+    "parcel_id": "024047  00022",
+    "property_address": "1382  FLORIDA ST",
+    "owner_name": "SHOWERS PETER JR AND LOLITA R SHOWERS",
+    "owner_mailing_street": "465BONNELLAVE",
+    "owner_mailing_city": "MEMPHIS",
+    "owner_mailing_state": "TN",
+    "owner_mailing_zip": "38109",
+    "is_vacant_lot": null,
+    "total_appraisal_usd": 13900,
+    "sales_history": [
+      {
+        "date": "01/28/2002",
+        "price_text": "",
+        "deed_or_inst": "02016812",
+        "type_code": "QC",
+        "year": 2002
+      },
+      {
+        "date": "12/04/2001",
+        "price_text": "$0",
+        "deed_or_inst": "02016812",
+        "type_code": "QC",
+        "price_usd": 0,
+        "year": 2001
+      },
+      {
+        "date": "07/09/1987",
+        "price_text": "$0",
+        "deed_or_inst": "464",
+        "type_code": "DN",
+        "price_usd": 0,
+        "year": 1987
+      },
+      {
+        "date": "12/12/1966",
+        "price_text": "$12,000",
+        "deed_or_inst": "6046-243",
+        "type_code": "UN",
+        "price_usd": 12000,
+        "year": 1966
+      },
+      {
+        "date": "07/29/1966",
+        "price_text": "$7,000",
+        "deed_or_inst": "6004-81",
+        "type_code": "UN",
+        "price_usd": 7000,
+        "year": 1966
+      }
+    ],
+    "tax_sale_marker": "TS2202"
+  },
+  "signals": {
+    "is_estate": false,
+    "estate_decedent_name": null,
+    "is_absentee_outofstate": false,
+    "is_absentee_instate": false,
+    "owner_mailing_apartment": false,
+    "is_llc_owner": false,
+    "is_religious_org_owner": false,
+    "is_long_term_owner": true,
+    "ownership_years": 24,
+    "is_high_value": false,
+    "is_vacant_lot": false,
+    "tax_delinquent_years": "4+",
+    "multiple_sales_in_history": true
+  },
+  "browser_queue": [
+    {
+      "label": "Shelby Register of Deeds -- all deeds in 'SHOWERS PETER JR AND LOLITA R SHOWERS' name",
+      "url": "https://search.register.shelby.tn.us/search/",
+      "instructions": "Name search 'SHOWERS PETER JR AND LOLITA R SHOWERS'. Save MHTML of result list. Tells us if owner has OTHER properties in Shelby County (= portfolio = sophisticated investor).",
+      "priority": "HIGH"
+    },
+    {
+      "label": "Obit search -- Google site:legacy.com 'SHOWERS PETER JR AND LOLITA R SHOWERS' Memphis",
+      "url": "https://www.google.com/search?q=site%3Alegacy.com+%22SHOWERS+PETER+JR+AND+LOLITA+R+SHOWERS%22+Memphis+OR+Tennessee",
+      "instructions": "Click any hit, MHTML the obit. Tells us: death date, age, surviving family names + cities (= heir candidates).",
+      "priority": "LOW"
+    },
+    {
+      "label": "Facebook public search -- SHOWERS PETER JR AND LOLITA R SHOWERS in MEMPHIS",
+      "url": "https://www.facebook.com/public/SHOWERS+PETER+JR+AND+LOLITA+R+SHOWERS",
+      "instructions": "If profile public, tells us age range, employer, family, recent posts. Don't friend; just look. MHTML the search result page.",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "LinkedIn search -- SHOWERS PETER JR AND LOLITA R SHOWERS MEMPHIS",
+      "url": "https://www.linkedin.com/search/results/people/?keywords=SHOWERS+PETER+JR+AND+LOLITA+R+SHOWERS+MEMPHIS",
+      "instructions": "Profession, employer, tenure. Helps frame the pitch (busy professional = lead with time-saving; recent retiree = lead with simplicity).",
+      "priority": "MEDIUM"
+    },
+    {
+      "label": "TN Public Notice + Court Records -- civil/foreclosure history",
+      "url": "https://www.tncourts.gov/courts/public-notices",
+      "instructions": "Search 'SHOWERS PETER JR AND LOLITA R SHOWERS'. Civil suits, eviction filings, foreclosure starts = financial pressure signals.",
+      "priority": "MEDIUM"
+    }
+  ],
+  "pitch_hooks": [
+    {
+      "name": "long_ownership_dignified_close",
+      "angle": "Honor the time; clean exit",
+      "lead_line": "You've held this property for 24 years \u2014 that's a long time. Memphis values have shifted and so has the cost of carrying property. We can offer a clean, no-surprise close.",
+      "use_when": "Owner held property >=20 years, no estate."
+    },
+    {
+      "name": "back_tax_relief",
+      "angle": "We pay the back tax \u2014 you walk clean",
+      "lead_line": "We see the property's been on the back-tax list for a few years. We pay every dollar of back tax + penalty at closing \u2014 out of OUR side, not yours. You walk away clean.",
+      "use_when": "TS2202 lead. Strong on absentee owners with no plan to develop."
+    }
+  ],
+  "generated_at": "2026-04-29T21:40:40.634946+00:00"
+}

@@ -115,7 +115,7 @@ grep "79 agents" 06_DEVELOPMENT/everlight_os/hive_mind/roster.yaml
 ssh oracle-e5 "curl -s localhost:8502" | head -5
 
 # Blinko reachable?
-curl -s http://129.159.38.250:1111/api/v1/note/list | head -5
+curl -s http://e5-mother:1111/api/v1/note/list | head -5
 
 # Dashboard reachable?
 curl -s http://129.159.38.250:8504 | head -5

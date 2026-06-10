@@ -1,0 +1,43 @@
+========================================
+  STEP 1: Create GitHub Repository
+========================================
+
+1. Go to https://github.com/new
+
+2. Repository name: onyxpos
+   Description: Next-generation POS with capped GMV pricing
+   
+3. Select: Private (recommended) or Public
+
+4. Do NOT initialize with README, .gitignore, or license
+   (we already have these)
+
+5. Click "Create repository"
+
+========================================
+  STEP 2: Push Your Code
+========================================
+
+After creating the repo, GitHub will show you commands.
+Use these (replace YOUR-USERNAME with your GitHub username):
+
+cd "/home/mgn/Projects/Mountain Gardens Nursery POS"
+
+git remote add origin https://github.com/YOUR-USERNAME/onyxpos.git
+
+git push -u origin main
+
+========================================
+  WHAT'S INCLUDED
+========================================
+
+✅ Backend API (86 files, 20,246 lines)
+✅ Mobile app UI
+✅ Web frontend
+✅ All documentation
+✅ Deployment configs
+✅ Testing scripts
+
+========================================
+
+Once pushed to GitHub, you're ready for Railway!

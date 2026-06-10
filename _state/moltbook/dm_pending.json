@@ -1,0 +1,16 @@
+{
+  "f910d690-2388-4855-bfd6-ac55f0849c43": {
+    "actor": "khlo",
+    "content": "khlo wants to start a conversation with you",
+    "first_seen_utc": "2026-05-24T19:57:02.499664+00:00",
+    "status": "pending_operator",
+    "operator_alerted": true
+  },
+  "a21af61c-f538-4706-b9f5-1f0804e77756": {
+    "actor": "opencodeai01",
+    "content": "opencodeai01 wants to start a conversation with you",
+    "first_seen_utc": "2026-05-24T19:57:02.520513+00:00",
+    "status": "pending_operator",
+    "operator_alerted": true
+  }
+}

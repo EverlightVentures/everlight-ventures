@@ -1,0 +1,760 @@
+{% extends "base.html" %}
+
+{% block page_title %}CSV Invoice Import{% endblock %}
+{% block header_emoji %}📊{% endblock %}
+{% block header_title %}CSV Invoice Import{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('receive_stock') }}" class="btn btn-secondary">
+  <i data-lucide="arrow-left"></i> Back to Receive
+</a>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+  .card{
+    background: linear-gradient(145deg, rgba(30,58,42,0.9), rgba(22,43,31,0.9));
+    border: 1px solid rgba(167, 243, 208, 0.12);
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 8px 22px rgba(0,0,0,0.25);
+    margin-bottom: 24px;
+  }
+
+  .card h3{
+    margin:0 0 16px 0;
+    font-size: 18px;
+    font-weight: 900;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color: #e8f5ee;
+  }
+
+  .hint{
+    color: rgba(232,245,238,0.65);
+    font-size: 13px;
+    margin-bottom: 14px;
+    line-height: 1.6;
+  }
+
+  .step-indicator{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.2);
+    border-radius: 12px;
+  }
+
+  .step-number{
+    width: 36px;
+    height: 36px;
+    background: #10b981;
+    color: #0a0f0c;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .step-text{
+    color: #e8f5ee;
+    font-weight: 700;
+  }
+
+  /* File upload area */
+  .upload-area{
+    border: 3px dashed rgba(167,243,208,0.3);
+    border-radius: 16px;
+    padding: 40px;
+    text-align: center;
+    background: rgba(16,185,129,0.04);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+  }
+
+  .upload-area:hover{
+    border-color: #10b981;
+    background: rgba(16,185,129,0.08);
+  }
+
+  .upload-area.dragover{
+    border-color: #10b981;
+    background: rgba(16,185,129,0.12);
+    transform: scale(1.02);
+  }
+
+  .upload-icon{
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.7;
+  }
+
+  .file-input{
+    display: none;
+  }
+
+  /* Preview section */
+  .preview-section{
+    display: none;
+    margin-top: 24px;
+  }
+
+  .preview-section.active{
+    display: block;
+  }
+
+  .preview-table{
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(0,0,0,0.2);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid rgba(167,243,208,0.12);
+    margin-bottom: 20px;
+  }
+
+  .preview-table th{
+    background: rgba(255,255,255,0.03);
+    padding: 12px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(232,245,238,0.70);
+    border-bottom: 1px solid rgba(167,243,208,0.08);
+  }
+
+  .preview-table td{
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(167,243,208,0.06);
+    color: #e8f5ee;
+    font-size: 13px;
+  }
+
+  .preview-table tr:hover{
+    background: rgba(255,255,255,0.02);
+  }
+
+  /* Mapping section */
+  .mapping-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .mapping-field{
+    background: rgba(0,0,0,0.15);
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(167,243,208,0.08);
+  }
+
+  .mapping-field label{
+    display:block;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    color: rgba(232,245,238,0.70);
+    margin-bottom: 8px;
+  }
+
+  .mapping-field select{
+    width:100%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 2px solid rgba(167,243,208,0.16);
+    background: rgba(0,0,0,0.22);
+    color: #e8f5ee;
+    outline: none;
+    font-family: inherit;
+  }
+
+  .mapping-field select:focus{
+    border-color:#10b981;
+    box-shadow: 0 0 0 4px rgba(16,185,129,0.18);
+  }
+
+  .mapping-field .hint{
+    margin-top: 6px;
+    margin-bottom: 0;
+  }
+
+  .input-field{
+    margin-bottom: 16px;
+  }
+
+  .input-field label{
+    display:block;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .4px;
+    text-transform: uppercase;
+    color: rgba(232,245,238,0.70);
+    margin-bottom: 6px;
+  }
+
+  .input-field input{
+    width:100%;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 2px solid rgba(167,243,208,0.16);
+    background: rgba(0,0,0,0.22);
+    color: #e8f5ee;
+    outline: none;
+    font-family: inherit;
+  }
+
+  .input-field input:focus{
+    border-color:#10b981;
+    box-shadow: 0 0 0 4px rgba(16,185,129,0.18);
+  }
+
+  /* Status badges */
+  .status-badge{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .status-badge.required{
+    background: rgba(239,68,68,0.15);
+    color: #ef4444;
+    border: 1px solid rgba(239,68,68,0.3);
+  }
+
+  .status-badge.optional{
+    background: rgba(245,158,11,0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245,158,11,0.3);
+  }
+
+  .status-badge.matched{
+    background: rgba(16,185,129,0.15);
+    color: #10b981;
+    border: 1px solid rgba(16,185,129,0.3);
+  }
+
+  /* Info boxes */
+  .info-box{
+    padding: 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .info-box.info{
+    background: rgba(59,130,246,0.08);
+    border: 1px solid rgba(59,130,246,0.2);
+  }
+
+  .info-box.warning{
+    background: rgba(245,158,11,0.08);
+    border: 1px solid rgba(245,158,11,0.2);
+  }
+
+  .info-box.success{
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.2);
+  }
+
+  .info-box-icon{
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  .info-box-content{
+    flex: 1;
+  }
+
+  .info-box-title{
+    font-weight: 800;
+    font-size: 14px;
+    color: #e8f5ee;
+    margin-bottom: 4px;
+  }
+
+  .info-box-text{
+    font-size: 13px;
+    color: rgba(232,245,238,0.70);
+    line-height: 1.5;
+  }
+
+  .info-box-text ul{
+    margin: 8px 0 0 0;
+    padding-left: 20px;
+  }
+
+  .info-box-text li{
+    margin-bottom: 4px;
+  }
+
+  /* Buttons */
+  .btn-group{
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .btn{
+    padding: 12px 24px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .btn-primary{
+    background: #10b981;
+    color: #0a0f0c;
+  }
+
+  .btn-primary:hover{
+    background: #059669;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(16,185,129,0.3);
+  }
+
+  .btn-secondary{
+    background: rgba(100,116,139,0.2);
+    color: #e8f5ee;
+    border: 1px solid rgba(167,243,208,0.2);
+  }
+
+  .btn-secondary:hover{
+    background: rgba(100,116,139,0.3);
+    border-color: rgba(167,243,208,0.3);
+  }
+
+  /* Loading spinner */
+  .spinner{
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  @keyframes spin{
+    to{ transform: rotate(360deg); }
+  }
+
+  .hidden{
+    display: none !important;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+
+  <!-- Step 1: Upload File -->
+  <div class="card">
+    <div class="step-indicator">
+      <div class="step-number">1</div>
+      <div class="step-text">Upload your CSV invoice file</div>
+    </div>
+
+    <div class="info-box info">
+      <div class="info-box-icon">💡</div>
+      <div class="info-box-content">
+        <div class="info-box-title">How it works</div>
+        <div class="info-box-text">
+          Upload any vendor invoice CSV. We'll automatically detect columns and match them to your inventory fields. You can adjust the mapping before importing.
+        </div>
+      </div>
+    </div>
+
+    <div class="upload-area" id="uploadArea">
+      <div class="upload-icon">📤</div>
+      <div style="font-size: 16px; font-weight: 700; color: #e8f5ee; margin-bottom: 8px;">
+        Click to upload or drag and drop
+      </div>
+      <div class="hint">
+        CSV files only • Maximum 5MB
+      </div>
+      <input type="file" id="fileInput" class="file-input" accept=".csv">
+    </div>
+
+    <div id="fileInfo" class="info-box success hidden">
+      <div class="info-box-icon">✅</div>
+      <div class="info-box-content">
+        <div class="info-box-title">File loaded</div>
+        <div class="info-box-text" id="fileInfoText"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Step 2: Preview & Map -->
+  <div class="card preview-section" id="previewSection">
+    <div class="step-indicator">
+      <div class="step-number">2</div>
+      <div class="step-text">Map CSV columns to inventory fields</div>
+    </div>
+
+    <div class="info-box warning">
+      <div class="info-box-icon">⚠️</div>
+      <div class="info-box-content">
+        <div class="info-box-title">Important</div>
+        <div class="info-box-text">
+          Items must exist in your inventory to be imported. The system will:
+          <ul>
+            <li>Look up items by SKU (if mapped)</li>
+            <li>Fall back to Item Name search (if no SKU)</li>
+            <li>Skip items not found in your system</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <h4 style="color: #e8f5ee; font-size: 14px; font-weight: 800; margin-bottom: 12px;">
+      PREVIEW (First 5 rows)
+    </h4>
+    <div style="overflow-x: auto; margin-bottom: 24px;">
+      <table class="preview-table" id="previewTable">
+        <thead id="previewHeader"></thead>
+        <tbody id="previewBody"></tbody>
+      </table>
+    </div>
+
+    <form method="POST" action="{{ url_for('csv_invoice_import') }}" id="importForm" enctype="multipart/form-data">
+      <h4 style="color: #e8f5ee; font-size: 14px; font-weight: 800; margin-bottom: 16px;">
+        FIELD MAPPING
+      </h4>
+
+      <div class="mapping-grid" id="mappingGrid">
+        <!-- SKU -->
+        <div class="mapping-field">
+          <label>
+            Item SKU
+            <span class="status-badge optional">Optional</span>
+          </label>
+          <select name="map_sku" id="map_sku">
+            <option value="">-- Not Mapped --</option>
+          </select>
+          <div class="hint">Match items by SKU code</div>
+        </div>
+
+        <!-- Item Name -->
+        <div class="mapping-field">
+          <label>
+            Item Name
+            <span class="status-badge optional">Optional</span>
+          </label>
+          <select name="map_item_name" id="map_item_name">
+            <option value="">-- Not Mapped --</option>
+          </select>
+          <div class="hint">Used if SKU not found</div>
+        </div>
+
+        <!-- Quantity -->
+        <div class="mapping-field">
+          <label>
+            Quantity
+            <span class="status-badge required">Required</span>
+          </label>
+          <select name="map_qty" id="map_qty" required>
+            <option value="">-- Not Mapped --</option>
+          </select>
+          <div class="hint">Number of units received</div>
+        </div>
+
+        <!-- Unit Cost -->
+        <div class="mapping-field">
+          <label>
+            Unit Cost
+            <span class="status-badge optional">Optional</span>
+          </label>
+          <select name="map_unit_cost" id="map_unit_cost">
+            <option value="">-- Not Mapped --</option>
+          </select>
+          <div class="hint">Cost per unit ($)</div>
+        </div>
+
+        <!-- Supplier -->
+        <div class="mapping-field">
+          <label>
+            Supplier
+            <span class="status-badge optional">Optional</span>
+          </label>
+          <select name="map_supplier" id="map_supplier">
+            <option value="">-- Not Mapped --</option>
+          </select>
+          <div class="hint">Vendor name</div>
+        </div>
+
+        <!-- Invoice Number -->
+        <div class="mapping-field">
+          <label>
+            Invoice Number
+            <span class="status-badge optional">Optional</span>
+          </label>
+          <select name="map_invoice_no" id="map_invoice_no">
+            <option value="">-- Not Mapped --</option>
+          </select>
+          <div class="hint">Invoice or PO number</div>
+        </div>
+      </div>
+
+      <h4 style="color: #e8f5ee; font-size: 14px; font-weight: 800; margin-bottom: 16px; margin-top: 24px;">
+        DEFAULT VALUES (Optional)
+      </h4>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+        <div class="input-field">
+          <label>Default Supplier</label>
+          <input type="text" name="default_supplier" placeholder="e.g., ABC Wholesale">
+          <div class="hint">Used if supplier column not mapped</div>
+        </div>
+
+        <div class="input-field">
+          <label>Default Invoice Number</label>
+          <input type="text" name="default_invoice" placeholder="e.g., INV-2025-001">
+          <div class="hint">Used if invoice column not mapped</div>
+        </div>
+      </div>
+
+      <input type="hidden" name="csv_file" id="csvFileData">
+
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">
+          <i data-lucide="upload"></i>
+          Import Invoice
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="location.reload()">
+          <i data-lucide="x"></i>
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  lucide.createIcons();
+
+  const uploadArea = document.getElementById('uploadArea');
+  const fileInput = document.getElementById('fileInput');
+  const fileInfo = document.getElementById('fileInfo');
+  const fileInfoText = document.getElementById('fileInfoText');
+  const previewSection = document.getElementById('previewSection');
+  const previewHeader = document.getElementById('previewHeader');
+  const previewBody = document.getElementById('previewBody');
+  const mappingSelects = {
+    sku: document.getElementById('map_sku'),
+    item_name: document.getElementById('map_item_name'),
+    qty: document.getElementById('map_qty'),
+    unit_cost: document.getElementById('map_unit_cost'),
+    supplier: document.getElementById('map_supplier'),
+    invoice_no: document.getElementById('map_invoice_no')
+  };
+
+  // Upload area click
+  uploadArea.addEventListener('click', () => fileInput.click());
+
+  // Drag and drop
+  uploadArea.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadArea.classList.add('dragover');
+  });
+
+  uploadArea.addEventListener('dragleave', () => {
+    uploadArea.classList.remove('dragover');
+  });
+
+  uploadArea.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadArea.classList.remove('dragover');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      fileInput.files = files;
+      handleFileSelect();
+    }
+  });
+
+  // File input change
+  fileInput.addEventListener('change', handleFileSelect);
+
+  async function handleFileSelect() {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.csv')) {
+      alert('Please select a CSV file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File must be smaller than 5MB');
+      return;
+    }
+
+    // Show file info
+    fileInfo.classList.remove('hidden');
+    fileInfoText.textContent = `${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+
+    // Preview file
+    await previewFile(file);
+  }
+
+  async function previewFile(file) {
+    const formData = new FormData();
+    formData.append('csv_file', file);
+
+    try {
+      const response = await fetch('{{ url_for("csv_import_preview") }}', {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to preview file');
+      }
+
+      const data = await response.json();
+
+      // Populate preview table
+      populatePreview(data.headers, data.preview);
+
+      // Populate mapping selects
+      populateMappingSelects(data.headers, data.suggestions);
+
+      // Show preview section
+      previewSection.classList.add('active');
+
+      // Smooth scroll to preview
+      previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    } catch (error) {
+      alert('Error previewing file: ' + error.message);
+    }
+  }
+
+  function populatePreview(headers, rows) {
+    // Header
+    previewHeader.innerHTML = '<tr>' +
+      headers.map(h => `<th>${escapeHtml(h)}</th>`).join('') +
+      '</tr>';
+
+    // Body
+    previewBody.innerHTML = rows.map(row =>
+      '<tr>' +
+      headers.map(h => `<td>${escapeHtml(String(row[h] || ''))}</td>`).join('') +
+      '</tr>'
+    ).join('');
+  }
+
+  function populateMappingSelects(headers, suggestions) {
+    // Populate all selects with headers
+    Object.values(mappingSelects).forEach(select => {
+      // Keep first option (-- Not Mapped --)
+      select.innerHTML = '<option value="">-- Not Mapped --</option>' +
+        headers.map(h => `<option value="${escapeHtml(h)}">${escapeHtml(h)}</option>`).join('');
+    });
+
+    // Apply suggestions
+    Object.entries(suggestions).forEach(([field, header]) => {
+      if (header && mappingSelects[field]) {
+        mappingSelects[field].value = header;
+
+        // Add visual indicator
+        const badge = mappingSelects[field].parentElement.querySelector('.status-badge');
+        if (badge && badge.classList.contains('optional')) {
+          badge.textContent = 'Auto-Mapped';
+          badge.classList.remove('optional');
+          badge.classList.add('matched');
+        }
+      }
+    });
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  const importForm = document.getElementById('importForm');
+
+  // Form validation + submit
+  importForm.addEventListener('submit', async (e) => {
+    if (!mappingSelects.qty.value) {
+      e.preventDefault();
+      alert('Quantity field mapping is required');
+      mappingSelects.qty.focus();
+      return;
+    }
+
+    if (!mappingSelects.unit_cost.value) {
+      e.preventDefault();
+      alert('Unit Cost field mapping is required');
+      mappingSelects.unit_cost.focus();
+      return;
+    }
+
+    const file = fileInput.files[0];
+    if (!file) {
+      e.preventDefault();
+      alert('Please select a CSV file to import');
+      return;
+    }
+
+    e.preventDefault();
+
+    const submitBtn = importForm.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+    }
+
+    const formData = new FormData(importForm);
+    formData.delete('csv_file');
+    formData.append('csv_file', file);
+
+    try {
+      const response = await fetch(importForm.action, {
+        method: 'POST',
+        body: formData
+      });
+
+      const data = await response.json();
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Import failed');
+      }
+
+      window.location.href = '/inventory';
+    } catch (error) {
+      alert('Import failed: ' + error.message);
+      if (submitBtn) {
+        submitBtn.disabled = false;
+      }
+    }
+  });
+</script>
+{% endblock %}

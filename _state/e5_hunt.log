@@ -1,0 +1,137 @@
+[2026-05-14 11:52:32 PDT] === hunt_and_provision_e5 START ===
+[2026-05-14 11:52:34 PDT] attempt #1  shape={"ocpus": 4, "memoryInGBs": 24}
+[2026-05-14 11:54:21 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 24}
+[2026-05-14 11:54:21 PDT] attempt #1  shape={"ocpus": 4, "memoryInGBs": 23}
+[2026-05-14 11:56:09 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 23}
+[2026-05-14 11:56:09 PDT] attempt #1  shape={"ocpus": 4, "memoryInGBs": 20}
+[2026-05-14 11:57:52 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 20}
+[2026-05-14 11:57:52 PDT] attempt #1  shape={"ocpus": 4, "memoryInGBs": 16}
+[2026-05-14 11:59:39 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 16}
+[2026-05-14 11:59:39 PDT]   all shapes exhausted this round -- sleep 300s
+[2026-05-14 12:04:39 PDT] attempt #2  shape={"ocpus": 4, "memoryInGBs": 24}
+[2026-05-14 12:06:25 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 24}
+[2026-05-14 12:06:25 PDT] attempt #2  shape={"ocpus": 4, "memoryInGBs": 23}
+[2026-05-14 12:08:09 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 23}
+[2026-05-14 12:08:10 PDT] attempt #2  shape={"ocpus": 4, "memoryInGBs": 20}
+[2026-05-14 12:09:55 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 20}
+[2026-05-14 12:09:55 PDT] attempt #2  shape={"ocpus": 4, "memoryInGBs": 16}
+[2026-05-14 12:11:40 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 16}
+[2026-05-14 12:11:40 PDT]   all shapes exhausted this round -- sleep 300s
+[2026-05-14 12:16:40 PDT] attempt #3  shape={"ocpus": 4, "memoryInGBs": 24}
+[2026-05-14 12:18:24 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 24}
+[2026-05-14 12:18:24 PDT] attempt #3  shape={"ocpus": 4, "memoryInGBs": 23}
+[2026-05-14 12:20:09 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 23}
+[2026-05-14 12:20:09 PDT] attempt #3  shape={"ocpus": 4, "memoryInGBs": 20}
+[2026-05-14 12:21:54 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 20}
+[2026-05-14 12:21:54 PDT] attempt #3  shape={"ocpus": 4, "memoryInGBs": 16}
+[2026-05-14 12:23:40 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 16}
+[2026-05-14 12:23:40 PDT]   all shapes exhausted this round -- sleep 300s
+[2026-05-14 12:28:40 PDT] attempt #4  shape={"ocpus": 4, "memoryInGBs": 24}
+[2026-05-14 12:30:25 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 24}
+[2026-05-14 12:30:25 PDT] attempt #4  shape={"ocpus": 4, "memoryInGBs": 23}
+[2026-05-14 12:32:08 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 23}
+[2026-05-14 12:32:08 PDT] attempt #4  shape={"ocpus": 4, "memoryInGBs": 20}
+[2026-05-14 12:33:53 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 20}
+[2026-05-14 12:33:53 PDT] attempt #4  shape={"ocpus": 4, "memoryInGBs": 16}
+[2026-05-14 12:35:40 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 16}
+[2026-05-14 12:35:40 PDT]   all shapes exhausted this round -- sleep 300s
+[2026-05-14 12:40:40 PDT] attempt #5  shape={"ocpus": 4, "memoryInGBs": 24}
+[2026-05-14 12:42:25 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 24}
+[2026-05-14 12:42:25 PDT] attempt #5  shape={"ocpus": 4, "memoryInGBs": 23}
+[2026-05-14 12:44:12 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 23}
+[2026-05-14 12:44:12 PDT] attempt #5  shape={"ocpus": 4, "memoryInGBs": 20}
+[2026-05-14 12:46:02 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 20}
+[2026-05-14 12:46:02 PDT] attempt #5  shape={"ocpus": 4, "memoryInGBs": 16}
+[2026-05-14 12:47:52 PDT]   out of capacity at {"ocpus": 4, "memoryInGBs": 16}
+[2026-05-14 12:47:52 PDT]   all shapes exhausted this round -- sleep 300s
+[2026-05-14 12:52:52 PDT] attempt #6  shape={"ocpus": 4, "memoryInGBs": 24}
+[2026-05-14 12:52:58 PDT] LANDED  ocid=ocid1.instance.oc1.us-sanjose-1.anzwuljrwtpnzgacjfubz64nyrbdymap3ujkq4jymnwbhuojooy2jdd6qzmq  shape={"ocpus": 4, "memoryInGBs": 24}
+[2026-05-14 12:53:01 PDT] Phase 2 -- waiting for RUNNING state + public IP
+[2026-05-14 12:53:14 PDT]   state=PROVISIONING (1/60)
+[2026-05-14 12:53:28 PDT]   state=PROVISIONING (2/60)
+[2026-05-14 12:53:47 PDT]   RUNNING, public IP = 192.18.137.52
+[2026-05-14 12:53:47 PDT] Phase 3 -- waiting for cloud-init / SSH on 2222 (can take 5-7 min)
+[2026-05-14 12:54:02 PDT]   cloud-init not ready (1/50)
+[2026-05-14 12:54:17 PDT]   cloud-init not ready (2/50)
+[2026-05-14 12:54:32 PDT]   cloud-init not ready (3/50)
+[2026-05-14 12:54:47 PDT]   cloud-init not ready (4/50)
+[2026-05-14 12:55:02 PDT]   cloud-init not ready (5/50)
+[2026-05-14 12:55:17 PDT]   cloud-init not ready (6/50)
+[2026-05-14 12:55:33 PDT]   cloud-init not ready (7/50)
+[2026-05-14 12:55:48 PDT]   cloud-init not ready (8/50)
+[2026-05-14 12:56:03 PDT]   cloud-init not ready (9/50)
+[2026-05-14 12:56:18 PDT]   cloud-init not ready (10/50)
+[2026-05-14 12:56:33 PDT]   cloud-init not ready (11/50)
+[2026-05-14 12:56:48 PDT]   cloud-init not ready (12/50)
+[2026-05-14 12:57:03 PDT]   cloud-init not ready (13/50)
+[2026-05-14 12:57:19 PDT]   cloud-init not ready (14/50)
+[2026-05-14 12:57:34 PDT]   cloud-init not ready (15/50)
+[2026-05-14 12:57:49 PDT]   cloud-init not ready (16/50)
+[2026-05-14 12:58:04 PDT]   cloud-init not ready (17/50)
+[2026-05-14 12:58:19 PDT]   cloud-init not ready (18/50)
+[2026-05-14 12:58:34 PDT]   cloud-init not ready (19/50)
+[2026-05-14 12:58:49 PDT]   cloud-init not ready (20/50)
+[2026-05-14 12:59:04 PDT]   cloud-init not ready (21/50)
+[2026-05-14 12:59:20 PDT]   cloud-init not ready (22/50)
+[2026-05-14 12:59:35 PDT]   cloud-init not ready (23/50)
+[2026-05-14 12:59:50 PDT]   cloud-init not ready (24/50)
+[2026-05-14 13:00:05 PDT]   cloud-init not ready (25/50)
+[2026-05-14 13:00:20 PDT]   cloud-init not ready (26/50)
+[2026-05-14 13:00:35 PDT]   cloud-init not ready (27/50)
+[2026-05-14 13:00:50 PDT]   cloud-init not ready (28/50)
+[2026-05-14 13:01:05 PDT]   cloud-init not ready (29/50)
+[2026-05-14 13:01:20 PDT]   cloud-init not ready (30/50)
+[2026-05-14 13:01:36 PDT]   cloud-init not ready (31/50)
+[2026-05-14 13:01:51 PDT]   cloud-init not ready (32/50)
+[2026-05-14 13:02:06 PDT]   cloud-init not ready (33/50)
+[2026-05-14 13:02:21 PDT]   cloud-init not ready (34/50)
+[2026-05-14 13:02:36 PDT]   cloud-init not ready (35/50)
+[2026-05-14 13:02:51 PDT]   cloud-init not ready (36/50)
+[2026-05-14 13:03:06 PDT]   cloud-init not ready (37/50)
+[2026-05-14 13:03:21 PDT]   cloud-init not ready (38/50)
+[2026-05-14 13:03:37 PDT]   cloud-init not ready (39/50)
+[2026-05-14 13:03:52 PDT]   cloud-init not ready (40/50)
+[2026-05-14 13:04:07 PDT]   cloud-init not ready (41/50)
+[2026-05-14 13:04:22 PDT]   cloud-init not ready (42/50)
+[2026-05-14 13:04:37 PDT]   cloud-init not ready (43/50)
+[2026-05-14 13:04:52 PDT]   cloud-init not ready (44/50)
+[2026-05-14 13:05:07 PDT]   cloud-init not ready (45/50)
+[2026-05-14 13:05:22 PDT]   cloud-init not ready (46/50)
+[2026-05-14 13:05:37 PDT]   cloud-init not ready (47/50)
+[2026-05-14 13:05:52 PDT]   cloud-init not ready (48/50)
+[2026-05-14 13:06:08 PDT]   cloud-init not ready (49/50)
+[2026-05-14 13:06:23 PDT]   cloud-init not ready (50/50)
+[2026-05-14 13:06:23 PDT] WARN: cloud-init flag never appeared -- continuing anyway, may need manual finish
+[2026-05-14 13:06:23 PDT] Phase 4 -- attaching orphan E5 boot volume
+    "lifecycle-state": "ATTACHING",
+[2026-05-14 13:06:47 PDT] Phase 5 -- mounting orphan volume + transferring E5 data
+ssh: connect to host 192.18.137.52 port 2222: No route to host
+[2026-05-14 13:06:47 PDT] Phase 6 -- Tailscale readiness
+ssh: connect to host 192.18.137.52 port 2222: No route to host
+[2026-05-14 13:06:47 PDT] Phase 7 -- writing landing report
+========================================================
+  E5-MOTHER LANDED + PROVISIONED  --  2026-05-14 13:06:47 PDT
+========================================================
+
+  PUBLIC IP : 192.18.137.52
+  OCID      : ocid1.instance.oc1.us-sanjose-1.anzwuljrwtpnzgacjfubz64nyrbdymap3ujkq4jymnwbhuojooy2jdd6qzmq
+
+  CONNECT (SSH):
+    ssh -i /root/.ssh/github_deploy -p 2222 ubuntu@192.18.137.52
+
+  JOIN TAILSCALE (run this once you're SSH'd in):
+    sudo tailscale up --ssh --hostname=e5-mother
+    # then it's reachable as 'e5-mother' on your tailnet
+
+  E5 PRODUCTION DATA:
+    restored to  /home/ubuntu/e5_data/   on the new box
+    systemd units in /home/ubuntu/e5_data/_systemd_units/
+    (rsync'd directly off the orphan boot volume xlm-bot-core-e5-2c16g)
+
+  NEXT (provisioning the hive stack):
+    the recovered .env + service units are in /home/ubuntu/e5_data/
+    run the e5_mother/provision.sh flow or restore services manually
+
+  cloud-init: INCOMPLETE -- check manually
+========================================================
+[2026-05-14 13:06:49 PDT] === DONE -- e5-mother at 192.18.137.52 ===

@@ -1,0 +1,144 @@
+{
+  "name": "Alley Kingz #0018 Flash Saluki",
+  "symbol": "BCARDI",
+  "description": "Flash Saluki, a Rare Skirmisher in the Zoomie Syndicate. The Saluki pilots the Saluki Rig -- sport speed rig -- nitro, drag body, glass-cannon velocity. Signature move: \"Sidecut\". A playable Alley Kingz battle card on Solana -- the NFT is the card, with gameplay stats written on-chain. Cosmetic art plus gameplay stats; in-game items are for entertainment and utility, not investments. No promised returns.",
+  "image": "ipfs://<IMAGE_CID_DIR>/0018_flash_saluki.png",
+  "animation_url": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_FlashSaluki_Saluki_Seedance_V1.mp4",
+  "external_url": "https://everlightventures.io/cards/0018",
+  "attributes": [
+    {
+      "trait_type": "Card Number",
+      "value": "0018"
+    },
+    {
+      "trait_type": "Faction",
+      "value": "Zoomie Syndicate"
+    },
+    {
+      "trait_type": "Faction Id",
+      "value": "zoomie_syndicate"
+    },
+    {
+      "trait_type": "Breed",
+      "value": "Saluki"
+    },
+    {
+      "trait_type": "Name",
+      "value": "Flash Saluki"
+    },
+    {
+      "trait_type": "Rarity",
+      "value": "Rare"
+    },
+    {
+      "trait_type": "Role",
+      "value": "Skirmisher"
+    },
+    {
+      "trait_type": "Cost",
+      "value": 4
+    },
+    {
+      "trait_type": "Tag",
+      "value": "Dash"
+    },
+    {
+      "trait_type": "HP",
+      "value": 800
+    },
+    {
+      "trait_type": "Damage",
+      "value": 95
+    },
+    {
+      "trait_type": "Attack Speed",
+      "value": 1.2
+    },
+    {
+      "trait_type": "Move Speed",
+      "value": 1.3
+    },
+    {
+      "trait_type": "Range",
+      "value": 1
+    },
+    {
+      "trait_type": "Ability",
+      "value": "Sidecut"
+    },
+    {
+      "trait_type": "Ability Cooldown",
+      "value": 10
+    },
+    {
+      "trait_type": "Queen Target",
+      "value": false
+    },
+    {
+      "trait_type": "Rig",
+      "value": "Saluki Rig"
+    },
+    {
+      "trait_type": "Rig Class",
+      "value": "sprinter"
+    },
+    {
+      "trait_type": "Weapon Mod",
+      "value": "ram_plow"
+    }
+  ],
+  "properties": {
+    "category": "video",
+    "chain": "solana",
+    "standard": "metaplex-core",
+    "ticker": "$BCARDD",
+    "files": [
+      {
+        "uri": "ipfs://<IMAGE_CID_DIR>/0018_flash_saluki.png",
+        "type": "image/png"
+      },
+      {
+        "uri": "ipfs://<ANIMATION_CID_DIR>/2026-06-02_AKBattle_FlashSaluki_Saluki_Seedance_V1.mp4",
+        "type": "video/mp4"
+      }
+    ]
+  },
+  "onchain_attributes": [
+    {
+      "key": "hp",
+      "value": "800"
+    },
+    {
+      "key": "damage",
+      "value": "95"
+    },
+    {
+      "key": "attack_speed",
+      "value": "1.2"
+    },
+    {
+      "key": "move_speed",
+      "value": "1.3"
+    },
+    {
+      "key": "range",
+      "value": "1"
+    },
+    {
+      "key": "cost",
+      "value": "4"
+    },
+    {
+      "key": "rarity",
+      "value": "Rare"
+    },
+    {
+      "key": "ability_id",
+      "value": "sidecut"
+    },
+    {
+      "key": "queen_target",
+      "value": "0"
+    }
+  ]
+}

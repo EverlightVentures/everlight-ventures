@@ -1,0 +1,14 @@
+{
+  "agent": "Piper Reeves",
+  "halt_active": false,
+  "would_send": false,
+  "channel_eligibility": {
+    "tn_cold_call": "BLOCKED -- TN telephone solicitor rules",
+    "tn_sms": "BLOCKED -- TN telephone solicitor rules",
+    "tn_mail": "ALLOWED with TN-SB909 disclaimer",
+    "tn_email": "ALLOWED with CAN-SPAM disclaimer + opt-out"
+  },
+  "postcard_text": "To the Carnegie Church Of God In Christ Property Committee,\n\nMy name is Piper Reeves with Everlight Ventures. I noticed your property at 1577  Mcmillan St, Memphis TN. We work with local Memphis investors who buy properties as-is, cash, no repairs required. If you've ever thought about selling -- or just want to know what your property's worth in today's market -- I'd love to have a quick conversation.\n\nNo pressure. No obligation. I just like meeting Memphis property owners.\n\nCall or text anytime: <PHONE>\nOr email: piper@everlightventures.io\n\nWarmly,\nPiper Reeves\nEverlight Ventures\n\n---\nYou're receiving this postcard because of public property records. To stop receiving mail from us, reply STOP via mail or email. TN-SB909 compliance: this is not a foreclosure-rescue offer.",
+  "email_html": "<!DOCTYPE html>\n<html><head><style>\nbody { font-family: Inter, sans-serif; color: #E8E8E8; background: #0A0A0A;\n       max-width: 600px; margin: 0 auto; padding: 32px; }\nh2 { font-family: 'Playfair Display', serif; color: #D4A843; margin-top: 0; }\n.signature { color: #D4A843; font-style: italic; }\n.disclaimer { font-size: 11px; color: #999999; margin-top: 32px;\n              border-top: 1px solid #1A1A1A; padding-top: 16px; }\n</style></head>\n<body>\n<h2>Quick note about your Memphis property</h2>\n<p>To the Carnegie Church Of God In Christ Property Committee,</p>\n<p>I'm Piper with Everlight Ventures. We work with Memphis investors who buy\nproperties as-is, cash, no repairs needed.</p>\n<p>I came across your property at <strong>1577  Mcmillan St</strong> and\nwanted to reach out -- not to pressure you, just to introduce myself.</p>\n<p>If you've ever thought about selling, or just want a no-obligation\nconversation about what your property's worth, I'd love to chat.</p>\n<p>You can reach me anytime:</p>\n<ul>\n<li>Email: piper@everlightventures.io</li>\n<li>Reply to this email</li>\n</ul>\n<p class=\"signature\">Warmly,<br>Piper Reeves<br>Everlight Ventures</p>\n<p class=\"disclaimer\">\nYou're receiving this email because of public property records. To stop,\nreply STOP. TN-SB909 compliance: this is not a foreclosure-rescue offer.\nEverlight Ventures is not a licensed real estate broker.\n</p>\n</body></html>\n",
+  "narration": "Y'all, I drafted the postcard and email. Skipping send -- dry-run mode. Once Justine + Marcus signoff lifts the halt, I'll fire it through branded_mailer with budget_category=nurture. Postcard goes through Lob to 5340SANTA MONICAST -- need city/state/zip filled in first or it bounces."
+}
