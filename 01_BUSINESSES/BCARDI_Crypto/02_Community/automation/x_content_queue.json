@@ -1,32 +1,134 @@
 [
-  { "id": "tease-01", "phase": "tease", "post_at": null, "status": "pending",
-    "text": "A dog walks into a casino and deals the cards himself. Never blinks. His name is Bacardi. Something is coming to Solana. 🐶🃏" },
-  { "id": "tease-02", "phase": "tease", "post_at": null, "status": "pending",
-    "text": "Most meme coins are a jpeg and a prayer. This one has a dealer. Meet Bacardi soon. $BCARDD 🐶" },
-  { "id": "tease-03", "phase": "tease", "post_at": null, "status": "pending",
-    "text": "He doesn't chase the ball. He chases the table. $BCARDD is loading on Solana. 🐶🃏" },
-  { "id": "tease-04", "phase": "tease", "post_at": null, "status": "pending",
-    "text": "Every dog has his day. Bacardi wants the whole table. Solana. Soon. Not affiliated with Bacardi Limited. Not financial advice." },
-  { "id": "tease-05", "phase": "tease", "post_at": null, "status": "pending",
-    "text": "Real dog. Real name. His own blackjack table. $BCARDD is almost here. 🐶🃏" },
-  { "id": "tease-06", "phase": "tease", "post_at": null, "status": "pending",
-    "text": "The house always wins. This time the house is a dog. $BCARDD on Solana. Soon. 🐶" },
-  { "id": "launch-01", "phase": "launch", "post_at": null, "status": "pending",
-    "text": "$BCARDD is LIVE on Solana. 🐶🃏 The dog with his own blackjack table. LP auto-locked. Dev bag locked -- check the chain. CA: <CA> Buy: <PUMP_LINK> Not affiliated with Bacardi Limited. Not financial advice." },
-  { "id": "sustain-01", "phase": "sustain", "post_at": null, "status": "pending",
-    "text": "Bacardi just dealt you pocket aces. What you doing with them? 🃏 $BCARDD" },
-  { "id": "sustain-02", "phase": "sustain", "post_at": null, "status": "pending",
-    "text": "Diamond paws only. 🐶💎 Holders know. $BCARDD on Solana." },
-  { "id": "sustain-03", "phase": "sustain", "post_at": null, "status": "pending",
-    "text": "GM to everyone except the ones who paper-handed the dog. 🐶 $BCARDD" },
-  { "id": "sustain-04", "phase": "sustain", "post_at": null, "status": "pending",
-    "text": "Dev bag is locked and you can verify it on-chain. Trust is a receipt, not a promise. $BCARDD 🃏" },
-  { "id": "sustain-05", "phase": "sustain", "post_at": null, "status": "pending",
-    "text": "The dealer never sleeps. Drop a 🐶 if you're at the table. $BCARDD" },
-  { "id": "sustain-06", "phase": "sustain", "post_at": null, "status": "pending",
-    "text": "New meme just hit the felt. Tag a degen who needs a dog in the bags. 🐶🃏 $BCARDD" },
-  { "id": "sustain-07", "phase": "sustain", "post_at": null, "status": "pending",
-    "text": "Bacardi says: do your own research, have fun, never bet the rent. Not financial advice. 🐶 $BCARDD" },
-  { "id": "sustain-08", "phase": "sustain", "post_at": null, "status": "pending",
-    "text": "Pull up to the table. The dog is dealing. $BCARDD on Solana. 🃏🐶" }
+  {
+    "id": "tease-01",
+    "phase": "tease",
+    "post_at": null,
+    "status": "retired_post_launch",
+    "text": "A dog walks into a casino and deals the cards himself. Never blinks. His name is Bacardi. Something is coming to Solana. \ud83d\udc36\ud83c\udccf",
+    "retire_reason": "coin launched 2026-06-10; tease copy stale"
+  },
+  {
+    "id": "tease-02",
+    "phase": "tease",
+    "post_at": null,
+    "status": "retired_post_launch",
+    "text": "Most meme coins are a jpeg and a prayer. This one has a dealer. Meet Bacardi soon. $BCARDD \ud83d\udc36",
+    "retire_reason": "coin launched 2026-06-10; tease copy stale"
+  },
+  {
+    "id": "tease-03",
+    "phase": "tease",
+    "post_at": null,
+    "status": "retired_post_launch",
+    "text": "He doesn't chase the ball. He chases the table. $BCARDD is loading on Solana. \ud83d\udc36\ud83c\udccf",
+    "retire_reason": "coin launched 2026-06-10; tease copy stale"
+  },
+  {
+    "id": "tease-04",
+    "phase": "tease",
+    "post_at": null,
+    "status": "retired_post_launch",
+    "text": "Every dog has his day. Bacardi wants the whole table. Solana. Soon. Not affiliated with Bacardi Limited. Not financial advice.",
+    "retire_reason": "coin launched 2026-06-10; tease copy stale"
+  },
+  {
+    "id": "tease-05",
+    "phase": "tease",
+    "post_at": null,
+    "status": "retired_post_launch",
+    "text": "Real dog. Real name. His own blackjack table. $BCARDD is almost here. \ud83d\udc36\ud83c\udccf",
+    "retire_reason": "coin launched 2026-06-10; tease copy stale"
+  },
+  {
+    "id": "tease-06",
+    "phase": "tease",
+    "post_at": null,
+    "status": "retired_post_launch",
+    "text": "The house always wins. This time the house is a dog. $BCARDD on Solana. Soon. \ud83d\udc36",
+    "retire_reason": "coin launched 2026-06-10; tease copy stale"
+  },
+  {
+    "id": "launch-01",
+    "phase": "launch",
+    "post_at": null,
+    "status": "pending",
+    "text": "$BCARDD is LIVE on Solana. \ud83d\udc36\ud83c\udccf The dog with his own blackjack table. LP auto-locked. Dev bag locked -- check the chain. CA: <CA> Buy: <PUMP_LINK> Not affiliated with Bacardi Limited. Not financial advice."
+  },
+  {
+    "id": "sustain-01",
+    "phase": "sustain",
+    "post_at": null,
+    "status": "pending",
+    "text": "Bacardi just dealt you pocket aces. What you doing with them? \ud83c\udccf $BCARDD"
+  },
+  {
+    "id": "sustain-02",
+    "phase": "sustain",
+    "post_at": null,
+    "status": "pending",
+    "text": "Diamond paws only. \ud83d\udc36\ud83d\udc8e Holders know. $BCARDD on Solana."
+  },
+  {
+    "id": "sustain-03",
+    "phase": "sustain",
+    "post_at": null,
+    "status": "pending",
+    "text": "GM to everyone except the ones who paper-handed the dog. \ud83d\udc36 $BCARDD"
+  },
+  {
+    "id": "sustain-04",
+    "phase": "sustain",
+    "post_at": null,
+    "status": "pending",
+    "text": "Dev bag is locked and you can verify it on-chain. Trust is a receipt, not a promise. $BCARDD \ud83c\udccf"
+  },
+  {
+    "id": "sustain-05",
+    "phase": "sustain",
+    "post_at": null,
+    "status": "pending",
+    "text": "The dealer never sleeps. Drop a \ud83d\udc36 if you're at the table. $BCARDD"
+  },
+  {
+    "id": "sustain-06",
+    "phase": "sustain",
+    "post_at": null,
+    "status": "pending",
+    "text": "New meme just hit the felt. Tag a degen who needs a dog in the bags. \ud83d\udc36\ud83c\udccf $BCARDD"
+  },
+  {
+    "id": "sustain-07",
+    "phase": "sustain",
+    "post_at": null,
+    "status": "pending",
+    "text": "Bacardi says: do your own research, have fun, never bet the rent. Not financial advice. \ud83d\udc36 $BCARDD"
+  },
+  {
+    "id": "sustain-08",
+    "phase": "sustain",
+    "post_at": null,
+    "status": "pending",
+    "text": "Pull up to the table. The dog is dealing. $BCARDD on Solana. \ud83c\udccf\ud83d\udc36"
+  },
+  {
+    "id": "verify-01",
+    "phase": "verify",
+    "post_at": null,
+    "status": "pending",
+    "text": "Holders: 10 seconds of your day. Open our Jupiter page, connect, tap the like. Smart likes from real holders are how $BCARDD gets verified across every Solana wallet.\n\nhttps://jup.ag/tokens/<CA>\n\nThe dog tips his hat. \ud83d\udc36"
+  },
+  {
+    "id": "verify-02",
+    "phase": "verify",
+    "post_at": null,
+    "status": "pending",
+    "text": "Receipts over promises: the dev bag is LOCKED on Streamflow. On-chain, public, verifiable. $BCARDD plays its cards face up. \ud83c\udccf\n\nLock + RugCheck + revoked authorities, all in one place:\nhttps://alleykingz.online/bcardd/"
+  },
+  {
+    "id": "verify-03",
+    "phase": "verify",
+    "post_at": null,
+    "status": "pending",
+    "text": "Every like on our Jupiter page is a brick in the wall. Verified token = no more spam flags in your wallet = easier for the next holder to find the real $BCARDD.\n\nLike: https://jup.ag/tokens/<CA>\nReceipts: https://alleykingz.online/bcardd/ \ud83d\udc36\ud83c\udccf"
+  }
 ]
