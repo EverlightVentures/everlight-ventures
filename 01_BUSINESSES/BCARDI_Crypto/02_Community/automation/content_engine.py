@@ -41,7 +41,10 @@ BRAND = (
     "2021 SHIB, 2026 is OURS). Reference the lineage, claim the throne, never beg. "
     "HARD RULES: never promise profit/returns/gains/moon/pump/1000x; no financial advice; "
     "no 'investment'; never the words blackjack/casino/gambling/bet/bacardi. "
-    "Tease the dealer, name the dog, flex the game + the locked bag + the receipts."
+    "Tease the dealer, name the dog, flex the game + the locked bag + the receipts. "
+    "ANONYMITY (hard rule): never write first-person as a creator/dev/founder; no I-made-this; "
+    "the coin and the dog just EXIST, faceless like Satoshi; the dog is a real Dogo Argentino, "
+    "never 'someone's dog'."
 )
 
 
