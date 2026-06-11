@@ -71,6 +71,10 @@ def _no_leak(t):
     low = t.lower()
     return not any(w in low for w in SECRET_LEAK)
 
+
+def _full_name(t):
+    return re.sub(r'\b(the\s+)?(yung\s+)?printz\b', 'The Yung Printz', t, flags=re.I)
+
 def clean(text):
     low = text.lower()
     return _no_leak(text) and not any(b in low for b in xa.BANNED)
@@ -92,7 +96,7 @@ def refill_x():
         # bake the funnel into every post (rotate the CTA so it never reads canned)
         ctas = [f"\n\nthe pack: {TGL}", f"\n\nback room: {TGL} -- like + repost",
                 f"\n\n{TGL} | search $BCARDD on Jupiter, tap the heart"]
-        body = t + ctas[i % len(ctas)] + "\n$BCARDD"
+        body = _full_name(t + ctas[i % len(ctas)]) + "\n$BCARDD"
         if len(body) > 280 or not clean(body):
             continue
         items.append({"id": f"gen-x-{base + added + 1:03d}", "phase": "sustain",
@@ -125,7 +129,7 @@ def refill_tg():
         if len(body) < 60 or not clean(body):
             continue
         items.append({"id": f"gen-tg-{base + added + 1:03d}", "phase": "tg",
-                      "text": body + foot, "post_at": None, "status": "pending"})
+                      "text": _full_name(body) + foot, "post_at": None, "status": "pending"})
         added += 1
     TGQ.write_text(json.dumps(items, indent=2))
     print(f"TG refilled +{added}")
