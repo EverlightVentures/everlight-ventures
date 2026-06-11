@@ -75,14 +75,45 @@ def render():
         "__CARDS__", "\n".join(cards))
 
 
+# operator-only pages (NEVER public -- served on 127.0.0.1 only)
+OPS = "/mnt/sdcard/AA_MY_DRIVE/_state/bcardd_ops"
+LOCAL_PAGES = {"/share": OPS + "/share.html", "/kit": OPS + "/kit.html"}
+
+OPS_INDEX = """<!DOCTYPE html><html><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>BCARDD Ops (private)</title><style>
+body{background:#0A0A0A;color:#E8E8E8;font-family:system-ui;padding:24px;max-width:480px;margin:0 auto}
+h1{color:#F0D060;font-size:20px}p{color:#8a8578;font-size:12px;margin-bottom:18px}
+a{display:block;text-decoration:none;color:#0A0A0A;background:linear-gradient(160deg,#F0D060,#D4AF37);
+border-radius:12px;padding:16px;margin-bottom:12px;font-weight:800;font-size:15px}
+small{display:block;font-weight:600;opacity:.7;font-size:11px;margin-top:3px}</style></head><body>
+<h1>&#128054; BCARDD Ops</h1><p>Private. This runs only on your phone (127.0.0.1). Never public.</p>
+<a href="/share">&#10084;&#65039; Share Kit<small>heart ask + anonymous share messages</small></a>
+<a href="/kit">&#128203; Submission Kit<small>copy-paste fields for listing forms</small></a>
+<a href="/karma">&#129504; Karma Pack<small>today's reddit comment missions</small></a>
+</body></html>"""
+
+
 class H(BaseHTTPRequestHandler):
     def do_GET(self):
-        body = render().encode()
+        path = self.path.split("?")[0].rstrip("/") or "/"
+        if path in ("/", "/ops"):
+            body = OPS_INDEX
+        elif path == "/karma":
+            body = render()
+        elif path in LOCAL_PAGES:
+            try:
+                with open(LOCAL_PAGES[path], encoding="utf-8") as f:
+                    body = f.read()
+            except OSError:
+                body = "<h1>not found locally</h1>"
+        else:
+            body = OPS_INDEX
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Cache-Control", "no-store")
         self.end_headers()
-        self.wfile.write(body)
+        self.wfile.write(body.encode())
 
     def log_message(self, *a):
         pass
