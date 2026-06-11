@@ -8,7 +8,11 @@ Why not autonomous posting: new-account automated promo = shadowban. This is
 the machine doing 95% (find threads, give angles) and the human doing the 5%
 Reddit actually polices (typing two genuine sentences).
 
-Cron (e5): 5 16 * * *   (9:05 AM PT daily)
+Crons (e5):
+  0 16 * * *            --generate  (build the day's pack, send header)
+  5 16-23,0-3 * * *     --drip      (deliver ONE thread+paste per hour --
+                                     matches Reddit's ~1-comment-per-10-min
+                                     new-account rate limit with margin)
 Env: TELEGRAM_BOT_TOKEN + TG_OPERATOR_CHAT (Rich's DM chat id)
 """
 import json
@@ -96,17 +100,46 @@ def main():
     from pathlib import Path
     Path("karma_pack.json").write_text(json.dumps(
         {"date": date.today().isoformat(), "rows": rows}, indent=1))
-    # TG: header, then ONE MESSAGE PER PIECE so long-press copies exactly that piece
-    send(f"\U0001F9E0 REDDIT KARMA PACK -- {date.today().isoformat()}\n"
-         "Each thread = 2 messages: the link, then the paste text (long-press -> Copy).\n"
-         "Tweak a word so it's yours. ZERO coin talk. Dashboard: http://localhost:2600")
-    ok = True
-    for r in rows:
-        ok &= send(f"r/{r['sub']}: {r['title']}\n{r['link']}")
-        ok &= send(r["paste"] or ("\U0001F4A1 " + r["hint"]))
-    print("pack sent:", ok, f"({len(rows)} threads)")
-    return 0 if ok else 1
+    Path("karma_drip_state.json").write_text(json.dumps({"date": date.today().isoformat(), "idx": 0}))
+    send(f"\U0001F9E0 KARMA PACK READY -- {date.today().isoformat()} ({len(rows)} threads)\n"
+         "One mission lands per hour (Reddit rate-limit pace). Do it when it dings.\n"
+         "Cockpit anytime: http://localhost:2600")
+    print("pack generated:", len(rows), "threads")
+    return 0
+
+
+def drip():
+    """Send the NEXT unsent thread+paste as its own task. One per cron tick."""
+    from pathlib import Path
+    tok = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+    chat = os.environ.get("TG_OPERATOR_CHAT", "")
+    if not (tok and chat and Path("karma_pack.json").exists()):
+        return 0
+    pack = json.loads(Path("karma_pack.json").read_text())
+    st = json.loads(Path("karma_drip_state.json").read_text()) if Path("karma_drip_state.json").exists() else {"date": "", "idx": 0}
+    if st.get("date") != pack.get("date"):
+        st = {"date": pack.get("date"), "idx": 0}
+    rows = pack.get("rows", [])
+    if st["idx"] >= len(rows):
+        return 0  # day's pack done, stay silent
+    r = rows[st["idx"]]
+    n = st["idx"] + 1
+
+    def send(text):
+        body = json.dumps({"chat_id": chat, "text": text[:4000],
+                           "disable_web_page_preview": True}).encode()
+        req = urllib.request.Request(f"https://api.telegram.org/bot{tok}/sendMessage",
+                                     body, {"Content-Type": "application/json"})
+        return json.load(urllib.request.urlopen(req, timeout=20)).get("ok")
+
+    send(f"\U0001F3AF KARMA MISSION {n}/{len(rows)} -- r/{r['sub']}\n{r['title']}\n{r['link']}")
+    send(r["paste"] or ("\U0001F4A1 " + r["hint"]))
+    st["idx"] = n
+    Path("karma_drip_state.json").write_text(json.dumps(st))
+    print(f"dripped {n}/{len(rows)}")
+    return 0
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    import sys
+    raise SystemExit(drip() if "--drip" in sys.argv else main())
