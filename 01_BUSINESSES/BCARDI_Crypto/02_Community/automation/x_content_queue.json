@@ -51,15 +51,20 @@
     "id": "launch-01",
     "phase": "launch",
     "post_at": null,
-    "status": "pending",
-    "text": "the dog made it to Solana \ud83d\udc36\ud83c\udccf\n\n$BCARDD -- coin of the Alley Kingz arcade. he's got a deck and he knows how to use it.\n\nCA: <CA>\n\nhttps://alleykingz.online #AlleyKingz\nfor fun, not financial advice"
+    "status": "retired_superseded",
+    "text": "the dog made it to Solana \ud83d\udc36\ud83c\udccf\n\n$BCARDD -- coin of the Alley Kingz arcade. he's got a deck and he knows how to use it.\n\nCA: <CA>\n\nhttps://alleykingz.online #AlleyKingz\nfor fun, not financial advice",
+    "posted_at": "2026-06-11T02:56:05.450587+00:00",
+    "result": "post failed: 403 Forbidden\nCrypto addresses are prohibited for the first 7 days after authentication. / 403 Forbidden\nCrypto addresses are prohibited for the first 7 days after authentication.",
+    "retire_reason": "operator posted the lineage reveal manually 6/10; launch announced"
   },
   {
     "id": "sustain-01",
     "phase": "sustain",
     "post_at": null,
-    "status": "pending",
-    "text": "the dog's been practicing his shuffle \ud83c\udccf\ud83d\udc36 $BCARDD"
+    "status": "posted",
+    "text": "the dog's been practicing his shuffle \ud83c\udccf\ud83d\udc36 $BCARDD",
+    "posted_at": "2026-06-11T02:56:44.440159+00:00",
+    "result": "tweet_id=2064904637657104770"
   },
   {
     "id": "sustain-02",
@@ -113,9 +118,9 @@
   {
     "id": "verify-01",
     "phase": "verify",
-    "post_at": null,
+    "post_at": "2026-06-18T17:00:00+00:00",
     "status": "pending",
-    "text": "Holders: 10 seconds of your day. Open our Jupiter page, connect, tap the like. Smart likes from real holders are how $BCARDD gets verified across every Solana wallet.\n\nhttps://jup.ag/tokens/<CA>\n\nThe dog tips his hat. \ud83d\udc36"
+    "text": "heart check \ud83d\udc36 if you hold  and haven't tapped the like on our Jupiter page yet, that's the single biggest thing you can do for the pack today. every real-holder heart pushes verification closer.\n\nhttps://jup.ag/tokens/<CA>"
   },
   {
     "id": "verify-02",
@@ -127,7 +132,7 @@
   {
     "id": "verify-03",
     "phase": "verify",
-    "post_at": null,
+    "post_at": "2026-06-18T17:00:00+00:00",
     "status": "pending",
     "text": "every like on our Jupiter page is a brick in the wall. verified = no more spam flags = easier to find the real $BCARDD.\n\nlike: https://jup.ag/tokens/<CA>\nreceipts: https://alleykingz.online/bcardd/ \ud83d\udc36"
   }
