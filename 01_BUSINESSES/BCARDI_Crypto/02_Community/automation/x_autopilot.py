@@ -25,6 +25,7 @@ Cron (on e5-mother, 3 drips/day at 9a/2p/7p PT):
   0 16,21,2 * * *  cd <this dir> && /usr/bin/python3 x_autopilot.py --once >> x_autopilot.cron.log 2>&1
 """
 import os
+import re
 import sys
 import json
 import datetime
@@ -80,6 +81,20 @@ def compliance_check(text):
     if len(text) > MAX_LEN:
         return False, "over %d chars (%d)" % (MAX_LEN, len(text))
     return True, "ok"
+
+
+CASHTAG_RE = re.compile(r"\$([A-Za-z][A-Za-z0-9]*)")
+
+
+def sanitize_cashtags(text):
+    """X rejects posts with >1 cashtag (403). Keep the first $TAG, demote the rest to #TAG."""
+    seen = [0]
+
+    def repl(m):
+        seen[0] += 1
+        return m.group(0) if seen[0] == 1 else "#" + m.group(1)
+
+    return CASHTAG_RE.sub(repl, text)
 
 
 def render(text):
@@ -163,6 +178,7 @@ def cmd_once():
         log_event({"event": "held", "id": it["id"], "reason": "BCARDI_CA/PUMP unset"})
         print("held item %s (needs contract address); run again for next." % it["id"])
         return 0
+    text = sanitize_cashtags(text)
     ok, reason = compliance_check(text)
     if not ok:
         it["status"] = "blocked"

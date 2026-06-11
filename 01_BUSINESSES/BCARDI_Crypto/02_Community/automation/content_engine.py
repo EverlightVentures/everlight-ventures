@@ -96,7 +96,7 @@ def refill_x():
         # bake the funnel into every post (rotate the CTA so it never reads canned)
         ctas = [f"\n\nthe pack: {TGL}", f"\n\nback room: {TGL} -- like + repost",
                 f"\n\n{TGL} | search $BCARDD on Jupiter, tap the heart"]
-        body = _full_name(t + ctas[i % len(ctas)]) + "\n$BCARDD"
+        body = xa.sanitize_cashtags(_full_name(t + ctas[i % len(ctas)]) + "\n$BCARDD")
         if len(body) > 280 or not clean(body):
             continue
         items.append({"id": f"gen-x-{base + added + 1:03d}", "phase": "sustain",
@@ -181,7 +181,7 @@ def sponsor_shoutout():
     body = (raw or "").strip().strip('"').replace("\u2014", "-")
     if not body or not clean(body) or handle not in body:
         body = "shoutout to " + handle + " -- " + why + ". \U0001F436\U0001F0CF the dog is proud to be built here. $BCARDD"
-    body = body[:235] + "\n\nthe pack: " + TGL + "\n$BCARDD"
+    body = xa.sanitize_cashtags(body[:235] + "\n\nthe pack: " + TGL + "\n$BCARDD")
     xs.append({"id": "sponsor-" + format(len(prior) + 1, "03d"), "phase": "sustain",
                "text": body, "post_at": None, "status": "pending"})
     XQ.write_text(json.dumps(xs, indent=2))
@@ -200,7 +200,7 @@ def community_post():
     if not body or not clean(body):
         body = ("DOGE and SHIB were cartoons. The Yung Printz is a real dog -- and so is yours. "
                 "every good boy is royalty. show us your prince. \U0001F436\U0001F451")
-    body = _full_name(body)[:230] + "\n\nthe pack: " + TGL + "\n$BCARDD"
+    body = xa.sanitize_cashtags(_full_name(body)[:230] + "\n\nthe pack: " + TGL + "\n$BCARDD")
     xs.append({'id': 'community-' + format(len(prior) + 1, '03d'), 'phase': 'sustain',
                'text': body, 'post_at': None, 'status': 'pending'})
     XQ.write_text(json.dumps(xs, indent=2))

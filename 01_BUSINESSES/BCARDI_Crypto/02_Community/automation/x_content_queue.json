@@ -1,5 +1,12 @@
 [
   {
+    "id": "recruit-x-01",
+    "phase": "sustain",
+    "post_at": null,
+    "status": "pending",
+    "text": "the pack builds itself now. \ud83d\udc36\ud83d\udc51\n\njoin the back room, DM the bot /invite, recruit your crew. top recruiters get remembered.\n\nt.me/b_card_d\n$BCARDD"
+  },
+  {
     "id": "tease-01",
     "phase": "tease",
     "post_at": null,
@@ -70,10 +77,10 @@
     "id": "sustain-02",
     "phase": "sustain",
     "post_at": null,
-    "status": "error",
-    "text": "Diamond paws only. \ud83d\udc36\ud83d\udc8e Holders know.\n\nThe pack talks here \ud83d\udc47\nt.me/b_card_d\n\nSearch $BCARDD on Jupiter + tap the heart to get us verified. $BCARDD",
-    "result": "post failed: 403 Forbidden\nPosts are limited to a maximum of one cashtag ($SYMBOL). Please remove additional cashtags and try again. / 403 Forbidden\nPosts are limited to a maximum of one cashtag ($SYMBOL). Please remove additional cashtags and try again.",
-    "posted_at": "2026-06-11T16:00:02.573489+00:00"
+    "status": "posted",
+    "text": "Diamond paws only. \ud83d\udc36\ud83d\udc8e Holders know.\n\nThe pack talks here \ud83d\udc47\nt.me/b_card_d\n\nSearch $BCARDD on Jupiter + tap the heart to get us verified. #BCARDD",
+    "result": "tweet_id=2065207456222085302",
+    "posted_at": "2026-06-11T23:00:02.158004+00:00"
   },
   {
     "id": "sustain-03",
@@ -87,7 +94,7 @@
     "phase": "sustain",
     "post_at": null,
     "status": "pending",
-    "text": "Dev bag locked. Verify it yourself -- trust is a receipt, not a promise. \ud83c\udccf\n\nProof + the pack: t.me/b_card_d\nSearch $BCARDD on Jupiter, tap the heart. $BCARDD"
+    "text": "Dev bag locked. Verify it yourself -- trust is a receipt, not a promise. \ud83c\udccf\n\nProof + the pack: t.me/b_card_d\nSearch $BCARDD on Jupiter, tap the heart. #BCARDD"
   },
   {
     "id": "sustain-05",
@@ -115,7 +122,7 @@
     "phase": "sustain",
     "post_at": null,
     "status": "pending",
-    "text": "pull up. the dog's already here. \ud83d\udc36\ud83c\udccf\n\nback room: t.me/b_card_d\nlike + repost + search $BCARDD on Jupiter. $BCARDD #AlleyKingz"
+    "text": "pull up. the dog's already here. \ud83d\udc36\ud83c\udccf\n\nback room: t.me/b_card_d\nlike + repost + search $BCARDD on Jupiter. #BCARDD #AlleyKingz"
   },
   {
     "id": "verify-01",
@@ -162,7 +169,7 @@
   {
     "id": "gen-x-003",
     "phase": "sustain",
-    "text": "locked bag on-chain. no smoke, just the block.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n$BCARDD",
+    "text": "locked bag on-chain. no smoke, just the block.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n#BCARDD",
     "post_at": null,
     "status": "pending"
   },
@@ -183,7 +190,7 @@
   {
     "id": "gen-x-006",
     "phase": "sustain",
-    "text": "in dogo we trust. simple.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n$BCARDD",
+    "text": "in dogo we trust. simple.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n#BCARDD",
     "post_at": null,
     "status": "pending"
   },
@@ -204,7 +211,7 @@
   {
     "id": "gen-x-009",
     "phase": "sustain",
-    "text": "receipts > narratives. always.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n$BCARDD",
+    "text": "receipts > narratives. always.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n#BCARDD",
     "post_at": null,
     "status": "pending"
   },
@@ -225,7 +232,7 @@
   {
     "id": "gen-x-012",
     "phase": "sustain",
-    "text": "early is a mindset. late is a regret.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n$BCARDD",
+    "text": "early is a mindset. late is a regret.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n#BCARDD",
     "post_at": null,
     "status": "pending"
   },
@@ -246,7 +253,7 @@
   {
     "id": "sponsor-001",
     "phase": "sustain",
-    "text": "thank you @solana - fast, cheap, and where the culture lives. $BCARDD built with the chain the dog runs on. in DOGO we trust.\n\nthe pack: t.me/b_card_d\n$BCARDD",
+    "text": "thank you @solana - fast, cheap, and where the culture lives. $BCARDD built with the chain the dog runs on. in DOGO we trust.\n\nthe pack: t.me/b_card_d\n#BCARDD",
     "post_at": null,
     "status": "pending"
   },
@@ -267,7 +274,7 @@
   {
     "id": "gen-x-017",
     "phase": "sustain",
-    "text": "shib made noise. The Yung Printz came with receipts.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n$BCARDD",
+    "text": "shib made noise. The Yung Printz came with receipts.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n#BCARDD",
     "post_at": null,
     "status": "pending"
   },
@@ -288,7 +295,7 @@
   {
     "id": "gen-x-020",
     "phase": "sustain",
-    "text": "the alley remembers. the throne does too.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n$BCARDD",
+    "text": "the alley remembers. the throne does too.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n#BCARDD",
     "post_at": null,
     "status": "pending"
   },
@@ -309,7 +316,7 @@
   {
     "id": "gen-x-023",
     "phase": "sustain",
-    "text": "not a phase. not a meme. a crowned dog with a mission.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n$BCARDD",
+    "text": "not a phase. not a meme. a crowned dog with a mission.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n#BCARDD",
     "post_at": null,
     "status": "pending"
   },
@@ -330,7 +337,7 @@
   {
     "id": "gen-x-026",
     "phase": "sustain",
-    "text": "if you know, you know. if you don\u2019t, you\u2019re early.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n$BCARDD",
+    "text": "if you know, you know. if you don\u2019t, you\u2019re early.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n#BCARDD",
     "post_at": null,
     "status": "pending"
   },
