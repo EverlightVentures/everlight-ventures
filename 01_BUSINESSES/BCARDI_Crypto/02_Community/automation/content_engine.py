@@ -188,11 +188,31 @@ def sponsor_shoutout():
     print("sponsor shoutout queued:", handle)
 
 
+def community_post():
+    """Daily inclusion post: pull dog-owners into the pack (widens TAM beyond crypto)."""
+    xs = json.loads(XQ.read_text())
+    prior = [i for i in xs if i['id'].startswith('community-')]
+    raw = ppx("Write ONE short X post (under 180 chars) that makes EVERY dog owner feel "
+              "included in $BCARDD -- their real dog is royalty too, a young prince/princess, "
+              "part of the pack. Warm + inclusive, real-dog-owner life, not crypto-jargon. "
+              "Invite them to show/crown their dog. Return only the post.", 200)
+    body = (raw or '').strip().strip('\"')
+    if not body or not clean(body):
+        body = ("DOGE and SHIB were cartoons. The Yung Printz is a real dog -- and so is yours. "
+                "every good boy is royalty. show us your prince. \U0001F436\U0001F451")
+    body = _full_name(body)[:230] + "\n\nthe pack: " + TGL + "\n$BCARDD"
+    xs.append({'id': 'community-' + format(len(prior) + 1, '03d'), 'phase': 'sustain',
+               'text': body, 'post_at': None, 'status': 'pending'})
+    XQ.write_text(json.dumps(xs, indent=2))
+    print('community post queued')
+
+
 def main():
     refill_x()
     refill_tg()
     pack_order()
     sponsor_shoutout()
+    community_post()
     return 0
 
 
