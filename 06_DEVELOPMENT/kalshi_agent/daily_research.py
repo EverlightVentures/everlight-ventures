@@ -29,6 +29,7 @@ from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 from kalshi_agent.dataflows.kalshi_api import best_bbo
+from kalshi_agent.dataflows import odds_api
 from kalshi_agent.hunt_kalshi import _markets_by_series
 
 HERE = Path(__file__).parent
@@ -44,10 +45,10 @@ ABBR_FIX = {"GS": "GSW", "NO": "NOP", "NY": "NYK", "SA": "SAS", "UTAH": "UTA",
             "CHW": "CWS", "AZ": "ARI", "TB": "TBL", "LA": "LAK", "NJ": "NJD", "SJ": "SJS"}
 
 SPORTS = {
-    "nba": {"espn": "basketball/nba", "series": "KXNBAGAME", "kind": "spread2", "sigma": 12.0},
-    "mlb": {"espn": "baseball/mlb", "series": "KXMLBGAME", "kind": "ml2"},
-    "nhl": {"espn": "hockey/nhl", "series": "KXNHLGAME", "kind": "ml2"},
-    "wc":  {"espn": "soccer/fifa.world", "series": "KXWCGAME", "kind": "soccer3"},
+    "nba": {"espn": "basketball/nba", "series": "KXNBAGAME", "kind": "spread2", "sigma": 12.0, "odds": "basketball_nba"},
+    "mlb": {"espn": "baseball/mlb", "series": "KXMLBGAME", "kind": "ml2", "odds": "baseball_mlb"},
+    "nhl": {"espn": "hockey/nhl", "series": "KXNHLGAME", "kind": "ml2", "odds": "icehockey_nhl"},
+    "wc":  {"espn": "soccer/fifa.world", "series": "KXWCGAME", "kind": "soccer3", "odds": "soccer_fifa_world_cup"},
     "atp": {"espn": "tennis/atp", "series": "KXATPMATCH", "kind": "tennis2"},
     "wta": {"espn": "tennis/wta", "series": "KXWTAMATCH", "kind": "tennis2"},
 }
@@ -144,6 +145,12 @@ def _game_outcomes(cfg, comp, home, away):
 
 def espn_slate(cfg, days=3):
     out = []
+    cons = []
+    if cfg.get("odds"):
+        try:
+            cons = odds_api.consensus(cfg["odds"])   # one Odds API call per sport (multi-book)
+        except Exception:
+            cons = []
     base = datetime.now(timezone.utc)
     for d in range(days):
         ymd = (base + timedelta(days=d)).strftime("%Y%m%d")
@@ -163,10 +170,26 @@ def espn_slate(cfg, days=3):
             if not res:
                 continue
             ca, cb, outcomes = res
+            books = 1
             book = ((comp.get("odds") or [{}])[0].get("provider") or {}).get("name", "book")
+            # SHARPEN: replace the single-book ESPN prob with the multi-book consensus
+            # where we can match the game by team name. More books -> trust smaller edges.
+            if cons:
+                hn = (home.get("team") or {}).get("displayName")
+                an = (away.get("team") or {}).get("displayName")
+                probs, nbk = odds_api.match(cons, hn, an)
+                if probs and nbk:
+                    namemap = {fix((home.get("team") or {}).get("abbreviation")): hn,
+                               fix((away.get("team") or {}).get("abbreviation")): an,
+                               "TIE": "Draw"}
+                    sharp = []
+                    for c, p in outcomes:
+                        cp = odds_api.prob_for(probs, namemap.get(c))
+                        sharp.append((c, cp if cp is not None else p))
+                    outcomes, books, book = sharp, nbk, "consensus/%dbk" % nbk
             out.append({"date": ktoken, "code_a": ca, "code_b": cb,
                         "outcomes": [{"code": c, "prob": round(p, 4)} for c, p in outcomes],
-                        "name": e.get("name"), "book": book})
+                        "name": e.get("name"), "book": book, "books": books})
     return out
 
 
@@ -216,6 +239,7 @@ def research(write=True):
                 if write and ya is not None:
                     existing[tk] = {"fair_prob": oc["prob"],
                                     "source": "%s %s->prob (daily_research)" % (g["book"], sport),
+                                    "books": g.get("books", 1),
                                     "expires_ts": int(time.time()) + 18 * 3600,
                                     "fresh_ts": int(time.time())}
     if write:

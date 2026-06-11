@@ -1,8 +1,17 @@
 {
-  "_doc": "Autonomous edge engine config. live=false => dry-run only (logs candidates, places NOTHING). Flip live=true to let it bet within the caps. Lane modes: 'bet' = real maker orders, 'log' = record to scorecard only (measure, no money), 'alert' = notify only. ENVELOPE: Aggressive, set by Rich 2026-06-04.",
+  "_doc": "Autonomous edge engine config. live=false => dry-run only (logs candidates, places NOTHING). Flip live=true to let it bet within the caps. Lane modes: 'bet' = real maker orders, 'log' = record to scorecard only (measure, no money), 'alert' = notify only. ENVELOPE: Aggressive, set by Rich 2026-06-04. (A one-off cap bump on 2026-06-10 was reverted same day -- caps change on a rule, not on a post-win impulse.)",
   "live": true,
-  "min_net_edge_pct": 0.025,
+  "min_net_edge_pct": 0.03,
   "min_abs_edge_prob": 0.03,
+  "min_abs_edge_prob_sharp": 0.02,
+  "sharp_min_books": 5,
+  "target_win_rate": 0.70,
+  "win_floor_base": 0.60,
+  "win_floor_max": 0.86,
+  "win_floor_gain": 1.5,
+  "min_fair_prob_sharp": 0.60,
+  "_winrate_doc": "WIN-RATE MAINTENANCE CONTROLLER. The engine only takes a sharp-lane bet if the model gives that side >= an effective win-prob floor. floor = win_floor_base + win_floor_gain*(target_win_rate - realized_hit_rate), clamped [base, max]. So if the realized hit rate dips below target it AUTO-TIGHTENS (demands stronger favorites -> rate climbs back); when we're above target it relaxes to base for more volume. min_fair_prob_sharp is the live floor the engine overwrites each run.",
+  "_sharp_doc": "When a sharp number is a multi-book CONSENSUS (>= sharp_min_books books via The Odds API), trust a smaller gap (min_abs_edge_prob_sharp) -- a single-book de-vig still needs the wider 3pt floor. The net-EV-after-fee floor still applies to every bet.",
   "sanity_max_raw_edge": 0.40,
   "override_stale_divergence_cents": 8,
   "fresh_window_sec": 7200,
@@ -15,9 +24,18 @@
   "min_balance_floor_usd": 20.0,
   "favorite_longshot_max_picks": 3,
   "favorite_longshot_max_buy_c": 92,
+  "_press_doc": "PRESS lane (2026-06-10, Rich's idea): double-down on an OPEN bet with LOCKED daily profit, only where it STILL shows fresh real edge at the live ask, capped so the night stays net-green. Funded from profit, never principal. Starts in 'log' mode (proves it flags the right spots, spends nothing) -- flip to 'bet' to go live.",
+  "press_min_daily_profit_usd": 15.0,
+  "press_fraction": 0.5,
+  "press_keep_min_profit_usd": 12.0,
+  "press_max_adds_per_ticker": 1,
+  "press_per_add_max_usd": 6.0,
+  "press_max_adverse_cents": 6,
+  "press_max_trusted_edge": 0.12,
   "lanes": {
     "sharp_sports": "bet",
     "favorite_longshot": "bet",
-    "arbitrage": "off"
+    "arbitrage": "off",
+    "press_winners": "bet"
   }
 }

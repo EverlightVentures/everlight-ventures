@@ -40,6 +40,7 @@ HERE = Path(__file__).parent
 CONFIG = HERE / "auto_edge_config.json"
 HALT_FILE = HERE / "AUTO_EDGE_HALT"
 LEDGER = HERE / "data" / "auto_edge_ledger.jsonl"
+UPCOMING = HERE / "data" / "upcoming_edges.json"   # what the engine is about to bet (for the dashboard)
 
 
 def load_config():
@@ -149,6 +150,67 @@ def held_tickers(positions):
     return out
 
 
+def _live_book(k):
+    """Rebuild from FILLS (the only honest source -- /positions reports 0): the open
+    positions we actually hold {ticker: {contracts, avg, side}} and the P&L we have
+    REALIZED today. The press lane needs both: what to add to, and how much locked
+    profit is available to fund it."""
+    from collections import defaultdict
+    fills = k._request("GET", "/portfolio/fills").get("fills", [])
+    setls = {s["ticker"]: s for s in k._request("GET", "/portfolio/settlements").get("settlements", [])}
+    agg = defaultdict(lambda: {"contracts": 0.0, "cost": 0.0, "side": None})
+    for f in fills:
+        tk, sd = f.get("ticker"), f.get("side")
+        c = float(f.get("count_fp") or 0)
+        px = float(f.get("yes_price_dollars") or 0) if sd == "yes" else float(f.get("no_price_dollars") or 0)
+        sgn = 1 if f.get("action") == "buy" else -1
+        a = agg[tk]; a["contracts"] += sgn * c; a["cost"] += sgn * c * px
+        if a["side"] is None:
+            a["side"] = sd
+    today = _today()
+    realized_today, openpos = 0.0, {}
+    for tk, a in agg.items():
+        if abs(a["contracts"]) < 0.01:
+            continue
+        if tk in setls:
+            s = setls[tk]
+            if (s.get("settled_time") or "")[:10] == today:
+                won = s.get("market_result") == a["side"]
+                realized_today += (a["contracts"] if won else 0.0) - a["cost"]
+        else:
+            openpos[tk] = {"contracts": a["contracts"], "side": a["side"], "cost": a["cost"],
+                           "avg": a["cost"] / a["contracts"] if a["contracts"] else 0.0}
+    return openpos, realized_today
+
+
+def settled_record(k, n=25):
+    """Win/loss over our last n SETTLED bets (our side vs the result). The realized
+    hit rate the win-rate controller steers on."""
+    fills = k._request("GET", "/portfolio/fills").get("fills", [])
+    setls = k._request("GET", "/portfolio/settlements").get("settlements", [])
+    side = {}
+    for f in fills:
+        side.setdefault(f.get("ticker"), f.get("side"))
+    rows = [(s.get("settled_time", ""), s.get("market_result") == side[s["ticker"]])
+            for s in setls if s.get("ticker") in side]
+    rows.sort(reverse=True)
+    recent = rows[:n]
+    wins = sum(1 for _, w in recent if w)
+    return wins, len(recent) - wins, (wins / len(recent) if recent else None)
+
+
+def win_prob_floor(cfg, winrate):
+    """THE MAINTENANCE FORMULA. Effective sharp-lane win-prob floor:
+        floor = base + gain * (target - realized_hit_rate),  clamped to [base, max].
+    Below target -> floor rises -> only stronger favorites clear -> hit rate recovers.
+    Above target -> floor eases to base -> more volume. Self-correcting toward target."""
+    base = cfg.get("win_floor_base", 0.60)
+    if winrate is None:
+        return base
+    f = base + cfg.get("win_floor_gain", 1.5) * (cfg.get("target_win_rate", 0.72) - winrate)
+    return max(base, min(cfg.get("win_floor_max", 0.86), f))
+
+
 def size_bet(cfg, price, balance, spent_today, total_exposure):
     """Largest contract count that fits every cap. price in dollars."""
     room = min(cfg["per_bet_max_usd"],
@@ -160,7 +222,7 @@ def size_bet(cfg, price, balance, spent_today, total_exposure):
     return int(room // price)
 
 
-def gate(cfg, count, our_cents, fair, depth, spread_cents):
+def gate(cfg, count, our_cents, fair, depth, spread_cents, books=1):
     """Every guardrail in one place. Returns (ok, reason)."""
     if count < 1:
         return False, "size=0 (caps/balance)"
@@ -168,12 +230,22 @@ def gate(cfg, count, our_cents, fair, depth, spread_cents):
     raw_edge = fair - price
     if abs(raw_edge) > cfg["sanity_max_raw_edge"]:
         return False, "edge %.0f%% > sanity cap (likely a bug/stale)" % (raw_edge * 100)
-    # ABSOLUTE-edge floor (2026-06-09): a 1-2 point gap vs a single book is de-vig
-    # NOISE, not an edge -- only act when the probability gap is real. (Stopped the
-    # engine churning the daily cap on marginal MLB moneylines.)
-    if raw_edge < cfg.get("min_abs_edge_prob", 0.0):
-        return False, "abs gap %.1fpts < %.1fpt floor (noise, not a real edge)" % (
-            raw_edge * 100, cfg.get("min_abs_edge_prob", 0.0) * 100)
+    # ABSOLUTE-edge floor: a 1-2 point gap vs a SINGLE book is de-vig NOISE. But a
+    # multi-book CONSENSUS (>= sharp_min_books via The Odds API) is sharp enough to
+    # trust a smaller gap -- that is the whole point of the consensus: more real edges
+    # become bettable without lowering the standard. The net-EV floor still applies.
+    sharp = books >= cfg.get("sharp_min_books", 4)
+    floor = cfg.get("min_abs_edge_prob_sharp", cfg.get("min_abs_edge_prob", 0.0)) if sharp \
+        else cfg.get("min_abs_edge_prob", 0.0)
+    if raw_edge < floor:
+        return False, "abs gap %.1fpts < %.1fpt floor (%s)" % (
+            raw_edge * 100, floor * 100, ("sharp %dbk" % books) if sharp else "single-book noise")
+    # WIN-RATE GUARD (Rich 2026-06-10): on the sharp lane, skip sub-floor win-prob
+    # longshots -- great EV but they lose most of the time and drag the hit rate. The
+    # convex/longshot plays live in the favorite_longshot lane, gated separately.
+    if sharp and fair < cfg.get("min_fair_prob_sharp", 0.0):
+        return False, "fair %.0f%% < %.0f%% win-prob floor (protects hit rate)" % (
+            fair * 100, cfg.get("min_fair_prob_sharp", 0.0) * 100)
     if depth < cfg["min_depth_dollars"]:
         return False, "depth $%d < min" % int(depth)
     if spread_cents is not None and spread_cents > cfg["max_spread_cents"]:
@@ -228,7 +300,7 @@ def lane_sharp_sports(cfg):
         cands.append({"lane": "sharp_sports", "ticker": tk, "side": "yes",
                       "our_cents": our_cents, "fair": fair, "ask": ya, "bid": yb,
                       "depth": yc or 0, "spread": spread, "source": sf["source"],
-                      "post_only": post_only})
+                      "post_only": post_only, "books": sf.get("books", 1)})
     return cands
 
 
@@ -245,6 +317,56 @@ def lane_favorite_longshot(cfg):
                     "our_cents": c["buy_c"], "fair": c["our_prob"], "ask": c["buy_c"],
                     "bid": None, "depth": c.get("depth", 0), "spread": None, "post_only": True,
                     "source": "favorite-longshot +%.0f%% hypothesis" % ((c["our_prob"] - c["implied"]) * 100)})
+    return out
+
+
+def lane_press_winners(cfg, open_book, realized_today):
+    """Profit-funded double-down. Add to an OPEN position ONLY when every test holds:
+      * we are already net-green for the day (realized_today >= press_min_daily_profit);
+      * the position's sharp number is FRESH; and the live ask STILL shows real edge
+        (>= the absolute-edge floor) -- never press just because price moved our way;
+      * the price has NOT collapsed below our entry (a falling knife = our pre-game
+        number is stale, the Astros trap) -- press_max_adverse_cents;
+      * the edge isn't too-good-to-be-true (a huge gap at press time = stale live
+        number, not a gift) -- press_max_trusted_edge.
+    Sized from a fraction of LOCKED profit, capped so the night stays net-green."""
+    out = []
+    floor_profit = cfg.get("press_min_daily_profit_usd", 15.0)
+    if realized_today < floor_profit:
+        return out
+    bankroll = min(cfg.get("press_fraction", 0.5) * realized_today,
+                   realized_today - cfg.get("press_keep_min_profit_usd", 12.0))
+    if bankroll <= 0:
+        return out
+    for tk, pos in open_book.items():
+        if pos["side"] != "yes":          # v1 presses the yes-side sharp positions only
+            continue
+        sf = sharp_lines.sharp_fair(tk)
+        if not sf:
+            continue
+        fresh_ts = sf.get("fresh_ts")
+        if not (bool(fresh_ts) and (time.time() - fresh_ts) < cfg.get("fresh_window_sec", 7200)):
+            continue
+        try:
+            yb, ya, nb, yc, nc = best_bbo(tk)
+        except Exception:
+            continue
+        if ya is None:
+            continue
+        fair, avg_c = sf["fair_prob"], pos["avg"] * 100
+        add_edge = fair - ya / 100.0
+        if ya < avg_c - cfg.get("press_max_adverse_cents", 6):
+            continue                      # falling knife -- stale model vs a live drop
+        if add_edge > cfg.get("press_max_trusted_edge", 0.12):
+            continue                      # too good to be true at press time = stale
+        if add_edge < cfg.get("min_abs_edge_prob", 0.03):
+            continue                      # not enough fresh edge left to add
+        out.append({"lane": "press_winners", "ticker": tk, "side": "yes",
+                    "our_cents": ya, "fair": fair, "ask": ya, "bid": yb,
+                    "depth": yc or 0, "spread": (ya - yb) if yb else None,
+                    "post_only": False, "bankroll": bankroll, "avg": pos["avg"],
+                    "source": "press locked-profit: +%.1fpt fresh edge at %dc (entry %.0fc)" % (
+                        add_edge * 100, ya, avg_c)})
     return out
 
 
@@ -279,6 +401,7 @@ def run(live=False):
         return 0
 
     balance, positions = None, []
+    open_book, realized_today = {}, 0.0
     if live:
         from kalshi_agent.execution.kalshi_exec import from_creds
         k = from_creds()
@@ -287,7 +410,30 @@ def run(live=False):
         if balance < cfg["min_balance_floor_usd"]:
             print("  balance $%.2f < floor $%.2f -- HALT." % (balance, cfg["min_balance_floor_usd"]))
             return 0
-    held = held_tickers(positions)
+        try:
+            open_book, realized_today = _live_book(k)
+        except Exception as e:
+            print("  (press book unavailable: %s)" % str(e)[:60])
+    else:
+        try:
+            from kalshi_agent.execution.kalshi_exec import from_creds as _fc
+            open_book, realized_today = _live_book(_fc())
+        except Exception:
+            pass
+    # WIN-RATE MAINTENANCE CONTROLLER: steer the sharp-lane win-prob floor off the
+    # realized hit rate so the system holds the target instead of drifting down.
+    try:
+        from kalshi_agent.execution.kalshi_exec import from_creds as _fcw
+        _w, _l, _wr = settled_record(_fcw())
+        cfg["min_fair_prob_sharp"] = win_prob_floor(cfg, _wr)
+        print("  win-rate %s (%d-%d) -> sharp win-prob floor %.0f%% (target %.0f%%)" % (
+            ("%.0f%%" % (_wr * 100)) if _wr is not None else "n/a", _w, _l,
+            cfg["min_fair_prob_sharp"] * 100, cfg.get("target_win_rate", 0.72) * 100))
+    except Exception:
+        pass
+    # idempotency for the normal lanes: never re-bet anything we already hold (open_book
+    # is reliable; /positions is not). The press lane targets these on purpose, below.
+    held = held_tickers(positions) | set(open_book.keys())
     # money-idempotency: a real position, or a maker bid we already placed in the
     # last 3 days (so the cron doesn't re-post the same resting bid every cycle).
     # A logged scorecard prediction does NOT block a bet -- that's measurement only.
@@ -350,6 +496,56 @@ def run(live=False):
             print("    OP-BET rejected: %s" % str(e)[:90])
 
     modes = cfg["lanes"]
+
+    # ---- PRESS WINNERS (profit-funded double-down, Rich 2026-06-10): add to an OPEN
+    # position only where it STILL shows fresh real edge at the live ask, funded by a
+    # slice of LOCKED daily profit, capped so the night stays net-green. 'log' proves
+    # it flags the right spots without spending; 'bet' makes it live.
+    press_mode = modes.get("press_winners", "off")
+    if press_mode in ("bet", "log"):
+        print("  press: realized today $%.2f (need >$%.0f to arm)" % (
+            realized_today, cfg.get("press_min_daily_profit_usd", 15.0)))
+        prior = [r for r in _ledger_rows() if r.get("lane") == "press_winners"
+                 and r.get("day") == _today() and r.get("placed")]
+        pressed_ct, press_spent = {}, 0.0
+        for r in prior:
+            pressed_ct[r["ticker"]] = pressed_ct.get(r["ticker"], 0) + 1
+            press_spent += r.get("cost", 0.0)
+        for c in lane_press_winners(cfg, open_book, realized_today):
+            tk = c["ticker"]
+            if pressed_ct.get(tk, 0) >= cfg.get("press_max_adds_per_ticker", 1):
+                print("  PRESS skip %-28s (already pressed today)" % tk[:28]); continue
+            room = min(cfg.get("press_per_add_max_usd", 6.0), c["bankroll"] - press_spent)
+            if live:
+                room = min(room, cfg["daily_max_usd"] - spent_today,
+                           cfg["total_exposure_max_usd"] - total_exposure,
+                           max(0.0, (balance or 0) - cfg["min_balance_floor_usd"]))
+            count = int(room // (c["our_cents"] / 100.0)) if c["our_cents"] else 0
+            print("  PRESS %-28s [%s] add x%d @ %dc (fair %.0f%%) -- %s" % (
+                tk[:28], press_mode, count, c["our_cents"], c["fair"] * 100, c["source"]))
+            scorecard.record("press_winners", tk, "yes", c["fair"], c["our_cents"] / 100.0,
+                             reasoning=c["source"][:110])
+            if press_mode != "bet" or not live or count < 1:
+                continue
+            from kalshi_agent.execution.kalshi_exec import from_creds
+            kp = from_creds()
+            try:
+                o = kp.place_order(tk, side="yes", action="buy", count=count,
+                                   price_cents=c["our_cents"], post_only=False)
+                cost = count * c["our_cents"] / 100.0
+                spent_today += cost; total_exposure += cost; press_spent += cost
+                pressed_ct[tk] = pressed_ct.get(tk, 0) + 1
+                log_ledger({"ts": int(time.time()), "day": _today(), "lane": "press_winners",
+                            "ticker": tk, "side": "yes", "count": count, "price_c": c["our_cents"],
+                            "cost": round(cost, 2), "fair": c["fair"], "placed": True,
+                            "order_id": o.get("order_id"), "source": c["source"]})
+                notify("auto-edge PRESS (locked-profit add) YES %s x%d @ %dc -> %s" % (
+                    tk, count, c["our_cents"], o.get("order_id")))
+            except Exception as e:
+                log_ledger({"ts": int(time.time()), "day": _today(), "lane": "press_winners",
+                            "ticker": tk, "placed": False, "error": str(e)[:140]})
+                print("    PRESS rejected: %s" % str(e)[:90])
+
     candidates = []
     if modes.get("sharp_sports") in ("bet", "log"):
         candidates += lane_sharp_sports(cfg)
@@ -363,10 +559,12 @@ def run(live=False):
                 a["ticker"], a["yes_ask"], a["no_ask"], a["lock_c"]))
 
     placed = 0
+    flagged = []          # every gate-passing edge this run (for the dashboard's "coming up")
+    cap_reached = False
     for c in candidates:
-        if live and placed >= cfg.get("max_new_bets_per_run", 2):
-            print("  (per-run bet cap %d reached -- holding the rest for the next cycle)" % cfg.get("max_new_bets_per_run", 2))
-            break
+        if live and placed >= cfg.get("max_new_bets_per_run", 2) and not cap_reached:
+            print("  (per-run bet cap %d reached -- still flagging the rest for the dashboard)" % cfg.get("max_new_bets_per_run", 2))
+            cap_reached = True
         mode = modes.get(c["lane"], "off")
         tk = c["ticker"]
         if tk in held or tk in recent_placed:
@@ -376,7 +574,7 @@ def run(live=False):
             print("  skip %-32s (no maker price)" % tk[:32])
             continue
         count = size_bet(cfg, c["our_cents"] / 100.0, balance or 0.0, spent_today, total_exposure) if mode == "bet" and live else max(1, int(cfg["per_bet_max_usd"] // (c["our_cents"] / 100.0)))
-        ok, info = gate(cfg, count, c["our_cents"], c["fair"], c["depth"], c["spread"])
+        ok, info = gate(cfg, count, c["our_cents"], c["fair"], c["depth"], c["spread"], c.get("books", 1))
         edge_pct = c["fair"] - c["our_cents"] / 100.0
         tag = "[%s/%s]" % (c["lane"], mode)
         if not ok:
@@ -385,12 +583,15 @@ def run(live=False):
         ev = info
         print("  EDGE %-30s %s  buy %dc fair %.0f%% (+%.1f%% raw, +%.1f%% net) x%d depth$%d" % (
             tk[:30], tag, c["our_cents"], c["fair"] * 100, edge_pct * 100, ev["net_pct"] * 100, count, int(c["depth"])))
+        flagged.append({"ticker": tk, "lane": c["lane"], "side": c["side"],
+                        "our_cents": c["our_cents"], "fair": c["fair"],
+                        "net_pct": ev["net_pct"], "source": c["source"]})
 
         # log to scorecard (measurement) for bet+log lanes
         scorecard.record(c["lane"], tk, c["side"], c["fair"], c["our_cents"] / 100.0,
                          reasoning=c["source"][:110])
 
-        if mode != "bet" or not live:
+        if mode != "bet" or not live or cap_reached:
             continue
         # ---- place the maker bid ----
         from kalshi_agent.execution.kalshi_exec import from_creds
@@ -414,6 +615,13 @@ def run(live=False):
                         "price_c": c["our_cents"], "placed": False, "error": str(e)[:140]})
             print("    rejected: %s" % str(e)[:90])
     print("  placed %d maker bid(s)." % placed)
+    # publish what the engine is about to bet so the dashboard can show "coming up"
+    try:
+        UPCOMING.parent.mkdir(parents=True, exist_ok=True)
+        flagged.sort(key=lambda x: -x.get("net_pct", 0))
+        UPCOMING.write_text(json.dumps({"ts": int(time.time()), "edges": flagged[:8]}, indent=2))
+    except Exception:
+        pass
     return 0
 
 

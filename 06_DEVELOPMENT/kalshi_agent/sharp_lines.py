@@ -63,7 +63,7 @@ def from_overrides(ticker: str):
     if fp is None:
         return None
     return {"fair_prob": float(fp), "source": row.get("source", "override"),
-            "fresh_ts": row.get("fresh_ts")}
+            "fresh_ts": row.get("fresh_ts"), "books": row.get("books", 1)}
 
 
 def _odds_api(sport_key: str):
