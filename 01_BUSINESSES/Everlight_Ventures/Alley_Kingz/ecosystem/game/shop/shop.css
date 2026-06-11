@@ -380,3 +380,23 @@
   .aks-top{padding:12px 14px; gap:10px}
   .aks-coin{font-size:12px; padding:6px 10px}
 }
+
+/* ---- PROMOTIONS / SALES (grand opening, weekend, holiday, loyalty) ---- */
+.aks-saletag{
+  display:inline-block; margin:4px 0 2px; padding:2px 8px; border-radius:6px;
+  font-family:'Cinzel',serif; font-weight:900; font-size:9px; letter-spacing:.08em;
+  color:#0a0a0a; background:linear-gradient(160deg,#ff5a5a,#ff9a3a);
+  box-shadow:0 2px 8px rgba(255,90,90,.4); text-transform:uppercase;
+}
+.aks-price.was{ text-decoration:line-through; opacity:.55; font-size:.9em; margin-right:6px; color:#9a9a9a; }
+.aks-price.now{ color:#3DDC84; font-weight:800; }
+.aks-btn.hot{ background:linear-gradient(160deg,#ff7a3a,#ff5a5a); color:#fff; box-shadow:0 3px 12px rgba(255,90,90,.45); }
+.aks-promobanner{
+  display:flex; align-items:center; gap:8px; margin:0 0 12px; padding:10px 14px;
+  border-radius:11px; border:1px solid rgba(255,90,90,.5);
+  background:linear-gradient(110deg,rgba(255,90,90,.16),rgba(255,154,58,.10));
+  animation:akspulse 2s infinite alternate;
+}
+.aks-promo-flame{ font-size:16px; }
+.aks-promo-txt{ font-family:'Cinzel',serif; font-weight:900; font-size:12px; letter-spacing:.04em; color:#ffd9b0; }
+@keyframes akspulse{ from{ box-shadow:0 0 0 rgba(255,90,90,0);} to{ box-shadow:0 0 16px rgba(255,90,90,.5);} }

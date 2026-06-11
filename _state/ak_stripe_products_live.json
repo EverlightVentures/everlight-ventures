@@ -1,0 +1,43 @@
+{
+  "_meta": {
+    "mode": "live",
+    "game_id": "alley-kingz"
+  },
+  "products": {
+    "ak-gems-rookie": {
+      "product_id": "prod_UgZQx61Ig6zB0J",
+      "price_id": "price_1ThCHSGd8n4Fz3nADR7fLJVF",
+      "unit_amount": 499,
+      "gems": 500,
+      "title": "AK Rookie Stash"
+    },
+    "ak-gems-player": {
+      "product_id": "prod_UgZQyKruuDEPeO",
+      "price_id": "price_1ThCHeGd8n4Fz3nAswLavyf8",
+      "unit_amount": 999,
+      "gems": 1100,
+      "title": "AK Player Pack"
+    },
+    "ak-gems-baller": {
+      "product_id": "prod_UgZQkcMRJhU1T7",
+      "price_id": "price_1ThCHlGd8n4Fz3nA68AaemEn",
+      "unit_amount": 1999,
+      "gems": 2500,
+      "title": "AK Baller Bag"
+    },
+    "ak-gems-highroller": {
+      "product_id": "prod_UgZQXlooqmQc4Y",
+      "price_id": "price_1ThCHwGd8n4Fz3nAcIXFmiXL",
+      "unit_amount": 4999,
+      "gems": 6500,
+      "title": "AK High Roller Crate"
+    },
+    "ak-gems-kingpin": {
+      "product_id": "prod_UgZQJcYgaCmR8Y",
+      "price_id": "price_1ThCI3Gd8n4Fz3nALhcINPyL",
+      "unit_amount": 9999,
+      "gems": 14000,
+      "title": "AK Kingpin Vault"
+    }
+  }
+}

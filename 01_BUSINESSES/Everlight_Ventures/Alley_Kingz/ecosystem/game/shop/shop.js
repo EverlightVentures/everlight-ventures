@@ -312,10 +312,21 @@
   }
 
   // ---- GEMS view -----------------------------------------------------------
+  function promoBanner() {
+    var ps = (state.active_promos || []);
+    if (!ps.length) return null;
+    var top = ps.slice().sort(function (a, b) { return b.percent - a.percent; })[0];
+    return h("div", { class: "aks-promobanner" }, [
+      h("span", { class: "aks-promo-flame", text: "\uD83D\uDD25" }),
+      h("span", { class: "aks-promo-txt", text: top.label + " -- up to " + top.percent + "% OFF. Limited time." }),
+    ]);
+  }
   function gemsView() {
     var packs = state.products.filter(function (p) { return p.kind === "gems"; });
-    return secHead("Gem Packs", "Gems are the premium in-game currency. Bought via Stripe (TEST mode). In-game value only -- never cashable.")
-      .concat([grid(packs.map(gemTile))]);
+    var head = secHead("Gem Packs", "Gems are the premium in-game currency. Secure checkout via Stripe. In-game value only -- never cashable.");
+    var banner = promoBanner();
+    if (banner) head = [banner].concat(head);
+    return head.concat([grid(packs.map(gemTile))]);
   }
   function gemTile(p) {
     var gems = (p.grants && p.grants.gems) || 0;
@@ -327,7 +338,12 @@
       h("div", { class: "aks-sub", text: fmt(gems) + " Gems" }),
       bonus ? h("div", { class: "aks-bonus", text: "Bonus " + bonus[0].replace(/\s/g, "") })
         : h("div", { class: "aks-desc", text: "Premium currency" }),
-      h("div", { class: "aks-row" }, [
+      p.sale ? h("div", { class: "aks-saletag", text: p.sale.label + " -" + p.sale.percent_off + "%" }) : null,
+      h("div", { class: "aks-row" }, p.sale ? [
+        h("span", { class: "aks-price was", text: "$" + Number(p.sale.original_price_usd).toFixed(2) }),
+        h("span", { class: "aks-price now", text: "$" + Number(p.sale.sale_price_usd).toFixed(2) }),
+        h("button", { class: "aks-btn hot", text: "Buy", onclick: function () { buyGems(p.sku); } }),
+      ] : [
         h("span", { class: "aks-price usd", text: "$" + Number(p.price_usd).toFixed(2) }),
         h("button", { class: "aks-btn", text: "Buy", onclick: function () { buyGems(p.sku); } }),
       ]),
@@ -688,9 +704,7 @@
   function foot() {
     return h("div", { class: "aks-foot" }, [
       h("b", { text: "Alley Kingz items are in-game value only and have no cash value." }),
-      " Gems are purchased through Stripe (currently ",
-      h("b", { text: "TEST MODE" }),
-      " -- no real charges). Cards, Coins and Scrap are earned through play. An Everlight Ventures arcade.",
+      " Gems are purchased through Stripe secure checkout. Cards, Coins and Scrap are earned through play.",
     ]);
   }
 
@@ -734,7 +748,7 @@
         toast(okMsg + " (demo -- saved to your crew).", "ok");
         return;
       }
-      toast("Demo mode -- connect a backend to spend.", "bad"); return;
+      promptSignIn(); return;
     }
     api(action, extra).then(function (r) {
       if (r.ok) {
@@ -746,8 +760,13 @@
       else { toast(humanErr(r), "bad"); }
     }).catch(function () { toast("Network error.", "bad"); });
   }
+  function promptSignIn() {
+    var acct = (typeof window !== "undefined") && window.AKAccount;
+    if (acct && acct.signIn) { toast("Sign in with Google to buy -- your gems save to your account.", "ok"); acct.signIn(); }
+    else { toast("Sign in (lobby) to unlock purchases.", "bad"); }
+  }
   function buyGems(sku) {
-    if (!cfg.online) { toast("Demo mode -- gem checkout needs the backend + TEST Stripe.", "bad"); return; }
+    if (!cfg.online) { promptSignIn(); return; }
     api("buy-gems", {
       sku: sku,
       success_url: location.href.split("#")[0] + "#gems-ok={CHECKOUT_SESSION_ID}",
@@ -792,6 +811,21 @@
     ensureRoot();
     root.removeAttribute("hidden");
     ensureCatalog().then(load);
+    confirmPendingGems();
+  }
+  // Stripe success redirect lands back here with #gems-ok=<session_id>.
+  // confirm-gems is idempotent server-side (ak_transactions unique lock), so
+  // re-running on refresh is safe; the hash is cleared after one attempt.
+  function confirmPendingGems() {
+    var m = /[#&]gems-ok=([^&]+)/.exec(location.hash || "");
+    if (!m || !cfg.online) return;
+    var sid = decodeURIComponent(m[1]);
+    try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+    api("confirm-gems", { session_id: sid }).then(function (r) {
+      if (r.ok) { toast("Gems delivered. Spend wisely, champ.", "ok"); load(); }
+      else if (r.error === "already_credited") { toast("Already credited.", "ok"); load(); }
+      else { toast(humanErr(r), "bad"); }
+    }).catch(function () { toast("Could not confirm purchase -- it will retry next visit.", "bad"); });
   }
   function close() { if (root) root.setAttribute("hidden", ""); }
 

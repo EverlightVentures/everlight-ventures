@@ -8,6 +8,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
+const SERVICE_ROLES = [Deno.env.get("SUPABASE_SERVICE_ROLE_KEY"), Deno.env.get("SB_SERVICE_ROLE_KEY")].filter(Boolean) as string[];
 const PRICE_MAP: Record<string, string> = {
   "sam-book-1": "price_1T86XVGd8n4Fz3nAs7ubL82A",
   "sam-book-2": "price_1T86XVGd8n4Fz3nACgflduDO",
@@ -80,7 +81,7 @@ Deno.serve(async (req: Request) => {
       httpClient: Stripe.createFetchHttpClient(),
     });
 
-    const { slug, success_url, cancel_url, metadata } = await req.json();
+    const { slug, success_url, cancel_url, metadata, coupon_percent } = await req.json();
 
     if (!slug || !PRICE_MAP[slug]) {
       return new Response(
@@ -102,9 +103,26 @@ Deno.serve(async (req: Request) => {
           )
         : {};
 
+    // Discounts are server-authoritative: only honored when the caller presents the
+    // service-role key (i.e. the buy-gems edge fn), never a public/anon client.
+    const _auth = req.headers.get("Authorization") || "";
+    const _isServer = SERVICE_ROLES.some((k) => _auth === `Bearer ${k}`);
+    const _pct = Math.round(Number(coupon_percent) || 0);
+    let _discounts: { coupon: string }[] | undefined;
+    if (_isServer && !isSub && _pct >= 1 && _pct <= 90) {
+      const couponId = `ak-pct-${_pct}-once`;
+      try { await stripe.coupons.retrieve(couponId); }
+      catch (_e) {
+        await stripe.coupons.create({ id: couponId, percent_off: _pct,
+          duration: "once", name: `${_pct}% off` });
+      }
+      _discounts = [{ coupon: couponId }];
+    }
+
     const session = await stripe.checkout.sessions.create({
       mode: isSub ? "subscription" : "payment",
       line_items: [{ price: priceId, quantity: 1 }],
+      ...(_discounts ? { discounts: _discounts } : {}),
       success_url:
         success_url ??
         "https://everlightventures.io/purchase/success?session_id={CHECKOUT_SESSION_ID}",

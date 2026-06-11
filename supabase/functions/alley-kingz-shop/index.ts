@@ -74,6 +74,138 @@ const GEM_PER_COPY: Record<string, number> = {
   Common: 2, Rare: 10, Epic: 50, Legendary: 500, Mythic: 2000,
 };
 
+// ============================================================================
+// PROMOTIONS ENGINE  (server-authoritative, full-price by DEFAULT)
+// ----------------------------------------------------------------------------
+// Specials are the EXCEPTION, not the rule: grand-opening hype, a first-day
+// welcome for new accounts, weekend deals, holiday blowouts (Black Friday is the
+// biggest), and loyalty rewards for grinders. Percentages VARY and the
+// emphasized category ROTATES by week, so the discount pattern is not trackable.
+// The client never sets a discount: get-shop annotates sale prices for display,
+// buy-gems resolves the % from verified time + player state, and the Stripe
+// coupon is created + applied server-side at checkout. Tweak the knobs below.
+// ============================================================================
+const PROMO_TZ_OFFSET_H = -8; // PT-ish; promos are coarse day-windows
+
+// Grand opening window. Move this date to extend or close the launch sale.
+const GRAND_OPENING_END = "2026-06-16T07:00:00Z"; // ~Mon 00:00 PT
+
+type PKind = "gems" | "chest" | "consumable" | "cosmetic" | "pass" | "bundle";
+interface Promo {
+  id: string; label: string; audience: "all" | "new" | "loyal";
+  kinds: PKind[]; percent: number; ends_at: string; priority: number;
+}
+const ALL_KINDS: PKind[] = ["gems", "chest", "consumable", "cosmetic", "pass", "bundle"];
+
+function ptNow(): Date { return new Date(Date.now() + PROMO_TZ_OFFSET_H * 3600 * 1000); }
+function seedFor(key: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < key.length; i++) { h ^= key.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function pick<T>(arr: T[], seed: number): T { return arr[seed % arr.length]; }
+function weekKey(d: Date): string {
+  const jan1 = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  const wk = Math.ceil((((d.getTime() - jan1.getTime()) / 86400000) + jan1.getUTCDay() + 1) / 7);
+  return d.getUTCFullYear() + "-W" + wk;
+}
+function weekendEnd(now: Date): string {
+  const d = new Date(now); const toSun = (7 - d.getUTCDay()) % 7;
+  d.setUTCDate(d.getUTCDate() + toSun);
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 7, 0, 0)).toISOString();
+}
+
+// Holiday windows (PT MM-DD ranges) + their own % bands. Black Friday is biggest.
+const HOLIDAYS: { from: string; to: string; label: string; band: number[] }[] = [
+  { from: "01-01", to: "01-02", label: "NEW YEAR DROP",   band: [20, 25, 30] },
+  { from: "02-13", to: "02-15", label: "PUPPY LOVE SALE", band: [15, 20, 25] },
+  { from: "07-03", to: "07-05", label: "FIREWORKS SALE",  band: [20, 25, 30] },
+  { from: "10-29", to: "10-31", label: "HOWL-O-WEEN",     band: [20, 25, 30] },
+  { from: "11-27", to: "11-30", label: "BLACK FRIDAY",    band: [30, 35, 40] },
+  { from: "12-23", to: "12-26", label: "HOLIDAY HEIST",   band: [25, 30, 35] },
+];
+
+interface PlayerCtx { created_at?: string | null; tx_count?: number }
+
+function activePromos(p: PlayerCtx | null): Promo[] {
+  const now = ptNow();
+  const ymd = now.toISOString().slice(0, 10);
+  const md = ymd.slice(5);
+  const wk = weekKey(now);
+  const out: Promo[] = [];
+
+  // 1) GRAND OPENING (all) -- headline gems deal + a rotating emphasis pair.
+  if (Date.now() < new Date(GRAND_OPENING_END).getTime()) {
+    const emph = [pick(ALL_KINDS, seedFor("go-a" + wk)), pick(ALL_KINDS, seedFor("go-b" + wk))];
+    const pct = pick([20, 25, 30], seedFor("go-pct" + wk));
+    out.push({ id: "grand-opening", label: "GRAND OPENING", audience: "all",
+      kinds: Array.from(new Set<PKind>(["gems", ...emph])), percent: pct,
+      ends_at: GRAND_OPENING_END, priority: 50 });
+  }
+  // 2) HOLIDAY (all) -- date window, themed, biggest band on Black Friday.
+  for (const h of HOLIDAYS) {
+    if (md >= h.from && md <= h.to) {
+      const pct = pick(h.band, seedFor(h.label + ymd));
+      const emph = pick(ALL_KINDS, seedFor("hol" + ymd));
+      out.push({ id: "holiday", label: h.label, audience: "all",
+        kinds: Array.from(new Set<PKind>(["gems", "chest", emph])), percent: pct,
+        ends_at: now.getUTCFullYear() + "-" + h.to + "T07:00:00Z", priority: 70 });
+    }
+  }
+  // 3) WEEKEND (all) -- Fri/Sat/Sun, modest, rotating category + %.
+  const dow = now.getUTCDay();
+  if (dow === 5 || dow === 6 || dow === 0) {
+    const pct = pick([10, 15, 20], seedFor("wknd" + wk));
+    const emph = pick(ALL_KINDS, seedFor("wkndk" + wk));
+    out.push({ id: "weekend", label: "WEEKEND SPECIAL", audience: "all",
+      kinds: Array.from(new Set<PKind>(["gems", emph])), percent: pct,
+      ends_at: weekendEnd(now), priority: 30 });
+  }
+  // 4) WELCOME (new accounts, first 48h) -- strong first-purchase nudge.
+  if (p && p.created_at) {
+    const ageH = (Date.now() - new Date(p.created_at).getTime()) / 3600000;
+    if (ageH >= 0 && ageH <= 48) {
+      out.push({ id: "welcome", label: "WELCOME -- FIRST DAY", audience: "new",
+        kinds: ["gems", "chest", "bundle"], percent: 25,
+        ends_at: new Date(new Date(p.created_at).getTime() + 48 * 3600000).toISOString(),
+        priority: 60 });
+    }
+  }
+  // 5) LOYALTY (grinders) -- tiered by lifetime transactions.
+  if (p && p.tx_count && p.tx_count >= 10) {
+    const pct = p.tx_count >= 40 ? 20 : p.tx_count >= 20 ? 15 : 10;
+    out.push({ id: "loyalty", label: "LOYAL PACK REWARD", audience: "loyal",
+      kinds: ["gems", "chest", "consumable"], percent: pct, ends_at: "", priority: 40 });
+  }
+  return out;
+}
+
+// Best promo (highest priority, then highest %) for a product kind.
+function bestPromoFor(kind: string, promos: Promo[]): Promo | null {
+  const hits = promos.filter((p) => (p.kinds as string[]).includes(kind));
+  if (!hits.length) return null;
+  hits.sort((a, b) => b.priority - a.priority || b.percent - a.percent);
+  return hits[0];
+}
+
+// Verified player context for audience targeting (account age + activity).
+// Fail-open: any lookup error -> no per-player promos (full price), never a crash.
+async function loadPlayerCtx(db: ReturnType<typeof createClient>, playerId: string): Promise<PlayerCtx> {
+  const ctx: PlayerCtx = { created_at: null, tx_count: 0 };
+  if (!playerId) return ctx;
+  try {
+    const u = await db.auth.admin.getUserById(playerId);
+    ctx.created_at = u.data.user?.created_at ?? null;
+  } catch (_e) { /* ignore */ }
+  try {
+    const c = await db.from("ak_transactions").select("*", { count: "exact", head: true })
+      .eq("player_id", playerId);
+    ctx.tx_count = c.count ?? 0;
+  } catch (_e) { /* ignore */ }
+  return ctx;
+}
+
+
 function reply(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
@@ -214,11 +346,24 @@ Deno.serve(async (req: Request) => {
         };
       }
 
+      const _pctx = await loadPlayerCtx(db, playerId);
+      const _promos = activePromos(_pctx);
+      const _prodOut = (products.data ?? []).map((pr: Record<string, unknown>) => {
+        const promo = bestPromoFor(String(pr.kind ?? ""), _promos);
+        const base = Number(pr.price_usd ?? 0);
+        if (!promo || !base) return pr;
+        const sale = Math.round(base * (100 - promo.percent)) / 100;
+        return { ...pr, sale: { percent_off: promo.percent, label: promo.label,
+          ends_at: promo.ends_at, original_price_usd: base, sale_price_usd: sale } };
+      });
+
       return reply({
         ok: true,
         test_mode: TEST_MODE,
         disclaimer: DISCLAIMER,
-        products: products.data ?? [],
+        products: _prodOut,
+        active_promos: _promos.map((p) => ({ id: p.id, label: p.label,
+          percent: p.percent, kinds: p.kinds, ends_at: p.ends_at })),
         catalog: catalog.data ?? [],
         level_costs: costs.data ?? [],
         player,
@@ -438,6 +583,11 @@ Deno.serve(async (req: Request) => {
       if (!prod || !prod.checkout_slug)
         return reply({ ok: false, error: "GEM_SKU_NOT_FOUND" }, 404);
 
+      // Resolve the live promo for this player + product kind (server-authoritative).
+      const _bgPromos = activePromos(await loadPlayerCtx(db, playerId));
+      const _gemPromo = bestPromoFor(String(prod.kind ?? "gems"), _bgPromos);
+      const _gemPromoPct = _gemPromo ? _gemPromo.percent : 0;
+
       // Server-to-server call into create-checkout (reuse, do not rebuild Stripe).
       const res = await fetch(`${SUPABASE_URL}/functions/v1/create-checkout`, {
         method: "POST",
@@ -446,7 +596,9 @@ Deno.serve(async (req: Request) => {
           slug: prod.checkout_slug,
           success_url: body.success_url,
           cancel_url: body.cancel_url,
-          metadata: { player_id: playerId, game_id: GAME_ID, ak_sku: sku },
+          coupon_percent: _gemPromoPct,
+          metadata: { player_id: playerId, game_id: GAME_ID, ak_sku: sku,
+            ak_promo: _gemPromo ? _gemPromo.id : "", ak_promo_pct: String(_gemPromoPct) },
         }),
       });
       const out = await res.json();
