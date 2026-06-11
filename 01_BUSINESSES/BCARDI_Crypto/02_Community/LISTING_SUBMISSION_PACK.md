@@ -26,7 +26,8 @@ Work down the checklist. Every field every form asks for is below. Same data eve
 - Proof / docs page: https://alleykingz.online/bcardd
 - X (Twitter): https://x.com/B_CARD_D
 - Logo image: save the PNG from https://ipfs.io/ipfs/bafybeicfplug5ois4s62fxcdnsb64f5ozluijosa6r6a6sow4a6sdsqz64 and upload where forms want a file
-- Telegram / Discord: leave blank until live (never fake)
+- Telegram: https://t.me/b_card_d (LIVE as of 2026-06-10)
+- Discord: leave blank (not yet)
 
 ## DESCRIPTION -- FULL (operator-approved script; use wherever it fits)
 B_CARD_D is a meme token inspired by the Argentine Dogo, with a logo featuring a dog wearing a crown and American flag glasses. Its slogan is 'In DOGO we trust', emphasizing it as a crypto cultural symbol rather than financial advice.

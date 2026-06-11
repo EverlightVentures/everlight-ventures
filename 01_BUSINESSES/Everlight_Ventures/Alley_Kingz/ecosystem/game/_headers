@@ -6,3 +6,15 @@
   Cache-Control: no-cache
 /engine.js
   Cache-Control: no-cache
+/api/circulating-supply/
+  Content-Type: application/json
+  Cache-Control: max-age=300
+/api/circulating-supply
+  Content-Type: application/json
+  Cache-Control: max-age=300
+/api/total-supply/
+  Content-Type: application/json
+  Cache-Control: max-age=300
+/api/total-supply
+  Content-Type: application/json
+  Cache-Control: max-age=300

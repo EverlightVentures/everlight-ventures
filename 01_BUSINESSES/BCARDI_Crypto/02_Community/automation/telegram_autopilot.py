@@ -28,6 +28,14 @@ sys.path.insert(0, str(HERE))
 import x_autopilot as xa  # compliance_check, render, load_queue
 
 SENT = HERE / "tg_sent.json"
+TG_QUEUE = HERE / "tg_content_queue.json"
+
+
+def load_items():
+    """TG-native queue when present; falls back to the shared X queue."""
+    if TG_QUEUE.exists():
+        return json.loads(TG_QUEUE.read_text())
+    return xa.load_queue()
 
 
 def load_sent():
@@ -53,7 +61,7 @@ def main():
     token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
     chat = os.environ.get("TELEGRAM_CHAT_ID", "")
     sent = load_sent()
-    items = xa.load_queue()
+    items = load_items()
 
     if "--status" in sys.argv:
         pending = [i for i in items if i["id"] not in sent
@@ -72,7 +80,11 @@ def main():
         text = xa.render(it["text"])
         if text is None:
             continue  # placeholder unfilled
-        ok, reason = xa.compliance_check(text)
+        # banned-word gate shared with X; length cap is Telegram's own (4096)
+        low = text.lower()
+        hits = [b for b in xa.BANNED if b in low]
+        ok, reason = (False, "banned: " + ",".join(hits)) if hits else \
+                     (False, f"over 4096 chars ({len(text)})") if len(text) > 4096 else (True, "")
         if not ok:
             print(f"SKIP {it['id']}: {reason}")
             sent.add(it["id"])  # never retry a blocked item
