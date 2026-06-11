@@ -61,16 +61,19 @@
     "id": "sustain-01",
     "phase": "sustain",
     "post_at": null,
-    "status": "pending",
+    "status": "posted",
     "text": "the dog's been practicing his shuffle \ud83c\udccf\ud83d\udc36\n\nwhere the pack talks: t.me/b_card_d\nlike + share to wake the alley. $BCARDD",
-    "posted_at": "2026-06-11T02:56:44.440159+00:00"
+    "posted_at": "2026-06-11T10:00:02.259517+00:00",
+    "result": "tweet_id=2065011163642077648"
   },
   {
     "id": "sustain-02",
     "phase": "sustain",
     "post_at": null,
-    "status": "pending",
-    "text": "Diamond paws only. \ud83d\udc36\ud83d\udc8e Holders know.\n\nThe pack talks here \ud83d\udc47\nt.me/b_card_d\n\nSearch $BCARDD on Jupiter + tap the heart to get us verified. $BCARDD"
+    "status": "error",
+    "text": "Diamond paws only. \ud83d\udc36\ud83d\udc8e Holders know.\n\nThe pack talks here \ud83d\udc47\nt.me/b_card_d\n\nSearch $BCARDD on Jupiter + tap the heart to get us verified. $BCARDD",
+    "result": "post failed: 403 Forbidden\nPosts are limited to a maximum of one cashtag ($SYMBOL). Please remove additional cashtags and try again. / 403 Forbidden\nPosts are limited to a maximum of one cashtag ($SYMBOL). Please remove additional cashtags and try again.",
+    "posted_at": "2026-06-11T16:00:02.573489+00:00"
   },
   {
     "id": "sustain-03",
@@ -147,14 +150,14 @@
     "phase": "sustain",
     "text": "every cycle has its dog. 2013 was doge, 2021 was shib, 2026? the yung printz is at the table.\n\nthe pack: t.me/b_card_d\n$BCARDD",
     "post_at": null,
-    "status": "pending"
+    "status": "retired_dealer_leak"
   },
   {
     "id": "gen-x-002",
     "phase": "sustain",
     "text": "the dealer is a real dog. crowned, calm, and already shuffling receipts.\n\nback room: t.me/b_card_d -- like + repost\n$BCARDD",
     "post_at": null,
-    "status": "pending"
+    "status": "retired_dealer_leak"
   },
   {
     "id": "gen-x-003",
@@ -189,14 +192,14 @@
     "phase": "sustain",
     "text": "the cap table\u2019s cute until the dog-dealer starts dealing.\n\nthe pack: t.me/b_card_d\n$BCARDD",
     "post_at": null,
-    "status": "pending"
+    "status": "retired_dealer_leak"
   },
   {
     "id": "gen-x-008",
     "phase": "sustain",
     "text": "american-flag glasses, crown on, deck in paw. read it again.\n\nback room: t.me/b_card_d -- like + repost\n$BCARDD",
     "post_at": null,
-    "status": "pending"
+    "status": "retired_dealer_leak"
   },
   {
     "id": "gen-x-009",
@@ -237,6 +240,111 @@
     "id": "gen-x-014",
     "phase": "sustain",
     "text": "the throne wasn\u2019t inherited. it was claimed.\n\nback room: t.me/b_card_d -- like + repost\n$BCARDD",
+    "post_at": null,
+    "status": "pending"
+  },
+  {
+    "id": "sponsor-001",
+    "phase": "sustain",
+    "text": "thank you @solana - fast, cheap, and where the culture lives. $BCARDD built with the chain the dog runs on. in DOGO we trust.\n\nthe pack: t.me/b_card_d\n$BCARDD",
+    "post_at": null,
+    "status": "pending"
+  },
+  {
+    "id": "gen-x-015",
+    "phase": "sustain",
+    "text": "every cycle has its dog. 2013 had doge, 2021 had shib, 2026 got printz.\n\nthe pack: t.me/b_card_d\n$BCARDD",
+    "post_at": null,
+    "status": "pending"
+  },
+  {
+    "id": "gen-x-016",
+    "phase": "sustain",
+    "text": "doge walked so the printz could run the alley.\n\nback room: t.me/b_card_d -- like + repost\n$BCARDD",
+    "post_at": null,
+    "status": "pending"
+  },
+  {
+    "id": "gen-x-017",
+    "phase": "sustain",
+    "text": "shib made noise. the printz came with receipts.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n$BCARDD",
+    "post_at": null,
+    "status": "pending"
+  },
+  {
+    "id": "gen-x-018",
+    "phase": "sustain",
+    "text": "locked bag. no smoke. no leaks. just printz.\n\nthe pack: t.me/b_card_d\n$BCARDD",
+    "post_at": null,
+    "status": "pending"
+  },
+  {
+    "id": "gen-x-019",
+    "phase": "sustain",
+    "text": "you\u2019ve seen dogs. you haven\u2019t seen this one.\n\nback room: t.me/b_card_d -- like + repost\n$BCARDD",
+    "post_at": null,
+    "status": "pending"
+  },
+  {
+    "id": "gen-x-020",
+    "phase": "sustain",
+    "text": "the alley remembers. the throne does too.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n$BCARDD",
+    "post_at": null,
+    "status": "pending"
+  },
+  {
+    "id": "gen-x-021",
+    "phase": "sustain",
+    "text": "early is an understatement.\n\nthe pack: t.me/b_card_d\n$BCARDD",
+    "post_at": null,
+    "status": "pending"
+  },
+  {
+    "id": "gen-x-022",
+    "phase": "sustain",
+    "text": "watch the printz move when nobody\u2019s looking.\n\nback room: t.me/b_card_d -- like + repost\n$BCARDD",
+    "post_at": null,
+    "status": "pending"
+  },
+  {
+    "id": "gen-x-023",
+    "phase": "sustain",
+    "text": "not a phase. not a meme. a crowned dog with a mission.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n$BCARDD",
+    "post_at": null,
+    "status": "pending"
+  },
+  {
+    "id": "gen-x-024",
+    "phase": "sustain",
+    "text": "doge. shib. printz. the lineage is obvious.\n\nthe pack: t.me/b_card_d\n$BCARDD",
+    "post_at": null,
+    "status": "pending"
+  },
+  {
+    "id": "gen-x-025",
+    "phase": "sustain",
+    "text": "bags locked on-chain. talk is cheap.\n\nback room: t.me/b_card_d -- like + repost\n$BCARDD",
+    "post_at": null,
+    "status": "pending"
+  },
+  {
+    "id": "gen-x-026",
+    "phase": "sustain",
+    "text": "if you know, you know. if you don\u2019t, you\u2019re early.\n\nt.me/b_card_d | search $BCARDD on Jupiter, tap the heart\n$BCARDD",
+    "post_at": null,
+    "status": "pending"
+  },
+  {
+    "id": "gen-x-027",
+    "phase": "sustain",
+    "text": "the real one doesn\u2019t beg for attention.\n\nthe pack: t.me/b_card_d\n$BCARDD",
+    "post_at": null,
+    "status": "pending"
+  },
+  {
+    "id": "gen-x-028",
+    "phase": "sustain",
+    "text": "something\u2019s up his sleeve. the alley can feel it.\n\nback room: t.me/b_card_d -- like + repost\n$BCARDD",
     "post_at": null,
     "status": "pending"
   }

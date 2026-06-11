@@ -31,21 +31,7 @@ TGL = "t.me/b_card_d"
 XL = "x.com/B_CARD_D"
 LOW_WATER = 12  # refill when fewer pending than this
 
-BRAND = (
-    "You write posts for $BCARDD, a Solana meme coin. The mascot is a REAL Dogo "
-    "Argentino named 'The Yung Printz' -- a crowned card-dealing dog in American-flag "
-    "glasses. Tagline: 'In DOGO we trust.' It has a real playable game at alleykingz.online "
-    "and a dev bag locked 6 months on-chain. "
-    "VOICE: aggressive crypto-twitter degen energy, confident, funny, street, lowercase ok. "
-    "POSITIONING: this is the next great dog coin -- every cycle has its dog (2013 DOGE, "
-    "2021 SHIB, 2026 is OURS). Reference the lineage, claim the throne, never beg. "
-    "HARD RULES: never promise profit/returns/gains/moon/pump/1000x; no financial advice; "
-    "no 'investment'; never the words blackjack/casino/gambling/bet/bacardi. "
-    "Tease the dealer, name the dog, flex the game + the locked bag + the receipts. "
-    "ANONYMITY (hard rule): never write first-person as a creator/dev/founder; no I-made-this; "
-    "the coin and the dog just EXIST, faceless like Satoshi; the dog is a real Dogo Argentino, "
-    "never 'someone's dog'."
-)
+BRAND = "You write posts for $BCARDD, a Solana meme coin. The mascot is THE YUNG PRINTZ: a REAL Dogo Argentino, a crowned street prince in American-flag glasses. What the audience knows him for: he pilots a battle RIG, he blows stuff up, he runs the alley, he has his own playable game at alleykingz.online, and his dev bag is locked on-chain. He is a real dog, a prince, a warrior, and a coin. SECRET (TEASE ONLY, NEVER STATE): the Printz has a hidden second life. You may drop SUBTLE foreshadowing (tricks nobody has seen yet, a sly grin, something up his sleeve) but NEVER say he deals cards / is a dealer / shuffles / runs the table / has a deck. That reveal comes later, do NOT spoil it. VOICE: aggressive crypto-twitter degen energy, confident, funny, street, lowercase ok. POSITIONING (push hard, most posts): the next great dog coin in the lineage of the giants. 2013 had $DOGE, 2021 had $SHIB, 2026 is THE PRINTZ. doge walked, shib ran, the printz takes the throne. it is the dog's year. shiba-killer / doge-killer energy. claim it, never beg. HARD RULES: never promise profit/returns/gains/moon/pump/1000x; no financial advice; no investment; never the words blackjack/casino/gambling/bet/bacardi/dealer/shuffle/deck/cards. ANONYMITY: never first-person as a creator/dev/founder; the coin and dog just EXIST, faceless like Satoshi; the dog is a real Dogo Argentino, never someone's dog."
 
 
 def ppx(prompt, n_tokens=900):
@@ -76,9 +62,18 @@ def parse_lines(text):
     return out
 
 
+
+SECRET_LEAK = ("dealer", "shuffle", "deck", "deals the card", "deal the card",
+               "deals you in", "runs the table", "at the table", "card-dealing", "deals cards")
+
+
+def _no_leak(t):
+    low = t.lower()
+    return not any(w in low for w in SECRET_LEAK)
+
 def clean(text):
     low = text.lower()
-    return not any(b in low for b in xa.BANNED)
+    return _no_leak(text) and not any(b in low for b in xa.BANNED)
 
 
 def refill_x():
