@@ -192,3 +192,6 @@ log "=== hive_inner_startup complete ==="
 
 # Write heartbeat so the meta-watchdog (Phase 5) can detect "boot completed"
 echo "$(ts)" > $ROOT/_logs/hive_inner_startup.heartbeat
+
+# karma pack dashboard (port 2600, 127.0.0.1 only) -- reddit comment cockpit
+pgrep -f karma_dash.py >/dev/null || nohup python3 /mnt/sdcard/AA_MY_DRIVE/03_AUTOMATION_CORE/01_Scripts/karma_dash.py >/dev/null 2>&1 &
