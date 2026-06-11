@@ -155,10 +155,42 @@ def pack_order():
     print("pack order queued")
 
 
+
+# --- THE SPONSORS LANE: shout out the chain of command, ride their reach ---
+# Tagging big ecosystem accounts = their followers + algo see us. Gratitude, not begging.
+SPONSORS = [
+    ("@solana", "the chain the dog runs on -- fast, cheap, where the culture lives"),
+    ("@pumpdotfun", "the launchpad that let a real dog deal his own cards"),
+    ("@JupiterExchange", "the aggregator + the verification layer keeping it honest"),
+    ("@StreamflowFi", "where the dev bag is locked, public, on-chain"),
+    ("@phantom", "the wallet the whole pack carries"),
+    ("@dexscreener", "where degens watch the dog\'s chart in real time"),
+]
+
+
+def sponsor_shoutout():
+    """Queue a gratitude shoutout tagging an ecosystem giant (rotates daily)."""
+    xs = json.loads(XQ.read_text())
+    prior = [i for i in xs if i["id"].startswith("sponsor-")]
+    handle, why = SPONSORS[len(prior) % len(SPONSORS)]
+    raw = ppx("Write ONE short X post (under 200 chars) thanking " + handle + " -- " + why + ". "
+              "Genuine gratitude with dog swagger, frame $BCARDD as proudly built on/with them. "
+              "Tag them naturally. No financial promises. Return only the post.", 220)
+    body = (raw or "").strip().strip('"').replace("\u2014", "-")
+    if not body or not clean(body) or handle not in body:
+        body = "shoutout to " + handle + " -- " + why + ". \U0001F436\U0001F0CF the dog is proud to be built here. $BCARDD"
+    body = body[:235] + "\n\nthe pack: " + TGL + "\n$BCARDD"
+    xs.append({"id": "sponsor-" + format(len(prior) + 1, "03d"), "phase": "sustain",
+               "text": body, "post_at": None, "status": "pending"})
+    XQ.write_text(json.dumps(xs, indent=2))
+    print("sponsor shoutout queued:", handle)
+
+
 def main():
     refill_x()
     refill_tg()
     pack_order()
+    sponsor_shoutout()
     return 0
 
 
