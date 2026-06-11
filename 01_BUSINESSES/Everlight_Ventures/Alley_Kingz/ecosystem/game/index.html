@@ -465,6 +465,16 @@
     color:var(--gold-lo); letter-spacing:0.06em;
   }
   #playerchip .pc-stats b{ color:var(--gold-hi); }
+  /* account chip: Google sign-in / cloud-save state (ak_account.js mounts in #ak-auth) */
+  #ak-auth{ display:flex; justify-content:flex-end; padding:0 14px; margin-top:6px; }
+  #ak-auth-btn{
+    font:700 10px/1 Inter,system-ui,sans-serif; letter-spacing:0.12em;
+    padding:7px 12px; border-radius:10px; cursor:pointer;
+    background:linear-gradient(170deg,rgba(20,19,31,0.88),rgba(8,8,14,0.88));
+    color:var(--gold,#D4AF37); border:1px solid rgba(212,175,55,0.32);
+  }
+  #ak-auth-btn.ak-auth-in{ color:#9fdc9f; border-color:rgba(120,200,120,0.35); }
+  #ak-auth-btn:active{ transform:scale(0.97); }
   #dailychip{
     flex:0 0 auto; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px;
     padding:6px 11px; border-radius:12px;
@@ -758,6 +768,9 @@
       </div>
     </div>
 
+    <!-- account: Google sign-in + cloud save (ak_account.js mounts here) -->
+    <div id="ak-auth"></div>
+
     <!-- hero: street art behind the crest; gracefully falls back to the gradient look -->
     <div class="lobby-hero">
       <img id="lobbyhero" src="assets/ui/lobby_hero.png" alt="" onerror="this.style.display='none'">
@@ -798,7 +811,7 @@
     </div>
 
     <p class="fineprint">Early prototype. Not financial advice. Shop items are in-game only, no cash value.</p>
-    <div class="wordmark">Everlight Ventures &bull; $BCARDD</div>
+    <div class="wordmark">ALLEY KINGZ &bull; $BCARDD</div>
     <div id="lobbytoast"></div>
   </section>
 
@@ -856,7 +869,7 @@
     <button id="againbtn" class="btn">Play Again</button>
     <button id="homebtn" class="btn" style="margin-top:10px;padding:10px 32px;font-size:13px;background:none;border:1px solid rgba(212,175,55,0.45);color:var(--gold-hi);box-shadow:none;">Lobby</button>
     <p class="fineprint">Early prototype. Not financial advice.</p>
-    <div class="wordmark">Everlight Ventures &bull; $BCARDD</div>
+    <div class="wordmark">ALLEY KINGZ &bull; $BCARDD</div>
   </section>
 
   <!-- ============ STORM CODEX (studyable frozen catalog) ============ -->
@@ -866,7 +879,7 @@
     <div class="cx-list" id="codexlist"></div>
     <div class="cx-doctrine">Fairness Doctrine: both sides eat the identical event at the identical second. Hazards hit cells, not units -- good spacing dodges them. Buffs stack-cap at +100% move / +80% damage. A fully-ignored hazard threatens a small slice of a tower; chaos punishes mistakes, it never decides the game.</div>
     <button id="codexclose" class="btn">Back</button>
-    <div class="wordmark">Everlight Ventures &bull; $BCARDD</div>
+    <div class="wordmark">ALLEY KINGZ &bull; $BCARDD</div>
   </section>
 
   <!-- ============ DECK LAB (collection + 11-card builder + templates) ============ -->
@@ -881,6 +894,7 @@
 <!-- order matters: canon globals first, then the engine that consumes them -->
 <script src="canon.js?v=29"></script>
 <script src="engine.js?v=29"></script>
+<script src="ak_account.js?v=29"></script>
 <script>
 (function(){
   'use strict';
@@ -1035,6 +1049,11 @@
       canvas.style.transformOrigin = '50% 100%';  // pivot at the near/bottom edge
       canvas.style.transform = 'perspective('+PERSP_PX+'px) rotateX('+TILT_DEG+'deg)';
       canvas.style.willChange = 'transform';
+      // TILT_BOOST can outgrow the slot; bottom-anchor so the clip eats ONLY the
+      // top spill (which the rotateX recession pulls inward) -- never the player
+      // king tower / hp strip at the near edge (operator bug 2026-06-11).
+      const bw = document.getElementById('boardwrap');
+      if(bw && bw.style) bw.style.alignItems = 'flex-end';
     }
   }catch(_e){}
 
@@ -1473,7 +1492,7 @@
     const sx=scaleX(), sy=scaleY(); const px=toX(t.x), py=toY(t.y);
     if(!onScreen(px,py)) return;                          // cull off-board towers during a pan
     const isGate = !!t.isGate;
-    const sz = ((t.type==='king'?2.0:1.5) * (isGate?1.18:1)) * sx;   // original tower sizing (operator reverted v17 bump); Gate boss still reads bigger
+    const sz = ((t.type==='king'?2.6:2.0) * (isGate?1.18:1)) * sx;   // bigger towers (operator 2026-06-11: 'towers are very small' under the tilt); Gate boss still reads bigger
     const owner = t.owner===0?PAL.blue:PAL.red;
     const sec = curSection();
     if(t.destroyed){
@@ -3216,6 +3235,19 @@
     }
     showNews();
     try{ setTimeout(cycleNews, 4000); }catch(_){}
+    // live build feed: the art daemon publishes updates.json with every deploy.
+    // Freshest drop leads the ticker so players SEE the game growing daily.
+    try{
+      fetch('updates.json?t=' + Date.now()).then(function(r){ return r.json(); }).then(function(u){
+        if(!u || !u.length) return;
+        const fresh = u.filter(function(e){ return e && e.count > 0; }).slice(0, 3);
+        const total = fresh.reduce(function(s, e){ return s + e.count; }, 0);
+        if(total > 0 && fresh[0]){
+          NEWS.unshift('FRESH PAINT ' + fresh[0].date + ': +' + total + ' new artworks in the alley');
+          newsIdx = 0; showNews();
+        }
+      }).catch(function(){});
+    }catch(_){}
   }catch(_){ /* lobby chrome must never block the game boot */ }
 
   // ---- boot: build the card index after the DOM + scripts are ready ----

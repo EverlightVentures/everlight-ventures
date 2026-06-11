@@ -35,14 +35,18 @@
        buy the exact card you want with Scrap, level your crew 1 to 10, stock the garage.
        Real card art, real grit.</p>
     <button onclick="window.AKShop.open({})">Enter the Chop Shop</button>
+    <div id="ak-auth"></div>
   </div>
+  <style>
+    #ak-auth-btn{font:700 11px/1 Inter,sans-serif;letter-spacing:.12em;padding:9px 14px;border-radius:10px;
+      cursor:pointer;background:rgba(20,19,31,.88);color:#D4AF37;border:1px solid rgba(212,175,55,.32)}
+    #ak-auth-btn.ak-auth-in{color:#9fdc9f;border-color:rgba(120,200,120,.35)}
+  </style>
 
-  <!--
-    GO-LIVE CONFIG (operator/lead): set the Supabase anon key to connect to the
-    alley-kingz-shop edge function. Leave commented for DEMO (offline) review.
-    The anon key is a PUBLIC client key (RLS + service-role writes protect data).
-  -->
-  <!-- <script>window.AK_SUPABASE_ANON_KEY = "<supabase_anon_key>";</script> -->
+  <!-- account layer: Google sign-in + cloud save + ak_player_id + anon key.
+       Sets window.AK_SUPABASE_ANON_KEY and re-opens the shop ONLINE once the
+       session restores. Signed out = labelled DEMO data, exactly as before. -->
+  <script src="../ak_account.js"></script>
 
   <!-- card catalog (window.AK_CARDS, 106 cards) -> drives real-art Card Shop + Draw -->
   <script src="cards_catalog.js"></script>
