@@ -1,0 +1,19 @@
+# COVERFORGE render worker -- deploy on e5 only.
+# Install: copy the coverforge repo to /home/opc/coverforge, create .venv, then:
+#   sudo cp coverforge-worker.service /etc/systemd/system/
+#   sudo systemctl daemon-reload && sudo systemctl enable --now coverforge-worker
+[Unit]
+Description=COVERFORGE render worker (cover_jobs poller)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/opc/coverforge
+ExecStart=/home/opc/coverforge/.venv/bin/python -m render.poll_loop
+Restart=always
+RestartSec=5
+EnvironmentFile=/home/opc/coverforge/.env
+
+[Install]
+WantedBy=multi-user.target

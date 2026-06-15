@@ -1,0 +1,4 @@
+# Extra deps for the e5 render worker only (NOT needed for unit tests).
+# Install on e5 alongside requirements.txt: pip install -r requirements.txt -r requirements-worker.txt
+supabase>=2.4
+requests>=2.31
