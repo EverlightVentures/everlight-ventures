@@ -241,6 +241,20 @@ Deno.serve(async (req: Request) => {
           if (slackUrl) {
             await postSlack(slackUrl, `[NOS] "${slug}" purchased ($${((session.amount_total || 0) / 100).toFixed(2)})`);
           }
+        } else if (productType === "cover_credits") {
+          // COVERFORGE credit purchase -> append to credit_ledger (idempotent on session.id)
+          const CREDIT_AMOUNTS: Record<string, number> = { "cover-3": 3, "cover-pro-20": 20, "cover-pro-50": 50 };
+          const amount = CREDIT_AMOUNTS[slug] || 0;
+          const userId = session.metadata?.user_id;
+          if (amount > 0 && userId) {
+            await supabaseAdmin.from("credit_ledger").upsert(
+              { user_id: userId, delta: amount, reason: "purchase", stripe_session_id: session.id },
+              { onConflict: "stripe_session_id" }
+            );
+            if (slackUrl) {
+              await postSlack(slackUrl, `[CoverForge] ${amount} credits credited for "${slug}" ($${((session.amount_total || 0) / 100).toFixed(2)})`);
+            }
+          }
         }
         break;
       }
