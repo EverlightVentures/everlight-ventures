@@ -1,6 +1,7 @@
 # tests/test_compositor.py
 from PIL import Image
-from render.compositor import compose_front
+from render.compositor import compose_front, compose_wrap
+from render.kdp_spec import cover_dimensions
 
 def _bg(w, h):
     return Image.new("RGB", (w, h), (10, 10, 10))
@@ -16,3 +17,9 @@ def test_front_panel_actually_draws_text():
     out = compose_front(blank, "MIDNIGHT", "A. Author", target)
     # at least some pixels changed vs the blank background => text was drawn
     assert out.tobytes() != blank.tobytes()
+
+def test_wrap_is_exact_full_size_and_tiles_panels():
+    d = cover_dimensions((6.0, 9.0), 200, "white")
+    bg = Image.new("RGB", (d.full_w_px, d.full_h_px), (20, 20, 20))
+    wrap = compose_wrap(bg, "MIDNIGHT", "A. Author", "Back blurb here.", d)
+    assert wrap.size == (d.full_w_px, d.full_h_px)
