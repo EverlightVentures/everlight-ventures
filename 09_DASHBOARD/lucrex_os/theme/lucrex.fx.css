@@ -1,0 +1,15 @@
+/* Arcade vibe FX. Applied only under [data-vibe="arcade"]. Static glass +
+   gentle breathing only; the cursor-halo / drifting-grid / mote loops are
+   intentionally NOT here (battery/thermal -- see spec 3.2). */
+[data-vibe="arcade"] .lx-card {
+  background: linear-gradient(135deg, rgba(30,30,30,0.85), rgba(20,20,20,0.6));
+  backdrop-filter: blur(10px) saturate(130%);
+  animation: lx-breath 6s ease-in-out infinite;
+}
+@keyframes lx-breath {
+  0%,100% { box-shadow: 0 6px 24px rgba(0,0,0,0.45); }
+  50%     { box-shadow: 0 0 22px -4px rgba(212,175,55,0.18), 0 6px 30px rgba(0,0,0,0.5); }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-vibe="arcade"] .lx-card { animation: none; }
+}
