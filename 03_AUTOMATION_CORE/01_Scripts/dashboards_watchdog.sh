@@ -129,6 +129,22 @@ if [ "$STATUS_ONLY" -eq 0 ]; then
     log "  agentmemory_inbox has entries -- merging"
     python3 $ROOT/03_AUTOMATION_CORE/01_Scripts/agentmemory_inbox_merger.py drain >> "$LOG" 2>&1 &
   fi
+
+  # Action 3: mirror the Kalshi trading dashboards from e5 into the 2200 Reports Hub.
+  # They are GENERATED on e5 (live data + creds live there) and served locally at
+  # http://127.0.0.1:2200/reports/{ops,kalshi,watchdog}.html. Throttled to 5 min +
+  # backgrounded so it never slows the 1-min cycle; keeps the last good copy if e5 is down.
+  # (kalshi_dashboard.html on e5 is served as kalshi.html here -- name-mapped.)
+  KMIRROR=/tmp/kalshi_mirror.last
+  if [ ! -f "$KMIRROR" ] || [ $(( $(date +%s) - $(stat -c %Y "$KMIRROR" 2>/dev/null || echo 0) )) -ge 300 ]; then
+    touch "$KMIRROR"
+    ( RD="$ROOT/09_DASHBOARD/reports"
+      for pair in kalshi_dashboard.html:kalshi.html watchdog.html:watchdog.html ops.html:ops.html; do
+        s="${pair%%:*}"; d="${pair##*:}"
+        scp -q -o ConnectTimeout=12 -o ServerAliveInterval=5 "e5:/home/ubuntu/hive_reports/$s" "$RD/$d.tmp" 2>/dev/null \
+          && mv "$RD/$d.tmp" "$RD/$d" 2>/dev/null
+      done ) >> "$LOG" 2>&1 &
+  fi
 fi
 
 # Print summary

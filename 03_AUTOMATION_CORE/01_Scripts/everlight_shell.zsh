@@ -301,7 +301,10 @@ _ev_print_banner() {
     _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2200/reports/RESOURCES_HUB.html${_EV_RESET}       ${_EV_SILVER_DIM}745 free tools, categorized${_EV_RESET}"
     _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2200/reports/HIVE_MIND.html${_EV_RESET}           ${_EV_SILVER_DIM}94 agents, 28 tools${_EV_RESET}"
     _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2200/reports/SERVICES_REGISTRY.html${_EV_RESET}   ${_EV_SILVER_DIM}24 external services${_EV_RESET}"
-    _ev_row "  ${_EV_GOLD}└${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2200/reports/xlm_honest_dashboard.html${_EV_RESET} ${_EV_SILVER_DIM}XLM bot truth layer${_EV_RESET}"
+    _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2200/reports/xlm_honest_dashboard.html${_EV_RESET} ${_EV_SILVER_DIM}XLM bot truth layer${_EV_RESET}"
+    _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2200/reports/ops.html${_EV_RESET}                 ${_EV_SILVER_DIM}Kalshi Trader -- ops hub (memos, brakes/gas, to-do)${_EV_RESET}"
+    _ev_row "  ${_EV_GOLD}├${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2200/reports/kalshi.html${_EV_RESET}              ${_EV_SILVER_DIM}Kalshi P&L dashboard${_EV_RESET}"
+    _ev_row "  ${_EV_GOLD}└${_EV_RESET}  ${_EV_TURQUOISE}http://127.0.0.1:2200/reports/watchdog.html${_EV_RESET}            ${_EV_SILVER_DIM}Kalshi self-healing watchdog (CEO memos)${_EV_RESET}"
     _ev_row ""
     _ev_row "${_EV_SILVER_DIM}usage:  <band> [list|recent|search|api|...]   ${_EV_RESET}${_EV_GOLD}dashboards${_EV_RESET}${_EV_SILVER_DIM} = print this map${_EV_RESET}"
     _ev_spine
