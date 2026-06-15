@@ -1,0 +1,7 @@
+{
+  "generated_at": "2026-06-15T09:00:00-07:00",
+  "kpis": [
+    { "key": "all_time_pnl", "label": "All-Time P&L", "value": "+$85.96", "delta": "+$12.40", "baseline_label": "vs last week" },
+    { "key": "record", "label": "Win / Loss", "value": "6-3" }
+  ]
+}

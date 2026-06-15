@@ -1,0 +1,28 @@
+tokens:
+  gold: "#D4AF37"
+  dark: "#0A0A0A"
+  text: "#E8E8E8"
+bands:
+  - port: 2000
+    name: hub
+    range: "2000"
+    default_vibe: boardroom
+  - port: 2200
+    name: reports
+    range: "2200-2299"
+    default_vibe: boardroom
+dashboards:
+  - id: kalshi
+    title: "Kalshi Edge Engine"
+    band: 2200
+    sub_route: "/reports/kalshi.html"
+    renderer: static
+    source: { type: file, path: "tests/fixtures/kalshi_data.json" }
+    layout: kpi
+    vibe: boardroom
+    access: tailnet
+    hero_metric: all_time_pnl
+    refresh_seconds: 90
+    health_path: "/"
+    icon: "K"
+    description: "Sports edge engine"
