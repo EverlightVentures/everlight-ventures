@@ -9,6 +9,7 @@ def _load_font(font_path, size):
     return ImageFont.load_default()  # tests stay font-agnostic and deterministic
 
 def _fit_text(draw, text, max_w, font_path, start_size):
+    assert start_size > 8, "start_size must be > 8 (font fallback is size 8)"
     size = start_size
     while size > 8:
         font = _load_font(font_path, size)
@@ -37,10 +38,13 @@ def compose_wrap(background: Image.Image, title: str, author: str,
     """Assemble back | spine | front into one full-bleed wrap at exact pixel size."""
     wrap = background.convert("RGB").resize((dims.full_w_px, dims.full_h_px))
     draw = ImageDraw.Draw(wrap)
-    # front panel: composite the finished front into the rightmost panel
-    front = compose_front(background, title, author,
+    # front panel: crop the already-resized wrap at the front region so the
+    # background aligns perfectly; back+spine+front == full_w_px is guaranteed.
+    front_x = dims.back_w_px + dims.spine_px
+    front_bg = wrap.crop((front_x, 0, front_x + dims.front_w_px, dims.full_h_px))
+    front = compose_front(front_bg, title, author,
                           (dims.front_w_px, dims.full_h_px), font_path)
-    wrap.paste(front, (dims.back_w_px + dims.spine_px, 0))
+    wrap.paste(front, (front_x, 0))
     # back panel: blurb text, wrapped within the back panel margins
     bmargin = int(dims.back_w_px * 0.10)
     bfont = _load_font(font_path, int(dims.full_h_px * 0.025))

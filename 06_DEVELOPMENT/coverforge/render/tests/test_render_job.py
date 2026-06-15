@@ -20,3 +20,10 @@ def test_render_book_free_tier_makes_preview_only(tmp_path):
     result = render_book(meta, FakeProvider(), str(tmp_path), tier="free")
     assert os.path.exists(result.preview_png)
     assert result.wrap_pdf is None  # free tier never produces the print file
+
+def test_render_book_rejects_unknown_tier(tmp_path):
+    import pytest
+    meta = BookMeta(title="X", author="Y", genre="thriller", vibe="v",
+                    trim=(6.0, 9.0), page_count=120, paper="white", blurb="b")
+    with pytest.raises(ValueError):
+        render_book(meta, FakeProvider(), str(tmp_path), tier="premium")

@@ -4,6 +4,7 @@ free tier  -> watermarked preview PNG only (cheap, no print file)
 paid tier  -> ebook PDF + full-wrap PDF + validation + bundle hook"""
 import os
 from dataclasses import dataclass, field
+from typing import Optional
 from render.kdp_spec import cover_dimensions, ebook_dimensions
 from render.prompt_builder import build_background_prompt
 from render.compositor import compose_front, compose_wrap
@@ -24,9 +25,9 @@ class BookMeta:
 
 @dataclass
 class RenderResult:
-    preview_png: str = None
-    ebook_pdf: str = None
-    wrap_pdf: str = None
+    preview_png: Optional[str] = None
+    ebook_pdf: Optional[str] = None
+    wrap_pdf: Optional[str] = None
     validation_ok: bool = False
     validation_problems: list = field(default_factory=list)
 
@@ -43,6 +44,9 @@ def render_book(meta: BookMeta, provider, out_dir: str, tier: str = "paid",
         path = os.path.join(out_dir, "preview.png")
         make_preview(front).save(path)
         return RenderResult(preview_png=path)
+
+    if tier != "paid":
+        raise ValueError(f"unknown tier {tier!r}; expected 'free' or 'paid'")
 
     # paid: ebook cover
     ew, eh = ebook_dimensions()

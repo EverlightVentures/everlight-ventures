@@ -38,5 +38,7 @@ class FalFluxProvider:
         )
         resp.raise_for_status()
         url = resp.json()["images"][0]["url"]
-        img_bytes = requests.get(url, timeout=120).content
+        img_resp = requests.get(url, timeout=120)
+        img_resp.raise_for_status()
+        img_bytes = img_resp.content
         return Image.open(io.BytesIO(img_bytes)).convert("RGB")

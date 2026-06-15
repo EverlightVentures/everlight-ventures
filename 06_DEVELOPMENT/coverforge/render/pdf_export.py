@@ -9,7 +9,10 @@ def export_pdf(image: Image.Image, out_path: str, dpi: int = 300) -> str:
     return out_path
 
 def to_pdf_x1a(in_pdf: str, out_pdf: str) -> str:
-    """Convert to PDF/X-1a via Ghostscript. Raises if gs is unavailable."""
+    """Convert to a CMYK PDF suitable for KDP print upload. This is an approximate
+    PDF/X pass (CMYK conversion via Ghostscript); full PDF/X-1a conformance also
+    needs an embedded output-intent ICC profile (add -sOutputICCProfile=...).
+    Raises if gs is unavailable."""
     if not shutil.which("gs"):
         raise RuntimeError("ghostscript (gs) not installed")
     subprocess.run(

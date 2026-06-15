@@ -23,3 +23,9 @@ def test_wrap_is_exact_full_size_and_tiles_panels():
     bg = Image.new("RGB", (d.full_w_px, d.full_h_px), (20, 20, 20))
     wrap = compose_wrap(bg, "MIDNIGHT", "A. Author", "Back blurb here.", d)
     assert wrap.size == (d.full_w_px, d.full_h_px)
+    # front region must have title/author composited over it (not a plain panel)
+    front_x = d.back_w_px + d.spine_px
+    front_region = wrap.crop((front_x, 0, d.full_w_px, d.full_h_px))
+    assert front_region.size == (d.front_w_px, d.full_h_px)
+    plain = Image.new("RGB", (d.front_w_px, d.full_h_px), (20, 20, 20))
+    assert front_region.tobytes() != plain.tobytes()  # title/author were drawn
