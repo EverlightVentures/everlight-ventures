@@ -41,6 +41,30 @@ CONFIG = HERE / "auto_edge_config.json"
 HALT_FILE = HERE / "AUTO_EDGE_HALT"
 LEDGER = HERE / "data" / "auto_edge_ledger.jsonl"
 UPCOMING = HERE / "data" / "upcoming_edges.json"   # what the engine is about to bet (for the dashboard)
+WD_STATE = HERE / "data" / "watchdog_state.json"   # the watchdog's brakes+gas (quarantines + lean-ins)
+
+_SPORT_PREFIX = (("KXNBA", "nba"), ("KXMLB", "mlb"), ("KXNHL", "nhl"), ("KXWC", "wc"),
+                 ("KXUFC", "ufc"), ("KXNFL", "nfl"), ("KXWNBA", "wnba"))
+
+
+def sport_of(ticker):
+    t = (ticker or "").upper()
+    for pre, sp in _SPORT_PREFIX:
+        if t.startswith(pre):
+            return sp
+    return "other"
+
+
+def load_watchdog_state():
+    """The self-healing watchdog's live decisions: {quarantine:{seg:{until,..}}, lean_in:{seg:{until,mult,..}}}.
+    Expired entries drop on read so brakes/gas auto-release. Missing file = no-op (engine runs normally)."""
+    try:
+        st = json.loads(WD_STATE.read_text())
+    except Exception:
+        return {"quarantine": {}, "lean_in": {}}
+    now = time.time()
+    return {"quarantine": {k: v for k, v in st.get("quarantine", {}).items() if v.get("until", 0) > now},
+            "lean_in": {k: v for k, v in st.get("lean_in", {}).items() if v.get("until", 0) > now}}
 
 
 def load_config():
@@ -211,9 +235,34 @@ def win_prob_floor(cfg, winrate):
     return max(base, min(cfg.get("win_floor_max", 0.86), f))
 
 
-def size_bet(cfg, price, balance, spent_today, total_exposure):
-    """Largest contract count that fits every cap. price in dollars."""
-    room = min(cfg["per_bet_max_usd"],
+def conviction_stake(cfg, fair, our_cents, books, is_fresh=False):
+    """CONVICTION-WEIGHTED stake (Rich 2026-06-15: "if the logic supports it, place a bigger
+    bet -- be adaptive in a good way too, don't limit yourself"). Flat $8-on-everything
+    over-bets a marginal edge and under-bets a monster one. Conviction blends three evidence
+    signals -- edge size, multi-book CONSENSUS strength, and favorite safety -- into a dollar
+    stake in [conviction_min_usd, conviction_max_usd]. The hard caps (daily / exposure /
+    balance floor) still bound it; this only decides WHERE in the envelope a bet sits."""
+    if not cfg.get("conviction_sizing", True):
+        return cfg["per_bet_max_usd"]
+    raw_edge = max(0.0, fair - our_cents / 100.0)
+    edge_s = min(1.0, raw_edge / cfg.get("conviction_full_edge", 0.10))            # 10pt gap = full marks
+    span = max(1, cfg.get("sharp_min_books", 5) - 2)
+    books_s = min(1.0, max(0.0, (books - 2) / float(span)))                        # 2bk=0 .. 5+bk=full
+    safe_s = min(1.0, max(0.0, (fair - 0.50) / 0.40))                              # 50%=0 .. 90%+=full
+    w = cfg.get("conviction_weights", {"edge": 0.40, "books": 0.35, "safety": 0.25})
+    conv = w["edge"] * edge_s + w["books"] * books_s + w["safety"] * safe_s
+    if is_fresh:
+        conv = min(1.0, conv + cfg.get("conviction_fresh_bonus", 0.10))
+    lo, hi = cfg.get("conviction_min_usd", 3.0), cfg.get("conviction_max_usd", 12.0)
+    return round(lo + conv * (hi - lo), 2)
+
+
+def size_bet(cfg, price, balance, spent_today, total_exposure, stake_usd=None):
+    """Largest contract count that fits every cap. price in dollars. stake_usd = the
+    conviction-chosen target stake (defaults to the flat per-bet max); the hard daily /
+    exposure / balance-floor caps still clamp it -- the ruin-prevention governor."""
+    cap = stake_usd if stake_usd is not None else cfg["per_bet_max_usd"]
+    room = min(cap,
                cfg["daily_max_usd"] - spent_today,
                cfg["total_exposure_max_usd"] - total_exposure,
                max(0.0, balance - cfg["min_balance_floor_usd"]))
@@ -222,10 +271,21 @@ def size_bet(cfg, price, balance, spent_today, total_exposure):
     return int(room // price)
 
 
-def gate(cfg, count, our_cents, fair, depth, spread_cents, books=1):
+def gate(cfg, count, our_cents, fair, depth, spread_cents, books=1, lane=None):
     """Every guardrail in one place. Returns (ok, reason)."""
-    if count < 1:
-        return False, "size=0 (caps/balance)"
+    # NO-COVERAGE GUARD (Rich 2026-06-15: "if we don't have coverage it's betting blind").
+    # The sharp lane's whole trust comes from a MULTI-BOOK consensus -- one bookmaker's number
+    # is a rumor, not a signal. When the odds service has no coverage for a market (the entire
+    # World Cup slate -> 0 games -> ESPN single-book fallback -> books=1), we'd be betting BLIND
+    # on one book -- exactly the soccer bleed. Require >= require_consensus_books independent
+    # books on the sharp lane. (favorite_longshot is a Kalshi-internal screen, not book-backed,
+    # so it's exempt -- this only fences the consensus-dependent sharp lane.)
+    if lane == "sharp_sports" and books < cfg.get("require_consensus_books", 2):
+        return False, "no multi-book coverage (%d book) -- betting blind, skip" % books
+    # DUST floor: a 1-contract bet is noise -- it clutters the record/dashboard with
+    # extra reds (and meaningless greens) without moving money. Keep small bets, kill dust.
+    if count < cfg.get("min_bet_contracts", 1):
+        return False, "size %d < %d-contract min (dust/caps)" % (count, cfg.get("min_bet_contracts", 1))
     price = our_cents / 100.0
     raw_edge = fair - price
     if abs(raw_edge) > cfg["sanity_max_raw_edge"]:
@@ -240,10 +300,20 @@ def gate(cfg, count, our_cents, fair, depth, spread_cents, books=1):
     if raw_edge < floor:
         return False, "abs gap %.1fpts < %.1fpt floor (%s)" % (
             raw_edge * 100, floor * 100, ("sharp %dbk" % books) if sharp else "single-book noise")
-    # WIN-RATE GUARD (Rich 2026-06-10): on the sharp lane, skip sub-floor win-prob
-    # longshots -- great EV but they lose most of the time and drag the hit rate. The
-    # convex/longshot plays live in the favorite_longshot lane, gated separately.
-    if sharp and fair < cfg.get("min_fair_prob_sharp", 0.0):
+    # SINGLE-BOOK STALE CAP (2026-06-15): one book claiming a huge edge is almost always
+    # STALE/WRONG, not gold -- it cuts both ways (a lone book at 13% made South Africa look
+    # +31% EV; a lone book at 56% made Australia look +210% EV). Only a multi-book CONSENSUS
+    # earns trust for a big gap; a single book gets a hard ceiling. The whole World Cup slate
+    # is single-book right now (Odds API has 0 WC games), so this is where the bleed lived.
+    if not sharp and raw_edge > cfg.get("single_book_max_edge", 0.15):
+        return False, "single-book edge %.0fpt > %.0fpt cap (stale -- need consensus)" % (
+            raw_edge * 100, cfg.get("single_book_max_edge", 0.15) * 100)
+    # WIN-RATE GUARD (Rich 2026-06-10, BYPASS FIXED 2026-06-15): skip sub-floor win-prob
+    # longshots -- great EV but they lose most of the time and drag the hit rate Rich cares
+    # about. This now protects EVERY sharp-lane bet, not just multi-book ones -- the old
+    # `if sharp and` clause let single-book longshots (the entire WC slate) skip it, which
+    # is exactly what flipped the record green->red. The controller sets the floor each run.
+    if fair < cfg.get("min_fair_prob_sharp", 0.0):
         return False, "fair %.0f%% < %.0f%% win-prob floor (protects hit rate)" % (
             fair * 100, cfg.get("min_fair_prob_sharp", 0.0) * 100)
     if depth < cfg["min_depth_dollars"]:
@@ -355,6 +425,9 @@ def lane_press_winners(cfg, open_book, realized_today):
             continue
         fair, avg_c = sf["fair_prob"], pos["avg"] * 100
         add_edge = fair - ya / 100.0
+        if fair < cfg.get("min_fair_prob_sharp", 0.0):
+            continue                      # never PRESS a longshot -- it pressed South Africa
+                                          # at 13% on 2026-06-11; same win-rate floor as the gate
         if ya < avg_c - cfg.get("press_max_adverse_cents", 6):
             continue                      # falling knife -- stale model vs a live drop
         if add_edge > cfg.get("press_max_trusted_edge", 0.12):
@@ -391,6 +464,7 @@ def lane_arbitrage(cfg):
 
 def run(live=False):
     cfg = load_config()
+    wd_state = load_watchdog_state()      # the watchdog's brakes (quarantine) + gas (lean-in)
     live = live and cfg.get("live", False)
     print("=" * 64)
     print("  AUTO-EDGE ENGINE", "[LIVE]" if live else "[DRY-RUN]", time.strftime("%Y-%m-%d %H:%M UTC", time.gmtime()))
@@ -513,6 +587,8 @@ def run(live=False):
             press_spent += r.get("cost", 0.0)
         for c in lane_press_winners(cfg, open_book, realized_today):
             tk = c["ticker"]
+            if sport_of(tk) in wd_state["quarantine"]:
+                print("  PRESS skip %-28s (watchdog quarantine)" % tk[:28]); continue
             if pressed_ct.get(tk, 0) >= cfg.get("press_max_adds_per_ticker", 1):
                 print("  PRESS skip %-28s (already pressed today)" % tk[:28]); continue
             room = min(cfg.get("press_per_add_max_usd", 6.0), c["bankroll"] - press_spent)
@@ -573,8 +649,20 @@ def run(live=False):
         if c["our_cents"] is None or c["our_cents"] < 1:
             print("  skip %-32s (no maker price)" % tk[:32])
             continue
-        count = size_bet(cfg, c["our_cents"] / 100.0, balance or 0.0, spent_today, total_exposure) if mode == "bet" and live else max(1, int(cfg["per_bet_max_usd"] // (c["our_cents"] / 100.0)))
-        ok, info = gate(cfg, count, c["our_cents"], c["fair"], c["depth"], c["spread"], c.get("books", 1))
+        sp = sport_of(tk)
+        q = wd_state["quarantine"].get(sp) or wd_state["quarantine"].get(c["lane"])
+        if q:                                 # BRAKES: watchdog quarantined this segment for a cooldown
+            print("  skip %-32s (watchdog quarantine: %s)" % (tk[:32], (q.get("reason") or "")[:28]))
+            continue
+        if mode == "bet" and live:
+            stake = conviction_stake(cfg, c["fair"], c["our_cents"], c.get("books", 1), not c.get("post_only", True))
+            li = wd_state["lean_in"].get(sp) or wd_state["lean_in"].get(c["lane"])
+            if li and li.get("mult"):         # GAS: watchdog leaning into a proven hot segment
+                stake = min(stake * li["mult"], cfg.get("conviction_max_usd", 12.0))
+            count = size_bet(cfg, c["our_cents"] / 100.0, balance or 0.0, spent_today, total_exposure, stake)
+        else:
+            count = max(1, int(cfg["per_bet_max_usd"] // (c["our_cents"] / 100.0)))
+        ok, info = gate(cfg, count, c["our_cents"], c["fair"], c["depth"], c["spread"], c.get("books", 1), c.get("lane"))
         edge_pct = c["fair"] - c["our_cents"] / 100.0
         tag = "[%s/%s]" % (c["lane"], mode)
         if not ok:
