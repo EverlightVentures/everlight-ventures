@@ -67,7 +67,15 @@ def run_sync(reg, dry_run=False) -> list[str]:
                 inject_block(path, mark, content)
     return changed
 
-if __name__ == "__main__":
-    reg = load_registry(OS_DIR / "registry.yaml")
-    dry = "--check" in sys.argv or "--dry-run" in sys.argv
+def main(argv):
+    path = OS_DIR / "registry.yaml"
+    if not path.exists():
+        print(f"registry.yaml not found at {path}; nothing to sync (Plan B populates it)")
+        return 0
+    reg = load_registry(path)
+    dry = "--check" in argv or "--dry-run" in argv
     print("would change:" if dry else "synced:", run_sync(reg, dry_run=dry))
+    return 0
+
+if __name__ == "__main__":
+    raise SystemExit(main(sys.argv[1:]))

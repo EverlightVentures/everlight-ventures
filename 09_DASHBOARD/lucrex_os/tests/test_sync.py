@@ -56,3 +56,18 @@ def test_token_injection_writes_root_block(fixture_path, tmp_path, monkeypatch):
     monkeypatch.setattr(sync, "SHELL_BANNER", banner)
     sync.run_sync(reg, dry_run=False)
     assert "--gold: #D4AF37;" in css.read_text()       # tokens injected -> dashboard is styled
+
+def test_inject_block_appends_when_no_markers(tmp_path):
+    f = tmp_path / "x.sh"
+    f.write_text("alpha\nbeta\n")
+    sync.inject_block(f, MARK, "NEW")
+    out = f.read_text()
+    assert out.startswith("alpha\nbeta")
+    assert "# LX:START\nNEW\n# LX:END" in out
+    assert out.count("# LX:START") == 1
+
+def test_main_skips_when_registry_absent(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(sync, "OS_DIR", tmp_path)   # tmp_path has no registry.yaml
+    rc = sync.main([])
+    assert rc == 0
+    assert "not found" in capsys.readouterr().out

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Self-heal loop for LUCREX OS. Singleton-guarded. NOT a cron entry.
-# Phone has no crond -- cron entries silently never run. Use this daemon loop.
+# Drift-watcher daemon for LUCREX OS. Singleton-guarded. NOT a cron replacement.
+# Runs sync.py --check (read-only drift detection); healing requires a deliberate sync.py run.
 set -uo pipefail
 ROOT="${LUCREX_OS_ROOT:-$(cd "$(dirname "$0")/../.." && pwd)}"
 OS_DIR="$ROOT/09_DASHBOARD/lucrex_os"
