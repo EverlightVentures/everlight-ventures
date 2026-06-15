@@ -58,7 +58,7 @@ Image models render warped, misspelled titles; every pure-AI cover tool has this
 
 **Why the render worker lives on e5, not an edge function:** print-exact compositing, 300 DPI full-wrap (~3825x2775 px for 6x9), and **PDF/X-1a** export (Ghostscript) exceed Deno edge-function CPU/time limits and aren't Deno-native. e5 is the always-on prod compute host; the phone never renders. The edge function just validates input, debits credit, and enqueues a row in `cover_jobs`; the worker polls, renders, uploads, marks `done`; the frontend polls job status.
 
-**Image model:** lock **ONE**. Recommend **Flux Dev via fal.ai/Replicate (~$0.025/bg)** as the quality/cost sweet spot, cheap fallback Flux Schnell (~$0.003). WARNING: **not Leonardo**, its API is dead (per art-autoroute memory, 2026-06-10).
+**Image model:** tiered (the `ImageProvider` makes it a config swap). **Standard (default) = Flux Dev (fal.ai, ~$0.04) or Imagen 4 Standard (~$0.04)** - because the compositor renders the title text, the model only paints a background scene, so we never pay for text-capable models. **Premium SKU = Nano Banana Pro batch (~$0.067) or GPT Image high**, priced as its own product. **Excluded:** Leonardo (API dead 2026-06-10), Midjourney (no official API), Seedance (video). Full economics in section 11.
 
 ## 5. Data flow
 
@@ -112,7 +112,23 @@ You are your **own first customer**: dogfood on your KDP factory day one; your o
 3. **Fiction subgenres seeded first**: romance + thriller + fantasy (the genre prompt library covers these three at launch).
 4. **A+ content**: OUT of v1, fast-follow.
 5. **Stripe**: reuse the existing Everlight Stripe, add new cover-credit SKUs; split to its own account later if the brand fully separates.
+6. **Image model + margins** (added 2026-06-15): standard = Flux Dev / Imagen 4 Standard (compositor adds text so cheap art models suffice); premium = a separate Nano Banana Pro / GPT Image SKU; **variation cap 4 per credit**; COGS gate encoded in `render/pricing.py`. See section 11.
 
-## 11. Out of scope (YAGNI for v1)
+## 11. Unit economics and margin guardrails (locked 2026-06-15)
+
+The credit price must always exceed the API spend per cover (the "trades clear costs and grow" law applied to SaaS). Researched current June-2026 image-API pricing to lock this.
+
+**Per-cover P&L (standard tier):** ~$0.03 background image + ~$0.002 Haiku bundle + ~$0.25 amortized Stripe fee (on a $15 / 3-batch pack) = **~$0.28 COGS** vs **$5.00 charged** = **~94% gross margin**.
+
+**The gate (enforced in `render/pricing.py`):** `price_per_cover >= cogs_per_cover / (1 - target_margin)`. Floor at 90% margin + $0.28 COGS = $2.80; we charge $5, so it clears with room.
+
+**Three hard guardrails (encode, never trust):**
+1. **1 credit = 1 batch, variations CAPPED at 4.** Regenerations cost another credit. NEVER offer "unlimited" anything whose COGS scales with use - it is the one thing that flips a 94% margin negative.
+2. **Premium models are a separate, higher-priced SKU**, sized so the premium model's COGS still clears the gate.
+3. **Free tier rate-limited** (1 free cover per verified account) - uncapped free generation is the only real COGS leak.
+
+**Legal-safety note:** Adobe Firefly is the only image API offering copyright indemnification (trained on licensed data). Hold in reserve if reselling-art liability becomes a concern; not needed for v1.
+
+## 12. Out of scope (YAGNI for v1)
 
 Series/box-set wraps, audiobook covers, hardcover case wraps, A+ content modules, multi-language, team seats, the DISPO/LAUNCHPACK products (queued separately on the same rails).

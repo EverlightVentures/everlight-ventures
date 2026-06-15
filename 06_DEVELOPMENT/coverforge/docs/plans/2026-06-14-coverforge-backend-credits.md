@@ -323,6 +323,69 @@ git commit -m "feat(coverforge): pure job processor with refund-on-failure (fake
 
 ---
 
+## Task A5: pricing guardrails (the margin gate)
+
+**Files:** Create `render/pricing.py`; Test `render/tests/test_pricing.py`
+
+- [ ] **Step 1: failing tests**
+```python
+# tests/test_pricing.py
+import pytest
+from render.pricing import MAX_VARIATIONS, cost_per_cover, clears_costs
+
+def test_standard_5dollar_cover_clears_90pct_margin():
+    assert clears_costs(5.0, "standard", variations=4)
+
+def test_variations_capped_at_max():
+    assert cost_per_cover("standard", 100) == cost_per_cover("standard", MAX_VARIATIONS)
+
+def test_unknown_tier_raises():
+    with pytest.raises(ValueError):
+        cost_per_cover("ultra", 1)
+
+def test_underpriced_cover_fails_gate():
+    assert not clears_costs(1.0, "standard", variations=4)
+
+def test_premium_costs_more_than_standard():
+    assert cost_per_cover("premium") > cost_per_cover("standard")
+```
+- [ ] **Step 2: run, verify fail**
+- [ ] **Step 3: implement**
+```python
+# render/pricing.py
+"""Single source of truth for image-model tiers + the margin gate.
+Encodes the 'price must clear COGS and grow' law so the build enforces it,
+not the operator's memory. Mirrored as Deno constants in coverforge-create-job."""
+
+MAX_VARIATIONS = 4  # per credit; regenerations cost another credit
+
+TIER_MODELS = {
+    "economy":  {"model": "fal-ai/flux/schnell",          "img_cost": 0.025},
+    "standard": {"model": "fal-ai/flux/dev",              "img_cost": 0.04},
+    "premium":  {"model": "google/nano-banana-pro-batch", "img_cost": 0.067},
+}
+HAIKU_BUNDLE_COST = 0.002
+STRIPE_FEE_PER_COVER = 0.25  # amortized over a 3-batch $15 pack
+
+def cost_per_cover(tier: str, variations: int = 1) -> float:
+    if tier not in TIER_MODELS:
+        raise ValueError(f"unknown tier {tier!r}; expected {list(TIER_MODELS)}")
+    v = min(max(variations, 1), MAX_VARIATIONS)
+    return TIER_MODELS[tier]["img_cost"] * v + HAIKU_BUNDLE_COST + STRIPE_FEE_PER_COVER
+
+def clears_costs(price: float, tier: str, variations: int = 1, target_margin: float = 0.90) -> bool:
+    """True iff price >= cogs / (1 - target_margin)."""
+    return price >= cost_per_cover(tier, variations) / (1 - target_margin)
+```
+- [ ] **Step 4: run, verify pass** - Expected: 5 passed
+- [ ] **Step 5: commit**
+```bash
+git add render/pricing.py tests/test_pricing.py
+git commit -m "feat(coverforge): pricing tiers + margin gate (price must clear COGS)"
+```
+
+---
+
 # PART B - Deploy (LIVE Supabase + Stripe) -- CHECKPOINT REQUIRED
 
 > ⛔ **Do NOT run Part B against production until Rich approves.** All Stripe wiring uses TEST keys first (the `AK_SHOP_TEST_MODE` discipline). Migrations apply to a Supabase branch or are reviewed before `apply_migration`. These tasks are authored here; execution is a separate, gated step.
@@ -375,6 +438,8 @@ insert into storage.buckets (id, name, public) values ('covers','covers', false)
 ## Task B2: edge fn coverforge-create-job
 
 **Files:** Create `supabase/functions/coverforge-create-job/index.ts`
+
+> Mirror the Python guardrails (`render/pricing.py`) as Deno constants: clamp `variations` to **4** (`MAX_VARIATIONS`), allow only the `economy|standard|premium` tier->model map, and keep **1 credit = 1 batch**. Premium is its own higher-priced credit SKU, never bundled into a standard credit.
 
 - [ ] **Step 1: write fn** (reuses `_shared/mod.ts` like the other functions)
 ```ts
