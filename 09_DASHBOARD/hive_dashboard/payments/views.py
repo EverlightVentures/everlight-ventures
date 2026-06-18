@@ -88,8 +88,11 @@ def stripe_webhook(request):
         try:
             import stripe
             event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
-        except (ValueError, Exception) as e:
-            log.warning(f"Stripe webhook signature verification failed: {e}")
+        except ValueError as e:
+            log.warning("Stripe webhook payload invalid: %s", e)
+            return HttpResponse(status=400)
+        except Exception as e:
+            log.warning("Stripe webhook signature verification failed: %s", e)
             return HttpResponse(status=400)
     else:
         try:

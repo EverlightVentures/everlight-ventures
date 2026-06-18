@@ -2,11 +2,14 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 from datetime import datetime, timezone
 from pathlib import Path
 
 import requests
+
+logger = logging.getLogger(__name__)
 
 from export_metrics import build_metrics, write_metrics
 from public_watchtower import build_public_watchtower_fields
@@ -28,8 +31,8 @@ def _read_json(path: Path) -> dict:
         if path.exists():
             payload = json.loads(path.read_text(encoding="utf-8"))
             return payload if isinstance(payload, dict) else {}
-    except Exception:
-        pass
+    except (json.JSONDecodeError, OSError) as exc:
+        logger.warning("Failed to read JSON from %s: %s", path, exc)
     return {}
 
 
@@ -48,7 +51,8 @@ def _minutes_old(ts_value: str) -> float | None:
         if parsed.tzinfo is None:
             parsed = parsed.replace(tzinfo=timezone.utc)
         return round((datetime.now(timezone.utc) - parsed).total_seconds() / 60.0, 1)
-    except Exception:
+    except (ValueError, TypeError) as exc:
+        logger.debug("Could not parse timestamp %r: %s", ts_value, exc)
         return None
 
 
@@ -167,7 +171,8 @@ def main() -> int:
     if os.environ.get("WATCHTOWER_PUSH_SUPABASE", "1").lower() not in {"0", "false", "no"}:
         try:
             push_exit = run_push()
-        except Exception:
+        except Exception as exc:
+            logger.error("Supabase push failed: %s", exc)
             push_exit = 1
 
     watchtower = build_watchtower(metrics)
@@ -204,8 +209,8 @@ def main() -> int:
             from alerts import slack as slack_alert
 
             slack_alert.send(message, level="error" if current_flag == "degraded" else "info")
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning("Slack alert failed: %s", exc)
 
         webhook_payload = {
             "event": "trading_watchtower_state_change",
@@ -214,12 +219,12 @@ def main() -> int:
         }
         try:
             _post_webhook(os.environ.get("N8N_TRADING_WATCHTOWER_WEBHOOK", ""), webhook_payload)
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning("N8N webhook failed: %s", exc)
         try:
             _post_webhook(os.environ.get("TRADING_WATCHTOWER_WEBHOOK", ""), webhook_payload)
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning("Trading watchtower webhook failed: %s", exc)
 
     _write_json(
         STATE_PATH,

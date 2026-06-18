@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import logging
 from typing import Dict
 
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 from indicators.adx import adx
 from indicators.atr import atr
@@ -251,7 +254,8 @@ def confluence_score_v4(
                     vwap_confirm = price >= vwap_val
                 else:
                     vwap_confirm = price <= vwap_val
-    except Exception:
+    except Exception as exc:
+        logger.debug("VWAP confluence calculation failed: %s", exc)
         vwap_confirm = False
 
     # FVG confluence (imported lazily to avoid circular imports)
@@ -269,7 +273,8 @@ def confluence_score_v4(
                 "low": round(float(nfvg.get("low", 0)), 6),
                 "age": int(nfvg.get("age", 0)),
             }
-    except Exception:
+    except Exception as exc:
+        logger.debug("FVG confluence calculation failed: %s", exc)
         fvg_support = False
 
     # Channel confluence (imported lazily)
@@ -290,7 +295,8 @@ def confluence_score_v4(
                 "lower": round(float(chan.get("lower_at_now", 0)), 6),
                 "width_atr": round(float(chan.get("width_atr", 0)), 2),
             }
-    except Exception:
+    except Exception as exc:
+        logger.debug("Channel confluence calculation failed: %s", exc)
         channel_support = False
         channel_breakout = False
 

@@ -1,5 +1,6 @@
 import hashlib
 import json
+import logging
 import mimetypes
 import os
 import shutil
@@ -10,6 +11,8 @@ from PIL import Image
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+
+logger = logging.getLogger(__name__)
 
 from fastapi import FastAPI, HTTPException, Request, Response, UploadFile, File, Form
 from fastapi.responses import FileResponse, HTMLResponse
@@ -248,8 +251,8 @@ def index_refresher():
             for r in ROOTS:
                 try:
                     build_index(r)
-                except Exception:
-                    pass
+                except Exception as exc:
+                    logger.warning("Index build failed for %s: %s", r, exc)
         time.sleep(INDEX_REFRESH_SEC)
 
 if AUTO_BUILD_INDEX:
@@ -301,7 +304,8 @@ def load_index(root: Path) -> Optional[Dict]:
         return None
     try:
         return json.loads(path.read_text())
-    except Exception:
+    except (json.JSONDecodeError, OSError) as exc:
+        logger.warning("Failed to load index from %s: %s", path, exc)
         return None
 
 
@@ -591,7 +595,8 @@ async def api_services_status(request: Request):
                 status[key]["pid"] = pid
                 os.kill(pid, 0)
                 status[key]["running"] = True
-            except Exception:
+            except (ValueError, OSError, ProcessLookupError) as exc:
+                logger.debug("Service %s not running: %s", key, exc)
                 status[key]["running"] = False
     return {"status": status}
 
@@ -625,8 +630,8 @@ async def api_services_stop(request: Request):
         try:
             pid = int(pid_path.read_text().strip())
             os.kill(pid, 15)
-        except Exception:
-            pass
+        except (ValueError, OSError, ProcessLookupError) as exc:
+            logger.warning("Failed to stop service %s (pid file %s): %s", key, pid_path, exc)
         pid_path.unlink(missing_ok=True)
     return {"ok": True}
 
@@ -734,7 +739,8 @@ def file_view(request: Request, root: Optional[int] = None, path: str = ""):
         kind = "text"
         try:
             text_body = target.read_text(errors="ignore")
-        except Exception:
+        except OSError as exc:
+            logger.warning("Could not read text file %s: %s", target, exc)
             text_body = ""
 
     return templates.TemplateResponse(
@@ -763,7 +769,8 @@ def edit_view(request: Request, root: Optional[int] = None, path: str = ""):
         raise HTTPException(status_code=415, detail="Not a text file")
     try:
         content = target.read_text(errors="ignore")
-    except Exception:
+    except OSError as exc:
+        logger.warning("Could not read file for editing %s: %s", target, exc)
         content = ""
     return templates.TemplateResponse(
         "edit.html",
@@ -792,8 +799,8 @@ async def api_save(request: Request):
             vp = version_path(root_path, str(target.relative_to(root_path)))
             vp.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(target, vp)
-    except Exception:
-        pass
+    except OSError as exc:
+        logger.warning("Version backup failed for %s: %s", target, exc)
     target.write_text(content)
     return {"ok": True}
 

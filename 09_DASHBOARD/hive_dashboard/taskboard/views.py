@@ -350,7 +350,8 @@ def nerve_center(request):
         total_leads = Lead.objects.count()
         today_leads = Lead.objects.filter(created_at__date=now.date()).count()
         emails_sent = FunnelEvent.objects.filter(event_type="email_sent").count()
-    except Exception:
+    except Exception as exc:
+        log.debug("Could not load funnel stats: %s", exc)
         total_leads = today_leads = emails_sent = 0
 
     funnel_health = "ok" if total_leads > 0 else "info"

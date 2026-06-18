@@ -53,7 +53,10 @@ Deno.serve(async (req: Request) => {
 
     if (!signature || !webhookSecret) {
       console.error("Missing stripe-signature header or STRIPE_WEBHOOK_SECRET");
-      return ok();
+      return new Response(
+        JSON.stringify({ error: "Missing signature or webhook secret" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     let event: Stripe.Event;
@@ -65,7 +68,10 @@ Deno.serve(async (req: Request) => {
       );
     } catch (err) {
       console.error("Webhook signature verification failed:", err.message);
-      return ok();
+      return new Response(
+        JSON.stringify({ error: "Webhook signature verification failed" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     // Log every event to stripe_events table

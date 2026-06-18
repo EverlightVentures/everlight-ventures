@@ -71,7 +71,8 @@ def _dispatch_claude_execution(session_dir, summary_text, user_query):
         try:
             sj = json.loads(session_json.read_text())
             category = sj.get("category", "full")
-        except Exception: pass
+        except (json.JSONDecodeError, OSError) as exc:
+            print(f"[WATCHER] Failed to read session.json in {session_dir.name}: {exc}")
 
     try:
         from everlight_os.hive_mind.manager_claude import run_detached
@@ -88,7 +89,8 @@ def _extract_query(session_dir):
         try:
             sj = json.loads(session_json.read_text())
             return sj.get("prompt", sj.get("query", ""))
-        except Exception: pass
+        except (json.JSONDecodeError, OSError) as exc:
+            print(f"[WATCHER] Failed to read session.json in {session_dir.name}: {exc}")
     summary = session_dir / "combined_summary.md"
     if summary.exists():
         for line in summary.read_text().splitlines():
