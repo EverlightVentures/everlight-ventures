@@ -95,6 +95,17 @@ def main():
     if not (CONV["conviction_min_usd"] <= weak <= strong <= CONV["conviction_max_usd"]):
         fails.append("conviction: stakes must stay within [min,max], got weak=%.2f strong=%.2f" % (weak, strong))
 
+    # 8) PAYOUT-RATIO CEILING (Rich: "$6.15 to win $7 is ridiculous"): an 80c favorite is
+    #    rejected even with a real consensus edge -- the win (20c) is too thin per 80c risked.
+    cfg_ceil = dict(CFG, max_buy_price_c=68)
+    okc, whyc = gate(cfg_ceil, 10, 80, 0.86, DEEP, SPREAD, 9, "sharp_sports")
+    if okc or "ceiling" not in str(whyc):
+        fails.append("80c favorite should hit the payout ceiling, got ok=%s why=%s" % (okc, whyc))
+    # a 62c favorite with edge stays bettable (good geometry: win 38c per 62c)
+    ok62, why62 = gate(cfg_ceil, 10, 62, 0.70, DEEP, SPREAD, 9, "sharp_sports")
+    if "ceiling" in str(why62):
+        fails.append("62c favorite wrongly hit the ceiling: %s" % (why62,))
+
     if fails:
         print("FAIL:")
         for f in fails:

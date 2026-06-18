@@ -43,6 +43,7 @@ SERVICES=(
   "2301|/healthz|cd $ROOT/06_DEVELOPMENT/everlight_os/intel_center && nohup python3 -m uvicorn osint_api.main:app --host 127.0.0.1 --port 2301 > /tmp/svc_2301.log 2>&1 &|Intel FastAPI"
   "2302|/healthz|cd $ROOT/06_DEVELOPMENT/everlight_os/intel_center && nohup python3 -m uvicorn osint_api.esign_server:app --host 127.0.0.1 --port 2302 > /tmp/svc_2302.log 2>&1 &|E-Sign + Signatures"
   "2400|/|cd $ROOT/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/Alley_Kingz/prototype && nohup python3 $ROOT/03_AUTOMATION_CORE/01_Scripts/serve_helpers/everlight_themed_server.py 2400 . 'Apps -- Alley Kingz' > /tmp/svc_2400.log 2>&1 &|Apps"
+  "2410|/|cd $ROOT/01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem && nohup python3 $ROOT/03_AUTOMATION_CORE/01_Scripts/serve_helpers/everlight_themed_server.py 2410 . 'AK Seedance Copy-Deck' > /tmp/svc_2410.log 2>&1 &|AK Seedance Copy-Deck"
   "2401|/api/health|cd $ROOT/09_DASHBOARD/moltbook && nohup python3 serve.py > /tmp/svc_2401.log 2>&1 &|Moltbook -- audit notebook"
   "2500|/|cd $ROOT/05_PERSONAL/02_Training/MMA_Notebook/Fight_Camp_OS && nohup python3 $ROOT/03_AUTOMATION_CORE/01_Scripts/serve_helpers/everlight_themed_server.py 2500 . 'MMA Fight Camp' > /tmp/svc_2500.log 2>&1 &|Health (MMA)"
   "2700|/health|cd $ROOT && BLINKO_PORT=2700 nohup python3 06_DEVELOPMENT/everlight_os/blinko/blinko_lite.py > /tmp/svc_2700.log 2>&1 &|Blinko RAG"
@@ -130,20 +131,26 @@ if [ "$STATUS_ONLY" -eq 0 ]; then
     python3 $ROOT/03_AUTOMATION_CORE/01_Scripts/agentmemory_inbox_merger.py drain >> "$LOG" 2>&1 &
   fi
 
-  # Action 3: mirror the Kalshi trading dashboards from e5 into the 2200 Reports Hub.
-  # They are GENERATED on e5 (live data + creds live there) and served locally at
-  # http://127.0.0.1:2200/reports/{ops,kalshi,watchdog}.html. Throttled to 5 min +
-  # backgrounded so it never slows the 1-min cycle; keeps the last good copy if e5 is down.
-  # (kalshi_dashboard.html on e5 is served as kalshi.html here -- name-mapped.)
+  # Action 3+4: feed the Everlight Command Center (served at :2200/reports/).
+  # e5 GENERATES the trade data (creds live there); the phone mirrors the Kalshi P&L +
+  # watchdog pages, pulls a fresh kalshi_summary.json, then rebuilds ev_data.js from all
+  # LOCAL sources. NOTE: ops.html is NOT mirrored -- it is the local Command Center hub now
+  # (a static page fed by ev_data.js). Throttled 5 min + backgrounded so it never slows the
+  # 1-min cycle; last-good copies are kept if e5 is unreachable.
   KMIRROR=/tmp/kalshi_mirror.last
   if [ ! -f "$KMIRROR" ] || [ $(( $(date +%s) - $(stat -c %Y "$KMIRROR" 2>/dev/null || echo 0) )) -ge 300 ]; then
     touch "$KMIRROR"
     ( RD="$ROOT/09_DASHBOARD/reports"
-      for pair in kalshi_dashboard.html:kalshi.html watchdog.html:watchdog.html ops.html:ops.html; do
+      for pair in kalshi_dashboard.html:kalshi.html watchdog.html:watchdog.html; do
         s="${pair%%:*}"; d="${pair##*:}"
         scp -q -o ConnectTimeout=12 -o ServerAliveInterval=5 "e5:/home/ubuntu/hive_reports/$s" "$RD/$d.tmp" 2>/dev/null \
           && mv "$RD/$d.tmp" "$RD/$d" 2>/dev/null
-      done ) >> "$LOG" 2>&1 &
+      done
+      ssh -o ConnectTimeout=12 -o ServerAliveInterval=5 e5 'cd /home/ubuntu/AA_MY_DRIVE/06_DEVELOPMENT && PYTHONPATH=$PWD python3 -m kalshi_agent.kalshi_summary --creds /home/ubuntu/AA_MY_DRIVE/03_AUTOMATION_CORE/03_Credentials' > "$RD/kalshi_summary.json.tmp" 2>/dev/null \
+        && python3 -c "import json;json.load(open('$RD/kalshi_summary.json.tmp'))" 2>/dev/null \
+        && mv "$RD/kalshi_summary.json.tmp" "$RD/kalshi_summary.json" 2>/dev/null
+      python3 "$ROOT/03_AUTOMATION_CORE/01_Scripts/build_command_center.py"
+    ) >> "$LOG" 2>&1 &
   fi
 fi
 

@@ -56,6 +56,16 @@ def main():
     if ae.sport_of("KXWCGAME-26JUN15ESPCPV-ESP") != "wc" or ae.sport_of("KXUFCFIGHT-X-GAE") != "ufc":
         fails.append("sport_of mis-parsed a ticker prefix")
 
+    # a COVERED sport on a loss STREAK -> quarantined (rotate away), even with no win-rate culprit
+    streak = {"culprit": None, "hot": None, "cold_streak": ("mlb", 3)}
+    q4, _, acts4 = decide_actions(streak, CFG, lambda s: False, NOW)
+    if "mlb" not in q4 or not any("streak" in x.lower() for x in acts4):
+        fails.append("cold-streak covered sport should be quarantined: q=%s acts=%s" % (q4, acts4))
+    # a BLIND streak sport -> NOT quarantined (gate handles it)
+    q5, _, acts5 = decide_actions(streak, CFG, lambda s: True, NOW)
+    if q5:
+        fails.append("blind streak sport must NOT be quarantined: q=%s" % (q5,))
+
     if fails:
         print("FAIL:")
         for f in fails:

@@ -46,6 +46,7 @@ ABBR_FIX = {"GS": "GSW", "NO": "NOP", "NY": "NYK", "SA": "SAS", "UTAH": "UTA",
 
 SPORTS = {
     "nba": {"espn": "basketball/nba", "series": "KXNBAGAME", "kind": "spread2", "sigma": 12.0, "odds": "basketball_nba"},
+    "wnba": {"espn": "basketball/wnba", "series": "KXWNBAGAME", "kind": "spread2", "sigma": 11.0, "odds": "basketball_wnba"},
     "mlb": {"espn": "baseball/mlb", "series": "KXMLBGAME", "kind": "ml2", "odds": "baseball_mlb"},
     "nhl": {"espn": "hockey/nhl", "series": "KXNHLGAME", "kind": "ml2", "odds": "icehockey_nhl"},
     "wc":  {"espn": "soccer/fifa.world", "series": "KXWCGAME", "kind": "soccer3", "odds": "soccer_fifa_world_cup"},
@@ -100,6 +101,8 @@ def _game_outcomes(cfg, comp, home, away):
     if not odds:
         return None
     o = odds[0]
+    if not isinstance(o, dict):     # ESPN sometimes returns [null] -- skip, don't crash the run
+        return None
     kind = cfg["kind"]
     if kind == "tennis2":
         ca = _surname_code((away.get("athlete") if away else None))
@@ -214,7 +217,11 @@ def research(write=True):
             existing = {}
     rows, ngames = [], 0
     for sport, cfg in SPORTS.items():
-        slate = espn_slate(cfg)
+        try:
+            slate = espn_slate(cfg)        # isolate each sport -- one bad feed can't abort the rest
+        except Exception as e:
+            print("  (%s slate failed: %s -- skipping)" % (sport, str(e)[:70]))
+            continue
         if not slate:
             continue
         try:

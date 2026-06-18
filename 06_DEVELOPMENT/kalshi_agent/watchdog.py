@@ -42,7 +42,8 @@ RECENT_N = 10          # the "now" window of settled bets
 PRIOR_N = 10           # the "before" window we compare against
 MIN_SEG_VOL = 3        # a segment needs this many bets before we blame it
 DROP_ALERT = 0.15      # a >=15pt win-rate drop recent-vs-prior = regime shift
-TARGET = 0.70          # the win-rate we steer to (mirrors auto_edge target_win_rate)
+TARGET = 0.75          # the win-rate we steer to (mirrors auto_edge target_win_rate)
+STREAK_N = 3           # N consecutive losses in a sport -> quarantine it (Rich's "bad streak -> switch sport")
 
 # Kalshi ticker prefix -> sport, and sport -> Odds-API key (for the coverage check)
 SPORT_PREFIX = [("KXNBA", "nba"), ("KXMLB", "mlb"), ("KXNHL", "nhl"),
@@ -135,6 +136,22 @@ def coverage_blind(sport):
         return None
 
 
+def _streaks(rows):
+    """Per-sport TRAILING consecutive-loss count (chronological). The 'bad streak' signal."""
+    seqs = defaultdict(list)
+    for r in rows:
+        seqs[r[2]].append(r[4])           # sport -> [won, won, ...] in time order
+    out = {}
+    for sp, seq in seqs.items():
+        n = 0
+        for won in reversed(seq):
+            if won:
+                break
+            n += 1
+        out[sp] = n
+    return out
+
+
 def analyze(rows):
     recent = rows[-RECENT_N:]
     prior = rows[-(RECENT_N + PRIOR_N):-RECENT_N]
@@ -155,10 +172,16 @@ def analyze(rows):
     # win-rate, real volume, actually making money. The size-up half of the gas pedal.
     hot = [(k, v) for k, v in sports.items() if v["n"] >= MIN_SEG_VOL and v["pnl"] > 0 and v["wr"] >= TARGET]
     hot.sort(key=lambda kv: -kv[1]["wr"])
+    # BAD-STREAK detector (Rich: "bad streak in a sport -> bet a different sport"). Trailing
+    # consecutive losses per sport over the full record; quarantine fires off this even when
+    # the windowed win-rate hasn't dropped below BAD_WR yet -- faster than the window.
+    streaks = _streaks(rows)
+    cold = sorted([(sp, n) for sp, n in streaks.items() if n >= STREAK_N], key=lambda x: -x[1])
     regime_shift = bool(r_wr is not None and (
         (p_wr is not None and r_wr <= p_wr - DROP_ALERT) or r_wr <= TARGET - DROP_ALERT))
     return {"recent_wr": r_wr, "prior_wr": p_wr, "recent_n": len(recent), "prior_n": len(prior),
             "sports": sports, "lanes": lanes, "culprit": culprit, "hot": hot[0] if hot else None,
+            "cold_streak": cold[0] if cold else None, "streaks": streaks,
             "regime_shift": regime_shift, "all_time_wr": _wr(rows), "all_time_n": len(rows)}
 
 
@@ -199,6 +222,17 @@ def decide_actions(a, cfg, blind_fn, now):
                      "wr": sv["wr"], "n": sv["n"]}
             actions.append("BRAKES: quarantined %s for %dh (%.0f%% win-rate over %d) -- auto-lifts when it recovers." % (
                 sp.upper(), hours, sv["wr"] * 100, sv["n"]))
+    # BAD-STREAK brake (Rich: "bad streak in a sport -> bet a different sport"). Fires off a
+    # raw consecutive-loss streak, faster than the windowed win-rate. Quarantine = rotate away.
+    if a.get("cold_streak"):
+        sp, n = a["cold_streak"]
+        if sp not in q:
+            if blind_fn(sp) is True:
+                actions.append("%s on a %d-loss streak but BLIND -- the gate already sits it out." % (sp.upper(), n))
+            else:
+                q[sp] = {"until": now + cool, "reason": "%d losses in a row" % n, "streak": n}
+                actions.append("BRAKES: quarantined %s for %dh (%d-loss streak) -- rotating to other sports." % (
+                    sp.upper(), hours, n))
     if a.get("hot"):
         hs, hv = a["hot"]
         if blind_fn(hs) is not True:

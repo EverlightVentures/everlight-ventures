@@ -316,6 +316,15 @@ def gate(cfg, count, our_cents, fair, depth, spread_cents, books=1, lane=None):
     if fair < cfg.get("min_fair_prob_sharp", 0.0):
         return False, "fair %.0f%% < %.0f%% win-prob floor (protects hit rate)" % (
             fair * 100, cfg.get("min_fair_prob_sharp", 0.0) * 100)
+    # PAYOUT-RATIO CEILING (Rich 2026-06-15: "$8 to win $16 is cool, $6.15 to win $7 is
+    # ridiculous"). Never overpay for a favorite -- a win must be WORTH taking. Buying at
+    # `our_cents` risks that to win (100-our_cents); above max_buy_price_c the payout/risk is
+    # too thin to support the 2:1 profit-factor target (one loss eats many wins). This is the
+    # geometry fix that lets a 75% win rate actually MAKE money. Operator bets bypass gate().
+    maxc = cfg.get("max_buy_price_c", 100)
+    if our_cents > maxc:
+        return False, "buy %dc > %dc ceiling -- win only %dc per %dc risked (payout too thin)" % (
+            our_cents, maxc, 100 - our_cents, our_cents)
     if depth < cfg["min_depth_dollars"]:
         return False, "depth $%d < min" % int(depth)
     if spread_cents is not None and spread_cents > cfg["max_spread_cents"]:
@@ -634,6 +643,17 @@ def run(live=False):
             notify("auto-edge ARB watch: %s yes_ask %dc + no_ask %dc -> lock %dc" % (
                 a["ticker"], a["yes_ask"], a["no_ask"], a["lock_c"]))
 
+    # ONE BET PER GAME (Rich 2026-06-15: "the bot bets both teams on opposite sides"). That is
+    # NOT a hedge -- it pays the vig twice and one side always loses (France+Senegal netted
+    # -$2.72). Take only the SINGLE best-edge outcome per game. (TRUE arbitrage -- all outcomes
+    # priced < 100c combined -- is the separate arb lane, off by default.) Sort best-edge-first
+    # so the kept outcome is the strongest, then dedupe by game.
+    candidates.sort(key=lambda c: -(((c.get("fair") or 0) - (c.get("our_cents") or 100) / 100.0)))
+    def _game_key(t):
+        return (t or "").rsplit("-", 1)[0]
+    held_games = {_game_key(t) for t in held}
+    bet_games = set()
+
     placed = 0
     flagged = []          # every gate-passing edge this run (for the dashboard's "coming up")
     cap_reached = False
@@ -645,6 +665,10 @@ def run(live=False):
         tk = c["ticker"]
         if tk in held or tk in recent_placed:
             print("  skip %-32s (already held / bid placed)" % tk[:32])
+            continue
+        gk = _game_key(tk)
+        if gk in held_games or gk in bet_games:
+            print("  skip %-32s (one-bet-per-game: already betting this game)" % tk[:32])
             continue
         if c["our_cents"] is None or c["our_cents"] < 1:
             print("  skip %-32s (no maker price)" % tk[:32])
@@ -669,6 +693,7 @@ def run(live=False):
             print("  PASS %-30s %s  buy %dc fair %.0f%%  -- %s" % (tk[:30], tag, c["our_cents"], c["fair"] * 100, info))
             continue
         ev = info
+        bet_games.add(gk)     # claim this game -- no second outcome of it gets bet this run
         print("  EDGE %-30s %s  buy %dc fair %.0f%% (+%.1f%% raw, +%.1f%% net) x%d depth$%d" % (
             tk[:30], tag, c["our_cents"], c["fair"] * 100, edge_pct * 100, ev["net_pct"] * 100, count, int(c["depth"])))
         flagged.append({"ticker": tk, "lane": c["lane"], "side": c["side"],
