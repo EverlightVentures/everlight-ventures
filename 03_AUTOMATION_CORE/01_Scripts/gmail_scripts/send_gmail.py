@@ -3,20 +3,14 @@ from email.message import EmailMessage
 import ssl
 import smtplib
 
-'''
-username = os.environ.get('UNAME2')
-password = os.environ.get('GPASS2')
 
-print(username)
-print(password)
-'''
+email_sender = os.environ.get('GMAIL_SENDER', 'lg.train4life@gmail.com')
 
+email_password = os.environ.get('GMAIL_APP_PASSWORD', '')
+if not email_password:
+    raise RuntimeError('GMAIL_APP_PASSWORD environment variable is not set')
 
-email_sender = 'lg.train4life@gmail.com'
-
-email_password = 'ewtyyncxgpgkilmc'
-
-email_receiver = 'linogillies@gmail.com'
+email_receiver = os.environ.get('GMAIL_RECEIVER', 'linogillies@gmail.com')
 
 
 subject = ' Sign Up Special'

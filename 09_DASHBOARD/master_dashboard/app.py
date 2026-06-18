@@ -52,8 +52,8 @@ FOLLOW_SYMLINKS = bool(CONFIG.get("follow_symlinks", False))
 APPS = CONFIG.get("apps", [])
 SERVICES = CONFIG.get("services", {})
 SOFT_DELETE = bool(CONFIG.get("soft_delete", True))
-REQUIRE_AUTH = bool(CONFIG.get("require_auth", False))
-API_KEY = CONFIG.get("api_key", "")
+REQUIRE_AUTH = bool(CONFIG.get("require_auth", True))
+API_KEY = CONFIG.get("api_key", "") or os.environ.get("DASHBOARD_API_KEY", "")
 
 
 async def check_auth(request: Request):

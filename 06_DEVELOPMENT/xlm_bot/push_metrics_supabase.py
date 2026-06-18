@@ -64,11 +64,10 @@ SUPABASE_KEY = (
     or RUNTIME_ENV.get("SUPABASE_SERVICE_ROLE_KEY")
     or RUNTIME_ENV.get("SUPABASE_SECRET_KEY")
     or os.environ.get("SUPABASE_KEY")
-    or os.environ.get(
-        "SUPABASE_ANON_KEY",
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkcXFtc213bWJzbmxuc3R5YXZsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI4MTk5ODMsImV4cCI6MjA4ODM5NTk4M30.9BDviI2WR46sphcS3uzKapcKbslYpMO4PdSEPFrv3Ww"
-    )
+    or os.environ.get("SUPABASE_ANON_KEY", "")
 )
+if not SUPABASE_KEY:
+    sys.exit("ERROR: No Supabase key found. Set SUPABASE_ANON_KEY or SUPABASE_SERVICE_ROLE_KEY.")
 
 # Daily profit goals
 DAILY_TARGET_USD = 100.0
