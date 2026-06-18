@@ -10,6 +10,7 @@ ACX Technical Requirements:
 """
 import os
 import re
+import sys
 import time
 import requests
 from pathlib import Path
@@ -17,11 +18,15 @@ from io import BytesIO
 from pydub import AudioSegment
 from docx import Document as DocxDocument
 
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+from shared.publishing.book_config import BOOKS as BOOK_REGISTRY, BASE_DIR, SERIES_AUTHOR, SERIES_PUBLISHER
+from shared.publishing.markdown_utils import clean_for_narration, extract_chapters_from_md
+
 # ============================================================
 # CONFIG
 # ============================================================
 API_KEY = os.environ.get("OPENAI_API_KEY", "")
-BASE = Path("/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM")
+BASE = BASE_DIR
 
 TTS_MODEL = "tts-1-hd"
 TTS_VOICE = "fable"  # Expressive storytelling voice -- warm, captivating, soothing for kids
@@ -31,139 +36,25 @@ NARRATOR = "Fable"  # Virtual voice name for credits
 PUBLISHER = "Everlight Ventures"
 COPYRIGHT_YEAR = "2026"
 
-BOOKS = [
-    {
-        "id": 1,
-        "title": "Sam's First Superpower",
-        "subtitle": "Adventures with Sam and Robo, Book 1",
-        "source": BASE / "Book1/Sams_First_Superpower_MASTER.md",
-        "source_type": "md",
-        "audio_dir": BASE / "Book1/audiobook",
-    },
-    {
-        "id": 2,
-        "title": "Sam's Second Superpower",
-        "subtitle": "Adventures with Sam and Robo, Book 2",
-        "source": BASE / "Book 2/Sams_Second_Superpower_MASTER.md",
-        "source_type": "md",
-        "audio_dir": BASE / "Book 2/audiobook",
-    },
-    {
-        "id": 3,
-        "title": "Sam's Third Superpower",
-        "subtitle": "Adventures with Sam and Robo, Book 3",
-        "source": BASE / "book_3/Sams_Third_Superpower.docx",
-        "source_type": "docx",
-        "audio_dir": BASE / "book_3/audiobook",
-    },
-    {
-        "id": 4,
-        "title": "Sam's Fourth Superpower",
-        "subtitle": "Adventures with Sam and Robo, Book 4",
-        "source": BASE / "book_4/manuscript/Sams_Fourth_Superpower_MASTER.md",
-        "source_type": "md",
-        "audio_dir": BASE / "book_4/audiobook",
-    },
-    {
-        "id": 5,
-        "title": "Sam's Fifth Superpower",
-        "subtitle": "Adventures with Sam and Robo, Book 5",
-        "source": BASE / "book_5/manuscript/Sams_Fifth_Superpower_MASTER.md",
-        "source_type": "md",
-        "audio_dir": BASE / "book_5/audiobook",
-    },
-]
+# Build BOOKS list from central registry (previously duplicated inline)
+BOOKS = []
+for _bid in [1, 2, 3, 4, 5]:
+    _b = BOOK_REGISTRY[_bid]
+    BOOKS.append({
+        "id": _bid,
+        "title": _b["title"],
+        "subtitle": f"Adventures with Sam and Robo, Book {_bid}",
+        "source": _b["manuscript"],
+        "source_type": _b["manuscript_type"],
+        "audio_dir": _b["dir"] / "audiobook",
+    })
 
 
 # ============================================================
 # TEXT EXTRACTION
 # ============================================================
-def extract_chapters_from_md(md_path):
-    """Parse MASTER.md into chapters of narration-ready text."""
-    with open(md_path, "r", encoding="utf-8") as f:
-        content = f.read()
-
-    # Strip markdown formatting for narration
-    def clean_for_narration(text):
-        # Remove image references
-        text = re.sub(r"!\[[^\]]*\]\([^\)]*\)", "", text)
-        # Remove horizontal rules
-        text = re.sub(r"^---+\s*$", "", text, flags=re.MULTILINE)
-        # Remove markdown headers (keep the text)
-        text = re.sub(r"^#{1,4}\s+", "", text, flags=re.MULTILINE)
-        # Convert bold to plain
-        text = re.sub(r"\*\*([^*]+)\*\*", r"\1", text)
-        # Convert italic to plain
-        text = re.sub(r"\*([^*]+)\*", r"\1", text)
-        # Remove metadata lines
-        skip_patterns = [
-            r"^\*\*Document Status:.*$",
-            r"^\*\*Date:.*$",
-            r"^\*\*Format:.*$",
-            r"^\*\*Page Layout:.*$",
-            r"^\*\*Phonics Focus:.*$",
-            r"^\*\*Core Value:.*$",
-            r"^\*\*CASEL.*$",
-            r"^\*\*CCSS.*$",
-            r"^\*\*Superpower Unlocked:.*$",
-            r"^\*\*Target Age:.*$",
-            r"^\*\*Series Position:.*$",
-            r"^End of Master Manuscript.*$",
-            r"^Next steps:.*$",
-            r"^\> \[ASSISTANT NOTE.*$",
-        ]
-        for pat in skip_patterns:
-            text = re.sub(pat, "", text, flags=re.MULTILINE)
-        # Clean up multiple blank lines
-        text = re.sub(r"\n{3,}", "\n\n", text)
-        return text.strip()
-
-    # Split into chapters
-    # Look for "CHAPTER" headers or "## CHAPTER" or "SERIES RECAP" or "BACK MATTER"
-    chapter_pattern = re.compile(
-        r"(?:^|\n)(?:#{1,3}\s+)?(CHAPTER \d+[:\s].*?|SERIES RECAP.*?|BACK MATTER.*?|THE LEARNING CORNER.*?|THE VALUES MOMENT.*?)(?:\n|$)",
-        re.IGNORECASE
-    )
-
-    sections = []
-    matches = list(chapter_pattern.finditer(content))
-
-    if not matches:
-        # Fallback: treat entire content as one chapter
-        sections.append(("Full Story", clean_for_narration(content)))
-    else:
-        # Add Series Recap as intro if present before first chapter
-        first_match_pos = matches[0].start()
-        intro = content[:first_match_pos].strip()
-        if intro and len(intro) > 100:
-            cleaned_intro = clean_for_narration(intro)
-            if cleaned_intro:
-                sections.append(("Introduction", cleaned_intro))
-
-        for i, m in enumerate(matches):
-            title = m.group(1).strip()
-            start = m.end()
-            end = matches[i + 1].start() if i + 1 < len(matches) else len(content)
-            section_text = content[start:end]
-            cleaned = clean_for_narration(section_text)
-
-            # Skip very short sections (metadata only)
-            if len(cleaned) < 50:
-                continue
-
-            # Convert Interactive Moments for narration
-            cleaned = re.sub(
-                r"Interactive Moment:\s*",
-                "Here's an interactive moment for you! ",
-                cleaned
-            )
-            # Convert Q&A for narration
-            cleaned = re.sub(r"Question:\s*", "Here's a question to think about: ", cleaned)
-            cleaned = re.sub(r"Answer:\s*", "The answer is: ", cleaned)
-
-            sections.append((title, cleaned))
-
-    return sections
+# extract_chapters_from_md and clean_for_narration are now imported
+# from shared.publishing.markdown_utils
 
 
 def extract_chapters_from_docx(docx_path):

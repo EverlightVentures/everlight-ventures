@@ -15,12 +15,13 @@ Layout:
 """
 
 import os
+import sys
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from pathlib import Path
 
-BASE_DIR = Path(
-    "/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/Adventures_Series/ADVENTURES_WITH_SAM"
-)
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+from shared.publishing.book_config import BOOKS as BOOK_REGISTRY, BASE_DIR
+from shared.publishing.image_utils import draw_centered_text, create_gradient_band
 
 # Amazon ideal ebook cover size
 EBOOK_W = 1600
@@ -31,93 +32,27 @@ FONT_BOLD = "/usr/share/fonts/truetype/tuffy/tuffy_bold.ttf"
 FONT_REG = "/usr/share/fonts/truetype/tuffy/tuffy_regular.ttf"
 FONT_ITALIC = "/usr/share/fonts/truetype/tuffy/tuffy_italic.ttf"
 
-BOOKS = {
-    "1": {
-        "cover_jpg": BASE_DIR / "Book1" / "images" / "1_cover.jpg",
-        "ebook_cover": BASE_DIR / "Book1" / "images" / "1_cover_ebook.jpg",
-        "title": "Sam's First\nSuperpower",
-        "title_short": "Sam's First Superpower",
-        "book_num": 1,
-        "bg_top": (30, 60, 100),
-        "bg_bottom": (20, 45, 75),
-        "accent": (218, 165, 32),
-    },
-    "2": {
-        "cover_jpg": BASE_DIR / "Book 2" / "images" / "2_cover.jpg",
-        "ebook_cover": BASE_DIR / "Book 2" / "images" / "2_cover_ebook.jpg",
-        "title": "Sam's Second\nSuperpower",
-        "title_short": "Sam's Second Superpower",
-        "book_num": 2,
-        "bg_top": (15, 40, 90),
-        "bg_bottom": (10, 30, 70),
-        "accent": (80, 180, 255),
-    },
-    "3": {
-        "cover_jpg": BASE_DIR / "book_3" / "images" / "3_cover.jpg",
-        "ebook_cover": BASE_DIR / "book_3" / "images" / "3_cover_ebook.jpg",
-        "title": "Sam's Third\nSuperpower",
-        "title_short": "Sam's Third Superpower",
-        "book_num": 3,
-        "bg_top": (50, 20, 80),
-        "bg_bottom": (35, 10, 60),
-        "accent": (180, 120, 255),
-    },
-    "4": {
-        "cover_jpg": BASE_DIR / "book_4" / "images" / "4_cover.jpg",
-        "ebook_cover": BASE_DIR / "book_4" / "images" / "4_cover_ebook.jpg",
-        "title": "Sam's Fourth\nSuperpower",
-        "title_short": "Sam's Fourth Superpower",
-        "book_num": 4,
-        "bg_top": (15, 60, 30),
-        "bg_bottom": (10, 45, 20),
-        "accent": (80, 200, 100),
-    },
-    "5": {
-        "cover_jpg": BASE_DIR / "book_5" / "images" / "5_cover.jpg",
-        "ebook_cover": BASE_DIR / "book_5" / "images" / "5_cover_ebook.jpg",
-        "title": "Sam's Fifth\nSuperpower",
-        "title_short": "Sam's Fifth Superpower",
-        "book_num": 5,
-        "bg_top": (90, 45, 10),
-        "bg_bottom": (70, 35, 8),
-        "accent": (255, 180, 60),
-    },
-}
+# Build BOOKS dict from central registry (previously duplicated inline)
+_TITLE_SPLITS = {1: "Sam's First\nSuperpower", 2: "Sam's Second\nSuperpower",
+                 3: "Sam's Third\nSuperpower", 4: "Sam's Fourth\nSuperpower",
+                 5: "Sam's Fifth\nSuperpower"}
+BOOKS = {}
+for _bid in [1, 2, 3, 4, 5]:
+    _b = BOOK_REGISTRY[_bid]
+    BOOKS[str(_bid)] = {
+        "cover_jpg": _b["cover_jpg"],
+        "ebook_cover": _b["img_dir"] / f"{_b['prefix']}_cover_ebook.jpg",
+        "title": _TITLE_SPLITS[_bid],
+        "title_short": _b["title"],
+        "book_num": _bid,
+        "bg_top": _b["ebook_bg_top"],
+        "bg_bottom": _b["ebook_bg_bottom"],
+        "accent": _b["accent"],
+    }
 
 
-def draw_centered_text(draw, text, y, font, fill, canvas_width):
-    """Draw text centered horizontally."""
-    bbox = draw.textbbox((0, 0), text, font=font)
-    text_w = bbox[2] - bbox[0]
-    x = (canvas_width - text_w) // 2
-    draw.text((x, y), text, font=font, fill=fill)
-    return bbox[3] - bbox[1]
-
-
-def create_gradient_bg(width, height, color_top, color_bottom):
-    """Create a vertical gradient background."""
-    img = Image.new("RGB", (width, height))
-    for y in range(height):
-        ratio = y / height
-        r = int(color_top[0] * (1 - ratio) + color_bottom[0] * ratio)
-        g = int(color_top[1] * (1 - ratio) + color_bottom[1] * ratio)
-        b = int(color_top[2] * (1 - ratio) + color_bottom[2] * ratio)
-        for x in range(width):
-            img.putpixel((x, y), (r, g, b))
-    return img
-
-
-def create_gradient_band(width, height, color_top, color_bottom):
-    """Create a gradient band more efficiently using line drawing."""
-    img = Image.new("RGB", (width, height))
-    draw = ImageDraw.Draw(img)
-    for y in range(height):
-        ratio = y / max(height - 1, 1)
-        r = int(color_top[0] * (1 - ratio) + color_bottom[0] * ratio)
-        g = int(color_top[1] * (1 - ratio) + color_bottom[1] * ratio)
-        b = int(color_top[2] * (1 - ratio) + color_bottom[2] * ratio)
-        draw.line([(0, y), (width - 1, y)], fill=(r, g, b))
-    return img
+# draw_centered_text and create_gradient_band are now imported from
+# shared.publishing.image_utils
 
 
 def build_ebook_cover(config):

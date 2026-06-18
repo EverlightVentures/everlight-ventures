@@ -1,30 +1,35 @@
 import os
-import requests
+import sys
 import time
 from pathlib import Path
 
-API_KEY = os.environ.get("OPENAI_API_KEY", "")
-BASE_DIR = Path("/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM")
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "src"))
+from shared.publishing.book_config import BOOKS as BOOK_REGISTRY
+from shared.publishing.openai_images import generate_image as _shared_generate, download_image as _shared_download
 
+API_KEY = os.environ.get("OPENAI_API_KEY", "")
+
+# Cover themes per book (generate_covers.py uses a different BASE_DIR -- legacy KDP path)
+_LEGACY_BASE = Path("/mnt/sdcard/AA_MY_DRIVE/01_BUSINESSES/Everlight_Ventures/Publishing/Ebook_Sells/ADVENTURES_WITH_SAM")
 COVERS = {
     "1": {
         "title": "SAM'S FIRST SUPERPOWER",
         "number": "1",
         "theme": "animals, clearing in the woods, glowing book, butterflies",
-        "save_dir": BASE_DIR / "Book1/images"
+        "save_dir": BOOK_REGISTRY[1]["img_dir"],
     },
     "2": {
         "title": "SAM'S SECOND SUPERPOWER",
         "number": "2",
         "theme": "science lab, beakers, volcano experiment, sparks and bubbles",
-        "save_dir": BASE_DIR / "Book 2/images"
+        "save_dir": BOOK_REGISTRY[2]["img_dir"],
     },
     "4": {
         "title": "SAM'S FOURTH SUPERPOWER",
         "number": "4",
         "theme": "nature, mountain peak, glowing green crystal, forest and river",
-        "save_dir": BASE_DIR / "book_4/images"
-    }
+        "save_dir": BOOK_REGISTRY[4]["img_dir"],
+    },
 }
 
 STYLE_GUIDE = """
@@ -39,41 +44,19 @@ COMPOSITION:
 """
 
 def generate_image(prompt, is_bw=False):
-    url = "https://api.openai.com/v1/images/generations"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {API_KEY}"
-    }
-    
-    if is_bw:
-        full_prompt = f"Children's coloring book line art version of: {prompt}. Bold clean black outlines, white background, no color, black and white only."
-    else:
-        full_prompt = prompt
+    """Generate image via shared utility."""
+    return _shared_generate(
+        prompt,
+        is_bw=is_bw,
+        bw_prefix="Children's coloring book line art version of: ",
+        style_suffix="Bold clean black outlines, white background, no color, black and white only." if is_bw else "",
+        api_key=API_KEY,
+    )
 
-    data = {
-        "model": "dall-e-3",
-        "prompt": full_prompt,
-        "n": 1,
-        "size": "1024x1024"
-    }
-
-    try:
-        response = requests.post(url, headers=headers, json=data, timeout=120)
-        response.raise_for_status()
-        return response.json()['data'][0]['url']
-    except Exception as e:
-        print(f"Error: {e}")
-        return None
 
 def download_image(url, save_path):
-    try:
-        response = requests.get(url, timeout=60)
-        response.raise_for_status()
-        with open(save_path, 'wb') as f:
-            f.write(response.content)
-        print(f"Saved: {save_path}")
-    except Exception as e:
-        print(f"Error downloading: {e}")
+    """Download image via shared utility."""
+    _shared_download(url, save_path)
 
 if __name__ == "__main__":
     for bid, info in COVERS.items():
