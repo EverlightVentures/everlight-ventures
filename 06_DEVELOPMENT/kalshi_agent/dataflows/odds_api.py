@@ -26,6 +26,8 @@ SPORT_KEYS = {
     "nhl": "icehockey_nhl",
     "wc": "soccer_fifa_world_cup",
     "wnba": "basketball_wnba",
+    "kbo": "baseball_kbo",      # Korea -- fills US overnight (name-matched slate)
+    "npb": "baseball_npb",      # Japan -- fills US overnight (name-matched slate)
 }
 
 
@@ -50,21 +52,58 @@ def _norm(name):
     return re.sub(r"[^a-z]", "", (name or "").lower())
 
 
+CACHE_DIR = Path(__file__).resolve().parent.parent / "data" / "odds_cache"
+CACHE_TTL = 7200          # re-fetch a sport at most every 2h (free tier = 500 credits/day)
+STALE_MAX = 6 * 3600      # on quota/error, serve cache up to 6h old rather than starve the engine
+
+
+def _cache_path(sport_key, regions):
+    return CACHE_DIR / ("%s_%s.json" % (sport_key, regions.replace(",", "-")))
+
+
 def consensus(sport_key, regions="us"):
-    """[{home, away, home_n, away_n, probs:{team_name: fair}, books:n}] -- the multi-book
-    no-vig AVERAGE per outcome. Keeps 'Draw' for 3-way soccer. [] on any failure."""
+    """Cached multi-book no-vig consensus. Returns cached games when fresh (< CACHE_TTL),
+    re-fetches otherwise, and on a quota/API error serves recent stale cache instead of []
+    so a credit blip doesn't starve the engine. The whole reason the bot went dark: the free
+    500/day Odds-API budget was being burned by 30-min x many-sport polling; this caps it."""
+    import time
+    p, now = _cache_path(sport_key, regions), time.time()
+    try:
+        cached = json.loads(p.read_text())
+    except Exception:
+        cached = None
+    if cached and (now - cached.get("ts", 0) < CACHE_TTL):
+        return cached.get("games", [])
+    games = _fetch_consensus(sport_key, regions)
+    if games is not None:                                  # legit response (maybe empty) -- cache it
+        try:
+            CACHE_DIR.mkdir(parents=True, exist_ok=True)
+            p.write_text(json.dumps({"ts": int(now), "games": games}))
+        except Exception:
+            pass
+        return games
+    if cached and (now - cached.get("ts", 0) < STALE_MAX):  # quota/error -> recent stale, don't starve
+        return cached.get("games", [])
+    return []
+
+
+def _fetch_consensus(sport_key, regions="us"):
+    """Raw fetch + de-vig. Returns the games list, or None on API/quota error (so the cache
+    layer falls back to stale). An empty list [] is a legit 'no games right now'."""
     k = key()
     if not k:
-        return []
+        return None
     url = "%s/sports/%s/odds/?apiKey=%s&regions=%s&markets=h2h&oddsFormat=american" % (
         BASE, sport_key, k, regions)
     try:
         data = json.loads(urllib.request.urlopen(
             urllib.request.Request(url, headers={"User-Agent": "ev-sharp/1.0"}), timeout=20).read())
     except Exception:
-        return []
+        return None
+    if not isinstance(data, list):     # quota message / error object -> signal error to the cache layer
+        return None
     out = []
-    for g in data if isinstance(data, list) else []:
+    for g in data:
         acc, nbk = {}, 0
         for bk in g.get("bookmakers", []):
             mk = next((m for m in bk.get("markets", []) if m.get("key") == "h2h"), None)

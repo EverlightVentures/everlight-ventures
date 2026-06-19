@@ -20,7 +20,8 @@ FUNDED = 116.26
 def sport_of(t):
     t = (t or "").upper()
     for pre, sp in (("KXNBA", "nba"), ("KXMLB", "mlb"), ("KXNHL", "nhl"), ("KXWC", "wc"),
-                    ("KXUFC", "ufc"), ("KXNFL", "nfl"), ("KXWNBA", "wnba")):
+                    ("KXUFC", "ufc"), ("KXNFL", "nfl"), ("KXWNBA", "wnba"),
+                    ("KXKBO", "kbo"), ("KXNPB", "npb")):
         if t.startswith(pre):
             return sp
     return "other"

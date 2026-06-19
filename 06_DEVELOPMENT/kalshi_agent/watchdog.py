@@ -47,7 +47,8 @@ STREAK_N = 3           # N consecutive losses in a sport -> quarantine it (Rich'
 
 # Kalshi ticker prefix -> sport, and sport -> Odds-API key (for the coverage check)
 SPORT_PREFIX = [("KXNBA", "nba"), ("KXMLB", "mlb"), ("KXNHL", "nhl"),
-                ("KXWC", "wc"), ("KXUFC", "ufc"), ("KXNFL", "nfl"), ("KXWNBA", "wnba")]
+                ("KXWC", "wc"), ("KXUFC", "ufc"), ("KXNFL", "nfl"), ("KXWNBA", "wnba"),
+                ("KXKBO", "kbo"), ("KXNPB", "npb")]
 
 
 def _client(creds):

@@ -44,7 +44,8 @@ UPCOMING = HERE / "data" / "upcoming_edges.json"   # what the engine is about to
 WD_STATE = HERE / "data" / "watchdog_state.json"   # the watchdog's brakes+gas (quarantines + lean-ins)
 
 _SPORT_PREFIX = (("KXNBA", "nba"), ("KXMLB", "mlb"), ("KXNHL", "nhl"), ("KXWC", "wc"),
-                 ("KXUFC", "ufc"), ("KXNFL", "nfl"), ("KXWNBA", "wnba"))
+                 ("KXUFC", "ufc"), ("KXNFL", "nfl"), ("KXWNBA", "wnba"),
+                 ("KXKBO", "kbo"), ("KXNPB", "npb"))
 
 
 def sport_of(ticker):

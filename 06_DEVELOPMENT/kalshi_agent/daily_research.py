@@ -50,6 +50,8 @@ SPORTS = {
     "mlb": {"espn": "baseball/mlb", "series": "KXMLBGAME", "kind": "ml2", "odds": "baseball_mlb"},
     "nhl": {"espn": "hockey/nhl", "series": "KXNHLGAME", "kind": "ml2", "odds": "icehockey_nhl"},
     "wc":  {"espn": "soccer/fifa.world", "series": "KXWCGAME", "kind": "soccer3", "odds": "soccer_fifa_world_cup"},
+    "kbo": {"series": "KXKBOGAME", "odds": "baseball_kbo", "slate": "oddsapi"},   # Korea, US-overnight
+    "npb": {"series": "KXNPBGAME", "odds": "baseball_npb", "slate": "oddsapi"},   # Japan, US-overnight
     "atp": {"espn": "tennis/atp", "series": "KXATPMATCH", "kind": "tennis2"},
     "wta": {"espn": "tennis/wta", "series": "KXWTAMATCH", "kind": "tennis2"},
 }
@@ -208,6 +210,42 @@ def _find_ticker(markets, date_tok, code_a, code_b, outcome):
     return None
 
 
+def oddsapi_slate(cfg):
+    """Name-matched slate for sports ESPN doesn't carry (KBO/NPB, etc). Match each Kalshi
+    market's yes_sub_title (the YES team) to the multi-book CONSENSUS fair by team name --
+    no ESPN abbreviations needed. Generalizes to any Kalshi series + Odds-API key.
+    Returns [{ticker, fair_prob, books, game}]."""
+    out = []
+    key = cfg.get("odds")
+    if not key:
+        return out
+    try:
+        cons = odds_api.consensus(key)
+    except Exception:
+        cons = []
+    if not cons:
+        return out
+    teammap = {}                          # normalized team name -> (consensus fair, books)
+    for g in cons:
+        bk = g.get("books", 1)
+        for nm, p in (g.get("probs") or {}).items():
+            teammap[odds_api._norm(nm)] = (p, bk)
+    try:
+        kmkts = _markets_by_series(cfg["series"])
+    except Exception:
+        kmkts = []
+    for m in kmkts:
+        sub, tk = m.get("yes_sub_title"), m.get("ticker")
+        if not sub or not tk:
+            continue
+        n = odds_api._norm(sub)
+        hit = teammap.get(n) or next((v for kk, v in teammap.items() if kk and (kk in n or n in kk)), None)
+        if not hit:
+            continue
+        out.append({"ticker": tk, "fair_prob": round(hit[0], 4), "books": hit[1], "game": m.get("title")})
+    return out
+
+
 def research(write=True):
     existing = {}
     if OVERRIDES.exists():
@@ -217,6 +255,31 @@ def research(write=True):
             existing = {}
     rows, ngames = [], 0
     for sport, cfg in SPORTS.items():
+        if cfg.get("slate") == "oddsapi":          # name-matched slate (KBO/NPB -- no ESPN feed)
+            try:
+                items = oddsapi_slate(cfg)
+            except Exception as e:
+                print("  (%s oddsapi slate failed: %s -- skipping)" % (sport, str(e)[:70]))
+                continue
+            for it in items:
+                ngames += 1
+                tk = it["ticker"]
+                try:
+                    yb, ya, nb, yc, nc = best_bbo(tk)
+                except Exception:
+                    ya = None
+                row = {"sport": sport, "ticker": tk, "outcome": "yes", "fair_prob": it["fair_prob"],
+                       "kalshi_ask": ya, "game": it.get("game"), "book": "consensus/%dbk" % it["books"]}
+                if ya is not None:
+                    row["edge_buy"] = round(it["fair_prob"] - ya / 100.0, 4)
+                rows.append(row)
+                if write:
+                    existing[tk] = {"fair_prob": it["fair_prob"],
+                                    "source": "consensus/%dbk %s oddsapi (daily_research)" % (it["books"], sport),
+                                    "books": it["books"],
+                                    "expires_ts": int(time.time()) + 18 * 3600,
+                                    "fresh_ts": int(time.time())}
+            continue
         try:
             slate = espn_slate(cfg)        # isolate each sport -- one bad feed can't abort the rest
         except Exception as e:
