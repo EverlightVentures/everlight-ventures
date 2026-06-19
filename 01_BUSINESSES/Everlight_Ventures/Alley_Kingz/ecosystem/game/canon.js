@@ -1510,7 +1510,7 @@ const CANON_CARDS = [
  "cost": 5,
  "role": "Striker",
  "hp": 1080,
- "damage": 219,
+ "damage": 185,
  "attack_speed": 1.18,
  "move_speed": 0.94,
  "range": 1,
@@ -1542,7 +1542,7 @@ const CANON_CARDS = [
  "rarity": "Legendary",
  "cost": 10,
  "role": "Vanguard",
- "hp": 3648,
+ "hp": 2850,
  "damage": 132,
  "attack_speed": 0.63,
  "move_speed": 0.48,
@@ -1608,7 +1608,7 @@ const CANON_CARDS = [
  "rarity": "Epic",
  "cost": 9,
  "role": "Vanguard",
- "hp": 3392,
+ "hp": 2850,
  "damage": 115,
  "attack_speed": 0.63,
  "move_speed": 0.48,
@@ -1872,7 +1872,7 @@ const CANON_CARDS = [
  "rarity": "Epic",
  "cost": 9,
  "role": "Vanguard",
- "hp": 3392,
+ "hp": 2850,
  "damage": 115,
  "attack_speed": 0.63,
  "move_speed": 0.48,
@@ -1971,8 +1971,8 @@ const CANON_CARDS = [
  "rarity": "Common",
  "cost": 2,
  "role": "Skirmisher",
- "hp": 504,
- "damage": 119,
+ "hp": 420,
+ "damage": 105,
  "attack_speed": 1.46,
  "move_speed": 1.54,
  "range": 1,
@@ -2038,7 +2038,7 @@ const CANON_CARDS = [
  "cost": 3,
  "role": "Striker",
  "hp": 864,
- "damage": 169,
+ "damage": 155,
  "attack_speed": 1.18,
  "move_speed": 1.21,
  "range": 1,
@@ -2104,7 +2104,7 @@ const CANON_CARDS = [
  "cost": 4,
  "role": "Lancer",
  "hp": 828,
- "damage": 225,
+ "damage": 205, // AK-FACTION: Ricochet (Zoomie Street Lancer) 225->205, trims a non-excluded high outlier toward parity (p/e 111->~106); within dmg clamp
  "attack_speed": 1.06,
  "move_speed": 0.94,
  "range": 2,
@@ -2170,7 +2170,7 @@ const CANON_CARDS = [
  "cost": 3,
  "role": "Skirmisher",
  "hp": 540,
- "damage": 138,
+ "damage": 125,
  "attack_speed": 1.46,
  "move_speed": 1.54,
  "range": 1,
@@ -2368,7 +2368,7 @@ const CANON_CARDS = [
  "cost": 5,
  "role": "Striker",
  "hp": 1080,
- "damage": 219,
+ "damage": 185,
  "attack_speed": 1.18,
  "move_speed": 1.21,
  "range": 1,
@@ -2764,7 +2764,7 @@ const CANON_CARDS = [
  "cost": 3,
  "role": "Lancer",
  "hp": 720,
- "damage": 188,
+ "damage": 175,
  "attack_speed": 1.06,
  "move_speed": 0.94,
  "range": 3,
@@ -2829,8 +2829,8 @@ const CANON_CARDS = [
  "rarity": "Common",
  "cost": 2,
  "role": "Skirmisher",
- "hp": 504,
- "damage": 119,
+ "hp": 420,
+ "damage": 105,
  "attack_speed": 1.46,
  "move_speed": 1.21,
  "range": 2,
@@ -2929,7 +2929,7 @@ const CANON_CARDS = [
  "cost": 5,
  "role": "Structure",
  "hp": 1344,
- "damage": 72,
+ "damage": 80, // AK-FACTION: Bunker (K9 Heavy Structure) 72->80 (Heavy-structure relief ~0.85->0.95 mult), lifts the lowest non-excluded K9 outlier toward parity (p/e 74->~78)
  "attack_speed": 0.9,
  "move_speed": 0.0,
  "range": 5,
@@ -3061,7 +3061,7 @@ const CANON_CARDS = [
  "cost": 6,
  "role": "Structure",
  "hp": 1472,
- "damage": 81,
+ "damage": 90,
  "attack_speed": 0.9,
  "move_speed": 0.0,
  "range": 4,
@@ -3325,7 +3325,7 @@ const CANON_CARDS = [
  "cost": 8,
  "role": "Structure",
  "hp": 1856,
- "damage": 106,
+ "damage": 120,
  "attack_speed": 0.9,
  "move_speed": 0.0,
  "range": 4,
@@ -3619,8 +3619,10 @@ const AIR_UNITS = {
   'Pixel Greyhound':true, 'Neon Whippet':true, 'Flash Saluki':true, 'Bolt Corgi':true,
   'Ghost Spaniel':true, 'Drift Sheltie':true,
   'Neon Dachshund':true, 'Pixel Pug':true,
-  // Heavy/Street air variants (inherit their parent line's air domain):
-  'Roadblock':true, 'Nitro':true, 'Crashcage':true, 'Hotwire':true,
+  // AK-AIRFIX: range-1 MELEE skirmisher variants moved to GROUND so the 35 ground-only
+  // cards can answer them (was unhittable melee air). Grounded: Roadblock, Nitro,
+  // Crashcage, Hotwire. Kept air below = RANGED (range 2) anti-air flyers, NOT the
+  // melee-air break (Spike is range 2 Leashbreak, mispaired with Nitro by stats):
   'Bumper':true, 'Backfire':true, 'Hardline':true, 'Spike':true
 };
 // Identity splash overrides (Spec section 2/3: a few legendaries crush swarms).
@@ -3692,7 +3694,7 @@ const CANON_SPELLS = [
     name: 'Jolt', short: 'JOLT',
     type: 'spell', factionId: 'zoomie_syndicate', class: 'Zoomie Syndicate',
     rarity: 'Common', cost: 3, cooldown: 9,
-    effect: 'zap', radius: 2.4, duration: 0.5, damage: 130,
+    effect: 'zap', radius: 2.4, duration: 0.5, damage: 210, // AK-SPELLFIX: 130->210, scaled proportional to Strike; stays chip+stun (cannot solo a 420-HP troop)
     spellNumber: 'S004', glyph: '⚡',  // high voltage
     fx: 'zap',
     description: 'Instant AOE damage + 0.5s stun. Kills swarms, resets attacks.'
@@ -3701,7 +3703,7 @@ const CANON_SPELLS = [
     name: 'Strike', short: 'STRIKE',
     type: 'spell', factionId: 'neutral', class: 'Neutral',
     rarity: 'Epic', cost: 4, cooldown: 11,
-    effect: 'strike', radius: 2.6, duration: 0, damage: 320,
+    effect: 'strike', radius: 2.6, duration: 0, damage: 520, // AK-SPELLFIX: 320->520 so it kills the cheapest real troops (min HP ~420-504); CC spells (Freeze/Tar/Snare) untouched
     spellNumber: 'S005', glyph: '✹',  // burst star
     fx: 'strike',
     description: 'The fireball: medium AOE burst damage at a point.'
