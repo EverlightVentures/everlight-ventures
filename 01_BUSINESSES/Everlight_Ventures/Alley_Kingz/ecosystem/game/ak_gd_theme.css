@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@500;600;700&display=swap');
+/* ==========================================================================
+ * ak_gd_theme.css -- AK-GDTHEME 2026-06-15
+ * ONE override layer that retones every in-game menu/overlay to the Chop Shop
+ * "gd" look: gold #D4AF37, gold-radial vanta-black bg, Cinzel/Anton display
+ * headers, gold-glass cards + gold-gradient buttons. Loaded LAST in index.html;
+ * !important beats the overlays' runtime-injected CSS (which is plain, no
+ * !important). Operator 2026-06-15: "upgrade the ugly pages to match the chop
+ * shop -- not the other way around." The Chop Shop itself (shop.css) is the
+ * source of truth and is untouched.
+ * ======================================================================== */
+:root{
+  --gd-gold:#D4AF37; --gd-gold-hi:#f3d77a; --gd-gold-lo:#9c7d28;
+  --gd-ink:#0a0a0a; --gd-line:rgba(212,175,55,.26);
+  --gd-glass:linear-gradient(160deg, rgba(26,24,34,.93), rgba(10,10,14,.97));
+  --gd-bg:radial-gradient(920px 500px at 50% -6%, rgba(212,175,55,.11), transparent), #0a0a0a;
+  --gd-disp:'Cinzel','Anton','Playfair Display',serif;
+}
+
+/* ---- overlay SHELLS: premium gold-radial bg (kills the flat #0b0b12 dark) ---- */
+#ak-pass, #ak-drip, #ak-social, #ak-quests{ background:var(--gd-bg) !important; }
+
+/* ---- top bars -> gold-glass header ---- */
+#ak-pass .akp-top, #ak-drip .akd-top, #ak-social .aks-top, #ak-quests .akq-top{
+  background:rgba(8,8,12,.86) !important; -webkit-backdrop-filter:blur(14px); backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--gd-line) !important; padding:13px 15px !important;
+}
+/* ---- titles -> Cinzel/Anton gold ---- */
+#ak-pass .akp-top h2, #ak-drip .akd-top h2, #ak-social .aks-top h2, #ak-quests .akq-top h2{
+  font-family:var(--gd-disp) !important; font-weight:800 !important; color:var(--gd-gold) !important;
+  font-size:20px !important; letter-spacing:.6px !important; margin:0 !important;
+}
+.akp-x, .akd-x, .aks-x, .akq-x{ color:var(--gd-gold) !important; }
+
+/* ---- secondary gold text + section heads -> chop-shop gold ---- */
+.akd-gold, .akp-prem, .akq-rw{ color:var(--gd-gold-hi) !important; }
+.akd-sec, .akq-sec, .aks-sub{
+  font-family:var(--gd-disp) !important; color:var(--gd-gold-hi) !important;
+  letter-spacing:.08em !important; text-transform:uppercase !important;
+}
+
+/* ---- primary buttons -> chop-shop gold gradient ---- */
+.akp-btn, .akd-btn, .aks-btn, .akq-btn{
+  background:linear-gradient(135deg, var(--gd-gold-hi), var(--gd-gold) 60%, var(--gd-gold)) !important;
+  color:#0a0a0e !important; border:0 !important; border-radius:10px !important; font-weight:800 !important;
+  letter-spacing:.02em !important;
+}
+.akp-btn:disabled, .akd-btn:disabled, .aks-btn:disabled, .akq-btn:disabled{ filter:grayscale(.6); opacity:.5; }
+
+/* ---- glass cards / rows / lanes ---- */
+#ak-drip .akd-item, #ak-social .aks-card, #ak-social .aks-msg, #ak-quests .akq-card,
+#ak-pass .akp-tier, #ak-pass .akp-lane{
+  background:var(--gd-glass) !important; border:1px solid rgba(255,255,255,.07) !important;
+  border-radius:13px !important;
+}
+#ak-drip .akd-item:hover, #ak-social .aks-card:hover{ border-color:var(--gd-gold) !important; }
+
+/* ---- tabs (drip + crew) -> gold underline, like the chop-shop .aks-tab ---- */
+#ak-drip .akd-tab.sel, #ak-drip .akd-tab[aria-selected="true"],
+#ak-social .aks-tab.sel, #ak-social .aks-tab[aria-selected="true"]{
+  color:var(--gd-gold) !important; border-color:transparent !important;
+  box-shadow:0 -2px 0 var(--gd-gold) inset !important; background:rgba(212,175,55,.06) !important;
+}
+
+/* ---- progress fills + rarity dots -> gold ---- */
+.akp-fill, .akq-fill{ background:linear-gradient(90deg, var(--gd-gold), var(--gd-gold-hi)) !important; }
+.aks-dot{ box-shadow:0 0 8px var(--gd-gold) !important; }
+
+/* ---- toasts -> gold-glass ---- */
+.akp-toast, .akd-toast, .aks-toast, .akq-toast{
+  border:1px solid rgba(212,175,55,.5) !important; color:var(--gd-gold-hi) !important;
+  background:rgba(8,8,12,.96) !important;
+}
+
+/* ======================================================================
+ * IN-GAME SCREENS (index.html .screen sections): Deck Lab / Profile /
+ * Codex / Crates -- shell retone to the same premium bg + gold headers.
+ * ==================================================================== */
+#deckscreen, #profilescreen, #codexscreen, #cratedrawer{ background:var(--gd-bg) !important; }
+#deckscreen h1, #deckscreen h2, #profilescreen h1, #profilescreen h2,
+#cratedrawer h1, #cratedrawer h2{
+  font-family:var(--gd-disp) !important; color:var(--gd-gold) !important; letter-spacing:.04em !important;
+}
+/* generic .screen primary buttons (Deck Lab / Profile actions) -> gold gradient */
+#deckscreen .btn, #profilescreen .btn, #cratedrawer .btn{
+  background:linear-gradient(135deg, var(--gd-gold-hi), var(--gd-gold)) !important; color:#0a0a0e !important;
+  border:0 !important;
+}
+
+/* ============================================================
+ * AK-GDMATCH 2026-06-15: make Drip/Crew/Alley Pass/Hit List TRULY match the
+ * Chop Shop -- the shell was themed, but the inner TYPE (Arial) + FRAMING
+ * (rounded) still read as a "basic AK webpage". Fix = Anton/Oswald condensed
+ * type + clip-path stamped panels (not border-radius) + uppercase, exactly
+ * like the shop's .aks-card / .aks-btn / .aks-tab / .aks-sec-title.
+ * ============================================================ */
+
+/* body type -> Oswald (kills the Arial fallback that screamed "basic html") */
+#ak-drip, #ak-social, #ak-pass, #ak-quests,
+#ak-drip *, #ak-social *, #ak-pass *, #ak-quests *{ font-family:'Oswald','Inter',sans-serif !important; }
+
+/* headers + section labels -> Anton condensed (id-scoped so they beat the * rule) */
+#ak-drip .akd-top h2, #ak-social .aks-top h2, #ak-pass .akp-top h2, #ak-quests .akq-top h2,
+#ak-drip .akd-sec, #ak-social .aks-sub, #ak-quests .akq-sec, #ak-pass .akp-sec, #ak-pass .akp-prem{
+  font-family:'Anton','Oswald',sans-serif !important; letter-spacing:.06em !important; text-transform:uppercase !important;
+}
+
+/* buttons -> stamped clip-path + Oswald uppercase, like .aks-btn */
+.akp-btn, .akd-btn, .aks-btn, .akq-btn{
+  clip-path:polygon(8px 0,100% 0,100% 100%,0 100%,0 8px) !important; border-radius:0 !important;
+  font-family:'Oswald',sans-serif !important; font-weight:700 !important; text-transform:uppercase !important; letter-spacing:.6px !important;
+}
+/* tabs -> stamped clip-path + Oswald, like .aks-tab */
+#ak-drip .akd-tab, #ak-social .aks-tab{
+  clip-path:polygon(10px 0,100% 0,100% 100%,0 100%,0 0) !important; border-radius:0 !important;
+  font-family:'Oswald',sans-serif !important; text-transform:uppercase !important; letter-spacing:1px !important;
+}
+/* content panels/cards/rows/chat -> stamped (not rounded), like .aks-card */
+#ak-drip .akd-item, #ak-social .aks-card, #ak-social .aks-msg, #ak-social .aks-li,
+#ak-quests .akq-card, #ak-pass .akp-tier, #ak-pass .akp-lane, #ak-pass .akp-cell{
+  clip-path:polygon(10px 0,100% 0,100% 100%,0 100%,0 10px) !important; border-radius:0 !important;
+}
+
+/* AK-MENUART: custom menu-tile icons (swap emoji -> image, emoji is the fallback) */
+#startscreen.ak-relayout #ak-iconrow .mt-ico.ak-tileart,
+#startscreen.ak-relayout #ak-tabbar .mt-ico.ak-tileart,
+#startscreen.ak-relayout #skillsbtn .sb-ico.ak-tileart{
+  display:block !important; width:36px; height:36px; margin:0 auto 2px; color:transparent !important;
+  background-size:cover; background-position:center; background-repeat:no-repeat; border-radius:9px;
+  box-shadow:0 0 10px -3px rgba(212,175,55,.5);
+}

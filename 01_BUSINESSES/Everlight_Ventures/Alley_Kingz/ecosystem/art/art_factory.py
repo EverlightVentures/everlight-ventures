@@ -16,7 +16,7 @@ SOURCES (priority order):
 RUN:   LEONARDO_API_KEY=xxx python3 art_factory.py --limit 12
 ENQUEUE: python3 art_factory.py --enqueue --id shop_chest_crew --prompt "<gritty prompt>" --out game/assets/cards/chest_crew.png
 """
-import os, sys, json, time, argparse, urllib.request, urllib.error
+import os, sys, json, time, base64, argparse, urllib.request, urllib.error
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ECO  = os.path.normpath(os.path.join(HERE, ".."))
@@ -58,6 +58,32 @@ def leo_gen(prompt, neg, w, h, key):
             raise RuntimeError("complete no url")
         if g.get("status") == "FAILED": raise RuntimeError("FAILED")
     raise RuntimeError("timeout")
+
+CF_ACCT = os.environ.get("CLOUDFLARE_ACCOUNT_ID", "d06376317522c7451e390a9af44aebba")
+CF_AI = "https://api.cloudflare.com/client/v4/accounts/%s/ai/run/" % CF_ACCT
+
+def cf_gen(prompt, neg, w, h, tok):
+    # Cloudflare Workers AI -- 10k free neurons/day (~100+ images), no renewal cliff.
+    # flux-1-schnell is square-only JSON+b64; SDXL takes width/height and returns raw PNG.
+    if w == h:
+        model = "@cf/black-forest-labs/flux-1-schnell"
+        body = {"prompt": (prompt + (" . avoid: " + neg if neg else ""))[:2040], "steps": 8}
+    else:
+        model = "@cf/stabilityai/stable-diffusion-xl-base-1.0"
+        body = {"prompt": prompt[:2040], "width": w, "height": h, "num_steps": 20}
+        if neg: body["negative_prompt"] = neg[:2040]
+    req = urllib.request.Request(CF_AI + model, data=json.dumps(body).encode(), method="POST")
+    req.add_header("Authorization", "Bearer " + tok); req.add_header("Content-Type", "application/json")
+    try:
+        raw = urllib.request.urlopen(req, timeout=180).read()
+    except urllib.error.HTTPError as e:
+        raise RuntimeError("cf %d: %s" % (e.code, e.read().decode()[:120]))
+    if raw[:1] == b"{":
+        j = json.loads(raw)
+        img = (j.get("result") or {}).get("image")
+        if not img: raise RuntimeError("cf no image: " + str(j.get("errors"))[:100])
+        return base64.b64decode(img)
+    return raw
 
 def resolve(p):
     if os.path.isabs(p): return p
@@ -106,36 +132,82 @@ def enqueue(a):
     json.dump(q, open(QUEUE, "w"), indent=2)
     print("enqueued:", a.id, "->", a.out)
 
+def _is_map(jid):
+    return str(jid).startswith("map_")
+
+
+def _apply_lane(jobs, lane):
+    """Alternate the daily focus -- cards one day, maps the next (50/50) -- so BOTH
+    keep flowing into the game evenly instead of finishing all cards before any maps.
+    'auto' picks the lane by UTC day-of-year parity (even=cards, odd=maps).
+    If the chosen lane is already fully painted, spend the day on the other one."""
+    if lane == "auto":
+        import datetime
+        doy = datetime.datetime.now(datetime.timezone.utc).timetuple().tm_yday
+        lane = "cards" if doy % 2 == 0 else "maps"
+        print("  lane=auto -> '%s' (UTC day-of-year %d)" % (lane, doy))
+    if lane not in ("cards", "maps"):
+        return jobs
+    want_map = (lane == "maps")
+    laned = [j for j in jobs if _is_map(j[0]) == want_map]
+    if not laned:
+        print("  '%s' lane fully painted -> working the other lane today" % lane)
+        return jobs
+    print("  lane '%s': %d of %d outstanding assets" % (lane, len(laned), len(jobs)))
+    return laned
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=0); ap.add_argument("--delay", type=float, default=2.0)
     ap.add_argument("--enqueue", action="store_true")
     ap.add_argument("--id"); ap.add_argument("--prompt", default=""); ap.add_argument("--out", default="")
     ap.add_argument("--neg", default=""); ap.add_argument("--w", type=int, default=768); ap.add_argument("--h", type=int, default=768)
+    ap.add_argument("--lane", choices=["all", "cards", "maps", "auto"], default="all")
     a = ap.parse_args()
     if a.enqueue:
         if not (a.id and a.prompt and a.out): print("need --id --prompt --out"); return 2
         enqueue(a); return 0
-    key = os.environ.get("LEONARDO_API_KEY")
-    if not key: print("no LEONARDO_API_KEY"); return 2
+    # Engine failover chain. Leonardo API credits are PURCHASED (no daily reset --
+    # verified 2026-06-10: apiPaidTokens=21, renewal=null), so when they run dry the
+    # batch fails over to Cloudflare Workers AI (CF_AI_TOKEN, 10k free neurons/day)
+    # instead of waiting for a reset that never comes.
+    leo_key = os.environ.get("LEONARDO_API_KEY")
+    cf_tok  = os.environ.get("CF_AI_TOKEN")
+    engines = [e for e, k in (("leo", leo_key), ("cf", cf_tok)) if k]
+    if not engines: print("no art engine keys (set LEONARDO_API_KEY and/or CF_AI_TOKEN)"); return 2
     jobs = worklist()
-    print("art_factory: %d assets need painting" % len(jobs))
+    jobs = _apply_lane(jobs, a.lane)
+    print("art_factory: %d assets need painting (engines: %s)" % (len(jobs), "+".join(engines)))
     made = fail = streak = 0
     for jid, prompt, neg, out, w, h in jobs:
         if a.limit and made >= a.limit: print("-- hit --limit %d --" % a.limit); break
+        if not engines: break
         try:
-            data = leo_gen(prompt, neg, w, h, key)
+            data = None
+            while engines:
+                eng = engines[0]
+                try:
+                    data = leo_gen(prompt, neg, w, h, leo_key) if eng == "leo" else cf_gen(prompt, neg, w, h, cf_tok)
+                    break
+                except Exception as e:
+                    msg = str(e)
+                    # exhausted/unauthorized engines won't recover mid-batch: drop and fail over
+                    leo_dead = eng == "leo" and ("not enough api tokens" in msg or "gen 400" in msg or "429" in msg)
+                    cf_dead  = eng == "cf"  and any(s in msg for s in ("cf 401", "cf 403", "cf 429", "capacity"))
+                    if leo_dead or cf_dead:
+                        print("  -- engine %s down (%s); failing over --" % (eng, msg[:70]))
+                        engines.pop(0); continue
+                    raise
+            if not engines:
+                print("  -- all art engines exhausted; stopping batch --"); fail += 1; break
             if not data: raise RuntimeError("empty image")
             os.makedirs(os.path.dirname(out), exist_ok=True)
             with open(out, "wb") as f: f.write(data)   # write ONLY on real bytes -- never leave a 0-byte stub
             made += 1; streak = 0
-            print("  PAINTED", jid)
+            print("  PAINTED %s (via %s)" % (jid, engines[0]))
         except Exception as e:
             msg = str(e); print("  FAIL", jid, msg[:80]); fail += 1; streak += 1
-            # Daily free-token exhaustion (400 "not enough api tokens") or rate cap
-            # won't clear mid-batch: stop fast instead of churning the whole worklist.
-            if "not enough api tokens" in msg or "gen 400" in msg or "429" in msg:
-                print("  -- Leonardo tokens exhausted; stopping until UTC reset --"); break
             if streak >= 3:
                 print("  -- %d consecutive failures; aborting batch --" % streak); break
         time.sleep(a.delay)

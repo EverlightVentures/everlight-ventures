@@ -14,7 +14,7 @@
   <title>Alley Kingz // Chop Shop</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="shop.css">
+  <link rel="stylesheet" href="shop.css?v=1781486888">
   <style>
     html,body{margin:0;height:100%;background:#050507}
     /* Lightweight launcher shown only when the overlay is closed (standalone use). */
@@ -29,6 +29,16 @@
 </head>
 <!-- data-akshop-standalone="1" tells shop.js to auto-open on load. -->
 <body data-akshop-standalone="1">
+  <!-- AK-BACK: standalone shop always offers the road home (operator 2026-06-12:
+       "once I enter the chop shop there's no way for me to go back to the game") -->
+  <a id="aks-backlink" href="../">&larr; BACK TO THE ALLEY</a>
+  <style>
+    #aks-backlink{position:fixed;top:max(10px,env(safe-area-inset-top));left:10px;z-index:99999;
+      font:800 11px/1 Inter,sans-serif;letter-spacing:.1em;text-decoration:none;
+      color:#D4AF37;background:rgba(8,8,14,.92);border:1px solid rgba(212,175,55,.4);
+      padding:9px 13px;border-radius:10px}
+    #aks-backlink:active{transform:scale(.96)}
+  </style>
   <div id="aks-launch">
     <h1>ALLEY KINGZ // CHOP SHOP</h1>
     <p>Back-alley black market for the dog crews. Pull the Lucky Draw for Mythic rigs,
@@ -46,10 +56,19 @@
   <!-- account layer: Google sign-in + cloud save + ak_player_id + anon key.
        Sets window.AK_SUPABASE_ANON_KEY and re-opens the shop ONLINE once the
        session restores. Signed out = labelled DEMO data, exactly as before. -->
-  <script src="../ak_account.js"></script>
+  <script src="../ak_account.js?v=1781486888"></script>
 
   <!-- card catalog (window.AK_CARDS, 106 cards) -> drives real-art Card Shop + Draw -->
-  <script src="cards_catalog.js"></script>
-  <script src="shop.js"></script>
+  <script src="cards_catalog.js?v=1781486888"></script>
+  <!-- AK-CARDX: canon stats (window.CANON_CARDS: hp/dmg/cost/range/ability) for the multi-tab card detail -->
+  <script src="../canon.js?v=1781486888"></script>
+  <!-- AK-LORE: taglines + bios (window.AK_LORE_GET); shop degrades cleanly if absent -->
+  <script src="../cards_lore.js?v=1781486888"></script>
+  <!-- AK-HANDLER: commander roster (window.AK_HANDLERS) for the Handlers tab -->
+  <script src="../handlers_data.js?v=1781486888"></script>
+  <script src="../keywords_data.js?v=1781486888"></script>
+  <!-- AK-PORT: social.js loaded for AKSocial.claimGrants (grant rail used by Pass/Hit/Crew tabs); its overlay never opens here -->
+  <script src="../social.js?v=1781486888"></script>
+  <script src="shop.js?v=1781486888"></script>
 </body>
 </html>

@@ -3733,6 +3733,9 @@ if (typeof window !== 'undefined') { window.CANON_META = CANON_META; window.CANO
     var num = String(card.cardNumber || card.num || card.id || '').replace(/[^0-9]/g,'');
     if(!num || !s) return '';
     num = ('0000' + num).slice(-4);
-    return 'cards/' + num + '_' + s + '.png';                          // unified: number-prefixed + name slug, one folder
+    return 'cards/' + num + '_' + s + '.webp';                         // AK-WEBP 2026-06-18: ~93% smaller than PNG; PNG stays as the akImgErr onerror fallback
   };
+  // AK-WEBP onerror fallback: if a .webp <img> fails to load (missing file or no WebP support), swap to the .png
+  // ONCE. Returns true if it retried (caller should NOT remove the img yet), false otherwise. Safe no-op on non-webp.
+  g.akImgErr = function(img){ try{ if(img && !img._fb && /\.webp(\?|$)/.test(img.src||'')){ img._fb=1; img.src=String(img.src).replace(/\.webp(\?|$)/, '.png$1'); return true; } }catch(_e){} return false; };
 })(typeof window !== 'undefined' ? window : (typeof global !== 'undefined' ? global : this));

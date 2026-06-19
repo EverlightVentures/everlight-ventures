@@ -1,0 +1,461 @@
+[
+ {
+  "date": "2026-06-14",
+  "time": "17:22 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "COMBAT HUD CLEANUP: enemy King + Princess tower HP now render below the towers so they're never hidden up top; active synergies moved to a vertical rail on the LEFT (off the towers); phase-2 speed corrected to 1.0; one voice per card on deploy."
+ },
+ {
+  "date": "2026-06-14",
+  "time": "15:03 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "WORLD MAP IS BACK ON PLAY: tapping PLAY NOW drops you onto the campaign map at your current city -- the road, your stars, locked/unlocked levels -- and tapping your level offers Resume Checkpoint or From Start. Pick up exactly where you left off."
+ },
+ {
+  "date": "2026-06-14",
+  "time": "14:59 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "STRATEGY: towers + spawners with lifetime left now ROLL OVER into the next phase -- drop a den or turret before a district ends and it's already defending when the next one opens. Both sides play by this rule."
+ },
+ {
+  "date": "2026-06-14",
+  "time": "14:39 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "SHOP FIX: you can now buy a card you already own to STACK copies toward upgrades (owned cards show 'Stack +1'). The bogus 'sign in to stack copies' block is gone -- if you have the Scrap, you buy it, period."
+ },
+ {
+  "date": "2026-06-14",
+  "time": "14:25 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "COMBAT LOGIC (Clash-Royale rules): spawners + buildings now have a LIFETIME (Pug den ~30s, towers ~40s) so they crumble instead of spawning forever; troops COMMIT to their target and finish it (only Assassins/Skirmishers re-pick); and the map only changes at the phase transition now, never mid-fight."
+ },
+ {
+  "date": "2026-06-14",
+  "time": "12:59 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "COMBAT FIX: enemy troops no longer freeze in a blob at the back of their towers. They were getting parked just out of attack range by the surround logic -- now overflow attackers press in and fight instead of piling up untouchable. Your pushes can break through again."
+ },
+ {
+  "date": "2026-06-14",
+  "time": "11:29 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "EVERY CARD NOW SPEAKS IN A REAL VOICE: 111 premium ElevenLabs voice lines (deep giants, yippy little dogs, gravelly Boneguard) play when you deploy -- free device voices are the fallback. Plus the tutorial board is brighter so you can see the map while you learn."
+ },
+ {
+  "date": "2026-06-13",
+  "time": "12:10 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "PLAYABLE AGAIN: fixed the bug that blacked out the match (a menu screen was layering over the board) -- every match now shows the full bright arena. New players land straight on the working lobby; the hands-on tutorial is being rebuilt right."
+ },
+ {
+  "date": "2026-06-13",
+  "time": "11:02 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "PLAYABILITY FIX: the tutorial no longer blacks out the screen -- the lobby and the live match stay bright and visible, the spotlight just gently dims around the card it is teaching. The intro is now one line that drops you straight into hands-on play, not a story wall."
+ },
+ {
+  "date": "2026-06-13",
+  "time": "02:16 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "TUTORIAL REBORN: new players now LEARN BY PLAYING -- a guided first match that makes you drag cards, manage energy, take a tower, open your first crate (skippable, replayable in settings). And the last stray Everlight link is gone -- the alley is fully its own house."
+ },
+ {
+  "date": "2026-06-13",
+  "time": "02:08 PDT",
+  "count": 12,
+  "painted": [
+   "map_rain_docks_L01_market",
+   "map_rain_docks_L01_works",
+   "map_rain_docks_L01_core",
+   "map_rain_docks_L02_gate",
+   "map_rain_docks_L02_market",
+   "map_rain_docks_L02_works",
+   "map_rain_docks_L02_core",
+   "map_rain_docks_L03_gate",
+   "map_rain_docks_L03_market",
+   "map_rain_docks_L03_works",
+   "map_rain_docks_L03_core",
+   "map_rain_docks_L04_gate"
+  ],
+  "remaining": "267"
+ },
+ {
+  "date": "2026-06-13",
+  "time": "01:45 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "WAVE 8: battlefield loot now drops chest KEYS + card-copy SHARDS, SPECIALIZATIONS unlock at level 10 (commit a path, get exclusive nodes), painted city maps are now the in-match BACKDROPS, damage spells actually KILL now, and the roster is fairer (air-melee fixed, faction gap closed). Card voices now have premium-voice samples staged."
+ },
+ {
+  "date": "2026-06-13",
+  "time": "01:40 PDT",
+  "count": 12,
+  "painted": [
+   "map_golden_industrial_L08_market",
+   "map_golden_industrial_L08_works",
+   "map_golden_industrial_L08_core",
+   "map_golden_industrial_L09_gate",
+   "map_golden_industrial_L09_market",
+   "map_golden_industrial_L09_works",
+   "map_golden_industrial_L09_core",
+   "map_golden_industrial_L10_gate",
+   "map_golden_industrial_L10_market",
+   "map_golden_industrial_L10_works",
+   "map_golden_industrial_L10_core",
+   "map_rain_docks_L01_gate"
+  ],
+  "remaining": "279"
+ },
+ {
+  "date": "2026-06-13",
+  "time": "01:12 PDT",
+  "count": 12,
+  "painted": [
+   "map_golden_industrial_L05_market",
+   "map_golden_industrial_L05_works",
+   "map_golden_industrial_L05_core",
+   "map_golden_industrial_L06_gate",
+   "map_golden_industrial_L06_market",
+   "map_golden_industrial_L06_works",
+   "map_golden_industrial_L06_core",
+   "map_golden_industrial_L07_gate",
+   "map_golden_industrial_L07_market",
+   "map_golden_industrial_L07_works",
+   "map_golden_industrial_L07_core",
+   "map_golden_industrial_L08_gate"
+  ],
+  "remaining": "291"
+ },
+ {
+  "date": "2026-06-13",
+  "time": "00:35 PDT",
+  "count": 12,
+  "painted": [
+   "map_golden_industrial_L02_market",
+   "map_golden_industrial_L02_works",
+   "map_golden_industrial_L02_core",
+   "map_golden_industrial_L03_gate",
+   "map_golden_industrial_L03_market",
+   "map_golden_industrial_L03_works",
+   "map_golden_industrial_L03_core",
+   "map_golden_industrial_L04_gate",
+   "map_golden_industrial_L04_market",
+   "map_golden_industrial_L04_works",
+   "map_golden_industrial_L04_core",
+   "map_golden_industrial_L05_gate"
+  ],
+  "remaining": "303"
+ },
+ {
+  "date": "2026-06-12",
+  "time": "23:20 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "BALANCE PASS: the streets are fair. Over-strong Street commons trimmed (Nitro/Spike/Knuckles/Flatline/Switchblade/Carrier/Hotwire), the 2850 HP ceiling enforced so nothing out-tanks $BCARDD (Tombstone/Anvil/Slab), and the two weakest Heavy structures buffed (Emplacement/Flakwall). The 48 originals were already on-curve, untouched."
+ },
+ {
+  "date": "2026-06-12",
+  "time": "22:59 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "SHOP CHAIN FIXED: charges labeled honestly (no more TEST MODE), your login sticks, every card you pull or win now lands in your collection (upgrade counts work), upgrades no longer freeze, and the whole roster has distinct voices instead of two."
+ },
+ {
+  "date": "2026-06-12",
+  "time": "22:30 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "THE BIG ONE: loot drops in battle (DMZ-style, real shrunk art), 30 sidequests + a quest journal, NEMESIS rivals that remember you + a climbing opponent name ladder, THE CODEX encyclopedia, a new-player tutorial, the full district transition showpiece, card nicknames + rap sheets + badges + profile themes, and your reported bugs squashed (drag-to-cancel, enemy king HP, towers-only phase carry)."
+ },
+ {
+  "date": "2026-06-12",
+  "time": "17:15 PDT",
+  "count": 12,
+  "painted": [
+   "loot_scrap_shard",
+   "loot_key_fragment",
+   "loot_tag_frame",
+   "loot_power_bone",
+   "map_neon_night_L05_works",
+   "map_neon_night_L07_works",
+   "map_neon_night_L08_market",
+   "map_neon_night_L08_core",
+   "map_neon_night_L09_gate",
+   "map_neon_night_L09_market",
+   "map_neon_night_L09_works",
+   "map_neon_night_L09_core"
+  ],
+  "remaining": "324"
+ },
+ {
+  "date": "2026-06-12",
+  "time": "13:15 PDT",
+  "count": 12,
+  "painted": [
+   "map_neon_night_L05_gate",
+   "map_neon_night_L05_market",
+   "map_neon_night_L05_core",
+   "map_neon_night_L06_gate",
+   "map_neon_night_L06_market",
+   "map_neon_night_L06_works",
+   "map_neon_night_L06_core",
+   "map_neon_night_L07_gate",
+   "map_neon_night_L07_market",
+   "map_neon_night_L07_core",
+   "map_neon_night_L08_gate",
+   "map_neon_night_L08_works"
+  ],
+  "remaining": "332"
+ },
+ {
+  "date": "2026-06-12",
+  "time": "12:44 PDT",
+  "count": 12,
+  "painted": [
+   "map_neon_night_L02_gate",
+   "map_neon_night_L02_market",
+   "map_neon_night_L02_works",
+   "map_neon_night_L02_core",
+   "map_neon_night_L03_gate",
+   "map_neon_night_L03_market",
+   "map_neon_night_L03_works",
+   "map_neon_night_L03_core",
+   "map_neon_night_L04_gate",
+   "map_neon_night_L04_market",
+   "map_neon_night_L04_works",
+   "map_neon_night_L04_core"
+  ],
+  "remaining": "344"
+ },
+ {
+  "date": "2026-06-12",
+  "time": "12:16 PDT",
+  "count": 12,
+  "painted": [
+   "map_the_lot_L09_gate",
+   "map_the_lot_L09_market",
+   "map_the_lot_L09_works",
+   "map_the_lot_L09_core",
+   "map_the_lot_L10_gate",
+   "map_the_lot_L10_market",
+   "map_the_lot_L10_works",
+   "map_the_lot_L10_core",
+   "map_neon_night_L01_gate",
+   "map_neon_night_L01_market",
+   "map_neon_night_L01_works",
+   "map_neon_night_L01_core"
+  ],
+  "remaining": "356"
+ },
+ {
+  "date": "2026-06-12",
+  "time": "11:43 PDT",
+  "count": 12,
+  "painted": [
+   "nova-shepherd",
+   "laser-beagle",
+   "volt-corgi",
+   "grid-schnauzer",
+   "chrome-airedale",
+   "beacon-basset",
+   "neon-dachshund",
+   "flux-pomeranian",
+   "rail-terrier",
+   "pixel-pug",
+   "map_the_lot_L08_works",
+   "map_the_lot_L08_core"
+  ],
+  "remaining": "368"
+ },
+ {
+  "date": "2026-06-12",
+  "time": "11:13 PDT",
+  "count": 12,
+  "painted": [
+   "shop_earned_wood",
+   "shop_earned_bronze",
+   "shop_earned_silver",
+   "shop_earned_gold",
+   "shop_earned_diamond",
+   "signal-pointer",
+   "ghost-spaniel",
+   "echo-dalmatian",
+   "static-sheba-inu",
+   "vibe-shih-tzu",
+   "crown-foxhound",
+   "circuit-retriever"
+  ],
+  "remaining": "380"
+ },
+ {
+  "date": "2026-06-12",
+  "time": "05:20 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "YOUR DOGS SPEAK: every card says its line when deployed (big dogs boom, small dogs yip; voice toggle in lobby). Every stat now DEFINED with real numbers on the card sheet -- and card upgrades now truly power up your units in battle (+6% HP/DMG per level). Fixed: upgrades were not applying before."
+ },
+ {
+  "date": "2026-06-12",
+  "time": "02:32 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "YOUR ALLEY, YOUR RULES: pick your starting district on beaten levels, the Garage now holds your WHOLE collection (dupes visible, level up right there), the arena edge pulses to the music, and the Chop Shop finally has a back door."
+ },
+ {
+  "date": "2026-06-12",
+  "time": "01:11 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "COMBAT READS CLEAN: melee now surrounds targets in rings (no more stacking), air dogs actually FLY (elevation + shadows + up/down shots), and card tuning expands to 6 attributes: HP, damage, defense, special defense, agility, attack speed."
+ },
+ {
+  "date": "2026-06-12",
+  "time": "00:29 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "EVERY CARD HAS A VOICE: unique bark + weapon sounds for all 111 (big dogs boom, small dogs yip), taglines flash on deploy, full bios in the collection, and skill tuning now lives ON the card. Mute toggle in the lobby."
+ },
+ {
+  "date": "2026-06-11",
+  "time": "20:27 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "COMBAT OVERHAUL: real attack ranges per class, no more dog-piles (bodies separate), GoW knockback, energy starts at 0 and ramps by district, board resets between districts (survivors carry into the finale), AI gets harder across all 400 stages, unit SHAPES show class at a glance, 10 crew SYNERGIES live, XP bar + crate drawer in the lobby."
+ },
+ {
+  "date": "2026-06-11",
+  "time": "19:38 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "WORLD MAP IS OPEN: 10 cities, 100 levels, locked progression + checkpoints. 3-crown a district to advance EARLY. Chests now drop from matches; dupes pay Scrap; SKILL TREE live with per-card builds."
+ },
+ {
+  "date": "2026-06-11",
+  "time": "12:40 PDT",
+  "count": 12,
+  "painted": [
+   "glitch-basenji",
+   "neon-whippet",
+   "turbo-jack",
+   "drift-sheltie",
+   "byte-beagle",
+   "rosco",
+   "synth-collie",
+   "noir-setter",
+   "pulse-border-collie",
+   "holo-husky",
+   "chill-samoyed",
+   "prism-poodle"
+  ],
+  "remaining": "387"
+ },
+ {
+  "date": "2026-06-11",
+  "time": "12:11 PDT",
+  "count": 12,
+  "painted": [
+   "warden-newfie",
+   "rust-cane-corso",
+   "tank-pug",
+   "copper-chow",
+   "brick-bullmastiff",
+   "jagged",
+   "razor-vizsla",
+   "aero-malinois",
+   "pixel-greyhound",
+   "circuit-shiba",
+   "flash-saluki",
+   "bolt-corgi"
+  ],
+  "remaining": "399"
+ },
+ {
+  "date": "2026-06-11",
+  "time": "11:38 PDT",
+  "count": 12,
+  "painted": [
+   "hairtrigger",
+   "stronghold",
+   "snubnose",
+   "emplacement",
+   "salvo",
+   "bcardd",
+   "stonejaw",
+   "balboa",
+   "iron-rottweiler",
+   "granite-saint",
+   "grit-bulldog",
+   "alloy-akita"
+  ],
+  "remaining": "411"
+ },
+ {
+  "date": "2026-06-11",
+  "time": "10:54 PDT",
+  "count": 12,
+  "painted": [
+   "spike",
+   "bulwark",
+   "brownout",
+   "bunker",
+   "buckshot",
+   "howitzer",
+   "tripwire",
+   "flakwall",
+   "deadeye",
+   "casemate",
+   "shrapnel",
+   "pillbox"
+  ],
+  "remaining": "423"
+ },
+ {
+  "date": "2026-06-11",
+  "time": "17:30 PDT",
+  "count": 0,
+  "painted": [],
+  "note": "SHOP LIVE: gem packs purchasable + Google sign-in cloud saves"
+ },
+ {
+  "date": "2026-06-11",
+  "time": "10:38 PDT",
+  "count": 12,
+  "painted": [
+   "shop_ak-gems-baller",
+   "shop_ak-gems-highroller",
+   "shop_ak-gems-kingpin",
+   "lobby_hero",
+   "ui_daily_drop",
+   "glitchfork",
+   "hexer",
+   "sandbag",
+   "whitenoise",
+   "blacksite",
+   "carrier",
+   "hardline"
+  ],
+  "remaining": "435",
+  "note": "first Cloudflare engine batch + auto-deploy"
+ },
+ {
+  "date": "2026-06-11",
+  "time": "04:30 PDT",
+  "count": 2,
+  "painted": [
+   "ak-gems-rookie",
+   "ak-gems-player"
+  ],
+  "remaining": "447",
+  "note": "Leonardo salvage run"
+ }
+]

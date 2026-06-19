@@ -1711,6 +1711,9 @@
   <!-- ============ START SCREEN / LOBBY HUB (the front door) ============ -->
   <section id="startscreen" class="screen">
 
+    <!-- AK-HUBBETA 2026-06-18: one-tap entry to the Phase-0 walkable feel-proto (separate throwaway page). Lobby-only (hides in-match). -->
+    <a href="hub_proto.html" id="hubbeta" style="position:absolute;top:5px;left:50%;transform:translateX(-50%);z-index:60;padding:7px 15px;border-radius:20px;background:linear-gradient(180deg,#e8c55a,#c9a84c);color:#1a1206;font-weight:800;font-size:11px;text-decoration:none;box-shadow:0 3px 10px rgba(201,168,76,.45);letter-spacing:.05em;white-space:nowrap;">&#127961; WALK THE LOT (beta)</a>
+
     <!-- identity row: player chip (tap to rename) + daily streak -->
     <div class="lobby-top">
       <div id="playerchip" role="button" title="Tap to set your street name">
@@ -2010,6 +2013,11 @@
     <button id="nextbtn" class="btn" style="display:none">Next Level</button>
     <button id="againbtn" class="btn">Play Again</button>
     <button id="homebtn" class="btn" style="margin-top:10px;padding:10px 32px;font-size:13px;background:none;border:1px solid rgba(212,175,55,0.45);color:var(--gold-hi);box-shadow:none;">Lobby</button>
+    <!-- AK-RESULTNAV 2026-06-18: quick-exit row so you don't backspace out -- Journal + Main Menu beside the Map button -->
+    <div id="resultnav" style="display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap;">
+      <button id="journalbtn" class="btn" style="padding:9px 20px;font-size:12px;background:none;border:1px solid rgba(212,175,55,0.4);color:var(--gold-hi);box-shadow:none;">Journal</button>
+      <button id="menubtn" class="btn" style="padding:9px 20px;font-size:12px;background:none;border:1px solid rgba(212,175,55,0.4);color:var(--gold-hi);box-shadow:none;">Main Menu</button>
+    </div>
     <p class="fineprint">Early prototype. Not financial advice.</p>
     <div class="wordmark">ALLEY KINGZ &bull; $BCARDD</div>
   </section>
@@ -2359,8 +2367,8 @@
     cards.forEach(c=>{
       if(!c || !c.cardNumber) return;
       const img = new Image();
-      img.src = artSrc(c);                          // units/ for originals, cards/ for variants
-      img.onerror = ()=>{ img._failed = true; };  // stays !complete-as-art, shape fallback
+      img.src = artSrc(c);                          // canonical cards/<NNNN>_<slug>.webp via akCardArtRel
+      img.onerror = ()=>{ if(!(window.akImgErr && window.akImgErr(img))) img._failed = true; };  // AK-WEBP: try .png, then shape fallback
       UNIT_ICONS[c.cardNumber] = img;
       try{ window.AKPreload && AKPreload.watch(img); }catch(_e){}   // AK-PRELOAD
     });
@@ -4323,7 +4331,7 @@
         const sport = artSrc(card);   // assets/spells/<slug>.png
         el.innerHTML =
           '<div class="art"><span class="glyph">'+(card.glyph||'✦')+'</span>'+
-            '<img src="'+sport+'" alt="" onerror="this.remove()"></div>'+
+            '<img src="'+sport+'" alt="" onerror="if(!(window.akImgErr&&window.akImgErr(this)))this.remove()"></div>'+
           '<div class="scrim"></div>'+
           '<div class="cost">'+card.cost+'</div>'+
           '<div class="spelltag">Spell</div>'+
@@ -4335,7 +4343,7 @@
         const _fc=({'Boneguard Crew':'Crest_Boneguard','Zoomie Syndicate':'Crest_Zoomie','Leashbreak Tactix':'Crest_Leashbreak','K9 Circuitry':'Crest_K9'})[card.factionName||'']||'';  // AK-ART: faction class crest
         el.innerHTML =
           '<div class="art"><span class="glyph">'+(card.glyph||'?')+'</span>'+
-            '<img src="'+port+'" alt="" onerror="this.remove()"></div>'+
+            '<img src="'+port+'" alt="" onerror="if(!(window.akImgErr&&window.akImgErr(this)))this.remove()"></div>'+
           '<div class="scrim"></div>'+
           '<div class="cost">'+card.cost+'</div>'+
           (card.isMythic?'<div class="crown">'+'♛'+'</div>':'')+
@@ -5273,6 +5281,23 @@
     try{ refreshLobbyChip(); }catch(_){}
   });
 
+  // AK-RESULTNAV 2026-06-18: quick exits off the result screen so you don't backspace 3x. homeBtn = Map (World Map);
+  // these add MAIN MENU (straight to the lobby) + JOURNAL (the map's quest journal).
+  const menuBtn=document.getElementById('menubtn');
+  if(menuBtn) menuBtn.addEventListener('click', ()=>{
+    resultScreen.classList.add('hidden');
+    try{ WORLD_RUN=null; }catch(_){}
+    startScreen.classList.remove('hidden');
+    try{ refreshLobbyChip(); }catch(_){}
+  });
+  const journalBtn=document.getElementById('journalbtn');
+  if(journalBtn) journalBtn.addEventListener('click', ()=>{
+    resultScreen.classList.add('hidden');
+    try{ var rc=(WORLD_RUN && typeof WORLD_RUN.city==='number') ? WORLD_RUN.city : (((typeof loadWorld==='function'?loadWorld():null)||{}).city||0); WORLD_RUN=null; worldOpenLadder(rc); }
+    catch(_){ try{ startScreen.classList.remove('hidden'); }catch(_e){} }
+    setTimeout(function(){ try{ var qb=document.getElementById('wm-journal'); if(qb) qb.click(); }catch(_e){} }, 140);   // open the journal via its existing toggle once the map is up
+  });
+
   // AK-WORLD: result-screen continue flow. Quick Play keeps the classic buttons
   // untouched; world runs rename them and surface NEXT LEVEL (win) or a priced
   // RESUME DISTRICT N (loss with a checkpoint) on #nextbtn. All DOM guarded.
@@ -5548,7 +5573,7 @@
     const vb = c.isMythic ? '<div class="t-crown">♛</div>'
       : (c.variant==='HEAVY' ? '<div class="t-vbadge H">HVY</div>'
       : (c.variant==='STREET' ? '<div class="t-vbadge S">STR</div>' : ''));
-    const img = art ? '<img src="'+art+'" alt="" onerror="this.remove()">' : '';
+    const img = art ? '<img src="'+art+'" alt="" onerror="if(!(window.akImgErr&&window.akImgErr(this)))this.remove()">' : '';
     const lock = (opts.lockUnowned && !owned) ? '<div class="t-lock">&#128274;</div>' : '';
     // AK-SKILLS: surface assigned Garage Tuning points on the collection tile
     let tn=''; try{
@@ -5649,7 +5674,7 @@
       const n=cards[i];
       if(n){ const c=DBBYNAME[n]; const art=tileArt(c);
         strip+='<div class="ds-slot filled" data-act="removecard" data-idx="'+i+'">'+
-          (art?'<img src="'+art+'" onerror="this.remove()">':'')+
+          (art?'<img src="'+art+'" onerror="if(!(window.akImgErr&&window.akImgErr(this)))this.remove()">':'')+
           '<span class="ds-glyph">'+(c.isSpell?(c.glyph||'✦'):esc(c.name.charAt(0)))+'</span>'+
           '<span class="ds-cost">'+c.cost+'</span><span class="ds-x">&times;</span></div>';
       } else { strip+='<div class="ds-slot empty"><span class="ds-num">'+(i+1)+'</span></div>'; }
@@ -5873,7 +5898,7 @@
       '<div class="dd-top">'+titleTop+'<div class="dd-cost">'+c.cost+'</div></div>'+
       '<div class="dd-meta">'+esc(c.rarity)+' &middot; '+esc(c.faction)+' &middot; '+esc(c.role)+
         (c.variant&&c.variant!=='ORIGINAL'?(' &middot; '+esc(c.variant)):'')+(c.breed?(' &middot; '+esc(c.breed)):'')+'</div>'+
-      (art?'<div class="dd-art"><img src="'+art+'" alt="" onerror="this.remove()"></div>':'')+   // AK-LORE: art on the detail
+      (art?'<div class="dd-art"><img src="'+art+'" alt="" onerror="if(!(window.akImgErr&&window.akImgErr(this)))this.remove()"></div>':'')+   // AK-LORE: art on the detail
       badgeRow+   // AK-PERSONA: earned badge stamps on the card art frame
       (lore&&lore.tagline?'<div class="dd-tag">&quot;'+esc(lore.tagline)+'&quot;</div>':'')+      // AK-LORE: tagline
       '<div class="dd-stats">'+

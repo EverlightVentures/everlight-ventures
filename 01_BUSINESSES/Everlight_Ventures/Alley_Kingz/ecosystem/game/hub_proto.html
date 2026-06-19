@@ -1,0 +1,127 @@
+<!doctype html><html><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Alley Kingz -- Hub Feel-Proto v2 (scrolling world)</title>
+<!-- AK-HUB-PHASE0-v2 2026-06-18: THROWAWAY feel-proto. Scrolling WORLD (camera-follow) bigger than the screen,
+     radar/mini-map, roads/paths, scattered props (scenery scrolls), an NPC, waypoint arrow. Standalone, no deps. -->
+<style>
+  html,body{margin:0;height:100%;background:#06060a;overflow:hidden;font-family:Inter,system-ui,sans-serif;color:#E8E8E8;-webkit-tap-highlight-color:transparent;}
+  #c{display:block;width:100vw;height:100vh;}
+  #hud{position:fixed;left:0;right:0;top:0;padding:9px 12px;font-size:11px;letter-spacing:.04em;color:#c9a84c;text-align:center;pointer-events:none;text-shadow:0 1px 3px #000;}
+  #banner{position:fixed;left:50%;top:40%;transform:translateX(-50%);padding:13px 24px;border-radius:12px;background:rgba(12,12,18,.93);border:1px solid #c9a84c;color:#e8c55a;font-weight:700;font-size:15px;opacity:0;transition:opacity .25s;pointer-events:none;text-align:center;max-width:80vw;}
+  #fight{position:fixed;right:14px;bottom:16px;padding:13px 20px;border-radius:14px;background:linear-gradient(180deg,#e8c55a,#c9a84c);color:#1a1206;font-weight:800;font-size:14px;border:none;box-shadow:0 4px 14px rgba(201,168,76,.4);letter-spacing:.05em;z-index:5;}
+  #stick{position:fixed;left:18px;bottom:18px;width:118px;height:118px;border-radius:50%;background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.35);touch-action:none;z-index:5;}
+  #nub{position:absolute;left:34px;top:34px;width:50px;height:50px;border-radius:50%;background:rgba(201,168,76,.55);}
+  #radar{position:fixed;right:10px;top:30px;width:104px;height:128px;border-radius:8px;background:rgba(8,8,14,.78);border:1px solid rgba(201,168,76,.5);z-index:5;}
+  .tag{position:fixed;bottom:6px;left:0;right:0;text-align:center;font-size:10px;color:#555;}
+</style></head><body>
+<canvas id="c"></canvas>
+<div id="hud">THE LOT &mdash; walk the city: tap / joystick / WASD / arrows / Vim hjkl &middot; the radar shows where to go</div>
+<canvas id="radar" width="104" height="128"></canvas>
+<div id="banner"></div>
+<button id="fight">FIGHT NOW</button>
+<div id="stick"><div id="nub"></div></div>
+<div class="tag">Phase 0 feel-proto v2 &bull; scrolling world &bull; not the real build</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const rad=document.getElementById('radar'),rctx=rad.getContext('2d');
+let W,H,DPR=Math.min(2,window.devicePixelRatio||1);
+function resize(){W=cv.clientWidth;H=cv.clientHeight;cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
+addEventListener('resize',resize);resize();
+// ---- THE WORLD (bigger than the screen so the camera can scroll) ----
+const WORLD_W=1500, WORLD_H=1800;
+const dog=new Image();dog.src='assets/cards/0001_bcardd.webp';dog.onerror=()=>{dog.src='assets/cards/0001_bcardd.png';};
+const me={x:WORLD_W/2,y:WORLD_H-220,tx:null,ty:null,r:24,spd:250};
+let cam={x:0,y:0};
+// buildings in WORLD coords
+const buildings=[
+  {id:'ARENA', label:'THE ARENA', act:'would start a MATCH',        col:'#e8c55a', x:WORLD_W/2, y:300, w:200,h:120},
+  {id:'GARAGE',label:'THE GARAGE',act:'would open DECK / GARAGE',   col:'#7fc8ff', x:300,       y:680, w:170,h:104},
+  {id:'DROP',  label:'THE DROP',  act:'would open the SHOP',        col:'#ff8fae', x:WORLD_W-300,y:680, w:170,h:104},
+  {id:'CLAN',  label:'CLAN YARD', act:'would open CREWS / CHAT',    col:'#9d8bff', x:360,       y:1180,w:170,h:104},
+  {id:'ARCADE',label:'THE ARCADE',act:'would open the ARCADE',      col:'#7CFFb0', x:WORLD_W-360,y:1180,w:170,h:104},
+];
+// roads connecting the plaza spine to each building
+const plaza={x:WORLD_W/2,y:WORLD_H-260};
+// scattered props (neon lamps/crates) so scenery visibly scrolls
+const props=[];(function(){let s=20210;function rnd(){s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff;}
+  for(let i=0;i<70;i++){props.push({x:60+rnd()*(WORLD_W-120),y:60+rnd()*(WORLD_H-120),t:rnd()<.5?'lamp':'crate',h:.5+rnd()*.8});}})();
+const npc={x:WORLD_W/2-180,y:WORLD_H-360,r:20,name:'OL’ SCRAPS',line:'"New mutt? Walk the block. Arena’s up north. Holler at the Garage for a deck."'};
+// ---- input ----
+let keys={};
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=1;if(['arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();});
+addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=0;});
+cv.addEventListener('pointerdown',e=>{me.tx=e.clientX+cam.x;me.ty=e.clientY+cam.y;});  // screen->world
+let stickV={x:0,y:0},stickOn=false;const stick=document.getElementById('stick'),nub=document.getElementById('nub');
+stick.addEventListener('pointerdown',e=>{stickOn=true;stick.setPointerCapture(e.pointerId);});
+stick.addEventListener('pointermove',e=>{if(!stickOn)return;const r=stick.getBoundingClientRect();let dx=e.clientX-(r.left+59),dy=e.clientY-(r.top+59);const m=Math.hypot(dx,dy)||1;const cl=Math.min(m,45);dx=dx/m*cl;dy=dy/m*cl;nub.style.left=(34+dx)+'px';nub.style.top=(34+dy)+'px';stickV.x=dx/45;stickV.y=dy/45;me.tx=me.ty=null;});
+function stickEnd(){stickOn=false;stickV.x=stickV.y=0;nub.style.left='34px';nub.style.top='34px';}
+stick.addEventListener('pointerup',stickEnd);stick.addEventListener('pointercancel',stickEnd);
+const banner=document.getElementById('banner');let bannerT=0,inZone=null;
+function showBanner(t){banner.textContent=t;banner.style.opacity='1';bannerT=2.0;}
+document.getElementById('fight').onclick=()=>showBanner('FIGHT NOW → would start a match');
+// ---- loop ----
+let last=performance.now();
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
+  let vx=0,vy=0;
+  if(keys['a']||keys['arrowleft']||keys['h'])vx-=1; if(keys['d']||keys['arrowright']||keys['l'])vx+=1;
+  if(keys['w']||keys['arrowup']||keys['k'])vy-=1; if(keys['s']||keys['arrowdown']||keys['j'])vy+=1;
+  if(stickV.x||stickV.y){vx=stickV.x;vy=stickV.y;}
+  if(vx||vy){const m=Math.hypot(vx,vy)||1;me.x+=vx/m*me.spd*dt;me.y+=vy/m*me.spd*dt;me.tx=me.ty=null;}
+  else if(me.tx!=null){const dx=me.tx-me.x,dy=me.ty-me.y,d=Math.hypot(dx,dy);if(d>4){me.x+=dx/d*Math.min(me.spd*dt,d);me.y+=dy/d*Math.min(me.spd*dt,d);}else me.tx=me.ty=null;}
+  me.x=Math.max(20,Math.min(WORLD_W-20,me.x));me.y=Math.max(20,Math.min(WORLD_H-20,me.y));
+  // camera follows, clamped to world
+  cam.x=Math.max(0,Math.min(WORLD_W-W, me.x-W/2));
+  cam.y=Math.max(0,Math.min(WORLD_H-H, me.y-H/2));
+  // proximity: buildings + npc
+  let near=null;buildings.forEach(b=>{const cx=Math.max(b.x-b.w/2,Math.min(me.x,b.x+b.w/2)),cy=Math.max(b.y-b.h/2,Math.min(me.y,b.y+b.h/2));if(Math.hypot(me.x-cx,me.y-cy)<me.r+12)near=b;});
+  if(!near && Math.hypot(me.x-npc.x,me.y-npc.y)<me.r+npc.r+10)near={id:'NPC',label:npc.name,act:npc.line};
+  if(near&&near.id!==(inZone&&inZone.id)){inZone=near;showBanner(near.id==='NPC'?(near.label+': '+near.act):('Entering '+near.label+' → '+near.act));}
+  if(!near)inZone=null;
+  if(bannerT>0){bannerT-=dt;if(bannerT<=0)banner.style.opacity='0';}
+  draw();drawRadar();requestAnimationFrame(loop);
+}
+function wx(x){return x-cam.x;} function wy(y){return y-cam.y;}
+function draw(){ctx.fillStyle='#06060a';ctx.fillRect(0,0,W,H);
+  // ground grid (world-space, scrolls with camera) -> the "scenery moves" cue
+  ctx.strokeStyle='rgba(201,168,76,.06)';ctx.lineWidth=1;const G=80;
+  const ox=-(cam.x%G),oy=-(cam.y%G);
+  for(let x=ox;x<W;x+=G){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+  for(let y=oy;y<H;y+=G){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  // roads: plaza spine + branches to each building
+  ctx.strokeStyle='rgba(120,120,140,.30)';ctx.lineWidth=26;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(wx(plaza.x),wy(plaza.y));ctx.lineTo(wx(WORLD_W/2),wy(360));ctx.stroke();
+  buildings.forEach(b=>{ctx.beginPath();ctx.moveTo(wx(WORLD_W/2),wy(Math.min(b.y,plaza.y)));ctx.lineTo(wx(b.x),wy(b.y));ctx.stroke();});
+  // props (scenery)
+  props.forEach(p=>{const X=wx(p.x),Y=wy(p.y);if(X<-30||X>W+30||Y<-30||Y>H+30)return;
+    if(p.t==='lamp'){ctx.save();ctx.shadowColor='#c9a84c';ctx.shadowBlur=12;ctx.fillStyle='rgba(201,168,76,.55)';ctx.beginPath();ctx.arc(X,Y,4,0,7);ctx.fill();ctx.restore();ctx.strokeStyle='rgba(150,150,160,.4)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(X,Y);ctx.lineTo(X,Y+18*p.h);ctx.stroke();}
+    else{ctx.fillStyle='rgba(70,68,86,.7)';ctx.fillRect(X-7,Y-7,14*p.h+6,14*p.h+6);ctx.strokeStyle='rgba(120,120,140,.4)';ctx.strokeRect(X-7,Y-7,14*p.h+6,14*p.h+6);}});
+  // buildings
+  buildings.forEach(b=>{const X=wx(b.x),Y=wy(b.y);if(X<-200||X>W+200||Y<-200||Y>H+200)return;
+    ctx.save();ctx.shadowColor=b.col;ctx.shadowBlur=20;ctx.fillStyle='#1b1a26';ctx.strokeStyle=b.col;ctx.lineWidth=2.5;ctx.beginPath();ctx.rect(X-b.w/2,Y-b.h/2,b.w,b.h);ctx.fill();ctx.stroke();ctx.restore();
+    ctx.fillStyle=b.col;ctx.globalAlpha=.85;ctx.fillRect(X-16,Y+b.h/2-26,32,26);ctx.globalAlpha=1;
+    ctx.fillStyle=b.col;ctx.font='700 13px Inter,sans-serif';ctx.textAlign='center';ctx.fillText(b.label,X,Y-b.h/2-8);});
+  // NPC
+  {const X=wx(npc.x),Y=wy(npc.y);ctx.fillStyle='#9d8bff';ctx.beginPath();ctx.arc(X,Y,npc.r,0,7);ctx.fill();ctx.fillStyle='#9d8bff';ctx.font='700 10px Inter';ctx.textAlign='center';ctx.fillText('NPC',X,Y-npc.r-6);}
+  // waypoint arrow to ARENA if off-screen
+  const ar=buildings[0],aX=wx(ar.x),aY=wy(ar.y);
+  if(aX<0||aX>W||aY<0||aY>H){const ang=Math.atan2(ar.y-me.y,ar.x-me.x);const px=Math.max(30,Math.min(W-30,wx(me.x)+Math.cos(ang)*60)),py=Math.max(70,Math.min(H-90,wy(me.y)+Math.sin(ang)*60));ctx.save();ctx.translate(px,py);ctx.rotate(ang);ctx.fillStyle=ar.col;ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(-8,-8);ctx.lineTo(-8,8);ctx.closePath();ctx.fill();ctx.restore();}
+  // avatar (dog token), drawn at its screen position
+  const X=wx(me.x),Y=wy(me.y);
+  ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(X,Y+me.r+2,me.r*.8,6,0,0,7);ctx.fill();
+  ctx.save();ctx.beginPath();ctx.arc(X,Y,me.r,0,7);ctx.closePath();ctx.shadowColor='#c9a84c';ctx.shadowBlur=14;ctx.fillStyle='#222';ctx.fill();ctx.clip();
+  if(dog.complete&&dog.naturalWidth>0)ctx.drawImage(dog,X-me.r,Y-me.r-6,me.r*2,me.r*2+12);else{ctx.fillStyle='#c9a84c';ctx.fillRect(X-me.r,Y-me.r,me.r*2,me.r*2);}
+  ctx.restore();ctx.strokeStyle='#c9a84c';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(X,Y,me.r,0,7);ctx.stroke();
+}
+function drawRadar(){rctx.clearRect(0,0,104,128);rctx.fillStyle='rgba(8,8,14,.6)';rctx.fillRect(0,0,104,128);
+  const sx=104/WORLD_W, sy=128/WORLD_H;
+  // viewport box
+  rctx.strokeStyle='rgba(255,255,255,.25)';rctx.lineWidth=1;rctx.strokeRect(cam.x*sx,cam.y*sy,W*sx,H*sy);
+  // building dots
+  buildings.forEach(b=>{rctx.fillStyle=b.col;rctx.beginPath();rctx.arc(b.x*sx,b.y*sy,3,0,7);rctx.fill();});
+  rctx.fillStyle='#9d8bff';rctx.beginPath();rctx.arc(npc.x*sx,npc.y*sy,2,0,7);rctx.fill();
+  // me
+  rctx.fillStyle='#fff';rctx.beginPath();rctx.arc(me.x*sx,me.y*sy,2.6,0,7);rctx.fill();
+}
+requestAnimationFrame(loop);
+</script></body></html>

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seedance Art Prompts | Alley Kingz | LUCREX OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --gold:#D4AF37; --gold-hot:#e8c55a; --dark:#0A0A0A; --canvas:#141414;
+    --card:#1c1c1c; --line:#2e2e2e; --text:#E8E8E8; --dim:#A8A8A8; --faint:#777;
+    --pos:#5fff8f; --t1:#D4AF37; --t2:#d08a3a; --t3:#2ee6ff; --t4:#9B8CFF; --t5:#ff5a2c;
+    --mono:'JetBrains Mono',monospace; --disp:'Playfair Display',serif; --body:'Inter',-apple-system,sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{background:var(--dark);color:var(--text);font-family:var(--body);line-height:1.55;padding-bottom:80px}
+  a{color:var(--gold)}
+  .top{background:linear-gradient(135deg,#0a0a0a,#171717);border-bottom:2px solid var(--gold);padding:26px 20px 20px}
+  .wm{font-family:var(--disp);letter-spacing:4px;text-transform:uppercase;color:var(--gold);font-size:12px}
+  h1{font-family:var(--disp);font-size:26px;font-weight:700;margin:6px 0 2px}
+  .sub{color:var(--dim);font-size:13px}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+  details.brief{max-width:1100px;margin:18px auto 0;padding:0 20px}
+  details.brief>summary{cursor:pointer;list-style:none;color:var(--gold);font-weight:600;font-size:13px;
+    padding:10px 14px;background:var(--canvas);border:1px solid var(--line);border-radius:8px;display:flex;justify-content:space-between;align-items:center}
+  details.brief>summary::-webkit-details-marker{display:none}
+  .brief-body{background:var(--canvas);border:1px solid var(--line);border-top:none;border-radius:0 0 8px 8px;padding:14px;margin-top:-6px}
+  .hs{font-family:var(--mono);font-size:12px;color:#cfcfcf;background:#0d0d0d;border-left:3px solid var(--gold);
+    padding:12px 14px;border-radius:6px;white-space:pre-wrap;margin:8px 0}
+  .rules{font-size:12.5px;color:var(--dim);margin-top:8px}
+  .rules b{color:var(--text)}
+  .controls{max-width:1100px;margin:18px auto 0;padding:0 20px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+  #q{flex:1;min-width:200px;background:var(--canvas);border:1px solid var(--line);border-left:3px solid var(--gold);
+    color:var(--text);font-family:var(--body);font-size:14px;padding:10px 12px;border-radius:8px}
+  #q:focus{outline:none;border-color:var(--gold)}
+  .chip{cursor:pointer;font-size:12px;font-weight:600;padding:7px 12px;border-radius:20px;background:var(--canvas);
+    border:1px solid var(--line);color:var(--dim);user-select:none}
+  .chip.on{color:var(--dark);background:var(--gold);border-color:var(--gold)}
+  .toggle{font-size:12px;color:var(--dim);display:flex;align-items:center;gap:6px;cursor:pointer;user-select:none}
+  .prog{max-width:1100px;margin:14px auto 0;padding:0 20px;display:flex;align-items:center;gap:12px}
+  .bar{flex:1;height:10px;background:var(--canvas);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+  .bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),var(--gold-hot));transition:width .35s}
+  .pcount{font-family:var(--mono);font-size:13px;color:var(--gold);white-space:nowrap}
+  .reset{font-size:11px;color:var(--faint);background:none;border:1px solid var(--line);border-radius:6px;padding:5px 9px;cursor:pointer}
+  .tier{max-width:1100px;margin:30px auto 0;padding:0 20px}
+  .tier h2{font-family:var(--disp);font-size:18px;display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--line);padding-bottom:8px}
+  .tier h2 .tnum{font-size:12px;font-family:var(--mono);padding:2px 8px;border-radius:5px;color:var(--dark)}
+  .tier h2 .tnote{font-size:12px;color:var(--faint);font-weight:400;font-family:var(--body)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:14px}
+  .pcard{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent,var(--gold));
+    border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;position:relative}
+  .pcard.done{opacity:.5}
+  .fnrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .fn{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--gold-hot)}
+  .mini{cursor:pointer;font-size:10px;color:var(--dim);background:#0d0d0d;border:1px solid var(--line);
+    border-radius:5px;padding:3px 7px;font-family:var(--mono)}
+  .mini:hover{border-color:var(--gold);color:var(--gold)}
+  .meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .tag{font-size:10.5px;font-family:var(--mono);color:var(--dim);background:#0d0d0d;border:1px solid var(--line);padding:2px 7px;border-radius:5px;display:inline-flex;align-items:center}
+  .tag.opt{color:var(--t5);border-color:#3a2a22}
+  .sw{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:5px;border:1px solid #0008}
+  .desc{font-size:13px;color:#d6d6d6;flex:1}
+  .actions{display:flex;align-items:center;gap:10px;margin-top:2px}
+  .copy{flex:1;cursor:pointer;font-family:var(--body);font-weight:700;font-size:13px;color:var(--dark);
+    background:linear-gradient(135deg,var(--gold),var(--gold-hot));border:none;border-radius:8px;padding:10px;letter-spacing:.3px}
+  .copy:active{transform:translateY(1px)}
+  .copy.ok{background:linear-gradient(135deg,#3fae5e,var(--pos));color:#062}
+  .chk{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--dim);cursor:pointer;user-select:none;white-space:nowrap}
+  .chk input{accent-color:var(--gold);width:15px;height:15px}
+  .empty{max-width:1100px;margin:40px auto;padding:0 20px;color:var(--faint);text-align:center;font-size:14px}
+  footer{max-width:1100px;margin:40px auto 0;padding:18px 20px;border-top:1px solid var(--line);color:var(--faint);font-size:11.5px}
+  footer b{color:var(--gold)}
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(40px);opacity:0;
+    background:var(--gold);color:var(--dark);font-weight:700;font-size:13px;padding:10px 18px;border-radius:24px;
+    transition:all .25s;pointer-events:none;z-index:99}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+  <header class="top">
+    <div class="wrap">
+      <div class="wm">Everlight Ventures &nbsp;&#9670;&nbsp; Alley Kingz</div>
+      <h1>Seedance Art Prompts</h1>
+      <div class="sub">Tap <b style="color:var(--gold)">Copy prompt</b> &rarr; the house style is auto-appended &rarr; paste into Seedance &rarr; save with the exact filename to <span style="font-family:var(--mono)">/sdcard/Download</span>.</div>
+    </div>
+  </header>
+
+  <details class="brief">
+    <summary><span>House style + format rules + workflow</span><span>show / hide</span></summary>
+    <div class="brief-body">
+      <div style="font-size:12.5px;color:var(--dim)">Each Copy-prompt button auto-appends the right house style for its tier. Grab them standalone here:</div>
+      <div style="font-size:11px;color:var(--gold);margin-top:8px;font-family:var(--mono)">ART / ICONS house style</div>
+      <div class="hs" id="hsArt"></div>
+      <button class="mini" data-copy="art">Copy art house style</button>
+      <div style="font-size:11px;color:var(--gold);margin-top:12px;font-family:var(--mono)">GEM-PACK / STORE house style</div>
+      <div class="hs" id="hsStore"></div>
+      <button class="mini" data-copy="store">Copy store house style</button>
+      <div style="font-size:11px;color:var(--gold);margin-top:12px;font-family:var(--mono)">SPELL / EFFECT house style</div>
+      <div class="hs" id="hsSpell"></div>
+      <button class="mini" data-copy="spell">Copy spell house style</button>
+      <div class="rules">
+        <p><b>Formats:</b> icons = <b>square 1024x1024</b> (subject centered on a dark plate so it reads as a badge) &middot; screens = <b>vertical 1080x1920</b> &middot; play button = <b>wide 1024x512</b> &middot; timer frame = <b>512x512</b>. JPEG is fine (no transparency needed -- the dark plate IS the background).</p>
+        <p style="margin-top:6px"><b>Priority:</b> Tier 1 &rarr; 2 &rarr; 3, then 4 / 5 whenever. Even just Tier 1 makes the whole HUD feel custom. Do not sweat exact pixels -- get close, it gets cropped/masked in code.</p>
+        <p style="margin-top:6px"><b>Loop:</b> when a batch is saved in <span style="font-family:var(--mono)">/sdcard/Download</span>, ping "art's in" and it gets placed + wired + deployed + verified live.</p>
+      </div>
+    </div>
+  </details>
+
+  <div class="controls">
+    <input id="q" type="search" placeholder="Search filename or prompt...">
+    <span class="chip on" data-tier="all">All</span>
+    <span class="chip" data-tier="1">Tier 1</span>
+    <span class="chip" data-tier="2">Tier 2</span>
+    <span class="chip" data-tier="3">Tier 3</span>
+    <span class="chip" data-tier="4">Tier 4</span>
+    <span class="chip" data-tier="5">Tier 5</span>
+    <span class="chip" data-tier="6">Gem Packs</span>
+    <span class="chip" data-tier="7">Spells</span>
+    <span class="chip" data-tier="8">Specials</span>
+    <label class="toggle"><input type="checkbox" id="remain"> remaining only</label>
+  </div>
+
+  <div class="prog">
+    <span class="pcount" id="pcount">0 / 0</span>
+    <div class="bar"><i id="barfill"></i></div>
+    <button class="reset" id="reset">reset progress</button>
+  </div>
+
+  <main id="main"></main>
+  <div class="empty" id="empty" style="display:none">No prompts match that filter.</div>
+
+  <footer class="wrap">
+    Source of truth: <b>Alley_Kingz/ecosystem/SEEDANCE_ART_PROMPTS.md</b> &middot; progress saved in this browser only (localStorage) &middot; LUCREX OS copy-deck.
+  </footer>
+
+  <div id="toast">Copied</div>
+
+<script>
+const HOUSE = `Gritty TV-MA cyberpunk street aesthetic, neon-noir alley lighting, battle-worn metal and concrete, Everlight gold (#D4AF37) accents, deep near-black background, high detail, dramatic rim light, centered subject, video-game asset, no text, no watermark.`;
+const HOUSE_STORE = `Gritty TV-MA cyberpunk street aesthetic, neon-noir alley lighting, Everlight gold (#D4AF37) accents, deep near-black background, high detail, dramatic rim light, premium mobile-game store asset, collectible energy, no text, no watermark.`;
+const HOUSE_SPELL = `Gritty TV-MA cyberpunk dog-gang aesthetic, neon-noir alley, analog grime, Everlight gold (#D4AF37) accents, deep near-black background, dramatic rim light, high detail, square video-game effect asset, no text, no watermark.`;
+
+const TIERS = {
+  1:{name:"Currency & loot",       note:"you see these every screen -- do these first", color:"var(--t1)"},
+  2:{name:"Chests",                note:"high impact -- you flagged these blank",        color:"var(--t2)"},
+  3:{name:"Play button & screens", note:"the big yellow play + result screens",          color:"var(--t3)"},
+  4:{name:"Keyword icons",         note:"10 card mechanics, faction-tinted badges",      color:"var(--t4)"},
+  5:{name:"Emotes & flair",        note:"nice-to-have",                                  color:"var(--t5)"},
+  6:{name:"Gem Packs",             note:"Chop Shop store -- escalating tiers, replaces the old Leonardo art (inline price gem reuses cur_gems)", color:"#c77dff"},
+  7:{name:"Spells",                note:"5 card spells -> game/assets/spells/<slug>.png (effect art, no characters)", color:"#5b8cff"},
+  8:{name:"Handler Specials",      note:"6 commander specials -> game/assets/specials/<kind>.png (effect art, no characters)", color:"#46c2a8"},
+};
+
+const PROMPTS = [
+  {tier:1,file:"cur_gems.jpg",fmt:"1024x1024 square",desc:`A cluster of glowing cyan-violet crystal gems on a dark obsidian plate, faceted, internal glow, premium.`},
+  {tier:1,file:"cur_gold.jpg",fmt:"1024x1024 square",desc:`A stack of battle-worn gold coins stamped with a crowned dog-bone "B" sigil, warm gold glow on dark.`},
+  {tier:1,file:"cur_scrap.jpg",fmt:"1024x1024 square",desc:`A pile of salvaged metal scrap (bent rebar, bolts, a torn circuit shard), cold steel with faint sparks, on dark.`},
+  {tier:1,file:"cur_bones.jpg",fmt:"1024x1024 square",desc:`A small pile of chrome-plated dog bones with a faint gold rune glow, trophy feel, on dark.`},
+  {tier:1,file:"cur_keys.jpg",fmt:"1024x1024 square",desc:`A heavy ornate skeleton key forged from gold and gunmetal with a dog-bone bow, glowing keyhole teeth, on dark.`},
+  {tier:1,file:"loot_coin.jpg",fmt:"1024x1024 square",desc:`A single spinning gold coin (the crowned-B sigil), bright glint, motion-blur edge, small battlefield pickup, on dark.`},
+  {tier:1,file:"loot_shard.jpg",fmt:"1024x1024 square",desc:`A single sharp crystal scrap-shard, cyan glow, floating pickup with a soft ground shadow, on dark.`},
+  {tier:1,file:"loot_key.jpg",fmt:"1024x1024 square",desc:`A single glowing key fragment (broken half of a gold key), sparks at the break, on dark.`},
+
+  {tier:2,file:"chest_wood.jpg",fmt:"1024x1024 square",desc:`A battered wooden street-crate reinforced with rusted metal bands and a gold-bone padlock, closed, sitting in a neon alley, slight gold glow at the seams.`},
+  {tier:2,file:"chest_bronze.jpg",fmt:"1024x1024 square",desc:`The same street-crate upgraded: bronze-plated corners, a brighter lock, embers, closed.`},
+  {tier:2,file:"chest_silver.jpg",fmt:"1024x1024 square",desc:`A chrome/silver armored chest, cyan glow seams, sci-fi latches, closed.`},
+  {tier:2,file:"chest_gold.jpg",fmt:"1024x1024 square",desc:`A royal gold chest with the crowned-B sigil, radiant gold light bursting from the seam, closed but glowing like it is about to pop.`},
+  {tier:2,file:"chest_diamond.jpg",fmt:"1024x1024 square",desc:`A crystalline diamond-and-gold vault chest, prismatic light, the rarest tier, closed.`},
+  {tier:2,file:"chest_gold_open.mp4",fmt:"video 3-4 sec",optional:true,desc:`Short looping clip: the gold chest lid bursts open, a light beam shoots up, gold coins and a glowing card fly out, then it loops back closed. Start with just this one to prove the flow.`},
+
+  {tier:3,file:"play_btn.jpg",fmt:"1024x512 wide",desc:`A wide horizontal battle-CTA plate: brushed gold metal with a glowing forward-chevron / play arrow, crowned-B sigil embossed on the left, riveted edges, the word-space left blank, neon underglow.`},
+  {tier:3,file:"play_btn_tall.jpg",fmt:"512x1024 tall",optional:true,desc:`A tall vertical version of the battle-CTA plate: brushed gold metal play button with a glowing forward-chevron, crowned-B sigil, riveted edges, blank word-space, neon underglow.`},
+  {tier:3,file:"screen_victory.jpg",fmt:"1080x1920 vertical",desc:`A triumphant cyberpunk alley at golden dawn: a victorious armored dog-king silhouette on a throne of scrap, gold confetti light, crowns and bones raining, room left at center/bottom for the result card.`},
+  {tier:3,file:"screen_defeat.jpg",fmt:"1080x1920 vertical",desc:`A somber rain-soaked neon alley at night, a lone battle-worn dog silhouette under a flickering streetlight, a broken crown on wet concrete, cold blue tone, room left center/bottom for the result card.`},
+  {tier:3,file:"timer_frame.jpg",fmt:"512x512 square",desc:`A small ornate gold-and-gunmetal HUD bezel/frame for the match countdown clock, hexagonal, glowing edge, dark empty center (live numbers overlaid in code).`},
+
+  {tier:4,file:"kw_frontline.jpg",fmt:"1024x1024 square",tint:"#c0612e",desc:`A riot-shield wall of scrap metal, "hold the line", tinted burnt-orange #c0612e.`},
+  {tier:4,file:"kw_hidden.jpg",fmt:"1024x1024 square",tint:"#9B8CFF",desc:`A dog silhouette dissolving into static/shadow, stealth, tinted violet #9B8CFF.`},
+  {tier:4,file:"kw_ward.jpg",fmt:"1024x1024 square",tint:"#6fb6ff",desc:`A glowing hexagonal tech-rune barrier deflecting a spell bolt, tinted blue #6fb6ff.`},
+  {tier:4,file:"kw_protected.jpg",fmt:"1024x1024 square",tint:"#D4AF37",desc:`A golden bubble shield over a dog tag, first-hit guard, tinted gold #D4AF37.`},
+  {tier:4,file:"kw_regen.jpg",fmt:"1024x1024 square",tint:"#5fff8f",desc:`A pulsing green heartbeat/cross over a bandaged paw, healing, tinted green #5fff8f.`},
+  {tier:4,file:"kw_burn.jpg",fmt:"1024x1024 square",tint:"#ff5a2c",desc:`A snarling ember-mawed flame glyph, damage-over-time, tinted hot-orange #ff5a2c.`},
+  {tier:4,file:"kw_twin_strike.jpg",fmt:"1024x1024 square",tint:"#1fd6c4",desc:`Two crossed neon fangs/blades striking twice, tinted teal #1fd6c4.`},
+  {tier:4,file:"kw_deadly.jpg",fmt:"1024x1024 square",tint:"#ff4d6d",desc:`A skull-and-fang poison glyph, lethal, tinted red #ff4d6d.`},
+  {tier:4,file:"kw_afterlife.jpg",fmt:"1024x1024 square",tint:"#b06bff",desc:`A ghostly spectral dog rising from a grave glyph, death-spawn, tinted purple #b06bff.`},
+  {tier:4,file:"kw_blitz.jpg",fmt:"1024x1024 square",tint:"#2ee6ff",desc:`A lightning-fast dog blur with speed lines, instant-charge, tinted cyan #2ee6ff.`},
+
+  {tier:5,file:"emote_woof.jpg",fmt:"1024x1024 square",desc:`A small circular sticker-style dog emote: a woof bark, comic punch, on dark.`},
+  {tier:5,file:"emote_crown.jpg",fmt:"1024x1024 square",desc:`A small circular sticker-style dog emote: a gold crown, comic punch, on dark.`},
+  {tier:5,file:"emote_gg.jpg",fmt:"1024x1024 square",desc:`A small circular sticker-style dog emote: a handshake (GG), comic punch, on dark.`},
+  {tier:5,file:"emote_skull.jpg",fmt:"1024x1024 square",desc:`A small circular sticker-style dog emote: a skull, comic punch, on dark.`},
+
+  {tier:6,file:"ak-gems-rookie.jpg",label:"Rookie Stash (500)",fmt:"1024x1024 square",house:HOUSE_STORE,desc:`A small handful of glowing cyan gems spilling from a torn canvas pouch on a dark plate, modest, starter-tier.`},
+  {tier:6,file:"ak-gems-player.jpg",label:"Player Pack (1,100)",fmt:"1024x1024 square",house:HOUSE_STORE,desc:`A tidy stack of cyan-violet gems in a battered metal tin, a little more loot, brighter glow.`},
+  {tier:6,file:"ak-gems-baller.jpg",label:"Baller Bag (2,500)",fmt:"1024x1024 square",house:HOUSE_STORE,desc:`A bulging duffel bag overflowing with glowing gems and a few gold coins, street-baller energy, richer light.`},
+  {tier:6,file:"ak-gems-highroller.jpg",label:"High Roller Crate (6,500)",fmt:"1024x1024 square",house:HOUSE_STORE,desc:`An open armored crate packed with radiant gems spilling out, gold trim, sparks, high-value drama.`},
+  {tier:6,file:"ak-gems-kingpin.jpg",label:"Kingpin Vault (14,000)",fmt:"1024x1024 square",house:HOUSE_STORE,desc:`A cracked-open vault door pouring a cascade of brilliant gems and gold, the crowned-B sigil on the vault, the jackpot tier, blinding gold-cyan glow, the most epic of the five.`},
+
+  {tier:7,file:"boneshatter-freeze.png",label:"Boneshatter Freeze",fmt:"1024x1024 square",house:HOUSE_SPELL,desc:`Cryo blast freezing a neon-lit alley, shattered ice shards and a frost shockwave, no characters.`},
+  {tier:7,file:"tar-pour.png",label:"Tar Pour",fmt:"1024x1024 square",house:HOUSE_SPELL,desc:`Thick black tar slick flooding a neon street, viscous oil sheen, hazard glow, no characters.`},
+  {tier:7,file:"snare-trap.png",label:"Snare Trap",fmt:"1024x1024 square",house:HOUSE_SPELL,desc:`A hidden steel snare wired with a neon tripwire on wet asphalt, about to spring, no characters.`},
+  {tier:7,file:"jolt.png",label:"Jolt",fmt:"1024x1024 square",house:HOUSE_SPELL,desc:`An electric AOE shock burst, blue-white lightning arcs cratering a neon street, no characters.`},
+  {tier:7,file:"strike.png",label:"Strike",fmt:"1024x1024 square",house:HOUSE_SPELL,desc:`A fireball artillery strike exploding on a neon street, orange blast core and debris, no characters.`},
+
+  {tier:8,file:"heal-totem.png",label:"Mender -> Field Kennel",fmt:"1024x1024 square",house:HOUSE_SPELL,desc:`A deployable neon field-kennel healing totem beacon, green med-cross glow, medic tech, no characters.`},
+  {tier:8,file:"mark.png",label:"Tracker -> Scent Probe",fmt:"1024x1024 square",house:HOUSE_SPELL,desc:`A scanning recon pulse painting red target reticles over enemies, scan rings, surveillance, no characters.`},
+  {tier:8,file:"slipstream.png",label:"Shadow -> Slipstream",fmt:"1024x1024 square",house:HOUSE_SPELL,desc:`A stealth speed-blur slipstream, violet motion trails and cloaking shimmer, no characters.`},
+  {tier:8,file:"drop-rig.png",label:"Rigger -> Drop Rig",fmt:"1024x1024 square",house:HOUSE_SPELL,desc:`A deployable turret rig drop-pod, gun nest and tesla coil sparks, street ordnance, no characters.`},
+  {tier:8,file:"war-cry.png",label:"Bruiser -> War Cry",fmt:"1024x1024 square",house:HOUSE_SPELL,desc:`A shockwave rally roar buff aura, red pulse rings radiating out, aggressive warband energy, no characters.`},
+  {tier:8,file:"house-edge.png",label:"Dealer -> House Edge",fmt:"1024x1024 square",house:HOUSE_SPELL,desc:`A dealer's gamble: a neon playing card and dice burst, gold luck aura, casino, no characters.`},
+];
+
+const KEY="seedance_done_v1";
+let done={}; try{ done=JSON.parse(localStorage.getItem(KEY)||"{}"); }catch(e){ done={}; }
+let filterTier="all", remainOnly=false, query="";
+
+const fullPrompt=p=>p.desc+" "+(p.house||HOUSE);
+// Seedance auto-saves images as .png, so display/copy the bare name (keep .mp4 for the video clip).
+// NOTE: the data id + localStorage done-key stay as the full filename, so existing checkmarks survive.
+const baseName=f=>f.replace(/\.(jpe?g|png)$/i,"");
+function save(){ try{ localStorage.setItem(KEY,JSON.stringify(done)); }catch(e){} }
+
+// tiny DOM helper -- text always via textContent (no innerHTML, no XSS surface)
+function el(tag,attrs,...kids){
+  const n=document.createElement(tag);
+  if(attrs) for(const k in attrs){
+    if(k==="text") n.textContent=attrs[k];
+    else if(k==="class") n.className=attrs[k];
+    else n.setAttribute(k,attrs[k]);
+  }
+  for(const kid of kids){ if(kid==null) continue; n.appendChild(typeof kid==="object"?kid:document.createTextNode(String(kid))); }
+  return n;
+}
+
+let toastT;
+function toast(msg){
+  const t=document.getElementById("toast"); t.textContent=msg; t.classList.add("show");
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),1100);
+}
+function copyText(text){
+  if(navigator.clipboard && window.isSecureContext){
+    return navigator.clipboard.writeText(text).catch(()=>fallbackCopy(text));
+  }
+  return Promise.resolve(fallbackCopy(text));
+}
+function fallbackCopy(text){
+  const ta=document.createElement("textarea"); ta.value=text;
+  ta.style.position="fixed"; ta.style.top="-1000px"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  try{ document.execCommand("copy"); }catch(e){}
+  document.body.removeChild(ta);
+}
+
+function card(p,accent){
+  const c=el("article",{class:"pcard"+(done[p.file]?" done":""),style:"--accent:"+(p.tint||accent)});
+  c.appendChild(el("div",{class:"fnrow"},
+    el("span",{class:"fn",text:baseName(p.file)}),
+    el("span",{class:"mini","data-fn":baseName(p.file),text:"copy name"})
+  ));
+  const meta=el("div",{class:"meta"});
+  if(p.label) meta.appendChild(el("span",{class:"tag",style:"color:#0a0a0a;background:var(--gold);border-color:var(--gold);font-weight:700",text:p.label}));
+  if(p.tint){
+    const sw=el("span",{class:"sw",style:"background:"+p.tint});
+    meta.appendChild(el("span",{class:"tag"},sw,"tint "+p.tint));
+  }
+  meta.appendChild(el("span",{class:"tag",text:p.fmt}));
+  if(p.optional) meta.appendChild(el("span",{class:"tag opt",text:"optional"}));
+  c.appendChild(meta);
+  c.appendChild(el("div",{class:"desc",text:p.desc}));
+  const copyBtn=el("button",{class:"copy","data-file":p.file,text:"Copy prompt"});
+  const input=el("input",{type:"checkbox","data-done":p.file}); input.checked=!!done[p.file];
+  const chk=el("label",{class:"chk"},input," got it");
+  c.appendChild(el("div",{class:"actions"},copyBtn,chk));
+  return c;
+}
+function tierSection(tn,items){
+  const T=TIERS[tn];
+  const sec=el("section",{class:"tier"});
+  sec.appendChild(el("h2",null,
+    el("span",{class:"tnum",style:"background:"+T.color,text:"T"+tn}),
+    " "+T.name+" ",
+    el("span",{class:"tnote",text:T.note})
+  ));
+  const grid=el("div",{class:"grid"});
+  for(const p of items) grid.appendChild(card(p,T.color));
+  sec.appendChild(grid);
+  return sec;
+}
+function render(){
+  const main=document.getElementById("main");
+  main.replaceChildren();
+  const q=query.trim().toLowerCase();
+  let shown=0;
+  for(const tn of [1,2,3,4,5,6,7,8]){
+    if(filterTier!=="all" && filterTier!==String(tn)) continue;
+    const items=PROMPTS.filter(p=>p.tier===tn
+      && (!remainOnly || !done[p.file])
+      && (!q || p.file.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q)));
+    if(!items.length) continue;
+    shown+=items.length;
+    main.appendChild(tierSection(tn,items));
+  }
+  document.getElementById("empty").style.display=shown?"none":"block";
+  updateProgress();
+}
+function updateProgress(){
+  const total=PROMPTS.length, d=PROMPTS.filter(p=>done[p.file]).length;
+  document.getElementById("pcount").textContent=d+" / "+total;
+  document.getElementById("barfill").style.width=(total?Math.round(d/total*100):0)+"%";
+}
+
+document.getElementById("main").addEventListener("click",e=>{
+  const cp=e.target.closest(".copy");
+  if(cp){ const p=PROMPTS.find(x=>x.file===cp.dataset.file);
+    if(p){ copyText(fullPrompt(p)); cp.classList.add("ok"); const o=cp.textContent;
+      cp.textContent="Copied (with house style)"; toast("Prompt copied");
+      setTimeout(()=>{cp.classList.remove("ok");cp.textContent=o;},1300);} return; }
+  const mn=e.target.closest(".mini[data-fn]");
+  if(mn){ copyText(mn.dataset.fn); toast("Filename copied: "+mn.dataset.fn); }
+});
+document.getElementById("main").addEventListener("change",e=>{
+  const ck=e.target.closest("input[data-done]");
+  if(ck){ const f=ck.dataset.done; if(ck.checked) done[f]=1; else delete done[f]; save();
+    ck.closest(".pcard").classList.toggle("done",ck.checked);
+    if(remainOnly) render(); else updateProgress(); }
+});
+document.querySelector(".controls").addEventListener("click",e=>{
+  const ch=e.target.closest(".chip[data-tier]");
+  if(ch){ filterTier=ch.dataset.tier;
+    document.querySelectorAll(".chip[data-tier]").forEach(x=>x.classList.toggle("on",x===ch)); render(); }
+});
+document.getElementById("q").addEventListener("input",e=>{ query=e.target.value; render(); });
+document.getElementById("remain").addEventListener("change",e=>{ remainOnly=e.target.checked; render(); });
+document.getElementById("reset").addEventListener("click",()=>{ if(confirm("Clear all progress?")){ done={}; save(); render(); } });
+const HOUSES={art:HOUSE,store:HOUSE_STORE,spell:HOUSE_SPELL};
+document.getElementById("hsArt").textContent=HOUSE;
+document.getElementById("hsStore").textContent=HOUSE_STORE;
+document.getElementById("hsSpell").textContent=HOUSE_SPELL;
+document.querySelectorAll("[data-copy]").forEach(b=>b.addEventListener("click",()=>{
+  copyText(HOUSES[b.dataset.copy]||HOUSE);
+  toast(b.dataset.copy[0].toUpperCase()+b.dataset.copy.slice(1)+" house style copied");
+}));
+render();
+</script>
+</body>
+</html>

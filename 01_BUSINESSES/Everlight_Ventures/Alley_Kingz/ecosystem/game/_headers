@@ -1,3 +1,8 @@
+# AK-SEC 2026-06-15: safe hardening headers site-wide (no CSP -- inline scripts).
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  Referrer-Policy: strict-origin-when-cross-origin
 /
   Cache-Control: no-store, must-revalidate
 /index.html

@@ -1,0 +1,139 @@
+/* ==========================================================================
+   ALLEY KINGZ -- RESPONSIVE / FULL-VIEWPORT SHELL  (AK-RESPONSIVE 2026-06-15)
+   Loaded LAST in <head> (after ak_gd_theme.css) so it overrides the inline CSS
+   on first paint -- before lobby.js runs. Three jobs:
+     1. FULL-BLEED CONTAINER  -- kill the 520px #app cap so the game fills ANY
+        device (phone / tablet / unfolded Z Fold). 100dvh + safe-area insets.
+     2. LOBBY COLD-LOAD CLEAN -- no old-menu flash, no dog-poster flash; only
+        menu_bg.mp4 is the wallpaper.
+     3. CLASH-STYLE GOLD GLOW -- glowing light border on the lobby tiles/buttons.
+   The in-match COVER scaling lives in index.html resize() (canvas display size);
+   this file only owns the DOM/CSS shell + cosmetics, so the camera/pan is untouched.
+   ========================================================================== */
+
+/* ---------------------------------------------------------------------------
+   1. FULL-VIEWPORT CONTAINER  -- the fix for "small centered box + black space"
+   The limiter was #app{max-width:520px}. On a wide unfolded Z Fold the game sat
+   in a 520px column with the near-black body showing on both sides. Remove the
+   cap and pin #app to the real viewport. 100dvh tracks the live mobile viewport
+   (URL-bar show/hide); safe-area insets keep HUD clear of the camera cutout /
+   rounded corners. The board itself bleeds to the edges via boardwrap; the body
+   stays brand-dark so any overscroll is never white.
+   --------------------------------------------------------------------------- */
+html, body{
+  width:100%;
+  height:100vh;          /* fallback for old engines */
+  height:100dvh;
+  min-height:100vh;
+  min-height:100dvh;
+}
+body{ background:#050507 !important; }
+
+#app{
+  width:100vw  !important;
+  width:100dvw !important;
+  height:100vh !important;   /* fallback */
+  height:100dvh !important;
+  max-width:none  !important;   /* was 520px -- THE limiter that boxed the game */
+  max-height:none !important;
+  /* keep interactive chrome out of the notch/cutout/rounded corners on any device */
+  padding:
+    max(env(safe-area-inset-top),  0px)
+    max(env(safe-area-inset-right), 0px)
+    max(env(safe-area-inset-bottom),0px)
+    max(env(safe-area-inset-left),  0px) !important;
+}
+
+/* The in-match stage fills the container; boardwrap (flex:1) gets all the room
+   between the topbar and the dock, and the board COVER-scales into it (resize()).
+   Its atmospheric gradient already lights any residual gutter so it is never
+   dead black -- on ultra-wide screens a portrait board keeps lit side margins,
+   exactly like Clash Royale on a tablet. */
+#stage{ width:100% !important; height:100% !important; }
+
+/* Optional polish: on very wide screens (unfolded Z Fold) keep the LOBBY content
+   column readable instead of stretching edge-to-edge. The bottom tab bar stays
+   full width; only the scrolling content column is centered+capped. The in-match
+   #stage is NOT capped, so the board still fills the screen. */
+@media (min-width:560px){
+  #startscreen.ak-relayout > #ak-content{ max-width:620px; margin-left:auto; margin-right:auto; }
+}
+
+/* ---------------------------------------------------------------------------
+   2. LOBBY COLD-LOAD CLEAN  -- one wallpaper: menu_bg.mp4
+   Two stale layers used to flash on a cold / private-tab load:
+     (a) the ORIGINAL #startscreen lobby (its .lobby-hero + #lobbyhero dog photo)
+         renders for the moment before lobby.js adds .ak-relayout;
+     (b) the dog poster lobby_hero.png (video poster + the .ak-relayout bg url).
+   (b) is removed in lobby.js (poster attr + bg url dropped). Here we kill (a):
+   hide the dog img outright, and blank the pre-relayout screen to clean dark so
+   the menu_bg.mp4 video fades in as the only background -- instant, no dog flash,
+   faster cold paint (no large PNG decode on the critical path).
+   --------------------------------------------------------------------------- */
+#lobbyhero{ display:none !important; }                 /* kill the dog photo entirely */
+
+/* Before lobby.js mounts the new layout, show a clean brand-dark screen instead
+   of the original lobby (no old-menu flash). Once .ak-relayout is added these
+   stop matching and the new topbar/content/tabbar + video become visible. */
+#startscreen:not(.ak-relayout){ background:#0a0a0e !important; }
+#startscreen:not(.ak-relayout) > *{ visibility:hidden !important; }
+
+/* belt-and-suspenders: the relayout video should buffer over dark, never a flash
+   of the poster (poster attr is also removed in lobby.js). */
+#ak-bgvid{ background:#0a0a0e !important; }
+
+/* ---------------------------------------------------------------------------
+   3. CLASH-STYLE GOLD GLOW BORDERS  -- lobby tiles + buttons
+   A glowing light gold border (ring + soft outer glow + inner highlight) on the
+   secondary icon-row tiles, the bottom tab-bar tiles, the Alley Pass strip and
+   the currency chips. Subtle idle pulse; brighter on press. Honors
+   prefers-reduced-motion and stays cheap (box-shadow only, no layout).
+   --------------------------------------------------------------------------- */
+#startscreen.ak-relayout #ak-iconrow .mode-tile,
+#startscreen.ak-relayout #ak-tabbar  .mode-tile,
+#startscreen.ak-relayout #ak-passstrip,
+#ak-topbar .ak-cur{
+  border:1px solid rgba(240,200,90,0.55) !important;
+  box-shadow:
+    0 0 0 1px rgba(240,200,90,0.20),
+    0 0 12px rgba(240,200,90,0.28),
+    0 0 26px rgba(212,175,55,0.14),
+    inset 0 1px 0 rgba(255,255,255,0.10) !important;
+  transition:box-shadow 160ms ease, border-color 160ms ease, transform 120ms ease;
+}
+
+/* press / focus = the tile lights up like a Clash card */
+#startscreen.ak-relayout #ak-iconrow .mode-tile:active,
+#startscreen.ak-relayout #ak-tabbar  .mode-tile:active,
+#startscreen.ak-relayout #ak-passstrip:active,
+#ak-topbar .ak-cur:active{
+  border-color:rgba(248,216,120,0.95) !important;
+  box-shadow:
+    0 0 0 1px rgba(248,216,120,0.45),
+    0 0 18px rgba(248,216,120,0.55),
+    0 0 40px rgba(212,175,55,0.30),
+    inset 0 1px 0 rgba(255,255,255,0.18) !important;
+  transform:translateY(1px) scale(0.99);
+}
+
+/* the raised center PLAY proxy gets the strongest, breathing halo (already gold) */
+#startscreen.ak-relayout #ak-tabbar .ak-playtab{
+  animation:akGlowPulse 2.6s ease-in-out infinite;
+}
+@keyframes akGlowPulse{
+  0%,100%{ box-shadow:0 6px 16px rgba(0,0,0,.5), 0 0 18px rgba(201,168,76,.40); }
+  50%    { box-shadow:0 6px 16px rgba(0,0,0,.5), 0 0 34px rgba(248,216,120,.70); }
+}
+
+@media (prefers-reduced-motion:reduce){
+  #startscreen.ak-relayout #ak-tabbar .ak-playtab{ animation:none; }
+}
+
+/* AK-GLOW2: flashier Clash-style borders -- brighter + breathing on ALL tiles */
+#startscreen.ak-relayout #ak-iconrow .mode-tile,
+#startscreen.ak-relayout #ak-tabbar .mode-tile{
+  border:1.5px solid rgba(248,216,120,.75) !important;
+  animation:akTileGlow 2.8s ease-in-out infinite !important;
+}
+@keyframes akTileGlow{0%,100%{box-shadow:0 0 0 1px rgba(248,216,120,.28),0 0 14px rgba(240,200,90,.40),0 0 30px rgba(212,175,55,.18),inset 0 1px 0 rgba(255,255,255,.12)}50%{box-shadow:0 0 0 1px rgba(248,216,120,.60),0 0 24px rgba(248,216,120,.72),0 0 48px rgba(212,175,55,.40),inset 0 1px 0 rgba(255,255,255,.22)}}
+@media (prefers-reduced-motion:reduce){#startscreen.ak-relayout #ak-iconrow .mode-tile,#startscreen.ak-relayout #ak-tabbar .mode-tile{animation:none !important}}
