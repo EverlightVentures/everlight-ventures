@@ -138,7 +138,7 @@ const SEP_ITERATIONS = 4, SEP_MAX_PUSH = 0.55;      // AK-SEP4 2026-06-15: 2->4 
 // VISUAL radius so the drawn tokens keep a real gap. Combat ranges (effRange) are unchanged.
 const SEP_VIS_R = 0.92;   // AK-SEP3 bump 2026-06-15: drawn token radius ~0.85 -> 0.92 keeps a real GAP (no overlap, "always a little space" per operator)
 const KB_TAU = 0.06;                                 // knockback velocity decay time constant (impulse plays out over ~0.12s)
-const HIT_STOP = 0.04;                               // melee hit-stop freeze (both units)
+const HIT_STOP = 0.06;                               // melee hit-stop freeze (both units) -- AK-JUICE 2026-06-18: 0.04->0.06 punchier impact (webgl decision Phase-0 #4)
 const MATCH_TIME = 180;  // 3-minute match (4 stages x 45s real wall-clock) -- operator 2026-06-07
 // ---- TIERED PACE RAMP (Spec: Rich 2026-06-03) ----
 // The match clock runs a real 4:00. The SIMULATION speed ramps each minute so

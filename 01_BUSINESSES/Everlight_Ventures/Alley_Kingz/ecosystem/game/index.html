@@ -2341,6 +2341,7 @@
   // placeholder shows until painted). Spells are glyph-only (no PNG).
   function artSrc(card){
     if(!card) return '';
+    if(typeof window!=='undefined' && window.akCardArtRel){ var _r=window.akCardArtRel(card); return _r ? ('assets/'+_r) : ''; }   // AK-ARTRESOLVER: single source of truth (canon.js); legacy below = fallback
     const slug = iconSlug(card.name);
     if(card.type==='spell') return 'assets/spells/' + slug.replace(/_/g,'-') + '.png';   // AK-SPELLART: in-match hand + anywhere artSrc is read (hyphen slug matches the files)
     const num = parseInt(card.cardNumber,10) || 0;
@@ -3817,6 +3818,7 @@
     const a=Math.max(0,1-p.t/p.dur);
     ctx.save();
     ctx.globalAlpha=a; ctx.fillStyle=p.color;
+    ctx.globalCompositeOperation='lighter';   // AK-JUICE 2026-06-18 (webgl decision Phase-0 #2): additive blend -> particles BLOOM where they cluster (impacts / casts / deaths) -- the "premium glow" look, no shadowBlur cost added
     ctx.shadowColor=p.color; ctx.shadowBlur=sb(6);
     const s=p.sz*sx*1.4;   // a touch bigger/brighter
     ctx.fillRect(px-s/2,py-s/2,s,s);
@@ -5510,7 +5512,7 @@
   function isOwned(n){ return !!DBPROFILE && DBPROFILE.owned.indexOf(n)>=0; }
   function factionShort(f){ return FAC_SHORT[f]||f; }
   function dbRootEl(){ return document.getElementById('db-root'); }
-  function tileArt(c){ return c.isSpell ? ('assets/spells/'+String(c.name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')+'.png') : artSrc({cardNumber:c.num, name:c.name, type:'troop'}); }   // AK-SPELLART: spell tiles wear their art too
+  function tileArt(c){ if(typeof window!=='undefined' && window.akCardArtRel){ var _r=window.akCardArtRel(c); return _r?('assets/'+_r):''; } return c.isSpell ? ('assets/spells/'+String(c.name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'')+'.png') : artSrc({cardNumber:c.num, name:c.name, type:'troop'}); }   // AK-ARTRESOLVER: single source of truth (canon.js)
 
   // deck linter math: avg cost, archetype, anti-air answers, win-cons, crew bonus
   function deckStats(cards){

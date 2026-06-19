@@ -3714,3 +3714,25 @@ if (typeof module !== 'undefined' && module.exports) { module.exports = { CANON_
 // Browser: top-level const does NOT attach to window, but engine.js reads window.CANON_*.
 // Publish to the global object so the engine (and any script) can see the canon.
 if (typeof window !== 'undefined') { window.CANON_META = CANON_META; window.CANON_CARDS = CANON_CARDS; window.CANON_DECKS = CANON_DECKS; window.CANON_SPELLS = CANON_SPELLS; }
+
+// AK-ARTRESOLVER 2026-06-18: THE single source of truth for card/spell art, loaded by BOTH index.html and
+// shop/shop.html (both load canon.js). Every surface (in-game hand+battlefield artSrc, shop artCandidates, deck
+// tileArt) calls this instead of computing paths itself -- ends the "3 resolvers disagree" bug class.
+// Returns the path RELATIVE to assets/ (callers prepend their base: index='assets/', shop=ASSET_BASE='../assets/').
+// Canonical naming (consolidated): cards = cards/<NNNN>_<name_slug>.png ; spells = spells/<name-slug>.png.
+// The custom art for every card was migrated to this name, so the art always follows its card.
+(function(g){
+  function akSlug(n){ return String(n||'').toLowerCase().replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,''); }
+  g.akSlug = akSlug;
+  g.akCardArtRel = function(card){
+    if(!card) return '';
+    var s = akSlug(card.name);
+    if(card.type==='spell' || card.isSpell || card.abilityType==='spell'){
+      return s ? ('spells/' + s.replace(/_/g,'-') + '.png') : '';     // spells use a hyphen slug
+    }
+    var num = String(card.cardNumber || card.num || card.id || '').replace(/[^0-9]/g,'');
+    if(!num || !s) return '';
+    num = ('0000' + num).slice(-4);
+    return 'cards/' + num + '_' + s + '.png';                          // unified: number-prefixed + name slug, one folder
+  };
+})(typeof window !== 'undefined' ? window : (typeof global !== 'undefined' ? global : this));

@@ -173,6 +173,7 @@
 
   // resolve the real art file(s) for a card; falls back gracefully.
   function artCandidates(card) {
+    if (typeof window !== "undefined" && window.akCardArtRel) { var _r = window.akCardArtRel(card); if (_r) return [ASSET_BASE + _r]; }   // AK-ARTRESOLVER: single source of truth (canon.js), shared with the game
     // AK-FIX 2026-06-17: canon cards carry name + cardNumber, NOT slug/num/id -> the old code produced an
     // EMPTY candidate list for every deck/shop card -> "art incoming" placeholder everywhere. Derive the
     // hyphen-slug from the name + use cardNumber, and try BOTH art dirs (units/ originals, cards/ variants)
