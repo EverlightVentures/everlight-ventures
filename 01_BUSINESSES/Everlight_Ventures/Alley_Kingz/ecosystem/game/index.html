@@ -2344,7 +2344,10 @@
     const slug = iconSlug(card.name);
     if(card.type==='spell') return 'assets/spells/' + slug.replace(/_/g,'-') + '.png';   // AK-SPELLART: in-match hand + anywhere artSrc is read (hyphen slug matches the files)
     const num = parseInt(card.cardNumber,10) || 0;
-    return num >= 49 ? ('assets/cards/' + slug + '.png')
+    // AK-ARTFIX 2026-06-18: cards/ variant files are HYPHEN-named (aero-malinois.png) -- artSrc was using the
+    // underscore slug here, so EVERY variant unit (49-106) 404'd in-game while the shop (artCandidates, hyphen) loaded.
+    // Now consistent with artCandidates. units/ originals stay underscore + number-prefixed (those files match).
+    return num >= 49 ? ('assets/cards/' + slug.replace(/_/g,'-') + '.png')
                      : ('assets/units/' + card.cardNumber + '_' + slug + '.png');
   }
   const SPECIAL_ART = {};   // AK-SPECIALART 2026-06-18: handler-special sprites by kind (assets/specials/<kind>.png)

@@ -125,7 +125,11 @@ def main():
                     out=os.path.join(adir,"L%02d_%s.png"%(lvl,dslug))
                     if os.path.exists(out) and not a.force: skip+=1; continue
                     prompt="%s A %s, showing %s, %s. %s" % (FRAMING, theme, drole, LEVEL_MODS[lvl-1], NEG)
-                    try: open(out,"wb").write(leo_gen(prompt,leo)); print(" MAP %s L%02d %s"%(slug,lvl,dslug)); made+=1
+                    try:
+                        _d = leo_gen(prompt,leo)                       # AK-FIX: build bytes FIRST -- never open(wb)/truncate on failure
+                        if _d and len(_d) > 20000:                     # only write a REAL image (>20KB); empties were the old corrupt-file bug
+                            open(out,"wb").write(_d); print(" MAP %s L%02d %s"%(slug,lvl,dslug)); made+=1
+                        else: print(" FAIL %s L%02d %s: empty/small (%d B)"%(slug,lvl,dslug,len(_d or b""))); fail+=1
                     except Exception as e: print(" FAIL %s L%02d %s: %s"%(slug,lvl,dslug,str(e)[:70])); fail+=1
                     time.sleep(a.delay)
     elif not a.music_only and not leo: print(" (no LEONARDO_API_KEY -> maps skipped)")
