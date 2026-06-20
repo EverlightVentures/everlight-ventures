@@ -26,7 +26,9 @@ CARD_MANIFEST = os.path.join(ECO, "data", "card_art_manifest.json")
 LEO = "https://cloud.leonardo.ai/api/rest/v1"; LEO_MODEL = "de7d3faf-762f-48e0-b3b7-9d0ac3a3fcf3"
 # The house art voice -- gritty TV-MA street / Twisted-Metal, appended to ad-hoc prompts.
 GRITTY = ("gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, "
-          "Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish")
+          "Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish, "
+          "isometric game-asset, consistent 3/4 top-down angle and lighting, clean dark background, "
+          "part of ONE cohesive Alley Kingz art set (match the existing card + facade style)")
 
 def _bytes(u, t=180):
     r = urllib.request.Request(u); r.add_header("User-Agent", "Mozilla/5.0")

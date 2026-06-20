@@ -63,7 +63,7 @@
   var cfg = { playerId: null, anonKey: null, online: false };
   var state = null;     // last get-shop payload
   var root = null;      // overlay element
-  var activeTab = "gems";
+  var activeTab = "gems", soloTab = false; // AK-SOLOTAB: entered via a building deep-link -> show ONLY that sub-menu (hide the tab strip)
   var filters = { rarity: "All", faction: "All", variant: "All" };
 
   // ---- safe DOM hyperscript (no innerHTML) --------------------------------
@@ -299,7 +299,7 @@
     clear(root);
     root.appendChild(topbar(w));
     root.appendChild(banner(demo));
-    root.appendChild(tabsBar());
+    if (!soloTab) root.appendChild(tabsBar()); // AK-SOLOTAB: building deep-link hides the strip -- one building = one sub-menu, walk back to the map to switch
     var body = h("div", { class: "aks-body", id: "aks-body" });
     root.appendChild(body);
     root.appendChild(foot());
@@ -2543,7 +2543,7 @@ function hitView() {
     ensureRoot();
     // deep-link: shop.html#handlers / #draw / #cards ... opens straight to that tab
     try { var hh = (location.hash || "").replace(/^#/, "").split("&")[0];
-      if (["deck", "gems", "cards", "draw", "chests", "upgrade", "codex2", "handlers", "street", "drip2", "crew2", "pass2", "hit2"].indexOf(hh) >= 0) activeTab = hh; } catch (_) {}
+      if (["deck", "gems", "cards", "draw", "chests", "upgrade", "codex2", "handlers", "street", "drip2", "crew2", "pass2", "hit2"].indexOf(hh) >= 0) { activeTab = hh; soloTab = true; } } catch (_) {}
     root.removeAttribute("hidden");
     ensureCatalog().then(ensureEconomy).then(load);   // AK-SCRAP: shared economy first
     confirmPendingGems();

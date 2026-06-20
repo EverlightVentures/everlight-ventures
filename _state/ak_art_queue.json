@@ -86,5 +86,261 @@
     "out": "game/assets/ui/daily_drop.png",
     "w": 768,
     "h": 768
+  },
+  {
+    "id": "shop_earned_wood",
+    "prompt": "a battered wooden street crate bound with rope, splintered planks, humble starter loot spilling a few coins. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/shop/earned_wood.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "shop_earned_bronze",
+    "prompt": "a riveted bronze footlocker with a crowned-B stamp, warm metal sheen, modest coins and scrap spilling out. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/shop/earned_bronze.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "shop_earned_silver",
+    "prompt": "a polished silver reinforced case, cool neon reflections, rare-tier loot glow leaking from the seams. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/shop/earned_silver.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "shop_earned_gold",
+    "prompt": "an ornate gold strongbox, crowned-B emblem, radiant epic-tier light bursting from the cracked lid. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/shop/earned_gold.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "shop_earned_diamond",
+    "prompt": "a crystalline diamond vault chest, prismatic refractions, mythic-tier brilliance, the ultimate earned prize. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/shop/earned_diamond.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "loot_scrap_shard",
+    "prompt": "single jagged chrome scrap-metal shard, exposed copper wiring, oil sheen, cyberpunk alley junk, isolated game item icon on transparent background, painted, gritty. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/ui/loot_scrap_shard.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "loot_key_fragment",
+    "prompt": "broken third of an ornate brass dog-tag key on a snapped chain, scratched metal, isolated game item icon on transparent background, painted, gritty. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/ui/loot_key_fragment.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "loot_tag_frame",
+    "prompt": "empty brass military dog-tag frame with ball chain, transparent center window, scratched and street-worn, isolated game UI frame on transparent background. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/ui/loot_tag_frame.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "loot_power_bone",
+    "prompt": "glowing neon cyber-bone wrapped in bloody butcher paper, street-food menace, isolated game pickup icon on transparent background, painted, gritty. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/ui/loot_power_bone.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "spell_freeze",
+    "prompt": "cryo blast freezing a neon-lit alley, shattered ice shards and a frost shockwave, no characters, square card art. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/spells/boneshatter-freeze.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "spell_tar",
+    "prompt": "thick black tar slick flooding a neon street, viscous oil sheen, hazard warning glow, no characters. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/spells/tar-pour.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "spell_snare",
+    "prompt": "a hidden steel snare trap wired with a neon tripwire on wet asphalt, menacing, about to spring, no characters. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/spells/snare-trap.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "spell_jolt",
+    "prompt": "an electric AOE shock burst, blue-white lightning arcs cratering a neon street, no characters. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/spells/jolt.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "spell_strike",
+    "prompt": "a fireball artillery strike exploding on a neon street, orange blast core and flying debris, no characters. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/spells/strike.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "spec_heal_totem",
+    "prompt": "a deployable neon field-kennel healing totem beacon, green medical cross glow, cyberpunk dog-gang medic tech, no characters. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/specials/heal-totem.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "spec_mark",
+    "prompt": "a scanning recon pulse painting red target reticles over enemies, surveillance scan rings, cyberpunk, no characters. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/specials/mark.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "spec_slipstream",
+    "prompt": "a stealth speed-blur slipstream, violet motion trails and cloaking shimmer, cyberpunk, no characters. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/specials/slipstream.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "spec_drop_rig",
+    "prompt": "a deployable turret rig drop-pod, gun nest and tesla coil sparks, cyberpunk street ordnance, no characters. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/specials/drop-rig.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "spec_war_cry",
+    "prompt": "a shockwave rally roar buff aura, red pulse rings radiating outward, aggressive cyberpunk warband energy, no characters. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/specials/war-cry.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "spec_house_edge",
+    "prompt": "the dealer's gamble: a neon playing card and dice burst with a gold luck aura, cyberpunk casino, no characters. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/specials/house-edge.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "ak_prod_gem_mine",
+    "prompt": "neon-lit back-alley GEM MINE extraction rig, glowing purple crystal seams, pipes and conduits, Alley Kingz dog-gang turf, isometric building exterior, readable silhouette. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/hub/gem_mine.png",
+    "w": 832,
+    "h": 1216
+  },
+  {
+    "id": "ak_prod_gold_mint",
+    "prompt": "underground GOLD MINT press stamping coins, stacked gold bricks, warm gold neon, vault door, Alley Kingz dog-gang, isometric building exterior, readable silhouette. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/hub/gold_mint.png",
+    "w": 832,
+    "h": 1216
+  },
+  {
+    "id": "ak_prod_card_forge",
+    "prompt": "graffiti-covered CARD FORGE, holographic trading-card weaver mid-print, sparks and ribbons of light, Alley Kingz dog-gang, isometric building exterior, readable silhouette. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/hub/card_forge.png",
+    "w": 832,
+    "h": 1216
+  },
+  {
+    "id": "ak_prod_research_lab",
+    "prompt": "street-tech RESEARCH LAB, wall of monitors and skill-point terminals, cyan glow, wires, Alley Kingz dog-gang, isometric building exterior, readable silhouette. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/hub/research_lab.png",
+    "w": 832,
+    "h": 1216
+  },
+  {
+    "id": "ak_prod_power_gen",
+    "prompt": "jury-rigged ELECTRIC GENERATOR powering the block, thick cables, arcing electricity, danger glow, Alley Kingz dog-gang, isometric building exterior, readable silhouette. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/hub/power_gen.png",
+    "w": 832,
+    "h": 1216
+  },
+  {
+    "id": "ak_enemy_ghost_dog",
+    "prompt": "spectral GHOST DOG, translucent blue glow, snarling stray spirit, top-down game sprite, Alley Kingz gritty cyberpunk dog-gang house style, transparent background. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/world/enemy_ghost_dog.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "ak_enemy_stray_pack",
+    "prompt": "feral ALLEY STRAY dog, mangy aggressive mutt mid-lunge, top-down game sprite, Alley Kingz gritty cyberpunk dog-gang house style, transparent background. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/world/enemy_stray_pack.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "ak_enemy_sewer_rat",
+    "prompt": "giant mutant SEWER RAT-KING, glowing red eyes, top-down game sprite, Alley Kingz gritty cyberpunk dog-gang house style, transparent background. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/world/enemy_sewer_rat.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "ak_node_bone_dig",
+    "prompt": "BONE DIG SPOT, fresh dirt mound with a buried bone glinting, top-down node art, Alley Kingz gritty cyberpunk dog-gang house style, transparent background. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/world/node_bone_dig.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "ak_node_hydrant",
+    "prompt": "graffiti-tagged FIRE HYDRANT territory marker, neon drip, top-down node art, Alley Kingz gritty cyberpunk dog-gang house style, transparent background. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/world/node_hydrant.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "ak_node_scrap",
+    "prompt": "junkyard SCRAP PILE cache, glowing loot inside, top-down node art, Alley Kingz gritty cyberpunk dog-gang house style, transparent background. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish",
+    "negative": "",
+    "out": "game/assets/world/node_scrap.png",
+    "w": 768,
+    "h": 768
+  },
+  {
+    "id": "ak_loading_splash",
+    "prompt": "ALLEY KINGZ title/loading splash -- the crowned dog mascot (a tough cartoon dog wearing a gold crown) perched on the hood of a chromed lowrider, headlights glowing, gritty cyberpunk street at night, dramatic hero composition. gritty TV-MA street aesthetic, cyberpunk dog-crew / Twisted-Metal, chrome + rust + neon grime, Everlight gold #D4AF37 on vanta-black #050507, premium, NOT kiddish, NOT cartoonish, isometric game-asset, consistent 3/4 top-down angle and lighting, clean dark background, part of ONE cohesive Alley Kingz art set (match the existing card + facade style)",
+    "negative": "",
+    "out": "game/assets/ui/loading_splash.png",
+    "w": 832,
+    "h": 1216
   }
 ]

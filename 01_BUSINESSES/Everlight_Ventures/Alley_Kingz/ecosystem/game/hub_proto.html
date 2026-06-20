@@ -12,7 +12,7 @@
   #dist{position:fixed;left:0;right:0;top:26px;text-align:center;font-weight:800;font-size:15px;letter-spacing:.14em;color:#e8c55a;pointer-events:none;text-shadow:0 1px 4px #000;opacity:.92;}
   #banner{position:fixed;left:50%;top:38%;transform:translateX(-50%);padding:12px 22px;border-radius:12px;background:rgba(12,12,18,.93);border:1px solid #c9a84c;color:#e8c55a;font-weight:700;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;text-align:center;max-width:82vw;}
   #fight{position:fixed;right:12px;bottom:14px;padding:12px 18px;border-radius:14px;background:linear-gradient(180deg,#e8c55a,#c9a84c);color:#1a1206;font-weight:800;font-size:13px;border:none;box-shadow:0 4px 14px rgba(201,168,76,.4);letter-spacing:.05em;z-index:5;}
-  #stick{position:fixed;left:16px;bottom:16px;width:116px;height:116px;border-radius:50%;background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.35);touch-action:none;z-index:5;}
+  #stick{position:fixed;left:16px;bottom:16px;width:116px;height:116px;border-radius:50%;background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.35);touch-action:none;z-index:5;pointer-events:none;transition:opacity .15s;}
   #nub{position:absolute;left:33px;top:33px;width:50px;height:50px;border-radius:50%;background:rgba(201,168,76,.55);}
   #radar{position:fixed;right:10px;top:46px;width:100px;height:128px;border-radius:8px;background:rgba(8,8,14,.78);border:1px solid rgba(201,168,76,.5);z-index:5;}
   #fade{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .45s;z-index:20;}
@@ -21,14 +21,22 @@
   #phud{position:fixed;left:10px;top:30px;z-index:6;display:flex;gap:6px;align-items:center;font-family:Inter,sans-serif;pointer-events:none;}
   #phud .chip{background:rgba(8,8,14,.82);border:1px solid rgba(201,168,76,.55);border-radius:18px;padding:5px 11px;font-size:11px;font-weight:800;color:#e8c55a;letter-spacing:.03em;}
   #phud .res{background:rgba(8,8,14,.82);border:1px solid rgba(201,168,76,.35);border-radius:14px;padding:4px 9px;font-size:11px;font-weight:700;color:#E8E8E8;}
+  /* AK-LOADING: branded crowned-dog load screen (initial load + page-nav transitions) */
+  #loadscreen{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:16vh;transition:opacity .55s;
+    background:linear-gradient(180deg,rgba(5,5,7,.12),rgba(5,5,7,.9)), url('assets/ui/loading_splash.png') center/cover no-repeat #050507;}
+  #loadscreen.hide{opacity:0;pointer-events:none;}
+  #ls-word{font-family:'Playfair Display',Cinzel,serif;font-weight:800;font-size:32px;letter-spacing:.06em;color:#e8c55a;text-shadow:0 2px 12px #000;}
+  #ls-bar{margin-top:14px;width:60vw;max-width:280px;height:5px;border-radius:3px;background:rgba(201,168,76,.2);overflow:hidden;}
+  #ls-fill{height:100%;width:8%;background:linear-gradient(90deg,#c9a84c,#e8c55a);transition:width .5s ease-out;}
+  #ls-tip{margin-top:12px;font-size:11px;color:#c9a84c;opacity:.85;letter-spacing:.04em;}
 </style></head><body>
 <canvas id="c"></canvas>
+<div id="loadscreen"><div id="ls-word">ALLEY KINGZ</div><div id="ls-bar"><div id="ls-fill"></div></div><div id="ls-tip">Rule the streets. Build your crew. Take the crown.</div></div>
 <div id="hud">THE LOT &mdash; walk to a building to enter its mode &middot; tap / joystick / WASD / arrows / hjkl</div>
 <div id="phud"><span class="chip" id="ph-name">&#128100; STRAY</span><span class="res" id="ph-gold">&#129689; -</span><span class="res" id="ph-gem">&#128142; -</span></div>
 <div id="dist"></div>
 <canvas id="radar" width="100" height="128"></canvas>
 <div id="banner"></div>
-<button id="fight">FIGHT NOW</button>
 <div id="stick"><div id="nub"></div></div>
 <div id="fade"></div>
 <div class="tag">walkable world proto &bull; 3 districts &bull; not the final build</div>
@@ -39,64 +47,123 @@ const fade=document.getElementById('fade'),distEl=document.getElementById('dist'
 let W,H,DPR=Math.min(2,window.devicePixelRatio||1);
 function resize(){W=cv.clientWidth;H=cv.clientHeight;cv.width=W*DPR;cv.height=H*DPR;ctx.setTransform(DPR,0,0,DPR,0,0);}
 addEventListener('resize',resize);resize();
-const WORLD_W=2600, WORLD_H=2600;
+// === AK-ZONES 2026-06-19 (V2 Build 1): real DISCRETE districts. Walk to an edge -> hard-cut gold fade -> a whole new district map. Radar tap = fast-travel. ===
+const ZW=1700, ZH=1300;          // each district is its OWN discrete map (~1.5 screens), not stacked bands
+let WORLD_W=ZW, WORLD_H=ZH;       // bounds of the ACTIVE zone (uniform for now)
 const dog=new Image();dog.src='assets/cards/0001_bcardd.webp';dog.onerror=()=>{dog.src='assets/cards/0001_bcardd.png';};
-// AK-FACADES 2026-06-19: building facade art (Leonardo) + INDEPENDENT building LEVELS (the Clash/Dark-War intricacy made visible -- each building its own level)
-const FAC={TROPHY:'trophy',FIXER:'fixer',GARAGE:'garage',DROP:'drop',KENNEL:'kennel',CLAN:'clan',PASS:'pass',WARD:'wardrobe',ARCH:'archive',STREET:'street',ARCADE:'arcade'};
-const LV={ARENA:8,TROPHY:4,FIXER:3,GARAGE:6,DROP:5,KENNEL:4,CLAN:5,PASS:2,WARD:3,ARCH:2,STREET:3,ARCADE:1};
+// building facade art (Leonardo) + INDEPENDENT building LEVELS (Clash/Dark-War intricacy, visible per building)
+const FAC={TROPHY:'trophy',FIXER:'fixer',GARAGE:'garage',DROP:'drop',KENNEL:'kennel',CLAN:'clan',PASS:'pass',WARD:'wardrobe',ARCH:'archive',STREET:'street',ARCADE:'arcade',GEM:'gem_mine',MINT:'gold_mint',FORGE:'card_forge',LAB:'research_lab',GEN:'power_gen'};
+const LV={ARENA:8,TROPHY:4,FIXER:3,GARAGE:6,DROP:5,KENNEL:4,CLAN:5,PASS:2,WARD:3,ARCH:2,STREET:3,ARCADE:1,GEM:5,MINT:4,FORGE:3,LAB:3,GEN:4};
 const facImg={}; for(const _k in FAC){ var _im=new Image(); _im.src='assets/hub/'+FAC[_k]+'.png'; facImg[_k]=_im; }
-// AK-GROUND: the generated themed district GROUND art (Alley Kingz cyberpunk street) -- the map IS a painted image, not a grid
 const groundImg={uptown:new Image(),midtown:new Image(),docks:new Image()};
 groundImg.uptown.src='assets/hub/uptown_ground.png'; groundImg.midtown.src='assets/hub/midtown_ground.png'; groundImg.docks.src='assets/hub/docks_ground.png';
-function groundFor(y){ return y<900?groundImg.uptown : y<1750?groundImg.midtown : groundImg.docks; }
-const me={x:1300,y:1300,tx:null,ty:null,r:23,spd:300};
+function B(id,label,col,x,y,w,h,url,act){return {id,label,col,x,y,w,h,url,act};}
+// the 4 painted cities as real zones; linear E-W chain + one LOCKED silhouette off DOWNTOWN-north (barrier demo)
+// 3x3 GRID of districts (gx,gy). Every edge of every cell leads to a neighbor -- no dead ends. spawn = the OPPOSITE edge of the target (Stardew rule). ZW-150=1550, ZH-150=1150.
+const ZONES={
+  // row 0 (NORTH)
+  THE_OVERLOOK:{id:'THE_OVERLOOK',name:'THE OVERLOOK',gx:0,gy:0,tint:[7,9,15],ground:'midtown',locked:true,barrierLabel:'POLICE CHECKPOINT',buildings:[],
+    edges:{E:{to:'DOWNTOWN',spawn:{x:150,y:650}},S:{to:'THE_YARDS',spawn:{x:850,y:150}}}},
+  DOWNTOWN:{id:'DOWNTOWN',name:'DOWNTOWN',gx:1,gy:0,tint:[14,12,18],ground:'midtown',
+    buildings:[B('DROP','THE DROP','#ff8fae',560,560,170,104,'shop/shop.html#gems','the SHOP'),
+               B('GARAGE','THE GARAGE','#7fc8ff',1140,560,170,104,'shop/shop.html#deck','deck builder')],
+    edges:{S:{to:'HOME_TURF',spawn:{x:850,y:150}},W:{to:'THE_OVERLOOK',spawn:{x:1550,y:650}},E:{to:'NEON_HEIGHTS',spawn:{x:150,y:650}}}},
+  NEON_HEIGHTS:{id:'NEON_HEIGHTS',name:'NEON HEIGHTS',gx:2,gy:0,tint:[16,10,20],ground:'midtown',
+    buildings:[B('WARD','THE WARDROBE','#ff79c6',560,560,160,96,'shop/shop.html#drip2','Drip cosmetics'),
+               B('ARCH','THE ARCHIVE','#c9a8ff',1140,560,160,96,'shop/shop.html#codex2','the Codex')],
+    edges:{W:{to:'DOWNTOWN',spawn:{x:1550,y:650}},S:{to:'FACTORY_ROW',spawn:{x:850,y:150}}}},
+  // row 1 (CENTER -- spawn)
+  THE_YARDS:{id:'THE_YARDS',name:'THE YARDS',gx:0,gy:1,tint:[12,15,13],ground:'docks',
+    buildings:[B('CLAN','CLAN YARD','#9d8bff',560,560,170,104,'shop/shop.html#crew2','crews / chat'),
+               B('PASS','PASS HOUSE','#5ad0c0',1140,560,170,104,'shop/shop.html#pass2','Alley Pass'),
+               B('FIXER','THE FIXER','#ff9d5c',850,960,160,96,'shop/shop.html#hit2','Hit List')],
+    edges:{E:{to:'HOME_TURF',spawn:{x:150,y:650}},N:{to:'THE_OVERLOOK',spawn:{x:850,y:1150}},S:{to:'THE_UNDERCITY',spawn:{x:850,y:150}}}},
+  HOME_TURF:{id:'HOME_TURF',name:'THE LOT',gx:1,gy:1,tint:[10,14,24],ground:'uptown',
+    buildings:[B('ARENA','TOWN HALL','#e8c55a',850,360,210,124,'game.html','the main game'),
+               B('TROPHY','TROPHY HALL','#ffd76b',430,880,160,96,'soon','trophies / profile'),
+               B('KENNEL','THE KENNEL','#b6f06b',1270,880,160,96,'shop/shop.html#handlers','handlers')],
+    edges:{N:{to:'DOWNTOWN',spawn:{x:850,y:1150}},S:{to:'THE_STRIP',spawn:{x:850,y:150}},E:{to:'FACTORY_ROW',spawn:{x:150,y:650}},W:{to:'THE_YARDS',spawn:{x:1550,y:650}}}},
+  FACTORY_ROW:{id:'FACTORY_ROW',name:'FACTORY ROW',gx:2,gy:1,tint:[18,13,8],ground:'docks',
+    buildings:[B('GEM','GEM MINE','#b07bff',520,540,160,100,'soon','production: gems'),
+               B('MINT','GOLD MINT','#ffd76b',1180,540,160,100,'soon','production: gold'),
+               B('FORGE','CARD FORGE','#ff9d5c',850,960,170,104,'soon','production: cards')],
+    edges:{W:{to:'HOME_TURF',spawn:{x:1550,y:650}},N:{to:'NEON_HEIGHTS',spawn:{x:850,y:1150}},S:{to:'THE_DOCKS',spawn:{x:850,y:150}}}},
+  // row 2 (SOUTH)
+  THE_UNDERCITY:{id:'THE_UNDERCITY',name:'THE UNDERCITY',gx:0,gy:2,tint:[6,8,14],ground:'midtown',locked:true,barrierLabel:'COLLAPSED BRIDGE',buildings:[],
+    edges:{N:{to:'THE_YARDS',spawn:{x:850,y:1150}},E:{to:'THE_STRIP',spawn:{x:150,y:650}}}},
+  THE_STRIP:{id:'THE_STRIP',name:'THE STRIP',gx:1,gy:2,tint:[9,16,12],ground:'docks',
+    buildings:[B('STREET','THE STREET','#7CFFb0',560,560,160,96,'shop/shop.html#street','street mode'),
+               B('ARCADE','THE ARCADE','#7CFFE0',1140,560,160,96,'soon','mini-games')],
+    edges:{N:{to:'HOME_TURF',spawn:{x:850,y:1150}},W:{to:'THE_UNDERCITY',spawn:{x:1550,y:650}},E:{to:'THE_DOCKS',spawn:{x:150,y:650}}}},
+  THE_DOCKS:{id:'THE_DOCKS',name:'THE DOCKS',gx:2,gy:2,tint:[9,15,18],ground:'docks',
+    buildings:[B('LAB','RESEARCH LAB','#7fc8ff',560,540,160,100,'soon','production: skill pts'),
+               B('GEN','THE GENERATOR','#ffce6b',1140,540,160,100,'soon','production: power')],
+    edges:{N:{to:'FACTORY_ROW',spawn:{x:850,y:1150}},W:{to:'THE_STRIP',spawn:{x:1550,y:650}}}},
+};
+const ZNAV=['THE_OVERLOOK','DOWNTOWN','NEON_HEIGHTS','THE_YARDS','HOME_TURF','FACTORY_ROW','THE_UNDERCITY','THE_STRIP','THE_DOCKS'];
+function getZone(id){return ZONES[id]||ZONES.HOME_TURF;}
+let activeZone=getZone(localStorage.getItem('ak_hub_zone')||'HOME_TURF');
+function curBuildings(){return activeZone.buildings;}
+function curGround(){return groundImg[activeZone.ground];}
+function curTint(){var c=activeZone.tint;return 'rgb('+c[0]+','+c[1]+','+c[2]+')';}
+const me={x:850,y:650,tx:null,ty:null,r:23,spd:300}; // AK-SPAWN: centre of the active zone (empty tile)
+let spawnGrace=0.8;
 let cam={x:0,y:0};
-// districts (by y) -> bg tint shifts in real time as you cross. [name, yTop, color]
-const DIST=[{n:'UPTOWN',y:0,c:[10,14,24]},{n:'MIDTOWN',y:900,c:[14,12,18]},{n:'THE DOCKS',y:1750,c:[9,16,12]}];
-function distAt(y){let d=DIST[0];for(const z of DIST)if(y>=z.y)d=z;return d;}
-function bgColor(y){ // smooth lerp between district colors by world-y
-  let t=Math.max(0,Math.min(1,y/WORLD_H));
-  let a=t<.42?DIST[0].c:t<.70?DIST[1].c:DIST[2].c;
-  let b=t<.42?DIST[1].c:DIST[2].c; let f=t<.42?(t/.42):t<.70?((t-.42)/.28):1;
-  const m=(i)=>Math.round(a[i]+(b[i]-a[i])*f); return 'rgb('+m(0)+','+m(1)+','+m(2)+')';
-}
-// a building per game mode, spread in ALL directions across the 3 districts. url=real screen, or 'soon'.
-const buildings=[
-  // UPTOWN
-  {id:'ARENA', label:'THE ARENA', col:'#e8c55a', x:1300,y:470, w:210,h:124, url:'index.html?go=match', act:'real BATTLE'},
-  {id:'TROPHY',label:'TROPHY HALL',col:'#ffd76b', x:840, y:600, w:160,h:96,  url:'soon',                act:'trophies / profile'},
-  {id:'FIXER', label:'THE FIXER',  col:'#ff9d5c', x:1780,y:600, w:160,h:96,  url:'shop/shop.html#hit2', act:'Hit List bounties'},
-  // MIDTOWN
-  {id:'GARAGE',label:'THE GARAGE', col:'#7fc8ff', x:560, y:1120,w:170,h:104, url:'shop/shop.html#deck', act:'deck builder'},
-  {id:'DROP',  label:'THE DROP',   col:'#ff8fae', x:2040,y:1120,w:170,h:104, url:'shop/shop.html',      act:'the SHOP'},
-  {id:'KENNEL',label:'THE KENNEL', col:'#b6f06b', x:1300,y:1300,w:160,h:96,  url:'shop/shop.html#handlers',act:'handlers / commanders'},
-  {id:'CLAN',  label:'CLAN YARD',  col:'#9d8bff', x:600, y:1560,w:170,h:104, url:'shop/shop.html#crew2', act:'crews / chat'},
-  {id:'PASS',  label:'PASS HOUSE', col:'#5ad0c0', x:2000,y:1560,w:170,h:104, url:'shop/shop.html#pass2', act:'Alley Pass'},
-  // THE DOCKS
-  {id:'WARD',  label:'THE WARDROBE',col:'#ff79c6',x:760, y:2040,w:160,h:96,  url:'shop/shop.html#drip2',act:'Drip cosmetics'},
-  {id:'ARCH',  label:'THE ARCHIVE', col:'#c9a8ff',x:1860,y:2040,w:160,h:96,  url:'shop/shop.html#codex2',act:'the Codex'},
-  {id:'STREET',label:'THE STREET',  col:'#7CFFb0',x:1120,y:2250,w:160,h:96,  url:'shop/shop.html#street',act:'street mode'},
-  {id:'ARCADE',label:'THE ARCADE',  col:'#7CFFE0',x:1620,y:2210,w:160,h:96,  url:'soon',                act:'mini-games'},
-];
-const plaza={x:WORLD_W/2,y:1320};
-const props=[];(function(){let s=70217;function rnd(){s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff;}
-  for(let i=0;i<150;i++){props.push({x:50+rnd()*(WORLD_W-100),y:50+rnd()*(WORLD_H-100),t:rnd()<.5?'lamp':'crate',h:.5+rnd()*.9});}})();
-const npc={x:1300,y:1430,r:19,name:'OL’ SCRAPS',line:'"Whole block’s yours, mutt. Arena up north. Shops midtown. Docks down south."'};
+let walkT=0,faceDir=1,avMoving=false,lastX=850,lastY=650; // AK-AVATAR: live walk-cycle animation (bob/lean/squash/flip) so the dog WALKS, not floats
+const plaza={x:ZW/2,y:ZH/2};
+let props=[];
+function genProps(){props=[];let s=70217+activeZone.id.length*131+activeZone.id.charCodeAt(0);
+  function rnd(){s=(s*1103515245+12345)&0x7fffffff;return s/0x7fffffff;}
+  for(let i=0;i<90;i++){props.push({x:50+rnd()*(WORLD_W-100),y:50+rnd()*(WORLD_H-100),t:rnd()<.5?'lamp':'crate',h:.5+rnd()*.9});}}
+genProps();
+// restore saved position (return from game.html -> same zone/spot)
+(function(){try{var pz=localStorage.getItem('ak_hub_zone');if(pz&&ZONES[pz])activeZone=ZONES[pz];
+  var pp=JSON.parse(localStorage.getItem('ak_hub_pos')||'null');if(pp&&typeof pp.x==='number'){me.x=pp.x;me.y=pp.y;}
+  if(localStorage.getItem('ak_returning')==='1'){ window.__akReturning=true; localStorage.removeItem('ak_returning'); spawnGrace=1.0; // AK-EXIT: 1s exit grace
+    for(var _i=0;_i<activeZone.buildings.length;_i++){var _b=activeZone.buildings[_i]; if(Math.hypot(me.x-_b.x,me.y-(_b.y+_b.h/2))<me.r+80){ me.x=_b.x; me.y=_b.y+_b.h/2+(me.r+95); break; } } } // land OFF the door so the 1/8s rule can't re-enter
+  genProps();}catch(_e){}})();
+// AK-FX 2026-06-19: drifting ambient embers + mood vignette (screen-space, glow-safe, perf-light) -- makes the air feel alive
+const motes=[]; for(let i=0;i<26;i++)motes.push({x:Math.random()*(W||360),y:Math.random()*(H||640),vx:(Math.random()-.5)*10,vy:-5-Math.random()*12,r:.5+Math.random()*1.6,a:.14+Math.random()*.38,tw:Math.random()*6});
+const npc={x:850,y:1080,r:19,name:'OL’ SCRAPS',line:'"Whole block’s yours, mutt. Arena up north. Shops midtown. Docks down south."'};
 let keys={};
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=1;if(['arrowup','arrowdown','arrowleft','arrowright'].includes(k))e.preventDefault();});
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=0;});
-cv.addEventListener('pointerdown',e=>{me.tx=e.clientX+cam.x;me.ty=e.clientY+cam.y;});
-let stickV={x:0,y:0},stickOn=false;const stick=document.getElementById('stick'),nub=document.getElementById('nub');
-stick.addEventListener('pointerdown',e=>{stickOn=true;stick.setPointerCapture(e.pointerId);});
-stick.addEventListener('pointermove',e=>{if(!stickOn)return;const r=stick.getBoundingClientRect();let dx=e.clientX-(r.left+58),dy=e.clientY-(r.top+58);const m=Math.hypot(dx,dy)||1;const cl=Math.min(m,44);dx=dx/m*cl;dy=dy/m*cl;nub.style.left=(33+dx)+'px';nub.style.top=(33+dy)+'px';stickV.x=dx/44;stickV.y=dy/44;me.tx=me.ty=null;});
-function stickEnd(){stickOn=false;stickV.x=stickV.y=0;nub.style.left='33px';nub.style.top='33px';}
-stick.addEventListener('pointerup',stickEnd);stick.addEventListener('pointercancel',stickEnd);
+// AK-MOVE2: floating stick -- press anywhere in the LEFT ~45% and the stick spawns under your thumb (control); RIGHT zone = tap-to-move
+cv.addEventListener('pointerdown',function(e){
+  if(e.clientX < innerWidth*0.45){ stickOn=true; stickId=e.pointerId; try{cv.setPointerCapture(e.pointerId);}catch(_e){}
+    stick.style.left=(e.clientX-58)+'px'; stick.style.top=(e.clientY-58)+'px'; stick.style.bottom='auto'; setStick(e); }
+  else { me.tx=e.clientX+cam.x; me.ty=e.clientY+cam.y; } });
+cv.addEventListener('pointermove',function(e){ if(stickOn && e.pointerId===stickId) setStick(e); });
+function cvStickUp(e){ if(stickOn && e.pointerId===stickId){ stickEnd(e); stick.style.left='16px'; stick.style.top='auto'; stick.style.bottom='16px'; } }
+cv.addEventListener('pointerup',cvStickUp); cv.addEventListener('pointercancel',cvStickUp);
+// AK-MOVE 2026-06-19 (Build 2): radial deadzone (kills drift) + analog magnitude (trot/sprint) + seed-on-touch + multi-touch guard
+let stickV={x:0,y:0},stickOn=false,stickId=null;const stick=document.getElementById('stick'),nub=document.getElementById('nub');
+const STICK_DZ=0.14; // resting deadzone: below this = no movement (no jitter)
+function setStick(e){const r=stick.getBoundingClientRect();let dx=e.clientX-(r.left+58),dy=e.clientY-(r.top+58);
+  const m=Math.hypot(dx,dy)||1; const cl=Math.min(m,44); nub.style.left=(33+dx/m*cl)+'px'; nub.style.top=(33+dy/m*cl)+'px';
+  let mag=cl/44; mag = mag<STICK_DZ ? 0 : (mag-STICK_DZ)/(1-STICK_DZ); // deadzone + rescale -> clean 0..1 analog (light=trot, full=sprint)
+  stickV.x=dx/m*mag; stickV.y=dy/m*mag; me.tx=me.ty=null;}
+function stickEnd(e){if(e&&e.pointerId!=null&&e.pointerId!==stickId)return;stickOn=false;stickId=null;stickV.x=stickV.y=0;nub.style.left='33px';nub.style.top='33px';}
 const banner=document.getElementById('banner');let bannerT=0;
 function showBanner(t,hold){banner.textContent=t;banner.style.opacity='1';bannerT=hold||1.6;}
-let entering=false;
-function doEnter(url,label){ if(entering)return; entering=true; showBanner('Entering '+label+'…',3); fade.style.opacity='1';
+let entering=false, state='IN_ZONE';   // FSM: IN_ZONE | TRANSITIONING
+function doEnter(url,label){ if(entering)return; entering=true;
+  try{localStorage.setItem('ak_hub_zone',activeZone.id);localStorage.setItem('ak_hub_pos',JSON.stringify({x:Math.round(me.x),y:Math.round(me.y)}));localStorage.setItem('ak_returning','1');}catch(_e){}
+  showBanner('Entering '+label+'…',3); fade.style.opacity='1'; if(window.akShowLoad)akShowLoad();
   setTimeout(function(){ try{ window.location.href=url; }catch(_e){ entering=false; fade.style.opacity='0'; } }, 480); }
-document.getElementById('fight').onclick=()=>doEnter('index.html?go=match','THE ARENA');
+// AK-ZONES: in-page DISTRICT swap (not location.href) -- hard-cut gold fade + title card, spawn >=1 tile inside (Stardew rule)
+function enterZone(id,spawn){ if(state!=='IN_ZONE')return; state='TRANSITIONING'; fade.style.opacity='1';
+  setTimeout(function(){ activeZone=getZone(id); WORLD_W=ZW; WORLD_H=ZH;
+    me.x=spawn?spawn.x:ZW/2; me.y=spawn?spawn.y:ZH/2; me.tx=me.ty=null;
+    cam.x=Math.max(0,Math.min(WORLD_W-W,me.x-W/2)); cam.y=Math.max(0,Math.min(WORLD_H-H,me.y-H/2));
+    genProps(); distEl.textContent=activeZone.name; showBanner(activeZone.name,1.6);
+    try{localStorage.setItem('ak_hub_zone',id);localStorage.setItem('ak_hub_pos',JSON.stringify({x:Math.round(me.x),y:Math.round(me.y)}));}catch(_e){}
+    spawnGrace=0.6; fade.style.opacity='0'; state='IN_ZONE'; }, 460); }
+function showBarrier(tz){ if(bannerT<=0) showBanner((tz.barrierLabel||'LOCKED')+' -- '+tz.name+' sealed (soon)',1.4); }
+// FIGHT NOW button removed (operator): walk onto the TOWN HALL building to enter the main game -- the dwell-to-enter IS the button.
+// radar fast-travel: tap a district pip in the top strip -> teleport via the same fade
+rad.addEventListener('pointerdown',function(e){var r=rad.getBoundingClientRect();var lx=e.clientX-r.left,ly=e.clientY-r.top;
+  if(ly<=16){var i=Math.floor(lx/(100/ZNAV.length));var z=ZONES[ZNAV[i]];if(z){if(z.locked)showBarrier(z);else if(z.id!==activeZone.id)enterZone(z.id,{x:ZW/2,y:ZH/2});}}});
 let dwellB=null, dwellT=0;
 let last=performance.now();
 function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
@@ -104,29 +171,39 @@ function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
   if(keys['a']||keys['arrowleft']||keys['h'])vx-=1; if(keys['d']||keys['arrowright']||keys['l'])vx+=1;
   if(keys['w']||keys['arrowup']||keys['k'])vy-=1; if(keys['s']||keys['arrowdown']||keys['j'])vy+=1;
   if(stickV.x||stickV.y){vx=stickV.x;vy=stickV.y;}
-  if(!entering){
-    if(vx||vy){const m=Math.hypot(vx,vy)||1;me.x+=vx/m*me.spd*dt;me.y+=vy/m*me.spd*dt;me.tx=me.ty=null;}
-    else if(me.tx!=null){const dx=me.tx-me.x,dy=me.ty-me.y,d=Math.hypot(dx,dy);if(d>4){me.x+=dx/d*Math.min(me.spd*dt,d);me.y+=dy/d*Math.min(me.spd*dt,d);}else me.tx=me.ty=null;}
+  var tvx=0,tvy=0; // AK-MOVE2: compute target velocity, then SMOOTH toward it (accel/decel) for a non-jerky feel
+  if(!entering && state==='IN_ZONE'){
+    if(vx||vy){let m=Math.hypot(vx,vy); if(m>1){vx/=m;vy/=m;} tvx=vx*me.spd; tvy=vy*me.spd; me.tx=me.ty=null;}
+    else if(me.tx!=null){var dx=me.tx-me.x,dy=me.ty-me.y,d=Math.hypot(dx,dy); if(d>6){tvx=dx/d*me.spd; tvy=dy/d*me.spd;} else me.tx=me.ty=null;}
   }
+  var _sk=1-Math.exp(-16*dt); me.vx=(me.vx||0)+(tvx-(me.vx||0))*_sk; me.vy=(me.vy||0)+(tvy-(me.vy||0))*_sk;
+  me.x+=me.vx*dt; me.y+=me.vy*dt;
+  // AK-ZONES edge transition: walk into a mapped edge -> new district (locked target -> barrier)
+  if(state==='IN_ZONE' && spawnGrace<=0){ var E=42, ez=null;
+    if(me.x<E && activeZone.edges.W) ez=activeZone.edges.W; else if(me.x>WORLD_W-E && activeZone.edges.E) ez=activeZone.edges.E;
+    else if(me.y<E && activeZone.edges.N) ez=activeZone.edges.N; else if(me.y>WORLD_H-E && activeZone.edges.S) ez=activeZone.edges.S;
+    if(ez){ var tz=getZone(ez.to); if(tz.locked) showBarrier(tz); else enterZone(ez.to,ez.spawn); } }
   me.x=Math.max(20,Math.min(WORLD_W-20,me.x));me.y=Math.max(20,Math.min(WORLD_H-20,me.y));
   cam.x=Math.max(0,Math.min(WORLD_W-W, me.x-W/2));
   cam.y=Math.max(0,Math.min(WORLD_H-H, me.y-H/2));
-  distEl.textContent=distAt(me.y).n;
-  // door proximity: each building's door is front-bottom-center
-  let near=null;for(const b of buildings){const dx=me.x-b.x, dy=me.y-(b.y+b.h/2);if(Math.hypot(dx,dy)<me.r+30){near=b;break;}}
+  { var _dx=me.x-lastX,_dy=me.y-lastY; avMoving=(state==='IN_ZONE'&&Math.hypot(_dx,_dy)>0.2); if(avMoving){walkT+=dt*11; if(_dx>0.06)faceDir=1; else if(_dx<-0.06)faceDir=-1;} lastX=me.x;lastY=me.y; } // AK-AVATAR drive
+  distEl.textContent=activeZone.name;
+  // door proximity (per-zone buildings). AK-SPAWN: no detection during the spawn grace or a transition.
+  if(spawnGrace>0)spawnGrace-=dt;
+  let near=null;if(spawnGrace<=0 && state==='IN_ZONE')for(const b of curBuildings()){const dx=me.x-b.x, dy=me.y-(b.y+b.h/2);if(Math.hypot(dx,dy)<me.r+30){near=b;break;}}
   if(near){ if(dwellB!==near){dwellB=near;dwellT=0;}
     if(near.url==='soon'){ if(dwellT===0)showBanner(near.label+' → '+near.act+' (coming soon)',1.6); dwellT=0.01; }
     else { dwellT+=dt; showBanner('Entering '+near.label+' → '+near.act+'…',0.4);
       if(dwellT>0.125) doEnter(near.url,near.label); }   // AK: 1/8s dwell (operator: 1/2 too long)
   } else { dwellB=null; dwellT=0;
-    if(!near && Math.hypot(me.x-npc.x,me.y-npc.y)<me.r+npc.r+8){ showBanner(npc.name+': '+npc.line,1.4); } }
+    if(activeZone.id==='HOME_TURF' && !near && Math.hypot(me.x-npc.x,me.y-npc.y)<me.r+npc.r+8){ showBanner(npc.name+': '+npc.line,1.4); } }
   if(bannerT>0){bannerT-=dt;if(bannerT<=0)banner.style.opacity='0';}
-  draw();drawRadar();requestAnimationFrame(loop);
+  draw();drawFX(dt);drawRadar();requestAnimationFrame(loop);
 }
 function wx(x){return x-cam.x;} function wy(y){return y-cam.y;}
-function draw(){ctx.fillStyle=bgColor(me.y);ctx.fillRect(0,0,W,H);
-  // AK-GROUND: the generated themed district ground art, tiled + scrolling with the camera = the painted map base layer
-  var gd=groundFor(me.y);
+function draw(){ctx.fillStyle=curTint();ctx.fillRect(0,0,W,H);
+  // AK-GROUND: per-zone themed ground art, tiled + scrolling with the camera = the painted map base layer
+  var gd=curGround();
   if(gd&&gd.complete&&gd.naturalWidth>0){ if(!gd._pat){var oc=document.createElement('canvas');oc.width=oc.height=320;oc.getContext('2d').drawImage(gd,0,0,320,320);gd._pat=ctx.createPattern(oc,'repeat');}
     ctx.save();ctx.globalAlpha=0.62;ctx.fillStyle=gd._pat;ctx.translate(-(cam.x%320),-(cam.y%320));ctx.fillRect(0,0,W+320,H+320);ctx.restore(); }
   ctx.strokeStyle='rgba(201,168,76,.05)';ctx.lineWidth=1;const G=80,ox=-(cam.x%G),oy=-(cam.y%G);
@@ -134,11 +211,11 @@ function draw(){ctx.fillStyle=bgColor(me.y);ctx.fillRect(0,0,W,H);
   for(let y=oy;y<H;y+=G){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
   // roads: each building branches to the plaza
   ctx.strokeStyle='rgba(120,120,140,.22)';ctx.lineWidth=22;ctx.lineCap='round';
-  buildings.forEach(b=>{ctx.beginPath();ctx.moveTo(wx(plaza.x),wy(plaza.y));ctx.lineTo(wx(b.x),wy(b.y));ctx.stroke();});
+  curBuildings().forEach(b=>{ctx.beginPath();ctx.moveTo(wx(plaza.x),wy(plaza.y));ctx.lineTo(wx(b.x),wy(b.y));ctx.stroke();});
   props.forEach(p=>{const X=wx(p.x),Y=wy(p.y);if(X<-30||X>W+30||Y<-30||Y>H+30)return;
     if(p.t==='lamp'){ctx.save();ctx.shadowColor='#c9a84c';ctx.shadowBlur=10;ctx.fillStyle='rgba(201,168,76,.5)';ctx.beginPath();ctx.arc(X,Y,3.5,0,7);ctx.fill();ctx.restore();ctx.strokeStyle='rgba(150,150,160,.35)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(X,Y);ctx.lineTo(X,Y+16*p.h);ctx.stroke();}
     else{ctx.fillStyle='rgba(70,68,86,.6)';ctx.fillRect(X-6,Y-6,13*p.h,13*p.h);}});
-  buildings.forEach(b=>{const X=wx(b.x),Y=wy(b.y);if(X<-220||X>W+220||Y<-220||Y>H+220)return;
+  curBuildings().forEach(b=>{const X=wx(b.x),Y=wy(b.y);if(X<-220||X>W+220||Y<-220||Y>H+220)return;
     var fi=facImg[b.id];
     if(fi&&fi.complete&&fi.naturalWidth>0){ // real facade art, cover-fit + clipped to the footprint
       ctx.save();ctx.beginPath();ctx.rect(X-b.w/2,Y-b.h/2,b.w,b.h);ctx.clip();
@@ -153,21 +230,46 @@ function draw(){ctx.fillStyle=bgColor(me.y);ctx.fillRect(0,0,W,H);
     ctx.fillStyle=b.col;ctx.font='700 12px Inter,sans-serif';ctx.textAlign='center';ctx.fillText(b.label,X,Y-b.h/2-7);
     var lv=LV[b.id]||1; ctx.fillStyle='rgba(8,8,14,.88)';ctx.fillRect(X+b.w/2-30,Y-b.h/2+4,26,15);ctx.fillStyle=b.col;ctx.font='700 10px Inter';ctx.fillText('Lv'+lv,X+b.w/2-17,Y-b.h/2+15);
     if(b.url==='soon'){ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='9px Inter';ctx.fillText('soon',X,Y+4);}});
-  {const X=wx(npc.x),Y=wy(npc.y);ctx.fillStyle='#9d8bff';ctx.beginPath();ctx.arc(X,Y,npc.r,0,7);ctx.fill();ctx.fillStyle='#9d8bff';ctx.font='700 10px Inter';ctx.textAlign='center';ctx.fillText('NPC',X,Y-npc.r-5);}
-  const ar=buildings[0],aX=wx(ar.x),aY=wy(ar.y);
-  if(aX<0||aX>W||aY<0||aY>H){const ang=Math.atan2(ar.y-me.y,ar.x-me.x);const px=Math.max(28,Math.min(W-28,wx(me.x)+Math.cos(ang)*58)),py=Math.max(80,Math.min(H-80,wy(me.y)+Math.sin(ang)*58));ctx.save();ctx.translate(px,py);ctx.rotate(ang);ctx.fillStyle=ar.col;ctx.beginPath();ctx.moveTo(13,0);ctx.lineTo(-8,-7);ctx.lineTo(-8,7);ctx.closePath();ctx.fill();ctx.restore();}
+  if(activeZone.id==='HOME_TURF'){const X=wx(npc.x),Y=wy(npc.y);ctx.fillStyle='#9d8bff';ctx.beginPath();ctx.arc(X,Y,npc.r,0,7);ctx.fill();ctx.fillStyle='#9d8bff';ctx.font='700 10px Inter';ctx.textAlign='center';ctx.fillText('NPC',X,Y-npc.r-5);}
+  var ar=curBuildings().find(function(b){return b.id==='ARENA';});
+  if(ar){var aX=wx(ar.x),aY=wy(ar.y);
+  if(aX<0||aX>W||aY<0||aY>H){const ang=Math.atan2(ar.y-me.y,ar.x-me.x);const px=Math.max(28,Math.min(W-28,wx(me.x)+Math.cos(ang)*58)),py=Math.max(80,Math.min(H-80,wy(me.y)+Math.sin(ang)*58));ctx.save();ctx.translate(px,py);ctx.rotate(ang);ctx.fillStyle=ar.col;ctx.beginPath();ctx.moveTo(13,0);ctx.lineTo(-8,-7);ctx.lineTo(-8,7);ctx.closePath();ctx.fill();ctx.restore();}}
   const X=wx(me.x),Y=wy(me.y);
-  ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(X,Y+me.r+2,me.r*.8,5,0,0,7);ctx.fill();
-  ctx.save();ctx.beginPath();ctx.arc(X,Y,me.r,0,7);ctx.closePath();ctx.shadowColor='#c9a84c';ctx.shadowBlur=13;ctx.fillStyle='#222';ctx.fill();ctx.clip();
-  if(dog.complete&&dog.naturalWidth>0)ctx.drawImage(dog,X-me.r,Y-me.r-5,me.r*2,me.r*2+10);else{ctx.fillStyle='#c9a84c';ctx.fillRect(X-me.r,Y-me.r,me.r*2,me.r*2);}
-  ctx.restore();ctx.strokeStyle='#c9a84c';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(X,Y,me.r,0,7);ctx.stroke();
+  // AK-AVATAR: procedural walk -- hop, lean, step-squash shadow, face the travel direction (so it reads as walking, not a floating portrait)
+  var bob = avMoving ? -Math.abs(Math.sin(walkT))*5 : 0;
+  var lean = avMoving ? Math.sin(walkT)*0.07 : 0;
+  var sq = avMoving ? 1+0.16*Math.abs(Math.sin(walkT)) : 1;
+  ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(X,Y+me.r+2,me.r*.8*sq,5/sq,0,0,7);ctx.fill();
+  ctx.save();ctx.translate(X,Y+bob);ctx.rotate(lean);
+  ctx.beginPath();ctx.arc(0,0,me.r,0,7);ctx.closePath();ctx.shadowColor='#c9a84c';ctx.shadowBlur=13;ctx.fillStyle='#222';ctx.fill();ctx.clip();
+  ctx.scale(faceDir,1);
+  if(dog.complete&&dog.naturalWidth>0)ctx.drawImage(dog,-me.r,-me.r-5,me.r*2,me.r*2+10);else{ctx.fillStyle='#c9a84c';ctx.fillRect(-me.r,-me.r,me.r*2,me.r*2);}
+  ctx.restore();
+  ctx.save();ctx.translate(X,Y+bob);ctx.rotate(lean);ctx.strokeStyle='#c9a84c';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(0,0,me.r,0,7);ctx.stroke();ctx.restore();
 }
-function drawRadar(){rctx.clearRect(0,0,100,128);const sx=100/WORLD_W, sy=128/WORLD_H;
-  // district bands
-  DIST.forEach((z,i)=>{const y0=z.y*sy, y1=(i<DIST.length-1?DIST[i+1].y:WORLD_H)*sy;rctx.fillStyle='rgba('+z.c[0]+','+z.c[1]+','+z.c[2]+',.9)';rctx.fillRect(0,y0,100,y1-y0);});
-  rctx.strokeStyle='rgba(255,255,255,.22)';rctx.lineWidth=1;rctx.strokeRect(cam.x*sx,cam.y*sy,W*sx,H*sy);
-  buildings.forEach(b=>{rctx.fillStyle=b.url==='soon'?'rgba(150,150,150,.7)':b.col;rctx.beginPath();rctx.arc(b.x*sx,b.y*sy,2.4,0,7);rctx.fill();});
-  rctx.fillStyle='#fff';rctx.beginPath();rctx.arc(me.x*sx,me.y*sy,2.6,0,7);rctx.fill();
+function drawFX(dt){ // drifting embers (screen-space) + mood vignette
+  ctx.save();
+  for(const m of motes){ m.x+=m.vx*dt; m.y+=m.vy*dt; m.tw+=dt*2;
+    if(m.y<-4){m.y=H+4;m.x=Math.random()*W;} if(m.x<-4)m.x=W+4; if(m.x>W+4)m.x=-4;
+    ctx.globalAlpha=m.a*(0.55+0.45*Math.sin(m.tw)); ctx.fillStyle='#e8c55a'; ctx.shadowColor='#c9a84c'; ctx.shadowBlur=6;
+    ctx.beginPath(); ctx.arc(m.x,m.y,m.r,0,7); ctx.fill(); }
+  ctx.globalAlpha=1; ctx.shadowBlur=0; ctx.restore();
+  if(drawFX._vgW!==W||drawFX._vgH!==H){ var g=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.34,W/2,H/2,Math.max(W,H)*0.78);
+    g.addColorStop(0,'rgba(0,0,0,0)'); g.addColorStop(1,'rgba(0,0,0,0.42)'); drawFX._vg=g; drawFX._vgW=W; drawFX._vgH=H; }
+  ctx.fillStyle=drawFX._vg; ctx.fillRect(0,0,W,H);
+}
+function drawRadar(){rctx.clearRect(0,0,100,128);
+  // top strip: district pips (tap = fast-travel); current one outlined in gold
+  var cw=100/ZNAV.length;
+  for(var i=0;i<ZNAV.length;i++){var z=ZONES[ZNAV[i]],cx=i*cw;
+    rctx.fillStyle='rgb('+Math.min(255,z.tint[0]*5)+','+Math.min(255,z.tint[1]*5)+','+Math.min(255,z.tint[2]*5)+')';rctx.fillRect(cx+1,1,cw-2,13);
+    if(z.id===activeZone.id){rctx.strokeStyle='#e8c55a';rctx.lineWidth=1.5;rctx.strokeRect(cx+1,1,cw-2,13);}}
+  // active-zone mini-map below the strip
+  var sx=100/WORLD_W, sy=109/WORLD_H, oy=18;
+  rctx.fillStyle='rgba(18,18,28,.7)';rctx.fillRect(0,oy,100,128-oy);
+  curBuildings().forEach(function(b){rctx.fillStyle=b.url==='soon'?'rgba(150,150,150,.7)':b.col;rctx.beginPath();rctx.arc(b.x*sx,oy+b.y*sy,2.2,0,7);rctx.fill();});
+  rctx.strokeStyle='rgba(255,255,255,.22)';rctx.lineWidth=1;rctx.strokeRect(cam.x*sx,oy+cam.y*sy,W*sx,H*sy);
+  rctx.fillStyle='#fff';rctx.beginPath();rctx.arc(me.x*sx,oy+me.y*sy,2.4,0,7);rctx.fill();
 }
 // AK-HUD populate: pull player name + economy from shared localStorage (best-effort; textContent = XSS-safe)
 (function(){try{
@@ -180,5 +282,13 @@ function drawRadar(){rctx.clearRect(0,0,100,128);const sx=100/WORLD_W, sy=128/WO
   if(g!=null)document.getElementById('ph-gold').textContent='Gold '+String(g).slice(0,9);
   if(gm!=null)document.getElementById('ph-gem').textContent='Gems '+String(gm).slice(0,9);
 }catch(_e){}})();
+// AK-LOADING controller: fill the bar + fade out when ready; akShowLoad() re-shows it on page-nav (into shops/battler + back)
+(function(){var ls=document.getElementById('loadscreen'),fill=document.getElementById('ls-fill');if(!ls)return;
+  requestAnimationFrame(function(){if(fill)fill.style.width='100%';});
+  function hide(){ls.classList.add('hide');}
+  var _ht=window.__akReturning?2000:900; // AK-EXIT: 2s transition page when returning from a building; quick on first load
+  if(document.readyState==='complete')setTimeout(hide,_ht);else addEventListener('load',function(){setTimeout(hide,_ht);});
+  window.akShowLoad=function(){if(fill)fill.style.width='12%';ls.classList.remove('hide');requestAnimationFrame(function(){if(fill)fill.style.width='100%';});};
+})();
 requestAnimationFrame(loop);
 </script></body></html>
