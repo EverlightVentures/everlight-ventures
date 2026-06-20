@@ -103,7 +103,7 @@
 - **Skill expression** (predicting opponent's hand)
 
 ### The Card Cycle (Predictability + Surprise)
-- 8-card deck, 4 in hand
+- Fielded faction decks = 11 cards, 4 in hand (CR fusion target was 8; the live decks.json ships 11). Starter fallback = 8.
 - Played cards go to back of cycle
 - This means: you KNOW your opponent's 8 cards, but not their hand order
 - **Skill = tracking their cycle to predict their next play**

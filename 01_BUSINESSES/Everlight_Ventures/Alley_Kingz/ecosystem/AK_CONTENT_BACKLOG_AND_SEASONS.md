@@ -53,7 +53,7 @@ All rewards soft/cosmetic/Marks; mission text later voiced from `ak_flavor_pool`
 > All 7 already have an interior keeper + "coming soon" gate LIVE -- they just need the activity behind the keeper.
 
 ### BUILDINGS WITH A LIVE MENU (done, behind the new keeper now)
-THE DROP (gem shop) · THE GARAGE (deck builder) · THE WARDROBE (Drip cosmetics) · THE ARCHIVE (Codex) · CLAN YARD (crews/chat) · PASS HOUSE (Alley Pass) · THE FIXER (Hit List) · THE KENNEL (handlers) · THE STREET (street mode) · TOWN HALL/ARENA (the battler) -- all [LIVE].
+THE DROP (gem shop) · THE GARAGE (deck builder) · THE WARDROBE (Drip cosmetics) · THE ARCHIVE (Codex) · CREW YARD (crews/chat) · PASS HOUSE (Alley Pass) · THE FIXER (Hit List) · THE KENNEL (handlers) · THE STREET (street mode) · TOWN HALL/ARENA (the battler) -- all [LIVE].
 
 ### DESIGNED-BUT-UNBUILT MODES & SYSTEMS (specs exist)
 - **Town Hall meta-gate** [LIVE] (card-level cap + upgrade) -- the keystone, done this session.

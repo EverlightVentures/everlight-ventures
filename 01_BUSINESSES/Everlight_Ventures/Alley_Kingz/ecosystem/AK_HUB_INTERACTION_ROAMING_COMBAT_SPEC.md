@@ -24,7 +24,7 @@
 
 When you walk into THE DROP (shop), you don't see a generic menu. You see **Scratch the Broker** -- an Alley Kingz dog from the canon collection -- standing behind a graffiti-tagged counter. He talks to you. His portrait pops up in a comic-book speech bubble. When you buy something, he reacts ("Solid choice, mutt. That collar's gonna shine."). When you leave, he says goodbye ("Stay sharp out there. The strays are hungry tonight.").
 
-When you walk the hub, you're NOT alone. Other dogs from YOUR collection are out there -- your Rare Slinger is scrounging scraps near the Gem Mine. Your Epic Boss is guarding the Clan Yard. Your Common Runner is doing a delivery mission for The Fixer. They have little mission icons over their heads. You can tap them to see what they're doing, help them, or just watch them work.
+When you walk the hub, you're NOT alone. Other dogs from YOUR collection are out there -- your Rare Slinger is scrounging scraps near the Gem Mine. Your Epic Boss is guarding the Crew Yard. Your Common Runner is doing a delivery mission for The Fixer. They have little mission icons over their heads. You can tap them to see what they're doing, help them, or just watch them work.
 
 And when you toggle COMBAT MODE (the Brawl Stars button on your HUD), your dog pulls out a weapon -- a neon slingshot, a spray-can flamethrower, a chain-whip -- and you can shoot at other players' roaming dogs (ATA style) or blast zombie strays that spawn at night. It's just for fun. It's a toggle. But it makes the hub feel ALIVE.
 
@@ -94,7 +94,7 @@ And when you toggle COMBAT MODE (the Brawl Stars button on your HUD), your dog p
 | **TROPHY HALL** | Goldie | #0012 | Proud, celebratory | "Admire the hardware -- you earned it." / "Every belt tells a story, kid." / "Hall of kings." |
 | **PASS HOUSE** | Ticket | #0013 | Hype, energetic | "The season's heatin' up!" / "Premium lane's where it's at." / "Don't miss the tier rewards!" |
 | **THE FIXER** (bounties) | Shade | #0014 | Mysterious, quiet | "I got work. You got skills?" / "The streets talk. I listen." / "Discretion is currency here." |
-| **CLAN YARD** | Chief | #0015 | Authoritative, loyal | "Crew's family. You family?" / "We look out for our own." / "The yard's always open." |
+| **CREW YARD** | Chief | #0015 | Authoritative, loyal | "Crew's family. You family?" / "We look out for our own." / "The yard's always open." |
 
 ---
 

@@ -21,7 +21,7 @@
   /* AK-HUD: persistent home-screen HUD (player chip + resources) */
   #phud{position:fixed;left:10px;top:30px;z-index:6;display:flex;gap:6px;align-items:center;font-family:Inter,sans-serif;pointer-events:none;}
   #phud .chip{background:rgba(8,8,14,.82);border:1px solid rgba(201,168,76,.55);border-radius:18px;padding:5px 11px;font-size:11px;font-weight:800;color:#e8c55a;letter-spacing:.03em;}
-  #thpanel{position:fixed;inset:0;z-index:9;background:rgba(4,4,8,.8);display:none;align-items:center;justify-content:center;}
+  #thpanel{position:fixed;inset:0;z-index:9;background:rgba(4,4,8,.8);display:none;align-items:center;justify-content:center; perspective:1100px;}
   #thp-box{background:linear-gradient(160deg,#15110a,#0a0a0e);border:1.5px solid #c9a84c;border-radius:16px;padding:22px 24px;width:min(86vw,340px);text-align:center;font-family:Inter,sans-serif;box-shadow:0 0 34px rgba(201,168,76,.28);}
   #thp-title{font-family:Cinzel,serif;color:#e8c55a;font-size:19px;font-weight:800;letter-spacing:.05em;}
   #thp-lv{color:#fff;font-size:34px;font-weight:900;margin:8px 0 2px;}
@@ -30,7 +30,7 @@
   #thp-up:disabled{filter:grayscale(.65);opacity:.55;cursor:not-allowed;}
   #thp-hint{color:#9a8f6a;font-size:11px;margin-top:10px;min-height:14px;}
   #thp-close{margin-top:13px;background:none;border:1px solid rgba(201,168,76,.4);color:#b9a76a;border-radius:8px;padding:7px 18px;font-size:11px;cursor:pointer;}
-  #interior{position:fixed;inset:0;z-index:12;display:none;flex-direction:column;justify-content:flex-end;background:#08080c;}
+  #interior{position:fixed;inset:0;z-index:12;display:none;flex-direction:column;justify-content:flex-end;background:#08080c; perspective:1100px; perspective-origin:50% 78%;}
   #int-bg{position:absolute;inset:0;background-size:cover;background-position:center;}
   #int-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,12,.08) 38%,rgba(8,8,12,.93));}
   #int-card{position:relative;z-index:2;margin:0 12px 18px;background:rgba(10,10,16,.92);border:1.5px solid #c9a84c;border-radius:16px;padding:16px 18px;font-family:Inter,sans-serif;box-shadow:0 0 30px rgba(201,168,76,.25);}
@@ -54,13 +54,53 @@
   #ls-bar{margin-top:14px;width:60vw;max-width:280px;height:5px;border-radius:3px;background:rgba(201,168,76,.2);overflow:hidden;}
   #ls-fill{height:100%;width:8%;background:linear-gradient(90deg,#c9a84c,#e8c55a);transition:width .5s ease-out;}
   #ls-tip{margin-top:12px;font-size:11px;color:#c9a84c;opacity:.85;letter-spacing:.04em;}
+  /* ===========================================================================
+     AK-3D 2026-06-20 -- "extruded photo" 2.5D for DOM surfaces (Brawl-Stars look)
+     Pure CSS 3D transforms + a tiny pointer shim. GPU-only, ~0KB, NO WebGL.
+     Per AK_DEEP_DIVE_SYNTHESIS Part 1. Two usage modes:
+       MODE A (single element): scene parent gets .ak-3d; ONE box that has NO
+         overflow:hidden gets BOTH .ak-3d-tilt and .ak-3d-face  (#int-card,#thp-box)
+       MODE B (wrapper): .ak-3d > .ak-3d-tilt > .ak-3d-face, used when the face
+         keeps overflow:hidden/clip-path (shop .aks-card art window).
+     The shim writes --ak-rx / --ak-ry (deg) onto .ak-3d-tilt; CSS reads them.
+     =========================================================================== */
+  .ak-3d{ display:block; perspective:1100px; perspective-origin:50% 50%; }
+  .ak-3d-tilt{
+    display:block; position:relative; transform-style:preserve-3d;
+    transform:rotateX(var(--ak-rx,3deg)) rotateY(var(--ak-ry,0deg));
+    transition:transform .5s cubic-bezier(.2,.7,.2,1);
+  }
+  .ak-3d.ak-3d-live .ak-3d-tilt{ transition:none; will-change:transform; }
+  /* extruded thickness: two squeezed dark faces folded off the slab edges.
+     On .ak-3d-tilt (never clipped) so it works on a face that has overflow:hidden. */
+  .ak-3d-tilt::before, .ak-3d-tilt::after{ content:""; position:absolute; pointer-events:none; }
+  .ak-3d-tilt::before{ left:2px; right:2px; bottom:0; height:16px;
+    transform-origin:bottom center; transform:rotateX(-90deg);
+    background:linear-gradient(to top, rgba(0,0,0,.62), rgba(0,0,0,.18)); }
+  .ak-3d-tilt::after{ top:2px; bottom:2px; right:0; width:16px;
+    transform-origin:right center; transform:rotateY(90deg);
+    background:linear-gradient(to left, rgba(0,0,0,.62), rgba(0,0,0,.2)); }
+  /* face marker -- NO transform/shadow by default so it never fights an existing
+     :hover transform or a gold glow already on the surface. */
+  .ak-3d-face{ position:relative; }
+  /* OPT-IN contact shadow (use ONLY on surfaces with no rest box-shadow, e.g. .aks-card) */
+  .ak-3d-shadow{ box-shadow:0 16px 30px -10px rgba(0,0,0,.6); }
+  /* phones: no hover-steer -> keep ONLY the cheap static resting tilt + extrusion */
+  @media (hover:none),(pointer:coarse){
+    .ak-3d-tilt{ transform:rotateX(2.5deg) rotateY(0deg); transition:none; }
+    .ak-3d.ak-3d-live .ak-3d-tilt{ will-change:auto; }
+  }
+  @media (prefers-reduced-motion:reduce){
+    .ak-3d-tilt{ transform:none; transition:none; }
+    .ak-3d-tilt::before, .ak-3d-tilt::after{ display:none; }
+  }
 </style></head><body>
 <canvas id="c"></canvas>
 <div id="loadscreen"><video id="ls-vid" autoplay loop muted playsinline preload="auto" poster="assets/ui/lobby_hero.png"><source src="assets/ui/menu_bg.mp4" type="video/mp4"></video><div id="ls-word">ALLEY KINGZ</div><div id="ls-bar"><div id="ls-fill"></div></div><div id="ls-tip">Rule the streets. Build your crew. Take the crown.</div></div>
 <div id="hud">THE LOT &mdash; walk to a building to enter its mode &middot; tap / joystick / WASD / arrows / hjkl</div>
 <div id="phud"><span class="chip" id="ph-name">&#128100; STRAY</span><span class="chip" id="ph-th" style="cursor:pointer;pointer-events:auto;border-color:#e8c55a;">&#127963; TH -</span><span class="res" id="ph-gold">&#129689; -</span><span class="res" id="ph-gem">&#128142; -</span></div>
-<div id="thpanel"><div id="thp-box"><div id="thp-title">&#127963; TOWN HALL</div><div id="thp-lv">Level -</div><div id="thp-cap">--</div><button id="thp-up">UPGRADE</button><div id="thp-hint"></div><button id="thp-close">CLOSE</button></div></div>
-<div id="interior"><div id="int-bg"></div><div id="int-card">
+<div id="thpanel" class="ak-3d"><div id="thp-box" class="ak-3d-tilt ak-3d-face"><div id="thp-title">&#127963; TOWN HALL</div><div id="thp-lv">Level -</div><div id="thp-cap">--</div><button id="thp-up">UPGRADE</button><div id="thp-hint"></div><button id="thp-close">CLOSE</button></div></div>
+<div id="interior" class="ak-3d"><div id="int-bg"></div><div id="int-card" class="ak-3d-tilt ak-3d-face">
   <div id="int-place">BUILDING</div>
   <div id="int-keeper"><span id="int-glyph">&#128021;</span><span id="int-name">Keeper</span></div>
   <div id="int-line">...</div>
@@ -85,6 +125,7 @@
 <script src="systems/modes.js"></script>
 <script src="systems/worldmap.js"></script>
 <script src="systems/karma.js"></script>
+<script src="systems/loops.js"></script>
 <script>
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
 const rad=document.getElementById('radar'),rctx=rad.getContext('2d');
@@ -288,12 +329,19 @@ function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
   draw();drawFX(dt);drawRadar();requestAnimationFrame(loop);
 }
 function wx(x){return x-cam.x;} function wy(y){return y-cam.y;}
+// AK-25D 2026-06-20: 2.5D depth kit for the Canvas2D hub. Built ONCE -- no per-frame alloc, no new shadowBlur.
+const BLD_DEPTH={dx:6,dy:10};                                  // extrusion vector: thickness pushes down-right
+const bldShadow=(function(){var c=document.createElement('canvas');c.width=64;c.height=32;var g=c.getContext('2d');
+  var rg=g.createRadialGradient(32,16,2,32,16,30);rg.addColorStop(0,'rgba(0,0,0,.45)');rg.addColorStop(1,'rgba(0,0,0,0)');
+  g.fillStyle=rg;g.beginPath();g.ellipse(32,16,30,14,0,0,7);g.fill();return c;})(); // pre-rendered soft contact shadow
+function depthScale(sy){return 1+(((sy||0)/(H||640))-0.5)*0.06;} // lower on screen = a touch bigger (optional)
 function draw(){ctx.fillStyle=curTint();ctx.fillRect(0,0,W,H);
   // AK-GROUND2 2026-06-20: ONE themed image stretched to cover the whole district (NO tiling/repeat -- the operator disliked the tiled look). Scrolls 1:1 with the camera.
   var gd=curGround();
   if(gd&&gd.complete&&gd.naturalWidth>0){
     ctx.save();ctx.globalAlpha=0.80;ctx.imageSmoothingQuality='high';
-    ctx.drawImage(gd, -cam.x, -cam.y, WORLD_W, WORLD_H);
+    // AK-PARALLAX 2026-06-20: bg lags the world by 8% (depth cue). WORLD_W/H both far exceed the viewport, so the lag never exposes the tint underneath.
+    ctx.drawImage(gd, -cam.x*0.92, -cam.y*0.92, WORLD_W, WORLD_H);
     ctx.globalAlpha=1;ctx.restore();
   }
   ctx.strokeStyle='rgba(201,168,76,.05)';ctx.lineWidth=1;const G=80,ox=-(cam.x%G),oy=-(cam.y%G);
@@ -306,6 +354,13 @@ function draw(){ctx.fillStyle=curTint();ctx.fillRect(0,0,W,H);
     if(p.t==='lamp'){ctx.save();ctx.shadowColor='#c9a84c';ctx.shadowBlur=10;ctx.fillStyle='rgba(201,168,76,.5)';ctx.beginPath();ctx.arc(X,Y,3.5,0,7);ctx.fill();ctx.restore();ctx.strokeStyle='rgba(150,150,160,.35)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(X,Y);ctx.lineTo(X,Y+16*p.h);ctx.stroke();}
     else{ctx.fillStyle='rgba(70,68,86,.6)';ctx.fillRect(X-6,Y-6,13*p.h,13*p.h);}});
   curBuildings().forEach(b=>{const X=wx(b.x),Y=wy(b.y);if(X<-220||X>W+220||Y<-220||Y>H+220)return;
+    // AK-25D 2026-06-20: cheap contact shadow + extruded side/bottom faces (BEHIND the front face -> reads as a solid block)
+    var hw=b.w/2, hh=b.h/2, ex=BLD_DEPTH.dx, ey=BLD_DEPTH.dy;
+    ctx.drawImage(bldShadow, X-hw*1.10, Y+hh-6, b.w*1.28, 24);                              // soft ground shadow (sprite, no blur)
+    ctx.fillStyle='rgba(6,6,12,.55)';                                                       // BOTTOM face (darkest)
+    ctx.beginPath();ctx.moveTo(X-hw,Y+hh);ctx.lineTo(X+hw,Y+hh);ctx.lineTo(X+hw+ex,Y+hh+ey);ctx.lineTo(X-hw+ex,Y+hh+ey);ctx.closePath();ctx.fill();
+    ctx.fillStyle='rgba(13,12,20,.72)';                                                     // RIGHT side face
+    ctx.beginPath();ctx.moveTo(X+hw,Y-hh);ctx.lineTo(X+hw,Y+hh);ctx.lineTo(X+hw+ex,Y+hh+ey);ctx.lineTo(X+hw+ex,Y-hh+ey);ctx.closePath();ctx.fill();
     var fi=facImg[b.id];
     if(fi&&fi.complete&&fi.naturalWidth>0){ // real facade art, cover-fit + clipped to the footprint
       ctx.save();ctx.beginPath();ctx.rect(X-b.w/2,Y-b.h/2,b.w,b.h);ctx.clip();
@@ -325,18 +380,18 @@ function draw(){ctx.fillStyle=curTint();ctx.fillRect(0,0,W,H);
   if(ar){var aX=wx(ar.x),aY=wy(ar.y);
   if(aX<0||aX>W||aY<0||aY>H){const ang=Math.atan2(ar.y-me.y,ar.x-me.x);const px=Math.max(28,Math.min(W-28,wx(me.x)+Math.cos(ang)*58)),py=Math.max(80,Math.min(H-80,wy(me.y)+Math.sin(ang)*58));ctx.save();ctx.translate(px,py);ctx.rotate(ang);ctx.fillStyle=ar.col;ctx.beginPath();ctx.moveTo(13,0);ctx.lineTo(-8,-7);ctx.lineTo(-8,7);ctx.closePath();ctx.fill();ctx.restore();}}
   akDrawSystems();
-  const X=wx(me.x),Y=wy(me.y);
+  const X=wx(me.x),Y=wy(me.y); var ds=depthScale(Y);
   // AK-AVATAR: procedural walk -- hop, lean, step-squash shadow, face the travel direction (so it reads as walking, not a floating portrait)
   var bob = avMoving ? -Math.abs(Math.sin(walkT))*5 : 0;
   var lean = avMoving ? Math.sin(walkT)*0.07 : 0;
   var sq = avMoving ? 1+0.16*Math.abs(Math.sin(walkT)) : 1;
-  ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(X,Y+me.r+2,me.r*.8*sq,5/sq,0,0,7);ctx.fill();
-  ctx.save();ctx.translate(X,Y+bob);ctx.rotate(lean);
+  ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(X,Y+me.r*ds+2,me.r*.8*sq*ds,5/sq*ds,0,0,7);ctx.fill();
+  ctx.save();ctx.translate(X,Y+bob);ctx.rotate(lean);ctx.scale(ds,ds);
   ctx.beginPath();ctx.arc(0,0,me.r,0,7);ctx.closePath();ctx.shadowColor='#c9a84c';ctx.shadowBlur=13;ctx.fillStyle='#222';ctx.fill();ctx.clip();
   ctx.scale(faceDir,1);
   if(dog.complete&&dog.naturalWidth>0)ctx.drawImage(dog,-me.r,-me.r-5,me.r*2,me.r*2+10);else{ctx.fillStyle='#c9a84c';ctx.fillRect(-me.r,-me.r,me.r*2,me.r*2);}
   ctx.restore();
-  ctx.save();ctx.translate(X,Y+bob);ctx.rotate(lean);ctx.strokeStyle='#c9a84c';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(0,0,me.r,0,7);ctx.stroke();ctx.restore();
+  ctx.save();ctx.translate(X,Y+bob);ctx.rotate(lean);ctx.scale(ds,ds);ctx.strokeStyle='#c9a84c';ctx.lineWidth=2.5;ctx.beginPath();ctx.arc(0,0,me.r,0,7);ctx.stroke();ctx.restore();
 }
 function drawFX(dt){ // drifting embers (screen-space) + mood vignette
   ctx.save();
@@ -462,4 +517,38 @@ function akDrawSystems(){ if(!window.AK_SYSTEMS)return; var rs=AK_CTX._roamers;
   AK_SYSTEMS.drawAll(AK_CTX); }
 try{ if(window.AK_SYSTEMS) AK_SYSTEMS.initAll(AK_CTX); }catch(_e){}
 requestAnimationFrame(loop);
+</script>
+<script>
+/* AK-3D tilt shim -- one delegated pointer handler for ALL .ak-3d scenes.
+   Writes --ak-rx/--ak-ry (deg) onto the inner .ak-3d-tilt; CSS does the rest. */
+(function(){
+  if (window.__akTilt) return; window.__akTilt = true;
+  if (matchMedia('(hover:none),(pointer:coarse)').matches) return;     // static tilt only
+  if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+  var MAX = 9, raf = 0, pend = null;
+  function apply(){
+    raf = 0; if(!pend) return;
+    var t = pend.tilt, r = pend.rect;
+    var nx = (pend.x - r.left)/r.width  - .5;     // -0.5 .. 0.5
+    var ny = (pend.y - r.top )/r.height - .5;
+    t.style.setProperty('--ak-ry', ( nx*2*MAX).toFixed(2)+'deg');
+    t.style.setProperty('--ak-rx', (-ny*2*MAX + 3).toFixed(2)+'deg');  // +3 = tabletop bias
+    pend = null;
+  }
+  document.addEventListener('pointermove', function(e){
+    if (e.pointerType === 'touch') return;
+    var s = e.target.closest && e.target.closest('.ak-3d'); if(!s) return;
+    var t = s.querySelector('.ak-3d-tilt'); if(!t) return;
+    s.classList.add('ak-3d-live');
+    pend = { tilt:t, rect:s.getBoundingClientRect(), x:e.clientX, y:e.clientY };
+    if(!raf) raf = requestAnimationFrame(apply);
+  }, {passive:true});
+  document.addEventListener('pointerout', function(e){
+    var s = e.target.closest && e.target.closest('.ak-3d'); if(!s) return;
+    if (s.contains(e.relatedTarget)) return;          // pointer still inside the scene
+    s.classList.remove('ak-3d-live');
+    var t = s.querySelector('.ak-3d-tilt');
+    if(t){ t.style.removeProperty('--ak-rx'); t.style.removeProperty('--ak-ry'); }   // eases back to rest
+  }, {passive:true});
+})();
 </script></body></html>

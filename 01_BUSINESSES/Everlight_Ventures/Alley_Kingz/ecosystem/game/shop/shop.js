@@ -418,6 +418,8 @@
     (extraNodes || []).forEach(function (n) { box.appendChild(n); });
     return box;
   }
+  // AK-3D 2026-06-20: wrap a card tile in the extruded-photo 2.5D scene (MODE B -- wrapper).
+  function wrap3d(node){ return h("div", { class:"ak-3d" }, [ h("div", { class:"ak-3d-tilt" }, [ node ]) ]); }
   function cardFrame(card, opts) {
     opts = opts || {};
     var meta = [
@@ -430,10 +432,10 @@
     else meta.push(h("div", { class: "aks-desc", text: card.desc || "" }));
     (opts.metaExtra || []).forEach(function (n) { meta.push(n); });
     meta.push(h("div", { class: "aks-row" }, [opts.priceNode || h("span"), opts.btnNode || h("span")]));
-    return h("div", { class: "aks-card " + rarClass(card.rarity) + (opts.cls ? (" " + opts.cls) : "") }, [
+    return wrap3d(h("div", { class: "aks-card ak-3d-face ak-3d-shadow " + rarClass(card.rarity) + (opts.cls ? (" " + opts.cls) : "") }, [
       artBox(card, opts.topStamp ? [opts.topStamp] : []),
       h("div", { class: "aks-meta" }, meta),
-    ]);
+    ]));
   }
   function subLine(card) {
     var bits = [];
@@ -2532,6 +2534,7 @@ function hitView() {
     root = h("div", { class: "akshop", role: "dialog", "aria-label": "Alley Kingz Shop" });
     root.setAttribute("hidden", "");
     document.body.appendChild(root);
+    try { if (window.AKLoops) AKLoops.attachShop(root); } catch (_e) {}
   }
   function qs(k) { return new URLSearchParams(location.search).get(k); }
   function open(opts) {
@@ -2545,6 +2548,7 @@ function hitView() {
     try { var hh = (location.hash || "").replace(/^#/, "").split("&")[0];
       if (["deck", "gems", "cards", "draw", "chests", "upgrade", "codex2", "handlers", "street", "drip2", "crew2", "pass2", "hit2"].indexOf(hh) >= 0) { activeTab = hh; soloTab = true; } } catch (_) {}
     root.removeAttribute("hidden");
+    try { if (window.AKLoops) AKLoops.play("shop"); } catch (_e) {}
     ensureCatalog().then(ensureEconomy).then(load);   // AK-SCRAP: shared economy first
     confirmPendingGems();
   }
@@ -2566,7 +2570,7 @@ function hitView() {
       else { toast(humanErr(r), "bad"); }
     }).catch(function () { toast("Could not confirm purchase -- it will retry next visit.", "bad"); });
   }
-  function close() { if (root) root.setAttribute("hidden", ""); }
+  function close() { if (root) root.setAttribute("hidden", ""); try { if (window.AKLoops) AKLoops.pause("shop"); } catch (_e) {} }
 
   global.AKShop = {
     open: open, close: close,
@@ -2574,6 +2578,39 @@ function hitView() {
     config: function (o) { Object.assign(cfg, o || {}); cfg.online = !!(cfg.anonKey && cfg.playerId); },
     _state: function () { return state; },
   };
+
+  /* AK-3D tilt shim -- one delegated pointer handler for ALL .ak-3d scenes.
+     Writes --ak-rx/--ak-ry (deg) onto the inner .ak-3d-tilt; CSS does the rest. */
+  (function(){
+    if (window.__akTilt) return; window.__akTilt = true;
+    if (matchMedia('(hover:none),(pointer:coarse)').matches) return;     // static tilt only
+    if (matchMedia('(prefers-reduced-motion:reduce)').matches) return;
+    var MAX = 9, raf = 0, pend = null;
+    function apply(){
+      raf = 0; if(!pend) return;
+      var t = pend.tilt, r = pend.rect;
+      var nx = (pend.x - r.left)/r.width  - .5;     // -0.5 .. 0.5
+      var ny = (pend.y - r.top )/r.height - .5;
+      t.style.setProperty('--ak-ry', ( nx*2*MAX).toFixed(2)+'deg');
+      t.style.setProperty('--ak-rx', (-ny*2*MAX + 3).toFixed(2)+'deg');  // +3 = tabletop bias
+      pend = null;
+    }
+    document.addEventListener('pointermove', function(e){
+      if (e.pointerType === 'touch') return;
+      var s = e.target.closest && e.target.closest('.ak-3d'); if(!s) return;
+      var t = s.querySelector('.ak-3d-tilt'); if(!t) return;
+      s.classList.add('ak-3d-live');
+      pend = { tilt:t, rect:s.getBoundingClientRect(), x:e.clientX, y:e.clientY };
+      if(!raf) raf = requestAnimationFrame(apply);
+    }, {passive:true});
+    document.addEventListener('pointerout', function(e){
+      var s = e.target.closest && e.target.closest('.ak-3d'); if(!s) return;
+      if (s.contains(e.relatedTarget)) return;          // pointer still inside the scene
+      s.classList.remove('ak-3d-live');
+      var t = s.querySelector('.ak-3d-tilt');
+      if(t){ t.style.removeProperty('--ak-rx'); t.style.removeProperty('--ak-ry'); }   // eases back to rest
+    }, {passive:true});
+  })();
 
   // AK-SHOPFIX item 2: re-config + re-render the moment auth state changes, so
   // a player who signs in mid-session never gets the "log in" nag.

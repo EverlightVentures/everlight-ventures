@@ -2,7 +2,7 @@
 > The leap from "walkable menu" to a living overworld -- Sunflower Land dynamics, but dogs. Operator feedback after first walking the live hub. Companion to AK_WORLD_BIBLE.md + AK_RAID_DEFENSE_SYSTEM.md. The battler (game.html) + the shop sections are the DONE base; this is the world layer wrapped around them.
 
 ## ALREADY WORKING (verified in code 2026-06-19, hard-refresh to see)
-- DEEP-LINK: each building opens its OWN shop section (shop.js auto-opens on load via data-akshop-standalone + reads the #hash -> activeTab). Garage->Deck Lab, Kennel->Handlers, Clan Yard->Crew, Fixer->Hit List, Pass House->Alley Pass, Wardrobe->Drip, Archive->Codex, Street->Street Code. (THE DROP = the generic shop on purpose; point it at #gems.)
+- DEEP-LINK: each building opens its OWN shop section (shop.js auto-opens on load via data-akshop-standalone + reads the #hash -> activeTab). Garage->Deck Lab, Kennel->Handlers, Crew Yard->Crew, Fixer->Hit List, Pass House->Alley Pass, Wardrobe->Drip, Archive->Codex, Street->Street Code. (THE DROP = the generic shop on purpose; point it at #gems.)
 - EXIT: "<- BACK TO THE ALLEY" (top-left, every shop screen) -> ../ = the world map (the hub). game.html result-nav also has a Map button -> hub.
 - SPAWN: fixed -- empty tile (1300,950) + 0.8s grace, no auto-enter.
 
