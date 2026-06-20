@@ -82,6 +82,7 @@
 <script src="systems/trading.js"></script>
 <script src="systems/arcade.js"></script>
 <script src="systems/modes.js"></script>
+<script src="systems/worldmap.js"></script>
 <script>
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
 const rad=document.getElementById('radar'),rctx=rad.getContext('2d');
@@ -259,7 +260,9 @@ function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
   // AK-MOVE3 2026-06-20: smoothing branched by input. JOYSTICK = DIRECT -- the analog magnitude IS the ramp; lerping it again added ~190ms lag (the floaty/drifty feel). Keyboard/tap get a quick ramp so digital input isn't jarring; fast decel so you stop crisply.
   if(stickV.x||stickV.y){ me.vx=tvx; me.vy=tvy; }
   else { var _lam=(Math.hypot(tvx,tvy)>=Math.hypot(me.vx||0,me.vy||0))?22:35; var _sk=1-Math.exp(-_lam*dt); me.vx=(me.vx||0)+(tvx-(me.vx||0))*_sk; me.vy=(me.vy||0)+(tvy-(me.vy||0))*_sk; if(Math.hypot(me.vx,me.vy)<3){me.vx=tvx;me.vy=tvy;} }
+  var _px=me.x,_py=me.y;
   me.x+=me.vx*dt; me.y+=me.vy*dt;
+  if(window.AK_COLLISION) window.AK_COLLISION.resolve(me,_px,_py, window.AK_COLLISION.obstaclesFor(activeZone)); // AK-MOVE3: block out of obstacles + slide along edges (fences/cars/trains)
   // AK-ZONES edge transition: walk into a mapped edge -> new district (locked target -> barrier)
   if(state==='IN_ZONE' && spawnGrace<=0){ var E=42, ez=null;
     if(me.x<E && activeZone.edges.W) ez=activeZone.edges.W; else if(me.x>WORLD_W-E && activeZone.edges.E) ez=activeZone.edges.E;
@@ -404,6 +407,7 @@ window.AK_CTX = {
   ZONES: ZONES,
   get activeZone(){ return activeZone; }, get zoneId(){ return activeZone.id; },
   me: me, cam: cam,
+  get buildingLevels(){ try{ return LV; }catch(_e){ return null; } },
   showBanner: function(text, secs){ showBanner(text, secs); },
   ui:{ keeperCard:function(o){ o=o||{}; var $=function(id){return document.getElementById(id);};
     $('int-place').textContent=o.place||(interiorB&&interiorB.label)||'BUILDING';
