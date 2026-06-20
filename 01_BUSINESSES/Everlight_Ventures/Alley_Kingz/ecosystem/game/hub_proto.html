@@ -30,6 +30,19 @@
   #thp-up:disabled{filter:grayscale(.65);opacity:.55;cursor:not-allowed;}
   #thp-hint{color:#9a8f6a;font-size:11px;margin-top:10px;min-height:14px;}
   #thp-close{margin-top:13px;background:none;border:1px solid rgba(201,168,76,.4);color:#b9a76a;border-radius:8px;padding:7px 18px;font-size:11px;cursor:pointer;}
+  #interior{position:fixed;inset:0;z-index:12;display:none;flex-direction:column;justify-content:flex-end;background:#08080c;}
+  #int-bg{position:absolute;inset:0;background-size:cover;background-position:center;}
+  #int-bg::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,12,.08) 38%,rgba(8,8,12,.93));}
+  #int-card{position:relative;z-index:2;margin:0 12px 18px;background:rgba(10,10,16,.92);border:1.5px solid #c9a84c;border-radius:16px;padding:16px 18px;font-family:Inter,sans-serif;box-shadow:0 0 30px rgba(201,168,76,.25);}
+  #int-place{color:#9a8f6a;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;}
+  #int-keeper{display:flex;align-items:center;gap:10px;margin:5px 0 8px;}
+  #int-glyph{font-size:30px;line-height:1;}
+  #int-name{font-family:Cinzel,serif;color:#e8c55a;font-size:18px;font-weight:800;}
+  #int-line{color:#E8E8E8;font-size:14px;line-height:1.45;min-height:40px;}
+  #int-btns{display:flex;gap:10px;margin-top:12px;}
+  #int-go{flex:2;background:linear-gradient(180deg,#e8c55a,#c9a84c);color:#15110a;border:none;border-radius:10px;padding:13px 0;font-weight:900;font-size:14px;cursor:pointer;letter-spacing:.03em;}
+  #int-go:disabled{filter:grayscale(.65);opacity:.55;cursor:not-allowed;}
+  #int-exit{flex:1;background:none;border:1px solid rgba(201,168,76,.45);color:#b9a76a;border-radius:10px;padding:13px 0;font-weight:700;font-size:12px;cursor:pointer;}
   #phud .res{background:rgba(8,8,14,.82);border:1px solid rgba(201,168,76,.35);border-radius:14px;padding:4px 9px;font-size:11px;font-weight:700;color:#E8E8E8;}
   /* AK-LOADING: branded crowned-dog load screen (initial load + page-nav transitions) */
   #loadscreen{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:16vh;transition:opacity .55s;
@@ -45,6 +58,12 @@
 <div id="hud">THE LOT &mdash; walk to a building to enter its mode &middot; tap / joystick / WASD / arrows / hjkl</div>
 <div id="phud"><span class="chip" id="ph-name">&#128100; STRAY</span><span class="chip" id="ph-th" style="cursor:pointer;pointer-events:auto;border-color:#e8c55a;">&#127963; TH -</span><span class="res" id="ph-gold">&#129689; -</span><span class="res" id="ph-gem">&#128142; -</span></div>
 <div id="thpanel"><div id="thp-box"><div id="thp-title">&#127963; TOWN HALL</div><div id="thp-lv">Level -</div><div id="thp-cap">--</div><button id="thp-up">UPGRADE</button><div id="thp-hint"></div><button id="thp-close">CLOSE</button></div></div>
+<div id="interior"><div id="int-bg"></div><div id="int-card">
+  <div id="int-place">BUILDING</div>
+  <div id="int-keeper"><span id="int-glyph">&#128021;</span><span id="int-name">Keeper</span></div>
+  <div id="int-line">...</div>
+  <div id="int-btns"><button id="int-go" onclick="interiorGo()">ENTER</button><button id="int-exit" onclick="exitInterior()">LEAVE</button></div>
+</div></div>
 <div id="dist"></div>
 <canvas id="radar" width="100" height="128"></canvas>
 <div id="banner"></div>
@@ -69,6 +88,26 @@ const LV={ARENA:8,TROPHY:4,FIXER:3,GARAGE:6,DROP:5,KENNEL:4,CLAN:5,PASS:2,WARD:3
 const facImg={}; for(const _k in FAC){ var _im=new Image(); _im.src='assets/hub/'+FAC[_k]+'.png'; facImg[_k]=_im; }
 const groundImg={uptown:new Image(),midtown:new Image(),docks:new Image()};
 groundImg.uptown.src='assets/hub/uptown_ground.png'; groundImg.midtown.src='assets/hub/midtown_ground.png'; groundImg.docks.src='assets/hub/docks_ground.png';
+// AK-DISTRICTBG 2026-06-20: one cohesive themed background per district (consistent house style, generated as a matching set). Falls back to the shared ground if a bg PNG isn't loaded yet.
+const DBG={HOME_TURF:'the_lot',DOWNTOWN:'downtown',NEON_HEIGHTS:'neon_heights',THE_YARDS:'the_yards',FACTORY_ROW:'factory_row',THE_STRIP:'the_strip',THE_DOCKS:'the_docks'};
+const districtBg={}; Object.keys(DBG).forEach(function(k){var im=new Image();im.src='assets/hub/'+DBG[k]+'_bg.png';districtBg[k]=im;});
+// AK-INTERIOR 2026-06-20: buildings are PLACES, not vending machines. Walk in -> interior scene (own art) -> a KEEPER greets you -> they open the menu (Pokemon-mart style). Menus kept, embedded behind real bots. Keepers later voiced from ak_flavor_pool (see AK_AI_BOTS_PLAN).
+const intImg={}; ['merchant','arena','gem_mine','card_forge','research_lab','kennel'].forEach(function(t){var im=new Image();im.src='assets/interiors/'+t+'.png';intImg[t]=im;});
+const KEEPERS={
+  ARENA:{name:'Coach Diesel',glyph:'🥊',it:'arena',lines:["Step up, champ. The arena's hot tonight.","You ready to throw down or just sightseein'?","Crown's on the line. Let's move."]},
+  GEM:{name:'Prospector Pip',glyph:'⛏️',it:'gem_mine',lines:["Gems don't mine themselves, partner.","Rich veins today -- grab your haul.","Careful in the shaft, it's slick."]},
+  MINT:{name:'Banker Bones',glyph:'💰',it:'merchant',lines:["Gold's good here. What you need?","The mint never sleeps, friend.","Count it twice -- that's my motto."]},
+  FORGE:{name:'Sparks',glyph:'🔧',it:'card_forge',lines:["Forge is lit. Let's make somethin'.","Bring me scraps, I'll bring the heat.","Every legend starts on this anvil."]},
+  LAB:{name:'Doc Wattson',glyph:'🔬',it:'research_lab',lines:["Science waits for no dog. Pick your upgrades.","The skill tree's bloomin' -- come look.","Knowledge is the sharpest fang."]},
+  KENNEL:{name:'Mama Bones',glyph:'🦴',it:'kennel',lines:["Lookin' to grow the family? Come in.","My pups are the finest in the city.","Breed smart, raise 'em right."]},
+  TROPHY:{name:'Goldie',glyph:'🏆',it:'merchant',lines:["Admire the hardware -- you earned it.","Every belt tells a story, kid.","Hall of kings. You belong here."]},
+  GEN:{name:'Volt',glyph:'⚡',it:'research_lab',lines:["Keep the power flowin'.","No juice, no muscle -- simple.","She's hummin' sweet today."]}
+};
+function keeperFor(b){ var k=KEEPERS[b.id]; if(k)return k; var L=(b.label||'').toLowerCase();
+  if(/shop|chop|market|store/.test(L))return {name:'Scratch',glyph:'💰',it:'merchant',lines:["What you in the market for?","I got deals, friend -- step up.","Cash or trade, your call."]};
+  if(/coll|deck|card|crew|kennel/.test(L))return {name:'Roxy',glyph:'🃏',it:'merchant',lines:["Wanna check the crew? Step up.","Your deck's lookin' sharp.","Pick your fighters wisely."]};
+  return {name:'The Keeper',glyph:'🐕',it:'merchant',lines:["Welcome in.","Look around, take your time.","Holler if you need somethin'."]}; }
+let interiorOpen=false, interiorB=null;
 function B(id,label,col,x,y,w,h,url,act){return {id,label,col,x,y,w,h,url,act};}
 // the 4 painted cities as real zones; linear E-W chain + one LOCKED silhouette off DOWNTOWN-north (barrier demo)
 // 3x3 GRID of districts (gx,gy). Every edge of every cell leads to a neighbor -- no dead ends. spawn = the OPPOSITE edge of the target (Stardew rule). ZW-150=1550, ZH-150=1150.
@@ -116,7 +155,7 @@ const ZNAV=['THE_OVERLOOK','DOWNTOWN','NEON_HEIGHTS','THE_YARDS','HOME_TURF','FA
 function getZone(id){return ZONES[id]||ZONES.HOME_TURF;}
 let activeZone=getZone(localStorage.getItem('ak_hub_zone')||'HOME_TURF');
 function curBuildings(){return activeZone.buildings;}
-function curGround(){return groundImg[activeZone.ground];}
+function curGround(){var d=districtBg[activeZone.id]; if(d&&d.complete&&d.naturalWidth>0)return d; return groundImg[activeZone.ground];}
 function curTint(){var c=activeZone.tint;return 'rgb('+c[0]+','+c[1]+','+c[2]+')';}
 const me={x:850,y:650,tx:null,ty:null,r:23,spd:300}; // AK-SPAWN: centre of the active zone (empty tile)
 let spawnGrace=0.8;
@@ -159,6 +198,22 @@ function stickEnd(e){if(e&&e.pointerId!=null&&e.pointerId!==stickId)return;stick
 const banner=document.getElementById('banner');let bannerT=0;
 function showBanner(t,hold){banner.textContent=t;banner.style.opacity='1';bannerT=hold||1.6;}
 let entering=false, state='IN_ZONE';   // FSM: IN_ZONE | TRANSITIONING
+function enterInterior(b){ if(interiorOpen)return; interiorOpen=true; interiorB=b; var k=keeperFor(b);
+  var im=intImg[k.it]; var bg=document.getElementById('int-bg');
+  bg.style.backgroundImage=(im&&im.complete&&im.naturalWidth>0)?("url('assets/interiors/"+k.it+".png')"):'';
+  bg.style.background=(im&&im.complete&&im.naturalWidth>0)?bg.style.background:'radial-gradient(circle at 50% 35%, #1a1510, #08080c)';
+  document.getElementById('int-glyph').textContent=k.glyph;
+  document.getElementById('int-name').textContent=k.name;
+  document.getElementById('int-line').textContent=k.lines[Math.floor(Math.random()*k.lines.length)];
+  document.getElementById('int-place').textContent=b.label;
+  var go=document.getElementById('int-go');
+  if(b.url==='soon'){ go.textContent=(b.act||'this').toUpperCase()+' -- COMING SOON'; go.disabled=true; }
+  else { go.textContent='▶ '+(b.act||'enter').toUpperCase(); go.disabled=false; }
+  document.getElementById('interior').style.display='flex'; }
+function interiorGo(){ if(!interiorB||interiorB.url==='soon')return; doEnter(interiorB.url, interiorB.label); }
+function exitInterior(){ interiorOpen=false; document.getElementById('interior').style.display='none';
+  if(interiorB){ var b=interiorB; me.x=b.x; me.y=b.y+b.h/2+(me.r+85); } // land OFF the door so the dwell can't re-enter
+  interiorB=null; dwellB=null; dwellT=0; spawnGrace=0.5; }
 function doEnter(url,label){ if(entering)return; entering=true;
   try{localStorage.setItem('ak_hub_zone',activeZone.id);localStorage.setItem('ak_hub_pos',JSON.stringify({x:Math.round(me.x),y:Math.round(me.y)}));localStorage.setItem('ak_returning','1');}catch(_e){}
   showBanner('Entering '+label+'…',3); fade.style.opacity='1'; if(window.akShowLoad)akShowLoad();
@@ -184,7 +239,7 @@ function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
   if(keys['w']||keys['arrowup']||keys['k'])vy-=1; if(keys['s']||keys['arrowdown']||keys['j'])vy+=1;
   if(stickV.x||stickV.y){vx=stickV.x;vy=stickV.y;}
   var tvx=0,tvy=0; // AK-MOVE2: compute target velocity, then SMOOTH toward it (accel/decel) for a non-jerky feel
-  if(!entering && state==='IN_ZONE'){
+  if(!entering && !interiorOpen && state==='IN_ZONE'){
     if(vx||vy){let m=Math.hypot(vx,vy); if(m>1){vx/=m;vy/=m;} tvx=vx*me.spd; tvy=vy*me.spd; me.tx=me.ty=null;}
     else if(me.tx!=null){var dx=me.tx-me.x,dy=me.ty-me.y,d=Math.hypot(dx,dy); if(d>6){tvx=dx/d*me.spd; tvy=dy/d*me.spd;} else me.tx=me.ty=null;}
   }
@@ -204,13 +259,12 @@ function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
   distEl.textContent=activeZone.name;
   // door proximity (per-zone buildings). AK-SPAWN: no detection during the spawn grace or a transition.
   if(spawnGrace>0)spawnGrace-=dt;
-  let near=null;if(spawnGrace<=0 && state==='IN_ZONE')for(const b of curBuildings()){const dx=me.x-b.x, dy=me.y-(b.y+b.h/2);if(Math.hypot(dx,dy)<me.r+30){near=b;break;}}
+  let near=null;if(spawnGrace<=0 && state==='IN_ZONE' && !interiorOpen)for(const b of curBuildings()){const dx=me.x-b.x, dy=me.y-(b.y+b.h/2);if(Math.hypot(dx,dy)<me.r+30){near=b;break;}}
   if(near){ if(dwellB!==near){dwellB=near;dwellT=0;}
-    if(near.url==='soon'){ if(dwellT===0)showBanner(near.label+' → '+near.act+' (coming soon)',1.6); dwellT=0.01; }
-    else { dwellT+=dt; showBanner('Entering '+near.label+' → '+near.act+'…',0.4);
-      if(dwellT>0.125) doEnter(near.url,near.label); }   // AK: 1/8s dwell (operator: 1/2 too long)
+    dwellT+=dt; if(dwellT<0.22)showBanner('Step into '+near.label+'…',0.5);
+    if(dwellT>0.22 && !interiorOpen) enterInterior(near);   // AK-INTERIOR: every building -> walk in, the keeper greets you, they open the menu
   } else { dwellB=null; dwellT=0;
-    if(activeZone.id==='HOME_TURF' && !near && Math.hypot(me.x-npc.x,me.y-npc.y)<me.r+npc.r+8){ showBanner(npc.name+': '+npc.line,1.4); } }
+    if(activeZone.id==='HOME_TURF' && Math.hypot(me.x-npc.x,me.y-npc.y)<me.r+npc.r+8){ showBanner(npc.name+': '+npc.line,1.4); } }
   if(bannerT>0){bannerT-=dt;if(bannerT<=0)banner.style.opacity='0';}
   draw();drawFX(dt);drawRadar();requestAnimationFrame(loop);
 }
