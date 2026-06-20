@@ -1,0 +1,473 @@
+{
+  "document_title": "ALLEY KINGS \u2014 SQUAD-BASED MMO SYSTEM UPDATE",
+  "version": "3.0-SQUAD-MMO",
+  "created": "2026-06-19",
+  "session_id": "2026-06-19-1702",
+  "update_type": "MAJOR FEATURE ADDITION \u2014 Squad-Based Overworld & Cooperative Combat",
+  "executive_summary": {
+    "problem_identified": "Current design treats building entry as solo experience. Player wants squad-based overworld movement, multi-deck cooperative battles, and mini-teams within crew specializing in different game modes.",
+    "solution": "Implement SQUAD SYSTEM \u2014 players form 2-5 person squads within their crew, move together on overworld map, enter buildings/fights as a unit, combine decks for cooperative combat, with major crew events aggregating all squad performance into total crew score.",
+    "research_basis": [
+      "World of Warcraft raid composition (tank/healer/DPS trinity, 2-4-14 ratio in 20-player raids)",
+      "League of Legends team comp dynamics (engage/peel/siege compositions)",
+      "Call of Duty squad mechanics (squad spawning, shared objectives)",
+      "MMORPG party systems (open world cooperative, shared loot)",
+      "Clash of Clans clan games (multiple events, total points aggregation)"
+    ],
+    "key_principle": "Every player has a MAIN ROLE but can flex. Crews form SQUADS based on role composition. Squads move as PACKS on the overworld. Buildings scale to squad size. Major crew events aggregate ALL squad performance."
+  },
+  "the_squad_system": {
+    "overview": "Within every crew, players form SQUADS of 2-5 members. Squads are persistent (not temporary parties) with shared history, shared loot records, and shared reputation. A crew can have multiple squads. Players can be in only one squad at a time but can switch with 24h cooldown.",
+    "squad_formation": {
+      "min_size": 2,
+      "max_size": 5,
+      "formation_rules": [
+        "Squad leader initiates formation",
+        "Members must be in same crew",
+        "Members must be within 100 pixels on overworld map",
+        "Squad name chosen by leader (must be crew-appropriate)",
+        "Squad emblem auto-generated from crew emblem + squad color accent"
+      ],
+      "squad_roles": {
+        "description": "Each player brings their MAIN ROLE to the squad. Roles are determined by their highest-level card archetype, NOT chosen at squad formation.",
+        "roles": {
+          "VANGUARD": {
+            "equivalent": "Tank",
+            "source_archetypes": [
+              "The Brawler",
+              "The Muscle"
+            ],
+            "function": "Absorbs damage, draws enemy attention, protects squad",
+            "deck_contribution": "High health cards, taunt abilities, shield spells",
+            "visual_indicator": "Red aura outline, shield icon above head",
+            "squad_benefit": "Allies behind Vanguard take 25% less damage"
+          },
+          "MENDER": {
+            "equivalent": "Healer",
+            "source_archetypes": [
+              "The Fixer",
+              "The Scribe"
+            ],
+            "function": "Restores squad health, removes debuffs, revives fallen allies",
+            "deck_contribution": "Heal spells, cleanse abilities, resurrection cards",
+            "visual_indicator": "Green aura outline, cross icon above head",
+            "squad_benefit": "Squad regenerates 5% health every 10 seconds while Mender is alive"
+          },
+          "STRIKER": {
+            "equivalent": "DPS \u2014 Melee",
+            "source_archetypes": [
+              "The Slinger",
+              "The Boss"
+            ],
+            "function": "Deals high damage at close range, executes low-health enemies",
+            "deck_contribution": "High attack cards, critical hit abilities, execute spells",
+            "visual_indicator": "Orange aura outline, sword icon above head",
+            "squad_benefit": "Vanguard's taunt duration increased by 2 seconds per Striker"
+          },
+          "SNIPER": {
+            "equivalent": "DPS \u2014 Ranged",
+            "source_archetypes": [
+              "The Runner",
+              "The Ghost"
+            ],
+            "function": "Deals damage from distance, targets enemy backline, applies debuffs",
+            "deck_contribution": "Ranged attack cards, poison/curse abilities, mark spells",
+            "visual_indicator": "Purple aura outline, crosshair icon above head",
+            "squad_benefit": "Enemy healing reduced by 15% per Sniper in squad"
+          },
+          "TACTICIAN": {
+            "equivalent": "Support / Buffer",
+            "source_archetypes": [
+              "The Hype",
+              "The Kid"
+            ],
+            "function": "Buffs allies, debuffs enemies, controls battlefield, draws cards",
+            "deck_contribution": "Buff spells, crowd control, card draw abilities, trap cards",
+            "visual_indicator": "Blue aura outline, chess piece icon above head",
+            "squad_benefit": "All squad members draw +1 card at battle start per Tactician"
+          }
+        }
+      },
+      "optimal_compositions": {
+        "description": "Based on WoW raid composition research (2 tanks, 4-5 healers, 10-14 DPS in 20-player raids) adapted to 5-person squads",
+        "2_person_squad": {
+          "recommended": "1 Vanguard + 1 Striker OR 1 Mender + 1 Sniper",
+          "risk": "No flexibility if one role is countered"
+        },
+        "3_person_squad": {
+          "recommended": "1 Vanguard + 1 Mender + 1 Striker (holy trinity)",
+          "alternative": "1 Vanguard + 2 Strikers (glass cannon)",
+          "note": "3-person is the SWEET SPOT for most content"
+        },
+        "4_person_squad": {
+          "recommended": "1 Vanguard + 1 Mender + 1 Striker + 1 Sniper",
+          "alternative": "1 Vanguard + 1 Mender + 2 Strikers (melee heavy)",
+          "note": "Adds flexibility and damage diversity"
+        },
+        "5_person_squad": {
+          "recommended": "1 Vanguard + 1 Mender + 1 Striker + 1 Sniper + 1 Tactician (full composition)",
+          "alternative": "1 Vanguard + 1 Mender + 2 Strikers + 1 Sniper (damage heavy)",
+          "note": "Maximum power but harder to coordinate"
+        }
+      }
+    },
+    "squad_overworld_movement": {
+      "description": "When squad is formed, members move together on the overworld map as a PACK. Like League of Legends team movement or Call of Duty squad spawning.",
+      "movement_mechanics": {
+        "pack_formation": "Squad members auto-arrange in diamond formation around leader. Leader controls movement. Others follow.",
+        "follow_distance": "Members maintain 20-30 pixel distance from leader. If lagging, auto-sprint to catch up.",
+        "visual_representation": "Squad shown as connected group with colored lines between members. Leader has crown icon. Role icons visible above each member.",
+        "camera_behavior": "Camera centers on squad center-of-mass. Zooms out slightly for larger squads."
+      },
+      "squad_interactions": {
+        "entering_buildings": {
+          "description": "When squad approaches building, ALL members must confirm entry. Majority vote = squad enters together.",
+          "solo_option": "Player can choose 'Enter Solo' to break from squad temporarily. Rejoins on exit.",
+          "building_scaling": "Building interior scales to squad size. Enemy count, health, and loot all scale."
+        },
+        "encountering_enemies": {
+          "description": "When squad encounters enemy squad or NPCs on overworld, both parties enter COMBAT ZONE.",
+          "combat_zone": "Circular arena spawns around encounter point. Non-participants can watch but not interfere.",
+          "escape_option": "Squad can attempt retreat. Success = all members escape. Failure = combat continues.",
+          "ambush_mechanic": "Sniper-class players can initiate ambush from stealth, giving squad first-turn advantage."
+        },
+        "resource_gathering": {
+          "description": "Squad gathering = faster collection. Each member contributes to gathering speed.",
+          "scrap_yard": "5-person squad gathers 3x faster than solo. Shared pool, distributed by squad settings."
+        }
+      },
+      "squad_emotes_and_communication": {
+        "squad_only_chat": "Private squad channel, separate from crew chat. Visible only to squad members.",
+        "quick_pings": "Leader can ping locations (move here, attack this, retreat, loot here).",
+        "squad_emotes": "Synchronized emotes when squad is together. 'Squad Pose' for screenshots.",
+        "voice_chat": "Proximity voice chat within squad. 300% adoption increase in 2025 makes this critical."
+      }
+    },
+    "multi_deck_cooperative_combat": {
+      "description": "When squad enters combat, ALL members' decks combine into a SHARED BATTLE POOL. This is the core innovation \u2014 not 1v1 card battles, but squad vs squad or squad vs boss with combined card pools.",
+      "battle_pool_system": {
+        "pool_size": "Squad of 5 = up to 150 cards in pool (30 per player max). Actual pool = all equipped cards.",
+        "shared_hand": "Squad shares a SINGLE HAND of cards drawn from the pool. Hand size = 5 + (1 per Tactician in squad).",
+        "turn_structure": {
+          "description": "Squad takes turns as a UNIT, not individually.",
+          "squad_turn": "Squad leader decides which card from shared hand to play. Can consult squad via quick chat.",
+          "card_attribution": "Card shows which player's deck it came from. That player gets XP for card use.",
+          "role_bonuses": {
+            "Vanguard_cards": "When Vanguard plays their own card, taunt effect duration +50%",
+            "Mender_cards": "When Mender plays their own card, heal amount +50%",
+            "Striker_cards": "When Striker plays their own card, critical chance +25%",
+            "Sniper_cards": "When Sniper plays their own card, range +1 and ignores shields",
+            "Tactician_cards": "When Tactician plays their own card, draw 1 additional card"
+          }
+        },
+        "combo_system": {
+          "description": "Playing cards from same player in sequence creates COMBOS. Playing cards from different players creates SYNERGY.",
+          "combos": "3+ cards from same player in a row = combo multiplier on damage/healing",
+          "synergy": "Cards from 3+ different players in a row = synergy effect (random buff to entire squad)",
+          "role_chain": "Vanguard \u2192 Mender \u2192 Striker \u2192 Sniper \u2192 Tactician = perfect role chain, massive bonus"
+        }
+      },
+      "enemy_scaling": {
+        "squad_vs_squad": "Enemy squad has same composition rules. Matchmaking pairs squads of similar total deck power.",
+        "squad_vs_boss": {
+          "description": "World bosses and clan mission bosses scale to squad size and composition.",
+          "health_scaling": "Boss health = base \u00d7 (1 + 0.5 per squad member). 5-person = 3.5x health.",
+          "mechanic_scaling": "Boss gains new mechanics at 3-person and 5-person thresholds.",
+          "loot_scaling": "Loot quantity = base \u00d7 squad size. Loot quality = base + (0.1 per squad member).",
+          "shared_loot": "All squad members get loot. No fighting over drops. Like WoW personal loot system."
+        }
+      },
+      "squad_formation_tactics": {
+        "description": "During combat, squad can arrange into FORMATIONS that provide passive bonuses.",
+        "formations": {
+          "PHALANX": {
+            "arrangement": "Vanguard front, others behind",
+            "bonus": "Vanguard takes 50% more damage but allies take 50% less",
+            "best_for": "Defending against heavy damage"
+          },
+          "WEDGE": {
+            "arrangement": "Vanguard point, Strikers flanking, Mender/Sniper/Tactician rear",
+            "bonus": "+25% damage on first turn, -10% defense",
+            "best_for": "Aggressive opening"
+          },
+          "CIRCLE": {
+            "arrangement": "All members equidistant, facing outward",
+            "bonus": "No backline. All members can target any enemy. +10% healing received.",
+            "best_for": "Surrounded or chaotic fights"
+          },
+          "SKIRMISH": {
+            "arrangement": "Spread out, maximum distance",
+            "bonus": "Area attacks hit only 1 member. Sniper range +2.",
+            "best_for": "Avoiding area damage"
+          },
+          "BLOB": {
+            "arrangement": "Clustered tightly",
+            "bonus": "Mender heals affect all members. Area buffs affect all. But area enemy attacks hit all.",
+            "best_for": "Healing-intensive fights"
+          }
+        }
+      }
+    },
+    "mini_teams_within_crew": {
+      "description": "Crews naturally form MINI-TEAMS based on player preferences and strengths. These are NOT formal subgroups but emergent specializations.",
+      "specialization_tracks": {
+        "TOWER_BATTERS": {
+          "description": "Players who excel at 1v1 tower battles",
+          "focus": "Card deck optimization, meta knowledge, quick decision-making",
+          "crew_contribution": "Win tower battles = crew reputation points",
+          "mini_team_events": "Tower Battle Tournaments \u2014 1v1 bracket within crew, winner represents crew in inter-crew tournaments",
+          "recognition": "Tower Champion title, special card frame, leaderboard on crew hall wall"
+        },
+        "RAID_SPECIALISTS": {
+          "description": "Players who excel at cooperative clan missions and boss fights",
+          "focus": "Role mastery, coordination, boss mechanic knowledge",
+          "crew_contribution": "Complete clan missions = crew resource income",
+          "mini_team_events": "Speedrun Challenges \u2014 fastest clan mission completion times",
+          "recognition": "Raid Legend title, special gear appearance, trophy in crew hall"
+        },
+        "TERRITORY_WARRIORS": {
+          "description": "Players who excel at District vs District and crew war events",
+          "focus": "Large-scale strategy, territory control, siege tactics",
+          "crew_contribution": "Win wars = crew territory and daily income",
+          "mini_team_events": "War Council \u2014 strategic planning for upcoming DvD events",
+          "recognition": "War Hero title, territory naming rights, statue in controlled district"
+        },
+        "ECONOMISTS": {
+          "description": "Players who excel at marketplace trading and resource management",
+          "focus": "Market timing, arbitrage, crafting optimization",
+          "crew_contribution": "Economic activity = crew treasury funding",
+          "mini_team_events": "Trading Competitions \u2014 most profit in set time",
+          "recognition": "Market Mogul title, exclusive shop skin, economic advisor role"
+        },
+        "SOCIAL_CONNECTORS": {
+          "description": "Players who excel at recruitment, diplomacy, and crew culture",
+          "focus": "Social skills, event organization, conflict resolution",
+          "crew_contribution": "Recruitment and retention = crew growth",
+          "mini_team_events": "Crew Culture Awards \u2014 best event, best meme, most helpful member",
+          "recognition": "Heart of the Crew title, custom emote, hall of fame portrait"
+        }
+      },
+      "cross_specialization_benefits": {
+        "description": "Specializations are NOT silos. They feed into each other.",
+        "tower_batters_support_raid": "Tower battle winnings fund raid consumables",
+        "raid_specialists_support_territory": "Raid gear improves war performance",
+        "territory_warriors_support_economists": "Territory control = marketplace tax income",
+        "economists_support_social": "Treasury funds crew events and rewards",
+        "social_connectors_support_all": "Recruitment fills all specializations"
+      }
+    },
+    "major_crew_events": {
+      "description": "Periodic events where ALL squad performance aggregates into TOTAL CREW SCORE. These are the climaxes of crew activity.",
+      "event_types": {
+        "CREW_GAMES": {
+          "frequency": "Monthly",
+          "duration": "7 days",
+          "description": "Multiple mini-events running simultaneously. Each squad chooses which to participate in.",
+          "events": [
+            "Tower Battle Marathon \u2014 most tower battle wins",
+            "Raid Rush \u2014 most clan missions completed",
+            "Territory Takedown \u2014 most enemy buildings raided",
+            "Economic Empire \u2014 most $ALK earned through trading",
+            "Social Surge \u2014 most new recruits and active members"
+          ],
+          "scoring": "Each mini-event awards points 1st-10th place. Total crew score = sum of all mini-event points.",
+          "rewards": {
+            "crew_rewards": "Crew chest tier based on total score, crew-wide buffs, territory upgrades",
+            "squad_rewards": "Squad-specific rewards based on which events they participated in",
+            "individual_rewards": "Personal rewards based on individual contribution to squad performance"
+          },
+          "clash_of_clans_reference": "Inspired by Clan Games \u2014 multiple events, total points, tiered rewards"
+        },
+        "CREW_WAR_SEASON": {
+          "frequency": "Quarterly",
+          "duration": "30 days",
+          "description": "Month-long war season with multiple phases.",
+          "phases": {
+            "WEEK_1_RECON": "Squads scout enemy territories, gather intel, plan attacks",
+            "WEEK_2_SKIRMISH": "Small-scale squad vs squad battles for border territories",
+            "WEEK_3_SIEGE": "Large-scale crew vs crew battles for major territories",
+            "WEEK_4_FINALS": "Championship battles, territory consolidation, victory celebrations"
+          },
+          "scoring": "Territory control = daily points. Successful raids = bonus points. Defensive holds = bonus points.",
+          "rewards": {
+            "season_winner": "Crew name carved on server monument, exclusive skin set, $ALK prize pool",
+            "top_squads": "Squad-specific rewards, squad hall upgrades, custom squad emblems",
+            "participation": "All participants get season chest with rewards scaled to contribution"
+          }
+        },
+        "DISTRICT_VS_DISTRICT_CHAMPIONSHIP": {
+          "frequency": "Monthly",
+          "duration": "Single day (8-hour event)",
+          "description": "Server-wide event. Two districts matched by power. All crews in district fight together.",
+          "squad_role": "Squads are the BASIC UNIT of DvD. Crews assign squads to different objectives.",
+          "objectives": [
+            "Central Tower Assault \u2014 squads fight to capture and hold",
+            "Supply Line Disruption \u2014 squads raid enemy supply routes",
+            "Defensive Perimeter \u2014 squads defend friendly positions",
+            "Intel Gathering \u2014 squads scout and report enemy movements"
+          ],
+          "scoring": "Objective points + kill points + survival points = squad score. Squad scores aggregate to crew score. Crew scores aggregate to district score.",
+          "rewards": {
+            "winning_district": "District-wide buffs for 2 weeks, exclusive district skin, bragging rights",
+            "top_crews": "Crew rewards based on district contribution ranking",
+            "top_squads": "Squad rewards, squad name on district memorial",
+            "individual": "Personal rewards based on squad performance and individual contribution"
+          }
+        },
+        "THE_GAUNTLET": {
+          "frequency": "Weekly",
+          "duration": "2 hours",
+          "description": "Survival challenge. Squads face increasingly difficult waves of enemies.",
+          "mechanics": "Waves 1-10 = basic enemies. Waves 11-20 = elite enemies. Waves 21+ = boss enemies. Each wave harder than last.",
+          "scoring": "Highest wave reached \u00d7 squad size modifier \u00d7 role diversity bonus = squad score",
+          "squad_strategy": "Squad composition CRITICAL. Need sustain (Mender), damage (Striker/Sniper), and crowd control (Tactician) for high waves.",
+          "rewards": "Wave milestones = instant rewards. Weekly leaderboard = bonus rewards. Server record = permanent recognition."
+        },
+        "CREW_ASCENSION_CEREMONY": {
+          "frequency": "On crew prestige reset",
+          "duration": "1 hour event",
+          "description": "When crew ascends to next tier, entire crew participates in ceremony.",
+          "mechanics": "All squads must complete a cooperative challenge. Success = ascension proceeds. Failure = can retry after 24h.",
+          "challenge_types": [
+            "Tower Defense \u2014 defend Main Tower against waves",
+            "Relay Race \u2014 squads pass baton through obstacle course",
+            "Boss Rush \u2014 defeat series of bosses in sequence",
+            "Puzzle Gauntlet \u2014 solve cooperative puzzles under time pressure"
+          ],
+          "rewards": "Ascension tier unlock, visual upgrade for all buildings, crew-wide buff, celebration event"
+        }
+      },
+      "total_points_aggregation": {
+        "description": "Every action by every squad member contributes to TOTAL CREW SCORE.",
+        "point_sources": {
+          "daily_activities": "Tower battles, resource gathering, mini-games = small daily points",
+          "squad_achievements": "Squad milestones (first 100 wins, perfect run, etc.) = medium points",
+          "crew_events": "Crew Games, War Season, DvD = large points",
+          "special_achievements": "Server firsts, world records, community recognition = massive points"
+        },
+        "leaderboards": {
+          "squad_leaderboard": "Within crew, squads ranked by total contribution",
+          "crew_leaderboard": "Server-wide, crews ranked by total score",
+          "district_leaderboard": "Districts ranked by aggregate crew scores",
+          "individual_leaderboard": "Players ranked by total contribution across all activities"
+        },
+        "visual_representation": "Crew hall has LIVE SCOREBOARD showing real-time crew ranking, squad contributions, and progress toward next event tier."
+      }
+    },
+    "art_implications_squad_system": {
+      "new_art_categories": {
+        "squad_visual_identity": {
+          "description": "Squads need distinct visual identity within crew",
+          "assets": [
+            "Squad emblems (variations on crew emblem with color accents)",
+            "Squad formation silhouettes (diamond, wedge, circle arrangements)",
+            "Squad aura effects (colored outlines based on role composition)",
+            "Squad victory poses (synchronized celebrations)",
+            "Squad defeat animations (supportive/helping animations)"
+          ],
+          "example_prompt": "Squad visual identity for Alley Kings, 5-person diamond formation with colored role auras (red Vanguard, green Mender, orange Striker, purple Sniper, blue Tactician), squad emblem showing crew logo with orange accent stripe, connected by faint energy lines, urban street culture aesthetic, cartoon strategy game style, transparent background, game asset, Unity-ready"
+        },
+        "multi_deck_battle_ui": {
+          "description": "UI must show shared hand, pool composition, and role bonuses",
+          "assets": [
+            "Shared hand display (cards from all players, color-coded by source)",
+            "Pool composition meter (how many cards from each role remaining)",
+            "Role bonus indicators (active bonuses from current role cards)",
+            "Combo/synergy tracker (chain progress and upcoming bonuses)",
+            "Formation selector (5 formation icons with active state)"
+          ],
+          "example_prompt": "Multi-deck battle UI for Alley Kings squad combat, shared hand of 6 cards with colored borders showing source player (red for Vanguard, green for Mender, etc.), pool composition meter showing 30 cards remaining with role breakdown, active role bonus indicators with glow effects, combo tracker showing '3-card chain \u2014 next card gets +50% damage', formation selector with 5 icons (Phalanx active with shield glow), dark cyberpunk UI panel, cartoon strategy game style, 1920x1080 pixels, UI asset, Unity-ready"
+        },
+        "squad_overworld_presence": {
+          "description": "Squad must be visually distinct on overworld map",
+          "assets": [
+            "Squad leader crown icon (visible from distance)",
+            "Role icons above each member (readable at zoomed-out view)",
+            "Squad connection lines (faint energy tethering members)",
+            "Squad movement trail (fading footprint/path effect)",
+            "Squad emote synchronization (coordinated dance/pose animations)"
+          ],
+          "example_prompt": "Squad overworld presence for Alley Kings, 5-person pack moving through Core District, leader with golden crown icon and nameplate, role icons above each head (shield for Vanguard, cross for Mender, sword for Striker, crosshair for Sniper, chess piece for Tactician), faint purple energy lines connecting squad members, movement trail of fading neon footprints, urban street culture aesthetic, isometric 3D, cartoon strategy game style, game asset, Unity-ready"
+        },
+        "major_event_visuals": {
+          "description": "Major crew events need epic visual presentation",
+          "assets": [
+            "Crew Games scoreboard (live updating, dramatic presentation)",
+            "War Season territory map (real-time control visualization)",
+            "DvD championship arena (massive stadium, district colors)",
+            "Gauntlet wave counter (dramatic increasing intensity)",
+            "Ascension ceremony stage (transforming architecture, particle effects)"
+          ],
+          "example_prompt": "Crew Games live scoreboard for Alley Kings, massive holographic display in crew hall, real-time updating numbers with particle effects, crew ranking with gold/silver/bronze positions, mini-event icons showing progress bars, dramatic spotlighting with crew colors, celebratory confetti for milestones, cyberpunk scoreboard aesthetic, cartoon strategy game style, 1920x1080 pixels, UI asset, Unity-ready"
+        }
+      },
+      "updated_map_requirements": {
+        "description": "Existing maps need squad-specific updates",
+        "updates": [
+          {
+            "map": "The Core District",
+            "squad_feature": "Squad spawn points \u2014 designated areas where squads form and disband",
+            "art_addition": "Squad formation plazas with crew-colored markings on ground"
+          },
+          {
+            "map": "Card Clash Arena",
+            "squad_feature": "Squad vs Squad mode \u2014 larger arena, 5v5 combat",
+            "art_addition": "Expanded arena with squad benches, role-specific starting zones, combined deck visualization"
+          },
+          {
+            "map": "Crew War Battlefield",
+            "squad_feature": "Squads as units within crew war \u2014 assign squads to lanes",
+            "art_addition": "Squad deployment zones, squad movement arrows, squad vs squad encounter highlights"
+          },
+          {
+            "map": "District vs District War Zone",
+            "squad_feature": "Squads assigned to objectives \u2014 visual tracking of all squads",
+            "art_addition": "Squad markers on strategic map, objective assignment icons, squad status indicators (fighting, moving, dead, respawning)"
+          },
+          {
+            "map": "The Gauntlet",
+            "squad_feature": "Squad survival \u2014 shared health pool or individual with revive mechanics",
+            "art_addition": "Squad formation starting zone, wave intensity visual cues (darkening sky, shaking ground), squad revive stations"
+          }
+        ]
+      }
+    },
+    "technical_implications": {
+      "networking": {
+        "squad_synchronization": "All squad members must see same world state with <100ms latency",
+        "prediction": "Client-side prediction for squad movement to feel responsive",
+        "authority": "Server authoritative for combat, client authoritative for movement (with server validation)"
+      },
+      "matchmaking": {
+        "squad_vs_squad": "Match squads by total deck power, role composition balance, and win/loss history",
+        "squad_vs_boss": "Scale boss to squad composition (more DPS = more boss health, more healers = more boss damage)"
+      },
+      "database": {
+        "squad_persistence": "Squad data stored permanently: members, history, stats, achievements",
+        "shared_pool": "Battle pool assembled server-side from squad member decks at combat start",
+        "event_aggregation": "Real-time aggregation of all squad scores into crew totals"
+      }
+    },
+    "monetization_implications": {
+      "squad_cosmetics": "Squad emblems, formation skins, victory poses, connection line effects",
+      "squad_boosts": "Temporary squad buffs for events (controversial \u2014 must be cosmetic-only or minimal)",
+      "event_passes": "Crew Games battle pass with squad and individual tracks",
+      "spectator_mode": "Premium spectator features for major events (free for participants, paid for non-participants)"
+    }
+  },
+  "critical_reminders_for_next_agent": [
+    "SQUAD SYSTEM is not an add-on. It is CORE to the game experience. Every system must account for squad play.",
+    "Building entry is NOT solo. Squads enter together. Buildings scale to squad size.",
+    "Combat is NOT 1v1. It is squad vs squad or squad vs boss with SHARED DECK POOL.",
+    "Role system (Vanguard/Mender/Striker/Sniper/Tactician) is DERIVED from player card archetypes, NOT chosen separately.",
+    "Mini-teams within crew are EMERGENT, not forced. Players naturally specialize.",
+    "Major crew events aggregate ALL squad performance. No squad is irrelevant.",
+    "Art must show squad visual identity \u2014 connected members, role auras, formation silhouettes.",
+    "UI must support shared hand, pool composition, combo tracking, and formation selection.",
+    "Voice chat is ESSENTIAL for squad coordination. Proximity voice within squad.",
+    "Squad persistence creates SOCIAL BONDS. Switching squads has 24h cooldown to prevent abuse.",
+    "Loot is SHARED in squad combat. No fighting over drops. Everyone gets rewards.",
+    "Enemy scaling ensures squads of all sizes find appropriate challenge.",
+    "The client's vision is MMO-like social experience, not solo card game with chat."
+  ]
+}

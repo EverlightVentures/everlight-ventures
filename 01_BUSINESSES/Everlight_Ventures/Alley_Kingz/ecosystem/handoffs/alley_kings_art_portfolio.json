@@ -1,0 +1,924 @@
+{
+  "document_title": "ALLEY KINGS \u2014 Complete Art & Map Design Portfolio",
+  "version": "1.0",
+  "created": "2026-06-19",
+  "session_id": "2026-06-19-1640",
+  "client": "Everlight Ventures LLC / alleykingz.online",
+  "overview": {
+    "total_maps": 47,
+    "total_art_categories": 12,
+    "total_prompts": 89,
+    "art_style": "Urban fantasy street art meets cyberpunk neon meets cartoon strategy game (Clash of Clans meets Sunflower Land meets graffiti culture)",
+    "color_palette": {
+      "primary": [
+        "Electric Purple #8B5CF6",
+        "Neon Cyan #06B6D4",
+        "Hot Pink #EC4899"
+      ],
+      "secondary": [
+        "Graffiti Orange #F97316",
+        "Toxic Green #22C55E",
+        "Street Gold #EAB308"
+      ],
+      "neutrals": [
+        "Asphalt Black #1C1917",
+        "Concrete Gray #78716C",
+        "Brick Red #991B1B"
+      ],
+      "accents": [
+        "Police Siren Blue #3B82F6",
+        "Fire Red #EF4444",
+        "Smoke White #F5F5F4"
+      ]
+    },
+    "render_style": "Isometric 3D for buildings, top-down for world map, side-scrolling for mini-games, card-frame close-up for tower battles",
+    "target_platforms": [
+      "WebGL (browser)",
+      "Unity (PC/Mac)",
+      "Mobile (Google Play/iOS)",
+      "Promotional (social media, trailers)"
+    ]
+  },
+  "map_hierarchy": {
+    "tier_1_major_world_maps": {
+      "count": 3,
+      "description": "Large-scale overworld maps that players navigate between buildings and districts",
+      "maps": [
+        {
+          "id": "MAP_01",
+          "name": "The Core District",
+          "type": "Major World Map \u2014 Starting Zone",
+          "size": "2000x2000 pixels (tile-based, 64x64 tile grid)",
+          "theme": "Urban downtown core, neon-lit alleys, graffiti-covered buildings, steam vents, street vendors",
+          "buildings_present": [
+            "Main Tower (Crew HQ)",
+            "Spell Shop",
+            "Deck Lab",
+            "Training Grounds",
+            "Marketplace",
+            "Crew Hall",
+            "Bounty Board",
+            "Shield Station"
+          ],
+          "interactive_elements": [
+            "Street lamps (clickable, toggle light)",
+            "Graffiti walls (customizable by crews)",
+            "Trash cans (lootable, random items)",
+            "Vending machines (quick consumables)"
+          ],
+          "day_night_cycle": true,
+          "weather_effects": [
+            "Rain (reflective puddles)",
+            "Fog (reduced visibility, hidden enemies)",
+            "Neon haze (aesthetic, no gameplay effect)"
+          ],
+          "art_prompt": "Isometric 3D urban street scene at night, neon signs in electric purple and cyan, graffiti-covered brick walls, wet asphalt reflecting lights, steam rising from manhole covers, street vendors with glowing carts, cyberpunk alleyways with hidden doorways, cartoon strategy game aesthetic like Clash of Clans but grittier, vibrant saturated colors, clean readable silhouettes for gameplay, 2000x2000 pixel tileset, 64x64 grid, game asset, transparent background for objects, Unity-ready",
+          "artist_notes": "This is the FIRST thing players see. Must hook in 10 seconds. Make the Main Tower visually dominant \u2014 tallest building, pulsing neon crown, visible from anywhere on the map."
+        },
+        {
+          "id": "MAP_02",
+          "name": "The Outskirts",
+          "type": "Major World Map \u2014 Mid-Game Zone",
+          "size": "2500x2500 pixels (tile-based, 64x64 tile grid)",
+          "theme": "Industrial wasteland, abandoned factories, scrap yards, underground fight clubs, black market",
+          "buildings_present": [
+            "Advanced Spell Forge",
+            "Deck Evolution Chamber",
+            "Beast Arena",
+            "Black Market",
+            "Underground Casino",
+            "Scrap Yard (resource gathering)",
+            "Fight Pit (PvP duels)"
+          ],
+          "interactive_elements": [
+            "Conveyor belts (moving platforms)",
+            "Crane hooks (swing across gaps)",
+            "Hidden tunnels (secret passages between buildings)",
+            "Toxic waste pools (damage zones)"
+          ],
+          "day_night_cycle": true,
+          "weather_effects": [
+            "Acid rain (corrodes buildings over time)",
+            "Dust storms (reduced movement speed)",
+            "Aurora (rare, boosts all stats temporarily)"
+          ],
+          "unlock_condition": "Main Tower Level 10 OR Prestige Reset 1",
+          "art_prompt": "Isometric 3D industrial wasteland, rusted metal structures, abandoned factories with broken windows, scrap heaps with glowing salvage, underground entrance with neon 'FIGHT PIT' sign, toxic green puddles with bubbles, chain-link fences with barbed wire, graffiti tags marking territory, cyberpunk industrial aesthetic, cartoon strategy game style, dark moody lighting with neon accents, 2500x2500 pixel tileset, 64x64 grid, game asset, transparent background for objects, Unity-ready",
+          "artist_notes": "Contrast with Core District \u2014 this is DANGEROUS. Use warning colors (orange, red, toxic green). Make the Fight Pit visually exciting \u2014 crowds visible, lights flashing, energy in the air."
+        },
+        {
+          "id": "MAP_03",
+          "name": "The Neon Abyss",
+          "type": "Major World Map \u2014 Endgame Zone",
+          "size": "3000x3000 pixels (tile-based, 64x64 tile grid)",
+          "theme": "Futuristic megacity, holographic advertisements, flying vehicles, sky bridges, elite districts",
+          "buildings_present": [
+            "Ascension Temple (Prestige)",
+            "Legendary Card Forge",
+            "Crew Citadel (max level)",
+            "Sky Arena (tournaments)",
+            "Holographic Casino",
+            "VIP Lounge",
+            "Creator Hub (UGC marketplace)",
+            "District vs District War Zone"
+          ],
+          "interactive_elements": [
+            "Holographic billboards (dynamic, player ads possible)",
+            "Sky bridges (connect buildings, sniper positions)",
+            "Teleport pads (fast travel)",
+            "Holographic disguises (hide from enemies)"
+          ],
+          "day_night_cycle": false,
+          "weather_effects": [
+            "Digital rain (Matrix-style, aesthetic)",
+            "Holographic glitches (random visual distortions)",
+            "Solar flares (rare, disables shields temporarily)"
+          ],
+          "unlock_condition": "Prestige Reset 2 OR District vs District victory",
+          "art_prompt": "Isometric 3D futuristic megacity, towering skyscrapers with holographic advertisements, flying vehicles leaving light trails, glass sky bridges connecting buildings, neon-lit streets with reflective surfaces, elite district with golden accents, cyberpunk utopia aesthetic, vibrant holographic colors, clean geometric architecture mixed with chaotic street level, cartoon strategy game style but premium feel, 3000x3000 pixel tileset, 64x64 grid, game asset, transparent background for objects, Unity-ready",
+          "artist_notes": "This is the PRESTIGE zone. Players who reach here are ELITE. Make it feel exclusive \u2014 golden accents, holographic VIP signs, visible sky arena with crowds. Every building should look expensive."
+        }
+      ]
+    },
+    "tier_2_building_interiors": {
+      "count": 16,
+      "description": "Interior maps for each building when player enters",
+      "maps": [
+        {
+          "id": "INT_01",
+          "name": "Main Tower \u2014 Crew HQ Interior",
+          "parent_map": "MAP_01",
+          "size": "1200x800 pixels",
+          "theme": "Command center, war room, crew trophy wall, holographic strategy table, reinforcement stations",
+          "interactive_zones": [
+            "Strategy Table (assign war lanes)",
+            "Trophy Wall (past victories)",
+            "Reinforcement Terminal (send help to crew)",
+            "Shield Generator (activate crew shield)",
+            "Crew Chest Vault (shared rewards)"
+          ],
+          "art_prompt": "Interior of a high-tech command center, large circular holographic strategy table in center showing map with unit positions, walls covered with crew trophies and banners, neon-lit reinforcement terminals with pulsing energy, shield generator with visible force field, vault door with glowing crew emblem, cyberpunk war room aesthetic, cartoon strategy game interior, warm lighting with cool neon accents, 1200x800 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "INT_02",
+          "name": "Spell Shop Interior",
+          "parent_map": "MAP_01",
+          "size": "1000x700 pixels",
+          "theme": "Mystical apothecary, floating potions, glowing spell books, crystal orbs, cauldron with bubbling liquid",
+          "interactive_zones": [
+            "Potion Shelves (buy consumables)",
+            "Spell Book Archive (learn new abilities)",
+            "Crystal Ball (daily fortune/random buff)",
+            "Cauldron (craft custom spells)",
+            "Enchanting Table (upgrade card abilities)"
+          ],
+          "art_prompt": "Interior of a mystical spell shop, wooden shelves overflowing with glowing potions in various colors, floating spell books with animated pages, large crystal ball on velvet pedestal with swirling mist, bubbling cauldron with neon green liquid, enchanted weapons mounted on walls, mystical apothecary aesthetic, cartoon strategy game interior, warm amber lighting with magical particle effects, 1000x700 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "INT_03",
+          "name": "Deck Lab Interior",
+          "parent_map": "MAP_01",
+          "size": "1000x700 pixels",
+          "theme": "High-tech card engineering facility, holographic card displays, 3D printers for cards, testing arena",
+          "interactive_zones": [
+            "Card Forge (create new cards)",
+            "Upgrade Station (level up cards)",
+            "Testing Arena (try decks against AI)",
+            "Card Disassembler (recycle for materials)",
+            "Collection Display (showcase rare cards)"
+          ],
+          "art_prompt": "Interior of a high-tech card engineering lab, holographic card displays floating in air, 3D printers creating glowing cards, testing arena with holographic opponents, walls lined with card collection in glass cases, futuristic laboratory aesthetic, clean white and neon blue color scheme, cartoon strategy game interior, bright clinical lighting with colorful card glows, 1000x700 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "INT_04",
+          "name": "Training Grounds Interior",
+          "parent_map": "MAP_01",
+          "size": "1200x900 pixels",
+          "theme": "Underground fight pit, sand floor, crowd bleachers, spotlights, training dummies",
+          "interactive_zones": [
+            "Sparring Ring (practice combat)",
+            "Training Dummies (test damage)",
+            "Obstacle Course (movement practice)",
+            "Spectator Bleachers (watch crew train)",
+            "Coach Booth (AI training recommendations)"
+          ],
+          "art_prompt": "Interior of an underground training facility, circular sand-floored sparring ring with rope barriers, wooden training dummies with hit marks, tiered bleachers with cheering crowd silhouettes, harsh spotlights creating dramatic shadows, graffiti motivational quotes on walls, gritty gym aesthetic, cartoon strategy game interior, warm yellow lighting with cool shadow areas, 1200x900 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "INT_05",
+          "name": "Crew Hall Interior",
+          "parent_map": "MAP_01",
+          "size": "1400x900 pixels",
+          "theme": "Social hub, bar area, pool tables, dart boards, crew message wall, recruitment desk",
+          "interactive_zones": [
+            "Bar Counter (social emotes, drinks)",
+            "Message Wall (crew announcements)",
+            "Recruitment Desk (invite new members)",
+            "Pool Table (mini-game)",
+            "Photo Booth (crew photos/memories)"
+          ],
+          "art_prompt": "Interior of a crew social hall, long wooden bar with neon-backlit bottles, pool table with balls mid-game, dart board with darts stuck in wall, large message board with pinned notes and photos, recruitment desk with holographic signup form, comfortable seating areas with crew logos, warm social atmosphere, cartoon strategy game interior, warm amber and neon purple lighting, 1400x900 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "INT_06",
+          "name": "Marketplace Interior",
+          "parent_map": "MAP_01",
+          "size": "1200x800 pixels",
+          "theme": "Bustling bazaar, vendor stalls, auction podium, trading floor, black market corner",
+          "interactive_zones": [
+            "Vendor Stalls (buy/sell items)",
+            "Auction Podium (bid on rare items)",
+            "Trading Floor (player-to-player trades)",
+            "Black Market Corner (illegal/limited items)",
+            "Escrow Station (secure high-value trades)"
+          ],
+          "art_prompt": "Interior of a bustling marketplace, colorful vendor stalls with hanging wares, central auction podium with gavel and spotlight, trading floor with holographic price tickers, shadowy black market corner with suspicious figures, escrow station with security drones, bazaar aesthetic with cyberpunk touches, cartoon strategy game interior, busy chaotic lighting with warm vendor lamps, 1200x800 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "INT_07",
+          "name": "Bounty Board Interior",
+          "parent_map": "MAP_01",
+          "size": "1000x700 pixels",
+          "theme": "Mercenary guild hall, wanted posters, mission briefings, reward display, reputation tracker",
+          "interactive_zones": [
+            "Wanted Wall (daily bounties)",
+            "Mission Briefing Table (accept quests)",
+            "Reward Counter (claim completed bounties)",
+            "Reputation Tracker (your standing)",
+            "Bounty Hunter Hall of Fame"
+          ],
+          "art_prompt": "Interior of a mercenary bounty hall, wall covered with wanted posters and mission briefings, central table with holographic mission maps, reward counter with piles of gold and tokens, reputation tracker showing your rank among hunters, hall of fame with portraits of legendary bounty hunters, gritty mercenary aesthetic, cartoon strategy game interior, dramatic spotlighting with warm amber tones, 1000x700 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "INT_08",
+          "name": "Shield Station Interior",
+          "parent_map": "MAP_01",
+          "size": "900x600 pixels",
+          "theme": "Energy containment facility, force field generators, shield calibration equipment, emergency protocols",
+          "interactive_zones": [
+            "Shield Generator (activate/purchase shields)",
+            "Calibration Console (adjust shield strength)",
+            "Emergency Protocols (panic shield)",
+            "Shield History (past shield usage)",
+            "Recharge Station (restore shield energy)"
+          ],
+          "art_prompt": "Interior of a shield generation facility, large cylindrical force field generator with pulsing blue energy, calibration consoles with holographic readouts, emergency protocol lever with warning signs, shield history display showing timeline of activations, recharge station with energy cables, high-tech containment aesthetic, cartoon strategy game interior, cool blue and white lighting with warning red accents, 900x600 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "INT_09",
+          "name": "Advanced Spell Forge (Outskirts)",
+          "parent_map": "MAP_02",
+          "size": "1100x750 pixels",
+          "theme": "Industrial magic facility, molten metal channels, rune-etched machinery, volatile spell components",
+          "interactive_zones": [
+            "Forge Pit (craft advanced spells)",
+            "Rune Engraver (add effects to spells)",
+            "Component Mixer (combine spell parts)",
+            "Quality Tester (test spell potency)",
+            "Legendary Blueprint Vault"
+          ],
+          "art_prompt": "Interior of an industrial spell forge, molten metal channels running through floor, rune-etched machinery with glowing symbols, volatile spell components in containment jars, forge pit with magical flames, quality tester with dials and meters, dangerous but powerful atmosphere, industrial magic aesthetic, cartoon strategy game interior, hot orange and cool blue contrasting lighting, 1100x750 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "INT_10",
+          "name": "Deck Evolution Chamber (Outskirts)",
+          "parent_map": "MAP_02",
+          "size": "1100x750 pixels",
+          "theme": "Bio-mechanical card mutation lab, DNA helix displays, card incubation pods, evolution catalysts",
+          "interactive_zones": [
+            "Evolution Pod (mutate cards)",
+            "DNA Splicer (combine card traits)",
+            "Incubation Chamber (grow new cards)",
+            "Catalyst Injector (boost evolution speed)",
+            "Mutation Archive (view possible outcomes)"
+          ],
+          "art_prompt": "Interior of a bio-mechanical card evolution lab, glass incubation pods with growing cards inside, DNA helix holograms floating in air, evolution catalysts in syringe-like containers, mutation archive showing before/after card forms, sterile but slightly disturbing atmosphere, bio-punk aesthetic, cartoon strategy game interior, sterile white with organic green and purple accents, 1100x750 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "INT_11",
+          "name": "Beast Arena (Outskirts)",
+          "parent_map": "MAP_02",
+          "size": "1300x900 pixels",
+          "theme": "Monster fighting pit, chain-link cage, blood stains, roaring crowd, beast pens",
+          "interactive_zones": [
+            "Fighting Cage (PvE/PvP beast battles)",
+            "Beast Pens (collect/train beasts)",
+            "Betting Window (wager on fights)",
+            "Trophy Wall (defeated beasts)",
+            "Beast Market (buy/sell creatures)"
+          ],
+          "art_prompt": "Interior of a beast fighting arena, circular chain-link cage with blood stains, tiered crowd roaring with excitement, beast pens with various creatures pacing, betting window with holographic odds, trophy wall with mounted beast heads, brutal but exciting atmosphere, underground fight club aesthetic, cartoon strategy game interior, harsh spotlighting with warm crowd lighting, 1300x900 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "INT_12",
+          "name": "Black Market (Outskirts)",
+          "parent_map": "MAP_02",
+          "size": "1000x700 pixels",
+          "theme": "Shadowy underground trading post, coded negotiations, contraband goods, shady dealers",
+          "interactive_zones": [
+            "Contraband Stalls (illegal items)",
+            "Negotiation Booths (haggle prices)",
+            "Forgery Station (fake documents/cards)",
+            "Debt Collector (loans with interest)",
+            "Escape Tunnel (emergency exit)"
+          ],
+          "art_prompt": "Interior of a shadowy black market, dimly lit stalls with contraband goods, negotiation booths with privacy screens, forgery station with holographic ID templates, debt collector desk with threatening enforcers, escape tunnel hidden behind a false wall, dangerous criminal underworld aesthetic, cartoon strategy game interior, dim moody lighting with selective neon highlights, 1000x700 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "INT_13",
+          "name": "Ascension Temple (Neon Abyss)",
+          "parent_map": "MAP_03",
+          "size": "1400x1000 pixels",
+          "theme": "Mystical prestige hall, floating platforms, cosmic energy, ascension rituals, divine artifacts",
+          "interactive_zones": [
+            "Ascension Altar (prestige reset)",
+            "Cosmic Pool (view prestige rewards)",
+            "Divine Artifact Display (prestige-exclusive items)",
+            "Ritual Circle (perform ascension ceremony)",
+            "Star Map (track prestige progress)"
+          ],
+          "art_prompt": "Interior of a mystical ascension temple, floating platforms suspended in cosmic void, ascension altar with beam of light from above, cosmic pool with swirling galaxy reflections, divine artifacts floating in display cases, ritual circle with ancient runes, star map showing constellation progress, transcendent spiritual atmosphere, cosmic fantasy aesthetic, cartoon strategy game interior, ethereal blue and gold lighting with particle effects, 1400x1000 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "INT_14",
+          "name": "Legendary Card Forge (Neon Abyss)",
+          "parent_map": "MAP_03",
+          "size": "1200x800 pixels",
+          "theme": "Ultimate card creation facility, cosmic materials, reality-bending machinery, legendary blueprints",
+          "interactive_zones": [
+            "Cosmic Forge (create legendary cards)",
+            "Reality Weaver (add unique effects)",
+            "Blueprint Library (view all legendary designs)",
+            "Material Transmuter (convert resources)",
+            "Legendary Showcase (display your best cards)"
+          ],
+          "art_prompt": "Interior of a legendary card forge, cosmic forge with swirling nebula energy, reality weaver with distorted space around it, blueprint library with floating holographic schematics, material transmuter converting base elements into cosmic materials, legendary showcase with cards glowing with inner light, ultimate power atmosphere, cosmic industrial aesthetic, cartoon strategy game interior, ethereal purple and gold lighting, 1200x800 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "INT_15",
+          "name": "Sky Arena (Neon Abyss)",
+          "parent_map": "MAP_03",
+          "size": "1500x1000 pixels",
+          "theme": "Floating tournament stadium, glass floor showing city below, holographic scoreboards, VIP boxes",
+          "interactive_zones": [
+            "Tournament Ring (official matches)",
+            "Spectator Stands (watch and cheer)",
+            "VIP Boxes (premium viewing)",
+            "Champion Pedestal (display current champion)",
+            "Broadcast Booth (stream matches)"
+          ],
+          "art_prompt": "Interior of a floating sky arena, glass floor showing city lights far below, circular tournament ring with energy barriers, holographic scoreboards showing live stats, tiered spectator stands with cheering crowds, VIP boxes with luxury seating and champagne, champion pedestal with rotating trophy, broadcast booth with camera drones, epic tournament atmosphere, futuristic sports aesthetic, cartoon strategy game interior, dramatic arena lighting with city glow below, 1500x1000 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "INT_16",
+          "name": "Creator Hub (Neon Abyss)",
+          "parent_map": "MAP_03",
+          "size": "1300x900 pixels",
+          "theme": "UGC design studio, 3D modeling stations, texture libraries, preview theaters, marketplace integration",
+          "interactive_zones": [
+            "Design Station (create assets)",
+            "Texture Library (browse materials)",
+            "Preview Theater (test your creations)",
+            "Minting Terminal (turn designs into NFTs)",
+            "Sales Dashboard (track earnings)"
+          ],
+          "art_prompt": "Interior of a creator design hub, 3D modeling stations with holographic wireframes, texture library with material samples on shelves, preview theater with adjustable lighting, minting terminal with blockchain visualization, sales dashboard with real-time earnings graphs, creative and inspiring atmosphere, modern design studio aesthetic, cartoon strategy game interior, bright creative lighting with colorful accent walls, 1300x900 pixels, game asset, Unity-ready"
+        }
+      ]
+    },
+    "tier_3_mini_game_maps": {
+      "count": 12,
+      "description": "Self-contained mini-game environments for quick gameplay sessions",
+      "maps": [
+        {
+          "id": "MINI_01",
+          "name": "Card Clash Arena",
+          "type": "Tower Battle Mini-Game",
+          "size": "800x600 pixels",
+          "theme": "Compact battle arena, two towers facing each other, spectator stands, dramatic lighting",
+          "gameplay": "1v1 card-based tower battle, 3-5 minute matches",
+          "art_prompt": "Compact 1v1 card battle arena, two opposing towers with health bars, central battle ground with spell effects, small spectator stands with animated crowd, dramatic spotlights, energy barriers marking arena boundaries, competitive atmosphere, cartoon strategy game arena, dynamic lighting with spell glows, 800x600 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "MINI_02",
+          "name": "Crew War Battlefield",
+          "type": "Crew War Mini-Game (3 Lanes)",
+          "size": "1200x800 pixels",
+          "theme": "Three parallel battle lanes, crew banners, war-torn landscape, siege equipment",
+          "gameplay": "15v15 crew battle across 3 lanes, capture 2 of 3 to win",
+          "art_prompt": "Three parallel battle lanes in a war-torn landscape, crew banners marking territory, destroyed buildings and craters, siege equipment like catapults and battering rams, smoke and fire effects, epic war atmosphere, cartoon strategy game battlefield, dramatic orange and red lighting, 1200x800 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "MINI_03",
+          "name": "Beast Hunt Grounds",
+          "type": "PvE Beast Combat Mini-Game",
+          "size": "1000x700 pixels",
+          "theme": "Wild hunting grounds, beast dens, traps, bait stations, trophy collection points",
+          "gameplay": "Solo or crew PvE beast hunting, capture or kill for rewards",
+          "art_prompt": "Wild beast hunting grounds, dense urban jungle with overgrown buildings, beast dens with glowing eyes in darkness, trap stations with sprung mechanisms, bait piles with meat and treats, trophy collection points with mounted heads, dangerous wilderness atmosphere, cartoon strategy game hunting map, moody green and brown lighting, 1000x700 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "MINI_04",
+          "name": "Scrap Yard Scramble",
+          "type": "Resource Gathering Mini-Game",
+          "size": "900x600 pixels",
+          "theme": "Massive scrap yard, crushed cars, metal piles, crane operations, rival scavengers",
+          "gameplay": "Race against time and rivals to gather most scrap resources",
+          "art_prompt": "Massive scrap yard with towering piles of crushed cars and metal, operating cranes with magnetic lifts, rival scavenger crews competing for resources, conveyor belts moving scrap, dangerous machinery with warning signs, competitive resource rush atmosphere, industrial cartoon style, harsh daylight with dust particles, 900x600 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "MINI_05",
+          "name": "Underground Casino Heist",
+          "type": "Stealth Mini-Game",
+          "size": "1000x700 pixels",
+          "theme": "Luxury casino vault, laser grids, security cameras, guard patrols, loot rooms",
+          "gameplay": "Solo stealth mission to steal casino chips without getting caught",
+          "art_prompt": "Luxury underground casino vault, laser grid security systems, security cameras with red indicator lights, guard patrol routes marked on floor, loot rooms with piles of chips and gold, ventilation shafts for stealth entry, high-stakes heist atmosphere, cartoon stealth game style, dramatic red and gold lighting, 1000x700 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "MINI_06",
+          "name": "District vs District War Zone",
+          "type": "Mass PvP Mini-Game",
+          "size": "2000x1500 pixels",
+          "theme": "Neutral war zone, Central Tower, teleport pads, faction territories, battlefield debris",
+          "gameplay": "Two districts fight for Central Tower control, hold 2.5 hours or longest hold wins",
+          "art_prompt": "Massive war zone between two districts, central tower with contested flag, teleport pads with faction colors, temporary fortifications and barricades, battlefield debris and craters, medical stations and ammo depots, epic territorial warfare atmosphere, cartoon strategy game war map, dramatic sunset lighting with fire glows, 2000x1500 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "MINI_07",
+          "name": "Pool Hall Showdown",
+          "type": "Social Mini-Game",
+          "size": "800x600 pixels",
+          "theme": "Classic pool hall, multiple tables, betting counters, crowd watching",
+          "gameplay": "8-ball pool with betting, crew vs crew tournaments",
+          "art_prompt": "Classic urban pool hall, green felt tables with balls arranged, betting counter with holographic odds, crowd of spectators watching matches, neon beer signs on walls, casual competitive atmosphere, cartoon sports game style, warm bar lighting with overhead table lights, 800x600 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "MINI_08",
+          "name": "Dart Board Challenge",
+          "type": "Skill Mini-Game",
+          "size": "600x800 pixels",
+          "theme": "Pub dart board, score tracking, trick shot setups, crowd reactions",
+          "gameplay": "501 darts with trick shot challenges, crew competitions",
+          "art_prompt": "Pub dart board setup, traditional dart board with scoring segments, trick shot setups with moving targets, score tracking display, crowd reactions in background, casual pub atmosphere, cartoon sports game style, warm pub lighting, 600x800 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "MINI_09",
+          "name": "Obstacle Course Run",
+          "type": "Movement Skill Mini-Game",
+          "size": "1200x600 pixels",
+          "theme": "Urban parkour course, rooftops, alleyways, moving platforms, zip lines",
+          "gameplay": "Time trial parkour race, crew leaderboard, daily challenges",
+          "art_prompt": "Urban parkour obstacle course, rooftop jumps with city backdrop, alleyway squeezes between buildings, moving platforms and spinning obstacles, zip lines between rooftops, time trial checkpoints with glowing markers, energetic athletic atmosphere, cartoon platformer style, bright daytime city lighting, 1200x600 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "MINI_10",
+          "name": "Card Matching Memory Game",
+          "type": "Casual Mini-Game",
+          "size": "800x800 pixels",
+          "theme": "Mystical card table, floating cards, timer, combo multipliers, rare card reveals",
+          "gameplay": "Memory matching with card pairs, speed combos, rare card rewards",
+          "art_prompt": "Mystical card matching table, floating face-down cards with glowing backs, timer counting down with urgency, combo multiplier display, rare card reveals with special effects, magical card table atmosphere, cartoon puzzle game style, mystical purple and gold lighting, 800x800 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "MINI_11",
+          "name": "Graffiti Tag Competition",
+          "type": "Creative Mini-Game",
+          "size": "1000x600 pixels",
+          "theme": "Blank wall sections, spray cans, stencils, crew logo templates, voting booth",
+          "gameplay": "Design graffiti tags, crew votes on best design, winner gets wall space on main map",
+          "art_prompt": "Graffiti competition wall sections, blank concrete walls with spray paint cans, stencils and design tools, crew logo templates, voting booth with ballot box, creative artistic atmosphere, street art cartoon style, daylight with shadow accents, 1000x600 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "MINI_12",
+          "name": "Crew Trivia Challenge",
+          "type": "Knowledge Mini-Game",
+          "size": "900x700 pixels",
+          "theme": "Game show set, buzzer podiums, question screens, audience, prize wheel",
+          "gameplay": "Trivia about game lore, strategy, and general knowledge, crew vs crew",
+          "art_prompt": "Game show trivia set, contestant buzzer podiums with crew colors, large question screen with countdown timer, audience seating with cheering crowd, prize wheel with various rewards, competitive game show atmosphere, cartoon TV game show style, bright studio lighting with colored spotlights, 900x700 pixels, game asset, Unity-ready"
+        }
+      ]
+    },
+    "tier_4_clan_mission_maps": {
+      "count": 10,
+      "description": "Special mission environments for crew cooperative play",
+      "maps": [
+        {
+          "id": "CLAN_01",
+          "name": "The Heist \u2014 Bank Vault Raid",
+          "type": "Cooperative Raid Mission",
+          "size": "1500x1000 pixels",
+          "theme": "High-security bank vault, laser grids, vault doors, guard rooms, escape tunnels",
+          "crew_size": "3-5 players",
+          "objective": "Infiltrate vault, crack safe, escape with loot before timer expires",
+          "art_prompt": "High-security bank vault interior, massive circular vault door with spinning dials, laser grid security systems, guard rooms with sleeping guards, escape tunnels with emergency lighting, piles of gold and cash in open safe, heist movie atmosphere, cartoon strategy game raid map, dramatic blue security lighting with red alarm accents, 1500x1000 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "CLAN_02",
+          "name": "The Siege \u2014 Enemy Crew Base Assault",
+          "type": "Cooperative Siege Mission",
+          "size": "1800x1200 pixels",
+          "theme": "Enemy crew fortress, defensive towers, walls, gates, inner keep",
+          "crew_size": "5-10 players",
+          "objective": "Breach defenses, destroy inner keep, steal crew vault contents",
+          "art_prompt": "Enemy crew fortress under siege, tall defensive towers with archers, thick walls with siege ladders, main gate with battering ram, inner keep with crew flag, battlefield with siege equipment and debris, epic medieval siege atmosphere, cartoon strategy game siege map, dramatic sunset lighting with fire effects, 1800x1200 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "CLAN_03",
+          "name": "The Rescue \u2014 Captured Crew Member Extraction",
+          "type": "Cooperative Rescue Mission",
+          "size": "1400x900 pixels",
+          "theme": "Enemy prison complex, cell blocks, guard towers, interrogation rooms, extraction point",
+          "crew_size": "3-5 players",
+          "objective": "Infiltrate prison, locate captured crew member, extract to safe zone",
+          "art_prompt": "Enemy prison complex, rows of cell blocks with bars, guard towers with searchlights, interrogation room with one-way mirror, extraction point with helicopter pad, captured crew member in cell with health bar, stealth rescue atmosphere, cartoon strategy game rescue map, dim prison lighting with emergency red lights, 1400x900 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "CLAN_04",
+          "name": "The Ritual \u2014 Stop Enemy Ascension Ceremony",
+          "type": "Cooperative Boss Mission",
+          "size": "1600x1000 pixels",
+          "theme": "Ancient ritual site, magical circles, sacrifice altars, cultists, boss chamber",
+          "crew_size": "5-10 players",
+          "objective": "Fight through cultists, disrupt ritual, defeat boss before ascension completes",
+          "art_prompt": "Ancient ritual site with stone pillars and magical circles, sacrifice altar with glowing runes, cultists in robes performing ceremony, boss chamber with massive enemy entity, magical energy beams connecting pillars, dark mystical atmosphere, cartoon strategy game boss map, dramatic purple and red magical lighting, 1600x1000 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "CLAN_05",
+          "name": "The Convoy \u2014 Escort Resource Shipment",
+          "type": "Cooperative Escort Mission",
+          "size": "2000x800 pixels",
+          "theme": "Urban highway route, armored trucks, ambush points, safe houses, destination warehouse",
+          "crew_size": "3-5 players",
+          "objective": "Protect convoy from enemy raids, deliver resources to destination",
+          "art_prompt": "Urban highway convoy route, armored trucks with crew logos, ambush points with enemy positions marked, safe houses for repairs, destination warehouse with loading dock, highway overpasses and underpasses, tactical escort atmosphere, cartoon strategy game escort map, daytime city lighting with shadow ambush areas, 2000x800 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "CLAN_06",
+          "name": "The Defense \u2014 Hold the Line",
+          "type": "Cooperative Defense Mission",
+          "size": "1500x1000 pixels",
+          "theme": "Defensive position, barricades, choke points, ammo dumps, fallback positions",
+          "crew_size": "5-10 players",
+          "objective": "Defend position against waves of enemies for set time",
+          "art_prompt": "Defensive position with sandbag barricades and barbed wire, choke points between buildings, ammo dumps with weapon crates, fallback positions with medical stations, wave indicator showing enemy approaching, intense defensive atmosphere, cartoon strategy game defense map, dramatic sunset with approaching enemy shadows, 1500x1000 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "CLAN_07",
+          "name": "The Exploration \u2014 Abandoned District Discovery",
+          "type": "Cooperative Exploration Mission",
+          "size": "2200x1500 pixels",
+          "theme": "Abandoned city district, overgrown buildings, hidden treasures, environmental puzzles, secret bosses",
+          "crew_size": "3-5 players",
+          "objective": "Explore district, solve puzzles, find hidden treasures, defeat secret boss",
+          "art_prompt": "Abandoned city district with overgrown vegetation on buildings, hidden treasure chests in rubble, environmental puzzles with lever mechanisms and pressure plates, secret boss arena in collapsed stadium, exploration atmosphere with discovery moments, cartoon adventure game map, overgrown natural lighting with mysterious shadow areas, 2200x1500 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "CLAN_08",
+          "name": "The Rivalry \u2014 Crew vs Crew Territory Control",
+          "type": "Cooperative Territory Mission",
+          "size": "1800x1200 pixels",
+          "theme": "Contested district, capture points, crew territories, neutral zones, war-torn streets",
+          "crew_size": "5-10 players per crew",
+          "objective": "Capture and hold more points than rival crew for set time",
+          "art_prompt": "Contested urban district with capture points marked by glowing beacons, crew territories with colored borders, neutral zones with mercenary NPCs, war-torn streets with destroyed vehicles, strategic choke points and flanking routes, competitive territorial atmosphere, cartoon strategy game territory map, dramatic twilight with beacon glows, 1800x1200 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "CLAN_09",
+          "name": "The Gauntlet \u2014 Survival Challenge",
+          "type": "Cooperative Survival Mission",
+          "size": "1200x1200 pixels",
+          "theme": "Arena with multiple zones, environmental hazards, enemy spawn points, power-up stations",
+          "crew_size": "3-5 players",
+          "objective": "Survive increasingly difficult waves, last crew standing wins",
+          "art_prompt": "Survival arena with multiple themed zones (fire, ice, electric, toxic), environmental hazards like lava pools and ice patches, enemy spawn portals with glowing energy, power-up stations with health and damage boosts, wave counter display, intense survival atmosphere, cartoon strategy game survival map, dynamic zone-colored lighting, 1200x1200 pixels, game asset, Unity-ready"
+        },
+        {
+          "id": "CLAN_10",
+          "name": "The Revenge \u2014 Counter-Raid Mission",
+          "type": "Cooperative Revenge Mission",
+          "size": "1600x1000 pixels",
+          "theme": "Enemy base at night, stealth entry points, target buildings, extraction routes",
+          "crew_size": "3-5 players",
+          "objective": "Infiltrate base that raided you, destroy specific buildings, escape undetected (optional)",
+          "art_prompt": "Enemy crew base at night with stealth entry points marked, target buildings with red highlights, guard patrol routes visible, extraction routes with escape vehicles, revenge atmosphere with personal stakes, cartoon strategy game stealth map, dark night lighting with moonlight and building lights, 1600x1000 pixels, game asset, Unity-ready"
+        }
+      ]
+    },
+    "tier_5_ui_hud_elements": {
+      "count": 6,
+      "description": "User interface and heads-up display art assets",
+      "maps": [
+        {
+          "id": "UI_01",
+          "name": "Main HUD Overlay",
+          "type": "HUD Art",
+          "size": "1920x1080 pixels (transparent overlay)",
+          "elements": [
+            "Health Bar",
+            "Shield Indicator",
+            "Crew Status",
+            "Mini-Map",
+            "Quick Chat",
+            "Resource Counters",
+            "Action Buttons"
+          ],
+          "art_prompt": "Cyberpunk game HUD overlay, health bar with segmented neon green sections, shield indicator with pulsing blue force field icon, crew status showing online members with green dots, circular mini-map with building icons, quick chat button with speech bubble, resource counters with coin and gem icons, action buttons with graffiti-style icons, transparent background, clean readable design, cartoon strategy game UI, neon accents on dark semi-transparent panels, 1920x1080 pixels, UI asset, Unity-ready"
+        },
+        {
+          "id": "UI_02",
+          "name": "Crew War Lane Assignment Screen",
+          "type": "UI Screen",
+          "size": "1920x1080 pixels",
+          "elements": [
+            "3 Lane Displays",
+            "Player Assignment Slots",
+            "Opponent Intel",
+            "Buff Lock Indicator",
+            "Submit Button"
+          ],
+          "art_prompt": "Crew war lane assignment screen, three vertical lane panels with arena previews, player assignment slots with drag-and-drop functionality, opponent intel showing their previous round performance, buff lock indicator with countdown timer, large submit button with crew emblem, strategic planning atmosphere, cartoon strategy game UI, dark background with lane-colored accents (red, blue, green), 1920x1080 pixels, UI asset, Unity-ready"
+        },
+        {
+          "id": "UI_03",
+          "name": "District vs District War Map",
+          "type": "Strategic Map UI",
+          "size": "1920x1080 pixels",
+          "elements": [
+            "District Overview",
+            "Territory Control",
+            "Troop Movements",
+            "Central Tower Status",
+            "Timer",
+            "District Chat"
+          ],
+          "art_prompt": "District vs district strategic war map, top-down view of contested territory with colored control zones, animated troop movement arrows, central tower with contested flag animation, countdown timer with urgency colors, district chat panel with messages, tactical command atmosphere, cartoon strategy game UI, military green and red accents on dark map background, 1920x1080 pixels, UI asset, Unity-ready"
+        },
+        {
+          "id": "UI_04",
+          "name": "Card Collection & Gear Screen",
+          "type": "Inventory UI",
+          "size": "1920x1080 pixels",
+          "elements": [
+            "Card Grid",
+            "Gear Slots",
+            "Stats Panel",
+            "Upgrade Button",
+            "Filter Options",
+            "Search Bar"
+          ],
+          "art_prompt": "Card collection and gear management screen, grid of collectible cards with rarity borders (common gray, rare blue, epic purple, legendary gold), four gear slots per card (frame, gem, aura, finisher), stats panel with animated number increases, upgrade button with glowing effect, filter options with dropdown menus, search bar with predictive text, collector atmosphere, cartoon strategy game UI, dark background with card glow effects, 1920x1080 pixels, UI asset, Unity-ready"
+        },
+        {
+          "id": "UI_05",
+          "name": "Crew Chest Opening Animation",
+          "type": "Animated UI",
+          "size": "800x800 pixels",
+          "elements": [
+            "Crew Chest",
+            "Opening Animation",
+            "Reward Reveal",
+            "Shared Celebration",
+            "Skip Button"
+          ],
+          "art_prompt": "Crew chest opening animation sequence, ornate crew chest with glowing seams, opening animation with light beams and particle effects, reward reveal with card/item rising from chest, shared celebration with crew member avatars cheering, skip button for impatient players, exciting reward atmosphere, cartoon strategy game animation, golden light effects with confetti particles, 800x800 pixels, animated UI asset, Unity-ready"
+        },
+        {
+          "id": "UI_06",
+          "name": "Push Notification Templates",
+          "type": "Notification Art",
+          "size": "400x200 pixels each (5 variants)",
+          "variants": [
+            "Crew Under Siege",
+            "War Starting Soon",
+            "Crew Chest Opening",
+            "Revenge Available",
+            "Streak About to Break"
+          ],
+          "art_prompt": "Set of 5 push notification templates for mobile, each 400x200 pixels, crew under siege with red alert border and flame icon, war starting soon with countdown clock and crossed swords, crew chest opening with treasure chest and sparkles, revenge available with vengeful eye icon and target reticle, streak about to break with broken chain icon and warning colors, urgent attention-grabbing designs, cartoon strategy game notification style, bold colors with clear iconography, 400x200 pixels each, UI asset, Unity-ready"
+        }
+      ]
+    }
+  },
+  "art_categories_inventory": {
+    "category_01_characters": {
+      "name": "Character Designs",
+      "count": 25,
+      "subcategories": [
+        "Player Avatars (10 variants \u2014 different urban styles)",
+        "Crew Leaders (5 archetypes \u2014 brute, strategist, trickster, healer, scout)",
+        "NPC Vendors (5 designs \u2014 spell shop, deck lab, market, bounty, shield)",
+        "Enemy Raiders (5 designs \u2014 rival crew archetypes)"
+      ],
+      "art_style": "Stylized cartoon urban characters, exaggerated proportions, distinct silhouettes, graffiti-inspired clothing, neon accessories",
+      "example_prompt": "Stylized cartoon urban character, exaggerated muscular proportions, wearing graffiti-covered jacket with neon trim, cyberpunk streetwear, holding glowing card in hand, distinct readable silhouette, character design sheet with front/back/side views, cartoon strategy game character, vibrant colors with dark shadows, transparent background, game asset, Unity-ready"
+    },
+    "category_02_cards": {
+      "name": "Card Designs",
+      "count": 50,
+      "subcategories": [
+        "Common Cards (15 designs)",
+        "Rare Cards (15 designs)",
+        "Epic Cards (12 designs)",
+        "Legendary Cards (8 designs)"
+      ],
+      "art_style": "Holographic trading card aesthetic, rarity-based borders, dynamic poses, spell effects, urban fantasy theme",
+      "example_prompt": "Legendary trading card design, holographic gold border with animated shimmer, urban fantasy character in dynamic action pose, spell effects swirling around character, card name banner at top, stats panel at bottom, rarity gem in corner, collectible card game aesthetic, vibrant colors with metallic accents, 600x800 pixels, game asset, Unity-ready"
+    },
+    "category_03_buildings": {
+      "name": "Building Exteriors",
+      "count": 20,
+      "subcategories": [
+        "Core District Buildings (8)",
+        "Outskirts Buildings (6)",
+        "Neon Abyss Buildings (6)"
+      ],
+      "art_style": "Isometric 3D building exteriors, distinct architectural styles per district, neon signage, graffiti details, readable silhouettes",
+      "example_prompt": "Isometric 3D building exterior, cyberpunk spell shop with glowing potion sign, brick walls with graffiti murals, neon trim around windows and doors, rooftop antenna with magical energy, distinct readable silhouette, urban fantasy architecture, cartoon strategy game building, vibrant neon colors with dark shadows, transparent background, game asset, Unity-ready"
+    },
+    "category_04_vehicles": {
+      "name": "Vehicles & Mounts",
+      "count": 15,
+      "subcategories": [
+        "Crew Transport (5 \u2014 armored vans, hover bikes, etc.)",
+        "Beast Mounts (5 \u2014 urban creatures)",
+        "Flying Vehicles (5 \u2014 drones, hovercraft)"
+      ],
+      "art_style": "Stylized urban vehicles, graffiti paint jobs, neon underglow, exaggerated proportions",
+      "example_prompt": "Stylized urban crew transport vehicle, armored van with graffiti paint job and neon underglow, reinforced bumpers and tinted windows, exhaust pipes with flame effects, cartoon vehicle design, vibrant colors with metallic accents, transparent background, game asset, Unity-ready"
+    },
+    "category_05_weapons": {
+      "name": "Weapons & Gear",
+      "count": 30,
+      "subcategories": [
+        "Melee Weapons (10 \u2014 bats, chains, magical staffs)",
+        "Ranged Weapons (10 \u2014 cards as projectiles, spell guns)",
+        "Shield Gear (10 \u2014 force field generators, barrier devices)"
+      ],
+      "art_style": "Urban fantasy weapons, graffiti details, neon energy effects, exaggerated sizes",
+      "example_prompt": "Urban fantasy melee weapon, magical baseball bat with glowing runes and neon trim, graffiti tags on handle, energy crackling around impact zone, exaggerated proportions, cartoon weapon design, vibrant colors with energy glow effects, transparent background, game asset, Unity-ready"
+    },
+    "category_06_fx": {
+      "name": "Visual Effects",
+      "count": 40,
+      "subcategories": [
+        "Spell Effects (15 \u2014 fire, ice, lightning, poison, healing)",
+        "Impact Effects (10 \u2014 hit sparks, explosion, debris)",
+        "UI Effects (10 \u2014 level up, reward, notification)",
+        "Environmental Effects (5 \u2014 rain, fog, neon haze)"
+      ],
+      "art_style": "Stylized particle effects, neon-colored energy, cartoon physics, readable at small scale",
+      "example_prompt": "Stylized fire spell visual effect, neon orange and red energy burst, particle trail with ember sparks, cartoon physics with exaggerated motion, readable at small scale, spell effect asset, transparent background, game asset, Unity-ready"
+    },
+    "category_07_icons": {
+      "name": "Iconography",
+      "count": 60,
+      "subcategories": [
+        "Resource Icons (15 \u2014 coins, gems, tokens, materials)",
+        "Action Icons (15 \u2014 attack, defend, shield, heal, boost)",
+        "Status Icons (15 \u2014 buff, debuff, poison, stun, shield)",
+        "Building Icons (15 \u2014 mini versions for mini-map)"
+      ],
+      "art_style": "Clean readable icons, bold outlines, limited color palette, instantly recognizable",
+      "example_prompt": "Clean game icon, coin resource with dollar sign and sparkle effect, bold black outline, limited color palette with gold and yellow, instantly recognizable at 64x64 pixels, cartoon strategy game icon, transparent background, UI asset, Unity-ready"
+    },
+    "category_08_backgrounds": {
+      "name": "Background Art",
+      "count": 20,
+      "subcategories": [
+        "Loading Screens (5)",
+        "Menu Backgrounds (5)",
+        "Victory/Defeat Screens (5)",
+        "Seasonal Event Backgrounds (5)"
+      ],
+      "art_style": "Detailed atmospheric backgrounds, urban fantasy cityscapes, dynamic lighting, mood-setting",
+      "example_prompt": "Detailed atmospheric loading screen background, cyberpunk cityscape at night with towering skyscrapers, neon signs reflecting in rain puddles, flying vehicles with light trails, moody urban fantasy atmosphere, detailed background art, vibrant neon colors with dark atmospheric shadows, 1920x1080 pixels, background asset, Unity-ready"
+    },
+    "category_09_promotional": {
+      "name": "Promotional Art",
+      "count": 15,
+      "subcategories": [
+        "App Store Screenshots (5)",
+        "Social Media Banners (5)",
+        "Trailer Storyboards (5)"
+      ],
+      "art_style": "High-impact marketing art, dynamic compositions, character focus, brand consistency",
+      "example_prompt": "High-impact promotional art for mobile game, dynamic composition with crew of characters in action poses, neon-lit urban background, game logo prominently displayed, exciting energy with motion blur effects, marketing art style, vibrant saturated colors, 1920x1080 pixels, promotional asset"
+    },
+    "category_10_nft": {
+      "name": "NFT & Blockchain Assets",
+      "count": 25,
+      "subcategories": [
+        "Land NFTs (10 \u2014 district plots with unique features)",
+        "Building Skin NFTs (10 \u2014 rare cosmetic variations)",
+        "Card Frame NFTs (5 \u2014 legendary border designs)"
+      ],
+      "art_style": "Premium collectible aesthetic, holographic elements, blockchain verification visual, rarity emphasis",
+      "example_prompt": "Premium NFT land asset, unique district plot with rare fountain feature and golden pathways, holographic blockchain verification aura, rarity stars and gem indicators, premium collectible aesthetic, metallic gold and holographic effects, 800x800 pixels, NFT asset, blockchain-ready"
+    },
+    "category_11_cinematics": {
+      "name": "Cinematic Sequences",
+      "count": 10,
+      "subcategories": [
+        "Opening Cinematic (1)",
+        "Prestige Ascension (3)",
+        "Crew War Victory (3)",
+        "District vs District Win (3)"
+      ],
+      "art_style": "High-quality animated cinematics, dramatic camera angles, particle effects, emotional beats",
+      "example_prompt": "Cinematic storyboard panel, dramatic low-angle shot of crew standing victorious on battlefield, defeated enemy base smoking in background, sunrise breaking through clouds, emotional triumph moment, high-quality cinematic art, dramatic lighting with warm sunrise colors, 1920x1080 pixels, cinematic asset"
+    },
+    "category_12_emotes": {
+      "name": "Emotes & Expressions",
+      "count": 30,
+      "subcategories": [
+        "Character Emotes (15 \u2014 happy, angry, surprised, taunt, celebrate)",
+        "Crew Emblems (10 \u2014 logos, tags, symbols)",
+        "Chat Stickers (5 \u2014 meme-style reactions)"
+      ],
+      "art_style": "Expressive cartoon emotes, exaggerated facial expressions, readable at small scale, culturally relevant",
+      "example_prompt": "Expressive cartoon character emote, angry face with steam coming from ears, gritted teeth and furrowed brows, exaggerated expression readable at 128x128 pixels, cartoon emote style, vibrant colors with bold outlines, transparent background, chat asset, Unity-ready"
+    }
+  },
+  "prompt_categories_for_artist": {
+    "style_guide": {
+      "overall_aesthetic": "Urban fantasy street art meets cyberpunk neon meets cartoon strategy game",
+      "reference_games": [
+        "Clash of Clans (readability)",
+        "Sunflower Land (charm)",
+        "Brawl Stars (attitude)",
+        "Fortnite (cultural relevance)"
+      ],
+      "color_rules": [
+        "Primary: Electric Purple, Neon Cyan, Hot Pink",
+        "Secondary: Graffiti Orange, Toxic Green, Street Gold",
+        "Neutrals: Asphalt Black, Concrete Gray, Brick Red",
+        "Accents: Police Siren Blue, Fire Red, Smoke White"
+      ],
+      "silhouette_rule": "Every asset must be instantly recognizable by silhouette alone",
+      "readability_rule": "Assets must read clearly at 64x64 pixels (icons) and 200x200 pixels (characters)",
+      "consistency_rule": "All assets must feel like they belong in the same universe"
+    },
+    "prompt_templates": {
+      "map_prompt_template": "[RENDER_STYLE] [LOCATION_TYPE] in [THEME], [KEY_FEATURES], [INTERACTIVE_ELEMENTS], [ATMOSPHERE], [LIGHTING], cartoon strategy game [MAP_TYPE], [COLOR_SCHEME], [SIZE], game asset, [BACKGROUND_TYPE], Unity-ready",
+      "character_prompt_template": "Stylized cartoon urban [CHARACTER_TYPE], [PHYSICAL_TRAITS], wearing [CLOTHING_DESCRIPTION], [ACCESSORIES], [POSE_ACTION], distinct readable silhouette, character design sheet with front/back/side views, cartoon strategy game character, [COLOR_SCHEME], transparent background, game asset, Unity-ready",
+      "building_prompt_template": "Isometric 3D [BUILDING_TYPE] exterior, [ARCHITECTURAL_STYLE], [SIGNAGE_DETAILS], [DECORATIVE_ELEMENTS], [DISTINCTIVE_FEATURES], distinct readable silhouette, [DISTRICT_THEME] architecture, cartoon strategy game building, [COLOR_SCHEME], transparent background, game asset, Unity-ready",
+      "card_prompt_template": "[RARITY] trading card design, [BORDER_STYLE] border with [SPECIAL_EFFECTS], [CHARACTER_CONCEPT] in [POSE], [SPELL_EFFECTS], card name banner at top, stats panel at bottom, rarity gem in corner, collectible card game aesthetic, [COLOR_SCHEME], [SIZE], game asset, Unity-ready",
+      "fx_prompt_template": "Stylized [EFFECT_TYPE] visual effect, [COLOR_DESCRIPTION] energy [MOTION_TYPE], [PARTICLE_DETAILS], cartoon physics with [PHYSICS_STYLE], readable at small scale, [EFFECT_CATEGORY] asset, transparent background, game asset, Unity-ready",
+      "ui_prompt_template": "[UI_TYPE] for [GAME_FEATURE], [LAYOUT_DESCRIPTION], [KEY_ELEMENTS], [FUNCTIONALITY_HINTS], [ATMOSPHERE] atmosphere, cartoon strategy game UI, [COLOR_SCHEME], [SIZE], UI asset, Unity-ready"
+    },
+    "priority_order_for_production": [
+      "1. MAP_01 \u2014 The Core District (starting zone, first impression)",
+      "2. INT_01 \u2014 Main Tower Interior (crew HQ, social hub)",
+      "3. UI_01 \u2014 Main HUD Overlay (player sees this 100% of time)",
+      "4. Category 01 \u2014 Player Avatars (5 variants, quick win)",
+      "5. Category 02 \u2014 Common Cards (15 designs, core gameplay)",
+      "6. MINI_01 \u2014 Card Clash Arena (core loop)",
+      "7. Category 03 \u2014 Core District Buildings (8 exteriors)",
+      "8. UI_05 \u2014 Crew Chest Opening Animation (retention hook)",
+      "9. Category 06 \u2014 Spell Effects (5 core spells)",
+      "10. MAP_02 \u2014 The Outskirts (progression milestone)"
+    ]
+  },
+  "production_timeline": {
+    "phase_1_core": {
+      "duration": "4-6 weeks",
+      "assets": [
+        "MAP_01",
+        "INT_01",
+        "UI_01",
+        "Player Avatars (5)",
+        "Common Cards (15)",
+        "Core Buildings (8)",
+        "Basic FX (10)"
+      ],
+      "deliverable": "Playable vertical slice with Core District"
+    },
+    "phase_2_expansion": {
+      "duration": "6-8 weeks",
+      "assets": [
+        "MAP_02",
+        "Outskirts Buildings (6)",
+        "Rare Cards (15)",
+        "Mini-Games (6)",
+        "Clan Missions (5)",
+        "UI Screens (3)"
+      ],
+      "deliverable": "Beta with two districts and crew systems"
+    },
+    "phase_3_prestige": {
+      "duration": "8-10 weeks",
+      "assets": [
+        "MAP_03",
+        "Neon Abyss Buildings (6)",
+        "Epic/Legendary Cards (20)",
+        "Remaining Mini-Games (6)",
+        "Remaining Clan Missions (5)",
+        "NFT Assets (25)",
+        "Cinematics (10)"
+      ],
+      "deliverable": "Full launch with all three districts and Web3 integration"
+    }
+  }
+}

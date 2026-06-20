@@ -5271,6 +5271,16 @@
     if(typeof window.__akPlayWorld==='function'){ try{ window.__akPlayWorld(); return; }catch(_e){} }
     startMatch();
   });
+
+  // AK-HUBGO 2026-06-18: the walkable hub (hub_proto.html) navigates to ?go=match when you enter THE ARENA ->
+  // auto-fire Play Now once the lobby is up + the loading gate is gone. Mirrors a real tap. Additive; no-op without the flag.
+  try{ if(/[?&]go=match/.test(location.search)){
+    var _hgTries=0, _hgIv=setInterval(function(){ _hgTries++;
+      var sp=document.getElementById('startscreen'), gate=document.getElementById('akpl');
+      var gateGone=!gate || gate.classList.contains('hidden') || (gate.style && gate.style.display==='none');
+      if((sp && !sp.classList.contains('hidden') && gateGone) || _hgTries>50){ clearInterval(_hgIv); try{ playBtn.click(); }catch(_e){} }
+    }, 200);
+  } }catch(_e){}
   againBtn.addEventListener('click', function(){ if(WORLD_RUN){ worldRetry(); return; } startMatch(); });
   const homeBtn=document.getElementById('homebtn');
   if(homeBtn) homeBtn.addEventListener('click', ()=>{

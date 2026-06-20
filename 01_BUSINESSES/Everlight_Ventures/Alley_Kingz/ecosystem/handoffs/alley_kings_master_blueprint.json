@@ -1,0 +1,190 @@
+{
+  "title": "ALLEY KINGS \u2014 Master Development Blueprint",
+  "created": "2026-06-19",
+  "session_id": "2026-06-19-1600",
+  "client": "Everlight Ventures LLC / alleykingz.online / alley-kingz.pages.dev",
+  "status": "ACTIVE DEVELOPMENT \u2014 PHASE 1 PREPARATION",
+  "executive_summary": {
+    "product": "Alley Kings \u2014 Cross-platform PvP strategy game (WebGL/Three.js \u2192 Unity \u2192 Crypto \u2192 Google Play)",
+    "core_vision": "Socially radioactive game where friends beg each other to log in, hate each other for betraying the crew, and build real economic stakes through modular Web3 architecture",
+    "business_structure": {
+      "everlightventures.io": "Parent LLC \u2014 legal, funding, IP ownership",
+      "alleykingz.online": "Game product / subsidiary",
+      "alley-kingz.pages.dev": "Dev/staging environment"
+    },
+    "current_tech_stack": "WebGL + Three.js (browser-based 3D overworld map)",
+    "target_platforms": [
+      "WebGL/Browser",
+      "Unity (PC/Mac)",
+      "Web3/Crypto",
+      "Google Play/iOS",
+      "Console (future)"
+    ]
+  },
+  "conversation_arc": [
+    {
+      "turn": 1,
+      "timestamp": "2026-06-19 16:00",
+      "topic": "Initial game briefing \u2014 Alley Kings updates and vision",
+      "key_inputs": [
+        "WebGL + Three.js overworld map with building entry",
+        "Controller navigation needed",
+        "Auto-login bug: player spawns ON building, auto-enters",
+        "PvP raid system inspired by Clash of Clans",
+        "Shield system, crew/gang mechanics, revenge system",
+        "References: Sunflower Land, Dark War Survival, Clash of Clans, Classic Lands",
+        "Business data vs game dynamic data separation"
+      ]
+    },
+    {
+      "turn": 2,
+      "timestamp": "2026-06-19 16:05",
+      "topic": "Deep research and feature breakdown",
+      "research_conducted": [
+        "Sunflower Land mechanics (browser-first, seasonal events, skill trees, prestige system, tokenized assets)",
+        "Dark War Survival (alliance help, reinforcements, faction wars, shield system)",
+        "Clash of Clans (shield tiers, attack-through-shield penalties, Village Guard, revenge mechanics)",
+        "Pixels (social hub, free-to-play entry, land ownership, task board, staking)",
+        "25+ additional outlets researched (Monopoly GO, Coin Master, Roblox, Fortnite Creative, Brawl Stars, Pokemon GO, EVE Online, Genshin Impact, Axie Infinity, The Sandbox, Splinterlands, Gods Unchained, etc.)"
+      ],
+      "deliverables": [
+        "Priority implementation list (3 phases)",
+        "Modular game architecture (10 core modules)",
+        "Token sink/burn mechanics ($ALK economy)",
+        "Social urgency system design",
+        "Porting roadmap (WebGL \u2192 Unity \u2192 Crypto \u2192 Google Play)"
+      ]
+    },
+    {
+      "turn": 3,
+      "timestamp": "2026-06-19 16:10",
+      "topic": "Social mechanics deep-dive \u2014 Come on buddy system",
+      "key_requirements": [
+        "Socially radioactive \u2014 friends invite/hate each other",
+        "Urgency notifications (crew under siege, war countdown, streak crisis)",
+        "Crew chat as social weapon (betrayal log, MVP shaming, crew chest timer)",
+        "Shared reward anxiety (crew chest, rescue mission, betrayal bounty)",
+        "Dopamine loop engineering (variable raid timing, near-miss buildings, visual damage, loss aversion)"
+      ],
+      "deliverables": [
+        "3-tier social urgency system",
+        "Crew chat integration spec",
+        "Crew leaderboard & rivalries",
+        "Bonus windows & shared rewards",
+        "Dopamine engine flowchart"
+      ]
+    },
+    {
+      "turn": 4,
+      "timestamp": "2026-06-19 16:15",
+      "topic": "25+ outlets research \u2014 best-in-class dynamics",
+      "research_methodology": "Web search across 4 rounds covering: top-grossing mobile strategy games, web3 gaming tokens, monetization models, player retention mechanics, live ops events, social features, cross-platform games, onboarding psychology, creator economies",
+      "outlets_researched": 27,
+      "key_discoveries": [
+        "Clash of Clans: $7B+ lifetime, clan wars + shield economy = infinite retention",
+        "Monopoly GO: Highest IAP revenue 2025, Reward Flow \u2014 every reward triggers next reward",
+        "Roblox: $6.8B bookings, creator economy = self-sustaining ecosystem",
+        "Fortnite Creative: $722M+ creator payouts, in-island transactions",
+        "Coin Master: $100M+/month at peak, slot + raid hybrid, loss aversion + social pyramid",
+        "EVE Online: Player-driven economy, wealth concentration + player wars = emergent narrative",
+        "Genshin Impact: $1B+ annual, Primogems scarcity + character collection = FOMO engine",
+        "Axie Infinity: P2E collapse lesson \u2014 unsustainable economy without sinks",
+        "Whiteout Survival: $1.5B+, furnace progression = life-or-death urgency, alliance dependency"
+      ]
+    },
+    {
+      "turn": 5,
+      "timestamp": "2026-06-19 16:27",
+      "topic": "Whiteout Survival integration request",
+      "research_conducted": [
+        "Whiteout Survival furnace mechanics (HQ caps everything, heat/reputation system, Fire Crystal endgame)",
+        "Alliance Championship (6 alliances, 5 rounds, 3 lanes, score-based fight order)",
+        "State vs State warfare (monthly cross-server, 4 phases, Sunfire Castle capture)",
+        "Hero Gear system (4 slots, two combat systems, offline exploration progress)",
+        "Social pressure engine (help timers, state-wide shame/glory, shield anxiety, recovery FOMO)"
+      ],
+      "deliverables": [
+        "Main Tower as Crew HQ (furnace equivalent)",
+        "Reputation Flow system (heat equivalent)",
+        "Crew War Lanes (3-arena battles)",
+        "District vs District (monthly cross-district warfare)",
+        "Hype Phase tasks (5-day daily rotation)",
+        "Card Gear system (4-slot gear per card)",
+        "Training Grounds (offline auto-progression)",
+        "MODULE_11_WHITEOUT_INTEGRATION architecture"
+      ]
+    }
+  ],
+  "current_state": {
+    "modules_defined": 11,
+    "platforms_targeted": 5,
+    "games_researched": 27,
+    "token_economy": "$ALK with 7 burn sinks + staking",
+    "social_systems": "3-tier urgency + crew chat weaponization + dopamine engine",
+    "monetization_layers": 6,
+    "live_ops_events": "7 recurring event types",
+    "creator_economy": "UGC marketplace with 70/25/5 revenue split"
+  },
+  "critical_gaps_identified": [
+    "Anti-cheat / server-authoritative validation (WebGL client-side vulnerability)",
+    "Server costs for real-time features (chat, push notifications, war matchmaking)",
+    "Regulatory compliance (crypto + gambling mechanics = legal gray area)",
+    "Onboarding friction (Web3 wallets scare normies \u2014 need social login first)",
+    "Data privacy (GDPR/CCPA for push notifications, chat logs, behavior tracking)",
+    "Offline progression decay (what happens after 30 days AFK)",
+    "Regional pricing (APAC markets need local pricing)",
+    "Voice chat safety (300% increase in adoption = toxicity risk)",
+    "Creator moderation (UGC = IP theft, NSFW risk)",
+    "Token volatility hedging ($ALK crash = player revolt)",
+    "Anti-whale protection (one whale dominates = everyone quits)",
+    "Responsible gambling design (streaks, loot boxes, token sinks)"
+  ],
+  "next_actions_required": [
+    "Write MODULE_01_SPAWN_SYSTEM code (fix auto-login bug)",
+    "Write MODULE_03_PVP_RAID_SYSTEM code (shield + damage math)",
+    "Write MODULE_06_ECONOMY_TOKEN code ($ALK flows + burn logic)",
+    "Write MODULE_11_WHITEOUT_INTEGRATION code (Main Tower, Reputation Flow, Crew War Lanes)",
+    "Design onboarding flow (60-second hook)",
+    "Research client websites (alleykingz.online, alley-kingz.pages.dev, everlightventures.io)",
+    "Mock up $ALK smart contract",
+    "Design referral/invite system",
+    "Create live ops calendar template",
+    "Build anti-cheat architecture spec"
+  ],
+  "resources_documentation": {
+    "research_sources": [
+      "Clash of Clans shield mechanics documentation",
+      "Sunflower Land seasonal events and tokenomics",
+      "Dark War Survival alliance and faction war systems",
+      "Pixels social hub and multi-game staking",
+      "Monopoly GO live ops and Reward Flow strategy",
+      "Roblox creator economy and regional pricing data",
+      "Fortnite Creative in-island transactions and engagement payouts",
+      "Coin Master slot psychology and social pressure mechanics",
+      "EVE Online player-driven economy analysis",
+      "Genshin Impact gacha monetization and retention",
+      "Axie Infinity P2E collapse post-mortem",
+      "Whiteout Survival furnace, alliance championship, SvS, hero gear systems",
+      "Brawl Stars club wars and social engagement",
+      "Pokemon GO raid coordination and IRL social",
+      "Among Us social deduction psychology",
+      "Splinterlands free-to-start card renting economy",
+      "Gods Unchained skill-based TCG with true ownership",
+      "Immutable X and Ronin L2 infrastructure data",
+      "2026 mobile game monetization benchmarks",
+      "Player retention psychology and dopamine loop engineering"
+    ],
+    "technical_documentation": [
+      "Modular game architecture (11 modules + Integration Layer)",
+      "EventBus pub/sub communication protocol",
+      "Adapter pattern for cross-platform porting",
+      "$ALK token economy flow diagram",
+      "Shield system state machine",
+      "Crew War Lanes matchmaking algorithm",
+      "District vs District warfare phase controller",
+      "Card Gear loadout system (two combat modes)",
+      "Training Grounds offline progression math",
+      "Push notification urgency escalation system"
+    ]
+  }
+}
