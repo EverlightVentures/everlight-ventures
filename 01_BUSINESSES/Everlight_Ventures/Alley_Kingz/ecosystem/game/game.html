@@ -2103,6 +2103,8 @@
 <script src="handlers_data.js?v=1781486888"></script>
 <!-- AK-KEYWORDS -->
 <script src="keywords_data.js?v=1781486888"></script>
+<script src="systems/_registry.js?v=1781486888"></script>
+<script src="systems/modes.js?v=1781486888"></script>
 <script src="engine.js?v=1781486888"></script>
 <script src="ak_account.js?v=1781486888"></script>
 <script src="social.js?v=1781486888"></script>
@@ -5042,7 +5044,8 @@
         lootBudgetMult: lootBudgetMult,
         handler: _hsel ? _hsel.selected : 'handler_mender',
         handlerNodes: (_hsel && _hsel.unlocked && _hsel.unlocked[_hsel.selected]) || null,
-        nemesis: opts.nemesis||null });   // AK-NEMESIS: fielded rival pass-through
+        nemesis: opts.nemesis||null,
+        mode: (opts && opts.mode) || undefined });   // AK-NEMESIS: fielded rival pass-through + AK-MODE: forward the mode
     // convoy drives difficulty per section; this just seeds section-0 (the_lot=0).
     // AK-WORLD: skipped for world runs -- their staircase lives in diffOffset in-engine.
     if(AK.setDifficulty && !diffOffset && !(opts.startSection>0)) AK.setDifficulty(ARENA_DIFFICULTY[ACTIVE_ARENA] || 0);
@@ -5281,6 +5284,22 @@
       if((sp && !sp.classList.contains('hidden') && gateGone) || _hgTries>50){ clearInterval(_hgIv); try{ playBtn.click(); }catch(_e){} }
     }, 200);
   } }catch(_e){}
+  // AK-INTENT 2026-06-20: the walkable hub's ctx.battle.launch writes ak_match_intent + navigates to ?intent=1.
+  // Read it, wait for the lobby + loading gate, then fire startMatch() DIRECTLY with the mode (bypasses playBtn so a
+  // mode launch never detours to the World Map). One-shot; clears the intent. Normal play (no intent) is untouched.
+  try{
+    var _akIntent=null; try{ _akIntent=JSON.parse(localStorage.getItem('ak_match_intent')||'null'); }catch(_e){ _akIntent=null; }
+    if(_akIntent){
+      try{ localStorage.removeItem('ak_match_intent'); }catch(_e){}
+      var _iTries=0, _iIv=setInterval(function(){ _iTries++;
+        var sp=document.getElementById('startscreen'), gate=document.getElementById('akpl');
+        var gateGone=!gate || gate.classList.contains('hidden') || (gate.style && gate.style.display==='none');
+        if((sp && gateGone) || _iTries>50){ clearInterval(_iIv);
+          try{ startMatch({ mode:_akIntent.mode, nemesis:_akIntent.nemesis||null, city:_akIntent.city, level:_akIntent.level, diffOffset:_akIntent.diffOffset, startSection:_akIntent.startSection, handler:_akIntent.handler }); }catch(_e){}
+        }
+      }, 200);
+    }
+  }catch(_e){}
   againBtn.addEventListener('click', function(){ if(WORLD_RUN){ worldRetry(); return; } startMatch(); });
   const homeBtn=document.getElementById('homebtn');
   if(homeBtn) homeBtn.addEventListener('click', ()=>{

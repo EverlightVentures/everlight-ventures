@@ -1394,7 +1394,9 @@ function newMatch(playerDeckNames, opts){
     selected: -1,
     shake: 0,  // screen shake magnitude (renderer reads + decays via AK.game)
     // ---- CONVOY RUN state (Axis A, spec sec 2.2) ----
-    convoyMode: true,                // the 4-section run is on
+    mode:       (opts.mode || 'convoy'),                                   // AK-MODE: alternate win-conditions via AK_MODES
+    convoyMode: (opts.mode == null || opts.mode === 'convoy'),             // the 4-section run is on (default)
+    modeImpl:   (global.AK_MODES && opts.mode && global.AK_MODES[opts.mode]) || null,
     section: 0,                      // current district 0..3
     gatesCleared: 0,                 // District Gates beaten this run
     gateClearedThisSection: false,   // did we beat THIS district's gate?
@@ -1440,6 +1442,7 @@ function newMatch(playerDeckNames, opts){
     sectionClearTimes: [null,null,null,null]   // elapsed seconds when each Gate fell
   };
   computeAiCurve();                            // AK-AICURVE (AK-FEEL)
+  if(game.modeImpl && game.modeImpl.setup){ try{ game.modeImpl.setup(game); }catch(_e){} }  // AK-MODE: mode-specific board setup
   // towers (player bottom, opponent top)
   game.player.towers = [
     new Tower(BRIDGE_LX,27,'princess',0),
@@ -2656,6 +2659,10 @@ function update(dt){
   game.units = game.units.filter(u=> u.alive || u.deathTimer < 0.45);
 
   checkWin();
+  if(game.modeImpl && game.modeImpl.checkEnd && game.phase==='live'){   // AK-MODE: mode win-condition seam
+    var _mr=game.modeImpl.checkEnd(game, dt);
+    if(_mr){ if(_mr.result)game.result=_mr.result; if(typeof _mr.stars==='number')game.stars=_mr.stars; if(_mr.cleanSweep)game.cleanSweep=true; endMatch(); }
+  }
   if(game.time<=0 && game.phase==='live') endMatch();
 }
 
@@ -3966,6 +3973,7 @@ function checkWin(){
 function endMatch(){
   if(game.phase==='ended') return;
   game.phase='ended';
+  if(!game.result){   // AK-MODE: a mode (C3) may preset the result; only recompute from crowns when it didn't
   if(game.player.crowns>game.opponent.crowns) game.result='win';
   else if(game.opponent.crowns>game.player.crowns) game.result='lose';
   else {
@@ -3974,6 +3982,7 @@ function endMatch(){
     const pct = ts=>{ let hp=0,mx=0; ts.forEach(t=>{ mx+=t.maxHp; if(!t.destroyed) hp+=t.hp; }); return mx? hp/mx : 0; };
     const ph=pct(game.player.towers), oh=pct(game.opponent.towers);
     game.result = ph>oh?'win':oh>ph?'lose':'draw';
+  }
   }
   // AK-LOOT: win/timer/draw banks ALL unbanked loot; a LOSS keeps 50% of the
   // unbanked commons (rounded down per type) and 100% of Epic+ shards.
