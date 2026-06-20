@@ -88,6 +88,17 @@
     // AK-TOWNHALL 2026-06-20: the keystone meta-gate. On first migration, grandfather TH to your HIGHEST current card level so no existing card degrades; fresh profiles start at 1. (CARD_LV_CAP=10, literal here to avoid var-init order.)
     if (typeof p.townHall !== "number" || !isFinite(p.townHall)) { var _mx = 1; for (var _k in p.cardLvls) { var _v = Math.floor(p.cardLvls[_k] || 1); if (_v > _mx) _mx = _v; } p.townHall = Math.max(1, Math.min(10, _mx)); }
     p.townHall = Math.max(1, Math.min(10, Math.floor(p.townHall)));
+    // === AK_SYSTEMS consolidated falsy-default fields (8 waves; zero-state stays byte-identical) ===
+    if (typeof p.bones !== "number" || !isFinite(p.bones)) p.bones = 0;                 // shared soulbound skill currency
+    if (!p.prod     || typeof p.prod     !== "object") p.prod = {};                     // production:  buildingId -> {lvl,lastCollect,stored}
+    if (!p.missions || typeof p.missions !== "object") p.missions = {};                 // missions:    local cache (server = ak-quests)
+    if (!p.captures || typeof p.captures !== "object") p.captures = {};                 // encounters:  cardName -> capture count
+    if (typeof p.encSeed !== "number" || !isFinite(p.encSeed)) p.encSeed = 0;           // encounters:  deterministic spawn cursor
+    if (!p.raid     || typeof p.raid     !== "object") p.raid = { shieldUntil:0, lastRaid:0, revenge:[] };
+    if (!p.season   || typeof p.season   !== "object") p.season = { id:"", marks:0, claimed:[] }; // marks = cosmetic-only
+    if (!p.trades   || typeof p.trades   !== "object") p.trades = { sent:[], cooldownUntil:0 };
+    if (!p.arcade   || typeof p.arcade   !== "object") p.arcade = {};                   // arcade:      gameId -> {best,plays,lastReward}
+    if (!p.modes    || typeof p.modes    !== "object") p.modes = {};                    // modes:       modeId -> {wins,losses,best}
     return p;
   }
   function loadProfile() {
