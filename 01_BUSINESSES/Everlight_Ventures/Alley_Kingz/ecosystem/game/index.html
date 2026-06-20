@@ -47,7 +47,8 @@
   /* AK-LOADING: branded crowned-dog load screen (initial load + page-nav transitions) */
   #loadscreen{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:16vh;transition:opacity .55s;
     background:linear-gradient(180deg,rgba(5,5,7,.12),rgba(5,5,7,.9)), url('assets/ui/lobby_hero.png') center/cover no-repeat #050507;}
-  #ls-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:-1;opacity:.95;}
+  #ls-vid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;opacity:1;}
+  #loadscreen > #ls-word,#loadscreen > #ls-bar,#loadscreen > #ls-tip{position:relative;z-index:1;}
   #loadscreen.hide{opacity:0;pointer-events:none;}
   #ls-word{font-family:'Playfair Display',Cinzel,serif;font-weight:800;font-size:32px;letter-spacing:.06em;color:#e8c55a;text-shadow:0 2px 12px #000;}
   #ls-bar{margin-top:14px;width:60vw;max-width:280px;height:5px;border-radius:3px;background:rgba(201,168,76,.2);overflow:hidden;}
@@ -395,6 +396,7 @@ function drawRadar(){rctx.clearRect(0,0,100,128);
 })();
 // AK-LOADING controller: fill the bar + fade out when ready; akShowLoad() re-shows it on page-nav (into shops/battler + back)
 (function(){var ls=document.getElementById('loadscreen'),fill=document.getElementById('ls-fill');if(!ls)return;
+  var lsv=document.getElementById('ls-vid'); if(lsv){ try{ lsv.muted=true; lsv.playsInline=true; var _pp=lsv.play(); if(_pp&&_pp.catch)_pp.catch(function(){}); }catch(_e){} }
   requestAnimationFrame(function(){if(fill)fill.style.width='100%';});
   function hide(){ls.classList.add('hide');}
   var _ht=window.__akReturning?2000:900; // AK-EXIT: 2s transition page when returning from a building; quick on first load
