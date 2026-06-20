@@ -85,6 +85,9 @@
     // AK-VIS: universal card levels + spare copies (dupes pay copies toward upgrades)
     if (!p.cardLvls || typeof p.cardLvls !== "object") p.cardLvls = {};
     if (!p.copies || typeof p.copies !== "object") p.copies = {};
+    // AK-TOWNHALL 2026-06-20: the keystone meta-gate. On first migration, grandfather TH to your HIGHEST current card level so no existing card degrades; fresh profiles start at 1. (CARD_LV_CAP=10, literal here to avoid var-init order.)
+    if (typeof p.townHall !== "number" || !isFinite(p.townHall)) { var _mx = 1; for (var _k in p.cardLvls) { var _v = Math.floor(p.cardLvls[_k] || 1); if (_v > _mx) _mx = _v; } p.townHall = Math.max(1, Math.min(10, _mx)); }
+    p.townHall = Math.max(1, Math.min(10, Math.floor(p.townHall)));
     return p;
   }
   function loadProfile() {
@@ -255,11 +258,27 @@
   function cardLevel(p, name) {
     try {
       var v = p && p.cardLvls && p.cardLvls[name];
-      return Math.max(1, Math.min(CARD_LV_CAP, Math.floor(v || 1)));
+      var th = (p && typeof p.townHall === "number") ? p.townHall : CARD_LV_CAP; // AK-TOWNHALL: Main Tower caps every card
+      return Math.max(1, Math.min(CARD_LV_CAP, th, Math.floor(v || 1)));
     } catch (_) { return 1; }
   }
   function cardCopies(p, name) {
     try { return Math.max(0, Math.floor((p && p.copies && p.copies[name]) || 0)); } catch (_) { return 0; }
+  }
+  // AK-TOWNHALL 2026-06-20: the keystone meta-gate. TH level (1..10) caps every card's level (CoC model). Upgrading TH is the master progression beat.
+  function townHallLevel(p) { p = p || loadProfile(); return Math.max(1, Math.min(CARD_LV_CAP, (p.townHall | 0) || 1)); }
+  function townHallCost(lv) { return 500 * lv * lv; } // ramping coin cost to raise TH (L1->2 = 500, L9->10 = 40500)
+  function upgradeTownHall() {
+    var r = { ok: false };
+    mutateProfile(function (p) {
+      var lv = Math.max(1, Math.min(CARD_LV_CAP, (p.townHall | 0) || 1));
+      if (lv >= CARD_LV_CAP) { r = { ok: false, error: "MAX", level: lv }; return; }
+      var cost = townHallCost(lv);
+      if ((p.coins | 0) < cost) { r = { ok: false, error: "INSUFFICIENT_FUNDS", have: p.coins | 0, need: cost, level: lv }; return; }
+      p.coins = (p.coins | 0) - cost; p.townHall = lv + 1;
+      r = { ok: true, level: lv + 1, spent: cost };
+    });
+    return r;
   }
   // Next-level requirement for a card. p optional (defaults to a fresh load).
   // spare = copies BEYOND the next-level requirement (the dupe-surplus chip).
@@ -373,6 +392,9 @@
     UP_COINS: UP_COINS,
     CARD_LV_CAP: CARD_LV_CAP,
     cardLevel: cardLevel,
+    townHallLevel: townHallLevel,     // AK-TOWNHALL: the meta-gate (caps card level)
+    townHallCost: townHallCost,
+    upgradeTownHall: upgradeTownHall,
     cardCopies: cardCopies,
     upgradeNeed: upgradeNeed,
     levelUpCard: levelUpCard,

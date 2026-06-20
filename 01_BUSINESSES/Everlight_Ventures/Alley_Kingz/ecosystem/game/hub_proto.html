@@ -6,7 +6,8 @@
      a building per game mode wired to its REAL screen (Arena -> ?go=match real battle), dwell-to-enter + fade.
      Standalone throwaway proto, no deps. -->
 <style>
-  html,body{margin:0;height:100%;background:#06060a;overflow:hidden;font-family:Inter,system-ui,sans-serif;color:#E8E8E8;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;height:100%;background:#06060a;overflow:hidden;font-family:Inter,system-ui,sans-serif;color:#E8E8E8;-webkit-tap-highlight-color:transparent;overscroll-behavior:none;}
+  #c{touch-action:none;}  /* AK-MOVE3: the canvas is the pointer target -- without this the browser delays the first frames of every drag deciding scroll-vs-gesture (stuttery start) */
   #c{display:block;width:100vw;height:100vh;}
   #hud{position:fixed;left:0;right:0;top:0;padding:8px 12px;font-size:11px;letter-spacing:.05em;color:#c9a84c;text-align:center;pointer-events:none;text-shadow:0 1px 3px #000;}
   #dist{position:fixed;left:0;right:0;top:26px;text-align:center;font-weight:800;font-size:15px;letter-spacing:.14em;color:#e8c55a;pointer-events:none;text-shadow:0 1px 4px #000;opacity:.92;}
@@ -20,6 +21,15 @@
   /* AK-HUD: persistent home-screen HUD (player chip + resources) */
   #phud{position:fixed;left:10px;top:30px;z-index:6;display:flex;gap:6px;align-items:center;font-family:Inter,sans-serif;pointer-events:none;}
   #phud .chip{background:rgba(8,8,14,.82);border:1px solid rgba(201,168,76,.55);border-radius:18px;padding:5px 11px;font-size:11px;font-weight:800;color:#e8c55a;letter-spacing:.03em;}
+  #thpanel{position:fixed;inset:0;z-index:9;background:rgba(4,4,8,.8);display:none;align-items:center;justify-content:center;}
+  #thp-box{background:linear-gradient(160deg,#15110a,#0a0a0e);border:1.5px solid #c9a84c;border-radius:16px;padding:22px 24px;width:min(86vw,340px);text-align:center;font-family:Inter,sans-serif;box-shadow:0 0 34px rgba(201,168,76,.28);}
+  #thp-title{font-family:Cinzel,serif;color:#e8c55a;font-size:19px;font-weight:800;letter-spacing:.05em;}
+  #thp-lv{color:#fff;font-size:34px;font-weight:900;margin:8px 0 2px;}
+  #thp-cap{color:#b9a76a;font-size:12px;line-height:1.4;margin-bottom:15px;}
+  #thp-up{background:linear-gradient(180deg,#e8c55a,#c9a84c);color:#15110a;border:none;border-radius:10px;padding:12px 0;width:100%;font-weight:900;font-size:14px;cursor:pointer;letter-spacing:.03em;}
+  #thp-up:disabled{filter:grayscale(.65);opacity:.55;cursor:not-allowed;}
+  #thp-hint{color:#9a8f6a;font-size:11px;margin-top:10px;min-height:14px;}
+  #thp-close{margin-top:13px;background:none;border:1px solid rgba(201,168,76,.4);color:#b9a76a;border-radius:8px;padding:7px 18px;font-size:11px;cursor:pointer;}
   #phud .res{background:rgba(8,8,14,.82);border:1px solid rgba(201,168,76,.35);border-radius:14px;padding:4px 9px;font-size:11px;font-weight:700;color:#E8E8E8;}
   /* AK-LOADING: branded crowned-dog load screen (initial load + page-nav transitions) */
   #loadscreen{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding-bottom:16vh;transition:opacity .55s;
@@ -33,13 +43,15 @@
 <canvas id="c"></canvas>
 <div id="loadscreen"><div id="ls-word">ALLEY KINGZ</div><div id="ls-bar"><div id="ls-fill"></div></div><div id="ls-tip">Rule the streets. Build your crew. Take the crown.</div></div>
 <div id="hud">THE LOT &mdash; walk to a building to enter its mode &middot; tap / joystick / WASD / arrows / hjkl</div>
-<div id="phud"><span class="chip" id="ph-name">&#128100; STRAY</span><span class="res" id="ph-gold">&#129689; -</span><span class="res" id="ph-gem">&#128142; -</span></div>
+<div id="phud"><span class="chip" id="ph-name">&#128100; STRAY</span><span class="chip" id="ph-th" style="cursor:pointer;pointer-events:auto;border-color:#e8c55a;">&#127963; TH -</span><span class="res" id="ph-gold">&#129689; -</span><span class="res" id="ph-gem">&#128142; -</span></div>
+<div id="thpanel"><div id="thp-box"><div id="thp-title">&#127963; TOWN HALL</div><div id="thp-lv">Level -</div><div id="thp-cap">--</div><button id="thp-up">UPGRADE</button><div id="thp-hint"></div><button id="thp-close">CLOSE</button></div></div>
 <div id="dist"></div>
 <canvas id="radar" width="100" height="128"></canvas>
 <div id="banner"></div>
 <div id="stick"><div id="nub"></div></div>
 <div id="fade"></div>
 <div class="tag">walkable world proto &bull; 3 districts &bull; not the final build</div>
+<script src="economy.js"></script>
 <script>
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
 const rad=document.getElementById('radar'),rctx=rad.getContext('2d');
@@ -176,7 +188,9 @@ function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
     if(vx||vy){let m=Math.hypot(vx,vy); if(m>1){vx/=m;vy/=m;} tvx=vx*me.spd; tvy=vy*me.spd; me.tx=me.ty=null;}
     else if(me.tx!=null){var dx=me.tx-me.x,dy=me.ty-me.y,d=Math.hypot(dx,dy); if(d>6){tvx=dx/d*me.spd; tvy=dy/d*me.spd;} else me.tx=me.ty=null;}
   }
-  var _sk=1-Math.exp(-16*dt); me.vx=(me.vx||0)+(tvx-(me.vx||0))*_sk; me.vy=(me.vy||0)+(tvy-(me.vy||0))*_sk;
+  // AK-MOVE3 2026-06-20: smoothing branched by input. JOYSTICK = DIRECT -- the analog magnitude IS the ramp; lerping it again added ~190ms lag (the floaty/drifty feel). Keyboard/tap get a quick ramp so digital input isn't jarring; fast decel so you stop crisply.
+  if(stickV.x||stickV.y){ me.vx=tvx; me.vy=tvy; }
+  else { var _lam=(Math.hypot(tvx,tvy)>=Math.hypot(me.vx||0,me.vy||0))?22:35; var _sk=1-Math.exp(-_lam*dt); me.vx=(me.vx||0)+(tvx-(me.vx||0))*_sk; me.vy=(me.vy||0)+(tvy-(me.vy||0))*_sk; if(Math.hypot(me.vx,me.vy)<3){me.vx=tvx;me.vy=tvy;} }
   me.x+=me.vx*dt; me.y+=me.vy*dt;
   // AK-ZONES edge transition: walk into a mapped edge -> new district (locked target -> barrier)
   if(state==='IN_ZONE' && spawnGrace<=0){ var E=42, ez=null;
@@ -202,10 +216,13 @@ function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
 }
 function wx(x){return x-cam.x;} function wy(y){return y-cam.y;}
 function draw(){ctx.fillStyle=curTint();ctx.fillRect(0,0,W,H);
-  // AK-GROUND: per-zone themed ground art, tiled + scrolling with the camera = the painted map base layer
+  // AK-GROUND2 2026-06-20: ONE themed image stretched to cover the whole district (NO tiling/repeat -- the operator disliked the tiled look). Scrolls 1:1 with the camera.
   var gd=curGround();
-  if(gd&&gd.complete&&gd.naturalWidth>0){ if(!gd._pat){var oc=document.createElement('canvas');oc.width=oc.height=320;oc.getContext('2d').drawImage(gd,0,0,320,320);gd._pat=ctx.createPattern(oc,'repeat');}
-    ctx.save();ctx.globalAlpha=0.62;ctx.fillStyle=gd._pat;ctx.translate(-(cam.x%320),-(cam.y%320));ctx.fillRect(0,0,W+320,H+320);ctx.restore(); }
+  if(gd&&gd.complete&&gd.naturalWidth>0){
+    ctx.save();ctx.globalAlpha=0.80;ctx.imageSmoothingQuality='high';
+    ctx.drawImage(gd, -cam.x, -cam.y, WORLD_W, WORLD_H);
+    ctx.globalAlpha=1;ctx.restore();
+  }
   ctx.strokeStyle='rgba(201,168,76,.05)';ctx.lineWidth=1;const G=80,ox=-(cam.x%G),oy=-(cam.y%G);
   for(let x=ox;x<W;x+=G){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
   for(let y=oy;y<H;y+=G){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
@@ -282,6 +299,27 @@ function drawRadar(){rctx.clearRect(0,0,100,128);
   if(g!=null)document.getElementById('ph-gold').textContent='Gold '+String(g).slice(0,9);
   if(gm!=null)document.getElementById('ph-gem').textContent='Gems '+String(gm).slice(0,9);
 }catch(_e){}})();
+// AK-TOWNHALL: keystone meta-gate UI -- HUD chip + a panel to level up. Caps card level (grandfathered so nothing degrades). Reads the REAL economy via AK_ECON.
+(function(){
+  function thRefresh(){ try{ if(!window.AK_ECON)return;
+    var lv=AK_ECON.townHallLevel(), p=AK_ECON.loadProfile(), coins=p.coins|0, cap=AK_ECON.CARD_LV_CAP;
+    var chip=document.getElementById('ph-th'); if(chip)chip.textContent='TH '+lv;
+    var gEl=document.getElementById('ph-gold'); if(gEl)gEl.textContent='Gold '+coins;
+    var lvEl=document.getElementById('thp-lv'),capEl=document.getElementById('thp-cap'),upEl=document.getElementById('thp-up'),hintEl=document.getElementById('thp-hint');
+    if(lvEl){ lvEl.textContent='Level '+lv;
+      if(lv>=cap){ capEl.textContent='Caps every card at Lv '+lv+' (MAX)'; upEl.disabled=true; upEl.textContent='MAX LEVEL'; hintEl.textContent='Town Hall fully upgraded.'; }
+      else { var cost=AK_ECON.townHallCost(lv); capEl.textContent='Your cards can reach Lv '+lv+' -- raise the Town Hall to level them higher'; upEl.disabled=(coins<cost); upEl.textContent='UPGRADE -> Lv '+(lv+1); hintEl.textContent=(coins<cost?('Need '+cost+' gold (have '+coins+')'):('Cost: '+cost+' gold  (have '+coins+')')); } }
+  }catch(_e){} }
+  var chip=document.getElementById('ph-th'), pn=document.getElementById('thpanel');
+  if(chip)chip.addEventListener('click',function(){ thRefresh(); if(pn)pn.style.display='flex'; });
+  var cl=document.getElementById('thp-close'); if(cl)cl.addEventListener('click',function(){ if(pn)pn.style.display='none'; });
+  var up=document.getElementById('thp-up'); if(up)up.addEventListener('click',function(){ if(!window.AK_ECON)return; var r=AK_ECON.upgradeTownHall();
+    if(r.ok){ if(typeof showBanner==='function')showBanner('Town Hall -> Level '+r.level+'!',2.0); }
+    else if(r.error==='INSUFFICIENT_FUNDS'){ if(typeof showBanner==='function')showBanner('Need '+r.need+' gold (have '+r.have+')',1.8); }
+    else if(r.error==='MAX'){ if(typeof showBanner==='function')showBanner('Town Hall already maxed (Lv '+r.level+')',1.6); }
+    thRefresh(); });
+  thRefresh();
+})();
 // AK-LOADING controller: fill the bar + fade out when ready; akShowLoad() re-shows it on page-nav (into shops/battler + back)
 (function(){var ls=document.getElementById('loadscreen'),fill=document.getElementById('ls-fill');if(!ls)return;
   requestAnimationFrame(function(){if(fill)fill.style.width='100%';});

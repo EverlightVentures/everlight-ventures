@@ -1,0 +1,38 @@
+name: Deploy Alley Kingz to Cloudflare Pages
+# Reliable GitHub-based deploy (replaces flaky ssh->e5->cf_pages_direct_upload + phone wrangler segfault).
+# Runs on GitHub runners so wrangler works natively. Repo stays PRIVATE; only the built game ships public.
+# Maps excluded -- they live on the separate alley-kingz-maps project. Injection-safe: no github.event.* in run:.
+on:
+  push:
+    branches: [main, lucrex-os-engine]
+    paths:
+      - '01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/**'
+      - '.github/workflows/deploy-alley-kingz.yml'
+  workflow_dispatch: {}
+concurrency:
+  group: deploy-alley-kingz-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Stage game (exclude assets/maps -- separate CF project)
+        run: |
+          mkdir -p /tmp/ak_site
+          rsync -a --delete --exclude 'assets/maps' "01_BUSINESSES/Everlight_Ventures/Alley_Kingz/ecosystem/game/" /tmp/ak_site/
+          echo "::notice::Staged $(find /tmp/ak_site -type f | wc -l) files"
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy /tmp/ak_site --project-name=alley-kingz --branch=main
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Print deploy URL
+        if: always()
+        run: echo "::notice::Deployed https://alleykingz.online"
