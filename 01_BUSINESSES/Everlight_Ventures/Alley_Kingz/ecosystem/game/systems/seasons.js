@@ -418,7 +418,7 @@
     loadLeaderboard(function (crews, source) {
       if (HUB.tab !== 'ranks') return;
       if (!crews || !crews.length) {
-        setKids(listBox, mk('div', { class:'aksn-note', text:'No crews on the board yet. Start or join a crew in the Clan Yard -- your wins put your crew on the ' + ch.name + ' board.' }));
+        setKids(listBox, mk('div', { class:'aksn-note', text:'No crews on the board yet. Start or join a crew in the Crew Yard -- your wins put your crew on the ' + ch.name + ' board.' }));
         return;
       }
       var rows = crews.map(function (c, i) {

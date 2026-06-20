@@ -99,6 +99,8 @@
     if (!p.trades   || typeof p.trades   !== "object") p.trades = { sent:[], cooldownUntil:0 };
     if (!p.arcade   || typeof p.arcade   !== "object") p.arcade = {};                   // arcade:      gameId -> {best,plays,lastReward}
     if (!p.modes    || typeof p.modes    !== "object") p.modes = {};                    // modes:       modeId -> {wins,losses,best}
+    if (!p.baseLayout || typeof p.baseLayout !== "object") p.baseLayout = {};            // worldmap S2: base rearrange -> {buildingId:{x,y}}
+    if (!p.karma    || typeof p.karma    !== "object") p.karma = {};                    // karma:       zoneId -> social-karma points (0% burn, prestige resets)
     return p;
   }
   function loadProfile() {

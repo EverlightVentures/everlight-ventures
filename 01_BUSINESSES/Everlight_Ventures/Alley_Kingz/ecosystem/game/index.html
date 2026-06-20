@@ -83,6 +83,7 @@
 <script src="systems/arcade.js"></script>
 <script src="systems/modes.js"></script>
 <script src="systems/worldmap.js"></script>
+<script src="systems/karma.js"></script>
 <script>
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
 const rad=document.getElementById('radar'),rctx=rad.getContext('2d');
@@ -137,7 +138,7 @@ const ZONES={
     edges:{W:{to:'DOWNTOWN',spawn:{x:1550,y:650}},S:{to:'FACTORY_ROW',spawn:{x:850,y:150}}}},
   // row 1 (CENTER -- spawn)
   THE_YARDS:{id:'THE_YARDS',name:'THE YARDS',gx:0,gy:1,tint:[12,15,13],ground:'docks',
-    buildings:[B('CLAN','CLAN YARD','#9d8bff',560,560,170,104,'shop/shop.html#crew2','crews / chat'),
+    buildings:[B('CLAN','CREW YARD','#9d8bff',560,560,170,104,'shop/shop.html#crew2','crews / chat'),
                B('PASS','PASS HOUSE','#5ad0c0',1140,560,170,104,'shop/shop.html#pass2','Alley Pass'),
                B('FIXER','THE FIXER','#ff9d5c',850,960,160,96,'shop/shop.html#hit2','Hit List')],
     edges:{E:{to:'HOME_TURF',spawn:{x:150,y:650}},N:{to:'THE_OVERLOOK',spawn:{x:850,y:1150}},S:{to:'THE_UNDERCITY',spawn:{x:850,y:150}}}},

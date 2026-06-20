@@ -33,6 +33,24 @@
  *   close -- exactly the contract's "raid target picker" use case (S2.e). Zero
  *   risk of corrupting the live hub canvas state.
  *
+ * SPRINT 2 (this pass) -- two additive features in the SAME zoom-out view:
+ *   (A) OTHER PLAYERS' BASES: tappable RAID pins ringed around the player's own
+ *       base (HOME_TURF). Snapshots fetched LIVE from the ak-raid edge fn
+ *       ({action:'targets'}) through the shared Supabase client (AKAccount.client
+ *       -- the same handle social.js + raid.js use). Degrades to canon-named local
+ *       pins when signed out / offline. Tapping a pin reuses raid.js's full WAR MAP
+ *       (window.AKRaid.warMap) if loaded, else launches the raid battle directly
+ *       via ctx.battle.launch({mode:'raid',...}). Loot stays server-authoritative.
+ *   (B) BASE REARRANGE: a REARRANGE edit toggle lets the player DRAG one of their
+ *       OWN buildings to a new spot inside its district. Drop snaps to a grid,
+ *       validates with AK_COLLISION.validPlacement (door clear + footprint off
+ *       obstacles) + a sibling-overlap guard, then persists the new x,y into the
+ *       falsy-default p.baseLayout via AK_ECON.mutateProfile. The saved layout is
+ *       APPLIED to the live ZONES building objects on init -- and index.html's
+ *       (frozen) draw() reads those objects every frame -- so the HUB renders the
+ *       rearranged base, doors/roads/radar all follow, with ZERO host edit. The
+ *       only host hook returned is the ensureShape falsy-default (see the return).
+ *
  * HARD RULES honored: 2.5D Canvas2D only, battler untouched. Soft-currency /
  * cosmetic only (this view grants nothing -- it is a strategic VIEW). "crew"
  * never "clan". Gritty gold cyberpunk dog-gang voice. Reuses ZONES + the painted
@@ -114,7 +132,77 @@
       { type:'circle', x:560,  y:824,  r:48,         kind:'rubble'}, // scrap pile below CLAN (door@612 clear)
       { type:'rect',   x:1180, y:824,  w:96,  h:46,  kind:'car'   }, // junked car SE
       { type:'circle', x:1040, y:1040, r:44,         kind:'rubble'}  // scrap near FIXER (door@1008 clear)
-    ]
+    ],
+// --- NEON_HEIGHTS (planters/holo-kiosks; WARD@560,560 door@560,608  ARCH@1140,560 door@1140,608) ---
+    NEON_HEIGHTS: [
+      { type:'circle', x:690,  y:320,  r:34,         kind:'planter' }, // holo-kiosk flanking N entrance (left of x775-925 lane)
+      { type:'circle', x:1010, y:320,  r:34,         kind:'planter' }, // holo-kiosk flanking N entrance (right of lane)
+      { type:'circle', x:300,  y:430,  r:40,         kind:'planter' }, // big planter NW (above W corridor y575-725)
+      { type:'rect',   x:440,  y:716,  w:230, h:16,  kind:'fence'   }, // holo-barrier S of WARDROBE (door@560,608 clear, 108px below)
+      { type:'circle', x:1400, y:430,  r:40,         kind:'planter' }, // big planter NE (above E corridor)
+      { type:'rect',   x:1030, y:716,  w:230, h:16,  kind:'fence'   }, // holo-barrier S of ARCHIVE (door@1140,608 clear)
+      { type:'circle', x:700,  y:840,  r:36,         kind:'planter' }, // planter framing S approach (left of x775-925)
+      { type:'circle', x:1000, y:840,  r:36,         kind:'planter' }  // planter framing S approach (right of lane)
+    ],
+    // --- FACTORY_ROW (pipes/crates/forklifts; GEM@520,540 door@520,590  MINT@1180,540 door@1180,590  FORGE@850,960 door@850,1012) ---
+    FACTORY_ROW: [
+      { type:'rect',   x:140,  y:250,  w:18,  h:260, kind:'pipe'      }, // W coolant pipe, upper (ends y510, above W corridor)
+      { type:'rect',   x:140,  y:770,  w:18,  h:300, kind:'pipe'      }, // W coolant pipe, lower (starts y770, below W corridor)
+      { type:'rect',   x:640,  y:466,  w:72,  h:72,  kind:'container' }, // crate stack E of GEM MINE (footprint x440-600 clear)
+      { type:'rect',   x:980,  y:466,  w:72,  h:72,  kind:'container' }, // crate stack W of GOLD MINT (footprint x1100-1260 clear)
+      { type:'rect',   x:1300, y:280,  w:18,  h:240, kind:'pipe'      }, // E coolant pipe, upper
+      { type:'rect',   x:636,  y:756,  w:96,  h:48,  kind:'car'       }, // parked forklift, center-left (W of FORGE footprint x765-935)
+      { type:'rect',   x:984,  y:756,  w:96,  h:48,  kind:'car'       }, // parked forklift, center-right (E of FORGE footprint)
+      { type:'rect',   x:1290, y:770,  w:210, h:18,  kind:'pipe'      }, // E low pipe run (below E corridor)
+      { type:'circle', x:300,  y:1120, r:40,         kind:'rubble'    }, // slag pile SW corner
+      { type:'circle', x:1400, y:1120, r:40,         kind:'rubble'    }  // slag pile SE corner
+    ],
+    // --- THE_STRIP (parked cars/club barriers/bollards; STREET@560,560 door@560,608  ARCADE@1140,560 door@1140,608) ---
+    THE_STRIP: [
+      { type:'rect',   x:372,  y:356,  w:96,  h:48,  kind:'car'   }, // parked car, NW curb
+      { type:'rect',   x:500,  y:356,  w:96,  h:48,  kind:'car'   }, // parked car, NW curb (row)
+      { type:'rect',   x:1100, y:356,  w:96,  h:48,  kind:'car'   }, // parked car, NE curb
+      { type:'rect',   x:1228, y:356,  w:96,  h:48,  kind:'car'   }, // parked car, NE curb (row)
+      { type:'rect',   x:556,  y:822,  w:188, h:16,  kind:'fence' }, // club stanchion line S-left (right edge 744 < S lane 775)
+      { type:'rect',   x:956,  y:822,  w:188, h:16,  kind:'fence' }, // club stanchion line S-right (left edge 956 > S lane 925)
+      { type:'circle', x:300,  y:440,  r:24,         kind:'fence' }, // bollard W-upper (above W corridor)
+      { type:'circle', x:300,  y:860,  r:24,         kind:'fence' }, // bollard W-lower (below W corridor)
+      { type:'circle', x:1400, y:440,  r:24,         kind:'fence' }, // bollard E-upper (above E corridor)
+      { type:'circle', x:1400, y:860,  r:24,         kind:'fence' }  // bollard E-lower (below E corridor)
+    ],
+    // --- THE_DOCKS (shipping containers/crates/mooring posts; LAB@560,540 door@560,590  GEN@1140,540 door@1140,590) ---
+    THE_DOCKS: [
+      { type:'rect',   x:250,  y:300,  w:120, h:56,  kind:'container' }, // container stack NW (left of LAB footprint x480-640)
+      { type:'rect',   x:250,  y:366,  w:120, h:56,  kind:'container' }, // container stack NW (stacked, ends y422 < W corridor)
+      { type:'rect',   x:660,  y:460,  w:64,  h:64,  kind:'container' }, // crate pile E of LAB (door@560,590 clear)
+      { type:'rect',   x:1330, y:300,  w:120, h:56,  kind:'container' }, // container stack NE (right of GEN footprint x1060-1220)
+      { type:'rect',   x:980,  y:460,  w:64,  h:64,  kind:'container' }, // crate pile W of GEN (door@1140,590 clear)
+      { type:'rect',   x:380,  y:900,  w:160, h:60,  kind:'container' }, // long container row SW (above S lane, W of x775)
+      { type:'rect',   x:1160, y:900,  w:160, h:60,  kind:'container' }, // long container row SE (above S lane, E of x925)
+      { type:'circle', x:1500, y:460,  r:20,         kind:'pipe'      }, // mooring post E-upper (above E corridor)
+      { type:'circle', x:1500, y:840,  r:20,         kind:'pipe'      }, // mooring post E-lower (below E corridor)
+      { type:'circle', x:640,  y:1140, r:20,         kind:'pipe'      }, // mooring post S (left of x775-925 lane)
+      { type:'circle', x:1060, y:1140, r:20,         kind:'pipe'      }  // mooring post S (right of lane)
+    ],
+    // --- THE_OVERLOOK (LOCKED; for when unlocked -- POLICE CHECKPOINT theme; no buildings; active edges E->DOWNTOWN, S->THE_YARDS) ---
+    THE_OVERLOOK: [
+      { type:'rect',   x:520,  y:360,  w:240, h:16,  kind:'fence'     }, // police barricade N-left (right edge 760 < N lane 775)
+      { type:'rect',   x:940,  y:360,  w:240, h:16,  kind:'fence'     }, // police barricade N-right (left edge 940 > N lane 925)
+      { type:'rect',   x:1040, y:460,  w:64,  h:56,  kind:'container' }, // checkpoint booth (off plaza & lanes)
+      { type:'circle', x:320,  y:430,  r:40,         kind:'rubble'    }, // rubble NW (above W corridor)
+      { type:'circle', x:320,  y:860,  r:40,         kind:'rubble'    }, // rubble SW (below W corridor)
+      { type:'rect',   x:660,  y:780,  w:96,  h:48,  kind:'car'       }  // police cruiser (right edge 756 < S lane 775)
+    ],
+    // --- THE_UNDERCITY (LOCKED; for when unlocked -- COLLAPSED BRIDGE theme; no buildings; active edges N->THE_YARDS, E->THE_STRIP) ---
+    THE_UNDERCITY: [
+      { type:'circle', x:560,  y:820,  r:56,         kind:'rubble'    }, // collapsed-bridge rubble (top edge 764 > plaza 730)
+      { type:'circle', x:1100, y:820,  r:50,         kind:'rubble'    }, // bridge rubble chunk SE-center
+      { type:'rect',   x:1300, y:300,  w:18,  h:260, kind:'pipe'      }, // fallen conduit, E-upper (ends y560 < E corridor)
+      { type:'rect',   x:1280, y:820,  w:140, h:56,  kind:'container' }, // collapsed container SE
+      { type:'circle', x:320,  y:430,  r:42,         kind:'rubble'    }, // concrete debris NW (above W corridor)
+      { type:'rect',   x:520,  y:360,  w:200, h:18,  kind:'rubble'    }, // debris row left of N lane (right edge 720 < 775)
+      { type:'rect',   x:980,  y:360,  w:200, h:18,  kind:'rubble'    }  // debris row right of N lane (left edge 980 > 925)
+    ],
   };
 
   function obstaclesFor(zone) {
@@ -201,11 +289,9 @@
     obstaclesFor: obstaclesFor, OBSTACLES: BUILTIN
   };
 
-  /* ---- LATER-SPRINT server hook (rival/crew bases on the world map) -------- */
-  // TODO-SERVER: replace with an ak-worldmap edge fn returning crew + rival base
-  // snapshots (ak_grants pattern, soft-currency loot only). Stubbed empty so the
-  // base view renders the player's OWN territory now; "SCOUT RIVALS" stays locked.
-  function getRivalBases() { return []; }
+  /* SPRINT 2 (A): rival bases are now LIVE -- fetched from the ak-raid edge fn
+   * ({action:'targets'}) via the shared Supabase client (see fetchRivals() in the
+   * WORLD-MAP section below). Degrades to canon-named local pins when signed out. */
 
   /* If there's no registry we're not on the hub page -- AK_COLLISION is still
    * exported above (harmless), but skip all the DOM / overlay wiring. */
@@ -215,7 +301,9 @@
    * (A) THE WORLD-MAP / BASE VIEW  (ctx.overlay.open)
    * ======================================================================== */
   var WM = { ctx:null, ov:null, cam:{ x:0, y:0 }, scale:1, fitScale:1,
-    sel:null, ptrs:{}, pinch:null, panMoved:0, btns:[] };
+    sel:null, ptrs:{}, pinch:null, panMoved:0, btns:[],
+    // SPRINT 2 -- (A) rival RAID pins  +  (B) base REARRANGE edit mode
+    rivals:[], rivalsLoading:false, pins:[], editMode:false, drag:null };
 
   // visual grid: each district is a TILE square with GAP between, WALL perimeter
   var TILE = 230, GAP = 30, WALL = 16;
@@ -234,6 +322,188 @@
       if (p && p.prod && p.prod[id] && p.prod[id].lvl) return p.prod[id].lvl | 0;
     } catch (_) {}
     return 1;
+  }
+
+  /* ======================================================================== *
+   * SPRINT 2 (A) -- OTHER PLAYERS' BASES  (live ak-raid snapshots as RAID pins)
+   * ======================================================================== */
+  function sbc() { try { return global.AKAccount && global.AKAccount.client && global.AKAccount.client(); } catch (_) { return null; } }
+  // canon crew names (verbatim from raid.js FACTIONS.gangs) so the signed-out
+  // fallback still reuses REAL crews BY NAME -- never invented placeholders.
+  function localRivals() {
+    return [
+      { id:'wm_loc_0', name:'The Boneyard Mob', cls:'Boneguard Crew',   accent:'#e8c55a', tier:1, local:true },
+      { id:'wm_loc_1', name:'Zoomie Riot',      cls:'Zoomie Syndicate', accent:'#7CFFB0', tier:2, local:true },
+      { id:'wm_loc_2', name:'Circuit Hounds',   cls:'K9 Circuitry',     accent:'#7fc8ff', tier:3, local:true }
+    ];
+  }
+  function fetchRivals(ctx) {
+    if (WM.rivalsLoading) return;
+    var sb = sbc();
+    if (!sb) { if (!WM.rivals.length) WM.rivals = localRivals(); return; }   // signed out / no client -> local pins
+    WM.rivalsLoading = true;
+    try {
+      sb.functions.invoke('ak-raid', { body: { action: 'targets' } }).then(function (r) {
+        WM.rivalsLoading = false;
+        var d = r && r.data;
+        if (d && d.ok && Array.isArray(d.bases) && d.bases.length) WM.rivals = d.bases.slice(0, 3);
+        else if (!WM.rivals.length) WM.rivals = localRivals();
+      }, function () { WM.rivalsLoading = false; if (!WM.rivals.length) WM.rivals = localRivals(); });
+    } catch (_) { WM.rivalsLoading = false; if (!WM.rivals.length) WM.rivals = localRivals(); }
+  }
+  // resolve a base's marquee defender -> a fielded nemesis blob (engine AK-NEMESIS)
+  function nemesisFor(ctx, base) {
+    try {
+      var nm = base && base.roster && base.roster[0];
+      if (!nm) return null;
+      var c = ctx.cards()[nm];
+      var num = c && (c.cardNumber || c.id);
+      if (!num) return null;
+      return { card: String(num), name: nm, title: base.name, tier: base.tier || 1, taunt: 'Wrong block, mutt.' };
+    } catch (_) { return null; }
+  }
+  // launch the raid battle straight (base layout = battlefield; mode:'raid').
+  // Difficulty mirrors raid.js's tier->city/level mapping so it's consistent.
+  function raidFrom(ctx, base) {
+    var tier = (base && base.tier) || 1;
+    ctx.battle.launch({
+      mode: 'raid',
+      city: (base && base.city != null) ? base.city : clamp(tier + 1, 0, 9),
+      level: (base && base.level != null) ? base.level : clamp(2 + tier * 2, 1, 10),
+      diffOffset: (base && base.diffOffset != null) ? base.diffOffset : (tier - 1),
+      nemesis: nemesisFor(ctx, base),
+      label: 'RAID -- ' + ((base && base.name) || 'Rival Crew')
+    });
+  }
+
+  /* ======================================================================== *
+   * SPRINT 2 (B) -- BASE REARRANGE  (drag a building to a new grid tile)
+   *   placeOK() = AK_COLLISION.validPlacement (door clear + footprint off
+   *   obstacles) + an in-bounds clamp + a sibling-overlap guard. commitMove()
+   *   persists into falsy-default p.baseLayout; applyLayout() mirrors the saved
+   *   layout onto the LIVE ZONES building objects (which the hub already draws).
+   * ======================================================================== */
+  var GSTEP = 100;                                   // grid snap (world units inside a 1700x1300 district)
+  function snap(v) { return Math.round(v / GSTEP) * GSTEP; }
+  function zoneObj(ctx, b) { return (b && b._zid && ctx.ZONES[b._zid]) || null; }
+  // candidate footprint overlaps another building in the same zone? (don't stack)
+  function overlapsSibling(zone, b, x, y) {
+    var bs = zone.buildings || [], gap = 12;
+    var ax0 = x - (b.w||0)/2 - gap, ay0 = y - (b.h||0)/2 - gap, ax1 = x + (b.w||0)/2 + gap, ay1 = y + (b.h||0)/2 + gap;
+    for (var i = 0; i < bs.length; i++) { var o = bs[i]; if (o === b) continue;
+      var ox0 = o.x - (o.w||0)/2, oy0 = o.y - (o.h||0)/2, ox1 = o.x + (o.w||0)/2, oy1 = o.y + (o.h||0)/2;
+      if (ax0 < ox1 && ax1 > ox0 && ay0 < oy1 && ay1 > oy0) return true; }
+    return false;
+  }
+  function placeOK(ctx, b, x, y) {
+    var zone = zoneObj(ctx, b); if (!zone) return false;
+    if (x < (b.w||0)/2 + 30 || x > ZW - (b.w||0)/2 - 30) return false;       // keep footprint inside the district
+    if (y < (b.h||0)/2 + 24 || y > ZH - (b.h||0)/2 - 48) return false;       // leave room for the door (y + h/2)
+    var cand = { id: b.id, x: x, y: y, w: b.w, h: b.h };
+    if (!(global.AK_COLLISION && global.AK_COLLISION.validPlacement(zone, cand))) return false;  // door clear + off obstacles
+    if (overlapsSibling(zone, b, x, y)) return false;                        // not on top of another building
+    return true;
+  }
+  // apply the saved p.baseLayout onto the LIVE ZONES building objects (idempotent;
+  // captures each building's authored home the first time so a reset can restore it).
+  function applyLayout(ctx) {
+    var p = profile(ctx), layout = (p && p.baseLayout) || {};
+    var Z = ctx.ZONES;
+    for (var k in Z) { if (!Z.hasOwnProperty(k)) continue; var bs = Z[k].buildings || [];
+      for (var i = 0; i < bs.length; i++) { var b = bs[i];
+        b._zid = Z[k].id;
+        if (b._hx == null) { b._hx = b.x; b._hy = b.y; }                     // authored home, captured once
+        var L = layout[b.id];
+        if (L && typeof L.x === 'number' && typeof L.y === 'number') { b.x = L.x; b.y = L.y; }
+        else { b.x = b._hx; b.y = b._hy; }
+      }
+    }
+  }
+  function commitMove(ctx, b) {
+    if (!ctx.econ) return;
+    try { ctx.econ.mutateProfile(function (p) {
+      if (!p.baseLayout || typeof p.baseLayout !== 'object') p.baseLayout = {};
+      p.baseLayout[b.id] = { x: Math.round(b.x), y: Math.round(b.y) };
+    }); } catch (_) {}
+  }
+  function resetLayout(ctx) {
+    if (ctx.econ) { try { ctx.econ.mutateProfile(function (p) { p.baseLayout = {}; }); } catch (_) {} }
+    applyLayout(ctx);
+  }
+  // screen -> a building's home-district LOCAL world coords (0..ZW, 0..ZH)
+  function screenToLocal(b, px, py) {
+    var z = WM.ctx.ZONES[b._zid]; if (!z) return null;
+    var t = tileXY(z.gx, z.gy), X = sx(t.x), Y = sy(t.y), S = TILE * WM.scale;
+    if (S <= 0) return null;
+    return { x: (px - X) / S * ZW, y: (py - Y) / S * ZH };
+  }
+  // hit-test a building chip in the zoom-out view (screen space). null = miss.
+  function buildingAt(ctx, px, py) {
+    var Z = ctx.ZONES;
+    for (var k in Z) { if (!Z.hasOwnProperty(k)) continue; var z = Z[k]; if (z.locked) continue;
+      var t = tileXY(z.gx, z.gy), X = sx(t.x), Y = sy(t.y), S = TILE * WM.scale;
+      var bs = z.buildings || [];
+      for (var i = 0; i < bs.length; i++) { var b = bs[i];
+        var bw = (b.id === 'ARENA' ? 0.20 : 0.155) * S, hh = Math.max(bw / 2, 14);
+        var bx = X + (b.x / ZW) * S, by = Y + (b.y / ZH) * S;
+        if (px >= bx - hh && px <= bx + hh && py >= by - hh && py <= by + hh) { b._zid = z.id; return b; }
+      }
+    }
+    return null;
+  }
+
+  // ---- (A) rival RAID pins ringed around the player's base (HOME_TURF tile) ----
+  function drawRaidPins(g, ctx) {
+    WM.pins = [];
+    if (WM.editMode) return;                          // hidden while rearranging (no tap conflict)
+    var rivals = WM.rivals; if (!rivals || !rivals.length) return;
+    var home = ctx.ZONES.HOME_TURF; if (!home) return;
+    var t = tileXY(home.gx, home.gy);
+    var cxg = t.x + TILE / 2, cyg = t.y + TILE / 2;   // HOME_TURF tile center (GRID space)
+    var ringG = TILE * 0.92, n = rivals.length;
+    for (var i = 0; i < n; i++) {
+      var base = rivals[i];
+      var ang = -Math.PI / 2 + (i / n) * Math.PI * 2;  // start at top, spread evenly
+      var px = sx(cxg + Math.cos(ang) * ringG), py = sy(cyg + Math.sin(ang) * ringG);
+      var pr = clamp(15 * WM.scale, 11, 20), ac = base.accent || RED;
+      // tether line back to the base
+      g.save(); g.strokeStyle = 'rgba(192,57,43,.32)'; g.lineWidth = 1; g.setLineDash([4, 4]);
+      g.beginPath(); g.moveTo(sx(cxg), sy(cyg)); g.lineTo(px, py); g.stroke(); g.restore();
+      // skull chip
+      g.save();
+      g.beginPath(); g.arc(px, py, pr, 0, 7); g.fillStyle = 'rgba(10,8,10,.92)'; g.fill();
+      g.lineWidth = 2; g.strokeStyle = ac; g.shadowColor = ac; g.shadowBlur = 8; g.stroke();
+      g.restore();
+      label(g, '☠', px, py + 0.5, clamp(pr, 10, 18), ac, '900');
+      // tier stars + crew-name tag
+      var st = ''; for (var s = 0; s < (base.tier || 1); s++) st += '★';
+      label(g, st, px, py - pr - 6 * WM.scale, clamp(8 * WM.scale, 7, 11), GOLD, '800');
+      var nm = String(base.name || 'Rival Crew');
+      g.save(); g.font = '800 ' + clamp(9 * WM.scale, 8, 11) + 'px Inter,system-ui'; g.textAlign = 'center';
+      var tw = g.measureText(nm).width + 10;
+      g.fillStyle = 'rgba(8,8,12,.82)'; rr(g, px - tw / 2, py + pr + 3 * WM.scale, tw, 14 * WM.scale, 4); g.fill();
+      g.restore();
+      label(g, nm, px, py + pr + 10 * WM.scale, clamp(9 * WM.scale, 8, 11), '#f3d9a8', '800');
+      WM.pins.push({ x: px, y: py, r: pr + 8, base: base });
+    }
+  }
+
+  // ---- (B) live valid/invalid feedback for the building being dragged ----------
+  function drawDragFx(g, ctx) {
+    if (!WM.drag) return;
+    var b = WM.drag.b, z = ctx.ZONES[b._zid]; if (!z) return;
+    var t = tileXY(z.gx, z.gy), X = sx(t.x), Y = sy(t.y), S = TILE * WM.scale;
+    var nx = snap(b.x), ny = snap(b.y), ok = placeOK(ctx, b, nx, ny);
+    var bw = (b.id === 'ARENA' ? 0.20 : 0.155) * S;
+    // snapped ghost target
+    var gx = X + (nx / ZW) * S, gy = Y + (ny / ZH) * S, col = ok ? '#7CFFB0' : '#ff5a4d';
+    g.save(); g.globalAlpha = .55; g.fillStyle = ok ? 'rgba(124,255,176,.22)' : 'rgba(255,90,77,.20)';
+    rr(g, gx - bw / 2, gy - bw / 2, bw, bw, 6 * WM.scale); g.fill(); g.restore();
+    // dashed ring on the dragged chip
+    var bx = X + (b.x / ZW) * S, by = Y + (b.y / ZH) * S;
+    g.save(); rr(g, bx - bw / 2 - 4, by - bw / 2 - 4, bw + 8, bw + 8, 8 * WM.scale);
+    g.lineWidth = 3; g.setLineDash([7, 5]); g.strokeStyle = col; g.shadowColor = col; g.shadowBlur = 10; g.stroke();
+    g.restore();
   }
 
   function rr(g, x, y, w, h, rad) {
@@ -365,18 +635,37 @@
     WM.btns = [];
     // top title
     g.fillStyle = 'rgba(8,8,12,.78)'; g.fillRect(0, 0, vp.w, 50);
-    label(g, '🗺️  YOUR TERRITORY', 14, 25, 15, GOLD, '900', 'left');
-    label(g, liveTerritoryCount(ctx) + ' districts held', 14, 41, 11, DIM, '700', 'left');
+    label(g, WM.editMode ? '🛠️  REBUILD YOUR BASE' : '🗺️  YOUR TERRITORY', 14, 25, 15, GOLD, '900', 'left');
+    label(g, WM.editMode ? 'drag a building to a new spot · snaps to grid'
+      : (liveTerritoryCount(ctx) + ' districts held'), 14, 41, 11, DIM, '700', 'left');
     // close (x)
     var cb = { id:'close', x: vp.w - 50, y: 8, w: 38, h: 34 };
     g.fillStyle = 'rgba(255,255,255,.06)'; rr(g, cb.x, cb.y, cb.w, cb.h, 9); g.fill();
     label(g, '×', cb.x + cb.w / 2, cb.y + cb.h / 2, 24, '#ccc', '700'); WM.btns.push(cb);
+    // (B) REARRANGE / LOCK IN toggle (top bar, left of close)
+    var eb = { id:'edit', x: vp.w - 50 - 12 - 116, y: 8, w: 116, h: 34 };
+    g.save(); rr(g, eb.x, eb.y, eb.w, eb.h, 9);
+    if (WM.editMode) { var grd0 = g.createLinearGradient(0, eb.y, 0, eb.y + eb.h); grd0.addColorStop(0, GOLD); grd0.addColorStop(1, GOLD_D); g.fillStyle = grd0; g.fill(); }
+    else { g.fillStyle = 'rgba(201,168,76,.10)'; g.fill(); g.strokeStyle = 'rgba(201,168,76,.5)'; g.lineWidth = 1; g.stroke(); }
+    g.restore();
+    label(g, WM.editMode ? '✓ LOCK IN' : '✛ REARRANGE', eb.x + eb.w / 2, eb.y + eb.h / 2, 12, WM.editMode ? '#15110a' : GOLD, '900'); WM.btns.push(eb);
 
     // bottom action bar
-    var z = WM.sel ? ctx.ZONES[WM.sel] : null;
     var barY = vp.h - 78;
     g.fillStyle = 'rgba(8,8,12,.9)'; g.fillRect(0, barY, vp.w, 78);
     g.strokeStyle = 'rgba(201,168,76,.25)'; g.lineWidth = 1; g.beginPath(); g.moveTo(0, barY); g.lineTo(vp.w, barY); g.stroke();
+
+    if (WM.editMode) {                                  // (B) edit-mode bar
+      label(g, 'EDIT MODE', 16, barY + 22, 14, GOLD, '800', 'left');
+      label(g, 'Buildings stay in their district. Green = OK, red = blocked.', 16, barY + 44, 11, DIM, '700', 'left');
+      var rsb = { id:'reset', x: vp.w - 150, y: barY + 18, w: 134, h: 42 };
+      g.save(); rr(g, rsb.x, rsb.y, rsb.w, rsb.h, 11); g.fillStyle = 'rgba(255,255,255,.05)';
+      g.fill(); g.strokeStyle = 'rgba(201,168,76,.4)'; g.lineWidth = 1; g.stroke(); g.restore();
+      label(g, '↺ RESET LAYOUT', rsb.x + rsb.w / 2, barY + 39, 11, GOLD, '800'); WM.btns.push(rsb);
+      return;
+    }
+
+    var z = WM.sel ? ctx.ZONES[WM.sel] : null;
     if (z) {
       label(g, z.name, 16, barY + 22, 14, z.locked ? '#9a9aa6' : GOLD, '800', 'left');
       var sub = z.locked ? (z.barrierLabel || 'SEALED -- soon')
@@ -392,12 +681,15 @@
         label(g, 'YOU ARE HERE', vp.w - 16, barY + 36, 12, GOLD, '800', 'right');
       }
     } else {
-      label(g, 'Tap a district to inspect it. Drag to pan, pinch to zoom.', 16, barY + 26, 12, DIM, '700', 'left');
-      // rivals stub (later sprint -- server)
+      label(g, 'Tap a district to inspect · drag to pan, pinch to zoom', 16, barY + 26, 12, DIM, '700', 'left');
+      // (A) SCOUT RIVALS -> raid.js war map if loaded, else a heads-up
+      var live = !!(global.AKRaid && global.AKRaid.warMap);
       var rb = { id:'rivals', x: vp.w - 150, y: barY + 18, w: 134, h: 42 };
-      g.save(); rr(g, rb.x, rb.y, rb.w, rb.h, 11); g.fillStyle = 'rgba(255,255,255,.05)';
-      g.fill(); g.strokeStyle = 'rgba(201,168,76,.3)'; g.lineWidth = 1; g.stroke(); g.restore();
-      label(g, '🔒 SCOUT RIVALS', rb.x + rb.w / 2, barY + 39, 11, '#9a9aa6', '800'); WM.btns.push(rb);
+      g.save(); rr(g, rb.x, rb.y, rb.w, rb.h, 11);
+      if (live) { g.fillStyle = 'rgba(192,57,43,.18)'; g.fill(); g.strokeStyle = 'rgba(192,57,43,.6)'; g.lineWidth = 1.2; g.stroke(); }
+      else { g.fillStyle = 'rgba(255,255,255,.05)'; g.fill(); g.strokeStyle = 'rgba(201,168,76,.3)'; g.lineWidth = 1; g.stroke(); }
+      g.restore();
+      label(g, '☠ SCOUT RIVALS', rb.x + rb.w / 2, barY + 39, 11, live ? '#f3a0a0' : GOLD, '800'); WM.btns.push(rb);
     }
   }
 
@@ -417,6 +709,8 @@
     // districts
     var Z = WM.ctx.ZONES;
     for (var k in Z) if (Z.hasOwnProperty(k)) { try { drawDistrict(g, ctx, Z[k]); } catch (_e) {} }
+    try { drawRaidPins(g, ctx); } catch (_e1) {}      // (A) rival pins around HOME_TURF
+    try { drawDragFx(g, ctx); } catch (_e2) {}        // (B) drag valid/invalid feedback
     drawHud(g, vp, ctx);
   }
 
@@ -425,6 +719,12 @@
   function onPointer(e, api) {
     var vp = api.vp;
     if (e.type === 'pointerdown') {
+      if (WM.drag) return;                              // (B) already dragging -> ignore extra fingers
+      // (B) rearrange: grab a building (instead of panning) when edit mode is on
+      if (WM.editMode && ptrList().length === 0) {
+        var hb = buildingAt(WM.ctx, e.clientX, e.clientY);
+        if (hb) { WM.drag = { b: hb, id: e.pointerId, x0: hb.x, y0: hb.y }; WM.panMoved = 0; return; }
+      }
       WM.ptrs[e.pointerId] = { x: e.clientX, y: e.clientY, x0: e.clientX, y0: e.clientY };
       WM.panMoved = 0;
       var pl = ptrList();
@@ -432,6 +732,13 @@
         mx: (pl[0].x + pl[1].x) / 2, my: (pl[0].y + pl[1].y) / 2,
         wx: ((pl[0].x + pl[1].x) / 2 - WM.cam.x) / WM.scale, wy: ((pl[0].y + pl[1].y) / 2 - WM.cam.y) / WM.scale };
     } else if (e.type === 'pointermove') {
+      if (WM.drag && e.pointerId === WM.drag.id) {      // (B) drag the building under the finger
+        var loc = screenToLocal(WM.drag.b, e.clientX, e.clientY);
+        if (loc) { var bb = WM.drag.b;
+          bb.x = clamp(loc.x, (bb.w||0)/2 + 20, ZW - (bb.w||0)/2 - 20);
+          bb.y = clamp(loc.y, (bb.h||0)/2 + 16, ZH - (bb.h||0)/2 - 40); }
+        return;
+      }
       var p = WM.ptrs[e.pointerId]; if (!p) return;
       var pdx = e.clientX - p.x, pdy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
       var pl2 = ptrList();
@@ -446,6 +753,12 @@
         WM.cam.x += pdx; WM.cam.y += pdy; WM.panMoved += Math.hypot(pdx, pdy); clampCam(vp);
       }
     } else if (e.type === 'pointerup' || e.type === 'pointercancel') {
+      if (WM.drag && e.pointerId === WM.drag.id) {       // (B) drop: snap + validate + persist (or revert)
+        var b = WM.drag.b, nx = snap(b.x), ny = snap(b.y);
+        if (placeOK(WM.ctx, b, nx, ny)) { b.x = nx; b.y = ny; commitMove(WM.ctx, b); WM.ctx.showBanner((b.label || 'Building') + ' moved.', 1.0); }
+        else { b.x = WM.drag.x0; b.y = WM.drag.y0; WM.ctx.showBanner("Can't build there -- blocked.", 1.3); }
+        WM.drag = null; return;
+      }
       var wasSingle = ptrList().length === 1, moved = WM.panMoved;
       delete WM.ptrs[e.pointerId]; if (ptrList().length < 2) WM.pinch = null;
       if (wasSingle && moved < 9) handleTap(e.clientX, e.clientY, api);
@@ -459,9 +772,27 @@
       var b = WM.btns[i];
       if (px >= b.x && px <= b.x + b.w && py >= b.y && py <= b.y + b.h) {
         if (b.id === 'close') { api.close(); return; }
-        if (b.id === 'rivals') { ctx.showBanner('Rival recon unlocks with the war update.', 1.6); return; }
+        if (b.id === 'edit') { WM.editMode = !WM.editMode; WM.drag = null;
+          ctx.showBanner(WM.editMode ? 'Rearrange mode -- drag your buildings.' : 'Base locked in.', WM.editMode ? 1.6 : 1.1); return; }
+        if (b.id === 'reset') { resetLayout(ctx); ctx.showBanner('Base layout reset to default.', 1.4); return; }
+        if (b.id === 'rivals') {
+          if (global.AKRaid && global.AKRaid.warMap) api.close({ warmap: true });
+          else ctx.showBanner('Rival recon comes online with the war update.', 1.8);
+          return;
+        }
         if (b.id === 'dive') { api.close({ dive: b.z }); return; }
         return;
+      }
+    }
+    // (A) RAID pins (not while rearranging)
+    if (!WM.editMode) {
+      for (var pi = 0; pi < WM.pins.length; pi++) {
+        var pn = WM.pins[pi];
+        if (Math.hypot(px - pn.x, py - pn.y) <= pn.r) {
+          if (global.AKRaid && global.AKRaid.warMap) api.close({ warmap: true });  // reuse raid.js war map
+          else api.close({ raid: pn.base });                                       // else launch raid straight
+          return;
+        }
       }
     }
     // district hit-test (GRID space)
@@ -476,6 +807,9 @@
 
   function openMap(ctx) {
     WM.ctx = ctx; WM.sel = ctx.zoneId; WM.ptrs = {}; WM.pinch = null;
+    WM.editMode = false; WM.drag = null; WM.pins = [];
+    try { applyLayout(ctx); } catch (_e0) {}    // mirror saved p.baseLayout onto the live building objects
+    fetchRivals(ctx);                           // (A) kick off the ak-raid targets fetch (degrades to local)
     var vp0 = { w: (typeof innerWidth !== 'undefined' ? innerWidth : 360), h: (typeof innerHeight !== 'undefined' ? innerHeight : 640) };
     fitToScreen(vp0);
     try {
@@ -485,9 +819,13 @@
         onPointer: function (e, api) { try { onPointer(e, api); } catch (_e) {} },
         onClose: function (res) {
           WM.ov = null;
-          if (res && res.dive && global.enterZone) { // host's own dive_in transition (S3); state is IN_ZONE again here
-            try { global.enterZone(res.dive, { x: ZW / 2, y: ZH / 2 }); } catch (_e) {}
+          if (WM.drag) { WM.drag.b.x = WM.drag.x0; WM.drag.b.y = WM.drag.y0; WM.drag = null; } // revert an in-flight drag
+          if (!res) return;
+          if (res.dive && global.enterZone) { // host's own dive_in transition (S3); state is IN_ZONE again here
+            try { global.enterZone(res.dive, { x: ZW / 2, y: ZH / 2 }); } catch (_e) {} return;
           }
+          if (res.warmap) { try { if (global.AKRaid && global.AKRaid.warMap) global.AKRaid.warMap(); } catch (_e) {} return; }
+          if (res.raid)   { try { raidFrom(ctx, res.raid); } catch (_e) {} return; }
         }
       });
     } catch (_e) { WM.ov = null; }
@@ -521,6 +859,9 @@
     id: 'worldmap',
     init: function (ctx) {
       WM.ctx = ctx;
+      // (B) mirror the saved base layout onto the live ZONES building objects so the
+      // hub (index.html's frozen draw()) renders the rearranged base from frame 1.
+      try { applyLayout(ctx); } catch (_e0) {}
       try { mountButton(ctx); } catch (_e) {}
       // warm the painted-art cache so the first open paints instantly
       try {

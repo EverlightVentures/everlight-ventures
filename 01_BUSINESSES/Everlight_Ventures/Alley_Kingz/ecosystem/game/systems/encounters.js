@@ -168,6 +168,13 @@
     }
   }
   function spawnWild(ctx) {
+    if (global.AKKarma && global.AKKarma.rollEncounter) {  // KARMA HOOK (deep-dive Part 3): friendly/hostile branch
+      var _ke = global.AKKarma.rollEncounter(ctx.zoneId, ctx);
+      if (_ke && _ke.kind !== 'hostile') {
+        if (_ke.kind !== 'nothing') { try { global.AKKarma.spawnFriendly(ctx.zoneId, ctx, _ke); } catch (_e) {} }
+        return;
+      }
+    }
     var card = pickCard(); if (!card) return;
     var d = derive(card);
     var WW = ctx.world.WORLD_W, WH = ctx.world.WORLD_H, x = 0, y = 0, ok = false, tries = 0;
