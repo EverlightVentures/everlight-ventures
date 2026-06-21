@@ -1,6 +1,6 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
-import type { AgentId, AgentStatus, TrendDirection } from "@/types";
+import type { AgentId, AgentStatus } from "@/types";
 
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
@@ -19,12 +19,6 @@ export function formatRelativeTime(date: Date): string {
   if (diffHr < 24) return `${diffHr}h ago`;
   if (diffDay < 7) return `${diffDay}d ago`;
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-export function getTrendColor(trend: TrendDirection, inverted = false): string {
-  if (trend === "neutral") return "text-[#A0A0B8]";
-  const isPositive = inverted ? trend === "down" : trend === "up";
-  return isPositive ? "text-emerald-400" : "text-red-400";
 }
 
 export function getTrendSign(change: number): string {
