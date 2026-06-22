@@ -1265,14 +1265,49 @@ function showLoadingState() {
     `;
 }
 
-function showNoResults() {
-    productsBody.innerHTML = `
-        <div class="products-state">
-            <span class="products-state-icon">📭</span>
-            <h3>No Products Found</h3>
-            <p>Try a different search term</p>
-        </div>
-    `;
+function showNoResults(query) {
+    // Built with safe DOM methods (textContent) so the typed query can never inject HTML.
+    const q = (query || '').trim();
+    const wrap = document.createElement('div');
+    wrap.className = 'products-state';
+    const icon = document.createElement('span');
+    icon.className = 'products-state-icon';
+    icon.textContent = '📭';
+    const h3 = document.createElement('h3');
+    h3.textContent = 'No Products Found';
+    const p = document.createElement('p');
+    p.textContent = 'Not in the catalog? Add it on the spot and keep selling.';
+    const btn = document.createElement('button');
+    btn.textContent = q ? ('+ Quick Add "' + q + '"') : '+ Quick Add item';
+    btn.style.cssText = 'margin-top:14px;padding:12px 20px;background:#c9a84c;color:#111;border:0;border-radius:8px;font-weight:700;font-size:15px;cursor:pointer';
+    btn.addEventListener('click', () => quickAddPrompt(q));
+    wrap.append(icon, h3, p, btn);
+    productsBody.replaceChildren(wrap);
+}
+
+// Cashier "add on the spot": creates a provisional QA- item, then reuses the
+// normal add-to-cart path. Reconcilable later at /inventory/reconcile.
+async function quickAddPrompt(prefill) {
+    const name = prompt('Item name:', prefill || '');
+    if (!name || !name.trim()) return;
+    const priceStr = prompt('Price for "' + name.trim() + '":', '');
+    if (priceStr === null) return;
+    const price = parseFloat(priceStr);
+    if (!price || price <= 0) { alert('Enter a price greater than 0.'); return; }
+    try {
+        const res = await fetch('/sales/quick_add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: name.trim(), price: price })
+        });
+        const data = await res.json();
+        if (!data.ok) { alert(data.error || 'Quick add failed'); return; }
+        await addItem(data.sku);                 // reuse the proven add-to-cart flow
+        if (searchInput) { searchInput.value = ''; searchInput.focus(); }
+    } catch (err) {
+        console.error('Quick add error:', err);
+        alert('Quick add failed. Try again.');
+    }
 }
 
 async function doSearch(query, category = '') {
@@ -1281,7 +1316,7 @@ async function doSearch(query, category = '') {
         const data = await res.json();
 
         if (!data.items || data.items.length === 0) {
-            showNoResults();
+            showNoResults(query);
             searchResults.innerHTML = '';
             return;
         }

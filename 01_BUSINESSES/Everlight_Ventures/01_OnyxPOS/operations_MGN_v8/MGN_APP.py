@@ -210,6 +210,9 @@ from POS_CORE import (
     record_sale,
     run_payroll,
     search_items,
+    quick_add_item,
+    get_unreconciled_quickadds,
+    reconcile_quickadd,
     set_data_dir,
     start_break,
     update_csv_row,
@@ -671,11 +674,13 @@ def send_onboarding_email(to_email: str, business_name: str) -> bool:
 
 
 def send_eod_report_email(summary_text: str,
-                          subject: str = "Mountain Gardens POS -- End of Day Report") -> bool:
-    """Email the end-of-day close-out summary. Best-effort (never raises).
+                          subject: str = "Mountain Gardens POS -- End of Day Report",
+                          attachments=None) -> bool:
+    """Email the end-of-day close-out summary + optional CSV attachments.
 
     Recipients come from the MGN_EOD_EMAIL env var (comma-separated; defaults to
-    the owner). Returns True only if the message was actually sent.
+    the owner -- set it to 'owner@...,adam@...' for multiple). Best-effort (never
+    raises). Returns True only if the message was actually sent.
     """
     host = os.getenv("SMTP_HOST", "").strip()
     port = int(os.getenv("SMTP_PORT", "587"))
@@ -690,6 +695,14 @@ def send_eod_report_email(summary_text: str,
     msg["From"] = mail_from
     msg["To"] = ", ".join(recipients)
     msg.set_content(summary_text)
+    for p in (attachments or []):
+        try:
+            if p and os.path.exists(p):
+                with open(p, "rb") as fh:
+                    msg.add_attachment(fh.read(), maintype="text", subtype="csv",
+                                       filename=os.path.basename(p))
+        except Exception:
+            pass
     try:
         with smtplib.SMTP(host, port) as s:
             s.starttls()
@@ -3199,6 +3212,82 @@ def sales_item_details(sku):
             "taxable": item.get("Taxable", "Y") == "Y",
         }
     )
+
+
+@app.route("/sales/quick_add", methods=["POST"])
+@login_required
+def sales_quick_add():
+    """Cashier adds an item on the spot (name + price) and it drops into the cart.
+    Persists as a 'QA-' provisional item so a manager can reconcile it at EOD."""
+    data = request.get_json(silent=True) or {}
+    name = (data.get("name") or "").strip()
+    try:
+        price = float(data.get("price") or 0)
+    except (TypeError, ValueError):
+        price = 0.0
+    if not name or price <= 0:
+        return jsonify({"ok": False, "error": "Name and a price greater than 0 are required."}), 400
+    sku, row = quick_add_item(
+        name, price,
+        category=(data.get("category") or "Quick-Add"),
+        size=(data.get("size") or ""),
+        emp_id=session.get("employee_id", ""),
+        emp_name=session.get("employee_name", ""),
+    )
+    # mirror /sales/item/<sku> so the front-end drops it straight into the cart
+    return jsonify({"ok": True, "success": True, "sku": sku, "name": row["Item_Name"],
+                    "price": price, "category": row["Category"], "taxable": True,
+                    "qty_on_hand": 0, "on_hand": 0, "stock": 0})
+
+
+RECONCILE_PAGE = """<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Reconcile Quick-Add Items</title><style>
+ body{font-family:system-ui,Arial,sans-serif;margin:0;background:#0f1115;color:#e8e8e8}
+ .wrap{max-width:960px;margin:0 auto;padding:20px}.muted{color:#9aa6b2}
+ h1{font-size:20px;color:#e8c55a}a{color:#c9a84c}
+ input{padding:7px;background:#161a22;color:#e8e8e8;border:1px solid #2a2f3a;border-radius:6px}
+ button{padding:7px 14px;background:#c9a84c;color:#111;border:0;border-radius:6px;font-weight:600;cursor:pointer}
+ .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:12px;border-bottom:1px solid #232833}
+ .empty{padding:48px;text-align:center;color:#9aa6b2}
+</style></head><body><div class="wrap">
+<h1>End-of-Day Reconciliation</h1>
+<p class="muted">Map each on-the-spot (quick-add) item rung today to the real catalog product, so sold items stay aligned with inventory. <a href="/sales">&larr; back to register</a></p>
+{% with msgs = get_flashed_messages(with_categories=true) %}{% for cat,m in msgs %}<p class="muted">- {{ m }}</p>{% endfor %}{% endwith %}
+{% if not qas %}<div class="empty">No quick-add items to reconcile. &#10003;</div>{% else %}
+<datalist id="catalog">{% for c in catalog %}<option value="{{c.sku}}">{{c.name}} ({{c.sku}})</option>{% endfor %}</datalist>
+{% for q in qas %}
+<form class="row" method="post" action="{{ url_for('inventory_reconcile_apply') }}">
+  <div style="flex:1;min-width:220px"><b>{{ q.Item_Name }}</b> <span class="muted">${{ q.Default_Price }} &middot; {{ q.SKU }}</span></div>
+  <input type="hidden" name="qa_sku" value="{{ q.SKU }}">
+  <input list="catalog" name="canonical_sku" placeholder="map to product / SKU" required style="width:220px">
+  <input name="reason" placeholder="note (optional)" style="width:150px">
+  <button type="submit">Map</button>
+</form>{% endfor %}{% endif %}
+</div></body></html>"""
+
+
+@app.route("/inventory/reconcile")
+@manager_required
+def inventory_reconcile():
+    from flask import render_template_string
+    qas = get_unreconciled_quickadds()
+    catalog = [{"sku": i.get("SKU", ""), "name": i.get("Item_Name", "")}
+               for i in get_all_items() if not str(i.get("SKU", "")).startswith("QA-")]
+    return render_template_string(RECONCILE_PAGE, qas=qas, catalog=catalog)
+
+
+@app.route("/inventory/reconcile/apply", methods=["POST"])
+@manager_required
+def inventory_reconcile_apply():
+    ok, msg = reconcile_quickadd(
+        (request.form.get("qa_sku") or "").strip(),
+        (request.form.get("canonical_sku") or "").strip(),
+        mapped_by=session.get("employee_id", ""),
+        reason=(request.form.get("reason") or "").strip(),
+    )
+    flash(msg, "success" if ok else "error")
+    return redirect(url_for("inventory_reconcile"))
 
 
 @app.route("/sales/complete", methods=["POST"])
@@ -7434,8 +7523,7 @@ def api_till_close():
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             if not file_exists:
                 writer.writeheader()
-            writer.writerow(
-                {
+            closeout_row = {
                     "date": date.today().strftime("%Y-%m-%d"),
                     "time": datetime.now().strftime("%H:%M:%S"),
                     "employee": session.get("employee_name", "Unknown"),
@@ -7449,8 +7537,8 @@ def api_till_close():
                     "counted": counted,
                     "variance": variance,
                     **denominations,
-                }
-            )
+            }
+            writer.writerow(closeout_row)
         # End-of-day confirmation: tamper-evident audit line + email the report.
         emailed = False
         try:
@@ -7470,7 +7558,45 @@ def api_till_close():
             "-- Day totals --\n"
             f"Transactions:  {day_summary.get('total_transactions','')}\n"
             f"Revenue:       ${float(day_summary.get('total_revenue',0) or 0):.2f}\n"
+            f"\nQuick-add items awaiting reconciliation: {len(get_unreconciled_quickadds())}\n"
+            "Reconcile them at /inventory/reconcile\n"
         )
+        # Export the day's files locally (Daily_Reports/<date>/) + attach to the email,
+        # so the close-out is saved AND viewable regardless of whether email sends.
+        attach_paths = []
+        try:
+            day_str = date.today().strftime("%Y-%m-%d")
+            reports_dir = os.path.join(DATA_DIR, "Daily_Reports", day_str)
+            os.makedirs(reports_dir, exist_ok=True)
+            # (a) the day's sales log CSV
+            try:
+                src = _find_saleslog_for_date(date.today())
+            except Exception:
+                src = None
+            if src and os.path.exists(src):
+                dst = os.path.join(reports_dir, os.path.basename(src))
+                with open(src, "rb") as _s, open(dst, "wb") as _d:
+                    _d.write(_s.read())
+                attach_paths.append(dst)
+            # (b) daily summary flattened to CSV
+            summary_csv = os.path.join(reports_dir, f"{day_str}_DailySummary.csv")
+            with open(summary_csv, "w", newline="", encoding="utf-8") as sf:
+                w = csv.writer(sf)
+                w.writerow(["Metric", "Value"])
+                for k, v in (day_summary or {}).items():
+                    if isinstance(v, (dict, list)):
+                        v = json.dumps(v, ensure_ascii=False)
+                    w.writerow([k, v])
+            attach_paths.append(summary_csv)
+            # (c) this close-out row as its own CSV
+            closeout_csv = os.path.join(reports_dir, f"{day_str}_Closeout.csv")
+            with open(closeout_csv, "w", newline="", encoding="utf-8") as cf:
+                cw = csv.DictWriter(cf, fieldnames=fieldnames)
+                cw.writeheader()
+                cw.writerow(closeout_row)
+            attach_paths.append(closeout_csv)
+        except Exception:
+            pass
         try:
             from POS_CORE import append_audit_event
             append_audit_event("till_close", {
@@ -7481,7 +7607,7 @@ def api_till_close():
         except Exception:
             pass
         try:
-            emailed = send_eod_report_email(report_text)
+            emailed = send_eod_report_email(report_text, attachments=attach_paths)
         except Exception:
             emailed = False
         return jsonify(
