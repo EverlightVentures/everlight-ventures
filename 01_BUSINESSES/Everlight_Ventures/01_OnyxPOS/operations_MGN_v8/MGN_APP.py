@@ -667,6 +667,36 @@ def send_onboarding_email(to_email: str, business_name: str) -> bool:
     return True
 
 
+def send_eod_report_email(summary_text: str,
+                          subject: str = "Mountain Gardens POS -- End of Day Report") -> bool:
+    """Email the end-of-day close-out summary. Best-effort (never raises).
+
+    Recipients come from the MGN_EOD_EMAIL env var (comma-separated; defaults to
+    the owner). Returns True only if the message was actually sent.
+    """
+    host = os.getenv("SMTP_HOST", "").strip()
+    port = int(os.getenv("SMTP_PORT", "587"))
+    user = os.getenv("SMTP_USER", "").strip()
+    pw = os.getenv("SMTP_PASS", "").strip()
+    mail_from = os.getenv("SMTP_FROM", user).strip()
+    recipients = [a.strip() for a in os.getenv("MGN_EOD_EMAIL", "1m.rich.gee@gmail.com").split(",") if a.strip()]
+    if not host or not user or not pw or not recipients:
+        return False
+    msg = EmailMessage()
+    msg["Subject"] = subject
+    msg["From"] = mail_from
+    msg["To"] = ", ".join(recipients)
+    msg.set_content(summary_text)
+    try:
+        with smtplib.SMTP(host, port) as s:
+            s.starttls()
+            s.login(user, pw)
+            s.send_message(msg)
+        return True
+    except Exception:
+        return False
+
+
 def find_tenant_by_referral(code: str):
     code = (code or "").strip()
     if not code:
@@ -5981,9 +6011,8 @@ def update_pay_config():
 @app.route("/payroll/reports")
 @manager_required
 def payroll_reports():
-    """Payroll reports placeholder"""
-    flash("Reports feature coming soon!", "info")
-    return redirect(url_for("payroll_dashboard"))
+    """Payroll reports -> hours export (Generic / QuickBooks / Shopify)."""
+    return redirect(url_for("payroll_export_hours", format=request.args.get("format", "generic")))
 
 
 @app.route("/payroll/time-admin")
@@ -6442,6 +6471,11 @@ def run_payroll():
         return redirect(url_for("payroll_dashboard"))
 
     if request.method == "POST":
+        # Payroll lock: a PROCESSED period must not be silently re-run (double-pay).
+        if str(current_period.get("Status", "")).upper() == "PROCESSED" and request.form.get("force") != "1":
+            flash("This pay period is already PROCESSED and is locked. Re-running would "
+                  "double-pay employees -- a manager override (force) is required.", "error")
+            return redirect(url_for("payroll_dashboard"))
         try:
             start_date = current_period.get("Start_Date", "")
             end_date = current_period.get("End_Date", "")
@@ -6575,6 +6609,15 @@ def run_payroll():
                 f"Payroll processed for {processed_count} employees (CA compliant)!",
                 "success",
             )
+            try:
+                from POS_CORE import append_audit_event
+                append_audit_event("payroll_run", {
+                    "period_id": period_id,
+                    "run_by": session.get("employee_id", ""),
+                    "employees": processed_count,
+                })
+            except Exception:
+                pass
             return redirect(url_for("payroll_dashboard"))
 
         except Exception as e:
@@ -6584,6 +6627,81 @@ def run_payroll():
             traceback.print_exc()
 
     return render_template("payroll/run_payroll.html", period=current_period)
+
+
+@app.route("/payroll/export-hours")
+@manager_required
+def payroll_export_hours():
+    """Export a pay period's hours as CSV for a third-party payroll provider.
+
+    Query params: ?period_id=<id> (default: current period),
+                  ?format=generic|quickbooks|shopify (default: generic).
+    Read-only -- reuses the same hour math as the dashboard, writes nothing.
+    """
+    import io
+    from flask import Response
+    fmt = (request.args.get("format", "generic") or "generic").lower()
+    period_id = request.args.get("period_id", "")
+
+    periods = get_all_pay_periods()
+    period = None
+    if period_id:
+        period = next((p for p in periods if str(p.get("Period_ID", "")) == str(period_id)), None)
+    if not period:
+        period = get_current_pay_period()
+    if not period:
+        flash("No pay period available to export.", "error")
+        return redirect(url_for("payroll_dashboard"))
+
+    start_date = period.get("Start_Date", "")
+    end_date = period.get("End_Date", "")
+    pid = period.get("Period_ID", "")
+
+    punches_by_emp = defaultdict(list)
+    for punch in scan_timeclock_files(start_date, end_date):
+        eid = str(punch.get("Employee_ID", ""))
+        if eid:
+            punches_by_emp[eid].append(punch)
+
+    rows = []
+    for emp in get_all_employees():
+        if emp.get("Status") != "Active":
+            continue
+        eid = str(emp.get("Employee_ID", ""))
+        regular, ot, double = calculate_california_hours(punches_by_emp.get(eid, []))
+        if (regular + ot + double) <= 0:
+            continue
+        rows.append({
+            "emp_id": eid, "name": emp.get("Employee_Name", ""),
+            "regular": round(regular, 2), "ot": round(ot, 2),
+            "double": round(double, 2), "rate": get_employee_pay_rate(eid),
+        })
+
+    # CSV-injection guard for any text cell exported to a spreadsheet app.
+    def _g(v):
+        s = "" if v is None else str(v)
+        return ("'" + s) if s[:1] in ("=", "+", "-", "@") else s
+
+    if fmt == "quickbooks":
+        headers = ["Employee", "Regular Hours", "Overtime Hours", "Double Time Hours", "Hourly Rate"]
+        out_rows = [[_g(r["name"]), r["regular"], r["ot"], r["double"], r["rate"]] for r in rows]
+    elif fmt == "shopify":
+        headers = ["Staff Name", "Employee ID", "Regular Hours", "Overtime Hours", "Hourly Rate"]
+        out_rows = [[_g(r["name"]), _g(r["emp_id"]), r["regular"], round(r["ot"] + r["double"], 2), r["rate"]] for r in rows]
+    else:  # generic -- imports into QuickBooks / Gusto / ADP / Paychex
+        headers = ["Employee_ID", "Employee_Name", "Period_Start", "Period_End",
+                   "Regular_Hours", "Overtime_Hours", "Double_Time_Hours", "Hourly_Rate"]
+        out_rows = [[_g(r["emp_id"]), _g(r["name"]), start_date, end_date,
+                     r["regular"], r["ot"], r["double"], r["rate"]] for r in rows]
+
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(headers)
+    w.writerows(out_rows)
+
+    filename = f"hours_{pid or 'current'}_{fmt}.csv"
+    return Response(buf.getvalue(), mimetype="text/csv",
+                    headers={"Content-Disposition": f"attachment; filename={filename}"})
 
 
 def _update_period_status(period_id, new_status):
@@ -7330,12 +7448,46 @@ def api_till_close():
                     **denominations,
                 }
             )
+        # End-of-day confirmation: tamper-evident audit line + email the report.
+        emailed = False
+        try:
+            day_summary = generate_daily_summary()
+        except Exception:
+            day_summary = {}
+        report_text = (
+            "Mountain Gardens POS -- End of Day\n"
+            f"Date: {date.today().strftime('%Y-%m-%d')}  Time: {datetime.now().strftime('%H:%M:%S')}\n"
+            f"Closed by: {session.get('employee_name','Unknown')} (ID {session.get('employee_id','')})\n\n"
+            "-- Till --\n"
+            f"Opening float: ${float(totals.get('opening_float',0) or 0):.2f}\n"
+            f"Cash sales:    ${float(totals.get('cash_sales',0) or 0):.2f}\n"
+            f"Expected cash: ${expected:.2f}\n"
+            f"Counted cash:  ${counted:.2f}\n"
+            f"Variance:      ${variance:+.2f}\n\n"
+            "-- Day totals --\n"
+            f"Transactions:  {day_summary.get('total_transactions','')}\n"
+            f"Revenue:       ${float(day_summary.get('total_revenue',0) or 0):.2f}\n"
+        )
+        try:
+            from POS_CORE import append_audit_event
+            append_audit_event("till_close", {
+                "date": date.today().strftime("%Y-%m-%d"),
+                "closed_by": session.get("employee_id", ""),
+                "expected": expected, "counted": counted, "variance": variance,
+            })
+        except Exception:
+            pass
+        try:
+            emailed = send_eod_report_email(report_text)
+        except Exception:
+            emailed = False
         return jsonify(
             {
                 "success": True,
                 "expected": expected,
                 "counted": counted,
                 "variance": variance,
+                "emailed": emailed,
             }
         )
     except Exception as e:

@@ -31,20 +31,21 @@ Goal (owner): "make them go extra steps to safeguard us" against punch fraud / d
   four punch functions + edit/add/delete.
 - [x] **Sequence guards + server time** -- already present in `clock_in/out/start_break/end_break`
   (reject double clock-in, clock-out without clock-in, etc.; timestamps are server-side). Verified.
-- [ ] **Payroll lock:** before `/payroll/run`, check a period-lock so a PROCESSED period can't be
-  silently re-run/edited; record an immutable run event via `append_audit_event("payroll_run", ...)`
-  (helper already exists -- just call it from the route).
-- [ ] **Hours export route** `GET /payroll/export-hours?period_id=` (manager-only) -> CSV reusing
-  `scan_timeclock_files` + `calculate_california_hours`. Formats: Generic + QuickBooks (+ Shopify).
-  Replaces the current "Reports -- coming soon" stub. (Lives in MGN_APP.py -- verify live on the Dell.)
+- [x] **Payroll lock** -- BUILT. `/payroll/run` refuses a PROCESSED period (would double-pay)
+  unless `force=1`; a successful run records `append_audit_event("payroll_run", ...)`. Verify live on Dell.
+- [x] **Hours export route** -- BUILT. `GET /payroll/export-hours?period_id=&format=generic|quickbooks|shopify`
+  (manager-only), reuses `scan_timeclock_files` + `calculate_california_hours`, CSV-injection-guarded.
+  The old "Reports -- coming soon" `/payroll/reports` stub now redirects to it. Verify live on Dell.
 
-## C. NEXT -- EOD / logout confirmation email (does NOT exist today)
+## C. EOD confirmation email -- BUILT (needs SMTP env on the Dell to actually send)
 
-Audit confirmed: `/logout` only clears the session; `/api/till/close` writes a running log
-(`Till/closeouts.csv`) but **sends no email**, and **no recipient was ever configured**.
-Plan: on day-close, send the close-out summary via the existing `smtplib` pattern
-(`send_onboarding_email` is the template) to `MGN_EOD_EMAIL` (default `1m.rich.gee@gmail.com`,
-comma-separated for multiple). Gated on SMTP env so it can't misfire half-configured.
+Was missing entirely (audit: `/logout` only cleared the session; `/api/till/close` wrote
+`Till/closeouts.csv` but sent no email, no recipient). NOW: on day-close, `/api/till/close`
+writes a tamper-evident `till_close` audit line and emails the close-out summary (till
+reconciliation + day totals) via `send_eod_report_email` to `MGN_EOD_EMAIL`
+(default `1m.rich.gee@gmail.com`, comma-separated for multiple). The response includes `emailed: true/false`.
+Gated on SMTP env so it can't misfire half-configured -- set `SMTP_HOST/USER/PASS` in `.env` on the
+Dell (Gmail app-password) to turn sending on. Verify live on Dell.
 
 ## D. NEXT -- Stripe / Square / Shopify / QuickBooks integration workflow
 
