@@ -9,7 +9,35 @@ fixed + tested, and the prioritized next build. Owner priorities driving this:
 
 ---
 
-## A. DONE this session (committed + tested -- `tools/test_pos_core_integrity.py`, 3/3 green)
+## 0. INVENTORY + SEARCH MADE USABLE (2026-06-22, DONE -- the operational unblock)
+
+A 7-agent audit workflow found why cashiers couldn't search/select ANY product:
+1. **Dead tenant Data_Dir.** `tenants.csv` pointed `Data_Dir` at `/home/mgn/...` (the old Dell
+   path). Every request repointed the data dir there and auto-created an EMPTY `Items.csv` -- the
+   real 989-item catalog was never read. FIX: `get_tenant_data_dir()` falls back to the app's own
+   folder when the path is missing (relocation-proof); `tenants.csv` Data_Dir blanked.
+2. **Every product was named "Plant"** (986/989; the import flattened names, source CSV gone).
+   FIX: `tools/repair_item_names.py` synthesizes searchable labels from Size+price+SKU
+   ("Plant 5 gal $24.99 (D56CAC)"), idempotent, backs up first, preserves all 26 columns. The
+   repaired `Items.csv` is committed. PROOF: `search_items('5 gal')` 0 -> 290 hits.
+3. **`ITEM_HEADERS` aligned 23 -> 26 cols** so no rewrite drops trailing columns.
+
+Built on top (make-it-usable):
+- **Quick-add at the register** -- `/sales/quick_add` + a "+ Quick Add" button in the no-results
+  state (name prefilled from the search + price) -> sellable `QA-` item dropped into the cart.
+- **Reconciliation matrix** -- `/inventory/reconcile` (manager): map each on-the-spot `QA-` item
+  to the real catalog product (`Reconciliation_Map.csv`, deactivates the provisional, audit-logged).
+- **EOD file export** -- close-out saves the day's Sales + Summary + Closeout CSVs to
+  `Daily_Reports/<date>/` and attaches them to the email; multi-recipient via `MGN_EOD_EMAIL`
+  (owner + Adam); email reports the # of quick-adds awaiting reconciliation.
+- **`tools/inventory_audit.py`** (+12 tests) -- health + inventory<->saleslog alignment gap finder.
+
+Full suite 28/28 green. OPEN: real product names need an owner re-import (synthetic labels are a
+stopgap); add a nav link to `/inventory/reconcile`.
+
+---
+
+## A. DONE earlier this session (committed + tested -- `tools/test_pos_core_integrity.py`, 3/3 green)
 
 | Fix | File | Why it matters |
 |---|---|---|

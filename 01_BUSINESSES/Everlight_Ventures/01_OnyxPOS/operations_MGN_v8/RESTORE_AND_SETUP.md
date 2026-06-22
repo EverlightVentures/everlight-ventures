@@ -86,3 +86,13 @@ Edit `MountainGardensPOS.desktop` -- set `Path=` and `Exec=` to this folder -- t
 - Sales logging was **hardened** (see `INTEGRITY_AND_ROADMAP.md`): failed writes now fail loud,
   inventory writes are atomic + locked, daily-revenue math fixed. Your data files are untouched.
 - New `tools/inventory_transfer.py` converts inventory CSV to/from Square, Shopify, QuickBooks.
+- **Product search now works.** The catalog was un-searchable (the tenant pointed at a dead path,
+  and every item was named "Plant"). Fixed, and the repaired `Items.csv` ships in this branch --
+  search "5 gal" and products appear. Real names need an owner re-import later (current labels are a
+  searchable stopgap built from Size + price).
+- **Quick-add at the register.** A failed search shows a **"+ Quick Add"** button -- enter name +
+  price and it drops straight into the cart (creates a `QA-` item). Managers reconcile these to real
+  products at **`/inventory/reconcile`**.
+- **End of day exports files.** Close-out saves the day's Sales + Summary + Closeout CSVs to
+  `Daily_Reports/<date>/` and emails them. Set `MGN_EOD_EMAIL=you@...,adam@...` (comma-separated) +
+  `SMTP_*` in `.env` for the multi-recipient send (local saves happen regardless).
