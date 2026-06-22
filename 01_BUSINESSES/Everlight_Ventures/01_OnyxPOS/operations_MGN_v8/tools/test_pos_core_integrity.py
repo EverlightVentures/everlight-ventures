@@ -62,5 +62,35 @@ class RecordSaleFailsLoud(unittest.TestCase):
         self.assertTrue(any(r.get("SKU") == "TEST2" for r in sales))
 
 
+class TamperEvidentAuditChain(unittest.TestCase):
+    def test_chain_verifies_and_detects_tampering(self):
+        # fresh chain (clear any prior test events)
+        path = POS_CORE.get_audit_chain_path()
+        if path.exists():
+            path.unlink()
+        POS_CORE.append_audit_event("punch", {"emp_id": "1001", "type": "CLOCK_IN"})
+        POS_CORE.append_audit_event("punch", {"emp_id": "1001", "type": "CLOCK_OUT"})
+        POS_CORE.append_audit_event("payroll_run", {"period": "P1", "gross": 1234.56})
+        ok, broken = POS_CORE.verify_audit_chain()
+        self.assertTrue(ok, f"clean chain should verify (broke at {broken})")
+
+        # tamper: rewrite the 2nd line's payload on disk
+        lines = path.read_text(encoding="utf-8").splitlines()
+        lines[1] = lines[1].replace("CLOCK_OUT", "CLOCK_IN")  # forge a punch
+        path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        ok, broken = POS_CORE.verify_audit_chain()
+        self.assertFalse(ok, "editing a past punch must break the chain")
+        self.assertEqual(broken, 1, "break should be detected at the tampered seq")
+
+    def test_clock_in_writes_an_audit_event(self):
+        path = POS_CORE.get_audit_chain_path()
+        if path.exists():
+            path.unlink()
+        POS_CORE.clock_in("9999", "Test Emp")
+        ok, _ = POS_CORE.verify_audit_chain()
+        self.assertTrue(ok)
+        self.assertIn("9999", path.read_text(encoding="utf-8"))
+
+
 if __name__ == "__main__":
     unittest.main()

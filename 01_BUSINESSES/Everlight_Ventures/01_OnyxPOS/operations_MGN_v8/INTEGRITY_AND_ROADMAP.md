@@ -20,25 +20,23 @@ fixed + tested, and the prioritized next build. Owner priorities driving this:
 | **Portable launcher** | `START_POS.sh` | No more hardcoded `/home/mgn/...`; auto-detects the folder. |
 | **Private bind + requirements.txt** | `MGN_APP.py`, new `requirements.txt` | Binds 127.0.0.1 by default; deps were undocumented (no requirements file existed). |
 | **Inventory transfer tool** | `tools/inventory_transfer.py` (+ 9 tests green) | CSV auto-format MGN <-> Square / Shopify / QuickBooks, with CSV-injection protection. Round-trips all 989 live items. |
+| **Tamper-evident time clock** | `POS_CORE` audit chain (+ 2 tests green) | Every punch AND every manager edit/add/delete writes a hash-chained line to `Time_Clock/_audit/chain.jsonl`; `verify_audit_chain()` detects any edited/deleted/inserted punch even if done directly on disk. (Sequence guards, server-authoritative time, and mandatory-reason edits already existed.) |
 
-## B. NEXT -- Time clock + payroll "foolproof" (designed, not yet built)
+## B. Time clock + payroll "foolproof" -- tamper-evidence DONE, payroll-lock + export NEXT
 
 Goal (owner): "make them go extra steps to safeguard us" against punch fraud / disputes.
-Lowest-risk plan, additive (no change to existing CSV schemas -- there is a known header-drift bug):
 
-1. **Tamper-evident audit journal (sidecar).** New `append_audit_event(category, payload)` ->
-   append a hash-chained JSON line to `Time_Clock/_audit/chain.jsonl` (`row_hash = sha256(prev_hash + canonical(payload))`).
-   Add `verify_audit_chain()` -> detects any edited/deleted/inserted punch. Every punch + every
-   payroll run writes one line. Punches stay plain CSV; the chain makes tampering *detectable*.
-2. **Sequence guards** in `clock_in/clock_out/start_break/end_break`: reject double clock-in,
-   clock-out with no open clock-in, break with no clock-in. Server-authoritative timestamps only
-   (never trust a client-supplied time).
-3. **Payroll lock:** before `/payroll/run`, check `is_period_locked(period_id)`; a PROCESSED
-   period cannot be silently re-run/edited. Record an immutable run event (who/when/totals hash)
-   in the journal.
-4. **Hours export route** `GET /payroll/export-hours?period_id=` (manager-only) -> CSV reusing the
-   existing `scan_timeclock_files` + `calculate_california_hours`. Formats: Generic + QuickBooks
-   (+ Shopify if used). Replaces the current "Reports -- coming soon" stub.
+- [x] **Tamper-evident audit journal** -- BUILT + tested. `append_audit_event` /
+  `verify_audit_chain` in POS_CORE, hash-chained `Time_Clock/_audit/chain.jsonl`, wired into all
+  four punch functions + edit/add/delete.
+- [x] **Sequence guards + server time** -- already present in `clock_in/out/start_break/end_break`
+  (reject double clock-in, clock-out without clock-in, etc.; timestamps are server-side). Verified.
+- [ ] **Payroll lock:** before `/payroll/run`, check a period-lock so a PROCESSED period can't be
+  silently re-run/edited; record an immutable run event via `append_audit_event("payroll_run", ...)`
+  (helper already exists -- just call it from the route).
+- [ ] **Hours export route** `GET /payroll/export-hours?period_id=` (manager-only) -> CSV reusing
+  `scan_timeclock_files` + `calculate_california_hours`. Formats: Generic + QuickBooks (+ Shopify).
+  Replaces the current "Reports -- coming soon" stub. (Lives in MGN_APP.py -- verify live on the Dell.)
 
 ## C. NEXT -- EOD / logout confirmation email (does NOT exist today)
 

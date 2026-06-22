@@ -1660,6 +1660,9 @@ def clock_in(emp_id, emp_name, notes=""):
         "Notes": notes,
     }
     append_csv(get_timeclock_path(), TIMECLOCK_HEADERS, row)
+    append_audit_event("punch", {"punch_id": row.get("Punch_ID"), "emp_id": row.get("Employee_ID"),
+                                 "name": row.get("Employee_Name"), "type": row.get("Punch_Type"),
+                                 "date": row.get("Date"), "time": row.get("Time")})
     return True, f"Clocked in at {now.strftime('%I:%M %p')}", {}
 
 
@@ -1702,6 +1705,9 @@ def clock_out(emp_id, emp_name, notes=""):
            "Employee_ID": emp_id, "Employee_Name": emp_name, "Punch_Type": "CLOCK_OUT",
            "Hours_Worked_Today": str(hours), "Overtime_Hours": str(ot), "Notes": notes}
     append_csv(get_timeclock_path(), TIMECLOCK_HEADERS, row)
+    append_audit_event("punch", {"punch_id": row.get("Punch_ID"), "emp_id": row.get("Employee_ID"),
+                                 "name": row.get("Employee_Name"), "type": row.get("Punch_Type"),
+                                 "date": row.get("Date"), "time": row.get("Time")})
     return True, f"Clocked out - {hours:.2f} hrs", {"hours": hours, "overtime": ot}
 
 def start_break(emp_id, emp_name, break_type="BREAK"):
@@ -1714,6 +1720,9 @@ def start_break(emp_id, emp_name, break_type="BREAK"):
            "Employee_ID": emp_id, "Employee_Name": emp_name, "Punch_Type": break_type,
            "Hours_Worked_Today": str(hours), "Overtime_Hours": str(ot), "Notes": ""}
     append_csv(get_timeclock_path(), TIMECLOCK_HEADERS, row)
+    append_audit_event("punch", {"punch_id": row.get("Punch_ID"), "emp_id": row.get("Employee_ID"),
+                                 "name": row.get("Employee_Name"), "type": row.get("Punch_Type"),
+                                 "date": row.get("Date"), "time": row.get("Time")})
     return True, f"Started {break_type.lower()}", {}
 
 def end_break(emp_id, emp_name):
@@ -1727,6 +1736,9 @@ def end_break(emp_id, emp_name):
            "Employee_ID": emp_id, "Employee_Name": emp_name, "Punch_Type": pt,
            "Hours_Worked_Today": str(hours), "Overtime_Hours": str(ot), "Notes": ""}
     append_csv(get_timeclock_path(), TIMECLOCK_HEADERS, row)
+    append_audit_event("punch", {"punch_id": row.get("Punch_ID"), "emp_id": row.get("Employee_ID"),
+                                 "name": row.get("Employee_Name"), "type": row.get("Punch_Type"),
+                                 "date": row.get("Date"), "time": row.get("Time")})
     return True, "Break ended", {}
 def get_punches_for_date(target_date, employee_id=None):
     punches = read_csv(get_timeclock_path(target_date))
@@ -1772,6 +1784,9 @@ def edit_punch(punch_id, editor_id, editor_name, new_date=None, new_time=None, n
                 "New_Date": final_date, "New_Time": final_time, "New_Type": final_type,
                 "Reason": reason, "Approved_By": editor_id, "Approved_At": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
     append_csv(get_timeclock_edits_path(), TIMECLOCK_EDIT_HEADERS, edit_row)
+    append_audit_event("timeclock_edit", {"punch_id": edit_row.get("Punch_ID"), "editor_id": edit_row.get("Editor_ID"),
+                                          "editor": edit_row.get("Editor_Name"), "from_type": edit_row.get("Original_Type"),
+                                          "to_type": edit_row.get("New_Type"), "reason": edit_row.get("Reason")})
     punches = read_csv(get_timeclock_path(file_date))
     for p in punches:
         if p.get("Punch_ID") == punch_id:
@@ -1808,6 +1823,9 @@ def add_punch(employee_id, employee_name, punch_date, punch_time, punch_type, ad
                 "Reason": f"ADDED: {reason}", "Approved_By": added_by_id,
                 "Approved_At": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
     append_csv(get_timeclock_edits_path(), TIMECLOCK_EDIT_HEADERS, edit_row)
+    append_audit_event("timeclock_edit", {"punch_id": edit_row.get("Punch_ID"), "editor_id": edit_row.get("Editor_ID"),
+                                          "editor": edit_row.get("Editor_Name"), "from_type": edit_row.get("Original_Type"),
+                                          "to_type": edit_row.get("New_Type"), "reason": edit_row.get("Reason")})
     create_notification(employee_id, employee_name,
         f"A time punch was added for {punch_date} by {added_by_name}. Reason: {reason}", "TIMECLOCK")
     return True, f"Punch added: {punch_id}"
@@ -1828,6 +1846,9 @@ def delete_punch(punch_id, deleted_by_id, deleted_by_name, reason=""):
                 "Reason": f"DELETED: {reason}", "Approved_By": deleted_by_id,
                 "Approved_At": datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
     append_csv(get_timeclock_edits_path(), TIMECLOCK_EDIT_HEADERS, edit_row)
+    append_audit_event("timeclock_edit", {"punch_id": edit_row.get("Punch_ID"), "editor_id": edit_row.get("Editor_ID"),
+                                          "editor": edit_row.get("Editor_Name"), "from_type": edit_row.get("Original_Type"),
+                                          "to_type": edit_row.get("New_Type"), "reason": edit_row.get("Reason")})
     punches = read_csv(get_timeclock_path(file_date))
     for p in punches:
         if p.get("Punch_ID") == punch_id:
@@ -1843,6 +1864,97 @@ def get_timeclock_edit_history(employee_id=None, days=30):
     cutoff = (datetime.now() - timedelta(days=days)).strftime("%Y-%m-%d")
     edits = [e for e in edits if e.get("Edit_Date", "") >= cutoff]
     return sorted(edits, key=lambda x: x.get("Edit_Date", ""), reverse=True)
+
+# ==============================================================================
+#            TAMPER-EVIDENT AUDIT CHAIN (time clock + payroll)
+# ==============================================================================
+# Append-only, hash-chained journal. Each line's row_hash folds in the PREVIOUS
+# line's hash, so editing / deleting / inserting any past line breaks every line
+# after it -- making out-of-band tampering with punches or payroll DETECTABLE.
+# It is a sidecar file: it never touches the existing CSV schemas.
+
+def get_audit_chain_path():
+    p = TIMECLOCK_DIR / "_audit" / "chain.jsonl"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    return p
+
+def _canonical(obj):
+    return json.dumps(obj, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+
+def append_audit_event(category, payload):
+    """Append a hash-chained audit line. Returns the row_hash, or None on failure.
+
+    Best-effort + never raises into a punch/payroll flow: if the journal can't be
+    written we return None rather than blocking the operation. verify_audit_chain()
+    later proves whether the chain is intact.
+    """
+    with _IO_LOCK:
+        path = get_audit_chain_path()
+        prev_hash, seq = "GENESIS", 0
+        if path.exists():
+            try:
+                last = None
+                with open(path, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line:
+                            last = line
+                if last:
+                    prev = json.loads(last)
+                    prev_hash = prev.get("row_hash", "GENESIS")
+                    seq = int(prev.get("seq", 0)) + 1
+            except Exception:
+                pass  # unreadable tail -> still append; verify will flag the break
+        core = {
+            "seq": seq,
+            "ts": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "category": str(category),
+            "payload": payload,
+            "prev_hash": prev_hash,
+        }
+        row_hash = hashlib.sha256((prev_hash + _canonical(core)).encode("utf-8")).hexdigest()
+        record = dict(core); record["row_hash"] = row_hash
+        try:
+            with open(path, "a", encoding="utf-8") as f:
+                f.write(_canonical(record) + "\n")
+                f.flush()
+                os.fsync(f.fileno())
+            return row_hash
+        except Exception:
+            return None
+
+def verify_audit_chain():
+    """Recompute the whole chain. Returns (ok: bool, first_broken_seq: int|None).
+
+    ok=False means a line was edited, deleted, or inserted out of band -- the
+    first_broken_seq is where the chain stops matching.
+    """
+    path = get_audit_chain_path()
+    if not path.exists():
+        return True, None
+    prev_hash = "GENESIS"
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                rec = json.loads(line)
+                core = {
+                    "seq": rec.get("seq"),
+                    "ts": rec.get("ts"),
+                    "category": rec.get("category"),
+                    "payload": rec.get("payload"),
+                    "prev_hash": rec.get("prev_hash"),
+                }
+                expected = hashlib.sha256((prev_hash + _canonical(core)).encode("utf-8")).hexdigest()
+                if rec.get("prev_hash") != prev_hash or rec.get("row_hash") != expected:
+                    return False, rec.get("seq")
+                prev_hash = rec.get("row_hash")
+    except Exception:
+        return False, -1
+    return True, None
+
 
 # ==============================================================================
 #                              TIME OFF
@@ -2853,6 +2965,9 @@ def edit_punch(punch_id: str, editor_id: str, editor_name: str,
         "Approved_At": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
     append_csv(get_timeclock_edits_path(), TIMECLOCK_EDIT_HEADERS, edit_row)
+    append_audit_event("timeclock_edit", {"punch_id": edit_row.get("Punch_ID"), "editor_id": edit_row.get("Editor_ID"),
+                                          "editor": edit_row.get("Editor_Name"), "from_type": edit_row.get("Original_Type"),
+                                          "to_type": edit_row.get("New_Type"), "reason": edit_row.get("Reason")})
 
     # Update the punch record
     punches = read_csv(get_timeclock_path(punch_file_date))
@@ -2957,6 +3072,9 @@ def add_punch(employee_id: str, employee_name: str, punch_date: str, punch_time:
         "Approved_At": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
     append_csv(get_timeclock_edits_path(), TIMECLOCK_EDIT_HEADERS, edit_row)
+    append_audit_event("timeclock_edit", {"punch_id": edit_row.get("Punch_ID"), "editor_id": edit_row.get("Editor_ID"),
+                                          "editor": edit_row.get("Editor_Name"), "from_type": edit_row.get("Original_Type"),
+                                          "to_type": edit_row.get("New_Type"), "reason": edit_row.get("Reason")})
 
     # Log audit
     log_audit(added_by_id, added_by_name, "TIMECLOCK_ADD", "Punch", punch_id,
@@ -3003,6 +3121,9 @@ def delete_punch(punch_id: str, deleted_by_id: str, deleted_by_name: str,
         "Approved_At": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
     append_csv(get_timeclock_edits_path(), TIMECLOCK_EDIT_HEADERS, edit_row)
+    append_audit_event("timeclock_edit", {"punch_id": edit_row.get("Punch_ID"), "editor_id": edit_row.get("Editor_ID"),
+                                          "editor": edit_row.get("Editor_Name"), "from_type": edit_row.get("Original_Type"),
+                                          "to_type": edit_row.get("New_Type"), "reason": edit_row.get("Reason")})
 
     # Mark punch as deleted (don't actually remove)
     punches = read_csv(get_timeclock_path(punch_file_date))
