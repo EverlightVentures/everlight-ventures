@@ -11,6 +11,9 @@ import smtplib
 import csv
 import uuid
 import hashlib
+import json
+import tempfile
+import threading
 
 from email.message import EmailMessage
 from pathlib import Path
@@ -19,6 +22,20 @@ from typing import Optional, Dict, List, Tuple, Any
 from collections import defaultdict
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+
+
+# ------------------------------------------------------------------------------
+# Concurrency guard for CSV writes.
+#
+# Flask runs threaded by default, so two simultaneous sales can otherwise
+# read-modify-rewrite the same file (e.g. Lots.csv) and lost-update inventory.
+# Every full-file rewrite (write_csv), durable append (append_csv), the
+# inventory read-modify-write (consume_from_lots), and the tamper-evident audit
+# journal serialize on this single re-entrant lock. RLock (not Lock) so a
+# function that already holds it can safely call write_csv/append_csv which
+# re-acquire it.
+# ------------------------------------------------------------------------------
+_IO_LOCK = threading.RLock()
 
 
 
@@ -236,13 +253,24 @@ def read_csv(filepath: Path) -> List[Dict[str, str]]:
 
 
 def append_csv(filepath: Path, headers: List[str], row: Dict) -> bool:
+    """Append a single row, DURABLY.
+
+    Durability: f.flush() + os.fsync() before close, so a power loss / crash
+    immediately after a "sale complete" cannot silently drop the just-written
+    row from the OS page cache. Serialized on _IO_LOCK so concurrent threads
+    can't interleave partial rows into the same file. Returns bool (unchanged
+    contract) -- callers that care about loss (record_sale) MUST check it.
+    """
     filepath = Path(filepath)
     ensure_csv(filepath, headers)
     try:
         safe = {h: ("" if row.get(h) is None else str(row.get(h))) for h in headers}
-        with open(filepath, 'a', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=headers, extrasaction="ignore")
-            writer.writerow(safe)
+        with _IO_LOCK:
+            with open(filepath, 'a', newline='', encoding='utf-8') as f:
+                writer = csv.DictWriter(f, fieldnames=headers, extrasaction="ignore")
+                writer.writerow(safe)
+                f.flush()
+                os.fsync(f.fileno())
         return True
     except Exception as e:
         # Optional: uncomment for debugging
@@ -369,15 +397,35 @@ def log_customer_receipt(first_name: str, last_name: str, email: str, receipt_pa
     return True
 
 def write_csv(filepath: Path, headers: List[str], rows: List[Dict]) -> bool:
+    """Rewrite the whole file ATOMICALLY + DURABLY.
+
+    Writes to a temp file in the same directory, fsyncs it, then os.replace()
+    (atomic on POSIX) onto the target. A crash mid-write therefore leaves the
+    ORIGINAL file intact instead of a truncated/empty one -- critical for
+    Inventory/Lots.csv, the source of truth for stock on hand. Serialized on
+    _IO_LOCK so two concurrent sales can't lost-update inventory.
+    """
     filepath = Path(filepath)
     filepath.parent.mkdir(parents=True, exist_ok=True)
     try:
-        with open(filepath, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=headers, extrasaction="ignore")
-            writer.writeheader()
-            for row in rows:
-                safe = {h: ("" if row.get(h) is None else str(row.get(h))) for h in headers}
-                writer.writerow(safe)
+        with _IO_LOCK:
+            fd, tmp = tempfile.mkstemp(dir=str(filepath.parent), prefix=".tmp_", suffix=".csv")
+            try:
+                with os.fdopen(fd, 'w', newline='', encoding='utf-8') as f:
+                    writer = csv.DictWriter(f, fieldnames=headers, extrasaction="ignore")
+                    writer.writeheader()
+                    for row in rows:
+                        safe = {h: ("" if row.get(h) is None else str(row.get(h))) for h in headers}
+                        writer.writerow(safe)
+                    f.flush()
+                    os.fsync(f.fileno())
+                os.replace(tmp, filepath)
+            except Exception:
+                try:
+                    os.unlink(tmp)
+                except OSError:
+                    pass
+                raise
         return True
     except Exception as e:
         # Optional: uncomment for debugging
@@ -666,6 +714,12 @@ def get_ledger_path(): return ensure_csv(INVENTORY_DIR / "Ledger.csv", LEDGER_HE
 def get_pricing_rules_path(): return ensure_csv(PRICING_DIR / "Pricing_Rules.csv", PRICING_RULE_HEADERS)
 def get_sales_path(d=None): return ensure_csv(get_dated_path(SALES_DIR, "SalesLog.csv", d), SALES_HEADERS)
 def get_transaction_path(d=None): return ensure_csv(get_dated_path(TRANSACTION_DIR, "TransactionLog.csv", d), TRANSACTION_HEADERS)
+
+# Recovery log: a sale whose CSV write failed lands here so it is NEVER silently
+# lost. record_sale() writes to this then returns failure (cashier re-rings).
+FAILED_SALE_HEADERS = ["Transaction_ID", "Timestamp", "Employee_ID", "Total",
+                       "Header_Written", "Lines_Written", "Payload_JSON"]
+def get_failed_sales_path(): return ensure_csv(SALES_DIR / "_FAILED_SALES.csv", FAILED_SALE_HEADERS)
 def get_timeclock_path(d=None): return ensure_csv(get_dated_path(TIMECLOCK_DIR, "TimeClockLog.csv", d), TIMECLOCK_HEADERS)
 def get_timeoff_path(year=None): return ensure_csv(TIMEOFF_DIR / f"{year or date.today().year}_TimeOffRequests.csv", TIMEOFF_HEADERS)
 def get_employee_pay_path(): return ensure_csv(PAYROLL_DIR / "Employee_Pay_Config.csv", EMPLOYEE_PAY_HEADERS)
@@ -1021,12 +1075,15 @@ def consume_from_lots(sku, qty, trans_id, emp_id):
         remaining -= take
         consumed.append({"lot_id": lot["Lot_ID"], "qty": take, "cost": float(lot.get("Unit_Cost", 0))})
         ledger_entry(sku, lot["Lot_ID"], -take, "SALE", trans_id, emp_id, "")
-    all_lots = read_csv(get_lots_path())
-    for lot in all_lots:
-        for c in consumed:
-            if lot.get("Lot_ID") == c["lot_id"]:
-                lot["Qty_Remaining"] = str(float(lot.get("Qty_Remaining", 0)) - c["qty"])
-    write_csv(get_lots_path(), LOT_HEADERS, all_lots)
+    # Lock the whole re-read -> subtract -> rewrite so two concurrent sales
+    # can't both read the same on-hand and lost-update Lots.csv.
+    with _IO_LOCK:
+        all_lots = read_csv(get_lots_path())
+        for lot in all_lots:
+            for c in consumed:
+                if lot.get("Lot_ID") == c["lot_id"]:
+                    lot["Qty_Remaining"] = str(float(lot.get("Qty_Remaining", 0)) - c["qty"])
+        write_csv(get_lots_path(), LOT_HEADERS, all_lots)
     return consumed
 def check_low_stock():
     alerts = []
@@ -1259,7 +1316,11 @@ def record_sale(items, emp_id, emp_name, payment_method, amount_received, notes=
         "COGS_Total": f"{total_cogs:.2f}",
         "Gross_Profit": f"{gross_profit:.2f}",
     }
-    append_csv(get_transaction_path(now.date()), TRANSACTION_HEADERS, tx_row)
+    # Capture the durability result of every write. A failed write must FAIL
+    # LOUD (return success=False) so the cashier re-rings instead of the sale
+    # being silently dropped while the screen says "complete".
+    tx_ok = append_csv(get_transaction_path(now.date()), TRANSACTION_HEADERS, tx_row)
+    lines_ok = True
 
     # --- write SALES line rows (one per cart line) ---
     for n in normalized:
@@ -1312,7 +1373,30 @@ def record_sale(items, emp_id, emp_name, payment_method, amount_received, notes=
             "Qty_Remaining_After": n["qty_after"],
             "Gross_Margin": f"{(n['line_total'] - n['line_cogs']):.2f}",
         }
-        append_csv(get_sales_path(now.date()), SALES_HEADERS, sales_row)
+        if not append_csv(get_sales_path(now.date()), SALES_HEADERS, sales_row):
+            lines_ok = False
+
+    if not (tx_ok and lines_ok):
+        # Best-effort: preserve the sale to a recovery file so nothing is lost,
+        # then fail loud. complete_sale() surfaces result["error"] to the cashier.
+        try:
+            append_csv(get_failed_sales_path(), FAILED_SALE_HEADERS, {
+                "Transaction_ID": transaction_id,
+                "Timestamp": now.strftime("%Y-%m-%d %H:%M:%S"),
+                "Employee_ID": str(emp_id),
+                "Total": f"{total:.2f}",
+                "Header_Written": "Y" if tx_ok else "N",
+                "Lines_Written": "Y" if lines_ok else "N",
+                "Payload_JSON": json.dumps(
+                    {"items": normalized, "payment": pm, "amount_received": amt_recv},
+                    ensure_ascii=False),
+            })
+        except Exception:
+            pass
+        return False, {
+            "error": "SALE NOT RECORDED -- write failure. Saved to recovery log; re-ring to confirm.",
+            "transaction_id": transaction_id,
+        }
 
     return True, {
         "transaction_id": transaction_id,

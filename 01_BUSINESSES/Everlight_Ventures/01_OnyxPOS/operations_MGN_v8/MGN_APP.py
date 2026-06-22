@@ -7643,7 +7643,11 @@ def _compute_daily_sales_metrics(rows: list[dict]) -> dict:
         tx_ids.add(tx_id)
 
         qty = _safe_int(r.get("Quantity", 0))
-        subtotal = _safe_float(r.get("Subtotal", 0))
+        # Per-LINE revenue. The SalesLog "Subtotal" column stores the WHOLE-ticket
+        # subtotal repeated on every line, so summing it overstates revenue on any
+        # multi-item sale. Line_Total is the correct per-line amount (fall back to
+        # Subtotal only for legacy rows that predate the Line_Total column).
+        subtotal = _safe_float(r.get("Line_Total", r.get("Subtotal", 0)))
         cogs_line = _safe_float(r.get("COGS_Line", 0))
         gm = r.get("Gross_Margin", "")
         gross_line = _safe_float(gm, subtotal - cogs_line)
@@ -7789,4 +7793,11 @@ if __name__ == "__main__":
     print("  http://localhost:5000")
     print(f"{'=' * 60}\n")
 
-    app.run(debug=False, host="0.0.0.0", port=5000)
+    # Private by default (workspace network doctrine). For a single in-store
+    # terminal, 127.0.0.1 is correct. To serve other devices on the shop LAN,
+    # start with HOST=0.0.0.0 (and ensure the machine's firewall is set).
+    app.run(
+        debug=False,
+        host=os.environ.get("HOST", "127.0.0.1"),
+        port=int(os.environ.get("PORT", "5000")),
+    )

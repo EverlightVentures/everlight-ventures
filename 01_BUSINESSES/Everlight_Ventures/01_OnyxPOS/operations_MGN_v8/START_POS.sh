@@ -32,7 +32,9 @@ debug_shell() {
 # ─────────────────────────────────────────────────────────────
 
 APP_NAME="Mountain Gardens POS"
-APP_DIR="/home/mgn/Projects/Mountain Gardens Nursery POS"
+# Portable: defaults to wherever this script lives (the cloned repo), so it works
+# on any machine. Override with:  APP_DIR=/custom/path ./START_POS.sh
+APP_DIR="${APP_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 VENV_DIR="$APP_DIR/.venv"
 PY="$VENV_DIR/bin/python"
 PIP="$VENV_DIR/bin/pip"

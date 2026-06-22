@@ -1,0 +1,16 @@
+# Mountain Gardens Nursery POS -- Python dependencies
+# Install:  python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
+# Requires Python 3.9+ (uses zoneinfo). Everything else used by the app is stdlib.
+
+# --- Required to boot ---
+Flask
+qrcode
+reportlab
+
+# --- Optional (features degrade gracefully if absent) ---
+python-dotenv      # loads .env (SMTP / Stripe / OpenAI keys)
+requests           # outbound HTTP (n8n / webhooks)
+stripe             # billing / checkout
+openai             # AI helper features
+openpyxl           # .xlsx vendor/invoice import
+Pillow             # QR-code PNG generation
