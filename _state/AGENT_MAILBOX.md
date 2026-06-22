@@ -3839,3 +3839,30 @@ NEXT (designed, not yet built):
 OPEN for operator: EOD recipient defaulted to gmail (can add more); payroll export = generic CSV + QuickBooks (maybe Shopify).
 
 ---
+
+## [2026-06-22 PT] Session: MGN POS -- inventory/search FIXED + quick-add + reconciliation + EOD export (branch mgn-pos-restore)
+
+FROM: phone-claude | Lane: MGN POS make-it-usable. Apply to the Dell.
+
+WHY cashiers couldn't search/select ANY product (audited via a 7-agent workflow, root cause VERIFIED):
+1. tenants.csv `default` Data_Dir pointed at the dead Dell path /home/mgn/Projects/Mountain Gardens Nursery POS. Every request repointed INVENTORY_DIR there + auto-created an EMPTY Items.csv -> the real 989-item catalog was never read.
+2. 986/989 product names were the literal word "Plant" (the original import flattened them; the named source CSV is GONE -> real names unrecoverable from data).
+
+WHAT WAS FIXED + SHIPPED (all pushed to origin/mgn-pos-restore; full suite 28/28 green):
+- get_tenant_data_dir() now falls back to the app's own folder (SCRIPT_DIR) when the stored path doesn't exist -> relocation-proof, self-heals on ANY machine. tenants.csv Data_Dir blanked (resolves to app folder). Backups written (*.bak-*).
+- tools/repair_item_names.py: synthesized distinguishable, searchable labels from Size+price+SKU ("Plant 5 gal $24.99 (D56CAC)") for the 986 generic rows; idempotent; backed up Items.csv first; preserved all 26 columns. PROOF: search_items('5 gal') 0 -> 290 hits. The REPAIRED Items.csv is committed (Dell just pulls it).
+- ITEM_HEADERS extended 23 -> 26 cols so no Items.csv rewrite (reconcile/edit) silently drops Supplier_Barcode/QR_Code/QR_Image_Path.
+- QUICK-ADD on the spot: /sales/quick_add (POST) + a "+ Quick Add" button in terminal.html no-results state (prompts name prefilled from search + price) -> POS_CORE.quick_add_item creates a sellable QA- item + drops it in the cart. Price written into all 3 price columns.
+- RECONCILIATION MATRIX: /inventory/reconcile (manager) lists unreconciled QA- items + maps each to a real catalog SKU (Reconciliation_Map.csv, deactivates the provisional, audit-logged). /inventory/reconcile/apply does the mapping.
+- EOD EXPORT: api_till_close now saves the day's sales CSV + DailySummary CSV + Closeout CSV under Daily_Reports/<date>/ AND attaches them to the close-out email; multi-recipient via MGN_EOD_EMAIL (owner + Adam); email reports the count of quick-adds awaiting reconciliation.
+- tools/inventory_audit.py (+12 tests): health + inventory<->saleslog alignment gap finder. Catalog scores 100/100 post-repair. Found 1 off-catalog sold SKU (ANM-MOU-4020-1221 "mouse").
+
+APPLY ON THE DELL:
+1. cd into the working copy -> `git fetch origin && git checkout mgn-pos-restore && git pull` (the repaired Items.csv + blanked tenants.csv + all code come down).
+2. Restart the app (./STOP_POS.sh; ./START_POS.sh start) or `python MGN_APP.py`.
+3. In .env set `MGN_EOD_EMAIL=1m.rich.gee@gmail.com,<adam-email>` + SMTP_HOST/USER/PASS (Gmail app-password) so the EOD email + attachments actually send. Local Daily_Reports/ saves happen even without SMTP.
+4. Verify live: open /sales, search "5 gal" -> products appear + clickable; try "+ Quick Add"; ring a sale; at close-out check Daily_Reports/<date>/ + the email; visit /inventory/reconcile.
+
+OPEN / NEXT: real product names need an owner re-import (synthetic labels are a stopgap). Add a nav link to /inventory/reconcile (managers reach it by URL + the EOD email link today). Live Stripe/Square/Shopify/QuickBooks sync still the multi-session follow-on (CSV interchange works now via tools/inventory_transfer.py).
+
+---
