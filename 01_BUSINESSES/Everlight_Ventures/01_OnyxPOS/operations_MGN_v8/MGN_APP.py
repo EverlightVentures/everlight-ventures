@@ -361,9 +361,12 @@ def get_tenant(tenant_id: str):
 def get_tenant_data_dir(tenant_id: str) -> Path:
     tenant = get_tenant(tenant_id) or {}
     data_dir = tenant.get("Data_Dir", "")
-    if data_dir:
-        return Path(data_dir)
-    return TENANTS_DIR / tenant_id
+    p = Path(data_dir) if data_dir else (TENANTS_DIR / tenant_id)
+    # Relocation-proof: if the stored/derived path doesn't exist (e.g. a restore to
+    # a new machine still carrying the old absolute Data_Dir like /home/mgn/...),
+    # fall back to the app's own bundled folder so the REAL catalog/data is read
+    # instead of silently creating an empty Items.csv at a dead path.
+    return p if p.exists() else SCRIPT_DIR
 
 
 def create_tenant(name: str):

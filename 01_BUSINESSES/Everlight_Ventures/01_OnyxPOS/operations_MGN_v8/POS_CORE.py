@@ -132,7 +132,8 @@ NOTIFICATION_HEADERS = ["Notification_ID", "Employee_ID", "Employee_Name", "Date
 ITEM_HEADERS = ["SKU", "Item_Name", "Category", "Subcategory", "Product_Name",
                 "Default_Unit", "Default_Price", "Taxable", "Reorder_Point",
                 "Date_Added", "Last_Updated", "Status", "Notes", "Size", "Item_Description", "Wholesale_Cost", "Retail_Markup", "Retail_Price", "Unit_Cost", "Unit_Price",
-  "Last_Invoice_No", "Last_Vendor", "Last_Received_Date",]
+  "Last_Invoice_No", "Last_Vendor", "Last_Received_Date",
+                "Supplier_Barcode", "QR_Code", "QR_Image_Path",]  # aligned to the on-disk 26-col Items.csv so rewrites/appends never drop trailing columns
 
 
 
