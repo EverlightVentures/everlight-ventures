@@ -989,6 +989,81 @@ def create_item(sku, name, category, subcategory, product_name="", default_price
         return True, f"Item created: {sku}"
     return False, "Failed to create item"
 
+
+# ==============================================================================
+#          QUICK-ADD (sell on the spot) + END-OF-DAY RECONCILIATION
+# ==============================================================================
+# A cashier can add an item mid-sale with just a name + price. It is persisted as
+# a normal, immediately-sellable item with a "QA-" SKU so a manager can later map
+# it to the real catalog product on the reconciliation matrix -- keeping sold
+# items aligned with inventory even when the catalog is incomplete.
+
+RECON_MAP_HEADERS = ["Map_ID", "QA_SKU", "QA_Name", "Canonical_SKU",
+                     "Canonical_Name", "Mapped_By", "Mapped_At", "Reason"]
+def get_recon_map_path(): return ensure_csv(INVENTORY_DIR / "Reconciliation_Map.csv", RECON_MAP_HEADERS)
+
+
+def quick_add_item(name, price, category="Quick-Add", size="", emp_id="", emp_name=""):
+    """Cashier 'add on the spot'. Returns (sku, row).
+
+    Provisional item: 'QA-' SKU, fully sellable. Price is written into EVERY price
+    column so search/sale read it regardless of which column they prefer. The
+    QA- prefix is the durable marker for the reconciliation matrix.
+    """
+    name = (name or "").strip() or "Quick Item"
+    try:
+        price = round(float(price or 0), 2)
+    except Exception:
+        price = 0.0
+    sku = "QA-" + datetime.now().strftime("%Y%m%d%H%M%S") + uuid.uuid4().hex[:3].upper()
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    row = {
+        "SKU": sku, "Item_Name": name, "Category": category or "Quick-Add",
+        "Subcategory": "", "Product_Name": name, "Default_Unit": "each",
+        "Default_Price": f"{price:.2f}", "Taxable": "Y", "Reorder_Point": "0",
+        "Date_Added": now, "Last_Updated": now, "Status": "Active",
+        "Notes": f"QUICK-ADD by {emp_name or emp_id} -- needs reconciliation",
+        "Size": size or "", "Item_Description": "",
+        "Retail_Price": f"{price:.2f}", "Unit_Price": f"{price:.2f}",
+    }
+    append_csv(get_items_path(), ITEM_HEADERS, row)
+    try:
+        append_audit_event("quick_add_item", {"sku": sku, "name": name, "price": price, "emp_id": emp_id})
+    except Exception:
+        pass
+    return sku, row
+
+
+def get_unreconciled_quickadds():
+    """All quick-add items not yet reconciled (the EOD matrix rows)."""
+    return [i for i in read_csv(get_items_path())
+            if str(i.get("SKU", "")).startswith("QA-") and i.get("Status", "") != "Inactive"]
+
+
+def reconcile_quickadd(qa_sku, canonical_sku, mapped_by="", reason=""):
+    """Map a provisional QA item to a real catalog product. Records the mapping,
+    then deactivates the QA item so future sales use the canonical product."""
+    qa = get_item(qa_sku)
+    if not qa:
+        return False, "Quick-add item not found"
+    canon = get_item(canonical_sku)
+    if not canon:
+        return False, "Target catalog item not found"
+    append_csv(get_recon_map_path(), RECON_MAP_HEADERS, {
+        "Map_ID": generate_id("RMAP"), "QA_SKU": qa_sku, "QA_Name": qa.get("Item_Name", ""),
+        "Canonical_SKU": canonical_sku, "Canonical_Name": canon.get("Item_Name", ""),
+        "Mapped_By": mapped_by, "Mapped_At": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "Reason": reason,
+    })
+    update_csv_row(get_items_path(), ITEM_HEADERS, "SKU", qa_sku,
+                   {"Status": "Inactive", "Notes": f"Reconciled -> {canonical_sku} by {mapped_by}"})
+    try:
+        append_audit_event("reconcile_quickadd", {"qa_sku": qa_sku, "canonical_sku": canonical_sku, "by": mapped_by})
+    except Exception:
+        pass
+    return True, f"Reconciled {qa_sku} -> {canonical_sku}"
+
+
 def create_lot(sku, qty, cost, supplier="", invoice="", notes=""):
     lot_id = generate_id("LOT")
     row = {"Lot_ID": lot_id, "SKU": sku, "Received_Date": date.today().strftime("%Y-%m-%d"),

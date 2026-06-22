@@ -92,5 +92,30 @@ class TamperEvidentAuditChain(unittest.TestCase):
         self.assertIn("9999", path.read_text(encoding="utf-8"))
 
 
+class QuickAddAndReconcile(unittest.TestCase):
+    def test_quick_add_is_sellable_and_searchable(self):
+        sku, row = POS_CORE.quick_add_item("5 Gallon Apple Tree", 49.99, emp_id="1001")
+        self.assertTrue(sku.startswith("QA-"))
+        got = POS_CORE.get_item(sku)
+        # price written into every price column so search/sale read it either way
+        self.assertEqual(got["Default_Price"], "49.99")
+        self.assertEqual(got["Retail_Price"], "49.99")
+        self.assertEqual(got["Unit_Price"], "49.99")
+        # searchable right away
+        self.assertTrue(any(i.get("SKU") == sku for i in POS_CORE.search_items("apple")))
+
+    def test_reconcile_maps_and_deactivates(self):
+        qa_sku, _ = POS_CORE.quick_add_item("apple tree 5g", 49.99, emp_id="1001")
+        POS_CORE.create_item("APPLE-5G", "Apple Tree - 5 Gallon", "Plants", "Trees", default_price=49.99)
+        ok, msg = POS_CORE.reconcile_quickadd(qa_sku, "APPLE-5G", mapped_by="1001", reason="same product")
+        self.assertTrue(ok, msg)
+        # provisional item is deactivated and drops off the unreconciled matrix
+        self.assertEqual(POS_CORE.get_item(qa_sku)["Status"], "Inactive")
+        self.assertFalse(any(i.get("SKU") == qa_sku for i in POS_CORE.get_unreconciled_quickadds()))
+        # mapping is recorded
+        mapped = POS_CORE.read_csv(POS_CORE.get_recon_map_path())
+        self.assertTrue(any(m.get("QA_SKU") == qa_sku and m.get("Canonical_SKU") == "APPLE-5G" for m in mapped))
+
+
 if __name__ == "__main__":
     unittest.main()
