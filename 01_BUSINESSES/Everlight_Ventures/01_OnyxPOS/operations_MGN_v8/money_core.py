@@ -477,3 +477,191 @@ def payroll_readiness(persist=False):
                     "Cash_On_Hand": cash["amount"], "Payroll_Envelope": payroll_env,
                     "Gap": gap, "Alert_Level": level})
     return out
+
+
+# ===========================================================================
+# Section 4 -- BILLS + ORDERING (with approval gates)
+# ===========================================================================
+def _set_setting(k, v):
+    path = _p("Money_Settings.csv", SETTINGS_HEADERS)
+    with _IO_LOCK:
+        rows = [r for r in read_csv(path) if r.get("Key") != k]
+        rows.append({"Key": k, "Value": str(v)})
+        POS_CORE.write_csv(path, SETTINGS_HEADERS, rows)
+
+
+def add_overhead(vendor, category, amount, frequency, due_day, autopay="N", account="", note=""):
+    bid = generate_id("OVH")
+    append_csv(_p("Overhead.csv", OVERHEAD_HEADERS), OVERHEAD_HEADERS, {
+        "Bill_ID": bid, "Vendor": vendor, "Category": category, "Amount": f"{_f(amount):.2f}",
+        "Frequency": (frequency or "MONTHLY").upper(), "Due_Day": str(due_day),
+        "Autopay": autopay, "Account": account, "Active": "Y", "Notes": note})
+    return bid
+
+
+def add_bill(vendor, amount, due_date, type="BILL", priority="3", source="manual", note=""):
+    bid = generate_id("BIL")
+    append_csv(_p("Bills.csv", BILLS_HEADERS), BILLS_HEADERS, {
+        "Bill_ID": bid, "Vendor": vendor, "Type": type, "Amount": f"{_f(amount):.2f}",
+        "Due_Date": due_date, "Status": "SCHEDULED", "Priority": str(priority),
+        "Source": source, "Approved_By": "", "Approved_At": "", "Paid_At": "", "Notes": note})
+    return bid
+
+
+def _next_due_date(o, today):
+    import calendar
+    freq = (o.get("Frequency") or "MONTHLY").upper()
+    try:
+        day = int(float(o.get("Due_Day") or 1))
+    except ValueError:
+        day = 1
+    if freq == "MONTHLY":
+        y, m = today.year, today.month
+        cand = date(y, m, min(day, calendar.monthrange(y, m)[1]))
+        if cand < today:
+            m, y = (m % 12) + 1, y + (1 if m == 12 else 0)
+            cand = date(y, m, min(day, calendar.monthrange(y, m)[1]))
+        return cand
+    if freq == "WEEKLY":
+        return today + timedelta(days=(day - today.weekday()) % 7)
+    return None  # QUARTERLY/ANNUAL: managed manually for now
+
+
+def generate_due_bills(window_days=14):
+    """Materialize the next instance of each active recurring Overhead bill into
+    Bills.csv when due within the window and not already scheduled. Idempotent."""
+    today = date.today()
+    existing = read_csv(_p("Bills.csv", BILLS_HEADERS))
+    created = 0
+    for o in read_csv(_p("Overhead.csv", OVERHEAD_HEADERS)):
+        if (o.get("Active", "Y") or "Y").upper() == "N":
+            continue
+        due = _next_due_date(o, today)
+        if not due or (due - today).days > window_days:
+            continue
+        ref = f"recurring:{o.get('Bill_ID')}:{due.strftime('%Y-%m-%d')}"
+        if any(b.get("Source") == ref for b in existing):
+            continue
+        add_bill(o.get("Vendor", ""), o.get("Amount", 0), due.strftime("%Y-%m-%d"),
+                 type="BILL", priority="2", source=ref, note=o.get("Category", ""))
+        created += 1
+    return created
+
+
+def approve_bill(bill_id, by):
+    POS_CORE.update_csv_row(_p("Bills.csv", BILLS_HEADERS), BILLS_HEADERS, "Bill_ID", bill_id,
+                            {"Status": "APPROVED", "Approved_By": by,
+                             "Approved_At": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+    try:
+        POS_CORE.append_audit_event("bill_approved", {"bill_id": bill_id, "by": by})
+    except Exception:
+        pass
+    return True
+
+
+def pay_bill(bill_id, by):
+    POS_CORE.update_csv_row(_p("Bills.csv", BILLS_HEADERS), BILLS_HEADERS, "Bill_ID", bill_id,
+                            {"Status": "PAID", "Paid_At": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+    try:
+        POS_CORE.append_audit_event("bill_paid", {"bill_id": bill_id, "by": by})
+    except Exception:
+        pass
+    return True
+
+
+def bill_priority_view():
+    """Rank open bills against cash AFTER reserving the payroll need (payroll = priority 0)."""
+    bills = [b for b in read_csv(_p("Bills.csv", BILLS_HEADERS)) if b.get("Status") in ("SCHEDULED", "APPROVED")]
+    need = payroll_readiness()["total_need"]
+    cash = get_cash_on_hand()["amount"]
+    available = round(cash - need, 2)
+    today = date.today()
+
+    def days_to_due(b):
+        try:
+            return (datetime.strptime(b.get("Due_Date", ""), "%Y-%m-%d").date() - today).days
+        except ValueError:
+            return 999
+
+    bills.sort(key=lambda b: (days_to_due(b), _f(b.get("Priority"), 3), -_f(b.get("Amount"))))
+    running = available
+    out = []
+    for b in bills:
+        amt = _f(b.get("Amount"))
+        dd = days_to_due(b)
+        if dd < 0:
+            tag = "PAY_NOW"
+        elif running >= amt:
+            tag = "OK_TO_PAY"
+            running -= amt
+        else:
+            tag = "WAIT" if dd <= 3 else "AFTER_PAYDAY"
+        out.append({**b, "_tag": tag, "_days_to_due": dd})
+    return {"available_after_payroll": available, "cash": cash, "payroll_reserve": need, "bills": out}
+
+
+def get_autopilot_mode():
+    return get_settings().get("AUTOPILOT_MODE", "SUGGEST")
+
+
+def set_autopilot_mode(mode):
+    mode = (mode or "SUGGEST").upper()
+    if mode not in ("OFF", "SUGGEST", "ARMED"):
+        mode = "SUGGEST"
+    _set_setting("AUTOPILOT_MODE", mode)
+    return mode
+
+
+def run_autopilot(ceiling=500.0):
+    """Approval-gated automation. SUGGEST/OFF: do nothing automatic. ARMED: AUTO-APPROVE
+    (never auto-PAY -- there is no money rail) recurring bills flagged Autopay=Y under the
+    ceiling, audit-logged. Real payment always stays a manual @owner_required click."""
+    if get_autopilot_mode() != "ARMED":
+        return {"mode": get_autopilot_mode(), "actions": []}
+    autopay_vendors = {o.get("Vendor") for o in read_csv(_p("Overhead.csv", OVERHEAD_HEADERS))
+                       if (o.get("Autopay", "N") or "N").upper() == "Y"}
+    actions = []
+    for b in read_csv(_p("Bills.csv", BILLS_HEADERS)):
+        if b.get("Status") == "SCHEDULED" and b.get("Vendor") in autopay_vendors and _f(b.get("Amount")) <= ceiling:
+            approve_bill(b.get("Bill_ID"), "autopilot")
+            actions.append({"bill_id": b.get("Bill_ID"), "vendor": b.get("Vendor"), "action": "auto-approved"})
+    return {"mode": "ARMED", "actions": actions}
+
+
+# ===========================================================================
+# Section 5 -- DIY PAYROLL FILING HELPER (free + manual path: no provider)
+# ===========================================================================
+def filing_summary(period_id, year=None):
+    """Aggregate a PROCESSED pay run into the exact figures the owner keys into the
+    free government portals: federal deposit (EFTPS / Form 941) and CA deposit (DE 88
+    on EDD e-Services). Reads the existing YYYY_Payroll_Runs.csv -- no tax logic is
+    reinvented here. Employer SS/Medicare mirror the employee amounts; employer UI/ETT
+    is an ESTIMATE (the $7k YTD wage base isn't tracked here) -- verify in EDD e-Services.
+    """
+    year = year or date.today().year
+    rows = [r for r in read_csv(POS_CORE.DATA_DIR / "Payroll" / f"{year}_Payroll_Runs.csv")
+            if str(r.get("Period_ID", "")) == str(period_id)]
+    fed_inc = sum(_f(r.get("Federal_Tax")) for r in rows)
+    ss = sum(_f(r.get("Social_Security")) for r in rows)
+    med = sum(_f(r.get("Medicare")) for r in rows)
+    pit = sum(_f(r.get("State_Tax")) for r in rows)
+    sdi = sum(_f(r.get("CA_SDI")) for r in rows)
+    gross = sum(_f(r.get("Gross_Pay")) for r in rows)
+    net = sum(_f(r.get("Net_Pay")) for r in rows)
+    eftps = round(fed_inc + 2 * ss + 2 * med, 2)          # 941 deposit
+    ui_ett_est = round(gross * 0.035, 2)                  # new-employer UI 3.4% + ETT 0.1% (uncapped estimate)
+    de88 = round(pit + sdi + ui_ett_est, 2)
+    return {
+        "period_id": period_id, "employees": len(rows), "gross": round(gross, 2), "net": round(net, 2),
+        "federal_deposit_eftps": eftps,
+        "federal_breakdown": {"employee_income_wh": round(fed_inc, 2),
+                              "social_security_both_halves": round(2 * ss, 2),
+                              "medicare_both_halves": round(2 * med, 2)},
+        "ca_deposit_de88": de88,
+        "ca_breakdown": {"pit_withholding": round(pit, 2), "sdi": round(sdi, 2),
+                         "ui_ett_estimate": ui_ett_est},
+        "direct_deposit_total": round(net, 2),
+        "notes": ("Employer UI/ETT is an estimate (the $7,000 YTD wage base is not tracked here) -- "
+                  "confirm in EDD e-Services. SDI is 1.3% with no wage cap in 2026. File 941 + DE 9/DE 9C "
+                  "quarterly; deposit federal on EFTPS and CA on DE 88 by your assigned schedule."),
+    }

@@ -1,5 +1,6 @@
 """Tests for the Money OS engine brain (money_core). Runs against a temp data dir."""
 import os
+import shutil
 import sys
 import tempfile
 import unittest
@@ -33,6 +34,9 @@ def _sale(d, line_total, cogs, tax):
 class MoneyCore(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        # clean Money_OS so this class's P&L scenario has zero overhead regardless of
+        # other test classes (shared temp dir; classes run alphabetically)
+        shutil.rmtree(Path(_TMP) / "Money_OS", ignore_errors=True)
         # hourly employee $20/hr
         POS_CORE.append_csv(Path(_TMP) / "Payroll" / "Employee_Pay_Config.csv", PAY_CFG_HEADERS,
                             {"Employee_ID": "1004", "Pay_Type": "HOURLY", "Hourly_Rate": "20",
@@ -100,6 +104,52 @@ class MoneyCore(unittest.TestCase):
         r = M.payroll_readiness()
         self.assertGreaterEqual(r["catch_up"], 160.0)
         self.assertEqual(r["alert_level"], "BLACK")
+
+
+RUN_HEADERS = ["Payroll_ID", "Period_ID", "Employee_ID", "Gross_Pay", "Federal_Tax",
+               "State_Tax", "Social_Security", "Medicare", "CA_SDI", "Net_Pay", "Status"]
+
+
+class BillsAndFiling(unittest.TestCase):
+    def test_recurring_bill_materializes_once(self):
+        due_day = date.today().day  # due today -> within window
+        M.add_overhead("Rent Co", "Rent", 2000, "MONTHLY", due_day)
+        first = M.generate_due_bills()
+        second = M.generate_due_bills()  # idempotent
+        self.assertGreaterEqual(first, 1)
+        self.assertEqual(second, 0)
+
+    def test_bill_lifecycle_and_priority(self):
+        bid = M.add_bill("Vendor X", 150, date.today().strftime("%Y-%m-%d"))
+        M.approve_bill(bid, "1001")
+        view = M.bill_priority_view()
+        self.assertIn("available_after_payroll", view)
+        self.assertTrue(any(b["Bill_ID"] == bid for b in view["bills"]))
+        M.pay_bill(bid, "1001")
+        paid = [b for b in POS_CORE.read_csv(M._p("Bills.csv", M.BILLS_HEADERS)) if b["Bill_ID"] == bid]
+        self.assertEqual(paid[0]["Status"], "PAID")
+
+    def test_autopilot_mode_and_arm(self):
+        self.assertEqual(M.set_autopilot_mode("ARMED"), "ARMED")
+        self.assertEqual(M.get_autopilot_mode(), "ARMED")
+        M.add_overhead("AutoUtil", "Utilities", 120, "MONTHLY", date.today().day, autopay="Y")
+        M.add_bill("AutoUtil", 120, date.today().strftime("%Y-%m-%d"), source="manual")
+        res = M.run_autopilot(ceiling=500)
+        self.assertEqual(res["mode"], "ARMED")
+        self.assertTrue(any(a["vendor"] == "AutoUtil" for a in res["actions"]))
+        M.set_autopilot_mode("SUGGEST")  # reset so it doesn't leak
+
+    def test_filing_summary_deposit_figures(self):
+        yr = date.today().year
+        path = Path(_TMP) / "Payroll" / f"{yr}_Payroll_Runs.csv"
+        POS_CORE.append_csv(path, RUN_HEADERS, {
+            "Payroll_ID": "PR1", "Period_ID": "PP-FILE", "Employee_ID": "1004", "Gross_Pay": "1000",
+            "Federal_Tax": "100", "State_Tax": "30", "Social_Security": "62", "Medicare": "14.5",
+            "CA_SDI": "13", "Net_Pay": "780", "Status": "PROCESSED"})
+        f = M.filing_summary("PP-FILE", yr)
+        self.assertEqual(f["federal_deposit_eftps"], 253.0)   # 100 + 2*62 + 2*14.5
+        self.assertEqual(f["ca_deposit_de88"], 78.0)          # 30 + 13 + 35 (UI/ETT est)
+        self.assertEqual(f["direct_deposit_total"], 780.0)
 
 
 if __name__ == "__main__":
