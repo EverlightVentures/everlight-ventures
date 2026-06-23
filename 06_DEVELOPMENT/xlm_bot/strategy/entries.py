@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import logging
 from typing import Dict, Optional
 
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 from indicators.atr import atr
 from indicators.ema import ema
@@ -940,7 +943,8 @@ def slow_bleed_hunter(
         rsi_vals = _rsi_fn(df_15m["close"], 14)
         rsi_now = float(rsi_vals.iloc[-1])
         conf["RSI_MIDRANGE"] = rsi_lo <= rsi_now <= rsi_hi
-    except Exception:
+    except Exception as exc:
+        logger.debug("RSI midrange calculation failed (fail-open): %s", exc)
         conf["RSI_MIDRANGE"] = True  # fail-open
 
     # Candle body consistency (bleed = steady bars, not wild swings)
@@ -1111,8 +1115,8 @@ def mtf_conflict_block(
         else:
             if slope_15m < 0 and slope_1h > 0:
                 conflicts += 1  # 15m falling but 1h rising
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug("EMA slope conflict check failed: %s", exc)
 
     # 2. RSI gap > 20 between 15m and 1h
     try:
@@ -1122,8 +1126,8 @@ def mtf_conflict_block(
         rsi_1h_val = float(rsi_1h_s.iloc[-1])
         if abs(rsi_15m_val - rsi_1h_val) > 20:
             conflicts += 1
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug("RSI gap check failed: %s", exc)
 
     # 3. 4h EMA slope contradicts direction
     try:
@@ -1134,8 +1138,8 @@ def mtf_conflict_block(
                 conflicts += 1
             elif direction == "short" and slope_4h > 0:
                 conflicts += 1
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug("4h EMA slope check failed: %s", exc)
 
     return conflicts >= 2
 
@@ -1215,8 +1219,8 @@ def volume_climax_reversal(
             if direction == "short" and rsi_val > 70:
                 rsi_extreme = True
                 break
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug("RSI extreme check failed: %s", exc)
     if not rsi_extreme:
         return None
 
@@ -1270,7 +1274,8 @@ def vwap_reversion(
         if vwap_series.empty or pd.isna(vwap_series.iloc[-1]):
             return None
         vwap_val = float(vwap_series.iloc[-1])
-    except Exception:
+    except Exception as exc:
+        logger.debug("VWAP computation failed: %s", exc)
         return None
 
     if vwap_val <= 0:
@@ -1310,7 +1315,8 @@ def vwap_reversion(
                 rsi_ok = True  # not overbought, room to rise
             if direction == "short" and rsi_val > 40:
                 rsi_ok = True  # not oversold, room to fall
-    except Exception:
+    except Exception as exc:
+        logger.debug("RSI reversion check failed (fail-open): %s", exc)
         rsi_ok = True  # fail-open
 
     if not rsi_ok:
@@ -1326,7 +1332,8 @@ def vwap_reversion(
             # Peak should be in position 0-2 (earlier), not the latest bar
             if peak_pos < len(vols) - 1:
                 vol_declining = True
-    except Exception:
+    except Exception as exc:
+        logger.debug("Volume decline check failed (fail-open): %s", exc)
         vol_declining = True  # fail-open
 
     if not vol_declining:
@@ -1386,7 +1393,8 @@ def grid_range(
     try:
         r = rsi(df_15m["close"], 14)
         rsi_val = float(r.iloc[-1]) if not pd.isna(r.iloc[-1]) else 50
-    except Exception:
+    except Exception as exc:
+        logger.debug("RSI extreme check failed (fail-open): %s", exc)
         rsi_val = 50
 
     if direction == "long" and rsi_val > 35:
@@ -1432,8 +1440,8 @@ def grid_range(
             atr_mean = float(atr_vals.iloc[-20:].mean())
             if atr_mean > 0 and (atr_now / atr_mean) > 1.3:
                 return None  # ATR expanding, likely breakout
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug("ATR expansion check failed: %s", exc)
 
     # Level touch count: at least 2 touches in last 20 bars
     touch_count = 0
@@ -1445,7 +1453,7 @@ def grid_range(
                 bar_high = float(bar["high"])
                 if bar_low <= nearest_level <= bar_high:
                     touch_count += 1
-            except Exception:
+            except (IndexError, KeyError, ValueError):
                 pass
 
     if touch_count < 2:
@@ -1524,7 +1532,8 @@ def funding_arb_bias(
     try:
         r = rsi(df_15m["close"], 14)
         rsi_val = float(r.iloc[-1]) if not pd.isna(r.iloc[-1]) else 50
-    except Exception:
+    except Exception as exc:
+        logger.debug("RSI check failed (fail-open): %s", exc)
         rsi_val = 50
 
     if direction == "long" and rsi_val > 70:
@@ -1544,7 +1553,8 @@ def funding_arb_bias(
     try:
         ema21 = ema(df_15m["close"], 21).iloc[-1]
         trend_aligned = (direction == "long" and price > ema21) or (direction == "short" and price < ema21)
-    except Exception:
+    except Exception as exc:
+        logger.debug("EMA trend alignment check failed: %s", exc)
         trend_aligned = False
 
     conf = {
@@ -1606,7 +1616,8 @@ def regime_low_vol(
         bb_pctile = float((bb_width.iloc[-100:] < bb_now).sum()) / 100.0
         if bb_pctile > 0.25:
             return None  # not in bottom 25% = not a squeeze
-    except Exception:
+    except Exception as exc:
+        logger.debug("BB squeeze detection failed: %s", exc)
         return None
 
     # ATR declining check
@@ -1617,7 +1628,8 @@ def regime_low_vol(
             atr_5ago = float(atr_vals.iloc[-5])
             if atr_now > atr_5ago * 1.05:
                 return None  # ATR rising, not a low-vol regime
-    except Exception:
+    except Exception as exc:
+        logger.debug("ATR declining check failed: %s", exc)
         return None
 
     # Range edge detection: top/bottom 25% of 50-bar range
@@ -1634,14 +1646,16 @@ def regime_low_vol(
             return None  # not near bottom of range
         if direction == "short" and position_in_range < 0.70:
             return None  # not near top of range
-    except Exception:
+    except Exception as exc:
+        logger.debug("Range edge detection failed: %s", exc)
         return None
 
     # RSI confirmation
     try:
         r = rsi(close, 14)
         rsi_val = float(r.iloc[-1]) if not pd.isna(r.iloc[-1]) else 50
-    except Exception:
+    except Exception as exc:
+        logger.debug("RSI confirmation failed (fail-open): %s", exc)
         rsi_val = 50
 
     if direction == "long" and rsi_val > 40:
@@ -1712,7 +1726,8 @@ def stat_arb_proxy(
         if std_1h <= 0 or pd.isna(mean_1h) or pd.isna(std_1h):
             return None
         zscore_1h = (price - mean_1h) / std_1h
-    except Exception:
+    except Exception as exc:
+        logger.debug("1h z-score calculation failed: %s", exc)
         return None
 
     # Direction must align with z-score
@@ -1729,7 +1744,8 @@ def stat_arb_proxy(
         if std_15m <= 0 or pd.isna(mean_15m) or pd.isna(std_15m):
             return None
         zscore_15m = (price - mean_15m) / std_15m
-    except Exception:
+    except Exception as exc:
+        logger.debug("15m z-score calculation failed: %s", exc)
         return None
 
     if direction == "long" and zscore_15m > -1.5:
@@ -1747,8 +1763,8 @@ def stat_arb_proxy(
             # Strong trend = ATR expanding rapidly
             if atr_mean > 0 and (atr_now / atr_mean) > 1.5:
                 return None  # strong trend, don't mean-revert
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug("ADX/ATR trend check failed: %s", exc)
 
     # Confirming candle: initial reversal move
     curr = df_15m.iloc[-1]
@@ -1821,7 +1837,7 @@ def orderflow_imbalance(
             sell_pct = (h - c) / bar_range
             buy_vol_total += v * buy_pct
             sell_vol_total += v * sell_pct
-        except Exception:
+        except (IndexError, KeyError, ValueError, TypeError):
             continue
 
     if buy_vol_total <= 0 and sell_vol_total <= 0:
@@ -1849,7 +1865,8 @@ def orderflow_imbalance(
         vol_now = float(df_15m["volume"].iloc[-1])
         if vol_avg > 0 and vol_now < vol_avg * 0.8:
             return None  # low volume, weak signal
-    except Exception:
+    except Exception as exc:
+        logger.debug("Volume average check failed: %s", exc)
         return None
 
     # Confirming candle
@@ -1864,7 +1881,8 @@ def orderflow_imbalance(
     try:
         r = rsi(df_15m["close"], 14)
         rsi_val = float(r.iloc[-1]) if not pd.isna(r.iloc[-1]) else 50
-    except Exception:
+    except Exception as exc:
+        logger.debug("RSI sanity check failed (fail-open): %s", exc)
         rsi_val = 50
 
     if direction == "long" and rsi_val > 72:
@@ -1922,7 +1940,8 @@ def macro_ma_cross(
         ma200_now = float(ma200.iloc[-1])
         if pd.isna(ma200_now) or ma200_now <= 0:
             return None
-    except Exception:
+    except Exception as exc:
+        logger.debug("200 MA calculation failed: %s", exc)
         return None
 
     # Check for recent cross (within last 3 bars)
@@ -1948,7 +1967,7 @@ def macro_ma_cross(
                     cross_found = True
                     cross_bar_idx = -i
                     break
-        except Exception:
+        except (IndexError, KeyError, ValueError, TypeError):
             continue
 
     if not cross_found:
@@ -1965,8 +1984,8 @@ def macro_ma_cross(
                     htf_confirmed = True
                 elif direction == "short" and price < ma50_4h_now:
                     htf_confirmed = True
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug("4h 50 MA confirmation failed: %s", exc)
     else:
         htf_confirmed = True  # no 4h data, skip this check
 
@@ -1981,7 +2000,8 @@ def macro_ma_cross(
             body_ratio = 0
         if body_ratio < 0.50:
             return None  # weak cross, not convincing
-    except Exception:
+    except Exception as exc:
+        logger.debug("Cross bar momentum check failed: %s", exc)
         return None
 
     # Volume above average on cross
@@ -1992,8 +2012,8 @@ def macro_ma_cross(
             vol_cross = float(df_1h.iloc[cross_bar_idx]["volume"])
             if vol_avg > 0 and vol_cross < vol_avg * 0.9:
                 vol_confirmed = False
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug("Volume confirmation check failed: %s", exc)
 
     if not vol_confirmed:
         return None
@@ -2085,8 +2105,8 @@ def liquidity_sweep(
         if atr_val > 0 and e21_val > 0:
             distance_from_ema = abs(price - e21_val)
             ema_stretched = distance_from_ema > atr_val
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug("EMA/VWAP stretch check failed: %s", exc)
 
     # Check volume spike
     vol_spike = False
@@ -2165,8 +2185,8 @@ def liquidity_sweep(
                 momentum_ok = True
             elif d == "short" and slope < 0:
                 momentum_ok = True
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.debug("Momentum alignment check failed: %s", exc)
 
         if momentum_ok:
             return {
@@ -2241,8 +2261,8 @@ def exhaustion_warning_block(
                 )
                 if all_bearish:
                     warnings += 1
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug("Body acceleration check failed: %s", exc)
 
     # 2. RSI in deep extreme
     try:
@@ -2253,8 +2273,8 @@ def exhaustion_warning_block(
                 warnings += 1
             if direction == "short" and rsi_val < 25:
                 warnings += 1
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug("RSI deep extreme check failed: %s", exc)
 
     # 3. Volume divergence: price extending but volume declining
     try:
@@ -2267,8 +2287,8 @@ def exhaustion_warning_block(
             price_rising = closes[-1] < closes[0]  # "rising" in short = price falling
         if vol_declining and price_rising:
             warnings += 1
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug("Volume divergence check failed: %s", exc)
 
     # 4. ATR shock (> 2x normal)
     try:
@@ -2278,7 +2298,7 @@ def exhaustion_warning_block(
             atr_mean = float(atr_series.iloc[-20:].mean())
             if atr_mean > 0 and atr_now > 2.0 * atr_mean:
                 warnings += 1
-    except Exception:
-        pass
+    except Exception as exc:
+        logger.debug("ATR shock check failed: %s", exc)
 
     return warnings >= 3

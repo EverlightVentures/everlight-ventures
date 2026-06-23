@@ -205,8 +205,8 @@ class CoinbaseAPI:
                             )
                             logger.error(f"API Error {response.status_code}: {messages}")
                             return None
-                    except Exception:
-                        pass
+                    except (ValueError, KeyError) as parse_exc:
+                        logger.debug("Could not parse error body: %s", parse_exc)
                     logger.error(f"API Error {response.status_code}: {response.text}")
                     return None
 
@@ -415,7 +415,8 @@ class CoinbaseAPI:
         """Fetch authenticated product details (includes futures fields)."""
         try:
             return self._request("GET", f"/api/v3/brokerage/products/{product_id}")
-        except Exception:
+        except Exception as exc:
+            logger.warning("Failed to get product details for %s: %s", product_id, exc)
             return None
 
     def _decimal_places_from_increment(self, increment: str) -> int:
@@ -423,8 +424,8 @@ class CoinbaseAPI:
             inc = str(increment)
             if "." in inc:
                 return len(inc.split(".")[1].rstrip("0"))
-        except Exception:
-            pass
+        except (ValueError, IndexError) as exc:
+            logger.debug("Could not parse increment %r: %s", increment, exc)
         return 0
 
     def _round_base_size(self, size: float, product_id: str) -> Optional[float]:
@@ -435,17 +436,20 @@ class CoinbaseAPI:
 
         try:
             base_inc = float(details.get("base_increment", "1") or "1")
-        except Exception:
+        except (ValueError, TypeError) as exc:
+            logger.debug("Invalid base_increment for %s: %s", product_id, exc)
             base_inc = 1.0
 
         try:
             base_min = float(details.get("base_min_size", "0") or "0")
-        except Exception:
+        except (ValueError, TypeError) as exc:
+            logger.debug("Invalid base_min_size for %s: %s", product_id, exc)
             base_min = 0.0
 
         try:
             base_max = float(details.get("base_max_size", "0") or "0")
-        except Exception:
+        except (ValueError, TypeError) as exc:
+            logger.debug("Invalid base_max_size for %s: %s", product_id, exc)
             base_max = 0.0
 
         if base_inc > 0:
@@ -641,8 +645,8 @@ class CoinbaseAPI:
             if summary and "balance_summary" in summary:
                 bp = summary["balance_summary"].get("futures_buying_power", {})
                 return float(bp.get("value", 0) or 0)
-        except Exception:
-            pass
+        except (ValueError, TypeError, KeyError) as exc:
+            logger.warning("Failed to parse CFM buying power: %s", exc)
         return None
 
     def get_futures_positions(self) -> Optional[List]:
@@ -730,16 +734,10 @@ class CoinbaseAPI:
             portfolios = self.get_portfolios()
             if portfolios:
                 def _ptype(p: dict) -> str:
-                    try:
-                        return str(p.get("type", "") or "").upper()
-                    except Exception:
-                        return ""
+                    return str(p.get("type", "") or "").upper()
 
                 def _pname(p: dict) -> str:
-                    try:
-                        return str(p.get("name", "") or "").lower()
-                    except Exception:
-                        return ""
+                    return str(p.get("name", "") or "").lower()
 
                 # Source: default portfolio (spot)
                 if not from_portfolio:
@@ -1013,7 +1011,8 @@ class CoinbaseAPI:
             return 0
         try:
             orders = self.get_open_orders(product_id) or []
-        except Exception:
+        except Exception as exc:
+            logger.warning("Failed to fetch open orders for %s: %s", product_id, exc)
             orders = []
         count = 0
         for o in orders:
@@ -1023,8 +1022,8 @@ class CoinbaseAPI:
             try:
                 if self.cancel_order(str(oid)):
                     count += 1
-            except Exception:
-                continue
+            except Exception as exc:
+                logger.warning("Failed to cancel order %s for %s: %s", oid, product_id, exc)
         return count
 
     def close_cfm_position(self, product_id: str) -> Optional[dict]:
@@ -1055,7 +1054,8 @@ class CoinbaseAPI:
                 or pos.get("position_size")
                 or 0
             )
-        except Exception:
+        except (ValueError, TypeError) as exc:
+            logger.warning("Failed to parse position size for %s: %s", product_id, exc)
             size = 0.0
         side_raw = str(pos.get("side") or "").lower()
 
@@ -1111,15 +1111,16 @@ class CoinbaseAPI:
                         or cur.get("position_size")
                         or 0
                     )
-                except Exception:
+                except (ValueError, TypeError) as exc:
+                    logger.debug("Failed to parse position size during close check: %s", exc)
                     cur_size = 0.0
                 if abs(cur_size) <= 0:
                     closed = True
                     break
             if closed:
                 self.cancel_open_orders(product_id)
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning("Post-close cleanup failed for %s: %s", product_id, exc)
 
         return resp
 
