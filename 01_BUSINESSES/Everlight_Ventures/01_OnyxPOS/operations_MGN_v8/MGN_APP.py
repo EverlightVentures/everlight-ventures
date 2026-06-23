@@ -139,6 +139,7 @@ def manager_required(f):
 #                     IMPORT POS CORE
 # ==============================================================================
 
+import money_core as money
 from POS_CORE import (
     ANIMAL_SUBCATEGORIES,
     # App meta
@@ -3288,6 +3289,188 @@ def inventory_reconcile_apply():
     )
     flash(msg, "success" if ok else "error")
     return redirect(url_for("inventory_reconcile"))
+
+
+# ============================================================================
+# MONEY OS -- owner/manager financial cockpit (engine in money_core.py).
+# P&L, payday readiness, envelopes, bills + autopilot, DIY payroll filing helper.
+# ============================================================================
+MONEY_DASHBOARD = """<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Money OS</title><style>
+ body{font-family:system-ui,Arial,sans-serif;margin:0;background:#0f1115;color:#e8e8e8}
+ .wrap{max-width:1040px;margin:0 auto;padding:18px}h1{font-size:20px;color:#e8c55a;margin:.2em 0}
+ a{color:#c9a84c}.muted{color:#9aa6b2;font-size:13px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+ .card{background:#161a22;border:1px solid #232833;border-radius:12px;padding:14px}
+ .big{font-size:26px;font-weight:700}.flag{display:inline-block;padding:2px 10px;border-radius:20px;font-size:12px;font-weight:700}
+ .PROFITABLE,.GREEN{background:#10391f;color:#5fe39b}.SLOW,.AMBER{background:#4a3a10;color:#ffcf5f}
+ .LOSS,.RED{background:#4a1414;color:#ff8080}.BLACK{background:#000;color:#ff8080;border:1px solid #ff8080}
+ input,select,button{padding:7px;border-radius:7px;border:1px solid #2a2f3a;background:#0f1115;color:#e8e8e8}
+ button{background:#c9a84c;color:#111;border:0;font-weight:700;cursor:pointer}
+ table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px;border-bottom:1px solid #232833;text-align:left}
+ .bar{height:8px;background:#232833;border-radius:6px;overflow:hidden}.bar>i{display:block;height:100%;background:#c9a84c}
+ form.inline{display:inline}
+</style></head><body><div class="wrap">
+<h1>Money OS</h1>
+<p class="muted">Owner/manager cockpit. Reads your sales + time clock. Nothing here moves real money -- it stages, you approve. <a href="/sales">register</a> &middot; <a href="/payroll">payroll</a></p>
+{% with msgs = get_flashed_messages() %}{% for m in msgs %}<p class="muted">- {{ m }}</p>{% endfor %}{% endwith %}
+
+<div class="grid">
+  <div class="card">
+    <div class="muted">Today's profit ({{ pnl.date }})</div>
+    <div class="big">${{ '%.2f'|format(pnl.net_profit) }} <span class="flag {{ pnl.flag }}">{{ pnl.flag }}</span></div>
+    <table>
+      <tr><td>Revenue</td><td>${{ '%.2f'|format(pnl.revenue) }}</td></tr>
+      <tr><td>COGS</td><td>-${{ '%.2f'|format(pnl.cogs) }}</td></tr>
+      <tr><td>Labor (OT-correct)</td><td>-${{ '%.2f'|format(pnl.labor_cost) }}</td></tr>
+      <tr><td>Employer tax est</td><td>-${{ '%.2f'|format(pnl.employer_tax) }}</td></tr>
+      <tr><td>Overhead (prorated)</td><td>-${{ '%.2f'|format(pnl.overhead_allocated) }}</td></tr>
+      <tr><td>Sales tax collected</td><td>${{ '%.2f'|format(pnl.sales_tax_collected) }} <span class="muted">(owed to CDTFA)</span></td></tr>
+    </table>
+    <form class="inline" method="post" action="/money/allocate"><button>Run today's set-aside</button></form>
+  </div>
+
+  <div class="card">
+    <div class="muted">Payroll readiness {% if r.pay_date %}(by {{ r.pay_date }}){% endif %}</div>
+    <div class="big">{% if r.gap > 0 %}Short ${{ '%.2f'|format(r.gap) }}{% else %}Covered{% endif %}
+      <span class="flag {{ r.alert_level }}">{{ r.alert_level }}</span></div>
+    {% if r.catch_up > 0 %}<p class="flag BLACK">CATCH-UP OWED: ${{ '%.2f'|format(r.catch_up) }} across {{ r.catch_up_periods|length }} unrun period(s)</p>{% endif %}
+    <table>
+      <tr><td>Accrued to date</td><td>${{ '%.2f'|format(r.accrued_to_date) }}</td></tr>
+      <tr><td>Projected to payday</td><td>${{ '%.2f'|format(r.projected_to_payday) }}</td></tr>
+      <tr><td>Employer tax est</td><td>${{ '%.2f'|format(r.employer_tax_est) }}</td></tr>
+      <tr><td>Total need</td><td>${{ '%.2f'|format(r.total_need) }}</td></tr>
+      <tr><td>Cash on hand{% if r.cash_stale %} (stale){% endif %}</td><td>${{ '%.2f'|format(r.cash_on_hand) }}</td></tr>
+      <tr><td>Payroll envelopes</td><td>${{ '%.2f'|format(r.payroll_envelope) }}</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="muted">Envelopes</div>
+    <table>{% for e in envelopes %}<tr><td>{{ e.Envelope }}</td>
+      <td style="width:50%"><div class="bar"><i style="width:{{ ((e.Balance|float / e.Target|float * 100) if e.Target|float > 0 else (100 if e.Balance|float>0 else 0))|round|int }}%"></i></div></td>
+      <td>${{ '%.2f'|format(e.Balance|float) }}</td></tr>{% endfor %}</table>
+  </div>
+
+  <div class="card">
+    <div class="muted">Cash on hand (manual)</div>
+    <form method="post" action="/money/cash"><input name="amount" type="number" step="0.01" placeholder="bank balance"> <button>Update</button></form>
+    <p class="muted">{% if cash.as_of %}as of {{ cash.as_of }} ({{ cash.source }}){% else %}not set{% endif %}. Plaid auto-pull is a later upgrade.</p>
+    <div class="muted" style="margin-top:10px">Autopilot</div>
+    <form method="post" action="/money/autopilot">
+      <select name="mode">
+        <option value="OFF" {% if autopilot=='OFF' %}selected{% endif %}>OFF</option>
+        <option value="SUGGEST" {% if autopilot=='SUGGEST' %}selected{% endif %}>SUGGEST (default -- no auto money)</option>
+        <option value="ARMED" {% if autopilot=='ARMED' %}selected{% endif %}>ARMED (auto-approve flagged autopay only)</option>
+      </select> <button>Set</button>
+    </form>
+  </div>
+</div>
+
+<div class="card" style="margin-top:14px">
+  <div class="muted">Bills -- available after payroll reserve: <b>${{ '%.2f'|format(bills.available_after_payroll) }}</b>
+    (cash ${{ '%.2f'|format(bills.cash) }} - payroll ${{ '%.2f'|format(bills.payroll_reserve) }})</div>
+  <table><tr><th>Vendor</th><th>Amount</th><th>Due</th><th>Status</th><th>When</th><th></th></tr>
+  {% for b in bills.bills %}<tr>
+    <td>{{ b.Vendor }}</td><td>${{ '%.2f'|format(b.Amount|float) }}</td><td>{{ b.Due_Date }}</td>
+    <td>{{ b.Status }}</td><td><span class="muted">{{ b._tag }}</span></td>
+    <td>{% if b.Status != 'PAID' %}
+      <form class="inline" method="post" action="/money/bills/{{ b.Bill_ID }}/approve"><button>Approve</button></form>
+      <form class="inline" method="post" action="/money/bills/{{ b.Bill_ID }}/pay"><button>Pay</button></form>
+    {% endif %}</td></tr>{% endfor %}</table>
+  <form method="post" action="/money/bills/add" style="margin-top:8px">
+    <input name="vendor" placeholder="vendor"> <input name="amount" type="number" step="0.01" placeholder="amount">
+    <input name="due_date" type="date"> <button>Add bill</button>
+  </form>
+</div>
+<p class="muted" style="margin-top:10px">DIY payroll filing figures: <a href="/money/filing">/money/filing?period_id=...</a> gives the exact EFTPS (federal) + DE 88 (CA) deposit amounts to key into the free government portals after a pay run.</p>
+</div></body></html>"""
+
+
+@app.route("/money")
+@manager_required
+def money_dashboard():
+    from flask import render_template_string
+    try:
+        money.generate_due_bills()
+    except Exception:
+        pass
+    pnl = money.compute_daily_pnl(date.today())
+    return render_template_string(
+        MONEY_DASHBOARD, pnl=pnl, r=money.payroll_readiness(), envelopes=money.get_envelopes(),
+        bills=money.bill_priority_view(), cash=money.get_cash_on_hand(),
+        autopilot=money.get_autopilot_mode())
+
+
+@app.route("/api/money/pnl")
+@manager_required
+def api_money_pnl():
+    if request.args.get("range") == "week":
+        return jsonify(money.compute_weekly_pnl(request.args.get("date") or date.today().strftime("%Y-%m-%d")))
+    return jsonify(money.compute_daily_pnl(request.args.get("date") or None))
+
+
+@app.route("/api/money/payroll-readiness")
+@manager_required
+def api_money_readiness():
+    return jsonify(money.payroll_readiness())
+
+
+@app.route("/money/cash", methods=["POST"])
+@manager_required
+def money_cash():
+    money.set_cash_manual(request.form.get("amount", 0), by=session.get("employee_id", ""))
+    flash("Cash on hand updated.", "success")
+    return redirect(url_for("money_dashboard"))
+
+
+@app.route("/money/allocate", methods=["POST"])
+@manager_required
+def money_allocate():
+    res = money.allocate_for_date()
+    flash("Already allocated today." if res.get("skipped") else "Daily set-aside run.", "info")
+    return redirect(url_for("money_dashboard"))
+
+
+@app.route("/money/bills/add", methods=["POST"])
+@manager_required
+def money_bill_add():
+    money.add_bill(request.form.get("vendor", ""), request.form.get("amount", 0),
+                   request.form.get("due_date", ""), type=request.form.get("type", "BILL"),
+                   note=request.form.get("note", ""))
+    flash("Bill added.", "success")
+    return redirect(url_for("money_dashboard"))
+
+
+@app.route("/money/bills/<bid>/approve", methods=["POST"])
+@manager_required
+def money_bill_approve(bid):
+    money.approve_bill(bid, session.get("employee_id", ""))
+    return redirect(url_for("money_dashboard"))
+
+
+@app.route("/money/bills/<bid>/pay", methods=["POST"])
+@manager_required
+def money_bill_pay(bid):
+    money.pay_bill(bid, session.get("employee_id", ""))
+    flash("Bill marked paid.", "success")
+    return redirect(url_for("money_dashboard"))
+
+
+@app.route("/money/autopilot", methods=["POST"])
+@manager_required
+def money_autopilot():
+    m = money.set_autopilot_mode(request.form.get("mode", "SUGGEST"))
+    flash(f"Autopilot set to {m}.", "info")
+    return redirect(url_for("money_dashboard"))
+
+
+@app.route("/money/filing")
+@manager_required
+def money_filing():
+    pid = (request.args.get("period_id") or "").strip()
+    if not pid:
+        return jsonify({"error": "period_id required, e.g. /money/filing?period_id=PP-2026-06"})
+    return jsonify(money.filing_summary(pid))
 
 
 @app.route("/sales/complete", methods=["POST"])
