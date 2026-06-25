@@ -324,6 +324,27 @@ def get_customer_history(email: str):
     return sorted(rows, key=lambda r: r.get("Timestamp", ""), reverse=True)
 
 
+def list_customers():
+    """All customers (Customers.csv), newest first."""
+    rows = read_csv(CUSTOMERS_DIR / "Customers.csv")
+    return sorted(rows, key=lambda r: r.get("Created_At", ""), reverse=True)
+
+
+def get_customer_by_id(customer_id: str):
+    cid = (customer_id or "").strip()
+    for r in read_csv(CUSTOMERS_DIR / "Customers.csv"):
+        if (r.get("Customer_ID") or "").strip() == cid:
+            return r
+    return None
+
+
+def get_newsletter_subscribers(active_only: bool = True):
+    rows = read_csv(get_newsletter_path())
+    if active_only:
+        rows = [r for r in rows if (r.get("Status") or "").upper() == "ACTIVE"]
+    return sorted(rows, key=lambda r: r.get("Subscribed_At", ""), reverse=True)
+
+
 def _iter_csv_files(root: Path, suffix: str):
     if not root.exists():
         return []

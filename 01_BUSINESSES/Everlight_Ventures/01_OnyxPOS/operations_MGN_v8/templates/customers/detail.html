@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block page_title %}{{ customer.Name or 'Customer' }}{% endblock %}
+{% block header_emoji %}🧑‍🌾{% endblock %}
+{% block header_title %}{{ customer.Name or 'Customer' }}{% endblock %}
+{% block header_actions %}
+<a href="{{ url_for('customers_list') }}" class="btn btn-secondary">
+    <i data-lucide="arrow-left"></i> Back to Customers
+</a>
+{% endblock %}
+{% block content %}
+<div style="background:linear-gradient(145deg,#1e3a2a,#162b1f);border:1px solid rgba(167,243,208,0.12);border-radius:16px;padding:20px;margin-bottom:18px;color:#e8f5ee;">
+  <div style="font-size:16px;">{{ customer.Email }}</div>
+  <div style="color:#94a3b8;margin-top:6px;">Total spent <strong style="color:#34d399;">${{ '%.2f'|format(spent) }}</strong> across {{ history|length }} visit(s){% if customer.Created_At %} &middot; since {{ customer.Created_At[:10] }}{% endif %}</div>
+</div>
+<div style="overflow:auto;background:linear-gradient(145deg,#1e3a2a,#162b1f);border:1px solid rgba(167,243,208,0.12);border-radius:16px;padding:8px;">
+<table style="width:100%;border-collapse:collapse;color:#e8f5ee;font-size:14px;">
+  <thead><tr style="text-align:left;color:#94a3b8;border-bottom:1px solid rgba(167,243,208,0.15);">
+    <th style="padding:12px;">Date</th><th style="padding:12px;">Items</th><th style="padding:12px;">Total</th></tr></thead>
+  <tbody>
+  {% for h in history %}
+    <tr style="border-bottom:1px solid rgba(167,243,208,0.08);">
+      <td style="padding:12px;white-space:nowrap;">{{ h.Date }} {{ h.Time }}</td>
+      <td style="padding:12px;">{{ h.Items_Summary }}</td>
+      <td style="padding:12px;">${{ h.Total }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="3" style="padding:20px;color:#94a3b8;">No purchases recorded yet.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}
+{% block extra_js %}<script>lucide.createIcons();</script>{% endblock %}

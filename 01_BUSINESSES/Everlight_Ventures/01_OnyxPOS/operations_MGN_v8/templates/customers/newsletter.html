@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block page_title %}Newsletter{% endblock %}
+{% block header_emoji %}📣{% endblock %}
+{% block header_title %}Newsletter Subscribers{% endblock %}
+{% block header_actions %}
+<a href="{{ url_for('newsletter_export') }}" class="btn btn-secondary">
+    <i data-lucide="download"></i> Download CSV
+</a>
+<a href="{{ url_for('customers_list') }}" class="btn btn-secondary">
+    <i data-lucide="users"></i> Customers
+</a>
+{% endblock %}
+{% block content %}
+<div style="overflow:auto;background:linear-gradient(145deg,#1e3a2a,#162b1f);border:1px solid rgba(167,243,208,0.12);border-radius:16px;padding:8px;">
+<table style="width:100%;border-collapse:collapse;color:#e8f5ee;font-size:14px;">
+  <thead><tr style="text-align:left;color:#94a3b8;border-bottom:1px solid rgba(167,243,208,0.15);">
+    <th style="padding:12px;">Email</th><th style="padding:12px;">Name</th>
+    <th style="padding:12px;">Since</th><th style="padding:12px;">Status</th></tr></thead>
+  <tbody>
+  {% for s in subscribers %}
+    <tr style="border-bottom:1px solid rgba(167,243,208,0.08);">
+      <td style="padding:12px;">{{ s.Email }}</td>
+      <td style="padding:12px;">{{ s.Name }}</td>
+      <td style="padding:12px;">{{ s.Subscribed_At[:10] }}</td>
+      <td style="padding:12px;">{{ s.Status }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="4" style="padding:20px;color:#94a3b8;">No subscribers yet. Customers opt in with "Add to newsletter" at checkout.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}
+{% block extra_js %}<script>lucide.createIcons();</script>{% endblock %}

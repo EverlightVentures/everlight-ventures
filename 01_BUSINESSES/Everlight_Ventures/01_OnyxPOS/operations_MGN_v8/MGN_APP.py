@@ -281,6 +281,9 @@ from POS_CORE import (
     log_receipt_delivery,
     send_receipt_email_smtp,
     upsert_customer,
+    list_customers,
+    get_customer_by_id,
+    get_newsletter_subscribers,
     run_payroll,
     search_items,
     quick_add_item,
@@ -4027,6 +4030,68 @@ def receipt_email(trans_id):
             customer_email=customer_email,
         )
         return jsonify({"ok": False, "error": f"Email failed: {e}"}), 500
+
+
+# ==============================================================================
+#                     CUSTOMERS + NEWSLETTER (marketing)
+# ==============================================================================
+
+
+@app.route("/customers")
+@manager_required
+def customers_list():
+    enriched = []
+    for c in list_customers():
+        hist = get_customer_history(c.get("Email", ""))
+        spent = 0.0
+        for h in hist:
+            try:
+                spent += float(h.get("Total") or 0)
+            except Exception:
+                pass
+        enriched.append({**c, "purchases": len(hist), "spent": round(spent, 2),
+                         "last": hist[0].get("Date") if hist else ""})
+    return render_template("customers/list.html", customers=enriched)
+
+
+@app.route("/customers/<customer_id>")
+@manager_required
+def customer_detail(customer_id):
+    cust = get_customer_by_id(customer_id)
+    if not cust:
+        flash("Customer not found.", "error")
+        return redirect(url_for("customers_list"))
+    history = get_customer_history(cust.get("Email", ""))
+    spent = 0.0
+    for h in history:
+        try:
+            spent += float(h.get("Total") or 0)
+        except Exception:
+            pass
+    return render_template("customers/detail.html", customer=cust,
+                           history=history, spent=round(spent, 2))
+
+
+@app.route("/newsletter")
+@manager_required
+def newsletter_list():
+    subs = get_newsletter_subscribers(active_only=False)
+    return render_template("customers/newsletter.html", subscribers=subs)
+
+
+@app.route("/newsletter/export")
+@manager_required
+def newsletter_export():
+    from flask import Response
+    subs = get_newsletter_subscribers(active_only=True)
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["Email", "Name", "Subscribed_At"])
+    for s in subs:
+        w.writerow([s.get("Email", ""), s.get("Name", ""), s.get("Subscribed_At", "")])
+    return Response(
+        buf.getvalue(), mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=newsletter_subscribers.csv"})
 
 
 # ==============================================================================

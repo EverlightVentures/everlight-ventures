@@ -63,9 +63,12 @@ and a PDF receipt is emailed (best-effort; needs SMTP in .env). Also fixed: the 
 were never imported (the old /sales/receipt/<id>/email route was dead) -- now wired. Also fixed a
 relative-path bug in upsert_customer (was writing to a CWD-relative folder). 21 tests green.
 
+### SHIPPED 2026-06-25: CUSTOMER VIEWS (list + history + newsletter export)
+/customers lists every customer with visit count + total spent; click one for their full purchase
+history (so you can see what they bought and tailor offers). /newsletter lists subscribers with a
+"Download CSV" button -- that is your mailing list for your own newsletters/offers. All manager-gated.
+
 ### STILL BUILDING (sequenced for daily use):
-- CUSTOMER VIEWS (next): a customers list + per-customer purchase-history page + newsletter CSV
-  export, so you can review what they bought and send tailored offers.
 - OWNER/ADMIN TASK SCHEDULER: recurring day-rules (1st/15th, 2nd & 4th), admin-profile
   notifications, self-assign; managers excluded.
 - VENDOR INVOICE INGEST + MASTER-SKU + FIFO (new request 2026-06-25): OUR item = the MASTER SKU;
