@@ -239,6 +239,7 @@ from POS_CORE import (
     # Tasks
     get_all_tasks,
     get_average_cost,
+    get_config,
     get_employee,
     get_employee_path,
     get_employee_pay_config,
@@ -750,6 +751,14 @@ def send_onboarding_email(to_email: str, business_name: str) -> bool:
     return True
 
 
+def get_eod_recipients():
+    """EOD report recipients (owner + e.g. mom who handles the books). Settable
+    in-app via Settings (Config.csv 'EOD_Emails'), else env MGN_EOD_EMAIL, else the
+    owner. Comma-separated."""
+    raw = (get_config("EOD_Emails", "") or os.getenv("MGN_EOD_EMAIL", "1m.rich.gee@gmail.com"))
+    return [a.strip() for a in raw.split(",") if a.strip()]
+
+
 def send_eod_report_email(summary_text: str,
                           subject: str = "Mountain Gardens POS -- End of Day Report",
                           attachments=None) -> bool:
@@ -764,7 +773,7 @@ def send_eod_report_email(summary_text: str,
     user = os.getenv("SMTP_USER", "").strip()
     pw = os.getenv("SMTP_PASS", "").strip()
     mail_from = os.getenv("SMTP_FROM", user).strip()
-    recipients = [a.strip() for a in os.getenv("MGN_EOD_EMAIL", "1m.rich.gee@gmail.com").split(",") if a.strip()]
+    recipients = get_eod_recipients()
     if not host or not user or not pw or not recipients:
         return False
     msg = EmailMessage()
@@ -7870,6 +7879,7 @@ def api_till_close():
         # Export the day's files locally (Daily_Reports/<date>/) + attach to the email,
         # so the close-out is saved AND viewable regardless of whether email sends.
         attach_paths = []
+        reports_dir = None
         try:
             day_str = date.today().strftime("%Y-%m-%d")
             reports_dir = os.path.join(DATA_DIR, "Daily_Reports", day_str)
@@ -7901,8 +7911,14 @@ def api_till_close():
                 cw.writeheader()
                 cw.writerow(closeout_row)
             attach_paths.append(closeout_csv)
-        except Exception:
-            pass
+        except Exception as _eod_exc:
+            # Don't silently swallow a failed LOCAL export -- a missing PC copy must
+            # be detectable (the local file is one of the 3 required copies).
+            try:
+                from POS_CORE import append_audit_event
+                append_audit_event("eod_local_export_failed", {"error": str(_eod_exc)})
+            except Exception:
+                pass
         try:
             from POS_CORE import append_audit_event
             append_audit_event("till_close", {
@@ -7916,6 +7932,20 @@ def api_till_close():
             emailed = send_eod_report_email(report_text, attachments=attach_paths)
         except Exception:
             emailed = False
+        # Provable delivery trail: record where the EOD went (or that SMTP was off)
+        # so the LOCAL Daily_Reports copy is an auditable 3rd copy / fallback.
+        eod_recipients = get_eod_recipients()
+        try:
+            if reports_dir:
+                with open(os.path.join(reports_dir, "_EOD_DELIVERY.txt"), "w", encoding="utf-8") as _df:
+                    _df.write(
+                        f"Closed: {datetime.now():%Y-%m-%d %H:%M:%S}\n"
+                        f"Emailed: {'YES' if emailed else 'NO (SMTP not configured or send failed)'}\n"
+                        f"Recipients: {', '.join(eod_recipients)}\n"
+                        f"Local copies: {', '.join(os.path.basename(p) for p in attach_paths)}\n"
+                    )
+        except Exception:
+            pass
         return jsonify(
             {
                 "success": True,
@@ -7923,6 +7953,8 @@ def api_till_close():
                 "counted": counted,
                 "variance": variance,
                 "emailed": emailed,
+                "emailed_to": eod_recipients,
+                "local_copies": [os.path.basename(p) for p in attach_paths],
             }
         )
     except Exception as e:
@@ -7975,6 +8007,7 @@ def settings():
         tier=tier,
         billing_mode=billing_mode,
         usage=usage,
+        eod_emails=", ".join(get_eod_recipients()),
     )
 
 
@@ -8041,6 +8074,11 @@ def update_receipt_settings():
     # Mirror the rate into the live tax engine (Settings/Config.csv) so record_sale
     # uses exactly what the owner enters here. Accepts 8.25 or 0.0825.
     set_config("Store_Tax_Rate", tax_rate_input)
+    # EOD report recipients (owner + e.g. mom). Comma-separated. Drives who gets the
+    # end-of-day close-out email; the local PC copy is always saved regardless.
+    eod_emails = (request.form.get("eod_emails") or "").strip()
+    if eod_emails:
+        set_config("EOD_Emails", eod_emails)
     tenant_settings["Receipt_Footer"] = request.form.get("receipt_footer", "")
     tenant_settings["Business_Address"] = request.form.get("business_address", "")
     tenant_settings["Business_Phone"] = request.form.get("business_phone", "")

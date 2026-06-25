@@ -48,8 +48,14 @@ veggies/fruit/herbs/berries; leave ornamentals + hardgoods "Taxable". New plant 
 by keywords -- but the current 989 items lost their real names in an earlier import, so it can only
 match 1 today; re-run it after importing a named catalog, or classify the key sellers by hand.
 
+### SHIPPED 2026-06-25: EOD = 3 COPIES (local PC + you + mom)
+At till close the report is saved on the PC (Daily_Reports/<date>/: sales log + summary + closeout)
+AND emailed to everyone set in Settings -> "End-of-Day Report Emails" (comma list, e.g. you + mom).
+A _EOD_DELIVERY.txt is written each close noting whether the email sent, so the local copy is a
+provable fallback. SMTP must be set in .env (SMTP_HOST/PORT/USER/PASS) for emails to actually leave;
+local copies save regardless. Set recipients in Settings (or env MGN_EOD_EMAIL).
+
 ### STILL BUILDING (sequenced for daily use):
-- EOD = 3 COPIES: local on the PC + owner email + mom email (set MGN_EOD_EMAIL=owner,mom).
 - CUSTOMER EMAIL at checkout -> emailed receipt -> customer profile + purchase history ->
   newsletter list for marketing.
 - OWNER/ADMIN TASK SCHEDULER: recurring day-rules (1st/15th, 2nd & 4th), admin-profile

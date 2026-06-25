@@ -247,7 +247,12 @@
                     <div class="form-group">
                         <label class="form-label">Tax Rate (%)</label>
                         <input type="number" name="tax_rate" class="form-input" value="{{ tenant_settings.Tax_Rate or '8.25' }}" step="0.01" min="0" max="100">
-                        <small class="text-muted" style="display: block; margin-top: 6px;">Default tax rate for all transactions</small>
+                        <small class="text-muted" style="display: block; margin-top: 6px;">Combined state + local rate (CA base 7.25% + your district). Food-producing plants are exempt automatically.</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">End-of-Day Report Emails</label>
+                        <input type="text" name="eod_emails" class="form-input" value="{{ eod_emails or '' }}" placeholder="you@gmail.com, mom@gmail.com">
+                        <small class="text-muted" style="display: block; margin-top: 6px;">Comma-separated. At till close the report is saved on this PC AND emailed to everyone listed (e.g. you + mom who handles the books).</small>
                     </div>
                 </div>
 
