@@ -29,6 +29,21 @@
 </div>
 
 <div class="ix-panel">
+  <h3 style="margin-top:0;">Accounting export (for QuickBooks / your accountant)</h3>
+  <form method="GET" action="{{ url_for('integrations_accounting') }}" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
+    <div><label class="ix-label">From</label><input class="ix-input" type="date" name="from"></div>
+    <div><label class="ix-label">To</label><input class="ix-input" type="date" name="to"></div>
+    <div><label class="ix-label">Type</label>
+      <select class="ix-input" name="kind">
+        <option value="summary">Daily sales summary</option>
+        <option value="journal">QuickBooks journal entries</option>
+      </select></div>
+    <button class="ix-btn" type="submit"><i data-lucide="download"></i> Download</button>
+  </form>
+  <div class="ix-hint">Summary = one row per day (sales, tax, COGS, cash/card). Journal = double-entry lines to import into QuickBooks. Blank dates = this month.</div>
+</div>
+
+<div class="ix-panel">
   <h3 style="margin-top:0;">Import a CSV</h3>
   <p style="color:#cbd5e1;margin-top:0;">Upload a Square / Shopify / QuickBooks / MGN export. It auto-detects the format, shows a preview, then you apply it.</p>
   <form method="POST" action="{{ url_for('integrations_import_preview') }}" enctype="multipart/form-data">

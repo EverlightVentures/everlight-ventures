@@ -4344,6 +4344,56 @@ def integrations_import_apply():
     return redirect(url_for("integrations"))
 
 
+_ACCT = None
+
+
+def _acct():
+    """Lazy-load the standalone accounting_export module."""
+    global _ACCT
+    if _ACCT is None:
+        import importlib.util as ilu
+        p = os.path.join(SCRIPT_DIR, "tools", "accounting_export.py")
+        spec = ilu.spec_from_file_location("accounting_export", p)
+        mod = ilu.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        _ACCT = mod
+    return _ACCT
+
+
+@app.route("/integrations/accounting")
+@manager_required
+def integrations_accounting():
+    from flask import Response
+    from datetime import datetime as _dt
+    kind = (request.args.get("kind") or "summary").strip().lower()
+    today = date.today()
+
+    def _parse(s, default):
+        try:
+            return _dt.strptime((s or "").strip(), "%Y-%m-%d").date()
+        except Exception:
+            return default
+
+    start = _parse(request.args.get("from"), today.replace(day=1))
+    end = _parse(request.args.get("to"), today)
+    acc = _acct()
+    if kind == "journal":
+        rows = acc.journal_entry_rows(start, end)
+        headers = ["Date", "Account", "Debit", "Credit", "Memo"]
+    else:
+        rows = acc.daily_summary_rows(start, end)
+        headers = ["Date", "Transactions", "Gross_Sales", "Sales_Tax", "COGS",
+                   "Gross_Profit", "Cash", "Card"]
+    buf = io.StringIO()
+    w = csv.DictWriter(buf, fieldnames=headers)
+    w.writeheader()
+    w.writerows(rows)
+    return Response(
+        buf.getvalue(), mimetype="text/csv",
+        headers={"Content-Disposition":
+                 f"attachment; filename=accounting_{kind}_{start}_{end}.csv"})
+
+
 # ==============================================================================
 #                     INVENTORY
 # ==============================================================================
