@@ -1102,7 +1102,7 @@
 lucide.createIcons();
 
 // === CONFIG ===
-const TAX_RATE = 0.0825;
+const TAX_RATE = {{ tax_rate|default(0.0825) }};
 const CARD_FEE_RATE = {{ (card_fee_rate or 0.03) | float }};
 let cart = [];
 let paymentMethod = 'CASH';
@@ -1422,6 +1422,7 @@ async function addItem(sku) {
             name: item.name,
             price: parseFloat(item.price) || 0,
             category: item.category || '',
+            taxable: item.taxable !== false,
             qty: 1
         });
 
@@ -1497,9 +1498,15 @@ function renderCart() {
     lucide.createIcons();
 }
 
+function cartTaxable() {
+    // Taxable subtotal only -- exempt food-producing plants contribute $0 tax,
+    // matching the server (CA Reg 1588). Items default to taxable.
+    return cart.reduce((sum, i) => sum + (i.taxable !== false ? i.qty * i.price : 0), 0);
+}
+
 function updateTotals() {
     const subtotal = cart.reduce((sum, i) => sum + (i.qty * i.price), 0);
-    const tax = subtotal * TAX_RATE;
+    const tax = cartTaxable() * TAX_RATE;
     const cardFee = paymentMethod === 'CARD' ? subtotal * CARD_FEE_RATE : 0;
     const total = subtotal + tax + cardFee;
 
@@ -1540,7 +1547,7 @@ function calcChange() {
 
     const cash = parseFloat(document.getElementById('cashInput').value) || 0;
     const subtotal = cart.reduce((sum, i) => sum + (i.qty * i.price), 0);
-    const total = subtotal + (subtotal * TAX_RATE) + (paymentMethod === 'CARD' ? subtotal * CARD_FEE_RATE : 0);
+    const total = subtotal + (cartTaxable() * TAX_RATE) + (paymentMethod === 'CARD' ? subtotal * CARD_FEE_RATE : 0);
     const change = cash - total;
 
     const display = document.getElementById('changeDisplay');
@@ -1559,7 +1566,7 @@ async function completeSale() {
 
     const subtotal = cart.reduce((sum, i) => sum + (i.qty * i.price), 0);
     const cardFee = paymentMethod === 'CARD' ? subtotal * CARD_FEE_RATE : 0;
-    const total = subtotal + (subtotal * TAX_RATE) + cardFee;
+    const total = subtotal + (cartTaxable() * TAX_RATE) + cardFee;
 
     let cashReceived = null;
     if (paymentMethod === 'CASH') {

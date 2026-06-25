@@ -259,6 +259,7 @@ from POS_CORE import (
     get_task_assignments_for_date,
     get_task_events,
     get_tasks_for_employee,
+    get_tax_rate,
     # Time off
     get_time_off_requests,
     get_timeclock_edit_history,
@@ -3252,6 +3253,7 @@ def sales():
         product_subs=PRODUCT_SUBCATEGORIES,
         plant_subs=PLANT_SUBCATEGORIES,
         card_fee_rate=card_fee_rate,
+        tax_rate=get_tax_rate(),
     )
 
 
@@ -3278,6 +3280,7 @@ def sales_search():
                 "category": item.get("Category", ""),
                 "price": float(item.get("Default_Price", 0) or 0),
                 "stock": stock,
+                "taxable": str(item.get("Taxable", "Y")).strip().upper() not in ("N", "NO", "EXEMPT", "FALSE", "0"),
             }
         )
 
@@ -3305,7 +3308,7 @@ def sales_item_details(sku):
             "wholesale": avg_cost,
             "qty_on_hand": stock,
             "on_hand": stock,
-            "taxable": item.get("Taxable", "Y") == "Y",
+            "taxable": str(item.get("Taxable", "Y")).strip().upper() not in ("N", "NO", "EXEMPT", "FALSE", "0"),
         }
     )
 
