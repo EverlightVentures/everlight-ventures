@@ -271,6 +271,16 @@ from POS_CORE import (
     # Data helpers
     read_csv,
     record_sale,
+    add_newsletter_subscriber,
+    build_receipt_payload,
+    build_receipt_pdf_bytes,
+    get_customer_history,
+    get_newsletter_path,
+    get_receipt_bundle,
+    log_customer_receipt,
+    log_receipt_delivery,
+    send_receipt_email_smtp,
+    upsert_customer,
     run_payroll,
     search_items,
     quick_add_item,
@@ -3601,6 +3611,15 @@ def complete_sale():
             amount_received = float(request.form.get("cash_received") or 0)
             card_fee = float(request.form.get("card_fee") or 0)
 
+        # Optional customer capture (works for both JSON and form posts)
+        def _truthy(v):
+            return str(v).strip().lower() in ("1", "true", "on", "yes")
+        _src = data if request.is_json else request.form
+        customer_name = (_src.get("customer_name") or "").strip()
+        customer_email = (_src.get("customer_email") or "").strip()
+        email_receipt = _truthy(_src.get("email_receipt"))
+        newsletter = _truthy(_src.get("newsletter"))
+
         if not items:
             return jsonify({"success": False, "error": "No items in cart"})
 
@@ -3622,6 +3641,51 @@ def complete_sale():
             if settings.get("Review_Prompt_Enabled", "Y").upper() == "Y" and review_url:
                 txns = _count_transactions_current_month()
                 prompt_review = txns in (25, 100, 250)
+
+            # --- customer profile + receipt email + newsletter (all optional) ---
+            txid = result["transaction_id"]
+            customer_id = ""
+            receipt_emailed = False
+            newsletter_added = False
+            if customer_email and "@" in customer_email:
+                try:
+                    customer_id = upsert_customer(customer_name, customer_email)
+                    parts = customer_name.split(" ", 1)
+                    first = parts[0] if parts else ""
+                    last = parts[1] if len(parts) > 1 else ""
+                    # purchase history (so we can see what they bought + tailor offers)
+                    log_customer_receipt(first, last, customer_email,
+                                         build_receipt_payload(txid) or {})
+                    if newsletter:
+                        newsletter_added = add_newsletter_subscriber(
+                            customer_id, customer_email, customer_name)[0]
+                    if email_receipt:
+                        try:
+                            bundle = get_receipt_bundle(txid)
+                            pdf_bytes = build_receipt_pdf_bytes(bundle)
+                            send_receipt_email_smtp(
+                                to_email=customer_email, customer_name=customer_name,
+                                trans_id=txid, pdf_bytes=pdf_bytes)
+                            receipt_emailed = True
+                            log_receipt_delivery(
+                                txid, method="EMAIL", status="OK",
+                                notes="Receipt emailed at checkout",
+                                emp_id=session.get("employee_id", ""),
+                                customer_id=customer_id, customer_name=customer_name,
+                                customer_email=customer_email)
+                        except Exception as _re:
+                            # email is best-effort -- the sale + profile already saved
+                            try:
+                                log_receipt_delivery(
+                                    txid, method="EMAIL", status="FAILED", notes=str(_re),
+                                    emp_id=session.get("employee_id", ""),
+                                    customer_id=customer_id, customer_name=customer_name,
+                                    customer_email=customer_email)
+                            except Exception:
+                                pass
+                except Exception:
+                    pass
+
             return jsonify(
                 {
                     "success": True,
@@ -3631,6 +3695,9 @@ def complete_sale():
                     "change_breakdown": make_change_breakdown(change),
                     "review_prompt": prompt_review,
                     "review_url": review_url,
+                    "customer_id": customer_id,
+                    "receipt_emailed": receipt_emailed,
+                    "newsletter_added": newsletter_added,
                 }
             )
         else:

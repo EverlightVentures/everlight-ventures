@@ -280,9 +280,49 @@ def append_csv(filepath: Path, headers: List[str], row: Dict) -> bool:
         return False
 
 
+NEWSLETTER_HEADERS = ["Subscriber_ID", "Customer_ID", "Email", "Name",
+                      "Subscribed_At", "Status", "Last_Email_Sent", "Unsubscribe_Date"]
+
+
+def get_newsletter_path():
+    return ensure_csv(CUSTOMERS_DIR / "Newsletter_Subscribers.csv", NEWSLETTER_HEADERS)
+
+
 def ensure_customer_files():
     CUSTOMERS_DIR.mkdir(parents=True, exist_ok=True)
     ensure_csv(CUSTOMER_RECEIPTS_PATH, CUSTOMER_RECEIPTS_HEADERS)
+    ensure_csv(CUSTOMERS_DIR / "Newsletter_Subscribers.csv", NEWSLETTER_HEADERS)
+
+
+def add_newsletter_subscriber(customer_id: str, email: str, name: str = ""):
+    """Add an email to the marketing newsletter list. Idempotent by email.
+    Returns (added: bool, subscriber_id)."""
+    email = (email or "").strip().lower()
+    if not email or "@" not in email:
+        return False, ""
+    rows = read_csv(get_newsletter_path())
+    for r in rows:
+        if (r.get("Email") or "").strip().lower() == email:
+            return False, r.get("Subscriber_ID", "")   # already on the list
+    sub_id = "SUB-" + datetime.now().strftime("%Y%m%d%H%M%S") + uuid.uuid4().hex[:3].upper()
+    append_csv(get_newsletter_path(), NEWSLETTER_HEADERS, {
+        "Subscriber_ID": sub_id, "Customer_ID": customer_id or "", "Email": email,
+        "Name": (name or "").strip(),
+        "Subscribed_At": datetime.now().isoformat(timespec="seconds"),
+        "Status": "ACTIVE", "Last_Email_Sent": "", "Unsubscribe_Date": "",
+    })
+    return True, sub_id
+
+
+def get_customer_history(email: str):
+    """All receipt rows for a customer email (purchase history), newest first."""
+    email = (email or "").strip().lower()
+    if not email:
+        return []
+    rows = [r for r in read_csv(CUSTOMER_RECEIPTS_PATH)
+            if (r.get("Email") or "").strip().lower() == email]
+    return sorted(rows, key=lambda r: r.get("Timestamp", ""), reverse=True)
+
 
 def _iter_csv_files(root: Path, suffix: str):
     if not root.exists():
@@ -533,7 +573,10 @@ def upsert_customer(name: str, email: str) -> str:
     email = (email or "").strip().lower()
     name = (name or "").strip()
 
-    customers_path = Path("Customers") / "Customers.csv"
+    # Absolute, DATA_DIR-anchored path (was a relative Path("Customers") that
+    # depended on the process working directory -- the same class of fragility that
+    # orphaned records before). CUSTOMERS_DIR tracks the active data dir.
+    customers_path = CUSTOMERS_DIR / "Customers.csv"
     headers = ["Customer_ID", "Name", "Email", "Created_At"]
 
     _ensure_csv(customers_path, headers)

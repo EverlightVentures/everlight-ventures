@@ -1046,6 +1046,17 @@
                 <div class="change-value" id="changeValue">$0.00</div>
             </div>
 
+            <div class="customer-capture" style="margin:14px 0;display:flex;flex-direction:column;gap:8px;">
+                <input id="custName" type="text" placeholder="Customer name (optional)"
+                       style="padding:12px 14px;border-radius:12px;border:1px solid rgba(167,243,208,0.15);background:#1a2f23;color:#e8f5ee;font-family:inherit;font-size:15px;">
+                <input id="custEmail" type="email" placeholder="Email for receipt / offers (optional)"
+                       style="padding:12px 14px;border-radius:12px;border:1px solid rgba(167,243,208,0.15);background:#1a2f23;color:#e8f5ee;font-family:inherit;font-size:15px;">
+                <div style="display:flex;gap:18px;font-size:13px;color:#94a3b8;">
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="custEmailReceipt" checked> Email receipt</label>
+                    <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="custNewsletter"> Add to newsletter</label>
+                </div>
+            </div>
+
             <button class="complete-btn" id="completeBtn" onclick="completeSale()" disabled>
                 <i data-lucide="check-circle"></i>
                 Complete Sale
@@ -1456,6 +1467,9 @@ function clearCart() {
     renderCart();
     document.getElementById('cashInput').value = '';
     document.getElementById('changeDisplay').classList.remove('active');
+    const cn = document.getElementById('custName'); if (cn) cn.value = '';
+    const ce = document.getElementById('custEmail'); if (ce) ce.value = '';
+    const nl = document.getElementById('custNewsletter'); if (nl) nl.checked = false;
 }
 
 function renderCart() {
@@ -1585,7 +1599,11 @@ async function completeSale() {
                 items: cart,
                 payment_method: paymentMethod,
                 cash_received: cashReceived,
-                card_fee: cardFee
+                card_fee: cardFee,
+                customer_name: (document.getElementById('custName') || {}).value || '',
+                customer_email: (document.getElementById('custEmail') || {}).value || '',
+                email_receipt: !!((document.getElementById('custEmailReceipt') || {}).checked),
+                newsletter: !!((document.getElementById('custNewsletter') || {}).checked)
             })
         });
 
