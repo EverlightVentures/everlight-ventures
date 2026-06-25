@@ -284,6 +284,11 @@ from POS_CORE import (
     list_customers,
     get_customer_by_id,
     get_newsletter_subscribers,
+    ingest_invoice_lines,
+    map_vendor_sku,
+    resolve_vendor_sku,
+    get_vendor_aliases_for_sku,
+    list_vendor_map,
     run_payroll,
     search_items,
     quick_add_item,
@@ -4092,6 +4097,101 @@ def newsletter_export():
     return Response(
         buf.getvalue(), mimetype="text/csv",
         headers={"Content-Disposition": "attachment; filename=newsletter_subscribers.csv"})
+
+
+# ==============================================================================
+#         VENDOR INVOICE INGEST (master-SKU + vendor aliases + FIFO lots)
+# ==============================================================================
+
+
+def _parse_invoice_csv(text):
+    """Tolerant invoice-line parser. Accepts common column names from Square /
+    Shopify / QuickBooks / a vendor's own export."""
+    out = []
+    if not text or not text.strip():
+        return out
+
+    def pick(row, *names):
+        for k in row:
+            kn = (k or "").strip().lower().replace(" ", "_")
+            if kn in names:
+                return (row[k] or "").strip()
+        return ""
+
+    reader = csv.DictReader(io.StringIO(text))
+    for row in reader:
+        vsku = pick(row, "vendor_sku", "sku", "item_no", "item_number", "product_no",
+                    "product_number", "item", "item_code", "code")
+        desc = pick(row, "desc", "description", "name", "item_name", "product", "title")
+        qty = pick(row, "qty", "quantity", "units", "count", "received")
+        cost = pick(row, "unit_cost", "cost", "price", "unit_price", "wholesale", "wholesale_cost")
+        if not (vsku or desc):
+            continue
+        out.append({"vendor_sku": vsku, "desc": desc, "qty": qty, "unit_cost": cost})
+    return out
+
+
+@app.route("/inventory/vendor-invoice", methods=["GET", "POST"])
+@manager_required
+def vendor_invoice():
+    if request.method == "POST":
+        vendor = (request.form.get("vendor") or "").strip()
+        invoice_no = (request.form.get("invoice_no") or "").strip()
+        csv_text = request.form.get("csv_text") or ""
+        f = request.files.get("csv_file")
+        if f and f.filename:
+            try:
+                csv_text = f.read().decode("utf-8", errors="ignore")
+            except Exception:
+                csv_text = ""
+        if not vendor:
+            flash("Enter the vendor name.", "error")
+            return redirect(url_for("vendor_invoice"))
+        lines = _parse_invoice_csv(csv_text)
+        if not lines:
+            flash("No invoice lines found. Paste/upload CSV with columns like "
+                  "vendor_sku, description, qty, unit_cost.", "error")
+            return redirect(url_for("vendor_invoice"))
+        result = ingest_invoice_lines(vendor, invoice_no, lines,
+                                      emp_id=session.get("employee_id", ""))
+        return render_template("inventory/vendor_invoice.html", result=result,
+                               vendor=vendor, invoice_no=invoice_no, submitted=True,
+                               items=get_all_items())
+    return render_template("inventory/vendor_invoice.html", result=None,
+                           submitted=False, items=[])
+
+
+@app.route("/inventory/vendor-invoice/map", methods=["POST"])
+@manager_required
+def vendor_invoice_map():
+    master_sku = (request.form.get("master_sku") or "").strip()
+    vendor = (request.form.get("vendor") or "").strip()
+    vendor_sku = (request.form.get("vendor_sku") or "").strip()
+    desc = (request.form.get("desc") or "").strip()
+    invoice_no = (request.form.get("invoice_no") or "").strip()
+    try:
+        qty = int(float(request.form.get("qty") or 0))
+    except Exception:
+        qty = 0
+    try:
+        cost = float(request.form.get("unit_cost") or 0)
+    except Exception:
+        cost = 0.0
+    # accept "SKU - Name" from the datalist by taking the leading token
+    master_sku = master_sku.split(" - ")[0].split(" ")[0].strip()
+    if not (master_sku and vendor_sku):
+        flash("Pick a master product to map this vendor item to.", "error")
+        return redirect(url_for("vendor_invoice"))
+    if not get_item(master_sku):
+        flash(f"Master SKU '{master_sku}' not found in the catalog.", "error")
+        return redirect(url_for("vendor_invoice"))
+    map_vendor_sku(master_sku, vendor, vendor_sku, vendor_desc=desc, unit_cost=cost)
+    if qty > 0:
+        create_lot(master_sku, qty, cost, supplier=vendor, invoice=invoice_no,
+                   notes=f"Vendor {vendor} SKU {vendor_sku}")
+    flash(f"Mapped {vendor} #{vendor_sku} to {master_sku} and received {qty}. "
+          f"Future invoices from {vendor} auto-match.", "success")
+    return redirect(url_for("vendor_invoice"))
 
 
 # ==============================================================================

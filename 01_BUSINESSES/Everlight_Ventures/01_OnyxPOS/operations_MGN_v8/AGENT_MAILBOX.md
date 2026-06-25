@@ -71,10 +71,12 @@ history (so you can see what they bought and tailor offers). /newsletter lists s
 ### STILL BUILDING (sequenced for daily use):
 - OWNER/ADMIN TASK SCHEDULER: recurring day-rules (1st/15th, 2nd & 4th), admin-profile
   notifications, self-assign; managers excluded.
-- VENDOR INVOICE INGEST + MASTER-SKU + FIFO (new request 2026-06-25): OUR item = the MASTER SKU;
-  each vendor's own product number nests under it (Vendor_SKU_Map). Upload a weekly invoice ->
-  auto-match vendor SKUs to our master -> create FIFO lots so we know exactly when a vendor's
-  batch/invoice sold out. Builds on the existing Lots engine (already FIFO) + Supplier_Barcode.
+- VENDOR INVOICE INGEST + MASTER-SKU + FIFO -- SHIPPED 2026-06-25. /inventory/vendor-invoice:
+  upload or paste a vendor invoice CSV; each vendor's product number maps to YOUR master item
+  (Vendor_SKU_Map) and is received as a FIFO lot (carrying vendor + invoice), so consume_from_lots
+  depletes oldest-first and you know exactly when a vendor's batch sold out. Unmatched lines get a
+  one-click "Map & Receive" (remembered for next time). Tolerant CSV (Square/Shopify/QuickBooks/
+  vendor exports). 3 vendor tests + 55 total green.
 
 ---
 

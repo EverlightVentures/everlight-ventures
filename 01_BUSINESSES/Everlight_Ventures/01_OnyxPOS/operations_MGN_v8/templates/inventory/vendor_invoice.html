@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block page_title %}Vendor Invoice{% endblock %}
+{% block header_emoji %}🚚{% endblock %}
+{% block header_title %}Vendor Invoice Intake{% endblock %}
+{% block header_actions %}
+<a href="{{ url_for('inventory') }}" class="btn btn-secondary"><i data-lucide="arrow-left"></i> Inventory</a>
+{% endblock %}
+{% block content %}
+<style>
+  .vi-panel{background:linear-gradient(145deg,#1e3a2a,#162b1f);border:1px solid rgba(167,243,208,0.12);border-radius:16px;padding:20px;margin-bottom:18px;color:#e8f5ee;}
+  .vi-input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(167,243,208,0.15);background:#1a2f23;color:#e8f5ee;font-family:inherit;font-size:15px;margin-top:6px;}
+  .vi-label{font-size:12px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;}
+  .vi-btn{padding:12px 22px;border:none;border-radius:12px;background:linear-gradient(180deg,#34d399,#059669);color:#fff;font-weight:700;cursor:pointer;font-family:inherit;}
+  .vi-table{width:100%;border-collapse:collapse;font-size:14px;}
+  .vi-table th{text-align:left;color:#94a3b8;padding:10px;border-bottom:1px solid rgba(167,243,208,0.15);}
+  .vi-table td{padding:10px;border-bottom:1px solid rgba(167,243,208,0.08);}
+  .vi-hint{font-size:12px;color:#64748b;margin-top:6px;}
+</style>
+
+<div class="vi-panel">
+  <p style="margin-top:0;color:#cbd5e1;">Upload a weekly invoice. Each vendor's product number is matched to <strong>your</strong> master item and received as a FIFO lot, so you always know which vendor's batch sold. Unmatched lines drop into a one-click map below (remembered for next time).</p>
+  <form method="POST" enctype="multipart/form-data">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div><label class="vi-label">Vendor *</label><input class="vi-input" name="vendor" placeholder="West Covina Growers" value="{{ vendor or '' }}" required></div>
+      <div><label class="vi-label">Invoice #</label><input class="vi-input" name="invoice_no" placeholder="INV-10293" value="{{ invoice_no or '' }}"></div>
+    </div>
+    <div style="margin-top:14px;"><label class="vi-label">Upload CSV</label><input class="vi-input" type="file" name="csv_file" accept=".csv,text/csv"></div>
+    <div style="margin-top:14px;"><label class="vi-label">...or paste CSV</label>
+      <textarea class="vi-input" name="csv_text" rows="5" placeholder="vendor_sku,description,qty,unit_cost&#10;WC-SF-22,Sunflower 1G,24,3.50"></textarea>
+      <div class="vi-hint">Columns are flexible: vendor_sku / sku / item_no, description / name, qty / quantity, unit_cost / cost / price.</div>
+    </div>
+    <div style="margin-top:16px;"><button class="vi-btn" type="submit"><i data-lucide="upload"></i> Receive Invoice</button></div>
+  </form>
+</div>
+
+{% if submitted and result %}
+<div class="vi-panel">
+  <h3 style="margin-top:0;color:#34d399;">Received {{ result.received|length }} line(s) into inventory</h3>
+  {% if result.received %}
+  <table class="vi-table">
+    <thead><tr><th>Master SKU</th><th>Vendor SKU</th><th>Qty</th><th>Unit Cost</th><th>Lot</th></tr></thead>
+    <tbody>
+    {% for r in result.received %}
+      <tr><td>{{ r.master_sku }}</td><td>{{ r.vendor_sku }}</td><td>{{ r.qty }}</td><td>${{ '%.2f'|format(r.unit_cost) }}</td><td>{{ r.lot_id }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}<p style="color:#94a3b8;">Nothing auto-matched yet -- map the lines below.</p>{% endif %}
+</div>
+
+{% if result.unmapped %}
+<div class="vi-panel">
+  <h3 style="margin-top:0;color:#fbbf24;">{{ result.unmapped|length }} line(s) need mapping (one-time per vendor item)</h3>
+  <datalist id="masterSkus">
+    {% for i in items %}<option value="{{ i.SKU }} - {{ i.Item_Name }}">{% endfor %}
+  </datalist>
+  <table class="vi-table">
+    <thead><tr><th>Vendor SKU</th><th>Description</th><th>Qty</th><th>Cost</th><th>Map to YOUR master product</th></tr></thead>
+    <tbody>
+    {% for u in result.unmapped %}
+      <tr>
+        <td>{{ u.vendor_sku }}</td>
+        <td>{{ u.desc }}</td>
+        <td>{{ u.qty }}</td>
+        <td>${{ '%.2f'|format(u.unit_cost) }}</td>
+        <td>
+          <form method="POST" action="{{ url_for('vendor_invoice_map') }}" style="display:flex;gap:8px;">
+            <input type="hidden" name="vendor" value="{{ vendor }}">
+            <input type="hidden" name="invoice_no" value="{{ invoice_no }}">
+            <input type="hidden" name="vendor_sku" value="{{ u.vendor_sku }}">
+            <input type="hidden" name="desc" value="{{ u.desc }}">
+            <input type="hidden" name="qty" value="{{ u.qty }}">
+            <input type="hidden" name="unit_cost" value="{{ u.unit_cost }}">
+            <input class="vi-input" list="masterSkus" name="master_sku" placeholder="Type SKU or name..." required style="margin-top:0;flex:1;min-width:220px;">
+            <button class="vi-btn" type="submit" style="padding:10px 14px;">Map &amp; Receive</button>
+          </form>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  <div class="vi-hint">Once mapped, every future invoice from this vendor auto-matches this item.</div>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}
+{% block extra_js %}<script>lucide.createIcons();</script>{% endblock %}

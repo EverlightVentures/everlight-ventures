@@ -1239,6 +1239,108 @@ def consume_from_lots(sku, qty, trans_id, emp_id):
                     lot["Qty_Remaining"] = str(float(lot.get("Qty_Remaining", 0)) - c["qty"])
         write_csv(get_lots_path(), LOT_HEADERS, all_lots)
     return consumed
+# ==============================================================================
+#       VENDOR INVOICE INGEST -- master-SKU + vendor-SKU aliases + FIFO lots
+# ==============================================================================
+# OUR item is the MASTER SKU. Each vendor's own product number is an ALIAS nested
+# under it (Vendor_SKU_Map). An uploaded invoice maps vendor SKUs -> our master and
+# creates a FIFO lot (create_lot carries Supplier + Invoice_Ref), so consume_from_lots
+# depletes oldest-first and we know exactly when a vendor's batch/invoice sold out.
+VENDOR_MAP_HEADERS = ["Map_ID", "Master_SKU", "Vendor", "Vendor_SKU", "Vendor_Desc",
+                      "Last_Unit_Cost", "Pack_Size", "Last_Seen", "Status"]
+
+
+def get_vendor_map_path():
+    return ensure_csv(INVENTORY_DIR / "Vendor_SKU_Map.csv", VENDOR_MAP_HEADERS)
+
+
+def _vkey(vendor, vendor_sku):
+    return ((vendor or "").strip().lower(), (vendor_sku or "").strip().lower())
+
+
+def resolve_vendor_sku(vendor, vendor_sku):
+    """Master_SKU mapped to (vendor, vendor_sku), or None."""
+    want = _vkey(vendor, vendor_sku)
+    for r in read_csv(get_vendor_map_path()):
+        if _vkey(r.get("Vendor"), r.get("Vendor_SKU")) == want:
+            return (r.get("Master_SKU") or "").strip() or None
+    return None
+
+
+def map_vendor_sku(master_sku, vendor, vendor_sku, vendor_desc="", unit_cost="", pack_size=""):
+    """Create/update the alias linking a vendor's product number to OUR master SKU.
+    Idempotent on (vendor, vendor_sku). Returns Map_ID."""
+    rows = read_csv(get_vendor_map_path())
+    want = _vkey(vendor, vendor_sku)
+    now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    for r in rows:
+        if _vkey(r.get("Vendor"), r.get("Vendor_SKU")) == want:
+            r["Master_SKU"] = master_sku
+            if vendor_desc:
+                r["Vendor_Desc"] = vendor_desc
+            if str(unit_cost) != "":
+                r["Last_Unit_Cost"] = str(unit_cost)
+            if pack_size:
+                r["Pack_Size"] = str(pack_size)
+            r["Last_Seen"] = now
+            r["Status"] = "Active"
+            write_csv(get_vendor_map_path(), VENDOR_MAP_HEADERS, rows)
+            return r.get("Map_ID")
+    map_id = generate_id("VMAP")
+    append_csv(get_vendor_map_path(), VENDOR_MAP_HEADERS, {
+        "Map_ID": map_id, "Master_SKU": master_sku, "Vendor": (vendor or "").strip(),
+        "Vendor_SKU": (vendor_sku or "").strip(), "Vendor_Desc": vendor_desc,
+        "Last_Unit_Cost": str(unit_cost), "Pack_Size": str(pack_size),
+        "Last_Seen": now, "Status": "Active"})
+    return map_id
+
+
+def get_vendor_aliases_for_sku(master_sku):
+    return [r for r in read_csv(get_vendor_map_path())
+            if (r.get("Master_SKU") or "").strip() == (master_sku or "").strip()]
+
+
+def list_vendor_map():
+    return read_csv(get_vendor_map_path())
+
+
+def ingest_invoice_lines(vendor, invoice_no, lines, received_date="", emp_id=""):
+    """Receive an invoice into inventory via the vendor->master map, creating FIFO
+    lots under each MASTER SKU. lines = [{vendor_sku, desc, qty, unit_cost}].
+    Returns {"received": [...], "unmapped": [...]}. Unmapped lines are NOT guessed --
+    they come back for one-click mapping, then re-ingest."""
+    received, unmapped = [], []
+    for ln in lines:
+        vsku = str(ln.get("vendor_sku") or "").strip()
+        desc = str(ln.get("desc") or "").strip()
+        try:
+            qty = int(float(ln.get("qty") or 0))
+        except Exception:
+            qty = 0
+        try:
+            cost = float(ln.get("unit_cost") or 0)
+        except Exception:
+            cost = 0.0
+        if qty <= 0:
+            continue
+        master = resolve_vendor_sku(vendor, vsku)
+        if not master:
+            unmapped.append({"vendor_sku": vsku, "desc": desc, "qty": qty, "unit_cost": cost})
+            continue
+        lot_id = create_lot(master, qty, cost, supplier=vendor, invoice=invoice_no,
+                            notes=f"Vendor {vendor} SKU {vsku}")
+        map_vendor_sku(master, vendor, vsku, vendor_desc=desc, unit_cost=cost)
+        try:
+            update_csv_row(get_items_path(), ITEM_HEADERS, "SKU", master, {
+                "Last_Invoice_No": invoice_no, "Last_Vendor": vendor,
+                "Last_Received_Date": received_date or date.today().strftime("%Y-%m-%d")})
+        except Exception:
+            pass
+        received.append({"master_sku": master, "vendor_sku": vsku, "qty": qty,
+                         "unit_cost": cost, "lot_id": lot_id})
+    return {"received": received, "unmapped": unmapped}
+
+
 def check_low_stock():
     alerts = []
     for item in get_all_items():
