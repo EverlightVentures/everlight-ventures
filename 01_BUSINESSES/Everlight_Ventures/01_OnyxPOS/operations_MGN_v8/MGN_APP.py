@@ -223,6 +223,7 @@ from POS_CORE import (
     create_employee,
     create_item,
     create_lot,
+    import_items,
     create_notification,
     deactivate_employee,
     delete_punch,
@@ -4245,6 +4246,102 @@ def admin_schedule_pause(sid):
     set_recurring_status(sid, "PAUSED")
     flash("Schedule paused.", "success")
     return redirect(url_for("admin_schedule"))
+
+
+# ==============================================================================
+#       INTEGRATIONS -- CSV import/export (Square / Shopify / QuickBooks / MGN)
+# ==============================================================================
+
+_ITX = None
+
+
+def _itx():
+    """Lazy-load the standalone inventory_transfer converter module (CLI tool)."""
+    global _ITX
+    if _ITX is None:
+        import importlib.util as ilu
+        p = os.path.join(SCRIPT_DIR, "tools", "inventory_transfer.py")
+        spec = ilu.spec_from_file_location("inventory_transfer", p)
+        mod = ilu.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        _ITX = mod
+    return _ITX
+
+
+_PLATFORMS = ["square", "shopify", "quickbooks", "mgn"]
+
+
+@app.route("/integrations")
+@manager_required
+def integrations():
+    return render_template("integrations.html", platforms=_PLATFORMS,
+                           item_count=len(get_all_items()))
+
+
+@app.route("/integrations/export")
+@manager_required
+def integrations_export():
+    from flask import Response
+    fmt = (request.args.get("format") or "square").strip().lower()
+    if fmt not in _PLATFORMS:
+        flash("Unknown export format.", "error")
+        return redirect(url_for("integrations"))
+    itx = _itx()
+    headers, rows, _skipped = itx.convert("mgn", fmt, ITEM_HEADERS, get_all_items())
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(headers)
+    w.writerows(rows)
+    return Response(
+        buf.getvalue(), mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=catalog_{fmt}.csv"})
+
+
+@app.route("/integrations/import", methods=["POST"])
+@manager_required
+def integrations_import_preview():
+    f = request.files.get("csv_file")
+    src = (request.form.get("src_format") or "auto").strip().lower()
+    if not f or not f.filename:
+        flash("Choose a CSV file to import.", "error")
+        return redirect(url_for("integrations"))
+    try:
+        text = f.read().decode("utf-8-sig", errors="ignore")
+    except Exception:
+        text = ""
+    reader = csv.DictReader(io.StringIO(text))
+    headers = list(reader.fieldnames or [])
+    rows = list(reader)
+    itx = _itx()
+    if src == "auto":
+        src = itx.detect_format(headers) or ""
+    if src not in itx.IMPORTERS:
+        flash("Could not detect the CSV format. Pick the source platform and retry.", "error")
+        return redirect(url_for("integrations"))
+    items, skipped = itx.IMPORTERS[src](rows)
+    return render_template(
+        "integrations.html", platforms=_PLATFORMS, item_count=len(get_all_items()),
+        preview={"src": src, "items": items[:50], "total": len(items),
+                 "skipped": len(skipped)},
+        staged=json.dumps(items))
+
+
+@app.route("/integrations/import/apply", methods=["POST"])
+@manager_required
+def integrations_import_apply():
+    staged = request.form.get("staged") or "[]"
+    create_lots = (request.form.get("create_lots") or "") in ("1", "on", "true", "yes")
+    try:
+        items = json.loads(staged)
+    except Exception:
+        items = []
+    if not items:
+        flash("Nothing to import.", "error")
+        return redirect(url_for("integrations"))
+    res = import_items(items, create_lots=create_lots, actor=session.get("employee_id", ""))
+    flash(f"Imported: {res['created']} created, {res['updated']} updated, "
+          f"{res['lots']} stock lots, {res['skipped']} skipped.", "success")
+    return redirect(url_for("integrations"))
 
 
 # ==============================================================================

@@ -686,6 +686,10 @@
                         <span class="nav-emoji">🔁</span>
                         <span class="nav-text">Reconcile Items</span>
                     </a>
+                    <a href="{{ url_for('integrations') }}" class="nav-item {% if 'integration' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">🔄</span>
+                        <span class="nav-text">Import / Export</span>
+                    </a>
                     {% if session.role in ['Owner', 'Admin'] %}
                     <a href="{{ url_for('admin_schedule') }}" class="nav-item {% if 'admin_schedule' in (request.endpoint or '') %}active{% endif %}">
                         <span class="nav-emoji">🗓️</span>

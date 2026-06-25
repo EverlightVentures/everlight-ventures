@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block page_title %}Integrations{% endblock %}
+{% block header_emoji %}🔄{% endblock %}
+{% block header_title %}Import / Export{% endblock %}
+{% block header_actions %}
+<a href="{{ url_for('inventory') }}" class="btn btn-secondary"><i data-lucide="arrow-left"></i> Inventory</a>
+{% endblock %}
+{% block content %}
+<style>
+  .ix-panel{background:linear-gradient(145deg,#1e3a2a,#162b1f);border:1px solid rgba(167,243,208,0.12);border-radius:16px;padding:20px;margin-bottom:18px;color:#e8f5ee;}
+  .ix-input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(167,243,208,0.15);background:#1a2f23;color:#e8f5ee;font-family:inherit;font-size:15px;margin-top:6px;}
+  .ix-label{font-size:12px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;}
+  .ix-btn{padding:11px 18px;border:none;border-radius:12px;background:linear-gradient(180deg,#34d399,#059669);color:#fff;font-weight:700;cursor:pointer;font-family:inherit;text-decoration:none;display:inline-block;}
+  .ix-chip{padding:10px 16px;border-radius:12px;background:rgba(255,255,255,0.06);color:#e8f5ee;text-decoration:none;border:1px solid rgba(167,243,208,0.15);font-weight:600;}
+  .ix-table{width:100%;border-collapse:collapse;font-size:14px;}
+  .ix-table th{text-align:left;color:#94a3b8;padding:8px;border-bottom:1px solid rgba(167,243,208,0.15);}
+  .ix-table td{padding:8px;border-bottom:1px solid rgba(167,243,208,0.08);}
+  .ix-hint{font-size:12px;color:#64748b;margin-top:6px;}
+</style>
+
+<div class="ix-panel">
+  <h3 style="margin-top:0;">Export your catalog ({{ item_count }} items)</h3>
+  <p style="color:#cbd5e1;margin-top:0;">Download your inventory pre-formatted for another platform.</p>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;">
+    {% for p in platforms %}
+      <a class="ix-chip" href="{{ url_for('integrations_export', format=p) }}"><i data-lucide="download"></i> {{ p|capitalize }} CSV</a>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="ix-panel">
+  <h3 style="margin-top:0;">Import a CSV</h3>
+  <p style="color:#cbd5e1;margin-top:0;">Upload a Square / Shopify / QuickBooks / MGN export. It auto-detects the format, shows a preview, then you apply it.</p>
+  <form method="POST" action="{{ url_for('integrations_import_preview') }}" enctype="multipart/form-data">
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">
+      <div><label class="ix-label">CSV file</label><input class="ix-input" type="file" name="csv_file" accept=".csv,text/csv" required></div>
+      <div><label class="ix-label">Source format</label>
+        <select class="ix-input" name="src_format">
+          <option value="auto">Auto-detect</option>
+          {% for p in platforms %}<option value="{{ p }}">{{ p|capitalize }}</option>{% endfor %}
+        </select></div>
+    </div>
+    <div style="margin-top:16px;"><button class="ix-btn" type="submit"><i data-lucide="upload"></i> Preview import</button></div>
+  </form>
+</div>
+
+{% if preview %}
+<div class="ix-panel">
+  <h3 style="margin-top:0;color:#34d399;">Preview -- detected "{{ preview.src }}": {{ preview.total }} item(s){% if preview.skipped %}, {{ preview.skipped }} skipped{% endif %}</h3>
+  <table class="ix-table">
+    <thead><tr><th>SKU</th><th>Name</th><th>Category</th><th>Price</th><th>Taxable</th></tr></thead>
+    <tbody>
+    {% for i in preview['items'] %}
+      <tr><td>{{ i.sku }}</td><td>{{ i.name }}</td><td>{{ i.category }}</td><td>${{ '%.2f'|format(i.price) }}</td><td>{{ 'Y' if i.taxable else 'N' }}</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if preview.total > preview['items']|length %}<div class="ix-hint">Showing first {{ preview['items']|length }} of {{ preview.total }}.</div>{% endif %}
+  <form method="POST" action="{{ url_for('integrations_import_apply') }}" style="margin-top:16px;">
+    <input type="hidden" name="staged" value="{{ staged }}">
+    <label style="display:flex;align-items:center;gap:8px;color:#94a3b8;font-size:13px;margin-bottom:12px;"><input type="checkbox" name="create_lots" value="1"> Also receive the quantities as stock (creates FIFO lots)</label>
+    <button class="ix-btn" type="submit"><i data-lucide="check"></i> Apply import ({{ preview.total }} items)</button>
+  </form>
+  <div class="ix-hint">Items.csv is backed up before any change. Existing SKUs are updated; new SKUs are created.</div>
+</div>
+{% endif %}
+{% endblock %}
+{% block extra_js %}<script>lucide.createIcons();</script>{% endblock %}

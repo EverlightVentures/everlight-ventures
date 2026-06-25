@@ -75,8 +75,18 @@ pause schedules. Due tasks auto-assign + notify the assignee (the admin badge li
 idempotently at each till close, or "Run due tasks now". Note: semi-monthly (1,15) covers payroll
 cadence; true nth-weekday (e.g. 2nd & 4th Friday) is day-of-month for now. 5 tests green (60 total).
 
-### ALL FIVE ROADMAP FEATURES SHIPPED. Remaining polish: nav links to the new pages; live
-verification on the Dell (Flask can't run on the phone).
+### ALL FIVE ROADMAP FEATURES SHIPPED + nav links wired. Live verification on the Dell pending
+(Flask can't run on the phone).
+
+### SHIPPED 2026-06-25: INTEGRATIONS Import/Export (Menu -> Import / Export)
+Wired the existing (CLI-only) inventory_transfer converter to the UI: EXPORT your catalog as a
+Square / Shopify / QuickBooks / MGN CSV (download), and IMPORT a CSV from any of them (auto-detects
+the format, shows a preview, then upserts by SKU with an Items.csv backup; optional "receive as
+stock" creates FIFO lots). Free, no credentials. tools/test_integrations.py (3); 63 tests total.
+NEXT (needs YOUR credentials): live real-time API sync (Square / Shopify / QuickBooks / Stripe
+OAuth). Honest note: the prototype "channels.py" the old roadmap referenced does NOT exist, and the
+existing Stripe code is only SaaS subscription billing -- so the live API layer is a fresh build
+gated on API keys. The CSV import/export covers transfer today without any keys.
 - VENDOR INVOICE INGEST + MASTER-SKU + FIFO -- SHIPPED 2026-06-25. /inventory/vendor-invoice:
   upload or paste a vendor invoice CSV; each vendor's product number maps to YOUR master item
   (Vendor_SKU_Map) and is received as a FIFO lot (carrying vendor + invoice), so consume_from_lots

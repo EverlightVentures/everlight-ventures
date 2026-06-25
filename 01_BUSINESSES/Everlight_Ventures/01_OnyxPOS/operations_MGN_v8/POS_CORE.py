@@ -1069,6 +1069,68 @@ def create_item(sku, name, category, subcategory, product_name="", default_price
     return False, "Failed to create item"
 
 
+def import_items(items, create_lots=False, actor=""):
+    """Upsert canonical item dicts (from the inventory_transfer importers --
+    Square/Shopify/QuickBooks/MGN) into the catalog. Backs up Items.csv first.
+    Matches by SKU (create if new, update if existing). When create_lots is set, a
+    positive quantity_on_hand seeds a FIFO lot. Returns counts."""
+    import shutil
+    itp = get_items_path()
+    try:
+        if itp.exists():
+            shutil.copy2(itp, itp.with_name(
+                f"Items.csv.bak-import-{datetime.now():%Y%m%d-%H%M%S}"))
+    except Exception:
+        pass
+    created = updated = lots = skipped = 0
+    for it in items:
+        name = (it.get("name") or "").strip()
+        if not name:
+            skipped += 1
+            continue
+        sku = (it.get("sku") or "").strip() or ("IMP-" + generate_id("X"))
+        cat = (it.get("category") or "Imported").strip() or "Imported"
+        try:
+            price = float(it.get("price") or 0)
+        except Exception:
+            price = 0.0
+        try:
+            cost = float(it.get("cost") or 0)
+        except Exception:
+            cost = 0.0
+        fields = {
+            "Item_Name": name, "Category": cat, "Subcategory": cat, "Product_Name": name,
+            "Default_Price": f"{price:.2f}", "Retail_Price": f"{price:.2f}",
+            "Unit_Price": f"{price:.2f}", "Wholesale_Cost": f"{cost:.2f}",
+            "Unit_Cost": f"{cost:.2f}",
+            "Taxable": "Y" if it.get("taxable", True) else "N",
+            "Item_Description": (it.get("description") or ""),
+            "Supplier_Barcode": (it.get("barcode") or ""),
+            "Last_Vendor": (it.get("vendor") or ""),
+            "Last_Updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        if get_item(sku):
+            update_csv_row(get_items_path(), ITEM_HEADERS, "SKU", sku, fields)
+            updated += 1
+        else:
+            ok, _msg = create_item(sku, name, cat, cat, product_name=name, default_price=price)
+            if not ok:
+                skipped += 1
+                continue
+            update_csv_row(get_items_path(), ITEM_HEADERS, "SKU", sku, fields)
+            created += 1
+        if create_lots:
+            try:
+                qoh = int(float(it.get("quantity_on_hand") or 0))
+            except Exception:
+                qoh = 0
+            if qoh > 0:
+                create_lot(sku, qoh, cost, supplier=(it.get("vendor") or ""),
+                           invoice="IMPORT", notes="CSV import")
+                lots += 1
+    return {"created": created, "updated": updated, "lots": lots, "skipped": skipped}
+
+
 # ==============================================================================
 #          QUICK-ADD (sell on the spot) + END-OF-DAY RECONCILIATION
 # ==============================================================================
