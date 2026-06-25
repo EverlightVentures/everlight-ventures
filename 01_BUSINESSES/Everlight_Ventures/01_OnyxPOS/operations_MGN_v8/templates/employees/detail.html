@@ -476,7 +476,15 @@
                         <i data-lucide="key"></i>
                         PIN
                     </span>
-                    <span class="info-value mono">****</span>
+                    <span class="info-value mono">
+                        <span id="pinMask">&bull;&bull;&bull;&bull;</span>
+                        {% if session.role in ['Owner', 'Admin'] %}
+                        <span id="pinReal" style="display:none;">{{ employee.PIN }}</span>
+                        <button type="button" id="pinToggle"
+                            onclick="var m=document.getElementById('pinMask'),r=document.getElementById('pinReal'),show=r.style.display==='none';r.style.display=show?'inline':'none';m.style.display=show?'none':'inline';this.textContent=show?'Hide':'Show';"
+                            style="margin-left:10px;font-size:12px;cursor:pointer;background:rgba(255,255,255,0.08);color:#94a3b8;border:none;border-radius:6px;padding:2px 10px;">Show</button>
+                        {% endif %}
+                    </span>
                 </div>
             </div>
 
@@ -538,13 +546,25 @@
                     </div>
                 </a>
 
+                {% if session.role in ['Owner', 'Admin'] %}
                 <a href="{{ url_for('reset_employee_pin', emp_id=employee.Employee_ID) }}" class="action-btn reset">
                     <div class="icon"><i data-lucide="key"></i></div>
                     <div class="text">
                         Reset PIN
-                        <span>Generate new PIN</span>
+                        <span>Generate a random PIN</span>
                     </div>
                 </a>
+
+                <form method="POST" action="{{ url_for('set_employee_pin', emp_id=employee.Employee_ID) }}"
+                      onsubmit="return /^[0-9]{4}$/.test(this.new_pin.value) || (alert('PIN must be exactly 4 digits'), false);"
+                      style="display:flex;gap:8px;align-items:center;margin-top:10px;">
+                    <input type="text" name="new_pin" inputmode="numeric" maxlength="4" pattern="[0-9]{4}"
+                           placeholder="Set a specific 4-digit PIN" required
+                           style="flex:1;padding:12px 14px;border-radius:12px;border:1px solid rgba(167,243,208,0.15);background:#1a2f23;color:#e8f5ee;font-family:inherit;">
+                    <button type="submit"
+                            style="padding:12px 18px;border:none;border-radius:12px;background:#059669;color:#fff;font-weight:700;cursor:pointer;font-family:inherit;">Set PIN</button>
+                </form>
+                {% endif %}
 
                 {% if employee.Status == 'Active' %}
                 <a href="{{ url_for('deactivate_employee', emp_id=employee.Employee_ID) }}" class="action-btn deactivate">

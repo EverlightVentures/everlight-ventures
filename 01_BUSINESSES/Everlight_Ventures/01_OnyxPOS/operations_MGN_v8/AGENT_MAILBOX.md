@@ -9,6 +9,51 @@ port 5000, owner login Employee 1001 / PIN 8008).
 
 ---
 
+## [2026-06-25 PT] CRITICAL FIXES: name-save, overnight data loss, back-arrow exploit, PIN mgmt
+
+Root causes (traced in code AND independently reproduced by a 7-agent audit workflow):
+1. NAME not saving on Add -> the Add form posts first_name + last_name, but the route read a
+   single "name" field that never existed, so every new hire saved with a BLANK name until you
+   re-edited. FIX: the route now combines first+last (compose_full_name); create_employee also
+   rejects a blank name. Editing always worked -- that is why re-editing fixed it.
+2. EMPLOYEES/records "gone the next day" -> the data folder was picked per-request from
+   session["tenant_id"], so a single shop could WRITE to one folder and READ another the next
+   launch. The records were orphaned, not deleted. FIX: SINGLE-STORE LOCK (MGN_SINGLE_STORE=1,
+   default ON) pins every read/write to ONE fixed folder, every request, every day.
+3. BACK-ARROW re-login into a logged-out admin -> no cache headers, plus the secret key was the
+   public default (forgeable session cookie). FIX: global no-store headers (browser can't restore
+   the cached admin page on Back), session hardening (HttpOnly + SameSite=Lax + 12h expiry), and a
+   per-install RANDOM secret key persisted to .secret_key (never the public default).
+4. PIN management -> detail page hardcoded **** and only offered a RANDOM reset. FIX: Owner/Admin
+   can VIEW a PIN (click Show) and SET a SPECIFIC 4-digit PIN (audited + employee notified). Gated
+   owner/admin only -- managers excluded (new owner_required decorator).
+
+Tests: tools/test_employee_fixes.py (6) green; MGN_APP.py + POS_CORE.py compile; templates valid.
+
+### APPLY ON THE DELL
+git fetch origin && git checkout mgn-pos-restore && git reset --hard origin/mgn-pos-restore
+Restart the app. (Optional .env: SECRET_KEY=<random> -- else auto-generated to .secret_key.
+MGN_SINGLE_STORE=1 is already the default.) Verify: add an employee with First+Last -> name shows
+in the list; log in as owner, log out, press Back -> you get bounced to login; open an employee
+-> Show PIN + Set PIN appear (owner only).
+
+### STILL BUILDING (speced this session, sequenced for daily use):
+- PER-CATEGORY SALES TAX (next): food-producing plants EXEMPT (CA Reg 1588 / R&TC 6359),
+  ornamentals + pots + soil + tools TAXABLE, computed per-LINE in mixed carts, rate location-set
+  (never hardcoded). Uses the existing Items "Taxable" column (Y/N/REVIEW); new plant SKUs default
+  to REVIEW so nobody guesses.
+- EOD = 3 COPIES: local on the PC + owner email + mom email (set MGN_EOD_EMAIL=owner,mom).
+- CUSTOMER EMAIL at checkout -> emailed receipt -> customer profile + purchase history ->
+  newsletter list for marketing.
+- OWNER/ADMIN TASK SCHEDULER: recurring day-rules (1st/15th, 2nd & 4th), admin-profile
+  notifications, self-assign; managers excluded.
+- VENDOR INVOICE INGEST + MASTER-SKU + FIFO (new request 2026-06-25): OUR item = the MASTER SKU;
+  each vendor's own product number nests under it (Vendor_SKU_Map). Upload a weekly invoice ->
+  auto-match vendor SKUs to our master -> create FIFO lots so we know exactly when a vendor's
+  batch/invoice sold out. Builds on the existing Lots engine (already FIFO) + Supplier_Barcode.
+
+---
+
 ## [2026-06-22 PT] Inventory/search FIXED + quick-add + reconciliation + EOD export
 
 WHY cashiers couldn't search/select ANY product (root cause verified by a 7-agent audit):

@@ -65,7 +65,49 @@ from werkzeug.utils import secure_filename
 # ==============================================================================
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "mountain-gardens-pos-2024-dev-key")
+
+
+def _load_secret_key():
+    """Stable per-install secret key. Never ship the old public default
+    ("mountain-gardens-pos-2024-dev-key") -- a known key lets anyone forge an admin
+    session cookie. Prefer SECRET_KEY env; else persist a random key to .secret_key
+    so logins survive app restarts without exposing a guessable key."""
+    env_key = os.environ.get("SECRET_KEY")
+    if env_key:
+        return env_key
+    import secrets
+    key_file = Path(__file__).parent / ".secret_key"
+    try:
+        if key_file.exists():
+            existing = key_file.read_text(encoding="utf-8").strip()
+            if existing:
+                return existing
+        new_key = secrets.token_hex(32)
+        key_file.write_text(new_key, encoding="utf-8")
+        return new_key
+    except Exception:
+        return secrets.token_hex(32)
+
+
+app.secret_key = _load_secret_key()
+app.config.update(
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Lax",
+    PERMANENT_SESSION_LIFETIME=43200,  # auto-expire idle sessions after 12 hours
+)
+
+
+@app.after_request
+def add_security_headers(response):
+    """Kill back/forward-cache so a logged-out admin page can NOT be restored with
+    the browser Back button (the /logout route already clears the session server
+    side; this stops the cached page from ever being shown again)."""
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    response.headers["Pragma"] = "no-cache"
+    response.headers["Expires"] = "0"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    return response
 
 # Add parent directory for imports
 sys.path.insert(0, str(Path(__file__).parent))
@@ -135,6 +177,23 @@ def manager_required(f):
     return decorated
 
 
+def owner_required(f):
+    """Require OWNER/ADMIN role (managers excluded). Gates the most sensitive
+    controls -- viewing/assigning employee PINs and the admin task scheduler."""
+
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if "employee_id" not in session:
+            flash("Please log in first.", "warning")
+            return redirect(url_for("login"))
+        if session.get("role") not in ("Owner", "Admin"):
+            flash("Owner access required.", "error")
+            return redirect(url_for("dashboard"))
+        return f(*args, **kwargs)
+
+    return decorated
+
+
 # ==============================================================================
 #                     IMPORT POS CORE
 # ==============================================================================
@@ -160,6 +219,7 @@ from POS_CORE import (
     check_low_stock,
     clock_in,
     clock_out,
+    compose_full_name,
     create_employee,
     create_item,
     create_lot,
@@ -214,7 +274,9 @@ from POS_CORE import (
     quick_add_item,
     get_unreconciled_quickadds,
     reconcile_quickadd,
+    reset_pin,
     set_data_dir,
+    setup_employee_pay,
     start_break,
     update_csv_row,
     update_task_status,
@@ -362,7 +424,20 @@ def get_tenant(tenant_id: str):
     return None
 
 
+# Single-store lock (ON by default). A single physical shop must ALWAYS read and
+# write ONE fixed data folder, every request and every day, so its records can
+# never split-brain across session-derived tenant folders -- that split is the root
+# cause of "employees I added yesterday are gone today". Multi-tenant SaaS mode:
+# set MGN_SINGLE_STORE=0. Pin the folder explicitly with MGN_DATA_DIR if desired.
+SINGLE_STORE = os.environ.get("MGN_SINGLE_STORE", "1").strip().lower() in (
+    "1", "true", "yes", "on",
+)
+FIXED_DATA_DIR = Path(os.environ.get("MGN_DATA_DIR", str(SCRIPT_DIR))).resolve()
+
+
 def get_tenant_data_dir(tenant_id: str) -> Path:
+    if SINGLE_STORE:
+        return FIXED_DATA_DIR
     tenant = get_tenant(tenant_id) or {}
     data_dir = tenant.get("Data_Dir", "")
     p = Path(data_dir) if data_dir else (TENANTS_DIR / tenant_id)
@@ -896,12 +971,22 @@ def not_found(e):
 
 @app.before_request
 def apply_tenant_context():
+    # Single-store: pin the data layer to the one fixed folder on EVERY request,
+    # regardless of session, so a single shop can never write to one folder today
+    # and read from another tomorrow.
+    if SINGLE_STORE:
+        set_data_dir(FIXED_DATA_DIR)
+        globals()["DATA_DIR"] = str(FIXED_DATA_DIR)
+        return
     tenant_id = session.get("tenant_id")
     if tenant_id:
         tenant_dir = get_tenant_data_dir(tenant_id)
         set_data_dir(tenant_dir)
         globals()["DATA_DIR"] = str(tenant_dir)
     else:
+        # Reset POS_CORE's module globals too, so a prior request's tenant folder
+        # can't leak into an unauthenticated request on a shared worker.
+        set_data_dir(SCRIPT_DIR)
         globals()["DATA_DIR"] = str(SCRIPT_DIR)
 
 
@@ -5530,7 +5615,7 @@ def edit_employee(emp_id):
 
 
 @app.route("/employees/<emp_id>/reset-pin")
-@manager_required
+@owner_required
 def reset_employee_pin(emp_id):
     """Generate a new random PIN for employee"""
     import random
@@ -5566,6 +5651,23 @@ def reset_employee_pin(emp_id):
     except Exception as e:
         flash(f"Error: {str(e)}", "error")
         return redirect(url_for("employees"))
+
+
+@app.route("/employees/<emp_id>/set-pin", methods=["POST"])
+@owner_required
+def set_employee_pin(emp_id):
+    """Owner/manager assigns a SPECIFIC 4-digit PIN (not random). Validated,
+    audit-logged, and the employee is notified -- via the same hardened path as a
+    reset so there is one trail for every PIN change."""
+    new_pin = (request.form.get("new_pin") or "").strip()
+    ok, msg = reset_pin(
+        emp_id,
+        new_pin,
+        session.get("employee_id", ""),
+        session.get("employee_name", ""),
+    )
+    flash(msg, "success" if ok else "error")
+    return redirect(url_for("employee_detail", emp_id=emp_id))
 
 
 @app.route("/employees/<emp_id>/activate")
@@ -5662,14 +5764,34 @@ def add_employee():
         if not enforce_limit_or_upgrade("max_users", len(get_all_employees())):
             return redirect(url_for("employees"))
 
-        name = request.form.get("name")
+        # The add form posts first_name + last_name; the old code read a single
+        # "name" field that never existed, so every new hire saved with a BLANK
+        # name until re-edited. Combine the parts (still accept a single "name").
+        name = (request.form.get("name") or "").strip()
+        if not name:
+            name = compose_full_name(
+                request.form.get("first_name", ""),
+                request.form.get("last_name", ""),
+            )
         role = request.form.get("role")
         pin = request.form.get("pin")
         phone = request.form.get("phone", "")
         email = request.form.get("email", "")
 
+        if not name:
+            flash("Employee name is required.", "error")
+            return redirect(url_for("add_employee"))
+
         success, msg, emp_id = create_employee(name, role, pin, phone, email)
         if success:
+            # The form also collects an hourly rate that the old route silently
+            # dropped -- wire it into pay config so payroll/Money OS sees it.
+            rate = (request.form.get("hourly_rate") or "").strip()
+            if rate:
+                try:
+                    setup_employee_pay(emp_id, "HOURLY", hourly_rate=float(rate))
+                except Exception:
+                    pass
             flash(msg, "success")
             return redirect(url_for("employees"))
         flash(msg, "error")

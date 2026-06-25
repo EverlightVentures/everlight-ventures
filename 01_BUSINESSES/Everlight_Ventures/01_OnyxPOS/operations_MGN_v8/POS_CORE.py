@@ -802,7 +802,17 @@ def get_employee(emp_id):
             return e
     return None
 
+def compose_full_name(first="", last="", fallback=""):
+    """Build a display name from first/last parts; fall back to a combined/explicit
+    value. Fixes the add-employee bug where the add form posts first_name/last_name
+    but the route read a non-existent 'name' field and saved a BLANK name."""
+    full = " ".join(p for p in [(first or "").strip(), (last or "").strip()] if p)
+    return full.strip() or (fallback or "").strip()
+
+
 def create_employee(name, role, pin, phone="", email=""):
+    if not (name and str(name).strip()):
+        return False, "Name is required", ""
     if not pin.isdigit() or len(pin) != 4:
         return False, "PIN must be 4 digits", ""
     if role not in ROLES:
