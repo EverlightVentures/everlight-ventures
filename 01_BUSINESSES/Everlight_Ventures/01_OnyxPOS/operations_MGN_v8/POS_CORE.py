@@ -147,7 +147,8 @@ SALES_HEADERS = ["Date", "Time", "Transaction_ID", "Employee_ID", "Employee_Name
                  "Category", "Subcategory", "Product_Name", "Item_Name", "SKU",
                  "Quantity", "Size", "Item_Description", "Unit_Price", "Unit_Cost", "COGS_Line","Gross_Margin","Qty_Remaining_Before", "Qty_Remaining_After",
                  "Subtotal", "Tax_Rate", "Tax_Amount", "Line_Total",
-                 "Payment_Method", "Amount_Received", "Change_Due", "Notes"]
+                 "Payment_Method", "Amount_Received", "Change_Due", "Notes",
+                 "Tax_Exempt_Reason"]
 TRANSACTION_HEADERS = ["Transaction_ID", "Date", "Time", "Employee_ID", "Employee_Name",
                        "Item_Count", "Subtotal", "Tax", "Card_Fee", "Grand_Total",
                        "Payment_Method", "Amount_Received", "Change_Due", "Receipt_Number", "Notes"]
@@ -992,9 +993,12 @@ def create_item(sku, name, category, subcategory, product_name="", default_price
     if get_item(sku):
         return False, "SKU already exists"
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    # New plant SKUs default to REVIEW (owner confirms food-producing -> exempt) per
+    # the CA Reg 1588 guardrail of not guessing; everything else defaults taxable.
+    default_taxable = "REVIEW" if str(category).strip().lower().startswith("plant") else "Y"
     row = {"SKU": sku, "Item_Name": name, "Category": category, "Subcategory": subcategory,
            "Product_Name": product_name or name, "Default_Unit": "each", "Default_Price": f"{default_price:.2f}",
-           "Taxable": "Y", "Reorder_Point": str(reorder_point), "Date_Added": now,
+           "Taxable": default_taxable, "Reorder_Point": str(reorder_point), "Date_Added": now,
            "Last_Updated": now, "Status": "Active", "Notes": notes}
     if append_csv(get_items_path(), ITEM_HEADERS, row):
         return True, f"Item created: {sku}"
@@ -1270,6 +1274,65 @@ def calculate_price(sku, base_price):
 #                              SALES
 # ==============================================================================
 
+# ==============================================================================
+#                          SALES-TAX ENGINE (per-line)
+# ==============================================================================
+# CA Reg 1588 / R&TC 6359: the tax decision is PER ITEM, not per cart -- a plant
+# whose product is human food (vegetable start, fruit tree, berry, herb) is EXEMPT
+# even when sold as ornamental, while ornamentals + hardgoods (pots, soil, tools,
+# decor) are TAXABLE. The per-SKU "Taxable" column is the source of truth; the rate
+# is LOCATION-SET (CA base 7.25% + local district), so it is config/data not a const.
+CONFIG_HEADERS = ["Key", "Value"]
+
+
+def get_config_path():
+    return ensure_csv(DATA_DIR / "Settings" / "Config.csv", CONFIG_HEADERS)
+
+
+def get_config(key, default=""):
+    for row in read_csv(get_config_path()):
+        if (row.get("Key") or "").strip() == key:
+            return (row.get("Value") or "").strip() or default
+    return default
+
+
+def set_config(key, value):
+    rows = read_csv(get_config_path())
+    for row in rows:
+        if (row.get("Key") or "").strip() == key:
+            row["Value"] = str(value)
+            return write_csv(get_config_path(), CONFIG_HEADERS, rows)
+    rows.append({"Key": key, "Value": str(value)})
+    return write_csv(get_config_path(), CONFIG_HEADERS, rows)
+
+
+def get_tax_rate():
+    """Combined state+local sales-tax rate as a decimal. Resolution order:
+    env MGN_TAX_RATE > Config.csv 'Store_Tax_Rate' > TAX_RATE default. Accepts a
+    percent (8.25) or decimal (0.0825). Rate is set by the store location -- the
+    CA 7.25% base plus the local district add-on -- so it is never hardcoded."""
+    raw = (os.environ.get("MGN_TAX_RATE") or get_config("Store_Tax_Rate") or "").strip()
+    try:
+        r = float(raw)
+    except Exception:
+        return float(TAX_RATE)
+    if r > 1:  # entered as a percent like 8.25
+        r = r / 100.0
+    return r if r >= 0 else float(TAX_RATE)
+
+
+def resolve_line_tax(item):
+    """(is_taxable, reason) for a sale line, from the item's Taxable flag.
+    N/NO/EXEMPT -> exempt (food-producing plant); REVIEW -> taxed but flagged for
+    owner review; anything else (Y/blank) -> taxable."""
+    flag = str((item or {}).get("Taxable", "") or "").strip().upper()
+    if flag in ("N", "NO", "FALSE", "0", "EXEMPT"):
+        return False, "EXEMPT:food-producing plant (CA Reg 1588 / R&TC 6359)"
+    if flag in ("REVIEW", "?", "PENDING", "NEEDS_REVIEW"):
+        return True, "TAXABLE:NEEDS_REVIEW"
+    return True, "TAXABLE"
+
+
 def record_sale(items, emp_id, emp_name, payment_method, amount_received, notes="", card_fee=0.0):
     """
     Expects items like:
@@ -1295,8 +1358,10 @@ def record_sale(items, emp_id, emp_name, payment_method, amount_received, notes=
     if not items:
         return False, {"error": "No items in cart"}
 
+    rate = get_tax_rate()
     normalized = []
     subtotal = 0.0
+    total_tax = 0.0
     total_cogs = 0.0
     total_items = 0
 
@@ -1331,6 +1396,13 @@ def record_sale(items, emp_id, emp_name, payment_method, amount_received, notes=
         subtotal += line_total
         total_items += qty
 
+        # Per-item tax decision (CA Reg 1588): exempt food-producing plants pay $0;
+        # taxable lines pay line_total * the store rate. Sum per line, never blanket.
+        meta = get_item(sku) if sku else {}
+        is_taxable, tax_reason = resolve_line_tax(meta)
+        line_tax = round(line_total * rate, 2) if is_taxable else 0.0
+        total_tax += line_tax
+
         consumed = []
         line_cogs = 0.0
         if sku:
@@ -1361,12 +1433,16 @@ def record_sale(items, emp_id, emp_name, payment_method, amount_received, notes=
             "line_cogs": round(line_cogs, 2),
             "qty_before": qty_before,
             "qty_after": qty_after,
+            "meta": meta,
+            "line_tax": line_tax,
+            "is_taxable": is_taxable,
+            "tax_reason": tax_reason,
         })
 
     if not normalized:
         return False, {"error": "No valid items to record"}
 
-    tax = round(subtotal * float(TAX_RATE), 2)
+    tax = round(total_tax, 2)
     try:
         card_fee_amt = float(card_fee or 0)
     except Exception:
@@ -1410,7 +1486,7 @@ def record_sale(items, emp_id, emp_name, payment_method, amount_received, notes=
 
     # --- write SALES line rows (one per cart line) ---
     for n in normalized:
-        meta = get_item(n["sku"]) or {}
+        meta = n.get("meta") or {}
         category = meta.get("Category", "") or ""
         subcategory = meta.get("Subcategory", "") or ""
         product_name = meta.get("Product_Name", "") or meta.get("Item_Name", n["name"]) or n["name"]
@@ -1418,10 +1494,11 @@ def record_sale(items, emp_id, emp_name, payment_method, amount_received, notes=
         size = meta.get("Size", "") or ""
         item_desc = meta.get("Item_Description", "") or meta.get("Notes", "") or ""
 
-        # proportional line tax (optional)
-        line_tax = 0.0
-        if subtotal > 0:
-            line_tax = round((n["line_total"] / subtotal) * tax, 2)
+        # per-line tax computed up front: exempt food-producing plants carry $0
+        # (CA Reg 1588 / R&TC 6359); taxable lines carry line_total * the location
+        # rate. So a tomato and a mousetrap in one cart are taxed correctly.
+        line_tax = n.get("line_tax", 0.0)
+        line_rate = rate if n.get("is_taxable") else 0.0
 
         sales_row = {
             "Date": now.strftime("%Y-%m-%d"),
@@ -1445,8 +1522,9 @@ def record_sale(items, emp_id, emp_name, payment_method, amount_received, notes=
             "COGS_Line": f"{n['line_cogs']:.2f}",
 
             "Subtotal": f"{subtotal:.2f}",
-            "Tax_Rate": str(TAX_RATE),
+            "Tax_Rate": f"{line_rate:.4f}",
             "Tax_Amount": f"{line_tax:.2f}",
+            "Tax_Exempt_Reason": n.get("tax_reason", ""),
             "Line_Total": f"{n['line_total']:.2f}",
 
             "Payment_Method": pm,

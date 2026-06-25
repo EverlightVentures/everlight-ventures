@@ -275,6 +275,7 @@ from POS_CORE import (
     get_unreconciled_quickadds,
     reconcile_quickadd,
     reset_pin,
+    set_config,
     set_data_dir,
     setup_employee_pay,
     start_break,
@@ -8035,7 +8036,11 @@ def update_receipt_settings():
 
     # Save receipt settings to tenant settings
     tenant_settings = get_or_create_tenant_settings()
-    tenant_settings["Tax_Rate"] = request.form.get("tax_rate", "8.25")
+    tax_rate_input = request.form.get("tax_rate", "8.25")
+    tenant_settings["Tax_Rate"] = tax_rate_input
+    # Mirror the rate into the live tax engine (Settings/Config.csv) so record_sale
+    # uses exactly what the owner enters here. Accepts 8.25 or 0.0825.
+    set_config("Store_Tax_Rate", tax_rate_input)
     tenant_settings["Receipt_Footer"] = request.form.get("receipt_footer", "")
     tenant_settings["Business_Address"] = request.form.get("business_address", "")
     tenant_settings["Business_Phone"] = request.form.get("business_phone", "")

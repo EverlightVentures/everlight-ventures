@@ -411,9 +411,10 @@
                     <div class="form-group">
                         <label class="form-label">Taxable</label>
                         <select class="form-select" name="Taxable">
-                            {% set t = (item.get('Taxable', 'Y') or 'Y') %}
-                            <option value="Y" {% if t == 'Y' %}selected{% endif %}>Yes</option>
-                            <option value="N" {% if t == 'N' %}selected{% endif %}>No</option>
+                            {% set t = (item.get('Taxable', 'Y') or 'Y')|upper %}
+                            <option value="Y" {% if t in ['Y','YES'] %}selected{% endif %}>Taxable (default)</option>
+                            <option value="N" {% if t in ['N','NO','EXEMPT'] %}selected{% endif %}>Exempt - food-producing plant (CA Reg 1588)</option>
+                            <option value="REVIEW" {% if t in ['REVIEW','NEEDS_REVIEW'] %}selected{% endif %}>Needs review</option>
                         </select>
                     </div>
 

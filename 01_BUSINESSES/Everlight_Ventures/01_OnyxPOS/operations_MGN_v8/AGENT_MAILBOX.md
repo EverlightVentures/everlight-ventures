@@ -37,11 +37,18 @@ MGN_SINGLE_STORE=1 is already the default.) Verify: add an employee with First+L
 in the list; log in as owner, log out, press Back -> you get bounced to login; open an employee
 -> Show PIN + Set PIN appear (owner only).
 
-### STILL BUILDING (speced this session, sequenced for daily use):
-- PER-CATEGORY SALES TAX (next): food-producing plants EXEMPT (CA Reg 1588 / R&TC 6359),
-  ornamentals + pots + soil + tools TAXABLE, computed per-LINE in mixed carts, rate location-set
-  (never hardcoded). Uses the existing Items "Taxable" column (Y/N/REVIEW); new plant SKUs default
-  to REVIEW so nobody guesses.
+### SHIPPED 2026-06-25 (commit after the fixes above): PER-CATEGORY SALES TAX
+Tax is now computed PER LINE: food-producing plants are EXEMPT (CA Reg 1588 / R&TC 6359),
+ornamentals + pots + soil + tools are TAXABLE, so a tomato and a mousetrap in one cart are handled
+correctly. The rate is location-set, never hardcoded (env MGN_TAX_RATE > Settings/Config.csv >
+8.25% fallback; the Receipt/Tax settings page now drives it). 5 tax tests + 7 money-path tests green.
+HOW TO USE: open an item -> Edit -> "Taxable" dropdown -> "Exempt - food-producing plant" for
+veggies/fruit/herbs/berries; leave ornamentals + hardgoods "Taxable". New plant SKUs default to
+"Needs review". Bulk helper: tools/backfill_item_tax.py (dry-run; --apply after a backup) classifies
+by keywords -- but the current 989 items lost their real names in an earlier import, so it can only
+match 1 today; re-run it after importing a named catalog, or classify the key sellers by hand.
+
+### STILL BUILDING (sequenced for daily use):
 - EOD = 3 COPIES: local on the PC + owner email + mom email (set MGN_EOD_EMAIL=owner,mom).
 - CUSTOMER EMAIL at checkout -> emailed receipt -> customer profile + purchase history ->
   newsletter list for marketing.
