@@ -666,6 +666,32 @@
                         <span class="nav-emoji">📊</span>
                         <span class="nav-text">Reports</span>
                     </a>
+                    <a href="{{ url_for('money_dashboard') }}" class="nav-item {% if 'money' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">💵</span>
+                        <span class="nav-text">Money OS</span>
+                    </a>
+                    <a href="{{ url_for('customers_list') }}" class="nav-item {% if 'customer' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">🧑‍🌾</span>
+                        <span class="nav-text">Customers</span>
+                    </a>
+                    <a href="{{ url_for('newsletter_list') }}" class="nav-item {% if 'newsletter' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">📣</span>
+                        <span class="nav-text">Newsletter</span>
+                    </a>
+                    <a href="{{ url_for('vendor_invoice') }}" class="nav-item {% if 'vendor_invoice' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">🚚</span>
+                        <span class="nav-text">Vendor Invoice</span>
+                    </a>
+                    <a href="{{ url_for('inventory_reconcile') }}" class="nav-item {% if 'reconcile' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">🔁</span>
+                        <span class="nav-text">Reconcile Items</span>
+                    </a>
+                    {% if session.role in ['Owner', 'Admin'] %}
+                    <a href="{{ url_for('admin_schedule') }}" class="nav-item {% if 'admin_schedule' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">🗓️</span>
+                        <span class="nav-text">Admin Schedule</span>
+                    </a>
+                    {% endif %}
                 </div>
                 {% endif %}
 
