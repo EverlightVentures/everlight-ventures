@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block page_title %}Admin Schedule{% endblock %}
+{% block header_emoji %}🗓️{% endblock %}
+{% block header_title %}Admin Task Scheduler{% endblock %}
+{% block header_actions %}
+<form method="POST" action="{{ url_for('admin_schedule_run') }}" style="display:inline;">
+  <button class="btn btn-secondary" type="submit"><i data-lucide="play"></i> Run due tasks now</button>
+</form>
+{% endblock %}
+{% block content %}
+<style>
+  .sc-panel{background:linear-gradient(145deg,#1e3a2a,#162b1f);border:1px solid rgba(167,243,208,0.12);border-radius:16px;padding:20px;margin-bottom:18px;color:#e8f5ee;}
+  .sc-input{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(167,243,208,0.15);background:#1a2f23;color:#e8f5ee;font-family:inherit;font-size:15px;margin-top:6px;}
+  .sc-label{font-size:12px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;}
+  .sc-btn{padding:12px 22px;border:none;border-radius:12px;background:linear-gradient(180deg,#34d399,#059669);color:#fff;font-weight:700;cursor:pointer;font-family:inherit;}
+  .sc-table{width:100%;border-collapse:collapse;font-size:14px;}
+  .sc-table th{text-align:left;color:#94a3b8;padding:10px;border-bottom:1px solid rgba(167,243,208,0.15);}
+  .sc-table td{padding:10px;border-bottom:1px solid rgba(167,243,208,0.08);}
+  .sc-hint{font-size:12px;color:#64748b;margin-top:6px;}
+</style>
+
+<div class="sc-panel">
+  <h3 style="margin-top:0;">New recurring admin task</h3>
+  <form method="POST">
+    <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;">
+      <div><label class="sc-label">Task title *</label><input class="sc-input" name="title" placeholder="Deposit payroll taxes (EFTPS)" required></div>
+      <div><label class="sc-label">Day rule *</label><input class="sc-input" name="day_rule" placeholder="1,15" required>
+        <div class="sc-hint">1,15 = 1st &amp; 15th &middot; 31 = month end &middot; DAILY &middot; WEEKLY</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px;">
+      <div><label class="sc-label">Assign to (owner/admin)</label>
+        <select class="sc-input" name="assignee">
+          {% for a in admins %}<option value="{{ a.Employee_ID }}">{{ a.Employee_Name }} ({{ a.Role }})</option>{% endfor %}
+        </select></div>
+      <div><label class="sc-label">Stop after (optional)</label><input class="sc-input" type="date" name="end_date"></div>
+    </div>
+    <div style="margin-top:14px;"><label class="sc-label">Notes</label><input class="sc-input" name="description" placeholder="What to do on this day"></div>
+    <div style="margin-top:16px;"><button class="sc-btn" type="submit"><i data-lucide="plus"></i> Add schedule</button></div>
+  </form>
+</div>
+
+<div class="sc-panel">
+  <h3 style="margin-top:0;">Coming up (next 14 days)</h3>
+  {% if preview %}
+  <table class="sc-table">
+    <thead><tr><th>Date</th><th>Task</th><th>Assignee</th><th>Rule</th></tr></thead>
+    <tbody>{% for p in preview %}<tr><td>{{ p.date }}</td><td>{{ p.title }}</td><td>{{ p.assignee }}</td><td>{{ p.day_rule }}</td></tr>{% endfor %}</tbody>
+  </table>
+  {% else %}<p style="color:#94a3b8;">Nothing scheduled in the next 14 days.</p>{% endif %}
+</div>
+
+<div class="sc-panel">
+  <h3 style="margin-top:0;">All schedules</h3>
+  <table class="sc-table">
+    <thead><tr><th>Title</th><th>Rule</th><th>Next</th><th>Assignee</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for s in schedules %}
+      <tr>
+        <td>{{ s.Title }}</td><td>{{ s.Day_Rule }}</td><td>{{ s.Next_Scheduled }}</td>
+        <td>{{ s.Assignee_Employee_ID }}</td><td>{{ s.Status }}</td>
+        <td>{% if s.Status == 'ACTIVE' %}
+          <form method="POST" action="{{ url_for('admin_schedule_pause', sid=s.Schedule_ID) }}" style="display:inline;">
+            <button type="submit" style="padding:6px 12px;border:none;border-radius:8px;background:rgba(255,255,255,0.08);color:#94a3b8;cursor:pointer;">Pause</button>
+          </form>{% endif %}</td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" style="color:#94a3b8;padding:18px;">No recurring tasks yet.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+{% block extra_js %}<script>lucide.createIcons();</script>{% endblock %}

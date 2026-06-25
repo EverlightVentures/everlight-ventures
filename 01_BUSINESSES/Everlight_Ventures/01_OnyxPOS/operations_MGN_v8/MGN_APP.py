@@ -289,6 +289,11 @@ from POS_CORE import (
     resolve_vendor_sku,
     get_vendor_aliases_for_sku,
     list_vendor_map,
+    create_recurring_task,
+    check_and_assign_recurring_tasks,
+    list_recurring_schedules,
+    set_recurring_status,
+    preview_recurring,
     run_payroll,
     search_items,
     quick_add_item,
@@ -4192,6 +4197,54 @@ def vendor_invoice_map():
     flash(f"Mapped {vendor} #{vendor_sku} to {master_sku} and received {qty}. "
           f"Future invoices from {vendor} auto-match.", "success")
     return redirect(url_for("vendor_invoice"))
+
+
+# ==============================================================================
+#       ADMIN TASK SCHEDULER (owner/admin only -- managers excluded)
+# ==============================================================================
+
+
+@app.route("/admin/schedule", methods=["GET"])
+@owner_required
+def admin_schedule():
+    admins = [e for e in get_all_employees()
+              if (e.get("Role") or "") in ("Owner", "Admin")]
+    return render_template("admin/schedule.html",
+                           schedules=list_recurring_schedules(active_only=False),
+                           preview=preview_recurring(14), admins=admins)
+
+
+@app.route("/admin/schedule", methods=["POST"])
+@owner_required
+def admin_schedule_create():
+    title = (request.form.get("title") or "").strip()
+    day_rule = (request.form.get("day_rule") or "").strip()
+    assignee = (request.form.get("assignee") or session.get("employee_id", "")).strip()
+    description = (request.form.get("description") or "").strip()
+    end_date = (request.form.get("end_date") or "").strip()
+    if not title or not day_rule:
+        flash("A title and a day rule (e.g. 1,15) are required.", "error")
+        return redirect(url_for("admin_schedule"))
+    create_recurring_task(title, day_rule, assignee, session.get("employee_id", ""),
+                          description=description, end_date=end_date)
+    flash(f"Recurring task '{title}' scheduled ({day_rule}).", "success")
+    return redirect(url_for("admin_schedule"))
+
+
+@app.route("/admin/schedule/run", methods=["POST"])
+@owner_required
+def admin_schedule_run():
+    made = check_and_assign_recurring_tasks()
+    flash(f"Assigned {len(made)} task(s) due today.", "success")
+    return redirect(url_for("admin_schedule"))
+
+
+@app.route("/admin/schedule/<sid>/pause", methods=["POST"])
+@owner_required
+def admin_schedule_pause(sid):
+    set_recurring_status(sid, "PAUSED")
+    flash("Schedule paused.", "success")
+    return redirect(url_for("admin_schedule"))
 
 
 # ==============================================================================
@@ -8161,6 +8214,11 @@ def api_till_close():
                 "closed_by": session.get("employee_id", ""),
                 "expected": expected, "counted": counted, "variance": variance,
             })
+        except Exception:
+            pass
+        # Daily, idempotent: assign any recurring admin tasks due today.
+        try:
+            check_and_assign_recurring_tasks()
         except Exception:
             pass
         try:

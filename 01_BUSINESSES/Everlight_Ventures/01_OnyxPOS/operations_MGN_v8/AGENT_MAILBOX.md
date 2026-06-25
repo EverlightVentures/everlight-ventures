@@ -68,9 +68,15 @@ relative-path bug in upsert_customer (was writing to a CWD-relative folder). 21 
 history (so you can see what they bought and tailor offers). /newsletter lists subscribers with a
 "Download CSV" button -- that is your mailing list for your own newsletters/offers. All manager-gated.
 
-### STILL BUILDING (sequenced for daily use):
-- OWNER/ADMIN TASK SCHEDULER: recurring day-rules (1st/15th, 2nd & 4th), admin-profile
-  notifications, self-assign; managers excluded.
+### SHIPPED 2026-06-25: OWNER/ADMIN TASK SCHEDULER (managers excluded)
+/admin/schedule (owner/admin only): create recurring tasks with day-rules (1,15 = 1st & 15th;
+31 = month end; DAILY; WEEKLY), assign to any owner/admin, see a 14-day "coming up" preview, and
+pause schedules. Due tasks auto-assign + notify the assignee (the admin badge lights up) -- fired
+idempotently at each till close, or "Run due tasks now". Note: semi-monthly (1,15) covers payroll
+cadence; true nth-weekday (e.g. 2nd & 4th Friday) is day-of-month for now. 5 tests green (60 total).
+
+### ALL FIVE ROADMAP FEATURES SHIPPED. Remaining polish: nav links to the new pages; live
+verification on the Dell (Flask can't run on the phone).
 - VENDOR INVOICE INGEST + MASTER-SKU + FIFO -- SHIPPED 2026-06-25. /inventory/vendor-invoice:
   upload or paste a vendor invoice CSV; each vendor's product number maps to YOUR master item
   (Vendor_SKU_Map) and is received as a FIFO lot (carrying vendor + invoice), so consume_from_lots

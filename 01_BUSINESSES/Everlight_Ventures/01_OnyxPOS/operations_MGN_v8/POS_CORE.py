@@ -2471,6 +2471,132 @@ def get_task_by_title(title, category=None):
     return None
 
 
+# ==============================================================================
+#       RECURRING ADMIN TASK SCHEDULER (owner/admin only)
+# ==============================================================================
+RECURRING_HEADERS = ["Schedule_ID", "Task_ID", "Title", "Recurrence_Type", "Day_Rule",
+                     "Recurrence_End_Date", "Last_Triggered", "Next_Scheduled",
+                     "Assignee_Employee_ID", "Admin_Only", "Status"]
+
+
+def get_recurring_path():
+    return ensure_csv(TASKS_DIR / "Recurring_Schedule.csv", RECURRING_HEADERS)
+
+
+def _days_in_month(y, m):
+    import calendar
+    return calendar.monthrange(y, m)[1]
+
+
+def compute_next_occurrence(day_rule, from_date=None):
+    """Soonest due date strictly AFTER from_date for a Day_Rule:
+      'DAILY' -> +1 day; 'WEEKLY' -> +7 days;
+      '1,15' or 'D:1,15' -> day-of-month list (e.g. the 1st and 15th).
+    Days past month end clamp to the last day of that month (Feb-31 -> Feb 28/29)."""
+    from_date = from_date or date.today()
+    rule = (day_rule or "").strip().upper()
+    if rule in ("DAILY", "EVERY DAY"):
+        return from_date + timedelta(days=1)
+    if rule in ("WEEKLY", "EVERY WEEK"):
+        return from_date + timedelta(days=7)
+    spec = rule.split(":", 1)[1] if ":" in rule else rule
+    try:
+        days = sorted({int(x) for x in spec.replace(" ", "").split(",") if x})
+    except Exception:
+        days = []
+    if not days:
+        return from_date + timedelta(days=30)
+    y, m = from_date.year, from_date.month
+    for _ in range(14):
+        dim = _days_in_month(y, m)
+        for d in days:
+            cand = date(y, m, min(d, dim))
+            if cand > from_date:
+                return cand
+        m += 1
+        if m > 12:
+            m, y = 1, y + 1
+    return from_date + timedelta(days=30)
+
+
+def create_recurring_task(title, day_rule, assignee_id, created_by, description="",
+                          category="Admin", priority="MEDIUM", admin_only=True, end_date=""):
+    task_id = create_task(title, description, category, priority, created_by=created_by)
+    sched_id = generate_id("RSCH")
+    nxt = compute_next_occurrence(day_rule, date.today() - timedelta(days=1))  # today counts
+    append_csv(get_recurring_path(), RECURRING_HEADERS, {
+        "Schedule_ID": sched_id, "Task_ID": task_id, "Title": title,
+        "Recurrence_Type": "DAY_OF_MONTH", "Day_Rule": day_rule,
+        "Recurrence_End_Date": end_date, "Last_Triggered": "",
+        "Next_Scheduled": nxt.isoformat(), "Assignee_Employee_ID": assignee_id,
+        "Admin_Only": "Y" if admin_only else "N", "Status": "ACTIVE"})
+    return sched_id
+
+
+def list_recurring_schedules(active_only=True):
+    rows = read_csv(get_recurring_path())
+    if active_only:
+        rows = [r for r in rows if (r.get("Status") or "").upper() == "ACTIVE"]
+    return rows
+
+
+def set_recurring_status(schedule_id, status):
+    rows = read_csv(get_recurring_path())
+    for r in rows:
+        if (r.get("Schedule_ID") or "").strip() == (schedule_id or "").strip():
+            r["Status"] = status
+            return write_csv(get_recurring_path(), RECURRING_HEADERS, rows)
+    return False
+
+
+def check_and_assign_recurring_tasks(today=None):
+    """For each ACTIVE schedule due on/before today and not already triggered today,
+    create a task assignment + notify the assignee (Type=TASK lights the admin badge).
+    Idempotent via Last_Triggered. Returns the assignments made."""
+    today = today or date.today()
+    today_s = today.isoformat()
+    rows = read_csv(get_recurring_path())
+    made, changed = [], False
+    for r in rows:
+        if (r.get("Status") or "").upper() != "ACTIVE":
+            continue
+        end = (r.get("Recurrence_End_Date") or "").strip()
+        if end and end < today_s:
+            continue
+        if r.get("Last_Triggered") == today_s:
+            continue
+        nxt = (r.get("Next_Scheduled") or "").strip()
+        if nxt and nxt <= today_s:
+            emp = r.get("Assignee_Employee_ID", "")
+            empd = get_employee(emp) or {}
+            assign_task(r.get("Task_ID", ""), emp, today_s, "SYSTEM",
+                        notes=f"Recurring rule {r.get('Day_Rule', '')}")
+            create_notification(emp, empd.get("Employee_Name", ""),
+                                f"Admin task due today: {r.get('Title', '')}", "TASK")
+            r["Last_Triggered"] = today_s
+            r["Next_Scheduled"] = compute_next_occurrence(
+                r.get("Day_Rule", ""), today).isoformat()
+            made.append({"schedule_id": r.get("Schedule_ID"),
+                         "title": r.get("Title"), "assignee": emp})
+            changed = True
+    if changed:
+        write_csv(get_recurring_path(), RECURRING_HEADERS, rows)
+    return made
+
+
+def preview_recurring(days=7, today=None):
+    """Read-only: which recurring tasks are due in the next N days."""
+    today = today or date.today()
+    out = []
+    for r in list_recurring_schedules():
+        d = compute_next_occurrence(r.get("Day_Rule", ""), today - timedelta(days=1))
+        if 0 <= (d - today).days < days:
+            out.append({"title": r.get("Title"), "date": d.isoformat(),
+                        "assignee": r.get("Assignee_Employee_ID"),
+                        "day_rule": r.get("Day_Rule")})
+    return sorted(out, key=lambda x: x["date"])
+
+
 def get_or_create_task_template(title, description="", category="General", priority="MEDIUM",
                                estimated_minutes=15, created_by=""):
     """
