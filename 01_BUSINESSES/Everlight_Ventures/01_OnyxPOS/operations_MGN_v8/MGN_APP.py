@@ -287,6 +287,10 @@ from POS_CORE import (
     get_newsletter_subscribers,
     unsubscribe_newsletter,
     customer_tier,
+    award_points,
+    points_balance,
+    points_dollar_value,
+    redeem_points,
     ingest_invoice_lines,
     map_vendor_sku,
     resolve_vendor_sku,
@@ -3671,6 +3675,8 @@ def complete_sale():
             customer_id = ""
             receipt_emailed = False
             newsletter_added = False
+            points_earned = 0
+            points_bal = 0
             if customer_email and "@" in customer_email:
                 try:
                     customer_id = upsert_customer(customer_name, customer_email)
@@ -3680,6 +3686,14 @@ def complete_sale():
                     # purchase history (so we can see what they bought + tailor offers)
                     log_customer_receipt(first, last, customer_email,
                                          build_receipt_payload(txid) or {})
+                    # loyalty flywheel: earn points on this sale (tier from total spend)
+                    _spent = sum(float(h.get("Total") or 0)
+                                 for h in get_customer_history(customer_email))
+                    points_earned = award_points(customer_id, customer_email,
+                                                 result["total"],
+                                                 tier=customer_tier(_spent),
+                                                 transaction_id=txid)
+                    points_bal = points_balance(customer_email)
                     if newsletter:
                         newsletter_added = add_newsletter_subscriber(
                             customer_id, customer_email, customer_name)[0]
@@ -3722,6 +3736,8 @@ def complete_sale():
                     "customer_id": customer_id,
                     "receipt_emailed": receipt_emailed,
                     "newsletter_added": newsletter_added,
+                    "points_earned": points_earned,
+                    "points_balance": points_bal,
                 }
             )
         else:
@@ -4082,7 +4098,8 @@ def customers_list():
             except Exception:
                 days = None
         enriched.append({**c, "purchases": len(hist), "spent": round(spent, 2),
-                         "last": last, "days": days, "tier": customer_tier(spent)})
+                         "last": last, "days": days, "tier": customer_tier(spent),
+                         "points": points_balance(c.get("Email", ""))})
     if tier_filter:
         enriched = [e for e in enriched if e["tier"] == tier_filter]
     if inactive_days is not None:
@@ -4112,7 +4129,8 @@ def customer_detail(customer_id):
     if not cust:
         flash("Customer not found.", "error")
         return redirect(url_for("customers_list"))
-    history = get_customer_history(cust.get("Email", ""))
+    email = cust.get("Email", "")
+    history = get_customer_history(email)
     spent = 0.0
     for h in history:
         try:
@@ -4120,7 +4138,10 @@ def customer_detail(customer_id):
         except Exception:
             pass
     return render_template("customers/detail.html", customer=cust,
-                           history=history, spent=round(spent, 2))
+                           history=history, spent=round(spent, 2),
+                           tier=customer_tier(spent),
+                           points=points_balance(email),
+                           points_value=points_dollar_value(email))
 
 
 @app.route("/newsletter")

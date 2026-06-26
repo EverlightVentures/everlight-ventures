@@ -11,6 +11,7 @@
 <div style="background:linear-gradient(145deg,#1e3a2a,#162b1f);border:1px solid rgba(167,243,208,0.12);border-radius:16px;padding:20px;margin-bottom:18px;color:#e8f5ee;">
   <div style="font-size:16px;">{{ customer.Email }}</div>
   <div style="color:#94a3b8;margin-top:6px;">Total spent <strong style="color:#34d399;">${{ '%.2f'|format(spent) }}</strong> across {{ history|length }} visit(s){% if customer.Created_At %} &middot; since {{ customer.Created_At[:10] }}{% endif %}</div>
+  <div style="color:#94a3b8;margin-top:6px;">Tier <strong style="color:#fbbf24;">{{ tier|capitalize }}</strong> &middot; <strong style="color:#34d399;">{{ points }}</strong> reward points (${{ '%.2f'|format(points_value) }} off available)</div>
 </div>
 <div style="overflow:auto;background:linear-gradient(145deg,#1e3a2a,#162b1f);border:1px solid rgba(167,243,208,0.12);border-radius:16px;padding:8px;">
 <table style="width:100%;border-collapse:collapse;color:#e8f5ee;font-size:14px;">

@@ -383,6 +383,95 @@ def customer_tier(total_spent):
     return "BRONZE"
 
 
+# ==============================================================================
+#       LOYALTY / REWARDS -- the flywheel (earn on every sale, redeem at checkout)
+# ==============================================================================
+POINTS_LEDGER_HEADERS = ["Entry_ID", "Customer_ID", "Email", "Date", "Type",
+                         "Points", "Dollar_Value", "Transaction_ID", "Note"]
+
+# Higher tiers earn faster -> a reason to climb.
+TIER_POINT_MULTIPLIER = {"BRONZE": 1.0, "SILVER": 1.25, "GOLD": 1.5, "PLATINUM": 2.0}
+
+
+def get_points_ledger_path():
+    return ensure_csv(CUSTOMERS_DIR / "Points_Ledger.csv", POINTS_LEDGER_HEADERS)
+
+
+def points_settings():
+    """Configurable rates: earn_per_dollar = points per $1 spent;
+    redeem_value_per_point = dollars off per point. Set in Config.csv."""
+    try:
+        earn = float(get_config("Points_Earn_Per_Dollar", "1") or 1)
+    except Exception:
+        earn = 1.0
+    try:
+        redeem = float(get_config("Points_Dollar_Per_Point", "0.05") or 0.05)
+    except Exception:
+        redeem = 0.05
+    return {"earn_per_dollar": earn, "redeem_value_per_point": redeem}
+
+
+def points_balance(email):
+    email = (email or "").strip().lower()
+    if not email:
+        return 0
+    bal = 0
+    for r in read_csv(get_points_ledger_path()):
+        if (r.get("Email") or "").strip().lower() != email:
+            continue
+        try:
+            p = int(float(r.get("Points") or 0))
+        except Exception:
+            p = 0
+        bal += -p if (r.get("Type") or "").upper() == "REDEEM" else p
+    return bal
+
+
+def points_dollar_value(email):
+    """Current balance expressed as dollars-off."""
+    return round(points_balance(email) * points_settings()["redeem_value_per_point"], 2)
+
+
+def award_points(customer_id, email, amount_spent, tier="BRONZE", transaction_id=""):
+    """Accrue points on a sale: amount * earn_rate * tier multiplier (floored)."""
+    email = (email or "").strip().lower()
+    if not email:
+        return 0
+    cfg = points_settings()
+    mult = TIER_POINT_MULTIPLIER.get((tier or "BRONZE").upper(), 1.0)
+    try:
+        pts = int(float(amount_spent or 0) * cfg["earn_per_dollar"] * mult)
+    except Exception:
+        pts = 0
+    if pts <= 0:
+        return 0
+    append_csv(get_points_ledger_path(), POINTS_LEDGER_HEADERS, {
+        "Entry_ID": generate_id("PTS"), "Customer_ID": customer_id or "", "Email": email,
+        "Date": datetime.now().isoformat(timespec="seconds"), "Type": "EARN",
+        "Points": str(pts), "Dollar_Value": "", "Transaction_ID": transaction_id,
+        "Note": f"Earned on ${float(amount_spent or 0):.2f} (x{mult} {tier})"})
+    return pts
+
+
+def redeem_points(customer_id, email, points, transaction_id=""):
+    """Redeem points for a dollar discount. Returns (ok, dollars_off); fails if the
+    balance is short."""
+    email = (email or "").strip().lower()
+    try:
+        points = int(float(points or 0))
+    except Exception:
+        points = 0
+    if not email or points <= 0 or points > points_balance(email):
+        return False, 0.0
+    dollars = round(points * points_settings()["redeem_value_per_point"], 2)
+    append_csv(get_points_ledger_path(), POINTS_LEDGER_HEADERS, {
+        "Entry_ID": generate_id("PTS"), "Customer_ID": customer_id or "", "Email": email,
+        "Date": datetime.now().isoformat(timespec="seconds"), "Type": "REDEEM",
+        "Points": str(points), "Dollar_Value": f"{dollars:.2f}",
+        "Transaction_ID": transaction_id, "Note": f"Redeemed {points} pts = ${dollars:.2f} off"})
+    return True, dollars
+
+
 def _iter_csv_files(root: Path, suffix: str):
     if not root.exists():
         return []
