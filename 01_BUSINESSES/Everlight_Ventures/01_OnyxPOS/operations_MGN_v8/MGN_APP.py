@@ -3325,6 +3325,17 @@ def sales_search():
     return jsonify({"items": results})
 
 
+@app.route("/sales/customer-points")
+@login_required
+def sales_customer_points():
+    """Look up a customer's reward balance by email (for the redeem-at-checkout view)."""
+    email = (request.args.get("email") or "").strip()
+    if not email or "@" not in email:
+        return jsonify({"points": 0, "dollars": 0.0})
+    return jsonify({"points": points_balance(email),
+                    "dollars": points_dollar_value(email)})
+
+
 @app.route("/sales/item/<sku>")
 @login_required
 def sales_item_details(sku):
@@ -3647,9 +3658,19 @@ def complete_sale():
         customer_email = (_src.get("customer_email") or "").strip()
         email_receipt = _truthy(_src.get("email_receipt"))
         newsletter = _truthy(_src.get("newsletter"))
+        redeem_reward = _truthy(_src.get("redeem_reward"))
 
         if not items:
             return jsonify({"success": False, "error": "No items in cart"})
+
+        # Loyalty redemption: if the cashier applied the reward, turn the customer's
+        # points balance into a dollar discount on this sale (committed only if the
+        # sale succeeds, below).
+        reward_discount = 0.0
+        reward_points_used = 0
+        if redeem_reward and customer_email and "@" in customer_email:
+            reward_points_used = points_balance(customer_email)
+            reward_discount = points_dollar_value(customer_email)
 
         success, result = record_sale(
             items=items,
@@ -3659,6 +3680,7 @@ def complete_sale():
             amount_received=amount_received,
             notes="",
             card_fee=card_fee,
+            discount=reward_discount,
         )
 
         if success:
@@ -3686,6 +3708,10 @@ def complete_sale():
                     # purchase history (so we can see what they bought + tailor offers)
                     log_customer_receipt(first, last, customer_email,
                                          build_receipt_payload(txid) or {})
+                    # commit the redemption (if any) now that the sale succeeded
+                    if reward_points_used > 0:
+                        redeem_points(customer_id, customer_email, reward_points_used,
+                                      transaction_id=txid)
                     # loyalty flywheel: earn points on this sale (tier from total spend)
                     _spent = sum(float(h.get("Total") or 0)
                                  for h in get_customer_history(customer_email))
@@ -3738,6 +3764,7 @@ def complete_sale():
                     "newsletter_added": newsletter_added,
                     "points_earned": points_earned,
                     "points_balance": points_bal,
+                    "reward_discount": result.get("discount", 0),
                 }
             )
         else:

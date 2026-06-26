@@ -1063,8 +1063,12 @@
             <div class="customer-capture" style="margin:14px 0;display:flex;flex-direction:column;gap:8px;">
                 <input id="custName" type="text" placeholder="Customer name (optional)"
                        style="padding:12px 14px;border-radius:12px;border:1px solid rgba(167,243,208,0.15);background:#1a2f23;color:#e8f5ee;font-family:inherit;font-size:15px;">
-                <input id="custEmail" type="email" placeholder="Email for receipt / offers (optional)"
+                <input id="custEmail" type="email" placeholder="Email for receipt / offers (optional)" onblur="lookupPoints()"
                        style="padding:12px 14px;border-radius:12px;border:1px solid rgba(167,243,208,0.15);background:#1a2f23;color:#e8f5ee;font-family:inherit;font-size:15px;">
+                <div id="rewardLine" style="display:none;align-items:center;gap:8px;font-size:14px;color:#34d399;background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);border-radius:10px;padding:10px 12px;">
+                    <input type="checkbox" id="custRedeem" onchange="updateTotals()">
+                    <label for="custRedeem" id="rewardLabel" style="cursor:pointer;">Apply reward</label>
+                </div>
                 <div style="display:flex;gap:18px;font-size:13px;color:#94a3b8;">
                     <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="custEmailReceipt" checked> Email receipt</label>
                     <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="custNewsletter"> Add to newsletter</label>
@@ -1484,6 +1488,9 @@ function clearCart() {
     const cn = document.getElementById('custName'); if (cn) cn.value = '';
     const ce = document.getElementById('custEmail'); if (ce) ce.value = '';
     const nl = document.getElementById('custNewsletter'); if (nl) nl.checked = false;
+    const rd = document.getElementById('custRedeem'); if (rd) rd.checked = false;
+    const rl = document.getElementById('rewardLine'); if (rl) rl.style.display = 'none';
+    availableReward = 0;
 }
 
 function renderCart() {
@@ -1532,6 +1539,25 @@ function cartTaxable() {
     return cart.reduce((sum, i) => sum + (i.taxable !== false ? i.qty * i.price : 0), 0);
 }
 
+let availableReward = 0;
+function rewardApplied(total) {
+    const r = document.getElementById('custRedeem');
+    return (r && r.checked) ? Math.min(availableReward, total) : 0;
+}
+function lookupPoints() {
+    const email = (document.getElementById('custEmail') || {}).value || '';
+    const line = document.getElementById('rewardLine');
+    if (!email || email.indexOf('@') < 0) { availableReward = 0; if (line) line.style.display = 'none'; updateTotals(); return; }
+    fetch('/sales/customer-points?email=' + encodeURIComponent(email)).then(r => r.json()).then(d => {
+        availableReward = d.dollars || 0;
+        if ((d.points || 0) > 0) {
+            document.getElementById('rewardLabel').textContent = 'Apply reward: ' + d.points + ' pts = ' + money(d.dollars) + ' off';
+            if (line) line.style.display = 'flex';
+        } else if (line) { line.style.display = 'none'; }
+        updateTotals();
+    }).catch(() => {});
+}
+
 function updateTotals() {
     const subtotal = cart.reduce((sum, i) => sum + (i.qty * i.price), 0);
     const tax = cartTaxable() * TAX_RATE;
@@ -1540,7 +1566,7 @@ function updateTotals() {
 
     document.getElementById('subtotal').textContent = money(subtotal);
     document.getElementById('taxAmount').textContent = money(tax);
-    document.getElementById('grandTotal').textContent = money(total);
+    document.getElementById('grandTotal').textContent = money(total - rewardApplied(total));
     document.getElementById('cardFeeAmount').textContent = money(cardFee);
     document.getElementById('cardFeeRow').classList.toggle('active', paymentMethod === 'CARD' && cardFee > 0);
 
@@ -1575,7 +1601,8 @@ function calcChange() {
 
     const cash = parseFloat(document.getElementById('cashInput').value) || 0;
     const subtotal = cart.reduce((sum, i) => sum + (i.qty * i.price), 0);
-    const total = subtotal + (cartTaxable() * TAX_RATE) + (paymentMethod === 'CARD' ? subtotal * CARD_FEE_RATE : 0);
+    let total = subtotal + (cartTaxable() * TAX_RATE) + (paymentMethod === 'CARD' ? subtotal * CARD_FEE_RATE : 0);
+    total = total - rewardApplied(total);
     const change = cash - total;
 
     const display = document.getElementById('changeDisplay');
@@ -1594,7 +1621,8 @@ async function completeSale() {
 
     const subtotal = cart.reduce((sum, i) => sum + (i.qty * i.price), 0);
     const cardFee = paymentMethod === 'CARD' ? subtotal * CARD_FEE_RATE : 0;
-    const total = subtotal + (cartTaxable() * TAX_RATE) + cardFee;
+    let total = subtotal + (cartTaxable() * TAX_RATE) + cardFee;
+    total = total - rewardApplied(total);
 
     let cashReceived = null;
     if (paymentMethod === 'CASH') {
@@ -1617,7 +1645,8 @@ async function completeSale() {
                 customer_name: (document.getElementById('custName') || {}).value || '',
                 customer_email: (document.getElementById('custEmail') || {}).value || '',
                 email_receipt: !!((document.getElementById('custEmailReceipt') || {}).checked),
-                newsletter: !!((document.getElementById('custNewsletter') || {}).checked)
+                newsletter: !!((document.getElementById('custNewsletter') || {}).checked),
+                redeem_reward: !!((document.getElementById('custRedeem') || {}).checked)
             })
         });
 

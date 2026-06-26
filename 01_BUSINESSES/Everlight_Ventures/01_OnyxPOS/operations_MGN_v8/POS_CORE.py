@@ -1695,7 +1695,7 @@ def resolve_line_tax(item):
     return True, "TAXABLE"
 
 
-def record_sale(items, emp_id, emp_name, payment_method, amount_received, notes="", card_fee=0.0):
+def record_sale(items, emp_id, emp_name, payment_method, amount_received, notes="", card_fee=0.0, discount=0.0):
     """
     Expects items like:
       {"sku":"...", "name":"...", "price":7.98, "qty":3}
@@ -1811,7 +1811,11 @@ def record_sale(items, emp_id, emp_name, payment_method, amount_received, notes=
         card_fee_amt = 0.0
     if pm != "CARD":
         card_fee_amt = 0.0
-    total = round(subtotal + tax + card_fee_amt, 2)
+    try:
+        disc = max(0.0, float(discount or 0))
+    except Exception:
+        disc = 0.0
+    total = round(max(0.0, subtotal + tax + card_fee_amt - disc), 2)
 
     change_due = 0.0
     if pm == "CASH":
@@ -1929,6 +1933,7 @@ def record_sale(items, emp_id, emp_name, payment_method, amount_received, notes=
         "subtotal": round(subtotal, 2),
         "tax": round(tax, 2),
         "total": round(total, 2),
+        "discount": round(disc, 2),
         "change_due": round(change_due, 2),
         "total_items": total_items,
         "cogs_total": round(total_cogs, 2),

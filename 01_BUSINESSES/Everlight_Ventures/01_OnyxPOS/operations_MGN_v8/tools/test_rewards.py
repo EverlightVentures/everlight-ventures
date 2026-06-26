@@ -37,6 +37,19 @@ class Rewards(unittest.TestCase):
     def test_no_email_no_points(self):
         self.assertEqual(C.award_points("", "", 100), 0)
 
+    def test_record_sale_discount_reduces_total_and_floors_at_zero(self):
+        os.environ["MGN_TAX_RATE"] = "0"
+        C.create_item("RW1", "Pot", "Product", "P", default_price=20)
+        ok, res = C.record_sale([{"sku": "RW1", "name": "Pot", "price": 20, "qty": 1}],
+                                "1001", "Owner", "CASH", 100, discount=5)
+        self.assertTrue(ok, res)
+        self.assertEqual(res["discount"], 5.0)
+        self.assertEqual(res["total"], 15.0)        # 20 - 5 (no tax)
+        ok2, res2 = C.record_sale([{"sku": "RW1", "name": "Pot", "price": 20, "qty": 1}],
+                                  "1001", "Owner", "CASH", 100, discount=999)
+        self.assertTrue(ok2)
+        self.assertEqual(res2["total"], 0.0)         # discount can't go negative
+
 
 if __name__ == "__main__":
     unittest.main()
