@@ -705,6 +705,10 @@
                         <span class="nav-emoji">🗓️</span>
                         <span class="nav-text">Admin Schedule</span>
                     </a>
+                    <a href="{{ url_for('admin_backup') }}" class="nav-item {% if 'backup' in (request.endpoint or '') %}active{% endif %}">
+                        <span class="nav-emoji">💾</span>
+                        <span class="nav-text">Backups</span>
+                    </a>
                     {% endif %}
                 </div>
                 {% endif %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block page_title %}Backups{% endblock %}
+{% block header_emoji %}💾{% endblock %}
+{% block header_title %}Backups{% endblock %}
+{% block header_actions %}
+<form method="POST" action="{{ url_for('admin_backup_run') }}" style="display:inline;">
+  <button class="btn btn-secondary" type="submit"><i data-lucide="save"></i> Back up now</button>
+</form>
+{% endblock %}
+{% block content %}
+<style>
+  .bk-panel{background:linear-gradient(145deg,#1e3a2a,#162b1f);border:1px solid rgba(167,243,208,0.12);border-radius:16px;padding:20px;margin-bottom:18px;color:#e8f5ee;}
+  .bk-table{width:100%;border-collapse:collapse;font-size:14px;}
+  .bk-table th{text-align:left;color:#94a3b8;padding:10px;border-bottom:1px solid rgba(167,243,208,0.15);}
+  .bk-table td{padding:10px;border-bottom:1px solid rgba(167,243,208,0.08);}
+  .bk-hint{font-size:12px;color:#64748b;margin-top:6px;}
+</style>
+
+<div class="bk-panel">
+  <p style="margin-top:0;color:#cbd5e1;">A full copy of everything (sales, customers, inventory, payroll) is saved automatically at every till close, and you can run one any time. Keep at least one copy off this PC.</p>
+  <div style="display:flex;gap:24px;flex-wrap:wrap;">
+    <div>Encryption: {% if encrypted %}<strong style="color:#34d399;">ON</strong>{% else %}<strong style="color:#fbbf24;">off</strong>{% endif %}</div>
+    <div>Offsite copy: {% if offsite %}<strong style="color:#34d399;">{{ offsite }}</strong>{% else %}<strong style="color:#fbbf24;">not set</strong>{% endif %}</div>
+  </div>
+  <div class="bk-hint">To turn on encryption set <code>MGN_BACKUP_PASSPHRASE</code> in .env (uses openssl AES-256). To auto-copy to a USB or network drive set <code>MGN_BACKUP_OFFSITE</code> to that folder. Restore: <code>tar -xzf mgn_backup_*.tar.gz</code> (or <code>openssl enc -d -aes-256-cbc -pbkdf2 -in file.enc -out file.tar.gz -pass pass:...</code> first).</div>
+</div>
+
+<div class="bk-panel">
+  <h3 style="margin-top:0;">Recent backups</h3>
+  <table class="bk-table">
+    <thead><tr><th>When</th><th>File</th><th>Size</th><th></th></tr></thead>
+    <tbody>
+    {% for b in backups %}
+      <tr>
+        <td>{{ b.when }}</td><td>{{ b.name }}</td><td>{{ b.size_kb }} KB</td>
+        <td><a href="{{ url_for('admin_backup_download', name=b.name) }}" style="color:#34d399;">Download</a></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4" style="padding:18px;color:#94a3b8;">No backups yet. Click "Back up now" or close the till.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+{% block extra_js %}<script>lucide.createIcons();</script>{% endblock %}

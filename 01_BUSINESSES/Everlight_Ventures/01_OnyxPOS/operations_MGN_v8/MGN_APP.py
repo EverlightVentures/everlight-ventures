@@ -4442,6 +4442,60 @@ def integrations_accounting():
 
 
 # ==============================================================================
+#       BACKUPS (resilience -- one mini PC = one dead drive without these)
+# ==============================================================================
+
+_BK = None
+
+
+def _bk():
+    global _BK
+    if _BK is None:
+        import importlib.util as ilu
+        p = os.path.join(SCRIPT_DIR, "tools", "backup_data.py")
+        spec = ilu.spec_from_file_location("backup_data", p)
+        mod = ilu.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        _BK = mod
+    return _BK
+
+
+@app.route("/admin/backup")
+@owner_required
+def admin_backup():
+    return render_template("admin/backup.html", backups=_bk().list_backups(),
+                           encrypted=bool(os.environ.get("MGN_BACKUP_PASSPHRASE")),
+                           offsite=os.environ.get("MGN_BACKUP_OFFSITE", ""))
+
+
+@app.route("/admin/backup/run", methods=["POST"])
+@owner_required
+def admin_backup_run():
+    try:
+        r = _bk().create_backup()
+        bits = [f"Backup saved ({round(r['size'] / 1024, 1)} KB)"]
+        if r.get("encrypted"):
+            bits.append("encrypted")
+        if r.get("offsite"):
+            bits.append("copied offsite")
+        flash(", ".join(bits) + ".", "success")
+    except Exception as e:
+        flash(f"Backup failed: {e}", "error")
+    return redirect(url_for("admin_backup"))
+
+
+@app.route("/admin/backup/download/<name>")
+@owner_required
+def admin_backup_download(name):
+    name = os.path.basename(name)  # path-traversal guard
+    path = _bk().backup_dir() / name
+    if not path.exists():
+        flash("Backup not found.", "error")
+        return redirect(url_for("admin_backup"))
+    return send_file(str(path), as_attachment=True, download_name=name)
+
+
+# ==============================================================================
 #                     INVENTORY
 # ==============================================================================
 
@@ -8415,6 +8469,11 @@ def api_till_close():
         # Daily, idempotent: assign any recurring admin tasks due today.
         try:
             check_and_assign_recurring_tasks()
+        except Exception:
+            pass
+        # Daily automatic backup of all data at close (best-effort resilience).
+        try:
+            _bk().create_backup()
         except Exception:
             pass
         try:
