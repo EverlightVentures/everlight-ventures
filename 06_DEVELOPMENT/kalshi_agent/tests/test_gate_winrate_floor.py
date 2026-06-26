@@ -106,6 +106,16 @@ def main():
     if "ceiling" in str(why62):
         fails.append("62c favorite wrongly hit the ceiling: %s" % (why62,))
 
+    # 9) MIN PAYOUT RATIO (Rich: "risk $8, win $8+"). At ratio 1.0 a 60c bet (0.67:1) is blocked
+    #    (by ceiling or payout); a 45c bet (1.22:1) the model makes a favorite clears it.
+    cfgp = dict(CFG, min_payout_ratio=1.0, max_buy_price_c=50, min_fair_prob_sharp=0.50)
+    okp, whyp = gate(cfgp, 10, 60, 0.70, DEEP, SPREAD, 9, "sharp_sports")
+    if okp or not any(s in str(whyp) for s in ("ceiling", "payout")):
+        fails.append("60c bet should fail payout/ceiling, got ok=%s why=%s" % (okp, whyp))
+    _, why45 = gate(cfgp, 10, 45, 0.55, DEEP, SPREAD, 9, "sharp_sports")
+    if any(s in str(why45) for s in ("payout", "ceiling")):
+        fails.append("45c favorite (1.2:1) wrongly blocked by payout/ceiling: %s" % (why45,))
+
     if fails:
         print("FAIL:")
         for f in fails:

@@ -326,6 +326,13 @@ def gate(cfg, count, our_cents, fair, depth, spread_cents, books=1, lane=None):
     if our_cents > maxc:
         return False, "buy %dc > %dc ceiling -- win only %dc per %dc risked (payout too thin)" % (
             our_cents, maxc, 100 - our_cents, our_cents)
+    # MIN PAYOUT RATIO (Rich's HARD RULE 2026-06-25: "risk $8, win $8+, not 75c"). win/risk =
+    # (100-price)/price must clear min_payout_ratio (1.0 = win >= risk). Operator bets bypass gate().
+    ratio = (100 - our_cents) / float(our_cents) if our_cents > 0 else 0.0
+    need = cfg.get("min_payout_ratio", 0.0)
+    if ratio < need:
+        return False, "payout %.2f:1 < %.2f:1 required (risk %dc to win only %dc)" % (
+            ratio, need, our_cents, 100 - our_cents)
     if depth < cfg["min_depth_dollars"]:
         return False, "depth $%d < min" % int(depth)
     if spread_cents is not None and spread_cents > cfg["max_spread_cents"]:
