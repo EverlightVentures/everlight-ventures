@@ -49,7 +49,29 @@ PREFIX_MAP = {
 }
 
 
+# Exact-name tags for keys that do not follow a clean prefix.
+EXACT_NAME_MAP = {
+    "ATTOM_API_KEY": ("broker_os", "property-data"),
+    "BLINKO_URL": ("infra", "knowledge-rag"),
+    "IMAP_HOST": ("comms", "email-inbound"),
+    "IMAP_USER": ("comms", "email-inbound"),
+    "IMAP_PASS": ("comms", "email-inbound"),
+    "SMTP_HOST": ("comms", "email-smtp"),
+    "SMTP_USER": ("comms", "email-smtp"),
+    "SMTP_PASS": ("comms", "email-smtp"),
+    "SMTP_PORT": ("comms", "email-smtp"),
+    "SMTP_FROM": ("comms", "email-smtp"),
+    "SMTP_PROVIDER": ("comms", "email-smtp"),
+    "LEONARDO_API_KEY": ("media", "image-gen"),
+    "PERPLEXITY_API_KEY": ("research", "perplexity"),
+    "MARCUS_COLE_PHONE": ("comms", "voice-handler"),
+    "SITE_BASE_URL": ("infra", "site-config"),
+}
+
+
 def infer(name: str) -> tuple[str, str]:
+    if name in EXACT_NAME_MAP:
+        return EXACT_NAME_MAP[name]
     for pre, tag in PREFIX_MAP.items():
         if name.upper().startswith(pre):
             return tag
