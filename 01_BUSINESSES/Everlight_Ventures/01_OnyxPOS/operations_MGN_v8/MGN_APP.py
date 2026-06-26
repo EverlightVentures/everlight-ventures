@@ -3579,7 +3579,7 @@ def money_bill_pay(bid):
 
 
 @app.route("/money/autopilot", methods=["POST"])
-@manager_required
+@owner_required
 def money_autopilot():
     m = money.set_autopilot_mode(request.form.get("mode", "SUGGEST"))
     flash(f"Autopilot set to {m}.", "info")
@@ -4788,6 +4788,8 @@ def edit_item(sku):
             "Notes": (request.form.get("Notes") or "").strip(),
             "Size": (request.form.get("Size") or "").strip(),
             "Item_Description": (request.form.get("Item_Description") or "").strip(),
+            "Botanical_Name": (request.form.get("Botanical_Name") or "").strip(),
+            "Common_Name": (request.form.get("Common_Name") or "").strip(),
             "Wholesale_Cost": (request.form.get("Wholesale_Cost") or "").strip(),
             "Retail_Markup": (request.form.get("Retail_Markup") or "").strip(),
             "Retail_Price": (request.form.get("Retail_Price") or "").strip(),

@@ -133,7 +133,8 @@ ITEM_HEADERS = ["SKU", "Item_Name", "Category", "Subcategory", "Product_Name",
                 "Default_Unit", "Default_Price", "Taxable", "Reorder_Point",
                 "Date_Added", "Last_Updated", "Status", "Notes", "Size", "Item_Description", "Wholesale_Cost", "Retail_Markup", "Retail_Price", "Unit_Cost", "Unit_Price",
   "Last_Invoice_No", "Last_Vendor", "Last_Received_Date",
-                "Supplier_Barcode", "QR_Code", "QR_Image_Path",]  # aligned to the on-disk 26-col Items.csv so rewrites/appends never drop trailing columns
+                "Supplier_Barcode", "QR_Code", "QR_Image_Path",
+                "Botanical_Name", "Common_Name",]  # 28 cols; Botanical/Common appended at the tail -- safe, old 26-col rows read back with empty new fields
 
 
 
@@ -1290,7 +1291,14 @@ def consume_from_lots(sku, qty, trans_id, emp_id):
         lot["Qty_Remaining"] = str(available - take)
         remaining -= take
         consumed.append({"lot_id": lot["Lot_ID"], "qty": take, "cost": float(lot.get("Unit_Cost", 0))})
-        ledger_entry(sku, lot["Lot_ID"], -take, "SALE", trans_id, emp_id, "")
+        # Inventory movement ledger row (the prior ledger_entry() call passed args in
+        # the wrong slots -> garbage rows; this matches create_lot's LEDGER_HEADERS shape).
+        append_csv(get_ledger_path(), LEDGER_HEADERS, {
+            "Entry_ID": generate_id("LED"),
+            "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "SKU": sku, "Lot_ID": lot["Lot_ID"], "Delta_Qty": str(-take),
+            "Reason": "Sale", "Ref_Transaction_ID": trans_id,
+            "Employee_ID": emp_id, "Notes": ""})
     # Lock the whole re-read -> subtract -> rewrite so two concurrent sales
     # can't both read the same on-hand and lost-update Lots.csv.
     with _IO_LOCK:

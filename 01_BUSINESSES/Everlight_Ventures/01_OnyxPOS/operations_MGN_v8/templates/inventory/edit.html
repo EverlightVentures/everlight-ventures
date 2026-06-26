@@ -389,6 +389,16 @@
                     </div>
 
                     <div class="form-group">
+                        <label class="form-label">Botanical / Latin Name</label>
+                        <input type="text" class="form-input" name="Botanical_Name" value="{{ item.get('Botanical_Name', '') }}" placeholder="e.g. Malus domestica">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Common Name</label>
+                        <input type="text" class="form-input" name="Common_Name" value="{{ item.get('Common_Name', '') }}" placeholder="e.g. Apple Tree">
+                    </div>
+
+                    <div class="form-group">
                         <label class="form-label">Default Unit</label>
                         <input type="text" class="form-input" name="Default_Unit" value="{{ item.get('Default_Unit', '') }}">
                     </div>
