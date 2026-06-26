@@ -399,6 +399,31 @@
                     </div>
 
                     <div class="form-group">
+                        <label class="form-label">Sun</label>
+                        <input type="text" class="form-input" name="Sun_Requirements" value="{{ item.get('Sun_Requirements', '') }}" placeholder="Full Sun / Partial Shade / Full Shade">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Water</label>
+                        <input type="text" class="form-input" name="Water_Needs" value="{{ item.get('Water_Needs', '') }}" placeholder="Dry / Moderate / Moist">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Hardiness Zone</label>
+                        <input type="text" class="form-input" name="Hardiness_Zone" value="{{ item.get('Hardiness_Zone', '') }}" placeholder="e.g. 7-10">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Mature Size</label>
+                        <input type="text" class="form-input" name="Mature_Size" value="{{ item.get('Mature_Size', '') }}" placeholder="e.g. 15 ft H x 10 ft W">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Bloom Time</label>
+                        <input type="text" class="form-input" name="Bloom_Time" value="{{ item.get('Bloom_Time', '') }}" placeholder="e.g. Spring">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Growth Rate</label>
+                        <input type="text" class="form-input" name="Growth_Rate" value="{{ item.get('Growth_Rate', '') }}" placeholder="Slow / Moderate / Fast">
+                    </div>
+
+                    <div class="form-group">
                         <label class="form-label">Default Unit</label>
                         <input type="text" class="form-input" name="Default_Unit" value="{{ item.get('Default_Unit', '') }}">
                     </div>

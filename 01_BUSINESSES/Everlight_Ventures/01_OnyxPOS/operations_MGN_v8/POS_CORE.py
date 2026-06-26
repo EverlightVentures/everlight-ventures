@@ -134,7 +134,9 @@ ITEM_HEADERS = ["SKU", "Item_Name", "Category", "Subcategory", "Product_Name",
                 "Date_Added", "Last_Updated", "Status", "Notes", "Size", "Item_Description", "Wholesale_Cost", "Retail_Markup", "Retail_Price", "Unit_Cost", "Unit_Price",
   "Last_Invoice_No", "Last_Vendor", "Last_Received_Date",
                 "Supplier_Barcode", "QR_Code", "QR_Image_Path",
-                "Botanical_Name", "Common_Name",]  # 28 cols; Botanical/Common appended at the tail -- safe, old 26-col rows read back with empty new fields
+                "Botanical_Name", "Common_Name",
+                "Sun_Requirements", "Water_Needs", "Hardiness_Zone",
+                "Mature_Size", "Bloom_Time", "Growth_Rate",]  # 34 cols; plant-care fields trailing-appended -- safe, old rows read back with empty new fields
 
 
 

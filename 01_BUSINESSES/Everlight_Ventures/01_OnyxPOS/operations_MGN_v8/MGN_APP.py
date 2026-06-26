@@ -3291,6 +3291,14 @@ def sales_search():
 
     items = search_items(query, category=category if category else None)
 
+    # Barcode scan: a scanner just types the code into the search box + Enter. Match
+    # it against Supplier_Barcode and surface that item first.
+    if query:
+        existing = {(it.get("SKU") or "") for it in items}
+        for it in get_all_items():
+            if (it.get("Supplier_Barcode") or "").strip() == query and (it.get("SKU") or "") not in existing:
+                items = [it] + items
+
     results = []
     for item in items[:20]:
         sku = (item.get("SKU") or "").strip()
@@ -4876,6 +4884,12 @@ def edit_item(sku):
             "Item_Description": (request.form.get("Item_Description") or "").strip(),
             "Botanical_Name": (request.form.get("Botanical_Name") or "").strip(),
             "Common_Name": (request.form.get("Common_Name") or "").strip(),
+            "Sun_Requirements": (request.form.get("Sun_Requirements") or "").strip(),
+            "Water_Needs": (request.form.get("Water_Needs") or "").strip(),
+            "Hardiness_Zone": (request.form.get("Hardiness_Zone") or "").strip(),
+            "Mature_Size": (request.form.get("Mature_Size") or "").strip(),
+            "Bloom_Time": (request.form.get("Bloom_Time") or "").strip(),
+            "Growth_Rate": (request.form.get("Growth_Rate") or "").strip(),
             "Wholesale_Cost": (request.form.get("Wholesale_Cost") or "").strip(),
             "Retail_Markup": (request.form.get("Retail_Markup") or "").strip(),
             "Retail_Price": (request.form.get("Retail_Price") or "").strip(),
