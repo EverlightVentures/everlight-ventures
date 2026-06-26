@@ -37,11 +37,13 @@ def daily_summary_rows(start, end):
                    if (t.get("Payment_Method") or "").upper() == "CASH")
         card = sum(_f(t, "Grand_Total") for t in txns
                    if (t.get("Payment_Method") or "").upper() == "CARD")
+        jim = sum(_f(t, "Grand_Total") for t in txns
+                  if (t.get("Payment_Method") or "").upper() == "JIM")
         out.append({
             "Date": d.isoformat(), "Transactions": len(txns),
             "Gross_Sales": round(gross, 2), "Sales_Tax": round(tax, 2),
             "COGS": round(cogs, 2), "Gross_Profit": round(gross - cogs, 2),
-            "Cash": round(cash, 2), "Card": round(card, 2),
+            "Cash": round(cash, 2), "Card": round(card, 2), "JIM": round(jim, 2),
         })
     return out
 

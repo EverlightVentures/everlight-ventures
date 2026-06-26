@@ -612,7 +612,7 @@
     /* Payment Selector */
     .payment-row {
         display: grid;
-        grid-template-columns: 1fr 1.2fr;
+        grid-template-columns: 1fr 1fr 1fr;
         gap: 12px;
         margin-bottom: 12px;
     }
@@ -1027,6 +1027,13 @@
                         Card
                     </div>
                     <div class="payment-note">Customer pays card fee</div>
+                </button>
+                <button class="payment-btn card" data-method="JIM" onclick="setPayment('JIM')">
+                    <div class="payment-title">
+                        <i data-lucide="smartphone"></i>
+                        JIM Tap
+                    </div>
+                    <div class="payment-note">Tap to Pay on phone</div>
                 </button>
             </div>
 
@@ -1626,7 +1633,7 @@ async function completeSale() {
         // Show success modal
         document.getElementById('modalTxId').textContent = 'Transaction #' + data.transaction_id;
         document.getElementById('modalItems').textContent = cart.reduce((sum, i) => sum + i.qty, 0);
-        document.getElementById('modalPayment').textContent = paymentMethod === 'CASH' ? 'Cash' : 'Card';
+        document.getElementById('modalPayment').textContent = paymentMethod === 'CASH' ? 'Cash' : (paymentMethod === 'JIM' ? 'JIM Tap' : 'Card');
         document.getElementById('modalChange').textContent = money(data.change || 0);
         document.getElementById('modalTotal').textContent = money(data.total);
         const feeRow = document.getElementById('modalCardFeeRow');

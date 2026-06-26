@@ -4438,7 +4438,7 @@ def integrations_accounting():
     else:
         rows = acc.daily_summary_rows(start, end)
         headers = ["Date", "Transactions", "Gross_Sales", "Sales_Tax", "COGS",
-                   "Gross_Profit", "Cash", "Card"]
+                   "Gross_Profit", "Cash", "Card", "JIM"]
     buf = io.StringIO()
     w = csv.DictWriter(buf, fieldnames=headers)
     w.writeheader()
