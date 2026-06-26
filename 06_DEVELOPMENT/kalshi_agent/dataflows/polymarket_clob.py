@@ -72,8 +72,8 @@ class PolymarketCLOB:
         url = f"{self.proxy_url}/gamma{path}" if self.proxy_url else f"{self.gamma_url}{path}"
         return self._fetch(url)
 
-    def scan_markets(self, limit: int = 300) -> list:
-        data = self._gamma(f"/markets?limit={limit}&active=true&closed=false&enableOrderBook=true")
+    def scan_markets(self, limit: int = 300, offset: int = 0) -> list:
+        data = self._gamma(f"/markets?limit={limit}&offset={offset}&active=true&closed=false&enableOrderBook=true")
         rows = data.get("data", data) if isinstance(data, dict) else data
         markets = []
         for m in rows:
