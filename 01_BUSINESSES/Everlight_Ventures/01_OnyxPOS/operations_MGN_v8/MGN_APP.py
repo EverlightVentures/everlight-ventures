@@ -285,6 +285,8 @@ from POS_CORE import (
     list_customers,
     get_customer_by_id,
     get_newsletter_subscribers,
+    unsubscribe_newsletter,
+    customer_tier,
     ingest_invoice_lines,
     map_vendor_sku,
     resolve_vendor_sku,
@@ -4051,6 +4053,10 @@ def receipt_email(trans_id):
 @app.route("/customers")
 @manager_required
 def customers_list():
+    from datetime import datetime as _dt
+    inactive_days = request.args.get("inactive_days", type=int)
+    tier_filter = (request.args.get("tier") or "").strip().upper()
+    today = date.today()
     enriched = []
     for c in list_customers():
         hist = get_customer_history(c.get("Email", ""))
@@ -4060,9 +4066,35 @@ def customers_list():
                 spent += float(h.get("Total") or 0)
             except Exception:
                 pass
+        last = hist[0].get("Date") if hist else ""
+        days = None
+        if last:
+            try:
+                days = (today - _dt.strptime(last, "%Y-%m-%d").date()).days
+            except Exception:
+                days = None
         enriched.append({**c, "purchases": len(hist), "spent": round(spent, 2),
-                         "last": hist[0].get("Date") if hist else ""})
-    return render_template("customers/list.html", customers=enriched)
+                         "last": last, "days": days, "tier": customer_tier(spent)})
+    if tier_filter:
+        enriched = [e for e in enriched if e["tier"] == tier_filter]
+    if inactive_days is not None:
+        enriched = [e for e in enriched if e["days"] is not None and e["days"] >= inactive_days]
+    enriched.sort(key=lambda e: e["spent"], reverse=True)
+    return render_template("customers/list.html", customers=enriched,
+                           tier_filter=tier_filter, inactive_days=inactive_days)
+
+
+@app.route("/newsletter/unsubscribe/<sub_id>")
+def newsletter_unsubscribe(sub_id):
+    """PUBLIC (no login) -- the unsubscribe link recipients click from a marketing
+    email. CAN-SPAM compliant: deactivates the subscriber."""
+    from markupsafe import escape
+    ok, email = unsubscribe_newsletter(sub_id)
+    msg = (f"{escape(email)} has been unsubscribed from the newsletter."
+           if ok else "That subscription was not found (it may already be removed).")
+    return ("<html><body style='font-family:sans-serif;max-width:520px;margin:60px auto;"
+            "text-align:center;color:#1e3a2a;'><h2>Mountain Gardens Nursery</h2>"
+            f"<p style='font-size:16px;'>{msg}</p></body></html>")
 
 
 @app.route("/customers/<customer_id>")

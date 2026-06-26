@@ -8,22 +8,30 @@
 </a>
 {% endblock %}
 {% block content %}
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+  <a href="{{ url_for('customers_list') }}" style="padding:8px 14px;border-radius:10px;background:rgba(255,255,255,0.06);color:#e8f5ee;text-decoration:none;border:1px solid rgba(167,243,208,0.15);">All</a>
+  <a href="{{ url_for('customers_list', inactive_days=90) }}" style="padding:8px 14px;border-radius:10px;background:rgba(255,255,255,0.06);color:#e8f5ee;text-decoration:none;border:1px solid rgba(167,243,208,0.15);">Inactive 90+ days</a>
+  {% for t in ['PLATINUM','GOLD','SILVER','BRONZE'] %}
+  <a href="{{ url_for('customers_list', tier=t) }}" style="padding:8px 14px;border-radius:10px;background:{% if tier_filter==t %}#059669{% else %}rgba(255,255,255,0.06){% endif %};color:#e8f5ee;text-decoration:none;border:1px solid rgba(167,243,208,0.15);">{{ t|capitalize }}</a>
+  {% endfor %}
+</div>
 <div style="overflow:auto;background:linear-gradient(145deg,#1e3a2a,#162b1f);border:1px solid rgba(167,243,208,0.12);border-radius:16px;padding:8px;">
 <table style="width:100%;border-collapse:collapse;color:#e8f5ee;font-size:14px;">
   <thead><tr style="text-align:left;color:#94a3b8;border-bottom:1px solid rgba(167,243,208,0.15);">
-    <th style="padding:12px;">Name</th><th style="padding:12px;">Email</th>
+    <th style="padding:12px;">Name</th><th style="padding:12px;">Email</th><th style="padding:12px;">Tier</th>
     <th style="padding:12px;">Visits</th><th style="padding:12px;">Spent</th><th style="padding:12px;">Last</th></tr></thead>
   <tbody>
   {% for c in customers %}
     <tr style="border-bottom:1px solid rgba(167,243,208,0.08);">
       <td style="padding:12px;"><a href="{{ url_for('customer_detail', customer_id=c.Customer_ID) }}" style="color:#34d399;text-decoration:none;font-weight:600;">{{ c.Name or '(no name)' }}</a></td>
       <td style="padding:12px;">{{ c.Email }}</td>
+      <td style="padding:12px;">{{ c.tier|capitalize }}</td>
       <td style="padding:12px;">{{ c.purchases }}</td>
       <td style="padding:12px;">${{ '%.2f'|format(c.spent) }}</td>
-      <td style="padding:12px;">{{ c.last or '-' }}</td>
+      <td style="padding:12px;">{{ c.last or '-' }}{% if c.days is not none %} <span style="color:#94a3b8;">({{ c.days }}d)</span>{% endif %}</td>
     </tr>
   {% else %}
-    <tr><td colspan="5" style="padding:20px;color:#94a3b8;">No customers yet. Capture an email at checkout and they'll appear here.</td></tr>
+    <tr><td colspan="6" style="padding:20px;color:#94a3b8;">No customers yet. Capture an email at checkout and they'll appear here.</td></tr>
   {% endfor %}
   </tbody>
 </table>

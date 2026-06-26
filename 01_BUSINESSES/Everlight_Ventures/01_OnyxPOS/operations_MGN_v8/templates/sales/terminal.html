@@ -39,6 +39,13 @@
         }
     }
 
+    @media (max-width: 600px) {
+        /* phone: 2 product columns instead of 1, and a height-capped scrollable
+           search dropdown so long result lists don't run off the bottom of the screen */
+        .products-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+        .search-shelf { left: 8px; right: 8px; max-height: 55vh; overflow-y: auto; }
+    }
+
     /* === LEFT PANEL: PRODUCTS === */
     .products-panel {
         display: flex;

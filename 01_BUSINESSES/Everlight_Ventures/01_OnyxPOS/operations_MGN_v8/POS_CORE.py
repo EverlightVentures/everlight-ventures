@@ -346,6 +346,41 @@ def get_newsletter_subscribers(active_only: bool = True):
     return sorted(rows, key=lambda r: r.get("Subscribed_At", ""), reverse=True)
 
 
+def unsubscribe_newsletter(token):
+    """CAN-SPAM: deactivate a subscriber by Subscriber_ID OR email. Idempotent.
+    Returns (ok, email). The unsubscribe link in marketing email points here."""
+    token = (token or "").strip()
+    if not token:
+        return False, ""
+    rows = read_csv(get_newsletter_path())
+    email = ""
+    for r in rows:
+        if (r.get("Subscriber_ID", "").strip() == token
+                or (r.get("Email", "").strip().lower() == token.lower())):
+            r["Status"] = "INACTIVE"
+            r["Unsubscribe_Date"] = datetime.now().isoformat(timespec="seconds")
+            email = r.get("Email", "")
+    if email:
+        write_csv(get_newsletter_path(), NEWSLETTER_HEADERS, rows)
+        return True, email
+    return False, ""
+
+
+def customer_tier(total_spent):
+    """Spend tier for targeting (e.g. a GOLD-only discount). Thresholds in dollars."""
+    try:
+        s = float(total_spent or 0)
+    except Exception:
+        s = 0.0
+    if s >= 1000:
+        return "PLATINUM"
+    if s >= 500:
+        return "GOLD"
+    if s >= 200:
+        return "SILVER"
+    return "BRONZE"
+
+
 def _iter_csv_files(root: Path, suffix: str):
     if not root.exists():
         return []
