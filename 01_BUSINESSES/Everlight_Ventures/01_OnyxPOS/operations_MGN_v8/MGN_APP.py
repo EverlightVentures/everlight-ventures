@@ -4269,13 +4269,28 @@ def _itx():
 
 
 _PLATFORMS = ["square", "shopify", "quickbooks", "mgn"]
+_API = None
+
+
+def _api():
+    """Lazy-load the credential-gated live-sync adapters."""
+    global _API
+    if _API is None:
+        import importlib.util as ilu
+        p = os.path.join(SCRIPT_DIR, "tools", "integrations_api.py")
+        spec = ilu.spec_from_file_location("integrations_api", p)
+        mod = ilu.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        _API = mod
+    return _API
 
 
 @app.route("/integrations")
 @manager_required
 def integrations():
     return render_template("integrations.html", platforms=_PLATFORMS,
-                           item_count=len(get_all_items()))
+                           item_count=len(get_all_items()),
+                           sync_status=_api().status())
 
 
 @app.route("/integrations/export")

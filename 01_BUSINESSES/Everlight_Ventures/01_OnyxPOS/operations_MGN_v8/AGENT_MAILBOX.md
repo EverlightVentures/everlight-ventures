@@ -88,11 +88,14 @@ range -> download a daily sales summary CSV (sales, tax, COGS, cash/card) OR a Q
 double-entry journal CSV (Undeposited Funds / Sales Income / Sales Tax Payable / COGS) that balances.
 tools/accounting_export.py + test (2). This is the original "export to third-party accounting
 software" ask, no keys needed.
-NEXT (needs YOUR input + credentials): live real-time API sync. Honest note: the prototype
-"channels.py" the old roadmap referenced does NOT exist, existing Stripe is SaaS billing only -- so
-live OAuth is a fresh build. Before building it I need to know WHICH platforms MGN actually uses
-(Square hardware? Shopify online store? QuickBooks Online?) + API keys -- building all four blind is
-waste. CSV import/export + accounting export cover transfer TODAY with no keys.
+LIVE API ADAPTER CHASSIS BUILT 2026-06-25 (tools/integrations_api.py, gated + inactive): operator
+chose "CSV-only for now, but we'll need all 3 (QuickBooks Online, Square, Shopify) later." The adapter
+layer is in place -- each platform reads its keys from .env (NEVER git/CSV), is_configured() + status()
+drive a "Live sync" panel on the Import/Export page (Connected / Not connected + which env vars to set);
+push_catalog/push_sale degrade gracefully until keys exist (branded_sms pattern). The real HTTP calls
+are marked TODO(live) -- wired the day real keys + a live account exist to test. test_integrations_api
+(4). TO ACTIVATE LATER: set QBO_* / SQUARE_ACCESS_TOKEN / SHOPIFY_* in .env, then implement the marked
+API call. CSV import/export + accounting export cover transfer TODAY with no keys.
 - VENDOR INVOICE INGEST + MASTER-SKU + FIFO -- SHIPPED 2026-06-25. /inventory/vendor-invoice:
   upload or paste a vendor invoice CSV; each vendor's product number maps to YOUR master item
   (Vendor_SKU_Map) and is received as a FIFO lot (carrying vendor + invoice), so consume_from_lots

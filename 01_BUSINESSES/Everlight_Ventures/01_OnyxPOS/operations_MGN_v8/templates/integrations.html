@@ -59,6 +59,25 @@
   </form>
 </div>
 
+{% if sync_status %}
+<div class="ix-panel">
+  <h3 style="margin-top:0;">Live sync (activates when API keys are set)</h3>
+  <p style="color:#cbd5e1;margin-top:0;">The CSV import/export above works today with no keys. Real-time API sync turns on per platform once its keys are in the .env file on this PC -- nothing is sent anywhere until then.</p>
+  <table class="ix-table">
+    <thead><tr><th>Platform</th><th>Status</th><th>To connect</th></tr></thead>
+    <tbody>
+    {% for s in sync_status %}
+      <tr>
+        <td>{{ s.label }}</td>
+        <td>{% if s.configured %}<span style="color:#34d399;">Connected</span>{% else %}<span style="color:#fbbf24;">Not connected</span>{% endif %}</td>
+        <td style="color:#94a3b8;font-size:13px;">{{ s.guide }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
 {% if preview %}
 <div class="ix-panel">
   <h3 style="margin-top:0;color:#34d399;">Preview -- detected "{{ preview.src }}": {{ preview.total }} item(s){% if preview.skipped %}, {{ preview.skipped }} skipped{% endif %}</h3>
