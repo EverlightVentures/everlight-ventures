@@ -9,6 +9,34 @@ port 5000, owner login Employee 1001 / PIN 8008).
 
 ---
 
+## [2026-06-25 PT] FULL AUDIT (7-agent workflow) + fixes + prioritized queue
+
+Ran an end-to-end audit (competitors + backend + mobile + customer-data + data-model + repo). KEY:
+the audit's headline "critical COGS bug -> profit overstated" was VERIFIED FALSE empirically (sold a
+stocked item: stock 10->7, COGS $60 correct). The real bug was only a garbage row in the inventory
+MOVEMENT ledger (consume_from_lots called ledger_entry with args in the wrong slots) -- FIXED to write
+a proper "Sale" LEDGER_HEADERS row. Stock + COGS + profit + QuickBooks export were always correct.
+
+FIXED this pass (commits 2107531 + 67b6059): inventory-ledger row; Botanical_Name + Common_Name added
+to ITEM_HEADERS (28 cols) + the item Edit form (the plant-name gap); /money/autopilot now
+owner_required; mobile header buttons wrap. Plus the mobile HAMBURGER menu (f8313f3) -- the whole nav
+was hidden off-screen on phones, which is why mobile looked like only ~25% of features existed.
+
+PRIORITIZED QUEUE (real audit items):
+- HIGH: sales-terminal mobile layout (still cramped on a phone -- the most-used screen).
+- HIGH (legal): newsletter CAN-SPAM -- add an unsubscribe link + /newsletter/unsubscribe route BEFORE
+  sending marketing email; + Last_Purchase_Date + customer segments/tiers for targeted discounts.
+- HIGH (resilience): automated encrypted backups + 2nd-terminal failover (one mini PC = single point
+  of failure).
+- BIG: optional integrated card payments (Stripe Terminal). "$0 swipe fees" is our killer edge
+  (~$12k/yr saved vs Square's ~2.6% on $40k/mo card volume), but we take ZERO cards today.
+- MED: barcode scan + plant-tag label printing; plant-care fields (sun/water/zone/mature size); dedup
+  the two _sales_logs_root/_list_saleslog_files defs; wire cash_sales from CASH transactions.
+COMPETITORS: we win on $0 fees + data ownership + CA plant tax + bundled payroll; they win on cards,
+managed cloud/backups, online store, loyalty/gift cards, barcode/hardware, plant-size-variant items.
+
+---
+
 ## [2026-06-25 PT] CRITICAL FIXES: name-save, overnight data loss, back-arrow exploit, PIN mgmt
 
 Root causes (traced in code AND independently reproduced by a 7-agent audit workflow):
