@@ -72,17 +72,35 @@ class KalshiClient:
 
     # ---- writes ----
     def place_order(self, ticker: str, side: str, action: str, count: int,
-                    price_cents: int = None, post_only: bool = True) -> dict:
-        """Place an order. Maker-first by default (post_only=True -> 75% cheaper fee).
-        side 'yes'/'no', action 'buy'/'sell', price_cents 1..99 (limit) or None (market)."""
-        body = {"ticker": ticker, "client_order_id": uuid.uuid4().hex,
-                "side": side, "action": action, "count": int(count),
-                "type": "limit" if price_cents is not None else "market"}
-        if price_cents is not None:
-            body["yes_price" if side == "yes" else "no_price"] = int(price_cents)
+                    price_cents: int = None, post_only: bool = True,
+                    tif: str = "good_till_canceled") -> dict:
+        """Place an order via Kalshi's v2 single-book endpoint (/portfolio/events/orders).
+        Kalshi deprecated the legacy /portfolio/orders (HTTP 410) -- migrated 2026-06-29.
+
+        Back-compat signature (callers unchanged): side 'yes'/'no', action 'buy'/'sell',
+        price_cents 1..99 (limit) or None (marketable). v2 quotes ONE yes book:
+          bid = buy yes;  ask = sell yes ( == buy no at the inverted price ).
+        So buy-no @ p maps to ask @ (100-p). Price is a fixed-point DOLLAR string, count a
+        string. Maker-first by default (post_only -> ~75% cheaper fee, rests GTC); pass
+        tif='immediate_or_cancel' to take. yes-side confirmed live (operator fill 2026-06-29);
+        no-side is the documented bid/ask inversion."""
+        buy = (action == "buy")
+        if side == "yes":
+            v2_side, yes_c = ("bid" if buy else "ask"), price_cents
+        else:  # 'no': buy no == sell yes @ (100-p); sell no == buy yes @ (100-p)
+            v2_side, yes_c = ("ask" if buy else "bid"), (None if price_cents is None else 100 - price_cents)
+        body = {"ticker": ticker, "client_order_id": uuid.uuid4().hex, "side": v2_side,
+                "count": "%d.00" % int(count),
+                "time_in_force": "immediate_or_cancel" if yes_c is None else tif,
+                "self_trade_prevention_type": "taker_at_cross"}
+        if yes_c is not None:
+            body["price"] = "%.4f" % (max(1, min(99, int(yes_c))) / 100.0)
             if post_only:
                 body["post_only"] = True
-        return self._request("POST", "/portfolio/orders", body).get("order", {})
+        else:
+            body["price"] = "0.9900" if v2_side == "bid" else "0.0100"  # marketable IOC
+        resp = self._request("POST", "/portfolio/events/orders", body)
+        return resp.get("order", resp) if isinstance(resp, dict) else resp
 
     def cancel_order(self, order_id: str) -> dict:
         return self._request("DELETE", f"/portfolio/orders/{order_id}")
