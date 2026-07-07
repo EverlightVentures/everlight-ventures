@@ -231,3 +231,107 @@ setInterval(() => {
   const sel = document.getElementById("day");
   if (!sel.value || sel.selectedIndex === 0) loadEvents(sel.value);
 }, 60000);
+
+/* ---- Live transportation layer: aircraft + trains ---- */
+const AIR_COLORS = { military: "#ff2d2d", commercial: "#7fd1ff", ga: "#cccccc" };
+let airMarkers = new Map();   // hex -> marker (reused so planes glide, not flicker)
+let trainMarkers = [];
+let airOn = false, railOn = false;
+
+function center() {
+  return userLatLon || [map.getCenter().lng, map.getCenter().lat];
+}
+
+async function refreshAircraft() {
+  if (!airOn) return;
+  const [lon, lat] = center();
+  let data;
+  try { data = await (await fetch(`/api/aircraft?lat=${lat}&lon=${lon}&dist=120`)).json(); }
+  catch (e) { return; }
+  const seen = new Set();
+  for (const a of data.aircraft || []) {
+    seen.add(a.id);
+    let m = airMarkers.get(a.id);
+    const color = a.emergency ? "#ff00d4" : AIR_COLORS[a.kind] || "#ccc";
+    if (!m) {
+      const el = document.createElement("div");
+      el.className = "plane";
+      const glyph = document.createElement("span");
+      glyph.textContent = "✈";
+      glyph.style.display = "inline-block";
+      el.appendChild(glyph);
+      el.onclick = () => openAir(a);
+      m = new maplibregl.Marker({ element: el, rotationAlignment: "map" });
+      airMarkers.set(a.id, m);
+      m.setLngLat([a.lon, a.lat]).addTo(map);
+    }
+    m.setLngLat([a.lon, a.lat]);
+    m.setRotation((a.track || 0) - 45); // the glyph points NE at 0deg
+    const s = m.getElement().firstElementChild;
+    s.style.color = color;
+    s.style.fontSize = a.kind === "military" ? "20px" : "15px";
+    m.getElement().title = `${a.flight} ${a.type || ""} ${a.alt || "?"}ft ${a.kind}${a.emergency ? " EMERGENCY" : ""}`;
+  }
+  for (const [id, m] of airMarkers) if (!seen.has(id)) { m.remove(); airMarkers.delete(id); }
+}
+
+async function refreshTrains() {
+  trainMarkers.forEach((m) => m.remove());
+  trainMarkers = [];
+  if (!railOn) return;
+  const [lon, lat] = center();
+  let data;
+  try { data = await (await fetch(`/api/trains?lat=${lat}&lon=${lon}&radius=80`)).json(); }
+  catch (e) { return; }
+  for (const t of data.trains || []) {
+    const el = document.createElement("div");
+    el.className = "train";
+    el.textContent = "🚆";
+    el.title = `${t.route} #${t.num} ${t.speed || 0}mph ${t.state || ""}`;
+    el.onclick = () => openTrain(t);
+    trainMarkers.push(new maplibregl.Marker({ element: el }).setLngLat([t.lon, t.lat]).addTo(map));
+  }
+}
+
+function openAir(a) {
+  const d = document.getElementById("detail");
+  d.classList.remove("hidden");
+  const tl = document.getElementById("d-threat");
+  tl.textContent = a.emergency ? "AIRCRAFT EMERGENCY" : a.kind.toUpperCase() + " AIRCRAFT";
+  tl.style.background = a.emergency ? "#ff00d4" : AIR_COLORS[a.kind];
+  tl.style.color = "#0A0A0A";
+  document.getElementById("d-title").textContent = a.flight;
+  document.getElementById("d-where").textContent = `${a.type || "unknown type"} · reg ${a.reg || "?"}`;
+  document.getElementById("d-story").textContent =
+    `Altitude: ${a.alt || "?"} ft\nGround speed: ${a.speed || "?"} kt\nHeading: ${Math.round(a.track || 0)}°\nSquawk: ${a.squawk || "?"}` +
+    (a.emergency ? "\n\n*** EMERGENCY SQUAWK ***" : "");
+  document.getElementById("d-cams").textContent = "n/a for aircraft";
+  document.getElementById("d-feeds").textContent = "n/a";
+}
+
+function openTrain(t) {
+  const d = document.getElementById("detail");
+  d.classList.remove("hidden");
+  const tl = document.getElementById("d-threat");
+  tl.textContent = "RAIL"; tl.style.background = "#8a8a8a"; tl.style.color = "#fff";
+  document.getElementById("d-title").textContent = `${t.route} #${t.num}`;
+  document.getElementById("d-where").textContent = `${t.distance_mi} mi away · ${t.state || ""}`;
+  document.getElementById("d-story").textContent =
+    `Speed: ${t.speed || 0} mph\nHeading: ${t.heading || "?"}\nState: ${t.state || "?"}`;
+  document.getElementById("d-cams").textContent = "n/a";
+  document.getElementById("d-feeds").textContent = "n/a";
+}
+
+document.getElementById("air-toggle").onclick = () => {
+  airOn = !airOn;
+  document.getElementById("air-toggle").style.background = airOn ? "#D4AF37" : "#1a1a1a";
+  if (airOn) refreshAircraft();
+  else { airMarkers.forEach((m) => m.remove()); airMarkers.clear(); }
+};
+document.getElementById("rail-toggle").onclick = () => {
+  railOn = !railOn;
+  document.getElementById("rail-toggle").style.background = railOn ? "#D4AF37" : "#1a1a1a";
+  refreshTrains();
+};
+setInterval(refreshAircraft, 12000);  // planes glide every 12s
+setInterval(refreshTrains, 30000);

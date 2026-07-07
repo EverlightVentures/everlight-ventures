@@ -8,8 +8,9 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
+from . import aircraft as air_mod
 from . import cameras as cams_mod
-from . import dvr, store, threat, wayfinding
+from . import dvr, store, threat, trains as train_mod, wayfinding
 from .feeds import feeds_for_county
 from .geo_county import county_for
 
@@ -121,6 +122,37 @@ def feeds(lat: float, lon: float):
     except Exception:  # noqa: BLE001
         fips = None
     return {"fips": fips, "feeds": feeds_for_county(fips)}
+
+
+_AIR_CACHE: dict = {}   # keyed by rounded (lat,lon,dist) -> (ts, data)
+_TRAIN_CACHE: dict = {"at": 0.0, "trains": []}
+
+
+@app.get("/api/aircraft")
+def aircraft(lat: float, lon: float, dist: int = 100):
+    """Live aircraft (commercial + military) within dist nm of a point."""
+    key = (round(lat, 1), round(lon, 1), dist)
+    hit = _AIR_CACHE.get(key)
+    if hit and time.time() - hit[0] < 8:   # short cache; adsb.lol throttles (420)
+        return {"aircraft": hit[1]}
+    try:
+        acs = air_mod.fetch(lat, lon, dist)
+        _AIR_CACHE[key] = (time.time(), acs)
+        return {"aircraft": acs}
+    except Exception as e:  # noqa: BLE001
+        return {"aircraft": hit[1] if hit else [], "error": str(e)}
+
+
+@app.get("/api/trains")
+def trains(lat: float, lon: float, radius: float = 60):
+    """Live Amtrak trains within radius miles of a point."""
+    if time.time() - _TRAIN_CACHE["at"] > 30 or not _TRAIN_CACHE["trains"]:
+        try:
+            _TRAIN_CACHE["trains"] = train_mod.fetch()
+            _TRAIN_CACHE["at"] = time.time()
+        except Exception:  # noqa: BLE001
+            pass
+    return {"trains": train_mod.near(_TRAIN_CACHE["trains"], lat, lon, radius)}
 
 
 # Serve the static web page at "/" (index.html). Mounted last so /api and
