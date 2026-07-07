@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from . import dvr, store, threat
+from . import cameras as cams_mod
+from . import dvr, store, threat, wayfinding
+from .feeds import feeds_for_county
 from .geo_county import county_for
 
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
@@ -82,6 +85,42 @@ def incidents(limit: int = 200):
         return {"incidents": dvr.recent(conn, limit)}
     finally:
         conn.close()
+
+
+# Caltrans camera list is large and slow; cache it in-process for 5 minutes.
+_CAM_CACHE: dict = {"at": 0.0, "cams": []}
+
+
+def _all_cameras() -> list[dict]:
+    if time.time() - _CAM_CACHE["at"] > 300 or not _CAM_CACHE["cams"]:
+        try:
+            _CAM_CACHE["cams"] = cams_mod.fetch_cameras()
+            _CAM_CACHE["at"] = time.time()
+        except Exception:  # noqa: BLE001 - serve stale on transient failure
+            pass
+    return _CAM_CACHE["cams"]
+
+
+@app.get("/api/cameras")
+def cameras(lat: float, lon: float, n: int = 3):
+    """The n public traffic cameras nearest a point (visual support for an incident)."""
+    return {"cameras": cams_mod.nearest(_all_cameras(), lat, lon, n)}
+
+
+@app.get("/api/where")
+def where(lat: float, lon: float):
+    """Human wayfinding for a point: nearest landmark + cross street + city."""
+    return wayfinding.where(lat, lon)
+
+
+@app.get("/api/feeds")
+def feeds(lat: float, lon: float):
+    """Live-listen scanner feeds for the county containing a point."""
+    try:
+        fips = county_for(lat, lon).get("fips")
+    except Exception:  # noqa: BLE001
+        fips = None
+    return {"fips": fips, "feeds": feeds_for_county(fips)}
 
 
 # Serve the static web page at "/" (index.html). Mounted last so /api and

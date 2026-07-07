@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Solano Live Desk</title>
-  <link href="https://unpkg.com/maplibre-gl@4.5.0/dist/maplibre-gl.css" rel="stylesheet" />
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
   <link href="style.css" rel="stylesheet" />
 </head>
 <body>
@@ -14,13 +14,34 @@
     <span id="county">locating...</span>
     <select id="day"></select>
     <span id="count">0 incidents</span>
+    <button id="sat-toggle" type="button">Satellite</button>
     <label id="scrub">
       <input type="range" id="time" min="0" max="100" value="100" />
       <span id="clock">live</span>
     </label>
   </header>
   <div id="map"></div>
-  <script src="https://unpkg.com/maplibre-gl@4.5.0/dist/maplibre-gl.js"></script>
+
+  <aside id="detail" class="hidden">
+    <button id="detail-close" type="button" aria-label="close">&times;</button>
+    <div id="d-threat" class="d-threat"></div>
+    <h2 id="d-title"></h2>
+    <div id="d-where" class="d-where">locating...</div>
+    <div class="d-section">
+      <h3>Story</h3>
+      <div id="d-story" class="d-story"></div>
+    </div>
+    <div class="d-section">
+      <h3>Cameras nearby</h3>
+      <div id="d-cams" class="d-cams">loading...</div>
+    </div>
+    <div class="d-section">
+      <h3>Listen live</h3>
+      <div id="d-feeds" class="d-feeds">loading...</div>
+    </div>
+  </aside>
+
+  <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
