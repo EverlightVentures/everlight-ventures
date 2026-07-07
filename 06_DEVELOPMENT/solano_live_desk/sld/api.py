@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from . import aircraft as air_mod
 from . import cameras as cams_mod
-from . import dvr, store, threat, trains as train_mod, wayfinding
+from . import dvr, evac, store, threat, trains as train_mod, wayfinding
 from .feeds import feeds_for_county
 from .geo_county import county_for
 
@@ -153,6 +153,28 @@ def trains(lat: float, lon: float, radius: float = 60):
         except Exception:  # noqa: BLE001
             pass
     return {"trains": train_mod.near(_TRAIN_CACHE["trains"], lat, lon, radius)}
+
+
+_EVAC_CACHE: dict = {"at": 0.0, "gj": {"type": "FeatureCollection", "features": []}}
+
+
+@app.get("/api/evac")
+def evac_zones():
+    """Active CA evacuation zones (GeoJSON + a flat summary). Empty in blue-sky."""
+    if time.time() - _EVAC_CACHE["at"] > 120:
+        try:
+            _EVAC_CACHE["gj"] = evac.fetch_active_zones()
+            _EVAC_CACHE["at"] = time.time()
+        except Exception:  # noqa: BLE001
+            pass
+    gj = _EVAC_CACHE["gj"]
+    return {"geojson": gj, "zones": evac.summarize(gj)}
+
+
+@app.get("/api/safepoints")
+def safe_points(lat: float, lon: float):
+    """Nearest hospitals / police / fire stations / shelters (where to go)."""
+    return {"safe_points": evac.fetch_safe_points(lat, lon)}
 
 
 # Serve the static web page at "/" (index.html). Mounted last so /api and

@@ -335,3 +335,61 @@ document.getElementById("rail-toggle").onclick = () => {
 };
 setInterval(refreshAircraft, 12000);  // planes glide every 12s
 setInterval(refreshTrains, 30000);
+
+/* ---- Evacuation zones + safe points (the "where do I go" layer) ---- */
+let safeMarkers = [];
+const SAFE_ICON = { hospital: "🏥", police: "🚓", fire_station: "🚒", shelter: "🏠", assembly_point: "🟢" };
+
+async function refreshEvac(on) {
+  if (map.getLayer("evac-fill")) map.removeLayer("evac-fill");
+  if (map.getLayer("evac-line")) map.removeLayer("evac-line");
+  if (map.getSource("evac")) map.removeSource("evac");
+  if (!on) return;
+  let gj;
+  try { gj = (await (await fetch("/api/evac")).json()).geojson; } catch (e) { return; }
+  const n = (gj.features || []).length;
+  if (!n) { alert("No active evacuation zones in California right now (blue sky)."); return; }
+  map.addSource("evac", { type: "geojson", data: gj });
+  map.addLayer({
+    id: "evac-fill", type: "fill", source: "evac",
+    paint: {
+      "fill-color": ["match", ["get", "STATUS"],
+        "Evacuation Order", "#ff2d2d", "Evacuation Warning", "#ff8c1a",
+        "Shelter in Place", "#7fd1ff", "#ffd21a"],
+      "fill-opacity": 0.35,
+    },
+  });
+  map.addLayer({
+    id: "evac-line", type: "line", source: "evac",
+    paint: { "line-color": "#fff", "line-width": 1 },
+  });
+}
+
+async function refreshSafe(on) {
+  safeMarkers.forEach((m) => m.remove());
+  safeMarkers = [];
+  if (!on) return;
+  const [lon, lat] = center();
+  let pts;
+  try { pts = (await (await fetch(`/api/safepoints?lat=${lat}&lon=${lon}`)).json()).safe_points; }
+  catch (e) { return; }
+  for (const p of pts || []) {
+    const el = document.createElement("div");
+    el.textContent = SAFE_ICON[p.kind] || "➕";
+    el.style.fontSize = "18px";
+    el.style.cursor = "pointer";
+    el.title = `${p.name} (${p.kind}) · ${p.distance_mi} mi`;
+    safeMarkers.push(new maplibregl.Marker({ element: el }).setLngLat([p.lon, p.lat]).addTo(map));
+  }
+}
+
+document.getElementById("evac-toggle").onclick = (e) => {
+  const on = e.target.style.background !== "rgb(212, 175, 55)";
+  e.target.style.background = on ? "#D4AF37" : "#1a1a1a";
+  refreshEvac(on);
+};
+document.getElementById("safe-toggle").onclick = (e) => {
+  const on = e.target.style.background !== "rgb(212, 175, 55)";
+  e.target.style.background = on ? "#D4AF37" : "#1a1a1a";
+  refreshSafe(on);
+};
