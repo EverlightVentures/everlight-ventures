@@ -23,6 +23,7 @@ let markers = [];
 let events = [];
 let userLatLon = null; // [lon, lat]
 let selectedId = null;
+let lastUpdate = Date.now();
 
 map.on("load", () => {
   // 3D terrain (free, no key)
@@ -201,6 +202,7 @@ async function loadEvents(date) {
   if (userLatLon) url += `${url.includes("?") ? "&" : "?"}lat=${userLatLon[1]}&lon=${userLatLon[0]}`;
   const data = await (await fetch(url)).json();
   events = data.events || [];
+  lastUpdate = Date.now();
   const withGeo = events.filter((e) => e.lat != null);
   if (withGeo.length && !map.__fitted) {
     const b = new maplibregl.LngLatBounds();
@@ -249,10 +251,21 @@ function locateUser() {
   );
 }
 
+// Live refresh: pull the current day's incidents every 15s (source updates ~60s,
+// but this keeps new pins landing fast). Only the live (today) view auto-refreshes.
 setInterval(() => {
   const sel = document.getElementById("day");
   if (!sel.value || sel.selectedIndex === 0) loadEvents(sel.value);
-}, 60000);
+}, 15000);
+
+// LIVE indicator: ticks every second, shows how fresh the data is.
+setInterval(() => {
+  const el = document.getElementById("live");
+  if (!el) return;
+  const secs = Math.round((Date.now() - lastUpdate) / 1000);
+  el.textContent = secs < 3 ? "● LIVE" : `● LIVE (${secs}s ago)`;
+  el.classList.toggle("stale", secs > 45);
+}, 1000);
 
 /* ---- Live transportation layer: aircraft + trains ---- */
 const AIR_COLORS = { military: "#ff2d2d", commercial: "#7fd1ff", ga: "#cccccc" };
@@ -357,7 +370,7 @@ document.getElementById("rail-toggle").onclick = () => {
   document.getElementById("rail-toggle").style.background = railOn ? "#D4AF37" : "#1a1a1a";
   refreshTrains();
 };
-setInterval(refreshAircraft, 12000);  // planes glide every 12s
+setInterval(refreshAircraft, 8000);   // planes glide every 8s (live)
 setInterval(refreshTrains, 30000);
 
 /* ---- Evacuation zones + safe points (the "where do I go" layer) ---- */
@@ -525,4 +538,5 @@ document.getElementById("cam-toggle").onclick = (e) => {
   e.target.style.background = camOn ? "#D4AF37" : "#1a1a1a";
   refreshCams();
 };
-setInterval(refreshBuses, 20000);  // buses move every 20s
+setInterval(refreshBuses, 15000);  // buses move every 15s (live)
+setInterval(() => { if (camOn) refreshCams(); }, 30000);  // refresh webcam stills

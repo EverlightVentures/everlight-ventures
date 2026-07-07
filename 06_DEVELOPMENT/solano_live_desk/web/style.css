@@ -11,6 +11,10 @@ html, body { margin: 0; height: 100%; font-family: system-ui, sans-serif; }
   border-radius: 4px; padding: 4px 8px; font-size: 12px; cursor: pointer;
 }
 #county { font-size: 12px; opacity: 0.8; }
+.live { font-size: 11px; font-weight: 700; color: #2ecc71; }
+.live.stale { color: #ff8c1a; }
+.live .dot, .live::before { animation: livepulse 1.4s infinite; }
+@keyframes livepulse { 50% { opacity: 0.25; } }
 .posture { font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
 .posture.green { background: #1a7f37; color: #fff; }
 .posture.yellow { background: #ffd21a; color: #0A0A0A; }

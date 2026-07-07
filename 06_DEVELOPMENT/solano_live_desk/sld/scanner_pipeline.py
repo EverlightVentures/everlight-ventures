@@ -6,7 +6,7 @@ import time
 from datetime import datetime
 
 from . import broadcastify as bc
-from . import store, threat
+from . import radio, store, threat
 from . import transcribe as tr
 
 # Solano scanner feeds to transcribe (feed_id -> label + coverage centroid).
@@ -76,6 +76,13 @@ def run(base: str, feed_ids=None, model: str = "base.en", now_iso: str | None = 
         start_ts = blk.get("startTs", 0)
         events, geocoded = [], 0
 
+        def stamp(offset):
+            return datetime.fromtimestamp(start_ts + offset, store.PT).strftime("%-I:%M:%S %p")
+
+        # Timestamped, code-named, event-coded transcript lines.
+        for s in segs:
+            s["line"] = radio.annotate_line(stamp(s["start"]), s["text"], base)
+
         # Always store the whole block as a readable + replayable scanner log,
         # pinned to the feed's coverage area, severity = the loudest thing heard.
         if segs:
@@ -92,7 +99,7 @@ def run(base: str, feed_ids=None, model: str = "base.en", now_iso: str | None = 
                     "lon": clon,
                     "geo_label": FEEDS.get(fid, fid),
                     "log_time": datetime.fromtimestamp(start_ts, store.PT).isoformat(),
-                    "body": "\n".join(s["text"] for s in segs)[:4000],
+                    "body": "\n".join(s["line"] for s in segs)[:6000],
                     "details": [],
                     "severity": block_sev,
                     "audio_url": f"/api/scanner_audio/{bid}",
@@ -114,6 +121,14 @@ def run(base: str, feed_ids=None, model: str = "base.en", now_iso: str | None = 
             if lat is None:
                 continue
             ev_time = datetime.fromtimestamp(start_ts + seg["start"], store.PT).isoformat()
+            # Correlate: which units/operators are on this call (spoken within 90s).
+            responders: set = set()
+            for s2 in segs:
+                if 0 <= (s2["start"] - seg["start"]) <= 90:
+                    responders.update(radio.line_ids(s2["text"], base))
+            body = seg["line"]
+            if responders:
+                body += "\n\nUnits on this call: " + ", ".join(sorted(responders))
             events.append(
                 {
                     "id": f"scanner:{bid}:{i}",
@@ -124,7 +139,7 @@ def run(base: str, feed_ids=None, model: str = "base.en", now_iso: str | None = 
                     "lon": lon,
                     "geo_label": loc.group(0),
                     "log_time": ev_time,
-                    "body": seg["text"],
+                    "body": body,
                     "details": [],
                     "severity": sev,
                     "audio_url": f"/api/scanner_audio/{bid}",
