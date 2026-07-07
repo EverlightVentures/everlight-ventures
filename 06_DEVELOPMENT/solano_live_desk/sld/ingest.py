@@ -90,5 +90,15 @@ async def poll_loop(base: str, interval: int = 60) -> None:
                 print(f"[ingest] upserted {nn} NWS alerts", flush=True)
             except Exception as e:  # noqa: BLE001
                 print(f"[ingest] nws error: {e}", flush=True)
+        # Score today's events vs the phone's last-known GPS and fire alerts.
+        try:
+            from .alert_worker import run_alerts
+
+            fired = run_alerts(base)
+            if fired:
+                print(f"[alert] fired {len(fired)}: "
+                      + ", ".join(f"{f['threat_level']} {f['type']}" for f in fired), flush=True)
+        except Exception as e:  # noqa: BLE001
+            print(f"[alert] error: {e}", flush=True)
         ticks += 1
         await asyncio.sleep(interval)

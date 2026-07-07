@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from . import store, threat
+from . import dvr, store, threat
 from .geo_county import county_for
 
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
@@ -62,6 +63,25 @@ def county(lat: float, lon: float):
         return county_for(lat, lon)
     except Exception as e:  # noqa: BLE001
         return {"error": str(e), "fips": None, "county": None, "state": None}
+
+
+@app.post("/api/location")
+def set_location(lat: float, lon: float):
+    """Phone posts its live GPS so server-side alerting scores against it."""
+    p = Path(_store_dir())
+    p.mkdir(parents=True, exist_ok=True)
+    (p / "last_location.json").write_text(json.dumps({"lat": lat, "lon": lon}))
+    return {"ok": True, "lat": lat, "lon": lon}
+
+
+@app.get("/api/incidents")
+def incidents(limit: int = 200):
+    """The DVR / case log: cross-day recorded incidents, newest first."""
+    conn = dvr.connect(_store_dir())
+    try:
+        return {"incidents": dvr.recent(conn, limit)}
+    finally:
+        conn.close()
 
 
 # Serve the static web page at "/" (index.html). Mounted last so /api and

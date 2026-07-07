@@ -167,6 +167,8 @@ function locateUser() {
       const first = !userLatLon;
       userLatLon = [longitude, latitude];
       if (first) resolveCounty(latitude, longitude);
+      // Tell the server our position so it can push alerts scored against us.
+      fetch(`/api/location?lat=${latitude}&lon=${longitude}`, { method: "POST" }).catch(() => {});
       loadEvents(document.getElementById("day").value); // re-score against live GPS
     },
     () => {
