@@ -12,8 +12,19 @@ map.addControl(
   })
 ); // "follow-me"
 
+const THREAT_COLORS = {
+  EXTREME: "#ff2d2d",
+  HIGH: "#ff8c1a",
+  MEDIUM: "#ffd21a",
+  LOW: "#D4AF37",
+  LOG: "#8a8a8a",
+};
+const POSTURE = ["LOG", "LOW", "MEDIUM", "HIGH", "EXTREME"];
+const POSTURE_CLASS = { EXTREME: "red", HIGH: "orange", MEDIUM: "yellow", LOW: "green", LOG: "green" };
+
 let markers = [];
 let events = [];
+let userLatLon = null; // [lon, lat] not set until GPS resolves
 
 function clearMarkers() {
   markers.forEach((m) => m.remove());
@@ -24,21 +35,35 @@ function tsMillis(ev) {
   return Date.parse(ev.last_seen) || 0;
 }
 
-// Build popup content as DOM nodes with textContent (no innerHTML: XSS-safe).
 function buildPopupNode(ev) {
   const wrap = document.createElement("div");
   const title = document.createElement("strong");
   title.textContent = ev.type || "Incident";
+  const tl = document.createElement("span");
+  const dist = ev.distance_mi != null ? ` · ${ev.distance_mi} mi` : "";
+  tl.textContent = ` [${ev.threat_level}${dist}]`;
+  tl.style.color = THREAT_COLORS[ev.threat_level] || "#888";
   const meta = document.createElement("small");
   meta.textContent = `${ev.geo_label || ""} · ${ev.log_time || ""}`;
   const body = document.createElement("div");
   body.className = "popup-body";
   body.textContent = ev.body || "";
   wrap.appendChild(title);
+  wrap.appendChild(tl);
   wrap.appendChild(document.createElement("br"));
   wrap.appendChild(meta);
   wrap.appendChild(body);
   return wrap;
+}
+
+function updatePosture() {
+  let top = "LOG";
+  for (const ev of events) {
+    if (POSTURE.indexOf(ev.threat_level) > POSTURE.indexOf(top)) top = ev.threat_level;
+  }
+  const el = document.getElementById("posture");
+  el.textContent = top === "LOG" ? "GREEN" : top;
+  el.className = "posture " + (POSTURE_CLASS[top] || "green");
 }
 
 function render(cutoffMillis) {
@@ -47,15 +72,14 @@ function render(cutoffMillis) {
   for (const ev of events) {
     if (ev.lat == null || ev.lon == null) continue;
     if (cutoffMillis && tsMillis(ev) > cutoffMillis) continue;
+    const color = THREAT_COLORS[ev.threat_level] || "#D4AF37";
     const el = document.createElement("div");
     el.textContent = "!";
     el.style.cssText =
-      "background:#D4AF37;color:#0A0A0A;font-weight:700;border-radius:50%;" +
+      `background:${color};color:#0A0A0A;font-weight:700;border-radius:50%;` +
       "width:22px;height:22px;display:flex;align-items:center;justify-content:center;" +
       "border:2px solid #0A0A0A;cursor:pointer;";
-    const popup = new maplibregl.Popup({ offset: 14 }).setDOMContent(
-      buildPopupNode(ev)
-    );
+    const popup = new maplibregl.Popup({ offset: 14 }).setDOMContent(buildPopupNode(ev));
     markers.push(
       new maplibregl.Marker({ element: el })
         .setLngLat([ev.lon, ev.lat])
@@ -65,6 +89,7 @@ function render(cutoffMillis) {
     shown++;
   }
   document.getElementById("count").textContent = shown + " incidents";
+  updatePosture();
 }
 
 async function loadDays() {
@@ -82,14 +107,16 @@ async function loadDays() {
 }
 
 async function loadEvents(date) {
-  const url = date ? `/api/events?date=${date}` : "/api/events";
+  let url = date ? `/api/events?date=${date}` : "/api/events";
+  if (userLatLon) url += `${url.includes("?") ? "&" : "?"}lat=${userLatLon[1]}&lon=${userLatLon[0]}`;
   const data = await (await fetch(url)).json();
   events = data.events || [];
   const withGeo = events.filter((e) => e.lat != null);
-  if (withGeo.length) {
+  if (withGeo.length && !map.__fitted) {
     const b = new maplibregl.LngLatBounds();
     withGeo.forEach((e) => b.extend([e.lon, e.lat]));
     if (!b.isEmpty()) map.fitBounds(b, { padding: 60, maxZoom: 12 });
+    map.__fitted = true;
   }
   wireSlider();
   render(null);
@@ -120,7 +147,39 @@ function wireSlider() {
   };
 }
 
-map.on("load", loadDays);
+async function resolveCounty(lat, lon) {
+  try {
+    const c = await (await fetch(`/api/county?lat=${lat}&lon=${lon}`)).json();
+    if (c.county) document.getElementById("county").textContent = `${c.county}, ${c.state}`;
+  } catch (e) {
+    /* leave placeholder */
+  }
+}
+
+function locateUser() {
+  if (!navigator.geolocation) {
+    document.getElementById("county").textContent = "no GPS";
+    return;
+  }
+  navigator.geolocation.watchPosition(
+    (pos) => {
+      const { latitude, longitude } = pos.coords;
+      const first = !userLatLon;
+      userLatLon = [longitude, latitude];
+      if (first) resolveCounty(latitude, longitude);
+      loadEvents(document.getElementById("day").value); // re-score against live GPS
+    },
+    () => {
+      document.getElementById("county").textContent = "GPS denied";
+    },
+    { enableHighAccuracy: true, maximumAge: 30000 }
+  );
+}
+
+map.on("load", () => {
+  loadDays();
+  locateUser();
+});
 setInterval(() => {
   const sel = document.getElementById("day");
   if (!sel.value || sel.selectedIndex === 0) loadEvents(sel.value);

@@ -6,6 +6,13 @@ html, body { margin: 0; height: 100%; font-family: system-ui, sans-serif; }
   background: #0A0A0A; color: #E8E8E8; border-bottom: 2px solid #D4AF37;
 }
 #bar strong { color: #D4AF37; }
+#county { font-size: 12px; opacity: 0.8; }
+.posture { font-weight: 700; padding: 2px 8px; border-radius: 4px; font-size: 12px; }
+.posture.green { background: #1a7f37; color: #fff; }
+.posture.yellow { background: #ffd21a; color: #0A0A0A; }
+.posture.orange { background: #ff8c1a; color: #0A0A0A; }
+.posture.red { background: #ff2d2d; color: #fff; animation: pulse 1s infinite; }
+@keyframes pulse { 50% { opacity: 0.55; } }
 #map { position: absolute; top: 48px; bottom: 0; left: 0; right: 0; }
 #scrub { display: flex; align-items: center; gap: 6px; margin-left: auto; }
 #time { width: 200px; }
