@@ -13,4 +13,5 @@ python3 -c "import asyncio; from sld.ingest import poll_loop; asyncio.run(poll_l
 INGEST_PID=$!
 trap 'kill $INGEST_PID 2>/dev/null || true' EXIT
 
-exec uvicorn sld.api:app --host "$BIND" --port "$PORT"
+# python3 -m uvicorn works whether uvicorn is a --user install or on PATH.
+exec python3 -m uvicorn sld.api:app --host "$BIND" --port "$PORT"
