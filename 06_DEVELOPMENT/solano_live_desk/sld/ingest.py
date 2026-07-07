@@ -13,6 +13,8 @@ from .chp_parser import DEFAULT_CENTER, parse_incidents
 from .firms import fetch as fetch_firms
 from .nws import fetch_alerts
 from .quakes import fetch_quakes
+from .roads import fetch as fetch_roads
+from .geo_county import distance_mi
 
 config.load_env()
 
@@ -100,6 +102,20 @@ def run_once_firms(
     return _store_all(events, base, day, now_iso)
 
 
+def run_once_roads(
+    base, day: str | None = None, now_iso: str | None = None, fetch_fn=None,
+) -> int:
+    """Pull 511 road incidents/closures within the bubble and upsert them."""
+    day = day or store.today_pt()
+    now_iso = now_iso or datetime.now(store.PT).isoformat()
+    c = bubble_center(base)
+    events = [
+        ev for ev in fetch_roads(fetch_fn=fetch_fn)
+        if distance_mi(c, (ev["lat"], ev["lon"])) <= RADIUS_MI
+    ]
+    return _store_all(events, base, day, now_iso)
+
+
 def fetch_chp(timeout: float = 20.0) -> str:
     """GET the CHP statewide XML with retries (old IIS host is flaky)."""
     import httpx
@@ -142,6 +158,12 @@ async def poll_loop(base: str, interval: int = 60) -> None:
                     print(f"[ingest] upserted {nf} wildfire hotspots", flush=True)
             except Exception as e:  # noqa: BLE001
                 print(f"[ingest] firms error: {e}", flush=True)
+            try:
+                nr = run_once_roads(base)
+                if nr:
+                    print(f"[ingest] upserted {nr} road events", flush=True)
+            except Exception as e:  # noqa: BLE001
+                print(f"[ingest] roads error: {e}", flush=True)
         # Score today's events vs the phone's last-known GPS and fire alerts.
         try:
             from .alert_worker import run_alerts

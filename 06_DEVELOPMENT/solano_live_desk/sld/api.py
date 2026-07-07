@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from . import aircraft as air_mod
 from . import cameras as cams_mod
-from . import config, dvr, evac, store, threat, trains as train_mod, transit as transit_mod, wayfinding, webcams
+from . import config, dvr, evac, news, store, threat, trains as train_mod, transit as transit_mod, wayfinding, webcams
 from .feeds import feeds_for_county
 from .geo_county import county_for
 
@@ -199,6 +199,23 @@ def transit_near(lat: float, lon: float, radius: float = 30):
             pass
     near = transit_mod.near(_TRANSIT_CACHE["vehicles"], lat, lon, radius)
     return {"transit": near[:150]}  # cap markers so the map stays smooth
+
+
+_NEWS_CACHE: dict = {}   # place -> (ts, articles)
+
+
+@app.get("/api/news")
+def local_news(place: str):
+    """Recent news about a place (the survival-OS news outlet). 10-min cache."""
+    hit = _NEWS_CACHE.get(place)
+    if hit and time.time() - hit[0] < 600:
+        return {"place": place, "news": hit[1]}
+    try:
+        arts = news.fetch_news(place)
+        _NEWS_CACHE[place] = (time.time(), arts)
+        return {"place": place, "news": arts}
+    except Exception as e:  # noqa: BLE001
+        return {"place": place, "news": hit[1] if hit else [], "error": str(e)}
 
 
 # Serve the static web page at "/" (index.html). Mounted last so /api and

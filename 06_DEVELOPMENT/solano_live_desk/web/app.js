@@ -294,6 +294,7 @@ async function refreshTrains() {
 }
 
 function openAir(a) {
+  map.flyTo({ center: [a.lon, a.lat], zoom: 10, pitch: 30 });
   const d = document.getElementById("detail");
   d.classList.remove("hidden");
   const tl = document.getElementById("d-threat");
@@ -310,6 +311,7 @@ function openAir(a) {
 }
 
 function openTrain(t) {
+  map.flyTo({ center: [t.lon, t.lat], zoom: 11 });
   const d = document.getElementById("detail");
   d.classList.remove("hidden");
   const tl = document.getElementById("d-threat");
@@ -411,7 +413,21 @@ async function refreshBuses() {
     const el = document.createElement("div");
     el.textContent = "🚌";
     el.style.fontSize = "15px";
+    el.style.cursor = "pointer";
     el.title = `Route ${v.route || v.label || "?"} · ${v.distance_mi} mi`;
+    el.onclick = () => {
+      map.flyTo({ center: [v.lon, v.lat], zoom: 13 });
+      const d = document.getElementById("detail");
+      d.classList.remove("hidden");
+      document.getElementById("d-threat").textContent = "TRANSIT";
+      document.getElementById("d-threat").style.background = "#8a8a8a";
+      document.getElementById("d-threat").style.color = "#fff";
+      document.getElementById("d-title").textContent = `Bus / Route ${v.route || v.label || "?"}`;
+      document.getElementById("d-where").textContent = `${v.distance_mi} mi away`;
+      document.getElementById("d-story").textContent = `Route: ${v.route || "?"}\nVehicle: ${v.label || v.id}`;
+      document.getElementById("d-cams").textContent = "n/a";
+      document.getElementById("d-feeds").textContent = "n/a";
+    };
     busMarkers.push(new maplibregl.Marker({ element: el }).setLngLat([v.lon, v.lat]).addTo(map));
   }
 }
@@ -431,6 +447,7 @@ async function refreshCams() {
     el.style.cursor = "pointer";
     el.title = c.name;
     el.onclick = () => {
+      map.flyTo({ center: [c.lon, c.lat], zoom: 13 });
       const d = document.getElementById("detail");
       d.classList.remove("hidden");
       document.getElementById("d-threat").textContent = "WEBCAM";
@@ -452,6 +469,34 @@ document.getElementById("bus-toggle").onclick = (e) => {
   busOn = !busOn;
   e.target.style.background = busOn ? "#D4AF37" : "#1a1a1a";
   refreshBuses();
+};
+
+document.getElementById("news-toggle").onclick = async () => {
+  const countyText = document.getElementById("county").textContent;
+  const place = /[A-Za-z]/.test(countyText) ? countyText.split(",")[0] : "Solano County";
+  const d = document.getElementById("detail");
+  d.classList.remove("hidden");
+  document.getElementById("d-threat").textContent = "NEWS";
+  document.getElementById("d-threat").style.background = "#a77fff";
+  document.getElementById("d-threat").style.color = "#0A0A0A";
+  document.getElementById("d-title").textContent = `Local news: ${place}`;
+  document.getElementById("d-where").textContent = "what is driving events around you";
+  document.getElementById("d-story").textContent = "loading...";
+  document.getElementById("d-cams").textContent = "";
+  const feeds = document.getElementById("d-feeds");
+  feeds.replaceChildren();
+  try {
+    const data = await (await fetch(`/api/news?place=${encodeURIComponent(place)}`)).json();
+    document.getElementById("d-story").textContent = (data.news || []).length ? "" : "no recent news found";
+    for (const a of data.news || []) {
+      const link = document.createElement("a");
+      link.href = a.url; link.target = "_blank";
+      link.textContent = `📰 ${a.title || a.domain}`;
+      feeds.appendChild(link);
+    }
+  } catch (e) {
+    document.getElementById("d-story").textContent = "news unavailable";
+  }
 };
 document.getElementById("cam-toggle").onclick = (e) => {
   camOn = !camOn;

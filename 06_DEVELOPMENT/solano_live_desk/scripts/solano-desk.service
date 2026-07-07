@@ -1,0 +1,16 @@
+[Unit]
+Description=Solano Live Desk survival-OS dashboard
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=exec
+# EDIT this path to where the repo lives on your Ubuntu box:
+WorkingDirectory=%h/solano_live_desk
+ExecStart=%h/solano_live_desk/scripts/start_dashboard.sh
+Restart=always
+RestartSec=5
+Environment=PORT=2600
+
+[Install]
+WantedBy=default.target
