@@ -2,3 +2,4 @@ httpx>=0.27
 fastapi>=0.110
 uvicorn[standard]>=0.29
 pytest>=8.0
+gtfs-realtime-bindings>=1.0   # 511 transit vehicle positions (protobuf)

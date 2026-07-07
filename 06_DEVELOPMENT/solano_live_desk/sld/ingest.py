@@ -2,15 +2,19 @@ from __future__ import annotations
 
 import asyncio
 import json
+import math
 import os
 from datetime import datetime
 from pathlib import Path
 
-from . import store
+from . import config, store
 from . import threat
 from .chp_parser import DEFAULT_CENTER, parse_incidents
+from .firms import fetch as fetch_firms
 from .nws import fetch_alerts
 from .quakes import fetch_quakes
+
+config.load_env()
 
 CHP_URL = "http://media.chp.ca.gov/sa_xml/sa.xml"
 # Bubble radius (miles) around the center. Default 75mi = whole Bay Area +
@@ -78,6 +82,24 @@ def run_once_quakes(
     return _store_all(events, base, day, now_iso)
 
 
+def _bbox(lat: float, lon: float, radius_mi: float) -> tuple[float, float, float, float]:
+    dlat = radius_mi / 69.0
+    dlon = radius_mi / (69.0 * max(0.1, math.cos(math.radians(lat))))
+    return (lon - dlon, lat - dlat, lon + dlon, lat + dlat)  # w, s, e, n
+
+
+def run_once_firms(
+    base, day: str | None = None, now_iso: str | None = None, fetch_fn=None,
+) -> int:
+    """Pull satellite wildfire hotspots within the bubble and upsert them."""
+    day = day or store.today_pt()
+    now_iso = now_iso or datetime.now(store.PT).isoformat()
+    c = bubble_center(base)
+    w, s, e, n = _bbox(c[0], c[1], RADIUS_MI)
+    events = fetch_firms(w, s, e, n, fetch_fn=fetch_fn)
+    return _store_all(events, base, day, now_iso)
+
+
 def fetch_chp(timeout: float = 20.0) -> str:
     """GET the CHP statewide XML with retries (old IIS host is flaky)."""
     import httpx
@@ -114,6 +136,12 @@ async def poll_loop(base: str, interval: int = 60) -> None:
                 print(f"[ingest] upserted {nq} earthquakes", flush=True)
             except Exception as e:  # noqa: BLE001
                 print(f"[ingest] quake error: {e}", flush=True)
+            try:
+                nf = run_once_firms(base)
+                if nf:
+                    print(f"[ingest] upserted {nf} wildfire hotspots", flush=True)
+            except Exception as e:  # noqa: BLE001
+                print(f"[ingest] firms error: {e}", flush=True)
         # Score today's events vs the phone's last-known GPS and fire alerts.
         try:
             from .alert_worker import run_alerts

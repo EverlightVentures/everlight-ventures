@@ -393,3 +393,69 @@ document.getElementById("safe-toggle").onclick = (e) => {
   e.target.style.background = on ? "#D4AF37" : "#1a1a1a";
   refreshSafe(on);
 };
+
+/* ---- Buses (511 transit) + public webcams ---- */
+let busMarkers = [];
+let camMarkers = [];
+let busOn = false, camOn = false;
+
+async function refreshBuses() {
+  busMarkers.forEach((m) => m.remove());
+  busMarkers = [];
+  if (!busOn) return;
+  const [lon, lat] = center();
+  let data;
+  try { data = await (await fetch(`/api/transit?lat=${lat}&lon=${lon}&radius=40`)).json(); }
+  catch (e) { return; }
+  for (const v of data.transit || []) {
+    const el = document.createElement("div");
+    el.textContent = "🚌";
+    el.style.fontSize = "15px";
+    el.title = `Route ${v.route || v.label || "?"} · ${v.distance_mi} mi`;
+    busMarkers.push(new maplibregl.Marker({ element: el }).setLngLat([v.lon, v.lat]).addTo(map));
+  }
+}
+
+async function refreshCams() {
+  camMarkers.forEach((m) => m.remove());
+  camMarkers = [];
+  if (!camOn) return;
+  const [lon, lat] = center();
+  let data;
+  try { data = await (await fetch(`/api/webcams?lat=${lat}&lon=${lon}&radius_km=60`)).json(); }
+  catch (e) { return; }
+  for (const c of data.webcams || []) {
+    const el = document.createElement("div");
+    el.textContent = "📷";
+    el.style.fontSize = "15px";
+    el.style.cursor = "pointer";
+    el.title = c.name;
+    el.onclick = () => {
+      const d = document.getElementById("detail");
+      d.classList.remove("hidden");
+      document.getElementById("d-threat").textContent = "WEBCAM";
+      document.getElementById("d-threat").style.background = "#7fd1ff";
+      document.getElementById("d-threat").style.color = "#0A0A0A";
+      document.getElementById("d-title").textContent = c.name;
+      document.getElementById("d-where").textContent = "public webcam";
+      document.getElementById("d-story").textContent = "";
+      const box = document.getElementById("d-cams");
+      box.replaceChildren();
+      if (c.image) { const img = document.createElement("img"); img.src = c.image; box.appendChild(img); }
+      document.getElementById("d-feeds").textContent = "";
+    };
+    camMarkers.push(new maplibregl.Marker({ element: el }).setLngLat([c.lon, c.lat]).addTo(map));
+  }
+}
+
+document.getElementById("bus-toggle").onclick = (e) => {
+  busOn = !busOn;
+  e.target.style.background = busOn ? "#D4AF37" : "#1a1a1a";
+  refreshBuses();
+};
+document.getElementById("cam-toggle").onclick = (e) => {
+  camOn = !camOn;
+  e.target.style.background = camOn ? "#D4AF37" : "#1a1a1a";
+  refreshCams();
+};
+setInterval(refreshBuses, 20000);  // buses move every 20s

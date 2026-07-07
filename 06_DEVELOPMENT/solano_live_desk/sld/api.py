@@ -10,9 +10,11 @@ from fastapi.staticfiles import StaticFiles
 
 from . import aircraft as air_mod
 from . import cameras as cams_mod
-from . import dvr, evac, store, threat, trains as train_mod, wayfinding
+from . import config, dvr, evac, store, threat, trains as train_mod, transit as transit_mod, wayfinding, webcams
 from .feeds import feeds_for_county
 from .geo_county import county_for
+
+config.load_env()
 
 WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 
@@ -175,6 +177,28 @@ def evac_zones():
 def safe_points(lat: float, lon: float):
     """Nearest hospitals / police / fire stations / shelters (where to go)."""
     return {"safe_points": evac.fetch_safe_points(lat, lon)}
+
+
+@app.get("/api/webcams")
+def webcams_near(lat: float, lon: float, radius_km: int = 50):
+    """Public webcams near a point (the legal 'look around' layer)."""
+    return {"webcams": webcams.fetch_near(lat, lon, radius_km)}
+
+
+_TRANSIT_CACHE: dict = {"at": 0.0, "vehicles": []}
+
+
+@app.get("/api/transit")
+def transit_near(lat: float, lon: float, radius: float = 30):
+    """Live buses / BART / regional transit near a point (511, Bay Area)."""
+    if time.time() - _TRANSIT_CACHE["at"] > 20 or not _TRANSIT_CACHE["vehicles"]:
+        try:
+            _TRANSIT_CACHE["vehicles"] = transit_mod.fetch("RG")
+            _TRANSIT_CACHE["at"] = time.time()
+        except Exception:  # noqa: BLE001
+            pass
+    near = transit_mod.near(_TRANSIT_CACHE["vehicles"], lat, lon, radius)
+    return {"transit": near[:150]}  # cap markers so the map stays smooth
 
 
 # Serve the static web page at "/" (index.html). Mounted last so /api and
