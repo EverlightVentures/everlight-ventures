@@ -104,6 +104,15 @@ def _all_cameras() -> list[dict]:
     return _CAM_CACHE["cams"]
 
 
+@app.on_event("startup")
+def _warm_caches():
+    # Pre-fetch the 735-camera list in a thread so the first incident click is
+    # instant instead of blocking on a cold Caltrans fetch.
+    import threading
+
+    threading.Thread(target=_all_cameras, daemon=True).start()
+
+
 @app.get("/api/cameras")
 def cameras(lat: float, lon: float, n: int = 3):
     """The n public traffic cameras nearest a point (visual support for an incident)."""

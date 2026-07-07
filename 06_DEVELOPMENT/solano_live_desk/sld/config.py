@@ -3,6 +3,11 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+# The protobuf "upb" C extension segfaults under proot/ARM (crashes the whole
+# server when 511 transit parses a GTFS-RT feed). Force the pure-Python backend
+# BEFORE protobuf is ever imported. Slower parse, but it does not crash.
+os.environ.setdefault("PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION", "python")
+
 _ENV = Path(__file__).resolve().parent.parent / ".env"
 
 

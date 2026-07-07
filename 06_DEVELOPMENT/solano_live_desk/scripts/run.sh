@@ -4,6 +4,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 export SLD_STORE="${SLD_STORE:-$PWD/store}"
+# Pure-Python protobuf avoids the upb C-extension segfault under proot/ARM.
+export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 BIND="${EV_BIND:-127.0.0.1}"
 PORT="${PORT:-2600}"
 

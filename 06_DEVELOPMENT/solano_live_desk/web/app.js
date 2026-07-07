@@ -64,7 +64,20 @@ document.getElementById("sat-toggle").onclick = () => {
 };
 document.getElementById("detail-close").onclick = () => {
   document.getElementById("detail").classList.add("hidden");
+  window.speechSynthesis && window.speechSynthesis.cancel();
   selectedId = null;
+};
+
+// "Listen to the report" -- read the panel aloud with the browser's own voice.
+document.getElementById("d-listen").onclick = () => {
+  if (!window.speechSynthesis) return;
+  const text = [
+    document.getElementById("d-title").textContent,
+    document.getElementById("d-where").textContent,
+    document.getElementById("d-story").textContent,
+  ].filter(Boolean).join(". ");
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
 };
 
 function clearMarkers() { markers.forEach((m) => m.remove()); markers = []; }
