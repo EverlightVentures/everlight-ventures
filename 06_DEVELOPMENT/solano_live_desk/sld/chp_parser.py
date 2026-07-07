@@ -3,7 +3,11 @@ from __future__ import annotations
 import re
 import xml.etree.ElementTree as ET
 
-from .geo import decode_latlon, in_corridor_bbox, in_solano_bbox
+from .geo_county import distance_mi
+from .geo import decode_latlon
+
+# Default bubble center (Fairfield / Solano) when the driver's GPS is unknown.
+DEFAULT_CENTER: tuple[float, float] = (38.2494, -122.0400)
 
 # Escape a bare '&' that is not already the start of an XML entity.
 _BARE_AMP = re.compile(r"&(?!amp;|lt;|gt;|quot;|apos;|#\d+;|#x[0-9A-Fa-f]+;)")
@@ -17,34 +21,6 @@ def _clean(text: str | None) -> str:
 
 def _sanitize(xml_str: str) -> str:
     return _BARE_AMP.sub("&amp;", xml_str)
-
-
-def is_solano(
-    area: str,
-    lat: float | None = None,
-    lon: float | None = None,
-    scope: str = "corridor",
-) -> bool:
-    """Decide whether an incident belongs on the feed.
-
-    CHP assigns every incident to an area office (Solano = office #365), so an
-    area of "Solano" is always included. Beyond that the two scopes differ:
-
-    - scope="corridor" (default): include anything inside the driving-corridor
-      box regardless of which county office CHP assigned it to, so Benicia-Bridge
-      and I-80/I-680 approach incidents (which CHP labels a neighbor county) show.
-      Road names are never used, so far-south freeway calls (San Jose) stay out.
-    - scope="county": trust CHP's label. Reject any non-blank, non-Solano office;
-      use the strict Solano box only when CHP left the area blank.
-    """
-    a = _clean(area).lower()
-    if a == "solano":
-        return True
-    if scope == "corridor":
-        return in_corridor_bbox(lat, lon)
-    if a:
-        return False
-    return in_solano_bbox(lat, lon)
 
 
 def _build_event(log: ET.Element, dispatch_id: str, lat: float | None, lon: float | None) -> dict:
@@ -77,19 +53,26 @@ def _build_event(log: ET.Element, dispatch_id: str, lat: float | None, lon: floa
 
 
 def parse_incidents(
-    xml_str: str, dispatch_id: str = "GGCC", scope: str = "corridor"
+    xml_str: str,
+    center: tuple[float, float] | None = None,
+    radius_mi: float = 75.0,
 ) -> list[dict]:
-    """Parse CHP sa.xml into normalized incident dicts for the given scope.
+    """Parse CHP sa.xml into incidents inside a radius bubble around a center.
 
-    Tolerant by design: the live CHP feed frequently ends mid-tag or carries
-    an unescaped '&'. We feed an XMLPullParser and read only the <Log> elements
-    that completed, so a broken tail cannot discard the good records before it.
+    The bubble replaces the old fixed-county filter: we read EVERY dispatch
+    center statewide and keep any located incident within radius_mi of the
+    center point (the driver's live GPS, or Fairfield by default). This is what
+    makes the map cover the whole Bay Area and follow the operator anywhere.
+
+    Tolerant by design: the live feed often ends mid-tag or carries a bare '&',
+    so we read completed <Log> elements from an XMLPullParser and ignore the tail.
     """
+    center = center or DEFAULT_CENTER
     parser = ET.XMLPullParser(events=("start", "end"))
     try:
         parser.feed(_sanitize(xml_str))
     except ET.ParseError:
-        pass  # keep whatever completed before the malformed point
+        pass
     out: list[dict] = []
     dispatch_stack: list[str | None] = []
     for event, elem in parser.read_events():
@@ -99,12 +82,11 @@ def parse_incidents(
             elif dispatch_stack:
                 dispatch_stack.pop()
         elif event == "end" and elem.tag == "Log":
-            current = dispatch_stack[-1] if dispatch_stack else None
-            if current != dispatch_id:
-                continue
-            area = _clean(elem.findtext("Area"))
+            dispatch_id = dispatch_stack[-1] if dispatch_stack else "CHP"
             lat, lon = decode_latlon(_clean(elem.findtext("LATLON")))
-            if not is_solano(area, lat, lon, scope=scope):
+            if lat is None or lon is None:
+                continue  # unlocated incidents cannot be placed in the bubble
+            if distance_mi(center, (lat, lon)) > radius_mi:
                 continue
             out.append(_build_event(elem, dispatch_id, lat, lon))
     return out

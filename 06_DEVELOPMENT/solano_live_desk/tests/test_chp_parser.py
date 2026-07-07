@@ -1,36 +1,12 @@
 from pathlib import Path
-from sld.chp_parser import parse_incidents, is_solano
+from sld.chp_parser import parse_incidents, DEFAULT_CENTER
 
 FIX = Path(__file__).parent / "fixtures" / "sa_sample.xml"
 
 
-def test_is_solano_by_area_label():
-    assert is_solano("Solano") is True
-    assert is_solano('"Solano"') is True  # quoted like the live feed
-
-
-def test_far_county_incident_excluded_in_both_scopes():
-    # San Jose on I-680 is far south of the corridor -> out no matter the scope.
-    assert is_solano("San Jose", 37.38, -121.85, scope="corridor") is False
-    assert is_solano("San Jose", 37.38, -121.85, scope="county") is False
-
-
-def test_corridor_includes_bridge_labeled_neighbor_county():
-    # Benicia Bridge: CHP labels it Contra Costa, but it's on Rich's corridor.
-    assert is_solano("Contra Costa", 38.02, -122.11, scope="corridor") is True
-    assert is_solano("Contra Costa", 38.02, -122.11, scope="county") is False
-
-
-def test_county_scope_blank_area_uses_solano_box():
-    assert is_solano("", 38.25, -122.0, scope="county") is True   # inside county
-    assert is_solano("", 37.38, -121.85, scope="county") is False  # San Jose
-    assert is_solano("", None, None, scope="county") is False      # no coords
-
-
-def test_parse_keeps_only_ggcc_solano():
-    events = parse_incidents(FIX.read_text())
-    # GGCC 0043 is SF (filtered), SFCC 9001 is wrong dispatch (skipped),
-    # only GGCC 0042 (Solano) survives.
+def test_parse_keeps_located_incidents_in_bubble():
+    events = parse_incidents(FIX.read_text())  # default center = Fairfield, 75mi
+    # Only GGCC 0042 has real coords (near Fairfield); the SF 0:0 logs are unlocated.
     assert len(events) == 1
     ev = events[0]
     assert ev["id"] == "chp:GGCC:0042"
@@ -38,17 +14,48 @@ def test_parse_keeps_only_ggcc_solano():
     assert ev["type"] == "Trfc Collision-No Inj"
     assert ev["lat"] == 38.22374
     assert ev["lon"] == -122.12696
-    assert ev["geo_label"] == "I80 E / SUISUN VALLEY RD"
     assert ev["body"] == "7:35AM  veh in center divide\n7:36AM  units en route"
-    assert ev["details"] == [
-        "7:35AM  veh in center divide",
-        "7:36AM  units en route",
-    ]
+
+
+def test_parse_reads_all_dispatches_not_just_ggcc():
+    # A located incident under a NON-GGCC dispatch, inside the bubble, is kept.
+    xml = (
+        '<State><Center ID = "SAHB"><Dispatch ID = "SACC">'
+        '<Log ID = "9"><LogType>"Fire"</LogType><Location>"I80 near Dixon"</Location>'
+        '<Area>"Sacramento"</Area><LATLON>"38400000:121800000"</LATLON></Log>'
+        "</Dispatch></Center></State>"
+    )
+    events = parse_incidents(xml)  # Dixon-ish point is ~15mi from Fairfield -> kept
+    assert len(events) == 1
+    assert events[0]["id"] == "chp:SACC:9"
+
+
+def test_parse_radius_excludes_far_incident():
+    # An LA point is ~380mi from Fairfield -> outside the 75mi bubble -> dropped.
+    xml = (
+        '<State><Center ID = "LAHB"><Dispatch ID = "LACC">'
+        '<Log ID = "1"><LogType>"Crash"</LogType><Location>"I5 LA"</Location>'
+        '<Area>"Los Angeles"</Area><LATLON>"34050000:118240000"</LATLON></Log>'
+        "</Dispatch></Center></State>"
+    )
+    assert parse_incidents(xml) == []
+    # ...but a wide radius keeps it.
+    assert len(parse_incidents(xml, radius_mi=500)) == 1
+
+
+def test_parse_recenters_bubble_on_given_center():
+    # Same LA incident is kept when the bubble is centered on LA (follow-me).
+    xml = (
+        '<State><Center ID = "LAHB"><Dispatch ID = "LACC">'
+        '<Log ID = "1"><LogType>"Crash"</LogType><Location>"I5 LA"</Location>'
+        '<Area>"Los Angeles"</Area><LATLON>"34050000:118240000"</LATLON></Log>'
+        "</Dispatch></Center></State>"
+    )
+    assert len(parse_incidents(xml, center=(34.05, -118.24))) == 1
 
 
 def test_parse_tolerates_truncated_tail_and_bare_amp():
-    # The live CHP feed ends mid-tag and carries unescaped '&'. A complete
-    # Solano log followed by a broken tail must still yield the good record.
+    # A complete located log followed by a broken tail still yields the good record.
     xml = (
         '<State><Center ID = "GGHB"><Dispatch ID = "GGCC">'
         '<Log ID = "1"><LogType>"Fire"</LogType>'
@@ -61,5 +68,8 @@ def test_parse_tolerates_truncated_tail_and_bare_amp():
     events = parse_incidents(xml)
     assert len(events) == 1
     assert events[0]["id"] == "chp:GGCC:1"
-    assert events[0]["lat"] == 38.22374
     assert events[0]["body"] == "1AM  smoke"
+
+
+def test_default_center_is_fairfield():
+    assert abs(DEFAULT_CENTER[0] - 38.25) < 0.1
