@@ -9,16 +9,22 @@ def test_is_solano_by_area_label():
     assert is_solano('"Solano"') is True  # quoted like the live feed
 
 
-def test_is_solano_rejects_other_area_office():
-    # I-680 runs through San Jose too; trust CHP's label, not the road name.
-    assert is_solano("San Jose", 37.38, -121.85) is False
-    assert is_solano("Contra Costa", 38.02, -122.11) is False
+def test_far_county_incident_excluded_in_both_scopes():
+    # San Jose on I-680 is far south of the corridor -> out no matter the scope.
+    assert is_solano("San Jose", 37.38, -121.85, scope="corridor") is False
+    assert is_solano("San Jose", 37.38, -121.85, scope="county") is False
 
 
-def test_is_solano_blank_area_falls_back_to_bbox():
-    assert is_solano("", 38.25, -122.0) is True   # inside Solano box
-    assert is_solano("", 37.38, -121.85) is False  # San Jose, outside box
-    assert is_solano("", None, None) is False      # blank + no coords
+def test_corridor_includes_bridge_labeled_neighbor_county():
+    # Benicia Bridge: CHP labels it Contra Costa, but it's on Rich's corridor.
+    assert is_solano("Contra Costa", 38.02, -122.11, scope="corridor") is True
+    assert is_solano("Contra Costa", 38.02, -122.11, scope="county") is False
+
+
+def test_county_scope_blank_area_uses_solano_box():
+    assert is_solano("", 38.25, -122.0, scope="county") is True   # inside county
+    assert is_solano("", 37.38, -121.85, scope="county") is False  # San Jose
+    assert is_solano("", None, None, scope="county") is False      # no coords
 
 
 def test_parse_keeps_only_ggcc_solano():

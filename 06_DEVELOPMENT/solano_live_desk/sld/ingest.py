@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import os
 from datetime import datetime
 
 from . import store
@@ -9,11 +10,19 @@ from .chp_parser import parse_incidents
 CHP_URL = "http://media.chp.ca.gov/sa_xml/sa.xml"
 
 
-def run_once(fetch_fn, base, day: str | None = None, now_iso: str | None = None) -> int:
+def scope() -> str:
+    """Feed scope: 'corridor' (default, Solano + I-80/I-680 approaches) or 'county'."""
+    return os.environ.get("SLD_SCOPE", "corridor")
+
+
+def run_once(
+    fetch_fn, base, day: str | None = None, now_iso: str | None = None,
+    scope_name: str | None = None,
+) -> int:
     """Fetch, parse, and upsert one cycle. fetch_fn is injectable for tests."""
     day = day or store.today_pt()
     now_iso = now_iso or datetime.now(store.PT).isoformat()
-    events = parse_incidents(fetch_fn())
+    events = parse_incidents(fetch_fn(), scope=scope_name or scope())
     conn = store.connect(base, day)
     try:
         for ev in events:
