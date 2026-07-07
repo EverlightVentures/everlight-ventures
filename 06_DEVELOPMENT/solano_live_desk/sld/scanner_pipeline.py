@@ -9,11 +9,16 @@ from . import broadcastify as bc
 from . import store, threat
 from . import transcribe as tr
 
-# Solano scanner feeds to transcribe (feed_id -> label).
+# Solano scanner feeds to transcribe (feed_id -> label + coverage centroid).
 FEEDS = {
     "45149": "Solano PD/Fire/CHP",
     "20773": "Solano Sheriff / Rio Vista / Dixon",
 }
+FEED_CENTROIDS = {
+    "45149": (38.2494, -122.0400),   # Fairfield / Vacaville / Suisun
+    "20773": (38.20, -121.85),        # Sheriff countywide / Rio Vista / Dixon
+}
+_RANK = {"CRITICAL": 3, "HIGH": 2, "MEDIUM": 1, "LOW": 0}
 
 # Street address or intersection mentioned in a dispatch line.
 _LOC = re.compile(
@@ -70,6 +75,30 @@ def run(base: str, feed_ids=None, model: str = "base.en", now_iso: str | None = 
         segs = tr.transcribe_file(path, size=model)
         start_ts = blk.get("startTs", 0)
         events, geocoded = [], 0
+
+        # Always store the whole block as a readable + replayable scanner log,
+        # pinned to the feed's coverage area, severity = the loudest thing heard.
+        if segs:
+            sevs = [threat.severity(s["text"]) for s in segs]
+            block_sev = max(sevs, key=lambda x: _RANK[x])
+            clat, clon = FEED_CENTROIDS.get(fid, (38.25, -122.0))
+            events.append(
+                {
+                    "id": f"scanner:{bid}:log",
+                    "source": "scanner",
+                    "type": f"Scanner log: {FEEDS.get(fid, fid)}",
+                    "title": f"{FEEDS.get(fid, fid)} {blk.get('start', '')}-{blk.get('end', '')}",
+                    "lat": clat,
+                    "lon": clon,
+                    "geo_label": FEEDS.get(fid, fid),
+                    "log_time": datetime.fromtimestamp(start_ts, store.PT).isoformat(),
+                    "body": "\n".join(s["text"] for s in segs)[:4000],
+                    "details": [],
+                    "severity": block_sev,
+                    "audio_url": f"/api/scanner_audio/{bid}",
+                    "archive_block": bid,
+                }
+            )
         for i, seg in enumerate(segs):
             loc = _LOC.search(seg["text"])
             sev = threat.severity(seg["text"])
