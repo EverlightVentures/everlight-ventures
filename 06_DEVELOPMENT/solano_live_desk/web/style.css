@@ -1,0 +1,13 @@
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; font-family: system-ui, sans-serif; }
+#bar {
+  position: fixed; top: 0; left: 0; right: 0; height: 48px; z-index: 5;
+  display: flex; align-items: center; gap: 12px; padding: 0 12px;
+  background: #0A0A0A; color: #E8E8E8; border-bottom: 2px solid #D4AF37;
+}
+#bar strong { color: #D4AF37; }
+#map { position: absolute; top: 48px; bottom: 0; left: 0; right: 0; }
+#scrub { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+#time { width: 200px; }
+.maplibregl-popup-content { max-width: 280px; font-size: 13px; }
+.popup-body { white-space: pre-wrap; margin-top: 6px; color: #333; }

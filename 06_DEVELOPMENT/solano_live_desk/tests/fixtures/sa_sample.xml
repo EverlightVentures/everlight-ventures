@@ -1,0 +1,35 @@
+<State>
+  <Center ID="GGHB">
+    <Dispatch ID="GGCC">
+      <Log ID="0042">
+        <LogTime>"7:34AM"</LogTime>
+        <LogType>"Trfc Collision-No Inj"</LogType>
+        <Location>"I80 E / SUISUN VALLEY RD"</Location>
+        <LocationDesc>"Fairfield"</LocationDesc>
+        <Area>"Solano"</Area>
+        <LATLON>"38223740:122126960"</LATLON>
+        <LogDetails>
+          <details><DetailTime>"7:35AM"</DetailTime><IncidentDetail>"veh in center divide"</IncidentDetail></details>
+          <details><DetailTime>"7:36AM"</DetailTime><IncidentDetail>"units en route"</IncidentDetail></details>
+        </LogDetails>
+      </Log>
+      <Log ID="0043">
+        <LogTime>"7:40AM"</LogTime>
+        <LogType>"Traffic Hazard"</LogType>
+        <Location>"SR1 / OCEAN AVE"</Location>
+        <LocationDesc>"San Francisco"</LocationDesc>
+        <Area>"San Francisco"</Area>
+        <LATLON>"0:0"</LATLON>
+        <LogDetails></LogDetails>
+      </Log>
+    </Dispatch>
+    <Dispatch ID="SFCC">
+      <Log ID="9001">
+        <LogType>"x"</LogType>
+        <Location>"FAIRFIELD ST"</Location>
+        <Area>"San Francisco"</Area>
+        <LATLON>"0:0"</LATLON>
+      </Log>
+    </Dispatch>
+  </Center>
+</State>
