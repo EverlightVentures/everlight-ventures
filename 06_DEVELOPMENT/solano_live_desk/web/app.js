@@ -118,6 +118,15 @@ async function openDetail(ev) {
   document.getElementById("d-title").textContent = ev.type || "Incident";
   document.getElementById("d-story").textContent =
     (ev.body || "(no dispatch detail yet)") + `\n\n${ev.geo_label || ""} · ${ev.log_time || ""}`;
+  // Recorded scanner audio -> DVR replay right in the panel.
+  const audio = document.getElementById("d-audio");
+  if (ev.audio_url) {
+    audio.src = ev.audio_url;
+    audio.classList.remove("hidden");
+  } else {
+    audio.classList.add("hidden");
+    audio.removeAttribute("src");
+  }
   document.getElementById("d-where").textContent = "locating landmark...";
   document.getElementById("d-cams").textContent = ev.lat == null ? "no coordinates" : "loading...";
   document.getElementById("d-feeds").textContent = "loading...";

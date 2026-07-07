@@ -16,12 +16,14 @@ CREATE TABLE IF NOT EXISTS events (
     lat REAL, lon REAL, geo_label TEXT,
     first_seen TEXT, last_seen TEXT,
     body TEXT, entities TEXT, raw TEXT,
-    severity TEXT, log_time TEXT
+    severity TEXT, log_time TEXT,
+    audio_url TEXT, archive_block TEXT
 );
 """
 
 # Columns added after the original schema shipped; added to old DBs on connect.
-_MIGRATIONS = [("severity", "TEXT"), ("log_time", "TEXT")]
+_MIGRATIONS = [("severity", "TEXT"), ("log_time", "TEXT"),
+               ("audio_url", "TEXT"), ("archive_block", "TEXT")]
 
 
 def today_pt() -> str:
@@ -55,12 +57,13 @@ def upsert_event(conn: sqlite3.Connection, ev: dict, now_iso: str) -> None:
         conn.execute(
             "INSERT INTO events "
             "(id,source,type,title,lat,lon,geo_label,first_seen,last_seen,body,"
-            "entities,raw,severity,log_time) "
-            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            "entities,raw,severity,log_time,audio_url,archive_block) "
+            "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             (ev["id"], ev.get("source"), ev.get("type"), ev.get("title"),
              ev.get("lat"), ev.get("lon"), ev.get("geo_label"),
              now_iso, now_iso, ev.get("body"), entities, raw,
-             ev.get("severity"), ev.get("log_time")),
+             ev.get("severity"), ev.get("log_time"),
+             ev.get("audio_url"), ev.get("archive_block")),
         )
     else:
         conn.execute(

@@ -39,6 +39,8 @@ html, body { margin: 0; height: 100%; font-family: system-ui, sans-serif; }
 .d-listen { background: #1a1a1a; color: #E8E8E8; border: 1px solid #D4AF37;
   border-radius: 4px; padding: 6px 10px; font-size: 13px; cursor: pointer; margin-bottom: 6px; }
 .d-listen:hover { background: #D4AF37; color: #0A0A0A; }
+.d-audio { width: 100%; margin: 4px 0 8px; height: 34px; }
+.d-audio.hidden { display: none; }
 .d-section { border-top: 1px solid #2a2a2a; padding-top: 10px; margin-top: 10px; }
 .d-section h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;
   color: #888; margin: 0 0 8px; }

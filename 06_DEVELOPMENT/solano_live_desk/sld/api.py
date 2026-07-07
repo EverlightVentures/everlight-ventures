@@ -6,6 +6,7 @@ import time
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import aircraft as air_mod
@@ -211,6 +212,18 @@ def transit_near(lat: float, lon: float, radius: float = 30):
 
 
 _NEWS_CACHE: dict = {}   # place -> (ts, articles)
+
+
+@app.get("/api/scanner_audio/{block_id}")
+def scanner_audio(block_id: str):
+    """Serve a downloaded Broadcastify archive block for DVR replay."""
+    from fastapi import HTTPException
+
+    safe = block_id.replace("/", "").replace("..", "")
+    path = Path(_store_dir()) / "audio" / f"{safe}.mp3"
+    if not path.exists():
+        raise HTTPException(status_code=404, detail="audio not available")
+    return FileResponse(str(path), media_type="audio/mpeg")
 
 
 @app.get("/api/news")
