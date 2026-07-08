@@ -113,7 +113,8 @@ async function openDetail(ev) {
   const d = document.getElementById("detail");
   d.classList.remove("hidden");
   const tl = document.getElementById("d-threat");
-  tl.textContent = `${ev.threat_level}${ev.distance_mi != null ? " · " + ev.distance_mi + " mi" : ""}`;
+  const st = ev.status ? " · " + ev.status : "";
+  tl.textContent = `${ev.threat_level}${ev.distance_mi != null ? " · " + ev.distance_mi + " mi" : ""}${st}`;
   tl.style.background = THREAT_COLORS[ev.threat_level] || "#888";
   tl.style.color = ["EXTREME", "HIGH", "LOG"].includes(ev.threat_level) ? "#fff" : "#0A0A0A";
   document.getElementById("d-title").textContent = ev.type || "Incident";
@@ -533,6 +534,58 @@ document.getElementById("news-toggle").onclick = async () => {
     document.getElementById("d-story").textContent = "news unavailable";
   }
 };
+
+/* ---- Fused incidents: the PSIM correlation brain ---- */
+let fusedMarkers = [];
+let fusedOn = false;
+
+async function refreshFused() {
+  fusedMarkers.forEach((m) => m.remove());
+  fusedMarkers = [];
+  if (!fusedOn) return;
+  const [lon, lat] = center();
+  let data;
+  try { data = await (await fetch(`/api/correlated?lat=${lat}&lon=${lon}`)).json(); }
+  catch (e) { return; }
+  for (const inc of data.incidents || []) {
+    if (inc.lat == null) continue;
+    const color = THREAT_COLORS[inc.threat_level] || "#D4AF37";
+    const el = document.createElement("div");
+    el.textContent = "◆";
+    const size = inc.confidence >= 0.8 ? 30 : inc.confidence >= 0.6 ? 24 : 18;
+    el.style.cssText =
+      `color:${color};font-size:${size}px;cursor:pointer;text-shadow:0 0 7px ${color};` +
+      (inc.inferred ? "animation:livepulse 1s infinite;" : "");
+    el.title = `${inc.tier} ${Math.round(inc.confidence * 100)}% | ${inc.sources.join("+")}`;
+    el.onclick = () => openCorrelated(inc);
+    fusedMarkers.push(new maplibregl.Marker({ element: el }).setLngLat([inc.lon, inc.lat]).addTo(map));
+  }
+}
+
+function openCorrelated(inc) {
+  map.flyTo({ center: [inc.lon, inc.lat], zoom: 13 });
+  const d = document.getElementById("detail");
+  d.classList.remove("hidden");
+  const tl = document.getElementById("d-threat");
+  tl.textContent = `${inc.threat_level} · ${inc.tier} ${Math.round(inc.confidence * 100)}% · ${inc.status}`;
+  tl.style.background = inc.inferred ? "#ff00d4" : THREAT_COLORS[inc.threat_level] || "#888";
+  tl.style.color = "#fff";
+  document.getElementById("d-title").textContent = inc.type;
+  document.getElementById("d-where").textContent =
+    `${inc.geo_label || ""} · sources: ${inc.sources.join(", ")}` +
+    (inc.units.length ? ` · units: ${inc.units.join(", ")}` : "");
+  document.getElementById("d-story").textContent = inc.body || "";
+  document.getElementById("d-audio").classList.add("hidden");
+  document.getElementById("d-cams").textContent = "";
+  document.getElementById("d-feeds").textContent = "";
+}
+
+document.getElementById("fused-toggle").onclick = (e) => {
+  fusedOn = !fusedOn;
+  e.target.style.background = fusedOn ? "#D4AF37" : "#1a1a1a";
+  refreshFused();
+};
+setInterval(() => { if (fusedOn) refreshFused(); }, 15000);
 document.getElementById("cam-toggle").onclick = (e) => {
   camOn = !camOn;
   e.target.style.background = camOn ? "#D4AF37" : "#1a1a1a";

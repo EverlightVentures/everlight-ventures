@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 from . import aircraft as air_mod
 from . import cameras as cams_mod
-from . import config, dvr, evac, news, store, threat, trains as train_mod, transit as transit_mod, wayfinding, webcams
+from . import config, correlate, dvr, evac, news, store, threat, trains as train_mod, transit as transit_mod, wayfinding, webcams
 from .feeds import feeds_for_county
 from .geo_county import county_for
 
@@ -53,6 +53,8 @@ def events(date: str | None = None, lat: float | None = None, lon: float | None 
         conn.close()
     user = (lat, lon) if lat is not None and lon is not None else None
     scored = [threat.classify(r, user) for r in rows]
+    for e in scored:  # lifecycle: LIVE while updating, REPORT once quiet
+        e["status"] = correlate.lifecycle_status(e.get("last_seen"))
     scored.sort(
         key=lambda e: (
             _LEVEL_RANK.get(e["threat_level"], 0),
@@ -61,6 +63,24 @@ def events(date: str | None = None, lat: float | None = None, lon: float | None 
         reverse=True,
     )
     return {"date": day, "user": user, "events": scored}
+
+
+@app.get("/api/correlated")
+def correlated(date: str | None = None, lat: float | None = None, lon: float | None = None):
+    """Fused, confidence-scored incidents (the PSIM brain) for a day, GPS-scored."""
+    base = _store_dir()
+    day = date or store.today_pt()
+    if not store.day_db_path(base, day).exists():
+        return {"date": day, "incidents": []}
+    conn = store.connect(base, day)
+    try:
+        rows = store.get_events(conn)
+    finally:
+        conn.close()
+    user = (lat, lon) if lat is not None and lon is not None else None
+    fused = [threat.classify(i, user) for i in correlate.correlate(rows)]
+    fused.sort(key=lambda e: (_LEVEL_RANK.get(e["threat_level"], 0), e.get("confidence", 0)), reverse=True)
+    return {"date": day, "incidents": fused}
 
 
 @app.get("/api/county")
