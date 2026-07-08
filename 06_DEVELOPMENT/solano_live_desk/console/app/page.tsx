@@ -7,7 +7,7 @@ import type { ToggleKey } from "@/components/Toolbar";
 import {
   getEvents, getCorrelated, getSpaceWx, getCounty, getAircraft, getTrains,
   getEvac, getSafePoints, getBuses, getDanger, getRoute, getDays, getMapCameras, getNews, getStats,
-  getSocialHotspots,
+  getSocialHotspots, getLinks,
 } from "@/lib/api";
 import StatusBar from "@/components/StatusBar";
 import AlarmQueue from "@/components/AlarmQueue";
@@ -64,6 +64,15 @@ export default function Home() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
+  const [linkTargets, setLinkTargets] = useState<any[]>([]);
+
+  // Fetch link analysis when an incident is selected -> draw connection lines.
+  useEffect(() => {
+    if (!selected?.id) { setLinkTargets([]); return; }
+    getLinks(selected.id)
+      .then((d) => setLinkTargets((d.links || []).filter((l: any) => l.lat != null)))
+      .catch(() => setLinkTargets([]));
+  }, [selected?.id]);
   const [layerData, setLayerData] = useState<Layers>({});
   const [day, setDay] = useState(""); // "" = today/live; else an archived day
   const [days, setDays] = useState<string[]>([]);
@@ -249,12 +258,14 @@ export default function Home() {
         rankMap={rankMap}
         userPos={pos}
         showRings={layerOn.rings}
+        linkFrom={selected && selected.lat != null && selected.lon != null ? { lat: selected.lat, lon: selected.lon } : null}
+        linkTargets={linkTargets}
         selectedId={selected?.id ?? null}
         onSelect={setSelected}
       />
       {(() => {
-        const HOT = 4; // "heating up" bar, tuned now that 3-source data is flowing
-        const hot = hotspots.filter((h) => h.count >= HOT);
+        // Per-city auto-tuned "hot" flag (spike above the city's own baseline).
+        const hot = hotspots.filter((h) => (h.hot ?? h.count >= 4));
         if (!hot.length) return null;
         // Prefer the hotspot NEAREST me (proximity beats raw count); highest count if no GPS.
         const rank = (h: any) => (pos ? (h.lat - pos.lat) ** 2 + (h.lon - pos.lon) ** 2 : -h.count);

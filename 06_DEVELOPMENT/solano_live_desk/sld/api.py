@@ -608,7 +608,8 @@ def links(id: str, days: int = 3):
             reasons.append("same location")
         if reasons:
             out.append({"id": r.get("id"), "type": r.get("type"), "day": r.get("_day"),
-                        "geo_label": r.get("geo_label"), "reasons": list(dict.fromkeys(reasons))})
+                        "geo_label": r.get("geo_label"), "lat": r.get("lat"), "lon": r.get("lon"),
+                        "reasons": list(dict.fromkeys(reasons))})
     return {"links": out[:20], "entities": te}
 
 

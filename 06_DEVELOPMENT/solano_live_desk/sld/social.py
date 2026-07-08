@@ -109,9 +109,37 @@ def hotspots(posts: list[dict]) -> list[dict]:
     return out
 
 
+def _auto_tune(base: str, hs: list[dict]) -> list[dict]:
+    """Judge each city against ITS OWN rolling baseline (EMA), so a spike in a
+    usually-quiet town flags even at a lower count than a busy city's normal."""
+    import json
+    import os
+
+    p = os.path.join(base, "social_baseline.json")
+    bl: dict = {}
+    if os.path.exists(p):
+        try:
+            bl = json.load(open(p))
+        except Exception:  # noqa: BLE001
+            bl = {}
+    counts = {h["city"]: h["count"] for h in hs}
+    for c in set(bl) | set(counts):  # EMA: seen cities move toward current, unseen decay
+        bl[c] = round(0.7 * bl.get(c, 0) + 0.3 * counts.get(c, 0), 2)
+    for h in hs:
+        b = bl.get(h["city"], 0)
+        h["baseline"] = b
+        # hot = a real cluster AND well above this city's own normal
+        h["hot"] = h["count"] >= 3 and (b < 1.0 or h["count"] > b * 1.6)
+    try:
+        json.dump({k: v for k, v in bl.items() if v >= 0.1}, open(p, "w"))
+    except Exception:  # noqa: BLE001
+        pass
+    return hs
+
+
 def collect(base: str, place: str = "Solano County") -> dict:
-    """Fetch safety chatter, geo-tag it to cities, compute hotspots, write
-    store/social.json. Run periodically (from the ingest loop)."""
+    """Fetch safety chatter, geo-tag it to cities, compute hotspots (auto-tuned to
+    each city's baseline), write store/social.json. Run from the ingest loop."""
     import json
     import os
     import time
@@ -122,7 +150,7 @@ def collect(base: str, place: str = "Solano County") -> dict:
         if city:
             p["city"] = city
             p["lat"], p["lon"] = coord
-    data = {"posts": posts, "hotspots": hotspots(posts), "updated": int(time.time())}
+    data = {"posts": posts, "hotspots": _auto_tune(base, hotspots(posts)), "updated": int(time.time())}
     try:
         json.dump(data, open(os.path.join(base, "social.json"), "w"))
     except Exception:  # noqa: BLE001

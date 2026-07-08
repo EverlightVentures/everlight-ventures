@@ -234,7 +234,7 @@ export type Layers = {
 };
 
 export default function MapView({
-  incidents, fused, aircraft, trains, layers, rankMap, userPos, showRings, selectedId, onSelect,
+  incidents, fused, aircraft, trains, layers, rankMap, userPos, showRings, linkFrom, linkTargets, selectedId, onSelect,
 }: {
   incidents: Incident[];
   fused: Incident[];
@@ -244,6 +244,8 @@ export default function MapView({
   rankMap: Record<string, number>;
   userPos: { lat: number; lon: number } | null;
   showRings: boolean;
+  linkFrom: { lat: number; lon: number } | null;
+  linkTargets: any[];
   selectedId: string | null;
   onSelect: (ev: Incident) => void;
 }) {
@@ -279,6 +281,22 @@ export default function MapView({
       onMoveEnd={(e) => setZoom(e.viewState.zoom)}
       style={{ position: "absolute", inset: 0 }}
     >
+      {linkFrom && linkTargets.length > 0 && (
+        <Source
+          id="links"
+          type="geojson"
+          data={{
+            type: "FeatureCollection",
+            features: linkTargets.filter((t) => t.lat != null && t.lon != null).map((t) => ({
+              type: "Feature",
+              geometry: { type: "LineString", coordinates: [[linkFrom.lon, linkFrom.lat], [t.lon, t.lat]] },
+              properties: {},
+            })),
+          }}
+        >
+          <Layer id="links" type="line" paint={{ "line-color": "#8fe3a8", "line-width": 2, "line-dasharray": [1, 1.5], "line-opacity": 0.75 }} />
+        </Source>
+      )}
       {showRings && userPos && [5, 10, 25].map((mi) => (
         <Source key={"ring" + mi} id={"ring" + mi} type="geojson" data={ringGeo(userPos.lat, userPos.lon, mi)}>
           <Layer id={"ring" + mi} type="line" paint={{ "line-color": "#7fd1ff", "line-width": 1, "line-dasharray": [2, 3], "line-opacity": 0.5 }} />
@@ -320,7 +338,7 @@ export default function MapView({
       ))}
       {(layers.socialHot || []).map((h, i) => {
         const sz = 22 + Math.min(h.count * 4, 22);
-        const hot = h.count >= 4;
+        const hot = h.hot ?? h.count >= 4;
         return (
           <Marker key={"hot" + i} longitude={h.lon} latitude={h.lat} onClick={(e) => { e.originalEvent.stopPropagation(); setPoi({ kind: "social", data: h }); }}>
             <div
