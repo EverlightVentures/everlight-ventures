@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import Map, { Marker } from "react-map-gl/maplibre";
+import Map, { Marker, Source, Layer } from "react-map-gl/maplibre";
 import type { StyleSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Incident, Aircraft, Train } from "@/lib/types";
@@ -64,13 +64,22 @@ function useGlide(aircraft: Aircraft[]): Aircraft[] {
   return frame;
 }
 
+export type Layers = {
+  evac?: any;
+  danger?: any;
+  safe?: any[];
+  buses?: any[];
+  route?: any;
+};
+
 export default function MapView({
-  incidents, fused, aircraft, trains, selectedId, onSelect,
+  incidents, fused, aircraft, trains, layers, selectedId, onSelect,
 }: {
   incidents: Incident[];
   fused: Incident[];
   aircraft: Aircraft[];
   trains: Train[];
+  layers: Layers;
   selectedId: string | null;
   onSelect: (ev: Incident) => void;
 }) {
@@ -85,6 +94,38 @@ export default function MapView({
       attributionControl={false}
       style={{ position: "absolute", inset: 0 }}
     >
+      {layers.evac && (
+        <Source id="evac" type="geojson" data={layers.evac}>
+          <Layer id="evac-fill" type="fill" paint={{ "fill-color": "#ff8c1a", "fill-opacity": 0.16 }} />
+          <Layer id="evac-line" type="line" paint={{ "line-color": "#ff8c1a", "line-width": 1.5 }} />
+        </Source>
+      )}
+      {layers.danger && (
+        <Source id="danger" type="geojson" data={layers.danger}>
+          <Layer id="danger-fill" type="fill" filter={["==", "$type", "Polygon"]} paint={{ "fill-color": "#ff2d2d", "fill-opacity": 0.22 }} />
+          <Layer id="danger-pt" type="circle" filter={["==", "$type", "Point"]} paint={{ "circle-radius": 6, "circle-color": "#ff2d2d", "circle-opacity": 0.5 }} />
+        </Source>
+      )}
+      {layers.route?.route && (
+        <Source id="route" type="geojson" data={{ type: "Feature", geometry: layers.route.route, properties: {} }}>
+          <Layer id="route-line" type="line" paint={{ "line-color": "#2ecc71", "line-width": 5, "line-opacity": 0.9 }} />
+        </Source>
+      )}
+      {(layers.safe || []).map((s, i) => (
+        <Marker key={"safe" + i} longitude={s.lon} latitude={s.lat}>
+          <div title={`${s.name || "safe"} (${s.kind || ""})`} style={{ fontSize: 15, filter: "drop-shadow(0 0 3px #000)" }}>&#127973;</div>
+        </Marker>
+      ))}
+      {(layers.buses || []).map((b, i) => (
+        <Marker key={"bus" + i} longitude={b.lon} latitude={b.lat}>
+          <div title={b.route || "bus"} style={{ fontSize: 12, filter: "drop-shadow(0 0 2px #000)" }}>&#128652;</div>
+        </Marker>
+      ))}
+      {layers.route?.dest && (
+        <Marker longitude={layers.route.dest.lon} latitude={layers.route.dest.lat}>
+          <div title={layers.route.dest.name} style={{ fontSize: 18 }}>&#128205;</div>
+        </Marker>
+      )}
       {trains.map((t) => (
         <Marker key={t.id} longitude={t.lon} latitude={t.lat}>
           <div title={`${t.route || "train"} ${t.num || ""}`} style={{ fontSize: 16, filter: "drop-shadow(0 0 3px #000)" }}>

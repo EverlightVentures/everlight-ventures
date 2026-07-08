@@ -48,9 +48,11 @@ def _geocode(text: str) -> tuple[float | None, float | None]:
 
 
 def latest_completed_block(session, feed_id: str, date: str) -> dict | None:
+    # The archive API can list blocks newest-first, so pick by endTs explicitly
+    # instead of trusting order (else we re-transcribe the 12am block forever).
     now = time.time()
     done = [b for b in bc.list_blocks(session, feed_id, date) if b.get("endTs", 0) < now]
-    return done[-1] if done else None
+    return max(done, key=lambda b: b.get("endTs", 0)) if done else None
 
 
 def run(base: str, feed_ids=None, model: str = "base.en", now_iso: str | None = None,

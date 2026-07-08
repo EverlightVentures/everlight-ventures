@@ -1,11 +1,17 @@
 "use client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import type { Incident, SpaceWx, Aircraft, Train } from "@/lib/types";
-import { getEvents, getCorrelated, getSpaceWx, getCounty, getAircraft, getTrains } from "@/lib/api";
+import type { Layers } from "@/components/MapView";
+import type { ToggleKey } from "@/components/Toolbar";
+import {
+  getEvents, getCorrelated, getSpaceWx, getCounty, getAircraft, getTrains,
+  getEvac, getSafePoints, getBuses, getDanger, getRoute, getDays,
+} from "@/lib/api";
 import StatusBar from "@/components/StatusBar";
 import AlarmQueue from "@/components/AlarmQueue";
 import DetailDrawer from "@/components/DetailDrawer";
+import Toolbar from "@/components/Toolbar";
 
 // MapLibre is browser-only -- never render it on the server.
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
@@ -20,16 +26,48 @@ export default function Home() {
   const [pos, setPos] = useState<{ lat: number; lon: number } | null>(null);
   const [aircraft, setAircraft] = useState<Aircraft[]>([]);
   const [trains, setTrains] = useState<Train[]>([]);
+  const [layerOn, setLayerOn] = useState<Record<ToggleKey, boolean>>({
+    danger: false, evac: false, safe: false, buses: false, route: false,
+  });
+  const [layerData, setLayerData] = useState<Layers>({});
+  const [day, setDay] = useState(""); // "" = today/live; else an archived day
+  const [days, setDays] = useState<string[]>([]);
+  const [alarmOpen, setAlarmOpen] = useState(true);
+  const dayRef = useRef("");
+  useEffect(() => { dayRef.current = day; }, [day]);
 
   const refreshFused = useCallback(() => {
-    getCorrelated(pos?.lat, pos?.lon).then(setFused).catch(() => {});
-  }, [pos]);
+    getCorrelated(pos?.lat, pos?.lon, day || undefined).then(setFused).catch(() => {});
+  }, [pos, day]);
 
+  // Today (live) or an archived past day -- yesterday never bleeds into today.
   useEffect(() => {
-    getEvents(pos?.lat, pos?.lon).then(setIncidents).catch(() => {});
+    getEvents(pos?.lat, pos?.lon, day || undefined).then(setIncidents).catch(() => {});
     refreshFused();
     getSpaceWx().then(setSpacewx).catch(() => {});
-  }, [pos, refreshFused]);
+  }, [pos, day, refreshFused]);
+
+  useEffect(() => { getDays().then((d) => setDays(d.filter((x) => x !== ""))).catch(() => {}); }, []);
+
+  const toggleLayer = (k: ToggleKey) => {
+    const on = !layerOn[k];
+    setLayerOn((p) => ({ ...p, [k]: on }));
+    if (!on) { setLayerData((d) => ({ ...d, [k]: undefined })); return; }
+    const c = pos ?? { lat: 38.25, lon: -122.04 };
+    if (k === "evac") getEvac(c.lat, c.lon).then((g) => setLayerData((d) => ({ ...d, evac: g }))).catch(() => {});
+    if (k === "danger") getDanger().then((g) => setLayerData((d) => ({ ...d, danger: g }))).catch(() => {});
+    if (k === "safe") getSafePoints(c.lat, c.lon).then((s) => setLayerData((d) => ({ ...d, safe: s }))).catch(() => {});
+    if (k === "buses") getBuses(c.lat, c.lon).then((b) => setLayerData((d) => ({ ...d, buses: b }))).catch(() => {});
+    if (k === "route") getRoute(c.lat, c.lon).then((r) => setLayerData((d) => ({ ...d, route: r }))).catch(() => {});
+  };
+
+  // Buses move -- refresh them while the layer is on.
+  useEffect(() => {
+    if (!layerOn.buses) return;
+    const c = pos ?? { lat: 38.25, lon: -122.04 };
+    const id = setInterval(() => getBuses(c.lat, c.lon).then((b) => setLayerData((d) => ({ ...d, buses: b }))).catch(() => {}), 15000);
+    return () => clearInterval(id);
+  }, [layerOn.buses, pos]);
 
   // Follow-me GPS: post it so the server threat-scores against my location.
   useEffect(() => {
@@ -59,6 +97,7 @@ export default function Home() {
       ws = new WebSocket(`${proto}://${location.host}/ws`);
       ws.onopen = () => setLive(true);
       ws.onmessage = (m) => {
+        if (dayRef.current) return; // reviewing an archived day -- ignore live push
         try {
           const msg = JSON.parse(m.data);
           if (msg.t === "snapshot") setIncidents(msg.events || []);
@@ -101,11 +140,19 @@ export default function Home() {
         fused={fused}
         aircraft={aircraft}
         trains={trains}
+        layers={layerData}
         selectedId={selected?.id ?? null}
         onSelect={setSelected}
       />
-      <StatusBar incidents={incidents} spacewx={spacewx} county={county} live={live} />
-      <AlarmQueue incidents={incidents} selectedId={selected?.id ?? null} onSelect={setSelected} />
+      <StatusBar incidents={incidents} spacewx={spacewx} county={county} live={live && !day} />
+      <AlarmQueue
+        incidents={incidents}
+        selectedId={selected?.id ?? null}
+        onSelect={setSelected}
+        open={alarmOpen}
+        onToggle={() => setAlarmOpen((v) => !v)}
+      />
+      <Toolbar active={layerOn} onToggle={toggleLayer} days={days} day={day} onDay={setDay} />
       <DetailDrawer ev={selected} onClose={() => setSelected(null)} />
     </main>
   );

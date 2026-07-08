@@ -10,12 +10,29 @@ async function j<T>(url: string): Promise<T> {
 
 const q = (lat?: number, lon?: number) =>
   lat != null && lon != null ? `?lat=${lat}&lon=${lon}` : "";
+const qd = (lat?: number, lon?: number, date?: string) => {
+  const p = new URLSearchParams();
+  if (lat != null && lon != null) { p.set("lat", String(lat)); p.set("lon", String(lon)); }
+  if (date) p.set("date", date);
+  const s = p.toString();
+  return s ? `?${s}` : "";
+};
 
-export const getEvents = (lat?: number, lon?: number) =>
-  j<{ events: Incident[] }>(`/api/events${q(lat, lon)}`).then((d) => d.events);
+export const getEvents = (lat?: number, lon?: number, date?: string) =>
+  j<{ events: Incident[] }>(`/api/events${qd(lat, lon, date)}`).then((d) => d.events);
 
-export const getCorrelated = (lat?: number, lon?: number) =>
-  j<{ incidents: Incident[] }>(`/api/correlated${q(lat, lon)}`).then((d) => d.incidents);
+export const getCorrelated = (lat?: number, lon?: number, date?: string) =>
+  j<{ incidents: Incident[] }>(`/api/correlated${qd(lat, lon, date)}`).then((d) => d.incidents);
+
+export const getEvac = (lat: number, lon: number) =>
+  j<{ geojson: any }>(`/api/evac?lat=${lat}&lon=${lon}`).then((d) => d.geojson);
+export const getSafePoints = (lat: number, lon: number) =>
+  j<{ safe_points: any[] }>(`/api/safepoints?lat=${lat}&lon=${lon}`).then((d) => d.safe_points || []);
+export const getBuses = (lat: number, lon: number) =>
+  j<{ transit: any[] }>(`/api/transit?lat=${lat}&lon=${lon}`).then((d) => d.transit || []);
+export const getDanger = () => j<any>("/api/danger");
+export const getRoute = (lat: number, lon: number) => j<any>(`/api/route?lat=${lat}&lon=${lon}`);
+export const getDays = () => j<{ days: string[] }>("/api/days").then((d) => d.days || []);
 
 export const getSpaceWx = () => j<SpaceWx>("/api/spacewx");
 

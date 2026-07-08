@@ -4,17 +4,34 @@ import type { Incident } from "@/lib/types";
 import { THREAT_COLORS, THREAT_RANK } from "@/lib/types";
 
 export default function AlarmQueue({
-  incidents, selectedId, onSelect,
+  incidents, selectedId, onSelect, open, onToggle,
 }: {
   incidents: Incident[];
   selectedId: string | null;
   onSelect: (ev: Incident) => void;
+  open: boolean;
+  onToggle: () => void;
 }) {
   const sorted = [...incidents].sort(
     (a, b) =>
       THREAT_RANK[b.threat_level] - THREAT_RANK[a.threat_level] ||
       (a.distance_mi ?? 9999) - (b.distance_mi ?? 9999)
   );
+  if (!open) {
+    return (
+      <button
+        onClick={onToggle}
+        className="glass"
+        style={{
+          position: "absolute", top: 76, left: 12, zIndex: 16, borderRadius: 10,
+          padding: "8px 11px", color: "var(--gold)", border: "1px solid var(--line)",
+          cursor: "pointer", fontSize: 12, fontWeight: 600,
+        }}
+      >
+        &#9654; Alarms ({incidents.length})
+      </button>
+    );
+  }
   return (
     <aside
       className="glass scroll-thin"
@@ -23,13 +40,22 @@ export default function AlarmQueue({
         borderRadius: 14, padding: 12, overflowY: "auto", zIndex: 15,
       }}
     >
-      <div
-        style={{
-          fontSize: 11, color: "var(--muted)", textTransform: "uppercase",
-          letterSpacing: 1, marginBottom: 8, paddingLeft: 2,
-        }}
-      >
-        Alarm queue
+      <div style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
+        <span
+          style={{
+            fontSize: 11, color: "var(--muted)", textTransform: "uppercase",
+            letterSpacing: 1, paddingLeft: 2,
+          }}
+        >
+          Alarm queue
+        </span>
+        <button
+          onClick={onToggle}
+          title="collapse"
+          style={{ marginLeft: "auto", background: "none", border: "none", color: "var(--muted)", cursor: "pointer", fontSize: 15 }}
+        >
+          &#9664;
+        </button>
       </div>
       {sorted.map((ev, i) => (
         <motion.button

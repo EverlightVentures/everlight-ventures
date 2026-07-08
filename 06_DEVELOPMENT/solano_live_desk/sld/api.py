@@ -313,7 +313,7 @@ def event_transcript(lat: float, lon: float, radius_mi: float = 2.5, limit: int 
         d = distance_mi((lat, lon), (r["lat"], r["lon"]))
         if d <= radius_mi:
             calls.append((d, r))
-    calls.sort(key=lambda x: x[0])
+    calls.sort(key=lambda x: (x[1].get("log_time") or ""), reverse=True)  # most recent first
     segments = []
     for d, r in calls[:limit]:
         for s in speaker_segments(r.get("body") or ""):
