@@ -174,5 +174,16 @@ async def poll_loop(base: str, interval: int = 60) -> None:
                       + ", ".join(f"{f['threat_level']} {f['type']}" for f in fired), flush=True)
         except Exception as e:  # noqa: BLE001
             print(f"[alert] error: {e}", flush=True)
+        # Camera DVR: snapshot the cameras nearest the operator into the ring
+        # buffer so an incident can replay the 5-min-before/after window.
+        try:
+            from . import camera_dvr
+
+            clat, clon = bubble_center(base)
+            camera_dvr.snapshot_once(base, clat, clon)
+            if ticks % 5 == 0:
+                camera_dvr.rotate(base)
+        except Exception as e:  # noqa: BLE001
+            print(f"[camdvr] error: {e}", flush=True)
         ticks += 1
         await asyncio.sleep(interval)

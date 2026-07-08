@@ -220,7 +220,7 @@ async function loadTranscriptTab(ev) {
   box.textContent = "loading radio traffic...";
   const SERVICE_COLORS = { EMS: "#ff5b5b", Fire: "#ff8c1a", CHP: "#7fd1ff", Police: "#D4AF37", Dispatch: "#8fe3a8" };
   try {
-    const data = await (await fetch(`/api/event_transcript?lat=${ev.lat}&lon=${ev.lon}`)).json();
+    const data = await (await fetch(`/api/event_transcript?lat=${ev.lat}&lon=${ev.lon}&id=${encodeURIComponent(ev.id)}`)).json();
     box.replaceChildren();
     const convos = data.conversations || [];
     if (!convos.length) { box.textContent = "no radio traffic matched to this incident"; return; }

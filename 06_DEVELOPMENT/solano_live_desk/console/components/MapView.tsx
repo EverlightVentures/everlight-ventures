@@ -135,6 +135,14 @@ export default function MapView({
   const [zoom, setZoom] = useState(9);
   const mapRef = useRef<any>(null);
   const { clusters, singles } = useMemo(() => clusterPins(pins, zoom), [pins, zoom]);
+  // Rank pins by recency: newest incident is #1.
+  const rankMap = useMemo(() => {
+    const m: Record<string, number> = {};
+    [...pins]
+      .sort((a, b) => (Date.parse(b.last_seen || "") || 0) - (Date.parse(a.last_seen || "") || 0))
+      .forEach((e, i) => { m[e.id] = i + 1; });
+    return m;
+  }, [pins]);
 
   return (
     <Map
@@ -257,19 +265,36 @@ export default function MapView({
       ))}
       {singles.map((ev) => {
         const crit = ev.threat_level === "EXTREME" || ev.threat_level === "HIGH";
+        const rank = rankMap[ev.id];
+        const t = ev.last_seen ? new Date(ev.last_seen).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "";
         return (
           <Marker key={ev.id} longitude={ev.lon!} latitude={ev.lat!} onClick={(e) => { e.originalEvent.stopPropagation(); onSelect(ev); }}>
-            <div
-              className="mk"
-              style={{
-                background: THREAT_COLORS[ev.threat_level] || "#D4AF37",
-                borderColor: ev.id === selectedId ? "#fff" : "rgba(0,0,0,0.6)",
-                ...(crit
-                  ? { animation: "critglow 1.4s ease-in-out infinite", ["--gc" as any]: THREAT_COLORS[ev.threat_level] }
-                  : {}),
-              }}
-            >
-              !
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <div
+                className="mk"
+                style={{
+                  background: THREAT_COLORS[ev.threat_level] || "#D4AF37",
+                  borderColor: ev.id === selectedId ? "#fff" : "rgba(0,0,0,0.6)",
+                  fontSize: rank > 99 ? 9 : 11,
+                  ...(crit
+                    ? { animation: "critglow 1.4s ease-in-out infinite", ["--gc" as any]: THREAT_COLORS[ev.threat_level] }
+                    : {}),
+                }}
+              >
+                {rank}
+              </div>
+              {zoom >= 11 && (
+                <div
+                  style={{
+                    marginTop: 2, fontSize: 9, lineHeight: 1.15, color: "#fff",
+                    background: "rgba(0,0,0,0.62)", padding: "1px 4px", borderRadius: 3,
+                    whiteSpace: "nowrap", maxWidth: 132, overflow: "hidden",
+                    textOverflow: "ellipsis", textShadow: "0 0 2px #000",
+                  }}
+                >
+                  {(ev.type || "incident").slice(0, 20)} &middot; {t}
+                </div>
+              )}
             </div>
           </Marker>
         );

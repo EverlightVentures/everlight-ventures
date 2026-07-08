@@ -14,6 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from . import aircraft as air_mod
 from . import broadcaster
 from . import cameras as cams_mod
+from . import camera_dvr
 from . import config, correlate, dvr, evac, fema, news, routing, spacewx, store, threat, trains as train_mod, transit as transit_mod, wayfinding, webcams
 from .hub import HUB
 from .feeds import feeds_for_county
@@ -326,10 +327,11 @@ def scanner_near(lat: float | None = None, lon: float | None = None, limit: int 
 
 
 @app.get("/api/event_transcript")
-def event_transcript(lat: float, lon: float, radius_mi: float = 0.75, limit: int = 6):
-    """The radio traffic that belongs to THIS event: geocoded scanner CALLS within
-    radius (block-log dumps excluded), each split into speaker turns (Dispatcher /
-    Officer 1,2,...) so the operator reads who said what -- tailored per event."""
+def event_transcript(lat: float, lon: float, id: str | None = None,
+                     radius_mi: float = 0.75, limit: int = 6):
+    """The radio traffic for THIS event. If the incident IS a scanner call (id
+    given), return ONLY its own conversation -- exact. Otherwise the geocoded
+    calls within radius, each split into speaker turns + tagged by service."""
     from .radio import speaker_segments, classify_service
     from .geo_county import distance_mi
     from datetime import datetime as _dt
@@ -343,6 +345,28 @@ def event_transcript(lat: float, lon: float, radius_mi: float = 0.75, limit: int
         rows = store.get_events(conn)
     finally:
         conn.close()
+
+    def _fmt(iso):
+        try:
+            return _dt.fromisoformat(iso).strftime("%-I:%M %p")
+        except Exception:  # noqa: BLE001
+            return ""
+
+    def _conv(r, d=0.0):
+        body = r.get("body") or ""
+        return {
+            "service": classify_service(body), "call": r.get("geo_label"),
+            "start": _fmt(r.get("log_time") or ""), "distance_mi": round(d, 1),
+            "audio_url": r.get("audio_url"), "segments": speaker_segments(body),
+        }
+
+    # Exact: this incident is itself a scanner call -> only its own conversation.
+    if id:
+        own = next((r for r in rows if r.get("id") == id
+                    and (r.get("type") or "").startswith("Scanner call")), None)
+        if own:
+            return {"conversations": [_conv(own)], "sources": 1}
+
     calls = []
     for r in rows:
         if r.get("source") != "scanner" or r.get("lat") is None:
@@ -353,26 +377,23 @@ def event_transcript(lat: float, lon: float, radius_mi: float = 0.75, limit: int
         if d <= radius_mi:
             calls.append((d, r))
     calls.sort(key=lambda x: (x[1].get("log_time") or ""), reverse=True)  # most recent first
+    return {"conversations": [_conv(r, d) for d, r in calls[:limit]], "sources": len(calls)}
 
-    def _fmt(iso):
-        try:
-            return _dt.fromisoformat(iso).strftime("%-I:%M %p")
-        except Exception:  # noqa: BLE001
-            return ""
 
-    # Each geocoded call = one conversation, tagged with which service is talking.
-    conversations = []
-    for d, r in calls[:limit]:
-        body = r.get("body") or ""
-        conversations.append({
-            "service": classify_service(body),
-            "call": r.get("geo_label"),
-            "start": _fmt(r.get("log_time") or ""),
-            "distance_mi": round(d, 1),
-            "audio_url": r.get("audio_url"),
-            "segments": speaker_segments(body),
-        })
-    return {"conversations": conversations, "sources": len(calls)}
+@app.get("/api/cam_dvr")
+def cam_dvr(lat: float, lon: float, t: int | None = None):
+    """Recorded camera frames around an event time (5 min before -> after)."""
+    return camera_dvr.window(_store_dir(), lat, lon, t or int(time.time()))
+
+
+@app.get("/api/camframe/{safe_id}/{ts}")
+def camframe(safe_id: str, ts: str):
+    from fastapi import HTTPException
+
+    p = camera_dvr.frame_path(_store_dir(), safe_id, ts)
+    if os.path.exists(p):
+        return FileResponse(p, media_type="image/jpeg")
+    raise HTTPException(status_code=404)
 
 
 @app.get("/api/scanner_audio/{block_id}")

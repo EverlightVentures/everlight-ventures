@@ -40,8 +40,12 @@ export const getNews = (place: string) =>
 
 export const getSpaceWx = () => j<SpaceWx>("/api/spacewx");
 
-export const getEventTranscript = (lat: number, lon: number) =>
-  j<{ conversations: any[]; sources: number }>(`/api/event_transcript?lat=${lat}&lon=${lon}`);
+export const getEventTranscript = (lat: number, lon: number, id?: string) =>
+  j<{ conversations: any[]; sources: number }>(
+    `/api/event_transcript?lat=${lat}&lon=${lon}${id ? `&id=${encodeURIComponent(id)}` : ""}`
+  );
+export const getCamDvr = (lat: number, lon: number, t?: number) =>
+  j<{ camera: any; frames: any[] }>(`/api/cam_dvr?lat=${lat}&lon=${lon}${t ? `&t=${t}` : ""}`);
 
 export const getCameras = (lat: number, lon: number) =>
   j<{ cameras: any[] }>(`/api/cameras?lat=${lat}&lon=${lon}&n=3`).then((d) => d.cameras);

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Incident } from "@/lib/types";
 import { THREAT_COLORS } from "@/lib/types";
-import { getEventTranscript, getCameras } from "@/lib/api";
+import { getEventTranscript, getCameras, getCamDvr } from "@/lib/api";
 import LiveVideo from "@/components/LiveVideo";
 
 const TABS = ["Feed", "Transcript", "Audio", "Cameras", "Sources"] as const;
@@ -94,6 +94,32 @@ function Cams({ data }: { data: any[] | null }) {
   );
 }
 
+function DvrPlayer({ data, eventTs }: { data: { camera: any; frames: any[] } | null; eventTs: number }) {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    if (data?.frames?.length) {
+      let best = 0, bd = 1e12;
+      data.frames.forEach((f, i) => { const d = Math.abs(f.ts - eventTs); if (d < bd) { bd = d; best = i; } });
+      setIdx(best);
+    }
+  }, [data, eventTs]);
+  if (data === null) return <Muted>loading footage...</Muted>;
+  if (!data.frames.length) return <Muted>no recorded footage near this event yet (the DVR records cameras near you from now on)</Muted>;
+  const f = data.frames[Math.min(idx, data.frames.length - 1)];
+  const rel = Math.round((f.ts - eventTs) / 60);
+  const label = rel === 0 ? "at event time" : rel < 0 ? `${-rel} min before` : `${rel} min after`;
+  return (
+    <div>
+      <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 6 }}>
+        {data.camera?.name} &middot; {data.camera?.distance_mi} mi &middot; {data.frames.length} frames
+      </div>
+      <img src={f.url} alt="" style={{ width: "100%", borderRadius: 8, background: "#000" }} />
+      <div style={{ fontSize: 12, color: "var(--gold)", textAlign: "center", margin: "5px 0", fontWeight: 600 }}>{label}</div>
+      <input type="range" min={0} max={data.frames.length - 1} value={idx} onChange={(e) => setIdx(Number(e.target.value))} style={{ width: "100%", accentColor: "#D4AF37" }} />
+    </div>
+  );
+}
+
 function Sources({ ev }: { ev: Incident }) {
   const rows = [
     ["Source", ev.source], ["Type", ev.type], ["Location", ev.geo_label],
@@ -124,17 +150,21 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
   const [tab, setTab] = useState<Tab>("Feed");
   const [transcripts, setTranscripts] = useState<{ conversations: any[]; sources: number } | null>(null);
   const [cams, setCams] = useState<any[] | null>(null);
+  const [dvr, setDvr] = useState<{ camera: any; frames: any[] } | null>(null);
+  const eventTs = ev ? Math.round((Date.parse(ev.last_seen || "") || Date.now()) / 1000) : 0;
 
-  useEffect(() => { setTab("Feed"); setTranscripts(null); setCams(null); }, [ev?.id]);
+  useEffect(() => { setTab("Feed"); setTranscripts(null); setCams(null); setDvr(null); }, [ev?.id]);
   useEffect(() => {
     if (!ev) return;
     if (tab === "Transcript" && transcripts === null) {
-      if (ev.lat != null) getEventTranscript(ev.lat, ev.lon!).then(setTranscripts).catch(() => setTranscripts({ conversations: [], sources: 0 }));
+      if (ev.lat != null) getEventTranscript(ev.lat, ev.lon!, ev.id).then(setTranscripts).catch(() => setTranscripts({ conversations: [], sources: 0 }));
       else setTranscripts({ conversations: [], sources: 0 });
     }
     if (tab === "Cameras" && cams === null && ev.lat != null)
       getCameras(ev.lat, ev.lon!).then(setCams).catch(() => setCams([]));
-  }, [tab, ev, transcripts, cams]);
+    if (tab === "Cameras" && dvr === null && ev.lat != null)
+      getCamDvr(ev.lat, ev.lon!, eventTs).then(setDvr).catch(() => setDvr({ camera: null, frames: [] }));
+  }, [tab, ev, transcripts, cams, dvr, eventTs]);
 
   return (
     <AnimatePresence>
@@ -195,7 +225,18 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
           {tab === "Audio" && (ev.audio_url
             ? <audio controls preload="none" src={ev.audio_url} style={{ width: "100%" }} />
             : <Muted>no recorded audio for this incident</Muted>)}
-          {tab === "Cameras" && <Cams data={cams} />}
+          {tab === "Cameras" && (
+            <div>
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--gold)", marginBottom: 6 }}>
+                Event footage (5 min before &rarr; after)
+              </div>
+              <DvrPlayer data={dvr} eventTs={eventTs} />
+              <div style={{ fontSize: 12, fontWeight: 700, color: "var(--gold)", margin: "14px 0 6px" }}>
+                Live cameras nearby
+              </div>
+              <Cams data={cams} />
+            </div>
+          )}
           {tab === "Sources" && <Sources ev={ev} />}
         </motion.aside>
       )}
