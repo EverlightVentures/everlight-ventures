@@ -15,7 +15,7 @@ from . import aircraft as air_mod
 from . import broadcaster
 from . import cameras as cams_mod
 from . import camera_dvr
-from . import config, correlate, dvr, evac, fema, news, routing, spacewx, store, threat, trains as train_mod, transit as transit_mod, wayfinding, webcams
+from . import config, correlate, decide as decide_mod, dvr, evac, fema, news, routing, spacewx, store, threat, trains as train_mod, transit as transit_mod, wayfinding, webcams
 from .hub import HUB
 from .feeds import feeds_for_county
 from .geo_county import county_for
@@ -703,6 +703,32 @@ def danger():
 def route(lat: float, lon: float):
     """Route to the nearest safe destination (with alternates)."""
     return routing.route_to_safety(lat, lon)
+
+
+_EVAC_CACHE: dict = {"at": 0.0, "gj": None}
+
+
+@app.get("/api/decision")
+def decision(lat: float, lon: float):
+    """Shelter-in-place vs Evacuate vs Clear, fused from classified incidents +
+    active evac zones. The 'what do I actually do' layer."""
+    base = _store_dir()
+    day = store.today_pt()
+    incidents: list[dict] = []
+    if store.day_db_path(base, day).exists():
+        conn = store.connect(base, day)
+        try:
+            incidents = [threat.classify(r, (lat, lon)) for r in store.get_events(conn)]
+        finally:
+            conn.close()
+    if time.time() - _EVAC_CACHE["at"] > 300 or _EVAC_CACHE["gj"] is None:
+        try:
+            _EVAC_CACHE["gj"] = evac.fetch_active_zones()
+            _EVAC_CACHE["at"] = time.time()
+        except Exception:  # noqa: BLE001 - serve stale/empty on transient failure
+            _EVAC_CACHE["gj"] = _EVAC_CACHE["gj"] or {"features": []}
+    zones = decide_mod.enrich_zones(_EVAC_CACHE["gj"], lat, lon)
+    return decide_mod.decide(incidents, zones, has_gps=True)
 
 
 @app.get("/api/spacewx")

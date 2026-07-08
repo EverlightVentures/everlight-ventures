@@ -7,7 +7,7 @@ import type { ToggleKey } from "@/components/Toolbar";
 import {
   getEvents, getCorrelated, getSpaceWx, getCounty, getAircraft, getTrains,
   getEvac, getSafePoints, getBuses, getDanger, getRoute, getDays, getMapCameras, getNews, getStats,
-  getSocialHotspots, getLinks,
+  getSocialHotspots, getLinks, getDecision,
 } from "@/lib/api";
 import StatusBar from "@/components/StatusBar";
 import AlarmQueue from "@/components/AlarmQueue";
@@ -65,6 +65,16 @@ export default function Home() {
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [linkTargets, setLinkTargets] = useState<any[]>([]);
+  const [decision, setDecision] = useState<any>(null);
+
+  // Shelter-vs-Evacuate decision, refreshed against live GPS.
+  useEffect(() => {
+    if (!pos) return;
+    const f = () => getDecision(pos.lat, pos.lon).then(setDecision).catch(() => {});
+    f();
+    const id = setInterval(f, 60000);
+    return () => clearInterval(id);
+  }, [pos]);
 
   // Fetch link analysis when an incident is selected -> draw connection lines.
   useEffect(() => {
@@ -274,7 +284,7 @@ export default function Home() {
         return (
           <div
             style={{
-              position: "absolute", top: 56, left: "50%", transform: "translateX(-50%)", zIndex: 30,
+              position: "absolute", top: 100, left: "50%", transform: "translateX(-50%)", zIndex: 30,
               background: "rgba(200,0,0,0.92)", color: "#fff", padding: "6px 14px", borderRadius: 10,
               fontSize: 13, fontWeight: 700, boxShadow: "0 4px 20px rgba(0,0,0,0.5)", cursor: "pointer",
             }}
@@ -315,6 +325,24 @@ export default function Home() {
         onToggle={() => setFilterOpen((v) => !v)}
       />
       <Legend />
+      {decision && (
+        <div
+          style={{
+            position: "absolute", top: 52, left: "50%", transform: "translateX(-50%)", zIndex: 20,
+            background: decision.action === "EVACUATE" ? "rgba(200,0,0,0.95)"
+              : decision.action === "SHELTER" ? "rgba(28,74,190,0.95)" : "rgba(20,120,50,0.9)",
+            color: "#fff", padding: "7px 15px", borderRadius: 11, maxWidth: "92vw",
+            boxShadow: "0 4px 22px rgba(0,0,0,0.55)", textAlign: "center", cursor: decision.action === "EVACUATE" ? "pointer" : "default",
+          }}
+          onClick={() => { if (decision.action === "EVACUATE") setLayerOn((p) => ({ ...p, route: true })); }}
+        >
+          <div style={{ fontSize: 14, fontWeight: 800, letterSpacing: 0.4 }}>
+            {decision.action === "EVACUATE" ? "\u{1F6A8} EVACUATE"
+              : decision.action === "SHELTER" ? "\u{1F6E1} SHELTER IN PLACE" : "✓ CLEAR"}
+          </div>
+          <div style={{ fontSize: 11, marginTop: 1, opacity: 0.95 }}>{decision.reason}</div>
+        </div>
+      )}
       <Toolbar
         active={layerOn}
         onToggle={toggleLayer}

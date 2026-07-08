@@ -15,15 +15,17 @@ def plan(threat_level: str) -> list[tuple[str, int]]:
     return _ROUTING.get(threat_level, [("dashboard", 0)])
 
 
-def dispatch(event: dict, senders: dict) -> list[dict]:
+def dispatch(event: dict, senders: dict, route_as: str | None = None) -> list[dict]:
     """Fire an event through its routed channels.
 
     senders maps channel name -> callable(event, priority) -> truthy on success.
-    A channel with no sender is skipped. A sender that raises is captured, never
-    propagated, so one dead channel cannot silence the others (safety-critical).
+    route_as overrides the routing level (e.g. a near-but-MEDIUM incident routed
+    as HIGH so proximity still forces a push). A channel with no sender is skipped.
+    A sender that raises is captured, never propagated, so one dead channel cannot
+    silence the others (safety-critical).
     """
     receipts: list[dict] = []
-    for channel, prio in plan(event.get("threat_level", "LOG")):
+    for channel, prio in plan(route_as or event.get("threat_level", "LOG")):
         fn = senders.get(channel)
         if fn is None:
             continue

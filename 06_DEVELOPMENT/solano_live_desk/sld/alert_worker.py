@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -8,6 +9,10 @@ from . import alerts, dvr, notify, store, threat
 
 # Threat levels that trigger an active push/email (vs. dashboard-only logging).
 ALERT_LEVELS = {"EXTREME", "HIGH"}
+# Proximity-first rule: ANYTHING this close pings you, whatever its level -- the
+# whole point of a life-safety app is what is happening in your zone right now.
+NEAR_MI = 1.5
+_NEAR_NOISE = re.compile(r"construction|roadwork|road work|closure|maintenance", re.I)
 
 
 def process(
@@ -26,14 +31,25 @@ def process(
     fired: list[dict] = []
     for ev in (threat.classify(e, user_latlon) for e in events):
         dvr.record(dvr_conn, ev, now_iso)
-        if ev["threat_level"] in ALERT_LEVELS and ev["id"] not in seen:
+        dist = ev.get("distance_mi")
+        text = f"{ev.get('type', '')} {ev.get('body', '')}"
+        is_blocklog = (ev.get("type") or "").startswith("Scanner log")
+        near = dist is not None and dist <= NEAR_MI and not is_blocklog and not _NEAR_NOISE.search(text)
+        if (ev["threat_level"] in ALERT_LEVELS or near) and ev["id"] not in seen:
             seen.add(ev["id"])
+            # Proximity forces a push: route a near-but-lower incident as HIGH/EXTREME
+            # so it reaches the phone, even if its raw threat level is only MEDIUM.
+            route_as = None
+            if near:
+                route_as = "EXTREME" if (dist is not None and dist <= 0.5) else "HIGH"
             fired.append(
                 {
                     "id": ev["id"],
                     "threat_level": ev["threat_level"],
                     "type": ev.get("type"),
-                    "receipts": alerts.dispatch(ev, senders),
+                    "distance_mi": dist,
+                    "near": near,
+                    "receipts": alerts.dispatch(ev, senders, route_as=route_as),
                 }
             )
     return fired

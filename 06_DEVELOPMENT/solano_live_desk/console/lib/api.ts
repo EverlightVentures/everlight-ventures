@@ -52,6 +52,7 @@ export const getStats = (date?: string) => j<any>(`/api/stats${date ? `?date=${d
 export const getMesh = () => j<{ nodes: any[]; messages: any[]; updated: number }>("/api/mesh");
 export const getIntel = (lat: number, lon: number) => j<any>(`/api/intel?lat=${lat}&lon=${lon}`);
 export const getLinks = (id: string) => j<{ links: any[]; entities: any }>(`/api/links?id=${encodeURIComponent(id)}`);
+export const getDecision = (lat: number, lon: number) => j<any>(`/api/decision?lat=${lat}&lon=${lon}`);
 export const getSocial = (place: string) => j<{ posts: any[] }>(`/api/social?place=${encodeURIComponent(place)}`);
 export const getSocialHotspots = () => j<{ hotspots: any[]; updated: number }>("/api/social_hotspots");
 
