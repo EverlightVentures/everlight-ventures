@@ -191,6 +191,12 @@ export default function Home() {
   const shownFused = scrubT >= 100 ? fused : fused.filter((e) => (Date.parse(e.last_seen || "") || 0) <= cutoff);
   const scrubLabel = scrubT >= 100 || !tmax ? "" : new Date(cutoff).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
+  // One shared recency ranking: newest = #1. Map pin #N === alarm-queue #N.
+  const rankMap: Record<string, number> = {};
+  [...shown]
+    .sort((a, b) => (Date.parse(b.last_seen || "") || 0) - (Date.parse(a.last_seen || "") || 0))
+    .forEach((e, i) => { rankMap[e.id] = i + 1; });
+
   return (
     <main style={{ position: "fixed", inset: 0 }}>
       <MapView
@@ -199,6 +205,7 @@ export default function Home() {
         aircraft={aircraft}
         trains={trains}
         layers={layerData}
+        rankMap={rankMap}
         selectedId={selected?.id ?? null}
         onSelect={setSelected}
       />
@@ -207,6 +214,7 @@ export default function Home() {
       <StatusBar incidents={incidents} spacewx={spacewx} county={county} live={live && !day && scrubT >= 100} />
       <AlarmQueue
         incidents={shown}
+        rankMap={rankMap}
         selectedId={selected?.id ?? null}
         onSelect={setSelected}
         open={alarmOpen}

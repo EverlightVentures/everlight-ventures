@@ -14,10 +14,12 @@ from . import transcribe as tr
 FEEDS = {
     "45149": "Solano PD/Fire/CHP",
     "20773": "Solano Sheriff / Rio Vista / Dixon",
+    "32738": "Solano Fire / EMS",     # Fire Dispatch, Tac + EMS/ambulance traffic
 }
 FEED_CENTROIDS = {
     "45149": (38.2494, -122.0400),   # Fairfield / Vacaville / Suisun
     "20773": (38.20, -121.85),        # Sheriff countywide / Rio Vista / Dixon
+    "32738": (38.25, -122.00),        # Fire/EMS countywide
 }
 _RANK = {"CRITICAL": 3, "HIGH": 2, "MEDIUM": 1, "LOW": 0}
 

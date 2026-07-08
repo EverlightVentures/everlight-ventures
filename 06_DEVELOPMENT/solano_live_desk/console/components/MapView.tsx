@@ -119,13 +119,14 @@ export type Layers = {
 };
 
 export default function MapView({
-  incidents, fused, aircraft, trains, layers, selectedId, onSelect,
+  incidents, fused, aircraft, trains, layers, rankMap, selectedId, onSelect,
 }: {
   incidents: Incident[];
   fused: Incident[];
   aircraft: Aircraft[];
   trains: Train[];
   layers: Layers;
+  rankMap: Record<string, number>;
   selectedId: string | null;
   onSelect: (ev: Incident) => void;
 }) {
@@ -135,14 +136,6 @@ export default function MapView({
   const [zoom, setZoom] = useState(9);
   const mapRef = useRef<any>(null);
   const { clusters, singles } = useMemo(() => clusterPins(pins, zoom), [pins, zoom]);
-  // Rank pins by recency: newest incident is #1.
-  const rankMap = useMemo(() => {
-    const m: Record<string, number> = {};
-    [...pins]
-      .sort((a, b) => (Date.parse(b.last_seen || "") || 0) - (Date.parse(a.last_seen || "") || 0))
-      .forEach((e, i) => { m[e.id] = i + 1; });
-    return m;
-  }, [pins]);
 
   return (
     <Map

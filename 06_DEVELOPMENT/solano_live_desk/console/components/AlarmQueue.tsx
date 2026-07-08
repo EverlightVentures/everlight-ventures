@@ -4,18 +4,18 @@ import type { Incident } from "@/lib/types";
 import { THREAT_COLORS, THREAT_RANK } from "@/lib/types";
 
 export default function AlarmQueue({
-  incidents, selectedId, onSelect, open, onToggle,
+  incidents, rankMap, selectedId, onSelect, open, onToggle,
 }: {
   incidents: Incident[];
+  rankMap: Record<string, number>;
   selectedId: string | null;
   onSelect: (ev: Incident) => void;
   open: boolean;
   onToggle: () => void;
 }) {
+  // Newest first, numbered to match the map pins (#1 = newest).
   const sorted = [...incidents].sort(
-    (a, b) =>
-      THREAT_RANK[b.threat_level] - THREAT_RANK[a.threat_level] ||
-      (a.distance_mi ?? 9999) - (b.distance_mi ?? 9999)
+    (a, b) => (rankMap[a.id] ?? 99999) - (rankMap[b.id] ?? 99999)
   );
   if (!open) {
     return (
@@ -75,6 +75,9 @@ export default function AlarmQueue({
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{ fontWeight: 700, color: "var(--gold)", fontSize: 12, flex: "0 0 auto", minWidth: 30 }}>
+              #{rankMap[ev.id] ?? "-"}
+            </span>
             <span
               style={{
                 width: 8, height: 8, borderRadius: "50%",
