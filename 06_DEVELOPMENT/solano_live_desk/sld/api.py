@@ -506,20 +506,35 @@ def intel(lat: float, lon: float, radius_mi: float = 2.0, days: int = 7):
     return {"precursors": precursors[:30], "prior_count": len(precursors), "area_today": area_today, "radius_mi": radius_mi}
 
 
-_SOCIAL_CACHE: dict = {}
-
-
 @app.get("/api/social")
 def social(place: str = "Solano County"):
-    """Local safety/hotspot chatter from Reddit (public RSS; 8-min cache)."""
+    """Local safety chatter (Reddit RSS), collected + geo-tagged by the ingest loop."""
+    import json as _json
+
+    p = os.path.join(_store_dir(), "social.json")
+    if os.path.exists(p):
+        try:
+            return {"place": place, "posts": _json.load(open(p)).get("posts", [])}
+        except Exception:  # noqa: BLE001
+            pass
     from . import social as social_mod
 
-    hit = _SOCIAL_CACHE.get(place)
-    if hit and time.time() - hit[0] < 480:
-        return {"place": place, "posts": hit[1]}
-    posts = social_mod.safety_posts(place)
-    _SOCIAL_CACHE[place] = (time.time(), posts)
-    return {"place": place, "posts": posts}
+    return {"place": place, "posts": social_mod.safety_posts(place)}
+
+
+@app.get("/api/social_hotspots")
+def social_hotspots():
+    """Geo-tagged social heat: cities with clustered safety chatter (for the map)."""
+    import json as _json
+
+    p = os.path.join(_store_dir(), "social.json")
+    if os.path.exists(p):
+        try:
+            d = _json.load(open(p))
+            return {"hotspots": d.get("hotspots", []), "updated": d.get("updated", 0)}
+        except Exception:  # noqa: BLE001
+            pass
+    return {"hotspots": [], "updated": 0}
 
 
 @app.get("/api/mesh")

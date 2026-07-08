@@ -186,5 +186,16 @@ async def poll_loop(base: str, interval: int = 60) -> None:
                 camera_dvr.rotate(base)
         except Exception as e:  # noqa: BLE001
             print(f"[camdvr] error: {e}", flush=True)
+        # Social recon: fetch + geo-tag local safety chatter into hotspots ~10min.
+        if ticks % 10 == 0:
+            try:
+                from . import social
+
+                data = social.collect(base)
+                if data.get("hotspots"):
+                    print(f"[social] {len(data['posts'])} posts, hotspots: "
+                          + ", ".join(f"{h['city']}({h['count']})" for h in data["hotspots"][:4]), flush=True)
+            except Exception as e:  # noqa: BLE001
+                print(f"[social] error: {e}", flush=True)
         ticks += 1
         await asyncio.sleep(interval)

@@ -85,6 +85,18 @@ function PoiCard({ poi }: { poi: { kind: string; data: any } }) {
       </div>
     );
   }
+  if (poi.kind === "social") {
+    return (
+      <div style={{ minWidth: 200, maxWidth: 260, color: "#111" }}>
+        <div style={{ fontWeight: 700 }}>&#128293; {d.city} &middot; {d.count} safety post{d.count !== 1 ? "s" : ""}</div>
+        {(d.posts || []).slice(0, 4).map((p: any, i: number) => (
+          <a key={i} href={p.url} target="_blank" rel="noreferrer" style={{ display: "block", fontSize: 11, marginTop: 4, color: "#1a4b8c", textDecoration: "none" }}>
+            {(p.title || "").slice(0, 82)}
+          </a>
+        ))}
+      </div>
+    );
+  }
   return null;
 }
 
@@ -197,6 +209,7 @@ export type Layers = {
   buses?: any[];
   route?: any;
   cams?: any[];
+  socialHot?: any[];
 };
 
 export default function MapView({
@@ -277,6 +290,25 @@ export default function MapView({
           <div title={cm.name || "camera"} style={{ fontSize: 14, cursor: "pointer", filter: "drop-shadow(0 0 2px #000)" }}>&#128247;</div>
         </Marker>
       ))}
+      {(layers.socialHot || []).map((h, i) => {
+        const sz = 22 + Math.min(h.count * 4, 22);
+        const hot = h.count >= 3;
+        return (
+          <Marker key={"hot" + i} longitude={h.lon} latitude={h.lat} onClick={(e) => { e.originalEvent.stopPropagation(); setPoi({ kind: "social", data: h }); }}>
+            <div
+              title={`${h.city}: ${h.count} safety posts`}
+              style={{
+                background: hot ? "rgba(255,45,45,0.85)" : "rgba(255,140,26,0.82)", color: "#fff", fontWeight: 700,
+                borderRadius: "50%", width: sz, height: sz, display: "flex", alignItems: "center",
+                justifyContent: "center", fontSize: 12, border: "2px solid #fff", cursor: "pointer",
+                ...(hot ? { animation: "critglow 1.2s ease-in-out infinite", ["--gc" as any]: "#ff2d2d" } : {}),
+              }}
+            >
+              {h.count}
+            </div>
+          </Marker>
+        );
+      })}
       {openCam && (
         <Popup longitude={openCam.lon} latitude={openCam.lat} anchor="bottom" maxWidth="300px" onClose={() => setOpenCam(null)} closeOnClick={false}>
           <div style={{ width: 260 }}>

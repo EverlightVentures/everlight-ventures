@@ -7,6 +7,7 @@ import type { ToggleKey } from "@/components/Toolbar";
 import {
   getEvents, getCorrelated, getSpaceWx, getCounty, getAircraft, getTrains,
   getEvac, getSafePoints, getBuses, getDanger, getRoute, getDays, getMapCameras, getNews, getStats,
+  getSocialHotspots,
 } from "@/lib/api";
 import StatusBar from "@/components/StatusBar";
 import AlarmQueue from "@/components/AlarmQueue";
@@ -52,8 +53,9 @@ export default function Home() {
   const [aircraft, setAircraft] = useState<Aircraft[]>([]);
   const [trains, setTrains] = useState<Train[]>([]);
   const [layerOn, setLayerOn] = useState<Record<ToggleKey, boolean>>({
-    danger: false, evac: false, safe: false, buses: false, route: false, cams: false,
+    danger: false, evac: false, safe: false, buses: false, route: false, cams: false, social: false,
   });
+  const [hotspots, setHotspots] = useState<any[]>([]);
   const [layerData, setLayerData] = useState<Layers>({});
   const [day, setDay] = useState(""); // "" = today/live; else an archived day
   const [days, setDays] = useState<string[]>([]);
@@ -177,6 +179,14 @@ export default function Home() {
     if (statsOpen) getStats(day || undefined).then(setStats).catch(() => setStats(null));
   }, [statsOpen, day]);
 
+  // Social hotspots (safety-chatter heat) -- refresh every 5 min for the map + alert.
+  useEffect(() => {
+    const f = () => getSocialHotspots().then((d) => setHotspots(d.hotspots || [])).catch(() => {});
+    f();
+    const id = setInterval(f, 300000);
+    return () => clearInterval(id);
+  }, []);
+
   // Sound alert on a brand-new EXTREME incident (skips the initial load).
   useEffect(() => {
     let fresh = false;
@@ -212,11 +222,26 @@ export default function Home() {
         fused={shownFused}
         aircraft={aircraft}
         trains={trains}
-        layers={layerData}
+        layers={{ ...layerData, socialHot: layerOn.social ? hotspots : undefined }}
         rankMap={rankMap}
         selectedId={selected?.id ?? null}
         onSelect={setSelected}
       />
+      {hotspots.find((h) => h.count >= 3) && (() => {
+        const h = hotspots.find((x) => x.count >= 3);
+        return (
+          <div
+            style={{
+              position: "absolute", top: 72, left: "50%", transform: "translateX(-50%)", zIndex: 30,
+              background: "rgba(200,0,0,0.92)", color: "#fff", padding: "6px 14px", borderRadius: 10,
+              fontSize: 13, fontWeight: 700, boxShadow: "0 4px 20px rgba(0,0,0,0.5)", cursor: "pointer",
+            }}
+            onClick={() => setLayerOn((p) => ({ ...p, social: true }))}
+          >
+            {"\u{1F525}"} {h.city} heating up: {h.count} safety posts
+          </div>
+        );
+      })()}
       <div className="radar-sweep" />
       <div className="scanlines" />
       <StatusBar incidents={incidents} spacewx={spacewx} county={county} live={live && !day && scrubT >= 100} />
