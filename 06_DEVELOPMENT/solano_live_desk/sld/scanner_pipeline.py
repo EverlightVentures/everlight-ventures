@@ -167,7 +167,7 @@ def _process_block(session, base, fid, blk, model, now_iso, gc, budget) -> int:
 
 
 def run(base: str, feed_ids=None, model: str = "base.en", now_iso: str | None = None,
-        max_geocode: int = 24, blocks: int = 2) -> int:
+        max_geocode: int = 24, blocks: int = 1) -> int:
     """Transcribe the latest `blocks` completed blocks per feed, geocode located
     calls (cached across runs so tabs fill faster), store as mapped incidents."""
     now_iso = now_iso or datetime.now(store.PT).isoformat()
