@@ -19,11 +19,17 @@ export const getCorrelated = (lat?: number, lon?: number) =>
 
 export const getSpaceWx = () => j<SpaceWx>("/api/spacewx");
 
-export const getScannerNear = (lat?: number, lon?: number) =>
-  j<{ transcripts: any[] }>(`/api/scanner_near${q(lat, lon)}`).then((d) => d.transcripts);
+export const getEventTranscript = (lat: number, lon: number) =>
+  j<{ segments: any[]; sources: number }>(`/api/event_transcript?lat=${lat}&lon=${lon}`);
 
 export const getCameras = (lat: number, lon: number) =>
   j<{ cameras: any[] }>(`/api/cameras?lat=${lat}&lon=${lon}&n=3`).then((d) => d.cameras);
 
 export const getCounty = (lat: number, lon: number) =>
   j<{ county: string; state: string }>(`/api/county?lat=${lat}&lon=${lon}`);
+
+export const getAircraft = (lat: number, lon: number) =>
+  j<{ aircraft: any[] }>(`/api/aircraft?lat=${lat}&lon=${lon}`).then((d) => d.aircraft || []);
+
+export const getTrains = (lat: number, lon: number) =>
+  j<{ trains: any[] }>(`/api/trains?lat=${lat}&lon=${lon}`).then((d) => d.trains || []);

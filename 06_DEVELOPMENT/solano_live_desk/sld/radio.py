@@ -87,3 +87,38 @@ def line_ids(text: str, base: str | Path) -> list[str]:
     """The code names of units/operators heard in a line (for correlation)."""
     ids, _ = extract(text)
     return ["BASE" if i == "DISPATCH" else code_name(i, base) for i in ids]
+
+
+def speaker_segments(text: str) -> list[dict]:
+    """Attribute each transcript line to a speaker so the operator reads WHO said
+    WHAT: dispatch chatter -> 'Dispatcher'; each distinct unit -> 'Officer 1/2/...'
+    (numbered per transcript in order of appearance). Heuristic, no diarization."""
+    out: list[dict] = []
+    officer_map: dict[str, str] = {}
+    for raw in text.splitlines():
+        line = raw.strip()
+        if not line:
+            continue
+        ts = ""
+        m = re.match(r"^\[([^\]]+)\]\s*(.*)$", line)  # pull a leading [time]
+        if m:
+            ts, line = m.group(1), m.group(2)
+        line = re.sub(r"^\[[^\]]*\]\s*", "", line)     # drop any [CODENAMES] prefix
+        line = re.sub(r"\s*\{[^}]*\}\s*$", "", line)    # drop a trailing {CODE=event}
+        if not line:
+            continue
+        ids, codes = extract(line)
+        non_dispatch = [i for i in ids if i != "DISPATCH"]
+        if "DISPATCH" in ids or not non_dispatch:
+            speaker = "Dispatcher"
+        else:
+            unit = non_dispatch[0]
+            officer_map.setdefault(unit, f"Officer {len(officer_map) + 1}")
+            speaker = officer_map[unit]
+        out.append({
+            "speaker": speaker,
+            "time": ts,
+            "text": line,
+            "codes": [f"{c}={l}" if l else c for c, l in codes],
+        })
+    return out

@@ -287,6 +287,42 @@ def scanner_near(lat: float | None = None, lon: float | None = None, limit: int 
     ]}
 
 
+@app.get("/api/event_transcript")
+def event_transcript(lat: float, lon: float, radius_mi: float = 2.5, limit: int = 6):
+    """The radio traffic that belongs to THIS event: geocoded scanner CALLS within
+    radius (block-log dumps excluded), each split into speaker turns (Dispatcher /
+    Officer 1,2,...) so the operator reads who said what -- tailored per event."""
+    from .radio import speaker_segments
+    from .geo_county import distance_mi
+
+    base = _store_dir()
+    day = store.today_pt()
+    if not store.day_db_path(base, day).exists():
+        return {"segments": [], "sources": 0}
+    conn = store.connect(base, day)
+    try:
+        rows = store.get_events(conn)
+    finally:
+        conn.close()
+    calls = []
+    for r in rows:
+        if r.get("source") != "scanner" or r.get("lat") is None:
+            continue
+        if not (r.get("type") or "").startswith("Scanner call"):  # skip block-log dumps
+            continue
+        d = distance_mi((lat, lon), (r["lat"], r["lon"]))
+        if d <= radius_mi:
+            calls.append((d, r))
+    calls.sort(key=lambda x: x[0])
+    segments = []
+    for d, r in calls[:limit]:
+        for s in speaker_segments(r.get("body") or ""):
+            s.update({"call": r.get("geo_label"), "distance_mi": round(d, 1),
+                      "audio_url": r.get("audio_url"), "log_time": r.get("log_time")})
+            segments.append(s)
+    return {"segments": segments, "sources": len(calls)}
+
+
 @app.get("/api/scanner_audio/{block_id}")
 def scanner_audio(block_id: str):
     """Serve a downloaded Broadcastify archive block for DVR replay."""

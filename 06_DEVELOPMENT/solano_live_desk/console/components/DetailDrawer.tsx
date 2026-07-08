@@ -3,10 +3,18 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Incident } from "@/lib/types";
 import { THREAT_COLORS } from "@/lib/types";
-import { getScannerNear, getCameras } from "@/lib/api";
+import { getEventTranscript, getCameras } from "@/lib/api";
 
 const TABS = ["Feed", "Transcript", "Audio", "Cameras", "Sources"] as const;
 type Tab = (typeof TABS)[number];
+
+// Distinct colors so each Officer reads as a different voice; Dispatcher is gold.
+const OFFICER_COLORS = ["#7fd1ff", "#8fe3a8", "#ffb454", "#d59bff", "#ff9bb0", "#9bffe0"];
+function speakerColor(speaker: string) {
+  if (speaker === "Dispatcher") return "#d4af37";
+  const n = parseInt(speaker.replace(/\D/g, ""), 10) || 1;
+  return OFFICER_COLORS[(n - 1) % OFFICER_COLORS.length];
+}
 
 function LiveVideo({ src }: { src: string }) {
   const ref = useRef<HTMLVideoElement>(null);
@@ -33,20 +41,28 @@ function LiveVideo({ src }: { src: string }) {
   return <video ref={ref} controls muted playsInline autoPlay style={{ width: "100%", borderRadius: 8, background: "#000" }} />;
 }
 
-function Transcripts({ data }: { data: any[] | null }) {
-  if (data === null) return <Muted>loading radio transcripts...</Muted>;
-  if (!data.length) return <Muted>no radio transcripts yet (scanner transcribes every 30 min)</Muted>;
+function Transcripts({ data }: { data: { segments: any[]; sources: number } | null }) {
+  if (data === null) return <Muted>loading radio traffic...</Muted>;
+  if (!data.segments.length) return <Muted>no radio traffic matched to this event yet</Muted>;
+  const audio = data.segments.find((s) => s.audio_url)?.audio_url;
   return (
     <div>
-      {data.map((t, i) => (
-        <div key={i} style={{ borderTop: "1px solid var(--line)", paddingTop: 10, marginTop: 10 }}>
-          <div style={{ color: "var(--gold)", fontSize: 12, fontWeight: 600 }}>
-            {t.type || "scanner"} &middot; {t.log_time || ""}
+      <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 8 }}>
+        {data.sources} matched call{data.sources !== 1 ? "s" : ""} near this event &middot; who said what
+      </div>
+      {audio && <audio controls preload="none" src={audio} style={{ width: "100%", height: 32, marginBottom: 10 }} />}
+      {data.segments.map((s, i) => (
+        <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+          <span style={{ flex: "0 0 auto", width: 72, fontSize: 11, fontWeight: 700, color: speakerColor(s.speaker) }}>
+            {s.speaker}
+          </span>
+          <div style={{ fontSize: 13, lineHeight: 1.45 }}>
+            {s.time && <span style={{ color: "var(--muted)", fontSize: 11, marginRight: 6 }}>{s.time}</span>}
+            {s.text}
+            {s.codes?.length ? (
+              <span style={{ color: "#ff8c1a", fontSize: 11, marginLeft: 6 }}>{s.codes.join(", ")}</span>
+            ) : null}
           </div>
-          {t.audio_url && (
-            <audio controls preload="none" src={t.audio_url} style={{ width: "100%", height: 32, margin: "6px 0" }} />
-          )}
-          <pre style={preStyle}>{t.body || ""}</pre>
         </div>
       ))}
     </div>
@@ -100,14 +116,16 @@ const Muted = ({ children }: { children: React.ReactNode }) => (
 
 export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onClose: () => void }) {
   const [tab, setTab] = useState<Tab>("Feed");
-  const [transcripts, setTranscripts] = useState<any[] | null>(null);
+  const [transcripts, setTranscripts] = useState<{ segments: any[]; sources: number } | null>(null);
   const [cams, setCams] = useState<any[] | null>(null);
 
   useEffect(() => { setTab("Feed"); setTranscripts(null); setCams(null); }, [ev?.id]);
   useEffect(() => {
     if (!ev) return;
-    if (tab === "Transcript" && transcripts === null)
-      getScannerNear(ev.lat ?? undefined, ev.lon ?? undefined).then(setTranscripts).catch(() => setTranscripts([]));
+    if (tab === "Transcript" && transcripts === null) {
+      if (ev.lat != null) getEventTranscript(ev.lat, ev.lon!).then(setTranscripts).catch(() => setTranscripts({ segments: [], sources: 0 }));
+      else setTranscripts({ segments: [], sources: 0 });
+    }
     if (tab === "Cameras" && cams === null && ev.lat != null)
       getCameras(ev.lat, ev.lon!).then(setCams).catch(() => setCams([]));
   }, [tab, ev, transcripts, cams]);

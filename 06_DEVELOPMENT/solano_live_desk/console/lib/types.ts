@@ -23,6 +23,16 @@ export type Incident = {
 
 export type SpaceWx = { kp: number | null; level: string; gps: string; alert: boolean };
 
+export type Aircraft = {
+  id: string; flight?: string; lat: number; lon: number; alt?: number;
+  speed?: number; track?: number; type?: string; kind?: string; emergency?: boolean;
+};
+
+export type Train = {
+  id: string; num?: string; route?: string; lat: number; lon: number;
+  heading?: number; speed?: number; state?: string; distance_mi?: number;
+};
+
 export const THREAT_COLORS: Record<string, string> = {
   EXTREME: "#ff2d2d",
   HIGH: "#ff8c1a",

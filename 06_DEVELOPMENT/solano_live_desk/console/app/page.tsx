@@ -1,8 +1,8 @@
 "use client";
 import { useCallback, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import type { Incident, SpaceWx } from "@/lib/types";
-import { getEvents, getCorrelated, getSpaceWx, getCounty } from "@/lib/api";
+import type { Incident, SpaceWx, Aircraft, Train } from "@/lib/types";
+import { getEvents, getCorrelated, getSpaceWx, getCounty, getAircraft, getTrains } from "@/lib/api";
 import StatusBar from "@/components/StatusBar";
 import AlarmQueue from "@/components/AlarmQueue";
 import DetailDrawer from "@/components/DetailDrawer";
@@ -18,6 +18,8 @@ export default function Home() {
   const [county, setCounty] = useState("");
   const [live, setLive] = useState(false);
   const [pos, setPos] = useState<{ lat: number; lon: number } | null>(null);
+  const [aircraft, setAircraft] = useState<Aircraft[]>([]);
+  const [trains, setTrains] = useState<Train[]>([]);
 
   const refreshFused = useCallback(() => {
     getCorrelated(pos?.lat, pos?.lon).then(setFused).catch(() => {});
@@ -81,11 +83,24 @@ export default function Home() {
     return () => clearInterval(id);
   }, [refreshFused]);
 
+  // Transportation: planes every 6s (they glide between polls), trains every 15s.
+  useEffect(() => {
+    const c = pos ?? { lat: 38.25, lon: -122.04 };
+    const planes = () => getAircraft(c.lat, c.lon).then(setAircraft).catch(() => {});
+    const rail = () => getTrains(c.lat, c.lon).then(setTrains).catch(() => {});
+    planes(); rail();
+    const a = setInterval(planes, 6000);
+    const t = setInterval(rail, 15000);
+    return () => { clearInterval(a); clearInterval(t); };
+  }, [pos]);
+
   return (
     <main style={{ position: "fixed", inset: 0 }}>
       <MapView
         incidents={incidents}
         fused={fused}
+        aircraft={aircraft}
+        trains={trains}
         selectedId={selected?.id ?? null}
         onSelect={setSelected}
       />

@@ -1,12 +1,11 @@
 "use client";
-import { useMemo } from "react";
-import Map, { Marker, Source, Layer } from "react-map-gl/maplibre";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Map, { Marker } from "react-map-gl/maplibre";
 import type { StyleSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import type { Incident } from "@/lib/types";
+import type { Incident, Aircraft, Train } from "@/lib/types";
 import { THREAT_COLORS } from "@/lib/types";
 
-// Satellite imagery + a place/road label overlay (free Esri tiles, no token).
 const SAT_STYLE: StyleSpecification = {
   version: 8,
   sources: {
@@ -28,18 +27,56 @@ const SAT_STYLE: StyleSpecification = {
   ],
 };
 
+// Dead-reckon aircraft between polls: advance each along its heading/speed so it
+// glides smoothly instead of jumping. Throttled to ~7fps to stay light on phones.
+function useGlide(aircraft: Aircraft[]): Aircraft[] {
+  const [frame, setFrame] = useState<Aircraft[]>(aircraft);
+  const truth = useRef<{ list: Aircraft[]; t: number }>({ list: aircraft, t: 0 });
+  useEffect(() => {
+    truth.current = { list: aircraft, t: performance.now() };
+    setFrame(aircraft);
+  }, [aircraft]);
+  useEffect(() => {
+    let raf = 0;
+    let last = 0;
+    const tick = (now: number) => {
+      if (now - last > 150) {
+        last = now;
+        const dt = (now - truth.current.t) / 1000; // seconds since last truth
+        setFrame(
+          truth.current.list.map((a) => {
+            if (a.speed == null || a.track == null) return a;
+            const distDeg = ((a.speed * dt) / 3600) / 60; // knots*s -> nm -> deg
+            const rad = (a.track * Math.PI) / 180;
+            return {
+              ...a,
+              lat: a.lat + distDeg * Math.cos(rad),
+              lon: a.lon + (distDeg * Math.sin(rad)) / Math.cos((a.lat * Math.PI) / 180),
+            };
+          })
+        );
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+  return frame;
+}
+
 export default function MapView({
-  incidents,
-  fused,
-  selectedId,
-  onSelect,
+  incidents, fused, aircraft, trains, selectedId, onSelect,
 }: {
   incidents: Incident[];
   fused: Incident[];
+  aircraft: Aircraft[];
+  trains: Train[];
   selectedId: string | null;
   onSelect: (ev: Incident) => void;
 }) {
   const pins = useMemo(() => incidents.filter((e) => e.lat != null && e.lon != null), [incidents]);
+  const planes = useGlide(aircraft).slice(0, 80); // cap for phone perf
+
   return (
     <Map
       initialViewState={{ longitude: -121.98, latitude: 38.25, zoom: 9, pitch: 45, bearing: 0 }}
@@ -48,18 +85,38 @@ export default function MapView({
       attributionControl={false}
       style={{ position: "absolute", inset: 0 }}
     >
+      {trains.map((t) => (
+        <Marker key={t.id} longitude={t.lon} latitude={t.lat}>
+          <div title={`${t.route || "train"} ${t.num || ""}`} style={{ fontSize: 16, filter: "drop-shadow(0 0 3px #000)" }}>
+            &#128646;
+          </div>
+        </Marker>
+      ))}
+      {planes.map((a) => (
+        <Marker key={a.id} longitude={a.lon} latitude={a.lat}>
+          <div
+            title={`${a.flight || a.id} ${a.alt ? a.alt + "ft" : ""}`}
+            style={{
+              color: a.emergency ? "#ff2d2d" : a.kind === "mil" ? "#ffd21a" : "#8fe3ff",
+              fontSize: 13,
+              transform: `rotate(${(a.track ?? 0)}deg)`,
+              textShadow: "0 0 4px #000",
+            }}
+          >
+            &#9650;
+          </div>
+        </Marker>
+      ))}
       {fused
         .filter((f) => f.lat != null)
         .map((f) => (
           <Marker key={f.id} longitude={f.lon!} latitude={f.lat!} onClick={(e) => { e.originalEvent.stopPropagation(); onSelect(f); }}>
             <div
-              className={f.inferred ? "mk pulse" : "mk"}
+              className={f.inferred ? "pulse" : undefined}
               style={{
-                background: "transparent",
                 color: THREAT_COLORS[f.threat_level] || "#D4AF37",
                 fontSize: (f.confidence ?? 0) >= 0.8 ? 26 : 20,
-                border: "none",
-                boxShadow: "none",
+                cursor: "pointer",
                 textShadow: `0 0 8px ${THREAT_COLORS[f.threat_level] || "#D4AF37"}`,
               }}
             >
