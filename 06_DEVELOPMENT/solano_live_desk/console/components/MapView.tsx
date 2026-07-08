@@ -4,8 +4,36 @@ import Map, { Marker, Source, Layer, Popup } from "react-map-gl/maplibre";
 import type { StyleSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Incident, Aircraft, Train } from "@/lib/types";
-import { THREAT_COLORS } from "@/lib/types";
+import { THREAT_COLORS, THREAT_RANK } from "@/lib/types";
 import LiveVideo from "@/components/LiveVideo";
+
+// Grid-cluster pins when zoomed out so a dense area reads as one count bubble.
+function clusterPins(items: Incident[], zoom: number) {
+  if (zoom >= 11) return { clusters: [] as any[], singles: items };
+  const cell = zoom < 8 ? 0.3 : zoom < 10 ? 0.09 : 0.035;
+  const grid: Record<string, Incident[]> = {};
+  for (const e of items) {
+    const key = `${Math.round(e.lat! / cell)},${Math.round(e.lon! / cell)}`;
+    (grid[key] ||= []).push(e);
+  }
+  const clusters: any[] = [];
+  const singles: Incident[] = [];
+  for (const k in grid) {
+    const g = grid[k];
+    if (g.length >= 3) {
+      clusters.push({
+        key: k,
+        count: g.length,
+        lat: g.reduce((s, e) => s + e.lat!, 0) / g.length,
+        lon: g.reduce((s, e) => s + e.lon!, 0) / g.length,
+        top: g.reduce((a, e) => (THREAT_RANK[e.threat_level] > THREAT_RANK[a] ? e.threat_level : a), "LOG"),
+      });
+    } else {
+      singles.push(...g);
+    }
+  }
+  return { clusters, singles };
+}
 
 const SAT_STYLE: StyleSpecification = {
   version: 8,
@@ -21,10 +49,26 @@ const SAT_STYLE: StyleSpecification = {
       tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"],
       tileSize: 256,
     },
+    // OpenMapTiles vector schema (free) -- used only for 3D building footprints.
+    omt: { type: "vector", url: "https://tiles.openfreemap.org/planet" },
   },
   layers: [
     { id: "sat", type: "raster", source: "sat" },
     { id: "ref", type: "raster", source: "ref", paint: { "raster-opacity": 0.85 } },
+    // 3D building extrusion (appears when you zoom in + tilt).
+    {
+      id: "buildings3d",
+      type: "fill-extrusion",
+      source: "omt",
+      "source-layer": "building",
+      minzoom: 14,
+      paint: {
+        "fill-extrusion-color": "#2b2b33",
+        "fill-extrusion-height": ["coalesce", ["get", "render_height"], 6],
+        "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
+        "fill-extrusion-opacity": 0.72,
+      },
+    },
   ],
 };
 
@@ -88,13 +132,18 @@ export default function MapView({
   const pins = useMemo(() => incidents.filter((e) => e.lat != null && e.lon != null), [incidents]);
   const planes = useGlide(aircraft).slice(0, 80); // cap for phone perf
   const [openCam, setOpenCam] = useState<any>(null);
+  const [zoom, setZoom] = useState(9);
+  const mapRef = useRef<any>(null);
+  const { clusters, singles } = useMemo(() => clusterPins(pins, zoom), [pins, zoom]);
 
   return (
     <Map
+      ref={mapRef}
       initialViewState={{ longitude: -121.98, latitude: 38.25, zoom: 9, pitch: 45, bearing: 0 }}
       mapStyle={SAT_STYLE}
       maxPitch={75}
       attributionControl={false}
+      onMoveEnd={(e) => setZoom(e.viewState.zoom)}
       style={{ position: "absolute", inset: 0 }}
     >
       {layers.evac && (
@@ -187,7 +236,26 @@ export default function MapView({
             </div>
           </Marker>
         ))}
-      {pins.map((ev) => {
+      {clusters.map((c) => (
+        <Marker
+          key={"cl" + c.key}
+          longitude={c.lon}
+          latitude={c.lat}
+          onClick={(e) => { e.originalEvent.stopPropagation(); mapRef.current?.flyTo({ center: [c.lon, c.lat], zoom: Math.min(zoom + 3, 13) }); }}
+        >
+          <div
+            style={{
+              background: THREAT_COLORS[c.top] || "#D4AF37", color: "#08080a", fontWeight: 700,
+              borderRadius: "50%", width: 34, height: 34, display: "flex", alignItems: "center",
+              justifyContent: "center", border: "2px solid #08080a", cursor: "pointer", fontSize: 13,
+              boxShadow: "0 0 0 3px rgba(212,175,55,0.35)",
+            }}
+          >
+            {c.count}
+          </div>
+        </Marker>
+      ))}
+      {singles.map((ev) => {
         const crit = ev.threat_level === "EXTREME" || ev.threat_level === "HIGH";
         return (
           <Marker key={ev.id} longitude={ev.lon!} latitude={ev.lat!} onClick={(e) => { e.originalEvent.stopPropagation(); onSelect(ev); }}>

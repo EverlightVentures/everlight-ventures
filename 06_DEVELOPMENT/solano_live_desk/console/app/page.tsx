@@ -14,6 +14,7 @@ import DetailDrawer from "@/components/DetailDrawer";
 import Toolbar from "@/components/Toolbar";
 import Scrubber from "@/components/Scrubber";
 import NewsPanel from "@/components/NewsPanel";
+import MiniMap from "@/components/MiniMap";
 
 // Short alert tone on a brand-new critical incident (WebAudio, no asset).
 function playBeep() {
@@ -224,6 +225,7 @@ export default function Home() {
         onMute={() => setMuted((v) => !v)}
       />
       <NewsPanel open={newsOpen} news={news} place={county} onClose={() => setNewsOpen(false)} />
+      {pos && <MiniMap lat={pos.lat} lon={pos.lon} />}
       <DetailDrawer ev={selected} onClose={() => setSelected(null)} />
     </main>
   );
