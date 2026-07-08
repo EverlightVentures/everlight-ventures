@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Incident } from "@/lib/types";
-import { THREAT_COLORS } from "@/lib/types";
+import { THREAT_COLORS, LIFECYCLE_COLORS } from "@/lib/types";
 import { getEventTranscript, getCameras, getCamDvr, getMesh, getIntel, getSocial, getLinks, getFlight } from "@/lib/api";
 import LiveVideo from "@/components/LiveVideo";
 import { ageLabel } from "@/lib/util";
@@ -414,10 +414,18 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
             {ev.geo_label}
             {ev.distance_mi != null ? ` · ${ev.distance_mi} mi` : ""}
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
             <SourceBadge source={ev.source} />
             <span style={{ fontSize: 11, color: "var(--muted)" }}>{ageLabel(ev.last_seen)}</span>
           </div>
+          {ev.lifecycle && (
+            <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 12, padding: "7px 10px", borderRadius: 8, background: "var(--card)", border: `1px solid ${(LIFECYCLE_COLORS[ev.lifecycle.state] || "#8a8a90")}44` }}>
+              <span style={{ width: 9, height: 9, borderRadius: "50%", background: LIFECYCLE_COLORS[ev.lifecycle.state] || "#8a8a90", flex: "0 0 auto" }} />
+              <span style={{ fontSize: 12, fontWeight: 700, color: LIFECYCLE_COLORS[ev.lifecycle.state] || "var(--text)" }}>{ev.lifecycle.state}</span>
+              <span style={{ fontSize: 11, color: "var(--muted)" }}>{ev.lifecycle.reason}</span>
+              {ev.lifecycle.closed ? <span style={{ marginLeft: "auto", fontSize: 10, color: "var(--muted)" }}>story ended</span> : null}
+            </div>
+          )}
           <div style={{ display: "flex", gap: 2, borderBottom: "1px solid var(--line)", marginBottom: 12, overflowX: "auto" }}>
             {visibleTabs.map((t) => (
               <button

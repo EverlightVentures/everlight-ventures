@@ -96,8 +96,9 @@ def events(date: str | None = None, lat: float | None = None, lon: float | None 
         conn.close()
     user = (lat, lon) if lat is not None and lon is not None else None
     scored = [threat.classify(r, user) for r in rows]
-    for e in scored:  # lifecycle: LIVE while updating, REPORT once quiet
+    for e in scored:  # lifecycle: derived narrative state (ACTIVE..CLEARED/CLOSED)
         e["status"] = correlate.lifecycle_status(e.get("last_seen"))
+        e["lifecycle"] = correlate.lifecycle(e)
     scored.sort(
         key=lambda e: (
             _LEVEL_RANK.get(e["threat_level"], 0),
@@ -122,6 +123,8 @@ def correlated(date: str | None = None, lat: float | None = None, lon: float | N
         conn.close()
     user = (lat, lon) if lat is not None and lon is not None else None
     fused = [threat.classify(i, user) for i in correlate.correlate(rows)]
+    for e in fused:
+        e["lifecycle"] = correlate.lifecycle(e)
     fused.sort(key=lambda e: (_LEVEL_RANK.get(e["threat_level"], 0), e.get("confidence", 0)), reverse=True)
     return {"date": day, "incidents": fused}
 

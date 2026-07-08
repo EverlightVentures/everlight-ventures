@@ -19,6 +19,13 @@ export type Incident = {
   sources?: string[];
   units?: string[];
   inferred?: boolean;
+  lifecycle?: { state: string; reason: string; closed: boolean; age_min: number };
+};
+
+// Narrative-state colors (ACTIVE hot -> CLOSED cold).
+export const LIFECYCLE_COLORS: Record<string, string> = {
+  ACTIVE: "#ff2d2d", ONGOING: "#ff8c1a", "WINDING DOWN": "#ffd21a",
+  CLEARED: "#2ecc71", CLOSED: "#8a8a90",
 };
 
 export type SpaceWx = { kp: number | null; level: string; gps: string; alert: boolean };

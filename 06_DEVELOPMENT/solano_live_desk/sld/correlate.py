@@ -35,6 +35,42 @@ def lifecycle_status(last_seen: str | None, now=None) -> str:
     return "LIVE" if (now - dt) <= timedelta(minutes=LIVE_MIN) else "REPORT"
 
 
+# Resolution + activity language in CHP/scanner traffic -> narrative state.
+_CLEAR_RE = re.compile(
+    r"\b(10-?22|code\s*4|clear(?:ed)?|10-?8|resolved|cancel(?:l?ed)?|unfounded|"
+    r"g\.?o\.?a\.?|gone on arrival|97 ?and ?clear|assignment complete|nothing further|disregard)\b",
+    re.I,
+)
+_ACTIVE_RE = re.compile(
+    r"\b(responding|en ?route|10-?97|on ?scene|code\s*3|in progress|pursuit|"
+    r"shots? fired|active shooter|foot pursuit|units? dispatched|fire is active)\b",
+    re.I,
+)
+AUTO_CLOSE_MIN = 180  # no update in 3h -> the story ends on its own
+
+
+def lifecycle(ev: dict, now=None) -> dict:
+    """Full narrative state from free signals only (clear-codes + activity + staleness).
+    We have no CAD/AVL, so this is DERIVED, not dispatched -- but it guarantees every
+    incident reaches a definite end: CLEARED (explicit) or CLOSED (auto). Closes the
+    'stories die mid-narrative' gap."""
+    now = now or datetime.now(store.PT)
+    dt = _parse_dt(ev.get("last_seen") or "")
+    age_min = (now - dt).total_seconds() / 60 if dt else 9999
+    text = " ".join(str(ev.get(k) or "") for k in ("type", "body", "status", "title"))
+    if _CLEAR_RE.search(text):
+        return {"state": "CLEARED", "reason": "clear signal in the traffic", "closed": True, "age_min": int(age_min)}
+    if age_min > AUTO_CLOSE_MIN:
+        return {"state": "CLOSED", "reason": "auto-closed, no update 3h+", "closed": True, "age_min": int(age_min)}
+    if age_min <= LIVE_MIN or _ACTIVE_RE.search(text):
+        active = bool(_ACTIVE_RE.search(text))
+        return {"state": "ACTIVE", "reason": "responding / active" if active else "updated just now",
+                "closed": False, "age_min": int(age_min)}
+    if age_min <= 90:
+        return {"state": "ONGOING", "reason": f"last update {int(age_min)}m ago", "closed": False, "age_min": int(age_min)}
+    return {"state": "WINDING DOWN", "reason": f"quiet {int(age_min)}m", "closed": False, "age_min": int(age_min)}
+
+
 class _UF:
     def __init__(self, n):
         self.p = list(range(n))

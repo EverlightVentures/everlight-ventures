@@ -1,7 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import type { Incident } from "@/lib/types";
-import { THREAT_COLORS, THREAT_RANK } from "@/lib/types";
+import { THREAT_COLORS, THREAT_RANK, LIFECYCLE_COLORS } from "@/lib/types";
 import { ageLabel } from "@/lib/util";
 import SourceBadge from "@/components/SourceBadge";
 
@@ -94,14 +94,17 @@ export default function AlarmQueue({
             >
               {ev.type || "Incident"}
             </span>
-            {ev.status && (
+            {ev.lifecycle && (
               <span
+                title={ev.lifecycle.reason}
                 style={{
-                  marginLeft: "auto", fontSize: 10,
-                  color: ev.status === "LIVE" ? "#2ecc71" : "var(--muted)",
+                  marginLeft: "auto", fontSize: 9, fontWeight: 700, flex: "0 0 auto",
+                  color: LIFECYCLE_COLORS[ev.lifecycle.state] || "var(--muted)",
+                  border: `1px solid ${LIFECYCLE_COLORS[ev.lifecycle.state] || "var(--muted)"}66`,
+                  borderRadius: 4, padding: "1px 5px", whiteSpace: "nowrap",
                 }}
               >
-                {ev.status}
+                {ev.lifecycle.state}
               </span>
             )}
           </div>
