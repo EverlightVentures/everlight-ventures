@@ -17,6 +17,10 @@ import Scrubber from "@/components/Scrubber";
 import NewsPanel from "@/components/NewsPanel";
 import StatsPanel from "@/components/StatsPanel";
 import MiniMap from "@/components/MiniMap";
+import FilterBar from "@/components/FilterBar";
+import Legend from "@/components/Legend";
+import { filterIncidents, EMPTY_FILTERS } from "@/lib/util";
+import type { Filters } from "@/lib/util";
 
 // Short alert tone on a brand-new critical incident (WebAudio, no asset).
 function playBeep() {
@@ -53,9 +57,13 @@ export default function Home() {
   const [aircraft, setAircraft] = useState<Aircraft[]>([]);
   const [trains, setTrains] = useState<Train[]>([]);
   const [layerOn, setLayerOn] = useState<Record<ToggleKey, boolean>>({
-    danger: false, evac: false, safe: false, buses: false, route: false, cams: false, social: false,
+    danger: false, evac: false, safe: false, buses: false, route: false, cams: false, social: false, rings: false,
   });
   const [hotspots, setHotspots] = useState<any[]>([]);
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [playing, setPlaying] = useState(false);
+  const [speed, setSpeed] = useState(1);
   const [layerData, setLayerData] = useState<Layers>({});
   const [day, setDay] = useState(""); // "" = today/live; else an archived day
   const [days, setDays] = useState<string[]>([]);
@@ -187,6 +195,19 @@ export default function Home() {
     return () => clearInterval(id);
   }, []);
 
+  // Playback: advance the scrubber while playing, at the chosen speed.
+  useEffect(() => {
+    if (!playing) return;
+    const id = setInterval(() => {
+      setScrubT((v) => {
+        const next = v + speed * 0.6;
+        if (next >= 100) { setPlaying(false); return 100; }
+        return next;
+      });
+    }, 220);
+    return () => clearInterval(id);
+  }, [playing, speed]);
+
   // Sound alert on a brand-new EXTREME incident (skips the initial load).
   useEffect(() => {
     let fresh = false;
@@ -200,12 +221,14 @@ export default function Home() {
     if (fresh && !muted) playBeep();
   }, [incidents, muted]);
 
-  // Time-scrubber: replay the day up to a cutoff (100 = live/all).
+  // Search + severity + source filter, then the time-scrubber cutoff.
+  const filtered = filterIncidents(incidents, filters);
+  const sources = Array.from(new Set(incidents.map((e) => e.source).filter(Boolean))).sort();
   const times = incidents.map((e) => Date.parse(e.last_seen || "") || 0).filter(Boolean);
   const tmin = times.length ? Math.min(...times) : 0;
   const tmax = times.length ? Math.max(...times) : 0;
   const cutoff = scrubT >= 100 ? Infinity : tmin + (scrubT / 100) * (tmax - tmin);
-  const shown = scrubT >= 100 ? incidents : incidents.filter((e) => (Date.parse(e.last_seen || "") || 0) <= cutoff);
+  const shown = scrubT >= 100 ? filtered : filtered.filter((e) => (Date.parse(e.last_seen || "") || 0) <= cutoff);
   const shownFused = scrubT >= 100 ? fused : fused.filter((e) => (Date.parse(e.last_seen || "") || 0) <= cutoff);
   const scrubLabel = scrubT >= 100 || !tmax ? "" : new Date(cutoff).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
@@ -224,6 +247,8 @@ export default function Home() {
         trains={trains}
         layers={{ ...layerData, socialHot: layerOn.social ? hotspots : undefined }}
         rankMap={rankMap}
+        userPos={pos}
+        showRings={layerOn.rings}
         selectedId={selected?.id ?? null}
         onSelect={setSelected}
       />
@@ -253,7 +278,26 @@ export default function Home() {
         open={alarmOpen}
         onToggle={() => setAlarmOpen((v) => !v)}
       />
-      <Scrubber value={scrubT} onChange={setScrubT} label={scrubLabel} live={scrubT >= 100} />
+      <Scrubber
+        value={scrubT}
+        onChange={(v) => { setScrubT(v); if (v >= 100) setPlaying(false); }}
+        label={scrubLabel}
+        live={scrubT >= 100}
+        playing={playing}
+        onPlay={() => setPlaying((p) => !p)}
+        speed={speed}
+        onSpeed={() => setSpeed((s) => (s === 1 ? 4 : s === 4 ? 20 : 1))}
+        onLive={() => { setPlaying(false); setScrubT(100); }}
+      />
+      <FilterBar
+        filters={filters}
+        onChange={setFilters}
+        sources={sources}
+        count={shown.length}
+        open={filterOpen}
+        onToggle={() => setFilterOpen((v) => !v)}
+      />
+      <Legend />
       <Toolbar
         active={layerOn}
         onToggle={toggleLayer}

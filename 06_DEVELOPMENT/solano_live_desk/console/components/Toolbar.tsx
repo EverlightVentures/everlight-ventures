@@ -1,10 +1,11 @@
 "use client";
 
-export type ToggleKey = "danger" | "evac" | "safe" | "buses" | "route" | "cams" | "social";
+export type ToggleKey = "danger" | "evac" | "safe" | "buses" | "route" | "cams" | "social" | "rings";
 
 const CHIPS: { k: ToggleKey; label: string }[] = [
   { k: "danger", label: "\u{1F534} Danger" },
   { k: "social", label: "\u{1F525} Hotspots" },
+  { k: "rings", label: "\u{2B55} Rings" },
   { k: "evac", label: "\u{1F6D1} Evac" },
   { k: "safe", label: "\u{1F3E5} Safe" },
   { k: "buses", label: "\u{1F68C} Bus" },

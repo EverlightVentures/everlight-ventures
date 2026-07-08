@@ -5,6 +5,8 @@ import type { Incident } from "@/lib/types";
 import { THREAT_COLORS } from "@/lib/types";
 import { getEventTranscript, getCameras, getCamDvr, getMesh, getIntel, getSocial } from "@/lib/api";
 import LiveVideo from "@/components/LiveVideo";
+import { ageLabel } from "@/lib/util";
+import SourceBadge from "@/components/SourceBadge";
 
 const TABS = ["Feed", "Transcript", "Mesh", "Intel", "Social", "Audio", "Cameras", "Sources"] as const;
 type Tab = (typeof TABS)[number];
@@ -301,9 +303,13 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
           <h2 className="display" style={{ fontSize: 20, margin: "10px 0 3px", color: "var(--gold)" }}>
             {ev.type || "Incident"}
           </h2>
-          <div style={{ fontSize: 12, color: "var(--muted)", marginBottom: 12 }}>
+          <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 3, marginBottom: 8 }}>
             {ev.geo_label}
             {ev.distance_mi != null ? ` · ${ev.distance_mi} mi` : ""}
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+            <SourceBadge source={ev.source} />
+            <span style={{ fontSize: 11, color: "var(--muted)" }}>{ageLabel(ev.last_seen)}</span>
           </div>
           <div style={{ display: "flex", gap: 2, borderBottom: "1px solid var(--line)", marginBottom: 12, overflowX: "auto" }}>
             {TABS.map((t) => (

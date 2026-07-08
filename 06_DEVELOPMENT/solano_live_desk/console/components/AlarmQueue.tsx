@@ -2,6 +2,8 @@
 import { motion } from "framer-motion";
 import type { Incident } from "@/lib/types";
 import { THREAT_COLORS, THREAT_RANK } from "@/lib/types";
+import { ageLabel } from "@/lib/util";
+import SourceBadge from "@/components/SourceBadge";
 
 export default function AlarmQueue({
   incidents, rankMap, selectedId, onSelect, open, onToggle,
@@ -103,9 +105,14 @@ export default function AlarmQueue({
               </span>
             )}
           </div>
-          <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>
+          <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {ev.geo_label || ev.source}
-            {ev.distance_mi != null ? ` · ${ev.distance_mi} mi` : ""}
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 3, flexWrap: "wrap" }}>
+            <SourceBadge source={ev.source} />
+            <span style={{ fontSize: 11, color: "var(--muted)" }}>
+              {ev.distance_mi != null ? `${ev.distance_mi} mi · ` : ""}{ageLabel(ev.last_seen)}
+            </span>
           </div>
         </motion.button>
       ))}

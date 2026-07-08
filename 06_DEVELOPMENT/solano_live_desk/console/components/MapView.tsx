@@ -7,6 +7,20 @@ import type { Incident, Aircraft, Train } from "@/lib/types";
 import { THREAT_COLORS, THREAT_RANK } from "@/lib/types";
 import LiveVideo from "@/components/LiveVideo";
 import { getFlight } from "@/lib/api";
+import { ageOpacity, categoryGlyph } from "@/lib/util";
+
+// Geodesic ring polygon (miles) around a point, for the proximity rings.
+function ringGeo(lat: number, lon: number, miles: number) {
+  const pts: [number, number][] = [];
+  const R = 3958.8;
+  for (let i = 0; i <= 64; i++) {
+    const a = (i / 64) * 2 * Math.PI;
+    const dLat = ((miles / R) * Math.cos(a) * 180) / Math.PI;
+    const dLon = ((miles / R) * Math.sin(a) * 180) / Math.PI / Math.cos((lat * Math.PI) / 180);
+    pts.push([lon + dLon, lat + dLat]);
+  }
+  return { type: "Feature" as const, geometry: { type: "LineString" as const, coordinates: pts }, properties: {} };
+}
 
 const SAFE_ICON: Record<string, string> = {
   police: "\u{1F693}", hospital: "\u{1F3E5}", fire: "\u{1F692}",
@@ -220,7 +234,7 @@ export type Layers = {
 };
 
 export default function MapView({
-  incidents, fused, aircraft, trains, layers, rankMap, selectedId, onSelect,
+  incidents, fused, aircraft, trains, layers, rankMap, userPos, showRings, selectedId, onSelect,
 }: {
   incidents: Incident[];
   fused: Incident[];
@@ -228,6 +242,8 @@ export default function MapView({
   trains: Train[];
   layers: Layers;
   rankMap: Record<string, number>;
+  userPos: { lat: number; lon: number } | null;
+  showRings: boolean;
   selectedId: string | null;
   onSelect: (ev: Incident) => void;
 }) {
@@ -263,6 +279,11 @@ export default function MapView({
       onMoveEnd={(e) => setZoom(e.viewState.zoom)}
       style={{ position: "absolute", inset: 0 }}
     >
+      {showRings && userPos && [5, 10, 25].map((mi) => (
+        <Source key={"ring" + mi} id={"ring" + mi} type="geojson" data={ringGeo(userPos.lat, userPos.lon, mi)}>
+          <Layer id={"ring" + mi} type="line" paint={{ "line-color": "#7fd1ff", "line-width": 1, "line-dasharray": [2, 3], "line-opacity": 0.5 }} />
+        </Source>
+      ))}
       {layers.evac && (
         <Source id="evac" type="geojson" data={layers.evac}>
           <Layer id="evac-fill" type="fill" paint={{ "fill-color": "#ff8c1a", "fill-opacity": 0.16 }} />
@@ -404,7 +425,7 @@ export default function MapView({
         const t = ev.last_seen ? new Date(ev.last_seen).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "";
         return (
           <Marker key={ev.id} longitude={ev.lon!} latitude={ev.lat!} onClick={(e) => { e.originalEvent.stopPropagation(); onSelect(ev); }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: ev.id === selectedId ? 1 : ageOpacity(ev.last_seen) }}>
               <div
                 className="mk"
                 style={{
@@ -429,7 +450,7 @@ export default function MapView({
                     textOverflow: "ellipsis", textShadow: "0 0 2px #000",
                   }}
                 >
-                  {(ev.type || "incident").slice(0, 20)} &middot; {t}
+                  {categoryGlyph(ev.type)} {(ev.type || "incident").slice(0, 18)} &middot; {t}
                 </div>
               )}
             </div>
