@@ -254,8 +254,24 @@ export default function MapView({
   const [openCam, setOpenCam] = useState<any>(null);
   const [poi, setPoi] = useState<{ kind: string; data: any } | null>(null);
   const [zoom, setZoom] = useState(9);
+  const [follow, setFollow] = useState(true);
   const mapRef = useRef<any>(null);
+  const didCenter = useRef(false);
   const { clusters, singles } = useMemo(() => clusterPins(pins, zoom), [pins, zoom]);
+
+  // Center on the operator: snap in on the first GPS fix, then track live while
+  // "follow" is on (turned off the moment they pan the map by hand).
+  useEffect(() => {
+    if (!userPos || !mapRef.current) return;
+    if (!follow && didCenter.current) return;
+    mapRef.current.flyTo({
+      center: [userPos.lon, userPos.lat],
+      zoom: didCenter.current ? (mapRef.current.getZoom?.() ?? 13.5) : 13.5,
+      duration: didCenter.current ? 700 : 1500,
+      essential: true,
+    });
+    didCenter.current = true;
+  }, [userPos, follow]);
 
   // Selecting an incident (from the alarm queue or the map) sweeps the map to it.
   useEffect(() => {
@@ -272,13 +288,15 @@ export default function MapView({
   }, [selectedId, incidents]);
 
   return (
+    <>
     <Map
       ref={mapRef}
-      initialViewState={{ longitude: -121.98, latitude: 38.25, zoom: 9, pitch: 45, bearing: 0 }}
+      initialViewState={{ longitude: userPos?.lon ?? -121.98, latitude: userPos?.lat ?? 38.25, zoom: userPos ? 13.5 : 9, pitch: 45, bearing: 0 }}
       mapStyle={SAT_STYLE}
       maxPitch={75}
       attributionControl={false}
       onMoveEnd={(e) => setZoom(e.viewState.zoom)}
+      onDragStart={() => setFollow(false)}
       style={{ position: "absolute", inset: 0 }}
     >
       {linkFrom && linkTargets.length > 0 && (
@@ -502,6 +520,27 @@ export default function MapView({
           </Marker>
         );
       })}
+      {userPos && (
+        <Marker longitude={userPos.lon} latitude={userPos.lat} anchor="center">
+          <div style={{ position: "relative", width: 20, height: 20 }}>
+            <div style={{ position: "absolute", inset: 0, borderRadius: "50%", background: "#2f9bff", opacity: 0.35, animation: "ring 2s ease-out infinite" }} />
+            <div style={{ position: "absolute", top: 5, left: 5, width: 10, height: 10, borderRadius: "50%", background: "#2f9bff", border: "2px solid #fff", boxShadow: "0 0 8px #2f9bff" }} />
+          </div>
+        </Marker>
+      )}
     </Map>
+      <button
+        onClick={() => { setFollow(true); if (userPos && mapRef.current) mapRef.current.flyTo({ center: [userPos.lon, userPos.lat], zoom: 13.5, duration: 700, essential: true }); }}
+        title={follow ? "following you" : "recenter on me"}
+        className="glass"
+        style={{
+          position: "absolute", bottom: 118, right: 12, zIndex: 16, width: 40, height: 40,
+          borderRadius: "50%", border: `1px solid ${follow ? "#2f9bff" : "var(--line)"}`,
+          color: follow ? "#2f9bff" : "var(--text)", fontSize: 18, cursor: "pointer", lineHeight: 1,
+        }}
+      >
+        {"◉"}
+      </button>
+    </>
   );
 }

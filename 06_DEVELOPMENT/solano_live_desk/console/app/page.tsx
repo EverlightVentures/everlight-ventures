@@ -16,7 +16,6 @@ import Toolbar from "@/components/Toolbar";
 import Scrubber from "@/components/Scrubber";
 import NewsPanel from "@/components/NewsPanel";
 import StatsPanel from "@/components/StatsPanel";
-import MiniMap from "@/components/MiniMap";
 import FilterBar from "@/components/FilterBar";
 import Legend from "@/components/Legend";
 import { filterIncidents, EMPTY_FILTERS } from "@/lib/util";
@@ -358,7 +357,6 @@ export default function Home() {
       />
       <NewsPanel open={newsOpen} news={news} place={county} onClose={() => setNewsOpen(false)} />
       <StatsPanel open={statsOpen} stats={stats} onClose={() => setStatsOpen(false)} />
-      {pos && <MiniMap lat={pos.lat} lon={pos.lon} />}
       <DetailDrawer ev={selected} onClose={() => setSelected(null)} />
     </main>
   );
