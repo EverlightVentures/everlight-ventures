@@ -1,0 +1,14 @@
+{
+  "name": "Solano Live Desk",
+  "short_name": "Survival OS",
+  "description": "Personal survival-OS: live incidents, threats, cameras, scanner, evac.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0A0A0A",
+  "theme_color": "#0A0A0A",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "192x192", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/icon.svg", "sizes": "512x512", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
