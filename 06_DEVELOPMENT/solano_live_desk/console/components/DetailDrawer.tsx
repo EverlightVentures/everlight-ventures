@@ -3,13 +3,13 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Incident } from "@/lib/types";
 import { THREAT_COLORS } from "@/lib/types";
-import { getEventTranscript, getCameras, getCamDvr, getMesh, getIntel, getSocial, getLinks } from "@/lib/api";
+import { getEventTranscript, getCameras, getCamDvr, getMesh, getIntel, getSocial, getLinks, getFlight } from "@/lib/api";
 import LiveVideo from "@/components/LiveVideo";
 import { ageLabel } from "@/lib/util";
 import SourceBadge from "@/components/SourceBadge";
 
 const TABS = ["Feed", "Transcript", "Mesh", "Intel", "Social", "Audio", "Cameras", "Sources"] as const;
-type Tab = (typeof TABS)[number];
+type Tab = (typeof TABS)[number] | "Flight" | "Info";
 
 const RISK_BG: Record<string, string> = {
   HIGH: "rgba(200,0,0,0.85)", MEDIUM: "rgba(255,140,26,0.82)", LOW: "rgba(26,127,55,0.7)",
@@ -75,9 +75,67 @@ function SocialTab({ data }: { data: { posts: any[] } | null }) {
       {posts.map((p: any, i: number) => (
         <a key={i} href={p.url} target="_blank" rel="noreferrer" style={{ display: "block", padding: "7px 0", borderTop: "1px solid var(--line)", color: "var(--text)", fontSize: 13, textDecoration: "none" }}>
           {p.title}
-          <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>r/{p.sub} &middot; {p.author}</div>
+          <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>{p.source || "reddit"} &middot; {p.sub}{p.author ? " · " + p.author : ""}</div>
         </a>
       ))}
+    </div>
+  );
+}
+
+function KV({ k, v }: { k: string; v: any }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 13, padding: "5px 0", borderTop: "1px solid var(--line)" }}>
+      <span style={{ color: "var(--muted)" }}>{k}</span>
+      <span style={{ fontWeight: 600, textAlign: "right" }}>{v}</span>
+    </div>
+  );
+}
+
+const SAFE_EMOJI: Record<string, string> = {
+  police: "\u{1F693}", hospital: "\u{1F3E5}", fire: "\u{1F692}", shelter: "\u{1F3E0}", pharmacy: "\u{1F48A}",
+};
+
+function FlightTab({ data }: { data: any }) {
+  const [route, setRoute] = useState<any>(null);
+  useEffect(() => {
+    setRoute(null);
+    if (data?.flight) getFlight(data.flight, data.type).then(setRoute).catch(() => {});
+  }, [data]);
+  if (!data) return <Muted>no flight data</Muted>;
+  return (
+    <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 10, padding: "12px 14px" }}>
+      <div style={{ fontSize: 17, fontWeight: 700 }}>&#9992; {data.flight || data.id}{data.kind === "mil" ? " (military)" : ""}</div>
+      {route?.airline ? <div style={{ color: "var(--gold)", fontSize: 13, marginTop: 3 }}>{route.airline}</div> : null}
+      {route && (route.origin || route.dest) ? (
+        <div style={{ fontSize: 15, fontWeight: 600, margin: "8px 0 4px" }}>
+          {route.origin?.city || route.origin?.code || "?"} &rarr; {route.dest?.city || route.dest?.code || "?"}
+        </div>
+      ) : route ? <div style={{ fontSize: 12, color: "var(--muted)", margin: "8px 0" }}>route not published</div> : null}
+      <KV k="Altitude" v={data.alt ? data.alt.toLocaleString() + " ft" : "?"} />
+      <KV k="Speed" v={data.speed ? Math.round(data.speed) + " kt" : "?"} />
+      <KV k="Heading" v={data.track != null ? Math.round(data.track) + "°" : "?"} />
+      <KV k="Aircraft" v={data.type || "?"} />
+      {route?.seats ? <KV k="Capacity" v={"~" + route.est_pax + " of " + route.seats + " aboard (est)"} /> : null}
+      {data.squawk ? <KV k="Squawk" v={data.squawk} /> : null}
+      {data.emergency ? <div style={{ color: "#ff5b5b", fontWeight: 700, marginTop: 8 }}>EMERGENCY SQUAWK</div> : null}
+      <div style={{ fontSize: 10, color: "var(--muted)", marginTop: 8 }}>live occupancy is not broadcast; capacity is the type&apos;s typical seating</div>
+    </div>
+  );
+}
+
+function SafeTab({ data }: { data: any }) {
+  if (!data) return <Muted>no data</Muted>;
+  const dir = `https://www.google.com/maps/dir/?api=1&destination=${data.lat},${data.lon}`;
+  return (
+    <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 10, padding: "12px 14px" }}>
+      <div style={{ fontSize: 17, fontWeight: 700 }}>{SAFE_EMOJI[data.kind] || "\u{1F3E5}"} {data.name}</div>
+      <div style={{ fontSize: 12, color: "var(--muted)", marginTop: 3, marginBottom: 6 }}>safe haven &middot; open to the public</div>
+      <KV k="Type" v={data.kind} />
+      {data.distance_mi != null ? <KV k="Distance" v={data.distance_mi + " mi"} /> : null}
+      {data.address ? <KV k="Address" v={data.address} /> : null}
+      <a href={dir} target="_blank" rel="noreferrer" style={{ display: "block", textAlign: "center", marginTop: 12, background: "var(--gold)", color: "#08080a", fontWeight: 700, borderRadius: 8, padding: "10px", textDecoration: "none" }}>
+        Directions
+      </a>
     </div>
   );
 }
@@ -286,10 +344,16 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
   const [social, setSocial] = useState<{ posts: any[] } | null>(null);
   const eventTs = ev ? Math.round((Date.parse(ev.last_seen || "") || Date.now()) / 1000) : 0;
 
-  const isSocial = !!(ev as any)?._social;
-  const visibleTabs: readonly string[] = isSocial ? ["Social", "Intel", "Sources"] : TABS;
+  const kind = (ev as any)?._kind as string | undefined;
+  const isSocial = kind === "social";
+  const visibleTabs: readonly string[] =
+    kind === "social" ? ["Social", "Intel", "Sources"]
+    : kind === "plane" ? ["Flight"]
+    : kind === "safe" ? ["Info", "Intel"]
+    : TABS;
+  const defaultTab: Tab = kind === "social" ? "Social" : kind === "plane" ? "Flight" : kind === "safe" ? "Info" : "Feed";
 
-  useEffect(() => { setTab(isSocial ? "Social" : "Feed"); setTranscripts(null); setCams(null); setDvr(null); setMesh(null); setIntel(null); setLinks(null); setSocial(null); }, [ev?.id, isSocial]);
+  useEffect(() => { setTab(defaultTab); setTranscripts(null); setCams(null); setDvr(null); setMesh(null); setIntel(null); setLinks(null); setSocial(null); }, [ev?.id, defaultTab]);
   useEffect(() => {
     if (!ev) return;
     if (tab === "Transcript" && transcripts === null) {
@@ -375,6 +439,8 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
               <pre style={preStyle}>{ev.body || "(no dispatch detail yet)"}</pre>
             </div>
           )}
+          {tab === "Flight" && <FlightTab data={(ev as any).planeData} />}
+          {tab === "Info" && <SafeTab data={(ev as any).safeData} />}
           {tab === "Transcript" && <Transcripts data={transcripts} />}
           {tab === "Mesh" && (ev.lat != null ? <MeshTab data={mesh} lat={ev.lat} lon={ev.lon!} /> : <Muted>no coordinates for this event</Muted>)}
           {tab === "Intel" && (ev.lat != null ? <IntelTab data={intel} radius={2} links={links} /> : <Muted>no coordinates for this event</Muted>)}

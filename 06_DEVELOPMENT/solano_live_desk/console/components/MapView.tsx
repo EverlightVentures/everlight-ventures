@@ -320,7 +320,15 @@ export default function MapView({
         </Source>
       )}
       {(layers.safe || []).map((s, i) => (
-        <Marker key={"safe" + i} longitude={s.lon} latitude={s.lat} onClick={(e) => { e.originalEvent.stopPropagation(); setPoi({ kind: "safe", data: s }); }}>
+        <Marker key={"safe" + i} longitude={s.lon} latitude={s.lat} onClick={(e) => {
+          e.originalEvent.stopPropagation();
+          onSelect({
+            id: "safe-" + (s.name || i), type: s.name || "Safe haven", source: "safe",
+            threat_level: "LOG", lat: s.lat, lon: s.lon,
+            geo_label: s.kind + (s.distance_mi != null ? " · " + s.distance_mi + " mi" : ""),
+            last_seen: new Date().toISOString(), _kind: "safe", safeData: s,
+          } as any);
+        }}>
           <div title={`${s.name || "safe"} (${s.kind || ""})`} style={{ fontSize: 15, cursor: "pointer", filter: "drop-shadow(0 0 3px #000)" }}>
             {SAFE_ICON[s.kind] || "\u{1F3E5}"}
           </div>
@@ -348,7 +356,7 @@ export default function MapView({
               threat_level: hot ? "HIGH" : "MEDIUM", severity: h.count, lat: h.lat, lon: h.lon,
               geo_label: h.city + " · " + h.count + " safety post" + (h.count !== 1 ? "s" : ""),
               last_seen: new Date().toISOString(), first_seen: new Date().toISOString(),
-              posts: h.posts, _social: true,
+              posts: h.posts, _kind: "social",
             } as any);
           }}>
             <div
@@ -397,7 +405,15 @@ export default function MapView({
         </Marker>
       ))}
       {planes.map((a) => (
-        <Marker key={a.id} longitude={a.lon} latitude={a.lat} onClick={(e) => { e.originalEvent.stopPropagation(); setPoi({ kind: "plane", data: a }); }}>
+        <Marker key={a.id} longitude={a.lon} latitude={a.lat} onClick={(e) => {
+          e.originalEvent.stopPropagation();
+          onSelect({
+            id: "plane-" + (a.flight || a.id), type: "Flight " + (a.flight || a.id),
+            source: "adsb", threat_level: a.emergency ? "HIGH" : "LOG", lat: a.lat, lon: a.lon,
+            geo_label: (a.type || "aircraft") + (a.alt ? " · " + a.alt.toLocaleString() + " ft" : ""),
+            last_seen: new Date().toISOString(), _kind: "plane", planeData: a,
+          } as any);
+        }}>
           <div
             title={`${a.flight || a.id} ${a.alt ? a.alt + "ft" : ""}`}
             style={{
