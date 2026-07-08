@@ -286,7 +286,10 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
   const [social, setSocial] = useState<{ posts: any[] } | null>(null);
   const eventTs = ev ? Math.round((Date.parse(ev.last_seen || "") || Date.now()) / 1000) : 0;
 
-  useEffect(() => { setTab("Feed"); setTranscripts(null); setCams(null); setDvr(null); setMesh(null); setIntel(null); setLinks(null); setSocial(null); }, [ev?.id]);
+  const isSocial = !!(ev as any)?._social;
+  const visibleTabs: readonly string[] = isSocial ? ["Social", "Intel", "Sources"] : TABS;
+
+  useEffect(() => { setTab(isSocial ? "Social" : "Feed"); setTranscripts(null); setCams(null); setDvr(null); setMesh(null); setIntel(null); setLinks(null); setSocial(null); }, [ev?.id, isSocial]);
   useEffect(() => {
     if (!ev) return;
     if (tab === "Transcript" && transcripts === null) {
@@ -299,13 +302,15 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
       getIntel(ev.lat, ev.lon!).then(setIntel).catch(() => setIntel({ precursors: [], prior_count: 0, area_today: 0 }));
     if (tab === "Intel" && links === null && ev.id)
       getLinks(ev.id).then(setLinks).catch(() => setLinks({ links: [], entities: {} }));
-    if (tab === "Social" && social === null)
-      getSocial(ev.geo_label || "Solano County").then(setSocial).catch(() => setSocial({ posts: [] }));
+    if (tab === "Social" && social === null) {
+      if (isSocial) setSocial({ posts: (ev as any).posts || [] });  // hotspot carries its own posts
+      else getSocial(ev.geo_label || "Solano County").then(setSocial).catch(() => setSocial({ posts: [] }));
+    }
     if (tab === "Cameras" && cams === null && ev.lat != null)
       getCameras(ev.lat, ev.lon!).then(setCams).catch(() => setCams([]));
     if (tab === "Cameras" && dvr === null && ev.lat != null)
       getCamDvr(ev.lat, ev.lon!, eventTs).then(setDvr).catch(() => setDvr({ camera: null, frames: [] }));
-  }, [tab, ev, transcripts, cams, dvr, mesh, intel, links, social, eventTs]);
+  }, [tab, ev, transcripts, cams, dvr, mesh, intel, links, social, eventTs, isSocial]);
 
   return (
     <AnimatePresence>
@@ -350,10 +355,10 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
             <span style={{ fontSize: 11, color: "var(--muted)" }}>{ageLabel(ev.last_seen)}</span>
           </div>
           <div style={{ display: "flex", gap: 2, borderBottom: "1px solid var(--line)", marginBottom: 12, overflowX: "auto" }}>
-            {TABS.map((t) => (
+            {visibleTabs.map((t) => (
               <button
                 key={t}
-                onClick={() => setTab(t)}
+                onClick={() => setTab(t as any)}
                 style={{
                   background: "none", border: "none", cursor: "pointer", padding: "6px 9px",
                   fontSize: 12, whiteSpace: "nowrap",

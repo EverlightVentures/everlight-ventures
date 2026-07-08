@@ -340,7 +340,17 @@ export default function MapView({
         const sz = 22 + Math.min(h.count * 4, 22);
         const hot = h.hot ?? h.count >= 4;
         return (
-          <Marker key={"hot" + i} longitude={h.lon} latitude={h.lat} onClick={(e) => { e.originalEvent.stopPropagation(); setPoi({ kind: "social", data: h }); }}>
+          <Marker key={"hot" + i} longitude={h.lon} latitude={h.lat} onClick={(e) => {
+            e.originalEvent.stopPropagation();
+            // A hotspot IS an alert -> open the full drawer, not a popup.
+            onSelect({
+              id: "social-" + h.city, type: "Social hotspot: " + h.city, source: "reddit",
+              threat_level: hot ? "HIGH" : "MEDIUM", severity: h.count, lat: h.lat, lon: h.lon,
+              geo_label: h.city + " · " + h.count + " safety post" + (h.count !== 1 ? "s" : ""),
+              last_seen: new Date().toISOString(), first_seen: new Date().toISOString(),
+              posts: h.posts, _social: true,
+            } as any);
+          }}>
             <div
               title={`${h.city}: ${h.count} safety posts`}
               style={{
