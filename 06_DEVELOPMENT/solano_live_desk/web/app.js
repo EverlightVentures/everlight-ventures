@@ -55,7 +55,42 @@ map.on("load", () => {
 
   loadDays();
   locateUser();
+  connectWS();
 });
+
+// Real-time push: apply server deltas instantly instead of waiting for a poll.
+// Only for the live (today) view; the 15s poll stays as a fallback if /ws drops.
+function onLiveView() {
+  const sel = document.getElementById("day");
+  return !sel.value || sel.selectedIndex === 0;
+}
+function connectWS() {
+  let ws;
+  try {
+    const proto = location.protocol === "https:" ? "wss" : "ws";
+    ws = new WebSocket(`${proto}://${location.host}/ws`);
+  } catch (e) {
+    setTimeout(connectWS, 5000);
+    return;
+  }
+  ws.onmessage = (m) => {
+    if (!onLiveView()) return;
+    let msg;
+    try { msg = JSON.parse(m.data); } catch (e) { return; }
+    if (msg.t === "snapshot") {
+      events = msg.events || [];
+    } else if (msg.t === "delta") {
+      const byId = Object.fromEntries(events.map((e) => [e.id, e]));
+      for (const e of msg.events || []) byId[e.id] = e;
+      events = Object.values(byId);
+    } else return;
+    lastUpdate = Date.now();
+    wireSlider();
+    if (document.getElementById("time").value === "100") render(null);  // don't disturb a scrub
+  };
+  ws.onclose = () => setTimeout(connectWS, 5000);   // auto-reconnect
+  ws.onerror = () => { try { ws.close(); } catch (e) {} };
+}
 
 document.getElementById("sat-toggle").onclick = () => {
   const v = map.getLayoutProperty("sat", "visibility") === "visible" ? "none" : "visible";
@@ -157,19 +192,28 @@ function renderCams(cams) {
   for (const c of cams) {
     const div = document.createElement("div");
     div.className = "cam";
-    if (c.image_url) {
+    if (c.stream_url) {
+      // Live HLS video, played inline via the vendored hls.js.
+      const v = document.createElement("video");
+      v.controls = true; v.muted = true; v.playsInline = true; v.autoplay = true;
+      v.style.cssText = "width:100%;border-radius:6px;background:#000;";
+      if (window.Hls && window.Hls.isSupported()) {
+        const hls = new Hls({ liveDurationInfinity: true });
+        hls.loadSource(c.stream_url);
+        hls.attachMedia(v);
+      } else {
+        v.src = c.stream_url; // Safari plays HLS natively
+      }
+      div.appendChild(v);
+    } else if (c.image_url) {
       const img = document.createElement("img");
       img.src = c.image_url + (c.image_url.includes("?") ? "&" : "?") + "t=" + Date.now();
       img.loading = "lazy";
       div.appendChild(img);
     }
     const cap = document.createElement("small");
-    cap.textContent = `${c.name || "camera"} · ${c.distance_mi} mi` + (c.stream_url ? " (live)" : "");
+    cap.textContent = `${c.name || "camera"} · ${c.distance_mi} mi` + (c.stream_url ? " · LIVE" : " · still");
     div.appendChild(cap);
-    if (c.stream_url) {
-      div.style.cursor = "pointer";
-      div.onclick = () => window.open(c.stream_url, "_blank");
-    }
     box.appendChild(div);
   }
 }

@@ -5,13 +5,17 @@ import os
 import time
 from pathlib import Path
 
-from fastapi import FastAPI
+import asyncio
+
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from . import aircraft as air_mod
+from . import broadcaster
 from . import cameras as cams_mod
 from . import config, correlate, dvr, evac, fema, news, spacewx, store, threat, trains as train_mod, transit as transit_mod, wayfinding, webcams
+from .hub import HUB
 from .feeds import feeds_for_county
 from .geo_county import county_for
 
@@ -132,6 +136,33 @@ def _warm_caches():
     import threading
 
     threading.Thread(target=_all_cameras, daemon=True).start()
+
+
+@app.on_event("startup")
+async def _start_broadcaster():
+    # The WebSocket push loop: diffs the store every 2s, pushes deltas to /ws.
+    asyncio.create_task(broadcaster.broadcast_loop(_store_dir()))
+
+
+@app.websocket("/ws")
+async def ws(websocket: WebSocket):
+    """Live push: an immediate snapshot, then incident deltas as they happen."""
+    await websocket.accept()
+    q = HUB.subscribe()
+    try:
+        day = store.today_pt()
+        user = broadcaster.read_user(_store_dir())
+        snap = await asyncio.to_thread(broadcaster.snapshot, _store_dir(), day, user)
+        await websocket.send_json({"t": "snapshot", "date": day,
+                                   "user": list(user) if user else None, "events": snap})
+        while True:
+            await websocket.send_json(await q.get())
+    except WebSocketDisconnect:
+        pass
+    except Exception:  # noqa: BLE001
+        pass
+    finally:
+        HUB.unsubscribe(q)
 
 
 @app.get("/api/cameras")
