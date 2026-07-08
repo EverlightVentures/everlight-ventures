@@ -137,15 +137,18 @@ def _process_block(session, base, fid, blk, model, now_iso, gc, budget) -> int:
             time.sleep(1.1)                    # Nominatim 1 req/s -- new locations only
         if lat is None:
             continue
-        sev = threat.severity(seg["text"])
         ev_time = datetime.fromtimestamp(start_ts + seg["start"], store.PT).isoformat()
+        # The whole exchange around this call (~30s before to ~2.5min after), so
+        # the transcript reads as a real conversation AND the service classifies
+        # from the call type + the units' talk, not just the dispatch address line.
+        window = [s2 for s2 in segs if -30 <= (s2["start"] - seg["start"]) <= 150]
+        body = "\n".join(s2["line"] for s2 in window)
         responders: set = set()
-        for s2 in segs:
-            if 0 <= (s2["start"] - seg["start"]) <= 90:
-                responders.update(radio.line_ids(s2["text"], base))
-        body = seg["line"]
+        for s2 in window:
+            responders.update(radio.line_ids(s2["text"], base))
         if responders:
             body += "\n\nUnits on this call: " + ", ".join(sorted(responders))
+        sev = max((threat.severity(s2["text"]) for s2 in window), key=lambda x: _RANK[x])
         events.append({
             "id": f"scanner:{bid}:{i}", "source": "scanner",
             "type": f"Scanner call ({place[:22]})", "title": seg["text"][:70],
