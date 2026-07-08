@@ -113,6 +113,53 @@ def classify_service(text: str) -> str:
     return best
 
 
+_STATUS = [
+    (r"shots?\s*fired|gunshot|11-?99", "shots fired / officer in danger"),
+    (r"structure\s*fire|fully involved|working fire", "working structure fire"),
+    (r"\bfire\s*(is\s*)?(out|contained|knocked)", "fire contained"),
+    (r"on\s*scene|10-?97", "units on scene"),
+    (r"en\s*route|responding|10-?76", "units en route"),
+    (r"code\s*3", "running code 3 (lights + siren)"),
+    (r"in\s*custody|10-?15", "suspect in custody"),
+    (r"pursuit|fleeing|foot\s*chase", "active pursuit"),
+    (r"code\s*4|10-?98|clear the?\s*(air|call)", "situation under control"),
+    (r"transport(ing)?|to the hospital|code\s*3\s*transport", "patient being transported"),
+    (r"\bgsw\b|gunshot wound|shot victim", "gunshot victim"),
+    (r"unconscious|not breathing|cardiac|cpr", "medical emergency, patient down"),
+]
+
+
+def summarize(segments: list[dict], service: str = "Dispatch", call: str | None = None) -> str:
+    """Plain-English summary of a radio conversation: decodes the jargon (codes ->
+    events, status phrases) so the operator understands it at a glance. No LLM."""
+    if not segments:
+        return ""
+    text = " ".join(s.get("text", "") for s in segments).lower()
+    events: list[str] = []
+    speakers: set[str] = set()
+    for s in segments:
+        if s.get("speaker"):
+            speakers.add(s["speaker"])
+        for c in s.get("codes", []):
+            lbl = c.split("=", 1)[1].strip() if "=" in c else ""
+            if lbl:
+                events.append(lbl)
+    events = list(dict.fromkeys(events))
+    officers = sorted(sp for sp in speakers if sp and sp != "Dispatcher")
+    statuses = list(dict.fromkeys(phrase for pat, phrase in _STATUS if re.search(pat, text)))
+    loc = f" at {call}" if call else ""
+    lead = f"{service} call{loc}"
+    if events:
+        lead += ": " + ", ".join(events)
+    bits = [lead + "."]
+    if statuses:
+        s0 = ", ".join(statuses)
+        bits.append(s0[0].upper() + s0[1:] + ".")
+    if officers:
+        bits.append(f"{len(officers)} unit{'s' if len(officers) != 1 else ''} involved ({', '.join(officers)}).")
+    return " ".join(bits)
+
+
 def speaker_segments(text: str) -> list[dict]:
     """Attribute each transcript line to a speaker so the operator reads WHO said
     WHAT: dispatch chatter -> 'Dispatcher'; each distinct unit -> 'Officer 1/2/...'

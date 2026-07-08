@@ -6,6 +6,87 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import type { Incident, Aircraft, Train } from "@/lib/types";
 import { THREAT_COLORS, THREAT_RANK } from "@/lib/types";
 import LiveVideo from "@/components/LiveVideo";
+import { getFlight } from "@/lib/api";
+
+const SAFE_ICON: Record<string, string> = {
+  police: "\u{1F693}", hospital: "\u{1F3E5}", fire: "\u{1F692}",
+  shelter: "\u{1F3E0}", pharmacy: "\u{1F48A}",
+};
+
+function Row({ k, v }: { k: string; v: any }) {
+  return (
+    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 12, color: "#333" }}>
+      <span style={{ color: "#777" }}>{k}</span>
+      <span style={{ fontWeight: 600 }}>{v}</span>
+    </div>
+  );
+}
+
+// One detail card for any non-incident marker; planes get live route lookup.
+function PoiCard({ poi }: { poi: { kind: string; data: any } }) {
+  const [route, setRoute] = useState<any>(null);
+  useEffect(() => {
+    setRoute(null);
+    if (poi.kind === "plane" && poi.data.flight) getFlight(poi.data.flight).then(setRoute).catch(() => {});
+  }, [poi]);
+  const d = poi.data;
+  if (poi.kind === "plane") {
+    return (
+      <div style={{ minWidth: 184, color: "#111" }}>
+        <div style={{ fontWeight: 700 }}>&#9992; {d.flight || d.id}{d.kind === "mil" ? " (military)" : ""}</div>
+        <Row k="Altitude" v={d.alt ? `${d.alt.toLocaleString()} ft` : "?"} />
+        <Row k="Speed" v={d.speed ? `${Math.round(d.speed)} kt` : "?"} />
+        <Row k="Heading" v={d.track != null ? `${Math.round(d.track)}°` : "?"} />
+        <Row k="Type" v={d.type || "?"} />
+        {d.squawk ? <Row k="Squawk" v={d.squawk} /> : null}
+        {d.emergency ? <div style={{ color: "#c00", fontWeight: 700, fontSize: 12 }}>EMERGENCY</div> : null}
+        <div style={{ marginTop: 6, borderTop: "1px solid #ddd", paddingTop: 4 }}>
+          {route && (route.origin || route.dest) ? (
+            <>
+              {route.airline ? <div style={{ fontSize: 11, color: "#666" }}>{route.airline}</div> : null}
+              <div style={{ fontWeight: 600 }}>
+                {route.origin?.city || route.origin?.code || "?"} &rarr; {route.dest?.city || route.dest?.code || "?"}
+              </div>
+            </>
+          ) : route ? (
+            <div style={{ fontSize: 11, color: "#888" }}>route not published</div>
+          ) : (
+            <div style={{ fontSize: 11, color: "#888" }}>looking up route&hellip;</div>
+          )}
+        </div>
+      </div>
+    );
+  }
+  if (poi.kind === "train") {
+    return (
+      <div style={{ minWidth: 150, color: "#111" }}>
+        <div style={{ fontWeight: 700 }}>&#128646; {d.route || "Train"} {d.num || ""}</div>
+        <Row k="Status" v={d.state || "?"} />
+        <Row k="Speed" v={d.speed != null ? `${Math.round(d.speed)} mph` : "?"} />
+        {d.distance_mi != null ? <Row k="Distance" v={`${d.distance_mi} mi`} /> : null}
+      </div>
+    );
+  }
+  if (poi.kind === "safe") {
+    return (
+      <div style={{ minWidth: 160, color: "#111" }}>
+        <div style={{ fontWeight: 700 }}>{SAFE_ICON[d.kind] || "\u{1F3E5}"} {d.name}</div>
+        <Row k="Type" v={d.kind} />
+        <Row k="Distance" v={`${d.distance_mi} mi`} />
+        <div style={{ fontSize: 11, color: "#888", marginTop: 4 }}>safe haven &middot; open to the public</div>
+      </div>
+    );
+  }
+  if (poi.kind === "bus") {
+    return (
+      <div style={{ minWidth: 130, color: "#111" }}>
+        <div style={{ fontWeight: 700 }}>&#128652; {d.route || "Transit"}</div>
+        {d.speed != null ? <Row k="Speed" v={`${Math.round(d.speed)} mph`} /> : null}
+      </div>
+    );
+  }
+  return null;
+}
 
 // Grid-cluster pins when zoomed out so a dense area reads as one count bubble.
 function clusterPins(items: Incident[], zoom: number) {
@@ -133,9 +214,24 @@ export default function MapView({
   const pins = useMemo(() => incidents.filter((e) => e.lat != null && e.lon != null), [incidents]);
   const planes = useGlide(aircraft).slice(0, 80); // cap for phone perf
   const [openCam, setOpenCam] = useState<any>(null);
+  const [poi, setPoi] = useState<{ kind: string; data: any } | null>(null);
   const [zoom, setZoom] = useState(9);
   const mapRef = useRef<any>(null);
   const { clusters, singles } = useMemo(() => clusterPins(pins, zoom), [pins, zoom]);
+
+  // Selecting an incident (from the alarm queue or the map) sweeps the map to it.
+  useEffect(() => {
+    if (!selectedId || !mapRef.current) return;
+    const ev = incidents.find((e) => e.id === selectedId);
+    if (ev && ev.lat != null && ev.lon != null) {
+      mapRef.current.flyTo({
+        center: [ev.lon, ev.lat],
+        zoom: Math.max(13, mapRef.current.getZoom?.() ?? 13),
+        duration: 1400,
+        essential: true,
+      });
+    }
+  }, [selectedId, incidents]);
 
   return (
     <Map
@@ -165,13 +261,15 @@ export default function MapView({
         </Source>
       )}
       {(layers.safe || []).map((s, i) => (
-        <Marker key={"safe" + i} longitude={s.lon} latitude={s.lat}>
-          <div title={`${s.name || "safe"} (${s.kind || ""})`} style={{ fontSize: 15, filter: "drop-shadow(0 0 3px #000)" }}>&#127973;</div>
+        <Marker key={"safe" + i} longitude={s.lon} latitude={s.lat} onClick={(e) => { e.originalEvent.stopPropagation(); setPoi({ kind: "safe", data: s }); }}>
+          <div title={`${s.name || "safe"} (${s.kind || ""})`} style={{ fontSize: 15, cursor: "pointer", filter: "drop-shadow(0 0 3px #000)" }}>
+            {SAFE_ICON[s.kind] || "\u{1F3E5}"}
+          </div>
         </Marker>
       ))}
       {(layers.buses || []).map((b, i) => (
-        <Marker key={"bus" + i} longitude={b.lon} latitude={b.lat}>
-          <div title={b.route || "bus"} style={{ fontSize: 12, filter: "drop-shadow(0 0 2px #000)" }}>&#128652;</div>
+        <Marker key={"bus" + i} longitude={b.lon} latitude={b.lat} onClick={(e) => { e.originalEvent.stopPropagation(); setPoi({ kind: "bus", data: b }); }}>
+          <div title={b.route || "bus"} style={{ fontSize: 12, cursor: "pointer", filter: "drop-shadow(0 0 2px #000)" }}>&#128652;</div>
         </Marker>
       ))}
       {(layers.cams || []).map((cm, i) => (
@@ -193,25 +291,30 @@ export default function MapView({
           </div>
         </Popup>
       )}
+      {poi && poi.data.lat != null && (
+        <Popup longitude={poi.data.lon} latitude={poi.data.lat} anchor="bottom" onClose={() => setPoi(null)} closeOnClick={false} maxWidth="264px">
+          <PoiCard poi={poi} />
+        </Popup>
+      )}
       {layers.route?.dest && (
         <Marker longitude={layers.route.dest.lon} latitude={layers.route.dest.lat}>
           <div title={layers.route.dest.name} style={{ fontSize: 18 }}>&#128205;</div>
         </Marker>
       )}
       {trains.map((t) => (
-        <Marker key={t.id} longitude={t.lon} latitude={t.lat}>
-          <div title={`${t.route || "train"} ${t.num || ""}`} style={{ fontSize: 16, filter: "drop-shadow(0 0 3px #000)" }}>
+        <Marker key={t.id} longitude={t.lon} latitude={t.lat} onClick={(e) => { e.originalEvent.stopPropagation(); setPoi({ kind: "train", data: t }); }}>
+          <div title={`${t.route || "train"} ${t.num || ""}`} style={{ fontSize: 16, cursor: "pointer", filter: "drop-shadow(0 0 3px #000)" }}>
             &#128646;
           </div>
         </Marker>
       ))}
       {planes.map((a) => (
-        <Marker key={a.id} longitude={a.lon} latitude={a.lat}>
+        <Marker key={a.id} longitude={a.lon} latitude={a.lat} onClick={(e) => { e.originalEvent.stopPropagation(); setPoi({ kind: "plane", data: a }); }}>
           <div
             title={`${a.flight || a.id} ${a.alt ? a.alt + "ft" : ""}`}
             style={{
               color: a.emergency ? "#ff2d2d" : a.kind === "mil" ? "#ffd21a" : "#8fe3ff",
-              fontSize: 13,
+              fontSize: 13, cursor: "pointer",
               transform: `rotate(${(a.track ?? 0)}deg)`,
               textShadow: "0 0 4px #000",
             }}
@@ -269,9 +372,11 @@ export default function MapView({
                   background: THREAT_COLORS[ev.threat_level] || "#D4AF37",
                   borderColor: ev.id === selectedId ? "#fff" : "rgba(0,0,0,0.6)",
                   fontSize: rank > 99 ? 9 : 11,
-                  ...(crit
-                    ? { animation: "critglow 1.4s ease-in-out infinite", ["--gc" as any]: THREAT_COLORS[ev.threat_level] }
-                    : {}),
+                  ...(ev.id === selectedId
+                    ? { animation: "critglow 1s ease-in-out infinite", ["--gc" as any]: "#ffffff" }
+                    : crit
+                      ? { animation: "critglow 1.4s ease-in-out infinite", ["--gc" as any]: THREAT_COLORS[ev.threat_level] }
+                      : {}),
                 }}
               >
                 {rank}

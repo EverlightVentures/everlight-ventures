@@ -56,6 +56,12 @@ function Transcripts({ data }: { data: { conversations: any[]; sources: number }
             {c.service} &middot; {c.call}
             <span style={{ color: "var(--muted)", fontWeight: 400 }}> &middot; started {c.start}</span>
           </div>
+          {c.summary && (
+            <div style={{ background: "rgba(212,175,55,0.1)", border: "1px solid var(--line)", borderRadius: 8, padding: "7px 9px", margin: "6px 0" }}>
+              <span style={{ color: "var(--gold)", fontWeight: 700, fontSize: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>Summary</span>
+              <div style={{ fontSize: 13, lineHeight: 1.4, marginTop: 2 }}>{c.summary}</div>
+            </div>
+          )}
           {c.audio_url && <audio controls preload="none" src={c.audio_url} style={{ width: "100%", height: 32, margin: "6px 0" }} />}
           {c.segments.map((s: any, j: number) => (
             <div key={j} style={{ display: "flex", gap: 8, marginBottom: 6 }}>

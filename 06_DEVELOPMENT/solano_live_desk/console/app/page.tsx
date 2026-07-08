@@ -6,7 +6,7 @@ import type { Layers } from "@/components/MapView";
 import type { ToggleKey } from "@/components/Toolbar";
 import {
   getEvents, getCorrelated, getSpaceWx, getCounty, getAircraft, getTrains,
-  getEvac, getSafePoints, getBuses, getDanger, getRoute, getDays, getMapCameras, getNews,
+  getEvac, getSafePoints, getBuses, getDanger, getRoute, getDays, getMapCameras, getNews, getStats,
 } from "@/lib/api";
 import StatusBar from "@/components/StatusBar";
 import AlarmQueue from "@/components/AlarmQueue";
@@ -14,6 +14,7 @@ import DetailDrawer from "@/components/DetailDrawer";
 import Toolbar from "@/components/Toolbar";
 import Scrubber from "@/components/Scrubber";
 import NewsPanel from "@/components/NewsPanel";
+import StatsPanel from "@/components/StatsPanel";
 import MiniMap from "@/components/MiniMap";
 
 // Short alert tone on a brand-new critical incident (WebAudio, no asset).
@@ -59,6 +60,8 @@ export default function Home() {
   const [alarmOpen, setAlarmOpen] = useState(true);
   const [newsOpen, setNewsOpen] = useState(false);
   const [news, setNews] = useState<any[]>([]);
+  const [statsOpen, setStatsOpen] = useState(false);
+  const [stats, setStats] = useState<any>(null);
   const [muted, setMuted] = useState(false);
   const [scrubT, setScrubT] = useState(100); // 100 = live; lower = replay earlier
   const dayRef = useRef("");
@@ -169,6 +172,11 @@ export default function Home() {
     if (newsOpen && county) getNews(county).then(setNews).catch(() => setNews([]));
   }, [newsOpen, county]);
 
+  // Analytics when the panel opens (and for the selected archived day).
+  useEffect(() => {
+    if (statsOpen) getStats(day || undefined).then(setStats).catch(() => setStats(null));
+  }, [statsOpen, day]);
+
   // Sound alert on a brand-new EXTREME incident (skips the initial load).
   useEffect(() => {
     let fresh = false;
@@ -229,10 +237,13 @@ export default function Home() {
         onDay={setDay}
         newsOpen={newsOpen}
         onNews={() => setNewsOpen((v) => !v)}
+        statsOpen={statsOpen}
+        onStats={() => setStatsOpen((v) => !v)}
         muted={muted}
         onMute={() => setMuted((v) => !v)}
       />
       <NewsPanel open={newsOpen} news={news} place={county} onClose={() => setNewsOpen(false)} />
+      <StatsPanel open={statsOpen} stats={stats} onClose={() => setStatsOpen(false)} />
       {pos && <MiniMap lat={pos.lat} lon={pos.lon} />}
       <DetailDrawer ev={selected} onClose={() => setSelected(null)} />
     </main>

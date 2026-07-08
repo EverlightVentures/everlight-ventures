@@ -46,6 +46,9 @@ export const getEventTranscript = (lat: number, lon: number, id?: string) =>
   );
 export const getCamDvr = (lat: number, lon: number, t?: number) =>
   j<{ camera: any; frames: any[] }>(`/api/cam_dvr?lat=${lat}&lon=${lon}${t ? `&t=${t}` : ""}`);
+export const getFlight = (callsign: string) =>
+  j<any>(`/api/flight?callsign=${encodeURIComponent(callsign)}`);
+export const getStats = (date?: string) => j<any>(`/api/stats${date ? `?date=${date}` : ""}`);
 
 export const getCameras = (lat: number, lon: number) =>
   j<{ cameras: any[] }>(`/api/cameras?lat=${lat}&lon=${lon}&n=3`).then((d) => d.cameras);

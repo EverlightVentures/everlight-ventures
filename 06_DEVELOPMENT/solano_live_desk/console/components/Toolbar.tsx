@@ -26,7 +26,7 @@ function chipStyle(on: boolean): React.CSSProperties {
 }
 
 export default function Toolbar({
-  active, onToggle, days, day, onDay, newsOpen, onNews, muted, onMute,
+  active, onToggle, days, day, onDay, newsOpen, onNews, statsOpen, onStats, muted, onMute,
 }: {
   active: Record<ToggleKey, boolean>;
   onToggle: (k: ToggleKey) => void;
@@ -35,6 +35,8 @@ export default function Toolbar({
   onDay: (d: string) => void;
   newsOpen: boolean;
   onNews: () => void;
+  statsOpen: boolean;
+  onStats: () => void;
   muted: boolean;
   onMute: () => void;
 }) {
@@ -53,6 +55,7 @@ export default function Toolbar({
         </button>
       ))}
       <button onClick={onNews} style={chipStyle(newsOpen)}>{"\u{1F4F0}"} News</button>
+      <button onClick={onStats} style={chipStyle(statsOpen)}>{"\u{1F4CA}"} Stats</button>
       <button onClick={onMute} style={chipStyle(!muted)} title="sound alerts on new critical incidents">
         {muted ? "\u{1F507}" : "\u{1F514}"}
       </button>

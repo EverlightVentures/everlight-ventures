@@ -126,6 +126,54 @@ def correlated(date: str | None = None, lat: float | None = None, lon: float | N
     return {"date": day, "incidents": fused}
 
 
+@app.get("/api/stats")
+def stats(date: str | None = None):
+    """Trader-style analytics for a day: busy hours, type mix, severity, hotspots."""
+    from collections import Counter
+    from datetime import datetime as _dt
+
+    base = _store_dir()
+    day = date or store.today_pt()
+    empty = {"date": day, "total": 0, "by_hour": [0] * 24, "by_type": [],
+             "by_severity": {}, "by_area": [], "by_source": {}, "avg_active_min": 0}
+    if not store.day_db_path(base, day).exists():
+        return empty
+    conn = store.connect(base, day)
+    try:
+        rows = store.get_events(conn)
+    finally:
+        conn.close()
+    if not rows:
+        return empty
+    by_hour = [0] * 24
+    by_type, by_sev, by_area, by_src = Counter(), Counter(), Counter(), Counter()
+    durations = []
+    for r in rows:
+        try:
+            by_hour[_dt.fromisoformat(r.get("last_seen") or r.get("first_seen")).hour] += 1
+        except Exception:  # noqa: BLE001
+            pass
+        by_type[(r.get("type") or "Other")[:26]] += 1
+        by_sev[r.get("severity") or "LOW"] += 1
+        by_area[(r.get("geo_label") or r.get("source") or "?")[:26]] += 1
+        by_src[r.get("source") or "?"] += 1
+        try:
+            fs = _dt.fromisoformat(r.get("first_seen"))
+            le = _dt.fromisoformat(r.get("last_seen"))
+            durations.append((le - fs).total_seconds() / 60)
+        except Exception:  # noqa: BLE001
+            pass
+    return {
+        "date": day, "total": len(rows),
+        "by_hour": by_hour,
+        "by_type": by_type.most_common(8),
+        "by_severity": dict(by_sev),
+        "by_area": by_area.most_common(8),
+        "by_source": dict(by_src),
+        "avg_active_min": round(sum(durations) / len(durations), 1) if durations else 0,
+    }
+
+
 @app.get("/api/county")
 def county(lat: float, lon: float):
     """Resolve the caller's GPS to a US county (the follow-me re-key trigger)."""
@@ -228,6 +276,37 @@ def feeds(lat: float, lon: float):
 
 _AIR_CACHE: dict = {}   # keyed by rounded (lat,lon,dist) -> (ts, data)
 _TRAIN_CACHE: dict = {"at": 0.0, "trains": []}
+_FLIGHT_CACHE: dict = {}   # callsign -> route (routes are static; cache forever)
+
+
+@app.get("/api/flight")
+def flight(callsign: str):
+    """Enrich a live flight with its origin -> destination + airline (adsbdb)."""
+    cs = callsign.strip().upper()
+    if not cs:
+        return {"callsign": cs, "origin": None, "dest": None}
+    if cs in _FLIGHT_CACHE:
+        return _FLIGHT_CACHE[cs]
+    out = {"callsign": cs, "origin": None, "dest": None, "airline": None}
+    try:
+        import httpx
+
+        r = httpx.get(f"https://api.adsbdb.com/v0/callsign/{cs}", timeout=10,
+                      headers={"User-Agent": "solano-live-desk/0.1"})
+        if r.status_code == 200:
+            fr = (r.json().get("response") or {}).get("flightroute") or {}
+            o, d = fr.get("origin") or {}, fr.get("destination") or {}
+            if o or d:
+                out = {
+                    "callsign": cs,
+                    "origin": {"code": o.get("iata_code") or o.get("icao_code"), "city": o.get("municipality"), "name": o.get("name")},
+                    "dest": {"code": d.get("iata_code") or d.get("icao_code"), "city": d.get("municipality"), "name": d.get("name")},
+                    "airline": (fr.get("airline") or {}).get("name"),
+                }
+    except Exception:  # noqa: BLE001
+        pass
+    _FLIGHT_CACHE[cs] = out
+    return out
 
 
 @app.get("/api/aircraft")
@@ -332,7 +411,7 @@ def event_transcript(lat: float, lon: float, id: str | None = None,
     """The radio traffic for THIS event. If the incident IS a scanner call (id
     given), return ONLY its own conversation -- exact. Otherwise the geocoded
     calls within radius, each split into speaker turns + tagged by service."""
-    from .radio import speaker_segments, classify_service
+    from .radio import speaker_segments, classify_service, summarize
     from .geo_county import distance_mi
     from datetime import datetime as _dt
 
@@ -354,10 +433,13 @@ def event_transcript(lat: float, lon: float, id: str | None = None,
 
     def _conv(r, d=0.0):
         body = r.get("body") or ""
+        segs = speaker_segments(body)
+        svc = classify_service(body)
         return {
-            "service": classify_service(body), "call": r.get("geo_label"),
+            "service": svc, "call": r.get("geo_label"),
             "start": _fmt(r.get("log_time") or ""), "distance_mi": round(d, 1),
-            "audio_url": r.get("audio_url"), "segments": speaker_segments(body),
+            "audio_url": r.get("audio_url"), "segments": segs,
+            "summary": summarize(segs, svc, r.get("geo_label")),
         }
 
     # Exact: this incident is itself a scanner call -> only its own conversation.
