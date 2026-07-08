@@ -277,17 +277,39 @@ def feeds(lat: float, lon: float):
 _AIR_CACHE: dict = {}   # keyed by rounded (lat,lon,dist) -> (ts, data)
 _TRAIN_CACHE: dict = {"at": 0.0, "trains": []}
 _FLIGHT_CACHE: dict = {}   # callsign -> route (routes are static; cache forever)
+# ICAO airline prefix -> name, so we can name the carrier even with no route.
+_ICAO_AIRLINE = {
+    "UAL": "United", "SWA": "Southwest", "AAL": "American", "DAL": "Delta",
+    "JBU": "JetBlue", "ASA": "Alaska", "NKS": "Spirit", "FFT": "Frontier",
+    "SKW": "SkyWest", "FDX": "FedEx", "UPS": "UPS", "AAY": "Allegiant",
+    "HAL": "Hawaiian", "ACA": "Air Canada", "VOI": "Volaris", "AMX": "Aeromexico",
+    "QXE": "Horizon", "GJS": "GoJet", "EDV": "Endeavor", "RPA": "Republic",
+    "ENY": "Envoy", "JIA": "PSA", "AWI": "Air Wisconsin", "CPZ": "Compass",
+}
+# Aircraft type -> typical passenger seats (occupancy is NOT broadcast; this is
+# the type's usual capacity, the closest honest number available).
+_TYPE_SEATS = {
+    "B738": 176, "B739": 189, "B737": 143, "B38M": 178, "B39M": 189,
+    "A320": 180, "A321": 200, "A319": 140, "A20N": 180, "A21N": 200, "A319neo": 140,
+    "B752": 200, "B763": 245, "B764": 245, "B77W": 396, "B772": 314, "B788": 242,
+    "B789": 290, "B744": 416, "A332": 268, "A333": 295, "A359": 325, "A388": 555,
+    "E75L": 76, "E170": 76, "E145": 50, "CRJ2": 50, "CRJ7": 70, "CRJ9": 90,
+    "DH8D": 78, "AT76": 70, "C208": 9, "PC12": 9,
+}
 
 
 @app.get("/api/flight")
-def flight(callsign: str):
-    """Enrich a live flight with its origin -> destination + airline (adsbdb)."""
+def flight(callsign: str, type: str = ""):
+    """Enrich a live flight: origin->destination + airline (adsbdb, or airline
+    from the callsign prefix) + typical seat capacity for the aircraft type."""
     cs = callsign.strip().upper()
+    seats = _TYPE_SEATS.get(type.strip().upper()) if type else None
     if not cs:
-        return {"callsign": cs, "origin": None, "dest": None}
+        return {"callsign": cs, "origin": None, "dest": None, "seats": seats}
     if cs in _FLIGHT_CACHE:
-        return _FLIGHT_CACHE[cs]
-    out = {"callsign": cs, "origin": None, "dest": None, "airline": None}
+        return {**_FLIGHT_CACHE[cs], "seats": seats}
+    airline = _ICAO_AIRLINE.get(cs[:3])
+    out = {"callsign": cs, "origin": None, "dest": None, "airline": airline}
     try:
         import httpx
 
@@ -301,12 +323,12 @@ def flight(callsign: str):
                     "callsign": cs,
                     "origin": {"code": o.get("iata_code") or o.get("icao_code"), "city": o.get("municipality"), "name": o.get("name")},
                     "dest": {"code": d.get("iata_code") or d.get("icao_code"), "city": d.get("municipality"), "name": d.get("name")},
-                    "airline": (fr.get("airline") or {}).get("name"),
+                    "airline": (fr.get("airline") or {}).get("name") or airline,
                 }
     except Exception:  # noqa: BLE001
         pass
     _FLIGHT_CACHE[cs] = out
-    return out
+    return {**out, "seats": seats}
 
 
 @app.get("/api/aircraft")

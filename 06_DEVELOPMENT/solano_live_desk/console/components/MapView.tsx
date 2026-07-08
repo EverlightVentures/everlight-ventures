@@ -27,7 +27,7 @@ function PoiCard({ poi }: { poi: { kind: string; data: any } }) {
   const [route, setRoute] = useState<any>(null);
   useEffect(() => {
     setRoute(null);
-    if (poi.kind === "plane" && poi.data.flight) getFlight(poi.data.flight).then(setRoute).catch(() => {});
+    if (poi.kind === "plane" && poi.data.flight) getFlight(poi.data.flight, poi.data.type).then(setRoute).catch(() => {});
   }, [poi]);
   const d = poi.data;
   if (poi.kind === "plane") {
@@ -41,17 +41,22 @@ function PoiCard({ poi }: { poi: { kind: string; data: any } }) {
         {d.squawk ? <Row k="Squawk" v={d.squawk} /> : null}
         {d.emergency ? <div style={{ color: "#c00", fontWeight: 700, fontSize: 12 }}>EMERGENCY</div> : null}
         <div style={{ marginTop: 6, borderTop: "1px solid #ddd", paddingTop: 4 }}>
-          {route && (route.origin || route.dest) ? (
-            <>
-              {route.airline ? <div style={{ fontSize: 11, color: "#666" }}>{route.airline}</div> : null}
-              <div style={{ fontWeight: 600 }}>
-                {route.origin?.city || route.origin?.code || "?"} &rarr; {route.dest?.city || route.dest?.code || "?"}
-              </div>
-            </>
-          ) : route ? (
-            <div style={{ fontSize: 11, color: "#888" }}>route not published</div>
+          {!route ? (
+            <div style={{ fontSize: 11, color: "#888" }}>looking up flight&hellip;</div>
           ) : (
-            <div style={{ fontSize: 11, color: "#888" }}>looking up route&hellip;</div>
+            <>
+              {route.airline ? <div style={{ fontSize: 11, color: "#666", fontWeight: 600 }}>{route.airline}</div> : null}
+              {route.origin || route.dest ? (
+                <div style={{ fontWeight: 600 }}>
+                  {route.origin?.city || route.origin?.code || "?"} &rarr; {route.dest?.city || route.dest?.code || "?"}
+                </div>
+              ) : (
+                <div style={{ fontSize: 11, color: "#888" }}>route not published</div>
+              )}
+              {route.seats ? (
+                <div style={{ fontSize: 11, color: "#555", marginTop: 2 }}>~{route.seats} seats ({d.type}) &middot; live occupancy not broadcast</div>
+              ) : null}
+            </>
           )}
         </div>
       </div>
