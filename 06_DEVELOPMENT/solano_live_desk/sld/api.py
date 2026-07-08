@@ -11,7 +11,7 @@ from fastapi.staticfiles import StaticFiles
 
 from . import aircraft as air_mod
 from . import cameras as cams_mod
-from . import config, correlate, dvr, evac, news, store, threat, trains as train_mod, transit as transit_mod, wayfinding, webcams
+from . import config, correlate, dvr, evac, fema, news, spacewx, store, threat, trains as train_mod, transit as transit_mod, wayfinding, webcams
 from .feeds import feeds_for_county
 from .geo_county import county_for
 
@@ -244,6 +244,30 @@ def scanner_audio(block_id: str):
     if not path.exists():
         raise HTTPException(status_code=404, detail="audio not available")
     return FileResponse(str(path), media_type="audio/mpeg")
+
+
+_SWX_CACHE: dict = {"at": 0.0, "v": None}
+_FEMA_CACHE: dict = {}
+
+
+@app.get("/api/spacewx")
+def space_weather():
+    """Geomagnetic (Kp) status -> GPS/comms reliability (10-min cache)."""
+    if time.time() - _SWX_CACHE["at"] > 600 or _SWX_CACHE["v"] is None:
+        _SWX_CACHE["v"] = spacewx.fetch()
+        _SWX_CACHE["at"] = time.time()
+    return _SWX_CACHE["v"]
+
+
+@app.get("/api/disasters")
+def disasters(state: str = "CA"):
+    """Recent FEMA disaster declarations for a state (1-hour cache)."""
+    hit = _FEMA_CACHE.get(state)
+    if hit and time.time() - hit[0] < 3600:
+        return {"state": state, "disasters": hit[1]}
+    d = fema.fetch(state=state)
+    _FEMA_CACHE[state] = (time.time(), d)
+    return {"state": state, "disasters": d}
 
 
 @app.get("/api/news")

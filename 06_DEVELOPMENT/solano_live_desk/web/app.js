@@ -586,6 +586,42 @@ document.getElementById("fused-toggle").onclick = (e) => {
   refreshFused();
 };
 setInterval(() => { if (fusedOn) refreshFused(); }, 15000);
+
+/* ---- Space weather chip (GPS/comms reliability) + FEMA disasters ---- */
+async function refreshSpaceWx() {
+  try {
+    const s = await (await fetch("/api/spacewx")).json();
+    const el = document.getElementById("spacewx");
+    if (!el) return;
+    el.textContent = s.kp == null ? "GPS ?" : `Kp ${s.kp} · ${s.gps}`;
+    el.className = "chip" + (s.alert ? " alert" : (s.kp >= 4 ? " warn" : ""));
+  } catch (e) { /* leave */ }
+}
+refreshSpaceWx();
+setInterval(refreshSpaceWx, 600000);
+
+document.getElementById("disasters-toggle").onclick = async () => {
+  const d = document.getElementById("detail");
+  d.classList.remove("hidden");
+  document.getElementById("d-threat").textContent = "FEMA";
+  document.getElementById("d-threat").style.background = "#ff8c1a";
+  document.getElementById("d-threat").style.color = "#0A0A0A";
+  document.getElementById("d-title").textContent = "Recent CA disaster declarations";
+  document.getElementById("d-where").textContent = "federally declared";
+  document.getElementById("d-story").textContent = "loading...";
+  document.getElementById("d-audio").classList.add("hidden");
+  document.getElementById("d-cams").textContent = "";
+  document.getElementById("d-feeds").textContent = "";
+  try {
+    const data = await (await fetch("/api/disasters?state=CA")).json();
+    const lines = (data.disasters || []).slice(0, 20).map(
+      (x) => `${x.type}: ${x.title || ""} (${x.county || ""}) ${x.begin ? x.begin.slice(0, 10) : ""}`
+    );
+    document.getElementById("d-story").textContent = lines.length ? lines.join("\n") : "no recent declarations";
+  } catch (e) {
+    document.getElementById("d-story").textContent = "unavailable";
+  }
+};
 document.getElementById("cam-toggle").onclick = (e) => {
   camOn = !camOn;
   e.target.style.background = camOn ? "#D4AF37" : "#1a1a1a";
