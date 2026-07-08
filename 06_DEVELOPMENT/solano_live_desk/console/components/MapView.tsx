@@ -1,10 +1,11 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
-import Map, { Marker, Source, Layer } from "react-map-gl/maplibre";
+import Map, { Marker, Source, Layer, Popup } from "react-map-gl/maplibre";
 import type { StyleSpecification } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { Incident, Aircraft, Train } from "@/lib/types";
 import { THREAT_COLORS } from "@/lib/types";
+import LiveVideo from "@/components/LiveVideo";
 
 const SAT_STYLE: StyleSpecification = {
   version: 8,
@@ -70,6 +71,7 @@ export type Layers = {
   safe?: any[];
   buses?: any[];
   route?: any;
+  cams?: any[];
 };
 
 export default function MapView({
@@ -85,6 +87,7 @@ export default function MapView({
 }) {
   const pins = useMemo(() => incidents.filter((e) => e.lat != null && e.lon != null), [incidents]);
   const planes = useGlide(aircraft).slice(0, 80); // cap for phone perf
+  const [openCam, setOpenCam] = useState<any>(null);
 
   return (
     <Map
@@ -121,6 +124,25 @@ export default function MapView({
           <div title={b.route || "bus"} style={{ fontSize: 12, filter: "drop-shadow(0 0 2px #000)" }}>&#128652;</div>
         </Marker>
       ))}
+      {(layers.cams || []).map((cm, i) => (
+        <Marker key={"cam" + i} longitude={cm.lon} latitude={cm.lat} onClick={(e) => { e.originalEvent.stopPropagation(); setOpenCam(cm); }}>
+          <div title={cm.name || "camera"} style={{ fontSize: 14, cursor: "pointer", filter: "drop-shadow(0 0 2px #000)" }}>&#128247;</div>
+        </Marker>
+      ))}
+      {openCam && (
+        <Popup longitude={openCam.lon} latitude={openCam.lat} anchor="bottom" maxWidth="300px" onClose={() => setOpenCam(null)} closeOnClick={false}>
+          <div style={{ width: 260 }}>
+            {openCam.stream_url ? (
+              <LiveVideo src={openCam.stream_url} />
+            ) : openCam.image_url ? (
+              <img src={`${openCam.image_url}${openCam.image_url.includes("?") ? "&" : "?"}t=${Date.now()}`} alt="" style={{ width: "100%", borderRadius: 6 }} />
+            ) : (
+              <div style={{ fontSize: 12 }}>no feed</div>
+            )}
+            <div style={{ fontSize: 11, color: "#333", marginTop: 4 }}>{openCam.name} {openCam.stream_url ? "· LIVE" : "· still"}</div>
+          </div>
+        </Popup>
+      )}
       {layers.route?.dest && (
         <Marker longitude={layers.route.dest.lon} latitude={layers.route.dest.lat}>
           <div title={layers.route.dest.name} style={{ fontSize: 18 }}>&#128205;</div>
@@ -165,19 +187,25 @@ export default function MapView({
             </div>
           </Marker>
         ))}
-      {pins.map((ev) => (
-        <Marker key={ev.id} longitude={ev.lon!} latitude={ev.lat!} onClick={(e) => { e.originalEvent.stopPropagation(); onSelect(ev); }}>
-          <div
-            className="mk"
-            style={{
-              background: THREAT_COLORS[ev.threat_level] || "#D4AF37",
-              borderColor: ev.id === selectedId ? "#fff" : "rgba(0,0,0,0.6)",
-            }}
-          >
-            !
-          </div>
-        </Marker>
-      ))}
+      {pins.map((ev) => {
+        const crit = ev.threat_level === "EXTREME" || ev.threat_level === "HIGH";
+        return (
+          <Marker key={ev.id} longitude={ev.lon!} latitude={ev.lat!} onClick={(e) => { e.originalEvent.stopPropagation(); onSelect(ev); }}>
+            <div
+              className="mk"
+              style={{
+                background: THREAT_COLORS[ev.threat_level] || "#D4AF37",
+                borderColor: ev.id === selectedId ? "#fff" : "rgba(0,0,0,0.6)",
+                ...(crit
+                  ? { animation: "critglow 1.4s ease-in-out infinite", ["--gc" as any]: THREAT_COLORS[ev.threat_level] }
+                  : {}),
+              }}
+            >
+              !
+            </div>
+          </Marker>
+        );
+      })}
     </Map>
   );
 }

@@ -1,12 +1,13 @@
 "use client";
 
-export type ToggleKey = "danger" | "evac" | "safe" | "buses" | "route";
+export type ToggleKey = "danger" | "evac" | "safe" | "buses" | "route" | "cams";
 
 const CHIPS: { k: ToggleKey; label: string }[] = [
   { k: "danger", label: "\u{1F534} Danger" },
   { k: "evac", label: "\u{1F6D1} Evac" },
   { k: "safe", label: "\u{1F3E5} Safe" },
   { k: "buses", label: "\u{1F68C} Bus" },
+  { k: "cams", label: "\u{1F4F7} Cams" },
   { k: "route", label: "\u{1F9ED} Route out" },
 ];
 
@@ -25,13 +26,17 @@ function chipStyle(on: boolean): React.CSSProperties {
 }
 
 export default function Toolbar({
-  active, onToggle, days, day, onDay,
+  active, onToggle, days, day, onDay, newsOpen, onNews, muted, onMute,
 }: {
   active: Record<ToggleKey, boolean>;
   onToggle: (k: ToggleKey) => void;
   days: string[];
   day: string;
   onDay: (d: string) => void;
+  newsOpen: boolean;
+  onNews: () => void;
+  muted: boolean;
+  onMute: () => void;
 }) {
   return (
     <div
@@ -47,6 +52,10 @@ export default function Toolbar({
           {c.label}
         </button>
       ))}
+      <button onClick={onNews} style={chipStyle(newsOpen)}>{"\u{1F4F0}"} News</button>
+      <button onClick={onMute} style={chipStyle(!muted)} title="sound alerts on new critical incidents">
+        {muted ? "\u{1F507}" : "\u{1F514}"}
+      </button>
       <div style={{ width: 1, height: 22, background: "var(--line)" }} />
       <select
         value={day}

@@ -60,3 +60,25 @@ html, body {
 .mk:hover { transform: scale(1.25); }
 
 .maplibregl-ctrl-attrib { font-size: 9px; opacity: 0.5; }
+
+/* Glamour: critical-incident glow */
+@keyframes critglow {
+  0%, 100% { box-shadow: 0 0 5px 1px var(--gc, #ff2d2d); }
+  50% { box-shadow: 0 0 18px 7px var(--gc, #ff2d2d); }
+}
+
+/* Glamour: slow radar sweep centered on the operator (cosmetic ambiance) */
+@keyframes radar { to { transform: rotate(360deg); } }
+.radar-sweep {
+  position: fixed; left: 50%; top: 55%; width: 78vmin; height: 78vmin;
+  margin-left: -39vmin; margin-top: -39vmin; border-radius: 50%;
+  pointer-events: none; z-index: 1; opacity: 0.16;
+  background: conic-gradient(from 0deg, transparent 0deg 305deg, rgba(212,175,55,0.85) 356deg, transparent 360deg);
+  animation: radar 6s linear infinite;
+}
+
+/* Glamour: faint scanlines for the command-center look */
+.scanlines {
+  position: fixed; inset: 0; pointer-events: none; z-index: 2; opacity: 0.05;
+  background: repeating-linear-gradient(0deg, #fff 0 1px, transparent 1px 3px);
+}

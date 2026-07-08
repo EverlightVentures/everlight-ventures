@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import type { Incident } from "@/lib/types";
 import { THREAT_COLORS } from "@/lib/types";
 import { getEventTranscript, getCameras } from "@/lib/api";
+import LiveVideo from "@/components/LiveVideo";
 
 const TABS = ["Feed", "Transcript", "Audio", "Cameras", "Sources"] as const;
 type Tab = (typeof TABS)[number];
@@ -14,31 +15,6 @@ function speakerColor(speaker: string) {
   if (speaker === "Dispatcher") return "#d4af37";
   const n = parseInt(speaker.replace(/\D/g, ""), 10) || 1;
   return OFFICER_COLORS[(n - 1) % OFFICER_COLORS.length];
-}
-
-function LiveVideo({ src }: { src: string }) {
-  const ref = useRef<HTMLVideoElement>(null);
-  useEffect(() => {
-    const v = ref.current;
-    if (!v) return;
-    let hls: any;
-    (async () => {
-      if (v.canPlayType("application/vnd.apple.mpegurl")) {
-        v.src = src; // Safari native HLS
-      } else {
-        const Hls = (await import("hls.js")).default;
-        if (Hls.isSupported()) {
-          hls = new Hls({ liveDurationInfinity: true });
-          hls.loadSource(src);
-          hls.attachMedia(v);
-        } else {
-          v.src = src;
-        }
-      }
-    })();
-    return () => hls && hls.destroy();
-  }, [src]);
-  return <video ref={ref} controls muted playsInline autoPlay style={{ width: "100%", borderRadius: 8, background: "#000" }} />;
 }
 
 function Transcripts({ data }: { data: { segments: any[]; sources: number } | null }) {

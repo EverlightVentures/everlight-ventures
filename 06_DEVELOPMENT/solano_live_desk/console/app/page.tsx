@@ -6,12 +6,35 @@ import type { Layers } from "@/components/MapView";
 import type { ToggleKey } from "@/components/Toolbar";
 import {
   getEvents, getCorrelated, getSpaceWx, getCounty, getAircraft, getTrains,
-  getEvac, getSafePoints, getBuses, getDanger, getRoute, getDays,
+  getEvac, getSafePoints, getBuses, getDanger, getRoute, getDays, getMapCameras, getNews,
 } from "@/lib/api";
 import StatusBar from "@/components/StatusBar";
 import AlarmQueue from "@/components/AlarmQueue";
 import DetailDrawer from "@/components/DetailDrawer";
 import Toolbar from "@/components/Toolbar";
+import Scrubber from "@/components/Scrubber";
+import NewsPanel from "@/components/NewsPanel";
+
+// Short alert tone on a brand-new critical incident (WebAudio, no asset).
+function playBeep() {
+  try {
+    const Ctx = (window.AudioContext || (window as any).webkitAudioContext);
+    const ctx = new Ctx();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.type = "sine";
+    g.gain.value = 0.14;
+    o.connect(g);
+    g.connect(ctx.destination);
+    o.frequency.setValueAtTime(880, ctx.currentTime);
+    o.frequency.setValueAtTime(620, ctx.currentTime + 0.14);
+    o.start();
+    o.stop(ctx.currentTime + 0.3);
+    setTimeout(() => ctx.close(), 500);
+  } catch {
+    /* autoplay may be blocked until first interaction */
+  }
+}
 
 // MapLibre is browser-only -- never render it on the server.
 const MapView = dynamic(() => import("@/components/MapView"), { ssr: false });
@@ -27,13 +50,19 @@ export default function Home() {
   const [aircraft, setAircraft] = useState<Aircraft[]>([]);
   const [trains, setTrains] = useState<Train[]>([]);
   const [layerOn, setLayerOn] = useState<Record<ToggleKey, boolean>>({
-    danger: false, evac: false, safe: false, buses: false, route: false,
+    danger: false, evac: false, safe: false, buses: false, route: false, cams: false,
   });
   const [layerData, setLayerData] = useState<Layers>({});
   const [day, setDay] = useState(""); // "" = today/live; else an archived day
   const [days, setDays] = useState<string[]>([]);
   const [alarmOpen, setAlarmOpen] = useState(true);
+  const [newsOpen, setNewsOpen] = useState(false);
+  const [news, setNews] = useState<any[]>([]);
+  const [muted, setMuted] = useState(false);
+  const [scrubT, setScrubT] = useState(100); // 100 = live; lower = replay earlier
   const dayRef = useRef("");
+  const seenCrit = useRef<Set<string>>(new Set());
+  const firstLoad = useRef(true);
   useEffect(() => { dayRef.current = day; }, [day]);
 
   const refreshFused = useCallback(() => {
@@ -59,6 +88,7 @@ export default function Home() {
     if (k === "safe") getSafePoints(c.lat, c.lon).then((s) => setLayerData((d) => ({ ...d, safe: s }))).catch(() => {});
     if (k === "buses") getBuses(c.lat, c.lon).then((b) => setLayerData((d) => ({ ...d, buses: b }))).catch(() => {});
     if (k === "route") getRoute(c.lat, c.lon).then((r) => setLayerData((d) => ({ ...d, route: r }))).catch(() => {});
+    if (k === "cams") getMapCameras(c.lat, c.lon).then((cams) => setLayerData((d) => ({ ...d, cams }))).catch(() => {});
   };
 
   // Buses move -- refresh them while the layer is on.
@@ -133,26 +163,67 @@ export default function Home() {
     return () => { clearInterval(a); clearInterval(t); };
   }, [pos]);
 
+  // Local news headlines when the panel is open.
+  useEffect(() => {
+    if (newsOpen && county) getNews(county).then(setNews).catch(() => setNews([]));
+  }, [newsOpen, county]);
+
+  // Sound alert on a brand-new EXTREME incident (skips the initial load).
+  useEffect(() => {
+    let fresh = false;
+    for (const e of incidents) {
+      if (e.threat_level === "EXTREME" && !seenCrit.current.has(e.id)) {
+        seenCrit.current.add(e.id);
+        if (!firstLoad.current) fresh = true;
+      }
+    }
+    firstLoad.current = false;
+    if (fresh && !muted) playBeep();
+  }, [incidents, muted]);
+
+  // Time-scrubber: replay the day up to a cutoff (100 = live/all).
+  const times = incidents.map((e) => Date.parse(e.last_seen || "") || 0).filter(Boolean);
+  const tmin = times.length ? Math.min(...times) : 0;
+  const tmax = times.length ? Math.max(...times) : 0;
+  const cutoff = scrubT >= 100 ? Infinity : tmin + (scrubT / 100) * (tmax - tmin);
+  const shown = scrubT >= 100 ? incidents : incidents.filter((e) => (Date.parse(e.last_seen || "") || 0) <= cutoff);
+  const shownFused = scrubT >= 100 ? fused : fused.filter((e) => (Date.parse(e.last_seen || "") || 0) <= cutoff);
+  const scrubLabel = scrubT >= 100 || !tmax ? "" : new Date(cutoff).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
   return (
     <main style={{ position: "fixed", inset: 0 }}>
       <MapView
-        incidents={incidents}
-        fused={fused}
+        incidents={shown}
+        fused={shownFused}
         aircraft={aircraft}
         trains={trains}
         layers={layerData}
         selectedId={selected?.id ?? null}
         onSelect={setSelected}
       />
-      <StatusBar incidents={incidents} spacewx={spacewx} county={county} live={live && !day} />
+      <div className="radar-sweep" />
+      <div className="scanlines" />
+      <StatusBar incidents={incidents} spacewx={spacewx} county={county} live={live && !day && scrubT >= 100} />
       <AlarmQueue
-        incidents={incidents}
+        incidents={shown}
         selectedId={selected?.id ?? null}
         onSelect={setSelected}
         open={alarmOpen}
         onToggle={() => setAlarmOpen((v) => !v)}
       />
-      <Toolbar active={layerOn} onToggle={toggleLayer} days={days} day={day} onDay={setDay} />
+      <Scrubber value={scrubT} onChange={setScrubT} label={scrubLabel} live={scrubT >= 100} />
+      <Toolbar
+        active={layerOn}
+        onToggle={toggleLayer}
+        days={days}
+        day={day}
+        onDay={setDay}
+        newsOpen={newsOpen}
+        onNews={() => setNewsOpen((v) => !v)}
+        muted={muted}
+        onMute={() => setMuted((v) => !v)}
+      />
+      <NewsPanel open={newsOpen} news={news} place={county} onClose={() => setNewsOpen(false)} />
       <DetailDrawer ev={selected} onClose={() => setSelected(null)} />
     </main>
   );

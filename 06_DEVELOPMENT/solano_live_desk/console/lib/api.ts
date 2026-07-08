@@ -33,6 +33,10 @@ export const getBuses = (lat: number, lon: number) =>
 export const getDanger = () => j<any>("/api/danger");
 export const getRoute = (lat: number, lon: number) => j<any>(`/api/route?lat=${lat}&lon=${lon}`);
 export const getDays = () => j<{ days: string[] }>("/api/days").then((d) => d.days || []);
+export const getMapCameras = (lat: number, lon: number) =>
+  j<{ cameras: any[] }>(`/api/cameras?lat=${lat}&lon=${lon}&n=14`).then((d) => d.cameras || []);
+export const getNews = (place: string) =>
+  j<{ news: any[] }>(`/api/news?place=${encodeURIComponent(place)}`).then((d) => d.news || []);
 
 export const getSpaceWx = () => j<SpaceWx>("/api/spacewx");
 
