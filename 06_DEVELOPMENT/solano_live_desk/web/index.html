@@ -42,19 +42,29 @@
     <div id="d-threat" class="d-threat"></div>
     <h2 id="d-title"></h2>
     <div id="d-where" class="d-where">locating...</div>
-    <button id="d-listen" type="button" class="d-listen">&#128266; Listen to report</button>
-    <audio id="d-audio" class="d-audio hidden" controls preload="none"></audio>
-    <div class="d-section">
-      <h3>Report</h3>
+    <div class="tabbar" id="d-tabs">
+      <button class="tab active" data-tab="feed" type="button">Feed</button>
+      <button class="tab" data-tab="transcript" type="button">Transcript</button>
+      <button class="tab" data-tab="audio" type="button">Audio</button>
+      <button class="tab" data-tab="cams" type="button">Cameras</button>
+      <button class="tab" data-tab="sources" type="button">Sources</button>
+    </div>
+    <div class="pane active" data-pane="feed">
+      <button id="d-listen" type="button" class="d-listen">&#128266; Listen to report</button>
       <div id="d-story" class="d-story"></div>
     </div>
-    <div class="d-section">
-      <h3>Cameras nearby</h3>
-      <div id="d-cams" class="d-cams">loading...</div>
+    <div class="pane" data-pane="transcript">
+      <div id="d-transcript" class="d-story"></div>
     </div>
-    <div class="d-section">
-      <h3>Listen live</h3>
-      <div id="d-feeds" class="d-feeds">loading...</div>
+    <div class="pane" data-pane="audio">
+      <audio id="d-audio" class="d-audio hidden" controls preload="none"></audio>
+      <div id="d-feeds" class="d-feeds"></div>
+    </div>
+    <div class="pane" data-pane="cams">
+      <div id="d-cams" class="d-cams"></div>
+    </div>
+    <div class="pane" data-pane="sources">
+      <div id="d-sources" class="d-story"></div>
     </div>
   </aside>
 

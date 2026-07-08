@@ -41,7 +41,10 @@ map.on("load", () => {
     tiles: ["https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"],
     attribution: "Imagery: Esri, Maxar, Earthstar Geographics",
   });
-  map.addLayer({ id: "sat", type: "raster", source: "sat", layout: { visibility: "none" } });
+  // Satellite ON by default (Google-Earth feel from the first paint).
+  map.addLayer({ id: "sat", type: "raster", source: "sat", layout: { visibility: "visible" } });
+  document.getElementById("sat-toggle").style.background = "#D4AF37";
+  map.easeTo({ pitch: 45, duration: 800 });
 
   // County boundary lines (US counties = admin_level 6)
   try {
@@ -143,10 +146,33 @@ function render(cutoffMillis) {
   pe.className = "posture " + (POSTURE_CLASS[top] || "green");
 }
 
+/* ---- Tabbed detail panel (each event = a multi-tab article) ---- */
+let currentEv = null;
+
+function activateTab(name) {
+  document.querySelectorAll("#detail .tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === name));
+  document.querySelectorAll("#detail .pane").forEach((p) => p.classList.toggle("active", p.dataset.pane === name));
+  if (!currentEv) return;
+  if (name === "transcript" && !currentEv._t) { currentEv._t = 1; loadTranscriptTab(currentEv); }
+  if (name === "audio" && !currentEv._a) { currentEv._a = 1; loadAudioTab(currentEv); }
+  if (name === "cams" && !currentEv._c) { currentEv._c = 1; loadCamsTab(currentEv); }
+  if (name === "sources" && !currentEv._s) { currentEv._s = 1; loadSourcesTab(currentEv); }
+}
+document.querySelectorAll("#detail .tab").forEach((t) => (t.onclick = () => activateTab(t.dataset.tab)));
+
+function resetPanes() {
+  document.getElementById("d-transcript").textContent = "open this tab for radio transcripts";
+  document.getElementById("d-cams").textContent = "open this tab for cameras";
+  document.getElementById("d-feeds").textContent = "";
+  document.getElementById("d-sources").textContent = "";
+  document.getElementById("d-audio").classList.add("hidden");
+  activateTab("feed");
+}
+
 async function openDetail(ev) {
   selectedId = ev.id;
-  const d = document.getElementById("detail");
-  d.classList.remove("hidden");
+  currentEv = ev; ev._t = ev._a = ev._c = ev._s = 0;
+  document.getElementById("detail").classList.remove("hidden");
   const tl = document.getElementById("d-threat");
   const st = ev.status ? " · " + ev.status : "";
   tl.textContent = `${ev.threat_level}${ev.distance_mi != null ? " · " + ev.distance_mi + " mi" : ""}${st}`;
@@ -155,34 +181,72 @@ async function openDetail(ev) {
   document.getElementById("d-title").textContent = ev.type || "Incident";
   document.getElementById("d-story").textContent =
     (ev.body || "(no dispatch detail yet)") + `\n\n${ev.geo_label || ""} · ${ev.log_time || ""}`;
-  // Recorded scanner audio -> DVR replay right in the panel.
-  const audio = document.getElementById("d-audio");
-  if (ev.audio_url) {
-    audio.src = ev.audio_url;
-    audio.classList.remove("hidden");
-  } else {
-    audio.classList.add("hidden");
-    audio.removeAttribute("src");
+  document.getElementById("d-where").textContent = ev.lat == null ? (ev.geo_label || "") : "locating landmark...";
+  resetPanes();
+  render(null);
+  if (ev.lat != null) {
+    map.flyTo({ center: [ev.lon, ev.lat], zoom: 14, pitch: 45 });
+    fetch(`/api/where?lat=${ev.lat}&lon=${ev.lon}`).then((r) => r.json())
+      .then((w) => { if (selectedId === ev.id) document.getElementById("d-where").textContent = w.text; })
+      .catch(() => {});
   }
-  document.getElementById("d-where").textContent = "locating landmark...";
-  document.getElementById("d-cams").textContent = ev.lat == null ? "no coordinates" : "loading...";
-  document.getElementById("d-feeds").textContent = "loading...";
-  map.flyTo({ center: [ev.lon, ev.lat], zoom: 14, pitch: 45 });
-  render(null); // redraw so the selected marker gets a white ring
+}
 
-  if (ev.lat == null) return;
-  fetch(`/api/where?lat=${ev.lat}&lon=${ev.lon}`)
-    .then((r) => r.json())
-    .then((w) => { if (selectedId === ev.id) document.getElementById("d-where").textContent = w.text; })
-    .catch(() => {});
-  fetch(`/api/cameras?lat=${ev.lat}&lon=${ev.lon}&n=3`)
-    .then((r) => r.json())
-    .then((c) => { if (selectedId === ev.id) renderCams(c.cameras || []); })
-    .catch(() => { document.getElementById("d-cams").textContent = "cameras unavailable"; });
-  fetch(`/api/feeds?lat=${ev.lat}&lon=${ev.lon}`)
-    .then((r) => r.json())
-    .then((f) => { if (selectedId === ev.id) renderFeeds(f.feeds || []); })
-    .catch(() => {});
+function loadAudioTab(ev) {
+  const audio = document.getElementById("d-audio");
+  if (ev.audio_url) { audio.src = ev.audio_url; audio.classList.remove("hidden"); }
+  else { audio.classList.add("hidden"); audio.removeAttribute("src"); }
+  const box = document.getElementById("d-feeds");
+  if (ev.lat == null) { box.textContent = "no coordinates"; return; }
+  box.textContent = "loading scanner feeds...";
+  fetch(`/api/feeds?lat=${ev.lat}&lon=${ev.lon}`).then((r) => r.json())
+    .then((f) => renderFeeds(f.feeds || [])).catch(() => { box.textContent = "feeds unavailable"; });
+}
+
+function loadCamsTab(ev) {
+  const box = document.getElementById("d-cams");
+  if (ev.lat == null) { box.textContent = "no coordinates"; return; }
+  box.textContent = "loading cameras...";
+  fetch(`/api/cameras?lat=${ev.lat}&lon=${ev.lon}&n=3`).then((r) => r.json())
+    .then((c) => renderCams(c.cameras || [])).catch(() => { box.textContent = "cameras unavailable"; });
+}
+
+async function loadTranscriptTab(ev) {
+  const box = document.getElementById("d-transcript");
+  box.textContent = "loading radio transcripts...";
+  try {
+    const q = ev.lat != null ? `?lat=${ev.lat}&lon=${ev.lon}` : "";
+    const data = await (await fetch(`/api/scanner_near${q}`)).json();
+    box.replaceChildren();
+    const ts = data.transcripts || [];
+    if (!ts.length) { box.textContent = "no radio transcripts yet (scanner transcribes every 30 min)"; return; }
+    for (const t of ts) {
+      const blk = document.createElement("div"); blk.className = "scanner-block";
+      const hd = document.createElement("strong"); hd.textContent = `${t.type || "scanner"} · ${t.log_time || ""}`;
+      blk.appendChild(hd);
+      if (t.audio_url) {
+        const a = document.createElement("audio");
+        a.controls = true; a.preload = "none"; a.src = t.audio_url;
+        a.style.cssText = "width:100%;height:32px;margin:5px 0;";
+        blk.appendChild(a);
+      }
+      const body = document.createElement("div"); body.className = "d-story"; body.textContent = t.body || "";
+      blk.appendChild(body);
+      box.appendChild(blk);
+    }
+  } catch (e) { box.textContent = "transcripts unavailable"; }
+}
+
+function loadSourcesTab(ev) {
+  const lines = [
+    `Source: ${ev.source || "?"}`, `Type: ${ev.type || ""}`, `Location: ${ev.geo_label || ""}`,
+    `First seen: ${ev.first_seen || ""}`, `Last seen: ${ev.last_seen || ""}`,
+    `Threat: ${ev.threat_level || ""}${ev.status ? " · " + ev.status : ""}`,
+  ];
+  if (ev.confidence != null) lines.push(`Confidence: ${Math.round(ev.confidence * 100)}% (${ev.tier || ""})`);
+  if (ev.sources) lines.push(`Corroborating sources: ${ev.sources.join(", ")}`);
+  if (ev.units && ev.units.length) lines.push(`Units on call: ${ev.units.join(", ")}`);
+  document.getElementById("d-sources").textContent = lines.join("\n");
 }
 
 function renderCams(cams) {
@@ -377,6 +441,7 @@ function openAir(a) {
   map.flyTo({ center: [a.lon, a.lat], zoom: 10, pitch: 30 });
   const d = document.getElementById("detail");
   d.classList.remove("hidden");
+  currentEv = null; activateTab("feed");
   const tl = document.getElementById("d-threat");
   tl.textContent = a.emergency ? "AIRCRAFT EMERGENCY" : a.kind.toUpperCase() + " AIRCRAFT";
   tl.style.background = a.emergency ? "#ff00d4" : AIR_COLORS[a.kind];
@@ -394,6 +459,7 @@ function openTrain(t) {
   map.flyTo({ center: [t.lon, t.lat], zoom: 11 });
   const d = document.getElementById("detail");
   d.classList.remove("hidden");
+  currentEv = null; activateTab("feed");
   const tl = document.getElementById("d-threat");
   tl.textContent = "RAIL"; tl.style.background = "#8a8a8a"; tl.style.color = "#fff";
   document.getElementById("d-title").textContent = `${t.route} #${t.num}`;
@@ -608,8 +674,8 @@ async function refreshFused() {
 
 function openCorrelated(inc) {
   map.flyTo({ center: [inc.lon, inc.lat], zoom: 13 });
-  const d = document.getElementById("detail");
-  d.classList.remove("hidden");
+  selectedId = inc.id; currentEv = inc; inc._t = inc._a = inc._c = inc._s = 0;
+  document.getElementById("detail").classList.remove("hidden");
   const tl = document.getElementById("d-threat");
   tl.textContent = `${inc.threat_level} · ${inc.tier} ${Math.round(inc.confidence * 100)}% · ${inc.status}`;
   tl.style.background = inc.inferred ? "#ff00d4" : THREAT_COLORS[inc.threat_level] || "#888";
@@ -619,9 +685,7 @@ function openCorrelated(inc) {
     `${inc.geo_label || ""} · sources: ${inc.sources.join(", ")}` +
     (inc.units.length ? ` · units: ${inc.units.join(", ")}` : "");
   document.getElementById("d-story").textContent = inc.body || "";
-  document.getElementById("d-audio").classList.add("hidden");
-  document.getElementById("d-cams").textContent = "";
-  document.getElementById("d-feeds").textContent = "";
+  resetPanes();
 }
 
 document.getElementById("fused-toggle").onclick = (e) => {

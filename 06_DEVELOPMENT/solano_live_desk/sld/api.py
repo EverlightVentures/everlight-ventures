@@ -265,6 +265,28 @@ def transit_near(lat: float, lon: float, radius: float = 30):
 _NEWS_CACHE: dict = {}   # place -> (ts, articles)
 
 
+@app.get("/api/scanner_near")
+def scanner_near(lat: float | None = None, lon: float | None = None, limit: int = 8):
+    """Recent radio transcripts (timestamped, code-named) for the Transcript tab.
+    Returns each scanner block/call with its transcript + replayable audio."""
+    base = _store_dir()
+    day = store.today_pt()
+    if not store.day_db_path(base, day).exists():
+        return {"transcripts": []}
+    conn = store.connect(base, day)
+    try:
+        rows = store.get_events(conn)
+    finally:
+        conn.close()
+    sc = [r for r in rows if r.get("source") == "scanner"]
+    sc.sort(key=lambda r: r.get("last_seen") or "", reverse=True)
+    return {"transcripts": [
+        {"type": r.get("type"), "geo_label": r.get("geo_label"), "log_time": r.get("log_time"),
+         "body": r.get("body"), "audio_url": r.get("audio_url"), "block": r.get("archive_block")}
+        for r in sc[:limit]
+    ]}
+
+
 @app.get("/api/scanner_audio/{block_id}")
 def scanner_audio(block_id: str):
     """Serve a downloaded Broadcastify archive block for DVR replay."""

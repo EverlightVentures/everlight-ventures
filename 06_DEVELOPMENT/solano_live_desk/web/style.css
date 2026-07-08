@@ -51,6 +51,14 @@ html, body { margin: 0; height: 100%; font-family: system-ui, sans-serif; }
 .d-section { border-top: 1px solid #2a2a2a; padding-top: 10px; margin-top: 10px; }
 .d-section h3 { font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px;
   color: #888; margin: 0 0 8px; }
+.tabbar { display: flex; gap: 2px; border-bottom: 1px solid #2a2a2a; margin: 6px 0 8px; overflow-x: auto; }
+.tab { background: none; border: none; color: #888; padding: 6px 9px; font-size: 12px;
+  cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+.tab.active { color: #D4AF37; border-bottom-color: #D4AF37; }
+.pane { display: none; }
+.pane.active { display: block; }
+.scanner-block { border-top: 1px solid #2a2a2a; padding-top: 8px; margin-top: 8px; }
+.scanner-block strong { color: #D4AF37; font-size: 12px; }
 .d-story { white-space: pre-wrap; font-size: 13px; line-height: 1.5; }
 .d-cams img { width: 100%; border-radius: 6px; margin-bottom: 4px; background: #222; }
 .d-cams .cam { margin-bottom: 12px; }
