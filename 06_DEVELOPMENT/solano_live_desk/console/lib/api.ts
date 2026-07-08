@@ -50,6 +50,8 @@ export const getFlight = (callsign: string) =>
   j<any>(`/api/flight?callsign=${encodeURIComponent(callsign)}`);
 export const getStats = (date?: string) => j<any>(`/api/stats${date ? `?date=${date}` : ""}`);
 export const getMesh = () => j<{ nodes: any[]; messages: any[]; updated: number }>("/api/mesh");
+export const getIntel = (lat: number, lon: number) => j<any>(`/api/intel?lat=${lat}&lon=${lon}`);
+export const getSocial = (place: string) => j<{ posts: any[] }>(`/api/social?place=${encodeURIComponent(place)}`);
 
 export const getCameras = (lat: number, lon: number) =>
   j<{ cameras: any[] }>(`/api/cameras?lat=${lat}&lon=${lon}&n=3`).then((d) => d.cameras);

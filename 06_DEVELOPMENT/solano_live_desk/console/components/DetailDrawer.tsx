@@ -3,11 +3,56 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Incident } from "@/lib/types";
 import { THREAT_COLORS } from "@/lib/types";
-import { getEventTranscript, getCameras, getCamDvr, getMesh } from "@/lib/api";
+import { getEventTranscript, getCameras, getCamDvr, getMesh, getIntel, getSocial } from "@/lib/api";
 import LiveVideo from "@/components/LiveVideo";
 
-const TABS = ["Feed", "Transcript", "Mesh", "Audio", "Cameras", "Sources"] as const;
+const TABS = ["Feed", "Transcript", "Mesh", "Intel", "Social", "Audio", "Cameras", "Sources"] as const;
 type Tab = (typeof TABS)[number];
+
+function IntelTab({ data, radius }: { data: any | null; radius: number }) {
+  if (data === null) return <Muted>looking back over the past week...</Muted>;
+  const pre = data.precursors || [];
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
+        <div className="glass" style={{ flex: 1, borderRadius: 8, padding: "6px 9px" }}>
+          <div style={{ fontSize: 19, fontWeight: 700, color: "var(--gold)" }}>{data.prior_count}</div>
+          <div style={{ fontSize: 10, color: "var(--muted)" }}>prior nearby (7d)</div>
+        </div>
+        <div className="glass" style={{ flex: 1, borderRadius: 8, padding: "6px 9px" }}>
+          <div style={{ fontSize: 19, fontWeight: 700, color: "var(--gold)" }}>{data.area_today}</div>
+          <div style={{ fontSize: 10, color: "var(--muted)" }}>active here today</div>
+        </div>
+      </div>
+      <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 6 }}>
+        {data.prior_count ? "This spot has history -- what signaled it:" : `No incidents within ${data.radius_mi ?? radius} mi in the past week.`}
+      </div>
+      {pre.map((p: any, i: number) => (
+        <div key={i} style={{ display: "flex", justifyContent: "space-between", gap: 8, fontSize: 12, padding: "4px 0", borderTop: "1px solid var(--line)" }}>
+          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.date} &middot; {(p.type || "").slice(0, 26)}</span>
+          <span style={{ color: "var(--muted)", flex: "0 0 auto" }}>{p.dist} mi</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function SocialTab({ data }: { data: { posts: any[] } | null }) {
+  if (data === null) return <Muted>scanning local social chatter...</Muted>;
+  const posts = data.posts || [];
+  if (!posts.length) return <Muted>no local safety chatter right now (Reddit is bursty; rechecks every few minutes)</Muted>;
+  return (
+    <div>
+      <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 6 }}>{posts.length} local safety-relevant post{posts.length !== 1 ? "s" : ""}</div>
+      {posts.map((p: any, i: number) => (
+        <a key={i} href={p.url} target="_blank" rel="noreferrer" style={{ display: "block", padding: "7px 0", borderTop: "1px solid var(--line)", color: "var(--text)", fontSize: 13, textDecoration: "none" }}>
+          {p.title}
+          <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>r/{p.sub} &middot; {p.author}</div>
+        </a>
+      ))}
+    </div>
+  );
+}
 
 function distMi(la1: number, lo1: number, la2: number, lo2: number) {
   const R = 3958.8, r = Math.PI / 180;
@@ -199,9 +244,11 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
   const [cams, setCams] = useState<any[] | null>(null);
   const [dvr, setDvr] = useState<{ camera: any; frames: any[] } | null>(null);
   const [mesh, setMesh] = useState<{ nodes: any[]; messages: any[] } | null>(null);
+  const [intel, setIntel] = useState<any>(null);
+  const [social, setSocial] = useState<{ posts: any[] } | null>(null);
   const eventTs = ev ? Math.round((Date.parse(ev.last_seen || "") || Date.now()) / 1000) : 0;
 
-  useEffect(() => { setTab("Feed"); setTranscripts(null); setCams(null); setDvr(null); setMesh(null); }, [ev?.id]);
+  useEffect(() => { setTab("Feed"); setTranscripts(null); setCams(null); setDvr(null); setMesh(null); setIntel(null); setSocial(null); }, [ev?.id]);
   useEffect(() => {
     if (!ev) return;
     if (tab === "Transcript" && transcripts === null) {
@@ -210,11 +257,15 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
     }
     if (tab === "Mesh" && mesh === null)
       getMesh().then((d) => setMesh({ nodes: d.nodes, messages: d.messages })).catch(() => setMesh({ nodes: [], messages: [] }));
+    if (tab === "Intel" && intel === null && ev.lat != null)
+      getIntel(ev.lat, ev.lon!).then(setIntel).catch(() => setIntel({ precursors: [], prior_count: 0, area_today: 0 }));
+    if (tab === "Social" && social === null)
+      getSocial(ev.geo_label || "Solano County").then(setSocial).catch(() => setSocial({ posts: [] }));
     if (tab === "Cameras" && cams === null && ev.lat != null)
       getCameras(ev.lat, ev.lon!).then(setCams).catch(() => setCams([]));
     if (tab === "Cameras" && dvr === null && ev.lat != null)
       getCamDvr(ev.lat, ev.lon!, eventTs).then(setDvr).catch(() => setDvr({ camera: null, frames: [] }));
-  }, [tab, ev, transcripts, cams, dvr, mesh, eventTs]);
+  }, [tab, ev, transcripts, cams, dvr, mesh, intel, social, eventTs]);
 
   return (
     <AnimatePresence>
@@ -273,6 +324,8 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
           {tab === "Feed" && <pre style={preStyle}>{ev.body || "(no dispatch detail yet)"}</pre>}
           {tab === "Transcript" && <Transcripts data={transcripts} />}
           {tab === "Mesh" && (ev.lat != null ? <MeshTab data={mesh} lat={ev.lat} lon={ev.lon!} /> : <Muted>no coordinates for this event</Muted>)}
+          {tab === "Intel" && (ev.lat != null ? <IntelTab data={intel} radius={2} /> : <Muted>no coordinates for this event</Muted>)}
+          {tab === "Social" && <SocialTab data={social} />}
           {tab === "Audio" && (ev.audio_url
             ? <audio controls preload="none" src={ev.audio_url} style={{ width: "100%" }} />
             : <Muted>no recorded audio for this incident</Muted>)}

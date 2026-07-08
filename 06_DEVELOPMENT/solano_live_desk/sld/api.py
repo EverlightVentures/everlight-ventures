@@ -462,6 +462,66 @@ def event_transcript(lat: float, lon: float, id: str | None = None,
     return {"conversations": [_conv(r, d) for d, r in calls[:limit]], "sources": len(calls)}
 
 
+@app.get("/api/intel")
+def intel(lat: float, lon: float, radius_mi: float = 2.0, days: int = 7):
+    """Temporal intel for an area: precursors (nearby incidents over the past
+    `days`) + how active the area is today. 'Was this signaled yesterday?'"""
+    from .geo_county import distance_mi
+    from datetime import datetime as _dt, timedelta
+
+    base = _store_dir()
+    today = store.today_pt()
+    try:
+        base_date = _dt.strptime(today, "%Y_%m_%d")
+    except Exception:  # noqa: BLE001
+        base_date = None
+    precursors = []
+    if base_date:
+        for i in range(1, days + 1):
+            dk = (base_date - timedelta(days=i)).strftime("%Y_%m_%d")
+            if not store.day_db_path(base, dk).exists():
+                continue
+            conn = store.connect(base, dk)
+            try:
+                rows = store.get_events(conn)
+            finally:
+                conn.close()
+            for r in rows:
+                if r.get("lat") is None:
+                    continue
+                d = distance_mi((lat, lon), (r["lat"], r["lon"]))
+                if d <= radius_mi:
+                    precursors.append({"date": dk.replace("_", "-"), "type": r.get("type"),
+                                       "severity": r.get("severity"), "dist": round(d, 1)})
+    area_today = 0
+    if store.day_db_path(base, today).exists():
+        conn = store.connect(base, today)
+        try:
+            for r in store.get_events(conn):
+                if r.get("lat") is not None and distance_mi((lat, lon), (r["lat"], r["lon"])) <= radius_mi:
+                    area_today += 1
+        finally:
+            conn.close()
+    precursors.sort(key=lambda x: x["date"], reverse=True)
+    return {"precursors": precursors[:30], "prior_count": len(precursors), "area_today": area_today, "radius_mi": radius_mi}
+
+
+_SOCIAL_CACHE: dict = {}
+
+
+@app.get("/api/social")
+def social(place: str = "Solano County"):
+    """Local safety/hotspot chatter from Reddit (public RSS; 8-min cache)."""
+    from . import social as social_mod
+
+    hit = _SOCIAL_CACHE.get(place)
+    if hit and time.time() - hit[0] < 480:
+        return {"place": place, "posts": hit[1]}
+    posts = social_mod.safety_posts(place)
+    _SOCIAL_CACHE[place] = (time.time(), posts)
+    return {"place": place, "posts": posts}
+
+
 @app.get("/api/mesh")
 def mesh():
     """Meshtastic nodes + messages in the bubble (collected off the public MQTT)."""
