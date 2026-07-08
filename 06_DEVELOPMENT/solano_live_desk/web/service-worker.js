@@ -1,6 +1,6 @@
 // Offline resilience: cache the app shell + last-known data so the survival OS
 // still opens and shows the last picture when the network dies.
-const CACHE = "sld-v3";
+const CACHE = "sld-v4";
 const SHELL = ["/", "/app.js", "/style.css", "/vendor/hls.min.js", "/manifest.json", "/icon.svg"];
 
 self.addEventListener("install", (e) => {
@@ -29,8 +29,18 @@ self.addEventListener("fetch", (e) => {
     return;
   }
 
-  // App shell + map tiles + CDN libs: cache-first, then network (runtime cache
-  // so recently-viewed map areas keep working offline).
+  // Navigations + app shell: NETWORK-FIRST so an online user always gets the
+  // latest code; fall back to cache only when offline. (Prevents stale UI.)
+  if (e.request.mode === "navigate" || SHELL.includes(url.pathname)) {
+    e.respondWith(
+      fetch(e.request)
+        .then((r) => { const cp = r.clone(); caches.open(CACHE).then((c) => c.put(e.request, cp)); return r; })
+        .catch(() => caches.match(e.request).then((c) => c || caches.match("/")))
+    );
+    return;
+  }
+
+  // Map tiles + CDN libs: cache-first (immutable-ish, keep offline).
   e.respondWith(
     caches.match(e.request).then((cached) =>
       cached ||

@@ -47,6 +47,17 @@ async def _private_gate(request, call_next):
     return await call_next(request)
 
 
+@app.middleware("http")
+async def _no_cache_html(request, call_next):
+    # HTML must never be stale -- it references hashed JS/CSS. Always revalidate
+    # the shell so a rebuild reaches the browser on the next load. Hashed assets
+    # keep their own long cache.
+    resp = await call_next(request)
+    if "text/html" in resp.headers.get("content-type", ""):
+        resp.headers["Cache-Control"] = "no-store, must-revalidate"
+    return resp
+
+
 @app.get("/unlock/{token}")
 def unlock(token: str):
     if _ACCESS_TOKEN and token == _ACCESS_TOKEN:
