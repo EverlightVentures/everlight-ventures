@@ -462,6 +462,20 @@ def event_transcript(lat: float, lon: float, id: str | None = None,
     return {"conversations": [_conv(r, d) for d, r in calls[:limit]], "sources": len(calls)}
 
 
+@app.get("/api/mesh")
+def mesh():
+    """Meshtastic nodes + messages in the bubble (collected off the public MQTT)."""
+    import json as _json
+
+    p = os.path.join(_store_dir(), "mesh.json")
+    if os.path.exists(p):
+        try:
+            return _json.load(open(p))
+        except Exception:  # noqa: BLE001
+            pass
+    return {"nodes": [], "messages": [], "updated": 0}
+
+
 @app.get("/api/cam_dvr")
 def cam_dvr(lat: float, lon: float, t: int | None = None):
     """Recorded camera frames around an event time (5 min before -> after)."""

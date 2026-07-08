@@ -3,11 +3,52 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Incident } from "@/lib/types";
 import { THREAT_COLORS } from "@/lib/types";
-import { getEventTranscript, getCameras, getCamDvr } from "@/lib/api";
+import { getEventTranscript, getCameras, getCamDvr, getMesh } from "@/lib/api";
 import LiveVideo from "@/components/LiveVideo";
 
-const TABS = ["Feed", "Transcript", "Audio", "Cameras", "Sources"] as const;
+const TABS = ["Feed", "Transcript", "Mesh", "Audio", "Cameras", "Sources"] as const;
 type Tab = (typeof TABS)[number];
+
+function distMi(la1: number, lo1: number, la2: number, lo2: number) {
+  const R = 3958.8, r = Math.PI / 180;
+  const dLa = (la2 - la1) * r, dLo = (lo2 - lo1) * r;
+  const a = Math.sin(dLa / 2) ** 2 + Math.cos(la1 * r) * Math.cos(la2 * r) * Math.sin(dLo / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(a));
+}
+
+function MeshTab({ data, lat, lon }: { data: { nodes: any[]; messages: any[] } | null; lat: number; lon: number }) {
+  if (data === null) return <Muted>loading mesh...</Muted>;
+  const near = (n: any) => n.lat != null && distMi(lat, lon, n.lat, n.lon) <= 12;
+  const nodes = (data.nodes || []).filter(near)
+    .map((n) => ({ ...n, dist: distMi(lat, lon, n.lat, n.lon) }))
+    .sort((a, b) => a.dist - b.dist);
+  const msgs = (data.messages || []).filter(near);
+  if (!nodes.length && !msgs.length)
+    return <Muted>no Meshtastic nodes near this event yet (mesh coverage varies; the collector fills over time)</Muted>;
+  return (
+    <div>
+      <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 8 }}>
+        {nodes.length} mesh node{nodes.length !== 1 ? "s" : ""} within 12 mi of this event
+      </div>
+      {msgs.length > 0 && (
+        <div style={{ marginBottom: 10 }}>
+          <div style={{ fontSize: 11, color: "var(--gold)", fontWeight: 700, marginBottom: 3 }}>Recent mesh chatter</div>
+          {msgs.slice(-8).reverse().map((m, i) => (
+            <div key={i} style={{ fontSize: 12, marginTop: 3 }}>
+              <b style={{ color: "#8fe3a8" }}>{m.name || m.id}:</b> {m.text}
+            </div>
+          ))}
+        </div>
+      )}
+      {nodes.map((n, i) => (
+        <div key={i} style={{ display: "flex", justifyContent: "space-between", fontSize: 12, padding: "5px 0", borderTop: "1px solid var(--line)" }}>
+          <span>&#128225; {n.name || n.id}</span>
+          <span style={{ color: "var(--muted)" }}>{n.dist.toFixed(1)} mi</span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 // Distinct colors so each Officer reads as a different voice; Dispatcher is gold.
 const OFFICER_COLORS = ["#7fd1ff", "#8fe3a8", "#ffb454", "#d59bff", "#ff9bb0", "#9bffe0"];
@@ -157,20 +198,23 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
   const [transcripts, setTranscripts] = useState<{ conversations: any[]; sources: number } | null>(null);
   const [cams, setCams] = useState<any[] | null>(null);
   const [dvr, setDvr] = useState<{ camera: any; frames: any[] } | null>(null);
+  const [mesh, setMesh] = useState<{ nodes: any[]; messages: any[] } | null>(null);
   const eventTs = ev ? Math.round((Date.parse(ev.last_seen || "") || Date.now()) / 1000) : 0;
 
-  useEffect(() => { setTab("Feed"); setTranscripts(null); setCams(null); setDvr(null); }, [ev?.id]);
+  useEffect(() => { setTab("Feed"); setTranscripts(null); setCams(null); setDvr(null); setMesh(null); }, [ev?.id]);
   useEffect(() => {
     if (!ev) return;
     if (tab === "Transcript" && transcripts === null) {
       if (ev.lat != null) getEventTranscript(ev.lat, ev.lon!, ev.id).then(setTranscripts).catch(() => setTranscripts({ conversations: [], sources: 0 }));
       else setTranscripts({ conversations: [], sources: 0 });
     }
+    if (tab === "Mesh" && mesh === null)
+      getMesh().then((d) => setMesh({ nodes: d.nodes, messages: d.messages })).catch(() => setMesh({ nodes: [], messages: [] }));
     if (tab === "Cameras" && cams === null && ev.lat != null)
       getCameras(ev.lat, ev.lon!).then(setCams).catch(() => setCams([]));
     if (tab === "Cameras" && dvr === null && ev.lat != null)
       getCamDvr(ev.lat, ev.lon!, eventTs).then(setDvr).catch(() => setDvr({ camera: null, frames: [] }));
-  }, [tab, ev, transcripts, cams, dvr, eventTs]);
+  }, [tab, ev, transcripts, cams, dvr, mesh, eventTs]);
 
   return (
     <AnimatePresence>
@@ -228,6 +272,7 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
           </div>
           {tab === "Feed" && <pre style={preStyle}>{ev.body || "(no dispatch detail yet)"}</pre>}
           {tab === "Transcript" && <Transcripts data={transcripts} />}
+          {tab === "Mesh" && (ev.lat != null ? <MeshTab data={mesh} lat={ev.lat} lon={ev.lon!} /> : <Muted>no coordinates for this event</Muted>)}
           {tab === "Audio" && (ev.audio_url
             ? <audio controls preload="none" src={ev.audio_url} style={{ width: "100%" }} />
             : <Muted>no recorded audio for this incident</Muted>)}
