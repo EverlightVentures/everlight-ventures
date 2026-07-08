@@ -6,8 +6,17 @@ cd "$(dirname "$0")/.."
 export SLD_STORE="${SLD_STORE:-$PWD/store}"
 # Pure-Python protobuf avoids the upb C-extension segfault under proot/ARM.
 export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
-BIND="${EV_BIND:-127.0.0.1}"
+# Bind all interfaces by default so the phone reaches it over the tailnet.
+# (e5 is tailnet-gated; set EV_BIND=127.0.0.1 to keep it strictly local.)
+BIND="${EV_BIND:-0.0.0.0}"
 PORT="${PORT:-2600}"
+
+# Print the REAL reachable address(es), not localhost.
+TSIP="$(tailscale ip -4 2>/dev/null | head -1)"
+echo "[run] Dashboard will be live at:"
+[ -n "$TSIP" ] && echo "        http://${TSIP}:${PORT}   (tailnet IP)"
+echo "        http://$(hostname):${PORT}   (tailnet name, if MagicDNS)"
+echo "        band 2600 = Survival OS"
 
 python3 -c "import asyncio; from sld.ingest import poll_loop; asyncio.run(poll_loop('$SLD_STORE'))" &
 INGEST_PID=$!
