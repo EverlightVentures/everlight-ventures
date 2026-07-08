@@ -644,6 +644,49 @@ async function refreshSpaceWx() {
 refreshSpaceWx();
 setInterval(refreshSpaceWx, 600000);
 
+let routeDestMarker = null;
+async function routeOut() {
+  const [lon, lat] = center();
+  // Danger overlay (evac orders + fires + high-threat incidents to avoid).
+  try {
+    const dj = await (await fetch("/api/danger")).json();
+    ["danger-fill", "danger-pt"].forEach((l) => { if (map.getLayer(l)) map.removeLayer(l); });
+    if (map.getSource("danger")) map.removeSource("danger");
+    map.addSource("danger", { type: "geojson", data: dj });
+    map.addLayer({ id: "danger-fill", type: "fill", source: "danger",
+      filter: ["==", "$type", "Polygon"], paint: { "fill-color": "#ff2d2d", "fill-opacity": 0.22 } });
+    map.addLayer({ id: "danger-pt", type: "circle", source: "danger",
+      filter: ["==", "$type", "Point"], paint: { "circle-radius": 7, "circle-color": "#ff2d2d", "circle-opacity": 0.45 } });
+  } catch (e) { /* overlay optional */ }
+  // Route to the nearest safe destination.
+  let r;
+  try { r = await (await fetch(`/api/route?lat=${lat}&lon=${lon}`)).json(); }
+  catch (e) { alert("Routing unavailable"); return; }
+  if (r.error) { alert("Route: " + r.error); return; }
+  if (map.getLayer("route-line")) map.removeLayer("route-line");
+  if (map.getSource("route")) map.removeSource("route");
+  map.addSource("route", { type: "geojson", data: { type: "Feature", geometry: r.route } });
+  map.addLayer({ id: "route-line", type: "line", source: "route",
+    paint: { "line-color": "#2ecc71", "line-width": 5, "line-opacity": 0.9 } });
+  if (routeDestMarker) routeDestMarker.remove();
+  routeDestMarker = new maplibregl.Marker({ color: "#2ecc71" }).setLngLat([r.dest.lon, r.dest.lat]).addTo(map);
+  const d = document.getElementById("detail");
+  d.classList.remove("hidden");
+  const tl = document.getElementById("d-threat");
+  tl.textContent = "EVAC ROUTE"; tl.style.background = "#2ecc71"; tl.style.color = "#0A0A0A";
+  document.getElementById("d-title").textContent = `To ${r.dest.name}`;
+  document.getElementById("d-where").textContent = `${r.dest.kind} · ${r.distance_mi} mi · ETA ${r.eta_min} min`;
+  document.getElementById("d-story").textContent =
+    "Green = your route. Red = danger to avoid (evac orders, fires, high-threat incidents). Auto-avoid routing (Valhalla) is staged.";
+  document.getElementById("d-audio").classList.add("hidden");
+  document.getElementById("d-cams").textContent = "";
+  document.getElementById("d-feeds").textContent = "";
+  const b = new maplibregl.LngLatBounds();
+  (r.route.coordinates || []).forEach((c) => b.extend(c));
+  if (!b.isEmpty()) map.fitBounds(b, { padding: 80, maxZoom: 14 });
+}
+document.getElementById("route-toggle").onclick = routeOut;
+
 document.getElementById("disasters-toggle").onclick = async () => {
   const d = document.getElementById("detail");
   d.classList.remove("hidden");

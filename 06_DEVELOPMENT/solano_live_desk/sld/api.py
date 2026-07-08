@@ -14,7 +14,7 @@ from fastapi.staticfiles import StaticFiles
 from . import aircraft as air_mod
 from . import broadcaster
 from . import cameras as cams_mod
-from . import config, correlate, dvr, evac, fema, news, spacewx, store, threat, trains as train_mod, transit as transit_mod, wayfinding, webcams
+from . import config, correlate, dvr, evac, fema, news, routing, spacewx, store, threat, trains as train_mod, transit as transit_mod, wayfinding, webcams
 from .hub import HUB
 from .feeds import feeds_for_county
 from .geo_county import county_for
@@ -279,6 +279,18 @@ def scanner_audio(block_id: str):
 
 _SWX_CACHE: dict = {"at": 0.0, "v": None}
 _FEMA_CACHE: dict = {}
+
+
+@app.get("/api/danger")
+def danger():
+    """GeoJSON of everything to avoid: evac ORDER zones + fire + CRITICAL/HIGH incidents."""
+    return routing.danger_features(_store_dir())
+
+
+@app.get("/api/route")
+def route(lat: float, lon: float):
+    """Route to the nearest safe destination (with alternates)."""
+    return routing.route_to_safety(lat, lon)
 
 
 @app.get("/api/spacewx")
