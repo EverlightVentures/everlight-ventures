@@ -19,9 +19,10 @@ from .geo_county import distance_mi
 config.load_env()
 
 CHP_URL = "http://media.chp.ca.gov/sa_xml/sa.xml"
-# Bubble radius (miles) around the center. Default 75mi = whole Bay Area +
-# Napa + toward Sacramento. Override with SLD_RADIUS_MI as you like.
-RADIUS_MI = float(os.environ.get("SLD_RADIUS_MI", "75"))
+# Bubble radius (miles) around the operator's live GPS. 45mi covers Solano +
+# Napa/Yolo + eastern Contra Costa + the near East Bay, and drops SF, San Jose,
+# Santa Rosa, Stockton, Sacramento -- less area = less CPU. Override SLD_RADIUS_MI.
+RADIUS_MI = float(os.environ.get("SLD_RADIUS_MI", "45"))
 
 
 def bubble_center(base: str) -> tuple[float, float]:

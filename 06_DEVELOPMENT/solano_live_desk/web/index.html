@@ -72,10 +72,13 @@
   <script src="vendor/hls.min.js"></script>
   <script src="app.js"></script>
   <script>
-    // Offline resilience (works over HTTPS / the survival.everlightventures.io domain).
+    // The service worker (scope "/") was serving stale cached content and even
+    // hijacking /console/. Unregister it everywhere + purge caches so every load
+    // is fresh. (Offline PWA dropped in favor of always-current.)
     if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => navigator.serviceWorker.register("service-worker.js").catch(() => {}));
+      navigator.serviceWorker.getRegistrations().then((rs) => rs.forEach((r) => r.unregister()));
     }
+    if ("caches" in window) caches.keys().then((ks) => ks.forEach((k) => caches.delete(k)));
   </script>
 </body>
 </html>
