@@ -89,6 +89,30 @@ def line_ids(text: str, base: str | Path) -> list[str]:
     return ["BASE" if i == "DISPATCH" else code_name(i, base) for i in ids]
 
 
+_SERVICE_KW = {
+    "EMS": r"\b(medical|ambulance|medic|patient|gsw|unconscious|breathing|cardiac|"
+           r"overdose|\bod\b|injury|bleeding|cpr|als|bls|902|1141|fall victim|seizure)\b",
+    "Fire": r"\b(fire|engine|structure|smoke|flames|brush|hydrant|ladder|battalion|"
+            r"fully involved|working fire|grass fire|vegetation)\b",
+    "CHP": r"\b(chp|highway|freeway|interstate|i-?80|i-?680|i-?505|sr-?\d+|sig-?alert|"
+           r"traffic break|1179|1180|1181|1125|20001|20002|23152|off ?ramp|on ?ramp)\b",
+    "Police": r"\b(officer|suspect|deputy|warrant|in custody|211|459|415|5150|242|240|"
+              r"245|207|187|10851|417|foot pursuit|code ?3|pd\b)\b",
+}
+
+
+def classify_service(text: str) -> str:
+    """Which service this radio traffic belongs to (EMS/Fire/CHP/Police), so an
+    event's transcript groups by who is talking. Highest keyword hit-count wins."""
+    low = text.lower()
+    best, score = "Dispatch", 0
+    for svc, pat in _SERVICE_KW.items():
+        n = len(re.findall(pat, low, re.I))
+        if n > score:
+            best, score = svc, n
+    return best
+
+
 def speaker_segments(text: str) -> list[dict]:
     """Attribute each transcript line to a speaker so the operator reads WHO said
     WHAT: dispatch chatter -> 'Dispatcher'; each distinct unit -> 'Officer 1/2/...'

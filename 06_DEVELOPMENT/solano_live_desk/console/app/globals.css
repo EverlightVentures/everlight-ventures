@@ -4,8 +4,9 @@
 
 :root {
   --bg: #08080a;
-  --panel: rgba(18, 18, 22, 0.72);
+  --panel: rgba(12, 12, 16, 0.5);
   --panel-solid: #121216;
+  --card: rgba(0, 0, 0, 0.42);
   --gold: #d4af37;
   --gold-dim: #9a7d28;
   --text: #e8e8e8;
@@ -28,8 +29,8 @@ html, body {
 /* Glassmorphism panel -- the signature luxury surface */
 .glass {
   background: var(--panel);
-  backdrop-filter: blur(18px) saturate(1.2);
-  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  backdrop-filter: blur(9px) saturate(1.15);
+  -webkit-backdrop-filter: blur(9px) saturate(1.15);
   border: 1px solid var(--line);
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }

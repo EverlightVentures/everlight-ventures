@@ -218,48 +218,57 @@ async function loadTranscriptTab(ev) {
   const OFFICER_COLORS = ["#7fd1ff", "#8fe3a8", "#ffb454", "#d59bff", "#ff9bb0"];
   if (ev.lat == null) { box.textContent = "no location for this incident"; return; }
   box.textContent = "loading radio traffic...";
+  const SERVICE_COLORS = { EMS: "#ff5b5b", Fire: "#ff8c1a", CHP: "#7fd1ff", Police: "#D4AF37", Dispatch: "#8fe3a8" };
   try {
     const data = await (await fetch(`/api/event_transcript?lat=${ev.lat}&lon=${ev.lon}`)).json();
     box.replaceChildren();
-    const segs = data.segments || [];
-    if (!segs.length) { box.textContent = "no radio traffic matched to this incident"; return; }
+    const convos = data.conversations || [];
+    if (!convos.length) { box.textContent = "no radio traffic matched to this incident"; return; }
     const hdr = document.createElement("div");
     hdr.style.cssText = "font-size:11px;color:#888;margin-bottom:8px;";
-    hdr.textContent = `${data.sources} matched call(s) near this incident`;
+    hdr.textContent = `${data.sources} call(s) near this incident, grouped by service`;
     box.appendChild(hdr);
-    const au = (segs.find((s) => s.audio_url) || {}).audio_url;
-    if (au) {
-      const a = document.createElement("audio");
-      a.controls = true; a.preload = "none"; a.src = au;
-      a.style.cssText = "width:100%;height:32px;margin-bottom:10px;";
-      box.appendChild(a);
-    }
-    for (const s of segs) {
-      const row = document.createElement("div");
-      row.style.cssText = "display:flex;gap:8px;margin-bottom:8px;";
-      const sp = document.createElement("span");
-      const n = parseInt((s.speaker || "").replace(/\D/g, ""), 10) || 1;
-      const col = s.speaker === "Dispatcher" ? "#D4AF37" : OFFICER_COLORS[(n - 1) % OFFICER_COLORS.length];
-      sp.style.cssText = `flex:0 0 auto;width:72px;font-size:11px;font-weight:700;color:${col};`;
-      sp.textContent = s.speaker;
-      const txt = document.createElement("div");
-      txt.style.cssText = "font-size:13px;line-height:1.45;";
-      if (s.time) {
-        const tm = document.createElement("span");
-        tm.style.cssText = "color:#888;font-size:11px;margin-right:6px;";
-        tm.textContent = s.time;
-        txt.appendChild(tm);
+    for (const c of convos) {
+      const sec = document.createElement("div");
+      sec.style.cssText = "border-top:1px solid #2a2a2a;padding-top:10px;margin-top:10px;";
+      const h = document.createElement("div");
+      h.style.cssText = `font-size:12px;font-weight:700;color:${SERVICE_COLORS[c.service] || "#D4AF37"};`;
+      h.textContent = `${c.service} · ${c.call || ""} · started ${c.start || ""}`;
+      sec.appendChild(h);
+      if (c.audio_url) {
+        const a = document.createElement("audio");
+        a.controls = true; a.preload = "none"; a.src = c.audio_url;
+        a.style.cssText = "width:100%;height:32px;margin:6px 0;";
+        sec.appendChild(a);
       }
-      txt.appendChild(document.createTextNode(s.text));
-      if (s.codes && s.codes.length) {
-        const c = document.createElement("span");
-        c.style.cssText = "color:#ff8c1a;font-size:11px;margin-left:6px;";
-        c.textContent = s.codes.join(", ");
-        txt.appendChild(c);
+      for (const s of (c.segments || [])) {
+        const row = document.createElement("div");
+        row.style.cssText = "display:flex;gap:8px;margin-bottom:6px;";
+        const sp = document.createElement("span");
+        const n = parseInt((s.speaker || "").replace(/\D/g, ""), 10) || 1;
+        const col = s.speaker === "Dispatcher" ? "#D4AF37" : OFFICER_COLORS[(n - 1) % OFFICER_COLORS.length];
+        sp.style.cssText = `flex:0 0 auto;width:72px;font-size:11px;font-weight:700;color:${col};`;
+        sp.textContent = s.speaker;
+        const txt = document.createElement("div");
+        txt.style.cssText = "font-size:13px;line-height:1.4;";
+        if (s.time) {
+          const tm = document.createElement("span");
+          tm.style.cssText = "color:#888;font-size:11px;margin-right:6px;";
+          tm.textContent = s.time;
+          txt.appendChild(tm);
+        }
+        txt.appendChild(document.createTextNode(s.text));
+        if (s.codes && s.codes.length) {
+          const cc = document.createElement("span");
+          cc.style.cssText = "color:#ff8c1a;font-size:11px;margin-left:6px;";
+          cc.textContent = s.codes.join(", ");
+          txt.appendChild(cc);
+        }
+        row.appendChild(sp);
+        row.appendChild(txt);
+        sec.appendChild(row);
       }
-      row.appendChild(sp);
-      row.appendChild(txt);
-      box.appendChild(row);
+      box.appendChild(sec);
     }
   } catch (e) { box.textContent = "transcripts unavailable"; }
 }

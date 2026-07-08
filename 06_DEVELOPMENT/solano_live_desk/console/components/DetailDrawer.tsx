@@ -17,28 +17,58 @@ function speakerColor(speaker: string) {
   return OFFICER_COLORS[(n - 1) % OFFICER_COLORS.length];
 }
 
-function Transcripts({ data }: { data: { segments: any[]; sources: number } | null }) {
+const SERVICE_COLORS: Record<string, string> = {
+  EMS: "#ff5b5b", Fire: "#ff8c1a", CHP: "#7fd1ff", Police: "#d4af37", Dispatch: "#8fe3a8",
+};
+
+function Transcripts({ data }: { data: { conversations: any[]; sources: number } | null }) {
+  const [svc, setSvc] = useState<string | null>(null);
   if (data === null) return <Muted>loading radio traffic...</Muted>;
-  if (!data.segments.length) return <Muted>no radio traffic matched to this event yet</Muted>;
-  const audio = data.segments.find((s) => s.audio_url)?.audio_url;
+  const convos = data.conversations || [];
+  if (!convos.length) return <Muted>no radio traffic matched to this event yet</Muted>;
+  const services = Array.from(new Set(convos.map((c) => c.service)));
+  const active = svc && services.includes(svc) ? svc : services[0];
+  const shown = convos.filter((c) => c.service === active);
   return (
     <div>
       <div style={{ fontSize: 11, color: "var(--muted)", marginBottom: 8 }}>
-        {data.sources} matched call{data.sources !== 1 ? "s" : ""} near this event &middot; who said what
+        {data.sources} call{data.sources !== 1 ? "s" : ""} near this event &middot; pick a service
       </div>
-      {audio && <audio controls preload="none" src={audio} style={{ width: "100%", height: 32, marginBottom: 10 }} />}
-      {data.segments.map((s, i) => (
-        <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-          <span style={{ flex: "0 0 auto", width: 72, fontSize: 11, fontWeight: 700, color: speakerColor(s.speaker) }}>
-            {s.speaker}
-          </span>
-          <div style={{ fontSize: 13, lineHeight: 1.45 }}>
-            {s.time && <span style={{ color: "var(--muted)", fontSize: 11, marginRight: 6 }}>{s.time}</span>}
-            {s.text}
-            {s.codes?.length ? (
-              <span style={{ color: "#ff8c1a", fontSize: 11, marginLeft: 6 }}>{s.codes.join(", ")}</span>
-            ) : null}
+      <div style={{ display: "flex", gap: 4, marginBottom: 10, flexWrap: "wrap" }}>
+        {services.map((s) => (
+          <button
+            key={s}
+            onClick={() => setSvc(s)}
+            style={{
+              background: active === s ? SERVICE_COLORS[s] || "#888" : "transparent",
+              color: active === s ? "#08080a" : "var(--text)",
+              border: `1px solid ${SERVICE_COLORS[s] || "var(--line)"}`,
+              borderRadius: 6, padding: "3px 9px", fontSize: 11, fontWeight: 600, cursor: "pointer",
+            }}
+          >
+            {s} ({convos.filter((c) => c.service === s).length})
+          </button>
+        ))}
+      </div>
+      {shown.map((c, i) => (
+        <div key={i} style={{ borderTop: i ? "1px solid var(--line)" : "none", paddingTop: i ? 10 : 0, marginTop: i ? 10 : 0 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: SERVICE_COLORS[c.service] || "var(--gold)" }}>
+            {c.service} &middot; {c.call}
+            <span style={{ color: "var(--muted)", fontWeight: 400 }}> &middot; started {c.start}</span>
           </div>
+          {c.audio_url && <audio controls preload="none" src={c.audio_url} style={{ width: "100%", height: 32, margin: "6px 0" }} />}
+          {c.segments.map((s: any, j: number) => (
+            <div key={j} style={{ display: "flex", gap: 8, marginBottom: 6 }}>
+              <span style={{ flex: "0 0 auto", width: 72, fontSize: 11, fontWeight: 700, color: speakerColor(s.speaker) }}>
+                {s.speaker}
+              </span>
+              <div style={{ fontSize: 13, lineHeight: 1.4 }}>
+                {s.time && <span style={{ color: "var(--muted)", fontSize: 11, marginRight: 6 }}>{s.time}</span>}
+                {s.text}
+                {s.codes?.length ? <span style={{ color: "#ff8c1a", fontSize: 11, marginLeft: 6 }}>{s.codes.join(", ")}</span> : null}
+              </div>
+            </div>
+          ))}
         </div>
       ))}
     </div>
@@ -92,15 +122,15 @@ const Muted = ({ children }: { children: React.ReactNode }) => (
 
 export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onClose: () => void }) {
   const [tab, setTab] = useState<Tab>("Feed");
-  const [transcripts, setTranscripts] = useState<{ segments: any[]; sources: number } | null>(null);
+  const [transcripts, setTranscripts] = useState<{ conversations: any[]; sources: number } | null>(null);
   const [cams, setCams] = useState<any[] | null>(null);
 
   useEffect(() => { setTab("Feed"); setTranscripts(null); setCams(null); }, [ev?.id]);
   useEffect(() => {
     if (!ev) return;
     if (tab === "Transcript" && transcripts === null) {
-      if (ev.lat != null) getEventTranscript(ev.lat, ev.lon!).then(setTranscripts).catch(() => setTranscripts({ segments: [], sources: 0 }));
-      else setTranscripts({ segments: [], sources: 0 });
+      if (ev.lat != null) getEventTranscript(ev.lat, ev.lon!).then(setTranscripts).catch(() => setTranscripts({ conversations: [], sources: 0 }));
+      else setTranscripts({ conversations: [], sources: 0 });
     }
     if (tab === "Cameras" && cams === null && ev.lat != null)
       getCameras(ev.lat, ev.lon!).then(setCams).catch(() => setCams([]));

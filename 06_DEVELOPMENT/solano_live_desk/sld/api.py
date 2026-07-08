@@ -330,13 +330,14 @@ def event_transcript(lat: float, lon: float, radius_mi: float = 0.75, limit: int
     """The radio traffic that belongs to THIS event: geocoded scanner CALLS within
     radius (block-log dumps excluded), each split into speaker turns (Dispatcher /
     Officer 1,2,...) so the operator reads who said what -- tailored per event."""
-    from .radio import speaker_segments
+    from .radio import speaker_segments, classify_service
     from .geo_county import distance_mi
+    from datetime import datetime as _dt
 
     base = _store_dir()
     day = store.today_pt()
     if not store.day_db_path(base, day).exists():
-        return {"segments": [], "sources": 0}
+        return {"conversations": [], "sources": 0}
     conn = store.connect(base, day)
     try:
         rows = store.get_events(conn)
@@ -352,13 +353,26 @@ def event_transcript(lat: float, lon: float, radius_mi: float = 0.75, limit: int
         if d <= radius_mi:
             calls.append((d, r))
     calls.sort(key=lambda x: (x[1].get("log_time") or ""), reverse=True)  # most recent first
-    segments = []
+
+    def _fmt(iso):
+        try:
+            return _dt.fromisoformat(iso).strftime("%-I:%M %p")
+        except Exception:  # noqa: BLE001
+            return ""
+
+    # Each geocoded call = one conversation, tagged with which service is talking.
+    conversations = []
     for d, r in calls[:limit]:
-        for s in speaker_segments(r.get("body") or ""):
-            s.update({"call": r.get("geo_label"), "distance_mi": round(d, 1),
-                      "audio_url": r.get("audio_url"), "log_time": r.get("log_time")})
-            segments.append(s)
-    return {"segments": segments, "sources": len(calls)}
+        body = r.get("body") or ""
+        conversations.append({
+            "service": classify_service(body),
+            "call": r.get("geo_label"),
+            "start": _fmt(r.get("log_time") or ""),
+            "distance_mi": round(d, 1),
+            "audio_url": r.get("audio_url"),
+            "segments": speaker_segments(body),
+        })
+    return {"conversations": conversations, "sources": len(calls)}
 
 
 @app.get("/api/scanner_audio/{block_id}")

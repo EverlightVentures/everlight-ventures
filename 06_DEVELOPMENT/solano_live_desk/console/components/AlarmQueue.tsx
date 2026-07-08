@@ -51,10 +51,13 @@ export default function AlarmQueue({
         </span>
         <button
           onClick={onToggle}
-          title="collapse"
-          style={{ marginLeft: "auto", background: "none", border: "none", color: "var(--muted)", cursor: "pointer", fontSize: 15 }}
+          title="hide alarm panel"
+          style={{
+            marginLeft: "auto", background: "rgba(255,255,255,0.06)", border: "1px solid var(--line)",
+            color: "var(--text)", cursor: "pointer", fontSize: 11, borderRadius: 6, padding: "3px 9px",
+          }}
         >
-          &#9664;
+          &#9664; hide
         </button>
       </div>
       {sorted.map((ev, i) => (
@@ -66,7 +69,7 @@ export default function AlarmQueue({
           onClick={() => onSelect(ev)}
           style={{
             display: "block", width: "100%", textAlign: "left",
-            background: ev.id === selectedId ? "rgba(212,175,55,0.12)" : "transparent",
+            background: ev.id === selectedId ? "rgba(212,175,55,0.22)" : "var(--card)",
             border: "1px solid var(--line)", borderRadius: 10, padding: "8px 10px",
             marginBottom: 6, cursor: "pointer", color: "var(--text)",
           }}
