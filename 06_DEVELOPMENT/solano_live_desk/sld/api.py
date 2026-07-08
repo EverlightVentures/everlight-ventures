@@ -298,16 +298,25 @@ _TYPE_SEATS = {
 }
 
 
+# US industry average passenger load factor (BTS ~83%); estimate occupancy from
+# the type's seats since actual counts are never broadcast.
+_LOAD_FACTOR = 0.83
+
+
+def _pax(seats):
+    return round(seats * _LOAD_FACTOR) if seats else None
+
+
 @app.get("/api/flight")
 def flight(callsign: str, type: str = ""):
     """Enrich a live flight: origin->destination + airline (adsbdb, or airline
-    from the callsign prefix) + typical seat capacity for the aircraft type."""
+    from the callsign prefix) + typical seat capacity + estimated occupancy."""
     cs = callsign.strip().upper()
     seats = _TYPE_SEATS.get(type.strip().upper()) if type else None
     if not cs:
-        return {"callsign": cs, "origin": None, "dest": None, "seats": seats}
+        return {"callsign": cs, "origin": None, "dest": None, "seats": seats, "est_pax": _pax(seats)}
     if cs in _FLIGHT_CACHE:
-        return {**_FLIGHT_CACHE[cs], "seats": seats}
+        return {**_FLIGHT_CACHE[cs], "seats": seats, "est_pax": _pax(seats)}
     airline = _ICAO_AIRLINE.get(cs[:3])
     out = {"callsign": cs, "origin": None, "dest": None, "airline": airline}
     try:
@@ -328,7 +337,7 @@ def flight(callsign: str, type: str = ""):
     except Exception:  # noqa: BLE001
         pass
     _FLIGHT_CACHE[cs] = out
-    return {**out, "seats": seats}
+    return {**out, "seats": seats, "est_pax": _pax(seats)}
 
 
 @app.get("/api/aircraft")

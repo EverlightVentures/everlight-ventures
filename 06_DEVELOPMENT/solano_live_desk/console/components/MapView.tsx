@@ -54,7 +54,9 @@ function PoiCard({ poi }: { poi: { kind: string; data: any } }) {
                 <div style={{ fontSize: 11, color: "#888" }}>route not published</div>
               )}
               {route.seats ? (
-                <div style={{ fontSize: 11, color: "#555", marginTop: 2 }}>~{route.seats} seats ({d.type}) &middot; live occupancy not broadcast</div>
+                <div style={{ fontSize: 11, color: "#555", marginTop: 2 }}>
+                  &asymp;{route.est_pax} aboard of {route.seats} ({d.type}, est. ~83% load)
+                </div>
               ) : null}
             </>
           )}
