@@ -288,7 +288,7 @@ def scanner_near(lat: float | None = None, lon: float | None = None, limit: int 
 
 
 @app.get("/api/event_transcript")
-def event_transcript(lat: float, lon: float, radius_mi: float = 2.5, limit: int = 6):
+def event_transcript(lat: float, lon: float, radius_mi: float = 0.75, limit: int = 6):
     """The radio traffic that belongs to THIS event: geocoded scanner CALLS within
     radius (block-log dumps excluded), each split into speaker turns (Dispatcher /
     Officer 1,2,...) so the operator reads who said what -- tailored per event."""

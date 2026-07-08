@@ -212,27 +212,54 @@ function loadCamsTab(ev) {
 }
 
 async function loadTranscriptTab(ev) {
+  // ONLY the radio traffic tied to THIS incident (geocoded calls near it),
+  // speaker-attributed. Not the day's whole dump.
   const box = document.getElementById("d-transcript");
-  box.textContent = "loading radio transcripts...";
+  const OFFICER_COLORS = ["#7fd1ff", "#8fe3a8", "#ffb454", "#d59bff", "#ff9bb0"];
+  if (ev.lat == null) { box.textContent = "no location for this incident"; return; }
+  box.textContent = "loading radio traffic...";
   try {
-    const q = ev.lat != null ? `?lat=${ev.lat}&lon=${ev.lon}` : "";
-    const data = await (await fetch(`/api/scanner_near${q}`)).json();
+    const data = await (await fetch(`/api/event_transcript?lat=${ev.lat}&lon=${ev.lon}`)).json();
     box.replaceChildren();
-    const ts = data.transcripts || [];
-    if (!ts.length) { box.textContent = "no radio transcripts yet (scanner transcribes every 30 min)"; return; }
-    for (const t of ts) {
-      const blk = document.createElement("div"); blk.className = "scanner-block";
-      const hd = document.createElement("strong"); hd.textContent = `${t.type || "scanner"} · ${t.log_time || ""}`;
-      blk.appendChild(hd);
-      if (t.audio_url) {
-        const a = document.createElement("audio");
-        a.controls = true; a.preload = "none"; a.src = t.audio_url;
-        a.style.cssText = "width:100%;height:32px;margin:5px 0;";
-        blk.appendChild(a);
+    const segs = data.segments || [];
+    if (!segs.length) { box.textContent = "no radio traffic matched to this incident"; return; }
+    const hdr = document.createElement("div");
+    hdr.style.cssText = "font-size:11px;color:#888;margin-bottom:8px;";
+    hdr.textContent = `${data.sources} matched call(s) near this incident`;
+    box.appendChild(hdr);
+    const au = (segs.find((s) => s.audio_url) || {}).audio_url;
+    if (au) {
+      const a = document.createElement("audio");
+      a.controls = true; a.preload = "none"; a.src = au;
+      a.style.cssText = "width:100%;height:32px;margin-bottom:10px;";
+      box.appendChild(a);
+    }
+    for (const s of segs) {
+      const row = document.createElement("div");
+      row.style.cssText = "display:flex;gap:8px;margin-bottom:8px;";
+      const sp = document.createElement("span");
+      const n = parseInt((s.speaker || "").replace(/\D/g, ""), 10) || 1;
+      const col = s.speaker === "Dispatcher" ? "#D4AF37" : OFFICER_COLORS[(n - 1) % OFFICER_COLORS.length];
+      sp.style.cssText = `flex:0 0 auto;width:72px;font-size:11px;font-weight:700;color:${col};`;
+      sp.textContent = s.speaker;
+      const txt = document.createElement("div");
+      txt.style.cssText = "font-size:13px;line-height:1.45;";
+      if (s.time) {
+        const tm = document.createElement("span");
+        tm.style.cssText = "color:#888;font-size:11px;margin-right:6px;";
+        tm.textContent = s.time;
+        txt.appendChild(tm);
       }
-      const body = document.createElement("div"); body.className = "d-story"; body.textContent = t.body || "";
-      blk.appendChild(body);
-      box.appendChild(blk);
+      txt.appendChild(document.createTextNode(s.text));
+      if (s.codes && s.codes.length) {
+        const c = document.createElement("span");
+        c.style.cssText = "color:#ff8c1a;font-size:11px;margin-left:6px;";
+        c.textContent = s.codes.join(", ");
+        txt.appendChild(c);
+      }
+      row.appendChild(sp);
+      row.appendChild(txt);
+      box.appendChild(row);
     }
   } catch (e) { box.textContent = "transcripts unavailable"; }
 }

@@ -1,6 +1,6 @@
 // Offline resilience: cache the app shell + last-known data so the survival OS
 // still opens and shows the last picture when the network dies.
-const CACHE = "sld-v2";
+const CACHE = "sld-v3";
 const SHELL = ["/", "/app.js", "/style.css", "/vendor/hls.min.js", "/manifest.json", "/icon.svg"];
 
 self.addEventListener("install", (e) => {
