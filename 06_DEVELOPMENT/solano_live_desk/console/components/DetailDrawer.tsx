@@ -370,7 +370,11 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
               </button>
             ))}
           </div>
-          {tab === "Feed" && <pre style={preStyle}>{ev.body || "(no dispatch detail yet)"}</pre>}
+          {tab === "Feed" && (
+            <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: 10, padding: "11px 13px" }}>
+              <pre style={preStyle}>{ev.body || "(no dispatch detail yet)"}</pre>
+            </div>
+          )}
           {tab === "Transcript" && <Transcripts data={transcripts} />}
           {tab === "Mesh" && (ev.lat != null ? <MeshTab data={mesh} lat={ev.lat} lon={ev.lon!} /> : <Muted>no coordinates for this event</Muted>)}
           {tab === "Intel" && (ev.lat != null ? <IntelTab data={intel} radius={2} links={links} /> : <Muted>no coordinates for this event</Muted>)}
