@@ -8,7 +8,7 @@ from pathlib import Path
 import asyncio
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 
 from . import aircraft as air_mod
@@ -27,6 +27,33 @@ WEB_DIR = Path(__file__).resolve().parent.parent / "web"
 _LEVEL_RANK = {"EXTREME": 4, "HIGH": 3, "MEDIUM": 2, "LOW": 1, "LOG": 0}
 
 app = FastAPI(title="Solano Live Desk")
+
+# --- Private-domain gate ---------------------------------------------------
+# The public Cloudflare tunnel (survival.everlightventures.io) is locked to the
+# operator with a one-time magic link that sets a long-lived cookie. Any other
+# Host (tailnet IP, localhost) is unaffected and stays frictionless.
+_ACCESS_TOKEN = os.environ.get("SLD_ACCESS_TOKEN", "")
+_PUBLIC_HOST = os.environ.get("SLD_PUBLIC_HOST", "survival.everlightventures.io")
+
+
+@app.middleware("http")
+async def _private_gate(request, call_next):
+    host = (request.headers.get("host") or "").split(":")[0]
+    if _ACCESS_TOKEN and host == _PUBLIC_HOST:
+        path = request.url.path
+        if not (path == "/healthz" or path.startswith("/unlock/")):
+            if request.cookies.get("sld_auth") != _ACCESS_TOKEN:
+                return Response("Private dashboard. Open your unlock link.", status_code=403)
+    return await call_next(request)
+
+
+@app.get("/unlock/{token}")
+def unlock(token: str):
+    if _ACCESS_TOKEN and token == _ACCESS_TOKEN:
+        r = RedirectResponse("/console/")
+        r.set_cookie("sld_auth", _ACCESS_TOKEN, max_age=31_536_000, httponly=True, samesite="lax", secure=True)
+        return r
+    return Response("invalid unlock link", status_code=403)
 
 
 def _store_dir() -> str:
