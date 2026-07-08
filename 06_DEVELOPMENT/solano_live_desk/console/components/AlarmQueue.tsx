@@ -15,9 +15,9 @@ export default function AlarmQueue({
   open: boolean;
   onToggle: () => void;
 }) {
-  // Newest first, numbered to match the map pins (#1 = newest).
+  // Listed newest-first; the #N is chronological (first event = #1) to match the map.
   const sorted = [...incidents].sort(
-    (a, b) => (rankMap[a.id] ?? 99999) - (rankMap[b.id] ?? 99999)
+    (a, b) => (Date.parse(b.last_seen || "") || 0) - (Date.parse(a.last_seen || "") || 0)
   );
   if (!open) {
     return (

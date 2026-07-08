@@ -37,10 +37,12 @@ export function sourceMeta(source?: string) {
 
 // Category glyph from the incident type (fire / medical-traffic / crime / quake).
 const GLYPH: [RegExp, string][] = [
-  [/fire|smoke|arson|hazmat|explos/i, "\u{1F525}"],
+  [/fire|smoke|arson|hazmat|explos|wildfire/i, "\u{1F525}"],
   [/robber|211|459|415|assault|242|240|suspect|pursuit|shot|shooting|187|homicide|weapon|gun/i, "\u{1F6A8}"],
-  [/medical|ems|injur|gsw|collision|crash|1179|1181|traffic|hazard|debris|vehicle/i, "\u{1F697}"],
+  [/construction|roadwork|road work|closure|closed|cone/i, "\u{1F6A7}"],
   [/quake|earthquake/i, "\u{1F30A}"],
+  [/flood|storm|wind|weather|heat/i, "\u{26A0}"],
+  [/medical|ems|injur|gsw|collision|crash|1179|1181|traffic|hazard|debris|vehicle|dui/i, "\u{1F697}"],
 ];
 export function categoryGlyph(type?: string): string {
   for (const [re, g] of GLYPH) if (re.test(type || "")) return g;

@@ -241,10 +241,11 @@ export default function Home() {
   const shownFused = scrubT >= 100 ? fused : fused.filter((e) => (Date.parse(e.last_seen || "") || 0) <= cutoff);
   const scrubLabel = scrubT >= 100 || !tmax ? "" : new Date(cutoff).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
-  // One shared recency ranking: newest = #1. Map pin #N === alarm-queue #N.
+  // Chronological numbering: first event = #1, latest = highest number.
+  // Map pin #N === alarm-queue #N (the queue still lists newest-first).
   const rankMap: Record<string, number> = {};
   [...shown]
-    .sort((a, b) => (Date.parse(b.last_seen || "") || 0) - (Date.parse(a.last_seen || "") || 0))
+    .sort((a, b) => (Date.parse(a.last_seen || "") || 0) - (Date.parse(b.last_seen || "") || 0))
     .forEach((e, i) => { rankMap[e.id] = i + 1; });
 
   return (

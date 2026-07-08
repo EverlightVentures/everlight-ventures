@@ -29,8 +29,8 @@ const SAFE_ICON: Record<string, string> = {
 
 function Row({ k, v }: { k: string; v: any }) {
   return (
-    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 12, color: "#333" }}>
-      <span style={{ color: "#777" }}>{k}</span>
+    <div style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 12, color: "var(--text)" }}>
+      <span style={{ color: "var(--muted)" }}>{k}</span>
       <span style={{ fontWeight: 600 }}>{v}</span>
     </div>
   );
@@ -46,7 +46,7 @@ function PoiCard({ poi }: { poi: { kind: string; data: any } }) {
   const d = poi.data;
   if (poi.kind === "plane") {
     return (
-      <div style={{ minWidth: 184, color: "#111" }}>
+      <div style={{ minWidth: 184, color: "var(--text)" }}>
         <div style={{ fontWeight: 700 }}>&#9992; {d.flight || d.id}{d.kind === "mil" ? " (military)" : ""}</div>
         <Row k="Altitude" v={d.alt ? `${d.alt.toLocaleString()} ft` : "?"} />
         <Row k="Speed" v={d.speed ? `${Math.round(d.speed)} kt` : "?"} />
@@ -54,21 +54,21 @@ function PoiCard({ poi }: { poi: { kind: string; data: any } }) {
         <Row k="Type" v={d.type || "?"} />
         {d.squawk ? <Row k="Squawk" v={d.squawk} /> : null}
         {d.emergency ? <div style={{ color: "#c00", fontWeight: 700, fontSize: 12 }}>EMERGENCY</div> : null}
-        <div style={{ marginTop: 6, borderTop: "1px solid #ddd", paddingTop: 4 }}>
+        <div style={{ marginTop: 6, borderTop: "1px solid var(--line)", paddingTop: 4 }}>
           {!route ? (
-            <div style={{ fontSize: 11, color: "#888" }}>looking up flight&hellip;</div>
+            <div style={{ fontSize: 11, color: "var(--muted)" }}>looking up flight&hellip;</div>
           ) : (
             <>
-              {route.airline ? <div style={{ fontSize: 11, color: "#666", fontWeight: 600 }}>{route.airline}</div> : null}
+              {route.airline ? <div style={{ fontSize: 11, color: "var(--muted)", fontWeight: 600 }}>{route.airline}</div> : null}
               {route.origin || route.dest ? (
                 <div style={{ fontWeight: 600 }}>
                   {route.origin?.city || route.origin?.code || "?"} &rarr; {route.dest?.city || route.dest?.code || "?"}
                 </div>
               ) : (
-                <div style={{ fontSize: 11, color: "#888" }}>route not published</div>
+                <div style={{ fontSize: 11, color: "var(--muted)" }}>route not published</div>
               )}
               {route.seats ? (
-                <div style={{ fontSize: 11, color: "#555", marginTop: 2 }}>
+                <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 2 }}>
                   &asymp;{route.est_pax} aboard of {route.seats} ({d.type}, est. ~83% load)
                 </div>
               ) : null}
@@ -80,7 +80,7 @@ function PoiCard({ poi }: { poi: { kind: string; data: any } }) {
   }
   if (poi.kind === "train") {
     return (
-      <div style={{ minWidth: 150, color: "#111" }}>
+      <div style={{ minWidth: 150, color: "var(--text)" }}>
         <div style={{ fontWeight: 700 }}>&#128646; {d.route || "Train"} {d.num || ""}</div>
         <Row k="Status" v={d.state || "?"} />
         <Row k="Speed" v={d.speed != null ? `${Math.round(d.speed)} mph` : "?"} />
@@ -90,17 +90,17 @@ function PoiCard({ poi }: { poi: { kind: string; data: any } }) {
   }
   if (poi.kind === "safe") {
     return (
-      <div style={{ minWidth: 160, color: "#111" }}>
+      <div style={{ minWidth: 160, color: "var(--text)" }}>
         <div style={{ fontWeight: 700 }}>{SAFE_ICON[d.kind] || "\u{1F3E5}"} {d.name}</div>
         <Row k="Type" v={d.kind} />
         <Row k="Distance" v={`${d.distance_mi} mi`} />
-        <div style={{ fontSize: 11, color: "#888", marginTop: 4 }}>safe haven &middot; open to the public</div>
+        <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>safe haven &middot; open to the public</div>
       </div>
     );
   }
   if (poi.kind === "bus") {
     return (
-      <div style={{ minWidth: 130, color: "#111" }}>
+      <div style={{ minWidth: 130, color: "var(--text)" }}>
         <div style={{ fontWeight: 700 }}>&#128652; {d.route || "Transit"}</div>
         {d.speed != null ? <Row k="Speed" v={`${Math.round(d.speed)} mph`} /> : null}
       </div>
@@ -108,10 +108,10 @@ function PoiCard({ poi }: { poi: { kind: string; data: any } }) {
   }
   if (poi.kind === "social") {
     return (
-      <div style={{ minWidth: 200, maxWidth: 260, color: "#111" }}>
+      <div style={{ minWidth: 200, maxWidth: 260, color: "var(--text)" }}>
         <div style={{ fontWeight: 700 }}>&#128293; {d.city} &middot; {d.count} safety post{d.count !== 1 ? "s" : ""}</div>
         {(d.posts || []).slice(0, 4).map((p: any, i: number) => (
-          <a key={i} href={p.url} target="_blank" rel="noreferrer" style={{ display: "block", fontSize: 11, marginTop: 4, color: "#1a4b8c", textDecoration: "none" }}>
+          <a key={i} href={p.url} target="_blank" rel="noreferrer" style={{ display: "block", fontSize: 11, marginTop: 4, color: "#7fd1ff", textDecoration: "none" }}>
             {(p.title || "").slice(0, 82)}
           </a>
         ))}
@@ -365,7 +365,7 @@ export default function MapView({
             ) : (
               <div style={{ fontSize: 12 }}>no feed</div>
             )}
-            <div style={{ fontSize: 11, color: "#333", marginTop: 4 }}>{openCam.name} {openCam.stream_url ? "· LIVE" : "· still"}</div>
+            <div style={{ fontSize: 11, color: "var(--muted)", marginTop: 4 }}>{openCam.name} {openCam.stream_url ? "· LIVE" : "· still"}</div>
           </div>
         </Popup>
       )}
@@ -440,35 +440,36 @@ export default function MapView({
       {singles.map((ev) => {
         const crit = ev.threat_level === "EXTREME" || ev.threat_level === "HIGH";
         const rank = rankMap[ev.id];
+        const sel = ev.id === selectedId;
+        const color = THREAT_COLORS[ev.threat_level] || "#D4AF37";
+        const glyph = categoryGlyph(ev.type);
         const t = ev.last_seen ? new Date(ev.last_seen).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }) : "";
         return (
           <Marker key={ev.id} longitude={ev.lon!} latitude={ev.lat!} onClick={(e) => { e.originalEvent.stopPropagation(); onSelect(ev); }}>
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: ev.id === selectedId ? 1 : ageOpacity(ev.last_seen) }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", opacity: sel ? 1 : ageOpacity(ev.last_seen) }}>
               <div
-                className="mk"
                 style={{
-                  background: THREAT_COLORS[ev.threat_level] || "#D4AF37",
-                  borderColor: ev.id === selectedId ? "#fff" : "rgba(0,0,0,0.6)",
-                  fontSize: rank > 99 ? 9 : 11,
-                  ...(ev.id === selectedId
-                    ? { animation: "critglow 1s ease-in-out infinite", ["--gc" as any]: "#ffffff" }
-                    : crit
-                      ? { animation: "critglow 1.4s ease-in-out infinite", ["--gc" as any]: THREAT_COLORS[ev.threat_level] }
-                      : {}),
+                  width: sel ? 26 : 21, height: sel ? 26 : 21, borderRadius: "50%",
+                  background: "rgba(9,9,12,0.82)",
+                  border: `2px solid ${sel ? "#fff" : color}`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: glyph ? 12 : 9, color, fontWeight: 700, cursor: "pointer",
+                  boxShadow: `0 1px 4px rgba(0,0,0,0.55), 0 0 ${crit || sel ? 9 : 3}px ${color}`,
+                  ...(crit && !sel ? { animation: "critglow 1.5s ease-in-out infinite", ["--gc" as any]: color } : {}),
                 }}
               >
-                {rank}
+                {glyph || "●"}
               </div>
               {zoom >= 11 && (
                 <div
                   style={{
                     marginTop: 2, fontSize: 9, lineHeight: 1.15, color: "#fff",
-                    background: "rgba(0,0,0,0.62)", padding: "1px 4px", borderRadius: 3,
-                    whiteSpace: "nowrap", maxWidth: 132, overflow: "hidden",
+                    background: "rgba(0,0,0,0.6)", padding: "1px 5px", borderRadius: 4,
+                    whiteSpace: "nowrap", maxWidth: 140, overflow: "hidden",
                     textOverflow: "ellipsis", textShadow: "0 0 2px #000",
                   }}
                 >
-                  {categoryGlyph(ev.type)} {(ev.type || "incident").slice(0, 18)} &middot; {t}
+                  #{rank} {(ev.type || "incident").slice(0, 16)} &middot; {t}
                 </div>
               )}
             </div>
