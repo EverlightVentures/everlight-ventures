@@ -130,11 +130,36 @@ def collect(base: str, place: str = "Solano County") -> dict:
     return data
 
 
+MASTO_TAGS = ["bayarea", "california", "sacramento", "napa", "solano"]
+
+
+def fetch_mastodon(tags: list[str], instance: str = "mastodon.social", limit: int = 20) -> list[dict]:
+    """Mastodon public hashtag timelines (no auth, no cloud-IP block)."""
+    import httpx
+
+    out: list[dict] = []
+    for tag in tags:
+        try:
+            r = httpx.get(f"https://{instance}/api/v1/timelines/tag/{tag}", params={"limit": limit},
+                          headers={"User-Agent": "solano-safety-monitor"}, timeout=12)
+            if r.status_code == 200:
+                for p in r.json():
+                    text = re.sub(r"<[^>]+>", " ", p.get("content", "") or "").strip()
+                    out.append({
+                        "source": "mastodon", "sub": "#" + tag, "title": re.sub(r"\s+", " ", text)[:200],
+                        "url": p.get("url", ""), "author": (p.get("account") or {}).get("acct"),
+                        "updated": p.get("created_at", ""),
+                    })
+        except Exception:  # noqa: BLE001
+            pass
+    return out
+
+
 def safety_posts(place: str = "Solano County") -> list[dict]:
-    """Recent local safety/hotspot chatter: Reddit posts that hit a safety keyword
-    or name the operator's city, newest first, deduped."""
+    """Recent local safety/hotspot chatter from Reddit + Mastodon: posts that hit
+    a safety keyword or name the operator's city, newest first, deduped."""
     city = place.split(",")[0].strip()
-    posts = fetch_reddit_rss(LOCAL_SUBS)
+    posts = fetch_reddit_rss(LOCAL_SUBS) + fetch_mastodon(MASTO_TAGS)
     rel = [p for p in posts if _SAFETY.search(p["title"]) or (city and city.lower() in p["title"].lower())]
     seen, out = set(), []
     for p in sorted(rel, key=lambda x: x.get("updated", ""), reverse=True):
