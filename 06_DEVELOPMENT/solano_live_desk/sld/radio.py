@@ -160,6 +160,30 @@ def summarize(segments: list[dict], service: str = "Dispatch", call: str | None 
     return " ".join(bits)
 
 
+_ENTITY_PATS = {
+    "vehicle": r"\b(?:(?:red|blue|black|white|silver|gr[ae]y|green|tan|brown)\s+)?"
+               r"(?:sedan|suv|truck|pickup|van|motorcycle|honda|toyota|ford|chevy|chevrolet|"
+               r"nissan|bmw|tesla|jeep|dodge|hyundai|kia|lexus)\b",
+    "weapon": r"\b(?:handgun|firearm|rifle|shotgun|pistol|knife|machete|weapon|armed|gun|blade)\b",
+    "person": r"\b(?:male|female|\bman\b|woman|juvenile|suspect|subject)"
+              r"(?:\s+(?:wearing|in)\s+[a-z]+(?:\s[a-z]+){0,2})?",
+    "plate": r"\b\d[A-Z]{3}\d{3}\b",
+}
+
+
+def extract_entities(text: str) -> dict:
+    """Pull descriptions the operator cares about from radio traffic: vehicles,
+    weapons, person descriptions, CA plates. Sparse on terse calls, rich on
+    descriptive ones -- the raw material for linking incidents."""
+    out: dict[str, list[str]] = {}
+    for kind, pat in _ENTITY_PATS.items():
+        found = [m.group(0).strip() for m in re.finditer(pat, text, re.I)]
+        found = list(dict.fromkeys(f for f in found if len(f) > 2))
+        if found:
+            out[kind] = found[:5]
+    return out
+
+
 def speaker_segments(text: str) -> list[dict]:
     """Attribute each transcript line to a speaker so the operator reads WHO said
     WHAT: dispatch chatter -> 'Dispatcher'; each distinct unit -> 'Officer 1/2/...'

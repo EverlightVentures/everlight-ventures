@@ -442,7 +442,7 @@ def event_transcript(lat: float, lon: float, id: str | None = None,
     """The radio traffic for THIS event. If the incident IS a scanner call (id
     given), return ONLY its own conversation -- exact. Otherwise the geocoded
     calls within radius, each split into speaker turns + tagged by service."""
-    from .radio import speaker_segments, classify_service, summarize
+    from .radio import speaker_segments, classify_service, summarize, extract_entities
     from .geo_county import distance_mi
     from datetime import datetime as _dt
 
@@ -471,6 +471,7 @@ def event_transcript(lat: float, lon: float, id: str | None = None,
             "start": _fmt(r.get("log_time") or ""), "distance_mi": round(d, 1),
             "audio_url": r.get("audio_url"), "segments": segs,
             "summary": summarize(segs, svc, r.get("geo_label")),
+            "entities": extract_entities(body),
         }
 
     # Exact: this incident is itself a scanner call -> only its own conversation.
@@ -534,7 +535,23 @@ def intel(lat: float, lon: float, radius_mi: float = 2.0, days: int = 7):
         finally:
             conn.close()
     precursors.sort(key=lambda x: x["date"], reverse=True)
-    return {"precursors": precursors[:30], "prior_count": len(precursors), "area_today": area_today, "radius_mi": radius_mi}
+    # Predictive risk from OUR OWN history: density (7d) + activity now, weighted
+    # up if a CRITICAL/HIGH precursor sits here. A real risk-terrain-lite score.
+    prior = len(precursors)
+    hi_prior = sum(1 for p in precursors if p.get("severity") in ("CRITICAL", "HIGH"))
+    risk = min(100, prior * 7 + area_today * 15 + hi_prior * 6)
+    level = "HIGH" if risk >= 50 else "MEDIUM" if risk >= 20 else "LOW"
+    factors = []
+    if prior >= 3:
+        factors.append(f"{prior} incidents here in 7 days")
+    if hi_prior:
+        factors.append(f"{hi_prior} were high-severity")
+    if area_today >= 2:
+        factors.append(f"{area_today} active in this spot today")
+    if not factors:
+        factors.append("quiet area, little recent history")
+    return {"precursors": precursors[:30], "prior_count": prior, "area_today": area_today,
+            "radius_mi": radius_mi, "risk_score": risk, "risk_level": level, "risk_factors": factors}
 
 
 @app.get("/api/social")

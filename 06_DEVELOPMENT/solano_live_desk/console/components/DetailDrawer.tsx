@@ -11,11 +11,21 @@ import SourceBadge from "@/components/SourceBadge";
 const TABS = ["Feed", "Transcript", "Mesh", "Intel", "Social", "Audio", "Cameras", "Sources"] as const;
 type Tab = (typeof TABS)[number];
 
+const RISK_BG: Record<string, string> = {
+  HIGH: "rgba(200,0,0,0.85)", MEDIUM: "rgba(255,140,26,0.82)", LOW: "rgba(26,127,55,0.7)",
+};
+
 function IntelTab({ data, radius }: { data: any | null; radius: number }) {
   if (data === null) return <Muted>looking back over the past week...</Muted>;
   const pre = data.precursors || [];
   return (
     <div>
+      {data.risk_level && (
+        <div style={{ background: RISK_BG[data.risk_level] || RISK_BG.LOW, color: "#fff", borderRadius: 8, padding: "8px 10px", marginBottom: 10 }}>
+          <div style={{ fontSize: 13, fontWeight: 700 }}>Risk: {data.risk_level} ({data.risk_score}/100)</div>
+          <div style={{ fontSize: 11, marginTop: 2, opacity: 0.95 }}>{(data.risk_factors || []).join(" · ")}</div>
+        </div>
+      )}
       <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
         <div className="glass" style={{ flex: 1, borderRadius: 8, padding: "6px 9px" }}>
           <div style={{ fontSize: 19, fontWeight: 700, color: "var(--gold)" }}>{data.prior_count}</div>
@@ -148,6 +158,15 @@ function Transcripts({ data }: { data: { conversations: any[]; sources: number }
             <div style={{ background: "rgba(212,175,55,0.1)", border: "1px solid var(--line)", borderRadius: 8, padding: "7px 9px", margin: "6px 0" }}>
               <span style={{ color: "var(--gold)", fontWeight: 700, fontSize: 10, textTransform: "uppercase", letterSpacing: 0.5 }}>Summary</span>
               <div style={{ fontSize: 13, lineHeight: 1.4, marginTop: 2 }}>{c.summary}</div>
+            </div>
+          )}
+          {c.entities && Object.keys(c.entities).length > 0 && (
+            <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 6 }}>
+              {Object.entries(c.entities).map(([k, v]: any, i: number) => (
+                <span key={i} style={{ fontSize: 10, background: "rgba(255,91,91,0.15)", color: "#ff9b9b", border: "1px solid #ff5b5b44", borderRadius: 4, padding: "1px 6px" }}>
+                  {k}: {(v as string[]).join(", ")}
+                </span>
+              ))}
             </div>
           )}
           {c.audio_url && <audio controls preload="none" src={c.audio_url} style={{ width: "100%", height: 32, margin: "6px 0" }} />}
