@@ -155,11 +155,71 @@ def fetch_mastodon(tags: list[str], instance: str = "mastodon.social", limit: in
     return out
 
 
+_BSKY_SESSION: dict = {}
+_BSKY_QUERIES = [
+    "Fairfield police", "Vacaville fire", "Solano crash", "Vallejo shooting",
+    "Napa evacuate", "Bay Area protest", "Sacramento police",
+]
+
+
+def _bsky_jwt():
+    import os
+
+    import httpx
+
+    u, pw = os.environ.get("SLD_BLUESKY_USER"), os.environ.get("SLD_BLUESKY_PASS")
+    if not u or not pw:
+        return None
+    if _BSKY_SESSION.get("jwt"):
+        return _BSKY_SESSION["jwt"]
+    try:
+        r = httpx.post("https://bsky.social/xrpc/com.atproto.server.createSession",
+                       json={"identifier": u, "password": pw}, timeout=15)
+        if r.status_code == 200:
+            _BSKY_SESSION["jwt"] = r.json().get("accessJwt")
+            return _BSKY_SESSION["jwt"]
+    except Exception:  # noqa: BLE001
+        pass
+    return None
+
+
+def fetch_bluesky(queries: list[str] | None = None, limit: int = 12) -> list[dict]:
+    """Authenticated Bluesky search (official API) for location + safety terms."""
+    import httpx
+
+    jwt = _bsky_jwt()
+    if not jwt:
+        return []
+    out: list[dict] = []
+    for q in (queries or _BSKY_QUERIES):
+        try:
+            r = httpx.get("https://api.bsky.app/xrpc/app.bsky.feed.searchPosts",
+                          params={"q": q, "limit": limit, "sort": "latest"},
+                          headers={"Authorization": f"Bearer {jwt}"}, timeout=15)
+            if r.status_code == 401:  # token expired -> re-auth once
+                _BSKY_SESSION.pop("jwt", None)
+                jwt = _bsky_jwt()
+                if not jwt:
+                    break
+                continue
+            if r.status_code == 200:
+                for p in r.json().get("posts", []):
+                    rec, auth = p.get("record", {}) or {}, p.get("author", {}) or {}
+                    out.append({
+                        "source": "bluesky", "sub": "bsky", "title": (rec.get("text") or "")[:200],
+                        "url": f"https://bsky.app/profile/{auth.get('handle')}/post/{(p.get('uri') or '').split('/')[-1]}",
+                        "author": auth.get("handle"), "updated": rec.get("createdAt", ""),
+                    })
+        except Exception:  # noqa: BLE001
+            pass
+    return out
+
+
 def safety_posts(place: str = "Solano County") -> list[dict]:
-    """Recent local safety/hotspot chatter from Reddit + Mastodon: posts that hit
-    a safety keyword or name the operator's city, newest first, deduped."""
+    """Recent local safety chatter fused from Reddit + Mastodon + Bluesky: posts
+    that hit a safety keyword or name the operator's city, newest first, deduped."""
     city = place.split(",")[0].strip()
-    posts = fetch_reddit_rss(LOCAL_SUBS) + fetch_mastodon(MASTO_TAGS)
+    posts = fetch_reddit_rss(LOCAL_SUBS) + fetch_mastodon(MASTO_TAGS) + fetch_bluesky()
     rel = [p for p in posts if _SAFETY.search(p["title"]) or (city and city.lower() in p["title"].lower())]
     seen, out = set(), []
     for p in sorted(rel, key=lambda x: x.get("updated", ""), reverse=True):
