@@ -554,6 +554,64 @@ def intel(lat: float, lon: float, radius_mi: float = 2.0, days: int = 7):
             "radius_mi": radius_mi, "risk_score": risk, "risk_level": level, "risk_factors": factors}
 
 
+@app.get("/api/links")
+def links(id: str, days: int = 3):
+    """Link analysis: incidents connected to this one by shared plate, vehicle,
+    suspect description, responding unit, or exact location (today + recent days)."""
+    from .radio import extract_entities, line_ids
+    from datetime import datetime as _dt, timedelta
+
+    base = _store_dir()
+    rows: list[dict] = []
+    try:
+        bd = _dt.strptime(store.today_pt(), "%Y_%m_%d")
+    except Exception:  # noqa: BLE001
+        return {"links": [], "entities": {}}
+    for i in range(days):
+        dk = (bd - timedelta(days=i)).strftime("%Y_%m_%d")
+        if not store.day_db_path(base, dk).exists():
+            continue
+        conn = store.connect(base, dk)
+        try:
+            for r in store.get_events(conn):
+                r["_day"] = dk.replace("_", "-")
+                rows.append(r)
+        finally:
+            conn.close()
+    target = next((r for r in rows if r.get("id") == id), None)
+    if not target:
+        return {"links": [], "entities": {}}
+    tb = target.get("body") or ""
+    te = extract_entities(tb)
+    t_plate, t_veh, t_person = set(te.get("plate", [])), set(te.get("vehicle", [])), set(te.get("person", []))
+    t_units = set(line_ids(tb, base))
+    t_loc = (target.get("geo_label") or "").strip().lower()
+    out = []
+    for r in rows:
+        if r.get("id") == id or r.get("lat") is None:
+            continue
+        if (r.get("type") or "").startswith("Scanner log"):  # skip block-log dumps (match everything)
+            continue
+        rb = r.get("body") or ""
+        re_ = extract_entities(rb)
+        reasons = []
+        if t_plate & set(re_.get("plate", [])):
+            reasons.append("same plate")
+        if t_veh & set(re_.get("vehicle", [])):
+            reasons.append("same vehicle")
+        if t_person & set(re_.get("person", [])):
+            reasons.append("same description")
+        su = t_units & set(line_ids(rb, base))
+        if su:
+            reasons.append("unit " + ", ".join(sorted(su)[:2]))
+        if t_loc and t_loc == (r.get("geo_label") or "").strip().lower():
+            reasons.append("same location")
+        if reasons:
+            out.append({"id": r.get("id"), "type": r.get("type"), "day": r.get("_day"),
+                        "geo_label": r.get("geo_label"), "reasons": list(dict.fromkeys(reasons))})
+    return {"links": out[:20], "entities": te}
+
+
 @app.get("/api/social")
 def social(place: str = "Solano County"):
     """Local safety chatter (Reddit RSS), collected + geo-tagged by the ingest loop."""

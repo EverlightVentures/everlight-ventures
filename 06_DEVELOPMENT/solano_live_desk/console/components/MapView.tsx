@@ -320,7 +320,7 @@ export default function MapView({
       ))}
       {(layers.socialHot || []).map((h, i) => {
         const sz = 22 + Math.min(h.count * 4, 22);
-        const hot = h.count >= 3;
+        const hot = h.count >= 4;
         return (
           <Marker key={"hot" + i} longitude={h.lon} latitude={h.lat} onClick={(e) => { e.originalEvent.stopPropagation(); setPoi({ kind: "social", data: h }); }}>
             <div

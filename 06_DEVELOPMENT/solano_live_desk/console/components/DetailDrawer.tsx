@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Incident } from "@/lib/types";
 import { THREAT_COLORS } from "@/lib/types";
-import { getEventTranscript, getCameras, getCamDvr, getMesh, getIntel, getSocial } from "@/lib/api";
+import { getEventTranscript, getCameras, getCamDvr, getMesh, getIntel, getSocial, getLinks } from "@/lib/api";
 import LiveVideo from "@/components/LiveVideo";
 import { ageLabel } from "@/lib/util";
 import SourceBadge from "@/components/SourceBadge";
@@ -15,9 +15,10 @@ const RISK_BG: Record<string, string> = {
   HIGH: "rgba(200,0,0,0.85)", MEDIUM: "rgba(255,140,26,0.82)", LOW: "rgba(26,127,55,0.7)",
 };
 
-function IntelTab({ data, radius }: { data: any | null; radius: number }) {
+function IntelTab({ data, radius, links }: { data: any | null; radius: number; links: any }) {
   if (data === null) return <Muted>looking back over the past week...</Muted>;
   const pre = data.precursors || [];
+  const linked = (links && links.links) || [];
   return (
     <div>
       {data.risk_level && (
@@ -45,6 +46,21 @@ function IntelTab({ data, radius }: { data: any | null; radius: number }) {
           <span style={{ color: "var(--muted)", flex: "0 0 auto" }}>{p.dist} mi</span>
         </div>
       ))}
+      {linked.length > 0 && (
+        <div style={{ marginTop: 12 }}>
+          <div style={{ fontSize: 11, color: "var(--gold)", fontWeight: 700, marginBottom: 4 }}>
+            {"\u{1F517}"} {linked.length} linked incident{linked.length !== 1 ? "s" : ""}
+          </div>
+          {linked.map((l: any, i: number) => (
+            <div key={i} style={{ padding: "5px 0", borderTop: "1px solid var(--line)" }}>
+              <div style={{ fontSize: 12 }}>
+                {(l.type || "incident").slice(0, 30)} <span style={{ color: "var(--muted)" }}>&middot; {l.day}</span>
+              </div>
+              <div style={{ fontSize: 10, color: "#8fe3a8" }}>{l.reasons.join(" · ")}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -266,10 +282,11 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
   const [dvr, setDvr] = useState<{ camera: any; frames: any[] } | null>(null);
   const [mesh, setMesh] = useState<{ nodes: any[]; messages: any[] } | null>(null);
   const [intel, setIntel] = useState<any>(null);
+  const [links, setLinks] = useState<any>(null);
   const [social, setSocial] = useState<{ posts: any[] } | null>(null);
   const eventTs = ev ? Math.round((Date.parse(ev.last_seen || "") || Date.now()) / 1000) : 0;
 
-  useEffect(() => { setTab("Feed"); setTranscripts(null); setCams(null); setDvr(null); setMesh(null); setIntel(null); setSocial(null); }, [ev?.id]);
+  useEffect(() => { setTab("Feed"); setTranscripts(null); setCams(null); setDvr(null); setMesh(null); setIntel(null); setLinks(null); setSocial(null); }, [ev?.id]);
   useEffect(() => {
     if (!ev) return;
     if (tab === "Transcript" && transcripts === null) {
@@ -280,13 +297,15 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
       getMesh().then((d) => setMesh({ nodes: d.nodes, messages: d.messages })).catch(() => setMesh({ nodes: [], messages: [] }));
     if (tab === "Intel" && intel === null && ev.lat != null)
       getIntel(ev.lat, ev.lon!).then(setIntel).catch(() => setIntel({ precursors: [], prior_count: 0, area_today: 0 }));
+    if (tab === "Intel" && links === null && ev.id)
+      getLinks(ev.id).then(setLinks).catch(() => setLinks({ links: [], entities: {} }));
     if (tab === "Social" && social === null)
       getSocial(ev.geo_label || "Solano County").then(setSocial).catch(() => setSocial({ posts: [] }));
     if (tab === "Cameras" && cams === null && ev.lat != null)
       getCameras(ev.lat, ev.lon!).then(setCams).catch(() => setCams([]));
     if (tab === "Cameras" && dvr === null && ev.lat != null)
       getCamDvr(ev.lat, ev.lon!, eventTs).then(setDvr).catch(() => setDvr({ camera: null, frames: [] }));
-  }, [tab, ev, transcripts, cams, dvr, mesh, intel, social, eventTs]);
+  }, [tab, ev, transcripts, cams, dvr, mesh, intel, links, social, eventTs]);
 
   return (
     <AnimatePresence>
@@ -349,7 +368,7 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
           {tab === "Feed" && <pre style={preStyle}>{ev.body || "(no dispatch detail yet)"}</pre>}
           {tab === "Transcript" && <Transcripts data={transcripts} />}
           {tab === "Mesh" && (ev.lat != null ? <MeshTab data={mesh} lat={ev.lat} lon={ev.lon!} /> : <Muted>no coordinates for this event</Muted>)}
-          {tab === "Intel" && (ev.lat != null ? <IntelTab data={intel} radius={2} /> : <Muted>no coordinates for this event</Muted>)}
+          {tab === "Intel" && (ev.lat != null ? <IntelTab data={intel} radius={2} links={links} /> : <Muted>no coordinates for this event</Muted>)}
           {tab === "Social" && <SocialTab data={social} />}
           {tab === "Audio" && (ev.audio_url
             ? <audio controls preload="none" src={ev.audio_url} style={{ width: "100%" }} />

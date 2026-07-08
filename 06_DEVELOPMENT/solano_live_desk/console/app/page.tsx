@@ -252,12 +252,17 @@ export default function Home() {
         selectedId={selected?.id ?? null}
         onSelect={setSelected}
       />
-      {hotspots.find((h) => h.count >= 3) && (() => {
-        const h = hotspots.find((x) => x.count >= 3);
+      {(() => {
+        const HOT = 4; // "heating up" bar, tuned now that 3-source data is flowing
+        const hot = hotspots.filter((h) => h.count >= HOT);
+        if (!hot.length) return null;
+        // Prefer the hotspot NEAREST me (proximity beats raw count); highest count if no GPS.
+        const rank = (h: any) => (pos ? (h.lat - pos.lat) ** 2 + (h.lon - pos.lon) ** 2 : -h.count);
+        const h = [...hot].sort((a, b) => rank(a) - rank(b))[0];
         return (
           <div
             style={{
-              position: "absolute", top: 72, left: "50%", transform: "translateX(-50%)", zIndex: 30,
+              position: "absolute", top: 56, left: "50%", transform: "translateX(-50%)", zIndex: 30,
               background: "rgba(200,0,0,0.92)", color: "#fff", padding: "6px 14px", borderRadius: 10,
               fontSize: 13, fontWeight: 700, boxShadow: "0 4px 20px rgba(0,0,0,0.5)", cursor: "pointer",
             }}
