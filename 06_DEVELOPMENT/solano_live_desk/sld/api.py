@@ -43,6 +43,10 @@ async def _private_gate(request, call_next):
     if _ACCESS_TOKEN and host == _PUBLIC_HOST:
         path = request.url.path
         if not (path == "/healthz" or path.startswith("/unlock/")):
+            # The background GPS poster authenticates with the token as a query
+            # param (no browser, no cookie) so location stays fresh app-closed.
+            if path == "/api/location" and request.query_params.get("token") == _ACCESS_TOKEN:
+                return await call_next(request)
             if request.cookies.get("sld_auth") != _ACCESS_TOKEN:
                 return Response("Private dashboard. Open your unlock link.", status_code=403)
     return await call_next(request)
