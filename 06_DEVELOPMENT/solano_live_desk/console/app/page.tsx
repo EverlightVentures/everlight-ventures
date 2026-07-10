@@ -102,10 +102,17 @@ export default function Home() {
   }, [pos, day]);
 
   // Today (live) or an archived past day -- yesterday never bleeds into today.
+  // Poll on a timer too, so the map/queue stay fresh while you are PARKED at a
+  // delivery (GPS stationary) and new calls keep arriving server-side.
   useEffect(() => {
-    getEvents(pos?.lat, pos?.lon, day || undefined).then(setIncidents).catch(() => {});
-    refreshFused();
+    const load = () => {
+      getEvents(pos?.lat, pos?.lon, day || undefined).then(setIncidents).catch(() => {});
+      refreshFused();
+    };
+    load();
     getSpaceWx().then(setSpacewx).catch(() => {});
+    const id = setInterval(load, 20000);
+    return () => clearInterval(id);
   }, [pos, day, refreshFused]);
 
   useEffect(() => { getDays().then((d) => setDays(d.filter((x) => x !== ""))).catch(() => {}); }, []);
@@ -333,13 +340,22 @@ export default function Home() {
             color: "#fff", padding: "7px 15px", borderRadius: 11, maxWidth: "92vw",
             boxShadow: "0 4px 22px rgba(0,0,0,0.55)", textAlign: "center", cursor: decision.action === "EVACUATE" ? "pointer" : "default",
           }}
-          onClick={() => { if (decision.action === "EVACUATE") setLayerOn((p) => ({ ...p, route: true })); }}
+          onClick={() => {
+            if (decision.hazard_id) {
+              const h = incidents.find((e) => e.id === decision.hazard_id);
+              if (h) setSelected(h);
+            }
+            if (decision.action === "EVACUATE") setLayerOn((p) => ({ ...p, route: true }));
+          }}
         >
           <div style={{ fontSize: 14, fontWeight: 800, letterSpacing: 0.4 }}>
             {decision.action === "EVACUATE" ? "\u{1F6A8} EVACUATE"
               : decision.action === "SHELTER" ? "\u{1F6E1} SHELTER IN PLACE" : "✓ CLEAR"}
           </div>
           <div style={{ fontSize: 11, marginTop: 1, opacity: 0.95 }}>{decision.reason}</div>
+          {decision.hazard_id ? (
+            <div style={{ fontSize: 10, marginTop: 2, opacity: 0.85, fontWeight: 600 }}>tap to pinpoint it on the map</div>
+          ) : null}
         </div>
       )}
       <Toolbar

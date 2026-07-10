@@ -728,7 +728,7 @@ def decision(lat: float, lon: float):
         except Exception:  # noqa: BLE001 - serve stale/empty on transient failure
             _EVAC_CACHE["gj"] = _EVAC_CACHE["gj"] or {"features": []}
     zones = decide_mod.enrich_zones(_EVAC_CACHE["gj"], lat, lon)
-    return decide_mod.decide(incidents, zones, has_gps=True)
+    return decide_mod.decide(incidents, zones, user=(lat, lon))
 
 
 @app.get("/api/spacewx")

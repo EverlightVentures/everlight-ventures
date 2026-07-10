@@ -55,10 +55,25 @@ def enrich_zones(geojson: dict, lat: float, lon: float) -> list[dict]:
     return out
 
 
-def decide(incidents: list[dict], evac_zones: list[dict], has_gps: bool = True) -> dict:
-    """Return {action, reason, hazard, confidence, factors}.
-    action: EVACUATE (red GO) | SHELTER (blue STAY) | CLEAR (green)."""
-    if not has_gps:
+def _bearing(user, e) -> str | None:
+    """Compass direction (N/NE/.../NW) from the operator to a hazard."""
+    import math
+
+    if not user or e.get("lat") is None or e.get("lon") is None:
+        return None
+    lat1, lon1 = math.radians(user[0]), math.radians(user[1])
+    lat2, lon2 = math.radians(e["lat"]), math.radians(e["lon"])
+    dl = lon2 - lon1
+    y = math.sin(dl) * math.cos(lat2)
+    x = math.cos(lat1) * math.sin(lat2) - math.sin(lat1) * math.cos(lat2) * math.cos(dl)
+    deg = (math.degrees(math.atan2(y, x)) + 360) % 360
+    return ["N", "NE", "E", "SE", "S", "SW", "W", "NW"][round(deg / 45) % 8]
+
+
+def decide(incidents: list[dict], evac_zones: list[dict], user=None) -> dict:
+    """Return {action, reason, hazard, hazard_lat/lon/dist/bearing, confidence, factors}.
+    action: EVACUATE (red GO) | SHELTER (blue STAY) | CLEAR (green). user = (lat, lon)."""
+    if not user:
         return {"action": "CLEAR", "reason": "no GPS fix yet", "hazard": None, "confidence": 0.0, "factors": []}
 
     # 1) Active EVACUATION ORDER you are inside or within 3 mi -> leave.
@@ -87,20 +102,24 @@ def decide(incidents: list[dict], evac_zones: list[dict], has_gps: bool = True) 
         if rank == 0 and not violence and _VIOLENCE.search(text):
             violence = e
 
+    def _haz(e: dict) -> dict:  # so the console can fly to + highlight the exact hazard
+        return {"hazard_id": e.get("id"), "hazard_lat": e.get("lat"), "hazard_lon": e.get("lon"),
+                "hazard_dist": e.get("distance_mi"), "hazard_bearing": _bearing(user, e)}
+
     if fire:
-        d = fire.get("distance_mi")
-        return {"action": "EVACUATE", "reason": f"fire {d} mi away in your {(fire.get('ring') or '').lower()} ring, leave early",
-                "hazard": fire.get("type"), "confidence": 0.75,
-                "factors": [f"FIRE: {fire.get('type')} ({d} mi, {fire.get('ring')})"]}
+        d, b = fire.get("distance_mi"), _bearing(user, fire)
+        return {"action": "EVACUATE", "reason": f"fire {d} mi to your {b}, head the other way",
+                "hazard": fire.get("type"), "confidence": 0.75, **_haz(fire),
+                "factors": [f"FIRE: {fire.get('type')} ({d} mi {b}, {fire.get('ring')})"]}
     if airborne:
-        d = airborne.get("distance_mi")
-        return {"action": "SHELTER", "reason": f"airborne hazard {d} mi away, close windows and stay inside",
-                "hazard": airborne.get("type"), "confidence": 0.7,
-                "factors": [f"AIRBORNE: {airborne.get('type')} ({d} mi)"]}
+        d, b = airborne.get("distance_mi"), _bearing(user, airborne)
+        return {"action": "SHELTER", "reason": f"airborne hazard {d} mi to your {b}, close windows and stay inside",
+                "hazard": airborne.get("type"), "confidence": 0.7, **_haz(airborne),
+                "factors": [f"AIRBORNE: {airborne.get('type')} ({d} mi {b})"]}
     if violence:
-        d = violence.get("distance_mi")
-        return {"action": "SHELTER", "reason": f"active violence {d} mi away, lock down and stay off the street",
-                "hazard": violence.get("type"), "confidence": 0.75,
-                "factors": [f"VIOLENCE: {violence.get('type')} ({d} mi)"]}
+        d, b = violence.get("distance_mi"), _bearing(user, violence)
+        return {"action": "SHELTER", "reason": f"active violence {d} mi to your {b}, lock down and stay off the street",
+                "hazard": violence.get("type"), "confidence": 0.75, **_haz(violence),
+                "factors": [f"VIOLENCE: {violence.get('type')} ({d} mi {b})"]}
 
     return {"action": "CLEAR", "reason": "no immediate threat in your rings", "hazard": None, "confidence": 0.6, "factors": []}
