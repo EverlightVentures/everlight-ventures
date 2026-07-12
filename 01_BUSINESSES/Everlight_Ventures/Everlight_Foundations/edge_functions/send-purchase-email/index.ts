@@ -2,8 +2,6 @@
 // Called by verify-ebook-purchase after generating download link
 // Uses Resend API (free tier: 3k emails/mo)
 
-const SUPABASE_URL = "https://jdqqmsmwmbsnlnstyavl.supabase.co";
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",

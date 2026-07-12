@@ -121,16 +121,6 @@ export interface HiveLogEntry {
   tokens?: number;
 }
 
-// Navigation
-export interface NavItem {
-  id: string;
-  label: string;
-  href: string;
-  icon: string; // Lucide icon name
-  badge?: string | number;
-  group?: "main" | "tools" | "settings";
-}
-
 // User / Account
 export type PlanTier = "starter" | "pro" | "team" | "enterprise";
 
