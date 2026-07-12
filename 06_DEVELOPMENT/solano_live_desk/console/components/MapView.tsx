@@ -234,7 +234,7 @@ export type Layers = {
 };
 
 export default function MapView({
-  incidents, fused, aircraft, trains, layers, rankMap, userPos, showRings, linkFrom, linkTargets, selectedId, onSelect,
+  incidents, fused, aircraft, trains, layers, rankMap, userPos, showRings, linkFrom, linkTargets, escape, selectedId, onSelect,
 }: {
   incidents: Incident[];
   fused: Incident[];
@@ -246,6 +246,7 @@ export default function MapView({
   showRings: boolean;
   linkFrom: { lat: number; lon: number } | null;
   linkTargets: any[];
+  escape?: { dest?: any; routes?: any[]; error?: string } | null;
   selectedId: string | null;
   onSelect: (ev: Incident) => void;
 }) {
@@ -336,6 +337,31 @@ export default function MapView({
         <Source id="route" type="geojson" data={{ type: "Feature", geometry: layers.route.route, properties: {} }}>
           <Layer id="route-line" type="line" paint={{ "line-color": "#2ecc71", "line-width": 5, "line-opacity": 0.9 }} />
         </Source>
+      )}
+      {escape?.routes?.length ? (
+        // Dispersed Egress: alternates first, recommended drawn last so it sits on top.
+        [...escape.routes]
+          .map((r, idx) => ({ r, idx }))
+          .sort((a, b) => (a.r.recommended ? 1 : 0) - (b.r.recommended ? 1 : 0))
+          .map(({ r, idx }) => (
+            <Source key={"esc" + idx} id={"esc" + idx} type="geojson" data={{ type: "Feature", geometry: r.geometry, properties: {} }}>
+              <Layer
+                id={"esc" + idx}
+                type="line"
+                paint={{
+                  "line-color": r.recommended ? "#39ff88" : r.blocked ? "#ff4d4d" : "#ffb454",
+                  "line-width": r.recommended ? 6 : 3,
+                  "line-opacity": r.recommended ? 0.95 : 0.6,
+                  ...(r.recommended ? {} : { "line-dasharray": [2, 2] }),
+                }}
+              />
+            </Source>
+          ))
+      ) : null}
+      {escape?.dest && (
+        <Marker longitude={escape.dest.lon} latitude={escape.dest.lat}>
+          <div title={escape.dest.name} style={{ fontSize: 20, filter: "drop-shadow(0 0 4px #000)" }}>{"\u{1F3C1}"}</div>
+        </Marker>
       )}
       {(layers.safe || []).map((s, i) => (
         <Marker key={"safe" + i} longitude={s.lon} latitude={s.lat} onClick={(e) => {

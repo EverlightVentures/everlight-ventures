@@ -7,7 +7,7 @@ import type { ToggleKey } from "@/components/Toolbar";
 import {
   getEvents, getCorrelated, getSpaceWx, getCounty, getAircraft, getTrains,
   getEvac, getSafePoints, getBuses, getDanger, getRoute, getDays, getMapCameras, getNews, getStats,
-  getSocialHotspots, getLinks, getDecision,
+  getSocialHotspots, getLinks, getDecision, getEscape,
 } from "@/lib/api";
 import StatusBar from "@/components/StatusBar";
 import AlarmQueue from "@/components/AlarmQueue";
@@ -18,6 +18,7 @@ import NewsPanel from "@/components/NewsPanel";
 import StatsPanel from "@/components/StatsPanel";
 import FilterBar from "@/components/FilterBar";
 import Legend from "@/components/Legend";
+import CrashGuard from "@/components/CrashGuard";
 import { filterIncidents, EMPTY_FILTERS } from "@/lib/util";
 import type { Filters } from "@/lib/util";
 
@@ -65,6 +66,7 @@ export default function Home() {
   const [speed, setSpeed] = useState(1);
   const [linkTargets, setLinkTargets] = useState<any[]>([]);
   const [decision, setDecision] = useState<any>(null);
+  const [escape, setEscape] = useState<any>(null);
 
   // Shelter-vs-Evacuate decision, refreshed against live GPS.
   useEffect(() => {
@@ -74,6 +76,9 @@ export default function Home() {
     const id = setInterval(f, 60000);
     return () => clearInterval(id);
   }, [pos]);
+
+  // Ways-out routes only make sense while evacuating -- drop them otherwise.
+  useEffect(() => { if (decision && decision.action !== "EVACUATE") setEscape(null); }, [decision]);
 
   // Fetch link analysis when an incident is selected -> draw connection lines.
   useEffect(() => {
@@ -277,6 +282,7 @@ export default function Home() {
         showRings={layerOn.rings}
         linkFrom={selected && selected.lat != null && selected.lon != null ? { lat: selected.lat, lon: selected.lon } : null}
         linkTargets={linkTargets}
+        escape={escape}
         selectedId={selected?.id ?? null}
         onSelect={setSelected}
       />
@@ -345,7 +351,7 @@ export default function Home() {
               const h = incidents.find((e) => e.id === decision.hazard_id);
               if (h) setSelected(h);
             }
-            if (decision.action === "EVACUATE") setLayerOn((p) => ({ ...p, route: true }));
+            if (decision.action === "EVACUATE" && pos) getEscape(pos.lat, pos.lon).then(setEscape).catch(() => {});
           }}
         >
           <div style={{ fontSize: 14, fontWeight: 800, letterSpacing: 0.4 }}>
@@ -353,9 +359,47 @@ export default function Home() {
               : decision.action === "SHELTER" ? "\u{1F6E1} SHELTER IN PLACE" : "✓ CLEAR"}
           </div>
           <div style={{ fontSize: 11, marginTop: 1, opacity: 0.95 }}>{decision.reason}</div>
-          {decision.hazard_id ? (
+          {decision.action === "EVACUATE" ? (
+            <div style={{ fontSize: 10, marginTop: 2, opacity: 0.85, fontWeight: 600 }}>tap for the hazard + your ways out</div>
+          ) : decision.hazard_id ? (
             <div style={{ fontSize: 10, marginTop: 2, opacity: 0.85, fontWeight: 600 }}>tap to pinpoint it on the map</div>
           ) : null}
+          {decision.action === "EVACUATE" || decision.action === "SHELTER" ? (
+            <div style={{ fontSize: 9, marginTop: 3, opacity: 0.8, letterSpacing: 0.2 }}>
+              Advisory only, not an official order. Follow 911 and local authorities.
+            </div>
+          ) : null}
+        </div>
+      )}
+      {escape && (
+        <div
+          style={{
+            position: "absolute", left: 12, bottom: 96, zIndex: 26, width: 300, maxWidth: "88vw",
+            background: "rgba(10,10,10,0.93)", border: "1px solid #2a2820", borderRadius: 12,
+            padding: "12px 14px", boxShadow: "0 6px 26px rgba(0,0,0,0.6)", color: "#e8e8e8",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+            <span style={{ fontSize: 12, fontWeight: 800, color: "#39ff88", letterSpacing: 0.4 }}>WAYS OUT</span>
+            <button onClick={() => setEscape(null)} style={{ background: "none", border: "none", color: "#e8e8e8", fontSize: 18, cursor: "pointer", lineHeight: 1 }}>&times;</button>
+          </div>
+          {escape.error ? (
+            <div style={{ fontSize: 12, color: "#968f80" }}>{escape.error}</div>
+          ) : (
+            <>
+              <div style={{ fontSize: 12, marginBottom: 8, lineHeight: 1.4 }}>{escape.headline}</div>
+              {(escape.routes || []).map((r: any, i: number) => (
+                <div key={i} style={{ display: "flex", gap: 8, alignItems: "baseline", padding: "5px 0", borderTop: i ? "1px solid #2a2820" : "none" }}>
+                  <span style={{ width: 9, height: 9, borderRadius: "50%", flex: "0 0 auto", marginTop: 4, background: r.recommended ? "#39ff88" : r.blocked ? "#ff4d4d" : "#ffb454" }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 12, fontWeight: 600 }}>{r.eta_min} min &middot; {r.distance_mi} mi</div>
+                    <div style={{ fontSize: 10.5, color: "#968f80" }}>{r.reason}</div>
+                  </div>
+                </div>
+              ))}
+              <div style={{ fontSize: 9, color: "#968f80", marginTop: 8, letterSpacing: 0.2 }}>Advisory only. Follow 911 and local authorities.</div>
+            </>
+          )}
         </div>
       )}
       <Toolbar
@@ -374,6 +418,7 @@ export default function Home() {
       <NewsPanel open={newsOpen} news={news} place={county} onClose={() => setNewsOpen(false)} />
       <StatsPanel open={statsOpen} stats={stats} onClose={() => setStatsOpen(false)} />
       <DetailDrawer ev={selected} onClose={() => setSelected(null)} />
+      <CrashGuard pos={pos} />
     </main>
   );
 }

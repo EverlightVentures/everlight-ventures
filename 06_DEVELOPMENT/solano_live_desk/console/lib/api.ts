@@ -53,6 +53,13 @@ export const getMesh = () => j<{ nodes: any[]; messages: any[]; updated: number 
 export const getIntel = (lat: number, lon: number) => j<any>(`/api/intel?lat=${lat}&lon=${lon}`);
 export const getLinks = (id: string) => j<{ links: any[]; entities: any }>(`/api/links?id=${encodeURIComponent(id)}`);
 export const getDecision = (lat: number, lon: number) => j<any>(`/api/decision?lat=${lat}&lon=${lon}`);
+// Dispersed Egress: several ranked escape routes to safety (clearest way out first).
+export const getEscape = (lat: number, lon: number) => j<any>(`/api/escape?lat=${lat}&lon=${lon}`);
+// Personal SOS / crash alert -> max-priority push to a trusted phone.
+export const sendSos = (lat: number, lon: number, kind: "crash" | "manual", where = "") =>
+  fetch(`/api/sos?lat=${lat}&lon=${lon}&kind=${kind}${where ? `&where=${encodeURIComponent(where)}` : ""}`, { method: "POST" })
+    .then((r) => r.json())
+    .catch(() => ({ ok: false }));
 export const getSocial = (place: string) => j<{ posts: any[] }>(`/api/social?place=${encodeURIComponent(place)}`);
 export const getSocialHotspots = () => j<{ hotspots: any[]; updated: number }>("/api/social_hotspots");
 

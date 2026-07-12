@@ -7,6 +7,7 @@ import { getEventTranscript, getCameras, getCamDvr, getMesh, getIntel, getSocial
 import LiveVideo from "@/components/LiveVideo";
 import { ageLabel } from "@/lib/util";
 import SourceBadge from "@/components/SourceBadge";
+import { PUBLIC_BUILD } from "@/lib/mode";
 
 const TABS = ["Feed", "Transcript", "Mesh", "Intel", "Social", "Audio", "Cameras", "Sources"] as const;
 type Tab = (typeof TABS)[number] | "Flight" | "Info";
@@ -21,7 +22,7 @@ function IntelTab({ data, radius, links }: { data: any | null; radius: number; l
   const linked = (links && links.links) || [];
   return (
     <div>
-      {data.risk_level && (
+      {data.risk_level && !PUBLIC_BUILD && (
         <div style={{ background: RISK_BG[data.risk_level] || RISK_BG.LOW, color: "#fff", borderRadius: 8, padding: "8px 10px", marginBottom: 10 }}>
           <div style={{ fontSize: 13, fontWeight: 700 }}>Risk: {data.risk_level} ({data.risk_score}/100)</div>
           <div style={{ fontSize: 11, marginTop: 2, opacity: 0.95 }}>{(data.risk_factors || []).join(" · ")}</div>
@@ -234,7 +235,7 @@ function Transcripts({ data }: { data: { conversations: any[]; sources: number }
               <div style={{ fontSize: 13, lineHeight: 1.4, marginTop: 2 }}>{c.summary}</div>
             </div>
           )}
-          {c.entities && Object.keys(c.entities).length > 0 && (
+          {!PUBLIC_BUILD && c.entities && Object.keys(c.entities).length > 0 && (
             <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 6 }}>
               {Object.entries(c.entities).map(([k, v]: any, i: number) => (
                 <span key={i} style={{ fontSize: 10, background: "rgba(255,91,91,0.15)", color: "#ff9b9b", border: "1px solid #ff5b5b44", borderRadius: 4, padding: "1px 6px" }}>
@@ -346,11 +347,13 @@ export default function DetailDrawer({ ev, onClose }: { ev: Incident | null; onC
 
   const kind = (ev as any)?._kind as string | undefined;
   const isSocial = kind === "social";
-  const visibleTabs: readonly string[] =
+  const rawTabs: readonly string[] =
     kind === "social" ? ["Social", "Intel", "Sources"]
     : kind === "plane" ? ["Flight"]
     : kind === "safe" ? ["Info", "Intel"]
     : TABS;
+  // Public app omits the Intel tab entirely (per-area risk score + place-history = legal risk).
+  const visibleTabs: readonly string[] = PUBLIC_BUILD ? rawTabs.filter((t) => t !== "Intel") : rawTabs;
   const defaultTab: Tab = kind === "social" ? "Social" : kind === "plane" ? "Flight" : kind === "safe" ? "Info" : "Feed";
 
   useEffect(() => { setTab(defaultTab); setTranscripts(null); setCams(null); setDvr(null); setMesh(null); setIntel(null); setLinks(null); setSocial(null); }, [ev?.id, defaultTab]);

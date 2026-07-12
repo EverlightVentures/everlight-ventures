@@ -15,7 +15,7 @@ from . import aircraft as air_mod
 from . import broadcaster
 from . import cameras as cams_mod
 from . import camera_dvr
-from . import config, correlate, decide as decide_mod, dvr, evac, fema, news, routing, spacewx, store, threat, trains as train_mod, transit as transit_mod, wayfinding, webcams
+from . import config, correlate, decide as decide_mod, dvr, escape as escape_mod, evac, fema, news, notify, routing, spacewx, store, threat, trains as train_mod, transit as transit_mod, wayfinding, webcams
 from .hub import HUB
 from .feeds import feeds_for_county
 from .geo_county import county_for
@@ -733,6 +733,40 @@ def decision(lat: float, lon: float):
             _EVAC_CACHE["gj"] = _EVAC_CACHE["gj"] or {"features": []}
     zones = decide_mod.enrich_zones(_EVAC_CACHE["gj"], lat, lon)
     return decide_mod.decide(incidents, zones, user=(lat, lon))
+
+
+@app.get("/api/escape")
+def escape_route(lat: float, lon: float):
+    """Dispersed Egress: several ranked escape routes to safety, scored by real
+    free-flow time (road speed limits + a penalty per traffic light and stop sign)
+    and steered around incident-blocked roads, so you take the clearest way out
+    instead of the jammed artery. Advisory only -- follow official orders + 911."""
+    hazard = None
+    try:
+        d = decision(lat, lon)  # flee AWAY from the decide-engine's hazard
+        if d.get("hazard_lat") is not None:
+            hazard = {"lat": d["hazard_lat"], "lon": d["hazard_lon"]}
+    except Exception:  # noqa: BLE001
+        pass
+    return escape_mod.plan_escape(lat, lon, _store_dir(), hazard=hazard)
+
+
+@app.post("/api/sos")
+def sos(lat: float | None = None, lon: float | None = None, kind: str = "manual", where: str = ""):
+    """Personal SOS / crash alert. Fires a max-priority ntfy push (breaks Do Not
+    Disturb) with the location + a maps link, so a trusted phone gets it even when
+    the operator can't act. Advisory: the app also offers to dial 911 client-side."""
+    maps = f"https://maps.google.com/?q={lat},{lon}" if lat is not None and lon is not None else ""
+    label = "CRASH DETECTED" if kind == "crash" else "SOS"
+    ev = {
+        "threat_level": "EXTREME",
+        "type": label,
+        "geo_label": where or maps,
+        "distance_mi": None,
+        "body": f"{label} from AroundMe.\n{where}\n{maps}".strip(),
+    }
+    ok = notify.ntfy_sender(ev, 5)  # priority 5 = breaks Do Not Disturb
+    return {"ok": ok, "maps": maps, "label": label}
 
 
 @app.get("/api/spacewx")

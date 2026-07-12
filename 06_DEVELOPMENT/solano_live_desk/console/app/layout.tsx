@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import KillSW from "@/components/KillSW";
@@ -12,8 +12,20 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Survival Console",
-  description: "Everlight personal survival OS -- live incidents, threats, evac.",
+  title: "AroundMe",
+  description: "Know what's happening around you, right now.",
+  applicationName: "AroundMe",
+  // Lets iOS "Add to Home Screen" open AroundMe fullscreen, like an installed app.
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "AroundMe" },
+  formatDetection: { telephone: false },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0A0A0A",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover", // draw under the notch so it feels native
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
