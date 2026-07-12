@@ -38,6 +38,23 @@ def test_presence_expires_and_clears(tmp_path):
     assert reports.active(str(tmp_path), now=501) == []
 
 
+def test_nearby_same_kind_reports_cluster_and_escalate(tmp_path):
+    # Two shoulder-driver reports at ~the same spot -> ONE verified marker, bumped severity.
+    reports.add_report(str(tmp_path), "reckless_shoulder", 38.2500, -122.0400, now=0)   # HIGH
+    reports.add_report(str(tmp_path), "reckless_shoulder", 38.2503, -122.0402, now=30)  # ~30m away
+    act = reports.active(str(tmp_path), now=60)
+    assert len(act) == 1
+    assert act[0]["count"] == 2 and act[0]["verified"] is True
+    assert act[0]["severity"] == "CRITICAL"  # HIGH bumped one level
+
+
+def test_far_apart_reports_stay_separate(tmp_path):
+    reports.add_report(str(tmp_path), "reckless_shoulder", 38.25, -122.04, now=0)
+    reports.add_report(str(tmp_path), "reckless_shoulder", 38.30, -122.10, now=0)  # miles away
+    act = reports.active(str(tmp_path), now=1)
+    assert len(act) == 2 and all(r["count"] == 1 for r in act)
+
+
 def test_reports_and_presence_coexist(tmp_path):
     reports.add_report(str(tmp_path), "hazard_flood", 38.2, -122.0, now=0)
     reports.mark_presence(str(tmp_path), "driverC", 38.3, -122.1, now=0)

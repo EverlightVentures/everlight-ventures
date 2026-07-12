@@ -16,6 +16,22 @@ const HAZARDS = [
   { kind: "hazard_flood", label: "Flooded road", icon: "\u{1F30A}" },
 ];
 
+// Map a spoken phrase to a report kind, so a driver never touches the screen.
+const VOICE_MAP: Array<[RegExp, string, string]> = [
+  [/wrong.?way/i, "reckless_wrongway", "Wrong-way driver"],
+  [/shoulder/i, "reckless_shoulder", "Shoulder driving"],
+  [/weav|swerv/i, "reckless_weaving", "Weaving"],
+  [/tailgat|aggressive|riding/i, "reckless_tailgating", "Tailgating"],
+  [/rac(e|ing)/i, "reckless_racing", "Street racing"],
+  [/flood/i, "hazard_flood", "Flooded road"],
+  [/pot.?hole/i, "hazard_pothole", "Pothole"],
+  [/object|debris|tire|ladder|couch/i, "hazard_object", "Object on road"],
+];
+function matchKind(t: string): [string, string] | null {
+  for (const [re, kind, label] of VOICE_MAP) if (re.test(t)) return [kind, label];
+  return null;
+}
+
 function clientId(): string {
   try {
     let id = localStorage.getItem("aroundme_client");
@@ -32,6 +48,7 @@ const btn: React.CSSProperties = {
 export default function ReportPanel({ pos }: { pos: { lat: number; lon: number } | null }) {
   const [sheet, setSheet] = useState(false);
   const [onDelivery, setOnDelivery] = useState(false);
+  const [listening, setListening] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const posRef = useRef(pos);
   useEffect(() => { posRef.current = pos; }, [pos]);
@@ -59,11 +76,36 @@ export default function ReportPanel({ pos }: { pos: { lat: number; lon: number }
     flash("Reported: " + label);
   };
 
+  // Hands-free: say "shoulder driver", "wrong way", "pothole", etc.
+  const listen = () => {
+    const SR: any = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { flash("Voice not supported here"); return; }
+    const rec = new SR();
+    rec.lang = "en-US"; rec.interimResults = false; rec.maxAlternatives = 1;
+    setListening(true);
+    rec.onresult = (e: any) => {
+      const t = (e.results?.[0]?.[0]?.transcript || "").trim();
+      const m = matchKind(t);
+      if (m) report(m[0], m[1]);
+      else flash(t ? `Heard "${t}" -- no match` : "Didn't catch that");
+    };
+    rec.onerror = () => { setListening(false); flash("Didn't catch that"); };
+    rec.onend = () => setListening(false);
+    try { rec.start(); } catch { setListening(false); }
+  };
+
   return (
     <>
       <div style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", bottom: 150, zIndex: 27, display: "flex", gap: 8 }}>
         <button onClick={() => setSheet(true)} style={{ ...btn, background: "rgba(120,20,20,0.92)", color: "#ffd7d7" }}>
           {"\u{26A0}\u{FE0F}"} Report
+        </button>
+        <button
+          onClick={listen}
+          title="Report by voice, hands-free"
+          style={{ ...btn, background: listening ? "rgba(120,20,20,0.95)" : "rgba(10,10,10,0.85)", color: listening ? "#fff" : "#968f80", border: `1px solid ${listening ? "#ff5b5b" : "#2a2820"}`, animation: listening ? "pulse 1s infinite" : "none" }}
+        >
+          {"\u{1F3A4}"}{listening ? " Listening" : ""}
         </button>
         <button
           onClick={() => setOnDelivery((v) => !v)}

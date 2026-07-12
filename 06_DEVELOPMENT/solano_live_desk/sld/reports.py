@@ -97,8 +97,22 @@ def clear_presence(base, client) -> dict:
     return {"ok": True}
 
 
+_SEV_ORDER = ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+
+
+def _escalate(sev: str, count: int) -> tuple[str, bool]:
+    """Two or more reports of the same thing nearby = corroborated: bump severity
+    and mark verified (the handoff doc's '2+ reports = verified' model)."""
+    if count < 2 or sev not in _SEV_ORDER:
+        return sev, count >= 2
+    bump = 2 if count >= 3 else 1
+    return _SEV_ORDER[min(len(_SEV_ORDER) - 1, _SEV_ORDER.index(sev) + bump)], True
+
+
 def active(base, now=None) -> list[dict]:
-    """All non-expired reports + presences as marker dicts (expired rows purged)."""
+    """Non-expired markers. Presences pass through one-per-driver; one-shot reports
+    of the same kind within ~150 m collapse to a single marker whose count drives
+    severity escalation + a 'verified' flag, so one incident is not five pins."""
     now = now if now is not None else time.time()
     conn = _db(base)
     try:
@@ -107,11 +121,28 @@ def active(base, now=None) -> list[dict]:
         rows = conn.execute("SELECT * FROM reports WHERE expires >= ? ORDER BY created", (now,)).fetchall()
     finally:
         conn.close()
-    out = []
+
+    presences: list[dict] = []
+    groups: dict[tuple, list[dict]] = {}
     for r in rows:
         d = dict(r)
         d["age_s"] = int(now - d["created"])
         d["ttl_s"] = int(d["expires"] - now)
         d["is_presence"] = str(d["kind"]).startswith("presence")
-        out.append(d)
+        if d["is_presence"]:
+            d["count"], d["verified"] = 1, False
+            presences.append(d)
+        else:  # 3-decimal lat/lon grid ~= 150 m clustering per kind
+            key = (d["kind"],
+                   round(d["lat"], 3) if d["lat"] is not None else None,
+                   round(d["lon"], 3) if d["lon"] is not None else None)
+            groups.setdefault(key, []).append(d)
+
+    out = list(presences)
+    for g in groups.values():
+        g.sort(key=lambda x: x["created"])
+        marker = dict(g[-1])  # freshest position wins as the marker
+        marker["count"] = len(g)
+        marker["severity"], marker["verified"] = _escalate(marker["severity"], len(g))
+        out.append(marker)
     return out

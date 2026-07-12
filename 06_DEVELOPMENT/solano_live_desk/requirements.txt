@@ -3,3 +3,7 @@ fastapi>=0.110
 uvicorn[standard]>=0.29
 pytest>=8.0
 gtfs-realtime-bindings>=1.0   # 511 transit vehicle positions (protobuf)
+faster-whisper>=1.0          # scanner audio -> text (transcribe.py / scanner_pipeline.py)
+meshtastic>=2.3              # Meshtastic mesh reader (meshtastic_mesh.py)
+paho-mqtt>=2.0               # mesh MQTT subscription
+cryptography>=42.0           # Meshtastic default-channel AES-CTR decrypt
