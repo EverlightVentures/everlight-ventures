@@ -234,7 +234,7 @@ export type Layers = {
 };
 
 export default function MapView({
-  incidents, fused, aircraft, trains, layers, rankMap, userPos, showRings, linkFrom, linkTargets, escape, selectedId, onSelect,
+  incidents, fused, aircraft, trains, layers, rankMap, userPos, showRings, linkFrom, linkTargets, escape, reports, selectedId, onSelect,
 }: {
   incidents: Incident[];
   fused: Incident[];
@@ -247,6 +247,7 @@ export default function MapView({
   linkFrom: { lat: number; lon: number } | null;
   linkTargets: any[];
   escape?: { dest?: any; routes?: any[]; error?: string } | null;
+  reports?: any[];
   selectedId: string | null;
   onSelect: (ev: Incident) => void;
 }) {
@@ -362,6 +363,20 @@ export default function MapView({
         <Marker longitude={escape.dest.lon} latitude={escape.dest.lat}>
           <div title={escape.dest.name} style={{ fontSize: 20, filter: "drop-shadow(0 0 4px #000)" }}>{"\u{1F3C1}"}</div>
         </Marker>
+      )}
+      {(reports || []).map((r, i) =>
+        r.lat != null && r.lon != null ? (
+          <Marker key={"rep" + (r.id || i)} longitude={r.lon} latitude={r.lat}>
+            <div title={r.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", filter: "drop-shadow(0 0 3px #000)", cursor: "default" }}>
+              <div style={{ fontSize: r.is_presence ? 20 : 17 }}>
+                {r.is_presence ? "\u{1F69A}" : String(r.kind).startsWith("reckless") ? "\u{1F6A8}" : "\u{26A0}\u{FE0F}"}
+              </div>
+              {r.is_presence ? (
+                <div style={{ fontSize: 8, fontWeight: 700, color: "#7fd1ff", background: "rgba(8,18,28,0.88)", padding: "1px 5px", borderRadius: 6, whiteSpace: "nowrap", marginTop: -1 }}>delivery</div>
+              ) : null}
+            </div>
+          </Marker>
+        ) : null
       )}
       {(layers.safe || []).map((s, i) => (
         <Marker key={"safe" + i} longitude={s.lon} latitude={s.lat} onClick={(e) => {

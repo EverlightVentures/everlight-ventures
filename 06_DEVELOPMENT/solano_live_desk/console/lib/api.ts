@@ -60,6 +60,15 @@ export const sendSos = (lat: number, lon: number, kind: "crash" | "manual", wher
   fetch(`/api/sos?lat=${lat}&lon=${lon}&kind=${kind}${where ? `&where=${encodeURIComponent(where)}` : ""}`, { method: "POST" })
     .then((r) => r.json())
     .catch(() => ({ ok: false }));
+
+// Community reports (reckless driver / hazard) + gig-driver "on delivery" presence.
+export const postReport = (kind: string, lat: number, lon: number, detail = "") =>
+  fetch(`/api/report?kind=${kind}&lat=${lat}&lon=${lon}${detail ? `&detail=${encodeURIComponent(detail)}` : ""}`, { method: "POST" })
+    .then((r) => r.json()).catch(() => ({ ok: false }));
+export const postPresence = (client: string, lat: number, lon: number, active: boolean) =>
+  fetch(`/api/presence?client=${encodeURIComponent(client)}&lat=${lat}&lon=${lon}&active=${active}`, { method: "POST" })
+    .then((r) => r.json()).catch(() => ({ ok: false }));
+export const getReports = () => j<{ reports: any[] }>("/api/reports").then((d) => d.reports || []);
 export const getSocial = (place: string) => j<{ posts: any[] }>(`/api/social?place=${encodeURIComponent(place)}`);
 export const getSocialHotspots = () => j<{ hotspots: any[]; updated: number }>("/api/social_hotspots");
 

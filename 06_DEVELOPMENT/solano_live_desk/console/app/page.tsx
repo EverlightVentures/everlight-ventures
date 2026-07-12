@@ -7,7 +7,7 @@ import type { ToggleKey } from "@/components/Toolbar";
 import {
   getEvents, getCorrelated, getSpaceWx, getCounty, getAircraft, getTrains,
   getEvac, getSafePoints, getBuses, getDanger, getRoute, getDays, getMapCameras, getNews, getStats,
-  getSocialHotspots, getLinks, getDecision, getEscape,
+  getSocialHotspots, getLinks, getDecision, getEscape, getReports,
 } from "@/lib/api";
 import StatusBar from "@/components/StatusBar";
 import AlarmQueue from "@/components/AlarmQueue";
@@ -19,6 +19,7 @@ import StatsPanel from "@/components/StatsPanel";
 import FilterBar from "@/components/FilterBar";
 import Legend from "@/components/Legend";
 import CrashGuard from "@/components/CrashGuard";
+import ReportPanel from "@/components/ReportPanel";
 import { filterIncidents, EMPTY_FILTERS } from "@/lib/util";
 import type { Filters } from "@/lib/util";
 
@@ -67,6 +68,7 @@ export default function Home() {
   const [linkTargets, setLinkTargets] = useState<any[]>([]);
   const [decision, setDecision] = useState<any>(null);
   const [escape, setEscape] = useState<any>(null);
+  const [reports, setReports] = useState<any[]>([]);
 
   // Shelter-vs-Evacuate decision, refreshed against live GPS.
   useEffect(() => {
@@ -79,6 +81,14 @@ export default function Home() {
 
   // Ways-out routes only make sense while evacuating -- drop them otherwise.
   useEffect(() => { if (decision && decision.action !== "EVACUATE") setEscape(null); }, [decision]);
+
+  // Community reports + gig-driver "on delivery" presence markers, polled.
+  useEffect(() => {
+    const f = () => getReports().then(setReports).catch(() => {});
+    f();
+    const id = setInterval(f, 20000);
+    return () => clearInterval(id);
+  }, []);
 
   // Fetch link analysis when an incident is selected -> draw connection lines.
   useEffect(() => {
@@ -283,6 +293,7 @@ export default function Home() {
         linkFrom={selected && selected.lat != null && selected.lon != null ? { lat: selected.lat, lon: selected.lon } : null}
         linkTargets={linkTargets}
         escape={escape}
+        reports={reports}
         selectedId={selected?.id ?? null}
         onSelect={setSelected}
       />
@@ -419,6 +430,7 @@ export default function Home() {
       <StatsPanel open={statsOpen} stats={stats} onClose={() => setStatsOpen(false)} />
       <DetailDrawer ev={selected} onClose={() => setSelected(null)} />
       <CrashGuard pos={pos} />
+      <ReportPanel pos={pos} />
     </main>
   );
 }

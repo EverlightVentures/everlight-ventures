@@ -771,6 +771,31 @@ def sos(lat: float | None = None, lon: float | None = None, kind: str = "manual"
     return {"ok": ok, "maps": maps, "label": label}
 
 
+@app.post("/api/report")
+def post_report(kind: str, lat: float, lon: float, detail: str = "", heading: float | None = None):
+    """One-tap community hazard / reckless-driver report. Warns other drivers, not
+    police. Time-decaying (reckless fades fast, static hazards linger)."""
+    from . import reports
+    return reports.add_report(_store_dir(), kind, lat, lon, detail, heading)
+
+
+@app.post("/api/presence")
+def post_presence(client: str, lat: float, lon: float, active: bool = True):
+    """Gig-driver 'on delivery' self-marker, so a vehicle idling on a street reads
+    as a delivery, not a prowler. Refreshed while working; active=false clears it."""
+    from . import reports
+    if not active:
+        return reports.clear_presence(_store_dir(), client)
+    return reports.mark_presence(_store_dir(), client, lat, lon)
+
+
+@app.get("/api/reports")
+def get_reports():
+    """Active community reports + gig-driver presence markers (non-expired)."""
+    from . import reports
+    return {"reports": reports.active(_store_dir())}
+
+
 @app.get("/api/spacewx")
 def space_weather():
     """Geomagnetic (Kp) status -> GPS/comms reliability (10-min cache)."""
