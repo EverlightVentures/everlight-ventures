@@ -34,6 +34,14 @@ def day_db_path(base: str | Path, day: str) -> Path:
     return Path(base) / f"events_{day}.db"
 
 
+def on_day(last_seen: str | None, day: str) -> bool:
+    """True if an ISO last_seen falls on `day` (DAY_FMT, e.g. 2026_07_12). Keeps
+    the live view to today only, so an incident that stopped updating yesterday
+    (a straggler written near the midnight boundary) drops off the map -- while a
+    genuinely ongoing incident, which keeps refreshing its last_seen, stays."""
+    return bool(last_seen) and last_seen[:10] == day.replace("_", "-")
+
+
 def connect(base: str | Path, day: str) -> sqlite3.Connection:
     Path(base).mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(day_db_path(base, day))

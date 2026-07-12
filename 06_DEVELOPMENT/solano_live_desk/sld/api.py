@@ -98,6 +98,7 @@ def events(date: str | None = None, lat: float | None = None, lon: float | None 
         rows = store.get_events(conn)
     finally:
         conn.close()
+    rows = [r for r in rows if store.on_day(r.get("last_seen"), day)]  # daily reset: this day's live events only
     user = (lat, lon) if lat is not None and lon is not None else None
     scored = [threat.classify(r, user) for r in rows]
     for e in scored:  # lifecycle: derived narrative state (ACTIVE..CLEARED/CLOSED)
@@ -125,6 +126,7 @@ def correlated(date: str | None = None, lat: float | None = None, lon: float | N
         rows = store.get_events(conn)
     finally:
         conn.close()
+    rows = [r for r in rows if store.on_day(r.get("last_seen"), day)]  # daily reset: this day's live events only
     user = (lat, lon) if lat is not None and lon is not None else None
     fused = [threat.classify(i, user) for i in correlate.correlate(rows)]
     for e in fused:

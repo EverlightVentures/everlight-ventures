@@ -51,6 +51,7 @@ def snapshot(base: str, day: str, user: tuple[float, float] | None) -> list[dict
         rows = store.get_events(conn)
     finally:
         conn.close()
+    rows = [r for r in rows if store.on_day(r.get("last_seen"), day)]  # daily reset: only this day's live events
     return [threat.classify(r, user) for r in rows]
 
 
