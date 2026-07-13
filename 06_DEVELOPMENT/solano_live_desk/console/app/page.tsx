@@ -69,6 +69,7 @@ export default function Home() {
   const [decision, setDecision] = useState<any>(null);
   const [escape, setEscape] = useState<any>(null);
   const [reports, setReports] = useState<any[]>([]);
+  const [focusPoint, setFocusPoint] = useState<{ lat: number; lon: number } | null>(null);
 
   // Shelter-vs-Evacuate decision, refreshed against live GPS.
   useEffect(() => {
@@ -294,6 +295,7 @@ export default function Home() {
         linkTargets={linkTargets}
         escape={escape}
         reports={reports}
+        focusPoint={focusPoint}
         selectedId={selected?.id ?? null}
         onSelect={setSelected}
       />
@@ -358,9 +360,20 @@ export default function Home() {
             boxShadow: "0 4px 22px rgba(0,0,0,0.55)", textAlign: "center", cursor: decision.action === "EVACUATE" ? "pointer" : "default",
           }}
           onClick={() => {
-            if (decision.hazard_id) {
-              const h = incidents.find((e) => e.id === decision.hazard_id);
-              if (h) setSelected(h);
+            const haz = decision.hazard_id ? incidents.find((e) => e.id === decision.hazard_id) : null;
+            if (decision.hazard_lat != null && decision.hazard_lon != null) {
+              // Fly the map to the hazard's OWN coordinates -- works even if the
+              // hazard is not a tappable pin in the current list.
+              setFocusPoint({ lat: decision.hazard_lat, lon: decision.hazard_lon });
+              setSelected(haz || ({
+                id: decision.hazard_id || "hazard", type: decision.hazard || "Hazard",
+                source: "decision", threat_level: "EXTREME",
+                lat: decision.hazard_lat, lon: decision.hazard_lon,
+                geo_label: (decision.hazard_dist != null ? decision.hazard_dist + " mi " : "") + (decision.hazard_bearing || ""),
+                last_seen: new Date().toISOString(), body: decision.reason,
+              } as any));
+            } else if (haz) {
+              setSelected(haz);
             }
             if (decision.action === "EVACUATE" && pos) getEscape(pos.lat, pos.lon).then(setEscape).catch(() => {});
           }}

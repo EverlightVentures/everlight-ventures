@@ -234,7 +234,7 @@ export type Layers = {
 };
 
 export default function MapView({
-  incidents, fused, aircraft, trains, layers, rankMap, userPos, showRings, linkFrom, linkTargets, escape, reports, selectedId, onSelect,
+  incidents, fused, aircraft, trains, layers, rankMap, userPos, showRings, linkFrom, linkTargets, escape, reports, focusPoint, selectedId, onSelect,
 }: {
   incidents: Incident[];
   fused: Incident[];
@@ -248,6 +248,7 @@ export default function MapView({
   linkTargets: any[];
   escape?: { dest?: any; routes?: any[]; error?: string } | null;
   reports?: any[];
+  focusPoint?: { lat: number; lon: number } | null;
   selectedId: string | null;
   onSelect: (ev: Incident) => void;
 }) {
@@ -288,6 +289,19 @@ export default function MapView({
       });
     }
   }, [selectedId, incidents]);
+
+  // Fly to an explicit point (the evacuate banner tapping to the hazard's own
+  // coordinates) even when the hazard is not a pin in the current list.
+  useEffect(() => {
+    if (!focusPoint || !mapRef.current) return;
+    setFollow(false); // stop tracking me so the map holds on the hazard
+    mapRef.current.flyTo({
+      center: [focusPoint.lon, focusPoint.lat],
+      zoom: Math.max(14.5, mapRef.current.getZoom?.() ?? 14.5),
+      duration: 1400,
+      essential: true,
+    });
+  }, [focusPoint]);
 
   return (
     <>

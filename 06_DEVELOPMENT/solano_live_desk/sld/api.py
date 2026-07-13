@@ -724,9 +724,10 @@ def decision(lat: float, lon: float):
     if store.day_db_path(base, day).exists():
         conn = store.connect(base, day)
         try:
-            incidents = [threat.classify(r, (lat, lon)) for r in store.get_events(conn)]
+            rows = [r for r in store.get_events(conn) if store.on_day(r.get("last_seen"), day)]
         finally:
             conn.close()
+        incidents = [threat.classify(r, (lat, lon)) for r in rows]  # same daily-reset as the map
     if time.time() - _EVAC_CACHE["at"] > 300 or _EVAC_CACHE["gj"] is None:
         try:
             _EVAC_CACHE["gj"] = evac.fetch_active_zones()
