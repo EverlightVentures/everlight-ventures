@@ -14,9 +14,6 @@ from .models import Customer, Subscription, Payment, RevenueSnapshot
 
 log = logging.getLogger(__name__)
 
-WORKSPACE = "/mnt/sdcard/AA_MY_DRIVE"
-
-
 def _notify_slack(message, channel="#05-revenue"):
     """Send revenue notification to Slack."""
     webhook = os.environ.get("SLACK_WEBHOOK_URL")
@@ -88,7 +85,7 @@ def stripe_webhook(request):
         try:
             import stripe
             event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
-        except (ValueError, Exception) as e:
+        except Exception as e:
             log.warning(f"Stripe webhook signature verification failed: {e}")
             return HttpResponse(status=400)
     else:
